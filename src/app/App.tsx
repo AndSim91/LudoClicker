@@ -109,7 +109,7 @@ export function App() {
       className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
       style={{ "--school-accent": state.school.accentColor } as CSSProperties}
     >
-      <TitleBar />
+      <TitleBar currentMonth={state.school.currentMonth} />
       <CommandBar onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }} />
       <div className={view === "mail" ? "workspace" : "workspace overview-workspace"}>
         <AppRail view={view} onChange={setView} />

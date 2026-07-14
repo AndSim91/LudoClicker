@@ -159,7 +159,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
 - **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
 
-Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **60 secondi reali**, viene numerato progressivamente e non appartiene a un anno: il gioco non tiene traccia degli anni. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. Il gioco non mostra né tiene traccia degli anni. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -329,7 +329,7 @@ Per il primo prototipo:
 | Bonus di iscrizione | immediato (€20) |
 | Accredito della quota mensile | al cambio mese (€40 per iscritto) |
 
-Il mese di gioco dura 60 secondi. Il contatore dei mesi cresce senza essere raggruppato in anni. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
+Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre, ricominciando poi da Gennaio senza un contatore degli anni. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
 ### 7.3 Formule di conversione
 
@@ -1171,7 +1171,7 @@ Il riepilogo mostra:
 - iscrizione dopo prova in palestra: 50% provvisorio;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
-- durata di un mese di gioco: 60 secondi, senza conteggio degli anni;
+- durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre senza conteggio degli anni;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
 - il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
 - il primo evento e il primo sparring sono gratuiti e guidati.

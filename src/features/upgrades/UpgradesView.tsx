@@ -8,6 +8,7 @@ import {
   type UpgradeDefinition,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
+import { getGameMonthName } from "../../game/calendar";
 import { selectIncomePerMonth } from "../../game/selectors";
 import { getOfflineLimitMs } from "../../game/offline";
 import type { GameState, UpgradeId } from "../../game/types";
@@ -62,6 +63,7 @@ export function UpgradesView({
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
 }) {
   const incomePerMonth = selectIncomePerMonth(state);
+  const monthName = getGameMonthName(state.school.currentMonth);
   const secondsToNextMonth = Math.max(
     0,
     Math.ceil((state.school.nextFeeAt - state.automation.lastProcessedAt) / 1_000),
@@ -71,7 +73,7 @@ export function UpgradesView({
     <main className="overview-view shop-view">
       <header><Icon name="spark" /><div><h1>Miglioramenti</h1><p>Strumenti e procedure per far crescere l'Ordine delle Onde</p></div></header>
       <section className="income-summary" aria-label="Entrate dell'Ordine">
-        <div><span>Entrate del mese {state.school.currentMonth}</span><strong>{euro.format(incomePerMonth)} <small>al mese</small></strong></div>
+        <div><span>Entrate di {monthName}</span><strong>{euro.format(incomePerMonth)} <small>al mese</small></strong></div>
         <p>{state.school.activeMembers} {state.school.activeMembers === 1 ? "iscritto attivo" : "iscritti attivi"} × {euro.format(GAME_CONFIG.monthlyMemberFee)} di quota mensile · prossimo mese tra {secondsToNextMonth} s</p>
         <div className="income-balance"><span>Disponibilità attuale</span><b>{euro.format(state.school.euros)}</b></div>
       </section>

@@ -43,7 +43,7 @@ describe("game engine", () => {
 
     const updated = gameReducer(state, {
       type: "UPDATE_PROFILE_NAME",
-      displayName: "  Andrea   Simonazzi  ",
+      displayName: "  Andrea   Ungaro  ",
     });
 
     expect(updated.profile.displayName).toBe("Andrea Ungaro");

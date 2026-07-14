@@ -57,12 +57,24 @@ svg {
 
 .title-bar {
   display: grid;
-  grid-template-columns: 52px 1fr auto;
+  grid-template-columns: 52px 1fr auto auto;
   align-items: center;
   color: white;
   background: var(--blue-700);
   font-size: 13px;
   user-select: none;
+}
+
+.title-month {
+  display: grid;
+  align-self: stretch;
+  min-width: 88px;
+  padding: 0 18px;
+  place-items: center;
+  border-inline: 1px solid rgb(255 255 255 / 18%);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
 .title-menu {
