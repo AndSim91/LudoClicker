@@ -21,6 +21,7 @@ function isGameState(value: unknown): value is GameState {
   return (
     state.version === GAME_CONFIG.version &&
     Array.isArray(state.contacts) &&
+    state.contacts.every((contact) => contact.rarity === "common" || contact.rarity === "legendary") &&
     Array.isArray(state.emails) &&
     Array.isArray(state.acquisitionEvents) &&
     typeof state.activities?.nextSparringAt === "number" &&
@@ -31,7 +32,13 @@ function isGameState(value: unknown): value is GameState {
     typeof state.equipment?.totalSwords === "number" &&
     typeof state.equipment?.availableSwords === "number" &&
     typeof state.equipment?.wear === "number" &&
+    Array.isArray(state.legendaryCollaborators?.encounteredProfileIds) &&
+    Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
+    typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
     Array.isArray(state.collaborators) &&
+    state.collaborators.every((collaborator) =>
+      collaborator.rarity === "common" || collaborator.rarity === "legendary"
+    ) &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.statistics?.automatedCharacters === "number" &&
     typeof state.statistics?.socialCampaigns === "number" &&
@@ -264,7 +271,7 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 12) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 13,
       contacts: migrated.contacts?.map((contact) => {
         const profile = SPECIAL_COLLABORATORS.find(
           (candidate) => candidate.firstName === contact.firstName &&
@@ -278,6 +285,48 @@ function migrate(value: unknown): unknown {
         );
         return profile ? { ...collaborator, specialProfileId: profile.id } : collaborator;
       }),
+    };
+  }
+
+  if (migrated.version === 13) {
+    const encounteredProfileIds = [...new Set([
+      ...(migrated.contacts ?? []).flatMap((contact) =>
+        contact.specialProfileId ? [contact.specialProfileId] : [],
+      ),
+      ...(migrated.collaborators ?? []).flatMap((collaborator) =>
+        collaborator.specialProfileId ? [collaborator.specialProfileId] : [],
+      ),
+    ])];
+    const enrolledProfileIds = [...new Set(
+      (migrated.collaborators ?? []).flatMap((collaborator) =>
+        collaborator.specialProfileId ? [collaborator.specialProfileId] : [],
+      ),
+    )];
+    migrated = {
+      ...migrated,
+      version: 14,
+      legendaryCollaborators: {
+        encounteredProfileIds,
+        enrolledProfileIds,
+        enrollmentAttempts: Object.fromEntries(
+          enrolledProfileIds.map((profileId) => [profileId, 1]),
+        ),
+      },
+    };
+  }
+
+  if (migrated.version === 14) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      contacts: migrated.contacts?.map((contact) => ({
+        ...contact,
+        rarity: contact.specialProfileId ? "legendary" : "common",
+      })),
+      collaborators: migrated.collaborators?.map((collaborator) => ({
+        ...collaborator,
+        rarity: collaborator.specialProfileId ? "legendary" : "common",
+      })),
     };
   }
 
@@ -295,6 +344,16 @@ function migrate(value: unknown): unknown {
             }
           : contact,
       ),
+    };
+  }
+
+  if (migrated.contacts?.some((contact) => /\.\d+@/.test(contact.email))) {
+    migrated = {
+      ...migrated,
+      contacts: migrated.contacts.map((contact) => ({
+        ...contact,
+        email: contact.email.replace(/\.\d+(?=@)/, ""),
+      })),
     };
   }
 

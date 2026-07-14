@@ -18,6 +18,7 @@ describe("PeopleView", () => {
           joinedAt: 1_000,
           forms: [],
           assignment: null,
+          rarity: "legendary" as const,
           specialProfileId: "andrea-simonazzi" as const,
         },
       ],
@@ -26,10 +27,23 @@ describe("PeopleView", () => {
     const onAssign = vi.fn();
     render(<PeopleView state={state} onAssign={onAssign} onStartTraining={() => undefined} />);
 
+    expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
+      "Email lasciata: 85%",
+    );
+    expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
+      "Comparsa: 5% dalla 10ª email",
+    );
+    expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
+      "Funnel stimato: 10,2%",
+    );
+    expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
+      "Funnel stimato: 0,1%",
+    );
     fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
     expect(screen.getByText("Andrea Simonazzi")).toHaveClass("special-name");
     expect(screen.getByText("VIP")).toBeVisible();
     expect(screen.queryByText("Tutorial")).not.toBeInTheDocument();
+    expect(screen.getByText(/Livello Leggendario/)).toBeVisible();
     fireEvent.change(screen.getByRole("combobox", { name: "Assegnazione" }), {
       target: { value: "writing" },
     });
@@ -46,6 +60,7 @@ describe("PeopleView", () => {
       joinedAt: 1_000,
       forms: [],
       assignment: null,
+      rarity: "common" as const,
     };
     const onStartTraining = vi.fn();
     render(<PeopleView state={{ ...initial, school: { ...initial.school, euros: 20 }, collaborators: [collaborator], unlocks: { ...initial.unlocks, collaborators: true, forms: true } }} onAssign={() => undefined} onStartTraining={onStartTraining} />);

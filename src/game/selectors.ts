@@ -22,6 +22,29 @@ export function selectUpcomingTrials(state: GameState): ScheduledTrial[] {
     .sort((a, b) => a.startsAt - b.startsAt);
 }
 
+export function selectDayTrials(state: GameState, now: number): ScheduledTrial[] {
+  const today = new Date(now);
+  const startOfDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  ).getTime();
+  const endOfDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 1,
+  ).getTime();
+
+  return state.scheduledTrials
+    .filter(
+      (trial) =>
+        trial.status === "scheduled" ||
+        (trial.startsAt >= startOfDay && trial.startsAt < endOfDay),
+    )
+    .slice()
+    .sort((a, b) => a.startsAt - b.startsAt);
+}
+
 export function selectEmailProgress(email: CampaignEmail | undefined): number {
   if (!email || email.body.length === 0) return 0;
   return Math.min(100, Math.round((email.revealedCharacters / email.body.length) * 100));

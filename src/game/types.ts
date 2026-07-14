@@ -16,6 +16,8 @@ export type SpecialCollaboratorId =
   | "guglielmo-oliveri"
   | "niccolo-effrati";
 
+export type PersonRarity = "common" | "legendary";
+
 export interface Contact {
   id: string;
   firstName: string;
@@ -24,6 +26,7 @@ export interface Contact {
   source: "tutorial" | "sparring" | "event" | "social" | "collaborator";
   acquiredAt: number;
   status: ContactStatus;
+  rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
 }
 
@@ -230,12 +233,19 @@ export interface Collaborator {
   joinedAt: number;
   forms: FormId[];
   assignment: CollaboratorAssignment;
+  rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
   training?: {
     formId: FormId;
     startedAt: number;
     completesAt: number;
   };
+}
+
+export interface LegendaryCollaboratorProgress {
+  encounteredProfileIds: SpecialCollaboratorId[];
+  enrolledProfileIds: SpecialCollaboratorId[];
+  enrollmentAttempts: Partial<Record<SpecialCollaboratorId, number>>;
 }
 
 export interface Statistics {
@@ -301,6 +311,7 @@ export interface GameState {
     availableSwords: number;
     wear: number;
   };
+  legendaryCollaborators: LegendaryCollaboratorProgress;
   collaborators: Collaborator[];
   automation: {
     lastProcessedAt: number;

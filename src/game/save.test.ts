@@ -46,6 +46,27 @@ describe("local save", () => {
     ]);
   });
 
+  it("removes numeric suffixes from previously saved prospect emails", () => {
+    const state = createInitialState(1_000);
+    const withNumericSuffixes = {
+      ...state,
+      contacts: state.contacts.map((contact, index) => ({
+        ...contact,
+        email: contact.email.replace("@", `.${index + 1}@`),
+      })),
+    };
+    localStorage.setItem(
+      "oggetto-nuovi-iscritti.save",
+      JSON.stringify(withNumericSuffixes),
+    );
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.contacts.map((contact) => contact.email)).toEqual(
+      state.contacts.map((contact) => contact.email),
+    );
+  });
+
   it("prompts for a name when an existing save has no user profile", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     delete legacy.profile;
@@ -69,7 +90,7 @@ describe("local save", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.school.euros).toBe(37);
     expect(migrated.acquisitionEvents).toEqual([]);
     expect(migrated.statistics.contactsAcquired).toBe(0);
@@ -86,7 +107,7 @@ describe("local save", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.upgrades["comfortable-keyboard"]).toBe(2);
     expect(migrated.upgrades["prepared-presentation"]).toBe(0);
     expect(migrated.player.writingPower).toBe(3);
@@ -114,7 +135,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.acquisitionEvents[0].peopleMet).toBe(10);
     expect(migrated.acquisitionEvents[0].demonstrationsGiven).toBe(4);
     expect(migrated.acquisitionEvents[0].equipmentUsed).toBe(0);
@@ -130,7 +151,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.equipment).toEqual({ totalSwords: 6, availableSwords: 6, wear: 0 });
     expect(migrated.statistics.maintenanceCompleted).toBe(0);
   });
@@ -148,7 +169,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.collaborators).toEqual([]);
     expect(migrated.automation.lastProcessedAt).toBe(5_000);
     expect(migrated.unlocks).toEqual({ upgrades: true, collaborators: false, social: false, forms: false });
@@ -163,7 +184,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.statistics.socialCampaigns).toBe(0);
   });
 
@@ -176,7 +197,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.unlocks.forms).toBe(false);
     expect(migrated.statistics.formsCompleted).toBe(0);
   });
@@ -194,7 +215,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.upgrades["comfortable-keyboard"]).toBe(2);
     expect(migrated.upgrades["organized-rack"]).toBe(0);
     expect(migrated.upgrades["multi-site-coordination"]).toBe(0);
@@ -210,7 +231,7 @@ describe("local save", () => {
 
     const migrated = loadGame(5_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.achievements).toEqual([]);
     expect(migrated.narrative.history).toEqual([]);
     expect(migrated.narrative.nextEventAt).toBe(1_000 + 120_000);
@@ -229,7 +250,7 @@ describe("local save", () => {
 
     const migrated = loadGame(1_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.school.city).toBe("Genova");
     expect(migrated.school.specialization).toBe("generale");
     expect(migrated.network).toEqual({ reputation: 0, schools: [], prestigeOfferSent: false });
@@ -243,7 +264,7 @@ describe("local save", () => {
 
     const migrated = loadGame(1_000);
 
-    expect(migrated.version).toBe(13);
+    expect(migrated.version).toBe(15);
     expect(migrated.school.currentMonth).toBe(1);
     expect(migrated.school.nextFeeAt).toBe(61_000);
   });
@@ -260,10 +281,10 @@ describe("local save", () => {
   it("restores special profile identifiers in version 12 saves", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 12;
-    delete legacy.contacts[0].specialProfileId;
+    delete legacy.contacts[8].specialProfileId;
     legacy.collaborators = [{
       id: "legacy-special",
-      contactId: legacy.contacts[0].id,
+      contactId: legacy.contacts[8].id,
       displayName: "Andrea Simonazzi",
       joinedAt: 1_000,
       forms: [],
@@ -273,9 +294,56 @@ describe("local save", () => {
 
     const migrated = loadGame(1_000);
 
-    expect(migrated.version).toBe(13);
-    expect(migrated.contacts[0].specialProfileId).toBe("andrea-simonazzi");
+    expect(migrated.version).toBe(15);
+    expect(migrated.contacts[8].specialProfileId).toBe("andrea-simonazzi");
     expect(migrated.collaborators[0].specialProfileId).toBe("andrea-simonazzi");
+    expect(migrated.legendaryCollaborators.enrolledProfileIds).toContain("andrea-simonazzi");
+  });
+
+  it("migrates version 13 saves into global Legendary progress", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 13;
+    delete legacy.legendaryCollaborators;
+    legacy.collaborators = [{
+      id: "legacy-legendary",
+      contactId: legacy.contacts[0].id,
+      displayName: "Andrea Simonazzi",
+      joinedAt: 1_000,
+      forms: [],
+      assignment: null,
+      specialProfileId: "andrea-simonazzi",
+    }];
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.version).toBe(15);
+    expect(migrated.legendaryCollaborators.encounteredProfileIds).toContain("andrea-simonazzi");
+    expect(migrated.legendaryCollaborators.enrolledProfileIds).toEqual(["andrea-simonazzi"]);
+    expect(migrated.legendaryCollaborators.enrollmentAttempts["andrea-simonazzi"]).toBe(1);
+  });
+
+  it("migrates version 14 contacts and collaborators into explicit rarities", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 14;
+    for (const contact of legacy.contacts) delete contact.rarity;
+    legacy.collaborators = [{
+      id: "legacy-rarity",
+      contactId: legacy.contacts[8].id,
+      displayName: "Andrea Simonazzi",
+      joinedAt: 1_000,
+      forms: [],
+      assignment: null,
+      specialProfileId: "andrea-simonazzi",
+    }];
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.version).toBe(15);
+    expect(migrated.contacts[0].rarity).toBe("common");
+    expect(migrated.contacts[8].rarity).toBe("legendary");
+    expect(migrated.collaborators[0].rarity).toBe("legendary");
   });
 
   it("resets both primary and backup saves", () => {

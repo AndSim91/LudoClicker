@@ -1,8 +1,9 @@
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorProductivity } from "../content/forms";
+import { PERSON_RARITIES } from "../content/rarities";
 import { GAME_CONFIG } from "./config";
-import type { GameState } from "./types";
+import type { GameState, PersonRarity } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -14,7 +15,11 @@ export function getEmailBookingChance(state: GameState) {
   return clamp(GAME_CONFIG.emailBookingChance * multiplier, 0.01, 0.7);
 }
 
-export function getEnrollmentChance(state: GameState) {
+export function getEnrollmentChance(
+  state: GameState,
+  rarity: PersonRarity = "common",
+  previousFailures = 0,
+) {
   const lessonProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "lessons")
     .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
@@ -23,7 +28,11 @@ export function getEnrollmentChance(state: GameState) {
     getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") +
     lessonProductivity * 0.1 +
     (state.school.specialization === "accoglienza" ? 0.1 : 0);
-  return clamp(GAME_CONFIG.enrollmentChance * multiplier, 0.01, 0.9);
+  const failureBonus = rarity === "legendary"
+    ? previousFailures * GAME_CONFIG.legendaryEnrollmentChancePerFailure
+    : 0;
+  const baseChance = PERSON_RARITIES[rarity].baseEnrollmentChance + failureBonus;
+  return clamp(baseChance * multiplier, 0.01, 1);
 }
 
 export function getEventFunnelOutcome(
@@ -56,16 +65,16 @@ export function getEventFunnelOutcome(
     1,
     Math.round(peopleMet * definition.demonstrationRate * charismaMultiplier),
   );
+  const emailShareChance = clamp(
+    PERSON_RARITIES.common.emailShareChance * charismaMultiplier * collaboratorMultiplier,
+    0,
+    1,
+  );
   const contactsObtained = Math.max(
     1,
-    Math.round(
-      demonstrationsGiven *
-        definition.contactRate *
-        charismaMultiplier *
-        collaboratorMultiplier,
-    ),
+    Math.round(demonstrationsGiven * emailShareChance),
   );
-  return { peopleMet, demonstrationsGiven, contactsObtained };
+  return { peopleMet, demonstrationsGiven, contactsObtained, emailShareChance };
 }
 
 export function getWritingPower(state: GameState) {

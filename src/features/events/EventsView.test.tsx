@@ -38,7 +38,7 @@ describe("EventsView", () => {
   it("shows the complete event funnel preview", () => {
     render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
 
-    expect(screen.getByText(/8 persone → 5 prove → 2 contatti/)).toBeVisible();
+    expect(screen.getByText(/8 persone → 5 prove → 4 contatti/)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Stand sportivo" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Open day della scuola" })).toBeVisible();
   });

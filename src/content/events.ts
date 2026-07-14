@@ -9,7 +9,6 @@ export interface AcquisitionEventDefinition {
   cost: number;
   baseAttendance: number;
   demonstrationRate: number;
-  contactRate: number;
   varianceMin: number;
   varianceMax: number;
   risk: "Basso" | "Medio" | "Alto";
@@ -29,7 +28,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 0,
     baseAttendance: 8,
     demonstrationRate: 0.65,
-    contactRate: 0.4,
     varianceMin: 0.8,
     varianceMax: 1.2,
     risk: "Basso",
@@ -47,7 +45,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 15,
     baseAttendance: 30,
     demonstrationRate: 0.45,
-    contactRate: 0.4,
     varianceMin: 0.85,
     varianceMax: 1.2,
     risk: "Medio",
@@ -65,7 +62,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 30,
     baseAttendance: 50,
     demonstrationRate: 0.35,
-    contactRate: 0.45,
     varianceMin: 0.9,
     varianceMax: 1.15,
     risk: "Basso",
@@ -83,7 +79,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 20,
     baseAttendance: 35,
     demonstrationRate: 0.35,
-    contactRate: 0.35,
     varianceMin: 0.65,
     varianceMax: 1.4,
     risk: "Medio",
@@ -101,7 +96,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 40,
     baseAttendance: 70,
     demonstrationRate: 0.45,
-    contactRate: 0.4,
     varianceMin: 0.8,
     varianceMax: 1.25,
     risk: "Medio",
@@ -119,7 +113,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 25,
     baseAttendance: 30,
     demonstrationRate: 0.55,
-    contactRate: 0.55,
     varianceMin: 0.9,
     varianceMax: 1.1,
     risk: "Basso",
@@ -137,7 +130,6 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     cost: 10,
     baseAttendance: 20,
     demonstrationRate: 0.3,
-    contactRate: 0.25,
     varianceMin: 0.35,
     varianceMax: 2.5,
     risk: "Alto",

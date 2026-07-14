@@ -5,6 +5,7 @@ import { getAcquisitionEventDefinition } from "../content/events";
 import { canTrainForm, getCollaboratorProductivity, getFormDefinition } from "../content/forms";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { ACQUIRED_CONTACT_NAMES, CONTACT_NAMES } from "../content/names";
+import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import {
   createInitialUpgradeLevels,
@@ -35,6 +36,7 @@ import type {
   FormId,
   SchoolFoundationDetails,
   SpecialCollaboratorId,
+  LegendaryCollaboratorProgress,
 } from "./types";
 
 const euroFormatter = new Intl.NumberFormat("it-IT", {
@@ -54,32 +56,67 @@ function normalizeEmailLocalPart(firstName: string, lastName: string): string {
     .toLocaleLowerCase("it-IT");
 }
 
-function createContacts(now: number, includeTutorialCollaborators: boolean): Contact[] {
-  const tutorialProfiles = includeTutorialCollaborators ? SPECIAL_COLLABORATORS : [];
-  const regularCount = GAME_CONFIG.initialContacts - tutorialProfiles.length;
-  const profiles: Array<{
-    firstName: string;
-    lastName: string;
-    specialProfileId?: SpecialCollaboratorId;
-  }> = [
-    ...tutorialProfiles.map((profile) => ({
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      specialProfileId: profile.id,
-    })),
-    ...CONTACT_NAMES.slice(0, regularCount).map(([firstName, lastName]) => ({ firstName, lastName })),
-  ];
+const ANDREA_SIMONAZZI_ID: SpecialCollaboratorId = "andrea-simonazzi";
 
-  return profiles.map(({ firstName, lastName, specialProfileId }, index) => ({
-    id: makeId("contact", now, index),
-    firstName,
-    lastName,
-    email: createProspectEmail(normalizeEmailLocalPart(firstName, lastName), index),
-    source: "tutorial",
-    acquiredAt: now,
-    status: index === 0 ? "writing" : "available",
-    specialProfileId,
-  }));
+function chooseLegendaryProfile(
+  seed: number,
+  progress: LegendaryCollaboratorProgress,
+) {
+  const [appearanceRoll, seedAfterAppearance] = nextRandom(seed);
+  if (appearanceRoll >= PERSON_RARITIES.legendary.queueAppearanceChance) {
+    return { profile: undefined, nextSeed: seedAfterAppearance };
+  }
+  const candidates = SPECIAL_COLLABORATORS.filter((profile) =>
+    !progress.enrolledProfileIds.includes(profile.id) &&
+    profile.id !== ANDREA_SIMONAZZI_ID,
+  );
+  if (candidates.length === 0) return { profile: undefined, nextSeed: seedAfterAppearance };
+  if (candidates.length === 1) return { profile: candidates[0], nextSeed: seedAfterAppearance };
+  const [profileRoll, nextSeed] = nextRandom(seedAfterAppearance);
+  return {
+    profile: candidates[Math.min(candidates.length - 1, Math.floor(profileRoll * candidates.length))],
+    nextSeed,
+  };
+}
+
+function createContacts(
+  now: number,
+  includeAndrea: boolean,
+  seed: number,
+  existingProgress: LegendaryCollaboratorProgress,
+): { contacts: Contact[]; nextSeed: number; progress: LegendaryCollaboratorProgress } {
+  let nextSeed = seed;
+  let progress = existingProgress;
+  const andrea = SPECIAL_COLLABORATORS.find((profile) => profile.id === ANDREA_SIMONAZZI_ID)!;
+  const contacts = Array.from({ length: GAME_CONFIG.initialContacts }, (_, index) => {
+    let legendaryProfile = includeAndrea && index === 8 &&
+      !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
+      ? andrea
+      : undefined;
+    if (!legendaryProfile && index >= 9) {
+      const selected = chooseLegendaryProfile(nextSeed, progress);
+      legendaryProfile = selected.profile;
+      nextSeed = selected.nextSeed;
+    }
+    if (legendaryProfile) {
+      progress = addLegendaryEncounter(progress, legendaryProfile.id);
+    }
+    const [regularFirstName, regularLastName] = CONTACT_NAMES[index % CONTACT_NAMES.length];
+    const firstName = legendaryProfile?.firstName ?? regularFirstName;
+    const lastName = legendaryProfile?.lastName ?? regularLastName;
+    return {
+      id: makeId("contact", now, index),
+      firstName,
+      lastName,
+      email: createProspectEmail(normalizeEmailLocalPart(firstName, lastName), index),
+      source: "tutorial" as const,
+      acquiredAt: now,
+      status: index === 0 ? "writing" as const : "available" as const,
+      rarity: legendaryProfile ? "legendary" as const : "common" as const,
+      specialProfileId: legendaryProfile?.id,
+    };
+  });
+  return { contacts, nextSeed, progress };
 }
 
 function createCampaign(
@@ -116,14 +153,27 @@ function systemMessage(now: number): InboxMessage {
 export function createInitialState(
   now = Date.now(),
   displayName = "",
-  includeTutorialCollaborators = true,
+  includeAndrea = true,
+  existingLegendaryProgress?: LegendaryCollaboratorProgress,
 ): GameState {
-  const contacts = createContacts(now, includeTutorialCollaborators);
+  const initialSeed = (now ^ 0x5f3759df) | 0;
+  const legendaryProgress = existingLegendaryProgress ?? {
+    encounteredProfileIds: [],
+    enrolledProfileIds: [],
+    enrollmentAttempts: {},
+  };
+  const initialContacts = createContacts(
+    now,
+    includeAndrea,
+    initialSeed,
+    legendaryProgress,
+  );
+  const contacts = initialContacts.contacts;
   return {
     version: GAME_CONFIG.version,
     createdAt: now,
     lastSavedAt: now,
-    randomSeed: (now ^ 0x5f3759df) | 0,
+    randomSeed: initialContacts.nextSeed,
     profile: { displayName },
     school: {
       name: "Ordine delle Onde — Genova",
@@ -156,6 +206,7 @@ export function createInitialState(
       availableSwords: GAME_CONFIG.initialSwords,
       wear: 0,
     },
+    legendaryCollaborators: initialContacts.progress,
     collaborators: [],
     automation: {
       lastProcessedAt: now,
@@ -195,34 +246,21 @@ function createAcquiredContacts(
   now: number,
 ): { contacts: Contact[]; nextSeed: number } {
   let nextSeed = state.randomSeed;
-  const specialIdsInSchool = new Set(
-    state.contacts.flatMap((contact) => contact.specialProfileId ? [contact.specialProfileId] : []),
-  );
+  let progress = state.legendaryCollaborators;
   const contacts = Array.from({ length: count }, (_, index) => {
     const sequence = state.statistics.contactsAcquired + index;
-    const [specialRoll, seedAfterSpecialRoll] = nextRandom(nextSeed);
-    nextSeed = seedAfterSpecialRoll;
-    const availableSpecialProfiles = SPECIAL_COLLABORATORS.filter(
-      (profile) => !specialIdsInSchool.has(profile.id),
-    );
-    let specialProfile = availableSpecialProfiles.length > 0 &&
-      state.network.schools.length > 0 &&
-      specialRoll < GAME_CONFIG.specialCollaboratorChance
-      ? availableSpecialProfiles[0]
-      : undefined;
-    if (specialProfile && availableSpecialProfiles.length > 1) {
-      const [profileRoll, seedAfterProfileRoll] = nextRandom(nextSeed);
-      nextSeed = seedAfterProfileRoll;
-      specialProfile = availableSpecialProfiles[
-        Math.min(availableSpecialProfiles.length - 1, Math.floor(profileRoll * availableSpecialProfiles.length))
-      ];
-    }
-    if (specialProfile) specialIdsInSchool.add(specialProfile.id);
+    const queuePosition = state.contacts.length + index + 1;
+    const selected = queuePosition >= 10
+      ? chooseLegendaryProfile(nextSeed, progress)
+      : { profile: undefined, nextSeed };
+    const specialProfile = selected.profile;
+    nextSeed = selected.nextSeed;
+    if (specialProfile) progress = addLegendaryEncounter(progress, specialProfile.id);
     const [regularFirstName, regularLastName] =
       ACQUIRED_CONTACT_NAMES[sequence % ACQUIRED_CONTACT_NAMES.length];
     const firstName = specialProfile?.firstName ?? regularFirstName;
     const lastName = specialProfile?.lastName ?? regularLastName;
-    const localPart = `${normalizeEmailLocalPart(firstName, lastName)}.${sequence + 1}`;
+    const localPart = normalizeEmailLocalPart(firstName, lastName);
     return {
       id: makeId("contact", now, `acquired-${sequence}`),
       firstName,
@@ -231,10 +269,41 @@ function createAcquiredContacts(
       source,
       acquiredAt: now,
       status: "available" as const,
+      rarity: specialProfile ? "legendary" as const : "common" as const,
       specialProfileId: specialProfile?.id,
     };
   });
   return { contacts, nextSeed };
+}
+
+function addLegendaryEncounter(
+  progress: LegendaryCollaboratorProgress,
+  profileId: SpecialCollaboratorId,
+): LegendaryCollaboratorProgress {
+  if (progress.encounteredProfileIds.includes(profileId)) return progress;
+  return {
+    ...progress,
+    encounteredProfileIds: [...progress.encounteredProfileIds, profileId],
+  };
+}
+
+function addLegendaryEncounters(
+  progress: LegendaryCollaboratorProgress,
+  contacts: Contact[],
+): LegendaryCollaboratorProgress {
+  let nextProgress = progress;
+  for (const contact of contacts) {
+    if (contact.specialProfileId) {
+      nextProgress = addLegendaryEncounter(nextProgress, contact.specialProfileId);
+    }
+  }
+  return nextProgress;
+}
+
+export function getLegendaryEnrollmentChance(state: GameState, profileId: SpecialCollaboratorId) {
+  if (profileId === "andrea-simonazzi") return 1;
+  const previousAttempts = state.legendaryCollaborators.enrollmentAttempts[profileId] ?? 0;
+  return getEnrollmentChance(state, "legendary", previousAttempts);
 }
 
 function addMessage(
@@ -282,10 +351,6 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     GAME_CONFIG.emailOutcomeMaxMs,
   );
   const guaranteedTutorialBooking = state.statistics.emailsSent === 0;
-  const tutorialSpecialBooking = state.network.schools.length === 0 &&
-    state.contacts.some((contact) =>
-      contact.id === email.contactId && Boolean(contact.specialProfileId),
-    );
   const recentEmailResults = state.emails
     .slice()
     .reverse()
@@ -294,8 +359,7 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
   const protectedBooking =
     (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
   const result =
-    guaranteedTutorialBooking || tutorialSpecialBooking || protectedBooking ||
-      bookingRoll < getEmailBookingChance(state)
+    guaranteedTutorialBooking || protectedBooking || bookingRoll < getEmailBookingChance(state)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -401,8 +465,10 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
   const trialContact = state.contacts.find((contact) => contact.id === trial.contactId);
-  const tutorialSpecialEnrollment = state.network.schools.length === 0 &&
-    Boolean(trialContact?.specialProfileId);
+  const specialProfileId = trialContact?.specialProfileId;
+  const alreadyEnrolledLegendary = specialProfileId
+    ? state.legendaryCollaborators.enrolledProfileIds.includes(specialProfileId)
+    : false;
   const recentTrials = state.scheduledTrials
     .filter((candidate) => candidate.status === "completed")
     .slice()
@@ -412,10 +478,27 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   );
   const protectedEnrollment =
     (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >= 4;
-  const enrolled = tutorialGuarantee || tutorialSpecialEnrollment || protectedEnrollment ||
-    enrollmentRoll < getEnrollmentChance(state);
+  const enrolled = specialProfileId
+    ? !alreadyEnrolledLegendary &&
+      enrollmentRoll < getLegendaryEnrollmentChance(state, specialProfileId)
+    : tutorialGuarantee || protectedEnrollment ||
+      enrollmentRoll < getEnrollmentChance(state, trialContact?.rarity ?? "common");
+  const legendaryCollaborators = specialProfileId
+    ? {
+        ...state.legendaryCollaborators,
+        enrollmentAttempts: {
+          ...state.legendaryCollaborators.enrollmentAttempts,
+          [specialProfileId]:
+            (state.legendaryCollaborators.enrollmentAttempts[specialProfileId] ?? 0) + 1,
+        },
+        enrolledProfileIds: enrolled
+          ? [...new Set([...state.legendaryCollaborators.enrolledProfileIds, specialProfileId])]
+          : state.legendaryCollaborators.enrolledProfileIds,
+      }
+    : state.legendaryCollaborators;
   let nextState: GameState = {
     ...state,
+    legendaryCollaborators,
     scheduledTrials: state.scheduledTrials.map((candidate) =>
       candidate.id === trial.id ? { ...candidate, status: "completed" } : candidate,
     ),
@@ -472,6 +555,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     joinedAt: now,
     forms: [] as FormId[],
     assignment: null,
+    rarity: enrolledContact.rarity,
     specialProfileId: enrolledContact.specialProfileId,
   };
   nextState = {
@@ -591,6 +675,7 @@ function resolveAcquisitionEvent(
   let nextState: GameState = {
     ...state,
     randomSeed: acquired.nextSeed,
+    legendaryCollaborators: addLegendaryEncounters(state.legendaryCollaborators, contacts),
     contacts: [...state.contacts, ...contacts],
     equipment: {
       ...state.equipment,
@@ -845,6 +930,10 @@ function processAutomation(state: GameState, now: number): GameState {
     nextState = {
       ...nextState,
       randomSeed: acquired.nextSeed,
+      legendaryCollaborators: addLegendaryEncounters(
+        nextState.legendaryCollaborators,
+        contacts,
+      ),
       contacts: [...nextState.contacts, ...contacts],
       statistics: {
         ...nextState.statistics,
@@ -888,6 +977,7 @@ function runSocialCampaign(state: GameState, now: number): GameState {
   let nextState: GameState = {
     ...state,
     randomSeed: acquired.nextSeed,
+    legendaryCollaborators: addLegendaryEncounters(state.legendaryCollaborators, contacts),
     school: {
       ...state.school,
       euros: state.school.euros - GAME_CONFIG.socialCampaignCost,
@@ -942,6 +1032,7 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
   let nextState: GameState = {
     ...state,
     randomSeed: acquired.nextSeed,
+    legendaryCollaborators: addLegendaryEncounters(state.legendaryCollaborators, contacts),
     school: {
       ...state.school,
       activeMembers: Math.max(0, state.school.activeMembers + (definition.memberDelta ?? 0)),
@@ -1016,7 +1107,12 @@ function foundSchool(
   now: number,
 ): GameState {
   if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
-  const fresh = createInitialState(now, state.profile.displayName, false);
+  const fresh = createInitialState(
+    now,
+    state.profile.displayName,
+    !state.legendaryCollaborators.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID),
+    state.legendaryCollaborators,
+  );
   const archivedSchool = {
     id: makeId("school", now, state.network.schools.length),
     name: state.school.name,
@@ -1047,6 +1143,7 @@ function foundSchool(
       prestigeOfferSent: false,
     },
     achievements: state.achievements,
+    legendaryCollaborators: fresh.legendaryCollaborators,
     statistics: state.statistics,
     messages: state.messages,
   };

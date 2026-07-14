@@ -40,9 +40,9 @@ describe("CalendarView", () => {
     render(<CalendarView state={state} onOpenSentEmail={onOpenSentEmail} />);
 
     expect(screen.getByText("In corso")).toBeVisible();
-    expect(screen.getByText("Andrea Simonazzi")).toBeVisible();
+    expect(screen.getByText("Giulia Ferrando")).toBeVisible();
     expect(
-      screen.getByRole("progressbar", { name: "Avanzamento lezione di prova di Andrea Simonazzi" }),
+      screen.getByRole("progressbar", { name: "Avanzamento lezione di prova di Giulia Ferrando" }),
     ).toHaveAttribute("aria-valuenow", "50");
 
     fireEvent.click(screen.getByRole("button", { name: "Apri mail inviata" }));
