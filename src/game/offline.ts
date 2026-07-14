@@ -14,13 +14,23 @@ export interface OfflineSummary {
   contactsAcquired: number;
 }
 
+export function getOfflineLimitMs(state: GameState): number {
+  const coordinationLevel = state.upgrades["multi-site-coordination"];
+  const progress = Math.min(1, coordinationLevel / 5);
+  return Math.round(
+    GAME_CONFIG.offlineLimitMs +
+      (GAME_CONFIG.offlineMaxLimitMs - GAME_CONFIG.offlineLimitMs) * progress,
+  );
+}
+
 export function simulateOfflineProgress(
   state: GameState,
   now: number,
 ): { state: GameState; summary: OfflineSummary | null } {
   const rawElapsed = Math.max(0, now - state.lastSavedAt);
   if (rawElapsed === 0) return { state, summary: null };
-  const elapsedMs = Math.min(rawElapsed, GAME_CONFIG.offlineLimitMs);
+  const offlineLimitMs = getOfflineLimitMs(state);
+  const elapsedMs = Math.min(rawElapsed, offlineLimitMs);
   const endAt = state.lastSavedAt + elapsedMs;
   const before = state.statistics;
   let processed = state;
@@ -32,7 +42,7 @@ export function simulateOfflineProgress(
 
   const summary: OfflineSummary = {
     elapsedMs,
-    capped: rawElapsed > GAME_CONFIG.offlineLimitMs,
+    capped: rawElapsed > offlineLimitMs,
     emailsCompleted: processed.statistics.emailsSent - before.emailsSent,
     trialsBooked: processed.statistics.trialsBooked - before.trialsBooked,
     trialsCompleted: processed.statistics.trialsCompleted - before.trialsCompleted,
@@ -55,7 +65,7 @@ export function simulateOfflineProgress(
     id: `offline-${now.toString(36)}`,
     sender: "Segreteria automatica",
     subject: "Riepilogo attività offline",
-    preview: `${hours} h ${minutes} min elaborati${summary.capped ? " (limite di 8 ore)" : ""}. Email ${summary.emailsCompleted}, prove ${summary.trialsCompleted}, iscritti ${summary.membersEnrolled}, collaboratori ${summary.collaboratorsRecruited}, entrate € ${Math.round(summary.eurosEarned)}, contatti ${summary.contactsAcquired}.${blocked}`,
+    preview: `${hours} h ${minutes} min elaborati${summary.capped ? ` (limite di ${Math.round(offlineLimitMs / 3_600_000)} ore)` : ""}. Email ${summary.emailsCompleted}, prove ${summary.trialsCompleted}, iscritti ${summary.membersEnrolled}, collaboratori ${summary.collaboratorsRecruited}, entrate € ${Math.round(summary.eurosEarned)}, contatti ${summary.contactsAcquired}.${blocked}`,
     receivedAt: now,
     tone: "system",
     unread: true,

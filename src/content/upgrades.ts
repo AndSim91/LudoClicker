@@ -27,9 +27,9 @@ export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; des
   { id: "organization", title: "Organizzazione", description: "Migliora automazione, quote e coordinamento della scuola." },
 ];
 
-const GROWTH = 1.25;
+const GROWTH = 1.3;
 
-export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
+const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
   { id: "outlook-templates", category: "speed", title: "Modelli di Outlook", description: "Blocchi di testo pronti accelerano ogni campagna.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 45, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 5 },
   { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+2 caratteri per input e livello", effect: "writingPower", effectPerLevel: 2, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
@@ -85,6 +85,60 @@ export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = [
   { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+30% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.3, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
 ];
 
+const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
+  "comfortable-keyboard": 75,
+  "outlook-templates": 175,
+  "quick-phrases": 400,
+  "automatic-signature": 800,
+  "smart-fields": 1_500,
+  "instant-review": 2_750,
+  "mail-merge": 5_000,
+  "prepared-presentation": 50,
+  "qr-cards": 150,
+  "coordinated-demo": 400,
+  "recognizable-stand": 800,
+  "order-welcome": 1_500,
+  "difficult-questions": 2_750,
+  "not-that-thing": 5_000,
+  "clear-subject": 75,
+  "personalized-invite": 175,
+  "call-to-action": 400,
+  "collective-review": 850,
+  testimonials: 1_600,
+  "convincing-paragraph": 3_000,
+  "honest-advertising": 5_500,
+  "welcome-procedure": 75,
+  "tested-intro": 250,
+  "clear-material": 700,
+  "dedicated-helper": 1_300,
+  "prepared-room": 2_500,
+  "memorable-experience": 5_000,
+  "updated-page": 250,
+  "editorial-calendar": 400,
+  "lesson-photos": 750,
+  "demo-video": 1_500,
+  "weekly-column": 2_500,
+  "viral-post": 4_000,
+  "professional-management": 6_500,
+  "pre-event-check": 150,
+  "maintenance-kit": 400,
+  "organized-rack": 750,
+  "essential-parts": 1_300,
+  "demo-set": 2_500,
+  "equipment-register": 4_000,
+  "all-fixed": 6_500,
+  "shared-calendar": 250,
+  "collaborator-shifts": 700,
+  checklist: 1_300,
+  "registration-form": 2_500,
+  "order-secretariat": 4_000,
+  "multi-site-coordination": 6_500,
+};
+
+export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG.map(
+  (definition) => ({ ...definition, baseCost: SHOP_BASE_COSTS[definition.id] }),
+);
+
 export function createInitialUpgradeLevels(): UpgradeLevels {
   return Object.fromEntries(UPGRADE_DEFINITIONS.map((definition) => [definition.id, 0])) as UpgradeLevels;
 }
@@ -93,8 +147,10 @@ export function getUpgradeDefinition(id: UpgradeId) {
   return UPGRADE_DEFINITIONS.find((upgrade) => upgrade.id === id);
 }
 
-export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: number) {
-  return Math.round(definition.baseCost * definition.costGrowth ** currentLevel);
+export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: number, networkSchools = 0) {
+  return Math.round(
+    definition.baseCost * definition.costGrowth ** currentLevel * (1 + networkSchools * 0.15),
+  );
 }
 
 export function getUpgradeEffectTotal(levels: UpgradeLevels, effect: UpgradeEffect): number {

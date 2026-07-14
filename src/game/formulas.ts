@@ -36,7 +36,8 @@ export function getEventFunnelOutcome(
   const equipmentMultiplier = 1 - Math.min(0.25, state.equipment.wear / 400);
   const attendanceMultiplier =
     1 + getUpgradeEffectTotal(state.upgrades, "eventAttendanceMultiplier") +
-    (state.school.specialization === "eventi" ? 0.1 : 0);
+    (state.school.specialization === "eventi" ? 0.1 : 0) +
+    state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   const eventProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "events")
     .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);

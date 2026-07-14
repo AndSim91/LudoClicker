@@ -13,7 +13,9 @@ export function useGameEngine() {
 
   useEffect(() => {
     const tickId = window.setInterval(() => {
-      dispatch({ type: "TICK", now: Date.now() });
+      if (stateRef.current.profile.displayName.trim()) {
+        dispatch({ type: "TICK", now: Date.now() });
+      }
     }, 250);
     return () => window.clearInterval(tickId);
   }, []);
@@ -32,7 +34,7 @@ export function useGameEngine() {
     return () => window.removeEventListener("beforeunload", saveOnExit);
   }, []);
 
-  const saveCheckpoint = `${state.statistics.emailsSent}:${state.statistics.trialsBooked}:${state.statistics.membersEnrolled}:${state.statistics.eventsCompleted}:${JSON.stringify(state.upgrades)}:${state.messages.filter((message) => message.unread).length}:${state.acquisitionEvents.length}`;
+  const saveCheckpoint = `${state.profile.displayName}:${state.statistics.emailsSent}:${state.statistics.trialsBooked}:${state.statistics.membersEnrolled}:${state.statistics.eventsCompleted}:${JSON.stringify(state.upgrades)}:${state.messages.filter((message) => message.unread).length}:${state.acquisitionEvents.length}`;
   useEffect(() => {
     saveGame(stateRef.current);
   }, [saveCheckpoint]);

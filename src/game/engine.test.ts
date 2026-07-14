@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/emailAddresses";
 import { GAME_CONFIG } from "./config";
-import { canFoundSchool, createInitialState, gameReducer } from "./engine";
+import { canFoundSchool, createInitialState, gameReducer, getPrestigeRequirements } from "./engine";
 import { getEmailBookingChance, getEnrollmentChance } from "./formulas";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import {
   selectActiveEmail,
-  selectIncomePerMinute,
+  selectIncomePerMonth,
   selectSentEmailStatus,
   selectUnreadMessages,
 } from "./selectors";
@@ -36,6 +36,19 @@ describe("game engine", () => {
     expect(selectActiveEmail(next)?.revealedCharacters).toBe(2);
     expect(selectActiveEmail(next)?.body.slice(0, 2)).toBe(email.body.slice(0, 2));
     expect(next.statistics.inputs).toBe(1);
+  });
+
+  it("stores the user name and applies it to the active email signature", () => {
+    const state = createInitialState(1_000);
+
+    const updated = gameReducer(state, {
+      type: "UPDATE_PROFILE_NAME",
+      displayName: "  Andrea   Simonazzi  ",
+    });
+
+    expect(updated.profile.displayName).toBe("Andrea Simonazzi");
+    expect(updated.emails[0].body).toContain("Andrea Simonazzi - Ordine delle Onde");
+    expect(updated.emails[0].body.toLocaleLowerCase("it-IT")).not.toContain("segreteria");
   });
 
   it("determines and stores the first email outcome exactly once", () => {
@@ -105,7 +118,9 @@ describe("game engine", () => {
     state = gameReducer(state, { type: "TICK", now: trial.resolvesAt });
 
     expect(state.school.activeMembers).toBe(1);
-    expect(state.school.euros).toBe(GAME_CONFIG.firstEnrollmentFee + 25);
+    expect(state.school.euros).toBe(
+      GAME_CONFIG.enrollmentBonus + GAME_CONFIG.monthlyMemberFee + 25,
+    );
     expect(state.unlocks.upgrades).toBe(true);
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);
@@ -145,8 +160,20 @@ describe("game engine", () => {
     const paid = gameReducer(state, { type: "TICK", now: dueAt });
     const sameTick = gameReducer(paid, { type: "TICK", now: dueAt });
 
-    expect(paid.school.euros).toBe(2 * GAME_CONFIG.memberFee);
+    expect(paid.school.euros).toBe(2 * GAME_CONFIG.monthlyMemberFee);
+    expect(paid.school.currentMonth).toBe(2);
     expect(sameTick.school.euros).toBe(paid.school.euros);
+  });
+
+  it("advances game months even without active members", () => {
+    const initial = createInitialState(1_000);
+    const advanced = gameReducer(initial, {
+      type: "TICK",
+      now: 1_000 + GAME_CONFIG.gameMonthMs * 3,
+    });
+
+    expect(advanced.school.currentMonth).toBe(4);
+    expect(advanced.school.euros).toBe(0);
   });
 
   it("marks an inbox message as read exactly once", () => {
@@ -160,11 +187,11 @@ describe("game engine", () => {
     expect(readAgain).toBe(read);
   });
 
-  it("calculates income per minute from active members", () => {
+  it("calculates income per game month from active members", () => {
     const state = createInitialState(1_000);
     const withMembers = { ...state, school: { ...state.school, activeMembers: 3 } };
 
-    expect(selectIncomePerMinute(withMembers)).toBe(3 * GAME_CONFIG.memberFee);
+    expect(selectIncomePerMonth(withMembers)).toBe(3 * GAME_CONFIG.monthlyMemberFee);
   });
 
   it("resolves free park sparring into new usable contacts once", () => {
@@ -298,7 +325,7 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 100, historicMembers: 1 },
+      school: { ...initial.school, euros: 200, historicMembers: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
     const first = gameReducer(funded, {
@@ -313,16 +340,16 @@ describe("game engine", () => {
     });
 
     expect(first.upgrades["prepared-presentation"]).toBe(1);
-    expect(first.school.euros).toBe(85);
+    expect(first.school.euros).toBe(150);
     expect(second.upgrades["prepared-presentation"]).toBe(2);
-    expect(second.school.euros).toBe(66);
+    expect(second.school.euros).toBe(85);
   });
 
   it("adds purchased equipment capacity immediately", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 500, historicMembers: 20 },
+      school: { ...initial.school, euros: 750, historicMembers: 20 },
     };
 
     const upgraded = gameReducer(funded, {
@@ -339,7 +366,7 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 20 },
+      school: { ...initial.school, euros: 75 },
     };
 
     const purchased = gameReducer(funded, {
@@ -356,7 +383,7 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 100, historicMembers: 1 },
+      school: { ...initial.school, euros: 200, historicMembers: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
     const faster = gameReducer(funded, {
@@ -538,6 +565,24 @@ describe("game engine", () => {
     expect(repeated.narrative.history).toHaveLength(1);
   });
 
+  it("includes the amount in an extraordinary contribution notification", () => {
+    const initial = createInitialState(1_000);
+    const due = {
+      ...initial,
+      randomSeed: 0,
+      school: { ...initial.school, activeMembers: 3 },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+
+    const resolved = gameReducer(due, { type: "TICK", now: 2_000 });
+    const contribution = resolved.messages.find(
+      (message) => message.subject === "Contributo straordinario",
+    );
+
+    expect(contribution?.preview).toContain("Contributo ricevuto: 20,00\u00a0€.");
+    expect(resolved.narrative.history[0].summary).toBe(contribution?.preview);
+  });
+
   it("offers and founds a new school while preserving the permanent network", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 8 }, (_, index) => ({
@@ -577,7 +622,39 @@ describe("game engine", () => {
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
     expect(founded.player.writingPower).toBeCloseTo(1.375);
-    expect(selectIncomePerMinute(founded)).toBeCloseTo(6.25);
+    expect(selectIncomePerMonth(founded)).toBeCloseTo(6.25);
+    expect(getPrestigeRequirements(founded)).toEqual({ historicMembers: 200, collaborators: 10, events: 24 });
+
+    const upgraded = gameReducer(
+      { ...founded, school: { ...founded.school, euros: 100 } },
+      { type: "BUY_UPGRADE", upgradeId: "comfortable-keyboard", now: 4_000 },
+    );
+    expect(upgraded.school.euros).toBe(14);
+  });
+
+  it("adds event capacity as the school network grows", () => {
+    const initial = createInitialState(1_000);
+    const archived = {
+      id: "school-archive",
+      name: "Sede precedente",
+      city: "Genova",
+      motto: "",
+      specialization: "generale" as const,
+      membersAtTransfer: 100,
+      emailsSent: 20,
+      eventsCompleted: 12,
+      transferredAt: 1_000,
+    };
+    const networked = {
+      ...initial,
+      school: { ...initial.school, euros: 100, activeMembers: 10 },
+      network: { ...initial.network, schools: [archived, { ...archived, id: "school-archive-2" }] },
+    };
+
+    const first = gameReducer(networked, { type: "START_ACQUISITION_EVENT", definitionId: "park-sparring", now: 2_000 });
+    const second = gameReducer(first, { type: "START_ACQUISITION_EVENT", definitionId: "public-demo", now: 2_100 });
+
+    expect(second.acquisitionEvents.filter((event) => event.status === "running")).toHaveLength(2);
   });
 
   it("guarantees a booking after four consecutive lost email outcomes", () => {

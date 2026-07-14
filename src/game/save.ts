@@ -42,7 +42,9 @@ function isGameState(value: unknown): value is GameState {
     typeof state.narrative?.nextEventAt === "number" &&
     Array.isArray(state.narrative?.history) &&
     typeof state.randomSeed === "number" &&
+    typeof state.profile?.displayName === "string" &&
     typeof state.school?.euros === "number" &&
+    typeof state.school?.currentMonth === "number" &&
     typeof state.school?.city === "string" &&
     typeof state.school?.accentColor === "string" &&
     typeof state.network?.reputation === "number" &&
@@ -227,7 +229,7 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 10) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 11,
       school: migrated.school
         ? {
             ...migrated.school,
@@ -245,6 +247,19 @@ function migrate(value: unknown): unknown {
     };
   }
 
+  if (migrated.version === 11) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      school: migrated.school
+        ? {
+            ...migrated.school,
+            currentMonth: migrated.school.currentMonth ?? 1,
+          }
+        : migrated.school,
+    };
+  }
+
   if (migrated.contacts?.some((contact) => contact.email.endsWith(LEGACY_PROSPECT_EMAIL_DOMAIN))) {
     migrated = {
       ...migrated,
@@ -259,6 +274,13 @@ function migrate(value: unknown): unknown {
             }
           : contact,
       ),
+    };
+  }
+
+  if (!migrated.profile) {
+    migrated = {
+      ...migrated,
+      profile: { displayName: "" },
     };
   }
 
@@ -285,7 +307,15 @@ function read(key: string): GameState | null {
 
 export function loadGame(now = Date.now()): GameState {
   const saved = read(SAVE_KEY) ?? read(BACKUP_KEY);
-  return saved ? simulateOfflineProgress(saved, now).state : createInitialState(now);
+  if (!saved) return createInitialState(now);
+  if (!saved.profile.displayName.trim()) {
+    return {
+      ...saved,
+      lastSavedAt: now,
+      automation: { ...saved.automation, lastProcessedAt: now },
+    };
+  }
+  return simulateOfflineProgress(saved, now).state;
 }
 
 export function saveGame(state: GameState, now = Date.now()): void {

@@ -1,7 +1,7 @@
 export interface EmailTemplate {
   id: string;
   subject: string;
-  body: (firstName: string) => string;
+  body: (firstName: string, senderName: string) => string;
 }
 
 interface TemplateCopy {
@@ -11,10 +11,10 @@ interface TemplateCopy {
   invitation: string;
 }
 
-const signature = `
+const signature = (senderName: string) => `
 
 Un saluto,
-Segreteria — Ordine delle Onde
+${senderName} - Ordine delle Onde
 LudoSport Genova`;
 
 const realistic: TemplateCopy[] = [
@@ -65,7 +65,7 @@ const confident: TemplateCopy[] = [
 
 const playful: TemplateCopy[] = [
   { id: "divano", subject: "Una proposta che il tuo divano non approverà", opening: "il tuo divano sostiene che questa settimana non sia il momento giusto per provare qualcosa di nuovo. Abbiamo esaminato la sua posizione e non siamo d'accordo.", invitation: "Vieni a conoscere l'Ordine delle Onde con una prova gratuita." },
-  { id: "agenda-spada", subject: "Abbiamo trovato uno spazio libero nella tua agenda", opening: "tra impegni, notifiche e cose rimandate esiste probabilmente un'ora in cui potresti imparare a usare una spada in sicurezza.", invitation: "La segreteria propone di occuparla con una lezione introduttiva." },
+  { id: "agenda-spada", subject: "Abbiamo trovato uno spazio libero nella tua agenda", opening: "tra impegni, notifiche e cose rimandate esiste probabilmente un'ora in cui potresti imparare a usare una spada in sicurezza.", invitation: "Ti proponiamo di occuparla con una lezione introduttiva." },
   { id: "scarpe-comode", subject: "Abiti comodi, scarpe pulite, ottime intenzioni", opening: "la lista per iniziare è sorprendentemente breve. Non comprende talenti segreti, mantelli o dichiarazioni solenni.", invitation: "Porta questi tre elementi e al resto penserà il gruppo." },
   { id: "riunione-movimento", subject: "Una riunione in cui è consentito muoversi", opening: "abbiamo tavoli solo quando servono, nessuna presentazione di quarantadue diapositive e parecchio spazio per allenarsi.", invitation: "Partecipa alla prossima riunione non amministrativa dell'Ordine." },
   { id: "mercoledi-epico", subject: "Il mercoledì può ancora migliorare", opening: "le probabilità che una normale serata migliori dopo aver impugnato una spada luminosa sono oggetto di uno studio interno molto ottimista.", invitation: "Contribuisci ai dati partecipando a una prova gratuita." },
@@ -88,7 +88,7 @@ const playful: TemplateCopy[] = [
 
 const administrative: TemplateCopy[] = [
   { id: "protocollo-curiosita", subject: "Protocollo interno per la gestione della curiosità", opening: "la tua richiesta informale è stata classificata come interesse potenzialmente trasformabile in allenamento concreto.", invitation: "La procedura raccomandata prevede una lezione gratuita e nessun ulteriore modulo." },
-  { id: "verbale-spade", subject: "Verbale sintetico sulla disponibilità delle spade", opening: "il controllo inventario si è concluso positivamente: esiste attrezzatura sufficiente per accogliere almeno una nuova persona motivata.", invitation: "La segreteria propone di associare il tuo nome a una delle disponibilità." },
+  { id: "verbale-spade", subject: "Verbale sintetico sulla disponibilità delle spade", opening: "il controllo inventario si è concluso positivamente: esiste attrezzatura sufficiente per accogliere almeno una nuova persona motivata.", invitation: "Ti proponiamo di associare il tuo nome a una delle disponibilità." },
   { id: "foglio-calcolo", subject: "Il foglio di calcolo suggerisce una prova", opening: "dopo un numero non necessario di formule, la colonna conclusioni restituisce un risultato sorprendentemente leggibile: dovresti venire in palestra.", invitation: "Possiamo trasformare la cella in un appuntamento reale." },
   { id: "comitato-lunedi", subject: "Delibera del comitato per il miglioramento del lunedì", opening: "il comitato ha stabilito che movimento, concentrazione e spade luminose costituiscono un aggiornamento accettabile alla normale routine.", invitation: "La delibera entra in vigore con la tua prima lezione." },
   { id: "ticket-esperienza", subject: "Ticket aperto: nuova esperienza da configurare", opening: "la richiesta è stata presa in carico. Mancano soltanto una data, abiti comodi e la presenza dell'utente interessato.", invitation: "Conferma la disponibilità per permetterci di chiudere il ticket con successo." },
@@ -96,7 +96,7 @@ const administrative: TemplateCopy[] = [
   { id: "circolare-movimento", subject: "Circolare n. 12: introduzione al movimento controllato", opening: "la circolare stabilisce che tutti i nuovi partecipanti inizino da esercizi chiari, sicuri e progressivi sotto supervisione.", invitation: "Puoi partecipare alla prossima applicazione pratica della circolare." },
   { id: "budget-zero", subject: "Preventivo approvato: costo della prima prova € 0", opening: "la voce di spesa relativa alla lezione introduttiva è stata verificata e rimane ostinatamente pari a zero.", invitation: "Il budget non sembra quindi un motivo valido per rimandare." },
   { id: "riunione-operativa", subject: "Convocazione a riunione operativa senza sedie", opening: "l'ordine del giorno comprende sicurezza, postura, distanza e primi esercizi. La riunione si svolgerà quasi interamente in movimento.", invitation: "La tua partecipazione è facoltativa ma fortemente incoraggiata." },
-  { id: "allegato-invisibile", subject: "Allegato: una serata diversa dal solito", opening: "l'allegato non compare perché è composto da spazio, persone e attività fisica. Per aprirlo è necessario presentarsi in palestra.", invitation: "La segreteria può programmare l'accesso gratuito." },
+  { id: "allegato-invisibile", subject: "Allegato: una serata diversa dal solito", opening: "l'allegato non compare perché è composto da spazio, persone e attività fisica. Per aprirlo è necessario presentarsi in palestra.", invitation: "Possiamo programmare l'accesso gratuito." },
   { id: "kpi-coordinazione", subject: "Aggiornamento KPI: coordinazione migliorabile", opening: "gli indicatori disponibili suggeriscono margini di crescita interessanti nella gestione di distanza, equilibrio e precisione.", invitation: "È disponibile un intervento formativo introduttivo senza costi." },
   { id: "approvazione-unanime", subject: "Invito approvato all'unanimità", opening: "tutti i membri presenti, incluse alcune spade correttamente riposte, hanno espresso parere favorevole alla tua visita.", invitation: "Resta da individuare soltanto la data della prova." },
   { id: "procedura-abiti", subject: "Procedura semplificata per gli abiti comodi", opening: "la documentazione richiesta è stata ridotta a una sola indicazione: indossa qualcosa che permetta di muoverti liberamente.", invitation: "Ogni altro elemento necessario sarà fornito sul posto." },
@@ -137,6 +137,6 @@ const copies = [...realistic, ...confident, ...playful, ...administrative, ...ne
 export const EMAIL_TEMPLATES: EmailTemplate[] = copies.map((copy, index) => ({
   id: copy.id,
   subject: copy.subject,
-  body: (name) =>
-    `${index % 3 === 0 ? "Buongiorno" : "Ciao"} ${name},\n\n${copy.opening}\n\n${copy.invitation}${signature}`,
+  body: (name, senderName) =>
+    `${index % 3 === 0 ? "Buongiorno" : "Ciao"} ${name},\n\n${copy.opening}\n\n${copy.invitation}${signature(senderName)}`,
 }));

@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
-import { canFoundSchool } from "../game/engine";
+import { canFoundSchool, getPrestigeRequirements } from "../game/engine";
+import { getOfflineLimitMs } from "../game/offline";
 import type { GameState, SchoolFoundationDetails } from "../game/types";
 
 type OverviewViewName = Exclude<AppView, "mail" | "upgrades" | "events" | "calendar" | "statistics" | "contacts">;
@@ -17,6 +18,7 @@ interface OverviewViewProps {
   onExport: () => void;
   onImport: (raw: string) => boolean;
   onReset: () => void;
+  onUpdateProfileName: (displayName: string) => void;
   onFoundSchool: (details: SchoolFoundationDetails) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
@@ -28,6 +30,7 @@ export function OverviewView({
   onExport,
   onImport,
   onReset,
+  onUpdateProfileName,
   onFoundSchool,
   reduceMotion,
   onReduceMotionChange,
@@ -44,6 +47,7 @@ export function OverviewView({
     specialization: "redazione",
   });
   const eligible = canFoundSchool(state);
+  const requirements = getPrestigeRequirements(state);
 
   const importSave = () => {
     const success = onImport(importText);
@@ -65,8 +69,25 @@ export function OverviewView({
       <header><Icon name="settings" /><div><h1>{title}</h1><p>{subtitle}</p></div></header>
 
       <section className="settings-sheet">
+        <h2>Profilo email</h2>
+        <p>Questo nome viene inserito nella firma delle bozze e delle nuove campagne.</p>
+        <form
+          className="profile-settings-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const form = new FormData(event.currentTarget);
+            const displayName = String(form.get("displayName") ?? "").trim();
+            if (displayName) onUpdateProfileName(displayName);
+          }}
+        >
+          <label htmlFor="settings-display-name"><span>Nome e cognome</span><input id="settings-display-name" name="displayName" required maxLength={80} defaultValue={state.profile.displayName} /></label>
+          <button type="submit">Aggiorna nome</button>
+        </form>
+      </section>
+
+      <section className="settings-sheet">
         <h2>Salvataggio locale</h2>
-        <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Il progresso offline è limitato a 8 ore.</p>
+        <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Il progresso offline è limitato a {Math.round(getOfflineLimitMs(state) / 3_600_000)} ore.</p>
         <dl><div><dt>Versione salvataggio</dt><dd>{state.version}</dd></div><div><dt>Ultimo salvataggio</dt><dd>{new Intl.DateTimeFormat("it-IT", { timeStyle: "medium" }).format(state.lastSavedAt)}</dd></div></dl>
         <label className="preference-check"><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span></label>
         <div className="settings-actions">
@@ -81,9 +102,9 @@ export function OverviewView({
       <section className="network-sheet">
         <div className="network-heading"><div><Icon name="people" /><span><strong>Rete delle scuole</strong><small>Reputazione {state.network.reputation} · bonus permanente +{Math.round(state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool * 100)}%</small></span></div><b>{state.network.schools.length} sedi precedenti</b></div>
         <div className="prestige-requirements" aria-label="Requisiti nuova scuola">
-          <Requirement label="Iscritti storici" value={state.school.historicMembers} target={GAME_CONFIG.prestigeHistoricMembers} />
-          <Requirement label="Collaboratori" value={state.collaborators.length} target={GAME_CONFIG.prestigeCollaborators} />
-          <Requirement label="Eventi completati" value={state.statistics.eventsCompleted} target={GAME_CONFIG.prestigeEvents} />
+          <Requirement label="Iscritti storici" value={state.school.historicMembers} target={requirements.historicMembers} />
+          <Requirement label="Collaboratori" value={state.collaborators.length} target={requirements.collaborators} />
+          <Requirement label="Eventi completati" value={state.statistics.eventsCompleted} target={requirements.events} />
         </div>
         {state.network.schools.length > 0 ? <div className="school-archive">{state.network.schools.slice().reverse().map((school) => <article key={school.id}><div><strong>{school.name}</strong><small>{school.city} · {school.membersAtTransfer} iscritti al trasferimento</small></div><time>{new Intl.DateTimeFormat("it-IT", { dateStyle: "medium" }).format(school.transferredAt)}</time></article>)}</div> : null}
 

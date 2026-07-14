@@ -35,6 +35,11 @@ import type {
   SchoolFoundationDetails,
 } from "./types";
 
+const euroFormatter = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+});
+
 function makeId(prefix: string, now: number, suffix: number | string): string {
   return `${prefix}-${now.toString(36)}-${suffix}`;
 }
@@ -51,14 +56,19 @@ function createContacts(now: number): Contact[] {
   }));
 }
 
-function createCampaign(contact: Contact, campaignIndex: number, now: number): CampaignEmail {
+function createCampaign(
+  contact: Contact,
+  campaignIndex: number,
+  now: number,
+  senderName: string,
+): CampaignEmail {
   const template = EMAIL_TEMPLATES[campaignIndex % EMAIL_TEMPLATES.length];
   return {
     id: makeId("email", now, campaignIndex),
     contactId: contact.id,
     templateId: template.id,
     subject: template.subject,
-    body: template.body(contact.firstName),
+    body: template.body(contact.firstName, senderName),
     revealedCharacters: 0,
     createdAt: now,
     status: "writing",
@@ -77,13 +87,14 @@ function systemMessage(now: number): InboxMessage {
   };
 }
 
-export function createInitialState(now = Date.now()): GameState {
+export function createInitialState(now = Date.now(), displayName = ""): GameState {
   const contacts = createContacts(now);
   return {
     version: GAME_CONFIG.version,
     createdAt: now,
     lastSavedAt: now,
     randomSeed: (now ^ 0x5f3759df) | 0,
+    profile: { displayName },
     school: {
       name: "Ordine delle Onde — Genova",
       city: "Genova",
@@ -93,12 +104,13 @@ export function createInitialState(now = Date.now()): GameState {
       activeMembers: 0,
       historicMembers: 0,
       euros: 0,
-      nextFeeAt: now + GAME_CONFIG.feePeriodMs,
+      currentMonth: 1,
+      nextFeeAt: now + GAME_CONFIG.gameMonthMs,
     },
     player: { writingPower: 1 },
     network: { reputation: 0, schools: [], prestigeOfferSent: false },
     contacts,
-    emails: [createCampaign(contacts[0], 0, now)],
+    emails: [createCampaign(contacts[0], 0, now, displayName)],
     pendingEmailOutcomes: [],
     scheduledTrials: [],
     messages: [systemMessage(now)],
@@ -195,7 +207,7 @@ function startNextCampaign(state: GameState, now: number): GameState {
   const nextContact = state.contacts.find((contact) => contact.status === "available");
   if (!nextContact) return state;
 
-  const email = createCampaign(nextContact, state.emails.length, now);
+  const email = createCampaign(nextContact, state.emails.length, now, state.profile.displayName);
   return {
     ...state,
     contacts: state.contacts.map((contact) =>
@@ -339,8 +351,6 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   const protectedEnrollment =
     (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >= 4;
   const enrolled = tutorialGuarantee || protectedEnrollment || enrollmentRoll < getEnrollmentChance(state);
-  const wasEmpty = state.school.activeMembers === 0;
-
   let nextState: GameState = {
     ...state,
     scheduledTrials: state.scheduledTrials.map((candidate) =>
@@ -356,7 +366,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       trialsCompleted: state.statistics.trialsCompleted + 1,
       contactsLost: state.statistics.contactsLost + (enrolled ? 0 : 1),
       membersEnrolled: state.statistics.membersEnrolled + (enrolled ? 1 : 0),
-      eurosEarned: state.statistics.eurosEarned + (enrolled ? GAME_CONFIG.firstEnrollmentFee : 0),
+      eurosEarned: state.statistics.eurosEarned + (enrolled ? GAME_CONFIG.enrollmentBonus : 0),
     },
   };
 
@@ -368,8 +378,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       ...nextState.school,
       activeMembers: nextState.school.activeMembers + 1,
       historicMembers: nextState.school.historicMembers + 1,
-      euros: nextState.school.euros + GAME_CONFIG.firstEnrollmentFee,
-      nextFeeAt: wasEmpty ? now + GAME_CONFIG.feePeriodMs : nextState.school.nextFeeAt,
+      euros: nextState.school.euros + GAME_CONFIG.enrollmentBonus,
     },
     unlocks: {
       ...nextState.unlocks,
@@ -381,8 +390,8 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   nextState = addMessage(
     nextState,
     now,
-    state.school.historicMembers === 0 ? "Prima quota associativa" : "Nuovo iscritto registrato",
-    `Quota iniziale di € ${GAME_CONFIG.firstEnrollmentFee.toFixed(2).replace(".", ",")} accreditata. Nuovi miglioramenti disponibili.`,
+    state.school.historicMembers === 0 ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
+    `Bonus di iscrizione di € ${GAME_CONFIG.enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
   );
 
   const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
@@ -418,25 +427,27 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
 }
 
 function collectFees(state: GameState, now: number): GameState {
-  if ((state.school.activeMembers === 0 && state.network.schools.length === 0) || now < state.school.nextFeeAt) return state;
-  const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.feePeriodMs) + 1;
+  if (now < state.school.nextFeeAt) return state;
+  const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.gameMonthMs) + 1;
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const earned =
+  const earned = Math.round((
     periods *
-    (state.school.activeMembers * GAME_CONFIG.memberFee +
+    (state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
       state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
     (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
-    networkMultiplier;
+    networkMultiplier
+  ) * 100) / 100;
   return {
     ...state,
     school: {
       ...state.school,
-      euros: state.school.euros + earned,
-      nextFeeAt: state.school.nextFeeAt + periods * GAME_CONFIG.feePeriodMs,
+      euros: Math.round((state.school.euros + earned) * 100) / 100,
+      currentMonth: state.school.currentMonth + periods,
+      nextFeeAt: state.school.nextFeeAt + periods * GAME_CONFIG.gameMonthMs,
     },
     statistics: {
       ...state.statistics,
-      eurosEarned: state.statistics.eurosEarned + earned,
+      eurosEarned: Math.round((state.statistics.eurosEarned + earned) * 100) / 100,
     },
   };
 }
@@ -447,7 +458,9 @@ function startAcquisitionEvent(
   now: number,
 ): GameState {
   const definition = getAcquisitionEventDefinition(definitionId);
-  if (!definition || state.acquisitionEvents.some((event) => event.status === "running")) {
+  const maxConcurrentEvents = 1 + Math.floor(state.network.schools.length / 2);
+  const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running").length;
+  if (!definition || runningEvents >= maxConcurrentEvents) {
     return state;
   }
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
@@ -842,7 +855,9 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
   const contacts = definition.contactDelta
     ? createAcquiredContacts(state, definition.contactDelta, "collaborator", now)
     : [];
-  const summary = definition.description;
+  const summary = definition.euroDelta && definition.euroDelta > 0
+    ? `${definition.description} Contributo ricevuto: ${euroFormatter.format(definition.euroDelta)}.`
+    : definition.description;
   let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
@@ -877,15 +892,25 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
         state.statistics.eurosEarned + Math.max(0, definition.euroDelta ?? 0),
     },
   };
-  nextState = addMessage(nextState, now, definition.title, definition.description, definition.tone);
+  nextState = addMessage(nextState, now, definition.title, summary, definition.tone);
   return contacts.length > 0 ? startNextCampaign(nextState, now) : nextState;
 }
 
+export function getPrestigeRequirements(state: GameState) {
+  const cycle = state.network.schools.length + 1;
+  return {
+    historicMembers: GAME_CONFIG.prestigeHistoricMembers * cycle,
+    collaborators: GAME_CONFIG.prestigeCollaborators + (cycle - 1) * 2,
+    events: GAME_CONFIG.prestigeEvents * cycle,
+  };
+}
+
 export function canFoundSchool(state: GameState): boolean {
+  const requirements = getPrestigeRequirements(state);
   return (
-    state.school.historicMembers >= GAME_CONFIG.prestigeHistoricMembers &&
-    state.collaborators.length >= GAME_CONFIG.prestigeCollaborators &&
-    state.statistics.eventsCompleted >= GAME_CONFIG.prestigeEvents
+    state.school.historicMembers >= requirements.historicMembers &&
+    state.collaborators.length >= requirements.collaborators &&
+    state.statistics.eventsCompleted >= requirements.events
   );
 }
 
@@ -910,7 +935,7 @@ function foundSchool(
   now: number,
 ): GameState {
   if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
-  const fresh = createInitialState(now);
+  const fresh = createInitialState(now, state.profile.displayName);
   const archivedSchool = {
     id: makeId("school", now, state.network.schools.length),
     name: state.school.name,
@@ -1024,7 +1049,7 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   ) {
     return state;
   }
-  const cost = getUpgradeCost(definition, currentLevel);
+  const cost = getUpgradeCost(definition, currentLevel, state.network.schools.length);
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
@@ -1048,6 +1073,28 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   };
 }
 
+function updateProfileName(state: GameState, displayName: string): GameState {
+  const normalizedName = displayName.trim().replace(/\s+/g, " ").slice(0, 80);
+  if (!normalizedName || normalizedName === state.profile.displayName) return state;
+
+  return {
+    ...state,
+    profile: { displayName: normalizedName },
+    emails: state.emails.map((email) => {
+      if (email.status !== "writing") return email;
+      const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
+      const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
+      if (!contact || !template) return email;
+      const body = template.body(contact.firstName, normalizedName);
+      return {
+        ...email,
+        body,
+        revealedCharacters: Math.min(email.revealedCharacters, body.length),
+      };
+    }),
+  };
+}
+
 export function gameReducer(state: GameState, action: GameAction): GameState {
   let nextState: GameState;
   switch (action.type) {
@@ -1059,6 +1106,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     case "REPLACE_STATE":
       nextState = action.state;
+      break;
+    case "UPDATE_PROFILE_NAME":
+      nextState = updateProfileName(state, action.displayName);
       break;
     case "FOUND_SCHOOL":
       nextState = foundSchool(state, action.details, action.now);

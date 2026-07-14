@@ -159,7 +159,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
 - **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
 
-Ogni iscritto attivo genera periodicamente una quota associativa. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **60 secondi reali**, viene numerato progressivamente e non appartiene a un anno: il gioco non tiene traccia degli anni. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -326,9 +326,10 @@ Per il primo prototipo:
 | Esito dell'email | 20 secondi–3 minuti |
 | Attesa della lezione in palestra | 1–5 minuti |
 | Esito della lezione | immediato al termine |
-| Accredito della prima quota | immediato o entro 1 minuto |
+| Bonus di iscrizione | immediato (€20) |
+| Accredito della quota mensile | al cambio mese (€40 per iscritto) |
 
-Con la progressione, il gioco può simulare ore e giorni usando tempi compressi. I tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
+Il mese di gioco dura 60 secondi. Il contatore dei mesi cresce senza essere raggruppato in anni. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
 ### 7.3 Formule di conversione
 
@@ -656,7 +657,7 @@ Tutti i potenziamenti vengono acquistati esclusivamente in Euro. Non esistono ri
 costoLivello = costoBase × crescita^(livelloCorrente)
 ```
 
-Valore iniziale consigliato di `crescita`: **1,20**, aumentabile a 1,25–1,35 per automazioni e moltiplicatori particolarmente forti.
+Il prototipo usa una crescita di **1,30** per livello. I prezzi base vanno da **€50** per i primi acquisti fino a **€6.500** per i sistemi avanzati, calibrati sulle quote mensili disponibili alla rispettiva soglia di iscritti.
 
 Alcuni livelli richiedono anche soglie non spendibili, come numero di iscritti, eventi completati, collaboratori o Forme conosciute.
 
@@ -868,8 +869,8 @@ Il tutorial avviene tramite email ricevute.
 4. **Nuova lezione prenotata**
    Introduce il passaggio email → prova in palestra → possibile iscrizione.
 
-5. **Prima quota associativa**
-   Introduce gli Euro e il finanziamento dei potenziamenti.
+5. **Primo bonus e quota associativa**
+   Introduce il bonus immediato di €20, la quota mensile di €40 e il finanziamento dei potenziamenti.
 
 6. **Una mano in più**
    Il primo Iscritto volenteroso può essere garantito dal tutorial e introduce l'automazione.
@@ -1168,6 +1169,9 @@ Il riepilogo mostra:
 - 6 spade disponibili;
 - prenotazione prova dopo email: 20% provvisorio;
 - iscrizione dopo prova in palestra: 50% provvisorio;
+- bonus immediato per ogni nuova iscrizione: €20;
+- quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
+- durata di un mese di gioco: 60 secondi, senza conteggio degli anni;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
 - il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
 - il primo evento e il primo sparring sono gratuiti e guidati.
@@ -1535,7 +1539,8 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 - ogni esito email e ogni lezione vengono risolti una sola volta;
 - ricaricare non cambia l'esito già determinato;
 - soltanto gli Euro vengono spesi per acquistare potenziamenti;
-- gli iscritti generano quote una sola volta per ogni periodo;
+- gli iscritti generano quote una sola volta per ogni mese di gioco;
+- il contatore dei mesi avanza anche quando non ci sono iscritti attivi;
 - i collaboratori non possono svolgere due incarichi incompatibili;
 - gli iscritti possono aumentare o diminuire soltanto tramite esiti ed eventi validi.
 

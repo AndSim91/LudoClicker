@@ -8,16 +8,23 @@ afterEach(() => {
   cleanup();
 });
 
-describe("App calendar flow", () => {
-  it("shows the LudoSport Genova sender in the active draft", () => {
+describe("App profile and calendar flow", () => {
+  it("asks for the name before showing the active draft", () => {
     render(<App />);
 
+    expect(screen.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
+    fireEvent.change(screen.getByRole("textbox", { name: "Nome e cognome" }), {
+      target: { value: "Andrea Simonazzi" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Inizia" }));
+
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
+    expect(screen.getByText(/Andrea Simonazzi - Ordine delle Onde/)).toBeVisible();
   });
 
   it("opens the associated campaign in Sent mail", () => {
     const now = Date.now();
-    const initial = createInitialState(now);
+    const initial = createInitialState(now, "Andrea Simonazzi");
     const contact = { ...initial.contacts[0], status: "trialScheduled" as const };
     const email = {
       ...initial.emails[0],

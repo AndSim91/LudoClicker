@@ -252,6 +252,9 @@ export interface GameState {
   createdAt: number;
   lastSavedAt: number;
   randomSeed: number;
+  profile: {
+    displayName: string;
+  };
   school: {
     name: string;
     city: string;
@@ -261,6 +264,7 @@ export interface GameState {
     activeMembers: number;
     historicMembers: number;
     euros: number;
+    currentMonth: number;
     nextFeeAt: number;
   };
   player: {
@@ -311,6 +315,7 @@ export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "TICK"; now: number }
   | { type: "REPLACE_STATE"; state: GameState }
+  | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "MARK_MESSAGE_READ"; messageId: string }

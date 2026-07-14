@@ -20,8 +20,10 @@ export function EventsView({
   onStart: (definitionId: AcquisitionEvent["definitionId"]) => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
-  const runningEvent = state.acquisitionEvents.find((event) => event.status === "running");
-  const refreshIntervalMs = runningEvent ? 100 : 1_000;
+  const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running");
+  const maxConcurrentEvents = 1 + Math.floor(state.network.schools.length / 2);
+  const capacityFull = runningEvents.length >= maxConcurrentEvents;
+  const refreshIntervalMs = runningEvents.length > 0 ? 100 : 1_000;
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), refreshIntervalMs);
     return () => window.clearInterval(timer);
@@ -47,10 +49,10 @@ export function EventsView({
           const remainingSeconds = matching
             ? Math.max(0, Math.ceil((matching.resolvesAt - now) / 1_000))
             : 0;
-          const disabled = Boolean(runningEvent || onCooldown || lacksFunds || lacksMembers || lacksEquipment);
+          const disabled = Boolean(matching || capacityFull || onCooldown || lacksFunds || lacksMembers || lacksEquipment);
           let action = definition.cost === 0 ? "Partecipa gratis" : `Partecipa · ${euro.format(definition.cost)}`;
           if (matching) action = "Attività in corso…";
-          else if (runningEvent) action = "Attendi l'attività in corso";
+          else if (capacityFull) action = "Attendi un'attività in corso";
           else if (onCooldown) action = `Di nuovo tra ${Math.ceil(cooldown / 1_000)} s`;
           else if (lacksMembers) action = `Richiede ${definition.requiredMembers} iscritti`;
           else if (lacksEquipment) action = `Richiede ${definition.requiredSwords} spade`;

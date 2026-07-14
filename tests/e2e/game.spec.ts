@@ -4,6 +4,9 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await expect(page.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
+  await page.getByRole("textbox", { name: "Nome e cognome" }).fill("Andrea Simonazzi");
+  await page.getByRole("button", { name: "Inizia" }).click();
 });
 
 test("scrive con tastiera e click senza intercettare la navigazione", async ({ page }) => {
@@ -37,6 +40,7 @@ test("invia automaticamente la mail completa e apre il contatto successivo", asy
   await sentFolder.click();
   await expect(page.locator(".campaign-status")).toHaveText("In attesa");
   await expect(page.getByRole("article")).toContainText("Buongiorno Giulia,");
+  await expect(page.getByRole("article")).toContainText("Andrea Simonazzi - Ordine delle Onde");
 });
 
 test("legge le notifiche e apre shop ed eventi", async ({ page }) => {
@@ -47,7 +51,7 @@ test("legge le notifiche e apre shop ed eventi", async ({ page }) => {
 
   await page.getByRole("button", { name: /Miglioramenti/ }).click();
   await expect(page.getByRole("heading", { name: "Miglioramenti" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Entrate dell'Ordine" })).toContainText("0,00 € al minuto");
+  await expect(page.getByRole("region", { name: "Entrate dell'Ordine" })).toContainText("0,00 € al mese");
   if (process.env.QA_SCREENSHOT_DIR) {
     await page.screenshot({ path: `${process.env.QA_SCREENSHOT_DIR}/improvements-shop.png` });
   }

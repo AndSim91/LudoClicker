@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Icon } from "../components/common/Icon";
+import { ProfileNameDialog } from "../components/ProfileNameDialog";
 import { AppRail, type AppView } from "../components/outlook-shell/AppRail";
 import { CommandBar } from "../components/outlook-shell/CommandBar";
 import { Composer } from "../components/outlook-shell/Composer";
@@ -45,6 +46,7 @@ export function App() {
         view !== "mail" ||
         mailFolder !== "inbox" ||
         selectedMessageId !== null ||
+        !state.profile.displayName.trim() ||
         event.repeat ||
         targetConsumesKeyboard(event.target)
       ) return;
@@ -52,7 +54,7 @@ export function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [dispatch, mailFolder, selectedMessageId, view]);
+  }, [dispatch, mailFolder, selectedMessageId, state.profile.displayName, view]);
 
   const write = () => dispatch({ type: "WRITE", now: Date.now() });
   const selectMessage = (messageId: string | null) => {
@@ -94,8 +96,19 @@ export function App() {
   const resetSave = () => {
     dispatch({ type: "REPLACE_STATE", state: resetGame() });
   };
+  const updateProfileName = (displayName: string) => {
+    dispatch({ type: "UPDATE_PROFILE_NAME", displayName });
+  };
+
+  if (!state.profile.displayName.trim()) {
+    return <ProfileNameDialog onSubmit={updateProfileName} />;
+  }
+
   return (
-    <div className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}>
+    <div
+      className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
+      style={{ "--school-accent": state.school.accentColor } as CSSProperties}
+    >
       <TitleBar />
       <CommandBar onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }} />
       <div className={view === "mail" ? "workspace" : "workspace overview-workspace"}>
@@ -169,13 +182,14 @@ export function App() {
             onExport={exportSave}
             onImport={importSave}
             onReset={resetSave}
+            onUpdateProfileName={updateProfileName}
             onFoundSchool={(details) => dispatch({ type: "FOUND_SCHOOL", details, now: Date.now() })}
             reduceMotion={reduceMotion}
             onReduceMotionChange={setReduceMotion}
           />
         )}
       </div>
-      <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Connesso localmente</span><b>{state.school.name}</b></footer>
+      <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Connesso localmente</span><b title={state.school.motto || undefined}>{state.school.name}</b></footer>
     </div>
   );
 }

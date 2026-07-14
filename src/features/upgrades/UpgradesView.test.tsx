@@ -15,7 +15,10 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Attrezzatura" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
     expect(screen.getAllByText("Prezzo")).toHaveLength(47);
-    expect(screen.getByText(/15,00/)).toBeVisible();
+    expect(screen.getByText(/^50,00/)).toBeVisible();
+    expect(screen.getByRole("region", { name: "Entrate dell'Ordine" }))
+      .toHaveTextContent(/40,00.*quota mensile/);
+    expect(screen.getByText(/al mese/)).toBeVisible();
     expect(screen.getAllByRole("button", { name: /Fondi insufficienti/ })).toHaveLength(4);
   });
 

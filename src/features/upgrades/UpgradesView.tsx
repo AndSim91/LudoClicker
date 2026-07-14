@@ -8,7 +8,8 @@ import {
   type UpgradeDefinition,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
-import { selectIncomePerMinute } from "../../game/selectors";
+import { selectIncomePerMonth } from "../../game/selectors";
+import { getOfflineLimitMs } from "../../game/offline";
 import type { GameState, UpgradeId } from "../../game/types";
 
 const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
@@ -38,7 +39,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "equipment":
       return `${state.equipment.totalSwords} spade · -${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura`;
     case "organization":
-      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
+      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione · ${Math.round(getOfflineLimitMs(state) / 3_600_000)} h offline`;
   }
 }
 
@@ -48,7 +49,7 @@ function getPurchaseLabel(state: GameState, definition: UpgradeDefinition) {
   if (state.school.historicMembers < definition.requiredHistoricMembers) {
     return `Richiede ${definition.requiredHistoricMembers} iscritti`;
   }
-  const cost = getUpgradeCost(definition, level);
+  const cost = getUpgradeCost(definition, level, state.network.schools.length);
   if (state.school.euros < cost) return "Fondi insufficienti";
   return "Acquista";
 }
@@ -60,14 +61,18 @@ export function UpgradesView({
   state: GameState;
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
 }) {
-  const incomePerMinute = selectIncomePerMinute(state);
+  const incomePerMonth = selectIncomePerMonth(state);
+  const secondsToNextMonth = Math.max(
+    0,
+    Math.ceil((state.school.nextFeeAt - state.automation.lastProcessedAt) / 1_000),
+  );
 
   return (
     <main className="overview-view shop-view">
       <header><Icon name="spark" /><div><h1>Miglioramenti</h1><p>Strumenti e procedure per far crescere l'Ordine delle Onde</p></div></header>
       <section className="income-summary" aria-label="Entrate dell'Ordine">
-        <div><span>Entrate previste</span><strong>{euro.format(incomePerMinute)} <small>al minuto</small></strong></div>
-        <p>{state.school.activeMembers} {state.school.activeMembers === 1 ? "iscritto attivo" : "iscritti attivi"} × {euro.format(GAME_CONFIG.memberFee)} ogni minuto</p>
+        <div><span>Entrate del mese {state.school.currentMonth}</span><strong>{euro.format(incomePerMonth)} <small>al mese</small></strong></div>
+        <p>{state.school.activeMembers} {state.school.activeMembers === 1 ? "iscritto attivo" : "iscritti attivi"} × {euro.format(GAME_CONFIG.monthlyMemberFee)} di quota mensile · prossimo mese tra {secondsToNextMonth} s</p>
         <div className="income-balance"><span>Disponibilità attuale</span><b>{euro.format(state.school.euros)}</b></div>
       </section>
       {UPGRADE_CATEGORIES.map((category) => (
@@ -76,7 +81,7 @@ export function UpgradesView({
           {UPGRADE_DEFINITIONS.filter((definition) => definition.category === category.id).map(
             (definition) => {
               const level = state.upgrades[definition.id];
-              const cost = getUpgradeCost(definition, level);
+              const cost = getUpgradeCost(definition, level, state.network.schools.length);
               const unlocked =
                 state.school.historicMembers >= definition.requiredHistoricMembers;
               const canBuy =

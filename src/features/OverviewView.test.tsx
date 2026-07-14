@@ -10,6 +10,7 @@ describe("OverviewView settings", () => {
     onExport: vi.fn(),
     onImport: vi.fn(() => true),
     onReset: vi.fn(),
+    onUpdateProfileName: vi.fn(),
     onFoundSchool: vi.fn(),
     reduceMotion: false,
     onReduceMotionChange: vi.fn(),
@@ -32,5 +33,22 @@ describe("OverviewView settings", () => {
 
     expect(callbacks.onImport).toHaveBeenCalledWith("{\"version\":11}");
     expect(screen.getByRole("status")).toHaveTextContent("Salvataggio importato correttamente");
+  });
+
+  it("updates the email signature name", () => {
+    render(
+      <OverviewView
+        view="settings"
+        state={createInitialState(1_000, "Andrea Simonazzi")}
+        {...callbacks}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Nome e cognome"), {
+      target: { value: "Giulia Bianchi" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Aggiorna nome" }));
+
+    expect(callbacks.onUpdateProfileName).toHaveBeenCalledWith("Giulia Bianchi");
   });
 });
