@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
-import type { GameState } from "./types";
+import { createInitialUpgradeLevels } from "../content/upgrades";
+import type { GameState, UpgradeLevels } from "./types";
 
 const SAVE_KEY = "oggetto-nuovi-iscritti.save";
 const BACKUP_KEY = `${SAVE_KEY}.backup`;
@@ -15,6 +16,7 @@ function isGameState(value: unknown): value is GameState {
     Array.isArray(state.emails) &&
     Array.isArray(state.acquisitionEvents) &&
     typeof state.activities?.nextSparringAt === "number" &&
+    typeof state.upgrades?.["comfortable-keyboard"] === "number" &&
     typeof state.randomSeed === "number" &&
     typeof state.school?.euros === "number"
   );
@@ -22,22 +24,43 @@ function isGameState(value: unknown): value is GameState {
 
 function migrate(value: unknown): unknown {
   if (!value || typeof value !== "object") return value;
-  const legacy = value as Partial<GameState> & {
+  type MigratableState = Partial<GameState> & {
     version?: number;
     statistics?: Partial<GameState["statistics"]>;
+    upgrades?: Partial<UpgradeLevels> & { speedLevel?: number };
   };
-  if (legacy.version !== 1 || !legacy.statistics) return value;
-  return {
-    ...legacy,
-    version: GAME_CONFIG.version,
-    acquisitionEvents: [],
-    activities: { nextSparringAt: legacy.lastSavedAt ?? legacy.createdAt ?? Date.now() },
-    statistics: {
-      ...legacy.statistics,
-      contactsAcquired: 0,
-      eventsCompleted: 0,
-    },
-  };
+  let migrated = value as MigratableState;
+
+  if (migrated.version === 1 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 2,
+      acquisitionEvents: [],
+      activities: {
+        nextSparringAt: migrated.lastSavedAt ?? migrated.createdAt ?? Date.now(),
+      },
+      statistics: {
+        ...migrated.statistics,
+        contactsAcquired: 0,
+        eventsCompleted: 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 2) {
+    const legacySpeedLevel =
+      migrated.upgrades?.speedLevel ?? Math.max(0, (migrated.player?.writingPower ?? 1) - 1);
+    const upgrades = createInitialUpgradeLevels();
+    upgrades["comfortable-keyboard"] = legacySpeedLevel;
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      upgrades,
+      player: { writingPower: 1 + legacySpeedLevel },
+    };
+  }
+
+  return migrated;
 }
 
 function read(key: string): GameState | null {

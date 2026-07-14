@@ -68,6 +68,14 @@ export interface AcquisitionEvent {
   status: "running" | "completed";
 }
 
+export type UpgradeId =
+  | "comfortable-keyboard"
+  | "prepared-presentation"
+  | "clear-subject"
+  | "welcome-procedure";
+
+export type UpgradeLevels = Record<UpgradeId, number>;
+
 export interface Statistics {
   inputs: number;
   emailsSent: number;
@@ -108,15 +116,13 @@ export interface GameState {
   unlocks: {
     upgrades: boolean;
   };
-  upgrades: {
-    speedLevel: number;
-  };
+  upgrades: UpgradeLevels;
 }
 
 export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "TICK"; now: number }
-  | { type: "BUY_SPEED"; now: number }
+  | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "MARK_MESSAGE_READ"; messageId: string }
   | {
       type: "START_ACQUISITION_EVENT";

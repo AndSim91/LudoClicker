@@ -24,7 +24,6 @@ export function DayPanel({ state }: { state: GameState }) {
           <div><strong>Lezione di prova</strong><span>{getContactName(state, trial.contactId)}</span><small>Ordine delle Onde</small></div>
         </div>
       ))}
-      <button className="add-event" type="button" disabled><Icon name="plus" /> Aggiungi impegno</button>
     </aside>
   );
 }

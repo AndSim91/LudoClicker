@@ -83,7 +83,9 @@ export function App() {
         ) : view === "upgrades" ? (
           <UpgradesView
             state={state}
-            onBuySpeed={() => dispatch({ type: "BUY_SPEED", now: Date.now() })}
+            onBuyUpgrade={(upgradeId) =>
+              dispatch({ type: "BUY_UPGRADE", upgradeId, now: Date.now() })
+            }
           />
         ) : view === "events" ? (
           <EventsView

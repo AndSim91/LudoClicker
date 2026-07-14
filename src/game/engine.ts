@@ -1,7 +1,18 @@
 import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 import { getAcquisitionEventDefinition } from "../content/events";
 import { ACQUIRED_CONTACT_NAMES, CONTACT_NAMES } from "../content/names";
+import {
+  createInitialUpgradeLevels,
+  getUpgradeCost,
+  getUpgradeDefinition,
+} from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import {
+  getEmailBookingChance,
+  getEnrollmentChance,
+  getEventContactReward,
+  getWritingPower,
+} from "./formulas";
 import { nextRandom, randomBetween } from "./random";
 import { selectActiveEmail } from "./selectors";
 import type {
@@ -13,6 +24,7 @@ import type {
   InboxMessage,
   PendingEmailOutcome,
   ScheduledTrial,
+  UpgradeId,
 } from "./types";
 
 function makeId(prefix: string, now: number, suffix: number | string): string {
@@ -91,7 +103,7 @@ export function createInitialState(now = Date.now()): GameState {
       eventsCompleted: 0,
     },
     unlocks: { upgrades: false },
-    upgrades: { speedLevel: 0 },
+    upgrades: createInitialUpgradeLevels(),
   };
 }
 
@@ -177,7 +189,7 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
   );
   const guaranteedTutorialBooking = state.statistics.emailsSent === 0;
   const result =
-    guaranteedTutorialBooking || bookingRoll < GAME_CONFIG.emailBookingChance
+    guaranteedTutorialBooking || bookingRoll < getEmailBookingChance(state)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -272,7 +284,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   if (trial.status !== "scheduled") return state;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
-  const enrolled = tutorialGuarantee || enrollmentRoll < GAME_CONFIG.enrollmentChance;
+  const enrolled = tutorialGuarantee || enrollmentRoll < getEnrollmentChance(state);
   const wasEmpty = state.school.activeMembers === 0;
 
   let nextState: GameState = {
@@ -311,7 +323,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     nextState,
     now,
     "Nuovo iscritto registrato",
-    `Quota iniziale di € ${GAME_CONFIG.firstEnrollmentFee.toFixed(2).replace(".", ",")} accreditata. Ottimizzazione scrittura disponibile.`,
+    `Quota iniziale di € ${GAME_CONFIG.firstEnrollmentFee.toFixed(2).replace(".", ",")} accreditata. Nuovi miglioramenti disponibili.`,
   );
 }
 
@@ -359,7 +371,7 @@ function startAcquisitionEvent(
     startedAt: now,
     resolvesAt: now + definition.durationMs,
     cost: definition.cost,
-    contactReward: definition.contactReward,
+    contactReward: getEventContactReward(state, definition.contactReward),
     status: "running",
   };
   return {
@@ -383,12 +395,15 @@ function resolveAcquisitionEvent(
 ): GameState {
   if (event.status !== "running") return state;
   const source = event.definitionId === "park-sparring" ? "sparring" : "event";
-  const contacts = createAcquiredContacts(state, event.contactReward, source, now);
+  const contactReward = event.contactReward ?? 0;
+  const contacts = createAcquiredContacts(state, contactReward, source, now);
   let nextState: GameState = {
     ...state,
     contacts: [...state.contacts, ...contacts],
     acquisitionEvents: state.acquisitionEvents.map((candidate) =>
-      candidate.id === event.id ? { ...candidate, status: "completed" } : candidate,
+      candidate.id === event.id
+        ? { ...candidate, contactReward, status: "completed" }
+        : candidate,
     ),
     statistics: {
       ...state.statistics,
@@ -396,6 +411,8 @@ function resolveAcquisitionEvent(
       eventsCompleted: state.statistics.eventsCompleted + 1,
     },
   };
+  if (contacts.length === 0) return nextState;
+
   nextState = addMessage(
     nextState,
     now,
@@ -465,19 +482,28 @@ function write(state: GameState, now: number): GameState {
   };
 }
 
-function buySpeed(state: GameState): GameState {
+function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
+  const definition = getUpgradeDefinition(upgradeId);
+  if (!definition) return state;
+  const currentLevel = state.upgrades[upgradeId];
   if (
-    !state.unlocks.upgrades ||
-    state.upgrades.speedLevel > 0 ||
-    state.school.euros < GAME_CONFIG.speedUpgradeCost
+    currentLevel >= definition.maxLevel ||
+    state.school.historicMembers < definition.requiredHistoricMembers
   ) {
     return state;
   }
-  return {
+  const cost = getUpgradeCost(definition, currentLevel);
+  if (state.school.euros < cost) return state;
+
+  const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
+  const nextState: GameState = {
     ...state,
-    school: { ...state.school, euros: state.school.euros - GAME_CONFIG.speedUpgradeCost },
-    player: { ...state.player, writingPower: state.player.writingPower + 1 },
-    upgrades: { ...state.upgrades, speedLevel: state.upgrades.speedLevel + 1 },
+    school: { ...state.school, euros: state.school.euros - cost },
+    upgrades,
+  };
+  return {
+    ...nextState,
+    player: { ...nextState.player, writingPower: getWritingPower(nextState) },
   };
 }
 
@@ -487,8 +513,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return write(state, action.now);
     case "TICK":
       return tick(state, action.now);
-    case "BUY_SPEED":
-      return buySpeed(state);
+    case "BUY_UPGRADE":
+      return buyUpgrade(state, action.upgradeId);
     case "MARK_MESSAGE_READ":
       return markMessageRead(state, action.messageId);
     case "START_ACQUISITION_EVENT":

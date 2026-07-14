@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 2,
+  version: 3,
   initialContacts: 10,
   emailBookingChance: 0.2,
   enrollmentChance: 0.5,
@@ -12,7 +12,6 @@ export const GAME_CONFIG = {
   memberFee: 10,
   firstEnrollmentFee: 20,
   feePeriodMs: 60_000,
-  speedUpgradeCost: 20,
   sparringCooldownMs: 30_000,
   saveIntervalMs: 10_000,
 } as const;

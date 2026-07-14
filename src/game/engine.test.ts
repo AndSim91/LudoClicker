@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
+import { getEmailBookingChance, getEnrollmentChance } from "./formulas";
 import {
   selectActiveEmail,
   selectIncomePerMinute,
@@ -150,6 +151,37 @@ describe("game engine", () => {
     expect(tickedAgain.contacts).toHaveLength(completed.contacts.length);
   });
 
+  it("completes a zero-contact event without sending an inbox message", () => {
+    const state = createInitialState(1_000);
+    const started = gameReducer(state, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: 2_000,
+    });
+    const withoutAvailableContacts = {
+      ...started,
+      contacts: started.contacts.map((contact) => ({ ...contact, status: "lost" as const })),
+      emails: started.emails.map((email) => ({ ...email, status: "lost" as const })),
+      acquisitionEvents: started.acquisitionEvents.map((event) => ({
+        ...event,
+        contactReward: 0,
+      })),
+    };
+    const messagesBeforeCompletion = withoutAvailableContacts.messages;
+    const event = withoutAvailableContacts.acquisitionEvents[0];
+
+    const completed = gameReducer(withoutAvailableContacts, {
+      type: "TICK",
+      now: event.resolvesAt,
+    });
+
+    expect(completed.acquisitionEvents[0].contactReward).toBe(0);
+    expect(completed.acquisitionEvents[0].status).toBe("completed");
+    expect(completed.statistics.eventsCompleted).toBe(1);
+    expect(completed.contacts).toHaveLength(state.contacts.length);
+    expect(completed.messages).toBe(messagesBeforeCompletion);
+  });
+
   it("requires enough euros for the programmed public event", () => {
     const state = createInitialState(1_000);
     const blocked = gameReducer(state, {
@@ -196,5 +228,88 @@ describe("game engine", () => {
     expect(selectSentEmailStatus(invited, email)).toBe("In attesa");
     expect(selectSentEmailStatus(trial, email)).toBe("Prova in palestra");
     expect(selectSentEmailStatus(enrolled, email)).toBe("Iscritto");
+  });
+
+  it("buys data-driven upgrades with growing costs", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 100, historicMembers: 1 },
+      unlocks: { upgrades: true },
+    };
+    const first = gameReducer(funded, {
+      type: "BUY_UPGRADE",
+      upgradeId: "prepared-presentation",
+      now: 2_000,
+    });
+    const second = gameReducer(first, {
+      type: "BUY_UPGRADE",
+      upgradeId: "prepared-presentation",
+      now: 3_000,
+    });
+
+    expect(first.upgrades["prepared-presentation"]).toBe(1);
+    expect(first.school.euros).toBe(85);
+    expect(second.upgrades["prepared-presentation"]).toBe(2);
+    expect(second.school.euros).toBe(67);
+  });
+
+  it("allows buying an upgrade as soon as the balance covers its price", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 20 },
+    };
+
+    const purchased = gameReducer(funded, {
+      type: "BUY_UPGRADE",
+      upgradeId: "comfortable-keyboard",
+      now: 2_000,
+    });
+
+    expect(purchased.school.euros).toBe(0);
+    expect(purchased.upgrades["comfortable-keyboard"]).toBe(1);
+  });
+
+  it("applies speed and charisma upgrades to their production formulas", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 100, historicMembers: 1 },
+      unlocks: { upgrades: true },
+    };
+    const faster = gameReducer(funded, {
+      type: "BUY_UPGRADE",
+      upgradeId: "comfortable-keyboard",
+      now: 2_000,
+    });
+    const charismatic = gameReducer(faster, {
+      type: "BUY_UPGRADE",
+      upgradeId: "prepared-presentation",
+      now: 3_000,
+    });
+    const eventStarted = gameReducer(charismatic, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: 4_000,
+    });
+
+    expect(faster.player.writingPower).toBe(2);
+    expect(eventStarted.acquisitionEvents[0].contactReward).toBe(3);
+  });
+
+  it("applies writing and welcome upgrades to conversion chances", () => {
+    const initial = createInitialState(1_000);
+    const improved = {
+      ...initial,
+      upgrades: {
+        ...initial.upgrades,
+        "clear-subject": 2,
+        "welcome-procedure": 2,
+      },
+    };
+
+    expect(getEmailBookingChance(improved)).toBeCloseTo(0.232);
+    expect(getEnrollmentChance(improved)).toBeCloseTo(0.6);
   });
 });

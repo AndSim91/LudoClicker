@@ -1213,7 +1213,7 @@ svg {
 
 .upgrade-row {
   display: grid;
-  grid-template-columns: 46px minmax(260px, 1fr) 130px 220px;
+  grid-template-columns: 46px minmax(240px, 1fr) 190px 105px 170px;
   align-items: center;
   gap: 16px;
   min-height: 92px;
@@ -1248,7 +1248,36 @@ svg {
 }
 
 .upgrade-effect {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upgrade-effect strong {
   color: var(--success);
+  font-size: 12px;
+}
+
+.upgrade-effect span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.upgrade-price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.upgrade-price span {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.upgrade-price strong {
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -1456,9 +1485,14 @@ svg {
   }
 
   .upgrade-effect,
+  .upgrade-price,
   .upgrade-row button,
   .event-row > button {
     grid-column: 2;
+  }
+
+  .upgrade-price {
+    text-align: left;
   }
 }
 

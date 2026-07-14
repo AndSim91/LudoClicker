@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ACQUISITION_EVENTS } from "../../content/events";
+import { getEventContactReward } from "../../game/formulas";
 import type { AcquisitionEvent, GameState } from "../../game/types";
 
 const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
@@ -43,6 +44,7 @@ export function EventsView({
           const publicEventDone = definition.id === "public-demo" && completed;
           const lacksFunds = state.school.euros < definition.cost;
           const progress = matching ? getEventProgress(matching, now) : 0;
+          const predictedReward = getEventContactReward(state, definition.contactReward);
           const remainingSeconds = matching
             ? Math.max(0, Math.ceil((matching.resolvesAt - now) / 1_000))
             : 0;
@@ -77,7 +79,7 @@ export function EventsView({
                     </div>
                   </div>
                 ) : (
-                  <small>Risultato previsto: {definition.contactReward} nuovi contatti</small>
+                  <small>Risultato previsto: {predictedReward} nuovi contatti</small>
                 )}
               </div>
               <button type="button" disabled={disabled} onClick={() => onStart(definition.id)}>{action}</button>
@@ -86,7 +88,7 @@ export function EventsView({
         })}
       </section>
       {state.acquisitionEvents.some((event) => event.status === "completed") ? (
-        <section className="event-history"><h2>Attività completate</h2>{state.acquisitionEvents.filter((event) => event.status === "completed").slice().reverse().map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{event.contactReward} contatti ottenuti</small></span><time>{new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(event.resolvesAt)}</time></div>)}</section>
+        <section className="event-history"><h2>Attività completate</h2>{state.acquisitionEvents.filter((event) => event.status === "completed").slice().reverse().map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{event.contactReward ?? 0} contatti ottenuti</small></span><time>{new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(event.resolvesAt)}</time></div>)}</section>
       ) : null}
     </main>
   );

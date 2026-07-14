@@ -30,10 +30,25 @@ describe("local save", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.school.euros).toBe(37);
     expect(migrated.acquisitionEvents).toEqual([]);
     expect(migrated.statistics.contactsAcquired).toBe(0);
+    expect(migrated.upgrades["comfortable-keyboard"]).toBe(0);
+  });
+
+  it("migrates version 2 speed progress into the upgrade catalog", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 2;
+    legacy.upgrades = { speedLevel: 2 };
+    legacy.player = { writingPower: 3 };
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(5_000);
+    expect(migrated.version).toBe(3);
+    expect(migrated.upgrades["comfortable-keyboard"]).toBe(2);
+    expect(migrated.upgrades["prepared-presentation"]).toBe(0);
+    expect(migrated.player.writingPower).toBe(3);
   });
 
   it("removes previously saved trial-booking messages", () => {
