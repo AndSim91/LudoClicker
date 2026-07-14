@@ -5,6 +5,7 @@ import { getAcquisitionEventDefinition } from "../content/events";
 import { canTrainForm, getCollaboratorProductivity, getFormDefinition } from "../content/forms";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { ACQUIRED_CONTACT_NAMES, CONTACT_NAMES } from "../content/names";
+import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import {
   createInitialUpgradeLevels,
   getUpgradeCost,
@@ -33,6 +34,7 @@ import type {
   CollaboratorAssignment,
   FormId,
   SchoolFoundationDetails,
+  SpecialCollaboratorId,
 } from "./types";
 
 const euroFormatter = new Intl.NumberFormat("it-IT", {
@@ -44,15 +46,39 @@ function makeId(prefix: string, now: number, suffix: number | string): string {
   return `${prefix}-${now.toString(36)}-${suffix}`;
 }
 
-function createContacts(now: number): Contact[] {
-  return CONTACT_NAMES.slice(0, GAME_CONFIG.initialContacts).map(([firstName, lastName], index) => ({
+function normalizeEmailLocalPart(firstName: string, lastName: string): string {
+  return `${firstName}.${lastName}`
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, ".")
+    .toLocaleLowerCase("it-IT");
+}
+
+function createContacts(now: number, includeTutorialCollaborators: boolean): Contact[] {
+  const tutorialProfiles = includeTutorialCollaborators ? SPECIAL_COLLABORATORS : [];
+  const regularCount = GAME_CONFIG.initialContacts - tutorialProfiles.length;
+  const profiles: Array<{
+    firstName: string;
+    lastName: string;
+    specialProfileId?: SpecialCollaboratorId;
+  }> = [
+    ...tutorialProfiles.map((profile) => ({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      specialProfileId: profile.id,
+    })),
+    ...CONTACT_NAMES.slice(0, regularCount).map(([firstName, lastName]) => ({ firstName, lastName })),
+  ];
+
+  return profiles.map(({ firstName, lastName, specialProfileId }, index) => ({
     id: makeId("contact", now, index),
     firstName,
     lastName,
-    email: createProspectEmail(`${firstName}.${lastName}`.toLocaleLowerCase("it-IT"), index),
+    email: createProspectEmail(normalizeEmailLocalPart(firstName, lastName), index),
     source: "tutorial",
     acquiredAt: now,
     status: index === 0 ? "writing" : "available",
+    specialProfileId,
   }));
 }
 
@@ -87,8 +113,12 @@ function systemMessage(now: number): InboxMessage {
   };
 }
 
-export function createInitialState(now = Date.now(), displayName = ""): GameState {
-  const contacts = createContacts(now);
+export function createInitialState(
+  now = Date.now(),
+  displayName = "",
+  includeTutorialCollaborators = true,
+): GameState {
+  const contacts = createContacts(now, includeTutorialCollaborators);
   return {
     version: GAME_CONFIG.version,
     createdAt: now,
@@ -163,14 +193,36 @@ function createAcquiredContacts(
   count: number,
   source: "sparring" | "event" | "social" | "collaborator",
   now: number,
-): Contact[] {
-  return Array.from({ length: count }, (_, index) => {
+): { contacts: Contact[]; nextSeed: number } {
+  let nextSeed = state.randomSeed;
+  const specialIdsInSchool = new Set(
+    state.contacts.flatMap((contact) => contact.specialProfileId ? [contact.specialProfileId] : []),
+  );
+  const contacts = Array.from({ length: count }, (_, index) => {
     const sequence = state.statistics.contactsAcquired + index;
-    const [firstName, lastName] = ACQUIRED_CONTACT_NAMES[sequence % ACQUIRED_CONTACT_NAMES.length];
-    const localPart = `${firstName}.${lastName}.${sequence + 1}`
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "")
-      .toLocaleLowerCase("it-IT");
+    const [specialRoll, seedAfterSpecialRoll] = nextRandom(nextSeed);
+    nextSeed = seedAfterSpecialRoll;
+    const availableSpecialProfiles = SPECIAL_COLLABORATORS.filter(
+      (profile) => !specialIdsInSchool.has(profile.id),
+    );
+    let specialProfile = availableSpecialProfiles.length > 0 &&
+      state.network.schools.length > 0 &&
+      specialRoll < GAME_CONFIG.specialCollaboratorChance
+      ? availableSpecialProfiles[0]
+      : undefined;
+    if (specialProfile && availableSpecialProfiles.length > 1) {
+      const [profileRoll, seedAfterProfileRoll] = nextRandom(nextSeed);
+      nextSeed = seedAfterProfileRoll;
+      specialProfile = availableSpecialProfiles[
+        Math.min(availableSpecialProfiles.length - 1, Math.floor(profileRoll * availableSpecialProfiles.length))
+      ];
+    }
+    if (specialProfile) specialIdsInSchool.add(specialProfile.id);
+    const [regularFirstName, regularLastName] =
+      ACQUIRED_CONTACT_NAMES[sequence % ACQUIRED_CONTACT_NAMES.length];
+    const firstName = specialProfile?.firstName ?? regularFirstName;
+    const lastName = specialProfile?.lastName ?? regularLastName;
+    const localPart = `${normalizeEmailLocalPart(firstName, lastName)}.${sequence + 1}`;
     return {
       id: makeId("contact", now, `acquired-${sequence}`),
       firstName,
@@ -178,9 +230,11 @@ function createAcquiredContacts(
       email: createProspectEmail(localPart, sequence),
       source,
       acquiredAt: now,
-      status: "available",
+      status: "available" as const,
+      specialProfileId: specialProfile?.id,
     };
   });
+  return { contacts, nextSeed };
 }
 
 function addMessage(
@@ -228,6 +282,10 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     GAME_CONFIG.emailOutcomeMaxMs,
   );
   const guaranteedTutorialBooking = state.statistics.emailsSent === 0;
+  const tutorialSpecialBooking = state.network.schools.length === 0 &&
+    state.contacts.some((contact) =>
+      contact.id === email.contactId && Boolean(contact.specialProfileId),
+    );
   const recentEmailResults = state.emails
     .slice()
     .reverse()
@@ -236,7 +294,8 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
   const protectedBooking =
     (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
   const result =
-    guaranteedTutorialBooking || protectedBooking || bookingRoll < getEmailBookingChance(state)
+    guaranteedTutorialBooking || tutorialSpecialBooking || protectedBooking ||
+      bookingRoll < getEmailBookingChance(state)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -341,6 +400,9 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   if (trial.status !== "scheduled") return state;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
+  const trialContact = state.contacts.find((contact) => contact.id === trial.contactId);
+  const tutorialSpecialEnrollment = state.network.schools.length === 0 &&
+    Boolean(trialContact?.specialProfileId);
   const recentTrials = state.scheduledTrials
     .filter((candidate) => candidate.status === "completed")
     .slice()
@@ -350,7 +412,8 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   );
   const protectedEnrollment =
     (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >= 4;
-  const enrolled = tutorialGuarantee || protectedEnrollment || enrollmentRoll < getEnrollmentChance(state);
+  const enrolled = tutorialGuarantee || tutorialSpecialEnrollment || protectedEnrollment ||
+    enrollmentRoll < getEnrollmentChance(state);
   let nextState: GameState = {
     ...state,
     scheduledTrials: state.scheduledTrials.map((candidate) =>
@@ -397,7 +460,8 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
   const [volunteerRoll, nextSeed] = nextRandom(nextState.randomSeed);
   const becomesVolunteer =
-    nextState.collaborators.length === 0 || volunteerRoll < GAME_CONFIG.volunteerChance;
+    Boolean(enrolledContact?.specialProfileId) || nextState.collaborators.length === 0 ||
+    volunteerRoll < GAME_CONFIG.volunteerChance;
   nextState = { ...nextState, randomSeed: nextSeed };
   if (!becomesVolunteer || !enrolledContact) return nextState;
 
@@ -408,6 +472,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     joinedAt: now,
     forms: [] as FormId[],
     assignment: null,
+    specialProfileId: enrolledContact.specialProfileId,
   };
   nextState = {
     ...nextState,
@@ -521,9 +586,11 @@ function resolveAcquisitionEvent(
   if (event.status !== "running") return state;
   const source = event.definitionId === "park-sparring" ? "sparring" : "event";
   const contactReward = event.contactReward ?? 0;
-  const contacts = createAcquiredContacts(state, contactReward, source, now);
+  const acquired = createAcquiredContacts(state, contactReward, source, now);
+  const contacts = acquired.contacts;
   let nextState: GameState = {
     ...state,
+    randomSeed: acquired.nextSeed,
     contacts: [...state.contacts, ...contacts],
     equipment: {
       ...state.equipment,
@@ -773,9 +840,11 @@ function processAutomation(state: GameState, now: number): GameState {
   }
 
   if (socialContacts > 0) {
-    const contacts = createAcquiredContacts(nextState, socialContacts, "social", now);
+    const acquired = createAcquiredContacts(nextState, socialContacts, "social", now);
+    const contacts = acquired.contacts;
     nextState = {
       ...nextState,
+      randomSeed: acquired.nextSeed,
       contacts: [...nextState.contacts, ...contacts],
       statistics: {
         ...nextState.statistics,
@@ -809,10 +878,16 @@ function runSocialCampaign(state: GameState, now: number): GameState {
         (1 + getUpgradeEffectTotal(state.upgrades, "socialMultiplier")),
     ),
   );
-  const contacts = createAcquiredContacts(state, contactCount, "social", now);
+  const acquired = createAcquiredContacts(
+    { ...state, randomSeed: nextSeed },
+    contactCount,
+    "social",
+    now,
+  );
+  const contacts = acquired.contacts;
   let nextState: GameState = {
     ...state,
-    randomSeed: nextSeed,
+    randomSeed: acquired.nextSeed,
     school: {
       ...state.school,
       euros: state.school.euros - GAME_CONFIG.socialCampaignCost,
@@ -852,15 +927,21 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
     GAME_CONFIG.narrativeEventMinMs,
     GAME_CONFIG.narrativeEventMaxMs,
   );
-  const contacts = definition.contactDelta
-    ? createAcquiredContacts(state, definition.contactDelta, "collaborator", now)
-    : [];
+  const acquired = definition.contactDelta
+    ? createAcquiredContacts(
+        { ...state, randomSeed: nextSeed },
+        definition.contactDelta,
+        "collaborator",
+        now,
+      )
+    : { contacts: [], nextSeed };
+  const contacts = acquired.contacts;
   const summary = definition.euroDelta && definition.euroDelta > 0
     ? `${definition.description} Contributo ricevuto: ${euroFormatter.format(definition.euroDelta)}.`
     : definition.description;
   let nextState: GameState = {
     ...state,
-    randomSeed: nextSeed,
+    randomSeed: acquired.nextSeed,
     school: {
       ...state.school,
       activeMembers: Math.max(0, state.school.activeMembers + (definition.memberDelta ?? 0)),
@@ -935,7 +1016,7 @@ function foundSchool(
   now: number,
 ): GameState {
   if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
-  const fresh = createInitialState(now, state.profile.displayName);
+  const fresh = createInitialState(now, state.profile.displayName, false);
   const archivedSchool = {
     id: makeId("school", now, state.network.schools.length),
     name: state.school.name,

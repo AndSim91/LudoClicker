@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 12,
+  version: 13,
   initialContacts: 10,
   initialSwords: 6,
   emailBookingChance: 0.2,
@@ -16,6 +16,7 @@ export const GAME_CONFIG = {
   sparringCooldownMs: 30_000,
   equipmentMaintenanceCost: 10,
   volunteerChance: 0.02,
+  specialCollaboratorChance: 0.001,
   collaboratorWritingPerSecond: 2,
   socialContactIntervalMs: 45_000,
   socialCampaignCost: 25,

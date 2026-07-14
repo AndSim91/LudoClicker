@@ -2,6 +2,7 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
 import { simulateOfflineProgress } from "./offline";
 import { createProspectEmail } from "../content/emailAddresses";
+import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../content/upgrades";
 import type { GameState, UpgradeLevels } from "./types";
 
@@ -250,13 +251,33 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 11) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 12,
       school: migrated.school
         ? {
             ...migrated.school,
             currentMonth: migrated.school.currentMonth ?? 1,
           }
         : migrated.school,
+    };
+  }
+
+  if (migrated.version === 12) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      contacts: migrated.contacts?.map((contact) => {
+        const profile = SPECIAL_COLLABORATORS.find(
+          (candidate) => candidate.firstName === contact.firstName &&
+            candidate.lastName === contact.lastName,
+        );
+        return profile ? { ...contact, specialProfileId: profile.id } : contact;
+      }),
+      collaborators: migrated.collaborators?.map((collaborator) => {
+        const profile = SPECIAL_COLLABORATORS.find(
+          (candidate) => `${candidate.firstName} ${candidate.lastName}` === collaborator.displayName,
+        );
+        return profile ? { ...collaborator, specialProfileId: profile.id } : collaborator;
+      }),
     };
   }
 

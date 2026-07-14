@@ -14,10 +14,11 @@ describe("PeopleView", () => {
         {
           id: "collaborator-1",
           contactId: initial.contacts[0].id,
-          displayName: "Giulia Ferrando",
+          displayName: "Andrea Simonazzi",
           joinedAt: 1_000,
           forms: [],
           assignment: null,
+          specialProfileId: "andrea-simonazzi" as const,
         },
       ],
       unlocks: { ...initial.unlocks, collaborators: true },
@@ -26,7 +27,9 @@ describe("PeopleView", () => {
     render(<PeopleView state={state} onAssign={onAssign} onStartTraining={() => undefined} />);
 
     fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
-    expect(screen.getByText("Giulia Ferrando")).toBeVisible();
+    expect(screen.getByText("Andrea Simonazzi")).toHaveClass("special-name");
+    expect(screen.getByText("VIP")).toBeVisible();
+    expect(screen.queryByText("Tutorial")).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole("combobox", { name: "Assegnazione" }), {
       target: { value: "writing" },
     });

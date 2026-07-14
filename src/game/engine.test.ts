@@ -4,6 +4,7 @@ import { GAME_CONFIG } from "./config";
 import { canFoundSchool, createInitialState, gameReducer, getPrestigeRequirements } from "./engine";
 import { getEmailBookingChance, getEnrollmentChance } from "./formulas";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
+import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import {
   selectActiveEmail,
   selectIncomePerMonth,
@@ -25,6 +26,13 @@ describe("game engine", () => {
     ]);
     expect(selectActiveEmail(state)?.status).toBe("writing");
     expect(state.school.euros).toBe(0);
+    expect(state.contacts.slice(0, SPECIAL_COLLABORATORS.length).map((contact) => ({
+      name: `${contact.firstName} ${contact.lastName}`,
+      specialProfileId: contact.specialProfileId,
+    }))).toEqual(SPECIAL_COLLABORATORS.map((profile) => ({
+      name: `${profile.firstName} ${profile.lastName}`,
+      specialProfileId: profile.id,
+    })));
   });
 
   it("reveals only the configured amount of predetermined text", () => {
@@ -125,6 +133,7 @@ describe("game engine", () => {
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);
     expect(state.collaborators).toHaveLength(1);
+    expect(state.collaborators[0].specialProfileId).toBe("andrea-simonazzi");
     expect(state.unlocks.collaborators).toBe(true);
     expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(true);
   });
@@ -290,6 +299,45 @@ describe("game engine", () => {
     expect(maintained.equipment.wear).toBe(0);
     expect(maintained.statistics.maintenanceCompleted).toBe(1);
     expect(repeated).toBe(maintained);
+  });
+
+  it("can encounter a tutorial collaborator very rarely in a later school", () => {
+    const initial = createInitialState(1_000, "", false);
+    const archivedSchool = {
+      id: "school-archive",
+      name: "Sede precedente",
+      city: "Genova",
+      motto: "",
+      specialization: "generale" as const,
+      membersAtTransfer: 100,
+      emailsSent: 30,
+      eventsCompleted: 12,
+      transferredAt: 500,
+    };
+    const event = {
+      id: "rare-special-event",
+      definitionId: "public-demo" as const,
+      title: "Dimostrazione pubblica",
+      location: "Genova",
+      startedAt: 1_000,
+      resolvesAt: 2_000,
+      cost: 0,
+      peopleMet: 1,
+      demonstrationsGiven: 1,
+      contactReward: 1,
+      equipmentUsed: 0,
+      wearAdded: 0,
+      status: "running" as const,
+    };
+    const resolved = gameReducer({
+      ...initial,
+      randomSeed: 1_216,
+      network: { ...initial.network, schools: [archivedSchool] },
+      acquisitionEvents: [event],
+      automation: { ...initial.automation, lastProcessedAt: 2_000 },
+    }, { type: "TICK", now: 2_000 });
+
+    expect(resolved.contacts.at(-1)?.specialProfileId).toBeDefined();
   });
 
   it("derives sent-mail status from the contact funnel", () => {
@@ -617,6 +665,7 @@ describe("game engine", () => {
     expect(founded.school.activeMembers).toBe(0);
     expect(founded.school.historicMembers).toBe(100);
     expect(founded.collaborators).toEqual([]);
+    expect(founded.contacts.every((contact) => !contact.specialProfileId)).toBe(true);
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.network.reputation).toBe(1);
     expect(founded.network.schools).toHaveLength(1);

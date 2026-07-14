@@ -32,14 +32,14 @@ test("invia automaticamente la mail completa e apre il contatto successivo", asy
     }
   });
 
-  await expect(page.getByText("Bozza per Luca Parodi")).toBeVisible({ timeout: 2_000 });
+  await expect(page.getByText("Bozza per Eva Parodi")).toBeVisible({ timeout: 2_000 });
   const sentFolder = page.getByRole("button", { name: /Posta inviata 1/ });
   await expect(sentFolder).toBeVisible();
   await expect(page.getByRole("button", { name: "Bozze" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Archivio" })).toHaveCount(0);
   await sentFolder.click();
   await expect(page.locator(".campaign-status")).toHaveText("In attesa");
-  await expect(page.getByRole("article")).toContainText("Buongiorno Giulia,");
+  await expect(page.getByRole("article")).toContainText("Buongiorno Andrea,");
   await expect(page.getByRole("article")).toContainText("Andrea Ungaro - Ordine delle Onde");
 });
 

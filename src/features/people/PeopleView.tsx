@@ -54,8 +54,8 @@ export function PeopleView({
             const contact = state.contacts.find((candidate) => candidate.id === collaborator.contactId);
             return (
               <article className="collaborator-row" key={collaborator.id}>
-                <div className="person-avatar">{collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</div>
-                <div className="collaborator-copy"><strong>{collaborator.displayName}</strong><span>{contact?.email}</span><small>{collaborator.forms.length ? collaborator.forms.map((formId) => getFormDefinition(formId)?.title).join(", ") : "Nessuna Forma completata"}</small></div>
+                <div className={`person-avatar${collaborator.specialProfileId ? " special-avatar" : ""}`}>{collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</div>
+                <div className="collaborator-copy"><strong className={collaborator.specialProfileId ? "special-name" : undefined}>{collaborator.displayName}{collaborator.specialProfileId ? <span className="special-collaborator-badge">VIP</span> : null}</strong><span>{contact?.email}</span><small>{collaborator.forms.length ? collaborator.forms.map((formId) => getFormDefinition(formId)?.title).join(", ") : "Nessuna Forma completata"}</small></div>
                 <label><span>Assegnazione</span><select value={collaborator.assignment ?? ""} onChange={(event) => onAssign(collaborator.id, (event.target.value || null) as CollaboratorAssignment)}><option value="">Non assegnato</option>{Object.entries(assignmentLabels).map(([value, label]) => <option value={value} key={value} disabled={value === "social" && !state.unlocks.social}>{label}{value === "social" && !state.unlocks.social ? " — si sblocca con 10 iscritti" : ""}</option>)}</select></label>
                 <TrainingControl collaborator={collaborator} state={state} onStartTraining={onStartTraining} />
               </article>

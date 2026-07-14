@@ -6,6 +6,16 @@ export type ContactStatus =
   | "enrolled"
   | "lost";
 
+export type SpecialCollaboratorId =
+  | "andrea-simonazzi"
+  | "eva-parodi"
+  | "andrea-ferrari"
+  | "marco-gabriele-fedozzi"
+  | "matteo-scarzello"
+  | "chris-usai"
+  | "guglielmo-oliveri"
+  | "niccolo-effrati";
+
 export interface Contact {
   id: string;
   firstName: string;
@@ -14,6 +24,7 @@ export interface Contact {
   source: "tutorial" | "sparring" | "event" | "social" | "collaborator";
   acquiredAt: number;
   status: ContactStatus;
+  specialProfileId?: SpecialCollaboratorId;
 }
 
 export interface CampaignEmail {
@@ -219,6 +230,7 @@ export interface Collaborator {
   joinedAt: number;
   forms: FormId[];
   assignment: CollaboratorAssignment;
+  specialProfileId?: SpecialCollaboratorId;
   training?: {
     formId: FormId;
     startedAt: number;
