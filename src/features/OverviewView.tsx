@@ -1,37 +1,110 @@
+import { useState } from "react";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
-import type { GameState } from "../game/types";
+import { GAME_CONFIG } from "../game/config";
+import { canFoundSchool } from "../game/engine";
+import type { GameState, SchoolFoundationDetails } from "../game/types";
 
-type OverviewViewName = Exclude<AppView, "mail" | "upgrades" | "events">;
+type OverviewViewName = Exclude<AppView, "mail" | "upgrades" | "events" | "calendar" | "statistics" | "contacts">;
 
 const titles: Record<OverviewViewName, [string, string]> = {
-  calendar: ["Calendario", "Lezioni di prova e appuntamenti della scuola"],
-  contacts: ["Persone", "Contatti della campagna corrente"],
-  statistics: ["Attività", "Riepilogo operativo dell'Ordine delle Onde"],
-  settings: ["Impostazioni", "Dati locali e preferenze dell'applicazione"],
+  settings: ["Impostazioni", "Dati locali, rete delle scuole e preferenze"],
 };
 
-export function OverviewView({ view, state }: { view: OverviewViewName; state: GameState }) {
+interface OverviewViewProps {
+  view: OverviewViewName;
+  state: GameState;
+  onExport: () => void;
+  onImport: (raw: string) => boolean;
+  onReset: () => void;
+  onFoundSchool: (details: SchoolFoundationDetails) => void;
+  reduceMotion: boolean;
+  onReduceMotionChange: (enabled: boolean) => void;
+}
+
+export function OverviewView({
+  view,
+  state,
+  onExport,
+  onImport,
+  onReset,
+  onFoundSchool,
+  reduceMotion,
+  onReduceMotionChange,
+}: OverviewViewProps) {
   const [title, subtitle] = titles[view];
+  const [importText, setImportText] = useState("");
+  const [importStatus, setImportStatus] = useState("");
+  const [resetArmed, setResetArmed] = useState(false);
+  const [foundation, setFoundation] = useState<SchoolFoundationDetails>({
+    name: "",
+    city: "",
+    accentColor: "#0f6cbd",
+    motto: "",
+    specialization: "redazione",
+  });
+  const eligible = canFoundSchool(state);
+
+  const importSave = () => {
+    const success = onImport(importText);
+    setImportStatus(success ? "Salvataggio importato correttamente." : "Il testo non contiene un salvataggio valido.");
+    if (success) setImportText("");
+  };
+
+  const reset = () => {
+    if (!resetArmed) {
+      setResetArmed(true);
+      return;
+    }
+    onReset();
+    setResetArmed(false);
+  };
+
   return (
-    <main className="overview-view">
-      <header><Icon name={view === "calendar" ? "calendar" : view === "contacts" ? "people" : view === "statistics" ? "tasks" : "settings"} /><div><h1>{title}</h1><p>{subtitle}</p></div></header>
-      {view === "contacts" ? (
-        <div className="data-table"><div className="table-row table-head"><span>Nome</span><span>Indirizzo</span><span>Stato</span></div>{state.contacts.map((contact) => <div className="table-row" key={contact.id}><strong>{contact.firstName} {contact.lastName}</strong><span>{contact.email}</span><span className={`status ${contact.status}`}>{contact.status}</span></div>)}</div>
-      ) : null}
-      {view === "statistics" ? (
-        <div className="statistics-grid"><Stat label="Input registrati" value={state.statistics.inputs}/><Stat label="Email inviate" value={state.statistics.emailsSent}/><Stat label="Prove prenotate" value={state.statistics.trialsBooked}/><Stat label="Prove completate" value={state.statistics.trialsCompleted}/><Stat label="Nuovi iscritti" value={state.statistics.membersEnrolled}/><Stat label="Contatti acquisiti" value={state.statistics.contactsAcquired}/><Stat label="Eventi completati" value={state.statistics.eventsCompleted}/><Stat label="Euro incassati" value={`€ ${state.statistics.eurosEarned}`}/></div>
-      ) : null}
-      {view === "calendar" ? (
-        <div className="calendar-sheet"><div className="calendar-title">Oggi</div>{state.scheduledTrials.length ? state.scheduledTrials.map((trial) => <div className="calendar-event" key={trial.id}><time>{new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(trial.startsAt)}</time><div><strong>Lezione di prova</strong><span>{trial.status === "completed" ? "Completata" : "Pianificata"}</span></div></div>) : <p>Nessun appuntamento. Le prenotazioni generate dalle email appariranno qui.</p>}</div>
-      ) : null}
-      {view === "settings" ? (
-        <div className="settings-sheet"><h2>Salvataggio locale</h2><p>I progressi sono salvati automaticamente in questo browser ogni 10 secondi. Nessun messaggio viene inviato e nessun dato viene trasmesso a servizi esterni.</p><dl><div><dt>Versione salvataggio</dt><dd>{state.version}</dd></div><div><dt>Ultimo salvataggio</dt><dd>{new Intl.DateTimeFormat("it-IT", { timeStyle: "medium" }).format(state.lastSavedAt)}</dd></div></dl></div>
-      ) : null}
+    <main className="overview-view settings-view">
+      <header><Icon name="settings" /><div><h1>{title}</h1><p>{subtitle}</p></div></header>
+
+      <section className="settings-sheet">
+        <h2>Salvataggio locale</h2>
+        <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Il progresso offline è limitato a 8 ore.</p>
+        <dl><div><dt>Versione salvataggio</dt><dd>{state.version}</dd></div><div><dt>Ultimo salvataggio</dt><dd>{new Intl.DateTimeFormat("it-IT", { timeStyle: "medium" }).format(state.lastSavedAt)}</dd></div></dl>
+        <label className="preference-check"><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span></label>
+        <div className="settings-actions">
+          <button type="button" onClick={onExport}>Esporta JSON</button>
+          <button type="button" className={resetArmed ? "danger" : "secondary"} onClick={reset}>{resetArmed ? "Conferma: azzera definitivamente" : "Azzera salvataggio"}</button>
+        </div>
+        <label className="import-field"><span>Importa da JSON</span><textarea value={importText} onChange={(event) => setImportText(event.target.value)} placeholder="Incolla qui il contenuto esportato" /></label>
+        <button type="button" className="secondary" disabled={!importText.trim()} onClick={importSave}>Importa salvataggio</button>
+        {importStatus ? <p role="status" className="settings-status">{importStatus}</p> : null}
+      </section>
+
+      <section className="network-sheet">
+        <div className="network-heading"><div><Icon name="people" /><span><strong>Rete delle scuole</strong><small>Reputazione {state.network.reputation} · bonus permanente +{Math.round(state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool * 100)}%</small></span></div><b>{state.network.schools.length} sedi precedenti</b></div>
+        <div className="prestige-requirements" aria-label="Requisiti nuova scuola">
+          <Requirement label="Iscritti storici" value={state.school.historicMembers} target={GAME_CONFIG.prestigeHistoricMembers} />
+          <Requirement label="Collaboratori" value={state.collaborators.length} target={GAME_CONFIG.prestigeCollaborators} />
+          <Requirement label="Eventi completati" value={state.statistics.eventsCompleted} target={GAME_CONFIG.prestigeEvents} />
+        </div>
+        {state.network.schools.length > 0 ? <div className="school-archive">{state.network.schools.slice().reverse().map((school) => <article key={school.id}><div><strong>{school.name}</strong><small>{school.city} · {school.membersAtTransfer} iscritti al trasferimento</small></div><time>{new Intl.DateTimeFormat("it-IT", { dateStyle: "medium" }).format(school.transferredAt)}</time></article>)}</div> : null}
+
+        <form className="foundation-form" onSubmit={(event) => { event.preventDefault(); onFoundSchool(foundation); }}>
+          <h3>Procedura apertura nuova scuola</h3>
+          <p>{eligible ? "La richiesta è approvata. La fondazione è volontaria e riavvierà la progressione locale." : "Completa tutti i requisiti per ricevere l'approvazione della rete."}</p>
+          <div className="foundation-fields">
+            <label><span>Nome dell'Ordine</span><input required value={foundation.name} onChange={(event) => setFoundation({ ...foundation, name: event.target.value })} /></label>
+            <label><span>Città</span><input required value={foundation.city} onChange={(event) => setFoundation({ ...foundation, city: event.target.value })} /></label>
+            <label><span>Specializzazione</span><select value={foundation.specialization} onChange={(event) => setFoundation({ ...foundation, specialization: event.target.value as SchoolFoundationDetails["specialization"] })}><option value="redazione">Redazione · +10% scrittura</option><option value="eventi">Eventi · +10% pubblico</option><option value="accoglienza">Accoglienza · +10% conversioni</option></select></label>
+            <label><span>Colore accento</span><input type="color" value={foundation.accentColor} onChange={(event) => setFoundation({ ...foundation, accentColor: event.target.value })} /></label>
+            <label className="motto-field"><span>Motto facoltativo</span><input value={foundation.motto} onChange={(event) => setFoundation({ ...foundation, motto: event.target.value })} /></label>
+          </div>
+          <button type="submit" disabled={!eligible || !foundation.name.trim() || !foundation.city.trim()}>Fonda la nuova scuola</button>
+        </form>
+      </section>
     </main>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
+function Requirement({ label, value, target }: { label: string; value: number; target: number }) {
+  const completed = value >= target;
+  return <div className={completed ? "completed" : ""}><span>{label}</span><strong>{Math.min(value, target)}/{target}</strong><small>{completed ? "Completato" : "In corso"}</small></div>;
 }

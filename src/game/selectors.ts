@@ -1,5 +1,6 @@
 import type { CampaignEmail, Contact, GameState, ScheduledTrial } from "./types";
 import { GAME_CONFIG } from "./config";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {
   return state.emails.find((email) => email.status === "writing" || email.status === "sending");
@@ -27,9 +28,12 @@ export function selectEmailProgress(email: CampaignEmail | undefined): number {
 }
 
 export function selectIncomePerMinute(state: GameState): number {
+  const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   return (
-    state.school.activeMembers *
-    GAME_CONFIG.memberFee *
+    (state.school.activeMembers * GAME_CONFIG.memberFee +
+      state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
+    (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
+    networkMultiplier *
     (60_000 / GAME_CONFIG.feePeriodMs)
   );
 }

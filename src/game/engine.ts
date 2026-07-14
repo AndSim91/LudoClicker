@@ -1,16 +1,20 @@
 import { EMAIL_TEMPLATES } from "../content/emailTemplates";
+import { getNewAchievements } from "../content/achievements";
 import { getAcquisitionEventDefinition } from "../content/events";
+import { canTrainForm, getCollaboratorProductivity, getFormDefinition } from "../content/forms";
+import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { ACQUIRED_CONTACT_NAMES, CONTACT_NAMES } from "../content/names";
 import {
   createInitialUpgradeLevels,
   getUpgradeCost,
   getUpgradeDefinition,
+  getUpgradeEffectTotal,
 } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
   getEmailBookingChance,
   getEnrollmentChance,
-  getEventContactReward,
+  getEventFunnelOutcome,
   getWritingPower,
 } from "./formulas";
 import { nextRandom, randomBetween } from "./random";
@@ -25,6 +29,9 @@ import type {
   PendingEmailOutcome,
   ScheduledTrial,
   UpgradeId,
+  CollaboratorAssignment,
+  FormId,
+  SchoolFoundationDetails,
 } from "./types";
 
 function makeId(prefix: string, now: number, suffix: number | string): string {
@@ -78,19 +85,41 @@ export function createInitialState(now = Date.now()): GameState {
     randomSeed: (now ^ 0x5f3759df) | 0,
     school: {
       name: "Ordine delle Onde — Genova",
+      city: "Genova",
+      accentColor: "#0f6cbd",
+      motto: "Ogni onda comincia da un movimento",
+      specialization: "generale",
       activeMembers: 0,
       historicMembers: 0,
       euros: 0,
       nextFeeAt: now + GAME_CONFIG.feePeriodMs,
     },
     player: { writingPower: 1 },
+    network: { reputation: 0, schools: [], prestigeOfferSent: false },
     contacts,
     emails: [createCampaign(contacts[0], 0, now)],
     pendingEmailOutcomes: [],
     scheduledTrials: [],
     messages: [systemMessage(now)],
     acquisitionEvents: [],
+    achievements: [],
+    narrative: {
+      nextEventAt: now + GAME_CONFIG.narrativeEventMinMs,
+      history: [],
+    },
     activities: { nextSparringAt: now },
+    equipment: {
+      totalSwords: GAME_CONFIG.initialSwords,
+      availableSwords: GAME_CONFIG.initialSwords,
+      wear: 0,
+    },
+    collaborators: [],
+    automation: {
+      lastProcessedAt: now,
+      writingBuffer: 0,
+      socialBuffer: 0,
+      equipmentBuffer: 0,
+    },
     statistics: {
       inputs: 0,
       emailsSent: 0,
@@ -100,9 +129,18 @@ export function createInitialState(now = Date.now()): GameState {
       membersEnrolled: 0,
       eurosEarned: 0,
       contactsAcquired: 0,
+      peopleMet: 0,
+      demonstrationsGiven: 0,
       eventsCompleted: 0,
+      maintenanceCompleted: 0,
+      collaboratorsRecruited: 0,
+      automatedCharacters: 0,
+      socialContacts: 0,
+      socialCampaigns: 0,
+      formsCompleted: 0,
+      narrativeEvents: 0,
     },
-    unlocks: { upgrades: false },
+    unlocks: { upgrades: false, collaborators: false, social: false, forms: false },
     upgrades: createInitialUpgradeLevels(),
   };
 }
@@ -110,7 +148,7 @@ export function createInitialState(now = Date.now()): GameState {
 function createAcquiredContacts(
   state: GameState,
   count: number,
-  source: "sparring" | "event",
+  source: "sparring" | "event" | "social" | "collaborator",
   now: number,
 ): Contact[] {
   return Array.from({ length: count }, (_, index) => {
@@ -188,8 +226,15 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     GAME_CONFIG.emailOutcomeMaxMs,
   );
   const guaranteedTutorialBooking = state.statistics.emailsSent === 0;
+  const recentEmailResults = state.emails
+    .slice()
+    .reverse()
+    .filter((candidate) => candidate.status === "lost" || candidate.status === "trialBooked");
+  const emailLossStreak = recentEmailResults.findIndex((candidate) => candidate.status !== "lost");
+  const protectedBooking =
+    (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
   const result =
-    guaranteedTutorialBooking || bookingRoll < getEmailBookingChance(state)
+    guaranteedTutorialBooking || protectedBooking || bookingRoll < getEmailBookingChance(state)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -200,7 +245,7 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     result,
   };
 
-  const nextState: GameState = {
+  let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
     emails: state.emails.map((candidate) =>
@@ -214,7 +259,30 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     pendingEmailOutcomes: [...state.pendingEmailOutcomes, outcome],
     statistics: { ...state.statistics, emailsSent: state.statistics.emailsSent + 1 },
   };
-  return startNextCampaign(nextState, now);
+  nextState = startNextCampaign(nextState, now);
+  if (state.statistics.emailsSent === 0) {
+    nextState = addMessage(
+      nextState,
+      now,
+      "Configurazione campagna completata",
+      "La prima email è partita. Miglioramenti di Scrittura e Velocità sono disponibili nella barra laterale.",
+      "system",
+    );
+  }
+  const remainingContacts = nextState.contacts.filter((contact) => contact.status === "available").length;
+  if (
+    remainingContacts <= 3 &&
+    !nextState.messages.some((message) => message.subject === "Stiamo finendo i contatti")
+  ) {
+    nextState = addMessage(
+      nextState,
+      now + 1,
+      "Stiamo finendo i contatti",
+      "Calendario ed Eventi permettono di incontrare persone, fare dimostrazioni e raccogliere nuovi indirizzi. Lo sparring al parco è sempre gratuito.",
+      "system",
+    );
+  }
+  return nextState;
 }
 
 function resolveEmailOutcome(
@@ -284,7 +352,16 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
   if (trial.status !== "scheduled") return state;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
-  const enrolled = tutorialGuarantee || enrollmentRoll < getEnrollmentChance(state);
+  const recentTrials = state.scheduledTrials
+    .filter((candidate) => candidate.status === "completed")
+    .slice()
+    .sort((a, b) => b.resolvesAt - a.resolvesAt);
+  const trialLossStreak = recentTrials.findIndex((candidate) =>
+    state.contacts.some((contact) => contact.id === candidate.contactId && contact.status === "enrolled"),
+  );
+  const protectedEnrollment =
+    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >= 4;
+  const enrolled = tutorialGuarantee || protectedEnrollment || enrollmentRoll < getEnrollmentChance(state);
   const wasEmpty = state.school.activeMembers === 0;
 
   let nextState: GameState = {
@@ -317,20 +394,62 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       euros: nextState.school.euros + GAME_CONFIG.firstEnrollmentFee,
       nextFeeAt: wasEmpty ? now + GAME_CONFIG.feePeriodMs : nextState.school.nextFeeAt,
     },
-    unlocks: { ...nextState.unlocks, upgrades: true },
+    unlocks: {
+      ...nextState.unlocks,
+      upgrades: true,
+      social: nextState.school.activeMembers >= 10,
+      forms: nextState.school.activeMembers >= 50,
+    },
+  };
+  nextState = addMessage(
+    nextState,
+    now,
+    state.school.historicMembers === 0 ? "Prima quota associativa" : "Nuovo iscritto registrato",
+    `Quota iniziale di € ${GAME_CONFIG.firstEnrollmentFee.toFixed(2).replace(".", ",")} accreditata. Nuovi miglioramenti disponibili.`,
+  );
+
+  const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
+  const [volunteerRoll, nextSeed] = nextRandom(nextState.randomSeed);
+  const becomesVolunteer =
+    nextState.collaborators.length === 0 || volunteerRoll < GAME_CONFIG.volunteerChance;
+  nextState = { ...nextState, randomSeed: nextSeed };
+  if (!becomesVolunteer || !enrolledContact) return nextState;
+
+  const collaborator = {
+    id: makeId("collaborator", now, nextState.collaborators.length),
+    contactId: enrolledContact.id,
+    displayName: `${enrolledContact.firstName} ${enrolledContact.lastName}`,
+    joinedAt: now,
+    forms: [] as FormId[],
+    assignment: null,
+  };
+  nextState = {
+    ...nextState,
+    collaborators: [...nextState.collaborators, collaborator],
+    unlocks: { ...nextState.unlocks, collaborators: true },
+    statistics: {
+      ...nextState.statistics,
+      collaboratorsRecruited: nextState.statistics.collaboratorsRecruited + 1,
+    },
   };
   return addMessage(
     nextState,
-    now,
-    "Nuovo iscritto registrato",
-    `Quota iniziale di € ${GAME_CONFIG.firstEnrollmentFee.toFixed(2).replace(".", ",")} accreditata. Nuovi miglioramenti disponibili.`,
+    now + 1,
+    "Nuovo collaboratore disponibile",
+    `${collaborator.displayName} è disponibile per Redazione, Eventi, Lezioni, Social o Attrezzatura.`,
   );
 }
 
 function collectFees(state: GameState, now: number): GameState {
-  if (state.school.activeMembers === 0 || now < state.school.nextFeeAt) return state;
+  if ((state.school.activeMembers === 0 && state.network.schools.length === 0) || now < state.school.nextFeeAt) return state;
   const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.feePeriodMs) + 1;
-  const earned = periods * state.school.activeMembers * GAME_CONFIG.memberFee;
+  const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
+  const earned =
+    periods *
+    (state.school.activeMembers * GAME_CONFIG.memberFee +
+      state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
+    (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
+    networkMultiplier;
   return {
     ...state,
     school: {
@@ -355,13 +474,14 @@ function startAcquisitionEvent(
     return state;
   }
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
-  if (
-    definitionId === "public-demo" &&
-    state.acquisitionEvents.some((event) => event.definitionId === "public-demo")
-  ) {
-    return state;
-  }
+  if (state.school.activeMembers < definition.requiredMembers) return state;
+  if (state.equipment.availableSwords < definition.requiredSwords) return state;
   if (state.school.euros < definition.cost) return state;
+
+  const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
+  const attendanceVariance =
+    definition.varianceMin + varianceRoll * (definition.varianceMax - definition.varianceMin);
+  const outcome = getEventFunnelOutcome(state, definition, attendanceVariance);
 
   const event: AcquisitionEvent = {
     id: makeId("activity", now, state.acquisitionEvents.length),
@@ -371,12 +491,27 @@ function startAcquisitionEvent(
     startedAt: now,
     resolvesAt: now + definition.durationMs,
     cost: definition.cost,
-    contactReward: getEventContactReward(state, definition.contactReward),
+    peopleMet: outcome.peopleMet,
+    demonstrationsGiven: outcome.demonstrationsGiven,
+    contactReward: outcome.contactsObtained,
+    equipmentUsed: definition.requiredSwords,
+    wearAdded: Math.max(
+      0,
+      Math.round(
+        definition.wearAdded *
+          (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))),
+      ),
+    ),
     status: "running",
   };
   return {
     ...state,
+    randomSeed: nextSeed,
     school: { ...state.school, euros: state.school.euros - definition.cost },
+    equipment: {
+      ...state.equipment,
+      availableSwords: state.equipment.availableSwords - definition.requiredSwords,
+    },
     acquisitionEvents: [...state.acquisitionEvents, event],
     activities: {
       ...state.activities,
@@ -400,6 +535,14 @@ function resolveAcquisitionEvent(
   let nextState: GameState = {
     ...state,
     contacts: [...state.contacts, ...contacts],
+    equipment: {
+      ...state.equipment,
+      availableSwords: Math.min(
+        state.equipment.totalSwords,
+        state.equipment.availableSwords + (event.equipmentUsed ?? 0),
+      ),
+      wear: Math.min(100, state.equipment.wear + (event.wearAdded ?? 0)),
+    },
     acquisitionEvents: state.acquisitionEvents.map((candidate) =>
       candidate.id === event.id
         ? { ...candidate, contactReward, status: "completed" }
@@ -408,6 +551,9 @@ function resolveAcquisitionEvent(
     statistics: {
       ...state.statistics,
       contactsAcquired: state.statistics.contactsAcquired + contacts.length,
+      peopleMet: state.statistics.peopleMet + event.peopleMet,
+      demonstrationsGiven:
+        state.statistics.demonstrationsGiven + event.demonstrationsGiven,
       eventsCompleted: state.statistics.eventsCompleted + 1,
     },
   };
@@ -421,7 +567,38 @@ function resolveAcquisitionEvent(
       : "Contatti acquisiti alla dimostrazione",
     `${contacts.length} nuovi indirizzi sono disponibili per la campagna email.`,
   );
+  if (state.statistics.eventsCompleted === 0) {
+    nextState = addMessage(
+      nextState,
+      now + 1,
+      "Le spade non si sistemano da sole",
+      "Gli eventi consumano l'attrezzatura. Controlla l'usura e pianifica la manutenzione dalla sezione Attività.",
+      "system",
+    );
+  }
   return startNextCampaign(nextState, now);
+}
+
+function maintainEquipment(state: GameState): GameState {
+  if (
+    state.equipment.wear <= 0 ||
+    state.school.euros < GAME_CONFIG.equipmentMaintenanceCost ||
+    state.acquisitionEvents.some((event) => event.status === "running")
+  ) {
+    return state;
+  }
+  return {
+    ...state,
+    school: {
+      ...state.school,
+      euros: state.school.euros - GAME_CONFIG.equipmentMaintenanceCost,
+    },
+    equipment: { ...state.equipment, wear: 0 },
+    statistics: {
+      ...state.statistics,
+      maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
+    },
+  };
 }
 
 function markMessageRead(state: GameState, messageId: string): GameState {
@@ -434,10 +611,401 @@ function markMessageRead(state: GameState, messageId: string): GameState {
   };
 }
 
-function tick(state: GameState, now: number): GameState {
-  let nextState = state;
+function assignCollaborator(
+  state: GameState,
+  collaboratorId: string,
+  assignment: CollaboratorAssignment,
+): GameState {
+  if (assignment === "social" && !state.unlocks.social) return state;
+  if (!state.collaborators.some((collaborator) => collaborator.id === collaboratorId)) {
+    return state;
+  }
+  return {
+    ...state,
+    collaborators: state.collaborators.map((collaborator) =>
+      collaborator.id === collaboratorId ? { ...collaborator, assignment } : collaborator,
+    ),
+  };
+}
 
-  for (const email of state.emails) {
+function startFormTraining(
+  state: GameState,
+  collaboratorId: string,
+  formId: FormId,
+  now: number,
+): GameState {
+  if (!state.unlocks.forms) return state;
+  const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
+  const definition = getFormDefinition(formId);
+  if (
+    !collaborator ||
+    !definition ||
+    !canTrainForm(collaborator, definition) ||
+    state.school.euros < definition.cost
+  ) return state;
+  return {
+    ...state,
+    school: { ...state.school, euros: state.school.euros - definition.cost },
+    collaborators: state.collaborators.map((candidate) =>
+      candidate.id === collaboratorId
+        ? {
+            ...candidate,
+            training: {
+              formId,
+              startedAt: now,
+              completesAt: now + definition.durationMs,
+            },
+          }
+        : candidate,
+    ),
+  };
+}
+
+function resolveFormTraining(state: GameState, collaboratorId: string, now: number): GameState {
+  const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
+  if (!collaborator?.training || collaborator.training.completesAt > now) return state;
+  const definition = getFormDefinition(collaborator.training.formId);
+  if (!definition) return state;
+  let nextState: GameState = {
+    ...state,
+    collaborators: state.collaborators.map((candidate) =>
+      candidate.id === collaboratorId
+        ? {
+            ...candidate,
+            forms: [...candidate.forms, collaborator.training!.formId],
+            training: undefined,
+          }
+        : candidate,
+    ),
+    statistics: {
+      ...state.statistics,
+      formsCompleted: state.statistics.formsCompleted + 1,
+    },
+  };
+  nextState = addMessage(
+    nextState,
+    now,
+    "Formazione completata",
+    `${collaborator.displayName} ha completato ${definition.title}${definition.branch ? ` — ${definition.branch}` : ""}.`,
+  );
+  return nextState;
+}
+
+function writeCharacters(
+  state: GameState,
+  amount: number,
+  now: number,
+  source: "manual" | "automation",
+): GameState {
+  const activeEmail = selectActiveEmail(state);
+  if (!activeEmail || activeEmail.status !== "writing" || amount <= 0) return state;
+  const revealedCharacters = Math.min(
+    activeEmail.body.length,
+    activeEmail.revealedCharacters + amount,
+  );
+  const charactersWritten = revealedCharacters - activeEmail.revealedCharacters;
+  const completed = revealedCharacters >= activeEmail.body.length;
+  return {
+    ...state,
+    emails: state.emails.map((email) =>
+      email.id === activeEmail.id
+        ? {
+            ...email,
+            revealedCharacters,
+            status: completed ? "sending" : "writing",
+            sendCompletesAt: completed ? now + GAME_CONFIG.sendDelayMs : undefined,
+          }
+        : email,
+    ),
+    statistics: {
+      ...state.statistics,
+      inputs: state.statistics.inputs + (source === "manual" ? 1 : 0),
+      automatedCharacters:
+        state.statistics.automatedCharacters +
+        (source === "automation" ? charactersWritten : 0),
+    },
+  };
+}
+
+function processAutomation(state: GameState, now: number): GameState {
+  const elapsedMs = Math.min(1_000, Math.max(0, now - state.automation.lastProcessedAt));
+  if (elapsedMs <= 0) return state;
+
+  const productivityFor = (assignment: CollaboratorAssignment) =>
+    state.collaborators
+      .filter((collaborator) => collaborator.assignment === assignment)
+      .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
+  const writingProductivity = productivityFor("writing");
+  const socialProductivity = state.unlocks.social ? productivityFor("social") : 0;
+  const equipmentProductivity = productivityFor("equipment");
+  const automationMultiplier =
+    1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
+  const socialMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "socialMultiplier");
+
+  const writingTotal =
+    state.automation.writingBuffer +
+    (elapsedMs / 1_000) *
+      writingProductivity *
+      GAME_CONFIG.collaboratorWritingPerSecond *
+      state.player.writingPower *
+      automationMultiplier;
+  const automatedCharacters = Math.floor(writingTotal);
+  const socialTotal =
+    state.automation.socialBuffer +
+    (elapsedMs / GAME_CONFIG.socialContactIntervalMs) *
+    socialProductivity *
+    socialMultiplier *
+    automationMultiplier;
+  const socialContacts = Math.floor(socialTotal);
+  const equipmentTotal =
+    state.automation.equipmentBuffer +
+    (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
+    equipmentProductivity *
+    automationMultiplier;
+  const repairedWear = Math.floor(equipmentTotal);
+
+  let nextState: GameState = {
+    ...state,
+    automation: {
+      lastProcessedAt: now,
+      writingBuffer: writingTotal - automatedCharacters,
+      socialBuffer: socialTotal - socialContacts,
+      equipmentBuffer: equipmentTotal - repairedWear,
+    },
+    equipment: {
+      ...state.equipment,
+      wear: Math.max(0, state.equipment.wear - repairedWear),
+    },
+  };
+
+  if (automatedCharacters > 0) {
+    nextState = writeCharacters(nextState, automatedCharacters, now, "automation");
+  }
+
+  if (socialContacts > 0) {
+    const contacts = createAcquiredContacts(nextState, socialContacts, "social", now);
+    nextState = {
+      ...nextState,
+      contacts: [...nextState.contacts, ...contacts],
+      statistics: {
+        ...nextState.statistics,
+        contactsAcquired: nextState.statistics.contactsAcquired + contacts.length,
+        socialContacts: nextState.statistics.socialContacts + contacts.length,
+      },
+    };
+    nextState = addMessage(
+      nextState,
+      now,
+      "Nuovi contatti dai Social",
+      `${contacts.length} nuovi indirizzi sono stati raccolti dalle attività online.`,
+    );
+    nextState = startNextCampaign(nextState, now);
+  }
+
+  return nextState;
+}
+
+function runSocialCampaign(state: GameState, now: number): GameState {
+  if (!state.unlocks.social || state.school.euros < GAME_CONFIG.socialCampaignCost) {
+    return state;
+  }
+  const [viralRoll, nextSeed] = nextRandom(state.randomSeed);
+  const viral = viralRoll < GAME_CONFIG.socialViralChance;
+  const contactCount = Math.max(
+    1,
+    Math.round(
+      GAME_CONFIG.socialCampaignContacts *
+        (viral ? 3 : 1) *
+        (1 + getUpgradeEffectTotal(state.upgrades, "socialMultiplier")),
+    ),
+  );
+  const contacts = createAcquiredContacts(state, contactCount, "social", now);
+  let nextState: GameState = {
+    ...state,
+    randomSeed: nextSeed,
+    school: {
+      ...state.school,
+      euros: state.school.euros - GAME_CONFIG.socialCampaignCost,
+    },
+    contacts: [...state.contacts, ...contacts],
+    statistics: {
+      ...state.statistics,
+      contactsAcquired: state.statistics.contactsAcquired + contacts.length,
+      socialContacts: state.statistics.socialContacts + contacts.length,
+      socialCampaigns: state.statistics.socialCampaigns + 1,
+    },
+  };
+  nextState = addMessage(
+    nextState,
+    now,
+    viral ? "Post inspiegabilmente virale" : "Campagna Social completata",
+    `${contacts.length} nuovi indirizzi sono disponibili per la campagna email.`,
+  );
+  return startNextCampaign(nextState, now);
+}
+
+function processNarrativeEvent(state: GameState, now: number): GameState {
+  if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
+  const recentKinds = state.narrative.history.slice(-2).map((record) =>
+    NARRATIVE_EVENTS.find((definition) => definition.id === record.definitionId)?.kind,
+  );
+  const blockNegative = recentKinds.length === 2 && recentKinds.every((kind) => kind === "negative");
+  const eligible = NARRATIVE_EVENTS.filter(
+    (definition) => state.school.activeMembers >= definition.minMembers &&
+      (!blockNegative || definition.kind !== "negative"),
+  );
+  if (eligible.length === 0) return state;
+  const [eventRoll, seedAfterEvent] = nextRandom(state.randomSeed);
+  const definition = eligible[Math.min(eligible.length - 1, Math.floor(eventRoll * eligible.length))];
+  const [nextDelay, nextSeed] = randomBetween(
+    seedAfterEvent,
+    GAME_CONFIG.narrativeEventMinMs,
+    GAME_CONFIG.narrativeEventMaxMs,
+  );
+  const contacts = definition.contactDelta
+    ? createAcquiredContacts(state, definition.contactDelta, "collaborator", now)
+    : [];
+  const summary = definition.description;
+  let nextState: GameState = {
+    ...state,
+    randomSeed: nextSeed,
+    school: {
+      ...state.school,
+      activeMembers: Math.max(0, state.school.activeMembers + (definition.memberDelta ?? 0)),
+      euros: Math.max(0, state.school.euros + (definition.euroDelta ?? 0)),
+    },
+    equipment: {
+      ...state.equipment,
+      wear: Math.min(100, Math.max(0, state.equipment.wear + (definition.wearDelta ?? 0))),
+    },
+    contacts: [...state.contacts, ...contacts],
+    narrative: {
+      nextEventAt: now + nextDelay,
+      history: [
+        ...state.narrative.history,
+        {
+          id: makeId("narrative", now, state.narrative.history.length),
+          definitionId: definition.id,
+          title: definition.title,
+          occurredAt: now,
+          summary,
+        },
+      ],
+    },
+    statistics: {
+      ...state.statistics,
+      contactsAcquired: state.statistics.contactsAcquired + contacts.length,
+      narrativeEvents: state.statistics.narrativeEvents + 1,
+      eurosEarned:
+        state.statistics.eurosEarned + Math.max(0, definition.euroDelta ?? 0),
+    },
+  };
+  nextState = addMessage(nextState, now, definition.title, definition.description, definition.tone);
+  return contacts.length > 0 ? startNextCampaign(nextState, now) : nextState;
+}
+
+export function canFoundSchool(state: GameState): boolean {
+  return (
+    state.school.historicMembers >= GAME_CONFIG.prestigeHistoricMembers &&
+    state.collaborators.length >= GAME_CONFIG.prestigeCollaborators &&
+    state.statistics.eventsCompleted >= GAME_CONFIG.prestigeEvents
+  );
+}
+
+function notifyPrestigeOffer(state: GameState, now: number): GameState {
+  if (!canFoundSchool(state) || state.network.prestigeOfferSent) return state;
+  const ready: GameState = {
+    ...state,
+    network: { ...state.network, prestigeOfferSent: true },
+  };
+  return addMessage(
+    ready,
+    now,
+    "Richiesta apertura nuova scuola",
+    "La rete ha approvato la fondazione di una nuova sede. Completa la procedura nelle Impostazioni quando desideri trasferirti.",
+    "system",
+  );
+}
+
+function foundSchool(
+  state: GameState,
+  details: SchoolFoundationDetails,
+  now: number,
+): GameState {
+  if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
+  const fresh = createInitialState(now);
+  const archivedSchool = {
+    id: makeId("school", now, state.network.schools.length),
+    name: state.school.name,
+    city: state.school.city,
+    motto: state.school.motto,
+    specialization: state.school.specialization,
+    membersAtTransfer: state.school.activeMembers,
+    emailsSent: state.statistics.emailsSent,
+    eventsCompleted: state.statistics.eventsCompleted,
+    transferredAt: now,
+  };
+  const nextState: GameState = {
+    ...fresh,
+    createdAt: state.createdAt,
+    randomSeed: state.randomSeed,
+    school: {
+      ...fresh.school,
+      name: details.name.trim(),
+      city: details.city.trim(),
+      accentColor: details.accentColor,
+      motto: details.motto.trim(),
+      specialization: details.specialization,
+      historicMembers: state.school.historicMembers,
+    },
+    network: {
+      reputation: state.network.reputation + 1,
+      schools: [...state.network.schools, archivedSchool],
+      prestigeOfferSent: false,
+    },
+    achievements: state.achievements,
+    statistics: state.statistics,
+    messages: state.messages,
+  };
+  const announced = addMessage(
+    nextState,
+    now,
+    `Nuova scuola fondata: ${details.name.trim()}`,
+    `La sede di ${details.city.trim()} è operativa. Bonus permanente di rete: +${Math.round((state.network.schools.length + 1) * GAME_CONFIG.prestigeBonusPerSchool * 100)}%.`,
+    "system",
+  );
+  return {
+    ...announced,
+    player: { writingPower: getWritingPower(announced) },
+  };
+}
+
+function grantAchievements(state: GameState, now: number): GameState {
+  const earned = getNewAchievements(state);
+  if (earned.length === 0) return state;
+  const reward = earned.reduce((total, definition) => total + definition.euroReward, 0);
+  let nextState: GameState = {
+    ...state,
+    achievements: [...state.achievements, ...earned.map((definition) => definition.id)],
+    school: { ...state.school, euros: state.school.euros + reward },
+    statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + reward },
+  };
+  for (const definition of earned) {
+    nextState = addMessage(
+      nextState,
+      now,
+      `Traguardo: ${definition.title}`,
+      `${definition.description} Premio amministrativo: € ${definition.euroReward}.`,
+      "system",
+    );
+  }
+  return nextState;
+}
+
+function tick(state: GameState, now: number): GameState {
+  let nextState = processAutomation(state, now);
+
+  for (const email of nextState.emails.slice()) {
     if (email.status === "sending" && (email.sendCompletesAt ?? Infinity) <= now) {
       nextState = finalizeEmail(nextState, email.id, now);
     }
@@ -455,31 +1023,18 @@ function tick(state: GameState, now: number): GameState {
       nextState = resolveAcquisitionEvent(nextState, event, now);
     }
   }
-  return collectFees(nextState, now);
+  for (const collaborator of nextState.collaborators.slice()) {
+    if (collaborator.training && collaborator.training.completesAt <= now) {
+      nextState = resolveFormTraining(nextState, collaborator.id, now);
+    }
+  }
+  nextState = collectFees(nextState, now);
+  nextState = processNarrativeEvent(nextState, now);
+  return notifyPrestigeOffer(nextState, now);
 }
 
 function write(state: GameState, now: number): GameState {
-  const activeEmail = selectActiveEmail(state);
-  if (!activeEmail || activeEmail.status !== "writing") return state;
-  const revealedCharacters = Math.min(
-    activeEmail.body.length,
-    activeEmail.revealedCharacters + state.player.writingPower,
-  );
-  const completed = revealedCharacters >= activeEmail.body.length;
-  return {
-    ...state,
-    emails: state.emails.map((email) =>
-      email.id === activeEmail.id
-        ? {
-            ...email,
-            revealedCharacters,
-            status: completed ? "sending" : "writing",
-            sendCompletesAt: completed ? now + GAME_CONFIG.sendDelayMs : undefined,
-          }
-        : email,
-    ),
-    statistics: { ...state.statistics, inputs: state.statistics.inputs + 1 },
-  };
+  return writeCharacters(state, state.player.writingPower, now, "manual");
 }
 
 function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
@@ -496,10 +1051,19 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
+  const totalSwords =
+    GAME_CONFIG.initialSwords +
+    Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
+  const addedSwords = Math.max(0, totalSwords - state.equipment.totalSwords);
   const nextState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
+    equipment: {
+      ...state.equipment,
+      totalSwords,
+      availableSwords: state.equipment.availableSwords + addedSwords,
+    },
   };
   return {
     ...nextState,
@@ -508,18 +1072,44 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
+  let nextState: GameState;
   switch (action.type) {
     case "WRITE":
-      return write(state, action.now);
+      nextState = write(state, action.now);
+      break;
     case "TICK":
-      return tick(state, action.now);
+      nextState = tick(state, action.now);
+      break;
+    case "REPLACE_STATE":
+      nextState = action.state;
+      break;
+    case "FOUND_SCHOOL":
+      nextState = foundSchool(state, action.details, action.now);
+      break;
     case "BUY_UPGRADE":
-      return buyUpgrade(state, action.upgradeId);
+      nextState = buyUpgrade(state, action.upgradeId);
+      break;
     case "MARK_MESSAGE_READ":
-      return markMessageRead(state, action.messageId);
+      nextState = markMessageRead(state, action.messageId);
+      break;
+    case "MAINTAIN_EQUIPMENT":
+      nextState = maintainEquipment(state);
+      break;
+    case "ASSIGN_COLLABORATOR":
+      nextState = assignCollaborator(state, action.collaboratorId, action.assignment);
+      break;
+    case "RUN_SOCIAL_CAMPAIGN":
+      nextState = runSocialCampaign(state, action.now);
+      break;
+    case "START_FORM_TRAINING":
+      nextState = startFormTraining(state, action.collaboratorId, action.formId, action.now);
+      break;
     case "START_ACQUISITION_EVENT":
-      return startAcquisitionEvent(state, action.definitionId, action.now);
+      nextState = startAcquisitionEvent(state, action.definitionId, action.now);
+      break;
     default:
-      return state;
+      nextState = state;
   }
+  const now = "now" in action ? action.now : state.lastSavedAt;
+  return grantAchievements(nextState, now);
 }

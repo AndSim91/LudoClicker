@@ -18,6 +18,9 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   charisma: "people",
   writing: "mail",
   welcome: "contact",
+  social: "people",
+  equipment: "settings",
+  organization: "tasks",
 };
 
 function getCategorySummary(state: GameState, category: UpgradeCategory) {
@@ -30,12 +33,21 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "bookingMultiplier") * 100)}% prenotazioni`;
     case "welcome":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") * 100)}% iscrizioni`;
+    case "social":
+      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "socialMultiplier") * 100)}% produzione`;
+    case "equipment":
+      return `${state.equipment.totalSwords} spade · -${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura`;
+    case "organization":
+      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
   }
 }
 
 function getPurchaseLabel(state: GameState, definition: UpgradeDefinition) {
   const level = state.upgrades[definition.id];
   if (level >= definition.maxLevel) return "Completato";
+  if (state.school.historicMembers < definition.requiredHistoricMembers) {
+    return `Richiede ${definition.requiredHistoricMembers} iscritti`;
+  }
   const cost = getUpgradeCost(definition, level);
   if (state.school.euros < cost) return "Fondi insufficienti";
   return "Acquista";

@@ -11,7 +11,10 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Carisma" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Scrittura" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Accoglienza" })).toBeVisible();
-    expect(screen.getAllByText("Prezzo")).toHaveLength(4);
+    expect(screen.getByRole("heading", { name: "Social" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Attrezzatura" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
+    expect(screen.getAllByText("Prezzo")).toHaveLength(47);
     expect(screen.getByText(/15,00/)).toBeVisible();
     expect(screen.getAllByRole("button", { name: /Fondi insufficienti/ })).toHaveLength(4);
   });

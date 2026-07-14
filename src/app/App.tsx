@@ -10,9 +10,13 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
+import { ActivitiesView } from "../features/activities/ActivitiesView";
+import { CalendarView } from "../features/calendar/CalendarView";
 import { EventsView } from "../features/events/EventsView";
+import { PeopleView } from "../features/people/PeopleView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { useGameEngine } from "../game/useGameEngine";
+import { exportGame, importGame, resetGame, saveGame } from "../game/save";
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -25,8 +29,15 @@ export function App() {
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedSentEmailId, setSelectedSentEmailId] = useState<string | null>(null);
+  const [reduceMotion, setReduceMotion] = useState(
+    () => localStorage.getItem("oggetto-nuovi-iscritti.reduce-motion") === "true",
+  );
   const selectedMessage = state.messages.find((message) => message.id === selectedMessageId);
   const selectedSentEmail = state.emails.find((email) => email.id === selectedSentEmailId);
+
+  useEffect(() => {
+    localStorage.setItem("oggetto-nuovi-iscritti.reduce-motion", String(reduceMotion));
+  }, [reduceMotion]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -58,8 +69,33 @@ export function App() {
       setSelectedSentEmailId(latestSent?.id ?? null);
     }
   };
+  const openSentEmail = (emailId: string) => {
+    setView("mail");
+    setMailFolder("sent");
+    setSelectedMessageId(null);
+    setSelectedSentEmailId(emailId);
+  };
+  const exportSave = () => {
+    const blob = new Blob([exportGame(state)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `oggetto-nuovi-iscritti-${Date.now()}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+  const importSave = (raw: string) => {
+    const imported = importGame(raw);
+    if (!imported) return false;
+    dispatch({ type: "REPLACE_STATE", state: imported });
+    saveGame(imported);
+    return true;
+  };
+  const resetSave = () => {
+    dispatch({ type: "REPLACE_STATE", state: resetGame() });
+  };
   return (
-    <div className="application-shell">
+    <div className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}>
       <TitleBar />
       <CommandBar onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }} />
       <div className={view === "mail" ? "workspace" : "workspace overview-workspace"}>
@@ -94,8 +130,49 @@ export function App() {
               dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: Date.now() })
             }
           />
+        ) : view === "calendar" ? (
+          <CalendarView state={state} onOpenSentEmail={openSentEmail} />
+        ) : view === "statistics" ? (
+          <ActivitiesView
+            state={state}
+            onMaintainEquipment={() =>
+              dispatch({ type: "MAINTAIN_EQUIPMENT", now: Date.now() })
+            }
+            onRunSocialCampaign={() =>
+              dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: Date.now() })
+            }
+          />
+        ) : view === "contacts" ? (
+          <PeopleView
+            state={state}
+            onAssign={(collaboratorId, assignment) =>
+              dispatch({
+                type: "ASSIGN_COLLABORATOR",
+                collaboratorId,
+                assignment,
+                now: Date.now(),
+              })
+            }
+            onStartTraining={(collaboratorId, formId) =>
+              dispatch({
+                type: "START_FORM_TRAINING",
+                collaboratorId,
+                formId,
+                now: Date.now(),
+              })
+            }
+          />
         ) : (
-          <OverviewView view={view} state={state} />
+          <OverviewView
+            view={view}
+            state={state}
+            onExport={exportSave}
+            onImport={importSave}
+            onReset={resetSave}
+            onFoundSchool={(details) => dispatch({ type: "FOUND_SCHOOL", details, now: Date.now() })}
+            reduceMotion={reduceMotion}
+            onReduceMotionChange={setReduceMotion}
+          />
         )}
       </div>
       <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Connesso localmente</span><b>{state.school.name}</b></footer>

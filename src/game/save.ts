@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
-import { createInitialUpgradeLevels } from "../content/upgrades";
+import { simulateOfflineProgress } from "./offline";
+import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../content/upgrades";
 import type { GameState, UpgradeLevels } from "./types";
 
 const SAVE_KEY = "oggetto-nuovi-iscritti.save";
@@ -17,8 +18,30 @@ function isGameState(value: unknown): value is GameState {
     Array.isArray(state.acquisitionEvents) &&
     typeof state.activities?.nextSparringAt === "number" &&
     typeof state.upgrades?.["comfortable-keyboard"] === "number" &&
+    typeof state.statistics?.peopleMet === "number" &&
+    typeof state.statistics?.demonstrationsGiven === "number" &&
+    typeof state.statistics?.maintenanceCompleted === "number" &&
+    typeof state.equipment?.totalSwords === "number" &&
+    typeof state.equipment?.availableSwords === "number" &&
+    typeof state.equipment?.wear === "number" &&
+    Array.isArray(state.collaborators) &&
+    typeof state.automation?.lastProcessedAt === "number" &&
+    typeof state.statistics?.automatedCharacters === "number" &&
+    typeof state.statistics?.socialCampaigns === "number" &&
+    typeof state.statistics?.formsCompleted === "number" &&
+    typeof state.statistics?.narrativeEvents === "number" &&
+    typeof state.unlocks?.collaborators === "boolean" &&
+    typeof state.unlocks?.forms === "boolean" &&
+    Array.isArray(state.achievements) &&
+    typeof state.narrative?.nextEventAt === "number" &&
+    Array.isArray(state.narrative?.history) &&
     typeof state.randomSeed === "number" &&
-    typeof state.school?.euros === "number"
+    typeof state.school?.euros === "number" &&
+    typeof state.school?.city === "string" &&
+    typeof state.school?.accentColor === "string" &&
+    typeof state.network?.reputation === "number" &&
+    Array.isArray(state.network?.schools) &&
+    typeof state.network?.prestigeOfferSent === "boolean"
   );
 }
 
@@ -54,9 +77,165 @@ function migrate(value: unknown): unknown {
     upgrades["comfortable-keyboard"] = legacySpeedLevel;
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 3,
       upgrades,
       player: { writingPower: 1 + legacySpeedLevel },
+    };
+  }
+
+  if (migrated.version === 3 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 4,
+      acquisitionEvents: (migrated.acquisitionEvents ?? []).map((event) => ({
+        ...event,
+        peopleMet: event.peopleMet ?? Math.max(0, (event.contactReward ?? 0) * 5),
+        demonstrationsGiven:
+          event.demonstrationsGiven ?? Math.max(0, (event.contactReward ?? 0) * 2),
+      })),
+      statistics: {
+        ...migrated.statistics,
+        peopleMet: migrated.statistics.peopleMet ?? 0,
+        demonstrationsGiven: migrated.statistics.demonstrationsGiven ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 4 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 5,
+      equipment: migrated.equipment ?? {
+        totalSwords: 6,
+        availableSwords: 6,
+        wear: 0,
+      },
+      acquisitionEvents: (migrated.acquisitionEvents ?? []).map((event) => ({
+        ...event,
+        equipmentUsed: event.equipmentUsed ?? 0,
+        wearAdded: event.wearAdded ?? 0,
+      })),
+      statistics: {
+        ...migrated.statistics,
+        maintenanceCompleted: migrated.statistics.maintenanceCompleted ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 5 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 6,
+      collaborators: migrated.collaborators ?? [],
+      automation: migrated.automation ?? {
+        lastProcessedAt: migrated.lastSavedAt ?? migrated.createdAt ?? Date.now(),
+        writingBuffer: 0,
+        socialBuffer: 0,
+        equipmentBuffer: 0,
+      },
+      unlocks: {
+        upgrades: migrated.unlocks?.upgrades ?? false,
+        collaborators: migrated.unlocks?.collaborators ?? false,
+        social: migrated.unlocks?.social ?? false,
+        forms: migrated.unlocks?.forms ?? false,
+      },
+      statistics: {
+        ...migrated.statistics,
+        collaboratorsRecruited: migrated.statistics.collaboratorsRecruited ?? 0,
+        automatedCharacters: migrated.statistics.automatedCharacters ?? 0,
+        socialContacts: migrated.statistics.socialContacts ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 6 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 7,
+      statistics: {
+        ...migrated.statistics,
+        socialCampaigns: migrated.statistics.socialCampaigns ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 7 && migrated.statistics) {
+    migrated = {
+      ...migrated,
+      version: 8,
+      collaborators: (migrated.collaborators ?? []).map((collaborator) => ({
+        ...collaborator,
+        forms: collaborator.forms ?? [],
+      })),
+      unlocks: {
+        upgrades: migrated.unlocks?.upgrades ?? false,
+        collaborators: migrated.unlocks?.collaborators ?? false,
+        social: migrated.unlocks?.social ?? false,
+        forms: migrated.unlocks?.forms ?? false,
+      },
+      statistics: {
+        ...migrated.statistics,
+        formsCompleted: migrated.statistics.formsCompleted ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 8) {
+    const upgrades = {
+      ...createInitialUpgradeLevels(),
+      ...(migrated.upgrades ?? {}),
+    };
+    const totalSwords =
+      GAME_CONFIG.initialSwords + Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
+    migrated = {
+      ...migrated,
+      version: 9,
+      upgrades,
+      equipment: migrated.equipment
+        ? {
+            ...migrated.equipment,
+            totalSwords,
+            availableSwords: Math.min(totalSwords, migrated.equipment.availableSwords),
+          }
+        : migrated.equipment,
+    };
+  }
+
+  if (migrated.version === 9 && migrated.statistics) {
+    const referenceTime = migrated.lastSavedAt ?? migrated.createdAt ?? Date.now();
+    migrated = {
+      ...migrated,
+      version: 10,
+      achievements: migrated.achievements ?? [],
+      narrative: migrated.narrative ?? {
+        nextEventAt: referenceTime + GAME_CONFIG.narrativeEventMinMs,
+        history: [],
+      },
+      statistics: {
+        ...migrated.statistics,
+        narrativeEvents: migrated.statistics.narrativeEvents ?? 0,
+      } as GameState["statistics"],
+    };
+  }
+
+  if (migrated.version === 10) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      school: migrated.school
+        ? {
+            ...migrated.school,
+            city: migrated.school.city ?? "Genova",
+            accentColor: migrated.school.accentColor ?? "#0f6cbd",
+            motto: migrated.school.motto ?? "Ogni onda comincia da un movimento",
+            specialization: migrated.school.specialization ?? "generale",
+          }
+        : migrated.school,
+      network: migrated.network ?? {
+        reputation: 0,
+        schools: [],
+        prestigeOfferSent: false,
+      },
     };
   }
 
@@ -82,7 +261,8 @@ function read(key: string): GameState | null {
 }
 
 export function loadGame(now = Date.now()): GameState {
-  return read(SAVE_KEY) ?? read(BACKUP_KEY) ?? createInitialState(now);
+  const saved = read(SAVE_KEY) ?? read(BACKUP_KEY);
+  return saved ? simulateOfflineProgress(saved, now).state : createInitialState(now);
 }
 
 export function saveGame(state: GameState, now = Date.now()): void {
@@ -93,4 +273,23 @@ export function saveGame(state: GameState, now = Date.now()): void {
   } catch {
     // Il gioco resta utilizzabile anche quando lo storage del browser è indisponibile.
   }
+}
+
+export function exportGame(state: GameState): string {
+  return JSON.stringify(state, null, 2);
+}
+
+export function importGame(raw: string): GameState | null {
+  try {
+    const parsed = migrate(JSON.parse(raw));
+    return isGameState(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function resetGame(now = Date.now()): GameState {
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem(BACKUP_KEY);
+  return createInitialState(now);
 }

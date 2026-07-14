@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAME_CONFIG } from "./config";
-import { createInitialState, gameReducer } from "./engine";
+import { canFoundSchool, createInitialState, gameReducer } from "./engine";
 import { getEmailBookingChance, getEnrollmentChance } from "./formulas";
 import {
   selectActiveEmail,
@@ -73,10 +73,13 @@ describe("game engine", () => {
     state = gameReducer(state, { type: "TICK", now: trial.resolvesAt });
 
     expect(state.school.activeMembers).toBe(1);
-    expect(state.school.euros).toBe(GAME_CONFIG.firstEnrollmentFee);
+    expect(state.school.euros).toBe(GAME_CONFIG.firstEnrollmentFee + 25);
     expect(state.unlocks.upgrades).toBe(true);
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);
+    expect(state.collaborators).toHaveLength(1);
+    expect(state.unlocks.collaborators).toBe(true);
+    expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(true);
   });
 
   it("schedules booked trials without adding an inbox message", () => {
@@ -147,7 +150,12 @@ describe("game engine", () => {
     expect(event.status).toBe("running");
     expect(completed.contacts).toHaveLength(state.contacts.length + 2);
     expect(completed.statistics.contactsAcquired).toBe(2);
+    expect(completed.statistics.peopleMet).toBe(event.peopleMet);
+    expect(completed.statistics.demonstrationsGiven).toBe(event.demonstrationsGiven);
     expect(completed.statistics.eventsCompleted).toBe(1);
+    expect(started.equipment.availableSwords).toBe(4);
+    expect(completed.equipment.availableSwords).toBe(6);
+    expect(completed.equipment.wear).toBe(3);
     expect(tickedAgain.contacts).toHaveLength(completed.contacts.length);
   });
 
@@ -189,7 +197,10 @@ describe("game engine", () => {
       definitionId: "public-demo",
       now: 2_000,
     });
-    const funded = { ...state, school: { ...state.school, euros: 20 } };
+    const funded = {
+      ...state,
+      school: { ...state.school, euros: 20, activeMembers: 1 },
+    };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",
       definitionId: "public-demo",
@@ -199,6 +210,23 @@ describe("game engine", () => {
     expect(blocked).toBe(state);
     expect(started.school.euros).toBe(5);
     expect(started.acquisitionEvents).toHaveLength(1);
+  });
+
+  it("repairs worn equipment by spending euros outside events", () => {
+    const initial = createInitialState(1_000);
+    const worn = {
+      ...initial,
+      school: { ...initial.school, euros: 15 },
+      equipment: { ...initial.equipment, wear: 40 },
+    };
+
+    const maintained = gameReducer(worn, { type: "MAINTAIN_EQUIPMENT", now: 2_000 });
+    const repeated = gameReducer(maintained, { type: "MAINTAIN_EQUIPMENT", now: 3_000 });
+
+    expect(maintained.school.euros).toBe(10);
+    expect(maintained.equipment.wear).toBe(0);
+    expect(maintained.statistics.maintenanceCompleted).toBe(1);
+    expect(repeated).toBe(maintained);
   });
 
   it("derives sent-mail status from the contact funnel", () => {
@@ -235,7 +263,7 @@ describe("game engine", () => {
     const funded = {
       ...initial,
       school: { ...initial.school, euros: 100, historicMembers: 1 },
-      unlocks: { upgrades: true },
+      unlocks: { ...initial.unlocks, upgrades: true },
     };
     const first = gameReducer(funded, {
       type: "BUY_UPGRADE",
@@ -251,7 +279,24 @@ describe("game engine", () => {
     expect(first.upgrades["prepared-presentation"]).toBe(1);
     expect(first.school.euros).toBe(85);
     expect(second.upgrades["prepared-presentation"]).toBe(2);
-    expect(second.school.euros).toBe(67);
+    expect(second.school.euros).toBe(66);
+  });
+
+  it("adds purchased equipment capacity immediately", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 500, historicMembers: 20 },
+    };
+
+    const upgraded = gameReducer(funded, {
+      type: "BUY_UPGRADE",
+      upgradeId: "organized-rack",
+      now: 2_000,
+    });
+
+    expect(upgraded.equipment.totalSwords).toBe(8);
+    expect(upgraded.equipment.availableSwords).toBe(8);
   });
 
   it("allows buying an upgrade as soon as the balance covers its price", () => {
@@ -276,7 +321,7 @@ describe("game engine", () => {
     const funded = {
       ...initial,
       school: { ...initial.school, euros: 100, historicMembers: 1 },
-      unlocks: { upgrades: true },
+      unlocks: { ...initial.unlocks, upgrades: true },
     };
     const faster = gameReducer(funded, {
       type: "BUY_UPGRADE",
@@ -295,7 +340,7 @@ describe("game engine", () => {
     });
 
     expect(faster.player.writingPower).toBe(2);
-    expect(eventStarted.acquisitionEvents[0].contactReward).toBe(3);
+    expect(eventStarted.acquisitionEvents[0].contactReward).toBeGreaterThan(2);
   });
 
   it("applies writing and welcome upgrades to conversion chances", () => {
@@ -311,5 +356,191 @@ describe("game engine", () => {
 
     expect(getEmailBookingChance(improved)).toBeCloseTo(0.232);
     expect(getEnrollmentChance(improved)).toBeCloseTo(0.6);
+  });
+
+  it("assigns one collaborator and writes on the active email automatically", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-1",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      assignment: null,
+    };
+    const withCollaborator = {
+      ...initial,
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, collaborators: true },
+    };
+
+    const assigned = gameReducer(withCollaborator, {
+      type: "ASSIGN_COLLABORATOR",
+      collaboratorId: collaborator.id,
+      assignment: "writing",
+      now: 1_500,
+    });
+    const automated = gameReducer(assigned, { type: "TICK", now: 2_000 });
+
+    expect(assigned.collaborators[0].assignment).toBe("writing");
+    expect(selectActiveEmail(automated)?.revealedCharacters).toBe(2);
+    expect(automated.statistics.inputs).toBe(0);
+    expect(automated.statistics.automatedCharacters).toBe(2);
+  });
+
+  it("generates passive Social contacts and repairs equipment through assignments", () => {
+    const initial = createInitialState(1_000);
+    const socialCollaborator = {
+      id: "collaborator-social",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      assignment: "social" as const,
+    };
+    const equipmentCollaborator = {
+      ...socialCollaborator,
+      id: "collaborator-equipment",
+      assignment: "equipment" as const,
+    };
+    const automated = gameReducer(
+      {
+        ...initial,
+        collaborators: [socialCollaborator, equipmentCollaborator],
+        unlocks: { ...initial.unlocks, collaborators: true, social: true },
+        equipment: { ...initial.equipment, wear: 5 },
+        automation: {
+          ...initial.automation,
+          socialBuffer: 0.99,
+          equipmentBuffer: 0.95,
+        },
+      },
+      { type: "TICK", now: 2_000 },
+    );
+
+    expect(automated.statistics.socialContacts).toBe(1);
+    expect(automated.contacts).toHaveLength(initial.contacts.length + 1);
+    expect(automated.contacts.at(-1)?.source).toBe("social");
+    expect(automated.equipment.wear).toBe(4);
+  });
+
+  it("runs paid Social campaigns after the ten-member unlock", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 30, activeMembers: 10 },
+      unlocks: { ...initial.unlocks, social: true },
+    };
+
+    const campaigned = gameReducer(funded, { type: "RUN_SOCIAL_CAMPAIGN", now: 2_000 });
+
+    expect(campaigned.school.euros).toBe(5);
+    expect(campaigned.statistics.socialCampaigns).toBe(1);
+    expect(campaigned.statistics.socialContacts).toBeGreaterThanOrEqual(4);
+  });
+
+  it("trains collaborators through the ordered Form path", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-training",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      assignment: "writing" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, euros: 20 },
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+    };
+
+    const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", collaboratorId: collaborator.id, formId: "form-2", now: 2_000 });
+    const training = gameReducer(ready, { type: "START_FORM_TRAINING", collaboratorId: collaborator.id, formId: "form-1", now: 2_000 });
+    const completed = gameReducer(training, { type: "TICK", now: 22_000 });
+
+    expect(blocked).toBe(ready);
+    expect(training.school.euros).toBe(5);
+    expect(training.collaborators[0].training?.formId).toBe("form-1");
+    expect(completed.collaborators[0].forms).toContain("form-1");
+    expect(completed.collaborators[0].training).toBeUndefined();
+    expect(completed.statistics.formsCompleted).toBe(1);
+  });
+
+  it("grants each achievement and its reward only once", () => {
+    const initial = createInitialState(1_000);
+    const qualifying = {
+      ...initial,
+      statistics: { ...initial.statistics, emailsSent: 1 },
+    };
+
+    const earned = gameReducer(qualifying, { type: "TICK", now: 2_000 });
+    const repeated = gameReducer(earned, { type: "TICK", now: 2_000 });
+
+    expect(earned.achievements).toContain("first-email");
+    expect(earned.school.euros).toBe(5);
+    expect(earned.messages.some((message) => message.subject === "Traguardo: Prima email inviata")).toBe(true);
+    expect(repeated.school.euros).toBe(earned.school.euros);
+    expect(repeated.achievements.filter((id) => id === "first-email")).toHaveLength(1);
+  });
+
+  it("resolves a due narrative event once and schedules the next one", () => {
+    const initial = createInitialState(1_000);
+    const due = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 3 },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+
+    const resolved = gameReducer(due, { type: "TICK", now: 2_000 });
+    const repeated = gameReducer(resolved, { type: "TICK", now: 2_000 });
+
+    expect(resolved.narrative.history).toHaveLength(1);
+    expect(resolved.statistics.narrativeEvents).toBe(1);
+    expect(resolved.narrative.nextEventAt).toBeGreaterThan(2_000);
+    expect(repeated.narrative.history).toHaveLength(1);
+  });
+
+  it("offers and founds a new school while preserving the permanent network", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = Array.from({ length: 8 }, (_, index) => ({
+      id: `collaborator-${index}`,
+      contactId: initial.contacts[0].id,
+      displayName: `Collaboratore ${index}`,
+      joinedAt: 1_000,
+      forms: [],
+      assignment: null,
+    }));
+    const eligible = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 80, historicMembers: 100, euros: 500 },
+      collaborators,
+      statistics: { ...initial.statistics, eventsCompleted: 12, emailsSent: 30 },
+      upgrades: { ...initial.upgrades, "comfortable-keyboard": 2 },
+    };
+
+    expect(canFoundSchool(eligible)).toBe(true);
+    const offered = gameReducer(eligible, { type: "TICK", now: 2_000 });
+    const offeredAgain = gameReducer(offered, { type: "TICK", now: 2_000 });
+    const founded = gameReducer(offeredAgain, {
+      type: "FOUND_SCHOOL",
+      now: 3_000,
+      details: { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3", motto: "Verso il largo", specialization: "redazione" },
+    });
+
+    expect(offered.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
+    expect(offeredAgain.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
+    expect(founded.school.name).toBe("Ordine del Faro");
+    expect(founded.school.city).toBe("Trieste");
+    expect(founded.school.activeMembers).toBe(0);
+    expect(founded.school.historicMembers).toBe(100);
+    expect(founded.collaborators).toEqual([]);
+    expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
+    expect(founded.network.reputation).toBe(1);
+    expect(founded.network.schools).toHaveLength(1);
+    expect(founded.network.schools[0].membersAtTransfer).toBe(80);
+    expect(founded.player.writingPower).toBeCloseTo(1.375);
+    expect(selectIncomePerMinute(founded)).toBeCloseTo(6.25);
   });
 });
