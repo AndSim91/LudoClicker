@@ -4,8 +4,8 @@
 
 **Titolo di lavorazione:** Oggetto: Nuovi Iscritti  
 **Sottotitolo:** Un incremental game dell'Ordine delle Onde  
-**Versione documento:** 1.0  
-**Stato:** concept completo, pronto per la prototipazione  
+**Versione documento:** 1.1  
+**Stato:** concept avanzato, economia e progressione definite, pronto per la prototipazione  
 **Piattaforma:** browser desktop  
 **Lingua:** italiano  
 **Salvataggio:** locale nel browser  
@@ -18,11 +18,11 @@ Oggetto: Nuovi Iscritti è un browser game clicker incrementale ambientato dentr
 
 Il giocatore collabora inizialmente con **LudoSport Genova – Ordine delle Onde** e deve trovare nuovi potenziali interessati, ottenere i loro indirizzi email, scrivere inviti e trasformare i contatti in iscritti. Ogni pressione della tastiera inserisce il carattere successivo di un'email prestabilita, indipendentemente dal tasto premuto. Anche un click nel corpo della mail inserisce un carattere. All'inizio ogni input produce un solo carattere; i potenziamenti aumentano progressivamente la velocità.
 
-Le email completate vengono inviate automaticamente. Dopo un intervallo casuale, ogni destinatario può iscriversi oppure non rispondere. Il tasso di conversione dipende soprattutto dalla qualità della scrittura, dalla qualità del contatto e dai potenziamenti della scuola.
+Le email completate vengono inviate automaticamente e invitano il destinatario a partecipare a una singola lezione di prova in palestra. Dopo un intervallo compresso, il contatto può prenotare oppure sparire definitivamente. Chi partecipa alla lezione ha un'alta probabilità, ma non la certezza, di iscriversi.
 
-I contatti non sono infiniti. Per continuare a inviare email bisogna organizzare eventi, dimostrazioni e lezioni di prova. Queste attività producono potenziali contatti in base al Carisma del gruppo, all'efficacia dei collaboratori, alla disponibilità di spade in buono stato e alla qualità dell'evento.
+I contatti non sono infiniti. Per continuare a inviare email bisogna organizzare eventi reali in luoghi di Genova. Ogni evento attira un certo numero di persone; una porzione prova la disciplina sul posto, una porzione lascia il proprio indirizzo email, una porzione accetta l'invito alla prova in palestra e infine una porzione si iscrive. Carisma, Scrittura, Social, organizzazione, collaboratori e attrezzatura migliorano fasi diverse del funnel.
 
-Con la crescita della scuola, alcuni iscritti diventano **Collaboratori delle Onde**. I collaboratori possono scrivere email automaticamente, partecipare agli eventi, raccogliere contatti, gestire i social o occuparsi dell'attrezzatura. Possono essere potenziati attraverso le sette Forme LudoSport, usate come riferimenti narrativi e rami di specializzazione, non come simulazione del combattimento.
+Gli iscritti generano periodicamente **Euro** tramite le quote associative. Gli Euro sono l'unica risorsa spendibile. Una piccola percentuale degli iscritti è composta da rari **Iscritti volenterosi**, equivalenti ludicamente a una variante rara: possono essere assegnati liberamente come Collaboratori delle Onde alla scrittura, agli eventi, ai social o alla manutenzione. Possono apprendere le Forme LudoSport seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` e i tre rami Spada Lunga, Staffa e Doppia spada corta.
 
 Raggiunta una dimensione significativa, al giocatore viene proposto di trasferirsi e fondare una nuova scuola, scegliendone nome e sede. Questa è la meccanica di prestigio: una parte dei progressi locali riparte, mentre l'esperienza accumulata e la rete delle scuole fondate forniscono bonus permanenti. Il gioco non ha un finale e può continuare indefinitamente.
 
@@ -48,7 +48,7 @@ Il giocatore deve sentirsi contemporaneamente:
    Qualunque tasto utile fa avanzare il testo. Non si può sbagliare a scrivere. Il giocatore deve poter martellare la tastiera come in Hacker Typer.
 
 3. **Una catena produttiva leggibile**  
-   Eventi e lezioni generano contatti; i contatti ricevono email; le email generano iscritti; gli iscritti generano collaboratori; i collaboratori migliorano tutte le fasi.
+   Eventi generano pubblico; il pubblico genera prove dimostrative; le prove generano contatti; le email generano prenotazioni; le lezioni in palestra generano iscritti; le quote generano Euro; gli iscritti volenterosi generano automazione.
 
 4. **Umorismo crescente**  
    Il gioco parte con messaggi realistici e professionali. Con il progresso, le email, gli oggetti e le iniziative diventano più stravaganti, pur restando leggibili e funzionali.
@@ -58,6 +58,9 @@ Il giocatore deve sentirsi contemporaneamente:
 
 6. **Rispetto dell'identità LudoSport**  
    Il gioco può citare Forme, spade, Ordini, scuole, lezioni, eventi e terminologia LudoSport. I riferimenti a franchise cinematografici esterni restano indiretti e comici.
+
+7. **Svelamento progressivo**  
+   Il gioco comincia quasi vuoto. Nuove cartelle, funzioni e sistemi di Outlook compaiono soltanto quando il giocatore raggiunge traguardi comprensibili o completa speciali comunicazioni interne manuali.
 
 ### 2.3 Tono
 
@@ -89,7 +92,7 @@ Esempio di escalation:
 
 ### 3.2 Durata delle sessioni
 
-- **Micro-sessione:** 30–90 secondi per completare una mail o controllare le risposte.
+- **Micro-sessione:** 30–90 secondi per completare una mail o controllare prenotazioni e quote.
 - **Sessione normale:** 5–15 minuti per scrivere, acquistare potenziamenti e organizzare attività.
 - **Sessione di gestione:** 15–30 minuti per assegnare collaboratori, pianificare eventi e preparare un prestigio.
 - **Ritorno idle:** riepilogo dei progressi maturati mentre il gioco era chiuso.
@@ -100,17 +103,18 @@ Esempio di escalation:
 
 ```mermaid
 flowchart LR
-    A["Eventi e lezioni di prova"] --> B["Persone incontrate"]
-    B -->|Carisma| C["Contatti email"]
-    C --> D["Email da scrivere"]
-    D -->|Scrittura manuale o automatica| E["Email inviate"]
-    E -->|Tempo e qualità della mail| F["Risposte"]
-    F -->|Conversione riuscita| G["Iscritti"]
-    G --> H["Collaboratori delle Onde"]
-    H --> A
-    H --> D
-    H --> I["Social e attrezzatura"]
+    A["Evento esterno"] --> B["Persone presenti"]
+    B -->|Carisma| C["Prove dimostrative"]
+    C -->|Carisma| D["Contatti email"]
+    D --> E["Email da scrivere"]
+    E -->|Scrittura| F["Lezioni prenotate"]
+    F -->|Qualità della prova| G["Iscritti"]
+    G --> H["Quote in Euro"]
+    G -->|Evento raro| I["Iscritti volenterosi"]
     I --> A
+    I --> E
+    I --> J["Social e attrezzatura"]
+    J --> A
 ```
 
 ### 4.1 Loop attivo
@@ -119,13 +123,14 @@ flowchart LR
 2. Preme tasti o clicca nel corpo della mail.
 3. Ogni input rivela il prossimo carattere del testo prestabilito.
 4. Quando il corpo è completo, la mail viene inviata automaticamente.
-5. Il contatto viene consumato dalla lista dei contatti disponibili e la risposta viene programmata.
+5. Il contatto viene consumato e viene programmato l'esito ritardato dell'invito alla prova in palestra.
 6. Se esiste un altro contatto, si apre immediatamente una nuova mail.
-7. Se i contatti sono terminati, Outlook mostra una comunicazione plausibile che invita a pianificare un evento o una lezione di prova.
+7. Il giocatore può continuare a premere tasti senza interrompersi: il sistema passa da una mail alla successiva in modo trasparente.
+8. Se i contatti sono terminati, Outlook mostra una comunicazione plausibile che invita a pianificare un evento o a partecipare a uno sparring esterno.
 
 ### 4.2 Loop gestionale
 
-1. Controllare risposte, iscritti e contatti rimasti.
+1. Controllare prenotazioni, prove in palestra, iscritti, Euro e contatti rimasti.
 2. Assegnare collaboratori alle attività.
 3. Sbloccare o migliorare Carisma, Scrittura, Velocità, Social e Attrezzatura.
 4. Pianificare eventi nel Calendario.
@@ -148,18 +153,27 @@ flowchart LR
 
 ### 5.1 Iscritti
 
-Gli **Iscritti** sono la valuta, il punteggio e il principale indicatore di progresso.
+Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una sorgente di entrate ricorrenti. Non sono spendibili.
 
-Per evitare l'effetto narrativamente sgradevole di “spendere persone”, sono divisi in:
+- **Iscritti attivi:** membri attuali della scuola; possono aumentare o diminuire tramite eventi narrativi.
+- **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
+- **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
 
-- **Iscritti totali:** tutti gli iscritti ottenuti nella scuola corrente; non diminuiscono.
-- **Iscritti disponibili:** iscritti non ancora impegnati in iniziative permanenti.
-- **Iscritti coinvolti:** iscritti assegnati a potenziamenti, progetti o attività.
-- **Iscritti storici:** totale ottenuto in tutte le scuole e in tutti i cicli di prestigio.
+Ogni iscritto attivo genera periodicamente una quota associativa. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
-Acquistare un potenziamento significa coinvolgere o dedicare un certo numero di iscritti al progetto. L'iscritto non scompare: passa da disponibile a coinvolto. Alcuni potenziamenti successivi possono liberare iscritti precedentemente impegnati.
+### 5.2 Euro
 
-### 5.2 Contatti
+Gli **Euro (€)** sono l'unica risorsa spendibile. Provengono principalmente dalle quote periodiche degli iscritti e vengono usati per:
+
+- potenziamenti di Carisma, Scrittura e Velocità;
+- campagne social;
+- manutenzione e miglioramento delle spade;
+- organizzazione di eventi;
+- strumenti amministrativi e organizzativi.
+
+Gli iscritti possono fungere da requisito di sblocco, ma non vengono mai consumati per acquistare qualcosa.
+
+### 5.3 Contatti
 
 I Contatti sono indirizzi email inventati ottenuti attraverso eventi, lezioni di prova, social e collaboratori.
 
@@ -169,14 +183,12 @@ Ogni contatto contiene:
 - indirizzo email fittizio;
 - fonte del contatto;
 - data di acquisizione;
-- livello di interesse;
-- qualità del contatto;
-- eventuali tag;
-- stato: nuovo, in coda, contattato, iscritto, non interessato.
+- eventuali tag tecnici o narrativi;
+- stato: disponibile, in scrittura, invitato, prova prenotata, convertito o perso.
 
 I contatti sono una risorsa limitante. Se finiscono, la produzione di email si ferma.
 
-### 5.3 Email
+### 5.4 Email
 
 Stati possibili:
 
@@ -184,16 +196,17 @@ Stati possibili:
 - in scrittura;
 - completata;
 - inviata;
-- in attesa di risposta;
-- risposta positiva;
-- risposta negativa;
-- nessuna risposta.
+- in attesa dell'esito;
+- prova prenotata;
+- contatto perso.
 
-### 5.4 Collaboratori
+Non esistono follow-up né conversazioni di risposta: ogni contatto riceve una sola mail e viene poi convertito o eliminato.
+
+### 5.5 Collaboratori
 
 I Collaboratori delle Onde sono iscritti che decidono di aiutare attivamente la scuola. Sono una sottocategoria degli Iscritti e non una valuta separata.
 
-### 5.5 Attrezzatura
+### 5.6 Attrezzatura
 
 Le spade della scuola sono gestite come inventario operativo:
 
@@ -203,9 +216,9 @@ Le spade della scuola sono gestite come inventario operativo:
 - in manutenzione;
 - temporaneamente inutilizzabili.
 
-La quantità e lo stato delle spade limitano la capacità di eventi e lezioni di prova.
+Nella prima versione la quantità di spade non impone una capienza rigida. L'usura è attivata soprattutto da eventi narrativi; un valore di usura più alto aumenta la probabilità di inconvenienti e riduce l'efficacia degli eventi.
 
-### 5.6 Reputazione di rete
+### 5.7 Reputazione di rete
 
 La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
 
@@ -215,25 +228,29 @@ La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo 
 
 ### 6.1 Regole di input
 
-- Il gioco ascolta gli eventi `keydown` quando il corpo della mail ha il focus.
-- Ogni pressione valida produce il numero attuale di caratteri per input.
+- Il gioco ascolta gli eventi `keydown` quando la vista di composizione è attiva e nessun controllo dell'interfaccia richiede l'input.
+- Ogni tasto, inclusi modificatori e tasti di navigazione, produce una sola unità di input; `event.repeat` viene ignorato.
 - Un click nel corpo produce lo stesso avanzamento.
-- I tasti modificatori premuti da soli non producono caratteri: Shift, Control, Alt, Meta, Caps Lock, Tab ed Escape.
-- Le combinazioni di sistema e del browser non devono essere bloccate.
-- Tenere premuto un tasto può produrre ripetizioni, con un limite configurabile per evitare velocità anomale.
+- I click su cartelle, menu, Calendario, Contatti e altre opzioni eseguono la loro funzione e non scrivono.
+- Le combinazioni di sistema e del browser non devono essere bloccate, anche quando il relativo `keydown` fa avanzare il testo.
+- Tenere premuto un tasto conta come una singola pressione.
 - Incollare testo non completa la mail.
 - Il testo rivelato è sempre quello del modello corrente; ciò che il giocatore preme non viene registrato.
-- L'input manuale rimane utile anche nelle fasi avanzate tramite bonus combo e campagne speciali.
+- L'input manuale rimane utile nelle fasi avanzate perché la stessa potenza di scrittura moltiplica anche il lavoro dei collaboratori.
 
 ### 6.2 Caratteri per input
 
 Formula iniziale:
 
 ```text
-caratteriPerInput = 1
-  + bonusVelocità
-  + bonusStrumenti
-  + bonusPrestigio
+potenzaScrittura = 1 + livelliVelocità
+
+caratteriPerInput = floor(
+  potenzaScrittura
+  × moltiplicatoreScrittura
+  × moltiplicatoreForme
+  × moltiplicatorePrestigio
+)
 ```
 
 Valori consigliati per la prima curva:
@@ -246,16 +263,15 @@ Valori consigliati per la prima curva:
 | Metà ciclo | 8–15 |
 | Fine ciclo | 25–50 |
 
-### 6.3 Combo manuale
+### 6.3 Rapporto tra scrittura manuale e automatica
 
-Per mantenere piacevole la scrittura manuale:
+La velocità non dipende da combo o precisione, ma esclusivamente dai potenziamenti e dai moltiplicatori permanenti. I bonus generali alla scrittura migliorano contemporaneamente:
 
-- input consecutivi aumentano una combo discreta;
-- la combo decade dopo 1,5 secondi senza input;
-- la combo non deve apparire come un indicatore arcade;
-- viene rappresentata dalla voce plausibile “Velocità di digitazione” nella barra di stato;
-- il bonus massimo iniziale è +25% caratteri per input;
-- potenziamenti avanzati possono aumentarlo.
+- caratteri prodotti da ogni input manuale;
+- caratteri prodotti dai Collaboratori delle Onde;
+- efficacia di eventuali strumenti automatici futuri.
+
+Questo collegamento impedisce che la potenza manuale diventi un ramo morto dopo lo sblocco dell'automazione.
 
 ### 6.4 Completamento e invio
 
@@ -264,11 +280,11 @@ Al completamento:
 1. il cursore si ferma alla fine del testo;
 2. compare per 250–400 ms lo stato Outlook “Invio in corso…”;
 3. la mail passa in Posta inviata;
-4. il risultato della conversione viene deciso e salvato immediatamente, ma mostrato solo alla scadenza del tempo di risposta;
+4. viene determinato e salvato l'esito ritardato `prenota la prova / contatto perso`;
 5. si apre la mail successiva entro 300–600 ms;
 6. non viene riprodotto alcun suono.
 
-Decidere l'esito al momento dell'invio impedisce di cambiare il risultato ricaricando la pagina.
+Decidere l'esito al momento dell'invio impedisce di cambiare il risultato ricaricando la pagina. L'esito della successiva lezione in palestra viene invece determinato quando la lezione viene risolta.
 
 ### 6.5 Lunghezza delle email
 
@@ -289,73 +305,76 @@ La lunghezza deve influenzare la qualità potenziale: una mail lunga non è auto
 
 ### 7.1 Flusso
 
-Ogni email inviata crea un record di risposta futura con:
+Ogni email inviata crea un esito futuro con due possibili risultati:
 
-- orario minimo di risposta;
-- orario effettivo di risposta;
-- risultato già determinato;
-- testo della risposta;
-- eventuale iscrizione;
-- eventuale disponibilità a collaborare.
+- il contatto prenota una singola lezione di prova in palestra;
+- il contatto non converte e sparisce definitivamente.
 
-### 7.2 Tempo di risposta
+Non vengono mostrate risposte personali e non esistono follow-up. Se la prova viene prenotata, il sistema crea una presenza nel Calendario. Quando la lezione si conclude, viene risolto un secondo esito:
+
+- la persona si iscrive;
+- la persona non si iscrive e sparisce definitivamente.
+
+Un nuovo iscritto può inoltre risultare, con probabilità rara, un Iscritto volenteroso.
+
+### 7.2 Tempi compressi
 
 Per il primo prototipo:
 
-| Esito | Tempo suggerito |
+| Passaggio | Tempo suggerito |
 |---|---:|
-| Risposta rapida | 20–90 secondi |
-| Risposta normale | 2–8 minuti |
-| Risposta lenta | 10–30 minuti |
-| Nessuna risposta | archiviata dopo 30 minuti |
+| Esito dell'email | 20 secondi–3 minuti |
+| Attesa della lezione in palestra | 1–5 minuti |
+| Esito della lezione | immediato al termine |
+| Accredito della prima quota | immediato o entro 1 minuto |
 
 Con la progressione, il gioco può simulare ore e giorni usando tempi compressi. I tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
-### 7.3 Formula di conversione
+### 7.3 Formule di conversione
 
 ```text
-probabilitàIscrizione = clamp(
-  conversioneBase
-  × qualitàContatto
+probabilitàPrenotazione = clamp(
+  prenotazioneBase
   × moltiplicatoreScrittura
   × moltiplicatoreReputazione
-  × bonusCampagna
+  × bonusSocial
+  × bonusPrestigio,
+  minimo,
+  massimo
+)
+
+probabilitàIscrizioneDopoProva = clamp(
+  iscrizioneBaseDopoProva
+  × qualitàLezione
+  × bonusAccoglienza
+  × efficaciaCollaboratori
+  × statoAttrezzatura
   × bonusPrestigio,
   minimo,
   massimo
 )
 ```
 
-Valori di partenza consigliati:
+Ipotesi iniziali da verificare con il prototipo:
 
-- conversione base: 2%;
-- qualità contatto freddo: ×0,7;
-- contatto da evento: ×1,0;
-- contatto da lezione di prova: ×1,8;
-- minimo: 0,25%;
-- massimo ordinario: 45%;
-- campagne o eventi speciali possono superare temporaneamente il massimo.
+- prenotazione della prova dopo l'email: 20%;
+- iscrizione dopo la lezione in palestra: 50%;
+- probabilità minima di ogni passaggio: 1%;
+- massimo ordinario della prenotazione: 70%;
+- massimo ordinario dell'iscrizione dopo la prova: 90%.
 
 Questi numeri sono ipotesi di bilanciamento e andranno corretti dopo i primi test.
 
-### 7.4 Risposte negative
+### 7.4 Comunicazione degli esiti
 
-Le risposte negative non devono risultare punitive. Servono a:
+Gli esiti positivi vengono comunicati come messaggi automatici interni, non come risposte dei destinatari:
 
-- dare vita alla casella di posta;
-- raccontare piccole storie;
-- rendere visibile che non tutte le mail convertono;
-- offrire spunti comici;
-- alimentare statistiche utili ai potenziamenti.
+- “Nuova lezione di prova prenotata”;
+- “Nuovo iscritto registrato”;
+- “Quota associativa accreditata”;
+- “Nuovo collaboratore disponibile”.
 
-Categorie:
-
-- nessuna risposta;
-- non interessato;
-- interessato ma senza tempo;
-- ha confuso LudoSport con un'altra attività;
-- chiede informazioni aggiuntive;
-- promette di partecipare “il prossimo mese” per sempre.
+Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili soltanto nelle statistiche aggregate del funnel.
 
 ---
 
@@ -363,21 +382,23 @@ Categorie:
 
 ### 8.1 Eventi
 
-Gli eventi sono programmati attraverso il Calendario di Outlook. Ogni evento richiede:
+Gli eventi sono programmati attraverso il Calendario di Outlook e si svolgono in tempo compresso. Esistono eventi fissi ed eventi che compaiono casualmente. Nella prima versione gli esiti sono automatici: il sistema decisionale verrà valutato successivamente.
+
+Ogni evento può richiedere:
 
 - un tempo di preparazione;
 - uno o più collaboratori;
-- un numero minimo di spade disponibili;
 - una durata;
-- talvolta una soglia di iscritti;
+- un costo in Euro;
+- talvolta una soglia di iscritti o collaboratori;
 - eventuali requisiti di Carisma, Social o Attrezzatura.
 
 Tipi iniziali:
 
 | Evento | Durata | Rischio | Contatti | Nota |
 |---|---:|---:|---:|---|
-| Lezione di prova | breve | basso | pochi, alta qualità | evento fondamentale |
-| Dimostrazione pubblica | media | medio | medi | richiede spade pronte |
+| Sparring esterno | breve | basso | pochissimi | fonte gratuita di emergenza |
+| Dimostrazione pubblica | media | medio | medi | include prove sul posto |
 | Stand sportivo | lunga | basso | molti | forte effetto Carisma |
 | Evento locale | media | medio | variabili | pubblico generalista |
 | Evento a tema | lunga | medio | molti | evitare riferimenti diretti a franchise |
@@ -386,37 +407,38 @@ Tipi iniziali:
 
 ### 8.2 Persone incontrate e contatti ottenuti
 
-Un evento non genera direttamente indirizzi email garantiti. Prima calcola le persone incontrate, poi applica la conversione del Carisma.
+Un evento attraversa tre passaggi distinti prima di generare indirizzi email.
 
 ```text
 personeIncontrate = capienzaBase
   × qualitàEvento
-  × disponibilitàSpade
   × bonusSocial
   × variabilitàCasuale
 
-contattiOttenuti = personeIncontrate
-  × conversioneCarisma
+proveDimostrative = personeIncontrate
+  × probabilitàProvaSulPosto
+  × moltiplicatoreCarisma
+
+contattiOttenuti = proveDimostrative
+  × probabilitàRilascioEmail
+  × moltiplicatoreCarisma
   × efficaciaCollaboratori
 ```
 
-Valori iniziali suggeriti:
+Ipotesi iniziali:
 
-- conversione Carisma base: 15%;
-- lezione di prova: 35%;
-- dimostrazione: 12%;
-- stand: 18%;
-- massimo ordinario: 75%.
+- persone che provano sul posto: 35%;
+- persone che lasciano l'email dopo la prova: 25%;
+- entrambi i passaggi sono migliorabili tramite Carisma;
+- il numero di persone presenti varia in base al tipo di evento, non al meteo o al giorno della settimana.
 
-### 8.3 Lezioni di prova
+### 8.3 Lezioni in palestra, Social e sparring
 
-Le lezioni di prova sono una variante ad alta qualità:
+La **lezione di prova in palestra** non genera nuovi indirizzi: consuma una prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
-- generano meno persone rispetto a un grande evento;
-- producono contatti più interessati;
-- richiedono almeno un collaboratore e spade disponibili;
-- possono generare una piccola probabilità di iscrizione diretta;
-- migliorano sensibilmente il tasso della successiva email.
+I **Social** generano passivamente contatti email e possono ricevere campagne pagate in Euro. Le piattaforme sono inventate e i loro contatti seguono lo stesso percorso degli altri: email → prova in palestra → possibile iscrizione. Un evento virale può generare un picco casuale di contatti.
+
+Lo **sparring esterno** è sempre disponibile come attività di sicurezza quando mancano contatti o denaro. Costa poco o nulla, ma produce soltanto pochi indirizzi.
 
 ### 8.4 Esaurimento dei contatti
 
@@ -437,9 +459,7 @@ Questa situazione è intenzionale e rappresenta il principale collo di bottiglia
 
 ### 9.1 Reclutamento
 
-Ogni nuovo iscritto ha una probabilità di diventare collaboratore dopo un ritardo casuale.
-
-Valore base consigliato: **8%**.
+Ogni nuovo iscritto ha una probabilità rara e casuale di essere un **Iscritto volenteroso**. Questi iscritti possono essere assegnati come Collaboratori delle Onde. La probabilità iniziale consigliata per il prototipo è **2%**, da validare con i test.
 
 La probabilità può aumentare con:
 
@@ -449,21 +469,23 @@ La probabilità può aumentare con:
 - progetti interni;
 - potenziamenti organizzativi.
 
-### 9.2 Attributi
+### 9.2 Dati e regole
 
 Ogni collaboratore possiede:
 
 - nome inventato;
 - data di ingresso;
-- livello;
-- specializzazione;
-- Velocità;
-- Scrittura;
-- Carisma;
-- Organizzazione;
-- Tecnica dell'attrezzatura;
 - Forme sbloccate;
 - stato e assegnazione attuale.
+
+Regole:
+
+- alcuni personaggi reali potranno essere aggiunti in seguito;
+- nella prima versione non esistono livelli, ritratti o personalità individuali;
+- non esiste un limite massimo di collaboratori;
+- ogni collaboratore svolge un solo incarico alla volta;
+- la riassegnazione è libera e immediata;
+- un collaboratore può lasciare la scuola soltanto tramite eventi narrativi casuali.
 
 ### 9.3 Ruoli
 
@@ -471,22 +493,23 @@ Ogni collaboratore possiede:
 |---|---|
 | Redazione | scrive caratteri automaticamente |
 | Eventi | aumenta persone incontrate e contatti ottenuti |
-| Lezioni di prova | aumenta capienza e qualità dei contatti |
+| Lezioni in palestra | aumenta la probabilità di iscrizione finale |
 | Social | genera interesse e contatti nel tempo |
 | Attrezzatura | controlla e ripristina le spade |
-| Coordinamento | fornisce bonus a più collaboratori |
+| Coordinamento | funzione futura, non inclusa nell'MVP |
 
 ### 9.4 Scrittura automatica
 
 ```text
 caratteriAutomaticiAlSecondo = velocitàBaseCollaboratore
-  × livello
+  × collaboratoriAssegnati
+  × potenzaScrittura
   × bonusForma
   × bonusScritturaScuola
-  × efficienzaAssegnazione
+  × moltiplicatorePrestigio
 ```
 
-I caratteri automatici avanzano la stessa mail del giocatore. L'input manuale si somma senza conflitti.
+I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input manuale si somma senza conflitti. La scrittura automatica non può essere messa in pausa, ma si ferma naturalmente quando finiscono i contatti.
 
 ### 9.5 Raccolta automatica dei contatti
 
@@ -500,26 +523,30 @@ I collaboratori assegnati a eventi o promozione possono:
 
 La raccolta automatica deve essere più lenta degli eventi gestiti attivamente, ma sufficiente a impedire un blocco totale nelle fasi avanzate.
 
-### 9.6 Le sette Forme come potenziamenti
+### 9.6 Percorso delle Forme
 
-Le Forme non rappresentano combattimenti nel gioco. Sono percorsi narrativi di crescita dei collaboratori.
+Le Forme non simulano il combattimento: rappresentano formazione e moltiplicatori del collaboratore. Il percorso è:
 
-| Forma | Identità ludica proposta | Bonus principale |
-|---|---|---|
-| Forma 1 | fondamentali e affidabilità | efficienza generale e minori errori organizzativi |
-| Forma 2 | rapidità e iniziativa | raffiche di scrittura automatica |
-| Forma 3 | osservazione e adattamento | qualità delle email e conversione |
-| Forma 4 | movimento e presenza | rendimento degli eventi |
-| Forma 5 | forza e gestione delle risorse | capacità e manutenzione attrezzatura |
-| Forma 6 | complessità e coordinamento | social, sinergie e più ruoli |
-| Forma 7 | intensità e leadership | moltiplicatore globale del collaboratore |
+```text
+Forma 1
+  → Corso X
+  → Forma 2
+  → Corso Y
+  → Forme 3, 4 e 5 in uno o più rami:
+      - Spada Lunga
+      - Staffa
+      - Doppia spada corta
+  → Forma 6
+  → Forma 7
+```
+
+Nomi e numeri sono sufficienti nella prima versione; gli effetti ludici non devono riprodurre fedelmente le caratteristiche tecniche reali delle Forme.
 
 Regole:
 
-- non tutti i collaboratori devono sbloccare tutte le Forme;
-- ogni Forma richiede livello e anzianità;
-- alcune specializzazioni offrono percorsi diversi;
-- il livello massimo deve crescere con il prestigio;
+- un collaboratore può conoscere più Forme;
+- l'eventuale accesso a più rami 3/4/5 resta configurabile;
+- la formazione richiede Euro e/o tempo, ma non livelli personali;
 - le descrizioni definitive dovranno usare terminologia LudoSport approvata.
 
 ---
@@ -528,33 +555,46 @@ Regole:
 
 ### 10.1 Carisma
 
-Influenza la conversione da persone incontrate a indirizzi email.
+Influenza due passaggi degli eventi: la probabilità che una persona provi la disciplina sul posto e la probabilità che, dopo la prova dimostrativa, lasci il proprio indirizzo email.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
-| Presentazione preparata | +10% conversione Carisma |
+| Presentazione preparata | +10% prove dimostrative |
 | Biglietti con QR code | +15% contatti agli eventi |
 | Dimostrazione coordinata | +20% qualità evento |
 | Stand riconoscibile | +25% persone incontrate |
-| Accoglienza dell'Ordine | +15% qualità contatti |
+| Accoglienza dell'Ordine | +15% indirizzi lasciati |
 | Risposte alle domande difficili | riduce contatti persi |
 | “No, non è esattamente quella cosa” | bonus comico alle spiegazioni |
 
 ### 10.2 Scrittura
 
-Influenza il tasso da email inviata a iscritto.
+Influenza sia il moltiplicatore generale di digitazione sia il tasso da email inviata a lezione di prova prenotata. Non modifica direttamente l'esito della lezione in palestra.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
-| Oggetto chiaro | +8% conversione email |
-| Invito personalizzato | +12% conversione email |
-| Call to action | +15% conversione email |
-| Revisione collettiva | +10% e riduzione tempi risposta |
-| Testimonianze | +20% sui contatti da evento |
+| Oggetto chiaro | +8% prenotazioni |
+| Invito personalizzato | +12% prenotazioni |
+| Call to action | +15% prenotazioni |
+| Revisione collettiva | +10% prenotazioni e moltiplicatore di scrittura |
+| Testimonianze | +20% prenotazioni |
 | Il paragrafo che convince davvero | bonus alle mail lunghe |
 | Pubblicità sorprendentemente onesta | bonus globale avanzato |
 
-### 10.3 Velocità
+### 10.3 Accoglienza e qualità della lezione
+
+Influenza la conversione finale da partecipante alla lezione in palestra a iscritto.
+
+| Potenziamento | Effetto indicativo |
+|---|---|
+| Procedura di benvenuto | +10% iscrizioni dopo la prova |
+| Lezione introduttiva collaudata | +15% qualità lezione |
+| Materiale informativo chiaro | +10% iscrizioni dopo la prova |
+| Collaboratore dedicato | bonus per ogni volenteroso assegnato |
+| Sala preparata | riduce gli esiti negativi narrativi |
+| Esperienza memorabile | moltiplicatore avanzato |
+
+### 10.4 Velocità
 
 Influenza caratteri per pressione e automazione.
 
@@ -565,12 +605,12 @@ Influenza caratteri per pressione e automazione.
 | Frasi rapide | +2 caratteri per input |
 | Firma automatica | completa automaticamente la chiusura |
 | Campi intelligenti | completa nome e luogo automaticamente |
-| Revisione istantanea | aumenta combo massima |
+| Revisione istantanea | moltiplica manuale e collaboratori |
 | Fusione documenti | grande bonus di fine ciclo |
 
-### 10.4 Social
+### 10.5 Social
 
-Genera persone interessate e contatti anche senza eventi.
+Genera passivamente contatti email anche senza eventi. Le campagne social consumano Euro, usano piattaforme inventate e possono diventare casualmente virali.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
@@ -582,9 +622,9 @@ Genera persone interessate e contatti anche senza eventi.
 | Post inspiegabilmente virale | evento casuale positivo |
 | Gestione professionale | automazione social |
 
-### 10.5 Attrezzatura
+### 10.6 Attrezzatura
 
-Influenza capienza, qualità e frequenza degli eventi.
+Influenza qualità e frequenza degli eventi e riduce il rischio di eventi narrativi negativi. Nella prima versione non determina una capienza rigida.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
@@ -596,28 +636,68 @@ Influenza capienza, qualità e frequenza degli eventi.
 | Registro dell'attrezzatura | automazione dei controlli |
 | “Le abbiamo messe a posto tutte” | moltiplicatore avanzato |
 
-### 10.6 Organizzazione
+### 10.7 Organizzazione
 
 | Potenziamento | Effetto indicativo |
 |---|---|
 | Calendario condiviso | più eventi pianificabili |
 | Turni dei collaboratori | maggiore efficienza assegnazioni |
 | Lista di controllo | riduce imprevisti |
-| Modulo di iscrizione | conversione più rapida |
-| Segreteria dell'Ordine | automazione delle risposte |
+| Modulo di iscrizione | accredito e registrazione più rapidi |
+| Segreteria dell'Ordine | automatizza notifiche e quote |
 | Coordinamento multi-sede | bonus di prestigio |
 
-### 10.7 Costi
+### 10.8 Costi
 
-I costi seguono una curva esponenziale moderata:
+Tutti i potenziamenti vengono acquistati esclusivamente in Euro. Non esistono rimborsi, ma nel lungo periodo è possibile comprare ogni ramo. La curva iniziale riprende la crescita graduale del gioco di riferimento:
 
 ```text
 costoLivello = costoBase × crescita^(livelloCorrente)
 ```
 
-Valore iniziale consigliato di `crescita`: 1,55.
+Valore iniziale consigliato di `crescita`: **1,20**, aumentabile a 1,25–1,35 per automazioni e moltiplicatori particolarmente forti.
 
-Gli iscritti usati come costo vengono **coinvolti** nel progetto e restano conteggiati negli Iscritti totali.
+Alcuni livelli richiedono anche soglie non spendibili, come numero di iscritti, eventi completati, collaboratori o Forme conosciute.
+
+### 10.9 Sblocco progressivo
+
+L'interfaccia non mostra tutti i sistemi dall'inizio. Una prima sequenza consigliata è:
+
+| Traguardo | Sblocco diegetico |
+|---|---|
+| Avvio | sola composizione della mail e primi contatti |
+| Prima email | Posta inviata e statistiche minime |
+| 3 email | comunicazione “Configurazione campagna” |
+| Comunicazione completata | Potenziamenti di Scrittura e Velocità |
+| Primo esaurimento contatti | Calendario, eventi e sparring esterno |
+| Prima prova prenotata | report aggregato del funnel |
+| Primo iscritto | Euro e quote associative |
+| Primo Iscritto volenteroso | Persone, Collaboratori e assegnazioni |
+| 10 iscritti | Social |
+| 20 iscritti | Attrezzatura e usura narrativa |
+| 50 iscritti | Forme dei collaboratori |
+| Circa 100 iscritti | procedura per fondare una nuova scuola |
+
+Le soglie sono configurabili e andranno calibrate per raggiungere il primo prestigio dopo circa 3–4 ore.
+
+### 10.10 Comunicazioni di sistema
+
+Alcuni traguardi aprono una breve **comunicazione di sistema**, equivalente ai file di sistema del gioco di riferimento. Esempi:
+
+- Configurazione modelli di invito;
+- Attivazione calendario condiviso;
+- Registro quote associative;
+- Procedura manutenzione attrezzatura;
+- Configurazione account social;
+- Richiesta apertura nuova scuola.
+
+Queste comunicazioni:
+
+- vengono completate con la stessa meccanica di tastiera;
+- devono essere scritte manualmente e ignorano l'automazione;
+- sono brevi e rare;
+- sbloccano un'intera funzione al completamento;
+- impediscono che il progresso idle faccia saltare l'introduzione di una nuova meccanica.
 
 ---
 
@@ -657,10 +737,10 @@ Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come prodo
 
 | Elemento apparente | Funzione ludica |
 |---|---|
-| Posta in arrivo | risposte, tutorial, notifiche e storia |
+| Posta in arrivo | comunicazioni interne, tutorial, notifiche e storia |
 | Bozze | email in coda o interrotte |
 | Posta inviata | storico delle campagne |
-| Posta indesiderata | risposte comiche e fallimenti |
+| Posta indesiderata | eventi comici, anomalie e messaggi narrativi |
 | Archivio | statistiche delle vecchie scuole |
 | Calendario | eventi e lezioni di prova |
 | Persone | contatti e collaboratori |
@@ -675,7 +755,8 @@ Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come prodo
 I numeri del gioco vengono nascosti in elementi plausibili:
 
 - Contatti disponibili: conteggio accanto alla cartella Contatti;
-- Risposte in attesa: conteggio accanto a Posta inviata o una cartella dedicata;
+- Esiti in attesa: conteggio accanto a Posta inviata o Calendario;
+- Euro disponibili: saldo in un report amministrativo o nella cartella Quote;
 - Iscritti: gruppo contatti “Iscritti attivi”;
 - Collaboratori: gruppo contatti “Collaboratori delle Onde”;
 - Caratteri al secondo: stato “Sincronizzazione” nella barra inferiore;
@@ -711,7 +792,7 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 Azioni:
 
 - scrivere la mail;
-- consultare risposte;
+- consultare prenotazioni, iscrizioni e notifiche interne;
 - leggere tutorial diegetici;
 - controllare campagne;
 - aprire comunicazioni di sblocco.
@@ -758,10 +839,11 @@ Presentate come report di campagna:
 - contatti ottenuti;
 - email inviate;
 - tempo medio di scrittura;
-- risposte positive;
+- prove prenotate;
+- prove completate;
 - iscritti;
 - conversione per fonte;
-- conversione per modello email;
+- conversione aggregata delle email;
 - rendimento collaboratori;
 - andamento nel tempo.
 
@@ -777,18 +859,24 @@ Il tutorial avviene tramite email ricevute.
    Introduce il contesto e assegna i primi 10 contatti fittizi.
 
 2. **Prima campagna inviti**  
-   Chiede di aprire una bozza e scriverla premendo qualunque tasto.
+   Chiede di scrivere premendo qualunque tasto. L'invio e l'apertura della mail successiva sono automatici.
 
-3. **Risposte in arrivo**  
-   Spiega che non tutti risponderanno e introduce Scrittura.
+3. **Configurazione campagna**  
+   È la prima comunicazione di sistema manuale e sblocca Scrittura e Velocità.
 
 4. **Stiamo finendo i contatti**  
-   Introduce Calendario, eventi e Carisma.
+   Introduce Calendario, eventi, prove dimostrative, Carisma e sparring esterno.
 
-5. **Una mano in più**  
-   Il primo collaboratore garantito si rende disponibile e introduce l'automazione.
+5. **Nuova lezione prenotata**  
+   Introduce il passaggio email → prova in palestra → possibile iscrizione.
 
-6. **Le spade non si sistemano da sole**  
+6. **Prima quota associativa**  
+   Introduce gli Euro e il finanziamento dei potenziamenti.
+
+7. **Una mano in più**  
+   Il primo Iscritto volenteroso può essere garantito dal tutorial e introduce l'automazione.
+
+8. **Le spade non si sistemano da sole**  
    Introduce attrezzatura e manutenzione. Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si sistemano quasi da sole.
 
 Il tutorial non deve usare frecce luminose o overlay da gioco. Può evidenziare gli elementi con i normali stati di focus di Windows.
@@ -864,15 +952,16 @@ Questo testo è un segnaposto. L'email di esempio fornita dal committente defini
 - differenziare davvero i 100 testi, evitando semplici sostituzioni di sinonimi;
 - ogni mail deve avere una call to action riconoscibile.
 
-### 14.5 Risposte generate
+### 14.5 Comunicazioni generate
 
 Servono almeno:
 
-- 25 risposte positive;
-- 35 risposte negative o interlocutorie;
-- 20 risposte comiche;
-- 10 comunicazioni interne;
-- 10 messaggi di sistema diegetici.
+- 20 notifiche di prenotazione, iscrizione e pagamento;
+- 20 comunicazioni interne;
+- 20 eventi narrativi positivi o negativi;
+- 20 messaggi comici;
+- 10 comunicazioni di sistema che sbloccano funzioni;
+- 10 riepiloghi e report diegetici.
 
 ---
 
@@ -910,12 +999,13 @@ I nomi reali pubblicati sui portali LudoSport non vengono usati automaticamente 
 
 ## 16. Eventi casuali
 
-Gli eventi casuali arrivano come email o modifiche al Calendario.
+Gli eventi casuali arrivano come email o modifiche al Calendario. Nella prima versione il loro esito è automatico; in seguito potranno offrire scelte. Possono aumentare o diminuire iscritti, Euro, contatti, collaboratori e stato dell'attrezzatura.
 
 ### Positivi
 
 - un post ottiene più attenzione del previsto;
 - un collaboratore porta amici a una prova;
+- un gruppo di amici si iscrive grazie al passaparola;
 - una spada torna disponibile prima del previsto;
 - una dimostrazione viene spostata in una posizione migliore;
 - una vecchia email riceve finalmente risposta.
@@ -925,6 +1015,7 @@ Gli eventi casuali arrivano come email o modifiche al Calendario.
 - pioggia durante un evento;
 - sovrapposizione nel Calendario;
 - una parte dell'attrezzatura richiede manutenzione;
+- un litigio provoca uno o più abbandoni;
 - il pubblico dell'evento era interessato soprattutto al buffet;
 - un destinatario risponde alla persona sbagliata;
 
@@ -936,7 +1027,7 @@ Gli eventi casuali arrivano come email o modifiche al Calendario.
 - un contatto chiede se la spada è inclusa nell'abbonamento della palestra;
 - un evento genera più collaboratori che partecipanti.
 
-Gli eventi negativi non devono cancellare grandi quantità di progresso. Devono creare variazione, non frustrazione.
+Gli eventi negativi non devono cancellare grandi quantità di progresso. Devono creare variazione, non frustrazione. Una protezione impedisce lunghe serie di eventi negativi consecutivi.
 
 ---
 
@@ -946,11 +1037,11 @@ Gli eventi negativi non devono cancellare grandi quantità di progresso. Devono 
 
 Ogni nuova partita inizia presso **LudoSport Genova – Ordine delle Onde**.
 
-Il primo ciclo racconta la crescita del giocatore da collaboratore operativo a persona capace di coordinare una scuola.
+Il primo ciclo racconta la crescita del giocatore da collaboratore operativo a persona capace di coordinare una scuola e deve durare indicativamente **3–4 ore di gioco**.
 
 ### 17.2 Sblocco
 
-L'offerta di fondare una nuova scuola arriva tramite un'email formale quando sono soddisfatti requisiti come:
+L'offerta di fondare una nuova scuola arriva tramite una comunicazione di sistema manuale quando sono soddisfatti requisiti come:
 
 - soglia di Iscritti totali;
 - numero minimo di collaboratori;
@@ -959,7 +1050,9 @@ L'offerta di fondare una nuova scuola arriva tramite un'email formale quando son
 - disponibilità di attrezzatura;
 - reputazione sufficiente.
 
-Soglia provvisoria del primo ciclo: 100 iscritti, 8 collaboratori e 12 eventi.
+Soglia provvisoria del primo ciclo: 100 iscritti, 8 collaboratori e 12 eventi, da bilanciare sulla durata obiettivo.
+
+Il prestigio è una scelta volontaria. A differenza del gioco di riferimento, il primo prestigio deve concedere immediatamente un bonus permanente chiaramente percepibile; non deve richiedere più reset prima di diventare utile.
 
 ### 17.3 Creazione della scuola
 
@@ -977,11 +1070,12 @@ Il modulo appare come una procedura amministrativa ricevuta via email.
 
 - contatti locali;
 - email in coda;
-- iscritti disponibili della scuola precedente;
 - potenziamenti operativi locali;
 - eventi programmati;
-- parte dell'attrezzatura;
-- collaboratori non trasferiti.
+- parte dell'attrezzatura e degli Euro locali;
+- collaboratori che rimangono assegnati alla scuola precedente.
+
+Gli iscritti della scuola precedente non vengono cancellati: passano allo storico e, nel modello provvisorio, contribuiscono a una piccola rendita di rete.
 
 ### 17.5 Cosa rimane
 
@@ -993,6 +1087,8 @@ Il modulo appare come una procedura amministrativa ricevuta via email.
 - modelli email sbloccati;
 - traguardi;
 - un collaboratore mentore selezionato, se sbloccato.
+
+Bonus iniziale consigliato per la prima fondazione: almeno **+25%** alla velocità complessiva del nuovo ciclo oppure un vantaggio equivalente distribuito tra Carisma, Scrittura ed entrate. Il valore è provvisorio, ma l'effetto deve essere immediato.
 
 ### 17.6 Progressione infinita
 
@@ -1016,13 +1112,14 @@ La rete delle scuole precedenti produce un piccolo contributo passivo e appare n
 Quando il gioco viene riaperto:
 
 1. calcola il tempo trascorso;
-2. simula risposte già programmate;
+2. risolve esiti delle email e lezioni già programmati;
 3. applica la scrittura automatica;
 4. consuma contatti solo se erano disponibili;
 5. completa eventi terminati;
 6. genera contatti dalle attività automatiche;
-7. applica manutenzione e social;
-8. mostra un riepilogo in forma di email “Riepilogo attività”.
+7. accredita le quote maturate in Euro;
+8. applica manutenzione, social ed eventi narrativi consentiti offline;
+9. mostra un riepilogo in forma di email “Riepilogo attività”.
 
 ### 18.2 Limiti
 
@@ -1040,9 +1137,10 @@ Il riepilogo mostra:
 - tempo trascorso;
 - email completate;
 - contatti utilizzati;
-- risposte ricevute;
+- prove prenotate e completate;
 - nuovi iscritti;
 - nuovi collaboratori;
+- Euro incassati;
 - contatti acquisiti;
 - attività bloccate e motivo.
 
@@ -1055,14 +1153,14 @@ Il riepilogo mostra:
 | Traguardo | Tempo desiderato |
 |---|---:|
 | Prima mail | meno di 1 minuto |
-| Prima risposta | 1–3 minuti |
+| Prima prova prenotata | 1–3 minuti |
 | Primo iscritto | 3–8 minuti |
 | Primo potenziamento | 5–10 minuti |
 | Primo esaurimento contatti | 10–20 minuti |
 | Primo evento | entro 20 minuti |
 | Primo collaboratore | 20–40 minuti |
 | Automazione percepibile | 30–60 minuti |
-| Primo prestigio | 4–8 ore attive distribuite |
+| Primo prestigio | 3–4 ore attive distribuite |
 
 ### 19.2 Avvio consigliato
 
@@ -1070,14 +1168,15 @@ Il riepilogo mostra:
 - 1 carattere per input;
 - 0 collaboratori;
 - 6 spade disponibili;
-- conversione email base 2%;
+- prenotazione prova dopo email: 20% provvisorio;
+- iscrizione dopo prova in palestra: 50% provvisorio;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
-- il primo collaboratore può essere garantito entro il quinto iscritto;
-- la prima lezione di prova è gratuita e guidata.
+- il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
+- il primo evento e il primo sparring sono gratuiti e guidati.
 
 ### 19.3 Protezione dalla sfortuna
 
-- dopo una serie di email senza iscritti, aumenta temporaneamente la probabilità;
+- dopo una serie di funnel senza iscritti, aumenta temporaneamente la probabilità del passaggio più debole;
 - il bonus non viene mostrato esplicitamente;
 - viene azzerato alla prima conversione;
 - gli eventi tutorial hanno un risultato minimo garantito;
@@ -1109,7 +1208,8 @@ interface GameState {
   player: PlayerState;
   contacts: Contact[];
   messages: Message[];
-  responseQueue: PendingResponse[];
+  pendingEmailOutcomes: PendingEmailOutcome[];
+  scheduledTrials: ScheduledTrial[];
   collaborators: Collaborator[];
   equipment: EquipmentItem[];
   calendar: CalendarEvent[];
@@ -1175,7 +1275,7 @@ src/
     tutorial/
   content/
     emailTemplates.ts
-    responseTemplates.ts
+    notificationTemplates.ts
     names.ts
     events.ts
     upgrades.ts
@@ -1194,7 +1294,8 @@ src/
 - formule pure e testabili;
 - azioni timestampate;
 - casualità con seed persistente;
-- risultati delle email determinati all'invio;
+- esito `prenotazione / contatto perso` determinato all'invio;
+- esito `iscrizione / prova non convertita` determinato alla risoluzione della lezione;
 - contenuti e bilanciamento separati dal codice;
 - nessuna formula dipendente dal frame rate.
 
@@ -1222,11 +1323,9 @@ interface Contact {
   firstName: string;
   lastName: string;
   email: string;
-  source: "event" | "trial" | "social" | "collaborator" | "tutorial";
-  quality: number;
-  interest: number;
+  source: "event" | "sparring" | "social" | "collaborator" | "tutorial";
   acquiredAt: number;
-  status: "available" | "queued" | "contacted" | "enrolled" | "lost";
+  status: "available" | "writing" | "invited" | "trialScheduled" | "enrolled" | "lost";
   tags: string[];
 }
 ```
@@ -1243,7 +1342,7 @@ interface CampaignEmail {
   revealedCharacters: number;
   createdAt: number;
   sentAt?: number;
-  status: "draft" | "writing" | "sent" | "resolved";
+  status: "draft" | "writing" | "sent" | "trialBooked" | "lost";
 }
 ```
 
@@ -1254,13 +1353,7 @@ interface Collaborator {
   id: string;
   displayName: string;
   joinedAt: number;
-  level: number;
-  writing: number;
-  charisma: number;
-  organization: number;
-  equipment: number;
-  speed: number;
-  forms: number[];
+  forms: FormQualification[];
   assignment: CollaboratorAssignment | null;
 }
 ```
@@ -1276,8 +1369,29 @@ interface GameEvent {
   endsAt: number;
   assignedCollaboratorIds: string[];
   assignedEquipmentIds: string[];
-  status: "planned" | "running" | "completed" | "cancelled";
+  status: "planned" | "running" | "completed";
   resolvedOutcome?: EventOutcome;
+}
+```
+
+### Esiti del funnel
+
+```ts
+interface PendingEmailOutcome {
+  id: string;
+  emailId: string;
+  contactId: string;
+  resolvesAt: number;
+  result: "trialBooked" | "lost";
+}
+
+interface ScheduledTrial {
+  id: string;
+  contactId: string;
+  startsAt: number;
+  resolvesAt: number;
+  resultSeed: string;
+  status: "scheduled" | "completed";
 }
 ```
 
@@ -1302,7 +1416,7 @@ Esempi:
 
 - Prima email inviata;
 - Primo iscritto;
-- Dieci risposte senza perdere l'ottimismo;
+- Dieci inviti senza una prenotazione, ma senza perdere l'ottimismo;
 - Primo evento completato;
 - Cento contatti raccolti;
 - Prima spada rimessa in ordine;
@@ -1326,9 +1440,12 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 - input da tastiera e click;
 - testi prestabiliti;
 - invio automatico;
-- coda delle risposte;
+- esito ritardato delle email;
+- prenotazioni e lezioni in palestra semplificate;
 - contatti limitati;
 - primi iscritti;
+- prime quote in Euro;
+- primo sblocco tramite comunicazione di sistema;
 - salvataggio locale.
 
 **Criterio di completamento:** il giocatore può scrivere, inviare e convertire email per almeno 15 minuti senza errori bloccanti.
@@ -1336,18 +1453,19 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 ### Fase 2 — Calendario ed eventi
 
 - calendario navigabile;
-- lezioni di prova;
+- prove dimostrative agli eventi;
+- lezioni di prova in palestra;
 - eventi;
 - Carisma;
 - persone incontrate e contatti;
 - attrezzatura di base;
 - esaurimento e recupero contatti.
 
-**Criterio di completamento:** la catena eventi → contatti → email → iscritti è completa.
+**Criterio di completamento:** la catena eventi → prove dimostrative → contatti → email → lezioni in palestra → iscritti → Euro è completa.
 
 ### Fase 3 — Collaboratori e automazione
 
-- generazione collaboratori;
+- generazione rara degli Iscritti volenterosi;
 - assegnazioni;
 - scrittura automatica;
 - raccolta contatti;
@@ -1371,7 +1489,7 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 ### Fase 5 — Contenuti e bilanciamento
 
 - 100 email;
-- risposte e comunicazioni interne;
+- notifiche, comunicazioni interne e comunicazioni di sistema;
 - eventi casuali;
 - tutti i potenziamenti;
 - curve economiche;
@@ -1403,9 +1521,10 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 
 ### Input
 
-- ogni tasto valido avanza il testo;
+- ogni `keydown` non ripetuto avanza il testo quando la composizione è attiva;
 - il testo ottenuto è sempre quello previsto;
-- i modificatori non scrivono;
+- anche modificatori e tasti di navigazione possono avanzare il testo senza bloccare il loro comportamento normale;
+- tenere premuto un tasto conta una sola volta;
 - le scorciatoie del browser funzionano;
 - un click fuori dal corpo non scrive;
 - un click nel corpo scrive;
@@ -1415,11 +1534,12 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 
 - un contatto può ricevere una sola campagna alla volta;
 - nessuna email viene inviata senza contatto;
-- ogni risposta viene risolta una sola volta;
+- ogni esito email e ogni lezione vengono risolti una sola volta;
 - ricaricare non cambia l'esito già determinato;
-- gli iscritti totali non diminuiscono acquistando potenziamenti;
+- soltanto gli Euro vengono spesi per acquistare potenziamenti;
+- gli iscritti generano quote una sola volta per ogni periodo;
 - i collaboratori non possono svolgere due incarichi incompatibili;
-- un evento non usa spade non disponibili.
+- gli iscritti possono aumentare o diminuire soltanto tramite esiti ed eventi validi.
 
 ### Offline
 
@@ -1455,7 +1575,7 @@ Un Outlook troppo fedele può nascondere eccessivamente il gioco. La soluzione �
 
 ### Esaurimento dei contatti
 
-È un collo di bottiglia interessante, ma può bloccare il giocatore. Deve sempre esistere almeno una lezione di prova gratuita o un'attività minima utilizzabile.
+È un collo di bottiglia interessante, ma può bloccare il giocatore. Deve sempre esistere lo sparring esterno come attività minima gratuita o quasi gratuita.
 
 ### Casualità della conversione
 
@@ -1463,7 +1583,11 @@ Una lunga serie negativa può sembrare un malfunzionamento. Servono protezione d
 
 ### Automazione e perdita di interazione
 
-Se i collaboratori fanno tutto, scrivere manualmente perde significato. Combo, campagne speciali e bonus manuali devono mantenere utile la tastiera.
+Se i collaboratori fanno tutto, scrivere manualmente perde significato. La potenza di scrittura deve moltiplicare sia input manuale sia automazione; comunicazioni di sistema e campagne speciali mantengono inoltre una componente manuale.
+
+### Prestigio troppo punitivo
+
+Un reset che richiede più cicli prima di produrre un vantaggio concreto crea una fase morta. La prima nuova scuola deve offrire immediatamente un bonus significativo e visibile.
 
 ### Quantità di testi
 
@@ -1483,17 +1607,38 @@ L'uso pubblico di un'interfaccia quasi identica a Outlook richiede attenzione a 
 - Posta, Calendario, Persone e altri elementi possono ospitare meccaniche di gioco.
 - Ogni input parte da un carattere e viene migliorato con i potenziamenti.
 - Solo i click nel corpo della mail producono caratteri.
+- Ogni tasto conta una volta; tenere premuto non genera ripetizioni.
 - L'invio è automatico e apre subito la mail successiva.
-- Gli iscritti all'Ordine delle Onde sono la valuta principale.
-- Le risposte arrivano dopo un tempo casuale e possono non convertire.
-- Eventi e lezioni di prova generano indirizzi email.
+- Le email e i relativi modelli sono scelti automaticamente e possono ripetersi.
+- Oggetto, destinatario, saluto, corpo, firma e allegati fanno parte del testo da generare.
+- Ogni contatto riceve una sola mail; non esistono follow-up né risposte personali.
+- Il funnel è: evento → persone → prove dimostrative → contatti → email → prova in palestra → iscritti.
+- Ogni persona partecipa a una sola lezione di prova in palestra.
+- Gli iscritti non sono spendibili e generano periodicamente quote in Euro.
+- Gli Euro sono l'unica valuta spendibile.
+- Gli iscritti possono aumentare o diminuire tramite eventi narrativi casuali.
+- Gli eventi possono essere fissi o casuali e usano tempo compresso.
+- Gli eventi iniziali hanno esito automatico; un sistema decisionale potrà essere aggiunto in futuro.
+- Gli eventi usano luoghi reali; meteo e giorno della settimana non influenzano i risultati.
 - I contatti possono esaurirsi.
-- I Collaboratori delle Onde possono scrivere, partecipare agli eventi, raccogliere contatti, gestire i social e mantenere le spade.
+- Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
+- I Social generano contatti passivamente e possono ricevere campagne pagate in Euro.
+- Le piattaforme social sono inventate e possono produrre eventi virali.
+- Gli Iscritti volenterosi sono una variante rara degli iscritti e diventano Collaboratori delle Onde.
+- I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni, social e spade.
+- Ogni collaboratore svolge un incarico alla volta, può essere riassegnato liberamente e non ha livelli.
+- Non esiste un limite massimo di collaboratori.
+- I collaboratori scrivono sulla stessa mail visibile e la loro automazione non può essere messa in pausa.
 - Carisma e Scrittura sono statistiche fondamentali.
-- Velocità, Social, Attrezzatura e Organizzazione completano il sistema.
-- Le sette Forme sono potenziamenti narrativi dei collaboratori.
+- Accoglienza, Velocità, Social, Attrezzatura e Organizzazione completano il sistema.
+- L'usura delle spade aumenta soprattutto tramite eventi narrativi.
+- I potenziamenti non sono rimborsabili, ma nel tempo si può acquistare tutto.
+- Le Forme seguono `1 → X → 2 → Y → 3/4/5 → 6 → 7`, con rami Spada Lunga, Staffa e Doppia spada corta.
+- Le Forme sono potenziamenti narrativi dei collaboratori e non simulazioni tecniche del combattimento.
+- Le funzioni vengono introdotte progressivamente tramite comunicazioni di sistema manuali.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome scelto dal giocatore.
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
+- Il primo prestigio deve arrivare dopo circa 3–4 ore e offrire subito un bonus significativo.
 - Il gioco è infinito.
 - Il progresso offline è attivo.
 - Sono previsti almeno 100 testi email.
@@ -1519,7 +1664,14 @@ Questi elementi non bloccano il prototipo, ma servono prima della versione compl
 5. terminologia ufficiale desiderata per le sette Forme;
 6. lista di battute o riferimenti interni all'Ordine delle Onde;
 7. conferma sull'eventuale uso di persone reali come personaggi;
-8. revisione dei valori di bilanciamento dopo il primo prototipo.
+8. revisione dei valori di bilanciamento dopo il primo prototipo;
+9. importo e frequenza compressa delle quote associative;
+10. probabilità definitiva di generare un Iscritto volenteroso;
+11. regole di accesso multiplo ai tre rami delle Forme 3/4/5;
+12. elenco iniziale degli eventi e dei luoghi reali di Genova;
+13. nomi e comportamento definitivo delle spade reali;
+14. elementi esatti mantenuti o azzerati dal prestigio;
+15. durata massima definitiva del progresso offline.
 
 ---
 
@@ -1535,6 +1687,12 @@ Questi elementi non bloccano il prototipo, ma servono prima della versione compl
   https://ludosport.net/Learning-Path.html
 - Riferimento di interazione Hacker Typer:  
   https://hackertyper.net/
+- Riferimento incrementale interattivo YAIG:  
+  https://yetanotherincrementalgamebutthistimeaboutcoding.com/
+- Descrizione completa dei sistemi YAIG:  
+  https://poptocrack.itch.io/yet-another-incremental-game-but-this-time-about-coding
+- Pagina ufficiale Steam di YAIG:  
+  https://store.steampowered.com/app/3729810/Yet_Another_Incremental_Game_but_this_time_about_coding/
 
 ---
 
@@ -1546,13 +1704,17 @@ L'MVP è pronto quando il giocatore può:
 2. ricevere i primi contatti tramite il tutorial;
 3. scrivere email premendo tasti o cliccando nel corpo;
 4. inviare automaticamente almeno dieci modelli diversi;
-5. aspettare e ricevere risposte;
-6. ottenere iscritti;
-7. terminare i contatti;
-8. organizzare una lezione di prova dal Calendario;
-9. ottenere nuovi contatti tramite Carisma;
-10. acquistare potenziamenti di Scrittura e Velocità;
-11. ottenere e assegnare il primo Collaboratore delle Onde;
-12. chiudere e riaprire il browser senza perdere i progressi.
+5. aspettare l'esito delle email senza ricevere risposte personali;
+6. vedere una prova prenotata nel Calendario;
+7. risolvere la lezione in palestra e ottenere o perdere il potenziale iscritto;
+8. ottenere iscritti e incassare quote in Euro;
+9. terminare i contatti e utilizzare lo sparring esterno;
+10. organizzare un evento e attraversare il funnel completo;
+11. ottenere nuovi contatti tramite Carisma;
+12. acquistare potenziamenti in Euro;
+13. completare una comunicazione di sistema e sbloccare una funzione;
+14. ottenere e assegnare il primo Iscritto volenteroso;
+15. osservare un collaboratore scrivere sulla stessa mail;
+16. chiudere e riaprire il browser senza perdere i progressi.
 
 Il prestigio, i 100 testi, tutte le Forme, i social avanzati e la rete infinita appartengono alla versione completa successiva all'MVP.
