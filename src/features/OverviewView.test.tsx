@@ -39,7 +39,7 @@ describe("OverviewView settings", () => {
     render(
       <OverviewView
         view="settings"
-        state={createInitialState(1_000, "Andrea Simonazzi")}
+        state={createInitialState(1_000, "Andrea Ungaro")}
         {...callbacks}
       />,
     );

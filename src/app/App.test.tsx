@@ -14,17 +14,17 @@ describe("App profile and calendar flow", () => {
 
     expect(screen.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
     fireEvent.change(screen.getByRole("textbox", { name: "Nome e cognome" }), {
-      target: { value: "Andrea Simonazzi" },
+      target: { value: "Andrea Ungaro" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Inizia" }));
 
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
-    expect(screen.getByText(/Andrea Simonazzi - Ordine delle Onde/)).toBeVisible();
+    expect(screen.getByText(/Andrea Ungaro - Ordine delle Onde/)).toBeVisible();
   });
 
   it("opens the associated campaign in Sent mail", () => {
     const now = Date.now();
-    const initial = createInitialState(now, "Andrea Simonazzi");
+    const initial = createInitialState(now, "Andrea Ungaro");
     const contact = { ...initial.contacts[0], status: "trialScheduled" as const };
     const email = {
       ...initial.emails[0],

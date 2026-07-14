@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await expect(page.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
-  await page.getByRole("textbox", { name: "Nome e cognome" }).fill("Andrea Simonazzi");
+  await page.getByRole("textbox", { name: "Nome e cognome" }).fill("Andrea Ungaro");
   await page.getByRole("button", { name: "Inizia" }).click();
 });
 
@@ -40,7 +40,7 @@ test("invia automaticamente la mail completa e apre il contatto successivo", asy
   await sentFolder.click();
   await expect(page.locator(".campaign-status")).toHaveText("In attesa");
   await expect(page.getByRole("article")).toContainText("Buongiorno Giulia,");
-  await expect(page.getByRole("article")).toContainText("Andrea Simonazzi - Ordine delle Onde");
+  await expect(page.getByRole("article")).toContainText("Andrea Ungaro - Ordine delle Onde");
 });
 
 test("legge le notifiche e apre shop ed eventi", async ({ page }) => {

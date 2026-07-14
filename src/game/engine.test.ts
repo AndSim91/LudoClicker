@@ -46,8 +46,8 @@ describe("game engine", () => {
       displayName: "  Andrea   Simonazzi  ",
     });
 
-    expect(updated.profile.displayName).toBe("Andrea Simonazzi");
-    expect(updated.emails[0].body).toContain("Andrea Simonazzi - Ordine delle Onde");
+    expect(updated.profile.displayName).toBe("Andrea Ungaro");
+    expect(updated.emails[0].body).toContain("Andrea Ungaro - Ordine delle Onde");
     expect(updated.emails[0].body.toLocaleLowerCase("it-IT")).not.toContain("segreteria");
   });
 

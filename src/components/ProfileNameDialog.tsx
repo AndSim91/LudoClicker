@@ -33,7 +33,7 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
             autoComplete="name"
             autoFocus
             maxLength={80}
-            placeholder="Es. Andrea Simonazzi"
+            placeholder="Es. Andrea Ungaro"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
           />
