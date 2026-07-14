@@ -66,15 +66,35 @@ svg {
 }
 
 .title-month {
-  display: grid;
+  position: relative;
+  display: flex;
   align-self: stretch;
+  flex-direction: column;
+  justify-content: center;
   min-width: 88px;
-  padding: 0 18px;
-  place-items: center;
+  padding: 0 18px 3px;
+  text-align: center;
   border-inline: 1px solid rgb(255 255 255 / 18%);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
+}
+
+.month-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 18%);
+}
+
+.month-progress > i {
+  display: block;
+  height: 100%;
+  background: #83c9ff;
+  transition: width 250ms linear;
 }
 
 .title-menu {
@@ -1095,7 +1115,7 @@ svg {
 
 .rarity-overview {
   display: grid;
-  grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(220px, 1fr));
+  grid-template-columns: minmax(190px, 1.1fr) repeat(3, minmax(190px, 1fr));
   max-width: 1100px;
   margin-top: 18px;
   border: 1px solid var(--line);
@@ -1127,12 +1147,31 @@ svg {
   color: #986700;
 }
 
+.rarity-overview .rare > strong {
+  color: #6b3fa0;
+}
+
 .people-row {
   display: grid;
   grid-template-columns: minmax(190px, 1fr) minmax(260px, 1.4fr) 130px 150px;
   min-height: 48px;
   align-items: center;
   border-bottom: 1px solid var(--line);
+}
+
+.member-row {
+  grid-template-columns: minmax(170px, .9fr) minmax(220px, 1.15fr) 150px 110px minmax(280px, 1.5fr);
+  min-height: 68px;
+}
+
+.member-row > .member-training-cell {
+  overflow: visible;
+  white-space: normal;
+}
+
+.member-training-cell > small {
+  color: var(--ink-muted);
+  font-size: 11px;
 }
 
 .people-row > * {
@@ -1183,10 +1222,16 @@ svg {
   font-weight: 600;
 }
 
-.person-avatar.special-avatar {
+.person-avatar.special-avatar,
+.person-avatar.rarity-legendary {
   color: #4f3700;
   background: linear-gradient(145deg, #f8df8b, #c99324);
   box-shadow: inset 0 0 0 1px rgb(112 76 7 / 22%);
+}
+
+.person-avatar.rarity-rare {
+  background: linear-gradient(145deg, #9c6ade, #5c2d91);
+  box-shadow: inset 0 0 0 1px rgb(62 25 101 / 24%);
 }
 
 .collaborator-copy,
@@ -1202,8 +1247,41 @@ svg {
   gap: 8px;
 }
 
-.special-name {
+.special-name,
+.rarity-name.rarity-legendary {
   color: #986700;
+}
+
+.rarity-name.rarity-rare {
+  color: #6b3fa0;
+}
+
+.rarity-address {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rarity-address.rarity-common {
+  color: var(--blue-700);
+  background: var(--blue-100);
+}
+
+.rarity-address.rarity-rare {
+  color: #51257f;
+  background: #efe3ff;
+  box-shadow: inset 0 0 0 1px rgb(92 45 145 / 18%);
+}
+
+.rarity-address.rarity-legendary {
+  color: #6d4a00;
+  background: #fff2bd;
+  box-shadow: inset 0 0 0 1px rgb(152 103 0 / 22%);
 }
 
 .collaborator-copy .special-collaborator-badge,
@@ -1224,6 +1302,11 @@ svg {
 .collaborator-row label > span {
   color: var(--ink-muted);
   font-size: 11px;
+}
+
+.collaborator-copy .form-bonus-summary {
+  color: var(--blue-700);
+  font-weight: 600;
 }
 
 .collaborator-row select {

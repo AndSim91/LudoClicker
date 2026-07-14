@@ -53,7 +53,7 @@ export function MessageList({
               onClick={() => onSelectMessage(null)}
             >
               <i className="unread-dot" />
-              <span className="message-copy"><strong>Bozza per {activeContact.firstName} {activeContact.lastName}</strong><span>{activeEmail.subject}</span><small>{activeEmail.status === "sending" ? "Invio in corso…" : "Digitazione in corso…"}</small></span>
+              <span className="message-copy"><strong className={`rarity-name rarity-${activeContact.rarity}`}>Bozza per {activeContact.firstName} {activeContact.lastName}</strong><span>{activeEmail.subject}</span><small>{activeEmail.status === "sending" ? "Invio in corso…" : "Digitazione in corso…"}</small></span>
               <time>{time(activeEmail.createdAt)}</time>
             </button>
           ) : null}
@@ -82,7 +82,7 @@ export function MessageList({
               onClick={() => onSelectSentEmail(email.id)}
             >
               <i className="read-dot" />
-              <span className="message-copy"><strong>{contact?.firstName} {contact?.lastName}</strong><span>{email.subject}</span><small className={`sent-status ${statusClass(status)}`}>{status}</small></span>
+              <span className="message-copy"><strong className={contact ? `rarity-name rarity-${contact.rarity}` : undefined}>{contact?.firstName} {contact?.lastName}</strong><span>{email.subject}</span><small className={`sent-status ${statusClass(status)}`}>{status}</small></span>
               <time>{email.sentAt ? time(email.sentAt) : ""}</time>
             </button>
           );

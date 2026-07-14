@@ -13,6 +13,7 @@ import {
   getUpgradeDefinition,
   getUpgradeEffectTotal,
 } from "../content/upgrades";
+import { getGameYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import {
   getEmailBookingChance,
@@ -58,6 +59,16 @@ function normalizeEmailLocalPart(firstName: string, lastName: string): string {
 
 const ANDREA_SIMONAZZI_ID: SpecialCollaboratorId = "andrea-simonazzi";
 
+function chooseOrdinaryRarity(seed: number) {
+  const [rarityRoll, nextSeed] = nextRandom(seed);
+  return {
+    rarity: rarityRoll < PERSON_RARITIES.rare.queueAppearanceChance
+      ? "rare" as const
+      : "common" as const,
+    nextSeed,
+  };
+}
+
 function chooseLegendaryProfile(
   seed: number,
   progress: LegendaryCollaboratorProgress,
@@ -101,6 +112,10 @@ function createContacts(
     if (legendaryProfile) {
       progress = addLegendaryEncounter(progress, legendaryProfile.id);
     }
+    const ordinary = legendaryProfile
+      ? undefined
+      : chooseOrdinaryRarity(nextSeed);
+    if (ordinary) nextSeed = ordinary.nextSeed;
     const [regularFirstName, regularLastName] = CONTACT_NAMES[index % CONTACT_NAMES.length];
     const firstName = legendaryProfile?.firstName ?? regularFirstName;
     const lastName = legendaryProfile?.lastName ?? regularLastName;
@@ -112,8 +127,9 @@ function createContacts(
       source: "tutorial" as const,
       acquiredAt: now,
       status: index === 0 ? "writing" as const : "available" as const,
-      rarity: legendaryProfile ? "legendary" as const : "common" as const,
+      rarity: legendaryProfile ? "legendary" as const : ordinary!.rarity,
       specialProfileId: legendaryProfile?.id,
+      forms: [],
     };
   });
   return { contacts, nextSeed, progress };
@@ -256,6 +272,8 @@ function createAcquiredContacts(
     const specialProfile = selected.profile;
     nextSeed = selected.nextSeed;
     if (specialProfile) progress = addLegendaryEncounter(progress, specialProfile.id);
+    const ordinary = specialProfile ? undefined : chooseOrdinaryRarity(nextSeed);
+    if (ordinary) nextSeed = ordinary.nextSeed;
     const [regularFirstName, regularLastName] =
       ACQUIRED_CONTACT_NAMES[sequence % ACQUIRED_CONTACT_NAMES.length];
     const firstName = specialProfile?.firstName ?? regularFirstName;
@@ -269,8 +287,9 @@ function createAcquiredContacts(
       source,
       acquiredAt: now,
       status: "available" as const,
-      rarity: specialProfile ? "legendary" as const : "common" as const,
+      rarity: specialProfile ? "legendary" as const : ordinary!.rarity,
       specialProfileId: specialProfile?.id,
+      forms: [],
     };
   });
   return { contacts, nextSeed };
@@ -323,6 +342,43 @@ function addMessage(
     unread: true,
   };
   return { ...state, messages: [message, ...state.messages] };
+}
+
+function recruitCollaborator(state: GameState, contact: Contact, now: number): GameState {
+  if (
+    contact.rarity === "common" ||
+    state.collaborators.some((collaborator) => collaborator.contactId === contact.id)
+  ) return state;
+
+  const collaborator = {
+    id: makeId("collaborator", now, state.collaborators.length),
+    contactId: contact.id,
+    displayName: `${contact.firstName} ${contact.lastName}`,
+    joinedAt: now,
+    forms: contact.forms,
+    assignment: null,
+    rarity: contact.rarity,
+    specialProfileId: contact.specialProfileId,
+    lastFormTrainingYear: contact.lastFormTrainingYear,
+  };
+  const nextState: GameState = {
+    ...state,
+    collaborators: [...state.collaborators, collaborator],
+    unlocks: { ...state.unlocks, collaborators: true },
+    statistics: {
+      ...state.statistics,
+      collaboratorsRecruited: state.statistics.collaboratorsRecruited + 1,
+    },
+  };
+  const power = contact.rarity === "legendary"
+    ? " Il suo potere VIP raddoppia l'efficacia di ogni incarico."
+    : "";
+  return addMessage(
+    nextState,
+    now + 1,
+    "Nuovo collaboratore disponibile",
+    `${collaborator.displayName} è disponibile per Redazione, Eventi, Lezioni, Social o Attrezzatura.${power}`,
+  );
 }
 
 function startNextCampaign(state: GameState, now: number): GameState {
@@ -504,7 +560,10 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     ),
     contacts: state.contacts.map((contact) =>
       contact.id === trial.contactId
-        ? { ...contact, status: enrolled ? "enrolled" : "lost" }
+        ? {
+            ...contact,
+            status: enrolled ? "enrolled" : "lost",
+          }
         : contact,
     ),
     statistics: {
@@ -529,8 +588,8 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     unlocks: {
       ...nextState.unlocks,
       upgrades: true,
-      social: nextState.school.activeMembers >= 10,
-      forms: nextState.school.activeMembers >= 50,
+      social: nextState.school.activeMembers + 1 >= 10,
+      forms: true,
     },
   };
   nextState = addMessage(
@@ -539,40 +598,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     state.school.historicMembers === 0 ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
     `Bonus di iscrizione di € ${GAME_CONFIG.enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
   );
-
-  const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
-  const [volunteerRoll, nextSeed] = nextRandom(nextState.randomSeed);
-  const becomesVolunteer =
-    Boolean(enrolledContact?.specialProfileId) || nextState.collaborators.length === 0 ||
-    volunteerRoll < GAME_CONFIG.volunteerChance;
-  nextState = { ...nextState, randomSeed: nextSeed };
-  if (!becomesVolunteer || !enrolledContact) return nextState;
-
-  const collaborator = {
-    id: makeId("collaborator", now, nextState.collaborators.length),
-    contactId: enrolledContact.id,
-    displayName: `${enrolledContact.firstName} ${enrolledContact.lastName}`,
-    joinedAt: now,
-    forms: [] as FormId[],
-    assignment: null,
-    rarity: enrolledContact.rarity,
-    specialProfileId: enrolledContact.specialProfileId,
-  };
-  nextState = {
-    ...nextState,
-    collaborators: [...nextState.collaborators, collaborator],
-    unlocks: { ...nextState.unlocks, collaborators: true },
-    statistics: {
-      ...nextState.statistics,
-      collaboratorsRecruited: nextState.statistics.collaboratorsRecruited + 1,
-    },
-  };
-  return addMessage(
-    nextState,
-    now + 1,
-    "Nuovo collaboratore disponibile",
-    `${collaborator.displayName} è disponibile per Redazione, Eventi, Lezioni, Social o Attrezzatura.`,
-  );
+  return nextState;
 }
 
 function collectFees(state: GameState, now: number): GameState {
@@ -772,53 +798,68 @@ function assignCollaborator(
 
 function startFormTraining(
   state: GameState,
-  collaboratorId: string,
+  personId: string,
   formId: FormId,
   now: number,
 ): GameState {
   if (!state.unlocks.forms) return state;
-  const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
+  const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
+  const member = state.contacts.find((candidate) =>
+    candidate.id === personId &&
+    candidate.status === "enrolled" &&
+    !state.collaborators.some((existing) => existing.contactId === candidate.id),
+  );
+  const student = collaborator ?? member;
   const definition = getFormDefinition(formId);
+  const currentYear = getGameYear(state.school.currentMonth);
   if (
-    !collaborator ||
+    !student ||
     !definition ||
-    !canTrainForm(collaborator, definition) ||
+    !canTrainForm(student, definition, currentYear) ||
     state.school.euros < definition.cost
   ) return state;
+  const training = {
+    formId,
+    startedAt: now,
+    completesAt: now + definition.durationMs,
+  };
   return {
     ...state,
     school: { ...state.school, euros: state.school.euros - definition.cost },
-    collaborators: state.collaborators.map((candidate) =>
-      candidate.id === collaboratorId
-        ? {
-            ...candidate,
-            training: {
-              formId,
-              startedAt: now,
-              completesAt: now + definition.durationMs,
-            },
-          }
-        : candidate,
-    ),
+    contacts: member
+      ? state.contacts.map((candidate) => candidate.id === member.id
+        ? { ...candidate, training, lastFormTrainingYear: currentYear }
+        : candidate)
+      : state.contacts,
+    collaborators: collaborator
+      ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+        ? { ...candidate, training, lastFormTrainingYear: currentYear }
+        : candidate)
+      : state.collaborators,
   };
 }
 
-function resolveFormTraining(state: GameState, collaboratorId: string, now: number): GameState {
-  const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
-  if (!collaborator?.training || collaborator.training.completesAt > now) return state;
-  const definition = getFormDefinition(collaborator.training.formId);
+function resolveFormTraining(state: GameState, personId: string, now: number): GameState {
+  const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
+  const member = state.contacts.find((candidate) => candidate.id === personId);
+  const student = collaborator ?? member;
+  if (!student?.training || student.training.completesAt > now) return state;
+  const completedFormId = student.training.formId;
+  const definition = getFormDefinition(completedFormId);
   if (!definition) return state;
+  const completedForms = [...student.forms, completedFormId];
   let nextState: GameState = {
     ...state,
-    collaborators: state.collaborators.map((candidate) =>
-      candidate.id === collaboratorId
-        ? {
-            ...candidate,
-            forms: [...candidate.forms, collaborator.training!.formId],
-            training: undefined,
-          }
-        : candidate,
-    ),
+    contacts: member && !collaborator
+      ? state.contacts.map((candidate) => candidate.id === member.id
+        ? { ...candidate, forms: completedForms, training: undefined }
+        : candidate)
+      : state.contacts,
+    collaborators: collaborator
+      ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+        ? { ...candidate, forms: completedForms, training: undefined }
+        : candidate)
+      : state.collaborators,
     statistics: {
       ...state.statistics,
       formsCompleted: state.statistics.formsCompleted + 1,
@@ -828,9 +869,16 @@ function resolveFormTraining(state: GameState, collaboratorId: string, now: numb
     nextState,
     now,
     "Formazione completata",
-    `${collaborator.displayName} ha completato ${definition.title}${definition.branch ? ` — ${definition.branch}` : ""}.`,
+    `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha completato ${definition.title}${definition.branch ? ` — ${definition.branch}` : ""}.`,
   );
-  return nextState;
+  if (
+    !member ||
+    collaborator ||
+    completedFormId !== "course-y" ||
+    member.rarity === "common"
+  ) return nextState;
+  const qualifiedMember = nextState.contacts.find((contact) => contact.id === member.id);
+  return qualifiedMember ? recruitCollaborator(nextState, qualifiedMember, now) : nextState;
 }
 
 function writeCharacters(
@@ -1203,6 +1251,11 @@ function tick(state: GameState, now: number): GameState {
       nextState = resolveAcquisitionEvent(nextState, event, now);
     }
   }
+  for (const contact of nextState.contacts.slice()) {
+    if (contact.training && contact.training.completesAt <= now) {
+      nextState = resolveFormTraining(nextState, contact.id, now);
+    }
+  }
   for (const collaborator of nextState.collaborators.slice()) {
     if (collaborator.training && collaborator.training.completesAt <= now) {
       nextState = resolveFormTraining(nextState, collaborator.id, now);
@@ -1307,7 +1360,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       nextState = runSocialCampaign(state, action.now);
       break;
     case "START_FORM_TRAINING":
-      nextState = startFormTraining(state, action.collaboratorId, action.formId, action.now);
+      nextState = startFormTraining(state, action.personId, action.formId, action.now);
       break;
     case "START_ACQUISITION_EVENT":
       nextState = startAcquisitionEvent(state, action.definitionId, action.now);

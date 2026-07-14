@@ -109,7 +109,11 @@ export function App() {
       className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
       style={{ "--school-accent": state.school.accentColor } as CSSProperties}
     >
-      <TitleBar currentMonth={state.school.currentMonth} />
+      <TitleBar
+        currentMonth={state.school.currentMonth}
+        nextMonthAt={state.school.nextFeeAt}
+        now={state.automation.lastProcessedAt}
+      />
       <CommandBar onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }} />
       <div className={view === "mail" ? "workspace" : "workspace overview-workspace"}>
         <AppRail view={view} onChange={setView} />
@@ -166,10 +170,10 @@ export function App() {
                 now: Date.now(),
               })
             }
-            onStartTraining={(collaboratorId, formId) =>
+            onStartTraining={(personId, formId) =>
               dispatch({
                 type: "START_FORM_TRAINING",
-                collaboratorId,
+                personId,
                 formId,
                 now: Date.now(),
               })

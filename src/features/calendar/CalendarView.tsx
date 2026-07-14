@@ -99,8 +99,8 @@ export function CalendarView({
                     <div className="trial-heading">
                       <div>
                         <h2>Lezione di prova</h2>
-                        <strong>{contactName}</strong>
-                        <span>{contact?.email}</span>
+                        <strong className={contact ? `rarity-name rarity-${contact.rarity}` : undefined}>{contactName}</strong>
+                        <span className={contact ? `rarity-address rarity-${contact.rarity}` : undefined}>{contact?.email}</span>
                       </div>
                       <span className={`trial-status ${status.toLocaleLowerCase("it-IT").replaceAll(" ", "-")}`}>
                         {status}

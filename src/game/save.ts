@@ -21,7 +21,10 @@ function isGameState(value: unknown): value is GameState {
   return (
     state.version === GAME_CONFIG.version &&
     Array.isArray(state.contacts) &&
-    state.contacts.every((contact) => contact.rarity === "common" || contact.rarity === "legendary") &&
+    state.contacts.every((contact) =>
+      (contact.rarity === "common" || contact.rarity === "rare" || contact.rarity === "legendary") &&
+      Array.isArray(contact.forms)
+    ) &&
     Array.isArray(state.emails) &&
     Array.isArray(state.acquisitionEvents) &&
     typeof state.activities?.nextSparringAt === "number" &&
@@ -37,7 +40,8 @@ function isGameState(value: unknown): value is GameState {
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
     Array.isArray(state.collaborators) &&
     state.collaborators.every((collaborator) =>
-      collaborator.rarity === "common" || collaborator.rarity === "legendary"
+      (collaborator.rarity === "rare" || collaborator.rarity === "legendary") &&
+      Array.isArray(collaborator.forms)
     ) &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.statistics?.automatedCharacters === "number" &&
@@ -318,7 +322,7 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 14) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 15,
       contacts: migrated.contacts?.map((contact) => ({
         ...contact,
         rarity: contact.specialProfileId ? "legendary" : "common",
@@ -327,6 +331,49 @@ function migrate(value: unknown): unknown {
         ...collaborator,
         rarity: collaborator.specialProfileId ? "legendary" : "common",
       })),
+    };
+  }
+
+  if (migrated.version === 15) {
+    const qualifiedForms = ["form-1", "course-x", "form-2", "course-y"] as const;
+    const collaboratorsByContactId = new Map(
+      (migrated.collaborators ?? []).map((collaborator) => [collaborator.contactId, collaborator]),
+    );
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      school: migrated.school
+        ? { ...migrated.school, nextFeeAt: migrated.school.nextFeeAt + 60_000 }
+        : migrated.school,
+      contacts: migrated.contacts?.map((contact) => {
+        const existingCollaborator = collaboratorsByContactId.get(contact.id);
+        return {
+          ...contact,
+          rarity: contact.rarity === "common" && existingCollaborator ? "rare" : contact.rarity,
+          forms: existingCollaborator
+            ? [...new Set([...qualifiedForms, ...(existingCollaborator.forms ?? [])])]
+            : [],
+          training: undefined,
+          lastFormTrainingYear: 0,
+        };
+      }),
+      collaborators: migrated.collaborators?.map((collaborator) => ({
+        ...collaborator,
+        rarity: collaborator.rarity === "common" ? "rare" : collaborator.rarity,
+        forms: [...new Set([...qualifiedForms, ...(collaborator.forms ?? [])])],
+        training: collaborator.training && qualifiedForms.includes(
+          collaborator.training.formId as (typeof qualifiedForms)[number],
+        )
+          ? undefined
+          : collaborator.training,
+        lastFormTrainingYear: 0,
+      })),
+      unlocks: migrated.unlocks
+        ? {
+            ...migrated.unlocks,
+            forms: migrated.unlocks.forms || (migrated.school?.activeMembers ?? 0) > 0,
+          }
+        : migrated.unlocks,
     };
   }
 

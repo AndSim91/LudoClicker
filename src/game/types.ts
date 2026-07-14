@@ -16,7 +16,13 @@ export type SpecialCollaboratorId =
   | "guglielmo-oliveri"
   | "niccolo-effrati";
 
-export type PersonRarity = "common" | "legendary";
+export type PersonRarity = "common" | "rare" | "legendary";
+
+export interface FormTraining {
+  formId: FormId;
+  startedAt: number;
+  completesAt: number;
+}
 
 export interface Contact {
   id: string;
@@ -28,6 +34,9 @@ export interface Contact {
   status: ContactStatus;
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
+  forms: FormId[];
+  training?: FormTraining;
+  lastFormTrainingYear?: number;
 }
 
 export interface CampaignEmail {
@@ -235,11 +244,8 @@ export interface Collaborator {
   assignment: CollaboratorAssignment;
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
-  training?: {
-    formId: FormId;
-    startedAt: number;
-    completesAt: number;
-  };
+  training?: FormTraining;
+  lastFormTrainingYear?: number;
 }
 
 export interface LegendaryCollaboratorProgress {
@@ -352,7 +358,7 @@ export type GameAction =
   | { type: "RUN_SOCIAL_CAMPAIGN"; now: number }
   | {
       type: "START_FORM_TRAINING";
-      collaboratorId: string;
+      personId: string;
       formId: FormId;
       now: number;
     }

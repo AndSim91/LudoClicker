@@ -6,6 +6,7 @@ import { getEmailBookingChance, getEnrollmentChance } from "./formulas";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
+import { getAvailableForms, getCollaboratorProductivity } from "../content/forms";
 import {
   selectActiveEmail,
   selectIncomePerMonth,
@@ -35,10 +36,10 @@ describe("game engine", () => {
       specialProfileId: "andrea-simonazzi",
     });
     expect(state.contacts.slice(0, 9).filter((contact) => contact.rarity === "legendary")).toHaveLength(1);
-    expect(PERSON_RARITIES.common.emailShareChance).toBe(0.85);
+    expect(PERSON_RARITIES.common.emailShareChance).toBe(0.7);
     expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.05);
-    expect(getEnrollmentChance(state, "common")).toBe(0.6);
-    expect(getEnrollmentChance(state, "legendary")).toBe(0.1);
+    expect(getEnrollmentChance(state, "common")).toBe(0.4);
+    expect(getEnrollmentChance(state, "legendary")).toBe(0.025);
   });
 
   it("reveals only the configured amount of predetermined text", () => {
@@ -53,9 +54,10 @@ describe("game engine", () => {
   });
 
   it("starts random Legendary rolls at the tenth queued email", () => {
-    const state = createInitialState(11);
+    const state = Array.from({ length: 2_000 }, (_, index) => createInitialState(index + 1))
+      .find((candidate) => candidate.contacts[9].rarity === "legendary")!;
 
-    expect(state.contacts.slice(0, 8).every((contact) => contact.rarity === "common")).toBe(true);
+    expect(state.contacts.slice(0, 8).every((contact) => contact.rarity !== "legendary")).toBe(true);
     expect(state.contacts[8].specialProfileId).toBe("andrea-simonazzi");
     expect(state.contacts[9].rarity).toBe("legendary");
     expect(state.contacts[9].specialProfileId).not.toBe("andrea-simonazzi");
@@ -141,17 +143,14 @@ describe("game engine", () => {
     state = gameReducer(state, { type: "TICK", now: trial.resolvesAt });
 
     expect(state.school.activeMembers).toBe(1);
-    expect(state.school.euros).toBe(
-      GAME_CONFIG.enrollmentBonus + GAME_CONFIG.monthlyMemberFee + 25,
-    );
+    expect(state.school.euros).toBe(GAME_CONFIG.enrollmentBonus + 15);
     expect(state.unlocks.upgrades).toBe(true);
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);
-    expect(state.collaborators).toHaveLength(1);
-    expect(state.collaborators[0].rarity).toBe("common");
-    expect(state.collaborators[0].specialProfileId).toBeUndefined();
-    expect(state.unlocks.collaborators).toBe(true);
-    expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(true);
+    expect(state.collaborators).toHaveLength(0);
+    expect(state.unlocks.forms).toBe(true);
+    expect(state.unlocks.collaborators).toBe(false);
+    expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(false);
   });
 
   it("makes legendary enrollment difficult, progressive, and guaranteed only for Andrea", () => {
@@ -195,12 +194,13 @@ describe("game engine", () => {
     }, { type: "TICK", now: 2_000 });
 
     expect(getLegendaryEnrollmentChance(initial, "andrea-simonazzi")).toBe(1);
-    expect(getLegendaryEnrollmentChance(initial, "eva-parodi")).toBe(0.1);
+    expect(getLegendaryEnrollmentChance(initial, "eva-parodi")).toBe(0.025);
     expect(firstAttempt.contacts.find((contact) => contact.id === eva.id)?.status).toBe("lost");
     expect(firstAttempt.legendaryCollaborators.enrollmentAttempts["eva-parodi"]).toBe(1);
     expect(firstAttempt.collaborators).toHaveLength(0);
     expect(protectedAttempt.contacts.find((contact) => contact.id === eva.id)?.status).toBe("enrolled");
-    expect(protectedAttempt.collaborators[0].specialProfileId).toBe("eva-parodi");
+    expect(protectedAttempt.collaborators).toHaveLength(0);
+    expect(protectedAttempt.unlocks.forms).toBe(true);
   });
 
   it("always enrolls Andrea Simonazzi when his ninth queued contact reaches a trial", () => {
@@ -225,11 +225,8 @@ describe("game engine", () => {
     }, { type: "TICK", now: 2_000 });
 
     expect(resolved.contacts[8].status).toBe("enrolled");
-    expect(resolved.collaborators[0]).toMatchObject({
-      displayName: "Andrea Simonazzi",
-      rarity: "legendary",
-      specialProfileId: "andrea-simonazzi",
-    });
+    expect(resolved.collaborators).toHaveLength(0);
+    expect(resolved.contacts[8].forms).toEqual([]);
   });
 
   it("schedules booked trials without adding an inbox message", () => {
@@ -624,8 +621,8 @@ describe("game engine", () => {
     };
 
     expect(getEmailBookingChance(improved)).toBeCloseTo(0.232);
-    expect(getEnrollmentChance(improved)).toBeCloseTo(0.72);
-    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.12);
+    expect(getEnrollmentChance(improved)).toBeCloseTo(0.48);
+    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.03);
   });
 
   it("assigns one collaborator and writes on the active email automatically", () => {
@@ -637,7 +634,7 @@ describe("game engine", () => {
       joinedAt: 1_000,
       forms: [],
       assignment: null,
-      rarity: "common" as const,
+      rarity: "rare" as const,
     };
     const withCollaborator = {
       ...initial,
@@ -668,7 +665,7 @@ describe("game engine", () => {
       joinedAt: 1_000,
       forms: [],
       assignment: "social" as const,
-      rarity: "common" as const,
+      rarity: "rare" as const,
     };
     const equipmentCollaborator = {
       ...socialCollaborator,
@@ -711,34 +708,68 @@ describe("game engine", () => {
     expect(campaigned.statistics.socialContacts).toBeGreaterThanOrEqual(4);
   });
 
-  it("trains collaborators through the ordered Form path", () => {
+  it("trains members once per year and promotes them only after Course Y", () => {
     const initial = createInitialState(1_000);
-    const collaborator = {
-      id: "collaborator-training",
-      contactId: initial.contacts[0].id,
-      displayName: "Giulia Ferrando",
-      joinedAt: 1_000,
-      forms: [],
-      assignment: "writing" as const,
-      rarity: "common" as const,
+    const member = { ...initial.contacts[0], status: "enrolled" as const };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, euros: 200 },
+      contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-2", now: 2_000 });
+    const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-1", now: 2_000 });
+    const completed = gameReducer(training, { type: "TICK", now: 22_000 });
+    const annualBlock = gameReducer(completed, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
+
+    expect(blocked).toBe(ready);
+    expect(training.school.euros).toBe(185);
+    expect(training.contacts[0].training?.formId).toBe("form-1");
+    expect(completed.contacts[0].forms).toContain("form-1");
+    expect(completed.contacts[0].training).toBeUndefined();
+    expect(completed.statistics.formsCompleted).toBe(1);
+    expect(annualBlock).toBe(completed);
+    expect(completed.collaborators).toHaveLength(0);
+  });
+
+  it("creates a collaborator at Course Y and applies weapon and Legendary bonuses", () => {
+    const initial = createInitialState(1_000);
+    const member = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      rarity: "rare" as const,
+      forms: ["form-1", "course-x", "form-2"] as const,
+      lastFormTrainingYear: 3,
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, euros: 20 },
-      collaborators: [collaborator],
-      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+      school: { ...initial.school, activeMembers: 1, currentMonth: 37, euros: 200 },
+      contacts: initial.contacts.map((contact) => contact.id === member.id
+        ? { ...member, forms: [...member.forms] }
+        : contact),
+      unlocks: { ...initial.unlocks, forms: true },
     };
+    const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-y", now: 2_000 });
+    const completed = gameReducer(training, { type: "TICK", now: 37_000 });
+    const collaborator = completed.collaborators[0];
 
-    const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", collaboratorId: collaborator.id, formId: "form-2", now: 2_000 });
-    const training = gameReducer(ready, { type: "START_FORM_TRAINING", collaboratorId: collaborator.id, formId: "form-1", now: 2_000 });
-    const completed = gameReducer(training, { type: "TICK", now: 22_000 });
+    expect(collaborator.forms).toEqual(["form-1", "course-x", "form-2", "course-y"]);
+    expect(completed.unlocks.collaborators).toBe(true);
+    expect(completed.statistics.collaboratorsRecruited).toBe(1);
+    expect(getAvailableForms(collaborator, 5).map((form) => form.id)).toEqual([
+      "form-3-long",
+      "form-3-staff",
+      "form-3-double",
+    ]);
 
-    expect(blocked).toBe(ready);
-    expect(training.school.euros).toBe(5);
-    expect(training.collaborators[0].training?.formId).toBe("form-1");
-    expect(completed.collaborators[0].forms).toContain("form-1");
-    expect(completed.collaborators[0].training).toBeUndefined();
-    expect(completed.statistics.formsCompleted).toBe(1);
+    const longFormFive = { ...collaborator, forms: [...collaborator.forms, "form-3-long", "form-4-long", "form-5-long"] as const, assignment: "events" as const };
+    expect(getCollaboratorProductivity({ ...longFormFive, forms: [...longFormFive.forms] })).toBe(1.5);
+    expect(getAvailableForms({ ...longFormFive, forms: [...longFormFive.forms] }, 8)).toEqual([]);
+
+    const legendary = { ...longFormFive, rarity: "legendary" as const, forms: [...longFormFive.forms, "form-6"] as const };
+    expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(3.2);
+    expect(getAvailableForms({ ...legendary, forms: [...legendary.forms] }, 9).map((form) => form.id)).toEqual(["form-7"]);
   });
 
   it("grants each achievement and its reward only once", () => {
