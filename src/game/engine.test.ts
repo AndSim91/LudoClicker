@@ -848,6 +848,32 @@ describe("game engine", () => {
     expect(repeated.achievements.filter((id) => id === "first-email")).toHaveLength(1);
   });
 
+  it("rotates short goals and grants each narrative reward only once", () => {
+    const initial = createInitialState(1_000);
+    const qualifying = {
+      ...initial,
+      achievements: ["first-email" as const],
+      statistics: { ...initial.statistics, emailsSent: 3 },
+    };
+
+    const completed = gameReducer(qualifying, { type: "TICK", now: 2_000 });
+    const repeated = gameReducer(completed, { type: "TICK", now: 2_000 });
+
+    expect(completed.school.euros).toBe(15);
+    expect(completed.shortGoal.definitionId).toBe("book-trials");
+    expect(completed.shortGoal.completedCount).toBe(1);
+    expect(completed.messages[0].subject).toBe("Obiettivo completato: Tre inviti in partenza");
+    expect(completed.messages[0].preview).toContain("Agenda in movimento");
+    expect(repeated.school.euros).toBe(completed.school.euros);
+  });
+
+  it("marks the whole inbox as read in one action", () => {
+    const initial = createInitialState(1_000);
+    const read = gameReducer(initial, { type: "MARK_ALL_MESSAGES_READ" });
+
+    expect(read.messages.every((message) => !message.unread)).toBe(true);
+  });
+
   it("resolves a due narrative event once and schedules the next one", () => {
     const initial = createInitialState(1_000);
     const due = {

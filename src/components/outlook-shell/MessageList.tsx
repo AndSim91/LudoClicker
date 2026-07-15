@@ -35,7 +35,6 @@ export function MessageList({
     .filter((email) => email.status !== "writing" && email.status !== "sending")
     .slice()
     .reverse();
-
   return (
     <section className="message-list" aria-label={folder === "inbox" ? "Posta in arrivo" : "Posta inviata"}>
       <div className="list-tabs">
@@ -65,7 +64,7 @@ export function MessageList({
               onClick={() => onSelectMessage(message.id)}
             >
               <i className={message.unread ? "unread-dot" : "read-dot"} />
-              <span className="message-copy"><strong>{message.sender}</strong><span>{message.subject}</span><small>{message.preview}</small></span>
+              <span className="message-copy"><strong>{message.sender}</strong><span>{message.subject}{(message.stackCount ?? 1) > 1 ? ` · ${message.stackCount} notifiche` : ""}</span><small>{message.preview}</small></span>
               <time>{time(message.receivedAt)}</time>
             </button>
           ))}

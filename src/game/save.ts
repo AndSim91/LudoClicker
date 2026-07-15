@@ -5,6 +5,8 @@ import { createProspectEmail } from "../content/emailAddresses";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailPresentationLevel } from "../content/emailPresentation";
+import { createShortGoalFromStatistics } from "../content/shortGoals";
+import { normalizeStackedMessages } from "./messages";
 import type { GameState, UpgradeLevels } from "./types";
 
 const SAVE_KEY = "oggetto-nuovi-iscritti.save";
@@ -50,6 +52,7 @@ function isGameState(value: unknown): value is GameState {
       Array.isArray(collaborator.forms)
     ) &&
     typeof state.automation?.lastProcessedAt === "number" &&
+    typeof state.automation?.offlineContactBuffer === "number" &&
     typeof state.statistics?.automatedCharacters === "number" &&
     typeof state.statistics?.socialCampaigns === "number" &&
     typeof state.statistics?.formsCompleted === "number" &&
@@ -59,6 +62,11 @@ function isGameState(value: unknown): value is GameState {
     Array.isArray(state.achievements) &&
     typeof state.narrative?.nextEventAt === "number" &&
     Array.isArray(state.narrative?.history) &&
+    typeof state.shortGoal?.definitionId === "string" &&
+    typeof state.shortGoal?.baseline === "number" &&
+    typeof state.shortGoal?.target === "number" &&
+    typeof state.shortGoal?.startedAt === "number" &&
+    typeof state.shortGoal?.completedCount === "number" &&
     typeof state.randomSeed === "number" &&
     typeof state.profile?.displayName === "string" &&
     typeof state.school?.euros === "number" &&
@@ -158,6 +166,7 @@ function migrate(value: unknown): unknown {
         writingBuffer: 0,
         socialBuffer: 0,
         equipmentBuffer: 0,
+        offlineContactBuffer: 0,
       },
       unlocks: {
         upgrades: migrated.unlocks?.upgrades ?? false,
@@ -391,11 +400,35 @@ function migrate(value: unknown): unknown {
     const presentationLevel = getEmailPresentationLevel(upgrades);
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 17,
       emails: (migrated.emails ?? []).map((email) => ({
         ...email,
         presentationLevel,
       })),
+    };
+  }
+
+  if (migrated.version === 17) {
+    migrated = {
+      ...migrated,
+      version: 18,
+      automation: migrated.automation
+        ? { ...migrated.automation, offlineContactBuffer: 0 }
+        : migrated.automation,
+      messages: normalizeStackedMessages(migrated.messages ?? []),
+    };
+  }
+
+  if (migrated.version === 18 && migrated.statistics) {
+    const referenceTime = migrated.lastSavedAt ?? migrated.createdAt ?? Date.now();
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      shortGoal: createShortGoalFromStatistics(
+        migrated.statistics as GameState["statistics"],
+        0,
+        referenceTime,
+      ),
     };
   }
 
@@ -444,8 +477,10 @@ function read(key: string): GameState | null {
     return isGameState(parsed)
       ? {
           ...parsed,
-          messages: parsed.messages.filter(
-            (message) => !HIDDEN_MESSAGE_SUBJECTS.has(message.subject),
+          messages: normalizeStackedMessages(
+            parsed.messages.filter(
+              (message) => !HIDDEN_MESSAGE_SUBJECTS.has(message.subject),
+            ),
           ),
         }
       : null;
@@ -484,7 +519,9 @@ export function exportGame(state: GameState): string {
 export function importGame(raw: string): GameState | null {
   try {
     const parsed = migrate(JSON.parse(raw));
-    return isGameState(parsed) ? parsed : null;
+    return isGameState(parsed)
+      ? { ...parsed, messages: normalizeStackedMessages(parsed.messages) }
+      : null;
   } catch {
     return null;
   }

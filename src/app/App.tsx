@@ -114,7 +114,15 @@ export function App() {
         nextMonthAt={state.school.nextFeeAt}
         now={state.automation.lastProcessedAt}
       />
-      <CommandBar onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }} />
+      <CommandBar
+        onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }}
+        onMarkAllRead={() => dispatch({ type: "MARK_ALL_MESSAGES_READ" })}
+        canMarkAllRead={
+          view === "mail" &&
+          mailFolder === "inbox" &&
+          state.messages.some((message) => message.unread)
+        }
+      />
       <div className={view === "mail" ? "workspace" : "workspace overview-workspace"}>
         <AppRail view={view} onChange={setView} />
         {view === "mail" ? (

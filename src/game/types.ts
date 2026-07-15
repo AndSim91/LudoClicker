@@ -80,6 +80,7 @@ export interface InboxMessage {
   receivedAt: number;
   tone: "system" | "positive" | "neutral";
   unread: boolean;
+  stackCount?: number;
 }
 
 export type AcquisitionEventId =
@@ -189,6 +190,20 @@ export interface NarrativeEventRecord {
   title: string;
   occurredAt: number;
   summary: string;
+}
+
+export type ShortGoalId =
+  | "send-emails"
+  | "book-trials"
+  | "complete-event"
+  | "enroll-member";
+
+export interface ShortGoalProgress {
+  definitionId: ShortGoalId;
+  baseline: number;
+  target: number;
+  startedAt: number;
+  completedCount: number;
 }
 
 export type SchoolSpecialization = "generale" | "redazione" | "eventi" | "accoglienza";
@@ -327,12 +342,14 @@ export interface GameState {
     writingBuffer: number;
     socialBuffer: number;
     equipmentBuffer: number;
+    offlineContactBuffer: number;
   };
   achievements: AchievementId[];
   narrative: {
     nextEventAt: number;
     history: NarrativeEventRecord[];
   };
+  shortGoal: ShortGoalProgress;
   statistics: Statistics;
   unlocks: {
     upgrades: boolean;
@@ -345,12 +362,13 @@ export interface GameState {
 
 export type GameAction =
   | { type: "WRITE"; now: number }
-  | { type: "TICK"; now: number }
+  | { type: "TICK"; now: number; gainMultiplier?: number }
   | { type: "REPLACE_STATE"; state: GameState }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "MARK_MESSAGE_READ"; messageId: string }
+  | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
   | {
       type: "ASSIGN_COLLABORATOR";

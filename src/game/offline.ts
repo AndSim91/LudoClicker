@@ -36,9 +36,17 @@ export function simulateOfflineProgress(
   let processed = state;
 
   for (let stepAt = state.lastSavedAt + 1_000; stepAt < endAt; stepAt += 1_000) {
-    processed = gameReducer(processed, { type: "TICK", now: stepAt });
+    processed = gameReducer(processed, {
+      type: "TICK",
+      now: stepAt,
+      gainMultiplier: GAME_CONFIG.offlineGainMultiplier,
+    });
   }
-  processed = gameReducer(processed, { type: "TICK", now: endAt });
+  processed = gameReducer(processed, {
+    type: "TICK",
+    now: endAt,
+    gainMultiplier: GAME_CONFIG.offlineGainMultiplier,
+  });
 
   const summary: OfflineSummary = {
     elapsedMs,

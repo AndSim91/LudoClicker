@@ -9,6 +9,13 @@ import { ACQUIRED_CONTACT_NAMES, CONTACT_NAMES } from "../content/names";
 import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import {
+  SHORT_GOALS,
+  createInitialShortGoal,
+  createNextShortGoal,
+  getShortGoalProgress,
+  getShortGoalReward,
+} from "../content/shortGoals";
+import {
   createInitialUpgradeLevels,
   getUpgradeCost,
   getUpgradeDefinition,
@@ -16,6 +23,7 @@ import {
 } from "../content/upgrades";
 import { getGameYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
+import { addInboxMessage } from "./messages";
 import {
   getEmailBookingChance,
   getEnrollmentChance,
@@ -45,6 +53,31 @@ const euroFormatter = new Intl.NumberFormat("it-IT", {
   style: "currency",
   currency: "EUR",
 });
+
+function scaleCurrencyGain(amount: number, gainMultiplier: number): number {
+  return Math.round(amount * Math.max(0, gainMultiplier) * 100) / 100;
+}
+
+function scaleContactGain(
+  state: GameState,
+  amount: number,
+  gainMultiplier: number,
+): { state: GameState; amount: number } {
+  if (gainMultiplier >= 1) return { state, amount };
+
+  const total = state.automation.offlineContactBuffer + amount * Math.max(0, gainMultiplier);
+  const scaledAmount = Math.floor(total + Number.EPSILON);
+  return {
+    state: {
+      ...state,
+      automation: {
+        ...state.automation,
+        offlineContactBuffer: total - scaledAmount,
+      },
+    },
+    amount: scaledAmount,
+  };
+}
 
 function makeId(prefix: string, now: number, suffix: number | string): string {
   return `${prefix}-${now.toString(36)}-${suffix}`;
@@ -219,6 +252,7 @@ export function createInitialState(
       nextEventAt: now + GAME_CONFIG.narrativeEventMinMs,
       history: [],
     },
+    shortGoal: createInitialShortGoal(now),
     activities: { nextSparringAt: now },
     equipment: {
       totalSwords: GAME_CONFIG.initialSwords,
@@ -232,6 +266,7 @@ export function createInitialState(
       writingBuffer: 0,
       socialBuffer: 0,
       equipmentBuffer: 0,
+      offlineContactBuffer: 0,
     },
     statistics: {
       inputs: 0,
@@ -348,7 +383,7 @@ function addMessage(
     tone,
     unread: true,
   };
-  return { ...state, messages: [message, ...state.messages] };
+  return { ...state, messages: addInboxMessage(state.messages, message) };
 }
 
 function recruitCollaborator(state: GameState, contact: Contact, now: number): GameState {
@@ -529,7 +564,12 @@ function resolveEmailOutcome(
   return nextState;
 }
 
-function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): GameState {
+function resolveTrial(
+  state: GameState,
+  trial: ScheduledTrial,
+  now: number,
+  gainMultiplier: number,
+): GameState {
   if (trial.status !== "scheduled") return state;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
@@ -552,6 +592,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       enrollmentRoll < getLegendaryEnrollmentChance(state, specialProfileId)
     : tutorialGuarantee || protectedEnrollment ||
       enrollmentRoll < getEnrollmentChance(state, trialContact?.rarity ?? "common");
+  const enrollmentBonus = scaleCurrencyGain(GAME_CONFIG.enrollmentBonus, gainMultiplier);
   const legendaryCollaborators = specialProfileId
     ? {
         ...state.legendaryCollaborators,
@@ -584,7 +625,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       trialsCompleted: state.statistics.trialsCompleted + 1,
       contactsLost: state.statistics.contactsLost + (enrolled ? 0 : 1),
       membersEnrolled: state.statistics.membersEnrolled + (enrolled ? 1 : 0),
-      eurosEarned: state.statistics.eurosEarned + (enrolled ? GAME_CONFIG.enrollmentBonus : 0),
+      eurosEarned: state.statistics.eurosEarned + (enrolled ? enrollmentBonus : 0),
     },
   };
 
@@ -596,7 +637,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
       ...nextState.school,
       activeMembers: nextState.school.activeMembers + 1,
       historicMembers: nextState.school.historicMembers + 1,
-      euros: nextState.school.euros + GAME_CONFIG.enrollmentBonus,
+      euros: nextState.school.euros + enrollmentBonus,
     },
     unlocks: {
       ...nextState.unlocks,
@@ -609,7 +650,7 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     nextState,
     now,
     state.school.historicMembers === 0 ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
-    `Bonus di iscrizione di € ${GAME_CONFIG.enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
+    `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
   );
   const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
   return enrolledContact?.rarity === "legendary"
@@ -617,17 +658,17 @@ function resolveTrial(state: GameState, trial: ScheduledTrial, now: number): Gam
     : nextState;
 }
 
-function collectFees(state: GameState, now: number): GameState {
+function collectFees(state: GameState, now: number, gainMultiplier: number): GameState {
   if (now < state.school.nextFeeAt) return state;
   const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.gameMonthMs) + 1;
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const earned = Math.round((
+  const earned = scaleCurrencyGain((
     periods *
     (state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
       state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
     (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
     networkMultiplier
-  ) * 100) / 100;
+  ), gainMultiplier);
   return {
     ...state,
     school: {
@@ -708,37 +749,40 @@ function resolveAcquisitionEvent(
   state: GameState,
   event: AcquisitionEvent,
   now: number,
+  gainMultiplier: number,
 ): GameState {
   if (event.status !== "running") return state;
   const source = event.definitionId === "park-sparring" ? "sparring" : "event";
-  const contactReward = event.contactReward ?? 0;
-  const acquired = createAcquiredContacts(state, contactReward, source, now);
+  const scaledReward = scaleContactGain(state, event.contactReward ?? 0, gainMultiplier);
+  const rewardState = scaledReward.state;
+  const contactReward = scaledReward.amount;
+  const acquired = createAcquiredContacts(rewardState, contactReward, source, now);
   const contacts = acquired.contacts;
   let nextState: GameState = {
-    ...state,
+    ...rewardState,
     randomSeed: acquired.nextSeed,
-    legendaryCollaborators: addLegendaryEncounters(state.legendaryCollaborators, contacts),
-    contacts: [...state.contacts, ...contacts],
+    legendaryCollaborators: addLegendaryEncounters(rewardState.legendaryCollaborators, contacts),
+    contacts: [...rewardState.contacts, ...contacts],
     equipment: {
-      ...state.equipment,
+      ...rewardState.equipment,
       availableSwords: Math.min(
-        state.equipment.totalSwords,
-        state.equipment.availableSwords + (event.equipmentUsed ?? 0),
+        rewardState.equipment.totalSwords,
+        rewardState.equipment.availableSwords + (event.equipmentUsed ?? 0),
       ),
-      wear: Math.min(100, state.equipment.wear + (event.wearAdded ?? 0)),
+      wear: Math.min(100, rewardState.equipment.wear + (event.wearAdded ?? 0)),
     },
-    acquisitionEvents: state.acquisitionEvents.map((candidate) =>
+    acquisitionEvents: rewardState.acquisitionEvents.map((candidate) =>
       candidate.id === event.id
         ? { ...candidate, contactReward, status: "completed" }
         : candidate,
     ),
     statistics: {
-      ...state.statistics,
-      contactsAcquired: state.statistics.contactsAcquired + contacts.length,
-      peopleMet: state.statistics.peopleMet + event.peopleMet,
+      ...rewardState.statistics,
+      contactsAcquired: rewardState.statistics.contactsAcquired + contacts.length,
+      peopleMet: rewardState.statistics.peopleMet + event.peopleMet,
       demonstrationsGiven:
-        state.statistics.demonstrationsGiven + event.demonstrationsGiven,
-      eventsCompleted: state.statistics.eventsCompleted + 1,
+        rewardState.statistics.demonstrationsGiven + event.demonstrationsGiven,
+      eventsCompleted: rewardState.statistics.eventsCompleted + 1,
     },
   };
   if (contacts.length === 0) return nextState;
@@ -751,7 +795,7 @@ function resolveAcquisitionEvent(
       : "Contatti acquisiti alla dimostrazione",
     `${contacts.length} nuovi indirizzi sono disponibili per la campagna email.`,
   );
-  if (state.statistics.eventsCompleted === 0) {
+  if (rewardState.statistics.eventsCompleted === 0) {
     nextState = addMessage(
       nextState,
       now + 1,
@@ -792,6 +836,14 @@ function markMessageRead(state: GameState, messageId: string): GameState {
     messages: state.messages.map((message) =>
       message.id === messageId ? { ...message, unread: false } : message,
     ),
+  };
+}
+
+function markAllMessagesRead(state: GameState): GameState {
+  if (!state.messages.some((message) => message.unread)) return state;
+  return {
+    ...state,
+    messages: state.messages.map((message) => ({ ...message, unread: false })),
   };
 }
 
@@ -933,7 +985,7 @@ function writeCharacters(
   };
 }
 
-function processAutomation(state: GameState, now: number): GameState {
+function processAutomation(state: GameState, now: number, gainMultiplier: number): GameState {
   const elapsedMs = Math.min(1_000, Math.max(0, now - state.automation.lastProcessedAt));
   if (elapsedMs <= 0) return state;
 
@@ -961,7 +1013,8 @@ function processAutomation(state: GameState, now: number): GameState {
     (elapsedMs / GAME_CONFIG.socialContactIntervalMs) *
     socialProductivity *
     socialMultiplier *
-    automationMultiplier;
+    automationMultiplier *
+    Math.max(0, gainMultiplier);
   const socialContacts = Math.floor(socialTotal);
   const equipmentTotal =
     state.automation.equipmentBuffer +
@@ -973,6 +1026,7 @@ function processAutomation(state: GameState, now: number): GameState {
   let nextState: GameState = {
     ...state,
     automation: {
+      ...state.automation,
       lastProcessedAt: now,
       writingBuffer: writingTotal - automatedCharacters,
       socialBuffer: socialTotal - socialContacts,
@@ -1063,7 +1117,7 @@ function runSocialCampaign(state: GameState, now: number): GameState {
   return startNextCampaign(nextState, now);
 }
 
-function processNarrativeEvent(state: GameState, now: number): GameState {
+function processNarrativeEvent(state: GameState, now: number, gainMultiplier: number): GameState {
   if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
   const recentKinds = state.narrative.history.slice(-2).map((record) =>
     NARRATIVE_EVENTS.find((definition) => definition.id === record.definitionId)?.kind,
@@ -1081,36 +1135,46 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
     GAME_CONFIG.narrativeEventMinMs,
     GAME_CONFIG.narrativeEventMaxMs,
   );
-  const acquired = definition.contactDelta
-    ? createAcquiredContacts(
+  const rewardState = definition.contactDelta
+    ? scaleContactGain(
         { ...state, randomSeed: nextSeed },
         definition.contactDelta,
+        gainMultiplier,
+      )
+    : { state: { ...state, randomSeed: nextSeed }, amount: 0 };
+  const acquired = rewardState.amount > 0
+    ? createAcquiredContacts(
+        rewardState.state,
+        rewardState.amount,
         "collaborator",
         now,
       )
-    : { contacts: [], nextSeed };
+    : { contacts: [], nextSeed: rewardState.state.randomSeed };
   const contacts = acquired.contacts;
+  const euroDelta = (definition.euroDelta ?? 0) > 0
+    ? scaleCurrencyGain(definition.euroDelta ?? 0, gainMultiplier)
+    : (definition.euroDelta ?? 0);
   const summary = definition.euroDelta && definition.euroDelta > 0
-    ? `${definition.description} Contributo ricevuto: ${euroFormatter.format(definition.euroDelta)}.`
+    ? `${definition.description} Contributo ricevuto: ${euroFormatter.format(euroDelta)}.`
     : definition.description;
   let nextState: GameState = {
-    ...state,
+    ...rewardState.state,
     randomSeed: acquired.nextSeed,
-    legendaryCollaborators: addLegendaryEncounters(state.legendaryCollaborators, contacts),
+    legendaryCollaborators: addLegendaryEncounters(rewardState.state.legendaryCollaborators, contacts),
     school: {
-      ...state.school,
-      activeMembers: Math.max(0, state.school.activeMembers + (definition.memberDelta ?? 0)),
-      euros: Math.max(0, state.school.euros + (definition.euroDelta ?? 0)),
+      ...rewardState.state.school,
+      activeMembers: Math.max(0, rewardState.state.school.activeMembers + (definition.memberDelta ?? 0)),
+      euros: Math.max(0, rewardState.state.school.euros + euroDelta),
     },
     equipment: {
-      ...state.equipment,
-      wear: Math.min(100, Math.max(0, state.equipment.wear + (definition.wearDelta ?? 0))),
+      ...rewardState.state.equipment,
+      wear: Math.min(100, Math.max(0, rewardState.state.equipment.wear + (definition.wearDelta ?? 0))),
     },
-    contacts: [...state.contacts, ...contacts],
+    contacts: [...rewardState.state.contacts, ...contacts],
     narrative: {
       nextEventAt: now + nextDelay,
       history: [
-        ...state.narrative.history,
+        ...rewardState.state.narrative.history,
         {
           id: makeId("narrative", now, state.narrative.history.length),
           definitionId: definition.id,
@@ -1121,11 +1185,11 @@ function processNarrativeEvent(state: GameState, now: number): GameState {
       ],
     },
     statistics: {
-      ...state.statistics,
-      contactsAcquired: state.statistics.contactsAcquired + contacts.length,
-      narrativeEvents: state.statistics.narrativeEvents + 1,
+      ...rewardState.state.statistics,
+      contactsAcquired: rewardState.state.statistics.contactsAcquired + contacts.length,
+      narrativeEvents: rewardState.state.statistics.narrativeEvents + 1,
       eurosEarned:
-        state.statistics.eurosEarned + Math.max(0, definition.euroDelta ?? 0),
+        rewardState.state.statistics.eurosEarned + Math.max(0, euroDelta),
     },
   };
   nextState = addMessage(nextState, now, definition.title, summary, definition.tone);
@@ -1210,6 +1274,7 @@ function foundSchool(
     legendaryCollaborators: fresh.legendaryCollaborators,
     statistics: state.statistics,
     messages: state.messages,
+    shortGoal: state.shortGoal,
   };
   const announced = addMessage(
     nextState,
@@ -1224,10 +1289,13 @@ function foundSchool(
   };
 }
 
-function grantAchievements(state: GameState, now: number): GameState {
+function grantAchievements(state: GameState, now: number, gainMultiplier: number): GameState {
   const earned = getNewAchievements(state);
   if (earned.length === 0) return state;
-  const reward = earned.reduce((total, definition) => total + definition.euroReward, 0);
+  const reward = scaleCurrencyGain(
+    earned.reduce((total, definition) => total + definition.euroReward, 0),
+    gainMultiplier,
+  );
   let nextState: GameState = {
     ...state,
     achievements: [...state.achievements, ...earned.map((definition) => definition.id)],
@@ -1235,19 +1303,49 @@ function grantAchievements(state: GameState, now: number): GameState {
     statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + reward },
   };
   for (const definition of earned) {
+    const achievementReward = scaleCurrencyGain(definition.euroReward, gainMultiplier);
     nextState = addMessage(
       nextState,
       now,
       `Traguardo: ${definition.title}`,
-      `${definition.description} Premio amministrativo: € ${definition.euroReward}.`,
+      `${definition.description} Premio amministrativo: ${euroFormatter.format(achievementReward)}.`,
       "system",
     );
   }
   return nextState;
 }
 
-function tick(state: GameState, now: number): GameState {
-  let nextState = processAutomation(state, now);
+function completeShortGoal(
+  state: GameState,
+  now: number,
+  gainMultiplier: number,
+): GameState {
+  if (getShortGoalProgress(state) < state.shortGoal.target) return state;
+
+  const definition = SHORT_GOALS[state.shortGoal.definitionId];
+  const reward = scaleCurrencyGain(getShortGoalReward(state.shortGoal), gainMultiplier);
+  const completedCount = state.shortGoal.completedCount + 1;
+  const rewarded: GameState = {
+    ...state,
+    school: { ...state.school, euros: state.school.euros + reward },
+    statistics: {
+      ...state.statistics,
+      eurosEarned: state.statistics.eurosEarned + reward,
+    },
+  };
+  const nextGoal = createNextShortGoal(rewarded, completedCount, now);
+  const nextDefinition = SHORT_GOALS[nextGoal.definitionId];
+  return addMessage(
+    { ...rewarded, shortGoal: nextGoal },
+    now,
+    `Obiettivo completato: ${definition.title}`,
+    `${definition.completionNarrative} Premio operativo: ${euroFormatter.format(reward)}. Prossima priorità: ${nextDefinition.title}.`,
+    "positive",
+  );
+}
+
+function tick(state: GameState, now: number, gainMultiplier: number): GameState {
+  let nextState = processAutomation(state, now, gainMultiplier);
 
   for (const email of nextState.emails.slice()) {
     if (email.status === "sending" && (email.sendCompletesAt ?? Infinity) <= now) {
@@ -1259,12 +1357,12 @@ function tick(state: GameState, now: number): GameState {
   }
   for (const trial of nextState.scheduledTrials.slice()) {
     if (trial.status === "scheduled" && trial.resolvesAt <= now) {
-      nextState = resolveTrial(nextState, trial, now);
+      nextState = resolveTrial(nextState, trial, now, gainMultiplier);
     }
   }
   for (const event of nextState.acquisitionEvents.slice()) {
     if (event.status === "running" && event.resolvesAt <= now) {
-      nextState = resolveAcquisitionEvent(nextState, event, now);
+      nextState = resolveAcquisitionEvent(nextState, event, now, gainMultiplier);
     }
   }
   for (const contact of nextState.contacts.slice()) {
@@ -1277,8 +1375,8 @@ function tick(state: GameState, now: number): GameState {
       nextState = resolveFormTraining(nextState, collaborator.id, now);
     }
   }
-  nextState = collectFees(nextState, now);
-  nextState = processNarrativeEvent(nextState, now);
+  nextState = collectFees(nextState, now, gainMultiplier);
+  nextState = processNarrativeEvent(nextState, now, gainMultiplier);
   return notifyPrestigeOffer(nextState, now);
 }
 
@@ -1354,7 +1452,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       nextState = write(state, action.now);
       break;
     case "TICK":
-      nextState = tick(state, action.now);
+      nextState = tick(state, action.now, action.gainMultiplier ?? 1);
       break;
     case "REPLACE_STATE":
       nextState = action.state;
@@ -1370,6 +1468,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     case "MARK_MESSAGE_READ":
       nextState = markMessageRead(state, action.messageId);
+      break;
+    case "MARK_ALL_MESSAGES_READ":
+      nextState = markAllMessagesRead(state);
       break;
     case "MAINTAIN_EQUIPMENT":
       nextState = maintainEquipment(state);
@@ -1390,5 +1491,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       nextState = state;
   }
   const now = "now" in action ? action.now : state.lastSavedAt;
-  return grantAchievements(nextState, now);
+  const gainMultiplier = action.type === "TICK" ? (action.gainMultiplier ?? 1) : 1;
+  return completeShortGoal(
+    grantAchievements(nextState, now, gainMultiplier),
+    now,
+    gainMultiplier,
+  );
 }

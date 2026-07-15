@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 17,
+  version: 19,
   initialContacts: 5,
   initialSwords: 6,
   emailBookingChance: 0.2,
@@ -27,6 +27,7 @@ export const GAME_CONFIG = {
   offlineLimitMs: 8 * 60 * 60 * 1_000,
   offlineMaxLimitMs: 24 * 60 * 60 * 1_000,
   offlineSummaryMinMs: 60_000,
+  offlineGainMultiplier: 0.1,
   prestigeHistoricMembers: 100,
   prestigeCollaborators: 8,
   prestigeEvents: 12,
