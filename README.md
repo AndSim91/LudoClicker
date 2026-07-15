@@ -24,7 +24,7 @@ Per la verifica rapida del bilanciamento a lungo termine:
 npm run test:balance
 ```
 
-La suite usa il tempo virtuale e lancia quattro partite indipendenti per ciascun profilo (intenso/tranquillo); il batch è riutilizzabile con un numero arbitrario di seed senza attendere ore reali.
+La suite usa il tempo virtuale e lancia un batch configurabile di partite indipendenti per ciascun profilo (attualmente due seed intenso e due tranquillo); il batch è riutilizzabile con un numero arbitrario di seed senza attendere ore reali.
 
 Il gioco non invia email e non accede a servizi esterni: destinatari, messaggi e progressi sono simulati e salvati esclusivamente in `localStorage`.
 

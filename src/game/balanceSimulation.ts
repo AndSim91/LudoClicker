@@ -39,12 +39,15 @@ const RELAXED_INPUTS_PER_TICK = 1;
 // second, hidden balance model.
 const UPGRADE_PRIORITY: UpgradeId[] = [
   "comfortable-keyboard",
+  "prepared-presentation",
   "clear-subject",
   "welcome-procedure",
   "outlook-templates",
   "quick-phrases",
   "automatic-signature",
+  "qr-cards",
   "tested-intro",
+  "coordinated-demo",
   "personalized-invite",
   "shared-calendar",
   "pre-event-check",
@@ -138,15 +141,13 @@ export function simulateBalanceGame({
   horizonMs,
 }: BalanceSimulationOptions): BalanceSimulationResult {
   const startedAt = SIMULATION_START_MS + seed * 100_000;
-  let now = startedAt;
   let state = createInitialState(startedAt, `Simulazione ${seed}`);
   const inputsPerTick = pace === "intense"
     ? INTENSE_INPUTS_PER_TICK
     : RELAXED_INPUTS_PER_TICK;
   let prestigeReadyAtMs: number | undefined;
-
   for (let elapsedMs = 0; elapsedMs <= horizonMs; elapsedMs += SIMULATION_TICK_MS) {
-    now = startedAt + elapsedMs;
+    const now = startedAt + elapsedMs;
     state = dispatch(state, { type: "TICK", now });
     state = takeStrategicActions(state, now);
 
@@ -157,7 +158,6 @@ export function simulateBalanceGame({
         if (selectActiveEmail(state)?.status !== "writing") break;
       }
     }
-
     if (prestigeReadyAtMs === undefined && canFoundSchool(state)) {
       prestigeReadyAtMs = elapsedMs;
       break;

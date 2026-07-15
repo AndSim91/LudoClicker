@@ -46,14 +46,17 @@ describe("long-term automated balance simulation", () => {
     const intenseTimes = reachedTimes(intense);
     const relaxedTimes = reachedTimes(relaxed);
 
+    expect(intenseTimes.length).toBeGreaterThan(0);
+    expect(relaxedTimes.length).toBeGreaterThan(0);
+
     if (intenseTimes.length > 0) {
-      expect(
+      expect.soft(
         percentile(intenseTimes, 0.1),
         "P10 del primo prestigio intenso: target minimo 2 ore",
       ).toBeGreaterThanOrEqual(INTENSE_MINIMUM_MS);
     }
     if (relaxedTimes.length > 0) {
-      expect(
+      expect.soft(
         percentile(relaxedTimes, 0.1),
         "P10 del primo prestigio tranquillo: target minimo 4 ore",
       ).toBeGreaterThanOrEqual(RELAXED_MINIMUM_MS);
