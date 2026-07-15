@@ -2,19 +2,17 @@ import { Icon, type IconName } from "../common/Icon";
 
 export type AppView =
   | "mail"
-  | "upgrades"
   | "events"
-  | "calendar"
   | "contacts"
+  | "upgrades"
   | "statistics"
   | "settings";
 
 const items: { id: AppView; label: string; icon: IconName }[] = [
   { id: "mail", label: "Posta", icon: "mail" },
-  { id: "upgrades", label: "Miglioramenti", icon: "spark" },
   { id: "events", label: "Eventi", icon: "flag" },
-  { id: "calendar", label: "Calendario", icon: "calendar" },
   { id: "contacts", label: "Iscritti", icon: "people" },
+  { id: "upgrades", label: "Miglioramenti", icon: "spark" },
   { id: "statistics", label: "Attività", icon: "tasks" },
   { id: "settings", label: "Impostazioni", icon: "settings" },
 ];

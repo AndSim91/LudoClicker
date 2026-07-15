@@ -7,6 +7,13 @@ import {
 } from "./prospectDirectory";
 
 describe("prospect directory", () => {
+  it("contains at least 50 unique Italian first and last names", () => {
+    expect(PROSPECT_FIRST_NAMES.length).toBeGreaterThanOrEqual(50);
+    expect(PROSPECT_LAST_NAMES.length).toBeGreaterThanOrEqual(50);
+    expect(new Set(PROSPECT_FIRST_NAMES).size).toBe(PROSPECT_FIRST_NAMES.length);
+    expect(new Set(PROSPECT_LAST_NAMES).size).toBe(PROSPECT_LAST_NAMES.length);
+  });
+
   it("randomly combines first name, last name, and email provider", () => {
     const generated = Array.from({ length: 20 }, (_, seed) =>
       createRandomProspect(seed)

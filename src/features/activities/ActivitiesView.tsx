@@ -20,10 +20,12 @@ function equipmentCondition(wear: number) {
 export function ActivitiesView({
   state,
   onMaintainEquipment,
+  onBuyOfficialSword,
   onRunSocialCampaign,
 }: {
   state: GameState;
   onMaintainEquipment: () => void;
+  onBuyOfficialSword: () => void;
   onRunSocialCampaign: () => void;
 }) {
   const eventRunning = state.acquisitionEvents.some((event) => event.status === "running");
@@ -37,6 +39,10 @@ export function ActivitiesView({
   else if (state.school.euros < GAME_CONFIG.equipmentMaintenanceCost) {
     maintenanceLabel = `Servono ${euro.format(GAME_CONFIG.equipmentMaintenanceCost)}`;
   }
+  const canBuyOfficialSword = state.school.euros >= GAME_CONFIG.officialSwordCost;
+  const swordPurchaseLabel = canBuyOfficialSword
+    ? `Ordina 1 Polaris · ${euro.format(GAME_CONFIG.officialSwordCost)}`
+    : `Servono ${euro.format(GAME_CONFIG.officialSwordCost)}`;
   const assigned = (assignment: NonNullable<GameState["collaborators"][number]["assignment"]>) =>
     state.collaborators.filter((collaborator) => collaborator.assignment === assignment).length;
   const socialProgress = Math.min(100, Math.floor(state.automation.socialBuffer * 100));
@@ -71,7 +77,16 @@ export function ActivitiesView({
         </div>
         <div className="equipment-wear-label"><span>Usura complessiva</span><strong>{state.equipment.wear}%</strong></div>
         <div className="equipment-wear" role="progressbar" aria-label="Usura attrezzatura" aria-valuemin={0} aria-valuemax={100} aria-valuenow={state.equipment.wear}><span style={{ width: `${state.equipment.wear}%` }} /></div>
-        <button type="button" disabled={!canMaintain} onClick={onMaintainEquipment}>{maintenanceLabel}</button>
+        <button className="maintenance-action" type="button" disabled={!canMaintain} onClick={onMaintainEquipment}>{maintenanceLabel}</button>
+        <div className="official-supplier">
+          <div>
+            <strong>Fornitura ufficiale · LamaDiLuce</strong>
+            <small>Polaris EVO Basic combat-ready · partner tecnico LudoSport</small>
+            <p>Modulare, autorizzata per pratica ed eventi ufficiali, con lama marcata per anno. La tesoreria ha già smesso di chiedere se ne bastasse «una da condividere».</p>
+            <a href="https://lamadiluce.it/" target="_blank" rel="noreferrer">lamadiluce.it · Abridge S.r.l.</a>
+          </div>
+          <button type="button" disabled={!canBuyOfficialSword} onClick={onBuyOfficialSword}>{swordPurchaseLabel}</button>
+        </div>
       </section>
 
       <section className="automation-panel" aria-label="Assegnazioni collaboratori">

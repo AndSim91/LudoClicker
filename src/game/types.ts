@@ -90,7 +90,12 @@ export type AcquisitionEventId =
   | "local-event"
   | "themed-event"
   | "school-open-day"
-  | "organized-flyering";
+  | "organized-flyering"
+  | "burtomics"
+  | "genova-comics"
+  | "megacon-genova"
+  | "lucca-comics"
+  | "milan-games-week";
 
 export interface AcquisitionEvent {
   id: string;
@@ -371,6 +376,7 @@ export type GameAction =
   | { type: "MARK_MESSAGE_READ"; messageId: string }
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
+  | { type: "BUY_OFFICIAL_SWORD"; now: number }
   | {
       type: "ASSIGN_COLLABORATOR";
       collaboratorId: string;

@@ -6,8 +6,12 @@ import type { AcquisitionEvent, GameState } from "../../game/types";
 
 const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
+function quantityLabel(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 function memberRequirement(count: number) {
-  return `${count} ${count === 1 ? "iscritto" : "iscritti"}`;
+  return quantityLabel(count, "iscritto", "iscritti");
 }
 
 function getEventProgress(event: AcquisitionEvent, now: number) {
@@ -26,6 +30,13 @@ export function EventsView({
   const [now, setNow] = useState(() => Date.now());
   const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running");
   const availableMembers = selectAvailableEventMembers(state);
+  const visibleEvents = ACQUISITION_EVENTS.filter((definition) =>
+    definition.unlockMembers <= state.school.activeMembers ||
+    runningEvents.some((event) => event.definitionId === definition.id)
+  );
+  const nextLockedEvent = ACQUISITION_EVENTS.find(
+    (definition) => definition.unlockMembers > state.school.activeMembers,
+  );
   const refreshIntervalMs = runningEvents.length > 0 ? 100 : 1_000;
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), refreshIntervalMs);
@@ -40,8 +51,9 @@ export function EventsView({
         <div><Icon name="people" /><span><strong>{availableMembers}/{state.school.activeMembers} iscritti disponibili</strong><small>Gli iscritti impegnati tornano disponibili a fine evento.</small></span></div>
         <div><Icon name="settings" /><span><strong>{state.equipment.availableSwords}/{state.equipment.totalSwords} spade disponibili</strong><small>Usura attrezzatura {state.equipment.wear}%</small></span></div>
       </div>
+      <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {memberRequirement(state.school.activeMembers)}</strong><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} iscritti.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
       <section className="event-list">
-        {ACQUISITION_EVENTS.map((definition) => {
+        {visibleEvents.map((definition) => {
           const matching = state.acquisitionEvents.find(
             (event) => event.definitionId === definition.id && event.status === "running",
           );
@@ -71,7 +83,7 @@ export function EventsView({
                 <h2>{definition.title}</h2>
                 <strong>{definition.location}</strong>
                 <p>{definition.description}</p>
-                <small className={`event-potential potential-${definition.potential.toLocaleLowerCase("it-IT")}`}>Potenzialità: {definition.potential}</small>
+                <small className="event-potential">Potenzialità: {definition.potential}</small>
                 {matching ? (
                   <div className="event-progress-block">
                     <div className="event-progress-label"><span>Attività in corso</span><strong>{remainingSeconds} s rimanenti · {progress}%</strong></div>
@@ -94,7 +106,7 @@ export function EventsView({
         })}
       </section>
       {state.acquisitionEvents.some((event) => event.status === "completed") ? (
-        <section className="event-history"><h2>Attività completate</h2>{state.acquisitionEvents.filter((event) => event.status === "completed").slice().reverse().map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{event.peopleMet ?? 0} persone · {event.demonstrationsGiven ?? 0} prove · {event.contactReward ?? 0} contatti</small></span><time>{new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(event.resolvesAt)}</time></div>)}</section>
+        <section className="event-history"><h2>Attività completate</h2>{state.acquisitionEvents.filter((event) => event.status === "completed").slice().reverse().map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{quantityLabel(event.peopleMet ?? 0, "persona", "persone")} · {quantityLabel(event.demonstrationsGiven ?? 0, "prova", "prove")} · {quantityLabel(event.contactReward ?? 0, "contatto", "contatti")}</small></span><time>{new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(event.resolvesAt)}</time></div>)}</section>
       ) : null}
     </main>
   );

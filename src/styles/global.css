@@ -1930,9 +1930,8 @@ svg {
   background: var(--warning);
 }
 
-.equipment-panel > button {
+.equipment-panel button {
   min-height: 38px;
-  margin-top: 20px;
   padding: 0 14px;
   border: 1px solid var(--blue-600);
   border-radius: var(--radius-md);
@@ -1942,10 +1941,56 @@ svg {
   font-weight: 600;
 }
 
-.equipment-panel > button:disabled {
+.equipment-panel button:disabled {
   border-color: var(--line-strong);
   color: var(--ink-muted);
   background: var(--surface-muted);
+}
+
+.maintenance-action {
+  margin-top: 20px;
+}
+
+.official-supplier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #b7d2e9;
+  border-radius: var(--radius-md);
+  background: white;
+}
+
+.official-supplier > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 600px;
+}
+
+.official-supplier small,
+.official-supplier p {
+  color: var(--ink-muted);
+}
+
+.official-supplier p {
+  margin: 5px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.official-supplier a {
+  width: fit-content;
+  color: var(--blue-700);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.official-supplier > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .automation-panel,
@@ -3050,6 +3095,34 @@ svg {
   font-size: 11px;
 }
 
+.event-fame-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 1100px;
+  padding: 10px 15px;
+  border: 1px solid var(--line);
+  border-top: 0;
+  background: #fff;
+}
+
+.event-fame-note svg {
+  width: 18px;
+  flex: 0 0 auto;
+  color: var(--blue-600);
+}
+
+.event-fame-note span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-fame-note small {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
 .event-notice svg {
   color: var(--blue-600);
 }
@@ -3185,6 +3258,15 @@ svg {
 }
 
 @media (max-width: 1050px) {
+  .official-supplier {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .official-supplier > button {
+    align-self: flex-start;
+  }
+
   .profile-settings-form {
     align-items: stretch;
     flex-direction: column;

@@ -12,7 +12,6 @@ import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
 import { ActivitiesView } from "../features/activities/ActivitiesView";
-import { CalendarView } from "../features/calendar/CalendarView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
@@ -70,12 +69,6 @@ export function App() {
         .at(-1);
       setSelectedSentEmailId(latestSent?.id ?? null);
     }
-  };
-  const openSentEmail = (emailId: string) => {
-    setView("mail");
-    setMailFolder("sent");
-    setSelectedMessageId(null);
-    setSelectedSentEmailId(emailId);
   };
   const exportSave = () => {
     const blob = new Blob([exportGame(state)], { type: "application/json" });
@@ -155,13 +148,14 @@ export function App() {
               dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: Date.now() })
             }
           />
-        ) : view === "calendar" ? (
-          <CalendarView state={state} onOpenSentEmail={openSentEmail} />
         ) : view === "statistics" ? (
           <ActivitiesView
             state={state}
             onMaintainEquipment={() =>
               dispatch({ type: "MAINTAIN_EQUIPMENT", now: Date.now() })
+            }
+            onBuyOfficialSword={() =>
+              dispatch({ type: "BUY_OFFICIAL_SWORD", now: Date.now() })
             }
             onRunSocialCampaign={() =>
               dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: Date.now() })

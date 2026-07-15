@@ -679,6 +679,7 @@ function startAcquisitionEvent(
   const definition = getAcquisitionEventDefinition(definitionId);
   if (!definition) return state;
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
+  if (state.school.activeMembers < definition.unlockMembers) return state;
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
   if (state.equipment.availableSwords < definition.requiredSwords) return state;
   if (state.school.euros < definition.cost) return state;
@@ -809,6 +810,22 @@ function maintainEquipment(state: GameState): GameState {
     statistics: {
       ...state.statistics,
       maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
+    },
+  };
+}
+
+function buyOfficialSword(state: GameState): GameState {
+  if (state.school.euros < GAME_CONFIG.officialSwordCost) return state;
+  return {
+    ...state,
+    school: {
+      ...state.school,
+      euros: state.school.euros - GAME_CONFIG.officialSwordCost,
+    },
+    equipment: {
+      ...state.equipment,
+      totalSwords: state.equipment.totalSwords + 1,
+      availableSwords: state.equipment.availableSwords + 1,
     },
   };
 }
@@ -1382,10 +1399,10 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
-  const totalSwords =
-    GAME_CONFIG.initialSwords +
-    Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
-  const addedSwords = Math.max(0, totalSwords - state.equipment.totalSwords);
+  const previousUpgradeSwords = Math.floor(getUpgradeEffectTotal(state.upgrades, "totalSwords"));
+  const upgradedSwords = Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
+  const addedSwords = Math.max(0, upgradedSwords - previousUpgradeSwords);
+  const totalSwords = state.equipment.totalSwords + addedSwords;
   const nextState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
@@ -1458,6 +1475,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     case "MAINTAIN_EQUIPMENT":
       nextState = maintainEquipment(state);
+      break;
+    case "BUY_OFFICIAL_SWORD":
+      nextState = buyOfficialSword(state);
       break;
     case "ASSIGN_COLLABORATOR":
       nextState = assignCollaborator(state, action.collaboratorId, action.assignment);

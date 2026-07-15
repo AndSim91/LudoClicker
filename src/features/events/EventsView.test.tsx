@@ -36,16 +36,31 @@ describe("EventsView", () => {
     expect(screen.getByText("0 persone · 0 prove · 0 contatti")).toBeVisible();
   });
 
-  it("shows only generic potential without detailed forecasts", () => {
+  it("starts with only sparring and flyering at very low potential", () => {
     render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
 
-    expect(screen.getAllByText("Potenzialità: Bassa")).toHaveLength(2);
-    expect(screen.getAllByText("Potenzialità: Media")).toHaveLength(4);
-    expect(screen.getByText("Potenzialità: Alta")).toBeVisible();
+    expect(screen.getAllByText("Potenzialità: Molto bassa")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Sparring al parco" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Volantinaggio organizzato benissimo" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Lezioni all'aperto" })).not.toBeInTheDocument();
+    expect(screen.getByText("Prossimo sblocco: Lezioni all'aperto a 5 iscritti.")).toBeVisible();
     expect(screen.queryByText(/Previsione:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/persone →/)).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Stand sportivo" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Open day della scuola" })).toBeVisible();
+  });
+
+  it("reveals higher potential events as the school gains members", () => {
+    const initial = createInitialState(1_000);
+    render(<EventsView state={{
+      ...initial,
+      school: { ...initial.school, activeMembers: 60 },
+    }} onStart={() => undefined} />);
+
+    expect(screen.getByRole("heading", { name: "Mele Comics" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "CairoMix" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "CogoComix" })).toBeVisible();
+    expect(screen.getByText("Potenzialità: Alta")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Burtomics" })).not.toBeInTheDocument();
+    expect(screen.getByText("Prossimo sblocco: Burtomics a 90 iscritti.")).toBeVisible();
   });
 
   it("shows members and swords available for concurrent events", () => {

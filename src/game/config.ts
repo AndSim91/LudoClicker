@@ -14,6 +14,7 @@ export const GAME_CONFIG = {
   gameMonthMs: 120_000,
   sparringCooldownMs: 30_000,
   equipmentMaintenanceCost: 10,
+  officialSwordCost: 330,
   volunteerChance: 0.02,
   legendaryEnrollmentChancePerFailure: 0.18,
   collaboratorWritingPerSecond: 2,

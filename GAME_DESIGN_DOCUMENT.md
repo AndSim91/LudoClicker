@@ -397,17 +397,24 @@ Ogni evento richiede:
 
 Non esiste un limite numerico separato agli eventi contemporanei. Il giocatore può avviarne più di uno finché restano disponibili sia gli iscritti sia le spade richieste; entrambe le risorse tornano disponibili al termine dell'attività.
 
-Tipi iniziali:
+Le nuove spade possono essere acquistate dall'area Attività tramite **LamaDiLuce (Abridge S.r.l.)**, partner tecnico e fornitore ufficiale LudoSport. Il riferimento di gioco è la **Polaris EVO Basic combat-ready** a €330: costruzione modulare, lama autorizzata per pratica ed eventi ufficiali e marcatura dell'anno di produzione. L'acquisto è immediato per non introdurre microgestione logistica; la presentazione conserva un tono goliardico senza alterare i riferimenti reali del produttore.
 
-| Evento | Costo | Iscritti | Spade | Potenzialità |
-|---|---:|---:|---:|---:|
-| Sparring esterno | €0 | 0 | 2 | bassa |
-| Dimostrazione pubblica | €80 | 2 | 4 | media |
-| Stand sportivo | €160 | 4 | 6 | media |
-| Evento locale | €120 | 3 | 4 | media |
-| Evento a tema | €320 | 8 | 6 | alta |
-| Open day della scuola | €200 | 5 | 4 | media |
-| Volantinaggio organizzato benissimo | €40 | 1 | 2 | bassa |
+La fama della scuola, misurata attraverso gli iscritti attivi, sblocca progressivamente cinque tier di potenzialità: **Molto bassa**, **Bassa**, **Media**, **Alta** e **Altissima**. All'inizio sono visibili soltanto Sparring e Volantinaggio; l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra previsioni numeriche sui contatti.
+
+| Evento | Sblocco | Costo | Impiegati | Spade | Potenzialità |
+|---|---:|---:|---:|---:|---:|
+| Sparring al parco | 0 | €0 | 0 | 2 | molto bassa |
+| Volantinaggio organizzato benissimo | 0 | €40 | 1 | 2 | molto bassa |
+| Lezioni all'aperto | 5 | €120 | 2 | 4 | bassa |
+| Evento sportivo | 10 | €240 | 4 | 6 | bassa |
+| Mele Comics | 20 | €400 | 6 | 8 | media |
+| CairoMix | 35 | €640 | 8 | 10 | media |
+| CogoComix | 60 | €1.200 | 12 | 12 | alta |
+| Burtomics | 90 | €1.800 | 16 | 16 | alta |
+| Genova Comics & Games | 120 | €2.600 | 20 | 20 | alta |
+| Megacon Genova | 180 | €4.200 | 28 | 24 | altissima |
+| Lucca Comics & Games | 250 | €7.000 | 40 | 30 | altissima |
+| Milan Games Week & Cartoomics | 350 | €10.000 | 50 | 36 | altissima |
 
 ### 8.2 Persone incontrate e contatti ottenuti
 

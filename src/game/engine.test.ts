@@ -406,16 +406,20 @@ describe("game engine", () => {
     expect(completed.messages).toBe(messagesBeforeCompletion);
   });
 
-  it("requires enough euros for the programmed public event", () => {
+  it("requires enough school fame and euros for outdoor lessons", () => {
     const state = createInitialState(1_000);
-    const blocked = gameReducer(state, {
+    const notFamousEnough = {
+      ...state,
+      school: { ...state.school, euros: 1_000, activeMembers: 4 },
+    };
+    const blocked = gameReducer(notFamousEnough, {
       type: "START_ACQUISITION_EVENT",
       definitionId: "public-demo",
       now: 2_000,
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 80, activeMembers: 2 },
+      school: { ...state.school, euros: 120, activeMembers: 5 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",
@@ -423,7 +427,7 @@ describe("game engine", () => {
       now: 2_000,
     });
 
-    expect(blocked).toBe(state);
+    expect(blocked).toBe(notFamousEnough);
     expect(started.school.euros).toBe(0);
     expect(started.acquisitionEvents).toHaveLength(1);
   });
@@ -443,6 +447,30 @@ describe("game engine", () => {
     expect(maintained.equipment.wear).toBe(0);
     expect(maintained.statistics.maintenanceCompleted).toBe(1);
     expect(repeated).toBe(maintained);
+  });
+
+  it("buys official swords and preserves them when equipment upgrades are purchased", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 2_000, historicMembers: 20 },
+    };
+
+    const purchased = gameReducer(funded, { type: "BUY_OFFICIAL_SWORD", now: 2_000 });
+    const upgraded = gameReducer(purchased, {
+      type: "BUY_UPGRADE",
+      upgradeId: "organized-rack",
+      now: 3_000,
+    });
+
+    expect(purchased.school.euros).toBe(1_670);
+    expect(purchased.equipment).toMatchObject({ totalSwords: 7, availableSwords: 7 });
+    expect(upgraded.equipment).toMatchObject({ totalSwords: 9, availableSwords: 9 });
+  });
+
+  it("does not buy an official sword without enough euros", () => {
+    const initial = createInitialState(1_000);
+    expect(gameReducer(initial, { type: "BUY_OFFICIAL_SWORD", now: 2_000 })).toBe(initial);
   });
 
   it("can discover a Legendary with the configured roll in a later school", () => {
@@ -972,7 +1000,7 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const resourced = {
       ...initial,
-      school: { ...initial.school, euros: 200, activeMembers: 3 },
+      school: { ...initial.school, euros: 200, activeMembers: 5 },
     };
 
     const first = gameReducer(resourced, { type: "START_ACQUISITION_EVENT", definitionId: "public-demo", now: 2_000 });
