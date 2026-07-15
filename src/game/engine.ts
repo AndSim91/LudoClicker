@@ -39,6 +39,13 @@ import {
 } from "../content/upgrades";
 import { getSchoolYear, getSchoolYearStartMonth, isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
+import {
+  applyEquipmentWear,
+  applySwordDamage,
+  getAvailableSwords,
+  getEquipmentMaintenanceCost,
+  synchronizeEquipmentAvailability,
+} from "./equipment";
 import { addInboxMessage } from "./messages";
 import {
   getEmailBookingChance,
@@ -282,6 +289,7 @@ export function createInitialState(
     equipment: {
       totalSwords: GAME_CONFIG.initialSwords,
       availableSwords: GAME_CONFIG.initialSwords,
+      damagedSwords: 0,
       wear: 0,
     },
     legendaryCollaborators: initialContacts.progress,
@@ -932,7 +940,8 @@ function startAcquisitionEvent(
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
   if (state.school.peakActiveMembers < definition.unlockMembers) return state;
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
-  if (state.equipment.availableSwords < definition.requiredSwords) return state;
+  const availableSwords = getAvailableSwords(state.equipment);
+  if (availableSwords < definition.requiredSwords) return state;
   if (state.school.euros < definition.cost) return state;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
@@ -968,7 +977,7 @@ function startAcquisitionEvent(
     school: { ...state.school, euros: state.school.euros - definition.cost },
     equipment: {
       ...state.equipment,
-      availableSwords: state.equipment.availableSwords - definition.requiredSwords,
+      availableSwords: availableSwords - definition.requiredSwords,
     },
     acquisitionEvents: [...state.acquisitionEvents, event],
     activities: {
@@ -999,14 +1008,16 @@ function resolveAcquisitionEvent(
     randomSeed: acquired.nextSeed,
     legendaryCollaborators: addLegendaryEncounters(rewardState.legendaryCollaborators, contacts),
     contacts: [...rewardState.contacts, ...contacts],
-    equipment: {
-      ...rewardState.equipment,
-      availableSwords: Math.min(
-        rewardState.equipment.totalSwords,
-        rewardState.equipment.availableSwords + (event.equipmentUsed ?? 0),
-      ),
-      wear: Math.min(100, rewardState.equipment.wear + (event.wearAdded ?? 0)),
-    },
+    equipment: applyEquipmentWear(
+      {
+        ...rewardState.equipment,
+        availableSwords: Math.min(
+          rewardState.equipment.totalSwords,
+          rewardState.equipment.availableSwords + (event.equipmentUsed ?? 0),
+        ),
+      },
+      event.wearAdded ?? 0,
+    ),
     acquisitionEvents: rewardState.acquisitionEvents.map((candidate) =>
       candidate.id === event.id
         ? { ...candidate, contactReward, status: "completed" }
@@ -1053,20 +1064,29 @@ function resolveAcquisitionEvent(
 }
 
 function maintainEquipment(state: GameState, now: number): GameState {
+  const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
   if (
-    state.equipment.wear <= 0 ||
-    state.school.euros < GAME_CONFIG.equipmentMaintenanceCost ||
+    (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) ||
+    state.school.euros < maintenanceCost ||
     state.acquisitionEvents.some((event) => event.status === "running")
   ) {
     return state;
   }
+  const swordsInRunningEvents = state.acquisitionEvents
+    .filter((event) => event.status === "running")
+    .reduce((total, event) => total + event.equipmentUsed, 0);
   const maintained = {
     ...state,
     school: {
       ...state.school,
-      euros: state.school.euros - GAME_CONFIG.equipmentMaintenanceCost,
+      euros: state.school.euros - maintenanceCost,
     },
-    equipment: { ...state.equipment, wear: 0 },
+    equipment: {
+      ...state.equipment,
+      availableSwords: Math.max(0, state.equipment.totalSwords - swordsInRunningEvents),
+      damagedSwords: 0,
+      wear: 0,
+    },
     statistics: {
       ...state.statistics,
       maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
@@ -1088,11 +1108,11 @@ function buyOfficialSword(state: GameState): GameState {
       ...state.school,
       euros: state.school.euros - GAME_CONFIG.officialSwordCost,
     },
-    equipment: {
+    equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords: state.equipment.totalSwords + 1,
       availableSwords: state.equipment.availableSwords + 1,
-    },
+    }),
   };
 }
 
@@ -1204,7 +1224,9 @@ function startFormTraining(
     ? getInstructorFormCost(definition?.cost ?? 0)
     : collaborator?.assignment === "instructor"
       ? definition?.cost ?? 0
-      : getStudentFormCost(definition?.cost ?? 0);
+      : instructor
+        ? getStudentFormCost(definition?.cost ?? 0)
+        : definition?.cost ?? 0;
   const branchCapacity = collaborator?.assignment === "instructor"
     ? Math.min(3, 1 + (state.upgrades["instructor-versatility"] ?? 0))
     : undefined;
@@ -1230,7 +1252,6 @@ function startFormTraining(
     ) ||
     !initialBranchCompatible ||
     (instructorSelf && selectInstructorTeachingCount(state, personId) > 0) ||
-    (!instructorSelf && !instructor) ||
     state.school.euros < trainingCost
   ) return state;
   const trainingSpeed = trainingInstructor
@@ -1608,10 +1629,10 @@ function processNarrativeEvent(state: GameState, now: number, gainMultiplier: nu
       activeMembers: Math.max(0, rewardState.state.school.activeMembers + (definition.memberDelta ?? 0)),
       euros: Math.max(0, rewardState.state.school.euros + euroDelta),
     },
-    equipment: {
-      ...rewardState.state.equipment,
-      wear: Math.min(100, Math.max(0, rewardState.state.equipment.wear + (definition.wearDelta ?? 0))),
-    },
+    equipment: applySwordDamage(
+      applyEquipmentWear(rewardState.state.equipment, definition.wearDelta ?? 0),
+      definition.damagedSwordsDelta ?? 0,
+    ),
     contacts: [...rewardState.state.contacts, ...contacts],
     narrative: {
       nextEventAt: now + nextDelay,

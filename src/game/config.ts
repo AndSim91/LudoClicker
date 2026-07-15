@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 26,
+  version: 27,
   initialContacts: 5,
   initialSwords: 6,
   emailBookingChance: 0.2,
@@ -14,6 +14,7 @@ export const GAME_CONFIG = {
   gameMonthMs: 120_000,
   sparringCooldownMs: 30_000,
   equipmentMaintenanceCost: 10,
+  equipmentMaintenanceCostPerSword: 50,
   officialSwordCost: 330,
   volunteerChance: 0.02,
   legendaryEnrollmentChancePerFailure: 0.18,

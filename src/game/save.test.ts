@@ -120,7 +120,7 @@ describe("local save", () => {
         id: "legacy-event",
         definitionId: "park-sparring",
         title: "Sparring al parco",
-        location: "Parco di Villa Croce",
+        location: "Parco Carlo Alberto Dalla Chiesa",
         startedAt: 2_000,
         resolvesAt: 3_000,
         cost: 0,
@@ -149,7 +149,7 @@ describe("local save", () => {
     const migrated = loadGame(5_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.equipment).toEqual({ totalSwords: 6, availableSwords: 6, wear: 0 });
+    expect(migrated.equipment).toEqual({ totalSwords: 6, availableSwords: 6, damagedSwords: 0, wear: 0 });
     expect(migrated.statistics.maintenanceCompleted).toBe(0);
   });
 
@@ -535,6 +535,18 @@ describe("local save", () => {
       equipment: 0,
       instructor: 0,
     });
+  });
+
+  it("migrates version 26 saves into sword damage tracking", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 26;
+    delete legacy.equipment.damagedSwords;
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.version).toBe(GAME_CONFIG.version);
+    expect(migrated.equipment.damagedSwords).toBe(0);
   });
 
   it("resets both primary and backup saves", () => {

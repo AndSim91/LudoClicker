@@ -629,6 +629,53 @@ describe("game engine", () => {
     expect(repeated).toBe(maintained);
   });
 
+  it("blocks damaged swords until paid maintenance repairs them", () => {
+    const initial = createInitialState(1_000);
+    const due = {
+      ...initial,
+      randomSeed: 4,
+      school: { ...initial.school, activeMembers: 3, euros: 20 },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+
+    const damaged = gameReducer(due, { type: "TICK", now: 2_000 });
+    const repairMessage = damaged.messages.find(
+      (message) => message.subject === "Riparazione non programmata",
+    );
+
+    expect(repairMessage?.preview).toContain("ha subito un danno");
+    expect(damaged.school.euros).toBe(20);
+    expect(damaged.equipment).toMatchObject({
+      availableSwords: 5,
+      damagedSwords: 1,
+      wear: 15,
+    });
+
+    const eventReady = {
+      ...damaged,
+      school: { ...damaged.school, activeMembers: 10, peakActiveMembers: 10, euros: 240 },
+    };
+    const blocked = gameReducer(eventReady, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "sports-stand",
+      now: 3_000,
+    });
+
+    expect(blocked).toBe(eventReady);
+
+    const maintained = gameReducer(
+      { ...damaged, school: { ...damaged.school, euros: 10 } },
+      { type: "MAINTAIN_EQUIPMENT", now: 4_000 },
+    );
+
+    expect(maintained.school.euros).toBe(5);
+    expect(maintained.equipment).toMatchObject({
+      availableSwords: 6,
+      damagedSwords: 0,
+      wear: 0,
+    });
+  });
+
   it("buys official swords and preserves them when equipment upgrades are purchased", () => {
     const initial = createInitialState(1_000);
     const funded = {
@@ -1113,6 +1160,29 @@ describe("game engine", () => {
     expect(completed.collaborators).toHaveLength(1);
   });
 
+  it("allows manual member training without an Instructor at the base cost", () => {
+    const initial = createInitialState(1_000);
+    const member = { ...initial.contacts[0], status: "enrolled" as const };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, euros: 25 },
+      contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const training = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: member.id,
+      formId: "form-1",
+      now: 2_000,
+    });
+
+    expect(training.school.euros).toBe(0);
+    expect(training.contacts[0].training?.formId).toBe("form-1");
+    expect(training.contacts[0].training?.instructorId).toBeUndefined();
+    expect(training.contacts[0].training?.completesAt).toBe(22_000);
+  });
+
   it("assigns the Instructor role for free and charges explicit 200% qualifications", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
@@ -1188,7 +1258,7 @@ describe("game engine", () => {
     expect(completed.collaborators[0].instructorForms).toContain("form-2");
   });
 
-  it("lets each qualified Instructor teach only one enrolled person at a time", () => {
+  it("uses the Instructor discount when available and falls back to manual training", () => {
     const initial = createInitialState(1_000);
     const [firstContact, secondContact, instructorContact] = initial.contacts;
     const first = { ...firstContact, status: "enrolled" as const };
@@ -1227,8 +1297,8 @@ describe("game engine", () => {
     });
 
     expect(firstTraining.contacts.find((contact) => contact.id === first.id)?.training?.instructorId).toBe(instructor.id);
-    expect(secondBlocked.contacts.find((contact) => contact.id === second.id)?.training).toBeUndefined();
-    expect(secondBlocked.school.euros).toBe(93.75);
+    expect(secondBlocked.contacts.find((contact) => contact.id === second.id)?.training?.instructorId).toBeUndefined();
+    expect(secondBlocked.school.euros).toBe(68.75);
   });
 
   it("starts automatic teaching, respects pause, and fills six Tiamat slots", () => {

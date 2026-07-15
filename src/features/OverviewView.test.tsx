@@ -12,6 +12,8 @@ describe("OverviewView settings", () => {
     onReset: vi.fn(),
     onUpdateProfileName: vi.fn(),
     onFoundSchool: vi.fn(),
+    darkMode: false,
+    onDarkModeChange: vi.fn(),
     reduceMotion: false,
     onReduceMotionChange: vi.fn(),
   };
@@ -50,5 +52,13 @@ describe("OverviewView settings", () => {
     fireEvent.click(screen.getByRole("button", { name: "Aggiorna nome" }));
 
     expect(callbacks.onUpdateProfileName).toHaveBeenCalledWith("Giulia Bianchi");
+  });
+
+  it("toggles the dark theme preference", () => {
+    render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /Tema scuro/ }));
+
+    expect(callbacks.onDarkModeChange).toHaveBeenCalledWith(true);
   });
 });

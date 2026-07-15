@@ -36,6 +36,9 @@ export function App() {
   const [reduceMotion, setReduceMotion] = useState(
     () => localStorage.getItem("oggetto-nuovi-iscritti.reduce-motion") === "true",
   );
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("oggetto-nuovi-iscritti.theme") === "dark",
+  );
   const selectedMessage = state.messages.find((message) => message.id === selectedMessageId);
   const selectedSentEmail = state.emails.find((email) => email.id === selectedSentEmailId);
   const activeView = isGameAreaUnlocked(view, state) ? view : "mail";
@@ -43,6 +46,11 @@ export function App() {
   useEffect(() => {
     localStorage.setItem("oggetto-nuovi-iscritti.reduce-motion", String(reduceMotion));
   }, [reduceMotion]);
+
+  useEffect(() => {
+    localStorage.setItem("oggetto-nuovi-iscritti.theme", darkMode ? "dark" : "light");
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+  }, [darkMode]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -204,6 +212,8 @@ export function App() {
             onReset={resetSave}
             onUpdateProfileName={updateProfileName}
             onFoundSchool={(details) => dispatch({ type: "FOUND_SCHOOL", details, now: Date.now() })}
+            darkMode={darkMode}
+            onDarkModeChange={setDarkMode}
             reduceMotion={reduceMotion}
             onReduceMotionChange={setReduceMotion}
           />

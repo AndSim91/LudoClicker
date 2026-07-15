@@ -13,7 +13,7 @@ describe("EventsView", () => {
       id: "activity-without-contacts",
       definitionId: "park-sparring",
       title: "Sparring al parco",
-      location: "Parco di Villa Croce",
+      location: "Parco Carlo Alberto Dalla Chiesa",
       startedAt: 2_000,
       resolvesAt: 3_000,
       cost: 0,
@@ -104,6 +104,22 @@ describe("EventsView", () => {
 
     expect(screen.getByText("3/5 iscritti disponibili")).toBeVisible();
     expect(screen.getByText("2/6 spade disponibili")).toBeVisible();
+  });
+
+  it("marks damaged swords as unavailable until maintenance", () => {
+    const initial = createInitialState(1_000);
+    render(<EventsView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, euros: 240 },
+        equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
+      }}
+      onStart={() => undefined}
+    />);
+
+    expect(screen.getByText("5/6 spade disponibili")).toBeVisible();
+    expect(screen.getByText("1 spada danneggiata · ripara per usarle agli eventi")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Ripara 1 spada" })).toBeDisabled();
   });
 
   it("does not show calendar date boxes in the event list", () => {

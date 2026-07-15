@@ -376,6 +376,7 @@ export interface GameState {
   equipment: {
     totalSwords: number;
     availableSwords: number;
+    damagedSwords: number;
     wear: number;
   };
   legendaryCollaborators: LegendaryCollaboratorProgress;

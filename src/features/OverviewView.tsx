@@ -20,6 +20,8 @@ interface OverviewViewProps {
   onReset: () => void;
   onUpdateProfileName: (displayName: string) => void;
   onFoundSchool: (details: SchoolFoundationDetails) => void;
+  darkMode: boolean;
+  onDarkModeChange: (enabled: boolean) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
 }
@@ -32,6 +34,8 @@ export function OverviewView({
   onReset,
   onUpdateProfileName,
   onFoundSchool,
+  darkMode,
+  onDarkModeChange,
   reduceMotion,
   onReduceMotionChange,
 }: OverviewViewProps) {
@@ -89,6 +93,7 @@ export function OverviewView({
         <h2>Salvataggio locale</h2>
         <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Il progresso offline è limitato a {Math.round(getOfflineLimitMs(state) / 3_600_000)} ore.</p>
         <dl><div><dt>Versione salvataggio</dt><dd>{state.version}</dd></div><div><dt>Ultimo salvataggio</dt><dd>{new Intl.DateTimeFormat("it-IT", { timeStyle: "medium" }).format(state.lastSavedAt)}</dd></div></dl>
+        <label className="preference-check"><input type="checkbox" checked={darkMode} onChange={(event) => onDarkModeChange(event.target.checked)} /><span><strong>Tema scuro</strong><small>Usa superfici blu-notte per una lettura più riposante.</small></span></label>
         <label className="preference-check"><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span></label>
         <div className="settings-actions">
           <button type="button" onClick={onExport}>Esporta JSON</button>

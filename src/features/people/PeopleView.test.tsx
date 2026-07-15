@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
+import type { FormId } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
 afterEach(() => cleanup());
@@ -64,27 +65,91 @@ describe("PeopleView", () => {
     expect(onAssign).toHaveBeenCalledWith("collaborator-1", "writing");
   });
 
-  it("shows enrolled members in the automatic teaching queue", () => {
+  it("lets enrolled members start a manual form training without an instructor", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
     const displayName = `${enrolled.firstName} ${enrolled.lastName}`;
-    const instructor = {
-      id: "instructor-form-1",
-      contactId: initial.contacts[1].id,
-      displayName: "Istruttore Forma 1",
-      joinedAt: 1_000,
-      forms: ["form-1" as const],
-      instructorForms: ["form-1" as const],
-      assignment: "instructor" as const,
-      rarity: "legendary" as const,
-    };
-    render(<PeopleView state={{ ...initial, school: { ...initial.school, activeMembers: 1, euros: 20 }, contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact), collaborators: [instructor], unlocks: { ...initial.unlocks, forms: true } }} onAssign={() => undefined} onStartTraining={() => undefined} />);
+    const onStartTraining = vi.fn();
+    render(<PeopleView state={{ ...initial, school: { ...initial.school, activeMembers: 1, euros: 25 }, contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact), unlocks: { ...initial.unlocks, forms: true } }} onAssign={() => undefined} onStartTraining={onStartTraining} />);
 
     fireEvent.click(screen.getByRole("tab", { name: /Iscritti/ }));
-    expect(screen.getByText("Rischio annuo se ignorato: 80%")).toBeVisible();
-    expect(screen.getByText("Coda didattica automatica")).toBeVisible();
-    expect(screen.getByText("In attesa di un Istruttore compatibile e dei fondi")).toBeVisible();
+    expect(screen.getByText("Rischio alto")).toBeVisible();
     expect(screen.queryByRole("combobox", { name: `Formazione per ${displayName}` })).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Forma 1/ })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /Paga e avvia/ }));
+    expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
+  });
+
+  it("shows qualitative departure risk for members without current-year form training", () => {
+    const initial = createInitialState(1_000);
+    const members = [
+      { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] },
+      { ...initial.contacts[1], status: "enrolled" as const, forms: ["form-2"] as FormId[] },
+      { ...initial.contacts[2], status: "enrolled" as const, forms: ["form-4-long"] as FormId[] },
+    ];
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: members.length },
+        contacts: initial.contacts.map((contact) => members.find((member) => member.id === contact.id) ?? contact),
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    expect(screen.getAllByText("Rischio alto")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio medio")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio basso")).toHaveLength(1);
+    expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+  });
+
+  it("shows no risk after a member completes form training this school year", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      lastFormTrainingYear: 1,
+    };
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 1 },
+        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    expect(screen.getByText("Nessun rischio")).toBeVisible();
+    expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
+  });
+
+  it("shows the weapon selector after Course Y", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: ["form-1", "course-x", "form-2", "course-y"] as FormId[],
+      formBranchPreferences: ["Spada Lunga", "Staffa"] as Array<"Spada Lunga" | "Staffa">,
+    };
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 1, euros: 600 },
+        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    const trainingSelect = screen.getByRole("combobox", { name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}` });
+    expect(trainingSelect).toBeVisible();
+    fireEvent.change(trainingSelect, { target: { value: "form-3-staff" } });
+    expect(screen.getByRole("img", { name: /Forma 3/ })).toBeVisible();
   });
 
   it("shows the summer break instead of allowing Form training in July", () => {
@@ -101,8 +166,8 @@ describe("PeopleView", () => {
       onStartTraining={() => undefined}
     />);
 
-    expect(screen.getByText("Coda didattica automatica")).toBeVisible();
-    expect(screen.getByText("In pausa fino a settembre")).toBeVisible();
+    expect(screen.getByText("Pausa estiva")).toBeVisible();
+    expect(screen.getByText("Le Forme riprendono a settembre")).toBeVisible();
     expect(screen.queryByRole("combobox", { name: /Formazione per/ })).not.toBeInTheDocument();
   });
 });

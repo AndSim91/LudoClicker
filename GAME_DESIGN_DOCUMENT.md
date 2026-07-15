@@ -594,7 +594,7 @@ Regole:
 - Corso Y richiede una qualifica esattamente come le Forme;
 - una qualifica pregressa viene acquistata esplicitamente dal comando di formazione e costa il **200% del costo base**;
 - una nuova Forma appresa mentre si è Istruttore costa il **300% totale del costo base** e comprende la qualifica;
-- l'allievo paga automaticamente il **25% del costo base**; senza fondi non parte una nuova lezione;
+- con un Istruttore disponibile l'allievo paga automaticamente il **25% del costo base**; senza Istruttore il level up manuale usa il costo base;
 - l'automazione dà priorità agli allievi meno avanzati e li porta dalla Forma 1 verso l'alto, rispettando prerequisiti, anno scolastico e compatibilità d'arma;
 - disattivare l'automazione o riassegnare l'Istruttore lascia terminare le lezioni già iniziate, ma non ne avvia altre;
 - **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti e tre i rami d'arma;

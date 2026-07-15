@@ -30,6 +30,13 @@ export function EventsView({
   const [now, setNow] = useState(() => Date.now());
   const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running");
   const availableMembers = selectAvailableEventMembers(state);
+  const availableSwords = Math.max(
+    0,
+    Math.min(
+      state.equipment.availableSwords,
+      state.equipment.totalSwords - state.equipment.damagedSwords,
+    ),
+  );
   const visibleEvents = ACQUISITION_EVENTS.filter((definition) =>
     definition.unlockMembers <= state.school.peakActiveMembers ||
     runningEvents.some((event) => event.definitionId === definition.id)
@@ -49,7 +56,7 @@ export function EventsView({
       <div className="event-notice"><Icon name="contact" /><div><strong>{state.contacts.filter((contact) => contact.status === "available").length} contatti disponibili</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
       <div className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
         <div><Icon name="people" /><span><strong>{availableMembers}/{state.school.activeMembers} iscritti disponibili</strong><small>Gli iscritti impegnati tornano disponibili a fine evento.</small></span></div>
-        <div><Icon name="settings" /><span><strong>{state.equipment.availableSwords}/{state.equipment.totalSwords} spade disponibili</strong><small>Usura attrezzatura {state.equipment.wear}%</small></span></div>
+        <div><Icon name="settings" /><span><strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong><small>{state.equipment.damagedSwords > 0 ? `${quantityLabel(state.equipment.damagedSwords, "spada danneggiata", "spade danneggiate")} · ripara per usarle agli eventi` : `Usura attrezzatura ${state.equipment.wear}%`}</small></span></div>
       </div>
       <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {state.school.peakActiveMembers}</strong><small>Equivalente al numero massimo di iscritti storici della scuola</small><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} iscritti massimi.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
       <section className="event-list">
@@ -62,7 +69,10 @@ export function EventsView({
           const lacksFunds = state.school.euros < definition.cost;
           const lacksMembers = state.school.activeMembers < definition.requiredMembers;
           const lacksAvailableMembers = availableMembers < definition.requiredMembers;
-          const lacksEquipment = state.equipment.availableSwords < definition.requiredSwords;
+          const lacksEquipment = availableSwords < definition.requiredSwords;
+          const needsRepairForEvent = lacksEquipment &&
+            state.equipment.damagedSwords > 0 &&
+            availableSwords + state.equipment.damagedSwords >= definition.requiredSwords;
           const progress = matching ? getEventProgress(matching, now) : 0;
           const remainingSeconds = matching
             ? Math.max(0, Math.ceil((matching.resolvesAt - now) / 1_000))
@@ -73,6 +83,7 @@ export function EventsView({
           else if (onCooldown) action = `Di nuovo tra ${Math.ceil(cooldown / 1_000)} s`;
           else if (lacksMembers) action = `Richiede ${memberRequirement(definition.requiredMembers)}`;
           else if (lacksAvailableMembers) action = `Servono ${memberRequirement(definition.requiredMembers)} liberi`;
+          else if (needsRepairForEvent) action = `Ripara ${quantityLabel(state.equipment.damagedSwords, "spada", "spade")}`;
           else if (lacksEquipment) action = `Richiede ${definition.requiredSwords} spade`;
           else if (lacksFunds) action = `Servono ${euro.format(definition.cost)}`;
 

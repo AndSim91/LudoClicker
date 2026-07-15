@@ -10,7 +10,8 @@ function percentage(value: number, total: number) {
   return `${Math.round((value / total) * 100)}%`;
 }
 
-function equipmentCondition(wear: number) {
+function equipmentCondition(wear: number, damagedSwords: number) {
+  if (damagedSwords > 0) return "Danno da riparare";
   if (wear === 0) return "Ottime condizioni";
   if (wear < 35) return "Usura leggera";
   if (wear < 70) return "Manutenzione consigliata";
@@ -29,12 +30,20 @@ export function ActivitiesView({
   onRunSocialCampaign: () => void;
 }) {
   const eventRunning = state.acquisitionEvents.some((event) => event.status === "running");
+  const needsMaintenance = state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
+  const availableSwords = Math.max(
+    0,
+    Math.min(
+      state.equipment.availableSwords,
+      state.equipment.totalSwords - state.equipment.damagedSwords,
+    ),
+  );
   const canMaintain =
-    state.equipment.wear > 0 &&
+    needsMaintenance &&
     state.school.euros >= GAME_CONFIG.equipmentMaintenanceCost &&
     !eventRunning;
   let maintenanceLabel = `Esegui manutenzione · ${euro.format(GAME_CONFIG.equipmentMaintenanceCost)}`;
-  if (state.equipment.wear === 0) maintenanceLabel = "Manutenzione non necessaria";
+  if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
   else if (eventRunning) maintenanceLabel = "Attendi la fine dell'evento";
   else if (state.school.euros < GAME_CONFIG.equipmentMaintenanceCost) {
     maintenanceLabel = `Servono ${euro.format(GAME_CONFIG.equipmentMaintenanceCost)}`;
@@ -79,8 +88,8 @@ export function ActivitiesView({
 
       <section className="equipment-panel" aria-label="Attrezzatura della scuola">
         <div className="equipment-heading">
-          <div><Icon name="settings" /><span><strong>Attrezzatura</strong><small>{equipmentCondition(state.equipment.wear)}</small></span></div>
-          <strong>{state.equipment.availableSwords}/{state.equipment.totalSwords} spade disponibili</strong>
+          <div><Icon name="settings" /><span><strong>Attrezzatura</strong><small>{equipmentCondition(state.equipment.wear, state.equipment.damagedSwords)}</small></span></div>
+          <strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong>
         </div>
         <div className="equipment-wear-label"><span>Usura complessiva</span><strong>{state.equipment.wear}%</strong></div>
         <div className="equipment-wear" role="progressbar" aria-label="Usura attrezzatura" aria-valuemin={0} aria-valuemax={100} aria-valuenow={state.equipment.wear}><span style={{ width: `${state.equipment.wear}%` }} /></div>

@@ -50,6 +50,7 @@ function isGameState(value: unknown): value is GameState {
     typeof state.school?.peakActiveMembers === "number" &&
     typeof state.equipment?.totalSwords === "number" &&
     typeof state.equipment?.availableSwords === "number" &&
+    typeof state.equipment?.damagedSwords === "number" &&
     typeof state.equipment?.wear === "number" &&
     Array.isArray(state.legendaryCollaborators?.encounteredProfileIds) &&
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
@@ -163,6 +164,7 @@ function migrate(value: unknown): unknown {
       equipment: migrated.equipment ?? {
         totalSwords: 6,
         availableSwords: 6,
+        damagedSwords: 0,
         wear: 0,
       },
       acquisitionEvents: (migrated.acquisitionEvents ?? []).map((event) => ({
@@ -603,11 +605,26 @@ function migrate(value: unknown): unknown {
     };
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 26,
       collaborators: (migrated.collaborators ?? []).map((collaborator) => ({
         ...collaborator,
         mastery: normalizeMastery(collaborator.mastery),
       })),
+    };
+  }
+
+  if (migrated.version === 26) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      equipment: migrated.equipment
+        ? { ...migrated.equipment, damagedSwords: migrated.equipment.damagedSwords ?? 0 }
+        : {
+            totalSwords: GAME_CONFIG.initialSwords,
+            availableSwords: GAME_CONFIG.initialSwords,
+            damagedSwords: 0,
+            wear: 0,
+          },
     };
   }
 

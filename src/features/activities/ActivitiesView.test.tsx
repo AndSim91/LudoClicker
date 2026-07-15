@@ -25,6 +25,28 @@ describe("ActivitiesView", () => {
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
 
+  it("requests paid maintenance for a damaged sword even without wear", () => {
+    const initial = createInitialState(1_000);
+    const onMaintainEquipment = vi.fn();
+
+    render(
+      <ActivitiesView
+        state={{
+          ...initial,
+          school: { ...initial.school, euros: 10 },
+          equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
+        }}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSword={() => undefined}
+        onRunSocialCampaign={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText("Danno da riparare")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /Esegui manutenzione/ }));
+    expect(onMaintainEquipment).toHaveBeenCalledOnce();
+  });
+
   it("runs a funded Social campaign after the unlock", () => {
     const initial = createInitialState(1_000);
     const onRunSocialCampaign = vi.fn();

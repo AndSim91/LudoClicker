@@ -24,7 +24,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
   {
     id: "park-sparring",
     title: "Sparring al parco",
-    location: "Parco di Villa Croce",
+    location: "Parco Carlo Alberto Dalla Chiesa",
     description: "Una sessione informale e gratuita per incontrare poche persone interessate.",
     durationMs: 15_000,
     cost: 0,
