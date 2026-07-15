@@ -4,15 +4,18 @@ import {
   getAvailableForms,
   getCollaboratorBonusSummary,
   getFormDefinition,
-  getInstructorConversionCost,
   getInstructorFormCost,
+  getInstructorQualificationCost,
   isInstructorForm,
   type FormStudent,
 } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getSchoolYear, isSummerBreak } from "../../game/calendar";
 import { getEnrollmentChance, getMemberAnnualDepartureChance } from "../../game/formulas";
-import { selectAvailableInstructor, selectBusyInstructorIds } from "../../game/selectors";
+import {
+  selectInstructorCapacity,
+  selectInstructorTeachingCount,
+} from "../../game/selectors";
 import type {
   CollaboratorAssignment,
   Contact,
@@ -52,10 +55,12 @@ export function PeopleView({
   state,
   onAssign,
   onStartTraining,
+  onToggleInstructorAutomation,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
+  onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
 }) {
   const [tab, setTab] = useState<PeopleTab>("members");
   const members = state.contacts.filter((contact) => contact.status === "enrolled");
@@ -79,7 +84,6 @@ export function PeopleView({
           ) : state.collaborators.map((collaborator) => {
             const contact = state.contacts.find((candidate) => candidate.id === collaborator.contactId);
             const bonusSummary = getCollaboratorBonusSummary(collaborator);
-            const instructorConversionCost = getInstructorConversionCost(collaborator);
             return (
               <article className="collaborator-row" key={collaborator.id}>
                 <div className={`person-avatar rarity-${collaborator.rarity}`}>{collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</div>
@@ -93,16 +97,15 @@ export function PeopleView({
                     : null}
                 </div>
                 <label><span>Assegnazione</span><select aria-label="Assegnazione" value={collaborator.assignment ?? ""} onChange={(event) => onAssign(collaborator.id, (event.target.value || null) as CollaboratorAssignment)}><option value="">Non assegnato</option>{Object.entries(assignmentLabels).map(([value, label]) => {
-                  const lacksInstructorFunds = value === "instructor" && state.school.euros < instructorConversionCost;
-                  const disabled = (value === "social" && !state.unlocks.social) || lacksInstructorFunds;
+                  const disabled = value === "social" && !state.unlocks.social;
                   const suffix = value === "social" && !state.unlocks.social
                     ? " — si sblocca con 10 iscritti"
-                    : value === "instructor" && instructorConversionCost > 0
-                      ? ` — attestati ${euro.format(instructorConversionCost)}`
-                      : "";
+                    : "";
                   return <option value={value} key={value} disabled={disabled}>{label}{suffix}</option>;
                 })}</select></label>
-                <TrainingControl personId={collaborator.id} displayName={collaborator.displayName} student={collaborator} state={state} onStartTraining={onStartTraining} />
+                {collaborator.assignment === "instructor"
+                  ? <InstructorPanel collaborator={collaborator} state={state} onStartTraining={onStartTraining} onToggle={onToggleInstructorAutomation} />
+                  : <AutomaticTrainingStatus displayName={collaborator.displayName} student={collaborator} state={state} />}
               </article>
             );
           })}
@@ -128,7 +131,7 @@ export function PeopleView({
                 <div className="member-training-cell">
                   {isCollaborator
                     ? <small>Gestisci dal pannello Collaboratori</small>
-                    : <TrainingControl personId={contact.id} displayName={`${contact.firstName} ${contact.lastName}`} student={contact} state={state} onStartTraining={onStartTraining} />}
+                    : <AutomaticTrainingStatus displayName={`${contact.firstName} ${contact.lastName}`} student={contact} state={state} />}
                 </div>
               </div>
             );

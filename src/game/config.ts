@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 23,
+  version: 25,
   initialContacts: 5,
   initialSwords: 6,
   emailBookingChance: 0.2,
@@ -17,6 +17,7 @@ export const GAME_CONFIG = {
   officialSwordCost: 330,
   volunteerChance: 0.02,
   legendaryEnrollmentChancePerFailure: 0.18,
+  legendaryDepartureMultiplier: 0.1,
   collaboratorWritingPerSecond: 2,
   socialContactIntervalMs: 45_000,
   socialCampaignCost: 25,

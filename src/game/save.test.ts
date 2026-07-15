@@ -471,6 +471,38 @@ describe("local save", () => {
     expect(migrated.collaborators[0].instructorForms).toEqual([]);
   });
 
+  it("migrates version 23 Legendary progression into retained profile memory", () => {
+    const initial = createInitialState(1_000);
+    const legacy = JSON.parse(JSON.stringify({
+      ...initial,
+      version: 23,
+      collaborators: [{
+        id: "legacy-eva",
+        contactId: initial.contacts[0].id,
+        displayName: "Eva Parodi",
+        joinedAt: 500,
+        forms: ["form-1", "course-x", "form-2"],
+        instructorForms: ["form-1", "form-2"],
+        assignment: "lessons",
+        rarity: "legendary",
+        specialProfileId: "eva-parodi",
+        lastFormTrainingYear: 2,
+      }],
+    }));
+    delete legacy.legendaryCollaborators.retainedProgress;
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.version).toBe(GAME_CONFIG.version);
+    expect(migrated.legendaryCollaborators.retainedProgress["eva-parodi"]).toEqual({
+      forms: ["form-1", "course-x", "form-2"],
+      instructorForms: ["form-1", "form-2"],
+      joinedAt: 500,
+      lastFormTrainingYear: 2,
+    });
+  });
+
   it("resets both primary and backup saves", () => {
     const state = createInitialState(1_000);
     saveGame(state, 2_000);

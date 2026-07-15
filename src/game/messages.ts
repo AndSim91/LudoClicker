@@ -1,6 +1,24 @@
 import type { InboxMessage } from "./types";
 
-const STACKED_MESSAGE_SUBJECTS = new Set(["Passaparola inatteso"]);
+export type InboxCategory = NonNullable<InboxMessage["category"]>;
+
+const STACKED_MESSAGE_SUBJECTS = new Set([
+  "Passaparola inatteso",
+  "Nuovi contatti dallo sparring",
+  "Contatti acquisiti alla dimostrazione",
+  "Nuovi contatti dai Social",
+  "Campagna Social completata",
+  "Riepilogo formazione automatica",
+]);
+
+export function getInboxCategory(message: InboxMessage): InboxCategory {
+  if (message.category) return message.category;
+  if (
+    message.subject.startsWith("Traguardo:") ||
+    message.subject.startsWith("Obiettivo completato:")
+  ) return "other";
+  return "focused";
+}
 
 export function addInboxMessage(
   messages: InboxMessage[],

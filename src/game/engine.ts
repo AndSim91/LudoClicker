@@ -3,11 +3,14 @@ import { getEmailPresentationLevel } from "../content/emailPresentation";
 import { getNewAchievements } from "../content/achievements";
 import { getAcquisitionEventDefinition } from "../content/events";
 import {
+  BRANCH_FORM_IDS,
+  FORM_BRANCHES,
   canTrainForm,
   getCollaboratorProductivity,
   getFormDefinition,
-  getInstructorConversionCost,
   getInstructorFormCost,
+  getInstructorQualificationCost,
+  getStudentFormCost,
   isInstructorForm,
 } from "../content/forms";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
@@ -34,6 +37,7 @@ import {
   getEmailBookingChance,
   getEnrollmentChance,
   getEventFunnelOutcome,
+  getLegendaryAnnualDepartureChance,
   getMemberAnnualDepartureChance,
   getWritingPower,
 } from "./formulas";
@@ -43,6 +47,9 @@ import {
   selectAvailableEventMembers,
   selectAvailableInstructor,
   selectBusyInstructorIds,
+  selectIncomePerMonth,
+  selectInstructorCapacity,
+  selectInstructorTeachingCount,
 } from "./selectors";
 import type {
   CampaignEmail,
@@ -59,6 +66,7 @@ import type {
   SchoolFoundationDetails,
   SpecialCollaboratorId,
   LegendaryCollaboratorProgress,
+  FormBranch,
 } from "./types";
 
 const euroFormatter = new Intl.NumberFormat("it-IT", {
@@ -166,7 +174,15 @@ function createContacts(
       status: index === 0 ? "writing" as const : "available" as const,
       rarity: legendaryProfile ? "legendary" as const : ordinary!.rarity,
       specialProfileId: legendaryProfile?.id,
-      forms: [],
+      forms: legendaryProfile
+        ? [...(progress.retainedProgress[legendaryProfile.id]?.forms ?? [])]
+        : [],
+      formBranchPreferences: legendaryProfile
+        ? [...(progress.retainedProgress[legendaryProfile.id]?.formBranchPreferences ?? [])]
+        : [],
+      lastFormTrainingYear: legendaryProfile
+        ? progress.retainedProgress[legendaryProfile.id]?.lastFormTrainingYear
+        : undefined,
     };
   });
   return { contacts, nextSeed, progress };
@@ -216,6 +232,7 @@ export function createInitialState(
     encounteredProfileIds: [],
     enrolledProfileIds: [],
     enrollmentAttempts: {},
+    retainedProgress: {},
   };
   const initialContacts = createContacts(
     now,
@@ -311,6 +328,7 @@ function createAcquiredContacts(
     const sequence = state.statistics.contactsAcquired + index;
     const queuePosition = state.contacts.length + index + 1;
     const selected = queuePosition === 9 &&
+      state.network.schools.length === 0 &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? { profile: andrea, nextSeed }
       : queuePosition >= 10
@@ -323,6 +341,9 @@ function createAcquiredContacts(
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);
     const { firstName, lastName, email } = generated;
+    const retained = specialProfile
+      ? progress.retainedProgress[specialProfile.id]
+      : undefined;
     return {
       id: makeId("contact", now, `acquired-${sequence}`),
       firstName,
@@ -333,7 +354,9 @@ function createAcquiredContacts(
       status: "available" as const,
       rarity: specialProfile ? "legendary" as const : ordinary!.rarity,
       specialProfileId: specialProfile?.id,
-      forms: [],
+      forms: [...(retained?.forms ?? [])],
+      formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
+      lastFormTrainingYear: retained?.lastFormTrainingYear,
     };
   });
   return { contacts, nextSeed };
@@ -375,6 +398,7 @@ function addMessage(
   subject: string,
   preview: string,
   tone: InboxMessage["tone"] = "positive",
+  category: NonNullable<InboxMessage["category"]> = "focused",
 ): GameState {
   const message: InboxMessage = {
     id: makeId("message", now, state.messages.length),
@@ -384,6 +408,7 @@ function addMessage(
     receivedAt: now,
     tone,
     unread: true,
+    category,
   };
   return { ...state, messages: addInboxMessage(state.messages, message) };
 }
@@ -394,17 +419,24 @@ function recruitCollaborator(state: GameState, contact: Contact, now: number): G
     state.collaborators.some((collaborator) => collaborator.contactId === contact.id)
   ) return state;
 
+  const retained = contact.specialProfileId
+    ? state.legendaryCollaborators.retainedProgress[contact.specialProfileId]
+    : undefined;
   const collaborator = {
     id: makeId("collaborator", now, state.collaborators.length),
     contactId: contact.id,
     displayName: `${contact.firstName} ${contact.lastName}`,
-    joinedAt: now,
-    forms: contact.forms,
-    instructorForms: [],
+    joinedAt: retained?.joinedAt ?? now,
+    forms: [...(retained?.forms ?? contact.forms)],
+    instructorForms: [...(retained?.instructorForms ?? [])],
+    formBranchPreferences: [
+      ...(retained?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
+    ],
+    autoTeachingEnabled: true,
     assignment: null,
     rarity: contact.rarity,
     specialProfileId: contact.specialProfileId,
-    lastFormTrainingYear: contact.lastFormTrainingYear,
+    lastFormTrainingYear: retained?.lastFormTrainingYear ?? contact.lastFormTrainingYear,
   };
   const nextState: GameState = {
     ...state,
@@ -458,6 +490,10 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
     GAME_CONFIG.emailOutcomeMaxMs,
   );
   const guaranteedTutorialBooking = state.statistics.emailsSent === 0;
+  const guaranteedAndreaBooking = state.contacts.some(
+    (contact) =>
+      contact.id === email.contactId && contact.specialProfileId === ANDREA_SIMONAZZI_ID,
+  );
   const recentEmailResults = state.emails
     .slice()
     .reverse()
@@ -466,7 +502,8 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
   const protectedBooking =
     (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
   const result =
-    guaranteedTutorialBooking || protectedBooking || bookingRoll < getEmailBookingChance(state)
+    guaranteedTutorialBooking || guaranteedAndreaBooking || protectedBooking ||
+      bookingRoll < getEmailBookingChance(state)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -671,16 +708,17 @@ function processMemberDepartures(
   completedSchoolYear: number,
   now: number,
 ): GameState {
-  const collaboratorContactIds = new Set(
-    state.collaborators.map((collaborator) => collaborator.contactId),
+  const collaboratorsByContactId = new Map(
+    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
   const firstMonthOfCompletedYear = getSchoolYearStartMonth(completedSchoolYear);
   const eligibleMembers = state.contacts.filter((contact) =>
     contact.status === "enrolled" &&
-    contact.rarity !== "legendary" &&
-    !collaboratorContactIds.has(contact.id) &&
+    contact.specialProfileId !== ANDREA_SIMONAZZI_ID &&
+    (contact.rarity === "legendary" || !collaboratorsByContactId.has(contact.id)) &&
     (contact.enrolledMonth ?? state.school.currentMonth) <= firstMonthOfCompletedYear &&
-    contact.lastFormTrainingYear !== completedSchoolYear
+    (collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
+      contact.lastFormTrainingYear) !== completedSchoolYear
   );
   if (eligibleMembers.length === 0) return state;
 
@@ -689,7 +727,12 @@ function processMemberDepartures(
   for (const member of eligibleMembers) {
     const [roll, seedAfterRoll] = nextRandom(nextSeed);
     nextSeed = seedAfterRoll;
-    if (roll < getMemberAnnualDepartureChance(member.forms)) departedIds.add(member.id);
+    const collaborator = collaboratorsByContactId.get(member.id);
+    const forms = collaborator?.forms ?? member.forms;
+    const departureChance = member.rarity === "legendary"
+      ? getLegendaryAnnualDepartureChance(forms)
+      : getMemberAnnualDepartureChance(forms);
+    if (roll < departureChance) departedIds.add(member.id);
   }
   if (departedIds.size === 0) return { ...state, randomSeed: nextSeed };
 
@@ -699,14 +742,53 @@ function processMemberDepartures(
     .map((member) => `${member.firstName} ${member.lastName}`)
     .join(", ");
   const others = departed.length > 3 ? ` e altri ${departed.length - 3}` : "";
+  const retainedProgress = { ...state.legendaryCollaborators.retainedProgress };
+  const departedProfileIds = new Set<SpecialCollaboratorId>();
+  for (const member of departed) {
+    if (!member.specialProfileId) continue;
+    const collaborator = collaboratorsByContactId.get(member.id);
+    departedProfileIds.add(member.specialProfileId);
+    retainedProgress[member.specialProfileId] = {
+      forms: [...(collaborator?.forms ?? member.forms)],
+      instructorForms: [...(collaborator?.instructorForms ?? [])],
+      formBranchPreferences: [
+        ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
+      ],
+      joinedAt: collaborator?.joinedAt ?? member.acquiredAt,
+      lastFormTrainingYear:
+        collaborator?.lastFormTrainingYear ?? member.lastFormTrainingYear,
+    };
+  }
   const updated: GameState = {
     ...state,
     randomSeed: nextSeed,
     contacts: state.contacts.map((contact) =>
       departedIds.has(contact.id)
-        ? { ...contact, status: "departed", training: undefined }
+        ? {
+            ...contact,
+            status: "departed",
+            forms: [...(collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms)],
+            formBranchPreferences: [
+              ...(collaboratorsByContactId.get(contact.id)?.formBranchPreferences ??
+                contact.formBranchPreferences ?? []),
+            ],
+            lastFormTrainingYear:
+              collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
+              contact.lastFormTrainingYear,
+            training: undefined,
+          }
         : contact,
     ),
+    collaborators: state.collaborators.filter(
+      (collaborator) => !departedIds.has(collaborator.contactId),
+    ),
+    legendaryCollaborators: {
+      ...state.legendaryCollaborators,
+      enrolledProfileIds: state.legendaryCollaborators.enrolledProfileIds.filter(
+        (profileId) => !departedProfileIds.has(profileId),
+      ),
+      retainedProgress,
+    },
     school: {
       ...state.school,
       activeMembers: Math.max(0, state.school.activeMembers - departed.length),
@@ -946,46 +1028,27 @@ function assignCollaborator(
   if (assignment === "social" && !state.unlocks.social) return state;
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
   if (!collaborator) return state;
-  if (assignment !== "instructor") {
-    return {
-      ...state,
-      collaborators: state.collaborators.map((candidate) =>
-        candidate.id === collaboratorId ? { ...candidate, assignment } : candidate,
-      ),
-    };
-  }
-
-  const conversionCost = getInstructorConversionCost(collaborator);
-  if (state.school.euros < conversionCost) return state;
-  const newlyCertifiedForms = collaborator.forms.filter((formId) =>
-    isInstructorForm(formId) && !collaborator.instructorForms.includes(formId)
-  );
-  const nextState: GameState = {
+  return {
     ...state,
-    school: {
-      ...state.school,
-      euros: Math.round((state.school.euros - conversionCost) * 100) / 100,
-    },
-    collaborators: state.collaborators.map((collaborator) =>
-      collaborator.id === collaboratorId
-        ? {
-            ...collaborator,
-            assignment,
-            instructorForms: [...collaborator.instructorForms, ...newlyCertifiedForms],
-            training: collaborator.training && isInstructorForm(collaborator.training.formId)
-              ? { ...collaborator.training, includesInstructorCertification: true }
-              : collaborator.training,
-          }
-        : collaborator,
+    collaborators: state.collaborators.map((candidate) =>
+      candidate.id === collaboratorId ? { ...candidate, assignment } : candidate,
     ),
   };
-  if (conversionCost === 0) return nextState;
-  return addMessage(
-    nextState,
-    now,
-    "Attestati da istruttore conseguiti",
-    `${collaborator.displayName} ha completato la conversione da Istruttore pagando il conguaglio di ${euroFormatter.format(conversionCost)} per le Forme concluse o già in corso.`,
-  );
+}
+
+function toggleInstructorAutomation(
+  state: GameState,
+  collaboratorId: string,
+  enabled: boolean,
+): GameState {
+  return {
+    ...state,
+    collaborators: state.collaborators.map((candidate) =>
+      candidate.id === collaboratorId
+        ? { ...candidate, autoTeachingEnabled: enabled }
+        : candidate,
+    ),
+  };
 }
 
 function startFormTraining(
@@ -1005,21 +1068,62 @@ function startFormTraining(
   const student = collaborator ?? member;
   const definition = getFormDefinition(formId);
   const currentYear = getSchoolYear(state.school.currentMonth);
-  const instructorTrack = Boolean(
-    collaborator?.assignment === "instructor" && isInstructorForm(formId),
+  const qualificationOnly = Boolean(
+    collaborator?.assignment === "instructor" &&
+    collaborator.forms.includes(formId) &&
+    isInstructorForm(formId) &&
+    !collaborator.instructorForms.includes(formId),
   );
-  const instructor = !instructorTrack && isInstructorForm(formId)
+  if (qualificationOnly && collaborator && definition) {
+    const qualificationCost = getInstructorQualificationCost(definition.cost);
+    if (collaborator.training || state.school.euros < qualificationCost) return state;
+    return addMessage(
+      {
+        ...state,
+        school: {
+          ...state.school,
+          euros: Math.round((state.school.euros - qualificationCost) * 100) / 100,
+        },
+        collaborators: state.collaborators.map((candidate) =>
+          candidate.id === collaborator.id
+            ? { ...candidate, instructorForms: [...candidate.instructorForms, formId] }
+            : candidate,
+        ),
+      },
+      now,
+      "Qualifica da Istruttore ottenuta",
+      `${collaborator.displayName} ora può insegnare ${definition.title}${definition.branch ? ` — ${definition.branch}` : ""}. Costo: ${euroFormatter.format(qualificationCost)}.`,
+    );
+  }
+  const instructorSelf = collaborator?.assignment === "instructor";
+  const instructorTrack = Boolean(instructorSelf && isInstructorForm(formId));
+  const instructor = !instructorSelf
     ? selectAvailableInstructor(state, formId, personId)
     : undefined;
   const trainingCost = instructorTrack
     ? getInstructorFormCost(definition?.cost ?? 0)
-    : definition?.cost ?? 0;
+    : collaborator?.assignment === "instructor"
+      ? definition?.cost ?? 0
+      : getStudentFormCost(definition?.cost ?? 0);
+  const branchCapacity = collaborator?.assignment === "instructor"
+    ? Math.min(
+        3,
+        Math.max(1, collaborator.formBranchPreferences?.length ?? 0) +
+          (state.upgrades["instructor-versatility"] ?? 0),
+      )
+    : undefined;
   if (
     !student ||
     !definition ||
-    !canTrainForm(student, definition, currentYear) ||
-    (instructorTrack && selectBusyInstructorIds(state).has(personId)) ||
-    (!instructorTrack && isInstructorForm(formId) && !instructor) ||
+    !canTrainForm(
+      student,
+      definition,
+      currentYear,
+      branchCapacity,
+      collaborator?.assignment !== "instructor",
+    ) ||
+    (instructorTrack && selectInstructorTeachingCount(state, personId) > 0) ||
+    (!instructorSelf && !instructor) ||
     state.school.euros < trainingCost
   ) return state;
   const training = {
@@ -1048,6 +1152,23 @@ function startFormTraining(
   };
 }
 
+function chooseFormBranchPreferences(seed: number): {
+  preferences: FormBranch[];
+  nextSeed: number;
+} {
+  const [countRoll, seedAfterCount] = nextRandom(seed);
+  const count = countRoll < 0.65 ? 1 : countRoll < 0.95 ? 2 : 3;
+  const [startRoll, nextSeed] = nextRandom(seedAfterCount);
+  const start = Math.floor(startRoll * FORM_BRANCHES.length) % FORM_BRANCHES.length;
+  return {
+    preferences: Array.from(
+      { length: count },
+      (_, index) => FORM_BRANCHES[(start + index) % FORM_BRANCHES.length],
+    ),
+    nextSeed,
+  };
+}
+
 function resolveFormTraining(state: GameState, personId: string, now: number): GameState {
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
   const member = state.contacts.find((candidate) => candidate.id === personId);
@@ -1057,11 +1178,24 @@ function resolveFormTraining(state: GameState, personId: string, now: number): G
   const definition = getFormDefinition(completedFormId);
   if (!definition) return state;
   const completedForms = [...student.forms, completedFormId];
+  const preferenceResult = completedFormId === "course-y" &&
+      (student.formBranchPreferences?.length ?? 0) === 0
+    ? chooseFormBranchPreferences(state.randomSeed)
+    : {
+        preferences: [...(student.formBranchPreferences ?? [])],
+        nextSeed: state.randomSeed,
+      };
   let nextState: GameState = {
     ...state,
+    randomSeed: preferenceResult.nextSeed,
     contacts: member && !collaborator
       ? state.contacts.map((candidate) => candidate.id === member.id
-        ? { ...candidate, forms: completedForms, training: undefined }
+        ? {
+            ...candidate,
+            forms: completedForms,
+            formBranchPreferences: preferenceResult.preferences,
+            training: undefined,
+          }
         : candidate)
       : state.contacts,
     collaborators: collaborator
@@ -1069,6 +1203,7 @@ function resolveFormTraining(state: GameState, personId: string, now: number): G
         ? {
             ...candidate,
             forms: completedForms,
+            formBranchPreferences: preferenceResult.preferences,
             instructorForms: student.training?.includesInstructorCertification
               ? [...candidate.instructorForms, completedFormId]
               : candidate.instructorForms,
@@ -1084,7 +1219,9 @@ function resolveFormTraining(state: GameState, personId: string, now: number): G
   nextState = addMessage(
     nextState,
     now,
-    "Formazione completata",
+    student.training.instructorId
+      ? "Riepilogo formazione automatica"
+      : "Formazione completata",
     `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha completato ${definition.title}${definition.branch ? ` — ${definition.branch}` : ""}.`,
   );
   if (
@@ -1340,7 +1477,7 @@ function processNarrativeEvent(state: GameState, now: number, gainMultiplier: nu
         rewardState.state.statistics.eurosEarned + Math.max(0, euroDelta),
     },
   };
-  nextState = addMessage(nextState, now, definition.title, summary, definition.tone);
+  nextState = addMessage(nextState, now, definition.title, summary, definition.tone, "other");
   return contacts.length > 0 ? startNextCampaign(nextState, now) : nextState;
 }
 
@@ -1386,7 +1523,7 @@ function foundSchool(
   const fresh = createInitialState(
     now,
     state.profile.displayName,
-    !state.legendaryCollaborators.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID),
+    false,
     state.legendaryCollaborators,
   );
   const archivedSchool = {
@@ -1458,6 +1595,7 @@ function grantAchievements(state: GameState, now: number, gainMultiplier: number
       `Traguardo: ${definition.title}`,
       `${definition.description} Premio amministrativo: ${euroFormatter.format(achievementReward)}.`,
       "system",
+      "other",
     );
   }
   return nextState;
@@ -1489,7 +1627,82 @@ function completeShortGoal(
     `Obiettivo completato: ${definition.title}`,
     `${definition.completionNarrative} Premio operativo: ${euroFormatter.format(reward)}. Prossima priorità: ${nextDefinition.title}.`,
     "positive",
+    "other",
   );
+}
+
+type AutomaticStudent = Contact | GameState["collaborators"][number];
+
+function getAutomaticFormCandidates(student: AutomaticStudent): FormId[] {
+  const core: FormId[] = ["form-1", "course-x", "form-2", "course-y"];
+  const nextCore = core.find((formId) => !student.forms.includes(formId));
+  if (nextCore) return [nextCore];
+
+  const completedFormFive = (["form-5-long", "form-5-staff", "form-5-double"] as FormId[])
+    .some((formId) => student.forms.includes(formId));
+  if (completedFormFive && !student.forms.includes("form-6")) return ["form-6"];
+  if (completedFormFive && !student.forms.includes("form-7")) return ["form-7"];
+
+  const preferredBranches = student.formBranchPreferences ?? [];
+  const orderedBranches = preferredBranches.slice().sort((left, right) => {
+    const startedLeft = BRANCH_FORM_IDS[left].some((formId) => student.forms.includes(formId));
+    const startedRight = BRANCH_FORM_IDS[right].some((formId) => student.forms.includes(formId));
+    return Number(startedRight) - Number(startedLeft);
+  });
+  return orderedBranches.flatMap((branch) => {
+    const nextForm = BRANCH_FORM_IDS[branch].find((formId) => !student.forms.includes(formId));
+    return nextForm ? [nextForm] : [];
+  });
+}
+
+function processAutomaticTeaching(state: GameState, now: number): GameState {
+  if (isSummerBreak(state.school.currentMonth)) return state;
+  const currentYear = getSchoolYear(state.school.currentMonth);
+  let nextState = state;
+
+  while (true) {
+    const collaboratorContactIds = new Set(
+      nextState.collaborators.map((collaborator) => collaborator.contactId),
+    );
+    const students: AutomaticStudent[] = [
+      ...nextState.contacts.filter((contact) =>
+        contact.status === "enrolled" &&
+        !collaboratorContactIds.has(contact.id) &&
+        !contact.training &&
+        contact.lastFormTrainingYear !== currentYear
+      ),
+      ...nextState.collaborators.filter((collaborator) =>
+        collaborator.assignment !== "instructor" &&
+        !collaborator.training &&
+        collaborator.lastFormTrainingYear !== currentYear
+      ),
+    ].sort((left, right) =>
+      left.forms.length - right.forms.length ||
+      ("acquiredAt" in left ? left.acquiredAt : left.joinedAt) -
+        ("acquiredAt" in right ? right.acquiredAt : right.joinedAt)
+    );
+
+    let started = false;
+    for (const student of students) {
+      const candidate = getAutomaticFormCandidates(student).find((formId) => {
+        const definition = getFormDefinition(formId);
+        return Boolean(
+          definition &&
+          canTrainForm(student, definition, currentYear) &&
+          selectAvailableInstructor(nextState, formId, student.id) &&
+          nextState.school.euros >= getStudentFormCost(definition.cost),
+        );
+      });
+      if (!candidate) continue;
+      const beforeEuros = nextState.school.euros;
+      nextState = startFormTraining(nextState, student.id, candidate, now);
+      if (nextState.school.euros < beforeEuros) {
+        started = true;
+        break;
+      }
+    }
+    if (!started) return nextState;
+  }
 }
 
 function tick(state: GameState, now: number, gainMultiplier: number): GameState {
@@ -1524,6 +1737,7 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
     }
   }
   nextState = collectFees(nextState, now, gainMultiplier);
+  nextState = processAutomaticTeaching(nextState, now);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
   return notifyPrestigeOffer(nextState, now);
 }
@@ -1593,6 +1807,101 @@ function updateProfileName(state: GameState, displayName: string): GameState {
   };
 }
 
+function processOfflinePassiveProgress(
+  state: GameState,
+  now: number,
+  elapsedMs: number,
+  rawElapsedMs: number,
+): GameState {
+  const automationMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
+  const socialMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "socialMultiplier");
+  const socialProductivity = state.unlocks.social
+    ? state.collaborators
+        .filter((collaborator) => collaborator.assignment === "social")
+        .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0)
+    : 0;
+  const socialTotal = state.automation.socialBuffer +
+    (elapsedMs / GAME_CONFIG.socialContactIntervalMs) *
+      socialProductivity *
+      socialMultiplier *
+      automationMultiplier *
+      GAME_CONFIG.offlineGainMultiplier;
+  const socialContacts = Math.floor(socialTotal);
+  const eurosEarned = Math.round(
+    selectIncomePerMonth(state) *
+      (elapsedMs / GAME_CONFIG.gameMonthMs) *
+      GAME_CONFIG.offlineGainMultiplier *
+      100,
+  ) / 100;
+  const shiftTraining = <T extends { training?: { startedAt: number; completesAt: number } }>(
+    person: T,
+  ): T => person.training
+    ? {
+        ...person,
+        training: {
+          ...person.training,
+          startedAt: person.training.startedAt + rawElapsedMs,
+          completesAt: person.training.completesAt + rawElapsedMs,
+        },
+      }
+    : person;
+  let nextState: GameState = {
+    ...state,
+    school: {
+      ...state.school,
+      euros: state.school.euros + eurosEarned,
+      nextFeeAt: state.school.nextFeeAt + rawElapsedMs,
+    },
+    contacts: state.contacts.map(shiftTraining),
+    collaborators: state.collaborators.map(shiftTraining),
+    emails: state.emails.map((email) => email.sendCompletesAt
+      ? { ...email, sendCompletesAt: email.sendCompletesAt + rawElapsedMs }
+      : email),
+    pendingEmailOutcomes: state.pendingEmailOutcomes.map((outcome) => ({
+      ...outcome,
+      resolvesAt: outcome.resolvesAt + rawElapsedMs,
+    })),
+    scheduledTrials: state.scheduledTrials.map((trial) => ({
+      ...trial,
+      startsAt: trial.startsAt + rawElapsedMs,
+      resolvesAt: trial.resolvesAt + rawElapsedMs,
+    })),
+    acquisitionEvents: state.acquisitionEvents.map((event) => ({
+      ...event,
+      startedAt: event.startedAt + rawElapsedMs,
+      resolvesAt: event.resolvesAt + rawElapsedMs,
+    })),
+    activities: { nextSparringAt: state.activities.nextSparringAt + rawElapsedMs },
+    narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + rawElapsedMs },
+    automation: {
+      ...state.automation,
+      lastProcessedAt: now,
+      socialBuffer: socialTotal - socialContacts,
+    },
+    statistics: {
+      ...state.statistics,
+      eurosEarned: state.statistics.eurosEarned + eurosEarned,
+    },
+  };
+  if (socialContacts <= 0) return nextState;
+  const acquired = createAcquiredContacts(nextState, socialContacts, "social", now);
+  nextState = {
+    ...nextState,
+    randomSeed: acquired.nextSeed,
+    legendaryCollaborators: addLegendaryEncounters(
+      nextState.legendaryCollaborators,
+      acquired.contacts,
+    ),
+    contacts: [...nextState.contacts, ...acquired.contacts],
+    statistics: {
+      ...nextState.statistics,
+      contactsAcquired: nextState.statistics.contactsAcquired + socialContacts,
+      socialContacts: nextState.statistics.socialContacts + socialContacts,
+    },
+  };
+  return nextState;
+}
+
 export function gameReducer(state: GameState, action: GameAction): GameState {
   let nextState: GameState;
   switch (action.type) {
@@ -1601,6 +1910,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     case "TICK":
       nextState = tick(state, action.now, action.gainMultiplier ?? 1);
+      break;
+    case "OFFLINE_PASSIVE_PROGRESS":
+      nextState = processOfflinePassiveProgress(
+        state,
+        action.now,
+        action.elapsedMs,
+        action.rawElapsedMs,
+      );
       break;
     case "REPLACE_STATE":
       nextState = action.state;
@@ -1629,6 +1946,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "ASSIGN_COLLABORATOR":
       nextState = assignCollaborator(state, action.collaboratorId, action.assignment, action.now);
       break;
+    case "TOGGLE_INSTRUCTOR_AUTOMATION":
+      nextState = toggleInstructorAutomation(
+        state,
+        action.collaboratorId,
+        action.enabled,
+      );
+      break;
     case "RUN_SOCIAL_CAMPAIGN":
       nextState = runSocialCampaign(state, action.now);
       break;
@@ -1642,6 +1966,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       nextState = state;
   }
   const now = "now" in action ? action.now : state.lastSavedAt;
+  if (action.type === "OFFLINE_PASSIVE_PROGRESS") return nextState;
   const gainMultiplier = action.type === "TICK" ? (action.gainMultiplier ?? 1) : 1;
   return completeShortGoal(
     grantAchievements(nextState, now, gainMultiplier),

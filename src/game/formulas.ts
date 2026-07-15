@@ -93,3 +93,7 @@ export function getMemberAnnualDepartureChance(forms: FormId[]): number {
   }, 0);
   return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)];
 }
+
+export function getLegendaryAnnualDepartureChance(forms: FormId[]): number {
+  return getMemberAnnualDepartureChance(forms) * GAME_CONFIG.legendaryDepartureMultiplier;
+}

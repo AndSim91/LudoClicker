@@ -18,6 +18,7 @@ export type SpecialCollaboratorId =
   | "niccolo-efrati";
 
 export type PersonRarity = "common" | "rare" | "legendary";
+export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
 
 export interface FormTraining {
   formId: FormId;
@@ -38,6 +39,7 @@ export interface Contact {
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
   forms: FormId[];
+  formBranchPreferences?: FormBranch[];
   training?: FormTraining;
   lastFormTrainingYear?: number;
   enrolledMonth?: number;
@@ -85,6 +87,7 @@ export interface InboxMessage {
   tone: "system" | "positive" | "neutral";
   unread: boolean;
   stackCount?: number;
+  category?: "focused" | "other";
 }
 
 export type AcquisitionEventId =
@@ -165,7 +168,9 @@ export type UpgradeId =
   | "checklist"
   | "registration-form"
   | "order-secretariat"
-  | "multi-site-coordination";
+  | "multi-site-coordination"
+  | "instructor-versatility"
+  | "tiamat-instructor";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
 
@@ -271,6 +276,8 @@ export interface Collaborator {
   joinedAt: number;
   forms: FormId[];
   instructorForms: FormId[];
+  formBranchPreferences?: FormBranch[];
+  autoTeachingEnabled?: boolean;
   assignment: CollaboratorAssignment;
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
@@ -278,10 +285,19 @@ export interface Collaborator {
   lastFormTrainingYear?: number;
 }
 
+export interface RetainedLegendaryProgress {
+  forms: FormId[];
+  instructorForms: FormId[];
+  formBranchPreferences?: FormBranch[];
+  joinedAt: number;
+  lastFormTrainingYear?: number;
+}
+
 export interface LegendaryCollaboratorProgress {
   encounteredProfileIds: SpecialCollaboratorId[];
   enrolledProfileIds: SpecialCollaboratorId[];
   enrollmentAttempts: Partial<Record<SpecialCollaboratorId, number>>;
+  retainedProgress: Partial<Record<SpecialCollaboratorId, RetainedLegendaryProgress>>;
 }
 
 export interface Statistics {
@@ -377,6 +393,7 @@ export interface GameState {
 export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "TICK"; now: number; gainMultiplier?: number }
+  | { type: "OFFLINE_PASSIVE_PROGRESS"; now: number; elapsedMs: number; rawElapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }
@@ -389,6 +406,12 @@ export type GameAction =
       type: "ASSIGN_COLLABORATOR";
       collaboratorId: string;
       assignment: CollaboratorAssignment;
+      now: number;
+    }
+  | {
+      type: "TOGGLE_INSTRUCTOR_AUTOMATION";
+      collaboratorId: string;
+      enabled: boolean;
       now: number;
     }
   | { type: "RUN_SOCIAL_CAMPAIGN"; now: number }

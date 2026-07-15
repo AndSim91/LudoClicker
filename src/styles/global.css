@@ -204,13 +204,30 @@ svg {
   align-self: stretch;
   flex-direction: column;
   justify-content: center;
-  min-width: 88px;
-  padding: 0 18px 3px;
+  min-width: 174px;
+  padding: 0 14px 3px;
   text-align: center;
   border-inline: 1px solid rgb(255 255 255 / 18%);
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
+}
+
+.title-month-copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.title-month-copy strong {
+  font-size: 12px;
+}
+
+.title-month-copy small {
+  color: rgb(255 255 255 / 78%);
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .month-progress {

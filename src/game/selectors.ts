@@ -1,6 +1,7 @@
 import type { CampaignEmail, Contact, FormId, GameState, ScheduledTrial } from "./types";
 import { GAME_CONFIG } from "./config";
 import { getUpgradeEffectTotal } from "../content/upgrades";
+import { isInstructorForm } from "../content/forms";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {
   return state.emails.find((email) => email.status === "writing" || email.status === "sending");
@@ -24,14 +25,42 @@ export function selectAvailableEventMembers(state: GameState): number {
 
 export function selectBusyInstructorIds(state: GameState): Set<string> {
   const busy = new Set<string>();
-  for (const contact of state.contacts) {
-    if (contact.training?.instructorId) busy.add(contact.training.instructorId);
-  }
   for (const collaborator of state.collaborators) {
     if (collaborator.training) busy.add(collaborator.id);
-    if (collaborator.training?.instructorId) busy.add(collaborator.training.instructorId);
+    if (selectInstructorTeachingCount(state, collaborator.id) >= selectInstructorCapacity(state)) {
+      busy.add(collaborator.id);
+    }
   }
   return busy;
+}
+
+export function selectInstructorCapacity(state: GameState): number {
+  return Math.min(6, 1 + (state.upgrades["tiamat-instructor"] ?? 0));
+}
+
+export function selectInstructorTeachingCount(state: GameState, instructorId: string): number {
+  const contactTrainings = state.contacts.filter(
+    (contact) => contact.training?.instructorId === instructorId,
+  ).length;
+  const collaboratorTrainings = state.collaborators.filter(
+    (collaborator) => collaborator.training?.instructorId === instructorId,
+  ).length;
+  return contactTrainings + collaboratorTrainings;
+}
+
+export function canInstructorTeachForm(
+  state: GameState,
+  instructorId: string,
+  formId: FormId,
+): boolean {
+  const instructor = state.collaborators.find((candidate) => candidate.id === instructorId);
+  return Boolean(
+    instructor &&
+    instructor.assignment === "instructor" &&
+    instructor.autoTeachingEnabled !== false &&
+    instructor.forms.includes(formId) &&
+    (!isInstructorForm(formId) || instructor.instructorForms.includes(formId)),
+  );
 }
 
 export function selectAvailableInstructor(
@@ -42,8 +71,7 @@ export function selectAvailableInstructor(
   const busyInstructorIds = selectBusyInstructorIds(state);
   return state.collaborators.find((collaborator) =>
     collaborator.id !== studentId &&
-    collaborator.assignment === "instructor" &&
-    collaborator.instructorForms.includes(formId) &&
+    canInstructorTeachForm(state, collaborator.id, formId) &&
     !busyInstructorIds.has(collaborator.id)
   );
 }

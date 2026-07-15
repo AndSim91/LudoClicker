@@ -26,6 +26,7 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   social: "people",
   equipment: "settings",
   organization: "tasks",
+  instructors: "people",
 };
 
 const recommendationReasons: Record<UpgradeCategory, string> = {
@@ -36,6 +37,7 @@ const recommendationReasons: Record<UpgradeCategory, string> = {
   social: "mantiene attiva l'acquisizione automatica",
   equipment: "riduce i rallentamenti dovuti all'usura",
   organization: "rafforza automazione ed entrate ricorrenti",
+  instructors: "estende compatibilità e capacità didattica",
 };
 
 function getCategorySummary(state: GameState, category: UpgradeCategory) {
@@ -54,6 +56,8 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
       return `${state.equipment.totalSwords} spade · -${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura`;
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione · ${Math.round(getOfflineLimitMs(state) / 3_600_000)} h offline`;
+    case "instructors":
+      return `Polivalenza ${state.upgrades["instructor-versatility"]}/2 · ${Math.min(6, 1 + state.upgrades["tiamat-instructor"])} allievi per Istruttore`;
   }
 }
 
@@ -71,8 +75,8 @@ function getPurchaseLabel(state: GameState, definition: UpgradeDefinition) {
 function getCategoryPriority(state: GameState): UpgradeCategory[] {
   const availableContacts = selectAvailableContacts(state);
   const categories: UpgradeCategory[] = availableContacts > 8
-    ? ["speed", "writing", "welcome", "charisma", "organization", "equipment", "social"]
-    : ["charisma", "speed", "writing", "welcome", "organization", "equipment", "social"];
+    ? ["speed", "writing", "welcome", "charisma", "organization", "instructors", "equipment", "social"]
+    : ["charisma", "speed", "writing", "welcome", "organization", "instructors", "equipment", "social"];
 
   if (state.scheduledTrials.some((trial) => trial.status === "scheduled")) {
     categories.splice(categories.indexOf("welcome"), 1);

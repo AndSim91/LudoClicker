@@ -159,7 +159,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
 - **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
 
-Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico va da Settembre a Giugno, con pausa estiva a Luglio e Agosto, e riparte ogni Settembre. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **120 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre a Giugno, con pausa estiva a Luglio e Agosto, e riparte ogni Settembre. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -329,7 +329,7 @@ Per il primo prototipo:
 | Bonus di iscrizione | immediato (€20) |
 | Accredito della quota mensile | al cambio mese (€40 per iscritto) |
 
-Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre. La formazione segue invece l'anno scolastico Settembre–Giugno: Luglio e Agosto sono pausa estiva e a Settembre inizia un nuovo anno scolastico. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
+Il mese di gioco dura 120 secondi e il calendario scorre da Gennaio a Dicembre. La formazione segue invece l'anno scolastico Settembre–Giugno: Luglio e Agosto sono pausa estiva e a Settembre inizia un nuovo anno scolastico, indicato accanto al mese corrente nella barra superiore. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
 ### 7.3 Formule di conversione
 
@@ -470,7 +470,7 @@ Questa situazione è intenzionale e rappresenta il principale collo di bottiglia
 
 ### 9.1 Reclutamento
 
-Ogni nuovo iscritto ha una probabilità rara e casuale di essere un **Iscritto volenteroso**. Gli iscritti volenterosi diventano Collaboratori delle Onde soltanto dopo aver completato la **Forma 7**. Gli iscritti comuni possono completare lo stesso percorso, ma non diventano collaboratori. I Leggendari sono collaboratori protetti fin dall'iscrizione.
+Ogni nuovo iscritto ha una probabilità rara e casuale di essere un **Iscritto volenteroso**. Gli iscritti volenterosi diventano Collaboratori delle Onde soltanto dopo aver completato la **Forma 7**. Gli iscritti comuni possono completare lo stesso percorso, ma non diventano collaboratori. I Leggendari diventano collaboratori fin dall'iscrizione.
 
 La probabilità può aumentare con:
 
@@ -496,7 +496,14 @@ Regole:
 - non esiste un limite massimo di collaboratori;
 - ogni collaboratore svolge un solo incarico alla volta;
 - la riassegnazione è libera e immediata;
-- un collaboratore può lasciare la scuola soltanto tramite eventi narrativi casuali.
+- un collaboratore non leggendario può lasciare la scuola soltanto tramite eventi narrativi casuali; i Leggendari seguono le regole interne descritte sotto.
+
+Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
+
+- Andrea Simonazzi compare soltanto nel primo ciclo prima del prestigio e non può essere selezionato da alcuna procedura di abbandono;
+- gli altri Leggendari possono lasciare la scuola con una probabilità annuale pari al 10% del rischio ordinario associato alla loro Forma più alta;
+- dopo un abbandono tornano disponibili per incontri futuri;
+- una nuova iscrizione ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
 
 ### 9.3 Ruoli
 
@@ -582,14 +589,14 @@ Regole:
 
 ### 9.8 Abbandono degli iscritti ignorati
 
-All'inizio di ogni nuovo anno scolastico, a Settembre, un iscritto ordinario che ha trascorso l'intero anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
+All'inizio di ogni nuovo anno scolastico, a Settembre, un iscritto che ha trascorso l'intero anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
 
-- i Leggendari;
-- i Collaboratori delle Onde;
+- il personaggio fisso interno del primo ciclo;
+- i Collaboratori delle Onde non leggendari;
 - gli iscritti entrati a anno già iniziato;
 - chi ha iniziato una formazione durante l'anno, anche se non l'ha ancora completata.
 
-La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio.
+La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Per i Leggendari non fissi si applica internamente un moltiplicatore 0,1 alla stessa curva.
 
 | Forma più alta | Probabilità annuale di abbandono |
 |---|---:|
@@ -1221,7 +1228,7 @@ Il riepilogo mostra:
 - iscrizione dopo prova in palestra: 50% provvisorio;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
-- durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Giugno;
+- durata di un mese di gioco: 120 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Giugno sempre visibile;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
 - il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
 - il primo evento e il primo sparring sono gratuiti e guidati.

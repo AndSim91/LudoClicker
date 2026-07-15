@@ -8,6 +8,7 @@ import { getEmailPresentationLevel } from "../content/emailPresentation";
 import { createShortGoalFromStatistics } from "../content/shortGoals";
 import { normalizeStackedMessages } from "./messages";
 import { getAcquisitionEventDefinition } from "../content/events";
+import { FORM_BRANCHES, getFormDefinition } from "../content/forms";
 import type { GameState, UpgradeLevels } from "./types";
 
 const SAVE_KEY = "oggetto-nuovi-iscritti.save";
@@ -49,12 +50,17 @@ function isGameState(value: unknown): value is GameState {
     Array.isArray(state.legendaryCollaborators?.encounteredProfileIds) &&
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
+    typeof state.legendaryCollaborators?.retainedProgress === "object" &&
     Array.isArray(state.collaborators) &&
     state.collaborators.every((collaborator) =>
       (collaborator.rarity === "rare" || collaborator.rarity === "legendary") &&
       Array.isArray(collaborator.forms) &&
-      Array.isArray(collaborator.instructorForms)
+      Array.isArray(collaborator.instructorForms) &&
+      Array.isArray(collaborator.formBranchPreferences) &&
+      typeof collaborator.autoTeachingEnabled === "boolean"
     ) &&
+    typeof state.upgrades?.["instructor-versatility"] === "number" &&
+    typeof state.upgrades?.["tiamat-instructor"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     typeof state.statistics?.automatedCharacters === "number" &&
@@ -335,6 +341,7 @@ function migrate(value: unknown): unknown {
         enrollmentAttempts: Object.fromEntries(
           enrolledProfileIds.map((profileId) => [profileId, 1]),
         ),
+        retainedProgress: {},
       },
     };
   }
@@ -500,11 +507,75 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 22) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 23,
       collaborators: (migrated.collaborators ?? []).map((collaborator) => ({
         ...collaborator,
         instructorForms: collaborator.instructorForms ?? [],
       })),
+    };
+  }
+
+  if (migrated.version === 23) {
+    const retainedProgress = Object.fromEntries(
+      (migrated.collaborators ?? []).flatMap((collaborator) =>
+        collaborator.specialProfileId
+          ? [[collaborator.specialProfileId, {
+              forms: [...collaborator.forms],
+              instructorForms: [...(collaborator.instructorForms ?? [])],
+              joinedAt: collaborator.joinedAt,
+              lastFormTrainingYear: collaborator.lastFormTrainingYear,
+            }]]
+          : [],
+      ),
+    );
+    migrated = {
+      ...migrated,
+      version: 24,
+      legendaryCollaborators: migrated.legendaryCollaborators
+        ? { ...migrated.legendaryCollaborators, retainedProgress }
+        : migrated.legendaryCollaborators,
+    };
+  }
+
+  if (migrated.version === 24) {
+    const preferencesFor = (forms: GameState["contacts"][number]["forms"], index: number) => {
+      if (!forms.includes("course-y")) return [];
+      const learnedBranches = FORM_BRANCHES.filter((branch) =>
+        forms.some((formId) => getFormDefinition(formId)?.branch === branch)
+      );
+      return learnedBranches.length > 0
+        ? learnedBranches
+        : [FORM_BRANCHES[index % FORM_BRANCHES.length]];
+    };
+    const retainedProgress = Object.fromEntries(
+      Object.entries(migrated.legendaryCollaborators?.retainedProgress ?? {}).map(
+        ([profileId, retained], index) => [profileId, retained
+          ? {
+              ...retained,
+              formBranchPreferences: retained.formBranchPreferences ??
+                preferencesFor(retained.forms, index),
+            }
+          : retained],
+      ),
+    );
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      contacts: (migrated.contacts ?? []).map((contact, index) => ({
+        ...contact,
+        formBranchPreferences: contact.formBranchPreferences ??
+          preferencesFor(contact.forms, index),
+      })),
+      collaborators: (migrated.collaborators ?? []).map((collaborator, index) => ({
+        ...collaborator,
+        formBranchPreferences: collaborator.formBranchPreferences ??
+          preferencesFor(collaborator.forms, index),
+        autoTeachingEnabled: collaborator.autoTeachingEnabled ?? true,
+      })),
+      legendaryCollaborators: migrated.legendaryCollaborators
+        ? { ...migrated.legendaryCollaborators, retainedProgress }
+        : migrated.legendaryCollaborators,
+      upgrades: { ...createInitialUpgradeLevels(), ...(migrated.upgrades ?? {}) },
     };
   }
 

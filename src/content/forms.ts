@@ -2,16 +2,18 @@ import type {
   Collaborator,
   CollaboratorAssignment,
   FormId,
+  FormBranch,
   FormTraining,
   PersonRarity,
 } from "../game/types";
 import { PERSON_RARITIES } from "./rarities";
 
-export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
+export type { FormBranch } from "../game/types";
 
 export interface FormStudent {
   forms: FormId[];
   rarity: PersonRarity;
+  formBranchPreferences?: FormBranch[];
   training?: FormTraining;
   lastFormTrainingYear?: number;
 }
@@ -38,24 +40,26 @@ export interface CollaboratorFormBonuses {
 }
 
 export const FORM_DEFINITIONS: FormDefinition[] = [
-  { id: "form-1", title: "Forma 1", cost: 15, durationMs: 20_000 },
-  { id: "course-x", title: "Corso X", cost: 20, durationMs: 25_000, prerequisite: "form-1" },
-  { id: "form-2", title: "Forma 2", cost: 25, durationMs: 30_000, prerequisite: "course-x" },
-  { id: "course-y", title: "Corso Y", cost: 30, durationMs: 35_000, prerequisite: "form-2" },
-  { id: "form-3-long", title: "Forma 3", branch: "Spada Lunga", cost: 40, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Eventi" },
-  { id: "form-4-long", title: "Forma 4", branch: "Spada Lunga", cost: 50, durationMs: 45_000, prerequisite: "form-3-long", bonusLabel: "+30% Eventi" },
-  { id: "form-5-long", title: "Forma 5", branch: "Spada Lunga", cost: 60, durationMs: 50_000, prerequisite: "form-4-long", bonusLabel: "+50% Eventi" },
-  { id: "form-3-staff", title: "Forma 3", branch: "Staffa", cost: 40, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Lezioni" },
-  { id: "form-4-staff", title: "Forma 4", branch: "Staffa", cost: 50, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Lezioni" },
-  { id: "form-5-staff", title: "Forma 5", branch: "Staffa", cost: 60, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Lezioni" },
-  { id: "form-3-double", title: "Forma 3", branch: "Doppia spada corta", cost: 40, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+10% Redazione e Social" },
-  { id: "form-4-double", title: "Forma 4", branch: "Doppia spada corta", cost: 50, durationMs: 45_000, prerequisite: "form-3-double", bonusLabel: "+20% Redazione e Social" },
-  { id: "form-5-double", title: "Forma 5", branch: "Doppia spada corta", cost: 60, durationMs: 50_000, prerequisite: "form-4-double", bonusLabel: "+35% Redazione e Social" },
-  { id: "form-6", title: "Forma 6", cost: 75, durationMs: 60_000, anyPrerequisite: ["form-5-long", "form-5-staff", "form-5-double"], bonusLabel: "+10% su ogni incarico" },
-  { id: "form-7", title: "Forma 7", cost: 100, durationMs: 75_000, prerequisite: "form-6", bonusLabel: "+20% su ogni incarico" },
+  { id: "form-1", title: "Forma 1", cost: 25, durationMs: 20_000 },
+  { id: "course-x", title: "Corso X", cost: 50, durationMs: 25_000, prerequisite: "form-1" },
+  { id: "form-2", title: "Forma 2", cost: 100, durationMs: 30_000, prerequisite: "course-x" },
+  { id: "course-y", title: "Corso Y", cost: 250, durationMs: 35_000, prerequisite: "form-2" },
+  { id: "form-3-long", title: "Forma 3", branch: "Spada Lunga", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Eventi" },
+  { id: "form-4-long", title: "Forma 4", branch: "Spada Lunga", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-long", bonusLabel: "+30% Eventi" },
+  { id: "form-5-long", title: "Forma 5", branch: "Spada Lunga", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-long", bonusLabel: "+50% Eventi" },
+  { id: "form-3-staff", title: "Forma 3", branch: "Staffa", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Lezioni" },
+  { id: "form-4-staff", title: "Forma 4", branch: "Staffa", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Lezioni" },
+  { id: "form-5-staff", title: "Forma 5", branch: "Staffa", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Lezioni" },
+  { id: "form-3-double", title: "Forma 3", branch: "Doppia spada corta", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+10% Redazione e Social" },
+  { id: "form-4-double", title: "Forma 4", branch: "Doppia spada corta", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-double", bonusLabel: "+20% Redazione e Social" },
+  { id: "form-5-double", title: "Forma 5", branch: "Doppia spada corta", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-double", bonusLabel: "+35% Redazione e Social" },
+  { id: "form-6", title: "Forma 6", cost: 2_200, durationMs: 60_000, anyPrerequisite: ["form-5-long", "form-5-staff", "form-5-double"], bonusLabel: "+10% su ogni incarico" },
+  { id: "form-7", title: "Forma 7", cost: 3_000, durationMs: 75_000, prerequisite: "form-6", bonusLabel: "+20% su ogni incarico" },
 ];
 
-const BRANCH_FORM_IDS: Record<FormBranch, FormId[]> = {
+export const FORM_BRANCHES: FormBranch[] = ["Spada Lunga", "Staffa", "Doppia spada corta"];
+
+export const BRANCH_FORM_IDS: Record<FormBranch, FormId[]> = {
   "Spada Lunga": ["form-3-long", "form-4-long", "form-5-long"],
   Staffa: ["form-3-staff", "form-4-staff", "form-5-staff"],
   "Doppia spada corta": ["form-3-double", "form-4-double", "form-5-double"],
@@ -66,25 +70,35 @@ export function getFormDefinition(id: FormId) {
 }
 
 export function isInstructorForm(formId: FormId): boolean {
-  return formId.startsWith("form-");
+  return formId !== "course-x";
 }
 
 export function getInstructorFormCost(cost: number): number {
-  return Math.round(cost * 1.5 * 100) / 100;
+  return Math.round(cost * 3 * 100) / 100;
+}
+
+export function getInstructorQualificationCost(cost: number): number {
+  return Math.round(cost * 2 * 100) / 100;
+}
+
+export function getStudentFormCost(cost: number): number {
+  return Math.round(cost * 0.25 * 100) / 100;
 }
 
 export function getInstructorConversionCost(collaborator: Collaborator): number {
   const certified = new Set(collaborator.instructorForms);
   let cost = collaborator.forms.reduce((total, formId) => {
     if (!isInstructorForm(formId) || certified.has(formId)) return total;
-    return total + (getFormDefinition(formId)?.cost ?? 0) * 0.5;
+    return total + getInstructorQualificationCost(getFormDefinition(formId)?.cost ?? 0);
   }, 0);
   if (
     collaborator.training &&
     isInstructorForm(collaborator.training.formId) &&
     !collaborator.training.includesInstructorCertification
   ) {
-    cost += (getFormDefinition(collaborator.training.formId)?.cost ?? 0) * 0.5;
+    cost += getInstructorQualificationCost(
+      getFormDefinition(collaborator.training.formId)?.cost ?? 0,
+    );
   }
   return Math.round(cost * 100) / 100;
 }
@@ -99,6 +113,8 @@ export function canTrainForm(
   student: FormStudent,
   definition: FormDefinition,
   currentYear?: number,
+  maximumBranches = student.formBranchPreferences?.length ?? 1,
+  restrictToPreferences = true,
 ) {
   if (student.forms.includes(definition.id) || student.training) return false;
   if (
@@ -110,13 +126,34 @@ export function canTrainForm(
     definition.anyPrerequisite &&
     !definition.anyPrerequisite.some((formId) => student.forms.includes(formId))
   ) return false;
-  const chosenBranch = getChosenFormBranch(student.forms);
-  if (definition.branch && chosenBranch && definition.branch !== chosenBranch) return false;
+  if (definition.branch) {
+    if (
+      restrictToPreferences &&
+      student.formBranchPreferences?.length &&
+      !student.formBranchPreferences.includes(definition.branch)
+    ) return false;
+    const learnedBranches = new Set(
+      student.forms.flatMap((formId) => {
+        const branch = getFormDefinition(formId)?.branch;
+        return branch ? [branch] : [];
+      }),
+    );
+    if (!learnedBranches.has(definition.branch) && learnedBranches.size >= maximumBranches) {
+      return false;
+    }
+  }
   return true;
 }
 
-export function getAvailableForms(student: FormStudent, currentYear?: number) {
-  return FORM_DEFINITIONS.filter((definition) => canTrainForm(student, definition, currentYear));
+export function getAvailableForms(
+  student: FormStudent,
+  currentYear?: number,
+  maximumBranches?: number,
+  restrictToPreferences?: boolean,
+) {
+  return FORM_DEFINITIONS.filter((definition) =>
+    canTrainForm(student, definition, currentYear, maximumBranches, restrictToPreferences)
+  );
 }
 
 function latestBranchBonus(forms: FormId[], branch: FormBranch): number {

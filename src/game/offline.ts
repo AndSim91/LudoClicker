@@ -32,21 +32,12 @@ export function simulateOfflineProgress(
   if (rawElapsed === 0) return { state, summary: null };
   const offlineLimitMs = getOfflineLimitMs(state);
   const elapsedMs = Math.min(rawElapsed, offlineLimitMs);
-  const endAt = state.lastSavedAt + elapsedMs;
   const before = state.statistics;
-  let processed = state;
-
-  for (let stepAt = state.lastSavedAt + 1_000; stepAt < endAt; stepAt += 1_000) {
-    processed = gameReducer(processed, {
-      type: "TICK",
-      now: stepAt,
-      gainMultiplier: GAME_CONFIG.offlineGainMultiplier,
-    });
-  }
-  processed = gameReducer(processed, {
-    type: "TICK",
-    now: endAt,
-    gainMultiplier: GAME_CONFIG.offlineGainMultiplier,
+  let processed = gameReducer(state, {
+    type: "OFFLINE_PASSIVE_PROGRESS",
+    now,
+    elapsedMs,
+    rawElapsedMs: rawElapsed,
   });
 
   const summary: OfflineSummary = {
@@ -68,14 +59,11 @@ export function simulateOfflineProgress(
 
   const hours = Math.floor(elapsedMs / 3_600_000);
   const minutes = Math.floor((elapsedMs % 3_600_000) / 60_000);
-  const blocked = processed.contacts.every((contact) => contact.status !== "available")
-    ? " Nessuna ulteriore email: non erano disponibili contatti."
-    : "";
   const message: InboxMessage = {
     id: `offline-${now.toString(36)}`,
     sender: "Segreteria automatica",
     subject: "Riepilogo attività offline",
-    preview: `${hours} h ${minutes} min elaborati${summary.capped ? ` (limite di ${Math.round(offlineLimitMs / 3_600_000)} ore)` : ""}. Email ${summary.emailsCompleted}, prove ${summary.trialsCompleted}, iscritti ${summary.membersEnrolled}, abbandoni ${summary.membersDeparted}, collaboratori ${summary.collaboratorsRecruited}, entrate € ${Math.round(summary.eurosEarned)}, contatti ${summary.contactsAcquired}.${blocked}`,
+    preview: `${hours} h ${minutes} min elaborati${summary.capped ? ` (limite di ${Math.round(offlineLimitMs / 3_600_000)} ore)` : ""}. Il calendario, le Forme e le attività sono rimasti fermi. Entrate € ${Math.round(summary.eurosEarned)}, contatti passivi ${summary.contactsAcquired}.`,
     receivedAt: now,
     tone: "system",
     unread: true,
