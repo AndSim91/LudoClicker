@@ -135,13 +135,13 @@ export function PeopleView({
             const isCollaborator = collaboratorContactIds.has(contact.id);
             return (
               <div className="people-row member-row" key={contact.id}>
-                <PersonName displayName={`${contact.firstName} ${contact.lastName}`} rarity={contact.rarity} />
-                <span><span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span></span>
-                <div className="member-path">
+                <PersonName displayName={`${contact.firstName} ${contact.lastName}`} rarity={contact.rarity} label="Nome" />
+                <span data-label="Indirizzo"><span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span></span>
+                <div className="member-path" data-label="Percorso">
                   <strong>{formatFormPath(contact.forms)}</strong>
-                  <FormLogoStrip forms={contact.forms} />
+                  <FormLogoStrip forms={contact.forms} showLabels={false} />
                 </div>
-                <span className="member-status">
+                <span className="member-status" data-label="Stato">
                   <span>{isCollaborator ? "Collaboratore" : statusLabels[contact.status]}</span>
                   <small>{isCollaborator || contact.rarity === "legendary"
                     ? "Non soggetto ad abbandono"
@@ -149,7 +149,7 @@ export function PeopleView({
                       ? "Nessun rischio"
                       : getMemberDepartureRiskLabel(contact.forms)}</small>
                 </span>
-                <div className="member-training-cell">
+                <div className="member-training-cell" data-label="Prossima evoluzione">
                   {isCollaborator
                     ? <small>Gestisci dal pannello Collaboratori</small>
                     : <TrainingControl
@@ -182,7 +182,7 @@ function getMemberDepartureRiskLabel(forms: FormId[]): string {
   return "Rischio basso";
 }
 
-function FormLogoStrip({ forms }: { forms: FormId[] }) {
+function FormLogoStrip({ forms, showLabels = true }: { forms: FormId[]; showLabels?: boolean }) {
   const entries = forms.map((formId) => {
     const definition = getFormDefinition(formId);
     const logo = getFormLogo(formId);
@@ -198,9 +198,9 @@ function FormLogoStrip({ forms }: { forms: FormId[] }) {
       {entries.length === 0 ? (
         <span className="form-logo-empty">Nessuna forma completata</span>
       ) : entries.map(({ formId, label, logo }) => (
-        <span className={`form-logo-item ${logo.source === "generated" ? "generated" : ""}`} key={formId} title={label}>
+        <span className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""}`} key={formId} title={label}>
           <img src={logo.assetPath} alt={`${label} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`} />
-          <span>{label}</span>
+          {showLabels ? <span>{label}</span> : null}
         </span>
       ))}
     </div>
@@ -253,8 +253,8 @@ function RarityOverview({ state }: { state: GameState }) {
   );
 }
 
-function PersonName({ displayName, rarity }: { displayName: string; rarity: PersonRarity }) {
-  return <strong className={`rarity-name rarity-${rarity}`}>{displayName}{rarity === "legendary" ? <span className="special-collaborator-badge">VIP</span> : null}</strong>;
+function PersonName({ displayName, rarity, label }: { displayName: string; rarity: PersonRarity; label?: string }) {
+  return <strong className={`rarity-name rarity-${rarity}`} data-label={label}>{displayName}{rarity === "legendary" ? <span className="special-collaborator-badge">VIP</span> : null}</strong>;
 }
 
 function TrainingFormPreview({ definition }: { definition: FormDefinition }) {
@@ -317,6 +317,7 @@ function TrainingControl({
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const hasTraining = Boolean(student.training);
   const currentYear = getSchoolYear(state.school.currentMonth);
+  const hasTrainedThisYear = student.lastFormTrainingYear === currentYear;
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
   useEffect(() => {
     if (!hasTraining) return;
@@ -355,7 +356,7 @@ function TrainingControl({
     const branch = getFormDefinition(formId)?.branch;
     return branch ? [branch] : [];
   }) ?? []);
-  const newForms = student.lastFormTrainingYear === currentYear
+  const newForms = hasTrainedThisYear
     ? []
     : getAvailableForms(student, currentYear, branchCapacity, collaborator?.assignment !== "instructor")
         .filter((definition) =>
@@ -373,7 +374,11 @@ function TrainingControl({
     return true;
   });
   if (academicallyAvailable.length === 0) {
-    return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla Forma 7</strong></div>;
+    if (hasTrainedThisYear) {
+      return <div className="training-locked"><strong>Hai già completato la formazione quest'anno</strong></div>;
+    }
+    const latestForm = getFormDefinition(student.forms.at(-1)!);
+    return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;
   }
   if (available.length === 0) {
     return <div className="training-locked"><span>Istruttore non disponibile</span><strong>Serve un Istruttore libero e attestato per questa Forma</strong></div>;

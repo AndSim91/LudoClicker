@@ -3,6 +3,7 @@ import {
   getUpgradeDefinition,
 } from "../content/upgrades";
 import { canFoundSchool, createInitialState, gameReducer } from "./engine";
+import { getEquipmentMaintenanceCost } from "./equipment";
 import { selectActiveEmail } from "./selectors";
 import type {
   CollaboratorAssignment,
@@ -117,9 +118,10 @@ function startBestAvailableActivity(state: GameState, now: number): GameState {
 }
 
 function maintainEquipmentWhenSafe(state: GameState, now: number): GameState {
+  const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
   if (
-    state.equipment.wear <= 0 ||
-    state.school.euros < 10 ||
+    (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) ||
+    state.school.euros < maintenanceCost ||
     runningEvents(state).length > 0
   ) return state;
   return dispatch(state, { type: "MAINTAIN_EQUIPMENT", now });

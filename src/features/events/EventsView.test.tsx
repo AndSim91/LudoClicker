@@ -1,5 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { AcquisitionEvent } from "../../game/types";
 import { EventsView } from "./EventsView";
@@ -7,6 +7,58 @@ import { EventsView } from "./EventsView";
 afterEach(() => cleanup());
 
 describe("EventsView", () => {
+  it("shows equipment condition and requests maintenance", () => {
+    const initial = createInitialState(1_000);
+    const onMaintainEquipment = vi.fn();
+
+    render(
+      <EventsView
+        state={{ ...initial, school: { ...initial.school, euros: 100 }, equipment: { ...initial.equipment, wear: 45 } }}
+        onStart={() => undefined}
+        onMaintainEquipment={onMaintainEquipment}
+      />,
+    );
+
+    expect(screen.getByText("Danno da riparare")).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Usura attrezzatura" })).toHaveAttribute("aria-valuenow", "45");
+    fireEvent.click(screen.getByRole("button", { name: /Esegui manutenzione/ }));
+    expect(onMaintainEquipment).toHaveBeenCalledOnce();
+  });
+
+  it("requests paid maintenance for a damaged sword even without wear", () => {
+    const initial = createInitialState(1_000);
+    const onMaintainEquipment = vi.fn();
+
+    render(
+      <EventsView
+        state={{ ...initial, school: { ...initial.school, euros: 50 }, equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 } }}
+        onStart={() => undefined}
+        onMaintainEquipment={onMaintainEquipment}
+      />,
+    );
+
+    expect(screen.getByText("Danno da riparare")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /Esegui manutenzione/ }));
+    expect(onMaintainEquipment).toHaveBeenCalledOnce();
+  });
+
+  it("orders an official LamaDiLuce sword when the school can afford it", () => {
+    const initial = createInitialState(1_000);
+    const onBuyOfficialSword = vi.fn();
+
+    render(
+      <EventsView
+        state={{ ...initial, school: { ...initial.school, euros: 330, peakActiveMembers: 15 } }}
+        onStart={() => undefined}
+        onBuyOfficialSword={onBuyOfficialSword}
+      />,
+    );
+
+    expect(screen.getByText("Fornitura ufficiale · LamaDiLuce")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /Ordina 1 Polaris/ }));
+    expect(onBuyOfficialSword).toHaveBeenCalledOnce();
+  });
+
   it("shows zero when a completed event has no contact reward", () => {
     const initial = createInitialState(1_000);
     const event: AcquisitionEvent = {
@@ -103,7 +155,8 @@ describe("EventsView", () => {
     }} onStart={() => undefined} />);
 
     expect(screen.getByText("3/5 iscritti disponibili")).toBeVisible();
-    expect(screen.getByText("2/6 spade disponibili")).toBeVisible();
+    const equipmentPanel = screen.getByRole("region", { name: "Risorse disponibili per gli eventi" });
+    expect(within(equipmentPanel).getByText("2/6 spade disponibili")).toBeVisible();
   });
 
   it("marks damaged swords as unavailable until maintenance", () => {
@@ -117,9 +170,25 @@ describe("EventsView", () => {
       onStart={() => undefined}
     />);
 
-    expect(screen.getByText("5/6 spade disponibili")).toBeVisible();
+    const equipmentPanel = screen.getByRole("region", { name: "Risorse disponibili per gli eventi" });
+    expect(within(equipmentPanel).getByText("5/6 spade disponibili")).toBeVisible();
     expect(screen.getByText("1 spada danneggiata · ripara per usarle agli eventi")).toBeVisible();
     expect(screen.getByRole("button", { name: "Ripara 1 spada" })).toBeDisabled();
+  });
+
+  it("shows no swords available at full wear", () => {
+    const initial = createInitialState(1_000);
+    render(<EventsView
+      state={{
+        ...initial,
+        equipment: { ...initial.equipment, wear: 100, damagedSwords: 0 },
+      }}
+      onStart={() => undefined}
+    />);
+
+    const equipmentPanel = screen.getByRole("region", { name: "Risorse disponibili per gli eventi" });
+    expect(within(equipmentPanel).getByText("0/6 spade disponibili")).toBeVisible();
+    expect(screen.getByText("6 spade danneggiate · ripara per usarle agli eventi")).toBeVisible();
   });
 
   it("does not show calendar date boxes in the event list", () => {

@@ -5,6 +5,7 @@ import { createProspectEmail } from "../content/prospectDirectory";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailPresentationLevel } from "../content/emailPresentation";
+import { synchronizeEquipmentAvailability } from "./equipment";
 import { createShortGoalFromStatistics } from "../content/shortGoals";
 import { normalizeStackedMessages } from "./messages";
 import { getAcquisitionEventDefinition } from "../content/events";
@@ -616,9 +617,27 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 26) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 27,
       equipment: migrated.equipment
         ? { ...migrated.equipment, damagedSwords: migrated.equipment.damagedSwords ?? 0 }
+        : {
+            totalSwords: GAME_CONFIG.initialSwords,
+            availableSwords: GAME_CONFIG.initialSwords,
+            damagedSwords: 0,
+            wear: 0,
+          },
+    };
+  }
+
+  if (migrated.version === 27) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      equipment: migrated.equipment
+        ? synchronizeEquipmentAvailability({
+            ...migrated.equipment,
+            damagedSwords: migrated.equipment.damagedSwords ?? 0,
+          })
         : {
             totalSwords: GAME_CONFIG.initialSwords,
             availableSwords: GAME_CONFIG.initialSwords,

@@ -10,48 +10,13 @@ function percentage(value: number, total: number) {
   return `${Math.round((value / total) * 100)}%`;
 }
 
-function equipmentCondition(wear: number, damagedSwords: number) {
-  if (damagedSwords > 0) return "Danno da riparare";
-  if (wear === 0) return "Ottime condizioni";
-  if (wear < 35) return "Usura leggera";
-  if (wear < 70) return "Manutenzione consigliata";
-  return "Manutenzione urgente";
-}
-
 export function ActivitiesView({
   state,
-  onMaintainEquipment,
-  onBuyOfficialSword,
   onRunSocialCampaign,
 }: {
   state: GameState;
-  onMaintainEquipment: () => void;
-  onBuyOfficialSword: () => void;
   onRunSocialCampaign: () => void;
 }) {
-  const eventRunning = state.acquisitionEvents.some((event) => event.status === "running");
-  const needsMaintenance = state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
-  const availableSwords = Math.max(
-    0,
-    Math.min(
-      state.equipment.availableSwords,
-      state.equipment.totalSwords - state.equipment.damagedSwords,
-    ),
-  );
-  const canMaintain =
-    needsMaintenance &&
-    state.school.euros >= GAME_CONFIG.equipmentMaintenanceCost &&
-    !eventRunning;
-  let maintenanceLabel = `Esegui manutenzione · ${euro.format(GAME_CONFIG.equipmentMaintenanceCost)}`;
-  if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
-  else if (eventRunning) maintenanceLabel = "Attendi la fine dell'evento";
-  else if (state.school.euros < GAME_CONFIG.equipmentMaintenanceCost) {
-    maintenanceLabel = `Servono ${euro.format(GAME_CONFIG.equipmentMaintenanceCost)}`;
-  }
-  const canBuyOfficialSword = state.school.euros >= GAME_CONFIG.officialSwordCost;
-  const swordPurchaseLabel = canBuyOfficialSword
-    ? `Ordina 1 Polaris · ${euro.format(GAME_CONFIG.officialSwordCost)}`
-    : `Servono ${euro.format(GAME_CONFIG.officialSwordCost)}`;
   const assigned = (assignment: NonNullable<GameState["collaborators"][number]["assignment"]>) =>
     state.collaborators.filter((collaborator) => collaborator.assignment === assignment).length;
   const socialProgress = Math.min(100, Math.floor(state.automation.socialBuffer * 100));
@@ -74,9 +39,6 @@ export function ActivitiesView({
     ["social", "Social"],
     ["collaborator", "Collaboratori"],
   ];
-  const showSupplier =
-    state.school.peakActiveMembers >= 15 ||
-    state.equipment.totalSwords > GAME_CONFIG.initialSwords;
   const showCollaborators = state.unlocks.collaborators || state.collaborators.length > 0;
   const earnedAchievements = ACHIEVEMENTS.filter((achievement) =>
     state.achievements.includes(achievement.id),
@@ -85,25 +47,6 @@ export function ActivitiesView({
   return (
     <main className="overview-view activities-view">
       <header><Icon name="tasks" /><div><h1>Attività</h1><p>Riepilogo operativo e manutenzione dell'Ordine delle Onde</p></div></header>
-
-      <section className="equipment-panel" aria-label="Attrezzatura della scuola">
-        <div className="equipment-heading">
-          <div><Icon name="settings" /><span><strong>Attrezzatura</strong><small>{equipmentCondition(state.equipment.wear, state.equipment.damagedSwords)}</small></span></div>
-          <strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong>
-        </div>
-        <div className="equipment-wear-label"><span>Usura complessiva</span><strong>{state.equipment.wear}%</strong></div>
-        <div className="equipment-wear" role="progressbar" aria-label="Usura attrezzatura" aria-valuemin={0} aria-valuemax={100} aria-valuenow={state.equipment.wear}><span style={{ width: `${state.equipment.wear}%` }} /></div>
-        <button className="maintenance-action" type="button" disabled={!canMaintain} onClick={onMaintainEquipment}>{maintenanceLabel}</button>
-        {showSupplier ? <div className="official-supplier">
-          <div>
-            <strong>Fornitura ufficiale · LamaDiLuce</strong>
-            <small>Polaris EVO Basic combat-ready · partner tecnico LudoSport</small>
-            <p>Modulare, autorizzata per pratica ed eventi ufficiali, con lama marcata per anno. La tesoreria ha già smesso di chiedere se ne bastasse «una da condividere».</p>
-            <a href="https://lamadiluce.it/" target="_blank" rel="noreferrer">lamadiluce.it · Abridge S.r.l.</a>
-          </div>
-          <button type="button" disabled={!canBuyOfficialSword} onClick={onBuyOfficialSword}>{swordPurchaseLabel}</button>
-        </div> : null}
-      </section>
 
       {showCollaborators ? <section className="automation-panel" aria-label="Assegnazioni collaboratori">
         <div className="automation-heading"><div><Icon name="people" /><span><strong>Collaboratori delle Onde</strong><small>{state.collaborators.length} disponibili · una assegnazione per persona</small></span></div><b>{state.statistics.automatedCharacters} caratteri automatici</b></div>

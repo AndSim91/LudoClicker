@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FORM_DEFINITIONS } from "../content/forms";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
+import { getEquipmentMaintenanceCost } from "./equipment";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { nextRandom } from "./random";
 import { selectActiveEmail } from "./selectors";
@@ -93,6 +94,15 @@ function simulateEarlyGame(seed: number): EarlyGameMilestones {
         definitionId: "park-sparring",
         now,
       });
+    }
+
+    const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
+    if (
+      state.equipment.wear > 0 &&
+      state.school.euros >= maintenanceCost &&
+      !state.acquisitionEvents.some((event) => event.status === "running")
+    ) {
+      state = gameReducer(state, { type: "MAINTAIN_EQUIPMENT", now });
     }
 
     const activeEmail = selectActiveEmail(state);

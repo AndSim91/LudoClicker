@@ -80,6 +80,50 @@ describe("PeopleView", () => {
     expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
   });
 
+  it("does not repeat the current form label below its logo", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: ["form-1"] as FormId[],
+    };
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 1, euros: 50 },
+        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    expect(screen.getAllByText("Forma 1", { exact: true })).toHaveLength(1);
+  });
+
+  it("does not report Forma 7 when the member has only trained this year", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: ["form-1"] as FormId[],
+      lastFormTrainingYear: 1,
+    };
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
+        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    expect(screen.getByText("Hai già completato la formazione quest'anno")).toBeVisible();
+    expect(screen.queryByText("Percorso completato alla Forma 7")).not.toBeInTheDocument();
+  });
+
   it("shows qualitative departure risk for members without current-year form training", () => {
     const initial = createInitialState(1_000);
     const members = [

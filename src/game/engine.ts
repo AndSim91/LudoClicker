@@ -966,6 +966,7 @@ function startAcquisitionEvent(
       0,
       Math.round(
         definition.wearAdded *
+          GAME_CONFIG.eventWearMultiplier *
           (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))),
       ),
     ),
@@ -1460,10 +1461,10 @@ function processAutomation(state: GameState, now: number, gainMultiplier: number
       socialBuffer: socialTotal - socialContacts,
       equipmentBuffer: equipmentTotal - repairedWear,
     },
-    equipment: {
+    equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       wear: Math.max(0, state.equipment.wear - repairedWear),
-    },
+    }),
   };
 
   if (repairedWear > 0) {
@@ -1990,11 +1991,11 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
         ? { ...email, presentationLevel: getEmailPresentationLevel(upgrades) }
         : email,
     ),
-    equipment: {
+    equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords,
       availableSwords: state.equipment.availableSwords + addedSwords,
-    },
+    }),
   };
   return {
     ...nextState,

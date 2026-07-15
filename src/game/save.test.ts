@@ -549,6 +549,19 @@ describe("local save", () => {
     expect(migrated.equipment.damagedSwords).toBe(0);
   });
 
+  it("migrates worn version 27 equipment into broken sword availability", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 27;
+    legacy.equipment.wear = 100;
+    legacy.equipment.damagedSwords = 0;
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.version).toBe(GAME_CONFIG.version);
+    expect(migrated.equipment).toMatchObject({ availableSwords: 0, damagedSwords: 6 });
+  });
+
   it("resets both primary and backup saves", () => {
     const state = createInitialState(1_000);
     saveGame(state, 2_000);

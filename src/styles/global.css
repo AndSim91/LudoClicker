@@ -1551,6 +1551,14 @@ svg {
   margin-top: 18px;
 }
 
+.people-view .people-tabs,
+.people-view .people-table,
+.people-view .collaborator-list,
+.people-view .rarity-overview {
+  width: 100%;
+  max-width: none;
+}
+
 .rarity-overview {
   display: grid;
   grid-template-columns: minmax(190px, 1.1fr) repeat(3, minmax(190px, 1fr));
@@ -1645,6 +1653,10 @@ svg {
   white-space: normal;
 }
 
+.form-logo-item.compact {
+  gap: 0;
+}
+
 .form-logo-item img {
   width: 28px;
   height: 28px;
@@ -1716,6 +1728,69 @@ svg {
   background: var(--surface-muted);
   font-size: 11px;
   font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  html,
+  body,
+  #root {
+    min-width: 0;
+  }
+
+  .overview-view.people-view {
+    padding: 22px 18px 48px;
+  }
+
+  .people-view .people-table,
+  .people-view .people-tabs {
+    max-width: none;
+  }
+
+  .people-view .member-row.people-head {
+    display: none;
+  }
+
+  .people-view .member-row:not(.people-head) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
+    min-height: 0;
+    padding: 16px 0;
+  }
+
+  .people-view .member-row > * {
+    overflow: visible;
+    padding: 0;
+    white-space: normal;
+  }
+
+  .people-view .member-row > .member-training-cell {
+    grid-column: 1 / -1;
+  }
+
+  .people-view .member-row > [data-label]::before {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--ink-muted);
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .people-view .member-row > strong[data-label] {
+    display: block;
+  }
+
+  .people-view .member-row .member-path,
+  .people-view .member-row .member-status {
+    align-self: start;
+  }
+
+  .people-view .member-row .member-training-cell {
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
 }
 
 .collaborator-row {
@@ -1942,6 +2017,7 @@ svg {
 }
 
 .training-form-label {
+  display: none;
   color: var(--ink-muted);
   font-size: 11px;
 }
@@ -2112,62 +2188,10 @@ svg {
   border-top: 1px solid var(--line);
 }
 
-.equipment-panel,
 .automation-panel,
 .social-panel,
 .operations-report {
   max-width: 900px;
-}
-
-.equipment-panel {
-  padding: 22px 24px;
-  border: 1px solid #c7dcef;
-  border-left: 4px solid var(--blue-600);
-  background: var(--blue-050);
-}
-
-.equipment-heading,
-.equipment-heading > div,
-.equipment-heading > div > span {
-  display: flex;
-}
-
-.equipment-heading {
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.equipment-heading > div {
-  align-items: center;
-  gap: 12px;
-}
-
-.equipment-heading svg {
-  width: 26px;
-  height: 26px;
-  color: var(--blue-600);
-}
-
-.equipment-heading > div > span {
-  flex-direction: column;
-  gap: 3px;
-}
-
-.equipment-heading small,
-.equipment-wear-label {
-  color: var(--ink-muted);
-}
-
-.equipment-wear-label {
-  display: flex;
-  justify-content: space-between;
-  margin: 22px 0 7px;
-  font-size: 11px;
-}
-
-.equipment-wear-label strong {
-  color: var(--blue-700);
 }
 
 .equipment-wear {
@@ -2182,69 +2206,6 @@ svg {
   height: 100%;
   border-radius: inherit;
   background: var(--warning);
-}
-
-.equipment-panel button {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-md);
-  color: white;
-  background: var(--blue-600);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.equipment-panel button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
-.maintenance-action {
-  margin-top: 20px;
-}
-
-.official-supplier {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 20px;
-  padding: 18px;
-  border: 1px solid #b7d2e9;
-  border-radius: var(--radius-md);
-  background: white;
-}
-
-.official-supplier > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 600px;
-}
-
-.official-supplier small,
-.official-supplier p {
-  color: var(--ink-muted);
-}
-
-.official-supplier p {
-  margin: 5px 0;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.official-supplier a {
-  width: fit-content;
-  color: var(--blue-700);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.official-supplier > button {
-  flex: 0 0 auto;
-  white-space: nowrap;
 }
 
 .automation-panel,
@@ -3349,6 +3310,93 @@ svg {
   font-size: 11px;
 }
 
+.event-equipment-summary {
+  align-items: flex-start !important;
+}
+
+.event-equipment-summary > svg {
+  margin-top: 2px;
+}
+
+.event-equipment-content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-equipment-heading,
+.event-equipment-actions,
+.event-equipment-supplier {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-equipment-heading {
+  justify-content: space-between;
+}
+
+.event-equipment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-equipment-heading small {
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+.event-equipment-content .equipment-wear {
+  height: 5px;
+}
+
+.event-equipment-actions {
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.event-equipment-maintenance,
+.event-equipment-supplier > button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--blue-600);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.event-equipment-maintenance:disabled,
+.event-equipment-supplier > button:disabled {
+  border-color: var(--line-strong);
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.event-equipment-supplier {
+  margin-left: auto;
+}
+
+.event-equipment-supplier > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-equipment-supplier small {
+  color: var(--ink-muted);
+}
+
+.event-equipment-supplier a {
+  color: var(--blue-700);
+  font-weight: 600;
+}
+
 .event-fame-note {
   display: flex;
   align-items: center;
@@ -3512,15 +3560,6 @@ svg {
 }
 
 @media (max-width: 1050px) {
-  .official-supplier {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .official-supplier > button {
-    align-self: flex-start;
-  }
-
   .profile-settings-form {
     align-items: stretch;
     flex-direction: column;
@@ -3568,6 +3607,19 @@ svg {
     border-left: 0;
   }
 
+  .event-equipment-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .event-equipment-heading small {
+    text-align: left;
+  }
+
+  .event-equipment-supplier {
+    margin-left: 0;
+  }
+
   .upgrade-price {
     text-align: left;
   }
@@ -3607,7 +3659,6 @@ svg {
 :root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
 :root[data-theme="dark"] .event-notice,
-:root[data-theme="dark"] .equipment-panel,
 :root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary {
   border-color: #2f5b80;
@@ -3617,7 +3668,6 @@ svg {
 :root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
 :root[data-theme="dark"] .event-notice,
-:root[data-theme="dark"] .equipment-panel,
 :root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary,
 :root[data-theme="dark"] .network-heading {
@@ -3637,7 +3687,6 @@ svg {
 :root[data-theme="dark"] .profile-dialog input,
 :root[data-theme="dark"] .foundation-fields input,
 :root[data-theme="dark"] .foundation-fields select,
-:root[data-theme="dark"] .official-supplier,
 :root[data-theme="dark"] .event-fame-note {
   background: var(--surface);
 }
@@ -3662,7 +3711,6 @@ svg {
 :root[data-theme="dark"] .upgrade-row button:disabled,
 :root[data-theme="dark"] .event-row > button:disabled,
 :root[data-theme="dark"] .training-control button:disabled,
-:root[data-theme="dark"] .equipment-panel button:disabled,
 :root[data-theme="dark"] .social-panel > button:disabled,
 :root[data-theme="dark"] .profile-dialog button:disabled {
   background: var(--surface-muted);
@@ -3702,7 +3750,7 @@ svg {
 :root[data-theme="dark"] .people-tabs button.active,
 :root[data-theme="dark"] .upgrade-command,
 :root[data-theme="dark"] .instructor-toggle,
-:root[data-theme="dark"] .official-supplier a {
+:root[data-theme="dark"] .event-equipment-supplier a {
   color: var(--blue-700);
 }
 
@@ -3811,7 +3859,6 @@ svg {
   box-shadow: 0 24px 70px rgb(0 0 0 / 42%);
 }
 
-:root[data-theme="dark"] .event-fame-note,
-:root[data-theme="dark"] .official-supplier {
+:root[data-theme="dark"] .event-fame-note {
   border-color: var(--line);
 }

@@ -527,7 +527,7 @@ describe("game engine", () => {
     expect(completed.statistics.eventsCompleted).toBe(1);
     expect(started.equipment.availableSwords).toBe(4);
     expect(completed.equipment.availableSwords).toBe(6);
-    expect(completed.equipment.wear).toBe(3);
+    expect(completed.equipment.wear).toBe(5);
     expect(tickedAgain.contacts).toHaveLength(completed.contacts.length);
   });
 
@@ -616,14 +616,14 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const worn = {
       ...initial,
-      school: { ...initial.school, euros: 15 },
+      school: { ...initial.school, euros: 100 },
       equipment: { ...initial.equipment, wear: 40 },
     };
 
     const maintained = gameReducer(worn, { type: "MAINTAIN_EQUIPMENT", now: 2_000 });
     const repeated = gameReducer(maintained, { type: "MAINTAIN_EQUIPMENT", now: 3_000 });
 
-    expect(maintained.school.euros).toBe(10);
+    expect(maintained.school.euros).toBe(5);
     expect(maintained.equipment.wear).toBe(0);
     expect(maintained.statistics.maintenanceCompleted).toBe(1);
     expect(repeated).toBe(maintained);
@@ -664,7 +664,7 @@ describe("game engine", () => {
     expect(blocked).toBe(eventReady);
 
     const maintained = gameReducer(
-      { ...damaged, school: { ...damaged.school, euros: 10 } },
+      { ...damaged, school: { ...damaged.school, euros: 50 } },
       { type: "MAINTAIN_EQUIPMENT", now: 4_000 },
     );
 
@@ -674,6 +674,23 @@ describe("game engine", () => {
       damagedSwords: 0,
       wear: 0,
     });
+  });
+
+  it("does not start an event when full wear has broken every sword", () => {
+    const initial = createInitialState(1_000);
+    const wornOut = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, euros: 240 },
+      equipment: { ...initial.equipment, wear: 100, damagedSwords: 0 },
+    };
+
+    const blocked = gameReducer(wornOut, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "sports-stand",
+      now: 2_000,
+    });
+
+    expect(blocked).toBe(wornOut);
   });
 
   it("buys official swords and preserves them when equipment upgrades are purchased", () => {

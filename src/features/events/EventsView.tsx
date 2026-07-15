@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ACQUISITION_EVENTS } from "../../content/events";
+import { GAME_CONFIG } from "../../game/config";
+import {
+  getAvailableSwords,
+  getEffectiveDamagedSwords,
+  getEquipmentMaintenanceCost,
+} from "../../game/equipment";
 import { selectAvailableEventMembers } from "../../game/selectors";
 import type { AcquisitionEvent, GameState } from "../../game/types";
 
@@ -14,6 +20,14 @@ function memberRequirement(count: number) {
   return quantityLabel(count, "iscritto", "iscritti");
 }
 
+function equipmentCondition(wear: number, damagedSwords: number) {
+  if (damagedSwords > 0) return "Danno da riparare";
+  if (wear === 0) return "Ottime condizioni";
+  if (wear < 35) return "Usura leggera";
+  if (wear < 70) return "Manutenzione consigliata";
+  return "Manutenzione urgente";
+}
+
 function getEventProgress(event: AcquisitionEvent, now: number) {
   const duration = event.resolvesAt - event.startedAt;
   if (duration <= 0) return 100;
@@ -23,20 +37,38 @@ function getEventProgress(event: AcquisitionEvent, now: number) {
 export function EventsView({
   state,
   onStart,
+  onMaintainEquipment = () => undefined,
+  onBuyOfficialSword = () => undefined,
 }: {
   state: GameState;
   onStart: (definitionId: AcquisitionEvent["definitionId"]) => void;
+  onMaintainEquipment?: () => void;
+  onBuyOfficialSword?: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running");
   const availableMembers = selectAvailableEventMembers(state);
-  const availableSwords = Math.max(
-    0,
-    Math.min(
-      state.equipment.availableSwords,
-      state.equipment.totalSwords - state.equipment.damagedSwords,
-    ),
-  );
+  const availableSwords = getAvailableSwords(state.equipment);
+  const damagedSwords = getEffectiveDamagedSwords(state.equipment);
+  const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
+  const needsMaintenance = state.equipment.wear > 0 || damagedSwords > 0;
+  const canMaintain =
+    needsMaintenance &&
+    state.school.euros >= maintenanceCost &&
+    runningEvents.length === 0;
+  let maintenanceLabel = `Esegui manutenzione · ${euro.format(maintenanceCost)}`;
+  if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
+  else if (runningEvents.length > 0) maintenanceLabel = "Attendi la fine dell'evento";
+  else if (state.school.euros < maintenanceCost) {
+    maintenanceLabel = `Servono ${euro.format(maintenanceCost)}`;
+  }
+  const canBuyOfficialSword = state.school.euros >= GAME_CONFIG.officialSwordCost;
+  const swordPurchaseLabel = canBuyOfficialSword
+    ? `Ordina 1 Polaris · ${euro.format(GAME_CONFIG.officialSwordCost)}`
+    : `Servono ${euro.format(GAME_CONFIG.officialSwordCost)}`;
+  const showSupplier =
+    state.school.peakActiveMembers >= 15 ||
+    state.equipment.totalSwords > GAME_CONFIG.initialSwords;
   const visibleEvents = ACQUISITION_EVENTS.filter((definition) =>
     definition.unlockMembers <= state.school.peakActiveMembers ||
     runningEvents.some((event) => event.definitionId === definition.id)
@@ -54,10 +86,33 @@ export function EventsView({
     <main className="overview-view events-view">
       <header><Icon name="flag" /><div><h1>Eventi</h1><p>Attività esterne per incontrare persone e raccogliere nuovi contatti</p></div></header>
       <div className="event-notice"><Icon name="contact" /><div><strong>{state.contacts.filter((contact) => contact.status === "available").length} contatti disponibili</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
-      <div className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
+      <section className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
         <div><Icon name="people" /><span><strong>{availableMembers}/{state.school.activeMembers} iscritti disponibili</strong><small>Gli iscritti impegnati tornano disponibili a fine evento.</small></span></div>
-        <div><Icon name="settings" /><span><strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong><small>{state.equipment.damagedSwords > 0 ? `${quantityLabel(state.equipment.damagedSwords, "spada danneggiata", "spade danneggiate")} · ripara per usarle agli eventi` : `Usura attrezzatura ${state.equipment.wear}%`}</small></span></div>
-      </div>
+        <div className="event-equipment-summary">
+          <Icon name="settings" />
+          <div className="event-equipment-content">
+            <div className="event-equipment-heading">
+              <strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong>
+              <div className="event-equipment-details">
+                <small>{equipmentCondition(state.equipment.wear, damagedSwords)}</small>
+                <small>Usura {state.equipment.wear}%</small>
+                {damagedSwords > 0 ? <small>{quantityLabel(damagedSwords, "spada danneggiata", "spade danneggiate")} · ripara per usarle agli eventi</small> : null}
+              </div>
+            </div>
+            <div className="equipment-wear" role="progressbar" aria-label="Usura attrezzatura" aria-valuemin={0} aria-valuemax={100} aria-valuenow={state.equipment.wear}><span style={{ width: `${state.equipment.wear}%` }} /></div>
+            <div className="event-equipment-actions">
+              <button className="event-equipment-maintenance" type="button" disabled={!canMaintain} onClick={onMaintainEquipment}>{maintenanceLabel}</button>
+              {showSupplier ? <div className="event-equipment-supplier">
+                <div>
+                  <strong>Fornitura ufficiale · LamaDiLuce</strong>
+                  <small>Polaris EVO Basic · <a href="https://lamadiluce.it/" target="_blank" rel="noreferrer">lamadiluce.it</a></small>
+                </div>
+                <button type="button" disabled={!canBuyOfficialSword} onClick={onBuyOfficialSword}>{swordPurchaseLabel}</button>
+              </div> : null}
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {state.school.peakActiveMembers}</strong><small>Equivalente al numero massimo di iscritti storici della scuola</small><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} iscritti massimi.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
       <section className="event-list">
         {visibleEvents.map((definition) => {
@@ -71,8 +126,8 @@ export function EventsView({
           const lacksAvailableMembers = availableMembers < definition.requiredMembers;
           const lacksEquipment = availableSwords < definition.requiredSwords;
           const needsRepairForEvent = lacksEquipment &&
-            state.equipment.damagedSwords > 0 &&
-            availableSwords + state.equipment.damagedSwords >= definition.requiredSwords;
+            damagedSwords > 0 &&
+            availableSwords + damagedSwords >= definition.requiredSwords;
           const progress = matching ? getEventProgress(matching, now) : 0;
           const remainingSeconds = matching
             ? Math.max(0, Math.ceil((matching.resolvesAt - now) / 1_000))
@@ -83,7 +138,7 @@ export function EventsView({
           else if (onCooldown) action = `Di nuovo tra ${Math.ceil(cooldown / 1_000)} s`;
           else if (lacksMembers) action = `Richiede ${memberRequirement(definition.requiredMembers)}`;
           else if (lacksAvailableMembers) action = `Servono ${memberRequirement(definition.requiredMembers)} liberi`;
-          else if (needsRepairForEvent) action = `Ripara ${quantityLabel(state.equipment.damagedSwords, "spada", "spade")}`;
+          else if (needsRepairForEvent) action = `Ripara ${quantityLabel(damagedSwords, "spada", "spade")}`;
           else if (lacksEquipment) action = `Richiede ${definition.requiredSwords} spade`;
           else if (lacksFunds) action = `Servono ${euro.format(definition.cost)}`;
 

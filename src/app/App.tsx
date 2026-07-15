@@ -161,16 +161,16 @@ export function App() {
             onStart={(definitionId) =>
               dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: Date.now() })
             }
-          />
-        ) : activeView === "statistics" ? (
-          <ActivitiesView
-            state={state}
             onMaintainEquipment={() =>
               dispatch({ type: "MAINTAIN_EQUIPMENT", now: Date.now() })
             }
             onBuyOfficialSword={() =>
               dispatch({ type: "BUY_OFFICIAL_SWORD", now: Date.now() })
             }
+          />
+        ) : activeView === "statistics" ? (
+          <ActivitiesView
+            state={state}
             onRunSocialCampaign={() =>
               dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: Date.now() })
             }
