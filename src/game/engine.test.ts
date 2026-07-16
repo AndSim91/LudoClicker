@@ -1048,14 +1048,17 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 200, historicMembers: 1 },
+      school: { ...initial.school, euros: 500, historicMembers: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
-    const faster = gameReducer(funded, {
-      type: "BUY_UPGRADE",
-      upgradeId: "comfortable-keyboard",
-      now: 2_000,
-    });
+    const faster = [2_000, 2_100, 2_200].reduce(
+      (state, now) => gameReducer(state, {
+        type: "BUY_UPGRADE",
+        upgradeId: "comfortable-keyboard",
+        now,
+      }),
+      funded,
+    );
     const charismatic = gameReducer(faster, {
       type: "BUY_UPGRADE",
       upgradeId: "prepared-presentation",

@@ -800,7 +800,7 @@ function resolveTrial(
     now,
     firstEnrollment ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
     firstEnrollment
-      ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Iscritti e Miglioramenti sono ora disponibili nella barra laterale.`
+      ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Iscritti e Upgrade sono ora disponibili nella barra laterale.`
       : `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
     "positive",
     firstEnrollment ? "focused" : "other",

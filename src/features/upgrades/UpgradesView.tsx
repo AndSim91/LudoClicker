@@ -148,7 +148,7 @@ export function UpgradesView({
 
   return (
     <main className="overview-view shop-view">
-      <header><Icon name="spark" /><div><h1>Miglioramenti</h1><p>Strumenti e procedure per far crescere l'Ordine delle Onde</p></div></header>
+      <header><Icon name="spark" /><div><h1>Upgrade</h1><p>Strumenti e procedure per far crescere l'Ordine delle Onde</p></div></header>
       <section className="income-summary" aria-label="Entrate dell'Ordine">
         <div><span>Entrate di {monthName}</span><strong>{euro.format(incomePerMonth)} <small>al mese</small></strong></div>
         <p>{state.school.activeMembers} {state.school.activeMembers === 1 ? "iscritto attivo" : "iscritti attivi"} × {euro.format(GAME_CONFIG.monthlyMemberFee)} di quota mensile · prossimo mese tra {secondsToNextMonth} s</p>

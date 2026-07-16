@@ -11,6 +11,7 @@ export interface UpgradeDefinition {
   effectLabel: string;
   effect: UpgradeEffect;
   effectPerLevel: number;
+  additionalEffectsPerLevel?: Partial<Record<UpgradeEffect, number>>;
   baseCost: number;
   costGrowth: number;
   maxLevel: number;
@@ -31,12 +32,12 @@ export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; des
 const GROWTH = 1.3;
 
 const UPGRADE_CATALOG: UpgradeDefinition[] = [
-  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
-  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+2 caratteri per input e livello", effect: "writingPower", effectPerLevel: 2, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
+  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+0,4 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.4, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
+  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
   { id: "automatic-signature", category: "speed", title: "Firma automatica", description: "La chiusura delle mail non richiede più lavoro manuale.", effectLabel: "+10% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 160, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 25 },
-  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati più velocemente.", effectLabel: "+3 caratteri per input e livello", effect: "writingPower", effectPerLevel: 3, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 40 },
-  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Manuale e collaboratori condividono una revisione rapidissima.", effectLabel: "+15% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.15, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 60 },
-  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una procedura di fine ciclo moltiplica l'intera redazione.", effectLabel: "+25% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.25, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 90 },
+  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati più velocemente.", effectLabel: "+2 caratteri per input e livello", effect: "writingPower", effectPerLevel: 2, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 40 },
+  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Manuale e collaboratori condividono una revisione rapidissima.", effectLabel: "+10% automazione e +0,6 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.1, additionalEffectsPerLevel: { writingPower: 0.6 }, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 60 },
+  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una procedura di fine ciclo moltiplica l'intera redazione.", effectLabel: "+10% automazione e +2 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.1, additionalEffectsPerLevel: { writingPower: 2 }, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 90 },
 
   { id: "prepared-presentation", category: "charisma", title: "Presentazione preparata", description: "Spiegazioni più chiare trasformano incontri in contatti utili.", effectLabel: "+10% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.1, baseCost: 15, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
   { id: "qr-cards", category: "charisma", title: "Biglietti con QR code", description: "Lasciare un indirizzo diventa immediato.", effectLabel: "+15% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.15, baseCost: 50, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 5 },
@@ -158,5 +159,10 @@ export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: numb
 }
 
 export function getUpgradeEffectTotal(levels: UpgradeLevels, effect: UpgradeEffect): number {
-  return UPGRADE_DEFINITIONS.reduce((total, definition) => definition.effect === effect ? total + (levels[definition.id] ?? 0) * definition.effectPerLevel : total, 0);
+  return UPGRADE_DEFINITIONS.reduce((total, definition) => {
+    const effectPerLevel =
+      (definition.effect === effect ? definition.effectPerLevel : 0) +
+      (definition.additionalEffectsPerLevel?.[effect] ?? 0);
+    return total + (levels[definition.id] ?? 0) * effectPerLevel;
+  }, 0);
 }

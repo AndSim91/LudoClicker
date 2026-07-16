@@ -33,7 +33,7 @@ Il gioco non invia email e non accede a servizi esterni: destinatari, messaggi e
 - composizione incrementale e invio automatico delle campagne;
 - Posta in arrivo con stato letto/non letto;
 - Posta inviata cliccabile con stato del funnel;
-- shop Miglioramenti con entrate previste al minuto;
+- shop Upgrade con entrate previste al minuto;
 - Eventi con sparring gratuito e dimostrazione programmata;
 - conversione contatto → prova → iscritto → quote;
 - collaboratori, assegnazioni automatiche, Social e percorso delle Forme;

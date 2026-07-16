@@ -53,7 +53,7 @@ describe("App profile and navigation", () => {
       "Posta",
       "Eventi",
       "Iscritti",
-      "Miglioramenti",
+      "Upgrade",
       "Attività",
       "Impostazioni",
       "Admin",
