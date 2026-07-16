@@ -1,11 +1,11 @@
 {
   "0:prima-prova": {
     "subject": "PROVA GRATIS (non è una truffa giuro)",
-    "body": "Ciao {{firstName}},\nVieni a provore Udosport, lo sport con le spade che fanno luce e zero interrogazioni. Siamo quasi tutti bravi e nessuno ha mai perso un braccio definitivamente.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nVieni a provore Udosport, lo sport con le spade che fanno luce e tanti suoni magici. Siamo quasi tutti bravi e nessuno ha mai perso un braccio in modo definitivo per ora.\n\n{{senderName}}"
   },
   "0:disciplina-originale": {
     "subject": "Sport strano cerca persona normale",
-    "body": "Ciao {{firstName}},\nAbbiamo inventato un modo elegante per correre in palestra agitando neon costosissimi. La prova e gratis, però se sei troppo forte fai finta di niente.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nAbbiamo inventato un modo elegante per correre in palestra agitando neon costosissimi. La prova è gratis, però se sei troppo forte fai finta di niente.\n\n{{senderName}}"
   },
   "0:sicurezza-prima": {
     "subject": "Sicurezza circa garantita",
@@ -13,7 +13,7 @@
   },
   "0:gruppo-genova": {
     "subject": "Il gruppo di Genova non morde quasi mai",
-    "body": "Ciao {{firstName}},\nSiamo un gruppo accogliente, apparte Luca quando perde e parla in latino. Vieni a fare spadate luminose con noi, la prima botta cioè prova e gratis.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nSiamo un gruppo accogliente, apparte Luca quando perde e parla in latino. Vieni a fare spadate luminose con noi, la prima botta cioè prova è gratis.\n\n{{senderName}}"
   },
   "0:coordinazione": {
     "subject": "Hai della coordinazione da buttare?",
@@ -21,7 +21,7 @@
   },
   "0:dopo-evento": {
     "subject": "Eri tu quello all'evento? Boh ciao",
-    "body": "Ciao {{firstName}},\nForse ci siamo visti all'evento o forse eri uno simile. Comunque abbiamo spade luminose e una palestra. Vieni gratis prima che ci dimentichiamo di nuovo.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nForse ci siamo visti all'evento o forse eri uno simile. Comunque abbiamo spade luminose e una palestra. Vieni a provare da noi prima che ci dimentichiamo di nuovo.\n\n{{senderName}}"
   },
   "0:materiale-fornito": {
     "subject": "Le spade le portiamo noi, tranquillo",
@@ -49,7 +49,7 @@
   },
   "0:nessuna-esperienza": {
     "subject": "Non serve esperienza e si vede",
-    "body": "Ciao {{firstName}},\nAccettiamo principianti totali, gente confusa e chi pensa che la spada laser si ricarica con USB. Ti spieghiamo quasi tutto. La prova e gratuita.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nAccettiamo principianti totali, gente confusa e chi pensa che la spada laser si ricarica con USB. Ti spieghiamo quasi tutto. La prova è gratuita.\n\n{{senderName}}"
   },
   "0:attivita-settimanale": {
     "subject": "Una cosa da fare invece dei compiti",
@@ -97,7 +97,7 @@
   },
   "0:serata-diversa": {
     "subject": "Serata diversa senza prendere un aereo",
-    "body": "Ciao {{firstName}},\nGenova di sera offre focaccia, traffico e noi che giochiamo seriamente con le spade. Vieni a provare l'opzione meno unta, la prima lezione e gratuita.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nGenova di sera offre focaccia, traffico e noi che giochiamo seriamente con le spade. Vieni a provare l'opzione meno unta, la prima lezione è gratuita.\n\n{{senderName}}"
   },
   "0:sfida-accessibile": {
     "subject": "Difficile ma non tipo matematica",
@@ -173,7 +173,7 @@
   },
   "0:riunione-movimento": {
     "subject": "Riunione senza PowerPoint finalmente",
-    "body": "Ciao {{firstName}},\nÈ una riunione dove puoi muoverti, non prendere appunti e colpire i colleghi sportivamente. Non ci sono slide, solo spade. La prova e gratis.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nÈ una riunione dove puoi muoverti, non prendere appunti e colpire i colleghi sportivamente. Non ci sono slide, solo spade. La prova è gratis.\n\n{{senderName}}"
   },
   "0:mercoledi-epico": {
     "subject": "Mercoledì 2: la vendetta",

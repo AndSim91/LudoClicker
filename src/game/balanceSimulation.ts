@@ -18,6 +18,7 @@ export interface BalanceSimulationOptions {
   seed: number;
   pace: BalancePace;
   horizonMs: number;
+  tickMs?: number;
 }
 
 export interface BalanceSimulationResult {
@@ -141,14 +142,19 @@ export function simulateBalanceGame({
   seed,
   pace,
   horizonMs,
+  tickMs = SIMULATION_TICK_MS,
 }: BalanceSimulationOptions): BalanceSimulationResult {
   const startedAt = SIMULATION_START_MS + seed * 100_000;
   let state = createInitialState(startedAt, `Simulazione ${seed}`);
-  const inputsPerTick = pace === "intense"
+  const inputsPerSecond = pace === "intense"
     ? INTENSE_INPUTS_PER_TICK
     : RELAXED_INPUTS_PER_TICK;
+  const inputsPerTick = Math.max(
+    1,
+    Math.round(inputsPerSecond * tickMs / SIMULATION_TICK_MS),
+  );
   let prestigeReadyAtMs: number | undefined;
-  for (let elapsedMs = 0; elapsedMs <= horizonMs; elapsedMs += SIMULATION_TICK_MS) {
+  for (let elapsedMs = 0; elapsedMs <= horizonMs; elapsedMs += tickMs) {
     const now = startedAt + elapsedMs;
     state = dispatch(state, { type: "TICK", now });
     state = takeStrategicActions(state, now);
@@ -180,10 +186,11 @@ export async function simulateBalanceBatch(
   seeds: number[],
   pace: BalancePace,
   horizonMs: number,
+  tickMs = SIMULATION_TICK_MS,
 ): Promise<BalanceSimulationResult[]> {
   return Promise.all(
     seeds.map((seed) =>
-      Promise.resolve().then(() => simulateBalanceGame({ seed, pace, horizonMs })),
+      Promise.resolve().then(() => simulateBalanceGame({ seed, pace, horizonMs, tickMs })),
     ),
   );
 }

@@ -1002,6 +1002,19 @@ svg {
 
 .appointment-entry {
   border-bottom: 1px solid var(--line);
+  animation: appointment-entry-arrive 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes appointment-entry-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .appointment-expiry {
@@ -1508,6 +1521,16 @@ svg {
   font-size: 15px;
   line-height: 1.7;
   padding: 24px 24px 80px
+}
+
+.level-zero-grammar-error {
+  color: #c42b1c;
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #d13438;
+  text-decoration-thickness: 1.25px;
+  text-underline-offset: 2px;
 }
 
 .typed-copy-level-1,

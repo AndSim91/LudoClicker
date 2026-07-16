@@ -26,6 +26,25 @@ describe("CampaignEmailContent", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
+  it("marks level zero grammar errors like a spell checker", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const body = "Ciao Nome, la prova è gratuita perchè puoi provore Udosport.";
+    const email = {
+      ...initial.emails[0],
+      body,
+      presentationLevel: 0 as const,
+      revealedCharacters: body.length,
+    };
+
+    const { container } = render(<CampaignEmailContent email={email} />);
+
+    expect(
+      Array.from(container.querySelectorAll(".level-zero-grammar-error"), (node) =>
+        node.textContent,
+      ),
+    ).toEqual(["perchè", "provore", "Udosport"]);
+  });
+
   it("renders catalog 2 as plain text while preserving the signature", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const body = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 2);

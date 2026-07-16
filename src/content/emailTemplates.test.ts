@@ -3,6 +3,7 @@ import {
   EMAIL_CATALOG,
   EMAIL_TEMPLATES,
   formatEmailSignature,
+  resolveEmailTemplateCopy,
 } from "./emailTemplates";
 
 describe("email template archive", () => {
@@ -38,6 +39,19 @@ describe("email template archive", () => {
     const firstClean = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 1);
     expect(firstDraft).toContain("Vieni a provore Udosport in palestra");
     expect(firstClean).toContain("Vieni a provare LudoSport in palestra");
+    expect(firstDraft).not.toContain("Un saluto,");
+    expect(firstClean).not.toContain("Un saluto,");
+  });
+
+  it("removes the signoff from level 0 and 1 overrides", () => {
+    const template = EMAIL_TEMPLATES[0];
+    const draft = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", 0);
+    const clean = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", 1);
+
+    expect(draft.body).not.toContain("Un saluto,");
+    expect(clean.body).not.toContain("Un saluto,");
+    expect(draft.body).not.toContain("Andrea Ungaro");
+    expect(clean.body).not.toContain("Andrea Ungaro");
   });
 
   it("progresses from cleaned short copy to the marketing course", () => {

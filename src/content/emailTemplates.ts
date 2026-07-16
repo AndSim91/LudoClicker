@@ -33,10 +33,6 @@ export interface EmailCatalogEntry {
 
 type TemplateCopy = EmailCatalogEntry;
 
-const signature = `
-
-Un saluto,`;
-
 const DEFAULT_ORDER_NAME = "Ordine delle Onde";
 const DEFAULT_CITY = "Genova";
 
@@ -110,10 +106,26 @@ function cleanCatalogCopy(value: string): string {
   return repairEncoding(value).replace(/[^\S\r\n]{2,}/g, " ").trim();
 }
 
-function normalizeEmailSignoff(body: string, senderName: string): string {
+function normalizeEmailSignoff(
+  body: string,
+  senderName: string,
+  presentationLevel: EmailPresentationLevel,
+): string {
   const legacySuffix = senderName ? `\n\n${senderName}` : "";
+  const signoffSuffix = "\n\nUn saluto,";
+
+  if (presentationLevel <= 1) {
+    if (legacySuffix && body.endsWith(legacySuffix)) {
+      return body.slice(0, -legacySuffix.length).trimEnd();
+    }
+    if (body.endsWith(signoffSuffix)) {
+      return body.slice(0, -signoffSuffix.length).trimEnd();
+    }
+    return body;
+  }
+
   if (!legacySuffix || !body.endsWith(legacySuffix)) return body;
-  return `${body.slice(0, -legacySuffix.length)}\n\nUn saluto,`;
+  return `${body.slice(0, -legacySuffix.length)}${signoffSuffix}`;
 }
 
 /**
@@ -279,7 +291,7 @@ function bodyForLevel(
   emailSignature: string,
 ) {
   const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
-  if (level <= 1) return `Ciao ${firstName},\n${compact}${signature}`;
+  if (level <= 1) return `Ciao ${firstName},\n${compact}`;
   return buildFinalEmailBody(firstName, {
     title: cleanCatalogCopy(copy.subject),
     opening: cleanCatalogCopy(copy.opening),
@@ -342,7 +354,11 @@ export function resolveEmailTemplateCopy(
       const renderedBody = renderEmailCopyTokens(draftOverride.body, firstName, senderName);
       return {
         subject: cleanDraftCopy(renderEmailCopyTokens(draftOverride.subject, firstName, senderName)),
-        body: normalizeEmailSignoff(cleanDraftCopy(renderedBody), senderName),
+        body: normalizeEmailSignoff(
+          cleanDraftCopy(renderedBody),
+          senderName,
+          presentationLevel,
+        ),
       };
     }
   }
@@ -353,6 +369,7 @@ export function resolveEmailTemplateCopy(
     body: normalizeEmailSignoff(
       renderEmailCopyTokens(override.body, firstName, senderName),
       senderName,
+      presentationLevel,
     ),
   };
 }

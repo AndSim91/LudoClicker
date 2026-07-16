@@ -11,6 +11,7 @@ import {
 } from "../../content/emailBuild";
 import { EMAIL_PRESENTATION_LEVELS } from "../../content/emailPresentation";
 import type { CampaignEmail } from "../../game/types";
+import { LevelZeroProofreadText } from "./LevelZeroProofreadText";
 
 const ORDER_EMAIL = "genova@ludosport.net";
 
@@ -504,8 +505,18 @@ export function CampaignEmailContent({
         aria-label={`Email in formato ${format.label}`}
         data-email-presentation={level}
       >
-        <span>{visible}</span>
-        {showCaret ? <i className="text-caret" /> : null}
+        {level === 0 ? (
+          <LevelZeroProofreadText
+            text={email.body}
+            revealedCharacters={textRevealedCharacters}
+            showCaret={showCaret}
+          />
+        ) : (
+          <>
+            <span>{visible}</span>
+            {showCaret ? <i className="text-caret" /> : null}
+          </>
+        )}
       </div>
     );
   }

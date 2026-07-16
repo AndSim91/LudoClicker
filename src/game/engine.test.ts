@@ -1048,10 +1048,10 @@ describe("game engine", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 500, historicMembers: 1 },
+      school: { ...initial.school, euros: 800, historicMembers: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
-    const faster = [2_000, 2_100, 2_200].reduce(
+    const faster = [2_000, 2_100, 2_200, 2_300, 2_400].reduce(
       (state, now) => gameReducer(state, {
         type: "BUY_UPGRADE",
         upgradeId: "comfortable-keyboard",
@@ -1620,7 +1620,7 @@ describe("game engine", () => {
     }));
     const eligible = {
       ...initial,
-      school: { ...initial.school, activeMembers: 80, historicMembers: 100, euros: 500 },
+      school: { ...initial.school, activeMembers: 80, historicMembers: 1_000, euros: 500 },
       contacts: initial.contacts.map((contact, index) => index === 0
         ? {
             ...contact,
@@ -1639,7 +1639,7 @@ describe("game engine", () => {
         encounteredProfileIds: ["eva-parodi" as const],
         enrolledProfileIds: ["eva-parodi" as const],
       },
-      statistics: { ...initial.statistics, eventsCompleted: 12, emailsSent: 30 },
+      statistics: { ...initial.statistics, eventsCompleted: 50, emailsSent: 30 },
       upgrades: { ...initial.upgrades, "comfortable-keyboard": 2 },
     };
 
@@ -1657,7 +1657,7 @@ describe("game engine", () => {
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
     expect(founded.school.activeMembers).toBe(0);
-    expect(founded.school.historicMembers).toBe(100);
+    expect(founded.school.historicMembers).toBe(1_000);
     expect(founded.collaborators).toEqual([]);
     expect(founded.contacts).toHaveLength(5);
     expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual([]);
@@ -1675,7 +1675,7 @@ describe("game engine", () => {
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
     expect(founded.player.writingPower).toBeCloseTo(1.375);
     expect(selectIncomePerMonth(founded)).toBeCloseTo(6.25);
-    expect(getPrestigeRequirements(founded)).toEqual({ historicMembers: 200, collaborators: 10, events: 24 });
+    expect(getPrestigeRequirements(founded)).toEqual({ historicMembers: 2_000, collaborators: 10, events: 100 });
 
     const postPrestigeEvent = {
       id: "post-prestige-contacts",

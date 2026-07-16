@@ -46,13 +46,13 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
   },
   "complete-event": {
     id: "complete-event",
-    title: "Uscire dall'ufficio",
-    description: "Porta a termine un evento esterno dell'Ordine.",
+    title: "Uscire a toccare l'erba",
+    description: "Porta a termine un evento in esterna.",
     metric: "eventsCompleted",
     baseTarget: 1,
     targetGrowth: 1,
     baseReward: 20,
-    completionNarrative: "Il verbale conferma che l'Ordine è stato visto nel mondo reale.",
+    completionNarrative: "Il verbale della polizia locale conferma che siamo stati visti fuori dalla palestra.",
   },
   "enroll-member": {
     id: "enroll-member",
