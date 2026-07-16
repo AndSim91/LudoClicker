@@ -28,8 +28,23 @@ const PRESENTATION_LEVELS = Object.keys(EMAIL_PRESENTATION_LEVELS).map(
 
 const previewRecipient = "Giulia";
 const previewSender = "Andrea Ungaro";
+const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
-export function AdminEmailView({ upgrades }: { upgrades: UpgradeLevels }) {
+interface AdminEmailViewProps {
+  upgrades: UpgradeLevels;
+  activeMembers: number;
+  euros: number;
+  onAddMembers: (amount: number) => void;
+  onAddEuros: (amount: number) => void;
+}
+
+export function AdminEmailView({
+  upgrades,
+  activeMembers,
+  euros,
+  onAddMembers,
+  onAddEuros,
+}: AdminEmailViewProps) {
   const [selectedLevel, setSelectedLevel] = useState<EmailPresentationLevel>(0);
   const [selectedTemplateId, setSelectedTemplateId] = useState(
     () => EMAIL_TEMPLATES[0]?.id ?? "",
@@ -38,6 +53,13 @@ export function AdminEmailView({ upgrades }: { upgrades: UpgradeLevels }) {
   const [overrides, setOverrides] = useState(loadEmailCopyOverrides);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [memberAmount, setMemberAmount] = useState("1");
+  const [euroAmount, setEuroAmount] = useState("1000");
+
+  const parsedMemberAmount = Math.floor(Number(memberAmount));
+  const parsedEuroAmount = Number(euroAmount);
+  const canAddMembers = Number.isSafeInteger(parsedMemberAmount) && parsedMemberAmount > 0;
+  const canAddEuros = Number.isFinite(parsedEuroAmount) && parsedEuroAmount > 0;
 
   const selectedTemplate =
     EMAIL_TEMPLATES.find((template) => template.id === selectedTemplateId) ??
@@ -122,6 +144,54 @@ export function AdminEmailView({ upgrades }: { upgrades: UpgradeLevels }) {
           Ogni acquisto sposta il 20% delle nuove email dal catalogo precedente a
           quello nuovo: 20%, 40%, 60%, 80%, 100%.
         </span>
+      </section>
+
+      <section className="admin-resource-tools" aria-labelledby="admin-resource-title">
+        <div className="admin-resource-heading">
+          <span>Risorse partita</span>
+          <h2 id="admin-resource-title">Aggiunte manuali</h2>
+          <p>Le quantità vengono sommate ai valori attuali.</p>
+        </div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (canAddMembers) onAddMembers(parsedMemberAmount);
+          }}
+        >
+          <label htmlFor="admin-member-amount">
+            Iscritti da aggiungere
+            <input
+              id="admin-member-amount"
+              type="number"
+              min="1"
+              step="1"
+              value={memberAmount}
+              onChange={(event) => setMemberAmount(event.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={!canAddMembers}>Aggiungi iscritti</button>
+          <small>Attuali: {activeMembers}</small>
+        </form>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (canAddEuros) onAddEuros(parsedEuroAmount);
+          }}
+        >
+          <label htmlFor="admin-euro-amount">
+            Euro da aggiungere
+            <input
+              id="admin-euro-amount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={euroAmount}
+              onChange={(event) => setEuroAmount(event.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={!canAddEuros}>Aggiungi Euro</button>
+          <small>Attuali: {euro.format(euros)}</small>
+        </form>
       </section>
 
       <div className="admin-email-workspace">

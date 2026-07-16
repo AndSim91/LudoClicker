@@ -34,7 +34,7 @@ export function useGameEngine() {
     return () => window.removeEventListener("beforeunload", saveOnExit);
   }, []);
 
-  const saveCheckpoint = `${state.profile.displayName}:${state.statistics.emailsSent}:${state.statistics.trialsBooked}:${state.statistics.membersEnrolled}:${state.statistics.eventsCompleted}:${JSON.stringify(state.upgrades)}:${state.messages.filter((message) => message.unread).length}:${state.acquisitionEvents.length}`;
+  const saveCheckpoint = `${state.profile.displayName}:${state.school.activeMembers}:${state.school.historicMembers}:${state.school.euros}:${state.statistics.emailsSent}:${state.statistics.trialsBooked}:${state.statistics.membersEnrolled}:${state.statistics.eventsCompleted}:${JSON.stringify(state.upgrades)}:${state.messages.filter((message) => message.unread).length}:${state.acquisitionEvents.length}`;
   useEffect(() => {
     saveGame(stateRef.current);
   }, [saveCheckpoint]);

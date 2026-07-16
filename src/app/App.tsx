@@ -207,7 +207,13 @@ export function App() {
             }
           />
         ) : activeView === "admin" ? (
-          <AdminEmailView upgrades={state.upgrades} />
+          <AdminEmailView
+            upgrades={state.upgrades}
+            activeMembers={state.school.activeMembers}
+            euros={state.school.euros}
+            onAddMembers={(amount) => dispatch({ type: "ADMIN_ADD_MEMBERS", amount })}
+            onAddEuros={(amount) => dispatch({ type: "ADMIN_ADD_EUROS", amount })}
+          />
         ) : (
           <OverviewView
             view={activeView}

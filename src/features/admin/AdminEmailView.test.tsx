@@ -14,10 +14,22 @@ afterEach(() => {
 });
 
 describe("AdminEmailView", () => {
+  const renderAdmin = (onAddMembers = vi.fn(), onAddEuros = vi.fn()) => {
+    render(
+      <AdminEmailView
+        upgrades={createInitialUpgradeLevels()}
+        activeMembers={4}
+        euros={250}
+        onAddMembers={onAddMembers}
+        onAddEuros={onAddEuros}
+      />,
+    );
+  };
+
   it("saves subject and body overrides in the repository file", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
-    render(<AdminEmailView upgrades={createInitialUpgradeLevels()} />);
+    renderAdmin();
 
     fireEvent.click(
       screen.getByRole("button", { name: /Catalogo 1.*Controllo ortografico/ }),
@@ -44,7 +56,28 @@ describe("AdminEmailView", () => {
       body: "Ciao Giulia,\n\nTi aspettiamo.\n\nAndrea",
     });
     expect(resolveEmailTemplateCopy(template, "Giulia", "Andrea", 0).subject).toBe(
-      template.subject,
+      "PROVA GRATIS (non è una truffa giuro)",
     );
+  });
+
+  it("adds the manually entered members and euros", () => {
+    const onAddMembers = vi.fn();
+    const onAddEuros = vi.fn();
+    renderAdmin(onAddMembers, onAddEuros);
+
+    expect(screen.getByLabelText("Iscritti da aggiungere")).toHaveValue(1);
+    expect(screen.getByLabelText("Euro da aggiungere")).toHaveValue(1000);
+
+    fireEvent.change(screen.getByLabelText("Iscritti da aggiungere"), {
+      target: { value: "7" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Aggiungi iscritti" }));
+    fireEvent.change(screen.getByLabelText("Euro da aggiungere"), {
+      target: { value: "1250.50" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Aggiungi Euro" }));
+
+    expect(onAddMembers).toHaveBeenCalledWith(7);
+    expect(onAddEuros).toHaveBeenCalledWith(1250.5);
   });
 });

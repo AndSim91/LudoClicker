@@ -1565,6 +1565,95 @@ svg {
   line-height: 1.45;
 }
 
+.admin-resource-tools {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) repeat(2, minmax(260px, 1fr));
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.admin-resource-heading span {
+  color: var(--blue-700);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-resource-heading h2 {
+  margin: 3px 0;
+  font-size: 17px;
+}
+
+.admin-resource-heading p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.admin-resource-tools form {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) auto;
+  align-items: end;
+  gap: 7px 10px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+}
+
+.admin-resource-tools label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-resource-tools input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-weight: 400;
+}
+
+.admin-resource-tools button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--blue-600);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-resource-tools small {
+  grid-column: 1 / -1;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1050px) {
+  .admin-resource-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-resource-tools form {
+    padding: 14px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
 .admin-email-workspace {
   display: grid;
   grid-template-columns: 220px 300px minmax(430px, 1fr);

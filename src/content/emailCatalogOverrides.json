@@ -1,1 +1,402 @@
-{}
+{
+  "0:prima-prova": {
+    "subject": "PROVA GRATIS (non è una truffa giuro)",
+    "body": "Ciao {{firstName}},\nVieni a provore Udosport, lo sport con le spade che fanno luce e zero interrogazioni. Siamo quasi tutti bravi e nessuno ha mai perso un braccio definitivamente.\n\n{{senderName}}"
+  },
+  "0:disciplina-originale": {
+    "subject": "Sport strano cerca persona normale",
+    "body": "Ciao {{firstName}},\nAbbiamo inventato un modo elegante per correre in palestra agitando neon costosissimi. La prova e gratis, però se sei troppo forte fai finta di niente.\n\n{{senderName}}"
+  },
+  "0:sicurezza-prima": {
+    "subject": "Sicurezza circa garantita",
+    "body": "Ciao {{firstName}},\nProva una disciplina diversa, con spade strane, esercizi mortali e un gruppo divergente. La prova è gratuita e non serve esperienza.\n\n{{senderName}}"
+  },
+  "0:gruppo-genova": {
+    "subject": "Il gruppo di Genova non morde quasi mai",
+    "body": "Ciao {{firstName}},\nSiamo un gruppo accogliente, apparte Luca quando perde e parla in latino. Vieni a fare spadate luminose con noi, la prima botta cioè prova e gratis.\n\n{{senderName}}"
+  },
+  "0:coordinazione": {
+    "subject": "Hai della coordinazione da buttare?",
+    "body": "Ciao {{firstName}},\nAlleniamo precisione, ritmo e il non cadere sui propri piedi. Se sai camminare sei già avanti, se non sai ti mettiamo vicino al muro. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:dopo-evento": {
+    "subject": "Eri tu quello all'evento? Boh ciao",
+    "body": "Ciao {{firstName}},\nForse ci siamo visti all'evento o forse eri uno simile. Comunque abbiamo spade luminose e una palestra. Vieni gratis prima che ci dimentichiamo di nuovo.\n\n{{senderName}}"
+  },
+  "0:materiale-fornito": {
+    "subject": "Le spade le portiamo noi, tranquillo",
+    "body": "Ciao {{firstName}},\nNon devi comprare niente perchè abbiamo già tutto, anche un casco che sa un pò di cantina. Porta scarpe e possibilmente te stesso. La prova è gratis.\n\n{{senderName}}"
+  },
+  "0:allenamento-completo": {
+    "subject": "Palestra per muscoli e altri organi",
+    "body": "Ciao {{firstName}},\nAlleni gambe, braccia, cervello e forse la milza. È completo perchè dopo sei stanco dappertutto. Vieni gratis e porta dell'acqua, non la cedrata.\n\n{{senderName}}"
+  },
+  "0:prima-volta": {
+    "subject": "La prima volta non si scorda (purtroppo)",
+    "body": "Ciao {{firstName}},\nPartiamo dalle basi: tenere la spada dal lato giusto e non sfidare il termosifone. Non serve esperienza, infatti alcuni di noi ancora non c'è l'hanno.\n\n{{senderName}}"
+  },
+  "0:orari-gruppo": {
+    "subject": "Orari precisi più o meno",
+    "body": "Ciao {{firstName}},\nCi alleniamo quando la palestra è aperta e qualcuno si ricorda le chiavi. Se rispondi ti diciamo l'orario vero appena lo chiediamo nel gruppo Whatsapp.\n\n{{senderName}}"
+  },
+  "0:ambiente-accogliente": {
+    "subject": "Ambiente accogliente con pavimento",
+    "body": "Ciao {{firstName}},\nLa palestra ha quattro muri, un gruppo simpatico e un distributore che ruba le monete. LudoSport è figo e divertenta, vieni gratis a verificare.\n\n{{senderName}}"
+  },
+  "0:controllo-movimento": {
+    "subject": "Controlla la spada prima che lei controlla te",
+    "body": "Ciao {{firstName}},\nImpari precisione, distanza e a fare facce molto serie mentre impugni un tubo luminoso. Sembra facile nei film, quindi vieni a essere smentito gratis.\n\n{{senderName}}"
+  },
+  "0:nessuna-esperienza": {
+    "subject": "Non serve esperienza e si vede",
+    "body": "Ciao {{firstName}},\nAccettiamo principianti totali, gente confusa e chi pensa che la spada laser si ricarica con USB. Ti spieghiamo quasi tutto. La prova e gratuita.\n\n{{senderName}}"
+  },
+  "0:attivita-settimanale": {
+    "subject": "Una cosa da fare invece dei compiti",
+    "body": "Ciao {{firstName}},\nLa settimana è lunga e guardare il soffitto non conta come hobby. Vieni a duellare con noi: è sport, socialità e una scusa credibile per comprare guanti.\n\n{{senderName}}"
+  },
+  "0:domande-prima": {
+    "subject": "Fai domande ma non troppo difficili",
+    "body": "Ciao {{firstName}},\nPuoi chiederci tutto su sicurezza, allenamenti e spade. Se non sappiamo la risposta guardiamo su internet con aria professionale. La prima prova è gratis.\n\n{{senderName}}"
+  },
+  "0:percorso-progressivo": {
+    "subject": "Prima piano poi fortissimo",
+    "body": "Ciao {{firstName}},\nIl percorso è graduale: prima cammini, poi colpisci, poi impari perchè non dovevi colpire lì. Ogni lezione aggiunge una roba nuova e qualche livido morale.\n\n{{senderName}}"
+  },
+  "0:prova-senza-impegno": {
+    "subject": "Prova senza impegno e senza notaio",
+    "body": "Ciao {{firstName}},\nVieni una volta, provi le spade e poi puoi sparire nella nebbia di Genova. Non firmi niente apparte forse la presenza, se troviamo la penna. È gratis.\n\n{{senderName}}"
+  },
+  "0:movimento-strategia": {
+    "subject": "Scacchi ma puoi correre e urlare piano",
+    "body": "Ciao {{firstName}},\nÈ uno sport di strategia, solo che i pezzi siete voi e nessuno ricorda come si muove l'alfiere. Muoviti, pensa e fai finta che era tutto calcolato.\n\n{{senderName}}"
+  },
+  "0:scuola-aperta": {
+    "subject": "La scuola è aperta, la porta anche",
+    "body": "Ciao {{firstName}},\nStiamo cercando nuovi partecipanti perchè ormai sappiamo già tutte le battute dei vecchi. Vieni a portare idee, energia o almeno una battuta diversa.\n\n{{senderName}}"
+  },
+  "0:invito-aperto": {
+    "subject": "Invito molto ufficiale fatto dal telefono",
+    "body": "Ciao {{firstName}},\nSei ufficialmente invitato all'Ordine delle Onde, nome serissimo scelto senza ridere. Porta vestiti comodi e curiosità; il mantello è facoltativo ma bello.\n\n{{senderName}}"
+  },
+  "0:lunedi-luminoso": {
+    "subject": "Il lunedì fa schifo, mettiamoci una spada",
+    "body": "Ciao {{firstName}},\nIl lunedì sera puoi fissare il muro oppure illuminare la palestra con noi. Entrambe allenano la concentrazione ma solo una ha le spade. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:curiosita-inizio": {
+    "subject": "Se hai aperto questa mail sei già qualificato",
+    "body": "Ciao {{firstName}},\nLa curiosità basta per iniziare, insieme a due gambe opzionali e delle scarpe pulite. Al resto pensiamo noi o chiediamo a quello grande del gruppo.\n\n{{senderName}}"
+  },
+  "0:routine-nuova": {
+    "subject": "La tua routine manca di rumori laser",
+    "body": "Ciao {{firstName}},\nSveglia, lavoro, cena, noia: manca chiaramente una spada luminosa in mezzo. Vieni a sistemare la settimana con esercizi strani e persone ancora più strane.\n\n{{senderName}}"
+  },
+  "0:precisione-divertente": {
+    "subject": "Precisione però anche casino",
+    "body": "Ciao {{firstName}},\nProviamo lo stesso movimento cento volte finchè viene bene o chiude la palestra. È stranamente divertente, tipo piegare le magliette ma con più duelli.\n\n{{senderName}}"
+  },
+  "0:serata-diversa": {
+    "subject": "Serata diversa senza prendere un aereo",
+    "body": "Ciao {{firstName}},\nGenova di sera offre focaccia, traffico e noi che giochiamo seriamente con le spade. Vieni a provare l'opzione meno unta, la prima lezione e gratuita.\n\n{{senderName}}"
+  },
+  "0:sfida-accessibile": {
+    "subject": "Difficile ma non tipo matematica",
+    "body": "Ciao {{firstName}},\nÈ una sfida accessibile: all'inizio sbagli tutto ma con eleganza, poi sbagli meno e compri pantaloni più larghi. Vieni gratis, nessuno interroga.\n\n{{senderName}}"
+  },
+  "0:energia-gruppo": {
+    "subject": "Porta energia o una merendina",
+    "body": "Ciao {{firstName}},\nIl gruppo mette spade, spiegazioni e incoraggiamenti urlati malissimo. Tu porta energia; se non ne hai vanno bene biscotti, purchè non sbriciolano.\n\n{{senderName}}"
+  },
+  "0:imparare-muovendosi": {
+    "subject": "Impara senza stare seduto che assurdità",
+    "body": "Ciao {{firstName}},\nQui si impara camminando, parando e cercando di ricordarsi il nome delle mosse. Finalmente una lezione dove alzarsi dal posto non è una punizione.\n\n{{senderName}}"
+  },
+  "0:tempo-ben-speso": {
+    "subject": "90 minuti che sembrano 87",
+    "body": "Ciao {{firstName}},\nIn novanta minuti impari mosse, conosci gente e scopri muscoli che non avevi autorizzato. È tempo ben speso, secondo una statistica fatta da noi.\n\n{{senderName}}"
+  },
+  "0:concentrazione-attiva": {
+    "subject": "Concentrarsi correndo è legale",
+    "body": "Ciao {{firstName}},\nDevi pensare mentre ti muovi, cosa che sembra impossibile ma ogni tanto riesce. È come meditare, però qualcuno tenta gentilmente di colpirti con una luce.\n\n{{senderName}}"
+  },
+  "0:gruppo-che-cresce": {
+    "subject": "Ci servono persone nuove urgentino",
+    "body": "Ciao {{firstName}},\nIl gruppo cresce ma nelle foto rimaniamo sempre in tre perchè gli altri arrivano tardi. Vieni a riempire lo sfondo e magari anche ad allenarti. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:eleganza-movimento": {
+    "subject": "Eleganza venduta separatamente",
+    "body": "Ciao {{firstName}},\nTi insegniamo movimenti precisi ed eleganti. L'eleganza può arrivare dopo parecchio, nel frattempo c'è la tuta con il ginocchio un pò scolorito.\n\n{{senderName}}"
+  },
+  "0:prova-pratica": {
+    "subject": "Meno teoria più pew pew",
+    "body": "Ciao {{firstName}},\nPotremmo spiegarti lo sport per ore, ma nessuno vuole questo. Meglio darti una spada, indicare il lato giusto e vedere cosa succede controllatamente.\n\n{{senderName}}"
+  },
+  "0:posto-riservato": {
+    "subject": "C'è un posto libero con scritto forse tu",
+    "body": "Ciao {{firstName}},\nAlla prossima prova avanza un posto perchè Marco ha detto forse, che vuol dire no. Te lo riserviamo senza caparra, password o sacrifici al dio della palestra.\n\n{{senderName}}"
+  },
+  "0:allenare-decisioni": {
+    "subject": "Impara a decidere prima di martedì",
+    "body": "Ciao {{firstName}},\nAlleni il corpo e prendi decisioni veloci tipo paro, scappo o fingo di aver capito. Utile anche nella vita e davanti al menù della pizzeria.\n\n{{senderName}}"
+  },
+  "0:settimana-memorabile": {
+    "subject": "Rendi la settimana ricordabile o almeno strana",
+    "body": "Ciao {{firstName}},\nTra sette giorni non ricorderai cosa hai visto online, ma forse ricorderai la volta che uno con una spada blu ti ha detto piega le ginocchia. Vieni gratis.\n\n{{senderName}}"
+  },
+  "0:inizio-semplice": {
+    "subject": "Iniziare è facile, continuare boh",
+    "body": "Ciao {{firstName}},\nPer iniziare basta entrare dalla porta con vestiti comodi. Noi diamo la spada e le istruzioni; alcune sono pure corrette. La prima prova non costa niente.\n\n{{senderName}}"
+  },
+  "0:disciplina-condivisa": {
+    "subject": "Impariamo insieme perchè da soli no",
+    "body": "Ciao {{firstName}},\nQui tutti aiutano tutti, specialmente quando nessuno ricorda la sequenza. Si sbaglia in compagnia ed è molto più professionale. Prova gratuitamente.\n\n{{senderName}}"
+  },
+  "0:invito-concreto": {
+    "subject": "Invito concreto ma la spada è plastica",
+    "body": "Ciao {{firstName}},\nEcco il piano: vieni, ti presentiamo gente, impugni una spada e provi. Piano semplicissimo scritto dopo quattro riunioni e due vocali di sette minuti.\n\n{{senderName}}"
+  },
+  "0:buona-storia": {
+    "subject": "Potrebbe uscirne una storia decente",
+    "body": "Ciao {{firstName}},\nVieni una sera e poi potrai dire ho combattuto con spade luminose in una palestra genovese. È una storia migliore di ho riordinato il cassetto.\n\n{{senderName}}"
+  },
+  "0:divano": {
+    "subject": "Il tuo divano ha paura di questa mail",
+    "body": "Ciao {{firstName}},\nIl divano ti vuole fermo e molle, noi ti vogliamo in palestra con una spada. Non fidarti di un mobile che raccoglie briciole da anni. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:agenda-spada": {
+    "subject": "Abbiamo hackerato la tua agenda (scherzo)",
+    "body": "Ciao {{firstName}},\nSecondo calcoli inventati hai una sera libera perfetta per LudoSport. Se non è vero sposta qualcosa di poco importante, tipo dormire o il compleanno del gatto.\n\n{{senderName}}"
+  },
+  "0:scarpe-comode": {
+    "subject": "Scarpe pulite, intenzioni discutibili",
+    "body": "Ciao {{firstName}},\nPorta vestiti comodi e scarpe pulite. Le ottime intenzioni sono facoltative, tanto dopo cinque minuti vorrai già battere quello che spiega. Con rispetto.\n\n{{senderName}}"
+  },
+  "0:riunione-movimento": {
+    "subject": "Riunione senza PowerPoint finalmente",
+    "body": "Ciao {{firstName}},\nÈ una riunione dove puoi muoverti, non prendere appunti e colpire i colleghi sportivamente. Non ci sono slide, solo spade. La prova e gratis.\n\n{{senderName}}"
+  },
+  "0:mercoledi-epico": {
+    "subject": "Mercoledì 2: la vendetta",
+    "body": "Ciao {{firstName}},\nIl mercoledì non ha personalità, quindi gli abbiamo dato le spade luminose. Adesso è quasi epico e sicuramente meno mercoledì. Vieni a controllare.\n\n{{senderName}}"
+  },
+  "0:coordinazione-caffe": {
+    "subject": "Il caffè non aggiusta i tuoi riflessi",
+    "body": "Ciao {{firstName}},\nBere il quarto caffè non aumenta la coordinazione, fa solo tremare meglio. Noi abbiamo esercizi apposta e anche l'acqua. Vieni a provare senza rovesciarla.\n\n{{senderName}}"
+  },
+  "0:nessun-prescelto": {
+    "subject": "Il prescelto non ha risposto, proviamo con te",
+    "body": "Ciao {{firstName}},\nNon cerchiamo eroi della galassia, ci bastano principianti puntuali o quasi. Se non hai poteri speciali meglio, così non dobbiamo cambiare assicurazione.\n\n{{senderName}}"
+  },
+  "0:manuale-non-incluso": {
+    "subject": "Manuale perso ma sappiamo le cose",
+    "body": "Ciao {{firstName}},\nIl manuale non te lo diamo perchè nessuno sa dov'è, però gli istruttori spiegano tutto a voce e con gesti enormi. Funziona dal 2016 circa. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:spazio-personale": {
+    "subject": "Spazio personale difeso con eleganza",
+    "body": "Ciao {{firstName}},\nImpari la distanza giusta dagli altri, molto utile pure in coda alle poste. Qui però hai una spada luminosa e alle poste ci hanno chiesto di non portarla.\n\n{{senderName}}"
+  },
+  "0:progetto-segreto": {
+    "subject": "Progetto segreto inoltrato a 100 persone",
+    "body": "Ciao {{firstName}},\nStiamo formando una squadra segretissima, quindi non dirlo a nessuno apparte amici, parenti e gente incontrata al bus. La parola d'ordine è prova gratis.\n\n{{senderName}}"
+  },
+  "0:notifica-utile": {
+    "subject": "Notifica importante forse",
+    "body": "Ciao {{firstName}},\nQuesta mail interrompe cose più importanti per dirti che puoi provare LudoSport gratis. Ora puoi tornare ai video di procioni, ma pensaci seriamente.\n\n{{senderName}}"
+  },
+  "0:postura-eroica": {
+    "subject": "Schiena dritta, mantello immaginario",
+    "body": "Ciao {{firstName}},\nPrima impari la postura corretta, poi quella eroica con mento alto e vento inesistente nei capelli. Il mantello è vietato perchè ci si inciampa.\n\n{{senderName}}"
+  },
+  "0:palestra-senza-draghi": {
+    "subject": "Controllato oggi: zero draghi",
+    "body": "Ciao {{firstName}},\nAbbiamo controllato tutta la palestra e non ci sono draghi, solo polvere dietro i materassi e un istruttore molto alto. Puoi venire senza armatura.\n\n{{senderName}}"
+  },
+  "0:livello-curiosita": {
+    "subject": "Curiosità rilevata sopra il minimo legale",
+    "body": "Ciao {{firstName}},\nSe stai ancora leggendo hai abbastanza curiosità per una prova. Non è un test scientifico, l'abbiamo deciso adesso, ma i risultati sembrano comodissimi.\n\n{{senderName}}"
+  },
+  "0:impegno-ragionevole": {
+    "subject": "Avventura media senza vulcani",
+    "body": "Ciao {{firstName}},\nTi proponiamo una quantità ragionevole di avventura: niente giungle o vulcani, solo una palestra, spade luminose e gente che conta ad alta voce male.\n\n{{senderName}}"
+  },
+  "0:modulo-entusiasmo": {
+    "subject": "Modulo entusiasmo smarrito",
+    "body": "Ciao {{firstName}},\nNon serve essere entusiasta subito, puoi compilare l'entusiasmo dopo aver provato. La penna però portala tu perchè le nostre spariscono misteriosamente.\n\n{{senderName}}"
+  },
+  "0:piano-b": {
+    "subject": "Piano B perchè il piano A era il divano",
+    "body": "Ciao {{firstName}},\nSe la tua serata prevedeva divano e niente, abbiamo un piano B con movimento e spade. Se va male il divano sarà ancora lì, non è velocissimo.\n\n{{senderName}}"
+  },
+  "0:statistica-sorrisi": {
+    "subject": "Il 113% dei partecipanti sorride",
+    "body": "Ciao {{firstName}},\nLe nostre statistiche dicono che il 113% si diverte. I conti li ha fatti uno di terza media, ma è molto convinto e aveva una calcolatrice blu.\n\n{{senderName}}"
+  },
+  "0:spada-assegnata": {
+    "subject": "Una spada ha chiesto proprio di te",
+    "body": "Ciao {{firstName}},\nC'è una spada libera che potrebbe essere tua per una sera. Non parla davvero, quello era Matteo dietro l'armadio, ma l'invito resta valido e gratis.\n\n{{senderName}}"
+  },
+  "0:decisione-semplice": {
+    "subject": "Decisione facile clicca cioè rispondi",
+    "body": "Ciao {{firstName}},\nPuoi dire sì, no o chi siete e come avete la mia mail. Noi speriamo sì, ma anche la terza è una domanda ragionevole. La prova comunque è gratuita.\n\n{{senderName}}"
+  },
+  "0:protocollo-curiosita": {
+    "subject": "Protocollo curiosità versione FINALfinal2",
+    "body": "Ciao {{firstName}},\nIl protocollo dice: uno, vieni in palestra; due, prendi una spada; tre, non improvvisare il quattro. Documento approvato da gente quasi maggiorenne.\n\n{{senderName}}"
+  },
+  "0:verbale-spade": {
+    "subject": "VERBALE: le spade ci sono",
+    "body": "Ciao {{firstName}},\nDopo accurato conteggio risultano parecchie spade, meno una che è forse nel bagagliaio di Sara. Ce n'è comunque una per te. Fine del verbale.\n\n{{senderName}}"
+  },
+  "0:foglio-calcolo": {
+    "subject": "Excel dice che devi venire",
+    "body": "Ciao {{firstName}},\nAbbiamo messo il tuo nome in un foglio di calcolo e la casella accanto è diventata verde. Nessuno sa perchè, quindi per sicurezza vieni a provare.\n\n{{senderName}}"
+  },
+  "0:comitato-lunedi": {
+    "subject": "Delibera contro il lunedì noioso",
+    "body": "Ciao {{firstName}},\nIl comitato composto da me e altri due ha deciso che il lunedì necessita spade luminose. La mozione è passata perchè il terzo era in bagno.\n\n{{senderName}}"
+  },
+  "0:ticket-esperienza": {
+    "subject": "Ticket #404: hobby non trovato",
+    "body": "Ciao {{firstName}},\nAbbiamo aperto un ticket perchè forse ti manca un hobby strano. Soluzione proposta: LudoSport gratis. Priorità alta ma puoi rispondere con calma.\n\n{{senderName}}"
+  },
+  "0:audit-divano": {
+    "subject": "Audit concluso: il divano perde",
+    "body": "Ciao {{firstName}},\nUn controllo indipendente fatto da noi conferma che il divano allena poco le gambe e troppo le briciole. La palestra vince 7 a 2, dati non disponibili.\n\n{{senderName}}"
+  },
+  "0:circolare-movimento": {
+    "subject": "Circolare numero boh sul movimento",
+    "body": "Ciao {{firstName}},\nLa presente circolare comunica che muoversi con una spada è più interessante che muoversi senza. Fonte: noi ieri sera. Partecipazione gratuita.\n\n{{senderName}}"
+  },
+  "0:budget-zero": {
+    "subject": "Preventivo professionale: € boh cioè zero",
+    "body": "Ciao {{firstName}},\nLa prima prova costa esattamente niente, IVA compresa credo. Il nostro reparto finanza è un barattolo con due monete, quindi approfittane finchè regge.\n\n{{senderName}}"
+  },
+  "0:riunione-operativa": {
+    "subject": "Convocazione operativa senza sedie",
+    "body": "Ciao {{firstName}},\nSei convocato a una riunione dove stare seduti è sconsigliato e le comunicazioni avvengono anche a colpi controllati. Ordine del giorno: divertirsi.\n\n{{senderName}}"
+  },
+  "0:allegato-invisibile": {
+    "subject": "ALLEGATO IMPORTANTE (non c'è)",
+    "body": "Ciao {{firstName}},\nIn allegato trovi una serata diversa. Se non la vedi è perchè devi venire in palestra per aprirla fisicamente. La tecnologia non è il nostro forte.\n\n{{senderName}}"
+  },
+  "0:kpi-coordinazione": {
+    "subject": "KPI delle tue gambe in rosso",
+    "body": "Ciao {{firstName}},\nI KPI inventati indicano coordinazione migliorabile e livello spada troppo basso. Proponiamo una prova gratuita e un grafico che non abbiamo ancora fatto.\n\n{{senderName}}"
+  },
+  "0:approvazione-unanime": {
+    "subject": "Invito approvato da tutti i presenti (io)",
+    "body": "Ciao {{firstName}},\nLa commissione ha approvato all'unanimità il tuo invito. Ero l'unico presente ma tecnicamente vale. Vieni a provare, così la prossima votiamo in due.\n\n{{senderName}}"
+  },
+  "0:procedura-abiti": {
+    "subject": "Procedura vestiti: mettili comodi",
+    "body": "Ciao {{firstName}},\nProcedura ufficiale: apri armadio, ignora i jeans stretti, scegli roba comoda e arriva. Non serve stirarla, tanto dopo cinque minuti nessuno nota niente.\n\n{{senderName}}"
+  },
+  "0:registro-presenze": {
+    "subject": "Nel registro c'è un buco a forma di te",
+    "body": "Ciao {{firstName}},\nAbbiamo una riga vuota nel registro e una penna quasi funzionante. Potremmo scriverci il tuo nome se vieni, oppure disegnare un dinosauro. Decidi tu.\n\n{{senderName}}"
+  },
+  "0:conformita-sicurezza": {
+    "subject": "Sicurezza verificata da uno con gli occhiali",
+    "body": "Ciao {{firstName}},\nAbbiamo controllato la sicurezza seriamente: spade a posto, pavimento presente e nessun vulcano attivo. Il responsabile annuiva molto convinto.\n\n{{senderName}}"
+  },
+  "0:memo-precisione": {
+    "subject": "MEMO: colpisci dove volevi colpire",
+    "body": "Ciao {{firstName}},\nLa precisione richiede pratica, altrimenti miri alla spalla e saluti una pianta. Le nostre piante sono stanche, vieni ad allenarti correttamente.\n\n{{senderName}}"
+  },
+  "0:istanza-novita": {
+    "subject": "Richiesta novità accettata senza leggerla",
+    "body": "Ciao {{firstName}},\nLa tua richiesta immaginaria di una settimana meno pallosa è stata approvata. La soluzione include spade, palestra e nessun rimborso perchè è già gratis.\n\n{{senderName}}"
+  },
+  "0:piano-formazione": {
+    "subject": "Piano formativo scritto sul retro",
+    "body": "Ciao {{firstName}},\nIl piano prevede sicurezza, mosse base e pausa acqua. Sul retro c'era la lista della spesa ma l'abbiamo cancellata quasi tutta. Formazione seria.\n\n{{senderName}}"
+  },
+  "0:notifica-sistema": {
+    "subject": "ERRORE: curiosità non convertita",
+    "body": "Ciao {{firstName}},\nIl sistema ha trovato curiosità ma zero spade impugnate. Per risolvere riavvia te stesso in palestra durante una prova. Se persiste portare biscotti.\n\n{{senderName}}"
+  },
+  "0:chiusura-pratica": {
+    "subject": "Chiudiamo sta pratica venendo in palestra",
+    "body": "Ciao {{firstName}},\nLa pratica rimane aperta finchè non provi. Ci occupa spazio sulla scrivania e qualcuno ci ha appoggiato una pizzetta. Aiutaci a chiuderla gratis.\n\n{{senderName}}"
+  },
+  "0:rete-onde": {
+    "subject": "Unisciti alla rete, non quella del Wi-Fi",
+    "body": "Ciao {{firstName}},\nLa rete dell'Ordine cresce una persona strana alla volta. Il Wi-Fi invece non prende negli spogliatoi, ma con una spada in mano non ti serve molto.\n\n{{senderName}}"
+  },
+  "0:cento-inviti": {
+    "subject": "Email numero 100 più o meno",
+    "body": "Ciao {{firstName}},\nQuesto invito ha superato molti controlli qualità, tutti fatti dalla stessa persona che lo ha scritto. Non ha trovato errori per evidente conflitto di interessi.\n\n{{senderName}}"
+  },
+  "0:ordine-espansione": {
+    "subject": "L'Ordine si espande tipo impasto",
+    "body": "Ciao {{firstName}},\nStiamo crescendo come la pizza lasciata fuori troppo, ma con meno lievito e più spade. Vieni prima che dobbiamo comprare un'altra panca. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:esperienza-consolidata": {
+    "subject": "Metodo consolidato con nastro adesivo",
+    "body": "Ciao {{firstName}},\nIl nostro metodo funziona da anni ed è stato aggiustato dove serviva, a volte metaforicamente e a volte col nastro. Per i principianti va una bomba.\n\n{{senderName}}"
+  },
+  "0:nuova-sede-futuro": {
+    "subject": "Future scuole forse anche sulla Luna",
+    "body": "Ciao {{firstName}},\nUn giorno apriremo scuole ovunque, magari pure sulla Luna se l'affitto è basso. Per ora c'è Genova e ci servono persone con gravità normale.\n\n{{senderName}}"
+  },
+  "0:collaborazione-reale": {
+    "subject": "Collaborazione vera, non il compito copiato",
+    "body": "Ciao {{firstName}},\nQui collaborare non vuol dire copiare i compiti: vuol dire allenarsi, aiutarsi e dire bella parata anche quando era chiaramente fortuna.\n\n{{senderName}}"
+  },
+  "0:forme-percorso": {
+    "subject": "Ci sono più Forme che stagioni di una serie",
+    "body": "Ciao {{firstName}},\nIl percorso continua oltre la prima Forma e nessuno ha ancora capito se ci sarà un finale. Ogni stagione ha mosse nuove e meno budget per gli snack.\n\n{{senderName}}"
+  },
+  "0:qualita-crescita": {
+    "subject": "Cresciamo bene secondo nostra nonna",
+    "body": "Ciao {{firstName}},\nIl gruppo cresce ma vogliamo restare di qualità. Nostra nonna dice che siamo bravissimi e ha visto ben due video, quindi la recensione è praticamente certificata.\n\n{{senderName}}"
+  },
+  "0:reputazione-costruita": {
+    "subject": "Reputazione ottima nel nostro gruppo chat",
+    "body": "Ciao {{firstName}},\nLa nostra reputazione è solidissima tra le persone che già ci conoscono e hanno silenziato il gruppo. Vieni a verificare con una prova indipendente gratis.\n\n{{senderName}}"
+  },
+  "0:generazione-contatti": {
+    "subject": "Da contatto misterioso a persona con spada",
+    "body": "Ciao {{firstName}},\nOra sei un indirizzo dentro un elenco, che è tristissimo. Vieni in palestra e diventa una persona vera con nome, faccia e tecnica inizialmente discutibile.\n\n{{senderName}}"
+  },
+  "0:automazione-umana": {
+    "subject": "Questa mail automatica è quasi umana",
+    "body": "Ciao {{firstName}},\nUn computer ha mandato la mail ma un adolescente ha scritto il testo, si nota dall'altissima qualità. Vieni a incontrare umani veri con spade finte.\n\n{{senderName}}"
+  },
+  "0:evento-prossimo": {
+    "subject": "Dall'evento al posto con i materassini",
+    "body": "Ciao {{firstName}},\nAll'evento hai visto le spade da lontano. Ora puoi vederle da vicino, forse troppo vicino ma con protezioni e spiegazioni. Prossimo passo gratuito.\n\n{{senderName}}"
+  },
+  "0:attrezzatura-pronta": {
+    "subject": "Spade contate due volte perchè sbagliavamo",
+    "body": "Ciao {{firstName}},\nAbbiamo controllato l'attrezzatura: tutto pronto e quasi in ordine cromatico. Manca solo qualcuno che la usa, possibilmente tu e con scarpe pulite.\n\n{{senderName}}"
+  },
+  "0:social-realta": {
+    "subject": "Dal post alla realtà in bassa definizione",
+    "body": "Ciao {{firstName}},\nNei video sembriamo epici grazie ai tagli giusti. Dal vivo sudiamo e sbagliamo pure, però ci divertiamo di più. Vieni a vedere la versione senza filtri.\n\n{{senderName}}"
+  },
+  "0:scuola-organizzata": {
+    "subject": "Siamo organizzatissimi da ieri",
+    "body": "Ciao {{firstName}},\nCalendario fatto, spade pronte, chiavi trovate: è un record. Vieni adesso prima che qualcosa torni nel bagagliaio sbagliato. Prima prova gratuita.\n\n{{senderName}}"
+  },
+  "0:dati-positivi": {
+    "subject": "I dati dicono sì ma li abbiamo chiesto noi",
+    "body": "Ciao {{firstName}},\nIl 92% apprezza la prova e l'altro 8% non ha risposto al sondaggio perchè il link era rotto. Statistica convincente no? Vieni a essere un altro numero.\n\n{{senderName}}"
+  },
+  "0:onda-successiva": {
+    "subject": "Potresti essere l'onda o almeno una goccia",
+    "body": "Ciao {{firstName}},\nOgni nuovo aiuta quello dopo, come un'onda ma con più protezioni alle ginocchia. Vieni a iniziare la prossima onda, o una piccola pozzanghera.\n\n{{senderName}}"
+  },
+  "0:programma-maturo": {
+    "subject": "Programma maturo, organizzatori meno",
+    "body": "Ciao {{firstName}},\nIl programma è avanzato e accoglie principianti. Noi invece ridiamo ancora se uno dice elsa, ma durante gli esercizi siamo seri almeno quasi sempre.\n\n{{senderName}}"
+  },
+  "0:invito-rete": {
+    "subject": "Invito ufficialissimo con timbro immaginario",
+    "body": "Ciao {{firstName}},\nLa rete dell'Ordine ti invita ufficialmente. Il timbro non lo troviamo e la firma è questa qui sotto, però le spade esistono davvero. Prova gratis.\n\n{{senderName}}"
+  },
+  "0:ultima-mail-prima-prova": {
+    "subject": "Ultima mail poi mandiamo un piccione",
+    "body": "Ciao {{firstName}},\nAbbiamo scritto, organizzato e pure trovato le chiavi. Adesso manca solo che vieni. Se non rispondi proveremo col piccione, ma non è addestrato bene.\n\n{{senderName}}"
+  }
+}

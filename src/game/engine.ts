@@ -2173,6 +2173,42 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "REPLACE_STATE":
       nextState = action.state;
       break;
+    case "ADMIN_ADD_MEMBERS": {
+      const amount = Math.trunc(action.amount);
+      if (!Number.isSafeInteger(amount) || amount <= 0) {
+        nextState = state;
+        break;
+      }
+      const activeMembers = state.school.activeMembers + amount;
+      const historicMembers = state.school.historicMembers + amount;
+      if (!Number.isSafeInteger(activeMembers) || !Number.isSafeInteger(historicMembers)) {
+        nextState = state;
+        break;
+      }
+      nextState = {
+        ...state,
+        school: {
+          ...state.school,
+          activeMembers,
+          peakActiveMembers: Math.max(state.school.peakActiveMembers, activeMembers),
+          historicMembers,
+        },
+        unlocks: {
+          ...state.unlocks,
+          upgrades: true,
+          social: state.unlocks.social || activeMembers >= 10,
+          forms: true,
+        },
+      };
+      break;
+    }
+    case "ADMIN_ADD_EUROS": {
+      const euros = Math.round((state.school.euros + action.amount) * 100) / 100;
+      nextState = Number.isFinite(action.amount) && action.amount > 0 && Number.isFinite(euros)
+        ? { ...state, school: { ...state.school, euros } }
+        : state;
+      break;
+    }
     case "UPDATE_PROFILE_NAME":
       nextState = updateProfileName(state, action.displayName);
       break;
