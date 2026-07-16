@@ -15,6 +15,7 @@ import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
 import { ActivitiesView } from "../features/activities/ActivitiesView";
+import { AdminEmailView } from "../features/admin/AdminEmailView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
@@ -41,7 +42,9 @@ export function App() {
   );
   const selectedMessage = state.messages.find((message) => message.id === selectedMessageId);
   const selectedSentEmail = state.emails.find((email) => email.id === selectedSentEmailId);
-  const activeView = isGameAreaUnlocked(view, state) ? view : "mail";
+  const activeView: AppView = view === "admin"
+    ? import.meta.env.DEV ? "admin" : "mail"
+    : isGameAreaUnlocked(view, state) ? view : "mail";
 
   useEffect(() => {
     localStorage.setItem("oggetto-nuovi-iscritti.reduce-motion", String(reduceMotion));
@@ -203,6 +206,8 @@ export function App() {
               })
             }
           />
+        ) : activeView === "admin" ? (
+          <AdminEmailView upgrades={state.upgrades} />
         ) : (
           <OverviewView
             view={activeView}

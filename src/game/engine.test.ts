@@ -1773,7 +1773,7 @@ describe("game engine", () => {
     expect(selected?.kind).not.toBe("negative");
   });
 
-  it("updates only the active draft when a visual email upgrade is bought", () => {
+  it("keeps existing drafts on their generated catalog when an email upgrade is bought", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const sentEmail = {
       ...initial.emails[0],
@@ -1799,6 +1799,6 @@ describe("game engine", () => {
     });
 
     expect(withLayout.emails[0].presentationLevel).toBe(0);
-    expect(withLayout.emails[1].presentationLevel).toBe(2);
+    expect(withLayout.emails[1].presentationLevel).toBe(0);
   });
 });

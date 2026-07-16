@@ -6,7 +6,7 @@ import { canFoundSchool, getPrestigeRequirements } from "../game/engine";
 import { getOfflineLimitMs } from "../game/offline";
 import type { GameState, SchoolFoundationDetails } from "../game/types";
 
-type OverviewViewName = Exclude<AppView, "mail" | "upgrades" | "events" | "statistics" | "contacts">;
+type OverviewViewName = Extract<AppView, "settings">;
 
 const titles: Record<OverviewViewName, [string, string]> = {
   settings: ["Impostazioni", "Dati locali, rete delle scuole e preferenze"],

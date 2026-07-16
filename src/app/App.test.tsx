@@ -20,7 +20,7 @@ describe("App profile and navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Inizia" }));
 
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
-    expect(screen.getByText(/Andrea Ungaro - Ordine delle Onde/)).toBeVisible();
+    expect(screen.getByText(/Andrea Ungaro/)).toBeVisible();
   });
 
   it("starts with only the applications useful during the first campaign", () => {
@@ -28,10 +28,11 @@ describe("App profile and navigation", () => {
     render(<App />);
 
     const navigation = screen.getByRole("navigation", { name: "Applicazioni" });
-    expect(navigation.querySelectorAll("button")).toHaveLength(2);
+    expect(navigation.querySelectorAll("button")).toHaveLength(3);
     expect(Array.from(navigation.querySelectorAll("button"), (button) => button.textContent)).toEqual([
       "Posta",
       "Impostazioni",
+      "Admin",
     ]);
     expect(screen.queryByRole("button", { name: "Calendario" })).not.toBeInTheDocument();
   });
@@ -55,6 +56,17 @@ describe("App profile and navigation", () => {
       "Miglioramenti",
       "Attività",
       "Impostazioni",
+      "Admin",
     ]);
+  });
+
+  it("opens the development-only email catalog editor", () => {
+    saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Admin" }));
+
+    expect(screen.getByRole("heading", { name: "Admin · Cataloghi email" })).toBeVisible();
+    expect(screen.getByText("DEV ONLY")).toBeVisible();
   });
 });

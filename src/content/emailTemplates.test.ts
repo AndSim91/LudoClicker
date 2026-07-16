@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { EMAIL_TEMPLATES } from "./emailTemplates";
+import { EMAIL_CATALOG, EMAIL_TEMPLATES } from "./emailTemplates";
 
 describe("email template archive", () => {
+  it("keeps every campaign copy in one editable catalog", () => {
+    expect(EMAIL_CATALOG).toHaveLength(100);
+    expect(EMAIL_CATALOG.every((entry) => entry.shortDraft.length > 0)).toBe(true);
+    expect(EMAIL_CATALOG.every((entry) => entry.shortClean.length > 0)).toBe(true);
+    expect(EMAIL_CATALOG.every((entry) => entry.opening.length > 0 && entry.invitation.length > 0)).toBe(true);
+    expect(EMAIL_CATALOG[0].shortDraft).toContain("Vieni a provore Udosport");
+    expect(EMAIL_CATALOG[0].shortClean).toContain("Vieni a provare LudoSport");
+  });
+
   it("contains one hundred unique simulated campaigns", () => {
     const ids = new Set(EMAIL_TEMPLATES.map((template) => template.id));
     const subjects = new Set(EMAIL_TEMPLATES.map((template) => template.subject));
@@ -14,8 +23,16 @@ describe("email template archive", () => {
     expect(subjects.size).toBe(100);
     expect(bodies.size).toBe(100);
     expect([...bodies].every((body) => body.length >= 150 && body.length <= 200)).toBe(true);
-    expect([...bodies].some((body) => /\b(?:piu|perche|puo)\b|Spero che ti interessa/u.test(body))).toBe(true);
+    expect([...bodies].every((body) => !body.includes("…"))).toBe(true);
+    expect([...bodies].every((body) => !body.includes("..."))).toBe(true);
+    expect([...bodies].some((body) => body.includes("Udosport") && body.includes("provore"))).toBe(true);
+    expect([...bodies].some((body) => body.includes("La prova e"))).toBe(true);
     expect([...bodies].every((body) => !body.includes("LudoSport Genova"))).toBe(true);
+
+    const firstDraft = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro");
+    const firstClean = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 1);
+    expect(firstDraft).toContain("Vieni a provore Udosport in palestra");
+    expect(firstClean).toContain("Vieni a provare LudoSport in palestra");
   });
 
   it("progresses from cleaned short copy to the marketing course", () => {

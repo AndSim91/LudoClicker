@@ -1,5 +1,11 @@
-import { EMAIL_TEMPLATES } from "../content/emailTemplates";
-import { getEmailPresentationLevel } from "../content/emailPresentation";
+import {
+  EMAIL_TEMPLATES,
+  resolveEmailTemplateCopy,
+} from "../content/emailTemplates";
+import {
+  chooseEmailPresentationLevel,
+  getEmailPresentationMix,
+} from "../content/emailPresentation";
 import { getNewAchievements } from "../content/achievements";
 import { getAcquisitionEventDefinition } from "../content/events";
 import {
@@ -212,12 +218,18 @@ function createCampaign(
   presentationLevel: CampaignEmail["presentationLevel"] = 0,
 ): CampaignEmail {
   const template = EMAIL_TEMPLATES[campaignIndex % EMAIL_TEMPLATES.length];
+  const copy = resolveEmailTemplateCopy(
+    template,
+    contact.firstName,
+    senderName,
+    presentationLevel,
+  );
   return {
     id: makeId("email", now, campaignIndex),
     contactId: contact.id,
     templateId: template.id,
-    subject: template.subject,
-    body: template.body(contact.firstName, senderName, presentationLevel),
+    subject: copy.subject,
+    body: copy.body,
     revealedCharacters: 0,
     createdAt: now,
     presentationLevel,
@@ -525,15 +537,24 @@ function startNextCampaign(state: GameState, now: number): GameState {
   const nextContact = state.contacts.find((contact) => contact.status === "available");
   if (!nextContact) return state;
 
+  const mix = getEmailPresentationMix(state.upgrades);
+  let presentationLevel = mix.newLevel;
+  let randomSeed = state.randomSeed;
+  if (mix.newCatalogShare > 0 && mix.newCatalogShare < 1) {
+    const [roll, nextSeed] = nextRandom(randomSeed);
+    presentationLevel = chooseEmailPresentationLevel(state.upgrades, roll);
+    randomSeed = nextSeed;
+  }
   const email = createCampaign(
     nextContact,
     state.emails.length,
     now,
     state.profile.displayName,
-    getEmailPresentationLevel(state.upgrades),
+    presentationLevel,
   );
   return {
     ...state,
+    randomSeed,
     contacts: state.contacts.map((contact) =>
       contact.id === nextContact.id ? { ...contact, status: "writing" } : contact,
     ),
@@ -1988,27 +2009,10 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   const upgradedSwords = Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
   const addedSwords = Math.max(0, upgradedSwords - previousUpgradeSwords);
   const totalSwords = state.equipment.totalSwords + addedSwords;
-  const nextPresentationLevel = getEmailPresentationLevel(upgrades);
   const nextState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
-    emails: state.emails.map((email) => {
-      if (email.status !== "writing") return email;
-      const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
-      const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
-      if (!contact || !template) return { ...email, presentationLevel: nextPresentationLevel };
-      const body = template.body(contact.firstName, state.profile.displayName, nextPresentationLevel);
-      const progress = email.body.length > 0
-        ? email.revealedCharacters / email.body.length
-        : 0;
-      return {
-        ...email,
-        body,
-        presentationLevel: nextPresentationLevel,
-        revealedCharacters: Math.min(body.length, Math.floor(progress * body.length)),
-      };
-    }),
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords,
@@ -2033,11 +2037,17 @@ function updateProfileName(state: GameState, displayName: string): GameState {
       const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
       const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
       if (!contact || !template) return email;
-      const body = template.body(contact.firstName, normalizedName, email.presentationLevel);
+      const copy = resolveEmailTemplateCopy(
+        template,
+        contact.firstName,
+        normalizedName,
+        email.presentationLevel,
+      );
       return {
         ...email,
-        body,
-        revealedCharacters: Math.min(email.revealedCharacters, body.length),
+        subject: copy.subject,
+        body: copy.body,
+        revealedCharacters: Math.min(email.revealedCharacters, copy.body.length),
       };
     }),
   };
