@@ -12,7 +12,6 @@ describe("CampaignEmailContent", () => {
     render(<CampaignEmailContent email={email} revealedCharacters={0} />);
 
     expect(screen.getByRole("img", { name: "Struttura della mail in costruzione" })).toBeVisible();
-    expect(screen.queryByText(/BOZZA NON REVISIONATA/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Ciao/)).not.toBeInTheDocument();
   });
 
@@ -25,6 +24,29 @@ describe("CampaignEmailContent", () => {
       "0",
     );
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("renders catalog 2 as plain text while preserving the signature", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const body = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 2);
+    const email = {
+      ...initial.emails[0],
+      body,
+      presentationLevel: 2 as const,
+      revealedCharacters: body.length,
+    };
+
+    render(<CampaignEmailContent email={email} />);
+
+    expect(screen.getByLabelText("Email in formato Email professionale")).toHaveTextContent(
+      "Andrea Ungaro, Ordine delle Onde - Genova",
+    );
+    expect(screen.getByLabelText("Email in formato Email professionale")).toHaveTextContent(
+      /^Ciao Nome,/,
+    );
+    expect(screen.queryByText(EMAIL_TEMPLATES[0].subject)).not.toBeInTheDocument();
+    expect(screen.queryByText("IL PROSSIMO PASSO")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Preview del codice HTML in costruzione")).not.toBeInTheDocument();
   });
 
   it("keeps the final HTML canvas silent while its structure is being written", () => {

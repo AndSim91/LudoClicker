@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { EMAIL_CATALOG, EMAIL_TEMPLATES } from "./emailTemplates";
+import {
+  EMAIL_CATALOG,
+  EMAIL_TEMPLATES,
+  formatEmailSignature,
+} from "./emailTemplates";
 
 describe("email template archive", () => {
   it("keeps every campaign copy in one editable catalog", () => {
@@ -47,6 +51,12 @@ describe("email template archive", () => {
 
     expect(cleanBodies.every((body) => !body.includes("Spero che ti interessa"))).toBe(true);
     expect(professionalBodies.every((body) => body.includes("Un saluto,"))).toBe(true);
+    expect(professionalBodies.every((body, index) =>
+      !body.startsWith(EMAIL_TEMPLATES[index].subject)
+    )).toBe(true);
+    expect(professionalBodies.every((body) =>
+      body.includes("Andrea Ungaro, Ordine delle Onde - Genova")
+    )).toBe(true);
     expect(professionalBodies.every((body) => !body.includes("Ordine delle Onde\nLudoSport Genova"))).toBe(true);
     expect(personalizedBodies.every((body) => body.length >= 450 && body.length <= 900)).toBe(true);
     expect(ctaBodies.every((body) => body.length <= 1_200)).toBe(true);
@@ -55,5 +65,17 @@ describe("email template archive", () => {
     expect(marketingBodies.every((body) => body.length <= 4_000)).toBe(true);
     expect(marketingBodies.every((body) => body.includes("COME PRENOTARE"))).toBe(true);
     expect(marketingBodies.every((body) => body.includes("DA VEDERE"))).toBe(true);
+  });
+
+  it("builds the HTML signature from player, order and city", () => {
+    expect(formatEmailSignature("Legend", "Ordine delle Onde", "Genova")).toBe(
+      "Legend, Ordine delle Onde - Genova",
+    );
+    expect(formatEmailSignature("Legend", "Ordine delle Onde — Genova", "Genova")).toBe(
+      "Legend, Ordine delle Onde - Genova",
+    );
+    expect(
+      EMAIL_TEMPLATES[0].body("Nome", "Legend", 2, "Ordine del Faro", "Trieste"),
+    ).toContain("Legend, Ordine del Faro - Trieste");
   });
 });

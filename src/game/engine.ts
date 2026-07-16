@@ -217,6 +217,8 @@ function createCampaign(
   now: number,
   senderName: string,
   presentationLevel: CampaignEmail["presentationLevel"] = 0,
+  orderName = "Ordine delle Onde",
+  city = "Genova",
 ): CampaignEmail {
   const template = EMAIL_TEMPLATES[campaignIndex % EMAIL_TEMPLATES.length];
   const copy = resolveEmailTemplateCopy(
@@ -224,6 +226,8 @@ function createCampaign(
     contact.firstName,
     senderName,
     presentationLevel,
+    orderName,
+    city,
   );
   return {
     id: makeId("email", now, campaignIndex),
@@ -552,6 +556,8 @@ function startNextCampaign(state: GameState, now: number): GameState {
     now,
     state.profile.displayName,
     presentationLevel,
+    state.school.name,
+    state.school.city,
   );
   return {
     ...state,
@@ -1807,7 +1813,7 @@ function foundSchool(
     shortGoal: state.shortGoal,
   };
   const announced = addMessage(
-    nextState,
+    refreshWritingCampaignCopies(nextState),
     now,
     `Nuova scuola fondata: ${details.name.trim()}`,
     `La sede di ${details.city.trim()} è operativa. Bonus permanente di rete: +${Math.round((state.network.schools.length + 1) * GAME_CONFIG.prestigeBonusPerSchool * 100)}%.`,
@@ -2027,13 +2033,9 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   };
 }
 
-function updateProfileName(state: GameState, displayName: string): GameState {
-  const normalizedName = displayName.trim().replace(/\s+/g, " ").slice(0, 80);
-  if (!normalizedName || normalizedName === state.profile.displayName) return state;
-
+function refreshWritingCampaignCopies(state: GameState): GameState {
   return {
     ...state,
-    profile: { displayName: normalizedName },
     emails: state.emails.map((email) => {
       if (email.status !== "writing") return email;
       const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
@@ -2042,8 +2044,10 @@ function updateProfileName(state: GameState, displayName: string): GameState {
       const copy = resolveEmailTemplateCopy(
         template,
         contact.firstName,
-        normalizedName,
+        state.profile.displayName,
         email.presentationLevel,
+        state.school.name,
+        state.school.city,
       );
       const updatedEmail = {
         ...email,
@@ -2056,6 +2060,16 @@ function updateProfileName(state: GameState, displayName: string): GameState {
       };
     }),
   };
+}
+
+function updateProfileName(state: GameState, displayName: string): GameState {
+  const normalizedName = displayName.trim().replace(/\s+/g, " ").slice(0, 80);
+  if (!normalizedName || normalizedName === state.profile.displayName) return state;
+
+  return refreshWritingCampaignCopies({
+    ...state,
+    profile: { displayName: normalizedName },
+  });
 }
 
 function processOfflinePassiveProgress(

@@ -3,6 +3,7 @@ import { createInitialState, gameReducer } from "./engine";
 import { exportGame, importGame, loadGame, resetGame, saveGame } from "./save";
 import { GAME_CONFIG } from "./config";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
+import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 
 describe("local save", () => {
   it("round-trips the game state", () => {
@@ -560,6 +561,28 @@ describe("local save", () => {
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.equipment).toMatchObject({ availableSwords: 0, damagedSwords: 6 });
+  });
+
+  it("adds the active school signature to a version 30 HTML draft", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000, "Legend")));
+    const signedBody = EMAIL_TEMPLATES[0].body(
+      legacy.contacts[0].firstName,
+      "Legend",
+      2,
+    );
+    legacy.version = 30;
+    legacy.school.name = "Ordine del Faro";
+    legacy.school.city = "Trieste";
+    legacy.emails[0] = {
+      ...legacy.emails[0],
+      presentationLevel: 2,
+      body: signedBody.replace("\n\nLegend, Ordine delle Onde - Genova", ""),
+    };
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.emails[0].body).toContain("Legend, Ordine del Faro - Trieste");
   });
 
   it("resets both primary and backup saves", () => {

@@ -229,7 +229,7 @@ function FinalEmailDocument({
   revealedCharacters: number;
   showCaret: boolean;
 }) {
-  if (email.presentationLevel >= 2) {
+  if (email.presentationLevel >= 3) {
     return (
       <HtmlEmailSourcePreview
         email={email}
@@ -476,7 +476,7 @@ export function CampaignEmailContent({
   const heroVisible = level >= 6 && progress >= 12;
   const detailsVisible = level >= 6 && progress >= 82;
 
-  if (textRevealedCharacters === 0 && level >= 2) {
+  if (textRevealedCharacters === 0 && level >= 3) {
     return (
       <HtmlEmailSourcePreview
         email={email}
@@ -486,7 +486,7 @@ export function CampaignEmailContent({
     );
   }
 
-  if (level >= 2) {
+  if (level >= 3) {
     return (
       <FinalEmailDocument
         email={email}
@@ -496,7 +496,7 @@ export function CampaignEmailContent({
     );
   }
 
-  if (level <= 1) {
+  if (level <= 2) {
     const visible = email.body.slice(0, textRevealedCharacters);
     return (
       <div
@@ -504,7 +504,6 @@ export function CampaignEmailContent({
         aria-label={`Email in formato ${format.label}`}
         data-email-presentation={level}
       >
-        <div className="typed-copy-kicker">{level === 0 ? "BOZZA NON REVISIONATA" : "TESTO REVISIONATO"}</div>
         <span>{visible}</span>
         {showCaret ? <i className="text-caret" /> : null}
       </div>

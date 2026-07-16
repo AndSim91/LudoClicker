@@ -850,6 +850,8 @@ svg {
   min-height: 0;
   overflow: auto;
   cursor: text;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .typed-copy {
@@ -1505,10 +1507,12 @@ svg {
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.7;
+  padding: 24px 24px 80px
 }
 
-.typed-copy-level-1 {
-  padding: 24px 5px;
+.typed-copy-level-1,
+.typed-copy-level-2 {
+  padding: 24px 24px 80px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 15px;
   line-height: 1.75;

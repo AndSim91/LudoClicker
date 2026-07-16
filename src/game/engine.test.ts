@@ -100,6 +100,31 @@ describe("game engine", () => {
     expect(updated.emails[0].body.toLocaleLowerCase("it-IT")).not.toContain("segreteria");
   });
 
+  it("uses the active school details in the HTML signature", () => {
+    const initial = createInitialState(1_000, "Legend");
+    const state = {
+      ...initial,
+      school: {
+        ...initial.school,
+        name: "Ordine del Faro",
+        city: "Trieste",
+      },
+      emails: initial.emails.map((email) => ({
+        ...email,
+        presentationLevel: 2 as const,
+      })),
+    };
+
+    const updated = gameReducer(state, {
+      type: "UPDATE_PROFILE_NAME",
+      displayName: "Nuovo Legend",
+    });
+
+    expect(updated.emails[0].body).toContain(
+      "Nuovo Legend, Ordine del Faro - Trieste",
+    );
+  });
+
   it("determines and stores the first email outcome exactly once", () => {
     const state = createInitialState(1_000);
     const email = selectActiveEmail(state)!;

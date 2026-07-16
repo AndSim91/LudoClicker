@@ -30,8 +30,8 @@ export const EMAIL_PRESENTATION_LEVELS: Record<
     description: "Gli errori spariscono, ma le battute e l'energia della bozza restano.",
   },
   2: {
-    label: "Struttura HTML base",
-    description: "Una tabella CSS rudimentale, tono professionale e logo nella firma.",
+    label: "Email professionale",
+    description: "Testo ordinato e professionale con firma completa, ancora senza HTML.",
   },
   3: {
     label: "Card della lezione",

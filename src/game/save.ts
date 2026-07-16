@@ -10,7 +10,10 @@ import { synchronizeEquipmentAvailability } from "./equipment";
 import { createShortGoalFromStatistics } from "../content/shortGoals";
 import { normalizeStackedMessages } from "./messages";
 import { getAcquisitionEventDefinition } from "../content/events";
-import { EMAIL_TEMPLATES } from "../content/emailTemplates";
+import {
+  EMAIL_TEMPLATES,
+  resolveEmailTemplateCopy,
+} from "../content/emailTemplates";
 import { FORM_BRANCHES, getFormDefinition } from "../content/forms";
 import {
   COLLABORATOR_MASTERY_ROLES,
@@ -698,7 +701,7 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 29) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 30,
       emails: (migrated.emails ?? []).map((email) => {
         const legacyLength = Math.max(1, email.body.length);
         const sourceLength = getEmailBuildLength(email);
@@ -706,6 +709,38 @@ function migrate(value: unknown): unknown {
         return {
           ...email,
           revealedCharacters: Math.round(legacyProgress * sourceLength),
+        };
+      }),
+    };
+  }
+
+  if (migrated.version === 30) {
+    const displayName = migrated.profile?.displayName ?? "";
+    const orderName = migrated.school?.name ?? "Ordine delle Onde";
+    const city = migrated.school?.city ?? "Genova";
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      emails: (migrated.emails ?? []).map((email) => {
+        if (email.status !== "writing" || email.presentationLevel < 2) return email;
+        const contact = migrated.contacts?.find((candidate) => candidate.id === email.contactId);
+        const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
+        if (!contact || !template) return email;
+
+        const previousLength = Math.max(1, getEmailBuildLength(email));
+        const progress = Math.min(1, Math.max(0, email.revealedCharacters / previousLength));
+        const copy = resolveEmailTemplateCopy(
+          template,
+          contact.firstName,
+          displayName,
+          email.presentationLevel,
+          orderName,
+          city,
+        );
+        const updatedEmail = { ...email, subject: copy.subject, body: copy.body };
+        return {
+          ...updatedEmail,
+          revealedCharacters: Math.round(progress * getEmailBuildLength(updatedEmail)),
         };
       }),
     };

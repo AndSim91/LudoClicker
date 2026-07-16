@@ -6,6 +6,7 @@ export interface FinalEmailCopyContext {
   title?: string;
   opening: string;
   invitation: string;
+  signature?: string;
   details?: readonly string[];
   contacts?: readonly string[];
   videoTitle?: string;
@@ -41,7 +42,7 @@ const DEFAULT_CONTACTS = [
 ] as const;
 
 const DEFAULT_VIDEO_TITLE = "Guarda il movimento in azione";
-const DEFAULT_VIDEO_CAPTION = "Un assaggio del percorso, oltre le parole.";
+const DEFAULT_VIDEO_CAPTION = "Un assaggio video del nostro sport";
 const DEFAULT_DISCLAIMER =
   "Ricevi questo messaggio perché hai mostrato interesse per le attività dell'Ordine delle Onde.";
 
@@ -66,17 +67,28 @@ export function buildFinalEmailTextEntries(
   const videoTitle = context.videoTitle?.trim() || DEFAULT_VIDEO_TITLE;
   const videoCaption = context.videoCaption?.trim() || DEFAULT_VIDEO_CAPTION;
   const disclaimer = context.disclaimer?.trim() || DEFAULT_DISCLAIMER;
+  const signature = context.signature?.trim() || FINAL_EMAIL_SIGNATURE;
 
-  const entries: FinalEmailTextEntry[] = [
-    { key: "title", text: title },
+  const entries: FinalEmailTextEntry[] = [];
+
+  if (level >= 3) {
+    entries.push({ key: "title", text: title });
+  }
+
+  entries.push(
     { key: "greeting", text: `Ciao ${firstName},` },
     {
       key: "intro",
       text: opening || "Scopri un modo nuovo di allenarti insieme a noi.",
     },
-    { key: "mainLabel", text: "IL PROSSIMO PASSO" },
-  ];
+  );
 
+  if (level >= 4) {
+    entries.push({
+      key: "mainLabel",
+      text: "Unisciti a Ludosport!",
+    });
+  }
   if (level >= 3) {
     entries.push({ key: "details", text: details.join("\n") });
   }
@@ -99,7 +111,7 @@ export function buildFinalEmailTextEntries(
   }
 
   entries.push({ key: "signoff", text: "Un saluto," });
-  if (level >= 7) entries.push({ key: "signature", text: FINAL_EMAIL_SIGNATURE });
+  if (level >= 2) entries.push({ key: "signature", text: signature });
   if (level >= 7) entries.push({ key: "disclaimer", text: disclaimer });
   return entries;
 }
@@ -160,7 +172,7 @@ function renderList(className: string, text: string): string {
 }
 
 /**
- * This is the actual document being written for presentation levels 2–7.
+ * This is the actual document being written for presentation levels 3–7.
  * The preview consumes a prefix of this string, so CSS, tags, attributes and
  * copy become visible only after their source characters have been written.
  */
@@ -173,7 +185,7 @@ export function buildEmailHtmlSource({
   body: string;
   presentationLevel?: number;
 }): string {
-  if (presentationLevel <= 1) return body;
+  if (presentationLevel <= 2) return body;
 
   const sections = getFinalEmailTextSections(body, presentationLevel);
   const title = textSection(sections, "title") || subject || FINAL_EMAIL_TITLE;
@@ -200,7 +212,7 @@ export function buildEmailHtmlSource({
         ${presentationLevel >= 3 ? renderList("final-email-details", details) : ""}
         ${renderParagraph("final-email-booking", textSection(sections, "booking"))}
         ${renderParagraph("final-email-signoff", textSection(sections, "signoff"))}
-        ${presentationLevel >= 7 ? `
+        ${presentationLevel >= 2 ? `
         <div class="final-email-signature" aria-label="Firma Ordine delle Onde">
           <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde">
           ${renderParagraph("final-email-signature-copy", textSection(sections, "signature"))}

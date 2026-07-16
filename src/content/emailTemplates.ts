@@ -12,6 +12,8 @@ export interface EmailTemplate {
     firstName: string,
     senderName: string,
     presentationLevel?: EmailPresentationLevel,
+    orderName?: string,
+    city?: string,
   ) => string;
 }
 
@@ -34,6 +36,25 @@ type TemplateCopy = EmailCatalogEntry;
 const signature = `
 
 Un saluto,`;
+
+const DEFAULT_ORDER_NAME = "Ordine delle Onde";
+const DEFAULT_CITY = "Genova";
+
+export function formatEmailSignature(
+  senderName: string,
+  orderName = DEFAULT_ORDER_NAME,
+  city = DEFAULT_CITY,
+): string {
+  const player = senderName.trim();
+  const location = city.trim();
+  const escapedCity = location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const normalizedOrder = orderName
+    .trim()
+    .replace(new RegExp(`\\s*[\\-\u2013\u2014]\\s*${escapedCity}$`, "iu"), "")
+    .trim();
+  const school = [normalizedOrder, location].filter(Boolean).join(" - ");
+  return [player, school].filter(Boolean).join(", ");
+}
 
 const MOJIBAKE_REPAIRS: Array<[string, string]> = [
   ["Ã ", "à"],
@@ -255,6 +276,7 @@ function bodyForLevel(
   index: number,
   firstName: string,
   level: EmailPresentationLevel,
+  emailSignature: string,
 ) {
   const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
   if (level <= 1) return `Ciao ${firstName},\n${compact}${signature}`;
@@ -262,14 +284,26 @@ function bodyForLevel(
     title: cleanCatalogCopy(copy.subject),
     opening: cleanCatalogCopy(copy.opening),
     invitation: cleanCatalogCopy(copy.invitation),
+    signature: emailSignature,
   }, level);
 }
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = EMAIL_CATALOG.map((copy, index) => ({
   id: copy.id,
   subject: copy.subject,
-  body: (name, senderName, presentationLevel = 0) =>
-    bodyForLevel(copy, index, name, presentationLevel),
+  body: (
+    name,
+    senderName,
+    presentationLevel = 0,
+    orderName = DEFAULT_ORDER_NAME,
+    city = DEFAULT_CITY,
+  ) => bodyForLevel(
+    copy,
+    index,
+    name,
+    presentationLevel,
+    formatEmailSignature(senderName, orderName, city),
+  ),
 }));
 
 export function getDefaultEmailTemplateCopy(
@@ -277,10 +311,12 @@ export function getDefaultEmailTemplateCopy(
   firstName: string,
   senderName: string,
   presentationLevel: EmailPresentationLevel,
+  orderName = DEFAULT_ORDER_NAME,
+  city = DEFAULT_CITY,
 ): ResolvedEmailTemplateCopy {
   return {
     subject: template.subject,
-    body: template.body(firstName, senderName, presentationLevel),
+    body: template.body(firstName, senderName, presentationLevel, orderName, city),
   };
 }
 
@@ -289,12 +325,16 @@ export function resolveEmailTemplateCopy(
   firstName: string,
   senderName: string,
   presentationLevel: EmailPresentationLevel,
+  orderName = DEFAULT_ORDER_NAME,
+  city = DEFAULT_CITY,
 ): ResolvedEmailTemplateCopy {
   const defaults = getDefaultEmailTemplateCopy(
     template,
     firstName,
     senderName,
     presentationLevel,
+    orderName,
+    city,
   );
   if (presentationLevel === 1) {
     const draftOverride = getEmailCopyOverride(template.id, 0);
