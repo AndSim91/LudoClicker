@@ -1,4 +1,5 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
+import { getEmailBuildLength } from "../../content/emailBuild";
 import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { Icon } from "../common/Icon";
@@ -16,6 +17,7 @@ export function Composer({ state, onWrite }: { state: GameState; onWrite: () => 
       </main>
     );
   }
+  const buildLength = getEmailBuildLength(email);
   return (
     <main className="composer">
       <div className="composer-tabs"><button className="active" type="button">Messaggio</button><button type="button">Inserisci</button><button type="button">Opzioni</button><button type="button">Formato testo</button><span /><button type="button" disabled><Icon name="send" /> Invia</button><button type="button" disabled><Icon name="attach" /> Allega</button></div>
@@ -38,7 +40,7 @@ export function Composer({ state, onWrite }: { state: GameState; onWrite: () => 
       <div className="composer-status">
         <span>Bozza salvata</span>
         <em>{email.status === "sending" ? "Invio in corso…" : "Digitazione in corso…"}</em>
-        <span className="composer-status-count">{email.revealedCharacters} / {email.body.length} caratteri · {state.player.writingPower} per input</span>
+        <span className="composer-status-count">{email.revealedCharacters} / {buildLength} caratteri · {state.player.writingPower} per input</span>
       </div>
     </main>
   );

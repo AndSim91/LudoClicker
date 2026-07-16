@@ -2,6 +2,7 @@ import {
   EMAIL_TEMPLATES,
   resolveEmailTemplateCopy,
 } from "../content/emailTemplates";
+import { getEmailBuildLength } from "../content/emailBuild";
 import {
   chooseEmailPresentationLevel,
   getEmailPresentationMix,
@@ -1412,12 +1413,13 @@ function writeCharacters(
 ): GameState {
   const activeEmail = selectActiveEmail(state);
   if (!activeEmail || activeEmail.status !== "writing" || amount <= 0) return state;
+  const buildLength = getEmailBuildLength(activeEmail);
   const revealedCharacters = Math.min(
-    activeEmail.body.length,
+    buildLength,
     activeEmail.revealedCharacters + amount,
   );
   const charactersWritten = revealedCharacters - activeEmail.revealedCharacters;
-  const completed = revealedCharacters >= activeEmail.body.length;
+  const completed = revealedCharacters >= buildLength;
   return {
     ...state,
     emails: state.emails.map((email) =>
@@ -2043,11 +2045,14 @@ function updateProfileName(state: GameState, displayName: string): GameState {
         normalizedName,
         email.presentationLevel,
       );
-      return {
+      const updatedEmail = {
         ...email,
         subject: copy.subject,
         body: copy.body,
-        revealedCharacters: Math.min(email.revealedCharacters, copy.body.length),
+      };
+      return {
+        ...updatedEmail,
+        revealedCharacters: Math.min(email.revealedCharacters, getEmailBuildLength(updatedEmail)),
       };
     }),
   };

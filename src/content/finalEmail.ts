@@ -142,37 +142,88 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+function textSection(sections: FinalEmailTextSection[], key: FinalEmailTextKey): string {
+  return sections.find((section) => section.key === key)?.text ?? "";
+}
+
+function renderParagraph(className: string, text: string): string {
+  return text ? `<p class="${className}">${escapeHtml(text)}</p>` : "";
+}
+
+function renderList(className: string, text: string): string {
+  if (!text) return "";
+  const items = text
+    .split("\n")
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .join("");
+  return `<ul class="${className}">${items}</ul>`;
+}
+
 /**
- * The visual mail is a projection of this source. It starts with the document
- * and CSS scaffolding so the first construction inputs are structural rather
- * than visible copy.
+ * This is the actual document being written for presentation levels 2–7.
+ * The preview consumes a prefix of this string, so CSS, tags, attributes and
+ * copy become visible only after their source characters have been written.
  */
-export function buildEmailHtmlSource({ subject, body }: { subject: string; body: string }): string {
+export function buildEmailHtmlSource({
+  subject,
+  body,
+  presentationLevel = 7,
+}: {
+  subject: string;
+  body: string;
+  presentationLevel?: number;
+}): string {
+  if (presentationLevel <= 1) return body;
+
+  const sections = getFinalEmailTextSections(body, presentationLevel);
+  const title = textSection(sections, "title") || subject || FINAL_EMAIL_TITLE;
+  const details = textSection(sections, "details");
+  const contacts = textSection(sections, "contacts");
+
   return `<!doctype html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(subject)}</title>
-  <style>
-    body { margin: 0; padding: 0; background: #f5f5f5; }
-    .mail { width: 100%; max-width: 600px; margin: 0 auto; background: #fff; }
-    .card { border: 0.5px solid #c0c0c0; border-radius: 10px; background: #fcfcfc; }
-    img { display: block; max-width: 100%; height: auto; }
-  </style>
-</head>
-<body>
-  <main class="mail">
-    <header><img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde"></header>
-    <h1>${escapeHtml(subject || FINAL_EMAIL_TITLE)}</h1>
-    <article class="card"><h2>IL PROSSIMO PASSO</h2>
-      <img src="/email-assets/lezione-prova.jpg" alt="Attività LudoSport">
-      <p>${escapeHtml(body)}</p>
-    </article>
-    <section class="card" data-section="contacts"><h2>CONTATTI</h2></section>
-    <section class="card" data-section="video"><h2>APPROFONDISCI</h2><img src="/email-assets/video-demo.jpg" alt="Attività LudoSport"></section>
-    <footer><img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde"></footer>
-  </main>
-</body>
-</html>`;
+<style data-email-source>
+  .source-mail { width: 100%; max-width: 600px; margin: 0 auto; background: #fff; }
+  .source-mail img { display: block; max-width: 100%; height: auto; }
+</style>
+<div class="campaign-email-document campaign-email-final campaign-email-final-stage-${presentationLevel}" aria-label="Email HTML in costruzione">
+  <div class="final-email-paper">
+    <header class="final-email-header">
+      <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde">
+      ${renderParagraph("final-email-title", title)}
+    </header>
+    <section class="final-email-card final-email-main-card">
+      ${renderParagraph("final-email-category", textSection(sections, "mainLabel"))}
+      ${presentationLevel >= 4 ? '<img class="final-email-hero" src="/email-assets/lezione-prova.jpg" alt="Attività LudoSport">' : ""}
+      <div class="final-email-copy">
+        ${renderParagraph("final-email-greeting", textSection(sections, "greeting"))}
+        ${renderParagraph("final-email-intro", textSection(sections, "intro"))}
+        ${presentationLevel >= 3 ? renderList("final-email-details", details) : ""}
+        ${renderParagraph("final-email-booking", textSection(sections, "booking"))}
+        ${renderParagraph("final-email-signoff", textSection(sections, "signoff"))}
+        ${presentationLevel >= 7 ? `
+        <div class="final-email-signature" aria-label="Firma Ordine delle Onde">
+          <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde">
+          ${renderParagraph("final-email-signature-copy", textSection(sections, "signature"))}
+        </div>` : ""}
+      </div>
+    </section>
+    ${presentationLevel >= 5 ? `
+    <section class="final-email-card final-email-contact-card">
+      ${renderParagraph("final-email-category", textSection(sections, "contactsLabel"))}
+      ${renderList("final-email-contacts", contacts)}
+    </section>` : ""}
+    ${presentationLevel >= 6 ? `
+    <section class="final-email-card final-email-video-card">
+      ${renderParagraph("final-email-category", textSection(sections, "videoLabel"))}
+      ${renderParagraph("final-email-video-title", textSection(sections, "videoTitle"))}
+      <img class="final-email-video-image" src="/email-assets/video-demo.jpg" alt="Video dimostrativo LudoSport">
+      ${renderParagraph("final-email-video-caption", textSection(sections, "videoCaption"))}
+    </section>` : ""}
+    ${presentationLevel >= 7 ? `
+    <footer class="final-email-footer">
+      <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde">
+      ${renderParagraph("final-email-disclaimer", textSection(sections, "disclaimer"))}
+    </footer>` : ""}
+  </div>
+</div>`;
 }

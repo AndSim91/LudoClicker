@@ -5,6 +5,7 @@ import { createProspectEmail } from "../content/prospectDirectory";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailPresentationLevel } from "../content/emailPresentation";
+import { getEmailBuildLength } from "../content/emailBuild";
 import { synchronizeEquipmentAvailability } from "./equipment";
 import { createShortGoalFromStatistics } from "../content/shortGoals";
 import { normalizeStackedMessages } from "./messages";
@@ -672,7 +673,7 @@ function migrate(value: unknown): unknown {
     const displayName = migrated.profile?.displayName ?? "";
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 29,
       upgrades,
       emails: (migrated.emails ?? []).map((email) => {
         const contact = migrated.contacts?.find((candidate) => candidate.id === email.contactId);
@@ -689,6 +690,22 @@ function migrate(value: unknown): unknown {
           body: email.status === "writing" && contact && template
             ? template.body(contact.firstName, displayName, activeLevel)
             : email.body,
+        };
+      }),
+    };
+  }
+
+  if (migrated.version === 29) {
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      emails: (migrated.emails ?? []).map((email) => {
+        const legacyLength = Math.max(1, email.body.length);
+        const sourceLength = getEmailBuildLength(email);
+        const legacyProgress = Math.min(1, Math.max(0, email.revealedCharacters / legacyLength));
+        return {
+          ...email,
+          revealedCharacters: Math.round(legacyProgress * sourceLength),
         };
       }),
     };

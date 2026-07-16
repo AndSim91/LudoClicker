@@ -849,7 +849,6 @@ svg {
   position: relative;
   min-height: 0;
   overflow: auto;
-  padding: 24px 28px 80px;
   cursor: text;
 }
 
@@ -2028,6 +2027,47 @@ svg {
 .campaign-email-level-7 .campaign-card {
   border-color: #d7e5ec;
   border-radius: 12px;
+}
+
+.email-source-preview {
+  min-height: 100%;
+  padding: 18px 12px;
+  background: #fff;
+}
+
+.email-source-preview-canvas {
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid #d9e2e8;
+  background: #fff;
+}
+
+.email-source-preview-canvas > .campaign-email-final {
+  min-height: 330px;
+}
+
+.email-source-code {
+  max-height: 100px;
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  overflow: hidden;
+  border: 1px solid #e1e5e8;
+  background: #fff;
+  color: #68737d;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.email-source-preview-caret {
+  display: block;
+  width: 1px;
+  height: 18px;
+  margin: 4px 0 0 2px;
+  background: #0f6cbd;
+  animation: composer-caret 1s steps(1, end) infinite;
 }
 
 .campaign-email-final {
