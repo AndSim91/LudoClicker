@@ -41,9 +41,9 @@ const RELAXED_INPUTS_PER_TICK = 1;
 const UPGRADE_PRIORITY: UpgradeId[] = [
   "comfortable-keyboard",
   "prepared-presentation",
-  "clear-subject",
+  "spell-check",
   "welcome-procedure",
-  "outlook-templates",
+  "professional-email",
   "quick-phrases",
   "automatic-signature",
   "qr-cards",

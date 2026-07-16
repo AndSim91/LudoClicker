@@ -9,6 +9,7 @@ import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { getAvailableForms, getCollaboratorProductivity } from "../content/forms";
 import type { FormId } from "./types";
+import { getSchoolYear } from "./calendar";
 import {
   selectActiveEmail,
   selectIncomePerMonth,
@@ -29,6 +30,8 @@ describe("game engine", () => {
     )).toBe(true);
     expect(selectActiveEmail(state)?.status).toBe("writing");
     expect(state.school.euros).toBe(0);
+    expect(state.school.currentMonth).toBe(9);
+    expect(getSchoolYear(state.school.currentMonth)).toBe(1);
     expect(state.contacts.every((contact) => contact.rarity !== "legendary")).toBe(true);
     expect(PERSON_RARITIES.common.emailShareChance).toBe(0.7);
     expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.05);
@@ -84,7 +87,7 @@ describe("game engine", () => {
       .toContain(state.contacts[8].specialProfileId);
   });
 
-  it("stores the user name and applies it to the active email signature", () => {
+  it("stores the user name in the active email", () => {
     const state = createInitialState(1_000);
 
     const updated = gameReducer(state, {
@@ -93,7 +96,7 @@ describe("game engine", () => {
     });
 
     expect(updated.profile.displayName).toBe("Andrea Ungaro");
-    expect(updated.emails[0].body).toContain("Andrea Ungaro - Ordine delle Onde");
+    expect(updated.emails[0].body).toContain("Andrea Ungaro");
     expect(updated.emails[0].body.toLocaleLowerCase("it-IT")).not.toContain("segreteria");
   });
 
@@ -118,6 +121,8 @@ describe("game engine", () => {
     });
 
     expect(sent.emails.find((candidate) => candidate.id === email.id)?.status).toBe("sent");
+    expect(sent.messages.find((message) => message.subject === "Configurazione campagna completata")?.sender)
+      .toBe("Ordine delle Onde");
     expect(sent.pendingEmailOutcomes).toHaveLength(1);
     expect(sent.pendingEmailOutcomes[0].result).toBe("trialBooked");
     expect(sent.statistics.emailsSent).toBe(1);
@@ -310,7 +315,7 @@ describe("game engine", () => {
     const sameTick = gameReducer(paid, { type: "TICK", now: dueAt });
 
     expect(paid.school.euros).toBe(2 * GAME_CONFIG.monthlyMemberFee);
-    expect(paid.school.currentMonth).toBe(2);
+    expect(paid.school.currentMonth).toBe(10);
     expect(sameTick.school.euros).toBe(paid.school.euros);
   });
 
@@ -321,11 +326,11 @@ describe("game engine", () => {
       now: 1_000 + GAME_CONFIG.gameMonthMs * 3,
     });
 
-    expect(advanced.school.currentMonth).toBe(4);
+    expect(advanced.school.currentMonth).toBe(12);
     expect(advanced.school.euros).toBe(0);
   });
 
-  it("lets ignored ordinary members leave when a new school year starts in September", () => {
+  it("lets ignored ordinary members leave in the June to July transition", () => {
     const initial = createInitialState(1_000);
     const [ignored, trained, legendary, collaboratorMember, recent] = initial.contacts;
     const contacts = [
@@ -347,7 +352,7 @@ describe("game engine", () => {
       ...initial,
       randomSeed: 7,
       contacts,
-      school: { ...initial.school, activeMembers: 5, currentMonth: 8, nextFeeAt: 2_000 },
+      school: { ...initial.school, activeMembers: 5, currentMonth: 18, nextFeeAt: 2_000 },
       collaborators: [{
         id: "collaborator-protected",
         contactId: collaboratorMember.id,
@@ -367,6 +372,13 @@ describe("game engine", () => {
     expect(renewed.school.activeMembers).toBe(3);
     expect(renewed.statistics.membersDeparted).toBe(2);
     expect(renewed.messages.some((message) => message.subject === "2 iscritti hanno lasciato la scuola")).toBe(true);
+
+    const septemberState = gameReducer({
+      ...state,
+      school: { ...state.school, currentMonth: 20 },
+    }, { type: "TICK", now: 2_000 });
+    expect(septemberState.statistics.membersDeparted).toBe(0);
+    expect(septemberState.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
   });
 
   it("reduces annual departure risk and applies the Form 7 rarity curve", () => {
@@ -451,7 +463,7 @@ describe("game engine", () => {
         activeMembers: 2,
         peakActiveMembers: 2,
         historicMembers: 2,
-        currentMonth: 8,
+        currentMonth: 18,
         nextFeeAt: 2_000,
       },
       legendaryCollaborators: {
@@ -1038,7 +1050,7 @@ describe("game engine", () => {
       ...initial,
       upgrades: {
         ...initial.upgrades,
-        "clear-subject": 2,
+        "spell-check": 2,
         "welcome-procedure": 2,
       },
     };
@@ -1157,11 +1169,11 @@ describe("game engine", () => {
     const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-2", now: 2_000 });
     const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-1", now: 2_000 });
     const completed = gameReducer(training, { type: "TICK", now: 22_000 });
-    const juneState = { ...completed, school: { ...completed.school, currentMonth: 6 } };
+    const juneState = { ...completed, school: { ...completed.school, currentMonth: 18 } };
     const annualBlock = gameReducer(juneState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
-    const julyState = { ...completed, school: { ...completed.school, currentMonth: 7 } };
+    const julyState = { ...completed, school: { ...completed.school, currentMonth: 19 } };
     const summerBlock = gameReducer(julyState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
-    const septemberState = { ...completed, school: { ...completed.school, currentMonth: 9 } };
+    const septemberState = { ...completed, school: { ...completed.school, currentMonth: 21 } };
     const nextSchoolYear = gameReducer(septemberState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
 
     expect(blocked).toBe(ready);
@@ -1256,7 +1268,7 @@ describe("game engine", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, currentMonth: 9, euros: 400 },
+      school: { ...initial.school, currentMonth: 21, euros: 400 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -1418,7 +1430,7 @@ describe("game engine", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, currentMonth: 9, euros: 2_000 },
+      school: { ...initial.school, currentMonth: 21, euros: 2_000 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -1464,7 +1476,7 @@ describe("game engine", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 1, currentMonth: 97, euros: 1_000 },
+      school: { ...initial.school, activeMembers: 1, currentMonth: 109, euros: 1_000 },
       contacts: initial.contacts.map((contact) => contact.id === member.id
         ? { ...member, forms: [...member.forms] }
         : contact),
@@ -1782,11 +1794,11 @@ describe("game engine", () => {
 
     const withLayout = gameReducer(funded, {
       type: "BUY_UPGRADE",
-      upgradeId: "outlook-templates",
+      upgradeId: "professional-email",
       now: 2_000,
     });
 
     expect(withLayout.emails[0].presentationLevel).toBe(0);
-    expect(withLayout.emails[1].presentationLevel).toBe(1);
+    expect(withLayout.emails[1].presentationLevel).toBe(2);
   });
 });

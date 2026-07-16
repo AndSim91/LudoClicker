@@ -159,7 +159,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
 - **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
 
-Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **120 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre a Giugno, con pausa estiva a Luglio e Agosto, e riparte ogni Settembre. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **120 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -288,16 +288,20 @@ Decidere l'esito al momento dell'invio impedisce di cambiare il risultato ricari
 
 ### 6.5 Lunghezza delle email
 
-Distribuzione iniziale dei 100 testi:
+La progressione dei testi delle email segue otto livelli:
 
-| Tipo | Percentuale | Lunghezza indicativa |
-|---|---:|---:|
-| Molto breve | 15% | 180–300 caratteri |
-| Breve | 35% | 301–550 caratteri |
-| Media | 35% | 551–900 caratteri |
-| Lunga | 15% | 901–1.400 caratteri |
+| Livello | Potenziamento | Formato e lunghezza |
+|---:|---|---|
+| 0 | Nessun potenziamento | Testo breve con piccoli refusi, 150–200 caratteri |
+| 1 | Controllo ortografico | Stesso testo senza errori |
+| 2 | Email professionale | Firma completa, struttura e spaziatura coerenti |
+| 3 | Invito personalizzato | Nuovo set di testi, 250–450 caratteri |
+| 4 | Call to action | Link e pulsanti, massimo 500 caratteri |
+| 5 | Impaginazione | Struttura CSS, massimo 600 caratteri |
+| 6 | Pubblicità vincente | Volantino completo con immagini, massimo 800 caratteri |
+| 7 | Corso di Marketing | Presentazione approfondita, massimo 2.000 caratteri |
 
-La lunghezza deve influenzare la qualità potenziale: una mail lunga non è automaticamente migliore. Oggetto, personalizzazione e chiarezza contano più del numero di caratteri.
+Il corpo iniziale usa il formato `Ciao {nome},` seguito dal testo e dal solo nome del giocatore. Il primo controllo ortografico rimuove gli errori senza cambiare il messaggio; i livelli successivi aggiungono struttura, contenuto e strumenti di conversione in modo progressivo.
 
 ---
 
@@ -329,7 +333,7 @@ Per il primo prototipo:
 | Bonus di iscrizione | immediato (€20) |
 | Accredito della quota mensile | al cambio mese (€40 per iscritto) |
 
-Il mese di gioco dura 120 secondi e il calendario scorre da Gennaio a Dicembre. La formazione segue invece l'anno scolastico Settembre–Giugno: Luglio e Agosto sono pausa estiva e a Settembre inizia un nuovo anno scolastico, indicato accanto al mese corrente nella barra superiore. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
+Il mese di gioco dura 120 secondi e il calendario scorre da Gennaio a Dicembre. La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono attive da Settembre a Giugno, Luglio e Agosto sono pausa estiva e gli abbandoni vengono elaborati nel passaggio da Giugno a Luglio. L'anno scolastico indicato accanto al mese corrente nella barra superiore riparte a Settembre. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
 ### 7.3 Formule di conversione
 
@@ -574,7 +578,7 @@ Regole:
 - ogni iscritto può conoscere più Forme;
 - ogni iscritto o collaboratore può iniziare al massimo una Forma per anno scolastico;
 - le Forme possono essere insegnate da Settembre a Giugno; Luglio e Agosto sono pausa estiva;
-- a Settembre inizia un nuovo anno scolastico e torna disponibile una nuova formazione;
+- l'anno scolastico va da Settembre ad Agosto, a Settembre torna disponibile una nuova formazione;
 - completare un solo ramo fino alla Forma 5 è sufficiente per accedere alla Forma 6;
 - durante Corso Y ogni allievo sviluppa automaticamente da una a tre preferenze fra Spada Lunga, Staffa e Doppia spada corta;
 - gli altri rami preferiti restano percorsi facoltativi che l'automazione può completare dopo la Forma 7;
@@ -603,7 +607,7 @@ Regole:
 
 ### 9.8 Abbandono degli iscritti ignorati
 
-All'inizio di ogni nuovo anno scolastico, a Settembre, un iscritto che ha trascorso l'intero anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
+Nel passaggio tra Giugno e Luglio, un iscritto che ha trascorso l'anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
 
 - i Collaboratori delle Onde non leggendari;
 - gli iscritti entrati a anno già iniziato;
@@ -648,13 +652,13 @@ Influenza sia il moltiplicatore generale di digitazione sia il tasso da email in
 
 | Potenziamento | Effetto indicativo |
 |---|---|
-| Oggetto chiaro | +8% prenotazioni |
-| Invito personalizzato | +12% prenotazioni |
-| Call to action | +15% prenotazioni |
-| Revisione collettiva | +10% prenotazioni e moltiplicatore di scrittura |
-| Testimonianze | +20% prenotazioni |
-| Il paragrafo che convince davvero | bonus alle mail lunghe |
-| Pubblicità sorprendentemente onesta | bonus globale avanzato |
+| Controllo ortografico | +8% prenotazioni e rimozione dei refusi |
+| Email professionale | +12% prenotazioni e struttura ordinata |
+| Invito personalizzato | +15% prenotazioni e testi da 250–450 caratteri |
+| Call to action | +15% prenotazioni, link e pulsanti |
+| Impaginazione | +10% prenotazioni e struttura CSS |
+| Pubblicità vincente | +20% prenotazioni e volantino completo |
+| Corso di Marketing | +35% prenotazioni e testi fino a 2.000 caratteri |
 
 ### 10.3 Accoglienza e qualità della lezione
 
@@ -1239,7 +1243,7 @@ Il riepilogo mostra:
 - iscrizione dopo prova in palestra: 50% provvisorio;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
-- durata di un mese di gioco: 120 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Giugno sempre visibile;
+- durata di un mese di gioco: 120 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Agosto sempre visibile;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
 - il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
 - il primo evento e il primo sparring sono gratuiti e guidati.

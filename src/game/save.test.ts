@@ -262,7 +262,7 @@ describe("local save", () => {
     const migrated = loadGame(1_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.school.currentMonth).toBe(1);
+    expect(migrated.school.currentMonth).toBe(9);
     expect(migrated.school.nextFeeAt).toBe(181_000);
   });
 
@@ -356,7 +356,7 @@ describe("local save", () => {
     const migrated = loadGame(1_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.emails[0].presentationLevel).toBe(2);
+    expect(migrated.emails[0].presentationLevel).toBe(4);
   });
 
   it("migrates version 17 saves into balanced offline progress, digests and short goals", () => {

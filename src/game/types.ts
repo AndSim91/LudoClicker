@@ -59,7 +59,7 @@ export interface CampaignEmail {
   status: "writing" | "sending" | "sent" | "trialBooked" | "lost";
 }
 
-export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4;
+export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface PendingEmailOutcome {
   id: string;
@@ -132,7 +132,6 @@ export interface AcquisitionEvent {
 
 export type UpgradeId =
   | "comfortable-keyboard"
-  | "outlook-templates"
   | "quick-phrases"
   | "automatic-signature"
   | "smart-fields"
@@ -145,13 +144,13 @@ export type UpgradeId =
   | "order-welcome"
   | "difficult-questions"
   | "not-that-thing"
-  | "clear-subject"
+  | "spell-check"
+  | "professional-email"
   | "personalized-invite"
   | "call-to-action"
-  | "collective-review"
-  | "testimonials"
-  | "convincing-paragraph"
-  | "honest-advertising"
+  | "email-layout"
+  | "winning-advertising"
+  | "marketing-course"
   | "welcome-procedure"
   | "tested-intro"
   | "clear-material"

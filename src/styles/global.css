@@ -1171,9 +1171,16 @@ svg {
   white-space: normal;
 }
 
-.campaign-email-level-1,
-.campaign-email-level-2 {
+.campaign-email-level-2,
+.campaign-email-level-3,
+.campaign-email-level-4,
+.campaign-email-level-5 {
   border-top: 5px solid #1c1c3c;
+}
+
+.campaign-email-level-5 {
+  border-color: #7a5a22;
+  background: #fbfaf5;
 }
 
 .campaign-brand {
@@ -1214,14 +1221,19 @@ svg {
   background: #fcfcfc;
 }
 
-.campaign-email-level-1 .campaign-card,
-.campaign-email-level-2 .campaign-card {
+.campaign-email-level-2 .campaign-card,
+.campaign-email-level-3 .campaign-card,
+.campaign-email-level-4 .campaign-card,
+.campaign-email-level-5 .campaign-card {
   border-color: #dedede;
   border-radius: 6px;
   background: #fff;
 }
 
-.campaign-email-level-4 .campaign-card + .campaign-card {
+.campaign-email-level-4 .campaign-card + .campaign-card,
+.campaign-email-level-5 .campaign-card + .campaign-card,
+.campaign-email-level-6 .campaign-card + .campaign-card,
+.campaign-email-level-7 .campaign-card + .campaign-card {
   margin-top: 15px;
 }
 

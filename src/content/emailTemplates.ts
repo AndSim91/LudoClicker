@@ -1,7 +1,13 @@
+import type { EmailPresentationLevel } from "../game/types";
+
 export interface EmailTemplate {
   id: string;
   subject: string;
-  body: (firstName: string, senderName: string) => string;
+  body: (
+    firstName: string,
+    senderName: string,
+    presentationLevel?: EmailPresentationLevel,
+  ) => string;
 }
 
 interface TemplateCopy {
@@ -134,9 +140,127 @@ const network: TemplateCopy[] = [
 
 const copies = [...realistic, ...confident, ...playful, ...administrative, ...network];
 
+const MEDIUM_APPENDIXES = [
+  "La prova è gratuita e aperta anche a chi parte da zero.",
+  "Puoi venire senza attrezzatura e decidere con calma dopo aver provato.",
+  "Ti spiegheremo tutto sul posto, con esercizi graduali e sicuri.",
+  "Bastano abiti comodi e la curiosità di fare qualcosa di diverso.",
+] as const;
+
+const MARKETING_APPENDIX = `
+
+Il Light Saber Combat è uno sport completo che unisce movimento, tecnica e capacità di lettura. Durante l'allenamento si lavora sulla postura, sulla coordinazione, sulla gestione della distanza e sulla precisione del gesto. Ogni esercizio è costruito per essere comprensibile anche a chi non ha mai praticato discipline simili.
+
+La lezione alterna spiegazioni, pratica individuale, lavoro in coppia e momenti di confronto con il gruppo. La sicurezza viene prima di tutto: si imparano regole, controllo e rispetto dell'avversario prima di aumentare ritmo e complessità. In questo modo il percorso resta impegnativo, ma accessibile.
+
+L'Ordine delle Onde mette a disposizione l'attrezzatura necessaria per iniziare. Non servono acquisti, esperienza precedente o preparazione atletica speciale. La prima lezione serve a conoscere il metodo, gli istruttori, la palestra e le persone con cui potresti allenarti ogni settimana.`;
+
+function firstSentence(value: string) {
+  const match = value.trim().match(/^[^.!?]+[.!?]?/u);
+  return (match?.[0] ?? value).trim();
+}
+
+function fitWords(value: string, maximum: number) {
+  const normalized = value.replace(/\s+/gu, " ").trim();
+  if (normalized.length <= maximum) return normalized;
+  const words = normalized.split(" ");
+  let result = "";
+  for (const word of words) {
+    const candidate = result ? `${result} ${word}` : word;
+    if (candidate.length > maximum - 1) break;
+    result = candidate;
+  }
+  return result.replace(/[,:;]$/u, "");
+}
+
+function fitSentence(value: string, maximum: number) {
+  const normalized = value.replace(/\s+/gu, " ").trim();
+  const clause = normalized.split(/[;:]/u)[0].trim();
+  if (clause.length <= maximum) {
+    return /[.!?]$/u.test(clause) ? clause : `${clause}.`;
+  }
+  return `${fitWords(clause, maximum - 1).replace(/[,:;]$/u, "")}.`;
+}
+
+function capitalize(value: string) {
+  return value ? `${value[0].toLocaleUpperCase("it-IT")}${value.slice(1)}` : value;
+}
+
+function shortCopy(copy: TemplateCopy) {
+  let value = `${fitSentence(firstSentence(copy.opening), 74)} ${fitSentence(firstSentence(copy.invitation), 52)}`;
+  const fillers = [
+    "La prova è gratuita.",
+    "Non serve esperienza.",
+  ];
+  let fillerIndex = 0;
+  while (value.length < 124) {
+    value += ` ${fillers[fillerIndex % fillers.length]}`;
+    fillerIndex += 1;
+  }
+  return capitalize(value);
+}
+
+function withEditorialErrors(value: string, index: number) {
+  if (index % 7 === 0) {
+    const error = " Spero che ti interessa.";
+    return `${fitWords(value, 170 - error.length)}${error}`;
+  }
+  const variants = [
+    [/\bè\b/gu, "e"],
+    [/\bpiù\b/gu, "piu"],
+    [/\bperché\b/gu, "perche"],
+    [/\bpuò\b/gu, "puo"],
+  ] as const;
+  const [pattern, replacement] = variants[index % variants.length];
+  const replaced = value.replace(pattern, replacement);
+  return replaced !== value
+    ? replaced
+    : `${fitWords(value, 170 - " Spero che ti interessa.".length)} Spero che ti interessa.`;
+}
+
+function fullSignature(senderName: string) {
+  return `Un saluto,\n${senderName} - Ordine delle Onde\nLudoSport Genova`;
+}
+
+function expandedBody(copy: TemplateCopy, index: number, firstName: string, senderName: string) {
+  return `Ciao ${firstName},\n\n${capitalize(copy.opening)}\n\n${copy.invitation} ${MEDIUM_APPENDIXES[index % MEDIUM_APPENDIXES.length]}${signature(senderName)}`;
+}
+
+function bodyForLevel(
+  copy: TemplateCopy,
+  index: number,
+  firstName: string,
+  senderName: string,
+  level: EmailPresentationLevel,
+) {
+  const compact = shortCopy(copy);
+  if (level === 0) {
+    return `Ciao ${firstName},\n${withEditorialErrors(compact, index)}\n\n${senderName}`;
+  }
+  if (level === 1) {
+    return `Ciao ${firstName},\n${compact}\n\n${senderName}`;
+  }
+  if (level === 2) {
+    return `Ciao ${firstName},\n\n${compact}\n\n${fullSignature(senderName)}`;
+  }
+
+  const expanded = expandedBody(copy, index, firstName, senderName);
+  if (level === 3) return expanded;
+  if (level === 4) {
+    return `${expanded}\n\nRispondi a questa email per prenotare la tua prova.`;
+  }
+  if (level === 5) {
+    return `${expanded}\n\nRispondi a questa email per prenotare; ti indicheremo orario, luogo e cosa portare.`;
+  }
+  if (level === 6) {
+    return `${expanded}\n\nQuando: prossima lezione disponibile\nDove: PalaGym Assarotti, Genova\nCosa portare: abiti comodi e scarpe da palestra.`;
+  }
+  return `${expanded}${MARKETING_APPENDIX}`;
+}
+
 export const EMAIL_TEMPLATES: EmailTemplate[] = copies.map((copy, index) => ({
   id: copy.id,
   subject: copy.subject,
-  body: (name, senderName) =>
-    `${index % 3 === 0 ? "Buongiorno" : "Ciao"} ${name},\n\n${copy.opening}\n\n${copy.invitation}${signature(senderName)}`,
+  body: (name, senderName, presentationLevel = 0) =>
+    bodyForLevel(copy, index, name, senderName, presentationLevel),
 }));

@@ -9,12 +9,13 @@ import { synchronizeEquipmentAvailability } from "./equipment";
 import { createShortGoalFromStatistics } from "../content/shortGoals";
 import { normalizeStackedMessages } from "./messages";
 import { getAcquisitionEventDefinition } from "../content/events";
+import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 import { FORM_BRANCHES, getFormDefinition } from "../content/forms";
 import {
   COLLABORATOR_MASTERY_ROLES,
   createInitialCollaboratorMastery,
 } from "../content/mastery";
-import type { CollaboratorMastery, GameState, UpgradeLevels } from "./types";
+import type { CollaboratorMastery, GameState, UpgradeId } from "./types";
 
 const SAVE_KEY = "oggetto-nuovi-iscritti.save";
 const BACKUP_KEY = `${SAVE_KEY}.backup`;
@@ -39,7 +40,7 @@ function isGameState(value: unknown): value is GameState {
     state.emails.every((email) =>
       Number.isInteger(email.presentationLevel) &&
       email.presentationLevel >= 0 &&
-      email.presentationLevel <= 4
+    email.presentationLevel <= 7
     ) &&
     Array.isArray(state.acquisitionEvents) &&
     state.acquisitionEvents.every((event) => typeof event.membersUsed === "number") &&
@@ -107,7 +108,7 @@ function migrate(value: unknown): unknown {
   type MigratableState = Partial<GameState> & {
     version?: number;
     statistics?: Partial<GameState["statistics"]>;
-    upgrades?: Partial<UpgradeLevels> & { speedLevel?: number };
+    upgrades?: Record<string, number> & { speedLevel?: number };
   };
   let migrated = value as MigratableState;
 
@@ -305,7 +306,7 @@ function migrate(value: unknown): unknown {
       school: migrated.school
         ? {
             ...migrated.school,
-            currentMonth: migrated.school.currentMonth ?? 1,
+            currentMonth: migrated.school.currentMonth ?? 9,
           }
         : migrated.school,
     };
@@ -477,7 +478,7 @@ function migrate(value: unknown): unknown {
       contacts: (migrated.contacts ?? []).map((contact) => ({
         ...contact,
         enrolledMonth: contact.status === "enrolled"
-          ? contact.enrolledMonth ?? migrated.school?.currentMonth ?? 1
+          ? contact.enrolledMonth ?? migrated.school?.currentMonth ?? 9
           : contact.enrolledMonth,
       })),
       statistics: {
@@ -632,7 +633,7 @@ function migrate(value: unknown): unknown {
   if (migrated.version === 27) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 28,
       equipment: migrated.equipment
         ? synchronizeEquipmentAvailability({
             ...migrated.equipment,
@@ -644,6 +645,52 @@ function migrate(value: unknown): unknown {
             damagedSwords: 0,
             wear: 0,
           },
+    };
+  }
+
+  if (migrated.version === 28) {
+    const legacyUpgrades = migrated.upgrades ?? {};
+    const aliases: Record<string, UpgradeId> = {
+      "outlook-templates": "professional-email",
+      "clear-subject": "spell-check",
+      "collective-review": "email-layout",
+      testimonials: "winning-advertising",
+      "convincing-paragraph": "marketing-course",
+      "honest-advertising": "marketing-course",
+      "lesson-photos": "winning-advertising",
+      "demo-video": "marketing-course",
+    };
+    const upgrades = createInitialUpgradeLevels();
+    for (const [id, rawLevel] of Object.entries(legacyUpgrades)) {
+      const target = aliases[id] ?? (id in upgrades ? id as UpgradeId : undefined);
+      const level = typeof rawLevel === "number" ? rawLevel : Number(rawLevel);
+      if (!target || !Number.isFinite(level)) continue;
+      upgrades[target] = Math.max(upgrades[target], Math.max(0, Math.floor(level)));
+    }
+    const levelMap = [0, 2, 4, 6, 7] as const;
+    const activeLevel = getEmailPresentationLevel(upgrades);
+    const displayName = migrated.profile?.displayName ?? "";
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      upgrades,
+      emails: (migrated.emails ?? []).map((email) => {
+        const contact = migrated.contacts?.find((candidate) => candidate.id === email.contactId);
+        const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
+        const oldLevel = Number.isInteger(email.presentationLevel)
+          ? Math.min(4, Math.max(0, email.presentationLevel ?? 0))
+          : 0;
+        const presentationLevel = email.status === "writing"
+          ? activeLevel
+          : levelMap[oldLevel];
+        return {
+          ...email,
+          presentationLevel,
+          body: email.status === "writing" && contact && template
+            ? template.body(contact.firstName, displayName, activeLevel)
+            : email.body,
+        };
+      }),
     };
   }
 

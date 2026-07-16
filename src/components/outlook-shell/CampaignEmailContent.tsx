@@ -113,7 +113,7 @@ export function CampaignEmailContent({
   const level = email.presentationLevel;
   const format = EMAIL_PRESENTATION_LEVELS[level];
 
-  if (level === 0) {
+  if (level <= 1) {
     const visible = email.body.slice(0, revealedCharacters);
     const hidden = email.body.slice(revealedCharacters);
     return (
@@ -135,23 +135,23 @@ export function CampaignEmailContent({
       aria-label={`Email in formato ${format.label}`}
       data-email-presentation={level}
     >
-      {level >= 3 ? (
+      {level >= 6 ? (
         <div className="campaign-brand">
           <img src="/email-assets/ludosport-genova.png" alt="LudoSport Genova" />
         </div>
       ) : null}
 
       <header className="campaign-title">
-        {level === 4 ? <span>ORDINE DELLE ONDE · GENOVA</span> : null}
+        {level >= 6 ? <span>ORDINE DELLE ONDE · GENOVA</span> : null}
         <h1>{email.subject}</h1>
       </header>
 
       <section className="campaign-card campaign-main-card">
-        {level === 4 ? (
+        {level >= 6 ? (
           <strong className="campaign-section-label">UNISCITI A UNA LEZIONE DI LIGHT SABER COMBAT</strong>
         ) : null}
 
-        {level >= 3 ? (
+        {level >= 6 ? (
           <img
             className="campaign-hero-image"
             src="/email-assets/lezione-prova.jpg"
@@ -165,7 +165,7 @@ export function CampaignEmailContent({
           showCaret={showCaret}
         />
 
-        {level >= 2 ? (
+        {level >= 4 ? (
           <div className="campaign-actions">
             <a href={`mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(email.subject)}`} onClick={stopComposerWrite}>
               Prenota una prova
@@ -176,7 +176,7 @@ export function CampaignEmailContent({
           </div>
         ) : null}
 
-        {level === 4 ? (
+        {level >= 6 ? (
           <dl className="campaign-details">
             <div><dt>Quando</dt><dd>Alla prossima lezione disponibile</dd></div>
             <div><dt>Durata</dt><dd>Due ore, dalle 20:30 alle 22:45</dd></div>
@@ -186,7 +186,7 @@ export function CampaignEmailContent({
         ) : null}
       </section>
 
-      {level === 4 ? (
+      {level >= 6 ? (
         <>
           <section className="campaign-card campaign-contact-card">
             <strong className="campaign-section-label">COME PRENOTARE</strong>
@@ -212,10 +212,10 @@ export function CampaignEmailContent({
         </>
       ) : null}
 
-      {level >= 3 ? (
+      {level >= 6 ? (
         <footer className="campaign-footer">
           <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde" />
-          {level === 4 ? (
+          {level >= 7 ? (
             <p>Ricevi questo messaggio perché hai dato disponibilità a ricevere informazioni sui corsi LudoSport a Genova. Questa è una campagna simulata all'interno del gioco.</p>
           ) : null}
         </footer>

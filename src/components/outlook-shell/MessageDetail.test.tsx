@@ -9,7 +9,7 @@ describe("MessageDetail", () => {
   it("does not show the stacked-conversation explanation", () => {
     const message: InboxMessage = {
       id: "repair-message",
-      sender: "Segreteria Ordine delle Onde",
+      sender: "Ordine delle Onde",
       subject: "Riparazione non programmata",
       preview: "Una spada ha subito un danno.",
       receivedAt: 2_000,

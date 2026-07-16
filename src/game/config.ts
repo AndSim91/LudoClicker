@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 28,
+  version: 29,
   initialContacts: 5,
   initialSwords: 6,
   emailBookingChance: 0.2,

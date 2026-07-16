@@ -10,7 +10,7 @@ describe("CampaignEmailContent", () => {
     const email = createInitialState(1_000, "Andrea Ungaro").emails[0];
     render(<CampaignEmailContent email={email} />);
 
-    expect(screen.getByLabelText("Email in formato Testo semplice")).toHaveAttribute(
+    expect(screen.getByLabelText("Email in formato Bozza con refusi")).toHaveAttribute(
       "data-email-presentation",
       "0",
     );
@@ -20,12 +20,12 @@ describe("CampaignEmailContent", () => {
 
   it("renders the complete flyer with local imagery and working links", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
-    const email = { ...initial.emails[0], presentationLevel: 4 as const };
+    const email = { ...initial.emails[0], presentationLevel: 6 as const };
     render(<CampaignEmailContent email={email} />);
 
-    expect(screen.getByLabelText("Email in formato Volantino digitale")).toHaveAttribute(
+    expect(screen.getByLabelText("Email in formato Pubblicità vincente")).toHaveAttribute(
       "data-email-presentation",
-      "4",
+      "6",
     );
     expect(screen.getByRole("img", { name: "LudoSport Genova" })).toHaveAttribute(
       "src",

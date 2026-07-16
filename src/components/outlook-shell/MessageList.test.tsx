@@ -13,7 +13,7 @@ function message(
 ): InboxMessage {
   return {
     id,
-    sender: "Segreteria Ordine delle Onde",
+    sender: "Ordine delle Onde",
     subject,
     preview: `Anteprima ${subject}`,
     receivedAt: 2_000,

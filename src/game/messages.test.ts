@@ -5,7 +5,7 @@ import type { InboxMessage } from "./types";
 function message(id: string, subject = "Passaparola inatteso"): InboxMessage {
   return {
     id,
-    sender: "Segreteria Ordine delle Onde",
+    sender: "Ordine delle Onde",
     subject,
     preview: "Sono arrivati nuovi contatti.",
     receivedAt: Number(id.replace(/\D/g, "")) || 1,

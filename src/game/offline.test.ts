@@ -16,7 +16,7 @@ describe("offline progress", () => {
     expect(result.summary?.elapsedMs).toBe(120_000);
     expect(result.state.school.euros).toBe(8);
     expect(result.summary?.eurosEarned).toBe(8);
-    expect(result.state.school.currentMonth).toBe(1);
+    expect(result.state.school.currentMonth).toBe(9);
     expect(result.state.school.nextFeeAt).toBe(181_000);
     expect(result.state.messages[0].subject).toBe("Riepilogo attività offline");
     expect(result.state.lastSavedAt).toBe(121_000);

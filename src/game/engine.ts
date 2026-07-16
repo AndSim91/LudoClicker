@@ -37,7 +37,12 @@ import {
   getUpgradeDefinition,
   getUpgradeEffectTotal,
 } from "../content/upgrades";
-import { getSchoolYear, getSchoolYearStartMonth, isSummerBreak } from "./calendar";
+import {
+  getSchoolYear,
+  getSchoolYearStartMonth,
+  isSchoolYearDepartureMonth,
+  isSummerBreak,
+} from "./calendar";
 import { GAME_CONFIG } from "./config";
 import {
   applyEquipmentWear,
@@ -212,7 +217,7 @@ function createCampaign(
     contactId: contact.id,
     templateId: template.id,
     subject: template.subject,
-    body: template.body(contact.firstName, senderName),
+    body: template.body(contact.firstName, senderName, presentationLevel),
     revealedCharacters: 0,
     createdAt: now,
     presentationLevel,
@@ -268,7 +273,7 @@ export function createInitialState(
       peakActiveMembers: 0,
       historicMembers: 0,
       euros: 0,
-      currentMonth: 1,
+      currentMonth: 9,
       nextFeeAt: now + GAME_CONFIG.gameMonthMs,
     },
     player: { writingPower: 1 },
@@ -409,7 +414,7 @@ function addMessage(
 ): GameState {
   const message: InboxMessage = {
     id: makeId("message", now, state.messages.length),
-    sender: "Segreteria Ordine delle Onde",
+    sender: "Ordine delle Onde",
     subject,
     preview,
     receivedAt: now,
@@ -587,7 +592,7 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
       nextState,
       now,
       "Configurazione campagna completata",
-      "La prima email è partita. La segreteria registrerà eventuali risposte e appuntamenti senza interrompere la stesura delle prossime bozze.",
+      "Hai inviato la tua prima email! Il sistema registrerà eventuali risposte e appuntamenti automaticamente senza interrompere la stesura delle tue prossime email",
       "system",
     );
   }
@@ -903,7 +908,8 @@ function collectFees(state: GameState, now: number, gainMultiplier: number): Gam
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   let nextState = state;
   for (let period = 0; period < periods; period += 1) {
-    const completedSchoolYear = getSchoolYear(nextState.school.currentMonth);
+    const currentMonth = nextState.school.currentMonth;
+    const completedSchoolYear = getSchoolYear(currentMonth);
     const earned = scaleCurrencyGain((
       (nextState.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
         nextState.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
@@ -915,7 +921,7 @@ function collectFees(state: GameState, now: number, gainMultiplier: number): Gam
       school: {
         ...nextState.school,
         euros: Math.round((nextState.school.euros + earned) * 100) / 100,
-        currentMonth: nextState.school.currentMonth + 1,
+        currentMonth: currentMonth + 1,
         nextFeeAt: nextState.school.nextFeeAt + GAME_CONFIG.gameMonthMs,
       },
       statistics: {
@@ -923,7 +929,7 @@ function collectFees(state: GameState, now: number, gainMultiplier: number): Gam
         eurosEarned: Math.round((nextState.statistics.eurosEarned + earned) * 100) / 100,
       },
     };
-    if (getSchoolYear(nextState.school.currentMonth) > completedSchoolYear) {
+    if (isSchoolYearDepartureMonth(currentMonth)) {
       nextState = processMemberDepartures(nextState, completedSchoolYear, now + period);
     }
   }
@@ -1982,15 +1988,27 @@ function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   const upgradedSwords = Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
   const addedSwords = Math.max(0, upgradedSwords - previousUpgradeSwords);
   const totalSwords = state.equipment.totalSwords + addedSwords;
+  const nextPresentationLevel = getEmailPresentationLevel(upgrades);
   const nextState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
-    emails: state.emails.map((email) =>
-      email.status === "writing"
-        ? { ...email, presentationLevel: getEmailPresentationLevel(upgrades) }
-        : email,
-    ),
+    emails: state.emails.map((email) => {
+      if (email.status !== "writing") return email;
+      const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
+      const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
+      if (!contact || !template) return { ...email, presentationLevel: nextPresentationLevel };
+      const body = template.body(contact.firstName, state.profile.displayName, nextPresentationLevel);
+      const progress = email.body.length > 0
+        ? email.revealedCharacters / email.body.length
+        : 0;
+      return {
+        ...email,
+        body,
+        presentationLevel: nextPresentationLevel,
+        revealedCharacters: Math.min(body.length, Math.floor(progress * body.length)),
+      };
+    }),
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords,
@@ -2015,7 +2033,7 @@ function updateProfileName(state: GameState, displayName: string): GameState {
       const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
       const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
       if (!contact || !template) return email;
-      const body = template.body(contact.firstName, normalizedName);
+      const body = template.body(contact.firstName, normalizedName, email.presentationLevel);
       return {
         ...email,
         body,
