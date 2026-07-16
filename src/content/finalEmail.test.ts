@@ -76,9 +76,9 @@ describe("final HTML email model", () => {
     };
 
     expect(buildFinalEmailBody("Nome", context, 3)).not.toContain("IL PROSSIMO PASSO");
-    expect(buildFinalEmailBody("Nome", context, 4)).toContain("Unisciti a Ludosport!");
+    expect(buildFinalEmailBody("Nome", context, 4)).toContain("UNISCITI A LUDOSPORT!");
     expect(buildFinalEmailBody("Nome", context, 4)).not.toContain("IL PROSSIMO PASSO");
-    expect(buildFinalEmailBody("Nome", context, 5)).toContain("Unisciti a Ludosport!");
+    expect(buildFinalEmailBody("Nome", context, 5)).toContain("UNISCITI A LUDOSPORT!");
     expect(buildFinalEmailBody("Nome", context, 7)).not.toContain("IL PROSSIMO PASSO");
   });
 

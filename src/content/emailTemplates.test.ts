@@ -51,9 +51,6 @@ describe("email template archive", () => {
 
     expect(cleanBodies.every((body) => !body.includes("Spero che ti interessa"))).toBe(true);
     expect(professionalBodies.every((body) => body.includes("Un saluto,"))).toBe(true);
-    expect(professionalBodies.every((body, index) =>
-      !body.startsWith(EMAIL_TEMPLATES[index].subject)
-    )).toBe(true);
     expect(professionalBodies.every((body) =>
       body.includes("Andrea Ungaro, Ordine delle Onde - Genova")
     )).toBe(true);
@@ -65,6 +62,13 @@ describe("email template archive", () => {
     expect(marketingBodies.every((body) => body.length <= 4_000)).toBe(true);
     expect(marketingBodies.every((body) => body.includes("COME PRENOTARE"))).toBe(true);
     expect(marketingBodies.every((body) => body.includes("DA VEDERE"))).toBe(true);
+  });
+
+  it("does not repeat the subject in catalog 2 bodies", () => {
+    expect(EMAIL_TEMPLATES.every((template) => {
+      const body = template.body("Nome", "Andrea Ungaro", 2);
+      return body.startsWith("Ciao Nome,") && !body.includes(template.subject);
+    })).toBe(true);
   });
 
   it("builds the HTML signature from player, order and city", () => {

@@ -86,7 +86,7 @@ export function buildFinalEmailTextEntries(
   if (level >= 4) {
     entries.push({
       key: "mainLabel",
-      text: "Unisciti a Ludosport!",
+      text: "UNISCITI A LUDOSPORT!",
     });
   }
   if (level >= 3) {
