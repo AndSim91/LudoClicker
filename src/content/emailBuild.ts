@@ -8,12 +8,16 @@ function getStructureInputBudget(bodyLength: number): number {
 
 export function getEmailStructureProgress(email: CampaignEmail): number {
   if (email.body.length === 0) return 0;
+  if (email.presentationLevel <= 1) return 100;
   const budget = getStructureInputBudget(email.body.length);
   return Math.min(100, Math.round((Math.min(email.revealedCharacters, budget) / budget) * 100));
 }
 
 export function getEmailTextRevealCount(email: CampaignEmail): number {
   if (email.body.length === 0) return 0;
+  if (email.presentationLevel <= 1) {
+    return Math.min(email.body.length, Math.max(0, email.revealedCharacters));
+  }
   const budget = getStructureInputBudget(email.body.length);
   if (email.revealedCharacters <= budget) return 0;
 

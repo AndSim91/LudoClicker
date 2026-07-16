@@ -378,7 +378,7 @@ function FinalEmailDocument({
             <img
               className="final-email-video-image"
               src="/email-assets/video-demo.jpg"
-              alt="Finale del Torneo Nazionale LudoSport 2022"
+              alt="Video dimostrativo LudoSport"
             />
             <TypedFinalBlock
               section={section("videoCaption")}
@@ -492,7 +492,7 @@ export function CampaignEmailContent({
   const heroVisible = level >= 6 && progress >= 12;
   const detailsVisible = level >= 6 && progress >= 82;
 
-  if (textRevealedCharacters === 0) {
+  if (textRevealedCharacters === 0 && level >= 2) {
     return <EmailStructurePreview level={level} progress={structureProgress} />;
   }
 

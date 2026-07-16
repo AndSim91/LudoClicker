@@ -29,6 +29,13 @@ function targetConsumesKeyboard(target: EventTarget | null): boolean {
   return Boolean(target.closest("button, input, textarea, select, a, [contenteditable='true']"));
 }
 
+function isWindowsKey(event: KeyboardEvent): boolean {
+  return event.key === "Meta" || event.key === "OS" || event.key === "Win" ||
+    event.key === "Shift" ||
+    event.code === "MetaLeft" || event.code === "MetaRight" ||
+    event.code === "ShiftLeft" || event.code === "ShiftRight";
+}
+
 export function App() {
   const { state, dispatch } = useGameEngine();
   const [view, setView] = useState<AppView>("mail");
@@ -64,6 +71,7 @@ export function App() {
         selectedMessageId !== null ||
         !state.profile.displayName.trim() ||
         event.repeat ||
+        isWindowsKey(event) ||
         targetConsumesKeyboard(event.target)
       ) return;
       dispatch({ type: "WRITE", now: Date.now() });

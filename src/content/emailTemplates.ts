@@ -259,6 +259,7 @@ function bodyForLevel(
   const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
   if (level <= 1) return `Ciao ${firstName},\n${compact}${signature}`;
   return buildFinalEmailBody(firstName, {
+    title: cleanCatalogCopy(copy.subject),
     opening: cleanCatalogCopy(copy.opening),
     invitation: cleanCatalogCopy(copy.invitation),
   }, level);
