@@ -8,6 +8,7 @@ import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { getAvailableForms, getCollaboratorProductivity } from "../content/forms";
+import { UPGRADE_DEFINITIONS } from "../content/upgrades";
 import type { FormId } from "./types";
 import { getSchoolYear } from "./calendar";
 import {
@@ -33,10 +34,22 @@ describe("game engine", () => {
     expect(state.school.currentMonth).toBe(9);
     expect(getSchoolYear(state.school.currentMonth)).toBe(1);
     expect(state.contacts.every((contact) => contact.rarity !== "legendary")).toBe(true);
-    expect(PERSON_RARITIES.common.emailShareChance).toBe(0.7);
-    expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.05);
-    expect(getEnrollmentChance(state, "common")).toBe(0.4);
-    expect(getEnrollmentChance(state, "legendary")).toBe(0.025);
+    expect(PERSON_RARITIES.common.queueAppearanceChance).toBe(0.8);
+    expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.125);
+    expect(PERSON_RARITIES["ultra-rare"].queueAppearanceChance).toBe(0.055);
+    expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.02);
+    expect(Object.values(PERSON_RARITIES).reduce(
+      (total, rarity) => total + rarity.queueAppearanceChance,
+      0,
+    )).toBe(1);
+    expect(getEnrollmentChance(state, "common")).toBe(0.5);
+    expect(getEnrollmentChance(state, "rare")).toBe(0.4);
+    expect(getEnrollmentChance(state, "ultra-rare")).toBe(0.3);
+    expect(getEnrollmentChance(state, "legendary")).toBe(0.2);
+    expect(getEmailBookingChance(state, "common")).toBe(0.3);
+    expect(getEmailBookingChance(state, "rare")).toBe(0.5);
+    expect(getEmailBookingChance(state, "ultra-rare")).toBe(0.75);
+    expect(getEmailBookingChance(state, "legendary")).toBe(1);
   });
 
   it("reveals only the configured amount of predetermined text", () => {
@@ -145,7 +158,6 @@ describe("game engine", () => {
     });
 
     expect(updated.profile.displayName).toBe("Andrea Ungaro");
-    expect(updated.emails[0].body).toContain("Andrea Ungaro");
     expect(updated.emails[0].body.toLocaleLowerCase("it-IT")).not.toContain("segreteria");
   });
 
@@ -204,7 +216,7 @@ describe("game engine", () => {
     expect(tickedAgain.statistics.emailsSent).toBe(1);
   });
 
-  it("does not favor Andrea's booking over the other Legendary profiles", () => {
+  it("guarantees a trial booking for every Legendary profile", () => {
     const initial = createInitialState(1_000);
     const email = selectActiveEmail(initial)!;
     const state = {
@@ -235,8 +247,8 @@ describe("game engine", () => {
       now: 2_000 + GAME_CONFIG.sendDelayMs,
     });
 
-    expect(getEmailBookingChance(state)).toBe(0.2);
-    expect(sent.pendingEmailOutcomes[0].result).toBe("lost");
+    expect(getEmailBookingChance(state, "legendary")).toBe(1);
+    expect(sent.pendingEmailOutcomes[0].result).toBe("trialBooked");
   });
 
   it("does not notify when contacts are running low or exhausted", () => {
@@ -329,8 +341,8 @@ describe("game engine", () => {
       },
     }, { type: "TICK", now: 2_000 });
 
-    expect(getLegendaryEnrollmentChance(initial, "andrea-simonazzi")).toBe(0.025);
-    expect(getLegendaryEnrollmentChance(initial, "eva-parodi")).toBe(0.025);
+    expect(getLegendaryEnrollmentChance(initial, "andrea-simonazzi")).toBe(0.2);
+    expect(getLegendaryEnrollmentChance(initial, "eva-parodi")).toBe(0.2);
     expect(firstAttempt.contacts.find((contact) => contact.id === eva.id)?.status).toBe("lost");
     expect(firstAttempt.legendaryCollaborators.enrollmentAttempts["eva-parodi"]).toBe(1);
     expect(firstAttempt.collaborators).toHaveLength(0);
@@ -852,9 +864,9 @@ describe("game engine", () => {
       automation: { ...initial.automation, lastProcessedAt: 2_000 },
     }, { type: "TICK", now: 2_000 });
 
-    expect(getLegendaryAppearanceChance(0)).toBe(0.05);
-    expect(getLegendaryAppearanceChance(1)).toBe(0.025);
-    expect(getLegendaryAppearanceChance(4)).toBe(0.025);
+    expect(getLegendaryAppearanceChance(0)).toBe(0.02);
+    expect(getLegendaryAppearanceChance(1)).toBe(0.02);
+    expect(getLegendaryAppearanceChance(4)).toBe(0.02);
     expect(resolved.contacts.at(-1)?.specialProfileId).toBe("andrea-simonazzi");
     expect(resolved.legendaryCollaborators.encounteredProfileIds).toContain(
       resolved.contacts.at(-1)?.specialProfileId,
@@ -976,7 +988,7 @@ describe("game engine", () => {
       contactId: returnedContact.id,
       startsAt: 2_500,
       resolvesAt: 3_000,
-      resultSeed: 1,
+      resultSeed: 0,
       status: "scheduled" as const,
     };
     const reenrolled = gameReducer({
@@ -1132,9 +1144,21 @@ describe("game engine", () => {
       },
     };
 
-    expect(getEmailBookingChance(improved)).toBeCloseTo(0.232);
-    expect(getEnrollmentChance(improved)).toBeCloseTo(0.48);
-    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.03);
+    expect(getEmailBookingChance(improved)).toBeCloseTo(0.348);
+    expect(getEnrollmentChance(improved)).toBeCloseTo(0.52);
+    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.206);
+
+    const maximized = {
+      ...initial,
+      upgrades: Object.fromEntries(UPGRADE_DEFINITIONS.map((definition) => [
+        definition.id,
+        definition.maxLevel,
+      ])) as typeof initial.upgrades,
+    };
+    expect(getEnrollmentChance(maximized, "common")).toBe(1);
+    expect(getEnrollmentChance(maximized, "rare")).toBe(0.9);
+    expect(getEnrollmentChance(maximized, "ultra-rare")).toBe(0.5);
+    expect(getEnrollmentChance(maximized, "legendary")).toBe(0.35);
   });
 
   it("assigns one collaborator and writes on the active email automatically", () => {
@@ -1532,22 +1556,22 @@ describe("game engine", () => {
     expect(unlocked.school.euros).toBe(200);
   });
 
-  it("creates a Rare collaborator at Form 7 and applies weapon and Legendary bonuses", () => {
+  it("creates an Ultra Rare collaborator at Course Y and applies rarity bonuses", () => {
     const initial = createInitialState(1_000);
     const member = {
       ...initial.contacts[0],
       status: "enrolled" as const,
-      rarity: "rare" as const,
-      forms: ["form-1", "course-x", "form-2", "course-y", "form-3-long", "form-4-long", "form-5-long", "form-6"] as const,
+      rarity: "ultra-rare" as const,
+      forms: ["form-1", "course-x", "form-2"] as const,
       lastFormTrainingYear: 8,
     };
     const instructor = {
-      id: "instructor-form-7",
+      id: "instructor-course-y",
       contactId: initial.contacts[1].id,
-      displayName: "Istruttore Forma 7",
+      displayName: "Istruttore Corso Y",
       joinedAt: 1_000,
-      forms: ["form-7" as const],
-      instructorForms: ["form-7" as const],
+      forms: ["course-y" as const],
+      instructorForms: ["course-y" as const],
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -1560,20 +1584,38 @@ describe("game engine", () => {
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };
-    const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-7", now: 2_000 });
-    const completed = gameReducer(training, { type: "TICK", now: 77_000 });
+    const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-y", now: 2_000 });
+    const completed = gameReducer(training, { type: "TICK", now: 37_000 });
     const collaborator = completed.collaborators.find((candidate) => candidate.contactId === member.id)!;
 
-    expect(collaborator.forms.at(-1)).toBe("form-7");
+    expect(collaborator.forms.at(-1)).toBe("course-y");
     expect(completed.unlocks.collaborators).toBe(true);
     expect(completed.statistics.collaboratorsRecruited).toBe(1);
-    const longFormFive = { ...collaborator, forms: ["form-1", "course-x", "form-2", "course-y", "form-3-long", "form-4-long", "form-5-long"] as const, assignment: "events" as const };
+    const longFormFive = { ...collaborator, forms: ["form-1", "course-x", "form-2", "course-y", "form-3-long", "form-4-long", "form-5-long"] as const, formBranchPreferences: ["Spada Lunga" as const], assignment: "events" as const };
     expect(getCollaboratorProductivity({ ...longFormFive, forms: [...longFormFive.forms] })).toBe(1.5);
     expect(getAvailableForms({ ...longFormFive, forms: [...longFormFive.forms] }, 8).map((form) => form.id)).toEqual(["form-6"]);
 
     const legendary = { ...longFormFive, rarity: "legendary" as const, forms: [...longFormFive.forms, "form-6"] as const, lastFormTrainingYear: 8 };
     expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(3.2);
     expect(getAvailableForms({ ...legendary, forms: [...legendary.forms] }, 9).map((form) => form.id)).toEqual(["form-7"]);
+
+    const rareReady = {
+      ...ready,
+      contacts: ready.contacts.map((contact) =>
+        contact.id === member.id ? { ...contact, rarity: "rare" as const } : contact,
+      ),
+    };
+    const rareTraining = gameReducer(rareReady, {
+      type: "START_FORM_TRAINING",
+      personId: member.id,
+      formId: "course-y",
+      now: 2_000,
+    });
+    const rareCompleted = gameReducer(rareTraining, { type: "TICK", now: 37_000 });
+    expect(rareCompleted.contacts.find((contact) => contact.id === member.id)?.forms)
+      .toContain("course-y");
+    expect(rareCompleted.collaborators.some((candidate) => candidate.contactId === member.id))
+      .toBe(false);
   });
 
   it("grants each achievement and its reward only once", () => {

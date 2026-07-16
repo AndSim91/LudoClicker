@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { FormId } from "../../game/types";
@@ -41,13 +41,13 @@ describe("PeopleView", () => {
     expect(screen.getByRole("heading", { name: "Iscritti" })).toBeVisible();
     expect(screen.queryByRole("tab", { name: /Potenziali interessati/ })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Email lasciata: 70%",
+      "ComuneComparsa: 80%Prova dopo la mail: 30%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Comparsa: 5% dalla 10ª email",
+      "Ultra RaroComparsa: 5,5%Prova dopo la mail: 75%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "RaroComparsa: 10% dei contatti non leggendari",
+      "LeggendarioComparsa: 2%Prova dopo la mail: 100%",
     );
     fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
     expect(screen.getByText("Andrea Simonazzi")).toHaveClass("rarity-legendary");
@@ -146,7 +146,8 @@ describe("PeopleView", () => {
     expect(screen.getAllByText("Rischio medio")).toHaveLength(1);
     expect(screen.getAllByText("Rischio basso")).toHaveLength(1);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/%/))
+      .not.toBeInTheDocument();
   });
 
   it("shows no risk after a member completes form training this school year", () => {

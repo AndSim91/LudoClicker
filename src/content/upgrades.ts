@@ -166,3 +166,12 @@ export function getUpgradeEffectTotal(levels: UpgradeLevels, effect: UpgradeEffe
     return total + (levels[definition.id] ?? 0) * effectPerLevel;
   }, 0);
 }
+
+export function getUpgradeEffectMaximum(effect: UpgradeEffect): number {
+  return UPGRADE_DEFINITIONS.reduce((total, definition) => {
+    const effectPerLevel =
+      (definition.effect === effect ? definition.effectPerLevel : 0) +
+      (definition.additionalEffectsPerLevel?.[effect] ?? 0);
+    return total + definition.maxLevel * effectPerLevel;
+  }, 0);
+}

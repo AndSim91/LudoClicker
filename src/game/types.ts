@@ -17,7 +17,7 @@ export type SpecialCollaboratorId =
   | "guglielmo-oliveri"
   | "niccolo-efrati";
 
-export type PersonRarity = "common" | "rare" | "legendary";
+export type PersonRarity = "common" | "rare" | "ultra-rare" | "legendary";
 export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
 
 export interface FormTraining {

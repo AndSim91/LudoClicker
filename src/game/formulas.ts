@@ -1,4 +1,4 @@
-import { getUpgradeEffectTotal } from "../content/upgrades";
+import { getUpgradeEffectMaximum, getUpgradeEffectTotal } from "../content/upgrades";
 import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorProductivity } from "../content/forms";
 import { PERSON_RARITIES } from "../content/rarities";
@@ -9,10 +9,13 @@ function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
-export function getEmailBookingChance(state: GameState) {
+export function getEmailBookingChance(
+  state: GameState,
+  rarity: PersonRarity = "common",
+) {
   const specializationBonus = state.school.specialization === "accoglienza" ? 0.1 : 0;
   const multiplier = 1 + getUpgradeEffectTotal(state.upgrades, "bookingMultiplier") + specializationBonus;
-  return clamp(GAME_CONFIG.emailBookingChance * multiplier, 0.01, 0.7);
+  return clamp(PERSON_RARITIES[rarity].baseTrialBookingChance * multiplier, 0.01, 1);
 }
 
 export function getEnrollmentChance(
@@ -23,16 +26,27 @@ export function getEnrollmentChance(
   const lessonProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "lessons")
     .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
-  const multiplier =
-    1 +
-    getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") +
-    lessonProductivity * 0.1 +
-    (state.school.specialization === "accoglienza" ? 0.1 : 0);
+  const maximumUpgradeEffect = getUpgradeEffectMaximum("enrollmentMultiplier");
+  const improvementProgress = clamp(
+    (
+      getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") +
+      lessonProductivity * 0.1 +
+      (state.school.specialization === "accoglienza" ? 0.1 : 0)
+    ) / maximumUpgradeEffect,
+    0,
+    1,
+  );
   const failureBonus = rarity === "legendary"
     ? previousFailures * GAME_CONFIG.legendaryEnrollmentChancePerFailure
     : 0;
-  const baseChance = PERSON_RARITIES[rarity].baseEnrollmentChance + failureBonus;
-  return clamp(baseChance * multiplier, 0.01, 1);
+  const definition = PERSON_RARITIES[rarity];
+  const improvedChance = definition.baseEnrollmentChance +
+    (definition.maxEnrollmentChance - definition.baseEnrollmentChance) * improvementProgress;
+  return clamp(
+    improvedChance + failureBonus,
+    definition.baseEnrollmentChance,
+    definition.maxEnrollmentChance,
+  );
 }
 
 export function getEventFunnelOutcome(

@@ -585,6 +585,40 @@ describe("local save", () => {
     expect(migrated.emails[0].body).toContain("Legend, Ordine del Faro - Trieste");
   });
 
+  it("migrates legacy Rare collaborators to the Ultra Rare tier", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    const contact = legacy.contacts[0];
+    legacy.version = 31;
+    contact.rarity = "rare";
+    legacy.collaborators = [{
+      id: "legacy-rare-collaborator",
+      contactId: contact.id,
+      displayName: `${contact.firstName} ${contact.lastName}`,
+      joinedAt: 1_000,
+      forms: ["form-1", "course-x", "form-2", "course-y"],
+      instructorForms: [],
+      formBranchPreferences: ["Spada Lunga"],
+      autoTeachingEnabled: true,
+      assignment: null,
+      mastery: {
+        writing: 0,
+        events: 0,
+        lessons: 0,
+        social: 0,
+        equipment: 0,
+        instructor: 0,
+      },
+      rarity: "rare",
+    }];
+    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+
+    const migrated = loadGame(1_000);
+
+    expect(migrated.collaborators[0].rarity).toBe("ultra-rare");
+    expect(migrated.contacts.find((candidate) => candidate.id === contact.id)?.rarity)
+      .toBe("ultra-rare");
+  });
+
   it("resets both primary and backup saves", () => {
     const state = createInitialState(1_000);
     saveGame(state, 2_000);

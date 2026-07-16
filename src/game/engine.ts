@@ -133,19 +133,23 @@ const ANDREA_SIMONAZZI_PROFILE = SPECIAL_COLLABORATORS.find(
 
 function chooseOrdinaryRarity(seed: number) {
   const [rarityRoll, nextSeed] = nextRandom(seed);
+  const nonLegendaryChance = 1 - PERSON_RARITIES.legendary.queueAppearanceChance;
+  const ultraRareThreshold =
+    PERSON_RARITIES["ultra-rare"].queueAppearanceChance / nonLegendaryChance;
+  const rareThreshold = ultraRareThreshold +
+    PERSON_RARITIES.rare.queueAppearanceChance / nonLegendaryChance;
   return {
-    rarity: rarityRoll < PERSON_RARITIES.rare.queueAppearanceChance
-      ? "rare" as const
-      : "common" as const,
+    rarity: rarityRoll < ultraRareThreshold
+      ? "ultra-rare" as const
+      : rarityRoll < rareThreshold
+        ? "rare" as const
+        : "common" as const,
     nextSeed,
   };
 }
 
-export function getLegendaryAppearanceChance(foundedSchools: number): number {
-  return PERSON_RARITIES.legendary.queueAppearanceChance *
-    (foundedSchools > 0
-      ? GAME_CONFIG.subsequentSchoolLegendaryAppearanceMultiplier
-      : 1);
+export function getLegendaryAppearanceChance(_foundedSchools: number): number {
+  return PERSON_RARITIES.legendary.queueAppearanceChance;
 }
 
 function chooseLegendaryProfile(
@@ -182,7 +186,7 @@ function createContacts(
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? ANDREA_SIMONAZZI_PROFILE
       : undefined;
-    if (!legendaryProfile && index >= 9) {
+    if (!legendaryProfile) {
       const selected = chooseLegendaryProfile(nextSeed, progress, 0);
       legendaryProfile = selected.profile;
       nextSeed = selected.nextSeed;
@@ -373,9 +377,7 @@ function createAcquiredContacts(
       state.network.schools.length === 0 &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? { profile: ANDREA_SIMONAZZI_PROFILE, nextSeed }
-      : queuePosition >= 9
-        ? chooseLegendaryProfile(nextSeed, progress, state.network.schools.length)
-        : { profile: undefined, nextSeed };
+      : chooseLegendaryProfile(nextSeed, progress, state.network.schools.length);
     const specialProfile = selected.profile;
     nextSeed = selected.nextSeed;
     if (specialProfile) progress = addLegendaryEncounter(progress, specialProfile.id);
@@ -503,7 +505,7 @@ function addCollaboratorMasteryExperience(
 
 function recruitCollaborator(state: GameState, contact: Contact, now: number): GameState {
   if (
-    contact.rarity === "common" ||
+    (contact.rarity !== "ultra-rare" && contact.rarity !== "legendary") ||
     state.collaborators.some((collaborator) => collaborator.contactId === contact.id)
   ) return state;
 
@@ -600,9 +602,12 @@ function finalizeEmail(state: GameState, emailId: string, now: number): GameStat
   const emailLossStreak = recentEmailResults.findIndex((candidate) => candidate.status !== "lost");
   const protectedBooking =
     (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
+  const contactRarity = state.contacts.find(
+    (contact) => contact.id === email.contactId,
+  )?.rarity ?? "common";
   const result =
     guaranteedTutorialBooking || protectedBooking ||
-      bookingRoll < getEmailBookingChance(state)
+      bookingRoll < getEmailBookingChance(state, contactRarity)
       ? "trialBooked"
       : "lost";
   const outcome: PendingEmailOutcome = {
@@ -1417,8 +1422,8 @@ function resolveFormTraining(state: GameState, personId: string, now: number): G
   if (
     !member ||
     collaborator ||
-    completedFormId !== "form-7" ||
-    member.rarity !== "rare"
+    completedFormId !== "course-y" ||
+    member.rarity !== "ultra-rare"
   ) return nextState;
   const qualifiedMember = nextState.contacts.find((contact) => contact.id === member.id);
   return qualifiedMember ? recruitCollaborator(nextState, qualifiedMember, now) : nextState;

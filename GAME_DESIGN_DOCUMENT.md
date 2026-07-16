@@ -22,7 +22,7 @@ Le email completate vengono inviate automaticamente e invitano il destinatario a
 
 I contatti non sono infiniti. Per continuare a inviare email bisogna organizzare eventi reali in luoghi di Genova. Ogni evento attira un certo numero di persone; una porzione prova la disciplina sul posto, una porzione lascia il proprio indirizzo email, una porzione accetta l'invito alla prova in palestra e infine una porzione si iscrive. Carisma, Scrittura, Social, organizzazione, collaboratori e attrezzatura migliorano fasi diverse del funnel.
 
-Gli iscritti generano periodicamente **Euro** tramite le quote associative. Gli Euro sono l'unica risorsa spendibile. Una piccola percentuale degli iscritti è composta da rari **Iscritti volenterosi**, equivalenti ludicamente a una variante rara: possono essere assegnati liberamente come Collaboratori delle Onde alla scrittura, agli eventi, ai social o alla manutenzione. Possono apprendere le Forme LudoSport seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` e i tre rami Spada Lunga, Staffa e Doppia spada corta.
+Gli iscritti generano periodicamente **Euro** tramite le quote associative. Gli Euro sono l'unica risorsa spendibile. Gli iscritti **Ultra Rari** diventano Collaboratori delle Onde dopo il Corso Y e possono essere assegnati liberamente alla scrittura, agli eventi, ai social o alla manutenzione. Possono apprendere le Forme LudoSport seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` e i tre rami Spada Lunga, Staffa e Doppia spada corta.
 
 Raggiunta una dimensione significativa, al giocatore viene proposto di trasferirsi e fondare una nuova scuola, scegliendone nome e sede. Questa è la meccanica di prestigio: una parte dei progressi locali riparte, mentre l'esperienza accumulata e la rete delle scuole fondate forniscono bonus permanenti. Il gioco non ha un finale e può continuare indefinitamente.
 
@@ -48,7 +48,7 @@ Il giocatore deve sentirsi contemporaneamente:
    Qualunque tasto utile fa avanzare il testo. Non si può sbagliare a scrivere. Il giocatore deve poter martellare la tastiera come in Hacker Typer.
 
 3. **Una catena produttiva leggibile**  
-   Eventi generano pubblico; il pubblico genera prove dimostrative; le prove generano contatti; le email generano prenotazioni; le lezioni in palestra generano iscritti; le quote generano Euro; gli iscritti volenterosi generano automazione.
+   Eventi generano pubblico; il pubblico genera prove dimostrative; le prove generano contatti; le email generano prenotazioni; le lezioni in palestra generano iscritti; le quote generano Euro; gli Ultra Rari e i Leggendari generano automazione.
 
 4. **Umorismo crescente**  
    Il gioco parte con messaggi realistici e professionali. Con il progresso, le email, gli oggetti e le iniziative diventano più stravaganti, pur restando leggibili e funzionali.
@@ -110,7 +110,7 @@ flowchart LR
     E -->|Scrittura| F["Lezioni prenotate"]
     F -->|Qualità della prova| G["Iscritti"]
     G --> H["Quote in Euro"]
-    G -->|Evento raro| I["Iscritti volenterosi"]
+    G -->|Ultra Raro o Leggendario| I["Collaboratori delle Onde"]
     I --> A
     I --> E
     I --> J["Social e attrezzatura"]
@@ -157,7 +157,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 
 - **Iscritti attivi:** membri attuali della scuola; possono aumentare o diminuire tramite eventi narrativi.
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
-- **Iscritti volenterosi:** variante rara degli iscritti, assegnabile ai progetti come Collaboratore delle Onde.
+- **Ultra Rari:** contatti rossi che diventano Collaboratori delle Onde dopo il Corso Y.
 
 Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **120 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
@@ -176,6 +176,17 @@ Gli iscritti possono fungere da requisito di sblocco, ma non vengono mai consuma
 ### 5.3 Contatti
 
 I Contatti sono indirizzi email inventati ottenuti attraverso eventi, lezioni di prova, social e collaboratori.
+
+Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità determina la probabilità di prenotare una prova dopo la mail e quella di iscriversi dopo la prova:
+
+| Rarità | Comparsa | Prova dopo la mail | Iscrizione base | Iscrizione massima | Collaboratore |
+|---|---:|---:|---:|---:|---|
+| Comune | 80% | 30% | 50% | 100% | Mai |
+| Raro | 12,5% | 50% | 40% | 90% | Mai |
+| Ultra Raro | 5,5% | 75% | 30% | 50% | Dopo il Corso Y |
+| Leggendario | 2% | 100% | 20% | 35% | Subito dopo l'iscrizione |
+
+I potenziamenti di Scrittura migliorano la prenotazione della prova fino al 100%. I potenziamenti di Accoglienza fanno avanzare ogni rarità dalla propria probabilità base d'iscrizione al proprio massimo specifico.
 
 Ogni contatto contiene:
 
@@ -319,7 +330,7 @@ Non vengono mostrate risposte personali e non esistono follow-up. Se la prova vi
 - la persona si iscrive;
 - la persona non si iscrive e sparisce definitivamente.
 
-Un nuovo iscritto può inoltre risultare, con probabilità rara, un Iscritto volenteroso.
+Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari lo diventano immediatamente dopo l'iscrizione.
 
 ### 7.2 Tempi compressi
 
@@ -360,15 +371,7 @@ probabilitàIscrizioneDopoProva = clamp(
 )
 ```
 
-Ipotesi iniziali da verificare con il prototipo:
-
-- prenotazione della prova dopo l'email: 20%;
-- iscrizione dopo la lezione in palestra: 50%;
-- probabilità minima di ogni passaggio: 1%;
-- massimo ordinario della prenotazione: 70%;
-- massimo ordinario dell'iscrizione dopo la prova: 90%.
-
-Questi numeri sono ipotesi di bilanciamento e andranno corretti dopo i primi test.
+I valori di prenotazione e iscrizione dipendono dalla rarità e sono definiti nella tabella dei Contatti. La prima email e la quinta dopo quattro fallimenti consecutivi conservano la protezione tutorial/anti-sfortuna.
 
 ### 7.4 Comunicazione degli esiti
 
@@ -474,7 +477,7 @@ Questa situazione è intenzionale e rappresenta il principale collo di bottiglia
 
 ### 9.1 Reclutamento
 
-Ogni nuovo iscritto ha una probabilità rara e casuale di essere un **Iscritto volenteroso**. Gli iscritti volenterosi diventano Collaboratori delle Onde soltanto dopo aver completato la **Forma 7**. Gli iscritti comuni possono completare lo stesso percorso, ma non diventano collaboratori. I Leggendari diventano collaboratori fin dall'iscrizione.
+Comuni e Rari non diventano Collaboratori delle Onde. Gli Ultra Rari diventano collaboratori dopo aver completato il **Corso Y**. I Leggendari diventano collaboratori fin dall'iscrizione.
 
 La probabilità può aumentare con:
 
@@ -512,7 +515,7 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 
 - Andrea Simonazzi è garantito come 9° contatto nella scuola iniziale; nelle scuole successive la sua comparsa torna casuale come per ogni altro Leggendario, senza garanzie di prenotazione, iscrizione o permanenza;
 - tutti i Leggendari possono lasciare la scuola con una probabilità annuale pari al 10% del rischio ordinario associato alla loro Forma più alta fino alla Forma 6; a Forma 7 usano la curva specifica per rarità e prestigio;
-- la probabilità di comparsa del pool Leggendario è 5% nella scuola iniziale e 2,5% in tutte le scuole successive;
+- la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto in ogni scuola;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della nuova scuola;
 - dopo un abbandono tornano disponibili per incontri futuri;
 - una nuova iscrizione ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
@@ -613,20 +616,20 @@ Nel passaggio tra Giugno e Luglio, un iscritto che ha trascorso l'anno scolastic
 - gli iscritti entrati a anno già iniziato;
 - chi ha iniziato una formazione durante l'anno, anche se non l'ha ancora completata.
 
-La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Fino alla Forma 6, Rari e Comuni seguono la curva ordinaria mentre i Leggendari ne ricevono il 10%. A Forma 7 si applicano valori specifici per rarità.
+La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Fino alla Forma 6, Comuni, Rari e Ultra Rari seguono la curva ordinaria mentre i Leggendari ne ricevono il 10%. A Forma 7 si applicano valori specifici per rarità. Normalmente un Ultra Raro è già collaboratore dal Corso Y ed è quindi escluso da questo controllo.
 
-| Forma più alta | Comuni | Rari | Leggendari |
-|---|---:|---:|---:|
-| Nessuna Forma | 80% | 80% | 8% |
-| Forma 1 | 65% | 65% | 6,5% |
-| Forma 2 | 50% | 50% | 5% |
-| Forma 3 | 35% | 35% | 3,5% |
-| Forma 4 | 25% | 25% | 2,5% |
-| Forma 5 | 15% | 15% | 1,5% |
-| Forma 6 | 10% | 10% | 1% |
-| Forma 7, prima scuola | 2,5% | 0,5% | 0% |
+| Forma più alta | Comuni | Rari | Ultra Rari | Leggendari |
+|---|---:|---:|---:|---:|
+| Nessuna Forma | 80% | 80% | 80% | 8% |
+| Forma 1 | 65% | 65% | 65% | 6,5% |
+| Forma 2 | 50% | 50% | 50% | 5% |
+| Forma 3 | 35% | 35% | 35% | 3,5% |
+| Forma 4 | 25% | 25% | 25% | 2,5% |
+| Forma 5 | 15% | 15% | 15% | 1,5% |
+| Forma 6 | 10% | 10% | 10% | 1% |
+| Forma 7, prima scuola | 2,5% | 0,5% | 0,25% | 0% |
 
-Per ogni nuova scuola già fondata, i tre valori di **Forma 7** aumentano di **0,5 punti percentuali**. Per esempio, nella seconda scuola diventano rispettivamente 3%, 1% e 0,5%. La regola si applica allo stesso modo ad Andrea Simonazzi e a tutti gli altri Leggendari.
+Per ogni nuova scuola già fondata, i quattro valori di **Forma 7** aumentano di **0,5 punti percentuali**. Per esempio, nella seconda scuola diventano rispettivamente 3%, 1%, 0,75% e 0,5%. La regola si applica allo stesso modo ad Andrea Simonazzi e a tutti gli altri Leggendari.
 
 ---
 
@@ -669,7 +672,7 @@ Influenza la conversione finale da partecipante alla lezione in palestra a iscri
 | Procedura di benvenuto | +10% iscrizioni dopo la prova |
 | Lezione introduttiva collaudata | +15% qualità lezione |
 | Materiale informativo chiaro | +10% iscrizioni dopo la prova |
-| Collaboratore dedicato | bonus per ogni volenteroso assegnato |
+| Collaboratore dedicato | bonus per ogni collaboratore assegnato |
 | Sala preparata | riduce gli esiti negativi narrativi |
 | Esperienza memorabile | moltiplicatore avanzato |
 
@@ -751,7 +754,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. Una prima sequenza consigl
 | Primo esaurimento contatti | Calendario, eventi e sparring esterno |
 | Prima prova prenotata | report aggregato del funnel |
 | Primo iscritto | Euro e quote associative |
-| Primo Iscritto volenteroso | Iscritti, Collaboratori e assegnazioni |
+| Primo Ultra Raro collaboratore | Iscritti, Collaboratori e assegnazioni |
 | 10 iscritti | Social |
 | 20 iscritti | Attrezzatura e usura narrativa |
 | 50 iscritti | Forme dei collaboratori |
@@ -949,7 +952,7 @@ Il tutorial avviene tramite email ricevute.
    Introduce il bonus immediato di €20, la quota mensile di €40 e il finanziamento dei potenziamenti.
 
 6. **Una mano in più**
-   Il primo Iscritto volenteroso può essere garantito dal tutorial e introduce l'automazione.
+   Il primo Ultra Raro che completa il Corso Y introduce l'automazione.
 
 7. **Le spade non si sistemano da sole**
    Introduce attrezzatura e manutenzione. Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si sistemano quasi da sole.
@@ -1245,7 +1248,7 @@ Il riepilogo mostra:
 - quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
 - durata di un mese di gioco: 120 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Agosto sempre visibile;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
-- il primo Iscritto volenteroso può essere garantito entro i primi iscritti;
+- il primo Ultra Raro deve comparire abbastanza presto da introdurre l'automazione senza spezzare il ritmo;
 - il primo evento e il primo sparring sono gratuiti e guidati.
 
 ### 19.3 Protezione dalla sfortuna
@@ -1539,7 +1542,7 @@ I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il si
 
 ### Fase 3 — Collaboratori e automazione
 
-- generazione rara degli Iscritti volenterosi;
+- generazione degli Ultra Rari secondo la quota del 5,5%;
 - assegnazioni;
 - scrittura automatica;
 - raccolta contatti;
@@ -1699,7 +1702,7 @@ L'uso pubblico di un'interfaccia quasi identica a Outlook richiede attenzione a 
 - Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
 - I Social generano contatti passivamente e possono ricevere campagne pagate in Euro.
 - Le piattaforme social sono inventate e possono produrre eventi virali.
-- Gli Iscritti volenterosi sono una variante rara degli iscritti e diventano Collaboratori delle Onde.
+- Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari dall'iscrizione.
 - I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni, social e spade.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
@@ -1741,7 +1744,7 @@ Questi elementi non bloccano il prototipo, ma servono prima della versione compl
 7. conferma sull'eventuale uso di persone reali come personaggi;
 8. revisione dei valori di bilanciamento dopo il primo prototipo;
 9. importo e frequenza compressa delle quote associative;
-10. probabilità definitiva di generare un Iscritto volenteroso;
+10. ritmo con cui il 5,5% di Ultra Rari introduce i primi collaboratori;
 11. regole di accesso multiplo ai tre rami delle Forme 3/4/5;
 12. elenco iniziale degli eventi e dei luoghi reali di Genova;
 13. nomi e comportamento definitivo delle spade reali;
@@ -1788,7 +1791,7 @@ L'MVP è pronto quando il giocatore può:
 11. ottenere nuovi contatti tramite Carisma;
 12. acquistare potenziamenti in Euro;
 13. completare una comunicazione di sistema e sbloccare una funzione;
-14. ottenere e assegnare il primo Iscritto volenteroso;
+14. ottenere un Ultra Raro, completare il Corso Y e assegnarlo;
 15. osservare un collaboratore scrivere sulla stessa mail;
 16. chiudere e riaprire il browser senza perdere i progressi.
 

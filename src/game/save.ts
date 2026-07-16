@@ -37,7 +37,12 @@ function isGameState(value: unknown): value is GameState {
     state.version === GAME_CONFIG.version &&
     Array.isArray(state.contacts) &&
     state.contacts.every((contact) =>
-      (contact.rarity === "common" || contact.rarity === "rare" || contact.rarity === "legendary") &&
+      (
+        contact.rarity === "common" ||
+        contact.rarity === "rare" ||
+        contact.rarity === "ultra-rare" ||
+        contact.rarity === "legendary"
+      ) &&
       Array.isArray(contact.forms)
     ) &&
     Array.isArray(state.emails) &&
@@ -64,7 +69,7 @@ function isGameState(value: unknown): value is GameState {
     typeof state.legendaryCollaborators?.retainedProgress === "object" &&
     Array.isArray(state.collaborators) &&
     state.collaborators.every((collaborator) =>
-      (collaborator.rarity === "rare" || collaborator.rarity === "legendary") &&
+      (collaborator.rarity === "ultra-rare" || collaborator.rarity === "legendary") &&
       Array.isArray(collaborator.forms) &&
       Array.isArray(collaborator.instructorForms) &&
       Array.isArray(collaborator.formBranchPreferences) &&
@@ -720,7 +725,7 @@ function migrate(value: unknown): unknown {
     const city = migrated.school?.city ?? "Genova";
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      version: 31,
       emails: (migrated.emails ?? []).map((email) => {
         if (email.status !== "writing" || email.presentationLevel < 2) return email;
         const contact = migrated.contacts?.find((candidate) => candidate.id === email.contactId);
@@ -743,6 +748,28 @@ function migrate(value: unknown): unknown {
           revealedCharacters: Math.round(progress * getEmailBuildLength(updatedEmail)),
         };
       }),
+    };
+  }
+
+  if (migrated.version === 31) {
+    const legacyCollaboratorContactIds = new Set(
+      (migrated.collaborators ?? [])
+        .filter((collaborator) => collaborator.rarity === "rare")
+        .map((collaborator) => collaborator.contactId),
+    );
+    migrated = {
+      ...migrated,
+      version: GAME_CONFIG.version,
+      contacts: (migrated.contacts ?? []).map((contact) =>
+        legacyCollaboratorContactIds.has(contact.id) && contact.rarity === "rare"
+          ? { ...contact, rarity: "ultra-rare" }
+          : contact,
+      ),
+      collaborators: (migrated.collaborators ?? []).map((collaborator) =>
+        collaborator.rarity === "rare"
+          ? { ...collaborator, rarity: "ultra-rare" }
+          : collaborator,
+      ),
     };
   }
 

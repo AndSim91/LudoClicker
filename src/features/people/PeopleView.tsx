@@ -20,7 +20,7 @@ import {
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormLogo } from "../../content/formLogos";
 import { getSchoolYear, isSummerBreak } from "../../game/calendar";
-import { getEnrollmentChance, getMemberAnnualDepartureChance } from "../../game/formulas";
+import { getEmailBookingChance, getEnrollmentChance, getMemberAnnualDepartureChance } from "../../game/formulas";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -96,7 +96,7 @@ export function PeopleView({
       {tab === "collaborators" ? (
         <section className="collaborator-list" aria-label="Collaboratori delle Onde">
           {state.collaborators.length === 0 ? (
-            <div className="people-empty"><Icon name="contact" /><strong>Nessun collaboratore disponibile</strong><span>I Rari diventano collaboratori dopo la Forma 7; i Leggendari lo sono dall'iscrizione.</span></div>
+            <div className="people-empty"><Icon name="contact" /><strong>Nessun collaboratore disponibile</strong><span>Gli Ultra Rari diventano collaboratori dopo il Corso Y; i Leggendari lo sono dall'iscrizione.</span></div>
           ) : state.collaborators.map((collaborator) => {
             const contact = state.contacts.find((candidate) => candidate.id === collaborator.contactId);
             const bonusSummary = getCollaboratorBonusSummary(collaborator);
@@ -106,7 +106,7 @@ export function PeopleView({
                 <div className="collaborator-copy">
                   <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
                   <span className={`rarity-address rarity-${collaborator.rarity}`}>{contact?.email}</span>
-                  <small>{collaborator.rarity === "legendary" ? "Livello Leggendario · Potere VIP ×2" : "Livello Raro · Forma 7 completata"}</small>
+                  <small>{collaborator.rarity === "legendary" ? "Livello Leggendario · Potere VIP ×2" : "Livello Ultra Raro · Corso Y completato"}</small>
                   <FormLogoStrip forms={collaborator.forms} />
                   <small className="form-bonus-summary">{bonusSummary || "Nessun bonus d'arma attivo"}</small>
                   <CollaboratorMasterySummary collaborator={collaborator} />
@@ -239,16 +239,19 @@ function CollaboratorMasterySummary({ collaborator }: { collaborator: Collaborat
 function RarityOverview({ state }: { state: GameState }) {
   const common = PERSON_RARITIES.common;
   const rare = PERSON_RARITIES.rare;
+  const ultraRare = PERSON_RARITIES["ultra-rare"];
   const legendary = PERSON_RARITIES.legendary;
   const commonEnrollmentChance = getEnrollmentChance(state, "common");
   const rareEnrollmentChance = getEnrollmentChance(state, "rare");
+  const ultraRareEnrollmentChance = getEnrollmentChance(state, "ultra-rare");
   const legendaryEnrollmentChance = getEnrollmentChance(state, "legendary");
   return (
     <section className="rarity-overview" aria-label="Sistema di rarità">
       <div><strong>Probabilità e rarità</strong><span>Valori base ed efficacia attuale con i tuoi potenziamenti</span></div>
-      <article><strong>Comune</strong><span>Email lasciata: {percent.format(common.emailShareChance)}</span><span>Iscrizione: {percent.format(common.baseEnrollmentChance)} base · {percent.format(commonEnrollmentChance)} attuale</span><span>Può arrivare alla Forma 7, ma non diventa collaboratore</span></article>
-      <article className="rare"><strong>Raro</strong><span>Comparsa: {percent.format(rare.queueAppearanceChance)} dei contatti non leggendari</span><span>Iscrizione: {percent.format(rare.baseEnrollmentChance)} base · {percent.format(rareEnrollmentChance)} attuale</span><span>Diventa collaboratore completando la Forma 7</span></article>
-      <article className="legendary"><strong>Leggendario</strong><span>Comparsa: {percent.format(legendary.queueAppearanceChance)} dalla 10ª email</span><span>Iscrizione: {percent.format(legendary.baseEnrollmentChance)} base · {percent.format(legendaryEnrollmentChance)} attuale · Andrea 100%</span><span>Collaboratore dall'iscrizione · potere VIP ×2 · non abbandona la scuola</span></article>
+      <article><strong>Comune</strong><span>Comparsa: {percent.format(common.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "common"))}</span><span>Iscrizione: {percent.format(common.baseEnrollmentChance)} base · {percent.format(commonEnrollmentChance)} attuale · max {percent.format(common.maxEnrollmentChance)}</span><span>Non diventa collaboratore</span></article>
+      <article className="rare"><strong>Raro</strong><span>Comparsa: {percent.format(rare.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "rare"))}</span><span>Iscrizione: {percent.format(rare.baseEnrollmentChance)} base · {percent.format(rareEnrollmentChance)} attuale · max {percent.format(rare.maxEnrollmentChance)}</span><span>Non diventa collaboratore</span></article>
+      <article className="ultra-rare"><strong>Ultra Raro</strong><span>Comparsa: {percent.format(ultraRare.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "ultra-rare"))}</span><span>Iscrizione: {percent.format(ultraRare.baseEnrollmentChance)} base · {percent.format(ultraRareEnrollmentChance)} attuale · max {percent.format(ultraRare.maxEnrollmentChance)}</span><span>Diventa collaboratore completando il Corso Y</span></article>
+      <article className="legendary"><strong>Leggendario</strong><span>Comparsa: {percent.format(legendary.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "legendary"))}</span><span>Iscrizione: {percent.format(legendary.baseEnrollmentChance)} base · {percent.format(legendaryEnrollmentChance)} attuale · max {percent.format(legendary.maxEnrollmentChance)}</span><span>Collaboratore dall'iscrizione · potere VIP ×2</span></article>
     </section>
   );
 }
