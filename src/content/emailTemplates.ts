@@ -3,6 +3,7 @@ import {
   getEmailCopyOverride,
   renderEmailCopyTokens,
 } from "./emailOverrides";
+import { buildFinalEmailBody } from "./finalEmail";
 
 export interface EmailTemplate {
   id: string;
@@ -201,20 +202,20 @@ export const EMAIL_CATALOG: TemplateCopy[] = [
   { id: "ultima-mail-prima-prova", subject: "L'ultima cosa da fare è venire a provare", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova e gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "abbiamo scritto, organizzato, controllato l'attrezzatura e preparato il gruppo. Tutto ciò che poteva essere completato a distanza è completo.", invitation: "Resta soltanto una lezione gratuita con il tuo nome." },
 ];
 
-const MEDIUM_APPENDIXES = [
+export const MEDIUM_APPENDIXES = [
   "La prova è gratuita e aperta anche a chi parte da zero.",
   "Puoi venire senza attrezzatura e decidere con calma dopo aver provato.",
   "Ti spiegheremo tutto sul posto, con esercizi graduali e sicuri.",
   "Bastano abiti comodi e la curiosità di fare qualcosa di diverso.",
 ] as const;
 
-const FORMS_AND_WEAPONS_APPENDIX = `
+export const FORMS_AND_WEAPONS_APPENDIX = `
 
 Il percorso non si ferma alla prima lezione. LudoSport è un sistema di combattimento sportivo con tre armi: lama singola, doppia lama e staffa. Ogni arma cambia distanza, ritmo e modo di occupare lo spazio, ma tutte si imparano con controllo, ascolto e rispetto.
 
 Le sette Forme aggiungono linguaggi diversi: difesa, velocità, fluidità, cambi di direzione e gestione della distanza. Non è necessario scegliere tutto subito: la progressione serve proprio a scoprire quale modo di muoversi ti incuriosisce di più.`;
 
-const PREMIUM_APPENDIX = `
+export const PREMIUM_APPENDIX = `
 
 Il Light Saber Combat è uno sport completo: allena gambe, postura, coordinazione, attenzione e capacità di prendere decisioni mentre il corpo è in movimento. Una parata non è soltanto un gesto da ricordare; è il risultato di distanza, tempo, angolo e lettura della persona davanti a te. La parte sorprendente è che questi elementi diventano comprensibili prima di quanto immagini, perché ogni esercizio aggiunge un tassello concreto.
 
@@ -226,7 +227,7 @@ In palestra alterniamo spiegazione, esercizi individuali, lavoro in coppia e con
 
 La scuola mette a disposizione il materiale necessario per cominciare. Porta abiti comodi, scarpe da palestra e la disponibilità a fare qualcosa che non assomiglia alla solita attività settimanale. Potresti scoprire uno sport; potresti trovare una comunità; potresti semplicemente uscire dalla palestra con una nuova Forma preferita e il sospetto che il lunedì sera sia stato rivalutato.`;
 
-const MARKETING_APPENDIX = `
+export const MARKETING_APPENDIX = `
 
 Se questa email fosse una mappa, la prima prova sarebbe il punto in cui compare la luce. Da lì impari a stare nello spazio, muovere il corpo con intenzione e leggere ciò che succede prima di reagire.
 
@@ -238,29 +239,15 @@ In palestra alterniamo regole, postura, esercizi individuali, lavoro in coppia e
 
 L'Ordine delle Onde ti aspetta con una lezione gratuita, attrezzatura disponibile e persone pronte a spiegarti da dove cominciare. Se hai letto fin qui, la curiosità ha già fatto il primo allenamento.`;
 
-function capitalize(value: string) {
+export function capitalize(value: string) {
   return value ? `${value[0].toLocaleUpperCase("it-IT")}${value.slice(1)}` : value;
 }
 
-const fullSignature = "Un saluto,";
-
-function expandedOpening(copy: TemplateCopy, index: number, firstName: string) {
+export function expandedOpening(copy: TemplateCopy, index: number, firstName: string) {
   const opening = cleanCatalogCopy(copy.opening);
   const invitation = cleanCatalogCopy(copy.invitation);
   const appendix = cleanCatalogCopy(MEDIUM_APPENDIXES[index % MEDIUM_APPENDIXES.length]);
   return `Ciao ${firstName},\n\n${capitalize(opening)}\n\n${invitation} ${appendix}`;
-}
-
-function expandedBody(copy: TemplateCopy, index: number, firstName: string) {
-  return `${expandedOpening(copy, index, firstName)}${signature}`;
-}
-
-function detailedBody(copy: TemplateCopy, index: number, firstName: string) {
-  return `${expandedOpening(copy, index, firstName)}${FORMS_AND_WEAPONS_APPENDIX}${signature}`;
-}
-
-function premiumBody(copy: TemplateCopy, index: number, firstName: string) {
-  return `${expandedOpening(copy, index, firstName)}${FORMS_AND_WEAPONS_APPENDIX}${PREMIUM_APPENDIX}${signature}`;
 }
 
 function bodyForLevel(
@@ -271,18 +258,10 @@ function bodyForLevel(
 ) {
   const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
   if (level <= 1) return `Ciao ${firstName},\n${compact}${signature}`;
-  if (level === 2) {
-    return `Ciao ${firstName},\n\n${compact}\n\n${fullSignature}`;
-  }
-
-  const expanded = expandedBody(copy, index, firstName);
-  if (level === 3) return expanded;
-  if (level === 4) return `${detailedBody(copy, index, firstName)}\n\nRispondi a questa email per prenotare la tua prova.`;
-  if (level === 5) return `${detailedBody(copy, index, firstName)}\n\nRispondi a questa email per prenotare: ti indicheremo orario, luogo e cosa portare.`;
-  if (level === 6) {
-    return `${premiumBody(copy, index, firstName)}\n\nQuando: prossima lezione disponibile\nDove: PalaGym Assarotti, Genova\nCosa portare: abiti comodi e scarpe da palestra.`;
-  }
-  return `${premiumBody(copy, index, firstName)}${MARKETING_APPENDIX}`;
+  return buildFinalEmailBody(firstName, {
+    opening: cleanCatalogCopy(copy.opening),
+    invitation: cleanCatalogCopy(copy.invitation),
+  }, level);
 }
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = EMAIL_CATALOG.map((copy, index) => ({

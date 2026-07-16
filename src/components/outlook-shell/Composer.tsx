@@ -1,27 +1,8 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
-import { selectActiveContact, selectActiveEmail, selectEmailProgress } from "../../game/selectors";
+import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { Icon } from "../common/Icon";
 import { CampaignEmailContent } from "./CampaignEmailContent";
-
-function EmailBuildProgress({ progress }: { progress: number }) {
-  return (
-    <div
-      className="composer-build-progress"
-      role="progressbar"
-      aria-label={`Costruzione email ${progress}%`}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={progress}
-    >
-      <span className="composer-build-progress-label">Costruzione email</span>
-      <span className="composer-build-progress-track" aria-hidden="true">
-        <span style={{ width: `${progress}%` }} />
-      </span>
-      <b>{progress}%</b>
-    </div>
-  );
-}
 
 export function Composer({ state, onWrite }: { state: GameState; onWrite: () => void }) {
   const email = selectActiveEmail(state);
@@ -35,7 +16,6 @@ export function Composer({ state, onWrite }: { state: GameState; onWrite: () => 
       </main>
     );
   }
-  const progress = selectEmailProgress(email);
   return (
     <main className="composer">
       <div className="composer-tabs"><button className="active" type="button">Messaggio</button><button type="button">Inserisci</button><button type="button">Opzioni</button><button type="button">Formato testo</button><span /><button type="button" disabled><Icon name="send" /> Invia</button><button type="button" disabled><Icon name="attach" /> Allega</button></div>
@@ -59,7 +39,6 @@ export function Composer({ state, onWrite }: { state: GameState; onWrite: () => 
         <span>Bozza salvata</span>
         <em>{email.status === "sending" ? "Invio in corso…" : "Digitazione in corso…"}</em>
         <span className="composer-status-count">{email.revealedCharacters} / {email.body.length} caratteri · {state.player.writingPower} per input</span>
-        <EmailBuildProgress progress={Math.max(0, Math.min(100, progress))} />
       </div>
     </main>
   );

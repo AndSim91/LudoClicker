@@ -106,11 +106,6 @@ export function selectDayTrials(state: GameState, now: number): ScheduledTrial[]
     .sort((a, b) => a.startsAt - b.startsAt);
 }
 
-export function selectEmailProgress(email: CampaignEmail | undefined): number {
-  if (!email || email.body.length === 0) return 0;
-  return Math.min(100, Math.round((email.revealedCharacters / email.body.length) * 100));
-}
-
 export function selectIncomePerMonth(state: GameState): number {
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   return (

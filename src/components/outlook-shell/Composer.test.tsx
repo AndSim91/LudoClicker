@@ -26,10 +26,11 @@ describe("Composer", () => {
     );
   });
 
-  it("shows one global email progress bar in the composer footer", () => {
+  it("keeps the character count without a redundant email progress bar", () => {
     render(<Composer state={createInitialState(1_000)} onWrite={() => undefined} />);
 
-    expect(screen.getByRole("progressbar", { name: "Costruzione email 0%" })).toBeVisible();
+    expect(screen.queryByRole("progressbar", { name: /Costruzione email/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/0 \/ \d+ caratteri/)).toBeVisible();
     expect(screen.queryByText(/Email aziendale grezza/)).not.toBeInTheDocument();
   });
 });

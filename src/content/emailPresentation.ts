@@ -30,27 +30,27 @@ export const EMAIL_PRESENTATION_LEVELS: Record<
     description: "Gli errori spariscono, ma le battute e l'energia della bozza restano.",
   },
   2: {
-    label: "Email aziendale grezza",
+    label: "Struttura HTML base",
     description: "Una tabella CSS rudimentale, tono professionale e logo nella firma.",
   },
   3: {
-    label: "Email con CTA finte",
+    label: "Card della lezione",
     description: "La struttura migliora e compaiono pulsanti visivi che non portano da nessuna parte.",
   },
   4: {
-    label: "Forme e armi",
+    label: "Dettagli della prova",
     description: "Il testo si allunga e racconta il percorso LudoSport, le Forme e le armi sportive.",
   },
   5: {
-    label: "Layout marketing",
+    label: "Contatti",
     description: "La stessa idea diventa una mail più fluida, elegante e persuasiva.",
   },
   6: {
-    label: "Testo premium",
+    label: "Sezione video",
     description: "Un testo lungo, entusiasta e curioso spiega perché vale la pena cominciare.",
   },
   7: {
-    label: "Volantino digitale",
+    label: "Mail finale HTML",
     description: "Il massimo splendore: testo approfondito, gerarchia visiva e grafica da campagna.",
   },
 };

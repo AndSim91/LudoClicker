@@ -27,7 +27,23 @@ describe("CampaignEmailContent", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("renders the complete flyer with local imagery and inert visual CTAs", () => {
+  it("keeps the final HTML canvas silent while its structure is being written", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const levelSevenCopy = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 7);
+    const email = {
+      ...initial.emails[0],
+      body: levelSevenCopy,
+      presentationLevel: 7 as const,
+      revealedCharacters: 0,
+    };
+    render(<CampaignEmailContent email={email} revealedCharacters={0} />);
+
+    expect(screen.getByRole("img", { name: "Struttura della mail in costruzione" })).toBeVisible();
+    expect(screen.queryByText("Ciao! Grazie di aver provato il nostro sport al MegaCon di Genova!")).not.toBeInTheDocument();
+    expect(screen.queryByText("COME PRENOTARE")).not.toBeInTheDocument();
+  });
+
+  it("renders the complete HTML email with local imagery and typed sections", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const levelSevenCopy = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 7);
     const email = {
@@ -38,19 +54,16 @@ describe("CampaignEmailContent", () => {
     };
     render(<CampaignEmailContent email={email} />);
 
-    expect(screen.getByLabelText("Email in formato Volantino digitale")).toHaveAttribute(
+    expect(screen.getByLabelText("Email finale in formato HTML")).toHaveAttribute(
       "data-email-presentation",
       "7",
     );
     expect(screen.getByRole("img", { name: "LudoSport Genova" })).toHaveAttribute(
       "src",
-      "/email-assets/ludosport-genova.png",
+      "/email-assets/ordine-onde.png",
     );
-    expect(screen.getByRole("button", { name: /Prenota una prova/ })).toHaveAttribute(
-      "aria-label",
-      expect.stringContaining("non attivo"),
-    );
-    expect(screen.getByText("PARLIAMONE")).toBeVisible();
+    expect(screen.getByText("Ciao! Grazie di aver provato il nostro sport al MegaCon di Genova!")).toBeVisible();
+    expect(screen.getByText("COME PRENOTARE")).toBeVisible();
     expect(screen.getByText("DA VEDERE")).toBeVisible();
     expect(screen.queryByText(/Andrea Ungaro · Ordine delle Onde/)).not.toBeInTheDocument();
   });
