@@ -17,7 +17,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
     const hasCampaignQueue = state.contacts.some(
       (contact) => contact.status === "available" || contact.status === "writing",
     );
-    return state.statistics.emailsSent >= 3 || !hasCampaignQueue;
+    return state.statistics.emailsSent >= GAME_CONFIG.eventsUnlockEmailsSent || !hasCampaignQueue;
   }
   if (view === "contacts") return state.school.historicMembers > 0;
   if (view === "upgrades") return state.unlocks.upgrades;

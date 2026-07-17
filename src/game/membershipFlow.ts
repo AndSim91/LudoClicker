@@ -5,7 +5,7 @@ import {
   isSchoolYearDepartureMonth,
 } from "./calendar";
 import { GAME_CONFIG } from "./config";
-import { scaleCurrencyGain } from "./economy";
+import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
@@ -161,13 +161,13 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
       ...nextState,
       school: {
         ...nextState.school,
-        euros: Math.round((nextState.school.euros + earned) * 100) / 100,
+        euros: roundCurrency(nextState.school.euros + earned),
         currentMonth: currentMonth + 1,
         nextFeeAt: nextState.school.nextFeeAt + GAME_CONFIG.gameMonthMs,
       },
       statistics: {
         ...nextState.statistics,
-        eurosEarned: Math.round((nextState.statistics.eurosEarned + earned) * 100) / 100,
+        eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),
       },
     };
     if (isSchoolYearDepartureMonth(currentMonth)) {

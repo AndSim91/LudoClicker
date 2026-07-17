@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { TabButton } from "../../components/common/TabButton";
+import { GAME_CONFIG } from "../../game/config";
 import type {
   CollaboratorAssignment,
   FormId,
   GameState,
 } from "../../game/types";
+import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { CollaboratorList } from "./CollaboratorList";
 import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
@@ -28,9 +30,9 @@ export function PeopleView({
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
-  const showCollaborators = state.unlocks.collaborators || state.collaborators.length > 0;
+  const showCollaborators = isCollaboratorAreaVisible(state);
   const showRarityOverview =
-    state.statistics.emailsSent >= 10 ||
+    state.statistics.emailsSent >= GAME_CONFIG.rarityOverviewEmailsSent ||
     members.some((contact) => contact.rarity !== "common") ||
     showCollaborators;
 

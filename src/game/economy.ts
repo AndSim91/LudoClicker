@@ -1,7 +1,11 @@
 import type { GameState } from "./types";
 
+export function roundCurrency(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
 export function scaleCurrencyGain(amount: number, gainMultiplier: number): number {
-  return Math.round(amount * Math.max(0, gainMultiplier) * 100) / 100;
+  return roundCurrency(amount * Math.max(0, gainMultiplier));
 }
 
 export function scaleContactGain(

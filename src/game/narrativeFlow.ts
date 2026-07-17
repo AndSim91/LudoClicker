@@ -18,10 +18,12 @@ export function processNarrativeEvent(
   gainMultiplier: number,
 ): GameState {
   if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
-  const recentKinds = state.narrative.history.slice(-2).map((record) =>
-    NARRATIVE_EVENTS.find((definition) => definition.id === record.definitionId)?.kind,
-  );
-  const blockNegative = recentKinds.length === 2 &&
+  const recentKinds = state.narrative.history
+    .slice(-GAME_CONFIG.narrativeNegativeStreakLimit)
+    .map((record) =>
+      NARRATIVE_EVENTS.find((definition) => definition.id === record.definitionId)?.kind,
+    );
+  const blockNegative = recentKinds.length === GAME_CONFIG.narrativeNegativeStreakLimit &&
     recentKinds.every((kind) => kind === "negative");
   const eligible = NARRATIVE_EVENTS.filter(
     (definition) => state.school.activeMembers >= definition.minMembers &&

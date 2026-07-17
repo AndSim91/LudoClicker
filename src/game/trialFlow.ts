@@ -10,6 +10,7 @@ import {
   addMessage,
 } from "./stateUpdates";
 import type { GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
+import { hasSocialMemberRequirement } from "./unlocks";
 
 export function getLegendaryEnrollmentChance(
   state: GameState,
@@ -45,7 +46,8 @@ export function resolveTrial(
     ),
   );
   const protectedEnrollment =
-    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >= 4;
+    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >=
+      GAME_CONFIG.conversionGuaranteeFailures;
   const enrolled = specialProfileId
     ? !alreadyEnrolledLegendary &&
       (guaranteedInitialSchoolAndrea ||
@@ -100,7 +102,9 @@ export function resolveTrial(
   if (!enrolled) return nextState;
 
   const firstEnrollment = state.school.historicMembers === 0;
-  const socialUnlockedNow = !state.unlocks.social && state.school.activeMembers + 1 >= 10;
+  const nextActiveMembers = nextState.school.activeMembers + 1;
+  const socialUnlockedNow = !state.unlocks.social &&
+    hasSocialMemberRequirement(nextActiveMembers);
   nextState = {
     ...nextState,
     school: {
@@ -116,7 +120,7 @@ export function resolveTrial(
     unlocks: {
       ...nextState.unlocks,
       upgrades: true,
-      social: nextState.school.activeMembers + 1 >= 10,
+      social: hasSocialMemberRequirement(nextActiveMembers),
       forms: true,
     },
   };

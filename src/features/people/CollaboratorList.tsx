@@ -8,6 +8,7 @@ import type {
   FormId,
   GameState,
 } from "../../game/types";
+import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
@@ -86,7 +87,9 @@ export function CollaboratorList({
                   <option value="">Non assegnato</option>
                   {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => {
                     const disabled = value === "social" && !state.unlocks.social;
-                    const suffix = disabled ? " — si sblocca con 10 iscritti" : "";
+                    const suffix = disabled
+                      ? ` — si sblocca con ${getSocialUnlockRequirementLabel()}`
+                      : "";
                     return (
                       <option value={value} key={value} disabled={disabled}>
                         {label}{suffix}

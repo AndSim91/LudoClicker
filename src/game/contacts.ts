@@ -93,7 +93,8 @@ export function createInitialContacts(
   let nextSeed = seed;
   let progress = existingProgress;
   const contacts = Array.from({ length: GAME_CONFIG.initialContacts }, (_, index) => {
-    let legendaryProfile = includeAndrea && index === 8 &&
+    let legendaryProfile = includeAndrea &&
+      index + 1 === GAME_CONFIG.guaranteedAndreaContactPosition &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? ANDREA_SIMONAZZI_PROFILE
       : undefined;
@@ -141,7 +142,7 @@ export function createAcquiredContacts(
   const contacts = Array.from({ length: count }, (_, index) => {
     const sequence = state.statistics.contactsAcquired + index;
     const queuePosition = state.contacts.length + index + 1;
-    const selected = queuePosition === 9 &&
+    const selected = queuePosition === GAME_CONFIG.guaranteedAndreaContactPosition &&
       state.network.schools.length === 0 &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? { profile: ANDREA_SIMONAZZI_PROFILE, nextSeed }

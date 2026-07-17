@@ -85,7 +85,7 @@ export function OverviewView({
             if (displayName) onUpdateProfileName(displayName);
           }}
         >
-          <label htmlFor="settings-display-name"><span>Nome e cognome</span><input id="settings-display-name" name="displayName" required maxLength={80} defaultValue={state.profile.displayName} /></label>
+          <label htmlFor="settings-display-name"><span>Nome e cognome</span><input id="settings-display-name" name="displayName" required maxLength={GAME_CONFIG.profileNameMaxLength} defaultValue={state.profile.displayName} /></label>
           <button type="submit">Aggiorna nome</button>
         </form>
       </section>

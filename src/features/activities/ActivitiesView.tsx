@@ -6,6 +6,7 @@ import {
   COLLABORATOR_ASSIGNMENT_LABELS,
 } from "../../content/collaboratorRoles";
 import { GAME_CONFIG } from "../../game/config";
+import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import type { GameState } from "../../game/types";
 import { formatCurrency, formatTime } from "../../shared/formatters";
 
@@ -27,7 +28,7 @@ export function ActivitiesView({
   const canRunSocial =
     state.unlocks.social && state.school.euros >= GAME_CONFIG.socialCampaignCost;
   const socialAction = !state.unlocks.social
-    ? "Si sblocca con 10 iscritti"
+    ? `Si sblocca con ${getSocialUnlockRequirementLabel()}`
     : state.school.euros < GAME_CONFIG.socialCampaignCost
       ? `Servono ${formatCurrency(GAME_CONFIG.socialCampaignCost)}`
       : `Avvia campagna · ${formatCurrency(GAME_CONFIG.socialCampaignCost)}`;

@@ -1,4 +1,6 @@
 import { GAME_CONFIG } from "./config";
+import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
+import { addCollaboratorMasteryExperience } from "./stateUpdates";
 import type { GameState } from "./types";
 
 type EquipmentState = GameState["equipment"];
@@ -74,4 +76,57 @@ export function applySwordDamage(
       (equipment.damagedSwords ?? 0) + Math.max(0, Math.floor(damagedSwordsDelta)),
     ),
   });
+}
+
+export function maintainEquipment(state: GameState, now: number): GameState {
+  const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
+  if (
+    (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) ||
+    state.school.euros < maintenanceCost ||
+    state.acquisitionEvents.some((event) => event.status === "running")
+  ) {
+    return state;
+  }
+  const swordsInRunningEvents = state.acquisitionEvents
+    .filter((event) => event.status === "running")
+    .reduce((total, event) => total + event.equipmentUsed, 0);
+  const maintained: GameState = {
+    ...state,
+    school: {
+      ...state.school,
+      euros: state.school.euros - maintenanceCost,
+    },
+    equipment: {
+      ...state.equipment,
+      availableSwords: Math.max(0, state.equipment.totalSwords - swordsInRunningEvents),
+      damagedSwords: 0,
+      wear: 0,
+    },
+    statistics: {
+      ...state.statistics,
+      maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
+    },
+  };
+  return addCollaboratorMasteryExperience(
+    maintained,
+    "equipment",
+    COLLABORATOR_MASTERY_XP.equipmentMaintenance,
+    now,
+  );
+}
+
+export function buyOfficialSword(state: GameState): GameState {
+  if (state.school.euros < GAME_CONFIG.officialSwordCost) return state;
+  return {
+    ...state,
+    school: {
+      ...state.school,
+      euros: state.school.euros - GAME_CONFIG.officialSwordCost,
+    },
+    equipment: synchronizeEquipmentAvailability({
+      ...state.equipment,
+      totalSwords: state.equipment.totalSwords + 1,
+      availableSwords: state.equipment.availableSwords + 1,
+    }),
+  };
 }

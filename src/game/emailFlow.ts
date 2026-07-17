@@ -64,7 +64,8 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     .filter((candidate) => candidate.status === "lost" || candidate.status === "trialBooked");
   const emailLossStreak = recentEmailResults.findIndex((candidate) => candidate.status !== "lost");
   const protectedBooking =
-    (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >= 4;
+    (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >=
+      GAME_CONFIG.conversionGuaranteeFailures;
   const contactRarity = state.contacts.find(
     (contact) => contact.id === email.contactId,
   )?.rarity ?? "common";

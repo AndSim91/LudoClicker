@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { GAME_CONFIG } from "../game/config";
 
 export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string) => void }) {
   const [displayName, setDisplayName] = useState("");
@@ -32,7 +33,7 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
             type="text"
             autoComplete="name"
             autoFocus
-            maxLength={80}
+            maxLength={GAME_CONFIG.profileNameMaxLength}
             placeholder="Es. Andrea Ungaro"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}

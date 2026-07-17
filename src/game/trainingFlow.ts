@@ -12,6 +12,8 @@ import {
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { getSchoolYear, isSummerBreak } from "./calendar";
 import { nextRandom } from "./random";
+import { GAME_CONFIG } from "./config";
+import { roundCurrency } from "./economy";
 import { selectAvailableInstructor, selectInstructorTeachingCount } from "./selectors";
 import type {
   CollaboratorAssignment,
@@ -109,7 +111,7 @@ export function startFormTraining(
         ...state,
         school: {
           ...state.school,
-          euros: Math.round((state.school.euros - qualificationCost) * 100) / 100,
+          euros: roundCurrency(state.school.euros - qualificationCost),
         },
         collaborators: state.collaborators.map((candidate) =>
           candidate.id === collaborator.id
@@ -171,7 +173,10 @@ export function startFormTraining(
   const training = {
     formId,
     startedAt: now,
-    completesAt: now + Math.max(1_000, Math.round(definition.durationMs / trainingSpeed)),
+    completesAt: now + Math.max(
+      GAME_CONFIG.minimumTrainingDurationMs,
+      Math.round(definition.durationMs / trainingSpeed),
+    ),
     instructorId: instructor?.id,
     includesInstructorCertification: instructorTrack || undefined,
   };
@@ -179,7 +184,7 @@ export function startFormTraining(
     ...state,
     school: {
       ...state.school,
-      euros: Math.round((state.school.euros - trainingCost) * 100) / 100,
+      euros: roundCurrency(state.school.euros - trainingCost),
     },
     contacts: member
       ? state.contacts.map((candidate) => candidate.id === member.id

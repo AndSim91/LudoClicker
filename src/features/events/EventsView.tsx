@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
+import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import {
   getAvailableSwords,
   getEffectiveDamagedSwords,
@@ -66,9 +67,7 @@ export function EventsView({
   const swordPurchaseLabel = canBuyOfficialSword
     ? `Ordina 1 Polaris · ${formatCurrency(GAME_CONFIG.officialSwordCost)}`
     : `Servono ${formatCurrency(GAME_CONFIG.officialSwordCost)}`;
-  const showSupplier =
-    state.school.peakActiveMembers >= 15 ||
-    state.equipment.totalSwords > GAME_CONFIG.initialSwords;
+  const showSupplier = isOfficialSwordSupplierVisible(state);
   const visibleEvents = ACQUISITION_EVENTS.filter((definition) =>
     definition.unlockMembers <= state.school.peakActiveMembers ||
     runningEvents.some((event) => event.definitionId === definition.id)
