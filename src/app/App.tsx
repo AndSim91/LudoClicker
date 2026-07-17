@@ -87,6 +87,11 @@ export function App() {
       setSelectedSentEmailId(latestSent?.id ?? null);
     }
   };
+  const openComposer = () => {
+    setView("mail");
+    setMailFolder("inbox");
+    setSelectedMessageId(null);
+  };
   const exportSave = () => {
     const blob = new Blob([exportGame(state)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -129,7 +134,7 @@ export function App() {
         euros={state.school.euros}
       />
       <CommandBar
-        onCompose={() => { setView("mail"); setMailFolder("inbox"); setSelectedMessageId(null); }}
+        onCompose={openComposer}
         onMarkAllRead={() => dispatch({ type: "MARK_ALL_MESSAGES_READ" })}
         canMarkAllRead={
           view === "mail" &&
@@ -141,7 +146,13 @@ export function App() {
         <AppRail view={activeView} state={state} onChange={setView} />
         {activeView === "mail" ? (
           <>
-            <FolderPane state={state} folder={mailFolder} onSelectFolder={selectFolder} />
+            <FolderPane
+              state={state}
+              folder={mailFolder}
+              onSelectFolder={selectFolder}
+              onOpenComposer={openComposer}
+              onOpenMembers={() => setView("contacts")}
+            />
             <MessageList
               state={state}
               folder={mailFolder}

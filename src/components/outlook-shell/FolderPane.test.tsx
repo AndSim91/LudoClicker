@@ -1,5 +1,5 @@
-import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { FolderPane } from "./FolderPane";
 import { formatExactCurrency } from "./resourceFormatting";
@@ -18,7 +18,15 @@ describe("FolderPane", () => {
       school: { ...initial.school, activeMembers: 999_999, euros },
     };
 
-    const { container } = render(<FolderPane state={state} folder="inbox" onSelectFolder={() => undefined} />);
+    const { container } = render(
+      <FolderPane
+        state={state}
+        folder="inbox"
+        onSelectFolder={() => undefined}
+        onOpenComposer={() => undefined}
+        onOpenMembers={() => undefined}
+      />,
+    );
     const rows = container.querySelectorAll(".resource-row");
 
     expect(rows[0]).toHaveTextContent(/1,2K/);
@@ -27,5 +35,29 @@ describe("FolderPane", () => {
     expect(container.querySelector(`b[title="${formatExactCurrency(euros)}"]`)).toHaveTextContent(
       /100\s+Mld\s+€/,
     );
+  });
+
+  it("opens the composer and members from their resource rows", () => {
+    const state = createInitialState(1_000);
+    const onOpenComposer = vi.fn();
+    const onOpenMembers = vi.fn();
+
+    const { container } = render(
+      <FolderPane
+        state={state}
+        folder="inbox"
+        onSelectFolder={() => undefined}
+        onOpenComposer={onOpenComposer}
+        onOpenMembers={onOpenMembers}
+      />,
+    );
+
+    const pane = within(container);
+    fireEvent.click(pane.getByRole("button", { name: /Contatti/ }));
+    fireEvent.click(pane.getByRole("button", { name: /Iscritti/ }));
+
+    expect(onOpenComposer).toHaveBeenCalledOnce();
+    expect(onOpenMembers).toHaveBeenCalledOnce();
+    expect(pane.getByText(/Disponibilit/).closest("button")).toBeNull();
   });
 });

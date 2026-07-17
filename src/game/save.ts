@@ -1,4 +1,5 @@
 import { createInitialState } from "./engine";
+import { recruitEnrolledLegendaryCollaborators } from "./collaboratorFlow";
 import { simulateOfflineProgress } from "./offline";
 import { normalizeStackedMessages } from "./messages";
 import { STORAGE_KEYS } from "../shared/storageKeys";
@@ -39,14 +40,15 @@ function read(key: string): GameState | null {
 export function loadGame(now = Date.now()): GameState {
   const saved = read(SAVE_KEY) ?? read(BACKUP_KEY);
   if (!saved) return createInitialState(now);
-  if (!saved.profile.displayName.trim()) {
+  const reconciled = recruitEnrolledLegendaryCollaborators(saved, now);
+  if (!reconciled.profile.displayName.trim()) {
     return {
-      ...saved,
+      ...reconciled,
       lastSavedAt: now,
-      automation: { ...saved.automation, lastProcessedAt: now },
+      automation: { ...reconciled.automation, lastProcessedAt: now },
     };
   }
-  return simulateOfflineProgress(saved, now).state;
+  return simulateOfflineProgress(reconciled, now).state;
 }
 
 export function saveGame(state: GameState, now = Date.now()): void {
@@ -67,7 +69,10 @@ export function importGame(raw: string): GameState | null {
   try {
     const parsed = migrateSave(JSON.parse(raw));
     return isValidGameState(parsed)
-      ? { ...parsed, messages: normalizeStackedMessages(parsed.messages) }
+      ? recruitEnrolledLegendaryCollaborators({
+          ...parsed,
+          messages: normalizeStackedMessages(parsed.messages),
+        }, Date.now())
       : null;
   } catch {
     return null;

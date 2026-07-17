@@ -185,6 +185,7 @@
 :root[data-theme="dark"] .message-row.selected,
 :root[data-theme="dark"] .folder:hover,
 :root[data-theme="dark"] .folder.active,
+:root[data-theme="dark"] .resource-link:hover,
 :root[data-theme="dark"] .mastery-entry.active,
 :root[data-theme="dark"] .upgrade-row.recommended,
 :root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {

@@ -205,6 +205,33 @@ describe("game engine: funnel", () => {
     expect(qualifiedUltraRare.collaborators).toHaveLength(1);
   });
 
+  it("repairs every enrolled Legendary regardless of how the state was produced", () => {
+    const initial = createInitialState(1_000);
+    const legendaryMembers = initial.contacts.slice(0, 3).map((contact, index) => ({
+      ...contact,
+      id: `enrolled-legendary-${index}`,
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+    }));
+    const repaired = gameReducer({
+      ...initial,
+      contacts: [...legendaryMembers, ...initial.contacts.slice(3)],
+      school: {
+        ...initial.school,
+        activeMembers: legendaryMembers.length,
+        historicMembers: legendaryMembers.length,
+      },
+    }, { type: "ADMIN_ADD_EUROS", amount: 1 });
+
+    expect(repaired.collaborators.map((collaborator) => collaborator.contactId))
+      .toEqual(legendaryMembers.map((contact) => contact.id));
+    expect(repaired.statistics.collaboratorsRecruited).toBe(legendaryMembers.length);
+
+    const repairedAgain = gameReducer(repaired, { type: "ADMIN_ADD_EUROS", amount: 1 });
+    expect(repairedAgain.collaborators).toHaveLength(legendaryMembers.length);
+    expect(repairedAgain.statistics.collaboratorsRecruited).toBe(legendaryMembers.length);
+  });
+
   it("stores the user name in the active email", () => {
     const state = createInitialState(1_000);
 

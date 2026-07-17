@@ -54,3 +54,22 @@ export function recruitCollaborator(
     "collaborators",
   );
 }
+
+export function recruitEnrolledLegendaryCollaborators(
+  state: GameState,
+  now: number,
+): GameState {
+  const collaboratorContactIds = new Set(
+    state.collaborators.map((collaborator) => collaborator.contactId),
+  );
+  return state.contacts
+    .filter((contact) =>
+      contact.status === "enrolled" &&
+      contact.rarity === "legendary" &&
+      !collaboratorContactIds.has(contact.id)
+    )
+    .reduce(
+      (nextState, contact) => recruitCollaborator(nextState, contact, now),
+      state,
+    );
+}

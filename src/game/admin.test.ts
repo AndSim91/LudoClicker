@@ -11,12 +11,14 @@ describe("admin resource actions", () => {
       activeMembers: 12,
       peakActiveMembers: 12,
       historicMembers: 12,
-      euros: 0,
+      euros: 10,
     });
     expect(state.unlocks).toMatchObject({ upgrades: true, social: true, forms: true });
     expect(state.statistics.membersEnrolled).toBe(0);
     expect(state.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(12);
     expect(new Set(state.contacts.map((contact) => contact.id)).size).toBe(state.contacts.length);
+    expect(state.collaborators).toHaveLength(1);
+    expect(state.collaborators[0].specialProfileId).toBe("andrea-simonazzi");
   });
 
   it("adds euros without counting them as earned income", () => {

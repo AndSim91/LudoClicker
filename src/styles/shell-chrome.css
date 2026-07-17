@@ -361,6 +361,18 @@
   padding: 0 8px;
 }
 
+.resource-link {
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.resource-link:hover {
+  background: #e8f1fb;
+}
+
 .resource-row svg {
   width: 19px;
   height: 19px;
@@ -390,4 +402,3 @@
   color: var(--ink-muted);
   font-size: 11px;
 }
-

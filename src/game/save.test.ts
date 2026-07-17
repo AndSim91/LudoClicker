@@ -15,6 +15,30 @@ describe("local save", () => {
     expect(loadGame(3_000).lastSavedAt).toBe(3_000);
   });
 
+  it("repairs enrolled Legendary members missing from collaborators on load", () => {
+    const initial = createInitialState(1_000);
+    const legendaryMembers = initial.contacts.slice(0, 3).map((contact, index) => ({
+      ...contact,
+      id: `saved-legendary-${index}`,
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+    }));
+    saveGame({
+      ...initial,
+      contacts: [...legendaryMembers, ...initial.contacts.slice(3)],
+      school: {
+        ...initial.school,
+        activeMembers: legendaryMembers.length,
+        historicMembers: legendaryMembers.length,
+      },
+    }, 2_000);
+
+    const loaded = loadGame(3_000);
+
+    expect(loaded.collaborators.map((collaborator) => collaborator.contactId))
+      .toEqual(legendaryMembers.map((contact) => contact.id));
+  });
+
   it("falls back to a fresh state when the save is corrupt", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
 

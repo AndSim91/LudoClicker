@@ -7,7 +7,10 @@ import {
   processAutomation,
   runSocialCampaign as executeSocialCampaign,
 } from "./automationFlow";
-import { recruitCollaborator } from "./collaboratorFlow";
+import {
+  recruitCollaborator,
+  recruitEnrolledLegendaryCollaborators,
+} from "./collaboratorFlow";
 import {
   finalizeEmail,
   resolveEmailOutcome,
@@ -139,12 +142,13 @@ const ACTION_HANDLERS = createGameActionHandlers({
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   const nextState = dispatchGameAction(state, action, ACTION_HANDLERS);
-  if (action.type === "OFFLINE_PASSIVE_PROGRESS") return nextState;
-
   const now = "now" in action ? action.now : state.lastSavedAt;
+  const reconciledState = recruitEnrolledLegendaryCollaborators(nextState, now);
+  if (action.type === "OFFLINE_PASSIVE_PROGRESS") return reconciledState;
+
   const gainMultiplier = action.type === "TICK" ? (action.gainMultiplier ?? 1) : 1;
   return completeShortGoal(
-    grantAchievements(nextState, now, gainMultiplier),
+    grantAchievements(reconciledState, now, gainMultiplier),
     now,
     gainMultiplier,
   );

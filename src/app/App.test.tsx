@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createInitialState } from "../game/engine";
 import { saveGame } from "../game/save";
@@ -58,6 +58,28 @@ describe("App profile and navigation", () => {
       "Impostazioni",
       "Admin",
     ]);
+  });
+
+  it("uses the resource rows as shortcuts to the composer and members", () => {
+    const initial = createInitialState(Date.now(), "Andrea Ungaro");
+    saveGame({
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+    });
+    render(<App />);
+
+    const folderPane = screen.getByText("Cartelle").closest("aside");
+    expect(folderPane).not.toBeNull();
+    const folders = within(folderPane!);
+
+    fireEvent.click(folders.getByRole("button", { name: /Posta inviata/ }));
+    expect(screen.getByRole("heading", { name: "Nessuna mail inviata" })).toBeVisible();
+
+    fireEvent.click(folders.getByRole("button", { name: /Contatti/ }));
+    expect(screen.getByRole("button", { name: /Corpo del messaggio/ })).toBeVisible();
+
+    fireEvent.click(folders.getByRole("button", { name: /Iscritti/ }));
+    expect(screen.getByRole("heading", { name: "Iscritti" })).toBeVisible();
   });
 
   it("opens the development-only email catalog editor", () => {
