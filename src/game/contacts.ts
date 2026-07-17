@@ -40,6 +40,19 @@ function chooseOrdinaryRarity(seed: number): { rarity: Exclude<PersonRarity, "le
   };
 }
 
+function chooseEarlyRarity(seed: number): {
+  rarity: Extract<PersonRarity, "common" | "rare">;
+  nextSeed: number;
+} {
+  const [rarityRoll, nextSeed] = nextRandom(seed);
+  return {
+    rarity: rarityRoll < PERSON_RARITIES.rare.queueAppearanceChance
+      ? "rare"
+      : "common",
+    nextSeed,
+  };
+}
+
 function chooseLegendaryProfile(
   seed: number,
   progress: LegendaryCollaboratorProgress,
@@ -93,12 +106,15 @@ export function createInitialContacts(
   let nextSeed = seed;
   let progress = existingProgress;
   const contacts = Array.from({ length: GAME_CONFIG.initialContacts }, (_, index) => {
+    const queuePosition = index + 1;
+    const advancedRaritiesUnlocked =
+      !includeAndrea || queuePosition > GAME_CONFIG.guaranteedAndreaContactPosition;
     let legendaryProfile = includeAndrea &&
-      index + 1 === GAME_CONFIG.guaranteedAndreaContactPosition &&
+      queuePosition === GAME_CONFIG.guaranteedAndreaContactPosition &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? ANDREA_SIMONAZZI_PROFILE
       : undefined;
-    if (!legendaryProfile) {
+    if (!legendaryProfile && advancedRaritiesUnlocked) {
       const selected = chooseLegendaryProfile(nextSeed, progress);
       legendaryProfile = selected.profile;
       nextSeed = selected.nextSeed;
@@ -106,7 +122,11 @@ export function createInitialContacts(
     if (legendaryProfile) {
       progress = addLegendaryEncounter(progress, legendaryProfile.id);
     }
-    const ordinary = legendaryProfile ? undefined : chooseOrdinaryRarity(nextSeed);
+    const ordinary = legendaryProfile
+      ? undefined
+      : advancedRaritiesUnlocked
+        ? chooseOrdinaryRarity(nextSeed)
+        : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, legendaryProfile);
     const { firstName, lastName, email } = generated;
@@ -139,26 +159,43 @@ export function createAcquiredContacts(
 ): { contacts: Contact[]; nextSeed: number } {
   let nextSeed = state.randomSeed;
   let progress = state.legendaryCollaborators;
+  const contactIds = new Set(state.contacts.map((contact) => contact.id));
+  let nextSequence = state.statistics.contactsAcquired;
   const contacts = Array.from({ length: count }, (_, index) => {
-    const sequence = state.statistics.contactsAcquired + index;
     const queuePosition = state.contacts.length + index + 1;
+    const isInitialSchool = state.network.schools.length === 0;
+    const advancedRaritiesUnlocked =
+      !isInitialSchool || queuePosition > GAME_CONFIG.guaranteedAndreaContactPosition;
     const selected = queuePosition === GAME_CONFIG.guaranteedAndreaContactPosition &&
-      state.network.schools.length === 0 &&
+      isInitialSchool &&
       !progress.enrolledProfileIds.includes(ANDREA_SIMONAZZI_ID)
       ? { profile: ANDREA_SIMONAZZI_PROFILE, nextSeed }
-      : chooseLegendaryProfile(nextSeed, progress);
+      : advancedRaritiesUnlocked
+        ? chooseLegendaryProfile(nextSeed, progress)
+        : { profile: undefined, nextSeed };
     const specialProfile = selected.profile;
     nextSeed = selected.nextSeed;
     if (specialProfile) progress = addLegendaryEncounter(progress, specialProfile.id);
-    const ordinary = specialProfile ? undefined : chooseOrdinaryRarity(nextSeed);
+    const ordinary = specialProfile
+      ? undefined
+      : advancedRaritiesUnlocked
+        ? chooseOrdinaryRarity(nextSeed)
+        : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);
     const { firstName, lastName, email } = generated;
     const retained = specialProfile
       ? progress.retainedProgress[specialProfile.id]
       : undefined;
+    let id = makeGameId("contact", now, `acquired-${nextSequence}`);
+    while (contactIds.has(id)) {
+      nextSequence += 1;
+      id = makeGameId("contact", now, `acquired-${nextSequence}`);
+    }
+    contactIds.add(id);
+    nextSequence += 1;
     return {
-      id: makeGameId("contact", now, `acquired-${sequence}`),
+      id,
       firstName,
       lastName,
       email,

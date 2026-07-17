@@ -212,7 +212,7 @@ export function App() {
           />
         ) : activeView === "admin" ? (
           <AdminEmailView
-            upgrades={state.upgrades}
+            totalContacts={state.contacts.length}
             availableContacts={selectAvailableContacts(state)}
             activeMembers={state.school.activeMembers}
             euros={state.school.euros}

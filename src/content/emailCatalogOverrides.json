@@ -13,7 +13,7 @@
   },
   "0:gruppo-genova": {
     "subject": "Il gruppo di Genova non morde quasi mai",
-    "body": "Ciao {{firstName}},\nSiamo un gruppo accogliente, apparte Luca quando perde e parla in latino. Vieni a fare spadate luminose con noi, la prima botta cioè prova è gratis.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nSiamo un gruppo accogliente, apparte Andrea quando perde e inizia a parlare in latino. Vieni a fare spadate luminose con noi, la prima botta...cioè...prova, è gratis.\n\n{{senderName}}"
   },
   "0:coordinazione": {
     "subject": "Hai della coordinazione da buttare?",

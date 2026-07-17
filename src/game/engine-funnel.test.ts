@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { PERSON_RARITIES } from "../content/rarities";
 import { getSchoolYear } from "./calendar";
+import { recruitCollaborator } from "./collaboratorFlow";
 import { GAME_CONFIG } from "./config";
 import {
   createInitialState,
@@ -30,7 +31,9 @@ describe("game engine: funnel", () => {
     expect(state.school.euros).toBe(0);
     expect(state.school.currentMonth).toBe(9);
     expect(getSchoolYear(state.school.currentMonth)).toBe(1);
-    expect(state.contacts.every((contact) => contact.rarity !== "legendary")).toBe(true);
+    expect(state.contacts.every((contact) =>
+      contact.rarity === "common" || contact.rarity === "rare"
+    )).toBe(true);
     expect(PERSON_RARITIES.common.queueAppearanceChance).toBe(0.8);
     expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.125);
     expect(PERSON_RARITIES["ultra-rare"].queueAppearanceChance).toBe(0.055);
@@ -69,7 +72,7 @@ describe("game engine: funnel", () => {
   });
 
   it("guarantees Andrea Simonazzi as the ninth contact in the initial school", () => {
-    const initial = createInitialState(1_000, "", false);
+    const initial = createInitialState(1_000);
     const padding = initial.contacts.slice(0, 3).map((contact, index) => ({
       ...contact,
       id: `padding-${index}`,
@@ -99,7 +102,9 @@ describe("game engine: funnel", () => {
       automation: { ...initial.automation, lastProcessedAt: 2_000 },
     }, { type: "TICK", now: 2_000 });
 
-    expect(state.contacts.slice(0, 8).every((contact) => contact.rarity !== "legendary")).toBe(true);
+    expect(state.contacts.slice(0, 8).every((contact) =>
+      contact.rarity === "common" || contact.rarity === "rare"
+    )).toBe(true);
     expect(state.contacts[8].rarity).toBe("legendary");
     expect(state.contacts[8].specialProfileId).toBe("andrea-simonazzi");
     expect(state.legendaryCollaborators.encounteredProfileIds).toContain("andrea-simonazzi");
@@ -152,6 +157,52 @@ describe("game engine: funnel", () => {
 
     expect(state.contacts).toHaveLength(9);
     expect(state.contacts[8].specialProfileId).not.toBe("andrea-simonazzi");
+  });
+
+  it("allows Ultra Rare and Legendary contacts only after Andrea in the initial school", () => {
+    const initial = createInitialState(1_000);
+    const padding = Array.from({ length: 3 }, (_, index) => ({
+      ...initial.contacts[index],
+      id: `advanced-rarity-padding-${index}`,
+      status: "available" as const,
+    }));
+    const generated = gameReducer({
+      ...initial,
+      contacts: [...initial.contacts, ...padding],
+      statistics: { ...initial.statistics, contactsAcquired: 3 },
+    }, {
+      type: "ADMIN_ADD_CONTACTS",
+      amount: 200,
+    });
+
+    expect(generated.contacts[8].specialProfileId).toBe("andrea-simonazzi");
+    expect(generated.contacts.slice(9).some((contact) =>
+      contact.rarity === "ultra-rare" || contact.rarity === "legendary"
+    )).toBe(true);
+  });
+
+  it("recruits only Legendary members and Ultra Rare members qualified at Course Y", () => {
+    const initial = createInitialState(1_000);
+    const contact = { ...initial.contacts[0], status: "enrolled" as const };
+
+    for (const rarity of ["common", "rare", "ultra-rare"] as const) {
+      const unchanged = recruitCollaborator(initial, { ...contact, rarity }, 2_000);
+      expect(unchanged).toBe(initial);
+    }
+
+    const legendary = recruitCollaborator(
+      initial,
+      { ...contact, rarity: "legendary" },
+      2_000,
+    );
+    const qualifiedUltraRare = recruitCollaborator(
+      initial,
+      { ...contact, rarity: "ultra-rare", forms: ["course-y"] },
+      2_000,
+    );
+
+    expect(legendary.collaborators).toHaveLength(1);
+    expect(qualifiedUltraRare.collaborators).toHaveLength(1);
   });
 
   it("stores the user name in the active email", () => {

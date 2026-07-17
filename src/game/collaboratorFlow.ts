@@ -8,8 +8,10 @@ export function recruitCollaborator(
   contact: Contact,
   now: number,
 ): GameState {
+  const qualifiesAsCollaborator = contact.rarity === "legendary" ||
+    (contact.rarity === "ultra-rare" && contact.forms.includes("course-y"));
   if (
-    (contact.rarity !== "ultra-rare" && contact.rarity !== "legendary") ||
+    !qualifiesAsCollaborator ||
     state.collaborators.some((collaborator) => collaborator.contactId === contact.id)
   ) return state;
 

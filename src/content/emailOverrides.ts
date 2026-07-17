@@ -8,9 +8,6 @@ export interface EmailCopyOverride {
 
 export type EmailCopyOverrides = Record<string, EmailCopyOverride>;
 
-export const EMAIL_COPY_OVERRIDES_FILE = "src/content/emailCatalogOverrides.json";
-export const EMAIL_COPY_OVERRIDES_ENDPOINT = "/__admin/email-catalogs";
-
 export const EMAIL_COPY_TOKENS = {
   firstName: "{{firstName}}",
   senderName: "{{senderName}}",
@@ -38,29 +35,7 @@ function normalizeEmailCopyOverrides(value: unknown): EmailCopyOverrides {
   );
 }
 
-let runtimeOverrides = normalizeEmailCopyOverrides(fileOverrides);
-
-export function loadEmailCopyOverrides(): EmailCopyOverrides {
-  return { ...runtimeOverrides };
-}
-
-export async function saveEmailCopyOverrides(
-  overrides: EmailCopyOverrides,
-): Promise<boolean> {
-  if (!import.meta.env.DEV) return false;
-  try {
-    const response = await fetch(EMAIL_COPY_OVERRIDES_ENDPOINT, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(overrides),
-    });
-    if (!response.ok) return false;
-    runtimeOverrides = normalizeEmailCopyOverrides(overrides);
-    return true;
-  } catch {
-    return false;
-  }
-}
+const runtimeOverrides = normalizeEmailCopyOverrides(fileOverrides);
 
 export function getEmailCopyOverride(
   templateId: string,

@@ -177,6 +177,8 @@ Gli iscritti possono fungere da requisito di sblocco, ma non vengono mai consuma
 
 I Contatti sono indirizzi email inventati ottenuti attraverso eventi, lezioni di prova, social e collaboratori.
 
+Nella scuola iniziale i primi otto contatti possono essere soltanto Comuni o Rari. Il nono contatto è sempre Andrea Simonazzi; dal decimo contatto si sbloccano anche le estrazioni Ultra Rare e Leggendarie. Nelle scuole successive tutte le rarità sono disponibili fin dal primo contatto e Andrea torna nel normale pool Leggendario.
+
 Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità determina la probabilità di prenotare una prova dopo la mail e quella di iscriversi dopo la prova:
 
 | Rarità | Comparsa | Prova dopo la mail | Iscrizione base | Effettiva base mail → iscritto | Iscrizione massima | Collaboratore |
@@ -517,7 +519,7 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 
 - Andrea Simonazzi è garantito come 9° contatto nella scuola iniziale; nelle scuole successive la sua comparsa torna casuale come per ogni altro Leggendario, senza garanzie di prenotazione, iscrizione o permanenza;
 - tutti i Leggendari possono lasciare la scuola con una probabilità annuale pari al 10% del rischio ordinario associato alla loro Forma più alta fino alla Forma 6; a Forma 7 usano la curva specifica per rarità e prestigio;
-- la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto in ogni scuola;
+- la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto idoneo: dal decimo nella scuola iniziale e fin dal primo nelle scuole successive;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della nuova scuola;
 - dopo un abbandono tornano disponibili per incontri futuri;
 - una nuova iscrizione ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
