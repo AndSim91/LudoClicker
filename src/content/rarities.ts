@@ -8,6 +8,8 @@ export interface PersonRarityDefinition {
   maxEnrollmentChance: number;
   queueAppearanceChance: number;
   collaboratorPath: "never" | "delayed" | "immediate";
+  collaboratorDescription: string;
+  collaboratorBadgeLabel?: string;
   collaboratorProductivityMultiplier: number;
 }
 
@@ -20,6 +22,7 @@ export const PERSON_RARITIES: Record<PersonRarity, PersonRarityDefinition> = {
     maxEnrollmentChance: 1,
     queueAppearanceChance: 0.8,
     collaboratorPath: "never",
+    collaboratorDescription: "Non diventa collaboratore",
     collaboratorProductivityMultiplier: 0,
   },
   rare: {
@@ -30,6 +33,7 @@ export const PERSON_RARITIES: Record<PersonRarity, PersonRarityDefinition> = {
     maxEnrollmentChance: 0.9,
     queueAppearanceChance: 0.125,
     collaboratorPath: "never",
+    collaboratorDescription: "Non diventa collaboratore",
     collaboratorProductivityMultiplier: 1,
   },
   "ultra-rare": {
@@ -40,6 +44,8 @@ export const PERSON_RARITIES: Record<PersonRarity, PersonRarityDefinition> = {
     maxEnrollmentChance: 0.5,
     queueAppearanceChance: 0.055,
     collaboratorPath: "delayed",
+    collaboratorDescription: "Diventa collaboratore completando il Corso Y",
+    collaboratorBadgeLabel: "Ultra Raro · Corso Y completato",
     collaboratorProductivityMultiplier: 1,
   },
   legendary: {
@@ -50,6 +56,8 @@ export const PERSON_RARITIES: Record<PersonRarity, PersonRarityDefinition> = {
     maxEnrollmentChance: 0.35,
     queueAppearanceChance: 0.02,
     collaboratorPath: "immediate",
+    collaboratorDescription: "Collaboratore dall'iscrizione",
+    collaboratorBadgeLabel: "Collaboratore VIP",
     collaboratorProductivityMultiplier: 2,
   },
 };

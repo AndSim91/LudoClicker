@@ -1,0 +1,115 @@
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 70px;
+  padding: 0 18px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  background: #fafafa;
+  font-size: 11px;
+}
+
+.status-bar b {
+  margin-left: auto;
+  font-weight: 400;
+}
+
+.empty-composer {
+  align-content: center;
+  justify-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-composer svg {
+  width: 42px;
+  height: 42px;
+  color: var(--blue-600);
+}
+
+.empty-composer h1 {
+  margin: 18px 0 7px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.empty-composer p {
+  max-width: 440px;
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.message-detail {
+  grid-template-rows: 50px auto minmax(0, 1fr);
+}
+
+.sent-mail-detail {
+  display: grid;
+  grid-template-rows: 50px auto auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.sent-heading {
+  display: flex;
+  align-items: center;
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sent-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sent-heading span,
+.sent-heading time {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.sent-heading time {
+  margin-left: auto;
+}
+
+.campaign-status {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sent-fields {
+  padding: 5px 26px 0;
+}
+
+.sent-fields > div {
+  display: grid;
+  grid-template-columns: 75px minmax(0, 1fr);
+  align-items: center;
+  min-height: 43px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.sent-fields span {
+  color: var(--ink-muted);
+}
+
+.sent-fields strong {
+  overflow: hidden;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sent-mail-detail article {
+  max-width: 840px;
+  min-height: 0;
+  overflow: auto;
+  padding: 26px;
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}

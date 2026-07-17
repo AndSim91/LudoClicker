@@ -1,66 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Icon } from "../../components/common/Icon";
-import {
-  getAvailableForms,
-  getCollaboratorBonusSummary,
-  getFormDefinition,
-  getInstructorFormCost,
-  getInstructorQualificationCost,
-  getStudentFormCost,
-  isInstructorForm,
-  type FormDefinition,
-  type FormStudent,
-} from "../../content/forms";
-import {
-  COLLABORATOR_MASTERY_ROLES,
-  COLLABORATOR_MASTERY_ROLE_LABELS,
-  createInitialCollaboratorMastery,
-  getCollaboratorMasteryProgress,
-} from "../../content/mastery";
-import { PERSON_RARITIES } from "../../content/rarities";
-import { getFormLogo } from "../../content/formLogos";
-import { getSchoolYear, isSummerBreak } from "../../game/calendar";
-import { getEmailBookingChance, getEnrollmentChance, getMemberAnnualDepartureChance } from "../../game/formulas";
-import {
-  selectAvailableInstructor,
-  selectInstructorCapacity,
-  selectInstructorTeachingCount,
-} from "../../game/selectors";
+import { TabButton } from "../../components/common/TabButton";
 import type {
-  Collaborator,
   CollaboratorAssignment,
-  Contact,
   FormId,
   GameState,
-  PersonRarity,
 } from "../../game/types";
+import { CollaboratorList } from "./CollaboratorList";
+import { MemberList } from "./MemberList";
+import { RarityOverview } from "./RarityOverview";
 
 type PeopleTab = "members" | "collaborators";
-
-const assignmentLabels: Record<Exclude<CollaboratorAssignment, null>, string> = {
-  writing: "Redazione",
-  events: "Eventi",
-  lessons: "Lezioni in palestra",
-  social: "Social",
-  equipment: "Attrezzatura",
-  instructor: "Istruttore",
-};
-
-const statusLabels: Record<Contact["status"], string> = {
-  available: "Disponibile",
-  writing: "In scrittura",
-  invited: "Invitato",
-  trialScheduled: "Prova prenotata",
-  enrolled: "Iscritto",
-  departed: "Ha lasciato la scuola",
-  lost: "Perso",
-};
-
-const percent = new Intl.NumberFormat("it-IT", {
-  style: "percent",
-  maximumFractionDigits: 2,
-});
-const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
 export function PeopleView({
   state,
@@ -86,439 +36,37 @@ export function PeopleView({
 
   return (
     <main className="overview-view people-view">
-      <header><Icon name="people" /><div><h1>Iscritti</h1><p>Iscritti e Collaboratori delle Onde</p></div></header>
+      <header>
+        <Icon name="people" />
+        <div><h1>Iscritti</h1><p>Iscritti e Collaboratori delle Onde</p></div>
+      </header>
       <div className="people-tabs" role="tablist" aria-label="Categorie iscritti">
-        <TabButton active={tab === "members"} onClick={() => setTab("members")} label={`Iscritti attivi (${members.length})`} />
-        {showCollaborators ? <TabButton active={tab === "collaborators"} onClick={() => setTab("collaborators")} label={`Collaboratori (${state.collaborators.length})`} /> : null}
+        <TabButton active={tab === "members"} onClick={() => setTab("members")}>
+          Iscritti attivi ({members.length})
+        </TabButton>
+        {showCollaborators ? (
+          <TabButton active={tab === "collaborators"} onClick={() => setTab("collaborators")}>
+            Collaboratori ({state.collaborators.length})
+          </TabButton>
+        ) : null}
       </div>
       {showRarityOverview ? <RarityOverview state={state} /> : null}
 
       {tab === "collaborators" ? (
-        <section className="collaborator-list" aria-label="Collaboratori delle Onde">
-          {state.collaborators.length === 0 ? (
-            <div className="people-empty"><Icon name="contact" /><strong>Nessun collaboratore disponibile</strong><span>Gli Ultra Rari diventano collaboratori dopo il Corso Y; i Leggendari lo sono dall'iscrizione.</span></div>
-          ) : state.collaborators.map((collaborator) => {
-            const contact = state.contacts.find((candidate) => candidate.id === collaborator.contactId);
-            const bonusSummary = getCollaboratorBonusSummary(collaborator);
-            return (
-              <article className={`collaborator-row rarity-${collaborator.rarity}`} key={collaborator.id}>
-                <div className="collaborator-identity">
-                  <div className={`person-avatar rarity-${collaborator.rarity}`} aria-hidden="true">{collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</div>
-                  <div className="collaborator-copy">
-                    <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
-                    <span className={`collaborator-tier rarity-${collaborator.rarity}`}>
-                      {collaborator.rarity === "legendary" ? "Collaboratore VIP" : "Ultra Raro · Corso Y completato"}
-                    </span>
-                    <span className={`rarity-address rarity-${collaborator.rarity}`}>{contact?.email}</span>
-                  </div>
-                </div>
-                <div className="collaborator-profile">
-                  <div className="collaborator-section-heading">
-                    <strong>{collaborator.forms.length} {collaborator.forms.length === 1 ? "forma conosciuta" : "forme conosciute"}</strong>
-                  </div>
-                  <FormLogoStrip forms={collaborator.forms} />
-                  <div className="collaborator-bonus">
-                    <span>Bonus attivo</span>
-                    <strong className="form-bonus-summary">{bonusSummary || "Nessun bonus d'arma attivo"}</strong>
-                  </div>
-                  <CollaboratorMasterySummary collaborator={collaborator} />
-                  {collaborator.assignment === "instructor" || collaborator.instructorForms.length > 0
-                    ? <small className="collaborator-certificates">Attestati da istruttore: {collaborator.instructorForms.length}</small>
-                    : null}
-                </div>
-                <div className="collaborator-actions">
-                  <label className="collaborator-assignment"><span>Assegnazione</span><select aria-label="Assegnazione" value={collaborator.assignment ?? ""} onChange={(event) => onAssign(collaborator.id, (event.target.value || null) as CollaboratorAssignment)}><option value="">Non assegnato</option>{Object.entries(assignmentLabels).map(([value, label]) => {
-                    const disabled = value === "social" && !state.unlocks.social;
-                    const suffix = value === "social" && !state.unlocks.social
-                      ? " — si sblocca con 10 iscritti"
-                      : "";
-                    return <option value={value} key={value} disabled={disabled}>{label}{suffix}</option>;
-                  })}</select></label>
-                  <div className="collaborator-training">
-                    <span className="collaborator-action-label">Formazione</span>
-                    {collaborator.assignment === "instructor"
-                      ? <InstructorPanel collaborator={collaborator} state={state} onStartTraining={onStartTraining} onToggle={onToggleInstructorAutomation} />
-                      : <TrainingControl personId={collaborator.id} displayName={collaborator.displayName} student={collaborator} state={state} onStartTraining={onStartTraining} />}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </section>
+        <CollaboratorList
+          state={state}
+          onAssign={onAssign}
+          onStartTraining={onStartTraining}
+          onToggleInstructorAutomation={onToggleInstructorAutomation}
+        />
       ) : (
-        <section className="people-table member-development-list" aria-label="Iscritti">
-          <div className="people-row people-head member-row"><span>Nome</span><span>Indirizzo</span><span>Percorso</span><span>Stato</span><span>Prossima evoluzione</span></div>
-          {members.map((contact) => {
-            const collaborator = collaboratorsByContactId.get(contact.id);
-            const isCollaborator = Boolean(collaborator);
-            const memberForms = collaborator?.forms ?? contact.forms;
-            return (
-              <div className="people-row member-row" key={contact.id}>
-                <PersonName displayName={`${contact.firstName} ${contact.lastName}`} rarity={contact.rarity} label="Nome" />
-                <span data-label="Indirizzo"><span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span></span>
-                <div className="member-path" data-label="Percorso">
-                  <strong>{formatFormPath(memberForms)}</strong>
-                  <FormLogoStrip forms={memberForms} showLabels={false} />
-                </div>
-                <span className="member-status" data-label="Stato">
-                  <span>{isCollaborator ? "Collaboratore" : statusLabels[contact.status]}</span>
-                  <small>{isCollaborator || contact.rarity === "legendary"
-                    ? "Non soggetto ad abbandono"
-                    : contact.lastFormTrainingYear === getSchoolYear(state.school.currentMonth)
-                      ? "Nessun rischio"
-                      : getMemberDepartureRiskLabel(contact.forms)}</small>
-                </span>
-                <div className="member-training-cell" data-label="Prossima evoluzione">
-                  {isCollaborator
-                    ? <small>Gestisci dal pannello Collaboratori</small>
-                    : <TrainingControl
-                        personId={contact.id}
-                        displayName={`${contact.firstName} ${contact.lastName}`}
-                        student={contact}
-                        state={state}
-                        onStartTraining={onStartTraining}
-                      />}
-                </div>
-              </div>
-            );
-          })}
-        </section>
+        <MemberList
+          state={state}
+          members={members}
+          collaboratorsByContactId={collaboratorsByContactId}
+          onStartTraining={onStartTraining}
+        />
       )}
     </main>
-  );
-}
-
-function formatFormPath(forms: FormId[]): string {
-  if (forms.length === 0) return "Da iniziare · Forma 1";
-  const latest = getFormDefinition(forms.at(-1)!);
-  return `${latest?.title ?? forms.at(-1)}${latest?.branch ? ` · ${latest.branch}` : ""}`;
-}
-
-function getMemberDepartureRiskLabel(forms: FormId[]): string {
-  const annualDepartureChance = getMemberAnnualDepartureChance(forms);
-  if (annualDepartureChance >= 2 / 3) return "Rischio alto";
-  if (annualDepartureChance >= 1 / 3) return "Rischio medio";
-  return "Rischio basso";
-}
-
-function FormLogoStrip({ forms, showLabels = true }: { forms: FormId[]; showLabels?: boolean }) {
-  const entries = forms.map((formId) => {
-    const definition = getFormDefinition(formId);
-    const logo = getFormLogo(formId);
-    const label = [definition?.title ?? formId, definition?.branch].filter(Boolean).join(" / ");
-    return { formId, label, logo };
-  });
-
-  return (
-    <div
-      className="form-logo-strip"
-      aria-label={entries.length > 0 ? `Forme conosciute: ${entries.map(({ label }) => label).join(", ")}` : "Forme conosciute: nessuna"}
-    >
-      {entries.length === 0 ? (
-        <span className="form-logo-empty">Nessuna forma completata</span>
-      ) : entries.map(({ formId, label, logo }) => (
-        <span className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""}`} key={formId} title={label}>
-          <img src={logo.assetPath} alt={`${label} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`} />
-          {showLabels ? <span>{label}</span> : null}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function CollaboratorMasterySummary({ collaborator }: { collaborator: Collaborator }) {
-  const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
-  const activeRole = collaborator.assignment;
-  const activeProgress = activeRole
-    ? getCollaboratorMasteryProgress(mastery[activeRole])
-    : undefined;
-  const activeXpLabel = activeProgress?.nextXp === undefined
-    ? `${activeProgress?.currentXp ?? 0} XP`
-    : `${activeProgress.currentXp}/${activeProgress.nextXp} XP`;
-
-  return (
-    <details className="collaborator-mastery" aria-label={`Maestrie di ${collaborator.displayName}`}>
-      <summary>
-        <span>Maestria operativa</span>
-        <strong>{activeRole && activeProgress ? `${COLLABORATOR_MASTERY_ROLE_LABELS[activeRole]} · ${activeProgress.definition.name}` : "Assegna un ruolo per iniziare"}</strong>
-        <small>{activeProgress ? `${activeXpLabel} · +${Math.round(activeProgress.definition.multiplier * 100)}%` : "6 percorsi disponibili"}</small>
-      </summary>
-      <div className="mastery-grid">
-        {COLLABORATOR_MASTERY_ROLES.map((role) => {
-          const progress = getCollaboratorMasteryProgress(mastery[role]);
-          const active = collaborator.assignment === role;
-          const xpLabel = progress.nextXp === undefined
-            ? `${progress.currentXp} XP`
-            : `${progress.currentXp}/${progress.nextXp} XP`;
-          return (
-            <div
-              className={active ? "mastery-entry active" : "mastery-entry"}
-              key={role}
-              title={`${COLLABORATOR_MASTERY_ROLE_LABELS[role]}: ${progress.definition.name}, ${xpLabel}`}
-            >
-              <strong>{progress.definition.name}</strong>
-              <small>{COLLABORATOR_MASTERY_ROLE_LABELS[role]} · +{Math.round(progress.definition.multiplier * 100)}% · {xpLabel}</small>
-              <div className="mastery-track" aria-hidden="true"><span style={{ width: `${progress.progress}%` }} /></div>
-            </div>
-          );
-        })}
-      </div>
-    </details>
-  );
-}
-
-function RarityOverview({ state }: { state: GameState }) {
-  const common = PERSON_RARITIES.common;
-  const rare = PERSON_RARITIES.rare;
-  const ultraRare = PERSON_RARITIES["ultra-rare"];
-  const legendary = PERSON_RARITIES.legendary;
-  const commonEnrollmentChance = getEnrollmentChance(state, "common");
-  const rareEnrollmentChance = getEnrollmentChance(state, "rare");
-  const ultraRareEnrollmentChance = getEnrollmentChance(state, "ultra-rare");
-  const legendaryEnrollmentChance = getEnrollmentChance(state, "legendary");
-  return (
-    <section className="rarity-overview" aria-label="Sistema di rarità">
-      <div><strong>Probabilità e rarità</strong><span>Valori base ed efficacia attuale con i tuoi potenziamenti</span></div>
-      <article><strong>Comune</strong><span>Comparsa: {percent.format(common.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "common"))}</span><span>Iscrizione: {percent.format(common.baseEnrollmentChance)} base · {percent.format(commonEnrollmentChance)} attuale · max {percent.format(common.maxEnrollmentChance)}</span><span>Effettiva base mail → iscritto: {percent.format(common.baseTrialBookingChance * common.baseEnrollmentChance)}</span><span>Non diventa collaboratore</span></article>
-      <article className="rare"><strong>Raro</strong><span>Comparsa: {percent.format(rare.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "rare"))}</span><span>Iscrizione: {percent.format(rare.baseEnrollmentChance)} base · {percent.format(rareEnrollmentChance)} attuale · max {percent.format(rare.maxEnrollmentChance)}</span><span>Effettiva base mail → iscritto: {percent.format(rare.baseTrialBookingChance * rare.baseEnrollmentChance)}</span><span>Non diventa collaboratore</span></article>
-      <article className="ultra-rare"><strong>Ultra Raro</strong><span>Comparsa: {percent.format(ultraRare.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "ultra-rare"))}</span><span>Iscrizione: {percent.format(ultraRare.baseEnrollmentChance)} base · {percent.format(ultraRareEnrollmentChance)} attuale · max {percent.format(ultraRare.maxEnrollmentChance)}</span><span>Effettiva base mail → iscritto: {percent.format(ultraRare.baseTrialBookingChance * ultraRare.baseEnrollmentChance)}</span><span>Diventa collaboratore completando il Corso Y</span></article>
-      <article className="legendary"><strong>Leggendario</strong><span>Comparsa: {percent.format(legendary.queueAppearanceChance)}</span><span>Prova dopo la mail: {percent.format(getEmailBookingChance(state, "legendary"))}</span><span>Iscrizione: {percent.format(legendary.baseEnrollmentChance)} base · {percent.format(legendaryEnrollmentChance)} attuale · max {percent.format(legendary.maxEnrollmentChance)}</span><span>Effettiva base mail → iscritto: {percent.format(legendary.baseTrialBookingChance * legendary.baseEnrollmentChance)}</span><span>Collaboratore dall'iscrizione · potere VIP ×2</span></article>
-    </section>
-  );
-}
-
-function PersonName({ displayName, rarity, label }: { displayName: string; rarity: PersonRarity; label?: string }) {
-  return <strong className={`rarity-name rarity-${rarity}`} data-label={label}>{displayName}{rarity === "legendary" ? <span className="special-collaborator-badge">VIP</span> : null}</strong>;
-}
-
-function TrainingFormPreview({ definition }: { definition: FormDefinition }) {
-  const logo = getFormLogo(definition.id);
-  return (
-    <div className="training-form-preview">
-      <img src={logo.assetPath} alt={`${definition.title} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`} />
-      <span>
-        <strong>{definition.title}</strong>
-        <small>{definition.branch ?? "Percorso lineare"}</small>
-      </span>
-    </div>
-  );
-}
-
-function TabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
-  return <button type="button" role="tab" aria-selected={active} className={active ? "active" : ""} onClick={onClick}>{label}</button>;
-}
-
-type InstructorTeachingEntry = {
-  id: string;
-  displayName: string;
-  training: NonNullable<FormStudent["training"]>;
-};
-
-function getInstructorTeachingStudents(state: GameState, instructorId: string): InstructorTeachingEntry[] {
-  return [
-    ...state.contacts.flatMap((contact) => contact.training?.instructorId === instructorId
-      ? [{ id: contact.id, displayName: `${contact.firstName} ${contact.lastName}`, training: contact.training }]
-      : []),
-    ...state.collaborators.flatMap((collaborator) => collaborator.training?.instructorId === instructorId
-      ? [{ id: collaborator.id, displayName: collaborator.displayName, training: collaborator.training }]
-      : []),
-  ];
-}
-
-function getTrainingProgress(training: NonNullable<FormStudent["training"]>, now: number): number {
-  const duration = training.completesAt - training.startedAt;
-  return duration <= 0 ? 100 : Math.min(100, Math.max(0, Math.round(((now - training.startedAt) / duration) * 100)));
-}
-
-function InstructorTeachingSummary({ entries, now }: { entries: InstructorTeachingEntry[]; now: number }) {
-  return (
-    <div className="instructor-teaching" aria-label="Allievi in formazione">
-      {entries.map((entry) => {
-        const definition = getFormDefinition(entry.training.formId);
-        const progress = getTrainingProgress(entry.training, now);
-        return (
-          <div className="instructor-student" key={entry.id}>
-            <span className="instructor-student-copy">
-              <strong>{entry.displayName}</strong>
-              <small>{definition?.title}{definition?.branch ? ` · ${definition.branch}` : ""}</small>
-            </span>
-            <strong className="instructor-student-progress">{progress}%</strong>
-            <div role="progressbar" aria-label={`Formazione di ${entry.displayName}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
-              <span style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function InstructorPanel({
-  collaborator,
-  state,
-  onStartTraining,
-  onToggle,
-}: {
-  collaborator: Collaborator;
-  state: GameState;
-  onStartTraining: (personId: string, formId: FormId) => void;
-  onToggle?: (collaboratorId: string, enabled: boolean) => void;
-}) {
-  const [now, setNow] = useState(() => Date.now());
-  const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
-  const capacity = selectInstructorCapacity(state);
-  const teaching = getInstructorTeachingStudents(state, collaborator.id);
-  const enabled = collaborator.autoTeachingEnabled !== false;
-  useEffect(() => {
-    if (teaching.length === 0) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
-    return () => window.clearInterval(timer);
-  }, [teaching.length]);
-
-  return <div className="instructor-panel">
-    <div className="instructor-panel-heading">
-      <span><strong>Lezioni automatiche</strong><small>{teachingCount}/{capacity} allievi</small></span>
-      <label className="instructor-toggle"><input type="checkbox" checked={enabled} onChange={(event) => onToggle?.(collaborator.id, event.target.checked)} /> Attive</label>
-    </div>
-    {teaching.length > 0
-      ? <InstructorTeachingSummary entries={teaching} now={now} />
-      : <small>{enabled ? "In attesa del prossimo allievo compatibile." : "Pausa: non verranno avviate nuove lezioni."}</small>}
-    <TrainingControl personId={collaborator.id} displayName={collaborator.displayName} student={collaborator} state={state} onStartTraining={onStartTraining} />
-  </div>;
-}
-
-function TrainingControl({
-  personId,
-  displayName,
-  student,
-  state,
-  onStartTraining,
-}: {
-  personId: string;
-  displayName: string;
-  student: FormStudent;
-  state: GameState;
-  onStartTraining: (personId: string, formId: FormId) => void;
-}) {
-  const [now, setNow] = useState(() => Date.now());
-  const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
-  const hasTraining = Boolean(student.training);
-  const currentYear = getSchoolYear(state.school.currentMonth);
-  const hasTrainedThisYear = student.lastFormTrainingYear === currentYear;
-  const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
-  useEffect(() => {
-    if (!hasTraining) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 100);
-    return () => window.clearInterval(timer);
-  }, [hasTraining]);
-
-  if (!state.unlocks.forms) {
-    return <div className="training-locked"><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
-  }
-  if (student.training) {
-    const definition = getFormDefinition(student.training.formId);
-    const instructor = student.training.instructorId
-      ? state.collaborators.find((candidate) => candidate.id === student.training?.instructorId)
-      : undefined;
-    const progress = getTrainingProgress(student.training, now);
-    return <div className="training-progress"><span>{definition?.title}{definition?.branch ? ` — ${definition.branch}` : ""}{instructor ? ` · con ${instructor.displayName}` : ""}{student.training.includesInstructorCertification ? " · attestato incluso" : ""}</span><strong>{progress}%</strong><div role="progressbar" aria-label={`Formazione di ${displayName}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: `${progress}%` }} /></div></div>;
-  }
-  if (isSummerBreak(state.school.currentMonth)) {
-    return <div className="training-locked"><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
-  }
-  const qualificationDefinitions = collaborator?.assignment === "instructor"
-    ? collaborator.forms.flatMap((formId) => {
-        const definition = getFormDefinition(formId);
-        return definition && isInstructorForm(formId) &&
-            !collaborator.instructorForms.includes(formId)
-          ? [definition]
-          : [];
-      })
-    : [];
-  const branchCapacity = collaborator?.assignment === "instructor"
-    ? Math.min(3, 1 + state.upgrades["instructor-versatility"])
-    : undefined;
-  const learnedBranches = new Set(collaborator?.forms.flatMap((formId) => {
-    const branch = getFormDefinition(formId)?.branch;
-    return branch ? [branch] : [];
-  }) ?? []);
-  const newForms = hasTrainedThisYear
-    ? []
-    : getAvailableForms(student, currentYear, branchCapacity, collaborator?.assignment !== "instructor")
-        .filter((definition) =>
-          !definition.branch ||
-          learnedBranches.size > 0 ||
-          !collaborator?.formBranchPreferences?.length ||
-          collaborator.formBranchPreferences.includes(definition.branch)
-        );
-  const academicallyAvailable = [...qualificationDefinitions, ...newForms];
-  const available = academicallyAvailable.filter((definition) => {
-    if (qualificationDefinitions.some((candidate) => candidate.id === definition.id)) return true;
-    if (collaborator?.assignment === "instructor") {
-      return selectInstructorTeachingCount(state, collaborator.id) === 0;
-    }
-    return true;
-  });
-  if (academicallyAvailable.length === 0) {
-    if (hasTrainedThisYear) {
-      return <div className="training-locked"><strong>Hai già completato la formazione quest'anno</strong></div>;
-    }
-    const latestForm = getFormDefinition(student.forms.at(-1)!);
-    return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;
-  }
-  if (available.length === 0) {
-    return <div className="training-locked"><span>Istruttore non disponibile</span><strong>Serve un Istruttore libero e attestato per questa Forma</strong></div>;
-  }
-  const needsSelection = qualificationDefinitions.length > 0 ||
-    (student.forms.includes("course-y") && available.length > 1);
-  const selected = needsSelection
-    ? available.find((definition) => definition.id === selectedFormId)
-    : available[0];
-  const selectedIsQualification = Boolean(
-    selected && qualificationDefinitions.some((definition) => definition.id === selected.id),
-  );
-  const selectedCost = selectedIsQualification && selected
-    ? getInstructorQualificationCost(selected.cost)
-    : selected && collaborator?.assignment === "instructor" && isInstructorForm(selected.id)
-      ? getInstructorFormCost(selected.cost)
-      : selected && collaborator?.assignment !== "instructor" && selectAvailableInstructor(state, selected.id, personId)
-        ? getStudentFormCost(selected.cost)
-      : selected?.cost ?? 0;
-  const actionLabel = !selected
-    ? "Seleziona una Forma"
-    : state.school.euros < selectedCost
-      ? `Servono ${euro.format(selectedCost)}`
-      : selectedIsQualification
-        ? "Ottieni qualifica"
-        : `Paga e avvia · ${euro.format(selectedCost)}`;
-  return (
-    <div className="training-control">
-      <div className="training-form-choice">
-        {needsSelection ? (
-          <label>
-            <span>{qualificationDefinitions.length > 0 ? "Scegli la prossima formazione" : "Scegli la specializzazione d'arma"}</span>
-            <select aria-label={`Formazione per ${displayName}`} value={selectedFormId} onChange={(event) => setSelectedFormId(event.target.value as FormId)}>
-              <option value="">Seleziona</option>
-              {available.map((definition) => {
-                const qualification = qualificationDefinitions.some((candidate) => candidate.id === definition.id);
-                const cost = qualification
-                  ? getInstructorQualificationCost(definition.cost)
-                  : collaborator?.assignment === "instructor" && isInstructorForm(definition.id)
-                    ? getInstructorFormCost(definition.cost)
-                    : collaborator?.assignment !== "instructor" && selectAvailableInstructor(state, definition.id, personId)
-                      ? getStudentFormCost(definition.cost)
-                      : definition.cost;
-                const hasInstructorDiscount = !qualification && collaborator?.assignment !== "instructor" && cost < definition.cost;
-                return <option key={definition.id} value={definition.id}>{qualification ? "Qualifica · " : ""}{definition.title}{definition.branch ? ` — ${definition.branch}` : ""}{definition.bonusLabel ? ` · ${definition.bonusLabel}` : ""} · {euro.format(cost)}{hasInstructorDiscount ? " · sconto Istruttore" : ""}{!qualification && cost > definition.cost ? " · qualifica inclusa" : ""}</option>;
-              })}
-            </select>
-          </label>
-        ) : (
-          <span className="training-form-label">Prossima formazione · anno scolastico {currentYear}</span>
-        )}
-        {selected ? <TrainingFormPreview definition={selected} /> : null}
-      </div>
-      <button type="button" disabled={!selected || state.school.euros < selectedCost} onClick={() => selected && onStartTraining(personId, selected.id)}>{actionLabel}</button>
-    </div>
   );
 }

@@ -17,6 +17,10 @@ const longDateFormatter = new Intl.DateTimeFormat("it-IT", {
   day: "numeric",
   month: "long",
 });
+const percentFormatter = new Intl.NumberFormat("it-IT", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
 
 export function formatCurrency(value: number): string {
   return currencyFormatter.format(value);
@@ -40,4 +44,8 @@ export function formatClock(value: number): string {
 
 export function formatLongDate(value: number): string {
   return longDateFormatter.format(value);
+}
+
+export function formatPercent(value: number): string {
+  return percentFormatter.format(value);
 }

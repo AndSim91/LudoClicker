@@ -1,0 +1,320 @@
+@media (max-width: 1050px) {
+  .profile-settings-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-settings-form button {
+    align-self: flex-start;
+  }
+
+  .income-summary {
+    grid-template-columns: 1fr auto;
+  }
+
+  .income-summary > p {
+    display: none;
+  }
+
+  .upgrade-row,
+  .trial-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .event-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .upgrade-effect,
+  .upgrade-price,
+  .upgrade-row button,
+  .trial-card > button {
+    grid-column: 2;
+  }
+
+  .event-row > button {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .event-capacity-note {
+    grid-template-columns: 1fr;
+  }
+
+  .event-capacity-note > div + div {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .event-equipment-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .event-equipment-heading small {
+    text-align: left;
+  }
+
+  .event-equipment-supplier {
+    margin-left: 0;
+  }
+
+  .upgrade-price {
+    text-align: left;
+  }
+}
+
+@media (max-width: 1300px) {
+  .workspace {
+    grid-template-columns: 58px 190px 280px minmax(480px, 1fr);
+  }
+
+  .overview-workspace {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .day-panel {
+    display: none;
+  }
+
+  .command {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Dark theme: calm blue-black surfaces keep the simulated mail readable while
+   preserving the light paper treatment inside campaign emails. */
+:root[data-theme="dark"] .short-goal-card,
+:root[data-theme="dark"] .shop-guide,
+:root[data-theme="dark"] .instructor-panel,
+:root[data-theme="dark"] .event-notice,
+:root[data-theme="dark"] .income-summary,
+:root[data-theme="dark"] .calendar-summary {
+  border-color: #2f5b80;
+}
+
+:root[data-theme="dark"] .short-goal-card,
+:root[data-theme="dark"] .shop-guide,
+:root[data-theme="dark"] .instructor-panel,
+:root[data-theme="dark"] .event-notice,
+:root[data-theme="dark"] .income-summary,
+:root[data-theme="dark"] .calendar-summary,
+:root[data-theme="dark"] .network-heading {
+  background: var(--blue-050);
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .application-shell,
+:root[data-theme="dark"] .composer,
+:root[data-theme="dark"] .message-detail,
+:root[data-theme="dark"] .empty-composer,
+:root[data-theme="dark"] .sent-mail-detail,
+:root[data-theme="dark"] .message-row,
+:root[data-theme="dark"] .list-tabs,
+:root[data-theme="dark"] .format-bar select,
+:root[data-theme="dark"] .profile-settings-form input,
+:root[data-theme="dark"] .profile-dialog input,
+:root[data-theme="dark"] .foundation-fields input,
+:root[data-theme="dark"] .foundation-fields select,
+:root[data-theme="dark"] .event-fame-note {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .title-bar {
+  background: #0f5fab;
+}
+
+:root[data-theme="dark"] .primary-command {
+  background: #0f6cbd;
+}
+
+:root[data-theme="dark"] .app-rail {
+  background: var(--surface-rail);
+}
+
+:root[data-theme="dark"] .folder-pane,
+:root[data-theme="dark"] .event-capacity-note,
+:root[data-theme="dark"] .report-head,
+:root[data-theme="dark"] .table-head,
+:root[data-theme="dark"] .people-head,
+:root[data-theme="dark"] .section-heading,
+:root[data-theme="dark"] .calendar-title,
+:root[data-theme="dark"] .trial-time,
+:root[data-theme="dark"] .rarity-overview,
+:root[data-theme="dark"] .rarity-overview article,
+:root[data-theme="dark"] .mastery-entry,
+:root[data-theme="dark"] .settings-sheet button:disabled,
+:root[data-theme="dark"] .foundation-form button:disabled,
+:root[data-theme="dark"] .upgrade-row button:disabled,
+:root[data-theme="dark"] .event-row > button:disabled,
+:root[data-theme="dark"] .training-control button:disabled,
+:root[data-theme="dark"] .social-panel > button:disabled,
+:root[data-theme="dark"] .profile-dialog button:disabled {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .message-list,
+:root[data-theme="dark"] .status-bar,
+:root[data-theme="dark"] .day-panel {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .rail-item {
+  color: var(--ink-muted);
+}
+
+:root[data-theme="dark"] .rail-item:hover,
+:root[data-theme="dark"] .command:hover:not(:disabled),
+:root[data-theme="dark"] .icon-command:hover,
+:root[data-theme="dark"] .upgrade-command:hover:not(:disabled),
+:root[data-theme="dark"] .message-row:hover {
+  background: #22313f;
+}
+
+:root[data-theme="dark"] .rail-item.active,
+:root[data-theme="dark"] .message-row.selected,
+:root[data-theme="dark"] .folder:hover,
+:root[data-theme="dark"] .folder.active,
+:root[data-theme="dark"] .mastery-entry.active,
+:root[data-theme="dark"] .upgrade-row.recommended,
+:root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {
+  background: #18334c;
+}
+
+:root[data-theme="dark"] .folder.active,
+:root[data-theme="dark"] .list-tabs button.active,
+:root[data-theme="dark"] .composer-tabs > button.active,
+:root[data-theme="dark"] .people-tabs button.active,
+:root[data-theme="dark"] .upgrade-command,
+:root[data-theme="dark"] .instructor-toggle,
+:root[data-theme="dark"] .event-equipment-supplier a {
+  color: var(--blue-700);
+}
+
+:root[data-theme="dark"] .upgrade-command {
+  border-color: #2f5b80;
+  background: #12283d;
+}
+
+:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
+:root[data-theme="dark"] .event-row > button:hover:not(:disabled) {
+  background: #3e8cda;
+}
+
+:root[data-theme="dark"] .short-goal-progress,
+:root[data-theme="dark"] .trial-progress,
+:root[data-theme="dark"] .event-progress,
+:root[data-theme="dark"] .mastery-track,
+:root[data-theme="dark"] .training-progress > div,
+:root[data-theme="dark"] .equipment-wear,
+:root[data-theme="dark"] .social-progress,
+:root[data-theme="dark"] .progress-dots i {
+  background: #29445c;
+}
+
+:root[data-theme="dark"] .short-goal-footer strong,
+:root[data-theme="dark"] .status.enrolled,
+:root[data-theme="dark"] .sent-status.iscritto,
+:root[data-theme="dark"] .campaign-status.iscritto {
+  color: var(--success);
+}
+
+:root[data-theme="dark"] .appointment-enrolled {
+  background: #173326;
+}
+
+:root[data-theme="dark"] .appointment-lost {
+  background: #3a2426;
+}
+
+:root[data-theme="dark"] .trial-status.iscritto {
+  color: var(--success);
+  background: #173326;
+}
+
+:root[data-theme="dark"] .trial-status.perso {
+  color: var(--warning);
+  background: #3a2426;
+}
+
+:root[data-theme="dark"] .rarity-address.rarity-common {
+  background: var(--blue-100);
+}
+
+:root[data-theme="dark"] .rarity-address.rarity-rare {
+  color: #d7b7ff;
+  background: #34204f;
+}
+
+:root[data-theme="dark"] .rarity-address.rarity-ultra-rare {
+  color: #ffb4ab;
+  background: #4b1f24;
+}
+
+:root[data-theme="dark"] .rarity-address.rarity-legendary,
+:root[data-theme="dark"] .collaborator-copy .special-collaborator-badge,
+:root[data-theme="dark"] .people-row .special-collaborator-badge {
+  color: #ffd979;
+  background: #433719;
+}
+
+:root[data-theme="dark"] .collaborator-copy .special-collaborator-badge,
+:root[data-theme="dark"] .people-row .special-collaborator-badge {
+  border-color: #9b7628;
+}
+
+:root[data-theme="dark"] .person-avatar.special-avatar,
+:root[data-theme="dark"] .person-avatar.rarity-legendary {
+  color: #3c2b08;
+}
+
+:root[data-theme="dark"] .special-name,
+:root[data-theme="dark"] .rarity-name.rarity-legendary,
+:root[data-theme="dark"] .rarity-overview .legendary > strong {
+  color: #ffd979;
+}
+
+:root[data-theme="dark"] .rarity-name.rarity-rare,
+:root[data-theme="dark"] .rarity-overview .rare > strong {
+  color: #d7b7ff;
+}
+
+:root[data-theme="dark"] .rarity-name.rarity-ultra-rare,
+:root[data-theme="dark"] .rarity-overview .ultra-rare > strong {
+  color: #ffb4ab;
+}
+
+:root[data-theme="dark"] .form-logo-item img {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .settings-sheet button.secondary {
+  color: var(--blue-700);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .profile-gate {
+  background:
+    radial-gradient(circle at 20% 15%, rgb(92 168 245 / 17%), transparent 34%),
+    linear-gradient(145deg, #0f1d2b, #111a24 58%, #172736);
+}
+
+:root[data-theme="dark"] .profile-dialog {
+  border-color: rgb(92 168 245 / 35%);
+  background: rgb(17 26 36 / 96%);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 42%);
+}
+
+:root[data-theme="dark"] .event-fame-note {
+  border-color: var(--line);
+}

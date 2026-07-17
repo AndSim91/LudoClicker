@@ -619,15 +619,30 @@ describe("local save", () => {
       .toBe("ultra-rare");
   });
 
-  it("keeps only the latest 30 school history entries when loading a version 32 save", () => {
+  it("runs every later migration when loading a version 32 save", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 32;
+    legacy.school.activeMembers = 1;
+    legacy.school.historicMembers = 3;
+    legacy.contacts = legacy.contacts.map((contact: { status: string }, index: number) => ({
+      ...contact,
+      status: index < 3 ? "enrolled" : contact.status,
+    }));
+    const renewalContacts = legacy.contacts.slice(1, 3);
     legacy.narrative.history = Array.from({ length: 35 }, (_, index) => ({
       id: `story-${index}`,
-      definitionId: "word-of-mouth",
+      definitionId: index >= 33 ? "missed-renewal" : "word-of-mouth",
       title: `Episodio ${index}`,
       occurredAt: 1_000 + index,
       summary: `Dettaglio ${index}`,
+      ...(index >= 33
+        ? {
+            person: {
+              displayName: `${renewalContacts[index - 33].firstName} ${renewalContacts[index - 33].lastName}`,
+              rarity: "common",
+            },
+          }
+        : {}),
     }));
     legacy.statistics.narrativeEvents = 35;
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
@@ -637,6 +652,8 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.narrative.history).toHaveLength(GAME_CONFIG.narrativeHistoryLimit);
     expect(migrated.narrative.history[0].id).toBe("story-5");
+    expect(migrated.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
+    expect(migrated.contacts.filter((contact) => contact.status === "departed")).toHaveLength(2);
   });
 
   it("repairs enrolled contacts left behind by missed renewals in version 33 saves", () => {

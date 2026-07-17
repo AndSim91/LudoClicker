@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
+import { TabButton } from "../../components/common/TabButton";
 import {
   UPGRADE_CATEGORIES,
   UPGRADE_DEFINITIONS,
@@ -156,9 +157,17 @@ export function UpgradesView({
 
       <section className="shop-guide" aria-label="Guida ai miglioramenti">
         <div className="shop-filters" role="tablist" aria-label="Filtra miglioramenti">
-          <FilterButton active={filter === "recommended"} onClick={() => setFilter("recommended")} label={`Consigliati (${recommendedIds.size})`} />
-          <FilterButton active={filter === "available"} onClick={() => setFilter("available")} label={`Disponibili (${availableCount})`} />
-          {showFullCatalog ? <FilterButton active={filter === "all"} onClick={() => setFilter("all")} label={`Catalogo completo (${UPGRADE_DEFINITIONS.length})`} /> : null}
+          <TabButton active={filter === "recommended"} onClick={() => setFilter("recommended")}>
+            Consigliati ({recommendedIds.size})
+          </TabButton>
+          <TabButton active={filter === "available"} onClick={() => setFilter("available")}>
+            Disponibili ({availableCount})
+          </TabButton>
+          {showFullCatalog ? (
+            <TabButton active={filter === "all"} onClick={() => setFilter("all")}>
+              Catalogo completo ({UPGRADE_DEFINITIONS.length})
+            </TabButton>
+          ) : null}
         </div>
         {nextUnlockCount > 0 ? (
           <p><strong>Prossimo sblocco:</strong> {nextUnlockCount} miglioramenti a {nextUnlockThreshold} iscritti storici.</p>
@@ -205,16 +214,4 @@ export function UpgradesView({
       })}
     </main>
   );
-}
-
-function FilterButton({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return <button type="button" role="tab" aria-selected={active} className={active ? "active" : ""} onClick={onClick}>{label}</button>;
 }

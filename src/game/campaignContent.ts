@@ -1,5 +1,6 @@
 import { EMAIL_TEMPLATES, resolveEmailTemplateCopy } from "../content/emailTemplates";
-import type { CampaignEmail, InboxMessage, Contact } from "./types";
+import { getEmailBuildLength } from "../content/emailBuild";
+import type { CampaignEmail, InboxMessage, Contact, GameState } from "./types";
 import { makeGameId } from "./ids";
 
 export function createCampaign(
@@ -42,5 +43,37 @@ export function createWelcomeMessage(now: number): InboxMessage {
     receivedAt: now,
     tone: "system",
     unread: true,
+  };
+}
+
+export function refreshWritingCampaignCopies(state: GameState): GameState {
+  return {
+    ...state,
+    emails: state.emails.map((email) => {
+      if (email.status !== "writing") return email;
+      const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
+      const template = EMAIL_TEMPLATES.find((candidate) => candidate.id === email.templateId);
+      if (!contact || !template) return email;
+      const copy = resolveEmailTemplateCopy(
+        template,
+        contact.firstName,
+        state.profile.displayName,
+        email.presentationLevel,
+        state.school.name,
+        state.school.city,
+      );
+      const updatedEmail = {
+        ...email,
+        subject: copy.subject,
+        body: copy.body,
+      };
+      return {
+        ...updatedEmail,
+        revealedCharacters: Math.min(
+          email.revealedCharacters,
+          getEmailBuildLength(updatedEmail),
+        ),
+      };
+    }),
   };
 }

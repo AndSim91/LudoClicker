@@ -1,0 +1,166 @@
+.day-panel {
+  min-width: 0;
+  overflow: auto;
+  padding: 11px 13px;
+  border-left: 1px solid var(--line);
+  background: #fdfdfd;
+}
+
+.today {
+  padding: 12px 8px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.day-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 58px 20px 42px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.day-empty svg {
+  width: 29px;
+  height: 29px;
+  margin-bottom: 14px;
+  color: var(--blue-600);
+}
+
+.day-empty strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.day-empty span {
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.appointment {
+  display: grid;
+  grid-template-columns: 68px 3px minmax(0, 1fr);
+  gap: 9px;
+  min-height: 82px;
+  padding: 13px 8px;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.appointment-entry {
+  border-bottom: 1px solid var(--line);
+  animation: appointment-entry-arrive 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes appointment-entry-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.appointment-expiry {
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.appointment-expiry > span {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  transition: width 100ms linear;
+}
+
+.appointment-entry-enrolled .appointment-expiry {
+  color: var(--success);
+}
+
+.appointment-entry-lost .appointment-expiry {
+  color: var(--warning);
+}
+
+.appointment-timing {
+  align-self: start;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.appointment > i {
+  border-radius: 2px;
+  background: var(--blue-500);
+  transition: background-color 180ms ease;
+}
+
+.appointment-in-progress .appointment-timing {
+  color: var(--blue-700);
+}
+
+.appointment-enrolled {
+  background: #edf7ee;
+}
+
+.appointment-enrolled > i {
+  background: var(--success);
+}
+
+.appointment-enrolled .appointment-timing {
+  color: var(--success);
+}
+
+.appointment-lost {
+  background: #fdf0f0;
+}
+
+.appointment-lost > i {
+  background: var(--warning);
+}
+
+.appointment-lost .appointment-timing {
+  color: var(--warning);
+}
+
+.appointment > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.appointment strong,
+.appointment span,
+.appointment small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment span,
+.appointment small {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.add-event {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px;
+  color: var(--blue-600);
+  background: transparent;
+}
+
+.add-event svg {
+  width: 16px;
+}
+

@@ -1,6 +1,10 @@
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACHIEVEMENTS } from "../../content/achievements";
+import {
+  AUTOMATION_ASSIGNMENTS,
+  COLLABORATOR_ASSIGNMENT_LABELS,
+} from "../../content/collaboratorRoles";
 import { GAME_CONFIG } from "../../game/config";
 import type { GameState } from "../../game/types";
 import { formatCurrency, formatTime } from "../../shared/formatters";
@@ -54,11 +58,13 @@ export function ActivitiesView({
       {showCollaborators ? <section className="automation-panel" aria-label="Assegnazioni collaboratori">
         <div className="automation-heading"><div><Icon name="people" /><span><strong>Collaboratori delle Onde</strong><small>{state.collaborators.length} disponibili · una assegnazione per persona</small></span></div><b>{state.statistics.automatedCharacters} caratteri automatici</b></div>
         <div className="assignment-grid">
-          <Assignment label="Redazione" value={assigned("writing")} />
-          <Assignment label="Eventi" value={assigned("events")} />
-          <Assignment label="Lezioni" value={assigned("lessons")} />
-          <Assignment label="Social" value={assigned("social")} />
-          <Assignment label="Attrezzatura" value={assigned("equipment")} />
+          {AUTOMATION_ASSIGNMENTS.map((assignment) => (
+            <Assignment
+              key={assignment}
+              label={COLLABORATOR_ASSIGNMENT_LABELS[assignment]}
+              value={assigned(assignment)}
+            />
+          ))}
         </div>
       </section> : null}
 

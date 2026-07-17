@@ -1,0 +1,239 @@
+.training-locked,
+.training-progress,
+.training-control,
+.training-control label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.training-locked span,
+.training-progress > span,
+.training-control label > span {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.training-locked strong,
+.training-progress > strong {
+  color: var(--blue-700);
+  font-size: 12px;
+}
+
+.training-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: end;
+}
+
+.training-form-choice {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.training-form-label {
+  display: none;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.training-control select {
+  width: 100%;
+}
+
+.training-form-preview {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.training-form-preview img {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.training-form-preview > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.training-form-preview strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.training-form-preview small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.training-control button {
+  min-height: 36px;
+  padding: 5px 9px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-sm);
+  color: white;
+  background: var(--blue-600);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.training-control button:disabled {
+  border-color: var(--line-strong);
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.instructor-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid #c7dcef;
+  border-radius: var(--radius-sm);
+  background: #f5faff;
+}
+
+@media (max-width: 1100px) {
+  .people-view .collaborator-row {
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    min-height: 0;
+    padding: 16px 0;
+  }
+
+  .people-view .collaborator-row > .collaborator-copy {
+    grid-column: 2;
+  }
+
+  .people-view .collaborator-row > label,
+  .people-view .collaborator-row > .instructor-panel,
+  .people-view .collaborator-row > .training-control,
+  .people-view .collaborator-row > .training-locked,
+  .people-view .collaborator-row > .training-progress {
+    grid-column: 1 / -1;
+  }
+
+  .people-view .collaborator-row > label {
+    margin-top: 4px;
+  }
+
+  .people-view .collaborator-row > .instructor-panel {
+    width: 100%;
+  }
+}
+
+.instructor-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.instructor-panel-heading > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.instructor-panel-heading > span > strong {
+  font-size: 12px;
+}
+
+.instructor-panel-heading > span > small,
+.instructor-panel > small {
+  color: var(--ink-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.instructor-toggle {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px !important;
+  color: var(--blue-700);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.instructor-teaching {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 1px;
+  padding: 7px 0 1px;
+  border-top: 1px solid #c7dcef;
+}
+
+.instructor-student {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  min-width: 0;
+  align-items: center;
+  gap: 3px 8px;
+}
+
+.instructor-student-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.instructor-student-copy strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instructor-student-copy small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instructor-student-progress {
+  color: var(--blue-700);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.instructor-student > [role="progressbar"] {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d9e7f4;
+}
+
+.instructor-student > [role="progressbar"] > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue-600);
+  transition: width 300ms ease;
+}
+
