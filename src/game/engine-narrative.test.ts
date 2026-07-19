@@ -81,7 +81,7 @@ describe("game engine: narrative", () => {
             firstName: index === 0 ? "Allievo" : "Secondo",
             lastName: "Storico",
             status: "enrolled" as const,
-            rarity: index === 0 ? "rare" as const : "common" as const,
+            rarity: index === 0 ? "rare" as const : "legendary" as const,
           }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
@@ -92,13 +92,15 @@ describe("game engine: narrative", () => {
 
     expect(resolved).toBeDefined();
     const event = resolved!.narrative.history[0];
-    expect(event.person?.displayName).toMatch(/^(Allievo|Secondo) Storico$/);
+    expect(event.person?.displayName).toBe("Allievo Storico");
     const affectedMember = due.contacts.find((contact) =>
       `${contact.firstName} ${contact.lastName}` === event.person?.displayName,
     );
     expect(event.person?.rarity).toBe(affectedMember?.rarity);
     expect(resolved!.contacts.find((contact) => contact.id === affectedMember?.id)?.status)
       .toBe("departed");
+    expect(resolved!.contacts.find((contact) => contact.firstName === "Secondo")?.status)
+      .toBe("enrolled");
     expect(resolved!.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
     expect(resolved!.school.activeMembers).toBe(1);
     expect(resolved!.statistics.membersDeparted).toBe(1);
@@ -110,6 +112,9 @@ describe("game engine: narrative", () => {
       ...initial,
       randomSeed: 0,
       school: { ...initial.school, activeMembers: 3 },
+      contacts: initial.contacts.map((contact, index) => index < 3
+        ? { ...contact, status: "enrolled" as const }
+        : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 

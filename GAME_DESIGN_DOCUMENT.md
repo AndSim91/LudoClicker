@@ -513,16 +513,18 @@ Regole:
 - non esiste un limite massimo di collaboratori;
 - ogni collaboratore svolge un solo incarico alla volta;
 - la riassegnazione è libera e immediata;
-- un collaboratore non leggendario può lasciare la scuola soltanto tramite eventi narrativi casuali; i Leggendari seguono le regole interne descritte sotto.
+- un collaboratore non leggendario può lasciare la scuola soltanto tramite eventi narrativi casuali;
+- i Leggendari non possono lasciare la scuola per inattività, mancato rinnovo o altri eventi generici.
 
 Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 
-- Andrea Simonazzi è garantito come 9° contatto nella scuola iniziale; nelle scuole successive la sua comparsa torna casuale come per ogni altro Leggendario, senza garanzie di prenotazione, iscrizione o permanenza;
-- tutti i Leggendari possono lasciare la scuola con una probabilità annuale pari al 10% del rischio ordinario associato alla loro Forma più alta fino alla Forma 6; a Forma 7 usano la curva specifica per rarità e prestigio;
+- Andrea Simonazzi è garantito come 9° contatto nella scuola iniziale; nelle scuole successive la sua comparsa torna casuale come per ogni altro Leggendario, senza garanzie di prenotazione o iscrizione;
+- la probabilità annuale di abbandono di tutti i Leggendari è sempre 0%, indipendentemente dalla formazione e dal numero di scuole fondate;
+- l'unico modo previsto per perdere un Leggendario sarà un evento narrativo dedicato, non ancora implementato; finché l'evento non esiste, un Leggendario iscritto resta nella scuola per sempre;
 - la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto idoneo: dal decimo nella scuola iniziale e fin dal primo nelle scuole successive;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della nuova scuola;
-- dopo un abbandono tornano disponibili per incontri futuri;
-- una nuova iscrizione ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
+- dopo l'eventuale abbandono causato dall'evento dedicato tornano disponibili per incontri futuri;
+- una nuova iscrizione successiva all'evento dedicato ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
 
 ### 9.3 Ruoli
 
@@ -616,24 +618,25 @@ Regole:
 
 Nel passaggio tra Giugno e Luglio, un iscritto che ha trascorso l'anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
 
+- tutti i Leggendari, anche se ignorati per più anni;
 - i Collaboratori delle Onde non leggendari;
 - gli iscritti entrati a anno già iniziato;
 - chi ha iniziato una formazione durante l'anno, anche se non l'ha ancora completata.
 
-La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Fino alla Forma 6, Comuni, Rari e Ultra Rari seguono la curva ordinaria mentre i Leggendari ne ricevono il 10%. A Forma 7 si applicano valori specifici per rarità. Normalmente un Ultra Raro è già collaboratore dal Corso Y ed è quindi escluso da questo controllo.
+La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Comuni, Rari e Ultra Rari seguono la curva ordinaria fino alla Forma 6; a Forma 7 si applicano valori specifici per rarità. I Leggendari hanno sempre probabilità 0%. Normalmente un Ultra Raro è già collaboratore dal Corso Y ed è quindi escluso da questo controllo.
 
 | Forma più alta | Comuni | Rari | Ultra Rari | Leggendari |
 |---|---:|---:|---:|---:|
-| Nessuna Forma | 80% | 80% | 80% | 8% |
-| Forma 1 | 65% | 65% | 65% | 6,5% |
-| Forma 2 | 50% | 50% | 50% | 5% |
-| Forma 3 | 35% | 35% | 35% | 3,5% |
-| Forma 4 | 25% | 25% | 25% | 2,5% |
-| Forma 5 | 15% | 15% | 15% | 1,5% |
-| Forma 6 | 10% | 10% | 10% | 1% |
+| Nessuna Forma | 80% | 80% | 80% | 0% |
+| Forma 1 | 65% | 65% | 65% | 0% |
+| Forma 2 | 50% | 50% | 50% | 0% |
+| Forma 3 | 35% | 35% | 35% | 0% |
+| Forma 4 | 25% | 25% | 25% | 0% |
+| Forma 5 | 15% | 15% | 15% | 0% |
+| Forma 6 | 10% | 10% | 10% | 0% |
 | Forma 7, prima scuola | 2,5% | 0,5% | 0,25% | 0% |
 
-Per ogni nuova scuola già fondata, i quattro valori di **Forma 7** aumentano di **0,5 punti percentuali**. Per esempio, nella seconda scuola diventano rispettivamente 3%, 1%, 0,75% e 0,5%. La regola si applica allo stesso modo ad Andrea Simonazzi e a tutti gli altri Leggendari.
+Per ogni nuova scuola già fondata, i valori di **Forma 7** di Comuni, Rari e Ultra Rari aumentano di **0,5 punti percentuali**. Per esempio, nella seconda scuola diventano rispettivamente 3%, 1% e 0,75%. I Leggendari restano sempre allo 0%.
 
 ---
 

@@ -2,6 +2,7 @@ import {
   getUpgradeCost,
   getUpgradeDefinition,
   getUpgradeEffectTotal,
+  hasCompletedUpgradePrerequisites,
 } from "../content/upgrades";
 import { synchronizeEquipmentAvailability } from "./equipment";
 import { getWritingPower } from "./formulas";
@@ -13,7 +14,8 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   const currentLevel = state.upgrades[upgradeId];
   if (
     currentLevel >= definition.maxLevel ||
-    state.school.historicMembers < definition.requiredHistoricMembers
+    state.school.historicMembers < definition.requiredHistoricMembers ||
+    !hasCompletedUpgradePrerequisites(state.upgrades, definition)
   ) {
     return state;
   }

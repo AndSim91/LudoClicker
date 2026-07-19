@@ -14,7 +14,9 @@ import {
   getEnrollmentChance,
   getMemberAnnualDepartureChance,
 } from "./formulas";
+import { departMembers } from "./membershipFlow";
 import { selectActiveEmail } from "./selectors";
+import type { GameState } from "./types";
 
 describe("game engine: funnel", () => {
   it("creates a playable tutorial state", () => {
@@ -549,7 +551,7 @@ describe("game engine: funnel", () => {
     expect(advanced.school.euros).toBe(0);
   });
 
-  it("lets ignored ordinary members leave in the June to July transition", () => {
+  it("lets ignored ordinary members leave but always retains Legendaries", () => {
     const initial = createInitialState(1_000);
     const [ignored, trained, legendary, collaboratorMember, recent] = initial.contacts;
     const contacts = [
@@ -587,6 +589,7 @@ describe("game engine: funnel", () => {
     const renewed = gameReducer(state, { type: "TICK", now: 2_000 });
 
     expect(renewed.contacts.find((contact) => contact.id === ignored.id)?.status).toBe("departed");
+    expect(renewed.contacts.find((contact) => contact.id === legendary.id)?.status).toBe("enrolled");
     expect(renewed.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(3);
     expect(renewed.school.activeMembers).toBe(3);
     expect(renewed.statistics.membersDeparted).toBe(2);
@@ -604,7 +607,7 @@ describe("game engine: funnel", () => {
     expect(getMemberAnnualDepartureChance([])).toBe(0.8);
     expect(getMemberAnnualDepartureChance(["form-1", "course-x"])).toBe(0.65);
     expect(getMemberAnnualDepartureChance(["form-1", "course-x", "form-2", "course-y"])).toBe(0.5);
-    expect(getMemberAnnualDepartureChance([], "legendary")).toBeCloseTo(0.08);
+    expect(getMemberAnnualDepartureChance([], "legendary")).toBe(0);
 
     const formSeven = ["form-1", "course-x", "form-2", "course-y", "form-3-staff", "form-4-staff", "form-5-staff", "form-6", "form-7"] as const;
     expect(getMemberAnnualDepartureChance([...formSeven], "common", 0)).toBe(0.025);
@@ -612,13 +615,13 @@ describe("game engine: funnel", () => {
     expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 0)).toBe(0);
     expect(getMemberAnnualDepartureChance([...formSeven], "common", 1)).toBeCloseTo(0.03);
     expect(getMemberAnnualDepartureChance([...formSeven], "rare", 1)).toBeCloseTo(0.01);
-    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 1)).toBeCloseTo(0.005);
+    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 1)).toBe(0);
     expect(getMemberAnnualDepartureChance([...formSeven], "common", 3)).toBeCloseTo(0.04);
     expect(getMemberAnnualDepartureChance([...formSeven], "rare", 3)).toBeCloseTo(0.02);
-    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 3)).toBeCloseTo(0.015);
+    expect(getMemberAnnualDepartureChance([...formSeven], "legendary", 3)).toBe(0);
   });
 
-  it("lets Andrea leave under the same rules and retains his full progress", () => {
+  it("protects Legendary members from every generic departure request", () => {
     const initial = createInitialState(1_000);
     const [andreaContact, evaContact] = initial.contacts;
     const contacts = initial.contacts.map((contact) => {
@@ -672,7 +675,7 @@ describe("game engine: funnel", () => {
         lastFormTrainingYear: 0,
       },
     ];
-    const renewed = gameReducer({
+    const state: GameState = {
       ...initial,
       randomSeed: 7,
       contacts,
@@ -690,28 +693,21 @@ describe("game engine: funnel", () => {
         encounteredProfileIds: ["andrea-simonazzi", "eva-parodi"],
         enrolledProfileIds: ["andrea-simonazzi", "eva-parodi"],
       },
-    }, { type: "TICK", now: 2_000 });
+    };
+    const directlyRequested = departMembers(state, [andreaContact.id, evaContact.id]);
+    const renewed = gameReducer(state, { type: "TICK", now: 2_000 });
 
-    expect(renewed.contacts.find((contact) => contact.id === andreaContact.id)).toMatchObject({
-      status: "departed",
-      forms: ["form-1"],
-    });
-    expect(renewed.collaborators.some((collaborator) =>
-      collaborator.specialProfileId === "andrea-simonazzi"
-    )).toBe(false);
-    expect(renewed.contacts.find((contact) => contact.id === evaContact.id)?.status)
-      .toBe("enrolled");
-    expect(renewed.collaborators.some((collaborator) =>
-      collaborator.specialProfileId === "eva-parodi"
-    )).toBe(true);
-    expect(renewed.legendaryCollaborators.enrolledProfileIds)
-      .toEqual(["eva-parodi"]);
-    expect(renewed.legendaryCollaborators.retainedProgress["andrea-simonazzi"]).toEqual({
-      forms: ["form-1"],
-      instructorForms: ["form-1"],
-      formBranchPreferences: [],
-      joinedAt: 1_000,
-      lastFormTrainingYear: 0,
-    });
+    for (const result of [directlyRequested, renewed]) {
+      expect(result.contacts.find((contact) => contact.id === andreaContact.id)?.status)
+        .toBe("enrolled");
+      expect(result.contacts.find((contact) => contact.id === evaContact.id)?.status)
+        .toBe("enrolled");
+      expect(result.collaborators).toHaveLength(2);
+      expect(result.school.activeMembers).toBe(2);
+      expect(result.statistics.membersDeparted).toBe(0);
+      expect(result.legendaryCollaborators.enrolledProfileIds)
+        .toEqual(["andrea-simonazzi", "eva-parodi"]);
+      expect(result.legendaryCollaborators.retainedProgress).toEqual({});
+    }
   });
 });

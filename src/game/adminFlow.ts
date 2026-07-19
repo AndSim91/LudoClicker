@@ -38,6 +38,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
   const nextActiveMembers = Math.max(0, state.school.activeMembers + amount);
   const enrolledContacts = state.contacts.filter((contact) => contact.status === "enrolled");
   let nextState = state;
+  let resolvedActiveMembers = nextActiveMembers;
 
   if (enrolledContacts.length < nextActiveMembers) {
     const missingMembers = nextActiveMembers - enrolledContacts.length;
@@ -70,10 +71,15 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
       },
     };
   } else if (enrolledContacts.length > nextActiveMembers) {
+    const requestedDepartures = enrolledContacts.length - nextActiveMembers;
     const departingIds = enrolledContacts
-      .slice(nextActiveMembers)
+      .filter((contact) => contact.rarity !== "legendary")
+      .slice(-requestedDepartures)
       .map((contact) => contact.id);
     nextState = departMembers(state, departingIds, false);
+    resolvedActiveMembers = nextState.contacts.filter(
+      (contact) => contact.status === "enrolled",
+    ).length;
     nextState = {
       ...nextState,
       statistics: state.statistics,
@@ -81,9 +87,9 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
   }
 
   const historicMembers = amount > 0
-    ? Math.max(state.school.historicMembers + amount, nextActiveMembers)
-    : Math.max(state.school.historicMembers, nextActiveMembers);
-  if (!Number.isSafeInteger(nextActiveMembers) || !Number.isSafeInteger(historicMembers)) {
+    ? Math.max(state.school.historicMembers + amount, resolvedActiveMembers)
+    : Math.max(state.school.historicMembers, resolvedActiveMembers);
+  if (!Number.isSafeInteger(resolvedActiveMembers) || !Number.isSafeInteger(historicMembers)) {
     return state;
   }
 
@@ -91,14 +97,14 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     ...nextState,
     school: {
       ...nextState.school,
-      activeMembers: nextActiveMembers,
-      peakActiveMembers: Math.max(nextState.school.peakActiveMembers, nextActiveMembers),
+      activeMembers: resolvedActiveMembers,
+      peakActiveMembers: Math.max(nextState.school.peakActiveMembers, resolvedActiveMembers),
       historicMembers,
     },
     unlocks: {
       ...nextState.unlocks,
       upgrades: amount > 0 ? true : nextState.unlocks.upgrades,
-      social: amount > 0 && hasSocialMemberRequirement(nextActiveMembers)
+      social: amount > 0 && hasSocialMemberRequirement(resolvedActiveMembers)
         ? true
         : nextState.unlocks.social,
       forms: amount > 0 ? true : nextState.unlocks.forms,

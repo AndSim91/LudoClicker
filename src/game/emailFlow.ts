@@ -102,7 +102,7 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
       nextState,
       now,
       "Configurazione campagna completata",
-      "Hai inviato la tua prima email! Il sistema registrerÃ  eventuali risposte e appuntamenti automaticamente senza interrompere la stesura delle tue prossime email",
+      "Hai inviato la tua prima email! Il sistema registrerà eventuali risposte e appuntamenti automaticamente senza interrompere la stesura delle tue prossime email",
       "system",
     );
   }
@@ -111,7 +111,7 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
       nextState,
       now + 1,
       "Ufficio Eventi disponibile",
-      "La prima tornata di inviti Ã¨ sufficiente per aprire l'organizzazione delle attivitÃ  esterne. La nuova area Ã¨ comparsa nella barra laterale.",
+      "La prima tornata di inviti è sufficiente per aprire l'organizzazione delle attività esterne. La nuova area è comparsa nella barra laterale.",
       "system",
     );
   }

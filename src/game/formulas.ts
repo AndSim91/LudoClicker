@@ -105,6 +105,8 @@ export function getMemberAnnualDepartureChance(
   rarity: PersonRarity = "common",
   foundedSchools = 0,
 ): number {
+  if (rarity === "legendary") return 0;
+
   const highestForm = forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);
     return match ? Math.max(highest, Number(match[1])) : highest;
@@ -118,7 +120,5 @@ export function getMemberAnnualDepartureChance(
     ) * 1_000) / 1_000;
   }
   const ordinaryChance = ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)];
-  return rarity === "legendary"
-    ? ordinaryChance * GAME_CONFIG.legendaryDepartureMultiplier
-    : ordinaryChance;
+  return ordinaryChance;
 }

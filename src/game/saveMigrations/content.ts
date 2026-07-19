@@ -206,10 +206,22 @@ export function migrateContentState(state: MigratableState): MigratableState {
       })
       .slice(0, surplus)
       .map((contact) => contact.id);
+    const reconciled: MigratableState = departureIds.length > 0
+      ? departMembers(migrated as GameState, departureIds, false)
+      : migrated;
     migrated = {
-      ...(departureIds.length > 0
-        ? departMembers(migrated as GameState, departureIds, false)
-        : migrated),
+      ...reconciled,
+      school: reconciled.school
+        ? {
+            ...reconciled.school,
+            activeMembers: Math.max(
+              activeMembers,
+              (reconciled.contacts ?? []).filter(
+                (contact) => contact.status === "enrolled",
+              ).length,
+            ),
+          }
+        : reconciled.school,
       version: 34,
     };
   }

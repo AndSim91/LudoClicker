@@ -152,6 +152,29 @@ export function getUpgradeDefinition(id: UpgradeId) {
   return UPGRADE_DEFINITIONS.find((upgrade) => upgrade.id === id);
 }
 
+export function getFirstIncompleteUpgradePrerequisite(
+  levels: UpgradeLevels,
+  definition: UpgradeDefinition,
+) {
+  const categoryDefinitions = UPGRADE_DEFINITIONS.filter(
+    (upgrade) => upgrade.category === definition.category,
+  );
+  const definitionIndex = categoryDefinitions.findIndex(
+    (upgrade) => upgrade.id === definition.id,
+  );
+  if (definitionIndex <= 0) return undefined;
+  return categoryDefinitions
+    .slice(0, definitionIndex)
+    .find((upgrade) => (levels[upgrade.id] ?? 0) < upgrade.maxLevel);
+}
+
+export function hasCompletedUpgradePrerequisites(
+  levels: UpgradeLevels,
+  definition: UpgradeDefinition,
+) {
+  return !getFirstIncompleteUpgradePrerequisite(levels, definition);
+}
+
 export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: number, networkSchools = 0) {
   return Math.round(
     definition.baseCost * definition.costGrowth ** currentLevel * (1 + networkSchools * 0.15),

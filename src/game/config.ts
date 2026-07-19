@@ -25,7 +25,6 @@ export const GAME_CONFIG = {
   eventWearMultiplier: 1.5,
   officialSwordCost: 330,
   legendaryEnrollmentChancePerFailure: 0.03,
-  legendaryDepartureMultiplier: 0.1,
   formSevenDepartureChance: {
     common: 0.025,
     rare: 0.005,

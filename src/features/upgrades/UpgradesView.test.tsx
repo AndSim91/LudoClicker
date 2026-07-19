@@ -6,13 +6,16 @@ import { UpgradesView } from "./UpgradesView";
 afterEach(cleanup);
 
 describe("UpgradesView", () => {
-  it("renders every data-driven upgrade branch", () => {
+  it("renders the complete upgrade catalog as eight connected branches", () => {
     const initial = createInitialState(1_000);
-    render(<UpgradesView state={{ ...initial, school: { ...initial.school, historicMembers: 5 } }} onBuyUpgrade={() => undefined} />);
+    render(
+      <UpgradesView
+        state={{ ...initial, school: { ...initial.school, historicMembers: 5 } }}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
 
-    expect(screen.getByRole("tab", { name: "Consigliati (4)" })).toHaveAttribute("aria-selected", "true");
-    fireEvent.click(screen.getByRole("tab", { name: "Catalogo completo (48)" }));
-
+    expect(screen.getByRole("heading", { name: "Piano dei potenziamenti" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Velocità di scrittura" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Carisma" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Scrittura" })).toBeVisible();
@@ -21,26 +24,58 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Attrezzatura" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Istruttori" })).toBeVisible();
-    expect(screen.getAllByText("Prezzo")).toHaveLength(48);
-    expect(screen.getByText(/^50,00/)).toBeVisible();
-    expect(screen.getByRole("region", { name: "Entrate dell'Ordine" }))
-      .toHaveTextContent(/40,00.*quota mensile/);
-    expect(screen.getByText(/al mese/)).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /Fondi insufficienti/ })).toHaveLength(7);
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(48);
   });
 
-  it("shows only actionable branches in the available filter", () => {
+  it("shows requirements, effect and disabled level-up action for a locked node", () => {
     render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
 
-    expect(screen.queryByRole("tab", { name: /Catalogo completo/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "Disponibili (4)" }));
+    fireEvent.click(screen.getByRole("button", { name: /Apri dettagli Pagina aggiornata/ }));
 
-    expect(screen.getAllByText("Prezzo")).toHaveLength(4);
-    expect(screen.queryByRole("heading", { name: "Social" })).not.toBeInTheDocument();
-    expect(screen.getByText(/Prossimo sblocco/)).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Pagina aggiornata" })).toBeVisible();
+    expect(document.querySelector(".upgrade-dialog-backdrop")).not.toBeInTheDocument();
+    expect(screen.getByText("+15% produzione Social per livello")).toBeVisible();
+    expect(screen.getByText("Servono 10 iscritti storici")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("allows a funded purchase without a member-gated unlock", () => {
+  it("requires every previous upgrade in the branch to be completed", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      school: { ...initial.school, euros: 10_000, historicMembers: 100 },
+    };
+    const { rerender } = render(
+      <UpgradesView state={state} onBuyUpgrade={() => undefined} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
+    );
+    expect(screen.getByText("Completa prima Presentazione preparata")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Chiudi dettagli" }));
+    rerender(
+      <UpgradesView
+        state={{
+          ...state,
+          upgrades: { ...state.upgrades, "prepared-presentation": 5 },
+        }}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
+    );
+    expect(screen.getByText("Pronto per il livello successivo")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Potenzia" })).toBeEnabled();
+  });
+
+  it("allows a funded level-up from the selected node dialog", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -50,8 +85,9 @@ describe("UpgradesView", () => {
     render(<UpgradesView state={state} onBuyUpgrade={onBuyUpgrade} />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /Acquista.*Presentazione preparata/ }),
+      screen.getByRole("button", { name: /Apri dettagli Presentazione preparata/ }),
     );
+    fireEvent.click(screen.getByRole("button", { name: "Potenzia" }));
 
     expect(onBuyUpgrade).toHaveBeenCalledOnce();
     expect(onBuyUpgrade).toHaveBeenCalledWith("prepared-presentation");

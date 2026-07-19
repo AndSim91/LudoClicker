@@ -18,7 +18,10 @@ export function departMembers(
 ): GameState {
   const requestedIds = new Set(memberIds);
   const departed = state.contacts.filter(
-    (contact) => contact.status === "enrolled" && requestedIds.has(contact.id),
+    (contact) =>
+      contact.status === "enrolled" &&
+      contact.rarity !== "legendary" &&
+      requestedIds.has(contact.id),
   );
   if (departed.length === 0) return state;
 
@@ -97,7 +100,8 @@ function processMemberDepartures(
   const firstMonthOfCompletedYear = getSchoolYearStartMonth(completedSchoolYear);
   const eligibleMembers = state.contacts.filter((contact) =>
     contact.status === "enrolled" &&
-    (contact.rarity === "legendary" || !collaboratorsByContactId.has(contact.id)) &&
+    contact.rarity !== "legendary" &&
+    !collaboratorsByContactId.has(contact.id) &&
     (contact.enrolledMonth ?? state.school.currentMonth) <= firstMonthOfCompletedYear &&
     (collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
       contact.lastFormTrainingYear) !== completedSchoolYear

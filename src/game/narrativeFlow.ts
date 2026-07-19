@@ -18,6 +18,9 @@ export function processNarrativeEvent(
   gainMultiplier: number,
 ): GameState {
   if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
+  const renewableMembers = state.contacts.filter(
+    (contact) => contact.status === "enrolled" && contact.rarity !== "legendary",
+  );
   const recentKinds = state.narrative.history
     .slice(-GAME_CONFIG.narrativeNegativeStreakLimit)
     .map((record) =>
@@ -27,6 +30,7 @@ export function processNarrativeEvent(
     recentKinds.every((kind) => kind === "negative");
   const eligible = NARRATIVE_EVENTS.filter(
     (definition) => state.school.activeMembers >= definition.minMembers &&
+      (definition.id !== "missed-renewal" || renewableMembers.length > 0) &&
       (!blockNegative || definition.kind !== "negative"),
   );
   if (eligible.length === 0) return state;
@@ -50,10 +54,9 @@ export function processNarrativeEvent(
     ? createAcquiredContacts(rewardState.state, rewardState.amount, "collaborator", now)
     : { contacts: [], nextSeed: rewardState.state.randomSeed };
   const contacts = acquired.contacts;
-  const enrolledMembers = state.contacts.filter((contact) => contact.status === "enrolled");
-  const renewalMember = definition.id === "missed-renewal" && enrolledMembers.length > 0
-    ? enrolledMembers[
-        Math.min(enrolledMembers.length - 1, Math.floor(eventRoll * enrolledMembers.length))
+  const renewalMember = definition.id === "missed-renewal" && renewableMembers.length > 0
+    ? renewableMembers[
+        Math.min(renewableMembers.length - 1, Math.floor(eventRoll * renewableMembers.length))
       ]
     : undefined;
   const euroDelta = (definition.euroDelta ?? 0) > 0
