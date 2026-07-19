@@ -8,7 +8,9 @@ import {
   getInstructorFormCost,
   getInstructorQualificationCost,
   getStudentFormCost,
+  getTrainingCourseTitle,
   isInstructorForm,
+  isAgonistCourse,
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
@@ -128,13 +130,18 @@ function InstructorTeachingSummary({
   return (
     <div className="instructor-teaching" aria-label="Allievi in formazione">
       {entries.map((entry) => {
-        const definition = getFormDefinition(entry.training.formId);
+        const definition = isAgonistCourse(entry.training.formId)
+          ? undefined
+          : getFormDefinition(entry.training.formId);
         const progress = getTrainingProgress(entry.training, now);
         return (
           <div className="instructor-student" key={entry.id}>
             <span className="instructor-student-copy">
               <strong>{entry.displayName}</strong>
-              <small>{definition?.title}{definition?.branch ? ` · ${definition.branch}` : ""}</small>
+              <small>
+                {getTrainingCourseTitle(entry.training.formId)}
+                {definition?.branch ? ` · ${definition.branch}` : ""}
+              </small>
             </span>
             <strong className="instructor-student-progress">{progress}%</strong>
             <ProgressBar
@@ -251,7 +258,9 @@ export function TrainingControl({
     return <div className="training-locked"><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
   }
   if (student.training) {
-    const definition = getFormDefinition(student.training.formId);
+    const definition = isAgonistCourse(student.training.formId)
+      ? undefined
+      : getFormDefinition(student.training.formId);
     const instructor = student.training.instructorId
       ? collaboratorsById.get(student.training.instructorId)
       : undefined;
@@ -259,7 +268,8 @@ export function TrainingControl({
     return (
       <div className="training-progress">
         <span>
-          {definition?.title}{definition?.branch ? ` — ${definition.branch}` : ""}
+          {getTrainingCourseTitle(student.training.formId)}
+          {definition?.branch ? ` — ${definition.branch}` : ""}
           {instructor ? ` · con ${instructor.displayName}` : ""}
           {student.training.includesInstructorCertification ? " · attestato incluso" : ""}
         </span>

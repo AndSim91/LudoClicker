@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
+import { ProgressBar } from "../../components/common/ProgressBar";
 import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
+import { getEmailBuildLength } from "../../content/emailBuild";
 import { getCollaboratorBonusSummary } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
 import type {
@@ -10,9 +12,66 @@ import type {
   GameState,
 } from "../../game/types";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
+import { useProvidedGameTime } from "../../game/GameTimeContext";
+import { selectActiveEmail } from "../../game/selectors";
+import { useCurrentTime } from "../../shared/useCurrentTime";
 import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
+
+function getTimedProgress(startedAt: number, completesAt: number, now: number): number {
+  const duration = completesAt - startedAt;
+  return duration <= 0
+    ? 100
+    : Math.min(100, Math.max(0, Math.round(((now - startedAt) / duration) * 100)));
+}
+
+function CollaboratorAutomationProgress({
+  state,
+  collaboratorId,
+  assignment,
+  now,
+  activeEmail,
+}: {
+  state: GameState;
+  collaboratorId: string;
+  assignment: CollaboratorAssignment;
+  now: number;
+  activeEmail: ReturnType<typeof selectActiveEmail>;
+}) {
+  if (assignment === "writing") {
+    const email = activeEmail;
+    if (!email || email.status !== "writing") return <small>In attesa</small>;
+    const length = getEmailBuildLength(email);
+    const progress = length === 0
+      ? 100
+      : Math.min(100, Math.round((email.revealedCharacters / length) * 100));
+    return (
+      <div className="collaborator-automation-progress">
+        <span>{email.subject}</span><strong>{progress}%</strong>
+        <ProgressBar
+          className="collaborator-progress-bar"
+          label={`Scrittura di ${email.subject}`}
+          value={progress}
+        />
+      </div>
+    );
+  }
+  if (assignment === "events") {
+    const event = state.acquisitionEvents.find((candidate) =>
+      candidate.status === "running" && candidate.collaboratorId === collaboratorId
+    );
+    if (!event) return <small>In attesa</small>;
+    const progress = getTimedProgress(event.startedAt, event.resolvesAt, now);
+    return (
+      <div className="collaborator-automation-progress">
+        <span>{event.title}</span><strong>{progress}%</strong>
+        <ProgressBar className="collaborator-progress-bar" label={event.title} value={progress} />
+      </div>
+    );
+  }
+  return null;
+}
 
 export function CollaboratorList({
   state,
@@ -20,6 +79,7 @@ export function CollaboratorList({
   onStartTraining,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
+  onToggleAgonistCourses,
   collaboratorsById,
 }: {
   state: GameState;
@@ -27,15 +87,38 @@ export function CollaboratorList({
   onStartTraining: (personId: string, formId: FormId) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
+  onToggleAgonistCourses?: (enabled: boolean) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
   );
+  const activeEmail = selectActiveEmail(state);
+  const hasTimedAutomation = state.acquisitionEvents.some((event) =>
+    event.status === "running" && event.collaboratorId !== undefined
+  );
+  const providedNow = useProvidedGameTime();
+  const liveNow = useCurrentTime(hasTimedAutomation && providedNow === null, 100);
+  const now = providedNow ?? liveNow;
 
   return (
     <section className="collaborator-list" aria-label="Collaboratori delle Onde">
+      {(state.upgrades["technical-arena"] ?? 0) >= 1 ? (
+        <div className="agonist-course-setting">
+          <span>
+            <strong>Corso Agonisti</strong>
+            <small>Protegge gli allievi a rischio senza altre Forme disponibili.</small>
+          </span>
+          <label className="instructor-toggle">
+            <input
+              type="checkbox"
+              checked={state.automation.agonistCoursesEnabled}
+              onChange={(event) => onToggleAgonistCourses?.(event.target.checked)}
+            /> Attivo
+          </label>
+        </div>
+      ) : null}
       {state.collaborators.length === 0 ? (
         <div className="people-empty">
           <Icon name="contact" />
@@ -104,6 +187,13 @@ export function CollaboratorList({
                   })}
                 </select>
               </label>
+              <CollaboratorAutomationProgress
+                state={state}
+                collaboratorId={collaborator.id}
+                assignment={collaborator.assignment}
+                now={now}
+                activeEmail={activeEmail}
+              />
               <div className="collaborator-training">
                 <span className="collaborator-action-label">Formazione</span>
                 {collaborator.assignment === "instructor" ? (

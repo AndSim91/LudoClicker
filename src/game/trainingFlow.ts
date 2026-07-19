@@ -1,4 +1,5 @@
 import {
+  AGONIST_COURSE_ID,
   BRANCH_FORM_IDS,
   FORM_BRANCHES,
   canTrainForm,
@@ -11,12 +12,16 @@ import {
   getMissingInstructorForms,
   getStudentFormCost,
   isInstructorForm,
+  isAgonistCourse,
 } from "../content/forms";
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
+import { getMemberAnnualDepartureChance } from "./formulas";
 import { roundCurrency } from "./economy";
+import { cancelAutomatedEventForCollaborator } from "./eventFlow";
+import { processAutomaticEvents } from "./eventAutomationFlow";
 import { selectAvailableInstructor, selectInstructorTeachingCount } from "./selectors";
 import type {
   CollaboratorAssignment,
@@ -55,16 +60,23 @@ export function assignCollaborator(
   state: GameState,
   collaboratorId: string,
   assignment: CollaboratorAssignment,
+  now = state.lastSavedAt,
 ): GameState {
   if (assignment === "social" && !state.unlocks.social) return state;
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
   if (!collaborator) return state;
-  return {
+  const reassignedState = {
     ...state,
     collaborators: state.collaborators.map((candidate) =>
       candidate.id === collaboratorId ? { ...candidate, assignment } : candidate,
     ),
   };
+  if (collaborator.assignment === "events" && assignment !== "events") {
+    return cancelAutomatedEventForCollaborator(reassignedState, collaboratorId, now);
+  }
+  return assignment === "events"
+    ? processAutomaticEvents(reassignedState, now)
+    : reassignedState;
 }
 
 export function toggleInstructorAutomation(
@@ -82,6 +94,93 @@ export function toggleInstructorAutomation(
     ),
   };
   return refreshInstructorTrainingDurations(nextState, now);
+}
+
+export function toggleAgonistCourses(state: GameState, enabled: boolean): GameState {
+  if ((state.upgrades["technical-arena"] ?? 0) < 1) return state;
+  return {
+    ...state,
+    automation: { ...state.automation, agonistCoursesEnabled: enabled },
+  };
+}
+
+export function getAgonistCourseCost(state: GameState): number {
+  return (state.upgrades["technical-arena"] ?? 0) >= 3
+    ? 0
+    : getStudentFormCost(GAME_CONFIG.agonistCourseBaseCost);
+}
+
+export function startAgonistCourse(
+  state: GameState,
+  personId: string,
+  instructorId: string,
+  now: number,
+): GameState {
+  const arenaLevel = state.upgrades["technical-arena"] ?? 0;
+  if (
+    arenaLevel < 1 ||
+    !state.automation.agonistCoursesEnabled ||
+    !state.unlocks.forms ||
+    isSummerBreak(state.school.currentMonth)
+  ) return state;
+
+  const collaboratorContactIds = new Set(
+    state.collaborators.map((collaborator) => collaborator.contactId),
+  );
+  const student = state.contacts.find((contact) =>
+    contact.id === personId &&
+    contact.status === "enrolled" &&
+    !collaboratorContactIds.has(contact.id)
+  );
+  const instructor = state.collaborators.find((collaborator) =>
+    collaborator.id === instructorId &&
+    collaborator.assignment === "instructor" &&
+    collaborator.autoTeachingEnabled !== false &&
+    !collaborator.training
+  );
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const capacity = 1 + (state.upgrades["tiamat-instructor"] ?? 0);
+  const cost = getAgonistCourseCost(state);
+  if (
+    !student ||
+    !instructor ||
+    student.training ||
+    student.rarity === "legendary" ||
+    state.tournaments.immuneContactIds.includes(student.id) ||
+    getFormTrainingCount(student, trainingYear) !== 0 ||
+    getAutomaticFormCandidates(student).length > 0 ||
+    getMemberAnnualDepartureChance(
+      student.forms,
+      student.rarity,
+      state.network.schools.length,
+    ) <= 0 ||
+    selectInstructorTeachingCount(state, instructor.id) >= capacity ||
+    state.school.euros < cost
+  ) return state;
+
+  const baseDuration = arenaLevel >= 2 ? 5_000 : GAME_CONFIG.agonistCourseDurationMs;
+  const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
+  const training = {
+    formId: AGONIST_COURSE_ID,
+    startedAt: now,
+    completesAt: now + Math.max(
+      GAME_CONFIG.minimumTrainingDurationMs,
+      Math.round(baseDuration / trainingSpeed),
+    ),
+    instructorId: instructor.id,
+  };
+  return {
+    ...state,
+    school: { ...state.school, euros: roundCurrency(state.school.euros - cost) },
+    contacts: state.contacts.map((contact) => contact.id === student.id
+      ? {
+          ...contact,
+          training,
+          lastFormTrainingYear: trainingYear,
+          formTrainingYearCount: 1,
+        }
+      : contact),
+  };
 }
 
 export function payInstructorCertificates(
@@ -342,6 +441,33 @@ export function resolveFormTraining(
   const student = collaborator ?? member;
   if (!student?.training || student.training.completesAt > now) return state;
   const completedFormId = student.training.formId;
+  if (isAgonistCourse(completedFormId)) {
+    let nextState: GameState = {
+      ...state,
+      contacts: member
+        ? state.contacts.map((contact) => contact.id === member.id
+          ? { ...contact, training: undefined }
+          : contact)
+        : state.contacts,
+    };
+    if (student.training.instructorId) {
+      nextState = dependencies.addCollaboratorMasteryExperience(
+        nextState,
+        "instructor",
+        COLLABORATOR_MASTERY_XP.instructorTraining,
+        now,
+      );
+    }
+    return dependencies.addMessage(
+      nextState,
+      now,
+      "Corso Agonisti completato",
+      `${member?.firstName} ${member?.lastName} ha completato il Corso Agonisti ed è al sicuro dall'abbandono per quest'anno.`,
+      "positive",
+      "other",
+      "training",
+    );
+  }
   const definition = getFormDefinition(completedFormId);
   if (!definition) return state;
   const completedForms = [...student.forms, completedFormId];

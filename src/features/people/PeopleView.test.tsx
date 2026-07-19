@@ -158,6 +158,58 @@ describe("PeopleView", () => {
     expect(onAssign).toHaveBeenCalledWith("collaborator-1", "writing");
   });
 
+  it("shows Arena Tecnica toggle and writing/event progress", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = ["writing", "events"].map((assignment, index) => ({
+      id: `collaborator-${index}`,
+      contactId: initial.contacts[index].id,
+      displayName: `Collaboratore ${index}`,
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: assignment as "writing" | "events",
+      rarity: "ultra-rare" as const,
+    }));
+    const onToggleAgonistCourses = vi.fn();
+    render(<PeopleView
+      state={{
+        ...initial,
+        collaborators,
+        upgrades: { ...initial.upgrades, "technical-arena": 1 },
+        automation: { ...initial.automation, agonistCoursesEnabled: true },
+        acquisitionEvents: [{
+          id: "event-1",
+          definitionId: "public-demo",
+          title: "Lezioni all'aperto",
+          location: "Parco",
+          startedAt: 1_000,
+          resolvesAt: 11_000,
+          cost: 120,
+          peopleMet: 10,
+          demonstrationsGiven: 5,
+          contactReward: 2,
+          membersUsed: 2,
+          equipmentUsed: 4,
+          wearAdded: 6,
+          collaboratorId: "collaborator-1",
+          status: "running",
+        }],
+        unlocks: { ...initial.unlocks, collaborators: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+      onToggleAgonistCourses={onToggleAgonistCourses}
+    />);
+
+    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
+    expect(screen.getByText("Corso Agonisti")).toBeVisible();
+    expect(screen.getByText(initial.emails[0].subject)).toBeVisible();
+    expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
+    expect(screen.getAllByRole("progressbar")).toHaveLength(2);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Attivo" }));
+    expect(onToggleAgonistCourses).toHaveBeenCalledWith(false);
+  });
+
   it("shows the assigned student's condensed training progress for an instructor", () => {
     const initial = createInitialState(1_000);
     const student = {
@@ -299,7 +351,7 @@ describe("PeopleView", () => {
     render(<PeopleView state={{ ...initial, school: { ...initial.school, activeMembers: 1, euros: 25 }, contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact), unlocks: { ...initial.unlocks, forms: true } }} onAssign={() => undefined} onStartTraining={onStartTraining} />);
 
     fireEvent.click(screen.getByRole("tab", { name: /Iscritti/ }));
-    expect(screen.getByText("Rischio alto")).toBeVisible();
+    expect(screen.getByText("Rischio abbandono - alto")).toBeVisible();
     expect(screen.queryByRole("combobox", { name: `Formazione per ${displayName}` })).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /Forma 1/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Paga e avvia/ }));
@@ -354,8 +406,8 @@ describe("PeopleView", () => {
     const initial = createInitialState(1_000);
     const members = [
       { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] },
-      { ...initial.contacts[1], status: "enrolled" as const, forms: ["form-2"] as FormId[] },
-      { ...initial.contacts[2], status: "enrolled" as const, forms: ["form-4-long"] as FormId[] },
+      { ...initial.contacts[1], status: "enrolled" as const, forms: ["form-3-long"] as FormId[] },
+      { ...initial.contacts[2], status: "enrolled" as const, forms: ["form-6"] as FormId[] },
     ];
     render(<PeopleView
       state={{
@@ -368,9 +420,9 @@ describe("PeopleView", () => {
       onStartTraining={() => undefined}
     />);
 
-    expect(screen.getAllByText("Rischio alto")).toHaveLength(1);
-    expect(screen.getAllByText("Rischio medio")).toHaveLength(1);
-    expect(screen.getAllByText("Rischio basso")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio abbandono - alto")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio abbandono - medio")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio abbandono - basso")).toHaveLength(1);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i))
       .not.toBeInTheDocument();

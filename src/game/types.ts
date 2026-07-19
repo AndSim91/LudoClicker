@@ -24,7 +24,7 @@ export type PersonRarity = "common" | "rare" | "ultra-rare" | "legendary";
 export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
 
 export interface FormTraining {
-  formId: FormId;
+  formId: TrainingCourseId;
   startedAt: number;
   completesAt: number;
   instructorId?: string;
@@ -138,6 +138,7 @@ export interface AcquisitionEvent {
   membersUsed: number;
   equipmentUsed: number;
   wearAdded: number;
+  collaboratorId?: string;
   status: "running" | "completed";
 }
 
@@ -188,8 +189,9 @@ export type UpgradeId =
   | "registration-form"
   | "order-secretariat"
   | "multi-site-coordination"
-  | "extra-form"
   | "instructor-versatility"
+  | "technical-arena"
+  | "extra-form"
   | "tiamat-instructor";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
@@ -295,6 +297,8 @@ export type FormId =
   | "form-5-double"
   | "form-6"
   | "form-7";
+
+export type TrainingCourseId = FormId | "agonist-course";
 
 export interface Collaborator {
   id: string;
@@ -529,6 +533,7 @@ export interface GameState {
     socialBuffer: number;
     equipmentBuffer: number;
     offlineContactBuffer: number;
+    agonistCoursesEnabled: boolean;
   };
   achievements: AchievementId[];
   narrative: {
@@ -572,6 +577,11 @@ export type GameAction =
   | {
       type: "TOGGLE_INSTRUCTOR_AUTOMATION";
       collaboratorId: string;
+      enabled: boolean;
+      now: number;
+    }
+  | {
+      type: "TOGGLE_AGONIST_COURSES";
       enabled: boolean;
       now: number;
     }

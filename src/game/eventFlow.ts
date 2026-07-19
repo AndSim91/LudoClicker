@@ -5,6 +5,7 @@ import { GAME_CONFIG } from "./config";
 import {
   applyEquipmentWear,
   getAvailableSwords,
+  synchronizeEquipmentAvailability,
 } from "./equipment";
 import { scaleContactGain } from "./economy";
 import { getEventFunnelOutcome } from "./formulas";
@@ -21,9 +22,24 @@ export function startAcquisitionEvent(
   state: GameState,
   definitionId: AcquisitionEvent["definitionId"],
   now: number,
+  collaboratorId?: string,
 ): GameState {
   const definition = getAcquisitionEventDefinition(definitionId);
   if (!definition) return state;
+  if (state.acquisitionEvents.some((event) =>
+    event.status === "running" && event.definitionId === definitionId
+  )) return state;
+  if (collaboratorId) {
+    const collaborator = state.collaborators.find((candidate) =>
+      candidate.id === collaboratorId && candidate.assignment === "events"
+    );
+    if (
+      !collaborator ||
+      state.acquisitionEvents.some((event) =>
+        event.status === "running" && event.collaboratorId === collaboratorId
+      )
+    ) return state;
+  }
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
   if (state.school.peakActiveMembers < definition.unlockMembers) return state;
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
@@ -61,6 +77,7 @@ export function startAcquisitionEvent(
           (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))),
       ),
     ),
+    collaboratorId,
     status: "running",
   };
   return {
@@ -79,6 +96,32 @@ export function startAcquisitionEvent(
           ? event.resolvesAt + GAME_CONFIG.sparringCooldownMs
           : state.activities.nextSparringAt,
     },
+  };
+}
+
+export function cancelAutomatedEventForCollaborator(
+  state: GameState,
+  collaboratorId: string,
+  now: number,
+): GameState {
+  const event = state.acquisitionEvents.find((candidate) =>
+    candidate.status === "running" && candidate.collaboratorId === collaboratorId
+  );
+  if (!event) return state;
+
+  return {
+    ...state,
+    school: { ...state.school, euros: state.school.euros + event.cost },
+    equipment: synchronizeEquipmentAvailability({
+      ...state.equipment,
+      availableSwords: state.equipment.availableSwords + event.equipmentUsed,
+    }),
+    acquisitionEvents: state.acquisitionEvents.filter(
+      (candidate) => candidate.id !== event.id,
+    ),
+    activities: event.definitionId === "park-sparring"
+      ? { ...state.activities, nextSparringAt: now }
+      : state.activities,
   };
 }
 

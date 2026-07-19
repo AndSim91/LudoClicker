@@ -44,6 +44,11 @@ describe("game engine: progression", () => {
     const funded = {
       ...initial,
       school: { ...initial.school, euros: 750, historicMembers: 20 },
+      upgrades: {
+        ...initial.upgrades,
+        "pre-event-check": 5,
+        "maintenance-kit": 5,
+      },
     };
 
     const upgraded = gameReducer(funded, {
@@ -95,7 +100,7 @@ describe("game engine: progression", () => {
     });
     const sparring = getAcquisitionEventDefinition("park-sparring")!;
 
-    expect(faster.player.writingPower).toBe(2);
+    expect(faster.player.writingPower).toBe(3);
     expect(getEventFunnelOutcome(charismatic, sparring).emailShareChance).toBeGreaterThan(
       getEventFunnelOutcome(faster, sparring).emailShareChance,
     );
@@ -156,9 +161,9 @@ describe("game engine: progression", () => {
     const automated = gameReducer(assigned, { type: "TICK", now: 2_000 });
 
     expect(assigned.collaborators[0].assignment).toBe("writing");
-    expect(selectActiveEmail(automated)?.revealedCharacters).toBe(2);
+    expect(selectActiveEmail(automated)?.revealedCharacters).toBe(5);
     expect(automated.statistics.inputs).toBe(0);
-    expect(automated.statistics.automatedCharacters).toBe(2);
+    expect(automated.statistics.automatedCharacters).toBe(5);
   });
 
   it("generates passive Social contacts and repairs equipment through assignments", () => {

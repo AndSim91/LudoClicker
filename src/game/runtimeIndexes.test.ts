@@ -118,7 +118,21 @@ describe("runtime indexes", () => {
         return Reflect.get(target, property, receiver);
       },
     });
-    const state = { ...initial, contacts };
+    const state = {
+      ...initial,
+      contacts,
+      unlocks: { ...initial.unlocks, forms: true },
+      collaborators: [{
+        id: "cache-instructor",
+        contactId: "cache-instructor-contact",
+        displayName: "Cache Instructor",
+        joinedAt: 1_000,
+        forms: ["form-1" as const],
+        instructorForms: ["form-1" as const],
+        assignment: "instructor" as const,
+        rarity: "ultra-rare" as const,
+      }],
+    };
     const startTraining = vi.fn((currentState) => currentState);
 
     expect(processAutomaticTeaching(state, 2_000, startTraining)).toBe(state);

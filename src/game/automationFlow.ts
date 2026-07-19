@@ -50,6 +50,12 @@ export interface AutomationFlowDependencies {
   ) => GameState;
   startNextCampaign: (state: GameState, now: number) => GameState;
   startFormTraining: (state: GameState, personId: string, formId: FormId, now: number) => GameState;
+  startAgonistCourse: (
+    state: GameState,
+    personId: string,
+    instructorId: string,
+    now: number,
+  ) => GameState;
 }
 
 interface AutomaticTeachingNoOp {
@@ -57,6 +63,8 @@ interface AutomaticTeachingNoOp {
   euros: number;
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
+  agonistCoursesEnabled: boolean;
+  immuneContactIds: GameState["tournaments"]["immuneContactIds"];
 }
 
 const automaticTeachingNoOpCache = new WeakMap<
@@ -73,7 +81,9 @@ function wasAutomaticTeachingNoOp(state: GameState): boolean {
     cached.currentMonth === state.school.currentMonth &&
     cached.euros === state.school.euros &&
     cached.upgrades === state.upgrades &&
-    cached.formsUnlocked === state.unlocks.forms
+    cached.formsUnlocked === state.unlocks.forms &&
+    cached.agonistCoursesEnabled === state.automation.agonistCoursesEnabled &&
+    cached.immuneContactIds === state.tournaments.immuneContactIds
   );
 }
 
@@ -88,6 +98,8 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     euros: state.school.euros,
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
+    agonistCoursesEnabled: state.automation.agonistCoursesEnabled,
+    immuneContactIds: state.tournaments.immuneContactIds,
   });
 }
 
@@ -277,6 +289,8 @@ export function processAutomaticTeaching(
   state: GameState,
   now: number,
   startFormTraining: AutomationFlowDependencies["startFormTraining"],
+  startAgonistCourse: AutomationFlowDependencies["startAgonistCourse"] = (currentState) =>
+    currentState,
 ): GameState {
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (wasAutomaticTeachingNoOp(state)) return state;
@@ -305,11 +319,32 @@ export function processAutomaticTeaching(
       !collaborator.training &&
       getFormTrainingCount(collaborator, trainingYear) < annualTrainingLimit
     ),
-  ].sort((left, right) =>
-    left.forms.length - right.forms.length ||
-    ("acquiredAt" in left ? left.acquiredAt : left.joinedAt) -
-      ("acquiredAt" in right ? right.acquiredAt : right.joinedAt)
-  );
+  ].sort((left, right) => {
+    const priority = (student: typeof left) => {
+      const candidate = getAutomaticFormCandidates(student)[0];
+      const order: FormId[] = [
+        "form-1",
+        "course-x",
+        "form-2",
+        "course-y",
+        "form-3-long",
+        "form-3-staff",
+        "form-3-double",
+        "form-4-long",
+        "form-4-staff",
+        "form-4-double",
+        "form-5-long",
+        "form-5-staff",
+        "form-5-double",
+        "form-6",
+        "form-7",
+      ];
+      return candidate ? order.indexOf(candidate) : Number.MAX_SAFE_INTEGER;
+    };
+    return priority(left) - priority(right) ||
+      ("acquiredAt" in right ? right.acquiredAt : right.joinedAt) -
+        ("acquiredAt" in left ? left.acquiredAt : left.joinedAt);
+  });
   const capacity = selectInstructorCapacity(state);
   const instructorLoads = new Map(
     getInstructorTeachingCounts(state.contacts, state.collaborators),
@@ -364,6 +399,40 @@ export function processAutomaticTeaching(
     const instructorId = startedStudent?.training?.instructorId;
     if (instructorId) {
       instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
+    }
+  }
+
+  if (
+    (nextState.upgrades["technical-arena"] ?? 0) >= 1 &&
+    nextState.automation.agonistCoursesEnabled
+  ) {
+    const arenaCandidates = nextState.contacts
+      .filter((contact) =>
+        contact.status === "enrolled" &&
+        !collaboratorContactIds.has(contact.id) &&
+        !contact.training &&
+        getFormTrainingCount(contact, trainingYear) === 0 &&
+        getAutomaticFormCandidates(contact).length === 0
+      )
+      .sort((left, right) => right.acquiredAt - left.acquiredAt);
+    for (const student of arenaCandidates) {
+      const instructor = nextState.collaborators.find((candidate) =>
+        candidate.assignment === "instructor" &&
+        candidate.autoTeachingEnabled !== false &&
+        !candidate.training &&
+        (instructorLoads.get(candidate.id) ?? 0) < capacity
+      );
+      if (!instructor) break;
+      const startedState = startAgonistCourse(
+        nextState,
+        student.id,
+        instructor.id,
+        now,
+      );
+      const startedStudent = startedState.contacts.find((contact) => contact.id === student.id);
+      if (!startedStudent?.training) continue;
+      nextState = startedState;
+      instructorLoads.set(instructor.id, (instructorLoads.get(instructor.id) ?? 0) + 1);
     }
   }
 

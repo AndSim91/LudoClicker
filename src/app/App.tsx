@@ -231,6 +231,13 @@ export function App() {
                 now: getGameNow(),
               })
             }
+            onToggleAgonistCourses={(enabled) =>
+              dispatch({
+                type: "TOGGLE_AGONIST_COURSES",
+                enabled,
+                now: getGameNow(),
+              })
+            }
             onPayInstructorCertificates={(collaboratorId) =>
               dispatch({
                 type: "PAY_INSTRUCTOR_CERTIFICATES",

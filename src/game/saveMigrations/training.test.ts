@@ -12,8 +12,10 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(38);
+    expect(migrated.version).toBe(39);
     expect(migrated.upgrades["extra-form"]).toBe(0);
+    expect(migrated.upgrades["technical-arena"]).toBe(0);
+    expect(migrated.automation.agonistCoursesEnabled).toBe(false);
     expect(migrated.contacts[0].lastFormTrainingYear).toBe(2);
     expect(migrated.contacts[0].formTrainingYearCount).toBe(1);
   });

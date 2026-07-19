@@ -91,6 +91,7 @@ export function createInitialState(
       socialBuffer: 0,
       equipmentBuffer: 0,
       offlineContactBuffer: 0,
+      agonistCoursesEnabled: false,
     },
     statistics: {
       inputs: 0,

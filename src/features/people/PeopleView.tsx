@@ -20,12 +20,14 @@ export function PeopleView({
   onStartTraining,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
+  onToggleAgonistCourses,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
+  onToggleAgonistCourses?: (enabled: boolean) => void;
 }) {
   const [tab, setTab] = useState<PeopleTab>("members");
   const members = useMemo(
@@ -73,6 +75,7 @@ export function PeopleView({
           onStartTraining={onStartTraining}
           onPayInstructorCertificates={onPayInstructorCertificates}
           onToggleInstructorAutomation={onToggleInstructorAutomation}
+          onToggleAgonistCourses={onToggleAgonistCourses}
           collaboratorsById={collaboratorsById}
         />
       ) : (

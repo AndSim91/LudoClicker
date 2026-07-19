@@ -228,6 +228,11 @@ describe("game engine: operations", () => {
     const funded = {
       ...initial,
       school: { ...initial.school, euros: 2_000, historicMembers: 20 },
+      upgrades: {
+        ...initial.upgrades,
+        "pre-event-check": 5,
+        "maintenance-kit": 5,
+      },
     };
 
     const purchased = gameReducer(funded, { type: "BUY_OFFICIAL_SWORD", now: 2_000 });

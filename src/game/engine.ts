@@ -17,6 +17,7 @@ import {
   startNextCampaign,
 } from "./emailFlow";
 import { resolveAcquisitionEvent } from "./eventFlow";
+import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
 import { compactGameHistory } from "./historyArchive";
@@ -32,6 +33,7 @@ import {
 import {
   resolveFormTraining as completeFormTraining,
   refreshInstructorTrainingDurations,
+  startAgonistCourse as beginAgonistCourse,
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
 import { resolveTrial } from "./trialFlow";
@@ -82,12 +84,22 @@ function resolveFormTraining(state: GameState, personId: string, now: number): G
   return completeFormTraining(state, personId, now, trainingDependencies);
 }
 
+function startAgonistCourse(
+  state: GameState,
+  personId: string,
+  instructorId: string,
+  now: number,
+): GameState {
+  return beginAgonistCourse(state, personId, instructorId, now);
+}
+
 const automationDependencies = {
   addMessage,
   addCollaboratorMasteryExperience,
   writeCharacters,
   startNextCampaign,
   startFormTraining,
+  startAgonistCourse,
 };
 
 function advanceAutomation(
@@ -138,7 +150,13 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
 
   nextState = refreshInstructorTrainingDurations(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier);
-  nextState = processAutomaticTeaching(nextState, now, startFormTraining);
+  nextState = processAutomaticTeaching(
+    nextState,
+    now,
+    startFormTraining,
+    startAgonistCourse,
+  );
+  nextState = processAutomaticEvents(nextState, now);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
   return notifyPrestigeOffer(nextState, now);
 }

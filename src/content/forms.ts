@@ -5,6 +5,7 @@ import type {
   FormBranch,
   FormTraining,
   PersonRarity,
+  TrainingCourseId,
 } from "../game/types";
 import { PERSON_RARITIES } from "./rarities";
 import { getCollaboratorMasteryMultiplier } from "./mastery";
@@ -71,7 +72,18 @@ export function getFormDefinition(id: FormId) {
   return FORM_DEFINITIONS.find((definition) => definition.id === id);
 }
 
-export function isInstructorForm(formId: FormId): boolean {
+export const AGONIST_COURSE_ID = "agonist-course" as const;
+
+export function isAgonistCourse(id: TrainingCourseId): id is typeof AGONIST_COURSE_ID {
+  return id === AGONIST_COURSE_ID;
+}
+
+export function getTrainingCourseTitle(id: TrainingCourseId): string {
+  return isAgonistCourse(id) ? "Corso Agonisti" : getFormDefinition(id)?.title ?? "Formazione";
+}
+
+export function isInstructorForm(formId: TrainingCourseId): formId is FormId {
+  if (isAgonistCourse(formId)) return false;
   return FORM_DEFINITIONS.some((definition) => definition.id === formId);
 }
 

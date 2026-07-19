@@ -1,7 +1,7 @@
 import type { UpgradeId, UpgradeLevels } from "../game/types";
 
 export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialMultiplier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialMultiplier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "agonistCourseTier";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -14,6 +14,7 @@ export interface UpgradeDefinition {
   additionalEffectsPerLevel?: Partial<Record<UpgradeEffect, number>>;
   baseCost: number;
   costGrowth: number;
+  levelCosts?: number[];
   maxLevel: number;
   requiredHistoricMembers: number;
 }
@@ -32,12 +33,12 @@ export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; des
 const GROWTH = 1.3;
 
 const UPGRADE_CATALOG: UpgradeDefinition[] = [
-  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+0,2 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.2, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
-  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+0,4 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.4, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
-  { id: "automatic-signature", category: "speed", title: "Firma automatica", description: "La chiusura delle mail non richiede più lavoro manuale.", effectLabel: "+10% automazione e +0,2 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.1, additionalEffectsPerLevel: { writingPower: 0.2 }, baseCost: 160, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 25 },
-  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati più velocemente.", effectLabel: "+0,6 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.6, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 40 },
-  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Manuale e collaboratori condividono una revisione rapidissima.", effectLabel: "+10% automazione e +0,6 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.1, additionalEffectsPerLevel: { writingPower: 0.6 }, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 60 },
-  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una procedura di fine ciclo moltiplica l'intera redazione.", effectLabel: "+10% automazione e +0,8 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.1, additionalEffectsPerLevel: { writingPower: 0.8 }, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 90 },
+  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+0,4 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.4, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
+  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+0,6 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.6, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
+  { id: "automatic-signature", category: "speed", title: "Firma automatica", description: "La chiusura delle mail non richiede più lavoro manuale.", effectLabel: "+20% automazione e +0,8 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 0.8 }, baseCost: 160, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 25 },
+  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati più velocemente.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 40 },
+  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Manuale e collaboratori condividono una revisione rapidissima.", effectLabel: "+20% automazione e +1 carattere per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 1 }, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 60 },
+  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una procedura di fine ciclo moltiplica l'intera redazione.", effectLabel: "+20% automazione e +1 carattere per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 1 }, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 90 },
 
   { id: "prepared-presentation", category: "charisma", title: "Presentazione preparata", description: "Spiegazioni più chiare trasformano incontri in contatti utili.", effectLabel: "+10% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.1, baseCost: 15, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 0 },
   { id: "qr-cards", category: "charisma", title: "Biglietti con QR code", description: "Lasciare un indirizzo diventa immediato.", effectLabel: "+15% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.15, baseCost: 50, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 5 },
@@ -78,16 +79,17 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "equipment-register", category: "equipment", title: "Registro dell'attrezzatura", description: "I controlli diventano parte dell'automazione.", effectLabel: "+20% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.2, baseCost: 950, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 70 },
   { id: "all-fixed", category: "equipment", title: "Le abbiamo messe a posto tutte", description: "Una dichiarazione finalmente supportata dai fatti.", effectLabel: "-10% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.1, baseCost: 1500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
 
-  { id: "shared-calendar", category: "organization", title: "Calendario condiviso", description: "Preparazione e disponibilità sono più leggibili.", effectLabel: "+10% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 100, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 10 },
-  { id: "collaborator-shifts", category: "organization", title: "Turni dei collaboratori", description: "Le assegnazioni producono risultati più regolari.", effectLabel: "+15% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.15, baseCost: 200, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 20 },
+  { id: "shared-calendar", category: "organization", title: "Calendario condiviso", description: "Preparazione e disponibilità sono più leggibili.", effectLabel: "+20% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.2, baseCost: 100, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 10 },
+  { id: "collaborator-shifts", category: "organization", title: "Turni dei collaboratori", description: "Le assegnazioni producono risultati più regolari.", effectLabel: "+40% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.4, baseCost: 200, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 20 },
   { id: "checklist", category: "organization", title: "Lista di controllo", description: "Gli imprevisti diventano eccezioni documentate.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 350, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 35 },
   { id: "registration-form", category: "organization", title: "Modulo di iscrizione", description: "Quote e registrazioni scorrono più rapidamente.", effectLabel: "+10% entrate per livello", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 600, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 50 },
   { id: "order-secretariat", category: "organization", title: "Segreteria dell'Ordine", description: "Notifiche, quote e pratiche seguono una procedura stabile.", effectLabel: "+20% entrate per livello", effect: "incomeMultiplier", effectPerLevel: 0.2, baseCost: 1000, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 75 },
-  { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+30% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.3, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
+  { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+100% automazione per livello", effect: "automationMultiplier", effectPerLevel: 1, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
 
-  { id: "extra-form", category: "instructors", title: "Extra Forma", description: "Aumenta per tutti gli atleti della scuola il numero di Forme apprendibili nello stesso anno formativo.", effectLabel: "+1 Forma apprendibile per atleta e anno", effect: "annualFormCapacity", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 50 },
-  { id: "instructor-versatility", category: "instructors", title: "Polivalenza didattica", description: "Permette agli Istruttori di apprendere rami d'arma oltre le proprie preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 6_000, costGrowth: 2, maxLevel: 2, requiredHistoricMembers: 50 },
-  { id: "tiamat-instructor", category: "instructors", title: "Istruttore stile Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1.8, maxLevel: 5, requiredHistoricMembers: 75 },
+  { id: "instructor-versatility", category: "instructors", title: "Polivalenza didattica", description: "Permette agli Istruttori di apprendere rami d'arma oltre le proprie preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 2_000, costGrowth: 2, levelCosts: [2_000, 4_000], maxLevel: 2, requiredHistoricMembers: 35 },
+  { id: "technical-arena", category: "instructors", title: "Arena Tecnica", description: "Sblocca il Corso Agonisti automatico per proteggere gli atleti a rischio di abbandono che non hanno altre Forme da apprendere.", effectLabel: "Livello 1: sblocco · Livello 2: 5 secondi · Livello 3: gratuito", effect: "agonistCourseTier", effectPerLevel: 1, baseCost: 2_000, costGrowth: 1, levelCosts: [2_000, 5_000, 10_000], maxLevel: 3, requiredHistoricMembers: 35 },
+  { id: "extra-form", category: "instructors", title: "Extra Forma", description: "Aumenta per tutti gli atleti della scuola il numero di Forme apprendibili nello stesso anno formativo.", effectLabel: "+1 Forma apprendibile per atleta e anno", effect: "annualFormCapacity", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 35 },
+  { id: "tiamat-instructor", category: "instructors", title: "Istruttore Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 8_000, 13_000, 21_000, 34_000], maxLevel: 5, requiredHistoricMembers: 35 },
 ];
 
 const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
@@ -137,9 +139,10 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   "registration-form": 2_500,
   "order-secretariat": 4_000,
   "multi-site-coordination": 6_500,
-  "extra-form": 5_000,
-  "instructor-versatility": 6_000,
-  "tiamat-instructor": 10_000,
+  "instructor-versatility": 2_000,
+  "technical-arena": 2_000,
+  "extra-form": 10_000,
+  "tiamat-instructor": 5_000,
 };
 
 export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG.map(
@@ -178,8 +181,10 @@ export function hasCompletedUpgradePrerequisites(
 }
 
 export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: number, networkSchools = 0) {
+  const localCost = definition.levelCosts?.[currentLevel] ??
+    definition.baseCost * definition.costGrowth ** currentLevel;
   return Math.round(
-    definition.baseCost * definition.costGrowth ** currentLevel * (1 + networkSchools * 0.15),
+    localCost * (1 + networkSchools * 0.15),
   );
 }
 

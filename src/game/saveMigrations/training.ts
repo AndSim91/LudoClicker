@@ -11,43 +11,67 @@ function normalizeTrainingCount(
 }
 
 export function migrateTrainingState(state: MigratableState): MigratableState {
-  if (state.version !== 37) return state;
+  let migrated = state;
 
-  const retainedProgress = Object.fromEntries(
-    Object.entries(state.legendaryCollaborators?.retainedProgress ?? {}).map(
-      ([profileId, progress]) => {
-        const retained = progress as RetainedLegendaryProgress;
-        return [profileId, {
-          ...retained,
-          formTrainingYearCount: normalizeTrainingCount(
-            retained.lastFormTrainingYear,
-            retained.formTrainingYearCount,
-          ),
-        }];
+  if (migrated.version === 37) {
+    const retainedProgress = Object.fromEntries(
+      Object.entries(migrated.legendaryCollaborators?.retainedProgress ?? {}).map(
+        ([profileId, progress]) => {
+          const retained = progress as RetainedLegendaryProgress;
+          return [profileId, {
+            ...retained,
+            formTrainingYearCount: normalizeTrainingCount(
+              retained.lastFormTrainingYear,
+              retained.formTrainingYearCount,
+            ),
+          }];
+        },
+      ),
+    );
+
+    migrated = {
+      ...migrated,
+      version: 38,
+      upgrades: { ...createInitialUpgradeLevels(), ...(migrated.upgrades ?? {}) },
+      contacts: (migrated.contacts ?? []).map((contact) => ({
+        ...contact,
+        formTrainingYearCount: normalizeTrainingCount(
+          contact.lastFormTrainingYear,
+          contact.formTrainingYearCount,
+        ),
+      })),
+      collaborators: (migrated.collaborators ?? []).map((collaborator) => ({
+        ...collaborator,
+        formTrainingYearCount: normalizeTrainingCount(
+          collaborator.lastFormTrainingYear,
+          collaborator.formTrainingYearCount,
+        ),
+      })),
+      legendaryCollaborators: migrated.legendaryCollaborators
+        ? { ...migrated.legendaryCollaborators, retainedProgress }
+        : migrated.legendaryCollaborators,
+    };
+  }
+
+  if (migrated.version === 38) {
+    migrated = {
+      ...migrated,
+      version: 39,
+      upgrades: { ...createInitialUpgradeLevels(), ...(migrated.upgrades ?? {}) },
+      automation: {
+        lastProcessedAt:
+          migrated.automation?.lastProcessedAt ??
+          migrated.lastSavedAt ??
+          migrated.createdAt ??
+          Date.now(),
+        writingBuffer: migrated.automation?.writingBuffer ?? 0,
+        socialBuffer: migrated.automation?.socialBuffer ?? 0,
+        equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
+        offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
+        agonistCoursesEnabled: false,
       },
-    ),
-  );
+    };
+  }
 
-  return {
-    ...state,
-    version: 38,
-    upgrades: { ...createInitialUpgradeLevels(), ...(state.upgrades ?? {}) },
-    contacts: (state.contacts ?? []).map((contact) => ({
-      ...contact,
-      formTrainingYearCount: normalizeTrainingCount(
-        contact.lastFormTrainingYear,
-        contact.formTrainingYearCount,
-      ),
-    })),
-    collaborators: (state.collaborators ?? []).map((collaborator) => ({
-      ...collaborator,
-      formTrainingYearCount: normalizeTrainingCount(
-        collaborator.lastFormTrainingYear,
-        collaborator.formTrainingYearCount,
-      ),
-    })),
-    legendaryCollaborators: state.legendaryCollaborators
-      ? { ...state.legendaryCollaborators, retainedProgress }
-      : state.legendaryCollaborators,
-  };
+  return migrated;
 }

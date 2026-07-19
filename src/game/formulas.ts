@@ -92,7 +92,7 @@ export function getEventFunnelOutcome(
 }
 
 export function getWritingPower(state: GameState) {
-  const localPower = 1 + Math.floor(getUpgradeEffectTotal(state.upgrades, "writingPower"));
+  const localPower = 1 + getUpgradeEffectTotal(state.upgrades, "writingPower");
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   const specializationMultiplier = state.school.specialization === "redazione" ? 1.1 : 1;
   return localPower * networkMultiplier * specializationMultiplier;
