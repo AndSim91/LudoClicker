@@ -623,6 +623,57 @@ describe("game engine: progression", () => {
     expect(paused.school.euros).toBe(100);
   });
 
+  it("gives favorite athletes priority for automatic instructor courses", () => {
+    const initial = createInitialState(1_000);
+    const favorite = {
+      ...initial.contacts[0],
+      id: "favorite-student",
+      status: "enrolled" as const,
+      acquiredAt: 1_000,
+      forms: [] as FormId[],
+      favorite: true,
+    };
+    const newerStudent = {
+      ...initial.contacts[1],
+      id: "newer-student",
+      status: "enrolled" as const,
+      acquiredAt: 2_000,
+      forms: [] as FormId[],
+      favorite: false,
+    };
+    const instructor = {
+      id: "favorite-instructor",
+      contactId: "external-favorite-instructor",
+      displayName: "Istruttore Preferiti",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: ["form-1" as const],
+      formBranchPreferences: ["Spada Lunga" as const],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 2, euros: 100 },
+      contacts: [favorite, newerStudent],
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const toggled = gameReducer(
+      { ...ready, contacts: [{ ...favorite, favorite: false }, newerStudent] },
+      { type: "TOGGLE_MEMBER_FAVORITE", contactId: favorite.id },
+    );
+    expect(toggled.contacts[0].favorite).toBe(true);
+
+    const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+    expect(teaching.contacts.find((contact) => contact.id === favorite.id)?.training?.formId)
+      .toBe("form-1");
+    expect(teaching.contacts.find((contact) => contact.id === newerStudent.id)?.training)
+      .toBeUndefined();
+  });
+
   it("generates one to three weapon preferences when Course Y is completed", () => {
     const initial = createInitialState(1_000);
     const member = {

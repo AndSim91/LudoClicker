@@ -70,7 +70,8 @@ export function isValidGameState(value: unknown): value is GameState {
         contact.rarity === "ultra-rare" ||
         contact.rarity === "legendary"
       ) &&
-      Array.isArray(contact.forms)
+      Array.isArray(contact.forms) &&
+      (contact.favorite === undefined || typeof contact.favorite === "boolean")
     ) &&
     Array.isArray(state.emails) &&
     state.emails.every((email) =>

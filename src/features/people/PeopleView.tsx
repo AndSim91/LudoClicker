@@ -7,10 +7,13 @@ import { CollaboratorList } from "./CollaboratorList";
 import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
 
+const ignoreFavoriteToggle = () => undefined;
+
 export function PeopleView({
   state,
   onAssign,
   onStartTraining,
+  onToggleFavorite,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
   onToggleAgonistCourses,
@@ -18,6 +21,7 @@ export function PeopleView({
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
+  onToggleFavorite?: (contactId: string) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
   onToggleAgonistCourses?: (enabled: boolean) => void;
@@ -29,10 +33,8 @@ export function PeopleView({
   );
   const members = useMemo(
     () =>
-      state.contacts.filter(
-        (contact) => contact.status === "enrolled" && !collaboratorsByContactId.has(contact.id),
-      ),
-    [collaboratorsByContactId, state.contacts],
+      state.contacts.filter((contact) => contact.status === "enrolled"),
+    [state.contacts],
   );
   const collaboratorsById = useMemo(
     () => new Map(state.collaborators.map((collaborator) => [collaborator.id, collaborator])),
@@ -79,8 +81,10 @@ export function PeopleView({
         <MemberList
           state={state}
           members={members}
+          collaboratorsByContactId={collaboratorsByContactId}
           collaboratorsById={collaboratorsById}
           onStartTraining={onStartTraining}
+          onToggleFavorite={onToggleFavorite ?? ignoreFavoriteToggle}
         />
       </section>
 

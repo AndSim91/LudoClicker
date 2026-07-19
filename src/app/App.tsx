@@ -223,6 +223,9 @@ export function App() {
                 now: getGameNow(),
               })
             }
+            onToggleFavorite={(contactId) =>
+              dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId })
+            }
             onToggleInstructorAutomation={(collaboratorId, enabled) =>
               dispatch({
                 type: "TOGGLE_INSTRUCTOR_AUTOMATION",

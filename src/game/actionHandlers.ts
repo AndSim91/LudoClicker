@@ -2,6 +2,7 @@ import { addAdminContacts, addAdminEuros, addAdminMembers } from "./adminFlow";
 import { buyOfficialSword, maintainEquipment } from "./equipment";
 import { startAcquisitionEvent } from "./eventFlow";
 import { markAllMessagesRead, markMessageRead } from "./inboxFlow";
+import { toggleMemberFavorite } from "./memberPreferences";
 import { freezeGameState } from "./offline";
 import { processOfflinePassiveProgress } from "./offlineProgress";
 import { updateProfileName } from "./profileFlow";
@@ -84,6 +85,10 @@ export function createGameActionHandlers(
     TOGGLE_AGONIST_COURSES: (state, action) => toggleAgonistCourses(
       state,
       action.enabled,
+    ),
+    TOGGLE_MEMBER_FAVORITE: (state, action) => toggleMemberFavorite(
+      state,
+      action.contactId,
     ),
     PAY_INSTRUCTOR_CERTIFICATES: (state, action) => payInstructorCertificates(
       state,

@@ -337,6 +337,13 @@ export function processAutomaticTeaching(
       getFormTrainingCount(collaborator, trainingYear) < annualTrainingLimit
     ),
   ].sort((left, right) => {
+    const favoriteContactIds = new Set(
+      state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
+    );
+    const isFavoriteMember = (student: typeof left) =>
+      "acquiredAt" in student
+        ? student.favorite === true
+        : favoriteContactIds.has(student.contactId);
     const priority = (student: typeof left) => {
       const candidate = getAutomaticFormCandidates(student)[0];
       const order: FormId[] = [
@@ -358,7 +365,8 @@ export function processAutomaticTeaching(
       ];
       return candidate ? order.indexOf(candidate) : Number.MAX_SAFE_INTEGER;
     };
-    return priority(left) - priority(right) ||
+    return Number(isFavoriteMember(right)) - Number(isFavoriteMember(left)) ||
+      priority(left) - priority(right) ||
       ("acquiredAt" in right ? right.acquiredAt : right.joinedAt) -
         ("acquiredAt" in left ? left.acquiredAt : left.joinedAt);
   });
@@ -431,7 +439,10 @@ export function processAutomaticTeaching(
         getFormTrainingCount(contact, trainingYear) === 0 &&
         getAutomaticFormCandidates(contact).length === 0
       )
-      .sort((left, right) => right.acquiredAt - left.acquiredAt);
+      .sort((left, right) =>
+        Number(right.favorite === true) - Number(left.favorite === true) ||
+        right.acquiredAt - left.acquiredAt
+      );
     for (const student of arenaCandidates) {
       const instructor = nextState.collaborators.find((candidate) =>
         candidate.assignment === "instructor" &&

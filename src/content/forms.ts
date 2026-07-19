@@ -222,20 +222,26 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
   return bonuses;
 }
 
-export function getCollaboratorProductivity(
+export function getCollaboratorBaseProductivity(
   collaborator: Collaborator,
   assignment: CollaboratorAssignment = collaborator.assignment,
 ) {
   const bonuses = getCollaboratorFormBonuses(collaborator);
   const roleBonus = assignment ? bonuses[assignment] : 0;
+  return (
+    (1 + bonuses.all + roleBonus) *
+    PERSON_RARITIES[collaborator.rarity].collaboratorProductivityMultiplier
+  );
+}
+
+export function getCollaboratorProductivity(
+  collaborator: Collaborator,
+  assignment: CollaboratorAssignment = collaborator.assignment,
+) {
   const masteryMultiplier = assignment
     ? getCollaboratorMasteryMultiplier(collaborator.mastery?.[assignment] ?? 0)
     : 1;
-  return (
-    (1 + bonuses.all + roleBonus) *
-    PERSON_RARITIES[collaborator.rarity].collaboratorProductivityMultiplier *
-    masteryMultiplier
-  );
+  return getCollaboratorBaseProductivity(collaborator, assignment) * masteryMultiplier;
 }
 
 export function getCollaboratorBonusSummary(collaborator: Collaborator): string {

@@ -252,13 +252,14 @@ Quando si attiva partecipano tutti gli iscritti idonei, senza limite massimo.
 
 ### 7.1 Gironi variabili
 
-- ogni girone contiene al massimo otto persone;
+- vengono creati al massimo otto gironi;
+- fino a 64 partecipanti ogni girone contiene al massimo otto persone; oltre questa soglia i gironi diventano più numerosi internamente;
 - i partecipanti vengono distribuiti nel modo più uniforme possibile;
 - i gironi differiscono al massimo di una persona;
 - passano i primi quattro di ogni girone;
 - se un girone contiene meno di quattro persone passano tutti.
 
-La fase eliminatoria usa il successivo numero potenza di due. I migliori qualificati ricevono eventuali bye.
+Alla fase eliminatoria accedono al massimo 32 atleti. Il tabellone usa il successivo numero potenza di due e i migliori qualificati ricevono eventuali bye.
 
 Esempi:
 
@@ -266,7 +267,7 @@ Esempi:
 - 10 partecipanti: due gironi da 5, 8 qualificati;
 - 17 partecipanti: gironi 6/6/5, 12 qualificati, tabellone da 16 con 4 bye;
 - 64 partecipanti: 8 gironi da 8, 32 qualificati;
-- 100 partecipanti: 13 gironi bilanciati, 52 qualificati, tabellone da 64 con 12 bye.
+- 100 partecipanti: 8 gironi bilanciati da 12 o 13 persone, 32 qualificati.
 
 ## 8. Tornei superiori
 

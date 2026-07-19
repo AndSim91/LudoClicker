@@ -28,6 +28,7 @@ import {
 } from "./schoolProgressionFlow";
 import {
   addCollaboratorMasteryExperience,
+  addCollaboratorMasteryExperienceForCollaborator,
   addMessage,
 } from "./stateUpdates";
 import {
@@ -68,6 +69,7 @@ export function createInitialState(
 const trainingDependencies = {
   addMessage,
   addCollaboratorMasteryExperience,
+  addCollaboratorMasteryExperienceForCollaborator,
   recruitCollaborator,
 };
 

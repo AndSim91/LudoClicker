@@ -7,6 +7,36 @@ import { PeopleView } from "./PeopleView";
 afterEach(() => cleanup());
 
 describe("PeopleView", () => {
+  it("lets users add and remove an enrolled athlete from favorites", () => {
+    const initial = createInitialState(1_000);
+    const favorite = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      favorite: true,
+    };
+    const onToggleFavorite = vi.fn();
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [favorite],
+          school: { ...initial.school, activeMembers: 1 },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleFavorite={onToggleFavorite}
+      />,
+    );
+
+    const star = screen.getByRole("button", {
+      name: `Rimuovi ${favorite.firstName} ${favorite.lastName} dai preferiti`,
+    });
+    expect(star).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(star);
+    expect(onToggleFavorite).toHaveBeenCalledWith(favorite.id);
+  });
+
   it("keeps the roster DOM bounded and lets users reach every member", () => {
     const initial = createInitialState(1_000);
     const seed = initial.contacts[0];
@@ -46,6 +76,74 @@ describe("PeopleView", () => {
 
     expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(10);
     expect(within(roster).getByText("Membro 159 Scalabile")).toBeVisible();
+  });
+
+  it("shows the requested columns and sorts visible scores in both directions", () => {
+    const initial = createInitialState(1_000);
+    const hidden = {
+      ...initial.contacts[0],
+      id: "hidden-score",
+      firstName: "Punteggio",
+      lastName: "Nascosto",
+      status: "enrolled" as const,
+      forms: ["form-1" as const],
+      arenaBase: 1,
+      styleBase: 1,
+    };
+    const high = {
+      ...initial.contacts[1],
+      id: "high-score",
+      firstName: "Arena",
+      lastName: "Alta",
+      status: "enrolled" as const,
+      forms: ["course-x" as const],
+      arenaBase: 90,
+      styleBase: 80,
+    };
+    const low = {
+      ...initial.contacts[2],
+      id: "low-score",
+      firstName: "Arena",
+      lastName: "Bassa",
+      status: "enrolled" as const,
+      forms: ["course-x" as const],
+      arenaBase: 10,
+      styleBase: 20,
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [hidden, high, low],
+          school: { ...initial.school, activeMembers: 3 },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Iscritti" });
+    const labels = ["Nome", "Email", "Percorso", "Arena", "Stile", "Stato", "Prossima Forma"];
+    for (const label of labels) {
+      expect(within(roster).getByRole("button", { name: `Ordina per ${label}` })).toBeVisible();
+    }
+    expect(within(roster).getAllByText("???", { exact: true })).toHaveLength(2);
+
+    const arenaSort = within(roster).getByRole("button", { name: "Ordina per Arena" });
+    fireEvent.click(arenaSort);
+    let rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Arena Bassa");
+    expect(rows[1]).toHaveTextContent("Arena Alta");
+    expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
+    expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "ascending");
+
+    fireEvent.click(arenaSort);
+    rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Arena Alta");
+    expect(rows[1]).toHaveTextContent("Arena Bassa");
+    expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
+    expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
   });
 
   it("uses one shared progress clock for multiple simultaneous trainings", () => {
@@ -329,7 +427,7 @@ describe("PeopleView", () => {
     expect(onPayInstructorCertificates).toHaveBeenCalledWith(collaborator.id);
   });
 
-  it("shows collaborators only in the collaborators list", () => {
+  it("also shows collaborators in the members list without training controls", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] };
     const state = {
@@ -362,9 +460,15 @@ describe("PeopleView", () => {
       within(collaborators).getByText(`${enrolled.firstName} ${enrolled.lastName}`),
     ).toBeVisible();
     expect(within(collaborators).getByText("Forma 1", { exact: true })).toBeVisible();
-    expect(
-      within(members).queryByText(`${enrolled.firstName} ${enrolled.lastName}`),
-    ).not.toBeInTheDocument();
+    const memberName = within(members).getByText(`${enrolled.firstName} ${enrolled.lastName}`);
+    const memberRow = memberName.closest(".member-row");
+    expect(memberName).toBeVisible();
+    expect(memberRow?.querySelector(".member-training-cell")).toHaveTextContent(
+      /^Collaboratore$/,
+    );
+    expect(within(members).queryByRole("combobox", {
+      name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
+    })).not.toBeInTheDocument();
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {

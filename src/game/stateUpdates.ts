@@ -6,7 +6,12 @@ import {
 } from "../content/mastery";
 import { addInboxMessage } from "./messages";
 import { makeGameId } from "./ids";
-import type { CollaboratorAssignment, GameState, InboxMessage } from "./types";
+import type {
+  Collaborator,
+  CollaboratorAssignment,
+  GameState,
+  InboxMessage,
+} from "./types";
 
 export function addMessage(
   state: GameState,
@@ -31,19 +36,20 @@ export function addMessage(
   return { ...state, messages: addInboxMessage(state.messages, message) };
 }
 
-export function addCollaboratorMasteryExperience(
+function addMatchingCollaboratorMasteryExperience(
   state: GameState,
-  role: CollaboratorAssignment,
+  role: Exclude<CollaboratorAssignment, null>,
   amount: number,
   now: number,
+  matches: (collaborator: Collaborator) => boolean,
 ): GameState {
-  if (!role || !Number.isFinite(amount) || amount <= 0) return state;
+  if (!Number.isFinite(amount) || amount <= 0) return state;
 
   const leveledUp: Array<{ displayName: string; levelName: string; multiplier: number }> = [];
   const nextState: GameState = {
     ...state,
     collaborators: state.collaborators.map((collaborator) => {
-      if (collaborator.assignment !== role) return collaborator;
+      if (!matches(collaborator)) return collaborator;
       const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
       const currentXp = Math.max(0, mastery[role] ?? 0);
       const nextXp = currentXp + amount;
@@ -73,5 +79,37 @@ export function addCollaboratorMasteryExperience(
       "collaborators",
     ),
     nextState,
+  );
+}
+
+export function addCollaboratorMasteryExperience(
+  state: GameState,
+  role: CollaboratorAssignment,
+  amount: number,
+  now: number,
+): GameState {
+  if (!role) return state;
+  return addMatchingCollaboratorMasteryExperience(
+    state,
+    role,
+    amount,
+    now,
+    (collaborator) => collaborator.assignment === role,
+  );
+}
+
+export function addCollaboratorMasteryExperienceForCollaborator(
+  state: GameState,
+  collaboratorId: string,
+  role: Exclude<CollaboratorAssignment, null>,
+  amount: number,
+  now: number,
+): GameState {
+  return addMatchingCollaboratorMasteryExperience(
+    state,
+    role,
+    amount,
+    now,
+    (collaborator) => collaborator.id === collaboratorId,
   );
 }

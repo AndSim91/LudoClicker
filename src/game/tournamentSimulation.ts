@@ -35,6 +35,10 @@ import type {
 export const ARENA_DECISIVENESS = 18;
 const MINIMUM_ASSAULT_CHANCE = 0.001;
 const MAXIMUM_ASSAULT_CHANCE = 0.999;
+const SCHOOL_MAX_GROUP_COUNT = 8;
+const PREFERRED_MAX_GROUP_SIZE = 8;
+const GROUP_QUALIFIER_LIMIT = 4;
+const MAX_KNOCKOUT_PARTICIPANTS = SCHOOL_MAX_GROUP_COUNT * GROUP_QUALIFIER_LIMIT;
 
 interface RandomCursor {
   seed: number;
@@ -387,8 +391,11 @@ function simulateMatch(
   };
 }
 
-function getGroupSizes(participantCount: number): number[] {
-  const groupCount = Math.max(1, Math.ceil(participantCount / 8));
+function getGroupSizes(participantCount: number, maximumGroupCount = Infinity): number[] {
+  const groupCount = Math.max(
+    1,
+    Math.min(maximumGroupCount, Math.ceil(participantCount / PREFERRED_MAX_GROUP_SIZE)),
+  );
   const minimumSize = Math.floor(participantCount / groupCount);
   const largerGroups = participantCount % groupCount;
   return Array.from(
@@ -602,7 +609,10 @@ export function simulateTournament(
   const styleTotals = new Map(
     participants.map((participant) => [participant.id, { total: 0, count: 0 }]),
   );
-  const groupSizes = getGroupSizes(participants.length);
+  const groupSizes = getGroupSizes(
+    participants.length,
+    level === "school" ? SCHOOL_MAX_GROUP_COUNT : undefined,
+  );
   let offset = 0;
   const advancing: { participant: TournamentParticipant; standing: MutableStanding }[] = [];
   groupSizes.forEach((size, groupIndex) => {
@@ -639,15 +649,18 @@ export function simulateTournament(
     }
     standings.sort(compareStandings);
     mutableStandings.push(...standings);
-    advancing.push(...standings.slice(0, Math.min(4, standings.length)).map((standing) => ({
+    advancing.push(...standings.slice(0, GROUP_QUALIFIER_LIMIT).map((standing) => ({
       participant: participantMap.get(standing.participantId)!, standing,
     })));
   });
 
   advancing.sort((a, b) => compareStandings(a.standing, b.standing));
-  const advancingIds = new Set(advancing.map((entry) => entry.participant.id));
+  const knockoutParticipants = advancing
+    .slice(0, MAX_KNOCKOUT_PARTICIPANTS)
+    .map((entry) => entry.participant);
+  const advancingIds = new Set(knockoutParticipants.map((participant) => participant.id));
   const knockout = buildArenaKnockout(
-    advancing.map((entry) => entry.participant), participantMap, cursor, matches, styleTotals,
+    knockoutParticipants, participantMap, cursor, matches, styleTotals,
   );
   const groupEliminated = mutableStandings
     .filter((standing) => !advancingIds.has(standing.participantId))

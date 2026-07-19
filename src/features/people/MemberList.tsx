@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { getSchoolYear } from "../../game/calendar";
+import { useMemo, useState } from "react";
+import { getFormTrainingYear, getSchoolYear } from "../../game/calendar";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
@@ -10,6 +10,11 @@ import {
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { getOfficialStatColor } from "../../shared/officialStatColor";
+import {
+  sortMembers,
+  type MemberSort,
+  type MemberSortKey,
+} from "./memberSorting";
 
 const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
   available: "Disponibile",
@@ -23,76 +28,206 @@ const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
 
 const MEMBERS_PER_PAGE = 75;
 
+function SortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+}: {
+  label: string;
+  sortKey: MemberSortKey;
+  sort: MemberSort | null;
+  onSort: (key: MemberSortKey) => void;
+}) {
+  const active = sort?.key === sortKey;
+  return (
+    <span role="columnheader" aria-sort={active ? sort.direction : "none"}>
+      <button
+        type="button"
+        className={`member-sort-button${active ? " is-active" : ""}`}
+        aria-label={`Ordina per ${label}`}
+        onClick={() => onSort(sortKey)}
+      >
+        <span>{label}</span>
+        <span className="member-sort-indicator" aria-hidden="true">
+          {active ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </span>
+  );
+}
+
 export function MemberList({
   state,
   members,
+  collaboratorsByContactId,
   collaboratorsById,
   onStartTraining,
+  onToggleFavorite,
 }: {
   state: GameState;
   members: Contact[];
+  collaboratorsByContactId: Map<string, Collaborator>;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
+  onToggleFavorite: (contactId: string) => void;
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
-  const currentYear = getSchoolYear(state.school.currentMonth);
+  const [sort, setSort] = useState<MemberSort | null>(null);
+  const currentMonth = state.school.currentMonth;
+  const extraFormLevel = state.upgrades["extra-form"] ?? 0;
+  const immuneContactIds = state.tournaments.immuneContactIds;
+  const foundedSchools = state.network.schools.length;
+  const currentYear = getSchoolYear(currentMonth);
+  const sortContext = useMemo(
+    () => ({
+      currentTrainingYear: getFormTrainingYear(currentMonth),
+      annualTrainingLimit: 1 + extraFormLevel,
+      immuneContactIds,
+      foundedSchools,
+      collaboratorsByContactId,
+    }),
+    [
+      collaboratorsByContactId,
+      currentMonth,
+      extraFormLevel,
+      foundedSchools,
+      immuneContactIds,
+    ],
+  );
+  const sortedMembers = useMemo(
+    () => sortMembers(members, sort, sortContext),
+    [members, sort, sortContext],
+  );
   const pageCount = Math.max(1, Math.ceil(members.length / MEMBERS_PER_PAGE));
   const page = Math.min(requestedPage, pageCount - 1);
   const firstMember = page * MEMBERS_PER_PAGE;
-  const visibleMembers = members.slice(firstMember, firstMember + MEMBERS_PER_PAGE);
+  const visibleMembers = sortedMembers.slice(firstMember, firstMember + MEMBERS_PER_PAGE);
+  const handleSort = (key: MemberSortKey) => {
+    setRequestedPage(0);
+    setSort((current) =>
+      current?.key === key
+        ? {
+            key,
+            direction: current.direction === "ascending" ? "descending" : "ascending",
+          }
+        : { key, direction: "ascending" },
+    );
+  };
+  const selectSort = (key: MemberSortKey) => {
+    setRequestedPage(0);
+    setSort((current) => ({
+      key,
+      direction: current?.key === key ? current.direction : "ascending",
+    }));
+  };
+  const reverseSort = () => {
+    setRequestedPage(0);
+    setSort((current) => current
+      ? {
+          ...current,
+          direction: current.direction === "ascending" ? "descending" : "ascending",
+        }
+      : current,
+    );
+  };
 
   return (
     <section className="people-table member-development-list" aria-label="Iscritti">
+      <div className="member-sort-mobile" aria-label="Ordina iscritti">
+        <label>
+          <span>Ordina per</span>
+          <select
+            aria-label="Campo di ordinamento"
+            value={sort?.key ?? ""}
+            onChange={(event) => selectSort(event.target.value as MemberSortKey)}
+          >
+            <option value="" disabled>Seleziona</option>
+            <option value="name">Nome</option>
+            <option value="email">Email</option>
+            <option value="path">Percorso</option>
+            <option value="arena">Arena</option>
+            <option value="style">Stile</option>
+            <option value="status">Stato</option>
+            <option value="next-form">Prossima Forma</option>
+          </select>
+        </label>
+        <button type="button" disabled={!sort} onClick={reverseSort}>
+          {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
+        </button>
+      </div>
       <div className="people-row people-head member-row">
-        <span>Nome</span>
-        <span>Indirizzo</span>
-        <span>Percorso</span>
-        <span>Stato</span>
-        <span>Prossima evoluzione</span>
+        <SortableHeader label="Nome" sortKey="name" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Email" sortKey="email" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Percorso" sortKey="path" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Arena" sortKey="arena" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Stile" sortKey="style" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Stato" sortKey="status" sort={sort} onSort={handleSort} />
+        <SortableHeader
+          label="Prossima Forma"
+          sortKey="next-form"
+          sort={sort}
+          onSort={handleSort}
+        />
       </div>
       {visibleMembers.map((contact) => {
-        const memberForms = contact.forms;
+        const collaborator = collaboratorsByContactId.get(contact.id);
+        const memberStudent = collaborator ?? contact;
+        const memberForms = memberStudent.forms;
         const hasVisibleStats = hasCompletedCourseX(memberForms);
         const preparation = hasVisibleStats
           ? getContactPreparation(contact, memberForms)
           : undefined;
         return (
           <div className="people-row member-row" key={contact.id}>
-            <PersonName
-              displayName={`${contact.firstName} ${contact.lastName}`}
-              rarity={contact.rarity}
-              label="Nome"
-              secretLegendary={Boolean(contact.secretLegendaryId)}
-            />
-            <span data-label="Indirizzo">
+            <div className="member-name" data-label="Nome">
+              <button
+                type="button"
+                className={`member-favorite${contact.favorite ? " is-favorite" : ""}`}
+                aria-label={`${contact.favorite ? "Rimuovi" : "Aggiungi"} ${contact.firstName} ${contact.lastName} ${contact.favorite ? "dai" : "ai"} preferiti`}
+                aria-pressed={contact.favorite === true}
+                title={contact.favorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
+                onClick={() => onToggleFavorite(contact.id)}
+              >
+                <span aria-hidden="true">★</span>
+              </button>
+              <PersonName
+                displayName={`${contact.firstName} ${contact.lastName}`}
+                rarity={contact.rarity}
+                secretLegendary={Boolean(contact.secretLegendaryId)}
+              />
+            </div>
+            <span data-label="Email">
               <span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span>
             </span>
             <div className="member-path" data-label="Percorso">
               <strong>{formatFormPath(memberForms)}</strong>
-              {preparation ? (
-                <small className="member-competitive-stats">
-                  Arena{" "}
-                  <strong
-                    className="official-stat-value"
-                    style={{ color: getOfficialStatColor(preparation.arena) }}
-                  >
-                    {preparation.arena.toFixed(3)}
-                  </strong>
-                  {" · "}Stile{" "}
-                  <strong
-                    className="official-stat-value"
-                    style={{ color: getOfficialStatColor(preparation.style) }}
-                  >
-                    {preparation.style.toFixed(3)}
-                  </strong>
-                </small>
-              ) : (
-                <small className="member-competitive-stats">
-                  Arena ??? · Stile ??? · completa Corso X
-                </small>
-              )}
               <FormLogoStrip forms={memberForms} showLabels={false} />
             </div>
+            <span className="member-stat" data-label="Arena">
+              {preparation ? (
+                <strong
+                  className="official-stat-value"
+                  style={{ color: getOfficialStatColor(preparation.arena) }}
+                >
+                  {preparation.arena.toFixed(3)}
+                </strong>
+              ) : (
+                <span className="member-stat-locked" title="Completa Corso X">???</span>
+              )}
+            </span>
+            <span className="member-stat" data-label="Stile">
+              {preparation ? (
+                <strong
+                  className="official-stat-value"
+                  style={{ color: getOfficialStatColor(preparation.style) }}
+                >
+                  {preparation.style.toFixed(3)}
+                </strong>
+              ) : (
+                <span className="member-stat-locked" title="Completa Corso X">???</span>
+              )}
+            </span>
             <span className="member-status" data-label="Stato">
               <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
               <small>
@@ -100,10 +235,10 @@ export function MemberList({
                   ? "Qualificato · immune"
                   : contact.rarity === "legendary"
                     ? "Non soggetto ad abbandono"
-                    : contact.lastFormTrainingYear === currentYear
+                    : memberStudent.lastFormTrainingYear === currentYear
                       ? "Nessun rischio"
                       : getMemberDepartureRiskLabel(
-                          contact.forms,
+                          memberForms,
                           contact.rarity,
                           state.network.schools.length,
                         )}
@@ -113,15 +248,19 @@ export function MemberList({
                 {Math.min(60, getContactTournamentExperience(contact) * 3)}%
               </small>
             </span>
-            <div className="member-training-cell" data-label="Prossima evoluzione">
-              <TrainingControl
-                personId={contact.id}
-                displayName={`${contact.firstName} ${contact.lastName}`}
-                student={contact}
-                state={state}
-                collaboratorsById={collaboratorsById}
-                onStartTraining={onStartTraining}
-              />
+            <div className="member-training-cell" data-label="Prossima Forma">
+              {collaborator ? (
+                <strong className="member-collaborator-label">Collaboratore</strong>
+              ) : (
+                <TrainingControl
+                  personId={contact.id}
+                  displayName={`${contact.firstName} ${contact.lastName}`}
+                  student={contact}
+                  state={state}
+                  collaboratorsById={collaboratorsById}
+                  onStartTraining={onStartTraining}
+                />
+              )}
             </div>
           </div>
         );

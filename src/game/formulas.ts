@@ -1,6 +1,6 @@
 import { getUpgradeEffectMaximum, getUpgradeEffectTotal } from "../content/upgrades";
 import type { AcquisitionEventDefinition } from "../content/events";
-import { getCollaboratorProductivity } from "../content/forms";
+import { getCollaboratorBaseProductivity } from "../content/forms";
 import { PERSON_RARITIES } from "../content/rarities";
 import { GAME_CONFIG } from "./config";
 import type { FormId, GameState, PersonRarity } from "./types";
@@ -25,7 +25,7 @@ export function getEnrollmentChance(
 ) {
   const lessonProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "lessons")
-    .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
+    .reduce((total, collaborator) => total + getCollaboratorBaseProductivity(collaborator), 0);
   const maximumUpgradeEffect = getUpgradeEffectMaximum("enrollmentMultiplier");
   const improvementProgress = clamp(
     (
@@ -63,7 +63,7 @@ export function getEventFunnelOutcome(
     state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   const eventProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "events")
-    .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
+    .reduce((total, collaborator) => total + getCollaboratorBaseProductivity(collaborator), 0);
   const collaboratorMultiplier = 1 + eventProductivity * 0.1;
   const peopleMet = Math.max(
     1,

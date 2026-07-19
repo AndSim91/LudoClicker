@@ -90,6 +90,7 @@ export function maintainEquipment(state: GameState, now: number): GameState {
   const swordsInRunningEvents = state.acquisitionEvents
     .filter((event) => event.status === "running")
     .reduce((total, event) => total + event.equipmentUsed, 0);
+  const repairedWear = Math.max(0, state.equipment.wear);
   const maintained: GameState = {
     ...state,
     school: {
@@ -110,7 +111,7 @@ export function maintainEquipment(state: GameState, now: number): GameState {
   return addCollaboratorMasteryExperience(
     maintained,
     "equipment",
-    COLLABORATOR_MASTERY_XP.equipmentMaintenance,
+    repairedWear * COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
     now,
   );
 }

@@ -53,6 +53,13 @@ export interface TrainingFlowDependencies {
     amount: number,
     now: number,
   ) => GameState;
+  addCollaboratorMasteryExperienceForCollaborator: (
+    state: GameState,
+    collaboratorId: string,
+    role: Exclude<CollaboratorAssignment, null>,
+    amount: number,
+    now: number,
+  ) => GameState;
   recruitCollaborator: (state: GameState, contact: Contact, now: number) => GameState;
 }
 
@@ -450,9 +457,14 @@ export function resolveFormTraining(
           : contact)
         : state.contacts,
     };
-    if (student.training.instructorId) {
-      nextState = dependencies.addCollaboratorMasteryExperience(
+    const instructorId = student.training.instructorId ??
+      (collaborator && student.training.includesInstructorCertification
+        ? collaborator.id
+        : undefined);
+    if (instructorId) {
+      nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
         nextState,
+        instructorId,
         "instructor",
         COLLABORATOR_MASTERY_XP.instructorTraining,
         now,
@@ -509,9 +521,14 @@ export function resolveFormTraining(
       formsCompleted: state.statistics.formsCompleted + 1,
     },
   };
-  if (student.training.instructorId) {
-    nextState = dependencies.addCollaboratorMasteryExperience(
+  const instructorId = student.training.instructorId ??
+    (collaborator && student.training.includesInstructorCertification
+      ? collaborator.id
+      : undefined);
+  if (instructorId) {
+    nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
       nextState,
+      instructorId,
       "instructor",
       COLLABORATOR_MASTERY_XP.instructorTraining,
       now,

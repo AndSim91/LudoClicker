@@ -48,6 +48,7 @@ describe("tournament simulation", () => {
 
     expect(simulation.result.participants).toHaveLength(6);
     expect(new Set(simulation.result.groupStandings.map((entry) => entry.groupIndex)).size).toBe(1);
+    expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(4);
     expect(simulation.result.qualifiers).toHaveLength(6);
     expect(new Set(simulation.result.qualifiers.map((entry) => entry.participantId)).size).toBe(6);
     expect(simulation.result.matches.every((match) =>
@@ -57,6 +58,39 @@ describe("tournament simulation", () => {
       match.styleScoreA > 0 && match.styleScoreA < 10 &&
       match.styleScoreB > 0 && match.styleScoreB < 10
     )).toBe(true);
+  });
+
+  it("caps a large school tournament at eight groups and 32 knockout athletes", () => {
+    const state = createTournamentSchool(66);
+    const eligible = getEligibleSchoolContacts(state);
+    const simulation = simulateTournament(state, "school", 1, 181_000, eligible);
+    const standingsByGroup = new Map<number, typeof simulation.result.groupStandings>();
+    simulation.result.groupStandings.forEach((standing) => {
+      const group = standingsByGroup.get(standing.groupIndex) ?? [];
+      group.push(standing);
+      standingsByGroup.set(standing.groupIndex, group);
+    });
+    const qualifiedIds = new Set(
+      simulation.result.groupStandings
+        .filter((standing) => standing.qualified)
+        .map((standing) => standing.participantId),
+    );
+    const roundOf32Ids = new Set(
+      simulation.result.matches
+        .filter((match) => match.stage === "round32")
+        .flatMap((match) => [match.participantAId, match.participantBId]),
+    );
+
+    expect(standingsByGroup.size).toBe(8);
+    expect([...standingsByGroup.values()].map((group) => group.length).sort((a, b) => a - b)).toEqual([
+      8, 8, 8, 8, 8, 8, 9, 9,
+    ]);
+    expect([...standingsByGroup.values()].every((group) =>
+      group.filter((standing) => standing.qualified).length === 4
+    )).toBe(true);
+    expect(qualifiedIds.size).toBe(32);
+    expect(roundOf32Ids).toEqual(qualifiedIds);
+    expect(simulation.result.matches.some((match) => match.stage === "round64")).toBe(false);
   });
 
   it("is deterministic from the saved seed", () => {

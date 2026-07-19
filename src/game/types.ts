@@ -52,6 +52,7 @@ export interface Contact {
   lastFormTrainingYear?: number;
   formTrainingYearCount?: number;
   enrolledMonth?: number;
+  favorite?: boolean;
 }
 
 export interface CampaignEmail {
@@ -588,6 +589,7 @@ export type GameAction =
       enabled: boolean;
       now: number;
     }
+  | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
   | {
       type: "PAY_INSTRUCTOR_CERTIFICATES";
       collaboratorId: string;

@@ -1,5 +1,8 @@
 import { getAcquisitionEventDefinition } from "../content/events";
-import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
+import {
+  COLLABORATOR_MASTERY_XP,
+  getCollaboratorMasteryDefinition,
+} from "../content/mastery";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
@@ -12,7 +15,10 @@ import { getEventFunnelOutcome } from "./formulas";
 import { createAcquiredContacts, addLegendaryEncounters } from "./contacts";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
-import { addCollaboratorMasteryExperience, addMessage } from "./stateUpdates";
+import {
+  addCollaboratorMasteryExperienceForCollaborator,
+  addMessage,
+} from "./stateUpdates";
 import { selectAvailableEventMembers } from "./selectors";
 import { startNextCampaign } from "./emailFlow";
 import { getArchivedCompletedEventCount } from "./historyArchive";
@@ -29,10 +35,12 @@ export function startAcquisitionEvent(
   if (state.acquisitionEvents.some((event) =>
     event.status === "running" && event.definitionId === definitionId
   )) return state;
-  if (collaboratorId) {
-    const collaborator = state.collaborators.find((candidate) =>
+  const collaborator = collaboratorId
+    ? state.collaborators.find((candidate) =>
       candidate.id === collaboratorId && candidate.assignment === "events"
-    );
+    )
+    : undefined;
+  if (collaboratorId) {
     if (
       !collaborator ||
       state.acquisitionEvents.some((event) =>
@@ -45,7 +53,11 @@ export function startAcquisitionEvent(
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
   const availableSwords = getAvailableSwords(state.equipment);
   if (availableSwords < definition.requiredSwords) return state;
-  if (state.school.euros < definition.cost) return state;
+  const masteryBonus = collaborator
+    ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0).multiplier
+    : 0;
+  const eventCost = Math.round(definition.cost * (1 - masteryBonus));
+  if (state.school.euros < eventCost) return state;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
   const attendanceVariance =
@@ -62,8 +74,8 @@ export function startAcquisitionEvent(
     title: definition.title,
     location: definition.location,
     startedAt: now,
-    resolvesAt: now + definition.durationMs,
-    cost: definition.cost,
+    resolvesAt: now + Math.round(definition.durationMs / (1 + masteryBonus)),
+    cost: eventCost,
     peopleMet: outcome.peopleMet,
     demonstrationsGiven: outcome.demonstrationsGiven,
     contactReward: outcome.contactsObtained,
@@ -74,7 +86,8 @@ export function startAcquisitionEvent(
       Math.round(
         definition.wearAdded *
           GAME_CONFIG.eventWearMultiplier *
-          (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))),
+          (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))) *
+          (1 - masteryBonus),
       ),
     ),
     collaboratorId,
@@ -83,7 +96,7 @@ export function startAcquisitionEvent(
   return {
     ...state,
     randomSeed: nextSeed,
-    school: { ...state.school, euros: state.school.euros - definition.cost },
+    school: { ...state.school, euros: state.school.euros - eventCost },
     equipment: {
       ...state.equipment,
       availableSwords: availableSwords - definition.requiredSwords,
@@ -167,12 +180,15 @@ export function resolveAcquisitionEvent(
       eventsCompleted: rewardState.statistics.eventsCompleted + 1,
     },
   };
-  nextState = addCollaboratorMasteryExperience(
-    nextState,
-    "events",
-    COLLABORATOR_MASTERY_XP.eventCompleted,
-    now,
-  );
+  if (event.collaboratorId) {
+    nextState = addCollaboratorMasteryExperienceForCollaborator(
+      nextState,
+      event.collaboratorId,
+      "events",
+      COLLABORATOR_MASTERY_XP.eventCompleted,
+      now,
+    );
+  }
   if (contacts.length > 0) {
     nextState = addMessage(
       nextState,
