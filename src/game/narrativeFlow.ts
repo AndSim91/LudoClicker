@@ -6,8 +6,6 @@ import { scaleContactGain, scaleCurrencyGain } from "./economy";
 import { startNextCampaign } from "./emailFlow";
 import { applyEquipmentWear, applySwordDamage } from "./equipment";
 import { makeGameId } from "./ids";
-import { departMembers } from "./membershipFlow";
-import { isSummerBreak } from "./calendar";
 import { canFoundSchool } from "./progression";
 import { nextRandom, randomBetween } from "./random";
 import { addMessage } from "./stateUpdates";
@@ -19,9 +17,6 @@ export function processNarrativeEvent(
   gainMultiplier: number,
 ): GameState {
   if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
-  const renewableMembers = state.contacts.filter(
-    (contact) => contact.status === "enrolled" && contact.rarity !== "legendary",
-  );
   const recentKinds = state.narrative.history
     .slice(-GAME_CONFIG.narrativeNegativeStreakLimit)
     .map((record) =>
@@ -31,8 +26,7 @@ export function processNarrativeEvent(
     recentKinds.every((kind) => kind === "negative");
   const eligible = NARRATIVE_EVENTS.filter(
     (definition) => state.school.activeMembers >= definition.minMembers &&
-      (definition.id !== "missed-renewal" ||
-        (renewableMembers.length > 0 && isSummerBreak(state.school.currentMonth))) &&
+      definition.id !== "missed-renewal" &&
       (!blockNegative || definition.kind !== "negative"),
   );
   if (eligible.length === 0) return state;
@@ -56,11 +50,6 @@ export function processNarrativeEvent(
     ? createAcquiredContacts(rewardState.state, rewardState.amount, "collaborator", now)
     : { contacts: [], nextSeed: rewardState.state.randomSeed };
   const contacts = acquired.contacts;
-  const renewalMember = definition.id === "missed-renewal" && renewableMembers.length > 0
-    ? renewableMembers[
-        Math.min(renewableMembers.length - 1, Math.floor(eventRoll * renewableMembers.length))
-      ]
-    : undefined;
   const euroDelta = (definition.euroDelta ?? 0) > 0
     ? scaleCurrencyGain(definition.euroDelta ?? 0, gainMultiplier)
     : (definition.euroDelta ?? 0);
@@ -76,11 +65,6 @@ export function processNarrativeEvent(
     ),
     school: {
       ...rewardState.state.school,
-      activeMembers: Math.max(
-        0,
-        rewardState.state.school.activeMembers +
-          (renewalMember ? 0 : (definition.memberDelta ?? 0)),
-      ),
       euros: Math.max(0, rewardState.state.school.euros + euroDelta),
     },
     equipment: applySwordDamage(
@@ -98,14 +82,6 @@ export function processNarrativeEvent(
           title: definition.title,
           occurredAt: now,
           summary,
-          ...(renewalMember
-            ? {
-                person: {
-                  displayName: `${renewalMember.firstName} ${renewalMember.lastName}`,
-                  rarity: renewalMember.rarity,
-                },
-              }
-            : {}),
         },
       ].slice(-GAME_CONFIG.narrativeHistoryLimit),
     },
@@ -116,9 +92,6 @@ export function processNarrativeEvent(
       eurosEarned: rewardState.state.statistics.eurosEarned + Math.max(0, euroDelta),
     },
   };
-  if (renewalMember) {
-    nextState = departMembers(nextState, [renewalMember.id]);
-  }
   nextState = addMessage(
     nextState,
     now,

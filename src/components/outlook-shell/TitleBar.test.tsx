@@ -11,7 +11,7 @@ describe("TitleBar", () => {
         currentMonth={9}
         nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
         now={1_000 + GAME_CONFIG.gameMonthMs / 2}
-        availableContacts={4}
+        contactsAwaitingEmail={4}
         activeMembers={3}
         euros={120}
       />,
@@ -33,7 +33,7 @@ describe("TitleBar", () => {
         currentMonth={20}
         nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
         now={1_000}
-        availableContacts={0}
+        contactsAwaitingEmail={0}
         activeMembers={0}
         euros={0}
       />,
@@ -45,7 +45,7 @@ describe("TitleBar", () => {
         currentMonth={21}
         nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
         now={1_000}
-        availableContacts={0}
+        contactsAwaitingEmail={0}
         activeMembers={0}
         euros={0}
       />,
@@ -61,7 +61,7 @@ describe("TitleBar", () => {
         currentMonth={9}
         nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
         now={1_000 + GAME_CONFIG.gameMonthMs / 2}
-        availableContacts={1_200_000}
+        contactsAwaitingEmail={1_200_000}
         activeMembers={999_999}
         euros={euros}
       />,

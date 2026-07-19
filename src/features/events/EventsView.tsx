@@ -9,7 +9,7 @@ import {
   getEffectiveDamagedSwords,
   getEquipmentMaintenanceCost,
 } from "../../game/equipment";
-import { selectAvailableContacts, selectAvailableEventMembers } from "../../game/selectors";
+import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import type { AcquisitionEvent, GameState } from "../../game/types";
 import { formatCurrency, formatTime } from "../../shared/formatters";
 
@@ -104,7 +104,7 @@ export function EventsView({
   return (
     <main className="overview-view events-view">
       <header><Icon name="flag" /><div><h1>Eventi</h1><p>Attività esterne per incontrare persone e raccogliere nuovi contatti</p></div></header>
-      <div className="event-notice"><Icon name="contact" /><div><strong>{selectAvailableContacts(state)} contatti disponibili</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
+      <div className="event-notice"><Icon name="contact" /><div><strong>{selectContactsAwaitingEmail(state)} contatti da contattare</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
       <section className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
         <div><Icon name="people" /><span><strong>{availableMembers}/{state.school.activeMembers} iscritti disponibili</strong><small>Gli iscritti impegnati tornano disponibili a fine evento.</small></span></div>
         <div className="event-equipment-summary">

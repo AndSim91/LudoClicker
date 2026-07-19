@@ -12,14 +12,14 @@ export function TitleBar({
   currentMonth,
   nextMonthAt,
   now,
-  availableContacts,
+  contactsAwaitingEmail,
   activeMembers,
   euros,
 }: {
   currentMonth: number;
   nextMonthAt: number;
   now: number;
-  availableContacts: number;
+  contactsAwaitingEmail: number;
   activeMembers: number;
   euros: number;
 }) {
@@ -36,10 +36,10 @@ export function TitleBar({
         <Icon name="menu" />
       </button>
       <div className="title-resources" aria-label="Situazione del gioco">
-        <span className="title-resource" aria-label={`Contatti disponibili: ${formatExactNumber(availableContacts)}`}>
+        <span className="title-resource" aria-label={`Contatti da contattare: ${formatExactNumber(contactsAwaitingEmail)}`}>
           <Icon name="contact" />
           <small>Contatti</small>
-          <strong title={formatExactNumber(availableContacts)}>{formatCompactNumber(availableContacts)}</strong>
+          <strong title={formatExactNumber(contactsAwaitingEmail)}>{formatCompactNumber(contactsAwaitingEmail)}</strong>
         </span>
         <span className="title-resource" aria-label={`Iscritti attivi: ${formatExactNumber(activeMembers)}`}>
           <Icon name="people" />

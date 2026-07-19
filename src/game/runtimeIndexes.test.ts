@@ -4,6 +4,7 @@ import { createInitialState } from "./engine";
 import {
   getActiveCampaignEmails,
   getAvailableContactCount,
+  getContactsAwaitingEmailCount,
   getCompletedTrialsByStartDay,
   getCompletedTrialsByMostRecent,
   getContactsById,
@@ -67,6 +68,20 @@ describe("runtime indexes", () => {
     expect(getCompletedTrialsByStartDay(trials)).toBe(historyByDay);
     expect(scheduled.map((trial) => trial.id)).toEqual(["earlier", "later"]);
     expect([...historyByDay.values()].flat().map((trial) => trial.id)).toEqual(["today"]);
+  });
+
+  it("keeps the active draft in the count until its email is sent", () => {
+    const initial = createInitialState(1_000);
+
+    expect(getAvailableContactCount(initial.contacts)).toBe(4);
+    expect(getContactsAwaitingEmailCount(initial.contacts)).toBe(5);
+
+    const lastDraft = initial.contacts.map((contact) => ({
+      ...contact,
+      status: contact.status === "writing" ? "writing" as const : "lost" as const,
+    }));
+    expect(getAvailableContactCount(lastDraft)).toBe(0);
+    expect(getContactsAwaitingEmailCount(lastDraft)).toBe(1);
   });
 
   it("builds contact and instructor indexes once per pair of source arrays", () => {

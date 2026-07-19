@@ -1,4 +1,5 @@
 import { getUpgradeEffectTotal } from "../content/upgrades";
+import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
   getSchoolYear,
   getSchoolYearStartMonth,
@@ -7,6 +8,7 @@ import {
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
+import { makeGameId } from "./ids";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
 import type { GameState, SpecialCollaboratorId } from "./types";
@@ -137,8 +139,32 @@ function processMemberDepartures(
     { ...state, randomSeed: nextSeed },
     departedIds,
   );
+  const withNarrative: GameState = {
+    ...updated,
+    narrative: {
+      ...updated.narrative,
+      history: [
+        ...updated.narrative.history,
+        ...departed.map((member, index) => ({
+          id: makeGameId("narrative", now, updated.narrative.history.length + index),
+          definitionId: MISSED_RENEWAL_EVENT.id,
+          title: MISSED_RENEWAL_EVENT.title,
+          occurredAt: now,
+          summary: MISSED_RENEWAL_EVENT.description,
+          person: {
+            displayName: `${member.firstName} ${member.lastName}`,
+            rarity: member.rarity,
+          },
+        })),
+      ].slice(-GAME_CONFIG.narrativeHistoryLimit),
+    },
+    statistics: {
+      ...updated.statistics,
+      narrativeEvents: updated.statistics.narrativeEvents + departed.length,
+    },
+  };
   return addMessage(
-    updated,
+    withNarrative,
     now,
     departed.length === 1
       ? "Un iscritto ha lasciato la scuola"

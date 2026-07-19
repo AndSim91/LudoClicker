@@ -23,6 +23,7 @@ const runningEventsCache = new WeakMap<AcquisitionEvent[], AcquisitionEvent[]>()
 const activeTrainingsCache = new WeakMap<TrainingPerson[], TrainingPerson[]>();
 const contactsByIdCache = new WeakMap<Contact[], ReadonlyMap<string, Contact>>();
 const availableContactCountCache = new WeakMap<Contact[], number>();
+const contactsAwaitingEmailCountCache = new WeakMap<Contact[], number>();
 const enrolledLegendaryContactsCache = new WeakMap<Contact[], Contact[]>();
 const collaboratorsByIdCache = new WeakMap<Collaborator[], ReadonlyMap<string, Collaborator>>();
 const instructorLoadsCache = new WeakMap<
@@ -148,6 +149,17 @@ export function getAvailableContactCount(contacts: Contact[]): number {
     if (contact.status === "available") count += 1;
   }
   availableContactCountCache.set(contacts, count);
+  return count;
+}
+
+export function getContactsAwaitingEmailCount(contacts: Contact[]): number {
+  const cached = contactsAwaitingEmailCountCache.get(contacts);
+  if (cached !== undefined) return cached;
+  let count = 0;
+  for (const contact of contacts) {
+    if (contact.status === "available" || contact.status === "writing") count += 1;
+  }
+  contactsAwaitingEmailCountCache.set(contacts, count);
   return count;
 }
 

@@ -593,6 +593,21 @@ describe("game engine: funnel", () => {
     expect(renewed.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(3);
     expect(renewed.school.activeMembers).toBe(3);
     expect(renewed.statistics.membersDeparted).toBe(2);
+    expect(renewed.statistics.narrativeEvents).toBe(2);
+    expect(renewed.narrative.history.filter(
+      (event) => event.definitionId === "missed-renewal",
+    )).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        person: expect.objectContaining({
+          displayName: `${ignored.firstName} ${ignored.lastName}`,
+        }),
+      }),
+      expect.objectContaining({
+        person: expect.objectContaining({
+          displayName: `${recent.firstName} ${recent.lastName}`,
+        }),
+      }),
+    ]));
     expect(renewed.messages.some((message) => message.subject === "2 iscritti hanno lasciato la scuola")).toBe(true);
 
     const septemberState = gameReducer({
@@ -601,6 +616,45 @@ describe("game engine: funnel", () => {
     }, { type: "TICK", now: 2_000 });
     expect(septemberState.statistics.membersDeparted).toBe(0);
     expect(septemberState.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
+  });
+
+  it("keeps trained and tournament-qualified members immune at annual renewal", () => {
+    const initial = createInitialState(1_000);
+    const [trained, qualified] = initial.contacts;
+    const state = {
+      ...initial,
+      contacts: initial.contacts.map((contact, index) => index < 2
+        ? {
+            ...contact,
+            status: "enrolled" as const,
+            rarity: "common" as const,
+            enrolledMonth: 9,
+            lastFormTrainingYear: index === 0 ? 1 : undefined,
+          }
+        : { ...contact, status: "lost" as const }),
+      school: {
+        ...initial.school,
+        activeMembers: 2,
+        currentMonth: 18,
+        nextFeeAt: 2_000,
+      },
+      tournaments: {
+        ...initial.tournaments,
+        immuneContactIds: [qualified.id],
+        missedTournaments: [{
+          level: "national" as const,
+          season: 1,
+          reason: "not-qualified" as const,
+        }],
+      },
+    };
+
+    const renewed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(renewed.contacts.find((contact) => contact.id === trained.id)?.status).toBe("enrolled");
+    expect(renewed.contacts.find((contact) => contact.id === qualified.id)?.status).toBe("enrolled");
+    expect(renewed.statistics.membersDeparted).toBe(0);
+    expect(renewed.narrative.history).toHaveLength(0);
   });
 
   it("reduces annual departure risk and applies the Form 7 rarity curve", () => {

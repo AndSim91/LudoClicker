@@ -8,6 +8,7 @@ import {
   getCollaboratorsById,
   getCompletedTrialsByStartDay,
   getContactsById,
+  getContactsAwaitingEmailCount,
   getInstructorTeachingCounts,
   getRunningAcquisitionEvents,
   getScheduledTrialsByStart,
@@ -24,6 +25,10 @@ export function selectActiveContact(state: GameState): Contact | undefined {
 
 export function selectAvailableContacts(state: GameState): number {
   return getAvailableContactCount(state.contacts);
+}
+
+export function selectContactsAwaitingEmail(state: GameState): number {
+  return getContactsAwaitingEmailCount(state.contacts);
 }
 
 export function selectAvailableEventMembers(state: GameState): number {

@@ -70,60 +70,24 @@ describe("game engine: narrative", () => {
     expect(repeated.narrative.history).toHaveLength(1);
   });
 
-  it("records the student and rarity for a missed renewal", () => {
+  it("never resolves a missed renewal as a random narrative event", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
       school: { ...initial.school, activeMembers: 2, currentMonth: 7 },
       contacts: initial.contacts.map((contact, index) => index < 2
-        ? {
-            ...contact,
-            firstName: index === 0 ? "Allievo" : "Secondo",
-            lastName: "Storico",
-            status: "enrolled" as const,
-            rarity: index === 0 ? "rare" as const : "legendary" as const,
-          }
-        : contact),
-      narrative: { ...initial.narrative, nextEventAt: 2_000 },
-    };
-    const resolved = Array.from({ length: 100 }, (_, randomSeed) =>
-      gameReducer({ ...due, randomSeed }, { type: "TICK", now: 2_000 }),
-    ).find((candidate) => candidate.narrative.history[0]?.definitionId === "missed-renewal");
-
-    expect(resolved).toBeDefined();
-    const event = resolved!.narrative.history[0];
-    expect(event.person?.displayName).toBe("Allievo Storico");
-    const affectedMember = due.contacts.find((contact) =>
-      `${contact.firstName} ${contact.lastName}` === event.person?.displayName,
-    );
-    expect(event.person?.rarity).toBe(affectedMember?.rarity);
-    expect(resolved!.contacts.find((contact) => contact.id === affectedMember?.id)?.status)
-      .toBe("departed");
-    expect(resolved!.contacts.find((contact) => contact.firstName === "Secondo")?.status)
-      .toBe("enrolled");
-    expect(resolved!.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
-    expect(resolved!.school.activeMembers).toBe(1);
-    expect(resolved!.statistics.membersDeparted).toBe(1);
-  });
-
-  it("allows missed renewals only in July and August", () => {
-    const initial = createInitialState(1_000);
-    const due = {
-      ...initial,
-      school: { ...initial.school, activeMembers: 2, currentMonth: 10 },
-      contacts: initial.contacts.map((contact, index) => index < 2
         ? { ...contact, status: "enrolled" as const }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
-
-    const octoberResults = Array.from({ length: 100 }, (_, randomSeed) =>
+    const results = Array.from({ length: 100 }, (_, randomSeed) =>
       gameReducer({ ...due, randomSeed }, { type: "TICK", now: 2_000 }),
     );
 
-    expect(octoberResults.every(
+    expect(results.every(
       (result) => result.narrative.history[0]?.definitionId !== "missed-renewal",
     )).toBe(true);
+    expect(results.every((result) => result.statistics.membersDeparted === 0)).toBe(true);
   });
 
   it("includes the amount in an extraordinary contribution notification", () => {
@@ -138,13 +102,16 @@ describe("game engine: narrative", () => {
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 
-    const resolved = gameReducer(due, { type: "TICK", now: 2_000 });
-    const contribution = resolved.messages.find(
+    const resolved = Array.from({ length: 100 }, (_, randomSeed) =>
+      gameReducer({ ...due, randomSeed }, { type: "TICK", now: 2_000 }),
+    ).find((candidate) => candidate.narrative.history[0]?.definitionId === "extra-donation");
+    const contribution = resolved?.messages.find(
       (message) => message.subject === "Contributo straordinario",
     );
 
+    expect(resolved).toBeDefined();
     expect(contribution?.preview).toContain("Contributo ricevuto: 20,00\u00a0€.");
-    expect(resolved.narrative.history[0].summary).toBe(contribution?.preview);
+    expect(resolved!.narrative.history[0].summary).toBe(contribution?.preview);
   });
 
   it("offers and founds a new school while preserving the permanent network", () => {

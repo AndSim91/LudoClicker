@@ -5,6 +5,23 @@ import { FolderPane } from "./FolderPane";
 import { formatExactCurrency } from "./resourceFormatting";
 
 describe("FolderPane", () => {
+  it("includes the active draft in the contacts still to email", () => {
+    const state = createInitialState(1_000);
+    const { container } = render(
+      <FolderPane
+        state={state}
+        folder="inbox"
+        onSelectFolder={() => undefined}
+        onOpenComposer={() => undefined}
+        onOpenMembers={() => undefined}
+      />,
+    );
+
+    const contactsRow = within(container).getByRole("button", { name: /Contatti/ });
+    expect(state.contacts.filter((contact) => contact.status === "available")).toHaveLength(4);
+    expect(contactsRow).toHaveTextContent("Contatti5");
+  });
+
   it("compacts every sidebar counter and keeps the full balance available on hover", () => {
     const initial = createInitialState(1_000);
     const euros = 99_999_999_088;

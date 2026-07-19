@@ -23,7 +23,7 @@ import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { useGameEngine } from "../game/useGameEngine";
 import { isGameAreaUnlocked } from "../game/progression";
 import { exportGame, importGame, resetGame, saveGame } from "../game/save";
-import { selectAvailableContacts } from "../game/selectors";
+import { selectAvailableContacts, selectContactsAwaitingEmail } from "../game/selectors";
 import { useAppPreferences } from "./useAppPreferences";
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
@@ -130,7 +130,7 @@ export function App() {
         currentMonth={state.school.currentMonth}
         nextMonthAt={state.school.nextFeeAt}
         now={state.automation.lastProcessedAt}
-        availableContacts={selectAvailableContacts(state)}
+        contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
         activeMembers={state.school.activeMembers}
         euros={state.school.euros}
       />
