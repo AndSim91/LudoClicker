@@ -77,6 +77,7 @@ export function createGameActionHandlers(
       state,
       action.collaboratorId,
       action.enabled,
+      action.now,
     ),
     PAY_INSTRUCTOR_CERTIFICATES: (state, action) => payInstructorCertificates(
       state,

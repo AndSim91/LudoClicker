@@ -31,6 +31,7 @@ import {
 } from "./stateUpdates";
 import {
   resolveFormTraining as completeFormTraining,
+  refreshInstructorTrainingDurations,
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
 import { resolveTrial } from "./trialFlow";
@@ -135,6 +136,7 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
     }
   }
 
+  nextState = refreshInstructorTrainingDurations(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier);
   nextState = processAutomaticTeaching(nextState, now, startFormTraining);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);

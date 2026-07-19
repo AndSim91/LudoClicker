@@ -341,7 +341,7 @@ describe("game engine: progression", () => {
       instructorForms: ["form-1" as const],
       assignment: "instructor" as const,
       rarity: "legendary" as const,
-      lastFormTrainingYear: 0,
+      lastFormTrainingYear: 1,
     };
     const ready = {
       ...initial,
@@ -359,9 +359,74 @@ describe("game engine: progression", () => {
     const completed = gameReducer(training, { type: "TICK", now: 32_000 });
 
     expect(training.school.euros).toBe(100);
+    expect(training.collaborators[0].lastFormTrainingYear).toBe(1);
     expect(training.collaborators[0].training?.includesInstructorCertification).toBe(true);
     expect(completed.collaborators[0].forms).toContain("form-2");
     expect(completed.collaborators[0].instructorForms).toContain("form-2");
+  });
+
+  it("slows an Instructor's own training while teaching and restores the normal speed when teaching stops", () => {
+    const initial = createInitialState(1_000);
+    const instructor = {
+      id: "busy-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Impegnato",
+      joinedAt: 1_000,
+      forms: ["form-1", "course-x"] as FormId[],
+      instructorForms: ["form-1", "course-x"] as FormId[],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+      lastFormTrainingYear: 1,
+    };
+    const student = {
+      ...initial.contacts[1],
+      status: "enrolled" as const,
+      forms: ["form-1", "course-x"] as FormId[],
+      training: {
+        formId: "form-2" as const,
+        startedAt: 1_000,
+        completesAt: 11_000,
+        instructorId: instructor.id,
+      },
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 21, euros: 1_000 },
+      contacts: initial.contacts.map((contact) => contact.id === student.id ? student : contact),
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+    const training = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "form-2",
+      now: 2_000,
+    });
+    const normalDuration = Math.round(
+      30_000 / getCollaboratorProductivity(instructor, "instructor"),
+    );
+    const slowTraining = training.collaborators[0].training!;
+
+    expect(slowTraining.completesAt - slowTraining.startedAt).toBe(normalDuration * 3);
+    expect(slowTraining.instructorTrainingDurationMultiplier).toBe(3);
+
+    const disabled = gameReducer(training, {
+      type: "TOGGLE_INSTRUCTOR_AUTOMATION",
+      collaboratorId: instructor.id,
+      enabled: false,
+      now: 6_000,
+    });
+    const remainingSlowWork = (slowTraining.completesAt - 6_000) / 3;
+    expect(disabled.collaborators[0].training?.completesAt).toBe(
+      6_000 + Math.round(remainingSlowWork),
+    );
+    expect(disabled.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(1);
+
+    const studentFinished = gameReducer(training, { type: "TICK", now: 12_000 });
+    expect(studentFinished.collaborators[0].training?.completesAt).toBe(
+      12_000 + Math.round((slowTraining.completesAt - 12_000) / 3),
+    );
   });
 
   it("uses the Instructor discount when available and falls back to manual training", () => {

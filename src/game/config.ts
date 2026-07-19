@@ -17,6 +17,7 @@ export const GAME_CONFIG = {
   trialWaitMaxMs: 55_000,
   trialDurationMs: 10_000,
   minimumTrainingDurationMs: 1_000,
+  instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,
   monthlyMemberFee: 40,
   enrollmentBonus: 20,

@@ -70,8 +70,9 @@ export function toggleInstructorAutomation(
   state: GameState,
   collaboratorId: string,
   enabled: boolean,
+  now: number,
 ): GameState {
-  return {
+  const nextState = {
     ...state,
     collaborators: state.collaborators.map((candidate) =>
       candidate.id === collaboratorId
@@ -79,6 +80,7 @@ export function toggleInstructorAutomation(
         : candidate,
     ),
   };
+  return refreshInstructorTrainingDurations(nextState, now);
 }
 
 export function payInstructorCertificates(
@@ -116,6 +118,55 @@ export function payInstructorCertificates(
       };
     }),
   };
+}
+
+function getInstructorTrainingDurationMultiplier(
+  state: GameState,
+  collaborator: GameState["collaborators"][number],
+): number {
+  return collaborator.autoTeachingEnabled !== false &&
+      selectInstructorTeachingCount(state, collaborator.id) > 0
+    ? GAME_CONFIG.instructorTrainingWhileTeachingDurationMultiplier
+    : 1;
+}
+
+export function refreshInstructorTrainingDurations(
+  state: GameState,
+  now: number,
+): GameState {
+  let changed = false;
+  const collaborators = state.collaborators.map((collaborator) => {
+    const training = collaborator.training;
+    if (
+      collaborator.assignment !== "instructor" ||
+      !training ||
+      !isInstructorForm(training.formId)
+    ) return collaborator;
+
+    const previousMultiplier = training.instructorTrainingDurationMultiplier ?? 1;
+    const nextMultiplier = getInstructorTrainingDurationMultiplier(state, collaborator);
+    if (previousMultiplier === nextMultiplier) return collaborator;
+
+    const previousDuration = Math.max(0, training.completesAt - training.startedAt);
+    const elapsed = Math.min(
+      previousDuration,
+      Math.max(0, now - training.startedAt),
+    );
+    const remainingWork = previousMultiplier > 0
+      ? Math.max(0, previousDuration - elapsed) / previousMultiplier
+      : 0;
+    changed = true;
+    return {
+      ...collaborator,
+      training: {
+        ...training,
+        completesAt: now + Math.round(remainingWork * nextMultiplier),
+        instructorTrainingDurationMultiplier: nextMultiplier,
+      },
+    };
+  });
+
+  return changed ? { ...state, collaborators } : state;
 }
 
 export function startFormTraining(
@@ -201,28 +252,35 @@ export function startFormTraining(
     !canTrainForm(
       student,
       definition,
-      currentYear,
+      canTrainAsInstructorInSummer ? undefined : currentYear,
       branchCapacity,
       collaborator?.assignment !== "instructor",
     ) ||
     !initialBranchCompatible ||
-    (instructorSelf && selectInstructorTeachingCount(state, personId) > 0) ||
     state.school.euros < trainingCost
   ) return state;
   const trainingSpeed = trainingInstructor
     ? getCollaboratorProductivity(trainingInstructor, "instructor")
+    : 1;
+  const instructorTrainingDurationMultiplier = instructorTrack && collaborator
+    ? getInstructorTrainingDurationMultiplier(state, collaborator)
     : 1;
   const training = {
     formId,
     startedAt: now,
     completesAt: now + Math.max(
       GAME_CONFIG.minimumTrainingDurationMs,
-      Math.round(definition.durationMs / trainingSpeed),
+      Math.round(
+        (definition.durationMs / trainingSpeed) * instructorTrainingDurationMultiplier,
+      ),
     ),
     instructorId: instructor?.id,
     includesInstructorCertification: instructorTrack || undefined,
+    instructorTrainingDurationMultiplier: instructorTrack
+      ? instructorTrainingDurationMultiplier
+      : undefined,
   };
-  return {
+  const nextState = {
     ...state,
     school: {
       ...state.school,
@@ -239,6 +297,7 @@ export function startFormTraining(
         : candidate)
       : state.collaborators,
   };
+  return refreshInstructorTrainingDurations(nextState, now);
 }
 
 export function chooseFormBranchPreferences(seed: number): {

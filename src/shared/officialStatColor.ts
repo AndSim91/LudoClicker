@@ -15,6 +15,7 @@ function mixColor(from: RgbColor, to: RgbColor, progress: number): string {
 export function getOfficialStatColor(value: number): string {
   const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
 
+  if (safeValue > 150) return mixColor(RED, RED, 0);
   if (safeValue > 100) return mixColor(GOLD, GOLD, 0);
   if (safeValue < 40) return mixColor(RED, BLACK, safeValue / 40);
   if (safeValue <= 60) return mixColor(BLACK, BLACK, 0);

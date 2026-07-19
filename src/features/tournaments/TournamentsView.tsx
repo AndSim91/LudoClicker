@@ -186,6 +186,7 @@ export function TournamentsView({ state }: { state: GameState }) {
             const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
             const visible = hasCompletedCourseX(forms);
             const preparation = getContactPreparation(contact, forms);
+            const experience = getContactTournamentExperience(contact);
             const immune = state.tournaments.immuneContactIds.includes(contact.id);
             return (
               <article key={contact.id} className={contact.secretLegendaryId ? "secret-card" : ""}>
@@ -213,7 +214,7 @@ export function TournamentsView({ state }: { state: GameState }) {
                       </strong>
                     ) : "???"}</dd>
                   </div>
-                  <div><dt>Esperienza</dt><dd>{getContactTournamentExperience(contact)} · +{Math.min(60, getContactTournamentExperience(contact) * 3)}%</dd></div>
+                  <div><dt>Esperienza</dt><dd>{experience}</dd></div>
                 </dl>
               </article>
             );

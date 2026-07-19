@@ -442,7 +442,7 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("combobox", { name: /Formazione per/ })).not.toBeInTheDocument();
   });
 
-  it("allows an instructor to start a form course during summer with the qualification included", () => {
+  it("allows an instructor who already trained this year to study during summer while teaching", () => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "summer-instructor",
@@ -453,13 +453,24 @@ describe("PeopleView", () => {
       instructorForms: ["form-1"] as FormId[],
       assignment: "instructor" as const,
       rarity: "legendary" as const,
-      lastFormTrainingYear: 0,
+      lastFormTrainingYear: 1,
+    };
+    const student = {
+      ...initial.contacts[1],
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 31_000,
+        instructorId: instructor.id,
+      },
     };
     const onStartTraining = vi.fn();
     render(<PeopleView
       state={{
         ...initial,
-        school: { ...initial.school, currentMonth: 7, euros: 400 },
+        school: { ...initial.school, activeMembers: 1, currentMonth: 7, euros: 400 },
+        contacts: initial.contacts.map((contact) => contact.id === student.id ? student : contact),
         collaborators: [instructor],
         unlocks: { ...initial.unlocks, collaborators: true, forms: true },
       }}

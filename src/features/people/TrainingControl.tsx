@@ -269,9 +269,10 @@ export function TrainingControl({
       </div>
     );
   }
-  const summerInstructorTraining = isSummerBreak(state.school.currentMonth) &&
+  const summerBreak = isSummerBreak(state.school.currentMonth);
+  const summerInstructorTraining = summerBreak &&
     collaborator?.assignment === "instructor";
-  if (isSummerBreak(state.school.currentMonth) && !summerInstructorTraining) {
+  if (summerBreak && !summerInstructorTraining) {
     return <div className="training-locked"><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
   }
 
@@ -291,11 +292,11 @@ export function TrainingControl({
     const branch = getFormDefinition(formId)?.branch;
     return branch ? [branch] : [];
   }) ?? []);
-  const newForms = hasTrainedThisYear
-    ? []
-    : getAvailableForms(
+  const annualTrainingAvailable = summerInstructorTraining || !hasTrainedThisYear;
+  const newForms = annualTrainingAvailable
+    ? getAvailableForms(
         student,
-        currentYear,
+        summerInstructorTraining ? undefined : currentYear,
         branchCapacity,
         collaborator?.assignment !== "instructor",
       ).filter((definition) =>
@@ -303,25 +304,19 @@ export function TrainingControl({
         learnedBranches.size > 0 ||
         !collaborator?.formBranchPreferences?.length ||
         collaborator.formBranchPreferences.includes(definition.branch)
-      );
+      )
+    : [];
   const academicallyAvailable = summerInstructorTraining
     ? [...qualificationDefinitions, ...newForms.filter((definition) => isInstructorForm(definition.id))]
     : [...qualificationDefinitions, ...newForms];
-  const available = academicallyAvailable.filter((definition) => {
-    if (qualificationDefinitions.some((candidate) => candidate.id === definition.id)) return true;
-    return collaborator?.assignment !== "instructor" ||
-      selectInstructorTeachingCount(state, collaborator.id) === 0;
-  });
+  const available = academicallyAvailable;
 
   if (academicallyAvailable.length === 0) {
-    if (hasTrainedThisYear) {
+    if (!annualTrainingAvailable) {
       return <div className="training-locked"><strong>Hai già completato la formazione quest'anno</strong></div>;
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
     return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;
-  }
-  if (available.length === 0) {
-    return <div className="training-locked"><span>Istruttore non disponibile</span><strong>Serve un Istruttore libero e attestato per questa Forma</strong></div>;
   }
 
   const needsSelection = qualificationDefinitions.length > 0 ||

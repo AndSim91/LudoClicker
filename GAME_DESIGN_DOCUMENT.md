@@ -586,7 +586,7 @@ Nomi e numeri sono sufficienti nella prima versione; gli effetti ludici non devo
 Regole:
 
 - ogni iscritto può conoscere più Forme;
-- ogni iscritto o collaboratore può iniziare al massimo una Forma per anno scolastico;
+- ogni iscritto o collaboratore può iniziare al massimo una Forma per anno scolastico; per gli Istruttori questo limite si riapre a luglio, mentre gli altri restano in pausa fino a settembre;
 - le Forme possono essere insegnate da Settembre a Giugno; Luglio e Agosto sono pausa estiva, salvo le formazioni da Istruttore pagate con qualifica inclusa;
 - l'anno scolastico va da Settembre ad Agosto, a Settembre torna disponibile una nuova formazione;
 - completare un solo ramo fino alla Forma 5 è sufficiente per accedere alla Forma 6;
@@ -606,6 +606,7 @@ Regole:
 - l'assegnazione al ruolo è gratuita e non converte automaticamente le Forme pregresse;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate; ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
 - una nuova Forma o un nuovo Corso appreso da Istruttore include sempre la relativa qualifica;
+- un Istruttore può iniziare una nuova formazione anche mentre insegna; in questo caso la durata è tripla rispetto alla velocità normale e torna normale quando non ha più allievi attivi o l'insegnamento automatico viene disabilitato;
 - una qualifica pregressa viene acquistata esplicitamente dal comando di formazione e costa il **200% del costo base**;
 - una nuova Forma appresa mentre si è Istruttore costa il **300% totale del costo base** e comprende la qualifica;
 - con un Istruttore disponibile l'allievo paga automaticamente il **25% del costo base**; senza Istruttore il level up manuale usa il costo base;

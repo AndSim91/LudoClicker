@@ -27,7 +27,7 @@ describe("TournamentsView", () => {
     expect(view.getAllByText("???").length).toBeGreaterThan(0);
   });
 
-  it("shows only the colored official Arena and Style values for athletes", () => {
+  it("shows the experience count and includes its bonus in Arena and Style", () => {
     const initial = createStateWithForms();
     const target = initial.contacts.find((contact) => contact.status === "enrolled")!;
     const state = {
@@ -38,6 +38,7 @@ describe("TournamentsView", () => {
             forms: ["form-1" as const, "course-x" as const],
             arenaBase: 100,
             styleBase: 50,
+            tournamentExperience: 10,
           }
         : contact),
     };
@@ -47,14 +48,44 @@ describe("TournamentsView", () => {
     fireEvent.click(view.getByRole("tab", { name: "Atleti" }));
     const athleteName = view.getByText(`${target.firstName} ${target.lastName}`);
     const athleteCard = within(athleteName.closest("article")!);
-    const arena = athleteCard.getByText("110.000");
-    const style = athleteCard.getByText("55.000");
+    const arena = athleteCard.getByText("143.000");
+    const style = athleteCard.getByText("71.500");
 
     expect(arena).toHaveClass("official-stat-value");
     expect(arena).toHaveStyle({ color: "rgb(176, 128, 0)" });
     expect(style).toHaveClass("official-stat-value");
-    expect(style).toHaveStyle({ color: "rgb(23, 23, 23)" });
-    expect(athleteCard.queryByText(/→/)).not.toBeInTheDocument();
+    expect(style).toHaveStyle({ color: "rgb(16, 53, 35)" });
+    expect(athleteCard.getByText("10", { exact: true })).toBeVisible();
+    expect(athleteCard.queryByText(/%/)).not.toBeInTheDocument();
+  });
+
+  it("colors Arena and Style red when their prepared value exceeds 150", () => {
+    const initial = createStateWithForms();
+    const target = initial.contacts.find((contact) => contact.status === "enrolled")!;
+    const state = {
+      ...initial,
+      contacts: initial.contacts.map((contact) => contact.id === target.id
+        ? {
+            ...contact,
+            forms: ["form-1" as const, "course-x" as const],
+            arenaBase: 100,
+            styleBase: 100,
+            tournamentExperience: 20,
+          }
+        : contact),
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Atleti" }));
+    const athleteName = view.getByText(`${target.firstName} ${target.lastName}`);
+    const athleteCard = within(athleteName.closest("article")!);
+    const preparedStats = athleteCard.getAllByText("176.000");
+
+    expect(preparedStats).toHaveLength(2);
+    preparedStats.forEach((stat) => {
+      expect(stat).toHaveStyle({ color: "rgb(196, 43, 28)" });
+    });
   });
 
   it("renders the two podiums and qualifiers of a completed tournament", () => {

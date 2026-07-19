@@ -29,6 +29,7 @@ export interface FormTraining {
   completesAt: number;
   instructorId?: string;
   includesInstructorCertification?: boolean;
+  instructorTrainingDurationMultiplier?: number;
 }
 
 export interface Contact {
