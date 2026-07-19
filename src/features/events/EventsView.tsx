@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
+import { useProvidedGameTime } from "../../game/GameTimeContext";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import {
   getAvailableSwords,
@@ -48,7 +49,9 @@ export function EventsView({
   onMaintainEquipment?: () => void;
   onBuyOfficialSword?: () => void;
 }) {
-  const [now, setNow] = useState(() => Date.now());
+  const providedNow = useProvidedGameTime();
+  const [localNow, setLocalNow] = useState(() => Date.now());
+  const now = providedNow ?? localNow;
   const [historyPage, setHistoryPage] = useState(0);
   const runningEvents = useMemo(
     () => state.acquisitionEvents.filter((event) => event.status === "running"),
@@ -97,9 +100,10 @@ export function EventsView({
   );
   const refreshIntervalMs = runningEvents.length > 0 ? 100 : 1_000;
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), refreshIntervalMs);
+    if (providedNow !== null) return;
+    const timer = window.setInterval(() => setLocalNow(Date.now()), refreshIntervalMs);
     return () => window.clearInterval(timer);
-  }, [refreshIntervalMs]);
+  }, [providedNow, refreshIntervalMs]);
 
   return (
     <main className="overview-view events-view">

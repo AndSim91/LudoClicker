@@ -224,6 +224,37 @@ describe("PeopleView", () => {
     expect(screen.queryByText(/Da iniziare/)).not.toBeInTheDocument();
   });
 
+  it("shows only the official Arena and Style values with their score colors", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: ["course-x"] as FormId[],
+      arenaBase: 108.564,
+      styleBase: 50,
+    };
+    render(<PeopleView
+      state={{
+        ...initial,
+        school: { ...initial.school, activeMembers: 1 },
+        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    const roster = screen.getByRole("region", { name: "Iscritti" });
+    const arena = within(roster).getByText("108.564");
+    const style = within(roster).getByText("50.000");
+    expect(arena).toHaveStyle({ color: "rgb(176, 128, 0)" });
+    expect(arena).toHaveClass("official-stat-value");
+    expect(arena.tagName).toBe("STRONG");
+    expect(style).toHaveStyle({ color: "rgb(23, 23, 23)" });
+    expect(style).toHaveClass("official-stat-value");
+    expect(style.tagName).toBe("STRONG");
+    expect(roster).not.toHaveTextContent("→");
+  });
+
   it("lets enrolled members start a manual form training without an instructor", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const };

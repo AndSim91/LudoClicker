@@ -10,7 +10,7 @@ import { createInitialState, gameReducer } from "./engine";
 import { departMembers } from "./membershipFlow";
 import { getEligibleSchoolContacts, simulateTournament } from "./tournamentSimulation";
 
-function createTournamentSchool(memberCount = 10) {
+function createTournamentSchool(memberCount = 6) {
   const initial = createInitialState(1_000, "Test Manager");
   const enrolled = addAdminMembers(initial, memberCount);
   return {
@@ -42,12 +42,12 @@ describe("athlete tournament statistics", () => {
 
 describe("tournament simulation", () => {
   it("creates variable school groups and six distinct qualifiers", () => {
-    const state = createTournamentSchool(10);
+    const state = createTournamentSchool();
     const eligible = getEligibleSchoolContacts(state);
     const simulation = simulateTournament(state, "school", 1, 181_000, eligible);
 
-    expect(simulation.result.participants).toHaveLength(10);
-    expect(new Set(simulation.result.groupStandings.map((entry) => entry.groupIndex)).size).toBe(2);
+    expect(simulation.result.participants).toHaveLength(6);
+    expect(new Set(simulation.result.groupStandings.map((entry) => entry.groupIndex)).size).toBe(1);
     expect(simulation.result.qualifiers).toHaveLength(6);
     expect(new Set(simulation.result.qualifiers.map((entry) => entry.participantId)).size).toBe(6);
     expect(simulation.result.matches.every((match) =>
@@ -60,7 +60,7 @@ describe("tournament simulation", () => {
   });
 
   it("is deterministic from the saved seed", () => {
-    const state = createTournamentSchool(10);
+    const state = createTournamentSchool();
     const eligible = getEligibleSchoolContacts(state);
     const first = simulateTournament(state, "school", 1, 181_000, eligible);
     const second = simulateTournament(state, "school", 1, 181_000, eligible);
@@ -68,7 +68,7 @@ describe("tournament simulation", () => {
   });
 
   it("fills an academy field to 64 with generated opponents", () => {
-    const state = createTournamentSchool(10);
+    const state = createTournamentSchool();
     const owned = getEligibleSchoolContacts(state).slice(0, 6);
     const simulation = simulateTournament(state, "academy", 1, 421_000, owned);
     expect(simulation.result.participants).toHaveLength(64);
@@ -79,7 +79,7 @@ describe("tournament simulation", () => {
 
 describe("tournament calendar and immunity", () => {
   it("runs the school tournament at the end of December", () => {
-    const state = createTournamentSchool(10);
+    const state = createTournamentSchool();
     const december = {
       ...state,
       school: { ...state.school, currentMonth: 12, nextFeeAt: 61_000 },
@@ -91,8 +91,8 @@ describe("tournament calendar and immunity", () => {
     expect(processed.tournaments.immuneContactIds).toHaveLength(6);
   });
 
-  it("skips the season below ten eligible members", () => {
-    const state = createTournamentSchool(9);
+  it("skips the season below six eligible members", () => {
+    const state = createTournamentSchool(5);
     const december = {
       ...state,
       school: { ...state.school, currentMonth: 12, nextFeeAt: 61_000 },
@@ -103,7 +103,7 @@ describe("tournament calendar and immunity", () => {
   });
 
   it("never removes a qualified immune athlete", () => {
-    const state = createTournamentSchool(10);
+    const state = createTournamentSchool();
     const protectedId = getEligibleSchoolContacts(state)[0].id;
     const protectedState = {
       ...state,

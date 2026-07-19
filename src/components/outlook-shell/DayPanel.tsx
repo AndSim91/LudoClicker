@@ -5,6 +5,7 @@ import {
   getShortGoalReward,
 } from "../../content/shortGoals";
 import type { GameState, ScheduledTrial } from "../../game/types";
+import { useProvidedGameTime } from "../../game/GameTimeContext";
 import { formatLongDate } from "../../shared/formatters";
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
@@ -64,7 +65,9 @@ function ShortGoalCard({ state }: { state: GameState }) {
 }
 
 export function DayPanel({ state }: { state: GameState }) {
-  const [now, setNow] = useState(() => Date.now());
+  const providedNow = useProvidedGameTime();
+  const [localNow, setLocalNow] = useState(() => Date.now());
+  const now = providedNow ?? localNow;
   const contactsById = useMemo(
     () => new Map(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
@@ -97,10 +100,10 @@ export function DayPanel({ state }: { state: GameState }) {
   );
 
   useEffect(() => {
-    if (!hasLiveNotifications) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 100);
+    if (providedNow !== null || !hasLiveNotifications) return;
+    const timer = window.setInterval(() => setLocalNow(Date.now()), 100);
     return () => window.clearInterval(timer);
-  }, [hasLiveNotifications]);
+  }, [hasLiveNotifications, providedNow]);
 
   return (
     <aside className="day-panel">

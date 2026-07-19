@@ -11,6 +11,7 @@ import {
   type FormStudent,
 } from "../../content/forms";
 import { getSchoolYear, isSummerBreak } from "../../game/calendar";
+import { useProvidedGameTime } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -169,7 +170,9 @@ export function InstructorPanel({
     ),
     [state.contacts, state.collaborators, collaborator.id],
   );
-  const now = useSharedTrainingTime(teaching.length > 0);
+  const providedNow = useProvidedGameTime();
+  const liveNow = useSharedTrainingTime(teaching.length > 0 && providedNow === null);
+  const now = providedNow ?? liveNow;
   const enabled = collaborator.autoTeachingEnabled !== false;
 
   return (
@@ -215,7 +218,9 @@ export function TrainingControl({
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
-  const now = useSharedTrainingTime(Boolean(student.training));
+  const providedNow = useProvidedGameTime();
+  const liveNow = useSharedTrainingTime(Boolean(student.training) && providedNow === null);
+  const now = providedNow ?? liveNow;
   const currentYear = getSchoolYear(state.school.currentMonth);
   const hasTrainedThisYear = student.lastFormTrainingYear === currentYear;
   const collaborator = collaboratorsById.get(personId);

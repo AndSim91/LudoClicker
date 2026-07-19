@@ -41,7 +41,7 @@ describe("App profile and navigation", () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({
       ...initial,
-      school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+      school: { ...initial.school, activeMembers: 6, historicMembers: 6 },
       equipment: { ...initial.equipment, wear: 3 },
       statistics: { ...initial.statistics, emailsSent: 3, eventsCompleted: 1 },
       unlocks: { ...initial.unlocks, upgrades: true, forms: true },
@@ -59,6 +59,26 @@ describe("App profile and navigation", () => {
       "Impostazioni",
       "Admin",
     ]);
+  });
+
+  it("unlocks tournaments after reaching six members", () => {
+    const initial = createInitialState(Date.now(), "Andrea Ungaro");
+    saveGame({
+      ...initial,
+      school: { ...initial.school, activeMembers: 5, historicMembers: 5 },
+    });
+    const { unmount } = render(<App />);
+
+    expect(screen.queryByRole("button", { name: "Tornei" })).not.toBeInTheDocument();
+    unmount();
+
+    saveGame({
+      ...initial,
+      school: { ...initial.school, activeMembers: 6, historicMembers: 6 },
+    });
+    render(<App />);
+
+    expect(screen.getByRole("button", { name: "Tornei" })).toBeVisible();
   });
 
   it("uses the resource rows as shortcuts to the composer and members", () => {

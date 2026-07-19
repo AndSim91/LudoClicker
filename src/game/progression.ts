@@ -21,7 +21,9 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
     return state.statistics.emailsSent >= GAME_CONFIG.eventsUnlockEmailsSent || !hasCampaignQueue;
   }
   if (view === "contacts") return state.school.historicMembers > 0;
-  if (view === "tournaments") return state.school.historicMembers > 0;
+  if (view === "tournaments") {
+    return state.school.historicMembers >= GAME_CONFIG.tournamentUnlockMembers;
+  }
   if (view === "upgrades") return state.unlocks.upgrades;
   return state.statistics.eventsCompleted > 0 ||
     state.equipment.wear > 0 ||

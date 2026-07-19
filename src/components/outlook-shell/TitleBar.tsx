@@ -15,6 +15,8 @@ export function TitleBar({
   contactsAwaitingEmail,
   activeMembers,
   euros,
+  isPaused,
+  onTogglePause,
 }: {
   currentMonth: number;
   nextMonthAt: number;
@@ -22,6 +24,8 @@ export function TitleBar({
   contactsAwaitingEmail: number;
   activeMembers: number;
   euros: number;
+  isPaused: boolean;
+  onTogglePause: () => void;
 }) {
   const monthName = getGameMonthName(currentMonth);
   const currentSchoolYear = getSchoolYear(currentMonth);
@@ -52,6 +56,16 @@ export function TitleBar({
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
       </div>
+      <button
+        className={isPaused ? "title-pause active" : "title-pause"}
+        type="button"
+        aria-label={isPaused ? "Riprendi" : "Pausa"}
+        aria-pressed={isPaused}
+        title={isPaused ? "Riprendi il gioco" : "Metti in pausa il gioco"}
+        onClick={onTogglePause}
+      >
+        <Icon name={isPaused ? "play" : "pause"} />
+      </button>
       <span
         className="title-month"
         aria-label={`Mese corrente: ${monthName}, anno scolastico ${currentSchoolYear}`}

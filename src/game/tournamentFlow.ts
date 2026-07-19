@@ -144,7 +144,7 @@ function recordMissedTournament(
       missedTournaments: [...state.tournaments.missedTournaments, { level, season, reason }],
     },
   }, now, `${label} non disputato`, reason === "insufficient-members"
-    ? "La scuola non ha raggiunto dieci iscritti attivi con Forma 1. La stagione competitiva termina qui."
+    ? `La scuola non ha raggiunto ${GAME_CONFIG.tournamentMinimumMembers} iscritti attivi con Forma 1. La stagione competitiva termina qui.`
     : "Nessun atleta della scuola si è qualificato per questa competizione.",
   "neutral", "focused", "tournaments");
 }
@@ -223,7 +223,7 @@ export function processTournamentAtMonthEnd(
 
   if (level === "school") {
     const eligible = getEligibleSchoolContacts(state);
-    if (eligible.length < 10) {
+    if (eligible.length < GAME_CONFIG.tournamentMinimumMembers) {
       return recordMissedTournament(state, level, season, "insufficient-members", now);
     }
     const simulation = simulateTournament(state, level, season, now, eligible);

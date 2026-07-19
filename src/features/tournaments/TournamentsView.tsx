@@ -9,6 +9,7 @@ import {
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { getGameYear } from "../../game/calendar";
+import { GAME_CONFIG } from "../../game/config";
 import { getEligibleSchoolContacts } from "../../game/tournamentSimulation";
 import type {
   GameState,
@@ -142,10 +143,10 @@ export function TournamentsView({ state }: { state: GameState }) {
       {tab === "season" ? (
         <div className="tournament-season">
           <section className="season-readiness">
-            <div><span>Idonei allo Scolastico</span><strong>{eligible.length}/10</strong></div>
-            <p>{eligible.length >= 10
+            <div><span>Idonei allo Scolastico</span><strong>{eligible.length}/{GAME_CONFIG.tournamentMinimumMembers}</strong></div>
+            <p>{eligible.length >= GAME_CONFIG.tournamentMinimumMembers
               ? "La scuola è pronta per il prossimo Torneo Scolastico."
-              : `Servono ancora ${10 - eligible.length} iscritti attivi con Forma 1.`}</p>
+              : `Servono ancora ${GAME_CONFIG.tournamentMinimumMembers - eligible.length} iscritti attivi con Forma 1.`}</p>
           </section>
           <div className="season-calendar">
             {TOURNAMENT_LEVEL_ORDER.map((level) => {

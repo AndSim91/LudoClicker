@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { TitleBar } from "./TitleBar";
 import { formatCompactCurrency, formatExactCurrency } from "./resourceFormatting";
@@ -14,6 +14,8 @@ describe("TitleBar", () => {
         contactsAwaitingEmail={4}
         activeMembers={3}
         euros={120}
+        isPaused={false}
+        onTogglePause={() => undefined}
       />,
     );
 
@@ -36,6 +38,8 @@ describe("TitleBar", () => {
         contactsAwaitingEmail={0}
         activeMembers={0}
         euros={0}
+        isPaused={false}
+        onTogglePause={() => undefined}
       />,
     );
     expect(screen.getByLabelText("Mese corrente: Agosto, anno scolastico 1")).toBeVisible();
@@ -48,6 +52,8 @@ describe("TitleBar", () => {
         contactsAwaitingEmail={0}
         activeMembers={0}
         euros={0}
+        isPaused={false}
+        onTogglePause={() => undefined}
       />,
     );
     expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 2"))
@@ -64,6 +70,8 @@ describe("TitleBar", () => {
         contactsAwaitingEmail={1_200_000}
         activeMembers={999_999}
         euros={euros}
+        isPaused={false}
+        onTogglePause={() => undefined}
       />,
     );
 
@@ -77,5 +85,39 @@ describe("TitleBar", () => {
     expect(container.querySelector(`strong[title="${formatExactCurrency(euros)}"]`)).toHaveTextContent(
       formatCompactCurrency(euros).replace(/\u00a0/g, " "),
     );
+  });
+
+  it("toggles the pause control between pause and resume", () => {
+    const onTogglePause = vi.fn();
+    const { rerender } = render(
+      <TitleBar
+        currentMonth={9}
+        nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
+        now={1_000}
+        contactsAwaitingEmail={0}
+        activeMembers={0}
+        euros={0}
+        isPaused={false}
+        onTogglePause={onTogglePause}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Pausa" }));
+    expect(onTogglePause).toHaveBeenCalledOnce();
+
+    rerender(
+      <TitleBar
+        currentMonth={9}
+        nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
+        now={1_000}
+        contactsAwaitingEmail={0}
+        activeMembers={0}
+        euros={0}
+        isPaused
+        onTogglePause={onTogglePause}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Riprendi" }))
+      .toHaveAttribute("aria-pressed", "true");
   });
 });

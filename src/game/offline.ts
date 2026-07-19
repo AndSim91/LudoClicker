@@ -21,8 +21,12 @@ function shiftOptional(timestamp: number | undefined, elapsedMs: number) {
  * Congela interamente il gioco durante la chiusura. Tutti i timer attivi
  * vengono traslati dello stesso intervallo, così conservano il tempo residuo.
  */
-export function pauseGameState(state: GameState, now: number): GameState {
-  const elapsedMs = Math.max(0, now - state.lastSavedAt);
+export function freezeGameState(
+  state: GameState,
+  now: number,
+  elapsedMs: number,
+): GameState {
+  elapsedMs = Math.max(0, elapsedMs);
   if (elapsedMs === 0) {
     return {
       ...state,
@@ -75,6 +79,10 @@ export function pauseGameState(state: GameState, now: number): GameState {
     narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
     automation: { ...state.automation, lastProcessedAt: now },
   };
+}
+
+export function pauseGameState(state: GameState, now: number): GameState {
+  return freezeGameState(state, now, now - state.lastSavedAt);
 }
 
 export function simulateOfflineProgress(

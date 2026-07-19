@@ -544,6 +544,7 @@ export interface GameState {
 export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "TICK"; now: number; gainMultiplier?: number }
+  | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "OFFLINE_PASSIVE_PROGRESS"; now: number; elapsedMs: number; rawElapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }
   | { type: "ADMIN_ADD_CONTACTS"; amount: number }

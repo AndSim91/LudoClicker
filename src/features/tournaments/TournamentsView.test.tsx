@@ -7,7 +7,7 @@ import { TournamentsView } from "./TournamentsView";
 
 function createStateWithForms() {
   const initial = createInitialState(1_000, "Manager");
-  const enrolled = addAdminMembers(initial, 10);
+  const enrolled = addAdminMembers(initial, 6);
   return {
     ...enrolled,
     contacts: enrolled.contacts.map((contact) => contact.status === "enrolled"
@@ -21,7 +21,7 @@ describe("TournamentsView", () => {
     const state = createStateWithForms();
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
-    expect(view.getByText("10/10")).toBeVisible();
+    expect(view.getByText("6/6")).toBeVisible();
 
     fireEvent.click(view.getByRole("tab", { name: "Atleti" }));
     expect(view.getAllByText("???").length).toBeGreaterThan(0);

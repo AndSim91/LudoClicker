@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../../components/common/Icon";
+import { useProvidedGameTime } from "../../game/GameTimeContext";
 import type { GameState, ScheduledTrial } from "../../game/types";
 
 const dateTime = new Intl.DateTimeFormat("it-IT", {
@@ -33,13 +34,19 @@ export function CalendarView({
   state: GameState;
   onOpenSentEmail: (emailId: string) => void;
 }) {
-  const [now, setNow] = useState(() => Date.now());
+  const providedNow = useProvidedGameTime();
+  const [localNow, setLocalNow] = useState(() => Date.now());
+  const now = providedNow ?? localNow;
   const hasPendingTrials = state.scheduledTrials.some((trial) => trial.status === "scheduled");
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), hasPendingTrials ? 100 : 1_000);
+    if (providedNow !== null) return;
+    const timer = window.setInterval(
+      () => setLocalNow(Date.now()),
+      hasPendingTrials ? 100 : 1_000,
+    );
     return () => window.clearInterval(timer);
-  }, [hasPendingTrials]);
+  }, [hasPendingTrials, providedNow]);
 
   return (
     <main className="overview-view calendar-view">

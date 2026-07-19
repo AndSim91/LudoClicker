@@ -20,6 +20,7 @@ import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { TournamentsView } from "../features/tournaments/TournamentsView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
+import { GameTimeProvider } from "../game/GameTimeContext";
 import { useGameEngine } from "../game/useGameEngine";
 import { isGameAreaUnlocked } from "../game/progression";
 import { exportGame, importGame, resetGame, saveGame } from "../game/save";
@@ -39,7 +40,13 @@ function isWindowsKey(event: KeyboardEvent): boolean {
 }
 
 export function App() {
-  const { state, dispatch } = useGameEngine();
+  const {
+    state,
+    dispatch,
+    getGameNow,
+    isPaused,
+    togglePause,
+  } = useGameEngine();
   const [view, setView] = useState<AppView>("mail");
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -67,13 +74,13 @@ export function App() {
         isWindowsKey(event) ||
         targetConsumesKeyboard(event.target)
       ) return;
-      dispatch({ type: "WRITE", now: Date.now() });
+      dispatch({ type: "WRITE", now: getGameNow() });
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeView, dispatch, mailFolder, selectedMessageId, state.profile.displayName]);
+  }, [activeView, dispatch, getGameNow, mailFolder, selectedMessageId, state.profile.displayName]);
 
-  const write = () => dispatch({ type: "WRITE", now: Date.now() });
+  const write = () => dispatch({ type: "WRITE", now: getGameNow() });
   const selectMessage = (messageId: string | null) => {
     if (messageId) dispatch({ type: "MARK_MESSAGE_READ", messageId });
     setSelectedMessageId(messageId);
@@ -122,10 +129,11 @@ export function App() {
   }
 
   return (
-    <div
-      className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
-      style={{ "--school-accent": state.school.accentColor } as CSSProperties}
-    >
+    <GameTimeProvider now={state.automation.lastProcessedAt}>
+      <div
+        className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
+        style={{ "--school-accent": state.school.accentColor } as CSSProperties}
+      >
       <TitleBar
         currentMonth={state.school.currentMonth}
         nextMonthAt={state.school.nextFeeAt}
@@ -133,6 +141,8 @@ export function App() {
         contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
         activeMembers={state.school.activeMembers}
         euros={state.school.euros}
+        isPaused={isPaused}
+        onTogglePause={togglePause}
       />
       <CommandBar
         onCompose={openComposer}
@@ -171,27 +181,27 @@ export function App() {
           <UpgradesView
             state={state}
             onBuyUpgrade={(upgradeId) =>
-              dispatch({ type: "BUY_UPGRADE", upgradeId, now: Date.now() })
+              dispatch({ type: "BUY_UPGRADE", upgradeId, now: getGameNow() })
             }
           />
         ) : activeView === "events" ? (
           <EventsView
             state={state}
             onStart={(definitionId) =>
-              dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: Date.now() })
+              dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: getGameNow() })
             }
             onMaintainEquipment={() =>
-              dispatch({ type: "MAINTAIN_EQUIPMENT", now: Date.now() })
+              dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() })
             }
             onBuyOfficialSword={() =>
-              dispatch({ type: "BUY_OFFICIAL_SWORD", now: Date.now() })
+              dispatch({ type: "BUY_OFFICIAL_SWORD", now: getGameNow() })
             }
           />
         ) : activeView === "statistics" ? (
           <ActivitiesView
             state={state}
             onRunSocialCampaign={() =>
-              dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: Date.now() })
+              dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: getGameNow() })
             }
           />
         ) : activeView === "contacts" ? (
@@ -202,7 +212,7 @@ export function App() {
                 type: "ASSIGN_COLLABORATOR",
                 collaboratorId,
                 assignment,
-                now: Date.now(),
+                now: getGameNow(),
               })
             }
             onStartTraining={(personId, formId) =>
@@ -210,7 +220,7 @@ export function App() {
                 type: "START_FORM_TRAINING",
                 personId,
                 formId,
-                now: Date.now(),
+                now: getGameNow(),
               })
             }
             onToggleInstructorAutomation={(collaboratorId, enabled) =>
@@ -218,7 +228,7 @@ export function App() {
                 type: "TOGGLE_INSTRUCTOR_AUTOMATION",
                 collaboratorId,
                 enabled,
-                now: Date.now(),
+                now: getGameNow(),
               })
             }
           />
@@ -242,7 +252,11 @@ export function App() {
             onImport={importSave}
             onReset={resetSave}
             onUpdateProfileName={updateProfileName}
-            onFoundSchool={(details) => dispatch({ type: "FOUND_SCHOOL", details, now: Date.now() })}
+            onFoundSchool={(details) => dispatch({
+              type: "FOUND_SCHOOL",
+              details,
+              now: getGameNow(),
+            })}
             darkMode={darkMode}
             onDarkModeChange={setDarkMode}
             reduceMotion={reduceMotion}
@@ -250,7 +264,8 @@ export function App() {
           />
         )}
       </div>
-      <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Profilo: {state.profile.displayName}</span><span>Connesso localmente</span><b title={state.school.motto || undefined}>{state.school.name}</b></footer>
-    </div>
+        <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Profilo: {state.profile.displayName}</span><span>Connesso localmente</span><b title={state.school.motto || undefined}>{state.school.name}</b></footer>
+      </div>
+    </GameTimeProvider>
   );
 }

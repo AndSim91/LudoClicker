@@ -2,6 +2,7 @@ import { addAdminContacts, addAdminEuros, addAdminMembers } from "./adminFlow";
 import { buyOfficialSword, maintainEquipment } from "./equipment";
 import { startAcquisitionEvent } from "./eventFlow";
 import { markAllMessagesRead, markMessageRead } from "./inboxFlow";
+import { freezeGameState } from "./offline";
 import { processOfflinePassiveProgress } from "./offlineProgress";
 import { updateProfileName } from "./profileFlow";
 import { foundSchool } from "./schoolProgressionFlow";
@@ -43,6 +44,11 @@ export function createGameActionHandlers(
       state,
       action.now,
       action.gainMultiplier ?? 1,
+    ),
+    RESUME_FROM_PAUSE: (state, action) => freezeGameState(
+      state,
+      action.now,
+      action.elapsedMs,
     ),
     OFFLINE_PASSIVE_PROGRESS: (state, action) => processOfflinePassiveProgress(
       state,

@@ -6,6 +6,8 @@ export const GAME_CONFIG = {
   eventsUnlockEmailsSent: 3,
   rarityOverviewEmailsSent: 10,
   socialUnlockMembers: 10,
+  tournamentUnlockMembers: 6,
+  tournamentMinimumMembers: 6,
   officialSwordSupplierUnlockMembers: 15,
   guaranteedAndreaContactPosition: 9,
   conversionGuaranteeFailures: 4,

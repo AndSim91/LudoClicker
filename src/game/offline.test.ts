@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
-import { simulateOfflineProgress } from "./offline";
+import { freezeGameState, simulateOfflineProgress } from "./offline";
 
 describe("offline progress disabled", () => {
   it("freezes fees and shifts every active deadline", () => {
@@ -45,5 +45,14 @@ describe("offline progress disabled", () => {
     };
     const result = simulateOfflineProgress(training, 101_000);
     expect(result.state.contacts[0].training?.completesAt).toBe(112_000);
+  });
+
+  it("freezes an explicit pause interval independently from the last save", () => {
+    const initial = createInitialState(1_000);
+    const paused = freezeGameState(initial, 51_000, 10_000);
+
+    expect(paused.lastSavedAt).toBe(51_000);
+    expect(paused.automation.lastProcessedAt).toBe(51_000);
+    expect(paused.school.nextFeeAt).toBe(initial.school.nextFeeAt + 10_000);
   });
 });

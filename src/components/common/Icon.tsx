@@ -19,6 +19,8 @@ export type IconName =
   | "coin"
   | "contact"
   | "flag"
+  | "pause"
+  | "play"
   | "admin";
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -40,6 +42,8 @@ const paths: Record<IconName, React.ReactNode> = {
   coin: <><ellipse cx="12" cy="7" rx="8" ry="4"/><path d="M4 7v5c0 2.2 3.6 4 8 4s8-1.8 8-4V7m-16 5v5c0 2.2 3.6 4 8 4s8-1.8 8-4v-5"/></>,
   contact: <><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-5 3.4-7 8-7s7.3 2 8 7"/></>,
   flag: <><path d="M5 21V4"/><path d="M5 5h10l-1.5 3L15 11H5"/></>,
+  pause: <><path d="M8 5v14M16 5v14"/></>,
+  play: <path d="m8 5 11 7-11 7V5Z" />,
   admin: <><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm-1 7c.6-2 1.9-3 4-3s3.4 1 4 3"/></>,
 };
 

@@ -168,7 +168,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   const nextState = dispatchGameAction(state, action, ACTION_HANDLERS);
   const now = "now" in action ? action.now : state.lastSavedAt;
   const reconciledState = recruitEnrolledLegendaryCollaborators(nextState, now);
-  if (action.type === "OFFLINE_PASSIVE_PROGRESS") {
+  if (
+    action.type === "OFFLINE_PASSIVE_PROGRESS" ||
+    action.type === "RESUME_FROM_PAUSE"
+  ) {
     return compactChangedHistory(state, reconciledState, action);
   }
 

@@ -239,7 +239,7 @@ Una Forma 1 completata esattamente sul confine rende l'atleta idoneo.
 
 ## 7. Torneo Scolastico
 
-Lo Scolastico si attiva con almeno dieci iscritti attivi che abbiano completato Forma 1.
+L'area Tornei si sblocca al raggiungimento di sei iscritti. Lo Scolastico si attiva con almeno sei iscritti attivi che abbiano completato Forma 1.
 
 Se il requisito non è soddisfatto:
 
@@ -262,6 +262,7 @@ La fase eliminatoria usa il successivo numero potenza di due. I migliori qualifi
 
 Esempi:
 
+- 6 partecipanti: un girone da 6, 4 qualificati al tabellone Arena;
 - 10 partecipanti: due gironi da 5, 8 qualificati;
 - 17 partecipanti: gironi 6/6/5, 12 qualificati, tabellone da 16 con 4 bye;
 - 64 partecipanti: 8 gironi da 8, 32 qualificati;
@@ -537,7 +538,7 @@ Viene aggiunta l'area `Tornei`, composta da:
 
 ### 15.1 Stagione
 
-Mostra calendario, stato dei quattro tornei e avanzamento verso i dieci idonei allo Scolastico.
+Mostra calendario, stato dei quattro tornei e avanzamento verso i sei idonei allo Scolastico.
 
 Stati previsti:
 
@@ -654,7 +655,8 @@ I log completi degli incontri devono restare separati dai riepiloghi permanenti,
 - Corso X ne controlla soltanto la visibilità;
 - Forme ed esperienza producono i moltiplicatori approvati;
 - nessun progresso avviene mentre il gioco è chiuso;
-- lo Scolastico parte con almeno dieci idonei e include tutti;
+- l'area Tornei si sblocca al raggiungimento di sei iscritti;
+- lo Scolastico parte con almeno sei idonei e include tutti;
 - i tornei superiori contengono fino a sei atleti della scuola e NPC fino a 64;
 - Arena usa incontri al meglio dei tre;
 - Stile mostra medie a tre decimali;
