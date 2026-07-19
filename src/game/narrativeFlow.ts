@@ -7,6 +7,7 @@ import { startNextCampaign } from "./emailFlow";
 import { applyEquipmentWear, applySwordDamage } from "./equipment";
 import { makeGameId } from "./ids";
 import { departMembers } from "./membershipFlow";
+import { isSummerBreak } from "./calendar";
 import { canFoundSchool } from "./progression";
 import { nextRandom, randomBetween } from "./random";
 import { addMessage } from "./stateUpdates";
@@ -30,7 +31,8 @@ export function processNarrativeEvent(
     recentKinds.every((kind) => kind === "negative");
   const eligible = NARRATIVE_EVENTS.filter(
     (definition) => state.school.activeMembers >= definition.minMembers &&
-      (definition.id !== "missed-renewal" || renewableMembers.length > 0) &&
+      (definition.id !== "missed-renewal" ||
+        (renewableMembers.length > 0 && isSummerBreak(state.school.currentMonth))) &&
       (!blockNegative || definition.kind !== "negative"),
   );
   if (eligible.length === 0) return state;

@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
-import { getOfflineLimitMs } from "../game/offline";
 import { canFoundSchool, getPrestigeRequirements } from "../game/progression";
 import type { GameState, SchoolFoundationDetails } from "../game/types";
 import { formatClock, formatDate } from "../shared/formatters";
@@ -92,7 +91,7 @@ export function OverviewView({
 
       <section className="settings-sheet">
         <h2>Salvataggio locale</h2>
-        <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Il progresso offline è limitato a {Math.round(getOfflineLimitMs(state) / 3_600_000)} ore.</p>
+        <p>I progressi sono salvati automaticamente ogni 10 secondi e dopo le azioni importanti. Quando il gioco è chiuso, calendario e timer rimangono completamente fermi.</p>
         <dl><div><dt>Versione salvataggio</dt><dd>{state.version}</dd></div><div><dt>Ultimo salvataggio</dt><dd>{formatClock(state.lastSavedAt)}</dd></div></dl>
         <label className="preference-check"><input type="checkbox" checked={darkMode} onChange={(event) => onDarkModeChange(event.target.checked)} /><span><strong>Tema scuro</strong><small>Usa superfici blu-notte per una lettura più riposante.</small></span></label>
         <label className="preference-check"><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span></label>
@@ -111,6 +110,7 @@ export function OverviewView({
           <Requirement label="Iscritti storici" value={state.school.historicMembers} target={requirements.historicMembers} />
           <Requirement label="Collaboratori" value={state.collaborators.length} target={requirements.collaborators} />
           <Requirement label="Eventi completati" value={state.statistics.eventsCompleted} target={requirements.events} />
+          <Requirement label="Champion's Arena" value={state.tournaments.championsVictoryCurrentSchool ? 1 : 0} target={1} />
         </div>
         {state.network.schools.length > 0 ? <div className="school-archive">{state.network.schools.slice().reverse().map((school) => <article key={school.id}><div><strong>{school.name}</strong><small>{school.city} · {school.membersAtTransfer} iscritti al trasferimento</small></div><time>{formatDate(school.transferredAt)}</time></article>)}</div> : null}
 

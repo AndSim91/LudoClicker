@@ -8,6 +8,7 @@ const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
   "event",
   "social",
   "collaborator",
+  "tournament",
 ];
 
 function isNonNegativeSafeInteger(value: unknown): value is number {
@@ -117,5 +118,11 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.network?.reputation === "number" &&
     Array.isArray(state.network?.schools) &&
     typeof state.network?.prestigeOfferSent === "boolean"
+    && Array.isArray(state.tournaments?.results)
+    && Array.isArray(state.tournaments?.missedTournaments)
+    && Array.isArray(state.tournaments?.immuneContactIds)
+    && Array.isArray(state.tournaments?.skippedSeasons)
+    && typeof state.tournaments?.championsVictoryCurrentSchool === "boolean"
+    && typeof state.network?.secretLegendaries === "object"
   );
 }

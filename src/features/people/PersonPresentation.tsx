@@ -46,15 +46,19 @@ export function PersonName({
   displayName,
   rarity,
   label,
+  secretLegendary = false,
 }: {
   displayName: string;
   rarity: PersonRarity;
   label?: string;
+  secretLegendary?: boolean;
 }) {
   return (
-    <strong className={`rarity-name rarity-${rarity}`} data-label={label}>
+    <strong className={`rarity-name rarity-${secretLegendary ? "secret-legendary" : rarity}`} data-label={label}>
       {displayName}
-      {rarity === "legendary" ? <span className="special-collaborator-badge">VIP</span> : null}
+      {secretLegendary
+        ? <span className="special-collaborator-badge secret">Segreto</span>
+        : rarity === "legendary" ? <span className="special-collaborator-badge">VIP</span> : null}
     </strong>
   );
 }

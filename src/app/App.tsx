@@ -18,6 +18,7 @@ import { ActivitiesView } from "../features/activities/ActivitiesView";
 import { AdminEmailView } from "../features/admin/AdminEmailView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
+import { TournamentsView } from "../features/tournaments/TournamentsView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { useGameEngine } from "../game/useGameEngine";
 import { isGameAreaUnlocked } from "../game/progression";
@@ -221,6 +222,8 @@ export function App() {
               })
             }
           />
+        ) : activeView === "tournaments" ? (
+          <TournamentsView state={state} />
         ) : activeView === "admin" ? (
           <AdminEmailView
             totalContacts={state.contacts.length}

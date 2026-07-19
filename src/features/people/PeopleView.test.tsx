@@ -305,7 +305,7 @@ describe("PeopleView", () => {
     expect(screen.getAllByText("Rischio medio")).toHaveLength(1);
     expect(screen.getAllByText("Rischio basso")).toHaveLength(1);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
-    expect(within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/%/))
+    expect(within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i))
       .not.toBeInTheDocument();
   });
 

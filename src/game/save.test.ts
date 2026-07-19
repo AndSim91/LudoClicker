@@ -311,7 +311,7 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.achievements).toEqual([]);
     expect(migrated.narrative.history).toEqual([]);
-    expect(migrated.narrative.nextEventAt).toBe(1_000 + 120_000);
+    expect(migrated.narrative.nextEventAt).toBe(5_000 + 120_000);
     expect(migrated.statistics.narrativeEvents).toBe(0);
   });
 
@@ -330,7 +330,15 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.school.city).toBe("Genova");
     expect(migrated.school.specialization).toBe("generale");
-    expect(migrated.network).toEqual({ reputation: 0, schools: [], prestigeOfferSent: false });
+    expect(migrated.network).toEqual({
+      reputation: 0,
+      schools: [],
+      prestigeOfferSent: false,
+      secretLegendaries: {
+        "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
+        "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
+      },
+    });
   });
 
   it("migrates version 11 saves into the month system", () => {

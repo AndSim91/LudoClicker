@@ -84,6 +84,7 @@ export function foundSchool(
       reputation: state.network.reputation + 1,
       schools: [...state.network.schools, archivedSchool],
       prestigeOfferSent: false,
+      secretLegendaries: state.network.secretLegendaries,
     },
     achievements: state.achievements,
     legendaryCollaborators: fresh.legendaryCollaborators,

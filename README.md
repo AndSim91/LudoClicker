@@ -40,7 +40,8 @@ Il gioco non invia email e non accede a servizi esterni: destinatari, messaggi e
 - maestria dei collaboratori per ruolo, con cinque gradi e notifiche di avanzamento;
 - attrezzatura, manutenzione, 47 potenziamenti e 100 modelli email;
 - traguardi, eventi narrativi e protezione dalle serie sfortunate;
-- progresso offline con riepilogo e limite di 8 ore;
+- pausa completa del gioco durante la chiusura, senza avanzamento offline;
+- tornei automatici con classifiche Arena e Stile, qualificazioni e premi;
 - fondazione di nuove scuole, reputazione e bonus permanenti di rete;
 - salvataggi locali versionati, backup, migrazioni, export/import e reset con doppia conferma.
 

@@ -74,7 +74,7 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 2 },
+      school: { ...initial.school, activeMembers: 2, currentMonth: 7 },
       contacts: initial.contacts.map((contact, index) => index < 2
         ? {
             ...contact,
@@ -104,6 +104,26 @@ describe("game engine: narrative", () => {
     expect(resolved!.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
     expect(resolved!.school.activeMembers).toBe(1);
     expect(resolved!.statistics.membersDeparted).toBe(1);
+  });
+
+  it("allows missed renewals only in July and August", () => {
+    const initial = createInitialState(1_000);
+    const due = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 2, currentMonth: 10 },
+      contacts: initial.contacts.map((contact, index) => index < 2
+        ? { ...contact, status: "enrolled" as const }
+        : contact),
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+
+    const octoberResults = Array.from({ length: 100 }, (_, randomSeed) =>
+      gameReducer({ ...due, randomSeed }, { type: "TICK", now: 2_000 }),
+    );
+
+    expect(octoberResults.every(
+      (result) => result.narrative.history[0]?.definitionId !== "missed-renewal",
+    )).toBe(true);
   });
 
   it("includes the amount in an extraordinary contribution notification", () => {
@@ -163,6 +183,10 @@ describe("game engine: narrative", () => {
       },
       statistics: { ...initial.statistics, eventsCompleted: 50, emailsSent: 30 },
       upgrades: { ...initial.upgrades, "comfortable-keyboard": 2 },
+      tournaments: {
+        ...initial.tournaments,
+        championsVictoryCurrentSchool: true,
+      },
     };
 
     expect(canFoundSchool(eligible)).toBe(true);

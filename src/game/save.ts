@@ -41,13 +41,6 @@ export function loadGame(now = Date.now()): GameState {
   const saved = read(SAVE_KEY) ?? read(BACKUP_KEY);
   if (!saved) return createInitialState(now);
   const reconciled = recruitEnrolledLegendaryCollaborators(saved, now);
-  if (!reconciled.profile.displayName.trim()) {
-    return {
-      ...reconciled,
-      lastSavedAt: now,
-      automation: { ...reconciled.automation, lastProcessedAt: now },
-    };
-  }
   return simulateOfflineProgress(reconciled, now).state;
 }
 
@@ -70,12 +63,13 @@ export function exportGame(state: GameState): string {
 
 export function importGame(raw: string): GameState | null {
   try {
+    const now = Date.now();
     const parsed = migrateSave(JSON.parse(raw));
     return isValidGameState(parsed)
-      ? recruitEnrolledLegendaryCollaborators({
+      ? simulateOfflineProgress(recruitEnrolledLegendaryCollaborators({
           ...parsed,
           messages: normalizeStackedMessages(parsed.messages),
-        }, Date.now())
+        }, now), now).state
       : null;
   } catch {
     return null;

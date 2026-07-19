@@ -8,6 +8,7 @@ const items: { id: AppView; label: string; icon: IconName; devOnly?: boolean }[]
   { id: "mail", label: "Posta", icon: "mail" },
   { id: "events", label: "Eventi", icon: "flag" },
   { id: "contacts", label: "Iscritti", icon: "people" },
+  { id: "tournaments", label: "Tornei", icon: "flag" },
   { id: "upgrades", label: "Upgrade", icon: "spark" },
   { id: "statistics", label: "Attività", icon: "tasks" },
   { id: "settings", label: "Impostazioni", icon: "settings" },

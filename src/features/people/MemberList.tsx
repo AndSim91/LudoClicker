@@ -7,6 +7,12 @@ import {
 } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
 import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
+import {
+  getContactBaseStats,
+  getContactPreparation,
+  getContactTournamentExperience,
+  hasCompletedCourseX,
+} from "../../game/athleteStats";
 
 const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
   available: "Disponibile",
@@ -49,24 +55,36 @@ export function MemberList({
         const collaborator = collaboratorsByContactId.get(contact.id);
         const isCollaborator = Boolean(collaborator);
         const memberForms = collaborator?.forms ?? contact.forms;
+        const hasVisibleStats = hasCompletedCourseX(memberForms);
+        const baseStats = hasVisibleStats ? getContactBaseStats(contact) : undefined;
+        const preparation = hasVisibleStats
+          ? getContactPreparation(contact, memberForms)
+          : undefined;
+        const competitiveStats = baseStats && preparation
+          ? `Arena ${baseStats.arena} → ${preparation.arena.toFixed(3)} · Stile ${baseStats.style} → ${preparation.style.toFixed(3)}`
+          : "Arena ??? · Stile ??? · completa Corso X";
         return (
           <div className="people-row member-row" key={contact.id}>
             <PersonName
               displayName={`${contact.firstName} ${contact.lastName}`}
               rarity={contact.rarity}
               label="Nome"
+              secretLegendary={Boolean(contact.secretLegendaryId)}
             />
             <span data-label="Indirizzo">
               <span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span>
             </span>
             <div className="member-path" data-label="Percorso">
               <strong>{formatFormPath(memberForms)}</strong>
+              <small className="member-competitive-stats">{competitiveStats}</small>
               <FormLogoStrip forms={memberForms} showLabels={false} />
             </div>
             <span className="member-status" data-label="Stato">
               <span>{isCollaborator ? "Collaboratore" : CONTACT_STATUS_LABELS[contact.status]}</span>
               <small>
-                {isCollaborator || contact.rarity === "legendary"
+                {state.tournaments.immuneContactIds.includes(contact.id)
+                  ? "Qualificato · immune"
+                  : isCollaborator || contact.rarity === "legendary"
                   ? "Non soggetto ad abbandono"
                   : contact.lastFormTrainingYear === currentYear
                     ? "Nessun rischio"
@@ -76,6 +94,7 @@ export function MemberList({
                         state.network.schools.length,
                       )}
               </small>
+              <small>Esperienza tornei {getContactTournamentExperience(contact)} · +{Math.min(60, getContactTournamentExperience(contact) * 3)}%</small>
             </span>
             <div className="member-training-cell" data-label="Prossima evoluzione">
               {isCollaborator ? (

@@ -13,6 +13,7 @@ const CONTACT_SOURCES: Contact["source"][] = [
   "event",
   "social",
   "collaborator",
+  "tournament",
 ];
 
 export function createEmptyHistoryArchive(): HistoryArchive {
@@ -23,6 +24,7 @@ export function createEmptyHistoryArchive(): HistoryArchive {
       event: { total: 0, enrolled: 0 },
       social: { total: 0, enrolled: 0 },
       collaborator: { total: 0, enrolled: 0 },
+      tournament: { total: 0, enrolled: 0 },
     },
     emails: { count: 0, totalWritingMs: 0 },
     completedTrials: 0,

@@ -1,43 +1,49 @@
 import { describe, expect, it } from "vitest";
-import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
-import { getOfflineLimitMs, simulateOfflineProgress } from "./offline";
+import { simulateOfflineProgress } from "./offline";
 
-describe("offline progress", () => {
-  it("collects elapsed fees and creates a readable summary", () => {
+describe("offline progress disabled", () => {
+  it("freezes fees and shifts every active deadline", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
       school: { ...initial.school, activeMembers: 2, nextFeeAt: 61_000 },
     };
-
     const result = simulateOfflineProgress(state, 121_000);
 
-    expect(result.summary?.elapsedMs).toBe(120_000);
-    expect(result.state.school.euros).toBe(16);
-    expect(result.summary?.eurosEarned).toBe(16);
+    expect(result.summary).toBeNull();
+    expect(result.state.school.euros).toBe(0);
     expect(result.state.school.currentMonth).toBe(9);
     expect(result.state.school.nextFeeAt).toBe(181_000);
-    expect(result.state.messages[0].subject).toBe("Riepilogo attività offline");
+    expect(result.state.messages[0].subject).not.toBe("Riepilogo attività offline");
     expect(result.state.lastSavedAt).toBe(121_000);
   });
 
-  it("caps elapsed time to eight hours", () => {
+  it("does not cap or process long closures", () => {
     const initial = createInitialState(1_000);
-    const result = simulateOfflineProgress(initial, 1_000 + GAME_CONFIG.offlineLimitMs + 60_000);
+    const result = simulateOfflineProgress(initial, 90_001_000);
 
-    expect(result.summary?.elapsedMs).toBe(GAME_CONFIG.offlineLimitMs);
-    expect(result.summary?.capped).toBe(true);
-    expect(result.state.messages[0].preview).toContain("limite di 8 ore");
+    expect(result.summary).toBeNull();
+    expect(result.state.school.currentMonth).toBe(9);
+    expect(result.state.school.nextFeeAt).toBe(initial.school.nextFeeAt + 90_000_000);
   });
 
-  it("extends the offline limit to twenty-four hours with multi-site coordination", () => {
+  it("preserves the remaining duration of training", () => {
     const initial = createInitialState(1_000);
-    const coordinated = {
+    const training = {
       ...initial,
-      upgrades: { ...initial.upgrades, "multi-site-coordination": 5 },
+      contacts: initial.contacts.map((contact, index) => index === 0
+        ? {
+            ...contact,
+            training: {
+              formId: "form-1" as const,
+              startedAt: 2_000,
+              completesAt: 12_000,
+            },
+          }
+        : contact),
     };
-
-    expect(getOfflineLimitMs(coordinated)).toBe(GAME_CONFIG.offlineMaxLimitMs);
+    const result = simulateOfflineProgress(training, 101_000);
+    expect(result.state.contacts[0].training?.completesAt).toBe(112_000);
   });
 });

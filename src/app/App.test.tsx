@@ -53,6 +53,7 @@ describe("App profile and navigation", () => {
       "Posta",
       "Eventi",
       "Iscritti",
+      "Tornei",
       "Upgrade",
       "Attività",
       "Impostazioni",
@@ -88,7 +89,7 @@ describe("App profile and navigation", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Admin" }));
 
-    expect(screen.getByRole("heading", { name: "Admin · Cataloghi email" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Admin" })).toBeVisible();
     expect(screen.getByText("DEV ONLY")).toBeVisible();
   });
 });

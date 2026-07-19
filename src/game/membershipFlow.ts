@@ -10,6 +10,7 @@ import { getMemberAnnualDepartureChance } from "./formulas";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
 import type { GameState, SpecialCollaboratorId } from "./types";
+import { processTournamentAtMonthEnd } from "./tournamentFlow";
 
 export function departMembers(
   state: GameState,
@@ -21,6 +22,7 @@ export function departMembers(
     (contact) =>
       contact.status === "enrolled" &&
       contact.rarity !== "legendary" &&
+      !state.tournaments.immuneContactIds.includes(contact.id) &&
       requestedIds.has(contact.id),
   );
   if (departed.length === 0) return state;
@@ -101,6 +103,7 @@ function processMemberDepartures(
   const eligibleMembers = state.contacts.filter((contact) =>
     contact.status === "enrolled" &&
     contact.rarity !== "legendary" &&
+    !state.tournaments.immuneContactIds.includes(contact.id) &&
     !collaboratorsByContactId.has(contact.id) &&
     (contact.enrolledMonth ?? state.school.currentMonth) <= firstMonthOfCompletedYear &&
     (collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
@@ -155,6 +158,11 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
   for (let period = 0; period < periods; period += 1) {
     const currentMonth = nextState.school.currentMonth;
     const completedSchoolYear = getSchoolYear(currentMonth);
+    nextState = processTournamentAtMonthEnd(
+      nextState,
+      currentMonth,
+      nextState.school.nextFeeAt,
+    );
     const earned = scaleCurrencyGain((
       (nextState.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
         nextState.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *

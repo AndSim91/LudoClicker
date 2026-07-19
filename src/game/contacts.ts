@@ -5,6 +5,7 @@ import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { getCurrentSchoolContactCount } from "./historyArchive";
 import { nextRandom } from "./random";
+import { advanceRandomSeed, rollAthleteBaseStats } from "./athleteStats";
 import type {
   Contact,
   GameState,
@@ -13,7 +14,7 @@ import type {
   SpecialCollaboratorId,
 } from "./types";
 
-export type AcquiredContactSource = "sparring" | "event" | "social" | "collaborator";
+export type AcquiredContactSource = "sparring" | "event" | "social" | "collaborator" | "tournament";
 
 export const ANDREA_SIMONAZZI_ID: SpecialCollaboratorId = "andrea-simonazzi";
 export const ANDREA_SIMONAZZI_PROFILE = SPECIAL_COLLABORATORS.find(
@@ -141,6 +142,10 @@ export function createInitialContacts(
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, legendaryProfile);
     const { firstName, lastName, email } = generated;
+    nextSeed = advanceRandomSeed(nextSeed, 3);
+    const rarity = legendaryProfile ? "legendary" as const : ordinary!.rarity;
+    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, legendaryProfile?.id);
+    nextSeed = athleteStats.nextSeed;
     const retained = legendaryProfile
       ? progress.retainedProgress[legendaryProfile.id]
       : undefined;
@@ -152,9 +157,12 @@ export function createInitialContacts(
       source: "tutorial" as const,
       acquiredAt: now,
       status: index === 0 ? "writing" as const : "available" as const,
-      rarity: legendaryProfile ? "legendary" as const : ordinary!.rarity,
+      rarity,
       specialProfileId: legendaryProfile?.id,
       forms: [...(retained?.forms ?? [])],
+      arenaBase: athleteStats.arena,
+      styleBase: athleteStats.style,
+      tournamentExperience: 0,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
     };
@@ -204,6 +212,10 @@ export function createAcquiredContacts(
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);
     const { firstName, lastName, email } = generated;
+    nextSeed = advanceRandomSeed(nextSeed, 3);
+    const rarity = specialProfile ? "legendary" as const : ordinary!.rarity;
+    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id);
+    nextSeed = athleteStats.nextSeed;
     const retained = specialProfile
       ? progress.retainedProgress[specialProfile.id]
       : undefined;
@@ -222,9 +234,12 @@ export function createAcquiredContacts(
       source,
       acquiredAt: now,
       status: "available" as const,
-      rarity: specialProfile ? "legendary" as const : ordinary!.rarity,
+      rarity,
       specialProfileId: specialProfile?.id,
       forms: [...(retained?.forms ?? [])],
+      arenaBase: athleteStats.arena,
+      styleBase: athleteStats.style,
+      tournamentExperience: 0,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
     };

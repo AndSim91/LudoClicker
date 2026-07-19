@@ -1,5 +1,5 @@
 export const GAME_CONFIG = {
-  version: 36,
+  version: 37,
   initialContacts: 5,
   initialSwords: 6,
   profileNameMaxLength: 80,
@@ -19,6 +19,7 @@ export const GAME_CONFIG = {
   monthlyMemberFee: 40,
   enrollmentBonus: 20,
   gameMonthMs: 60_000,
+  secretLegendaryTrialDurationMs: 150_000,
   sparringCooldownMs: 10_000,
   equipmentMaintenanceCost: 10,
   equipmentMaintenanceCostPerSword: 50,

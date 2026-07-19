@@ -15,7 +15,10 @@ export type SpecialCollaboratorId =
   | "matteo-scarzello"
   | "chris-usai"
   | "guglielmo-oliveri"
-  | "niccolo-efrati";
+  | "niccolo-efrati"
+  | SecretLegendaryId;
+
+export type SecretLegendaryId = "marco-palena" | "lorenzo-todaro";
 
 export type PersonRarity = "common" | "rare" | "ultra-rare" | "legendary";
 export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
@@ -33,12 +36,16 @@ export interface Contact {
   firstName: string;
   lastName: string;
   email: string;
-  source: "tutorial" | "sparring" | "event" | "social" | "collaborator";
+  source: "tutorial" | "sparring" | "event" | "social" | "collaborator" | "tournament";
   acquiredAt: number;
   status: ContactStatus;
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
+  secretLegendaryId?: SecretLegendaryId;
   forms: FormId[];
+  arenaBase?: number;
+  styleBase?: number;
+  tournamentExperience?: number;
   formBranchPreferences?: FormBranch[];
   training?: FormTraining;
   lastFormTrainingYear?: number;
@@ -76,6 +83,7 @@ export interface ScheduledTrial {
   resolvesAt: number;
   resultSeed: number;
   status: "scheduled" | "completed";
+  secretLegendaryId?: SecretLegendaryId;
 }
 
 export interface InboxMessage {
@@ -96,7 +104,8 @@ export interface InboxMessage {
     | "training"
     | "progress"
     | "narrative"
-    | "offline";
+    | "offline"
+    | "tournaments";
 }
 
 export type AcquisitionEventId =
@@ -338,6 +347,113 @@ export interface Statistics {
   narrativeEvents: number;
 }
 
+export type TournamentLevel = "school" | "academy" | "national" | "champions";
+export type TournamentDiscipline = "arena" | "style";
+
+export interface TournamentParticipant {
+  id: string;
+  ownedContactId?: string;
+  secretLegendaryId?: SecretLegendaryId;
+  firstName: string;
+  lastName: string;
+  schoolName: string;
+  city: string;
+  rarity: PersonRarity | "secret-legendary";
+  numericForms: number;
+  experience: number;
+  arenaBase: number;
+  styleBase: number;
+  arenaPreparation: number;
+  stylePreparation: number;
+  condition: number;
+  qualificationDiscipline?: TournamentDiscipline;
+}
+
+export interface TournamentMatch {
+  id: string;
+  stage: "group" | "round64" | "round32" | "round16" | "quarterfinal" | "semifinal" | "bronze" | "final";
+  groupIndex?: number;
+  participantAId: string;
+  participantBId: string;
+  arenaScoreA: number;
+  arenaScoreB: number;
+  styleScoreA: number;
+  styleScoreB: number;
+  winnerId: string;
+}
+
+export interface TournamentGroupStanding {
+  participantId: string;
+  groupIndex: number;
+  wins: number;
+  assaultPoints: number;
+  styleAverage: number;
+  qualified: boolean;
+}
+
+export interface TournamentPodiumEntry {
+  participantId: string;
+  position: 1 | 2 | 3;
+  discipline: TournamentDiscipline;
+  score: number;
+}
+
+export interface TournamentQualifier {
+  participantId: string;
+  ownedContactId?: string;
+  source: TournamentDiscipline;
+  rankingPosition: number;
+  repechage: boolean;
+}
+
+export interface TournamentReward {
+  discipline: TournamentDiscipline;
+  position: 1 | 2 | 3;
+  euros: number;
+  contacts: number;
+}
+
+export interface TournamentResult {
+  id: string;
+  level: TournamentLevel;
+  season: number;
+  completedAt: number;
+  participants: TournamentParticipant[];
+  matches: TournamentMatch[];
+  groupStandings: TournamentGroupStanding[];
+  arenaRanking: string[];
+  styleRanking: string[];
+  arenaPodium: TournamentPodiumEntry[];
+  stylePodium: TournamentPodiumEntry[];
+  qualifiers: TournamentQualifier[];
+  rewards: TournamentReward[];
+  secretLegendaryDefeatedIds: SecretLegendaryId[];
+}
+
+export interface SecretLegendaryProgress {
+  status: "external" | "trial" | "enrolled";
+  defeats: number;
+  failedTrials: number;
+  enrolledContactId?: string;
+}
+
+export interface TournamentState {
+  results: TournamentResult[];
+  missedTournaments: {
+    level: TournamentLevel;
+    season: number;
+    reason: "insufficient-members" | "not-qualified";
+  }[];
+  qualification?: {
+    level: Exclude<TournamentLevel, "school">;
+    season: number;
+    contactIds: string[];
+  };
+  immuneContactIds: string[];
+  skippedSeasons: number[];
+  championsVictoryCurrentSchool: boolean;
+}
+
 export interface HistorySourceSummary {
   total: number;
   enrolled: number;
@@ -381,6 +497,7 @@ export interface GameState {
     reputation: number;
     schools: FoundedSchool[];
     prestigeOfferSent: boolean;
+    secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
   };
   contacts: Contact[];
   emails: CampaignEmail[];
@@ -398,6 +515,7 @@ export interface GameState {
     wear: number;
   };
   legendaryCollaborators: LegendaryCollaboratorProgress;
+  tournaments: TournamentState;
   collaborators: Collaborator[];
   automation: {
     lastProcessedAt: number;

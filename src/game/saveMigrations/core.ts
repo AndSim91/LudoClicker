@@ -189,6 +189,10 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         reputation: 0,
         schools: [],
         prestigeOfferSent: false,
+        secretLegendaries: {
+          "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
+          "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
+        },
       },
     };
   }

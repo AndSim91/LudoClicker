@@ -7,6 +7,7 @@ export type GameArea =
   | "contacts"
   | "upgrades"
   | "statistics"
+  | "tournaments"
   | "settings";
 
 export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
@@ -20,6 +21,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
     return state.statistics.emailsSent >= GAME_CONFIG.eventsUnlockEmailsSent || !hasCampaignQueue;
   }
   if (view === "contacts") return state.school.historicMembers > 0;
+  if (view === "tournaments") return state.school.historicMembers > 0;
   if (view === "upgrades") return state.unlocks.upgrades;
   return state.statistics.eventsCompleted > 0 ||
     state.equipment.wear > 0 ||
@@ -41,6 +43,10 @@ export function canFoundSchool(state: GameState): boolean {
   return (
     state.school.historicMembers >= requirements.historicMembers &&
     state.collaborators.length >= requirements.collaborators &&
-    state.statistics.eventsCompleted >= requirements.events
+    state.statistics.eventsCompleted >= requirements.events &&
+    state.tournaments.championsVictoryCurrentSchool &&
+    !Object.values(state.network.secretLegendaries).some(
+      (progress) => progress.status === "trial",
+    )
   );
 }

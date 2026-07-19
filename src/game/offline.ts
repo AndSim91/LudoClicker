@@ -1,78 +1,85 @@
-import { GAME_CONFIG } from "./config";
-import { gameReducer } from "./engine";
-import { addInboxMessage } from "./messages";
-import type { GameState, InboxMessage } from "./types";
+import type { GameState } from "./types";
 
 export interface OfflineSummary {
   elapsedMs: number;
-  capped: boolean;
-  emailsCompleted: number;
-  trialsBooked: number;
-  trialsCompleted: number;
-  membersEnrolled: number;
-  membersDeparted: number;
-  collaboratorsRecruited: number;
-  eurosEarned: number;
-  contactsAcquired: number;
+  capped: false;
+  emailsCompleted: 0;
+  trialsBooked: 0;
+  trialsCompleted: 0;
+  membersEnrolled: 0;
+  membersDeparted: 0;
+  collaboratorsRecruited: 0;
+  eurosEarned: 0;
+  contactsAcquired: 0;
 }
 
-export function getOfflineLimitMs(state: GameState): number {
-  const coordinationLevel = state.upgrades["multi-site-coordination"];
-  const progress = Math.min(1, coordinationLevel / 5);
-  return Math.round(
-    GAME_CONFIG.offlineLimitMs +
-      (GAME_CONFIG.offlineMaxLimitMs - GAME_CONFIG.offlineLimitMs) * progress,
-  );
+function shiftOptional(timestamp: number | undefined, elapsedMs: number) {
+  return timestamp === undefined ? undefined : timestamp + elapsedMs;
+}
+
+/**
+ * Congela interamente il gioco durante la chiusura. Tutti i timer attivi
+ * vengono traslati dello stesso intervallo, così conservano il tempo residuo.
+ */
+export function pauseGameState(state: GameState, now: number): GameState {
+  const elapsedMs = Math.max(0, now - state.lastSavedAt);
+  if (elapsedMs === 0) {
+    return {
+      ...state,
+      lastSavedAt: now,
+      automation: { ...state.automation, lastProcessedAt: now },
+    };
+  }
+  const shiftTraining = <T extends { training?: { startedAt: number; completesAt: number } }>(
+    person: T,
+  ): T => person.training
+    ? {
+        ...person,
+        training: {
+          ...person.training,
+          startedAt: person.training.startedAt + elapsedMs,
+          completesAt: person.training.completesAt + elapsedMs,
+        },
+      }
+    : person;
+
+  return {
+    ...state,
+    lastSavedAt: now,
+    school: { ...state.school, nextFeeAt: state.school.nextFeeAt + elapsedMs },
+    contacts: state.contacts.map(shiftTraining),
+    collaborators: state.collaborators.map(shiftTraining),
+    emails: state.emails.map((email) => ({
+      ...email,
+      sendCompletesAt: shiftOptional(email.sendCompletesAt, elapsedMs),
+    })),
+    pendingEmailOutcomes: state.pendingEmailOutcomes.map((outcome) => ({
+      ...outcome,
+      resolvesAt: outcome.resolvesAt + elapsedMs,
+    })),
+    scheduledTrials: state.scheduledTrials.map((trial) => trial.status === "scheduled"
+      ? {
+          ...trial,
+          startsAt: trial.startsAt + elapsedMs,
+          resolvesAt: trial.resolvesAt + elapsedMs,
+        }
+      : trial),
+    acquisitionEvents: state.acquisitionEvents.map((event) => event.status === "running"
+      ? {
+          ...event,
+          startedAt: event.startedAt + elapsedMs,
+          resolvesAt: event.resolvesAt + elapsedMs,
+        }
+      : event),
+    activities: { nextSparringAt: state.activities.nextSparringAt + elapsedMs },
+    narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
+    automation: { ...state.automation, lastProcessedAt: now },
+  };
 }
 
 export function simulateOfflineProgress(
   state: GameState,
   now: number,
-): { state: GameState; summary: OfflineSummary | null } {
-  const rawElapsed = Math.max(0, now - state.lastSavedAt);
-  if (rawElapsed === 0) return { state, summary: null };
-  const offlineLimitMs = getOfflineLimitMs(state);
-  const elapsedMs = Math.min(rawElapsed, offlineLimitMs);
-  const before = state.statistics;
-  let processed = gameReducer(state, {
-    type: "OFFLINE_PASSIVE_PROGRESS",
-    now,
-    elapsedMs,
-    rawElapsedMs: rawElapsed,
-  });
-
-  const summary: OfflineSummary = {
-    elapsedMs,
-    capped: rawElapsed > offlineLimitMs,
-    emailsCompleted: processed.statistics.emailsSent - before.emailsSent,
-    trialsBooked: processed.statistics.trialsBooked - before.trialsBooked,
-    trialsCompleted: processed.statistics.trialsCompleted - before.trialsCompleted,
-    membersEnrolled: processed.statistics.membersEnrolled - before.membersEnrolled,
-    membersDeparted: processed.statistics.membersDeparted - before.membersDeparted,
-    collaboratorsRecruited:
-      processed.statistics.collaboratorsRecruited - before.collaboratorsRecruited,
-    eurosEarned: processed.statistics.eurosEarned - before.eurosEarned,
-    contactsAcquired: processed.statistics.contactsAcquired - before.contactsAcquired,
-  };
-
-  processed = { ...processed, lastSavedAt: now };
-  if (elapsedMs < GAME_CONFIG.offlineSummaryMinMs) return { state: processed, summary: null };
-
-  const hours = Math.floor(elapsedMs / 3_600_000);
-  const minutes = Math.floor((elapsedMs % 3_600_000) / 60_000);
-  const message: InboxMessage = {
-    id: `offline-${now.toString(36)}`,
-    sender: "Segreteria automatica",
-    subject: "Riepilogo attività offline",
-    preview: `${hours} h ${minutes} min elaborati${summary.capped ? ` (limite di ${Math.round(offlineLimitMs / 3_600_000)} ore)` : ""}. Il calendario, le Forme e le attività sono rimasti fermi. Entrate € ${Math.round(summary.eurosEarned)}, contatti passivi ${summary.contactsAcquired}.`,
-    receivedAt: now,
-    tone: "system",
-    unread: true,
-    category: "other",
-    threadKey: "offline",
-  };
-  return {
-    state: { ...processed, messages: addInboxMessage(processed.messages, message) },
-    summary,
-  };
+): { state: GameState; summary: null } {
+  return { state: pauseGameState(state, now), summary: null };
 }

@@ -89,6 +89,27 @@ export function resolveTrial(
     },
   };
 
+  if (trial.secretLegendaryId) {
+    const progress = state.network.secretLegendaries[trial.secretLegendaryId];
+    nextState = {
+      ...nextState,
+      network: {
+        ...nextState.network,
+        secretLegendaries: {
+          ...nextState.network.secretLegendaries,
+          [trial.secretLegendaryId]: enrolled
+            ? { ...progress, status: "enrolled", enrolledContactId: trial.contactId }
+            : {
+                ...progress,
+                status: "external",
+                failedTrials: progress.failedTrials + 1,
+                enrolledContactId: undefined,
+              },
+        },
+      },
+    };
+  }
+
   nextState = addCollaboratorMasteryExperience(
     nextState,
     "lessons",

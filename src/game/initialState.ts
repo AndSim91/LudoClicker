@@ -47,7 +47,15 @@ export function createInitialState(
       nextFeeAt: now + GAME_CONFIG.gameMonthMs,
     },
     player: { writingPower: 1 },
-    network: { reputation: 0, schools: [], prestigeOfferSent: false },
+    network: {
+      reputation: 0,
+      schools: [],
+      prestigeOfferSent: false,
+      secretLegendaries: {
+        "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
+        "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
+      },
+    },
     contacts,
     emails: [createCampaign(contacts[0], 0, now, displayName)],
     pendingEmailOutcomes: [],
@@ -68,6 +76,13 @@ export function createInitialState(
       wear: 0,
     },
     legendaryCollaborators: initialContacts.progress,
+    tournaments: {
+      results: [],
+      missedTournaments: [],
+      immuneContactIds: [],
+      skippedSeasons: [],
+      championsVictoryCurrentSchool: false,
+    },
     collaborators: [],
     automation: {
       lastProcessedAt: now,

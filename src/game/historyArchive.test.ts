@@ -135,7 +135,7 @@ describe("bounded game history", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(36);
+    expect(migrated.version).toBe(37);
     expect(migrated.emails).toHaveLength(500);
     expect(migrated.historyArchive.emails.count).toBe(300);
     expect(migrate(migrated)).toBe(migrated);

@@ -55,6 +55,17 @@
   color: #986700;
 }
 
+.rarity-name.rarity-secret-legendary,
+.rarity-address.rarity-secret-legendary {
+  color: #8a5a32;
+}
+
+.special-collaborator-badge.secret {
+  border-color: #8a5a32;
+  background: #f3e5d8;
+  color: #6c4224;
+}
+
 .rarity-name.rarity-rare {
   color: #6b3fa0;
 }
