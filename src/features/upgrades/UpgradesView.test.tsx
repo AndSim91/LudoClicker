@@ -24,7 +24,8 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Attrezzatura" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Istruttori" })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(48);
+    expect(screen.getByRole("button", { name: /Apri dettagli Extra Forma/ })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(49);
   });
 
   it("shows requirements, effect and disabled level-up action for a locked node", () => {

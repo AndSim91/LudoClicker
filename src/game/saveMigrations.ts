@@ -5,6 +5,7 @@ import { migratePeopleState } from "./saveMigrations/people";
 import { migrateProgressionState } from "./saveMigrations/progression";
 import { migrateScalabilityState } from "./saveMigrations/scalability";
 import { migrateTournamentState } from "./saveMigrations/tournaments";
+import { migrateTrainingState } from "./saveMigrations/training";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
@@ -14,6 +15,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateContentState,
   migrateScalabilityState,
   migrateTournamentState,
+  migrateTrainingState,
 ];
 
 export function migrate(value: unknown): unknown {
@@ -23,5 +25,10 @@ export function migrate(value: unknown): unknown {
     (state, migrationStage) => migrationStage(state),
     value as MigratableState,
   );
-  return normalizeLegacySave(migrated);
+  const normalized = normalizeLegacySave(migrated);
+  // Saves created before the compatibility gate are part of the first
+  // compatibility family and can continue through the explicit migrations.
+  return normalized.saveCompatibilityVersion === undefined
+    ? { ...normalized, saveCompatibilityVersion: 1 }
+    : normalized;
 }

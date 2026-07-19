@@ -165,6 +165,7 @@ export function createInitialContacts(
       tournamentExperience: 0,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
+      formTrainingYearCount: retained?.formTrainingYearCount,
     };
   });
   return { contacts, nextSeed, progress };
@@ -242,6 +243,7 @@ export function createAcquiredContacts(
       tournamentExperience: 0,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
+      formTrainingYearCount: retained?.formTrainingYearCount,
     };
   });
   return { contacts, nextSeed };

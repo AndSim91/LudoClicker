@@ -50,6 +50,7 @@ export interface Contact {
   formBranchPreferences?: FormBranch[];
   training?: FormTraining;
   lastFormTrainingYear?: number;
+  formTrainingYearCount?: number;
   enrolledMonth?: number;
 }
 
@@ -187,6 +188,7 @@ export type UpgradeId =
   | "registration-form"
   | "order-secretariat"
   | "multi-site-coordination"
+  | "extra-form"
   | "instructor-versatility"
   | "tiamat-instructor";
 
@@ -309,6 +311,7 @@ export interface Collaborator {
   specialProfileId?: SpecialCollaboratorId;
   training?: FormTraining;
   lastFormTrainingYear?: number;
+  formTrainingYearCount?: number;
 }
 
 export interface RetainedLegendaryProgress {
@@ -317,6 +320,7 @@ export interface RetainedLegendaryProgress {
   formBranchPreferences?: FormBranch[];
   joinedAt: number;
   lastFormTrainingYear?: number;
+  formTrainingYearCount?: number;
 }
 
 export interface LegendaryCollaboratorProgress {
@@ -472,6 +476,7 @@ export interface HistoryArchive {
 
 export interface GameState {
   version: number;
+  saveCompatibilityVersion: number;
   createdAt: number;
   lastSavedAt: number;
   randomSeed: number;

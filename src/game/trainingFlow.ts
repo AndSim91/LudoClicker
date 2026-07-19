@@ -4,6 +4,7 @@ import {
   canTrainForm,
   getCollaboratorProductivity,
   getFormDefinition,
+  getFormTrainingCount,
   getInstructorConversionCost,
   getInstructorFormCost,
   getInstructorQualificationCost,
@@ -12,7 +13,7 @@ import {
   isInstructorForm,
 } from "../content/forms";
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
-import { getSchoolYear, isSummerBreak } from "./calendar";
+import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
@@ -195,7 +196,8 @@ export function startFormTraining(
   );
   const student = collaborator ?? member;
   const definition = getFormDefinition(formId);
-  const currentYear = getSchoolYear(state.school.currentMonth);
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualTrainingLimit = 1 + (state.upgrades["extra-form"] ?? 0);
   if (qualificationOnly && collaborator && definition) {
     const qualificationCost = getInstructorQualificationCost(definition.cost);
     if (collaborator.training || state.school.euros < qualificationCost) return state;
@@ -252,9 +254,10 @@ export function startFormTraining(
     !canTrainForm(
       student,
       definition,
-      canTrainAsInstructorInSummer ? undefined : currentYear,
+      trainingYear,
       branchCapacity,
       collaborator?.assignment !== "instructor",
+      annualTrainingLimit,
     ) ||
     !initialBranchCompatible ||
     state.school.euros < trainingCost
@@ -280,6 +283,7 @@ export function startFormTraining(
       ? instructorTrainingDurationMultiplier
       : undefined,
   };
+  const formTrainingYearCount = getFormTrainingCount(student, trainingYear) + 1;
   const nextState = {
     ...state,
     school: {
@@ -288,12 +292,22 @@ export function startFormTraining(
     },
     contacts: member
       ? state.contacts.map((candidate) => candidate.id === member.id
-        ? { ...candidate, training, lastFormTrainingYear: currentYear }
+        ? {
+            ...candidate,
+            training,
+            lastFormTrainingYear: trainingYear,
+            formTrainingYearCount,
+          }
         : candidate)
       : state.contacts,
     collaborators: collaborator
       ? state.collaborators.map((candidate) => candidate.id === collaborator.id
-        ? { ...candidate, training, lastFormTrainingYear: currentYear }
+        ? {
+            ...candidate,
+            training,
+            lastFormTrainingYear: trainingYear,
+            formTrainingYearCount,
+          }
         : candidate)
       : state.collaborators,
   };

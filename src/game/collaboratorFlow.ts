@@ -35,6 +35,8 @@ export function recruitCollaborator(
     rarity: contact.rarity,
     specialProfileId: contact.specialProfileId,
     lastFormTrainingYear: retained?.lastFormTrainingYear ?? contact.lastFormTrainingYear,
+    formTrainingYearCount:
+      retained?.formTrainingYearCount ?? contact.formTrainingYearCount,
   };
   const nextState: GameState = {
     ...state,

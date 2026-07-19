@@ -48,6 +48,8 @@ export function departMembers(
       joinedAt: collaborator?.joinedAt ?? member.acquiredAt,
       lastFormTrainingYear:
         collaborator?.lastFormTrainingYear ?? member.lastFormTrainingYear,
+      formTrainingYearCount:
+        collaborator?.formTrainingYearCount ?? member.formTrainingYearCount,
     };
   }
 
@@ -66,6 +68,9 @@ export function departMembers(
             lastFormTrainingYear:
               collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
               contact.lastFormTrainingYear,
+            formTrainingYearCount:
+              collaboratorsByContactId.get(contact.id)?.formTrainingYearCount ??
+              contact.formTrainingYearCount,
             training: undefined,
           }
         : contact,

@@ -359,10 +359,74 @@ describe("game engine: progression", () => {
     const completed = gameReducer(training, { type: "TICK", now: 32_000 });
 
     expect(training.school.euros).toBe(100);
-    expect(training.collaborators[0].lastFormTrainingYear).toBe(1);
+    expect(training.collaborators[0].lastFormTrainingYear).toBe(2);
+    expect(training.collaborators[0].formTrainingYearCount).toBe(1);
     expect(training.collaborators[0].training?.includesInstructorCertification).toBe(true);
     expect(completed.collaborators[0].forms).toContain("form-2");
     expect(completed.collaborators[0].instructorForms).toContain("form-2");
+  });
+
+  it("counts an Instructor's July course in the upcoming year and Extra Form adds one slot", () => {
+    const initial = createInitialState(1_000);
+    const instructor = {
+      id: "instructor-extra-form",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Extra Forma",
+      joinedAt: 1_000,
+      forms: ["form-1", "course-x"] as FormId[],
+      instructorForms: ["form-1", "course-x"] as FormId[],
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+      lastFormTrainingYear: 1,
+      formTrainingYearCount: 1,
+    };
+    const julyState = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 19, euros: 5_000 },
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+    const julyTraining = gameReducer(julyState, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "form-2",
+      now: 2_000,
+    });
+    const julyCompleted = gameReducer(julyTraining, { type: "TICK", now: 100_000 });
+    const septemberState = {
+      ...julyCompleted,
+      school: { ...julyCompleted.school, currentMonth: 21 },
+    };
+    const blockedWithoutUpgrade = gameReducer(septemberState, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "course-y",
+      now: 101_000,
+    });
+    const septemberWithExtraForm = {
+      ...septemberState,
+      upgrades: { ...septemberState.upgrades, "extra-form": 1 },
+    };
+    const secondTraining = gameReducer(septemberWithExtraForm, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "course-y",
+      now: 101_000,
+    });
+    const secondCompleted = gameReducer(secondTraining, { type: "TICK", now: 200_000 });
+    const thirdTraining = gameReducer(secondCompleted, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "form-3-long",
+      now: 201_000,
+    });
+
+    expect(julyTraining.collaborators[0].lastFormTrainingYear).toBe(2);
+    expect(julyTraining.collaborators[0].formTrainingYearCount).toBe(1);
+    expect(blockedWithoutUpgrade).toBe(septemberState);
+    expect(secondTraining.collaborators[0].training?.formId).toBe("course-y");
+    expect(secondTraining.collaborators[0].formTrainingYearCount).toBe(2);
+    expect(thirdTraining).toBe(secondCompleted);
   });
 
   it("slows an Instructor's own training while teaching and restores the normal speed when teaching stops", () => {

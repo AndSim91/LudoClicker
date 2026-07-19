@@ -586,9 +586,10 @@ Nomi e numeri sono sufficienti nella prima versione; gli effetti ludici non devo
 Regole:
 
 - ogni iscritto può conoscere più Forme;
-- ogni iscritto o collaboratore può iniziare al massimo una Forma per anno scolastico; per gli Istruttori questo limite si riapre a luglio, mentre gli altri restano in pausa fino a settembre;
-- le Forme possono essere insegnate da Settembre a Giugno; Luglio e Agosto sono pausa estiva, salvo le formazioni da Istruttore pagate con qualifica inclusa;
-- l'anno scolastico va da Settembre ad Agosto, a Settembre torna disponibile una nuova formazione;
+- ogni iscritto o collaboratore può iniziare al massimo una Forma per anno formativo; il potenziamento unico **Extra Forma** porta questo limite a due;
+- gli slot annuali delle Forme si rinnovano a luglio e coprono il periodo luglio–giugno: una Forma iniziata a luglio consuma quindi uno slot valido anche nel settembre immediatamente successivo;
+- Luglio e Agosto sono pausa estiva per gli atleti normali, che pur avendo ricevuto i nuovi slot non possono usarli fino a settembre; gli Istruttori possono invece iniziare in estate una formazione pagata con qualifica inclusa;
+- l'anno scolastico ordinario resta da Settembre ad Agosto;
 - completare un solo ramo fino alla Forma 5 è sufficiente per accedere alla Forma 6;
 - durante Corso Y ogni allievo sviluppa automaticamente da una a tre preferenze fra Spada Lunga, Staffa e Doppia spada corta;
 - gli altri rami preferiti restano percorsi facoltativi che l'automazione può completare dopo la Forma 7;
@@ -613,6 +614,7 @@ Regole:
 - l'automazione dà priorità agli allievi meno avanzati e li porta dalla Forma 1 verso l'alto, rispettando prerequisiti, anno scolastico e compatibilità d'arma;
 - disattivare l'automazione o riassegnare l'Istruttore lascia terminare le lezioni già iniziate, ma non ne avvia altre;
 - **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti e tre i rami d'arma;
+- **Extra Forma** è un potenziamento unico del ramo Istruttori e concede a ogni atleta della scuola un secondo slot di formazione nel periodo luglio–giugno;
 - ogni Istruttore parte da un allievo contemporaneo; **Istruttore stile Tiamat** ha cinque livelli molto costosi e porta la capacità massima a sei allievi;
 - i completamenti automatici confluiscono in una notifica riepilogativa impilata.
 

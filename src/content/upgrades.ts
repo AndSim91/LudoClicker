@@ -1,7 +1,7 @@
 import type { UpgradeId, UpgradeLevels } from "../game/types";
 
 export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialMultiplier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "instructorBranchCapacity" | "instructorStudentCapacity";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialMultiplier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -85,6 +85,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "order-secretariat", category: "organization", title: "Segreteria dell'Ordine", description: "Notifiche, quote e pratiche seguono una procedura stabile.", effectLabel: "+20% entrate per livello", effect: "incomeMultiplier", effectPerLevel: 0.2, baseCost: 1000, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 75 },
   { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+30% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.3, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
 
+  { id: "extra-form", category: "instructors", title: "Extra Forma", description: "Aumenta per tutti gli atleti della scuola il numero di Forme apprendibili nello stesso anno formativo.", effectLabel: "+1 Forma apprendibile per atleta e anno", effect: "annualFormCapacity", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 50 },
   { id: "instructor-versatility", category: "instructors", title: "Polivalenza didattica", description: "Permette agli Istruttori di apprendere rami d'arma oltre le proprie preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 6_000, costGrowth: 2, maxLevel: 2, requiredHistoricMembers: 50 },
   { id: "tiamat-instructor", category: "instructors", title: "Istruttore stile Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1.8, maxLevel: 5, requiredHistoricMembers: 75 },
 ];
@@ -136,6 +137,7 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   "registration-form": 2_500,
   "order-secretariat": 4_000,
   "multi-site-coordination": 6_500,
+  "extra-form": 5_000,
   "instructor-versatility": 6_000,
   "tiamat-instructor": 10_000,
 };

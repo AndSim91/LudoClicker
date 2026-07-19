@@ -17,6 +17,7 @@ export interface FormStudent {
   formBranchPreferences?: FormBranch[];
   training?: FormTraining;
   lastFormTrainingYear?: number;
+  formTrainingYearCount?: number;
 }
 
 export interface FormDefinition {
@@ -123,11 +124,12 @@ export function canTrainForm(
   currentYear?: number,
   maximumBranches = student.formBranchPreferences?.length ?? 1,
   restrictToPreferences = true,
+  annualTrainingLimit = 1,
 ) {
   if (student.forms.includes(definition.id) || student.training) return false;
   if (
     typeof currentYear === "number" &&
-    student.lastFormTrainingYear === currentYear
+    getFormTrainingCount(student, currentYear) >= annualTrainingLimit
   ) return false;
   if (definition.prerequisite && !student.forms.includes(definition.prerequisite)) return false;
   if (
@@ -158,10 +160,23 @@ export function getAvailableForms(
   currentYear?: number,
   maximumBranches?: number,
   restrictToPreferences?: boolean,
+  annualTrainingLimit?: number,
 ) {
   return FORM_DEFINITIONS.filter((definition) =>
-    canTrainForm(student, definition, currentYear, maximumBranches, restrictToPreferences)
+    canTrainForm(
+      student,
+      definition,
+      currentYear,
+      maximumBranches,
+      restrictToPreferences,
+      annualTrainingLimit,
+    )
   );
+}
+
+export function getFormTrainingCount(student: FormStudent, trainingYear: number): number {
+  if (student.lastFormTrainingYear !== trainingYear) return 0;
+  return Math.max(1, student.formTrainingYearCount ?? 1);
 }
 
 function latestBranchBonus(forms: FormId[], branch: FormBranch): number {

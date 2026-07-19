@@ -2,12 +2,13 @@ import {
   canTrainForm,
   getCollaboratorProductivity,
   getFormDefinition,
+  getFormTrainingCount,
   getStudentFormCost,
   isInstructorForm,
 } from "../content/forms";
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { getUpgradeEffectTotal } from "../content/upgrades";
-import { getSchoolYear, isSummerBreak } from "./calendar";
+import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import {
   addLegendaryEncounters,
@@ -285,7 +286,8 @@ export function processAutomaticTeaching(
     !collaborator.training
   );
   if (!hasAutomaticInstructor) return state;
-  const currentYear = getSchoolYear(state.school.currentMonth);
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualTrainingLimit = 1 + (state.upgrades["extra-form"] ?? 0);
   let nextState = state;
 
   const collaboratorContactIds = new Set(
@@ -296,12 +298,12 @@ export function processAutomaticTeaching(
       contact.status === "enrolled" &&
       !collaboratorContactIds.has(contact.id) &&
       !contact.training &&
-      contact.lastFormTrainingYear !== currentYear
+      getFormTrainingCount(contact, trainingYear) < annualTrainingLimit
     ),
     ...state.collaborators.filter((collaborator) =>
       collaborator.assignment !== "instructor" &&
       !collaborator.training &&
-      collaborator.lastFormTrainingYear !== currentYear
+      getFormTrainingCount(collaborator, trainingYear) < annualTrainingLimit
     ),
   ].sort((left, right) =>
     left.forms.length - right.forms.length ||
@@ -337,7 +339,14 @@ export function processAutomaticTeaching(
       );
       return Boolean(
         definition &&
-        canTrainForm(student, definition, currentYear) &&
+        canTrainForm(
+          student,
+          definition,
+          trainingYear,
+          undefined,
+          undefined,
+          annualTrainingLimit,
+        ) &&
         instructor &&
         nextState.school.euros >= getStudentFormCost(definition.cost)
       );

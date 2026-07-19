@@ -13,6 +13,7 @@ const GAME_MONTH_NAMES = [
   "Dicembre",
 ] as const;
 const SCHOOL_YEAR_START_MONTH = 9;
+const FORM_TRAINING_YEAR_START_MONTH = 7;
 
 export function getGameMonthName(currentMonth: number): string {
   const normalizedMonth = Math.max(1, Math.floor(currentMonth));
@@ -29,6 +30,14 @@ export function getSchoolYear(currentMonth: number): number {
   return Math.max(
     1,
     Math.floor((normalizedMonth - SCHOOL_YEAR_START_MONTH) / GAME_MONTH_NAMES.length) + 1,
+  );
+}
+
+export function getFormTrainingYear(currentMonth: number): number {
+  const normalizedMonth = Math.max(1, Math.floor(currentMonth));
+  return Math.max(
+    1,
+    Math.floor((normalizedMonth - FORM_TRAINING_YEAR_START_MONTH) / GAME_MONTH_NAMES.length) + 1,
   );
 }
 

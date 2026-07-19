@@ -90,6 +90,7 @@ export function isValidGameState(value: unknown): value is GameState {
     ) &&
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["tiamat-instructor"] === "number" &&
+    typeof state.upgrades?.["extra-form"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     typeof state.statistics?.automatedCharacters === "number" &&

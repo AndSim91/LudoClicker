@@ -39,6 +39,8 @@ function prepareLegendaryProgressForNewSchool(
       joinedAt: collaborator?.joinedAt ?? contact.acquiredAt,
       lastFormTrainingYear:
         collaborator?.lastFormTrainingYear ?? contact.lastFormTrainingYear,
+      formTrainingYearCount:
+        collaborator?.formTrainingYearCount ?? contact.formTrainingYearCount,
     };
   }
   return {

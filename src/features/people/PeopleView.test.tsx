@@ -469,7 +469,7 @@ describe("PeopleView", () => {
     render(<PeopleView
       state={{
         ...initial,
-        school: { ...initial.school, activeMembers: 1, currentMonth: 7, euros: 400 },
+        school: { ...initial.school, activeMembers: 1, currentMonth: 19, euros: 400 },
         contacts: initial.contacts.map((contact) => contact.id === student.id ? student : contact),
         collaborators: [instructor],
         unlocks: { ...initial.unlocks, collaborators: true, forms: true },

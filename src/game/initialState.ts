@@ -29,6 +29,7 @@ export function createInitialState(
 
   return {
     version: GAME_CONFIG.version,
+    saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
     createdAt: now,
     lastSavedAt: now,
     randomSeed: initialContacts.nextSeed,

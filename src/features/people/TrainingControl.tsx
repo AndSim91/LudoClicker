@@ -3,6 +3,7 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   getAvailableForms,
   getFormDefinition,
+  getFormTrainingCount,
   getInstructorConversionCost,
   getInstructorFormCost,
   getInstructorQualificationCost,
@@ -11,7 +12,7 @@ import {
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
-import { getSchoolYear, isSummerBreak } from "../../game/calendar";
+import { getFormTrainingYear, isSummerBreak } from "../../game/calendar";
 import { useProvidedGameTime } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
@@ -240,8 +241,10 @@ export function TrainingControl({
   const providedNow = useProvidedGameTime();
   const liveNow = useSharedTrainingTime(Boolean(student.training) && providedNow === null);
   const now = providedNow ?? liveNow;
-  const currentYear = getSchoolYear(state.school.currentMonth);
-  const hasTrainedThisYear = student.lastFormTrainingYear === currentYear;
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualTrainingLimit = 1 + (state.upgrades["extra-form"] ?? 0);
+  const annualTrainingAvailable =
+    getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
   const collaborator = collaboratorsById.get(personId);
 
   if (!state.unlocks.forms) {
@@ -292,13 +295,13 @@ export function TrainingControl({
     const branch = getFormDefinition(formId)?.branch;
     return branch ? [branch] : [];
   }) ?? []);
-  const annualTrainingAvailable = summerInstructorTraining || !hasTrainedThisYear;
   const newForms = annualTrainingAvailable
     ? getAvailableForms(
         student,
-        summerInstructorTraining ? undefined : currentYear,
+        trainingYear,
         branchCapacity,
         collaborator?.assignment !== "instructor",
+        annualTrainingLimit,
       ).filter((definition) =>
         !definition.branch ||
         learnedBranches.size > 0 ||
@@ -313,7 +316,7 @@ export function TrainingControl({
 
   if (academicallyAvailable.length === 0) {
     if (!annualTrainingAvailable) {
-      return <div className="training-locked"><strong>Hai già completato la formazione quest'anno</strong></div>;
+      return <div className="training-locked"><strong>Hai raggiunto il limite di Forme per quest'anno</strong></div>;
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
     return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;

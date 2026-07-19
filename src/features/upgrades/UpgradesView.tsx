@@ -49,7 +49,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
-      return `Polivalenza ${state.upgrades["instructor-versatility"]}/2`;
+      return `Forme annue ${1 + state.upgrades["extra-form"]}/2 · Polivalenza ${state.upgrades["instructor-versatility"]}/2`;
   }
 }
 

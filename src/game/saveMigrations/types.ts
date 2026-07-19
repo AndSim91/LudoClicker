@@ -2,6 +2,7 @@ import type { GameState } from "../types";
 
 export type MigratableState = Partial<GameState> & {
   version?: number;
+  saveCompatibilityVersion?: number;
   statistics?: Partial<GameState["statistics"]>;
   upgrades?: Record<string, number> & { speedLevel?: number };
 };

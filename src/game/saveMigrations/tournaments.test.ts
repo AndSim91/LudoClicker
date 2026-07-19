@@ -15,7 +15,7 @@ describe("tournament save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(37);
+    expect(migrated.version).toBe(38);
     expect(migrated.contacts[0].arenaBase).toBeGreaterThanOrEqual(1);
     expect(migrated.contacts[0].styleBase).toBeGreaterThanOrEqual(1);
     expect(migrated.contacts[0].tournamentExperience).toBe(0);

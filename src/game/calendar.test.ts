@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getFormTrainingYear,
   getSchoolYear,
   getSchoolYearStartMonth,
   isSchoolYearDepartureMonth,
@@ -22,6 +23,15 @@ describe("school calendar", () => {
     expect(isSummerBreak(8)).toBe(true);
     expect(isSummerBreak(9)).toBe(false);
     expect(isSummerBreak(19)).toBe(true);
+  });
+
+  it("renews Form slots in July and keeps them assigned to the upcoming school year", () => {
+    expect(getFormTrainingYear(18)).toBe(1);
+    expect(getFormTrainingYear(19)).toBe(2);
+    expect(getFormTrainingYear(20)).toBe(2);
+    expect(getFormTrainingYear(21)).toBe(2);
+    expect(getFormTrainingYear(30)).toBe(2);
+    expect(getFormTrainingYear(31)).toBe(3);
   });
 
   it("marks the June to July transition as the departure period", () => {
