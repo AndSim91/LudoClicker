@@ -1,7 +1,9 @@
 import { TOURNAMENT_DEFINITIONS, TOURNAMENT_LEVEL_ORDER } from "../../content/tournaments";
 import { GAME_CONFIG } from "../../game/config";
 import { getTournamentSeason } from "../../game/tournamentFlow";
-import { getEligibleSchoolContacts } from "../../game/tournamentSimulation";
+import {
+  getEligibleSchoolContactsFromRoster,
+} from "../../game/tournamentSimulation";
 import type {
   GameState,
   TournamentLevel,
@@ -52,22 +54,32 @@ export interface UpcomingTournament {
 }
 
 export function findUpcomingTournament(state: GameState): UpcomingTournament | undefined {
+  return findUpcomingTournamentFromSchedule(state.school, state.tournaments);
+}
+
+export function findUpcomingTournamentFromSchedule(
+  school: Pick<GameState["school"], "currentMonth" | "nextFeeAt">,
+  tournaments: Pick<
+    GameState["tournaments"],
+    "qualification" | "results" | "missedTournaments"
+  >,
+): UpcomingTournament | undefined {
   for (let offset = 0; offset < 24; offset += 1) {
-    const absoluteMonth = state.school.currentMonth + offset;
+    const absoluteMonth = school.currentMonth + offset;
     const calendarMonth = getCalendarMonth(absoluteMonth);
     const level = TOURNAMENT_LEVEL_ORDER.find(
       (candidate) => TOURNAMENT_DEFINITIONS[candidate].calendarMonth === calendarMonth,
     );
     if (!level) continue;
     const season = getTournamentSeason(level, absoluteMonth);
-    const qualification = state.tournaments.qualification;
+    const qualification = tournaments.qualification;
     const canEnter = level === "school" || (
       qualification?.level === level && qualification.season === season
     );
     if (!canEnter) continue;
-    const alreadyProcessed = state.tournaments.results.some(
+    const alreadyProcessed = tournaments.results.some(
       (result) => result.level === level && result.season === season,
-    ) || state.tournaments.missedTournaments.some(
+    ) || tournaments.missedTournaments.some(
       (entry) => entry.level === level && entry.season === season,
     );
     if (alreadyProcessed) continue;
@@ -75,7 +87,7 @@ export function findUpcomingTournament(state: GameState): UpcomingTournament | u
       level,
       season,
       absoluteMonth,
-      occursAt: state.school.nextFeeAt + offset * GAME_CONFIG.gameMonthMs,
+      occursAt: school.nextFeeAt + offset * GAME_CONFIG.gameMonthMs,
     };
   }
   return undefined;
@@ -85,13 +97,26 @@ export function getUpcomingDelegationContactIds(
   state: GameState,
   upcoming = findUpcomingTournament(state),
 ): string[] {
+  return getUpcomingDelegationContactIdsFromRoster(
+    state.contacts,
+    state.collaborators,
+    state.tournaments.qualification,
+    upcoming,
+  );
+}
+
+export function getUpcomingDelegationContactIdsFromRoster(
+  contacts: GameState["contacts"],
+  collaborators: GameState["collaborators"],
+  qualification: GameState["tournaments"]["qualification"],
+  upcoming: UpcomingTournament | undefined,
+): string[] {
   if (!upcoming) return [];
   if (upcoming.level === "school") {
-    return getEligibleSchoolContacts(state)
+    return getEligibleSchoolContactsFromRoster(contacts, collaborators)
       .slice(0, GAME_CONFIG.tournamentMinimumMembers)
       .map((contact) => contact.id);
   }
-  const qualification = state.tournaments.qualification;
   if (qualification?.level !== upcoming.level || qualification.season !== upcoming.season) return [];
   return qualification.contactIds;
 }

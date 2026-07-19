@@ -38,6 +38,21 @@ function createCompletedTournamentState() {
 }
 
 describe("TournamentsView", () => {
+  it("virtualizes a large athlete roster", () => {
+    const state = createStateWithForms(160);
+    const { container } = render(<TournamentsView state={state} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Atleti" }));
+
+    const renderedRows = container.querySelectorAll(
+      ".athlete-table tbody tr:not(.virtual-table-spacer)",
+    );
+    expect(renderedRows.length).toBeGreaterThan(0);
+    expect(renderedRows.length).toBeLessThan(40);
+    expect(view.getByText("160 atleti")).toBeVisible();
+  });
+
   it("shows the tournament overview and hides official stats before Course X", () => {
     const state = createStateWithForms();
     const { container } = render(<TournamentsView state={state} />);

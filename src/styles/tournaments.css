@@ -614,6 +614,25 @@
   overflow-x: auto;
 }
 
+.virtualized-athlete-table {
+  max-height: min(65vh, 610px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.virtualized-athlete-table .athlete-table thead {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  background: var(--surface);
+}
+
+.athlete-table .virtual-table-spacer > td {
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
 .athlete-table,
 .group-table {
   width: 100%;
@@ -1219,6 +1238,16 @@
 .tournament-hall > div {
   display: flex;
   flex-direction: column;
+}
+
+.tournament-hall > .virtualized-tournament-hall {
+  max-height: min(65vh, 638px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.tournament-hall .virtual-list-spacer {
+  flex: 0 0 auto;
 }
 
 .tournament-hall article {

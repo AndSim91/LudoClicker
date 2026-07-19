@@ -26,6 +26,7 @@ import { getMemberAnnualDepartureChance } from "./formulas";
 import { roundCurrency } from "./economy";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
+import { getPeopleInTraining } from "./runtimeIndexes";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -251,6 +252,14 @@ export function refreshInstructorTrainingDurations(
   state: GameState,
   now: number,
 ): GameState {
+  const hasInstructorQualificationInProgress = getPeopleInTraining(
+    state.collaborators,
+  ).some((collaborator) =>
+    collaborator.assignment === "instructor" &&
+    isInstructorForm(collaborator.training!.formId)
+  );
+  if (!hasInstructorQualificationInProgress) return state;
+
   let changed = false;
   const collaborators = state.collaborators.map((collaborator) => {
     const training = collaborator.training;

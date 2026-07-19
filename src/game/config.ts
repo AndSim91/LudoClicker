@@ -72,4 +72,6 @@ export const GAME_CONFIG = {
   recentEmailsLimit: 500,
   recentCompletedTrialsLimit: 500,
   recentCompletedEventsLimit: 200,
+  recentTournamentResultsLimit: 24,
+  recentMissedTournamentsLimit: 48,
 } as const;

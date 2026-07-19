@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
@@ -20,6 +20,8 @@ import { useCurrentTime } from "../../shared/useCurrentTime";
 import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
+
+const COLLABORATORS_PER_PAGE = 25;
 
 function getTimedProgress(startedAt: number, completesAt: number, now: number): number {
   const duration = completesAt - startedAt;
@@ -140,6 +142,7 @@ export function CollaboratorList({
   onToggleAgonistCourses?: (enabled: boolean) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
+  const [requestedPage, setRequestedPage] = useState(0);
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
@@ -151,6 +154,15 @@ export function CollaboratorList({
   const providedNow = useProvidedGameTime();
   const liveNow = useCurrentTime(hasTimedAutomation && providedNow === null, 100);
   const now = providedNow ?? liveNow;
+  const pageCount = Math.max(
+    1,
+    Math.ceil(state.collaborators.length / COLLABORATORS_PER_PAGE),
+  );
+  const page = Math.min(requestedPage, pageCount - 1);
+  const visibleCollaborators = state.collaborators.slice(
+    page * COLLABORATORS_PER_PAGE,
+    (page + 1) * COLLABORATORS_PER_PAGE,
+  );
 
   return (
     <section className="collaborator-list" aria-label="Collaboratori delle Onde">
@@ -175,7 +187,7 @@ export function CollaboratorList({
           <strong>Nessun collaboratore disponibile</strong>
           <span>Gli Ultra Rari diventano collaboratori dopo il Corso Y; i Leggendari lo sono dall'iscrizione.</span>
         </div>
-      ) : state.collaborators.map((collaborator) => {
+      ) : visibleCollaborators.map((collaborator) => {
         const contact = contactsById.get(collaborator.contactId);
         const bonusSummary = getCollaboratorBonusSummary(collaborator);
         return (
@@ -270,6 +282,25 @@ export function CollaboratorList({
           </article>
         );
       })}
+      {pageCount > 1 ? (
+        <nav className="list-pagination" aria-label="Pagine collaboratori">
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => setRequestedPage((current) => Math.max(0, current - 1))}
+          >
+            Precedente
+          </button>
+          <span>Pagina {page + 1} di {pageCount}</span>
+          <button
+            type="button"
+            disabled={page === pageCount - 1}
+            onClick={() => setRequestedPage((current) => Math.min(pageCount - 1, current + 1))}
+          >
+            Successiva
+          </button>
+        </nav>
+      ) : null}
     </section>
   );
 }

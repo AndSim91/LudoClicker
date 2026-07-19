@@ -7,6 +7,7 @@ import {
   getContactsAwaitingEmailCount,
   getCompletedTrialsByStartDay,
   getCompletedTrialsByMostRecent,
+  getCollaboratorsByContactId,
   getContactsById,
   getInstructorTeachingCounts,
   getScheduledTrials,
@@ -16,6 +17,14 @@ import { resolveTrial } from "./trialFlow";
 import type { Contact, ScheduledTrial } from "./types";
 
 describe("runtime indexes", () => {
+  it("indexes collaborators by contact once per source array", () => {
+    const collaborators = createInitialState(1_000).collaborators;
+    const index = getCollaboratorsByContactId(collaborators);
+
+    expect(getCollaboratorsByContactId(collaborators)).toBe(index);
+    expect(getCollaboratorsByContactId([...collaborators])).not.toBe(index);
+  });
+
   it("reuses derived collections until their source identity changes", () => {
     const trials: ScheduledTrial[] = [
       { id: "old", contactId: "a", startsAt: 1, resolvesAt: 2, resultSeed: 1, status: "completed" },

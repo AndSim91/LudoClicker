@@ -18,6 +18,7 @@ import {
   hasCompletedFormOne,
 } from "./athleteStats";
 import { nextRandom } from "./random";
+import { getCollaboratorsByContactId } from "./runtimeIndexes";
 import type {
   Contact,
   GameState,
@@ -37,6 +38,8 @@ const MINIMUM_ASSAULT_CHANCE = 0.001;
 const MAXIMUM_ASSAULT_CHANCE = 0.999;
 const SCHOOL_MAX_GROUP_COUNT = 8;
 const PREFERRED_MAX_GROUP_SIZE = 8;
+export const SCHOOL_TOURNAMENT_FIELD_SIZE =
+  SCHOOL_MAX_GROUP_COUNT * PREFERRED_MAX_GROUP_SIZE;
 const GROUP_QUALIFIER_LIMIT = 4;
 const MAX_KNOCKOUT_PARTICIPANTS = SCHOOL_MAX_GROUP_COUNT * GROUP_QUALIFIER_LIMIT;
 
@@ -576,13 +579,21 @@ function findDefeatedSecretLegendaries(
   return [...defeated];
 }
 
-export function getEligibleSchoolContacts(state: GameState): Contact[] {
-  return state.contacts.filter((contact) =>
+export function getEligibleSchoolContactsFromRoster(
+  contacts: GameState["contacts"],
+  collaborators: GameState["collaborators"],
+): Contact[] {
+  const collaboratorsByContactId = getCollaboratorsByContactId(collaborators);
+  return contacts.filter((contact) =>
     contact.status === "enrolled" && hasCompletedFormOne(
-      state.collaborators.find((collaborator) => collaborator.contactId === contact.id)?.forms ??
+      collaboratorsByContactId.get(contact.id)?.forms ??
         contact.forms,
     )
   );
+}
+
+export function getEligibleSchoolContacts(state: GameState): Contact[] {
+  return getEligibleSchoolContactsFromRoster(state.contacts, state.collaborators);
 }
 
 export function simulateTournament(
@@ -593,8 +604,14 @@ export function simulateTournament(
   ownedContacts: readonly Contact[],
 ): SimulatedTournament {
   const cursor: RandomCursor = { seed: state.randomSeed };
-  const owned = createOwnedParticipants(state, ownedContacts, cursor);
   const definition = TOURNAMENT_DEFINITIONS[level];
+  // A school can eventually contain thousands of athletes. Keeping the local
+  // field at eight groups of eight prevents round-robin matches and save size
+  // from growing quadratically while preserving the historical roster order.
+  const entrants = level === "school"
+    ? ownedContacts.slice(0, SCHOOL_TOURNAMENT_FIELD_SIZE)
+    : ownedContacts;
+  const owned = createOwnedParticipants(state, entrants, cursor);
   const npcCount = level === "school" ? 0 : Math.max(0, definition.fieldSize! - owned.length);
   const npcs = level === "school"
     ? []

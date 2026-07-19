@@ -1,5 +1,7 @@
 /* Collaborators: keep identity, operational profile, and actions distinct. */
 .collaborator-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
   --collaborator-accent: var(--blue-600);
   display: grid;
   grid-template-columns: minmax(230px, .95fr) minmax(300px, 1.25fr) minmax(250px, .95fr);

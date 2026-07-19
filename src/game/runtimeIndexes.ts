@@ -26,6 +26,10 @@ const availableContactCountCache = new WeakMap<Contact[], number>();
 const contactsAwaitingEmailCountCache = new WeakMap<Contact[], number>();
 const enrolledLegendaryContactsCache = new WeakMap<Contact[], Contact[]>();
 const collaboratorsByIdCache = new WeakMap<Collaborator[], ReadonlyMap<string, Collaborator>>();
+const collaboratorsByContactIdCache = new WeakMap<
+  Collaborator[],
+  ReadonlyMap<string, Collaborator>
+>();
 const instructorLoadsCache = new WeakMap<
   Contact[],
   WeakMap<Collaborator[], ReadonlyMap<string, number>>
@@ -178,6 +182,18 @@ export function getCollaboratorsById(
   if (cached) return cached;
   const index = new Map(collaborators.map((collaborator) => [collaborator.id, collaborator]));
   collaboratorsByIdCache.set(collaborators, index);
+  return index;
+}
+
+export function getCollaboratorsByContactId(
+  collaborators: Collaborator[],
+): ReadonlyMap<string, Collaborator> {
+  const cached = collaboratorsByContactIdCache.get(collaborators);
+  if (cached) return cached;
+  const index = new Map(
+    collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
+  );
+  collaboratorsByContactIdCache.set(collaborators, index);
   return index;
 }
 

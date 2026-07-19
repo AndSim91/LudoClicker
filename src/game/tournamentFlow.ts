@@ -22,6 +22,33 @@ const LEVEL_BY_CALENDAR_MONTH: Partial<Record<number, TournamentLevel>> = {
   11: "champions",
 };
 
+export function compactTournamentHistory(state: GameState): GameState {
+  const results = state.tournaments.results.slice(
+    -GAME_CONFIG.recentTournamentResultsLimit,
+  );
+  const missedTournaments = state.tournaments.missedTournaments.slice(
+    -GAME_CONFIG.recentMissedTournamentsLimit,
+  );
+  const skippedSeasons = state.tournaments.skippedSeasons.slice(
+    -GAME_CONFIG.recentMissedTournamentsLimit,
+  );
+  if (
+    results.length === state.tournaments.results.length &&
+    missedTournaments.length === state.tournaments.missedTournaments.length &&
+    skippedSeasons.length === state.tournaments.skippedSeasons.length
+  ) return state;
+
+  return {
+    ...state,
+    tournaments: {
+      ...state.tournaments,
+      results,
+      missedTournaments,
+      skippedSeasons,
+    },
+  };
+}
+
 function getCalendarMonth(absoluteMonth: number): number {
   return ((Math.max(1, absoluteMonth) - 1) % 12) + 1;
 }
@@ -132,7 +159,9 @@ function recordMissedTournament(
   const label = TOURNAMENT_DEFINITIONS[level].label;
   const skippedSeasons = reason === "insufficient-members" &&
     !state.tournaments.skippedSeasons.includes(season)
-    ? [...state.tournaments.skippedSeasons, season]
+    ? [...state.tournaments.skippedSeasons, season].slice(
+        -GAME_CONFIG.recentMissedTournamentsLimit,
+      )
     : state.tournaments.skippedSeasons;
   return addMessage({
     ...state,
@@ -141,7 +170,10 @@ function recordMissedTournament(
       qualification: undefined,
       immuneContactIds: [],
       skippedSeasons,
-      missedTournaments: [...state.tournaments.missedTournaments, { level, season, reason }],
+      missedTournaments: [
+        ...state.tournaments.missedTournaments,
+        { level, season, reason },
+      ].slice(-GAME_CONFIG.recentMissedTournamentsLimit),
     },
   }, now, `${label} non disputato`, reason === "insufficient-members"
     ? `La scuola non ha raggiunto ${GAME_CONFIG.tournamentMinimumMembers} iscritti attivi con Forma 1. La stagione competitiva termina qui.`
@@ -174,7 +206,9 @@ function applyTournamentResult(
       : contact),
     tournaments: {
       ...state.tournaments,
-      results: [...state.tournaments.results, result],
+      results: [...state.tournaments.results, result].slice(
+        -GAME_CONFIG.recentTournamentResultsLimit,
+      ),
       qualification: nextLevel && ownedQualifierIds.length > 0
         ? {
             level: nextLevel as Exclude<TournamentLevel, "school">,

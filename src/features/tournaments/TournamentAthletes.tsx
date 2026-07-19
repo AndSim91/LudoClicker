@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import {
@@ -7,18 +7,21 @@ import {
   getNumericFormCount,
   hasCompletedCourseX,
 } from "../../game/athleteStats";
-import { getEligibleSchoolContacts } from "../../game/tournamentSimulation";
+import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import type { Contact, GameState } from "../../game/types";
 import { getOfficialStatColor } from "../../shared/officialStatColor";
+import { useVirtualRows } from "../../shared/useVirtualRows";
 import {
-  findUpcomingTournament,
+  findUpcomingTournamentFromSchedule,
   formatTournamentCountdown,
-  getUpcomingDelegationContactIds,
+  getUpcomingDelegationContactIdsFromRoster,
 } from "./tournamentPresentation";
 
 type QualificationFilter = "all" | "qualified" | "available";
 type DisciplineFilter = "all" | "arena" | "style";
 type AthleteSort = "preparation" | "name" | "experience" | "form";
+
+const ATHLETE_ROW_HEIGHT = 48;
 
 interface AthleteRow {
   contact: Contact;
@@ -55,13 +58,28 @@ export function TournamentAthletes({
   initialQualificationFilter = "all",
 }: TournamentAthletesProps) {
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [qualificationFilter, setQualificationFilter] = useState<QualificationFilter>(initialQualificationFilter);
   const [disciplineFilter, setDisciplineFilter] = useState<DisciplineFilter>("all");
   const [formFilter, setFormFilter] = useState("all");
   const [sortBy, setSortBy] = useState<AthleteSort>("preparation");
-  const eligible = useMemo(() => getEligibleSchoolContacts(state), [state]);
-  const upcoming = findUpcomingTournament(state);
-  const delegationContactIds = getUpcomingDelegationContactIds(state, upcoming);
+  const eligible = useMemo(
+    () => getEligibleSchoolContactsFromRoster(state.contacts, state.collaborators),
+    [state.contacts, state.collaborators],
+  );
+  const upcoming = useMemo(
+    () => findUpcomingTournamentFromSchedule(state.school, state.tournaments),
+    [state.school, state.tournaments],
+  );
+  const delegationContactIds = useMemo(
+    () => getUpcomingDelegationContactIdsFromRoster(
+      state.contacts,
+      state.collaborators,
+      state.tournaments.qualification,
+      upcoming,
+    ),
+    [state.contacts, state.collaborators, state.tournaments.qualification, upcoming],
+  );
   const qualifiedIds = useMemo(
     () => new Set(delegationContactIds),
     [delegationContactIds],
@@ -118,7 +136,7 @@ export function TournamentAthletes({
     [rows],
   );
   const filteredRows = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase("it-IT");
+    const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
     return rows.filter((row) => {
       if (normalizedSearch && !athleteName(row).toLocaleLowerCase("it-IT").includes(normalizedSearch)) return false;
       if (qualificationFilter === "qualified" && !row.qualified) return false;
@@ -133,8 +151,16 @@ export function TournamentAthletes({
       if (sortBy === "form") return b.formCount - a.formCount;
       return (b.arena + b.style) - (a.arena + a.style);
     });
-  }, [disciplineFilter, formFilter, qualificationFilter, rows, search, sortBy]);
-  const qualifiedRows = rows.filter((row) => row.qualified);
+  }, [deferredSearch, disciplineFilter, formFilter, qualificationFilter, rows, sortBy]);
+  const qualifiedRows = useMemo(
+    () => rows.filter((row) => row.qualified),
+    [rows],
+  );
+  const virtualRows = useVirtualRows({
+    count: filteredRows.length,
+    rowHeight: ATHLETE_ROW_HEIGHT,
+  });
+  const renderedRows = filteredRows.slice(virtualRows.startIndex, virtualRows.endIndex);
   const resetFilters = () => {
     setSearch("");
     setQualificationFilter("all");
@@ -163,13 +189,21 @@ export function TournamentAthletes({
           <button type="button" onClick={resetFilters}>Azzera filtri</button>
         </div>
 
-        <div className="athlete-table-wrap">
+        <div
+          className="athlete-table-wrap virtualized-athlete-table"
+          onScroll={virtualRows.onScroll}
+        >
           <table className="athlete-table">
             <thead><tr><th>#</th><th>Atleta</th><th>Stato</th><th>Forma</th><th>Arena</th><th>Stile</th><th>Esperienza</th><th>Qualificazione</th><th>Podi</th></tr></thead>
             <tbody>
-              {filteredRows.map((row, index) => (
+              {virtualRows.paddingTop > 0 ? (
+                <tr className="virtual-table-spacer" aria-hidden="true">
+                  <td colSpan={9} style={{ height: virtualRows.paddingTop }} />
+                </tr>
+              ) : null}
+              {renderedRows.map((row, index) => (
                 <tr key={row.contact.id} className={row.qualified ? "is-qualified" : ""}>
-                  <td>{index + 1}</td>
+                  <td>{virtualRows.startIndex + index + 1}</td>
                   <th scope="row" className={row.contact.secretLegendaryId ? "secret-legendary" : ""}>{athleteName(row)}</th>
                   <td><span className={row.qualified ? "athlete-status qualified" : "athlete-status"}><i aria-hidden="true">{row.qualified ? "✓" : "–"}</i>{row.qualified ? "Qualificato" : "Disponibile"}</span></td>
                   <td>Forma {row.formCount}</td>
@@ -180,6 +214,11 @@ export function TournamentAthletes({
                   <td>{row.podiums}</td>
                 </tr>
               ))}
+              {virtualRows.paddingBottom > 0 ? (
+                <tr className="virtual-table-spacer" aria-hidden="true">
+                  <td colSpan={9} style={{ height: virtualRows.paddingBottom }} />
+                </tr>
+              ) : null}
             </tbody>
           </table>
           {filteredRows.length === 0 ? <p className="empty-tournaments">Nessun atleta corrisponde ai filtri selezionati.</p> : null}

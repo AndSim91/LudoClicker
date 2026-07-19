@@ -46,6 +46,18 @@ function newestIds<T>(
   return retained;
 }
 
+function hasMoreThan<T>(
+  values: T[],
+  limit: number,
+  predicate: (value: T) => boolean,
+): boolean {
+  let count = 0;
+  for (const value of values) {
+    if (predicate(value) && ++count > limit) return true;
+  }
+  return false;
+}
+
 function emailWritingMs(email: CampaignEmail): number {
   return typeof email.sentAt === "number"
     ? Math.max(0, email.sentAt - email.createdAt)
@@ -73,13 +85,26 @@ export function getCurrentSchoolContactCount(state: GameState): number {
 }
 
 export function compactGameHistory(state: GameState): GameState {
-  const shouldCompactEmails = state.emails.length > GAME_CONFIG.recentEmailsLimit;
-  const shouldCompactTrials =
-    state.scheduledTrials.length > GAME_CONFIG.recentCompletedTrialsLimit;
-  const shouldCompactEvents =
-    state.acquisitionEvents.length > GAME_CONFIG.recentCompletedEventsLimit;
-  const shouldCompactContacts =
-    state.contacts.length > GAME_CONFIG.recentTerminalContactsLimit;
+  const shouldCompactEmails = hasMoreThan(
+    state.emails,
+    GAME_CONFIG.recentEmailsLimit,
+    (email) => email.status === "lost" || email.status === "trialBooked",
+  );
+  const shouldCompactTrials = hasMoreThan(
+    state.scheduledTrials,
+    GAME_CONFIG.recentCompletedTrialsLimit,
+    (trial) => trial.status === "completed",
+  );
+  const shouldCompactEvents = hasMoreThan(
+    state.acquisitionEvents,
+    GAME_CONFIG.recentCompletedEventsLimit,
+    (event) => event.status === "completed",
+  );
+  const shouldCompactContacts = hasMoreThan(
+    state.contacts,
+    GAME_CONFIG.recentTerminalContactsLimit,
+    (contact) => contact.status === "lost" || contact.status === "departed",
+  );
   if (!shouldCompactEmails && !shouldCompactTrials && !shouldCompactEvents && !shouldCompactContacts) {
     return state;
   }

@@ -281,6 +281,43 @@ describe("PeopleView", () => {
     expect(onAssign).toHaveBeenCalledWith("collaborator-1", "writing");
   });
 
+  it("keeps collaborator cards bounded and paginates the full roster", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = Array.from({ length: 30 }, (_, index) => ({
+      id: `collaborator-${index}`,
+      contactId: initial.contacts[index % initial.contacts.length].id,
+      displayName: `Collaboratore Scalabile ${index}`,
+      joinedAt: 1_000 + index,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      assignment: null,
+      rarity: "ultra-rare" as const,
+    }));
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators,
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
+    expect(roster.querySelectorAll(".collaborator-row")).toHaveLength(25);
+    expect(within(roster).getByText("Collaboratore Scalabile 0")).toBeVisible();
+    expect(within(roster).getByText("Pagina 1 di 2")).toBeVisible();
+
+    fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
+
+    expect(roster.querySelectorAll(".collaborator-row")).toHaveLength(5);
+    expect(within(roster).getByText("Collaboratore Scalabile 29")).toBeVisible();
+    expect(within(roster).queryByText("Collaboratore Scalabile 0")).not.toBeInTheDocument();
+  });
+
   it("shows Arena Tecnica toggle and every collaborator automation progress", () => {
     const initial = createInitialState(1_000);
     const assignments = ["writing", "events", "lessons", "social", "equipment"] as const;

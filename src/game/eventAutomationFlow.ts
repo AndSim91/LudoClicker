@@ -1,6 +1,7 @@
 import { ACQUISITION_EVENTS } from "../content/events";
 import { getEventFunnelOutcome } from "./formulas";
 import { startAcquisitionEvent } from "./eventFlow";
+import { getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type { GameState } from "./types";
 
 const EVENT_PREFERENCE = ACQUISITION_EVENTS
@@ -14,17 +15,22 @@ function expectedContacts(state: GameState, definition: (typeof ACQUISITION_EVEN
 
 export function processAutomaticEvents(state: GameState, now: number): GameState {
   let nextState = state;
+  const busyCollaboratorIds = new Set(
+    getRunningAcquisitionEvents(state.acquisitionEvents).flatMap((event) =>
+      event.collaboratorId ? [event.collaboratorId] : []
+    ),
+  );
   const idleCollaborators = state.collaborators.filter((collaborator) =>
     collaborator.assignment === "events" &&
-    !state.acquisitionEvents.some((event) =>
-      event.status === "running" && event.collaboratorId === collaborator.id
-    )
+    !busyCollaboratorIds.has(collaborator.id)
+  );
+  if (idleCollaborators.length === 0) return state;
+
+  const candidates = [...EVENT_PREFERENCE].sort((left, right) =>
+    expectedContacts(state, right) - expectedContacts(state, left)
   );
 
   for (const collaborator of idleCollaborators) {
-    const candidates = [...EVENT_PREFERENCE].sort((left, right) =>
-      expectedContacts(nextState, right) - expectedContacts(nextState, left)
-    );
     let started = false;
     for (const definition of candidates) {
       const attempted = startAcquisitionEvent(

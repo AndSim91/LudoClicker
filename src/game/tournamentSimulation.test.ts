@@ -8,7 +8,11 @@ import {
 } from "./athleteStats";
 import { createInitialState, gameReducer } from "./engine";
 import { departMembers } from "./membershipFlow";
-import { getEligibleSchoolContacts, simulateTournament } from "./tournamentSimulation";
+import {
+  getEligibleSchoolContacts,
+  SCHOOL_TOURNAMENT_FIELD_SIZE,
+  simulateTournament,
+} from "./tournamentSimulation";
 
 function createTournamentSchool(memberCount = 6) {
   const initial = createInitialState(1_000, "Test Manager");
@@ -60,8 +64,8 @@ describe("tournament simulation", () => {
     )).toBe(true);
   });
 
-  it("caps a large school tournament at eight groups and 32 knockout athletes", () => {
-    const state = createTournamentSchool(66);
+  it("keeps a large school tournament bounded to eight groups of eight", () => {
+    const state = createTournamentSchool(160);
     const eligible = getEligibleSchoolContacts(state);
     const simulation = simulateTournament(state, "school", 1, 181_000, eligible);
     const standingsByGroup = new Map<number, typeof simulation.result.groupStandings>();
@@ -82,8 +86,9 @@ describe("tournament simulation", () => {
     );
 
     expect(standingsByGroup.size).toBe(8);
-    expect([...standingsByGroup.values()].map((group) => group.length).sort((a, b) => a - b)).toEqual([
-      8, 8, 8, 8, 8, 8, 9, 9,
+    expect(simulation.result.participants).toHaveLength(SCHOOL_TOURNAMENT_FIELD_SIZE);
+    expect([...standingsByGroup.values()].map((group) => group.length)).toEqual([
+      8, 8, 8, 8, 8, 8, 8, 8,
     ]);
     expect([...standingsByGroup.values()].every((group) =>
       group.filter((standing) => standing.qualified).length === 4
@@ -91,6 +96,7 @@ describe("tournament simulation", () => {
     expect(qualifiedIds.size).toBe(32);
     expect(roundOf32Ids).toEqual(qualifiedIds);
     expect(simulation.result.matches.some((match) => match.stage === "round64")).toBe(false);
+    expect(simulation.result.matches.length).toBeLessThanOrEqual(256);
   });
 
   it("is deterministic from the saved seed", () => {

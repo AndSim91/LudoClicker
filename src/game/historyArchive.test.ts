@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ACHIEVEMENTS } from "../content/achievements";
+import { addAdminMembers } from "./adminFlow";
+import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import {
   compactGameHistory,
@@ -73,6 +75,14 @@ function createTerminalHistory(count: number, now: number) {
   return { contacts, emails, trials, events };
 }
 
+describe("history compaction thresholds", () => {
+  it("does not rebuild a large roster containing only active members", () => {
+    const active = addAdminMembers(createInitialState(1_000, "Manager"), 2_000);
+
+    expect(compactGameHistory(active)).toBe(active);
+  });
+});
+
 describe("bounded game history", () => {
   it("compacts terminal records atomically while preserving reports", () => {
     const now = 1_000;
@@ -135,7 +145,7 @@ describe("bounded game history", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(38);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.emails).toHaveLength(500);
     expect(migrated.historyArchive.emails.count).toBe(300);
     expect(migrate(migrated)).toBe(migrated);

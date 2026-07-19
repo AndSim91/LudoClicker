@@ -6,6 +6,7 @@ import { STORAGE_KEYS } from "../shared/storageKeys";
 import { isSaveCompatible, isValidGameState } from "./saveValidation";
 import { migrate as migrateSave } from "./saveMigrations";
 import { GAME_CONFIG } from "./config";
+import { compactTournamentHistory } from "./tournamentFlow";
 import type { GameState } from "./types";
 
 const SAVE_KEY = STORAGE_KEYS.gameSave;
@@ -67,7 +68,9 @@ export function loadGame(now = Date.now()): GameState {
     if (primary.incompatible || backup.incompatible) discardStoredSaves();
     return createInitialState(now);
   }
-  const reconciled = recruitEnrolledLegendaryCollaborators(saved, now);
+  const reconciled = compactTournamentHistory(
+    recruitEnrolledLegendaryCollaborators(saved, now),
+  );
   return simulateOfflineProgress(reconciled, now).state;
 }
 

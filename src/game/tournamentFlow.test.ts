@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
-import { scheduleSecretLegendaryTrial } from "./tournamentFlow";
+import {
+  compactTournamentHistory,
+  scheduleSecretLegendaryTrial,
+} from "./tournamentFlow";
 import { getLegendaryEnrollmentChance, resolveTrial } from "./trialFlow";
+import type { TournamentResult } from "./types";
 
 function findSeed(predicate: (roll: number) => boolean): number {
   for (let seed = 1; seed < 100_000; seed += 1) {
@@ -11,6 +15,52 @@ function findSeed(predicate: (roll: number) => boolean): number {
   }
   throw new Error("No deterministic seed found");
 }
+
+describe("tournament history retention", () => {
+  it("keeps detailed results and missed seasons bounded", () => {
+    const initial = createInitialState(1_000, "Manager");
+    const result = (index: number): TournamentResult => ({
+      id: `result-${index}`,
+      level: "school",
+      season: index,
+      completedAt: index,
+      participants: [],
+      matches: [],
+      groupStandings: [],
+      arenaRanking: [],
+      styleRanking: [],
+      arenaPodium: [],
+      stylePodium: [],
+      qualifiers: [],
+      rewards: [],
+      secretLegendaryDefeatedIds: [],
+    });
+    const expanded = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        results: Array.from({ length: 30 }, (_, index) => result(index)),
+        missedTournaments: Array.from({ length: 60 }, (_, season) => ({
+          level: "school" as const,
+          season,
+          reason: "insufficient-members" as const,
+        })),
+        skippedSeasons: Array.from({ length: 60 }, (_, index) => index),
+      },
+    };
+
+    const compacted = compactTournamentHistory(expanded);
+
+    expect(compacted.tournaments.results).toHaveLength(
+      GAME_CONFIG.recentTournamentResultsLimit,
+    );
+    expect(compacted.tournaments.results[0].id).toBe("result-6");
+    expect(compacted.tournaments.missedTournaments).toHaveLength(
+      GAME_CONFIG.recentMissedTournamentsLimit,
+    );
+    expect(compacted.tournaments.skippedSeasons[0]).toBe(12);
+  });
+});
 
 describe("secret legendary tournament trials", () => {
   it("starts Marco Palena's automatic 150-second trial without an email", () => {

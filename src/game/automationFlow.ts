@@ -350,34 +350,40 @@ export function processAutomaticTeaching(
       !collaborator.training &&
       getFormTrainingCount(collaborator, trainingYear) < annualTrainingLimit
     ),
-  ].sort((left, right) => {
-    const favoriteContactIds = new Set(
-      state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
-    );
+  ];
+  const favoriteContactIds = new Set(
+    state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
+  );
+  const automaticFormOrder: FormId[] = [
+    "form-1",
+    "course-x",
+    "form-2",
+    "course-y",
+    "form-3-long",
+    "form-3-staff",
+    "form-3-double",
+    "form-4-long",
+    "form-4-staff",
+    "form-4-double",
+    "form-5-long",
+    "form-5-staff",
+    "form-5-double",
+    "form-6",
+    "form-7",
+  ];
+  const automaticFormPriority = new Map(
+    automaticFormOrder.map((formId, index) => [formId, index]),
+  );
+  students.sort((left, right) => {
     const isFavoriteMember = (student: typeof left) =>
       "acquiredAt" in student
         ? student.favorite === true
         : favoriteContactIds.has(student.contactId);
     const priority = (student: typeof left) => {
       const candidate = getAutomaticFormCandidates(student)[0];
-      const order: FormId[] = [
-        "form-1",
-        "course-x",
-        "form-2",
-        "course-y",
-        "form-3-long",
-        "form-3-staff",
-        "form-3-double",
-        "form-4-long",
-        "form-4-staff",
-        "form-4-double",
-        "form-5-long",
-        "form-5-staff",
-        "form-5-double",
-        "form-6",
-        "form-7",
-      ];
-      return candidate ? order.indexOf(candidate) : Number.MAX_SAFE_INTEGER;
+      return candidate
+        ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
+        : Number.MAX_SAFE_INTEGER;
     };
     return Number(isFavoriteMember(right)) - Number(isFavoriteMember(left)) ||
       priority(left) - priority(right) ||

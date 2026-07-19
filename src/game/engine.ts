@@ -38,6 +38,7 @@ import {
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
 import { resolveTrial } from "./trialFlow";
+import { compactTournamentHistory } from "./tournamentFlow";
 import {
   getPendingEmailOutcomes,
   getPeopleInTraining,
@@ -181,9 +182,12 @@ function compactChangedHistory(
     previous.statistics.trialsCompleted !== next.statistics.trialsCompleted ||
     previous.statistics.eventsCompleted !== next.statistics.eventsCompleted;
   const adminRemovedMembers = action.type === "ADMIN_ADD_MEMBERS" && action.amount < 0;
-  return terminalHistoryChanged || adminRemovedMembers || action.type === "REPLACE_STATE"
+  const compacted = terminalHistoryChanged || adminRemovedMembers || action.type === "REPLACE_STATE"
     ? compactGameHistory(next)
     : next;
+  return action.type === "REPLACE_STATE"
+    ? compactTournamentHistory(compacted)
+    : compacted;
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
