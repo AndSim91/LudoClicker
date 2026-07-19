@@ -7,6 +7,75 @@ import { PeopleView } from "./PeopleView";
 afterEach(() => cleanup());
 
 describe("PeopleView", () => {
+  it("keeps the roster DOM bounded and lets users reach every member", () => {
+    const initial = createInitialState(1_000);
+    const seed = initial.contacts[0];
+    const contacts = Array.from({ length: 160 }, (_, index) => ({
+      ...seed,
+      id: `member-${index}`,
+      firstName: `Membro ${index}`,
+      lastName: "Scalabile",
+      email: `member-${index}@example.test`,
+      status: "enrolled" as const,
+    }));
+
+    render(<PeopleView
+      state={{
+        ...initial,
+        contacts,
+        school: { ...initial.school, activeMembers: contacts.length },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    const roster = screen.getByRole("region", { name: "Iscritti" });
+    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(75);
+    expect(within(roster).getByText("Membro 0 Scalabile")).toBeVisible();
+    expect(within(roster).getByText("Pagina 1 di 3")).toBeVisible();
+
+    fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
+
+    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(75);
+    expect(within(roster).queryByText("Membro 0 Scalabile")).not.toBeInTheDocument();
+    expect(within(roster).getByText("Membro 75 Scalabile")).toBeVisible();
+
+    fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
+
+    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(10);
+    expect(within(roster).getByText("Membro 159 Scalabile")).toBeVisible();
+  });
+
+  it("uses one shared progress clock for multiple simultaneous trainings", () => {
+    const initial = createInitialState(1_000);
+    const contacts = initial.contacts.slice(0, 2).map((contact, index) => ({
+      ...contact,
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 100_000,
+      },
+      id: `training-member-${index}`,
+    }));
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    render(<PeopleView
+      state={{
+        ...initial,
+        contacts,
+        school: { ...initial.school, activeMembers: contacts.length },
+        unlocks: { ...initial.unlocks, forms: true },
+      }}
+      onAssign={() => undefined}
+      onStartTraining={() => undefined}
+    />);
+
+    expect(screen.getAllByRole("progressbar")).toHaveLength(2);
+    expect(intervalSpy).toHaveBeenCalledTimes(1);
+    intervalSpy.mockRestore();
+  });
+
   it("shows only active members and excludes people who left the school", () => {
     const initial = createInitialState(1_000);
     const contacts = initial.contacts.map((contact, index) => ({

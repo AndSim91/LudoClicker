@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
-import type { InboxMessage } from "../../game/types";
+import type { CampaignEmail, InboxMessage } from "../../game/types";
 import { MessageList } from "./MessageList";
 
 afterEach(cleanup);
@@ -24,6 +24,52 @@ function message(
 }
 
 describe("MessageList", () => {
+  it("keeps sent-mail rendering bounded and provides access to the full archive", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const contact = initial.contacts[0];
+    const emails: CampaignEmail[] = Array.from({ length: 160 }, (_, index) => ({
+      id: `sent-${index}`,
+      contactId: contact.id,
+      templateId: "default",
+      subject: `Archivio ${index}`,
+      body: "Corpo",
+      revealedCharacters: 5,
+      createdAt: index,
+      sentAt: index + 1,
+      presentationLevel: 0,
+      status: "sent",
+    }));
+    const onSelectSentEmail = vi.fn();
+
+    render(
+      <MessageList
+        state={{ ...initial, emails }}
+        folder="sent"
+        selectedMessageId={null}
+        selectedSentEmailId={null}
+        onSelectMessage={vi.fn()}
+        onSelectSentEmail={onSelectSentEmail}
+      />,
+    );
+
+    const archive = screen.getByRole("region", { name: "Posta inviata" });
+    expect(archive.querySelectorAll(".sent-row")).toHaveLength(75);
+    expect(screen.getByText("Archivio 159")).toBeVisible();
+    expect(screen.getByText("Pagina 1 di 3")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Successiva" }));
+
+    expect(archive.querySelectorAll(".sent-row")).toHaveLength(75);
+    expect(screen.queryByText("Archivio 159")).not.toBeInTheDocument();
+    expect(screen.getByText("Archivio 84")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Successiva" }));
+
+    expect(archive.querySelectorAll(".sent-row")).toHaveLength(10);
+    fireEvent.click(screen.getByRole("button", { name: /Archivio 0/ }));
+    expect(onSelectSentEmail).toHaveBeenCalledWith("sent-0");
+  });
+
   it("keeps operational mail focused and moves secondary notifications to Other", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const state = {

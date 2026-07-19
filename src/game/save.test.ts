@@ -1,12 +1,66 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState, gameReducer } from "./engine";
 import { exportGame, importGame, loadGame, resetGame, saveGame } from "./save";
 import { GAME_CONFIG } from "./config";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { getEmailBuildLength } from "../content/emailBuild";
 import { EMAIL_TEMPLATES } from "../content/emailTemplates";
+import { createSaveScheduler } from "./saveScheduler";
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("local save", () => {
+  it("persists the initial reconciled state once", () => {
+    const state = createInitialState(1_000);
+    const persist = vi.fn(() => true);
+    const scheduler = createSaveScheduler(state, persist);
+
+    expect(scheduler.flush(2_000)).toBe(true);
+    expect(scheduler.flush(3_000)).toBe(false);
+    expect(persist).toHaveBeenCalledOnce();
+  });
+
+  it("coalesces multiple dirty revisions into one interval save", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    let state = createInitialState(1_000);
+    const persist = vi.fn(() => true);
+    const scheduler = createSaveScheduler(state, persist);
+    const stop = scheduler.start(GAME_CONFIG.saveIntervalMs);
+
+    state = { ...state, school: { ...state.school, euros: 1 } };
+    scheduler.markDirty(state);
+    state = { ...state, school: { ...state.school, euros: 2 } };
+    scheduler.markDirty(state);
+
+    vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs);
+
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(persist).toHaveBeenCalledWith(state, 20_000);
+    expect(scheduler.isDirty()).toBe(false);
+
+    vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs);
+    expect(persist).toHaveBeenCalledTimes(1);
+    stop();
+  });
+
+  it("keeps a failed revision dirty so a later flush can retry it", () => {
+    const state = createInitialState(1_000);
+    const persist = vi.fn()
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    const scheduler = createSaveScheduler(state, persist);
+    scheduler.markDirty(state);
+
+    expect(scheduler.flush(2_000)).toBe(false);
+    expect(scheduler.isDirty()).toBe(true);
+    expect(scheduler.flush(3_000)).toBe(true);
+    expect(scheduler.isDirty()).toBe(false);
+    expect(persist).toHaveBeenCalledTimes(2);
+  });
+
   it("round-trips the game state", () => {
     const state = createInitialState(1_000);
     saveGame({ ...state, school: { ...state.school, euros: 42 } }, 2_000);

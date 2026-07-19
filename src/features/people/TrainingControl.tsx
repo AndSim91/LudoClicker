@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   getAvailableForms,
@@ -18,7 +18,6 @@ import {
 } from "../../game/selectors";
 import type { Collaborator, FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
-import { useCurrentTime } from "../../shared/useCurrentTime";
 import { TrainingFormPreview } from "./PersonPresentation";
 
 type InstructorTeachingEntry = {
@@ -27,15 +26,59 @@ type InstructorTeachingEntry = {
   training: NonNullable<FormStudent["training"]>;
 };
 
+const trainingClockListeners = new Set<() => void>();
+let trainingClockNow = Date.now();
+let trainingClockTimer: number | undefined;
+
+function subscribeToTrainingClock(listener: () => void) {
+  trainingClockListeners.add(listener);
+  if (trainingClockTimer === undefined) {
+    trainingClockNow = Date.now();
+    listener();
+    trainingClockTimer = window.setInterval(() => {
+      trainingClockNow = Date.now();
+      trainingClockListeners.forEach((notify) => notify());
+    }, 100);
+  }
+  return () => {
+    trainingClockListeners.delete(listener);
+    if (trainingClockListeners.size === 0 && trainingClockTimer !== undefined) {
+      window.clearInterval(trainingClockTimer);
+      trainingClockTimer = undefined;
+    }
+  };
+}
+
+function subscribeToStaticClock() {
+  return () => undefined;
+}
+
+function getTrainingClockSnapshot() {
+  return trainingClockNow;
+}
+
+function getStaticClockSnapshot() {
+  return 0;
+}
+
+function useSharedTrainingTime(active: boolean): number {
+  return useSyncExternalStore(
+    active ? subscribeToTrainingClock : subscribeToStaticClock,
+    active ? getTrainingClockSnapshot : getStaticClockSnapshot,
+    getStaticClockSnapshot,
+  );
+}
+
 function getInstructorTeachingStudents(
-  state: GameState,
+  contacts: GameState["contacts"],
+  collaborators: GameState["collaborators"],
   instructorId: string,
 ): InstructorTeachingEntry[] {
   return [
-    ...state.contacts.flatMap((contact) => contact.training?.instructorId === instructorId
+    ...contacts.flatMap((contact) => contact.training?.instructorId === instructorId
       ? [{ id: contact.id, displayName: `${contact.firstName} ${contact.lastName}`, training: contact.training }]
       : []),
-    ...state.collaborators.flatMap((collaborator) =>
+    ...collaborators.flatMap((collaborator) =>
       collaborator.training?.instructorId === instructorId
         ? [{ id: collaborator.id, displayName: collaborator.displayName, training: collaborator.training }]
         : []),
@@ -108,16 +151,25 @@ export function InstructorPanel({
   state,
   onStartTraining,
   onToggle,
+  collaboratorsById,
 }: {
   collaborator: Collaborator;
   state: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggle?: (collaboratorId: string, enabled: boolean) => void;
+  collaboratorsById: Map<string, Collaborator>;
 }) {
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
-  const teaching = getInstructorTeachingStudents(state, collaborator.id);
-  const now = useCurrentTime(teaching.length > 0, 1_000);
+  const teaching = useMemo(
+    () => getInstructorTeachingStudents(
+      state.contacts,
+      state.collaborators,
+      collaborator.id,
+    ),
+    [state.contacts, state.collaborators, collaborator.id],
+  );
+  const now = useSharedTrainingTime(teaching.length > 0);
   const enabled = collaborator.autoTeachingEnabled !== false;
 
   return (
@@ -140,6 +192,7 @@ export function InstructorPanel({
         displayName={collaborator.displayName}
         student={collaborator}
         state={state}
+        collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
       />
     </div>
@@ -152,18 +205,20 @@ export function TrainingControl({
   student,
   state,
   onStartTraining,
+  collaboratorsById,
 }: {
   personId: string;
   displayName: string;
   student: FormStudent;
   state: GameState;
+  collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
-  const now = useCurrentTime(Boolean(student.training), 100);
+  const now = useSharedTrainingTime(Boolean(student.training));
   const currentYear = getSchoolYear(state.school.currentMonth);
   const hasTrainedThisYear = student.lastFormTrainingYear === currentYear;
-  const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
+  const collaborator = collaboratorsById.get(personId);
 
   if (!state.unlocks.forms) {
     return <div className="training-locked"><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
@@ -171,7 +226,7 @@ export function TrainingControl({
   if (student.training) {
     const definition = getFormDefinition(student.training.formId);
     const instructor = student.training.instructorId
-      ? state.collaborators.find((candidate) => candidate.id === student.training?.instructorId)
+      ? collaboratorsById.get(student.training.instructorId)
       : undefined;
     const progress = getTrainingProgress(student.training, now);
     return (

@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   SHORT_GOALS,
   getShortGoalProgress,
   getShortGoalReward,
 } from "../../content/shortGoals";
-import { selectDayTrials } from "../../game/selectors";
 import type { GameState, ScheduledTrial } from "../../game/types";
 import { formatLongDate } from "../../shared/formatters";
 import { Icon } from "../common/Icon";
@@ -39,11 +38,6 @@ const phaseLabels: Record<AppointmentPhase, string> = {
   lost: "Non iscritto",
 };
 
-function getContactName(state: GameState, id: string) {
-  const contact = state.contacts.find((candidate) => candidate.id === id);
-  return contact ? `${contact.firstName} ${contact.lastName}` : "Nuovo contatto";
-}
-
 function ShortGoalCard({ state }: { state: GameState }) {
   const definition = SHORT_GOALS[state.shortGoal.definitionId];
   const progress = Math.min(state.shortGoal.target, getShortGoalProgress(state));
@@ -71,10 +65,30 @@ function ShortGoalCard({ state }: { state: GameState }) {
 
 export function DayPanel({ state }: { state: GameState }) {
   const [now, setNow] = useState(() => Date.now());
-  const trials = selectDayTrials(state, now).filter(
-    (trial) =>
-      trial.status === "scheduled" ||
-      now < trial.resolvesAt + COMPLETED_TRIAL_VISIBILITY_MS,
+  const contactsById = useMemo(
+    () => new Map(state.contacts.map((contact) => [contact.id, contact])),
+    [state.contacts],
+  );
+  const currentDate = new Date(now);
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+  const currentDay = currentDate.getDate();
+  const dayTrials = useMemo(() => {
+    const startOfDay = new Date(currentYear, currentMonth, currentDay).getTime();
+    const endOfDay = new Date(currentYear, currentMonth, currentDay + 1).getTime();
+    return state.scheduledTrials
+      .filter(
+        (trial) =>
+          trial.status === "scheduled" ||
+          (trial.startsAt >= startOfDay && trial.startsAt < endOfDay),
+      )
+      .slice()
+      .sort((left, right) => left.startsAt - right.startsAt);
+  }, [state.scheduledTrials, currentYear, currentMonth, currentDay]);
+  const trials = dayTrials.filter(
+      (trial) =>
+        trial.status === "scheduled" ||
+        now < trial.resolvesAt + COMPLETED_TRIAL_VISIBILITY_MS,
   );
   const hasLiveNotifications = trials.some(
     (trial) =>
@@ -96,12 +110,14 @@ export function DayPanel({ state }: { state: GameState }) {
       {trials.length === 0 ? (
         <div className="day-empty"><Icon name="clock" /><strong>Nessuna prova in calendario</strong><span>Gli appuntamenti confermati compariranno qui.</span></div>
       ) : trials.map((trial) => {
-        const contact = state.contacts.find((candidate) => candidate.id === trial.contactId);
+        const contact = contactsById.get(trial.contactId);
         const phase = getAppointmentPhase(trial, contact?.status, now);
         const timing = phase === "scheduled"
           ? formatCountdown(trial.startsAt - now)
           : phaseLabels[phase];
-        const contactName = getContactName(state, trial.contactId);
+        const contactName = contact
+          ? `${contact.firstName} ${contact.lastName}`
+          : "Nuovo contatto";
         const expiryProgress = trial.status === "completed"
           ? Math.max(
               0,

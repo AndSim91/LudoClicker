@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
@@ -9,7 +9,7 @@ import {
   getEffectiveDamagedSwords,
   getEquipmentMaintenanceCost,
 } from "../../game/equipment";
-import { selectAvailableEventMembers } from "../../game/selectors";
+import { selectAvailableContacts, selectAvailableEventMembers } from "../../game/selectors";
 import type { AcquisitionEvent, GameState } from "../../game/types";
 import { formatCurrency, formatTime } from "../../shared/formatters";
 
@@ -35,6 +35,8 @@ function getEventProgress(event: AcquisitionEvent, now: number) {
   return Math.min(100, Math.max(0, Math.round(((now - event.startedAt) / duration) * 100)));
 }
 
+const EVENT_HISTORY_PAGE_SIZE = 100;
+
 export function EventsView({
   state,
   onStart,
@@ -47,7 +49,25 @@ export function EventsView({
   onBuyOfficialSword?: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
-  const runningEvents = state.acquisitionEvents.filter((event) => event.status === "running");
+  const [historyPage, setHistoryPage] = useState(0);
+  const runningEvents = useMemo(
+    () => state.acquisitionEvents.filter((event) => event.status === "running"),
+    [state.acquisitionEvents],
+  );
+  const runningByDefinition = useMemo(
+    () => new Map(runningEvents.map((event) => [event.definitionId, event])),
+    [runningEvents],
+  );
+  const completedEvents = useMemo(
+    () => state.acquisitionEvents.filter((event) => event.status === "completed").reverse(),
+    [state.acquisitionEvents],
+  );
+  const historyPageCount = Math.max(1, Math.ceil(completedEvents.length / EVENT_HISTORY_PAGE_SIZE));
+  const effectiveHistoryPage = Math.min(historyPage, historyPageCount - 1);
+  const visibleHistory = completedEvents.slice(
+    effectiveHistoryPage * EVENT_HISTORY_PAGE_SIZE,
+    (effectiveHistoryPage + 1) * EVENT_HISTORY_PAGE_SIZE,
+  );
   const availableMembers = selectAvailableEventMembers(state);
   const availableSwords = getAvailableSwords(state.equipment);
   const damagedSwords = getEffectiveDamagedSwords(state.equipment);
@@ -84,7 +104,7 @@ export function EventsView({
   return (
     <main className="overview-view events-view">
       <header><Icon name="flag" /><div><h1>Eventi</h1><p>Attività esterne per incontrare persone e raccogliere nuovi contatti</p></div></header>
-      <div className="event-notice"><Icon name="contact" /><div><strong>{state.contacts.filter((contact) => contact.status === "available").length} contatti disponibili</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
+      <div className="event-notice"><Icon name="contact" /><div><strong>{selectAvailableContacts(state)} contatti disponibili</strong><span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span></div></div>
       <section className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
         <div><Icon name="people" /><span><strong>{availableMembers}/{state.school.activeMembers} iscritti disponibili</strong><small>Gli iscritti impegnati tornano disponibili a fine evento.</small></span></div>
         <div className="event-equipment-summary">
@@ -115,9 +135,7 @@ export function EventsView({
       <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {state.school.peakActiveMembers}</strong><small>Equivalente al numero massimo di iscritti storici della scuola</small><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} iscritti massimi.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
       <section className="event-list">
         {visibleEvents.map((definition) => {
-          const matching = state.acquisitionEvents.find(
-            (event) => event.definitionId === definition.id && event.status === "running",
-          );
+          const matching = runningByDefinition.get(definition.id);
           const cooldown = Math.max(0, state.activities.nextSparringAt - now);
           const onCooldown = definition.id === "park-sparring" && cooldown > 0;
           const lacksFunds = state.school.euros < definition.cost;
@@ -161,8 +179,18 @@ export function EventsView({
           );
         })}
       </section>
-      {state.acquisitionEvents.some((event) => event.status === "completed") ? (
-        <section className="event-history"><h2>Attività completate</h2>{state.acquisitionEvents.filter((event) => event.status === "completed").slice().reverse().map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{quantityLabel(event.peopleMet ?? 0, "persona", "persone")} · {quantityLabel(event.demonstrationsGiven ?? 0, "prova", "prove")} · {quantityLabel(event.contactReward ?? 0, "contatto", "contatti")}</small></span><time>{formatTime(event.resolvesAt)}</time></div>)}</section>
+      {completedEvents.length > 0 ? (
+        <section className="event-history">
+          <h2>Attività completate</h2>
+          {visibleHistory.map((event) => <div key={event.id}><Icon name="flag" /><span><strong>{event.title}</strong><small>{quantityLabel(event.peopleMet ?? 0, "persona", "persone")} · {quantityLabel(event.demonstrationsGiven ?? 0, "prova", "prove")} · {quantityLabel(event.contactReward ?? 0, "contatto", "contatti")}</small></span><time>{formatTime(event.resolvesAt)}</time></div>)}
+          {historyPageCount > 1 ? (
+            <nav className="list-pagination" aria-label="Pagine attività completate">
+              <button type="button" disabled={effectiveHistoryPage === 0} onClick={() => setHistoryPage((page) => Math.max(0, page - 1))}>Più recenti</button>
+              <span>Pagina {effectiveHistoryPage + 1} di {historyPageCount}</span>
+              <button type="button" disabled={effectiveHistoryPage >= historyPageCount - 1} onClick={() => setHistoryPage((page) => Math.min(historyPageCount - 1, page + 1))}>Meno recenti</button>
+            </nav>
+          ) : null}
+        </section>
       ) : null}
     </main>
   );

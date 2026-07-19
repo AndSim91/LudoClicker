@@ -11,6 +11,7 @@ import {
 } from "./stateUpdates";
 import type { GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
 import { hasSocialMemberRequirement } from "./unlocks";
+import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
 
 export function getLegendaryEnrollmentChance(
   state: GameState,
@@ -29,21 +30,17 @@ export function resolveTrial(
   if (trial.status !== "scheduled") return state;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
   const tutorialGuarantee = state.school.historicMembers === 0;
-  const trialContact = state.contacts.find((contact) => contact.id === trial.contactId);
+  const contactsById = getContactsById(state.contacts);
+  const trialContact = contactsById.get(trial.contactId);
   const specialProfileId = trialContact?.specialProfileId;
   const alreadyEnrolledLegendary = specialProfileId
     ? state.legendaryCollaborators.enrolledProfileIds.includes(specialProfileId)
     : false;
   const guaranteedInitialSchoolAndrea =
     specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schools.length === 0;
-  const recentTrials = state.scheduledTrials
-    .filter((candidate) => candidate.status === "completed")
-    .slice()
-    .sort((a, b) => b.resolvesAt - a.resolvesAt);
+  const recentTrials = getCompletedTrialsByMostRecent(state.scheduledTrials);
   const trialLossStreak = recentTrials.findIndex((candidate) =>
-    state.contacts.some(
-      (contact) => contact.id === candidate.contactId && contact.status === "enrolled",
-    ),
+    contactsById.get(candidate.contactId)?.status === "enrolled",
   );
   const protectedEnrollment =
     (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >=
@@ -144,7 +141,7 @@ export function resolveTrial(
       "system",
     );
   }
-  const enrolledContact = nextState.contacts.find((contact) => contact.id === trial.contactId);
+  const enrolledContact = getContactsById(nextState.contacts).get(trial.contactId);
   return enrolledContact?.rarity === "legendary"
     ? recruitCollaborator(nextState, enrolledContact, now)
     : nextState;

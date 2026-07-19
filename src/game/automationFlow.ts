@@ -3,6 +3,7 @@ import {
   getCollaboratorProductivity,
   getFormDefinition,
   getStudentFormCost,
+  isInstructorForm,
 } from "../content/forms";
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { getUpgradeEffectTotal } from "../content/upgrades";
@@ -14,10 +15,8 @@ import {
 } from "./contacts";
 import { synchronizeEquipmentAvailability } from "./equipment";
 import { nextRandom } from "./random";
-import {
-  selectActiveEmail,
-  selectAvailableInstructor,
-} from "./selectors";
+import { selectActiveEmail, selectInstructorCapacity } from "./selectors";
+import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./trainingFlow";
 import type {
   CollaboratorAssignment,
@@ -52,6 +51,45 @@ export interface AutomationFlowDependencies {
   startFormTraining: (state: GameState, personId: string, formId: FormId, now: number) => GameState;
 }
 
+interface AutomaticTeachingNoOp {
+  currentMonth: number;
+  euros: number;
+  upgrades: GameState["upgrades"];
+  formsUnlocked: boolean;
+}
+
+const automaticTeachingNoOpCache = new WeakMap<
+  GameState["contacts"],
+  WeakMap<GameState["collaborators"], AutomaticTeachingNoOp>
+>();
+
+function wasAutomaticTeachingNoOp(state: GameState): boolean {
+  const cached = automaticTeachingNoOpCache
+    .get(state.contacts)
+    ?.get(state.collaborators);
+  return Boolean(
+    cached &&
+    cached.currentMonth === state.school.currentMonth &&
+    cached.euros === state.school.euros &&
+    cached.upgrades === state.upgrades &&
+    cached.formsUnlocked === state.unlocks.forms
+  );
+}
+
+function rememberAutomaticTeachingNoOp(state: GameState): void {
+  let byCollaborators = automaticTeachingNoOpCache.get(state.contacts);
+  if (!byCollaborators) {
+    byCollaborators = new WeakMap();
+    automaticTeachingNoOpCache.set(state.contacts, byCollaborators);
+  }
+  byCollaborators.set(state.collaborators, {
+    currentMonth: state.school.currentMonth,
+    euros: state.school.euros,
+    upgrades: state.upgrades,
+    formsUnlocked: state.unlocks.forms,
+  });
+}
+
 export function processAutomation(
   state: GameState,
   now: number,
@@ -61,13 +99,18 @@ export function processAutomation(
   const elapsedMs = Math.min(1_000, Math.max(0, now - state.automation.lastProcessedAt));
   if (elapsedMs <= 0) return state;
 
-  const productivityFor = (assignment: CollaboratorAssignment) =>
-    state.collaborators
-      .filter((collaborator) => collaborator.assignment === assignment)
-      .reduce((total, collaborator) => total + getCollaboratorProductivity(collaborator), 0);
-  const writingProductivity = productivityFor("writing");
-  const socialProductivity = state.unlocks.social ? productivityFor("social") : 0;
-  const equipmentProductivity = productivityFor("equipment");
+  let writingProductivity = 0;
+  let socialProductivity = 0;
+  let equipmentProductivity = 0;
+  for (const collaborator of state.collaborators) {
+    if (collaborator.assignment === "writing") {
+      writingProductivity += getCollaboratorProductivity(collaborator);
+    } else if (collaborator.assignment === "social" && state.unlocks.social) {
+      socialProductivity += getCollaboratorProductivity(collaborator);
+    } else if (collaborator.assignment === "equipment") {
+      equipmentProductivity += getCollaboratorProductivity(collaborator);
+    }
+  }
   const wasWriting = selectActiveEmail(state)?.status === "writing";
   const automationMultiplier =
     1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
@@ -235,50 +278,80 @@ export function processAutomaticTeaching(
   startFormTraining: AutomationFlowDependencies["startFormTraining"],
 ): GameState {
   if (isSummerBreak(state.school.currentMonth)) return state;
+  if (wasAutomaticTeachingNoOp(state)) return state;
   const currentYear = getSchoolYear(state.school.currentMonth);
   let nextState = state;
 
-  while (true) {
-    const collaboratorContactIds = new Set(
-      nextState.collaborators.map((collaborator) => collaborator.contactId),
-    );
-    const students = [
-      ...nextState.contacts.filter((contact) =>
-        contact.status === "enrolled" &&
-        !collaboratorContactIds.has(contact.id) &&
-        !contact.training &&
-        contact.lastFormTrainingYear !== currentYear
-      ),
-      ...nextState.collaborators.filter((collaborator) =>
-        collaborator.assignment !== "instructor" &&
-        !collaborator.training &&
-        collaborator.lastFormTrainingYear !== currentYear
-      ),
-    ].sort((left, right) =>
-      left.forms.length - right.forms.length ||
-      ("acquiredAt" in left ? left.acquiredAt : left.joinedAt) -
-        ("acquiredAt" in right ? right.acquiredAt : right.joinedAt)
-    );
-
-    let started = false;
-    for (const student of students) {
-      const candidate = getAutomaticFormCandidates(student).find((formId) => {
-        const definition = getFormDefinition(formId);
-        return Boolean(
-          definition &&
-          canTrainForm(student, definition, currentYear) &&
-          selectAvailableInstructor(nextState, formId, student.id) &&
-          nextState.school.euros >= getStudentFormCost(definition.cost),
-        );
-      });
-      if (!candidate) continue;
-      const beforeEuros = nextState.school.euros;
-      nextState = startFormTraining(nextState, student.id, candidate, now);
-      if (nextState.school.euros < beforeEuros) {
-        started = true;
-        break;
-      }
+  const collaboratorContactIds = new Set(
+    state.collaborators.map((collaborator) => collaborator.contactId),
+  );
+  const students = [
+    ...state.contacts.filter((contact) =>
+      contact.status === "enrolled" &&
+      !collaboratorContactIds.has(contact.id) &&
+      !contact.training &&
+      contact.lastFormTrainingYear !== currentYear
+    ),
+    ...state.collaborators.filter((collaborator) =>
+      collaborator.assignment !== "instructor" &&
+      !collaborator.training &&
+      collaborator.lastFormTrainingYear !== currentYear
+    ),
+  ].sort((left, right) =>
+    left.forms.length - right.forms.length ||
+    ("acquiredAt" in left ? left.acquiredAt : left.joinedAt) -
+      ("acquiredAt" in right ? right.acquiredAt : right.joinedAt)
+  );
+  const capacity = selectInstructorCapacity(state);
+  const instructorLoads = new Map(
+    getInstructorTeachingCounts(state.contacts, state.collaborators),
+  );
+  const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
+  for (const instructor of state.collaborators) {
+    if (
+      instructor.assignment !== "instructor" ||
+      instructor.autoTeachingEnabled === false ||
+      instructor.training
+    ) continue;
+    for (const formId of instructor.forms) {
+      if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
+      const instructors = instructorsByForm.get(formId);
+      if (instructors) instructors.push(instructor);
+      else instructorsByForm.set(formId, [instructor]);
     }
-    if (!started) return nextState;
   }
+
+  for (const student of students) {
+    const candidate = getAutomaticFormCandidates(student).find((formId) => {
+      const definition = getFormDefinition(formId);
+      const instructor = instructorsByForm.get(formId)?.find(
+        (available) =>
+          available.id !== student.id &&
+          (instructorLoads.get(available.id) ?? 0) < capacity,
+      );
+      return Boolean(
+        definition &&
+        canTrainForm(student, definition, currentYear) &&
+        instructor &&
+        nextState.school.euros >= getStudentFormCost(definition.cost)
+      );
+    });
+    if (!candidate) continue;
+
+    const beforeEuros = nextState.school.euros;
+    const startedState = startFormTraining(nextState, student.id, candidate, now);
+    nextState = startedState;
+    if (nextState.school.euros >= beforeEuros) continue;
+
+    const startedStudent = "acquiredAt" in student
+      ? nextState.contacts.find((contact) => contact.id === student.id)
+      : nextState.collaborators.find((collaborator) => collaborator.id === student.id);
+    const instructorId = startedStudent?.training?.instructorId;
+    if (instructorId) {
+      instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
+    }
+  }
+
+  if (nextState === state) rememberAutomaticTeachingNoOp(state);
+  return nextState;
 }

@@ -51,13 +51,16 @@ export function loadGame(now = Date.now()): GameState {
   return simulateOfflineProgress(reconciled, now).state;
 }
 
-export function saveGame(state: GameState, now = Date.now()): void {
+export function saveGame(state: GameState, now = Date.now()): boolean {
   try {
+    const serialized = JSON.stringify({ ...state, lastSavedAt: now });
     const current = localStorage.getItem(SAVE_KEY);
     if (current) localStorage.setItem(BACKUP_KEY, current);
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, lastSavedAt: now }));
+    localStorage.setItem(SAVE_KEY, serialized);
+    return true;
   } catch {
     // Il gioco resta utilizzabile anche quando lo storage del browser è indisponibile.
+    return false;
   }
 }
 

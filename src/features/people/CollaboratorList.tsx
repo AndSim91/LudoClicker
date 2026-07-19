@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
 import { getCollaboratorBonusSummary } from "../../content/forms";
@@ -18,14 +19,17 @@ export function CollaboratorList({
   onAssign,
   onStartTraining,
   onToggleInstructorAutomation,
+  collaboratorsById,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
+  collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
-  const contactsById = new Map<string, Contact>(
-    state.contacts.map((contact) => [contact.id, contact]),
+  const contactsById = useMemo(
+    () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
+    [state.contacts],
   );
 
   return (
@@ -106,6 +110,7 @@ export function CollaboratorList({
                     state={state}
                     onStartTraining={onStartTraining}
                     onToggle={onToggleInstructorAutomation}
+                    collaboratorsById={collaboratorsById}
                   />
                 ) : (
                   <TrainingControl
@@ -113,6 +118,7 @@ export function CollaboratorList({
                     displayName={collaborator.displayName}
                     student={collaborator}
                     state={state}
+                    collaboratorsById={collaboratorsById}
                     onStartTraining={onStartTraining}
                   />
                 )}

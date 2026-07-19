@@ -25,6 +25,33 @@
   font-size: 12px;
 }
 
+.list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-muted);
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.list-pagination button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--blue-700);
+}
+
+.list-pagination button:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+  opacity: .55;
+}
+
 .people-table,
 .collaborator-list {
   max-width: 1100px;

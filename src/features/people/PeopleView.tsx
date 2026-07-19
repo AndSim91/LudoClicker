@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { TabButton } from "../../components/common/TabButton";
 import { GAME_CONFIG } from "../../game/config";
@@ -26,9 +26,19 @@ export function PeopleView({
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
 }) {
   const [tab, setTab] = useState<PeopleTab>("members");
-  const members = state.contacts.filter((contact) => contact.status === "enrolled");
-  const collaboratorsByContactId = new Map(
-    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
+  const members = useMemo(
+    () => state.contacts.filter((contact) => contact.status === "enrolled"),
+    [state.contacts],
+  );
+  const collaboratorsByContactId = useMemo(
+    () => new Map(
+      state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
+    ),
+    [state.collaborators],
+  );
+  const collaboratorsById = useMemo(
+    () => new Map(state.collaborators.map((collaborator) => [collaborator.id, collaborator])),
+    [state.collaborators],
   );
   const showCollaborators = isCollaboratorAreaVisible(state);
   const showRarityOverview =
@@ -60,12 +70,14 @@ export function PeopleView({
           onAssign={onAssign}
           onStartTraining={onStartTraining}
           onToggleInstructorAutomation={onToggleInstructorAutomation}
+          collaboratorsById={collaboratorsById}
         />
       ) : (
         <MemberList
           state={state}
           members={members}
           collaboratorsByContactId={collaboratorsByContactId}
+          collaboratorsById={collaboratorsById}
           onStartTraining={onStartTraining}
         />
       )}

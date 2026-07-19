@@ -2,32 +2,43 @@ import type { CampaignEmail, Contact, FormId, GameState, ScheduledTrial } from "
 import { GAME_CONFIG } from "./config";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { isInstructorForm } from "../content/forms";
+import {
+  getActiveCampaignEmails,
+  getAvailableContactCount,
+  getCollaboratorsById,
+  getCompletedTrialsByStartDay,
+  getContactsById,
+  getInstructorTeachingCounts,
+  getRunningAcquisitionEvents,
+  getScheduledTrialsByStart,
+} from "./runtimeIndexes";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {
-  return state.emails.find((email) => email.status === "writing" || email.status === "sending");
+  return getActiveCampaignEmails(state.emails)[0];
 }
 
 export function selectActiveContact(state: GameState): Contact | undefined {
   const email = selectActiveEmail(state);
-  return email ? state.contacts.find((contact) => contact.id === email.contactId) : undefined;
+  return email ? getContactsById(state.contacts).get(email.contactId) : undefined;
 }
 
 export function selectAvailableContacts(state: GameState): number {
-  return state.contacts.filter((contact) => contact.status === "available").length;
+  return getAvailableContactCount(state.contacts);
 }
 
 export function selectAvailableEventMembers(state: GameState): number {
-  const assignedMembers = state.acquisitionEvents
-    .filter((event) => event.status === "running")
+  const assignedMembers = getRunningAcquisitionEvents(state.acquisitionEvents)
     .reduce((total, event) => total + event.membersUsed, 0);
   return Math.max(0, state.school.activeMembers - assignedMembers);
 }
 
 export function selectBusyInstructorIds(state: GameState): Set<string> {
   const busy = new Set<string>();
+  const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  const capacity = selectInstructorCapacity(state);
   for (const collaborator of state.collaborators) {
     if (collaborator.training) busy.add(collaborator.id);
-    if (selectInstructorTeachingCount(state, collaborator.id) >= selectInstructorCapacity(state)) {
+    if ((teachingCounts.get(collaborator.id) ?? 0) >= capacity) {
       busy.add(collaborator.id);
     }
   }
@@ -39,13 +50,7 @@ export function selectInstructorCapacity(state: GameState): number {
 }
 
 export function selectInstructorTeachingCount(state: GameState, instructorId: string): number {
-  const contactTrainings = state.contacts.filter(
-    (contact) => contact.training?.instructorId === instructorId,
-  ).length;
-  const collaboratorTrainings = state.collaborators.filter(
-    (collaborator) => collaborator.training?.instructorId === instructorId,
-  ).length;
-  return contactTrainings + collaboratorTrainings;
+  return getInstructorTeachingCounts(state.contacts, state.collaborators).get(instructorId) ?? 0;
 }
 
 export function canInstructorTeachForm(
@@ -53,7 +58,7 @@ export function canInstructorTeachForm(
   instructorId: string,
   formId: FormId,
 ): boolean {
-  const instructor = state.collaborators.find((candidate) => candidate.id === instructorId);
+  const instructor = getCollaboratorsById(state.collaborators).get(instructorId);
   return Boolean(
     instructor &&
     instructor.assignment === "instructor" &&
@@ -77,10 +82,7 @@ export function selectAvailableInstructor(
 }
 
 export function selectUpcomingTrials(state: GameState): ScheduledTrial[] {
-  return state.scheduledTrials
-    .filter((trial) => trial.status === "scheduled")
-    .slice()
-    .sort((a, b) => a.startsAt - b.startsAt);
+  return getScheduledTrialsByStart(state.scheduledTrials);
 }
 
 export function selectDayTrials(state: GameState, now: number): ScheduledTrial[] {
@@ -90,20 +92,10 @@ export function selectDayTrials(state: GameState, now: number): ScheduledTrial[]
     today.getMonth(),
     today.getDate(),
   ).getTime();
-  const endOfDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 1,
-  ).getTime();
+  const completedToday = getCompletedTrialsByStartDay(state.scheduledTrials).get(startOfDay) ?? [];
 
-  return state.scheduledTrials
-    .filter(
-      (trial) =>
-        trial.status === "scheduled" ||
-        (trial.startsAt >= startOfDay && trial.startsAt < endOfDay),
-    )
-    .slice()
-    .sort((a, b) => a.startsAt - b.startsAt);
+  return [...getScheduledTrialsByStart(state.scheduledTrials), ...completedToday]
+    .sort((left, right) => left.startsAt - right.startsAt);
 }
 
 export function selectIncomePerMonth(state: GameState): number {
@@ -126,7 +118,7 @@ export function selectSentEmailStatus(
   state: GameState,
   email: CampaignEmail,
 ): SentEmailStatus {
-  const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
+  const contact = getContactsById(state.contacts).get(email.contactId);
   if (contact?.status === "enrolled") return "Iscritto";
   if (contact?.status === "lost" || email.status === "lost") return "Perso";
   if (contact?.status === "trialScheduled" || email.status === "trialBooked") {

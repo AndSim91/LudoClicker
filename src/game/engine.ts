@@ -33,6 +33,13 @@ import {
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
 import { resolveTrial } from "./trialFlow";
+import {
+  getPendingEmailOutcomes,
+  getPeopleInTraining,
+  getRunningAcquisitionEvents,
+  getScheduledTrials,
+  getSendingEmails,
+} from "./runtimeIndexes";
 import type {
   FormId,
   GameAction,
@@ -96,33 +103,33 @@ function runSocialCampaign(state: GameState, now: number): GameState {
 function tick(state: GameState, now: number, gainMultiplier: number): GameState {
   let nextState = advanceAutomation(state, now, gainMultiplier);
 
-  for (const email of nextState.emails.slice()) {
-    if (email.status === "sending" && (email.sendCompletesAt ?? Infinity) <= now) {
+  for (const email of getSendingEmails(nextState.emails)) {
+    if ((email.sendCompletesAt ?? Infinity) <= now) {
       nextState = finalizeEmail(nextState, email.id, now);
     }
   }
-  for (const outcome of nextState.pendingEmailOutcomes.slice()) {
+  for (const outcome of getPendingEmailOutcomes(nextState.pendingEmailOutcomes)) {
     if (outcome.resolvesAt <= now) {
       nextState = resolveEmailOutcome(nextState, outcome, now);
     }
   }
-  for (const trial of nextState.scheduledTrials.slice()) {
-    if (trial.status === "scheduled" && trial.resolvesAt <= now) {
+  for (const trial of getScheduledTrials(nextState.scheduledTrials)) {
+    if (trial.resolvesAt <= now) {
       nextState = resolveTrial(nextState, trial, now, gainMultiplier);
     }
   }
-  for (const event of nextState.acquisitionEvents.slice()) {
-    if (event.status === "running" && event.resolvesAt <= now) {
+  for (const event of getRunningAcquisitionEvents(nextState.acquisitionEvents)) {
+    if (event.resolvesAt <= now) {
       nextState = resolveAcquisitionEvent(nextState, event, now, gainMultiplier);
     }
   }
-  for (const contact of nextState.contacts.slice()) {
-    if (contact.training && contact.training.completesAt <= now) {
+  for (const contact of getPeopleInTraining(nextState.contacts)) {
+    if (contact.training!.completesAt <= now) {
       nextState = resolveFormTraining(nextState, contact.id, now);
     }
   }
-  for (const collaborator of nextState.collaborators.slice()) {
-    if (collaborator.training && collaborator.training.completesAt <= now) {
+  for (const collaborator of getPeopleInTraining(nextState.collaborators)) {
+    if (collaborator.training!.completesAt <= now) {
       nextState = resolveFormTraining(nextState, collaborator.id, now);
     }
   }
