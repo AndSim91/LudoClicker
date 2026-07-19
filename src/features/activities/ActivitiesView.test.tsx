@@ -9,8 +9,17 @@ describe("ActivitiesView", () => {
   it("runs a funded Social campaign after the unlock", () => {
     const initial = createInitialState(1_000);
     const onRunSocialCampaign = vi.fn();
-    render(<ActivitiesView state={{ ...initial, school: { ...initial.school, euros: 30 }, unlocks: { ...initial.unlocks, social: true } }} onRunSocialCampaign={onRunSocialCampaign} />);
+    render(<ActivitiesView state={{
+      ...initial,
+      school: { ...initial.school, euros: 30 },
+      unlocks: { ...initial.unlocks, social: true },
+      automation: { ...initial.automation, socialBuffer: 0.5 },
+      statistics: { ...initial.statistics, socialTrials: 3 },
+    }} onRunSocialCampaign={onRunSocialCampaign} />);
 
+    expect(screen.getByText("3 prove portate direttamente in palestra")).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Progresso prossima prova Social" }))
+      .toHaveAttribute("aria-valuenow", "50");
     fireEvent.click(screen.getByRole("button", { name: /Avvia campagna/ }));
     expect(onRunSocialCampaign).toHaveBeenCalledOnce();
   });

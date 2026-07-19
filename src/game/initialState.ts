@@ -88,6 +88,7 @@ export function createInitialState(
     automation: {
       lastProcessedAt: now,
       writingBuffer: 0,
+      lessonBuffer: 0,
       socialBuffer: 0,
       equipmentBuffer: 0,
       offlineContactBuffer: 0,
@@ -110,6 +111,7 @@ export function createInitialState(
       collaboratorsRecruited: 0,
       automatedCharacters: 0,
       socialContacts: 0,
+      socialTrials: 0,
       socialCampaigns: 0,
       formsCompleted: 0,
       narrativeEvents: 0,

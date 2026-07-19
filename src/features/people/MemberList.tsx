@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { getSchoolYear } from "../../game/calendar";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
-import {
-  FormLogoStrip,
-  PersonName,
-} from "./PersonPresentation";
+import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
 import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
 import {
@@ -29,13 +26,11 @@ const MEMBERS_PER_PAGE = 75;
 export function MemberList({
   state,
   members,
-  collaboratorsByContactId,
   collaboratorsById,
   onStartTraining,
 }: {
   state: GameState;
   members: Contact[];
-  collaboratorsByContactId: Map<string, Collaborator>;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
@@ -49,12 +44,14 @@ export function MemberList({
   return (
     <section className="people-table member-development-list" aria-label="Iscritti">
       <div className="people-row people-head member-row">
-        <span>Nome</span><span>Indirizzo</span><span>Percorso</span><span>Stato</span><span>Prossima evoluzione</span>
+        <span>Nome</span>
+        <span>Indirizzo</span>
+        <span>Percorso</span>
+        <span>Stato</span>
+        <span>Prossima evoluzione</span>
       </div>
       {visibleMembers.map((contact) => {
-        const collaborator = collaboratorsByContactId.get(contact.id);
-        const isCollaborator = Boolean(collaborator);
-        const memberForms = collaborator?.forms ?? contact.forms;
+        const memberForms = contact.forms;
         const hasVisibleStats = hasCompletedCourseX(memberForms);
         const preparation = hasVisibleStats
           ? getContactPreparation(contact, memberForms)
@@ -97,35 +94,34 @@ export function MemberList({
               <FormLogoStrip forms={memberForms} showLabels={false} />
             </div>
             <span className="member-status" data-label="Stato">
-              <span>{isCollaborator ? "Collaboratore" : CONTACT_STATUS_LABELS[contact.status]}</span>
+              <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
               <small>
                 {state.tournaments.immuneContactIds.includes(contact.id)
                   ? "Qualificato · immune"
-                  : isCollaborator || contact.rarity === "legendary"
-                  ? "Non soggetto ad abbandono"
-                  : contact.lastFormTrainingYear === currentYear
-                    ? "Nessun rischio"
-                    : getMemberDepartureRiskLabel(
-                        contact.forms,
-                        contact.rarity,
-                        state.network.schools.length,
-                      )}
+                  : contact.rarity === "legendary"
+                    ? "Non soggetto ad abbandono"
+                    : contact.lastFormTrainingYear === currentYear
+                      ? "Nessun rischio"
+                      : getMemberDepartureRiskLabel(
+                          contact.forms,
+                          contact.rarity,
+                          state.network.schools.length,
+                        )}
               </small>
-              <small>Esperienza tornei {getContactTournamentExperience(contact)} · +{Math.min(60, getContactTournamentExperience(contact) * 3)}%</small>
+              <small>
+                Esperienza tornei {getContactTournamentExperience(contact)} · +
+                {Math.min(60, getContactTournamentExperience(contact) * 3)}%
+              </small>
             </span>
             <div className="member-training-cell" data-label="Prossima evoluzione">
-              {isCollaborator ? (
-                <small>Gestisci dal pannello Collaboratori</small>
-              ) : (
-                <TrainingControl
-                  personId={contact.id}
-                  displayName={`${contact.firstName} ${contact.lastName}`}
-                  student={contact}
-                  state={state}
-                  collaboratorsById={collaboratorsById}
-                  onStartTraining={onStartTraining}
-                />
-              )}
+              <TrainingControl
+                personId={contact.id}
+                displayName={`${contact.firstName} ${contact.lastName}`}
+                student={contact}
+                state={state}
+                collaboratorsById={collaboratorsById}
+                onStartTraining={onStartTraining}
+              />
             </div>
           </div>
         );
@@ -139,7 +135,9 @@ export function MemberList({
           >
             Precedente
           </button>
-          <span>Pagina {page + 1} di {pageCount}</span>
+          <span>
+            Pagina {page + 1} di {pageCount}
+          </span>
           <button
             type="button"
             disabled={page === pageCount - 1}

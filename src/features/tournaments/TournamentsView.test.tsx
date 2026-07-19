@@ -49,6 +49,57 @@ describe("TournamentsView", () => {
     expect(view.getAllByText("???").length).toBeGreaterThan(0);
   });
 
+  it("lists only the athletes in the current official qualification", () => {
+    const { state: completed, result } = createCompletedTournamentState();
+    const qualifiedContacts = completed.contacts
+      .filter((contact) => contact.status === "enrolled")
+      .slice(0, 2);
+    const state = {
+      ...completed,
+      tournaments: {
+        ...completed.tournaments,
+        qualification: {
+          level: "academy" as const,
+          season: result.season,
+          contactIds: qualifiedContacts.map((contact) => contact.id),
+        },
+      },
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
+
+    expect(qualifiedTeam.getByText("2 atleti")).toBeVisible();
+    qualifiedContacts.forEach((contact) => {
+      expect(qualifiedTeam.getByText(`${contact.firstName} ${contact.lastName}`)).toBeVisible();
+    });
+    expect(container.querySelectorAll(".qualified-team-list > div")).toHaveLength(2);
+  });
+
+  it("explains a missing National qualification and removes delegation form", () => {
+    const initial = createStateWithForms(64);
+    const simulation = simulateTournament(
+      initial,
+      "academy",
+      1,
+      181_000,
+      getEligibleSchoolContacts(initial),
+    );
+    const state = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        results: [simulation.result],
+        qualification: undefined,
+      },
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
+
+    expect(qualifiedTeam.getByText("Nessun atleta qualificato per il Torneo Nazionale anno 1.")).toBeVisible();
+    expect(qualifiedTeam.getByText("In attesa del prossimo Torneo Scolastico.")).toBeVisible();
+    expect(within(container).queryByText("Forma della delegazione")).not.toBeInTheDocument();
+  });
+
   it("shows the experience count and includes its bonus in Arena and Style", () => {
     const initial = createStateWithForms();
     const target = initial.contacts.find((contact) => contact.status === "enrolled")!;

@@ -70,6 +70,53 @@ function CollaboratorAutomationProgress({
       </div>
     );
   }
+  if (assignment === "lessons") {
+    const progress = Math.min(100, Math.floor(state.automation.lessonBuffer * 100));
+    return (
+      <div className="collaborator-automation-progress">
+        <span>Prossimo punto Arena o Stile</span><strong>{progress}%</strong>
+        <ProgressBar
+          className="collaborator-progress-bar"
+          label="Progresso miglioramento atleta"
+          value={progress}
+        />
+        <small className="collaborator-last-result">
+          {state.automation.lastImprovedAthlete
+            ? `Ultimo atleta migliorato: ${state.automation.lastImprovedAthlete}`
+            : "Nessun atleta migliorato finora"}
+        </small>
+      </div>
+    );
+  }
+  if (assignment === "social") {
+    const progress = Math.min(100, Math.floor(state.automation.socialBuffer * 100));
+    return (
+      <div className="collaborator-automation-progress">
+        <span>Prossima prova in palestra</span><strong>{progress}%</strong>
+        <ProgressBar
+          className="collaborator-progress-bar"
+          label="Progresso prossima prova Social"
+          value={progress}
+        />
+      </div>
+    );
+  }
+  if (assignment === "equipment") {
+    if (state.equipment.wear <= 0) {
+      return <small>Usura attrezzatura: 0% · In attesa</small>;
+    }
+    const progress = Math.min(100, Math.floor(state.automation.equipmentBuffer * 100));
+    return (
+      <div className="collaborator-automation-progress">
+        <span>Usura attrezzatura: {state.equipment.wear}%</span><strong>{progress}%</strong>
+        <ProgressBar
+          className="collaborator-progress-bar"
+          label="Progresso riduzione usura"
+          value={progress}
+        />
+      </div>
+    );
+  }
   return null;
 }
 

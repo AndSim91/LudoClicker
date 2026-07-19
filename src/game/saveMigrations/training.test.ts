@@ -12,11 +12,28 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(39);
+    expect(migrated.version).toBe(40);
     expect(migrated.upgrades["extra-form"]).toBe(0);
     expect(migrated.upgrades["technical-arena"]).toBe(0);
     expect(migrated.automation.agonistCoursesEnabled).toBe(false);
+    expect(migrated.automation.lessonBuffer).toBe(0);
+    expect(migrated.statistics.socialTrials).toBe(0);
     expect(migrated.contacts[0].lastFormTrainingYear).toBe(2);
     expect(migrated.contacts[0].formTrainingYearCount).toBe(1);
+  });
+
+  it("adds collaborator progress fields to version 39 saves", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 39;
+    delete legacy.automation.lessonBuffer;
+    delete legacy.automation.lastImprovedAthlete;
+    delete legacy.statistics.socialTrials;
+
+    const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.version).toBe(40);
+    expect(migrated.automation.lessonBuffer).toBe(0);
+    expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
+    expect(migrated.statistics.socialTrials).toBe(0);
   });
 });

@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
-import { TOURNAMENT_DEFINITIONS, TOURNAMENT_LEVEL_ORDER } from "../../content/tournaments";
+import {
+  TOURNAMENT_DEFINITIONS,
+  TOURNAMENT_LEVEL_ORDER,
+  getNextTournamentLevel,
+} from "../../content/tournaments";
 import {
   getContactPreparation,
   hasCompletedCourseX,
@@ -25,30 +29,35 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
   const upcomingDefinition = upcoming ? TOURNAMENT_DEFINITIONS[upcoming.level] : undefined;
   const qualification = state.tournaments.qualification;
   const delegationContactIds = getUpcomingDelegationContactIds(state, upcoming);
-  const qualifiedIds = useMemo(
-    () => new Set(delegationContactIds),
-    [delegationContactIds],
-  );
   const collaboratorsByContactId = useMemo(
     () => new Map(state.collaborators.map((entry) => [entry.contactId, entry])),
     [state.collaborators],
   );
-  const delegation = useMemo(() => {
-    const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
-    const source = delegationContactIds
-      .map((contactId) => contactsById.get(contactId))
-      .filter((contact) => contact !== undefined);
-    return source.map((contact) => {
+  const teamEntryByContactId = useMemo(() => new Map(
+    state.contacts.map((contact) => {
       const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
       const preparation = getContactPreparation(contact, forms);
       const visible = hasCompletedCourseX(forms);
-      const standard = upcomingDefinition?.standard ?? 0;
-      const readiness = standard > 0
-        ? Math.min(100, Math.round(((preparation.arena + preparation.style) / 2 / standard) * 100))
-        : 100;
-      return { contact, preparation, readiness, visible };
-    });
-  }, [collaboratorsByContactId, delegationContactIds, state.contacts, upcomingDefinition]);
+      return [contact.id, { contact, preparation, visible }] as const;
+    }),
+  ), [collaboratorsByContactId, state.contacts]);
+  const delegation = useMemo(() => delegationContactIds.flatMap((contactId) => {
+    const entry = teamEntryByContactId.get(contactId);
+    return entry ? [entry] : [];
+  }), [delegationContactIds, teamEntryByContactId]);
+  const officialQualified = useMemo(() => (qualification?.contactIds ?? []).flatMap((contactId) => {
+    const entry = teamEntryByContactId.get(contactId);
+    return entry ? [entry] : [];
+  }), [qualification, teamEntryByContactId]);
+  const latestResult = state.tournaments.results.at(-1);
+  const qualificationTarget = qualification
+    ? { level: qualification.level, season: qualification.season }
+    : latestResult
+      ? { level: getNextTournamentLevel(latestResult.level), season: latestResult.season }
+      : undefined;
+  const missingQualificationLabel = qualificationTarget?.level
+    ? `Nessun atleta qualificato per il ${TOURNAMENT_DEFINITIONS[qualificationTarget.level].label} anno ${qualificationTarget.season}.`
+    : "Nessuna qualificazione disponibile.";
   const required = GAME_CONFIG.tournamentMinimumMembers;
   const isReady = delegation.length >= required;
 
@@ -128,41 +137,38 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
         </section>
 
         <section className="qualified-team" aria-labelledby="qualified-team-title">
-          <header><h2 id="qualified-team-title">Qualificati</h2><span>{delegation.length} atleti</span></header>
-          <div className="qualified-team-head" aria-hidden="true"><span>#</span><span>Atleta</span><span>Arena</span><span>Stile</span></div>
-          <div className="qualified-team-list">
-            {delegation.map(({ contact, preparation, visible }, index) => (
-              <div key={contact.id}>
-                <b>{index + 1}</b>
-                <span><strong>{contact.firstName} {contact.lastName}</strong><small>{qualifiedIds.has(contact.id) ? "Delegazione" : "Idoneo"}</small></span>
-                <strong>{visible ? preparation.arena.toFixed(3) : "???"}</strong>
-                <strong>{visible ? preparation.style.toFixed(3) : "???"}</strong>
+          <header><h2 id="qualified-team-title">Qualificati</h2><span>{officialQualified.length} atleti</span></header>
+          {officialQualified.length > 0 && qualification ? (
+            <>
+              <div className="qualified-team-head" aria-hidden="true"><span>#</span><span>Atleta</span><span>Arena</span><span>Stile</span></div>
+              <div className="qualified-team-list">
+                {officialQualified.map(({ contact, preparation, visible }, index) => (
+                  <div key={contact.id}>
+                    <b>{index + 1}</b>
+                    <span>
+                      <strong>{contact.firstName} {contact.lastName}</strong>
+                      <small>{TOURNAMENT_DEFINITIONS[qualification.level].label} · anno {qualification.season}</small>
+                    </span>
+                    <strong>{visible ? preparation.arena.toFixed(3) : "???"}</strong>
+                    <strong>{visible ? preparation.style.toFixed(3) : "???"}</strong>
+                  </div>
+                ))}
               </div>
-            ))}
-            {delegation.length === 0 ? <p>Nessun atleta idoneo.</p> : null}
-          </div>
-          {delegation.length > 0 ? (
-            <footer>
-              <strong>Media squadra</strong>
-              <span>{delegation.some((entry) => !entry.visible) ? "???" : (delegation.reduce((sum, entry) => sum + entry.preparation.arena, 0) / delegation.length).toFixed(3)}</span>
-              <span>{delegation.some((entry) => !entry.visible) ? "???" : (delegation.reduce((sum, entry) => sum + entry.preparation.style, 0) / delegation.length).toFixed(3)}</span>
-            </footer>
-          ) : null}
+              <footer>
+                <strong>Media squadra</strong>
+                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : (officialQualified.reduce((sum, entry) => sum + entry.preparation.arena, 0) / officialQualified.length).toFixed(3)}</span>
+                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : (officialQualified.reduce((sum, entry) => sum + entry.preparation.style, 0) / officialQualified.length).toFixed(3)}</span>
+              </footer>
+            </>
+          ) : (
+            <div className="qualified-team-empty">
+              <span aria-hidden="true"><Icon name="trophy" /></span>
+              <strong>{missingQualificationLabel}</strong>
+              <p>In attesa del prossimo Torneo Scolastico.</p>
+            </div>
+          )}
         </section>
       </div>
-
-      <section className="delegation-form" aria-labelledby="delegation-form-title">
-        <h2 id="delegation-form-title">Forma della delegazione</h2>
-        <div>
-          {delegation.map(({ contact, readiness }) => (
-            <span key={contact.id}>
-              <small>{contact.firstName} {contact.lastName}</small>
-              <i><b style={{ width: `${readiness}%` }} /></i>
-              <strong>{readiness}%</strong>
-            </span>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

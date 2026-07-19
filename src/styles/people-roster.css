@@ -25,6 +25,39 @@
   font-size: 12px;
 }
 
+.people-section {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.people-section-heading {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.people-section-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.people-section-heading span {
+  min-width: 28px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .list-pagination {
   display: flex;
   align-items: center;
@@ -49,13 +82,13 @@
 .list-pagination button:disabled {
   color: var(--ink-muted);
   cursor: default;
-  opacity: .55;
+  opacity: 0.55;
 }
 
 .people-table,
 .collaborator-list {
   max-width: 1100px;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .people-view .people-tabs,
@@ -117,7 +150,7 @@
 }
 
 .member-row {
-  grid-template-columns: minmax(170px, .9fr) minmax(220px, 1.15fr) 150px 110px minmax(280px, 1.5fr);
+  grid-template-columns: minmax(170px, 0.9fr) minmax(220px, 1.15fr) 150px 110px minmax(280px, 1.5fr);
   min-height: 68px;
 }
 
@@ -309,4 +342,3 @@
     padding-top: 12px;
   }
 }
-

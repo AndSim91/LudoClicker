@@ -65,11 +65,37 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
           migrated.createdAt ??
           Date.now(),
         writingBuffer: migrated.automation?.writingBuffer ?? 0,
+        lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
         equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
         offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
         agonistCoursesEnabled: false,
       },
+    };
+  }
+
+  if (migrated.version === 39) {
+    migrated = {
+      ...migrated,
+      version: 40,
+      automation: {
+        lastProcessedAt:
+          migrated.automation?.lastProcessedAt ??
+          migrated.lastSavedAt ??
+          migrated.createdAt ??
+          Date.now(),
+        writingBuffer: migrated.automation?.writingBuffer ?? 0,
+        lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
+        socialBuffer: migrated.automation?.socialBuffer ?? 0,
+        equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
+        offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
+        agonistCoursesEnabled: migrated.automation?.agonistCoursesEnabled ?? false,
+        lastImprovedAthlete: migrated.automation?.lastImprovedAthlete,
+      },
+      statistics: {
+        ...migrated.statistics,
+        socialTrials: migrated.statistics?.socialTrials ?? 0,
+      } as MigratableState["statistics"],
     };
   }
 

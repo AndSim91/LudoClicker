@@ -351,6 +351,7 @@ export interface Statistics {
   collaboratorsRecruited: number;
   automatedCharacters: number;
   socialContacts: number;
+  socialTrials: number;
   socialCampaigns: number;
   formsCompleted: number;
   narrativeEvents: number;
@@ -530,10 +531,12 @@ export interface GameState {
   automation: {
     lastProcessedAt: number;
     writingBuffer: number;
+    lessonBuffer: number;
     socialBuffer: number;
     equipmentBuffer: number;
     offlineContactBuffer: number;
     agonistCoursesEnabled: boolean;
+    lastImprovedAthlete?: string;
   };
   achievements: AchievementId[];
   narrative: {

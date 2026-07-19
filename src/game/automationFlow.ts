@@ -9,6 +9,10 @@ import {
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
+import {
+  improveRandomAthletes,
+  scheduleSocialTrials,
+} from "./collaboratorAutomationOutcomes";
 import { GAME_CONFIG } from "./config";
 import {
   addLegendaryEncounters,
@@ -113,11 +117,14 @@ export function processAutomation(
   if (elapsedMs <= 0) return state;
 
   let writingProductivity = 0;
+  let lessonProductivity = 0;
   let socialProductivity = 0;
   let equipmentProductivity = 0;
   for (const collaborator of state.collaborators) {
     if (collaborator.assignment === "writing") {
       writingProductivity += getCollaboratorProductivity(collaborator);
+    } else if (collaborator.assignment === "lessons") {
+      lessonProductivity += getCollaboratorProductivity(collaborator);
     } else if (collaborator.assignment === "social" && state.unlocks.social) {
       socialProductivity += getCollaboratorProductivity(collaborator);
     } else if (collaborator.assignment === "equipment") {
@@ -137,20 +144,28 @@ export function processAutomation(
       state.player.writingPower *
       automationMultiplier;
   const automatedCharacters = Math.floor(writingTotal);
+  const hasEligibleAthletes = state.contacts.some((contact) => contact.status === "enrolled");
+  const lessonTotal = state.automation.lessonBuffer +
+    (hasEligibleAthletes
+      ? (elapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
+        lessonProductivity * automationMultiplier
+      : 0);
+  const lessonImprovements = Math.floor(lessonTotal);
   const socialTotal =
     state.automation.socialBuffer +
-    (elapsedMs / GAME_CONFIG.socialContactIntervalMs) *
+    (elapsedMs / GAME_CONFIG.socialTrialIntervalMs) *
       socialProductivity *
       socialMultiplier *
       automationMultiplier *
       Math.max(0, gainMultiplier);
-  const socialContacts = Math.floor(socialTotal);
-  const equipmentTotal =
-    state.automation.equipmentBuffer +
-    (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
-      equipmentProductivity *
-      automationMultiplier;
-  const repairedWear = Math.floor(equipmentTotal);
+  const socialTrials = Math.floor(socialTotal);
+  const equipmentTotal = state.equipment.wear > 0
+    ? state.automation.equipmentBuffer +
+      (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
+        equipmentProductivity *
+        automationMultiplier
+    : 0;
+  const repairedWear = Math.min(Math.floor(equipmentTotal), Math.ceil(state.equipment.wear));
 
   let nextState: GameState = {
     ...state,
@@ -158,8 +173,11 @@ export function processAutomation(
       ...state.automation,
       lastProcessedAt: now,
       writingBuffer: writingTotal - automatedCharacters,
-      socialBuffer: socialTotal - socialContacts,
-      equipmentBuffer: equipmentTotal - repairedWear,
+      lessonBuffer: lessonTotal - lessonImprovements,
+      socialBuffer: socialTotal - socialTrials,
+      equipmentBuffer: state.equipment.wear > repairedWear
+        ? equipmentTotal - repairedWear
+        : 0,
     },
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
@@ -188,28 +206,28 @@ export function processAutomation(
     }
   }
 
-  if (socialContacts > 0) {
-    const acquired = createAcquiredContacts(nextState, socialContacts, "social", now);
-    const contacts = acquired.contacts;
-    nextState = {
-      ...nextState,
-      randomSeed: acquired.nextSeed,
-      legendaryCollaborators: addLegendaryEncounters(
-        nextState.legendaryCollaborators,
-        contacts,
-      ),
-      contacts: [...nextState.contacts, ...contacts],
-      statistics: {
-        ...nextState.statistics,
-        contactsAcquired: nextState.statistics.contactsAcquired + contacts.length,
-        socialContacts: nextState.statistics.socialContacts + contacts.length,
-      },
-    };
+  if (lessonImprovements > 0) {
+    const improved = improveRandomAthletes(nextState, lessonImprovements);
+    nextState = improved.state;
+    if (improved.improvements > 0) {
+      nextState = dependencies.addCollaboratorMasteryExperience(
+        nextState,
+        "lessons",
+        improved.improvements * COLLABORATOR_MASTERY_XP.lessonCompleted,
+        now,
+      );
+    }
+  }
+
+  if (socialTrials > 0) {
+    nextState = scheduleSocialTrials(nextState, socialTrials, now);
     nextState = dependencies.addMessage(
       nextState,
       now,
-      "Nuovi contatti dai Social",
-      `${contacts.length} nuovi indirizzi sono stati raccolti dalle attività online.`,
+      socialTrials === 1 ? "Nuova prova dai Social" : "Nuove prove dai Social",
+      socialTrials === 1
+        ? "Una persona arrivata dai Social sta svolgendo la prova in palestra."
+        : `${socialTrials} persone arrivate dai Social stanno svolgendo la prova in palestra.`,
       "positive",
       "other",
       "contacts",
@@ -217,10 +235,9 @@ export function processAutomation(
     nextState = dependencies.addCollaboratorMasteryExperience(
       nextState,
       "social",
-      contacts.length * COLLABORATOR_MASTERY_XP.socialContact,
+      socialTrials * COLLABORATOR_MASTERY_XP.socialContact,
       now,
     );
-    nextState = dependencies.startNextCampaign(nextState, now);
   }
 
   return nextState;

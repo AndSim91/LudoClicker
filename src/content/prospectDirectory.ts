@@ -75,7 +75,7 @@ export const PROSPECT_FIRST_NAMES = [
 
 export const PROSPECT_LAST_NAMES = [
   "Altone",
-  "Barone",
+  "Baroncini",
   "Basile",
   "Bellini",
   "Bernardi",

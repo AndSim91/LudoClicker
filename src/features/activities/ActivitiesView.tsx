@@ -83,8 +83,8 @@ export function ActivitiesView({
       </section> : null}
 
       {state.unlocks.social ? <section className="social-panel" aria-label="Campagne Social">
-        <div><Icon name="contact" /><span><strong>Social</strong><small>{state.statistics.socialContacts} contatti raccolti online</small></span></div>
-        <><div className="social-progress-label"><span>Prossimo contatto passivo</span><strong>{socialProgress}%</strong></div><ProgressBar className="social-progress" label="Progresso contatto Social" value={socialProgress} /></>
+        <div><Icon name="contact" /><span><strong>Social</strong><small>{state.statistics.socialTrials} prove portate direttamente in palestra</small></span></div>
+        <><div className="social-progress-label"><span>Prossima prova dai Social</span><strong>{socialProgress}%</strong></div><ProgressBar className="social-progress" label="Progresso prossima prova Social" value={socialProgress} /></>
         <button type="button" disabled={!canRunSocial} onClick={onRunSocialCampaign}>{socialAction}</button>
       </section> : null}
 
@@ -95,7 +95,7 @@ export function ActivitiesView({
         <ReportRow label="Prove dimostrative" value={state.statistics.demonstrationsGiven} conversion={percentage(state.statistics.demonstrationsGiven, state.statistics.peopleMet)} />
         <ReportRow label="Contatti ottenuti" value={state.statistics.contactsAcquired} conversion={percentage(state.statistics.contactsAcquired, state.statistics.demonstrationsGiven)} />
         <ReportRow label="Email inviate" value={state.statistics.emailsSent} conversion={percentage(state.statistics.emailsSent, state.statistics.contactsAcquired + GAME_CONFIG.initialContacts)} />
-        <ReportRow label="Prove prenotate" value={state.statistics.trialsBooked} conversion={percentage(state.statistics.trialsBooked, state.statistics.emailsSent)} />
+        <ReportRow label="Prove prenotate" value={state.statistics.trialsBooked} conversion={percentage(state.statistics.trialsBooked, state.statistics.emailsSent + state.statistics.socialTrials)} />
         <ReportRow label="Nuovi iscritti" value={state.statistics.membersEnrolled} conversion={percentage(state.statistics.membersEnrolled, state.statistics.trialsCompleted)} />
         <ReportRow label="Tempo medio di scrittura" value={`${averageWritingSeconds} s`} conversion={`${state.player.writingPower.toFixed(2)} caratteri/input`} />
         <ReportRow label="Rendimento collaboratori" value={state.statistics.automatedCharacters} conversion={`${state.collaborators.length ? Math.round(state.statistics.automatedCharacters / state.collaborators.length) : 0} caratteri/persona`} />

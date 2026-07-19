@@ -1,18 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
-import { TabButton } from "../../components/common/TabButton";
 import { GAME_CONFIG } from "../../game/config";
-import type {
-  CollaboratorAssignment,
-  FormId,
-  GameState,
-} from "../../game/types";
+import type { CollaboratorAssignment, FormId, GameState } from "../../game/types";
 import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { CollaboratorList } from "./CollaboratorList";
 import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
-
-type PeopleTab = "members" | "collaborators";
 
 export function PeopleView({
   state,
@@ -29,16 +22,17 @@ export function PeopleView({
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
   onToggleAgonistCourses?: (enabled: boolean) => void;
 }) {
-  const [tab, setTab] = useState<PeopleTab>("members");
-  const members = useMemo(
-    () => state.contacts.filter((contact) => contact.status === "enrolled"),
-    [state.contacts],
-  );
   const collaboratorsByContactId = useMemo(
-    () => new Map(
-      state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
-    ),
+    () =>
+      new Map(state.collaborators.map((collaborator) => [collaborator.contactId, collaborator])),
     [state.collaborators],
+  );
+  const members = useMemo(
+    () =>
+      state.contacts.filter(
+        (contact) => contact.status === "enrolled" && !collaboratorsByContactId.has(contact.id),
+      ),
+    [collaboratorsByContactId, state.contacts],
   );
   const collaboratorsById = useMemo(
     () => new Map(state.collaborators.map((collaborator) => [collaborator.id, collaborator])),
@@ -54,39 +48,43 @@ export function PeopleView({
     <main className="overview-view people-view">
       <header>
         <Icon name="people" />
-        <div><h1>Iscritti</h1><p>Iscritti e Collaboratori delle Onde</p></div>
+        <div>
+          <h1>Iscritti</h1>
+          <p>Iscritti e Collaboratori delle Onde</p>
+        </div>
       </header>
-      <div className="people-tabs" role="tablist" aria-label="Categorie iscritti">
-        <TabButton active={tab === "members"} onClick={() => setTab("members")}>
-          Iscritti attivi ({members.length})
-        </TabButton>
-        {showCollaborators ? (
-          <TabButton active={tab === "collaborators"} onClick={() => setTab("collaborators")}>
-            Collaboratori ({state.collaborators.length})
-          </TabButton>
-        ) : null}
-      </div>
-      {showRarityOverview ? <RarityOverview state={state} /> : null}
+      {showCollaborators ? (
+        <section className="people-section">
+          <div className="people-section-heading">
+            <h2>Collaboratori</h2>
+            <span>{state.collaborators.length}</span>
+          </div>
+          <CollaboratorList
+            state={state}
+            onAssign={onAssign}
+            onStartTraining={onStartTraining}
+            onPayInstructorCertificates={onPayInstructorCertificates}
+            onToggleInstructorAutomation={onToggleInstructorAutomation}
+            onToggleAgonistCourses={onToggleAgonistCourses}
+            collaboratorsById={collaboratorsById}
+          />
+        </section>
+      ) : null}
 
-      {tab === "collaborators" ? (
-        <CollaboratorList
-          state={state}
-          onAssign={onAssign}
-          onStartTraining={onStartTraining}
-          onPayInstructorCertificates={onPayInstructorCertificates}
-          onToggleInstructorAutomation={onToggleInstructorAutomation}
-          onToggleAgonistCourses={onToggleAgonistCourses}
-          collaboratorsById={collaboratorsById}
-        />
-      ) : (
+      <section className="people-section">
+        <div className="people-section-heading">
+          <h2>Iscritti attivi</h2>
+          <span>{members.length}</span>
+        </div>
         <MemberList
           state={state}
           members={members}
-          collaboratorsByContactId={collaboratorsByContactId}
           collaboratorsById={collaboratorsById}
           onStartTraining={onStartTraining}
         />
-      )}
+      </section>
+
+      {showRarityOverview ? <RarityOverview state={state} /> : null}
     </main>
   );
 }

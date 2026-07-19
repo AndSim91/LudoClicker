@@ -115,9 +115,13 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["tiamat-instructor"] === "number" &&
     typeof state.upgrades?.["extra-form"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
+    typeof state.automation?.lessonBuffer === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     typeof state.automation?.agonistCoursesEnabled === "boolean" &&
+    (state.automation?.lastImprovedAthlete === undefined ||
+      typeof state.automation.lastImprovedAthlete === "string") &&
     typeof state.statistics?.automatedCharacters === "number" &&
+    typeof state.statistics?.socialTrials === "number" &&
     typeof state.statistics?.socialCampaigns === "number" &&
     typeof state.statistics?.formsCompleted === "number" &&
     typeof state.statistics?.membersDeparted === "number" &&

@@ -83,6 +83,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
       automation: migrated.automation ?? {
         lastProcessedAt: migrated.lastSavedAt ?? migrated.createdAt ?? Date.now(),
         writingBuffer: 0,
+        lessonBuffer: 0,
         socialBuffer: 0,
         equipmentBuffer: 0,
         offlineContactBuffer: 0,
@@ -99,6 +100,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         collaboratorsRecruited: migrated.statistics.collaboratorsRecruited ?? 0,
         automatedCharacters: migrated.statistics.automatedCharacters ?? 0,
         socialContacts: migrated.statistics.socialContacts ?? 0,
+        socialTrials: migrated.statistics.socialTrials ?? 0,
       } as GameState["statistics"],
     };
   }

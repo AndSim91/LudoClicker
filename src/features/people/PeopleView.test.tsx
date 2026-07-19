@@ -19,15 +19,17 @@ describe("PeopleView", () => {
       status: "enrolled" as const,
     }));
 
-    render(<PeopleView
-      state={{
-        ...initial,
-        contacts,
-        school: { ...initial.school, activeMembers: contacts.length },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts,
+          school: { ...initial.school, activeMembers: contacts.length },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
     expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(75);
@@ -60,16 +62,18 @@ describe("PeopleView", () => {
     }));
     const intervalSpy = vi.spyOn(window, "setInterval");
 
-    render(<PeopleView
-      state={{
-        ...initial,
-        contacts,
-        school: { ...initial.school, activeMembers: contacts.length },
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts,
+          school: { ...initial.school, activeMembers: contacts.length },
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getAllByRole("progressbar")).toHaveLength(2);
     expect(intervalSpy).toHaveBeenCalledTimes(1);
@@ -80,16 +84,20 @@ describe("PeopleView", () => {
     const initial = createInitialState(1_000);
     const contacts = initial.contacts.map((contact, index) => ({
       ...contact,
-      status: index < 3 ? "enrolled" as const : "departed" as const,
+      status: index < 3 ? ("enrolled" as const) : ("departed" as const),
     }));
 
-    render(<PeopleView
-      state={{ ...initial, contacts, school: { ...initial.school, activeMembers: 3 } }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{ ...initial, contacts, school: { ...initial.school, activeMembers: 3 } }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
-    expect(screen.getByRole("tab", { name: "Iscritti attivi (3)" })).toBeVisible();
+    const membersHeading = screen.getByRole("heading", { name: "Iscritti attivi" });
+    expect(membersHeading).toBeVisible();
+    expect(membersHeading.parentElement).toHaveTextContent("3");
     expect(screen.getAllByText("Iscritto")).toHaveLength(3);
     expect(screen.queryByText("Ha lasciato la scuola")).not.toBeInTheDocument();
   });
@@ -97,9 +105,22 @@ describe("PeopleView", () => {
   it("keeps advanced roster concepts hidden for the first member", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
-    render(<PeopleView state={{ ...initial, school: { ...initial.school, activeMembers: 1, historicMembers: 1 }, contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact), unlocks: { ...initial.unlocks, forms: true } }} onAssign={() => undefined} onStartTraining={() => undefined} />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
-    expect(screen.queryByRole("tab", { name: /Collaboratori/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Collaboratori" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Sistema di rarità" })).not.toBeInTheDocument();
   });
 
@@ -142,7 +163,11 @@ describe("PeopleView", () => {
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
       "Effettiva base mail → iscritto: 17,5%",
     );
-    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
+    const collaboratorsHeading = screen.getByRole("heading", { name: "Collaboratori" });
+    const membersHeading = screen.getByRole("heading", { name: "Iscritti attivi" });
+    expect(collaboratorsHeading.compareDocumentPosition(membersHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(screen.getByText("Andrea Simonazzi")).toHaveClass("rarity-legendary");
     expect(screen.getByText("VIP")).toBeVisible();
     expect(screen.getByRole("img", { name: /Forma 1 — emblema ufficiale/ })).toBeVisible();
@@ -158,54 +183,69 @@ describe("PeopleView", () => {
     expect(onAssign).toHaveBeenCalledWith("collaborator-1", "writing");
   });
 
-  it("shows Arena Tecnica toggle and writing/event progress", () => {
+  it("shows Arena Tecnica toggle and every collaborator automation progress", () => {
     const initial = createInitialState(1_000);
-    const collaborators = ["writing", "events"].map((assignment, index) => ({
+    const assignments = ["writing", "events", "lessons", "social", "equipment"] as const;
+    const collaborators = assignments.map((assignment, index) => ({
       id: `collaborator-${index}`,
       contactId: initial.contacts[index].id,
       displayName: `Collaboratore ${index}`,
       joinedAt: 1_000,
       forms: [],
       instructorForms: [],
-      assignment: assignment as "writing" | "events",
+      assignment,
       rarity: "ultra-rare" as const,
     }));
     const onToggleAgonistCourses = vi.fn();
-    render(<PeopleView
-      state={{
-        ...initial,
-        collaborators,
-        upgrades: { ...initial.upgrades, "technical-arena": 1 },
-        automation: { ...initial.automation, agonistCoursesEnabled: true },
-        acquisitionEvents: [{
-          id: "event-1",
-          definitionId: "public-demo",
-          title: "Lezioni all'aperto",
-          location: "Parco",
-          startedAt: 1_000,
-          resolvesAt: 11_000,
-          cost: 120,
-          peopleMet: 10,
-          demonstrationsGiven: 5,
-          contactReward: 2,
-          membersUsed: 2,
-          equipmentUsed: 4,
-          wearAdded: 6,
-          collaboratorId: "collaborator-1",
-          status: "running",
-        }],
-        unlocks: { ...initial.unlocks, collaborators: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-      onToggleAgonistCourses={onToggleAgonistCourses}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators,
+          upgrades: { ...initial.upgrades, "technical-arena": 1 },
+          automation: {
+            ...initial.automation,
+            agonistCoursesEnabled: true,
+            lessonBuffer: 0.25,
+            socialBuffer: 0.5,
+            equipmentBuffer: 0.75,
+            lastImprovedAthlete: "Mario Rossi",
+          },
+          equipment: { ...initial.equipment, wear: 42 },
+          acquisitionEvents: [
+            {
+              id: "event-1",
+              definitionId: "public-demo",
+              title: "Lezioni all'aperto",
+              location: "Parco",
+              startedAt: 1_000,
+              resolvesAt: 11_000,
+              cost: 120,
+              peopleMet: 10,
+              demonstrationsGiven: 5,
+              contactReward: 2,
+              membersUsed: 2,
+              equipmentUsed: 4,
+              wearAdded: 6,
+              collaboratorId: "collaborator-1",
+              status: "running",
+            },
+          ],
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleAgonistCourses={onToggleAgonistCourses}
+      />,
+    );
 
-    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
     expect(screen.getByText("Corso Agonisti")).toBeVisible();
     expect(screen.getByText(initial.emails[0].subject)).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
-    expect(screen.getAllByRole("progressbar")).toHaveLength(2);
+    expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
+    expect(screen.getByText("Prossima prova in palestra")).toBeVisible();
+    expect(screen.getByText("Usura attrezzatura: 42%")).toBeVisible();
+    expect(screen.getAllByRole("progressbar")).toHaveLength(5);
     fireEvent.click(screen.getByRole("checkbox", { name: "Attivo" }));
     expect(onToggleAgonistCourses).toHaveBeenCalledWith(false);
   });
@@ -224,7 +264,7 @@ describe("PeopleView", () => {
     };
     const state = {
       ...initial,
-      contacts: initial.contacts.map((contact) => contact.id === student.id ? student : contact),
+      contacts: initial.contacts.map((contact) => (contact.id === student.id ? student : contact)),
       collaborators: [
         {
           id: "collaborator-1",
@@ -241,12 +281,17 @@ describe("PeopleView", () => {
       unlocks: { ...initial.unlocks, collaborators: true, forms: true },
     };
 
-    render(<PeopleView state={state} onAssign={() => undefined} onStartTraining={() => undefined} />);
-    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
+    render(
+      <PeopleView state={state} onAssign={() => undefined} onStartTraining={() => undefined} />,
+    );
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
     expect(within(region).getByText(`${student.firstName} ${student.lastName}`)).toBeVisible();
-    expect(within(region).getByRole("progressbar", { name: `Formazione di ${student.firstName} ${student.lastName}` })).toHaveAttribute("aria-valuenow", "100");
+    expect(
+      within(region).getByRole("progressbar", {
+        name: `Formazione di ${student.firstName} ${student.lastName}`,
+      }),
+    ).toHaveAttribute("aria-valuenow", "100");
   });
 
   it("shows the total and pays all missing instructor certificates at once", () => {
@@ -276,7 +321,6 @@ describe("PeopleView", () => {
         onPayInstructorCertificates={onPayInstructorCertificates}
       />,
     );
-    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
     expect(within(region).getByText(/850,00/)).toBeVisible();
@@ -285,12 +329,14 @@ describe("PeopleView", () => {
     expect(onPayInstructorCertificates).toHaveBeenCalledWith(collaborator.id);
   });
 
-  it("shows a collaborator's learned path in the members tab", () => {
+  it("shows collaborators only in the collaborators list", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] };
     const state = {
       ...initial,
-      contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
+      contacts: initial.contacts.map((contact) =>
+        contact.id === enrolled.id ? enrolled : contact,
+      ),
       collaborators: [
         {
           id: "collaborator-1",
@@ -306,10 +352,19 @@ describe("PeopleView", () => {
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
-    render(<PeopleView state={state} onAssign={() => undefined} onStartTraining={() => undefined} />);
+    render(
+      <PeopleView state={state} onAssign={() => undefined} onStartTraining={() => undefined} />,
+    );
 
-    expect(screen.getByText("Forma 1", { exact: true })).toBeVisible();
-    expect(screen.queryByText(/Da iniziare/)).not.toBeInTheDocument();
+    const collaborators = screen.getByRole("region", { name: "Collaboratori delle Onde" });
+    const members = screen.getByRole("region", { name: "Iscritti" });
+    expect(
+      within(collaborators).getByText(`${enrolled.firstName} ${enrolled.lastName}`),
+    ).toBeVisible();
+    expect(within(collaborators).getByText("Forma 1", { exact: true })).toBeVisible();
+    expect(
+      within(members).queryByText(`${enrolled.firstName} ${enrolled.lastName}`),
+    ).not.toBeInTheDocument();
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {
@@ -321,15 +376,19 @@ describe("PeopleView", () => {
       arenaBase: 108.564,
       styleBase: 50,
     };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
     const arena = within(roster).getByText("108.564");
@@ -348,11 +407,25 @@ describe("PeopleView", () => {
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
     const displayName = `${enrolled.firstName} ${enrolled.lastName}`;
     const onStartTraining = vi.fn();
-    render(<PeopleView state={{ ...initial, school: { ...initial.school, activeMembers: 1, euros: 25 }, contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact), unlocks: { ...initial.unlocks, forms: true } }} onAssign={() => undefined} onStartTraining={onStartTraining} />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, euros: 25 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={onStartTraining}
+      />,
+    );
 
-    fireEvent.click(screen.getByRole("tab", { name: /Iscritti/ }));
     expect(screen.getByText("Rischio abbandono - alto")).toBeVisible();
-    expect(screen.queryByRole("combobox", { name: `Formazione per ${displayName}` })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", { name: `Formazione per ${displayName}` }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /Forma 1/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Paga e avvia/ }));
     expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
@@ -365,16 +438,20 @@ describe("PeopleView", () => {
       status: "enrolled" as const,
       forms: ["form-1"] as FormId[],
     };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1, euros: 50 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, euros: 50 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getAllByText("Forma 1", { exact: true })).toHaveLength(1);
   });
@@ -387,16 +464,20 @@ describe("PeopleView", () => {
       forms: ["form-1"] as FormId[],
       lastFormTrainingYear: 1,
     };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getByText("Hai raggiunto il limite di Forme per quest'anno")).toBeVisible();
     expect(screen.queryByText("Percorso completato alla Forma 7")).not.toBeInTheDocument();
@@ -409,23 +490,28 @@ describe("PeopleView", () => {
       { ...initial.contacts[1], status: "enrolled" as const, forms: ["form-3-long"] as FormId[] },
       { ...initial.contacts[2], status: "enrolled" as const, forms: ["form-6"] as FormId[] },
     ];
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: members.length },
-        contacts: initial.contacts.map((contact) => members.find((member) => member.id === contact.id) ?? contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: members.length },
+          contacts: initial.contacts.map(
+            (contact) => members.find((member) => member.id === contact.id) ?? contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getAllByText("Rischio abbandono - alto")).toHaveLength(1);
     expect(screen.getAllByText("Rischio abbandono - medio")).toHaveLength(1);
     expect(screen.getAllByText("Rischio abbandono - basso")).toHaveLength(1);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
-    expect(within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i))
-      .not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i),
+    ).not.toBeInTheDocument();
   });
 
   it("shows no risk after a member completes form training this school year", () => {
@@ -435,16 +521,20 @@ describe("PeopleView", () => {
       status: "enrolled" as const,
       lastFormTrainingYear: 1,
     };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getByText("Nessun rischio")).toBeVisible();
     expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
@@ -458,18 +548,24 @@ describe("PeopleView", () => {
       forms: ["form-1", "course-x", "form-2", "course-y"] as FormId[],
       formBranchPreferences: ["Spada Lunga", "Staffa"] as Array<"Spada Lunga" | "Staffa">,
     };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1, euros: 600 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, euros: 600 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
-    const trainingSelect = screen.getByRole("combobox", { name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}` });
+    const trainingSelect = screen.getByRole("combobox", {
+      name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
+    });
     expect(trainingSelect).toBeVisible();
     fireEvent.change(trainingSelect, { target: { value: "form-3-staff" } });
     expect(screen.getByRole("img", { name: /Forma 3/ })).toBeVisible();
@@ -478,16 +574,20 @@ describe("PeopleView", () => {
   it("shows the summer break instead of allowing Form training in July", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1, currentMonth: 7 },
-        contacts: initial.contacts.map((contact) => contact.id === enrolled.id ? enrolled : contact),
-        unlocks: { ...initial.unlocks, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={() => undefined}
-    />);
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 7 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
 
     expect(screen.getByText("Pausa estiva")).toBeVisible();
     expect(screen.getByText("Le Forme riprendono a settembre")).toBeVisible();
@@ -518,18 +618,21 @@ describe("PeopleView", () => {
       },
     };
     const onStartTraining = vi.fn();
-    render(<PeopleView
-      state={{
-        ...initial,
-        school: { ...initial.school, activeMembers: 1, currentMonth: 19, euros: 400 },
-        contacts: initial.contacts.map((contact) => contact.id === student.id ? student : contact),
-        collaborators: [instructor],
-        unlocks: { ...initial.unlocks, collaborators: true, forms: true },
-      }}
-      onAssign={() => undefined}
-      onStartTraining={onStartTraining}
-    />);
-    fireEvent.click(screen.getByRole("tab", { name: /Collaboratori/ }));
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 19, euros: 400 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === student.id ? student : contact,
+          ),
+          collaborators: [instructor],
+          unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={onStartTraining}
+      />,
+    );
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
     expect(within(region).getByRole("img", { name: /Corso X/ })).toBeVisible();

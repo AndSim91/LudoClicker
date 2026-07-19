@@ -166,7 +166,7 @@ describe("game engine: progression", () => {
     expect(automated.statistics.automatedCharacters).toBe(5);
   });
 
-  it("generates passive Social contacts and repairs equipment through assignments", () => {
+  it("generates direct Social trials and reduces equipment wear through assignments", () => {
     const initial = createInitialState(1_000);
     const socialCollaborator = {
       id: "collaborator-social",
@@ -198,10 +198,49 @@ describe("game engine: progression", () => {
       { type: "TICK", now: 2_000 },
     );
 
-    expect(automated.statistics.socialContacts).toBe(1);
+    expect(automated.statistics.socialContacts).toBe(0);
+    expect(automated.statistics.socialTrials).toBe(1);
+    expect(automated.automation.socialBuffer).toBeCloseTo(0.99 + 1 / 60 - 1);
     expect(automated.contacts).toHaveLength(initial.contacts.length + 1);
     expect(automated.contacts.at(-1)?.source).toBe("social");
+    expect(automated.contacts.at(-1)?.status).toBe("trialScheduled");
+    expect(automated.scheduledTrials).toHaveLength(1);
+    expect(automated.emails).toHaveLength(initial.emails.length);
     expect(automated.equipment.wear).toBe(4);
+    expect(automated.automation.equipmentBuffer).toBeCloseTo(0.05);
+  });
+
+  it("improves Arena or Style for one random enrolled athlete every lesson cycle", () => {
+    const initial = createInitialState(1_000);
+    const athlete = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      arenaBase: 50,
+      styleBase: 60,
+    };
+    const lessonCollaborator = {
+      id: "collaborator-lessons",
+      contactId: initial.contacts[1].id,
+      displayName: "Maestro Casuale",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "lessons" as const,
+      rarity: "ultra-rare" as const,
+    };
+    const automated = gameReducer({
+      ...initial,
+      contacts: [athlete],
+      collaborators: [lessonCollaborator],
+      automation: { ...initial.automation, lessonBuffer: 0.99 },
+    }, { type: "TICK", now: 2_000 });
+    const improved = automated.contacts[0];
+
+    expect((improved.arenaBase ?? 0) + (improved.styleBase ?? 0)).toBe(111);
+    expect(automated.automation.lastImprovedAthlete).toBe(
+      `${athlete.firstName} ${athlete.lastName}`,
+    );
+    expect(automated.automation.lessonBuffer).toBeLessThan(0.02);
   });
 
   it("runs paid Social campaigns after the ten-member unlock", () => {
