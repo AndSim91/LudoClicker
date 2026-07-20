@@ -72,7 +72,7 @@ interface AutomaticTeachingNoOp {
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
   agonistCoursesEnabled: boolean;
-  immuneContactIds: GameState["tournaments"]["immuneContactIds"];
+  tournamentQualification: GameState["tournaments"]["qualification"];
 }
 
 const automaticTeachingNoOpCache = new WeakMap<
@@ -91,7 +91,7 @@ function wasAutomaticTeachingNoOp(state: GameState): boolean {
     cached.upgrades === state.upgrades &&
     cached.formsUnlocked === state.unlocks.forms &&
     cached.agonistCoursesEnabled === state.automation.agonistCoursesEnabled &&
-    cached.immuneContactIds === state.tournaments.immuneContactIds
+    cached.tournamentQualification === state.tournaments.qualification
   );
 }
 
@@ -107,7 +107,7 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
     agonistCoursesEnabled: state.automation.agonistCoursesEnabled,
-    immuneContactIds: state.tournaments.immuneContactIds,
+    tournamentQualification: state.tournaments.qualification,
   });
 }
 

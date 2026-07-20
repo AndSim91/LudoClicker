@@ -546,14 +546,18 @@ describe("PeopleView", () => {
 
   it("lets enrolled members start a manual form training without an instructor", () => {
     const initial = createInitialState(1_000);
-    const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      enrolledMonth: 21,
+    };
     const displayName = `${enrolled.firstName} ${enrolled.lastName}`;
     const onStartTraining = vi.fn();
     render(
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1, euros: 25 },
+          school: { ...initial.school, activeMembers: 1, euros: 25, currentMonth: 21 },
           contacts: initial.contacts.map((contact) =>
             contact.id === enrolled.id ? enrolled : contact,
           ),
@@ -628,15 +632,15 @@ describe("PeopleView", () => {
   it("shows qualitative departure risk for members without current-year form training", () => {
     const initial = createInitialState(1_000);
     const members = [
-      { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] },
-      { ...initial.contacts[1], status: "enrolled" as const, forms: ["form-3-long"] as FormId[] },
-      { ...initial.contacts[2], status: "enrolled" as const, forms: ["form-6"] as FormId[] },
+      { ...initial.contacts[0], status: "enrolled" as const, enrolledMonth: 9, forms: [] as FormId[] },
+      { ...initial.contacts[1], status: "enrolled" as const, enrolledMonth: 9, forms: ["form-3-long"] as FormId[] },
+      { ...initial.contacts[2], status: "enrolled" as const, enrolledMonth: 9, forms: ["form-6"] as FormId[] },
     ];
     render(
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: members.length },
+          school: { ...initial.school, activeMembers: members.length, currentMonth: 21 },
           contacts: initial.contacts.map(
             (contact) => members.find((member) => member.id === contact.id) ?? contact,
           ),
@@ -656,18 +660,43 @@ describe("PeopleView", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows no risk after a member completes form training this school year", () => {
+  it("shows departure immunity for a January-August enrollment until September", () => {
     const initial = createInitialState(1_000);
     const enrolled = {
       ...initial.contacts[0],
       status: "enrolled" as const,
-      lastFormTrainingYear: 1,
+      enrolledMonth: 13,
     };
     render(
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1 },
+          school: { ...initial.school, activeMembers: 1, currentMonth: 18 },
+          contacts: [enrolled],
+          unlocks: { ...initial.unlocks, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText("Nuova iscrizione · immune fino a Settembre")).toBeVisible();
+    expect(screen.queryByText(/Rischio abbandono/)).not.toBeInTheDocument();
+  });
+
+  it("shows no risk after a member completes form training this school year", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      enrolledMonth: 9,
+      lastFormTrainingYear: 2,
+    };
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 21 },
           contacts: initial.contacts.map((contact) =>
             contact.id === enrolled.id ? enrolled : contact,
           ),
@@ -678,7 +707,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Nessun rischio")).toBeVisible();
+    expect(screen.getByText("Corso in palestra · immune al rinnovo annuale")).toBeVisible();
     expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
   });
 

@@ -622,11 +622,18 @@ Regole:
 
 ### 9.8 Abbandono degli iscritti ignorati
 
-Nel passaggio tra Giugno e Luglio, un iscritto che ha trascorso l'anno scolastico nella scuola senza iniziare alcuna formazione può lasciare la scuola. Sono sempre esclusi dal controllo:
+Nel passaggio tra Giugno e Luglio, un iscritto vulnerabile che non ha iniziato alcuna formazione durante l'anno scolastico appena concluso può lasciare la scuola. Le immunità degli atleti sono centralizzate e distinguono il controllo annuale dai futuri eventi imprevisti:
+
+| Motivo | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza |
+|---|---:|---:|---|
+| Iscrizione effettuata da Gennaio ad Agosto | Immune | Immune | Inizio di Settembre |
+| Qualificazione al prossimo torneo | Immune | Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
+| Forma, Corso X/Y o Corso Agonisti svolto nell'anno | Immune | Vulnerabile | Successivo controllo annuale |
+
+Le iscrizioni effettuate da Settembre a Dicembre non ricevono l'immunità da nuova iscrizione. Dopo la Champion's Arena la qualificazione viene azzerata: non essendoci un torneo successivo prima di Dicembre, gli atleti tornano vulnerabili salvo altre immunità attive. Sono inoltre sempre esclusi dal controllo annuale:
 
 - tutti i Leggendari, anche se ignorati per più anni;
 - i Collaboratori delle Onde non leggendari;
-- gli iscritti entrati a anno già iniziato;
 - chi ha iniziato una formazione durante l'anno, anche se non l'ha ancora completata.
 
 La probabilità annuale dipende dalla Forma numerata più alta completata. I Corsi X e Y non riducono da soli il rischio. Comuni, Rari e Ultra Rari seguono la curva ordinaria fino alla Forma 6; a Forma 7 si applicano valori specifici per rarità. I Leggendari hanno sempre probabilità 0%. Normalmente un Ultra Raro è già collaboratore dal Corso Y ed è quindi escluso da questo controllo.

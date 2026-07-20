@@ -556,7 +556,7 @@ describe("game engine: funnel", () => {
     const [ignored, trained, legendary, collaboratorMember, recent] = initial.contacts;
     const contacts = [
       { ...ignored, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 1 },
-      { ...trained, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 1, lastFormTrainingYear: 1 },
+      { ...trained, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 1, lastFormTrainingYear: 2 },
       {
         ...legendary,
         firstName: "Andrea",
@@ -567,13 +567,13 @@ describe("game engine: funnel", () => {
         enrolledMonth: 1,
       },
       { ...collaboratorMember, status: "enrolled" as const, rarity: "rare" as const, enrolledMonth: 1 },
-      { ...recent, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 2 },
+      { ...recent, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 21 },
     ];
     const state = {
       ...initial,
       randomSeed: 7,
       contacts,
-      school: { ...initial.school, activeMembers: 5, currentMonth: 18, nextFeeAt: 2_000 },
+      school: { ...initial.school, activeMembers: 5, currentMonth: 30, nextFeeAt: 2_000 },
       collaborators: [{
         id: "collaborator-protected",
         contactId: collaboratorMember.id,
@@ -612,10 +612,51 @@ describe("game engine: funnel", () => {
 
     const septemberState = gameReducer({
       ...state,
-      school: { ...state.school, currentMonth: 20 },
+      school: { ...state.school, currentMonth: 32 },
     }, { type: "TICK", now: 2_000 });
     expect(septemberState.statistics.membersDeparted).toBe(0);
     expect(septemberState.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
+  });
+
+  it("protects January-August enrollments until September, then removes immunity", () => {
+    const initial = createInitialState(1_000);
+    const [septemberMember, januaryMember] = initial.contacts;
+    const seasonalState = {
+      ...initial,
+      randomSeed: 7,
+      contacts: initial.contacts.map((contact, index) => index < 2
+        ? {
+            ...contact,
+            status: "enrolled" as const,
+            rarity: "common" as const,
+            enrolledMonth: index === 0 ? 9 : 13,
+          }
+        : { ...contact, status: "lost" as const }),
+      school: {
+        ...initial.school,
+        activeMembers: 2,
+        currentMonth: 18,
+        nextFeeAt: 2_000,
+      },
+    };
+
+    const firstRenewal = gameReducer(seasonalState, { type: "TICK", now: 2_000 });
+
+    expect(firstRenewal.contacts.find((contact) => contact.id === septemberMember.id)?.status).toBe("departed");
+    expect(firstRenewal.contacts.find((contact) => contact.id === januaryMember.id)?.status).toBe("enrolled");
+    expect(firstRenewal.statistics.membersDeparted).toBe(1);
+
+    const secondRenewal = gameReducer({
+      ...firstRenewal,
+      school: {
+        ...firstRenewal.school,
+        currentMonth: 30,
+        nextFeeAt: 3_000,
+      },
+    }, { type: "TICK", now: 3_000 });
+
+    expect(secondRenewal.contacts.find((contact) => contact.id === januaryMember.id)?.status).toBe("departed");
+    expect(secondRenewal.statistics.membersDeparted).toBe(2);
   });
 
   it("keeps trained and tournament-qualified members immune at annual renewal", () => {
@@ -640,6 +681,11 @@ describe("game engine: funnel", () => {
       },
       tournaments: {
         ...initial.tournaments,
+        qualification: {
+          level: "national" as const,
+          season: 1,
+          contactIds: [qualified.id],
+        },
         immuneContactIds: [qualified.id],
         missedTournaments: [{
           level: "national" as const,

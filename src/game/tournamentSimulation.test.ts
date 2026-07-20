@@ -7,6 +7,7 @@ import {
   getStyleVote,
 } from "./athleteStats";
 import { createInitialState, gameReducer } from "./engine";
+import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { departMembers } from "./membershipFlow";
 import {
   getEligibleSchoolContacts,
@@ -147,9 +148,47 @@ describe("tournament calendar and immunity", () => {
     const protectedId = getEligibleSchoolContacts(state)[0].id;
     const protectedState = {
       ...state,
-      tournaments: { ...state.tournaments, immuneContactIds: [protectedId] },
+      tournaments: {
+        ...state.tournaments,
+        qualification: {
+          level: "academy" as const,
+          season: 1,
+          contactIds: [protectedId],
+        },
+        immuneContactIds: [protectedId],
+      },
     };
     const departed = departMembers(protectedState, [protectedId]);
     expect(departed.contacts.find((entry) => entry.id === protectedId)?.status).toBe("enrolled");
+  });
+
+  it("removes tournament immunity after the Champion's Arena", () => {
+    const state = createTournamentSchool();
+    const protectedId = getEligibleSchoolContacts(state)[0].id;
+    const championsState = {
+      ...state,
+      school: { ...state.school, currentMonth: 23, nextFeeAt: 61_000 },
+      tournaments: {
+        ...state.tournaments,
+        qualification: {
+          level: "champions" as const,
+          season: 1,
+          contactIds: [protectedId],
+        },
+        immuneContactIds: [protectedId],
+      },
+    };
+
+    const processed = gameReducer(championsState, { type: "TICK", now: 61_000 });
+    const athlete = processed.contacts.find((contact) => contact.id === protectedId)!;
+    const immunity = getAthleteImmunityStatus({
+      currentMonth: processed.school.currentMonth,
+      tournamentQualification: processed.tournaments.qualification,
+    }, athlete);
+
+    expect(processed.tournaments.results.at(-1)?.level).toBe("champions");
+    expect(processed.tournaments.qualification).toBeUndefined();
+    expect(processed.tournaments.immuneContactIds).toEqual([]);
+    expect(immunity.reasons).toEqual([]);
   });
 });

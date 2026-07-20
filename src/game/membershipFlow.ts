@@ -1,10 +1,11 @@
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
-  getSchoolYear,
-  getSchoolYearStartMonth,
-  isSchoolYearDepartureMonth,
-} from "./calendar";
+  getAthleteImmunityStatus,
+  isAthleteImmuneFromDeparture,
+  type AthleteDepartureContext,
+} from "./athleteImmunity";
+import { isSchoolYearDepartureMonth } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
@@ -18,21 +19,33 @@ export function departMembers(
   state: GameState,
   memberIds: Iterable<string>,
   adjustActiveMembers = true,
+  departureContext: AthleteDepartureContext = "unexpected-event",
 ): GameState {
   const requestedIds = new Set(memberIds);
+  const collaboratorsByContactId = new Map(
+    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
+  );
+  const immunityContext = {
+    currentMonth: state.school.currentMonth,
+    tournamentQualification: state.tournaments.qualification,
+  };
   const departed = state.contacts.filter(
-    (contact) =>
-      contact.status === "enrolled" &&
-      contact.rarity !== "legendary" &&
-      !state.tournaments.immuneContactIds.includes(contact.id) &&
-      requestedIds.has(contact.id),
+    (contact) => {
+      const collaborator = collaboratorsByContactId.get(contact.id);
+      const immunity = getAthleteImmunityStatus(
+        immunityContext,
+        contact,
+        collaborator ?? contact,
+        Boolean(collaborator),
+      );
+      return contact.status === "enrolled" &&
+        requestedIds.has(contact.id) &&
+        !isAthleteImmuneFromDeparture(immunity, departureContext);
+    },
   );
   if (departed.length === 0) return state;
 
   const departedIds = new Set(departed.map((contact) => contact.id));
-  const collaboratorsByContactId = new Map(
-    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
-  );
   const retainedProgress = { ...state.legendaryCollaborators.retainedProgress };
   const departedProfileIds = new Set<SpecialCollaboratorId>();
   for (const member of departed) {
@@ -100,22 +113,26 @@ export function departMembers(
 
 function processMemberDepartures(
   state: GameState,
-  completedSchoolYear: number,
   now: number,
 ): GameState {
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
-  const firstMonthOfCompletedYear = getSchoolYearStartMonth(completedSchoolYear);
-  const eligibleMembers = state.contacts.filter((contact) =>
-    contact.status === "enrolled" &&
-    contact.rarity !== "legendary" &&
-    !state.tournaments.immuneContactIds.includes(contact.id) &&
-    !collaboratorsByContactId.has(contact.id) &&
-    (contact.enrolledMonth ?? state.school.currentMonth) <= firstMonthOfCompletedYear &&
-    (collaboratorsByContactId.get(contact.id)?.lastFormTrainingYear ??
-      contact.lastFormTrainingYear) !== completedSchoolYear
-  );
+  const immunityContext = {
+    currentMonth: state.school.currentMonth,
+    tournamentQualification: state.tournaments.qualification,
+  };
+  const eligibleMembers = state.contacts.filter((contact) => {
+    const collaborator = collaboratorsByContactId.get(contact.id);
+    const immunity = getAthleteImmunityStatus(
+      immunityContext,
+      contact,
+      collaborator ?? contact,
+      Boolean(collaborator),
+    );
+    return contact.status === "enrolled" &&
+      !isAthleteImmuneFromDeparture(immunity, "annual-rollout");
+  });
   if (eligibleMembers.length === 0) return state;
 
   let nextSeed = state.randomSeed;
@@ -143,6 +160,8 @@ function processMemberDepartures(
   const updated: GameState = departMembers(
     { ...state, randomSeed: nextSeed },
     departedIds,
+    true,
+    "annual-rollout",
   );
   const withNarrative: GameState = {
     ...updated,
@@ -188,7 +207,6 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
   let nextState = state;
   for (let period = 0; period < periods; period += 1) {
     const currentMonth = nextState.school.currentMonth;
-    const completedSchoolYear = getSchoolYear(currentMonth);
     nextState = processTournamentAtMonthEnd(
       nextState,
       currentMonth,
@@ -214,7 +232,7 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
       },
     };
     if (isSchoolYearDepartureMonth(currentMonth)) {
-      nextState = processMemberDepartures(nextState, completedSchoolYear, now + period);
+      nextState = processMemberDepartures(nextState, now + period);
     }
   }
   return nextState;

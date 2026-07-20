@@ -7,6 +7,10 @@ import {
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { getMemberAnnualDepartureChance } from "../../game/formulas";
+import {
+  getAthleteImmunityStatus,
+  type AthleteImmunityContext,
+} from "../../game/athleteImmunity";
 import type { Collaborator, Contact } from "../../game/types";
 import { formatFormPath } from "./peoplePresentation";
 
@@ -29,7 +33,7 @@ export interface MemberSort {
 export interface MemberSortContext {
   currentTrainingYear: number;
   annualTrainingLimit: number;
-  immuneContactIds: readonly string[];
+  immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   collaboratorsByContactId: ReadonlyMap<string, Collaborator>;
 }
@@ -68,11 +72,13 @@ function getNextFormLabel(contact: Contact, context: MemberSortContext): string 
 
 function getDisplayedRisk(contact: Contact, context: MemberSortContext): number {
   const student = getMemberStudent(contact, context);
-  if (
-    context.immuneContactIds.includes(contact.id) ||
-    contact.rarity === "legendary" ||
-    student.lastFormTrainingYear === context.currentTrainingYear
-  ) {
+  const immunity = getAthleteImmunityStatus(
+    context.immunityContext,
+    contact,
+    student,
+    context.collaboratorsByContactId.has(contact.id),
+  );
+  if (immunity.annualRollout) {
     return 0;
   }
   return getMemberAnnualDepartureChance(

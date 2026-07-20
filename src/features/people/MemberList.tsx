@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { getFormTrainingYear, getSchoolYear } from "../../game/calendar";
+import { getFormTrainingYear } from "../../game/calendar";
+import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import { getAnnualFormTrainingLimit } from "../../content/upgrades";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
@@ -77,14 +78,16 @@ export function MemberList({
   const [sort, setSort] = useState<MemberSort | null>(null);
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
-  const immuneContactIds = state.tournaments.immuneContactIds;
   const foundedSchools = state.network.schools.length;
-  const currentYear = getSchoolYear(currentMonth);
+  const immunityContext = useMemo(() => ({
+    currentMonth,
+    tournamentQualification: state.tournaments.qualification,
+  }), [currentMonth, state.tournaments.qualification]);
   const sortContext = useMemo(
     () => ({
       currentTrainingYear: getFormTrainingYear(currentMonth),
       annualTrainingLimit,
-      immuneContactIds,
+      immunityContext,
       foundedSchools,
       collaboratorsByContactId,
     }),
@@ -93,7 +96,7 @@ export function MemberList({
       currentMonth,
       annualTrainingLimit,
       foundedSchools,
-      immuneContactIds,
+      immunityContext,
     ],
   );
   const sortedMembers = useMemo(
@@ -175,6 +178,12 @@ export function MemberList({
         const collaborator = collaboratorsByContactId.get(contact.id);
         const memberStudent = collaborator ?? contact;
         const memberForms = memberStudent.forms;
+        const immunity = getAthleteImmunityStatus(
+          immunityContext,
+          contact,
+          memberStudent,
+          Boolean(collaborator),
+        );
         const hasVisibleStats = hasCompletedCourseX(memberForms);
         const preparation = hasVisibleStats
           ? getContactPreparation(contact, memberForms)
@@ -232,17 +241,11 @@ export function MemberList({
             <span className="member-status" data-label="Stato">
               <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
               <small>
-                {state.tournaments.immuneContactIds.includes(contact.id)
-                  ? "Qualificato · immune"
-                  : contact.rarity === "legendary"
-                    ? "Non soggetto ad abbandono"
-                    : memberStudent.lastFormTrainingYear === currentYear
-                      ? "Nessun rischio"
-                      : getMemberDepartureRiskLabel(
-                          memberForms,
-                          contact.rarity,
-                          state.network.schools.length,
-                        )}
+                {immunity.message ?? getMemberDepartureRiskLabel(
+                  memberForms,
+                  contact.rarity,
+                  state.network.schools.length,
+                )}
               </small>
               <small>
                 Esperienza tornei {getContactTournamentExperience(contact)} · +

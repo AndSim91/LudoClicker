@@ -207,7 +207,7 @@ export function migrateContentState(state: MigratableState): MigratableState {
       .slice(0, surplus)
       .map((contact) => contact.id);
     const reconciled: MigratableState = departureIds.length > 0
-      ? departMembers(migrated as GameState, departureIds, false)
+      ? departMembers(migrated as GameState, departureIds, false, "data-reconciliation")
       : migrated;
     migrated = {
       ...reconciled,

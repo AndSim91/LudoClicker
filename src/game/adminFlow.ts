@@ -76,7 +76,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
       .filter((contact) => contact.rarity !== "legendary")
       .slice(-requestedDepartures)
       .map((contact) => contact.id);
-    nextState = departMembers(state, departingIds, false);
+    nextState = departMembers(state, departingIds, false, "data-reconciliation");
     resolvedActiveMembers = nextState.contacts.filter(
       (contact) => contact.status === "enrolled",
     ).length;

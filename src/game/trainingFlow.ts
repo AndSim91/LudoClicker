@@ -20,6 +20,7 @@ import {
   hasFreeFormTraining,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
+import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
 import { getMemberAnnualDepartureChance } from "./formulas";
@@ -157,12 +158,17 @@ export function startAgonistCourse(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const capacity = selectInstructorCapacity(state);
   const cost = getAgonistCourseCost(state);
+  const immunity = student
+    ? getAthleteImmunityStatus({
+        currentMonth: state.school.currentMonth,
+        tournamentQualification: state.tournaments.qualification,
+      }, student)
+    : undefined;
   if (
     !student ||
     !instructor ||
     student.training ||
-    student.rarity === "legendary" ||
-    state.tournaments.immuneContactIds.includes(student.id) ||
+    immunity?.annualRollout ||
     getFormTrainingCount(student, trainingYear) !== 0 ||
     getAutomaticFormCandidates(student).length > 0 ||
     getMemberAnnualDepartureChance(
