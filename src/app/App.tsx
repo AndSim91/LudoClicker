@@ -126,7 +126,7 @@ export function App() {
     dispatch({ type: "UPDATE_PROFILE_NAME", displayName });
   };
   const forceGameUpdate = () => {
-    saveNow();
+    if (!saveNow()) return;
     const updateUrl = new URL(window.location.href);
     updateUrl.searchParams.set("refresh", Date.now().toString());
     window.location.replace(updateUrl);

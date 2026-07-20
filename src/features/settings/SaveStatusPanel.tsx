@@ -37,21 +37,26 @@ export function SaveStatusPanel({ status, onSaveNow }: SaveStatusPanelProps) {
     : status.phase === "pending"
       ? "clock"
       : "check";
+  const saveIntervalMinutes = GAME_CONFIG.saveIntervalMs / 60_000;
+  const saveIntervalLabel = saveIntervalMinutes === 1
+    ? "ogni minuto"
+    : `ogni ${saveIntervalMinutes} minuti`;
 
   return (
     <section
       className={`save-assurance is-${status.phase}`}
-      aria-live="polite"
       aria-label="Stato salvataggio"
     >
       <span className="save-assurance-icon"><Icon name={icon} /></span>
       <div>
-        <h2>{title}</h2>
-        <p>
-          {status.phase === "error"
-            ? "Il browser non ha potuto memorizzare la partita. Riprova ora."
-            : `${lastSaved} · Salvataggio automatico ogni ${GAME_CONFIG.saveIntervalMs / 60_000} minuto`}
-        </p>
+        <div role="status" aria-live="polite" aria-atomic="true">
+          <h2>{title}</h2>
+          <p>
+            {status.phase === "error"
+              ? "Il browser non ha potuto memorizzare la partita. Riprova ora."
+              : `${lastSaved} · Salvataggio automatico ${saveIntervalLabel}`}
+          </p>
+        </div>
         <small>
           {status.phase === "error"
             ? "Le modifiche restano in memoria finché questa pagina rimane aperta."

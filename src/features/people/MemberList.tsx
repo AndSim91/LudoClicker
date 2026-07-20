@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
@@ -14,8 +14,12 @@ import {
 } from "../../game/athleteStats";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import {
+  getMemberNextFormLabel,
+  getMemberStudent,
+  getMemberVisibleScore,
   sortMembers,
   type MemberSort,
+  type MemberSortContext,
   type MemberSortKey,
 } from "./memberSorting";
 
@@ -30,6 +34,31 @@ const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
 };
 
 const MEMBERS_PER_PAGE = 75;
+type MemberRarityFilter = "all" | Contact["rarity"];
+
+function uniqueSortedOptions(values: string[]): string[] {
+  return [...new Set(values)].sort((left, right) =>
+    left.localeCompare(right, "it", { numeric: true, sensitivity: "base" })
+  );
+}
+
+function getDisplayedMemberStatus(
+  contact: Contact,
+  context: MemberSortContext,
+): string {
+  const student = getMemberStudent(contact, context);
+  const immunity = getAthleteImmunityStatus(
+    context.immunityContext,
+    contact,
+    student,
+    context.collaboratorsByContactId.has(contact.id),
+  );
+  return immunity.message ?? getMemberDepartureRiskLabel(
+    student.forms,
+    contact.rarity,
+    context.foundedSchools,
+  );
+}
 
 function SortableHeader({
   label,
@@ -77,6 +106,14 @@ export function MemberList({
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
   const [sort, setSort] = useState<MemberSort | null>(null);
+  const [search, setSearch] = useState("");
+  const [rarityFilter, setRarityFilter] = useState<MemberRarityFilter>("all");
+  const [pathFilter, setPathFilter] = useState("all");
+  const [arenaMinimum, setArenaMinimum] = useState("");
+  const [styleMinimum, setStyleMinimum] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [nextFormFilter, setNextFormFilter] = useState("all");
+  const deferredSearch = useDeferredValue(search);
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const foundedSchools = state.network.schools.length;
@@ -100,11 +137,62 @@ export function MemberList({
       immunityContext,
     ],
   );
+  const filterOptions = useMemo(() => ({
+    paths: uniqueSortedOptions(members.map((contact) =>
+      formatFormPath(getMemberStudent(contact, sortContext).forms)
+    )),
+    statuses: uniqueSortedOptions(members.map((contact) =>
+      getDisplayedMemberStatus(contact, sortContext)
+    )),
+    nextForms: uniqueSortedOptions(members.map((contact) =>
+      getMemberNextFormLabel(contact, sortContext) ?? "Nessuna Forma disponibile"
+    )),
+  }), [members, sortContext]);
+  const filteredMembers = useMemo(() => {
+    const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
+    const minimumArena = arenaMinimum === "" ? undefined : Number(arenaMinimum);
+    const minimumStyle = styleMinimum === "" ? undefined : Number(styleMinimum);
+    return members.filter((contact) => {
+      const student = getMemberStudent(contact, sortContext);
+      const path = formatFormPath(student.forms);
+      const searchableText = `${contact.firstName} ${contact.lastName} ${contact.email}`
+        .toLocaleLowerCase("it-IT");
+      if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
+      if (rarityFilter !== "all" && contact.rarity !== rarityFilter) return false;
+      if (pathFilter !== "all" && path !== pathFilter) return false;
+      if (minimumArena !== undefined) {
+        const arena = getMemberVisibleScore(contact, "arena", sortContext);
+        if (arena === null || arena < minimumArena) return false;
+      }
+      if (minimumStyle !== undefined) {
+        const style = getMemberVisibleScore(contact, "style", sortContext);
+        if (style === null || style < minimumStyle) return false;
+      }
+      if (
+        statusFilter !== "all" &&
+        getDisplayedMemberStatus(contact, sortContext) !== statusFilter
+      ) return false;
+      const nextForm = getMemberNextFormLabel(contact, sortContext) ??
+        "Nessuna Forma disponibile";
+      if (nextFormFilter !== "all" && nextForm !== nextFormFilter) return false;
+      return true;
+    });
+  }, [
+    arenaMinimum,
+    deferredSearch,
+    members,
+    nextFormFilter,
+    pathFilter,
+    rarityFilter,
+    sortContext,
+    statusFilter,
+    styleMinimum,
+  ]);
   const sortedMembers = useMemo(
-    () => sortMembers(members, sort, sortContext),
-    [members, sort, sortContext],
+    () => sortMembers(filteredMembers, sort, sortContext),
+    [filteredMembers, sort, sortContext],
   );
-  const pageCount = Math.max(1, Math.ceil(members.length / MEMBERS_PER_PAGE));
+  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / MEMBERS_PER_PAGE));
   const page = Math.min(requestedPage, pageCount - 1);
   const firstMember = page * MEMBERS_PER_PAGE;
   const visibleMembers = sortedMembers.slice(firstMember, firstMember + MEMBERS_PER_PAGE);
@@ -135,6 +223,20 @@ export function MemberList({
         }
       : current,
     );
+  };
+  const updateFilter = (update: () => void) => {
+    setRequestedPage(0);
+    update();
+  };
+  const resetFilters = () => {
+    setSearch("");
+    setRarityFilter("all");
+    setPathFilter("all");
+    setArenaMinimum("");
+    setStyleMinimum("");
+    setStatusFilter("all");
+    setNextFormFilter("all");
+    setRequestedPage(0);
   };
 
   return (
@@ -174,6 +276,98 @@ export function MemberList({
           sort={sort}
           onSort={handleSort}
         />
+      </div>
+      <div className="member-filter-row" aria-label="Filtri iscritti">
+        <label>
+          <span className="sr-only">Cerca iscritto</span>
+          <input
+            type="search"
+            aria-label="Filtra iscritti per nome o email"
+            placeholder="Nome o email"
+            value={search}
+            onChange={(event) => updateFilter(() => setSearch(event.target.value))}
+          />
+        </label>
+        <label>
+          <span className="sr-only">Rarità iscritto</span>
+          <select
+            aria-label="Filtra iscritti per rarità"
+            value={rarityFilter}
+            onChange={(event) => updateFilter(() => setRarityFilter(event.target.value as MemberRarityFilter))}
+          >
+            <option value="all">Tutte le rarità</option>
+            {Object.entries(PERSON_RARITIES).map(([value, definition]) => (
+              <option value={value} key={value}>Rarità: {definition.label}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">Percorso iscritto</span>
+          <select
+            aria-label="Filtra iscritti per percorso"
+            value={pathFilter}
+            onChange={(event) => updateFilter(() => setPathFilter(event.target.value))}
+          >
+            <option value="all">Tutti i percorsi</option>
+            {filterOptions.paths.map((path) => (
+              <option value={path} key={path}>Percorso: {path}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">Arena minima</span>
+          <input
+            type="number"
+            min="0"
+            step="0.001"
+            aria-label="Filtra iscritti per Arena minima"
+            placeholder="Arena min."
+            value={arenaMinimum}
+            onChange={(event) => updateFilter(() => setArenaMinimum(event.target.value))}
+          />
+        </label>
+        <label>
+          <span className="sr-only">Stile minimo</span>
+          <input
+            type="number"
+            min="0"
+            step="0.001"
+            aria-label="Filtra iscritti per Stile minimo"
+            placeholder="Stile min."
+            value={styleMinimum}
+            onChange={(event) => updateFilter(() => setStyleMinimum(event.target.value))}
+          />
+        </label>
+        <label>
+          <span className="sr-only">Stato iscritto</span>
+          <select
+            aria-label="Filtra iscritti per stato"
+            value={statusFilter}
+            onChange={(event) => updateFilter(() => setStatusFilter(event.target.value))}
+          >
+            <option value="all">Tutti gli stati</option>
+            {filterOptions.statuses.map((status) => (
+              <option value={status} key={status}>Stato: {status}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">Prossima Forma</span>
+          <select
+            aria-label="Filtra iscritti per prossima Forma"
+            value={nextFormFilter}
+            onChange={(event) => updateFilter(() => setNextFormFilter(event.target.value))}
+          >
+            <option value="all">Tutte le prossime Forme</option>
+            {filterOptions.nextForms.map((nextForm) => (
+              <option value={nextForm} key={nextForm}>Prossima: {nextForm}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="member-filter-summary">
+        <span>{filteredMembers.length} di {members.length} iscritti</span>
+        <button type="button" onClick={resetFilters}>Azzera filtri</button>
       </div>
       {visibleMembers.map((contact) => {
         const collaborator = collaboratorsByContactId.get(contact.id);
@@ -268,6 +462,9 @@ export function MemberList({
           </div>
         );
       })}
+      {filteredMembers.length === 0 ? (
+        <div className="member-filter-empty">Nessun iscritto corrisponde ai filtri.</div>
+      ) : null}
       {pageCount > 1 ? (
         <nav className="list-pagination" aria-label="Pagine iscritti">
           <button

@@ -94,8 +94,8 @@ export function OverviewView({
             if (displayName) onUpdateProfileName(displayName);
           }}
         >
-            <label htmlFor="settings-display-name"><span>Nome e cognome</span><small>Firma usata nelle bozze e nelle nuove campagne.</small></label>
-            <input id="settings-display-name" name="displayName" required maxLength={GAME_CONFIG.profileNameMaxLength} defaultValue={state.profile.displayName} />
+            <div><label htmlFor="settings-display-name">Nome e cognome</label><small id="settings-display-name-help">Firma usata nelle bozze e nelle nuove campagne.</small></div>
+            <input id="settings-display-name" name="displayName" aria-describedby="settings-display-name-help" required maxLength={GAME_CONFIG.profileNameMaxLength} defaultValue={state.profile.displayName} />
           <button type="submit">Aggiorna nome</button>
         </form>
         </section>

@@ -41,6 +41,13 @@ export function useGameEngine() {
     return saved;
   }, []);
 
+  const dispatchAction = useCallback((action: GameAction) => {
+    if (action.type === "REPLACE_STATE" && pausedAtRef.current !== null) {
+      pausedAtRef.current = Date.now();
+    }
+    dispatch(action);
+  }, []);
+
   useLayoutEffect(() => {
     stateRef.current = state;
     if (observedStateRef.current !== state) {
@@ -69,7 +76,7 @@ export function useGameEngine() {
       tickId = window.setTimeout(() => {
         if (cancelled || pausedAtRef.current !== null) return;
         const stateBeforeTick = stateRef.current;
-        dispatch({ type: "TICK", now: Date.now() });
+        dispatchAction({ type: "TICK", now: Date.now() });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo
         // stesso oggetto di stato.
@@ -86,7 +93,7 @@ export function useGameEngine() {
       if (tickId !== undefined) window.clearTimeout(tickId);
       if (followUpId !== undefined) window.clearTimeout(followUpId);
     };
-  }, [isPaused, state]);
+  }, [dispatchAction, isPaused, state]);
 
   useEffect(() => {
     const saveScheduler = createSaveScheduler(stateRef.current, persistGame);
@@ -122,13 +129,6 @@ export function useGameEngine() {
     [],
   );
 
-  const dispatchAction = useCallback((action: GameAction) => {
-    if (action.type === "REPLACE_STATE" && pausedAtRef.current !== null) {
-      pausedAtRef.current = Date.now();
-    }
-    dispatch(action);
-  }, []);
-
   const getGameNow = useCallback(
     () => pausedAtRef.current ?? Date.now(),
     [],
@@ -139,16 +139,16 @@ export function useGameEngine() {
     const pausedAt = pausedAtRef.current;
 
     if (pausedAt === null) {
-      dispatch({ type: "TICK", now });
+      dispatchAction({ type: "TICK", now });
       pausedAtRef.current = now;
       setIsPaused(true);
       return;
     }
 
-    dispatch({ type: "RESUME_FROM_PAUSE", now, elapsedMs: now - pausedAt });
+    dispatchAction({ type: "RESUME_FROM_PAUSE", now, elapsedMs: now - pausedAt });
     pausedAtRef.current = null;
     setIsPaused(false);
-  }, []);
+  }, [dispatchAction]);
 
   return {
     state,

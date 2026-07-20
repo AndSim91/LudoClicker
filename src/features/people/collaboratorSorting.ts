@@ -27,14 +27,16 @@ function compareText(left: string, right: string): number {
 }
 
 function compareNullable(
-  left: number | null,
-  right: number | null,
+  left: string | number | null,
+  right: string | number | null,
   direction: CollaboratorSortDirection,
 ): number {
   if (left === null && right === null) return 0;
   if (left === null) return 1;
   if (right === null) return -1;
-  const comparison = left - right;
+  const comparison = typeof left === "string" && typeof right === "string"
+    ? compareText(left, right)
+    : Number(left) - Number(right);
   return direction === "ascending" ? comparison : -comparison;
 }
 
@@ -72,41 +74,19 @@ function getOfficialScore(
   return getContactPreparation(contact, collaborator.forms)[key];
 }
 
-function compareCollaborators(
-  left: Collaborator,
-  right: Collaborator,
-  sort: CollaboratorSort,
+function getSortValue(
+  collaborator: Collaborator,
+  key: CollaboratorSortKey,
   context: CollaboratorSortContext,
-): number {
-  if (sort.key === "name") {
-    const comparison = compareText(left.displayName, right.displayName);
-    return sort.direction === "ascending" ? comparison : -comparison;
-  }
-  if (sort.key === "assignment") {
-    const leftLabel = left.assignment
-      ? COLLABORATOR_ASSIGNMENT_LABELS[left.assignment]
+): string | number | null {
+  if (key === "name") return collaborator.displayName;
+  if (key === "assignment") {
+    return collaborator.assignment
+      ? COLLABORATOR_ASSIGNMENT_LABELS[collaborator.assignment]
       : null;
-    const rightLabel = right.assignment
-      ? COLLABORATOR_ASSIGNMENT_LABELS[right.assignment]
-      : null;
-    if (leftLabel === null && rightLabel === null) return 0;
-    if (leftLabel === null) return 1;
-    if (rightLabel === null) return -1;
-    const comparison = compareText(leftLabel, rightLabel);
-    return sort.direction === "ascending" ? comparison : -comparison;
   }
-  if (sort.key === "activity") {
-    return compareNullable(
-      getActivityValue(left, context),
-      getActivityValue(right, context),
-      sort.direction,
-    );
-  }
-  return compareNullable(
-    getOfficialScore(left, sort.key, context),
-    getOfficialScore(right, sort.key, context),
-    sort.direction,
-  );
+  if (key === "activity") return getActivityValue(collaborator, context);
+  return getOfficialScore(collaborator, key, context);
 }
 
 export function sortCollaborators(
@@ -116,9 +96,13 @@ export function sortCollaborators(
 ): Collaborator[] {
   if (!sort) return [...collaborators];
   return collaborators
-    .map((collaborator, index) => ({ collaborator, index }))
+    .map((collaborator, index) => ({
+      collaborator,
+      index,
+      value: getSortValue(collaborator, sort.key, context),
+    }))
     .sort((left, right) =>
-      compareCollaborators(left.collaborator, right.collaborator, sort, context) ||
+      compareNullable(left.value, right.value, sort.direction) ||
       left.index - right.index
     )
     .map(({ collaborator }) => collaborator);

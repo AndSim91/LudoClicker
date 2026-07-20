@@ -159,6 +159,76 @@ describe("PeopleView", () => {
     expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
   });
 
+  it("filters enrolled athletes using the values of their columns", () => {
+    const initial = createInitialState(1_000);
+    const members = [
+      {
+        ...initial.contacts[0],
+        id: "member-hidden",
+        firstName: "Carla",
+        lastName: "Base",
+        email: "carla@example.test",
+        status: "enrolled" as const,
+        rarity: "legendary" as const,
+        forms: [] as FormId[],
+      },
+      {
+        ...initial.contacts[1],
+        id: "member-high",
+        firstName: "Alba",
+        lastName: "Esperta",
+        email: "alba@example.test",
+        status: "enrolled" as const,
+        rarity: "common" as const,
+        forms: ["course-x" as const],
+        arenaBase: 90,
+        styleBase: 70,
+      },
+      {
+        ...initial.contacts[2],
+        id: "member-low",
+        firstName: "Bruno",
+        lastName: "Raro",
+        email: "bruno@example.test",
+        status: "enrolled" as const,
+        rarity: "rare" as const,
+        forms: ["course-x" as const],
+        arenaBase: 20,
+        styleBase: 30,
+      },
+    ];
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: members,
+          school: { ...initial.school, activeMembers: members.length },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Iscritti" });
+    expect(within(roster).getByRole("combobox", { name: "Filtra iscritti per rarità" })).toBeVisible();
+    expect(within(roster).getByRole("spinbutton", { name: "Filtra iscritti per Arena minima" })).toBeVisible();
+
+    fireEvent.change(within(roster).getByRole("combobox", { name: "Filtra iscritti per rarità" }), {
+      target: { value: "rare" },
+    });
+    expect(within(roster).getByText("Bruno Raro")).toBeVisible();
+    expect(within(roster).queryByText("Alba Esperta")).not.toBeInTheDocument();
+
+    fireEvent.click(within(roster).getByRole("button", { name: "Azzera filtri" }));
+    fireEvent.change(within(roster).getByRole("spinbutton", { name: "Filtra iscritti per Arena minima" }), {
+      target: { value: "50" },
+    });
+    expect(within(roster).getByText("Alba Esperta")).toBeVisible();
+    expect(within(roster).queryByText("Bruno Raro")).not.toBeInTheDocument();
+    expect(within(roster).queryByText("Carla Base")).not.toBeInTheDocument();
+    expect(within(roster).getByText("1 di 3 iscritti")).toBeVisible();
+  });
+
   it("uses one shared progress clock for multiple simultaneous trainings", () => {
     const initial = createInitialState(1_000);
     const contacts = initial.contacts.slice(0, 2).map((contact, index) => ({
@@ -415,6 +485,82 @@ describe("PeopleView", () => {
     });
     expect(within(roster).getByText("Bruno Eventi")).toBeVisible();
     expect(within(roster).queryByText("Carla Libera")).not.toBeInTheDocument();
+  });
+
+  it("sorts collaborator rows using column data in both directions", () => {
+    const initial = createInitialState(1_000);
+    const contacts = [
+      { ...initial.contacts[0], id: "contact-carla", arenaBase: 1, styleBase: 1 },
+      { ...initial.contacts[1], id: "contact-alba", arenaBase: 90, styleBase: 70 },
+      { ...initial.contacts[2], id: "contact-bruno", arenaBase: 20, styleBase: 30 },
+    ];
+    const collaborators = [
+      {
+        id: "collaborator-carla",
+        contactId: "contact-carla",
+        displayName: "Carla Base",
+        joinedAt: 1_000,
+        forms: [] as FormId[],
+        instructorForms: [] as FormId[],
+        assignment: null,
+        rarity: "ultra-rare" as const,
+      },
+      {
+        id: "collaborator-alba",
+        contactId: "contact-alba",
+        displayName: "Alba Esperta",
+        joinedAt: 1_000,
+        forms: ["course-x" as const],
+        instructorForms: [] as FormId[],
+        assignment: "writing" as const,
+        rarity: "legendary" as const,
+      },
+      {
+        id: "collaborator-bruno",
+        contactId: "contact-bruno",
+        displayName: "Bruno Tecnico",
+        joinedAt: 1_000,
+        forms: ["course-x" as const],
+        instructorForms: [] as FormId[],
+        assignment: "equipment" as const,
+        rarity: "ultra-rare" as const,
+      },
+    ];
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts,
+          collaborators,
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
+    const nameSort = within(roster).getByRole("button", {
+      name: "Ordina collaboratori per Collaboratore",
+    });
+    fireEvent.click(nameSort);
+    let rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Alba Esperta");
+    expect(rows[1]).toHaveTextContent("Bruno Tecnico");
+    expect(rows[2]).toHaveTextContent("Carla Base");
+
+    fireEvent.click(nameSort);
+    rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Carla Base");
+    expect(nameSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
+
+    fireEvent.click(within(roster).getByRole("button", {
+      name: "Ordina collaboratori per Arena",
+    }));
+    rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Bruno Tecnico");
+    expect(rows[1]).toHaveTextContent("Alba Esperta");
+    expect(rows[2]).toHaveTextContent("Carla Base");
   });
 
   it("shows Arena Tecnica toggle and every collaborator automation progress", () => {

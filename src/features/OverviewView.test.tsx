@@ -41,7 +41,8 @@ describe("OverviewView settings", () => {
     fireEvent.click(screen.getByRole("button", { name: "Importa salvataggio" }));
 
     expect(callbacks.onImport).toHaveBeenCalledWith("{\"version\":11}");
-    expect(screen.getByRole("status")).toHaveTextContent("Salvataggio importato correttamente");
+    expect(screen.getByText("Salvataggio importato correttamente."))
+      .toBeInTheDocument();
   });
 
   it("updates the email signature name", () => {
@@ -81,10 +82,25 @@ describe("OverviewView settings", () => {
     render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
 
     expect(screen.getByRole("heading", { name: "Partita salvata" })).toBeInTheDocument();
-    expect(screen.getByText(/Salvataggio automatico ogni 1 minuto/)).toBeInTheDocument();
+    expect(screen.getByText(/Salvataggio automatico ogni minuto/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Salva ora" }));
 
     expect(callbacks.onSaveNow).toHaveBeenCalledOnce();
+  });
+
+  it("makes a save failure explicit", () => {
+    render(
+      <OverviewView
+        view="settings"
+        state={createInitialState(1_000)}
+        {...callbacks}
+        saveStatus={{ ...callbacks.saveStatus, phase: "error" }}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Salvataggio non riuscito" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/Le modifiche restano in memoria/)).toBeInTheDocument();
   });
 
   it("shows prestige as coming soon and disables its controls", () => {

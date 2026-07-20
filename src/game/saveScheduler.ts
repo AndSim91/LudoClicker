@@ -46,11 +46,21 @@ export function createSaveScheduler(
     isDirty: () => revision !== savedRevision,
     start: (intervalMs, onNextSaveScheduled) => {
       onNextSaveScheduled?.(Date.now() + intervalMs);
+      let pendingSaveId: number | undefined;
       const intervalId = window.setInterval(() => {
-        saveNow();
+        const scheduledAt = Date.now();
         onNextSaveScheduled?.(Date.now() + intervalMs);
+        // Lascia terminare gli altri timer di gioco scattati nello stesso
+        // istante, così la fotografia include anche il loro stato più recente.
+        pendingSaveId = window.setTimeout(() => {
+          pendingSaveId = undefined;
+          saveNow(scheduledAt);
+        }, 0);
       }, intervalMs);
-      return () => window.clearInterval(intervalId);
+      return () => {
+        window.clearInterval(intervalId);
+        if (pendingSaveId !== undefined) window.clearTimeout(pendingSaveId);
+      };
     },
   };
 }

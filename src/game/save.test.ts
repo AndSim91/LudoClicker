@@ -37,6 +37,7 @@ describe("local save", () => {
     scheduler.markDirty(state);
 
     vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs);
+    vi.advanceTimersByTime(1);
 
     expect(persist).toHaveBeenCalledTimes(1);
     expect(persist).toHaveBeenCalledWith(
@@ -45,7 +46,8 @@ describe("local save", () => {
     );
     expect(scheduler.isDirty()).toBe(false);
 
-    vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs);
+    vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs - 1);
+    vi.advanceTimersByTime(1);
     expect(persist).toHaveBeenCalledTimes(2);
     expect(persist).toHaveBeenLastCalledWith(
       state,

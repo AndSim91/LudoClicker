@@ -23,6 +23,11 @@ import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
+import {
+  sortCollaborators,
+  type CollaboratorSort,
+  type CollaboratorSortKey,
+} from "./collaboratorSorting";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import {
   InstructorCompactActivity,
@@ -33,6 +38,35 @@ const COLLABORATORS_PER_PAGE = 25;
 type CollaboratorFilter = "all" | "unassigned" | Exclude<CollaboratorAssignment, null>;
 type ActivityFilter = "all" | "active" | "waiting";
 type StatsFilter = "all" | "visible" | "locked";
+
+function CollaboratorSortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+}: {
+  label: string;
+  sortKey: CollaboratorSortKey;
+  sort: CollaboratorSort | null;
+  onSort: (key: CollaboratorSortKey) => void;
+}) {
+  const active = sort?.key === sortKey;
+  return (
+    <span role="columnheader" aria-sort={active ? sort.direction : "none"}>
+      <button
+        type="button"
+        className={`collaborator-sort-button${active ? " is-active" : ""}`}
+        aria-label={`Ordina collaboratori per ${label}`}
+        onClick={() => onSort(sortKey)}
+      >
+        <span>{label}</span>
+        <span aria-hidden="true">
+          {active ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </span>
+  );
+}
 
 export function CollaboratorList({
   state,
@@ -58,6 +92,7 @@ export function CollaboratorList({
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all");
   const [statsFilter, setStatsFilter] = useState<StatsFilter>("all");
   const [levelFilter, setLevelFilter] = useState("all");
+  const [sort, setSort] = useState<CollaboratorSort | null>(null);
   const deferredSearch = useDeferredValue(search);
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
@@ -118,12 +153,22 @@ export function CollaboratorList({
     state,
     statsFilter,
   ]);
+  const sortContext = useMemo(() => ({
+    state,
+    contactsById,
+    activeEmail,
+    now,
+  }), [activeEmail, contactsById, now, state]);
+  const sortedCollaborators = useMemo(
+    () => sortCollaborators(filteredCollaborators, sort, sortContext),
+    [filteredCollaborators, sort, sortContext],
+  );
   const pageCount = Math.max(
     1,
     Math.ceil(filteredCollaborators.length / COLLABORATORS_PER_PAGE),
   );
   const page = Math.min(requestedPage, pageCount - 1);
-  const visibleCollaborators = filteredCollaborators.slice(
+  const visibleCollaborators = sortedCollaborators.slice(
     page * COLLABORATORS_PER_PAGE,
     (page + 1) * COLLABORATORS_PER_PAGE,
   );
@@ -150,6 +195,33 @@ export function CollaboratorList({
   const updateFilter = (update: () => void) => {
     setRequestedPage(0);
     update();
+  };
+  const handleSort = (key: CollaboratorSortKey) => {
+    setRequestedPage(0);
+    setSort((current) => current?.key === key
+      ? {
+          key,
+          direction: current.direction === "ascending" ? "descending" : "ascending",
+        }
+      : { key, direction: "ascending" },
+    );
+  };
+  const selectSort = (key: CollaboratorSortKey) => {
+    setRequestedPage(0);
+    setSort((current) => ({
+      key,
+      direction: current?.key === key ? current.direction : "ascending",
+    }));
+  };
+  const reverseSort = () => {
+    setRequestedPage(0);
+    setSort((current) => current
+      ? {
+          ...current,
+          direction: current.direction === "ascending" ? "descending" : "ascending",
+        }
+      : current,
+    );
   };
 
   return (
@@ -181,11 +253,48 @@ export function CollaboratorList({
         </div>
       ) : (
         <div className="collaborator-table">
-          <div className="collaborator-table-head" aria-hidden="true">
-            <span>Collaboratore</span>
-            <span>Assegnazione attuale</span>
-            <span>Attività</span>
-            <span>Arena / Stile</span>
+          <div className="collaborator-sort-mobile" aria-label="Ordina collaboratori">
+            <label>
+              <span>Ordina per</span>
+              <select
+                aria-label="Campo di ordinamento collaboratori"
+                value={sort?.key ?? ""}
+                onChange={(event) => selectSort(event.target.value as CollaboratorSortKey)}
+              >
+                <option value="" disabled>Seleziona</option>
+                <option value="name">Collaboratore</option>
+                <option value="assignment">Assegnazione</option>
+                <option value="activity">Attività</option>
+                <option value="arena">Arena</option>
+                <option value="style">Stile</option>
+              </select>
+            </label>
+            <button type="button" disabled={!sort} onClick={reverseSort}>
+              {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
+            </button>
+          </div>
+          <div className="collaborator-table-head">
+            <CollaboratorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />
+            <CollaboratorSortableHeader label="Assegnazione attuale" sortKey="assignment" sort={sort} onSort={handleSort} />
+            <CollaboratorSortableHeader label="Attività" sortKey="activity" sort={sort} onSort={handleSort} />
+            <span
+              className="collaborator-stat-sort"
+              role="columnheader"
+              aria-sort={sort?.key === "arena" || sort?.key === "style" ? sort.direction : "none"}
+            >
+              <button
+                type="button"
+                className={sort?.key === "arena" ? "is-active" : ""}
+                aria-label="Ordina collaboratori per Arena"
+                onClick={() => handleSort("arena")}
+              >Arena {sort?.key === "arena" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+              <button
+                type="button"
+                className={sort?.key === "style" ? "is-active" : ""}
+                aria-label="Ordina collaboratori per Stile"
+                onClick={() => handleSort("style")}
+              >Stile {sort?.key === "style" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+            </span>
             <span>Assegnazione</span>
             <span>Azioni</span>
           </div>

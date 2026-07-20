@@ -127,7 +127,7 @@
   border-bottom: 1px solid var(--line);
 }
 
-.settings-profile-row label,
+.settings-profile-row > div,
 .settings-toggle-row > span,
 .settings-data-row > span,
 .settings-import-row summary > span {
@@ -137,7 +137,7 @@
   gap: 2px;
 }
 
-.settings-profile-row label span,
+.settings-profile-row label,
 .settings-toggle-row strong,
 .settings-data-row strong,
 .settings-import-row summary strong {
@@ -329,7 +329,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .settings-profile-row label,
+  .settings-profile-row > div,
   .settings-profile-row input {
     grid-column: 1 / -1;
   }

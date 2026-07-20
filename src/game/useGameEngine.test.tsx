@@ -96,6 +96,7 @@ describe("useGameEngine pause", () => {
     expect(beforeInterval.lastSavedAt).toBe(1_000);
 
     act(() => vi.advanceTimersByTime(1));
+    act(() => vi.advanceTimersByTime(1));
     const afterInterval = JSON.parse(
       localStorage.getItem(STORAGE_KEYS.gameSave)!,
     );
@@ -129,6 +130,23 @@ describe("useGameEngine pause", () => {
     stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
     expect(stored.profile.displayName).toBe("Salvataggio in uscita");
     expect(result.current.saveStatus.phase).toBe("saved");
+  });
+
+  it("reports a storage failure without pretending the game is saved", () => {
+    const { result } = renderHook(() => useGameEngine());
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new Error("Storage unavailable");
+      });
+
+    act(() => result.current.dispatch({
+      type: "UPDATE_PROFILE_NAME",
+      displayName: "Modifica non salvata",
+    }));
+    act(() => result.current.saveNow());
+
+    expect(result.current.saveStatus.phase).toBe("error");
+    setItemSpy.mockRestore();
   });
 
   it("uses a one-second heartbeat while continuous automation is active", () => {
