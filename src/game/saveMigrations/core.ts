@@ -1,5 +1,6 @@
 import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../../content/upgrades";
 import { GAME_CONFIG } from "../config";
+import { createSecretLegendaryProgress } from "../legendaryAvailability";
 import type { GameState } from "../types";
 import type { MigratableState } from "./types";
 
@@ -191,10 +192,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         reputation: 0,
         schools: [],
         prestigeOfferSent: false,
-        secretLegendaries: {
-          "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
-          "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
-        },
+        secretLegendaries: createSecretLegendaryProgress(),
       },
     };
   }

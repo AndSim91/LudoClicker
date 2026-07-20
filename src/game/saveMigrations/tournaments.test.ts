@@ -1,8 +1,24 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 
 describe("tournament save migration", () => {
+  it("hydrates missing secret legendary progress from the catalogue", () => {
+    const saved = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    saved.network.secretLegendaries["marco-palena"].defeats = 2;
+    delete saved.network.secretLegendaries["lorenzo-todaro"];
+
+    const migrated = migrate(saved) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.network.secretLegendaries["marco-palena"].defeats).toBe(2);
+    expect(migrated.network.secretLegendaries["lorenzo-todaro"]).toEqual({
+      status: "external",
+      defeats: 0,
+      failedTrials: 0,
+    });
+  });
+
   it("adds stable athlete stats and initializes the competitive season", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 36;
@@ -15,7 +31,7 @@ describe("tournament save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(38);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.contacts[0].arenaBase).toBeGreaterThanOrEqual(1);
     expect(migrated.contacts[0].styleBase).toBeGreaterThanOrEqual(1);
     expect(migrated.contacts[0].tournamentExperience).toBe(0);

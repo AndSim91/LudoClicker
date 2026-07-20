@@ -1,3 +1,8 @@
+import type { SecretLegendaryId } from "../content/secretLegendaries";
+import type { TournamentSchoolId } from "../content/tournamentSchools";
+
+export type { SecretLegendaryId } from "../content/secretLegendaries";
+
 export type ContactStatus =
   | "available"
   | "writing"
@@ -17,8 +22,6 @@ export type SpecialCollaboratorId =
   | "guglielmo-oliveri"
   | "niccolo-efrati"
   | SecretLegendaryId;
-
-export type SecretLegendaryId = "marco-palena" | "lorenzo-todaro";
 
 export type PersonRarity = "common" | "rare" | "ultra-rare" | "legendary";
 export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
@@ -377,6 +380,7 @@ export interface TournamentParticipant {
   id: string;
   ownedContactId?: string;
   secretLegendaryId?: SecretLegendaryId;
+  schoolId?: TournamentSchoolId;
   firstName: string;
   lastName: string;
   schoolName: string;

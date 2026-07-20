@@ -1,6 +1,5 @@
 import type {
   PersonRarity,
-  SecretLegendaryId,
   TournamentDiscipline,
   TournamentLevel,
   TournamentRewardBonus,
@@ -121,106 +120,6 @@ export const TOURNAMENT_REWARDS: Record<
     3: { euros: 12_500, contacts: 0, bonus: { kind: "email", rarity: "legendary" } },
   },
 };
-
-export interface TournamentSchool {
-  name: string;
-  city: string;
-  nation: string;
-  academy?: string;
-}
-
-// Fotografia locale delle sedi pubbliche consultate nel luglio 2026.
-export const ALPHA_SCHOOLS: readonly TournamentSchool[] = [
-  { name: "Ordine della Cripta", city: "Milano", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine della Cripta", city: "Monza", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine degli Elementi", city: "Torino", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine delle Onde", city: "Genova", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine della Spirale", city: "Padova", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine di Minerva", city: "Pavia", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine dell'Equilibrio", city: "Pordenone", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine del Vento", city: "Trieste", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine degli Shardana", city: "Cagliari", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine della Loggia", city: "Brescia", nation: "Italia", academy: "Alpha" },
-  { name: "Scuola di Vicenza", city: "Vicenza", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine delle Mura", city: "Bergamo", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine dei Ronin", city: "Ravenna", nation: "Italia", academy: "Alpha" },
-  { name: "Ordine dei Ronin", city: "Cesena", nation: "Italia", academy: "Alpha" },
-];
-
-export const ITALIAN_SCHOOLS: readonly TournamentSchool[] = [
-  ...ALPHA_SCHOOLS,
-  ...[
-    "Busto Arsizio", "Magenta", "Varese", "Conegliano", "Rovigo", "Treviso",
-    "Bologna", "Ferrara", "Formigine", "Modena", "Reggio Emilia", "Firenze",
-    "Pisa", "Livorno", "Ponsacco", "Roma EUR", "Roma Africano", "Bracciano",
-    "Caserta", "Napoli",
-  ].map((city) => ({ name: `LudoSport ${city}`, city, nation: "Italia" })),
-];
-
-export const GLOBAL_SCHOOLS: readonly TournamentSchool[] = [
-  ...ITALIAN_SCHOOLS,
-  { name: "LudoSport Paris", city: "Parigi", nation: "Francia" },
-  { name: "LudoSport Madrid", city: "Madrid", nation: "Spagna" },
-  { name: "LudoSport Barcelona", city: "Barcellona", nation: "Spagna" },
-  { name: "LudoSport Berlin", city: "Berlino", nation: "Germania" },
-  { name: "LudoSport Dublin", city: "Dublino", nation: "Irlanda" },
-  { name: "LudoSport Brussels", city: "Bruxelles", nation: "Belgio" },
-  { name: "LudoSport London", city: "Londra", nation: "Regno Unito" },
-  { name: "LudoSport San Francisco", city: "San Francisco", nation: "Stati Uniti" },
-  { name: "LudoSport Boston", city: "Boston", nation: "Stati Uniti" },
-  { name: "LudoSport Lima", city: "Lima", nation: "Perù" },
-];
-
-export interface SecretLegendaryProfile {
-  id: SecretLegendaryId;
-  firstName: string;
-  lastName: string;
-  city: string;
-  academy: string;
-  schoolName: string;
-  arenaBase: number;
-  styleBase: number;
-  numericForms: number;
-  externalExperience: number;
-  specialty: "style" | "complete";
-}
-
-export const SECRET_LEGENDARIES: Record<SecretLegendaryId, SecretLegendaryProfile> = {
-  "marco-palena": {
-    id: "marco-palena",
-    firstName: "Marco",
-    lastName: "Palena",
-    city: "Torino",
-    academy: "Alpha",
-    schoolName: "Ordine degli Elementi",
-    arenaBase: 75,
-    styleBase: 90,
-    numericForms: 4,
-    externalExperience: 5,
-    specialty: "style",
-  },
-  "lorenzo-todaro": {
-    id: "lorenzo-todaro",
-    firstName: "Lorenzo",
-    lastName: "Todaro",
-    city: "Milano",
-    academy: "Alpha",
-    schoolName: "Ordine della Cripta",
-    arenaBase: 80,
-    styleBase: 80,
-    numericForms: 5,
-    externalExperience: 5,
-    specialty: "complete",
-  },
-};
-
-export const SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.1;
-
-export function getNpcSchoolPool(level: TournamentLevel): readonly TournamentSchool[] {
-  if (level === "academy") return ALPHA_SCHOOLS;
-  if (level === "national") return ITALIAN_SCHOOLS;
-  return GLOBAL_SCHOOLS;
-}
 
 export function getNextTournamentLevel(level: TournamentLevel): TournamentLevel | undefined {
   const index = TOURNAMENT_LEVEL_ORDER.indexOf(level);

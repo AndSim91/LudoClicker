@@ -1,4 +1,5 @@
-import { SECRET_LEGENDARIES, TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
+import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
 import { getGameYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";

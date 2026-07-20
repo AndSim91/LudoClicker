@@ -1,5 +1,6 @@
 import { createProspectEmail } from "../../content/prospectDirectory";
 import {
+  createSecretLegendaryProgress,
   isCataloguedLegendaryId,
   isSecretLegendaryId,
 } from "../legendaryAvailability";
@@ -138,6 +139,18 @@ function normalizeLegendaryAssignments(state: MigratableState): MigratableState 
 
 export function normalizeLegacySave(state: MigratableState): MigratableState {
   let migrated = state;
+
+  if (migrated.network) {
+    migrated = {
+      ...migrated,
+      network: {
+        ...migrated.network,
+        secretLegendaries: createSecretLegendaryProgress(
+          migrated.network.secretLegendaries,
+        ),
+      },
+    };
+  }
 
   if (migrated.contacts?.some((contact) => contact.email.endsWith(LEGACY_PROSPECT_EMAIL_DOMAIN))) {
     migrated = {

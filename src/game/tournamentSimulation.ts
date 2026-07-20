@@ -2,9 +2,15 @@ import { PROSPECT_FIRST_NAMES, PROSPECT_LAST_NAMES } from "../content/prospectDi
 import {
   SECRET_LEGENDARIES,
   SECRET_LEGENDARY_APPEARANCE_CHANCE,
+  getSecretLegendaryIdsForTournament,
+} from "../content/secretLegendaries";
+import {
+  getNpcSchoolPool,
+  getTournamentSchool,
+} from "../content/tournamentSchools";
+import {
   TOURNAMENT_DEFINITIONS,
   getNextTournamentLevel,
-  getNpcSchoolPool,
   getTournamentReward,
   type TournamentNpcProfile,
   type TournamentTier,
@@ -169,6 +175,7 @@ function createNpcCandidate(
   const school = schools[integer(cursor, 0, schools.length - 1)];
   return {
     id: `npc-${level}-${sequence}-${cursor.seed >>> 0}`,
+    schoolId: school.id,
     firstName,
     lastName,
     schoolName: school.name,
@@ -237,13 +244,15 @@ function createSecretParticipant(
   cursor: RandomCursor,
 ): TournamentParticipant {
   const profile = SECRET_LEGENDARIES[id];
+  const school = getTournamentSchool(profile.schoolId);
   return {
     id: `secret-${id}`,
     secretLegendaryId: id,
+    schoolId: school.id,
     firstName: profile.firstName,
     lastName: profile.lastName,
-    schoolName: profile.schoolName,
-    city: profile.city,
+    schoolName: school.name,
+    city: school.city,
     rarity: "secret-legendary",
     numericForms: profile.numericForms,
     experience: profile.externalExperience,
@@ -266,12 +275,13 @@ function createSecretParticipant(
 
 function maybeInsertSecretLegendary(
   state: GameState,
+  level: Exclude<TournamentLevel, "school">,
   participants: TournamentParticipant[],
   cursor: RandomCursor,
 ): TournamentParticipant[] {
   if (roll(cursor) >= SECRET_LEGENDARY_APPEARANCE_CHANCE) return participants;
-  const candidates = (Object.keys(SECRET_LEGENDARIES) as SecretLegendaryId[]).filter(
-    (id) => state.network.secretLegendaries[id].status === "external",
+  const candidates = getSecretLegendaryIdsForTournament(level).filter(
+    (id) => state.network.secretLegendaries[id]?.status === "external",
   );
   if (candidates.length === 0 || participants.length === 0) return participants;
   const id = candidates[integer(cursor, 0, candidates.length - 1)];
@@ -313,7 +323,7 @@ function createNpcParticipants(
       sequence += 1;
     }
   });
-  return maybeInsertSecretLegendary(state, participants, cursor).map((participant) => {
+  return maybeInsertSecretLegendary(state, level, participants, cursor).map((participant) => {
     if (
       participant.secretLegendaryId ||
       participant.schoolName !== state.school.name ||
@@ -323,7 +333,12 @@ function createNpcParticipants(
       school.name !== state.school.name || school.city !== state.school.city
     );
     return replacement
-      ? { ...participant, schoolName: replacement.name, city: replacement.city }
+      ? {
+          ...participant,
+          schoolId: replacement.id,
+          schoolName: replacement.name,
+          city: replacement.city,
+        }
       : participant;
   });
 }

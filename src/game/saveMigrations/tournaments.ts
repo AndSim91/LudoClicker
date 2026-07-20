@@ -1,4 +1,5 @@
 import { createStableFallbackStats } from "../athleteStats";
+import { createSecretLegendaryProgress } from "../legendaryAvailability";
 import type { GameState } from "../types";
 import type { MigratableState } from "./types";
 
@@ -25,10 +26,7 @@ export function migrateTournamentState(state: MigratableState): MigratableState 
     },
     network: state.network ? {
       ...state.network,
-      secretLegendaries: {
-        "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
-        "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
-      },
+      secretLegendaries: createSecretLegendaryProgress(),
     } : state.network,
     historyArchive: state.historyArchive
       ? {

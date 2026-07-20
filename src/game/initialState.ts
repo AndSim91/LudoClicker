@@ -5,6 +5,7 @@ import { createCampaign, createWelcomeMessage } from "./campaignContent";
 import { createInitialContacts } from "./contacts";
 import type { GameState, LegendaryCollaboratorProgress } from "./types";
 import { createEmptyHistoryArchive } from "./historyArchive";
+import { createSecretLegendaryProgress } from "./legendaryAvailability";
 
 export function createInitialState(
   now = Date.now(),
@@ -53,10 +54,7 @@ export function createInitialState(
       reputation: 0,
       schools: [],
       prestigeOfferSent: false,
-      secretLegendaries: {
-        "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
-        "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
-      },
+      secretLegendaries: createSecretLegendaryProgress(),
     },
     contacts,
     emails: [createCampaign(contacts[0], 0, now, displayName)],

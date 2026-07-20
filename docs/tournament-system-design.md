@@ -281,13 +281,16 @@ Accademico, Nazionale e Champion's hanno 64 partecipanti:
 
 Ambito delle scuole avversarie:
 
-- Accademico: scuole dell'Accademia Alpha;
-- Nazionale: scuole italiane;
-- Champion's: rete LudoSport+ globale.
+- Accademico: un record per ogni Ordine dell'Accademia Alpha, con le sedi dello
+  stesso Ordine consolidate;
+- Nazionale: un record per ogni altra Accademia italiana;
+- Champion's: un record per ogni nazione estera della rete LudoSport+.
 
 All'Accademico la scuola arriva sempre con i sei qualificati dello Scolastico. Dal Nazionale in avanti la rappresentanza dipende dai risultati ottenuti contro gli NPC. Se nessun atleta della scuola entra tra i sei qualificati complessivi, la scuola non prende parte ai tornei successivi della stagione.
 
-I nomi delle scuole vengono inclusi in una fotografia locale dei dati pubblici. Il gioco non usa Internet a runtime.
+I nomi delle scuole vengono inclusi in una fotografia locale dei dati pubblici.
+Ogni record possiede un ID stabile e appartiene a un solo livello del circuito.
+Il gioco non usa Internet a runtime.
 
 ## 9. Classifiche e qualificazioni
 
@@ -462,7 +465,9 @@ Le percentuali descrivono i candidati. La selezione per fascia può far emergere
 
 I Leggendari Segreti sono persone uniche, persistenti e reclutabili. Il colore semantico della rarità è marrone; la tonalità esatta deve rispettare il contrasto dell'interfaccia.
 
-Possono apparire nei tornei compatibili con città, nazione e Accademia. Al massimo uno appare nello stesso torneo.
+Ogni profilo fa riferimento all'ID di una scuola del catalogo e può apparire
+soltanto nel livello del circuito assegnato a quella scuola. Al massimo uno
+appare nello stesso torneo.
 
 Condizione di sconfitta:
 

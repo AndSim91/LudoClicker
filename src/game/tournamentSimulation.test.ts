@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getTournamentSchool } from "../content/tournamentSchools";
 import { addAdminMembers } from "./adminFlow";
 import {
   getContactBaseStats,
@@ -118,6 +119,10 @@ describe("tournament simulation", () => {
     const simulation = simulateTournament(state, "academy", 1, 421_000, owned);
     expect(simulation.result.participants).toHaveLength(64);
     expect(simulation.result.participants.filter((entry) => entry.ownedContactId)).toHaveLength(6);
+    expect(simulation.result.participants
+      .filter((entry) => !entry.ownedContactId)
+      .every((entry) => entry.schoolId && getTournamentSchool(entry.schoolId).level === "academy"))
+      .toBe(true);
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
   });
 });
