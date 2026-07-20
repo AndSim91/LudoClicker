@@ -195,7 +195,8 @@ export type UpgradeId =
   | "promiscuous-instructor"
   | "extra-form"
   | "tiamat-instructor"
-  | "pagosport";
+  | "pagosport"
+  | "divine-touch";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
 

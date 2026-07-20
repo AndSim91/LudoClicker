@@ -17,6 +17,7 @@ import {
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import {
   getAnnualFormTrainingLimit,
+  getUpgradeEffectTotal,
   hasFreeFormTraining,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
@@ -155,6 +156,7 @@ export function startAgonistCourse(
     collaborator.autoTeachingEnabled !== false
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const capacity = selectInstructorCapacity(state);
   const cost = getAgonistCourseCost(state);
   const immunity = student
@@ -198,7 +200,7 @@ export function startAgonistCourse(
           ...contact,
           training,
           lastFormTrainingYear: trainingYear,
-          formTrainingYearCount: 1,
+          formTrainingYearCount: annualTrainingLimit,
         }
         : contact),
   }, now);
@@ -396,8 +398,11 @@ export function startFormTraining(
     !initialBranchCompatible ||
     state.school.euros < trainingCost
   ) return state;
+  const instructorTeachingSpeed = instructor
+    ? 1 + getUpgradeEffectTotal(state.upgrades, "instructorTeachingSpeed")
+    : 1;
   const trainingSpeed = trainingInstructor
-    ? getCollaboratorProductivity(trainingInstructor, "instructor")
+    ? getCollaboratorProductivity(trainingInstructor, "instructor") * instructorTeachingSpeed
     : 1;
   const instructorTrainingDurationMultiplier = instructorTrack && collaborator
     ? getInstructorTrainingDurationMultiplier(state, collaborator)

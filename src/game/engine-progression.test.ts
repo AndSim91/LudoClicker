@@ -188,7 +188,7 @@ describe("game engine: progression", () => {
     const automated = gameReducer(
       {
         ...initial,
-        randomSeed: 10_359,
+        randomSeed: 12_955,
         school: { ...initial.school, activeMembers: 12 },
         collaborators: [socialCollaborator, equipmentCollaborator],
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
@@ -454,6 +454,39 @@ describe("game engine: progression", () => {
     expect(training.contacts[0].training?.formId).toBe("form-1");
     expect(training.contacts[0].training?.instructorId).toBeUndefined();
     expect(training.contacts[0].training?.completesAt).toBe(22_000);
+  });
+
+  it("applies Tocco Divino only when an Instructor teaches a Form", () => {
+    const initial = createInitialState(1_000);
+    const member = { ...initial.contacts[0], status: "enrolled" as const };
+    const instructor = {
+      id: "divine-instructor",
+      contactId: initial.contacts[1].id,
+      displayName: "Istruttore Divino",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: ["form-1" as const],
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, euros: 25 },
+      contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+      upgrades: { ...initial.upgrades, "divine-touch": 1 },
+    };
+
+    const training = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: member.id,
+      formId: "form-1",
+      now: 2_000,
+    });
+
+    expect(training.contacts[0].training?.instructorId).toBe(instructor.id);
+    expect(training.contacts[0].training?.completesAt).toBe(3_000);
   });
 
   it("assigns the Instructor role for free and charges explicit 200% qualifications", () => {

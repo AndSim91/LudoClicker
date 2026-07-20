@@ -3,7 +3,7 @@ import { GAME_CONFIG } from "../../game/config";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCurrency, formatPercent } from "../../shared/formatters";
 
 export interface CollaboratorAutomationPresentation {
   title: string;
@@ -78,7 +78,7 @@ export function getCollaboratorAutomationPresentation({
       title: `Prossimo rendimento · ${formatCurrency(
         state.school.activeMembers * GAME_CONFIG.socialIncomePerMember,
       )}`,
-      detail: `Ciclo base 60 s · ${Math.round(GAME_CONFIG.socialTrialChance * 100)}% prova · ${Math.round(GAME_CONFIG.socialContactChance * 100)}% nuovo contatto`,
+      detail: `Ciclo base 60 s · ${formatPercent(GAME_CONFIG.socialTrialChance)} prova · ${formatPercent(GAME_CONFIG.socialContactChance)} nuovo contatto`,
       progress: Math.min(100, Math.floor(state.automation.socialBuffer * 100)),
       progressLabel: "Progresso ciclo pubblicitario Social",
     };

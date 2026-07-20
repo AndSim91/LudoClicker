@@ -71,6 +71,7 @@ describe("instructor branch", () => {
       "extra-form",
       "tiamat-instructor",
       "pagosport",
+      "divine-touch",
     ]);
     expect(instructors.every((definition) => definition.requiredHistoricMembers === 35)).toBe(true);
     expect(instructors.map((definition) =>
@@ -84,7 +85,17 @@ describe("instructor branch", () => {
       [10_000],
       [8_000, 13_000, 21_000, 34_000],
       [55_000, 89_000, 144_000],
+      [1_000_000],
     ]);
+  });
+
+  it("applies Tocco Divino's exact +9999% teaching speed", () => {
+    const levels = {
+      ...createInitialUpgradeLevels(),
+      "divine-touch": 1,
+    };
+
+    expect(getUpgradeEffectTotal(levels, "instructorTeachingSpeed")).toBe(99.99);
   });
 
   it("caps PagoSport's annual slots at two and makes level three free", () => {

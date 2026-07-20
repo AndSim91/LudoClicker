@@ -103,6 +103,28 @@ describe("Corso Agonisti", () => {
     expect(free.school.euros).toBe(2_000);
   });
 
+  it("uses every annual Form slot even when upgrades provide more than one", () => {
+    const initial = arenaState(1);
+    const expandedPlan = {
+      ...initial,
+      upgrades: {
+        ...initial.upgrades,
+        "extra-form": 1,
+        pagosport: 2,
+      },
+    };
+
+    const started = startAgonistCourse(
+      expandedPlan,
+      expandedPlan.contacts[0].id,
+      expandedPlan.collaborators[0].id,
+      2_000,
+    );
+
+    expect(started.contacts[0].lastFormTrainingYear).toBe(1);
+    expect(started.contacts[0].formTrainingYearCount).toBe(4);
+  });
+
   it("can use an Instructor who is already in formation", () => {
     const initial = arenaState(1);
     const ready = {

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
-import type { FormId } from "../../game/types";
+import type { FormBranch, FormId } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
 afterEach(() => cleanup());
@@ -409,7 +409,7 @@ describe("PeopleView", () => {
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
     expect(screen.getByText("Prossimo rendimento · 0,00 €")).toBeVisible();
-    expect(screen.getByText("Ciclo base 60 s · 1% prova · 1% nuovo contatto")).toBeVisible();
+    expect(screen.getByText("Ciclo base 60 s · 0,25% prova · 1% nuovo contatto")).toBeVisible();
     expect(screen.getByText("Usura attrezzatura: 42%")).toBeVisible();
     expect(screen.getAllByRole("progressbar")).toHaveLength(5);
     fireEvent.click(screen.getByRole("checkbox", { name: "Attivo" }));
@@ -611,6 +611,58 @@ describe("PeopleView", () => {
     expect(screen.getByRole("img", { name: /Forma 1/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Paga e avvia/ }));
     expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
+  });
+
+  it("replaces manual training with every possible next Form when an Instructor is assigned", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: ["form-1", "course-x", "form-2", "course-y"] as FormId[],
+      formBranchPreferences: [
+        "Spada Lunga",
+        "Staffa",
+        "Doppia spada corta",
+      ] as FormBranch[],
+    };
+    const instructor = {
+      id: "assigned-instructor",
+      contactId: initial.contacts[1].id,
+      displayName: "Istruttore assegnato",
+      joinedAt: 1_000,
+      forms: ["form-1"] as FormId[],
+      instructorForms: ["form-1"] as FormId[],
+      assignment: "instructor" as const,
+      rarity: "ultra-rare" as const,
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 21 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === enrolled.id ? enrolled : contact,
+          ),
+          collaborators: [instructor],
+          unlocks: { ...initial.unlocks, forms: true, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const memberName = screen.getByText(`${enrolled.firstName} ${enrolled.lastName}`);
+    const memberRow = memberName.closest(".member-row");
+    expect(memberRow).not.toBeNull();
+    const trainingCell = within(memberRow as HTMLElement).getByText("Prossime Forme possibili")
+      .closest(".member-training-cell");
+
+    expect(trainingCell).toHaveTextContent("Forma 3 Spada Lunga");
+    expect(trainingCell).toHaveTextContent("Forma 3 Staffa");
+    expect(trainingCell).toHaveTextContent("Forma 3 Doppie Spade Corte");
+    expect(within(trainingCell as HTMLElement).queryByRole("button")).not.toBeInTheDocument();
+    expect(within(trainingCell as HTMLElement).queryByRole("combobox")).not.toBeInTheDocument();
   });
 
   it("does not repeat the current form label below its logo", () => {

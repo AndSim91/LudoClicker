@@ -1,5 +1,6 @@
 .training-locked,
 .training-progress,
+.training-future,
 .training-control,
 .training-control label {
   display: flex;
@@ -9,6 +10,7 @@
 
 .training-locked span,
 .training-progress > span,
+.training-future > span,
 .training-control label > span {
   color: var(--ink-muted);
   font-size: 11px;
@@ -29,6 +31,12 @@
 .training-form-choice {
   display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.training-future-options {
+  display: flex;
   flex-direction: column;
   gap: 5px;
 }

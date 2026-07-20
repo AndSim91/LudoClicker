@@ -10,7 +10,7 @@ import { GAME_CONFIG } from "../../game/config";
 import { getAverageWritingSeconds, getSourceSummaries } from "../../game/historyArchive";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import type { GameState } from "../../game/types";
-import { formatCurrency, formatTime } from "../../shared/formatters";
+import { formatCurrency, formatPercent, formatTime } from "../../shared/formatters";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 
 function percentage(value: number, total: number) {
@@ -84,7 +84,7 @@ export function ActivitiesView({
       </section> : null}
 
       {state.unlocks.social ? <section className="social-panel" aria-label="Campagne Social">
-        <div><Icon name="contact" /><span><strong>Social</strong><small>Ciclo base 60 s · {formatCurrency(GAME_CONFIG.socialIncomePerMember)} per iscritto · {Math.round(GAME_CONFIG.socialTrialChance * 100)}% prova · {Math.round(GAME_CONFIG.socialContactChance * 100)}% contatto</small></span></div>
+        <div><Icon name="contact" /><span><strong>Social</strong><small>Ciclo base 60 s · {formatCurrency(GAME_CONFIG.socialIncomePerMember)} per iscritto · {formatPercent(GAME_CONFIG.socialTrialChance)} prova · {formatPercent(GAME_CONFIG.socialContactChance)} contatto</small></span></div>
         <><div className="social-progress-label"><span>Prossimo rendimento · {formatCurrency(state.school.activeMembers * GAME_CONFIG.socialIncomePerMember)}</span><strong>{socialProgress}%</strong></div><ProgressBar className="social-progress" label="Progresso ciclo pubblicitario Social" value={socialProgress} /></>
         <button type="button" disabled={!canRunSocial} onClick={onRunSocialCampaign}>{socialAction}</button>
       </section> : null}

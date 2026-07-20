@@ -24,7 +24,7 @@
   /* Schema colori unico: rarità degli atleti. */
   --rarity-common-name: #242424;
   --rarity-common-mail-text: #242424;
-  --rarity-common-mail-background: #b3b3b3;
+  --rarity-common-mail-background: #e5e5e5;
   --rarity-common-avatar-text: #242424;
   --rarity-common-avatar-background: linear-gradient(145deg, #d6d6d6, #a1a1a1);
   --rarity-common-avatar-border: rgb(36 36 36 / 22%);
@@ -67,8 +67,7 @@
   --official-stat-50: #0f5fab;
   --official-stat-100: #6b3fa0;
   --official-stat-150: #986700;
-  --official-stat-200: #b42318;
-  --official-stat-250: #b42318;
+  --official-stat-225: #b42318;
   --official-stat-300: #0697b8;
   --official-stat-outline: #d49c04;
 }
@@ -114,8 +113,7 @@
   --official-stat-50: #a9cdf5;
   --official-stat-100: #d7b7ff;
   --official-stat-150: #ffd979;
-  --official-stat-200: #ffb4ab;
-  --official-stat-250: #ffb4ab;
+  --official-stat-225: #ffb4ab;
   --official-stat-300: #69d2e7;
   --official-stat-outline: #ffd979;
 }

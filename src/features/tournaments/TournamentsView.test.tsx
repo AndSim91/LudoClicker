@@ -173,7 +173,7 @@ describe("TournamentsView", () => {
     expect(preparedStats).toHaveLength(2);
     preparedStats.forEach((stat) => {
       expect(stat.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-150)");
-      expect(stat.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-200)");
+      expect(stat.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-225)");
     });
   });
 

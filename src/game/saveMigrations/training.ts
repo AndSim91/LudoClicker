@@ -117,5 +117,16 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
     };
   }
 
+  if (migrated.version === 41) {
+    migrated = {
+      ...migrated,
+      version: 42,
+      upgrades: {
+        ...createInitialUpgradeLevels(),
+        ...(migrated.upgrades ?? {}),
+      },
+    };
+  }
+
   return migrated;
 }

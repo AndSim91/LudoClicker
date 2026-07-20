@@ -460,7 +460,7 @@ Ipotesi iniziali:
 
 La **lezione di prova in palestra** non genera nuovi indirizzi: consuma una prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
-I **Social** sviluppano le capacità pubblicitarie della scuola. Ogni ciclo base di 60 secondi dei collaboratori assegnati accredita **€5 per iscritto attivo**; nello stesso ciclo esistono inoltre due possibilità indipendenti: **1%** di ottenere una prova diretta in palestra e **1%** di ottenere un nuovo contatto email. Le persone generate dal canale Social sono sempre almeno Rare. Le campagne pagate in Euro restano disponibili, usano piattaforme inventate e possono diventare casualmente virali.
+I **Social** sviluppano le capacità pubblicitarie della scuola. Ogni ciclo base di 60 secondi dei collaboratori assegnati accredita **€5 per iscritto attivo**; nello stesso ciclo esistono inoltre due possibilità indipendenti: **0,25%** di ottenere una prova diretta in palestra e **1%** di ottenere un nuovo contatto email. Le persone generate dal canale Social sono sempre almeno Rare. Le campagne pagate in Euro restano disponibili, usano piattaforme inventate e possono diventare casualmente virali.
 
 Lo **sparring esterno** è sempre disponibile come attività di sicurezza quando mancano contatti o denaro. Costa poco o nulla, ma produce soltanto pochi indirizzi.
 
@@ -628,7 +628,9 @@ Regole:
 - un Istruttore può iniziare o continuare una nuova formazione anche mentre insegna; in questo caso la durata è tripla rispetto alla velocità normale e torna normale quando non ha più allievi attivi o l'insegnamento automatico viene disabilitato;
 - una qualifica pregressa viene acquistata esplicitamente dal comando di formazione e costa il **200% del costo base**;
 - una nuova Forma appresa mentre si è Istruttore costa il **300% totale del costo base** e comprende la qualifica;
-- con un Istruttore disponibile l'allievo paga automaticamente il **25% del costo base**; senza Istruttore il level up manuale usa il costo base;
+- se nessun Collaboratore è assegnato al ruolo di Istruttore, il singolo allievo può iniziare manualmente la prossima Forma pagando il costo base;
+- se almeno un Collaboratore è assegnato al ruolo di Istruttore, il comando manuale scompare e la pagina Iscritti mostra al suo posto tutte le prossime Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto dall'automazione e, con un Istruttore compatibile, costano il **25% del costo base**;
+- completare il **Corso Agonisti** consuma tutti gli slot formativi ancora disponibili per l'atleta nell'anno corrente: la pagina Iscritti mostra il limite annuale raggiunto e l'atleta resta immune dall'abbandono annuale per quell'anno;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori, poi la prossima Forma secondo la progressione dalla Forma 1 verso l'alto e infine il contatto con `acquiredAt` più recente; a parità completa conserva l'ordine originale;
 - disattivare l'automazione o riassegnare l'Istruttore lascia terminare le lezioni già iniziate, ma non ne avvia altre;
 - **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti e tre i rami d'arma;
@@ -636,6 +638,7 @@ Regole:
 - **Extra Forma** è un potenziamento unico del ramo Istruttori e concede a ogni atleta della scuola un secondo slot di formazione nel periodo luglio–giugno;
 - **Istruttore Tiamat** ha quattro livelli molto costosi e, dopo Istruttore Promisquo, porta la capacità massima a sei allievi;
 - **PagoSport** segue Istruttore Tiamat: i primi due livelli concedono ciascuno uno slot di formazione annuale aggiuntivo, mentre il terzo rende gratuite tutte le Forme per allievi e collaboratori, comprese le qualifiche da Istruttore;
+- **Tocco Divino** è l'ultimo potenziamento del ramo Istruttori: costa **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore insegna le Forme agli allievi;
 - i completamenti automatici confluiscono in una notifica riepilogativa impilata.
 
 ### 9.8 Abbandono degli iscritti ignorati
@@ -730,7 +733,7 @@ Influenza caratteri per pressione e automazione.
 
 ### 10.5 Social
 
-L'automazione dei collaboratori Social completa un ciclo base ogni 60 secondi. Ogni ciclo genera €5 per iscritto attivo, ha l'1% di probabilità di portare una prova diretta in palestra e, con un tiro indipendente, l'1% di probabilità di aggiungere un contatto. Le persone generate dai Social non possono essere Comuni: sono sempre Rare, Ultra Rare o Leggendarie. Produttività, Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le campagne social manuali continuano a consumare Euro, usano piattaforme inventate e possono diventare casualmente virali.
+L'automazione dei collaboratori Social completa un ciclo base ogni 60 secondi. Ogni ciclo genera €5 per iscritto attivo, ha lo 0,25% di probabilità di portare una prova diretta in palestra e, con un tiro indipendente, l'1% di probabilità di aggiungere un contatto. Le persone generate dai Social non possono essere Comuni: sono sempre Rare, Ultra Rare o Leggendarie. Produttività, Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le campagne social manuali continuano a consumare Euro, usano piattaforme inventate e possono diventare casualmente virali.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
@@ -775,7 +778,7 @@ Tutti i potenziamenti vengono acquistati esclusivamente in Euro. Non esistono ri
 costoLivello = costoBase × crescita^(livelloCorrente)
 ```
 
-Il prototipo usa una crescita di **1,30** per livello. I prezzi base vanno da **€50** per i primi acquisti fino a **€6.500** per i sistemi avanzati, calibrati sulle quote mensili disponibili alla rispettiva soglia di iscritti.
+Il prototipo usa normalmente una crescita di **1,30** per livello. I potenziamenti avanzati possono usare costi espliciti per livello; il prezzo massimo è **€1.000.000** per Tocco Divino.
 
 Alcuni livelli richiedono anche soglie non spendibili, come numero di iscritti, eventi completati, collaboratori o Forme conosciute.
 
@@ -1737,7 +1740,7 @@ L'uso pubblico di un'interfaccia quasi identica a Outlook richiede attenzione a 
 - Gli eventi usano luoghi reali; meteo e giorno della settimana non influenzano i risultati.
 - I contatti possono esaurirsi.
 - Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
-- I collaboratori assegnati ai Social generano ogni 60 secondi base €5 per iscritto, con l'1% di probabilità di una prova e l'1% di probabilità indipendente di un contatto; tutte le persone generate dai Social sono almeno Rare e restano disponibili campagne pagate in Euro.
+- I collaboratori assegnati ai Social generano ogni 60 secondi base €5 per iscritto, con lo 0,25% di probabilità di una prova e l'1% di probabilità indipendente di un contatto; tutte le persone generate dai Social sono almeno Rare e restano disponibili campagne pagate in Euro.
 - Le piattaforme social sono inventate e possono produrre eventi virali.
 - Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari dall'iscrizione.
 - I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni, social e spade.

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-type OfficialStatToken = 0 | 50 | 100 | 150 | 200 | 250 | 300;
+type OfficialStatToken = 0 | 50 | 100 | 150 | 225 | 300;
 
 type OfficialStatStyle = CSSProperties & {
   "--official-stat-from": string;
@@ -40,14 +40,14 @@ export function getOfficialStatPresentation(value: number): OfficialStatPresenta
   if (safeValue < 150) {
     return { style: createStyle(100, 150, (safeValue - 100) / 50), outlined: false };
   }
-  if (safeValue < 200) {
-    return { style: createStyle(150, 200, (safeValue - 150) / 50), outlined: false };
-  }
-  if (safeValue < 250) {
-    return { style: createStyle(200, 250, 0), outlined: false };
+  if (safeValue < 225) {
+    return { style: createStyle(150, 225, (safeValue - 150) / 75), outlined: false };
   }
   if (safeValue < 300) {
-    return { style: createStyle(250, 300, (safeValue - 250) / 50), outlined: true };
+    return {
+      style: createStyle(225, 300, (safeValue - 225) / 75),
+      outlined: safeValue >= 275,
+    };
   }
   return { style: createStyle(300, 300, 0), outlined: true };
 }

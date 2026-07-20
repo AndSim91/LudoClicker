@@ -70,6 +70,7 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addAmount("Forme annue", "annualFormCapacity");
   addAmount("Rami per Istruttore", "instructorBranchCapacity");
   addAmount("Allievi per Istruttore", "instructorStudentCapacity");
+  addPercentage("Velocità insegnamento", "instructorTeachingSpeed");
 
   const agonistCourseTier = getUpgradeEffectTotal(state.upgrades, "agonistCourseTier");
   if (agonistCourseTier > 0) {

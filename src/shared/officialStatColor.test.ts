@@ -29,15 +29,14 @@ describe("getOfficialStatPresentation", () => {
     expectStop(75, 50, 100, "50%", "50%");
     expectStop(100, 100, 150, "100%", "0%");
     expectStop(125, 100, 150, "50%", "50%");
-    expectStop(150, 150, 200, "100%", "0%");
-    expectStop(175, 150, 200, "50%", "50%");
-    expectStop(200, 200, 250, "100%", "0%");
-    expectStop(249, 200, 250, "100%", "0%");
+    expectStop(150, 150, 225, "100%", "0%");
+    expectStop(187.5, 150, 225, "50%", "50%");
   });
 
-  it("adds the outline while moving to cyan from 250 onward", () => {
-    expectStop(250, 250, 300, "100%", "0%", true);
-    expectStop(275, 250, 300, "50%", "50%", true);
+  it("moves from red to cyan at 225 and adds the outline only from 275", () => {
+    expectStop(225, 225, 300, "100%", "0%");
+    expectStop(262.5, 225, 300, "50%", "50%");
+    expectStop(275, 225, 300, "33.333333333333336%", "66.66666666666666%", true);
     expectStop(300, 300, 300, "100%", "0%", true);
     expectStop(400, 300, 300, "100%", "0%", true);
   });

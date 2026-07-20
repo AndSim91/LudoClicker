@@ -100,6 +100,7 @@
 .rarity-address.rarity-common {
   color: var(--rarity-common-mail-text);
   background: var(--rarity-common-mail-background);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-common-name) 22%, transparent);
 }
 
 .rarity-address.rarity-rare {

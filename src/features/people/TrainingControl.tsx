@@ -318,6 +318,9 @@ export function TrainingControl({
   const annualTrainingAvailable =
     getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
   const collaborator = collaboratorsById.get(personId);
+  const hasAssignedInstructor = state.collaborators.some(
+    (candidate) => candidate.assignment === "instructor",
+  );
   const variantClass = variant === "compact" ? " training-compact" : "";
 
   if (!state.unlocks.forms) {
@@ -396,6 +399,21 @@ export function TrainingControl({
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
     return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Percorso completato alla {latestForm?.longName ?? "ultima Forma"}</strong></div>;
+  }
+
+  if (!collaborator && hasAssignedInstructor) {
+    return (
+      <div className={`training-future${variantClass}`}>
+        <span>
+          {available.length > 1 ? "Prossime Forme possibili" : "Prossima Forma"}
+        </span>
+        <div className="training-future-options">
+          {available.map((definition) => (
+            <TrainingFormPreview key={definition.id} definition={definition} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const needsSelection = qualificationDefinitions.length > 0 ||

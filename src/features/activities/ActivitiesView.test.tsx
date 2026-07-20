@@ -17,7 +17,7 @@ describe("ActivitiesView", () => {
       statistics: { ...initial.statistics, socialTrials: 3 },
     }} onRunSocialCampaign={onRunSocialCampaign} />);
 
-    expect(screen.getByText("Ciclo base 60 s · 5,00 € per iscritto · 1% prova · 1% contatto"))
+    expect(screen.getByText("Ciclo base 60 s · 5,00 € per iscritto · 0,25% prova · 1% contatto"))
       .toBeVisible();
     expect(screen.getByRole("progressbar", { name: "Progresso ciclo pubblicitario Social" }))
       .toHaveAttribute("aria-valuenow", "50");
