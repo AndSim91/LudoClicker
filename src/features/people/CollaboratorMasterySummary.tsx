@@ -7,7 +7,13 @@ import {
 } from "../../content/mastery";
 import type { Collaborator } from "../../game/types";
 
-export function CollaboratorMasterySummary({ collaborator }: { collaborator: Collaborator }) {
+export function CollaboratorMasterySummary({
+  collaborator,
+  defaultOpen = false,
+}: {
+  collaborator: Collaborator;
+  defaultOpen?: boolean;
+}) {
   const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
   const activeRole = collaborator.assignment;
   const activeProgress = activeRole
@@ -18,7 +24,11 @@ export function CollaboratorMasterySummary({ collaborator }: { collaborator: Col
     : `${activeProgress.currentXp}/${activeProgress.nextXp} XP`;
 
   return (
-    <details className="collaborator-mastery" aria-label={`Maestrie di ${collaborator.displayName}`}>
+    <details
+      className="collaborator-mastery"
+      aria-label={`Maestrie di ${collaborator.displayName}`}
+      open={defaultOpen || undefined}
+    >
       <summary>
         <span>Maestria operativa</span>
         <strong>

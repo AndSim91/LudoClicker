@@ -51,6 +51,17 @@ function getInstructorTeachingStudents(
   ];
 }
 
+function useInstructorTeachingEntries(state: GameState, instructorId: string) {
+  return useMemo(
+    () => getInstructorTeachingStudents(
+      state.contacts,
+      state.collaborators,
+      instructorId,
+    ),
+    [state.contacts, state.collaborators, instructorId],
+  );
+}
+
 function getTrainingProgress(
   training: NonNullable<FormStudent["training"]>,
   now: number,
@@ -118,6 +129,110 @@ function InstructorTeachingSummary({
   );
 }
 
+export function InstructorCompactStatus({
+  collaborator,
+  state,
+}: {
+  collaborator: Collaborator;
+  state: GameState;
+}) {
+  const teaching = useInstructorTeachingEntries(state, collaborator.id);
+  const enabled = collaborator.autoTeachingEnabled !== false;
+  const capacity = selectInstructorCapacity(state);
+
+  return (
+    <div className="instructor-compact-status" aria-label="Allievi seguiti">
+      {teaching.length > 0 ? teaching.map((entry) => (
+        <span className="instructor-compact-student" key={entry.id}>
+          <strong>{entry.displayName}</strong>
+          <small>{getTrainingCourseTitle(entry.training.formId)}</small>
+        </span>
+      )) : (
+        <span className="instructor-compact-student is-waiting">
+          <strong>{enabled ? "In attesa di un allievo" : "Lezioni in pausa"}</strong>
+          <small>0/{capacity} posti occupati</small>
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function InstructorCompactProgress({
+  collaborator,
+  state,
+}: {
+  collaborator: Collaborator;
+  state: GameState;
+}) {
+  const teaching = useInstructorTeachingEntries(state, collaborator.id);
+  const now = useGameTime(teaching.length > 0, 1_000);
+
+  if (teaching.length === 0) return <strong>—</strong>;
+
+  return (
+    <div className="instructor-compact-progress-list">
+      {teaching.map((entry) => {
+        const progress = getTrainingProgress(entry.training, now);
+        return (
+          <span className="instructor-compact-progress" key={entry.id}>
+            <strong>{progress}%</strong>
+            <ProgressBar
+              className="collaborator-progress-bar"
+              label={`Formazione di ${entry.displayName}`}
+              value={progress}
+            />
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+export function InstructorCompactTraining({
+  collaborator,
+  state,
+  onStartTraining,
+  onPayInstructorCertificates,
+  collaboratorsById,
+}: {
+  collaborator: Collaborator;
+  state: GameState;
+  onStartTraining: (personId: string, formId: FormId) => void;
+  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  collaboratorsById: Map<string, Collaborator>;
+}) {
+  const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
+  const instructorCertificatesCost = hasFreeFormTraining(state.upgrades)
+    ? 0
+    : getInstructorConversionCost(collaborator);
+
+  return (
+    <div className="instructor-compact-training" aria-label="Formazione istruttore">
+      {hasMissingInstructorCertificates ? (
+        <div className="instructor-compact-certification">
+          <span>Attestati · {formatCurrency(instructorCertificatesCost)}</span>
+          <button
+            type="button"
+            disabled={state.school.euros < instructorCertificatesCost}
+            onClick={() => onPayInstructorCertificates?.(collaborator.id)}
+          >
+            {instructorCertificatesCost === 0 ? "Ottieni attestati" : "Paga attestati"}
+          </button>
+        </div>
+      ) : null}
+      <TrainingControl
+        personId={collaborator.id}
+        displayName={collaborator.displayName}
+        student={collaborator}
+        state={state}
+        collaboratorsById={collaboratorsById}
+        onStartTraining={onStartTraining}
+        variant="compact"
+      />
+    </div>
+  );
+}
+
 export function InstructorPanel({
   collaborator,
   state,
@@ -135,14 +250,7 @@ export function InstructorPanel({
 }) {
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
-  const teaching = useMemo(
-    () => getInstructorTeachingStudents(
-      state.contacts,
-      state.collaborators,
-      collaborator.id,
-    ),
-    [state.contacts, state.collaborators, collaborator.id],
-  );
+  const teaching = useInstructorTeachingEntries(state, collaborator.id);
   const now = useGameTime(teaching.length > 0, 1_000);
   const enabled = collaborator.autoTeachingEnabled !== false;
   const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
@@ -199,6 +307,7 @@ export function TrainingControl({
   state,
   onStartTraining,
   collaboratorsById,
+  variant = "default",
 }: {
   personId: string;
   displayName: string;
@@ -206,6 +315,7 @@ export function TrainingControl({
   state: GameState;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
+  variant?: "default" | "compact";
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const now = useGameTime(Boolean(student.training), 1_000);
@@ -214,9 +324,10 @@ export function TrainingControl({
   const annualTrainingAvailable =
     getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
   const collaborator = collaboratorsById.get(personId);
+  const variantClass = variant === "compact" ? " training-compact" : "";
 
   if (!state.unlocks.forms) {
-    return <div className="training-locked"><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
+    return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
   }
   if (student.training) {
     const definition = isAgonistCourse(student.training.formId)
@@ -227,7 +338,7 @@ export function TrainingControl({
       : undefined;
     const progress = getTrainingProgress(student.training, now);
     return (
-      <div className="training-progress">
+      <div className={`training-progress${variantClass}`}>
         <span>
           {getTrainingCourseTitle(student.training.formId)}
           {definition?.branch ? ` — ${definition.branch}` : ""}
@@ -247,7 +358,7 @@ export function TrainingControl({
   const summerInstructorTraining = summerBreak &&
     collaborator?.assignment === "instructor";
   if (summerBreak && !summerInstructorTraining) {
-    return <div className="training-locked"><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
+    return <div className={`training-locked${variantClass}`}><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
   }
 
   const qualificationDefinitions = collaborator?.assignment === "instructor"
@@ -287,10 +398,10 @@ export function TrainingControl({
 
   if (academicallyAvailable.length === 0) {
     if (!annualTrainingAvailable) {
-      return <div className="training-locked"><strong>Hai raggiunto il limite di Forme per quest'anno</strong></div>;
+      return <div className={`training-locked${variantClass}`}><strong>Hai raggiunto il limite di Forme per quest'anno</strong></div>;
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
-    return <div className="training-locked"><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;
+    return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Percorso completato alla {latestForm?.title ?? "ultima Forma"}</strong></div>;
   }
 
   const needsSelection = qualificationDefinitions.length > 0 ||
@@ -321,7 +432,7 @@ export function TrainingControl({
           : `Paga e avvia · ${formatCurrency(selectedCost)}`;
 
   return (
-    <div className="training-control">
+    <div className={`training-control${variantClass}`}>
       <div className="training-form-choice">
         {needsSelection ? (
           <label>

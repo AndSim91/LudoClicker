@@ -345,7 +345,7 @@ describe("game engine: operations", () => {
     );
   });
 
-  it("can reencounter a Legendary before enrollment and falls back once all are enrolled", () => {
+  it("does not duplicate a Legendary already present and falls back to Ultra Rare", () => {
     const initial = createInitialState(1_000, "", false);
     const evaProfile = SPECIAL_COLLABORATORS.find((profile) => profile.id === "eva-parodi")!;
     const previousEncounter = {
@@ -402,10 +402,13 @@ describe("game engine: operations", () => {
       },
     }, { type: "TICK", now: 2_000 });
 
-    expect(reencountered.contacts.at(-1)?.specialProfileId).toBe("eva-parodi");
+    expect(reencountered.contacts.at(-1)).toMatchObject({
+      rarity: "ultra-rare",
+      specialProfileId: undefined,
+    });
     expect(reencountered.contacts.filter((contact) =>
       contact.specialProfileId === "eva-parodi",
-    )).toHaveLength(2);
+    )).toHaveLength(1);
     expect(afterEnrollment.contacts.at(-1)).toMatchObject({
       rarity: "ultra-rare",
       specialProfileId: undefined,

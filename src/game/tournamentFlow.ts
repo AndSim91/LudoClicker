@@ -1,10 +1,14 @@
 import { SECRET_LEGENDARIES, TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
-import { createAcquiredContacts, addLegendaryEncounters } from "./contacts";
 import { getGameYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
 import { addMessage } from "./stateUpdates";
+import {
+  applyTournamentRewards,
+  describeTournamentRewardBonus,
+  resolveTournamentRewardFallbacks,
+} from "./tournamentRewardFlow";
 import { getEligibleSchoolContacts, simulateTournament } from "./tournamentSimulation";
 import type {
   Contact,
@@ -77,9 +81,19 @@ export function scheduleSecretLegendaryTrial(
   const progress = state.network.secretLegendaries[id];
   if (progress.status !== "external") return state;
   const profile = SECRET_LEGENDARIES[id];
-  const contactId = makeGameId("secret", now, id);
+  const existingContact = state.contacts.find((contact) => contact.secretLegendaryId === id);
+  if (
+    existingContact?.status === "enrolled" ||
+    (existingContact && state.scheduledTrials.some(
+      (trial) => trial.contactId === existingContact.id && trial.status === "scheduled",
+    ))
+  ) return state;
+  const contactId = existingContact?.id ?? makeGameId("secret", now, id);
   const [resultSeed, nextSeed] = nextRandom(state.randomSeed);
-  const contact: Contact = {
+  const contact: Contact = existingContact ? {
+    ...existingContact,
+    status: "trialScheduled",
+  } : {
     id: contactId,
     firstName: profile.firstName,
     lastName: profile.lastName,
@@ -99,9 +113,11 @@ export function scheduleSecretLegendaryTrial(
   return {
     ...state,
     randomSeed: nextSeed,
-    contacts: [...state.contacts, contact],
+    contacts: existingContact
+      ? state.contacts.map((candidate) => candidate.id === contactId ? contact : candidate)
+      : [...state.contacts, contact],
     scheduledTrials: [...state.scheduledTrials, {
-      id: makeGameId("trial", now, id),
+      id: makeGameId("trial", now, `${id}-${progress.defeats + 1}`),
       contactId,
       startsAt: now,
       resolvesAt: now + GAME_CONFIG.secretLegendaryTrialDurationMs,
@@ -124,29 +140,6 @@ export function scheduleSecretLegendaryTrial(
     },
     statistics: { ...state.statistics, trialsBooked: state.statistics.trialsBooked + 1 },
   };
-}
-
-function applyTournamentRewards(state: GameState, result: TournamentResult, now: number): GameState {
-  const euros = result.rewards.reduce((total, reward) => total + reward.euros, 0);
-  const contactCount = result.rewards.reduce((total, reward) => total + reward.contacts, 0);
-  let nextState: GameState = {
-    ...state,
-    school: { ...state.school, euros: state.school.euros + euros },
-    statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + euros },
-  };
-  if (contactCount === 0) return nextState;
-  const acquired = createAcquiredContacts(nextState, contactCount, "tournament", now);
-  nextState = {
-    ...nextState,
-    randomSeed: acquired.nextSeed,
-    contacts: [...nextState.contacts, ...acquired.contacts],
-    legendaryCollaborators: addLegendaryEncounters(nextState.legendaryCollaborators, acquired.contacts),
-    statistics: {
-      ...nextState.statistics,
-      contactsAcquired: nextState.statistics.contactsAcquired + contactCount,
-    },
-  };
-  return nextState;
 }
 
 function recordMissedTournament(
@@ -187,16 +180,21 @@ function applyTournamentResult(
   nextSeed: number,
   now: number,
 ): GameState {
-  const nextLevel = getNextTournamentLevel(result.level);
-  const ownedQualifierIds = result.qualifiers.flatMap((qualifier) =>
+  const resolvedResult = resolveTournamentRewardFallbacks(state, result);
+  const nextLevel = getNextTournamentLevel(resolvedResult.level);
+  const ownedQualifierIds = resolvedResult.qualifiers.flatMap((qualifier) =>
     qualifier.ownedContactId ? [qualifier.ownedContactId] : []
   );
-  const participatingOwnedIds = new Set(result.participants.flatMap((participant) =>
+  const participatingOwnedIds = new Set(resolvedResult.participants.flatMap((participant) =>
     participant.ownedContactId ? [participant.ownedContactId] : []
   ));
-  const arenaWinner = result.participants.find((entry) => entry.id === result.arenaRanking[0]);
-  const styleWinner = result.participants.find((entry) => entry.id === result.styleRanking[0]);
-  const championOwned = result.level === "champions" &&
+  const arenaWinner = resolvedResult.participants.find(
+    (entry) => entry.id === resolvedResult.arenaRanking[0],
+  );
+  const styleWinner = resolvedResult.participants.find(
+    (entry) => entry.id === resolvedResult.styleRanking[0],
+  );
+  const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   let nextState: GameState = {
     ...state,
@@ -206,13 +204,13 @@ function applyTournamentResult(
       : contact),
     tournaments: {
       ...state.tournaments,
-      results: [...state.tournaments.results, result].slice(
+      results: [...state.tournaments.results, resolvedResult].slice(
         -GAME_CONFIG.recentTournamentResultsLimit,
       ),
       qualification: nextLevel && ownedQualifierIds.length > 0
         ? {
             level: nextLevel as Exclude<TournamentLevel, "school">,
-            season: result.season,
+            season: resolvedResult.season,
             contactIds: ownedQualifierIds,
           }
         : undefined,
@@ -221,20 +219,27 @@ function applyTournamentResult(
         state.tournaments.championsVictoryCurrentSchool || championOwned,
     },
   };
-  nextState = applyTournamentRewards(nextState, result, now);
-  for (const id of result.secretLegendaryDefeatedIds) {
+  nextState = applyTournamentRewards(nextState, resolvedResult, now);
+  for (const id of resolvedResult.secretLegendaryDefeatedIds) {
     nextState = scheduleSecretLegendaryTrial(nextState, id, now);
   }
-  const label = TOURNAMENT_DEFINITIONS[result.level].label;
-  const rewardEuros = result.rewards.reduce((total, reward) => total + reward.euros, 0);
-  const rewardContacts = result.rewards.reduce((total, reward) => total + reward.contacts, 0);
+  const label = TOURNAMENT_DEFINITIONS[resolvedResult.level].label;
+  const rewardEuros = resolvedResult.rewards.reduce(
+    (total, reward) => total + reward.euros,
+    0,
+  );
+  const rewardDetails = resolvedResult.rewards
+    .map(describeTournamentRewardBonus)
+    .filter((description) => description !== "Nessun bonus aggiuntivo");
   return addMessage(
     nextState,
     now,
     `${label} completato`,
     `${ownedQualifierIds.length} atlet${ownedQualifierIds.length === 1 ? "a qualificato" : "i qualificati"}` +
-      `${rewardEuros > 0 || rewardContacts > 0
-        ? `. Premi: € ${rewardEuros.toLocaleString("it-IT")} e ${rewardContacts} contatti.`
+      `${rewardEuros > 0 || rewardDetails.length > 0
+        ? `. Premi: € ${rewardEuros.toLocaleString("it-IT")}${rewardDetails.length > 0
+          ? ` · ${rewardDetails.join(" · ")}`
+          : ""}.`
         : "."}`,
     ownedQualifierIds.length > 0 || championOwned ? "positive" : "neutral",
     "focused",

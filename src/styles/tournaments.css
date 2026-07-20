@@ -199,6 +199,7 @@
 .group-stage,
 .knockout-stage,
 .podium-qualification-rail,
+.tournament-rewards,
 .tournament-hall {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -211,6 +212,7 @@
 .group-stage > h2,
 .knockout-stage > h2,
 .podium-qualification-rail > h2,
+.tournament-rewards > h2,
 .tournament-hall > header {
   margin: 0;
   padding: 15px 18px;
@@ -1235,6 +1237,84 @@
   font-size: 11px;
 }
 
+.tournament-rewards {
+  margin-top: 14px;
+}
+
+.tournament-rewards > div {
+  display: grid;
+  grid-template-columns: minmax(170px, .7fr) minmax(0, 1.5fr);
+  gap: 18px;
+  padding: 16px 18px;
+}
+
+.tournament-reward-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tournament-reward-summary span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.tournament-reward-summary small,
+.tournament-reward-list small {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.tournament-reward-summary strong {
+  color: var(--blue-700);
+  font-size: 16px;
+}
+
+.tournament-reward-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.tournament-reward-list article {
+  display: grid;
+  grid-template-columns: minmax(100px, .8fr) minmax(130px, 1.3fr) minmax(80px, .7fr) minmax(100px, .8fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tournament-reward-list article:last-child {
+  border-bottom: 0;
+}
+
+.tournament-reward-list article > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tournament-reward-list article > b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-reward-list article > span:not(:first-child) {
+  color: var(--blue-700);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
 .tournament-hall > div {
   display: flex;
   flex-direction: column;
@@ -1391,6 +1471,18 @@
     padding: 16px 0 0;
     border-top: 1px solid var(--line);
     border-left: 0;
+  }
+
+  .tournament-rewards > div {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-reward-list article {
+    grid-template-columns: minmax(95px, .8fr) minmax(100px, 1fr);
+  }
+
+  .tournament-reward-list article > span:not(:first-child) {
+    text-align: left;
   }
 
   .athlete-summary {

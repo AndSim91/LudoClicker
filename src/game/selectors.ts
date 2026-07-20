@@ -43,7 +43,7 @@ export function selectBusyInstructorIds(state: GameState): Set<string> {
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
   const capacity = selectInstructorCapacity(state);
   for (const collaborator of state.collaborators) {
-    if (collaborator.training) busy.add(collaborator.id);
+    if (collaborator.assignment !== "instructor") continue;
     if ((teachingCounts.get(collaborator.id) ?? 0) >= capacity) {
       busy.add(collaborator.id);
     }

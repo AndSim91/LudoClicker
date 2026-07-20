@@ -4,8 +4,14 @@ import type {
   TournamentMatch,
   TournamentParticipant,
   TournamentPodiumEntry,
+  TournamentReward,
   TournamentResult,
 } from "../../game/types";
+import {
+  describeTournamentRewardBonus,
+  getTournamentRewardBonus,
+} from "../../game/tournamentRewardFlow";
+import { formatCurrency } from "../../shared/formatters";
 import {
   knockoutStageLabel,
   levelShortLabel,
@@ -189,6 +195,61 @@ function PodiumList({
   );
 }
 
+function TournamentRewards({
+  result,
+  participantById,
+}: {
+  result: TournamentResult;
+  participantById: ReadonlyMap<string, TournamentParticipant>;
+}) {
+  const podiumByDiscipline: Record<TournamentReward["discipline"], readonly TournamentPodiumEntry[]> = {
+    arena: result.arenaPodium,
+    style: result.stylePodium,
+  };
+  const totalEuros = result.rewards.reduce((total, reward) => total + reward.euros, 0);
+  const totalRandomContacts = result.rewards.reduce((total, reward) => {
+    const bonus = getTournamentRewardBonus(reward);
+    return total + (bonus?.kind === "random-contacts" ? bonus.amount : 0);
+  }, 0);
+
+  return (
+    <section className="tournament-rewards" aria-labelledby="tournament-rewards-title">
+      <h2 id="tournament-rewards-title">Premi ricevuti</h2>
+      {result.rewards.length > 0 ? (
+        <div>
+          <div className="tournament-reward-summary">
+            <span><small>Totale premi</small><strong>{formatCurrency(totalEuros)}</strong></span>
+            <span><small>Contatti casuali</small><strong>+{totalRandomContacts}</strong></span>
+          </div>
+          <div className="tournament-reward-list">
+            {result.rewards.map((reward) => {
+              const podiumEntry = podiumByDiscipline[reward.discipline].find(
+                (entry) => entry.position === reward.position,
+              );
+              const participant = podiumEntry
+                ? participantById.get(podiumEntry.participantId)
+                : undefined;
+              return (
+                <article key={`${reward.discipline}-${reward.position}`}>
+                  <span>
+                    <strong>{reward.discipline === "arena" ? "Arena" : "Stile"}</strong>
+                    <small>{reward.position}° posto</small>
+                  </span>
+                  <b>{participantName(participant)}</b>
+                  <span>{formatCurrency(reward.euros)}</span>
+                  <span>{describeTournamentRewardBonus(reward)}</span>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <p className="empty-tournaments">Questo torneo non ha assegnato premi economici o contatti.</p>
+      )}
+    </section>
+  );
+}
+
 export function TournamentResults({
   result,
   results,
@@ -356,6 +417,8 @@ export function TournamentResults({
           </div>
         </div>
       </section>
+
+      <TournamentRewards result={result} participantById={participantById} />
     </div>
   );
 }

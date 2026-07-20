@@ -103,6 +103,31 @@ describe("Corso Agonisti", () => {
     expect(free.school.euros).toBe(2_000);
   });
 
+  it("can use an Instructor who is already in formation", () => {
+    const initial = arenaState(1);
+    const ready = {
+      ...initial,
+      collaborators: [{
+        ...initial.collaborators[0],
+        training: {
+          formId: "form-1" as const,
+          startedAt: 1_000,
+          completesAt: 100_000,
+        },
+      }],
+    };
+
+    const started = startAgonistCourse(
+      ready,
+      ready.contacts[0].id,
+      ready.collaborators[0].id,
+      2_000,
+    );
+
+    expect(started.contacts[0].training?.formId).toBe("agonist-course");
+    expect(started.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(3);
+  });
+
   it("does not start while a normal Form is still available", () => {
     const initial = arenaState(1);
     const withPathOpen = {

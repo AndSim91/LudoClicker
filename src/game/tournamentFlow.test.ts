@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getTournamentReward } from "../content/tournaments";
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
@@ -6,8 +7,12 @@ import {
   compactTournamentHistory,
   scheduleSecretLegendaryTrial,
 } from "./tournamentFlow";
+import {
+  applyTournamentRewards,
+  resolveTournamentRewardFallbacks,
+} from "./tournamentRewardFlow";
 import { getLegendaryEnrollmentChance, resolveTrial } from "./trialFlow";
-import type { TournamentResult } from "./types";
+import type { SpecialCollaboratorId, TournamentResult } from "./types";
 
 function findSeed(predicate: (roll: number) => boolean): number {
   for (let seed = 1; seed < 100_000; seed += 1) {
@@ -121,5 +126,162 @@ describe("secret legendary tournament trials", () => {
     });
     expect(rejected.contacts.find((contact) => contact.id === failureTrial.contactId)?.status)
       .toBe("lost");
+
+    const retried = scheduleSecretLegendaryTrial(rejected, "lorenzo-todaro", 40_000);
+    expect(retried.contacts.filter((contact) =>
+      contact.secretLegendaryId === "lorenzo-todaro",
+    )).toHaveLength(1);
+    expect(retried.scheduledTrials).toHaveLength(2);
+    expect(retried.scheduledTrials.at(-1)?.contactId).toBe(failureTrial.contactId);
+    expect(retried.contacts.find((contact) => contact.id === failureTrial.contactId)?.status)
+      .toBe("trialScheduled");
+  });
+});
+
+describe("tournament reward effects", () => {
+  it("uses the requested tournament reward catalogue", () => {
+    expect(getTournamentReward("academy", "arena", 1)).toMatchObject({
+      euros: 1_000,
+      contacts: 3,
+      bonus: { kind: "random-contacts", amount: 3 },
+    });
+    expect(getTournamentReward("national", "arena", 1)).toMatchObject({
+      euros: 5_000,
+      bonus: { kind: "trial", rarity: "ultra-rare" },
+    });
+    expect(getTournamentReward("national", "style", 2)).toMatchObject({
+      euros: 2_500,
+      bonus: { kind: "email", rarity: "ultra-rare" },
+    });
+    expect(getTournamentReward("champions", "arena", 1)).toMatchObject({
+      euros: 50_000,
+      bonus: { kind: "enrollment", rarity: "legendary" },
+    });
+  });
+
+  function rewardState() {
+    const initial = createInitialState(1_000, "Manager");
+    return {
+      ...initial,
+      contacts: initial.contacts.map((contact) => ({ ...contact, status: "enrolled" as const })),
+      emails: [],
+      school: {
+        ...initial.school,
+        activeMembers: initial.contacts.length,
+        historicMembers: initial.contacts.length,
+      },
+    };
+  }
+
+  function resultWithReward(reward: TournamentResult["rewards"][number]): TournamentResult {
+    return {
+      id: "reward-result",
+      level: "academy",
+      season: 1,
+      completedAt: 2_000,
+      participants: [],
+      matches: [],
+      groupStandings: [],
+      arenaRanking: [],
+      styleRanking: [],
+      arenaPodium: [],
+      stylePodium: [],
+      qualifiers: [],
+      rewards: [reward],
+      secretLegendaryDefeatedIds: [],
+    };
+  }
+
+  it("puts random tournament contacts into the email queue", () => {
+    const state = rewardState();
+    const rewarded = applyTournamentRewards(state, resultWithReward({
+      discipline: "arena",
+      position: 1,
+      euros: 1_000,
+      contacts: 3,
+      bonus: { kind: "random-contacts", amount: 3 },
+    }), 2_000);
+
+    const tournamentContacts = rewarded.contacts.filter((contact) => contact.source === "tournament");
+    expect(tournamentContacts).toHaveLength(3);
+    expect(rewarded.emails.some((email) => email.contactId === tournamentContacts[0].id)).toBe(true);
+    expect(tournamentContacts.filter((contact) => contact.status === "available")).toHaveLength(2);
+  });
+
+  it("creates guaranteed special contacts for email, trial and enrollment rewards", () => {
+    const emailState = applyTournamentRewards(rewardState(), resultWithReward({
+      discipline: "style",
+      position: 2,
+      euros: 2_500,
+      contacts: 0,
+      bonus: { kind: "email", rarity: "ultra-rare" },
+    }), 2_000);
+    const emailContact = emailState.contacts.at(-1)!;
+    expect(emailContact.rarity).toBe("ultra-rare");
+    expect(emailState.emails.at(-1)?.contactId).toBe(emailContact.id);
+
+    const trialState = applyTournamentRewards(rewardState(), resultWithReward({
+      discipline: "arena",
+      position: 1,
+      euros: 5_000,
+      contacts: 0,
+      bonus: { kind: "trial", rarity: "ultra-rare" },
+    }), 2_000);
+    expect(trialState.contacts.at(-1)?.rarity).toBe("ultra-rare");
+    expect(trialState.contacts.at(-1)?.status).toBe("trialScheduled");
+    expect(trialState.scheduledTrials).toHaveLength(1);
+
+    const enrollmentState = applyTournamentRewards(rewardState(), resultWithReward({
+      discipline: "arena",
+      position: 1,
+      euros: 50_000,
+      contacts: 0,
+      bonus: { kind: "enrollment", rarity: "legendary" },
+    }), 2_000);
+    expect(enrollmentState.contacts.at(-1)?.rarity).toBe("legendary");
+    expect(enrollmentState.contacts.at(-1)?.status).toBe("enrolled");
+    expect(enrollmentState.collaborators).toHaveLength(1);
+    expect(enrollmentState.school.activeMembers).toBe(rewardState().school.activeMembers + 1);
+  });
+
+  it("falls back to Ultra Rare when no standard Legendary profile is available", () => {
+    const state = rewardState();
+    const exhausted = {
+      ...state,
+      legendaryCollaborators: {
+        ...state.legendaryCollaborators,
+        enrolledProfileIds: [
+          "andrea-simonazzi",
+          "eva-parodi",
+          "andrea-ferrari",
+          "marco-gabriele-fedozzi",
+          "matteo-scarzello",
+          "chris-usai",
+          "guglielmo-oliveri",
+          "niccolo-efrati",
+        ] as SpecialCollaboratorId[],
+      },
+    };
+    const result = resultWithReward({
+      discipline: "arena",
+      position: 1,
+      euros: 50_000,
+      contacts: 0,
+      bonus: { kind: "enrollment", rarity: "legendary" },
+    });
+
+    const resolved = resolveTournamentRewardFallbacks(exhausted, result);
+    const rewarded = applyTournamentRewards(exhausted, result, 2_000);
+
+    expect(resolved.rewards[0].bonus).toEqual({
+      kind: "enrollment",
+      rarity: "ultra-rare",
+    });
+    expect(rewarded.contacts.at(-1)).toMatchObject({
+      rarity: "ultra-rare",
+      specialProfileId: undefined,
+      status: "enrolled",
+    });
+    expect(rewarded.collaborators).toHaveLength(exhausted.collaborators.length);
   });
 });

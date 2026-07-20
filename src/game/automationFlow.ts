@@ -23,6 +23,8 @@ import {
   createAcquiredContacts,
 } from "./contacts";
 import { repairEquipment } from "./equipment";
+import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
+import { getMemberAnnualDepartureChance } from "./formulas";
 import { nextRandom } from "./random";
 import { selectActiveEmail, selectInstructorCapacity } from "./selectors";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
@@ -333,8 +335,7 @@ export function processAutomaticTeaching(
   if (wasAutomaticTeachingNoOp(state)) return state;
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
     collaborator.assignment === "instructor" &&
-    collaborator.autoTeachingEnabled !== false &&
-    !collaborator.training
+    collaborator.autoTeachingEnabled !== false
   );
   if (!hasAutomaticInstructor) return state;
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
@@ -360,6 +361,7 @@ export function processAutomaticTeaching(
   const favoriteContactIds = new Set(
     state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
   );
+  const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
   const automaticFormOrder: FormId[] = [
     "form-1",
     "course-x",
@@ -380,21 +382,52 @@ export function processAutomaticTeaching(
   const automaticFormPriority = new Map(
     automaticFormOrder.map((formId, index) => [formId, index]),
   );
-  students.sort((left, right) => {
-    const isFavoriteMember = (student: typeof left) =>
-      "acquiredAt" in student
+  const originalOrder = new Map(students.map((student, index) => [student.id, index]));
+  const studentPriorities = new Map(students.map((student) => {
+    const contact = "acquiredAt" in student
+      ? student
+      : contactsById.get(student.contactId);
+    const immunity = contact
+      ? getAthleteImmunityStatus(
+        {
+          currentMonth: state.school.currentMonth,
+          tournamentQualification: state.tournaments.qualification,
+        },
+        contact,
+        student,
+        !("acquiredAt" in student),
+      )
+      : undefined;
+    const departureRisk = contact &&
+      !isAthleteImmuneFromDeparture(immunity!, "annual-rollout")
+      ? getMemberAnnualDepartureChance(
+        student.forms,
+        contact.rarity,
+        state.network.schools.length,
+      )
+      : 0;
+    const candidate = getAutomaticFormCandidates(student)[0];
+    return [student.id, {
+      departureRisk,
+      isFavorite: "acquiredAt" in student
         ? student.favorite === true
-        : favoriteContactIds.has(student.contactId);
-    const priority = (student: typeof left) => {
-      const candidate = getAutomaticFormCandidates(student)[0];
-      return candidate
+        : favoriteContactIds.has(student.contactId),
+      isCollaborator: !("acquiredAt" in student),
+      formPriority: candidate
         ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
-        : Number.MAX_SAFE_INTEGER;
-    };
-    return Number(isFavoriteMember(right)) - Number(isFavoriteMember(left)) ||
-      priority(left) - priority(right) ||
-      ("acquiredAt" in right ? right.acquiredAt : right.joinedAt) -
-        ("acquiredAt" in left ? left.acquiredAt : left.joinedAt);
+        : Number.MAX_SAFE_INTEGER,
+      acquiredAt: contact?.acquiredAt ?? 0,
+    }];
+  }));
+  students.sort((left, right) => {
+    const leftPriority = studentPriorities.get(left.id)!;
+    const rightPriority = studentPriorities.get(right.id)!;
+    return rightPriority.departureRisk - leftPriority.departureRisk ||
+      Number(rightPriority.isFavorite) - Number(leftPriority.isFavorite) ||
+      Number(rightPriority.isCollaborator) - Number(leftPriority.isCollaborator) ||
+      leftPriority.formPriority - rightPriority.formPriority ||
+      rightPriority.acquiredAt - leftPriority.acquiredAt ||
+      originalOrder.get(left.id)! - originalOrder.get(right.id)!;
   });
   const capacity = selectInstructorCapacity(state);
   const instructorLoads = new Map(
@@ -404,8 +437,7 @@ export function processAutomaticTeaching(
   for (const instructor of state.collaborators) {
     if (
       instructor.assignment !== "instructor" ||
-      instructor.autoTeachingEnabled === false ||
-      instructor.training
+      instructor.autoTeachingEnabled === false
     ) continue;
     for (const formId of instructor.forms) {
       if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
@@ -474,7 +506,6 @@ export function processAutomaticTeaching(
       const instructor = nextState.collaborators.find((candidate) =>
         candidate.assignment === "instructor" &&
         candidate.autoTeachingEnabled !== false &&
-        !candidate.training &&
         (instructorLoads.get(candidate.id) ?? 0) < capacity
       );
       if (!instructor) break;

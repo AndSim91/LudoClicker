@@ -203,6 +203,36 @@ describe("TournamentsView", () => {
     expect(view.getByText("Stile", { selector: ".results-podium-list > strong" })).toBeVisible();
   });
 
+  it("shows the detailed rewards received by the school", () => {
+    const { state: completed, result } = createCompletedTournamentState();
+    const podiumEntry = result.arenaPodium[0];
+    const state = {
+      ...completed,
+      tournaments: {
+        ...completed.tournaments,
+        results: [{
+          ...result,
+          rewards: [{
+            discipline: podiumEntry.discipline,
+            position: podiumEntry.position,
+            euros: 500,
+            contacts: 10,
+          }],
+        }],
+      },
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
+
+    expect(view.getByRole("heading", { name: "Premi ricevuti" })).toBeVisible();
+    const rewardList = within(container.querySelector(".tournament-reward-list")!);
+    expect(rewardList.getByText(/500,00/)).toBeVisible();
+    expect(rewardList.getByText("10 contatti casuali")).toBeVisible();
+    expect(rewardList.getByText("1° posto")).toBeVisible();
+  });
+
   it("shows the third-place match below the final and opens its detail", () => {
     const { state, result } = createCompletedTournamentState();
     const { container } = render(<TournamentsView state={state} />);

@@ -152,8 +152,7 @@ export function startAgonistCourse(
   const instructor = state.collaborators.find((collaborator) =>
     collaborator.id === instructorId &&
     collaborator.assignment === "instructor" &&
-    collaborator.autoTeachingEnabled !== false &&
-    !collaborator.training
+    collaborator.autoTeachingEnabled !== false
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const capacity = selectInstructorCapacity(state);
@@ -191,7 +190,7 @@ export function startAgonistCourse(
     ),
     instructorId: instructor.id,
   };
-  return {
+  return refreshInstructorTrainingDurations({
     ...state,
     school: { ...state.school, euros: roundCurrency(state.school.euros - cost) },
     contacts: state.contacts.map((contact) => contact.id === student.id
@@ -201,8 +200,8 @@ export function startAgonistCourse(
           lastFormTrainingYear: trainingYear,
           formTrainingYearCount: 1,
         }
-      : contact),
-  };
+        : contact),
+  }, now);
 }
 
 export function payInstructorCertificates(

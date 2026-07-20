@@ -837,6 +837,210 @@ describe("game engine: progression", () => {
       .toBeUndefined();
   });
 
+  it("prioritizes effective departure risk before favorites", () => {
+    const initial = createInitialState(1_000);
+    const highRisk = {
+      ...initial.contacts[0],
+      id: "high-risk-student",
+      status: "enrolled" as const,
+      acquiredAt: 1_000,
+      forms: [] as FormId[],
+      favorite: false,
+      rarity: "common" as const,
+    };
+    const lowRiskFavorite = {
+      ...initial.contacts[1],
+      id: "low-risk-favorite",
+      status: "enrolled" as const,
+      acquiredAt: 2_000,
+      forms: [
+        "form-1", "course-x", "form-2", "course-y",
+        "form-3-long", "form-4-long", "form-5-long", "form-6", "form-7",
+      ] as FormId[],
+      favorite: true,
+      rarity: "common" as const,
+    };
+    const instructor = {
+      id: "risk-priority-instructor",
+      contactId: "external-risk-priority-instructor",
+      displayName: "Istruttore Rischio",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: ["form-1" as const],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 21, euros: 100 },
+      contacts: [highRisk, lowRiskFavorite],
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+
+    expect(teaching.contacts.find((contact) => contact.id === highRisk.id)?.training?.formId)
+      .toBe("form-1");
+    expect(teaching.contacts.find((contact) => contact.id === lowRiskFavorite.id)?.training)
+      .toBeUndefined();
+  });
+
+  it("prioritizes collaborators after favorite members within the same effective risk", () => {
+    const initial = createInitialState(1_000);
+    const favorite = {
+      ...initial.contacts[0],
+      id: "favorite-zero-risk",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      favorite: true,
+      rarity: "legendary" as const,
+    };
+    const regular = {
+      ...initial.contacts[1],
+      id: "regular-zero-risk",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      favorite: false,
+      rarity: "legendary" as const,
+    };
+    const collaboratorContact = {
+      ...initial.contacts[2],
+      id: "collaborator-student-contact",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      favorite: false,
+      rarity: "common" as const,
+    };
+    const instructor = {
+      id: "collaborator-priority-instructor",
+      contactId: "external-collaborator-priority-instructor",
+      displayName: "Istruttore Priorità",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: ["form-1" as const],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const studentCollaborator = {
+      id: "collaborator-student",
+      contactId: collaboratorContact.id,
+      displayName: "Collaboratore Allievo",
+      joinedAt: 1_000,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      assignment: "lessons" as const,
+      rarity: "common" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 21, euros: 100 },
+      contacts: [favorite, regular, collaboratorContact],
+      collaborators: [instructor, studentCollaborator],
+      unlocks: { ...initial.unlocks, forms: true },
+      upgrades: { ...initial.upgrades, "promiscuous-instructor": 1 },
+    };
+
+    const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+
+    expect(teaching.contacts.find((contact) => contact.id === favorite.id)?.training?.formId)
+      .toBe("form-1");
+    expect(teaching.collaborators.find((collaborator) => collaborator.id === studentCollaborator.id)?.training?.formId)
+      .toBe("form-1");
+    expect(teaching.contacts.find((contact) => contact.id === regular.id)?.training)
+      .toBeUndefined();
+  });
+
+  it("uses the most recent acquiredAt as the final automatic priority", () => {
+    const initial = createInitialState(1_000);
+    const older = {
+      ...initial.contacts[0],
+      id: "older-student",
+      status: "enrolled" as const,
+      acquiredAt: 1_000,
+      forms: [] as FormId[],
+      favorite: false,
+      rarity: "common" as const,
+    };
+    const newer = {
+      ...initial.contacts[1],
+      id: "newer-student",
+      status: "enrolled" as const,
+      acquiredAt: 2_000,
+      forms: [] as FormId[],
+      favorite: false,
+      rarity: "common" as const,
+    };
+    const instructor = {
+      id: "recent-priority-instructor",
+      contactId: "external-recent-priority-instructor",
+      displayName: "Istruttore Acquisizioni",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: ["form-1" as const],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 21, euros: 100 },
+      contacts: [older, newer],
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+
+    expect(teaching.contacts.find((contact) => contact.id === newer.id)?.training?.formId)
+      .toBe("form-1");
+    expect(teaching.contacts.find((contact) => contact.id === older.id)?.training)
+      .toBeUndefined();
+  });
+
+  it("allows an Instructor in formation to teach and applies the slowdown", () => {
+    const initial = createInitialState(1_000);
+    const student = {
+      ...initial.contacts[1],
+      id: "student-with-training-instructor",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      training: undefined,
+    };
+    const instructor = {
+      id: "training-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore in Formazione",
+      joinedAt: 1_000,
+      forms: ["form-1", "course-x"] as FormId[],
+      instructorForms: ["form-1", "course-x"] as FormId[],
+      autoTeachingEnabled: true,
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+      training: {
+        formId: "form-2" as const,
+        startedAt: 1_000,
+        completesAt: 100_000,
+        instructorTrainingDurationMultiplier: 1,
+      },
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 21, euros: 100 },
+      contacts: initial.contacts.map((contact) => contact.id === initial.contacts[1].id ? student : contact),
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+
+    expect(teaching.contacts.find((contact) => contact.id === student.id)?.training?.instructorId)
+      .toBe(instructor.id);
+    expect(teaching.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(3);
+  });
+
   it("generates one to three weapon preferences when Course Y is completed", () => {
     const initial = createInitialState(1_000);
     const member = {

@@ -8,7 +8,6 @@ import { TrainingControl } from "./TrainingControl";
 import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
 import {
   getContactPreparation,
-  getContactTournamentExperience,
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { getOfficialStatColor } from "../../shared/officialStatColor";
@@ -212,7 +211,11 @@ export function MemberList({
             </span>
             <div className="member-path" data-label="Percorso">
               <strong>{formatFormPath(memberForms)}</strong>
-              <FormLogoStrip forms={memberForms} showLabels={false} />
+              <FormLogoStrip
+                forms={memberForms}
+                instructorForms={collaborator?.instructorForms}
+                showLabels={false}
+              />
             </div>
             <span className="member-stat" data-label="Arena">
               {preparation ? (
@@ -246,10 +249,6 @@ export function MemberList({
                   contact.rarity,
                   state.network.schools.length,
                 )}
-              </small>
-              <small>
-                Esperienza tornei {getContactTournamentExperience(contact)} · +
-                {Math.min(60, getContactTournamentExperience(contact) * 3)}%
               </small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">

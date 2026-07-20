@@ -233,7 +233,7 @@ describe("PeopleView", () => {
           displayName: "Andrea Simonazzi",
           joinedAt: 1_000,
           forms: ["form-1" as const, "course-x" as const, "form-2" as const, "course-y" as const],
-          instructorForms: [],
+          instructorForms: ["form-1" as const],
           assignment: null,
           rarity: "legendary" as const,
           specialProfileId: "andrea-simonazzi" as const,
@@ -271,6 +271,21 @@ describe("PeopleView", () => {
     expect(screen.getByRole("img", { name: /Forma 1 — emblema ufficiale/ })).toBeVisible();
     expect(screen.getByRole("img", { name: /Corso X — emblema generato/ })).toBeVisible();
     expect(screen.getByRole("img", { name: /Corso Y — emblema ufficiale/ })).toBeVisible();
+    const collaboratorRegion = screen.getByRole("region", { name: "Collaboratori delle Onde" });
+    const formOneLogo = within(collaboratorRegion).getByRole("img", {
+      name: /Forma 1 — emblema ufficiale/,
+    }).closest(".form-logo-item");
+    const courseXLogo = within(collaboratorRegion).getByRole("img", {
+      name: /Corso X — emblema generato/,
+    }).closest(".form-logo-item");
+    expect(formOneLogo).toHaveClass("instructor-certified");
+    expect(formOneLogo).toHaveTextContent("♛");
+    expect(courseXLogo).not.toHaveClass("instructor-certified");
+    expect(within(collaboratorRegion).queryByText("Collaboratore VIP")).not.toBeInTheDocument();
+    const officialStats = collaboratorRegion.querySelector(".collaborator-official-stats");
+    expect(officialStats).toHaveTextContent("Arena");
+    expect(officialStats).toHaveTextContent("Stile");
+    expect(officialStats?.querySelectorAll(":scope > span")).toHaveLength(2);
     expect(screen.queryByText("Tutorial")).not.toBeInTheDocument();
     expect(screen.queryByText(/Livello Leggendario/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Potere VIP ×2/)).not.toBeInTheDocument();
@@ -480,8 +495,8 @@ describe("PeopleView", () => {
           displayName: `${enrolled.firstName} ${enrolled.lastName}`,
           joinedAt: 1_000,
           forms: ["form-1" as const],
-          instructorForms: [],
-          assignment: null,
+          instructorForms: ["form-1" as const],
+          assignment: "writing" as const,
           rarity: enrolled.rarity,
         },
       ],
@@ -501,6 +516,10 @@ describe("PeopleView", () => {
     const memberName = within(members).getByText(`${enrolled.firstName} ${enrolled.lastName}`);
     const memberRow = memberName.closest(".member-row");
     expect(memberName).toBeVisible();
+    const memberFormLogo = memberRow?.querySelector(".form-logo-item");
+    expect(memberFormLogo).toHaveClass("instructor-certified");
+    expect(memberFormLogo).toHaveTextContent("♛");
+    expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
     expect(memberRow?.querySelector(".member-training-cell")).toHaveTextContent(
       /^Collaboratore$/,
     );

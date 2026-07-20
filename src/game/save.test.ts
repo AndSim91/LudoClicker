@@ -6,6 +6,7 @@ import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { getEmailBuildLength } from "../content/emailBuild";
 import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 import { createSaveScheduler } from "./saveScheduler";
+import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 
 afterEach(() => {
   vi.useRealTimers();
@@ -70,12 +71,13 @@ describe("local save", () => {
   });
 
   it("repairs enrolled Legendary members missing from collaborators on load", () => {
-    const initial = createInitialState(1_000);
+    const initial = createInitialState(1_000, "", false);
     const legendaryMembers = initial.contacts.slice(0, 3).map((contact, index) => ({
       ...contact,
       id: `saved-legendary-${index}`,
       status: "enrolled" as const,
       rarity: "legendary" as const,
+      specialProfileId: SPECIAL_COLLABORATORS[index + 1].id,
     }));
     saveGame({
       ...initial,
@@ -91,6 +93,43 @@ describe("local save", () => {
 
     expect(loaded.collaborators.map((collaborator) => collaborator.contactId))
       .toEqual(legendaryMembers.map((contact) => contact.id));
+  });
+
+  it("repairs old duplicated Legendary contacts without deleting linked records", () => {
+    const initial = createInitialState(1_000, "", false);
+    const base = initial.contacts[0];
+    const lostEva = {
+      ...base,
+      id: "saved-eva-lost",
+      firstName: "Eva",
+      lastName: "Parodi",
+      status: "lost" as const,
+      rarity: "legendary" as const,
+      specialProfileId: "eva-parodi" as const,
+    };
+    const enrolledEva = {
+      ...lostEva,
+      id: "saved-eva-enrolled",
+      status: "enrolled" as const,
+    };
+    saveGame({
+      ...initial,
+      contacts: [lostEva, enrolledEva, ...initial.contacts.slice(1)],
+      school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+    }, 2_000);
+
+    const loaded = loadGame(3_000);
+    const evaContacts = loaded.contacts.filter((contact) =>
+      contact.firstName === "Eva" && contact.lastName === "Parodi",
+    );
+
+    expect(evaContacts).toHaveLength(2);
+    expect(evaContacts.filter((contact) =>
+      contact.specialProfileId === "eva-parodi" && contact.rarity === "legendary",
+    )).toHaveLength(1);
+    const repairedDuplicate = evaContacts.find((contact) => contact.id === "saved-eva-lost");
+    expect(repairedDuplicate?.rarity).toBe("ultra-rare");
+    expect(repairedDuplicate?.specialProfileId).toBeUndefined();
   });
 
   it("falls back to a fresh state when the save is corrupt", () => {

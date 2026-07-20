@@ -4,16 +4,18 @@ import type { FormId, PersonRarity } from "../../game/types";
 
 export function FormLogoStrip({
   forms,
+  instructorForms = [],
   showLabels = true,
 }: {
   forms: FormId[];
+  instructorForms?: readonly FormId[];
   showLabels?: boolean;
 }) {
   const entries = forms.map((formId) => {
     const definition = getFormDefinition(formId);
     const logo = getFormLogo(formId);
     const label = [definition?.title ?? formId, definition?.branch].filter(Boolean).join(" / ");
-    return { formId, label, logo };
+    return { formId, label, logo, instructorCertified: instructorForms.includes(formId) };
   });
 
   return (
@@ -25,16 +27,21 @@ export function FormLogoStrip({
     >
       {entries.length === 0 ? (
         <span className="form-logo-empty">Nessuna forma completata</span>
-      ) : entries.map(({ formId, label, logo }) => (
+      ) : entries.map(({ formId, label, logo, instructorCertified }) => (
         <span
-          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""}`}
+          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""}`}
           key={formId}
-          title={label}
+          title={`${label}${instructorCertified ? " · Attestato da istruttore" : ""}`}
         >
-          <img
-            src={logo.assetPath}
-            alt={`${label} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`}
-          />
+          <span className="form-logo-mark">
+            <img
+              src={logo.assetPath}
+              alt={`${label} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`}
+            />
+            {instructorCertified ? (
+              <span className="form-instructor-crown" aria-hidden="true">♛</span>
+            ) : null}
+          </span>
           {showLabels ? <span>{label}</span> : null}
         </span>
       ))}

@@ -4,6 +4,10 @@ import {
   GAME_CONFIG,
   INITIAL_SAVE_COMPATIBILITY_VERSION,
 } from "./config";
+import {
+  isCataloguedLegendaryId,
+  isSecretLegendaryId,
+} from "./legendaryAvailability";
 import type { GameState } from "./types";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
@@ -55,6 +59,47 @@ function hasValidHistoryArchive(state: Partial<GameState>): boolean {
       isNonNegativeSafeInteger,
     )
   );
+}
+
+function hasValidLegendaryAssignments(state: Partial<GameState>): boolean {
+  if (
+    !Array.isArray(state.contacts) ||
+    !Array.isArray(state.collaborators) ||
+    !Array.isArray(state.scheduledTrials)
+  ) return false;
+  const assignedProfiles = new Set<string>();
+  const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
+  for (const contact of state.contacts) {
+    if (contact.rarity === "legendary") {
+      if (!isCataloguedLegendaryId(contact.specialProfileId)) return false;
+    } else if (contact.specialProfileId || contact.secretLegendaryId) {
+      return false;
+    }
+    if (!contact.specialProfileId) continue;
+    if (assignedProfiles.has(contact.specialProfileId)) return false;
+    assignedProfiles.add(contact.specialProfileId);
+    if (
+      isSecretLegendaryId(contact.specialProfileId)
+        ? contact.secretLegendaryId !== contact.specialProfileId
+        : contact.secretLegendaryId !== undefined
+    ) return false;
+  }
+  if (!state.collaborators.every((collaborator) => {
+    if (!collaborator.specialProfileId) return collaborator.rarity !== "legendary";
+    const contact = contactsById.get(collaborator.contactId);
+    return collaborator.rarity === "legendary" &&
+      isCataloguedLegendaryId(collaborator.specialProfileId) &&
+      contact?.specialProfileId === collaborator.specialProfileId;
+  })) return false;
+  const activeTrialProfiles = new Set<string>();
+  for (const trial of state.scheduledTrials) {
+    if (trial.status !== "scheduled") continue;
+    const profileId = contactsById.get(trial.contactId)?.specialProfileId;
+    if (!profileId) continue;
+    if (activeTrialProfiles.has(profileId)) return false;
+    activeTrialProfiles.add(profileId);
+  }
+  return true;
 }
 
 export function isValidGameState(value: unknown): value is GameState {
@@ -119,6 +164,7 @@ export function isValidGameState(value: unknown): value is GameState {
         (collaborator.mastery?.[role] ?? 0) >= 0
       )
     ) &&
+    hasValidLegendaryAssignments(state) &&
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["technical-arena"] === "number" &&
     typeof state.upgrades?.["promiscuous-instructor"] === "number" &&

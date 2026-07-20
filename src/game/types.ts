@@ -419,11 +419,19 @@ export interface TournamentQualifier {
   repechage: boolean;
 }
 
+export type TournamentRewardBonus =
+  | { kind: "random-contacts"; amount: number }
+  | { kind: "trial"; rarity: "ultra-rare" | "legendary" }
+  | { kind: "email"; rarity: "ultra-rare" | "legendary" }
+  | { kind: "enrollment"; rarity: "ultra-rare" | "legendary" };
+
 export interface TournamentReward {
   discipline: TournamentDiscipline;
   position: 1 | 2 | 3;
   euros: number;
+  /** Preserved for old saves; new rewards describe this through bonus. */
   contacts: number;
+  bonus?: TournamentRewardBonus;
 }
 
 export interface TournamentResult {

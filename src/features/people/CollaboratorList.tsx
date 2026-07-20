@@ -2,9 +2,14 @@ import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
-import { getEmailBuildLength } from "../../content/emailBuild";
-import { getCollaboratorBonusSummary } from "../../content/forms";
-import { PERSON_RARITIES } from "../../content/rarities";
+import {
+  COLLABORATOR_MASTERY_ROLE_LABELS,
+  createInitialCollaboratorMastery,
+  getCollaboratorMasteryProgress,
+} from "../../content/mastery";
+import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
+import { useGameTime } from "../../game/GameTimeContext";
+import { selectActiveEmail } from "../../game/selectors";
 import type {
   CollaboratorAssignment,
   Contact,
@@ -12,128 +17,17 @@ import type {
   GameState,
 } from "../../game/types";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
-import { GAME_CONFIG } from "../../game/config";
-import { getEffectiveDamagedSwords } from "../../game/equipment";
-import { useGameTime } from "../../game/GameTimeContext";
-import { selectActiveEmail } from "../../game/selectors";
-import { formatCurrency } from "../../shared/formatters";
-import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
+import { getOfficialStatColor } from "../../shared/officialStatColor";
+import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
+import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
-import { InstructorPanel, TrainingControl } from "./TrainingControl";
+import {
+  InstructorCompactProgress,
+  InstructorCompactStatus,
+  InstructorCompactTraining,
+} from "./TrainingControl";
 
 const COLLABORATORS_PER_PAGE = 25;
-
-function getTimedProgress(startedAt: number, completesAt: number, now: number): number {
-  const duration = completesAt - startedAt;
-  return duration <= 0
-    ? 100
-    : Math.min(100, Math.max(0, Math.round(((now - startedAt) / duration) * 100)));
-}
-
-function CollaboratorAutomationProgress({
-  state,
-  collaboratorId,
-  assignment,
-  now,
-  activeEmail,
-}: {
-  state: GameState;
-  collaboratorId: string;
-  assignment: CollaboratorAssignment;
-  now: number;
-  activeEmail: ReturnType<typeof selectActiveEmail>;
-}) {
-  if (assignment === "writing") {
-    const email = activeEmail;
-    if (!email || email.status !== "writing") return <small>In attesa</small>;
-    const length = getEmailBuildLength(email);
-    const progress = length === 0
-      ? 100
-      : Math.min(100, Math.round((email.revealedCharacters / length) * 100));
-    return (
-      <div className="collaborator-automation-progress">
-        <span>{email.subject}</span><strong>{progress}%</strong>
-        <ProgressBar
-          className="collaborator-progress-bar"
-          label={`Scrittura di ${email.subject}`}
-          value={progress}
-        />
-      </div>
-    );
-  }
-  if (assignment === "events") {
-    const event = state.acquisitionEvents.find((candidate) =>
-      candidate.status === "running" && candidate.collaboratorId === collaboratorId
-    );
-    if (!event) return <small>In attesa</small>;
-    const progress = getTimedProgress(event.startedAt, event.resolvesAt, now);
-    return (
-      <div className="collaborator-automation-progress">
-        <span>{event.title}</span><strong>{progress}%</strong>
-        <ProgressBar className="collaborator-progress-bar" label={event.title} value={progress} />
-      </div>
-    );
-  }
-  if (assignment === "lessons") {
-    const progress = Math.min(100, Math.floor(state.automation.lessonBuffer * 100));
-    return (
-      <div className="collaborator-automation-progress">
-        <span>Prossimo punto Arena o Stile</span><strong>{progress}%</strong>
-        <ProgressBar
-          className="collaborator-progress-bar"
-          label="Progresso miglioramento atleta"
-          value={progress}
-        />
-        <small className="collaborator-last-result">
-          {state.automation.lastImprovedAthlete
-            ? `Ultimo atleta migliorato: ${state.automation.lastImprovedAthlete}`
-            : "Nessun atleta migliorato finora"}
-        </small>
-      </div>
-    );
-  }
-  if (assignment === "social") {
-    const progress = Math.min(100, Math.floor(state.automation.socialBuffer * 100));
-    return (
-      <div className="collaborator-automation-progress">
-        <span>Prossimo rendimento · {formatCurrency(state.school.activeMembers * GAME_CONFIG.socialIncomePerMember)}</span><strong>{progress}%</strong>
-        <ProgressBar
-          className="collaborator-progress-bar"
-          label="Progresso ciclo pubblicitario Social"
-          value={progress}
-        />
-        <small className="collaborator-last-result">Ciclo base 60 s · 10% prova · 20% nuovo contatto</small>
-      </div>
-    );
-  }
-  if (assignment === "equipment") {
-    const damagedSwords = getEffectiveDamagedSwords(state.equipment);
-    if (state.equipment.wear <= 0 && damagedSwords <= 0) {
-      return <small>Usura attrezzatura: 0% · In attesa</small>;
-    }
-    const isRepairingSword = state.equipment.wear <= 0 && damagedSwords > 0;
-    const progress = Math.min(
-      100,
-      Math.floor(
-        (state.automation.equipmentBuffer /
-          (isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1)) *
-          100,
-      ),
-    );
-    return (
-      <div className="collaborator-automation-progress">
-        <span>{isRepairingSword ? `Spade danneggiate: ${damagedSwords}` : `Usura attrezzatura: ${state.equipment.wear}%`}</span><strong>{progress}%</strong>
-        <ProgressBar
-          className="collaborator-progress-bar"
-          label={isRepairingSword ? "Progresso riparazione spada" : "Progresso riduzione usura"}
-          value={progress}
-        />
-        {isRepairingSword ? <small>Una spada richiede 3 cicli base</small> : null}
-      </div>
-    );
-  }
-  return null;
-}
 
 export function CollaboratorList({
   state,
@@ -153,6 +47,7 @@ export function CollaboratorList({
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
+  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
@@ -171,6 +66,18 @@ export function CollaboratorList({
     page * COLLABORATORS_PER_PAGE,
     (page + 1) * COLLABORATORS_PER_PAGE,
   );
+  const selectedCollaborator = selectedCollaboratorId
+    ? state.collaborators.find((collaborator) => collaborator.id === selectedCollaboratorId)
+    : undefined;
+  const selectedAutomation = selectedCollaborator
+    ? getCollaboratorAutomationPresentation({
+        state,
+        collaboratorId: selectedCollaborator.id,
+        assignment: selectedCollaborator.assignment,
+        now,
+        activeEmail,
+      })
+    : undefined;
 
   return (
     <section className="collaborator-list" aria-label="Collaboratori delle Onde">
@@ -189,107 +96,198 @@ export function CollaboratorList({
           </label>
         </div>
       ) : null}
+
       {state.collaborators.length === 0 ? (
         <div className="people-empty">
           <Icon name="contact" />
           <strong>Nessun collaboratore disponibile</strong>
-          <span>Gli Ultra Rari diventano collaboratori dopo il Corso Y; i Leggendari lo sono dall'iscrizione.</span>
+          <span>
+            Gli Ultra Rari diventano collaboratori dopo il Corso Y; i Leggendari lo sono
+            dall'iscrizione.
+          </span>
         </div>
-      ) : visibleCollaborators.map((collaborator) => {
-        const contact = contactsById.get(collaborator.contactId);
-        const bonusSummary = getCollaboratorBonusSummary(collaborator);
-        return (
-          <article className={`collaborator-row rarity-${collaborator.rarity}`} key={collaborator.id}>
-            <div className="collaborator-identity">
-              <div className={`person-avatar rarity-${collaborator.rarity}`} aria-hidden="true">
-                {collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}
-              </div>
-              <div className="collaborator-copy">
-                <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
-                <span className={`collaborator-tier rarity-${collaborator.rarity}`}>
-                  {PERSON_RARITIES[collaborator.rarity].collaboratorBadgeLabel}
-                </span>
-                <span className={`rarity-address rarity-${collaborator.rarity}`}>{contact?.email}</span>
-              </div>
-            </div>
-            <div className="collaborator-profile">
-              <div className="collaborator-section-heading">
-                <strong>
-                  {collaborator.forms.length} {collaborator.forms.length === 1
-                    ? "forma conosciuta"
-                    : "forme conosciute"}
-                </strong>
-              </div>
-              <FormLogoStrip forms={collaborator.forms} />
-              <div className="collaborator-bonus">
-                <span>Bonus attivo</span>
-                <strong className="form-bonus-summary">
-                  {bonusSummary || "Nessun bonus d'arma attivo"}
-                </strong>
-              </div>
-              <CollaboratorMasterySummary collaborator={collaborator} />
-              {collaborator.assignment === "instructor" || collaborator.instructorForms.length > 0
-                ? <small className="collaborator-certificates">Attestati da istruttore: {collaborator.instructorForms.length}</small>
-                : null}
-            </div>
-            <div className="collaborator-actions">
-              <label className="collaborator-assignment">
-                <span>Assegnazione</span>
-                <select
-                  aria-label="Assegnazione"
-                  value={collaborator.assignment ?? ""}
-                  onChange={(event) => onAssign(
-                    collaborator.id,
-                    (event.target.value || null) as CollaboratorAssignment,
+      ) : (
+        <div className="collaborator-table">
+          <div className="collaborator-table-head" aria-hidden="true">
+            <span>Collaboratore</span>
+            <span>Assegnazione attuale</span>
+            <span>Stato e attività</span>
+            <span>Progresso</span>
+            <span>Arena / Stile</span>
+            <span>Assegnazione</span>
+            <span>Azioni</span>
+          </div>
+
+          {visibleCollaborators.map((collaborator) => {
+            const contact = contactsById.get(collaborator.contactId);
+            const automation = getCollaboratorAutomationPresentation({
+              state,
+              collaboratorId: collaborator.id,
+              assignment: collaborator.assignment,
+              now,
+              activeEmail,
+            });
+            const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
+            const masteryProgress = collaborator.assignment
+              ? getCollaboratorMasteryProgress(mastery[collaborator.assignment])
+              : undefined;
+            const hasVisibleStats = hasCompletedCourseX(collaborator.forms);
+            const officialStats = contact && hasVisibleStats
+              ? getContactPreparation(contact, collaborator.forms)
+              : undefined;
+            const selected = collaborator.id === selectedCollaboratorId;
+
+            return (
+              <article
+                className={`collaborator-row rarity-${collaborator.rarity}${
+                  selected ? " is-selected" : ""
+                }`}
+                key={collaborator.id}
+              >
+                <div className="collaborator-identity" data-label="Collaboratore">
+                  <div className={`person-avatar rarity-${collaborator.rarity}`} aria-hidden="true">
+                    {collaborator.displayName
+                      .split(" ")
+                      .map((part) => part[0])
+                      .slice(0, 2)
+                      .join("")}
+                  </div>
+                  <div className="collaborator-copy">
+                    <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
+                    {contact ? (
+                      <span className={`rarity-address rarity-${collaborator.rarity}`}>
+                        {contact.email}
+                      </span>
+                    ) : null}
+                    <FormLogoStrip
+                      forms={collaborator.forms}
+                      instructorForms={collaborator.instructorForms}
+                    />
+                  </div>
+                </div>
+
+                <div className="collaborator-current-role" data-label="Assegnazione attuale">
+                  <strong>
+                    {collaborator.assignment
+                      ? COLLABORATOR_ASSIGNMENT_LABELS[collaborator.assignment]
+                      : "Non assegnato"}
+                  </strong>
+                  <small>
+                    {collaborator.assignment && masteryProgress
+                      ? `${COLLABORATOR_MASTERY_ROLE_LABELS[collaborator.assignment]} · ${
+                          masteryProgress.definition.name
+                        }`
+                      : "Assegna un ruolo per iniziare"}
+                  </small>
+                </div>
+
+                <div className="collaborator-activity" data-label="Stato e attività">
+                  {collaborator.assignment === "instructor" ? (
+                    <InstructorCompactStatus collaborator={collaborator} state={state} />
+                  ) : (
+                    <>
+                      <strong>{automation.title}</strong>
+                      {automation.detail ? <small>{automation.detail}</small> : null}
+                    </>
                   )}
-                >
-                  <option value="">Non assegnato</option>
-                  {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => {
-                    const disabled = value === "social" && !state.unlocks.social;
-                    const suffix = disabled
-                      ? ` — si sblocca con ${getSocialUnlockRequirementLabel()}`
-                      : "";
-                    return (
-                      <option value={value} key={value} disabled={disabled}>
-                        {label}{suffix}
-                      </option>
-                    );
-                  })}
-                </select>
-              </label>
-              <CollaboratorAutomationProgress
-                state={state}
-                collaboratorId={collaborator.id}
-                assignment={collaborator.assignment}
-                now={now}
-                activeEmail={activeEmail}
-              />
-              <div className="collaborator-training">
-                <span className="collaborator-action-label">Formazione</span>
-                {collaborator.assignment === "instructor" ? (
-                  <InstructorPanel
-                    collaborator={collaborator}
-                    state={state}
-                    onStartTraining={onStartTraining}
-                    onPayInstructorCertificates={onPayInstructorCertificates}
-                    onToggle={onToggleInstructorAutomation}
-                    collaboratorsById={collaboratorsById}
-                  />
-                ) : (
-                  <TrainingControl
-                    personId={collaborator.id}
-                    displayName={collaborator.displayName}
-                    student={collaborator}
-                    state={state}
-                    collaboratorsById={collaboratorsById}
-                    onStartTraining={onStartTraining}
-                  />
-                )}
-              </div>
-            </div>
-          </article>
-        );
-      })}
+                </div>
+
+                <div className="collaborator-compact-progress" data-label="Progresso">
+                  {collaborator.assignment === "instructor" ? (
+                    <InstructorCompactProgress collaborator={collaborator} state={state} />
+                  ) : automation.progress === undefined ? (
+                    <strong>—</strong>
+                  ) : (
+                    <>
+                      <strong>{automation.progress}%</strong>
+                      <ProgressBar
+                        className="collaborator-progress-bar"
+                        label={automation.progressLabel ?? automation.title}
+                        value={automation.progress}
+                      />
+                    </>
+                  )}
+                </div>
+
+                <div className="collaborator-official-stats" data-label="Arena / Stile">
+                  <span>
+                    <small>Arena</small>
+                    {officialStats ? (
+                      <strong
+                        className="official-stat-value"
+                        style={{ color: getOfficialStatColor(officialStats.arena) }}
+                      >
+                        {officialStats.arena.toFixed(3)}
+                      </strong>
+                    ) : (
+                      <strong className="member-stat-locked" title="Completa Corso X">???</strong>
+                    )}
+                  </span>
+                  <span>
+                    <small>Stile</small>
+                    {officialStats ? (
+                      <strong
+                        className="official-stat-value"
+                        style={{ color: getOfficialStatColor(officialStats.style) }}
+                      >
+                        {officialStats.style.toFixed(3)}
+                      </strong>
+                    ) : (
+                      <strong className="member-stat-locked" title="Completa Corso X">???</strong>
+                    )}
+                  </span>
+                </div>
+
+                <div className="collaborator-assignment" data-label="Assegnazione">
+                  <span>Assegnazione</span>
+                  <select
+                    aria-label="Assegnazione"
+                    value={collaborator.assignment ?? ""}
+                    onChange={(event) => onAssign(
+                      collaborator.id,
+                      (event.target.value || null) as CollaboratorAssignment,
+                    )}
+                  >
+                    <option value="">Non assegnato</option>
+                    {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => {
+                      const disabled = value === "social" && !state.unlocks.social;
+                      const suffix = disabled
+                        ? ` — si sblocca con ${getSocialUnlockRequirementLabel()}`
+                        : "";
+                      return (
+                        <option value={value} key={value} disabled={disabled}>
+                          {label}{suffix}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {collaborator.assignment === "instructor" ? (
+                    <InstructorCompactTraining
+                      collaborator={collaborator}
+                      state={state}
+                      onStartTraining={onStartTraining}
+                      onPayInstructorCertificates={onPayInstructorCertificates}
+                      collaboratorsById={collaboratorsById}
+                    />
+                  ) : null}
+                </div>
+
+                <div className="collaborator-row-actions" data-label="Azioni">
+                  <button
+                    type="button"
+                    aria-label={`Dettagli di ${collaborator.displayName}`}
+                    aria-pressed={selected}
+                    onClick={() => setSelectedCollaboratorId(collaborator.id)}
+                  >
+                    Dettagli
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
       {pageCount > 1 ? (
         <nav className="list-pagination" aria-label="Pagine collaboratori">
           <button
@@ -308,6 +306,21 @@ export function CollaboratorList({
             Successiva
           </button>
         </nav>
+      ) : null}
+
+      {selectedCollaborator && selectedAutomation ? (
+        <CollaboratorDetailDrawer
+          state={state}
+          collaborator={selectedCollaborator}
+          contact={contactsById.get(selectedCollaborator.contactId)}
+          automation={selectedAutomation}
+          collaboratorsById={collaboratorsById}
+          onAssign={onAssign}
+          onStartTraining={onStartTraining}
+          onPayInstructorCertificates={onPayInstructorCertificates}
+          onToggleInstructorAutomation={onToggleInstructorAutomation}
+          onClose={() => setSelectedCollaboratorId(null)}
+        />
       ) : null}
     </section>
   );

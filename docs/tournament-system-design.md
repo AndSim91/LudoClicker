@@ -346,9 +346,11 @@ Arena e Stile assegnano premi identici e cumulabili:
 | Torneo | 1° posto | 2° posto | 3° posto |
 |---|---:|---:|---:|
 | Scolastico | titolo e qualificazione | titolo e qualificazione | titolo e qualificazione |
-| Accademico | €500 + 10 contatti | €250 + 6 contatti | €100 + 3 contatti |
-| Nazionale | €2.000 + 30 contatti | €1.000 + 15 contatti | €500 + 8 contatti |
-| Champion's | €8.000 + 100 contatti | €4.000 + 50 contatti | €2.000 + 25 contatti |
+| Accademico | €1.000 + 3 contatti casuali | €500 + 2 contatti casuali | €250 + 1 contatto casuale |
+| Nazionale | €5.000 + 1 prova in palestra ultra rara | €2.500 + 1 contatto email ultra raro | €1.250 + 3 contatti casuali |
+| Champion's | €50.000 + 1 iscrizione leggendaria | €25.000 + 1 prova in palestra leggendaria | €12.500 + 1 contatto email leggendario |
+
+I profili Leggendari sono unici e vengono riservati già al primo contatto. Se un premio Leggendario non trova più alcun profilo ordinario disponibile, conserva la propria modalità (iscrizione, prova o email) ma scende automaticamente a Ultra Raro. Il premio effettivamente risolto viene registrato anche nello storico del torneo.
 
 Un ripescato che non appartiene al vero podio riceve qualificazione e immunità, ma non il premio da podio.
 
@@ -470,6 +472,8 @@ Non conta una sconfitta inflitta da un'altra scuola.
 ### 14.1 Prova automatica
 
 Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una prova di 150 secondi nella scuola:
+
+Una nuova prova dello stesso Leggendario Segreto riutilizza il contatto esistente, senza crearne un doppione.
 
 ```text
 sconfitta → fine torneo → prova automatica 150 s → iscrizione o rifiuto

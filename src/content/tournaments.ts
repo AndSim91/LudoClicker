@@ -3,6 +3,7 @@ import type {
   SecretLegendaryId,
   TournamentDiscipline,
   TournamentLevel,
+  TournamentRewardBonus,
 } from "../game/types";
 
 export interface TournamentTier {
@@ -102,22 +103,22 @@ export const TOURNAMENT_LEVEL_ORDER: readonly TournamentLevel[] = [
 
 export const TOURNAMENT_REWARDS: Record<
   Exclude<TournamentLevel, "school">,
-  Record<1 | 2 | 3, { euros: number; contacts: number }>
+  Record<1 | 2 | 3, { euros: number; contacts: number; bonus: TournamentRewardBonus }>
 > = {
   academy: {
-    1: { euros: 500, contacts: 10 },
-    2: { euros: 250, contacts: 6 },
-    3: { euros: 100, contacts: 3 },
+    1: { euros: 1_000, contacts: 3, bonus: { kind: "random-contacts", amount: 3 } },
+    2: { euros: 500, contacts: 2, bonus: { kind: "random-contacts", amount: 2 } },
+    3: { euros: 250, contacts: 1, bonus: { kind: "random-contacts", amount: 1 } },
   },
   national: {
-    1: { euros: 2_000, contacts: 30 },
-    2: { euros: 1_000, contacts: 15 },
-    3: { euros: 500, contacts: 8 },
+    1: { euros: 5_000, contacts: 0, bonus: { kind: "trial", rarity: "ultra-rare" } },
+    2: { euros: 2_500, contacts: 0, bonus: { kind: "email", rarity: "ultra-rare" } },
+    3: { euros: 1_250, contacts: 3, bonus: { kind: "random-contacts", amount: 3 } },
   },
   champions: {
-    1: { euros: 8_000, contacts: 100 },
-    2: { euros: 4_000, contacts: 50 },
-    3: { euros: 2_000, contacts: 25 },
+    1: { euros: 50_000, contacts: 0, bonus: { kind: "enrollment", rarity: "legendary" } },
+    2: { euros: 25_000, contacts: 0, bonus: { kind: "trial", rarity: "legendary" } },
+    3: { euros: 12_500, contacts: 0, bonus: { kind: "email", rarity: "legendary" } },
   },
 };
 

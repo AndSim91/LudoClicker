@@ -524,7 +524,7 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - la probabilità annuale di abbandono di tutti i Leggendari è sempre 0%, indipendentemente dalla formazione e dal numero di scuole fondate;
 - l'unico modo previsto per perdere un Leggendario sarà un evento narrativo dedicato, non ancora implementato; finché l'evento non esiste, un Leggendario iscritto resta nella scuola per sempre;
 - la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto idoneo: dal decimo nella scuola iniziale e fin dal primo nelle scuole successive;
-- uno stesso profilo Leggendario può comparire più volte tra i contatti finché non si iscrive; mentre è iscritto viene escluso dal pool e, se tutti i profili sono iscritti, un successivo roll Leggendario genera invece un contatto Ultra Raro;
+- ogni profilo Leggendario è unico: finché esiste già come contatto, prova in palestra, iscritto o collaboratore non può essere generato una seconda volta; se nessun profilo del pool è disponibile, qualsiasi nuova assegnazione Leggendaria genera invece un Ultra Raro dello stesso tipo di premio;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della nuova scuola;
 - dopo l'eventuale abbandono causato dall'evento dedicato tornano disponibili per incontri futuri;
 - una nuova iscrizione successiva all'evento dedicato ripristina integralmente Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico operativo torna invece non assegnato.
@@ -611,11 +611,11 @@ Regole:
 - l'assegnazione al ruolo è gratuita e non converte automaticamente le Forme pregresse;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate; ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
 - una nuova Forma o un nuovo Corso appreso da Istruttore include sempre la relativa qualifica;
-- un Istruttore può iniziare una nuova formazione anche mentre insegna; in questo caso la durata è tripla rispetto alla velocità normale e torna normale quando non ha più allievi attivi o l'insegnamento automatico viene disabilitato;
+- un Istruttore può iniziare o continuare una nuova formazione anche mentre insegna; in questo caso la durata è tripla rispetto alla velocità normale e torna normale quando non ha più allievi attivi o l'insegnamento automatico viene disabilitato;
 - una qualifica pregressa viene acquistata esplicitamente dal comando di formazione e costa il **200% del costo base**;
 - una nuova Forma appresa mentre si è Istruttore costa il **300% totale del costo base** e comprende la qualifica;
 - con un Istruttore disponibile l'allievo paga automaticamente il **25% del costo base**; senza Istruttore il level up manuale usa il costo base;
-- l'automazione dà priorità agli allievi meno avanzati e li porta dalla Forma 1 verso l'alto, rispettando prerequisiti, anno scolastico e compatibilità d'arma;
+- l'automazione ordina gli allievi per rischio effettivo di abbandono annuale decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori, poi la prossima Forma secondo la progressione dalla Forma 1 verso l'alto e infine il contatto con `acquiredAt` più recente; a parità completa conserva l'ordine originale;
 - disattivare l'automazione o riassegnare l'Istruttore lascia terminare le lezioni già iniziate, ma non ne avvia altre;
 - **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti e tre i rami d'arma;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli allievi contemporanei di ogni Istruttore;

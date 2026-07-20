@@ -37,3 +37,44 @@ describe("save validation at extreme scale", () => {
     })).toBe(false);
   });
 });
+
+describe("Legendary save invariants", () => {
+  it("rejects generic and duplicated Legendary profiles", () => {
+    const initial = createInitialState(1_000, "", false);
+    const base = initial.contacts[0];
+    const generic = { ...base, id: "generic-legendary", rarity: "legendary" as const };
+    const eva = {
+      ...base,
+      id: "eva-one",
+      rarity: "legendary" as const,
+      specialProfileId: "eva-parodi" as const,
+    };
+    const duplicateEva = { ...eva, id: "eva-two" };
+    const duplicatedTrials = {
+      ...initial,
+      contacts: [{ ...eva, status: "trialScheduled" as const }],
+      scheduledTrials: [
+        {
+          id: "eva-trial-one",
+          contactId: eva.id,
+          startsAt: 1_000,
+          resolvesAt: 2_000,
+          resultSeed: 1,
+          status: "scheduled" as const,
+        },
+        {
+          id: "eva-trial-two",
+          contactId: eva.id,
+          startsAt: 1_000,
+          resolvesAt: 2_000,
+          resultSeed: 2,
+          status: "scheduled" as const,
+        },
+      ],
+    };
+
+    expect(isValidGameState({ ...initial, contacts: [generic] })).toBe(false);
+    expect(isValidGameState({ ...initial, contacts: [eva, duplicateEva] })).toBe(false);
+    expect(isValidGameState(duplicatedTrials)).toBe(false);
+  });
+});
