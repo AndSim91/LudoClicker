@@ -51,6 +51,8 @@ export interface Contact {
   training?: FormTraining;
   lastFormTrainingYear?: number;
   formTrainingYearCount?: number;
+  lastAgonistCourseYear?: number;
+  agonistCourseCompletions?: number;
   enrolledMonth?: number;
   favorite?: boolean;
 }
@@ -548,7 +550,6 @@ export interface GameState {
     socialBuffer: number;
     equipmentBuffer: number;
     offlineContactBuffer: number;
-    agonistCoursesEnabled: boolean;
     lastImprovedAthlete?: string;
     lastImprovedAthleteId?: string;
   };
@@ -594,11 +595,6 @@ export type GameAction =
   | {
       type: "TOGGLE_INSTRUCTOR_AUTOMATION";
       collaboratorId: string;
-      enabled: boolean;
-      now: number;
-    }
-  | {
-      type: "TOGGLE_AGONIST_COURSES";
       enabled: boolean;
       now: number;
     }

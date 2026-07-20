@@ -10,7 +10,6 @@ import { foundSchool } from "./schoolProgressionFlow";
 import {
   assignCollaborator,
   payInstructorCertificates,
-  toggleAgonistCourses,
   toggleInstructorAutomation,
 } from "./trainingFlow";
 import type { FormId, GameAction, GameState } from "./types";
@@ -81,10 +80,6 @@ export function createGameActionHandlers(
       action.collaboratorId,
       action.enabled,
       action.now,
-    ),
-    TOGGLE_AGONIST_COURSES: (state, action) => toggleAgonistCourses(
-      state,
-      action.enabled,
     ),
     TOGGLE_MEMBER_FAVORITE: (state, action) => toggleMemberFavorite(
       state,

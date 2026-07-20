@@ -69,7 +69,6 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
         equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
         offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
-        agonistCoursesEnabled: false,
       },
     };
   }
@@ -89,7 +88,6 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
         equipmentBuffer: migrated.automation?.equipmentBuffer ?? 0,
         offlineContactBuffer: migrated.automation?.offlineContactBuffer ?? 0,
-        agonistCoursesEnabled: migrated.automation?.agonistCoursesEnabled ?? false,
         lastImprovedAthlete: migrated.automation?.lastImprovedAthlete,
       },
       statistics: {
@@ -135,6 +133,26 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
       school: migrated.school
         ? { ...migrated.school, followers: migrated.school.followers ?? 0 }
         : migrated.school,
+    };
+  }
+
+  if (migrated.version === 43) {
+    const automation = Object.fromEntries(
+      Object.entries(migrated.automation ?? {}).filter(
+        ([key]) => key !== "agonistCoursesEnabled",
+      ),
+    ) as MigratableState["automation"];
+    migrated = {
+      ...migrated,
+      version: 44,
+      contacts: (migrated.contacts ?? []).map((contact) => ({
+        ...contact,
+        agonistCourseCompletions: Math.max(
+          0,
+          Math.floor(contact.agonistCourseCompletions ?? 0),
+        ),
+      })),
+      automation,
     };
   }
 

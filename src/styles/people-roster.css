@@ -424,6 +424,11 @@
   white-space: normal;
 }
 
+.member-status > .member-agonist-course-message {
+  color: var(--success);
+  font-weight: 600;
+}
+
 .people-row > * {
   min-width: 0;
   overflow: hidden;

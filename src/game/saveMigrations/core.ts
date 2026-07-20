@@ -87,7 +87,6 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         socialBuffer: 0,
         equipmentBuffer: 0,
         offlineContactBuffer: 0,
-        agonistCoursesEnabled: false,
       },
       unlocks: {
         upgrades: migrated.unlocks?.upgrades ?? false,

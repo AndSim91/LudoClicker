@@ -217,9 +217,10 @@ Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
 singolo allievo**. Corso X e Corso Y concorrono al conteggio; il Corso Agonisti
-è escluso perché non assegna un badge permanente. Ogni badge permanente può
-essere registrato una sola volta sullo stesso allievo: un duplicato rappresenta
-uno stato non valido e non viene corretto nel calcolo economico. Un mese dura
+è escluso perché potenzia Arena e Stile ma non assegna un badge permanente. Ogni
+badge permanente può essere registrato una sola volta sullo stesso allievo: un
+duplicato rappresenta uno stato non valido e non viene corretto nel calcolo
+economico. Un mese dura
 **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo
 Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra
 superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e
@@ -845,17 +846,30 @@ Regole:
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
   dall'automazione e, con un Istruttore compatibile, costano il **25% del costo
   base**;
-- completare il **Corso Agonisti** consuma tutti gli slot formativi ancora
-  disponibili per l'atleta nell'anno corrente: la pagina Iscritti mostra il
-  limite annuale raggiunto e l'atleta resta immune dall'abbandono annuale per
-  quell'anno;
+- **Arena Tecnica** sblocca il **Corso Agonisti** automatico, che da quel momento
+  resta sempre attivo e non può essere disabilitato separatamente;
+- l'automazione propone il Corso Agonisti a un atleta vulnerabile che non ha
+  ancora iniziato una formazione nell'anno quando ha completato il proprio
+  percorso oppure nessun Istruttore automatico possiede le qualifiche per le
+  sue prossime Forme;
+- iniziare il Corso Agonisti consuma un solo slot formativo annuale e protegge
+  subito l'atleta dal controllo degli abbandoni. Lo stesso atleta non può
+  iniziarlo più di una volta nello stesso periodo luglio–giugno, anche quando i
+  potenziamenti gli concedono altri slot;
+- completare il Corso Agonisti aumenta permanentemente di **+1 Arena** e
+  **+1 Stile** i valori base dell'atleta. Il bonus si accumula senza limite
+  negli anni successivi; la riga dell'atleta nella schermata Iscritti mostra
+  `Eseguito Corso Agonisti | Potenziale totale +X`, senza creare notifiche o
+  messaggi nell'inbox;
+- il corso costa il 25% del costo base di €5.000. Arena Tecnica al livello 2
+  porta la sua durata base da 15 a 10 secondi; al livello 3 lo rende gratuito;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
   decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
-  poi la prossima Forma secondo la progressione dalla Forma 1 verso l'alto e
-  infine il contatto con `acquiredAt` più recente; a parità completa conserva
-  l'ordine originale;
-- disattivare l'automazione o riassegnare l'Istruttore lascia terminare le
-  lezioni già iniziate, ma non ne avvia altre;
+  poi la prossima formazione secondo la progressione dalla Forma 1 verso
+  l'alto, includendo il Corso Agonisti come fallback, e infine il contatto con
+  `acquiredAt` più recente; a parità completa conserva l'ordine originale;
+- disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
+  terminare le lezioni già iniziate, ma non ne avvia altre;
 - **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti
   e tre i rami d'arma;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
@@ -881,11 +895,11 @@ alcuna formazione durante l'anno scolastico appena concluso può lasciare la
 scuola. Le immunità degli atleti sono centralizzate e distinguono il controllo
 annuale dai futuri eventi imprevisti:
 
-| Motivo                                             | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza                                                                             |
-| -------------------------------------------------- | --------------------------------: | ----------------: | ------------------------------------------------------------------------------------ |
-| Iscrizione effettuata da Gennaio ad Agosto         |                            Immune |            Immune | Inizio di Settembre                                                                  |
-| Qualificazione al prossimo torneo                  |                            Immune |            Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
-| Forma, Corso X/Y o Corso Agonisti svolto nell'anno |                            Immune |       Vulnerabile | Successivo controllo annuale                                                         |
+| Motivo                                               | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza                                                                             |
+| ---------------------------------------------------- | --------------------------------: | ----------------: | ------------------------------------------------------------------------------------ |
+| Iscrizione effettuata da Gennaio ad Agosto           |                            Immune |            Immune | Inizio di Settembre                                                                  |
+| Qualificazione al prossimo torneo                    |                            Immune |            Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
+| Forma, Corso X/Y o Corso Agonisti iniziato nell'anno |                            Immune |       Vulnerabile | Successivo controllo annuale                                                         |
 
 Le iscrizioni effettuate da Settembre a Dicembre non ricevono l'immunità da
 nuova iscrizione. Dopo la Champion's Arena la qualificazione viene azzerata: non

@@ -16,7 +16,6 @@ export function PeopleView({
   onToggleFavorite,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
-  onToggleAgonistCourses,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
@@ -24,7 +23,6 @@ export function PeopleView({
   onToggleFavorite?: (contactId: string) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
-  onToggleAgonistCourses?: (enabled: boolean) => void;
 }) {
   const collaboratorsByContactId = useMemo(
     () =>
@@ -67,7 +65,6 @@ export function PeopleView({
             onStartTraining={onStartTraining}
             onPayInstructorCertificates={onPayInstructorCertificates}
             onToggleInstructorAutomation={onToggleInstructorAutomation}
-            onToggleAgonistCourses={onToggleAgonistCourses}
             collaboratorsById={collaboratorsById}
           />
         </section>

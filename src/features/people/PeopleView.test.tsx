@@ -563,7 +563,7 @@ describe("PeopleView", () => {
     expect(rows[2]).toHaveTextContent("Carla Base");
   });
 
-  it("shows Arena Tecnica toggle and every collaborator automation progress", () => {
+  it("shows Arena Tecnica as always active and every collaborator automation progress", () => {
     const initial = createInitialState(1_000);
     const assignments = ["writing", "events", "lessons", "social", "equipment"] as const;
     const collaborators = assignments.map((assignment, index) => ({
@@ -576,7 +576,6 @@ describe("PeopleView", () => {
       assignment,
       rarity: "ultra-rare" as const,
     }));
-    const onToggleAgonistCourses = vi.fn();
     render(
       <PeopleView
         state={{
@@ -585,7 +584,6 @@ describe("PeopleView", () => {
           upgrades: { ...initial.upgrades, "technical-arena": 1 },
           automation: {
             ...initial.automation,
-            agonistCoursesEnabled: true,
             lessonBuffer: 0.25,
             socialBuffer: 0.5,
             equipmentBuffer: 0.75,
@@ -615,11 +613,11 @@ describe("PeopleView", () => {
         }}
         onAssign={() => undefined}
         onStartTraining={() => undefined}
-        onToggleAgonistCourses={onToggleAgonistCourses}
       />,
     );
 
     expect(screen.getByText("Corso Agonisti")).toBeVisible();
+    expect(screen.getByText("Sempre attivo · una volta l'anno · +1 Arena e +1 Stile.")).toBeVisible();
     expect(screen.getByText(initial.emails[0].subject)).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
@@ -628,8 +626,34 @@ describe("PeopleView", () => {
     expect(screen.getByText("Usura attrezzatura: 42%")).toBeVisible();
     expect(screen.getAllByRole("progressbar")).toHaveLength(10);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(5);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Attivo" }));
-    expect(onToggleAgonistCourses).toHaveBeenCalledWith(false);
+    expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
+  });
+
+  it("shows the Corso Agonisti total in the athlete row instead of the inbox", () => {
+    const initial = createInitialState(1_000);
+    const athlete = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      agonistCourseCompletions: 3,
+    };
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [athlete],
+          school: { ...initial.school, activeMembers: 1 },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const athleteRow = screen.getByText(`${athlete.firstName} ${athlete.lastName}`)
+      .closest(".member-row");
+    expect(athleteRow).not.toBeNull();
+    expect(within(athleteRow as HTMLElement).getByText(
+      "Eseguito Corso Agonisti | Potenziale totale +3",
+    )).toBeVisible();
   });
 
   it("shows the assigned student's condensed training progress for an instructor", () => {

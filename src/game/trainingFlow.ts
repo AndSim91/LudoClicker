@@ -22,6 +22,7 @@ import {
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { getAthleteImmunityStatus } from "./athleteImmunity";
+import { getContactBaseStats } from "./athleteStats";
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
 import { getMemberAnnualDepartureChance } from "./formulas";
@@ -114,14 +115,6 @@ export function toggleInstructorAutomation(
   return refreshInstructorTrainingDurations(nextState, now);
 }
 
-export function toggleAgonistCourses(state: GameState, enabled: boolean): GameState {
-  if ((state.upgrades["technical-arena"] ?? 0) < 1) return state;
-  return {
-    ...state,
-    automation: { ...state.automation, agonistCoursesEnabled: enabled },
-  };
-}
-
 export function getAgonistCourseCost(state: GameState): number {
   return (state.upgrades["technical-arena"] ?? 0) >= 3
     ? 0
@@ -137,7 +130,6 @@ export function startAgonistCourse(
   const arenaLevel = state.upgrades["technical-arena"] ?? 0;
   if (
     arenaLevel < 1 ||
-    !state.automation.agonistCoursesEnabled ||
     !state.unlocks.forms ||
     isSummerBreak(state.school.currentMonth)
   ) return state;
@@ -156,7 +148,6 @@ export function startAgonistCourse(
     collaborator.autoTeachingEnabled !== false
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
-  const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const capacity = selectInstructorCapacity(state);
   const cost = getAgonistCourseCost(state);
   const immunity = student
@@ -171,7 +162,7 @@ export function startAgonistCourse(
     student.training ||
     immunity?.annualRollout ||
     getFormTrainingCount(student, trainingYear) !== 0 ||
-    getAutomaticFormCandidates(student).length > 0 ||
+    student.lastAgonistCourseYear === trainingYear ||
     getMemberAnnualDepartureChance(
       student.forms,
       student.rarity,
@@ -181,7 +172,9 @@ export function startAgonistCourse(
     state.school.euros < cost
   ) return state;
 
-  const baseDuration = arenaLevel >= 2 ? 5_000 : GAME_CONFIG.agonistCourseDurationMs;
+  const baseDuration = arenaLevel >= 2
+    ? GAME_CONFIG.agonistCourseImprovedDurationMs
+    : GAME_CONFIG.agonistCourseDurationMs;
   const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
   const training = {
     formId: AGONIST_COURSE_ID,
@@ -200,7 +193,8 @@ export function startAgonistCourse(
           ...contact,
           training,
           lastFormTrainingYear: trainingYear,
-          formTrainingYearCount: annualTrainingLimit,
+          formTrainingYearCount: getFormTrainingCount(student, trainingYear) + 1,
+          lastAgonistCourseYear: trainingYear,
         }
         : contact),
   }, now);
@@ -482,11 +476,19 @@ export function resolveFormTraining(
   if (!student?.training || student.training.completesAt > now) return state;
   const completedFormId = student.training.formId;
   if (isAgonistCourse(completedFormId)) {
+    const baseStats = member ? getContactBaseStats(member) : undefined;
+    const totalCompletions = (member?.agonistCourseCompletions ?? 0) + 1;
     let nextState: GameState = {
       ...state,
       contacts: member
         ? state.contacts.map((contact) => contact.id === member.id
-          ? { ...contact, training: undefined }
+          ? {
+              ...contact,
+              training: undefined,
+              arenaBase: (baseStats?.arena ?? 0) + 1,
+              styleBase: (baseStats?.style ?? 0) + 1,
+              agonistCourseCompletions: totalCompletions,
+            }
           : contact)
         : state.contacts,
     };
@@ -503,15 +505,7 @@ export function resolveFormTraining(
         now,
       );
     }
-    return dependencies.addMessage(
-      nextState,
-      now,
-      "Corso Agonisti completato",
-      `${member?.firstName} ${member?.lastName} ha completato il Corso Agonisti ed è al sicuro dall'abbandono per quest'anno.`,
-      "positive",
-      "other",
-      "training",
-    );
+    return nextState;
   }
   const definition = getFormDefinition(completedFormId);
   if (!definition || student.forms.includes(completedFormId)) return state;

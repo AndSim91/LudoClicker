@@ -16,6 +16,12 @@ const HIDDEN_MESSAGE_SUBJECTS = new Set([
   "Stiamo finendo i contatti",
   "Contatti terminati",
 ]);
+const HIDDEN_MESSAGE_PREFIXES = ["Eseguito Corso Agonisti | Potenziale totale +"];
+
+function isHiddenMessageSubject(subject: string): boolean {
+  return HIDDEN_MESSAGE_SUBJECTS.has(subject) ||
+    HIDDEN_MESSAGE_PREFIXES.some((prefix) => subject.startsWith(prefix));
+}
 
 
 
@@ -39,7 +45,7 @@ function read(key: string): ReadResult {
             ...parsed,
             messages: normalizeStackedMessages(
               parsed.messages.filter(
-                (message) => !HIDDEN_MESSAGE_SUBJECTS.has(message.subject),
+                (message) => !isHiddenMessageSubject(message.subject),
               ),
             ),
           },

@@ -33,9 +33,6 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
-    automation: upgradeId === "technical-arena" && currentLevel === 0
-      ? { ...state.automation, agonistCoursesEnabled: true }
-      : state.automation,
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords: state.equipment.totalSwords + addedSwords,

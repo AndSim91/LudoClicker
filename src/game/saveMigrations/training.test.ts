@@ -12,14 +12,15 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(43);
+    expect(migrated.version).toBe(44);
     expect(migrated.upgrades["extra-form"]).toBe(0);
     expect(migrated.upgrades["technical-arena"]).toBe(0);
-    expect(migrated.automation.agonistCoursesEnabled).toBe(false);
+    expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.statistics.socialTrials).toBe(0);
     expect(migrated.contacts[0].lastFormTrainingYear).toBe(2);
     expect(migrated.contacts[0].formTrainingYearCount).toBe(1);
+    expect(migrated.contacts[0].agonistCourseCompletions).toBe(0);
   });
 
   it("adds collaborator progress fields to version 39 saves", () => {
@@ -31,7 +32,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(43);
+    expect(migrated.version).toBe(44);
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
     expect(migrated.statistics.socialTrials).toBe(0);
@@ -46,7 +47,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(43);
+    expect(migrated.version).toBe(44);
     expect(migrated.upgrades["promiscuous-instructor"]).toBe(1);
     expect(migrated.upgrades["tiamat-instructor"]).toBe(4);
     expect(migrated.upgrades.pagosport).toBe(0);
@@ -60,7 +61,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(43);
+    expect(migrated.version).toBe(44);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
   });
 
@@ -71,7 +72,20 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(43);
+    expect(migrated.version).toBe(44);
     expect(migrated.school.followers).toBe(0);
+  });
+
+  it("removes the legacy Corso Agonisti toggle from version 43 saves", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 43;
+    legacy.automation.agonistCoursesEnabled = false;
+    delete legacy.contacts[0].agonistCourseCompletions;
+
+    const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.version).toBe(44);
+    expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
+    expect(migrated.contacts[0].agonistCourseCompletions).toBe(0);
   });
 });

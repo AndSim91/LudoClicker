@@ -117,7 +117,11 @@ export function isValidGameState(value: unknown): value is GameState {
         contact.rarity === "legendary"
       ) &&
       isUniqueFormIdList(contact.forms) &&
-      (contact.favorite === undefined || typeof contact.favorite === "boolean")
+      (contact.favorite === undefined || typeof contact.favorite === "boolean") &&
+      (contact.lastAgonistCourseYear === undefined ||
+        (Number.isSafeInteger(contact.lastAgonistCourseYear) && contact.lastAgonistCourseYear >= 1)) &&
+      (contact.agonistCourseCompletions === undefined ||
+        isNonNegativeSafeInteger(contact.agonistCourseCompletions))
     ) &&
     Array.isArray(state.emails) &&
     state.emails.every((email) =>
@@ -176,7 +180,6 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.lessonBuffer === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
-    typeof state.automation?.agonistCoursesEnabled === "boolean" &&
     (state.automation?.lastImprovedAthlete === undefined ||
       typeof state.automation.lastImprovedAthlete === "string") &&
     (state.automation?.lastImprovedAthleteId === undefined ||

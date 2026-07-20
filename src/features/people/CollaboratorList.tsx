@@ -74,7 +74,6 @@ export function CollaboratorList({
   onStartTraining,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
-  onToggleAgonistCourses,
   collaboratorsById,
 }: {
   state: GameState;
@@ -82,7 +81,6 @@ export function CollaboratorList({
   onStartTraining: (personId: string, formId: FormId) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
-  onToggleAgonistCourses?: (enabled: boolean) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
@@ -230,15 +228,8 @@ export function CollaboratorList({
         <div className="agonist-course-setting">
           <span>
             <strong>Corso Agonisti</strong>
-            <small>Protegge gli allievi a rischio senza altre Forme disponibili.</small>
+            <small>Sempre attivo · una volta l'anno · +1 Arena e +1 Stile.</small>
           </span>
-          <label className="instructor-toggle">
-            <input
-              type="checkbox"
-              checked={state.automation.agonistCoursesEnabled}
-              onChange={(event) => onToggleAgonistCourses?.(event.target.checked)}
-            /> Attivo
-          </label>
         </div>
       ) : null}
 

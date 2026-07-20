@@ -928,6 +928,7 @@ describe("local save", () => {
       "Nuova lezione di prova prenotata",
       "Stiamo finendo i contatti",
       "Contatti terminati",
+      "Eseguito Corso Agonisti | Potenziale totale +3",
     ].map((subject, index) => ({
       ...state.messages[0],
       id: `message-obsolete-${index}`,

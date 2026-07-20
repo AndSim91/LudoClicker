@@ -73,7 +73,6 @@ interface AutomaticTeachingNoOp {
   euros: number;
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
-  agonistCoursesEnabled: boolean;
   tournamentQualification: GameState["tournaments"]["qualification"];
 }
 
@@ -92,7 +91,6 @@ function wasAutomaticTeachingNoOp(state: GameState): boolean {
     cached.euros === state.school.euros &&
     cached.upgrades === state.upgrades &&
     cached.formsUnlocked === state.unlocks.forms &&
-    cached.agonistCoursesEnabled === state.automation.agonistCoursesEnabled &&
     cached.tournamentQualification === state.tournaments.qualification
   );
 }
@@ -108,7 +106,6 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     euros: state.school.euros,
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
-    agonistCoursesEnabled: state.automation.agonistCoursesEnabled,
     tournamentQualification: state.tournaments.qualification,
   });
 }
@@ -365,6 +362,41 @@ export function processAutomaticTeaching(
     state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
   );
   const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
+  const capacity = selectInstructorCapacity(state);
+  const instructorLoads = new Map(
+    getInstructorTeachingCounts(state.contacts, state.collaborators),
+  );
+  const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
+  for (const instructor of state.collaborators) {
+    if (
+      instructor.assignment !== "instructor" ||
+      instructor.autoTeachingEnabled === false
+    ) continue;
+    for (const formId of instructor.forms) {
+      if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
+      const instructors = instructorsByForm.get(formId);
+      if (instructors) instructors.push(instructor);
+      else instructorsByForm.set(formId, [instructor]);
+    }
+  }
+  const qualifiedFormCandidates = new Map(students.map((student) => [
+    student.id,
+    getAutomaticFormCandidates(student).filter((formId) => {
+      const definition = getFormDefinition(formId);
+      return Boolean(
+        definition &&
+        canTrainForm(
+          student,
+          definition,
+          trainingYear,
+          undefined,
+          undefined,
+          annualTrainingLimit,
+        ) &&
+        instructorsByForm.get(formId)?.some((instructor) => instructor.id !== student.id)
+      );
+    }),
+  ]));
   const automaticFormOrder: FormId[] = [
     "form-1",
     "course-x",
@@ -409,7 +441,7 @@ export function processAutomaticTeaching(
         state.network.schools.length,
       )
       : 0;
-    const candidate = getAutomaticFormCandidates(student)[0];
+    const candidate = qualifiedFormCandidates.get(student.id)?.[0];
     return [student.id, {
       departureRisk,
       isFavorite: "acquiredAt" in student
@@ -432,26 +464,9 @@ export function processAutomaticTeaching(
       rightPriority.acquiredAt - leftPriority.acquiredAt ||
       originalOrder.get(left.id)! - originalOrder.get(right.id)!;
   });
-  const capacity = selectInstructorCapacity(state);
-  const instructorLoads = new Map(
-    getInstructorTeachingCounts(state.contacts, state.collaborators),
-  );
-  const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
-  for (const instructor of state.collaborators) {
-    if (
-      instructor.assignment !== "instructor" ||
-      instructor.autoTeachingEnabled === false
-    ) continue;
-    for (const formId of instructor.forms) {
-      if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
-      const instructors = instructorsByForm.get(formId);
-      if (instructors) instructors.push(instructor);
-      else instructorsByForm.set(formId, [instructor]);
-    }
-  }
-
   for (const student of students) {
-    const candidate = getAutomaticFormCandidates(student).find((formId) => {
+    const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
+    const candidate = qualifiedCandidates.find((formId) => {
       const definition = getFormDefinition(formId);
       const instructor = instructorsByForm.get(formId)?.find(
         (available) =>
@@ -460,14 +475,6 @@ export function processAutomaticTeaching(
       );
       return Boolean(
         definition &&
-        canTrainForm(
-          student,
-          definition,
-          trainingYear,
-          undefined,
-          undefined,
-          annualTrainingLimit,
-        ) &&
         instructor &&
         (
           hasFreeFormTraining(nextState.upgrades) ||
@@ -475,54 +482,41 @@ export function processAutomaticTeaching(
         )
       );
     });
-    if (!candidate) continue;
-
-    const startedState = startFormTraining(nextState, student.id, candidate, now);
-    nextState = startedState;
-    const startedStudent = "acquiredAt" in student
-      ? nextState.contacts.find((contact) => contact.id === student.id)
-      : nextState.collaborators.find((collaborator) => collaborator.id === student.id);
-    if (!startedStudent?.training) continue;
-    const instructorId = startedStudent?.training?.instructorId;
-    if (instructorId) {
-      instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
-    }
-  }
-
-  if (
-    (nextState.upgrades["technical-arena"] ?? 0) >= 1 &&
-    nextState.automation.agonistCoursesEnabled
-  ) {
-    const arenaCandidates = nextState.contacts
-      .filter((contact) =>
-        contact.status === "enrolled" &&
-        !collaboratorContactIds.has(contact.id) &&
-        !contact.training &&
-        getFormTrainingCount(contact, trainingYear) === 0 &&
-        getAutomaticFormCandidates(contact).length === 0
-      )
-      .sort((left, right) =>
-        Number(right.favorite === true) - Number(left.favorite === true) ||
-        right.acquiredAt - left.acquiredAt
-      );
-    for (const student of arenaCandidates) {
-      const instructor = nextState.collaborators.find((candidate) =>
-        candidate.assignment === "instructor" &&
-        candidate.autoTeachingEnabled !== false &&
-        (instructorLoads.get(candidate.id) ?? 0) < capacity
-      );
-      if (!instructor) break;
-      const startedState = startAgonistCourse(
-        nextState,
-        student.id,
-        instructor.id,
-        now,
-      );
-      const startedStudent = startedState.contacts.find((contact) => contact.id === student.id);
-      if (!startedStudent?.training) continue;
+    if (candidate) {
+      const startedState = startFormTraining(nextState, student.id, candidate, now);
       nextState = startedState;
-      instructorLoads.set(instructor.id, (instructorLoads.get(instructor.id) ?? 0) + 1);
+      const startedStudent = "acquiredAt" in student
+        ? nextState.contacts.find((contact) => contact.id === student.id)
+        : nextState.collaborators.find((collaborator) => collaborator.id === student.id);
+      if (!startedStudent?.training) continue;
+      const instructorId = startedStudent.training.instructorId;
+      if (instructorId) {
+        instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
+      }
+      continue;
     }
+
+    if (
+      qualifiedCandidates.length > 0 ||
+      (nextState.upgrades["technical-arena"] ?? 0) < 1 ||
+      !("acquiredAt" in student)
+    ) continue;
+    const instructor = nextState.collaborators.find((candidate) =>
+      candidate.assignment === "instructor" &&
+      candidate.autoTeachingEnabled !== false &&
+      (instructorLoads.get(candidate.id) ?? 0) < capacity
+    );
+    if (!instructor) continue;
+    const startedState = startAgonistCourse(
+      nextState,
+      student.id,
+      instructor.id,
+      now,
+    );
+    const startedStudent = startedState.contacts.find((contact) => contact.id === student.id);
+    if (!startedStudent?.training) continue;
+    nextState = startedState;
+    instructorLoads.set(instructor.id, (instructorLoads.get(instructor.id) ?? 0) + 1);
   }
 
   if (nextState === state) rememberAutomaticTeachingNoOp(state);
