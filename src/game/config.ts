@@ -55,6 +55,7 @@ export const GAME_CONFIG = {
   socialCampaignContacts: 4,
   socialViralChance: 0.1,
   equipmentRepairIntervalMs: 10_000,
+  equipmentSwordRepairWork: 3,
   narrativeEventMinMs: 120_000,
   narrativeEventMaxMs: 300_000,
   narrativeHistoryLimit: 30,

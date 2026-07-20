@@ -22,7 +22,7 @@ import {
   addLegendaryEncounters,
   createAcquiredContacts,
 } from "./contacts";
-import { synchronizeEquipmentAvailability } from "./equipment";
+import { repairEquipment } from "./equipment";
 import { nextRandom } from "./random";
 import { selectActiveEmail, selectInstructorCapacity } from "./selectors";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
@@ -163,13 +163,14 @@ export function processAutomation(
       automationMultiplier *
       Math.max(0, gainMultiplier);
   const socialCycles = Math.floor(socialTotal);
-  const equipmentTotal = state.equipment.wear > 0
+  const hasEquipmentRepairs = state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
+  const equipmentTotal = hasEquipmentRepairs
     ? state.automation.equipmentBuffer +
       (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
         equipmentProductivity *
         automationMultiplier
     : 0;
-  const repairedWear = Math.min(Math.floor(equipmentTotal), Math.ceil(state.equipment.wear));
+  const equipmentRepair = repairEquipment(state.equipment, equipmentTotal);
 
   let nextState: GameState = {
     ...state,
@@ -179,21 +180,17 @@ export function processAutomation(
       writingBuffer: writingTotal - automatedCharacters,
       lessonBuffer: lessonTotal - lessonImprovements,
       socialBuffer: socialTotal - socialCycles,
-      equipmentBuffer: state.equipment.wear > repairedWear
-        ? equipmentTotal - repairedWear
-        : 0,
+      equipmentBuffer: equipmentRepair.remainingWork,
     },
-    equipment: synchronizeEquipmentAvailability({
-      ...state.equipment,
-      wear: Math.max(0, state.equipment.wear - repairedWear),
-    }),
+    equipment: equipmentRepair.equipment,
   };
 
-  if (repairedWear > 0) {
+  if (equipmentRepair.repairedWear + equipmentRepair.repairedSwords > 0) {
     nextState = dependencies.addCollaboratorMasteryExperience(
       nextState,
       "equipment",
-      repairedWear * COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
+      (equipmentRepair.repairedWear + equipmentRepair.repairedSwords) *
+        COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
       now,
     );
   }

@@ -78,6 +78,44 @@ export function applySwordDamage(
   });
 }
 
+export function repairEquipment(
+  equipment: EquipmentState,
+  repairWork: number,
+): {
+  equipment: EquipmentState;
+  repairedWear: number;
+  repairedSwords: number;
+  remainingWork: number;
+} {
+  const availableWork = Math.max(0, repairWork);
+  const repairedWear = Math.min(Math.floor(availableWork), Math.ceil(equipment.wear));
+  const afterWear = synchronizeEquipmentAvailability({
+    ...equipment,
+    wear: clampWear(equipment.wear - repairedWear),
+  });
+  const remainingAfterWear = availableWork - repairedWear;
+  const repairableSwords = Math.max(0, afterWear.damagedSwords ?? 0);
+  const repairedSwords = Math.min(
+    repairableSwords,
+    Math.floor(remainingAfterWear / GAME_CONFIG.equipmentSwordRepairWork),
+  );
+  const afterSwords = synchronizeEquipmentAvailability({
+    ...afterWear,
+    damagedSwords: repairableSwords - repairedSwords,
+    availableSwords: afterWear.availableSwords + repairedSwords,
+  });
+  const hasRemainingRepairs = afterSwords.wear > 0 || afterSwords.damagedSwords > 0;
+
+  return {
+    equipment: afterSwords,
+    repairedWear,
+    repairedSwords,
+    remainingWork: hasRemainingRepairs
+      ? remainingAfterWear - repairedSwords * GAME_CONFIG.equipmentSwordRepairWork
+      : 0,
+  };
+}
+
 export function maintainEquipment(state: GameState, now: number): GameState {
   const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
   if (

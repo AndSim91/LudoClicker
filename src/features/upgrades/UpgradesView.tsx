@@ -33,6 +33,52 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   instructors: "people",
 };
 
+const numberFormatter = new Intl.NumberFormat("it-IT", {
+  maximumFractionDigits: 2,
+});
+
+function formatNumber(value: number) {
+  return numberFormatter.format(value);
+}
+
+function formatUpgradePercentage(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function getUpgradeBenefitsSummary(state: GameState) {
+  const benefits = [
+    { label: "Caratteri per input", value: formatNumber(state.player.writingPower) },
+  ];
+  const addPercentage = (label: string, effect: Parameters<typeof getUpgradeEffectTotal>[1], sign = "+") => {
+    const total = getUpgradeEffectTotal(state.upgrades, effect);
+    if (total > 0) benefits.push({ label, value: `${sign}${formatUpgradePercentage(total)}` });
+  };
+  const addAmount = (label: string, effect: Parameters<typeof getUpgradeEffectTotal>[1]) => {
+    const total = getUpgradeEffectTotal(state.upgrades, effect);
+    if (total > 0) benefits.push({ label, value: `+${formatNumber(total)}` });
+  };
+
+  addPercentage("Contatti", "eventContactsMultiplier");
+  addPercentage("Pubblico eventi", "eventAttendanceMultiplier");
+  addPercentage("Prenotazioni", "bookingMultiplier");
+  addPercentage("Iscrizioni", "enrollmentMultiplier");
+  addPercentage("Produzione Social", "socialMultiplier");
+  addPercentage("Automazione", "automationMultiplier");
+  addPercentage("Entrate", "incomeMultiplier");
+  addPercentage("Usura", "equipmentWearReduction", "−");
+  addAmount("Spade", "totalSwords");
+  addAmount("Forme annue", "annualFormCapacity");
+  addAmount("Rami per Istruttore", "instructorBranchCapacity");
+  addAmount("Allievi per Istruttore", "instructorStudentCapacity");
+
+  const agonistCourseTier = getUpgradeEffectTotal(state.upgrades, "agonistCourseTier");
+  if (agonistCourseTier > 0) {
+    benefits.push({ label: "Arena Tecnica", value: `livello ${agonistCourseTier}` });
+  }
+
+  return benefits;
+}
+
 function getCategorySummary(state: GameState, category: UpgradeCategory) {
   switch (category) {
     case "speed":
@@ -289,12 +335,30 @@ export function UpgradesView({
     setSelection(null);
     window.requestAnimationFrame(() => anchor?.focus());
   }, [selection]);
-  const availableCount = UPGRADE_DEFINITIONS.filter(
-    (definition) => getUpgradeStatus(state, definition) === "available",
-  ).length;
-  const completedCount = UPGRADE_DEFINITIONS.filter(
-    (definition) => getUpgradeStatus(state, definition) === "completed",
-  ).length;
+  let availableCount = 0;
+  let completedCount = 0;
+  let recommendedUpgrade: { definition: UpgradeDefinition; cost: number } | undefined;
+  for (const definition of UPGRADE_DEFINITIONS) {
+    const status = getUpgradeStatus(state, definition);
+    if (status === "completed") {
+      completedCount += 1;
+      continue;
+    }
+    if (status !== "available") continue;
+    availableCount += 1;
+    const cost = getUpgradeCost(
+      definition,
+      state.upgrades[definition.id],
+      state.network.schools.length,
+    );
+    if (!recommendedUpgrade || cost < recommendedUpgrade.cost) {
+      recommendedUpgrade = { definition, cost };
+    }
+  }
+  const upgradeBenefits = getUpgradeBenefitsSummary(state);
+  const recommendedAffordable = recommendedUpgrade
+    ? state.school.euros >= recommendedUpgrade.cost
+    : false;
 
   return (
     <main className="overview-view shop-view">
@@ -320,11 +384,45 @@ export function UpgradesView({
           </div>
         </div>
 
+        <div className="upgrade-benefits-summary" aria-label="Riepilogo dei bonus ottenuti dagli upgrade">
+          <strong>Bonus totali</strong>
+          <ul>
+            {upgradeBenefits.map((benefit) => (
+              <li key={benefit.label}><span>{benefit.label}:</span> {benefit.value}</li>
+            ))}
+          </ul>
+        </div>
+
         <div className="upgrade-tree-scroll" tabIndex={0} aria-label="Diagramma dei potenziamenti, scorribile orizzontalmente">
           <div className="upgrade-tree-canvas">
-            <div className="upgrade-tree-root" aria-hidden="true">
-              <span><Icon name="spark" /></span>
+            <div className="upgrade-tree-root">
+              <span aria-hidden="true"><Icon name="spark" /></span>
               <strong>Crescita<br />della scuola</strong>
+              <section className="upgrade-recommendation" aria-labelledby="upgrade-recommendation-title">
+                <h3 id="upgrade-recommendation-title">Upgrade raccomandato</h3>
+                {recommendedUpgrade ? (
+                  <>
+                    <strong>{recommendedUpgrade.definition.title}</strong>
+                    <small>
+                      Livello {state.upgrades[recommendedUpgrade.definition.id] + 1}
+                      {" · "}{formatCurrency(recommendedUpgrade.cost)}
+                    </small>
+                    <button
+                      type="button"
+                      onClick={() => onBuyUpgrade(recommendedUpgrade.definition.id)}
+                      disabled={!recommendedAffordable}
+                      aria-label={`Potenzia ${recommendedUpgrade.definition.title}`}
+                    >
+                      Potenzia
+                    </button>
+                    {!recommendedAffordable ? (
+                      <small>Mancano {formatCurrency(recommendedUpgrade.cost - state.school.euros)}</small>
+                    ) : null}
+                  </>
+                ) : (
+                  <small>Nessun upgrade disponibile</small>
+                )}
+              </section>
             </div>
             <div className="upgrade-tree-branches">
               {UPGRADE_CATEGORIES.map((category) => {

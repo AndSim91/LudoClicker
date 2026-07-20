@@ -13,6 +13,7 @@ import type {
 } from "../../game/types";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import { GAME_CONFIG } from "../../game/config";
+import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail } from "../../game/selectors";
 import { formatCurrency } from "../../shared/formatters";
@@ -106,18 +107,28 @@ function CollaboratorAutomationProgress({
     );
   }
   if (assignment === "equipment") {
-    if (state.equipment.wear <= 0) {
+    const damagedSwords = getEffectiveDamagedSwords(state.equipment);
+    if (state.equipment.wear <= 0 && damagedSwords <= 0) {
       return <small>Usura attrezzatura: 0% · In attesa</small>;
     }
-    const progress = Math.min(100, Math.floor(state.automation.equipmentBuffer * 100));
+    const isRepairingSword = state.equipment.wear <= 0 && damagedSwords > 0;
+    const progress = Math.min(
+      100,
+      Math.floor(
+        (state.automation.equipmentBuffer /
+          (isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1)) *
+          100,
+      ),
+    );
     return (
       <div className="collaborator-automation-progress">
-        <span>Usura attrezzatura: {state.equipment.wear}%</span><strong>{progress}%</strong>
+        <span>{isRepairingSword ? `Spade danneggiate: ${damagedSwords}` : `Usura attrezzatura: ${state.equipment.wear}%`}</span><strong>{progress}%</strong>
         <ProgressBar
           className="collaborator-progress-bar"
-          label="Progresso riduzione usura"
+          label={isRepairingSword ? "Progresso riparazione spada" : "Progresso riduzione usura"}
           value={progress}
         />
+        {isRepairingSword ? <small>Una spada richiede 3 cicli base</small> : null}
       </div>
     );
   }

@@ -12,7 +12,7 @@ import {
   getEventFunnelOutcome,
 } from "./formulas";
 import { selectActiveEmail } from "./selectors";
-import type { FormId } from "./types";
+import type { FormId, GameState } from "./types";
 
 describe("game engine: progression", () => {
   it("buys data-driven upgrades with growing costs", () => {
@@ -218,6 +218,38 @@ describe("game engine: progression", () => {
     expect(automated.emails).toHaveLength(initial.emails.length);
     expect(automated.equipment.wear).toBe(4);
     expect(automated.automation.equipmentBuffer).toBeCloseTo(0.05);
+  });
+
+  it("repairs damaged swords automatically after wear reaches zero", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-equipment-repair",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "equipment" as const,
+      rarity: "rare" as const,
+    };
+    let state: GameState = {
+      ...initial,
+      collaborators: [collaborator],
+      equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
+      unlocks: { ...initial.unlocks, collaborators: true },
+    };
+
+    for (let tick = 1; tick <= 29; tick += 1) {
+      state = gameReducer(state, { type: "TICK", now: 1_000 + tick * 1_000 });
+    }
+
+    expect(state.equipment.damagedSwords).toBe(1);
+    expect(state.automation.equipmentBuffer).toBeCloseTo(2.9);
+
+    const repaired = gameReducer(state, { type: "TICK", now: 31_000 });
+
+    expect(repaired.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
+    expect(repaired.automation.equipmentBuffer).toBe(0);
   });
 
   it("improves Arena or Style for one random enrolled athlete every lesson cycle", () => {

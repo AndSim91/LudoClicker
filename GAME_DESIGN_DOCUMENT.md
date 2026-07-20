@@ -231,6 +231,8 @@ Le spade della scuola sono gestite come inventario operativo:
 
 Le spade impongono una capienza operativa: quelle assegnate a un evento non sono disponibili fino alla sua conclusione. Un valore di usura più alto riduce inoltre l'efficacia degli eventi.
 
+I collaboratori assegnati all'Attrezzatura riducono progressivamente l'usura. Quando l'usura e' a zero, continuano riparando le spade danneggiate: ogni spada richiede tre volte il tempo base di riparazione.
+
 ### 5.7 Reputazione di rete
 
 La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
@@ -1723,6 +1725,7 @@ L'uso pubblico di un'interfaccia quasi identica a Outlook richiede attenzione a 
 - Le piattaforme social sono inventate e possono produrre eventi virali.
 - Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari dall'iscrizione.
 - I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni, social e spade.
+- I collaboratori assegnati alle spade riparano prima l'usura e poi le spade danneggiate; una riparazione completa richiede tre cicli base.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non può essere messa in pausa.

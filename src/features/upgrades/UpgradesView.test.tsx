@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { UpgradesView } from "./UpgradesView";
@@ -95,6 +95,79 @@ describe("UpgradesView", () => {
 
     expect(onBuyUpgrade).toHaveBeenCalledOnce();
     expect(onBuyUpgrade).toHaveBeenCalledWith("prepared-presentation");
+  });
+
+  it("recommends the cheapest available upgrade and buys it directly", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      school: { ...initial.school, euros: 1_000 },
+    };
+    const onBuyUpgrade = vi.fn();
+    render(<UpgradesView state={state} onBuyUpgrade={onBuyUpgrade} />);
+
+    const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
+    expect(within(recommendation).getByText("Presentazione preparata")).toBeVisible();
+    expect(within(recommendation).getByText(/Livello 1 · 50,00/)).toBeVisible();
+
+    fireEvent.click(within(recommendation).getByRole("button", {
+      name: "Potenzia Presentazione preparata",
+    }));
+
+    expect(onBuyUpgrade).toHaveBeenCalledOnce();
+    expect(onBuyUpgrade).toHaveBeenCalledWith("prepared-presentation");
+  });
+
+  it("disables the recommended quick upgrade when the balance is insufficient", () => {
+    const initial = createInitialState(1_000);
+    render(
+      <UpgradesView
+        state={{ ...initial, school: { ...initial.school, euros: 20 } }}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
+
+    const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
+    expect(within(recommendation).getByText("Presentazione preparata")).toBeVisible();
+    expect(within(recommendation).getByRole("button", {
+      name: "Potenzia Presentazione preparata",
+    })).toBeDisabled();
+    expect(within(recommendation).getByText(/Mancano 30,00/)).toBeVisible();
+  });
+
+  it("summarizes every cumulative benefit received from upgrades", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      player: { ...initial.player, writingPower: 3 },
+      upgrades: {
+        ...initial.upgrades,
+        "comfortable-keyboard": 5,
+        "prepared-presentation": 3,
+        "coordinated-demo": 1,
+        "organized-rack": 2,
+        "registration-form": 1,
+        "instructor-versatility": 2,
+        "technical-arena": 1,
+      },
+    };
+    render(<UpgradesView state={state} onBuyUpgrade={() => undefined} />);
+
+    const summary = screen.getByLabelText("Riepilogo dei bonus ottenuti dagli upgrade");
+    expect(within(summary).getByText("Caratteri per input:")).toBeVisible();
+    expect(within(summary).getByText("3")).toBeVisible();
+    expect(within(summary).getByText("Contatti:")).toBeVisible();
+    expect(within(summary).getByText("+30%")).toBeVisible();
+    expect(within(summary).getByText("Pubblico eventi:")).toBeVisible();
+    expect(within(summary).getByText("+20%")).toBeVisible();
+    expect(within(summary).getByText("Spade:")).toBeVisible();
+    expect(within(summary).getByText("+4")).toBeVisible();
+    expect(within(summary).getByText("Entrate:")).toBeVisible();
+    expect(within(summary).getByText("+10%")).toBeVisible();
+    expect(within(summary).getByText("Rami per Istruttore:")).toBeVisible();
+    expect(within(summary).getByText("+2")).toBeVisible();
+    expect(within(summary).getByText("Arena Tecnica:")).toBeVisible();
+    expect(within(summary).getByText("livello 1")).toBeVisible();
   });
 
   it("marks an unlocked unaffordable upgrade node until enough funds are available", () => {

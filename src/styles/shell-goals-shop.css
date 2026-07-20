@@ -177,6 +177,58 @@
   background: var(--success);
 }
 
+.upgrade-benefits-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  margin-bottom: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 12px;
+  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.upgrade-benefits-summary > strong {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-right: 1px solid var(--line);
+  color: var(--blue-700);
+  background: var(--blue-100);
+  white-space: nowrap;
+}
+
+.upgrade-benefits-summary ul {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 7px 12px;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.upgrade-benefits-summary li {
+  font-variant-numeric: tabular-nums;
+}
+
+.upgrade-benefits-summary li + li::before {
+  margin: 0 10px;
+  color: var(--line-strong);
+  content: "|";
+}
+
+.upgrade-benefits-summary li span {
+  color: var(--ink-muted);
+}
+
 .upgrade-tree-scroll {
   max-width: 100%;
   overflow: auto;
@@ -189,8 +241,8 @@
 
 .upgrade-tree-canvas {
   display: grid;
-  grid-template-columns: 130px minmax(980px, 1fr);
-  min-width: 1110px;
+  grid-template-columns: 190px minmax(980px, 1fr);
+  min-width: 1170px;
   padding-top: 4px;
   background: var(--surface);
 }
@@ -205,6 +257,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 8px;
+  padding: 12px;
   border-right: 1px solid var(--line);
   background: var(--surface-muted);
   text-align: center;
@@ -238,10 +291,66 @@
   height: 20px;
 }
 
-.upgrade-tree-root strong {
+.upgrade-tree-root > strong {
   color: var(--ink-muted);
   font-size: 11px;
   line-height: 1.35;
+}
+
+.upgrade-recommendation {
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 5px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: left;
+}
+
+.upgrade-recommendation h3 {
+  margin: 0;
+  color: var(--blue-700);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.upgrade-recommendation > strong {
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.upgrade-recommendation small {
+  color: var(--ink-muted);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.upgrade-recommendation button {
+  min-height: 27px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-sm);
+  color: white;
+  background: var(--blue-600);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.upgrade-recommendation button:hover:not(:disabled) {
+  background: #115ea3;
+}
+
+.upgrade-recommendation button:disabled {
+  border-color: var(--line-strong);
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  cursor: not-allowed;
 }
 
 .upgrade-tree-branches {
@@ -661,6 +770,8 @@
 :root[data-theme="dark"] .upgrade-tree-root,
 :root[data-theme="dark"] .upgrade-branch-heading,
 :root[data-theme="dark"] .upgrade-page-summary,
+:root[data-theme="dark"] .upgrade-benefits-summary,
+:root[data-theme="dark"] .upgrade-recommendation,
 :root[data-theme="dark"] .upgrade-dialog {
   background: var(--surface);
 }
