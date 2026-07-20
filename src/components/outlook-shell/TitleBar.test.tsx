@@ -2,7 +2,12 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { TitleBar } from "./TitleBar";
-import { formatCompactCurrency, formatExactCurrency } from "./resourceFormatting";
+import {
+  formatCompactCurrency,
+  formatCompactNumber,
+  formatExactCurrency,
+  formatExactNumber,
+} from "./resourceFormatting";
 
 afterEach(cleanup);
 
@@ -87,6 +92,39 @@ describe("TitleBar", () => {
     expect(container.querySelector(`strong[title="${formatExactCurrency(euros)}"]`)).toHaveTextContent(
       formatCompactCurrency(euros).replace(/\u00a0/g, " "),
     );
+  });
+
+  it("shows Follower only after Social is available", () => {
+    const { rerender } = render(
+      <TitleBar
+        currentMonth={9}
+        nextMonthAt={61_000}
+        now={1_000}
+        contactsAwaitingEmail={0}
+        activeMembers={0}
+        followers={1_250}
+        euros={0}
+        isPaused={false}
+        onTogglePause={() => undefined}
+      />,
+    );
+
+    expect(screen.getByLabelText(`Follower Social: ${formatExactNumber(1_250)}`))
+      .toHaveTextContent(`Follower${formatCompactNumber(1_250)}`);
+
+    rerender(
+      <TitleBar
+        currentMonth={9}
+        nextMonthAt={61_000}
+        now={1_000}
+        contactsAwaitingEmail={0}
+        activeMembers={0}
+        euros={0}
+        isPaused={false}
+        onTogglePause={() => undefined}
+      />,
+    );
+    expect(screen.queryByText("Follower")).not.toBeInTheDocument();
   });
 
   it("toggles the pause control between pause and resume", () => {

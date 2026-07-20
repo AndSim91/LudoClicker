@@ -188,25 +188,26 @@ describe("game engine: progression", () => {
     const automated = gameReducer(
       {
         ...initial,
-        randomSeed: 12_955,
-        school: { ...initial.school, activeMembers: 12 },
+        randomSeed: 81_259,
+        school: { ...initial.school, activeMembers: 12, followers: 1_000 },
         collaborators: [socialCollaborator, equipmentCollaborator],
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
         equipment: { ...initial.equipment, wear: 5 },
         automation: {
           ...initial.automation,
-          socialBuffer: 0.99,
+          socialBuffer: 0.995,
           equipmentBuffer: 0.95,
         },
       },
       { type: "TICK", now: 2_000 },
     );
 
-    expect(automated.school.euros).toBe(60);
-    expect(automated.statistics.eurosEarned).toBe(60);
+    expect(automated.school.euros).toBe(1_260);
+    expect(automated.school.followers).toBe(1_001);
+    expect(automated.statistics.eurosEarned).toBe(1_260);
     expect(automated.statistics.socialContacts).toBe(1);
     expect(automated.statistics.socialTrials).toBe(1);
-    expect(automated.automation.socialBuffer).toBeCloseTo(0.99 + 1 / 60 - 1);
+    expect(automated.automation.socialBuffer).toBeCloseTo(0.995 + 1 / 120 - 1);
     expect(automated.contacts).toHaveLength(initial.contacts.length + 2);
     expect(automated.contacts.filter((contact) => contact.source === "social"))
       .toHaveLength(2);
@@ -456,7 +457,7 @@ describe("game engine: progression", () => {
     expect(training.contacts[0].training?.completesAt).toBe(22_000);
   });
 
-  it("applies Tocco Divino only when an Instructor teaches a Form", () => {
+  it("applies Tocco DiGilo only when an Instructor teaches a Form", () => {
     const initial = createInitialState(1_000);
     const member = { ...initial.contacts[0], status: "enrolled" as const };
     const instructor = {

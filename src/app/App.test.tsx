@@ -61,6 +61,27 @@ describe("App profile and navigation", () => {
     ]);
   });
 
+  it("reveals Follower in the top bar only when Social is unlocked", () => {
+    const initial = createInitialState(Date.now(), "Andrea Ungaro");
+    saveGame({
+      ...initial,
+      school: { ...initial.school, followers: 12 },
+    });
+    const { unmount } = render(<App />);
+
+    expect(screen.queryByText("Follower")).not.toBeInTheDocument();
+    unmount();
+
+    saveGame({
+      ...initial,
+      school: { ...initial.school, followers: 12 },
+      unlocks: { ...initial.unlocks, social: true },
+    });
+    render(<App />);
+
+    expect(screen.getByLabelText("Follower Social: 12")).toBeVisible();
+  });
+
   it("unlocks tournaments after reaching six members", () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({

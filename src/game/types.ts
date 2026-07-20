@@ -510,6 +510,7 @@ export interface GameState {
     peakActiveMembers: number;
     historicMembers: number;
     euros: number;
+    followers: number;
     currentMonth: number;
     nextFeeAt: number;
   };

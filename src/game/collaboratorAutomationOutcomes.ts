@@ -1,8 +1,14 @@
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
 import { addLegendaryEncounters, createAcquiredContacts } from "./contacts";
+import { roundCurrency } from "./economy";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
+import {
+  getSocialContactChance,
+  getSocialIncomePerMember,
+  getSocialTrialChance,
+} from "./social";
 import type { GameState, ScheduledTrial } from "./types";
 
 export function improveRandomAthletes(
@@ -130,6 +136,7 @@ export interface SocialAutomationOutcome {
   state: GameState;
   cycles: number;
   eurosEarned: number;
+  followersGained: number;
   trialsBooked: number;
   contactsAcquired: number;
 }
@@ -145,33 +152,47 @@ export function resolveSocialAutomationCycles(
       state,
       cycles: 0,
       eurosEarned: 0,
+      followersGained: 0,
       trialsBooked: 0,
       contactsAcquired: 0,
     };
   }
 
   let nextSeed = state.randomSeed;
+  let followers = state.school.followers;
+  let followersGained = 0;
+  let eurosEarned = 0;
   let trialsBooked = 0;
   let contactsAcquired = 0;
   for (let index = 0; index < cycles; index += 1) {
-    const [trialRoll, seedAfterTrial] = nextRandom(nextSeed);
+    const trialChance = getSocialTrialChance(followers);
+    const contactChance = getSocialContactChance(followers);
+    eurosEarned += state.school.activeMembers * getSocialIncomePerMember(followers);
+
+    const [followerRoll, seedAfterFollower] = nextRandom(nextSeed);
+    const [trialRoll, seedAfterTrial] = nextRandom(seedAfterFollower);
     const [contactRoll, seedAfterContact] = nextRandom(seedAfterTrial);
     nextSeed = seedAfterContact;
-    if (trialRoll < GAME_CONFIG.socialTrialChance) trialsBooked += 1;
-    if (contactRoll < GAME_CONFIG.socialContactChance) contactsAcquired += 1;
+    if (followerRoll < GAME_CONFIG.socialFollowerChance) {
+      followers += 1;
+      followersGained += 1;
+    }
+    if (trialRoll < trialChance) trialsBooked += 1;
+    if (contactRoll < contactChance) contactsAcquired += 1;
   }
 
-  const eurosEarned = cycles * state.school.activeMembers * GAME_CONFIG.socialIncomePerMember;
+  eurosEarned = roundCurrency(eurosEarned);
   let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
     school: {
       ...state.school,
-      euros: state.school.euros + eurosEarned,
+      euros: roundCurrency(state.school.euros + eurosEarned),
+      followers,
     },
     statistics: {
       ...state.statistics,
-      eurosEarned: state.statistics.eurosEarned + eurosEarned,
+      eurosEarned: roundCurrency(state.statistics.eurosEarned + eurosEarned),
     },
   };
 
@@ -197,5 +218,12 @@ export function resolveSocialAutomationCycles(
     nextState = scheduleSocialTrials(nextState, trialsBooked, now);
   }
 
-  return { state: nextState, cycles, eurosEarned, trialsBooked, contactsAcquired };
+  return {
+    state: nextState,
+    cycles,
+    eurosEarned,
+    followersGained,
+    trialsBooked,
+    contactsAcquired,
+  };
 }

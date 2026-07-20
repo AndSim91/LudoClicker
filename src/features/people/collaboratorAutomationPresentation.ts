@@ -2,6 +2,11 @@ import { getEmailBuildLength } from "../../content/emailBuild";
 import { GAME_CONFIG } from "../../game/config";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
+import {
+  getSocialContactChance,
+  getSocialIncomePerMember,
+  getSocialTrialChance,
+} from "../../game/social";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
 import { formatCurrency, formatPercent } from "../../shared/formatters";
 
@@ -74,11 +79,12 @@ export function getCollaboratorAutomationPresentation({
   }
 
   if (assignment === "social") {
+    const incomePerMember = getSocialIncomePerMember(state.school.followers);
     return {
       title: `Prossimo rendimento · ${formatCurrency(
-        state.school.activeMembers * GAME_CONFIG.socialIncomePerMember,
+        state.school.activeMembers * incomePerMember,
       )}`,
-      detail: `Ciclo base 60 s · ${formatPercent(GAME_CONFIG.socialTrialChance)} prova · ${formatPercent(GAME_CONFIG.socialContactChance)} nuovo contatto`,
+      detail: `Ciclo base ${GAME_CONFIG.socialAutomationIntervalMs / 1_000} s · ${formatPercent(getSocialTrialChance(state.school.followers))} prova · ${formatPercent(getSocialContactChance(state.school.followers))} nuovo contatto`,
       progress: Math.min(100, Math.floor(state.automation.socialBuffer * 100)),
       progressLabel: "Progresso ciclo pubblicitario Social",
     };

@@ -44,6 +44,7 @@ export function createInitialState(
       peakActiveMembers: 0,
       historicMembers: 0,
       euros: 0,
+      followers: 0,
       currentMonth: 9,
       nextFeeAt: now + GAME_CONFIG.gameMonthMs,
     },

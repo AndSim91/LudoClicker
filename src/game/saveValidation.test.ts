@@ -12,6 +12,7 @@ describe("save validation at extreme scale", () => {
         activeMembers: 1_000_000_000,
         peakActiveMembers: 1_000_000_000,
         historicMembers: 1_000_000_000,
+        followers: 1_000_000_000,
         euros: 2_000_000_000_000_000,
       },
       statistics: {
@@ -27,6 +28,8 @@ describe("save validation at extreme scale", () => {
     ["fractional members", { activeMembers: 1.5 }],
     ["negative members", { activeMembers: -1 }],
     ["unsafe members", { activeMembers: Number.MAX_SAFE_INTEGER + 1 }],
+    ["fractional followers", { followers: 1.5 }],
+    ["negative followers", { followers: -1 }],
     ["infinite euros", { euros: Infinity }],
     ["negative euros", { euros: -1 }],
   ])("rejects %s", (_label, schoolPatch) => {

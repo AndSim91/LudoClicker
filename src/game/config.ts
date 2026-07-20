@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 42,
+  version: 43,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -48,10 +48,13 @@ export const GAME_CONFIG = {
   agonistCourseDurationMs: 15_000,
   lessonImprovementIntervalMs: 60_000,
   athleticPreparationFavoriteChance: 0.025,
-  socialAutomationIntervalMs: 60_000,
+  socialAutomationIntervalMs: 120_000,
   socialIncomePerMember: 5,
-  socialTrialChance: 0.0025,
-  socialContactChance: 0.01,
+  socialIncomePerMemberPerFollower: 0.1,
+  socialFollowerChance: 0.1,
+  socialTrialChance: 0.0001,
+  socialContactChance: 0.001,
+  socialChancePerFollower: 0.00001,
   socialCampaignCost: 25,
   socialCampaignContacts: 4,
   socialViralChance: 0.1,

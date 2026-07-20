@@ -12,7 +12,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(42);
+    expect(migrated.version).toBe(43);
     expect(migrated.upgrades["extra-form"]).toBe(0);
     expect(migrated.upgrades["technical-arena"]).toBe(0);
     expect(migrated.automation.agonistCoursesEnabled).toBe(false);
@@ -31,7 +31,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(42);
+    expect(migrated.version).toBe(43);
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
     expect(migrated.statistics.socialTrials).toBe(0);
@@ -46,21 +46,32 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(42);
+    expect(migrated.version).toBe(43);
     expect(migrated.upgrades["promiscuous-instructor"]).toBe(1);
     expect(migrated.upgrades["tiamat-instructor"]).toBe(4);
     expect(migrated.upgrades.pagosport).toBe(0);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
   });
 
-  it("adds Tocco Divino to version 41 saves", () => {
+  it("adds Tocco DiGilo to version 41 saves", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 41;
     delete legacy.upgrades["divine-touch"];
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(42);
+    expect(migrated.version).toBe(43);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
+  });
+
+  it("adds an empty Follower total to version 42 saves", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 42;
+    delete legacy.school.followers;
+
+    const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.version).toBe(43);
+    expect(migrated.school.followers).toBe(0);
   });
 });

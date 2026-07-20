@@ -89,7 +89,7 @@ describe("instructor branch", () => {
     ]);
   });
 
-  it("applies Tocco Divino's exact +9999% teaching speed", () => {
+  it("applies Tocco DiGilo's exact +9999% teaching speed", () => {
     const levels = {
       ...createInitialUpgradeLevels(),
       "divine-touch": 1,

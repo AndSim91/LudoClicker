@@ -15,6 +15,7 @@ export function TitleBar({
   now: providedNow,
   contactsAwaitingEmail,
   activeMembers,
+  followers,
   euros,
   isPaused,
   onTogglePause,
@@ -24,6 +25,7 @@ export function TitleBar({
   now?: number;
   contactsAwaitingEmail: number;
   activeMembers: number;
+  followers?: number;
   euros: number;
   isPaused: boolean;
   onTogglePause: () => void;
@@ -53,6 +55,13 @@ export function TitleBar({
           <small>Iscritti attivi</small>
           <strong title={formatExactNumber(activeMembers)}>{formatCompactNumber(activeMembers)}</strong>
         </span>
+        {followers === undefined ? null : (
+          <span className="title-resource" aria-label={`Follower Social: ${formatExactNumber(followers)}`}>
+            <Icon name="spark" />
+            <small>Follower</small>
+            <strong title={formatExactNumber(followers)}>{formatCompactNumber(followers)}</strong>
+          </span>
+        )}
         <span className="title-resource" aria-label={`Disponibilità economica: ${formatExactCurrency(euros)}`}>
           <Icon name="coin" />
           <small>Disponibilità</small>

@@ -135,6 +135,7 @@ export function isValidGameState(value: unknown): value is GameState {
     isNonNegativeSafeInteger(state.school?.activeMembers) &&
     isNonNegativeSafeInteger(state.school?.peakActiveMembers) &&
     isNonNegativeSafeInteger(state.school?.historicMembers) &&
+    isNonNegativeSafeInteger(state.school?.followers) &&
     typeof state.equipment?.totalSwords === "number" &&
     typeof state.equipment?.availableSwords === "number" &&
     typeof state.equipment?.damagedSwords === "number" &&

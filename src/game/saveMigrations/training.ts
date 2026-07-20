@@ -128,5 +128,15 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
     };
   }
 
+  if (migrated.version === 42) {
+    migrated = {
+      ...migrated,
+      version: 43,
+      school: migrated.school
+        ? { ...migrated.school, followers: migrated.school.followers ?? 0 }
+        : migrated.school,
+    };
+  }
+
   return migrated;
 }

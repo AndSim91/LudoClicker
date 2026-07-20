@@ -139,6 +139,7 @@ export function App() {
         nextMonthAt={state.school.nextFeeAt}
         contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
         activeMembers={state.school.activeMembers}
+        followers={state.unlocks.social ? state.school.followers : undefined}
         euros={state.school.euros}
         isPaused={isPaused}
         onTogglePause={togglePause}

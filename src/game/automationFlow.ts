@@ -240,6 +240,9 @@ export function processAutomation(
       "Rendimento pubblicitario Social",
       [
         `${outcome.cycles === 1 ? "Un ciclo" : `${outcome.cycles} cicli`} di promozione ha generato €${outcome.eurosEarned} grazie a ${state.school.activeMembers} iscritti attivi.`,
+        outcome.followersGained > 0
+          ? `${outcome.followersGained} ${outcome.followersGained === 1 ? "nuovo follower" : "nuovi follower"}.`
+          : "Nessun nuovo follower in questo ciclo.",
         outcome.trialsBooked > 0
           ? `${outcome.trialsBooked} ${outcome.trialsBooked === 1 ? "nuova prova" : "nuove prove"} in palestra.`
           : "Nessuna nuova prova in questo ciclo.",
