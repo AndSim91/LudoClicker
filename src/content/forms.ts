@@ -60,6 +60,20 @@ export const FORM_DEFINITIONS: FormDefinition[] = [
   { id: "form-7", title: "Forma 7", cost: 3_000, durationMs: 75_000, prerequisite: "form-6", bonusLabel: "+20% su ogni incarico" },
 ];
 
+const FORM_IDS = new Set<FormId>(FORM_DEFINITIONS.map((definition) => definition.id));
+
+export function isUniqueFormIdList(value: unknown): value is FormId[] {
+  if (!Array.isArray(value)) return false;
+  const seen = new Set<FormId>();
+  for (const entry of value) {
+    if (typeof entry !== "string" || !FORM_IDS.has(entry as FormId) || seen.has(entry as FormId)) {
+      return false;
+    }
+    seen.add(entry as FormId);
+  }
+  return true;
+}
+
 export const FORM_BRANCHES: FormBranch[] = ["Spada Lunga", "Staffa", "Doppia spada corta"];
 
 export const BRANCH_FORM_IDS: Record<FormBranch, FormId[]> = {

@@ -10,6 +10,7 @@ import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { makeGameId } from "./ids";
+import { getMonthlyMemberFees } from "./membershipEconomy";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
 import type { GameState, SpecialCollaboratorId } from "./types";
@@ -213,7 +214,7 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
       nextState.school.nextFeeAt,
     );
     const earned = scaleCurrencyGain((
-      (nextState.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
+      (getMonthlyMemberFees(nextState) +
         nextState.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
       (1 + getUpgradeEffectTotal(nextState.upgrades, "incomeMultiplier")) *
       networkMultiplier

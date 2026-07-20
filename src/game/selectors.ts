@@ -2,6 +2,7 @@ import type { CampaignEmail, Contact, FormId, GameState, ScheduledTrial } from "
 import { GAME_CONFIG } from "./config";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { isInstructorForm } from "../content/forms";
+import { getMonthlyMemberFees } from "./membershipEconomy";
 import {
   getActiveCampaignEmails,
   getAvailableContactCount,
@@ -111,7 +112,7 @@ export function selectDayTrials(state: GameState, now: number): ScheduledTrial[]
 export function selectIncomePerMonth(state: GameState): number {
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   return (
-    (state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
+    (getMonthlyMemberFees(state) +
       state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
     (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
     networkMultiplier

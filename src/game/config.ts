@@ -26,6 +26,7 @@ export const GAME_CONFIG = {
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,
   monthlyMemberFee: 40,
+  monthlyMemberFormBonus: 5,
   enrollmentBonus: 20,
   gameMonthMs: 60_000,
   secretLegendaryTrialDurationMs: 150_000,

@@ -139,6 +139,19 @@ describe("local save", () => {
     expect(importGame(incompatible)).toBeNull();
   });
 
+  it("rejects saves with duplicate or non-permanent form badges", () => {
+    const state = createInitialState(1_000);
+    const withForms = (forms: string[]) => JSON.stringify({
+      ...state,
+      contacts: state.contacts.map((contact, index) =>
+        index === 0 ? { ...contact, forms } : contact,
+      ),
+    });
+
+    expect(importGame(withForms(["form-1", "form-1"]))).toBeNull();
+    expect(importGame(withForms(["form-1", "agonist-course"]))).toBeNull();
+  });
+
   it("updates legacy prospect providers without resetting the save", () => {
     const state = createInitialState(1_000);
     const legacy = {

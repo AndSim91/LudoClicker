@@ -235,7 +235,7 @@ export function payInstructorCertificates(
       if (candidate.id !== collaboratorId) return candidate;
       return {
         ...candidate,
-        instructorForms: [...new Set([...candidate.instructorForms, ...missingCompletedForms])],
+        instructorForms: [...candidate.instructorForms, ...missingCompletedForms],
         training: hasPendingTrainingCertification && candidate.training
           ? { ...candidate.training, includesInstructorCertification: true }
           : candidate.training,
@@ -510,7 +510,7 @@ export function resolveFormTraining(
     );
   }
   const definition = getFormDefinition(completedFormId);
-  if (!definition) return state;
+  if (!definition || student.forms.includes(completedFormId)) return state;
   const completedForms = [...student.forms, completedFormId];
   const preferenceResult = completedFormId === "course-y" &&
       (student.formBranchPreferences?.length ?? 0) === 0

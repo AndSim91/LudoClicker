@@ -32,6 +32,43 @@ describe("game engine: operations", () => {
     expect(selectIncomePerMonth(withMembers)).toBe(3 * GAME_CONFIG.monthlyMemberFee);
   });
 
+  it("adds €5 for every registered form on the member", () => {
+    const state = createInitialState(1_000);
+    const forms = [
+      "form-1",
+      "course-x",
+      "form-2",
+      "course-y",
+      "form-3-long",
+      "form-3-double",
+      "form-4-long",
+    ] as const;
+    const member = {
+      ...state.contacts[0],
+      status: "enrolled" as const,
+      forms: [],
+    };
+    const dueAt = 10_000;
+    const withTrainedMember = {
+      ...state,
+      contacts: [member, ...state.contacts.slice(1)],
+      collaborators: [{
+        id: "collaborator-trained-member",
+        contactId: member.id,
+        displayName: `${member.firstName} ${member.lastName}`,
+        joinedAt: 2_000,
+        forms: [...forms],
+        instructorForms: [],
+        assignment: null,
+        rarity: "legendary" as const,
+      }],
+      school: { ...state.school, activeMembers: 1, nextFeeAt: dueAt },
+    };
+
+    expect(selectIncomePerMonth(withTrainedMember)).toBe(75);
+    expect(gameReducer(withTrainedMember, { type: "TICK", now: dueAt }).school.euros).toBe(75);
+  });
+
   it("resolves free park sparring into new usable contacts once", () => {
     const state = createInitialState(1_000);
     const started = gameReducer(state, {

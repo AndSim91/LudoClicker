@@ -1,4 +1,5 @@
 import { COLLABORATOR_MASTERY_ROLES } from "../content/mastery";
+import { isUniqueFormIdList } from "../content/forms";
 import {
   GAME_CONFIG,
   INITIAL_SAVE_COMPATIBILITY_VERSION,
@@ -70,7 +71,7 @@ export function isValidGameState(value: unknown): value is GameState {
         contact.rarity === "ultra-rare" ||
         contact.rarity === "legendary"
       ) &&
-      Array.isArray(contact.forms) &&
+      isUniqueFormIdList(contact.forms) &&
       (contact.favorite === undefined || typeof contact.favorite === "boolean")
     ) &&
     Array.isArray(state.emails) &&
@@ -97,11 +98,18 @@ export function isValidGameState(value: unknown): value is GameState {
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
     typeof state.legendaryCollaborators?.retainedProgress === "object" &&
+    Object.values(state.legendaryCollaborators?.retainedProgress ?? {}).every((progress) =>
+      Boolean(
+        progress &&
+        isUniqueFormIdList(progress.forms) &&
+        isUniqueFormIdList(progress.instructorForms),
+      )
+    ) &&
     Array.isArray(state.collaborators) &&
     state.collaborators.every((collaborator) =>
       (collaborator.rarity === "ultra-rare" || collaborator.rarity === "legendary") &&
-      Array.isArray(collaborator.forms) &&
-      Array.isArray(collaborator.instructorForms) &&
+      isUniqueFormIdList(collaborator.forms) &&
+      isUniqueFormIdList(collaborator.instructorForms) &&
       Array.isArray(collaborator.formBranchPreferences) &&
       typeof collaborator.autoTeachingEnabled === "boolean" &&
       typeof collaborator.mastery === "object" &&

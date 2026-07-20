@@ -148,7 +148,7 @@ export function resolveTrial(
     firstEnrollment ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
     firstEnrollment
       ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Iscritti e Upgrade sono ora disponibili nella barra laterale.`
-      : `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile di € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} arriverà al prossimo cambio mese.`,
+      : `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile parte da € ${GAME_CONFIG.monthlyMemberFee.toFixed(2).replace(".", ",")} e aumenta di € ${GAME_CONFIG.monthlyMemberFormBonus.toFixed(2).replace(".", ",")} per ogni Forma o corso registrato.`,
     "positive",
     firstEnrollment ? "focused" : "other",
     firstEnrollment ? undefined : "members",

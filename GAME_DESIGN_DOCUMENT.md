@@ -159,7 +159,7 @@ Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una 
 - **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di prestigio.
 - **Ultra Rari:** contatti rossi che diventano Collaboratori delle Onde dopo il Corso Y.
 
-Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota di **€40 per mese di gioco**. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**. In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul singolo allievo**. Corso X e Corso Y concorrono al conteggio; il Corso Agonisti è escluso perché non assegna un badge permanente. Ogni badge permanente può essere registrato una sola volta sullo stesso allievo: un duplicato rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -346,7 +346,7 @@ Per il primo prototipo:
 | Attesa della lezione in palestra | 1–5 minuti |
 | Esito della lezione | immediato al termine |
 | Bonus di iscrizione | immediato (€20) |
-| Accredito della quota mensile | al cambio mese (€40 per iscritto) |
+| Accredito della quota mensile | al cambio mese (€40 base + €5 per Forma o corso permanente del singolo iscritto) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre. La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono attive da Settembre a Giugno, Luglio e Agosto sono pausa estiva e gli abbandoni vengono elaborati nel passaggio da Giugno a Luglio. L'anno scolastico indicato accanto al mese corrente nella barra superiore riparte a Settembre. Gli altri tempi devono essere configurabili dai dati e non scritti direttamente nella logica.
 
@@ -969,7 +969,7 @@ Il tutorial avviene tramite email ricevute.
    Introduce il passaggio email → prova in palestra → possibile iscrizione.
 
 5. **Primo bonus e quota associativa**
-   Introduce il bonus immediato di €20, la quota mensile di €40 e il finanziamento dei potenziamenti.
+   Introduce il bonus immediato di €20, la quota mensile base di €40, il bonus di €5 per ogni Forma o corso permanente e il finanziamento dei potenziamenti.
 
 6. **Una mano in più**
    Il primo Ultra Raro che completa il Corso Y introduce l'automazione.
@@ -1264,7 +1264,7 @@ Il riepilogo mostra:
 - 6 spade disponibili;
 - prenotazione e iscrizione dipendono dalla rarità secondo la tabella dei Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;
-- quota ricorrente: €40 per iscritto attivo a ogni mese di gioco;
+- quota ricorrente: €40 base per iscritto attivo, più €5 per ogni Forma o corso permanente registrato sul singolo allievo, a ogni mese di gioco; il Corso Agonisti è escluso;
 - durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno scolastico Settembre–Agosto sempre visibile;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna estrema;
 - il primo Ultra Raro deve comparire abbastanza presto da introdurre l'automazione senza spezzare il ritmo;

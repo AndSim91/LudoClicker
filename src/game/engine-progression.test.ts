@@ -297,6 +297,7 @@ describe("game engine: progression", () => {
     const julyState = { ...completed, school: { ...completed.school, currentMonth: 19 } };
     const summerBlock = gameReducer(julyState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
     const septemberState = { ...completed, school: { ...completed.school, currentMonth: 21 } };
+    const duplicateBlock = gameReducer(septemberState, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-1", now: 23_000 });
     const nextSchoolYear = gameReducer(septemberState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
 
     expect(blocked).toBe(ready);
@@ -307,6 +308,7 @@ describe("game engine: progression", () => {
     expect(completed.statistics.formsCompleted).toBe(1);
     expect(annualBlock).toBe(juneState);
     expect(summerBlock).toBe(julyState);
+    expect(duplicateBlock).toBe(septemberState);
     expect(nextSchoolYear.contacts[0].training?.formId).toBe("course-x");
     expect(nextSchoolYear.contacts[0].lastFormTrainingYear).toBe(2);
     expect(completed.collaborators).toHaveLength(1);
