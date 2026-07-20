@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+  SECRET_LEGENDARIES,
+  type SecretLegendaryId,
+} from "../content/secretLegendaries";
 import { getTournamentSchool } from "../content/tournamentSchools";
 import { addAdminMembers } from "./adminFlow";
 import {
@@ -43,6 +47,60 @@ describe("athlete tournament statistics", () => {
       expect(stats.style).toBeLessThanOrEqual(100);
       expect(getContactPreparation(contact).arena).toBe(stats.arena);
     }
+  });
+});
+
+describe("secret legendary balancing", () => {
+  function preparation(id: SecretLegendaryId) {
+    const profile = SECRET_LEGENDARIES[id];
+    return {
+      arena: getPreparation(
+        profile.arenaBase,
+        profile.numericForms,
+        profile.externalExperience,
+      ),
+      style: getPreparation(
+        profile.styleBase,
+        profile.numericForms,
+        profile.externalExperience,
+      ),
+    };
+  }
+
+  it("places the new linked profiles in the intended tournament bands", () => {
+    const pietro = preparation("pietro-scarica");
+    const daniele = preparation("daniele-panizza");
+    const sara = preparation("sara-magnifico");
+
+    expect(pietro.arena).toBeCloseTo(179.4);
+    expect(pietro.style).toBeCloseTo(183.3);
+    expect(daniele.arena).toBeCloseTo(130.41);
+    expect(daniele.style).toBeCloseTo(99.82);
+    expect(sara.arena).toBeCloseTo(100.05);
+    expect(sara.style).toBeCloseTo(150.075);
+    expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level)
+      .toBe("national");
+    expect(getTournamentSchool(SECRET_LEGENDARIES["daniele-panizza"].schoolId!).level)
+      .toBe("academy");
+    expect(getTournamentSchool(SECRET_LEGENDARIES["sara-magnifico"].schoolId!).level)
+      .toBe("academy");
+  });
+
+  it("keeps the unassigned D'Addosio profile outside tournament balancing", () => {
+    expect(SECRET_LEGENDARIES["francesco-d-addosio"]).toMatchObject({
+      schoolId: undefined,
+      arenaBase: 1_000,
+      styleBase: 1_000,
+    });
+  });
+
+  it("keeps explicitly entered values unchanged when they have no modifiers", () => {
+    expect(preparation("piero-dipalo")).toEqual({ arena: 169, style: 169 });
+    expect(preparation("daniele-maggi")).toEqual({ arena: 150, style: 150 });
+    expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_001, style: 999 });
+    expect(preparation("simone-pedrazzi")).toEqual({ arena: 122, style: 145 });
+    expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level)
+      .toBe("national");
   });
 });
 

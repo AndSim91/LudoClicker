@@ -463,11 +463,14 @@ Le percentuali descrivono i candidati. La selezione per fascia può far emergere
 
 ## 14. Leggendari Segreti
 
-I Leggendari Segreti sono persone uniche, persistenti e reclutabili. Il colore semantico della rarità è marrone; la tonalità esatta deve rispettare il contrasto dell'interfaccia.
+I Leggendari Segreti sono persone uniche e persistenti, normalmente reclutabili.
+Il colore semantico della rarità è marrone; la tonalità esatta deve rispettare
+il contrasto dell'interfaccia.
 
-Ogni profilo fa riferimento all'ID di una scuola del catalogo e può apparire
-soltanto nel livello del circuito assegnato a quella scuola. Al massimo uno
-appare nello stesso torneo.
+Un profilo può fare riferimento all'ID di una scuola del catalogo e apparire
+soltanto nel livello del circuito assegnato a quella scuola. Un profilo ancora
+privo di scuola resta registrato ma non entra in alcun torneo. Al massimo un
+Leggendario Segreto appare nello stesso torneo.
 
 Condizione di sconfitta:
 
@@ -480,6 +483,10 @@ Non conta una sconfitta inflitta da un'altra scuola.
 ### 14.1 Prova automatica
 
 Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una prova di 150 secondi nella scuola:
+
+Un profilo può disabilitare la prova con la regola `recruitment: "never"`.
+Daniele Maggi usa questa eccezione: resta sempre esterno e ogni sconfitta dona
+30 Euro alla scuola, senza creare contatti o prove.
 
 Una nuova prova dello stesso Leggendario Segreto riutilizza il contatto esistente, senza crearne un doppione.
 

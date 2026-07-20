@@ -5,6 +5,7 @@ import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
 import {
   compactTournamentHistory,
+  resolveSecretLegendaryDefeat,
   scheduleSecretLegendaryTrial,
 } from "./tournamentFlow";
 import {
@@ -68,6 +69,25 @@ describe("tournament history retention", () => {
 });
 
 describe("secret legendary tournament trials", () => {
+  it("keeps Daniele Maggi external and donates 30 euros after every defeat", () => {
+    const initial = createInitialState(1_000, "Manager");
+
+    expect(scheduleSecretLegendaryTrial(initial, "daniele-maggi", 10_000)).toBe(initial);
+
+    const first = resolveSecretLegendaryDefeat(initial, "daniele-maggi", 20_000);
+    const second = resolveSecretLegendaryDefeat(first, "daniele-maggi", 30_000);
+
+    expect(first.contacts).toHaveLength(initial.contacts.length);
+    expect(first.scheduledTrials).toEqual([]);
+    expect(second.school.euros).toBe(initial.school.euros + 60);
+    expect(second.statistics.eurosEarned).toBe(initial.statistics.eurosEarned + 60);
+    expect(second.network.secretLegendaries["daniele-maggi"]).toMatchObject({
+      status: "external",
+      defeats: 2,
+      failedTrials: 0,
+    });
+  });
+
   it("starts Marco Palena's automatic 150-second trial without an email", () => {
     const initial = createInitialState(1_000, "Manager");
     const scheduled = scheduleSecretLegendaryTrial(initial, "marco-palena", 20_000);

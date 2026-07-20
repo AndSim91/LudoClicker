@@ -1,4 +1,7 @@
-import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import {
+  SECRET_LEGENDARIES,
+  type SecretLegendaryProfile,
+} from "../content/secretLegendaries";
 import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
 import { getGameYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
@@ -79,9 +82,14 @@ export function scheduleSecretLegendaryTrial(
   id: SecretLegendaryId,
   now: number,
 ): GameState {
-  const progress = state.network.secretLegendaries[id];
+  const profile: SecretLegendaryProfile = SECRET_LEGENDARIES[id];
+  if (profile.recruitment === "never") return state;
+  const progress = state.network.secretLegendaries[id] ?? {
+    status: "external",
+    defeats: 0,
+    failedTrials: 0,
+  };
   if (progress.status !== "external") return state;
-  const profile = SECRET_LEGENDARIES[id];
   const retained = state.legendaryCollaborators.retainedProgress[id];
   const existingContact = state.contacts.find((contact) => contact.secretLegendaryId === id);
   if (
@@ -144,6 +152,52 @@ export function scheduleSecretLegendaryTrial(
     },
     statistics: { ...state.statistics, trialsBooked: state.statistics.trialsBooked + 1 },
   };
+}
+
+export function resolveSecretLegendaryDefeat(
+  state: GameState,
+  id: SecretLegendaryId,
+  now: number,
+): GameState {
+  const profile: SecretLegendaryProfile = SECRET_LEGENDARIES[id];
+  if (profile.recruitment !== "never") {
+    return scheduleSecretLegendaryTrial(state, id, now);
+  }
+
+  const progress = state.network.secretLegendaries[id] ?? {
+    status: "external",
+    defeats: 0,
+    failedTrials: 0,
+  };
+  const euros = profile.defeatRewardEuros ?? 0;
+  const rewardedState: GameState = {
+    ...state,
+    school: { ...state.school, euros: state.school.euros + euros },
+    statistics: {
+      ...state.statistics,
+      eurosEarned: state.statistics.eurosEarned + euros,
+    },
+    network: {
+      ...state.network,
+      secretLegendaries: {
+        ...state.network.secretLegendaries,
+        [id]: {
+          ...progress,
+          status: "external",
+          defeats: progress.defeats + 1,
+        },
+      },
+    },
+  };
+  return addMessage(
+    rewardedState,
+    now,
+    `${profile.firstName} ${profile.lastName} mantiene la promessa`,
+    `Dopo la sconfitta ha donato € ${euros.toLocaleString("it-IT")} alla scuola. Non chiederà di iscriversi e potrà essere affrontato di nuovo.`,
+    "positive",
+    "focused",
+    "tournaments",
+  );
 }
 
 function recordMissedTournament(
@@ -225,7 +279,7 @@ function applyTournamentResult(
   };
   nextState = applyTournamentRewards(nextState, resolvedResult, now);
   for (const id of resolvedResult.secretLegendaryDefeatedIds) {
-    nextState = scheduleSecretLegendaryTrial(nextState, id, now);
+    nextState = resolveSecretLegendaryDefeat(nextState, id, now);
   }
   const label = TOURNAMENT_DEFINITIONS[resolvedResult.level].label;
   const rewardEuros = resolvedResult.rewards.reduce(

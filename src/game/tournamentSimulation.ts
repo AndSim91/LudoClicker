@@ -244,6 +244,9 @@ function createSecretParticipant(
   cursor: RandomCursor,
 ): TournamentParticipant {
   const profile = SECRET_LEGENDARIES[id];
+  if (!profile.schoolId) {
+    throw new Error(`Il Leggendario Segreto ${id} non ha una scuola assegnata.`);
+  }
   const school = getTournamentSchool(profile.schoolId);
   return {
     id: `secret-${id}`,

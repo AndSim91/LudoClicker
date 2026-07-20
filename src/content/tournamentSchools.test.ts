@@ -48,14 +48,28 @@ describe("secret legendary catalogue", () => {
   it("links every profile to an existing school and derives its tournament", () => {
     for (const id of SECRET_LEGENDARY_IDS) {
       const profile = SECRET_LEGENDARIES[id];
-      expect(getTournamentSchool(profile.schoolId)).toBeDefined();
+      if (profile.schoolId) expect(getTournamentSchool(profile.schoolId)).toBeDefined();
     }
 
     expect(getSecretLegendaryIdsForTournament("academy")).toEqual([
       "marco-palena",
       "lorenzo-todaro",
+      "daniele-panizza",
+      "sara-magnifico",
+      "daniele-maggi",
     ]);
-    expect(getSecretLegendaryIdsForTournament("national")).toEqual([]);
+    expect(getSecretLegendaryIdsForTournament("national")).toEqual([
+      "pietro-scarica",
+      "piero-dipalo",
+      "simone-pedrazzi",
+    ]);
     expect(getSecretLegendaryIdsForTournament("champions")).toEqual([]);
+    expect(SECRET_LEGENDARIES["francesco-d-addosio"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["paolo-scalzulli"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["lorenzo-ferrario"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["antonio-rocchitelli"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["ugo-cesare-tonelli"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["enrico-giovanetti"].schoolId).toBeUndefined();
+    expect(SECRET_LEGENDARIES["carlos-jimenez-moyano"].schoolId).toBeUndefined();
   });
 });
