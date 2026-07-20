@@ -8,6 +8,7 @@ import {
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
+import { useGameTime } from "../../game/GameTimeContext";
 import type { Contact, GameState } from "../../game/types";
 import { getOfficialStatColor } from "../../shared/officialStatColor";
 import { useVirtualRows } from "../../shared/useVirtualRows";
@@ -71,6 +72,7 @@ export function TournamentAthletes({
     () => findUpcomingTournamentFromSchedule(state.school, state.tournaments),
     [state.school, state.tournaments],
   );
+  const now = useGameTime(Boolean(upcoming), 1_000);
   const delegationContactIds = useMemo(
     () => getUpcomingDelegationContactIdsFromRoster(
       state.contacts,
@@ -174,7 +176,7 @@ export function TournamentAthletes({
       <section className="tournament-context-strip" aria-label="Prossimo torneo">
         <strong>{upcoming ? TOURNAMENT_DEFINITIONS[upcoming.level].label : "Stagione completata"}</strong>
         <span><b>{qualifiedIds.size}/6</b> qualificati</span>
-        <span>Inizia tra <b>{upcoming ? formatTournamentCountdown(upcoming.occursAt - state.automation.lastProcessedAt) : "—"}</b></span>
+        <span>Inizia tra <b>{upcoming ? formatTournamentCountdown(upcoming.occursAt - now) : "—"}</b></span>
         <i aria-hidden="true"><b style={{ width: `${Math.min(100, (qualifiedIds.size / 6) * 100)}%` }} /></i>
       </section>
 

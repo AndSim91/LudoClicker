@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
-import { useProvidedGameTime } from "../../game/GameTimeContext";
+import { useGameTime } from "../../game/GameTimeContext";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import {
   getAvailableSwords,
@@ -49,14 +49,12 @@ export function EventsView({
   onMaintainEquipment?: () => void;
   onBuyOfficialSword?: () => void;
 }) {
-  const providedNow = useProvidedGameTime();
-  const [localNow, setLocalNow] = useState(() => Date.now());
-  const now = providedNow ?? localNow;
   const [historyPage, setHistoryPage] = useState(0);
   const runningEvents = useMemo(
     () => state.acquisitionEvents.filter((event) => event.status === "running"),
     [state.acquisitionEvents],
   );
+  const now = useGameTime(true, 1_000);
   const runningByDefinition = useMemo(
     () => new Map(runningEvents.map((event) => [event.definitionId, event])),
     [runningEvents],
@@ -98,13 +96,6 @@ export function EventsView({
   const nextLockedEvent = ACQUISITION_EVENTS.find(
     (definition) => definition.unlockMembers > state.school.peakActiveMembers,
   );
-  const refreshIntervalMs = runningEvents.length > 0 ? 100 : 1_000;
-  useEffect(() => {
-    if (providedNow !== null) return;
-    const timer = window.setInterval(() => setLocalNow(Date.now()), refreshIntervalMs);
-    return () => window.clearInterval(timer);
-  }, [providedNow, refreshIntervalMs]);
-
   return (
     <main className="overview-view events-view">
       <header><Icon name="flag" /><div><h1>Eventi</h1><p>Attività esterne per incontrare persone e raccogliere nuovi contatti</p></div></header>

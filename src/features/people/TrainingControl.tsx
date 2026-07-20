@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   getAvailableForms,
@@ -19,7 +19,7 @@ import {
   hasFreeFormTraining,
 } from "../../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "../../game/calendar";
-import { useProvidedGameTime } from "../../game/GameTimeContext";
+import { useGameTime } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -34,49 +34,6 @@ type InstructorTeachingEntry = {
   displayName: string;
   training: NonNullable<FormStudent["training"]>;
 };
-
-const trainingClockListeners = new Set<() => void>();
-let trainingClockNow = Date.now();
-let trainingClockTimer: number | undefined;
-
-function subscribeToTrainingClock(listener: () => void) {
-  trainingClockListeners.add(listener);
-  if (trainingClockTimer === undefined) {
-    trainingClockNow = Date.now();
-    listener();
-    trainingClockTimer = window.setInterval(() => {
-      trainingClockNow = Date.now();
-      trainingClockListeners.forEach((notify) => notify());
-    }, 100);
-  }
-  return () => {
-    trainingClockListeners.delete(listener);
-    if (trainingClockListeners.size === 0 && trainingClockTimer !== undefined) {
-      window.clearInterval(trainingClockTimer);
-      trainingClockTimer = undefined;
-    }
-  };
-}
-
-function subscribeToStaticClock() {
-  return () => undefined;
-}
-
-function getTrainingClockSnapshot() {
-  return trainingClockNow;
-}
-
-function getStaticClockSnapshot() {
-  return 0;
-}
-
-function useSharedTrainingTime(active: boolean): number {
-  return useSyncExternalStore(
-    active ? subscribeToTrainingClock : subscribeToStaticClock,
-    active ? getTrainingClockSnapshot : getStaticClockSnapshot,
-    getStaticClockSnapshot,
-  );
-}
 
 function getInstructorTeachingStudents(
   contacts: GameState["contacts"],
@@ -186,9 +143,7 @@ export function InstructorPanel({
     ),
     [state.contacts, state.collaborators, collaborator.id],
   );
-  const providedNow = useProvidedGameTime();
-  const liveNow = useSharedTrainingTime(teaching.length > 0 && providedNow === null);
-  const now = providedNow ?? liveNow;
+  const now = useGameTime(teaching.length > 0, 1_000);
   const enabled = collaborator.autoTeachingEnabled !== false;
   const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
   const instructorCertificatesCost = hasFreeFormTraining(state.upgrades)
@@ -253,9 +208,7 @@ export function TrainingControl({
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
-  const providedNow = useProvidedGameTime();
-  const liveNow = useSharedTrainingTime(Boolean(student.training) && providedNow === null);
-  const now = providedNow ?? liveNow;
+  const now = useGameTime(Boolean(student.training), 1_000);
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const annualTrainingAvailable =

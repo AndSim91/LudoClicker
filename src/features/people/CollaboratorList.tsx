@@ -13,10 +13,9 @@ import type {
 } from "../../game/types";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import { GAME_CONFIG } from "../../game/config";
-import { useProvidedGameTime } from "../../game/GameTimeContext";
+import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail } from "../../game/selectors";
 import { formatCurrency } from "../../shared/formatters";
-import { useCurrentTime } from "../../shared/useCurrentTime";
 import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
@@ -151,9 +150,7 @@ export function CollaboratorList({
   const hasTimedAutomation = state.acquisitionEvents.some((event) =>
     event.status === "running" && event.collaboratorId !== undefined
   );
-  const providedNow = useProvidedGameTime();
-  const liveNow = useCurrentTime(hasTimedAutomation && providedNow === null, 100);
-  const now = providedNow ?? liveNow;
+  const now = useGameTime(hasTimedAutomation, 1_000);
   const pageCount = Math.max(
     1,
     Math.ceil(state.collaborators.length / COLLABORATORS_PER_PAGE),

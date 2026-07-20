@@ -10,6 +10,7 @@ import {
   hasCompletedCourseX,
 } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState, TournamentResult } from "../../game/types";
 import {
   findUpcomingTournament,
@@ -26,6 +27,7 @@ interface TournamentOverviewProps {
 
 export function TournamentOverview({ state, onOpenResult }: TournamentOverviewProps) {
   const upcoming = findUpcomingTournament(state);
+  const now = useGameTime(Boolean(upcoming), 1_000);
   const upcomingDefinition = upcoming ? TOURNAMENT_DEFINITIONS[upcoming.level] : undefined;
   const qualification = state.tournaments.qualification;
   const delegationContactIds = getUpcomingDelegationContactIds(state, upcoming);
@@ -73,7 +75,7 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
         </div>
         <div className="next-tournament-countdown">
           <small>Inizia tra</small>
-          <strong>{upcoming ? formatTournamentCountdown(upcoming.occursAt - state.automation.lastProcessedAt) : "—"}</strong>
+          <strong>{upcoming ? formatTournamentCountdown(upcoming.occursAt - now) : "—"}</strong>
           <span>{upcomingDefinition
             ? `${upcomingDefinition.calendarMonth.toString().padStart(2, "0")} ${monthShortLabel[upcomingDefinition.calendarMonth]} · STAGIONE ${upcoming?.season}`
             : "Nessun evento in programma"}</span>

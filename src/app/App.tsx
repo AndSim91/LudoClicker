@@ -129,7 +129,7 @@ export function App() {
   }
 
   return (
-    <GameTimeProvider now={state.automation.lastProcessedAt}>
+    <GameTimeProvider getNow={getGameNow} isPaused={isPaused}>
       <div
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
@@ -137,7 +137,6 @@ export function App() {
       <TitleBar
         currentMonth={state.school.currentMonth}
         nextMonthAt={state.school.nextFeeAt}
-        now={state.automation.lastProcessedAt}
         contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
         activeMembers={state.school.activeMembers}
         euros={state.school.euros}

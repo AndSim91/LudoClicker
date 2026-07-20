@@ -1,15 +1,21 @@
-import type { ReactNode } from "react";
-import { GameTimeContext } from "./GameTimeContext";
+import { useMemo, type ReactNode } from "react";
+import { GameTimeContext, type GameTimeSource } from "./GameTimeContext";
 
 export function GameTimeProvider({
-  now,
+  getNow,
+  isPaused,
   children,
 }: {
-  now: number;
+  getNow: () => number;
+  isPaused: boolean;
   children: ReactNode;
 }) {
+  const source = useMemo<GameTimeSource>(
+    () => ({ getNow, isPaused }),
+    [getNow, isPaused],
+  );
   return (
-    <GameTimeContext.Provider value={now}>
+    <GameTimeContext.Provider value={source}>
       {children}
     </GameTimeContext.Provider>
   );

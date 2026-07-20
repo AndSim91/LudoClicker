@@ -1,6 +1,7 @@
 import { Icon } from "../common/Icon";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameTime } from "../../game/GameTimeContext";
 import {
   formatCompactCurrency,
   formatCompactNumber,
@@ -11,7 +12,7 @@ import {
 export function TitleBar({
   currentMonth,
   nextMonthAt,
-  now,
+  now: providedNow,
   contactsAwaitingEmail,
   activeMembers,
   euros,
@@ -20,13 +21,15 @@ export function TitleBar({
 }: {
   currentMonth: number;
   nextMonthAt: number;
-  now: number;
+  now?: number;
   contactsAwaitingEmail: number;
   activeMembers: number;
   euros: number;
   isPaused: boolean;
   onTogglePause: () => void;
 }) {
+  const liveNow = useGameTime(providedNow === undefined, 1_000);
+  const now = providedNow ?? liveNow;
   const monthName = getGameMonthName(currentMonth);
   const currentSchoolYear = getSchoolYear(currentMonth);
   const monthProgress = Math.min(

@@ -11,6 +11,7 @@ import { gameReducer } from "./engine";
 import { freezeGameState } from "./offline";
 import { loadGame, saveGame } from "./save";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
+import { getNextGameTickDelay } from "./gameScheduler";
 import type { GameAction } from "./types";
 
 export function useGameEngine() {
@@ -37,16 +38,39 @@ export function useGameEngine() {
   }, [state]);
 
   useEffect(() => {
-    const tickId = window.setInterval(() => {
-      if (
-        pausedAtRef.current === null &&
-        stateRef.current.profile.displayName.trim()
-      ) {
+    if (isPaused || !state.profile.displayName.trim()) return;
+    let tickId: number | undefined;
+    let followUpId: number | undefined;
+    let cancelled = false;
+
+    const schedule = (minimumDelay = 0) => {
+      if (cancelled || pausedAtRef.current !== null) return;
+      const now = Date.now();
+      const delay = Math.max(
+        minimumDelay,
+        getNextGameTickDelay(stateRef.current, now),
+      );
+      tickId = window.setTimeout(() => {
+        if (cancelled || pausedAtRef.current !== null) return;
+        const stateBeforeTick = stateRef.current;
         dispatch({ type: "TICK", now: Date.now() });
-      }
-    }, 250);
-    return () => window.clearInterval(tickId);
-  }, []);
+        // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
+        // lo scheduler anche quando un tick intenzionalmente restituisce lo
+        // stesso oggetto di stato.
+        followUpId = window.setTimeout(
+          () => schedule(stateRef.current === stateBeforeTick ? 250 : 0),
+          0,
+        );
+      }, delay);
+    };
+
+    schedule();
+    return () => {
+      cancelled = true;
+      if (tickId !== undefined) window.clearTimeout(tickId);
+      if (followUpId !== undefined) window.clearTimeout(followUpId);
+    };
+  }, [isPaused, state]);
 
   useEffect(() => {
     const saveScheduler = createSaveScheduler(stateRef.current, savePausedGame);

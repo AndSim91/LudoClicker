@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   SHORT_GOALS,
   getShortGoalProgress,
   getShortGoalReward,
 } from "../../content/shortGoals";
 import type { GameState, ScheduledTrial } from "../../game/types";
-import { useProvidedGameTime } from "../../game/GameTimeContext";
+import { useGameTime } from "../../game/GameTimeContext";
 import { formatLongDate } from "../../shared/formatters";
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
@@ -65,9 +65,7 @@ function ShortGoalCard({ state }: { state: GameState }) {
 }
 
 export function DayPanel({ state }: { state: GameState }) {
-  const providedNow = useProvidedGameTime();
-  const [localNow, setLocalNow] = useState(() => Date.now());
-  const now = providedNow ?? localNow;
+  const now = useGameTime(true, 1_000);
   const contactsById = useMemo(
     () => new Map(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
@@ -93,18 +91,6 @@ export function DayPanel({ state }: { state: GameState }) {
         trial.status === "scheduled" ||
         now < trial.resolvesAt + COMPLETED_TRIAL_VISIBILITY_MS,
   );
-  const hasLiveNotifications = trials.some(
-    (trial) =>
-      trial.status === "scheduled" ||
-      now < trial.resolvesAt + COMPLETED_TRIAL_VISIBILITY_MS,
-  );
-
-  useEffect(() => {
-    if (providedNow !== null || !hasLiveNotifications) return;
-    const timer = window.setInterval(() => setLocalNow(Date.now()), 100);
-    return () => window.clearInterval(timer);
-  }, [hasLiveNotifications, providedNow]);
-
   return (
     <aside className="day-panel">
       <div className="day-heading"><strong>La mia giornata</strong><Icon name="calendar" /></div>
