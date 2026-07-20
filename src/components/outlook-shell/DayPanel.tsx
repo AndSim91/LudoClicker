@@ -7,6 +7,7 @@ import {
 import type { GameState, ScheduledTrial } from "../../game/types";
 import { useGameTime } from "../../game/GameTimeContext";
 import { formatLongDate } from "../../shared/formatters";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
 
@@ -128,7 +129,7 @@ export function DayPanel({ state }: { state: GameState }) {
               <i />
               <div>
                 <strong>Lezione di prova</strong>
-                <span className={contact ? `rarity-name rarity-${contact.rarity}` : undefined}>
+                <span className={contact ? `rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}` : undefined}>
                   {contactName}
                 </span>
                 <small>Ordine delle Onde</small>

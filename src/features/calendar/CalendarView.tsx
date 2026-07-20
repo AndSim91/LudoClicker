@@ -1,6 +1,7 @@
 import { Icon } from "../../components/common/Icon";
 import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState, ScheduledTrial } from "../../game/types";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 
 const dateTime = new Intl.DateTimeFormat("it-IT", {
   weekday: "short",
@@ -94,8 +95,8 @@ export function CalendarView({
                     <div className="trial-heading">
                       <div>
                         <h2>Lezione di prova</h2>
-                        <strong className={contact ? `rarity-name rarity-${contact.rarity}` : undefined}>{contactName}</strong>
-                        <span className={contact ? `rarity-address rarity-${contact.rarity}` : undefined}>{contact?.email}</span>
+                        <strong className={contact ? `rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}` : undefined}>{contactName}</strong>
+                        <span className={contact ? `rarity-address ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}` : undefined}>{contact?.email}</span>
                       </div>
                       <span className={`trial-status ${status.toLocaleLowerCase("it-IT").replaceAll(" ", "-")}`}>
                         {status}

@@ -11,6 +11,7 @@ import type {
   FormId,
   GameState,
 } from "../../game/types";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import type { CollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
@@ -74,14 +75,18 @@ export function CollaboratorDetailDrawer({
 
       <div className="collaborator-detail-scroll">
         <section className="collaborator-detail-identity">
-          <div className={`person-avatar rarity-${collaborator.rarity}`} aria-hidden="true">
+          <div className={`person-avatar ${getRarityClassName(collaborator.rarity, Boolean(contact?.secretLegendaryId))}`} aria-hidden="true">
             {collaborator.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")}
           </div>
           <div>
-            <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
+            <PersonName
+              displayName={collaborator.displayName}
+              rarity={collaborator.rarity}
+              secretLegendary={Boolean(contact?.secretLegendaryId)}
+            />
             {badgeLabel ? <span>{badgeLabel}</span> : null}
             {contact ? (
-              <span className={`rarity-address rarity-${collaborator.rarity}`}>{contact.email}</span>
+              <span className={`rarity-address ${getRarityClassName(collaborator.rarity, Boolean(contact.secretLegendaryId))}`}>{contact.email}</span>
             ) : null}
           </div>
         </section>

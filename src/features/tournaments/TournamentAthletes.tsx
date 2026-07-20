@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
+import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import {
   getContactPreparation,
@@ -10,7 +11,6 @@ import {
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import { useGameTime } from "../../game/GameTimeContext";
 import type { Contact, GameState } from "../../game/types";
-import { getOfficialStatColor } from "../../shared/officialStatColor";
 import { useVirtualRows } from "../../shared/useVirtualRows";
 import {
   findUpcomingTournamentFromSchedule,
@@ -43,11 +43,7 @@ interface TournamentAthletesProps {
 
 function OfficialStat({ value, visible }: { value: number; visible: boolean }) {
   if (!visible) return <span>???</span>;
-  return (
-    <strong className="official-stat-value" style={{ color: getOfficialStatColor(value) }}>
-      {value.toFixed(3)}
-    </strong>
-  );
+  return <OfficialStatValue value={value} />;
 }
 
 function athleteName(row: AthleteRow): string {

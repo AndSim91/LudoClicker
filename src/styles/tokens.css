@@ -20,6 +20,57 @@
   --shadow-flyout: 0 4px 16px rgb(0 0 0 / 14%);
   --radius-sm: 3px;
   --radius-md: 5px;
+
+  /* Schema colori unico: rarità degli atleti. */
+  --rarity-common-name: #242424;
+  --rarity-common-mail-text: #242424;
+  --rarity-common-mail-background: #b3b3b3;
+  --rarity-common-avatar-text: #242424;
+  --rarity-common-avatar-background: linear-gradient(145deg, #d6d6d6, #a1a1a1);
+  --rarity-common-avatar-border: rgb(36 36 36 / 22%);
+  --rarity-common-accent: #a1a1a1;
+
+  --rarity-rare-name: #0f5fab;
+  --rarity-rare-mail-text: #0f5fab;
+  --rarity-rare-mail-background: #e5f1fb;
+  --rarity-rare-avatar-text: #ffffff;
+  --rarity-rare-avatar-background: linear-gradient(145deg, #5ca8f5, #0f5fab);
+  --rarity-rare-avatar-border: rgb(15 95 171 / 24%);
+  --rarity-rare-accent: #0f5fab;
+
+  --rarity-ultra-rare-name: #6b3fa0;
+  --rarity-ultra-rare-mail-text: #51257f;
+  --rarity-ultra-rare-mail-background: #efe3ff;
+  --rarity-ultra-rare-avatar-text: #ffffff;
+  --rarity-ultra-rare-avatar-background: linear-gradient(145deg, #9c6ade, #5c2d91);
+  --rarity-ultra-rare-avatar-border: rgb(62 25 101 / 24%);
+  --rarity-ultra-rare-accent: #6b3fa0;
+
+  --rarity-legendary-name: #986700;
+  --rarity-legendary-mail-text: #6d4a00;
+  --rarity-legendary-mail-background: #fff2bd;
+  --rarity-legendary-avatar-text: #4f3700;
+  --rarity-legendary-avatar-background: linear-gradient(145deg, #f8df8b, #c99324);
+  --rarity-legendary-avatar-border: rgb(112 76 7 / 22%);
+  --rarity-legendary-accent: #986700;
+
+  --rarity-secret-legendary-name: #b42318;
+  --rarity-secret-legendary-mail-text: #912018;
+  --rarity-secret-legendary-mail-background: #fee4e2;
+  --rarity-secret-legendary-avatar-text: #ffffff;
+  --rarity-secret-legendary-avatar-background: linear-gradient(145deg, #e5484d, #9f1239);
+  --rarity-secret-legendary-avatar-border: rgb(101 18 36 / 28%);
+  --rarity-secret-legendary-accent: #b42318;
+
+  /* Schema colori unico: valori ufficiali Arena e Stile. */
+  --official-stat-0: #171717;
+  --official-stat-50: #0f5fab;
+  --official-stat-100: #6b3fa0;
+  --official-stat-150: #986700;
+  --official-stat-200: #b42318;
+  --official-stat-250: #b42318;
+  --official-stat-300: #0697b8;
+  --official-stat-outline: #d49c04;
 }
 
 :root[data-theme="dark"] {
@@ -41,4 +92,30 @@
   --success: #6ed38a;
   --warning: #ff9b78;
   --shadow-flyout: 0 12px 32px rgb(0 0 0 / 38%);
+
+  --rarity-common-name: #edf4fb;
+  --rarity-common-mail-text: #edf4fb;
+  --rarity-common-mail-background: #a1a1a1;
+  --rarity-rare-name: #a9cdf5;
+  --rarity-rare-mail-text: #a9cdf5;
+  --rarity-rare-mail-background: #173653;
+  --rarity-ultra-rare-name: #d7b7ff;
+  --rarity-ultra-rare-mail-text: #d7b7ff;
+  --rarity-ultra-rare-mail-background: #34204f;
+  --rarity-legendary-name: #ffd979;
+  --rarity-legendary-mail-text: #ffd979;
+  --rarity-legendary-mail-background: #433719;
+  --rarity-legendary-avatar-text: #3c2b08;
+  --rarity-secret-legendary-name: #ffb4ab;
+  --rarity-secret-legendary-mail-text: #ffb4ab;
+  --rarity-secret-legendary-mail-background: #4b1f24;
+
+  --official-stat-0: #edf4fb;
+  --official-stat-50: #a9cdf5;
+  --official-stat-100: #d7b7ff;
+  --official-stat-150: #ffd979;
+  --official-stat-200: #ffb4ab;
+  --official-stat-250: #ffb4ab;
+  --official-stat-300: #69d2e7;
+  --official-stat-outline: #ffd979;
 }

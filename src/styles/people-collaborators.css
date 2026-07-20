@@ -79,16 +79,24 @@
   box-shadow: inset 3px 0 var(--collaborator-accent, var(--blue-600));
 }
 
+.collaborator-row.rarity-common {
+  --collaborator-accent: var(--rarity-common-accent);
+}
+
 .collaborator-row.rarity-rare {
-  --collaborator-accent: #7a4bb2;
+  --collaborator-accent: var(--rarity-rare-accent);
 }
 
 .collaborator-row.rarity-ultra-rare {
-  --collaborator-accent: #c03432;
+  --collaborator-accent: var(--rarity-ultra-rare-accent);
 }
 
 .collaborator-row.rarity-legendary {
-  --collaborator-accent: #c99324;
+  --collaborator-accent: var(--rarity-legendary-accent);
+}
+
+.collaborator-row.rarity-secret-legendary {
+  --collaborator-accent: var(--rarity-secret-legendary-accent);
 }
 
 .collaborator-row > [data-label] {

@@ -14,27 +14,36 @@
   height: 42px;
   place-items: center;
   border-radius: 50%;
-  color: white;
-  background: var(--blue-600);
+  color: var(--rarity-common-avatar-text);
+  background: var(--rarity-common-avatar-background);
+  box-shadow: inset 0 0 0 1px var(--rarity-common-avatar-border);
   font-size: 12px;
   font-weight: 600;
 }
 
 .person-avatar.special-avatar,
 .person-avatar.rarity-legendary {
-  color: #4f3700;
-  background: linear-gradient(145deg, #f8df8b, #c99324);
-  box-shadow: inset 0 0 0 1px rgb(112 76 7 / 22%);
+  color: var(--rarity-legendary-avatar-text);
+  background: var(--rarity-legendary-avatar-background);
+  box-shadow: inset 0 0 0 1px var(--rarity-legendary-avatar-border);
 }
 
 .person-avatar.rarity-rare {
-  background: linear-gradient(145deg, #9c6ade, #5c2d91);
-  box-shadow: inset 0 0 0 1px rgb(62 25 101 / 24%);
+  color: var(--rarity-rare-avatar-text);
+  background: var(--rarity-rare-avatar-background);
+  box-shadow: inset 0 0 0 1px var(--rarity-rare-avatar-border);
 }
 
 .person-avatar.rarity-ultra-rare {
-  background: linear-gradient(145deg, #e5484d, #9f1239);
-  box-shadow: inset 0 0 0 1px rgb(101 18 36 / 28%);
+  color: var(--rarity-ultra-rare-avatar-text);
+  background: var(--rarity-ultra-rare-avatar-background);
+  box-shadow: inset 0 0 0 1px var(--rarity-ultra-rare-avatar-border);
+}
+
+.person-avatar.rarity-secret-legendary {
+  color: var(--rarity-secret-legendary-avatar-text);
+  background: var(--rarity-secret-legendary-avatar-background);
+  box-shadow: inset 0 0 0 1px var(--rarity-secret-legendary-avatar-border);
 }
 
 .collaborator-copy,
@@ -52,26 +61,29 @@
 
 .special-name,
 .rarity-name.rarity-legendary {
-  color: #986700;
+  color: var(--rarity-legendary-name);
 }
 
-.rarity-name.rarity-secret-legendary,
-.rarity-address.rarity-secret-legendary {
-  color: #8a5a32;
+.rarity-name.rarity-common {
+  color: var(--rarity-common-name);
+}
+
+.rarity-name.rarity-secret-legendary {
+  color: var(--rarity-secret-legendary-name);
 }
 
 .special-collaborator-badge.secret {
-  border-color: #8a5a32;
-  background: #f3e5d8;
-  color: #6c4224;
+  border-color: var(--rarity-secret-legendary-mail-text);
+  background: var(--rarity-secret-legendary-mail-background);
+  color: var(--rarity-secret-legendary-mail-text);
 }
 
 .rarity-name.rarity-rare {
-  color: #6b3fa0;
+  color: var(--rarity-rare-name);
 }
 
 .rarity-name.rarity-ultra-rare {
-  color: #b42318;
+  color: var(--rarity-ultra-rare-name);
 }
 
 .rarity-address {
@@ -86,39 +98,51 @@
 }
 
 .rarity-address.rarity-common {
-  color: var(--blue-700);
-  background: var(--blue-100);
+  color: var(--rarity-common-mail-text);
+  background: var(--rarity-common-mail-background);
 }
 
 .rarity-address.rarity-rare {
-  color: #51257f;
-  background: #efe3ff;
-  box-shadow: inset 0 0 0 1px rgb(92 45 145 / 18%);
+  color: var(--rarity-rare-mail-text);
+  background: var(--rarity-rare-mail-background);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-rare-name) 18%, transparent);
 }
 
 .rarity-address.rarity-ultra-rare {
-  color: #912018;
-  background: #fee4e2;
-  box-shadow: inset 0 0 0 1px rgb(180 35 24 / 20%);
+  color: var(--rarity-ultra-rare-mail-text);
+  background: var(--rarity-ultra-rare-mail-background);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-ultra-rare-name) 20%, transparent);
 }
 
 .rarity-address.rarity-legendary {
-  color: #6d4a00;
-  background: #fff2bd;
-  box-shadow: inset 0 0 0 1px rgb(152 103 0 / 22%);
+  color: var(--rarity-legendary-mail-text);
+  background: var(--rarity-legendary-mail-background);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-legendary-name) 22%, transparent);
+}
+
+.rarity-address.rarity-secret-legendary {
+  color: var(--rarity-secret-legendary-mail-text);
+  background: var(--rarity-secret-legendary-mail-background);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-secret-legendary-name) 20%, transparent);
 }
 
 .collaborator-copy .special-collaborator-badge,
 .people-row .special-collaborator-badge {
   padding: 2px 6px;
-  border: 1px solid #d6a83d;
+  border-width: 1px;
+  border-style: solid;
   border-radius: 999px;
-  color: #6d4a00;
-  background: #fff6d8;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;
+}
+
+.collaborator-copy .special-collaborator-badge:not(.secret),
+.people-row .special-collaborator-badge:not(.secret) {
+  border-color: var(--rarity-legendary-accent);
+  color: var(--rarity-legendary-mail-text);
+  background: var(--rarity-legendary-mail-background);
 }
 
 .collaborator-copy span,

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
+import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
 import {
@@ -17,7 +18,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
-import { getOfficialStatColor } from "../../shared/officialStatColor";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
@@ -137,13 +138,13 @@ export function CollaboratorList({
 
             return (
               <article
-                className={`collaborator-row rarity-${collaborator.rarity}${
+                className={`collaborator-row ${getRarityClassName(collaborator.rarity, Boolean(contact?.secretLegendaryId))}${
                   selected ? " is-selected" : ""
                 }`}
                 key={collaborator.id}
               >
                 <div className="collaborator-identity" data-label="Collaboratore">
-                  <div className={`person-avatar rarity-${collaborator.rarity}`} aria-hidden="true">
+                  <div className={`person-avatar ${getRarityClassName(collaborator.rarity, Boolean(contact?.secretLegendaryId))}`} aria-hidden="true">
                     {collaborator.displayName
                       .split(" ")
                       .map((part) => part[0])
@@ -151,9 +152,13 @@ export function CollaboratorList({
                       .join("")}
                   </div>
                   <div className="collaborator-copy">
-                    <PersonName displayName={collaborator.displayName} rarity={collaborator.rarity} />
+                    <PersonName
+                      displayName={collaborator.displayName}
+                      rarity={collaborator.rarity}
+                      secretLegendary={Boolean(contact?.secretLegendaryId)}
+                    />
                     {contact ? (
-                      <span className={`rarity-address rarity-${collaborator.rarity}`}>
+                      <span className={`rarity-address ${getRarityClassName(collaborator.rarity, Boolean(contact.secretLegendaryId))}`}>
                         {contact.email}
                       </span>
                     ) : null}
@@ -210,12 +215,7 @@ export function CollaboratorList({
                   <span>
                     <small>Arena</small>
                     {officialStats ? (
-                      <strong
-                        className="official-stat-value"
-                        style={{ color: getOfficialStatColor(officialStats.arena) }}
-                      >
-                        {officialStats.arena.toFixed(3)}
-                      </strong>
+                      <OfficialStatValue value={officialStats.arena} />
                     ) : (
                       <strong className="member-stat-locked" title="Completa Corso X">???</strong>
                     )}
@@ -223,12 +223,7 @@ export function CollaboratorList({
                   <span>
                     <small>Stile</small>
                     {officialStats ? (
-                      <strong
-                        className="official-stat-value"
-                        style={{ color: getOfficialStatColor(officialStats.style) }}
-                      >
-                        {officialStats.style.toFixed(3)}
-                      </strong>
+                      <OfficialStatValue value={officialStats.style} />
                     ) : (
                       <strong className="member-stat-locked" title="Completa Corso X">???</strong>
                     )}

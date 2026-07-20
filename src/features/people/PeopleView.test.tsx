@@ -89,6 +89,7 @@ describe("PeopleView", () => {
       forms: ["form-1" as const],
       arenaBase: 1,
       styleBase: 1,
+      rarity: "legendary" as const,
     };
     const high = {
       ...initial.contacts[1],
@@ -99,6 +100,7 @@ describe("PeopleView", () => {
       forms: ["course-x" as const],
       arenaBase: 90,
       styleBase: 80,
+      rarity: "common" as const,
     };
     const low = {
       ...initial.contacts[2],
@@ -109,6 +111,7 @@ describe("PeopleView", () => {
       forms: ["course-x" as const],
       arenaBase: 10,
       styleBase: 20,
+      rarity: "rare" as const,
     };
 
     render(
@@ -124,15 +127,25 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    const labels = ["Nome", "Email", "Percorso", "Arena", "Stile", "Stato", "Prossima Forma"];
+    const labels = ["Nome", "Rarità", "Percorso", "Arena", "Stile", "Stato", "Prossima Forma"];
     for (const label of labels) {
       expect(within(roster).getByRole("button", { name: `Ordina per ${label}` })).toBeVisible();
     }
+    expect(within(roster).queryByRole("button", { name: "Ordina per Email" })).not.toBeInTheDocument();
+    const hiddenName = within(roster).getByText("Punteggio Nascosto");
+    expect(hiddenName.closest(".member-identity")).toHaveTextContent(hidden.email);
+    expect(within(roster).getByText("Leggendario")).toBeVisible();
     expect(within(roster).getAllByText("???", { exact: true })).toHaveLength(2);
+
+    fireEvent.click(within(roster).getByRole("button", { name: "Ordina per Rarità" }));
+    let rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Arena Alta");
+    expect(rows[1]).toHaveTextContent("Arena Bassa");
+    expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
 
     const arenaSort = within(roster).getByRole("button", { name: "Ordina per Arena" });
     fireEvent.click(arenaSort);
-    let rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    rows = roster.querySelectorAll(".member-row:not(.people-head)");
     expect(rows[0]).toHaveTextContent("Arena Bassa");
     expect(rows[1]).toHaveTextContent("Arena Alta");
     expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
@@ -556,10 +569,12 @@ describe("PeopleView", () => {
     const roster = screen.getByRole("region", { name: "Iscritti" });
     const arena = within(roster).getByText("108.564");
     const style = within(roster).getByText("50.000");
-    expect(arena).toHaveStyle({ color: "rgb(176, 128, 0)" });
+    expect(arena.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-100)");
+    expect(arena.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-150)");
     expect(arena).toHaveClass("official-stat-value");
     expect(arena.tagName).toBe("STRONG");
-    expect(style).toHaveStyle({ color: "rgb(23, 23, 23)" });
+    expect(style.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-50)");
+    expect(style.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-100)");
     expect(style).toHaveClass("official-stat-value");
     expect(style.tagName).toBe("STRONG");
     expect(roster).not.toHaveTextContent("→");

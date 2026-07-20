@@ -1,6 +1,7 @@
 import { getFormLogo } from "../../content/formLogos";
 import { getFormDefinition, type FormDefinition } from "../../content/forms";
 import type { FormId, PersonRarity } from "../../game/types";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 
 export function FormLogoStrip({
   forms,
@@ -66,7 +67,7 @@ export function PersonName({
   secretLegendary?: boolean;
 }) {
   return (
-    <strong className={`rarity-name rarity-${secretLegendary ? "secret-legendary" : rarity}`} data-label={label}>
+    <strong className={`rarity-name ${getRarityClassName(rarity, secretLegendary)}`} data-label={label}>
       {displayName}
       {secretLegendary
         ? <span className="special-collaborator-badge secret">Segreto</span>

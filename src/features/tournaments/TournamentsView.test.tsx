@@ -140,9 +140,11 @@ describe("TournamentsView", () => {
     const style = athleteRow.getByText("71.500");
 
     expect(arena).toHaveClass("official-stat-value");
-    expect(arena).toHaveStyle({ color: "rgb(176, 128, 0)" });
+    expect(arena.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-100)");
+    expect(arena.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-150)");
     expect(style).toHaveClass("official-stat-value");
-    expect(style).toHaveStyle({ color: "rgb(16, 53, 35)" });
+    expect(style.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-50)");
+    expect(style.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-100)");
     expect(athleteRow.getByText("10", { exact: true })).toBeVisible();
   });
 
@@ -170,7 +172,8 @@ describe("TournamentsView", () => {
 
     expect(preparedStats).toHaveLength(2);
     preparedStats.forEach((stat) => {
-      expect(stat).toHaveStyle({ color: "rgb(196, 43, 28)" });
+      expect(stat.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-150)");
+      expect(stat.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-200)");
     });
   });
 

@@ -248,53 +248,6 @@
   background: #3a2426;
 }
 
-:root[data-theme="dark"] .rarity-address.rarity-common {
-  background: var(--blue-100);
-}
-
-:root[data-theme="dark"] .rarity-address.rarity-rare {
-  color: #d7b7ff;
-  background: #34204f;
-}
-
-:root[data-theme="dark"] .rarity-address.rarity-ultra-rare {
-  color: #ffb4ab;
-  background: #4b1f24;
-}
-
-:root[data-theme="dark"] .rarity-address.rarity-legendary,
-:root[data-theme="dark"] .collaborator-copy .special-collaborator-badge,
-:root[data-theme="dark"] .people-row .special-collaborator-badge {
-  color: #ffd979;
-  background: #433719;
-}
-
-:root[data-theme="dark"] .collaborator-copy .special-collaborator-badge,
-:root[data-theme="dark"] .people-row .special-collaborator-badge {
-  border-color: #9b7628;
-}
-
-:root[data-theme="dark"] .person-avatar.special-avatar,
-:root[data-theme="dark"] .person-avatar.rarity-legendary {
-  color: #3c2b08;
-}
-
-:root[data-theme="dark"] .special-name,
-:root[data-theme="dark"] .rarity-name.rarity-legendary,
-:root[data-theme="dark"] .rarity-overview .legendary > strong {
-  color: #ffd979;
-}
-
-:root[data-theme="dark"] .rarity-name.rarity-rare,
-:root[data-theme="dark"] .rarity-overview .rare > strong {
-  color: #d7b7ff;
-}
-
-:root[data-theme="dark"] .rarity-name.rarity-ultra-rare,
-:root[data-theme="dark"] .rarity-overview .ultra-rare > strong {
-  color: #ffb4ab;
-}
-
 :root[data-theme="dark"] .form-logo-item img {
   background: var(--surface-muted);
 }

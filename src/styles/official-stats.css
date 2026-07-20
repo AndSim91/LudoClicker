@@ -1,3 +1,13 @@
 .official-stat-value {
+  color: color-mix(
+    in srgb,
+    var(--official-stat-from) var(--official-stat-from-weight),
+    var(--official-stat-to) var(--official-stat-to-weight)
+  );
   font-weight: 700;
+}
+
+.official-stat-value[data-outlined="true"] {
+  -webkit-text-stroke: 1px var(--official-stat-outline);
+  paint-order: stroke fill;
 }

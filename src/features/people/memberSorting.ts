@@ -16,7 +16,7 @@ import { formatFormPath } from "./peoplePresentation";
 
 export type MemberSortKey =
   | "name"
-  | "email"
+  | "rarity"
   | "path"
   | "arena"
   | "style"
@@ -70,6 +70,13 @@ function getNextFormLabel(contact: Contact, context: MemberSortContext): string 
   return nextForm.longName;
 }
 
+const RARITY_RANK: Record<Contact["rarity"], number> = {
+  common: 0,
+  rare: 1,
+  "ultra-rare": 2,
+  legendary: 3,
+};
+
 function getDisplayedRisk(contact: Contact, context: MemberSortContext): number {
   const student = getMemberStudent(contact, context);
   const immunity = getAthleteImmunityStatus(
@@ -115,8 +122,8 @@ function compareMembers(
         `${right.firstName} ${right.lastName}`,
       );
       break;
-    case "email":
-      comparison = compareText(left.email, right.email);
+    case "rarity":
+      comparison = RARITY_RANK[left.rarity] - RARITY_RANK[right.rarity];
       break;
     case "path":
       {

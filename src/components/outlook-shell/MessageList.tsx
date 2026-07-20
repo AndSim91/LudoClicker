@@ -7,6 +7,7 @@ import {
 } from "../../game/selectors";
 import type { CampaignEmail, Contact, GameState, InboxMessage } from "../../game/types";
 import { formatTime } from "../../shared/formatters";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 import type { MailFolder } from "./FolderPane";
 
 function time(value: number) {
@@ -158,7 +159,7 @@ export function MessageList({
             >
               <i className="unread-dot" />
               <span className="message-copy">
-                <strong className={`rarity-name rarity-${activeContact.rarity}`}>
+                <strong className={`rarity-name ${getRarityClassName(activeContact.rarity, Boolean(activeContact.secretLegendaryId))}`}>
                   Bozza per {activeContact.firstName} {activeContact.lastName}
                 </strong>
                 <span>{activeEmail.subject}</span>
@@ -204,7 +205,7 @@ export function MessageList({
             >
               <i className="read-dot" />
               <span className="message-copy">
-                <strong className={contact ? `rarity-name rarity-${contact.rarity}` : undefined}>
+                <strong className={contact ? `rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}` : undefined}>
                   {contact?.firstName} {contact?.lastName}
                 </strong>
                 <span>{email.subject}</span>

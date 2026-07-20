@@ -1,17 +1,49 @@
 import { describe, expect, it } from "vitest";
-import { getOfficialStatColor } from "./officialStatColor";
+import { getOfficialStatPresentation } from "./officialStatColor";
 
-describe("getOfficialStatColor", () => {
-  it("moves from red to black, then green, gold above 100, and red above 150", () => {
-    expect(getOfficialStatColor(0)).toBe("rgb(196, 43, 28)");
-    expect(getOfficialStatColor(20)).toBe("rgb(110, 33, 26)");
-    expect(getOfficialStatColor(40)).toBe("rgb(23, 23, 23)");
-    expect(getOfficialStatColor(50)).toBe("rgb(23, 23, 23)");
-    expect(getOfficialStatColor(60)).toBe("rgb(23, 23, 23)");
-    expect(getOfficialStatColor(80)).toBe("rgb(12, 76, 44)");
-    expect(getOfficialStatColor(100)).toBe("rgb(0, 128, 64)");
-    expect(getOfficialStatColor(100.001)).toBe("rgb(176, 128, 0)");
-    expect(getOfficialStatColor(150)).toBe("rgb(176, 128, 0)");
-    expect(getOfficialStatColor(150.001)).toBe("rgb(196, 43, 28)");
+function expectStop(
+  value: number,
+  from: number,
+  to: number,
+  fromWeight: string,
+  toWeight: string,
+  outlined = false,
+) {
+  const presentation = getOfficialStatPresentation(value);
+  expect(presentation).toEqual({
+    style: {
+      "--official-stat-from": `var(--official-stat-${from})`,
+      "--official-stat-to": `var(--official-stat-${to})`,
+      "--official-stat-from-weight": fromWeight,
+      "--official-stat-to-weight": toWeight,
+    },
+    outlined,
+  });
+}
+
+describe("getOfficialStatPresentation", () => {
+  it("uses each centralized color stop across the Arena and Style scale", () => {
+    expectStop(0, 0, 50, "100%", "0%");
+    expectStop(25, 0, 50, "50%", "50%");
+    expectStop(50, 50, 100, "100%", "0%");
+    expectStop(75, 50, 100, "50%", "50%");
+    expectStop(100, 100, 150, "100%", "0%");
+    expectStop(125, 100, 150, "50%", "50%");
+    expectStop(150, 150, 200, "100%", "0%");
+    expectStop(175, 150, 200, "50%", "50%");
+    expectStop(200, 200, 250, "100%", "0%");
+    expectStop(249, 200, 250, "100%", "0%");
+  });
+
+  it("adds the outline while moving to cyan from 250 onward", () => {
+    expectStop(250, 250, 300, "100%", "0%", true);
+    expectStop(275, 250, 300, "50%", "50%", true);
+    expectStop(300, 300, 300, "100%", "0%", true);
+    expectStop(400, 300, 300, "100%", "0%", true);
+  });
+
+  it("clamps invalid and negative values to zero", () => {
+    expect(getOfficialStatPresentation(-10)).toEqual(getOfficialStatPresentation(0));
+    expect(getOfficialStatPresentation(Number.NaN)).toEqual(getOfficialStatPresentation(0));
   });
 });

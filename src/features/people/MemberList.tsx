@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { OfficialStatValue } from "../../components/common/OfficialStatValue";
+import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import { getAnnualFormTrainingLimit } from "../../content/upgrades";
@@ -10,7 +12,7 @@ import {
   getContactPreparation,
   hasCompletedCourseX,
 } from "../../game/athleteStats";
-import { getOfficialStatColor } from "../../shared/officialStatColor";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 import {
   sortMembers,
   type MemberSort,
@@ -147,7 +149,7 @@ export function MemberList({
           >
             <option value="" disabled>Seleziona</option>
             <option value="name">Nome</option>
-            <option value="email">Email</option>
+            <option value="rarity">Rarità</option>
             <option value="path">Percorso</option>
             <option value="arena">Arena</option>
             <option value="style">Stile</option>
@@ -161,7 +163,7 @@ export function MemberList({
       </div>
       <div className="people-row people-head member-row">
         <SortableHeader label="Nome" sortKey="name" sort={sort} onSort={handleSort} />
-        <SortableHeader label="Email" sortKey="email" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Rarità" sortKey="rarity" sort={sort} onSort={handleSort} />
         <SortableHeader label="Percorso" sortKey="path" sort={sort} onSort={handleSort} />
         <SortableHeader label="Arena" sortKey="arena" sort={sort} onSort={handleSort} />
         <SortableHeader label="Stile" sortKey="style" sort={sort} onSort={handleSort} />
@@ -200,14 +202,23 @@ export function MemberList({
               >
                 <span aria-hidden="true">★</span>
               </button>
-              <PersonName
-                displayName={`${contact.firstName} ${contact.lastName}`}
-                rarity={contact.rarity}
-                secretLegendary={Boolean(contact.secretLegendaryId)}
-              />
+              <span className="member-identity">
+                <PersonName
+                  displayName={`${contact.firstName} ${contact.lastName}`}
+                  rarity={contact.rarity}
+                  secretLegendary={Boolean(contact.secretLegendaryId)}
+                />
+                <span className={`member-email rarity-address ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}>
+                  {contact.email}
+                </span>
+              </span>
             </div>
-            <span data-label="Email">
-              <span className={`rarity-address rarity-${contact.rarity}`}>{contact.email}</span>
+            <span data-label="Rarità">
+              <strong
+                className={`member-rarity rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}
+              >
+                {PERSON_RARITIES[contact.rarity].label}
+              </strong>
             </span>
             <div className="member-path" data-label="Percorso">
               <strong>{formatFormPath(memberForms)}</strong>
@@ -218,24 +229,14 @@ export function MemberList({
             </div>
             <span className="member-stat" data-label="Arena">
               {preparation ? (
-                <strong
-                  className="official-stat-value"
-                  style={{ color: getOfficialStatColor(preparation.arena) }}
-                >
-                  {preparation.arena.toFixed(3)}
-                </strong>
+                <OfficialStatValue value={preparation.arena} />
               ) : (
                 <span className="member-stat-locked" title="Completa Corso X">???</span>
               )}
             </span>
             <span className="member-stat" data-label="Stile">
               {preparation ? (
-                <strong
-                  className="official-stat-value"
-                  style={{ color: getOfficialStatColor(preparation.style) }}
-                >
-                  {preparation.style.toFixed(3)}
-                </strong>
+                <OfficialStatValue value={preparation.style} />
               ) : (
                 <span className="member-stat-locked" title="Completa Corso X">???</span>
               )}

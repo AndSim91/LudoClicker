@@ -11,6 +11,7 @@ import { getAverageWritingSeconds, getSourceSummaries } from "../../game/history
 import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import type { GameState } from "../../game/types";
 import { formatCurrency, formatTime } from "../../shared/formatters";
+import { getRarityClassName } from "../../shared/rarityPresentation";
 
 function percentage(value: number, total: number) {
   if (total <= 0) return "0%";
@@ -132,7 +133,7 @@ export function ActivitiesView({
               <article key={event.id}>
                 <div>
                   <strong>{event.title}</strong>
-                  {event.person ? <strong className={`narrative-person rarity-name rarity-${event.person.rarity}`}>{event.person.displayName}</strong> : null}
+                  {event.person ? <strong className={`narrative-person rarity-name ${getRarityClassName(event.person.rarity)}`}>{event.person.displayName}</strong> : null}
                   <small>{event.summary}</small>
                 </div>
                 <time>{formatTime(event.occurredAt)}</time>
