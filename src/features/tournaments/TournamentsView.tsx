@@ -2,7 +2,8 @@ import { memo, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { TabButton } from "../../components/common/TabButton";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
-import type { GameState, TournamentDiscipline, TournamentParticipant, TournamentResult } from "../../game/types";
+import type { GameState, RockPaperScissorsChoice, TournamentDiscipline, TournamentParticipant, TournamentResult } from "../../game/types";
+import { ChroniclesView } from "./ChroniclesView";
 import { TournamentOverview } from "./TournamentOverview";
 import { TournamentResults } from "./TournamentResults";
 import { useVirtualRows } from "../../shared/useVirtualRows";
@@ -152,12 +153,18 @@ const TournamentsHall = memo(function TournamentsHall({
 export function TournamentsView({
   state,
   onOpenAthletes = () => undefined,
+  onStartChronicles = () => undefined,
+  onPlayChroniclesHand = () => undefined,
 }: {
   state: GameState;
   onOpenAthletes?: () => void;
+  onStartChronicles?: (contactIds: string[]) => void;
+  onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
 }) {
   const [tab, setTab] = useState<TournamentTab>("overview");
   const [selectedResultId, setSelectedResultId] = useState<string>();
+  const chroniclesUnlocked = state.tournaments.chronicles.unlocked;
+  const visibleTab = tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult = state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
   const openResult = (result: TournamentResult) => {
@@ -169,13 +176,16 @@ export function TournamentsView({
     <main className="overview-view tournaments-view">
       <header><div><h1>Tornei</h1><p>Segui la stagione, prepara la squadra, conquista la Champion’s Arena</p></div></header>
       <div className="people-tabs tournament-tabs" role="tablist" aria-label="Sezioni tornei">
-        <TabButton active={tab === "overview"} onClick={() => setTab("overview")}>Panoramica</TabButton>
-        <TabButton active={tab === "results"} onClick={() => setTab("results")}>Risultati</TabButton>
-        <TabButton active={tab === "hall"} onClick={() => setTab("hall")}>Albo d'oro</TabButton>
+        <TabButton active={visibleTab === "overview"} onClick={() => setTab("overview")}>Panoramica</TabButton>
+        <TabButton active={visibleTab === "results"} onClick={() => setTab("results")}>Risultati</TabButton>
+        <TabButton active={visibleTab === "hall"} onClick={() => setTab("hall")}>Albo d'oro</TabButton>
+        {chroniclesUnlocked ? (
+          <TabButton active={visibleTab === "chronicles"} onClick={() => setTab("chronicles")}>Chronicles</TabButton>
+        ) : null}
       </div>
 
-      {tab === "overview" ? <TournamentOverview state={state} onOpenResult={openResult} /> : null}
-      {tab === "results" ? (
+      {visibleTab === "overview" ? <TournamentOverview state={state} onOpenResult={openResult} /> : null}
+      {visibleTab === "results" ? (
         selectedResult ? (
           <TournamentResults
             result={selectedResult}
@@ -186,7 +196,14 @@ export function TournamentsView({
           />
         ) : <p className="empty-tournaments tournament-empty-page">Nessun torneo disputato.</p>
       ) : null}
-      {tab === "hall" ? <TournamentsHall results={state.tournaments.results} schoolName={state.school.name} /> : null}
+      {visibleTab === "hall" ? <TournamentsHall results={state.tournaments.results} schoolName={state.school.name} /> : null}
+      {visibleTab === "chronicles" && chroniclesUnlocked ? (
+        <ChroniclesView
+          state={state}
+          onStartTournament={onStartChronicles}
+          onPlayHand={onPlayChroniclesHand}
+        />
+      ) : null}
     </main>
   );
 }

@@ -191,4 +191,46 @@ describe("useGameEngine pause", () => {
     expect(result.current.state).not.toBe(initialState);
     expect(result.current.state.automation.lastProcessedAt).toBe(2_000);
   });
+
+  it("does not postpone collaborator writing while manual inputs keep changing state", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    saveGame({
+      ...initial,
+      collaborators: [{
+        id: "writer-1",
+        contactId: initial.contacts[0].id,
+        displayName: "Writer Test",
+        joinedAt: 1_000,
+        forms: [],
+        instructorForms: [],
+        formBranchPreferences: [],
+        autoTeachingEnabled: true,
+        assignment: "writing",
+        mastery: {
+          writing: 0,
+          events: 0,
+          lessons: 0,
+          social: 0,
+          equipment: 0,
+          instructor: 0,
+        },
+        rarity: "ultra-rare",
+      }],
+    }, 1_000);
+    const { result } = renderHook(() => useGameEngine());
+
+    for (let input = 0; input < 9; input += 1) {
+      act(() => vi.advanceTimersByTime(100));
+      act(() => result.current.dispatch({ type: "WRITE", now: Date.now() }));
+    }
+
+    expect(result.current.state.statistics.inputs).toBe(9);
+    expect(result.current.state.statistics.automatedCharacters).toBe(0);
+
+    act(() => vi.advanceTimersByTime(100));
+
+    expect(result.current.state.statistics.inputs).toBe(9);
+    expect(result.current.state.statistics.automatedCharacters).toBe(5);
+    expect(result.current.state.emails[0].revealedCharacters).toBe(14);
+  });
 });

@@ -109,8 +109,12 @@ export function getNextGameTickDelay(state: GameState, now: number): number {
     nextDeadline = earlier(nextDeadline, state.activities.nextSparringAt);
   }
   const deadlineDelay = Math.max(0, nextDeadline - now);
+  const automationHeartbeatDelay = Math.max(
+    0,
+    AUTOMATION_HEARTBEAT_MS - Math.max(0, now - state.automation.lastProcessedAt),
+  );
   const requestedDelay = needsAutomationHeartbeat(state)
-    ? Math.min(AUTOMATION_HEARTBEAT_MS, deadlineDelay)
+    ? Math.min(automationHeartbeatDelay, deadlineDelay)
     : deadlineDelay;
   return Math.min(MAX_TIMEOUT_MS, requestedDelay);
 }

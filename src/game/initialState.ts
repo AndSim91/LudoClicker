@@ -82,6 +82,7 @@ export function createInitialState(
       immuneContactIds: [],
       skippedSeasons: [],
       championsVictoryCurrentSchool: false,
+      chronicles: { unlocked: false, keys: 0 },
     },
     collaborators: [],
     automation: {

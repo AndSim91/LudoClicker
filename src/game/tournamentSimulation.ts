@@ -2,6 +2,7 @@ import { PROSPECT_FIRST_NAMES, PROSPECT_LAST_NAMES } from "../content/prospectDi
 import {
   SECRET_LEGENDARIES,
   SECRET_LEGENDARY_APPEARANCE_CHANCE,
+  getChroniclesLegendaryIds,
   getSecretLegendaryIdsForTournament,
 } from "../content/secretLegendaries";
 import {
@@ -48,6 +49,10 @@ export const SCHOOL_TOURNAMENT_FIELD_SIZE =
   SCHOOL_MAX_GROUP_COUNT * PREFERRED_MAX_GROUP_SIZE;
 const GROUP_QUALIFIER_LIMIT = 4;
 const MAX_KNOCKOUT_PARTICIPANTS = SCHOOL_MAX_GROUP_COUNT * GROUP_QUALIFIER_LIMIT;
+type ScheduledExternalTournamentLevel = Exclude<
+  TournamentLevel,
+  "school" | "chronicles"
+>;
 
 interface RandomCursor {
   seed: number;
@@ -157,7 +162,7 @@ function getRarityMinimum(rarity: Exclude<PersonRarity, "legendary">): number {
 }
 
 function createNpcCandidate(
-  level: Exclude<TournamentLevel, "school">,
+  level: ScheduledExternalTournamentLevel,
   profile: TournamentNpcProfile,
   discipline: TournamentDiscipline,
   cursor: RandomCursor,
@@ -193,7 +198,7 @@ function createNpcCandidate(
 }
 
 function createNpcInTier(
-  level: Exclude<TournamentLevel, "school">,
+  level: ScheduledExternalTournamentLevel,
   profile: TournamentNpcProfile,
   tier: TournamentTier,
   discipline: TournamentDiscipline,
@@ -278,7 +283,7 @@ function createSecretParticipant(
 
 function maybeInsertSecretLegendary(
   state: GameState,
-  level: Exclude<TournamentLevel, "school">,
+  level: ScheduledExternalTournamentLevel,
   participants: TournamentParticipant[],
   cursor: RandomCursor,
 ): TournamentParticipant[] {
@@ -311,7 +316,7 @@ function maybeInsertSecretLegendary(
 
 function createNpcParticipants(
   state: GameState,
-  level: Exclude<TournamentLevel, "school">,
+  level: ScheduledExternalTournamentLevel,
   count: number,
   cursor: RandomCursor,
 ): TournamentParticipant[] {
@@ -343,6 +348,58 @@ function createNpcParticipants(
           city: replacement.city,
         }
       : participant;
+  });
+}
+
+function createChroniclesSecretParticipant(
+  id: SecretLegendaryId,
+  cursor: RandomCursor,
+): TournamentParticipant {
+  const profile = SECRET_LEGENDARIES[id];
+  return {
+    id: `secret-${id}`,
+    secretLegendaryId: id,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    schoolName: "Chronicles of Ludosport",
+    city: "Sede segreta",
+    rarity: "secret-legendary",
+    numericForms: profile.numericForms,
+    experience: profile.externalExperience,
+    arenaBase: profile.arenaBase,
+    styleBase: profile.styleBase,
+    // In questo torneo i valori del catalogo sono la preparazione effettiva:
+    // la loro media è circa il 20% sopra quella degli avversari generati.
+    arenaPreparation: profile.arenaBase,
+    stylePreparation: profile.styleBase,
+    condition: triangularCondition(cursor),
+    qualificationDiscipline: profile.specialty === "style" ? "style" : "arena",
+  };
+}
+
+function createChroniclesNpcParticipants(
+  count: number,
+  cursor: RandomCursor,
+): TournamentParticipant[] {
+  return Array.from({ length: count }, (_, sequence) => {
+    const arenaBase = integer(cursor, 850, 1_150);
+    const styleBase = integer(cursor, 850, 1_150);
+    return {
+      id: `npc-chronicles-${sequence}-${cursor.seed >>> 0}`,
+      firstName: PROSPECT_FIRST_NAMES[integer(cursor, 0, PROSPECT_FIRST_NAMES.length - 1)],
+      lastName: PROSPECT_LAST_NAMES[integer(cursor, 0, PROSPECT_LAST_NAMES.length - 1)],
+      schoolName: "Chronicles of Ludosport",
+      city: "Sede segreta",
+      rarity: "legendary" as const,
+      numericForms: 0,
+      experience: 0,
+      arenaBase,
+      styleBase,
+      arenaPreparation: arenaBase,
+      stylePreparation: styleBase,
+      condition: triangularCondition(cursor),
+      qualificationDiscipline: sequence % 2 === 0 ? "arena" as const : "style" as const,
+    };
   });
 }
 
@@ -626,14 +683,29 @@ export function simulateTournament(
   // A school can eventually contain thousands of athletes. Keeping the local
   // field at eight groups of eight prevents round-robin matches and save size
   // from growing quadratically while preserving the historical roster order.
+  const chroniclesLegendaryIds = level === "chronicles"
+    ? getChroniclesLegendaryIds().filter(
+        (id) => state.network.secretLegendaries[id]?.status === "external",
+      )
+    : [];
   const entrants = level === "school"
     ? ownedContacts.slice(0, SCHOOL_TOURNAMENT_FIELD_SIZE)
-    : ownedContacts;
+    : level === "chronicles"
+      ? ownedContacts.slice(0, Math.max(0, definition.fieldSize! - chroniclesLegendaryIds.length))
+      : ownedContacts;
   const owned = createOwnedParticipants(state, entrants, cursor);
   const npcCount = level === "school" ? 0 : Math.max(0, definition.fieldSize! - owned.length);
   const npcs = level === "school"
     ? []
-    : createNpcParticipants(state, level, npcCount, cursor);
+    : level === "chronicles"
+      ? [
+          ...chroniclesLegendaryIds.map((id) => createChroniclesSecretParticipant(id, cursor)),
+          ...createChroniclesNpcParticipants(
+            Math.max(0, npcCount - chroniclesLegendaryIds.length),
+            cursor,
+          ),
+        ]
+      : createNpcParticipants(state, level, npcCount, cursor);
   const participants = ensureUniqueParticipantNames(
     shuffle(cursor, [...owned, ...npcs]),
     cursor,
@@ -749,9 +821,9 @@ export function simulateTournament(
     styleAverage: standingAverage(standing),
     qualified: advancingIds.has(standing.participantId),
   }));
-  const secretLegendaryDefeatedIds = findDefeatedSecretLegendaries(
-    participants, matches, styleRanking,
-  );
+  const secretLegendaryDefeatedIds = level === "chronicles"
+    ? []
+    : findDefeatedSecretLegendaries(participants, matches, styleRanking);
   return {
     nextSeed: cursor.seed,
     result: {

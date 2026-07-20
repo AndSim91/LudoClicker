@@ -102,6 +102,34 @@ function hasValidLegendaryAssignments(state: Partial<GameState>): boolean {
   return true;
 }
 
+function hasValidChroniclesProgress(state: Partial<GameState>): boolean {
+  const chronicles = state.tournaments?.chronicles;
+  if (
+    !chronicles ||
+    typeof chronicles.unlocked !== "boolean" ||
+    !isNonNegativeSafeInteger(chronicles.keys)
+  ) return false;
+  const challenge = chronicles.activeChallenge;
+  if (!challenge) return true;
+  const validChoice = (choice: unknown) =>
+    choice === "rock" || choice === "paper" || choice === "scissors";
+  const validDiscipline = (discipline: unknown) =>
+    discipline === "arena" || discipline === "style";
+  return isSecretLegendaryId(challenge.legendaryId) &&
+    typeof challenge.tournamentResultId === "string" &&
+    validDiscipline(challenge.discipline) &&
+    Array.isArray(challenge.queuedDisciplines) &&
+    challenge.queuedDisciplines.every(validDiscipline) &&
+    isNonNegativeSafeInteger(challenge.playerWins) && challenge.playerWins < 2 &&
+    isNonNegativeSafeInteger(challenge.legendaryWins) && challenge.legendaryWins < 2 &&
+    Array.isArray(challenge.hands) &&
+    challenge.hands.every((hand) =>
+      validChoice(hand.playerChoice) &&
+      validChoice(hand.legendaryChoice) &&
+      (hand.outcome === "player" || hand.outcome === "legendary" || hand.outcome === "draw")
+    );
+}
+
 export function isValidGameState(value: unknown): value is GameState {
   if (!value || typeof value !== "object") return false;
   const state = value as Partial<GameState>;
@@ -225,6 +253,7 @@ export function isValidGameState(value: unknown): value is GameState {
     && Array.isArray(state.tournaments?.immuneContactIds)
     && Array.isArray(state.tournaments?.skippedSeasons)
     && typeof state.tournaments?.championsVictoryCurrentSchool === "boolean"
+    && hasValidChroniclesProgress(state)
     && typeof state.network?.secretLegendaries === "object"
   );
 }

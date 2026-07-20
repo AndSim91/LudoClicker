@@ -1,8 +1,17 @@
-import type { CampaignEmail, Contact, FormId, GameState, ScheduledTrial } from "./types";
+import type {
+  CampaignEmail,
+  Contact,
+  FormId,
+  GameState,
+  InboxMessage,
+  ScheduledTrial,
+} from "./types";
 import { GAME_CONFIG } from "./config";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { isInstructorForm } from "../content/forms";
+import { getMessageThreadKey } from "./messages";
 import { getMonthlyMemberFees } from "./membershipEconomy";
+import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
   getAvailableContactCount,
@@ -119,8 +128,14 @@ export function selectIncomePerMonth(state: GameState): number {
   );
 }
 
+export function selectVisibleInboxMessages(state: GameState): InboxMessage[] {
+  if (isGameAreaUnlocked("tournaments", state)) return state.messages;
+  return state.messages.filter((message) => getMessageThreadKey(message) !== "tournaments");
+}
+
 export function selectUnreadMessages(state: GameState): number {
-  return state.messages.reduce((total, message) => total + (message.unread ? 1 : 0), 0);
+  return selectVisibleInboxMessages(state)
+    .reduce((total, message) => total + (message.unread ? 1 : 0), 0);
 }
 
 export type SentEmailStatus = "In attesa" | "Prova in palestra" | "Iscritto" | "Perso";

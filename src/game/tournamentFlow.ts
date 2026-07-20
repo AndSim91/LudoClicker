@@ -4,9 +4,12 @@ import {
 } from "../content/secretLegendaries";
 import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
 import { getGameYear } from "./calendar";
+import { createChroniclesVictoryChallenge } from "./chroniclesFlow";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
+import { isGameAreaUnlocked } from "./progression";
 import { nextRandom } from "./random";
+import { createSecretLegendaryContact } from "./secretLegendaryRoster";
 import { addMessage } from "./stateUpdates";
 import {
   applyTournamentRewards,
@@ -15,8 +18,6 @@ import {
 } from "./tournamentRewardFlow";
 import { getEligibleSchoolContacts, simulateTournament } from "./tournamentSimulation";
 import type {
-  Contact,
-  FormId,
   GameState,
   SecretLegendaryId,
   TournamentLevel,
@@ -66,31 +67,19 @@ export function getTournamentSeason(level: TournamentLevel, absoluteMonth: numbe
   return level === "school" ? year : Math.max(1, year - 1);
 }
 
-function getCanonicalSecretForms(numericForms: number): FormId[] {
-  const result: FormId[] = ["form-1"];
-  if (numericForms >= 2) result.push("course-x", "form-2");
-  if (numericForms >= 3) result.push("course-y", "form-3-long");
-  if (numericForms >= 4) result.push("form-4-long");
-  if (numericForms >= 5) result.push("form-5-long");
-  if (numericForms >= 6) result.push("form-6");
-  if (numericForms >= 7) result.push("form-7");
-  return result;
-}
-
 export function scheduleSecretLegendaryTrial(
   state: GameState,
   id: SecretLegendaryId,
   now: number,
 ): GameState {
   const profile: SecretLegendaryProfile = SECRET_LEGENDARIES[id];
-  if (profile.recruitment === "never") return state;
+  if (profile.recruitment === "never" || !profile.schoolId) return state;
   const progress = state.network.secretLegendaries[id] ?? {
     status: "external",
     defeats: 0,
     failedTrials: 0,
   };
   if (progress.status !== "external") return state;
-  const retained = state.legendaryCollaborators.retainedProgress[id];
   const existingContact = state.contacts.find((contact) => contact.secretLegendaryId === id);
   if (
     existingContact?.status === "enrolled" ||
@@ -100,28 +89,7 @@ export function scheduleSecretLegendaryTrial(
   ) return state;
   const contactId = existingContact?.id ?? makeGameId("secret", now, id);
   const [resultSeed, nextSeed] = nextRandom(state.randomSeed);
-  const contact: Contact = existingContact ? {
-    ...existingContact,
-    status: "trialScheduled",
-  } : {
-    id: contactId,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    email: `${id}@incontro.torneo`,
-    source: "tournament",
-    acquiredAt: now,
-    status: "trialScheduled",
-    rarity: "legendary",
-    specialProfileId: id,
-    secretLegendaryId: id,
-    forms: [...(retained?.forms ?? getCanonicalSecretForms(profile.numericForms))],
-    formBranchPreferences: [...(retained?.formBranchPreferences ?? ["Spada Lunga"])],
-    arenaBase: retained?.arenaBase ?? profile.arenaBase,
-    styleBase: retained?.styleBase ?? profile.styleBase,
-    tournamentExperience: retained?.tournamentExperience ?? profile.externalExperience,
-    agonistCourseCompletions: retained?.agonistCourseCompletions ?? 0,
-    lastAgonistCourseYear: retained?.lastAgonistCourseYear,
-  };
+  const contact = createSecretLegendaryContact(state, id, now, "trialScheduled");
   return {
     ...state,
     randomSeed: nextSeed,
@@ -254,6 +222,7 @@ function applyTournamentResult(
   );
   const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
+  const chroniclesKeyEarned = didSchoolEarnChroniclesKey(resolvedResult);
   let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
@@ -275,11 +244,30 @@ function applyTournamentResult(
       immuneContactIds: nextLevel ? ownedQualifierIds : [],
       championsVictoryCurrentSchool:
         state.tournaments.championsVictoryCurrentSchool || championOwned,
+      chronicles: chroniclesKeyEarned
+        ? {
+            ...state.tournaments.chronicles,
+            unlocked: true,
+            keys: state.tournaments.chronicles.keys + 1,
+          }
+        : state.tournaments.chronicles,
     },
   };
   nextState = applyTournamentRewards(nextState, resolvedResult, now);
   for (const id of resolvedResult.secretLegendaryDefeatedIds) {
     nextState = resolveSecretLegendaryDefeat(nextState, id, now);
+  }
+  nextState = createChroniclesVictoryChallenge(nextState, resolvedResult, now);
+  if (chroniclesKeyEarned) {
+    nextState = addMessage(
+      nextState,
+      now + 1,
+      "Chiave delle Chronicles conquistata",
+      "La scuola ha vinto Arena e Stile nella stessa Champion's Arena. La chiave può essere usata in qualsiasi momento dalla scheda Chronicles.",
+      "positive",
+      "focused",
+      "tournaments",
+    );
   }
   const label = TOURNAMENT_DEFINITIONS[resolvedResult.level].label;
   const rewardEuros = resolvedResult.rewards.reduce(
@@ -305,11 +293,62 @@ function applyTournamentResult(
   );
 }
 
+export function didSchoolEarnChroniclesKey(result: TournamentResult): boolean {
+  if (result.level !== "champions") return false;
+  const arenaWinner = result.participants.find(
+    (participant) => participant.id === result.arenaRanking[0],
+  );
+  const styleWinner = result.participants.find(
+    (participant) => participant.id === result.styleRanking[0],
+  );
+  return Boolean(arenaWinner?.ownedContactId && styleWinner?.ownedContactId);
+}
+
+export function startChroniclesTournament(
+  state: GameState,
+  contactIds: readonly string[],
+  now: number,
+): GameState {
+  const uniqueIds = [...new Set(contactIds)];
+  const chronicles = state.tournaments.chronicles;
+  if (
+    !chronicles.unlocked ||
+    chronicles.keys <= 0 ||
+    chronicles.activeChallenge ||
+    uniqueIds.length !== GAME_CONFIG.chroniclesTeamSize
+  ) return state;
+  const eligibleById = new Map(
+    getEligibleSchoolContacts(state).map((contact) => [contact.id, contact]),
+  );
+  const team = uniqueIds.flatMap((id) => {
+    const contact = eligibleById.get(id);
+    return contact ? [contact] : [];
+  });
+  if (team.length !== GAME_CONFIG.chroniclesTeamSize) return state;
+
+  const paidState: GameState = {
+    ...state,
+    tournaments: {
+      ...state.tournaments,
+      chronicles: { ...chronicles, keys: chronicles.keys - 1 },
+    },
+  };
+  const season = getGameYear(state.school.currentMonth);
+  const simulation = simulateTournament(paidState, "chronicles", season, now, team);
+  return applyTournamentResult(
+    paidState,
+    simulation.result,
+    simulation.nextSeed,
+    now,
+  );
+}
+
 export function processTournamentAtMonthEnd(
   state: GameState,
   absoluteMonth: number,
   now: number,
 ): GameState {
+  if (!isGameAreaUnlocked("tournaments", state)) return state;
   const level = LEVEL_BY_CALENDAR_MONTH[getCalendarMonth(absoluteMonth)];
   if (!level) return state;
   const season = getTournamentSeason(level, absoluteMonth);

@@ -12,13 +12,14 @@ import type {
   TournamentResult,
 } from "../../game/types";
 
-export type TournamentTab = "overview" | "results" | "hall";
+export type TournamentTab = "overview" | "results" | "hall" | "chronicles";
 
 export const levelShortLabel: Record<TournamentLevel, string> = {
   school: "Scolastico",
   academy: "Accademico",
   national: "Nazionale",
   champions: "Champion's",
+  chronicles: "Chronicles",
 };
 
 export const monthShortLabel: Record<number, string> = {

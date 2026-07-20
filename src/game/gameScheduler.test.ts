@@ -85,6 +85,9 @@ describe("game scheduler", () => {
 
     expect(needsAutomationHeartbeat(automated)).toBe(true);
     expect(getNextGameTickDelay(automated, NOW)).toBe(AUTOMATION_HEARTBEAT_MS);
+    expect(getNextGameTickDelay(automated, NOW + 400)).toBe(
+      AUTOMATION_HEARTBEAT_MS - 400,
+    );
   });
 
   it("wakes an event automator when the sparring cooldown expires", () => {

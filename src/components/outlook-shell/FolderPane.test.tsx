@@ -1,10 +1,54 @@
 import { fireEvent, render, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
+import type { InboxMessage } from "../../game/types";
 import { FolderPane } from "./FolderPane";
 import { formatExactCurrency } from "./resourceFormatting";
 
 describe("FolderPane", () => {
+  it("excludes locked tournament notifications from the inbox counter", () => {
+    const initial = createInitialState(1_000);
+    const tournamentMessage: InboxMessage = {
+      ...initial.messages[0],
+      id: "tournament-notification",
+      subject: "Torneo Scolastico non disputato",
+      threadKey: "tournaments",
+    };
+    const { container, rerender } = render(
+      <FolderPane
+        state={{ ...initial, messages: [tournamentMessage, ...initial.messages] }}
+        folder="inbox"
+        onSelectFolder={() => undefined}
+        onOpenComposer={() => undefined}
+        onOpenMembers={() => undefined}
+      />,
+    );
+
+    expect(within(container).getByRole("button", { name: "Posta in arrivo 1" }))
+      .toBeVisible();
+
+    rerender(
+      <FolderPane
+        state={{
+          ...initial,
+          school: {
+            ...initial.school,
+            historicMembers: GAME_CONFIG.tournamentUnlockMembers,
+          },
+          messages: [tournamentMessage, ...initial.messages],
+        }}
+        folder="inbox"
+        onSelectFolder={() => undefined}
+        onOpenComposer={() => undefined}
+        onOpenMembers={() => undefined}
+      />,
+    );
+
+    expect(within(container).getByRole("button", { name: "Posta in arrivo 2" }))
+      .toBeVisible();
+  });
+
   it("includes the active draft in the contacts still to email", () => {
     const state = createInitialState(1_000);
     const { container } = render(

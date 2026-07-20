@@ -4,6 +4,7 @@ import { startAcquisitionEvent } from "./eventFlow";
 import { markAllMessagesRead, markMessageRead } from "./inboxFlow";
 import { cancelMemberEnrollment } from "./membershipFlow";
 import { toggleMemberFavorite } from "./memberPreferences";
+import { playChroniclesHand } from "./chroniclesFlow";
 import { freezeGameState } from "./offline";
 import { processOfflinePassiveProgress } from "./offlineProgress";
 import { updateProfileName } from "./profileFlow";
@@ -14,6 +15,7 @@ import {
   toggleInstructorAutomation,
 } from "./trainingFlow";
 import type { FormId, GameAction, GameState } from "./types";
+import { startChroniclesTournament } from "./tournamentFlow";
 import { buyUpgrade } from "./upgradeFlow";
 
 type ActionType = GameAction["type"];
@@ -104,6 +106,16 @@ export function createGameActionHandlers(
     START_ACQUISITION_EVENT: (state, action) => startAcquisitionEvent(
       state,
       action.definitionId,
+      action.now,
+    ),
+    START_CHRONICLES_TOURNAMENT: (state, action) => startChroniclesTournament(
+      state,
+      action.contactIds,
+      action.now,
+    ),
+    PLAY_CHRONICLES_HAND: (state, action) => playChroniclesHand(
+      state,
+      action.choice,
       action.now,
     ),
   };

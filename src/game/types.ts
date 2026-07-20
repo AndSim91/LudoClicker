@@ -373,8 +373,9 @@ export interface Statistics {
   narrativeEvents: number;
 }
 
-export type TournamentLevel = "school" | "academy" | "national" | "champions";
+export type TournamentLevel = "school" | "academy" | "national" | "champions" | "chronicles";
 export type TournamentDiscipline = "arena" | "style";
+export type RockPaperScissorsChoice = "rock" | "paper" | "scissors";
 
 export interface TournamentParticipant {
   id: string;
@@ -472,6 +473,28 @@ export interface SecretLegendaryProgress {
   enrolledContactId?: string;
 }
 
+export interface ChroniclesHand {
+  playerChoice: RockPaperScissorsChoice;
+  legendaryChoice: RockPaperScissorsChoice;
+  outcome: "player" | "legendary" | "draw";
+}
+
+export interface ChroniclesChallenge {
+  legendaryId: SecretLegendaryId;
+  tournamentResultId: string;
+  discipline: TournamentDiscipline;
+  queuedDisciplines: TournamentDiscipline[];
+  playerWins: number;
+  legendaryWins: number;
+  hands: ChroniclesHand[];
+}
+
+export interface ChroniclesProgress {
+  unlocked: boolean;
+  keys: number;
+  activeChallenge?: ChroniclesChallenge;
+}
+
 export interface TournamentState {
   results: TournamentResult[];
   missedTournaments: {
@@ -487,6 +510,7 @@ export interface TournamentState {
   immuneContactIds: string[];
   skippedSeasons: number[];
   championsVictoryCurrentSchool: boolean;
+  chronicles: ChroniclesProgress;
 }
 
 export interface HistorySourceSummary {
@@ -626,5 +650,11 @@ export type GameAction =
   | {
       type: "START_ACQUISITION_EVENT";
       definitionId: AcquisitionEvent["definitionId"];
+      now: number;
+    }
+  | { type: "START_CHRONICLES_TOURNAMENT"; contactIds: string[]; now: number }
+  | {
+      type: "PLAY_CHRONICLES_HAND";
+      choice: RockPaperScissorsChoice;
       now: number;
     };

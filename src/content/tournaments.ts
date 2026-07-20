@@ -91,6 +91,13 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
       ],
     },
   },
+  chronicles: {
+    id: "chronicles",
+    label: "Chronicles of Ludosport",
+    calendarMonth: 0,
+    fieldSize: 64,
+    standard: 1_000,
+  },
 };
 
 export const TOURNAMENT_LEVEL_ORDER: readonly TournamentLevel[] = [
@@ -101,7 +108,7 @@ export const TOURNAMENT_LEVEL_ORDER: readonly TournamentLevel[] = [
 ];
 
 export const TOURNAMENT_REWARDS: Record<
-  Exclude<TournamentLevel, "school">,
+  Exclude<TournamentLevel, "school" | "chronicles">,
   Record<1 | 2 | 3, { euros: number; contacts: number; bonus: TournamentRewardBonus }>
 > = {
   academy: {
@@ -123,7 +130,7 @@ export const TOURNAMENT_REWARDS: Record<
 
 export function getNextTournamentLevel(level: TournamentLevel): TournamentLevel | undefined {
   const index = TOURNAMENT_LEVEL_ORDER.indexOf(level);
-  return TOURNAMENT_LEVEL_ORDER[index + 1];
+  return index >= 0 ? TOURNAMENT_LEVEL_ORDER[index + 1] : undefined;
 }
 
 export function getTournamentReward(
@@ -131,6 +138,8 @@ export function getTournamentReward(
   discipline: TournamentDiscipline,
   position: 1 | 2 | 3,
 ) {
-  if (level === "school") return { discipline, position, euros: 0, contacts: 0 };
+  if (level === "school" || level === "chronicles") {
+    return { discipline, position, euros: 0, contacts: 0 };
+  }
   return { discipline, position, ...TOURNAMENT_REWARDS[level][position] };
 }

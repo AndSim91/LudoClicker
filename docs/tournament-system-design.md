@@ -688,3 +688,22 @@ I log completi degli incontri devono restare separati dai riepiloghi permanenti,
 - la prova segreta dura 150 secondi di gioco attivo;
 - i parametri Monte Carlo rispettano gli obiettivi entro una tolleranza dichiarata;
 - le scelte ancora aperte sul prestigio non vengono anticipate nel codice.
+
+## 20. Chronicles of Ludosport
+
+Le Chronicles sono un torneo segreto fuori calendario e avviato manualmente.
+
+- una chiave viene assegnata soltanto quando la stessa edizione della Champion's Arena viene vinta dalla scuola sia in Arena sia in Stile;
+- le chiavi persistono e possono essere usate in qualsiasi momento;
+- ogni chiave avvia una singola edizione e richiede la selezione manuale di esattamente sei atleti idonei;
+- non si puÃ² avviare un'altra edizione mentre esiste una sfida leggendaria attiva;
+- il tabellone contiene 64 partecipanti, inclusi tutti i Leggendari Segreti senza scuola ancora esterni;
+- gli avversari generati hanno preparazione media 1.000, mentre i Leggendari Segreti hanno media circa 1.200;
+- i valori di catalogo dei Leggendari sono valori effettivi nelle Chronicles, senza ulteriori moltiplicatori;
+- un Leggendario giÃ  iscritto Ã¨ un'istanza unica: non puÃ² ricomparire tra gli avversari.
+
+Ogni titolo Chronicles conquistato dalla scuola, Arena o Stile, assegna un tentativo completo contro il Leggendario disponibile piÃ¹ debole. A paritÃ  di forza la scelta Ã¨ casuale e deterministica rispetto al seed.
+
+La sfida usa carta, forbice e sasso al meglio delle tre mani decisive. I pareggi vengono rigiocati. Se sono disponibili due tentativi e il primo viene perso, il secondo usa lo stesso Leggendario; se il primo viene vinto, il secondo passa al prossimo Leggendario disponibile. Una sconfitta senza altri tentativi lascia il Leggendario esterno per una futura edizione.
+
+La vittoria iscrive immediatamente il Leggendario come atleta e collaboratore permanente, senza email o prova in palestra. Oltre alla normale iscrizione, assegna 500 punti Fama alla scuola.

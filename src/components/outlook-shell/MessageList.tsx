@@ -3,6 +3,7 @@ import { getInboxCategory, type InboxCategory } from "../../game/messages";
 import {
   selectActiveContact,
   selectActiveEmail,
+  selectVisibleInboxMessages,
   type SentEmailStatus,
 } from "../../game/selectors";
 import type { CampaignEmail, Contact, GameState, InboxMessage } from "../../game/types";
@@ -83,11 +84,11 @@ export function MessageList({
   const [focusedMessages, otherMessages] = useMemo(() => {
     const focused: InboxMessage[] = [];
     const other: InboxMessage[] = [];
-    for (const message of state.messages) {
+    for (const message of selectVisibleInboxMessages(state)) {
       (getInboxCategory(message) === "focused" ? focused : other).push(message);
     }
     return [focused, other];
-  }, [state.messages]);
+  }, [state]);
   const visibleMessages = inboxCategory === "focused" ? focusedMessages : otherMessages;
   const focusedCount = focusedMessages.length + (activeEmail && activeContact ? 1 : 0);
   const sentEmails = useMemo(() => {

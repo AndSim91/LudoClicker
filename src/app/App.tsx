@@ -24,7 +24,11 @@ import { GameTimeProvider } from "../game/GameTimeProvider";
 import { useGameEngine } from "../game/useGameEngine";
 import { isGameAreaUnlocked } from "../game/progression";
 import { exportGame, importGame, resetGame, saveGame } from "../game/save";
-import { selectAvailableContacts, selectContactsAwaitingEmail } from "../game/selectors";
+import {
+  selectAvailableContacts,
+  selectContactsAwaitingEmail,
+  selectVisibleInboxMessages,
+} from "../game/selectors";
 import { useAppPreferences } from "./useAppPreferences";
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
@@ -59,7 +63,10 @@ export function App() {
     darkMode,
     setDarkMode,
   } = useAppPreferences();
-  const selectedMessage = state.messages.find((message) => message.id === selectedMessageId);
+  const visibleInboxMessages = selectVisibleInboxMessages(state);
+  const selectedMessage = visibleInboxMessages.find(
+    (message) => message.id === selectedMessageId,
+  );
   const selectedSentEmail = state.emails.find((email) => email.id === selectedSentEmailId);
   const activeView: AppView = view === "admin"
     ? import.meta.env.DEV ? "admin" : "mail"
@@ -158,7 +165,7 @@ export function App() {
         canMarkAllRead={
           view === "mail" &&
           mailFolder === "inbox" &&
-          state.messages.some((message) => message.unread)
+          visibleInboxMessages.some((message) => message.unread)
         }
       />
       <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
@@ -254,7 +261,20 @@ export function App() {
             }
           />
         ) : activeView === "tournaments" ? (
-          <TournamentsView state={state} onOpenAthletes={() => setView("contacts")} />
+          <TournamentsView
+            state={state}
+            onOpenAthletes={() => setView("contacts")}
+            onStartChronicles={(contactIds) => dispatch({
+              type: "START_CHRONICLES_TOURNAMENT",
+              contactIds,
+              now: getGameNow(),
+            })}
+            onPlayChroniclesHand={(choice) => dispatch({
+              type: "PLAY_CHRONICLES_HAND",
+              choice,
+              now: getGameNow(),
+            })}
+          />
         ) : activeView === "admin" ? (
           <AdminEmailView
             totalContacts={state.contacts.length}

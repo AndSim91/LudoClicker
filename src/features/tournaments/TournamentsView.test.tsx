@@ -387,4 +387,75 @@ describe("TournamentsView", () => {
     expect(view.getByText("Nessun vincitore della scuola")).toBeVisible();
     expect(view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`)).not.toBeInTheDocument();
   });
+
+  it("keeps Chronicles completely hidden until it is unlocked", () => {
+    const { container } = render(<TournamentsView state={createStateWithForms()} />);
+    const view = within(container);
+
+    expect(view.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+    expect(view.queryByText("Chronicles of Ludosport")).not.toBeInTheDocument();
+    expect(view.getByText("Calendario della stagione")).toBeVisible();
+  });
+
+  it("selects exactly six athletes and starts Chronicles with a key", () => {
+    const initial = createStateWithForms();
+    const state = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        chronicles: { unlocked: true, keys: 1 },
+      },
+    };
+    const onStartChronicles = vi.fn();
+    const { container } = render(
+      <TournamentsView state={state} onStartChronicles={onStartChronicles} />,
+    );
+    const view = within(container);
+
+    expect(view.getByRole("tab", { name: "Chronicles" })).toBeVisible();
+    fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+    view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
+    fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
+
+    expect(view.getByText("6 / 6")).toBeVisible();
+    expect(onStartChronicles).toHaveBeenCalledWith(
+      state.contacts.filter((contact) => contact.status === "enrolled").map((contact) => contact.id),
+    );
+  });
+
+  it("renders the persistent Legendary duel and sends a hand choice", () => {
+    const initial = createStateWithForms();
+    const state = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        chronicles: {
+          unlocked: true,
+          keys: 0,
+          activeChallenge: {
+            legendaryId: "enrico-giovanetti" as const,
+            tournamentResultId: "chronicles-1",
+            discipline: "style" as const,
+            queuedDisciplines: [],
+            playerWins: 1,
+            legendaryWins: 1,
+            hands: [],
+          },
+        },
+      },
+    };
+    const onPlayChroniclesHand = vi.fn();
+    const { container } = render(
+      <TournamentsView state={state} onPlayChroniclesHand={onPlayChroniclesHand} />,
+    );
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+    fireEvent.click(view.getByRole("button", { name: "Gioca Carta" }));
+
+    expect(view.getByRole("heading", { name: "Sfida leggendaria" })).toBeVisible();
+    expect(view.getByText("Enrico Giovanetti")).toBeVisible();
+    expect(view.getByText("Mano decisiva")).toBeVisible();
+    expect(onPlayChroniclesHand).toHaveBeenCalledWith("paper");
+  });
 });

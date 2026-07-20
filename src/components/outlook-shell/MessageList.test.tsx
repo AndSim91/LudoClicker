@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import type { CampaignEmail, InboxMessage } from "../../game/types";
 import { MessageList } from "./MessageList";
@@ -128,5 +129,46 @@ describe("MessageList", () => {
     );
 
     expect(screen.getByRole("tab", { name: "Altra (1)" })).toBeVisible();
+  });
+
+  it("hides tournament notifications until tournaments are unlocked", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const tournamentMessage: InboxMessage = {
+      ...message("tournament", "Torneo Scolastico non disputato", "focused"),
+      threadKey: "tournaments",
+    };
+    const { rerender } = render(
+      <MessageList
+        state={{ ...initial, messages: [tournamentMessage, ...initial.messages] }}
+        folder="inbox"
+        selectedMessageId={null}
+        selectedSentEmailId={null}
+        onSelectMessage={vi.fn()}
+        onSelectSentEmail={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText(tournamentMessage.subject)).not.toBeInTheDocument();
+
+    rerender(
+      <MessageList
+        state={{
+          ...initial,
+          school: {
+            ...initial.school,
+            activeMembers: GAME_CONFIG.tournamentUnlockMembers,
+            historicMembers: GAME_CONFIG.tournamentUnlockMembers,
+          },
+          messages: [tournamentMessage, ...initial.messages],
+        }}
+        folder="inbox"
+        selectedMessageId={null}
+        selectedSentEmailId={null}
+        onSelectMessage={vi.fn()}
+        onSelectSentEmail={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(tournamentMessage.subject)).toBeVisible();
   });
 });

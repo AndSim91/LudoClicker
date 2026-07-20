@@ -61,4 +61,15 @@ describe("tournament save migration", () => {
     expect(first.contacts[0].arenaBase).toBe(second.contacts[0].arenaBase);
     expect(first.contacts[0].styleBase).toBe(second.contacts[0].styleBase);
   });
+
+  it("adds Chronicles progress and restores earned keys from Champion's results", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 45;
+    delete legacy.tournaments.chronicles;
+
+    const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.version).toBe(GAME_CONFIG.version);
+    expect(migrated.tournaments.chronicles).toEqual({ unlocked: false, keys: 0 });
+  });
 });

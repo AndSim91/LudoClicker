@@ -45,8 +45,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Francesco",
     lastName: "D'Addosio",
     schoolId: undefined,
-    arenaBase: 1_000,
-    styleBase: 1_000,
+    arenaBase: 1_200,
+    styleBase: 1_200,
     numericForms: 7,
     externalExperience: 20,
     specialty: "complete",
@@ -85,8 +85,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Paolo",
     lastName: "Scalzulli",
     schoolId: undefined,
-    arenaBase: 1_000,
-    styleBase: 1_000,
+    arenaBase: 1_200,
+    styleBase: 1_200,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -95,8 +95,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Lorenzo",
     lastName: "Ferrario",
     schoolId: undefined,
-    arenaBase: 1_250,
-    styleBase: 1_250,
+    arenaBase: 1_500,
+    styleBase: 1_500,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -105,8 +105,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Antonio",
     lastName: "Rocchitelli",
     schoolId: undefined,
-    arenaBase: 900,
-    styleBase: 900,
+    arenaBase: 1_080,
+    styleBase: 1_080,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -115,8 +115,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Ugo Cesare",
     lastName: "Tonelli",
     schoolId: undefined,
-    arenaBase: 999,
-    styleBase: 999,
+    arenaBase: 1_199,
+    styleBase: 1_199,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -125,8 +125,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Enrico",
     lastName: "Giovanetti",
     schoolId: undefined,
-    arenaBase: 850,
-    styleBase: 850,
+    arenaBase: 1_020,
+    styleBase: 1_020,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -157,8 +157,8 @@ export const SECRET_LEGENDARIES = {
     firstName: "Carlos",
     lastName: "Jiménez Moyano",
     schoolId: undefined,
-    arenaBase: 1_001,
-    styleBase: 999,
+    arenaBase: 1_201,
+    styleBase: 1_199,
     numericForms: 0,
     externalExperience: 0,
     specialty: "complete",
@@ -178,6 +178,10 @@ export const SECRET_LEGENDARIES = {
 export type SecretLegendaryId = keyof typeof SECRET_LEGENDARIES;
 
 export const SECRET_LEGENDARY_IDS = Object.keys(SECRET_LEGENDARIES) as SecretLegendaryId[];
+
+export function getChroniclesLegendaryIds(): readonly SecretLegendaryId[] {
+  return SECRET_LEGENDARY_IDS.filter((id) => SECRET_LEGENDARIES[id].schoolId === undefined);
+}
 
 export const SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.1;
 

@@ -5,6 +5,7 @@ import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
 import {
   compactTournamentHistory,
+  processTournamentAtMonthEnd,
   resolveSecretLegendaryDefeat,
   scheduleSecretLegendaryTrial,
 } from "./tournamentFlow";
@@ -23,6 +24,16 @@ function findSeed(predicate: (roll: number) => boolean): number {
 }
 
 describe("tournament history retention", () => {
+  it("does not process tournaments or notify the player before they are unlocked", () => {
+    const initial = createInitialState(1_000, "Manager");
+
+    const locked = processTournamentAtMonthEnd(initial, 12, 2_000);
+
+    expect(locked).toBe(initial);
+    expect(locked.tournaments.missedTournaments).toEqual([]);
+    expect(locked.messages.some((message) => message.threadKey === "tournaments")).toBe(false);
+  });
+
   it("keeps detailed results and missed seasons bounded", () => {
     const initial = createInitialState(1_000, "Manager");
     const result = (index: number): TournamentResult => ({

@@ -89,15 +89,15 @@ describe("secret legendary balancing", () => {
   it("keeps the unassigned D'Addosio profile outside tournament balancing", () => {
     expect(SECRET_LEGENDARIES["francesco-d-addosio"]).toMatchObject({
       schoolId: undefined,
-      arenaBase: 1_000,
-      styleBase: 1_000,
+      arenaBase: 1_200,
+      styleBase: 1_200,
     });
   });
 
   it("keeps explicitly entered values unchanged when they have no modifiers", () => {
     expect(preparation("piero-dipalo")).toEqual({ arena: 169, style: 169 });
     expect(preparation("daniele-maggi")).toEqual({ arena: 150, style: 150 });
-    expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_001, style: 999 });
+    expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
     expect(preparation("simone-pedrazzi")).toEqual({ arena: 122, style: 145 });
     expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level)
       .toBe("national");
