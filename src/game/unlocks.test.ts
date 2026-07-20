@@ -10,11 +10,10 @@ import {
 
 describe("game unlock rules", () => {
   it("uses one shared member requirement for Social logic and labels", () => {
+    expect(GAME_CONFIG.socialUnlockMembers).toBe(15);
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers - 1)).toBe(false);
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers)).toBe(true);
-    expect(getSocialUnlockRequirementLabel()).toBe(
-      `${GAME_CONFIG.socialUnlockMembers} iscritti`,
-    );
+    expect(getSocialUnlockRequirementLabel()).toBe("15 iscritti");
   });
 
   it("keeps collaborator visibility tied to actual collaborator progression", () => {

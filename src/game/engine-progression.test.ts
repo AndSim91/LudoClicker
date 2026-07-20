@@ -188,7 +188,7 @@ describe("game engine: progression", () => {
     const automated = gameReducer(
       {
         ...initial,
-        randomSeed: 7,
+        randomSeed: 10_359,
         school: { ...initial.school, activeMembers: 12 },
         collaborators: [socialCollaborator, equipmentCollaborator],
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
@@ -216,6 +216,11 @@ describe("game engine: progression", () => {
     expect(automated.contacts.some((contact) =>
       contact.source === "social" && contact.status === "trialScheduled"
     )).toBe(true);
+    expect(
+      automated.contacts
+        .filter((contact) => contact.source === "social")
+        .every((contact) => contact.rarity !== "common"),
+    ).toBe(true);
     expect(automated.scheduledTrials).toHaveLength(1);
     expect(automated.emails).toHaveLength(initial.emails.length);
     expect(automated.equipment.wear).toBe(4);
@@ -362,11 +367,11 @@ describe("game engine: progression", () => {
     expect(result.contacts[0].arenaBase ?? 0).toBeGreaterThanOrEqual(50);
   });
 
-  it("runs paid Social campaigns after the ten-member unlock", () => {
+  it("runs paid Social campaigns after the fifteen-member unlock", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 30, activeMembers: 10 },
+      school: { ...initial.school, euros: 30, activeMembers: 15 },
       unlocks: { ...initial.unlocks, social: true },
     };
 
@@ -375,6 +380,11 @@ describe("game engine: progression", () => {
     expect(campaigned.school.euros).toBe(5);
     expect(campaigned.statistics.socialCampaigns).toBe(1);
     expect(campaigned.statistics.socialContacts).toBeGreaterThanOrEqual(4);
+    expect(
+      campaigned.contacts
+        .filter((contact) => contact.source === "social")
+        .every((contact) => contact.rarity !== "common"),
+    ).toBe(true);
   });
 
   it("trains members once per school year, pauses in summer, and restarts in September", () => {

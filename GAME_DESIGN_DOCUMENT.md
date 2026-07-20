@@ -460,7 +460,7 @@ Ipotesi iniziali:
 
 La **lezione di prova in palestra** non genera nuovi indirizzi: consuma una prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
-I **Social** sviluppano le capacità pubblicitarie della scuola. Ogni ciclo base di 60 secondi dei collaboratori assegnati accredita **€5 per iscritto attivo**; nello stesso ciclo esistono inoltre due possibilità indipendenti: **10%** di ottenere una prova diretta in palestra e **20%** di ottenere un nuovo contatto email. Le campagne pagate in Euro restano disponibili, usano piattaforme inventate e possono diventare casualmente virali.
+I **Social** sviluppano le capacità pubblicitarie della scuola. Ogni ciclo base di 60 secondi dei collaboratori assegnati accredita **€5 per iscritto attivo**; nello stesso ciclo esistono inoltre due possibilità indipendenti: **1%** di ottenere una prova diretta in palestra e **1%** di ottenere un nuovo contatto email. Le persone generate dal canale Social sono sempre almeno Rare. Le campagne pagate in Euro restano disponibili, usano piattaforme inventate e possono diventare casualmente virali.
 
 Lo **sparring esterno** è sempre disponibile come attività di sicurezza quando mancano contatti o denaro. Costa poco o nulla, ma produce soltanto pochi indirizzi.
 
@@ -730,7 +730,7 @@ Influenza caratteri per pressione e automazione.
 
 ### 10.5 Social
 
-L'automazione dei collaboratori Social completa un ciclo base ogni 60 secondi. Ogni ciclo genera €5 per iscritto attivo, ha il 10% di probabilità di portare una prova diretta in palestra e, con un tiro indipendente, il 20% di probabilità di aggiungere un contatto. Produttività, Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le campagne social manuali continuano a consumare Euro, usano piattaforme inventate e possono diventare casualmente virali.
+L'automazione dei collaboratori Social completa un ciclo base ogni 60 secondi. Ogni ciclo genera €5 per iscritto attivo, ha l'1% di probabilità di portare una prova diretta in palestra e, con un tiro indipendente, l'1% di probabilità di aggiungere un contatto. Le persone generate dai Social non possono essere Comuni: sono sempre Rare, Ultra Rare o Leggendarie. Produttività, Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le campagne social manuali continuano a consumare Euro, usano piattaforme inventate e possono diventare casualmente virali.
 
 | Potenziamento | Effetto indicativo |
 |---|---|
@@ -793,7 +793,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. Una prima sequenza consigl
 | Prima prova prenotata | report aggregato del funnel |
 | Primo iscritto | Euro e quote associative |
 | Primo Ultra Raro collaboratore | Iscritti, Collaboratori e assegnazioni |
-| 10 iscritti | Social |
+| 15 iscritti | Social |
 | 20 iscritti | Attrezzatura e usura narrativa |
 | 50 iscritti | Forme dei collaboratori |
 | 150 iscritti | procedura per fondare una nuova scuola |
@@ -1737,7 +1737,7 @@ L'uso pubblico di un'interfaccia quasi identica a Outlook richiede attenzione a 
 - Gli eventi usano luoghi reali; meteo e giorno della settimana non influenzano i risultati.
 - I contatti possono esaurirsi.
 - Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
-- I collaboratori assegnati ai Social generano ogni 60 secondi base €5 per iscritto, con il 10% di probabilità di una prova e il 20% di probabilità indipendente di un contatto; restano disponibili campagne pagate in Euro.
+- I collaboratori assegnati ai Social generano ogni 60 secondi base €5 per iscritto, con l'1% di probabilità di una prova e l'1% di probabilità indipendente di un contatto; tutte le persone generate dai Social sono almeno Rare e restano disponibili campagne pagate in Euro.
 - Le piattaforme social sono inventate e possono produrre eventi virali.
 - Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari dall'iscrizione.
 - I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni, social e spade.

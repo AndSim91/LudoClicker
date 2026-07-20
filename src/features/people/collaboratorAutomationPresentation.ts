@@ -78,7 +78,7 @@ export function getCollaboratorAutomationPresentation({
       title: `Prossimo rendimento · ${formatCurrency(
         state.school.activeMembers * GAME_CONFIG.socialIncomePerMember,
       )}`,
-      detail: "Ciclo base 60 s · 10% prova · 20% nuovo contatto",
+      detail: `Ciclo base 60 s · ${Math.round(GAME_CONFIG.socialTrialChance * 100)}% prova · ${Math.round(GAME_CONFIG.socialContactChance * 100)}% nuovo contatto`,
       progress: Math.min(100, Math.floor(state.automation.socialBuffer * 100)),
       progressLabel: "Progresso ciclo pubblicitario Social",
     };

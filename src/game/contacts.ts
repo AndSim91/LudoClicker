@@ -230,9 +230,12 @@ export function createAcquiredContacts(
     const generated = createRandomProspect(nextSeed, specialProfile);
     const { firstName, lastName, email } = generated;
     nextSeed = advanceRandomSeed(nextSeed, 3);
-    const rarity = specialProfile
+    const rolledRarity = specialProfile
       ? "legendary" as const
       : ordinary!.rarity;
+    const rarity = source === "social" && rolledRarity === "common"
+      ? "rare" as const
+      : rolledRarity;
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id);
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile

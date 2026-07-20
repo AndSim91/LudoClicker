@@ -84,7 +84,7 @@ export function ActivitiesView({
       </section> : null}
 
       {state.unlocks.social ? <section className="social-panel" aria-label="Campagne Social">
-        <div><Icon name="contact" /><span><strong>Social</strong><small>Ciclo base 60 s · {formatCurrency(GAME_CONFIG.socialIncomePerMember)} per iscritto · 10% prova · 20% contatto</small></span></div>
+        <div><Icon name="contact" /><span><strong>Social</strong><small>Ciclo base 60 s · {formatCurrency(GAME_CONFIG.socialIncomePerMember)} per iscritto · {Math.round(GAME_CONFIG.socialTrialChance * 100)}% prova · {Math.round(GAME_CONFIG.socialContactChance * 100)}% contatto</small></span></div>
         <><div className="social-progress-label"><span>Prossimo rendimento · {formatCurrency(state.school.activeMembers * GAME_CONFIG.socialIncomePerMember)}</span><strong>{socialProgress}%</strong></div><ProgressBar className="social-progress" label="Progresso ciclo pubblicitario Social" value={socialProgress} /></>
         <button type="button" disabled={!canRunSocial} onClick={onRunSocialCampaign}>{socialAction}</button>
       </section> : null}
