@@ -2,6 +2,7 @@ import { addAdminContacts, addAdminEuros, addAdminMembers } from "./adminFlow";
 import { buyOfficialSword, maintainEquipment } from "./equipment";
 import { startAcquisitionEvent } from "./eventFlow";
 import { markAllMessagesRead, markMessageRead } from "./inboxFlow";
+import { cancelMemberEnrollment } from "./membershipFlow";
 import { toggleMemberFavorite } from "./memberPreferences";
 import { freezeGameState } from "./offline";
 import { processOfflinePassiveProgress } from "./offlineProgress";
@@ -82,6 +83,10 @@ export function createGameActionHandlers(
       action.now,
     ),
     TOGGLE_MEMBER_FAVORITE: (state, action) => toggleMemberFavorite(
+      state,
+      action.contactId,
+    ),
+    CANCEL_MEMBER_ENROLLMENT: (state, action) => cancelMemberEnrollment(
       state,
       action.contactId,
     ),

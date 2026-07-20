@@ -23,6 +23,7 @@ export type IconName =
   | "pause"
   | "play"
   | "check"
+  | "close"
   | "warning"
   | "admin";
 
@@ -49,6 +50,7 @@ const paths: Record<IconName, React.ReactNode> = {
   pause: <><path d="M8 5v14M16 5v14"/></>,
   play: <path d="m8 5 11 7-11 7V5Z" />,
   check: <path d="m5 12 4 4L19 6" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
   warning: <><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></>,
   admin: <><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm-1 7c.6-2 1.9-3 4-3s3.4 1 4 3"/></>,
 };

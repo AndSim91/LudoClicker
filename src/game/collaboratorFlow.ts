@@ -1,4 +1,5 @@
 import { createInitialCollaboratorMastery } from "../content/mastery";
+import { hasAutomaticInstructorCertificates } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import { getEnrolledLegendaryContacts } from "./runtimeIndexes";
 import { addMessage } from "./stateUpdates";
@@ -25,13 +26,17 @@ export function recruitCollaborator(
     displayName: `${contact.firstName} ${contact.lastName}`,
     joinedAt: retained?.joinedAt ?? now,
     forms: [...(retained?.forms ?? contact.forms)],
-    instructorForms: [...(retained?.instructorForms ?? [])],
+    instructorForms: hasAutomaticInstructorCertificates(state.upgrades)
+      ? [...(retained?.forms ?? contact.forms)]
+      : [...(retained?.instructorForms ?? [])],
     formBranchPreferences: [
       ...(retained?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
     ],
     autoTeachingEnabled: true,
     assignment: null,
-    mastery: createInitialCollaboratorMastery(),
+    mastery: retained?.mastery
+      ? { ...retained.mastery }
+      : createInitialCollaboratorMastery(),
     rarity: contact.rarity,
     specialProfileId: contact.specialProfileId,
     lastFormTrainingYear: retained?.lastFormTrainingYear ?? contact.lastFormTrainingYear,

@@ -21,6 +21,7 @@ import { GAME_CONFIG } from "./config";
 import {
   addLegendaryEncounters,
   createAcquiredContacts,
+  mergeAcquiredContacts,
 } from "./contacts";
 import { repairEquipment } from "./equipment";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
@@ -298,7 +299,7 @@ export function runSocialCampaign(
       ...state.school,
       euros: state.school.euros - GAME_CONFIG.socialCampaignCost,
     },
-    contacts: [...state.contacts, ...contacts],
+    contacts: mergeAcquiredContacts(state.contacts, contacts),
     statistics: {
       ...state.statistics,
       contactsAcquired: state.statistics.contactsAcquired + contacts.length,

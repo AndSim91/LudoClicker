@@ -2,6 +2,7 @@ import {
   getUpgradeCost,
   getUpgradeDefinition,
   getUpgradeEffectTotal,
+  hasAutomaticInstructorCertificates,
   hasCompletedUpgradePrerequisites,
 } from "../content/upgrades";
 import { synchronizeEquipmentAvailability } from "./equipment";
@@ -33,6 +34,12 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
+    collaborators: hasAutomaticInstructorCertificates(upgrades)
+      ? state.collaborators.map((collaborator) => ({
+          ...collaborator,
+          instructorForms: [...collaborator.forms],
+        }))
+      : state.collaborators,
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords: state.equipment.totalSwords + addedSwords,

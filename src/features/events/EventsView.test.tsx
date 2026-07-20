@@ -95,7 +95,7 @@ describe("EventsView", () => {
     expect(screen.getByRole("heading", { name: "Sparring al parco" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Volantinaggio organizzato benissimo" })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Lezioni all'aperto" })).not.toBeInTheDocument();
-    expect(screen.getByText("Prossimo sblocco: Lezioni all'aperto a 5 iscritti massimi.")).toBeVisible();
+    expect(screen.getByText("Prossimo sblocco: Lezioni all'aperto a 5 Fama.")).toBeVisible();
     expect(screen.queryByText(/Previsione:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/persone →/)).not.toBeInTheDocument();
   });
@@ -104,7 +104,7 @@ describe("EventsView", () => {
     const initial = createInitialState(1_000);
     render(<EventsView state={{
       ...initial,
-      school: { ...initial.school, activeMembers: 60, peakActiveMembers: 60 },
+      school: { ...initial.school, activeMembers: 60, peakActiveMembers: 60, historicMembers: 60 },
     }} onStart={() => undefined} />);
 
     expect(screen.getByRole("heading", { name: "Mele Comics" })).toBeVisible();
@@ -112,20 +112,20 @@ describe("EventsView", () => {
     expect(screen.getByRole("heading", { name: "CogoComix" })).toBeVisible();
     expect(screen.getByText("Potenzialità: Alta")).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Burtomics" })).not.toBeInTheDocument();
-    expect(screen.getByText("Prossimo sblocco: Burtomics a 90 iscritti massimi.")).toBeVisible();
+    expect(screen.getByText("Prossimo sblocco: Burtomics a 90 Fama.")).toBeVisible();
   });
 
   it("keeps events unlocked when current members fall below the fame record", () => {
     const initial = createInitialState(1_000);
     render(<EventsView state={{
       ...initial,
-      school: { ...initial.school, activeMembers: 70, peakActiveMembers: 100 },
+      school: { ...initial.school, activeMembers: 70, peakActiveMembers: 70, historicMembers: 100 },
     }} onStart={() => undefined} />);
 
     expect(screen.getByText("Fama della scuola: 100")).toBeVisible();
-    expect(screen.getByText("Equivalente al numero massimo di iscritti storici della scuola")).toBeVisible();
+    expect(screen.getByText("Equivale al totale cumulativo delle iscrizioni e non diminuisce quando qualcuno lascia la scuola.")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Burtomics" })).toBeVisible();
-    expect(screen.getByText("Prossimo sblocco: Genova Comics & Games a 120 iscritti massimi.")).toBeVisible();
+    expect(screen.getByText("Prossimo sblocco: Genova Comics & Games a 120 Fama.")).toBeVisible();
   });
 
   it("shows members and swords available for concurrent events", () => {
@@ -164,7 +164,7 @@ describe("EventsView", () => {
     render(<EventsView
       state={{
         ...initial,
-        school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, euros: 240 },
+        school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, historicMembers: 10, euros: 240 },
         equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
       }}
       onStart={() => undefined}

@@ -1,4 +1,4 @@
-import { addLegendaryEncounters, createAcquiredContacts } from "./contacts";
+import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
@@ -78,7 +78,7 @@ function addRewardContacts(
     state: {
       ...state,
       randomSeed: acquired.nextSeed,
-      contacts: [...state.contacts, ...acquired.contacts],
+      contacts: mergeAcquiredContacts(state.contacts, acquired.contacts),
       legendaryCollaborators: addLegendaryEncounters(
         state.legendaryCollaborators,
         acquired.contacts,

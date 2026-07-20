@@ -1,9 +1,10 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
+import { Icon } from "../../components/common/Icon";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
-import { getAnnualFormTrainingLimit } from "../../content/upgrades";
+import { canCancelMemberEnrollment, getAnnualFormTrainingLimit } from "../../content/upgrades";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
@@ -96,6 +97,7 @@ export function MemberList({
   collaboratorsById,
   onStartTraining,
   onToggleFavorite,
+  onCancelEnrollment,
 }: {
   state: GameState;
   members: Contact[];
@@ -103,6 +105,7 @@ export function MemberList({
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleFavorite: (contactId: string) => void;
+  onCancelEnrollment: (contactId: string) => void;
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
   const [sort, setSort] = useState<MemberSort | null>(null);
@@ -116,6 +119,7 @@ export function MemberList({
   const deferredSearch = useDeferredValue(search);
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
+  const cancellationEnabled = canCancelMemberEnrollment(state.upgrades);
   const foundedSchools = state.network.schools.length;
   const immunityContext = useMemo(() => ({
     currentMonth,
@@ -406,6 +410,23 @@ export function MemberList({
                   {contact.email}
                 </span>
               </span>
+              {cancellationEnabled ? (
+                <button
+                  type="button"
+                  className="member-cancel-enrollment"
+                  aria-label={`Annulla l'iscrizione di ${contact.firstName} ${contact.lastName}`}
+                  title="Annulla iscrizione"
+                  onClick={() => {
+                    if (window.confirm(
+                      `Vuoi annullare l'iscrizione di ${contact.firstName} ${contact.lastName}? L'azione non può essere annullata.`,
+                    )) {
+                      onCancelEnrollment(contact.id);
+                    }
+                  }}
+                >
+                  <Icon name="close" />
+                </button>
+              ) : null}
             </div>
             <span data-label="Rarità">
               <strong

@@ -152,7 +152,15 @@ export function isValidGameState(value: unknown): value is GameState {
       Boolean(
         progress &&
         isUniqueFormIdList(progress.forms) &&
-        isUniqueFormIdList(progress.instructorForms),
+        isUniqueFormIdList(progress.instructorForms) &&
+        (progress.mastery === undefined || (
+          typeof progress.mastery === "object" &&
+          progress.mastery !== null &&
+          COLLABORATOR_MASTERY_ROLES.every((role) =>
+            Number.isFinite(progress.mastery?.[role]) &&
+            (progress.mastery?.[role] ?? 0) >= 0
+          )
+        )),
       )
     ) &&
     Array.isArray(state.collaborators) &&
@@ -172,6 +180,7 @@ export function isValidGameState(value: unknown): value is GameState {
     hasValidLegendaryAssignments(state) &&
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["technical-arena"] === "number" &&
+    typeof state.upgrades?.["no-hard-feelings"] === "number" &&
     typeof state.upgrades?.["promiscuous-instructor"] === "number" &&
     typeof state.upgrades?.["tiamat-instructor"] === "number" &&
     typeof state.upgrades?.["extra-form"] === "number" &&

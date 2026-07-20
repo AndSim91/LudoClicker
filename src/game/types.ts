@@ -194,6 +194,7 @@ export type UpgradeId =
   | "multi-site-coordination"
   | "instructor-versatility"
   | "technical-arena"
+  | "no-hard-feelings"
   | "promiscuous-instructor"
   | "extra-form"
   | "tiamat-instructor"
@@ -329,6 +330,12 @@ export interface RetainedLegendaryProgress {
   instructorForms: FormId[];
   formBranchPreferences?: FormBranch[];
   joinedAt: number;
+  mastery?: CollaboratorMastery;
+  arenaBase?: number;
+  styleBase?: number;
+  tournamentExperience?: number;
+  agonistCourseCompletions?: number;
+  lastAgonistCourseYear?: number;
   lastFormTrainingYear?: number;
   formTrainingYearCount?: number;
 }
@@ -599,6 +606,7 @@ export type GameAction =
       now: number;
     }
   | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
+  | { type: "CANCEL_MEMBER_ENROLLMENT"; contactId: string }
   | {
       type: "PAY_INSTRUCTOR_CERTIFICATES";
       collaboratorId: string;

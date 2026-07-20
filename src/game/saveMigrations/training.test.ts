@@ -12,7 +12,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.upgrades["extra-form"]).toBe(0);
     expect(migrated.upgrades["technical-arena"]).toBe(0);
     expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
@@ -32,7 +32,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
     expect(migrated.statistics.socialTrials).toBe(0);
@@ -47,7 +47,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.upgrades["promiscuous-instructor"]).toBe(1);
     expect(migrated.upgrades["tiamat-instructor"]).toBe(4);
     expect(migrated.upgrades.pagosport).toBe(0);
@@ -61,7 +61,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
   });
 
@@ -72,7 +72,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.school.followers).toBe(0);
   });
 
@@ -84,8 +84,34 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(44);
+    expect(migrated.version).toBe(45);
     expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
     expect(migrated.contacts[0].agonistCourseCompletions).toBe(0);
+  });
+
+  it("adds Nessun Rancore and applies PagoSport's retroactive certificates", () => {
+    const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
+    legacy.version = 44;
+    delete legacy.upgrades["no-hard-feelings"];
+    legacy.upgrades.pagosport = 2;
+    legacy.collaborators = [{
+      id: "legacy-pagosport",
+      contactId: legacy.contacts[0].id,
+      displayName: "Legacy PagoSport",
+      joinedAt: 1_000,
+      forms: ["form-1", "course-x"],
+      instructorForms: [],
+      formBranchPreferences: [],
+      autoTeachingEnabled: true,
+      assignment: null,
+      mastery: { writing: 0, events: 0, lessons: 0, social: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare",
+    }];
+
+    const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
+
+    expect(migrated.version).toBe(45);
+    expect(migrated.upgrades["no-hard-feelings"]).toBe(0);
+    expect(migrated.collaborators[0].instructorForms).toEqual(["form-1", "course-x"]);
   });
 });

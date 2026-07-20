@@ -81,6 +81,7 @@ export function scheduleSecretLegendaryTrial(
   const progress = state.network.secretLegendaries[id];
   if (progress.status !== "external") return state;
   const profile = SECRET_LEGENDARIES[id];
+  const retained = state.legendaryCollaborators.retainedProgress[id];
   const existingContact = state.contacts.find((contact) => contact.secretLegendaryId === id);
   if (
     existingContact?.status === "enrolled" ||
@@ -104,11 +105,13 @@ export function scheduleSecretLegendaryTrial(
     rarity: "legendary",
     specialProfileId: id,
     secretLegendaryId: id,
-    forms: getCanonicalSecretForms(profile.numericForms),
-    formBranchPreferences: ["Spada Lunga"],
-    arenaBase: profile.arenaBase,
-    styleBase: profile.styleBase,
-    tournamentExperience: profile.externalExperience,
+    forms: [...(retained?.forms ?? getCanonicalSecretForms(profile.numericForms))],
+    formBranchPreferences: [...(retained?.formBranchPreferences ?? ["Spada Lunga"])],
+    arenaBase: retained?.arenaBase ?? profile.arenaBase,
+    styleBase: retained?.styleBase ?? profile.styleBase,
+    tournamentExperience: retained?.tournamentExperience ?? profile.externalExperience,
+    agonistCourseCompletions: retained?.agonistCourseCompletions ?? 0,
+    lastAgonistCourseYear: retained?.lastAgonistCourseYear,
   };
   return {
     ...state,

@@ -14,6 +14,7 @@ export function PeopleView({
   onAssign,
   onStartTraining,
   onToggleFavorite,
+  onCancelEnrollment,
   onPayInstructorCertificates,
   onToggleInstructorAutomation,
 }: {
@@ -21,6 +22,7 @@ export function PeopleView({
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleFavorite?: (contactId: string) => void;
+  onCancelEnrollment?: (contactId: string) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
   onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
 }) {
@@ -82,6 +84,7 @@ export function PeopleView({
           collaboratorsById={collaboratorsById}
           onStartTraining={onStartTraining}
           onToggleFavorite={onToggleFavorite ?? ignoreFavoriteToggle}
+          onCancelEnrollment={onCancelEnrollment ?? ignoreFavoriteToggle}
         />
       </section>
 

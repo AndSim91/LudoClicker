@@ -167,10 +167,11 @@ export function createInitialContacts(
       rarity,
       specialProfileId: legendaryProfile?.id,
       forms: [...(retained?.forms ?? [])],
-      arenaBase: athleteStats.arena,
-      styleBase: athleteStats.style,
-      tournamentExperience: 0,
-      agonistCourseCompletions: 0,
+      arenaBase: retained?.arenaBase ?? athleteStats.arena,
+      styleBase: retained?.styleBase ?? athleteStats.style,
+      tournamentExperience: retained?.tournamentExperience ?? 0,
+      agonistCourseCompletions: retained?.agonistCourseCompletions ?? 0,
+      lastAgonistCourseYear: retained?.lastAgonistCourseYear,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
       formTrainingYearCount: retained?.formTrainingYearCount,
@@ -213,6 +214,11 @@ export function createAcquiredContacts(
         ? chooseLegendaryProfile(nextSeed, reservedProfileIds)
         : { profile: undefined, legendaryRolled: false, nextSeed };
     const specialProfile = selected.profile;
+    const returningContact = specialProfile
+      ? state.contacts.find((contact) =>
+          contact.status === "departed" && contact.specialProfileId === specialProfile.id
+        )
+      : undefined;
     nextSeed = selected.nextSeed;
     if (specialProfile) {
       progress = addLegendaryEncounter(progress, specialProfile.id);
@@ -242,32 +248,52 @@ export function createAcquiredContacts(
     const retained = specialProfile
       ? progress.retainedProgress[specialProfile.id]
       : undefined;
-    let id = makeGameId("contact", now, `acquired-${nextSequence}`);
-    while (contactIds.has(id)) {
+    let id = returningContact?.id ?? makeGameId("contact", now, `acquired-${nextSequence}`);
+    while (!returningContact && contactIds.has(id)) {
       nextSequence += 1;
       id = makeGameId("contact", now, `acquired-${nextSequence}`);
     }
     contactIds.add(id);
     nextSequence += 1;
     return {
+      ...returningContact,
       id,
-      firstName,
-      lastName,
-      email,
+      firstName: returningContact?.firstName ?? firstName,
+      lastName: returningContact?.lastName ?? lastName,
+      email: returningContact?.email ?? email,
       source,
       acquiredAt: now,
       status: "available" as const,
       rarity,
       specialProfileId: specialProfile?.id,
-      forms: [...(retained?.forms ?? [])],
-      arenaBase: athleteStats.arena,
-      styleBase: athleteStats.style,
-      tournamentExperience: 0,
-      agonistCourseCompletions: 0,
+      forms: [...(retained?.forms ?? returningContact?.forms ?? [])],
+      arenaBase: retained?.arenaBase ?? returningContact?.arenaBase ?? athleteStats.arena,
+      styleBase: retained?.styleBase ?? returningContact?.styleBase ?? athleteStats.style,
+      tournamentExperience:
+        retained?.tournamentExperience ?? returningContact?.tournamentExperience ?? 0,
+      agonistCourseCompletions:
+        retained?.agonistCourseCompletions ?? returningContact?.agonistCourseCompletions ?? 0,
+      lastAgonistCourseYear:
+        retained?.lastAgonistCourseYear ?? returningContact?.lastAgonistCourseYear,
       formBranchPreferences: [...(retained?.formBranchPreferences ?? [])],
       lastFormTrainingYear: retained?.lastFormTrainingYear,
       formTrainingYearCount: retained?.formTrainingYearCount,
+      training: undefined,
+      enrolledMonth: undefined,
     };
   });
   return { contacts, nextSeed };
+}
+
+export function mergeAcquiredContacts(
+  existingContacts: Contact[],
+  acquiredContacts: Contact[],
+): Contact[] {
+  if (acquiredContacts.length === 0) return existingContacts;
+  const acquiredById = new Map(acquiredContacts.map((contact) => [contact.id, contact]));
+  const existingIds = new Set(existingContacts.map((contact) => contact.id));
+  return [
+    ...existingContacts.map((contact) => acquiredById.get(contact.id) ?? contact),
+    ...acquiredContacts.filter((contact) => !existingIds.has(contact.id)),
+  ];
 }

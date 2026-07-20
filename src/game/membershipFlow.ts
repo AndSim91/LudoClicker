@@ -1,4 +1,4 @@
-import { getUpgradeEffectTotal } from "../content/upgrades";
+import { canCancelMemberEnrollment, getUpgradeEffectTotal } from "../content/upgrades";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
   getAthleteImmunityStatus,
@@ -60,6 +60,12 @@ export function departMembers(
         ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
       ],
       joinedAt: collaborator?.joinedAt ?? member.acquiredAt,
+      mastery: collaborator?.mastery ? { ...collaborator.mastery } : undefined,
+      arenaBase: member.arenaBase,
+      styleBase: member.styleBase,
+      tournamentExperience: member.tournamentExperience,
+      agonistCourseCompletions: member.agonistCourseCompletions,
+      lastAgonistCourseYear: member.lastAgonistCourseYear,
       lastFormTrainingYear:
         collaborator?.lastFormTrainingYear ?? member.lastFormTrainingYear,
       formTrainingYearCount:
@@ -108,6 +114,65 @@ export function departMembers(
     statistics: {
       ...state.statistics,
       membersDeparted: state.statistics.membersDeparted + departed.length,
+    },
+  };
+}
+
+export function cancelMemberEnrollment(
+  state: GameState,
+  contactId: string,
+): GameState {
+  if (!canCancelMemberEnrollment(state.upgrades)) return state;
+  const member = state.contacts.find(
+    (contact) => contact.id === contactId && contact.status === "enrolled",
+  );
+  if (!member) return state;
+
+  const removedCollaboratorId = state.collaborators.find(
+    (collaborator) => collaborator.contactId === contactId,
+  )?.id;
+  const departed = departMembers(
+    state,
+    [contactId],
+    true,
+    "manual-cancellation",
+  );
+  if (departed === state) return state;
+
+  const qualification = departed.tournaments.qualification;
+  const remainingQualifiedIds = qualification?.contactIds.filter((id) => id !== contactId) ?? [];
+  const secretLegendaryId = member.secretLegendaryId;
+  return {
+    ...departed,
+    contacts: departed.contacts.map((contact) =>
+      removedCollaboratorId && contact.training?.instructorId === removedCollaboratorId
+        ? { ...contact, training: undefined }
+        : contact,
+    ),
+    collaborators: departed.collaborators.map((collaborator) =>
+      removedCollaboratorId && collaborator.training?.instructorId === removedCollaboratorId
+        ? { ...collaborator, training: undefined }
+        : collaborator,
+    ),
+    network: secretLegendaryId
+      ? {
+          ...departed.network,
+          secretLegendaries: {
+            ...departed.network.secretLegendaries,
+            [secretLegendaryId]: {
+              ...departed.network.secretLegendaries[secretLegendaryId],
+              status: "external",
+              enrolledContactId: undefined,
+            },
+          },
+        }
+      : departed.network,
+    tournaments: {
+      ...departed.tournaments,
+      qualification: qualification && remainingQualifiedIds.length > 0
+        ? { ...qualification, contactIds: remainingQualifiedIds }
+        : undefined,
+      immuneContactIds: departed.tournaments.immuneContactIds.filter((id) => id !== contactId),
     },
   };
 }

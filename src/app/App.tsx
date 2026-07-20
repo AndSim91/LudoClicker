@@ -234,6 +234,9 @@ export function App() {
             onToggleFavorite={(contactId) =>
               dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId })
             }
+            onCancelEnrollment={(contactId) =>
+              dispatch({ type: "CANCEL_MEMBER_ENROLLMENT", contactId })
+            }
             onToggleInstructorAutomation={(collaboratorId, enabled) =>
               dispatch({
                 type: "TOGGLE_INSTRUCTOR_AUTOMATION",

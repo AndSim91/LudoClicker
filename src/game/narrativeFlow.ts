@@ -1,6 +1,6 @@
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { formatCurrency } from "../shared/formatters";
-import { addLegendaryEncounters, createAcquiredContacts } from "./contacts";
+import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { scaleContactGain, scaleCurrencyGain } from "./economy";
 import { startNextCampaign } from "./emailFlow";
@@ -71,7 +71,7 @@ export function processNarrativeEvent(
       applyEquipmentWear(rewardState.state.equipment, definition.wearDelta ?? 0),
       definition.damagedSwordsDelta ?? 0,
     ),
-    contacts: [...rewardState.state.contacts, ...contacts],
+    contacts: mergeAcquiredContacts(rewardState.state.contacts, contacts),
     narrative: {
       nextEventAt: now + nextDelay,
       history: [

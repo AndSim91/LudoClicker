@@ -10,10 +10,14 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import {
   UPGRADE_CATEGORIES,
   UPGRADE_DEFINITIONS,
+  canCancelMemberEnrollment,
   getAnnualFormTrainingLimit,
   getFirstIncompleteUpgradePrerequisite,
   getUpgradeCost,
+  getUpgradeEffectMaximum,
   getUpgradeEffectTotal,
+  hasAutomaticInstructorCertificates,
+  hasFreeFormTraining,
   type UpgradeCategory,
   type UpgradeDefinition,
 } from "../../content/upgrades";
@@ -76,6 +80,15 @@ function getUpgradeBenefitsSummary(state: GameState) {
   if (agonistCourseTier > 0) {
     benefits.push({ label: "Arena Tecnica", value: `livello ${agonistCourseTier}` });
   }
+  if (canCancelMemberEnrollment(state.upgrades)) {
+    benefits.push({ label: "Annullamento iscrizioni", value: "Sbloccato" });
+  }
+  if (hasAutomaticInstructorCertificates(state.upgrades)) {
+    benefits.push({ label: "Attestati collaboratori", value: "Automatici" });
+  }
+  if (hasFreeFormTraining(state.upgrades)) {
+    benefits.push({ label: "Costi di formazione", value: "Gratuiti" });
+  }
 
   return benefits;
 }
@@ -97,7 +110,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
-      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/4 · Polivalenza ${state.upgrades["instructor-versatility"]}/2`;
+      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/${1 + getUpgradeEffectMaximum("annualFormCapacity")} · Polivalenza ${state.upgrades["instructor-versatility"]}/2`;
   }
 }
 
@@ -105,7 +118,7 @@ type UpgradeStatus = "locked" | "available" | "completed";
 
 function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
   if (state.school.historicMembers < definition.requiredHistoricMembers) {
-    return `Servono ${definition.requiredHistoricMembers} iscritti storici`;
+    return `Serve Fama della scuola ${definition.requiredHistoricMembers}`;
   }
   const prerequisite = getFirstIncompleteUpgradePrerequisite(
     state.upgrades,
@@ -301,7 +314,7 @@ function UpgradeDetailsDialog({
           <div><dt>Livello attuale</dt><dd>{level}/{definition.maxLevel}</dd></div>
           <div><dt>Effetto per livello</dt><dd>{definition.effectLabel}</dd></div>
           <div><dt>Costo</dt><dd>{completed ? "—" : formatCurrency(cost)}</dd></div>
-          <div><dt>Requisito</dt><dd>{definition.requiredHistoricMembers} iscritti storici</dd></div>
+          <div><dt>Fama richiesta</dt><dd>{definition.requiredHistoricMembers || "Nessuna"}</dd></div>
         </dl>
 
         <p className={`upgrade-dialog-status${canBuy || completed ? " positive" : ""}`}>

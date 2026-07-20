@@ -1,4 +1,4 @@
-import { addLegendaryEncounters, createAcquiredContacts } from "./contacts";
+import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { roundCurrency } from "./economy";
 import { startNextCampaign } from "./emailFlow";
 import { departMembers } from "./membershipFlow";
@@ -18,7 +18,7 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
         state.legendaryCollaborators,
         acquired.contacts,
       ),
-      contacts: [...state.contacts, ...acquired.contacts],
+      contacts: mergeAcquiredContacts(state.contacts, acquired.contacts),
     }, state.lastSavedAt);
   }
 
@@ -59,7 +59,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     nextState = {
       ...state,
       randomSeed: acquired.nextSeed,
-      contacts: [...state.contacts, ...newMembers],
+      contacts: mergeAcquiredContacts(state.contacts, newMembers),
       legendaryCollaborators: {
         ...addLegendaryEncounters(state.legendaryCollaborators, newMembers),
         enrolledProfileIds: [

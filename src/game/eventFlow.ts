@@ -12,7 +12,7 @@ import {
 } from "./equipment";
 import { scaleContactGain } from "./economy";
 import { getEventFunnelOutcome } from "./formulas";
-import { createAcquiredContacts, addLegendaryEncounters } from "./contacts";
+import { createAcquiredContacts, addLegendaryEncounters, mergeAcquiredContacts } from "./contacts";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
 import {
@@ -49,7 +49,7 @@ export function startAcquisitionEvent(
     ) return state;
   }
   if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
-  if (state.school.peakActiveMembers < definition.unlockMembers) return state;
+  if (state.school.historicMembers < definition.unlockMembers) return state;
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
   const availableSwords = getAvailableSwords(state.equipment);
   if (availableSwords < definition.requiredSwords) return state;
@@ -155,7 +155,7 @@ export function resolveAcquisitionEvent(
     ...rewardState,
     randomSeed: acquired.nextSeed,
     legendaryCollaborators: addLegendaryEncounters(rewardState.legendaryCollaborators, contacts),
-    contacts: [...rewardState.contacts, ...contacts],
+    contacts: mergeAcquiredContacts(rewardState.contacts, contacts),
     equipment: applyEquipmentWear(
       {
         ...rewardState.equipment,

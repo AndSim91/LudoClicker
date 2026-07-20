@@ -131,7 +131,7 @@ export function OverviewView({
         <fieldset className="prestige-disabled-content" disabled aria-hidden="true">
           <div className="network-heading"><div><Icon name="people" /><span><strong>Rete delle scuole</strong><small>Reputazione {state.network.reputation} · bonus permanente +{Math.round(state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool * 100)}%</small></span></div><b>{state.network.schools.length} sedi precedenti</b></div>
           <div className="prestige-requirements" aria-label="Requisiti nuova scuola">
-            <Requirement label="Iscritti storici" value={state.school.historicMembers} target={requirements.historicMembers} />
+            <Requirement label="Fama della scuola" value={state.school.historicMembers} target={requirements.historicMembers} />
             <Requirement label="Collaboratori" value={state.collaborators.length} target={requirements.collaborators} />
             <Requirement label="Eventi completati" value={state.statistics.eventsCompleted} target={requirements.events} />
             <Requirement label="Champion's Arena" value={state.tournaments.championsVictoryCurrentSchool ? 1 : 0} target={1} />

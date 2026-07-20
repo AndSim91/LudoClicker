@@ -90,11 +90,11 @@ export function EventsView({
     : `Servono ${formatCurrency(GAME_CONFIG.officialSwordCost)}`;
   const showSupplier = isOfficialSwordSupplierVisible(state);
   const visibleEvents = ACQUISITION_EVENTS.filter((definition) =>
-    definition.unlockMembers <= state.school.peakActiveMembers ||
+    definition.unlockMembers <= state.school.historicMembers ||
     runningEvents.some((event) => event.definitionId === definition.id)
   );
   const nextLockedEvent = ACQUISITION_EVENTS.find(
-    (definition) => definition.unlockMembers > state.school.peakActiveMembers,
+    (definition) => definition.unlockMembers > state.school.historicMembers,
   );
   return (
     <main className="overview-view events-view">
@@ -127,7 +127,7 @@ export function EventsView({
           </div>
         </div>
       </section>
-      <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {state.school.peakActiveMembers}</strong><small>Equivalente al numero massimo di iscritti storici della scuola</small><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} iscritti massimi.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
+      <div className="event-fame-note"><Icon name="flag" /><span><strong>Fama della scuola: {state.school.historicMembers}</strong><small>Equivale al totale cumulativo delle iscrizioni e non diminuisce quando qualcuno lascia la scuola.</small><small>{nextLockedEvent ? `Prossimo sblocco: ${nextLockedEvent.title} a ${nextLockedEvent.unlockMembers} Fama.` : "Tutti gli eventi nazionali sono disponibili."}</small></span></div>
       <section className="event-list">
         {visibleEvents.map((definition) => {
           const matching = runningByDefinition.get(definition.id);

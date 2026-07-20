@@ -315,6 +315,32 @@
   color: #d99721;
 }
 
+.member-cancel-enrollment {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  margin-left: auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.member-cancel-enrollment svg {
+  width: 17px;
+  height: 17px;
+}
+
+.member-cancel-enrollment:hover,
+.member-cancel-enrollment:focus-visible {
+  background: color-mix(in srgb, #c93535 12%, transparent);
+  color: #b42318;
+}
+
 .member-row > .member-training-cell {
   overflow: visible;
   white-space: normal;

@@ -11,7 +11,8 @@ export type AthleteImmunityReason =
 export type AthleteDepartureContext =
   | "annual-rollout"
   | "unexpected-event"
-  | "data-reconciliation";
+  | "data-reconciliation"
+  | "manual-cancellation";
 
 export interface AthleteImmunityContext {
   currentMonth: number;
@@ -87,6 +88,7 @@ export function isAthleteImmuneFromDeparture(
   status: AthleteImmunityStatus,
   context: AthleteDepartureContext,
 ): boolean {
+  if (context === "manual-cancellation") return false;
   if (context === "annual-rollout") return status.annualRollout;
   if (context === "unexpected-event") return status.unexpectedEvents;
   return status.reasons.some((reason) =>

@@ -16,6 +16,7 @@ import {
 } from "../../content/forms";
 import {
   getAnnualFormTrainingLimit,
+  hasAutomaticInstructorCertificates,
   hasFreeFormTraining,
 } from "../../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "../../game/calendar";
@@ -83,7 +84,9 @@ function getDisplayedTrainingCost(
   if (hasFreeFormTraining(state.upgrades)) return 0;
   if (qualification) return getInstructorQualificationCost(definition.cost);
   if (collaborator?.assignment === "instructor" && isInstructorForm(definition.id)) {
-    return getInstructorFormCost(definition.cost);
+    return hasAutomaticInstructorCertificates(state.upgrades)
+      ? definition.cost
+      : getInstructorFormCost(definition.cost);
   }
   if (
     collaborator?.assignment !== "instructor" &&

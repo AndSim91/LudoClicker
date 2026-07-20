@@ -584,7 +584,13 @@ describe("local save", () => {
     const initial = createInitialState(1_000);
     const started = gameReducer({
       ...initial,
-      school: { ...initial.school, euros: 120, activeMembers: 5, peakActiveMembers: 5 },
+      school: {
+        ...initial.school,
+        euros: 120,
+        activeMembers: 5,
+        historicMembers: 5,
+        peakActiveMembers: 5,
+      },
     }, {
       type: "START_ACQUISITION_EVENT",
       definitionId: "public-demo",

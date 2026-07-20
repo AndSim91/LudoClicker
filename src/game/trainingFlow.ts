@@ -18,6 +18,7 @@ import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import {
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
+  hasAutomaticInstructorCertificates,
   hasFreeFormTraining,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
@@ -116,7 +117,7 @@ export function toggleInstructorAutomation(
 }
 
 export function getAgonistCourseCost(state: GameState): number {
-  return (state.upgrades["technical-arena"] ?? 0) >= 3
+  return hasFreeFormTraining(state.upgrades) || (state.upgrades["technical-arena"] ?? 0) >= 3
     ? 0
     : getStudentFormCost(GAME_CONFIG.agonistCourseBaseCost);
 }
@@ -359,7 +360,9 @@ export function startFormTraining(
   const trainingCost = hasFreeFormTraining(state.upgrades)
     ? 0
     : instructorTrack
-      ? getInstructorFormCost(definition?.cost ?? 0)
+      ? hasAutomaticInstructorCertificates(state.upgrades)
+        ? definition?.cost ?? 0
+        : getInstructorFormCost(definition?.cost ?? 0)
       : collaborator?.assignment === "instructor"
         ? definition?.cost ?? 0
         : instructor
@@ -536,7 +539,8 @@ export function resolveFormTraining(
             ...candidate,
             forms: completedForms,
             formBranchPreferences: preferenceResult.preferences,
-            instructorForms: student.training?.includesInstructorCertification
+            instructorForms: student.training?.includesInstructorCertification ||
+                hasAutomaticInstructorCertificates(state.upgrades)
               ? [...candidate.instructorForms, completedFormId]
               : candidate.instructorForms,
             training: undefined,

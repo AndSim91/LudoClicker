@@ -156,5 +156,21 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
     };
   }
 
+  if (migrated.version === 44) {
+    const upgrades = { ...createInitialUpgradeLevels(), ...(migrated.upgrades ?? {}) };
+    const automaticCertificates = (upgrades.pagosport ?? 0) >= 2;
+    migrated = {
+      ...migrated,
+      version: 45,
+      upgrades,
+      collaborators: (migrated.collaborators ?? []).map((collaborator) => ({
+        ...collaborator,
+        instructorForms: automaticCertificates
+          ? [...collaborator.forms]
+          : [...(collaborator.instructorForms ?? [])],
+      })),
+    };
+  }
+
   return migrated;
 }

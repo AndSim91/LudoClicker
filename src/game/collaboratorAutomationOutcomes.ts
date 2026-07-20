@@ -1,6 +1,6 @@
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
-import { addLegendaryEncounters, createAcquiredContacts } from "./contacts";
+import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { roundCurrency } from "./economy";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
@@ -119,10 +119,10 @@ export function scheduleSocialTrials(
       state.legendaryCollaborators,
       acquired.contacts,
     ),
-    contacts: [
-      ...state.contacts,
-      ...acquired.contacts.map((contact) => ({ ...contact, status: "trialScheduled" as const })),
-    ],
+    contacts: mergeAcquiredContacts(
+      state.contacts,
+      acquired.contacts.map((contact) => ({ ...contact, status: "trialScheduled" as const })),
+    ),
     scheduledTrials: [...state.scheduledTrials, ...trials],
     statistics: {
       ...state.statistics,
@@ -205,7 +205,7 @@ export function resolveSocialAutomationCycles(
         nextState.legendaryCollaborators,
         acquired.contacts,
       ),
-      contacts: [...nextState.contacts, ...acquired.contacts],
+      contacts: mergeAcquiredContacts(nextState.contacts, acquired.contacts),
       statistics: {
         ...nextState.statistics,
         contactsAcquired: nextState.statistics.contactsAcquired + contactsAcquired,

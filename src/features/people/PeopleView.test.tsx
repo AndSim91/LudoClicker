@@ -853,6 +853,34 @@ describe("PeopleView", () => {
     expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
   });
 
+  it("shows Nessun Rancore's cancellation action and asks for confirmation", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = { ...initial.contacts[0], status: "enrolled" as const };
+    const onCancelEnrollment = vi.fn();
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [enrolled, ...initial.contacts.slice(1)],
+          upgrades: { ...initial.upgrades, "no-hard-feelings": 1 },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onCancelEnrollment={onCancelEnrollment}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", {
+      name: `Annulla l'iscrizione di ${enrolled.firstName} ${enrolled.lastName}`,
+    }));
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(onCancelEnrollment).toHaveBeenCalledWith(enrolled.id);
+    confirm.mockRestore();
+  });
+
   it("replaces manual training with every possible next Form when an Instructor is assigned", () => {
     const initial = createInitialState(1_000);
     const enrolled = {

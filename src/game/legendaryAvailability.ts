@@ -32,7 +32,9 @@ export function getReservedLegendaryProfileIds(
     ...state.legendaryCollaborators.enrolledProfileIds,
   ]);
   for (const contact of state.contacts) {
-    if (contact.specialProfileId) reserved.add(contact.specialProfileId);
+    if (contact.specialProfileId && contact.status !== "departed") {
+      reserved.add(contact.specialProfileId);
+    }
   }
   for (const collaborator of state.collaborators) {
     if (collaborator.specialProfileId) reserved.add(collaborator.specialProfileId);

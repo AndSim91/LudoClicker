@@ -5,6 +5,7 @@ import {
   getAnnualFormTrainingLimit,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  hasAutomaticInstructorCertificates,
   hasFreeFormTraining,
 } from "./upgrades";
 import type { UpgradeId } from "../game/types";
@@ -65,22 +66,26 @@ describe("instructor branch", () => {
       (definition) => definition.category === "instructors",
     );
     expect(instructors.map((definition) => definition.id)).toEqual([
-      "instructor-versatility",
       "technical-arena",
+      "no-hard-feelings",
+      "instructor-versatility",
       "promiscuous-instructor",
       "extra-form",
       "tiamat-instructor",
       "pagosport",
       "divine-touch",
     ]);
-    expect(instructors.every((definition) => definition.requiredHistoricMembers === 35)).toBe(true);
+    expect(instructors.map((definition) => definition.requiredHistoricMembers)).toEqual([
+      15, 0, 0, 0, 0, 0, 0, 0,
+    ]);
     expect(instructors.map((definition) =>
       Array.from({ length: definition.maxLevel }, (_, level) =>
         getUpgradeCost(definition, level)
       )
     )).toEqual([
-      [2_000, 4_000],
       [2_000, 5_000, 10_000],
+      [2_500],
+      [2_000, 4_000],
       [5_000],
       [10_000],
       [8_000, 13_000, 21_000, 34_000],
@@ -98,15 +103,16 @@ describe("instructor branch", () => {
     expect(getUpgradeEffectTotal(levels, "instructorTeachingSpeed")).toBe(99.99);
   });
 
-  it("caps PagoSport's annual slots at two and makes level three free", () => {
+  it("gives PagoSport one annual slot, automatic certificates and free training", () => {
     const levels = {
       ...createInitialUpgradeLevels(),
       "extra-form": 1,
       pagosport: 3,
     };
 
-    expect(getUpgradeEffectTotal(levels, "annualFormCapacity")).toBe(3);
-    expect(getAnnualFormTrainingLimit(levels)).toBe(4);
+    expect(getUpgradeEffectTotal(levels, "annualFormCapacity")).toBe(2);
+    expect(getAnnualFormTrainingLimit(levels)).toBe(3);
+    expect(hasAutomaticInstructorCertificates(levels)).toBe(true);
     expect(hasFreeFormTraining(levels)).toBe(true);
   });
 });

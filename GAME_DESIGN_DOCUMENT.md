@@ -208,8 +208,9 @@ sorgente di entrate ricorrenti. Non sono spendibili.
 
 - **Iscritti attivi:** membri attuali della scuola; possono aumentare o
   diminuire tramite eventi narrativi.
-- **Iscritti storici:** totale lordo ottenuto nella partita e nei cicli di
-  prestigio.
+- **Fama della scuola:** totale cumulativo delle iscrizioni ottenute nella
+  partita e nei cicli di prestigio. Non diminuisce quando un iscritto lascia o
+  viene rimosso dalla scuola.
 - **Ultra Rari:** contatti rossi che diventano Collaboratori delle Onde dopo il
   Corso Y.
 
@@ -794,8 +795,8 @@ Regole:
 
 - ogni iscritto può conoscere più Forme;
 - ogni iscritto o collaboratore può iniziare al massimo una Forma per anno
-  formativo; **Extra Forma** porta questo limite a due e i primi due livelli di
-  **PagoSport** lo portano progressivamente fino a quattro;
+  formativo; **Doppio Corso** porta questo limite a due e il livello 1 di
+  **PagoSport** lo porta a tre;
 - gli slot annuali delle Forme si rinnovano a luglio e coprono il periodo
   luglio–giugno: una Forma iniziata a luglio consuma quindi uno slot valido
   anche nel settembre immediatamente successivo;
@@ -838,7 +839,8 @@ Regole:
 - una qualifica pregressa viene acquistata esplicitamente dal comando di
   formazione e costa il **200% del costo base**;
 - una nuova Forma appresa mentre si è Istruttore costa il **300% totale del
-  costo base** e comprende la qualifica;
+  costo base** e comprende la qualifica; con PagoSport al livello 2 la qualifica
+  è automatica e gratuita, quindi rimane soltanto il costo base della Forma;
 - se nessun Collaboratore è assegnato al ruolo di Istruttore, il singolo allievo
   può iniziare manualmente la prossima Forma pagando il costo base;
 - se almeno un Collaboratore è assegnato al ruolo di Istruttore, il comando
@@ -846,8 +848,10 @@ Regole:
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
   dall'automazione e, con un Istruttore compatibile, costano il **25% del costo
   base**;
-- **Arena Tecnica** sblocca il **Corso Agonisti** automatico, che da quel momento
-  resta sempre attivo e non può essere disabilitato separatamente;
+- **Arena Tecnica** è il primo potenziamento del ramo Istruttori, richiede
+  **Fama della scuola 15** e al livello 1 sblocca il **Corso Agonisti**
+  automatico, che da quel momento resta sempre attivo e non può essere
+  disabilitato separatamente;
 - l'automazione propone il Corso Agonisti a un atleta vulnerabile che non ha
   ancora iniziato una formazione nell'anno quando ha completato il proprio
   percorso oppure nessun Istruttore automatico possiede le qualifiche per le
@@ -862,7 +866,8 @@ Regole:
   `Eseguito Corso Agonisti | Potenziale totale +X`, senza creare notifiche o
   messaggi nell'inbox;
 - il corso costa il 25% del costo base di €5.000. Arena Tecnica al livello 2
-  porta la sua durata base da 15 a 10 secondi; al livello 3 lo rende gratuito;
+  porta la sua durata base da 15 a 10 secondi; al livello 3 lo rende gratuito.
+  Anche PagoSport al livello 3 azzera il costo;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
   decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
   poi la prossima formazione secondo la progressione dalla Forma 1 verso
@@ -870,18 +875,38 @@ Regole:
   `acquiredAt` più recente; a parità completa conserva l'ordine originale;
 - disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
   terminare le lezioni già iniziate, ma non ne avvia altre;
-- **Polivalenza didattica** ha due livelli e permette di apprendere fino a tutti
-  e tre i rami d'arma;
+- acquistare il livello 1 di Arena Tecnica sblocca subito **Nessun Rancore**;
+  i livelli 2 e 3 di Arena restano acquistabili in parallelo e non bloccano il
+  resto del ramo;
+- **Nessun Rancore** è un potenziamento unico da **€2.500**. Mostra una X nella
+  riga di ogni persona nella schermata Iscritti e, dopo una conferma esplicita,
+  ne annulla definitivamente l'iscrizione senza rimborso e senza ridurre la
+  Fama della scuola. La formazione personale e le lezioni tenute dal
+  collaboratore rimosso vengono interrotte;
+- gli iscritti non leggendari rimossi non possono tornare, ma email ed eventi
+  narrativi già avvenuti restano nello storico. I Leggendari conservano Forme,
+  attestati, Maestria, Arena, Stile, esperienza nei tornei, Corsi Agonisti e
+  anzianità; perdono soltanto incarico e automazione. I Leggendari ordinari
+  tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti
+  devono essere nuovamente sconfitti nel rispettivo torneo;
+- **Polivalenza didattica** segue Nessun Rancore, ha due livelli e permette di
+  apprendere fino a tutti e tre i rami d'arma;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
   allievi contemporanei di ogni Istruttore;
-- **Extra Forma** è un potenziamento unico del ramo Istruttori e concede a ogni
+- **Doppio Corso** è un potenziamento unico del ramo Istruttori e concede a ogni
   atleta della scuola un secondo slot di formazione nel periodo luglio–giugno;
 - **Istruttore Tiamat** ha quattro livelli molto costosi e, dopo Istruttore
   Promisquo, porta la capacità massima a sei allievi;
-- **PagoSport** segue Istruttore Tiamat: i primi due livelli concedono ciascuno
-  uno slot di formazione annuale aggiuntivo, mentre il terzo rende gratuite
-  tutte le Forme per allievi e collaboratori, comprese le qualifiche da
-  Istruttore;
+- **PagoSport** segue Istruttore Tiamat: il livello 1 concede uno slot di
+  formazione annuale aggiuntivo; il livello 2 assegna gratuitamente e
+  retroattivamente a ogni collaboratore l'attestato da Istruttore per tutte le
+  Forme già apprese e lo assegna automaticamente per ogni nuova Forma, senza
+  cambiare l'incarico operativo; il livello 3 rende gratuiti tutte le Forme,
+  tutti i corsi, tutti gli attestati e ogni altro costo di istruttoraggio;
+- dopo Arena Tecnica, il ramo è lineare: ogni potenziamento deve essere
+  completato prima di accedere al successivo. L'ordine è **Nessun Rancore →
+  Polivalenza didattica → Istruttore Promisquo → Doppio Corso → Istruttore
+  Tiamat → PagoSport → Tocco DiGilo**;
 - **Tocco DiGilo** è l'ultimo potenziamento del ramo Istruttori: costa
   **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore
   insegna le Forme agli allievi;
@@ -1519,7 +1544,7 @@ rete.
 
 ### 17.5 Cosa rimane
 
-- Iscritti storici;
+- Fama della scuola;
 - scuole fondate;
 - Reputazione di rete;
 - archivio delle email e statistiche storiche;

@@ -25,9 +25,10 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Istruttori" })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Istruttore Promisquo/ })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Extra Forma/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Doppio Corso/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(52);
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(54);
   });
 
   it("shows requirements, effect and disabled level-up action for a locked node", () => {
@@ -38,7 +39,7 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("dialog", { name: "Pagina aggiornata" })).toBeVisible();
     expect(document.querySelector(".upgrade-dialog-backdrop")).not.toBeInTheDocument();
     expect(screen.getByText("+15% produzione Social per livello")).toBeVisible();
-    expect(screen.getByText("Servono 10 iscritti storici")).toBeVisible();
+    expect(screen.getByText("Serve Fama della scuola 10")).toBeVisible();
     expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
     expect(screen.getByRole("button", { name: /Apri dettagli Pagina aggiornata/ })).not.toHaveClass("unaffordable");
 
