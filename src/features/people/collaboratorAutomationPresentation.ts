@@ -10,7 +10,17 @@ import {
   getSocialTrialChance,
 } from "../../game/social";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
-import { formatCurrency, formatPercent } from "../../shared/formatters";
+import { formatCurrency } from "../../shared/formatters";
+
+const perSecondRateFormatter = new Intl.NumberFormat("it-IT", {
+  maximumFractionDigits: 2,
+});
+
+function formatPerSecondRate(value: number): string {
+  return value > 0 && value < 0.01
+    ? "<0,01"
+    : perSecondRateFormatter.format(value);
+}
 
 export interface CollaboratorAutomationPresentation {
   title: string;
@@ -126,14 +136,21 @@ export function getCollaboratorAutomationPresentation({
 
   if (assignment === "social") {
     const incomePerMember = getSocialIncomePerMember(state.school.followers);
+    const cycleIncome = state.school.activeMembers * incomePerMember;
+    const durationMs = getAutomationCycleDurationMs(state, "social");
+    const durationSeconds = durationMs ? durationMs / 1_000 : 0;
+    const incomePerSecond = durationSeconds > 0 ? cycleIncome / durationSeconds : 0;
+    const trialsPerSecond = durationSeconds > 0
+      ? getSocialTrialChance(state.school.followers) / durationSeconds
+      : 0;
+    const contactsPerSecond = durationSeconds > 0
+      ? getSocialContactChance(state.school.followers) / durationSeconds
+      : 0;
     return {
-      title: `Prossimo rendimento · ${formatCurrency(
-        state.school.activeMembers * incomePerMember,
-      )}`,
-      detail: `Ciclo base ${GAME_CONFIG.socialAutomationIntervalMs / 1_000} s · ${formatPercent(getSocialTrialChance(state.school.followers))} prova · ${formatPercent(getSocialContactChance(state.school.followers))} nuovo contatto`,
+      title: `Rendimento: ${formatCurrency(incomePerSecond)}/s | ${formatPerSecondRate(trialsPerSecond)}/s Lezioni di prova | ${formatPerSecondRate(contactsPerSecond)}/s Nuovi contatti`,
       progress: Math.min(100, Math.floor(state.automation.socialBuffer * 100)),
       progressLabel: "Progresso ciclo pubblicitario Social",
-      durationMs: getAutomationCycleDurationMs(state, "social"),
+      durationMs,
     };
   }
 

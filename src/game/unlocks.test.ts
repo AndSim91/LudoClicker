@@ -6,6 +6,7 @@ import {
   hasSocialMemberRequirement,
   isCollaboratorAreaVisible,
   isOfficialSwordSupplierVisible,
+  unlockSocialIfEligible,
 } from "./unlocks";
 
 describe("game unlock rules", () => {
@@ -14,6 +15,27 @@ describe("game unlock rules", () => {
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers - 1)).toBe(false);
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers)).toBe(true);
     expect(getSocialUnlockRequirementLabel()).toBe("15 iscritti");
+  });
+
+  it("starts Social with one Follower per active member and initializes them only once", () => {
+    const initial = createInitialState(1_000);
+    const eligible = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: GAME_CONFIG.socialUnlockMembers,
+      },
+    };
+
+    const unlocked = unlockSocialIfEligible(eligible);
+    expect(unlocked.unlocks.social).toBe(true);
+    expect(unlocked.school.followers).toBe(GAME_CONFIG.socialUnlockMembers);
+
+    const withMoreFollowers = {
+      ...unlocked,
+      school: { ...unlocked.school, followers: GAME_CONFIG.socialUnlockMembers + 10 },
+    };
+    expect(unlockSocialIfEligible(withMoreFollowers)).toBe(withMoreFollowers);
   });
 
   it("keeps collaborator visibility tied to actual collaborator progression", () => {

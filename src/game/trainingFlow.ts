@@ -116,10 +116,16 @@ export function toggleInstructorAutomation(
   return refreshInstructorTrainingDurations(nextState, now);
 }
 
-export function getAgonistCourseCost(state: GameState): number {
-  return hasFreeFormTraining(state.upgrades) || (state.upgrades["technical-arena"] ?? 0) >= 3
-    ? 0
-    : getStudentFormCost(GAME_CONFIG.agonistCourseBaseCost);
+export function getAgonistCourseCost(
+  state: GameState,
+  taughtByInstructor: boolean,
+): number {
+  if (hasFreeFormTraining(state.upgrades) || (state.upgrades["technical-arena"] ?? 0) >= 3) {
+    return 0;
+  }
+  return taughtByInstructor
+    ? getStudentFormCost(GAME_CONFIG.agonistCourseBaseCost)
+    : GAME_CONFIG.agonistCourseBaseCost;
 }
 
 export function startAgonistCourse(
@@ -150,7 +156,7 @@ export function startAgonistCourse(
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const capacity = selectInstructorCapacity(state);
-  const cost = getAgonistCourseCost(state);
+  const cost = getAgonistCourseCost(state, true);
   const immunity = student
     ? getAthleteImmunityStatus({
         currentMonth: state.school.currentMonth,

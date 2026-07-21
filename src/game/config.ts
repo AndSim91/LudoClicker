@@ -45,7 +45,7 @@ export const GAME_CONFIG = {
   },
   departureChancePerFoundedSchool: 0.005,
   collaboratorWritingPerSecond: 5,
-  agonistCourseBaseCost: 5_000,
+  agonistCourseBaseCost: 1_000,
   agonistCourseDurationMs: 15_000,
   agonistCourseImprovedDurationMs: 10_000,
   lessonImprovementIntervalMs: 60_000,

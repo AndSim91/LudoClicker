@@ -1,21 +1,27 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { selectAvailableContacts } from "./selectors";
 
 describe("admin resource actions", () => {
   it("adds members and updates member-based progression", () => {
     const initial = createInitialState(1_000);
-    const state = gameReducer(initial, { type: "ADMIN_ADD_MEMBERS", amount: 12 });
+    const state = gameReducer(initial, {
+      type: "ADMIN_ADD_MEMBERS",
+      amount: GAME_CONFIG.socialUnlockMembers,
+    });
 
     expect(state.school).toMatchObject({
-      activeMembers: 12,
-      peakActiveMembers: 12,
-      historicMembers: 12,
+      activeMembers: GAME_CONFIG.socialUnlockMembers,
+      peakActiveMembers: GAME_CONFIG.socialUnlockMembers,
+      historicMembers: GAME_CONFIG.socialUnlockMembers,
       euros: 10,
+      followers: GAME_CONFIG.socialUnlockMembers,
     });
     expect(state.unlocks).toMatchObject({ upgrades: true, social: true, forms: true });
     expect(state.statistics.membersEnrolled).toBe(0);
-    expect(state.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(12);
+    expect(state.contacts.filter((contact) => contact.status === "enrolled"))
+      .toHaveLength(GAME_CONFIG.socialUnlockMembers);
     expect(new Set(state.contacts.map((contact) => contact.id)).size).toBe(state.contacts.length);
     expect(state.collaborators).toHaveLength(1);
     expect(state.collaborators[0].specialProfileId).toBe("andrea-simonazzi");

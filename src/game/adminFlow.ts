@@ -3,7 +3,7 @@ import { roundCurrency } from "./economy";
 import { startNextCampaign } from "./emailFlow";
 import { departMembers } from "./membershipFlow";
 import type { GameState } from "./types";
-import { hasSocialMemberRequirement } from "./unlocks";
+import { unlockSocialIfEligible } from "./unlocks";
 
 export function addAdminContacts(state: GameState, rawAmount: number): GameState {
   const amount = Math.trunc(rawAmount);
@@ -93,7 +93,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     return state;
   }
 
-  return {
+  const updatedState: GameState = {
     ...nextState,
     school: {
       ...nextState.school,
@@ -104,12 +104,10 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     unlocks: {
       ...nextState.unlocks,
       upgrades: amount > 0 ? true : nextState.unlocks.upgrades,
-      social: amount > 0 && hasSocialMemberRequirement(resolvedActiveMembers)
-        ? true
-        : nextState.unlocks.social,
       forms: amount > 0 ? true : nextState.unlocks.forms,
     },
   };
+  return amount > 0 ? unlockSocialIfEligible(updatedState) : updatedState;
 }
 
 export function addAdminEuros(state: GameState, amount: number): GameState {

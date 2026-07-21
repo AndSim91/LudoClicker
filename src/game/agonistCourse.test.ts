@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getContactBaseStats } from "./athleteStats";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
-import { startAgonistCourse } from "./trainingFlow";
+import { getAgonistCourseCost, startAgonistCourse } from "./trainingFlow";
 import type { Collaborator, Contact, GameState } from "./types";
 
 const completedPath = FORM_DEFINITIONS.map((definition) => definition.id);
@@ -40,6 +40,13 @@ function arenaState(level: number): GameState {
 }
 
 describe("Corso Agonisti", () => {
+  it("costs 1,000 euros manually and 250 euros with an Instructor", () => {
+    const initial = arenaState(1);
+
+    expect(getAgonistCourseCost(initial, false)).toBe(1_000);
+    expect(getAgonistCourseCost(initial, true)).toBe(250);
+  });
+
   it("is permanently available after buying the first Arena Tecnica level", () => {
     const initial = createInitialState(1_000);
     const funded = {
@@ -58,7 +65,7 @@ describe("Corso Agonisti", () => {
     expect(unlocked.automation).not.toHaveProperty("agonistCoursesEnabled");
   });
 
-  it("costs 1,250 euros, lasts 15 seconds and grants no Form", () => {
+  it("costs 250 euros with an Instructor, lasts 15 seconds and grants no Form", () => {
     const initial = arenaState(1);
     const started = startAgonistCourse(
       initial,
@@ -67,7 +74,7 @@ describe("Corso Agonisti", () => {
       2_000,
     );
 
-    expect(started.school.euros).toBe(750);
+    expect(started.school.euros).toBe(1_750);
     expect(started.contacts[0].training?.formId).toBe("agonist-course");
     expect(started.contacts[0].training?.completesAt).toBe(17_000);
 

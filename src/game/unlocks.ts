@@ -5,6 +5,24 @@ export function hasSocialMemberRequirement(activeMembers: number): boolean {
   return activeMembers >= GAME_CONFIG.socialUnlockMembers;
 }
 
+export function unlockSocialIfEligible(state: GameState): GameState {
+  if (state.unlocks.social || !hasSocialMemberRequirement(state.school.activeMembers)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    school: {
+      ...state.school,
+      followers: state.school.activeMembers,
+    },
+    unlocks: {
+      ...state.unlocks,
+      social: true,
+    },
+  };
+}
+
 export function getSocialUnlockRequirementLabel(): string {
   return `${GAME_CONFIG.socialUnlockMembers} iscritti`;
 }

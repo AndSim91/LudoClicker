@@ -25,7 +25,10 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Istruttori" })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Istruttore Promisquo/ })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ })).toBeVisible();
+    const noHardFeelings = screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ });
+    expect(noHardFeelings).toBeVisible();
+    expect(noHardFeelings).toHaveTextContent("Nessun Rancore");
+    expect(noHardFeelings.querySelector("em")).toHaveTextContent("Rancor");
     expect(screen.getByRole("button", { name: /Apri dettagli Doppio Corso/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(54);

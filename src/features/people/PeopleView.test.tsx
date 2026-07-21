@@ -621,8 +621,10 @@ describe("PeopleView", () => {
     expect(screen.getByText(initial.emails[0].subject)).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
-    expect(screen.getByText("Prossimo rendimento · 0,00 €")).toBeVisible();
-    expect(screen.getByText("Ciclo base 120 s · 0,01% prova · 0,1% nuovo contatto")).toBeVisible();
+    expect(screen.getByText(
+      "Rendimento: 0,00 €/s | <0,01/s Lezioni di prova | <0,01/s Nuovi contatti",
+    )).toBeVisible();
+    expect(screen.queryByText(/Prossimo rendimento|Ciclo base/)).not.toBeInTheDocument();
     expect(screen.getByText("Usura attrezzatura: 42%")).toBeVisible();
     expect(screen.getAllByRole("progressbar")).toHaveLength(10);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(5);

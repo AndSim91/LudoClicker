@@ -412,6 +412,39 @@ describe("game engine: funnel", () => {
     expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(false);
   });
 
+  it("starts Social with one Follower per active member when a trial reaches the unlock", () => {
+    const initial = createInitialState(1_000);
+    const contact = initial.contacts.find((candidate) => !candidate.specialProfileId)!;
+    const trial = {
+      id: "trial-social-unlock",
+      contactId: contact.id,
+      startsAt: 1_500,
+      resolvesAt: 2_000,
+      resultSeed: 1,
+      status: "scheduled" as const,
+    };
+    const ready = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: GAME_CONFIG.socialUnlockMembers - 1,
+        peakActiveMembers: GAME_CONFIG.socialUnlockMembers - 1,
+      },
+      contacts: initial.contacts.map((candidate) =>
+        candidate.id === contact.id
+          ? { ...candidate, status: "trialScheduled" as const }
+          : candidate,
+      ),
+      scheduledTrials: [trial],
+    };
+
+    const unlocked = gameReducer(ready, { type: "TICK", now: trial.resolvesAt });
+
+    expect(unlocked.unlocks.social).toBe(true);
+    expect(unlocked.school.activeMembers).toBe(GAME_CONFIG.socialUnlockMembers);
+    expect(unlocked.school.followers).toBe(GAME_CONFIG.socialUnlockMembers);
+  });
+
   it("makes enrollment equally difficult and progressive for every Legendary", () => {
     const initial = createInitialState(1_000);
     const eva = {

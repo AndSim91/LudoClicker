@@ -284,8 +284,9 @@ ferma.
 
 ### 5.4 Follower
 
-I **Follower** misurano il pubblico raggiunto dall'automazione Social. Partono
-da zero e diventano visibili nella barra superiore quando si sblocca Social.
+I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
+sblocca Social, partono dal numero di iscritti attivi e diventano visibili nella
+barra superiore.
 Non sono spendibili: aumentano le probabilità di ottenere prove e contatti e il
 ricavo pubblicitario per iscritto.
 
@@ -865,7 +866,8 @@ Regole:
   negli anni successivi; la riga dell'atleta nella schermata Iscritti mostra
   `Eseguito Corso Agonisti | Potenziale totale +X`, senza creare notifiche o
   messaggi nell'inbox;
-- il corso costa il 25% del costo base di €5.000. Arena Tecnica al livello 2
+- il corso ha un costo base manuale di €1.000 e, quando viene svolto sotto
+  Istruttore, costa il 25% del costo base (€250). Arena Tecnica al livello 2
   porta la sua durata base da 15 a 10 secondi; al livello 3 lo rende gratuito.
   Anche PagoSport al livello 3 azzera il costo;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale

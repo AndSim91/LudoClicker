@@ -304,6 +304,11 @@
   flex: 0 1 auto;
 }
 
+.collaborator-activity-title > strong:only-child {
+  text-overflow: clip;
+  white-space: normal;
+}
+
 .collaborator-activity-title > small {
   overflow: hidden;
   min-width: 0;

@@ -7,7 +7,7 @@ import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
 import { createSecretLegendaryContact } from "./secretLegendaryRoster";
 import { addMessage } from "./stateUpdates";
-import { hasSocialMemberRequirement } from "./unlocks";
+import { unlockSocialIfEligible } from "./unlocks";
 import type {
   ChroniclesChallenge,
   GameState,
@@ -175,7 +175,6 @@ function enrollLegendary(
       upgrades: true,
       collaborators: true,
       forms: true,
-      social: state.unlocks.social || hasSocialMemberRequirement(activeMembers),
     },
     statistics: {
       ...state.statistics,
@@ -201,7 +200,7 @@ function enrollLegendary(
       },
     },
   };
-  return recruitCollaborator(enrolled, contact, now);
+  return recruitCollaborator(unlockSocialIfEligible(enrolled), contact, now);
 }
 
 export function playChroniclesHand(

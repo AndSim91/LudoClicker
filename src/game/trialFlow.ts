@@ -10,7 +10,7 @@ import {
   addMessage,
 } from "./stateUpdates";
 import type { GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
-import { hasSocialMemberRequirement } from "./unlocks";
+import { hasSocialMemberRequirement, unlockSocialIfEligible } from "./unlocks";
 import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
 
 export function getLegendaryEnrollmentChance(
@@ -123,7 +123,7 @@ export function resolveTrial(
   const nextActiveMembers = nextState.school.activeMembers + 1;
   const socialUnlockedNow = !state.unlocks.social &&
     hasSocialMemberRequirement(nextActiveMembers);
-  nextState = {
+  nextState = unlockSocialIfEligible({
     ...nextState,
     school: {
       ...nextState.school,
@@ -138,10 +138,9 @@ export function resolveTrial(
     unlocks: {
       ...nextState.unlocks,
       upgrades: true,
-      social: hasSocialMemberRequirement(nextActiveMembers),
       forms: true,
     },
-  };
+  });
   nextState = addMessage(
     nextState,
     now,
