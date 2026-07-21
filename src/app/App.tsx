@@ -32,6 +32,7 @@ import {
   selectContactsAwaitingEmail,
   selectVisibleInboxMessages,
 } from "../game/selectors";
+import { APP_VERSION } from "../shared/appVersion";
 import { useAppPreferences } from "./useAppPreferences";
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
@@ -333,7 +334,7 @@ export function App() {
         )}
         <DayPanel state={state} />
       </div>
-        <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Profilo: {state.profile.displayName}</span><span>Connesso localmente</span><b title={state.school.motto || undefined}>{state.school.name}</b></footer>
+        <footer className="status-bar"><span>Tutti i messaggi sono aggiornati.</span><span>Profilo: {state.profile.displayName}</span><span>Connesso localmente</span><b title={state.school.motto || undefined}>{state.school.name} · v{APP_VERSION}</b></footer>
       </div>
       {tutorial.activeScene && tutorial.activeStep ? (
         <TutorialLayer

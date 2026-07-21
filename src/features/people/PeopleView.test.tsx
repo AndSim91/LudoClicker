@@ -1,10 +1,13 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { FormBranch, FormId } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 describe("PeopleView", () => {
   it("lets users add and remove an enrolled athlete from favorites", () => {
@@ -629,6 +632,49 @@ describe("PeopleView", () => {
     expect(screen.getAllByRole("progressbar")).toHaveLength(10);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(5);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
+  });
+
+  it("refreshes active equipment progress every 250 ms between engine ticks", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_500);
+    const initial = createInitialState(1_000);
+    const equipmentCollaborator = {
+      id: "collaborator-equipment",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Attrezzatura",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "equipment" as const,
+      rarity: "rare" as const,
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [equipmentCollaborator],
+          equipment: { ...initial.equipment, wear: 10 },
+          automation: {
+            ...initial.automation,
+            equipmentBuffer: 0.2,
+            lastProcessedAt: 1_000,
+          },
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const progress = screen.getByRole("progressbar", {
+      name: "Progresso riduzione usura",
+    });
+    expect(progress).toHaveAttribute("aria-valuenow", "25");
+
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(progress).toHaveAttribute("aria-valuenow", "27.5");
   });
 
   it("shows the Corso Agonisti total in the athlete row instead of the inbox", () => {

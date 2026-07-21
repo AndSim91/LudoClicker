@@ -221,13 +221,12 @@ singolo allievo**. Corso X e Corso Y concorrono al conteggio; il Corso Agonisti
 è escluso perché potenzia Arena e Stile ma non assegna un badge permanente. Ogni
 badge permanente può essere registrato una sola volta sullo stesso allievo: un
 duplicato rappresenta uno stato non valido e non viene corretto nel calcolo
-economico. Un mese dura
-**60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre; dopo
-Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra
-superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e
-gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un
-evento positivo di passaparola può produrre più potenziali iscritti; un litigio
-o un mancato rinnovo può ridurre il totale.
+economico. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio
+a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile
+nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a
+Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra
+Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali
+iscritti; un litigio o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -286,9 +285,8 @@ ferma.
 
 I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
 sblocca Social, partono dal numero di iscritti attivi e diventano visibili nella
-barra superiore.
-Non sono spendibili: aumentano le probabilità di ottenere prove e contatti e il
-ricavo pubblicitario per iscritto.
+barra superiore. Non sono spendibili: aumentano le probabilità di ottenere prove
+e contatti e il ricavo pubblicitario per iscritto.
 
 ### 5.5 Email
 
@@ -700,10 +698,9 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - ogni profilo Leggendario è unico: finché esiste già come contatto attivo,
   prova in palestra, iscritto o collaboratore non può essere generato una
   seconda volta;
-- dopo una prova non convertita, il profilo resta occupato finché l'esito
-  **Non iscritto** è visibile in **La mia giornata**; quando la notifica scade,
-  torna disponibile per nuovi contatti, prove, premi dei tornei e strumenti
-  Admin;
+- dopo una prova non convertita, il profilo resta occupato finché l'esito **Non
+  iscritto** è visibile in **La mia giornata**; quando la notifica scade, torna
+  disponibile per nuovi contatti, prove, premi dei tornei e strumenti Admin;
 - se nessun profilo del pool è disponibile, qualsiasi nuova assegnazione
   Leggendaria genera invece un Ultra Raro dello stesso tipo di premio;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della
@@ -718,7 +715,8 @@ La pagina **Admin**, disponibile soltanto in sviluppo, può avviare direttamente
 la prova in palestra di un profilo Leggendario scelto casualmente tra quelli
 ancora disponibili. Il comando non iscrive il personaggio: crea una prova della
 durata ordinaria, che usa le stesse probabilità di conversione, le stesse regole
-di unicità e lo stesso reclutamento automatico dei Leggendari del flusso normale.
+di unicità e lo stesso reclutamento automatico dei Leggendari del flusso
+normale.
 
 ### 9.3 Ruoli
 
@@ -866,15 +864,15 @@ Regole:
   disabilitato separatamente;
 - l'automazione propone il Corso Agonisti a un atleta vulnerabile che non ha
   ancora iniziato una formazione nell'anno quando ha completato il proprio
-  percorso oppure nessun Istruttore automatico possiede le qualifiche per le
-  sue prossime Forme;
+  percorso oppure nessun Istruttore automatico possiede le qualifiche per le sue
+  prossime Forme;
 - iniziare il Corso Agonisti consuma un solo slot formativo annuale e protegge
   subito l'atleta dal controllo degli abbandoni. Lo stesso atleta non può
   iniziarlo più di una volta nello stesso periodo luglio–giugno, anche quando i
   potenziamenti gli concedono altri slot;
-- completare il Corso Agonisti aumenta permanentemente di **+1 Arena** e
-  **+1 Stile** i valori base dell'atleta. Il bonus si accumula senza limite
-  negli anni successivi; la riga dell'atleta nella schermata Iscritti mostra
+- completare il Corso Agonisti aumenta permanentemente di **+1 Arena** e **+1
+  Stile** i valori base dell'atleta. Il bonus si accumula senza limite negli
+  anni successivi; la riga dell'atleta nella schermata Iscritti mostra
   `Eseguito Corso Agonisti | Potenziale totale +X`, senza creare notifiche o
   messaggi nell'inbox;
 - il corso ha un costo base manuale di €1.000 e, quando viene svolto sotto
@@ -883,8 +881,8 @@ Regole:
   Anche PagoSport al livello 3 azzera il costo;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
   decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
-  poi la prossima formazione secondo la progressione dalla Forma 1 verso
-  l'alto, includendo il Corso Agonisti come fallback, e infine il contatto con
+  poi la prossima formazione secondo la progressione dalla Forma 1 verso l'alto,
+  includendo il Corso Agonisti come fallback, e infine il contatto con
   `acquiredAt` più recente; a parità completa conserva l'ordine originale;
 - disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
   terminare le lezioni già iniziate, ma non ne avvia altre;
@@ -897,12 +895,12 @@ Regole:
   narrativi già avvenuti restano nello storico. I Leggendari conservano Forme,
   attestati, Maestria, Arena, Stile, esperienza nei tornei, Corsi Agonisti e
   anzianità; perdono soltanto incarico e automazione. I Leggendari ordinari
-  tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti
-  devono essere nuovamente sconfitti nel rispettivo torneo;
+  tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
+  essere nuovamente sconfitti nel rispettivo torneo;
 - acquistare il livello 1 di Arena Tecnica sblocca subito **Polivalenza
   didattica**; i livelli 2 e 3 di Arena restano acquistabili in parallelo e non
-  bloccano il resto del ramo. Polivalenza didattica ha due livelli e permette
-  di apprendere fino a tutti e tre i rami d'arma;
+  bloccano il resto del ramo. Polivalenza didattica ha due livelli e permette di
+  apprendere fino a tutti e tre i rami d'arma;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
   allievi contemporanei di ogni Istruttore;
 - **Doppio Corso** è un potenziamento unico del ramo Istruttori e concede a ogni
@@ -916,9 +914,9 @@ Regole:
   cambiare l'incarico operativo; il livello 3 rende gratuiti tutte le Forme,
   tutti i corsi, tutti gli attestati e ogni altro costo di istruttoraggio;
 - dopo Arena Tecnica, il ramo è lineare: ogni potenziamento deve essere
-  completato prima di accedere al successivo. L'ordine è **Polivalenza
-  didattica → Istruttore Promisquo → Doppio Corso → Istruttore Tiamat →
-  PagoSport → Tocco DiGilo**;
+  completato prima di accedere al successivo. L'ordine è **Polivalenza didattica
+  → Istruttore Promisquo → Doppio Corso → Istruttore Tiamat → PagoSport → Tocco
+  DiGilo**;
 - **Tocco DiGilo** è l'ultimo potenziamento del ramo Istruttori: costa
   **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore
   insegna le Forme agli allievi;
@@ -1043,10 +1041,10 @@ probabilità di una prova è `0,01% + Follower / 10000` punti percentuali e quel
 indipendente di un contatto è `0,1% + Follower / 5000` punti percentuali. Le
 probabilità sono limitate al 100%. I gradi di Maestria velocizzano i cicli del
 5%, 10%, 15% e infine 25% al grado Maestro. Le persone generate dai Social non
-possono essere Comuni: sono sempre Rare, Ultra
-Rare o Leggendarie. Produttività, Forme, Maestria e potenziamenti accelerano il
-completamento dei cicli. Le campagne social manuali continuano a consumare
-Euro, usano piattaforme inventate e possono diventare casualmente virali.
+possono essere Comuni: sono sempre Rare, Ultra Rare o Leggendarie. Produttività,
+Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le
+campagne social manuali continuano a consumare Euro, usano piattaforme inventate
+e possono diventare casualmente virali.
 
 | Potenziamento                | Effetto indicativo            |
 | ---------------------------- | ----------------------------- |
@@ -1082,7 +1080,7 @@ insieme agli iscritti liberi.
 | Turni dei collaboratori  | maggiore efficienza assegnazioni     |
 | Lista di controllo       | riduce imprevisti                    |
 | Modulo di iscrizione     | accredito e registrazione più rapidi |
-| Segreteria dell'Ordine   | automatizza notifiche e quote        |
+| A.N.D.E.R.               | automatizza notifiche e quote        |
 | Coordinamento multi-sede | bonus di prestigio                   |
 
 ### 10.8 Costi
@@ -1302,25 +1300,28 @@ Presentate come report di campagna:
 
 ## 13. Tutorial narrativo e interattivo
 
-Il tutorial combina le email ricevute con scene di dialogo attivate da condizioni
-di gioco. Le email restano parte del mondo narrativo; le scene servono a fermare
-il ritmo, spiegare il passaggio appena raggiunto e guidare l'azione successiva.
+Il tutorial combina le email ricevute con scene di dialogo attivate da
+condizioni di gioco. Le email restano parte del mondo narrativo; le scene
+servono a fermare il ritmo, spiegare il passaggio appena raggiunto e guidare
+l'azione successiva.
 
 Ogni scena è composta da due tipi di passaggio:
 
-- **dialogo**: mostra testi lineari senza scelte, mette in pausa il tempo di gioco
-  e permette soltanto di continuare o usare **Salta** nell'angolo della pagina;
+- **dialogo**: mostra testi lineari senza scelte, mette in pausa il tempo di
+  gioco e permette soltanto di continuare o usare **Salta** nell'angolo della
+  pagina;
 - **obiettivo guidato**: lascia interattive solo le aree necessarie e avanza
   automaticamente quando rileva l'azione richiesta. Ogni scena dichiara se il
   tempo debba restare fermo oppure ripartire durante l'obiettivo.
 
-Ogni passaggio dichiara quali aree dell'interfaccia restano a fuoco, quali vengono
-oscurate e sfocate e quali possono essere nascoste. Il completamento o il salto di
-una scena viene salvato, così la stessa scena non si ripete dopo il caricamento.
-Quando un obiettivo richiede di agire su un controllo preciso, quel controllo deve
-essere evidenziato direttamente con contrasto e pulsazione: mantenere visibile la
-sola sezione che lo contiene non è considerato sufficiente. Gli obiettivi di attesa
-evidenziano invece la scheda o il pannello nel quale osservare l'avanzamento.
+Ogni passaggio dichiara quali aree dell'interfaccia restano a fuoco, quali
+vengono oscurate e sfocate e quali possono essere nascoste. Il completamento o
+il salto di una scena viene salvato, così la stessa scena non si ripete dopo il
+caricamento. Quando un obiettivo richiede di agire su un controllo preciso, quel
+controllo deve essere evidenziato direttamente con contrasto e pulsazione:
+mantenere visibile la sola sezione che lo contiene non è considerato
+sufficiente. Gli obiettivi di attesa evidenziano invece la scheda o il pannello
+nel quale osservare l'avanzamento.
 
 ### Sequenza iniziale
 
@@ -1340,29 +1341,30 @@ evidenziano invece la scheda o il pannello nel quale osservare l'avanzamento.
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
    che le attività possono usurare o danneggiare le spade e richiede di avviare
    lo **Sparring al parco** gratuito. Soltanto in questo passaggio lo sparring
-   dura 3 secondi e garantisce almeno un nuovo contatto. La scena attende la fine
-   dell'evento e mette in evidenza il contatore **Contatti** nella barra superiore
-   mentre spiega l'aumento.
+   dura 3 secondi e garantisce almeno un nuovo contatto. La scena attende la
+   fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
+   superiore mentre spiega l'aumento.
 
 5. **Nuova lezione prenotata** Dopo la spiegazione sull'aumento dei contatti,
-   **Continua** riporta automaticamente il giocatore in **Posta**. Una delle email
-   della campagna iniziale garantisce una prova soltanto in questo momento; quando
-   la prova compare in **La mia giornata** con il conto alla rovescia, un dialogo
-   introduce il passaggio email → prova in palestra → possibile iscrizione. Il
-   pannello resta leggibile sotto il velo del tutorial, mentre l'intera riga della
-   prova viene portata in primo piano ed evidenziata. La prima sequenza di tutorial
-   termina premendo **Continua** in questo dialogo.
+   **Continua** riporta automaticamente il giocatore in **Posta**. Una delle
+   email della campagna iniziale garantisce una prova soltanto in questo
+   momento; quando la prova compare in **La mia giornata** con il conto alla
+   rovescia, un dialogo introduce il passaggio email → prova in palestra →
+   possibile iscrizione. Il pannello resta leggibile sotto il velo del tutorial,
+   mentre l'intera riga della prova viene portata in primo piano ed evidenziata.
+   La prima sequenza di tutorial termina premendo **Continua** in questo
+   dialogo.
 
 6. **Primo bonus e quota associativa** Introduce il bonus immediato di €20, la
    quota mensile base di €40, il bonus di €5 per ogni Forma o corso permanente e
    il finanziamento dei potenziamenti.
 
 7. **Il primo Leggendario** Quando Andrea Simonazzi diventa il nono contatto e
-   la sua email entra in scrittura, il gioco torna in **Posta**, mette in evidenza
-   la zona superiore della mail con il destinatario e spiega le quattro rarità.
-   Da questo momento possono apparire contatti Rari, Ultra Rari e Leggendari. Il
-   dialogo ricorda che i Leggendari sono profili unici e si chiude con
-   **“Collezionali tutti!”**.
+   la sua email entra in scrittura, il gioco torna in **Posta**, mette in
+   evidenza la zona superiore della mail con il destinatario e spiega le quattro
+   rarità. Da questo momento possono apparire contatti Rari, Ultra Rari e
+   Leggendari. Il dialogo ricorda che i Leggendari sono profili unici e si
+   chiude con **“Collezionali tutti!”**.
 
 8. **Una mano in più** Il primo Ultra Raro che completa il Corso Y introduce
    l'automazione.

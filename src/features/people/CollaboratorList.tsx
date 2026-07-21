@@ -11,6 +11,7 @@ import {
 } from "../../content/mastery";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
+import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
 import type {
@@ -100,8 +101,13 @@ export function CollaboratorList({
   const hasTimedAutomation = state.acquisitionEvents.some((event) =>
     event.status === "running" && event.collaboratorId !== undefined
   );
+  const hasActiveEquipmentAutomation = state.collaborators.some(
+    (collaborator) => collaborator.assignment === "equipment",
+  ) && (
+    state.equipment.wear > 0 || getEffectiveDamagedSwords(state.equipment) > 0
+  );
   const now = useGameTime(
-    hasTimedAutomation,
+    hasTimedAutomation || hasActiveEquipmentAutomation,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
   const filteredCollaborators = useMemo(() => {

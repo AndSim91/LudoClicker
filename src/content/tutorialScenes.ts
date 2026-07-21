@@ -100,31 +100,31 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "empty-school",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
-        title: "Il primo mattino",
+        speaker: "",
+        title: "Il primo giorno da Preside",
         body: [
-          "L'Ordine delle Onde ha una sala, sei spade e un problema: il corso è ancora vuoto.",
-          "Cinque persone hanno lasciato il loro contatto dopo una dimostrazione. Sono il primo filo da seguire.",
+          "Congratulazioni per aver accettato il posto da Preside dell'Ordine delle Onde di Genova!",
+          "Io sono A.N.D.E.R., il tuo assistente AI. Ti aiuterò a far crescere la tua prima scuola di LudoSport!",
         ],
         focusRegions: ["title"],
       },
       {
         id: "draft-ready",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
-        title: "Una bozza già pronta",
+        speaker: "A.N.D.E.R.",
+        title: "Una mail al giorno...",
         body: [
-          "Il primo invito è già aperto nella Posta. Per ora non devi comporre il testo: ogni pressione di un tasto fa avanzare la bozza.",
-          "Quando sarà completa, il messaggio verrà inviato automaticamente e la segreteria aspetterà una risposta.",
+          "Ho predisposto qualche contatto email a cui scrivere. Li ho trovati scrivendo lettere a caso fino a notte fonda, dovresti ringraziarmi.",
+          "Ora scrivi una bella mail pubblicitaria da spedire, il messaggio verrà inviato automaticamente poi dovremo solo attendere una risposta...",
         ],
         focusRegions: ["main"],
       },
       {
         id: "write-first-email",
         kind: "objective",
-        title: "Invia il primo invito",
+        title: "Invia la tua prima mail",
         body: [
-          "Premi un tasto qualsiasi finché la bozza è completa. Durante questo passaggio il tempo di gioco resta in pausa.",
+          "Premi un tasto qualsiasi fino a che la bozza non è completa. Non preoccuparti degli errori di battitura: Siamo solo agli inizi.",
         ],
         focusRegions: ["main", "composer-body"],
         isComplete: ({ state }) => state.emails.some((email) => email.status === "sending"),
@@ -138,9 +138,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "open-events",
         kind: "objective",
-        title: "Apri Eventi",
+        title: "Apri la pagina Eventi",
         body: [
-          "La prima missione è completata. Apri Eventi dalla barra delle applicazioni per organizzare nuove attività esterne.",
+          "La prima missione è completata. Ora apri la pagina Eventi dalla barra delle applicazioni per organizzare nuove attività per la scuola.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "events"
@@ -151,20 +151,20 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "events-and-equipment",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
+        speaker: "A.N.D.E.R.",
         title: "Eventi e attrezzatura",
         body: [
-          "Gli Eventi portano la scuola fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai ottenere nuovi contatti da invitare.",
-          "Ogni attività impegna iscritti e spade. L'attrezzatura accumula usura e può danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla.",
+          "Gli Eventi portano il nostro sport fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra nella speranza che ci siano persone interessate a provare il nostro sport.",
+          "Ogni attività impegna iscritti e spade. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla!",
         ],
         focusRegions: ["main"],
       },
       {
         id: "start-free-sparring",
         kind: "objective",
-        title: "Avvia lo sparring gratuito",
+        title: "Avvia l'evento di sparring gratuito",
         body: [
-          "Trova “Sparring al parco” e premi “Partecipa gratis”. Per questa dimostrazione guidata durerà soltanto 3 secondi.",
+          "Trova “Sparring al parco” e premi “Partecipa gratis”. Poi attendi il suo completamento.",
         ],
         focusRegions: ["main", "park-sparring-action"],
         isComplete: ({ state }) => state.acquisitionEvents.some(
@@ -176,7 +176,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Attendi la fine dello sparring",
         body: [
-          "Lascia scorrere i 3 secondi dell'attività. Il tempo di gioco resta attivo durante lo sparring.",
+          "Quante cose possiamo fare in tre secondi? ...",
+          "Scemo chi legge!",
         ],
         focusRegions: ["main", "park-sparring-event"],
         isComplete: ({ state }) => state.acquisitionEvents.some(
@@ -186,15 +187,15 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "contacts-increased",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
-        title: "I contatti sono aumentati",
+        speaker: "A.N.D.E.R.",
+        title: "Abbiamo dei contatti!",
         body: ({ state }) => {
           const contactReward = state.acquisitionEvents.find(
             (event) => event.tutorialSceneId === "first-event",
           )?.contactReward ?? GAME_CONFIG.tutorialSparringMinimumContacts;
           return [
-            `Lo sparring è finito: +${contactReward} ${contactReward === 1 ? "nuovo contatto" : "nuovi contatti"} per la scuola. Gli Eventi servono anche ad ampliare il pubblico che potrai invitare.`,
-            "I contatti da soli non sono ancora iscritti. Le email possono convertirli prima in una prova in palestra e, se la prova va bene, in un'iscrizione.",
+            `Lo sparring è finito: +${contactReward} ${contactReward === 1 ? "nuovo contatto" : "nuovi contatti"} per la scuola! Gli Eventi servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
+            "Non si tratta ancora di iscritti veri e propri, dovremo inviare le email per invitarli in palestra e, se la prova va bene, la scuola avrà una nuova recluta!",
           ];
         },
         focusRegions: ["title", "contacts-counter"],
@@ -221,11 +222,13 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "trial-booked",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
-        title: "Le email hanno funzionato",
+        speaker: "A.N.D.E.R.",
+        title: "Lezioni di prova",
         body: [
-          "Una delle email inviate a inizio partita ha ricevuto risposta: la prima prova in palestra è ora prenotata.",
-          "La trovi in “La mia giornata” con il conto alla rovescia. Alla fine saprai se il contatto si iscriverà alla scuola.",
+          "Come puoi vedere, una delle tue precedenti email ha avuto effetto: la prima prova in palestra è ora prenotata!",
+          "La sezione “La mia giornata” è molto utile per tenere traccia di tutti gli avvenimenti dell'Ordine delle Onde, tra cui scoprire se la prova avrà successo o meno.",
+          "Ora non ti resta che continuare a mandare mail e fare eventi fino a che qualcuno non si iscriverà...",
+          "Conto su di te!"
         ],
         focusRegions: ["day-panel", "first-trial-row"],
       },
@@ -244,12 +247,13 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "legendary-rarities",
         kind: "dialog",
-        speaker: "Segreteria dell'Ordine",
-        title: "Il primo Leggendario",
+        speaker: "A.N.D.E.R.",
+        title: "Un Leggendario è per sempre",
         body: [
-          "Finora hai incontrato soltanto atleti Comuni. Ogni possibile iscritto possiede però una rarità: Comune, Raro, Ultra Raro o Leggendario.",
-          "Andrea Simonazzi è il primo atleta Leggendario della partita. Da questo momento potranno comparire tutte le rarità, ognuna con probabilità e caratteristiche diverse.",
-          "I Leggendari sono profili unici e, quando si iscrivono, diventano subito Collaboratori delle Onde. Collezionali tutti!",
+          "Finora hai incontrato soltanto persone comuni. Ogni possibile iscritto possiede però una rarità possibile: Comune, Raro, Ultra Raro o Leggendario.",
+          "Finalmente hai incontrato il tuo primo atleta Leggendario della partita e col tempo potrai trovarli tutti, ognuno con effetti e caratteristiche diverse.",
+          "I Leggendari sono profili unici e, quando si iscrivono, diventano subito dei Collaboratori delle Onde per darti una mano nella gestione della scuola.",
+          "Collezionali tutti!",
         ],
         focusRegions: ["main", "composer-header"],
         navigateTo: "mail",
@@ -264,11 +268,12 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "first-fee",
         kind: "dialog",
-        speaker: "Tesoreria dell'Ordine",
-        title: "La prima quota",
+        speaker: "A.N.D.E.R.",
+        title: "Habemus inscriptum!",
         body: [
-          `Il primo iscritto porta subito ${GAME_CONFIG.enrollmentBonus} € e poi una quota base di ${GAME_CONFIG.monthlyMemberFee} € ogni mese di gioco.`,
-          `Ogni Forma o corso permanente conosciuto aggiunge ${GAME_CONFIG.monthlyMemberFormBonus} € alla quota mensile. È così che la scuola finanzia i suoi miglioramenti.`,
+          `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nella nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
+          `Ogni Forma o corso conosciuti dal singolo iscritto aggiunge ${GAME_CONFIG.monthlyMemberFormBonus}€ alla quota mensile. È così che la scuola finanzia i suoi miglioramenti.`,
+          `Pensavi che solo la tua Black Card fosse costosa?`,
         ],
         focusRegions: ["title"],
       },
@@ -288,11 +293,11 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "upgrade-tree",
         kind: "dialog",
-        speaker: "Tesoreria dell'Ordine",
-        title: "Investire per crescere",
+        speaker: "A.N.D.E.R.",
+        title: "Sviluppare l'Ordine delle Onde",
         body: [
-          "Qui puoi spendere la disponibilità della scuola per migliorare scrittura, prove, eventi e automazioni.",
-          "Gli Upgrade si sbloccano a rami: non serve comprare tutto subito. Scegli ciò che sostiene il prossimo obiettivo.",
+          "Nella pagine Upgrade puoi spendere i fondi della scuola per migliorare scrittura, prove, eventi e automazioni.",
+          "Gli Upgrade si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
         ],
         focusRegions: ["main"],
       },

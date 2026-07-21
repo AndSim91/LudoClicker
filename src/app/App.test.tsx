@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { afterEach, describe, expect, it } from "vitest";
 import { createInitialState } from "../game/engine";
 import { saveGame } from "../game/save";
+import { APP_VERSION } from "../shared/appVersion";
 import { App } from "./App";
 
 afterEach(() => {
@@ -22,6 +23,13 @@ describe("App profile and navigation", () => {
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
     expect(screen.getByText(/Andrea Ungaro/)).toBeVisible();
     expect(screen.getByRole("dialog", { name: "Il primo mattino" })).toBeVisible();
+  });
+
+  it("shows the generated application version in the status bar", () => {
+    saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
+    render(<App />);
+
+    expect(screen.getByRole("contentinfo")).toHaveTextContent(`v${APP_VERSION}`);
   });
 
   it("ends the first tutorial on sending and starts the three-email mission paused at zero", async () => {

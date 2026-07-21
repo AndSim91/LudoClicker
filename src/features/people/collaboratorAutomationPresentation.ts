@@ -68,6 +68,32 @@ function getAutomationCycleDurationMs(
   return undefined;
 }
 
+function getProjectedEquipmentProgress({
+  buffer,
+  requiredWork,
+  cycleDurationMs,
+  lastProcessedAt,
+  now,
+}: {
+  buffer: number;
+  requiredWork: number;
+  cycleDurationMs: number | undefined;
+  lastProcessedAt: number;
+  now: number;
+}): number {
+  const elapsedSinceEngineTick = Math.min(
+    GAME_CONFIG.gameTickMs,
+    Math.max(0, now - lastProcessedAt),
+  );
+  const projectedWork = cycleDurationMs
+    ? elapsedSinceEngineTick / cycleDurationMs
+    : 0;
+  return Math.min(
+    100,
+    Math.max(0, ((buffer / requiredWork) + projectedWork) * 100),
+  );
+}
+
 export function getCollaboratorAutomationPresentation({
   state,
   collaboratorId,
@@ -160,14 +186,15 @@ export function getCollaboratorAutomationPresentation({
       return { title: "Usura attrezzatura: 0%", detail: "In attesa" };
     }
     const isRepairingSword = state.equipment.wear <= 0 && damagedSwords > 0;
-    const progress = Math.min(
-      100,
-      Math.floor(
-        (state.automation.equipmentBuffer /
-          (isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1)) *
-          100,
-      ),
-    );
+    const requiredWork = isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1;
+    const durationMs = getAutomationCycleDurationMs(state, "equipment", requiredWork);
+    const progress = getProjectedEquipmentProgress({
+      buffer: state.automation.equipmentBuffer,
+      requiredWork,
+      cycleDurationMs: durationMs,
+      lastProcessedAt: state.automation.lastProcessedAt,
+      now,
+    });
     return {
       title: isRepairingSword
         ? `Spade danneggiate: ${damagedSwords}`
@@ -177,11 +204,7 @@ export function getCollaboratorAutomationPresentation({
       progressLabel: isRepairingSword
         ? "Progresso riparazione spada"
         : "Progresso riduzione usura",
-      durationMs: getAutomationCycleDurationMs(
-        state,
-        "equipment",
-        isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1,
-      ),
+      durationMs,
     };
   }
 
