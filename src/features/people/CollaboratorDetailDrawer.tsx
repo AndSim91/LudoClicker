@@ -111,7 +111,7 @@ export function CollaboratorDetailDrawer({
               <strong>—</strong>
             ) : (
               <>
-                <strong>{automation.progress}%</strong>
+                <strong>{Math.round(automation.progress)}%</strong>
                 <ProgressBar
                   className="collaborator-progress-bar"
                   label={automation.progressLabel ?? automation.title}

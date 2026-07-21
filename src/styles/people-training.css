@@ -285,6 +285,5 @@
   height: 100%;
   border-radius: inherit;
   background: var(--blue-600);
-  transition: width 300ms ease;
 }
 

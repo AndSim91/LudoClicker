@@ -68,7 +68,7 @@ export function EnrollmentCancellationDialog({
             Vuoi annullare definitivamente l&apos;iscrizione di <strong>{displayName}</strong>?
           </p>
           <p className="member-cancellation-warning">
-            L&apos;azione non può essere annullata e non prevede alcun rimborso.
+            L&apos;azione non può essere annullata
           </p>
         </div>
 

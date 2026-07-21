@@ -30,11 +30,11 @@ type AthleteProgress = Pick<Contact, "lastFormTrainingYear"> |
   Pick<Collaborator, "lastFormTrainingYear">;
 
 export const ATHLETE_IMMUNITY_MESSAGES: Record<AthleteImmunityReason, string> = {
-  legendary: "Non soggetto ad abbandono",
-  "tournament-qualification": "Qualificato al prossimo torneo · immune",
-  "recent-enrollment": "Nuova iscrizione · immune fino a Settembre",
-  collaborator: "Collaboratore · immune al rinnovo annuale",
-  "gym-course": "Corso in palestra · immune al rinnovo annuale",
+  legendary: "",
+  "tournament-qualification": "Qualificato al prossimo torneo",
+  "recent-enrollment": "Nuova iscrizione",
+  collaborator: "Collaboratore",
+  "gym-course": "Corso in palestra",
 };
 
 function hasRecentEnrollmentImmunity(enrolledMonth: number, currentMonth: number): boolean {

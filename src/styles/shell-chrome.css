@@ -86,7 +86,6 @@
   display: block;
   height: 100%;
   background: #83c9ff;
-  transition: width 250ms linear;
 }
 
 .title-menu {

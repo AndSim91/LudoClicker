@@ -71,7 +71,7 @@ function getTrainingProgress(
   const duration = training.completesAt - training.startedAt;
   return duration <= 0
     ? 100
-    : Math.min(100, Math.max(0, Math.round(((now - training.startedAt) / duration) * 100)));
+    : Math.min(100, Math.max(0, ((now - training.startedAt) / duration) * 100));
 }
 
 function getDisplayedTrainingCost(
@@ -120,7 +120,7 @@ function InstructorTeachingSummary({
                 {definition?.branch ? ` · ${definition.branch}` : ""}
               </small>
             </span>
-            <strong className="instructor-student-progress">{progress}%</strong>
+            <strong className="instructor-student-progress">{Math.round(progress)}%</strong>
             <ProgressBar
               className="instructor-student-progress-bar"
               label={`Formazione di ${entry.displayName}`}
@@ -176,7 +176,7 @@ export function InstructorCompactActivity({
               <small>{getTrainingCourseTitle(entry.training.formId)}</small>
             </span>
             <span className="collaborator-activity-progress">
-              <strong>{progress}%</strong>
+              <strong>{Math.round(progress)}%</strong>
               <ProgressBar
                 className="collaborator-progress-bar"
                 label={`Formazione di ${entry.displayName}`}
@@ -357,7 +357,7 @@ export function TrainingControl({
           {instructor ? ` · con ${instructor.displayName}` : ""}
           {student.training.includesInstructorCertification ? " · attestato incluso" : ""}
         </span>
-        <strong>{progress}%</strong>
+        <strong>{Math.round(progress)}%</strong>
         <ProgressBar
           className="training-progress-bar"
           label={`Formazione di ${displayName}`}

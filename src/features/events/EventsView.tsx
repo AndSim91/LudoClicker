@@ -37,7 +37,7 @@ function equipmentCondition(wear: number, damagedSwords: number) {
 function getEventProgress(event: AcquisitionEvent, now: number) {
   const duration = event.resolvesAt - event.startedAt;
   if (duration <= 0) return 100;
-  return Math.min(100, Math.max(0, Math.round(((now - event.startedAt) / duration) * 100)));
+  return Math.min(100, Math.max(0, ((now - event.startedAt) / duration) * 100));
 }
 
 const EVENT_HISTORY_PAGE_SIZE = 100;
@@ -180,7 +180,7 @@ export function EventsView({
                 <small className="event-potential">Potenzialità: {definition.potential}</small>
                 {matching ? (
                   <div className="event-progress-block">
-                    <div className="event-progress-label"><span>Attività in corso</span><strong>{remainingSeconds} s rimanenti · {progress}%</strong></div>
+                    <div className="event-progress-label"><span>Attività in corso</span><strong>{remainingSeconds} s rimanenti · {Math.round(progress)}%</strong></div>
                     <ProgressBar
                       className="event-progress"
                       label={`Avanzamento ${definition.title}`}

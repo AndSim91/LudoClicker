@@ -42,7 +42,7 @@ export function TitleBar({
   const currentSchoolYear = getSchoolYear(currentMonth);
   const monthProgress = Math.min(
     100,
-    Math.max(0, Math.round((1 - (nextMonthAt - now) / GAME_CONFIG.gameMonthMs) * 100)),
+    Math.max(0, (1 - (nextMonthAt - now) / GAME_CONFIG.gameMonthMs) * 100),
   );
 
   return (

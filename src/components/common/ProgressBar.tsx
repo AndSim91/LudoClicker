@@ -26,11 +26,21 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const safeMax = Math.max(1, max);
   const boundedValue = Math.min(safeMax, Math.max(0, value));
+  const accessibleValue = Math.round(boundedValue * 1_000) / 1_000;
   const percent = (boundedValue / safeMax) * 100;
   const indeterminate = durationMs !== undefined &&
     durationMs < GAME_CONFIG.progressUpdateIntervalMs;
+  const transitionIntervalMs = durationMs === undefined
+    ? GAME_CONFIG.gameTickMs
+    : GAME_CONFIG.progressUpdateIntervalMs;
   const progressStyle = variant === "circular"
     ? ({ "--progress-value": `${percent}%` } as CSSProperties)
+    : undefined;
+  const barStyle = variant === "linear" && !indeterminate
+    ? ({
+        width: `${percent}%`,
+        "--progress-transition-duration": `${transitionIntervalMs}ms`,
+      } as CSSProperties)
     : undefined;
   const classes = [
     "progress-bar",
@@ -46,14 +56,14 @@ export function ProgressBar({
       aria-hidden={ariaHidden || undefined}
       aria-valuemin={ariaHidden ? undefined : 0}
       aria-valuemax={ariaHidden ? undefined : safeMax}
-      aria-valuenow={ariaHidden || indeterminate ? undefined : boundedValue}
+      aria-valuenow={ariaHidden || indeterminate ? undefined : accessibleValue}
       aria-valuetext={ariaHidden
         ? undefined
         : indeterminate ? "Avanzamento in corso" : valueText}
       title={title}
       style={progressStyle}
     >
-      <span style={variant === "linear" && !indeterminate ? { width: `${percent}%` } : undefined} />
+      <span style={barStyle} />
     </span>
   );
 }

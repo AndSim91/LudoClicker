@@ -1,3 +1,7 @@
+.progress-bar-linear:not(.is-indeterminate) > span {
+  transition: width var(--progress-transition-duration, 1s) linear;
+}
+
 .progress-bar-linear.is-indeterminate > span {
   width: 100%;
   background:
@@ -36,6 +40,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .progress-bar-linear:not(.is-indeterminate) > span {
+    transition: none;
+  }
+
   .progress-bar-linear.is-indeterminate > span {
     animation-duration: 1.8s;
   }

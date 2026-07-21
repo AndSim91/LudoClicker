@@ -34,7 +34,7 @@ function getTimedProgress(startedAt: number, completesAt: number, now: number): 
   const duration = completesAt - startedAt;
   return duration <= 0
     ? 100
-    : Math.min(100, Math.max(0, Math.round(((now - startedAt) / duration) * 100)));
+    : Math.min(100, Math.max(0, ((now - startedAt) / duration) * 100));
 }
 
 function getAutomationCycleDurationMs(

@@ -73,7 +73,6 @@
   height: 100%;
   border-radius: inherit;
   background: currentColor;
-  transition: width 100ms linear;
 }
 
 .appointment-entry-enrolled .appointment-expiry {

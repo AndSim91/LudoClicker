@@ -38,9 +38,10 @@ describe("tournament school catalogue", () => {
     expect(getNpcSchoolPool("national").every((school) =>
       school.kind === "academy" && school.nation === "Italia"
     )).toBe(true);
-    expect(getNpcSchoolPool("champions").every((school) =>
-      school.kind === "nation" && school.nation !== "Italia"
-    )).toBe(true);
+    expect(getNpcSchoolPool("champions").every((school) => {
+      const nation: string = school.nation;
+      return school.kind === "nation" && nation !== "Italia";
+    })).toBe(true);
   });
 });
 

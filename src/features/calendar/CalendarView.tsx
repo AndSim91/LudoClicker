@@ -15,7 +15,7 @@ function getTrialProgress(trial: ScheduledTrial, now: number) {
   if (trial.status === "completed") return 100;
   const duration = trial.resolvesAt - trial.startsAt;
   if (duration <= 0 || now <= trial.startsAt) return 0;
-  return Math.min(100, Math.max(0, Math.round(((now - trial.startsAt) / duration) * 100)));
+  return Math.min(100, Math.max(0, ((now - trial.startsAt) / duration) * 100));
 }
 
 function getTrialStatus(
@@ -109,7 +109,7 @@ export function CalendarView({
                     </div>
                     <div className="trial-progress-label">
                       <span>{timing}</span>
-                      <strong>{progress}%</strong>
+                      <strong>{Math.round(progress)}%</strong>
                     </div>
                     <ProgressBar
                       className="trial-progress"

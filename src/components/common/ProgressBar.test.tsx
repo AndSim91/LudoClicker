@@ -19,7 +19,20 @@ describe("ProgressBar", () => {
     expect(progress).toHaveAttribute("aria-valuenow", "35");
     expect(progress).toHaveAttribute("aria-valuetext", "35 punti completati");
     expect(progress).not.toHaveClass("is-indeterminate");
-    expect(progress.firstElementChild).toHaveStyle({ width: "35%" });
+    expect(progress.firstElementChild).toHaveStyle({
+      width: "35%",
+      "--progress-transition-duration": `${GAME_CONFIG.progressUpdateIntervalMs}ms`,
+    });
+  });
+
+  it("interpolates engine-driven progress over the whole game tick", () => {
+    render(<ProgressBar label="Progresso automazione" value={25} />);
+
+    const progress = screen.getByRole("progressbar", { name: "Progresso automazione" });
+    expect(progress.firstElementChild).toHaveStyle({
+      width: "25%",
+      "--progress-transition-duration": `${GAME_CONFIG.gameTickMs}ms`,
+    });
   });
 
   it("uses the striped indeterminate state below one visual update", () => {

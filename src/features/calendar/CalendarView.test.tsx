@@ -33,7 +33,7 @@ afterEach(() => {
 describe("CalendarView", () => {
   it("shows live trial progress and opens the associated sent email", () => {
     vi.useFakeTimers();
-    vi.setSystemTime(15_000);
+    vi.setSystemTime(15_125);
     const onOpenSentEmail = vi.fn();
     const state = stateWithTrial("trialScheduled");
     const contact = state.contacts[0];
@@ -47,7 +47,8 @@ describe("CalendarView", () => {
       screen.getByRole("progressbar", {
         name: `Avanzamento lezione di prova di ${displayName}`,
       }),
-    ).toHaveAttribute("aria-valuenow", "50");
+    ).toHaveAttribute("aria-valuenow", "51.25");
+    expect(screen.getByText("51%")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Apri mail inviata" }));
     expect(onOpenSentEmail).toHaveBeenCalledWith(state.emails[0].id);
