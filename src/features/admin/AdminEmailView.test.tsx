@@ -11,6 +11,8 @@ describe("AdminEmailView", () => {
     onAddEuros = vi.fn(),
     onScheduleLegendaryTrial = vi.fn(),
     availableLegendaryProfiles = 3,
+    onAdvanceMonth = vi.fn(),
+    currentMonth = 9,
   ) => {
     render(
       <AdminEmailView
@@ -18,10 +20,12 @@ describe("AdminEmailView", () => {
         availableContacts={4}
         activeMembers={4}
         euros={250}
+        currentMonth={currentMonth}
         availableLegendaryProfiles={availableLegendaryProfiles}
         onAddContacts={onAddContacts}
         onAddMembers={onAddMembers}
         onAddEuros={onAddEuros}
+        onAdvanceMonth={onAdvanceMonth}
         onScheduleLegendaryTrial={onScheduleLegendaryTrial}
       />,
     );
@@ -34,6 +38,16 @@ describe("AdminEmailView", () => {
     expect(screen.getByText(/Totali: 8/)).toHaveTextContent("disponibili: 4");
     expect(screen.queryByRole("textbox", { name: "Oggetto" })).not.toBeInTheDocument();
     expect(screen.queryByText(/cataloghi email/i)).not.toBeInTheDocument();
+  });
+
+  it("advances to the named next month", () => {
+    const onAdvanceMonth = vi.fn();
+    renderAdmin(vi.fn(), vi.fn(), vi.fn(), vi.fn(), 3, onAdvanceMonth, 12);
+
+    expect(screen.getByText("Passa da Dicembre a Gennaio")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Passa a Gennaio" }));
+
+    expect(onAdvanceMonth).toHaveBeenCalledOnce();
   });
 
   it("submits the manually entered changes", () => {

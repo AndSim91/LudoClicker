@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon } from "../../components/common/Icon";
+import { getGameMonthName } from "../../game/calendar";
 import { formatCurrency } from "../../shared/formatters";
 
 interface AdminEmailViewProps {
@@ -7,10 +8,12 @@ interface AdminEmailViewProps {
   availableContacts: number;
   activeMembers: number;
   euros: number;
+  currentMonth: number;
   availableLegendaryProfiles: number;
   onAddContacts: (amount: number) => void;
   onAddMembers: (amount: number) => void;
   onAddEuros: (amount: number) => void;
+  onAdvanceMonth: () => void;
   onScheduleLegendaryTrial: () => void;
 }
 
@@ -19,10 +22,12 @@ export function AdminEmailView({
   availableContacts,
   activeMembers,
   euros,
+  currentMonth,
   availableLegendaryProfiles,
   onAddContacts,
   onAddMembers,
   onAddEuros,
+  onAdvanceMonth,
   onScheduleLegendaryTrial,
 }: AdminEmailViewProps) {
   const [contactAmount, setContactAmount] = useState("1");
@@ -35,6 +40,8 @@ export function AdminEmailView({
   const canAddContacts = Number.isSafeInteger(parsedContactAmount) && parsedContactAmount !== 0;
   const canAddMembers = Number.isSafeInteger(parsedMemberAmount) && parsedMemberAmount !== 0;
   const canAddEuros = Number.isFinite(parsedEuroAmount) && parsedEuroAmount !== 0;
+  const currentMonthName = getGameMonthName(currentMonth);
+  const nextMonthName = getGameMonthName(currentMonth + 1);
 
   return (
     <main className="overview-view admin-view">
@@ -112,6 +119,27 @@ export function AdminEmailView({
           <button type="submit" disabled={!canAddEuros}>Modifica Euro</button>
           <small>Attuali: {formatCurrency(euros)}</small>
         </form>
+      </section>
+
+      <section className="admin-gameplay-tools" aria-labelledby="admin-time-title">
+        <div className="admin-resource-heading">
+          <span>Tempo di gioco</span>
+          <h2 id="admin-time-title">Calendario</h2>
+          <p>Forza una scadenza mensile usando le regole normali della partita.</p>
+        </div>
+        <div className="admin-gameplay-action">
+          <div>
+            <strong>Passa da {currentMonthName} a {nextMonthName}</strong>
+            <p>
+              Elabora entrate, tornei, rinnovi annuali e automazioni legate
+              al cambio di mese. Le attività con una scadenza futura restano in corso.
+            </p>
+          </div>
+          <button type="button" onClick={onAdvanceMonth}>
+            Passa a {nextMonthName}
+          </button>
+          <small>Il prossimo mese inizierà immediatamente.</small>
+        </div>
       </section>
 
       <section className="admin-gameplay-tools" aria-labelledby="admin-gameplay-title">

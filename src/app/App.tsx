@@ -304,12 +304,17 @@ export function App() {
             availableContacts={selectAvailableContacts(state)}
             activeMembers={state.school.activeMembers}
             euros={state.school.euros}
+            currentMonth={state.school.currentMonth}
             availableLegendaryProfiles={
               getAvailableStandardLegendaryProfiles(state, getGameNow()).length
             }
             onAddContacts={(amount) => dispatch({ type: "ADMIN_ADD_CONTACTS", amount })}
             onAddMembers={(amount) => dispatch({ type: "ADMIN_ADD_MEMBERS", amount })}
             onAddEuros={(amount) => dispatch({ type: "ADMIN_ADD_EUROS", amount })}
+            onAdvanceMonth={() => dispatch({
+              type: "ADMIN_ADVANCE_MONTH",
+              now: getGameNow(),
+            })}
             onScheduleLegendaryTrial={() => dispatch({
               type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL",
               now: getGameNow(),

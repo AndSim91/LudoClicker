@@ -206,6 +206,8 @@ describe("App profile and navigation", () => {
 
     expect(screen.getByRole("heading", { name: "Admin" })).toBeVisible();
     expect(screen.getByText("DEV ONLY")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Passa a Ottobre" }));
+    expect(screen.getByRole("button", { name: "Passa a Novembre" })).toBeVisible();
   });
 
   it("keeps the same day panel mounted when changing page", () => {

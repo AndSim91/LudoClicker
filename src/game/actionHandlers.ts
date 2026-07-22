@@ -71,6 +71,15 @@ export function createGameActionHandlers(
     ADMIN_ADD_CONTACTS: (state, action) => addAdminContacts(state, action.amount),
     ADMIN_ADD_MEMBERS: (state, action) => addAdminMembers(state, action.amount),
     ADMIN_ADD_EUROS: (state, action) => addAdminEuros(state, action.amount),
+    ADMIN_ADVANCE_MONTH: (state, action) => Number.isFinite(action.now)
+      ? dependencies.tick({
+          ...state,
+          school: {
+            ...state.school,
+            nextFeeAt: action.now,
+          },
+        }, action.now, 1)
+      : state,
     ADMIN_SCHEDULE_LEGENDARY_TRIAL: (state, action) => scheduleAdminLegendaryTrial(
       state,
       action.now,

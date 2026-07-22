@@ -44,6 +44,26 @@ describe("admin resource actions", () => {
     expect(state.statistics.eurosEarned).toBe(0);
   });
 
+  it("advances one month through the same pipeline as a natural monthly deadline", () => {
+    const initial = gameReducer(createInitialState(1_000), {
+      type: "ADMIN_ADD_MEMBERS",
+      amount: 2,
+    });
+    const now = 2_000;
+    const naturalBoundaryState = {
+      ...initial,
+      school: { ...initial.school, nextFeeAt: now },
+    };
+
+    const advanced = gameReducer(initial, { type: "ADMIN_ADVANCE_MONTH", now });
+    const naturallyAdvanced = gameReducer(naturalBoundaryState, { type: "TICK", now });
+
+    expect(advanced).toEqual(naturallyAdvanced);
+    expect(advanced.school.currentMonth).toBe(initial.school.currentMonth + 1);
+    expect(advanced.school.nextFeeAt).toBe(now + GAME_CONFIG.gameMonthMs);
+    expect(advanced.statistics.eurosEarned).toBeGreaterThan(initial.statistics.eurosEarned);
+  });
+
   it("adds or removes available email contacts", () => {
     const initial = createInitialState(1_000);
     const added = gameReducer(initial, { type: "ADMIN_ADD_CONTACTS", amount: 2 });

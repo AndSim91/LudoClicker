@@ -631,6 +631,7 @@ export type GameAction =
   | { type: "ADMIN_ADD_CONTACTS"; amount: number }
   | { type: "ADMIN_ADD_MEMBERS"; amount: number }
   | { type: "ADMIN_ADD_EUROS"; amount: number }
+  | { type: "ADMIN_ADVANCE_MONTH"; now: number }
   | { type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL"; now: number }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }

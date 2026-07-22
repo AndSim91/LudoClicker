@@ -718,6 +718,11 @@ durata ordinaria, che usa le stesse probabilità di conversione, le stesse regol
 di unicità e lo stesso reclutamento automatico dei Leggendari del flusso
 normale.
 
+La stessa pagina può forzare il passaggio al mese successivo. Il comando porta
+la scadenza mensile all'istante corrente ed esegue la normale pipeline di gioco:
+entrate, tornei, rinnovi annuali, cambio del calendario e automazioni. Le
+attività che hanno una propria scadenza futura non vengono completate in anticipo.
+
 ### 9.3 Ruoli
 
 | Ruolo                | Funzione                                                                                                           |
