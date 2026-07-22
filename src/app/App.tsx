@@ -122,7 +122,11 @@ export function App() {
     setSelectedMessageId(null);
     if (folder === "sent") {
       const latestSent = state.emails
-        .filter((email) => email.status !== "writing" && email.status !== "sending")
+        .filter((email) =>
+          email.status !== "writing" &&
+          email.status !== "readyToSend" &&
+          email.status !== "sending",
+        )
         .at(-1);
       setSelectedSentEmailId(latestSent?.id ?? null);
     }
@@ -213,7 +217,15 @@ export function App() {
             />
             {mailFolder === "sent" ? (
               selectedSentEmail ? <SentMailDetail state={state} email={selectedSentEmail} /> : <main className="empty-composer"><Icon name="send" /><h1>Nessuna mail inviata</h1><p>Completa una campagna per visualizzarne qui il contenuto e lo stato.</p></main>
-            ) : selectedMessage ? <MessageDetail message={selectedMessage} /> : <Composer state={state} onWrite={write} />}
+            ) : selectedMessage ? <MessageDetail message={selectedMessage} /> : <Composer
+              state={state}
+              onWrite={write}
+              onAutomaticSendingChange={(enabled) => dispatch({
+                type: "SET_AUTOMATIC_EMAIL_SENDING",
+                enabled,
+                now: getGameNow(),
+              })}
+            />}
           </>
         ) : activeView === "upgrades" ? (
           <UpgradesView

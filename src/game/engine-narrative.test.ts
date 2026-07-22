@@ -264,7 +264,8 @@ describe("game engine: narrative", () => {
       statistics: { ...initial.statistics, emailsSent: 4 },
     };
 
-    const sending = gameReducer(ready, { type: "WRITE", now: 2_000 });
+    const completed = gameReducer(ready, { type: "WRITE", now: 2_000 });
+    const sending = gameReducer(completed, { type: "SEND_EMAIL", now: 2_000 });
     const sent = gameReducer(sending, { type: "TICK", now: 2_000 + GAME_CONFIG.sendDelayMs });
 
     expect(sent.pendingEmailOutcomes.at(-1)?.result).toBe("trialBooked");

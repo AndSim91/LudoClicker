@@ -91,6 +91,16 @@ describe("local save", () => {
     expect(loadGame(3_000).lastSavedAt).toBe(3_000);
   });
 
+  it("persists the player's disabled automatic email sending choice", () => {
+    const state = createInitialState(1_000);
+    saveGame({
+      ...state,
+      automation: { ...state.automation, autoSendEmails: false },
+    }, 2_000);
+
+    expect(loadGame(3_000).automation.autoSendEmails).toBe(false);
+  });
+
   it("repairs enrolled Legendary members missing from collaborators on load", () => {
     const initial = createInitialState(1_000, "", false);
     const legendaryMembers = initial.contacts.slice(0, 3).map((contact, index) => ({

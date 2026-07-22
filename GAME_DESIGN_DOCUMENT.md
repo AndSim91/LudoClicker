@@ -26,8 +26,10 @@ indipendentemente dal tasto premuto. Anche un click nel corpo della mail
 inserisce un carattere. All'inizio ogni input produce un solo carattere; i
 potenziamenti aumentano progressivamente la velocità.
 
-Le email completate vengono inviate automaticamente e invitano il destinatario a
-partecipare a una singola lezione di prova in palestra. Dopo un intervallo
+Le email completate vengono inviate automaticamente per impostazione predefinita
+e invitano il destinatario a partecipare a una singola lezione di prova in
+palestra. Il giocatore può disattivare l'invio automatico per rileggere la mail
+completa e confermarla con un ulteriore input. Dopo un intervallo
 compresso, il contatto può prenotare oppure sparire definitivamente. Chi
 partecipa alla lezione ha un'alta probabilità, ma non la certezza, di
 iscriversi.
@@ -168,7 +170,8 @@ flowchart LR
 1. Il giocatore apre una bozza già indirizzata a un contatto disponibile.
 2. Preme tasti o clicca nel corpo della mail.
 3. Ogni input rivela il prossimo carattere del testo prestabilito.
-4. Quando il corpo è completo, la mail viene inviata automaticamente.
+4. Quando il corpo è completo, la mail viene inviata automaticamente se il
+   relativo toggle è attivo; altrimenti resta pronta fino al successivo input.
 5. Il contatto viene consumato e viene programmato l'esito ritardato dell'invito
    alla prova in palestra.
 6. Se esiste un altro contatto, si apre immediatamente una nuova mail.
@@ -393,15 +396,18 @@ lo sblocco dell'automazione.
 
 ### 6.4 Completamento e invio
 
-Al completamento:
+Il toggle **Invio automatico** è attivo di default e la sua scelta viene salvata
+nella partita. Al completamento:
 
 1. il cursore si ferma alla fine del testo;
-2. compare per 250–400 ms lo stato Outlook “Invio in corso…”;
-3. la mail passa in Posta inviata;
-4. viene determinato e salvato l'esito ritardato
+2. con l'invio automatico attivo la mail parte subito; con l'opzione disattivata
+   resta completamente visibile finché il giocatore non preme un tasto o fa clic;
+3. compare per 250–400 ms lo stato Outlook “Invio in corso…”;
+4. la mail passa in Posta inviata;
+5. viene determinato e salvato l'esito ritardato
    `prenota la prova / contatto perso`;
-5. si apre la mail successiva entro 300–600 ms;
-6. non viene riprodotto alcun suono.
+6. si apre la mail successiva entro 300–600 ms;
+7. non viene riprodotto alcun suono.
 
 Decidere l'esito al momento dell'invio impedisce di cambiare il risultato
 ricaricando la pagina. L'esito della successiva lezione in palestra viene invece
@@ -754,8 +760,11 @@ caratteriAutomaticiAlSecondo = velocitàBaseCollaboratore
 ```
 
 I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input
-manuale si somma senza conflitti. La scrittura automatica non può essere messa
-in pausa, ma si ferma naturalmente quando finiscono i contatti.
+manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
+invia la mail appena raggiunge la lunghezza richiesta. Se è disattivato, anche i
+collaboratori si fermano sulla mail completa finché il giocatore non conferma
+l'invio. La scrittura automatica non può essere messa in pausa, ma si ferma
+naturalmente quando finiscono i contatti.
 
 ### 9.5 Raccolta automatica dei contatti
 

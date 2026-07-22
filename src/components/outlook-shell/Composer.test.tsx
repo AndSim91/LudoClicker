@@ -1,5 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMAIL_TEMPLATES } from "../../content/emailTemplates";
 import { createInitialState } from "../../game/engine";
 import { Composer } from "./Composer";
@@ -19,7 +19,13 @@ describe("Composer", () => {
       ),
     };
 
-    const { container } = render(<Composer state={state} onWrite={() => undefined} />);
+    const { container } = render(
+      <Composer
+        state={state}
+        onWrite={() => undefined}
+        onAutomaticSendingChange={() => undefined}
+      />,
+    );
 
     const recipient = screen.getByText(new RegExp(activeContact.email));
     const mailHeader = container.querySelector<HTMLElement>(".mail-fields")!;
@@ -34,7 +40,13 @@ describe("Composer", () => {
   });
 
   it("keeps the character count without a redundant email progress bar", () => {
-    render(<Composer state={createInitialState(1_000)} onWrite={() => undefined} />);
+    render(
+      <Composer
+        state={createInitialState(1_000)}
+        onWrite={() => undefined}
+        onAutomaticSendingChange={() => undefined}
+      />,
+    );
 
     expect(screen.queryByRole("progressbar", { name: /Costruzione email/ })).not.toBeInTheDocument();
     expect(screen.getByText(/0 \/ \d+ caratteri/)).toBeVisible();
@@ -43,6 +55,52 @@ describe("Composer", () => {
       "data-tutorial-region",
       "composer-body",
     );
+  });
+
+  it("shows whole numbers in the writing status without changing decimal game values", () => {
+    const initial = createInitialState(1_000);
+    const activeEmail = initial.emails[0];
+    const revealedCharacters = 15.399999999999999;
+    const writingPower = 2.2;
+    const state = {
+      ...initial,
+      player: { ...initial.player, writingPower },
+      emails: initial.emails.map((email) =>
+        email.id === activeEmail.id
+          ? { ...email, revealedCharacters }
+          : email,
+      ),
+    };
+
+    render(
+      <Composer
+        state={state}
+        onWrite={() => undefined}
+        onAutomaticSendingChange={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText(/15 \/ \d+ caratteri · 2 per input/)).toBeVisible();
+    expect(state.emails[0].revealedCharacters).toBe(revealedCharacters);
+    expect(state.player.writingPower).toBe(writingPower);
+  });
+
+  it("shows automatic sending enabled by default and lets the player disable it", () => {
+    const onAutomaticSendingChange = vi.fn();
+
+    render(
+      <Composer
+        state={createInitialState(1_000)}
+        onWrite={() => undefined}
+        onAutomaticSendingChange={onAutomaticSendingChange}
+      />,
+    );
+
+    const toggle = screen.getByRole("checkbox", { name: "Invio automatico" });
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+    expect(onAutomaticSendingChange).toHaveBeenCalledWith(false);
   });
 
   it("uses the HTML source workspace for an active level 3 draft", () => {
@@ -67,7 +125,13 @@ describe("Composer", () => {
       ),
     };
 
-    render(<Composer state={state} onWrite={() => undefined} />);
+    render(
+      <Composer
+        state={state}
+        onWrite={() => undefined}
+        onAutomaticSendingChange={() => undefined}
+      />,
+    );
 
     expect(screen.getByLabelText("Composizione HTML della mail")).toBeVisible();
     expect(screen.getByLabelText("Codice HTML scritto")).toHaveTextContent("<!doctype html>");

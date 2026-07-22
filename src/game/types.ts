@@ -68,7 +68,7 @@ export interface CampaignEmail {
   sentAt?: number;
   sendCompletesAt?: number;
   presentationLevel: EmailPresentationLevel;
-  status: "writing" | "sending" | "sent" | "trialBooked" | "lost";
+  status: "writing" | "readyToSend" | "sending" | "sent" | "trialBooked" | "lost";
 }
 
 export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -599,6 +599,7 @@ export interface GameState {
   collaborators: Collaborator[];
   automation: {
     lastProcessedAt: number;
+    autoSendEmails: boolean;
     writingBuffer: number;
     lessonBuffer: number;
     socialBuffer: number;
@@ -627,6 +628,8 @@ export interface GameState {
 
 export type GameAction =
   | { type: "WRITE"; now: number }
+  | { type: "SEND_EMAIL"; now: number }
+  | { type: "SET_AUTOMATIC_EMAIL_SENDING"; enabled: boolean; now: number }
   | { type: "TICK"; now: number; gainMultiplier?: number }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "OFFLINE_PASSIVE_PROGRESS"; now: number; elapsedMs: number; rawElapsedMs: number }

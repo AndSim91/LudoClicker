@@ -4,6 +4,31 @@ import type { Collaborator } from "../../game/types";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 
 describe("getCollaboratorAutomationPresentation", () => {
+  it("shows when Redazione is waiting for the player's final send action", () => {
+    const initial = createInitialState(1_000);
+    const activeEmail = {
+      ...initial.emails[0],
+      status: "readyToSend" as const,
+    };
+
+    const presentation = getCollaboratorAutomationPresentation({
+      state: {
+        ...initial,
+        automation: { ...initial.automation, autoSendEmails: false },
+      },
+      collaboratorId: "writer-1",
+      assignment: "writing",
+      now: 1_000,
+      activeEmail,
+    });
+
+    expect(presentation).toMatchObject({
+      title: activeEmail.subject,
+      detail: "Mail completa · in attesa dell'invio del giocatore",
+      progress: 100,
+    });
+  });
+
   it("projects equipment progress smoothly between engine ticks", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborator: Collaborator = {

@@ -91,6 +91,7 @@ export function createInitialState(
     collaborators: [],
     automation: {
       lastProcessedAt: now,
+      autoSendEmails: true,
       writingBuffer: 0,
       lessonBuffer: 0,
       socialBuffer: 0,

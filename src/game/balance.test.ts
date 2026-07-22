@@ -121,6 +121,7 @@ function simulateEarlyGame(seed: number): EarlyGameMilestones {
         ),
       };
       state = gameReducer(state, { type: "WRITE", now });
+      state = gameReducer(state, { type: "SEND_EMAIL", now });
       now += GAME_CONFIG.sendDelayMs;
       state = gameReducer(state, { type: "TICK", now });
       continue;

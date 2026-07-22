@@ -52,7 +52,7 @@ import type {
   GameState,
   LegendaryCollaboratorProgress,
 } from "./types";
-import { write, writeCharacters } from "./writingFlow";
+import { sendEmail, write, writeCharacters } from "./writingFlow";
 
 export { getLegendaryAppearanceChance } from "./contacts";
 export { canFoundSchool, getPrestigeRequirements } from "./progression";
@@ -166,6 +166,7 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
 
 const ACTION_HANDLERS = createGameActionHandlers({
   write,
+  sendEmail,
   tick,
   runSocialCampaign,
   startFormTraining,

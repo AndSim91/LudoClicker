@@ -51,7 +51,10 @@ export function getActiveCampaignEmails(emails: CampaignEmail[]): CampaignEmail[
   return cachedFilter(
     activeEmailsCache,
     emails,
-    (email) => email.status === "writing" || email.status === "sending",
+    (email) =>
+      email.status === "writing" ||
+      email.status === "readyToSend" ||
+      email.status === "sending",
   );
 }
 

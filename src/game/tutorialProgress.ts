@@ -26,7 +26,9 @@ export function finishTutorialScene(
     state.shortGoal.definitionId === "send-emails" &&
     state.shortGoal.completedCount === 0;
   const emailsCommittedBeforeMission = state.statistics.emailsSent +
-    state.emails.filter((email) => email.status === "sending").length;
+    state.emails.filter((email) =>
+      email.status === "readyToSend" || email.status === "sending",
+    ).length;
   const releasesTutorialEmails = sceneId === FIRST_EVENT_TUTORIAL_SCENE_ID;
   const tutorialFinishedAt = state.automation.lastProcessedAt;
   const completedSceneIds = skipped

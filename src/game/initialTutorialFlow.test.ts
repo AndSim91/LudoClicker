@@ -23,9 +23,12 @@ function completeActiveDraft(state: GameState, now: number): GameState {
 }
 
 function finishSendingEmail(state: GameState): GameState {
-  const sendingEmail = state.emails.find((email) => email.status === "sending");
+  const sendingState = state.emails.some((email) => email.status === "sending")
+    ? state
+    : gameReducer(state, { type: "WRITE", now: state.lastSavedAt });
+  const sendingEmail = sendingState.emails.find((email) => email.status === "sending");
   if (!sendingEmail?.sendCompletesAt) throw new Error("Expected an email being sent");
-  return gameReducer(state, { type: "TICK", now: sendingEmail.sendCompletesAt });
+  return gameReducer(sendingState, { type: "TICK", now: sendingEmail.sendCompletesAt });
 }
 
 describe("initial tutorial progression", () => {

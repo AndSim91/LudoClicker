@@ -226,6 +226,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.pagosport === "number" &&
     typeof state.upgrades?.["divine-touch"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
+    typeof state.automation?.autoSendEmails === "boolean" &&
     typeof state.automation?.lessonBuffer === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     (state.automation?.lastImprovedAthlete === undefined ||

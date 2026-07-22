@@ -95,7 +95,11 @@ export function MessageList({
     const result = [] as GameState["emails"];
     for (let index = state.emails.length - 1; index >= 0; index -= 1) {
       const email = state.emails[index];
-      if (email.status !== "writing" && email.status !== "sending") result.push(email);
+      if (
+        email.status !== "writing" &&
+        email.status !== "readyToSend" &&
+        email.status !== "sending"
+      ) result.push(email);
     }
     return result;
   }, [state.emails]);
@@ -164,7 +168,11 @@ export function MessageList({
                   Bozza per {activeContact.firstName} {activeContact.lastName}
                 </strong>
                 <span>{activeEmail.subject}</span>
-                <small>{activeEmail.status === "sending" ? "Invio in corso…" : "Digitazione in corso…"}</small>
+                <small>{activeEmail.status === "sending"
+                  ? "Invio in corso…"
+                  : activeEmail.status === "readyToSend"
+                    ? "Pronta per l’invio: premi un tasto o fai clic"
+                    : "Digitazione in corso…"}</small>
               </span>
               <time>{time(activeEmail.createdAt)}</time>
             </button>

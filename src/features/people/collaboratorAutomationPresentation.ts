@@ -108,6 +108,14 @@ export function getCollaboratorAutomationPresentation({
   activeEmail: ReturnType<typeof selectActiveEmail>;
 }): CollaboratorAutomationPresentation {
   if (assignment === "writing") {
+    if (activeEmail?.status === "readyToSend") {
+      return {
+        title: activeEmail.subject,
+        detail: "Mail completa · in attesa dell'invio del giocatore",
+        progress: 100,
+        progressLabel: `Scrittura di ${activeEmail.subject} completata`,
+      };
+    }
     if (!activeEmail || activeEmail.status !== "writing") {
       return { title: "In attesa", detail: "Nessuna email in scrittura" };
     }

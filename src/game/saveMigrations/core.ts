@@ -83,6 +83,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
       collaborators: migrated.collaborators ?? [],
       automation: migrated.automation ?? {
         lastProcessedAt: migrated.lastSavedAt ?? migrated.createdAt ?? Date.now(),
+        autoSendEmails: true,
         writingBuffer: 0,
         lessonBuffer: 0,
         socialBuffer: 0,

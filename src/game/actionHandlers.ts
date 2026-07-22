@@ -36,6 +36,7 @@ export type GameActionHandlers = {
 
 export interface GameActionHandlerDependencies {
   write: (state: GameState, now: number) => GameState;
+  sendEmail: (state: GameState, now: number) => GameState;
   tick: (state: GameState, now: number, gainMultiplier: number) => GameState;
   runSocialCampaign: (state: GameState, now: number) => GameState;
   startFormTraining: (
@@ -51,6 +52,19 @@ export function createGameActionHandlers(
 ): GameActionHandlers {
   return {
     WRITE: (state, action) => dependencies.write(state, action.now),
+    SEND_EMAIL: (state, action) => dependencies.sendEmail(state, action.now),
+    SET_AUTOMATIC_EMAIL_SENDING: (state, action) => {
+      const nextState = {
+        ...state,
+        automation: {
+          ...state.automation,
+          autoSendEmails: action.enabled,
+        },
+      };
+      return action.enabled
+        ? dependencies.sendEmail(nextState, action.now)
+        : nextState;
+    },
     TICK: (state, action) => dependencies.tick(
       state,
       action.now,

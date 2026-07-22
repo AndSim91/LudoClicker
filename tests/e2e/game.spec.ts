@@ -26,13 +26,19 @@ test("scrive con tastiera e click senza intercettare la navigazione", async ({ p
   await expect(composer).toBeVisible();
 });
 
-test("invia automaticamente la mail completa e apre il contatto successivo", async ({ page }) => {
+test("richiede un click finale per inviare la mail completa e apre il contatto successivo", async ({ page }) => {
   await page.evaluate(() => {
     for (let index = 0; index < 500; index += 1) {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
     }
   });
 
+  const completedComposer = page.getByRole("button", {
+    name: "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare.",
+  });
+  await expect(completedComposer).toBeVisible({ timeout: 2_000 });
+  await expect(page.getByRole("button", { name: /Posta inviata 0/ })).toBeVisible();
+  await completedComposer.click();
   await expect(page.getByText("Bozza per Luca Parodi")).toBeVisible({ timeout: 2_000 });
   const sentFolder = page.getByRole("button", { name: /Posta inviata 1/ });
   await expect(sentFolder).toBeVisible();

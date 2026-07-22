@@ -231,6 +231,12 @@ export function migrateContentState(state: MigratableState): MigratableState {
     migrated = {
       ...migrated,
       version: GAME_CONFIG.version,
+      automation: migrated.automation
+        ? {
+            ...migrated.automation,
+            autoSendEmails: migrated.automation.autoSendEmails ?? true,
+          }
+        : migrated.automation,
       tutorial: {
         completedSceneIds: [...TUTORIAL_SCENE_IDS],
         skippedSceneIds: [],

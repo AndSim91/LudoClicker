@@ -166,6 +166,9 @@ export function simulateBalanceGame({
         if (selectActiveEmail(state)?.status !== "writing") break;
       }
     }
+    if (selectActiveEmail(state)?.status === "readyToSend") {
+      state = dispatch(state, { type: "SEND_EMAIL", now });
+    }
     if (prestigeReadyAtMs === undefined && canFoundSchool(state)) {
       prestigeReadyAtMs = elapsedMs;
       break;

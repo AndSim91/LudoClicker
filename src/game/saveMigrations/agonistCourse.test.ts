@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 import type { GameState } from "../types";
@@ -45,7 +46,7 @@ describe("Corso Agonisti save migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated.version).toBe(48);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades["agonist-course-intensity"]).toBe(0);
     expect(migrated.contacts[0]).toMatchObject({
       agonistCourseArenaBonus: 3,

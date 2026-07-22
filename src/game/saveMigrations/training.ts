@@ -64,6 +64,7 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
           migrated.lastSavedAt ??
           migrated.createdAt ??
           Date.now(),
+        autoSendEmails: migrated.automation?.autoSendEmails ?? true,
         writingBuffer: migrated.automation?.writingBuffer ?? 0,
         lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
         socialBuffer: migrated.automation?.socialBuffer ?? 0,
@@ -83,6 +84,7 @@ export function migrateTrainingState(state: MigratableState): MigratableState {
           migrated.lastSavedAt ??
           migrated.createdAt ??
           Date.now(),
+        autoSendEmails: migrated.automation?.autoSendEmails ?? true,
         writingBuffer: migrated.automation?.writingBuffer ?? 0,
         lessonBuffer: migrated.automation?.lessonBuffer ?? 0,
         socialBuffer: migrated.automation?.socialBuffer ?? 0,

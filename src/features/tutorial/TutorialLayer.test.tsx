@@ -193,7 +193,11 @@ describe("TutorialLayer", () => {
     const { container } = render(
       <>
         <div className="workspace">
-          <Composer state={state} onWrite={vi.fn()} />
+          <Composer
+            state={state}
+            onWrite={vi.fn()}
+            onAutomaticSendingChange={vi.fn()}
+          />
         </div>
         <TutorialLayer
           scene={scene}

@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getEmailBuildLength } from "../content/emailBuild";
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
 import { needsAutomationHeartbeat } from "./gameScheduler";
@@ -76,21 +77,36 @@ describe("useGameEngine pause", () => {
     expect(result.current.isPaused).toBe(false);
   });
 
-  it("allows the first draft to reach sending while tutorial time stays frozen", () => {
+  it("waits for the final send input while tutorial time stays frozen", () => {
     const { result } = renderHook(() => useGameEngine());
 
     act(() => result.current.setTutorialPaused(true));
     const pausedAt = result.current.getGameNow();
+    const writingInputs = getEmailBuildLength(result.current.state.emails[0]);
 
     act(() => {
-      for (let input = 0; input < 1_000; input += 1) {
+      result.current.dispatch({
+        type: "SET_AUTOMATIC_EMAIL_SENDING",
+        enabled: false,
+        now: result.current.getGameNow(),
+      });
+    });
+
+    act(() => {
+      for (let input = 0; input < writingInputs; input += 1) {
         result.current.dispatch({ type: "WRITE", now: result.current.getGameNow() });
       }
     });
 
     expect(result.current.getGameNow()).toBe(pausedAt);
-    expect(result.current.state.emails[0].status).toBe("sending");
+    expect(result.current.state.emails[0].status).toBe("readyToSend");
     expect(result.current.state.statistics.emailsSent).toBe(0);
+
+    act(() => {
+      result.current.dispatch({ type: "SEND_EMAIL", now: result.current.getGameNow() });
+    });
+
+    expect(result.current.state.emails[0].status).toBe("sending");
 
     act(() => vi.advanceTimersByTime(10_000));
     expect(result.current.getGameNow()).toBe(pausedAt);

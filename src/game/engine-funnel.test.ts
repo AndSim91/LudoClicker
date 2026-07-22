@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getEmailBuildLength } from "../content/emailBuild";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { PERSON_RARITIES } from "../content/rarities";
 import { getSchoolYear } from "./calendar";
@@ -91,6 +92,91 @@ describe("game engine: funnel", () => {
     expect(selectActiveEmail(next)?.revealedCharacters).toBe(2);
     expect(selectActiveEmail(next)?.body.slice(0, 2)).toBe(email.body.slice(0, 2));
     expect(next.statistics.inputs).toBe(1);
+  });
+
+  it("sends automatically on the last character when the option is enabled", () => {
+    const state = createInitialState(1_000);
+    const completed = gameReducer(
+      { ...state, player: { writingPower: 10_000 } },
+      { type: "WRITE", now: 2_000 },
+    );
+
+    expect(state.automation.autoSendEmails).toBe(true);
+    expect(selectActiveEmail(completed)?.status).toBe("sending");
+    expect(selectActiveEmail(completed)?.sendCompletesAt).toBe(2_000 + GAME_CONFIG.sendDelayMs);
+  });
+
+  it("waits for one explicit final input when automatic sending is disabled", () => {
+    const state = createInitialState(1_000);
+    const completed = gameReducer(
+      {
+        ...state,
+        player: { writingPower: 10_000 },
+        automation: { ...state.automation, autoSendEmails: false },
+      },
+      { type: "WRITE", now: 2_000 },
+    );
+
+    expect(selectActiveEmail(completed)?.status).toBe("readyToSend");
+    expect(selectActiveEmail(completed)?.sendCompletesAt).toBeUndefined();
+    expect(completed.statistics.emailsSent).toBe(0);
+
+    const enabledWhileWaiting = gameReducer(completed, {
+      type: "SET_AUTOMATIC_EMAIL_SENDING",
+      enabled: true,
+      now: 2_001,
+    });
+    expect(selectActiveEmail(enabledWhileWaiting)?.status).toBe("sending");
+
+    const sending = gameReducer(completed, { type: "WRITE", now: 2_002 });
+    expect(selectActiveEmail(sending)?.status).toBe("sending");
+    expect(selectActiveEmail(sending)?.sendCompletesAt).toBe(2_002 + GAME_CONFIG.sendDelayMs);
+    expect(gameReducer(sending, { type: "WRITE", now: 2_003 })).toBe(sending);
+  });
+
+  it("lets Redazione send completed mail only when automatic sending is enabled", () => {
+    const initial = createInitialState(1_000);
+    const activeEmail = selectActiveEmail(initial)!;
+    const writer: GameState["collaborators"][number] = {
+      id: "writer-auto-send",
+      contactId: initial.contacts[0].id,
+      displayName: "Redattore Test",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      formBranchPreferences: [],
+      autoTeachingEnabled: true,
+      assignment: "writing",
+      mastery: {
+        writing: 0,
+        events: 0,
+        lessons: 0,
+        social: 0,
+        equipment: 0,
+        instructor: 0,
+      },
+      rarity: "ultra-rare",
+    };
+    const almostComplete: GameState = {
+      ...initial,
+      collaborators: [writer],
+      emails: initial.emails.map((email) =>
+        email.id === activeEmail.id
+          ? { ...email, revealedCharacters: getEmailBuildLength(email) - 1 }
+          : email,
+      ),
+    };
+
+    const sending = gameReducer(almostComplete, { type: "TICK", now: 2_000 });
+    expect(selectActiveEmail(sending)?.status).toBe("sending");
+    expect(sending.statistics.automatedCharacters).toBeGreaterThan(0);
+
+    const waiting = gameReducer({
+      ...almostComplete,
+      automation: { ...almostComplete.automation, autoSendEmails: false },
+    }, { type: "TICK", now: 2_000 });
+    expect(selectActiveEmail(waiting)?.status).toBe("readyToSend");
+    expect(selectActiveEmail(waiting)?.sendCompletesAt).toBeUndefined();
   });
 
   it("guarantees Andrea Simonazzi as the ninth contact in the initial school", () => {
@@ -307,7 +393,8 @@ describe("game engine: funnel", () => {
         revealedCharacters: candidate.body.length - 1,
       })),
     };
-    const sending = gameReducer(nearlyComplete, { type: "WRITE", now: 2_000 });
+    const ready = gameReducer(nearlyComplete, { type: "WRITE", now: 2_000 });
+    const sending = gameReducer(ready, { type: "SEND_EMAIL", now: 2_000 });
     const sent = gameReducer(sending, {
       type: "TICK",
       now: 2_000 + GAME_CONFIG.sendDelayMs,
@@ -352,7 +439,8 @@ describe("game engine: funnel", () => {
       })),
     };
 
-    const sending = gameReducer(state, { type: "WRITE", now: 2_000 });
+    const ready = gameReducer(state, { type: "WRITE", now: 2_000 });
+    const sending = gameReducer(ready, { type: "SEND_EMAIL", now: 2_000 });
     const sent = gameReducer(sending, {
       type: "TICK",
       now: 2_000 + GAME_CONFIG.sendDelayMs,
@@ -375,7 +463,8 @@ describe("game engine: funnel", () => {
       emails: [{ ...activeEmail, revealedCharacters: activeEmail.body.length - 1 }],
     };
 
-    const sending = gameReducer(ready, { type: "WRITE", now: 2_000 });
+    const completed = gameReducer(ready, { type: "WRITE", now: 2_000 });
+    const sending = gameReducer(completed, { type: "SEND_EMAIL", now: 2_000 });
     const sent = gameReducer(sending, {
       type: "TICK",
       now: 2_000 + GAME_CONFIG.sendDelayMs,
@@ -398,6 +487,7 @@ describe("game engine: funnel", () => {
       },
     };
     state = gameReducer(state, { type: "WRITE", now: 2_000 });
+    state = gameReducer(state, { type: "SEND_EMAIL", now: 2_000 });
     state = gameReducer(state, { type: "TICK", now: 3_000 });
     const outcome = state.pendingEmailOutcomes[0];
     state = gameReducer(state, { type: "TICK", now: outcome.resolvesAt });
@@ -571,6 +661,7 @@ describe("game engine: funnel", () => {
       emails: [{ ...email, revealedCharacters: email.body.length - 1 }],
     };
     state = gameReducer(state, { type: "WRITE", now: 2_000 });
+    state = gameReducer(state, { type: "SEND_EMAIL", now: 2_000 });
     state = gameReducer(state, { type: "TICK", now: 3_000 });
     const outcome = state.pendingEmailOutcomes[0];
     const messagesBeforeBooking = state.messages;
