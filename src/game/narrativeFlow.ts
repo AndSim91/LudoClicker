@@ -4,7 +4,11 @@ import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts }
 import { GAME_CONFIG } from "./config";
 import { scaleContactGain, scaleCurrencyGain } from "./economy";
 import { startNextCampaign } from "./emailFlow";
-import { applyEquipmentWear, applySwordDamage } from "./equipment";
+import {
+  applyEquipmentWear,
+  applySwordDamage,
+  repairDamagedSwords,
+} from "./equipment";
 import { makeGameId } from "./ids";
 import { canFoundSchool } from "./progression";
 import { nextRandom, randomBetween } from "./random";
@@ -53,9 +57,31 @@ export function processNarrativeEvent(
   const euroDelta = (definition.euroDelta ?? 0) > 0
     ? scaleCurrencyGain(definition.euroDelta ?? 0, gainMultiplier)
     : (definition.euroDelta ?? 0);
-  const summary = definition.euroDelta && definition.euroDelta > 0
+  const baseSummary = definition.euroDelta && definition.euroDelta > 0
     ? `${definition.description} Contributo ricevuto: ${formatCurrency(euroDelta)}.`
     : definition.description;
+  const equipmentEffects = [
+    definition.wearDelta
+      ? `${definition.wearDelta > 0 ? "+" : ""}${definition.wearDelta} carico`
+      : undefined,
+    definition.damagedSwordsDelta
+      ? `+${definition.damagedSwordsDelta} spada rotta`
+      : undefined,
+    definition.repairedSwordsDelta
+      ? `${definition.repairedSwordsDelta} spada riparata`
+      : undefined,
+  ].filter(Boolean);
+  const summary = equipmentEffects.length > 0
+    ? `${baseSummary} Effetto: ${equipmentEffects.join(", ")}.`
+    : baseSummary;
+  const equipmentAfterLoad = applyEquipmentWear(
+    rewardState.state.equipment,
+    definition.wearDelta ?? 0,
+  );
+  const equipmentAfterDamage = applySwordDamage(
+    equipmentAfterLoad,
+    definition.damagedSwordsDelta ?? 0,
+  );
   let nextState: GameState = {
     ...rewardState.state,
     randomSeed: acquired.nextSeed,
@@ -67,9 +93,9 @@ export function processNarrativeEvent(
       ...rewardState.state.school,
       euros: Math.max(0, rewardState.state.school.euros + euroDelta),
     },
-    equipment: applySwordDamage(
-      applyEquipmentWear(rewardState.state.equipment, definition.wearDelta ?? 0),
-      definition.damagedSwordsDelta ?? 0,
+    equipment: repairDamagedSwords(
+      equipmentAfterDamage,
+      definition.repairedSwordsDelta ?? 0,
     ),
     contacts: mergeAcquiredContacts(rewardState.state.contacts, contacts),
     narrative: {

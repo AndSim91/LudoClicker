@@ -35,8 +35,10 @@
 
 .appointment {
   display: grid;
-  grid-template-columns: 68px 3px minmax(0, 1fr);
-  gap: 9px;
+  grid-template-columns: 3px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 9px;
+  row-gap: 4px;
   min-height: 82px;
   padding: 13px 8px;
   transition: background-color 180ms ease, color 180ms ease;
@@ -92,6 +94,8 @@
 }
 
 .appointment-timing {
+  grid-column: 2;
+  grid-row: 1;
   align-self: start;
   font-size: 11px;
   font-weight: 600;
@@ -101,6 +105,8 @@
 }
 
 .appointment > i {
+  grid-column: 1;
+  grid-row: 1 / -1;
   border-radius: 2px;
   background: var(--blue-500);
   transition: background-color 180ms ease;
@@ -154,15 +160,20 @@
   color: var(--blue-700);
 }
 
-.appointment > div {
+.appointment-copy {
   display: flex;
+  grid-column: 2;
+  grid-row: 2;
   min-width: 0;
   flex-direction: column;
   gap: 3px;
 }
 
-.appointment > div > strong {
-  display: block;
+.appointment-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
   overflow: visible;
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -170,16 +181,17 @@
   white-space: normal;
 }
 
-.appointment > div > strong svg {
-  display: inline-block;
+.appointment-title svg {
+  flex: 0 0 auto;
   width: 13px;
   height: 13px;
-  margin-right: 5px;
-  vertical-align: -2px;
+  margin-top: 2px;
 }
 
-.appointment > div > span,
-.appointment > div > small {
+.appointment-title > span,
+.appointment-copy > span,
+.appointment-copy > small {
+  min-width: 0;
   overflow: visible;
   line-height: 1.35;
   overflow-wrap: anywhere;

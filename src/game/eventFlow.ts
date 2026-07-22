@@ -6,9 +6,10 @@ import {
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
-  applyEquipmentWear,
+  completeEquipmentUse,
   getAvailableSwords,
-  synchronizeEquipmentAvailability,
+  releaseSwords,
+  reserveSwords,
 } from "./equipment";
 import { scaleContactGain } from "./economy";
 import { getEventFunnelOutcome } from "./formulas";
@@ -98,8 +99,14 @@ export function startAcquisitionEvent(
       Math.round(
         definition.wearAdded *
           GAME_CONFIG.eventWearMultiplier *
-          (1 - Math.min(0.8, getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"))) *
-          (1 - masteryBonus),
+          (1 - Math.min(
+            GAME_CONFIG.equipmentMaximumUpgradeWearReduction,
+            getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"),
+          )) *
+          (1 - Math.min(
+            GAME_CONFIG.equipmentMaximumEventMasteryWearReduction,
+            masteryBonus,
+          )),
       ),
     ),
     collaboratorId,
@@ -112,10 +119,7 @@ export function startAcquisitionEvent(
     ...state,
     randomSeed: nextSeed,
     school: { ...state.school, euros: state.school.euros - eventCost },
-    equipment: {
-      ...state.equipment,
-      availableSwords: availableSwords - definition.requiredSwords,
-    },
+    equipment: reserveSwords(state.equipment, definition.requiredSwords) ?? state.equipment,
     acquisitionEvents: [...state.acquisitionEvents, event],
     activities: {
       ...state.activities,
@@ -140,10 +144,7 @@ export function cancelAutomatedEventForCollaborator(
   return {
     ...state,
     school: { ...state.school, euros: state.school.euros + event.cost },
-    equipment: synchronizeEquipmentAvailability({
-      ...state.equipment,
-      availableSwords: state.equipment.availableSwords + event.equipmentUsed,
-    }),
+    equipment: releaseSwords(state.equipment, event.equipmentUsed),
     acquisitionEvents: state.acquisitionEvents.filter(
       (candidate) => candidate.id !== event.id,
     ),
@@ -179,14 +180,9 @@ export function resolveAcquisitionEvent(
     randomSeed: acquired.nextSeed,
     legendaryCollaborators: addLegendaryEncounters(rewardState.legendaryCollaborators, contacts),
     contacts: mergeAcquiredContacts(rewardState.contacts, contacts),
-    equipment: applyEquipmentWear(
-      {
-        ...rewardState.equipment,
-        availableSwords: Math.min(
-          rewardState.equipment.totalSwords,
-          rewardState.equipment.availableSwords + (event.equipmentUsed ?? 0),
-        ),
-      },
+    equipment: completeEquipmentUse(
+      rewardState.equipment,
+      event.equipmentUsed ?? 0,
       event.wearAdded ?? 0,
     ),
     acquisitionEvents: rewardState.acquisitionEvents.map((candidate) =>

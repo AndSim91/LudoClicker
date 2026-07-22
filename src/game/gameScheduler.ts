@@ -50,7 +50,7 @@ export function needsAutomationHeartbeat(state: GameState): boolean {
       case "social":
         return state.unlocks.social;
       case "equipment":
-        return state.equipment.wear > 0;
+        return state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
       case "events":
       case "instructor":
         // Questi ruoli possono avviare nuovo lavoro dopo un cambio di stato.
@@ -84,7 +84,10 @@ export function getNextGameDeadline(state: GameState): number {
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(getScheduledTrials(state.scheduledTrials), (trial) => trial.resolvesAt),
+    earliest(
+      getScheduledTrials(state.scheduledTrials),
+      (trial) => trial.equipmentUsed ? trial.resolvesAt : trial.startsAt,
+    ),
   );
   nextDeadline = earlier(
     nextDeadline,
@@ -92,13 +95,20 @@ export function getNextGameDeadline(state: GameState): number {
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(getPeopleInTraining(state.contacts), (contact) => contact.training?.completesAt),
+    earliest(
+      getPeopleInTraining(state.contacts),
+      (contact) => contact.training?.status === "waitingForEquipment"
+        ? undefined
+        : contact.training?.completesAt,
+    ),
   );
   nextDeadline = earlier(
     nextDeadline,
     earliest(
       getPeopleInTraining(state.collaborators),
-      (collaborator) => collaborator.training?.completesAt,
+      (collaborator) => collaborator.training?.status === "waitingForEquipment"
+        ? undefined
+        : collaborator.training?.completesAt,
     ),
   );
 

@@ -6,6 +6,7 @@ import {
   getCollaboratorProductivity,
   getFormDefinition,
   getFormTrainingCount,
+  getAgonistCourseRequiredSwords,
   getInstructorConversionCost,
   getInstructorFormCost,
   getInstructorQualificationCost,
@@ -27,6 +28,11 @@ import { getContactBaseStats } from "./athleteStats";
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
+import {
+  completeEquipmentUse,
+  getAvailableSwords,
+  reserveSwords,
+} from "./equipment";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
 import { getPeopleInTraining } from "./runtimeIndexes";
@@ -174,6 +180,33 @@ export function startAgonistCourse(
     state.school.euros < cost
   ) return state;
 
+  const requiredSwords = getAgonistCourseRequiredSwords(student.forms);
+  const reservedEquipment = reserveSwords(state.equipment, requiredSwords);
+  if (!reservedEquipment) {
+    const waitingTraining = {
+      formId: AGONIST_COURSE_ID,
+      startedAt: now,
+      completesAt: now,
+      status: "waitingForEquipment" as const,
+      requestedInstructorId: instructor.id,
+      equipmentUsed: requiredSwords,
+      wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
+    };
+    return {
+      ...state,
+      contacts: member
+        ? state.contacts.map((contact) => contact.id === member.id
+          ? { ...contact, training: waitingTraining }
+          : contact)
+        : state.contacts,
+      collaborators: collaborator
+        ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+          ? { ...candidate, training: waitingTraining }
+          : candidate)
+        : state.collaborators,
+    };
+  }
+
   const baseDuration = arenaLevel >= 2
     ? GAME_CONFIG.agonistCourseImprovedDurationMs
     : GAME_CONFIG.agonistCourseDurationMs;
@@ -186,10 +219,14 @@ export function startAgonistCourse(
       Math.round(baseDuration / trainingSpeed),
     ),
     instructorId: instructor.id,
+    status: "running" as const,
+    equipmentUsed: requiredSwords,
+    wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
     agonistCourseSlotsConsumed: remainingAnnualSlots,
   };
   return refreshInstructorTrainingDurations({
     ...state,
+    equipment: reservedEquipment,
     school: { ...state.school, euros: roundCurrency(state.school.euros - cost) },
     contacts: state.contacts.map((contact) => contact.id === athleteContact.id
       ? {
@@ -273,6 +310,7 @@ export function refreshInstructorTrainingDurations(
     state.collaborators,
   ).some((collaborator) =>
     collaborator.assignment === "instructor" &&
+    collaborator.training!.status !== "waitingForEquipment" &&
     isInstructorForm(collaborator.training!.formId)
   );
   if (!hasInstructorQualificationInProgress) return state;
@@ -283,6 +321,7 @@ export function refreshInstructorTrainingDurations(
     if (
       collaborator.assignment !== "instructor" ||
       !training ||
+      training.status === "waitingForEquipment" ||
       !isInstructorForm(training.formId)
     ) return collaborator;
 
@@ -410,6 +449,30 @@ export function startFormTraining(
     !initialBranchCompatible ||
     state.school.euros < trainingCost
   ) return state;
+  const reservedEquipment = reserveSwords(state.equipment, definition.requiredSwords);
+  if (!reservedEquipment) {
+    const waitingTraining = {
+      formId,
+      startedAt: now,
+      completesAt: now,
+      status: "waitingForEquipment" as const,
+      equipmentUsed: definition.requiredSwords,
+      wearPerSword: definition.loadPerSword,
+    };
+    return {
+      ...state,
+      contacts: member
+        ? state.contacts.map((candidate) => candidate.id === member.id
+          ? { ...candidate, training: waitingTraining }
+          : candidate)
+        : state.contacts,
+      collaborators: collaborator
+        ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+          ? { ...candidate, training: waitingTraining }
+          : candidate)
+        : state.collaborators,
+    };
+  }
   const instructorTeachingSpeed = instructor
     ? 1 + getUpgradeEffectTotal(state.upgrades, "instructorTeachingSpeed")
     : 1;
@@ -429,6 +492,9 @@ export function startFormTraining(
       ),
     ),
     instructorId: instructor?.id,
+    status: "running" as const,
+    equipmentUsed: definition.requiredSwords,
+    wearPerSword: definition.loadPerSword,
     includesInstructorCertification: instructorTrack || undefined,
     instructorTrainingDurationMultiplier: instructorTrack
       ? instructorTrainingDurationMultiplier
@@ -437,6 +503,7 @@ export function startFormTraining(
   const formTrainingYearCount = getFormTrainingCount(student, trainingYear) + 1;
   const nextState = {
     ...state,
+    equipment: reservedEquipment,
     school: {
       ...state.school,
       euros: roundCurrency(state.school.euros - trainingCost),
@@ -491,7 +558,16 @@ export function resolveFormTraining(
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
   const member = state.contacts.find((candidate) => candidate.id === personId);
   const student = collaborator ?? member;
-  if (!student?.training || student.training.completesAt > now) return state;
+  if (
+    !student?.training ||
+    student.training.status === "waitingForEquipment" ||
+    student.training.completesAt > now
+  ) return state;
+  const completedEquipment = completeEquipmentUse(
+    state.equipment,
+    student.training.equipmentUsed ?? 0,
+    (student.training.equipmentUsed ?? 0) * (student.training.wearPerSword ?? 0),
+  );
   const completedFormId = student.training.formId;
   if (isAgonistCourse(completedFormId)) {
     const athleteContact = collaborator
@@ -508,6 +584,7 @@ export function resolveFormTraining(
     const totalCompletions = (athleteContact.agonistCourseCompletions ?? 0) + 1;
     let nextState: GameState = {
       ...state,
+      equipment: completedEquipment,
       randomSeed: nextSeed,
       contacts: state.contacts.map((contact) => contact.id === athleteContact.id
           ? {
@@ -557,6 +634,7 @@ export function resolveFormTraining(
       };
   let nextState: GameState = {
     ...state,
+    equipment: completedEquipment,
     randomSeed: preferenceResult.nextSeed,
     contacts: member && !collaborator
       ? state.contacts.map((candidate) => candidate.id === member.id
@@ -621,6 +699,74 @@ export function resolveFormTraining(
   return qualifiedMember
     ? dependencies.recruitCollaborator(nextState, qualifiedMember, now)
     : nextState;
+}
+
+export function processWaitingTrainings(
+  state: GameState,
+  now: number,
+  dependencies: TrainingFlowDependencies,
+): GameState {
+  const waitingIds = [...state.contacts, ...state.collaborators]
+    .filter((person) => person.training?.status === "waitingForEquipment")
+    .sort((left, right) =>
+      (left.training?.startedAt ?? 0) - (right.training?.startedAt ?? 0) ||
+      left.id.localeCompare(right.id)
+    )
+    .map((person) => person.id);
+
+  let nextState = state;
+  for (const personId of waitingIds) {
+    const contact = nextState.contacts.find((candidate) => candidate.id === personId);
+    const collaborator = nextState.collaborators.find((candidate) => candidate.id === personId);
+    const person = collaborator ?? contact;
+    const waiting = person?.training;
+    if (!person || waiting?.status !== "waitingForEquipment") continue;
+
+    const requiredSwords = waiting.equipmentUsed ?? 1;
+    if (getAvailableSwords(nextState.equipment) < requiredSwords) continue;
+
+    nextState = {
+      ...nextState,
+      contacts: contact
+        ? nextState.contacts.map((candidate) => candidate.id === personId
+          ? { ...candidate, training: undefined }
+          : candidate)
+        : nextState.contacts,
+      collaborators: collaborator
+        ? nextState.collaborators.map((candidate) => candidate.id === personId
+          ? { ...candidate, training: undefined }
+          : candidate)
+        : nextState.collaborators,
+    };
+
+    nextState = isAgonistCourse(waiting.formId)
+      ? startAgonistCourse(
+          nextState,
+          personId,
+          waiting.requestedInstructorId ?? "",
+          now,
+        )
+      : startFormTraining(nextState, personId, waiting.formId, now, dependencies);
+
+    const restarted = nextState.collaborators.find((candidate) => candidate.id === personId) ??
+      nextState.contacts.find((candidate) => candidate.id === personId);
+    if (!restarted?.training) {
+      nextState = {
+        ...nextState,
+        contacts: contact
+          ? nextState.contacts.map((candidate) => candidate.id === personId
+            ? { ...candidate, training: waiting }
+            : candidate)
+          : nextState.contacts,
+        collaborators: collaborator
+          ? nextState.collaborators.map((candidate) => candidate.id === personId
+            ? { ...candidate, training: waiting }
+            : candidate)
+          : nextState.collaborators,
+      };
+    }
+  }
+  return nextState;
 }
 
 export function getAutomaticFormCandidates(student: {

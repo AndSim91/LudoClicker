@@ -89,11 +89,15 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
   for (const trial of selectDayTrials(state, now)) {
     const contact = contactsById.get(trial.contactId);
     const completed = trial.status === "completed";
-    const expiresAt = completed
-      ? trial.resolvesAt + DAY_NOTIFICATION_VISIBILITY_MS
+    const cancelled = trial.status === "cancelled";
+    const terminalTimestamp = cancelled ? trial.startsAt : trial.resolvesAt;
+    const expiresAt = completed || cancelled
+      ? terminalTimestamp + DAY_NOTIFICATION_VISIBILITY_MS
       : undefined;
     if (expiresAt !== undefined && now >= expiresAt) continue;
-    const phase: DayNotificationPhase = completed
+    const phase: DayNotificationPhase = cancelled
+      ? "lost"
+      : completed
       ? contact?.status === "enrolled" ? "enrolled" : "lost"
       : now < trial.startsAt ? "scheduled" : "in-progress";
     notifications.push({
@@ -101,8 +105,10 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
       kind: "trial",
       phase,
       title: "Lezione di prova",
-      detail: "Ordine delle Onde",
-      timestamp: completed ? trial.resolvesAt : trial.startsAt,
+      detail: cancelled
+        ? "Annullata: nessuna spada disponibile"
+        : "Ordine delle Onde",
+      timestamp: completed || cancelled ? terminalTimestamp : trial.startsAt,
       startsAt: trial.startsAt,
       expiresAt,
       person: contact

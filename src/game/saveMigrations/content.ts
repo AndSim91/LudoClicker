@@ -7,7 +7,6 @@ import { getEmailPresentationLevel } from "../../content/emailPresentation";
 import { TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
 import { createInitialUpgradeLevels } from "../../content/upgrades";
 import { GAME_CONFIG } from "../config";
-import { synchronizeEquipmentAvailability } from "../equipment";
 import { departMembers } from "../membershipFlow";
 import type { GameState, UpgradeId } from "../types";
 import type { MigratableState } from "./types";
@@ -31,14 +30,30 @@ export function migrateContentState(state: MigratableState): MigratableState {
   }
 
   if (migrated.version === 27) {
+    const totalSwords = Math.max(0, Math.floor(
+      migrated.equipment?.totalSwords ?? GAME_CONFIG.initialSwords,
+    ));
+    const legacyWear = Math.max(0, migrated.equipment?.wear ?? 0);
+    const damagedSwords = Math.min(
+      totalSwords,
+      Math.max(
+        Math.floor(migrated.equipment?.damagedSwords ?? 0),
+        Math.floor(totalSwords * Math.min(100, legacyWear) / 100),
+      ),
+    );
     migrated = {
       ...migrated,
       version: 28,
       equipment: migrated.equipment
-        ? synchronizeEquipmentAvailability({
+        ? {
             ...migrated.equipment,
-            damagedSwords: migrated.equipment.damagedSwords ?? 0,
-          })
+            totalSwords,
+            damagedSwords,
+            availableSwords: Math.max(
+              0,
+              Math.min(migrated.equipment.availableSwords, totalSwords - damagedSwords),
+            ),
+          }
         : {
             totalSwords: GAME_CONFIG.initialSwords,
             availableSwords: GAME_CONFIG.initialSwords,

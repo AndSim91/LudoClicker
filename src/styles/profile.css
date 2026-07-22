@@ -530,8 +530,101 @@
   text-align: right;
 }
 
-.event-equipment-content .equipment-wear {
-  height: 5px;
+.equipment-condition {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.equipment-condition-bar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  gap: 2px;
+}
+
+.equipment-sword-cell {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  flex: 1 1 0;
+  border: 1px solid var(--line-strong);
+  background: var(--equipment-healthy);
+}
+
+.equipment-sword-cell:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.equipment-sword-cell:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.equipment-sword-cell:only-child {
+  border-radius: 4px;
+}
+
+.equipment-sword-cell.is-broken {
+  border-color: var(--equipment-broken);
+  background: var(--equipment-broken);
+}
+
+.equipment-sword-cell.is-reserved {
+  border-color: var(--equipment-reserved);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--equipment-reserved) 82%, transparent) 0 4px,
+      var(--equipment-reserved) 4px 8px
+    );
+}
+
+.equipment-sword-load {
+  display: block;
+  height: 100%;
+  background: var(--equipment-load);
+}
+
+.equipment-condition-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 14px;
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.equipment-condition-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.equipment-condition-legend i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--equipment-healthy);
+}
+
+.equipment-condition-legend .is-load i {
+  border-color: var(--equipment-load);
+  background: var(--equipment-load);
+}
+
+.equipment-condition-legend .is-broken i {
+  border-color: var(--equipment-broken);
+  background: var(--equipment-broken);
+}
+
+.equipment-condition-legend .is-reserved i {
+  border-color: var(--equipment-reserved);
+  background: var(--equipment-reserved);
+}
+
+.equipment-condition-legend strong {
+  color: var(--ink);
 }
 
 .event-equipment-actions {

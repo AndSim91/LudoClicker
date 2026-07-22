@@ -38,7 +38,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 0,
     requiredMembers: 0,
     requiredSwords: 2,
-    wearAdded: 3,
+    wearAdded: 5,
   },
   {
     id: "organized-flyering",
@@ -57,7 +57,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 0,
     requiredMembers: 1,
     requiredSwords: 2,
-    wearAdded: 2,
+    wearAdded: 0,
   },
   {
     id: "public-demo",
@@ -76,7 +76,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 5,
     requiredMembers: 2,
     requiredSwords: 4,
-    wearAdded: 6,
+    wearAdded: 10,
   },
   {
     id: "sports-stand",
@@ -95,7 +95,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 10,
     requiredMembers: 4,
     requiredSwords: 6,
-    wearAdded: 8,
+    wearAdded: 20,
   },
   {
     id: "local-event",
@@ -114,7 +114,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 20,
     requiredMembers: 6,
     requiredSwords: 8,
-    wearAdded: 9,
+    wearAdded: 30,
   },
   {
     id: "school-open-day",
@@ -133,7 +133,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 35,
     requiredMembers: 8,
     requiredSwords: 10,
-    wearAdded: 10,
+    wearAdded: 50,
   },
   {
     id: "themed-event",
@@ -152,7 +152,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 60,
     requiredMembers: 12,
     requiredSwords: 12,
-    wearAdded: 12,
+    wearAdded: 75,
   },
   {
     id: "burtomics",
@@ -171,7 +171,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 90,
     requiredMembers: 16,
     requiredSwords: 16,
-    wearAdded: 13,
+    wearAdded: 100,
   },
   {
     id: "genova-comics",
@@ -190,7 +190,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 120,
     requiredMembers: 20,
     requiredSwords: 20,
-    wearAdded: 14,
+    wearAdded: 125,
   },
   {
     id: "megacon-genova",
@@ -209,7 +209,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 180,
     requiredMembers: 28,
     requiredSwords: 24,
-    wearAdded: 16,
+    wearAdded: 250,
   },
   {
     id: "lucca-comics",
@@ -228,7 +228,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 250,
     requiredMembers: 40,
     requiredSwords: 30,
-    wearAdded: 18,
+    wearAdded: 350,
   },
   {
     id: "milan-games-week",
@@ -247,7 +247,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     unlockMembers: 350,
     requiredMembers: 50,
     requiredSwords: 36,
-    wearAdded: 20,
+    wearAdded: 500,
   },
 ];
 

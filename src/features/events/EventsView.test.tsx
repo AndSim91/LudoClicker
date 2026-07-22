@@ -11,16 +11,27 @@ describe("EventsView", () => {
     const initial = createInitialState(1_000);
     const onMaintainEquipment = vi.fn();
 
-    render(
+    const { container } = render(
       <EventsView
-        state={{ ...initial, school: { ...initial.school, euros: 100 }, equipment: { ...initial.equipment, wear: 45 } }}
+        state={{
+          ...initial,
+          school: { ...initial.school, euros: 100 },
+          equipment: { ...initial.equipment, availableSwords: 5, wear: 45 },
+        }}
         onStart={() => undefined}
         onMaintainEquipment={onMaintainEquipment}
       />,
     );
 
-    expect(screen.getByText("Danno da riparare")).toBeVisible();
-    expect(screen.getByRole("progressbar", { name: "Usura attrezzatura" })).toHaveAttribute("aria-valuenow", "45");
+    expect(screen.getByText("Manutenzione consigliata")).toBeVisible();
+    expect(screen.getByText("5/6 spade disponibili")).toBeVisible();
+    expect(screen.getByText("Usura complessiva 45/600")).toBeVisible();
+    expect(screen.getByRole("progressbar", {
+      name: "Usura complessiva attrezzatura",
+    })).toHaveAttribute("aria-valuenow", "45");
+    expect(container.querySelectorAll(".equipment-sword-cell")).toHaveLength(6);
+    expect(container.querySelectorAll(".equipment-sword-cell.is-reserved")).toHaveLength(1);
+    expect(container.querySelectorAll(".equipment-sword-load")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: /Esegui manutenzione/ }));
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
@@ -31,7 +42,7 @@ describe("EventsView", () => {
 
     render(
       <EventsView
-        state={{ ...initial, school: { ...initial.school, euros: 50 }, equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 } }}
+        state={{ ...initial, school: { ...initial.school, euros: 250 }, equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 } }}
         onStart={() => undefined}
         onMaintainEquipment={onMaintainEquipment}
       />,
@@ -99,6 +110,38 @@ describe("EventsView", () => {
       .not.toBeInTheDocument();
     expect(screen.queryByText(/Previsione:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/persone →/)).not.toBeInTheDocument();
+  });
+
+  it("shows broken, reserved, worn and healthy capacity in separate sword blocks", () => {
+    const initial = createInitialState(1_000);
+    const { container } = render(
+      <EventsView
+        state={{
+          ...initial,
+          equipment: {
+            ...initial.equipment,
+            availableSwords: 3,
+            damagedSwords: 1,
+            wear: 45,
+          },
+        }}
+        onStart={() => undefined}
+      />,
+    );
+
+    const bar = screen.getByRole("progressbar", {
+      name: "Usura complessiva attrezzatura",
+    });
+    expect(bar).toHaveAttribute("aria-valuemax", "600");
+    expect(bar).toHaveAttribute("aria-valuenow", "145");
+    expect(bar).toHaveAttribute(
+      "aria-valuetext",
+      "1 spada rotta, 2 spade riservate, 45 punti di carico normale, 255 punti sani riparabili",
+    );
+    expect(container.querySelectorAll(".equipment-sword-cell")).toHaveLength(6);
+    expect(container.querySelectorAll(".equipment-sword-cell.is-broken")).toHaveLength(1);
+    expect(container.querySelectorAll(".equipment-sword-cell.is-reserved")).toHaveLength(2);
+    expect(container.querySelectorAll(".equipment-sword-cell.is-available")).toHaveLength(3);
   });
 
   it("shows the three-second duration only while the Events tutorial is pending", () => {
@@ -200,15 +243,15 @@ describe("EventsView", () => {
     const equipmentPanel = screen.getByRole("region", { name: "Risorse disponibili per gli eventi" });
     expect(within(equipmentPanel).getByText("5/6 spade disponibili")).toBeVisible();
     expect(screen.getByText("1 spada danneggiata · ripara per usarle agli eventi")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Ripara 1 spada" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Servono almeno/ })).toBeDisabled();
   });
 
-  it("shows no swords available at full wear", () => {
+  it("shows no swords available when every sword is damaged", () => {
     const initial = createInitialState(1_000);
     render(<EventsView
       state={{
         ...initial,
-        equipment: { ...initial.equipment, wear: 100, damagedSwords: 0 },
+        equipment: { ...initial.equipment, availableSwords: 0, wear: 0, damagedSwords: 6 },
       }}
       onStart={() => undefined}
     />);

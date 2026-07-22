@@ -316,18 +316,50 @@ scuola. Sono una sottocategoria degli Iscritti e non una valuta separata.
 Le spade della scuola sono gestite come inventario operativo:
 
 - disponibili;
-- assegnate a un evento;
-- da controllare;
+- riservate da corsi, lezioni di prova o eventi;
+- cariche di usura;
 - in manutenzione;
-- temporaneamente inutilizzabili.
+- rotte e temporaneamente inutilizzabili.
 
-Le spade impongono una capienza operativa: quelle assegnate a un evento non sono
-disponibili fino alla sua conclusione. Un valore di usura più alto riduce
-inoltre l'efficacia degli eventi.
+Le spade impongono una capienza operativa: quelle riservate non sono disponibili
+fino alla conclusione dell'attività. Corsi e Corso Agonisti restano in attesa se
+non possono riservare tutte le spade richieste, senza consumare denaro, tempo o
+capienza dell'Istruttore. Una lezione di prova viene invece annullata allo
+scadere dell'attesa; un evento non può essere avviato.
 
-I collaboratori assegnati all'Attrezzatura riducono progressivamente l'usura.
-Quando l'usura e' a zero, continuano riparando le spade danneggiate: ogni spada
-richiede tre volte il tempo base di riparazione.
+Il carico viene applicato soltanto alla conclusione riuscita dell'attività ed è
+aggregato. Ogni 100 punti rompe una spada; più soglie superate rompono più spade
+e tutto il carico eccedente viene conservato. La manutenzione preventiva costa
+€2 per punto, mentre una spada già rotta costa €250 e torna da 100 a 0.
+
+I collaboratori assegnati all'Attrezzatura riparano prima le spade rotte e poi
+il carico residuo. Pagano il 50% dei costi manuali: €125 per spada e €1 per
+punto. Producono un punto-lavoro ogni 3 secondi base; una spada completa richiede
+150 punti-lavoro, pur ripristinando 100 punti di condizione.
+
+La manutenzione può procedere mentre corsi, prove o eventi sono attivi, ma
+interviene soltanto sulle spade non riservate. Le spade rotte sono sempre
+riparabili perché non possono essere in uso. Se tutte le spade sane sono
+impegnate, il carico residuo resta in attesa; le riparazioni parziali già
+possibili non modificano il numero di spade prenotate.
+
+L'interfaccia rappresenta la capacità complessiva come una barra divisa in un
+blocco da 100 punti per ogni spada della scuola. Il rosso indica una spada
+rotta, il grigio una spada riservata e temporaneamente non riparabile, l'oro il
+carico normale ancora rimovibile e lo spazio vuoto la condizione sana residua.
+Il riepilogo numerico mostra l'usura totale includendo 100 punti per ogni spada
+rotta.
+
+Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
+
+| Evento | Descrizione breve | Effetto |
+| ------ | ----------------- | -------: |
+| Un piccolo disastro | Non so cosa sia successo, non sono stato io! | +15 carico e 1 spada rotta |
+| Spada caduta: Fanne 5 | Capita a tutti prima o poi... | +5 carico |
+| Il portaspade di legno perfetto | Direttamente dall'Ordine del Vento di Trieste, è stupendo! | -20 carico |
+| Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare... | -30 carico e 1 spada riparata |
+| Si può avere nera? | Certe domande dovrebbero non essere mai fatte. | +15 carico |
+| Un Pini al lavoro | Darth Modificus alla riscossa! | -30 carico |
 
 ### 5.7 Reputazione di rete
 
@@ -520,6 +552,12 @@ risposte dei destinatari:
 Le prenotazioni delle lezioni di prova non generano messaggi in Posta in arrivo:
 sono visibili nel Calendario e nello stato dell'email inviata.
 
+Nel prototipo l'attesa è fissata a 30 secondi. La prova ordinaria dura 15
+secondi, riserva una spada e aggiunge 1 punto di carico alla conclusione. La
+prova di un Leggendario Segreto dura 30 secondi e aggiunge 20 punti. Se al
+termine dell'attesa manca una spada, la prova è annullata come una mancata
+iscrizione.
+
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 soltanto nelle statistiche aggregate del funnel.
 
@@ -564,20 +602,20 @@ All'inizio sono visibili soltanto Sparring e Volantinaggio; l'interfaccia
 anticipa esclusivamente il prossimo sblocco e non mostra previsioni numeriche
 sui contatti.
 
-| Evento                              | Sblocco |   Costo | Impiegati | Spade | Potenzialità |
-| ----------------------------------- | ------: | ------: | --------: | ----: | -----------: |
-| Sparring al parco                   |       0 |      €0 |         0 |     2 |  molto bassa |
-| Volantinaggio organizzato benissimo |       0 |     €40 |         1 |     2 |  molto bassa |
-| Lezioni all'aperto                  |       5 |    €120 |         2 |     4 |        bassa |
-| Evento sportivo                     |      10 |    €240 |         4 |     6 |        bassa |
-| Mele Comics                         |      20 |    €400 |         6 |     8 |        media |
-| CairoMix                            |      35 |    €640 |         8 |    10 |        media |
-| CogoComix                           |      60 |  €1.200 |        12 |    12 |         alta |
-| Burtomics                           |      90 |  €1.800 |        16 |    16 |         alta |
-| Genova Comics & Games               |     120 |  €2.600 |        20 |    20 |         alta |
-| Megacon Genova                      |     180 |  €4.200 |        28 |    24 |    altissima |
-| Lucca Comics & Games                |     250 |  €7.000 |        40 |    30 |    altissima |
-| Milan Games Week & Cartoomics       |     350 | €10.000 |        50 |    36 |    altissima |
+| Evento                              | Sblocco |   Costo | Impiegati | Spade | Carico | Potenzialità |
+| ----------------------------------- | ------: | ------: | --------: | ----: | -----: | -----------: |
+| Sparring al parco                   |       0 |      €0 |         0 |     2 |      5 |  molto bassa |
+| Volantinaggio organizzato benissimo |       0 |     €40 |         1 |     2 |      0 |  molto bassa |
+| Lezioni all'aperto                  |       5 |    €120 |         2 |     4 |     10 |        bassa |
+| Evento sportivo                     |      10 |    €240 |         4 |     6 |     20 |        bassa |
+| Mele Comics                         |      20 |    €400 |         6 |     8 |     30 |        media |
+| CairoMix                            |      35 |    €640 |         8 |    10 |     50 |        media |
+| CogoComix                           |      60 |  €1.200 |        12 |    12 |     75 |         alta |
+| Burtomics                           |      90 |  €1.800 |        16 |    16 |    100 |         alta |
+| Genova Comics & Games               |     120 |  €2.600 |        20 |    20 |    125 |         alta |
+| Megacon Genova                      |     180 |  €4.200 |        28 |    24 |    250 |    altissima |
+| Lucca Comics & Games                |     250 |  €7.000 |        40 |    30 |    350 |    altissima |
+| Milan Games Week & Cartoomics       |     350 | €10.000 |        50 |    36 |    500 |    altissima |
 
 ### 8.2 Persone incontrate e contatti ottenuti
 
@@ -835,7 +873,25 @@ Regole:
 - gli altri rami preferiti restano percorsi facoltativi che l'automazione può
   completare dopo la Forma 7;
 - la formazione richiede Euro e/o tempo, ma non livelli personali;
+- ogni corso riserva le spade per tutta la sua durata e applica il carico solo
+  al completamento;
 - le descrizioni definitive dovranno usare terminologia LudoSport approvata.
+
+| Corso o Forma | Spade per atleta | Carico per spada |
+| ------------- | ----------------: | ----------------: |
+| Forma 1, Corso X, Forma 2 | 1 | 5 |
+| Corso Y | 2 | 5 |
+| Forme 3 e 4 Spada Lunga | 1 | 5 |
+| Forme 3 e 4 Staffa o Doppie Spade | 2 | 5 |
+| Forma 5 Spada Lunga | 1 | 16 |
+| Forma 5 Staffa o Doppie Spade | 2 | 16 |
+| Forma 6 | 2 | 10 |
+| Forma 7 | 3 | 10 |
+| Corso Agonisti | da 1 a 3 secondo le Forme note | 10 |
+
+Forma 5 ha intenzionalmente il carico per spada più alto del gioco. Forma 6 e
+Forma 7 possono produrre più carico totale perché impiegano rispettivamente due
+e tre spade, ma non superano Forma 5 nell'aggressività della singola arma.
 
 Costi base: Forma 1 €25, Corso X €50, Forma 2 €100, Corso Y €250, Forma 3 €600,
 Forma 4 €1.000, Forma 5 €1.500, Forma 6 €2.200, Forma 7 €3.000. Lo scoglio
@@ -2222,8 +2278,8 @@ qualunque funzione che possa far credere di inviare davvero email.
   Leggendari dall'iscrizione.
 - I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni,
   social e spade.
-- I collaboratori assegnati alle spade riparano prima l'usura e poi le spade
-  danneggiate; una riparazione completa richiede tre cicli base.
+- I collaboratori assegnati alle spade riparano prima le spade rotte e poi il
+  carico residuo; una spada richiede 150 punti-lavoro da 3 secondi ciascuno.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato
   liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
@@ -2232,7 +2288,8 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Carisma e Scrittura sono statistiche fondamentali.
 - Accoglienza, Velocità, Social, Attrezzatura e Organizzazione completano il
   sistema.
-- L'usura delle spade aumenta soprattutto tramite eventi narrativi.
+- Il carico delle spade aumenta tramite corsi, prove, eventi e imprevisti
+  narrativi; ogni soglia di 100 rompe una spada.
 - I potenziamenti non sono rimborsabili, ma nel tempo si può acquistare tutto.
 - Le Forme seguono `1 → X → 2 → Y → 3/4/5 → 6 → 7`, con rami Spada Lunga, Staffa
   e Doppia spada corta.

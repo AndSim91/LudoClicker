@@ -24,6 +24,10 @@ export interface FormTraining {
   formId: TrainingCourseId;
   startedAt: number;
   completesAt: number;
+  status?: "running" | "waitingForEquipment";
+  requestedInstructorId?: string;
+  equipmentUsed?: number;
+  wearPerSword?: number;
   instructorId?: string;
   includesInstructorCertification?: boolean;
   instructorTrainingDurationMultiplier?: number;
@@ -89,7 +93,9 @@ export interface ScheduledTrial {
   startsAt: number;
   resolvesAt: number;
   resultSeed: number;
-  status: "scheduled" | "completed";
+  status: "scheduled" | "completed" | "cancelled";
+  equipmentUsed?: number;
+  cancellationReason?: "equipment";
   secretLegendaryId?: SecretLegendaryId;
   tutorialSceneId?: "first-event";
 }
@@ -228,6 +234,9 @@ export type NarrativeEventId =
   | "missed-renewal"
   | "unexpected-repair"
   | "calendar-confusion"
+  | "new-sabersmith"
+  | "black-sword-request"
+  | "pini-at-work"
   | "spreadsheet-fan-club"
   | "too-many-volunteers"
   | "perfect-rack";

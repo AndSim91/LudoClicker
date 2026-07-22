@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameTime } from "../../game/GameTimeContext";
@@ -9,6 +10,7 @@ import {
   getAvailableSwords,
   getEffectiveDamagedSwords,
   getEquipmentMaintenanceCost,
+  getEquipmentMinimumMaintenanceCost,
 } from "../../game/equipment";
 import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import {
@@ -76,17 +78,25 @@ export function EventsView({
   const availableMembers = selectAvailableEventMembers(state);
   const availableSwords = getAvailableSwords(state.equipment);
   const damagedSwords = getEffectiveDamagedSwords(state.equipment);
+  const totalEquipmentLoad =
+    damagedSwords * GAME_CONFIG.equipmentBreakLoad + state.equipment.wear;
+  const totalEquipmentCapacity =
+    state.equipment.totalSwords * GAME_CONFIG.equipmentBreakLoad;
   const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
+  const minimumMaintenanceCost = getEquipmentMinimumMaintenanceCost(state.equipment);
   const needsMaintenance = state.equipment.wear > 0 || damagedSwords > 0;
+  const hasRepairableEquipment = damagedSwords > 0 ||
+    (state.equipment.wear > 0 && availableSwords > 0);
   const canMaintain =
-    needsMaintenance &&
-    state.school.euros >= maintenanceCost &&
-    runningEvents.length === 0;
+    hasRepairableEquipment &&
+    state.school.euros >= minimumMaintenanceCost;
   let maintenanceLabel = `Esegui manutenzione · ${formatCurrency(maintenanceCost)}`;
   if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
-  else if (runningEvents.length > 0) maintenanceLabel = "Attendi la fine dell'evento";
-  else if (state.school.euros < maintenanceCost) {
-    maintenanceLabel = `Servono ${formatCurrency(maintenanceCost)}`;
+  else if (!hasRepairableEquipment) maintenanceLabel = "Tutte le spade sane sono in uso";
+  else if (state.school.euros < minimumMaintenanceCost) {
+    maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
+  } else if (state.school.euros < maintenanceCost) {
+    maintenanceLabel = `Manutenzione parziale · ${formatCurrency(state.school.euros)}`;
   }
   const canBuyOfficialSword = state.school.euros >= GAME_CONFIG.officialSwordCost;
   const swordPurchaseLabel = canBuyOfficialSword
@@ -114,11 +124,11 @@ export function EventsView({
               <strong>{availableSwords}/{state.equipment.totalSwords} spade disponibili</strong>
               <div className="event-equipment-details">
                 <small>{equipmentCondition(state.equipment.wear, damagedSwords)}</small>
-                <small>Usura {state.equipment.wear}%</small>
+                <small>Usura complessiva {Math.round(totalEquipmentLoad)}/{totalEquipmentCapacity}</small>
                 {damagedSwords > 0 ? <small>{quantityLabel(damagedSwords, "spada danneggiata", "spade danneggiate")} · ripara per usarle agli eventi</small> : null}
               </div>
             </div>
-            <ProgressBar className="equipment-wear" label="Usura attrezzatura" value={state.equipment.wear} />
+            <EquipmentConditionBar equipment={state.equipment} />
             <div className="event-equipment-actions">
               <button className="event-equipment-maintenance" type="button" disabled={!canMaintain} onClick={onMaintainEquipment}>{maintenanceLabel}</button>
               {showSupplier ? <div className="event-equipment-supplier">

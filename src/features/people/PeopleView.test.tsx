@@ -627,7 +627,7 @@ describe("PeopleView", () => {
       "Rendimento: 0,00 €/s | <0,01/s Lezioni di prova | <0,01/s Nuovi contatti",
     )).toBeVisible();
     expect(screen.queryByText(/Prossimo rendimento|Ciclo base/)).not.toBeInTheDocument();
-    expect(screen.getByText("Usura attrezzatura: 42%")).toBeVisible();
+    expect(screen.getByText("Carico attrezzatura: 42/100")).toBeVisible();
     expect(screen.getAllByRole("progressbar")).toHaveLength(10);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(5);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
@@ -667,13 +667,13 @@ describe("PeopleView", () => {
     );
 
     const progress = screen.getByRole("progressbar", {
-      name: "Progresso riduzione usura",
+      name: "Progresso riduzione carico",
     });
-    expect(progress).toHaveAttribute("aria-valuenow", "25");
+    expect(progress).toHaveAttribute("aria-valuenow", "36.667");
 
     act(() => vi.advanceTimersByTime(250));
 
-    expect(progress).toHaveAttribute("aria-valuenow", "27.5");
+    expect(progress).toHaveAttribute("aria-valuenow", "45");
   });
 
   it("shows the Corso Agonisti total in the athlete row instead of the inbox", () => {
@@ -1047,7 +1047,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Hai raggiunto il limite di Forme per quest'anno")).toBeVisible();
+    expect(screen.getByText("Corsi annuali completati")).toBeVisible();
     expect(screen.queryByText("Percorso completato alla Forma 7")).not.toBeInTheDocument();
   });
 

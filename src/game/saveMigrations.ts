@@ -11,6 +11,7 @@ import { migrateChroniclesState } from "./saveMigrations/chronicles";
 import { migrateTutorialState } from "./saveMigrations/tutorial";
 import { migrateAgonistCourseState } from "./saveMigrations/agonistCourse";
 import { migrateEmailAutomationState } from "./saveMigrations/emailAutomation";
+import { migrateEquipmentLoadState } from "./saveMigrations/equipmentLoad";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
@@ -25,6 +26,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateTutorialState,
   migrateAgonistCourseState,
   migrateEmailAutomationState,
+  migrateEquipmentLoadState,
 ];
 
 export function migrate(value: unknown): unknown {

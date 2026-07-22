@@ -125,8 +125,11 @@ function DayNotificationEntry({
       >
         <span className="appointment-timing">{timing}</span>
         <i />
-        <div>
-          <strong><Icon name={notificationIcons[notification.kind]} />{notification.title}</strong>
+        <div className="appointment-copy">
+          <strong className="appointment-title">
+            <Icon name={notificationIcons[notification.kind]} />
+            <span>{notification.title}</span>
+          </strong>
           {notification.person
             ? <span className={personClassName}>{notification.person.displayName}</span>
             : null}

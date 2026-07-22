@@ -60,12 +60,12 @@ describe("getCollaboratorAutomationPresentation", () => {
       activeEmail: undefined,
     }).progress;
 
-    expect(getProgressAt(1_500)).toBeCloseTo(25, 6);
-    expect(getProgressAt(1_750)).toBeCloseTo(27.5, 6);
-    expect(getProgressAt(3_000)).toBeCloseTo(30, 6);
+    expect(getProgressAt(1_500)).toBeCloseTo(36.666_667, 6);
+    expect(getProgressAt(1_750)).toBeCloseTo(45, 6);
+    expect(getProgressAt(3_000)).toBeCloseTo(53.333_333, 6);
   });
 
-  it("projects sword repair progress against its three-cycle workload", () => {
+  it("projects sword repair progress against its 150-point workload", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborator: Collaborator = {
       id: "equipment-collaborator",
@@ -100,8 +100,8 @@ describe("getCollaboratorAutomationPresentation", () => {
       activeEmail: undefined,
     });
 
-    expect(presentation.durationMs).toBe(30_000);
-    expect(presentation.progress).toBeCloseTo(51.666_667, 6);
+    expect(presentation.durationMs).toBe(450_000);
+    expect(presentation.progress).toBeCloseTo(1.111_111, 6);
   });
 
   it("shows Social income per second using the effective cycle with every speed bonus", () => {

@@ -1,146 +1,267 @@
-import { GAME_CONFIG } from "./config";
 import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
+import { GAME_CONFIG } from "./config";
+import { roundCurrency } from "./economy";
 import { addCollaboratorMasteryExperience } from "./stateUpdates";
 import type { GameState } from "./types";
 
 type EquipmentState = GameState["equipment"];
+const WORK_EPSILON = 1e-9;
 
-function clampWear(wear: number) {
-  return Math.min(100, Math.max(0, wear));
-}
-
-export function getWearBrokenSwords(equipment: EquipmentState): number {
-  return Math.min(
-    equipment.totalSwords,
-    Math.floor((equipment.totalSwords * clampWear(equipment.wear)) / 100),
-  );
+function clampCount(value: number, maximum: number) {
+  return Math.min(maximum, Math.max(0, Math.floor(value)));
 }
 
 export function getEffectiveDamagedSwords(equipment: EquipmentState): number {
-  return Math.min(
-    equipment.totalSwords,
-    Math.max(equipment.damagedSwords ?? 0, getWearBrokenSwords(equipment)),
+  return clampCount(equipment.damagedSwords ?? 0, equipment.totalSwords);
+}
+
+export function getReservedSwords(equipment: EquipmentState): number {
+  return Math.max(
+    0,
+    equipment.totalSwords - getEffectiveDamagedSwords(equipment) - equipment.availableSwords,
   );
 }
 
 export function getAvailableSwords(equipment: EquipmentState): number {
-  const damagedSwords = getEffectiveDamagedSwords(equipment);
   return Math.max(
     0,
-    Math.min(equipment.availableSwords, equipment.totalSwords - damagedSwords),
+    Math.min(
+      equipment.availableSwords,
+      equipment.totalSwords - getEffectiveDamagedSwords(equipment),
+    ),
   );
 }
 
 export function getEquipmentMaintenanceCost(equipment: EquipmentState): number {
-  const damagedSwords = getEffectiveDamagedSwords(equipment);
-  return damagedSwords > 0
-    ? damagedSwords * GAME_CONFIG.equipmentMaintenanceCostPerSword
-    : GAME_CONFIG.equipmentMaintenanceCost;
+  return getEffectiveDamagedSwords(equipment) * GAME_CONFIG.equipmentDamagedSwordRepairCost +
+    Math.ceil(Math.max(0, equipment.wear)) * GAME_CONFIG.equipmentMaintenanceCostPerLoad;
+}
+
+export function getEquipmentMinimumMaintenanceCost(equipment: EquipmentState): number {
+  if (getEffectiveDamagedSwords(equipment) > 0) {
+    return GAME_CONFIG.equipmentDamagedSwordRepairCost;
+  }
+  return equipment.wear > 0 && getAvailableSwords(equipment) > 0
+    ? GAME_CONFIG.equipmentMaintenanceCostPerLoad
+    : 0;
 }
 
 export function synchronizeEquipmentAvailability(equipment: EquipmentState): EquipmentState {
-  const currentDamagedSwords = equipment.damagedSwords ?? 0;
-  const damagedSwords = getEffectiveDamagedSwords(equipment);
-  const newlyDamagedSwords = damagedSwords - currentDamagedSwords;
+  const totalSwords = Math.max(0, Math.floor(equipment.totalSwords));
+  const damagedSwords = clampCount(equipment.damagedSwords ?? 0, totalSwords);
   return {
     ...equipment,
+    totalSwords,
     damagedSwords,
-    availableSwords: Math.max(
-      0,
-      Math.min(
-        equipment.totalSwords - damagedSwords,
-        equipment.availableSwords - newlyDamagedSwords,
-      ),
+    wear: Math.max(0, Number.isFinite(equipment.wear) ? equipment.wear : 0),
+    availableSwords: clampCount(
+      equipment.availableSwords,
+      totalSwords - damagedSwords,
     ),
   };
+}
+
+export function reserveSwords(
+  equipment: EquipmentState,
+  requiredSwords: number,
+): EquipmentState | undefined {
+  const required = Math.max(0, Math.floor(requiredSwords));
+  const available = getAvailableSwords(equipment);
+  if (available < required) return undefined;
+  return synchronizeEquipmentAvailability({
+    ...equipment,
+    availableSwords: available - required,
+  });
+}
+
+export function releaseSwords(
+  equipment: EquipmentState,
+  releasedSwords: number,
+): EquipmentState {
+  return synchronizeEquipmentAvailability({
+    ...equipment,
+    availableSwords: equipment.availableSwords + Math.max(0, Math.floor(releasedSwords)),
+  });
 }
 
 export function applyEquipmentWear(
   equipment: EquipmentState,
   wearDelta: number,
+  maximumNewlyDamagedSwords = Number.POSITIVE_INFINITY,
 ): EquipmentState {
+  const synchronized = synchronizeEquipmentAvailability(equipment);
+  const totalLoad = Math.max(0, synchronized.wear + wearDelta);
+  if (wearDelta <= 0) return { ...synchronized, wear: totalLoad };
+
+  const healthySwords = synchronized.totalSwords - synchronized.damagedSwords;
+  const newlyDamagedSwords = Math.min(
+    healthySwords,
+    Math.max(0, Math.floor(maximumNewlyDamagedSwords)),
+    Math.floor(totalLoad / GAME_CONFIG.equipmentBreakLoad),
+  );
   return synchronizeEquipmentAvailability({
-    ...equipment,
-    wear: clampWear(equipment.wear + wearDelta),
+    ...synchronized,
+    wear: totalLoad - newlyDamagedSwords * GAME_CONFIG.equipmentBreakLoad,
+    damagedSwords: synchronized.damagedSwords + newlyDamagedSwords,
+    availableSwords: synchronized.availableSwords - newlyDamagedSwords,
   });
+}
+
+export function completeEquipmentUse(
+  equipment: EquipmentState,
+  usedSwords: number,
+  addedLoad: number,
+): EquipmentState {
+  const released = releaseSwords(equipment, usedSwords);
+  return applyEquipmentWear(released, addedLoad, usedSwords);
 }
 
 export function applySwordDamage(
   equipment: EquipmentState,
   damagedSwordsDelta: number,
 ): EquipmentState {
+  const synchronized = synchronizeEquipmentAvailability(equipment);
+  const newlyDamagedSwords = Math.min(
+    synchronized.totalSwords - synchronized.damagedSwords,
+    Math.max(0, Math.floor(damagedSwordsDelta)),
+  );
   return synchronizeEquipmentAvailability({
-    ...equipment,
-    damagedSwords: Math.min(
-      equipment.totalSwords,
-      (equipment.damagedSwords ?? 0) + Math.max(0, Math.floor(damagedSwordsDelta)),
-    ),
+    ...synchronized,
+    damagedSwords: synchronized.damagedSwords + newlyDamagedSwords,
+    availableSwords: synchronized.availableSwords - newlyDamagedSwords,
+  });
+}
+
+export function repairDamagedSwords(
+  equipment: EquipmentState,
+  repairedSwords: number,
+): EquipmentState {
+  const synchronized = synchronizeEquipmentAvailability(equipment);
+  const repaired = Math.min(
+    synchronized.damagedSwords,
+    Math.max(0, Math.floor(repairedSwords)),
+  );
+  return synchronizeEquipmentAvailability({
+    ...synchronized,
+    damagedSwords: synchronized.damagedSwords - repaired,
+    availableSwords: synchronized.availableSwords + repaired,
   });
 }
 
 export function repairEquipment(
   equipment: EquipmentState,
   repairWork: number,
+  availableEuros = Number.POSITIVE_INFINITY,
 ): {
   equipment: EquipmentState;
   repairedWear: number;
   repairedSwords: number;
+  restoredCondition: number;
+  eurosSpent: number;
   remainingWork: number;
 } {
-  const availableWork = Math.max(0, repairWork);
-  const repairedWear = Math.min(Math.floor(availableWork), Math.ceil(equipment.wear));
-  const afterWear = synchronizeEquipmentAvailability({
-    ...equipment,
-    wear: clampWear(equipment.wear - repairedWear),
-  });
-  const remainingAfterWear = availableWork - repairedWear;
-  const repairableSwords = Math.max(0, afterWear.damagedSwords ?? 0);
-  const repairedSwords = Math.min(
-    repairableSwords,
-    Math.floor(remainingAfterWear / GAME_CONFIG.equipmentSwordRepairWork),
+  let nextEquipment = synchronizeEquipmentAvailability(equipment);
+  let remainingWork = Math.max(0, repairWork);
+  let remainingEuros = Math.max(0, availableEuros);
+  let eurosSpent = 0;
+  let repairedSwords = 0;
+  let repairedWear = 0;
+  const swordCost = Math.round(
+    GAME_CONFIG.equipmentDamagedSwordRepairCost * GAME_CONFIG.equipmentAutomaticCostFactor,
   );
-  const afterSwords = synchronizeEquipmentAvailability({
-    ...afterWear,
-    damagedSwords: repairableSwords - repairedSwords,
-    availableSwords: afterWear.availableSwords + repairedSwords,
-  });
-  const hasRemainingRepairs = afterSwords.wear > 0 || afterSwords.damagedSwords > 0;
+  const wearCost = GAME_CONFIG.equipmentMaintenanceCostPerLoad *
+    GAME_CONFIG.equipmentAutomaticCostFactor;
 
+  const repairableSwords = Math.min(
+    nextEquipment.damagedSwords,
+    Math.floor((remainingWork + WORK_EPSILON) / GAME_CONFIG.equipmentSwordRepairWork),
+    Math.floor(remainingEuros / swordCost),
+  );
+  if (repairableSwords > 0) {
+    repairedSwords = repairableSwords;
+    remainingWork -= repairedSwords * GAME_CONFIG.equipmentSwordRepairWork;
+    const spent = repairedSwords * swordCost;
+    remainingEuros -= spent;
+    eurosSpent += spent;
+    nextEquipment = repairDamagedSwords(nextEquipment, repairedSwords);
+  }
+
+  if (nextEquipment.damagedSwords > 0) {
+    if (remainingEuros < swordCost) remainingWork = 0;
+    return {
+      equipment: nextEquipment,
+      repairedWear,
+      repairedSwords,
+      restoredCondition: repairedSwords * GAME_CONFIG.equipmentBreakLoad,
+      eurosSpent,
+      remainingWork,
+    };
+  }
+
+  if (nextEquipment.wear > 0 && getAvailableSwords(nextEquipment) <= 0) {
+    return {
+      equipment: nextEquipment,
+      repairedWear,
+      repairedSwords,
+      restoredCondition: repairedSwords * GAME_CONFIG.equipmentBreakLoad,
+      eurosSpent,
+      remainingWork,
+    };
+  }
+
+  const repairableWear = Math.min(
+    Math.floor(remainingWork + WORK_EPSILON),
+    Math.floor(remainingEuros / wearCost),
+    Math.ceil(nextEquipment.wear),
+  );
+  if (repairableWear > 0) {
+    repairedWear = repairableWear;
+    remainingWork -= repairedWear;
+    const spent = repairedWear * wearCost;
+    remainingEuros -= spent;
+    eurosSpent += spent;
+    nextEquipment = applyEquipmentWear(nextEquipment, -repairedWear);
+  }
+
+  const hasRemainingRepairs = nextEquipment.wear > 0 || nextEquipment.damagedSwords > 0;
+  if (!hasRemainingRepairs || remainingEuros < wearCost) remainingWork = 0;
   return {
-    equipment: afterSwords,
+    equipment: nextEquipment,
     repairedWear,
     repairedSwords,
-    remainingWork: hasRemainingRepairs
-      ? remainingAfterWear - repairedSwords * GAME_CONFIG.equipmentSwordRepairWork
-      : 0,
+    restoredCondition:
+      repairedWear + repairedSwords * GAME_CONFIG.equipmentBreakLoad,
+    eurosSpent,
+    remainingWork,
   };
 }
 
 export function maintainEquipment(state: GameState, now: number): GameState {
-  const maintenanceCost = getEquipmentMaintenanceCost(state.equipment);
-  if (
-    (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) ||
-    state.school.euros < maintenanceCost ||
-    state.acquisitionEvents.some((event) => event.status === "running")
-  ) {
-    return state;
-  }
-  const swordsInRunningEvents = state.acquisitionEvents
-    .filter((event) => event.status === "running")
-    .reduce((total, event) => total + event.equipmentUsed, 0);
-  const repairedWear = Math.max(0, state.equipment.wear);
+  if (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) return state;
+
+  let remainingEuros = Math.max(0, state.school.euros);
+  const repairedSwords = Math.min(
+    state.equipment.damagedSwords,
+    Math.floor(remainingEuros / GAME_CONFIG.equipmentDamagedSwordRepairCost),
+  );
+  remainingEuros -= repairedSwords * GAME_CONFIG.equipmentDamagedSwordRepairCost;
+  let equipment = repairDamagedSwords(state.equipment, repairedSwords);
+  const repairedWear = equipment.damagedSwords > 0 || getAvailableSwords(equipment) <= 0
+    ? 0
+    : Math.min(
+        Math.ceil(equipment.wear),
+        Math.floor(remainingEuros / GAME_CONFIG.equipmentMaintenanceCostPerLoad),
+      );
+  remainingEuros -= repairedWear * GAME_CONFIG.equipmentMaintenanceCostPerLoad;
+  equipment = applyEquipmentWear(equipment, -repairedWear);
+  const restoredCondition =
+    repairedWear + repairedSwords * GAME_CONFIG.equipmentBreakLoad;
+  if (restoredCondition <= 0) return state;
+
   const maintained: GameState = {
     ...state,
-    school: {
-      ...state.school,
-      euros: state.school.euros - maintenanceCost,
-    },
-    equipment: {
-      ...state.equipment,
-      availableSwords: Math.max(0, state.equipment.totalSwords - swordsInRunningEvents),
-      damagedSwords: 0,
-      wear: 0,
-    },
+    school: { ...state.school, euros: roundCurrency(remainingEuros) },
+    equipment,
     statistics: {
       ...state.statistics,
       maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
@@ -149,7 +270,7 @@ export function maintainEquipment(state: GameState, now: number): GameState {
   return addCollaboratorMasteryExperience(
     maintained,
     "equipment",
-    repairedWear * COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
+    restoredCondition * COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
     now,
   );
 }

@@ -33,11 +33,12 @@ import {
 } from "./stateUpdates";
 import {
   resolveFormTraining as completeFormTraining,
+  processWaitingTrainings,
   refreshInstructorTrainingDurations,
   startAgonistCourse as beginAgonistCourse,
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
-import { resolveTrial } from "./trialFlow";
+import { processScheduledTrialStarts, resolveTrial } from "./trialFlow";
 import { compactTournamentHistory } from "./tournamentFlow";
 import {
   getPendingEmailOutcomes,
@@ -130,27 +131,35 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
       nextState = resolveEmailOutcome(nextState, outcome, now);
     }
   }
-  for (const trial of getScheduledTrials(nextState.scheduledTrials)) {
-    if (trial.resolvesAt <= now) {
-      nextState = resolveTrial(nextState, trial, now, gainMultiplier);
-    }
-  }
   for (const event of getRunningAcquisitionEvents(nextState.acquisitionEvents)) {
     if (event.resolvesAt <= now) {
       nextState = resolveAcquisitionEvent(nextState, event, now, gainMultiplier);
     }
   }
   for (const contact of getPeopleInTraining(nextState.contacts)) {
-    if (contact.training!.completesAt <= now) {
+    if (
+      contact.training!.status !== "waitingForEquipment" &&
+      contact.training!.completesAt <= now
+    ) {
       nextState = resolveFormTraining(nextState, contact.id, now);
     }
   }
   for (const collaborator of getPeopleInTraining(nextState.collaborators)) {
-    if (collaborator.training!.completesAt <= now) {
+    if (
+      collaborator.training!.status !== "waitingForEquipment" &&
+      collaborator.training!.completesAt <= now
+    ) {
       nextState = resolveFormTraining(nextState, collaborator.id, now);
     }
   }
 
+  nextState = processScheduledTrialStarts(nextState, now);
+  for (const trial of getScheduledTrials(nextState.scheduledTrials)) {
+    if (trial.resolvesAt <= now) {
+      nextState = resolveTrial(nextState, trial, now, gainMultiplier);
+    }
+  }
+  nextState = processWaitingTrainings(nextState, now, trainingDependencies);
   nextState = refreshInstructorTrainingDurations(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier);
   nextState = processAutomaticTeaching(

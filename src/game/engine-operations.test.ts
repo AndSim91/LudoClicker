@@ -191,7 +191,7 @@ describe("game engine: operations", () => {
     const maintained = gameReducer(worn, { type: "MAINTAIN_EQUIPMENT", now: 2_000 });
     const repeated = gameReducer(maintained, { type: "MAINTAIN_EQUIPMENT", now: 3_000 });
 
-    expect(maintained.school.euros).toBe(5);
+    expect(maintained.school.euros).toBe(25);
     expect(maintained.equipment.wear).toBe(0);
     expect(maintained.statistics.maintenanceCompleted).toBe(1);
     expect(repeated).toBe(maintained);
@@ -208,10 +208,10 @@ describe("game engine: operations", () => {
 
     const damaged = gameReducer(due, { type: "TICK", now: 2_000 });
     const repairMessage = damaged.messages.find(
-      (message) => message.subject === "Riparazione non programmata",
+      (message) => message.subject === "Un piccolo disastro",
     );
 
-    expect(repairMessage?.preview).toContain("ha subito un danno");
+    expect(repairMessage?.preview).toContain("Non so cosa sia successo");
     expect(damaged.school.euros).toBe(20);
     expect(damaged.equipment).toMatchObject({
       availableSwords: 5,
@@ -232,7 +232,7 @@ describe("game engine: operations", () => {
     expect(blocked).toBe(eventReady);
 
     const maintained = gameReducer(
-      { ...damaged, school: { ...damaged.school, euros: 50 } },
+      { ...damaged, school: { ...damaged.school, euros: 280 } },
       { type: "MAINTAIN_EQUIPMENT", now: 4_000 },
     );
 

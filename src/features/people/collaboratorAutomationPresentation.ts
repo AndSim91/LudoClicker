@@ -191,9 +191,9 @@ export function getCollaboratorAutomationPresentation({
   if (assignment === "equipment") {
     const damagedSwords = getEffectiveDamagedSwords(state.equipment);
     if (state.equipment.wear <= 0 && damagedSwords <= 0) {
-      return { title: "Usura attrezzatura: 0%", detail: "In attesa" };
+      return { title: "Carico attrezzatura: 0/100", detail: "In attesa" };
     }
-    const isRepairingSword = state.equipment.wear <= 0 && damagedSwords > 0;
+    const isRepairingSword = damagedSwords > 0;
     const requiredWork = isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1;
     const durationMs = getAutomationCycleDurationMs(state, "equipment", requiredWork);
     const progress = getProjectedEquipmentProgress({
@@ -206,12 +206,14 @@ export function getCollaboratorAutomationPresentation({
     return {
       title: isRepairingSword
         ? `Spade danneggiate: ${damagedSwords}`
-        : `Usura attrezzatura: ${state.equipment.wear}%`,
-      detail: isRepairingSword ? "Una spada richiede 3 cicli base" : "Riduzione usura in corso",
+        : `Carico attrezzatura: ${Math.round(state.equipment.wear)}/100`,
+      detail: isRepairingSword
+        ? "150 punti-lavoro per riportare una spada a piena efficienza"
+        : "Riduzione del carico in corso",
       progress,
       progressLabel: isRepairingSword
         ? "Progresso riparazione spada"
-        : "Progresso riduzione usura",
+        : "Progresso riduzione carico",
       durationMs,
     };
   }

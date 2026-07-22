@@ -189,7 +189,7 @@ describe("game engine: progression", () => {
       {
         ...initial,
         randomSeed: 470_208,
-        school: { ...initial.school, activeMembers: 12, followers: 1_000 },
+        school: { ...initial.school, activeMembers: 12, followers: 1_000, euros: 1 },
         collaborators: [socialCollaborator, equipmentCollaborator],
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
         equipment: { ...initial.equipment, wear: 5 },
@@ -226,7 +226,7 @@ describe("game engine: progression", () => {
     expect(automated.scheduledTrials).toHaveLength(1);
     expect(automated.emails).toHaveLength(initial.emails.length);
     expect(automated.equipment.wear).toBe(4);
-    expect(automated.automation.equipmentBuffer).toBeCloseTo(0.05);
+    expect(automated.automation.equipmentBuffer).toBe(0);
   });
 
   it("repairs damaged swords automatically after wear reaches zero", () => {
@@ -243,22 +243,24 @@ describe("game engine: progression", () => {
     };
     let state: GameState = {
       ...initial,
+      school: { ...initial.school, euros: 125 },
       collaborators: [collaborator],
       equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
-    for (let tick = 1; tick <= 29; tick += 1) {
+    for (let tick = 1; tick <= 449; tick += 1) {
       state = gameReducer(state, { type: "TICK", now: 1_000 + tick * 1_000 });
     }
 
     expect(state.equipment.damagedSwords).toBe(1);
-    expect(state.automation.equipmentBuffer).toBeCloseTo(2.9);
+    expect(state.automation.equipmentBuffer).toBeCloseTo(149.666_667);
 
-    const repaired = gameReducer(state, { type: "TICK", now: 31_000 });
+    const repaired = gameReducer(state, { type: "TICK", now: 451_000 });
 
     expect(repaired.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
     expect(repaired.automation.equipmentBuffer).toBe(0);
+    expect(repaired.school.euros).toBe(0);
   });
 
   it("improves Arena or Style for one random enrolled athlete every lesson cycle", () => {

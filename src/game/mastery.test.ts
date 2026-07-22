@@ -76,7 +76,7 @@ describe("collaborator mastery integration", () => {
 
     expect(event.resolvesAt - event.startedAt).toBe(16_000);
     expect(event.cost).toBe(30);
-    expect(event.wearAdded).toBe(2);
+    expect(event.wearAdded).toBe(0);
     expect(started.school.euros).toBe(70);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });

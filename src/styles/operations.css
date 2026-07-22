@@ -36,20 +36,6 @@
   max-width: 900px;
 }
 
-.equipment-wear {
-  height: 8px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #d9e7f4;
-}
-
-.equipment-wear > span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--warning);
-}
-
 .automation-panel,
 .social-panel {
   margin-top: 22px;

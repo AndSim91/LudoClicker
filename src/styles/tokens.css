@@ -17,6 +17,10 @@
   --focus: #0f6cbd;
   --success: #107c10;
   --warning: #c43e1c;
+  --equipment-load: #c99324;
+  --equipment-broken: #b42318;
+  --equipment-reserved: #8a8886;
+  --equipment-healthy: #ffffff;
   --shadow-flyout: 0 4px 16px rgb(0 0 0 / 14%);
   --radius-sm: 3px;
   --radius-md: 5px;
@@ -90,6 +94,10 @@
   --focus: #91c8ff;
   --success: #6ed38a;
   --warning: #ff9b78;
+  --equipment-load: #e7b84b;
+  --equipment-broken: #e5484d;
+  --equipment-reserved: #718092;
+  --equipment-healthy: #111a24;
   --shadow-flyout: 0 12px 32px rgb(0 0 0 / 38%);
 
   --rarity-common-name: #edf4fb;

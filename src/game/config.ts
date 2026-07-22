@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 49,
+  version: 50,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -18,9 +18,9 @@ export const GAME_CONFIG = {
   conversionGuaranteeFailures: 4,
   emailOutcomeMinMs: 20_000,
   emailOutcomeMaxMs: 45_000,
-  trialWaitMinMs: 25_000,
-  trialWaitMaxMs: 55_000,
-  trialDurationMs: 10_000,
+  trialWaitMinMs: 30_000,
+  trialWaitMaxMs: 30_000,
+  trialDurationMs: 15_000,
   dayNotificationVisibilityMs: 10_000,
   progressUpdateIntervalMs: 250,
   gameTickMs: 1_000,
@@ -31,13 +31,20 @@ export const GAME_CONFIG = {
   monthlyMemberFormBonus: 5,
   enrollmentBonus: 20,
   gameMonthMs: 60_000,
-  secretLegendaryTrialDurationMs: 150_000,
+  secretLegendaryTrialDurationMs: 30_000,
   sparringCooldownMs: 10_000,
   tutorialSparringDurationMs: 3_000,
   tutorialSparringMinimumContacts: 1,
-  equipmentMaintenanceCost: 10,
-  equipmentMaintenanceCostPerSword: 50,
-  eventWearMultiplier: 1.5,
+  equipmentMaintenanceCostPerLoad: 2,
+  equipmentDamagedSwordRepairCost: 250,
+  equipmentAutomaticCostFactor: 0.5,
+  equipmentLoadPerTrial: 1,
+  equipmentLoadPerSecretLegendaryTrial: 20,
+  equipmentLoadPerAgonistCourse: 10,
+  equipmentBreakLoad: 100,
+  eventWearMultiplier: 1,
+  equipmentMaximumUpgradeWearReduction: 0.5,
+  equipmentMaximumEventMasteryWearReduction: 0.25,
   officialSwordCost: 330,
   legendaryEnrollmentChancePerFailure: 0.03,
   formSevenDepartureChance: {
@@ -64,8 +71,8 @@ export const GAME_CONFIG = {
   socialCampaignCost: 25,
   socialCampaignContacts: 4,
   socialViralChance: 0.1,
-  equipmentRepairIntervalMs: 10_000,
-  equipmentSwordRepairWork: 3,
+  equipmentRepairIntervalMs: 3_000,
+  equipmentSwordRepairWork: 150,
   narrativeEventMinMs: 120_000,
   narrativeEventMaxMs: 300_000,
   narrativeHistoryLimit: 30,

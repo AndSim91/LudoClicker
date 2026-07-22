@@ -93,7 +93,7 @@ export function compactGameHistory(state: GameState): GameState {
   const shouldCompactTrials = hasMoreThan(
     state.scheduledTrials,
     GAME_CONFIG.recentCompletedTrialsLimit,
-    (trial) => trial.status === "completed",
+    (trial) => trial.status === "completed" || trial.status === "cancelled",
   );
   const shouldCompactEvents = hasMoreThan(
     state.acquisitionEvents,
@@ -135,12 +135,13 @@ export function compactGameHistory(state: GameState): GameState {
   const retainedTrialIds = newestIds(
     state.scheduledTrials,
     GAME_CONFIG.recentCompletedTrialsLimit,
-    (trial) => trial.status === "completed",
+    (trial) => trial.status === "completed" || trial.status === "cancelled",
     (trial) => trial.id,
   );
   const retainedTrials = state.scheduledTrials.filter((trial) => {
-    if (trial.status !== "completed" || retainedTrialIds.has(trial.id)) return true;
-    archive.completedTrials += 1;
+    const terminal = trial.status === "completed" || trial.status === "cancelled";
+    if (!terminal || retainedTrialIds.has(trial.id)) return true;
+    if (trial.status === "completed") archive.completedTrials += 1;
     return false;
   });
 

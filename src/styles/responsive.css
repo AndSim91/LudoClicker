@@ -216,7 +216,6 @@
 :root[data-theme="dark"] .event-progress,
 :root[data-theme="dark"] .mastery-track,
 :root[data-theme="dark"] .training-progress > div,
-:root[data-theme="dark"] .equipment-wear,
 :root[data-theme="dark"] .social-progress,
 :root[data-theme="dark"] .progress-dots i {
   background: #29445c;

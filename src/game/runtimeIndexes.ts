@@ -116,7 +116,7 @@ export function getCompletedTrialsByStartDay(
   if (cached) return cached;
   const byDay = new Map<number, ScheduledTrial[]>();
   for (const trial of trials) {
-    if (trial.status !== "completed") continue;
+    if (trial.status !== "completed" && trial.status !== "cancelled") continue;
     const dayStart = getLocalDayStart(trial.startsAt);
     const dayTrials = byDay.get(dayStart);
     if (dayTrials) dayTrials.push(trial);

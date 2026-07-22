@@ -31,6 +31,8 @@ export interface FormDefinition {
   prerequisite?: FormId;
   anyPrerequisite?: FormId[];
   bonusLabel?: string;
+  requiredSwords: number;
+  loadPerSword: number;
 }
 
 export interface CollaboratorFormBonuses {
@@ -44,22 +46,32 @@ export interface CollaboratorFormBonuses {
 }
 
 export const FORM_DEFINITIONS: FormDefinition[] = [
-  { id: "form-1", longName: "Forma 1", shortName: "F1", cost: 25, durationMs: 20_000 },
-  { id: "course-x", longName: "Corso X", shortName: "CX", cost: 50, durationMs: 25_000, prerequisite: "form-1" },
-  { id: "form-2", longName: "Forma 2", shortName: "F2", cost: 100, durationMs: 30_000, prerequisite: "course-x" },
-  { id: "course-y", longName: "Corso Y", shortName: "CY", cost: 250, durationMs: 35_000, prerequisite: "form-2" },
-  { id: "form-3-long", longName: "Forma 3 Spada Lunga", shortName: "F3L", branch: "Spada Lunga", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Eventi" },
-  { id: "form-4-long", longName: "Forma 4 Spada Lunga", shortName: "F4L", branch: "Spada Lunga", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-long", bonusLabel: "+30% Eventi" },
-  { id: "form-5-long", longName: "Forma 5 Spada Lunga", shortName: "F5L", branch: "Spada Lunga", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-long", bonusLabel: "+50% Eventi" },
-  { id: "form-3-staff", longName: "Forma 3 Staffa", shortName: "F3S", branch: "Staffa", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Preparatore Atletico" },
-  { id: "form-4-staff", longName: "Forma 4 Staffa", shortName: "F4S", branch: "Staffa", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Preparatore Atletico" },
-  { id: "form-5-staff", longName: "Forma 5 Staffa", shortName: "F5S", branch: "Staffa", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Preparatore Atletico" },
-  { id: "form-3-double", longName: "Forma 3 Doppie Spade Corte", shortName: "F3D", branch: "Doppia spada corta", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+10% Redazione e Social" },
-  { id: "form-4-double", longName: "Forma 4 Doppie Spade Corte", shortName: "F4D", branch: "Doppia spada corta", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-double", bonusLabel: "+20% Redazione e Social" },
-  { id: "form-5-double", longName: "Forma 5 Doppie Spade Corte", shortName: "F5D", branch: "Doppia spada corta", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-double", bonusLabel: "+35% Redazione e Social" },
-  { id: "form-6", longName: "Forma 6", shortName: "F6", cost: 2_200, durationMs: 60_000, anyPrerequisite: ["form-5-long", "form-5-staff", "form-5-double"], bonusLabel: "+10% su ogni incarico" },
-  { id: "form-7", longName: "Forma 7", shortName: "F7", cost: 3_000, durationMs: 75_000, prerequisite: "form-6", bonusLabel: "+20% su ogni incarico" },
+  { id: "form-1", longName: "Forma 1", shortName: "F1", cost: 25, durationMs: 20_000, requiredSwords: 1, loadPerSword: 5 },
+  { id: "course-x", longName: "Corso X", shortName: "CX", cost: 50, durationMs: 25_000, prerequisite: "form-1", requiredSwords: 1, loadPerSword: 5 },
+  { id: "form-2", longName: "Forma 2", shortName: "F2", cost: 100, durationMs: 30_000, prerequisite: "course-x", requiredSwords: 1, loadPerSword: 5 },
+  { id: "course-y", longName: "Corso Y", shortName: "CY", cost: 250, durationMs: 35_000, prerequisite: "form-2", requiredSwords: 2, loadPerSword: 5 },
+  { id: "form-3-long", longName: "Forma 3 Spada Lunga", shortName: "F3L", branch: "Spada Lunga", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Eventi", requiredSwords: 1, loadPerSword: 5 },
+  { id: "form-4-long", longName: "Forma 4 Spada Lunga", shortName: "F4L", branch: "Spada Lunga", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-long", bonusLabel: "+30% Eventi", requiredSwords: 1, loadPerSword: 5 },
+  { id: "form-5-long", longName: "Forma 5 Spada Lunga", shortName: "F5L", branch: "Spada Lunga", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-long", bonusLabel: "+50% Eventi", requiredSwords: 1, loadPerSword: 16 },
+  { id: "form-3-staff", longName: "Forma 3 Staffa", shortName: "F3S", branch: "Staffa", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Preparatore Atletico", requiredSwords: 2, loadPerSword: 5 },
+  { id: "form-4-staff", longName: "Forma 4 Staffa", shortName: "F4S", branch: "Staffa", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Preparatore Atletico", requiredSwords: 2, loadPerSword: 5 },
+  { id: "form-5-staff", longName: "Forma 5 Staffa", shortName: "F5S", branch: "Staffa", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Preparatore Atletico", requiredSwords: 2, loadPerSword: 16 },
+  { id: "form-3-double", longName: "Forma 3 Doppie Spade Corte", shortName: "F3D", branch: "Doppia spada corta", cost: 600, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+10% Redazione e Social", requiredSwords: 2, loadPerSword: 5 },
+  { id: "form-4-double", longName: "Forma 4 Doppie Spade Corte", shortName: "F4D", branch: "Doppia spada corta", cost: 1_000, durationMs: 45_000, prerequisite: "form-3-double", bonusLabel: "+20% Redazione e Social", requiredSwords: 2, loadPerSword: 5 },
+  { id: "form-5-double", longName: "Forma 5 Doppie Spade Corte", shortName: "F5D", branch: "Doppia spada corta", cost: 1_500, durationMs: 50_000, prerequisite: "form-4-double", bonusLabel: "+35% Redazione e Social", requiredSwords: 2, loadPerSword: 16 },
+  { id: "form-6", longName: "Forma 6", shortName: "F6", cost: 2_200, durationMs: 60_000, anyPrerequisite: ["form-5-long", "form-5-staff", "form-5-double"], bonusLabel: "+10% su ogni incarico", requiredSwords: 2, loadPerSword: 10 },
+  { id: "form-7", longName: "Forma 7", shortName: "F7", cost: 3_000, durationMs: 75_000, prerequisite: "form-6", bonusLabel: "+20% su ogni incarico", requiredSwords: 3, loadPerSword: 10 },
 ];
+
+export function getAgonistCourseRequiredSwords(forms: FormId[]): number {
+  if (forms.includes("form-7")) return 3;
+  if (
+    forms.includes("form-6") ||
+    forms.some((formId) => formId.includes("-staff") || formId.includes("-double")) ||
+    forms.includes("course-y")
+  ) return 2;
+  return 1;
+}
 
 const FORM_IDS = new Set<FormId>(FORM_DEFINITIONS.map((definition) => definition.id));
 

@@ -102,6 +102,21 @@ function hasValidLegendaryAssignments(state: Partial<GameState>): boolean {
   return true;
 }
 
+function hasValidTraining(training: GameState["contacts"][number]["training"]): boolean {
+  if (!training) return true;
+  return (
+    Number.isFinite(training.startedAt) &&
+    Number.isFinite(training.completesAt) &&
+    (training.status === undefined ||
+      training.status === "running" ||
+      training.status === "waitingForEquipment") &&
+    (training.equipmentUsed === undefined || isNonNegativeSafeInteger(training.equipmentUsed)) &&
+    (training.wearPerSword === undefined || (
+      Number.isFinite(training.wearPerSword) && training.wearPerSword >= 0
+    ))
+  );
+}
+
 function hasValidChroniclesProgress(state: Partial<GameState>): boolean {
   const chronicles = state.tournaments?.chronicles;
   if (
@@ -153,7 +168,8 @@ export function isValidGameState(value: unknown): value is GameState {
       (contact.agonistCourseArenaBonus === undefined ||
         isNonNegativeSafeInteger(contact.agonistCourseArenaBonus)) &&
       (contact.agonistCourseStyleBonus === undefined ||
-        isNonNegativeSafeInteger(contact.agonistCourseStyleBonus))
+        isNonNegativeSafeInteger(contact.agonistCourseStyleBonus)) &&
+      hasValidTraining(contact.training)
     ) &&
     Array.isArray(state.emails) &&
     state.emails.every((email) =>
@@ -163,6 +179,14 @@ export function isValidGameState(value: unknown): value is GameState {
     ) &&
     Array.isArray(state.acquisitionEvents) &&
     state.acquisitionEvents.every((event) => typeof event.membersUsed === "number") &&
+    Array.isArray(state.scheduledTrials) &&
+    state.scheduledTrials.every((trial) =>
+      (trial.status === "scheduled" ||
+        trial.status === "completed" ||
+        trial.status === "cancelled") &&
+      (trial.equipmentUsed === undefined || isNonNegativeSafeInteger(trial.equipmentUsed)) &&
+      (trial.cancellationReason === undefined || trial.cancellationReason === "equipment")
+    ) &&
     typeof state.activities?.nextSparringAt === "number" &&
     typeof state.upgrades?.["comfortable-keyboard"] === "number" &&
     typeof state.statistics?.peopleMet === "number" &&
@@ -176,6 +200,13 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.equipment?.availableSwords === "number" &&
     typeof state.equipment?.damagedSwords === "number" &&
     typeof state.equipment?.wear === "number" &&
+    isNonNegativeSafeInteger(state.equipment?.totalSwords) &&
+    isNonNegativeSafeInteger(state.equipment?.availableSwords) &&
+    isNonNegativeSafeInteger(state.equipment?.damagedSwords) &&
+    state.equipment.availableSwords + state.equipment.damagedSwords <=
+      state.equipment.totalSwords &&
+    Number.isFinite(state.equipment.wear) &&
+    state.equipment.wear >= 0 &&
     Array.isArray(state.legendaryCollaborators?.encounteredProfileIds) &&
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
@@ -214,7 +245,8 @@ export function isValidGameState(value: unknown): value is GameState {
       COLLABORATOR_MASTERY_ROLES.every((role) =>
         Number.isFinite(collaborator.mastery?.[role]) &&
         (collaborator.mastery?.[role] ?? 0) >= 0
-      )
+      ) &&
+      hasValidTraining(collaborator.training)
     ) &&
     hasValidLegendaryAssignments(state) &&
     typeof state.upgrades?.["instructor-versatility"] === "number" &&

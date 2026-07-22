@@ -13,6 +13,7 @@ const dateTime = new Intl.DateTimeFormat("it-IT", {
 
 function getTrialProgress(trial: ScheduledTrial, now: number) {
   if (trial.status === "completed") return 100;
+  if (trial.status === "cancelled") return 0;
   const duration = trial.resolvesAt - trial.startsAt;
   if (duration <= 0 || now <= trial.startsAt) return 0;
   return Math.min(100, Math.max(0, ((now - trial.startsAt) / duration) * 100));
@@ -26,6 +27,7 @@ function getTrialStatus(
   if (trial.status === "completed") {
     return contactStatus === "enrolled" ? "Iscritto" : "Perso";
   }
+  if (trial.status === "cancelled") return "Annullata";
   return now < trial.startsAt ? "Pianificata" : "In corso";
 }
 
@@ -88,7 +90,9 @@ export function CalendarView({
                 ? `Inizia tra ${startsInSeconds} s`
                 : status === "In corso"
                   ? `${remainingSeconds} s rimanenti`
-                  : "Lezione conclusa";
+                  : status === "Annullata"
+                    ? "Nessuna spada disponibile"
+                    : "Lezione conclusa";
 
               return (
                 <article className="trial-card" key={trial.id}>

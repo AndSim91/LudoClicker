@@ -19,12 +19,17 @@ import {
   resolveSocialAutomationCycles,
 } from "./collaboratorAutomationOutcomes";
 import { GAME_CONFIG } from "./config";
+import { roundCurrency } from "./economy";
 import {
   addLegendaryEncounters,
   createAcquiredContacts,
   mergeAcquiredContacts,
 } from "./contacts";
-import { repairEquipment } from "./equipment";
+import {
+  getAvailableSwords,
+  getEffectiveDamagedSwords,
+  repairEquipment,
+} from "./equipment";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { nextRandom } from "./random";
@@ -164,14 +169,28 @@ export function processAutomation(
       automationMultiplier *
       Math.max(0, gainMultiplier);
   const socialCycles = Math.floor(socialTotal);
-  const hasEquipmentRepairs = state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
-  const equipmentTotal = hasEquipmentRepairs
+  const damagedSwords = getEffectiveDamagedSwords(state.equipment);
+  const automaticSwordCost = Math.round(
+    GAME_CONFIG.equipmentDamagedSwordRepairCost * GAME_CONFIG.equipmentAutomaticCostFactor,
+  );
+  const automaticLoadCost =
+    GAME_CONFIG.equipmentMaintenanceCostPerLoad * GAME_CONFIG.equipmentAutomaticCostFactor;
+  const canRepairEquipment = damagedSwords > 0
+    ? state.school.euros >= automaticSwordCost
+    : state.equipment.wear > 0 &&
+      getAvailableSwords(state.equipment) > 0 &&
+      state.school.euros >= automaticLoadCost;
+  const equipmentTotal = canRepairEquipment
     ? state.automation.equipmentBuffer +
       (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
         equipmentProductivity *
         automationMultiplier
-    : 0;
-  const equipmentRepair = repairEquipment(state.equipment, equipmentTotal);
+    : state.automation.equipmentBuffer;
+  const equipmentRepair = repairEquipment(
+    state.equipment,
+    equipmentTotal,
+    state.school.euros,
+  );
 
   let nextState: GameState = {
     ...state,
@@ -184,13 +203,19 @@ export function processAutomation(
       equipmentBuffer: equipmentRepair.remainingWork,
     },
     equipment: equipmentRepair.equipment,
+    school: equipmentRepair.eurosSpent > 0
+      ? {
+          ...state.school,
+          euros: roundCurrency(state.school.euros - equipmentRepair.eurosSpent),
+        }
+      : state.school,
   };
 
-  if (equipmentRepair.repairedWear + equipmentRepair.repairedSwords > 0) {
+  if (equipmentRepair.restoredCondition > 0) {
     nextState = dependencies.addCollaboratorMasteryExperience(
       nextState,
       "equipment",
-      (equipmentRepair.repairedWear + equipmentRepair.repairedSwords) *
+      equipmentRepair.restoredCondition *
         COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
       now,
     );

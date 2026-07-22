@@ -68,6 +68,7 @@ function getTrainingProgress(
   training: NonNullable<FormStudent["training"]>,
   now: number,
 ): number {
+  if (training.status === "waitingForEquipment") return 0;
   const duration = training.completesAt - training.startedAt;
   return duration <= 0
     ? 100
@@ -110,6 +111,7 @@ function InstructorTeachingSummary({
         const definition = isAgonistCourse(entry.training.formId)
           ? undefined
           : getFormDefinition(entry.training.formId);
+        const waitingForEquipment = entry.training.status === "waitingForEquipment";
         const progress = getTrainingProgress(entry.training, now);
         return (
           <div className="instructor-student" key={entry.id}>
@@ -120,7 +122,9 @@ function InstructorTeachingSummary({
                 {definition?.branch ? ` · ${definition.branch}` : ""}
               </small>
             </span>
-            <strong className="instructor-student-progress">{Math.round(progress)}%</strong>
+            <strong className="instructor-student-progress">
+              {waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}
+            </strong>
             <ProgressBar
               className="instructor-student-progress-bar"
               label={`Formazione di ${entry.displayName}`}
@@ -168,6 +172,7 @@ export function InstructorCompactActivity({
   return (
     <div className="instructor-compact-activity-list" aria-label="Allievi seguiti">
       {teaching.map((entry) => {
+        const waitingForEquipment = entry.training.status === "waitingForEquipment";
         const progress = getTrainingProgress(entry.training, now);
         return (
           <span className="instructor-compact-activity" key={entry.id}>
@@ -176,7 +181,7 @@ export function InstructorCompactActivity({
               <small>{getTrainingCourseTitle(entry.training.formId)}</small>
             </span>
             <span className="collaborator-activity-progress">
-              <strong>{Math.round(progress)}%</strong>
+              <strong>{waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}</strong>
               <ProgressBar
                 className="collaborator-progress-bar"
                 label={`Formazione di ${entry.displayName}`}
@@ -349,6 +354,7 @@ export function TrainingControl({
       ? collaboratorsById.get(student.training.instructorId)
       : undefined;
     const progress = getTrainingProgress(student.training, now);
+    const waitingForEquipment = student.training.status === "waitingForEquipment";
     return (
       <div className={`training-progress${variantClass}`}>
         <span>
@@ -357,7 +363,7 @@ export function TrainingControl({
           {instructor ? ` · con ${instructor.displayName}` : ""}
           {student.training.includesInstructorCertification ? " · attestato incluso" : ""}
         </span>
-        <strong>{Math.round(progress)}%</strong>
+        <strong>{waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}</strong>
         <ProgressBar
           className="training-progress-bar"
           label={`Formazione di ${displayName}`}
@@ -411,7 +417,7 @@ export function TrainingControl({
 
   if (academicallyAvailable.length === 0) {
     if (!annualTrainingAvailable) {
-      return <div className={`training-locked${variantClass}`}><strong>Hai raggiunto il limite di Forme per quest'anno</strong></div>;
+      return <div className={`training-locked${variantClass}`}><strong>Corsi annuali completati</strong></div>;
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
     return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Percorso completato alla {latestForm?.longName ?? "ultima Forma"}</strong></div>;
