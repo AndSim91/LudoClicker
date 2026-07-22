@@ -287,11 +287,14 @@ Esempi:
 
 ## 8. Tornei superiori
 
-Accademico, Nazionale e Champion's hanno 64 partecipanti:
+Accademico, Nazionale e Champion's hanno un campo nominale di 64 posti:
 
-- da 0 a 6 qualificati distinti della scuola del giocatore;
-- avversari generati fino a raggiungere 64 partecipanti;
-- 8 gironi da 8;
+- da 0 a 12 qualificati distinti della scuola del giocatore;
+- avversari generati fino a occupare i posti non riservati ai qualificati;
+- ogni qualificato che nel frattempo lascia la scuola conserva uno slot vuoto
+  nel campo, gestito come bye e non sostituito da un avversario;
+- 8 gironi nominali; gli slot vacanti riducono la dimensione dei gironi
+  interessati senza creare partecipanti sostitutivi;
 - 4 qualificati per girone;
 - fase eliminatoria da 32.
 
@@ -302,7 +305,11 @@ Ambito delle scuole avversarie:
 - Nazionale: un record per ogni altra Accademia italiana;
 - Champion's: un record per ogni nazione estera della rete LudoSport+.
 
-All'Accademico la scuola arriva sempre con i sei qualificati dello Scolastico. Dal Nazionale in avanti la rappresentanza dipende dai risultati ottenuti contro gli NPC. Se nessun atleta della scuola entra tra i sei qualificati complessivi, la scuola non prende parte ai tornei successivi della stagione.
+All'Accademico la scuola arriva con il sottoinsieme dei 6 o 12 qualificati
+complessivi appartenente alla scuola del giocatore. Dal Nazionale in avanti la
+rappresentanza dipende dai risultati ottenuti contro gli NPC. Se nessun atleta
+della scuola entra nelle posizioni complessive disponibili, la scuola non
+prende parte ai tornei successivi della stagione.
 
 I nomi delle scuole vengono inclusi in una fotografia locale dei dati pubblici.
 Ogni record possiede un ID stabile e appartiene a un solo livello del circuito.
@@ -323,28 +330,53 @@ Criteri di ordinamento:
 
 Arena e Stile producono due classifiche pubbliche indipendenti. La stessa persona può apparire in entrambi i podi.
 
-### 9.3 Sei qualificati distinti
+### 9.3 Sei o dodici qualificati distinti
 
-Il torneo successivo riceve complessivamente sei persone diverse:
+Il numero di posizioni disponibili dipende dagli iscritti attivi quando termina
+il torneo che assegna la qualificazione:
+
+| Iscritti attivi | Accademico | Nazionale | Champion's |
+|---:|---:|---:|---:|
+| 0–99 | 6 | 6 | 6 |
+| 100–299 | 12 | 6 | 6 |
+| 300–500 | 12 | 12 | 6 |
+| 501+ | 12 | 12 | 12 |
+
+Il valore viene salvato insieme al risultato. Variazioni successive degli
+iscritti non modificano una qualificazione già assegnata e vengono considerate
+soltanto alla conclusione del torneo successivo.
+
+Con sei posizioni:
 
 1. entrano i primi tre Arena;
 2. si scorre la classifica Stile dal primo posto;
 3. entrano le prime tre persone non già qualificate tramite Arena.
 
+Con dodici posizioni lo stesso procedimento usa i primi sei Arena e le prime
+sei persone distinte ricavate dalla classifica Stile.
+
 Il podio Stile pubblico non viene modificato. Le persone aggiuntive sono indicate come ripescate per la delegazione.
 
-Soltanto il sottoinsieme appartenente alla scuola del giocatore costituisce la sua delegazione. Può quindi contenere da zero a sei atleti.
+Soltanto il sottoinsieme appartenente alla scuola del giocatore costituisce la
+sua delegazione. Può quindi contenere da zero al numero massimo di posizioni
+disponibili; gli NPC possono occupare le altre posizioni della classifica.
 
 ## 10. Immunità
 
-Chi si qualifica al torneo successivo diventa immune da qualsiasi forma di disiscrizione o rimozione dalla scuola.
+Chi si qualifica al torneo successivo è protetto dagli abbandoni automatici
+fino a quel torneo. La cancellazione manuale rimane possibile.
 
 La protezione deve avere precedenza su:
 
 - abbandono annuale;
 - eventi narrativi;
 - future disiscrizioni improvvise;
-- rimozioni amministrative o automatiche.
+- rimozioni automatiche.
+
+Se un qualificato lascia comunque la scuola, il suo identificativo resta nella
+qualificazione ma perde l'immunità operativa. Il torneo successivo viene
+disputato con il relativo posto vacante: non viene effettuato alcun ripescaggio
+e non viene generato un NPC sostitutivo.
 
 Ciclo:
 
@@ -352,6 +384,7 @@ Ciclo:
 qualificato → immune → torneo successivo
   → qualificato: immunità continua
   → non qualificato: immunità termina immediatamente
+  → uscito dalla scuola: posto vacante (bye)
 ```
 
 Dopo la Champion's l'immunità termina per tutti.
@@ -444,7 +477,9 @@ Non vengono generati Leggendari ordinari nelle altre scuole.
 
 ### 13.1 Fasce del campo avversario
 
-All'Accademico, dove la scuola presenta sei atleti, i 58 NPC sono distribuiti come segue:
+All'Accademico gli NPC occupano i posti non riservati alla delegazione e agli
+eventuali bye. Con sei qualificati presenti vengono generati 58 NPC; con dodici
+qualificati presenti ne vengono generati 52.
 
 | Fascia | Posti base |
 |---|---:|
@@ -636,12 +671,13 @@ Alla fine di ogni torneo:
 
 1. vengono salvati incontri e classifiche;
 2. vengono determinati i due podi;
-3. vengono scelti i sei qualificati distinti;
-4. vengono aggiornate le immunità;
-5. i partecipanti ricevono +1 esperienza;
-6. vengono assegnati premi e trofei;
-7. vengono create eventuali prove segrete;
-8. viene inviata la notifica.
+3. in base agli iscritti attivi vengono assegnate 6 o 12 posizioni;
+4. le posizioni vengono divise equamente tra Arena e Stile, senza duplicati;
+5. vengono aggiornate le immunità;
+6. i partecipanti ricevono +1 esperienza;
+7. vengono assegnati premi e trofei;
+8. vengono create eventuali prove segrete;
+9. viene inviata la notifica.
 
 Roster, tiri e risultati usano il seed persistente del gioco. Ricaricare lo stesso salvataggio non deve permettere di cambiare il risultato.
 
@@ -693,11 +729,14 @@ I log completi degli incontri devono restare separati dai riepiloghi permanenti,
 - nessun progresso avviene mentre il gioco è chiuso;
 - l'area Tornei si sblocca al raggiungimento di sei iscritti;
 - lo Scolastico parte con almeno sei idonei e include tutti;
-- i tornei superiori contengono fino a sei atleti della scuola e NPC fino a 64;
+- i tornei superiori contengono fino a dodici atleti della scuola, NPC e
+  eventuali posti vacanti fino a un campo nominale di 64;
 - Arena usa incontri al meglio dei tre;
 - Stile mostra medie a tre decimali;
-- vengono prodotti sei qualificati distinti con priorità Arena;
-- i qualificati non possono essere rimossi;
+- vengono prodotti 6 o 12 qualificati distinti, divisi equamente tra Arena e
+  Stile con i consueti ripescaggi;
+- i qualificati possono essere rimossi manualmente, ma il loro posto rimane
+  vacante fino al torneo di destinazione;
 - premi e +1 esperienza vengono assegnati una sola volta;
 - i risultati sono stabili dopo ricaricamento;
 - Palena e Todaro usano i profili canonici;

@@ -21,6 +21,11 @@ import {
 } from "./athleteStats";
 import { nextRandom } from "./random";
 import { getCollaboratorsByContactId } from "./runtimeIndexes";
+import {
+  getQualificationDisciplineSlotCount,
+  getQualificationSlotCount,
+  type QualificationSlotCount,
+} from "./tournamentQualification";
 import type {
   Contact,
   GameState,
@@ -63,6 +68,10 @@ interface MutableStanding {
 interface SimulatedTournament {
   result: TournamentResult;
   nextSeed: number;
+}
+
+export interface TournamentSimulationOptions {
+  vacantQualificationContactIds?: readonly string[];
 }
 
 function roll(cursor: RandomCursor): number {
@@ -529,10 +538,20 @@ function simulateMatch(
   };
 }
 
-function getGroupSizes(participantCount: number, maximumGroupCount = Infinity): number[] {
+function getGroupSizes(
+  participantCount: number,
+  maximumGroupCount = Infinity,
+  minimumGroupCount = 1,
+): number[] {
   const groupCount = Math.max(
     1,
-    Math.min(maximumGroupCount, Math.ceil(participantCount / PREFERRED_MAX_GROUP_SIZE)),
+    Math.min(
+      participantCount,
+      Math.max(
+        minimumGroupCount,
+        Math.min(maximumGroupCount, Math.ceil(participantCount / PREFERRED_MAX_GROUP_SIZE)),
+      ),
+    ),
   );
   const minimumSize = Math.floor(participantCount / groupCount);
   const largerGroups = participantCount % groupCount;
@@ -687,10 +706,12 @@ function buildQualifiers(
   arenaRanking: readonly string[],
   styleRanking: readonly string[],
   participantMap: Map<string, TournamentParticipant>,
+  slotCount: QualificationSlotCount,
 ): TournamentQualifier[] {
   const qualifiers: TournamentQualifier[] = [];
   const selected = new Set<string>();
-  arenaRanking.slice(0, 3).forEach((participantId, index) => {
+  const disciplineSlotCount = getQualificationDisciplineSlotCount(slotCount);
+  arenaRanking.slice(0, disciplineSlotCount).forEach((participantId, index) => {
     const participant = participantMap.get(participantId)!;
     selected.add(participantId);
     qualifiers.push({
@@ -701,7 +722,7 @@ function buildQualifiers(
       repechage: false,
     });
   });
-  for (let index = 0; index < styleRanking.length && qualifiers.length < 6; index += 1) {
+  for (let index = 0; index < styleRanking.length && qualifiers.length < slotCount; index += 1) {
     const participantId = styleRanking[index];
     if (selected.has(participantId)) continue;
     const participant = participantMap.get(participantId)!;
@@ -711,7 +732,7 @@ function buildQualifiers(
       ownedContactId: participant.ownedContactId,
       source: "style",
       rankingPosition: index + 1,
-      repechage: index >= 3,
+      repechage: index >= disciplineSlotCount,
     });
   }
   return qualifiers;
@@ -763,6 +784,7 @@ export function simulateTournament(
   season: number,
   completedAt: number,
   ownedContacts: readonly Contact[],
+  options: TournamentSimulationOptions = {},
 ): SimulatedTournament {
   const cursor: RandomCursor = { seed: state.randomSeed };
   const definition = TOURNAMENT_DEFINITIONS[level];
@@ -785,7 +807,15 @@ export function simulateTournament(
         ? ownedContacts.slice(0, Math.max(0, definition.fieldSize! - chroniclesLegendaryIds.length))
         : ownedContacts;
   const owned = createOwnedParticipants(state, entrants, cursor);
-  const npcCount = level === "school" ? 0 : Math.max(0, definition.fieldSize! - owned.length);
+  const vacantQualificationContactIds = level === "school" || level === "chronicles"
+    ? []
+    : [...new Set(options.vacantQualificationContactIds ?? [])];
+  const npcCount = level === "school"
+    ? 0
+    : Math.max(
+        0,
+        definition.fieldSize! - owned.length - vacantQualificationContactIds.length,
+      );
   const npcs =
     level === "school"
       ? []
@@ -807,7 +837,8 @@ export function simulateTournament(
   );
   const groupSizes = getGroupSizes(
     participants.length,
-    level === "school" ? SCHOOL_MAX_GROUP_COUNT : undefined,
+    SCHOOL_MAX_GROUP_COUNT,
+    level === "school" ? 1 : SCHOOL_MAX_GROUP_COUNT,
   );
   let offset = 0;
   const advancing: { participant: TournamentParticipant; standing: MutableStanding }[] = [];
@@ -889,8 +920,17 @@ export function simulateTournament(
       const averageB = scoreB.count > 0 ? scoreB.total / scoreB.count : 0;
       return averageB - averageA || styleDraws.get(b)! - styleDraws.get(a)!;
     });
-  const qualifiers = getNextTournamentLevel(level)
-    ? buildQualifiers(arenaRanking, styleRanking, participantMap)
+  const nextLevel = getNextTournamentLevel(level);
+  const qualificationDestination = nextLevel === "academy" ||
+    nextLevel === "national" ||
+    nextLevel === "champions"
+    ? nextLevel
+    : undefined;
+  const qualificationSlotCount = qualificationDestination
+    ? getQualificationSlotCount(qualificationDestination, state.school.activeMembers)
+    : undefined;
+  const qualifiers = qualificationDestination && qualificationSlotCount
+    ? buildQualifiers(arenaRanking, styleRanking, participantMap, qualificationSlotCount)
     : [];
   const podiumFor = (discipline: TournamentDiscipline, ranking: readonly string[]) =>
     ranking.slice(0, 3).map((participantId, index) => {
@@ -942,6 +982,16 @@ export function simulateTournament(
       rewards,
       secretLegendaryDefeatedIds,
       schoolPreliminary: schoolSelection?.preliminary,
+      qualificationAllocation: qualificationDestination && qualificationSlotCount
+        ? {
+            destinationLevel: qualificationDestination,
+            activeMembers: state.school.activeMembers,
+            slotCount: qualificationSlotCount,
+          }
+        : undefined,
+      vacantQualificationContactIds: vacantQualificationContactIds.length > 0
+        ? vacantQualificationContactIds
+        : undefined,
     },
   };
 }

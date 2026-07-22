@@ -140,8 +140,6 @@ export function cancelMemberEnrollment(
   );
   if (departed === state) return state;
 
-  const qualification = departed.tournaments.qualification;
-  const remainingQualifiedIds = qualification?.contactIds.filter((id) => id !== contactId) ?? [];
   const secretLegendaryId = member.secretLegendaryId;
   return {
     ...departed,
@@ -170,9 +168,6 @@ export function cancelMemberEnrollment(
       : departed.network,
     tournaments: {
       ...departed.tournaments,
-      qualification: qualification && remainingQualifiedIds.length > 0
-        ? { ...qualification, contactIds: remainingQualifiedIds }
-        : undefined,
       immuneContactIds: departed.tournaments.immuneContactIds.filter((id) => id !== contactId),
     },
   };

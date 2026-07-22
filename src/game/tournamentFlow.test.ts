@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { getTournamentReward } from "../content/tournaments";
+import { addAdminMembers } from "./adminFlow";
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
@@ -77,6 +78,85 @@ describe("tournament history retention", () => {
       GAME_CONFIG.recentMissedTournamentsLimit,
     );
     expect(compacted.tournaments.skippedSeasons[0]).toBe(12);
+  });
+});
+
+describe("dynamic tournament qualification", () => {
+  function createSchool(memberCount: number) {
+    const initial = addAdminMembers(createInitialState(1_000, "Manager"), memberCount);
+    return {
+      ...initial,
+      contacts: initial.contacts.map((contact) =>
+        contact.status === "enrolled"
+          ? { ...contact, forms: ["form-1" as const] }
+          : contact,
+      ),
+    };
+  }
+
+  it("captures slots at each source tournament without rewriting prior qualification", () => {
+    const schoolResult = processTournamentAtMonthEnd(createSchool(100), 12, 10_000);
+
+    expect(schoolResult.tournaments.results.at(-1)?.qualificationAllocation).toEqual({
+      destinationLevel: "academy",
+      activeMembers: 100,
+      slotCount: 12,
+    });
+    expect(schoolResult.tournaments.qualification).toMatchObject({
+      level: "academy",
+      season: 1,
+      slotCount: 12,
+      activeMembersAtQualification: 100,
+    });
+    expect(schoolResult.tournaments.qualification?.contactIds).toHaveLength(12);
+
+    const reducedSchool = {
+      ...schoolResult,
+      school: { ...schoolResult.school, activeMembers: 90 },
+    };
+    const academyResult = processTournamentAtMonthEnd(reducedSchool, 16, 20_000);
+    const academyTournament = academyResult.tournaments.results.at(-1)!;
+
+    expect(academyTournament.level).toBe("academy");
+    expect(academyTournament.participants.filter((entry) => entry.ownedContactId)).toHaveLength(12);
+    expect(academyTournament.qualificationAllocation).toEqual({
+      destinationLevel: "national",
+      activeMembers: 90,
+      slotCount: 6,
+    });
+  });
+
+  it("runs the next tournament with a bye when every school qualifier has left", () => {
+    const initial = createSchool(6);
+    const qualified = initial.contacts.find((contact) => contact.status === "enrolled")!;
+    const state = {
+      ...initial,
+      contacts: initial.contacts.map((contact) =>
+        contact.id === qualified.id
+          ? { ...contact, status: "departed" as const }
+          : contact,
+      ),
+      school: { ...initial.school, activeMembers: 5 },
+      tournaments: {
+        ...initial.tournaments,
+        qualification: {
+          level: "academy" as const,
+          season: 1,
+          contactIds: [qualified.id],
+          slotCount: 6 as const,
+          activeMembersAtQualification: 6,
+        },
+        immuneContactIds: [],
+      },
+    };
+
+    const processed = processTournamentAtMonthEnd(state, 16, 20_000);
+    const result = processed.tournaments.results.at(-1)!;
+
+    expect(result.level).toBe("academy");
+    expect(result.participants).toHaveLength(63);
+    expect(result.vacantQualificationContactIds).toEqual([qualified.id]);
+    expect(processed.tournaments.missedTournaments).toEqual([]);
   });
 });
 

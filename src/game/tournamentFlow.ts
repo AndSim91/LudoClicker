@@ -239,6 +239,9 @@ function applyTournamentResult(
             level: nextLevel as Exclude<TournamentLevel, "school">,
             season: resolvedResult.season,
             contactIds: ownedQualifierIds,
+            slotCount: resolvedResult.qualificationAllocation?.slotCount,
+            activeMembersAtQualification:
+              resolvedResult.qualificationAllocation?.activeMembers,
           }
         : undefined,
       immuneContactIds: nextLevel ? ownedQualifierIds : [],
@@ -375,9 +378,11 @@ export function processTournamentAtMonthEnd(
     const contact = contactsById.get(id);
     return contact?.status === "enrolled" ? [contact] : [];
   });
-  if (ownedContacts.length === 0) {
-    return recordMissedTournament(state, level, season, "not-qualified", now);
-  }
-  const simulation = simulateTournament(state, level, season, now, ownedContacts);
+  const vacantQualificationContactIds = qualification.contactIds.filter(
+    (id) => contactsById.get(id)?.status !== "enrolled",
+  );
+  const simulation = simulateTournament(state, level, season, now, ownedContacts, {
+    vacantQualificationContactIds,
+  });
   return applyTournamentResult(state, simulation.result, simulation.nextSeed, now);
 }

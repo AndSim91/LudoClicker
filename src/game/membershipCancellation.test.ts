@@ -90,7 +90,8 @@ describe("manual enrollment cancellation", () => {
     const retained = cancelled.legendaryCollaborators.retainedProgress["eva-parodi"];
     expect(cancelled.collaborators).toEqual([]);
     expect(cancelled.contacts.find((contact) => contact.id === student.id)?.training).toBeUndefined();
-    expect(cancelled.tournaments.qualification).toBeUndefined();
+    expect(cancelled.tournaments.qualification?.contactIds).toEqual([member.id]);
+    expect(cancelled.tournaments.immuneContactIds).toEqual([]);
     expect(retained).toMatchObject({
       forms: ["form-1", "course-x"],
       instructorForms: ["form-1"],

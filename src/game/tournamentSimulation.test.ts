@@ -158,6 +158,36 @@ describe("tournament simulation", () => {
     ).toBe(true);
   });
 
+  it("expands qualification to six Arena and six distinct Style slots", () => {
+    const state = createTournamentSchool(100);
+    const simulation = simulateTournament(
+      state,
+      "school",
+      1,
+      181_000,
+      getEligibleSchoolContacts(state),
+    );
+    const arenaQualifiers = simulation.result.qualifiers.filter(
+      (entry) => entry.source === "arena",
+    );
+    const styleQualifiers = simulation.result.qualifiers.filter(
+      (entry) => entry.source === "style",
+    );
+
+    expect(simulation.result.qualificationAllocation).toEqual({
+      destinationLevel: "academy",
+      activeMembers: 100,
+      slotCount: 12,
+    });
+    expect(arenaQualifiers).toHaveLength(6);
+    expect(styleQualifiers).toHaveLength(6);
+    expect(new Set(simulation.result.qualifiers.map((entry) => entry.participantId)).size)
+      .toBe(12);
+    expect(styleQualifiers.every((entry) =>
+      entry.repechage === (entry.rankingPosition > 6)
+    )).toBe(true);
+  });
+
   it("keeps a large school tournament bounded to eight groups of eight", () => {
     const state = createTournamentSchool(160);
     const eligible = getEligibleSchoolContacts(state);
@@ -285,6 +315,31 @@ describe("tournament simulation", () => {
         ),
     ).toBe(true);
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
+  });
+
+  it("leaves qualified absences vacant instead of generating replacement opponents", () => {
+    const state = createTournamentSchool();
+    const eligible = getEligibleSchoolContacts(state);
+    const vacantContactId = eligible[5].id;
+    const simulation = simulateTournament(state, "academy", 1, 421_000, eligible.slice(0, 5), {
+      vacantQualificationContactIds: [vacantContactId],
+    });
+
+    expect(simulation.result.participants).toHaveLength(63);
+    expect(simulation.result.vacantQualificationContactIds).toEqual([vacantContactId]);
+    expect(new Set(simulation.result.groupStandings.map((entry) => entry.groupIndex)).size).toBe(8);
+  });
+
+  it("awards the twelve external slots from the whole tournament ranking", () => {
+    const state = createTournamentSchool(300);
+    const owned = getEligibleSchoolContacts(state).slice(0, 12);
+    const simulation = simulateTournament(state, "academy", 1, 421_000, owned);
+
+    expect(simulation.result.qualificationAllocation?.slotCount).toBe(12);
+    expect(simulation.result.qualifiers).toHaveLength(12);
+    expect(simulation.result.qualifiers.some((entry) => !entry.ownedContactId)).toBe(true);
+    expect(simulation.result.qualifiers.filter((entry) => entry.ownedContactId).length)
+      .toBeLessThan(12);
   });
 });
 

@@ -394,6 +394,17 @@ export function TournamentResults({
             <i aria-hidden="true" />
           </>
         ) : null}
+        {result.vacantQualificationContactIds?.length ? (
+          <>
+            <span>
+              {result.vacantQualificationContactIds.length}{" "}
+              {result.vacantQualificationContactIds.length === 1
+                ? "posto vacante (bye)"
+                : "posti vacanti (bye)"}
+            </span>
+            <i aria-hidden="true" />
+          </>
+        ) : null}
         <strong>Completato</strong>
         <label>
           <span>Cambia torneo</span>
@@ -667,6 +678,12 @@ export function TournamentResults({
                 <strong>
                   {result.qualifiers.length} qualificati {qualificationDestination(nextLevel)}
                 </strong>
+                {result.qualificationAllocation ? (
+                  <small>
+                    {result.qualificationAllocation.slotCount} posti disponibili con{" "}
+                    {result.qualificationAllocation.activeMembers} iscritti attivi
+                  </small>
+                ) : null}
                 <button type="button" onClick={onViewQualified}>
                   Vedi qualificati
                 </button>

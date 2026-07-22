@@ -135,6 +135,42 @@ describe("TournamentsView", () => {
 
     fireEvent.click(view.getByRole("tab", { name: "Torneo" }));
     expect(view.getByRole("heading", { name: "Gironi" })).toBeVisible();
+    expect(container.querySelector(".result-qualifiers small"))
+      .toHaveTextContent("6 posti disponibili con 80 iscritti attivi");
+  });
+
+  it("shows a qualified absence as a bye without listing the departed athlete", () => {
+    const { state: completed, result } = createCompletedTournamentState();
+    const qualifiedContacts = completed.contacts
+      .filter((contact) => contact.status === "enrolled")
+      .slice(0, 2);
+    const departed = qualifiedContacts[0];
+    const active = qualifiedContacts[1];
+    const state = {
+      ...completed,
+      contacts: completed.contacts.map((contact) =>
+        contact.id === departed.id ? { ...contact, status: "departed" as const } : contact,
+      ),
+      school: { ...completed.school, activeMembers: completed.school.activeMembers - 1 },
+      tournaments: {
+        ...completed.tournaments,
+        qualification: {
+          level: "academy" as const,
+          season: result.season,
+          contactIds: qualifiedContacts.map((contact) => contact.id),
+          slotCount: 6 as const,
+          activeMembersAtQualification: 6,
+        },
+      },
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const view = within(container);
+
+    expect(view.getByText("1 qualificato")).toBeVisible();
+    expect(view.getByText("al Torneo Accademico Alpha · 1 bye")).toBeVisible();
+    expect(view.getByText("1 atleta · 1 bye")).toBeVisible();
+    expect(view.getByText(`${active.firstName} ${active.lastName}`)).toBeVisible();
+    expect(view.queryByText(`${departed.firstName} ${departed.lastName}`)).not.toBeInTheDocument();
   });
 
   it("lists only the athletes in the current official qualification", () => {

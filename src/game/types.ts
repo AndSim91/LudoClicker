@@ -435,6 +435,12 @@ export interface TournamentQualifier {
   repechage: boolean;
 }
 
+export interface TournamentQualificationAllocation {
+  destinationLevel: Exclude<TournamentLevel, "school" | "chronicles">;
+  activeMembers: number;
+  slotCount: 6 | 12;
+}
+
 export type TournamentRewardBonus =
   | { kind: "random-contacts"; amount: number }
   | { kind: "trial"; rarity: "ultra-rare" | "legendary" }
@@ -473,6 +479,8 @@ export interface TournamentResult {
   rewards: TournamentReward[];
   secretLegendaryDefeatedIds: SecretLegendaryId[];
   schoolPreliminary?: SchoolTournamentPreliminary;
+  qualificationAllocation?: TournamentQualificationAllocation;
+  vacantQualificationContactIds?: string[];
 }
 
 export interface SecretLegendaryProgress {
@@ -515,6 +523,8 @@ export interface TournamentState {
     level: Exclude<TournamentLevel, "school">;
     season: number;
     contactIds: string[];
+    slotCount?: 6 | 12;
+    activeMembersAtQualification?: number;
   };
   immuneContactIds: string[];
   skippedSeasons: number[];

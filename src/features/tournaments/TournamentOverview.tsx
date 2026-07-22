@@ -63,21 +63,27 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
   ), [collaboratorsByContactId, state.contacts]);
   const delegation = delegationContactIds.flatMap((contactId) => {
     const entry = teamEntryByContactId.get(contactId);
-    return entry ? [entry] : [];
+    return entry?.contact.status === "enrolled" ? [entry] : [];
   });
   const officialQualified = useMemo(() => (qualification?.contactIds ?? []).flatMap((contactId) => {
     const entry = teamEntryByContactId.get(contactId);
-    return entry ? [entry] : [];
+    return entry?.contact.status === "enrolled" ? [entry] : [];
   }), [qualification, teamEntryByContactId]);
+  const qualificationByeCount = Math.max(
+    0,
+    (qualification?.contactIds.length ?? 0) - officialQualified.length,
+  );
   const latestResult = state.tournaments.results.at(-1);
   const qualificationTarget = qualification
     ? { level: qualification.level, season: qualification.season }
     : latestResult
       ? { level: getNextTournamentLevel(latestResult.level), season: latestResult.season }
       : undefined;
-  const missingQualificationLabel = qualificationTarget?.level
-    ? `Nessun atleta qualificato per il ${TOURNAMENT_DEFINITIONS[qualificationTarget.level].label} anno ${qualificationTarget.season}.`
-    : "Nessuna qualificazione disponibile.";
+  const missingQualificationLabel = qualification && qualificationByeCount > 0
+    ? `${qualificationByeCount === 1 ? "Il qualificato ha" : "I qualificati hanno"} lasciato la scuola.`
+    : qualificationTarget?.level
+      ? `Nessun atleta qualificato per il ${TOURNAMENT_DEFINITIONS[qualificationTarget.level].label} anno ${qualificationTarget.season}.`
+      : "Nessuna qualificazione disponibile.";
   const participationCount = upcoming?.level === "school"
     ? schoolTournamentEntry.selection.selectedContacts.length
     : delegation.length;
@@ -109,7 +115,11 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
           <strong>{participationLabel}</strong>
           <small>{upcoming?.level === "school" && schoolTournamentEntry.selection.preliminary
             ? `su ${schoolTournamentEntry.eligibleCount} idonei · preliminari aggregate`
-            : upcomingDefinition ? `al ${upcomingDefinition.label}` : "al prossimo torneo"}</small>
+            : upcomingDefinition
+              ? `al ${upcomingDefinition.label}${qualificationByeCount > 0
+                  ? ` · ${qualificationByeCount} bye`
+                  : ""}`
+              : "al prossimo torneo"}</small>
         </div>
       </section>
 
@@ -166,7 +176,7 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
         </section>
 
         <section className="qualified-team" aria-labelledby="qualified-team-title">
-          <header><h2 id="qualified-team-title">Qualificati</h2><span>{officialQualified.length} atleti</span></header>
+          <header><h2 id="qualified-team-title">Qualificati</h2><span>{officialQualified.length} atlet{officialQualified.length === 1 ? "a" : "i"}{qualificationByeCount > 0 ? ` · ${qualificationByeCount} bye` : ""}</span></header>
           {officialQualified.length > 0 && qualification ? (
             <>
               <div className="qualified-team-head" aria-hidden="true"><span>#</span><span>Atleta</span><span>Arena</span><span>Stile</span></div>
@@ -193,7 +203,9 @@ export function TournamentOverview({ state, onOpenResult }: TournamentOverviewPr
             <div className="qualified-team-empty">
               <span aria-hidden="true"><Icon name="trophy" /></span>
               <strong>{missingQualificationLabel}</strong>
-              <p>In attesa del prossimo Torneo Scolastico.</p>
+              <p>{qualificationByeCount > 0
+                ? "Il torneo verrà disputato mantenendo i relativi posti vacanti."
+                : "In attesa del prossimo Torneo Scolastico."}</p>
             </div>
           )}
         </section>
