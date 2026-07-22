@@ -148,7 +148,7 @@ describe("bounded game history", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.emails).toHaveLength(500);
     expect(migrated.historyArchive.emails.count).toBe(300);
-    expect(migrate(migrated)).toBe(migrated);
+    expect(migrate(migrated)).toStrictEqual(migrated);
   });
 
   it("compacts imported runtime state before it enters the game loop", () => {

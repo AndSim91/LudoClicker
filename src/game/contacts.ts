@@ -218,7 +218,8 @@ export function createAcquiredContacts(
     const specialProfile = selected.profile;
     const returningContact = specialProfile
       ? state.contacts.find((contact) =>
-          contact.status === "departed" && contact.specialProfileId === specialProfile.id
+          (contact.status === "departed" || contact.status === "lost") &&
+          contact.specialProfileId === specialProfile.id
         )
       : undefined;
     nextSeed = selected.nextSeed;

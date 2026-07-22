@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 
@@ -12,7 +13,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades["extra-form"]).toBe(0);
     expect(migrated.upgrades["technical-arena"]).toBe(0);
     expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
@@ -32,7 +33,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
     expect(migrated.statistics.socialTrials).toBe(0);
@@ -47,7 +48,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades["promiscuous-instructor"]).toBe(1);
     expect(migrated.upgrades["tiamat-instructor"]).toBe(4);
     expect(migrated.upgrades.pagosport).toBe(0);
@@ -61,7 +62,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
   });
 
@@ -72,7 +73,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.school.followers).toBe(0);
   });
 
@@ -84,7 +85,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
     expect(migrated.contacts[0].agonistCourseCompletions).toBe(0);
   });
@@ -109,7 +110,7 @@ describe("Form training save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(45);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.collaborators[0].instructorForms).toEqual(["form-1", "course-x"]);
   });
 });

@@ -1102,7 +1102,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Nuova iscrizione · immune fino a Settembre")).toBeVisible();
+    expect(screen.getByText("Nuova iscrizione")).toBeVisible();
     expect(screen.queryByText(/Rischio abbandono/)).not.toBeInTheDocument();
   });
 
@@ -1129,7 +1129,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Corso in palestra · immune al rinnovo annuale")).toBeVisible();
+    expect(screen.getByText("Corso in palestra")).toBeVisible();
     expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
   });
 

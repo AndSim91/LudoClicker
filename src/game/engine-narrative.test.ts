@@ -234,7 +234,13 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const resourced = {
       ...initial,
-      school: { ...initial.school, euros: 200, activeMembers: 5, peakActiveMembers: 5 },
+      school: {
+        ...initial.school,
+        euros: 200,
+        activeMembers: 5,
+        peakActiveMembers: 5,
+        historicMembers: 5,
+      },
     };
 
     const first = gameReducer(resourced, { type: "START_ACQUISITION_EVENT", definitionId: "public-demo", now: 2_000 });

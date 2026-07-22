@@ -1,5 +1,5 @@
 import type { EmailPresentationLevel } from "../game/types";
-import fileOverrides from "./emailCatalogOverrides.json";
+import fileOverrides from "./emailCatalogOverrides.json" with { type: "json" };
 
 export interface EmailCopyOverride {
   subject: string;

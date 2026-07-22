@@ -25,7 +25,7 @@
   },
   "0:materiale-fornito": {
     "subject": "Le spade le portiamo noi, tranquillo",
-    "body": "Ciao {{firstName}},\nNon vogliamo venderti niente, solo l'esperienza migliore che potrebbe capitarti. Porta scarpe e possibilmente te stesso. La prova è gratis.\n\n{{senderName}}"
+    "body": "Ciao {{firstName}},\nNon vogliamo venderti niente, solo l'esperienza migliore che potrebbe capitarti. Porta scarpe e possibilmente te stesso. La prova è gratiss.\n\n{{senderName}}"
   },
   "0:allenamento-completo": {
     "subject": "Palestra per muscoli e altri organi",

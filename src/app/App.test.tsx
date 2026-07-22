@@ -22,7 +22,7 @@ describe("App profile and navigation", () => {
 
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
     expect(screen.getByText(/Andrea Ungaro/)).toBeVisible();
-    expect(screen.getByRole("dialog", { name: "Il primo mattino" })).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Il primo giorno da Preside" })).toBeVisible();
   });
 
   it("shows the generated application version in the status bar", () => {
@@ -43,14 +43,14 @@ describe("App profile and navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
 
-    expect(screen.getByText("Invia il primo invito")).toBeVisible();
+    expect(screen.getByText("Invia la tua prima mail")).toBeVisible();
     expect(screen.getByRole("button", { name: "Riprendi" })).toBeVisible();
 
     fireEvent.keyDown(window, { key: "a", code: "KeyA" });
 
     expect(screen.getAllByText("Invio in corso…").length).toBeGreaterThan(0);
     await waitFor(() => {
-      expect(screen.queryByText("Invia il primo invito")).not.toBeInTheDocument();
+      expect(screen.queryByText("Invia la tua prima mail")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
     });
     expect(screen.getByText("0/3")).toBeVisible();
@@ -75,24 +75,24 @@ describe("App profile and navigation", () => {
     });
     render(<App />);
 
-    expect(screen.getByText("Apri Eventi")).toBeVisible();
+    expect(screen.getByText("Apri la pagina Eventi")).toBeVisible();
     expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Eventi" }));
 
     expect(screen.getByRole("dialog", { name: "Eventi e attrezzatura" })).toBeVisible();
-    expect(screen.getByText(/può danneggiarsi/)).toBeVisible();
+    expect(screen.getByText(/potrebbe anche danneggiarsi/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Riprendi" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
 
-    expect(screen.getByText("Avvia lo sparring gratuito")).toBeVisible();
+    expect(screen.getByText("Avvia l'evento di sparring gratuito")).toBeVisible();
     expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Partecipa gratis" }));
 
     await waitFor(() => {
-      expect(screen.queryByText("Avvia lo sparring gratuito")).not.toBeInTheDocument();
+      expect(screen.queryByText("Avvia l'evento di sparring gratuito")).not.toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Attività in corso…" })).toBeDisabled();
   });

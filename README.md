@@ -13,18 +13,20 @@ npm run dev
 
 ```bash
 npm test
-npm run lint
-npm run build
-npm run test:e2e
 ```
 
-Per la verifica rapida del bilanciamento a lungo termine:
+`npm test` esegue in sequenza lint, test unitari Vitest, build TypeScript/Vite e
+test end-to-end Playwright su Chromium. Gli scenari browser usano un
+salvataggio di gioco deterministico costruito dagli stessi moduli di produzione,
+così coprono caricamento, interazioni e persistenza senza dipendere da dati
+personali o da un salvataggio locale esistente.
+
+Al primo utilizzo, se Chromium non è già disponibile per la versione installata
+di Playwright:
 
 ```bash
-npm run test:balance
+npx playwright install chromium
 ```
-
-La suite usa il tempo virtuale e lancia un batch configurabile di partite indipendenti per ciascun profilo (attualmente due seed intenso e due tranquillo); il batch è riutilizzabile con un numero arbitrario di seed senza attendere ore reali.
 
 Il gioco non invia email e non accede a servizi esterni: destinatari, messaggi e progressi sono simulati e salvati esclusivamente in `localStorage`.
 

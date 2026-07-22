@@ -227,7 +227,7 @@ describe("TutorialLayer", () => {
     expect(recipient.inert).not.toBe(true);
     const tutorialCard = container.querySelector<HTMLElement>(".tutorial-card")!;
     expect(container.querySelector(".tutorial-layer")).toHaveClass("is-card-left");
-    expect(tutorialCard).toHaveTextContent("Il primo Leggendario");
+    expect(tutorialCard).toHaveTextContent("Un Leggendario è per sempre");
     expect(tutorialCard).toHaveTextContent("Collezionali tutti!");
   });
 });

@@ -7,6 +7,7 @@ import { getEmailBuildLength } from "../content/emailBuild";
 import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 import { createSaveScheduler } from "./saveScheduler";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
+import { SECRET_LEGENDARY_IDS } from "../content/secretLegendaries";
 
 afterEach(() => {
   vi.useRealTimers();
@@ -455,10 +456,10 @@ describe("local save", () => {
       reputation: 0,
       schools: [],
       prestigeOfferSent: false,
-      secretLegendaries: {
-        "marco-palena": { status: "external", defeats: 0, failedTrials: 0 },
-        "lorenzo-todaro": { status: "external", defeats: 0, failedTrials: 0 },
-      },
+      secretLegendaries: Object.fromEntries(SECRET_LEGENDARY_IDS.map((id) => [
+        id,
+        { status: "external", defeats: 0, failedTrials: 0 },
+      ])),
     });
   });
 

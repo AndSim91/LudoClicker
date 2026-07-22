@@ -1,3 +1,7 @@
+.progress-bar-linear {
+  display: block;
+}
+
 .progress-bar-linear:not(.is-indeterminate) > span {
   transition: width var(--progress-transition-duration, 1s) linear;
 }

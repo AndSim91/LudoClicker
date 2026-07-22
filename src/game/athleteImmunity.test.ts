@@ -15,7 +15,7 @@ describe("athlete immunity", () => {
     const septemberStatus = getAthleteImmunityStatus({ currentMonth: 21 }, athlete);
 
     expect(protectedStatus.reasons).toEqual(["recent-enrollment"]);
-    expect(protectedStatus.message).toBe("Nuova iscrizione · immune fino a Settembre");
+    expect(protectedStatus.message).toBe("Nuova iscrizione");
     expect(isAthleteImmuneFromDeparture(protectedStatus, "annual-rollout")).toBe(true);
     expect(isAthleteImmuneFromDeparture(protectedStatus, "unexpected-event")).toBe(true);
     expect(septemberStatus.reasons).toEqual([]);
@@ -44,7 +44,7 @@ describe("athlete immunity", () => {
     }, athlete);
 
     expect(qualified.reasons).toEqual(["tournament-qualification"]);
-    expect(qualified.message).toBe("Qualificato al prossimo torneo · immune");
+    expect(qualified.message).toBe("Qualificato al prossimo torneo");
     expect(isAthleteImmuneFromDeparture(qualified, "annual-rollout")).toBe(true);
     expect(isAthleteImmuneFromDeparture(qualified, "unexpected-event")).toBe(true);
     expect(noLongerQualified.reasons).toEqual([]);
@@ -59,7 +59,7 @@ describe("athlete immunity", () => {
     const status = getAthleteImmunityStatus({ currentMonth: 21 }, athlete);
 
     expect(status.reasons).toEqual(["gym-course"]);
-    expect(status.message).toBe("Corso in palestra · immune al rinnovo annuale");
+    expect(status.message).toBe("Corso in palestra");
     expect(isAthleteImmuneFromDeparture(status, "annual-rollout")).toBe(true);
     expect(isAthleteImmuneFromDeparture(status, "unexpected-event")).toBe(false);
   });
