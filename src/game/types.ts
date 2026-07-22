@@ -4,13 +4,7 @@ import type { TournamentSchoolId } from "../content/tournamentSchools";
 export type { SecretLegendaryId } from "../content/secretLegendaries";
 
 export type ContactStatus =
-  | "available"
-  | "writing"
-  | "invited"
-  | "trialScheduled"
-  | "enrolled"
-  | "departed"
-  | "lost";
+  "available" | "writing" | "invited" | "trialScheduled" | "enrolled" | "departed" | "lost";
 
 export type SpecialCollaboratorId =
   | "andrea-simonazzi"
@@ -246,11 +240,7 @@ export interface NarrativeEventRecord {
   };
 }
 
-export type ShortGoalId =
-  | "send-emails"
-  | "book-trials"
-  | "complete-event"
-  | "enroll-member";
+export type ShortGoalId = "send-emails" | "book-trials" | "complete-event" | "enroll-member";
 
 export interface ShortGoalProgress {
   definitionId: ShortGoalId;
@@ -288,13 +278,7 @@ export interface SchoolFoundationDetails {
 }
 
 export type CollaboratorAssignment =
-  | "writing"
-  | "events"
-  | "lessons"
-  | "social"
-  | "equipment"
-  | "instructor"
-  | null;
+  "writing" | "events" | "lessons" | "social" | "equipment" | "instructor" | null;
 
 export type CollaboratorMasteryRole = Exclude<CollaboratorAssignment, null>;
 export type CollaboratorMastery = Record<CollaboratorMasteryRole, number>;
@@ -396,6 +380,7 @@ export interface TournamentParticipant {
   city: string;
   rarity: PersonRarity | "secret-legendary";
   numericForms: number;
+  knownFormIds?: FormId[];
   experience: number;
   arenaBase: number;
   styleBase: number;
@@ -407,7 +392,8 @@ export interface TournamentParticipant {
 
 export interface TournamentMatch {
   id: string;
-  stage: "group" | "round64" | "round32" | "round16" | "quarterfinal" | "semifinal" | "bronze" | "final";
+  stage:
+    "group" | "round64" | "round32" | "round16" | "quarterfinal" | "semifinal" | "bronze" | "final";
   groupIndex?: number;
   participantAId: string;
   participantBId: string;

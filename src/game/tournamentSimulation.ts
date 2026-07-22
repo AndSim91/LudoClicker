@@ -5,10 +5,7 @@ import {
   getChroniclesLegendaryIds,
   getSecretLegendaryIdsForTournament,
 } from "../content/secretLegendaries";
-import {
-  getNpcSchoolPool,
-  getTournamentSchool,
-} from "../content/tournamentSchools";
+import { getNpcSchoolPool, getTournamentSchool } from "../content/tournamentSchools";
 import {
   TOURNAMENT_DEFINITIONS,
   getNextTournamentLevel,
@@ -44,14 +41,10 @@ const MINIMUM_ASSAULT_CHANCE = 0.001;
 const MAXIMUM_ASSAULT_CHANCE = 0.999;
 const SCHOOL_MAX_GROUP_COUNT = 8;
 const PREFERRED_MAX_GROUP_SIZE = 8;
-export const SCHOOL_TOURNAMENT_FIELD_SIZE =
-  SCHOOL_MAX_GROUP_COUNT * PREFERRED_MAX_GROUP_SIZE;
+export const SCHOOL_TOURNAMENT_FIELD_SIZE = SCHOOL_MAX_GROUP_COUNT * PREFERRED_MAX_GROUP_SIZE;
 const GROUP_QUALIFIER_LIMIT = 4;
 const MAX_KNOCKOUT_PARTICIPANTS = SCHOOL_MAX_GROUP_COUNT * GROUP_QUALIFIER_LIMIT;
-type ScheduledExternalTournamentLevel = Exclude<
-  TournamentLevel,
-  "school" | "chronicles"
->;
+type ScheduledExternalTournamentLevel = Exclude<TournamentLevel, "school" | "chronicles">;
 
 interface RandomCursor {
   seed: number;
@@ -101,7 +94,7 @@ function shuffle<T>(cursor: RandomCursor, values: readonly T[]): T[] {
 }
 
 function triangularCondition(cursor: RandomCursor): number {
-  return ((0.7 + roll(cursor) * 0.6) + (0.7 + roll(cursor) * 0.6)) / 2;
+  return (0.7 + roll(cursor) * 0.6 + (0.7 + roll(cursor) * 0.6)) / 2;
 }
 
 function conditionMultiplier(condition: number): number {
@@ -142,6 +135,7 @@ function createOwnedParticipants(
       city: state.school.city,
       rarity: contact.secretLegendaryId ? "secret-legendary" : contact.rarity,
       numericForms: stats.numericForms,
+      knownFormIds: [...forms],
       experience: stats.tournamentExperience,
       arenaBase: stats.base.arena,
       styleBase: stats.base.style,
@@ -175,7 +169,8 @@ export function selectSchoolTournamentEntrantsFromRoster(
       stats: getAthleteTournamentStats(contact, forms),
     };
   });
-  const compareBy = (primary: "arena" | "style", secondary: "arena" | "style") =>
+  const compareBy =
+    (primary: "arena" | "style", secondary: "arena" | "style") =>
     (left: (typeof ranked)[number], right: (typeof ranked)[number]) =>
       right.stats[primary] - left.stats[primary] ||
       right.stats[secondary] - left.stats[secondary] ||
@@ -265,9 +260,8 @@ function createNpcInTier(
   const midpoint = (tier.minimum + tier.maximum) / 2;
   for (let attempt = 0; attempt < 2_000; attempt += 1) {
     const candidate = createNpcCandidate(level, profile, discipline, cursor, sequence + attempt);
-    const preparation = discipline === "arena"
-      ? candidate.arenaPreparation
-      : candidate.stylePreparation;
+    const preparation =
+      discipline === "arena" ? candidate.arenaPreparation : candidate.stylePreparation;
     if (preparation >= tier.minimum && preparation <= tier.maximum) return candidate;
     const distance = Math.abs(preparation - midpoint);
     if (distance < closestDistance) {
@@ -281,7 +275,7 @@ function createNpcInTier(
 function allocateTierSlots(npcCount: number, tiers: readonly TournamentTier[]): number[] {
   if (npcCount <= 0) return tiers.map(() => 0);
   const baseTotal = tiers.reduce((total, tier) => total + tier.baseSlots, 0);
-  const exact = tiers.map((tier) => npcCount * tier.baseSlots / baseTotal);
+  const exact = tiers.map((tier) => (npcCount * tier.baseSlots) / baseTotal);
   const slots = exact.map(Math.floor);
   const remaining = npcCount - slots.reduce((total, value) => total + value, 0);
   const priorities = exact
@@ -292,7 +286,9 @@ function allocateTierSlots(npcCount: number, tiers: readonly TournamentTier[]): 
     const needed = 2 - slots[slots.length - 1];
     slots[slots.length - 1] += needed;
     for (let index = 0; index < needed; index += 1) {
-      const donor = slots.findIndex((value, tierIndex) => tierIndex < slots.length - 1 && value > 1);
+      const donor = slots.findIndex(
+        (value, tierIndex) => tierIndex < slots.length - 1 && value > 1,
+      );
       if (donor >= 0) slots[donor] -= 1;
     }
   }
@@ -349,15 +345,15 @@ function maybeInsertSecretLegendary(
   if (candidates.length === 0 || participants.length === 0) return participants;
   const id = candidates[integer(cursor, 0, candidates.length - 1)];
   const secret = createSecretParticipant(id, cursor);
-  const relevant = secret.qualificationDiscipline === "style"
-    ? secret.stylePreparation
-    : secret.arenaPreparation;
+  const relevant =
+    secret.qualificationDiscipline === "style" ? secret.stylePreparation : secret.arenaPreparation;
   let replacementIndex = 0;
   let distance = Infinity;
   participants.forEach((participant, index) => {
-    const value = participant.qualificationDiscipline === "style"
-      ? participant.stylePreparation
-      : participant.arenaPreparation;
+    const value =
+      participant.qualificationDiscipline === "style"
+        ? participant.stylePreparation
+        : participant.arenaPreparation;
     const candidateDistance = Math.abs(value - relevant);
     if (candidateDistance < distance) {
       replacementIndex = index;
@@ -391,9 +387,10 @@ function createNpcParticipants(
       participant.secretLegendaryId ||
       participant.schoolName !== state.school.name ||
       participant.city !== state.school.city
-    ) return participant;
-    const replacement = getNpcSchoolPool(level).find((school) =>
-      school.name !== state.school.name || school.city !== state.school.city
+    )
+      return participant;
+    const replacement = getNpcSchoolPool(level).find(
+      (school) => school.name !== state.school.name || school.city !== state.school.city,
     );
     return replacement
       ? {
@@ -453,7 +450,7 @@ function createChroniclesNpcParticipants(
       arenaPreparation: arenaBase,
       stylePreparation: styleBase,
       condition: triangularCondition(cursor),
-      qualificationDiscipline: sequence % 2 === 0 ? "arena" as const : "style" as const,
+      qualificationDiscipline: sequence % 2 === 0 ? ("arena" as const) : ("style" as const),
     };
   });
 }
@@ -491,10 +488,14 @@ function simulateMatch(
   matchIndex: number,
   groupIndex?: number,
 ): TournamentMatch {
-  const poweredA = participantA.arenaPreparation ** ARENA_DECISIVENESS *
-    conditionMultiplier(participantA.condition) * encounterMultiplier(cursor);
-  const poweredB = participantB.arenaPreparation ** ARENA_DECISIVENESS *
-    conditionMultiplier(participantB.condition) * encounterMultiplier(cursor);
+  const poweredA =
+    participantA.arenaPreparation ** ARENA_DECISIVENESS *
+    conditionMultiplier(participantA.condition) *
+    encounterMultiplier(cursor);
+  const poweredB =
+    participantB.arenaPreparation ** ARENA_DECISIVENESS *
+    conditionMultiplier(participantB.condition) *
+    encounterMultiplier(cursor);
   const assaultChanceA = clamp(
     poweredA / (poweredA + poweredB),
     MINIMUM_ASSAULT_CHANCE,
@@ -506,10 +507,14 @@ function simulateMatch(
     if (roll(cursor) < assaultChanceA) arenaScoreA += 1;
     else arenaScoreB += 1;
   }
-  const stylePerformanceA = participantA.stylePreparation *
-    conditionMultiplier(participantA.condition) * encounterMultiplier(cursor);
-  const stylePerformanceB = participantB.stylePreparation *
-    conditionMultiplier(participantB.condition) * encounterMultiplier(cursor);
+  const stylePerformanceA =
+    participantA.stylePreparation *
+    conditionMultiplier(participantA.condition) *
+    encounterMultiplier(cursor);
+  const stylePerformanceB =
+    participantB.stylePreparation *
+    conditionMultiplier(participantB.condition) *
+    encounterMultiplier(cursor);
   return {
     id: `match-${stage}-${matchIndex}-${cursor.seed >>> 0}`,
     stage,
@@ -542,10 +547,12 @@ function standingAverage(standing: MutableStanding): number {
 }
 
 function compareStandings(a: MutableStanding, b: MutableStanding): number {
-  return b.wins - a.wins ||
+  return (
+    b.wins - a.wins ||
     b.assaultPoints - a.assaultPoints ||
     standingAverage(b) - standingAverage(a) ||
-    b.draw - a.draw;
+    b.draw - a.draw
+  );
 }
 
 function knockoutStage(roundSize: number): TournamentMatch["stage"] {
@@ -578,8 +585,10 @@ function buildArenaKnockout(
   const recordStyle = (match: TournamentMatch) => {
     const a = styleTotals.get(match.participantAId)!;
     const b = styleTotals.get(match.participantBId)!;
-    a.total += match.styleScoreA; a.count += 1;
-    b.total += match.styleScoreB; b.count += 1;
+    a.total += match.styleScoreA;
+    a.count += 1;
+    b.total += match.styleScoreB;
+    b.count += 1;
   };
 
   if (byeCount > 0) {
@@ -589,14 +598,18 @@ function buildArenaKnockout(
     const eliminated: string[] = [];
     for (let index = 0; index < firstRound.length; index += 2) {
       const match = simulateMatch(
-        firstRound[index], firstRound[index + 1], knockoutStage(bracketSize),
-        cursor, matches.length,
+        firstRound[index],
+        firstRound[index + 1],
+        knockoutStage(bracketSize),
+        cursor,
+        matches.length,
       );
-      matches.push(match); recordStyle(match);
+      matches.push(match);
+      recordStyle(match);
       winners.push(participantMap.get(match.winnerId)!);
-      eliminated.push(match.winnerId === firstRound[index].id
-        ? firstRound[index + 1].id
-        : firstRound[index].id);
+      eliminated.push(
+        match.winnerId === firstRound[index].id ? firstRound[index + 1].id : firstRound[index].id,
+      );
     }
     eliminatedByRound.push(eliminated);
     roundParticipants = shuffle(cursor, winners);
@@ -613,10 +626,12 @@ function buildArenaKnockout(
       const a = roundParticipants[index];
       const b = roundParticipants[index + 1];
       const match = simulateMatch(a, b, knockoutStage(roundSize), cursor, matches.length);
-      matches.push(match); recordStyle(match);
+      matches.push(match);
+      recordStyle(match);
       const winner = participantMap.get(match.winnerId)!;
       const loser = match.winnerId === a.id ? b : a;
-      winners.push(winner); eliminated.push(loser.id);
+      winners.push(winner);
+      eliminated.push(loser.id);
       if (roundSize === 4) semifinalLosers.push(loser);
     }
     eliminatedByRound.push(eliminated);
@@ -624,24 +639,32 @@ function buildArenaKnockout(
   }
 
   const final = simulateMatch(
-    roundParticipants[0], roundParticipants[1], "final", cursor, matches.length,
+    roundParticipants[0],
+    roundParticipants[1],
+    "final",
+    cursor,
+    matches.length,
   );
-  matches.push(final); recordStyle(final);
+  matches.push(final);
+  recordStyle(final);
   const champion = participantMap.get(final.winnerId)!;
-  const runnerUp = final.winnerId === roundParticipants[0].id
-    ? roundParticipants[1]
-    : roundParticipants[0];
+  const runnerUp =
+    final.winnerId === roundParticipants[0].id ? roundParticipants[1] : roundParticipants[0];
   let bronze: TournamentParticipant | undefined;
   let fourth: TournamentParticipant | undefined;
   if (semifinalLosers.length === 2) {
     const bronzeMatch = simulateMatch(
-      semifinalLosers[0], semifinalLosers[1], "bronze", cursor, matches.length,
+      semifinalLosers[0],
+      semifinalLosers[1],
+      "bronze",
+      cursor,
+      matches.length,
     );
-    matches.push(bronzeMatch); recordStyle(bronzeMatch);
+    matches.push(bronzeMatch);
+    recordStyle(bronzeMatch);
     bronze = participantMap.get(bronzeMatch.winnerId)!;
-    fourth = bronzeMatch.winnerId === semifinalLosers[0].id
-      ? semifinalLosers[1]
-      : semifinalLosers[0];
+    fourth =
+      bronzeMatch.winnerId === semifinalLosers[0].id ? semifinalLosers[1] : semifinalLosers[0];
   }
   const excluded = new Set([champion.id, runnerUp.id, bronze?.id, fourth?.id]);
   const remaining = eliminatedByRound
@@ -649,8 +672,13 @@ function buildArenaKnockout(
     .flat()
     .filter((id) => !excluded.has(id));
   return {
-    ranking: [champion.id, runnerUp.id, ...(bronze ? [bronze.id] : []),
-      ...(fourth ? [fourth.id] : []), ...remaining],
+    ranking: [
+      champion.id,
+      runnerUp.id,
+      ...(bronze ? [bronze.id] : []),
+      ...(fourth ? [fourth.id] : []),
+      ...remaining,
+    ],
     semifinalLosers,
   };
 }
@@ -695,12 +723,16 @@ function findDefeatedSecretLegendaries(
   styleRanking: readonly string[],
 ): SecretLegendaryId[] {
   const defeated = new Set<SecretLegendaryId>();
-  const ownedIds = new Set(participants.filter((entry) => entry.ownedContactId).map((entry) => entry.id));
+  const ownedIds = new Set(
+    participants.filter((entry) => entry.ownedContactId).map((entry) => entry.id),
+  );
   for (const participant of participants) {
     if (!participant.secretLegendaryId || participant.ownedContactId) continue;
-    const lostToOwnedInArena = matches.some((match) =>
-      (match.participantAId === participant.id || match.participantBId === participant.id) &&
-      match.winnerId !== participant.id && ownedIds.has(match.winnerId)
+    const lostToOwnedInArena = matches.some(
+      (match) =>
+        (match.participantAId === participant.id || match.participantBId === participant.id) &&
+        match.winnerId !== participant.id &&
+        ownedIds.has(match.winnerId),
     );
     const secretStyleIndex = styleRanking.indexOf(participant.id);
     const beatenInStyle = styleRanking.slice(0, secretStyleIndex).some((id) => ownedIds.has(id));
@@ -714,11 +746,10 @@ export function getEligibleSchoolContactsFromRoster(
   collaborators: GameState["collaborators"],
 ): Contact[] {
   const collaboratorsByContactId = getCollaboratorsByContactId(collaborators);
-  return contacts.filter((contact) =>
-    contact.status === "enrolled" && hasCompletedFormOne(
-      collaboratorsByContactId.get(contact.id)?.forms ??
-        contact.forms,
-    )
+  return contacts.filter(
+    (contact) =>
+      contact.status === "enrolled" &&
+      hasCompletedFormOne(collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms),
   );
 }
 
@@ -737,36 +768,37 @@ export function simulateTournament(
   const definition = TOURNAMENT_DEFINITIONS[level];
   // A school can eventually contain thousands of athletes. Aggregate
   // preliminaries select the field before the quadratic group simulation.
-  const schoolSelection = level === "school"
-    ? selectSchoolTournamentEntrantsFromRoster(ownedContacts, state.collaborators)
-    : undefined;
-  const chroniclesLegendaryIds = level === "chronicles"
-    ? getChroniclesLegendaryIds().filter(
-        (id) => state.network.secretLegendaries[id]?.status === "external",
-      )
-    : [];
-  const entrants = level === "school"
-    ? schoolSelection!.selectedContacts
-    : level === "chronicles"
-      ? ownedContacts.slice(0, Math.max(0, definition.fieldSize! - chroniclesLegendaryIds.length))
-      : ownedContacts;
+  const schoolSelection =
+    level === "school"
+      ? selectSchoolTournamentEntrantsFromRoster(ownedContacts, state.collaborators)
+      : undefined;
+  const chroniclesLegendaryIds =
+    level === "chronicles"
+      ? getChroniclesLegendaryIds().filter(
+          (id) => state.network.secretLegendaries[id]?.status === "external",
+        )
+      : [];
+  const entrants =
+    level === "school"
+      ? schoolSelection!.selectedContacts
+      : level === "chronicles"
+        ? ownedContacts.slice(0, Math.max(0, definition.fieldSize! - chroniclesLegendaryIds.length))
+        : ownedContacts;
   const owned = createOwnedParticipants(state, entrants, cursor);
   const npcCount = level === "school" ? 0 : Math.max(0, definition.fieldSize! - owned.length);
-  const npcs = level === "school"
-    ? []
-    : level === "chronicles"
-      ? [
-          ...chroniclesLegendaryIds.map((id) => createChroniclesSecretParticipant(id, cursor)),
-          ...createChroniclesNpcParticipants(
-            Math.max(0, npcCount - chroniclesLegendaryIds.length),
-            cursor,
-          ),
-        ]
-      : createNpcParticipants(state, level, npcCount, cursor);
-  const participants = ensureUniqueParticipantNames(
-    shuffle(cursor, [...owned, ...npcs]),
-    cursor,
-  );
+  const npcs =
+    level === "school"
+      ? []
+      : level === "chronicles"
+        ? [
+            ...chroniclesLegendaryIds.map((id) => createChroniclesSecretParticipant(id, cursor)),
+            ...createChroniclesNpcParticipants(
+              Math.max(0, npcCount - chroniclesLegendaryIds.length),
+              cursor,
+            ),
+          ]
+        : createNpcParticipants(state, level, npcCount, cursor);
+  const participants = ensureUniqueParticipantNames(shuffle(cursor, [...owned, ...npcs]), cursor);
   const participantMap = new Map(participants.map((participant) => [participant.id, participant]));
   const matches: TournamentMatch[] = [];
   const mutableStandings: MutableStanding[] = [];
@@ -795,7 +827,12 @@ export function simulateTournament(
     for (let first = 0; first < group.length; first += 1) {
       for (let second = first + 1; second < group.length; second += 1) {
         const match = simulateMatch(
-          group[first], group[second], "group", cursor, matches.length, groupIndex,
+          group[first],
+          group[second],
+          "group",
+          cursor,
+          matches.length,
+          groupIndex,
         );
         matches.push(match);
         const standingA = standingsById.get(group[first].id)!;
@@ -803,19 +840,26 @@ export function simulateTournament(
         standingsById.get(match.winnerId)!.wins += 1;
         standingA.assaultPoints += match.arenaScoreA;
         standingB.assaultPoints += match.arenaScoreB;
-        standingA.styleTotal += match.styleScoreA; standingA.styleCount += 1;
-        standingB.styleTotal += match.styleScoreB; standingB.styleCount += 1;
+        standingA.styleTotal += match.styleScoreA;
+        standingA.styleCount += 1;
+        standingB.styleTotal += match.styleScoreB;
+        standingB.styleCount += 1;
         const totalA = styleTotals.get(group[first].id)!;
         const totalB = styleTotals.get(group[second].id)!;
-        totalA.total += match.styleScoreA; totalA.count += 1;
-        totalB.total += match.styleScoreB; totalB.count += 1;
+        totalA.total += match.styleScoreA;
+        totalA.count += 1;
+        totalB.total += match.styleScoreB;
+        totalB.count += 1;
       }
     }
     standings.sort(compareStandings);
     mutableStandings.push(...standings);
-    advancing.push(...standings.slice(0, GROUP_QUALIFIER_LIMIT).map((standing) => ({
-      participant: participantMap.get(standing.participantId)!, standing,
-    })));
+    advancing.push(
+      ...standings.slice(0, GROUP_QUALIFIER_LIMIT).map((standing) => ({
+        participant: participantMap.get(standing.participantId)!,
+        standing,
+      })),
+    );
   });
 
   advancing.sort((a, b) => compareStandings(a.standing, b.standing));
@@ -824,7 +868,11 @@ export function simulateTournament(
     .map((entry) => entry.participant);
   const advancingIds = new Set(knockoutParticipants.map((participant) => participant.id));
   const knockout = buildArenaKnockout(
-    knockoutParticipants, participantMap, cursor, matches, styleTotals,
+    knockoutParticipants,
+    participantMap,
+    cursor,
+    matches,
+    styleTotals,
   );
   const groupEliminated = mutableStandings
     .filter((standing) => !advancingIds.has(standing.participantId))
@@ -851,9 +899,7 @@ export function simulateTournament(
         participantId,
         position: (index + 1) as 1 | 2 | 3,
         discipline,
-        score: discipline === "style"
-          ? style.total / Math.max(1, style.count)
-          : index + 1,
+        score: discipline === "style" ? style.total / Math.max(1, style.count) : index + 1,
       };
     });
   const arenaPodium = podiumFor("arena", arenaRanking);
@@ -863,11 +909,7 @@ export function simulateTournament(
       (entry) => participantMap.get(entry.participantId)?.ownedContactId,
     );
     return bestOwnedResult
-      ? [getTournamentReward(
-          level,
-          bestOwnedResult.discipline,
-          bestOwnedResult.position,
-        )]
+      ? [getTournamentReward(level, bestOwnedResult.discipline, bestOwnedResult.position)]
       : [];
   });
   const groupStandings: TournamentGroupStanding[] = mutableStandings.map((standing) => ({
@@ -878,9 +920,10 @@ export function simulateTournament(
     styleAverage: standingAverage(standing),
     qualified: advancingIds.has(standing.participantId),
   }));
-  const secretLegendaryDefeatedIds = level === "chronicles"
-    ? []
-    : findDefeatedSecretLegendaries(participants, matches, styleRanking);
+  const secretLegendaryDefeatedIds =
+    level === "chronicles"
+      ? []
+      : findDefeatedSecretLegendaries(participants, matches, styleRanking);
   return {
     nextSeed: cursor.seed,
     result: {

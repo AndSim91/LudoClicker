@@ -1,5 +1,6 @@
 import { fireEvent, render, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { FORM_DEFINITIONS } from "../../content/forms";
 import { addAdminMembers } from "../../game/adminFlow";
 import { createInitialState } from "../../game/engine";
 import { getEligibleSchoolContacts, simulateTournament } from "../../game/tournamentSimulation";
@@ -10,9 +11,9 @@ function createStateWithForms(memberCount = 6) {
   const enrolled = addAdminMembers(initial, memberCount);
   return {
     ...enrolled,
-    contacts: enrolled.contacts.map((contact) => contact.status === "enrolled"
-      ? { ...contact, forms: ["form-1" as const] }
-      : contact),
+    contacts: enrolled.contacts.map((contact) =>
+      contact.status === "enrolled" ? { ...contact, forms: ["form-1" as const] } : contact,
+    ),
   };
 }
 
@@ -36,7 +37,7 @@ function createCompletedTournamentState() {
           level: "academy" as const,
           season: simulation.result.season,
           contactIds: simulation.result.qualifiers.flatMap((qualifier) =>
-            qualifier.ownedContactId ? [qualifier.ownedContactId] : []
+            qualifier.ownedContactId ? [qualifier.ownedContactId] : [],
           ),
         },
       },
@@ -76,9 +77,23 @@ describe("TournamentsView", () => {
       181_000,
       getEligibleSchoolContacts(initial),
     );
+    const legacyResult = {
+      ...simulation.result,
+      participants: simulation.result.participants.map((participant) => {
+        const legacyParticipant = { ...participant };
+        delete legacyParticipant.knownFormIds;
+        return legacyParticipant;
+      }),
+    };
+    const crowdedContactId = legacyResult.schoolPreliminary?.arenaSelectedContactIds[0];
     const state = {
       ...initial,
-      tournaments: { ...initial.tournaments, results: [simulation.result] },
+      contacts: initial.contacts.map((contact) =>
+        contact.id === crowdedContactId
+          ? { ...contact, forms: FORM_DEFINITIONS.map((definition) => definition.id) }
+          : contact,
+      ),
+      tournaments: { ...initial.tournaments, results: [legacyResult] },
     };
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
@@ -87,6 +102,38 @@ describe("TournamentsView", () => {
 
     expect(view.getByText("64 partecipanti")).toBeVisible();
     expect(view.getByText("80 idonei alle preliminari")).toBeVisible();
+
+    const preliminaryTab = view.getByRole("tab", { name: "Preliminari, 80 idonei" });
+    expect(preliminaryTab).toHaveAttribute("aria-selected", "false");
+    fireEvent.click(preliminaryTab);
+
+    expect(preliminaryTab).toHaveAttribute("aria-selected", "true");
+    const summary = within(view.getByRole("region", { name: "Risultati delle preliminari" }));
+    expect(summary.getByText("80")).toBeVisible();
+    expect(summary.getByText("64")).toBeVisible();
+    expect(summary.getByText("16")).toBeVisible();
+    const arenaRanking = view.getByRole("region", { name: "Qualificati per Arena" });
+    const styleRanking = view.getByRole("region", { name: "Qualificati per Stile" });
+    expect(arenaRanking.querySelectorAll("tbody tr")).toHaveLength(32);
+    expect(styleRanking.querySelectorAll("tbody tr")).toHaveLength(32);
+    expect(within(arenaRanking).getByRole("columnheader", { name: /Rarit/ })).toBeVisible();
+    expect(within(arenaRanking).getByRole("columnheader", { name: "Forme" })).toBeVisible();
+    expect(within(arenaRanking).getByRole("columnheader", { name: "Arena" })).toBeVisible();
+    expect(
+      within(arenaRanking).queryByRole("columnheader", { name: "Stile" }),
+    ).not.toBeInTheDocument();
+    expect(within(styleRanking).getByRole("columnheader", { name: "Stile" })).toBeVisible();
+    expect(
+      within(styleRanking).queryByRole("columnheader", { name: "Arena" }),
+    ).not.toBeInTheDocument();
+    expect(arenaRanking.querySelectorAll(".preliminary-rarity")).toHaveLength(32);
+    expect(arenaRanking).toHaveStyle("--preliminary-form-columns: 8");
+    expect(arenaRanking.querySelectorAll(".preliminary-forms img")).toHaveLength(46);
+    expect(within(arenaRanking).queryByText(/15 Forme/)).not.toBeInTheDocument();
+    expect(view.queryByRole("heading", { name: "Gironi" })).not.toBeInTheDocument();
+
+    fireEvent.click(view.getByRole("tab", { name: "Torneo" }));
+    expect(view.getByRole("heading", { name: "Gironi" })).toBeVisible();
   });
 
   it("lists only the athletes in the current official qualification", () => {
@@ -135,7 +182,9 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
 
-    expect(qualifiedTeam.getByText("Nessun atleta qualificato per il Torneo Nazionale anno 1.")).toBeVisible();
+    expect(
+      qualifiedTeam.getByText("Nessun atleta qualificato per il Torneo Nazionale anno 1."),
+    ).toBeVisible();
     expect(qualifiedTeam.getByText("In attesa del prossimo Torneo Scolastico.")).toBeVisible();
     expect(within(container).queryByText("Forma della delegazione")).not.toBeInTheDocument();
   });
@@ -145,9 +194,11 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    fireEvent.click(view.getByRole("button", {
-      name: `Apri i risultati di Torneo Scolastico, stagione ${result.season}`,
-    }));
+    fireEvent.click(
+      view.getByRole("button", {
+        name: `Apri i risultati di Torneo Scolastico, stagione ${result.season}`,
+      }),
+    );
 
     expect(view.getByRole("tab", { name: "Risultati" })).toHaveAttribute("aria-selected", "true");
     expect(view.getByText("Gironi")).toBeVisible();
@@ -176,15 +227,19 @@ describe("TournamentsView", () => {
       ...completed,
       tournaments: {
         ...completed.tournaments,
-        results: [{
-          ...result,
-          rewards: [{
-            discipline: podiumEntry.discipline,
-            position: podiumEntry.position,
-            euros: 500,
-            contacts: 10,
-          }],
-        }],
+        results: [
+          {
+            ...result,
+            rewards: [
+              {
+                discipline: podiumEntry.discipline,
+                position: podiumEntry.position,
+                euros: 500,
+                contacts: 10,
+              },
+            ],
+          },
+        ],
       },
     };
     const { container } = render(<TournamentsView state={state} />);
@@ -204,7 +259,9 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
     const bronzeMatch = result.matches.find((match) => match.stage === "bronze")!;
-    const participantById = new Map(result.participants.map((participant) => [participant.id, participant]));
+    const participantById = new Map(
+      result.participants.map((participant) => [participant.id, participant]),
+    );
     const a = participantById.get(bronzeMatch.participantAId)!;
     const b = participantById.get(bronzeMatch.participantBId)!;
     const matchLabel = `${a.firstName} ${a.lastName} ${bronzeMatch.arenaScoreA} a ${bronzeMatch.arenaScoreB} ${b.firstName} ${b.lastName}`;
@@ -228,16 +285,20 @@ describe("TournamentsView", () => {
     fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
     const finalMatch = result.matches.find((match) => match.stage === "final")!;
     const semifinalMatches = result.matches.filter((match) => match.stage === "semifinal");
-    const expectedSemifinalOrder = [finalMatch.participantAId, finalMatch.participantBId]
-      .map((participantId) => semifinalMatches.find((match) => match.winnerId === participantId)!);
-    const participantById = new Map(result.participants.map((participant) => [participant.id, participant]));
+    const expectedSemifinalOrder = [finalMatch.participantAId, finalMatch.participantBId].map(
+      (participantId) => semifinalMatches.find((match) => match.winnerId === participantId)!,
+    );
+    const participantById = new Map(
+      result.participants.map((participant) => [participant.id, participant]),
+    );
     const expectedLabels = expectedSemifinalOrder.map((match) => {
       const a = participantById.get(match.participantAId)!;
       const b = participantById.get(match.participantBId)!;
       return `${a.firstName} ${a.lastName} ${match.arenaScoreA} a ${match.arenaScoreB} ${b.firstName} ${b.lastName}`;
     });
-    const renderedLabels = [...container.querySelectorAll(".stage-semifinal .bracket-match")]
-      .map((match) => match.getAttribute("aria-label"));
+    const renderedLabels = [...container.querySelectorAll(".stage-semifinal .bracket-match")].map(
+      (match) => match.getAttribute("aria-label"),
+    );
 
     expect(renderedLabels).toEqual(expectedLabels);
     expect(container.querySelectorAll(".bracket-connectors path").length).toBeGreaterThan(0);
@@ -298,9 +359,7 @@ describe("TournamentsView", () => {
       },
     };
     const onOpenAthletes = vi.fn();
-    const { container } = render(
-      <TournamentsView state={state} onOpenAthletes={onOpenAthletes} />,
-    );
+    const { container } = render(<TournamentsView state={state} onOpenAthletes={onOpenAthletes} />);
     const view = within(container);
 
     fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
@@ -318,9 +377,13 @@ describe("TournamentsView", () => {
 
     fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
 
-    expect(view.getAllByText(`${ownedParticipant.firstName} ${ownedParticipant.lastName}`).length).toBeGreaterThan(0);
+    expect(
+      view.getAllByText(`${ownedParticipant.firstName} ${ownedParticipant.lastName}`).length,
+    ).toBeGreaterThan(0);
     expect(container.querySelectorAll(".group-table tr.is-owned").length).toBeGreaterThan(0);
-    expect(container.querySelectorAll(".results-podium-list span.is-owned").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".results-podium-list span.is-owned").length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("shows the actual qualified athletes without treating a smaller team as incomplete", () => {
@@ -392,13 +455,27 @@ describe("TournamentsView", () => {
       181_000,
       getEligibleSchoolContacts(initial),
     );
-    const schoolWinner = simulation.result.participants.find((participant) => participant.ownedContactId)!;
-    const externalWinner = simulation.result.participants.find((participant) => !participant.ownedContactId)!;
+    const schoolWinner = simulation.result.participants.find(
+      (participant) => participant.ownedContactId,
+    )!;
+    const externalWinner = simulation.result.participants.find(
+      (participant) => !participant.ownedContactId,
+    )!;
     const result = {
       ...simulation.result,
       arenaPodium: [
-        { participantId: externalWinner.id, position: 1 as const, discipline: "arena" as const, score: 1 },
-        { participantId: schoolWinner.id, position: 2 as const, discipline: "arena" as const, score: 2 },
+        {
+          participantId: externalWinner.id,
+          position: 1 as const,
+          discipline: "arena" as const,
+          score: 1,
+        },
+        {
+          participantId: schoolWinner.id,
+          position: 2 as const,
+          discipline: "arena" as const,
+          score: 2,
+        },
       ],
       stylePodium: [],
     };
@@ -417,7 +494,9 @@ describe("TournamentsView", () => {
     expect(view.getByRole("heading", { name: "Stile" })).toBeVisible();
     expect(view.getByText(`${schoolWinner.firstName} ${schoolWinner.lastName}`)).toBeVisible();
     expect(view.getByText("Nessun vincitore della scuola")).toBeVisible();
-    expect(view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`)).not.toBeInTheDocument();
+    expect(
+      view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps Chronicles completely hidden until it is unlocked", () => {
@@ -451,7 +530,9 @@ describe("TournamentsView", () => {
 
     expect(view.getByText("6 / 6")).toBeVisible();
     expect(onStartChronicles).toHaveBeenCalledWith(
-      state.contacts.filter((contact) => contact.status === "enrolled").map((contact) => contact.id),
+      state.contacts
+        .filter((contact) => contact.status === "enrolled")
+        .map((contact) => contact.id),
     );
   });
 

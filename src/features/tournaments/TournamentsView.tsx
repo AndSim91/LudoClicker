@@ -167,6 +167,10 @@ export function TournamentsView({
   const visibleTab = tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult = state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
+  const knownFormsByContactId = useMemo(
+    () => new Map(state.contacts.map((contact) => [contact.id, contact.forms] as const)),
+    [state.contacts],
+  );
   const openResult = (result: TournamentResult) => {
     setSelectedResultId(result.id);
     setTab("results");
@@ -193,6 +197,7 @@ export function TournamentsView({
             onSelectResult={setSelectedResultId}
             onBackToOverview={() => setTab("overview")}
             onViewQualified={onOpenAthletes}
+            knownFormsByContactId={knownFormsByContactId}
           />
         ) : <p className="empty-tournaments tournament-empty-page">Nessun torneo disputato.</p>
       ) : null}

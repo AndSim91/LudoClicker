@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  SECRET_LEGENDARIES,
-  type SecretLegendaryId,
-} from "../content/secretLegendaries";
+import { SECRET_LEGENDARIES, type SecretLegendaryId } from "../content/secretLegendaries";
 import { getTournamentSchool } from "../content/tournamentSchools";
 import { addAdminMembers } from "./adminFlow";
 import {
@@ -28,9 +25,9 @@ function createTournamentSchool(memberCount = 6) {
   const enrolled = addAdminMembers(initial, memberCount);
   return {
     ...enrolled,
-    contacts: enrolled.contacts.map((contact) => contact.status === "enrolled"
-      ? { ...contact, forms: ["form-1" as const] }
-      : contact),
+    contacts: enrolled.contacts.map((contact) =>
+      contact.status === "enrolled" ? { ...contact, forms: ["form-1" as const] } : contact,
+    ),
   };
 }
 
@@ -84,16 +81,8 @@ describe("secret legendary balancing", () => {
   function preparation(id: SecretLegendaryId) {
     const profile = SECRET_LEGENDARIES[id];
     return {
-      arena: getPreparation(
-        profile.arenaBase,
-        profile.numericForms,
-        profile.externalExperience,
-      ),
-      style: getPreparation(
-        profile.styleBase,
-        profile.numericForms,
-        profile.externalExperience,
-      ),
+      arena: getPreparation(profile.arenaBase, profile.numericForms, profile.externalExperience),
+      style: getPreparation(profile.styleBase, profile.numericForms, profile.externalExperience),
     };
   }
 
@@ -108,12 +97,15 @@ describe("secret legendary balancing", () => {
     expect(daniele.style).toBeCloseTo(99.82);
     expect(sara.arena).toBeCloseTo(100.05);
     expect(sara.style).toBeCloseTo(150.075);
-    expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level)
-      .toBe("national");
-    expect(getTournamentSchool(SECRET_LEGENDARIES["daniele-panizza"].schoolId!).level)
-      .toBe("academy");
-    expect(getTournamentSchool(SECRET_LEGENDARIES["sara-magnifico"].schoolId!).level)
-      .toBe("academy");
+    expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level).toBe(
+      "national",
+    );
+    expect(getTournamentSchool(SECRET_LEGENDARIES["daniele-panizza"].schoolId!).level).toBe(
+      "academy",
+    );
+    expect(getTournamentSchool(SECRET_LEGENDARIES["sara-magnifico"].schoolId!).level).toBe(
+      "academy",
+    );
   });
 
   it("keeps the unassigned D'Addosio profile outside tournament balancing", () => {
@@ -129,8 +121,9 @@ describe("secret legendary balancing", () => {
     expect(preparation("daniele-maggi")).toEqual({ arena: 150, style: 150 });
     expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
     expect(preparation("simone-pedrazzi")).toEqual({ arena: 122, style: 145 });
-    expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level)
-      .toBe("national");
+    expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level).toBe(
+      "national",
+    );
   });
 });
 
@@ -149,13 +142,20 @@ describe("tournament simulation", () => {
       expect.objectContaining({ discipline: "arena", position: 1 }),
       expect.objectContaining({ discipline: "style", position: 1 }),
     ]);
-    expect(simulation.result.matches.every((match) =>
-      (match.arenaScoreA === 2) !== (match.arenaScoreB === 2)
-    )).toBe(true);
-    expect(simulation.result.matches.every((match) =>
-      match.styleScoreA > 0 && match.styleScoreA < 10 &&
-      match.styleScoreB > 0 && match.styleScoreB < 10
-    )).toBe(true);
+    expect(
+      simulation.result.matches.every(
+        (match) => (match.arenaScoreA === 2) !== (match.arenaScoreB === 2),
+      ),
+    ).toBe(true);
+    expect(
+      simulation.result.matches.every(
+        (match) =>
+          match.styleScoreA > 0 &&
+          match.styleScoreA < 10 &&
+          match.styleScoreB > 0 &&
+          match.styleScoreB < 10,
+      ),
+    ).toBe(true);
   });
 
   it("keeps a large school tournament bounded to eight groups of eight", () => {
@@ -187,12 +187,19 @@ describe("tournament simulation", () => {
     expect(simulation.result.schoolPreliminary?.arenaSelectedContactIds).toHaveLength(32);
     expect(simulation.result.schoolPreliminary?.styleSelectedContactIds).toHaveLength(32);
     expect(new Set(simulation.result.schoolPreliminary?.selectedContactIds).size).toBe(64);
+    expect(
+      simulation.result.participants.every((participant) =>
+        participant.knownFormIds?.includes("form-1"),
+      ),
+    ).toBe(true);
     expect([...standingsByGroup.values()].map((group) => group.length)).toEqual([
       8, 8, 8, 8, 8, 8, 8, 8,
     ]);
-    expect([...standingsByGroup.values()].every((group) =>
-      group.filter((standing) => standing.qualified).length === 4
-    )).toBe(true);
+    expect(
+      [...standingsByGroup.values()].every(
+        (group) => group.filter((standing) => standing.qualified).length === 4,
+      ),
+    ).toBe(true);
     expect(qualifiedIds.size).toBe(32);
     expect(roundOf32Ids).toEqual(qualifiedIds);
     expect(simulation.result.matches.some((match) => match.stage === "round64")).toBe(false);
@@ -228,29 +235,32 @@ describe("tournament simulation", () => {
     const enhancedId = enrolled.at(-1)!.id;
     const state = {
       ...initial,
-      contacts: initial.contacts.map((contact) => contact.status !== "enrolled"
-        ? contact
-        : contact.id === enhancedId
-          ? {
-              ...contact,
-              arenaBase: 70,
-              styleBase: 70,
-              tournamentExperience: 20,
-              forms: [
-                "form-1" as const,
-                "form-2" as const,
-                "form-3-long" as const,
-                "form-4-long" as const,
-                "form-5-long" as const,
-                "form-6" as const,
-                "form-7" as const,
-              ],
-            }
-          : { ...contact, arenaBase: 100, styleBase: 100 }),
+      contacts: initial.contacts.map((contact) =>
+        contact.status !== "enrolled"
+          ? contact
+          : contact.id === enhancedId
+            ? {
+                ...contact,
+                arenaBase: 70,
+                styleBase: 70,
+                tournamentExperience: 20,
+                forms: [
+                  "form-1" as const,
+                  "form-2" as const,
+                  "form-3-long" as const,
+                  "form-4-long" as const,
+                  "form-5-long" as const,
+                  "form-6" as const,
+                  "form-7" as const,
+                ],
+              }
+            : { ...contact, arenaBase: 100, styleBase: 100 },
+      ),
     };
 
-    expect(selectSchoolTournamentEntrants(state).selectedContacts.map((contact) => contact.id))
-      .toContain(enhancedId);
+    expect(
+      selectSchoolTournamentEntrants(state).selectedContacts.map((contact) => contact.id),
+    ).toContain(enhancedId);
   });
 
   it("is deterministic from the saved seed", () => {
@@ -267,10 +277,13 @@ describe("tournament simulation", () => {
     const simulation = simulateTournament(state, "academy", 1, 421_000, owned);
     expect(simulation.result.participants).toHaveLength(64);
     expect(simulation.result.participants.filter((entry) => entry.ownedContactId)).toHaveLength(6);
-    expect(simulation.result.participants
-      .filter((entry) => !entry.ownedContactId)
-      .every((entry) => entry.schoolId && getTournamentSchool(entry.schoolId).level === "academy"))
-      .toBe(true);
+    expect(
+      simulation.result.participants
+        .filter((entry) => !entry.ownedContactId)
+        .every(
+          (entry) => entry.schoolId && getTournamentSchool(entry.schoolId).level === "academy",
+        ),
+    ).toBe(true);
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
   });
 });
@@ -347,10 +360,13 @@ describe("tournament calendar and immunity", () => {
 
     const processed = gameReducer(championsState, { type: "TICK", now: 61_000 });
     const athlete = processed.contacts.find((contact) => contact.id === protectedId)!;
-    const immunity = getAthleteImmunityStatus({
-      currentMonth: processed.school.currentMonth,
-      tournamentQualification: processed.tournaments.qualification,
-    }, athlete);
+    const immunity = getAthleteImmunityStatus(
+      {
+        currentMonth: processed.school.currentMonth,
+        tournamentQualification: processed.tournaments.qualification,
+      },
+      athlete,
+    );
 
     expect(processed.tournaments.results.at(-1)?.level).toBe("champions");
     expect(processed.tournaments.qualification).toBeUndefined();
