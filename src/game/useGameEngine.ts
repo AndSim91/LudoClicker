@@ -167,7 +167,13 @@ export function useGameEngine() {
   }, [dispatchAction]);
 
   const togglePause = useCallback(() => {
-    setPauseReason("manual", !pauseReasonsRef.current.has("manual"));
+    const reasons = pauseReasonsRef.current;
+    if (reasons.has("manual")) {
+      setPauseReason("manual", false);
+      return;
+    }
+    if (reasons.has("tutorial")) return;
+    setPauseReason("manual", true);
   }, [setPauseReason]);
 
   const setTutorialPaused = useCallback((paused: boolean) => {

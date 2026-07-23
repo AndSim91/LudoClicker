@@ -287,14 +287,14 @@ describe("game engine: progression", () => {
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
-    for (let tick = 1; tick <= 449; tick += 1) {
+    for (let tick = 1; tick <= 224; tick += 1) {
       state = gameReducer(state, { type: "TICK", now: 1_000 + tick * 1_000 });
     }
 
     expect(state.equipment.damagedSwords).toBe(1);
-    expect(state.automation.equipmentBuffer).toBeCloseTo(149.666_667);
+    expect(state.automation.equipmentBuffer).toBeCloseTo(149.333_333);
 
-    const repaired = gameReducer(state, { type: "TICK", now: 451_000 });
+    const repaired = gameReducer(state, { type: "TICK", now: 226_000 });
 
     expect(repaired.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
     expect(repaired.automation.equipmentBuffer).toBe(0);

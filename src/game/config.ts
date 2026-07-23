@@ -66,7 +66,7 @@ export const GAME_CONFIG = {
   socialContactChancePerFollower: 0.0001,
   socialBaseContactChanceCap: 0.05,
   socialBaseFollowerValue: 0.01,
-  equipmentRepairIntervalMs: 3_000,
+  equipmentRepairIntervalMs: 1_500,
   equipmentSwordRepairWork: 150,
   narrativeEventMinMs: 120_000,
   narrativeEventMaxMs: 300_000,

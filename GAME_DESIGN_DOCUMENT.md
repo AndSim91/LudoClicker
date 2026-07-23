@@ -327,7 +327,9 @@ Le spade impongono una capienza operativa: quelle riservate non sono disponibili
 fino alla conclusione dell'attività. Corsi e Corso Agonisti restano in attesa se
 non possono riservare tutte le spade richieste, senza consumare denaro, tempo o
 capienza dell'Istruttore. Una lezione di prova viene invece annullata allo
-scadere dell'attesa; un evento non può essere avviato.
+scadere dell'attesa, tranne quando l'iscrizione è garantita al 100%: in quel
+caso si conclude senza usare né caricare una spada. Un evento non può essere
+avviato.
 
 Il carico viene applicato alla conclusione riuscita dell'attività ed è
 aggregato. Se un evento in corso viene annullato, si applica metà del carico
@@ -337,7 +339,7 @@ e tutto il carico eccedente viene conservato. La manutenzione preventiva costa
 
 I collaboratori assegnati all'Attrezzatura riparano prima le spade rotte e poi
 il carico residuo. Pagano il 50% dei costi manuali: €125 per spada e €1 per
-punto. Producono un punto-lavoro ogni 3 secondi base; una spada completa richiede
+punto. Producono un punto-lavoro ogni 1,5 secondi base; una spada completa richiede
 150 punti-lavoro, pur ripristinando 100 punti di condizione.
 
 La manutenzione può procedere mentre corsi, prove o eventi sono attivi, ma
@@ -559,7 +561,8 @@ Nel prototipo l'attesa è fissata a 30 secondi. La prova ordinaria dura 15
 secondi, riserva una spada e aggiunge 2 punti di carico alla conclusione. La
 prova di un Leggendario Segreto dura 30 secondi e aggiunge 40 punti. Se al
 termine dell'attesa manca una spada, la prova è annullata come una mancata
-iscrizione.
+iscrizione; se l'iscrizione è garantita al 100%, la prova si svolge invece senza
+spada e senza aggiungere carico.
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 soltanto nelle statistiche aggregate del funnel.
@@ -2264,7 +2267,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - I collaboratori possono scrivere email e contenuti Social, partecipare agli
   eventi, gestire lezioni e spade.
 - I collaboratori assegnati alle spade riparano prima le spade rotte e poi il
-  carico residuo; una spada richiede 150 punti-lavoro da 3 secondi ciascuno.
+  carico residuo; una spada richiede 150 punti-lavoro da 1,5 secondi ciascuno.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato
   liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
@@ -2275,6 +2278,8 @@ qualunque funzione che possa far credere di inviare davvero email.
   sistema.
 - Il carico delle spade aumenta tramite corsi, prove, eventi e imprevisti
   narrativi; ogni soglia di 100 rompe una spada.
+- Una prova con iscrizione garantita al 100% si conclude anche senza spade
+  disponibili e in quel caso non aggiunge carico.
 - I potenziamenti non sono rimborsabili, ma nel tempo si può acquistare tutto.
 - Le Forme seguono `1 → X → 2 → Y → 3/4/5 → 6 → 7`, con rami Spada Lunga, Staffa
   e Doppia spada corta.

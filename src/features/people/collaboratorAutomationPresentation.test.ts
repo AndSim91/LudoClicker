@@ -60,9 +60,9 @@ describe("getCollaboratorAutomationPresentation", () => {
       activeEmail: undefined,
     }).progress;
 
-    expect(getProgressAt(1_500)).toBeCloseTo(36.666_667, 6);
-    expect(getProgressAt(1_750)).toBeCloseTo(45, 6);
-    expect(getProgressAt(3_000)).toBeCloseTo(53.333_333, 6);
+    expect(getProgressAt(1_500)).toBeCloseTo(53.333_333, 6);
+    expect(getProgressAt(1_750)).toBeCloseTo(70, 6);
+    expect(getProgressAt(3_000)).toBeCloseTo(86.666_667, 6);
   });
 
   it("projects sword repair progress against its 150-point workload", () => {
@@ -100,8 +100,8 @@ describe("getCollaboratorAutomationPresentation", () => {
       activeEmail: undefined,
     });
 
-    expect(presentation.durationMs).toBe(450_000);
-    expect(presentation.progress).toBeCloseTo(1.111_111, 6);
+    expect(presentation.durationMs).toBe(225_000);
+    expect(presentation.progress).toBeCloseTo(1.222_222, 6);
   });
 
   it("shows Social content progress and its monthly return after Redazione evolves", () => {

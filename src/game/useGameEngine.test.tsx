@@ -63,13 +63,22 @@ describe("useGameEngine pause", () => {
     ).toBe(15_000);
   });
 
-  it("keeps a manual pause active when a tutorial dialogue ends", () => {
+  it("does not turn a tutorial pause into a manual pause when pressing resume", () => {
     const { result } = renderHook(() => useGameEngine());
 
     act(() => result.current.setTutorialPaused(true));
     expect(result.current.isPaused).toBe(true);
 
     act(() => result.current.togglePause());
+    act(() => result.current.setTutorialPaused(false));
+    expect(result.current.isPaused).toBe(false);
+  });
+
+  it("keeps a pause chosen before the tutorial until the player resumes", () => {
+    const { result } = renderHook(() => useGameEngine());
+
+    act(() => result.current.togglePause());
+    act(() => result.current.setTutorialPaused(true));
     act(() => result.current.setTutorialPaused(false));
     expect(result.current.isPaused).toBe(true);
 

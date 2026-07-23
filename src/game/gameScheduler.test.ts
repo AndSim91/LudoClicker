@@ -74,6 +74,25 @@ describe("game scheduler", () => {
     expect(getNextGameTickDelay(withEvent, NOW)).toBe(2_500);
   });
 
+  it("waits for resolution after a guaranteed trial starts without equipment", () => {
+    const state = stateAtNow();
+    const withTrial: GameState = {
+      ...state,
+      scheduledTrials: [{
+        id: "trial-without-equipment",
+        contactId: state.contacts[0].id,
+        startsAt: NOW - 1_000,
+        resolvesAt: NOW + 2_500,
+        resultSeed: 1,
+        status: "scheduled",
+        equipmentUsed: 0,
+      }],
+    };
+
+    expect(getNextGameDeadline(withTrial)).toBe(NOW + 2_500);
+    expect(getNextGameTickDelay(withTrial, NOW)).toBe(2_500);
+  });
+
   it("ignores email outcomes held by the Events tutorial", () => {
     const state = stateAtNow();
     const withHeldOutcome: GameState = {

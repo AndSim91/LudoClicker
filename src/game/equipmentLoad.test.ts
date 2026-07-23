@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { UPGRADE_DEFINITIONS } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
   applyEquipmentWear,
@@ -6,6 +7,7 @@ import {
   repairEquipment,
 } from "./equipment";
 import { createInitialState, gameReducer } from "./engine";
+import { getEnrollmentChance } from "./formulas";
 import type { GameState, ScheduledTrial } from "./types";
 
 function enrolledState(now = 1_000): GameState {
@@ -71,7 +73,7 @@ describe("carico aggregato delle spade", () => {
     expect(repairEquipment(broken, 149, 1_000).repairedSwords).toBe(0);
     const repaired = repairEquipment(broken, 150, 1_000);
 
-    expect(GAME_CONFIG.equipmentRepairIntervalMs).toBe(3_000);
+    expect(GAME_CONFIG.equipmentRepairIntervalMs).toBe(1_500);
     expect(repaired.repairedSwords).toBe(1);
     expect(repaired.restoredCondition).toBe(100);
     expect(repaired.eurosSpent).toBe(125);
@@ -169,6 +171,12 @@ describe("prenotazione delle spade", () => {
     };
     const scheduled = {
       ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 1,
+        peakActiveMembers: 1,
+        historicMembers: 1,
+      },
       contacts: initial.contacts.map((contact, index) =>
         index === 0 ? { ...contact, status: "trialScheduled" as const } : contact
       ),
@@ -183,5 +191,55 @@ describe("prenotazione delle spade", () => {
       cancellationReason: "equipment",
     });
     expect(cancelled.contacts[0].status).toBe("lost");
+  });
+
+  it("svolge senza spada una prova con iscrizione effettiva al 100%", () => {
+    const initial = createInitialState(1_000, "", false);
+    const contact = initial.contacts[0];
+    const trial: ScheduledTrial = {
+      id: "trial-guaranteed-no-sword",
+      contactId: contact.id,
+      startsAt: 2_000,
+      resolvesAt: 17_000,
+      resultSeed: 1,
+      status: "scheduled",
+    };
+    const guaranteed: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 1,
+        peakActiveMembers: 1,
+        historicMembers: 1,
+      },
+      upgrades: Object.fromEntries(UPGRADE_DEFINITIONS.map((definition) => [
+        definition.id,
+        definition.maxLevel,
+      ])) as GameState["upgrades"],
+      contacts: initial.contacts.map((candidate) =>
+        candidate.id === contact.id
+          ? { ...candidate, status: "trialScheduled" as const }
+          : candidate
+      ),
+      scheduledTrials: [trial],
+      equipment: { ...initial.equipment, availableSwords: 0, damagedSwords: 6 },
+    };
+
+    expect(getEnrollmentChance(guaranteed, contact.rarity)).toBe(1);
+
+    const started = gameReducer(guaranteed, { type: "TICK", now: trial.startsAt });
+
+    expect(started.scheduledTrials[0]).toMatchObject({
+      status: "scheduled",
+      equipmentUsed: 0,
+    });
+    expect(started.contacts[0].status).toBe("trialScheduled");
+    expect(started.equipment).toEqual(guaranteed.equipment);
+
+    const completed = gameReducer(started, { type: "TICK", now: trial.resolvesAt });
+
+    expect(completed.scheduledTrials[0].status).toBe("completed");
+    expect(completed.contacts[0].status).toBe("enrolled");
+    expect(completed.equipment).toEqual(guaranteed.equipment);
   });
 });

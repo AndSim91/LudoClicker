@@ -32,7 +32,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByRole("contentinfo")).toHaveTextContent(`v${APP_VERSION}`);
   });
 
-  it("ends the first tutorial on sending and starts the three-email mission paused at zero", async () => {
+  it("resumes after the first tutorial even if resume was pressed during its forced pause", async () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({
       ...initial,
@@ -40,6 +40,7 @@ describe("App profile and navigation", () => {
     });
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "Riprendi" }));
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
 
@@ -55,6 +56,9 @@ describe("App profile and navigation", () => {
     });
     expect(screen.getByText("0/3")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Eventi" })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Posta inviata 1" })).toBeVisible();
+    });
   });
 
   it("guides the first unlocked Event through the free sparring", async () => {

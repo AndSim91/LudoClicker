@@ -667,11 +667,11 @@ describe("PeopleView", () => {
     const progress = screen.getByRole("progressbar", {
       name: "Progresso riduzione carico",
     });
-    expect(progress).toHaveAttribute("aria-valuenow", "36.667");
+    expect(progress).toHaveAttribute("aria-valuenow", "53.333");
 
     act(() => vi.advanceTimersByTime(250));
 
-    expect(progress).toHaveAttribute("aria-valuenow", "45");
+    expect(progress).toHaveAttribute("aria-valuenow", "70");
   });
 
   it("shows the Corso Agonisti total in the athlete row instead of the inbox", () => {

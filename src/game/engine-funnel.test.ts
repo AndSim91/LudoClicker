@@ -610,7 +610,7 @@ describe("game engine: funnel", () => {
       .toBe(getLegendaryEnrollmentChance(withEqualAttempts, "eva-parodi"));
   });
 
-  it("guarantees Andrea Simonazzi's enrollment in the initial school for every roll", () => {
+  it("guarantees Andrea Simonazzi's enrollment without swords in the initial school for every roll", () => {
     const initial = createInitialState(1_000, "", false);
     const andrea = {
       ...initial.contacts[0],
@@ -642,6 +642,7 @@ describe("game engine: funnel", () => {
           contact.id === andrea.id ? andrea : contact,
         ),
         scheduledTrials: [trial],
+        equipment: { ...initial.equipment, availableSwords: 0, damagedSwords: 6 },
       };
 
       const resolved = gameReducer(ready, { type: "TICK", now: trial.resolvesAt });
@@ -651,6 +652,7 @@ describe("game engine: funnel", () => {
       ).toBe("enrolled");
       expect(resolved.legendaryCollaborators.enrolledProfileIds)
         .toContain("andrea-simonazzi");
+      expect(resolved.scheduledTrials[0].equipmentUsed).toBe(0);
     }
   });
 

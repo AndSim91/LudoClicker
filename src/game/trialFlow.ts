@@ -22,6 +22,37 @@ export function getLegendaryEnrollmentChance(
   return getEnrollmentChance(state, "legendary", previousAttempts);
 }
 
+function isTrialEnrollmentGuaranteed(
+  state: GameState,
+  trial: ScheduledTrial,
+): boolean {
+  const contactsById = getContactsById(state.contacts);
+  const trialContact = contactsById.get(trial.contactId);
+  const specialProfileId = trialContact?.specialProfileId;
+  if (specialProfileId) {
+    if (state.legendaryCollaborators.enrolledProfileIds.includes(specialProfileId)) {
+      return false;
+    }
+    return (
+      (specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schools.length === 0) ||
+      getLegendaryEnrollmentChance(state, specialProfileId) >= 1
+    );
+  }
+
+  const recentTrials = getCompletedTrialsByMostRecent(state.scheduledTrials);
+  const trialLossStreak = recentTrials.findIndex((candidate) =>
+    contactsById.get(candidate.contactId)?.status === "enrolled"
+  );
+  const protectedEnrollment =
+    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >=
+      GAME_CONFIG.conversionGuaranteeFailures;
+  return (
+    state.school.historicMembers === 0 ||
+    protectedEnrollment ||
+    getEnrollmentChance(state, trialContact?.rarity ?? "common") >= 1
+  );
+}
+
 export function processScheduledTrialStarts(
   state: GameState,
   now: number,
@@ -44,6 +75,16 @@ export function processScheduledTrialStarts(
         equipment: reservedEquipment,
         scheduledTrials: nextState.scheduledTrials.map((candidate) =>
           candidate.id === trial.id ? { ...candidate, equipmentUsed: 1 } : candidate
+        ),
+      };
+      continue;
+    }
+
+    if (isTrialEnrollmentGuaranteed(nextState, trial)) {
+      nextState = {
+        ...nextState,
+        scheduledTrials: nextState.scheduledTrials.map((candidate) =>
+          candidate.id === trial.id ? { ...candidate, equipmentUsed: 0 } : candidate
         ),
       };
       continue;
@@ -91,33 +132,29 @@ export function resolveTrial(
     ? processScheduledTrialStarts(state, now)
     : state;
   const startedTrial = startedState.scheduledTrials.find((candidate) => candidate.id === trial.id);
-  if (!startedTrial || startedTrial.status !== "scheduled" || !startedTrial.equipmentUsed) {
+  if (
+    !startedTrial ||
+    startedTrial.status !== "scheduled" ||
+    startedTrial.equipmentUsed === undefined
+  ) {
     return startedState;
   }
   state = startedState;
   trial = startedTrial;
   const [enrollmentRoll] = nextRandom(trial.resultSeed);
-  const tutorialGuarantee = state.school.historicMembers === 0;
   const contactsById = getContactsById(state.contacts);
   const trialContact = contactsById.get(trial.contactId);
   const specialProfileId = trialContact?.specialProfileId;
   const alreadyEnrolledLegendary = specialProfileId
     ? state.legendaryCollaborators.enrolledProfileIds.includes(specialProfileId)
     : false;
-  const guaranteedInitialSchoolAndrea =
-    specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schools.length === 0;
-  const recentTrials = getCompletedTrialsByMostRecent(state.scheduledTrials);
-  const trialLossStreak = recentTrials.findIndex((candidate) =>
-    contactsById.get(candidate.contactId)?.status === "enrolled",
-  );
-  const protectedEnrollment =
-    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >=
-      GAME_CONFIG.conversionGuaranteeFailures;
+  const guaranteedEnrollment =
+    trial.equipmentUsed === 0 || isTrialEnrollmentGuaranteed(state, trial);
   const enrolled = specialProfileId
     ? !alreadyEnrolledLegendary &&
-      (guaranteedInitialSchoolAndrea ||
+      (guaranteedEnrollment ||
         enrollmentRoll < getLegendaryEnrollmentChance(state, specialProfileId))
-    : tutorialGuarantee || protectedEnrollment ||
+    : guaranteedEnrollment ||
       enrollmentRoll < getEnrollmentChance(state, trialContact?.rarity ?? "common");
   const enrollmentBonus = scaleCurrencyGain(GAME_CONFIG.enrollmentBonus, gainMultiplier);
   const legendaryCollaborators = specialProfileId
@@ -138,9 +175,11 @@ export function resolveTrial(
     equipment: completeEquipmentUse(
       state.equipment,
       trial.equipmentUsed ?? 0,
-      trial.secretLegendaryId
-        ? GAME_CONFIG.equipmentLoadPerSecretLegendaryTrial
-        : GAME_CONFIG.equipmentLoadPerTrial,
+      trial.equipmentUsed === 0
+        ? 0
+        : trial.secretLegendaryId
+          ? GAME_CONFIG.equipmentLoadPerSecretLegendaryTrial
+          : GAME_CONFIG.equipmentLoadPerTrial,
     ),
     legendaryCollaborators,
     scheduledTrials: state.scheduledTrials.map((candidate) =>

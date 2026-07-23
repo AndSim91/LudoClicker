@@ -84,7 +84,7 @@ export function getNextGameDeadline(state: GameState): number {
     nextDeadline,
     earliest(
       getScheduledTrials(state.scheduledTrials),
-      (trial) => trial.equipmentUsed ? trial.resolvesAt : trial.startsAt,
+      (trial) => trial.equipmentUsed !== undefined ? trial.resolvesAt : trial.startsAt,
     ),
   );
   nextDeadline = earlier(

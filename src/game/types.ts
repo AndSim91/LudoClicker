@@ -94,6 +94,7 @@ export interface ScheduledTrial {
   resolvesAt: number;
   resultSeed: number;
   status: "scheduled" | "completed" | "cancelled";
+  /** Zero indica una prova garantita avviata senza riservare una spada. */
   equipmentUsed?: number;
   cancellationReason?: "equipment";
   secretLegendaryId?: SecretLegendaryId;
