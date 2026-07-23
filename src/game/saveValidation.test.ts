@@ -42,6 +42,16 @@ describe("save validation at extreme scale", () => {
 });
 
 describe("Legendary save invariants", () => {
+  it.each([-1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects invalid Pity values (%s)",
+    (legendaryPity) => {
+      expect(isValidGameState({
+        ...createInitialState(1_000, "", false),
+        legendaryPity,
+      })).toBe(false);
+    },
+  );
+
   it("rejects generic and duplicated Legendary profiles", () => {
     const initial = createInitialState(1_000, "", false);
     const base = initial.contacts[0];

@@ -536,6 +536,14 @@
   gap: 6px;
 }
 
+.equipment-condition.is-compact {
+  gap: 0;
+}
+
+.equipment-condition.is-compact .equipment-condition-bar {
+  height: 8px;
+}
+
 .equipment-condition-title {
   line-height: 1.2;
 }

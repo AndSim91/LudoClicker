@@ -207,6 +207,7 @@ export function isValidGameState(value: unknown): value is GameState {
       state.equipment.totalSwords &&
     Number.isFinite(state.equipment.wear) &&
     state.equipment.wear >= 0 &&
+    isNonNegativeSafeInteger(state.legendaryPity) &&
     Array.isArray(state.legendaryCollaborators?.encounteredProfileIds) &&
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&

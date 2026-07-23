@@ -5,6 +5,7 @@ import { addCollaboratorMasteryExperience } from "./stateUpdates";
 import type { GameState } from "./types";
 
 type EquipmentState = GameState["equipment"];
+export type EquipmentAutomaticRepairTarget = "wear" | "sword";
 const WORK_EPSILON = 1e-9;
 
 function clampCount(value: number, maximum: number) {
@@ -148,6 +149,23 @@ export function repairDamagedSwords(
   });
 }
 
+export function getEquipmentAutomaticRepairTarget(
+  equipment: EquipmentState,
+): EquipmentAutomaticRepairTarget | undefined {
+  if (equipment.wear > 0 && getAvailableSwords(equipment) > 0) return "wear";
+  if (getEffectiveDamagedSwords(equipment) > 0) return "sword";
+  return undefined;
+}
+
+export function getEquipmentAutomaticRepairUnitCost(
+  target: EquipmentAutomaticRepairTarget,
+): number {
+  const manualCost = target === "wear"
+    ? GAME_CONFIG.equipmentMaintenanceCostPerLoad
+    : GAME_CONFIG.equipmentDamagedSwordRepairCost;
+  return roundCurrency(manualCost * GAME_CONFIG.equipmentAutomaticCostFactor);
+}
+
 export function repairEquipment(
   equipment: EquipmentState,
   repairWork: number,
@@ -166,65 +184,51 @@ export function repairEquipment(
   let eurosSpent = 0;
   let repairedSwords = 0;
   let repairedWear = 0;
-  const swordCost = Math.round(
-    GAME_CONFIG.equipmentDamagedSwordRepairCost * GAME_CONFIG.equipmentAutomaticCostFactor,
-  );
-  const wearCost = GAME_CONFIG.equipmentMaintenanceCostPerLoad *
-    GAME_CONFIG.equipmentAutomaticCostFactor;
+  const swordCost = getEquipmentAutomaticRepairUnitCost("sword");
+  const wearCost = getEquipmentAutomaticRepairUnitCost("wear");
 
-  const repairableSwords = Math.min(
-    nextEquipment.damagedSwords,
-    Math.floor((remainingWork + WORK_EPSILON) / GAME_CONFIG.equipmentSwordRepairWork),
-    Math.floor(remainingEuros / swordCost),
-  );
-  if (repairableSwords > 0) {
-    repairedSwords = repairableSwords;
-    remainingWork -= repairedSwords * GAME_CONFIG.equipmentSwordRepairWork;
-    const spent = repairedSwords * swordCost;
-    remainingEuros -= spent;
-    eurosSpent += spent;
-    nextEquipment = repairDamagedSwords(nextEquipment, repairedSwords);
+  while (true) {
+    const target = getEquipmentAutomaticRepairTarget(nextEquipment);
+    if (!target) break;
+
+    const workPerRepair = target === "wear"
+      ? 1
+      : GAME_CONFIG.equipmentSwordRepairWork;
+    const unitCost = target === "wear" ? wearCost : swordCost;
+    const maximumRepairs = target === "wear"
+      ? Math.ceil(nextEquipment.wear)
+      : nextEquipment.wear > 0
+        ? 1
+        : nextEquipment.damagedSwords;
+    const repairCount = Math.min(
+      maximumRepairs,
+      Math.floor((remainingWork + WORK_EPSILON) / workPerRepair),
+      Math.floor((remainingEuros + WORK_EPSILON) / unitCost),
+    );
+    if (repairCount <= 0) break;
+
+    remainingWork = Math.max(0, remainingWork - repairCount * workPerRepair);
+    const spent = roundCurrency(repairCount * unitCost);
+    remainingEuros = roundCurrency(remainingEuros - spent);
+    eurosSpent = roundCurrency(eurosSpent + spent);
+
+    if (target === "wear") {
+      repairedWear += repairCount;
+      nextEquipment = applyEquipmentWear(nextEquipment, -repairCount);
+    } else {
+      repairedSwords += repairCount;
+      nextEquipment = repairDamagedSwords(nextEquipment, repairCount);
+    }
   }
 
-  if (nextEquipment.damagedSwords > 0) {
-    if (remainingEuros < swordCost) remainingWork = 0;
-    return {
-      equipment: nextEquipment,
-      repairedWear,
-      repairedSwords,
-      restoredCondition: repairedSwords * GAME_CONFIG.equipmentBreakLoad,
-      eurosSpent,
-      remainingWork,
-    };
-  }
-
-  if (nextEquipment.wear > 0 && getAvailableSwords(nextEquipment) <= 0) {
-    return {
-      equipment: nextEquipment,
-      repairedWear,
-      repairedSwords,
-      restoredCondition: repairedSwords * GAME_CONFIG.equipmentBreakLoad,
-      eurosSpent,
-      remainingWork,
-    };
-  }
-
-  const repairableWear = Math.min(
-    Math.floor(remainingWork + WORK_EPSILON),
-    Math.floor(remainingEuros / wearCost),
-    Math.ceil(nextEquipment.wear),
-  );
-  if (repairableWear > 0) {
-    repairedWear = repairableWear;
-    remainingWork -= repairedWear;
-    const spent = repairedWear * wearCost;
-    remainingEuros -= spent;
-    eurosSpent += spent;
-    nextEquipment = applyEquipmentWear(nextEquipment, -repairedWear);
-  }
-
+  const remainingTarget = getEquipmentAutomaticRepairTarget(nextEquipment);
   const hasRemainingRepairs = nextEquipment.wear > 0 || nextEquipment.damagedSwords > 0;
-  if (!hasRemainingRepairs || remainingEuros < wearCost) remainingWork = 0;
+  if (!hasRemainingRepairs || (
+    remainingTarget !== undefined &&
+    remainingEuros + WORK_EPSILON < getEquipmentAutomaticRepairUnitCost(remainingTarget)
+  )) {
+    remainingWork = 0;
+  }
   return {
     equipment: nextEquipment,
     repairedWear,

@@ -2,6 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import {
   COLLABORATOR_ASSIGNMENT_LABELS,
   getCollaboratorAssignmentLabel,
@@ -456,7 +457,15 @@ export function CollaboratorList({
                         <strong>{automation.title}</strong>
                         {automation.detail ? <small>{automation.detail}</small> : null}
                       </span>
-                      {automation.progress === undefined ? (
+                      {collaborator.assignment === "equipment" ? (
+                        <span className="collaborator-activity-progress is-equipment">
+                          <EquipmentConditionBar
+                            equipment={state.equipment}
+                            compact
+                            ariaLabel={`Condizione attrezzatura di ${collaborator.displayName}`}
+                          />
+                        </span>
+                      ) : automation.progress === undefined ? (
                         <span className="collaborator-activity-progress is-empty">
                           <strong>—</strong>
                         </span>

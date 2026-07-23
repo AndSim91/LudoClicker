@@ -62,7 +62,7 @@ describe("carico aggregato delle spade", () => {
     expect(result.availableSwords).toBe(4);
   });
 
-  it("richiede 150 punti-lavoro e 125 euro per la riparazione automatica", () => {
+  it("richiede 150 punti-lavoro e il 75% del costo manuale per una spada", () => {
     const broken = {
       totalSwords: 6,
       availableSwords: 5,
@@ -76,8 +76,55 @@ describe("carico aggregato delle spade", () => {
     expect(GAME_CONFIG.equipmentRepairIntervalMs).toBe(1_500);
     expect(repaired.repairedSwords).toBe(1);
     expect(repaired.restoredCondition).toBe(100);
-    expect(repaired.eurosSpent).toBe(125);
+    expect(repaired.eurosSpent).toBe(187.5);
     expect(repaired.equipment.availableSwords).toBe(6);
+  });
+
+  it("ripara l'usura delle spade sane prima di iniziare una spada rotta", () => {
+    const mixedCondition = {
+      totalSwords: 6,
+      availableSwords: 5,
+      damagedSwords: 1,
+      wear: 1,
+    };
+
+    const prioritized = repairEquipment(mixedCondition, 150, 1_000);
+
+    expect(prioritized).toMatchObject({
+      repairedWear: 1,
+      repairedSwords: 0,
+      eurosSpent: 1.5,
+      remainingWork: 149,
+      equipment: { wear: 0, damagedSwords: 1, availableSwords: 5 },
+    });
+
+    const completed = repairEquipment(mixedCondition, 151, 1_000);
+    expect(completed).toMatchObject({
+      repairedWear: 1,
+      repairedSwords: 1,
+      eurosSpent: 189,
+      remainingWork: 0,
+      equipment: { wear: 0, damagedSwords: 0, availableSwords: 6 },
+    });
+  });
+
+  it("sblocca una spada se tutte le sane sono in uso, poi torna all'usura", () => {
+    const blockedWear = {
+      totalSwords: 6,
+      availableSwords: 0,
+      damagedSwords: 1,
+      wear: 1,
+    };
+
+    const repaired = repairEquipment(blockedWear, 151, 1_000);
+
+    expect(repaired).toMatchObject({
+      repairedWear: 1,
+      repairedSwords: 1,
+      eurosSpent: 189,
+      remainingWork: 0,
+      equipment: { wear: 0, damagedSwords: 0, availableSwords: 1 },
+    });
   });
 
   it("ripara il carico sulle spade libere senza restituire quelle riservate", () => {
@@ -191,6 +238,7 @@ describe("prenotazione delle spade", () => {
       cancellationReason: "equipment",
     });
     expect(cancelled.contacts[0].status).toBe("lost");
+    expect(cancelled.legendaryPity).toBe(1);
   });
 
   it("svolge senza spada una prova con iscrizione effettiva al 100%", () => {

@@ -79,6 +79,7 @@ export function createInitialState(
       damagedSwords: 0,
       wear: 0,
     },
+    legendaryPity: 0,
     legendaryCollaborators: initialContacts.progress,
     tournaments: {
       results: [],

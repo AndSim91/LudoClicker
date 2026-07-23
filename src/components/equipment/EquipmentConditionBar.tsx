@@ -43,12 +43,16 @@ function getSwordTitle(condition: SwordCondition, index: number): string {
 function EquipmentConditionBarView({
   equipment,
   title,
+  compact = false,
+  ariaLabel = "Usura complessiva attrezzatura",
 }: {
   equipment: EquipmentState;
-  title: string;
+  title?: string;
+  compact?: boolean;
+  ariaLabel?: string;
 }) {
   const totalSwords = Math.max(0, Math.floor(equipment.totalSwords));
-  const showIndividualSwords = totalSwords <= INDIVIDUAL_SWORD_LIMIT;
+  const showIndividualSwords = !compact && totalSwords <= INDIVIDUAL_SWORD_LIMIT;
   const conditions = showIndividualSwords ? getSwordConditions(equipment) : [];
   const damagedSwords = getEffectiveDamagedSwords(equipment);
   const reservedSwords = getReservedSwords(equipment);
@@ -82,12 +86,12 @@ function EquipmentConditionBarView({
   ].join(", ");
 
   return (
-    <div className="equipment-condition">
-      <strong className="equipment-condition-title">{title}</strong>
+    <div className={`equipment-condition${compact ? " is-compact" : ""}`}>
+      {title ? <strong className="equipment-condition-title">{title}</strong> : null}
       <div
         className={`equipment-condition-bar${showIndividualSwords ? "" : " is-aggregate"}`}
         role="progressbar"
-        aria-label="Usura complessiva attrezzatura"
+        aria-label={ariaLabel}
         aria-valuemin={0}
         aria-valuemax={totalCapacity}
         aria-valuenow={Math.round(totalWear)}
@@ -131,12 +135,14 @@ function EquipmentConditionBarView({
             </>
           )}
       </div>
-      <div className="equipment-condition-legend" aria-hidden="true">
-        <span className="is-load"><i />Usura <strong>{Math.round(normalLoad)} pt</strong></span>
-        <span className="is-broken"><i />Rotte <strong>{damagedSwords}</strong></span>
-        <span className="is-reserved"><i />Riservate <strong>{reservedSwords}</strong></span>
-        <span className="is-healthy"><i />Disponibile</span>
-      </div>
+      {compact ? null : (
+        <div className="equipment-condition-legend" aria-hidden="true">
+          <span className="is-load"><i />Usura <strong>{Math.round(normalLoad)} pt</strong></span>
+          <span className="is-broken"><i />Rotte <strong>{damagedSwords}</strong></span>
+          <span className="is-reserved"><i />Riservate <strong>{reservedSwords}</strong></span>
+          <span className="is-healthy"><i />Disponibile</span>
+        </div>
+      )}
     </div>
   );
 }

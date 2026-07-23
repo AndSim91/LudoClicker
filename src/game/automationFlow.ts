@@ -21,8 +21,8 @@ import {
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import {
-  getAvailableSwords,
-  getEffectiveDamagedSwords,
+  getEquipmentAutomaticRepairTarget,
+  getEquipmentAutomaticRepairUnitCost,
   repairEquipment,
 } from "./equipment";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
@@ -162,17 +162,9 @@ export function processAutomation(
   const socialCycles = producingSocialContent
     ? Math.floor(socialContentTotal / socialContentCharacters)
     : 0;
-  const damagedSwords = getEffectiveDamagedSwords(state.equipment);
-  const automaticSwordCost = Math.round(
-    GAME_CONFIG.equipmentDamagedSwordRepairCost * GAME_CONFIG.equipmentAutomaticCostFactor,
-  );
-  const automaticLoadCost =
-    GAME_CONFIG.equipmentMaintenanceCostPerLoad * GAME_CONFIG.equipmentAutomaticCostFactor;
-  const canRepairEquipment = damagedSwords > 0
-    ? state.school.euros >= automaticSwordCost
-    : state.equipment.wear > 0 &&
-      getAvailableSwords(state.equipment) > 0 &&
-      state.school.euros >= automaticLoadCost;
+  const equipmentRepairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
+  const canRepairEquipment = equipmentRepairTarget !== undefined &&
+    state.school.euros >= getEquipmentAutomaticRepairUnitCost(equipmentRepairTarget);
   const equipmentTotal = canRepairEquipment
     ? state.automation.equipmentBuffer +
       (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *

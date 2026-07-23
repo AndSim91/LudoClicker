@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 import { isValidGameState } from "../saveValidation";
@@ -56,7 +57,7 @@ describe("Social revamp save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(51);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.unlocks.social).toBe(true);
     expect(migrated.school.followers).toBe(123);
     expect(migrated.school.historicMembers).toBe(123);

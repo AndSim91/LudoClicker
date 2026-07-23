@@ -2,7 +2,10 @@ import { getEmailBuildLength } from "../../content/emailBuild";
 import { getCollaboratorProductivity } from "../../content/forms";
 import { getUpgradeEffectTotal } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
-import { getEffectiveDamagedSwords } from "../../game/equipment";
+import {
+  getEffectiveDamagedSwords,
+  getEquipmentAutomaticRepairTarget,
+} from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
 import {
   getMonthlySocialIncome,
@@ -188,7 +191,14 @@ export function getCollaboratorAutomationPresentation({
     if (state.equipment.wear <= 0 && damagedSwords <= 0) {
       return { title: "Carico attrezzatura: 0/100", detail: "In attesa" };
     }
-    const isRepairingSword = damagedSwords > 0;
+    const repairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
+    if (!repairTarget) {
+      return {
+        title: `Carico attrezzatura: ${Math.round(state.equipment.wear)}/100`,
+        detail: "In attesa: tutte le spade sane sono in uso",
+      };
+    }
+    const isRepairingSword = repairTarget === "sword";
     const requiredWork = isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1;
     const durationMs = getAutomationCycleDurationMs(state, "equipment", requiredWork);
     const progress = getProjectedEquipmentProgress({

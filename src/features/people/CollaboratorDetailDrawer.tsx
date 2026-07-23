@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import {
   COLLABORATOR_ASSIGNMENT_LABELS,
   getCollaboratorAssignmentLabel,
@@ -111,8 +112,14 @@ export function CollaboratorDetailDrawer({
             {automation.detail ? <small>{automation.detail}</small> : null}
           </div>
           <div className="collaborator-detail-progress">
-            <span>Progresso</span>
-            {automation.progress === undefined ? (
+            <span>{collaborator.assignment === "equipment" ? "Condizione" : "Progresso"}</span>
+            {collaborator.assignment === "equipment" ? (
+              <EquipmentConditionBar
+                equipment={state.equipment}
+                compact
+                ariaLabel={`Condizione attrezzatura nel dettaglio di ${collaborator.displayName}`}
+              />
+            ) : automation.progress === undefined ? (
               <strong>—</strong>
             ) : (
               <>

@@ -601,6 +601,7 @@ export interface GameState {
     damagedSwords: number;
     wear: number;
   };
+  legendaryPity: number;
   legendaryCollaborators: LegendaryCollaboratorProgress;
   tournaments: TournamentState;
   collaborators: Collaborator[];

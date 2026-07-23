@@ -260,16 +260,26 @@ Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità
 determina la probabilità di prenotare una prova dopo la mail e quella di
 iscriversi dopo la prova:
 
-| Rarità      | Comparsa | Prova dopo la mail | Iscrizione base | Effettiva base mail → iscritto | Iscrizione massima | Collaboratore            |
-| ----------- | -------: | -----------------: | --------------: | -----------------------------: | -----------------: | ------------------------ |
-| Comune      |      80% |                40% |           62,5% |                            25% |               100% | Mai                      |
-| Raro        |    12,5% |                50% |             40% |                            20% |                90% | Mai                      |
-| Ultra Raro  |     5,5% |                75% |          23,33% |                          17,5% |                50% | Dopo il Corso Y          |
-| Leggendario |       2% |               100% |             15% |                            15% |                35% | Subito dopo l'iscrizione |
+| Rarità      | Comparsa | Prova dopo la mail | Iscrizione base | Effettiva base mail → iscritto | Massimo ordinario | Collaboratore            |
+| ----------- | -------: | -----------------: | --------------: | -----------------------------: | ----------------: | ------------------------ |
+| Comune      |      80% |                40% |           62,5% |                            25% |              100% | Mai                      |
+| Raro        |    12,5% |                50% |             40% |                            20% |               90% | Mai                      |
+| Ultra Raro  |     5,5% |                75% |          23,33% |                          17,5% |               50% | Dopo il Corso Y          |
+| Leggendario |       2% |               100% |             15% |                            15% |               35% | Subito dopo l'iscrizione |
 
 I potenziamenti di Scrittura migliorano la prenotazione della prova fino al
 100%. I potenziamenti di Accoglienza fanno avanzare ogni rarità dalla propria
 probabilità base d'iscrizione al proprio massimo specifico.
+
+Il **Pity** è un contatore globale interno e non viene mostrato nell'interfaccia.
+Ogni prova in palestra che non produce un'iscrizione, comprese quelle annullate
+per mancanza di spade, aggiunge 1 al contatore. Nelle prove dei Leggendari
+ordinari e Segreti, ogni punto Pity aggiunge un punto percentuale alla
+probabilità già calcolata, fino al 100%. L'iscrizione di un Leggendario ordinario
+o Segreto riporta Pity a zero; l'iscrizione di qualunque altra rarità lo lascia
+invariato. Il bonus personale dei Leggendari resta separato: ogni loro precedente
+tentativo fallito aggiunge 3 punti percentuali entro il massimo ordinario del
+35%, poi si applica Pity oltre quel limite.
 
 Ogni contatto contiene:
 
@@ -337,16 +347,19 @@ previsto e non si ottengono contatti. Ogni 100 punti rompe una spada; più sogli
 e tutto il carico eccedente viene conservato. La manutenzione preventiva costa
 €2 per punto, mentre una spada già rotta costa €250 e torna da 100 a 0.
 
-I collaboratori assegnati all'Attrezzatura riparano prima le spade rotte e poi
-il carico residuo. Pagano il 50% dei costi manuali: €125 per spada e €1 per
-punto. Producono un punto-lavoro ogni 1,5 secondi base; una spada completa richiede
-150 punti-lavoro, pur ripristinando 100 punti di condizione.
+I collaboratori assegnati all'Attrezzatura riducono prima il carico delle spade
+sane non riservate e poi riparano le spade rotte. Pagano il 75% dei costi
+manuali, ottenendo uno sconto del 25%: €187,50 per spada e €1,50 per punto.
+Producono un punto-lavoro ogni 1,5 secondi base; una spada completa richiede 150
+punti-lavoro, pur ripristinando 100 punti di condizione.
 
 La manutenzione può procedere mentre corsi, prove o eventi sono attivi, ma
 interviene soltanto sulle spade non riservate. Le spade rotte sono sempre
 riparabili perché non possono essere in uso. Se tutte le spade sane sono
 impegnate, il carico residuo resta in attesa; le riparazioni parziali già
-possibili non modificano il numero di spade prenotate.
+possibili non modificano il numero di spade prenotate. In questo caso il
+collaboratore può riparare una spada rotta e torna subito al carico residuo non
+appena la spada riparata diventa disponibile.
 
 L'interfaccia rappresenta la capacità complessiva come una barra divisa in un
 blocco da 100 punti per ogni spada della scuola. Il rosso indica una spada
@@ -354,7 +367,9 @@ rotta, il grigio una spada riservata e temporaneamente non riparabile, l'oro il
 carico normale ancora rimovibile e lo spazio vuoto la condizione sana residua.
 Il riepilogo numerico mostra l'usura totale includendo 100 punti per ogni spada
 rotta. Fino a 20 spade i blocchi restano individuali; da 21 spade in poi la
-barra diventa continua e aggrega proporzionalmente le quattro condizioni.
+barra diventa continua e aggrega proporzionalmente le quattro condizioni. Nella
+scheda dei Collaboratori assegnati all'Attrezzatura viene usata sempre la stessa
+barra aggregata in formato compatto.
 
 Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
 
@@ -538,6 +553,14 @@ probabilitàIscrizioneDopoProva = clamp(
   × bonusPrestigio,
   minimo,
   massimo
+)
+
+probabilitàIscrizioneLeggendario = clamp(
+  probabilitàIscrizioneDopoProva
+  + bonusTentativiPersonali
+  + Pity / 100,
+  0,
+  1
 )
 ```
 
@@ -744,6 +767,8 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto
   idoneo: dal decimo nella scuola iniziale e fin dal primo nelle scuole
   successive;
+- Pity modifica allo stesso modo le prove dei Leggendari ordinari e Segreti;
+  raggiunto il 100%, la prova è garantita e può concludersi anche senza spade;
 - ogni profilo Leggendario è unico: finché esiste già come contatto attivo,
   prova in palestra, iscritto o collaboratore non può essere generato una
   seconda volta;
@@ -1813,6 +1838,7 @@ interface GameState {
   pendingEmailOutcomes: PendingEmailOutcome[];
   scheduledTrials: ScheduledTrial[];
   collaborators: Collaborator[];
+  legendaryPity: number;
   equipment: EquipmentItem[];
   calendar: CalendarEvent[];
   upgrades: UpgradeState[];
@@ -2266,8 +2292,9 @@ qualunque funzione che possa far credere di inviare davvero email.
   Leggendari dall'iscrizione.
 - I collaboratori possono scrivere email e contenuti Social, partecipare agli
   eventi, gestire lezioni e spade.
-- I collaboratori assegnati alle spade riparano prima le spade rotte e poi il
-  carico residuo; una spada richiede 150 punti-lavoro da 1,5 secondi ciascuno.
+- I collaboratori assegnati alle spade riducono prima il carico sulle spade sane
+  e poi riparano quelle rotte; una spada richiede 150 punti-lavoro da 1,5
+  secondi ciascuno.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato
   liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
@@ -2280,6 +2307,9 @@ qualunque funzione che possa far credere di inviare davvero email.
   narrativi; ogni soglia di 100 rompe una spada.
 - Una prova con iscrizione garantita al 100% si conclude anche senza spade
   disponibili e in quel caso non aggiunge carico.
+- Ogni prova fallita aumenta Pity di 1; Pity aggiunge altrettanti punti
+  percentuali alle prove Leggendarie e si azzera soltanto quando si iscrive un
+  Leggendario ordinario o Segreto.
 - I potenziamenti non sono rimborsabili, ma nel tempo si può acquistare tutto.
 - Le Forme seguono `1 → X → 2 → Y → 3/4/5 → 6 → 7`, con rami Spada Lunga, Staffa
   e Doppia spada corta.

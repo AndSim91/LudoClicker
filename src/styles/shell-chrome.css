@@ -1,5 +1,6 @@
 .application-shell {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 32px 54px minmax(0, 1fr) 26px;
   width: 100vw;
   height: 100dvh;
@@ -237,6 +238,7 @@
 
 .workspace {
   display: grid;
+  min-width: 0;
   grid-template-columns:
     58px
     clamp(190px, 12vw, 230px)

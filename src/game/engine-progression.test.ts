@@ -267,7 +267,7 @@ describe("game engine: progression", () => {
     expect(contactOnly.state.scheduledTrials).toHaveLength(0);
   });
 
-  it("repairs damaged swords automatically after wear reaches zero", () => {
+  it("repairs a damaged sword automatically in 150 cycles at 75% of manual cost", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-equipment-repair",
@@ -281,7 +281,7 @@ describe("game engine: progression", () => {
     };
     let state: GameState = {
       ...initial,
-      school: { ...initial.school, euros: 125 },
+      school: { ...initial.school, euros: 187.5 },
       collaborators: [collaborator],
       equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },
       unlocks: { ...initial.unlocks, collaborators: true },
@@ -294,9 +294,55 @@ describe("game engine: progression", () => {
     expect(state.equipment.damagedSwords).toBe(1);
     expect(state.automation.equipmentBuffer).toBeCloseTo(149.333_333);
 
-    const repaired = gameReducer(state, { type: "TICK", now: 226_000 });
+    const repaired = gameReducer(state, {
+      type: "TICK",
+      now: 226_000,
+    });
 
     expect(repaired.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
+    expect(repaired.automation.equipmentBuffer).toBe(0);
+    expect(repaired.school.euros).toBe(0);
+  });
+
+  it("spends automatic work on healthy-sword wear before a broken sword", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-equipment-priority",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "equipment" as const,
+      rarity: "rare" as const,
+    };
+    const state: GameState = {
+      ...initial,
+      school: { ...initial.school, euros: 1.5 },
+      collaborators: [collaborator],
+      equipment: {
+        ...initial.equipment,
+        availableSwords: 5,
+        damagedSwords: 1,
+        wear: 2,
+      },
+      unlocks: { ...initial.unlocks, collaborators: true },
+    };
+
+    const firstTick = gameReducer(state, {
+      type: "TICK",
+      now: 2_000,
+    });
+    const repaired = gameReducer(firstTick, {
+      type: "TICK",
+      now: 3_000,
+    });
+
+    expect(repaired.equipment).toMatchObject({
+      availableSwords: 5,
+      damagedSwords: 1,
+      wear: 1,
+    });
     expect(repaired.automation.equipmentBuffer).toBe(0);
     expect(repaired.school.euros).toBe(0);
   });

@@ -307,6 +307,10 @@
   grid-template-columns: max-content;
 }
 
+.collaborator-activity-progress.is-equipment {
+  display: block;
+}
+
 .collaborator-activity-progress > strong {
   color: var(--blue-700);
   font-size: 11px;

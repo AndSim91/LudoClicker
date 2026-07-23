@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { FormBranch, FormId } from "../../game/types";
@@ -347,6 +347,8 @@ describe("PeopleView", () => {
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
       "Effettiva base mail → iscritto: 17,5%",
     );
+    expect(screen.getByRole("region", { name: "Sistema di rarità" }))
+      .not.toHaveTextContent("Pity");
     const collaboratorsHeading = screen.getByRole("heading", { name: "Collaboratori" });
     const membersHeading = screen.getByRole("heading", { name: "Iscritti attivi" });
     expect(collaboratorsHeading.compareDocumentPosition(membersHeading)).toBe(
@@ -626,14 +628,15 @@ describe("PeopleView", () => {
     expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
     expect(screen.getByText(/5% follower · 0,5% contatto/)).toBeVisible();
     expect(screen.getByText("Carico attrezzatura: 42/100")).toBeVisible();
+    expect(screen.getByRole("progressbar", {
+      name: "Condizione attrezzatura di Collaboratore 3",
+    })).toHaveClass("is-aggregate");
     expect(screen.getAllByRole("progressbar")).toHaveLength(8);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(4);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
-  it("refreshes active equipment progress every 250 ms between engine ticks", () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(1_500);
+  it("shows the aggregate equipment condition in the row and detail drawer", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborator = {
       id: "collaborator-equipment",
@@ -664,14 +667,21 @@ describe("PeopleView", () => {
       />,
     );
 
-    const progress = screen.getByRole("progressbar", {
-      name: "Progresso riduzione carico",
+    const rowCondition = screen.getByRole("progressbar", {
+      name: "Condizione attrezzatura di Collaboratore Attrezzatura",
     });
-    expect(progress).toHaveAttribute("aria-valuenow", "53.333");
+    expect(rowCondition).toHaveClass("is-aggregate");
+    expect(rowCondition).toHaveAttribute("aria-valuemax", "600");
+    expect(rowCondition).toHaveAttribute("aria-valuenow", "10");
+    expect(rowCondition.querySelectorAll(".equipment-condition-segment")).toHaveLength(4);
+    expect(rowCondition.querySelectorAll(".equipment-sword-cell")).toHaveLength(0);
 
-    act(() => vi.advanceTimersByTime(250));
-
-    expect(progress).toHaveAttribute("aria-valuenow", "70");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Dettagli di Collaboratore Attrezzatura",
+    }));
+    expect(screen.getByRole("progressbar", {
+      name: "Condizione attrezzatura nel dettaglio di Collaboratore Attrezzatura",
+    })).toHaveClass("is-aggregate");
   });
 
   it("shows the Corso Agonisti total in the athlete row instead of the inbox", () => {

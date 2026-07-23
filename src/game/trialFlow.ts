@@ -7,6 +7,11 @@ import { completeEquipmentUse, reserveSwords } from "./equipment";
 import { getEnrollmentChance } from "./formulas";
 import { nextRandom } from "./random";
 import {
+  applyLegendaryPityBonus,
+  incrementLegendaryPity,
+  updateLegendaryPityAfterTrial,
+} from "./legendaryPity";
+import {
   addCollaboratorMasteryExperience,
   addMessage,
 } from "./stateUpdates";
@@ -19,7 +24,10 @@ export function getLegendaryEnrollmentChance(
   profileId: SpecialCollaboratorId,
 ): number {
   const previousAttempts = state.legendaryCollaborators.enrollmentAttempts[profileId] ?? 0;
-  return getEnrollmentChance(state, "legendary", previousAttempts);
+  return applyLegendaryPityBonus(
+    getEnrollmentChance(state, "legendary", previousAttempts),
+    state.legendaryPity,
+  );
 }
 
 function isTrialEnrollmentGuaranteed(
@@ -107,6 +115,7 @@ export function processScheduledTrialStarts(
         ...nextState.statistics,
         contactsLost: nextState.statistics.contactsLost + 1,
       },
+      legendaryPity: incrementLegendaryPity(nextState.legendaryPity),
       network: trial.secretLegendaryId && secretProgress
         ? {
             ...nextState.network,
@@ -201,6 +210,11 @@ export function resolveTrial(
       membersEnrolled: state.statistics.membersEnrolled + (enrolled ? 1 : 0),
       eurosEarned: state.statistics.eurosEarned + (enrolled ? enrollmentBonus : 0),
     },
+    legendaryPity: updateLegendaryPityAfterTrial(
+      state.legendaryPity,
+      enrolled,
+      Boolean(specialProfileId),
+    ),
   };
 
   if (trial.secretLegendaryId) {
