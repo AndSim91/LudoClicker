@@ -318,10 +318,12 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "redaction-becomes-social",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "La Redazione diventa Social",
+        title: "La Scuola diventa Social!",
         body: [
-          "La scuola ha raggiunto 35 iscritti attivi. La Redazione ora gestisce anche la presenza online e da questo momento si chiamerà Social.",
-          "Non è un nuovo settore: i collaboratori della vecchia Redazione mantengono incarico, esperienza e capacità di scrittura.",
+          "L’Ordine delle Onde ha raggiunto 35 iscritti attivi: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
+          "Da oggi i collaboratori non si limiteranno più a scrivere email: lavoreranno anche per aumentare i nostri Contatti e i nostri Follower. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
+          "Abbiamo chiesto loro di fare rete e hanno preso l’incarico molto sul serio: stanno contattando amici, sindacati, l’Ispettorato del Lavoro e perfino un certo Guardia di Finanza.",
+          "Dev’essere un influencer importante: lo nominano tutti.",
         ],
         focusRegions: ["main"],
       },
@@ -329,20 +331,21 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "social-system",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Contenuti, follower e sponsorizzazioni",
+        title: "Contenuti, Follower e Sponsorizzazioni",
         body: [
-          "I collaboratori Social danno sempre priorità alle email. Quando non ci sono email attive, usano la stessa potenza di scrittura per produrre contenuti online.",
-          "Ogni contenuto può generare separatamente un follower e un contatto. Ogni follower ottenuto aumenta anche la Fama della scuola e migliora la probabilità futura di trovare contatti.",
-          "I follower producono inoltre una rendita da sponsorizzazioni insieme alle rette mensili. Il gioco chiuso non genera progressi o guadagni.",
+          "I collaboratori Social daranno sempre priorità alle Email. Quando non ci sono Email da scrivere, useranno le loro capacità per produrre contenuti online.",
+          "Ogni contenuto può generare Follower e nuovi Contatti. Ogni Follower ottenuto aumenta anche la Fama della scuola e migliora la possibilità di trovare sempre più Contatti nuovi.",
+          "I Follower producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
+          "Facile, no? Forse userò un Collaboratore Social per farmi ripartire la stampante..."
         ],
         focusRegions: ["title", "main"],
       },
       {
         id: "open-collaborators",
         kind: "objective",
-        title: "Apri i Collaboratori",
+        title: "Apri la pagina Iscritti",
         body: [
-          "Apri Iscritti dalla barra laterale e raggiungi l'elenco dei Collaboratori.",
+          "Premi su Iscritti nella barra laterale e raggiungi l'elenco dei Collaboratori delle Onde.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -355,7 +358,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Assegna un collaboratore ai Social",
         body: [
-          "Imposta almeno un collaboratore su Social. Senza collaboratori assegnati le email e i contenuti online non avanzano automaticamente.",
+          "Imposta almeno un Collaboratore sui Social. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente.",
         ],
         focusRegions: ["main", "collaborator-social-assignment"],
         isComplete: ({ state }) => state.collaborators.some(
