@@ -131,6 +131,7 @@ export function MemberList({
     () => ({
       currentTrainingYear: getFormTrainingYear(currentMonth),
       annualTrainingLimit,
+      technicalArenaLevel: state.upgrades["technical-arena"] ?? 0,
       immunityContext,
       foundedSchools,
       collaboratorsByContactId,
@@ -139,6 +140,7 @@ export function MemberList({
       collaboratorsByContactId,
       currentMonth,
       annualTrainingLimit,
+      state.upgrades,
       foundedSchools,
       immunityContext,
     ],

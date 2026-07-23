@@ -37,6 +37,24 @@ describe("buyUpgrade prerequisites", () => {
     expect(versatility.upgrades["technical-arena"]).toBe(1);
   });
 
+  it("opens Intensità agonistica only after unlocking Corso Agonisti", () => {
+    const initial = createInitialState(1_000);
+    const levelTwo = {
+      ...initial,
+      school: { ...initial.school, euros: 20_000 },
+      upgrades: { ...initial.upgrades, "technical-arena": 2 },
+    };
+
+    expect(buyUpgrade(levelTwo, "agonist-course-intensity")).toBe(levelTwo);
+
+    const levelThree = {
+      ...levelTwo,
+      upgrades: { ...levelTwo.upgrades, "technical-arena": 3 },
+    };
+    expect(buyUpgrade(levelThree, "agonist-course-intensity").upgrades["agonist-course-intensity"])
+      .toBe(1);
+  });
+
   it("grants every existing collaborator certificate at PagoSport level two", () => {
     const initial = createInitialState(1_000);
     const collaborator: Collaborator = {

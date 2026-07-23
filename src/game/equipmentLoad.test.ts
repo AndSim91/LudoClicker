@@ -194,7 +194,7 @@ describe("prenotazione delle spade", () => {
     const started = gameReducer(swordReturned, { type: "TICK", now: 3_000 });
 
     expect(started.contacts[0].training?.status).toBe("running");
-    expect(started.school.euros).toBe(975);
+    expect(started.school.euros).toBe(950);
     expect(started.equipment.availableSwords).toBe(0);
 
     const completed = gameReducer(started, {

@@ -914,14 +914,14 @@ Regole:
 | Forma 5 Staffa o Doppie Spade | 2 | 32 |
 | Forma 6 | 2 | 20 |
 | Forma 7 | 3 | 20 |
-| Corso Agonisti | da 1 a 3 secondo le Forme note | 20 |
+| Arena Tecnica / Corso Agonisti | da 1 a 3 secondo le Forme note | 20 |
 
 Forma 5 ha intenzionalmente il carico per spada più alto del gioco. Forma 6 e
 Forma 7 possono produrre più carico totale perché impiegano rispettivamente due
 e tre spade, ma non superano Forma 5 nell'aggressività della singola arma.
 
-Costi base: Forma 1 €25, Corso X €50, Forma 2 €100, Corso Y €250, Forma 3 €600,
-Forma 4 €1.000, Forma 5 €1.500, Forma 6 €2.200, Forma 7 €3.000. Lo scoglio
+Costi base: Forma 1 €50, Corso X €100, Forma 2 €250, Corso Y €500, Forma 3 €1.000,
+Forma 4 €1.500, Forma 5 €2.000, Forma 6 €3.000, Forma 7 €5.000. Lo scoglio
 economico principale inizia dopo Corso Y.
 
 ### 9.7 Istruttori e attestati
@@ -944,31 +944,46 @@ Regole:
   torna normale quando non ha più allievi attivi o l'insegnamento automatico
   viene disabilitato;
 - una qualifica pregressa viene acquistata esplicitamente dal comando di
-  formazione e costa il **200% del costo base**;
-- una nuova Forma appresa mentre si è Istruttore costa il **300% totale del
-  costo base** e comprende la qualifica; con PagoSport al livello 2 la qualifica
+  formazione e costa il **300% del costo base**;
+- una nuova Forma appresa mentre si è Istruttore costa il costo base della Forma
+  più il relativo attestato, per un totale pari al **400% del costo base**; con
+  PagoSport al livello 2 la qualifica
   è automatica e gratuita, quindi rimane soltanto il costo base della Forma;
 - se nessun Collaboratore è assegnato al ruolo di Istruttore, il singolo allievo
   può iniziare manualmente la prossima Forma pagando il costo base;
 - se almeno un Collaboratore è assegnato al ruolo di Istruttore, il comando
   manuale scompare e la pagina Iscritti mostra al suo posto tutte le prossime
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
-  dall'automazione e, con un Istruttore compatibile, costano il **25% del costo
-  base**;
-- **Arena Tecnica** è il primo potenziamento del ramo Istruttori, richiede
-  **Fama della scuola 15** e al livello 1 sblocca il **Corso Agonisti**
-  automatico, che da quel momento resta sempre attivo e non può essere
-  disabilitato separatamente;
-- l'automazione propone il Corso Agonisti a un atleta o a un collaboratore
+  dall'automazione e, con un Istruttore compatibile, ricevono una riduzione del
+  **25%** e costano quindi il **75% del costo base**;
+- **Arena Tecnica** è il primo potenziamento del ramo Istruttori, è disponibile
+  appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
+  “Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di perdere
+  atleti alla fine dell'anno e, con la giusta attenzione, li renderà sempre più
+  competitivi.”;
+- al livello 1 Arena Tecnica costa **€1.000** e sblocca l'omonima formazione
+  automatica, sempre attiva e non disabilitabile separatamente. La formazione
+  costa **€300 per atleta**, dura 42 secondi, non migliora le statistiche ma
+  protegge subito l'allievo dal controllo annuale degli abbandoni;
+- il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a
+  **30 secondi**;
+- il livello 3 costa **€5.000**, trasforma la formazione in **Corso Agonisti**,
+  ne porta il costo base a **€1.000** e attiva integralmente i miglioramenti
+  permanenti di Arena e Stile; la durata base resta di 30 secondi;
+- il livello 4 costa **€7.500** e riduce il costo base del Corso Agonisti a
+  **€500**;
+- l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un collaboratore
   inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
   automatico possiede le qualifiche per le sue prossime Forme;
-- iniziare il Corso Agonisti consuma **tutti gli slot formativi annuali ancora
+- iniziare Arena Tecnica o il Corso Agonisti consuma **tutti gli slot formativi annuali ancora
   disponibili** e protegge subito l'atleta dal controllo degli abbandoni. Lo
   stesso atleta non può
   iniziarlo più di una volta nello stesso periodo luglio–giugno, anche quando i
   potenziamenti gli concedono altri slot;
-- completare il Corso Agonisti aumenta permanentemente Arena e Stile. Senza
+- Arena Tecnica ai livelli 1 e 2 non modifica Arena, Stile o il totale storico
+  dei Corsi Agonisti. Dal livello 3, completare il Corso Agonisti aumenta
+  permanentemente Arena e Stile. Senza
   potenziamenti assegna **+1 Arena** e **+1 Stile**; **Intensità agonistica** ha
   quattro livelli e aumenta il massimo casuale di entrambe le caratteristiche
   fino a **+5**, mantenendo +1 come minimo. Il risultato casuale di ciascuna
@@ -977,10 +992,9 @@ Regole:
   limite negli anni successivi e sono
   registrati nella riga dell'atleta, senza creare notifiche o messaggi
   nell'inbox;
-- il corso ha un costo base manuale di €1.000 e, quando viene svolto sotto
-  Istruttore, costa il 25% del costo base (€250). Arena Tecnica al livello 2
-  porta la sua durata base da 15 a 10 secondi; al livello 3 lo rende gratuito.
-  Anche PagoSport al livello 3 azzera il costo;
+- i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
+  non ricevono la riduzione applicata alle Forme insegnate. PagoSport al livello
+  3 li azzera insieme agli altri costi di formazione;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
   decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
   poi la prossima formazione secondo la progressione dalla Forma 1 verso l'alto,
@@ -1000,10 +1014,10 @@ Regole:
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
   essere nuovamente sconfitti nel rispettivo torneo;
 - acquistare il livello 1 di Arena Tecnica sblocca subito **Polivalenza
-  didattica**; i livelli 2 e 3 di Arena restano acquistabili in parallelo e non
+  didattica**; i livelli 2, 3 e 4 di Arena restano acquistabili in parallelo e non
   bloccano il resto del ramo. Polivalenza didattica ha due livelli e permette di
   apprendere fino a tutti e tre i rami d'arma;
-- lo stesso livello sblocca **Intensità agonistica**, un potenziamento parallelo
+- il livello 3, insieme al Corso Agonisti, sblocca **Intensità agonistica**, un potenziamento parallelo
   in quattro livelli che porta il bonus massimo casuale del Corso Agonisti da
   +1 a +5 per ciascuna caratteristica senza bloccare gli altri potenziamenti;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
@@ -1040,7 +1054,7 @@ annuale dai futuri eventi imprevisti:
 | ---------------------------------------------------- | --------------------------------: | ----------------: | ------------------------------------------------------------------------------------ |
 | Iscrizione effettuata da Gennaio ad Agosto           |                            Immune |            Immune | Inizio di Settembre                                                                  |
 | Qualificazione al prossimo torneo                    |                            Immune |            Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
-| Forma, Corso X/Y o Corso Agonisti iniziato nell'anno |                            Immune |       Vulnerabile | Successivo controllo annuale                                                         |
+| Forma, Corso X/Y, Arena Tecnica o Corso Agonisti iniziato nell'anno |             Immune |       Vulnerabile | Successivo controllo annuale                                                         |
 
 Le iscrizioni effettuate da Settembre a Dicembre non ricevono l'immunità da
 nuova iscrizione. Dopo la Champion's Arena la qualificazione viene azzerata: non

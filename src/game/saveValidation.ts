@@ -111,6 +111,8 @@ function hasValidTraining(training: GameState["contacts"][number]["training"]): 
       training.status === "running" ||
       training.status === "waitingForEquipment") &&
     (training.equipmentUsed === undefined || isNonNegativeSafeInteger(training.equipmentUsed)) &&
+    (training.agonistCourseGrantsStats === undefined ||
+      typeof training.agonistCourseGrantsStats === "boolean") &&
     (training.wearPerSword === undefined || (
       Number.isFinite(training.wearPerSword) && training.wearPerSword >= 0
     ))

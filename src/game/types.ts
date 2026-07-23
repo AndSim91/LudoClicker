@@ -32,6 +32,7 @@ export interface FormTraining {
   includesInstructorCertification?: boolean;
   instructorTrainingDurationMultiplier?: number;
   agonistCourseSlotsConsumed?: number;
+  agonistCourseGrantsStats?: boolean;
 }
 
 export interface Contact {

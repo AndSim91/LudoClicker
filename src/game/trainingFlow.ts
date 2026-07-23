@@ -120,15 +120,12 @@ export function toggleInstructorAutomation(
   return refreshInstructorTrainingDurations(nextState, now);
 }
 
-export function getAgonistCourseCost(
-  state: GameState,
-  taughtByInstructor: boolean,
-): number {
-  if (hasFreeFormTraining(state.upgrades) || (state.upgrades["technical-arena"] ?? 0) >= 3) {
-    return 0;
-  }
-  return taughtByInstructor
-    ? getStudentFormCost(GAME_CONFIG.agonistCourseBaseCost)
+export function getAgonistCourseCost(state: GameState): number {
+  if (hasFreeFormTraining(state.upgrades)) return 0;
+  const arenaLevel = state.upgrades["technical-arena"] ?? 0;
+  if (arenaLevel < 3) return GAME_CONFIG.technicalArenaBaseCost;
+  return arenaLevel >= 4
+    ? GAME_CONFIG.agonistCourseDiscountedBaseCost
     : GAME_CONFIG.agonistCourseBaseCost;
 }
 
@@ -167,7 +164,8 @@ export function startAgonistCourse(
   const usedAnnualSlots = student ? getFormTrainingCount(student, trainingYear) : 0;
   const remainingAnnualSlots = annualTrainingLimit - usedAnnualSlots;
   const capacity = selectInstructorCapacity(state);
-  const cost = getAgonistCourseCost(state, true);
+  const cost = getAgonistCourseCost(state);
+  const agonistCourseGrantsStats = arenaLevel >= 3;
   if (
     !student ||
     !athleteContact ||
@@ -190,6 +188,7 @@ export function startAgonistCourse(
       requestedInstructorId: instructor.id,
       equipmentUsed: requiredSwords,
       wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
+      agonistCourseGrantsStats,
     };
     return {
       ...state,
@@ -206,9 +205,11 @@ export function startAgonistCourse(
     };
   }
 
-  const baseDuration = arenaLevel >= 2
-    ? GAME_CONFIG.agonistCourseImprovedDurationMs
-    : GAME_CONFIG.agonistCourseDurationMs;
+  const baseDuration = arenaLevel >= 3
+    ? GAME_CONFIG.agonistCourseDurationMs
+    : arenaLevel >= 2
+      ? GAME_CONFIG.technicalArenaImprovedDurationMs
+      : GAME_CONFIG.technicalArenaDurationMs;
   const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
   const training = {
     formId: AGONIST_COURSE_ID,
@@ -222,6 +223,7 @@ export function startAgonistCourse(
     equipmentUsed: requiredSwords,
     wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
     agonistCourseSlotsConsumed: remainingAnnualSlots,
+    agonistCourseGrantsStats,
   };
   return refreshInstructorTrainingDurations({
     ...state,
@@ -573,6 +575,32 @@ export function resolveFormTraining(
       ? state.contacts.find((contact) => contact.id === collaborator.contactId)
       : member;
     if (!athleteContact) return state;
+    const grantsStats = student.training.agonistCourseGrantsStats ?? true;
+    if (!grantsStats) {
+      let nextState: GameState = {
+        ...state,
+        equipment: completedEquipment,
+        contacts: state.contacts.map((contact) => contact.id === athleteContact.id
+          ? { ...contact, training: collaborator ? contact.training : undefined }
+          : contact),
+        collaborators: collaborator
+          ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+            ? { ...candidate, training: undefined }
+            : candidate)
+          : state.collaborators,
+      };
+      const instructorId = student.training.instructorId;
+      if (instructorId) {
+        nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
+          nextState,
+          instructorId,
+          "instructor",
+          COLLABORATOR_MASTERY_XP.instructorTraining,
+          now,
+        );
+      }
+      return nextState;
+    }
     const baseStats = getContactBaseStats(athleteContact);
     const maximumGain = getAgonistCourseMaximumStatGain(state.upgrades);
     const [arenaRoll, afterArena] = nextRandom(state.randomSeed);

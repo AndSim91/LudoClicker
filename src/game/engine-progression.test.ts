@@ -488,7 +488,7 @@ describe("game engine: progression", () => {
     const nextSchoolYear = gameReducer(septemberState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
 
     expect(blocked).toBe(ready);
-    expect(training.school.euros).toBe(193.75);
+    expect(training.school.euros).toBe(162.5);
     expect(training.contacts[0].training?.formId).toBe("form-1");
     expect(completed.contacts[0].forms).toContain("form-1");
     expect(completed.contacts[0].training).toBeUndefined();
@@ -506,7 +506,7 @@ describe("game engine: progression", () => {
     const member = { ...initial.contacts[0], status: "enrolled" as const };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 1, euros: 25 },
+      school: { ...initial.school, activeMembers: 1, euros: 50 },
       contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -539,7 +539,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 1, euros: 25 },
+      school: { ...initial.school, activeMembers: 1, euros: 50 },
       contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
@@ -557,7 +557,7 @@ describe("game engine: progression", () => {
     expect(training.contacts[0].training?.completesAt).toBe(3_000);
   });
 
-  it("assigns the Instructor role for free and charges explicit 200% qualifications", () => {
+  it("assigns the Instructor role for free and charges explicit 300% qualifications", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "instructor-conversion",
@@ -571,7 +571,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, euros: 400 },
+      school: { ...initial.school, euros: 1_500 },
       collaborators: [collaborator],
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -589,7 +589,7 @@ describe("game engine: progression", () => {
       now: 2_000,
     });
 
-    expect(assigned.school.euros).toBe(400);
+    expect(assigned.school.euros).toBe(1_500);
     expect(assigned.collaborators[0].assignment).toBe("instructor");
     expect(assigned.collaborators[0].instructorForms).toEqual([]);
 
@@ -599,9 +599,9 @@ describe("game engine: progression", () => {
       now: 2_000,
     });
 
-    expect(bulkQualified.school.euros).toBe(50);
+    expect(bulkQualified.school.euros).toBe(300);
     expect(bulkQualified.collaborators[0].instructorForms).toEqual(["form-1", "course-x", "form-2"]);
-    expect(qualifiedFormOne.school.euros).toBe(350);
+    expect(qualifiedFormOne.school.euros).toBe(1_350);
     expect(qualifiedFormOne.collaborators[0].instructorForms).toEqual(["form-1"]);
     expect(qualifiedFormOne.messages.some((message) => message.subject === "Qualifica da Istruttore ottenuta")).toBe(true);
 
@@ -623,7 +623,7 @@ describe("game engine: progression", () => {
     ]);
   });
 
-  it.each([19, 20])("charges an Instructor 300% total for a new Form and includes its qualification during summer month %i", (currentMonth) => {
+  it.each([19, 20])("charges an Instructor the base Form plus the 300% certificate during summer month %i", (currentMonth) => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "instructor-training",
@@ -638,7 +638,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, currentMonth, euros: 400 },
+      school: { ...initial.school, currentMonth, euros: 1_200 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -661,7 +661,7 @@ describe("game engine: progression", () => {
       now: 2_000,
     });
 
-    expect(training.school.euros).toBe(100);
+    expect(training.school.euros).toBe(200);
     expect(training.collaborators[0].lastFormTrainingYear).toBe(2);
     expect(training.collaborators[0].formTrainingYearCount).toBe(1);
     expect(training.collaborators[0].training?.includesInstructorCertification).toBe(true);
@@ -838,7 +838,7 @@ describe("game engine: progression", () => {
 
     expect(firstTraining.contacts.find((contact) => contact.id === first.id)?.training?.instructorId).toBe(instructor.id);
     expect(secondBlocked.contacts.find((contact) => contact.id === second.id)?.training?.instructorId).toBeUndefined();
-    expect(secondBlocked.school.euros).toBe(68.75);
+    expect(secondBlocked.school.euros).toBe(12.5);
   });
 
   it("starts automatic teaching, respects pause, and fills six Tiamat slots", () => {
@@ -1172,7 +1172,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, euros: 100 },
+      school: { ...initial.school, euros: 500 },
       contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
@@ -1209,7 +1209,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, currentMonth: 21, euros: 2_000 },
+      school: { ...initial.school, currentMonth: 21, euros: 5_000 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };
@@ -1231,7 +1231,7 @@ describe("game engine: progression", () => {
 
     expect(blocked).toBe(ready);
     expect(unlocked.collaborators[0].training?.formId).toBe("form-3-staff");
-    expect(unlocked.school.euros).toBe(200);
+    expect(unlocked.school.euros).toBe(1_000);
   });
 
   it("creates an Ultra Rare collaborator at Course Y and applies rarity bonuses", () => {

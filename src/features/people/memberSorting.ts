@@ -33,6 +33,7 @@ export interface MemberSort {
 export interface MemberSortContext {
   currentTrainingYear: number;
   annualTrainingLimit: number;
+  technicalArenaLevel: number;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   collaboratorsByContactId: ReadonlyMap<string, Collaborator>;
@@ -61,7 +62,13 @@ export function getMemberNextFormLabel(
   context: MemberSortContext,
 ): string | null {
   if (context.collaboratorsByContactId.has(contact.id)) return "Collaboratore";
-  if (contact.training) return getTrainingCourseTitle(contact.training.formId);
+  if (contact.training) {
+    return getTrainingCourseTitle(
+      contact.training.formId,
+      context.technicalArenaLevel,
+      contact.training.agonistCourseGrantsStats,
+    );
+  }
   const nextForm = getAvailableForms(
     contact,
     context.currentTrainingYear,

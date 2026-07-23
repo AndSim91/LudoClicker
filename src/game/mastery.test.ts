@@ -121,7 +121,7 @@ describe("collaborator mastery integration", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, euros: 100 },
+      school: { ...initial.school, euros: 200 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };

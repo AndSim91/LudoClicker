@@ -40,7 +40,7 @@ describe("PagoSport", () => {
       now: 2_000,
     });
 
-    expect(started.school.euros).toBe(975);
+    expect(started.school.euros).toBe(950);
     const completed = gameReducer(started, {
       type: "TICK",
       now: started.collaborators[0].training!.completesAt,
@@ -59,6 +59,6 @@ describe("PagoSport", () => {
     });
 
     expect(started.school.euros).toBe(1_000);
-    expect(getAgonistCourseCost(state, true)).toBe(0);
+    expect(getAgonistCourseCost(state)).toBe(0);
   });
 });

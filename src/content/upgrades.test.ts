@@ -77,14 +77,14 @@ describe("instructor branch", () => {
       "divine-touch",
     ]);
     expect(instructors.map((definition) => definition.requiredHistoricMembers)).toEqual([
-      15, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     expect(instructors.map((definition) =>
       Array.from({ length: definition.maxLevel }, (_, level) =>
         getUpgradeCost(definition, level)
       )
     )).toEqual([
-      [2_000, 5_000, 10_000],
+      [1_000, 2_000, 5_000, 7_500],
       [5_000, 10_000, 20_000, 40_000],
       [2_000, 4_000],
       [5_000],

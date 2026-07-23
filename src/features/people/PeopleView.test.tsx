@@ -778,7 +778,7 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, euros: 1_000 },
+          school: { ...initial.school, euros: 3_000 },
           collaborators: [collaborator],
           unlocks: { ...initial.unlocks, collaborators: true, forms: true },
         }}
@@ -789,7 +789,7 @@ describe("PeopleView", () => {
     );
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    expect(within(region).getByText(/850,00/)).toBeVisible();
+    expect(within(region).getByText(/Attestati/)).toHaveTextContent("2700,00");
     fireEvent.click(within(region).getByRole("button", { name: "Paga attestati" }));
 
     expect(onPayInstructorCertificates).toHaveBeenCalledWith(collaborator.id);
@@ -893,7 +893,7 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1, euros: 25, currentMonth: 21 },
+          school: { ...initial.school, activeMembers: 1, euros: 50, currentMonth: 21 },
           contacts: initial.contacts.map((contact) =>
             contact.id === enrolled.id ? enrolled : contact,
           ),

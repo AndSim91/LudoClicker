@@ -101,9 +101,11 @@ function getDisplayedTrainingCost(
 function InstructorTeachingSummary({
   entries,
   now,
+  technicalArenaLevel,
 }: {
   entries: InstructorTeachingEntry[];
   now: number;
+  technicalArenaLevel: number;
 }) {
   return (
     <div className="instructor-teaching" aria-label="Allievi in formazione">
@@ -118,7 +120,11 @@ function InstructorTeachingSummary({
             <span className="instructor-student-copy">
               <strong>{entry.displayName}</strong>
               <small>
-                {getTrainingCourseTitle(entry.training.formId)}
+                {getTrainingCourseTitle(
+                  entry.training.formId,
+                  technicalArenaLevel,
+                  entry.training.agonistCourseGrantsStats,
+                )}
                 {definition?.branch ? ` · ${definition.branch}` : ""}
               </small>
             </span>
@@ -178,7 +184,11 @@ export function InstructorCompactActivity({
           <span className="instructor-compact-activity" key={entry.id}>
             <span className="collaborator-activity-title">
               <strong>{entry.displayName}</strong>
-              <small>{getTrainingCourseTitle(entry.training.formId)}</small>
+              <small>{getTrainingCourseTitle(
+                entry.training.formId,
+                state.upgrades["technical-arena"] ?? 0,
+                entry.training.agonistCourseGrantsStats,
+              )}</small>
             </span>
             <span className="collaborator-activity-progress">
               <strong>{waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}</strong>
@@ -297,7 +307,11 @@ export function InstructorPanel({
         </div>
       ) : null}
       {teaching.length > 0
-        ? <InstructorTeachingSummary entries={teaching} now={now} />
+        ? <InstructorTeachingSummary
+            entries={teaching}
+            now={now}
+            technicalArenaLevel={state.upgrades["technical-arena"] ?? 0}
+          />
         : <small>{enabled ? "In attesa del prossimo allievo compatibile." : "Pausa: non verranno avviate nuove lezioni."}</small>}
       <TrainingControl
         personId={collaborator.id}
@@ -358,7 +372,11 @@ export function TrainingControl({
     return (
       <div className={`training-progress${variantClass}`}>
         <span>
-          {getTrainingCourseTitle(student.training.formId)}
+          {getTrainingCourseTitle(
+            student.training.formId,
+            state.upgrades["technical-arena"] ?? 0,
+            student.training.agonistCourseGrantsStats,
+          )}
           {definition?.branch ? ` — ${definition.branch}` : ""}
           {instructor ? ` · con ${instructor.displayName}` : ""}
           {student.training.includesInstructorCertification ? " · attestato incluso" : ""}

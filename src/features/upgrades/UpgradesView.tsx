@@ -92,7 +92,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
 
   const agonistCourseTier = getUpgradeEffectTotal(state.upgrades, "agonistCourseTier");
   if (agonistCourseTier > 0) {
-    benefits.push({ label: "Arena Tecnica", value: `livello ${agonistCourseTier}` });
+    benefits.push({
+      label: agonistCourseTier >= 3 ? "Corso Agonisti" : "Arena Tecnica",
+      value: `livello ${agonistCourseTier}`,
+    });
   }
   if (hasAutomaticInstructorCertificates(state.upgrades)) {
     benefits.push({ label: "Attestati collaboratori", value: "Automatici" });
@@ -143,7 +146,13 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
-      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/${1 + getUpgradeEffectMaximum("annualFormCapacity")} · Corso Agonisti fino a +${1 + getUpgradeEffectTotal(state.upgrades, "agonistCourseStatMaximum")}`;
+      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/${1 + getUpgradeEffectMaximum("annualFormCapacity")} · ${
+        (state.upgrades["technical-arena"] ?? 0) >= 3
+          ? `Corso Agonisti fino a +${1 + getUpgradeEffectTotal(state.upgrades, "agonistCourseStatMaximum")}`
+          : (state.upgrades["technical-arena"] ?? 0) >= 1
+            ? "Arena Tecnica attiva"
+            : "Corsi agonistici da sbloccare"
+      }`;
   }
 }
 
