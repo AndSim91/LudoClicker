@@ -130,7 +130,7 @@ describe("game engine: operations", () => {
     expect(completed.messages[0].subject).toBe("Attività operative disponibili");
   });
 
-  it("cancels a running event with half wear and no contacts", () => {
+  it("cancels a running event with quarter wear, no cooldown, and no contacts", () => {
     const state = createInitialState(1_000);
     const started = gameReducer(state, {
       type: "START_ACQUISITION_EVENT",
@@ -149,9 +149,66 @@ describe("game engine: operations", () => {
     expect(cancelled.contacts).toEqual(started.contacts);
     expect(cancelled.statistics.eventsCompleted).toBe(0);
     expect(cancelled.equipment.availableSwords).toBe(6);
-    expect(cancelled.equipment.wear).toBe(event.wearAdded / 2);
-    expect(cancelled.activities.nextSparringAt).toBe(3_000);
+    expect(cancelled.equipment.wear).toBe(event.wearAdded * 0.25);
+    expect(cancelled.activities.eventCooldowns["park-sparring"]).toBeUndefined();
     expect(cancelled.school.euros).toBe(started.school.euros);
+  });
+
+  it("refunds a paid cancelled event while applying only quarter wear", () => {
+    const initial = createInitialState(1_000);
+    const ready = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 5,
+        historicMembers: 5,
+        euros: 120,
+      },
+    };
+    const started = gameReducer(ready, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "public-demo",
+      now: 2_000,
+    });
+    const event = started.acquisitionEvents[0];
+
+    const cancelled = gameReducer(started, {
+      type: "CANCEL_ACQUISITION_EVENT",
+      eventId: event.id,
+      now: 3_000,
+    });
+
+    expect(cancelled.school.euros).toBe(120);
+    expect(cancelled.equipment.availableSwords).toBe(6);
+    expect(cancelled.equipment.wear).toBe(event.wearAdded * 0.25);
+    expect(cancelled.activities.eventCooldowns["public-demo"]).toBeUndefined();
+  });
+
+  it("starts an event cooldown only after completion", () => {
+    const state = createInitialState(1_000);
+    const started = gameReducer(state, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: 2_000,
+    });
+    const event = started.acquisitionEvents[0];
+    const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });
+
+    expect(completed.activities.eventCooldowns["park-sparring"]).toEqual({
+      kind: "realtime",
+      startedAt: event.resolvesAt,
+      availableAt: event.resolvesAt + 5_000,
+    });
+    expect(gameReducer(completed, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: event.resolvesAt + 4_999,
+    })).toBe(completed);
+    expect(gameReducer(completed, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: event.resolvesAt + 5_000,
+    }).acquisitionEvents.filter((candidate) => candidate.status === "running")).toHaveLength(1);
   });
 
   it("requires enough school fame and euros for outdoor lessons", () => {

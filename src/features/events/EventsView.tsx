@@ -4,6 +4,11 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
+import {
+  formatEventCooldownRemaining,
+  getEventCooldownProgress,
+  isEventCooldownActive,
+} from "../../game/eventCooldowns";
 import { useGameTime } from "../../game/GameTimeContext";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import {
@@ -131,8 +136,14 @@ export function EventsView({
       <section className="event-list">
         {visibleEvents.map((definition) => {
           const matching = runningByDefinition.get(definition.id);
-          const cooldown = Math.max(0, state.activities.nextSparringAt - now);
-          const onCooldown = definition.id === "park-sparring" && cooldown > 0;
+          const cooldown = state.activities.eventCooldowns[definition.id];
+          const onCooldown = isEventCooldownActive(cooldown, state, now);
+          const cooldownRemaining = cooldown && onCooldown
+            ? formatEventCooldownRemaining(cooldown, state, now)
+            : "";
+          const cooldownProgress = cooldown && onCooldown
+            ? getEventCooldownProgress(cooldown, state, now)
+            : 0;
           const lacksFunds = state.school.euros < definition.cost;
           const lacksMembers = state.school.activeMembers < definition.requiredMembers;
           const lacksAvailableMembers = availableMembers < definition.requiredMembers;
@@ -152,7 +163,7 @@ export function EventsView({
           const disabled = !matching && Boolean(onCooldown || lacksFunds || lacksAvailableMembers || lacksEquipment);
           let action = definition.cost === 0 ? "Partecipa gratis" : `Partecipa · ${formatCurrency(definition.cost)}`;
           if (matching) action = "Annulla evento";
-          else if (onCooldown) action = `Di nuovo tra ${Math.ceil(cooldown / 1_000)} s`;
+          else if (onCooldown) action = `Disponibile tra ${cooldownRemaining}`;
           else if (lacksMembers) action = `Richiede ${memberRequirement(definition.requiredMembers)}`;
           else if (lacksAvailableMembers) action = `Servono ${memberRequirement(definition.requiredMembers)} liberi`;
           else if (needsRepairForEvent) action = `Ripara ${quantityLabel(damagedSwords, "spada", "spade")}`;
@@ -182,6 +193,22 @@ export function EventsView({
                       label={`Avanzamento ${definition.title}`}
                       value={progress}
                       durationMs={matching.resolvesAt - matching.startedAt}
+                    />
+                  </div>
+                ) : cooldown && onCooldown ? (
+                  <div className="event-progress-block event-cooldown-block">
+                    <div className="event-progress-label">
+                      <span>In attesa del prossimo evento</span>
+                      <strong>{cooldownRemaining}</strong>
+                    </div>
+                    <ProgressBar
+                      className="event-progress event-cooldown-progress"
+                      label={`Cooldown ${definition.title}`}
+                      value={cooldownProgress}
+                      valueText={`Disponibile tra ${cooldownRemaining}`}
+                      durationMs={cooldown.kind === "realtime"
+                        ? cooldown.availableAt - cooldown.startedAt
+                        : GAME_CONFIG.gameMonthMs}
                     />
                   </div>
                 ) : null}

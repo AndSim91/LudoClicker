@@ -182,14 +182,14 @@ describe("EventsView", () => {
       .toHaveStyle({ width: "98.62%" });
   });
 
-  it("shows the three-second duration only while the Events tutorial is pending", () => {
+  it("shows the five-second duration only while the Events tutorial is pending", () => {
     const initial = createInitialState(1_000);
     const { rerender } = render(
       <EventsView state={initial} onStart={() => undefined} />,
     );
     const tutorialRow = screen.getByRole("heading", { name: "Sparring al parco" })
       .closest("article");
-    expect(within(tutorialRow!).getByText("3 secondi")).toBeVisible();
+    expect(within(tutorialRow!).getByText("5 secondi")).toBeVisible();
     expect(tutorialRow).toHaveAttribute("data-tutorial-region", "park-sparring-event");
     expect(within(tutorialRow!).getByRole("button", { name: "Partecipa gratis" }))
       .toHaveAttribute("data-tutorial-region", "park-sparring-action");
@@ -208,7 +208,7 @@ describe("EventsView", () => {
     );
     const normalRow = screen.getByRole("heading", { name: "Sparring al parco" })
       .closest("article");
-    expect(within(normalRow!).getByText("15 secondi")).toBeVisible();
+    expect(within(normalRow!).getByText("10 secondi")).toBeVisible();
   });
 
   it("reveals higher potential events as the school gains members", () => {
@@ -298,6 +298,60 @@ describe("EventsView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Annulla evento" }));
 
     expect(onCancel).toHaveBeenCalledWith(event.id);
+  });
+
+  it("shows a realtime cooldown and disables the event action", () => {
+    const initial = createInitialState(1_000);
+    const now = Date.now();
+
+    render(<EventsView
+      state={{
+        ...initial,
+        activities: {
+          eventCooldowns: {
+            "park-sparring": {
+              kind: "realtime",
+              startedAt: now,
+              availableAt: now + 5_000,
+            },
+          },
+        },
+      }}
+      onStart={() => undefined}
+    />);
+
+    expect(screen.getByRole("button", { name: "Disponibile tra 5 secondi" })).toBeDisabled();
+    expect(screen.getByRole("progressbar", { name: "Cooldown Sparring al parco" }))
+      .toHaveAttribute("aria-valuetext", "Disponibile tra 5 secondi");
+  });
+
+  it("shows calendar cooldowns in game months", () => {
+    const initial = createInitialState(1_000);
+
+    render(<EventsView
+      state={{
+        ...initial,
+        school: {
+          ...initial.school,
+          activeMembers: 20,
+          historicMembers: 20,
+          nextFeeAt: Date.now() + 60_000,
+        },
+        activities: {
+          eventCooldowns: {
+            "local-event": {
+              kind: "calendar",
+              startedMonthPosition: initial.school.currentMonth,
+              availableAtMonth: initial.school.currentMonth + 1,
+            },
+          },
+        },
+      }}
+      onStart={() => undefined}
+    />);
+
+    expect(screen.getByRole("button", { name: "Disponibile tra 1 mese" })).toBeDisabled();
+    expect(screen.getByRole("progressbar", { name: "Cooldown Mele Comics" })).toBeVisible();
   });
 
   it("marks damaged swords as unavailable until maintenance", () => {

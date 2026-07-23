@@ -3,6 +3,10 @@ import { FORM_DEFINITIONS } from "../content/forms";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { getEquipmentMaintenanceCost } from "./equipment";
+import {
+  getNextRealtimeEventCooldownDeadline,
+  isEventCooldownActive,
+} from "./eventCooldowns";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { nextRandom } from "./random";
 import { selectActiveEmail } from "./selectors";
@@ -35,8 +39,8 @@ function nextScheduledTime(state: GameState, now: number): number | undefined {
       .map((event) => event.resolvesAt),
     state.school.nextFeeAt,
     state.narrative.nextEventAt,
-    state.activities.nextSparringAt,
-  ].filter((time) => time > now);
+    getNextRealtimeEventCooldownDeadline(state, now),
+  ].filter((time): time is number => time !== undefined && time > now);
 
   return scheduledTimes.length > 0 ? Math.min(...scheduledTimes) : undefined;
 }
@@ -88,7 +92,10 @@ function simulateEarlyGame(seed: number): EarlyGameMilestones {
     const sparringRunning = state.acquisitionEvents.some(
       (event) => event.definitionId === "park-sparring" && event.status === "running",
     );
-    if (!sparringRunning && now >= state.activities.nextSparringAt) {
+    if (
+      !sparringRunning &&
+      !isEventCooldownActive(state.activities.eventCooldowns["park-sparring"], state, now)
+    ) {
       state = gameReducer(state, {
         type: "START_ACQUISITION_EVENT",
         definitionId: "park-sparring",

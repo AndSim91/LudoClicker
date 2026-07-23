@@ -3,6 +3,11 @@ import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorBaseProductivity } from "../content/forms";
 import { PERSON_RARITIES } from "../content/rarities";
 import { GAME_CONFIG } from "./config";
+import {
+  getEventAttendanceBonus,
+  getEventCharismaBonus,
+  getEventCollaboratorBonus,
+} from "./eventRewards";
 import type { FormId, GameState, PersonRarity } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -54,23 +59,14 @@ export function getEventFunnelOutcome(
   definition: AcquisitionEventDefinition,
   attendanceVariance = 1,
 ) {
-  const charismaMultiplier =
-    1 + getUpgradeEffectTotal(state.upgrades, "eventContactsMultiplier");
-  const equipmentMultiplier = 1 - Math.min(0.25, state.equipment.wear / 400);
-  const attendanceMultiplier =
-    1 + getUpgradeEffectTotal(state.upgrades, "eventAttendanceMultiplier") +
-    (state.school.specialization === "eventi" ? 0.1 : 0) +
-    state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const eventProductivity = state.collaborators
-    .filter((collaborator) => collaborator.assignment === "events")
-    .reduce((total, collaborator) => total + getCollaboratorBaseProductivity(collaborator), 0);
-  const collaboratorMultiplier = 1 + eventProductivity * 0.1;
+  const charismaMultiplier = 1 + getEventCharismaBonus(state);
+  const collaboratorMultiplier = 1 + getEventCollaboratorBonus(state);
+  const attendanceMultiplier = 1 + getEventAttendanceBonus(state);
   const peopleMet = Math.max(
     1,
     Math.round(
       definition.baseAttendance *
         attendanceVariance *
-        equipmentMultiplier *
         attendanceMultiplier *
         collaboratorMultiplier,
     ),
@@ -84,11 +80,7 @@ export function getEventFunnelOutcome(
     0,
     1,
   );
-  const contactsObtained = Math.max(
-    1,
-    Math.round(demonstrationsGiven * emailShareChance),
-  );
-  return { peopleMet, demonstrationsGiven, contactsObtained, emailShareChance };
+  return { peopleMet, demonstrationsGiven, emailShareChance };
 }
 
 export function getWritingPower(state: GameState) {

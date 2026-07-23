@@ -18,7 +18,21 @@ export interface AcquisitionEventDefinition {
   requiredMembers: number;
   requiredSwords: number;
   wearAdded: number;
+  contactOutcomes: readonly EventContactOutcome[];
+  cooldown: EventCooldownDefinition;
 }
+
+export interface EventContactOutcome {
+  weight: number;
+  min: number;
+  max: number;
+}
+
+export type EventCooldownDefinition =
+  | { kind: "realtime"; durationMs: number }
+  | { kind: "calendar"; months: number };
+
+const STANDARD_EVENT_DURATION_MS = 10_000;
 
 export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
   {
@@ -26,7 +40,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     title: "Sparring al parco",
     location: "Parco Carlo Alberto Dalla Chiesa",
     description: "Una sessione informale e gratuita per incontrare poche persone interessate.",
-    durationMs: 15_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 0,
     baseAttendance: 6,
     demonstrationRate: 0.5,
@@ -39,13 +53,19 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 0,
     requiredSwords: 2,
     wearAdded: 10,
+    contactOutcomes: [
+      { weight: 50, min: 0, max: 0 },
+      { weight: 40, min: 1, max: 1 },
+      { weight: 10, min: 2, max: 2 },
+    ],
+    cooldown: { kind: "realtime", durationMs: 5_000 },
   },
   {
     id: "organized-flyering",
     title: "Volantinaggio organizzato benissimo",
     location: "Centro di Genova",
     description: "Un piano impeccabile sulla carta, con risultati deliberatamente imprevedibili.",
-    durationMs: 20_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 40,
     baseAttendance: 12,
     demonstrationRate: 0.25,
@@ -58,13 +78,19 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 1,
     requiredSwords: 2,
     wearAdded: 0,
+    contactOutcomes: [
+      { weight: 30, min: 0, max: 0 },
+      { weight: 67, min: 1, max: 1 },
+      { weight: 3, min: 2, max: 2 },
+    ],
+    cooldown: { kind: "realtime", durationMs: 5_000 },
   },
   {
     id: "public-demo",
     title: "Lezioni all'aperto",
     location: "Parco delle Mura",
     description: "Una lezione introduttiva fuori dalla palestra, semplice da organizzare e facile da notare.",
-    durationMs: 35_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 120,
     baseAttendance: 18,
     demonstrationRate: 0.5,
@@ -77,13 +103,20 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 2,
     requiredSwords: 4,
     wearAdded: 20,
+    contactOutcomes: [
+      { weight: 5, min: 0, max: 0 },
+      { weight: 45, min: 1, max: 1 },
+      { weight: 40, min: 2, max: 2 },
+      { weight: 10, min: 3, max: 3 },
+    ],
+    cooldown: { kind: "realtime", durationMs: 15_000 },
   },
   {
     id: "sports-stand",
     title: "Evento sportivo",
     location: "Porto Antico",
     description: "Uno stand in una manifestazione multisport, con pubblico ampio ma interesse molto variabile.",
-    durationMs: 45_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 240,
     baseAttendance: 28,
     demonstrationRate: 0.35,
@@ -96,13 +129,19 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 4,
     requiredSwords: 6,
     wearAdded: 40,
+    contactOutcomes: [
+      { weight: 54, min: 1, max: 1 },
+      { weight: 36, min: 2, max: 2 },
+      { weight: 10, min: 3, max: 3 },
+    ],
+    cooldown: { kind: "realtime", durationMs: 20_000 },
   },
   {
     id: "local-event",
     title: "Mele Comics",
     location: "Mele",
     description: "Una giornata di comics, cosplay e attività sportive diffusa per le vie del paese.",
-    durationMs: 50_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 400,
     baseAttendance: 42,
     demonstrationRate: 0.4,
@@ -115,13 +154,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 6,
     requiredSwords: 8,
     wearAdded: 60,
+    contactOutcomes: [
+      { weight: 5, min: 1, max: 1 },
+      { weight: 25, min: 2, max: 2 },
+      { weight: 51, min: 3, max: 3 },
+      { weight: 16, min: 4, max: 4 },
+      { weight: 3, min: 5, max: 5 },
+    ],
+    cooldown: { kind: "calendar", months: 1 },
   },
   {
     id: "school-open-day",
     title: "CairoMix",
     location: "Cairo Montenotte",
     description: "Una fiera territoriale dedicata a fumetti, cosplay e cultura pop nell'entroterra savonese.",
-    durationMs: 55_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 640,
     baseAttendance: 55,
     demonstrationRate: 0.4,
@@ -134,13 +181,23 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 8,
     requiredSwords: 10,
     wearAdded: 100,
+    contactOutcomes: [
+      { weight: 5, min: 1, max: 1 },
+      { weight: 10, min: 2, max: 2 },
+      { weight: 24, min: 3, max: 3 },
+      { weight: 35, min: 4, max: 4 },
+      { weight: 17, min: 5, max: 5 },
+      { weight: 6, min: 6, max: 6 },
+      { weight: 3, min: 7, max: 7 },
+    ],
+    cooldown: { kind: "calendar", months: 1 },
   },
   {
     id: "themed-event",
     title: "CogoComix",
     location: "Cogoleto",
     description: "Una manifestazione sul mare con cosplay, spettacoli, stand e attività nel borgo.",
-    durationMs: 60_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 1_200,
     baseAttendance: 80,
     demonstrationRate: 0.4,
@@ -153,13 +210,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 12,
     requiredSwords: 12,
     wearAdded: 150,
+    contactOutcomes: [
+      { weight: 13, min: 2, max: 3 },
+      { weight: 29, min: 4, max: 5 },
+      { weight: 41, min: 6, max: 7 },
+      { weight: 13, min: 8, max: 9 },
+      { weight: 4, min: 10, max: 11 },
+    ],
+    cooldown: { kind: "calendar", months: 2 },
   },
   {
     id: "burtomics",
     title: "Burtomics",
     location: "Borgo ligure",
     description: "Una manifestazione comics raccolta in un borgo storico, con un pubblico ormai ben riconoscibile.",
-    durationMs: 65_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 1_800,
     baseAttendance: 110,
     demonstrationRate: 0.42,
@@ -172,13 +237,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 16,
     requiredSwords: 16,
     wearAdded: 200,
+    contactOutcomes: [
+      { weight: 11, min: 3, max: 5 },
+      { weight: 25, min: 6, max: 7 },
+      { weight: 39, min: 8, max: 9 },
+      { weight: 20, min: 10, max: 12 },
+      { weight: 5, min: 13, max: 16 },
+    ],
+    cooldown: { kind: "calendar", months: 2 },
   },
   {
     id: "genova-comics",
     title: "Genova Comics & Games",
     location: "Genova",
     description: "Una fiera cittadina in crescita, con aree comics, games, cosplay e ospiti del settore.",
-    durationMs: 70_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 2_600,
     baseAttendance: 140,
     demonstrationRate: 0.4,
@@ -191,13 +264,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 20,
     requiredSwords: 20,
     wearAdded: 250,
+    contactOutcomes: [
+      { weight: 12, min: 4, max: 6 },
+      { weight: 26, min: 7, max: 9 },
+      { weight: 37, min: 10, max: 11 },
+      { weight: 20, min: 12, max: 15 },
+      { weight: 5, min: 16, max: 18 },
+    ],
+    cooldown: { kind: "calendar", months: 2 },
   },
   {
     id: "megacon-genova",
     title: "Megacon Genova",
     location: "Fiera di Genova",
     description: "Un grande appuntamento dedicato a fumetto, gioco, cosplay e intrattenimento pop.",
-    durationMs: 80_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 4_200,
     baseAttendance: 200,
     demonstrationRate: 0.42,
@@ -210,13 +291,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 28,
     requiredSwords: 24,
     wearAdded: 500,
+    contactOutcomes: [
+      { weight: 15, min: 5, max: 8 },
+      { weight: 29, min: 9, max: 15 },
+      { weight: 36, min: 16, max: 21 },
+      { weight: 15, min: 22, max: 26 },
+      { weight: 5, min: 27, max: 30 },
+    ],
+    cooldown: { kind: "calendar", months: 12 },
   },
   {
     id: "lucca-comics",
     title: "Lucca Comics & Games",
     location: "Lucca",
     description: "Una delle grandi manifestazioni italiane della cultura pop: pubblico enorme e logistica severa.",
-    durationMs: 90_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 7_000,
     baseAttendance: 320,
     demonstrationRate: 0.4,
@@ -229,13 +318,21 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 40,
     requiredSwords: 30,
     wearAdded: 700,
+    contactOutcomes: [
+      { weight: 18, min: 8, max: 12 },
+      { weight: 20, min: 13, max: 20 },
+      { weight: 25, min: 21, max: 28 },
+      { weight: 24, min: 29, max: 37 },
+      { weight: 13, min: 38, max: 45 },
+    ],
+    cooldown: { kind: "calendar", months: 12 },
   },
   {
     id: "milan-games-week",
     title: "Milan Games Week & Cartoomics",
     location: "Fiera Milano Rho",
     description: "Una manifestazione nazionale di gaming, fumetto e cultura pop che richiede una scuola molto affermata.",
-    durationMs: 100_000,
+    durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 10_000,
     baseAttendance: 420,
     demonstrationRate: 0.38,
@@ -248,6 +345,14 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     requiredMembers: 50,
     requiredSwords: 36,
     wearAdded: 1000,
+    contactOutcomes: [
+      { weight: 17, min: 10, max: 15 },
+      { weight: 22, min: 16, max: 27 },
+      { weight: 25, min: 28, max: 37 },
+      { weight: 24, min: 38, max: 47 },
+      { weight: 12, min: 48, max: 57 },
+    ],
+    cooldown: { kind: "calendar", months: 12 },
   },
 ];
 

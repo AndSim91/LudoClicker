@@ -204,14 +204,14 @@ describe("useTutorialController", () => {
       expect.objectContaining({
         definitionId: "park-sparring",
         status: "running",
-        resolvesAt: 5_000,
+        resolvesAt: 7_000,
         tutorialSceneId: "first-event",
       }),
     );
     expect(result.current.tutorial.activeStep?.id).toBe("wait-free-sparring");
     expect(result.current.tutorial.shouldPauseGame).toBe(false);
 
-    act(() => result.current.tick(5_000));
+    act(() => result.current.tick(7_000));
 
     expect(result.current.tutorial.activeStep?.id).toBe("contacts-increased");
     expect(result.current.tutorial.activeStep?.kind).toBe("dialog");

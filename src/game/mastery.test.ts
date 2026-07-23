@@ -72,7 +72,7 @@ describe("collaborator mastery integration", () => {
     );
     const event = started.acquisitionEvents[0];
 
-    expect(event.resolvesAt - event.startedAt).toBe(16_000);
+    expect(event.resolvesAt - event.startedAt).toBe(8_000);
     expect(event.cost).toBe(30);
     expect(event.wearAdded).toBe(0);
     expect(started.school.euros).toBe(70);

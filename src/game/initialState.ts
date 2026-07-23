@@ -73,7 +73,7 @@ export function createInitialState(
       skippedSceneIds: [],
     },
     shortGoal: createInitialShortGoal(now),
-    activities: { nextSparringAt: now },
+    activities: { eventCooldowns: {} },
     equipment: {
       totalSwords: GAME_CONFIG.initialSwords,
       availableSwords: GAME_CONFIG.initialSwords,

@@ -157,6 +157,18 @@ export interface AcquisitionEvent {
   tutorialSceneId?: "first-event";
 }
 
+export type AcquisitionEventCooldown =
+  | {
+      kind: "realtime";
+      startedAt: number;
+      availableAt: number;
+    }
+  | {
+      kind: "calendar";
+      startedMonthPosition: number;
+      availableAtMonth: number;
+    };
+
 export type UpgradeId =
   | "comfortable-keyboard"
   | "quick-phrases"
@@ -607,7 +619,7 @@ export interface GameState {
   messages: InboxMessage[];
   acquisitionEvents: AcquisitionEvent[];
   activities: {
-    nextSparringAt: number;
+    eventCooldowns: Partial<Record<AcquisitionEventId, AcquisitionEventCooldown>>;
   };
   equipment: {
     totalSwords: number;

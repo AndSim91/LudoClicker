@@ -131,7 +131,15 @@ describe("game scheduler", () => {
     const automated: GameState = {
       ...state,
       collaborators: [collaborator("events")],
-      activities: { nextSparringAt: NOW + 400 },
+      activities: {
+        eventCooldowns: {
+          "park-sparring": {
+            kind: "realtime",
+            startedAt: NOW,
+            availableAt: NOW + 400,
+          },
+        },
+      },
     };
 
     expect(getNextGameTickDelay(automated, NOW)).toBe(400);

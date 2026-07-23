@@ -8,11 +8,12 @@ import { GAME_CONFIG } from "./config";
 import {
   completeEquipmentUse,
   getAvailableSwords,
-  releaseSwords,
   reserveSwords,
 } from "./equipment";
 import { scaleContactGain } from "./economy";
+import { createEventCooldown, isEventCooldownActive } from "./eventCooldowns";
 import { getEventFunnelOutcome } from "./formulas";
+import { rollEventContactReward } from "./eventRewards";
 import { createAcquiredContacts, addLegendaryEncounters, mergeAcquiredContacts } from "./contacts";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
@@ -54,7 +55,9 @@ export function startAcquisitionEvent(
       )
     ) return state;
   }
-  if (definitionId === "park-sparring" && now < state.activities.nextSparringAt) return state;
+  if (isEventCooldownActive(state.activities.eventCooldowns[definitionId], state, now)) {
+    return state;
+  }
   if (state.school.historicMembers < definition.unlockMembers) return state;
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
   const availableSwords = getAvailableSwords(state.equipment);
@@ -69,10 +72,14 @@ export function startAcquisitionEvent(
   const attendanceVariance =
     definition.varianceMin + varianceRoll * (definition.varianceMax - definition.varianceMin);
   const outcome = getEventFunnelOutcome(state, definition, attendanceVariance);
+  const reward = rollEventContactReward({ ...state, randomSeed: nextSeed }, definition);
   const isTutorialSparring = definitionId === "park-sparring" &&
     isGameAreaUnlocked("events", state) &&
     isTutorialScenePending(state, FIRST_EVENT_TUTORIAL_SCENE_ID);
 
+  const contactReward = isTutorialSparring ? 1 : reward.amount;
+  const demonstrationsGiven = Math.max(outcome.demonstrationsGiven, contactReward);
+  const peopleMet = Math.max(outcome.peopleMet, demonstrationsGiven);
   const event: AcquisitionEvent = {
     id: makeGameId(
       "activity",
@@ -87,11 +94,9 @@ export function startAcquisitionEvent(
       ? GAME_CONFIG.tutorialSparringDurationMs
       : Math.round(definition.durationMs / (1 + masteryBonus))),
     cost: eventCost,
-    peopleMet: outcome.peopleMet,
-    demonstrationsGiven: outcome.demonstrationsGiven,
-    contactReward: isTutorialSparring
-      ? Math.max(GAME_CONFIG.tutorialSparringMinimumContacts, outcome.contactsObtained)
-      : outcome.contactsObtained,
+    peopleMet,
+    demonstrationsGiven,
+    contactReward,
     membersUsed: definition.requiredMembers,
     equipmentUsed: definition.requiredSwords,
     wearAdded: Math.max(
@@ -117,24 +122,17 @@ export function startAcquisitionEvent(
   };
   return {
     ...state,
-    randomSeed: nextSeed,
+    randomSeed: reward.nextSeed,
     school: { ...state.school, euros: state.school.euros - eventCost },
     equipment: reserveSwords(state.equipment, definition.requiredSwords) ?? state.equipment,
     acquisitionEvents: [...state.acquisitionEvents, event],
-    activities: {
-      ...state.activities,
-      nextSparringAt:
-        definitionId === "park-sparring"
-          ? event.resolvesAt + GAME_CONFIG.sparringCooldownMs
-          : state.activities.nextSparringAt,
-    },
   };
 }
 
 export function cancelAutomatedEventForCollaborator(
   state: GameState,
   collaboratorId: string,
-  now: number,
+  _now: number,
 ): GameState {
   const event = state.acquisitionEvents.find((candidate) =>
     candidate.status === "running" && candidate.collaboratorId === collaboratorId
@@ -144,20 +142,21 @@ export function cancelAutomatedEventForCollaborator(
   return {
     ...state,
     school: { ...state.school, euros: state.school.euros + event.cost },
-    equipment: releaseSwords(state.equipment, event.equipmentUsed),
+    equipment: completeEquipmentUse(
+      state.equipment,
+      event.equipmentUsed,
+      event.wearAdded * 0.25,
+    ),
     acquisitionEvents: state.acquisitionEvents.filter(
       (candidate) => candidate.id !== event.id,
     ),
-    activities: event.definitionId === "park-sparring"
-      ? { ...state.activities, nextSparringAt: now }
-      : state.activities,
   };
 }
 
 export function cancelAcquisitionEvent(
   state: GameState,
   eventId: string,
-  now: number,
+  _now: number,
 ): GameState {
   const event = state.acquisitionEvents.find((candidate) =>
     candidate.id === eventId && candidate.status === "running"
@@ -166,17 +165,15 @@ export function cancelAcquisitionEvent(
 
   return {
     ...state,
+    school: { ...state.school, euros: state.school.euros + event.cost },
     equipment: completeEquipmentUse(
       state.equipment,
       event.equipmentUsed,
-      event.wearAdded / 2,
+      event.wearAdded * 0.25,
     ),
     acquisitionEvents: state.acquisitionEvents.filter(
       (candidate) => candidate.id !== event.id,
     ),
-    activities: event.definitionId === "park-sparring"
-      ? { ...state.activities, nextSparringAt: now }
-      : state.activities,
   };
 }
 
@@ -201,6 +198,7 @@ export function resolveAcquisitionEvent(
   const contactReward = scaledReward.amount;
   const acquired = createAcquiredContacts(rewardState, contactReward, source, now);
   const contacts = acquired.contacts;
+  const definition = getAcquisitionEventDefinition(event.definitionId);
   let nextState: GameState = {
     ...rewardState,
     randomSeed: acquired.nextSeed,
@@ -216,6 +214,15 @@ export function resolveAcquisitionEvent(
         ? { ...candidate, contactReward, status: "completed" }
         : candidate,
     ),
+    activities: definition
+      ? {
+          ...rewardState.activities,
+          eventCooldowns: {
+            ...rewardState.activities.eventCooldowns,
+            [event.definitionId]: createEventCooldown(rewardState, definition, now),
+          },
+        }
+      : rewardState.activities,
     statistics: {
       ...rewardState.statistics,
       contactsAcquired: rewardState.statistics.contactsAcquired + contacts.length,

@@ -603,16 +603,21 @@ valutato successivamente.
 
 Ogni evento richiede:
 
-- un tempo di preparazione;
 - un numero di iscritti da impiegare;
 - un numero di spade da impiegare;
-- una durata;
+- una durata base di 10 secondi, riducibile dalla Maestria del collaboratore;
 - un costo in Euro;
 - eventuali requisiti di Carisma, Social o Attrezzatura.
 
 Non esiste un limite numerico separato agli eventi contemporanei. Il giocatore
 può avviarne più di uno finché restano disponibili sia gli iscritti sia le spade
 richieste; entrambe le risorse tornano disponibili al termine dell'attività.
+Al completamento parte un conto alla rovescia specifico prima che lo stesso
+evento possa essere selezionato di nuovo. I tempi brevi usano secondi reali;
+fiere e manifestazioni usano mesi o anni del calendario di gioco. Durante
+questo intervallo iscritti e spade restano disponibili. Se l'evento viene
+annullato, il costo e le risorse sono ripristinati, non parte alcun conto alla
+rovescia e viene applicato soltanto il 25% del carico previsto.
 
 Le nuove spade possono essere acquistate dall'area Attività tramite **LamaDiLuce
 (Abridge S.r.l.)**, partner tecnico e fornitore ufficiale LudoSport. Il
@@ -646,32 +651,58 @@ sui contatti.
 | Lucca Comics & Games                |     250 |  €7.000 |        40 |    30 |    700 |    altissima |
 | Milan Games Week & Cartoomics       |     350 | €10.000 |        50 |    36 |  1.000 |    altissima |
 
+I conti alla rovescia sono: 5 secondi per Sparring e Volantinaggio, 15 secondi
+per Lezioni all'aperto, 20 secondi per Evento sportivo, un mese di gioco per
+Mele Comics e CairoMix, due mesi per CogoComix, Burtomics e Genova Comics &
+Games, un anno di gioco per Megacon Genova, Lucca Comics & Games e Milan Games
+Week & Cartoomics. Un conto basato sul calendario scade all'inizio del mese di
+destinazione, anche quando il calendario viene avanzato dagli strumenti Admin.
+
 ### 8.2 Persone incontrate e contatti ottenuti
 
-Un evento attraversa tre passaggi distinti prima di generare indirizzi email.
+Un evento determina separatamente l'affluenza e il numero di contatti. Le
+persone incontrate e le prove dimostrative conservano il funnel dell'evento;
+i contatti sono invece estratti da una distribuzione pesata specifica, scelta
+all'avvio e mostrata soltanto alla conclusione. L'usura delle spade non riduce
+più il risultato.
 
 ```text
 personeIncontrate = capienzaBase
-  × qualitàEvento
   × variabilitàCasuale
+  × bonusAffluenza
+  × efficaciaCollaboratori
 
 proveDimostrative = personeIncontrate
   × probabilitàProvaSulPosto
   × moltiplicatoreCarisma
 
-contattiOttenuti = proveDimostrative
-  × probabilitàRilascioEmail
-  × moltiplicatoreCarisma
-  × efficaciaCollaboratori
+contattiOttenuti = estrazionePesataEvento
+  + bonusIndipendenteSulValoreMedio
 ```
 
-Ipotesi iniziali:
+Le distribuzioni base sono:
 
-- persone che provano sul posto: 35%;
-- persone che lasciano l'email dopo la prova: 25–35% secondo l'evento;
-- entrambi i passaggi sono migliorabili tramite Carisma;
-- il numero di persone presenti varia in base al tipo di evento, non al meteo o
-  al giorno della settimana.
+| Evento                              | Distribuzione base dei contatti                                      |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| Sparring al parco                   | 50%: 0; 40%: 1; 10%: 2                                             |
+| Volantinaggio organizzato benissimo | 30%: 0; 67%: 1; 3%: 2                                              |
+| Lezioni all'aperto                  | 5%: 0; 45%: 1; 40%: 2; 10%: 3                                     |
+| Evento sportivo                     | 54%: 1; 36%: 2; 10%: 3                                             |
+| Mele Comics                         | 5%: 1; 25%: 2; 51%: 3; 16%: 4; 3%: 5                              |
+| CairoMix                            | 5%: 1; 10%: 2; 24%: 3; 35%: 4; 17%: 5; 6%: 6; 3%: 7              |
+| CogoComix                           | 13%: 2–3; 29%: 4–5; 41%: 6–7; 13%: 8–9; 4%: 10–11                |
+| Burtomics                           | 11%: 3–5; 25%: 6–7; 39%: 8–9; 20%: 10–12; 5%: 13–16              |
+| Genova Comics & Games               | 12%: 4–6; 26%: 7–9; 37%: 10–11; 20%: 12–15; 5%: 16–18            |
+| Megacon Genova                      | 15%: 5–8; 29%: 9–15; 36%: 16–21; 15%: 22–26; 5%: 27–30           |
+| Lucca Comics & Games                | 18%: 8–12; 20%: 13–20; 25%: 21–28; 24%: 29–37; 13%: 38–45        |
+| Milan Games Week & Cartoomics       | 17%: 10–15; 22%: 16–27; 25%: 28–37; 24%: 38–47; 12%: 48–57      |
+
+Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
+stessa probabilità. I bonus positivi di affluenza, Carisma e collaboratori
+generano un'aggiunta indipendente calcolata sul valore medio base. Possono
+quindi trasformare uno zero in un contatto o superare il massimo della
+distribuzione base, senza essere applicati due volte. L'interfaccia mostra solo
+indicazioni generiche di rischio e potenzialità, mai queste percentuali.
 
 ### 8.3 Lezioni in palestra, Social e sparring
 
@@ -1481,7 +1512,7 @@ nel quale osservare l'avanzamento.
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
    che le attività possono usurare o danneggiare le spade e richiede di avviare
    lo **Sparring al parco** gratuito. Soltanto in questo passaggio lo sparring
-   dura 3 secondi e garantisce almeno un nuovo contatto. La scena attende la
+   dura 5 secondi e garantisce esattamente un nuovo contatto. La scena attende la
    fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
 

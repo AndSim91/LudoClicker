@@ -48,7 +48,7 @@ describe("automatic collaborator events", () => {
     expect(running[0].definitionId).toBe("milan-games-week");
   });
 
-  it("cancels an event on reassignment and refunds euros and swords", () => {
+  it("cancels an event on reassignment, refunds its cost, and applies quarter wear", () => {
     const initial = fundedEventState();
     const oneCollaborator = { ...initial, collaborators: [initial.collaborators[0]] };
     const automated = processAutomaticEvents(oneCollaborator, 2_000);
@@ -57,8 +57,10 @@ describe("automatic collaborator events", () => {
 
     expect(reassigned.acquisitionEvents).toHaveLength(0);
     expect(reassigned.school.euros).toBe(automated.school.euros + event.cost);
-    expect(reassigned.equipment.availableSwords).toBe(
-      automated.equipment.availableSwords + event.equipmentUsed,
-    );
+    expect(reassigned.equipment).toMatchObject({
+      availableSwords: 98,
+      damagedSwords: 2,
+      wear: 50,
+    });
   });
 });

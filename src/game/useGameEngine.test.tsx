@@ -36,7 +36,7 @@ describe("useGameEngine pause", () => {
       definitionId: "park-sparring",
       now: result.current.getGameNow(),
     }));
-    expect(result.current.state.acquisitionEvents[0].resolvesAt - pausedAt).toBe(15_000);
+    expect(result.current.state.acquisitionEvents[0].resolvesAt - pausedAt).toBe(10_000);
 
     act(() => vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs));
 
@@ -60,7 +60,7 @@ describe("useGameEngine pause", () => {
     expect(
       result.current.state.acquisitionEvents[0].resolvesAt -
       result.current.state.automation.lastProcessedAt,
-    ).toBe(15_000);
+    ).toBe(10_000);
   });
 
   it("does not turn a tutorial pause into a manual pause when pressing resume", () => {

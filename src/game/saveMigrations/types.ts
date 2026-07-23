@@ -7,7 +7,7 @@ type LegacyCollaborator = Omit<Collaborator, "assignment" | "mastery"> & {
 
 export type MigratableState = Omit<
   Partial<GameState>,
-  "automation" | "collaborators" | "statistics" | "upgrades"
+  "activities" | "automation" | "collaborators" | "statistics" | "upgrades"
 > & {
   version?: number;
   saveCompatibilityVersion?: number;
@@ -18,6 +18,7 @@ export type MigratableState = Omit<
     socialCampaigns?: number;
   };
   upgrades?: Record<string, number> & { speedLevel?: number };
+  activities?: Partial<GameState["activities"]> & { nextSparringAt?: number };
 };
 
 export type SaveMigrationStage = (state: MigratableState) => MigratableState;

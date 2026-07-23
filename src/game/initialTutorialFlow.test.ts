@@ -103,12 +103,12 @@ describe("initial tutorial progression", () => {
     expect(tutorialSparring).toMatchObject({
       definitionId: "park-sparring",
       startedAt: 5_000,
-      resolvesAt: 8_000,
+      resolvesAt: 10_000,
       status: "running",
     });
     expect(tutorialSparring?.contactReward).toBeGreaterThanOrEqual(1);
 
-    const sparringCompleted = gameReducer(sparringStarted, { type: "TICK", now: 8_000 });
+    const sparringCompleted = gameReducer(sparringStarted, { type: "TICK", now: 10_000 });
     expect(sparringCompleted.contacts.length).toBeGreaterThan(contactsBeforeSparring);
     expect(sparringCompleted.scheduledTrials).toHaveLength(0);
     expect(sparringCompleted.pendingEmailOutcomes.filter(
@@ -117,12 +117,12 @@ describe("initial tutorial progression", () => {
     expect(sparringCompleted.pendingEmailOutcomes.find(
       (outcome) => outcome.tutorialSceneId === "first-event",
     )).toMatchObject({
-      resolvesAt: 8_000,
+      resolvesAt: 10_000,
       result: "trialBooked",
       waitForTutorialEvent: undefined,
     });
 
-    const trialAppeared = gameReducer(sparringCompleted, { type: "TICK", now: 8_001 });
+    const trialAppeared = gameReducer(sparringCompleted, { type: "TICK", now: 10_001 });
     expect(trialAppeared.scheduledTrials).toContainEqual(expect.objectContaining({
       status: "scheduled",
       tutorialSceneId: "first-event",
@@ -155,7 +155,7 @@ describe("initial tutorial progression", () => {
 
     expect(started.acquisitionEvents[0]).toMatchObject({
       startedAt: 2_000,
-      resolvesAt: 17_000,
+      resolvesAt: 12_000,
       tutorialSceneId: undefined,
     });
   });

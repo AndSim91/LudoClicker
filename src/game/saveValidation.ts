@@ -103,6 +103,22 @@ function hasValidLegendaryAssignments(state: Partial<GameState>): boolean {
   return true;
 }
 
+function hasValidEventCooldowns(state: Partial<GameState>): boolean {
+  const cooldowns = state.activities?.eventCooldowns;
+  if (!cooldowns || typeof cooldowns !== "object") return false;
+  return Object.values(cooldowns).every((cooldown) => {
+    if (!cooldown) return true;
+    return cooldown.kind === "realtime"
+      ? Number.isFinite(cooldown.startedAt) &&
+          Number.isFinite(cooldown.availableAt) &&
+          cooldown.availableAt >= cooldown.startedAt
+      : cooldown.kind === "calendar" &&
+          Number.isFinite(cooldown.startedMonthPosition) &&
+          Number.isSafeInteger(cooldown.availableAtMonth) &&
+          cooldown.availableAtMonth >= cooldown.startedMonthPosition;
+  });
+}
+
 function hasValidTraining(training: GameState["contacts"][number]["training"]): boolean {
   if (!training) return true;
   return (
@@ -216,7 +232,7 @@ export function isValidGameState(value: unknown): value is GameState {
       (trial.equipmentUsed === undefined || isNonNegativeSafeInteger(trial.equipmentUsed)) &&
       (trial.cancellationReason === undefined || trial.cancellationReason === "equipment")
     ) &&
-    typeof state.activities?.nextSparringAt === "number" &&
+    hasValidEventCooldowns(state) &&
     typeof state.upgrades?.["comfortable-keyboard"] === "number" &&
     typeof state.statistics?.peopleMet === "number" &&
     typeof state.statistics?.demonstrationsGiven === "number" &&

@@ -1,16 +1,15 @@
 import { ACQUISITION_EVENTS } from "../content/events";
-import { getEventFunnelOutcome } from "./formulas";
+import { getExpectedEventContacts } from "./eventRewards";
 import { startAcquisitionEvent } from "./eventFlow";
 import { getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type { GameState } from "./types";
 
-const EVENT_PREFERENCE = ACQUISITION_EVENTS
-  .filter((definition) => definition.id !== "park-sparring")
-  .sort((left, right) => right.baseAttendance * right.demonstrationRate * right.contactRate -
-    left.baseAttendance * left.demonstrationRate * left.contactRate);
+const EVENT_PREFERENCE = ACQUISITION_EVENTS.filter(
+  (definition) => definition.id !== "park-sparring",
+);
 
 function expectedContacts(state: GameState, definition: (typeof ACQUISITION_EVENTS)[number]) {
-  return getEventFunnelOutcome(state, definition, 1).contactsObtained;
+  return getExpectedEventContacts(state, definition);
 }
 
 export function processAutomaticEvents(state: GameState, now: number): GameState {

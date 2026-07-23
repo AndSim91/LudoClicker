@@ -181,7 +181,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Attendi la fine dello sparring",
         body: [
-          "Quante cose possiamo fare in tre secondi? ...",
+          "Quante cose possiamo fare in cinque secondi? ...",
           "Scemo chi legge!",
         ],
         focusRegions: ["main", "park-sparring-event"],

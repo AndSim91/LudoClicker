@@ -8,6 +8,7 @@ import {
 } from "./runtimeIndexes";
 import type { GameState } from "./types";
 import { GAME_CONFIG } from "./config";
+import { getNextRealtimeEventCooldownDeadline } from "./eventCooldowns";
 
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
 const MAX_TIMEOUT_MS = 2_147_000_000;
@@ -118,8 +119,8 @@ export function getNextGameTickDelay(state: GameState, now: number): number {
   const hasEventAutomation = state.collaborators.some(
     (collaborator) => collaborator.assignment === "events",
   );
-  if (hasEventAutomation && state.activities.nextSparringAt > now) {
-    nextDeadline = earlier(nextDeadline, state.activities.nextSparringAt);
+  if (hasEventAutomation) {
+    nextDeadline = earlier(nextDeadline, getNextRealtimeEventCooldownDeadline(state, now));
   }
   const deadlineDelay = Math.max(0, nextDeadline - now);
   const automationHeartbeatDelay = Math.max(

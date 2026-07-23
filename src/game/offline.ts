@@ -75,7 +75,20 @@ export function freezeGameState(
           resolvesAt: event.resolvesAt + elapsedMs,
         }
       : event),
-    activities: { nextSparringAt: state.activities.nextSparringAt + elapsedMs },
+    activities: {
+      eventCooldowns: Object.fromEntries(
+        Object.entries(state.activities.eventCooldowns).map(([definitionId, cooldown]) => [
+          definitionId,
+          cooldown?.kind === "realtime"
+            ? {
+                ...cooldown,
+                startedAt: cooldown.startedAt + elapsedMs,
+                availableAt: cooldown.availableAt + elapsedMs,
+              }
+            : cooldown,
+        ]),
+      ),
+    },
     narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
     automation: { ...state.automation, lastProcessedAt: now },
   };

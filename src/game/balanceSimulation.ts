@@ -4,6 +4,7 @@ import {
 } from "../content/upgrades";
 import { canFoundSchool, createInitialState, gameReducer } from "./engine";
 import { getEquipmentMinimumMaintenanceCost } from "./equipment";
+import { isEventCooldownActive } from "./eventCooldowns";
 import { selectActiveEmail } from "./selectors";
 import type {
   CollaboratorAssignment,
@@ -108,7 +109,10 @@ function startBestAvailableActivity(state: GameState, now: number): GameState {
     (event) => event.definitionId === "park-sparring" && event.status === "running",
   );
   let nextState = state;
-  if (!hasRunningParkSparring && now >= state.activities.nextSparringAt) {
+  if (
+    !hasRunningParkSparring &&
+    !isEventCooldownActive(state.activities.eventCooldowns["park-sparring"], state, now)
+  ) {
     nextState = dispatch(nextState, {
       type: "START_ACQUISITION_EVENT",
       definitionId: "park-sparring",
