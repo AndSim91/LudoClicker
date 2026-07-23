@@ -96,7 +96,7 @@ export function assignCollaborator(
     ),
   };
   if (collaborator.assignment === "events" && assignment !== "events") {
-    return cancelAutomatedEventForCollaborator(reassignedState, collaboratorId, now);
+    return cancelAutomatedEventForCollaborator(reassignedState, collaboratorId);
   }
   return assignment === "events"
     ? processAutomaticEvents(reassignedState, now)

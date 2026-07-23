@@ -211,6 +211,47 @@ describe("game engine: operations", () => {
     }).acquisitionEvents.filter((candidate) => candidate.status === "running")).toHaveLength(1);
   });
 
+  it("expires a calendar event cooldown when Admin advances the target month", () => {
+    const initial = createInitialState(1_000);
+    const ready = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 20,
+        historicMembers: 20,
+        euros: 800,
+      },
+      equipment: {
+        ...initial.equipment,
+        totalSwords: 8,
+        availableSwords: 8,
+      },
+    };
+    const started = gameReducer(ready, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "local-event",
+      now: 2_000,
+    });
+    const completed = gameReducer(started, { type: "TICK", now: 12_000 });
+
+    expect(completed.activities.eventCooldowns["local-event"]).toMatchObject({
+      kind: "calendar",
+      availableAtMonth: ready.school.currentMonth + 1,
+    });
+
+    const advanced = gameReducer(completed, { type: "ADMIN_ADVANCE_MONTH", now: 13_000 });
+    const restarted = gameReducer(advanced, {
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "local-event",
+      now: 13_000,
+    });
+
+    expect(advanced.school.currentMonth).toBe(ready.school.currentMonth + 1);
+    expect(restarted.acquisitionEvents.filter((event) =>
+      event.definitionId === "local-event" && event.status === "running"
+    )).toHaveLength(1);
+  });
+
   it("requires enough school fame and euros for outdoor lessons", () => {
     const state = createInitialState(1_000);
     const notFamousEnough = {

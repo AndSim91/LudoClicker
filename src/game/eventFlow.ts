@@ -132,7 +132,6 @@ export function startAcquisitionEvent(
 export function cancelAutomatedEventForCollaborator(
   state: GameState,
   collaboratorId: string,
-  _now: number,
 ): GameState {
   const event = state.acquisitionEvents.find((candidate) =>
     candidate.status === "running" && candidate.collaboratorId === collaboratorId
@@ -156,7 +155,6 @@ export function cancelAutomatedEventForCollaborator(
 export function cancelAcquisitionEvent(
   state: GameState,
   eventId: string,
-  _now: number,
 ): GameState {
   const event = state.acquisitionEvents.find((candidate) =>
     candidate.id === eventId && candidate.status === "running"

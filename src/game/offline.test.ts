@@ -104,10 +104,35 @@ describe("offline progress disabled", () => {
 
   it("freezes an explicit pause interval independently from the last save", () => {
     const initial = createInitialState(1_000);
-    const paused = freezeGameState(initial, 51_000, 10_000);
+    const withCooldowns = {
+      ...initial,
+      activities: {
+        eventCooldowns: {
+          "park-sparring": {
+            kind: "realtime" as const,
+            startedAt: 2_000,
+            availableAt: 7_000,
+          },
+          "local-event": {
+            kind: "calendar" as const,
+            startedMonthPosition: 9.5,
+            availableAtMonth: 10,
+          },
+        },
+      },
+    };
+    const paused = freezeGameState(withCooldowns, 51_000, 10_000);
 
     expect(paused.lastSavedAt).toBe(51_000);
     expect(paused.automation.lastProcessedAt).toBe(51_000);
     expect(paused.school.nextFeeAt).toBe(initial.school.nextFeeAt + 10_000);
+    expect(paused.activities.eventCooldowns["park-sparring"]).toEqual({
+      kind: "realtime",
+      startedAt: 12_000,
+      availableAt: 17_000,
+    });
+    expect(paused.activities.eventCooldowns["local-event"]).toEqual(
+      withCooldowns.activities.eventCooldowns["local-event"],
+    );
   });
 });

@@ -155,7 +155,6 @@ export function createGameActionHandlers(
     CANCEL_ACQUISITION_EVENT: (state, action) => cancelAcquisitionEvent(
       state,
       action.eventId,
-      action.now,
     ),
     START_CHRONICLES_TOURNAMENT: (state, action) => startChroniclesTournament(
       state,
