@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   COLLABORATOR_MASTERY_LEVELS,
-  COLLABORATOR_MASTERY_XP,
   getCollaboratorMasteryDefinition,
   getCollaboratorMasteryMultiplier,
   getCollaboratorMasteryProgress,
@@ -9,7 +8,6 @@ import {
 
 describe("collaborator mastery", () => {
   it("exposes the five Italian grades with personal speed bonuses up to 25%", () => {
-    expect(COLLABORATOR_MASTERY_XP.socialCycle).toBe(5);
     expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.name)).toEqual([
       "Novizio",
       "Iniziato",

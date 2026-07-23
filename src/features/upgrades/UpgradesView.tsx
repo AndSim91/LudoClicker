@@ -22,6 +22,12 @@ import {
 } from "../../content/upgrades";
 import { getGameMonthName } from "../../game/calendar";
 import { selectIncomePerMonth } from "../../game/selectors";
+import {
+  getSocialContactChanceCap,
+  getSocialContentCharacters,
+  getSocialFollowerChance,
+  getSocialFollowerValue,
+} from "../../game/social";
 import type { GameState, UpgradeId } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 
@@ -65,7 +71,6 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Pubblico eventi", "eventAttendanceMultiplier");
   addPercentage("Prenotazioni", "bookingMultiplier");
   addPercentage("Iscrizioni", "enrollmentMultiplier");
-  addPercentage("Produzione Social", "socialMultiplier");
   addPercentage("Automazione", "automationMultiplier");
   addPercentage("Entrate", "incomeMultiplier");
   addPercentage("Usura", "equipmentWearReduction", "−");
@@ -95,6 +100,28 @@ function getUpgradeBenefitsSummary(state: GameState) {
   if (hasFreeFormTraining(state.upgrades)) {
     benefits.push({ label: "Costi di formazione", value: "Gratuiti" });
   }
+  if (state.unlocks.social) {
+    benefits.push(
+      {
+        label: "Contenuto Social",
+        value: `${formatNumber(getSocialContentCharacters(state.upgrades))} caratteri`,
+      },
+      {
+        label: "Follower per contenuto",
+        value: formatUpgradePercentage(getSocialFollowerChance(state.upgrades)),
+      },
+      {
+        label: "Cap contatti Social",
+        value: formatUpgradePercentage(getSocialContactChanceCap(state.upgrades)),
+      },
+      {
+        label: "Valore follower",
+        value: `${getSocialFollowerValue(state.upgrades).toLocaleString("it-IT", {
+          maximumFractionDigits: 3,
+        })} €`,
+      },
+    );
+  }
 
   return benefits;
 }
@@ -110,7 +137,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "welcome":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") * 100)}% iscrizioni`;
     case "social":
-      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "socialMultiplier") * 100)}% produzione`;
+      return `${formatNumber(getSocialContentCharacters(state.upgrades))} caratteri · ${formatUpgradePercentage(getSocialFollowerChance(state.upgrades))} follower`;
     case "equipment":
       return `${state.equipment.totalSwords} spade · -${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura`;
     case "organization":
@@ -123,6 +150,12 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
 type UpgradeStatus = "locked" | "available" | "completed";
 
 function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
+  if (
+    definition.requiredUnlock !== undefined &&
+    !state.unlocks[definition.requiredUnlock]
+  ) {
+    return "Social non ancora sbloccato";
+  }
   if (state.school.historicMembers < definition.requiredHistoricMembers) {
     return `Serve Fama della scuola ${definition.requiredHistoricMembers}`;
   }
@@ -131,6 +164,10 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
     definition,
   );
   return prerequisite ? `Completa prima ${prerequisite.title}` : null;
+}
+
+function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): boolean {
+  return definition.category !== "social" || state.unlocks.social;
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -359,6 +396,7 @@ export function UpgradesView({
   let completedCount = 0;
   let recommendedUpgrade: { definition: UpgradeDefinition; cost: number } | undefined;
   for (const definition of UPGRADE_DEFINITIONS) {
+    if (!isUpgradeVisible(state, definition)) continue;
     const status = getUpgradeStatus(state, definition);
     if (status === "completed") {
       completedCount += 1;
@@ -445,7 +483,9 @@ export function UpgradesView({
               </section>
             </div>
             <div className="upgrade-tree-branches">
-              {UPGRADE_CATEGORIES.map((category) => {
+              {UPGRADE_CATEGORIES.filter(
+                (category) => category.id !== "social" || state.unlocks.social,
+              ).map((category) => {
                 const definitions = UPGRADE_DEFINITIONS.filter(
                   (definition) => definition.category === category.id,
                 );

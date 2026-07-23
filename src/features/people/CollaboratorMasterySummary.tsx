@@ -1,17 +1,19 @@
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   COLLABORATOR_MASTERY_ROLES,
-  COLLABORATOR_MASTERY_ROLE_LABELS,
   createInitialCollaboratorMastery,
+  getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
 import type { Collaborator } from "../../game/types";
 
 export function CollaboratorMasterySummary({
   collaborator,
+  socialUnlocked = false,
   defaultOpen = false,
 }: {
   collaborator: Collaborator;
+  socialUnlocked?: boolean;
   defaultOpen?: boolean;
 }) {
   const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
@@ -33,7 +35,7 @@ export function CollaboratorMasterySummary({
         <span>Maestria operativa</span>
         <strong>
           {activeRole && activeProgress
-            ? `${COLLABORATOR_MASTERY_ROLE_LABELS[activeRole]} · ${activeProgress.definition.name}`
+            ? `${getCollaboratorMasteryRoleLabel(activeRole, socialUnlocked)} · ${activeProgress.definition.name}`
             : "Assegna un ruolo per iniziare"}
         </strong>
         <small>
@@ -53,11 +55,11 @@ export function CollaboratorMasterySummary({
             <div
               className={active ? "mastery-entry active" : "mastery-entry"}
               key={role}
-              title={`${COLLABORATOR_MASTERY_ROLE_LABELS[role]}: ${progress.definition.name}, ${xpLabel}`}
+              title={`${getCollaboratorMasteryRoleLabel(role, socialUnlocked)}: ${progress.definition.name}, ${xpLabel}`}
             >
               <strong>{progress.definition.name}</strong>
               <small>
-                {COLLABORATOR_MASTERY_ROLE_LABELS[role]} · +{Math.round(progress.definition.multiplier * 100)}% · {xpLabel}
+                {getCollaboratorMasteryRoleLabel(role, socialUnlocked)} · +{Math.round(progress.definition.multiplier * 100)}% · {xpLabel}
               </small>
               <ProgressBar className="mastery-track" value={progress.progress} ariaHidden />
             </div>

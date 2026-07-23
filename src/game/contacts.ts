@@ -243,9 +243,7 @@ export function createAcquiredContacts(
     const rolledRarity = specialProfile
       ? "legendary" as const
       : ordinary!.rarity;
-    const rarity = source === "social" && rolledRarity === "common"
-      ? "rare" as const
-      : rolledRarity;
+    const rarity = rolledRarity;
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id);
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile

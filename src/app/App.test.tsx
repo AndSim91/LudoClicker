@@ -94,7 +94,7 @@ describe("App profile and navigation", () => {
     await waitFor(() => {
       expect(screen.queryByText("Avvia l'evento di sparring gratuito")).not.toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Attività in corso…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Annulla evento" })).toBeVisible();
   });
 
   it("starts with only the applications useful during the first campaign", () => {

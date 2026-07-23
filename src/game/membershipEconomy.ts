@@ -1,4 +1,6 @@
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { getMonthlySocialIncome } from "./social";
 import type { GameState } from "./types";
 
 export function getMonthlyMemberFees(state: GameState): number {
@@ -13,4 +15,16 @@ export function getMonthlyMemberFees(state: GameState): number {
 
   return state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
     registeredFormCount * GAME_CONFIG.monthlyMemberFormBonus;
+}
+
+export function getMonthlyOperationalIncome(state: GameState): number {
+  const networkMultiplier =
+    1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
+  const membershipIncome = (
+    getMonthlyMemberFees(state) +
+      state.network.schools.length * GAME_CONFIG.networkIncomePerSchool
+  ) * (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
+    networkMultiplier;
+
+  return membershipIncome + getMonthlySocialIncome(state);
 }

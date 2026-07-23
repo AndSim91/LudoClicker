@@ -14,7 +14,10 @@ export function unlockSocialIfEligible(state: GameState): GameState {
     ...state,
     school: {
       ...state.school,
-      followers: state.school.activeMembers,
+      // I follower iniziali fotografano la Fama gia ottenuta. Non generano
+      // nuova Fama, altrimenti lo sblocco conterebbe due volte lo stesso
+      // progresso.
+      followers: state.school.historicMembers,
     },
     unlocks: {
       ...state.unlocks,
@@ -24,7 +27,7 @@ export function unlockSocialIfEligible(state: GameState): GameState {
 }
 
 export function getSocialUnlockRequirementLabel(): string {
-  return `${GAME_CONFIG.socialUnlockMembers} iscritti`;
+  return `${GAME_CONFIG.socialUnlockMembers} iscritti attivi`;
 }
 
 export function isCollaboratorAreaVisible(state: GameState): boolean {

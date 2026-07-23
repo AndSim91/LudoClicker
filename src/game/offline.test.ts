@@ -76,6 +76,32 @@ describe("offline progress disabled", () => {
     expect(result.state.automation.lastImprovedAthleteId).toBeUndefined();
   });
 
+  it("does not produce Social content or sponsorship income while closed", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      school: { ...initial.school, followers: 1_000 },
+      unlocks: { ...initial.unlocks, social: true },
+      automation: { ...initial.automation, socialContentBuffer: 250 },
+      collaborators: [{
+        id: "offline-social",
+        contactId: initial.contacts[0].id,
+        displayName: "Collaboratore Social",
+        joinedAt: 1_000,
+        forms: [],
+        instructorForms: [],
+        assignment: "writing" as const,
+        rarity: "ultra-rare" as const,
+      }],
+    };
+
+    const result = simulateOfflineProgress(state, 121_000);
+
+    expect(result.state.automation.socialContentBuffer).toBe(250);
+    expect(result.state.statistics.socialContentCycles).toBe(0);
+    expect(result.state.school.euros).toBe(0);
+  });
+
   it("freezes an explicit pause interval independently from the last save", () => {
     const initial = createInitialState(1_000);
     const paused = freezeGameState(initial, 51_000, 10_000);

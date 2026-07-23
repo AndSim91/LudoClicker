@@ -1,7 +1,7 @@
 import type { UpgradeId, UpgradeLevels } from "../game/types";
 
 export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialMultiplier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialContactCapTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -18,6 +18,7 @@ export interface UpgradeDefinition {
   levelCosts?: number[];
   maxLevel: number;
   requiredHistoricMembers: number;
+  requiredUnlock?: "social";
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
 }
 
@@ -26,7 +27,7 @@ export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; des
   { id: "charisma", title: "Carisma", description: "Migliora pubblico, prove dimostrative e contatti durante gli eventi." },
   { id: "writing", title: "Scrittura", description: "Aumenta la probabilità che una mail generi una prova in palestra." },
   { id: "welcome", title: "Accoglienza", description: "Migliora la conversione da lezione di prova a nuovo iscritto." },
-  { id: "social", title: "Social", description: "Aumenta la produzione passiva e la portata delle campagne online." },
+  { id: "social", title: "Social", description: "Migliora contenuti, pubblico, contatti e sponsorizzazioni." },
   { id: "equipment", title: "Attrezzatura", description: "Riduce l'usura e amplia il materiale disponibile per gli eventi." },
   { id: "organization", title: "Organizzazione", description: "Migliora automazione, quote e coordinamento della scuola." },
   { id: "instructors", title: "Istruttori", description: "Amplia le armi insegnabili e il numero di allievi seguiti contemporaneamente." },
@@ -65,13 +66,10 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "prepared-room", category: "welcome", title: "Sala preparata", description: "Ogni dettaglio della prima esperienza è al suo posto.", effectLabel: "+20% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.2, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 55 },
   { id: "memorable-experience", category: "welcome", title: "Esperienza memorabile", description: "La lezione di prova diventa qualcosa da raccontare.", effectLabel: "+30% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.3, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 85 },
 
-  { id: "updated-page", category: "social", title: "Pagina aggiornata", description: "Una presenza minima ma affidabile genera interesse.", effectLabel: "+15% produzione Social per livello", effect: "socialMultiplier", effectPerLevel: 0.15, baseCost: 80, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 10 },
-  { id: "editorial-calendar", category: "social", title: "Calendario editoriale", description: "La pubblicazione diventa regolare.", effectLabel: "+20% produzione Social per livello", effect: "socialMultiplier", effectPerLevel: 0.2, baseCost: 140, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
-  { id: "lesson-photos", category: "social", title: "Foto delle lezioni", description: "Il pubblico vede l'attività anche nelle campagne email.", effectLabel: "+25% produzione Social · sblocca logo e immagini", effect: "socialMultiplier", effectPerLevel: 0.25, baseCost: 240, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 25 },
-  { id: "demo-video", category: "social", title: "Video dimostrativo", description: "Testi, dettagli, contatti e video diventano un volantino digitale.", effectLabel: "+30% produzione Social · sblocca il volantino completo", effect: "socialMultiplier", effectPerLevel: 0.3, baseCost: 400, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 40 },
-  { id: "weekly-column", category: "social", title: "Rubrica settimanale", description: "L'interesse si accumula nel tempo.", effectLabel: "+35% produzione Social per livello", effect: "socialMultiplier", effectPerLevel: 0.35, baseCost: 650, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 55 },
-  { id: "viral-post", category: "social", title: "Post inspiegabilmente virale", description: "Nessuno sa perché, ma continua a funzionare.", effectLabel: "+50% produzione Social per livello", effect: "socialMultiplier", effectPerLevel: 0.5, baseCost: 1000, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 75 },
-  { id: "professional-management", category: "social", title: "Gestione professionale", description: "La presenza online lavora come un sistema coordinato.", effectLabel: "+20% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.2, baseCost: 1600, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
+  { id: "social-content-synthesis", category: "social", title: "Sintesi dei contenuti", description: "Una linea editoriale più precisa riduce i caratteri necessari per pubblicare un contenuto.", effectLabel: "7.500 → 5.000 → 3.500 → 2.000 → 1.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000], maxLevel: 4, requiredHistoricMembers: 35, requiredUnlock: "social" },
+  { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Contenuti più mirati aumentano la probabilità di ottenere un nuovo follower.", effectLabel: "5% base → 6% → 7% → 8% → 9% → 10%", effect: "socialFollowerChanceTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredHistoricMembers: 50, requiredUnlock: "social" },
+  { id: "social-content-distribution", category: "social", title: "Diffusione dei contenuti", description: "Una distribuzione migliore alza il limite massimo della probabilità di ottenere contatti.", effectLabel: "Cap contatti 5% → 7,5% → 10% → 15% → 20% → 25%", effect: "socialContactCapTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredHistoricMembers: 75, requiredUnlock: "social" },
+  { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Accordi pubblicitari più remunerativi aumentano il valore mensile di ogni follower.", effectLabel: "0,01 € base → 0,05 € → 0,075 € → 0,10 € → 0,20 € → 0,50 €", effect: "socialFollowerValueTier", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 25_000, 75_000, 200_000, 500_000], maxLevel: 5, requiredHistoricMembers: 100, requiredUnlock: "social" },
 
   { id: "pre-event-check", category: "equipment", title: "Controllo pre-evento", description: "I problemi vengono trovati prima di uscire.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 70, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 5 },
   { id: "maintenance-kit", category: "equipment", title: "Kit di manutenzione", description: "Le riparazioni dei collaboratori diventano più efficaci.", effectLabel: "+15% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.15, baseCost: 130, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 15 },
@@ -125,13 +123,10 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   "dedicated-helper": 1_300,
   "prepared-room": 2_500,
   "memorable-experience": 5_000,
-  "updated-page": 250,
-  "editorial-calendar": 400,
-  "lesson-photos": 750,
-  "demo-video": 1_500,
-  "weekly-column": 2_500,
-  "viral-post": 4_000,
-  "professional-management": 6_500,
+  "social-content-synthesis": 2_500,
+  "social-editorial-plan": 5_000,
+  "social-content-distribution": 7_500,
+  "social-sponsorships": 10_000,
   "pre-event-check": 150,
   "maintenance-kit": 400,
   "organized-rack": 750,
@@ -203,6 +198,19 @@ export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: numb
   return Math.round(
     localCost * (1 + networkSchools * 0.15),
   );
+}
+
+export function getUpgradePrimaryEffectTotal(
+  levels: UpgradeLevels,
+  upgradeId: UpgradeId,
+): number {
+  const definition = getUpgradeDefinition(upgradeId);
+  if (!definition) return 0;
+  const effectiveLevel = Math.min(
+    levels[upgradeId] ?? 0,
+    definition.effectLevelCap ?? definition.maxLevel,
+  );
+  return effectiveLevel * definition.effectPerLevel;
 }
 
 export function getUpgradeEffectTotal(levels: UpgradeLevels, effect: UpgradeEffect): number {

@@ -245,7 +245,9 @@ export function migrateContentState(state: MigratableState): MigratableState {
   if (migrated.version === 34) {
     migrated = {
       ...migrated,
-      version: GAME_CONFIG.version,
+      // Questa migrazione deve consegnare lo stato allo step successivo. Usare
+      // la versione corrente salterebbe tutte le migrazioni aggiunte in futuro.
+      version: 35,
       automation: migrated.automation
         ? {
             ...migrated.automation,

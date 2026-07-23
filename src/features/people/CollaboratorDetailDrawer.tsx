@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
+import {
+  COLLABORATOR_ASSIGNMENT_LABELS,
+  getCollaboratorAssignmentLabel,
+} from "../../content/collaboratorRoles";
 import { getCollaboratorBonusSummary } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
-import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import type {
   Collaborator,
   CollaboratorAssignment,
@@ -96,7 +98,10 @@ export function CollaboratorDetailDrawer({
             <span>Assegnazione attuale</span>
             <strong>
               {collaborator.assignment
-                ? COLLABORATOR_ASSIGNMENT_LABELS[collaborator.assignment]
+                ? getCollaboratorAssignmentLabel(
+                    collaborator.assignment,
+                    state.unlocks.social,
+                  )
                 : "Non assegnato"}
             </strong>
           </div>
@@ -139,7 +144,11 @@ export function CollaboratorDetailDrawer({
 
         <section className="collaborator-detail-section">
           <h3>Maestrie</h3>
-          <CollaboratorMasterySummary collaborator={collaborator} defaultOpen />
+          <CollaboratorMasterySummary
+            collaborator={collaborator}
+            socialUnlocked={state.unlocks.social}
+            defaultOpen
+          />
         </section>
 
         <section className="collaborator-detail-section">
@@ -174,6 +183,10 @@ export function CollaboratorDetailDrawer({
           <span>Assegnazione</span>
           <select
             aria-label={`Assegnazione di ${collaborator.displayName}`}
+            data-tutorial-region={state.unlocks.social
+              ? "collaborator-social-assignment"
+              : undefined}
+            data-tutorial-target={state.unlocks.social ? "true" : undefined}
             value={collaborator.assignment ?? ""}
             onChange={(event) => onAssign(
               collaborator.id,
@@ -181,17 +194,14 @@ export function CollaboratorDetailDrawer({
             )}
           >
             <option value="">Non assegnato</option>
-            {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => {
-              const disabled = value === "social" && !state.unlocks.social;
-              const suffix = disabled
-                ? ` — si sblocca con ${getSocialUnlockRequirementLabel()}`
-                : "";
-              return (
-                <option value={value} key={value} disabled={disabled}>
-                  {label}{suffix}
-                </option>
-              );
-            })}
+            {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+              <option value={value} key={value}>
+                {getCollaboratorAssignmentLabel(
+                  value as Exclude<CollaboratorAssignment, null>,
+                  state.unlocks.social,
+                )}
+              </option>
+            ))}
           </select>
         </label>
       </div>

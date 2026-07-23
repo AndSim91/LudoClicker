@@ -9,6 +9,7 @@ const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   commands: ".command-bar",
   navigation: ".app-rail",
   "events-navigation": '[data-tutorial-region="events-navigation"]',
+  "contacts-navigation": '[data-tutorial-region="contacts-navigation"]',
   "upgrades-navigation": '[data-tutorial-region="upgrades-navigation"]',
   folders: ".folder-pane",
   messages: ".message-list",
@@ -20,6 +21,7 @@ const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   "park-sparring-action": '[data-tutorial-region="park-sparring-action"]',
   "day-panel": ".day-panel",
   "first-trial-row": '[data-tutorial-region="first-trial-row"]',
+  "collaborator-social-assignment": '[data-tutorial-region="collaborator-social-assignment"]',
   status: ".status-bar",
 };
 

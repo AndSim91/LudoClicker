@@ -104,7 +104,7 @@ describe("getCollaboratorAutomationPresentation", () => {
     expect(presentation.progress).toBeCloseTo(1.111_111, 6);
   });
 
-  it("shows Social income per second using the effective cycle with every speed bonus", () => {
+  it("shows Social content progress and its monthly return after Redazione evolves", () => {
     const initial = createInitialState(1_000);
     const socialCollaborator: Collaborator = {
       id: "social-collaborator",
@@ -123,12 +123,11 @@ describe("getCollaboratorAutomationPresentation", () => {
         "form-7",
       ],
       instructorForms: [],
-      assignment: "social" as const,
+      assignment: "writing" as const,
       mastery: {
-        writing: 0,
+        writing: 1_500,
         events: 0,
         lessons: 0,
-        social: 1_500,
         equipment: 0,
         instructor: 0,
       },
@@ -136,31 +135,29 @@ describe("getCollaboratorAutomationPresentation", () => {
     };
     const state = {
       ...initial,
-      school: { ...initial.school, activeMembers: 16 },
+      school: { ...initial.school, activeMembers: 35, followers: 100 },
+      emails: [],
       collaborators: [socialCollaborator],
+      unlocks: { ...initial.unlocks, social: true },
+      automation: { ...initial.automation, socialContentBuffer: 3_750 },
       upgrades: {
         ...initial.upgrades,
         "automatic-signature": 1,
-        "updated-page": 1,
       },
     };
 
     const presentation = getCollaboratorAutomationPresentation({
       state,
       collaboratorId: socialCollaborator.id,
-      assignment: "social",
+      assignment: "writing",
       now: 1_000,
       activeEmail: undefined,
     });
 
-    expect(presentation.title).toBe(
-      "Rendimento: 1,78\u00a0€/s | <0,01/s Lezioni di prova | <0,01/s Nuovi contatti",
-    );
-    expect(presentation.detail).toBeUndefined();
-    expect(presentation.title).not.toMatch(/Prossimo rendimento|Ciclo base/);
-    expect(presentation.durationMs).toBeCloseTo(
-      120_000 / (1.55 * 1.25 * 1.2 * 1.15),
-      6,
-    );
+    expect(presentation.title).toBe("Contenuto Social");
+    expect(presentation.detail).toBe("5% follower · 1,5% contatto · 1,00\u00a0€/mese");
+    expect(presentation.progress).toBe(50);
+    expect(presentation.progressLabel).toBe("Produzione del prossimo contenuto Social");
+    expect(presentation.durationMs).toBeGreaterThan(0);
   });
 });

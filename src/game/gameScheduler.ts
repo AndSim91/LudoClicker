@@ -44,11 +44,9 @@ export function needsAutomationHeartbeat(state: GameState): boolean {
   return state.collaborators.some((collaborator) => {
     switch (collaborator.assignment) {
       case "writing":
-        return hasWritingCampaign;
+        return hasWritingCampaign || state.unlocks.social;
       case "lessons":
         return hasEnrolledAthlete;
-      case "social":
-        return state.unlocks.social;
       case "equipment":
         return state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
       case "events":

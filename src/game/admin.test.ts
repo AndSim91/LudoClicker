@@ -32,8 +32,14 @@ describe("admin resource actions", () => {
     expect(state.contacts.filter((contact) => contact.status === "enrolled"))
       .toHaveLength(GAME_CONFIG.socialUnlockMembers);
     expect(new Set(state.contacts.map((contact) => contact.id)).size).toBe(state.contacts.length);
-    expect(state.collaborators).toHaveLength(1);
-    expect(state.collaborators[0].specialProfileId).toBe("andrea-simonazzi");
+    const enrolledLegendaryIds = state.contacts.flatMap((contact) =>
+      contact.status === "enrolled" && contact.specialProfileId
+        ? [contact.specialProfileId]
+        : [],
+    );
+    expect(state.collaborators.map((collaborator) => collaborator.specialProfileId))
+      .toEqual(enrolledLegendaryIds);
+    expect(enrolledLegendaryIds).toContain("andrea-simonazzi");
   });
 
   it("adds euros without counting them as earned income", () => {

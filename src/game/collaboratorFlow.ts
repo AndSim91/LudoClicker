@@ -1,4 +1,5 @@
 import { createInitialCollaboratorMastery } from "../content/mastery";
+import { getCollaboratorAssignmentLabel } from "../content/collaboratorRoles";
 import { hasAutomaticInstructorCertificates } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import { getEnrolledLegendaryContacts } from "./runtimeIndexes";
@@ -54,11 +55,15 @@ export function recruitCollaborator(
       collaboratorsRecruited: state.statistics.collaboratorsRecruited + 1,
     },
   };
+  const editorialSector = getCollaboratorAssignmentLabel(
+    "writing",
+    nextState.unlocks.social,
+  );
   return addMessage(
     nextState,
     now + 1,
     "Nuovo collaboratore disponibile",
-    `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Preparatore Atletico, Social, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
+    `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in ${editorialSector}, Eventi, Preparatore Atletico, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
     "positive",
     "focused",
     "collaborators",

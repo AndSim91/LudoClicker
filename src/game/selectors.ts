@@ -6,11 +6,9 @@ import type {
   InboxMessage,
   ScheduledTrial,
 } from "./types";
-import { GAME_CONFIG } from "./config";
-import { getUpgradeEffectTotal } from "../content/upgrades";
 import { isInstructorForm } from "../content/forms";
 import { getMessageThreadKey } from "./messages";
-import { getMonthlyMemberFees } from "./membershipEconomy";
+import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
@@ -119,13 +117,7 @@ export function selectDayTrials(state: GameState, now: number): ScheduledTrial[]
 }
 
 export function selectIncomePerMonth(state: GameState): number {
-  const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  return (
-    (getMonthlyMemberFees(state) +
-      state.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
-    (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
-    networkMultiplier
-  );
+  return getMonthlyOperationalIncome(state);
 }
 
 export function selectVisibleInboxMessages(state: GameState): InboxMessage[] {

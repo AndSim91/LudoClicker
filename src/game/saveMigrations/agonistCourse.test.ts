@@ -36,7 +36,6 @@ describe("Corso Agonisti save migration", () => {
           writing: 0,
           events: 0,
           lessons: 0,
-          social: 0,
           equipment: 0,
           instructor: 0,
         },

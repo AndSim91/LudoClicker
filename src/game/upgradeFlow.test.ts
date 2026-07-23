@@ -49,7 +49,7 @@ describe("buyUpgrade prerequisites", () => {
       formBranchPreferences: [],
       autoTeachingEnabled: true,
       assignment: null,
-      mastery: { writing: 0, events: 0, lessons: 0, social: 0, equipment: 0, instructor: 0 },
+      mastery: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 },
       rarity: "ultra-rare" as const,
     };
     const state = {

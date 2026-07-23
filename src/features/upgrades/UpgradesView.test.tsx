@@ -6,11 +6,23 @@ import { UpgradesView } from "./UpgradesView";
 afterEach(cleanup);
 
 describe("UpgradesView", () => {
+  it("keeps the Social branch hidden until the system unlocks", () => {
+    render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
+
+    expect(screen.queryByRole("heading", { name: "Social" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }))
+      .not.toBeInTheDocument();
+  });
+
   it("renders the complete upgrade catalog as eight connected branches", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
-        state={{ ...initial, school: { ...initial.school, historicMembers: 5 } }}
+        state={{
+          ...initial,
+          school: { ...initial.school, historicMembers: 5 },
+          unlocks: { ...initial.unlocks, social: true },
+        }}
         onBuyUpgrade={() => undefined}
       />,
     );
@@ -29,20 +41,24 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: /Apri dettagli Doppio Corso/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Intensità agonistica/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(54);
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(51);
   });
 
   it("shows requirements, effect and disabled level-up action for a locked node", () => {
-    render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
+    const initial = createInitialState(1_000);
+    render(<UpgradesView
+      state={{ ...initial, unlocks: { ...initial.unlocks, social: true } }}
+      onBuyUpgrade={() => undefined}
+    />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Apri dettagli Pagina aggiornata/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }));
 
-    expect(screen.getByRole("dialog", { name: "Pagina aggiornata" })).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Sintesi dei contenuti" })).toBeVisible();
     expect(document.querySelector(".upgrade-dialog-backdrop")).not.toBeInTheDocument();
-    expect(screen.getByText("+15% produzione Social per livello")).toBeVisible();
-    expect(screen.getByText("Serve Fama della scuola 10")).toBeVisible();
+    expect(screen.getByText("7.500 → 5.000 → 3.500 → 2.000 → 1.000 caratteri")).toBeVisible();
+    expect(screen.getByText("Serve Fama della scuola 35")).toBeVisible();
     expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Apri dettagli Pagina aggiornata/ })).not.toHaveClass("unaffordable");
+    expect(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ })).not.toHaveClass("unaffordable");
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

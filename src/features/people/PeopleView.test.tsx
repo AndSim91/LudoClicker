@@ -433,7 +433,7 @@ describe("PeopleView", () => {
         instructorForms: [] as FormId[],
         assignment: "writing" as const,
         rarity: "legendary" as const,
-        mastery: { writing: 120, events: 0, lessons: 0, social: 0, equipment: 0, instructor: 0 },
+        mastery: { writing: 120, events: 0, lessons: 0, equipment: 0, instructor: 0 },
       },
       {
         id: "event-manager",
@@ -568,7 +568,7 @@ describe("PeopleView", () => {
 
   it("shows every collaborator automation progress without the Corso Agonisti box", () => {
     const initial = createInitialState(1_000);
-    const assignments = ["writing", "events", "lessons", "social", "equipment"] as const;
+    const assignments = ["writing", "events", "lessons", "equipment"] as const;
     const collaborators = assignments.map((assignment, index) => ({
       id: `collaborator-${index}`,
       contactId: initial.contacts[index].id,
@@ -583,12 +583,13 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
+          emails: [],
           collaborators,
           upgrades: { ...initial.upgrades, "technical-arena": 1 },
           automation: {
             ...initial.automation,
             lessonBuffer: 0.25,
-            socialBuffer: 0.5,
+            socialContentBuffer: 3_750,
             equipmentBuffer: 0.75,
             lastImprovedAthlete: "Mario Rossi",
           },
@@ -612,7 +613,7 @@ describe("PeopleView", () => {
               status: "running",
             },
           ],
-          unlocks: { ...initial.unlocks, collaborators: true },
+          unlocks: { ...initial.unlocks, collaborators: true, social: true },
         }}
         onAssign={() => undefined}
         onStartTraining={() => undefined}
@@ -620,16 +621,13 @@ describe("PeopleView", () => {
     );
 
     expect(screen.queryByText("Corso Agonisti")).not.toBeInTheDocument();
-    expect(screen.getByText(initial.emails[0].subject)).toBeVisible();
+    expect(screen.getByText("Contenuto Social")).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
-    expect(screen.getByText(
-      "Rendimento: 0,00 €/s | <0,01/s Lezioni di prova | <0,01/s Nuovi contatti",
-    )).toBeVisible();
-    expect(screen.queryByText(/Prossimo rendimento|Ciclo base/)).not.toBeInTheDocument();
+    expect(screen.getByText(/5% follower · 0,5% contatto/)).toBeVisible();
     expect(screen.getByText("Carico attrezzatura: 42/100")).toBeVisible();
-    expect(screen.getAllByRole("progressbar")).toHaveLength(10);
-    expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(5);
+    expect(screen.getAllByRole("progressbar")).toHaveLength(8);
+    expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(4);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
@@ -701,7 +699,7 @@ describe("PeopleView", () => {
       .closest(".member-row");
     expect(athleteRow).not.toBeNull();
     const courseMessage = within(athleteRow as HTMLElement).getByText(
-      "Corso Agonisti | Arena +3 · Stile +3 · Potenziale totale +6",
+      "Corso Agonisti | Potenziale totale +6",
     );
     expect(courseMessage).toBeVisible();
     expect(courseMessage.closest(".member-training-cell")).not.toBeNull();

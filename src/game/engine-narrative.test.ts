@@ -8,6 +8,7 @@ import {
   getPrestigeRequirements,
 } from "./engine";
 import { selectIncomePerMonth } from "./selectors";
+import { formatCurrency } from "../shared/formatters";
 
 describe("game engine: narrative", () => {
   it("grants each achievement and its reward only once", () => {
@@ -110,7 +111,10 @@ describe("game engine: narrative", () => {
     );
 
     expect(resolved).toBeDefined();
-    expect(contribution?.preview).toContain("Contributo ricevuto: 20,00\u00a0€.");
+    const definition = NARRATIVE_EVENTS.find((event) => event.id === "extra-donation")!;
+    expect(contribution?.preview).toContain(
+      `Contributo ricevuto: ${formatCurrency(definition.euroDelta!)}.`,
+    );
     expect(resolved!.narrative.history[0].summary).toBe(contribution?.preview);
   });
 

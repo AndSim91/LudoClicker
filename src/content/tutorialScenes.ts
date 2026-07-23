@@ -8,6 +8,7 @@ export const TUTORIAL_REGION_IDS = [
   "commands",
   "navigation",
   "events-navigation",
+  "contacts-navigation",
   "upgrades-navigation",
   "folders",
   "messages",
@@ -19,6 +20,7 @@ export const TUTORIAL_REGION_IDS = [
   "park-sparring-action",
   "day-panel",
   "first-trial-row",
+  "collaborator-social-assignment",
   "status",
 ] as const;
 
@@ -30,6 +32,7 @@ export const TUTORIAL_SCENE_IDS = [
   "first-trial",
   "first-legendary",
   "first-enrollment",
+  "social-evolution",
 ] as const;
 
 export type TutorialSceneId = typeof TUTORIAL_SCENE_IDS[number];
@@ -217,6 +220,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
   },
   {
     id: "first-trial",
+    pauseWhileActive: true,
     canStart: ({ state }) => state.statistics.trialsBooked >= 1,
     steps: [
       {
@@ -236,6 +240,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
   },
   {
     id: "first-legendary",
+    pauseWhileActive: true,
     canStart: ({ state }) =>
       state.network.schools.length === 0 &&
       state.contacts.some(
@@ -263,6 +268,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
   },
   {
     id: "first-enrollment",
+    pauseWhileActive: true,
     canStart: ({ state }) => state.statistics.membersEnrolled >= 1,
     steps: [
       {
@@ -300,6 +306,61 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Gli Upgrade si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
         ],
         focusRegions: ["main"],
+      },
+    ],
+  },
+  {
+    id: "social-evolution",
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.unlocks.social,
+    steps: [
+      {
+        id: "redaction-becomes-social",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La Redazione diventa Social",
+        body: [
+          "La scuola ha raggiunto 35 iscritti attivi. La Redazione ora gestisce anche la presenza online e da questo momento si chiamerà Social.",
+          "Non è un nuovo settore: i collaboratori della vecchia Redazione mantengono incarico, esperienza e capacità di scrittura.",
+        ],
+        focusRegions: ["main"],
+      },
+      {
+        id: "social-system",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Contenuti, follower e sponsorizzazioni",
+        body: [
+          "I collaboratori Social danno sempre priorità alle email. Quando non ci sono email attive, usano la stessa potenza di scrittura per produrre contenuti online.",
+          "Ogni contenuto può generare separatamente un follower e un contatto. Ogni follower ottenuto aumenta anche la Fama della scuola e migliora la probabilità futura di trovare contatti.",
+          "I follower producono inoltre una rendita da sponsorizzazioni insieme alle rette mensili. Il gioco chiuso non genera progressi o guadagni.",
+        ],
+        focusRegions: ["title", "main"],
+      },
+      {
+        id: "open-collaborators",
+        kind: "objective",
+        title: "Apri i Collaboratori",
+        body: [
+          "Apri Iscritti dalla barra laterale e raggiungi l'elenco dei Collaboratori.",
+        ],
+        focusRegions: ({ activeView }) =>
+          activeView === "contacts"
+            ? ["main"]
+            : ["navigation", "contacts-navigation"],
+        isComplete: ({ activeView }) => activeView === "contacts",
+      },
+      {
+        id: "assign-social-collaborator",
+        kind: "objective",
+        title: "Assegna un collaboratore ai Social",
+        body: [
+          "Imposta almeno un collaboratore su Social. Senza collaboratori assegnati le email e i contenuti online non avanzano automaticamente.",
+        ],
+        focusRegions: ["main", "collaborator-social-assignment"],
+        isComplete: ({ state }) => state.collaborators.some(
+          (collaborator) => collaborator.assignment === "writing",
+        ),
       },
     ],
   },

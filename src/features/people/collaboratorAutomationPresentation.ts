@@ -5,22 +5,13 @@ import { GAME_CONFIG } from "../../game/config";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
 import {
+  getMonthlySocialIncome,
   getSocialContactChance,
-  getSocialIncomePerMember,
-  getSocialTrialChance,
+  getSocialContentCharacters,
+  getSocialFollowerChance,
 } from "../../game/social";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
-
-const perSecondRateFormatter = new Intl.NumberFormat("it-IT", {
-  maximumFractionDigits: 2,
-});
-
-function formatPerSecondRate(value: number): string {
-  return value > 0 && value < 0.01
-    ? "<0,01"
-    : perSecondRateFormatter.format(value);
-}
+import { formatCurrency, formatPercent } from "../../shared/formatters";
 
 export interface CollaboratorAutomationPresentation {
   title: string;
@@ -56,11 +47,6 @@ function getAutomationCycleDurationMs(
   const effectiveProductivity = productivity * automationMultiplier;
   if (assignment === "lessons") {
     return GAME_CONFIG.lessonImprovementIntervalMs / effectiveProductivity;
-  }
-  if (assignment === "social") {
-    const socialMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "socialMultiplier");
-    return GAME_CONFIG.socialAutomationIntervalMs /
-      (effectiveProductivity * socialMultiplier);
   }
   if (assignment === "equipment") {
     return GAME_CONFIG.equipmentRepairIntervalMs * work / effectiveProductivity;
@@ -117,7 +103,36 @@ export function getCollaboratorAutomationPresentation({
       };
     }
     if (!activeEmail || activeEmail.status !== "writing") {
-      return { title: "In attesa", detail: "Nessuna email in scrittura" };
+      if (activeEmail) {
+        return {
+          title: activeEmail.subject,
+          detail: "Invio email in corso · i contenuti Social riprenderanno dopo",
+        };
+      }
+      if (!state.unlocks.social) {
+        return { title: "In attesa", detail: "Nessuna email in scrittura" };
+      }
+      const requiredCharacters = getSocialContentCharacters(state.upgrades);
+      const progress = Math.min(
+        100,
+        state.automation.socialContentBuffer / requiredCharacters * 100,
+      );
+      const writingRate = state.collaborators.reduce(
+        (total, collaborator) => collaborator.assignment === "writing"
+          ? total + getCollaboratorProductivity(collaborator, "writing")
+          : total,
+        0,
+      ) * GAME_CONFIG.collaboratorWritingPerSecond * state.player.writingPower *
+        (1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier"));
+      return {
+        title: "Contenuto Social",
+        detail: `${formatPercent(getSocialFollowerChance(state.upgrades))} follower · ${formatPercent(getSocialContactChance(state.school.followers, state.upgrades))} contatto · ${formatCurrency(getMonthlySocialIncome(state))}/mese`,
+        progress,
+        progressLabel: "Produzione del prossimo contenuto Social",
+        durationMs: writingRate > 0
+          ? requiredCharacters / writingRate * 1_000
+          : undefined,
+      };
     }
     const length = getEmailBuildLength(activeEmail);
     const progress = length === 0
@@ -165,26 +180,6 @@ export function getCollaboratorAutomationPresentation({
       progress,
       progressLabel: "Progresso miglioramento atleta",
       durationMs: getAutomationCycleDurationMs(state, "lessons"),
-    };
-  }
-
-  if (assignment === "social") {
-    const incomePerMember = getSocialIncomePerMember(state.school.followers);
-    const cycleIncome = state.school.activeMembers * incomePerMember;
-    const durationMs = getAutomationCycleDurationMs(state, "social");
-    const durationSeconds = durationMs ? durationMs / 1_000 : 0;
-    const incomePerSecond = durationSeconds > 0 ? cycleIncome / durationSeconds : 0;
-    const trialsPerSecond = durationSeconds > 0
-      ? getSocialTrialChance(state.school.followers) / durationSeconds
-      : 0;
-    const contactsPerSecond = durationSeconds > 0
-      ? getSocialContactChance(state.school.followers) / durationSeconds
-      : 0;
-    return {
-      title: `Rendimento: ${formatCurrency(incomePerSecond)}/s | ${formatPerSecondRate(trialsPerSecond)}/s Lezioni di prova | ${formatPerSecondRate(contactsPerSecond)}/s Nuovi contatti`,
-      progress: Math.min(100, Math.floor(state.automation.socialBuffer * 100)),
-      progressLabel: "Progresso ciclo pubblicitario Social",
-      durationMs,
     };
   }
 

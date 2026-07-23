@@ -287,9 +287,11 @@ ferma.
 ### 5.4 Follower
 
 I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
-sblocca Social, partono dal numero di iscritti attivi e diventano visibili nella
-barra superiore. Non sono spendibili: aumentano le probabilità di ottenere prove
-e contatti e il ricavo pubblicitario per iscritto.
+sblocca Social, partono dalla Fama già raggiunta e diventano visibili nella
+barra superiore. Non sono spendibili. Ogni nuovo Follower aggiunge anche un
+punto Fama, aumenta la probabilità dei contenuti Social di ottenere contatti e
+produce una rendita mensile da sponsorizzazioni. I Follower non modificano
+direttamente le prove o le iscrizioni.
 
 ### 5.5 Email
 
@@ -520,7 +522,6 @@ probabilitàPrenotazione = clamp(
   prenotazioneBase
   × moltiplicatoreScrittura
   × moltiplicatoreReputazione
-  × bonusSocial
   × bonusPrestigio,
   minimo,
   massimo
@@ -626,7 +627,6 @@ Un evento attraversa tre passaggi distinti prima di generare indirizzi email.
 ```text
 personeIncontrate = capienzaBase
   × qualitàEvento
-  × bonusSocial
   × variabilitàCasuale
 
 proveDimostrative = personeIncontrate
@@ -653,16 +653,16 @@ La **lezione di prova in palestra** non genera nuovi indirizzi: consuma una
 prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per
 lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
-I **Social** sviluppano le capacità pubblicitarie della scuola. Ogni ciclo base
-di 120 secondi di un collaboratore assegnato ha il **25%** di probabilità di
-aggiungere un Follower. Il ciclo accredita per ogni iscritto attivo **€5 +
-Follower / 1000**, ha una probabilità di ottenere una prova diretta pari a
-**0,01% + Follower / 10000 punti percentuali** e una probabilità indipendente di
-ottenere un nuovo contatto pari a **0,1% + Follower / 5000 punti percentuali**.
-Le probabilità non possono superare il 100% e usano i Follower disponibili
-all'inizio del ciclo. Le persone generate dal canale Social sono sempre almeno
-Rare. Le campagne pagate in Euro restano disponibili, usano piattaforme
-inventate e possono diventare casualmente virali.
+I **Social** sviluppano la presenza online della scuola. La Redazione si evolve
+in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
+collaboratori già assegnati conservano incarico e Maestria. Le email hanno
+sempre priorità; in loro assenza la stessa potenza di scrittura produce un
+contenuto ogni 7.500 caratteri. Ogni contenuto effettua due tiri indipendenti:
+5% per ottenere un Follower e `min(5%, 0,5% + Follower × 0,01%)` per ottenere un
+contatto. Social non genera prove dirette, non migliora la qualità dei contatti
+e non accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le
+rette mensili, a partire da 0,01 € per Follower. Le campagne manuali del vecchio
+sistema non esistono più.
 
 Lo **sparring esterno** è sempre disponibile come attività di sicurezza quando
 mancano contatti o denaro. Costa poco o nulla, ma produce soltanto pochi
@@ -710,7 +710,7 @@ Ogni collaboratore possiede:
 - stato e assegnazione attuale.
 
 Ogni collaboratore accumula inoltre una **Maestria** separata per ciascun ruolo
-operativo: Redazione, Eventi, Preparatore Atletico, Social, Attrezzatura e
+operativo: Redazione/Social, Eventi, Preparatore Atletico, Attrezzatura e
 Istruttore. La Maestria parte dal grado **Novizio** e attraversa cinque livelli:
 Novizio, Iniziato, Accademico, Cavaliere e Maestro. Ogni grado concede un
 piccolo moltiplicatore alla produttività del relativo settore; il progresso
@@ -773,10 +773,9 @@ attività che hanno una propria scadenza futura non vengono completate in antici
 
 | Ruolo                | Funzione                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Redazione            | scrive caratteri automaticamente                                                                                   |
+| Redazione → Social   | scrive le email; dopo lo sblocco produce contenuti Social quando non ci sono email attive                           |
 | Eventi               | aumenta persone incontrate e contatti ottenuti                                                                     |
 | Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
-| Social               | genera Follower, ricavi pubblicitari e, occasionalmente, prove o contatti                                          |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
 | Istruttore           | insegna le Forme già attestate agli iscritti, una persona alla volta, e migliora la conversione prova → iscrizione |
 | Coordinamento        | funzione futura, non inclusa nell'MVP                                                                              |
@@ -803,18 +802,16 @@ I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input
 manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
 invia la mail appena raggiunge la lunghezza richiesta. Se è disattivato, anche i
 collaboratori si fermano sulla mail completa finché il giocatore non conferma
-l'invio. La scrittura automatica non può essere messa in pausa, ma si ferma
-naturalmente quando finiscono i contatti.
+l'invio. Dopo lo sblocco Social, quando non esiste una mail attiva, gli stessi
+collaboratori spostano automaticamente la produzione sui contenuti online.
 
 ### 9.5 Raccolta automatica dei contatti
 
-I collaboratori assegnati a eventi o promozione possono:
+I collaboratori assegnati agli Eventi possono:
 
 - aumentare il rendimento di un evento pianificato;
 - organizzare piccole attività ricorrenti;
-- produrre lentamente nuovi contatti offline;
-- alimentare i social;
-- migliorare la qualità media dei contatti.
+- produrre nuovi contatti tramite le attività automatiche previste.
 
 La raccolta automatica deve essere più lenta degli eventi gestiti attivamente,
 ma sufficiente a impedire un blocco totale nelle fasi avanzate.
@@ -1115,27 +1112,30 @@ Influenza caratteri per pressione e automazione.
 
 ### 10.5 Social
 
-L'automazione dei collaboratori Social completa un ciclo base ogni 120 secondi.
-Ogni ciclo ha il 25% di probabilità di aggiungere un Follower e assegna **5 XP
-Social** al collaboratore. Il ricavo per iscritto è `€5 + Follower / 1000`; la
-probabilità di una prova è `0,01% + Follower / 10000` punti percentuali e quella
-indipendente di un contatto è `0,1% + Follower / 5000` punti percentuali. Le
-probabilità sono limitate al 100%. I gradi di Maestria velocizzano i cicli del
-5%, 10%, 15% e infine 25% al grado Maestro. Le persone generate dai Social non
-possono essere Comuni: sono sempre Rare, Ultra Rare o Leggendarie. Produttività,
-Forme, Maestria e potenziamenti accelerano il completamento dei cicli. Le
-campagne social manuali continuano a consumare Euro, usano piattaforme inventate
-e possono diventare casualmente virali.
+Social è lo stadio evoluto della Redazione e usa la sua stessa assegnazione,
+produttività e Maestria. Si sblocca definitivamente a 35 iscritti attivi con un
+tutorial in pausa. Allo sblocco i Follower vengono inizializzati alla Fama
+esistente, senza aumentarla una seconda volta.
 
-| Potenziamento                | Effetto indicativo            |
-| ---------------------------- | ----------------------------- |
-| Pagina aggiornata            | flusso minimo di interesse    |
-| Calendario editoriale        | produzione più regolare       |
-| Foto delle lezioni           | migliore qualità dei contatti |
-| Video dimostrativo           | maggiore portata              |
-| Rubrica settimanale          | bonus cumulativo              |
-| Post inspiegabilmente virale | evento casuale positivo       |
-| Gestione professionale       | automazione social            |
+Un contenuto richiede 7.500 caratteri. La produzione avanza soltanto durante il
+gioco online e si interrompe, conservando il buffer, quando una email richiede
+la priorità. Al completamento vengono risolti separatamente:
+
+```text
+probabilitàFollower = 5%
+probabilitàContatto = min(capContatti, 0,5% + Follower × 0,01%)
+renditaMensileSocial = Follower × valoreFollower × moltiplicatoreA.N.D.E.R.
+```
+
+Ogni Follower ottenuto aumenta di 1 anche la Fama. Un contatto Social entra nel
+normale funnel email → prova → iscrizione senza bonus di rarità o conversione.
+
+| Potenziamento             | Progressione completa                                      |
+| ------------------------- | ---------------------------------------------------------- |
+| Sintesi dei contenuti     | 7.500 → 5.000 → 3.500 → 2.000 → 1.000 caratteri           |
+| Piano editoriale          | probabilità Follower 5% → 6% → 7% → 8% → 9% → 10%        |
+| Diffusione dei contenuti  | cap contatti 5% → 7,5% → 10% → 15% → 20% → 25%           |
+| Sponsorizzazioni          | 0,01 € → 0,05 € → 0,075 € → 0,10 € → 0,20 € → 0,50 €     |
 
 ### 10.6 Attrezzatura
 
@@ -1196,7 +1196,7 @@ consigliata è:
 | Prima prova prenotata          | report aggregato del funnel                   |
 | Primo iscritto                 | Euro e quote associative                      |
 | Primo Ultra Raro collaboratore | Iscritti, Collaboratori e assegnazioni        |
-| 15 iscritti                    | Social                                        |
+| 35 iscritti attivi             | Redazione si evolve in Social                 |
 | 20 iscritti                    | Attrezzatura e usura narrativa                |
 | 50 iscritti                    | Forme dei collaboratori                       |
 | 150 iscritti                   | procedura per fondare una nuova scuola        |
@@ -1715,38 +1715,23 @@ nell'Archivio come struttura organizzativa, non come mappa fantasy.
 
 ### 18.1 Regole
 
-Quando il gioco viene riaperto, il calendario e tutte le attività temporizzate
-restano fermi. Il progresso offline produce esclusivamente:
-
-1. contatti passivi generati dai collaboratori assegnati ai Social;
-2. entrate monetarie passive proporzionali al tempo elaborato;
-3. una email “Riepilogo attività offline”.
-
-Email, prove, eventi, manutenzione, Forme e insegnamento automatico non avanzano
-durante l'assenza.
+Quando il gioco viene chiuso o messo in pausa, il calendario e tutte le attività
+temporizzate restano fermi. Non vengono prodotti caratteri, contenuti Social,
+Follower, contatti, rette o sponsorizzazioni e non viene creato alcun riepilogo
+offline. Alla ripresa tutte le scadenze vengono spostate in avanti della durata
+dell'interruzione, conservando il tempo residuo.
 
 ### 18.2 Limiti
 
-- limite offline iniziale: 8 ore;
-- potenziabile fino a 24 ore;
-- nessuna produzione di email senza contatti;
-- nessun evento parte senza requisiti;
-- gli esiti casuali vengono determinati con un seed salvato;
-- il cambio manuale dell'orologio non deve produrre vantaggi estremi.
+- nessun limite offline, perché non esiste produzione durante la chiusura;
+- nessuna produzione di email o Social;
+- nessun evento parte o termina;
+- nessuna scadenza mensile viene riscossa;
+- gli esiti casuali vengono determinati con un seed salvato.
 
 ### 18.3 Riepilogo
 
-Il riepilogo mostra:
-
-- tempo trascorso;
-- email completate;
-- contatti utilizzati;
-- prove prenotate e completate;
-- nuovi iscritti;
-- nuovi collaboratori;
-- Euro incassati;
-- contatti acquisiti;
-- attività bloccate e motivo.
+Non viene mostrato alcun riepilogo offline, perché lo stato operativo non cambia.
 
 ---
 
@@ -2270,16 +2255,14 @@ qualunque funzione che possa far credere di inviare davvero email.
   i risultati.
 - I contatti possono esaurirsi.
 - Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
-- I collaboratori assegnati ai Social completano un ciclo base ogni 120 secondi
-  e hanno il 25% di probabilità di aggiungere un Follower; ogni Follower aumenta
-  ricavi e probabilità di prove e contatti secondo le formule Social approvate.
-  Tutte le persone generate dai Social sono almeno Rare e restano disponibili
-  campagne pagate in Euro.
-- Le piattaforme social sono inventate e possono produrre eventi virali.
+- A 35 iscritti attivi Redazione si evolve definitivamente in Social. In assenza
+  di email, 7.500 caratteri completano un contenuto con tiri indipendenti per un
+  Follower e un contatto. I Follower aumentano Fama e sponsorizzazioni mensili;
+  non esistono prove dirette, bonus di rarità o campagne manuali a pagamento.
 - Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i
   Leggendari dall'iscrizione.
-- I collaboratori possono scrivere, partecipare agli eventi, gestire lezioni,
-  social e spade.
+- I collaboratori possono scrivere email e contenuti Social, partecipare agli
+  eventi, gestire lezioni e spade.
 - I collaboratori assegnati alle spade riparano prima le spade rotte e poi il
   carico residuo; una spada richiede 150 punti-lavoro da 3 secondi ciascuno.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato

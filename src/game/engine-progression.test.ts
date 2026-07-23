@@ -13,7 +13,10 @@ import {
 } from "./formulas";
 import { selectActiveEmail } from "./selectors";
 import { nextRandom } from "./random";
-import { improveRandomAthletes } from "./collaboratorAutomationOutcomes";
+import {
+  improveRandomAthletes,
+  resolveSocialContentCycles,
+} from "./collaboratorAutomationOutcomes";
 import type { FormId, GameState } from "./types";
 
 describe("game engine: progression", () => {
@@ -168,7 +171,7 @@ describe("game engine: progression", () => {
     expect(automated.statistics.automatedCharacters).toBe(5);
   });
 
-  it("turns Social cycles into scaled income with independent trial and contact chances", () => {
+  it("turns Redazione work into Social content without immediate income or trials", () => {
     const initial = createInitialState(1_000);
     const socialCollaborator = {
       id: "collaborator-social",
@@ -177,56 +180,91 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: [],
       instructorForms: [],
-      assignment: "social" as const,
-      rarity: "rare" as const,
-    };
-    const equipmentCollaborator = {
-      ...socialCollaborator,
-      id: "collaborator-equipment",
-      assignment: "equipment" as const,
+      assignment: "writing" as const,
+      mastery: {
+        writing: 0,
+        events: 0,
+        lessons: 0,
+        equipment: 0,
+        instructor: 0,
+      },
+      rarity: "ultra-rare" as const,
     };
     const automated = gameReducer(
       {
         ...initial,
-        randomSeed: 470_208,
-        school: { ...initial.school, activeMembers: 12, followers: 1_000, euros: 1 },
-        collaborators: [socialCollaborator, equipmentCollaborator],
+        randomSeed: 1,
+        school: { ...initial.school, followers: 1_000, euros: 1 },
+        contacts: [],
+        emails: [],
+        collaborators: [socialCollaborator],
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
-        equipment: { ...initial.equipment, wear: 5 },
         automation: {
           ...initial.automation,
-          socialBuffer: 0.995,
-          equipmentBuffer: 0.95,
+          socialContentBuffer: 7_495,
         },
       },
       { type: "TICK", now: 2_000 },
     );
 
-    expect(automated.school.euros).toBe(72);
-    expect(automated.school.followers).toBe(1_001);
-    expect(automated.statistics.eurosEarned).toBe(72);
-    expect(automated.collaborators[0].mastery?.social).toBe(5);
-    expect(automated.statistics.socialContacts).toBe(1);
-    expect(automated.statistics.socialTrials).toBe(1);
-    expect(automated.automation.socialBuffer).toBeCloseTo(0.995 + 1 / 120 - 1);
-    expect(automated.contacts).toHaveLength(initial.contacts.length + 2);
-    expect(automated.contacts.filter((contact) => contact.source === "social"))
-      .toHaveLength(2);
-    expect(automated.contacts.some((contact) =>
-      contact.source === "social" && contact.status === "available"
-    )).toBe(true);
-    expect(automated.contacts.some((contact) =>
-      contact.source === "social" && contact.status === "trialScheduled"
-    )).toBe(true);
-    expect(
-      automated.contacts
-        .filter((contact) => contact.source === "social")
-        .every((contact) => contact.rarity !== "common"),
-    ).toBe(true);
-    expect(automated.scheduledTrials).toHaveLength(1);
-    expect(automated.emails).toHaveLength(initial.emails.length);
-    expect(automated.equipment.wear).toBe(4);
-    expect(automated.automation.equipmentBuffer).toBe(0);
+    expect(automated.school.euros).toBe(1);
+    expect(automated.school.followers).toBe(
+      1_000 + automated.statistics.socialFollowersGained,
+    );
+    expect(automated.school.historicMembers).toBe(
+      initial.school.historicMembers + automated.statistics.socialFollowersGained,
+    );
+    expect(automated.statistics.eurosEarned).toBe(0);
+    expect(automated.collaborators[0].mastery?.writing).toBe(1.5);
+    expect(automated.statistics.socialContentCycles).toBe(1);
+    expect(automated.automation.socialContentBuffer).toBe(0);
+    expect(automated.contacts).toHaveLength(automated.statistics.socialContacts);
+    expect(automated.contacts.every((contact) => contact.source === "social")).toBe(true);
+    expect(automated.scheduledTrials).toHaveLength(0);
+  });
+
+  it("rolls Social followers and contacts independently", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      school: { ...initial.school, followers: 1_000 },
+      contacts: [],
+      emails: [],
+      unlocks: { ...initial.unlocks, social: true },
+    };
+    let followerSeed = 0;
+    let contactSeed = 0;
+    for (let seed = 1; ; seed += 1) {
+      const [followerRoll, afterFollower] = nextRandom(seed);
+      const [contactRoll] = nextRandom(afterFollower);
+      if (followerRoll < 0.05 && contactRoll >= 0.05) followerSeed = seed;
+      if (followerRoll >= 0.05 && contactRoll < 0.05) contactSeed = seed;
+      if (followerSeed > 0 && contactSeed > 0) break;
+    }
+
+    const followerOnly = resolveSocialContentCycles(
+      { ...state, randomSeed: followerSeed },
+      1,
+      2_000,
+    );
+    const contactOnly = resolveSocialContentCycles(
+      { ...state, randomSeed: contactSeed },
+      1,
+      2_000,
+    );
+
+    expect(followerOnly).toMatchObject({ followersGained: 1, contactsAcquired: 0 });
+    expect(followerOnly.state.school.followers).toBe(1_001);
+    expect(followerOnly.state.school.historicMembers).toBe(
+      initial.school.historicMembers + 1,
+    );
+    expect(contactOnly).toMatchObject({ followersGained: 0, contactsAcquired: 1 });
+    expect(contactOnly.state.school.followers).toBe(1_000);
+    expect(contactOnly.state.contacts[0]).toMatchObject({
+      source: "social",
+      status: "available",
+    });
+    expect(contactOnly.state.scheduledTrials).toHaveLength(0);
   });
 
   it("repairs damaged swords automatically after wear reaches zero", () => {
@@ -369,26 +407,6 @@ describe("game engine: progression", () => {
 
     expect(result.automation.lastImprovedAthleteId).toBe("favorite-athlete");
     expect(result.contacts[0].arenaBase ?? 0).toBeGreaterThanOrEqual(50);
-  });
-
-  it("runs paid Social campaigns after the fifteen-member unlock", () => {
-    const initial = createInitialState(1_000);
-    const funded = {
-      ...initial,
-      school: { ...initial.school, euros: 30, activeMembers: 15 },
-      unlocks: { ...initial.unlocks, social: true },
-    };
-
-    const campaigned = gameReducer(funded, { type: "RUN_SOCIAL_CAMPAIGN", now: 2_000 });
-
-    expect(campaigned.school.euros).toBe(5);
-    expect(campaigned.statistics.socialCampaigns).toBe(1);
-    expect(campaigned.statistics.socialContacts).toBeGreaterThanOrEqual(4);
-    expect(
-      campaigned.contacts
-        .filter((contact) => contact.source === "social")
-        .every((contact) => contact.rarity !== "common"),
-    ).toBe(true);
   });
 
   it("trains members once per school year, pauses in summer, and restarts in September", () => {

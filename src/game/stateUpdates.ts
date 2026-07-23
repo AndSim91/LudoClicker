@@ -1,6 +1,6 @@
 import {
-  COLLABORATOR_MASTERY_ROLE_LABELS,
   createInitialCollaboratorMastery,
+  getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryDefinition,
   getCollaboratorMasteryLevel,
 } from "../content/mastery";
@@ -73,7 +73,7 @@ function addMatchingCollaboratorMasteryExperience(
       currentState,
       now,
       `Maestria raggiunta: ${collaborator.displayName}`,
-      `${collaborator.displayName} è ora ${collaborator.levelName} in ${COLLABORATOR_MASTERY_ROLE_LABELS[role]}. Bonus del settore: +${Math.round(collaborator.multiplier * 100)}%.`,
+      `${collaborator.displayName} è ora ${collaborator.levelName} in ${getCollaboratorMasteryRoleLabel(role, currentState.unlocks.social)}. Bonus del settore: +${Math.round(collaborator.multiplier * 100)}%.`,
       "positive",
       "other",
       "collaborators",

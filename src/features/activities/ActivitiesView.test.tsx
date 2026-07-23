@@ -1,28 +1,27 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { ActivitiesView } from "./ActivitiesView";
 
 afterEach(() => cleanup());
 
 describe("ActivitiesView", () => {
-  it("runs a funded Social campaign after the unlock", () => {
+  it("shows the passive Social production after the unlock", () => {
     const initial = createInitialState(1_000);
-    const onRunSocialCampaign = vi.fn();
     render(<ActivitiesView state={{
       ...initial,
-      school: { ...initial.school, euros: 30 },
+      school: { ...initial.school, followers: 100 },
       unlocks: { ...initial.unlocks, social: true },
-      automation: { ...initial.automation, socialBuffer: 0.5 },
-      statistics: { ...initial.statistics, socialTrials: 3 },
-    }} onRunSocialCampaign={onRunSocialCampaign} />);
+      automation: { ...initial.automation, socialContentBuffer: 3_750 },
+    }} />);
 
-    expect(screen.getByText("Ciclo base 120 s · 5,00 € per iscritto · 0,01% prova · 0,1% contatto"))
-      .toBeVisible();
-    expect(screen.getByRole("progressbar", { name: "Progresso ciclo pubblicitario Social" }))
+    const social = screen.getByRole("region", { name: "Produzione Social" });
+    expect(within(social).getByText("100")).toBeVisible();
+    expect(within(social).getByText("5%")).toBeVisible();
+    expect(within(social).getByText(/1,5%/)).toBeVisible();
+    expect(within(social).getByText(/1,00 €/)).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Progresso contenuto Social" }))
       .toHaveAttribute("aria-valuenow", "50");
-    fireEvent.click(screen.getByRole("button", { name: /Avvia campagna/ }));
-    expect(onRunSocialCampaign).toHaveBeenCalledOnce();
   });
 
   it("shows achievement progress and narrative history", () => {
@@ -37,7 +36,7 @@ describe("ActivitiesView", () => {
       statistics: { ...initial.statistics, narrativeEvents: 1 },
     };
 
-    render(<ActivitiesView state={state} onRunSocialCampaign={() => undefined} />);
+    render(<ActivitiesView state={state} />);
 
     expect(screen.getByText("1/12 completati")).toBeVisible();
     expect(screen.getByText("Passaparola inatteso")).toBeVisible();
@@ -62,7 +61,7 @@ describe("ActivitiesView", () => {
       statistics: { ...initial.statistics, narrativeEvents: 35 },
     };
 
-    render(<ActivitiesView state={state} onRunSocialCampaign={() => undefined} />);
+    render(<ActivitiesView state={state} />);
 
     const region = screen.getByRole("region", { name: "Cronaca della scuola" });
     expect(within(region).getAllByRole("article")).toHaveLength(30);
@@ -72,11 +71,11 @@ describe("ActivitiesView", () => {
 
   it("keeps later operational panels hidden until they become relevant", () => {
     const initial = createInitialState(1_000);
-    render(<ActivitiesView state={initial} onRunSocialCampaign={() => undefined} />);
+    render(<ActivitiesView state={initial} />);
 
     expect(screen.queryByText("Fornitura ufficiale · LamaDiLuce")).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Assegnazioni collaboratori" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Campagne Social" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Produzione Social" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Traguardi" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Cronaca della scuola" })).not.toBeInTheDocument();
   });

@@ -4,7 +4,6 @@ export const COLLABORATOR_MASTERY_ROLES: readonly CollaboratorMasteryRole[] = [
   "writing",
   "events",
   "lessons",
-  "social",
   "equipment",
   "instructor",
 ];
@@ -13,10 +12,18 @@ export const COLLABORATOR_MASTERY_ROLE_LABELS: Record<CollaboratorMasteryRole, s
   writing: "Scrittura",
   events: "Eventi",
   lessons: "Preparatore Atletico",
-  social: "Social",
   equipment: "Attrezzatura",
   instructor: "Istruttore",
 };
+
+export function getCollaboratorMasteryRoleLabel(
+  role: CollaboratorMasteryRole,
+  socialUnlocked: boolean,
+): string {
+  return role === "writing" && socialUnlocked
+    ? "Social"
+    : COLLABORATOR_MASTERY_ROLE_LABELS[role];
+}
 
 export const COLLABORATOR_MASTERY_LEVELS = [
   { name: "Novizio", minimumXp: 0, multiplier: 0 },
@@ -30,8 +37,6 @@ export const COLLABORATOR_MASTERY_XP = {
   writingPerSecond: 1.5,
   eventCompleted: 10,
   lessonCompleted: 5,
-  socialCycle: 5,
-  socialCampaignContact: 5,
   equipmentRepairPoint: 5,
   instructorTraining: 10,
 } as const;
@@ -41,7 +46,6 @@ export function createInitialCollaboratorMastery(): CollaboratorMastery {
     writing: 0,
     events: 0,
     lessons: 0,
-    social: 0,
     equipment: 0,
     instructor: 0,
   };

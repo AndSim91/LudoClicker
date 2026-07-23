@@ -18,7 +18,8 @@ describe("Form training save migration", () => {
     expect(migrated.upgrades["technical-arena"]).toBe(0);
     expect(migrated.automation).not.toHaveProperty("agonistCoursesEnabled");
     expect(migrated.automation.lessonBuffer).toBe(0);
-    expect(migrated.statistics.socialTrials).toBe(0);
+    expect(migrated.statistics).not.toHaveProperty("socialTrials");
+    expect(migrated.statistics.socialContentCycles).toBe(0);
     expect(migrated.contacts[0].lastFormTrainingYear).toBe(2);
     expect(migrated.contacts[0].formTrainingYearCount).toBe(1);
     expect(migrated.contacts[0].agonistCourseCompletions).toBe(0);
@@ -36,7 +37,8 @@ describe("Form training save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.automation.lessonBuffer).toBe(0);
     expect(migrated.automation.lastImprovedAthlete).toBeUndefined();
-    expect(migrated.statistics.socialTrials).toBe(0);
+    expect(migrated.statistics).not.toHaveProperty("socialTrials");
+    expect(migrated.statistics.socialContentCycles).toBe(0);
   });
 
   it("moves the first legacy Tiamat level to Istruttore Promisquo", () => {
@@ -104,7 +106,7 @@ describe("Form training save migration", () => {
       formBranchPreferences: [],
       autoTeachingEnabled: true,
       assignment: null,
-      mastery: { writing: 0, events: 0, lessons: 0, social: 0, equipment: 0, instructor: 0 },
+      mastery: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 },
       rarity: "ultra-rare",
     }];
 

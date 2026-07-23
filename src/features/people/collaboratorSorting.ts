@@ -1,4 +1,4 @@
-import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
+import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
 import type { Collaborator, Contact, GameState } from "../../game/types";
@@ -82,7 +82,10 @@ function getSortValue(
   if (key === "name") return collaborator.displayName;
   if (key === "assignment") {
     return collaborator.assignment
-      ? COLLABORATOR_ASSIGNMENT_LABELS[collaborator.assignment]
+      ? getCollaboratorAssignmentLabel(
+          collaborator.assignment,
+          context.state.unlocks.social,
+        )
       : null;
   }
   if (key === "activity") return getActivityValue(collaborator, context);

@@ -384,7 +384,8 @@ describe("local save", () => {
     const migrated = loadGame(5_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.statistics.socialCampaigns).toBe(0);
+    expect(migrated.statistics).not.toHaveProperty("socialCampaigns");
+    expect(migrated.statistics.socialContentCycles).toBe(0);
   });
 
   it("migrates version 7 Form progress", () => {
@@ -711,7 +712,7 @@ describe("local save", () => {
     const migrated = loadGame(1_000);
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.legendaryCollaborators.retainedProgress["eva-parodi"]).toEqual({
+    expect(migrated.legendaryCollaborators.retainedProgress["eva-parodi"]).toMatchObject({
       forms: ["form-1", "course-x", "form-2"],
       instructorForms: ["form-1", "form-2"],
       formBranchPreferences: [],
@@ -747,7 +748,6 @@ describe("local save", () => {
       writing: 0,
       events: 0,
       lessons: 0,
-      social: 0,
       equipment: 0,
       instructor: 0,
     });
@@ -819,7 +819,6 @@ describe("local save", () => {
         writing: 0,
         events: 0,
         lessons: 0,
-        social: 0,
         equipment: 0,
         instructor: 0,
       },

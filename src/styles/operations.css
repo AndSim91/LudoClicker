@@ -88,7 +88,7 @@
 
 .assignment-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   margin-top: 20px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
@@ -117,8 +117,38 @@
   font-size: 18px;
 }
 
-.social-panel.locked {
-  background: var(--surface-muted);
+.social-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+  border-block: 1px solid var(--line);
+}
+
+.social-metrics > span {
+  display: flex;
+  min-height: 72px;
+  padding: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.social-metrics > span + span {
+  border-left: 1px solid var(--line);
+}
+
+.social-metrics strong {
+  color: var(--blue-700);
+  font-size: 16px;
+}
+
+.social-metrics strong small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .social-progress-label {
@@ -145,24 +175,6 @@
   height: 100%;
   border-radius: inherit;
   background: var(--blue-600);
-}
-
-.social-panel > button {
-  min-height: 38px;
-  margin-top: 18px;
-  padding: 0 14px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-md);
-  color: white;
-  background: var(--blue-600);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.social-panel > button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
 }
 
 .operations-report {

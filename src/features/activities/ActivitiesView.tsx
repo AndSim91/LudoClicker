@@ -4,15 +4,17 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACHIEVEMENTS } from "../../content/achievements";
 import {
   AUTOMATION_ASSIGNMENTS,
-  COLLABORATOR_ASSIGNMENT_LABELS,
+  getCollaboratorAssignmentLabel,
 } from "../../content/collaboratorRoles";
 import { GAME_CONFIG } from "../../game/config";
 import { getAverageWritingSeconds, getSourceSummaries } from "../../game/historyArchive";
-import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import {
+  getMonthlySocialIncome,
+  getSocialContactChanceCap,
   getSocialContactChance,
-  getSocialIncomePerMember,
-  getSocialTrialChance,
+  getSocialContentCharacters,
+  getSocialFollowerChance,
+  getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState } from "../../game/types";
 import { formatCurrency, formatPercent, formatTime } from "../../shared/formatters";
@@ -23,6 +25,10 @@ function percentage(value: number, total: number) {
   return `${Math.round((value / total) * 100)}%`;
 }
 
+function formatFollowerValue(value: number) {
+  return `${value.toLocaleString("it-IT", { maximumFractionDigits: 3 })} €`;
+}
+
 const CONTACT_SOURCES: Array<[GameState["contacts"][number]["source"], string]> = [
   ["tutorial", "Lista iniziale"],
   ["sparring", "Sparring"],
@@ -31,13 +37,7 @@ const CONTACT_SOURCES: Array<[GameState["contacts"][number]["source"], string]> 
   ["collaborator", "Collaboratori"],
 ];
 
-export function ActivitiesView({
-  state,
-  onRunSocialCampaign,
-}: {
-  state: GameState;
-  onRunSocialCampaign: () => void;
-}) {
+export function ActivitiesView({ state }: { state: GameState }) {
   const assignedCounts = useMemo(() => {
     const counts = new Map<NonNullable<GameState["collaborators"][number]["assignment"]>, number>();
     for (const collaborator of state.collaborators) {
@@ -46,17 +46,20 @@ export function ActivitiesView({
     }
     return counts;
   }, [state.collaborators]);
-  const socialProgress = Math.min(100, Math.floor(state.automation.socialBuffer * 100));
-  const socialIncomePerMember = getSocialIncomePerMember(state.school.followers);
-  const socialTrialChance = getSocialTrialChance(state.school.followers);
-  const socialContactChance = getSocialContactChance(state.school.followers);
-  const canRunSocial =
-    state.unlocks.social && state.school.euros >= GAME_CONFIG.socialCampaignCost;
-  const socialAction = !state.unlocks.social
-    ? `Si sblocca con ${getSocialUnlockRequirementLabel()}`
-    : state.school.euros < GAME_CONFIG.socialCampaignCost
-      ? `Servono ${formatCurrency(GAME_CONFIG.socialCampaignCost)}`
-      : `Avvia campagna · ${formatCurrency(GAME_CONFIG.socialCampaignCost)}`;
+  const socialContentCharacters = getSocialContentCharacters(state.upgrades);
+  const socialProgress = Math.min(
+    100,
+    Math.floor(state.automation.socialContentBuffer / socialContentCharacters * 100),
+  );
+  const socialFollowerChance = getSocialFollowerChance(state.upgrades);
+  const socialContactChance = getSocialContactChance(
+    state.school.followers,
+    state.upgrades,
+  );
+  const socialContactCap = getSocialContactChanceCap(state.upgrades);
+  const socialMonthlyIncome = getMonthlySocialIncome(state);
+  const socialFollowerValue = getSocialFollowerValue(state.upgrades);
+  const socialCollaborators = assignedCounts.get("writing") ?? 0;
   const averageWritingSeconds = useMemo(
     () => getAverageWritingSeconds(state.emails, state.historyArchive.emails),
     [state.emails, state.historyArchive.emails],
@@ -84,17 +87,23 @@ export function ActivitiesView({
           {AUTOMATION_ASSIGNMENTS.map((assignment) => (
             <Assignment
               key={assignment}
-              label={COLLABORATOR_ASSIGNMENT_LABELS[assignment]}
+              label={getCollaboratorAssignmentLabel(assignment, state.unlocks.social)}
               value={assignedCounts.get(assignment) ?? 0}
             />
           ))}
         </div>
       </section> : null}
 
-      {state.unlocks.social ? <section className="social-panel" aria-label="Campagne Social">
-        <div><Icon name="contact" /><span><strong>Social</strong><small>Ciclo base {GAME_CONFIG.socialAutomationIntervalMs / 1_000} s · {formatCurrency(socialIncomePerMember)} per iscritto · {formatPercent(socialTrialChance)} prova · {formatPercent(socialContactChance)} contatto</small></span></div>
-        <><div className="social-progress-label"><span>Prossimo rendimento · {formatCurrency(state.school.activeMembers * socialIncomePerMember)}</span><strong>{socialProgress}%</strong></div><ProgressBar className="social-progress" label="Progresso ciclo pubblicitario Social" value={socialProgress} /></>
-        <button type="button" disabled={!canRunSocial} onClick={onRunSocialCampaign}>{socialAction}</button>
+      {state.unlocks.social ? <section className="social-panel" aria-label="Produzione Social">
+        <div><Icon name="contact" /><span><strong>Social</strong><small>{socialCollaborators} collaboratori · email prioritarie · nessun progresso offline</small></span></div>
+        <div className="social-metrics">
+          <span><small>Follower</small><strong>{state.school.followers}</strong></span>
+          <span><small>Nuovo follower</small><strong>{formatPercent(socialFollowerChance)}</strong></span>
+          <span><small>Nuovo contatto</small><strong>{formatPercent(socialContactChance)} <small>cap {formatPercent(socialContactCap)}</small></strong></span>
+          <span><small>Sponsorizzazioni</small><strong>{formatCurrency(socialMonthlyIncome)} <small>al mese · {formatFollowerValue(socialFollowerValue)}/follower</small></strong></span>
+        </div>
+        <div className="social-progress-label"><span>Contenuto online · {Math.floor(state.automation.socialContentBuffer).toLocaleString("it-IT")}/{socialContentCharacters.toLocaleString("it-IT")} caratteri</span><strong>{socialProgress}%</strong></div>
+        <ProgressBar className="social-progress" label="Progresso contenuto Social" value={socialProgress} />
       </section> : null}
 
       <section className="operations-report" aria-label="Report operativo">
@@ -104,7 +113,7 @@ export function ActivitiesView({
         <ReportRow label="Prove dimostrative" value={state.statistics.demonstrationsGiven} conversion={percentage(state.statistics.demonstrationsGiven, state.statistics.peopleMet)} />
         <ReportRow label="Contatti ottenuti" value={state.statistics.contactsAcquired} conversion={percentage(state.statistics.contactsAcquired, state.statistics.demonstrationsGiven)} />
         <ReportRow label="Email inviate" value={state.statistics.emailsSent} conversion={percentage(state.statistics.emailsSent, state.statistics.contactsAcquired + GAME_CONFIG.initialContacts)} />
-        <ReportRow label="Prove prenotate" value={state.statistics.trialsBooked} conversion={percentage(state.statistics.trialsBooked, state.statistics.emailsSent + state.statistics.socialTrials)} />
+        <ReportRow label="Prove prenotate" value={state.statistics.trialsBooked} conversion={percentage(state.statistics.trialsBooked, state.statistics.emailsSent)} />
         <ReportRow label="Nuovi iscritti" value={state.statistics.membersEnrolled} conversion={percentage(state.statistics.membersEnrolled, state.statistics.trialsCompleted)} />
         <ReportRow label="Tempo medio di scrittura" value={`${averageWritingSeconds} s`} conversion={`${state.player.writingPower.toFixed(2)} caratteri/input`} />
         <ReportRow label="Rendimento collaboratori" value={state.statistics.automatedCharacters} conversion={`${state.collaborators.length ? Math.round(state.statistics.automatedCharacters / state.collaborators.length) : 0} caratteri/persona`} />

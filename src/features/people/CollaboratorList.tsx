@@ -2,11 +2,14 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { COLLABORATOR_ASSIGNMENT_LABELS } from "../../content/collaboratorRoles";
+import {
+  COLLABORATOR_ASSIGNMENT_LABELS,
+  getCollaboratorAssignmentLabel,
+} from "../../content/collaboratorRoles";
 import {
   COLLABORATOR_MASTERY_LEVELS,
-  COLLABORATOR_MASTERY_ROLE_LABELS,
   createInitialCollaboratorMastery,
+  getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
@@ -20,7 +23,6 @@ import type {
   FormId,
   GameState,
 } from "../../game/types";
-import { getSocialUnlockRequirementLabel } from "../../game/unlocks";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
@@ -346,8 +348,13 @@ export function CollaboratorList({
               >
                 <option value="all">Tutte le assegnazioni</option>
                 <option value="unassigned">Non assegnati</option>
-                {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => (
-                  <option value={value} key={value}>{label}</option>
+                {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+                  <option value={value} key={value}>
+                    {getCollaboratorAssignmentLabel(
+                      value as Exclude<CollaboratorAssignment, null>,
+                      state.unlocks.social,
+                    )}
+                  </option>
                 ))}
               </select>
             </label>
@@ -412,13 +419,19 @@ export function CollaboratorList({
                 <div className="collaborator-current-role" data-label="Assegnazione attuale">
                   <strong>
                     {collaborator.assignment
-                      ? COLLABORATOR_ASSIGNMENT_LABELS[collaborator.assignment]
+                      ? getCollaboratorAssignmentLabel(
+                          collaborator.assignment,
+                          state.unlocks.social,
+                        )
                       : "Non assegnato"}
                   </strong>
                   {collaborator.assignment && masteryProgress ? (
                     <span className="collaborator-mastery-level">
                       <small>
-                        {COLLABORATOR_MASTERY_ROLE_LABELS[collaborator.assignment]} · {masteryProgress.definition.name}
+                        {getCollaboratorMasteryRoleLabel(
+                          collaborator.assignment,
+                          state.unlocks.social,
+                        )} · {masteryProgress.definition.name}
                       </small>
                       <ProgressBar
                         variant="circular"
@@ -485,6 +498,10 @@ export function CollaboratorList({
                   <span>Assegnazione</span>
                   <select
                     aria-label="Assegnazione"
+                    data-tutorial-region={state.unlocks.social
+                      ? "collaborator-social-assignment"
+                      : undefined}
+                    data-tutorial-target={state.unlocks.social ? "true" : undefined}
                     value={collaborator.assignment ?? ""}
                     onChange={(event) => onAssign(
                       collaborator.id,
@@ -492,17 +509,14 @@ export function CollaboratorList({
                     )}
                   >
                     <option value="">Non assegnato</option>
-                    {Object.entries(COLLABORATOR_ASSIGNMENT_LABELS).map(([value, label]) => {
-                      const disabled = value === "social" && !state.unlocks.social;
-                      const suffix = disabled
-                        ? ` — si sblocca con ${getSocialUnlockRequirementLabel()}`
-                        : "";
-                      return (
-                        <option value={value} key={value} disabled={disabled}>
-                          {label}{suffix}
-                        </option>
-                      );
-                    })}
+                    {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+                      <option value={value} key={value}>
+                        {getCollaboratorAssignmentLabel(
+                          value as Exclude<CollaboratorAssignment, null>,
+                          state.unlocks.social,
+                        )}
+                      </option>
+                    ))}
                   </select>
                   {collaborator.assignment === "instructor" ? (
                     <InstructorCompactTraining

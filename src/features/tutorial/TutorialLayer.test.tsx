@@ -27,6 +27,8 @@ describe("TutorialLayer", () => {
       { sceneId: "first-trial", stepId: "trial-booked", activeView: "mail", target: "first-trial-row" },
       { sceneId: "first-legendary", stepId: "legendary-rarities", activeView: "mail", target: "composer-header" },
       { sceneId: "first-enrollment", stepId: "open-upgrades", activeView: "events", target: "upgrades-navigation" },
+      { sceneId: "social-evolution", stepId: "open-collaborators", activeView: "mail", target: "contacts-navigation" },
+      { sceneId: "social-evolution", stepId: "assign-social-collaborator", activeView: "contacts", target: "collaborator-social-assignment" },
     ];
 
     for (const expectation of expectations) {
@@ -37,6 +39,41 @@ describe("TutorialLayer", () => {
         activeView: expectation.activeView,
       })).toContain(expectation.target);
     }
+  });
+
+  it("starts the paused Social tutorial only after the permanent unlock", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "social-evolution")!;
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const unlocked = {
+      ...initial,
+      unlocks: { ...initial.unlocks, social: true },
+    };
+    const assignmentStep = scene.steps.find(
+      ({ id }) => id === "assign-social-collaborator",
+    )!;
+
+    expect(scene.pauseWhileActive).toBe(true);
+    expect(scene.canStart({ state: initial, activeView: "contacts" })).toBe(false);
+    expect(scene.canStart({ state: unlocked, activeView: "contacts" })).toBe(true);
+    expect(assignmentStep.kind).toBe("objective");
+    if (assignmentStep.kind !== "objective") return;
+    expect(assignmentStep.isComplete({ state: unlocked, activeView: "contacts" })).toBe(false);
+    expect(assignmentStep.isComplete({
+      state: {
+        ...unlocked,
+        collaborators: [{
+          id: "social-tutorial-collaborator",
+          contactId: initial.contacts[0].id,
+          displayName: "Collaboratore Social",
+          joinedAt: 1_000,
+          forms: [],
+          instructorForms: [],
+          assignment: "writing",
+          rarity: "ultra-rare",
+        }],
+      },
+      activeView: "contacts",
+    })).toBe(true);
   });
 
   it("keeps the selected region in focus and disables the others", () => {

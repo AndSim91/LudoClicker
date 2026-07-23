@@ -231,8 +231,8 @@ export function resolveTrial(
     nextState = addMessage(
       nextState,
       now + 1,
-      "Canale Social disponibile",
-      "La scuola ha dimensioni sufficienti per sostenere campagne e raccolta passiva di contatti. Il nuovo pannello è disponibile in Attività.",
+      "La Redazione si è evoluta in Social",
+      "La scuola ha raggiunto 35 iscritti attivi. I collaboratori Social possono ora produrre contenuti, ottenere follower e contatti e alimentare le sponsorizzazioni mensili.",
       "system",
     );
   }

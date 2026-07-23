@@ -9,13 +9,13 @@ interface AppRailItem {
   label: string;
   icon: IconName;
   devOnly?: boolean;
-  tutorialRegion?: "events-navigation" | "upgrades-navigation";
+  tutorialRegion?: "events-navigation" | "contacts-navigation" | "upgrades-navigation";
 }
 
 const items: AppRailItem[] = [
   { id: "mail", label: "Posta", icon: "mail" },
   { id: "events", label: "Eventi", icon: "flag", tutorialRegion: "events-navigation" },
-  { id: "contacts", label: "Iscritti", icon: "people" },
+  { id: "contacts", label: "Iscritti", icon: "people", tutorialRegion: "contacts-navigation" },
   { id: "tournaments", label: "Tornei", icon: "trophy" },
   { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },
   { id: "statistics", label: "Attività", icon: "tasks" },

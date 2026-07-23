@@ -1,15 +1,12 @@
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
 import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
-import { roundCurrency } from "./economy";
-import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
 import {
   getSocialContactChance,
-  getSocialIncomePerMember,
-  getSocialTrialChance,
+  getSocialFollowerChance,
 } from "./social";
-import type { GameState, ScheduledTrial } from "./types";
+import type { GameState } from "./types";
 
 export function improveRandomAthletes(
   state: GameState,
@@ -90,70 +87,24 @@ export function improveRandomAthletes(
   };
 }
 
-export function scheduleSocialTrials(
-  state: GameState,
-  trialCount: number,
-  now: number,
-): GameState {
-  if (trialCount <= 0) return state;
-  const acquired = createAcquiredContacts(state, trialCount, "social", now);
-  let nextSeed = acquired.nextSeed;
-  const trialOffset = state.historyArchive.completedTrials + state.scheduledTrials.length;
-  const trials: ScheduledTrial[] = acquired.contacts.map((contact, index) => {
-    const [resultRoll, seedAfterResult] = nextRandom(nextSeed);
-    nextSeed = seedAfterResult;
-    return {
-      id: makeGameId("trial", now, trialOffset + index),
-      contactId: contact.id,
-      startsAt: now,
-      resolvesAt: now + GAME_CONFIG.trialDurationMs,
-      resultSeed: Math.floor(resultRoll * 2_147_483_647),
-      status: "scheduled",
-    };
-  });
-
-  return {
-    ...state,
-    randomSeed: nextSeed,
-    legendaryCollaborators: addLegendaryEncounters(
-      state.legendaryCollaborators,
-      acquired.contacts,
-    ),
-    contacts: mergeAcquiredContacts(
-      state.contacts,
-      acquired.contacts.map((contact) => ({ ...contact, status: "trialScheduled" as const })),
-    ),
-    scheduledTrials: [...state.scheduledTrials, ...trials],
-    statistics: {
-      ...state.statistics,
-      trialsBooked: state.statistics.trialsBooked + trialCount,
-      socialTrials: state.statistics.socialTrials + trialCount,
-    },
-  };
-}
-
-export interface SocialAutomationOutcome {
+export interface SocialContentOutcome {
   state: GameState;
   cycles: number;
-  eurosEarned: number;
   followersGained: number;
-  trialsBooked: number;
   contactsAcquired: number;
 }
 
-export function resolveSocialAutomationCycles(
+export function resolveSocialContentCycles(
   state: GameState,
   cycleCount: number,
   now: number,
-): SocialAutomationOutcome {
+): SocialContentOutcome {
   const cycles = Math.max(0, Math.floor(cycleCount));
   if (cycles === 0) {
     return {
       state,
       cycles: 0,
-      eurosEarned: 0,
       followersGained: 0,
-      trialsBooked: 0,
       contactsAcquired: 0,
     };
   }
@@ -161,38 +112,34 @@ export function resolveSocialAutomationCycles(
   let nextSeed = state.randomSeed;
   let followers = state.school.followers;
   let followersGained = 0;
-  let eurosEarned = 0;
-  let trialsBooked = 0;
   let contactsAcquired = 0;
   for (let index = 0; index < cycles; index += 1) {
-    const trialChance = getSocialTrialChance(followers);
-    const contactChance = getSocialContactChance(followers);
-    eurosEarned += state.school.activeMembers * getSocialIncomePerMember(followers);
+    const followerChance = getSocialFollowerChance(state.upgrades);
+    const contactChance = getSocialContactChance(followers, state.upgrades);
 
     const [followerRoll, seedAfterFollower] = nextRandom(nextSeed);
-    const [trialRoll, seedAfterTrial] = nextRandom(seedAfterFollower);
-    const [contactRoll, seedAfterContact] = nextRandom(seedAfterTrial);
+    const [contactRoll, seedAfterContact] = nextRandom(seedAfterFollower);
     nextSeed = seedAfterContact;
-    if (followerRoll < GAME_CONFIG.socialFollowerChance) {
+    if (followerRoll < followerChance) {
       followers += 1;
       followersGained += 1;
     }
-    if (trialRoll < trialChance) trialsBooked += 1;
     if (contactRoll < contactChance) contactsAcquired += 1;
   }
 
-  eurosEarned = roundCurrency(eurosEarned);
   let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
     school: {
       ...state.school,
-      euros: roundCurrency(state.school.euros + eurosEarned),
       followers,
+      historicMembers: state.school.historicMembers + followersGained,
     },
     statistics: {
       ...state.statistics,
-      eurosEarned: roundCurrency(state.statistics.eurosEarned + eurosEarned),
+      socialContentCycles: state.statistics.socialContentCycles + cycles,
+      socialFollowersGained:
+        state.statistics.socialFollowersGained + followersGained,
     },
   };
 
@@ -214,16 +161,10 @@ export function resolveSocialAutomationCycles(
     };
   }
 
-  if (trialsBooked > 0) {
-    nextState = scheduleSocialTrials(nextState, trialsBooked, now);
-  }
-
   return {
     state: nextState,
     cycles,
-    eurosEarned,
     followersGained,
-    trialsBooked,
     contactsAcquired,
   };
 }

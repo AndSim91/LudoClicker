@@ -11,29 +11,30 @@ import {
 
 describe("game unlock rules", () => {
   it("uses one shared member requirement for Social logic and labels", () => {
-    expect(GAME_CONFIG.socialUnlockMembers).toBe(15);
+    expect(GAME_CONFIG.socialUnlockMembers).toBe(35);
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers - 1)).toBe(false);
     expect(hasSocialMemberRequirement(GAME_CONFIG.socialUnlockMembers)).toBe(true);
-    expect(getSocialUnlockRequirementLabel()).toBe("15 iscritti");
+    expect(getSocialUnlockRequirementLabel()).toBe("35 iscritti attivi");
   });
 
-  it("starts Social with one Follower per active member and initializes them only once", () => {
+  it("starts Social with one Follower per Fame point and initializes them only once", () => {
     const initial = createInitialState(1_000);
     const eligible = {
       ...initial,
       school: {
         ...initial.school,
         activeMembers: GAME_CONFIG.socialUnlockMembers,
+        historicMembers: 47,
       },
     };
 
     const unlocked = unlockSocialIfEligible(eligible);
     expect(unlocked.unlocks.social).toBe(true);
-    expect(unlocked.school.followers).toBe(GAME_CONFIG.socialUnlockMembers);
+    expect(unlocked.school.followers).toBe(47);
 
     const withMoreFollowers = {
       ...unlocked,
-      school: { ...unlocked.school, followers: GAME_CONFIG.socialUnlockMembers + 10 },
+      school: { ...unlocked.school, followers: 57 },
     };
     expect(unlockSocialIfEligible(withMoreFollowers)).toBe(withMoreFollowers);
   });

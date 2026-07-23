@@ -5,7 +5,6 @@ import {
 import {
   processAutomaticTeaching,
   processAutomation,
-  runSocialCampaign as executeSocialCampaign,
 } from "./automationFlow";
 import {
   recruitCollaborator,
@@ -114,10 +113,6 @@ function advanceAutomation(
   return processAutomation(state, now, gainMultiplier, automationDependencies);
 }
 
-function runSocialCampaign(state: GameState, now: number): GameState {
-  return executeSocialCampaign(state, now, automationDependencies);
-}
-
 function tick(state: GameState, now: number, gainMultiplier: number): GameState {
   let nextState = advanceAutomation(state, now, gainMultiplier);
 
@@ -177,7 +172,6 @@ const ACTION_HANDLERS = createGameActionHandlers({
   write,
   sendEmail,
   tick,
-  runSocialCampaign,
   startFormTraining,
 });
 
@@ -204,10 +198,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   const nextState = dispatchGameAction(state, action, ACTION_HANDLERS);
   const now = "now" in action ? action.now : state.lastSavedAt;
   const reconciledState = recruitEnrolledLegendaryCollaborators(nextState, now);
-  if (
-    action.type === "OFFLINE_PASSIVE_PROGRESS" ||
-    action.type === "RESUME_FROM_PAUSE"
-  ) {
+  if (action.type === "RESUME_FROM_PAUSE") {
     return compactChangedHistory(state, reconciledState, action);
   }
 

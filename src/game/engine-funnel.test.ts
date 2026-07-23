@@ -151,7 +151,6 @@ describe("game engine: funnel", () => {
         writing: 0,
         events: 0,
         lessons: 0,
-        social: 0,
         equipment: 0,
         instructor: 0,
       },
@@ -506,7 +505,7 @@ describe("game engine: funnel", () => {
     expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(false);
   });
 
-  it("starts Social with one Follower per active member when a trial reaches the unlock", () => {
+  it("starts Social with one Follower per Fame point when a trial reaches the unlock", () => {
     const initial = createInitialState(1_000);
     const contact = initial.contacts.find((candidate) => !candidate.specialProfileId)!;
     const trial = {
@@ -514,7 +513,7 @@ describe("game engine: funnel", () => {
       contactId: contact.id,
       startsAt: 1_500,
       resolvesAt: 2_000,
-      resultSeed: 1,
+      resultSeed: 0,
       status: "scheduled" as const,
     };
     const ready = {
@@ -523,6 +522,7 @@ describe("game engine: funnel", () => {
         ...initial.school,
         activeMembers: GAME_CONFIG.socialUnlockMembers - 1,
         peakActiveMembers: GAME_CONFIG.socialUnlockMembers - 1,
+        historicMembers: 80,
       },
       contacts: initial.contacts.map((candidate) =>
         candidate.id === contact.id
@@ -536,7 +536,8 @@ describe("game engine: funnel", () => {
 
     expect(unlocked.unlocks.social).toBe(true);
     expect(unlocked.school.activeMembers).toBe(GAME_CONFIG.socialUnlockMembers);
-    expect(unlocked.school.followers).toBe(GAME_CONFIG.socialUnlockMembers);
+    expect(unlocked.school.historicMembers).toBe(81);
+    expect(unlocked.school.followers).toBe(81);
   });
 
   it("makes enrollment equally difficult and progressive for every Legendary", () => {
@@ -589,7 +590,7 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
     expect(protectedAttempt.unlocks.forms).toBe(true);
     expect(protectedAttempt.messages.find((message) => message.subject === "Nuovo collaboratore disponibile")?.preview)
-      .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Preparatore Atletico, Social, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
+      .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Preparatore Atletico, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
   });
 
   it("applies the same enrollment progression to Andrea and every other Legendary", () => {

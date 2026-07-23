@@ -12,7 +12,6 @@ import { cancelMemberEnrollment } from "./membershipFlow";
 import { toggleMemberFavorite } from "./memberPreferences";
 import { playChroniclesHand } from "./chroniclesFlow";
 import { freezeGameState } from "./offline";
-import { processOfflinePassiveProgress } from "./offlineProgress";
 import { updateProfileName } from "./profileFlow";
 import { foundSchool } from "./schoolProgressionFlow";
 import {
@@ -39,7 +38,6 @@ export interface GameActionHandlerDependencies {
   write: (state: GameState, now: number) => GameState;
   sendEmail: (state: GameState, now: number) => GameState;
   tick: (state: GameState, now: number, gainMultiplier: number) => GameState;
-  runSocialCampaign: (state: GameState, now: number) => GameState;
   startFormTraining: (
     state: GameState,
     personId: string,
@@ -75,12 +73,6 @@ export function createGameActionHandlers(
       state,
       action.now,
       action.elapsedMs,
-    ),
-    OFFLINE_PASSIVE_PROGRESS: (state, action) => processOfflinePassiveProgress(
-      state,
-      action.now,
-      action.elapsedMs,
-      action.rawElapsedMs,
     ),
     REPLACE_STATE: (_state, action) => action.state,
     ADMIN_ADD_CONTACTS: (state, action) => addAdminContacts(state, action.amount),
@@ -136,7 +128,6 @@ export function createGameActionHandlers(
       state,
       action.collaboratorId,
     ),
-    RUN_SOCIAL_CAMPAIGN: (state, action) => dependencies.runSocialCampaign(state, action.now),
     START_FORM_TRAINING: (state, action) => dependencies.startFormTraining(
       state,
       action.personId,

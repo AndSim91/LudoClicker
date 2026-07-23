@@ -24,7 +24,6 @@ function collaborator(assignment: Collaborator["assignment"]): Collaborator {
       writing: 0,
       events: 0,
       lessons: 0,
-      social: 0,
       equipment: 0,
       instructor: 0,
     },
@@ -123,7 +122,7 @@ describe("game scheduler", () => {
     const state = stateAtNow();
     const automated: GameState = {
       ...state,
-      collaborators: [collaborator("social")],
+      collaborators: [collaborator("writing")],
       unlocks: { ...state.unlocks, social: true },
     };
     let quarterTicks = automated;
@@ -135,8 +134,8 @@ describe("game scheduler", () => {
       now: NOW + 1_000,
     });
 
-    expect(quarterTicks.automation.socialBuffer).toBeCloseTo(
-      oneHeartbeat.automation.socialBuffer,
+    expect(quarterTicks.automation.socialContentBuffer).toBeCloseTo(
+      oneHeartbeat.automation.socialContentBuffer,
       10,
     );
     expect(quarterTicks.automation.lastProcessedAt).toBe(

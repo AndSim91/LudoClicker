@@ -182,13 +182,10 @@ export type UpgradeId =
   | "dedicated-helper"
   | "prepared-room"
   | "memorable-experience"
-  | "updated-page"
-  | "editorial-calendar"
-  | "lesson-photos"
-  | "demo-video"
-  | "weekly-column"
-  | "viral-post"
-  | "professional-management"
+  | "social-content-synthesis"
+  | "social-editorial-plan"
+  | "social-content-distribution"
+  | "social-sponsorships"
   | "pre-event-check"
   | "maintenance-kit"
   | "organized-rack"
@@ -291,7 +288,7 @@ export interface SchoolFoundationDetails {
 }
 
 export type CollaboratorAssignment =
-  "writing" | "events" | "lessons" | "social" | "equipment" | "instructor" | null;
+  "writing" | "events" | "lessons" | "equipment" | "instructor" | null;
 
 export type CollaboratorMasteryRole = Exclude<CollaboratorAssignment, null>;
 export type CollaboratorMastery = Record<CollaboratorMasteryRole, number>;
@@ -375,8 +372,8 @@ export interface Statistics {
   collaboratorsRecruited: number;
   automatedCharacters: number;
   socialContacts: number;
-  socialTrials: number;
-  socialCampaigns: number;
+  socialContentCycles: number;
+  socialFollowersGained: number;
   formsCompleted: number;
   narrativeEvents: number;
 }
@@ -611,7 +608,7 @@ export interface GameState {
     autoSendEmails: boolean;
     writingBuffer: number;
     lessonBuffer: number;
-    socialBuffer: number;
+    socialContentBuffer: number;
     equipmentBuffer: number;
     offlineContactBuffer: number;
     lastImprovedAthlete?: string;
@@ -641,7 +638,6 @@ export type GameAction =
   | { type: "SET_AUTOMATIC_EMAIL_SENDING"; enabled: boolean; now: number }
   | { type: "TICK"; now: number; gainMultiplier?: number }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
-  | { type: "OFFLINE_PASSIVE_PROGRESS"; now: number; elapsedMs: number; rawElapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }
   | { type: "ADMIN_ADD_CONTACTS"; amount: number }
   | { type: "ADMIN_ADD_MEMBERS"; amount: number }
@@ -676,7 +672,6 @@ export type GameAction =
       collaboratorId: string;
       now: number;
     }
-  | { type: "RUN_SOCIAL_CAMPAIGN"; now: number }
   | {
       type: "START_FORM_TRAINING";
       personId: string;

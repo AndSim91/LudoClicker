@@ -1,4 +1,3 @@
-import { getUpgradeEffectTotal } from "../content/upgrades";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
   getAthleteImmunityStatus,
@@ -10,7 +9,7 @@ import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { makeGameId } from "./ids";
-import { getMonthlyMemberFees } from "./membershipEconomy";
+import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
 import type { GameState, SpecialCollaboratorId } from "./types";
@@ -265,7 +264,6 @@ function processMemberDepartures(
 export function collectFees(state: GameState, now: number, gainMultiplier: number): GameState {
   if (now < state.school.nextFeeAt) return state;
   const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.gameMonthMs) + 1;
-  const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
   let nextState = state;
   for (let period = 0; period < periods; period += 1) {
     const currentMonth = nextState.school.currentMonth;
@@ -274,12 +272,10 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
       currentMonth,
       nextState.school.nextFeeAt,
     );
-    const earned = scaleCurrencyGain((
-      (getMonthlyMemberFees(nextState) +
-        nextState.network.schools.length * GAME_CONFIG.networkIncomePerSchool) *
-      (1 + getUpgradeEffectTotal(nextState.upgrades, "incomeMultiplier")) *
-      networkMultiplier
-    ), gainMultiplier);
+    const earned = scaleCurrencyGain(
+      getMonthlyOperationalIncome(nextState),
+      gainMultiplier,
+    );
     nextState = {
       ...nextState,
       school: {

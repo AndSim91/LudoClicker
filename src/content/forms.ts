@@ -39,7 +39,6 @@ export interface CollaboratorFormBonuses {
   writing: number;
   events: number;
   lessons: number;
-  social: number;
   equipment: number;
   instructor: number;
   all: number;
@@ -232,7 +231,6 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
     writing: 0,
     events: 0,
     lessons: 0,
-    social: 0,
     equipment: 0,
     instructor: 0,
     all: collaborator.forms.includes("form-7")
@@ -245,7 +243,6 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
   bonuses.lessons = latestBranchBonus(collaborator.forms, "Staffa");
   const doubleBonus = latestBranchBonus(collaborator.forms, "Doppia spada corta");
   bonuses.writing = doubleBonus;
-  bonuses.social = doubleBonus;
   return bonuses;
 }
 

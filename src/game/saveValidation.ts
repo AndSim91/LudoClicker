@@ -233,6 +233,10 @@ export function isValidGameState(value: unknown): value is GameState {
     Array.isArray(state.collaborators) &&
     state.collaborators.every((collaborator) =>
       (collaborator.rarity === "ultra-rare" || collaborator.rarity === "legendary") &&
+      (
+        collaborator.assignment === null ||
+        COLLABORATOR_MASTERY_ROLES.includes(collaborator.assignment)
+      ) &&
       isUniqueFormIdList(collaborator.forms) &&
       isUniqueFormIdList(collaborator.instructorForms) &&
       Array.isArray(collaborator.formBranchPreferences) &&
@@ -257,17 +261,22 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["extra-form"] === "number" &&
     typeof state.upgrades?.pagosport === "number" &&
     typeof state.upgrades?.["divine-touch"] === "number" &&
+    typeof state.upgrades?.["social-content-synthesis"] === "number" &&
+    typeof state.upgrades?.["social-editorial-plan"] === "number" &&
+    typeof state.upgrades?.["social-content-distribution"] === "number" &&
+    typeof state.upgrades?.["social-sponsorships"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.autoSendEmails === "boolean" &&
     typeof state.automation?.lessonBuffer === "number" &&
+    typeof state.automation?.socialContentBuffer === "number" &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     (state.automation?.lastImprovedAthlete === undefined ||
       typeof state.automation.lastImprovedAthlete === "string") &&
     (state.automation?.lastImprovedAthleteId === undefined ||
       typeof state.automation.lastImprovedAthleteId === "string") &&
     typeof state.statistics?.automatedCharacters === "number" &&
-    typeof state.statistics?.socialTrials === "number" &&
-    typeof state.statistics?.socialCampaigns === "number" &&
+    typeof state.statistics?.socialContentCycles === "number" &&
+    typeof state.statistics?.socialFollowersGained === "number" &&
     typeof state.statistics?.formsCompleted === "number" &&
     typeof state.statistics?.membersDeparted === "number" &&
     typeof state.statistics?.narrativeEvents === "number" &&

@@ -54,7 +54,7 @@ const UPGRADE_PRIORITY: UpgradeId[] = [
   "shared-calendar",
   "pre-event-check",
   "maintenance-kit",
-  "editorial-calendar",
+  "social-content-synthesis",
 ];
 
 function dispatch(state: GameState, action: GameAction): GameState {

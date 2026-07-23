@@ -252,12 +252,7 @@ export function App() {
             }
           />
         ) : activeView === "statistics" ? (
-          <ActivitiesView
-            state={state}
-            onRunSocialCampaign={() =>
-              dispatch({ type: "RUN_SOCIAL_CAMPAIGN", now: getGameNow() })
-            }
-          />
+          <ActivitiesView state={state} />
         ) : activeView === "contacts" ? (
           <PeopleView
             state={state}
