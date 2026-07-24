@@ -234,6 +234,10 @@ function StandardSectorCard({
       </div>
       {role === "equipment" ? (
         <div className="sector-card-equipment">
+          <span className="sector-card-equipment-summary">
+            <small>Usura attrezzatura</small>
+            <strong>{Math.round(state.equipment.wear)}/100</strong>
+          </span>
           <EquipmentConditionBar
             equipment={state.equipment}
             compact
@@ -253,7 +257,12 @@ function StandardSectorCard({
         </div>
       )}
 
-      <button type="button" className="sector-manage-button" onClick={onOpen}>
+      <button
+        type="button"
+        className="sector-manage-button"
+        disabled={assigned.length === 0}
+        onClick={onOpen}
+      >
         Gestisci settore
         <Icon name="arrowRight" />
       </button>

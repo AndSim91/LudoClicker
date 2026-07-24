@@ -4,6 +4,23 @@ import type { Collaborator } from "../../game/types";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 
 describe("getCollaboratorAutomationPresentation", () => {
+  it("describes idle equipment as waiting and explains why", () => {
+    const initial = createInitialState(1_000);
+
+    const presentation = getCollaboratorAutomationPresentation({
+      state: initial,
+      collaboratorId: "equipment-collaborator",
+      assignment: "equipment",
+      now: 1_000,
+      activeEmail: undefined,
+    });
+
+    expect(presentation).toEqual({
+      title: "In attesa",
+      detail: "Attrezzatura in ordine",
+    });
+  });
+
   it("shows when Redazione is waiting for the player's final send action", () => {
     const initial = createInitialState(1_000);
     const activeEmail = {

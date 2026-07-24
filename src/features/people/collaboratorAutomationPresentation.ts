@@ -173,13 +173,13 @@ export function getCollaboratorAutomationPresentation({
   if (assignment === "equipment") {
     const damagedSwords = getEffectiveDamagedSwords(state.equipment);
     if (state.equipment.wear <= 0 && damagedSwords <= 0) {
-      return { title: "Usura attrezzatura: 0/100", detail: "In attesa" };
+      return { title: "In attesa", detail: "Attrezzatura in ordine" };
     }
     const repairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
     if (!repairTarget) {
       return {
-        title: `Usura attrezzatura: ${Math.round(state.equipment.wear)}/100`,
-        detail: "In attesa: tutte le spade sane sono in uso",
+        title: "In attesa",
+        detail: "Tutte le spade sane sono in uso",
       };
     }
     const isRepairingSword = repairTarget === "sword";

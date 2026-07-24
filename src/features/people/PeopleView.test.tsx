@@ -52,6 +52,10 @@ describe("PeopleView", () => {
     expect(screen.getByRole("region", { name: "Gestione aggregata dei collaboratori" })).toBeVisible();
     expect(screen.queryByText("Collaboratore Aggregato 0")).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /^Preset [123]/ })).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: "Gestisci settore" })).toHaveLength(3);
+    screen.getAllByRole("button", { name: "Gestisci settore" }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Aumenta collaboratori in Redazione" }));
     expect(onIncrement).toHaveBeenCalledWith("writing");
@@ -89,6 +93,95 @@ describe("PeopleView", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /^Preset 1/ }));
     expect(onApply).toHaveBeenCalledWith("preset-1");
+  });
+
+  it("enables sector management only when the sector has assigned collaborators", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = Array.from({ length: 9 }, (_, index) => ({
+      id: `aggregate-${index}`,
+      contactId: initial.contacts[0].id,
+      displayName: `Collaboratore Aggregato ${index}`,
+      joinedAt: 1_000 + index,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      formBranchPreferences: [],
+      assignment: index === 0 ? "writing" as const : null,
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare" as const,
+    }));
+    const state = {
+      ...initial,
+      collaborators,
+      unlocks: { ...initial.unlocks, collaborators: true },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          writing: 1,
+        },
+      },
+    };
+
+    render(
+      <PeopleView
+        state={state}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onSaveCollaboratorPreset={() => undefined}
+        onApplyCollaboratorPreset={() => undefined}
+        onIncrementCollaboratorAssignment={() => undefined}
+      />,
+    );
+
+    const writingCard = screen.getByRole("heading", { name: "Redazione" }).closest("article");
+    expect(writingCard).not.toBeNull();
+    expect(within(writingCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeEnabled();
+
+    const eventsCard = screen.getByRole("heading", { name: "Eventi" }).closest("article");
+    expect(eventsCard).not.toBeNull();
+    expect(within(eventsCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeDisabled();
+  });
+
+  it("keeps the idle equipment status separate from its wear indicator", () => {
+    const initial = createInitialState(1_000);
+    const equipmentCollaborator = {
+      id: "aggregate-equipment",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Attrezzatura",
+      joinedAt: 1_000,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      assignment: "equipment" as const,
+      rarity: "rare" as const,
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [equipmentCollaborator],
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const equipmentCard = screen.getByRole("heading", { name: "Attrezzatura" }).closest("article");
+    expect(equipmentCard).not.toBeNull();
+    const card = within(equipmentCard!);
+    expect(card.getByText("In attesa")).toBeVisible();
+    expect(card.getByText("Attrezzatura in ordine")).toBeVisible();
+    expect(card.getByText("Usura attrezzatura")).toBeVisible();
+    expect(card.getByText("0/100")).toBeVisible();
+    expect(card.getByRole("progressbar", {
+      name: "Condizione attrezzatura del settore Attrezzatura",
+    })).toBeVisible();
   });
 
   it("lets users add and remove an enrolled athlete from favorites", () => {
@@ -1245,12 +1338,16 @@ describe("PeopleView", () => {
       />,
     );
 
-    const trainingSelect = screen.getByRole("combobox", {
+    const trainingPicker = screen.getByRole("radiogroup", {
       name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
     });
-    expect(trainingSelect).toBeVisible();
-    fireEvent.change(trainingSelect, { target: { value: "form-3-staff" } });
-    expect(screen.getByRole("img", { name: /Forma 3/ })).toBeVisible();
+    expect(trainingPicker).toBeVisible();
+    expect(screen.queryByRole("combobox", {
+      name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
+    })).not.toBeInTheDocument();
+    const staffOption = within(trainingPicker).getByRole("radio", { name: /Forma 3 Staffa/ });
+    fireEvent.click(staffOption);
+    expect(staffOption).toHaveAttribute("aria-checked", "true");
   });
 
   it("shows the summer break instead of allowing Form training in July", () => {

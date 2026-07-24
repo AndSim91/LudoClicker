@@ -30,6 +30,7 @@ import {
 import type { Collaborator, FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { TrainingFormPreview } from "./PersonPresentation";
+import { TrainingOptionPicker } from "./TrainingOptionPicker";
 
 type InstructorTeachingEntry = {
   id: string;
@@ -471,54 +472,53 @@ export function TrainingControl({
         : selectedCost === 0
           ? "Avvia gratuitamente"
           : `Paga e avvia · ${formatCurrency(selectedCost)}`;
+  const trainingOptions = available.map((definition) => {
+    const qualification = qualificationDefinitions.some(
+      (candidate) => candidate.id === definition.id,
+    );
+    const cost = getDisplayedTrainingCost(
+      state,
+      personId,
+      collaborator,
+      definition,
+      qualification,
+    );
+    const hasInstructorDiscount =
+      !qualification && collaborator?.assignment !== "instructor" && cost < definition.cost;
+    return {
+      definition,
+      costLabel: formatCurrency(cost),
+      contextLabel: qualification
+        ? "Attestato"
+        : hasInstructorDiscount
+          ? "Sconto Istruttore"
+          : cost > definition.cost
+            ? "Qualifica inclusa"
+            : undefined,
+    };
+  });
 
   return (
     <div className={`training-control${variantClass}`}>
       <div className="training-form-choice">
         {needsSelection ? (
-          <label>
-            <span>
-              {qualificationDefinitions.length > 0
-                ? "Scegli la prossima formazione"
-                : "Scegli la specializzazione d'arma"}
-            </span>
-            <select
-              aria-label={`Formazione per ${displayName}`}
-              value={selectedFormId}
-              onChange={(event) => setSelectedFormId(event.target.value as FormId)}
-            >
-              <option value="">Seleziona</option>
-              {available.map((definition) => {
-                const qualification = qualificationDefinitions.some(
-                  (candidate) => candidate.id === definition.id,
-                );
-                const cost = getDisplayedTrainingCost(
-                  state,
-                  personId,
-                  collaborator,
-                  definition,
-                  qualification,
-                );
-                const hasInstructorDiscount =
-                  !qualification && collaborator?.assignment !== "instructor" && cost < definition.cost;
-                return (
-                  <option key={definition.id} value={definition.id}>
-                    {qualification ? "Qualifica · " : ""}{definition.longName}
-                    {definition.bonusLabel ? ` · ${definition.bonusLabel}` : ""} · {formatCurrency(cost)}
-                    {hasInstructorDiscount ? " · sconto Istruttore" : ""}
-                    {!qualification && cost > definition.cost ? " · qualifica inclusa" : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
+          <TrainingOptionPicker
+            displayName={displayName}
+            label={qualificationDefinitions.length > 0
+              ? "Scegli la prossima formazione"
+              : "Scegli la specializzazione d'arma"}
+            options={trainingOptions}
+            selectedFormId={selectedFormId}
+            onSelect={setSelectedFormId}
+          />
         ) : (
           <span className="training-form-label">Prossima formazione · anno formativo {trainingYear}</span>
         )}
-        {selected ? <TrainingFormPreview definition={selected} /> : null}
+        {selected && !needsSelection ? <TrainingFormPreview definition={selected} /> : null}
       </div>
       <button
         type="button"
+        className="training-start-button"
         disabled={!selected || state.school.euros < selectedCost}
         onClick={() => selected && onStartTraining(personId, selected.id)}
       >

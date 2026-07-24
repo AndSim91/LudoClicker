@@ -47,10 +47,6 @@
   font-size: 11px;
 }
 
-.training-control select {
-  width: 100%;
-}
-
 .training-form-preview {
   display: flex;
   min-width: 0;
@@ -91,7 +87,141 @@
   white-space: nowrap;
 }
 
-.training-control button {
+.training-option-picker {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.training-option-picker-label {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.training-option-list {
+  display: grid;
+  max-height: 190px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 6px;
+  overflow-y: auto;
+  padding: 1px;
+  scrollbar-width: thin;
+}
+
+.training-control .training-option-card {
+  display: grid;
+  min-width: 0;
+  min-height: 58px;
+  grid-template-columns: 34px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: inherit;
+  font-weight: 400;
+  text-align: left;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.training-control .training-option-card:hover {
+  border-color: var(--blue-500);
+  background: var(--blue-050);
+}
+
+.training-control .training-option-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue-600) 40%, transparent);
+  outline-offset: 1px;
+}
+
+.training-control .training-option-card.is-selected {
+  border-color: var(--blue-600);
+  background: var(--blue-050);
+  box-shadow: inset 3px 0 var(--blue-600);
+}
+
+.training-option-card > img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.training-option-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.training-option-copy > strong {
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.training-option-copy > small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 8px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.training-option-meta {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 5px;
+  margin-top: 2px;
+}
+
+.training-option-meta > strong {
+  color: var(--blue-700);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.training-option-meta > small {
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.training-option-radio {
+  display: grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.training-option-card.is-selected .training-option-radio {
+  border-color: var(--blue-600);
+}
+
+.training-option-radio i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.training-option-card.is-selected .training-option-radio i {
+  background: var(--blue-600);
+}
+
+.training-control > .training-start-button {
   min-height: 36px;
   padding: 5px 9px;
   border: 1px solid var(--blue-600);
@@ -102,7 +232,7 @@
   font-weight: 600;
 }
 
-.training-control button:disabled {
+.training-control > .training-start-button:disabled {
   border-color: var(--line-strong);
   color: var(--ink-muted);
   background: var(--surface-muted);

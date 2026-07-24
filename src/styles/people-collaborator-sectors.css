@@ -568,8 +568,14 @@
   border-top: 1px solid var(--line);
 }
 
-.sector-manage-button:hover {
+.sector-manage-button:hover:not(:disabled) {
   background: var(--blue-050);
+}
+
+.sector-manage-button:disabled {
+  color: var(--ink-soft);
+  background: var(--surface-muted);
+  cursor: default;
 }
 
 .sector-manage-button svg {
@@ -692,6 +698,22 @@
 
 .sector-card-equipment {
   padding: 0 11px 11px;
+}
+
+.sector-card-equipment-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.sector-card-equipment-summary strong {
+  color: var(--ink);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
 }
 
 .sector-card-equipment .equipment-condition {

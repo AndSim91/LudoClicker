@@ -147,7 +147,7 @@
 :root[data-theme="dark"] .foundation-form button:disabled,
 :root[data-theme="dark"] .upgrade-row button:disabled,
 :root[data-theme="dark"] .event-row > button:disabled,
-:root[data-theme="dark"] .training-control button:disabled,
+:root[data-theme="dark"] .training-control > .training-start-button:disabled,
 :root[data-theme="dark"] .social-panel > button:disabled,
 :root[data-theme="dark"] .profile-dialog button:disabled {
   background: var(--surface-muted);
