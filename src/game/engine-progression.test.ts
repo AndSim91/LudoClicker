@@ -602,7 +602,7 @@ describe("game engine: progression", () => {
       formId: "form-1",
       trainingTrack: "instructor",
       trainingPhase: "instructor",
-      trainingBaseDurationMs: 5_000,
+      trainingBaseDurationMs: 7_500,
     });
   });
 
@@ -928,7 +928,7 @@ describe("game engine: progression", () => {
       .toBeUndefined();
   });
 
-  it("prioritizes effective departure risk before favorites", () => {
+  it("prioritizes favorites before effective departure risk", () => {
     const initial = createInitialState(1_000);
     const highRisk = {
       ...initial.contacts[0],
@@ -944,12 +944,9 @@ describe("game engine: progression", () => {
       id: "low-risk-favorite",
       status: "enrolled" as const,
       acquiredAt: 2_000,
-      forms: [
-        "form-1", "course-x", "form-2", "course-y",
-        "form-3-long", "form-4-long", "form-5-long", "form-6", "form-7",
-      ] as FormId[],
+      forms: [] as FormId[],
       favorite: true,
-      rarity: "common" as const,
+      rarity: "legendary" as const,
     };
     const instructor = {
       id: "risk-priority-instructor",
@@ -971,9 +968,9 @@ describe("game engine: progression", () => {
 
     const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
 
-    expect(teaching.contacts.find((contact) => contact.id === highRisk.id)?.training?.formId)
+    expect(teaching.contacts.find((contact) => contact.id === lowRiskFavorite.id)?.training?.formId)
       .toBe("form-1");
-    expect(teaching.contacts.find((contact) => contact.id === lowRiskFavorite.id)?.training)
+    expect(teaching.contacts.find((contact) => contact.id === highRisk.id)?.training)
       .toBeUndefined();
   });
 

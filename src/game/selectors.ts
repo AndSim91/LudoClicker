@@ -11,6 +11,7 @@ import { isInstructorForm } from "../content/forms";
 import { getCollaboratorProductivity } from "../content/forms";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
+import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
@@ -48,7 +49,7 @@ export function selectAvailableEventMembers(state: GameState): number {
 }
 
 export function selectBusyInstructorIds(state: GameState): Set<string> {
-  const busy = new Set<string>();
+  const busy = getPriorityInstructorQualificationTechnicianIds(state);
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
   const capacity = selectInstructorCapacity(state);
   for (const collaborator of state.collaborators) {

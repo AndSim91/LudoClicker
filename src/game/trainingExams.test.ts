@@ -47,7 +47,7 @@ describe("esami di formazione nascosti", () => {
       ...initial,
       contacts: [athlete],
       collaborators: [],
-      randomSeed: 58,
+      randomSeed: 6,
     };
 
     const failed = gameReducer(ready, { type: "TICK", now: 2_000 });
@@ -65,7 +65,7 @@ describe("esami di formazione nascosti", () => {
     expect(passed.contacts[0].training).toBeUndefined();
   });
 
-  it("uses distinct 45% and 40% thresholds for Instructor and Technician exams", () => {
+  it("uses distinct 50% and 45% thresholds for Instructor and Technician exams", () => {
     const initial = createInitialState(1_000, "", false);
     const instructorTraining: FormTraining = {
       formId: "form-1",
@@ -81,7 +81,7 @@ describe("esami di formazione nascosti", () => {
       ...initial,
       contacts: [],
       collaborators: [qualifiedCollaborator(initial, instructorTraining)],
-      randomSeed: 14,
+      randomSeed: 58,
     }, { type: "TICK", now: 2_000 });
     expect(instructorFailure.collaborators[0].instructorForms).toEqual([]);
     expect(instructorFailure.collaborators[0].training?.completesAt).toBe(3_000);
@@ -96,7 +96,7 @@ describe("esami di formazione nascosti", () => {
       ...initial,
       contacts: [],
       collaborators: [qualifiedCollaborator(initial, technicianTraining)],
-      randomSeed: 14,
+      randomSeed: 58,
     }, { type: "TICK", now: 2_000 });
     expect(technicianPass.collaborators[0].technicianForms).toEqual(["form-1"]);
 
@@ -104,7 +104,7 @@ describe("esami di formazione nascosti", () => {
       ...initial,
       contacts: [],
       collaborators: [qualifiedCollaborator(initial, technicianTraining)],
-      randomSeed: 0,
+      randomSeed: 14,
     }, { type: "TICK", now: 2_000 });
     expect(technicianFailure.collaborators[0].technicianForms).toEqual([]);
     expect(technicianFailure.collaborators[0].training?.completesAt).toBe(12_000);

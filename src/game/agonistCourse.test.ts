@@ -392,7 +392,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     expect(started.contacts[0].training?.formId).toBe("form-1");
   });
 
-  it("applies the official risk ordering to normal Forms and Corso Agonisti together", () => {
+  it("prioritizes favorites across normal Forms and Corso Agonisti", () => {
     const initial = arenaState(1);
     const highRisk = {
       ...initial.contacts[0],
@@ -427,9 +427,9 @@ describe("Arena Tecnica e Corso Agonisti", () => {
 
     const started = gameReducer(orderedState, { type: "TICK", now: 2_000 });
 
-    expect(started.contacts.find((contact) => contact.id === "high-risk")?.training?.formId)
-      .toBe("agonist-course");
-    expect(started.contacts.find((contact) => contact.id === "favorite-low-risk")?.training)
+    expect(started.contacts.find((contact) => contact.id === "favorite-low-risk")?.training?.formId)
+      .toBe("form-2");
+    expect(started.contacts.find((contact) => contact.id === "high-risk")?.training)
       .toBeUndefined();
   });
 });

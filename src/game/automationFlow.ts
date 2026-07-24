@@ -26,6 +26,7 @@ import {
 } from "./equipment";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import { getMemberAnnualDepartureChance } from "./formulas";
+import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import {
   compareInstructorTeachingPriority,
   selectActiveEmail,
@@ -258,10 +259,13 @@ export function processInstructorAthleticPreparation(
     state.contacts,
     state.collaborators,
   );
+  const priorityQualificationTechnicianIds =
+    getPriorityInstructorQualificationTechnicianIds(state);
   const availableInstructors = state.collaborators.filter(
     (collaborator) =>
       collaborator.assignment === "instructor" &&
       !collaborator.training &&
+      !priorityQualificationTechnicianIds.has(collaborator.id) &&
       (teachingCounts.get(collaborator.id) ?? 0) === 0,
   );
   if (availableInstructors.length === 0) return state;
@@ -310,8 +314,11 @@ export function processAutomaticTeaching(
 ): GameState {
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (wasAutomaticTeachingNoOp(state)) return state;
+  const priorityQualificationTechnicianIds =
+    getPriorityInstructorQualificationTechnicianIds(state);
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
-    collaborator.assignment === "instructor"
+    collaborator.assignment === "instructor" &&
+    !priorityQualificationTechnicianIds.has(collaborator.id)
   );
   if (!hasAutomaticInstructor) return state;
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
@@ -344,7 +351,8 @@ export function processAutomaticTeaching(
   const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
   for (const instructor of state.collaborators) {
     if (
-      instructor.assignment !== "instructor"
+      instructor.assignment !== "instructor" ||
+      priorityQualificationTechnicianIds.has(instructor.id)
     ) continue;
     for (const formId of instructor.forms) {
       if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
@@ -448,8 +456,8 @@ export function processAutomaticTeaching(
   students.sort((left, right) => {
     const leftPriority = studentPriorities.get(left.id)!;
     const rightPriority = studentPriorities.get(right.id)!;
-    return rightPriority.departureRisk - leftPriority.departureRisk ||
-      Number(rightPriority.isFavorite) - Number(leftPriority.isFavorite) ||
+    return Number(rightPriority.isFavorite) - Number(leftPriority.isFavorite) ||
+      rightPriority.departureRisk - leftPriority.departureRisk ||
       Number(rightPriority.isCollaborator) - Number(leftPriority.isCollaborator) ||
       leftPriority.formPriority - rightPriority.formPriority ||
       rightPriority.acquiredAt - leftPriority.acquiredAt ||
@@ -497,6 +505,7 @@ export function processAutomaticTeaching(
     const instructor = nextState.collaborators
       .filter((candidate) =>
         candidate.assignment === "instructor" &&
+        !priorityQualificationTechnicianIds.has(candidate.id) &&
         (instructorLoads.get(candidate.id) ?? 0) < capacity
       )
       .sort((left, right) =>

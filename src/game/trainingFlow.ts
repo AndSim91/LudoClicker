@@ -430,9 +430,9 @@ export function chooseFormBranchPreferences(seed: number): {
 
 function getExamFailureChance(training: FormTraining): number | undefined {
   const phase = getTrainingPhase(training);
-  if (phase === "athlete") return 0.5;
-  if (phase === "instructor") return 0.45;
-  if (phase === "technician") return 0.4;
+  if (phase === "athlete") return 0.55;
+  if (phase === "instructor") return 0.5;
+  if (phase === "technician") return 0.45;
   return undefined;
 }
 

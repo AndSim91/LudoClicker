@@ -19,6 +19,7 @@ import {
   getAutomaticFormCandidates,
   getFormProgressionRank,
 } from "./formProgression";
+import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import { selectInstructorTeachingCount } from "./selectors";
 import type {
   FormId,
@@ -246,6 +247,8 @@ export function processTechnicianCourseReservations(
   now: number,
 ): GameState {
   let nextState = state;
+  const priorityQualificationTechnicianIds =
+    getPriorityInstructorQualificationTechnicianIds(state);
   const reservations = state.collaborators
     .filter((collaborator) => collaborator.technicianCourseReservation)
     .sort((left, right) =>
@@ -264,6 +267,7 @@ export function processTechnicianCourseReservations(
       !collaborator ||
       !reservation ||
       collaborator.training ||
+      priorityQualificationTechnicianIds.has(collaborator.id) ||
       collaborator.assignment !== "instructor" ||
       nextState.school.currentMonth < reservation.eligibleMonth
     ) continue;
@@ -312,7 +316,7 @@ function getInstructorCourseDemand(state: GameState, formId: FormId): number {
   ).length;
 }
 
-export function processAutomaticInstructorQualifications(
+function processInstructorQualifications(
   state: GameState,
   now: number,
 ): GameState {
@@ -327,6 +331,8 @@ export function processAutomaticInstructorQualifications(
   const formOrder = new Map(
     FORM_DEFINITIONS.map((definition, index) => [definition.id, index]),
   );
+  // Può aspirare alla qualifica soltanto un collaboratore già assegnato
+  // al ruolo Istruttore; gli altri incarichi non entrano nella graduatoria.
   const candidates = state.collaborators.flatMap((collaborator) => {
     if (
       collaborator.assignment !== "instructor" ||
@@ -403,6 +409,21 @@ export function processAutomaticInstructorQualifications(
     startedCollaboratorIds.add(candidate.collaboratorId);
   }
   return nextState;
+}
+
+export function processPriorityInstructorQualifications(
+  state: GameState,
+  now: number,
+): GameState {
+  // Il motore esegue questo passaggio prima delle altre automazioni didattiche.
+  return processInstructorQualifications(state, now);
+}
+
+export function processAutomaticInstructorQualifications(
+  state: GameState,
+  now: number,
+): GameState {
+  return processInstructorQualifications(state, now);
 }
 
 export function processTeacherTraining(state: GameState, now: number): GameState {

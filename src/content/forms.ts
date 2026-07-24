@@ -135,7 +135,7 @@ export function getTechnicianCourseCost(cost: number): number {
 }
 
 export function getInstructorQualificationDuration(durationMs: number): number {
-  return Math.round(durationMs * 0.5);
+  return Math.round(durationMs * 0.75);
 }
 
 export function getInstructorFormDuration(durationMs: number): number {
@@ -143,7 +143,7 @@ export function getInstructorFormDuration(durationMs: number): number {
 }
 
 export function getTechnicianCourseDuration(durationMs: number): number {
-  return Math.round(durationMs * 5);
+  return Math.round(durationMs * 10);
 }
 
 export function getStudentFormCost(cost: number): number {

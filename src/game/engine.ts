@@ -38,6 +38,7 @@ import {
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
 import {
+  processPriorityInstructorQualifications,
   processTeacherTraining,
   refreshTrainingDurations,
 } from "./teacherTrainingFlow";
@@ -167,6 +168,7 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
   nextState = processWaitingTrainings(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier);
   nextState = reconcileCollaboratorManagement(nextState);
+  nextState = processPriorityInstructorQualifications(nextState, now);
   nextState = processAutomaticTeaching(
     nextState,
     now,
