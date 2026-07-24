@@ -8,15 +8,8 @@ import type {
   Collaborator,
   CollaboratorManagementState,
   CollaboratorMasteryRole,
-  CollaboratorPresetId,
   GameState,
 } from "./types";
-
-export const COLLABORATOR_PRESET_IDS: readonly CollaboratorPresetId[] = [
-  "preset-1",
-  "preset-2",
-  "preset-3",
-];
 
 export function createEmptyCollaboratorTargets(): Record<CollaboratorMasteryRole, number> {
   return {
@@ -30,14 +23,7 @@ export function createEmptyCollaboratorTargets(): Record<CollaboratorMasteryRole
 export function createInitialCollaboratorManagement(): CollaboratorManagementState {
   return {
     aggregateViewUnlocked: false,
-    activePresetId: null,
-    hasUnsavedChanges: false,
     targets: createEmptyCollaboratorTargets(),
-    presets: {
-      "preset-1": { saved: false, targets: createEmptyCollaboratorTargets() },
-      "preset-2": { saved: false, targets: createEmptyCollaboratorTargets() },
-      "preset-3": { saved: false, targets: createEmptyCollaboratorTargets() },
-    },
   };
 }
 
@@ -57,8 +43,8 @@ export function sanitizeCollaboratorTargets(
     },
     createEmptyCollaboratorTargets(),
   );
-  // Compatibilità con i preset creati quando Preparatore Atletico era un
-  // settore separato: quelle persone confluiscono negli Istruttori.
+  // Compatibilità con le vecchie configurazioni in cui Preparatore Atletico
+  // era un settore separato: quelle persone confluiscono negli Istruttori.
   sanitized.instructor += sanitizeTarget(targets.lessons ?? 0);
   return sanitized;
 }
@@ -88,52 +74,6 @@ export function getCollaboratorAssignmentCounts(
     if (collaborator.assignment) counts[collaborator.assignment] += 1;
   }
   return counts;
-}
-
-export function saveCollaboratorPreset(
-  state: GameState,
-  presetId: CollaboratorPresetId,
-  targets: Record<CollaboratorMasteryRole, number>,
-): GameState {
-  if (!state.collaboratorManagement.aggregateViewUnlocked) return state;
-  const nextState: GameState = {
-    ...state,
-    collaboratorManagement: {
-      ...state.collaboratorManagement,
-      activePresetId: presetId,
-      hasUnsavedChanges: false,
-      targets: sanitizeCollaboratorTargets(targets),
-      presets: {
-        ...state.collaboratorManagement.presets,
-        [presetId]: {
-          saved: true,
-          targets: sanitizeCollaboratorTargets(targets),
-        },
-      },
-    },
-  };
-  return reconcileCollaboratorManagement(nextState);
-}
-
-export function applyCollaboratorPreset(
-  state: GameState,
-  presetId: CollaboratorPresetId,
-): GameState {
-  if (
-    !state.collaboratorManagement.aggregateViewUnlocked ||
-    !state.collaboratorManagement.presets[presetId].saved
-  ) return state;
-  return reconcileCollaboratorManagement({
-    ...state,
-    collaboratorManagement: {
-      ...state.collaboratorManagement,
-      activePresetId: presetId,
-      hasUnsavedChanges: false,
-      targets: sanitizeCollaboratorTargets(
-        state.collaboratorManagement.presets[presetId].targets,
-      ),
-    },
-  });
 }
 
 function getInstructorCoverage(
@@ -324,8 +264,6 @@ export function incrementCollaboratorAssignment(
     ...state,
     collaboratorManagement: {
       ...state.collaboratorManagement,
-      activePresetId: null,
-      hasUnsavedChanges: true,
       targets: {
         ...state.collaboratorManagement.targets,
         [assignment]: state.collaboratorManagement.targets[assignment] + 1,
@@ -346,8 +284,6 @@ export function decrementCollaboratorAssignment(
     ...state,
     collaboratorManagement: {
       ...state.collaboratorManagement,
-      activePresetId: null,
-      hasUnsavedChanges: true,
       targets: {
         ...state.collaboratorManagement.targets,
         [assignment]: state.collaboratorManagement.targets[assignment] - 1,

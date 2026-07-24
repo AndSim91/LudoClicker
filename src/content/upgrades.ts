@@ -93,7 +93,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "promiscuous-instructor", category: "instructors", title: "Istruttore Promisquo", description: "Un'organizzazione più flessibile permette a ogni Istruttore di seguire un allievo aggiuntivo.", effectLabel: "+1 allievo contemporaneo · massimo 2", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { "instructor-versatility": 2 } },
   { id: "extra-form", category: "instructors", title: "Doppio Corso", description: "Aumenta per tutti gli atleti della scuola il numero di Forme apprendibili nello stesso anno formativo.", effectLabel: "+1 Forma apprendibile per atleta e anno", effect: "annualFormCapacity", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { "promiscuous-instructor": 1 } },
   { id: "tiamat-instructor", category: "instructors", title: "Istruttore Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 8_000, costGrowth: 1, levelCosts: [8_000, 13_000, 21_000, 34_000], maxLevel: 4, requiredHistoricMembers: 0, requiredUpgradeLevels: { "extra-form": 1 } },
-  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo, certifica automaticamente ogni Forma dei collaboratori e infine rende gratuita tutta la formazione.", effectLabel: "Livello 1: +1 Forma annua · Livello 2: attestati automatici · Livello 3: tutta la formazione gratuita", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 55_000, costGrowth: 1, levelCosts: [55_000, 89_000, 144_000], maxLevel: 3, requiredHistoricMembers: 0, requiredUpgradeLevels: { "tiamat-instructor": 4 } },
+  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera la preparazione di Tecnici, Istruttori e atleti.", effectLabel: "Livello 1: +1 Forma annua · Livello 2: +50% velocità Corsi Tecnici · Livello 3: +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 55_000, costGrowth: 1, levelCosts: [55_000, 89_000, 144_000], maxLevel: 3, requiredHistoricMembers: 0, requiredUpgradeLevels: { "tiamat-instructor": 4 } },
   { id: "divine-touch", category: "instructors", title: "Tocco DiGilo", description: "L'insegnamento delle Forme da parte degli Istruttori raggiunge una velocità sovrumana.", effectLabel: "+9999% velocità di insegnamento", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { pagosport: 3 } },
 ];
 
@@ -248,10 +248,10 @@ export function getAgonistCourseMaximumStatGain(levels: UpgradeLevels): number {
   return Math.min(5, 1 + getUpgradeEffectTotal(levels, "agonistCourseStatMaximum"));
 }
 
-export function hasFreeFormTraining(levels: UpgradeLevels): boolean {
-  return (levels.pagosport ?? 0) >= 3;
+export function getPagoSportAllCourseSpeedBonus(levels: UpgradeLevels): number {
+  return (levels.pagosport ?? 0) >= 3 ? 0.5 : 0;
 }
 
-export function hasAutomaticInstructorCertificates(levels: UpgradeLevels): boolean {
-  return (levels.pagosport ?? 0) >= 2;
+export function getPagoSportTechnicianSpeedBonus(levels: UpgradeLevels): number {
+  return (levels.pagosport ?? 0) >= 2 ? 0.5 : 0;
 }

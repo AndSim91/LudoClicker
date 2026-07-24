@@ -478,7 +478,10 @@ describe("game engine: progression", () => {
 
     const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-2", now: 2_000 });
     const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-1", now: 2_000 });
-    const completed = gameReducer(training, { type: "TICK", now: 22_000 });
+    const completed = gameReducer(
+      { ...training, randomSeed: 1 },
+      { type: "TICK", now: 22_000 },
+    );
     const juneState = { ...completed, school: { ...completed.school, currentMonth: 18 } };
     const annualBlock = gameReducer(juneState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
     const julyState = { ...completed, school: { ...completed.school, currentMonth: 19 } };
@@ -557,7 +560,7 @@ describe("game engine: progression", () => {
     expect(training.contacts[0].training?.completesAt).toBe(3_000);
   });
 
-  it("assigns the Instructor role for free and charges explicit 300% qualifications", () => {
+  it("assigns the Instructor role for free and starts a timed 250% qualification", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "instructor-conversion",
@@ -593,37 +596,17 @@ describe("game engine: progression", () => {
     expect(assigned.collaborators[0].assignment).toBe("instructor");
     expect(assigned.collaborators[0].instructorForms).toEqual([]);
 
-    const bulkQualified = gameReducer(assigned, {
-      type: "PAY_INSTRUCTOR_CERTIFICATES",
-      collaboratorId: collaborator.id,
-      now: 2_000,
+    expect(qualifiedFormOne.school.euros).toBe(1_375);
+    expect(qualifiedFormOne.collaborators[0].instructorForms).toEqual([]);
+    expect(qualifiedFormOne.collaborators[0].training).toMatchObject({
+      formId: "form-1",
+      trainingTrack: "instructor",
+      trainingPhase: "instructor",
+      trainingBaseDurationMs: 5_000,
     });
-
-    expect(bulkQualified.school.euros).toBe(300);
-    expect(bulkQualified.collaborators[0].instructorForms).toEqual(["form-1", "course-x", "form-2"]);
-    expect(qualifiedFormOne.school.euros).toBe(1_350);
-    expect(qualifiedFormOne.collaborators[0].instructorForms).toEqual(["form-1"]);
-    expect(qualifiedFormOne.messages.some((message) => message.subject === "Qualifica da Istruttore ottenuta")).toBe(true);
-
-    const coveredByPagoSport = {
-      ...assigned,
-      school: { ...assigned.school, euros: 0 },
-      upgrades: { ...assigned.upgrades, pagosport: 3 },
-    };
-    const freeBulkQualification = gameReducer(coveredByPagoSport, {
-      type: "PAY_INSTRUCTOR_CERTIFICATES",
-      collaboratorId: collaborator.id,
-      now: 2_000,
-    });
-    expect(freeBulkQualification.school.euros).toBe(0);
-    expect(freeBulkQualification.collaborators[0].instructorForms).toEqual([
-      "form-1",
-      "course-x",
-      "form-2",
-    ]);
   });
 
-  it.each([19, 20])("charges an Instructor the base Form plus the 300% certificate during summer month %i", (currentMonth) => {
+  it.each([19, 20])("charges 350% and doubles a combined Instructor course during summer month %i", (currentMonth) => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "instructor-training",
@@ -649,10 +632,9 @@ describe("game engine: progression", () => {
       formId: "form-2",
       now: 2_000,
     });
-    const completed = gameReducer(training, { type: "TICK", now: 32_000 });
-    const freeTraining = gameReducer({
+    const pagoSportTraining = gameReducer({
       ...ready,
-      school: { ...ready.school, euros: 0 },
+      school: { ...ready.school, euros: 1_200 },
       upgrades: { ...ready.upgrades, pagosport: 3 },
     }, {
       type: "START_FORM_TRAINING",
@@ -661,14 +643,14 @@ describe("game engine: progression", () => {
       now: 2_000,
     });
 
-    expect(training.school.euros).toBe(200);
+    expect(training.school.euros).toBe(325);
     expect(training.collaborators[0].lastFormTrainingYear).toBe(2);
     expect(training.collaborators[0].formTrainingYearCount).toBe(1);
     expect(training.collaborators[0].training?.includesInstructorCertification).toBe(true);
-    expect(completed.collaborators[0].forms).toContain("form-2");
-    expect(completed.collaborators[0].instructorForms).toContain("form-2");
-    expect(freeTraining.school.euros).toBe(0);
-    expect(freeTraining.collaborators[0].training?.formId).toBe("form-2");
+    expect(training.collaborators[0].training?.trainingBaseDurationMs).toBe(15_000);
+    expect(training.collaborators[0].training?.completesAt).toBe(9_500);
+    expect(pagoSportTraining.school.euros).toBe(325);
+    expect(pagoSportTraining.collaborators[0].training?.completesAt).toBe(8_000);
   });
 
   it("counts an Instructor's July course in the upcoming year and Extra Form adds one slot", () => {
@@ -697,7 +679,14 @@ describe("game engine: progression", () => {
       formId: "form-2",
       now: 2_000,
     });
-    const julyCompleted = gameReducer(julyTraining, { type: "TICK", now: 100_000 });
+    const julyAthleteCompleted = gameReducer(
+      { ...julyTraining, randomSeed: 1 },
+      { type: "TICK", now: 100_000 },
+    );
+    const julyCompleted = gameReducer(
+      { ...julyAthleteCompleted, randomSeed: 1 },
+      { type: "TICK", now: 200_000 },
+    );
     const septemberState = {
       ...julyCompleted,
       school: { ...julyCompleted.school, currentMonth: 21 },
@@ -706,7 +695,7 @@ describe("game engine: progression", () => {
       type: "START_FORM_TRAINING",
       personId: instructor.id,
       formId: "course-y",
-      now: 101_000,
+      now: 201_000,
     });
     const septemberWithExtraForm = {
       ...septemberState,
@@ -716,14 +705,21 @@ describe("game engine: progression", () => {
       type: "START_FORM_TRAINING",
       personId: instructor.id,
       formId: "course-y",
-      now: 101_000,
+      now: 201_000,
     });
-    const secondCompleted = gameReducer(secondTraining, { type: "TICK", now: 200_000 });
+    const secondAthleteCompleted = gameReducer(
+      { ...secondTraining, randomSeed: 1 },
+      { type: "TICK", now: 300_000 },
+    );
+    const secondCompleted = gameReducer(
+      { ...secondAthleteCompleted, randomSeed: 1 },
+      { type: "TICK", now: 400_000 },
+    );
     const thirdTraining = gameReducer(secondCompleted, {
       type: "START_FORM_TRAINING",
       personId: instructor.id,
       formId: "form-3-long",
-      now: 201_000,
+      now: 401_000,
     });
 
     expect(julyTraining.collaborators[0].lastFormTrainingYear).toBe(2);
@@ -779,7 +775,10 @@ describe("game engine: progression", () => {
     expect(slowTraining.completesAt - slowTraining.startedAt).toBe(normalDuration * 3);
     expect(slowTraining.instructorTrainingDurationMultiplier).toBe(3);
 
-    const studentFinished = gameReducer(training, { type: "TICK", now: 12_000 });
+    const studentFinished = gameReducer(
+      { ...training, randomSeed: 1 },
+      { type: "TICK", now: 12_000 },
+    );
     expect(studentFinished.collaborators[0].training?.completesAt).toBe(
       12_000 + Math.round((slowTraining.completesAt - 12_000) / 3),
     );
@@ -851,7 +850,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 8, euros: 0 },
+      school: { ...initial.school, activeMembers: 8, euros: 300 },
       contacts: students,
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
@@ -875,7 +874,7 @@ describe("game engine: progression", () => {
     expect(promiscuousOnly.contacts.filter((contact) => contact.training).length).toBe(2);
     expect(teaching.contacts.filter((contact) => contact.training).length).toBe(6);
     expect(nextTick.contacts.filter((contact) => contact.training).length).toBe(6);
-    expect(teaching.school.euros).toBe(0);
+    expect(teaching.school.euros).toBe(75);
 
   });
 
@@ -1159,7 +1158,10 @@ describe("game engine: progression", () => {
       formId: "course-y",
       now: 2_000,
     });
-    const completed = gameReducer(training, { type: "TICK", now: 37_000 });
+    const completed = gameReducer(
+      { ...training, randomSeed: 1 },
+      { type: "TICK", now: 37_000 },
+    );
     const preferences = completed.contacts.find((contact) => contact.id === member.id)
       ?.formBranchPreferences ?? [];
 
@@ -1206,7 +1208,7 @@ describe("game engine: progression", () => {
 
     expect(blocked).toBe(ready);
     expect(unlocked.collaborators[0].training?.formId).toBe("form-3-staff");
-    expect(unlocked.school.euros).toBe(1_000);
+    expect(unlocked.school.euros).toBe(1_500);
   });
 
   it("creates an Ultra Rare collaborator at Course Y and applies rarity bonuses", () => {
@@ -1238,7 +1240,10 @@ describe("game engine: progression", () => {
       unlocks: { ...initial.unlocks, forms: true },
     };
     const training = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-y", now: 2_000 });
-    const completed = gameReducer(training, { type: "TICK", now: 37_000 });
+    const completed = gameReducer(
+      { ...training, randomSeed: 1 },
+      { type: "TICK", now: 37_000 },
+    );
     const collaborator = completed.collaborators.find((candidate) => candidate.contactId === member.id)!;
 
     expect(collaborator.forms.at(-1)).toBe("course-y");
@@ -1264,7 +1269,10 @@ describe("game engine: progression", () => {
       formId: "course-y",
       now: 2_000,
     });
-    const rareCompleted = gameReducer(rareTraining, { type: "TICK", now: 37_000 });
+    const rareCompleted = gameReducer(
+      { ...rareTraining, randomSeed: 1 },
+      { type: "TICK", now: 37_000 },
+    );
     expect(rareCompleted.contacts.find((contact) => contact.id === member.id)?.forms)
       .toContain("course-y");
     expect(rareCompleted.collaborators.some((candidate) => candidate.contactId === member.id))

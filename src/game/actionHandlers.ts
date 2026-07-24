@@ -12,18 +12,16 @@ import { cancelMemberEnrollment } from "./membershipFlow";
 import { toggleMemberFavorite } from "./memberPreferences";
 import { playChroniclesHand } from "./chroniclesFlow";
 import {
-  applyCollaboratorPreset,
   decrementCollaboratorAssignment,
   incrementCollaboratorAssignment,
-  saveCollaboratorPreset,
 } from "./collaboratorManagement";
 import { freezeGameState } from "./offline";
 import { updateProfileName } from "./profileFlow";
 import { foundSchool } from "./schoolProgressionFlow";
 import {
   assignCollaborator,
-  payInstructorCertificates,
 } from "./trainingFlow";
+import { bookTechnicianCourse } from "./teacherTrainingFlow";
 import type { FormId, GameAction, GameState } from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
 import { buyUpgrade } from "./upgradeFlow";
@@ -115,15 +113,6 @@ export function createGameActionHandlers(
       action.assignment,
       action.now,
     ),
-    SAVE_COLLABORATOR_PRESET: (state, action) => saveCollaboratorPreset(
-      state,
-      action.presetId,
-      action.targets,
-    ),
-    APPLY_COLLABORATOR_PRESET: (state, action) => applyCollaboratorPreset(
-      state,
-      action.presetId,
-    ),
     INCREMENT_COLLABORATOR_ASSIGNMENT: (state, action) =>
       incrementCollaboratorAssignment(
         state,
@@ -142,10 +131,6 @@ export function createGameActionHandlers(
       state,
       action.contactId,
     ),
-    PAY_INSTRUCTOR_CERTIFICATES: (state, action) => payInstructorCertificates(
-      state,
-      action.collaboratorId,
-    ),
     START_FORM_TRAINING: (state, action) => dependencies.startFormTraining(
       state,
       action.personId,
@@ -155,6 +140,12 @@ export function createGameActionHandlers(
     START_ACQUISITION_EVENT: (state, action) => startAcquisitionEvent(
       state,
       action.definitionId,
+      action.now,
+    ),
+    BOOK_TECHNICIAN_COURSE: (state, action) => bookTechnicianCourse(
+      state,
+      action.collaboratorId,
+      action.formId,
       action.now,
     ),
     CANCEL_ACQUISITION_EVENT: (state, action) => cancelAcquisitionEvent(

@@ -12,8 +12,8 @@ function stateWithInstructor(pagosport: number) {
     contactId: contact.id,
     displayName: "Istruttore PagoSport",
     joinedAt: 1_000,
-    forms: [],
-    instructorForms: [],
+    forms: ["form-1"],
+    instructorForms: ["form-1"],
     formBranchPreferences: [],
     assignment: "instructor",
     mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
@@ -30,34 +30,50 @@ function stateWithInstructor(pagosport: number) {
 }
 
 describe("PagoSport", () => {
-  it("certifies every newly learned Form at level two without the Instructor surcharge", () => {
+  it("speeds Technician courses by 50% at level two", () => {
     const state = stateWithInstructor(2);
-    const started = gameReducer(state, {
-      type: "START_FORM_TRAINING",
-      personId: state.collaborators[0].id,
+    const julyState = {
+      ...state,
+      school: { ...state.school, currentMonth: 7 },
+    };
+    const started = gameReducer(julyState, {
+      type: "BOOK_TECHNICIAN_COURSE",
+      collaboratorId: state.collaborators[0].id,
       formId: "form-1",
       now: 2_000,
     });
 
-    expect(started.school.euros).toBe(950);
-    const completed = gameReducer(started, {
-      type: "TICK",
-      now: started.collaborators[0].training!.completesAt,
+    expect(started.school.euros).toBe(500);
+    expect(started.collaborators[0].training).toMatchObject({
+      trainingTrack: "technician",
+      trainingBaseDurationMs: 100_000,
     });
-    expect(completed.collaborators[0].forms).toContain("form-1");
-    expect(completed.collaborators[0].instructorForms).toContain("form-1");
+    expect(started.collaborators[0].training?.completesAt).toBe(42_000);
   });
 
-  it("makes Instructor training and the Corso Agonisti free at level three", () => {
+  it("keeps courses paid and speeds every course by 50% at level three", () => {
     const state = stateWithInstructor(3);
+    const instructor = {
+      ...state.collaborators[0],
+      forms: [],
+      instructorForms: [],
+    };
     const started = gameReducer(state, {
       type: "START_FORM_TRAINING",
-      personId: state.collaborators[0].id,
+      personId: instructor.id,
       formId: "form-1",
       now: 2_000,
     });
 
-    expect(started.school.euros).toBe(1_000);
-    expect(getAgonistCourseCost(state)).toBe(0);
+    const actuallyStarted = gameReducer({ ...state, collaborators: [instructor] }, {
+      type: "START_FORM_TRAINING",
+      personId: instructor.id,
+      formId: "form-1",
+      now: 2_000,
+    });
+    expect(started).toBe(state);
+    expect(actuallyStarted.school.euros).toBe(825);
+    expect(actuallyStarted.collaborators[0].training?.completesAt).toBe(15_333);
+    expect(getAgonistCourseCost(state)).toBe(300);
   });
 });

@@ -55,6 +55,7 @@ export function departMembers(
     retainedProgress[member.specialProfileId] = {
       forms: [...(collaborator?.forms ?? member.forms)],
       instructorForms: [...(collaborator?.instructorForms ?? [])],
+      technicianForms: [...(collaborator?.technicianForms ?? [])],
       formBranchPreferences: [
         ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
       ],

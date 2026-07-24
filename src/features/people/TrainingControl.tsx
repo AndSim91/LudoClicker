@@ -4,22 +4,23 @@ import {
   getAvailableForms,
   getFormDefinition,
   getFormTrainingCount,
-  getInstructorConversionCost,
   getInstructorFormCost,
   getInstructorQualificationCost,
   getStudentFormCost,
+  getTechnicianCourseCost,
   getTrainingCourseTitle,
   isInstructorForm,
   isAgonistCourse,
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
+import { getAnnualFormTrainingLimit } from "../../content/upgrades";
 import {
-  getAnnualFormTrainingLimit,
-  hasAutomaticInstructorCertificates,
-  hasFreeFormTraining,
-} from "../../content/upgrades";
-import { getFormTrainingYear, isSummerBreak } from "../../game/calendar";
+  getFormTrainingYear,
+  getGameMonthName,
+  getGameYear,
+  isSummerBreak,
+} from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameTime } from "../../game/GameTimeContext";
 import {
@@ -27,6 +28,7 @@ import {
   selectInstructorCapacity,
   selectInstructorTeachingCount,
 } from "../../game/selectors";
+import { getTrainingPhase } from "../../game/teacherTrainingFlow";
 import type { Collaborator, FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { TrainingFormPreview } from "./PersonPresentation";
@@ -83,12 +85,9 @@ function getDisplayedTrainingCost(
   definition: FormDefinition,
   qualification: boolean,
 ): number {
-  if (hasFreeFormTraining(state.upgrades)) return 0;
   if (qualification) return getInstructorQualificationCost(definition.cost);
   if (collaborator?.assignment === "instructor" && isInstructorForm(definition.id)) {
-    return hasAutomaticInstructorCertificates(state.upgrades)
-      ? definition.cost
-      : getInstructorFormCost(definition.cost);
+    return getInstructorFormCost(definition.cost);
   }
   if (
     collaborator?.assignment !== "instructor" &&
@@ -206,38 +205,104 @@ export function InstructorCompactActivity({
   );
 }
 
+function TechnicianCourseControl({
+  collaborator,
+  state,
+  onBookTechnicianCourse,
+  variant = "default",
+}: {
+  collaborator: Collaborator;
+  state: GameState;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
+  variant?: "default" | "compact";
+}) {
+  const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
+  const reservation = collaborator.technicianCourseReservation;
+  const definitions = collaborator.forms.flatMap((formId) => {
+    const definition = getFormDefinition(formId);
+    return definition &&
+      collaborator.instructorForms.includes(formId) &&
+      !(collaborator.technicianForms ?? []).includes(formId)
+      ? [definition]
+      : [];
+  });
+  const variantClass = variant === "compact" ? " training-compact" : "";
+
+  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
+    return null;
+  }
+  if (reservation) {
+    const definition = getFormDefinition(reservation.formId);
+    const startMonth = getGameMonthName(reservation.eligibleMonth);
+    const startYear = getGameYear(reservation.eligibleMonth);
+    return (
+      <div className={`training-future technician-course-reservation${variantClass}`}>
+        <span>Corso Tecnico SIS prenotato</span>
+        <strong>{definition?.longName ?? reservation.formId}</strong>
+        <small>Partenza da {startMonth}, anno {startYear}, appena il collaboratore è libero.</small>
+      </div>
+    );
+  }
+  if (!onBookTechnicianCourse || definitions.length === 0) return null;
+  const selected = definitions.find((definition) => definition.id === selectedFormId) ??
+    (definitions.length === 1 ? definitions[0] : undefined);
+  const cost = selected ? getTechnicianCourseCost(selected.cost) : 0;
+  const lacksFunds = selected ? state.school.euros < cost : false;
+  const options = definitions.map((definition) => ({
+    definition,
+    costLabel: formatCurrency(getTechnicianCourseCost(definition.cost)),
+    contextLabel: "Corso Tecnico SIS",
+  }));
+
+  return (
+    <div className={`training-control technician-course-control${variantClass}`}>
+      <div className="training-form-choice">
+        {definitions.length > 1 ? (
+          <TrainingOptionPicker
+            displayName={collaborator.displayName}
+            label="Scegli il percorso da Tecnico"
+            options={options}
+            selectedFormId={selectedFormId}
+            onSelect={setSelectedFormId}
+          />
+        ) : selected ? (
+          <>
+            <span className="training-form-label">Percorso Tecnico alla SIS</span>
+            <TrainingFormPreview definition={selected} />
+          </>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        className="training-start-button"
+        disabled={!selected || lacksFunds}
+        onClick={() => selected && onBookTechnicianCourse(collaborator.id, selected.id)}
+      >
+        {!selected
+          ? "Seleziona una Forma"
+          : lacksFunds
+            ? `Servono ${formatCurrency(cost)}`
+            : `Prenota SIS · ${formatCurrency(cost)}`}
+      </button>
+    </div>
+  );
+}
+
 export function InstructorCompactTraining({
   collaborator,
   state,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   collaboratorsById,
 }: {
   collaborator: Collaborator;
   state: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
-  const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
-  const instructorCertificatesCost = hasFreeFormTraining(state.upgrades)
-    ? 0
-    : getInstructorConversionCost(collaborator);
-
   return (
     <div className="instructor-compact-training" aria-label="Formazione istruttore">
-      {hasMissingInstructorCertificates ? (
-        <div className="instructor-compact-certification">
-          <span>Attestati · {formatCurrency(instructorCertificatesCost)}</span>
-          <button
-            type="button"
-            disabled={state.school.euros < instructorCertificatesCost}
-            onClick={() => onPayInstructorCertificates?.(collaborator.id)}
-          >
-            {instructorCertificatesCost === 0 ? "Ottieni attestati" : "Paga attestati"}
-          </button>
-        </div>
-      ) : null}
       <TrainingControl
         personId={collaborator.id}
         displayName={collaborator.displayName}
@@ -245,6 +310,12 @@ export function InstructorCompactTraining({
         state={state}
         collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
+        variant="compact"
+      />
+      <TechnicianCourseControl
+        collaborator={collaborator}
+        state={state}
+        onBookTechnicianCourse={onBookTechnicianCourse}
         variant="compact"
       />
     </div>
@@ -255,13 +326,13 @@ export function InstructorPanel({
   collaborator,
   state,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   collaboratorsById,
 }: {
   collaborator: Collaborator;
   state: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
@@ -271,31 +342,11 @@ export function InstructorPanel({
     teaching.length > 0,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
-  const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
-  const instructorCertificatesCost = hasFreeFormTraining(state.upgrades)
-    ? 0
-    : getInstructorConversionCost(collaborator);
-
   return (
     <div className="instructor-panel">
       <div className="instructor-panel-heading">
         <span><strong>Lezioni automatiche</strong><small>{teachingCount}/{capacity} allievi</small></span>
       </div>
-      {hasMissingInstructorCertificates ? (
-        <div className="instructor-certification-action">
-          <span className="instructor-certification-copy">
-            <small>Attestati mancanti</small>
-            <strong>{formatCurrency(instructorCertificatesCost)}</strong>
-          </span>
-          <button
-            type="button"
-            disabled={state.school.euros < instructorCertificatesCost}
-            onClick={() => onPayInstructorCertificates?.(collaborator.id)}
-          >
-            {instructorCertificatesCost === 0 ? "Ottieni attestati" : "Paga attestati"}
-          </button>
-        </div>
-      ) : null}
       {teaching.length > 0
         ? <InstructorTeachingSummary
             entries={teaching}
@@ -310,6 +361,11 @@ export function InstructorPanel({
         state={state}
         collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
+      />
+      <TechnicianCourseControl
+        collaborator={collaborator}
+        state={state}
+        onBookTechnicianCourse={onBookTechnicianCourse}
       />
     </div>
   );
@@ -357,19 +413,31 @@ export function TrainingControl({
     const instructor = student.training.instructorId
       ? collaboratorsById.get(student.training.instructorId)
       : undefined;
+    const technician = student.training.technicianId
+      ? collaboratorsById.get(student.training.technicianId)
+      : undefined;
+    const trainingPhase = getTrainingPhase(student.training);
+    const courseTitle = trainingPhase === "instructor"
+      ? `Corso Istruttori · ${definition?.longName ?? "Forma"}`
+      : trainingPhase === "technician"
+        ? `Corso Tecnico SIS · ${definition?.longName ?? "Forma"}`
+        : getTrainingCourseTitle(
+            student.training.formId,
+            state.upgrades["technical-arena"] ?? 0,
+            student.training.agonistCourseGrantsStats,
+          );
     const progress = getTrainingProgress(student.training, now);
     const waitingForEquipment = student.training.status === "waitingForEquipment";
     return (
       <div className={`training-progress${variantClass}`}>
         <span>
-          {getTrainingCourseTitle(
-            student.training.formId,
-            state.upgrades["technical-arena"] ?? 0,
-            student.training.agonistCourseGrantsStats,
-          )}
+          {courseTitle}
           {definition?.branch ? ` — ${definition.branch}` : ""}
           {instructor ? ` · con ${instructor.displayName}` : ""}
-          {student.training.includesInstructorCertification ? " · attestato incluso" : ""}
+          {technician ? ` · con il Tecnico ${technician.displayName}` : ""}
+          {student.training.trainingTrack === "combined-instructor" && trainingPhase === "athlete"
+            ? " · attestato incluso"
+            : ""}
         </span>
         <strong>{waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}</strong>
         <ProgressBar
@@ -468,7 +536,7 @@ export function TrainingControl({
     : state.school.euros < selectedCost
       ? `Servono ${formatCurrency(selectedCost)}`
       : selectedIsQualification
-        ? "Ottieni qualifica"
+        ? "Avvia Corso Istruttori"
         : selectedCost === 0
           ? "Avvia gratuitamente"
           : `Paga e avvia · ${formatCurrency(selectedCost)}`;
@@ -489,7 +557,7 @@ export function TrainingControl({
       definition,
       costLabel: formatCurrency(cost),
       contextLabel: qualification
-        ? "Attestato"
+        ? "Corso Istruttori"
         : hasInstructorDiscount
           ? "Sconto Istruttore"
           : cost > definition.cost

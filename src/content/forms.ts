@@ -119,11 +119,31 @@ export function isInstructorForm(formId: TrainingCourseId): formId is FormId {
 }
 
 export function getInstructorFormCost(cost: number): number {
-  return Math.round(cost * 4 * 100) / 100;
+  return Math.round(cost * 3.5 * 100) / 100;
 }
 
 export function getInstructorQualificationCost(cost: number): number {
-  return Math.round(cost * 3 * 100) / 100;
+  return Math.round(cost * 2.5 * 100) / 100;
+}
+
+export function getInternalInstructorQualificationCost(cost: number): number {
+  return Math.round(getInstructorQualificationCost(cost) * 0.75 * 100) / 100;
+}
+
+export function getTechnicianCourseCost(cost: number): number {
+  return Math.round(cost * 10 * 100) / 100;
+}
+
+export function getInstructorQualificationDuration(durationMs: number): number {
+  return Math.round(durationMs * 0.5);
+}
+
+export function getInstructorFormDuration(durationMs: number): number {
+  return durationMs + getInstructorQualificationDuration(durationMs);
+}
+
+export function getTechnicianCourseDuration(durationMs: number): number {
+  return Math.round(durationMs * 5);
 }
 
 export function getStudentFormCost(cost: number): number {

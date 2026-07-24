@@ -4,7 +4,6 @@ import { GAME_CONFIG } from "../../game/config";
 import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
-  CollaboratorPresetId,
   FormId,
   GameState,
 } from "../../game/types";
@@ -15,8 +14,6 @@ import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
 
 const ignoreFavoriteToggle = () => undefined;
-const ignorePresetSave = () => undefined;
-const ignorePresetApply = () => undefined;
 const ignoreCollaboratorAssignmentChange = () => undefined;
 
 export function PeopleView({
@@ -25,9 +22,7 @@ export function PeopleView({
   onStartTraining,
   onToggleFavorite,
   onCancelEnrollment,
-  onPayInstructorCertificates,
-  onSaveCollaboratorPreset,
-  onApplyCollaboratorPreset,
+  onBookTechnicianCourse,
   onIncrementCollaboratorAssignment,
   onDecrementCollaboratorAssignment,
 }: {
@@ -36,12 +31,7 @@ export function PeopleView({
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleFavorite?: (contactId: string) => void;
   onCancelEnrollment?: (contactId: string) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
-  onSaveCollaboratorPreset?: (
-    presetId: CollaboratorPresetId,
-    targets: Record<CollaboratorMasteryRole, number>,
-  ) => void;
-  onApplyCollaboratorPreset?: (presetId: CollaboratorPresetId) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
   onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
 }) {
@@ -90,19 +80,17 @@ export function PeopleView({
             <CollaboratorSectorView
               state={state}
               collaboratorsById={collaboratorsById}
-              onSavePreset={onSaveCollaboratorPreset ?? ignorePresetSave}
-              onApplyPreset={onApplyCollaboratorPreset ?? ignorePresetApply}
               onIncrement={onIncrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
               onDecrement={onDecrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
               onStartTraining={onStartTraining}
-              onPayInstructorCertificates={onPayInstructorCertificates}
+              onBookTechnicianCourse={onBookTechnicianCourse}
             />
           ) : (
             <CollaboratorList
               state={state}
               onAssign={onAssign}
               onStartTraining={onStartTraining}
-              onPayInstructorCertificates={onPayInstructorCertificates}
+              onBookTechnicianCourse={onBookTechnicianCourse}
               collaboratorsById={collaboratorsById}
             />
           )}

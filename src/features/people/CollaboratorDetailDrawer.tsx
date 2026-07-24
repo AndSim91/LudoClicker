@@ -28,7 +28,7 @@ export function CollaboratorDetailDrawer({
   collaboratorsById,
   onAssign,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   allowAssignment = true,
   onClose,
 }: {
@@ -39,7 +39,7 @@ export function CollaboratorDetailDrawer({
   collaboratorsById: Map<string, Collaborator>;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   allowAssignment?: boolean;
   onClose: () => void;
 }) {
@@ -141,6 +141,7 @@ export function CollaboratorDetailDrawer({
             <FormLogoStrip
               forms={collaborator.forms}
               instructorForms={collaborator.instructorForms}
+              technicianForms={collaborator.technicianForms}
             />
           </div>
           <div>
@@ -165,7 +166,7 @@ export function CollaboratorDetailDrawer({
               collaborator={collaborator}
               state={state}
               onStartTraining={onStartTraining}
-              onPayInstructorCertificates={onPayInstructorCertificates}
+              onBookTechnicianCourse={onBookTechnicianCourse}
               collaboratorsById={collaboratorsById}
             />
           ) : (
@@ -183,6 +184,7 @@ export function CollaboratorDetailDrawer({
         <section className="collaborator-detail-section collaborator-detail-certificates">
           <h3>Attestati da istruttore</h3>
           <span>{collaborator.instructorForms.length} attestati</span>
+          <span>{collaborator.technicianForms?.length ?? 0} qualifiche da Tecnico</span>
         </section>
 
         {allowAssignment ? (

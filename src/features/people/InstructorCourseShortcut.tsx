@@ -2,7 +2,6 @@ import {
   getFormDefinition,
   getInstructorQualificationCost,
 } from "../../content/forms";
-import { hasFreeFormTraining } from "../../content/upgrades";
 import type { FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import type { AvailableInstructorCourse } from "./instructorGroupPresentation";
@@ -20,9 +19,7 @@ export function InstructorCourseShortcut({
   const definition = getFormDefinition(course.formId);
   if (!definition) return null;
 
-  const cost = hasFreeFormTraining(state.upgrades)
-    ? 0
-    : getInstructorQualificationCost(definition.cost);
+  const cost = getInstructorQualificationCost(definition.cost);
   const trainingInProgress = Boolean(course.instructor.training);
   const lacksFunds = state.school.euros < cost;
   const actionLabel = trainingInProgress
@@ -30,8 +27,8 @@ export function InstructorCourseShortcut({
     : lacksFunds
       ? `Servono ${formatCurrency(cost)}`
       : cost === 0
-        ? "Ottieni qualifica"
-        : `Ottieni qualifica · ${formatCurrency(cost)}`;
+        ? "Avvia Corso Istruttori"
+        : `Avvia Corso Istruttori · ${formatCurrency(cost)}`;
 
   return (
     <div className="instructor-course-shortcut">

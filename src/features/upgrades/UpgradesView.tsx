@@ -12,11 +12,11 @@ import {
   UPGRADE_DEFINITIONS,
   getAnnualFormTrainingLimit,
   getFirstIncompleteUpgradePrerequisite,
+  getPagoSportAllCourseSpeedBonus,
+  getPagoSportTechnicianSpeedBonus,
   getUpgradeCost,
   getUpgradeEffectMaximum,
   getUpgradeEffectTotal,
-  hasAutomaticInstructorCertificates,
-  hasFreeFormTraining,
   type UpgradeCategory,
   type UpgradeDefinition,
 } from "../../content/upgrades";
@@ -79,6 +79,12 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addAmount("Rami per Istruttore", "instructorBranchCapacity");
   addAmount("Allievi per Istruttore", "instructorStudentCapacity");
   addPercentage("Velocità insegnamento", "instructorTeachingSpeed");
+  if (getPagoSportTechnicianSpeedBonus(state.upgrades) > 0) {
+    benefits.push({ label: "Velocità Corsi Tecnici", value: "+50%" });
+  }
+  if (getPagoSportAllCourseSpeedBonus(state.upgrades) > 0) {
+    benefits.push({ label: "Velocità di tutti i corsi", value: "+50%" });
+  }
   const agonistCourseMaximum = 1 + getUpgradeEffectTotal(
     state.upgrades,
     "agonistCourseStatMaximum",
@@ -96,12 +102,6 @@ function getUpgradeBenefitsSummary(state: GameState) {
       label: agonistCourseTier >= 3 ? "Corso Agonisti" : "Arena Tecnica",
       value: `livello ${agonistCourseTier}`,
     });
-  }
-  if (hasAutomaticInstructorCertificates(state.upgrades)) {
-    benefits.push({ label: "Attestati collaboratori", value: "Automatici" });
-  }
-  if (hasFreeFormTraining(state.upgrades)) {
-    benefits.push({ label: "Costi di formazione", value: "Gratuiti" });
   }
   if (state.unlocks.social) {
     benefits.push(

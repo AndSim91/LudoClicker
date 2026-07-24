@@ -12,6 +12,7 @@ interface ProgressBarProps {
   title?: string;
   valueText?: string;
   indeterminate?: boolean;
+  paused?: boolean;
 }
 
 export function ProgressBar({
@@ -25,6 +26,7 @@ export function ProgressBar({
   title,
   valueText,
   indeterminate: forceIndeterminate = false,
+  paused = false,
 }: ProgressBarProps) {
   const safeMax = Math.max(1, max);
   const boundedValue = Math.min(safeMax, Math.max(0, value));
@@ -49,6 +51,7 @@ export function ProgressBar({
     "progress-bar",
     `progress-bar-${variant}`,
     indeterminate ? "is-indeterminate" : "",
+    indeterminate && paused ? "is-paused" : "",
     className,
   ].filter(Boolean).join(" ");
   return (

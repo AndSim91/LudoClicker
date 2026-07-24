@@ -6,11 +6,13 @@ import { getRarityClassName } from "../../shared/rarityPresentation";
 export function FormLogoStrip({
   forms,
   instructorForms = [],
+  technicianForms = [],
   showLabels = true,
   className = "",
 }: {
   forms: FormId[];
   instructorForms?: readonly FormId[];
+  technicianForms?: readonly FormId[];
   showLabels?: boolean;
   className?: string;
 }) {
@@ -23,6 +25,7 @@ export function FormLogoStrip({
       shortName: definition?.shortName ?? formId,
       logo,
       instructorCertified: instructorForms.includes(formId),
+      technicianCertified: technicianForms.includes(formId),
     };
   });
 
@@ -35,19 +38,26 @@ export function FormLogoStrip({
     >
       {entries.length === 0 ? (
         <span className="form-logo-empty">Nessuna forma completata</span>
-      ) : entries.map(({ formId, longName, shortName, logo, instructorCertified }) => (
+      ) : entries.map(({ formId, longName, shortName, logo, instructorCertified, technicianCertified }) => (
         <span
-          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""}`}
+          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""} ${technicianCertified ? "technician-certified" : ""}`}
           key={formId}
-          title={`${longName}${instructorCertified ? " · Attestato da istruttore" : ""}`}
+          title={`${longName}${technicianCertified
+            ? " · Qualifica da Tecnico"
+            : instructorCertified
+              ? " · Attestato da istruttore"
+              : ""}`}
         >
           <span className="form-logo-mark">
             <img
               src={logo.assetPath}
               alt={`${longName} — emblema ${logo.source === "official" ? "ufficiale" : "generato"}`}
             />
-            {instructorCertified ? (
-              <span className="form-instructor-crown" aria-hidden="true">♛</span>
+            {technicianCertified || instructorCertified ? (
+              <span
+                className={`form-instructor-crown${technicianCertified ? " is-technician" : ""}`}
+                aria-hidden="true"
+              >♛</span>
             ) : null}
           </span>
           {showLabels ? <span>{shortName}</span> : null}

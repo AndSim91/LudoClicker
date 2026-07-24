@@ -34,10 +34,13 @@ import {
 import {
   resolveFormTraining as completeFormTraining,
   processWaitingTrainings,
-  refreshInstructorTrainingDurations,
   startAgonistCourse as beginAgonistCourse,
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
+import {
+  processTeacherTraining,
+  refreshTrainingDurations,
+} from "./teacherTrainingFlow";
 import { processScheduledTrialStarts, resolveTrial } from "./trialFlow";
 import { compactTournamentHistory } from "./tournamentFlow";
 import {
@@ -162,7 +165,6 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
     }
   }
   nextState = processWaitingTrainings(nextState, now, trainingDependencies);
-  nextState = refreshInstructorTrainingDurations(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier);
   nextState = reconcileCollaboratorManagement(nextState);
   nextState = processAutomaticTeaching(
@@ -171,6 +173,8 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
     startFormTraining,
     startAgonistCourse,
   );
+  nextState = processTeacherTraining(nextState, now);
+  nextState = refreshTrainingDurations(nextState, now);
   nextState = processInstructorAthleticPreparation(
     nextState,
     automationElapsedMs,

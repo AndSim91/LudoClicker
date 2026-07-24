@@ -797,18 +797,16 @@ Regole:
 - al raggiungimento del nono collaboratore si sblocca definitivamente la vista
   aggregata per settori, accompagnata da un tutorial che mette il gioco in
   pausa; la vista individuale non torna disponibile anche se l'organico scende;
-- la vista aggregata mostra il rapporto **Non assegnati/Totali** e tre preset
-  numerici personalizzabili, inizialmente vuoti;
-- ogni preset conserva il numero desiderato di persone per Redazione/Social,
-  Eventi, Preparatore Atletico, Attrezzatura e Istruttore, senza legarsi alle
-  identità dei singoli collaboratori;
-- applicando un preset, i collaboratori liberi vengono riallocati subito e
-  quelli in eccesso restano non assegnati;
+- la vista aggregata mostra il rapporto **Non assegnati/Totali** e permette di
+  aumentare o ridurre direttamente il numero desiderato di persone per ogni
+  settore, senza legarsi alle identità dei singoli collaboratori;
+- quando cambia l'organico desiderato, i collaboratori liberi vengono
+  riallocati subito e quelli in eccesso restano non assegnati;
 - un collaboratore impegnato in un evento o in una formazione conserva
   temporaneamente il proprio incarico, conclude l'attività e viene riallocato
   prima che possa avviarne un'altra automaticamente; i lavori continui e
   condivisi sono invece riassegnabili subito;
-- se un preset richiede più persone di quelle presenti, i posti mancanti
+- se un settore richiede più persone di quelle presenti, i posti mancanti
   restano memorizzati e vengono occupati automaticamente dai nuovi
   collaboratori liberi;
 - un collaboratore non leggendario può lasciare la scuola soltanto tramite
@@ -951,9 +949,10 @@ Regole:
 - gli slot annuali delle Forme si rinnovano a luglio e coprono il periodo
   luglio–giugno: una Forma iniziata a luglio consuma quindi uno slot valido
   anche nel settembre immediatamente successivo;
-- Luglio e Agosto sono pausa estiva per gli atleti normali, che pur avendo
-  ricevuto i nuovi slot non possono usarli fino a settembre; gli Istruttori
-  possono invece iniziare in estate una formazione pagata con qualifica inclusa;
+- Luglio e Agosto sono pausa estiva per tutte le Forme degli atleti, che pur
+  avendo ricevuto i nuovi slot non possono usarli fino a settembre; i Corsi
+  Istruttori e i Corsi Tecnici possono invece iniziare o proseguire e in questi
+  due mesi avanzano al **200% della velocità normale**;
 - l'anno scolastico ordinario resta da Settembre ad Agosto;
 - completare un solo ramo fino alla Forma 5 è sufficiente per accedere alla
   Forma 6;
@@ -988,10 +987,9 @@ economico principale inizia dopo Corso Y.
 
 ### 9.7 Istruttori e attestati
 
-Un Collaboratore delle Onde può essere assegnato al ruolo di **Istruttore**. Non
-esiste un corso separato per ottenere il ruolo: l'abilitazione è legata alle
-singole Forme numerate e consiste esclusivamente nel pagamento del relativo
-attestato.
+Un Collaboratore delle Onde può essere assegnato al ruolo di **Istruttore**.
+L'incarico operativo e gli attestati sono distinti: ogni Forma o Corso che
+assegna un badge richiede una propria formazione da Istruttore.
 
 Regole:
 
@@ -999,18 +997,26 @@ Regole:
   pregresse;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate;
   ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
-- una nuova Forma o un nuovo Corso appreso da Istruttore include sempre la
-  relativa qualifica;
+- chi conosce già una Forma completa un Corso Istruttori pari al **50% della
+  durata base della Forma** e paga il **250% del costo base**;
+- chi non conosce ancora la Forma segue un percorso combinato composto dalla
+  Forma da atleta e dal modulo da Istruttore: dura complessivamente il **150%**
+  della Forma, paga il **350% del costo base** e consuma un solo slot annuale;
+- le due parti del percorso combinato restano fasi separate: la Forma viene
+  acquisita prima dell'attestato e ciascuna fase ha la propria verifica finale;
 - un Istruttore può iniziare o continuare una nuova formazione anche mentre
   insegna; in questo caso la durata è tripla rispetto alla velocità normale e
   torna normale quando non ha più allievi attivi o l'insegnamento automatico
   viene disabilitato;
-- una qualifica pregressa viene acquistata esplicitamente dal comando di
-  formazione e costa il **300% del costo base**;
-- una nuova Forma appresa mentre si è Istruttore costa il costo base della Forma
-  più il relativo attestato, per un totale pari al **400% del costo base**; con
-  PagoSport al livello 2 la qualifica
-  è automatica e gratuita, quindi rimane soltanto il costo base della Forma;
+- gli esami finali sono un sistema interno e non vengono comunicati
+  nell'interfaccia: il rischio di non superarli è **50%** per Forme e Corsi da
+  atleta, **45%** per i Corsi Istruttori e **40%** per i Corsi Tecnici;
+- ogni verifica non superata prolunga soltanto la fase interessata del **10%**
+  della sua durata originaria; la verifica viene ripetuta al nuovo termine senza
+  mostrare probabilità, fallimenti o messaggi al giocatore;
+- le verifiche da atleta valgono per tutte le Forme e i Corsi che assegnano un
+  badge, inclusi Corso X, Corso Y e le varianti di ramo. Arena Tecnica e Corso
+  Agonisti sono esclusi;
 - se nessun Collaboratore è assegnato al ruolo di Istruttore, il singolo allievo
   può iniziare manualmente la prossima Forma pagando il costo base;
 - se almeno un Collaboratore è assegnato al ruolo di Istruttore, il comando
@@ -1055,8 +1061,7 @@ Regole:
   registrati nella riga dell'atleta, senza creare notifiche o messaggi
   nell'inbox;
 - i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
-  non ricevono la riduzione applicata alle Forme insegnate. PagoSport al livello
-  3 li azzera insieme agli altri costi di formazione;
+  non ricevono la riduzione applicata alle Forme insegnate;
 - l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
   decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
   poi la prossima formazione secondo la progressione dalla Forma 1 verso l'alto,
@@ -1097,11 +1102,11 @@ Regole:
 - **Istruttore Tiamat** ha quattro livelli molto costosi e, dopo Istruttore
   Promisquo, porta la capacità massima a sei allievi;
 - **PagoSport** segue Istruttore Tiamat: il livello 1 concede uno slot di
-  formazione annuale aggiuntivo; il livello 2 assegna gratuitamente e
-  retroattivamente a ogni collaboratore l'attestato da Istruttore per tutte le
-  Forme già apprese e lo assegna automaticamente per ogni nuova Forma, senza
-  cambiare l'incarico operativo; il livello 3 rende gratuiti tutte le Forme,
-  tutti i corsi, tutti gli attestati e ogni altro costo di istruttoraggio;
+  formazione annuale aggiuntivo; il livello 2 aumenta del **50%** la velocità
+  dei Corsi Tecnici; il livello 3 aumenta inoltre del **50%** la velocità di
+  tutte le formazioni, comprese Forme, Corsi Istruttori, Corsi Tecnici, Arena
+  Tecnica e Corso Agonisti. I bonus sono cumulativi e si sommano al raddoppio
+  estivo;
 - esclusa Intensità agonistica, che resta parallela, dopo Arena Tecnica il ramo
   è lineare: ogni potenziamento deve essere
   completato prima di accedere al successivo. L'ordine è **Polivalenza didattica
@@ -1112,6 +1117,47 @@ Regole:
   insegna le Forme agli allievi;
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
+
+### 9.7.1 Tecnici e formazione interna
+
+Il **Tecnico** è una qualifica per singola Forma o Corso, non un nuovo incarico
+operativo. Il percorso è disponibile per ogni formazione che assegna un badge,
+inclusi Corso X e Corso Y, ma esclude il Corso Agonisti.
+
+Regole:
+
+- può candidarsi soltanto un Collaboratore assegnato come Istruttore che abbia
+  già completato la formazione come atleta e possieda il relativo attestato da
+  Istruttore;
+- lo stesso Collaboratore può ottenere più qualifiche da Tecnico;
+- il Corso Tecnico è esterno, si svolge alla **SIS — Scuola Internazionale
+  Superiore** ed è tenuto dai Maestri Fondatori di LudoSport;
+- il corso costa il **1000% del costo base** e ha una durata base pari al
+  **500% della durata della Forma**;
+- la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
+  agosto il corso parte immediatamente se il Collaboratore è libero; negli
+  altri mesi viene programmato per il luglio successivo. Se a luglio il
+  Collaboratore è impegnato, parte appena si libera, anche dopo l'estate;
+- un corso già iniziato continua senza limiti di calendario;
+- un Tecnico forma automaticamente un solo aspirante Istruttore alla volta per
+  una Forma compatibile. L'aspirante deve essere assegnato come Istruttore,
+  conoscere già la Forma come atleta e non possedere l'attestato;
+- il Corso Istruttori interno costa il **75% del normale Corso Istruttori**, cioè
+  il **187,5% del costo base**, e mantiene durata ed esame del modulo da
+  Istruttore;
+- la scelta automatica privilegia, nell'ordine, la Forma più bassa nella
+  progressione, l'attestato più utile agli allievi in attesa e il Collaboratore
+  entrato prima nella scuola;
+- Istruttori e Tecnici possono continuare a insegnare agli allievi mentre sono
+  coinvolti in queste formazioni. Se il partecipante o, nel corso interno, il
+  Tecnico sta anche insegnando, la durata residua diventa tripla; la penalità
+  non si cumula se entrambi insegnano;
+- sulla singola Forma la corona dorata identifica l'attestato da Istruttore; la
+  qualifica da Tecnico la sostituisce con una corona glicine;
+- nella schermata aggregata, **Forme insegnabili** usa la corona glicine quando
+  è presente almeno un Tecnico compatibile e mostra i Corsi Istruttori interni
+  attivi con logo della Forma, corona dorata e barra di avanzamento. Non viene
+  mostrato alcun candidato successivo.
 
 ### 9.8 Abbandono degli iscritti ignorati
 

@@ -4,10 +4,10 @@ import {
   createInitialUpgradeLevels,
   getAnnualFormTrainingLimit,
   getAgonistCourseMaximumStatGain,
+  getPagoSportAllCourseSpeedBonus,
+  getPagoSportTechnicianSpeedBonus,
   getUpgradeCost,
   getUpgradeEffectTotal,
-  hasAutomaticInstructorCertificates,
-  hasFreeFormTraining,
 } from "./upgrades";
 import type { UpgradeId } from "../game/types";
 
@@ -126,7 +126,7 @@ describe("instructor branch", () => {
     )).toBe(1.25);
   });
 
-  it("gives PagoSport one annual slot, automatic certificates and free training", () => {
+  it("applies the three cumulative PagoSport levels", () => {
     const levels = {
       ...createInitialUpgradeLevels(),
       "extra-form": 1,
@@ -135,7 +135,7 @@ describe("instructor branch", () => {
 
     expect(getUpgradeEffectTotal(levels, "annualFormCapacity")).toBe(2);
     expect(getAnnualFormTrainingLimit(levels)).toBe(3);
-    expect(hasAutomaticInstructorCertificates(levels)).toBe(true);
-    expect(hasFreeFormTraining(levels)).toBe(true);
+    expect(getPagoSportTechnicianSpeedBonus(levels)).toBe(0.5);
+    expect(getPagoSportAllCourseSpeedBonus(levels)).toBe(0.5);
   });
 });

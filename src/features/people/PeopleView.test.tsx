@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
+import { GameTimeProvider } from "../../game/GameTimeProvider";
 import type { FormBranch, FormId } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
@@ -161,38 +162,159 @@ describe("PeopleView", () => {
     }));
 
     const onStartTraining = vi.fn();
-    render(
-      <PeopleView
-        state={{
-          ...initial,
-          school: { ...initial.school, euros: 1_000 },
-          collaborators,
-          upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
-          unlocks: { ...initial.unlocks, collaborators: true },
-          automation: { ...initial.automation, lessonBuffer: 0.58 },
-          collaboratorManagement: {
-            ...initial.collaboratorManagement,
-            aggregateViewUnlocked: true,
-          },
-        }}
-        onAssign={() => undefined}
-        onStartTraining={onStartTraining}
-      />,
+    const state = {
+      ...initial,
+      school: { ...initial.school, euros: 1_000 },
+      collaborators,
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      unlocks: { ...initial.unlocks, collaborators: true },
+      automation: { ...initial.automation, lessonBuffer: 0.58 },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+      },
+    };
+    const renderView = (isPaused: boolean) => (
+      <GameTimeProvider getNow={() => 1_000} isPaused={isPaused}>
+        <PeopleView
+          state={state}
+          onAssign={() => undefined}
+          onStartTraining={onStartTraining}
+        />
+      </GameTimeProvider>
     );
+    const view = render(renderView(false));
 
     expect(screen.getByText("Preparazione atletica in corso...")).toBeVisible();
     expect(document.querySelector(".instructor-preparation-row")).not.toBeInTheDocument();
     expect(screen.queryByText("Attività principale")).not.toBeInTheDocument();
     expect(screen.queryByText("Attività del gruppo")).not.toBeInTheDocument();
+    const preparationBar = screen.getByRole("progressbar", {
+      name: "Preparazione atletica continuativa",
+    });
+    expect(preparationBar).toHaveClass("is-indeterminate");
+    expect(preparationBar).not.toHaveClass("is-paused");
+
+    view.rerender(renderView(true));
     expect(screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
-    })).toHaveClass("is-indeterminate");
+    })).toHaveClass("is-indeterminate", "is-paused");
+    expect(screen.getByRole("progressbar", {
+      name: "Preparazione atletica continuativa",
+    })).toHaveAttribute("aria-valuetext", "Attività in pausa");
     expect(screen.getByText("Corso Istruttori disponibile")).toBeVisible();
     expect(screen.getByText("Istruttore Operativo")).toBeVisible();
 
-    const courseAction = screen.getByRole("button", { name: /Ottieni qualifica/ });
+    const courseAction = screen.getByRole("button", { name: /Avvia Corso Istruttori/ });
     fireEvent.click(courseAction);
     expect(onStartTraining).toHaveBeenCalledWith("aggregate-instructor-0", "course-x");
+  });
+
+  it("shows Technician coverage and the active internal Instructor course", () => {
+    const initial = createInitialState(1_000);
+    const technician = {
+      id: "aggregate-technician",
+      contactId: "technician-contact",
+      displayName: "Tecnico Glicine",
+      joinedAt: 1_000,
+      forms: ["form-1"] as FormId[],
+      instructorForms: ["form-1"] as FormId[],
+      technicianForms: ["form-1"] as FormId[],
+      formBranchPreferences: [],
+      assignment: "instructor" as const,
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare" as const,
+    };
+    const trainee = {
+      ...technician,
+      id: "aggregate-trainee",
+      contactId: "trainee-contact",
+      displayName: "Aspirante Istruttore",
+      joinedAt: 2_000,
+      instructorForms: [] as FormId[],
+      technicianForms: [] as FormId[],
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 11_000,
+        status: "running" as const,
+        technicianId: technician.id,
+        trainingTrack: "instructor" as const,
+        trainingPhase: "instructor" as const,
+      },
+    };
+    const otherCollaborators = Array.from({ length: 7 }, (_, index) => ({
+      ...technician,
+      id: `aggregate-other-${index}`,
+      contactId: `aggregate-other-contact-${index}`,
+      displayName: `Altro ${index}`,
+      joinedAt: 3_000 + index,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      technicianForms: [] as FormId[],
+      assignment: null,
+    }));
+
+    render(
+      <GameTimeProvider getNow={() => 6_000} isPaused={false}>
+        <PeopleView
+          state={{
+            ...initial,
+            collaborators: [technician, trainee, ...otherCollaborators],
+            unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+            collaboratorManagement: {
+              ...initial.collaboratorManagement,
+              aggregateViewUnlocked: true,
+            },
+          }}
+          onAssign={() => undefined}
+          onStartTraining={() => undefined}
+        />
+      </GameTimeProvider>,
+    );
+
+    expect(screen.getByTitle("Forma 1 · Qualifica da Tecnico")).toBeVisible();
+    expect(screen.getByText("Corsi Istruttori interni")).toBeVisible();
+    expect(screen.getByText("Forma 1 · Aspirante Istruttore")).toBeVisible();
+    expect(screen.getByRole("progressbar", {
+      name: "Corso Istruttori interno di Aspirante Istruttore",
+    })).toHaveAttribute("aria-valuenow", "50");
+    expect(screen.queryByText(/fallimento|probabilità/i)).not.toBeInTheDocument();
+  });
+
+  it("allows booking an eligible Technician course from the Instructor card", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "sis-ui-candidate",
+      contactId: initial.contacts[0].id,
+      displayName: "Candidata SIS",
+      joinedAt: 1_000,
+      forms: ["form-1"] as FormId[],
+      instructorForms: ["form-1"] as FormId[],
+      technicianForms: [] as FormId[],
+      formBranchPreferences: [],
+      assignment: "instructor" as const,
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare" as const,
+    };
+    const onBookTechnicianCourse = vi.fn();
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, euros: 1_000 },
+          collaborators: [collaborator],
+          unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onBookTechnicianCourse={onBookTechnicianCourse}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Prenota SIS/ }));
+    expect(onBookTechnicianCourse).toHaveBeenCalledWith(collaborator.id, "form-1");
   });
 
   it.each([7, 8])(
@@ -238,6 +360,65 @@ describe("PeopleView", () => {
       })).not.toBeInTheDocument();
     },
   );
+
+  it("stops and mutes athletic preparation while every instructor is teaching", () => {
+    const initial = createInitialState(1_000);
+    const instructor = {
+      id: "busy-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Impegnato",
+      joinedAt: 1_000,
+      forms: ["form-1"] as FormId[],
+      instructorForms: ["form-1"] as FormId[],
+      formBranchPreferences: [],
+      assignment: "instructor" as const,
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare" as const,
+    };
+    const student = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 31_000,
+        instructorId: instructor.id,
+      },
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
+          contacts: initial.contacts.map((contact) =>
+            contact.id === student.id ? student : contact,
+          ),
+          collaborators: [instructor],
+          upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText("In attesa · tutti gli istruttori stanno insegnando")).toBeVisible();
+    const preparationBar = screen.getByRole("progressbar", {
+      name: "Preparazione atletica in attesa",
+    });
+    expect(preparationBar).toHaveClass("is-inactive");
+    expect(preparationBar).not.toHaveClass("is-indeterminate");
+    expect(preparationBar).toHaveAttribute("aria-valuenow", "0");
+    expect(preparationBar).toHaveAttribute(
+      "aria-valuetext",
+      "In attesa di istruttori disponibili",
+    );
+  });
 
   it("keeps the idle equipment status separate from its wear indicator", () => {
     const initial = createInitialState(1_000);
@@ -1031,7 +1212,7 @@ describe("PeopleView", () => {
     expect(fastProgress).not.toHaveAttribute("aria-valuenow");
   });
 
-  it("shows the total and pays all missing instructor certificates at once", () => {
+  it("offers timed Instructor courses instead of a bulk certificate purchase", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-instructor",
@@ -1044,7 +1225,6 @@ describe("PeopleView", () => {
       rarity: "legendary" as const,
       specialProfileId: "andrea-simonazzi" as const,
     };
-    const onPayInstructorCertificates = vi.fn();
     render(
       <PeopleView
         state={{
@@ -1055,15 +1235,12 @@ describe("PeopleView", () => {
         }}
         onAssign={() => undefined}
         onStartTraining={() => undefined}
-        onPayInstructorCertificates={onPayInstructorCertificates}
       />,
     );
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    expect(within(region).getByText(/Attestati/)).toHaveTextContent("2700,00");
-    fireEvent.click(within(region).getByRole("button", { name: "Paga attestati" }));
-
-    expect(onPayInstructorCertificates).toHaveBeenCalledWith(collaborator.id);
+    expect(within(region).getByText("Scegli la prossima formazione")).toBeVisible();
+    expect(within(region).queryByRole("button", { name: "Paga attestati" })).not.toBeInTheDocument();
   });
 
   it("also shows collaborators in the members list without training controls", () => {

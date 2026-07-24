@@ -1,16 +1,15 @@
 import {
   AGONIST_COURSE_ID,
-  BRANCH_FORM_IDS,
   FORM_BRANCHES,
   canTrainForm,
   getCollaboratorProductivity,
   getFormDefinition,
   getFormTrainingCount,
   getAgonistCourseRequiredSwords,
-  getInstructorConversionCost,
   getInstructorFormCost,
   getInstructorQualificationCost,
-  getMissingInstructorForms,
+  getInstructorQualificationDuration,
+  getTechnicianCourseDuration,
   getStudentFormCost,
   isInstructorForm,
   isAgonistCourse,
@@ -19,8 +18,6 @@ import {
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
-  hasAutomaticInstructorCertificates,
-  hasFreeFormTraining,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { getContactBaseStats } from "./athleteStats";
@@ -35,25 +32,26 @@ import {
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
 import { getCollaboratorAssignmentCounts } from "./collaboratorManagement";
-import { getPeopleInTraining } from "./runtimeIndexes";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
   selectInstructorTeachingCount,
 } from "./selectors";
+import {
+  getTrainingDurationMultiplier,
+  getTrainingPhase,
+  getTrainingTrack,
+  scheduleTraining,
+} from "./teacherTrainingFlow";
 import type {
   CollaboratorAssignment,
   Contact,
   FormBranch,
   FormId,
+  FormTraining,
   GameState,
   InboxMessage,
 } from "./types";
-
-const euroFormatter = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-});
 
 export interface TrainingFlowDependencies {
   addMessage: (
@@ -87,8 +85,6 @@ export function assignCollaborator(
         ...reassignedState,
         collaboratorManagement: {
           ...reassignedState.collaboratorManagement,
-          activePresetId: null,
-          hasUnsavedChanges: true,
           targets: getCollaboratorAssignmentCounts(reassignedState),
         },
       }
@@ -102,7 +98,6 @@ export function assignCollaborator(
 }
 
 export function getAgonistCourseCost(state: GameState): number {
-  if (hasFreeFormTraining(state.upgrades)) return 0;
   const arenaLevel = state.upgrades["technical-arena"] ?? 0;
   if (arenaLevel < 3) return GAME_CONFIG.technicalArenaBaseCost;
   return arenaLevel >= 4
@@ -191,21 +186,24 @@ export function startAgonistCourse(
       ? GAME_CONFIG.technicalArenaImprovedDurationMs
       : GAME_CONFIG.technicalArenaDurationMs;
   const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
-  const training = {
-    formId: AGONIST_COURSE_ID,
-    startedAt: now,
-    completesAt: now + Math.max(
-      GAME_CONFIG.minimumTrainingDurationMs,
-      Math.round(baseDuration / trainingSpeed),
-    ),
-    instructorId: instructor.id,
-    status: "running" as const,
-    equipmentUsed: requiredSwords,
-    wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
-    agonistCourseSlotsConsumed: remainingAnnualSlots,
-    agonistCourseGrantsStats,
-  };
-  return refreshInstructorTrainingDurations({
+  const training = scheduleTraining(
+    state,
+    personId,
+    now,
+    baseDuration / trainingSpeed,
+    {
+      formId: AGONIST_COURSE_ID,
+      instructorId: instructor.id,
+      status: "running" as const,
+      equipmentUsed: requiredSwords,
+      wearPerSword: GAME_CONFIG.equipmentLoadPerAgonistCourse,
+      agonistCourseSlotsConsumed: remainingAnnualSlots,
+      agonistCourseGrantsStats,
+      trainingTrack: "agonist",
+      trainingPhase: "agonist",
+    },
+  );
+  return {
     ...state,
     equipment: reservedEquipment,
     school: { ...state.school, euros: roundCurrency(state.school.euros - cost) },
@@ -231,104 +229,7 @@ export function startAgonistCourse(
           }
         : candidate)
       : state.collaborators,
-  }, now);
-}
-
-export function payInstructorCertificates(
-  state: GameState,
-  collaboratorId: string,
-): GameState {
-  const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
-  if (!collaborator || collaborator.assignment !== "instructor") return state;
-
-  const missingForms = getMissingInstructorForms(collaborator);
-  const cost = hasFreeFormTraining(state.upgrades)
-    ? 0
-    : getInstructorConversionCost(collaborator);
-  if (missingForms.length === 0 || state.school.euros < cost) return state;
-
-  const missingCompletedForms = missingForms.filter((formId) => collaborator.forms.includes(formId));
-  const hasPendingTrainingCertification = Boolean(
-    collaborator.training &&
-    isInstructorForm(collaborator.training.formId) &&
-    !collaborator.training.includesInstructorCertification &&
-    !collaborator.forms.includes(collaborator.training.formId),
-  );
-  return {
-    ...state,
-    school: {
-      ...state.school,
-      euros: roundCurrency(state.school.euros - cost),
-    },
-    collaborators: state.collaborators.map((candidate) => {
-      if (candidate.id !== collaboratorId) return candidate;
-      return {
-        ...candidate,
-        instructorForms: [...candidate.instructorForms, ...missingCompletedForms],
-        training: hasPendingTrainingCertification && candidate.training
-          ? { ...candidate.training, includesInstructorCertification: true }
-          : candidate.training,
-      };
-    }),
   };
-}
-
-function getInstructorTrainingDurationMultiplier(
-  state: GameState,
-  collaborator: GameState["collaborators"][number],
-): number {
-  return selectInstructorTeachingCount(state, collaborator.id) > 0
-    ? GAME_CONFIG.instructorTrainingWhileTeachingDurationMultiplier
-    : 1;
-}
-
-export function refreshInstructorTrainingDurations(
-  state: GameState,
-  now: number,
-): GameState {
-  const hasInstructorQualificationInProgress = getPeopleInTraining(
-    state.collaborators,
-  ).some((collaborator) =>
-    collaborator.assignment === "instructor" &&
-    collaborator.training!.status !== "waitingForEquipment" &&
-    isInstructorForm(collaborator.training!.formId)
-  );
-  if (!hasInstructorQualificationInProgress) return state;
-
-  let changed = false;
-  const collaborators = state.collaborators.map((collaborator) => {
-    const training = collaborator.training;
-    if (
-      collaborator.assignment !== "instructor" ||
-      !training ||
-      training.status === "waitingForEquipment" ||
-      !isInstructorForm(training.formId)
-    ) return collaborator;
-
-    const previousMultiplier = training.instructorTrainingDurationMultiplier ?? 1;
-    const nextMultiplier = getInstructorTrainingDurationMultiplier(state, collaborator);
-    if (previousMultiplier === nextMultiplier) return collaborator;
-
-    const previousDuration = Math.max(0, training.completesAt - training.startedAt);
-    const elapsed = Math.min(
-      previousDuration,
-      Math.max(0, now - training.startedAt),
-    );
-    const remainingWork = previousMultiplier > 0
-      ? Math.max(0, previousDuration - elapsed) / previousMultiplier
-      : 0;
-    changed = true;
-    return {
-      ...collaborator,
-      training: {
-        ...training,
-        completesAt: now + Math.round(remainingWork * nextMultiplier),
-        instructorTrainingDurationMultiplier: nextMultiplier,
-      },
-    };
-  });
-
-  return changed ? { ...state, collaborators } : state;
 }
 
 export function startFormTraining(
@@ -336,7 +237,7 @@ export function startFormTraining(
   personId: string,
   formId: FormId,
   now: number,
-  dependencies: TrainingFlowDependencies,
+  _dependencies: TrainingFlowDependencies,
 ): GameState {
   if (!state.unlocks.forms) return state;
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
@@ -360,48 +261,49 @@ export function startFormTraining(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   if (qualificationOnly && collaborator && definition) {
-    const qualificationCost = hasFreeFormTraining(state.upgrades)
-      ? 0
-      : getInstructorQualificationCost(definition.cost);
+    const qualificationCost = getInstructorQualificationCost(definition.cost);
     if (collaborator.training || state.school.euros < qualificationCost) return state;
-    return dependencies.addMessage(
-      {
-        ...state,
-        school: {
-          ...state.school,
-          euros: roundCurrency(state.school.euros - qualificationCost),
-        },
-        collaborators: state.collaborators.map((candidate) =>
-          candidate.id === collaborator.id
-            ? { ...candidate, instructorForms: [...candidate.instructorForms, formId] }
-            : candidate,
-        ),
-      },
+    const training = scheduleTraining(
+      state,
+      collaborator.id,
       now,
-      "Qualifica da Istruttore ottenuta",
-      `${collaborator.displayName} ora può insegnare ${definition.longName}. Costo: ${euroFormatter.format(qualificationCost)}.`,
-      "positive",
-      "other",
-      "training",
+      getInstructorQualificationDuration(definition.durationMs) /
+        getCollaboratorProductivity(collaborator, "instructor"),
+      {
+        formId,
+        status: "running",
+        equipmentUsed: 0,
+        wearPerSword: 0,
+        includesInstructorCertification: true,
+        trainingTrack: "instructor",
+        trainingPhase: "instructor",
+      },
     );
+    return {
+      ...state,
+      school: {
+        ...state.school,
+        euros: roundCurrency(state.school.euros - qualificationCost),
+      },
+      collaborators: state.collaborators.map((candidate) =>
+        candidate.id === collaborator.id
+          ? { ...candidate, training }
+          : candidate
+      ),
+    };
   }
   const instructorSelf = collaborator?.assignment === "instructor";
   const instructorTrack = Boolean(instructorSelf && isInstructorForm(formId));
   const instructor = !instructorSelf
     ? selectAvailableInstructor(state, formId, personId)
     : undefined;
-  const trainingInstructor = instructor ?? (instructorSelf ? collaborator : undefined);
-  const trainingCost = hasFreeFormTraining(state.upgrades)
-    ? 0
-    : instructorTrack
-      ? hasAutomaticInstructorCertificates(state.upgrades)
-        ? definition?.cost ?? 0
-        : getInstructorFormCost(definition?.cost ?? 0)
-      : collaborator?.assignment === "instructor"
-        ? definition?.cost ?? 0
-        : instructor
-          ? getStudentFormCost(definition?.cost ?? 0)
-          : definition?.cost ?? 0;
+  const trainingCost = instructorTrack
+    ? getInstructorFormCost(definition?.cost ?? 0)
+    : collaborator?.assignment === "instructor"
+      ? definition?.cost ?? 0
+      : instructor
+        ? getStudentFormCost(definition?.cost ?? 0)
+        : definition?.cost ?? 0;
   const branchCapacity = collaborator?.assignment === "instructor"
     ? Math.min(3, 1 + (state.upgrades["instructor-versatility"] ?? 0))
     : undefined;
@@ -454,33 +356,29 @@ export function startFormTraining(
         : state.collaborators,
     };
   }
+  const trainingInstructor = instructor ?? (instructorTrack ? collaborator : undefined);
   const instructorTeachingSpeed = instructor
     ? 1 + getUpgradeEffectTotal(state.upgrades, "instructorTeachingSpeed")
     : 1;
   const trainingSpeed = trainingInstructor
     ? getCollaboratorProductivity(trainingInstructor, "instructor") * instructorTeachingSpeed
     : 1;
-  const instructorTrainingDurationMultiplier = instructorTrack && collaborator
-    ? getInstructorTrainingDurationMultiplier(state, collaborator)
-    : 1;
-  const training = {
-    formId,
-    startedAt: now,
-    completesAt: now + Math.max(
-      GAME_CONFIG.minimumTrainingDurationMs,
-      Math.round(
-        (definition.durationMs / trainingSpeed) * instructorTrainingDurationMultiplier,
-      ),
-    ),
-    instructorId: instructor?.id,
-    status: "running" as const,
-    equipmentUsed: definition.requiredSwords,
-    wearPerSword: definition.loadPerSword,
-    includesInstructorCertification: instructorTrack || undefined,
-    instructorTrainingDurationMultiplier: instructorTrack
-      ? instructorTrainingDurationMultiplier
-      : undefined,
-  };
+  const training = scheduleTraining(
+    state,
+    personId,
+    now,
+    definition.durationMs / trainingSpeed,
+    {
+      formId,
+      instructorId: instructor?.id,
+      status: "running" as const,
+      equipmentUsed: definition.requiredSwords,
+      wearPerSword: definition.loadPerSword,
+      includesInstructorCertification: instructorTrack || undefined,
+      trainingTrack: instructorTrack ? "combined-instructor" : "athlete",
+      trainingPhase: "athlete",
+    },
+  );
   const formTrainingYearCount = getFormTrainingCount(student, trainingYear) + 1;
   const nextState = {
     ...state,
@@ -510,7 +408,7 @@ export function startFormTraining(
         : candidate)
       : state.collaborators,
   };
-  return refreshInstructorTrainingDurations(nextState, now);
+  return nextState;
 }
 
 export function chooseFormBranchPreferences(seed: number): {
@@ -530,6 +428,76 @@ export function chooseFormBranchPreferences(seed: number): {
   };
 }
 
+function getExamFailureChance(training: FormTraining): number | undefined {
+  const phase = getTrainingPhase(training);
+  if (phase === "athlete") return 0.5;
+  if (phase === "instructor") return 0.45;
+  if (phase === "technician") return 0.4;
+  return undefined;
+}
+
+function getFallbackTrainingBaseDuration(training: FormTraining): number {
+  const definition = isAgonistCourse(training.formId)
+    ? undefined
+    : getFormDefinition(training.formId);
+  if (!definition) return GAME_CONFIG.minimumTrainingDurationMs;
+  const phase = getTrainingPhase(training);
+  if (phase === "instructor") {
+    return getInstructorQualificationDuration(definition.durationMs);
+  }
+  if (phase === "technician") {
+    return getTechnicianCourseDuration(definition.durationMs);
+  }
+  return definition.durationMs;
+}
+
+function replacePersonTraining(
+  state: GameState,
+  personId: string,
+  training: FormTraining | undefined,
+): GameState {
+  return {
+    ...state,
+    contacts: state.contacts.map((contact) =>
+      contact.id === personId ? { ...contact, training } : contact
+    ),
+    collaborators: state.collaborators.map((collaborator) =>
+      collaborator.id === personId ? { ...collaborator, training } : collaborator
+    ),
+  };
+}
+
+function resolveHiddenExam(
+  state: GameState,
+  personId: string,
+  training: FormTraining,
+  now: number,
+): { state: GameState; passed: boolean } {
+  const failureChance = getExamFailureChance(training);
+  if (failureChance === undefined) return { state, passed: true };
+  const [roll, nextSeed] = nextRandom(state.randomSeed);
+  const rolledState = { ...state, randomSeed: nextSeed };
+  if (roll >= failureChance) return { state: rolledState, passed: true };
+
+  const baseDuration = training.trainingBaseDurationMs ??
+    getFallbackTrainingBaseDuration(training);
+  const durationMultiplier = getTrainingDurationMultiplier(state, personId, training);
+  const extensionMs = Math.max(
+    GAME_CONFIG.minimumTrainingDurationMs,
+    Math.round(baseDuration * 0.1 * durationMultiplier),
+  );
+  return {
+    state: replacePersonTraining(rolledState, personId, {
+      ...training,
+      completesAt: now + extensionMs,
+      examFailures: (training.examFailures ?? 0) + 1,
+      trainingBaseDurationMs: baseDuration,
+      trainingDurationMultiplier: durationMultiplier,
+    }),
+    passed: false,
+  };
+}
+
 export function resolveFormTraining(
   state: GameState,
   personId: string,
@@ -544,45 +512,113 @@ export function resolveFormTraining(
     student.training.status === "waitingForEquipment" ||
     student.training.completesAt > now
   ) return state;
+  const training = student.training;
+  const completedFormId = training.formId;
+  const exam = resolveHiddenExam(state, personId, training, now);
+  if (!exam.passed) return exam.state;
+  const examState = exam.state;
+
+  const phase = getTrainingPhase(training);
+  const definition = isAgonistCourse(completedFormId)
+    ? undefined
+    : getFormDefinition(completedFormId);
+  if (phase === "instructor") {
+    if (!collaborator || !definition || isAgonistCourse(completedFormId)) {
+      return replacePersonTraining(examState, personId, undefined);
+    }
+    const completedInstructorFormId = completedFormId;
+    const qualifiedState = {
+      ...examState,
+      collaborators: examState.collaborators.map((candidate) =>
+        candidate.id === collaborator.id
+          ? {
+              ...candidate,
+              instructorForms: candidate.instructorForms.includes(completedInstructorFormId)
+                ? candidate.instructorForms
+                : [...candidate.instructorForms, completedInstructorFormId],
+              training: undefined,
+            }
+          : candidate
+      ),
+    };
+    return dependencies.addMessage(
+      qualifiedState,
+      now,
+      "Corso Istruttori completato",
+      `${collaborator.displayName} ha ottenuto l'attestato per ${definition.longName}.`,
+      "positive",
+      "other",
+      "training",
+    );
+  }
+  if (phase === "technician") {
+    if (!collaborator || !definition || isAgonistCourse(completedFormId)) {
+      return replacePersonTraining(examState, personId, undefined);
+    }
+    const completedTechnicianFormId = completedFormId;
+    const technicianState = {
+      ...examState,
+      collaborators: examState.collaborators.map((candidate) =>
+        candidate.id === collaborator.id
+          ? {
+              ...candidate,
+              technicianForms: (candidate.technicianForms ?? []).includes(completedTechnicianFormId)
+                ? candidate.technicianForms
+                : [...(candidate.technicianForms ?? []), completedTechnicianFormId],
+              training: undefined,
+            }
+          : candidate
+      ),
+    };
+    return dependencies.addMessage(
+      technicianState,
+      now,
+      "Corso Tecnico completato",
+      `${collaborator.displayName} è ora Tecnico di ${definition.longName}.`,
+      "positive",
+      "other",
+      "training",
+    );
+  }
+
   const completedEquipment = completeEquipmentUse(
-    state.equipment,
-    student.training.equipmentUsed ?? 0,
-    (student.training.equipmentUsed ?? 0) * (student.training.wearPerSword ?? 0),
+    examState.equipment,
+    training.equipmentUsed ?? 0,
+    (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
   );
-  const completedFormId = student.training.formId;
   if (isAgonistCourse(completedFormId)) {
     const athleteContact = collaborator
-      ? state.contacts.find((contact) => contact.id === collaborator.contactId)
+      ? examState.contacts.find((contact) => contact.id === collaborator.contactId)
       : member;
-    if (!athleteContact) return state;
-    const grantsStats = student.training.agonistCourseGrantsStats ?? true;
+    if (!athleteContact) return examState;
+    const grantsStats = training.agonistCourseGrantsStats ?? true;
     if (!grantsStats) {
       return {
-        ...state,
+        ...examState,
         equipment: completedEquipment,
-        contacts: state.contacts.map((contact) => contact.id === athleteContact.id
+        contacts: examState.contacts.map((contact) => contact.id === athleteContact.id
           ? { ...contact, training: collaborator ? contact.training : undefined }
           : contact),
         collaborators: collaborator
-          ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+          ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
             ? { ...candidate, training: undefined }
             : candidate)
-          : state.collaborators,
+          : examState.collaborators,
       };
     }
     const baseStats = getContactBaseStats(athleteContact);
-    const maximumGain = getAgonistCourseMaximumStatGain(state.upgrades);
-    const [arenaRoll, afterArena] = nextRandom(state.randomSeed);
+    const maximumGain = getAgonistCourseMaximumStatGain(examState.upgrades);
+    const [arenaRoll, afterArena] = nextRandom(examState.randomSeed);
     const [styleRoll, nextSeed] = nextRandom(afterArena);
-    const slotsConsumed = Math.max(1, student.training.agonistCourseSlotsConsumed ?? 1);
+    const slotsConsumed = Math.max(1, training.agonistCourseSlotsConsumed ?? 1);
     const arenaGain = (1 + Math.floor(arenaRoll * maximumGain)) * slotsConsumed;
     const styleGain = (1 + Math.floor(styleRoll * maximumGain)) * slotsConsumed;
     const totalCompletions = (athleteContact.agonistCourseCompletions ?? 0) + 1;
     const nextState: GameState = {
-      ...state,
+      ...examState,
       equipment: completedEquipment,
       randomSeed: nextSeed,
-      contacts: state.contacts.map((contact) => contact.id === athleteContact.id
+      contacts: examState.contacts.map((contact) => contact.id === athleteContact.id
           ? {
               ...contact,
               training: collaborator ? contact.training : undefined,
@@ -598,29 +634,47 @@ export function resolveFormTraining(
             }
           : contact),
       collaborators: collaborator
-        ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+        ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
           ? { ...candidate, training: undefined }
           : candidate)
-        : state.collaborators,
+        : examState.collaborators,
     };
     return nextState;
   }
-  const definition = getFormDefinition(completedFormId);
-  if (!definition || student.forms.includes(completedFormId)) return state;
+  if (!definition || student.forms.includes(completedFormId)) return examState;
   const completedForms = [...student.forms, completedFormId];
   const preferenceResult = completedFormId === "course-y" &&
       (student.formBranchPreferences?.length ?? 0) === 0
-    ? chooseFormBranchPreferences(state.randomSeed)
+    ? chooseFormBranchPreferences(examState.randomSeed)
     : {
         preferences: [...(student.formBranchPreferences ?? [])],
-        nextSeed: state.randomSeed,
+        nextSeed: examState.randomSeed,
       };
+  const combinedInstructorCourse = getTrainingTrack(training) === "combined-instructor";
+  const instructorPhase = combinedInstructorCourse && collaborator
+    ? scheduleTraining(
+        examState,
+        collaborator.id,
+        now,
+        getInstructorQualificationDuration(definition.durationMs) /
+          getCollaboratorProductivity(collaborator, "instructor"),
+        {
+          formId: completedFormId,
+          status: "running",
+          equipmentUsed: 0,
+          wearPerSword: 0,
+          includesInstructorCertification: true,
+          trainingTrack: "combined-instructor",
+          trainingPhase: "instructor",
+        },
+      )
+    : undefined;
   let nextState: GameState = {
-    ...state,
+    ...examState,
     equipment: completedEquipment,
     randomSeed: preferenceResult.nextSeed,
     contacts: member && !collaborator
-      ? state.contacts.map((candidate) => candidate.id === member.id
+      ? examState.contacts.map((candidate) => candidate.id === member.id
         ? {
             ...candidate,
             forms: completedForms,
@@ -628,26 +682,23 @@ export function resolveFormTraining(
             training: undefined,
           }
         : candidate)
-      : state.contacts,
+      : examState.contacts,
     collaborators: collaborator
-      ? state.collaborators.map((candidate) => candidate.id === collaborator.id
+      ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
         ? {
             ...candidate,
             forms: completedForms,
             formBranchPreferences: preferenceResult.preferences,
-            instructorForms: student.training?.includesInstructorCertification ||
-                hasAutomaticInstructorCertificates(state.upgrades)
-              ? [...candidate.instructorForms, completedFormId]
-              : candidate.instructorForms,
-            training: undefined,
+            training: instructorPhase,
           }
         : candidate)
-      : state.collaborators,
+      : examState.collaborators,
     statistics: {
-      ...state.statistics,
-      formsCompleted: state.statistics.formsCompleted + 1,
+      ...examState.statistics,
+      formsCompleted: examState.statistics.formsCompleted + 1,
     },
   };
+  if (instructorPhase) return nextState;
   nextState = dependencies.addMessage(
     nextState,
     now,
@@ -739,27 +790,3 @@ export function processWaitingTrainings(
   return nextState;
 }
 
-export function getAutomaticFormCandidates(student: {
-  forms: FormId[];
-  formBranchPreferences?: FormBranch[];
-}): FormId[] {
-  const core: FormId[] = ["form-1", "course-x", "form-2", "course-y"];
-  const nextCore = core.find((formId) => !student.forms.includes(formId));
-  if (nextCore) return [nextCore];
-
-  const completedFormFive = (["form-5-long", "form-5-staff", "form-5-double"] as FormId[])
-    .some((formId) => student.forms.includes(formId));
-  if (completedFormFive && !student.forms.includes("form-6")) return ["form-6"];
-  if (completedFormFive && !student.forms.includes("form-7")) return ["form-7"];
-
-  const preferredBranches = student.formBranchPreferences ?? [];
-  const orderedBranches = preferredBranches.slice().sort((left, right) => {
-    const startedLeft = BRANCH_FORM_IDS[left].some((formId) => student.forms.includes(formId));
-    const startedRight = BRANCH_FORM_IDS[right].some((formId) => student.forms.includes(formId));
-    return Number(startedRight) - Number(startedLeft);
-  });
-  return orderedBranches.flatMap((branch) => {
-    const nextForm = BRANCH_FORM_IDS[branch].find((formId) => !student.forms.includes(formId));
-    return nextForm ? [nextForm] : [];
-  });
-}

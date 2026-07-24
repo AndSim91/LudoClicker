@@ -66,6 +66,23 @@ describe("ProgressBar", () => {
     expect(progress).toHaveAttribute("aria-valuetext", "Lavoro costante");
   });
 
+  it("pauses an indeterminate animation without changing its continuous state", () => {
+    render(
+      <ProgressBar
+        label="Attività in pausa"
+        value={0}
+        valueText="Lavoro sospeso"
+        indeterminate
+        paused
+      />,
+    );
+
+    const progress = screen.getByRole("progressbar", { name: "Attività in pausa" });
+    expect(progress).toHaveClass("is-indeterminate", "is-paused");
+    expect(progress).not.toHaveAttribute("aria-valuenow");
+    expect(progress).toHaveAttribute("aria-valuetext", "Lavoro sospeso");
+  });
+
   it("renders circular progress through the same component", () => {
     render(<ProgressBar variant="circular" label="Verso Iniziato" value={25} />);
 

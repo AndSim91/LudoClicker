@@ -9,7 +9,6 @@ import {
   isSecretLegendaryId,
 } from "./legendaryAvailability";
 import type { GameState } from "./types";
-import { COLLABORATOR_PRESET_IDS } from "./collaboratorManagement";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
   "tutorial",
@@ -130,6 +129,27 @@ function hasValidTraining(training: GameState["contacts"][number]["training"]): 
     (training.equipmentUsed === undefined || isNonNegativeSafeInteger(training.equipmentUsed)) &&
     (training.agonistCourseGrantsStats === undefined ||
       typeof training.agonistCourseGrantsStats === "boolean") &&
+    (training.technicianId === undefined || typeof training.technicianId === "string") &&
+    (training.trainingTrack === undefined ||
+      training.trainingTrack === "athlete" ||
+      training.trainingTrack === "combined-instructor" ||
+      training.trainingTrack === "instructor" ||
+      training.trainingTrack === "technician" ||
+      training.trainingTrack === "agonist") &&
+    (training.trainingPhase === undefined ||
+      training.trainingPhase === "athlete" ||
+      training.trainingPhase === "instructor" ||
+      training.trainingPhase === "technician" ||
+      training.trainingPhase === "agonist") &&
+    (training.trainingBaseDurationMs === undefined || (
+      Number.isFinite(training.trainingBaseDurationMs) &&
+      training.trainingBaseDurationMs > 0
+    )) &&
+    (training.trainingDurationMultiplier === undefined || (
+      Number.isFinite(training.trainingDurationMultiplier) &&
+      training.trainingDurationMultiplier > 0
+    )) &&
+    (training.examFailures === undefined || isNonNegativeSafeInteger(training.examFailures)) &&
     (training.wearPerSword === undefined || (
       Number.isFinite(training.wearPerSword) && training.wearPerSword >= 0
     ))
@@ -169,27 +189,8 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   return Boolean(
     management &&
     typeof management.aggregateViewUnlocked === "boolean" &&
-    typeof management.hasUnsavedChanges === "boolean" &&
     COLLABORATOR_MASTERY_ROLES.every((role) =>
       isNonNegativeSafeInteger(management.targets?.[role])
-    ) &&
-    (
-      management.activePresetId === null ||
-      COLLABORATOR_PRESET_IDS.includes(management.activePresetId)
-    ) &&
-    COLLABORATOR_PRESET_IDS.every((presetId) => {
-      const preset = management.presets?.[presetId];
-      return Boolean(
-        preset &&
-        typeof preset.saved === "boolean" &&
-        COLLABORATOR_MASTERY_ROLES.every((role) =>
-          isNonNegativeSafeInteger(preset.targets?.[role])
-        ),
-      );
-    }) &&
-    (
-      management.activePresetId === null ||
-      management.presets[management.activePresetId].saved
     )
   );
 }
@@ -266,6 +267,7 @@ export function isValidGameState(value: unknown): value is GameState {
         progress &&
         isUniqueFormIdList(progress.forms) &&
         isUniqueFormIdList(progress.instructorForms) &&
+        isUniqueFormIdList(progress.technicianForms ?? []) &&
         (progress.agonistCourseArenaBonus === undefined ||
           isNonNegativeSafeInteger(progress.agonistCourseArenaBonus)) &&
         (progress.agonistCourseStyleBonus === undefined ||
@@ -289,6 +291,13 @@ export function isValidGameState(value: unknown): value is GameState {
       ) &&
       isUniqueFormIdList(collaborator.forms) &&
       isUniqueFormIdList(collaborator.instructorForms) &&
+      isUniqueFormIdList(collaborator.technicianForms ?? []) &&
+      (collaborator.technicianCourseReservation === undefined || (
+        isUniqueFormIdList([collaborator.technicianCourseReservation.formId]) &&
+        Number.isFinite(collaborator.technicianCourseReservation.bookedAt) &&
+        Number.isSafeInteger(collaborator.technicianCourseReservation.eligibleMonth) &&
+        collaborator.technicianCourseReservation.eligibleMonth >= 1
+      )) &&
       Array.isArray(collaborator.formBranchPreferences) &&
       (collaborator.lastAgonistCourseYear === undefined ||
         (Number.isSafeInteger(collaborator.lastAgonistCourseYear) &&

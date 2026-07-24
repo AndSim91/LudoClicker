@@ -17,6 +17,13 @@ export interface AvailableInstructorCourse {
   formId: FormId;
 }
 
+export interface InternalInstructorCourseEntry {
+  trainee: Collaborator;
+  technician: Collaborator;
+  formId: FormId;
+  training: FormTraining;
+}
+
 function getRequestedInstructorId(training: FormTraining): string | undefined {
   return training.instructorId ?? training.requestedInstructorId;
 }
@@ -80,6 +87,38 @@ export function getInstructorCoverageForms(
   return FORM_DEFINITIONS.flatMap((definition) =>
     certified.has(definition.id) ? [definition.id] : [],
   );
+}
+
+export function getTechnicianCoverageForms(
+  instructors: readonly Collaborator[],
+): FormId[] {
+  const qualified = new Set<FormId>(
+    instructors.flatMap((instructor) => instructor.technicianForms ?? []),
+  );
+  return FORM_DEFINITIONS.flatMap((definition) =>
+    qualified.has(definition.id) ? [definition.id] : [],
+  );
+}
+
+export function getInternalInstructorCourseEntries(
+  collaborators: readonly Collaborator[],
+): InternalInstructorCourseEntry[] {
+  const collaboratorsById = new Map(
+    collaborators.map((collaborator) => [collaborator.id, collaborator]),
+  );
+  return collaborators.flatMap((trainee) => {
+    const training = trainee.training;
+    const technician = training?.technicianId
+      ? collaboratorsById.get(training.technicianId)
+      : undefined;
+    return training &&
+      technician &&
+      training.trainingPhase === "instructor" &&
+      !isNaN(training.completesAt) &&
+      training.formId !== "agonist-course"
+      ? [{ trainee, technician, formId: training.formId, training }]
+      : [];
+  });
 }
 
 export function getAvailableInstructorCourseCount(

@@ -11,7 +11,6 @@ import {
 import {
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
-  hasFreeFormTraining,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import {
@@ -34,7 +33,7 @@ import {
 } from "./selectors";
 import { getSocialContentCharacters } from "./social";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
-import { getAutomaticFormCandidates } from "./trainingFlow";
+import { getAutomaticFormCandidates } from "./formProgression";
 import type {
   FormId,
   GameState,
@@ -471,7 +470,6 @@ export function processAutomaticTeaching(
         definition &&
         instructor &&
         (
-          hasFreeFormTraining(nextState.upgrades) ||
           nextState.school.euros >= getStudentFormCost(definition.cost)
         )
       );

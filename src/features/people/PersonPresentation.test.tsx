@@ -39,4 +39,19 @@ describe("nomi delle Forme", () => {
       "Forme conosciute: Forma 1, Corso X, Forma 3 Spada Lunga",
     )).toBeVisible();
   });
+
+  it("sostituisce la corona dorata con quella glicine per una qualifica da Tecnico", () => {
+    render(
+      <FormLogoStrip
+        forms={["form-1"]}
+        instructorForms={["form-1"]}
+        technicianForms={["form-1"]}
+      />,
+    );
+
+    const form = screen.getByTitle("Forma 1 · Qualifica da Tecnico");
+    expect(form).toHaveClass("technician-certified");
+    expect(form.querySelector(".form-instructor-crown")).toHaveClass("is-technician");
+    expect(form.querySelectorAll(".form-instructor-crown")).toHaveLength(1);
+  });
 });

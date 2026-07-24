@@ -307,6 +307,10 @@
   grid-template-columns: max-content;
 }
 
+.form-logo-mark > .form-instructor-crown.is-technician {
+  color: #a78bfa;
+}
+
 .collaborator-activity-progress.is-equipment {
   display: block;
 }

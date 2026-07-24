@@ -19,6 +19,10 @@
   transition: none;
 }
 
+.progress-bar-linear.is-indeterminate.is-paused > span {
+  animation-play-state: paused;
+}
+
 .progress-bar-circular {
   display: inline-grid;
   width: 16px;

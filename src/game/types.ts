@@ -20,6 +20,15 @@ export type SpecialCollaboratorId =
 export type PersonRarity = "common" | "rare" | "ultra-rare" | "legendary";
 export type FormBranch = "Spada Lunga" | "Staffa" | "Doppia spada corta";
 
+export type FormTrainingTrack =
+  | "athlete"
+  | "combined-instructor"
+  | "instructor"
+  | "technician"
+  | "agonist";
+
+export type FormTrainingPhase = "athlete" | "instructor" | "technician" | "agonist";
+
 export interface FormTraining {
   formId: TrainingCourseId;
   startedAt: number;
@@ -29,7 +38,13 @@ export interface FormTraining {
   equipmentUsed?: number;
   wearPerSword?: number;
   instructorId?: string;
+  technicianId?: string;
   includesInstructorCertification?: boolean;
+  trainingTrack?: FormTrainingTrack;
+  trainingPhase?: FormTrainingPhase;
+  trainingBaseDurationMs?: number;
+  trainingDurationMultiplier?: number;
+  examFailures?: number;
   instructorTrainingDurationMultiplier?: number;
   agonistCourseSlotsConsumed?: number;
   agonistCourseGrantsStats?: boolean;
@@ -308,19 +323,9 @@ export type CollaboratorAssignment =
 export type CollaboratorMasteryRole = Exclude<CollaboratorAssignment, null>;
 export type CollaboratorMastery = Record<CollaboratorMasteryRole, number>;
 
-export type CollaboratorPresetId = "preset-1" | "preset-2" | "preset-3";
-
-export interface CollaboratorSectorPreset {
-  saved: boolean;
-  targets: Record<CollaboratorMasteryRole, number>;
-}
-
 export interface CollaboratorManagementState {
   aggregateViewUnlocked: boolean;
-  activePresetId: CollaboratorPresetId | null;
-  hasUnsavedChanges: boolean;
   targets: Record<CollaboratorMasteryRole, number>;
-  presets: Record<CollaboratorPresetId, CollaboratorSectorPreset>;
 }
 
 export type FormId =
@@ -342,6 +347,12 @@ export type FormId =
 
 export type TrainingCourseId = FormId | "agonist-course";
 
+export interface TechnicianCourseReservation {
+  formId: FormId;
+  bookedAt: number;
+  eligibleMonth: number;
+}
+
 export interface Collaborator {
   id: string;
   contactId: string;
@@ -349,6 +360,8 @@ export interface Collaborator {
   joinedAt: number;
   forms: FormId[];
   instructorForms: FormId[];
+  technicianForms?: FormId[];
+  technicianCourseReservation?: TechnicianCourseReservation;
   formBranchPreferences?: FormBranch[];
   assignment: CollaboratorAssignment;
   mastery?: CollaboratorMastery;
@@ -363,6 +376,7 @@ export interface Collaborator {
 export interface RetainedLegendaryProgress {
   forms: FormId[];
   instructorForms: FormId[];
+  technicianForms?: FormId[];
   formBranchPreferences?: FormBranch[];
   joinedAt: number;
   mastery?: CollaboratorMastery;
@@ -693,15 +707,6 @@ export type GameAction =
       now: number;
     }
   | {
-      type: "SAVE_COLLABORATOR_PRESET";
-      presetId: CollaboratorPresetId;
-      targets: Record<CollaboratorMasteryRole, number>;
-    }
-  | {
-      type: "APPLY_COLLABORATOR_PRESET";
-      presetId: CollaboratorPresetId;
-    }
-  | {
       type: "INCREMENT_COLLABORATOR_ASSIGNMENT";
       assignment: CollaboratorMasteryRole;
     }
@@ -712,13 +717,14 @@ export type GameAction =
   | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
   | { type: "CANCEL_MEMBER_ENROLLMENT"; contactId: string }
   | {
-      type: "PAY_INSTRUCTOR_CERTIFICATES";
-      collaboratorId: string;
+      type: "START_FORM_TRAINING";
+      personId: string;
+      formId: FormId;
       now: number;
     }
   | {
-      type: "START_FORM_TRAINING";
-      personId: string;
+      type: "BOOK_TECHNICIAN_COURSE";
+      collaboratorId: string;
       formId: FormId;
       now: number;
     }

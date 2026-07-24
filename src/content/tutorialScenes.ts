@@ -342,13 +342,12 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         isComplete: ({ activeView }) => activeView === "contacts",
       },
       {
-        id: "collaborator-presets",
+        id: "collaborator-staffing",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Tre preset per domarli tutti",
+        title: "Organico per settore",
         body: [
           "Usa i tasti + e - nelle box dei settori per definire quanti Collaboratori lavoreranno in ogni area.",
-          "Ho predisposto tre preset che conservano le tue formazioni preferite: premi l'icona Salva preset nello slot desiderato e poi seleziona lo slot per applicarlo quando vuoi cambiare le squadre.",
           "I Collaboratori liberi si spostano subito.",
           "Chi è impegnato in un Evento o in una formazione conclude prima il lavoro assegnatogli per poi passare al suo nuovo lavoro.",
         ],
@@ -407,7 +406,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Assegna un collaboratore ai Social",
         body: ({ state }) => [
           state.collaboratorManagement.aggregateViewUnlocked
-            ? "Imposta almeno un posto Social in un preset, salvalo e applicalo. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente."
+            ? "Aumenta di almeno uno i posti Social. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente."
             : "Imposta almeno un Collaboratore sui Social. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente.",
         ],
         focusRegions: ({ state }) => state.collaboratorManagement.aggregateViewUnlocked

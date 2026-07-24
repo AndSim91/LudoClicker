@@ -7,13 +7,12 @@ import { createInitialUpgradeLevels } from "../../content/upgrades";
 import type {
   CollaboratorMastery,
   CollaboratorMasteryRole,
-  CollaboratorSectorPreset,
-  GameState,
 } from "../types";
 import type { MigratableState } from "./types";
 
 type LegacyMastery = Partial<CollaboratorMastery> & { lessons?: number };
 type LegacyTargets = Partial<Record<CollaboratorMasteryRole | "lessons", number>>;
+type LegacyPresetId = "preset-1" | "preset-2" | "preset-3";
 
 function migrateMastery(mastery?: LegacyMastery): CollaboratorMastery {
   const defaults = createInitialCollaboratorMastery();
@@ -31,7 +30,7 @@ function migrateMastery(mastery?: LegacyMastery): CollaboratorMastery {
 
 function migratePreset(
   preset: { saved?: boolean; targets?: LegacyTargets } | undefined,
-): CollaboratorSectorPreset {
+): { saved: boolean; targets: Record<CollaboratorMasteryRole, number> } {
   return {
     saved: preset?.saved === true,
     targets: sanitizeCollaboratorTargets(preset?.targets ?? {}),
@@ -67,11 +66,11 @@ export function migrateCollaboratorOperationsState(
   const legacyManagement = state.collaboratorManagement as
     | {
         aggregateViewUnlocked?: boolean;
-        activePresetId?: GameState["collaboratorManagement"]["activePresetId"];
-        presets?: Partial<Record<
-          keyof GameState["collaboratorManagement"]["presets"],
-          { saved?: boolean; targets?: LegacyTargets }
-        >>;
+        activePresetId?: LegacyPresetId | null;
+        presets?: Partial<Record<LegacyPresetId, {
+          saved?: boolean;
+          targets?: LegacyTargets;
+        }>>;
       }
     | undefined;
   const migratedPresets = {
@@ -104,12 +103,9 @@ export function migrateCollaboratorOperationsState(
     collaborators,
     collaboratorManagement: {
       aggregateViewUnlocked: legacyManagement?.aggregateViewUnlocked === true,
-      activePresetId: validActivePresetId,
-      hasUnsavedChanges: false,
       targets: validActivePresetId
         ? { ...migratedPresets[validActivePresetId].targets }
         : targets,
-      presets: migratedPresets,
     },
     legendaryCollaborators: state.legendaryCollaborators
       ? {

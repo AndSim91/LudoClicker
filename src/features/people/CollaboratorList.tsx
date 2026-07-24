@@ -76,13 +76,13 @@ export function CollaboratorList({
   state,
   onAssign,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   collaboratorsById,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
   const [requestedPage, setRequestedPage] = useState(0);
@@ -411,6 +411,7 @@ export function CollaboratorList({
                     <FormLogoStrip
                       forms={collaborator.forms}
                       instructorForms={collaborator.instructorForms}
+                      technicianForms={collaborator.technicianForms}
                     />
                   </div>
                 </div>
@@ -530,7 +531,7 @@ export function CollaboratorList({
                       collaborator={collaborator}
                       state={state}
                       onStartTraining={onStartTraining}
-                      onPayInstructorCertificates={onPayInstructorCertificates}
+                      onBookTechnicianCourse={onBookTechnicianCourse}
                       collaboratorsById={collaboratorsById}
                     />
                   ) : null}
@@ -584,7 +585,7 @@ export function CollaboratorList({
           collaboratorsById={collaboratorsById}
           onAssign={onAssign}
           onStartTraining={onStartTraining}
-          onPayInstructorCertificates={onPayInstructorCertificates}
+          onBookTechnicianCourse={onBookTechnicianCourse}
           onClose={() => setSelectedCollaboratorId(null)}
         />
       ) : null}

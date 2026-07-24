@@ -41,7 +41,7 @@ function SectorCollaboratorRow({
   now,
   collaboratorsById,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   onOpen,
 }: {
   state: GameState;
@@ -50,7 +50,7 @@ function SectorCollaboratorRow({
   now: number;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onOpen: () => void;
 }) {
   const activeEmail = selectActiveEmail(state);
@@ -131,6 +131,7 @@ function SectorCollaboratorRow({
         className="sector-form-strip"
         forms={collaborator.forms}
         instructorForms={collaborator.instructorForms}
+        technicianForms={collaborator.technicianForms}
         showLabels={false}
       />
 
@@ -141,7 +142,7 @@ function SectorCollaboratorRow({
             state={state}
             collaboratorsById={collaboratorsById}
             onStartTraining={onStartTraining}
-            onPayInstructorCertificates={onPayInstructorCertificates}
+            onBookTechnicianCourse={onBookTechnicianCourse}
           />
         </div>
       ) : null}
@@ -164,14 +165,14 @@ export function CollaboratorSectorPanel({
   role,
   collaboratorsById,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
   onClose,
 }: {
   state: GameState;
   role: CollaboratorMasteryRole;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onClose: () => void;
 }) {
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
@@ -269,7 +270,7 @@ export function CollaboratorSectorPanel({
                   now={now}
                   collaboratorsById={collaboratorsById}
                   onStartTraining={onStartTraining}
-                  onPayInstructorCertificates={onPayInstructorCertificates}
+                  onBookTechnicianCourse={onBookTechnicianCourse}
                   onOpen={() => setSelectedCollaboratorId(collaborator.id)}
                 />
               ))}
@@ -287,7 +288,7 @@ export function CollaboratorSectorPanel({
           collaboratorsById={collaboratorsById}
           onAssign={() => undefined}
           onStartTraining={onStartTraining}
-          onPayInstructorCertificates={onPayInstructorCertificates}
+          onBookTechnicianCourse={onBookTechnicianCourse}
           allowAssignment={false}
           onClose={() => setSelectedCollaboratorId(null)}
         />

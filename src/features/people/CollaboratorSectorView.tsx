@@ -3,18 +3,15 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
+import { getFormDefinition } from "../../content/forms";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameTime } from "../../game/GameTimeContext";
-import {
-  COLLABORATOR_PRESET_IDS,
-  getCollaboratorAssignmentCounts,
-} from "../../game/collaboratorManagement";
+import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
+import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { isSummerBreak } from "../../game/calendar";
 import { selectActiveEmail } from "../../game/selectors";
 import type {
   Collaborator,
   CollaboratorMasteryRole,
-  CollaboratorPresetId,
   FormId,
   GameState,
 } from "../../game/types";
@@ -23,8 +20,11 @@ import { CollaboratorSectorPanel } from "./CollaboratorSectorPanel";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import {
   getAvailableInstructorCourses,
+  getInternalInstructorCourseEntries,
   getInstructorCoverageForms,
+  getInstructorTrainingProgress,
   getInstructorTeachingEntries,
+  getTechnicianCoverageForms,
 } from "./instructorGroupPresentation";
 import { InstructorCourseShortcut } from "./InstructorCourseShortcut";
 import { FormLogoStrip } from "./PersonPresentation";
@@ -57,68 +57,6 @@ const ROLE_PRESENTATION: Record<
     description: "Forme, Corso Agonisti e preparazione atletica quando disponibile.",
   },
 };
-
-function getPresetLabel(presetId: CollaboratorPresetId): string {
-  return `Preset ${COLLABORATOR_PRESET_IDS.indexOf(presetId) + 1}`;
-}
-
-function CollaboratorPresetToolbar({
-  state,
-  onSave,
-  onApply,
-}: {
-  state: GameState;
-  onSave: (
-    presetId: CollaboratorPresetId,
-    targets: Record<CollaboratorMasteryRole, number>,
-  ) => void;
-  onApply: (presetId: CollaboratorPresetId) => void;
-}) {
-  return (
-    <div className="collaborator-command-rail">
-      <div className="collaborator-preset-toolbar" aria-label="Preset collaboratori">
-        {COLLABORATOR_PRESET_IDS.map((presetId) => {
-          const preset = state.collaboratorManagement.presets[presetId];
-          const active = state.collaboratorManagement.activePresetId === presetId;
-          const total = Object.values(preset.targets).reduce((sum, count) => sum + count, 0);
-          return (
-            <span
-              className={`collaborator-preset-slot${active ? " is-active" : ""}${preset.saved ? " is-saved" : ""}`}
-              key={presetId}
-            >
-              <button
-                type="button"
-                className="collaborator-preset-apply"
-                disabled={!preset.saved}
-                onClick={() => onApply(presetId)}
-                aria-pressed={active}
-              >
-                <span>{getPresetLabel(presetId)}</span>
-                <small>{preset.saved ? `${total} posti${active ? " · Attivo" : ""}` : "Vuoto"}</small>
-              </button>
-              <button
-                type="button"
-                className="collaborator-preset-save"
-                title={`Salva ${getPresetLabel(presetId)}`}
-                aria-label={`Salva preset ${COLLABORATOR_PRESET_IDS.indexOf(presetId) + 1}`}
-                onClick={() => onSave(presetId, state.collaboratorManagement.targets)}
-              >
-                <Icon name="save" />
-              </button>
-            </span>
-          );
-        })}
-      </div>
-
-      {state.collaboratorManagement.hasUnsavedChanges ? (
-        <span className="collaborator-unsaved" role="status">
-          <Icon name="warning" />
-          Modifiche non salvate
-        </span>
-      ) : null}
-    </div>
-  );
-}
 
 function StaffingStepper({
   label,
@@ -288,6 +226,7 @@ function InstructorSectorCard({
   onOpen: () => void;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
+  const isPaused = useGameTimeSource()?.isPaused ?? false;
   const instructors = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "instructor",
   );
@@ -296,6 +235,8 @@ function InstructorSectorCard({
     instructorIds.has(entry.instructorId),
   );
   const coverage = getInstructorCoverageForms(instructors);
+  const technicianCoverage = getTechnicianCoverageForms(instructors);
+  const internalCourses = getInternalInstructorCourseEntries(instructors);
   const availableInstructorCourses = getAvailableInstructorCourses(instructors);
   const singleInstructorCourse = availableInstructorCourses.length === 1
     ? availableInstructorCourses[0]
@@ -305,6 +246,7 @@ function InstructorSectorCard({
   const prepUnlocked = (state.upgrades["athletic-preparation"] ?? 0) > 0;
   const prepIsPrimary = entries.length === 0 && prepUnlocked && instructors.length > 0;
   const summerBreak = isSummerBreak(state.school.currentMonth);
+  const preparationIsActive = !summerBreak && idleInstructors > 0;
 
   return (
     <article className="instructor-sector-card">
@@ -361,8 +303,9 @@ function InstructorSectorCard({
                 className="instructor-preparation-loop"
                 label="Preparazione atletica continuativa"
                 value={0}
-                valueText="Attività continuativa"
+                valueText={isPaused ? "Attività in pausa" : "Attività continuativa"}
                 indeterminate
+                paused={isPaused}
               />
               <p><strong>{idleInstructors} istruttori disponibili</strong><span>Attività continuativa</span></p>
             </>
@@ -378,6 +321,7 @@ function InstructorSectorCard({
               className="sector-form-strip"
               forms={coverage}
               instructorForms={coverage}
+              technicianForms={technicianCoverage}
               showLabels={false}
             />
             {coverage.length === 0 ? <small>Forma gli istruttori per ampliare la copertura.</small> : null}
@@ -405,6 +349,41 @@ function InstructorSectorCard({
         </section>
       </div>
 
+      {internalCourses.length > 0 ? (
+        <section className="internal-instructor-courses" aria-label="Corsi Istruttori interni in svolgimento">
+          <div className="internal-instructor-courses-heading">
+            <strong>Corsi Istruttori interni</strong>
+            <small>{internalCourses.length} in svolgimento</small>
+          </div>
+          <div className="internal-instructor-course-list">
+            {internalCourses.map((entry) => {
+              const progress = getInstructorTrainingProgress(entry.training, now);
+              const formName = getFormDefinition(entry.formId)?.longName ?? entry.formId;
+              return (
+                <div className="internal-instructor-course" key={entry.trainee.id}>
+                  <FormLogoStrip
+                    className="sector-form-strip"
+                    forms={[entry.formId]}
+                    instructorForms={[entry.formId]}
+                    showLabels={false}
+                  />
+                  <span>
+                    <strong>{formName} · {entry.trainee.displayName}</strong>
+                    <small>con il Tecnico {entry.technician.displayName}</small>
+                  </span>
+                  <ProgressBar
+                    label={`Corso Istruttori interno di ${entry.trainee.displayName}`}
+                    value={progress}
+                    durationMs={entry.training.completesAt - entry.training.startedAt}
+                  />
+                  <strong>{Math.round(progress)}%</strong>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
       {prepUnlocked && instructors.length > 0 && !prepIsPrimary ? (
         <div className="instructor-preparation-row">
           <span className="sector-card-icon"><Icon name="trend" /></span>
@@ -417,13 +396,22 @@ function InstructorSectorCard({
                 : "In attesa · tutti gli istruttori stanno insegnando"}</small>
           </span>
           <ProgressBar
-            className="instructor-preparation-loop"
+            className={`instructor-preparation-loop${preparationIsActive ? "" : " is-inactive"}`}
             label={summerBreak
               ? "Preparazione atletica in pausa"
-              : "Preparazione atletica continuativa"}
+              : preparationIsActive
+                ? "Preparazione atletica continuativa"
+                : "Preparazione atletica in attesa"}
             value={0}
-            valueText={summerBreak ? "Pausa estiva" : "Attività continuativa"}
-            indeterminate={!summerBreak}
+            valueText={summerBreak
+              ? "Pausa estiva"
+              : !preparationIsActive
+                ? "In attesa di istruttori disponibili"
+              : isPaused
+                ? "Attività in pausa"
+                : "Attività continuativa"}
+            indeterminate={preparationIsActive}
+            paused={isPaused}
           />
         </div>
       ) : null}
@@ -444,33 +432,29 @@ export function CollaboratorSectorView({
   onIncrement,
   onDecrement,
   onStartTraining,
-  onPayInstructorCertificates,
+  onBookTechnicianCourse,
 }: {
   state: GameState;
   collaboratorsById: Map<string, Collaborator>;
-  onSavePreset: (
-    presetId: CollaboratorPresetId,
-    targets: Record<CollaboratorMasteryRole, number>,
-  ) => void;
-  onApplyPreset: (presetId: CollaboratorPresetId) => void;
   onIncrement: (assignment: CollaboratorMasteryRole) => void;
   onDecrement: (assignment: CollaboratorMasteryRole) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
-  onPayInstructorCertificates?: (collaboratorId: string) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
 }) {
   const [openRole, setOpenRole] = useState<CollaboratorMasteryRole | null>(null);
   const assignmentCounts = getCollaboratorAssignmentCounts(state);
   const available = state.collaborators.filter((collaborator) => collaborator.assignment === null).length;
   const hasTimedWork = state.acquisitionEvents.some((event) => event.status === "running") ||
     getInstructorTeachingEntries(state).length > 0 ||
+    getInternalInstructorCourseEntries(state.collaborators).length > 0 ||
     state.collaborators.some((collaborator) => collaborator.assignment === "equipment");
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
   const panelProps = useMemo(() => ({
     collaboratorsById,
     onStartTraining,
-    onPayInstructorCertificates,
-  }), [collaboratorsById, onPayInstructorCertificates, onStartTraining]);
+    onBookTechnicianCourse,
+  }), [collaboratorsById, onBookTechnicianCourse, onStartTraining]);
 
   return (
     <section
@@ -478,12 +462,6 @@ export function CollaboratorSectorView({
       aria-label="Gestione aggregata dei collaboratori"
       data-tutorial-region="collaborator-sectors"
     >
-      <CollaboratorPresetToolbar
-        state={state}
-        onSave={onSavePreset}
-        onApply={onApplyPreset}
-      />
-
       <InstructorSectorCard
         state={state}
         actual={assignmentCounts.instructor}
@@ -513,7 +491,7 @@ export function CollaboratorSectorView({
         ))}
         <div className="collaborator-sector-placeholder" aria-hidden="true">
           <Icon name="settings" />
-          <span>Nuovo settore</span>
+          <span>Coming soon...</span>
         </div>
       </div>
 

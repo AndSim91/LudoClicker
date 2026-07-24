@@ -33,6 +33,7 @@ function prepareLegendaryProgressForNewSchool(
     retainedProgress[contact.specialProfileId] = {
       forms: [...(collaborator?.forms ?? contact.forms)],
       instructorForms: [...(collaborator?.instructorForms ?? [])],
+      technicianForms: [...(collaborator?.technicianForms ?? [])],
       formBranchPreferences: [
         ...(collaborator?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
       ],

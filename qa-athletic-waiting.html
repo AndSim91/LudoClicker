@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="it">
+  <head><meta charset="UTF-8" /><title>QA preparazione atletica in attesa</title></head>
+  <body>
+    <script type="module">
+      import { TUTORIAL_SCENE_IDS } from "/src/content/tutorialScenes.ts";
+      import { createInitialState } from "/src/game/engine.ts";
+      import { saveGame } from "/src/game/save.ts";
+
+      const now = Date.now();
+      const state = createInitialState(now, "QA Attesa Istruttori", false);
+      const instructorId = "qa-busy-instructor";
+      state.contacts[0] = {
+        ...state.contacts[0],
+        status: "enrolled",
+        training: {
+          formId: "form-1",
+          startedAt: now,
+          completesAt: now + 60_000,
+          instructorId,
+        },
+      };
+      state.collaborators = [
+        {
+          id: instructorId,
+          contactId: state.contacts[0].id,
+          displayName: "Istruttore Impegnato",
+          joinedAt: now,
+          forms: ["form-1"],
+          instructorForms: ["form-1"],
+          formBranchPreferences: [],
+          assignment: "instructor",
+          mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+          rarity: "ultra-rare",
+        },
+        ...Array.from({ length: 8 }, (_, index) => ({
+          id: `qa-free-${index}`,
+          contactId: `qa-free-contact-${index}`,
+          displayName: `Collaboratore libero ${index + 1}`,
+          joinedAt: now + index + 1,
+          forms: [],
+          instructorForms: [],
+          formBranchPreferences: [],
+          assignment: null,
+          mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+          rarity: "ultra-rare",
+        })),
+      ];
+      state.school.activeMembers = 1;
+      state.school.peakActiveMembers = 1;
+      state.school.historicMembers = 1;
+      state.school.currentMonth = 1;
+      state.unlocks.collaborators = true;
+      state.upgrades["athletic-preparation"] = 1;
+      state.collaboratorManagement.aggregateViewUnlocked = true;
+      state.collaboratorManagement.targets.instructor = 1;
+      state.tutorial = {
+        completedSceneIds: [],
+        skippedSceneIds: [...TUTORIAL_SCENE_IDS],
+      };
+      saveGame(state, now);
+      location.replace("/");
+    </script>
+  </body>
+</html>

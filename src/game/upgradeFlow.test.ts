@@ -55,7 +55,7 @@ describe("buyUpgrade prerequisites", () => {
       .toBe(1);
   });
 
-  it("grants every existing collaborator certificate at PagoSport level two", () => {
+  it("does not grant Instructor certificates when PagoSport reaches level two", () => {
     const initial = createInitialState(1_000);
     const collaborator: Collaborator = {
       id: "collaborator-pagosport",
@@ -82,6 +82,6 @@ describe("buyUpgrade prerequisites", () => {
 
     const upgraded = buyUpgrade(state, "pagosport");
     expect(upgraded.upgrades.pagosport).toBe(2);
-    expect(upgraded.collaborators[0].instructorForms).toEqual(["form-1", "course-x"]);
+    expect(upgraded.collaborators[0].instructorForms).toEqual([]);
   });
 });

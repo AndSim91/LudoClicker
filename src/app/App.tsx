@@ -264,12 +264,6 @@ export function App() {
                 now: getGameNow(),
               })
             }
-            onSaveCollaboratorPreset={(presetId, targets) =>
-              dispatch({ type: "SAVE_COLLABORATOR_PRESET", presetId, targets })
-            }
-            onApplyCollaboratorPreset={(presetId) =>
-              dispatch({ type: "APPLY_COLLABORATOR_PRESET", presetId })
-            }
             onIncrementCollaboratorAssignment={(assignment) =>
               dispatch({ type: "INCREMENT_COLLABORATOR_ASSIGNMENT", assignment })
             }
@@ -284,18 +278,19 @@ export function App() {
                 now: getGameNow(),
               })
             }
+            onBookTechnicianCourse={(collaboratorId, formId) =>
+              dispatch({
+                type: "BOOK_TECHNICIAN_COURSE",
+                collaboratorId,
+                formId,
+                now: getGameNow(),
+              })
+            }
             onToggleFavorite={(contactId) =>
               dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId })
             }
             onCancelEnrollment={(contactId) =>
               dispatch({ type: "CANCEL_MEMBER_ENROLLMENT", contactId })
-            }
-            onPayInstructorCertificates={(collaboratorId) =>
-              dispatch({
-                type: "PAY_INSTRUCTOR_CERTIFICATES",
-                collaboratorId,
-                now: getGameNow(),
-              })
             }
           />
         ) : activeView === "tournaments" ? (
