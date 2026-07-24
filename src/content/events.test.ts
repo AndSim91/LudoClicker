@@ -52,16 +52,33 @@ describe("acquisition event progression", () => {
     expect(ACQUISITION_EVENTS.map(getBaseExpectedEventContacts)).toEqual([
       0.6,
       0.73,
-      1.55,
+      1.35,
       1.56,
-      2.87,
-      3.79,
-      5.82,
-      8.305,
-      10.115,
-      16.14,
-      24.54,
-      31.48,
+      2.41,
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      25,
+    ]);
+    expect(ACQUISITION_EVENTS.map((event) => [
+      Math.min(...event.contactOutcomes.map((outcome) => outcome.min)),
+      Math.max(...event.contactOutcomes.map((outcome) => outcome.max)),
+    ])).toEqual([
+      [0, 2],
+      [0, 2],
+      [0, 3],
+      [1, 3],
+      [1, 5],
+      [1, 5],
+      [2, 10],
+      [3, 15],
+      [4, 20],
+      [5, 25],
+      [10, 30],
+      [10, 40],
     ]);
   });
 

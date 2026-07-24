@@ -687,16 +687,16 @@ Le distribuzioni base sono:
 | ----------------------------------- | -------------------------------------------------------------------- |
 | Sparring al parco                   | 50%: 0; 40%: 1; 10%: 2                                             |
 | Volantinaggio organizzato benissimo | 30%: 0; 67%: 1; 3%: 2                                              |
-| Lezioni all'aperto                  | 5%: 0; 45%: 1; 40%: 2; 10%: 3                                     |
+| Lezioni all'aperto                  | 10%: 0; 50%: 1; 35%: 2; 5%: 3                                     |
 | Evento sportivo                     | 54%: 1; 36%: 2; 10%: 3                                             |
-| Mele Comics                         | 5%: 1; 25%: 2; 51%: 3; 16%: 4; 3%: 5                              |
-| CairoMix                            | 5%: 1; 10%: 2; 24%: 3; 35%: 4; 17%: 5; 6%: 6; 3%: 7              |
-| CogoComix                           | 13%: 2–3; 29%: 4–5; 41%: 6–7; 13%: 8–9; 4%: 10–11                |
-| Burtomics                           | 11%: 3–5; 25%: 6–7; 39%: 8–9; 20%: 10–12; 5%: 13–16              |
-| Genova Comics & Games               | 12%: 4–6; 26%: 7–9; 37%: 10–11; 20%: 12–15; 5%: 16–18            |
-| Megacon Genova                      | 15%: 5–8; 29%: 9–15; 36%: 16–21; 15%: 22–26; 5%: 27–30           |
-| Lucca Comics & Games                | 18%: 8–12; 20%: 13–20; 25%: 21–28; 24%: 29–37; 13%: 38–45        |
-| Milan Games Week & Cartoomics       | 17%: 10–15; 22%: 16–27; 25%: 28–37; 24%: 38–47; 12%: 48–57      |
+| Mele Comics                         | 20%: 1; 35%: 2; 30%: 3; 14%: 4; 1%: 5                            |
+| CairoMix                            | 10%: 1; 20%: 2; 40%: 3; 20%: 4; 10%: 5                           |
+| CogoComix                           | 30%: 2–3; 50%: 4; 15%: 5–6; 5%: 7–10                               |
+| Burtomics                           | 23%: 3–4; 45%: 5–6; 22%: 7–8; 8%: 9–11; 2%: 12–15               |
+| Genova Comics & Games               | 11%: 4–5; 41%: 6–7; 36%: 8–10; 10%: 11–14; 2%: 15–20             |
+| Megacon Genova                      | 12%: 5–7; 17%: 8–10; 54%: 11–14; 15%: 15–19; 2%: 20–25           |
+| Lucca Comics & Games                | 18%: 10–12; 20%: 13–15; 48%: 16–18; 12%: 19–23; 2%: 24–30        |
+| Milan Games Week & Cartoomics       | 5%: 10–15; 18%: 16–22; 60%: 23–28; 12%: 29–34; 5%: 35–40         |
 
 Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
 stessa probabilità. I bonus positivi di affluenza, Carisma e collaboratori
