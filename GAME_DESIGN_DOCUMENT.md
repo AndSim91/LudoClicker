@@ -836,7 +836,7 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
   seconda volta;
 - dopo una prova non convertita, il profilo resta occupato finché l'esito **Non
   iscritto** è visibile in **La mia giornata**; quando la notifica scade, torna
-  disponibile per nuovi contatti, prove, premi dei tornei e strumenti Admin;
+  disponibile per nuovi contatti, prove e strumenti Admin;
 - se nessun profilo del pool è disponibile, qualsiasi nuova assegnazione
   Leggendaria genera invece un Ultra Raro dello stesso tipo di premio;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della

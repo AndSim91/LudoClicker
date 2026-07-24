@@ -253,36 +253,49 @@ describe("secret legendary tournament trials", () => {
 describe("tournament reward effects", () => {
   it("uses the requested tournament reward catalogue", () => {
     expect(getTournamentReward("academy", "arena", 1)).toMatchObject({
-      euros: 1_000,
+      euros: 500,
+      followers: 5,
       contacts: 0,
-      bonus: { kind: "trial", rarity: "ultra-rare" },
     });
     expect(getTournamentReward("academy", "style", 2)).toMatchObject({
-      euros: 500,
+      euros: 250,
+      followers: 2,
       contacts: 0,
-      bonus: { kind: "email", rarity: "ultra-rare" },
     });
     expect(getTournamentReward("academy", "arena", 3)).toMatchObject({
       euros: 250,
-      contacts: 1,
-      bonus: { kind: "random-contacts", amount: 1 },
+      followers: 1,
+      contacts: 0,
     });
     expect(getTournamentReward("national", "arena", 1)).toMatchObject({
-      euros: 5_000,
-      bonus: { kind: "trial", rarity: "ultra-rare" },
+      euros: 2_500,
+      followers: 10,
+      contacts: 0,
     });
     expect(getTournamentReward("national", "style", 2)).toMatchObject({
-      euros: 2_500,
-      bonus: { kind: "email", rarity: "ultra-rare" },
+      euros: 1_250,
+      followers: 5,
+      contacts: 0,
     });
     expect(getTournamentReward("national", "arena", 3)).toMatchObject({
-      euros: 1_250,
-      contacts: 1,
-      bonus: { kind: "random-contacts", amount: 1 },
+      euros: 700,
+      followers: 3,
+      contacts: 0,
     });
     expect(getTournamentReward("champions", "arena", 1)).toMatchObject({
-      euros: 50_000,
-      bonus: { kind: "enrollment", rarity: "legendary" },
+      euros: 10_000,
+      followers: 15,
+      contacts: 0,
+    });
+    expect(getTournamentReward("champions", "style", 2)).toMatchObject({
+      euros: 5_000,
+      followers: 10,
+      contacts: 0,
+    });
+    expect(getTournamentReward("champions", "arena", 3)).toMatchObject({
+      euros: 2_500,
+      followers: 5,
+      contacts: 0,
     });
   });
 
@@ -322,6 +335,20 @@ describe("tournament reward effects", () => {
       secretLegendaryDefeatedIds: [],
     };
   }
+
+  it("adds tournament followers to both the audience and Fame", () => {
+    const state = rewardState();
+    const rewarded = applyTournamentRewards(state, resultWithRewards([
+      getTournamentReward("academy", "arena", 1),
+      getTournamentReward("academy", "style", 2),
+    ]), 2_000);
+
+    expect(rewarded.school.euros).toBe(state.school.euros + 750);
+    expect(rewarded.school.followers).toBe(state.school.followers + 7);
+    expect(rewarded.school.historicMembers).toBe(state.school.historicMembers + 7);
+    expect(rewarded.statistics.socialFollowersGained)
+      .toBe(state.statistics.socialFollowersGained);
+  });
 
   it("puts random tournament contacts into the email queue", () => {
     const state = rewardState();
@@ -373,29 +400,6 @@ describe("tournament reward effects", () => {
     expect(enrollmentState.contacts.at(-1)?.status).toBe("enrolled");
     expect(enrollmentState.collaborators).toHaveLength(1);
     expect(enrollmentState.school.activeMembers).toBe(rewardState().school.activeMembers + 1);
-  });
-
-  it("keeps both Champion rewards Legendary when two profiles are already enrolled", () => {
-    const initial = rewardState();
-    const withTwoLegendaries = applyTournamentRewards(initial, resultWithRewards([
-      getTournamentReward("champions", "arena", 1),
-      getTournamentReward("champions", "style", 1),
-    ]), 2_000);
-    const existingLegendaryCount = withTwoLegendaries.contacts.filter(
-      (contact) => contact.status === "enrolled" && contact.rarity === "legendary",
-    ).length;
-
-    const rewarded = applyTournamentRewards(withTwoLegendaries, resultWithRewards([
-      getTournamentReward("champions", "arena", 1),
-      getTournamentReward("champions", "style", 1),
-    ]), 3_000);
-    const newTournamentContacts = rewarded.contacts
-      .slice(withTwoLegendaries.contacts.length);
-
-    expect(existingLegendaryCount).toBe(2);
-    expect(newTournamentContacts).toHaveLength(2);
-    expect(newTournamentContacts.every((contact) => contact.rarity === "legendary")).toBe(true);
-    expect(new Set(newTournamentContacts.map((contact) => contact.specialProfileId)).size).toBe(2);
   });
 
   it("falls back to Ultra Rare when no standard Legendary profile is available", () => {

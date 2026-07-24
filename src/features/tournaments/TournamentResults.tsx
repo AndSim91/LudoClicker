@@ -11,6 +11,7 @@ import type {
 import {
   describeTournamentRewardBonus,
   getTournamentRewardBonus,
+  getTournamentRewardFollowers,
 } from "../../game/tournamentRewardFlow";
 import { formatCurrency } from "../../shared/formatters";
 import { knockoutStageLabel, levelShortLabel, participantName } from "./tournamentPresentation";
@@ -238,6 +239,10 @@ function TournamentRewards({
     style: result.stylePodium,
   };
   const totalEuros = result.rewards.reduce((total, reward) => total + reward.euros, 0);
+  const totalFollowers = result.rewards.reduce(
+    (total, reward) => total + getTournamentRewardFollowers(reward),
+    0,
+  );
   const totalRandomContacts = result.rewards.reduce((total, reward) => {
     const bonus = getTournamentRewardBonus(reward);
     return total + (bonus?.kind === "random-contacts" ? bonus.amount : 0);
@@ -253,10 +258,18 @@ function TournamentRewards({
               <small>Totale premi</small>
               <strong>{formatCurrency(totalEuros)}</strong>
             </span>
-            <span>
-              <small>Contatti casuali</small>
-              <strong>+{totalRandomContacts}</strong>
-            </span>
+            {totalFollowers > 0 ? (
+              <span>
+                <small>Follower</small>
+                <strong>+{totalFollowers}</strong>
+              </span>
+            ) : null}
+            {totalRandomContacts > 0 ? (
+              <span>
+                <small>Contatti casuali</small>
+                <strong>+{totalRandomContacts}</strong>
+              </span>
+            ) : null}
           </div>
           <div className="tournament-reward-list">
             {result.rewards.map((reward) => {
@@ -282,7 +295,7 @@ function TournamentRewards({
         </div>
       ) : (
         <p className="empty-tournaments">
-          Questo torneo non ha assegnato premi economici o contatti.
+          Questo torneo non ha assegnato premi economici o follower.
         </p>
       )}
     </section>

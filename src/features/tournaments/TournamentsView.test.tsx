@@ -272,7 +272,8 @@ describe("TournamentsView", () => {
                 discipline: podiumEntry.discipline,
                 position: podiumEntry.position,
                 euros: 500,
-                contacts: 10,
+                followers: 5,
+                contacts: 0,
               },
             ],
           },
@@ -287,7 +288,9 @@ describe("TournamentsView", () => {
     expect(view.getByRole("heading", { name: "Premi ricevuti" })).toBeVisible();
     const rewardList = within(container.querySelector(".tournament-reward-list")!);
     expect(rewardList.getByText(/500,00/)).toBeVisible();
-    expect(rewardList.getByText("10 contatti casuali")).toBeVisible();
+    expect(view.getByText("Follower")).toBeVisible();
+    expect(view.getByText("+5")).toBeVisible();
+    expect(rewardList.getByText("+5 follower")).toBeVisible();
     expect(rewardList.getByText("1° posto")).toBeVisible();
   });
 

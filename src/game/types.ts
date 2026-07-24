@@ -486,7 +486,9 @@ export interface TournamentReward {
   discipline: TournamentDiscipline;
   position: 1 | 2 | 3;
   euros: number;
-  /** Preserved for old saves; new rewards describe this through bonus. */
+  /** Optional so tournament results stored by older saves remain compatible. */
+  followers?: number;
+  /** Preserved for old saves; current rewards use followers instead. */
   contacts: number;
   bonus?: TournamentRewardBonus;
 }

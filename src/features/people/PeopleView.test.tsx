@@ -143,6 +143,50 @@ describe("PeopleView", () => {
     expect(within(eventsCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeDisabled();
   });
 
+  it("avoids duplicate athletic preparation and links available instructor courses", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = Array.from({ length: 9 }, (_, index) => ({
+      id: `aggregate-instructor-${index}`,
+      contactId: initial.contacts[0].id,
+      displayName: index === 0 ? "Istruttore Operativo" : `Collaboratore ${index}`,
+      joinedAt: 1_000 + index,
+      forms: index === 0 ? ["form-1", "course-x"] as FormId[] : [] as FormId[],
+      instructorForms: index === 0 ? ["form-1"] as FormId[] : [] as FormId[],
+      formBranchPreferences: [],
+      assignment: index === 0 ? "instructor" as const : null,
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare" as const,
+    }));
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators,
+          upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+          unlocks: { ...initial.unlocks, collaborators: true },
+          automation: { ...initial.automation, lessonBuffer: 0.58 },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText("Preparazione atletica in corso...")).toBeVisible();
+    expect(document.querySelector(".instructor-preparation-row")).not.toBeInTheDocument();
+
+    const coursesLink = screen.getByRole("button", {
+      name: "Apri 1 Corso Istruttori disponibile",
+    });
+    expect(coursesLink).toHaveTextContent("Corsi Istruttori disponibili");
+    fireEvent.click(coursesLink);
+    expect(screen.getByRole("dialog", { name: "Istruttori" })).toBeVisible();
+  });
+
   it("keeps the idle equipment status separate from its wear indicator", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborator = {

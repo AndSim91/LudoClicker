@@ -2,7 +2,6 @@ import type {
   PersonRarity,
   TournamentDiscipline,
   TournamentLevel,
-  TournamentRewardBonus,
 } from "../game/types";
 
 export interface TournamentTier {
@@ -109,22 +108,22 @@ export const TOURNAMENT_LEVEL_ORDER: readonly TournamentLevel[] = [
 
 export const TOURNAMENT_REWARDS: Record<
   Exclude<TournamentLevel, "school" | "chronicles">,
-  Record<1 | 2 | 3, { euros: number; contacts: number; bonus: TournamentRewardBonus }>
+  Record<1 | 2 | 3, { euros: number; followers: number; contacts: number }>
 > = {
   academy: {
-    1: { euros: 1_000, contacts: 0, bonus: { kind: "trial", rarity: "ultra-rare" } },
-    2: { euros: 500, contacts: 0, bonus: { kind: "email", rarity: "ultra-rare" } },
-    3: { euros: 250, contacts: 1, bonus: { kind: "random-contacts", amount: 1 } },
+    1: { euros: 500, followers: 5, contacts: 0 },
+    2: { euros: 250, followers: 2, contacts: 0 },
+    3: { euros: 250, followers: 1, contacts: 0 },
   },
   national: {
-    1: { euros: 5_000, contacts: 0, bonus: { kind: "trial", rarity: "ultra-rare" } },
-    2: { euros: 2_500, contacts: 0, bonus: { kind: "email", rarity: "ultra-rare" } },
-    3: { euros: 1_250, contacts: 1, bonus: { kind: "random-contacts", amount: 1 } },
+    1: { euros: 2_500, followers: 10, contacts: 0 },
+    2: { euros: 1_250, followers: 5, contacts: 0 },
+    3: { euros: 700, followers: 3, contacts: 0 },
   },
   champions: {
-    1: { euros: 50_000, contacts: 0, bonus: { kind: "enrollment", rarity: "legendary" } },
-    2: { euros: 25_000, contacts: 0, bonus: { kind: "trial", rarity: "legendary" } },
-    3: { euros: 12_500, contacts: 0, bonus: { kind: "email", rarity: "legendary" } },
+    1: { euros: 10_000, followers: 15, contacts: 0 },
+    2: { euros: 5_000, followers: 10, contacts: 0 },
+    3: { euros: 2_500, followers: 5, contacts: 0 },
   },
 };
 
@@ -139,7 +138,7 @@ export function getTournamentReward(
   position: 1 | 2 | 3,
 ) {
   if (level === "school" || level === "chronicles") {
-    return { discipline, position, euros: 0, contacts: 0 };
+    return { discipline, position, euros: 0, followers: 0, contacts: 0 };
   }
   return { discipline, position, ...TOURNAMENT_REWARDS[level][position] };
 }

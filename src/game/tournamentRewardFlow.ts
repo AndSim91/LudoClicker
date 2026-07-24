@@ -20,7 +20,13 @@ export function getTournamentRewardBonus(reward: TournamentReward): TournamentRe
     : undefined);
 }
 
+export function getTournamentRewardFollowers(reward: TournamentReward): number {
+  return reward.followers ?? 0;
+}
+
 export function describeTournamentRewardBonus(reward: TournamentReward): string {
+  const followers = getTournamentRewardFollowers(reward);
+  if (followers > 0) return `+${followers} follower`;
   const bonus = getTournamentRewardBonus(reward);
   if (!bonus) return "Nessun bonus aggiuntivo";
   if (bonus.kind === "random-contacts") {
@@ -175,9 +181,18 @@ export function applyTournamentRewards(
 ): GameState {
   const resolvedResult = resolveTournamentRewardFallbacks(state, result, now);
   const euros = resolvedResult.rewards.reduce((total, reward) => total + reward.euros, 0);
+  const followers = resolvedResult.rewards.reduce(
+    (total, reward) => total + getTournamentRewardFollowers(reward),
+    0,
+  );
   let nextState: GameState = {
     ...state,
-    school: { ...state.school, euros: state.school.euros + euros },
+    school: {
+      ...state.school,
+      euros: state.school.euros + euros,
+      followers: state.school.followers + followers,
+      historicMembers: state.school.historicMembers + followers,
+    },
     statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + euros },
   };
 

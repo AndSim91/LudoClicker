@@ -4,6 +4,7 @@ import { createInitialState } from "../../game/initialState";
 import type { Collaborator } from "../../game/types";
 import {
   getAggregateInstructorProgress,
+  getAvailableInstructorCourseCount,
   getInstructorCoverageForms,
   getInstructorTeachingEntries,
 } from "./instructorGroupPresentation";
@@ -28,6 +29,15 @@ describe("instructor group presentation", () => {
       instructor("uno", ["form-2", "form-1"]),
       instructor("due", ["form-1", "course-x"]),
     ])).toEqual(["form-1", "course-x", "form-2"]);
+  });
+
+  it("counts the instructor courses still available across the assigned group", () => {
+    const first = instructor("uno", ["form-1"]);
+    first.forms = ["form-1", "course-x", "form-2"];
+    const second = instructor("due", ["form-1", "course-x"]);
+    second.forms = ["form-1", "course-x", "form-2", "course-y"];
+
+    expect(getAvailableInstructorCourseCount([first, second])).toBe(4);
   });
 
   it("averages active lessons and keeps equipment waits at zero", () => {

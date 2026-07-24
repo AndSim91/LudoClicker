@@ -1,4 +1,8 @@
-import { FORM_DEFINITIONS, getTrainingCourseTitle } from "../../content/forms";
+import {
+  FORM_DEFINITIONS,
+  getMissingInstructorForms,
+  getTrainingCourseTitle,
+} from "../../content/forms";
 import type { Collaborator, FormId, FormTraining, GameState } from "../../game/types";
 
 export interface InstructorTeachingEntry {
@@ -73,6 +77,15 @@ export function getInstructorCoverageForms(
   );
 }
 
+export function getAvailableInstructorCourseCount(
+  instructors: readonly Collaborator[],
+): number {
+  return instructors.reduce(
+    (total, instructor) => total + getMissingInstructorForms(instructor).length,
+    0,
+  );
+}
+
 export function getInstructorTeachingTitle(
   entry: InstructorTeachingEntry,
   technicalArenaLevel: number,
@@ -83,4 +96,3 @@ export function getInstructorTeachingTitle(
     entry.training.agonistCourseGrantsStats,
   );
 }
-

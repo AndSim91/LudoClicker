@@ -485,6 +485,46 @@
   font-size: 10px;
 }
 
+.instructor-coverage-actions {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.instructor-courses-link {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 2px 0;
+  color: var(--blue-700);
+  background: transparent;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.instructor-courses-link:hover {
+  color: var(--blue-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.instructor-courses-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--blue-600) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.instructor-courses-link svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+}
+
 .sector-form-strip {
   display: flex;
   flex-wrap: wrap;

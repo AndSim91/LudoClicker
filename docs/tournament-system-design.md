@@ -401,11 +401,11 @@ quindi assegnare alla scuola al massimo due premi.
 | Torneo | 1° posto | 2° posto | 3° posto |
 |---|---:|---:|---:|
 | Scolastico | titolo e qualificazione | titolo e qualificazione | titolo e qualificazione |
-| Accademico | €1.000 + 1 prova in palestra ultra rara | €500 + 1 contatto email ultra raro | €250 + 1 contatto email casuale |
-| Nazionale | €5.000 + 1 prova in palestra ultra rara | €2.500 + 1 contatto email ultra raro | €1.250 + 1 contatto email casuale |
-| Champion's | €50.000 + 1 iscrizione leggendaria | €25.000 + 1 prova in palestra leggendaria | €12.500 + 1 contatto email leggendario |
+| Accademico | €500 + 5 follower | €250 + 2 follower | €250 + 1 follower |
+| Nazionale | €2.500 + 10 follower | €1.250 + 5 follower | €700 + 3 follower |
+| Champion's | €10.000 + 15 follower | €5.000 + 10 follower | €2.500 + 5 follower |
 
-I profili Leggendari sono unici e vengono riservati già al primo contatto. Se un premio Leggendario non trova più alcun profilo ordinario disponibile, conserva la propria modalità (iscrizione, prova o email) ma scende automaticamente a Ultra Raro. Il premio effettivamente risolto viene registrato anche nello storico del torneo.
+I follower ottenuti come premio aumentano dello stesso valore anche la Fama della scuola e contribuiscono normalmente alle sponsorizzazioni mensili.
 
 Un ripescato che non appartiene al vero podio riceve qualificazione e immunità, ma non il premio da podio.
 

@@ -20,7 +20,11 @@ import type {
 import { AggregatedTeachingBar } from "./AggregatedTeachingBar";
 import { CollaboratorSectorPanel } from "./CollaboratorSectorPanel";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
-import { getInstructorCoverageForms, getInstructorTeachingEntries } from "./instructorGroupPresentation";
+import {
+  getAvailableInstructorCourseCount,
+  getInstructorCoverageForms,
+  getInstructorTeachingEntries,
+} from "./instructorGroupPresentation";
 import { FormLogoStrip } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 
@@ -297,6 +301,7 @@ function InstructorSectorCard({
     instructorIds.has(entry.instructorId),
   );
   const coverage = getInstructorCoverageForms(instructors);
+  const availableInstructorCourses = getAvailableInstructorCourseCount(instructors);
   const instructorsTeaching = new Set(entries.map((entry) => entry.instructorId));
   const idleInstructors = Math.max(0, instructors.length - instructorsTeaching.size);
   const prepUnlocked = (state.upgrades["athletic-preparation"] ?? 0) > 0;
@@ -361,7 +366,20 @@ function InstructorSectorCard({
         <section className="instructor-coverage">
           <header>
             <span><small>Copertura didattica</small><strong>{coverage.length} Forme insegnabili</strong></span>
-            <SectorMasteryIndicator collaborators={instructors} role="instructor" />
+            <span className="instructor-coverage-actions">
+              <SectorMasteryIndicator collaborators={instructors} role="instructor" />
+              {availableInstructorCourses > 0 ? (
+                <button
+                  type="button"
+                  className="instructor-courses-link"
+                  aria-label={`Apri ${availableInstructorCourses} ${availableInstructorCourses === 1 ? "Corso Istruttori disponibile" : "Corsi Istruttori disponibili"}`}
+                  onClick={onOpen}
+                >
+                  Corsi Istruttori disponibili
+                  <Icon name="arrowRight" />
+                </button>
+              ) : null}
+            </span>
           </header>
           <FormLogoStrip
             className="sector-form-strip"
@@ -373,12 +391,14 @@ function InstructorSectorCard({
         </section>
       </div>
 
-      {prepUnlocked ? (
+      {prepUnlocked && instructors.length > 0 && !prepIsPrimary ? (
         <div className="instructor-preparation-row">
           <span className="sector-card-icon"><Icon name="trend" /></span>
           <span>
             <strong>Preparazione atletica</strong>
-            <small>Priorità finale · {idleInstructors} istruttori senza lezioni</small>
+            <small>{idleInstructors > 0
+              ? `Attività secondaria · ${idleInstructors} istruttori senza lezioni`
+              : "In attesa · tutti gli istruttori stanno insegnando"}</small>
           </span>
           <ProgressBar label="Prossimo miglioramento atletico" value={prepProgress} />
           <strong>{Math.round(prepProgress)}%</strong>
