@@ -16,7 +16,6 @@ describe("collaborator mastery integration", () => {
       mastery: {
         writing: 98.5,
         events: 0,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },
@@ -47,7 +46,6 @@ describe("collaborator mastery integration", () => {
       mastery: {
         writing: 0,
         events: 1_500,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },

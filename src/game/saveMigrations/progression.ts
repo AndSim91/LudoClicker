@@ -107,7 +107,6 @@ export function migrateProgressionState(state: MigratableState): MigratableState
         ...collaborator,
         formBranchPreferences: collaborator.formBranchPreferences ??
           preferencesFor(collaborator.forms, index),
-        autoTeachingEnabled: collaborator.autoTeachingEnabled ?? true,
       })),
       legendaryCollaborators: migrated.legendaryCollaborators
         ? { ...migrated.legendaryCollaborators, retainedProgress }
@@ -118,13 +117,20 @@ export function migrateProgressionState(state: MigratableState): MigratableState
 
   if (migrated.version === 25) {
     const normalizeMastery = (
-      mastery: Partial<CollaboratorMastery> | undefined,
+      mastery: (Partial<CollaboratorMastery> & { lessons?: number }) | undefined,
     ): CollaboratorMastery => {
       const defaults = createInitialCollaboratorMastery();
       return Object.fromEntries(
         COLLABORATOR_MASTERY_ROLES.map((role) => [
           role,
-          Math.max(0, Number.isFinite(mastery?.[role]) ? mastery?.[role] ?? 0 : defaults[role]),
+          Math.max(
+            0,
+            role === "instructor"
+              ? Math.max(mastery?.instructor ?? 0, mastery?.lessons ?? 0)
+              : Number.isFinite(mastery?.[role])
+                ? mastery?.[role] ?? 0
+                : defaults[role],
+          ),
         ]),
       ) as CollaboratorMastery;
     };

@@ -270,6 +270,12 @@ export function App() {
             onApplyCollaboratorPreset={(presetId) =>
               dispatch({ type: "APPLY_COLLABORATOR_PRESET", presetId })
             }
+            onIncrementCollaboratorAssignment={(assignment) =>
+              dispatch({ type: "INCREMENT_COLLABORATOR_ASSIGNMENT", assignment })
+            }
+            onDecrementCollaboratorAssignment={(assignment) =>
+              dispatch({ type: "DECREMENT_COLLABORATOR_ASSIGNMENT", assignment })
+            }
             onStartTraining={(personId, formId) =>
               dispatch({
                 type: "START_FORM_TRAINING",
@@ -283,14 +289,6 @@ export function App() {
             }
             onCancelEnrollment={(contactId) =>
               dispatch({ type: "CANCEL_MEMBER_ENROLLMENT", contactId })
-            }
-            onToggleInstructorAutomation={(collaboratorId, enabled) =>
-              dispatch({
-                type: "TOGGLE_INSTRUCTOR_AUTOMATION",
-                collaboratorId,
-                enabled,
-                now: getGameNow(),
-              })
             }
             onPayInstructorCertificates={(collaboratorId) =>
               dispatch({

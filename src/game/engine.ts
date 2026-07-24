@@ -5,6 +5,7 @@ import {
 import {
   processAutomaticTeaching,
   processAutomation,
+  processInstructorAthleticPreparation,
 } from "./automationFlow";
 import {
   recruitCollaborator,
@@ -100,6 +101,7 @@ function startAgonistCourse(
 const automationDependencies = {
   addMessage,
   addCollaboratorMasteryExperience,
+  addCollaboratorMasteryExperienceForCollaborator,
   writeCharacters,
   startNextCampaign,
   startFormTraining,
@@ -115,6 +117,10 @@ function advanceAutomation(
 }
 
 function tick(state: GameState, now: number, gainMultiplier: number): GameState {
+  const automationElapsedMs = Math.min(
+    1_000,
+    Math.max(0, now - state.automation.lastProcessedAt),
+  );
   let nextState = advanceAutomation(state, now, gainMultiplier);
 
   for (const email of getSendingEmails(nextState.emails)) {
@@ -164,6 +170,12 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
     now,
     startFormTraining,
     startAgonistCourse,
+  );
+  nextState = processInstructorAthleticPreparation(
+    nextState,
+    now,
+    automationElapsedMs,
+    automationDependencies,
   );
   nextState = processAutomaticEvents(nextState, now);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);

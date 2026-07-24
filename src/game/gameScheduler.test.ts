@@ -23,7 +23,6 @@ function collaborator(assignment: Collaborator["assignment"]): Collaborator {
     mastery: {
       writing: 0,
       events: 0,
-      lessons: 0,
       equipment: 0,
       instructor: 0,
     },
@@ -116,7 +115,8 @@ describe("game scheduler", () => {
     const automated: GameState = {
       ...state,
       school: { ...state.school, activeMembers: 1 },
-      collaborators: [collaborator("lessons")],
+      collaborators: [collaborator("instructor")],
+      upgrades: { ...state.upgrades, "athletic-preparation": 1 },
     };
 
     expect(needsAutomationHeartbeat(automated)).toBe(true);

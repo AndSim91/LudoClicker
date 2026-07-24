@@ -7,10 +7,12 @@ export function FormLogoStrip({
   forms,
   instructorForms = [],
   showLabels = true,
+  className = "",
 }: {
   forms: FormId[];
   instructorForms?: readonly FormId[];
   showLabels?: boolean;
+  className?: string;
 }) {
   const entries = forms.map((formId) => {
     const definition = getFormDefinition(formId);
@@ -26,7 +28,7 @@ export function FormLogoStrip({
 
   return (
     <div
-      className="form-logo-strip"
+      className={`form-logo-strip${className ? ` ${className}` : ""}`}
       aria-label={entries.length > 0
         ? `Forme conosciute: ${entries.map(({ longName }) => longName).join(", ")}`
         : "Forme conosciute: nessuna"}

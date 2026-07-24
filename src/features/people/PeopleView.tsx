@@ -17,6 +17,7 @@ import { RarityOverview } from "./RarityOverview";
 const ignoreFavoriteToggle = () => undefined;
 const ignorePresetSave = () => undefined;
 const ignorePresetApply = () => undefined;
+const ignoreCollaboratorAssignmentChange = () => undefined;
 
 export function PeopleView({
   state,
@@ -25,9 +26,10 @@ export function PeopleView({
   onToggleFavorite,
   onCancelEnrollment,
   onPayInstructorCertificates,
-  onToggleInstructorAutomation,
   onSaveCollaboratorPreset,
   onApplyCollaboratorPreset,
+  onIncrementCollaboratorAssignment,
+  onDecrementCollaboratorAssignment,
 }: {
   state: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
@@ -35,12 +37,13 @@ export function PeopleView({
   onToggleFavorite?: (contactId: string) => void;
   onCancelEnrollment?: (contactId: string) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
-  onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
   onSaveCollaboratorPreset?: (
     presetId: CollaboratorPresetId,
     targets: Record<CollaboratorMasteryRole, number>,
   ) => void;
   onApplyCollaboratorPreset?: (presetId: CollaboratorPresetId) => void;
+  onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
+  onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
 }) {
   const collaboratorsByContactId = useMemo(
     () =>
@@ -58,9 +61,6 @@ export function PeopleView({
   );
   const showCollaborators = isCollaboratorAreaVisible(state);
   const showAggregateCollaborators = state.collaboratorManagement.aggregateViewUnlocked;
-  const unassignedCollaborators = state.collaborators.filter(
-    (collaborator) => collaborator.assignment === null,
-  ).length;
   const showRarityOverview =
     state.statistics.emailsSent >= GAME_CONFIG.rarityOverviewEmailsSent ||
     members.some((contact) => contact.rarity !== "common") ||
@@ -79,17 +79,18 @@ export function PeopleView({
         <section className="people-section">
           <div className="people-section-heading">
             <h2>Collaboratori</h2>
-            <span>
-              {showAggregateCollaborators
-                ? `Non assegnati/Totali ${unassignedCollaborators}/${state.collaborators.length}`
-                : state.collaborators.length}
-            </span>
+            {!showAggregateCollaborators ? <span>{state.collaborators.length}</span> : null}
           </div>
           {showAggregateCollaborators ? (
             <CollaboratorSectorView
               state={state}
+              collaboratorsById={collaboratorsById}
               onSavePreset={onSaveCollaboratorPreset ?? ignorePresetSave}
               onApplyPreset={onApplyCollaboratorPreset ?? ignorePresetApply}
+              onIncrement={onIncrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
+              onDecrement={onDecrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
+              onStartTraining={onStartTraining}
+              onPayInstructorCertificates={onPayInstructorCertificates}
             />
           ) : (
             <CollaboratorList
@@ -97,7 +98,6 @@ export function PeopleView({
               onAssign={onAssign}
               onStartTraining={onStartTraining}
               onPayInstructorCertificates={onPayInstructorCertificates}
-              onToggleInstructorAutomation={onToggleInstructorAutomation}
               collaboratorsById={collaboratorsById}
             />
           )}

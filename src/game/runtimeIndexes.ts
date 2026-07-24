@@ -214,7 +214,8 @@ export function getInstructorTeachingCounts(
 
   const counts = new Map<string, number>();
   for (const person of [...getPeopleInTraining(contacts), ...getPeopleInTraining(collaborators)]) {
-    const instructorId = person.training?.instructorId;
+    const instructorId = person.training?.instructorId ??
+      person.training?.requestedInstructorId;
     if (instructorId) counts.set(instructorId, (counts.get(instructorId) ?? 0) + 1);
   }
   byCollaborators.set(collaborators, counts);

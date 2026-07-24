@@ -216,6 +216,7 @@ export type UpgradeId =
   | "instructor-versatility"
   | "technical-arena"
   | "agonist-course-intensity"
+  | "athletic-preparation"
   | "promiscuous-instructor"
   | "extra-form"
   | "tiamat-instructor"
@@ -302,7 +303,7 @@ export interface SchoolFoundationDetails {
 }
 
 export type CollaboratorAssignment =
-  "writing" | "events" | "lessons" | "equipment" | "instructor" | null;
+  "writing" | "events" | "equipment" | "instructor" | null;
 
 export type CollaboratorMasteryRole = Exclude<CollaboratorAssignment, null>;
 export type CollaboratorMastery = Record<CollaboratorMasteryRole, number>;
@@ -317,6 +318,8 @@ export interface CollaboratorSectorPreset {
 export interface CollaboratorManagementState {
   aggregateViewUnlocked: boolean;
   activePresetId: CollaboratorPresetId | null;
+  hasUnsavedChanges: boolean;
+  targets: Record<CollaboratorMasteryRole, number>;
   presets: Record<CollaboratorPresetId, CollaboratorSectorPreset>;
 }
 
@@ -347,7 +350,6 @@ export interface Collaborator {
   forms: FormId[];
   instructorForms: FormId[];
   formBranchPreferences?: FormBranch[];
-  autoTeachingEnabled?: boolean;
   assignment: CollaboratorAssignment;
   mastery?: CollaboratorMastery;
   rarity: PersonRarity;
@@ -698,10 +700,12 @@ export type GameAction =
       presetId: CollaboratorPresetId;
     }
   | {
-      type: "TOGGLE_INSTRUCTOR_AUTOMATION";
-      collaboratorId: string;
-      enabled: boolean;
-      now: number;
+      type: "INCREMENT_COLLABORATOR_ASSIGNMENT";
+      assignment: CollaboratorMasteryRole;
+    }
+  | {
+      type: "DECREMENT_COLLABORATOR_ASSIGNMENT";
+      assignment: CollaboratorMasteryRole;
     }
   | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
   | { type: "CANCEL_MEMBER_ENROLLMENT"; contactId: string }

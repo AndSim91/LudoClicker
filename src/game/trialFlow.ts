@@ -1,4 +1,3 @@
-import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { ANDREA_SIMONAZZI_ID } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { recruitCollaborator } from "./collaboratorFlow";
@@ -11,10 +10,7 @@ import {
   incrementLegendaryPity,
   updateLegendaryPityAfterTrial,
 } from "./legendaryPity";
-import {
-  addCollaboratorMasteryExperience,
-  addMessage,
-} from "./stateUpdates";
+import { addMessage } from "./stateUpdates";
 import type { GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
 import { hasSocialMemberRequirement, unlockSocialIfEligible } from "./unlocks";
 import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
@@ -237,13 +233,6 @@ export function resolveTrial(
       },
     };
   }
-
-  nextState = addCollaboratorMasteryExperience(
-    nextState,
-    "lessons",
-    COLLABORATOR_MASTERY_XP.lessonCompleted,
-    now,
-  );
 
   if (!enrolled) return nextState;
 

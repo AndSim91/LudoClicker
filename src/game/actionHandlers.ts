@@ -13,6 +13,8 @@ import { toggleMemberFavorite } from "./memberPreferences";
 import { playChroniclesHand } from "./chroniclesFlow";
 import {
   applyCollaboratorPreset,
+  decrementCollaboratorAssignment,
+  incrementCollaboratorAssignment,
   saveCollaboratorPreset,
 } from "./collaboratorManagement";
 import { freezeGameState } from "./offline";
@@ -21,7 +23,6 @@ import { foundSchool } from "./schoolProgressionFlow";
 import {
   assignCollaborator,
   payInstructorCertificates,
-  toggleInstructorAutomation,
 } from "./trainingFlow";
 import type { FormId, GameAction, GameState } from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
@@ -123,11 +124,15 @@ export function createGameActionHandlers(
       state,
       action.presetId,
     ),
-    TOGGLE_INSTRUCTOR_AUTOMATION: (state, action) => toggleInstructorAutomation(
+    INCREMENT_COLLABORATOR_ASSIGNMENT: (state, action) =>
+      incrementCollaboratorAssignment(
+        state,
+        action.assignment,
+      ),
+    DECREMENT_COLLABORATOR_ASSIGNMENT: (state, action) =>
+      decrementCollaboratorAssignment(
       state,
-      action.collaboratorId,
-      action.enabled,
-      action.now,
+      action.assignment,
     ),
     TOGGLE_MEMBER_FAVORITE: (state, action) => toggleMemberFavorite(
       state,

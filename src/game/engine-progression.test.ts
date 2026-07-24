@@ -184,7 +184,6 @@ describe("game engine: progression", () => {
       mastery: {
         writing: 0,
         events: 0,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },
@@ -347,7 +346,7 @@ describe("game engine: progression", () => {
     expect(repaired.school.euros).toBe(0);
   });
 
-  it("improves Arena or Style for one random enrolled athlete every lesson cycle", () => {
+  it("uses an idle Instructor to improve Arena or Style after unlocking athletic preparation", () => {
     const initial = createInitialState(1_000);
     const athlete = {
       ...initial.contacts[0],
@@ -356,13 +355,13 @@ describe("game engine: progression", () => {
       styleBase: 60,
     };
     const lessonCollaborator = {
-      id: "collaborator-lessons",
+      id: "collaborator-athletic-preparation",
       contactId: initial.contacts[1].id,
       displayName: "Maestro Casuale",
       joinedAt: 1_000,
       forms: [],
       instructorForms: [],
-      assignment: "lessons" as const,
+      assignment: "instructor" as const,
       rarity: "ultra-rare" as const,
     };
     const automated = gameReducer({
@@ -370,6 +369,7 @@ describe("game engine: progression", () => {
       contacts: [athlete],
       collaborators: [lessonCollaborator],
       automation: { ...initial.automation, lessonBuffer: 0.99 },
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
     }, { type: "TICK", now: 2_000 });
     const improved = automated.contacts[0];
 
@@ -442,13 +442,14 @@ describe("game engine: progression", () => {
       collaborators: [{
         id: "collaborator-favorite-priority",
         contactId: initial.contacts[2].id,
-        displayName: "Preparatore Atletico",
+        displayName: "Istruttore preparazione atletica",
         joinedAt: 1_000,
         forms: [],
         instructorForms: [],
-        assignment: "lessons" as const,
+        assignment: "instructor" as const,
         rarity: "rare" as const,
       }],
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
     }, { type: "TICK", now: 2_000 });
 
     expect(result.automation.lastImprovedAthleteId).toBe("favorite-athlete");
@@ -743,7 +744,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["form-1", "course-x"] as FormId[],
       instructorForms: ["form-1", "course-x"] as FormId[],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
       lastFormTrainingYear: 1,
@@ -779,18 +779,6 @@ describe("game engine: progression", () => {
 
     expect(slowTraining.completesAt - slowTraining.startedAt).toBe(normalDuration * 3);
     expect(slowTraining.instructorTrainingDurationMultiplier).toBe(3);
-
-    const disabled = gameReducer(training, {
-      type: "TOGGLE_INSTRUCTOR_AUTOMATION",
-      collaboratorId: instructor.id,
-      enabled: false,
-      now: 6_000,
-    });
-    const remainingSlowWork = (slowTraining.completesAt - 6_000) / 3;
-    expect(disabled.collaborators[0].training?.completesAt).toBe(
-      6_000 + Math.round(remainingSlowWork),
-    );
-    expect(disabled.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(1);
 
     const studentFinished = gameReducer(training, { type: "TICK", now: 12_000 });
     expect(studentFinished.collaborators[0].training?.completesAt).toBe(
@@ -841,9 +829,9 @@ describe("game engine: progression", () => {
     expect(secondBlocked.school.euros).toBe(12.5);
   });
 
-  it("starts automatic teaching, respects pause, and fills six Tiamat slots", () => {
+  it("starts automatic teaching and fills six Tiamat slots", () => {
     const initial = createInitialState(1_000);
-    const students = Array.from({ length: 6 }, (_, index) => ({
+    const students = Array.from({ length: 8 }, (_, index) => ({
       ...initial.contacts[index % initial.contacts.length],
       id: `tiamat-student-${index}`,
       status: "enrolled" as const,
@@ -859,13 +847,12 @@ describe("game engine: progression", () => {
       forms: ["form-1" as const],
       instructorForms: ["form-1" as const],
       formBranchPreferences: ["Spada Lunga" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 6, euros: 0 },
+      school: { ...initial.school, activeMembers: 8, euros: 0 },
       contacts: students,
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
@@ -885,16 +872,12 @@ describe("game engine: progression", () => {
       },
     }, { type: "TICK", now: 2_000 });
     const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
+    const nextTick = gameReducer(teaching, { type: "TICK", now: 3_000 });
     expect(promiscuousOnly.contacts.filter((contact) => contact.training).length).toBe(2);
     expect(teaching.contacts.filter((contact) => contact.training).length).toBe(6);
+    expect(nextTick.contacts.filter((contact) => contact.training).length).toBe(6);
     expect(teaching.school.euros).toBe(0);
 
-    const paused = gameReducer({
-      ...ready,
-      collaborators: [{ ...instructor, autoTeachingEnabled: false }],
-    }, { type: "TICK", now: 2_000 });
-    expect(paused.contacts.every((contact) => !contact.training)).toBe(true);
-    expect(paused.school.euros).toBe(0);
   });
 
   it("gives favorite athletes priority for automatic instructor courses", () => {
@@ -923,7 +906,6 @@ describe("game engine: progression", () => {
       forms: ["form-1" as const],
       instructorForms: ["form-1" as const],
       formBranchPreferences: ["Spada Lunga" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -978,7 +960,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["form-1" as const],
       instructorForms: ["form-1" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -1031,7 +1012,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["form-1" as const],
       instructorForms: ["form-1" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -1042,7 +1022,7 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: [] as FormId[],
       instructorForms: [] as FormId[],
-      assignment: "lessons" as const,
+      assignment: null,
       rarity: "common" as const,
     };
     const ready = {
@@ -1091,7 +1071,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["form-1" as const],
       instructorForms: ["form-1" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -1127,7 +1106,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["form-1", "course-x"] as FormId[],
       instructorForms: ["form-1", "course-x"] as FormId[],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
       training: {
@@ -1166,7 +1144,6 @@ describe("game engine: progression", () => {
       joinedAt: 1_000,
       forms: ["course-y" as const],
       instructorForms: ["course-y" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
     };
@@ -1202,7 +1179,6 @@ describe("game engine: progression", () => {
       forms: ["form-1", "course-x", "form-2", "course-y", "form-3-long"] as FormId[],
       instructorForms: ["form-1", "form-2", "course-y", "form-3-long"] as FormId[],
       formBranchPreferences: ["Spada Lunga" as const],
-      autoTeachingEnabled: true,
       assignment: "instructor" as const,
       rarity: "legendary" as const,
       lastFormTrainingYear: 1,

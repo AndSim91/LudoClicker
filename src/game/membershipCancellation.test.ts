@@ -53,9 +53,8 @@ describe("manual enrollment cancellation", () => {
       forms: [...member.forms],
       instructorForms: ["form-1"],
       formBranchPreferences: [],
-      autoTeachingEnabled: true,
       assignment: "instructor",
-      mastery: { writing: 10, events: 20, lessons: 30, equipment: 50, instructor: 60 },
+      mastery: { writing: 10, events: 20, equipment: 50, instructor: 60 },
       rarity: "legendary",
       specialProfileId: "eva-parodi",
     };

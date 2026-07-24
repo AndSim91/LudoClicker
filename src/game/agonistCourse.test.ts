@@ -259,7 +259,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
       forms: completedPath,
       instructorForms: [],
       formBranchPreferences: ["Spada Lunga"],
-      assignment: "lessons",
+      assignment: null,
       rarity: "legendary",
     };
     const ready = {

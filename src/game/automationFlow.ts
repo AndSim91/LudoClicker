@@ -1,6 +1,7 @@
 import {
   FORM_DEFINITIONS,
   canTrainForm,
+  getInstructorAthleticPreparationProductivity,
   getCollaboratorProductivity,
   getFormDefinition,
   getFormTrainingCount,
@@ -51,6 +52,13 @@ export interface AutomationFlowDependencies {
   addCollaboratorMasteryExperience: (
     state: GameState,
     role: CollaboratorAssignment,
+    amount: number,
+    now: number,
+  ) => GameState;
+  addCollaboratorMasteryExperienceForCollaborator: (
+    state: GameState,
+    collaboratorId: string,
+    role: Exclude<CollaboratorAssignment, null>,
     amount: number,
     now: number,
   ) => GameState;
@@ -122,13 +130,10 @@ export function processAutomation(
   if (elapsedMs <= 0) return state;
 
   let writingProductivity = 0;
-  let lessonProductivity = 0;
   let equipmentProductivity = 0;
   for (const collaborator of state.collaborators) {
     if (collaborator.assignment === "writing") {
       writingProductivity += getCollaboratorProductivity(collaborator);
-    } else if (collaborator.assignment === "lessons") {
-      lessonProductivity += getCollaboratorProductivity(collaborator);
     } else if (collaborator.assignment === "equipment") {
       equipmentProductivity += getCollaboratorProductivity(collaborator);
     }
@@ -149,13 +154,6 @@ export function processAutomation(
     : 0;
   const writingTotal = state.automation.writingBuffer + generatedWriting;
   const automatedCharacters = hasEditorialWork ? Math.floor(writingTotal) : 0;
-  const hasEligibleAthletes = state.contacts.some((contact) => contact.status === "enrolled");
-  const lessonTotal = hasEligibleAthletes
-    ? state.automation.lessonBuffer +
-      (elapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
-        lessonProductivity * automationMultiplier
-    : 0;
-  const lessonImprovements = Math.floor(lessonTotal);
   const socialContentCharacters = getSocialContentCharacters(state.upgrades);
   const socialContentTotal = state.automation.socialContentBuffer +
     (producingSocialContent ? automatedCharacters : 0);
@@ -185,7 +183,7 @@ export function processAutomation(
       writingBuffer: hasEditorialWork
         ? writingTotal - automatedCharacters
         : state.automation.writingBuffer,
-      lessonBuffer: hasEligibleAthletes ? lessonTotal - lessonImprovements : 0,
+      lessonBuffer: state.automation.lessonBuffer,
       socialContentBuffer: producingSocialContent
         ? socialContentTotal - socialCycles * socialContentCharacters
         : state.automation.socialContentBuffer,
@@ -229,28 +227,6 @@ export function processAutomation(
     );
   }
 
-  if (lessonImprovements > 0) {
-    const improved = improveRandomAthletes(nextState, lessonImprovements);
-    nextState = improved.state;
-    nextState = {
-      ...nextState,
-      automation: {
-        ...nextState.automation,
-        lessonBuffer: hasEligibleAthletes
-          ? lessonTotal - improved.improvements
-          : 0,
-      },
-    };
-    if (improved.improvements > 0) {
-      nextState = dependencies.addCollaboratorMasteryExperience(
-        nextState,
-        "lessons",
-        improved.improvements * COLLABORATOR_MASTERY_XP.lessonCompleted,
-        now,
-      );
-    }
-  }
-
   if (socialCycles > 0) {
     const outcome = resolveSocialContentCycles(nextState, socialCycles, now);
     nextState = outcome.state;
@@ -279,6 +255,95 @@ export function processAutomation(
   return nextState;
 }
 
+/**
+ * Ultima priorità degli Istruttori. Viene eseguita dopo l'assegnazione
+ * automatica di Forme e Corso Agonisti, così un collaboratore contribuisce
+ * soltanto se non sta insegnando e non è in formazione personale.
+ */
+export function processInstructorAthleticPreparation(
+  state: GameState,
+  now: number,
+  elapsedMs: number,
+  dependencies: Pick<
+    AutomationFlowDependencies,
+    "addCollaboratorMasteryExperienceForCollaborator"
+  >,
+): GameState {
+  const safeElapsedMs = Math.min(1_000, Math.max(0, elapsedMs));
+  const hasEligibleAthletes = state.contacts.some(
+    (contact) => contact.status === "enrolled",
+  );
+  if (!hasEligibleAthletes) {
+    return state.automation.lessonBuffer === 0
+      ? state
+      : {
+          ...state,
+          automation: { ...state.automation, lessonBuffer: 0 },
+        };
+  }
+  if (
+    safeElapsedMs <= 0 ||
+    (state.upgrades["athletic-preparation"] ?? 0) <= 0
+  ) return state;
+
+  const teachingCounts = getInstructorTeachingCounts(
+    state.contacts,
+    state.collaborators,
+  );
+  const availableInstructors = state.collaborators.filter(
+    (collaborator) =>
+      collaborator.assignment === "instructor" &&
+      !collaborator.training &&
+      (teachingCounts.get(collaborator.id) ?? 0) === 0,
+  );
+  if (availableInstructors.length === 0) return state;
+
+  const productivity = availableInstructors.reduce(
+    (total, collaborator) =>
+      total + getInstructorAthleticPreparationProductivity(collaborator),
+    0,
+  );
+  const automationMultiplier =
+    1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
+  const preparationMultiplier =
+    1 + getUpgradeEffectTotal(state.upgrades, "athleticPreparationPower");
+  const total = state.automation.lessonBuffer +
+    (safeElapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
+      productivity *
+      automationMultiplier *
+      preparationMultiplier;
+  const requestedImprovements = Math.floor(total);
+  if (requestedImprovements <= 0) {
+    return {
+      ...state,
+      automation: {
+        ...state.automation,
+        lessonBuffer: total,
+      },
+    };
+  }
+
+  const improved = improveRandomAthletes(state, requestedImprovements);
+  let nextState: GameState = {
+    ...improved.state,
+    automation: {
+      ...improved.state.automation,
+      lessonBuffer: total - improved.improvements,
+    },
+  };
+  if (improved.improvements <= 0) return nextState;
+  for (const instructor of availableInstructors) {
+    nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
+      nextState,
+      instructor.id,
+      "instructor",
+      improved.improvements * COLLABORATOR_MASTERY_XP.lessonCompleted,
+      now,
+    );
+  }
+  return nextState;
+}
+
 export function processAutomaticTeaching(
   state: GameState,
   now: number,
@@ -289,8 +354,7 @@ export function processAutomaticTeaching(
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (wasAutomaticTeachingNoOp(state)) return state;
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
-    collaborator.assignment === "instructor" &&
-    collaborator.autoTeachingEnabled !== false
+    collaborator.assignment === "instructor"
   );
   if (!hasAutomaticInstructor) return state;
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
@@ -323,8 +387,7 @@ export function processAutomaticTeaching(
   const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
   for (const instructor of state.collaborators) {
     if (
-      instructor.assignment !== "instructor" ||
-      instructor.autoTeachingEnabled === false
+      instructor.assignment !== "instructor"
     ) continue;
     for (const formId of instructor.forms) {
       if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
@@ -462,7 +525,8 @@ export function processAutomaticTeaching(
         ? nextState.contacts.find((contact) => contact.id === student.id)
         : nextState.collaborators.find((collaborator) => collaborator.id === student.id);
       if (!startedStudent?.training) continue;
-      const instructorId = startedStudent.training.instructorId;
+      const instructorId = startedStudent.training.instructorId ??
+        startedStudent.training.requestedInstructorId;
       if (instructorId) {
         instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
       }
@@ -474,11 +538,19 @@ export function processAutomaticTeaching(
       instructorsWithAvailablePersonalForms.has(student.id) ||
       (nextState.upgrades["technical-arena"] ?? 0) < 1
     ) continue;
-    const instructor = nextState.collaborators.find((candidate) =>
-      candidate.assignment === "instructor" &&
-      candidate.autoTeachingEnabled !== false &&
-      (instructorLoads.get(candidate.id) ?? 0) < capacity
-    );
+    const instructor = nextState.collaborators
+      .filter((candidate) =>
+        candidate.assignment === "instructor" &&
+        (instructorLoads.get(candidate.id) ?? 0) < capacity
+      )
+      .sort((left, right) =>
+        (instructorLoads.get(left.id) ?? 0) -
+          (instructorLoads.get(right.id) ?? 0) ||
+        getCollaboratorProductivity(right, "instructor") -
+          getCollaboratorProductivity(left, "instructor") ||
+        left.joinedAt - right.joinedAt ||
+        left.id.localeCompare(right.id)
+      )[0];
     if (!instructor) continue;
     const startedState = startAgonistCourse(
       nextState,

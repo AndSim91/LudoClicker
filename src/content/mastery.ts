@@ -3,7 +3,6 @@ import type { CollaboratorMastery, CollaboratorMasteryRole } from "../game/types
 export const COLLABORATOR_MASTERY_ROLES: readonly CollaboratorMasteryRole[] = [
   "writing",
   "events",
-  "lessons",
   "equipment",
   "instructor",
 ];
@@ -11,7 +10,6 @@ export const COLLABORATOR_MASTERY_ROLES: readonly CollaboratorMasteryRole[] = [
 export const COLLABORATOR_MASTERY_ROLE_LABELS: Record<CollaboratorMasteryRole, string> = {
   writing: "Scrittura",
   events: "Eventi",
-  lessons: "Preparatore Atletico",
   equipment: "Attrezzatura",
   instructor: "Istruttore",
 };
@@ -45,7 +43,6 @@ export function createInitialCollaboratorMastery(): CollaboratorMastery {
   return {
     writing: 0,
     events: 0,
-    lessons: 0,
     equipment: 0,
     instructor: 0,
   };

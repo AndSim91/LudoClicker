@@ -169,6 +169,10 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   return Boolean(
     management &&
     typeof management.aggregateViewUnlocked === "boolean" &&
+    typeof management.hasUnsavedChanges === "boolean" &&
+    COLLABORATOR_MASTERY_ROLES.every((role) =>
+      isNonNegativeSafeInteger(management.targets?.[role])
+    ) &&
     (
       management.activePresetId === null ||
       COLLABORATOR_PRESET_IDS.includes(management.activePresetId)
@@ -289,9 +293,10 @@ export function isValidGameState(value: unknown): value is GameState {
       (collaborator.lastAgonistCourseYear === undefined ||
         (Number.isSafeInteger(collaborator.lastAgonistCourseYear) &&
           collaborator.lastAgonistCourseYear >= 1)) &&
-      typeof collaborator.autoTeachingEnabled === "boolean" &&
+      !("autoTeachingEnabled" in collaborator) &&
       typeof collaborator.mastery === "object" &&
       collaborator.mastery !== null &&
+      !("lessons" in collaborator.mastery) &&
       COLLABORATOR_MASTERY_ROLES.every((role) =>
         Number.isFinite(collaborator.mastery?.[role]) &&
         (collaborator.mastery?.[role] ?? 0) >= 0
@@ -303,6 +308,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["technical-arena"] === "number" &&
     typeof state.upgrades?.["agonist-course-intensity"] === "number" &&
+    typeof state.upgrades?.["athletic-preparation"] === "number" &&
     typeof state.upgrades?.["promiscuous-instructor"] === "number" &&
     typeof state.upgrades?.["tiamat-instructor"] === "number" &&
     typeof state.upgrades?.["extra-form"] === "number" &&

@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 describe("PeopleView", () => {
-  it("replaces the individual list with three numeric presets after the aggregate unlock", () => {
+  it("replaces the individual list with an operational dashboard after the aggregate unlock", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 9 }, (_, index) => ({
       id: `aggregate-${index}`,
@@ -20,9 +20,8 @@ describe("PeopleView", () => {
       forms: [] as FormId[],
       instructorForms: [] as FormId[],
       formBranchPreferences: [],
-      autoTeachingEnabled: true,
       assignment: null,
-      mastery: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 },
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
       rarity: "ultra-rare" as const,
     }));
     const state = {
@@ -36,6 +35,7 @@ describe("PeopleView", () => {
     };
     const onSave = vi.fn();
     const onApply = vi.fn();
+    const onIncrement = vi.fn();
     const view = render(
       <PeopleView
         state={state}
@@ -43,28 +43,26 @@ describe("PeopleView", () => {
         onStartTraining={() => undefined}
         onSaveCollaboratorPreset={onSave}
         onApplyCollaboratorPreset={onApply}
+        onIncrementCollaboratorAssignment={onIncrement}
       />,
     );
 
-    expect(screen.getByText("Non assegnati/Totali 9/9")).toBeVisible();
+    expect(screen.getByText("Collaboratori disponibili")).toBeVisible();
+    expect(screen.getByText("9/9")).toBeVisible();
     expect(screen.getByRole("region", { name: "Gestione aggregata dei collaboratori" })).toBeVisible();
     expect(screen.queryByText("Collaboratore Aggregato 0")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("heading", { name: /Preset [123]/ })).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: /^Preset [123]/ })).toHaveLength(3);
 
-    const presetOne = screen.getByRole("heading", { name: "Preset 1" }).closest("article");
-    expect(presetOne).not.toBeNull();
-    fireEvent.change(within(presetOne!).getByLabelText("Preset 1: collaboratori in Redazione"), {
-      target: { value: "2" },
-    });
-    fireEvent.click(within(presetOne!).getByRole("button", { name: "Salva preset" }));
+    fireEvent.click(screen.getByRole("button", { name: "Aumenta collaboratori in Redazione" }));
+    expect(onIncrement).toHaveBeenCalledWith("writing");
+    fireEvent.click(screen.getByRole("button", { name: "Salva preset 1" }));
     expect(onSave).toHaveBeenCalledWith("preset-1", {
-      writing: 2,
+      writing: 0,
       events: 0,
-      lessons: 0,
       equipment: 0,
       instructor: 0,
     });
-    expect(within(presetOne!).getByRole("button", { name: "Applica" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Preset 1/ })).toBeDisabled();
 
     const savedState = {
       ...state,
@@ -74,7 +72,7 @@ describe("PeopleView", () => {
           ...state.collaboratorManagement.presets,
           "preset-1": {
             saved: true,
-            targets: { writing: 2, events: 0, lessons: 0, equipment: 0, instructor: 0 },
+            targets: { writing: 2, events: 0, equipment: 0, instructor: 0 },
           },
         },
       },
@@ -86,10 +84,10 @@ describe("PeopleView", () => {
         onStartTraining={() => undefined}
         onSaveCollaboratorPreset={onSave}
         onApplyCollaboratorPreset={onApply}
+        onIncrementCollaboratorAssignment={onIncrement}
       />,
     );
-    const savedPresetOne = screen.getByRole("heading", { name: "Preset 1" }).closest("article");
-    fireEvent.click(within(savedPresetOne!).getByRole("button", { name: "Applica" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Preset 1/ }));
     expect(onApply).toHaveBeenCalledWith("preset-1");
   });
 
@@ -518,7 +516,7 @@ describe("PeopleView", () => {
         instructorForms: [] as FormId[],
         assignment: "writing" as const,
         rarity: "legendary" as const,
-        mastery: { writing: 120, events: 0, lessons: 0, equipment: 0, instructor: 0 },
+        mastery: { writing: 120, events: 0, equipment: 0, instructor: 0 },
       },
       {
         id: "event-manager",
@@ -653,7 +651,7 @@ describe("PeopleView", () => {
 
   it("shows every collaborator automation progress without the Corso Agonisti box", () => {
     const initial = createInitialState(1_000);
-    const assignments = ["writing", "events", "lessons", "equipment"] as const;
+    const assignments = ["writing", "events", "instructor", "equipment"] as const;
     const collaborators = assignments.map((assignment, index) => ({
       id: `collaborator-${index}`,
       contactId: initial.contacts[index].id,
@@ -708,13 +706,13 @@ describe("PeopleView", () => {
     expect(screen.queryByText("Corso Agonisti")).not.toBeInTheDocument();
     expect(screen.getByText("Contenuto Social")).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
-    expect(screen.getByText("Ultimo atleta migliorato: Mario Rossi")).toBeVisible();
+    expect(screen.getByText("In attesa di un allievo")).toBeVisible();
     expect(screen.getByText(/5% follower · 0,5% contatto/)).toBeVisible();
     expect(screen.getByText("Usura attrezzatura: 42")).toBeVisible();
     expect(screen.getByRole("progressbar", {
       name: "Condizione attrezzatura di Collaboratore 3",
     })).toHaveClass("is-aggregate");
-    expect(screen.getAllByRole("progressbar")).toHaveLength(8);
+    expect(screen.getAllByRole("progressbar")).toHaveLength(7);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(4);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });

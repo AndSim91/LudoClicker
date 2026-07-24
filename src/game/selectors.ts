@@ -7,6 +7,7 @@ import type {
   ScheduledTrial,
 } from "./types";
 import { isInstructorForm } from "../content/forms";
+import { getCollaboratorProductivity } from "../content/forms";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { isGameAreaUnlocked } from "./progression";
@@ -80,7 +81,6 @@ export function canInstructorTeachForm(
   return Boolean(
     instructor &&
     instructor.assignment === "instructor" &&
-    instructor.autoTeachingEnabled !== false &&
     instructor.forms.includes(formId) &&
     (!isInstructorForm(formId) || instructor.instructorForms.includes(formId)),
   );
@@ -92,11 +92,24 @@ export function selectAvailableInstructor(
   studentId?: string,
 ) {
   const busyInstructorIds = selectBusyInstructorIds(state);
-  return state.collaborators.find((collaborator) =>
-    collaborator.id !== studentId &&
-    canInstructorTeachForm(state, collaborator.id, formId) &&
-    !busyInstructorIds.has(collaborator.id)
+  const teachingCounts = getInstructorTeachingCounts(
+    state.contacts,
+    state.collaborators,
   );
+  return state.collaborators
+    .filter((collaborator) =>
+      collaborator.id !== studentId &&
+      canInstructorTeachForm(state, collaborator.id, formId) &&
+      !busyInstructorIds.has(collaborator.id)
+    )
+    .sort((left, right) =>
+      (teachingCounts.get(left.id) ?? 0) -
+        (teachingCounts.get(right.id) ?? 0) ||
+      getCollaboratorProductivity(right, "instructor") -
+        getCollaboratorProductivity(left, "instructor") ||
+      left.joinedAt - right.joinedAt ||
+      left.id.localeCompare(right.id)
+    )[0];
 }
 
 export function selectUpcomingTrials(state: GameState): ScheduledTrial[] {

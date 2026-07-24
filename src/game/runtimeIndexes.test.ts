@@ -97,14 +97,19 @@ describe("runtime indexes", () => {
     const initial = createInitialState(1_000);
     const instructorId = "cached-instructor";
     const contacts = initial.contacts.map((contact, index) =>
-      index === 0
+      index < 2
         ? {
             ...contact,
             training: {
               formId: "form-1" as const,
               startedAt: 1_000,
               completesAt: 2_000,
-              instructorId,
+              ...(index === 0
+                ? { instructorId }
+                : {
+                    requestedInstructorId: instructorId,
+                    status: "waitingForEquipment" as const,
+                  }),
             },
           }
         : contact,
@@ -115,7 +120,7 @@ describe("runtime indexes", () => {
     expect(getContactsById(contacts)).toBe(contactsById);
     expect(getInstructorTeachingCounts(contacts, initial.collaborators)).toBe(loads);
     expect(contactsById.get(contacts[0].id)).toBe(contacts[0]);
-    expect(loads.get(instructorId)).toBe(1);
+    expect(loads.get(instructorId)).toBe(2);
   });
 
   it("memoizes automatic-teaching no-ops but invalidates them on relevant input", () => {

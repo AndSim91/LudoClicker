@@ -1,8 +1,12 @@
 import type { Collaborator, GameState } from "../types";
 
 type LegacyCollaborator = Omit<Collaborator, "assignment" | "mastery"> & {
-  assignment: Collaborator["assignment"] | "social";
-  mastery?: Partial<NonNullable<Collaborator["mastery"]>> & { social?: number };
+  assignment: Collaborator["assignment"] | "social" | "lessons";
+  autoTeachingEnabled?: boolean;
+  mastery?: Partial<NonNullable<Collaborator["mastery"]>> & {
+    social?: number;
+    lessons?: number;
+  };
 };
 
 export type MigratableState = Omit<

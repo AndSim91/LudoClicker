@@ -322,8 +322,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Una squadra che cresce",
         body: [
-          "Abbiamo raggiunto il nono Collaboratore delle Onde. Gestire ogni persona singolarmente stava diventando scomodo, quindi la sezione Collaboratori ora raggruppa l'organico per settore.",
-          "Il cambiamento è definitivo: da questo momento controllerai quante persone lavorano in ogni area, senza dover scegliere i singoli nomi.",
+          "La scuola sta crescendo e con essa anche i Collaboratori delle Onde. Gestire ogni persona, però, sta diventando scomodo, quindi iniziamo ad organizzare l'organico per settore.",
+          "Da questo momento controllerai quante persone lavorano in ogni area, senza dover scegliere i singoli Collaboratori",
+          "Perfettamente equilibrato, come tutto dovrebbe essere..."
         ],
         focusRegions: ["main"],
       },
@@ -332,7 +333,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la gestione dei Collaboratori",
         body: [
-          "Apri Iscritti dalla barra laterale per vedere i settori e il riepilogo Non assegnati/Totali.",
+          "Apri Iscritti dalla barra laterale per vedere i settori e il riepilogo Collaboratori disponibili.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -344,10 +345,12 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "collaborator-presets",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Tre preset per l'organico",
+        title: "Tre preset per domarli tutti",
         body: [
-          "Ogni preset conserva il numero desiderato di Collaboratori in ciascun settore. Imposta i valori, salvalo e applicalo quando vuoi cambiare priorità.",
-          "I Collaboratori liberi si spostano subito. Chi è impegnato in un Evento o in una formazione conclude prima il lavoro; gli eventuali posti mancanti restano nel preset e saranno occupati automaticamente dai prossimi Collaboratori disponibili.",
+          "Usa i tasti + e - nelle box dei settori per definire quanti Collaboratori lavoreranno in ogni area.",
+          "Ho predisposto tre preset che conservano le tue formazioni preferite: premi l'icona Salva preset nello slot desiderato e poi seleziona lo slot per applicarlo quando vuoi cambiare le squadre.",
+          "I Collaboratori liberi si spostano subito.",
+          "Chi è impegnato in un Evento o in una formazione conclude prima il lavoro assegnatogli per poi passare al suo nuovo lavoro.",
         ],
         focusRegions: ["main", "collaborator-sectors"],
         navigateTo: "contacts",

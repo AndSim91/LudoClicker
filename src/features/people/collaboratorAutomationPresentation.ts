@@ -48,9 +48,6 @@ function getAutomationCycleDurationMs(
     "automationMultiplier",
   );
   const effectiveProductivity = productivity * automationMultiplier;
-  if (assignment === "lessons") {
-    return GAME_CONFIG.lessonImprovementIntervalMs / effectiveProductivity;
-  }
   if (assignment === "equipment") {
     return GAME_CONFIG.equipmentRepairIntervalMs * work / effectiveProductivity;
   }
@@ -170,19 +167,6 @@ export function getCollaboratorAutomationPresentation({
       progress: getTimedProgress(event.startedAt, event.resolvesAt, now),
       progressLabel: event.title,
       durationMs: event.resolvesAt - event.startedAt,
-    };
-  }
-
-  if (assignment === "lessons") {
-    const progress = Math.min(100, Math.floor(state.automation.lessonBuffer * 100));
-    return {
-      title: "Prossimo punto Arena o Stile",
-      detail: state.automation.lastImprovedAthlete
-        ? `Ultimo atleta migliorato: ${state.automation.lastImprovedAthlete}`
-        : "Nessun atleta migliorato finora",
-      progress,
-      progressLabel: "Progresso miglioramento atleta",
-      durationMs: getAutomationCycleDurationMs(state, "lessons"),
     };
   }
 

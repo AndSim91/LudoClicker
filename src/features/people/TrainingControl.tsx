@@ -152,7 +152,6 @@ export function InstructorCompactActivity({
   state: GameState;
 }) {
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
-  const enabled = collaborator.autoTeachingEnabled !== false;
   const capacity = selectInstructorCapacity(state);
   const now = useGameTime(
     teaching.length > 0,
@@ -164,7 +163,7 @@ export function InstructorCompactActivity({
       <div className="instructor-compact-activity-list" aria-label="Allievi seguiti">
         <span className="instructor-compact-activity is-waiting">
           <span className="collaborator-activity-title">
-            <strong>{enabled ? "In attesa di un allievo" : "Lezioni in pausa"}</strong>
+            <strong>In attesa di un allievo</strong>
             <small>0/{capacity} posti</small>
           </span>
           <span className="collaborator-activity-progress is-empty">
@@ -256,14 +255,12 @@ export function InstructorPanel({
   state,
   onStartTraining,
   onPayInstructorCertificates,
-  onToggle,
   collaboratorsById,
 }: {
   collaborator: Collaborator;
   state: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
-  onToggle?: (collaboratorId: string, enabled: boolean) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
@@ -273,7 +270,6 @@ export function InstructorPanel({
     teaching.length > 0,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
-  const enabled = collaborator.autoTeachingEnabled !== false;
   const hasMissingInstructorCertificates = getInstructorConversionCost(collaborator) > 0;
   const instructorCertificatesCost = hasFreeFormTraining(state.upgrades)
     ? 0
@@ -283,13 +279,6 @@ export function InstructorPanel({
     <div className="instructor-panel">
       <div className="instructor-panel-heading">
         <span><strong>Lezioni automatiche</strong><small>{teachingCount}/{capacity} allievi</small></span>
-        <label className="instructor-toggle">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(event) => onToggle?.(collaborator.id, event.target.checked)}
-          /> Attive
-        </label>
       </div>
       {hasMissingInstructorCertificates ? (
         <div className="instructor-certification-action">
@@ -312,7 +301,7 @@ export function InstructorPanel({
             now={now}
             technicalArenaLevel={state.upgrades["technical-arena"] ?? 0}
           />
-        : <small>{enabled ? "In attesa del prossimo allievo compatibile." : "Pausa: non verranno avviate nuove lezioni."}</small>}
+        : <small>In attesa del prossimo allievo compatibile.</small>}
       <TrainingControl
         personId={collaborator.id}
         displayName={collaborator.displayName}

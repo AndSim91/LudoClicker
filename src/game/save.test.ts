@@ -734,7 +734,6 @@ describe("local save", () => {
         forms: [],
         instructorForms: [],
         formBranchPreferences: [],
-        autoTeachingEnabled: true,
         assignment: "writing",
         rarity: "rare",
       }],
@@ -747,7 +746,6 @@ describe("local save", () => {
     expect(migrated.collaborators[0].mastery).toEqual({
       writing: 0,
       events: 0,
-      lessons: 0,
       equipment: 0,
       instructor: 0,
     });
@@ -813,12 +811,10 @@ describe("local save", () => {
       forms: ["form-1", "course-x", "form-2", "course-y"],
       instructorForms: [],
       formBranchPreferences: ["Spada Lunga"],
-      autoTeachingEnabled: true,
       assignment: null,
       mastery: {
         writing: 0,
         events: 0,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },

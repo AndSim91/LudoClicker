@@ -18,7 +18,6 @@ describe("collaborator management save migration", () => {
       forms: [],
       instructorForms: [],
       formBranchPreferences: [],
-      autoTeachingEnabled: true,
       assignment: index === 0 ? "events" : null,
       mastery: createInitialCollaboratorMastery(),
       rarity: "ultra-rare",
@@ -29,10 +28,17 @@ describe("collaborator management save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.collaboratorManagement.aggregateViewUnlocked).toBe(true);
     expect(migrated.collaboratorManagement.activePresetId).toBeNull();
+    expect(migrated.collaboratorManagement.hasUnsavedChanges).toBe(false);
+    expect(migrated.collaboratorManagement.targets).toEqual({
+      writing: 0,
+      events: 1,
+      equipment: 0,
+      instructor: 0,
+    });
     expect(Object.values(migrated.collaboratorManagement.presets)).toEqual([
-      { saved: false, targets: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 } },
-      { saved: false, targets: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 } },
-      { saved: false, targets: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 } },
+      { saved: false, targets: { writing: 0, events: 0, equipment: 0, instructor: 0 } },
+      { saved: false, targets: { writing: 0, events: 0, equipment: 0, instructor: 0 } },
+      { saved: false, targets: { writing: 0, events: 0, equipment: 0, instructor: 0 } },
     ]);
     expect(migrated.collaborators[0].assignment).toBe("events");
     expect(isValidGameState(migrated)).toBe(true);

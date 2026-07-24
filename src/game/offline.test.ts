@@ -59,15 +59,16 @@ describe("offline progress disabled", () => {
       ...initial,
       contacts: [athlete],
       collaborators: [{
-        id: "offline-preparator",
+        id: "offline-instructor",
         contactId: initial.contacts[1].id,
-        displayName: "Preparatore Atletico",
+        displayName: "Istruttore",
         joinedAt: 1_000,
         forms: [],
         instructorForms: [],
-        assignment: "lessons" as const,
+        assignment: "instructor" as const,
         rarity: "legendary" as const,
       }],
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
     };
     const result = simulateOfflineProgress(state, 121_000);
 

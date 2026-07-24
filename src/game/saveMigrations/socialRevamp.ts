@@ -19,7 +19,10 @@ const NEW_SOCIAL_UPGRADE_IDS = [
   "social-sponsorships",
 ] as const;
 
-type LegacyMastery = Partial<CollaboratorMastery> & { social?: number };
+type LegacyMastery = Partial<CollaboratorMastery> & {
+  social?: number;
+  lessons?: number;
+};
 type LegacyCollaborator = Omit<Collaborator, "assignment" | "mastery"> & {
   assignment: Collaborator["assignment"] | "social";
   mastery?: LegacyMastery;
@@ -29,9 +32,8 @@ function withoutLegacySocialMastery(mastery: LegacyMastery | undefined): Collabo
   return {
     writing: Math.max(0, mastery?.writing ?? 0),
     events: Math.max(0, mastery?.events ?? 0),
-    lessons: Math.max(0, mastery?.lessons ?? 0),
     equipment: Math.max(0, mastery?.equipment ?? 0),
-    instructor: Math.max(0, mastery?.instructor ?? 0),
+    instructor: Math.max(0, mastery?.instructor ?? 0, mastery?.lessons ?? 0),
   };
 }
 

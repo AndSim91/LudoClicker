@@ -29,7 +29,7 @@ export function CollaboratorDetailDrawer({
   onAssign,
   onStartTraining,
   onPayInstructorCertificates,
-  onToggleInstructorAutomation,
+  allowAssignment = true,
   onClose,
 }: {
   state: GameState;
@@ -40,7 +40,7 @@ export function CollaboratorDetailDrawer({
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onPayInstructorCertificates?: (collaboratorId: string) => void;
-  onToggleInstructorAutomation?: (collaboratorId: string, enabled: boolean) => void;
+  allowAssignment?: boolean;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -166,7 +166,6 @@ export function CollaboratorDetailDrawer({
               state={state}
               onStartTraining={onStartTraining}
               onPayInstructorCertificates={onPayInstructorCertificates}
-              onToggle={onToggleInstructorAutomation}
               collaboratorsById={collaboratorsById}
             />
           ) : (
@@ -186,31 +185,33 @@ export function CollaboratorDetailDrawer({
           <span>{collaborator.instructorForms.length} attestati</span>
         </section>
 
-        <label className="collaborator-detail-assignment">
-          <span>Assegnazione</span>
-          <select
-            aria-label={`Assegnazione di ${collaborator.displayName}`}
-            data-tutorial-region={state.unlocks.social
-              ? "collaborator-social-assignment"
-              : undefined}
-            data-tutorial-target={state.unlocks.social ? "true" : undefined}
-            value={collaborator.assignment ?? ""}
-            onChange={(event) => onAssign(
-              collaborator.id,
-              (event.target.value || null) as CollaboratorAssignment,
-            )}
-          >
-            <option value="">Non assegnato</option>
-            {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
-              <option value={value} key={value}>
-                {getCollaboratorAssignmentLabel(
-                  value as Exclude<CollaboratorAssignment, null>,
-                  state.unlocks.social,
-                )}
-              </option>
-            ))}
-          </select>
-        </label>
+        {allowAssignment ? (
+          <label className="collaborator-detail-assignment">
+            <span>Assegnazione</span>
+            <select
+              aria-label={`Assegnazione di ${collaborator.displayName}`}
+              data-tutorial-region={state.unlocks.social
+                ? "collaborator-social-assignment"
+                : undefined}
+              data-tutorial-target={state.unlocks.social ? "true" : undefined}
+              value={collaborator.assignment ?? ""}
+              onChange={(event) => onAssign(
+                collaborator.id,
+                (event.target.value || null) as CollaboratorAssignment,
+              )}
+            >
+              <option value="">Non assegnato</option>
+              {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+                <option value={value} key={value}>
+                  {getCollaboratorAssignmentLabel(
+                    value as Exclude<CollaboratorAssignment, null>,
+                    state.unlocks.social,
+                  )}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
       </div>
     </aside>
   );

@@ -61,7 +61,7 @@ describe("game engine: funnel", () => {
       .toBeCloseTo(0.15);
   });
 
-  it("applies the enrollment bonus to Instructors, not Preparators", () => {
+  it("applies the enrollment bonus to Instructors, not unassigned collaborators", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-enrollment-role",
@@ -70,16 +70,16 @@ describe("game engine: funnel", () => {
       joinedAt: 1_000,
       forms: [],
       instructorForms: [],
-      assignment: "lessons" as const,
+      assignment: null,
       rarity: "legendary" as const,
     };
-    const lessonState = { ...initial, collaborators: [collaborator] };
+    const unassignedState = { ...initial, collaborators: [collaborator] };
     const instructorState = {
-      ...lessonState,
+      ...unassignedState,
       collaborators: [{ ...collaborator, assignment: "instructor" as const }],
     };
 
-    expect(getEnrollmentChance(lessonState, "common")).toBe(0.625);
+    expect(getEnrollmentChance(unassignedState, "common")).toBe(0.625);
     expect(getEnrollmentChance(instructorState, "common")).toBeGreaterThan(0.625);
   });
 
@@ -145,12 +145,10 @@ describe("game engine: funnel", () => {
       forms: [],
       instructorForms: [],
       formBranchPreferences: [],
-      autoTeachingEnabled: true,
       assignment: "writing",
       mastery: {
         writing: 0,
         events: 0,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },
@@ -590,7 +588,7 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
     expect(protectedAttempt.unlocks.forms).toBe(true);
     expect(protectedAttempt.messages.find((message) => message.subject === "Nuovo collaboratore disponibile")?.preview)
-      .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Preparatore Atletico, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
+      .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
   });
 
   it("applies the same enrollment progression to Andrea and every other Legendary", () => {
@@ -922,7 +920,7 @@ describe("game engine: funnel", () => {
         joinedAt: 500,
         forms: ["form-1" as const, "course-x" as const, "form-2" as const],
         instructorForms: ["form-1" as const, "form-2" as const],
-        assignment: "lessons" as const,
+        assignment: "instructor" as const,
         rarity: "legendary" as const,
         specialProfileId: "eva-parodi" as const,
         lastFormTrainingYear: 0,

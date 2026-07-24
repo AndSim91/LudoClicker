@@ -138,14 +138,19 @@ test("salva e applica un preset nella gestione aggregata dei collaboratori", asy
     forms: [],
     instructorForms: [],
     formBranchPreferences: [],
-    autoTeachingEnabled: true,
     assignment: null,
-    mastery: { writing: 0, events: 0, lessons: 0, equipment: 0, instructor: 0 },
+    mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
     rarity: index === 0 ? "legendary" as const : "ultra-rare" as const,
     specialProfileId: index === 0 ? "andrea-simonazzi" as const : undefined,
   }));
   state.unlocks.collaborators = true;
   state.collaboratorManagement.aggregateViewUnlocked = true;
+  state.collaboratorManagement.targets = {
+    writing: 0,
+    events: 0,
+    equipment: 0,
+    instructor: 0,
+  };
   await installGameSave(page, state);
   await page.goto("/");
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
@@ -155,20 +160,22 @@ test("salva e applica un preset nella gestione aggregata dei collaboratori", asy
     name: "Gestione aggregata dei collaboratori",
   });
   await expect(aggregateView).toBeVisible();
-  const preset = aggregateView.locator(".collaborator-preset-card").filter({ hasText: "Preset 1" });
-  await preset.getByLabel("Preset 1: collaboratori in Redazione").fill("2");
-  await preset.getByLabel("Preset 1: collaboratori in Eventi").fill("1");
-  await preset.getByRole("button", { name: "Salva preset" }).click();
-  await expect(preset.getByRole("button", { name: "Applica" })).toBeEnabled();
-  await preset.getByRole("button", { name: "Applica" }).click();
+  await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Redazione" }).click();
+  await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Redazione" }).click();
+  await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Eventi" }).click();
+  await expect(aggregateView.getByText("Modifiche non salvate")).toBeVisible();
+  await aggregateView.getByRole("button", { name: "Salva preset 1" }).click();
+  await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Istruttori" }).click();
+  await aggregateView.getByRole("button", { name: /^Preset 1/ }).click();
 
-  await expect(page.getByText("Non assegnati/Totali 6/9")).toBeVisible();
+  await expect(aggregateView.getByText("Collaboratori disponibili")).toBeVisible();
+  await expect(aggregateView.getByText("6/9")).toBeVisible();
   await expect(
     aggregateView.locator(".collaborator-sector-card").filter({ hasText: "Redazione" }),
-  ).toContainText(/2\s*\/\s*2/);
+  ).toContainText("2");
   await expect(
     aggregateView.locator(".collaborator-sector-card").filter({ hasText: "Eventi" }),
-  ).toContainText(/1\s*\/\s*1/);
+  ).toContainText("1");
 });
 
 test("acquista un Upgrade, salva e mantiene il livello dopo il reload", async ({ page }) => {

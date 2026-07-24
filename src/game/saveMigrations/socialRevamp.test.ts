@@ -65,7 +65,6 @@ describe("Social revamp save migration", () => {
     expect(migrated.collaborators[0].mastery).toEqual({
       writing: 120,
       events: 20,
-      lessons: 30,
       equipment: 50,
       instructor: 60,
     });

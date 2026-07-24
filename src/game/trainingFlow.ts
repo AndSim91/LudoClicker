@@ -35,6 +35,7 @@ import {
 } from "./equipment";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
+import { getCollaboratorAssignmentCounts } from "./collaboratorManagement";
 import { getPeopleInTraining } from "./runtimeIndexes";
 import {
   selectAvailableInstructor,
@@ -95,29 +96,23 @@ export function assignCollaborator(
       candidate.id === collaboratorId ? { ...candidate, assignment } : candidate,
     ),
   };
+  const managedState = state.collaboratorManagement.aggregateViewUnlocked
+    ? {
+        ...reassignedState,
+        collaboratorManagement: {
+          ...reassignedState.collaboratorManagement,
+          activePresetId: null,
+          hasUnsavedChanges: true,
+          targets: getCollaboratorAssignmentCounts(reassignedState),
+        },
+      }
+    : reassignedState;
   if (collaborator.assignment === "events" && assignment !== "events") {
-    return cancelAutomatedEventForCollaborator(reassignedState, collaboratorId);
+    return cancelAutomatedEventForCollaborator(managedState, collaboratorId);
   }
   return assignment === "events"
-    ? processAutomaticEvents(reassignedState, now)
-    : reassignedState;
-}
-
-export function toggleInstructorAutomation(
-  state: GameState,
-  collaboratorId: string,
-  enabled: boolean,
-  now: number,
-): GameState {
-  const nextState = {
-    ...state,
-    collaborators: state.collaborators.map((candidate) =>
-      candidate.id === collaboratorId
-        ? { ...candidate, autoTeachingEnabled: enabled }
-        : candidate,
-    ),
-  };
-  return refreshInstructorTrainingDurations(nextState, now);
+    ? processAutomaticEvents(managedState, now)
+    : managedState;
 }
 
 export function getAgonistCourseCost(state: GameState): number {
@@ -156,8 +151,7 @@ export function startAgonistCourse(
     : member;
   const instructor = state.collaborators.find((collaborator) =>
     collaborator.id === instructorId &&
-    collaborator.assignment === "instructor" &&
-    collaborator.autoTeachingEnabled !== false
+    collaborator.assignment === "instructor"
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
@@ -297,8 +291,7 @@ function getInstructorTrainingDurationMultiplier(
   state: GameState,
   collaborator: GameState["collaborators"][number],
 ): number {
-  return collaborator.autoTeachingEnabled !== false &&
-      selectInstructorTeachingCount(state, collaborator.id) > 0
+  return selectInstructorTeachingCount(state, collaborator.id) > 0
     ? GAME_CONFIG.instructorTrainingWhileTeachingDurationMultiplier
     : 1;
 }
@@ -457,6 +450,7 @@ export function startFormTraining(
       startedAt: now,
       completesAt: now,
       status: "waitingForEquipment" as const,
+      requestedInstructorId: instructor?.id,
       equipmentUsed: definition.requiredSwords,
       wearPerSword: definition.loadPerSword,
     };

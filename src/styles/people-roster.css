@@ -99,6 +99,10 @@
   max-width: none;
 }
 
+.overview-view.people-view {
+  overflow-x: hidden;
+}
+
 .rarity-overview {
   display: grid;
   grid-template-columns: minmax(170px, 1.1fr) repeat(4, minmax(150px, 1fr));
@@ -627,7 +631,7 @@
   font-weight: 600;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1480px) {
   html,
   body,
   #root {

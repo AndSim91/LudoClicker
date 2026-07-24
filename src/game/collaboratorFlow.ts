@@ -33,7 +33,6 @@ export function recruitCollaborator(
     formBranchPreferences: [
       ...(retained?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
     ],
-    autoTeachingEnabled: true,
     assignment: null,
     mastery: retained?.mastery
       ? { ...retained.mastery }
@@ -63,7 +62,7 @@ export function recruitCollaborator(
     nextState,
     now + 1,
     "Nuovo collaboratore disponibile",
-    `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in ${editorialSector}, Eventi, Preparatore Atletico, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
+    `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in ${editorialSector}, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
     "positive",
     "focused",
     "collaborators",

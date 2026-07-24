@@ -46,14 +46,14 @@ export function needsAutomationHeartbeat(state: GameState): boolean {
     switch (collaborator.assignment) {
       case "writing":
         return hasWritingCampaign || state.unlocks.social;
-      case "lessons":
-        return hasEnrolledAthlete;
       case "equipment":
         return state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
       case "events":
       case "instructor":
         // Questi ruoli possono avviare nuovo lavoro dopo un cambio di stato.
-        return true;
+        return collaborator.assignment === "instructor"
+          ? hasEnrolledAthlete || state.unlocks.forms
+          : true;
       default:
         return false;
     }

@@ -236,17 +236,16 @@ describe("useGameEngine pause", () => {
         forms: [],
         instructorForms: [],
         formBranchPreferences: [],
-        autoTeachingEnabled: true,
-        assignment: "lessons",
+        assignment: "instructor",
         mastery: {
           writing: 0,
           events: 0,
-          lessons: 0,
           equipment: 0,
           instructor: 0,
         },
         rarity: "ultra-rare",
       }],
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
     }, 1_000);
     const { result } = renderHook(() => useGameEngine());
     const initialState = result.current.state;
@@ -272,12 +271,10 @@ describe("useGameEngine pause", () => {
         forms: [],
         instructorForms: [],
         formBranchPreferences: [],
-        autoTeachingEnabled: true,
         assignment: "writing",
         mastery: {
           writing: 0,
           events: 0,
-          lessons: 0,
           equipment: 0,
           instructor: 0,
         },

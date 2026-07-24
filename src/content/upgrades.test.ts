@@ -69,6 +69,7 @@ describe("instructor branch", () => {
     expect(instructors.map((definition) => definition.id)).toEqual([
       "technical-arena",
       "agonist-course-intensity",
+      "athletic-preparation",
       "instructor-versatility",
       "promiscuous-instructor",
       "extra-form",
@@ -77,7 +78,7 @@ describe("instructor branch", () => {
       "divine-touch",
     ]);
     expect(instructors.map((definition) => definition.requiredHistoricMembers)).toEqual([
-      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     expect(instructors.map((definition) =>
       Array.from({ length: definition.maxLevel }, (_, level) =>
@@ -86,6 +87,7 @@ describe("instructor branch", () => {
     )).toEqual([
       [1_000, 2_000, 5_000, 7_500],
       [5_000, 10_000, 20_000, 40_000],
+      [2_500, 5_000, 10_000, 20_000, 40_000],
       [2_000, 4_000],
       [5_000],
       [10_000],
@@ -110,6 +112,18 @@ describe("instructor branch", () => {
 
     expect(getAgonistCourseMaximumStatGain(base)).toBe(1);
     expect(getAgonistCourseMaximumStatGain(maximum)).toBe(5);
+  });
+
+  it("scales athletic preparation from +25% to +125%", () => {
+    const base = createInitialUpgradeLevels();
+    expect(getUpgradeEffectTotal(
+      { ...base, "athletic-preparation": 1 },
+      "athleticPreparationPower",
+    )).toBe(0.25);
+    expect(getUpgradeEffectTotal(
+      { ...base, "athletic-preparation": 5 },
+      "athleticPreparationPower",
+    )).toBe(1.25);
   });
 
   it("gives PagoSport one annual slot, automatic certificates and free training", () => {

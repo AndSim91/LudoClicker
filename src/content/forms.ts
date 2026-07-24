@@ -38,7 +38,6 @@ export interface FormDefinition {
 export interface CollaboratorFormBonuses {
   writing: number;
   events: number;
-  lessons: number;
   equipment: number;
   instructor: number;
   all: number;
@@ -52,9 +51,9 @@ export const FORM_DEFINITIONS: FormDefinition[] = [
   { id: "form-3-long", longName: "Forma 3 Spada Lunga", shortName: "F3L", branch: "Spada Lunga", cost: 1_000, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Eventi", requiredSwords: 1, loadPerSword: 10 },
   { id: "form-4-long", longName: "Forma 4 Spada Lunga", shortName: "F4L", branch: "Spada Lunga", cost: 1_500, durationMs: 45_000, prerequisite: "form-3-long", bonusLabel: "+30% Eventi", requiredSwords: 1, loadPerSword: 10 },
   { id: "form-5-long", longName: "Forma 5 Spada Lunga", shortName: "F5L", branch: "Spada Lunga", cost: 2_000, durationMs: 50_000, prerequisite: "form-4-long", bonusLabel: "+50% Eventi", requiredSwords: 1, loadPerSword: 32 },
-  { id: "form-3-staff", longName: "Forma 3 Staffa", shortName: "F3S", branch: "Staffa", cost: 1_000, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Preparatore Atletico", requiredSwords: 2, loadPerSword: 10 },
-  { id: "form-4-staff", longName: "Forma 4 Staffa", shortName: "F4S", branch: "Staffa", cost: 1_500, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Preparatore Atletico", requiredSwords: 2, loadPerSword: 10 },
-  { id: "form-5-staff", longName: "Forma 5 Staffa", shortName: "F5S", branch: "Staffa", cost: 2_000, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Preparatore Atletico", requiredSwords: 2, loadPerSword: 32 },
+  { id: "form-3-staff", longName: "Forma 3 Staffa", shortName: "F3S", branch: "Staffa", cost: 1_000, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+15% Preparazione atletica istruttori", requiredSwords: 2, loadPerSword: 10 },
+  { id: "form-4-staff", longName: "Forma 4 Staffa", shortName: "F4S", branch: "Staffa", cost: 1_500, durationMs: 45_000, prerequisite: "form-3-staff", bonusLabel: "+30% Preparazione atletica istruttori", requiredSwords: 2, loadPerSword: 10 },
+  { id: "form-5-staff", longName: "Forma 5 Staffa", shortName: "F5S", branch: "Staffa", cost: 2_000, durationMs: 50_000, prerequisite: "form-4-staff", bonusLabel: "+50% Preparazione atletica istruttori", requiredSwords: 2, loadPerSword: 32 },
   { id: "form-3-double", longName: "Forma 3 Doppie Spade Corte", shortName: "F3D", branch: "Doppia spada corta", cost: 1_000, durationMs: 40_000, prerequisite: "course-y", bonusLabel: "+10% Redazione e Social", requiredSwords: 2, loadPerSword: 10 },
   { id: "form-4-double", longName: "Forma 4 Doppie Spade Corte", shortName: "F4D", branch: "Doppia spada corta", cost: 1_500, durationMs: 45_000, prerequisite: "form-3-double", bonusLabel: "+20% Redazione e Social", requiredSwords: 2, loadPerSword: 10 },
   { id: "form-5-double", longName: "Forma 5 Doppie Spade Corte", shortName: "F5D", branch: "Doppia spada corta", cost: 2_000, durationMs: 50_000, prerequisite: "form-4-double", bonusLabel: "+35% Redazione e Social", requiredSwords: 2, loadPerSword: 32 },
@@ -236,7 +235,6 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
   const bonuses: CollaboratorFormBonuses = {
     writing: 0,
     events: 0,
-    lessons: 0,
     equipment: 0,
     instructor: 0,
     all: collaborator.forms.includes("form-7")
@@ -246,10 +244,34 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
         : 0,
   };
   bonuses.events = latestBranchBonus(collaborator.forms, "Spada Lunga");
-  bonuses.lessons = latestBranchBonus(collaborator.forms, "Staffa");
   const doubleBonus = latestBranchBonus(collaborator.forms, "Doppia spada corta");
   bonuses.writing = doubleBonus;
   return bonuses;
+}
+
+/**
+ * La Preparazione atletica è un compito di riserva degli Istruttori. I bonus
+ * delle Forme contano soltanto quando il collaboratore possiede anche il
+ * relativo attestato da istruttore.
+ */
+export function getInstructorAthleticPreparationProductivity(
+  collaborator: Collaborator,
+): number {
+  const certifiedForms = collaborator.instructorForms;
+  const staffBonus = latestBranchBonus(certifiedForms, "Staffa");
+  const allBonus = certifiedForms.includes("form-7")
+    ? 0.2
+    : certifiedForms.includes("form-6")
+      ? 0.1
+      : 0;
+  const masteryMultiplier = getCollaboratorMasteryMultiplier(
+    collaborator.mastery?.instructor ?? 0,
+  );
+  return (
+    (1 + staffBonus + allBonus) *
+    PERSON_RARITIES[collaborator.rarity].collaboratorProductivityMultiplier *
+    masteryMultiplier
+  );
 }
 
 export function getCollaboratorBaseProductivity(
@@ -278,7 +300,11 @@ export function getCollaboratorBonusSummary(collaborator: Collaborator): string 
   const bonuses = getCollaboratorFormBonuses(collaborator);
   const entries = [
     bonuses.events > 0 ? `Eventi +${Math.round(bonuses.events * 100)}%` : "",
-    bonuses.lessons > 0 ? `Preparatore Atletico +${Math.round(bonuses.lessons * 100)}%` : "",
+    latestBranchBonus(collaborator.instructorForms, "Staffa") > 0
+      ? `Preparazione atletica +${Math.round(
+          latestBranchBonus(collaborator.instructorForms, "Staffa") * 100,
+        )}%`
+      : "",
     bonuses.writing > 0 ? `Redazione e Social +${Math.round(bonuses.writing * 100)}%` : "",
     bonuses.all > 0 ? `Tutti gli incarichi +${Math.round(bonuses.all * 100)}%` : "",
   ].filter(Boolean);

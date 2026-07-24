@@ -3,7 +3,6 @@ import type { CollaboratorMasteryRole } from "../game/types";
 export const COLLABORATOR_ASSIGNMENT_LABELS: Record<CollaboratorMasteryRole, string> = {
   writing: "Redazione",
   events: "Eventi",
-  lessons: "Preparatore Atletico",
   equipment: "Attrezzatura",
   instructor: "Istruttore",
 };
@@ -20,6 +19,5 @@ export function getCollaboratorAssignmentLabel(
 export const AUTOMATION_ASSIGNMENTS: readonly CollaboratorMasteryRole[] = [
   "writing",
   "events",
-  "lessons",
   "equipment",
 ];

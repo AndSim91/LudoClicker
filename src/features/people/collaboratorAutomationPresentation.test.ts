@@ -127,7 +127,6 @@ describe("getCollaboratorAutomationPresentation", () => {
       mastery: {
         writing: 1_500,
         events: 0,
-        lessons: 0,
         equipment: 0,
         instructor: 0,
       },
