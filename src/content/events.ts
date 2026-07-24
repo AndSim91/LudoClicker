@@ -83,7 +83,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 67, min: 1, max: 1 },
       { weight: 3, min: 2, max: 2 },
     ],
-    cooldown: { kind: "realtime", durationMs: 5_000 },
+    cooldown: { kind: "realtime", durationMs: 10_000 },
   },
   {
     id: "public-demo",
@@ -109,7 +109,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 40, min: 2, max: 2 },
       { weight: 10, min: 3, max: 3 },
     ],
-    cooldown: { kind: "realtime", durationMs: 15_000 },
+    cooldown: { kind: "realtime", durationMs: 30_000 },
   },
   {
     id: "sports-stand",
@@ -134,7 +134,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 36, min: 2, max: 2 },
       { weight: 10, min: 3, max: 3 },
     ],
-    cooldown: { kind: "realtime", durationMs: 20_000 },
+    cooldown: { kind: "calendar", months: 1 },
   },
   {
     id: "local-event",
@@ -161,7 +161,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 16, min: 4, max: 4 },
       { weight: 3, min: 5, max: 5 },
     ],
-    cooldown: { kind: "calendar", months: 1 },
+    cooldown: { kind: "calendar", months: 3 },
   },
   {
     id: "school-open-day",
@@ -190,7 +190,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 6, min: 6, max: 6 },
       { weight: 3, min: 7, max: 7 },
     ],
-    cooldown: { kind: "calendar", months: 1 },
+    cooldown: { kind: "calendar", months: 3 },
   },
   {
     id: "themed-event",
@@ -217,7 +217,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 13, min: 8, max: 9 },
       { weight: 4, min: 10, max: 11 },
     ],
-    cooldown: { kind: "calendar", months: 2 },
+    cooldown: { kind: "calendar", months: 6 },
   },
   {
     id: "burtomics",
@@ -244,7 +244,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 20, min: 10, max: 12 },
       { weight: 5, min: 13, max: 16 },
     ],
-    cooldown: { kind: "calendar", months: 2 },
+    cooldown: { kind: "calendar", months: 6 },
   },
   {
     id: "genova-comics",
@@ -271,7 +271,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 20, min: 12, max: 15 },
       { weight: 5, min: 16, max: 18 },
     ],
-    cooldown: { kind: "calendar", months: 2 },
+    cooldown: { kind: "calendar", months: 12 },
   },
   {
     id: "megacon-genova",
@@ -325,7 +325,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 24, min: 29, max: 37 },
       { weight: 13, min: 38, max: 45 },
     ],
-    cooldown: { kind: "calendar", months: 12 },
+    cooldown: { kind: "calendar", months: 24 },
   },
   {
     id: "milan-games-week",
@@ -352,7 +352,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
       { weight: 24, min: 38, max: 47 },
       { weight: 12, min: 48, max: 57 },
     ],
-    cooldown: { kind: "calendar", months: 12 },
+    cooldown: { kind: "calendar", months: 24 },
   },
 ];
 

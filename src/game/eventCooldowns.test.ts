@@ -24,18 +24,18 @@ describe("event cooldowns", () => {
     const initial = createInitialState(1_000);
     const mele = getAcquisitionEventDefinition("local-event")!;
     const cooldown = createEventCooldown(initial, mele, 31_000);
-    const nextMonth = {
+    const targetMonth = {
       ...initial,
       school: {
         ...initial.school,
-        currentMonth: initial.school.currentMonth + 1,
+        currentMonth: initial.school.currentMonth + 3,
         nextFeeAt: 91_000,
       },
     };
 
-    expect(formatEventCooldownRemaining(cooldown, initial, 31_000)).toBe("1 mese");
+    expect(formatEventCooldownRemaining(cooldown, initial, 31_000)).toBe("3 mesi");
     expect(isEventCooldownActive(cooldown, initial, 61_000)).toBe(true);
-    expect(isEventCooldownActive(cooldown, nextMonth, 61_000)).toBe(false);
+    expect(isEventCooldownActive(cooldown, targetMonth, 61_000)).toBe(false);
   });
 
   it("formats annual cooldowns in game years", () => {
@@ -44,5 +44,13 @@ describe("event cooldowns", () => {
     const cooldown = createEventCooldown(state, megacon, 2_000);
 
     expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("1 anno");
+  });
+
+  it("formats two-year cooldowns in game years", () => {
+    const state = createInitialState(1_000);
+    const lucca = getAcquisitionEventDefinition("lucca-comics")!;
+    const cooldown = createEventCooldown(state, lucca, 2_000);
+
+    expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("2 anni");
   });
 });

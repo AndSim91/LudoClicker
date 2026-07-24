@@ -69,17 +69,17 @@ describe("acquisition event progression", () => {
     expect(ACQUISITION_EVENTS.every((event) => event.durationMs === 10_000)).toBe(true);
     expect(ACQUISITION_EVENTS.map((event) => event.cooldown)).toEqual([
       { kind: "realtime", durationMs: 5_000 },
-      { kind: "realtime", durationMs: 5_000 },
-      { kind: "realtime", durationMs: 15_000 },
-      { kind: "realtime", durationMs: 20_000 },
+      { kind: "realtime", durationMs: 10_000 },
+      { kind: "realtime", durationMs: 30_000 },
       { kind: "calendar", months: 1 },
-      { kind: "calendar", months: 1 },
-      { kind: "calendar", months: 2 },
-      { kind: "calendar", months: 2 },
-      { kind: "calendar", months: 2 },
+      { kind: "calendar", months: 3 },
+      { kind: "calendar", months: 3 },
+      { kind: "calendar", months: 6 },
+      { kind: "calendar", months: 6 },
       { kind: "calendar", months: 12 },
       { kind: "calendar", months: 12 },
-      { kind: "calendar", months: 12 },
+      { kind: "calendar", months: 24 },
+      { kind: "calendar", months: 24 },
     ]);
   });
 });

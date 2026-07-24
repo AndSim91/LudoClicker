@@ -229,12 +229,12 @@ describe("game engine: operations", () => {
     };
     const started = gameReducer(ready, {
       type: "START_ACQUISITION_EVENT",
-      definitionId: "local-event",
+      definitionId: "sports-stand",
       now: 2_000,
     });
     const completed = gameReducer(started, { type: "TICK", now: 12_000 });
 
-    expect(completed.activities.eventCooldowns["local-event"]).toMatchObject({
+    expect(completed.activities.eventCooldowns["sports-stand"]).toMatchObject({
       kind: "calendar",
       availableAtMonth: ready.school.currentMonth + 1,
     });
@@ -242,13 +242,13 @@ describe("game engine: operations", () => {
     const advanced = gameReducer(completed, { type: "ADMIN_ADVANCE_MONTH", now: 13_000 });
     const restarted = gameReducer(advanced, {
       type: "START_ACQUISITION_EVENT",
-      definitionId: "local-event",
+      definitionId: "sports-stand",
       now: 13_000,
     });
 
     expect(advanced.school.currentMonth).toBe(ready.school.currentMonth + 1);
     expect(restarted.acquisitionEvents.filter((event) =>
-      event.definitionId === "local-event" && event.status === "running"
+      event.definitionId === "sports-stand" && event.status === "running"
     )).toHaveLength(1);
   });
 

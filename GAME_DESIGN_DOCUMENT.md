@@ -651,12 +651,13 @@ sui contatti.
 | Lucca Comics & Games                |     250 |  €7.000 |        40 |    30 |    700 |    altissima |
 | Milan Games Week & Cartoomics       |     350 | €10.000 |        50 |    36 |  1.000 |    altissima |
 
-I conti alla rovescia sono: 5 secondi per Sparring e Volantinaggio, 15 secondi
-per Lezioni all'aperto, 20 secondi per Evento sportivo, un mese di gioco per
-Mele Comics e CairoMix, due mesi per CogoComix, Burtomics e Genova Comics &
-Games, un anno di gioco per Megacon Genova, Lucca Comics & Games e Milan Games
-Week & Cartoomics. Un conto basato sul calendario scade all'inizio del mese di
-destinazione, anche quando il calendario viene avanzato dagli strumenti Admin.
+I conti alla rovescia sono: 5 secondi per Sparring, 10 secondi per
+Volantinaggio, 30 secondi per Lezioni all'aperto, un mese di gioco per Evento
+sportivo, tre mesi per Mele Comics e CairoMix, sei mesi per CogoComix e
+Burtomics, un anno per Genova Comics & Games e Megacon Genova, due anni per
+Lucca Comics & Games e Milan Games Week & Cartoomics. Un conto basato sul
+calendario scade all'inizio del mese di destinazione, anche quando il calendario
+viene avanzato dagli strumenti Admin.
 
 ### 8.2 Persone incontrate e contatti ottenuti
 

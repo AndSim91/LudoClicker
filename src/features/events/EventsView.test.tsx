@@ -342,7 +342,7 @@ describe("EventsView", () => {
             "local-event": {
               kind: "calendar",
               startedMonthPosition: initial.school.currentMonth,
-              availableAtMonth: initial.school.currentMonth + 1,
+              availableAtMonth: initial.school.currentMonth + 3,
             },
           },
         },
@@ -350,7 +350,7 @@ describe("EventsView", () => {
       onStart={() => undefined}
     />);
 
-    expect(screen.getByRole("button", { name: "Disponibile tra 1 mese" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Disponibile tra 3 mesi" })).toBeDisabled();
     expect(screen.getByRole("progressbar", { name: "Cooldown Mele Comics" })).toBeVisible();
   });
 
