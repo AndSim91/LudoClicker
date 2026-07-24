@@ -59,7 +59,7 @@ describe("instructor athletic preparation", () => {
     const active = gameReducer(preparationState(1), { type: "TICK", now: 2_000 });
     expect((active.contacts[0].arenaBase ?? 0) + (active.contacts[0].styleBase ?? 0))
       .toBe(21);
-    expect(active.collaborators[0].mastery?.instructor).toBeGreaterThan(0);
+    expect(active.collaborators[0].mastery?.instructor).toBe(1);
   });
 
   it("uses only instructors with no active teaching or personal training", () => {
@@ -81,7 +81,7 @@ describe("instructor athletic preparation", () => {
 
     expect(busy.contacts[0].arenaBase).toBe(10);
     expect(busy.contacts[0].styleBase).toBe(10);
-    expect(busy.collaborators[0].mastery?.instructor).toBe(0);
+    expect(busy.collaborators[0].mastery?.instructor).toBe(1);
   });
 
   it("applies Staffa bonuses only from certified instructor forms", () => {

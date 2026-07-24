@@ -1,8 +1,5 @@
 import { getAcquisitionEventDefinition } from "../content/events";
-import {
-  COLLABORATOR_MASTERY_XP,
-  getCollaboratorMasteryDefinition,
-} from "../content/mastery";
+import { getCollaboratorMasteryDefinition } from "../content/mastery";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
@@ -17,10 +14,7 @@ import { rollEventContactReward } from "./eventRewards";
 import { createAcquiredContacts, addLegendaryEncounters, mergeAcquiredContacts } from "./contacts";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
-import {
-  addCollaboratorMasteryExperienceForCollaborator,
-  addMessage,
-} from "./stateUpdates";
+import { addMessage } from "./stateUpdates";
 import { selectAvailableEventMembers } from "./selectors";
 import { startNextCampaign } from "./emailFlow";
 import { getArchivedCompletedEventCount } from "./historyArchive";
@@ -252,15 +246,6 @@ export function resolveAcquisitionEvent(
         return outcome;
       }),
     };
-  }
-  if (event.collaboratorId) {
-    nextState = addCollaboratorMasteryExperienceForCollaborator(
-      nextState,
-      event.collaboratorId,
-      "events",
-      COLLABORATOR_MASTERY_XP.eventCompleted,
-      now,
-    );
   }
   if (contacts.length > 0) {
     nextState = addMessage(

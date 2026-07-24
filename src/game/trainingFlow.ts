@@ -15,7 +15,6 @@ import {
   isInstructorForm,
   isAgonistCourse,
 } from "../content/forms";
-import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import {
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
@@ -65,19 +64,6 @@ export interface TrainingFlowDependencies {
     tone?: InboxMessage["tone"],
     category?: NonNullable<InboxMessage["category"]>,
     threadKey?: InboxMessage["threadKey"],
-  ) => GameState;
-  addCollaboratorMasteryExperience: (
-    state: GameState,
-    role: CollaboratorAssignment,
-    amount: number,
-    now: number,
-  ) => GameState;
-  addCollaboratorMasteryExperienceForCollaborator: (
-    state: GameState,
-    collaboratorId: string,
-    role: Exclude<CollaboratorAssignment, null>,
-    amount: number,
-    now: number,
   ) => GameState;
   recruitCollaborator: (state: GameState, contact: Contact, now: number) => GameState;
 }
@@ -571,7 +557,7 @@ export function resolveFormTraining(
     if (!athleteContact) return state;
     const grantsStats = student.training.agonistCourseGrantsStats ?? true;
     if (!grantsStats) {
-      let nextState: GameState = {
+      return {
         ...state,
         equipment: completedEquipment,
         contacts: state.contacts.map((contact) => contact.id === athleteContact.id
@@ -583,17 +569,6 @@ export function resolveFormTraining(
             : candidate)
           : state.collaborators,
       };
-      const instructorId = student.training.instructorId;
-      if (instructorId) {
-        nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
-          nextState,
-          instructorId,
-          "instructor",
-          COLLABORATOR_MASTERY_XP.instructorTraining,
-          now,
-        );
-      }
-      return nextState;
     }
     const baseStats = getContactBaseStats(athleteContact);
     const maximumGain = getAgonistCourseMaximumStatGain(state.upgrades);
@@ -603,7 +578,7 @@ export function resolveFormTraining(
     const arenaGain = (1 + Math.floor(arenaRoll * maximumGain)) * slotsConsumed;
     const styleGain = (1 + Math.floor(styleRoll * maximumGain)) * slotsConsumed;
     const totalCompletions = (athleteContact.agonistCourseCompletions ?? 0) + 1;
-    let nextState: GameState = {
+    const nextState: GameState = {
       ...state,
       equipment: completedEquipment,
       randomSeed: nextSeed,
@@ -628,19 +603,6 @@ export function resolveFormTraining(
           : candidate)
         : state.collaborators,
     };
-    const instructorId = student.training.instructorId ??
-      (collaborator && student.training.includesInstructorCertification
-        ? collaborator.id
-        : undefined);
-    if (instructorId) {
-      nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
-        nextState,
-        instructorId,
-        "instructor",
-        COLLABORATOR_MASTERY_XP.instructorTraining,
-        now,
-      );
-    }
     return nextState;
   }
   const definition = getFormDefinition(completedFormId);
@@ -686,19 +648,6 @@ export function resolveFormTraining(
       formsCompleted: state.statistics.formsCompleted + 1,
     },
   };
-  const instructorId = student.training.instructorId ??
-    (collaborator && student.training.includesInstructorCertification
-      ? collaborator.id
-      : undefined);
-  if (instructorId) {
-    nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
-      nextState,
-      instructorId,
-      "instructor",
-      COLLABORATOR_MASTERY_XP.instructorTraining,
-      now,
-    );
-  }
   nextState = dependencies.addMessage(
     nextState,
     now,

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { createInitialCollaboratorMastery } from "../content/mastery";
 import { startAcquisitionEvent } from "./eventFlow";
 import { createInitialState, gameReducer } from "./engine";
 
 describe("collaborator mastery integration", () => {
-  it("grants writing experience and announces a new grade", () => {
+  it("grants one XP per assigned second and announces a new grade", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "mastery-writing",
@@ -14,7 +15,7 @@ describe("collaborator mastery integration", () => {
       instructorForms: [],
       assignment: "writing" as const,
       mastery: {
-        writing: 98.5,
+        writing: 59,
         events: 0,
         equipment: 0,
         instructor: 0,
@@ -26,14 +27,43 @@ describe("collaborator mastery integration", () => {
       { type: "TICK", now: 2_000 },
     );
 
-    expect(next.collaborators[0].mastery?.writing).toBe(100);
+    expect(next.collaborators[0].mastery?.writing).toBe(60);
     expect(next.messages.some((message) =>
       message.subject === "Maestria raggiunta: Giulia Ferrando" &&
       message.preview.includes("Iniziato in Scrittura")
     )).toBe(true);
   });
 
-  it("applies Event mastery to its organizer's duration, cost, wear, and experience", () => {
+  it("advances only the currently assigned mastery for every collaborator", () => {
+    const initial = createInitialState(1_000);
+    const assignments = ["writing", "events", "equipment", "instructor", null] as const;
+    const collaborators = assignments.map((assignment, index) => ({
+      id: `mastery-role-${index}`,
+      contactId: initial.contacts[index].id,
+      displayName: `Collaboratore ${index}`,
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment,
+      mastery: createInitialCollaboratorMastery(),
+      rarity: "rare" as const,
+    }));
+
+    const next = gameReducer(
+      { ...initial, collaborators },
+      { type: "TICK", now: 2_500 },
+    );
+
+    expect(next.collaborators.map((collaborator) => collaborator.mastery)).toEqual([
+      { writing: 1.5, events: 0, equipment: 0, instructor: 0 },
+      { writing: 0, events: 1.5, equipment: 0, instructor: 0 },
+      { writing: 0, events: 0, equipment: 1.5, instructor: 0 },
+      { writing: 0, events: 0, equipment: 0, instructor: 1.5 },
+      createInitialCollaboratorMastery(),
+    ]);
+  });
+
+  it("applies Event mastery but grants XP only for elapsed assignment time", () => {
     const initial = createInitialState(1_000);
     const organizer = {
       id: "mastery-events",
@@ -45,7 +75,7 @@ describe("collaborator mastery integration", () => {
       assignment: "events" as const,
       mastery: {
         writing: 0,
-        events: 1_500,
+        events: 5_760,
         equipment: 0,
         instructor: 0,
       },
@@ -60,6 +90,7 @@ describe("collaborator mastery integration", () => {
         euros: 100,
       },
       collaborators: [organizer],
+      automation: { ...initial.automation, lastProcessedAt: 2_000 },
     };
 
     const started = startAcquisitionEvent(
@@ -70,16 +101,16 @@ describe("collaborator mastery integration", () => {
     );
     const event = started.acquisitionEvents[0];
 
-    expect(event.resolvesAt - event.startedAt).toBe(8_000);
-    expect(event.cost).toBe(30);
+    expect(event.resolvesAt - event.startedAt).toBe(5_000);
+    expect(event.cost).toBe(0);
     expect(event.wearAdded).toBe(0);
-    expect(started.school.euros).toBe(70);
+    expect(started.school.euros).toBe(100);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });
-    expect(completed.collaborators[0].mastery?.events).toBe(1_510);
+    expect(completed.collaborators[0].mastery?.events).toBe(5_765);
   });
 
-  it("grants maintenance experience for every point of wear removed to every assignee", () => {
+  it("does not grant experience for equipment maintenance", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborators = ["Ada", "Bruno"].map((displayName, index) => ({
       id: `mastery-equipment-${index}`,
@@ -89,6 +120,7 @@ describe("collaborator mastery integration", () => {
       forms: [],
       instructorForms: [],
       assignment: "equipment" as const,
+      mastery: createInitialCollaboratorMastery(),
       rarity: "rare" as const,
     }));
     const maintained = gameReducer(
@@ -102,10 +134,10 @@ describe("collaborator mastery integration", () => {
     );
 
     expect(maintained.collaborators.map((collaborator) => collaborator.mastery?.equipment))
-      .toEqual([185, 185]);
+      .toEqual([0, 0]);
   });
 
-  it("grants Instructor experience for self-training", () => {
+  it("grants Instructor experience for training time, without a completion reward", () => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "mastery-self-instructor",
@@ -122,6 +154,7 @@ describe("collaborator mastery integration", () => {
       school: { ...initial.school, euros: 200 },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
+      automation: { ...initial.automation, lastProcessedAt: 2_000 },
     };
     const training = gameReducer(ready, {
       type: "START_FORM_TRAINING",
@@ -134,6 +167,9 @@ describe("collaborator mastery integration", () => {
       now: training.collaborators[0].training!.completesAt,
     });
 
-    expect(completed.collaborators[0].mastery?.instructor).toBe(10);
+    const elapsedSeconds = (
+      training.collaborators[0].training!.completesAt - 2_000
+    ) / 1_000;
+    expect(completed.collaborators[0].mastery?.instructor).toBe(elapsedSeconds);
   });
 });

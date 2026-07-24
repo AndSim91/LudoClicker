@@ -768,11 +768,24 @@ Ogni collaboratore possiede:
 - stato e assegnazione attuale.
 
 Ogni collaboratore accumula inoltre una **Maestria** separata per ciascun ruolo
-operativo: Redazione/Social, Eventi, Preparatore Atletico, Attrezzatura e
-Istruttore. La Maestria parte dal grado **Novizio** e attraversa cinque livelli:
-Novizio, Iniziato, Accademico, Cavaliere e Maestro. Ogni grado concede un
-piccolo moltiplicatore alla produttività del relativo settore; il progresso
-viene comunicato tramite un messaggio automatico nella Posta.
+operativo: Redazione/Social, Eventi, Attrezzatura e Istruttore. La Preparazione
+atletica usa la Maestria Istruttore. I cinque gradi condividono la stessa curva
+di esperienza in tutti i ruoli:
+
+| Grado      | Tempo dal grado precedente | Tempo cumulativo | XP cumulativi | Bonus |
+|------------|----------------------------:|-----------------:|--------------:|------:|
+| Novizio    |                           — |                0 |             0 |    0% |
+| Iniziato   |                    1 minuto |         1 minuto |            60 |   20% |
+| Accademico |                    5 minuti |         6 minuti |           360 |   40% |
+| Cavaliere  |                   30 minuti |        36 minuti |         2.160 |   65% |
+| Maestro    |                       1 ora |     1 ora e 36 m |         5.760 |  100% |
+
+Durante il gioco attivo, ogni collaboratore assegnato riceve **1 XP al secondo**
+esclusivamente nella Maestria del proprio ruolo corrente, indipendentemente
+dall'attività svolta. Un collaboratore non assegnato non riceve XP; cambiando
+ruolo, inizia ad avanzare nel nuovo percorso e conserva gli XP già guadagnati
+negli altri. Il progresso non avanza mentre il gioco è chiuso. Il passaggio di
+grado viene comunicato tramite un messaggio automatico nella Posta.
 
 Regole:
 

@@ -107,7 +107,7 @@ export function createGameActionHandlers(
       action.sceneId,
       action.skipped,
     ),
-    MAINTAIN_EQUIPMENT: (state, action) => maintainEquipment(state, action.now),
+    MAINTAIN_EQUIPMENT: (state) => maintainEquipment(state),
     BUY_OFFICIAL_SWORD: (state) => buyOfficialSword(state),
     ASSIGN_COLLABORATOR: (state, action) => assignCollaborator(
       state,

@@ -28,8 +28,7 @@ import {
   grantAchievements,
 } from "./schoolProgressionFlow";
 import {
-  addCollaboratorMasteryExperience,
-  addCollaboratorMasteryExperienceForCollaborator,
+  addAssignedCollaboratorMasteryExperience,
   addMessage,
 } from "./stateUpdates";
 import {
@@ -71,8 +70,6 @@ export function createInitialState(
 
 const trainingDependencies = {
   addMessage,
-  addCollaboratorMasteryExperience,
-  addCollaboratorMasteryExperienceForCollaborator,
   recruitCollaborator,
 };
 
@@ -100,8 +97,6 @@ function startAgonistCourse(
 
 const automationDependencies = {
   addMessage,
-  addCollaboratorMasteryExperience,
-  addCollaboratorMasteryExperienceForCollaborator,
   writeCharacters,
   startNextCampaign,
   startFormTraining,
@@ -117,11 +112,16 @@ function advanceAutomation(
 }
 
 function tick(state: GameState, now: number, gainMultiplier: number): GameState {
-  const automationElapsedMs = Math.min(
-    1_000,
-    Math.max(0, now - state.automation.lastProcessedAt),
+  // La pausa aggiorna lastProcessedAt: questo intervallo rappresenta soltanto
+  // il tempo di gioco attivo trascorso con l'assegnazione corrente.
+  const masteryElapsedMs = Math.max(0, now - state.automation.lastProcessedAt);
+  const automationElapsedMs = Math.min(1_000, masteryElapsedMs);
+  let nextState = addAssignedCollaboratorMasteryExperience(
+    state,
+    masteryElapsedMs,
+    now,
   );
-  let nextState = advanceAutomation(state, now, gainMultiplier);
+  nextState = advanceAutomation(nextState, now, gainMultiplier);
 
   for (const email of getSendingEmails(nextState.emails)) {
     if ((email.sendCompletesAt ?? Infinity) <= now) {
@@ -173,9 +173,7 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
   );
   nextState = processInstructorAthleticPreparation(
     nextState,
-    now,
     automationElapsedMs,
-    automationDependencies,
   );
   nextState = processAutomaticEvents(nextState, now);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);

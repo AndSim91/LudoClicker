@@ -1,4 +1,5 @@
 import {
+  COLLABORATOR_MASTERY_XP_PER_SECOND,
   createInitialCollaboratorMastery,
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryDefinition,
@@ -7,8 +8,6 @@ import {
 import { addInboxMessage } from "./messages";
 import { makeGameId } from "./ids";
 import type {
-  Collaborator,
-  CollaboratorAssignment,
   GameState,
   InboxMessage,
 } from "./types";
@@ -36,20 +35,26 @@ export function addMessage(
   return { ...state, messages: addInboxMessage(state.messages, message) };
 }
 
-function addMatchingCollaboratorMasteryExperience(
+export function addAssignedCollaboratorMasteryExperience(
   state: GameState,
-  role: Exclude<CollaboratorAssignment, null>,
-  amount: number,
+  elapsedMs: number,
   now: number,
-  matches: (collaborator: Collaborator) => boolean,
 ): GameState {
+  const amount = (Math.max(0, elapsedMs) / 1_000) *
+    COLLABORATOR_MASTERY_XP_PER_SECOND;
   if (!Number.isFinite(amount) || amount <= 0) return state;
 
-  const leveledUp: Array<{ displayName: string; levelName: string; multiplier: number }> = [];
+  const leveledUp: Array<{
+    displayName: string;
+    role: NonNullable<GameState["collaborators"][number]["assignment"]>;
+    levelName: string;
+    multiplier: number;
+  }> = [];
   const nextState: GameState = {
     ...state,
     collaborators: state.collaborators.map((collaborator) => {
-      if (!matches(collaborator)) return collaborator;
+      const role = collaborator.assignment;
+      if (!role) return collaborator;
       const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
       const currentXp = Math.max(0, mastery[role] ?? 0);
       const nextXp = currentXp + amount;
@@ -57,6 +62,7 @@ function addMatchingCollaboratorMasteryExperience(
         const definition = getCollaboratorMasteryDefinition(nextXp);
         leveledUp.push({
           displayName: collaborator.displayName,
+          role,
           levelName: definition.name,
           multiplier: definition.multiplier,
         });
@@ -73,43 +79,11 @@ function addMatchingCollaboratorMasteryExperience(
       currentState,
       now,
       `Maestria raggiunta: ${collaborator.displayName}`,
-      `${collaborator.displayName} è ora ${collaborator.levelName} in ${getCollaboratorMasteryRoleLabel(role, currentState.unlocks.social)}. Bonus del settore: +${Math.round(collaborator.multiplier * 100)}%.`,
+      `${collaborator.displayName} è ora ${collaborator.levelName} in ${getCollaboratorMasteryRoleLabel(collaborator.role, currentState.unlocks.social)}. Bonus del settore: +${Math.round(collaborator.multiplier * 100)}%.`,
       "positive",
       "other",
       "collaborators",
     ),
     nextState,
-  );
-}
-
-export function addCollaboratorMasteryExperience(
-  state: GameState,
-  role: CollaboratorAssignment,
-  amount: number,
-  now: number,
-): GameState {
-  if (!role) return state;
-  return addMatchingCollaboratorMasteryExperience(
-    state,
-    role,
-    amount,
-    now,
-    (collaborator) => collaborator.assignment === role,
-  );
-}
-
-export function addCollaboratorMasteryExperienceForCollaborator(
-  state: GameState,
-  collaboratorId: string,
-  role: Exclude<CollaboratorAssignment, null>,
-  amount: number,
-  now: number,
-): GameState {
-  return addMatchingCollaboratorMasteryExperience(
-    state,
-    role,
-    amount,
-    now,
-    (collaborator) => collaborator.id === collaboratorId,
   );
 }

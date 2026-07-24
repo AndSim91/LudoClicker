@@ -8,7 +8,6 @@ import {
   getStudentFormCost,
   isInstructorForm,
 } from "../content/forms";
-import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import {
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
@@ -33,7 +32,6 @@ import { getSocialContentCharacters } from "./social";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./trainingFlow";
 import type {
-  CollaboratorAssignment,
   FormId,
   GameState,
   InboxMessage,
@@ -48,19 +46,6 @@ export interface AutomationFlowDependencies {
     tone?: InboxMessage["tone"],
     category?: NonNullable<InboxMessage["category"]>,
     threadKey?: InboxMessage["threadKey"],
-  ) => GameState;
-  addCollaboratorMasteryExperience: (
-    state: GameState,
-    role: CollaboratorAssignment,
-    amount: number,
-    now: number,
-  ) => GameState;
-  addCollaboratorMasteryExperienceForCollaborator: (
-    state: GameState,
-    collaboratorId: string,
-    role: Exclude<CollaboratorAssignment, null>,
-    amount: number,
-    now: number,
   ) => GameState;
   writeCharacters: (
     state: GameState,
@@ -198,16 +183,6 @@ export function processAutomation(
       : state.school,
   };
 
-  if (equipmentRepair.restoredCondition > 0) {
-    nextState = dependencies.addCollaboratorMasteryExperience(
-      nextState,
-      "equipment",
-      equipmentRepair.restoredCondition *
-        COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
-      now,
-    );
-  }
-
   if (automatedCharacters > 0) {
     nextState = wasWriting
       ? dependencies.writeCharacters(nextState, automatedCharacters, now, "automation")
@@ -219,12 +194,6 @@ export function processAutomation(
               nextState.statistics.automatedCharacters + automatedCharacters,
           },
         };
-    nextState = dependencies.addCollaboratorMasteryExperience(
-      nextState,
-      "writing",
-      (elapsedMs / 1_000) * COLLABORATOR_MASTERY_XP.writingPerSecond,
-      now,
-    );
   }
 
   if (socialCycles > 0) {
@@ -262,12 +231,7 @@ export function processAutomation(
  */
 export function processInstructorAthleticPreparation(
   state: GameState,
-  now: number,
   elapsedMs: number,
-  dependencies: Pick<
-    AutomationFlowDependencies,
-    "addCollaboratorMasteryExperienceForCollaborator"
-  >,
 ): GameState {
   const safeElapsedMs = Math.min(1_000, Math.max(0, elapsedMs));
   const hasEligibleAthletes = state.contacts.some(
@@ -324,24 +288,13 @@ export function processInstructorAthleticPreparation(
   }
 
   const improved = improveRandomAthletes(state, requestedImprovements);
-  let nextState: GameState = {
+  return {
     ...improved.state,
     automation: {
       ...improved.state.automation,
       lessonBuffer: total - improved.improvements,
     },
   };
-  if (improved.improvements <= 0) return nextState;
-  for (const instructor of availableInstructors) {
-    nextState = dependencies.addCollaboratorMasteryExperienceForCollaborator(
-      nextState,
-      instructor.id,
-      "instructor",
-      improved.improvements * COLLABORATOR_MASTERY_XP.lessonCompleted,
-      now,
-    );
-  }
-  return nextState;
 }
 
 export function processAutomaticTeaching(

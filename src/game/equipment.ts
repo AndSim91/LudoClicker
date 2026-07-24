@@ -1,7 +1,5 @@
-import { COLLABORATOR_MASTERY_XP } from "../content/mastery";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
-import { addCollaboratorMasteryExperience } from "./stateUpdates";
 import type { GameState } from "./types";
 
 type EquipmentState = GameState["equipment"];
@@ -240,7 +238,7 @@ export function repairEquipment(
   };
 }
 
-export function maintainEquipment(state: GameState, now: number): GameState {
+export function maintainEquipment(state: GameState): GameState {
   if (state.equipment.wear <= 0 && state.equipment.damagedSwords <= 0) return state;
 
   let remainingEuros = Math.max(0, state.school.euros);
@@ -262,7 +260,7 @@ export function maintainEquipment(state: GameState, now: number): GameState {
     repairedWear + repairedSwords * GAME_CONFIG.equipmentBreakLoad;
   if (restoredCondition <= 0) return state;
 
-  const maintained: GameState = {
+  return {
     ...state,
     school: { ...state.school, euros: roundCurrency(remainingEuros) },
     equipment,
@@ -271,12 +269,6 @@ export function maintainEquipment(state: GameState, now: number): GameState {
       maintenanceCompleted: state.statistics.maintenanceCompleted + 1,
     },
   };
-  return addCollaboratorMasteryExperience(
-    maintained,
-    "equipment",
-    restoredCondition * COLLABORATOR_MASTERY_XP.equipmentRepairPoint,
-    now,
-  );
 }
 
 export function buyOfficialSword(state: GameState): GameState {

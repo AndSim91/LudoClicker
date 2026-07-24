@@ -214,7 +214,7 @@ describe("game engine: progression", () => {
       initial.school.historicMembers + automated.statistics.socialFollowersGained,
     );
     expect(automated.statistics.eurosEarned).toBe(0);
-    expect(automated.collaborators[0].mastery?.writing).toBe(1.5);
+    expect(automated.collaborators[0].mastery?.writing).toBe(1);
     expect(automated.statistics.socialContentCycles).toBe(1);
     expect(automated.automation.socialContentBuffer).toBe(0);
     expect(automated.contacts).toHaveLength(automated.statistics.socialContacts);
@@ -266,7 +266,7 @@ describe("game engine: progression", () => {
     expect(contactOnly.state.scheduledTrials).toHaveLength(0);
   });
 
-  it("repairs a damaged sword automatically in 150 cycles at 75% of manual cost", () => {
+  it("accelerates automatic repair as mastery grows and pays 75% of manual cost", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-equipment-repair",
@@ -286,21 +286,20 @@ describe("game engine: progression", () => {
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
+    let repairedAtTick: number | undefined;
     for (let tick = 1; tick <= 224; tick += 1) {
       state = gameReducer(state, { type: "TICK", now: 1_000 + tick * 1_000 });
+      if (state.equipment.damagedSwords === 0) {
+        repairedAtTick = tick;
+        break;
+      }
     }
 
-    expect(state.equipment.damagedSwords).toBe(1);
-    expect(state.automation.equipmentBuffer).toBeCloseTo(149.333_333);
-
-    const repaired = gameReducer(state, {
-      type: "TICK",
-      now: 226_000,
-    });
-
-    expect(repaired.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
-    expect(repaired.automation.equipmentBuffer).toBe(0);
-    expect(repaired.school.euros).toBe(0);
+    expect(repairedAtTick).toBeGreaterThan(60);
+    expect(repairedAtTick).toBeLessThan(225);
+    expect(state.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
+    expect(state.automation.equipmentBuffer).toBe(0);
+    expect(state.school.euros).toBe(0);
   });
 
   it("spends automatic work on healthy-sword wear before a broken sword", () => {
