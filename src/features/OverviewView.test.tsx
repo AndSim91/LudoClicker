@@ -15,6 +15,7 @@ describe("OverviewView settings", () => {
       phase: "saved" as const,
       lastSavedAt: 1_000,
       nextAutoSaveAt: 61_000,
+      error: null,
     },
     onSaveNow: vi.fn(),
     onUpdateProfileName: vi.fn(),
@@ -36,12 +37,13 @@ describe("OverviewView settings", () => {
   it("imports pasted JSON and reports success", () => {
     render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Incolla qui il contenuto esportato"), { target: { value: "{\"version\":11}" } });
+    fireEvent.change(screen.getByPlaceholderText("Incolla qui il contenuto esportato"), {
+      target: { value: '{"version":11}' },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Importa salvataggio" }));
 
-    expect(callbacks.onImport).toHaveBeenCalledWith("{\"version\":11}");
-    expect(screen.getByText("Salvataggio importato correttamente."))
-      .toBeInTheDocument();
+    expect(callbacks.onImport).toHaveBeenCalledWith('{"version":11}');
+    expect(screen.getByText("Salvataggio importato correttamente.")).toBeInTheDocument();
   });
 
   it("updates the email signature name", () => {
@@ -93,13 +95,24 @@ describe("OverviewView settings", () => {
         view="settings"
         state={createInitialState(1_000)}
         {...callbacks}
-        saveStatus={{ ...callbacks.saveStatus, phase: "error" }}
+        saveStatus={{
+          ...callbacks.saveStatus,
+          phase: "error",
+          error: {
+            reason: "quota-exceeded",
+            operation: "write-backup",
+            errorName: "QuotaExceededError",
+            errorMessage: "Quota exceeded",
+            serializedLength: 512_000,
+          },
+        }}
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Salvataggio non riuscito" }))
-      .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Salvataggio non riuscito" })).toBeInTheDocument();
     expect(screen.getByText(/Le modifiche restano in memoria/)).toBeInTheDocument();
+    expect(screen.getByText(/spazio di archiviazione del browser/)).toBeInTheDocument();
+    expect(screen.getByText("Dettagli tecnici per il bugfix")).toBeInTheDocument();
   });
 
   it("does not render prestige or school-foundation controls", () => {
@@ -107,7 +120,6 @@ describe("OverviewView settings", () => {
 
     expect(screen.queryByText("Coming Soon")).not.toBeInTheDocument();
     expect(screen.queryByText("Rete delle scuole")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Fonda la nuova scuola" }))
-      .not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Fonda la nuova scuola" })).not.toBeInTheDocument();
   });
 });

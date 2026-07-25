@@ -100,6 +100,28 @@
   line-height: 1.35;
 }
 
+.save-assurance-diagnostic {
+  margin: 4px 0 2px;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.save-assurance-diagnostic summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-assurance-diagnostic code {
+  display: block;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font:
+    11px/1.45 Consolas,
+    monospace;
+}
+
 .settings-layout button {
   min-height: 38px;
   padding: 0 15px;
@@ -107,7 +129,9 @@
   border-radius: var(--radius-md);
   color: white;
   background: var(--blue-600);
-  font: 600 12px/1 "Segoe UI", sans-serif;
+  font:
+    600 12px/1 "Segoe UI",
+    sans-serif;
 }
 
 .settings-layout button:hover:not(:disabled) {
@@ -189,7 +213,9 @@
   border-radius: var(--radius-md);
   color: var(--ink);
   background: var(--surface);
-  font: 13px/1 "Segoe UI", sans-serif;
+  font:
+    13px/1 "Segoe UI",
+    sans-serif;
 }
 
 .settings-profile-row input:focus,

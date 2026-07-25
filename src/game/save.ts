@@ -7,6 +7,7 @@ import { isSaveCompatible, isValidGameState } from "./saveValidation";
 import { migrate as migrateSave } from "./saveMigrations";
 import { GAME_CONFIG } from "./config";
 import { compactTournamentHistory } from "./tournamentFlow";
+import { createSaveFailure, type SaveGameResult, type SaveOperation } from "./saveDiagnostics";
 import type { GameState } from "./types";
 
 const SAVE_KEY = STORAGE_KEYS.gameSave;
@@ -19,11 +20,11 @@ const HIDDEN_MESSAGE_SUBJECTS = new Set([
 const HIDDEN_MESSAGE_PREFIXES = ["Corso Agonisti | Potenziale totale +"];
 
 function isHiddenMessageSubject(subject: string): boolean {
-  return HIDDEN_MESSAGE_SUBJECTS.has(subject) ||
-    HIDDEN_MESSAGE_PREFIXES.some((prefix) => subject.startsWith(prefix));
+  return (
+    HIDDEN_MESSAGE_SUBJECTS.has(subject) ||
+    HIDDEN_MESSAGE_PREFIXES.some((prefix) => subject.startsWith(prefix))
+  );
 }
-
-
 
 interface ReadResult {
   state: GameState | null;
@@ -44,9 +45,7 @@ function read(key: string): ReadResult {
           state: {
             ...parsed,
             messages: normalizeStackedMessages(
-              parsed.messages.filter(
-                (message) => !isHiddenMessageSubject(message.subject),
-              ),
+              parsed.messages.filter((message) => !isHiddenMessageSubject(message.subject)),
             ),
           },
           incompatible: false,
@@ -74,34 +73,73 @@ export function loadGame(now = Date.now()): GameState {
     if (primary.incompatible || backup.incompatible) discardStoredSaves();
     return createInitialState(now);
   }
-  const reconciled = compactTournamentHistory(
-    recruitEnrolledLegendaryCollaborators(saved, now),
-  );
+  const reconciled = compactTournamentHistory(recruitEnrolledLegendaryCollaborators(saved, now));
   return simulateOfflineProgress(reconciled, now).state;
 }
 
-export function saveGame(state: GameState, now = Date.now()): boolean {
+export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult {
+  let serialized: string;
   try {
-    const serialized = JSON.stringify({
+    serialized = JSON.stringify({
       ...state,
       saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
       lastSavedAt: now,
     });
-    const current = localStorage.getItem(SAVE_KEY);
-    if (current) localStorage.setItem(BACKUP_KEY, current);
-    localStorage.setItem(SAVE_KEY, serialized);
-    return true;
-  } catch {
+  } catch (error) {
     // Il gioco resta utilizzabile anche quando lo storage del browser è indisponibile.
-    return false;
+    return {
+      ok: false,
+      error: createSaveFailure("serialize", error, null),
+    };
   }
+
+  const runStorageOperation = <T>(
+    operation: SaveOperation,
+    callback: () => T,
+  ): T | SaveGameResult => {
+    try {
+      return callback();
+    } catch (error) {
+      return {
+        ok: false,
+        error: createSaveFailure(operation, error, serialized.length),
+      };
+    }
+  };
+
+  const currentResult = runStorageOperation("read-current", () => localStorage.getItem(SAVE_KEY));
+  if (typeof currentResult !== "string" && currentResult !== null) {
+    return currentResult;
+  }
+
+  if (currentResult) {
+    const backupResult = runStorageOperation("write-backup", () =>
+      localStorage.setItem(BACKUP_KEY, currentResult),
+    );
+    if (typeof backupResult !== "undefined") return backupResult;
+  }
+
+  const saveResult = runStorageOperation("write-primary", () =>
+    localStorage.setItem(SAVE_KEY, serialized),
+  );
+  if (typeof saveResult !== "undefined") return saveResult;
+
+  return { ok: true };
+}
+
+export function saveGame(state: GameState, now = Date.now()): boolean {
+  return trySaveGame(state, now).ok;
 }
 
 export function exportGame(state: GameState): string {
-  return JSON.stringify({
-    ...state,
-    saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
-  }, null, 2);
+  return JSON.stringify(
+    {
+      ...state,
+      saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
+    },
+    null,
+    2,
+  );
 }
 
 export function importGame(raw: string): GameState | null {
@@ -111,10 +149,16 @@ export function importGame(raw: string): GameState | null {
     if (!isSaveCompatible(rawParsed)) return null;
     const parsed = migrateSave(rawParsed);
     return isValidGameState(parsed)
-      ? simulateOfflineProgress(recruitEnrolledLegendaryCollaborators({
-          ...parsed,
-          messages: normalizeStackedMessages(parsed.messages),
-        }, now), now).state
+      ? simulateOfflineProgress(
+          recruitEnrolledLegendaryCollaborators(
+            {
+              ...parsed,
+              messages: normalizeStackedMessages(parsed.messages),
+            },
+            now,
+          ),
+          now,
+        ).state
       : null;
   } catch {
     return null;
