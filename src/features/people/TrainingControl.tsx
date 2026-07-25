@@ -14,7 +14,10 @@ import {
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
-import { getAnnualFormTrainingLimit } from "../../content/upgrades";
+import {
+  getAnnualFormTrainingLimit,
+  isSISTechnicianCourseUnlocked,
+} from "../../content/upgrades";
 import {
   getFormTrainingYear,
   getGameMonthName,
@@ -218,6 +221,7 @@ function TechnicianCourseControl({
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const reservation = collaborator.technicianCourseReservation;
+  const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const definitions = collaborator.forms.flatMap((formId) => {
     const definition = getFormDefinition(formId);
     return definition &&
@@ -244,6 +248,7 @@ function TechnicianCourseControl({
     );
   }
   if (!onBookTechnicianCourse || definitions.length === 0) return null;
+  if (!sisUnlocked) return null;
   const selected = definitions.find((definition) => definition.id === selectedFormId) ??
     (definitions.length === 1 ? definitions[0] : undefined);
   const cost = selected ? getTechnicianCourseCost(selected.cost) : 0;
@@ -256,6 +261,13 @@ function TechnicianCourseControl({
 
   return (
     <div className={`training-control technician-course-control${variantClass}`}>
+      <div className="technician-course-heading">
+        <span className="technician-course-badge">SIS</span>
+        <span>
+          <strong>Scuola Internazionale Superiore</strong>
+          <small>Candidatura esterna per la qualifica da Tecnico</small>
+        </span>
+      </div>
       <div className="training-form-choice">
         {definitions.length > 1 ? (
           <TrainingOptionPicker

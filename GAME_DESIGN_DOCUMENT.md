@@ -1107,9 +1107,14 @@ Regole:
   tutte le formazioni, comprese Forme, Corsi Istruttori, Corsi Tecnici, Arena
   Tecnica e Corso Agonisti. I bonus sono cumulativi e si sommano al raddoppio
   estivo;
-- esclusa Intensità agonistica, che resta parallela, dopo Arena Tecnica il ramo
-  è lineare: ogni potenziamento deve essere
-  completato prima di accedere al successivo. L'ordine è **Polivalenza didattica
+- **Accreditamento SIS** è un potenziamento unico e parallelo del ramo
+  Istruttori: costa **€5.000**, richiede Arena Tecnica al livello 1 e sblocca la
+  possibilità di candidare gli Istruttori della scuola ai Corsi
+  Tecnici SIS;
+- Accreditamento SIS, **Intensità agonistica** e **Preparazione atletica**
+  restano paralleli; la sequenza didattica lineare dopo Arena Tecnica richiede
+  che ogni potenziamento sia completato prima di accedere al successivo. L'ordine
+  è **Polivalenza didattica
   → Istruttore Promisquo → Doppio Corso → Istruttore Tiamat → PagoSport → Tocco
   DiGilo**;
 - **Tocco DiGilo** è l'ultimo potenziamento del ramo Istruttori: costa
@@ -1126,6 +1131,8 @@ inclusi Corso X e Corso Y, ma esclude il Corso Agonisti.
 
 Regole:
 
+- la scuola deve avere acquistato **Accreditamento SIS** prima di poter
+  prenotare o avviare un Corso Tecnico esterno;
 - può candidarsi soltanto un Collaboratore assegnato come Istruttore che abbia
   già completato la formazione come atleta e possieda il relativo attestato da
   Istruttore;

@@ -261,19 +261,32 @@ describe("PeopleView", () => {
     };
     const onBookTechnicianCourse = vi.fn();
 
-    render(
+    const renderView = (sisUnlocked: boolean) => (
       <PeopleView
         state={{
           ...initial,
           school: { ...initial.school, euros: 1_000 },
           collaborators: [collaborator],
           unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+          upgrades: {
+            ...initial.upgrades,
+            "sis-accreditation": sisUnlocked ? 1 : 0,
+          },
         }}
         onAssign={() => undefined}
         onStartTraining={() => undefined}
         onBookTechnicianCourse={onBookTechnicianCourse}
-      />,
+      />
     );
+
+    const view = render(renderView(false));
+    expect(screen.queryByText("Scuola Internazionale Superiore")).not.toBeInTheDocument();
+    expect(document.querySelector(".technician-course-control")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();
+
+    view.rerender(renderView(true));
+    const sisHeading = screen.getByText("Scuola Internazionale Superiore");
+    expect(sisHeading.closest(".technician-course-control")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: /Prenota SIS/ }));
     expect(onBookTechnicianCourse).toHaveBeenCalledWith(collaborator.id, "form-1");

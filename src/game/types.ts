@@ -230,6 +230,7 @@ export type UpgradeId =
   | "multi-site-coordination"
   | "instructor-versatility"
   | "technical-arena"
+  | "sis-accreditation"
   | "agonist-course-intensity"
   | "athletic-preparation"
   | "promiscuous-instructor"

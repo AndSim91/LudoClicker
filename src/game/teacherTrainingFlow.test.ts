@@ -63,10 +63,18 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       ["form-1"],
       ["form-1"],
     );
-    const september = {
+    const lockedSeptember = {
       ...initial,
       school: { ...initial.school, currentMonth: 9, euros: 1_000 },
       collaborators: [candidate],
+    };
+    expect(
+      bookTechnicianCourse(lockedSeptember, candidate.id, "form-1", 2_000),
+    ).toBe(lockedSeptember);
+
+    const september = {
+      ...lockedSeptember,
+      upgrades: { ...initial.upgrades, "sis-accreditation": 1 },
     };
 
     const booked = bookTechnicianCourse(september, candidate.id, "form-1", 2_000);
@@ -117,6 +125,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       ...initial,
       school: { ...initial.school, currentMonth: 7, euros: 1_000 },
       collaborators: [candidate],
+      upgrades: { ...initial.upgrades, "sis-accreditation": 1 },
     };
 
     const booked = bookTechnicianCourse(july, candidate.id, "form-1", 2_000);

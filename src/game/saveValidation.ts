@@ -331,6 +331,7 @@ export function isValidGameState(value: unknown): value is GameState {
     hasValidLegendaryAssignments(state) &&
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["technical-arena"] === "number" &&
+    typeof state.upgrades?.["sis-accreditation"] === "number" &&
     typeof state.upgrades?.["agonist-course-intensity"] === "number" &&
     typeof state.upgrades?.["athletic-preparation"] === "number" &&
     typeof state.upgrades?.["promiscuous-instructor"] === "number" &&

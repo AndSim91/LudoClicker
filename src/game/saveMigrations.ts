@@ -19,6 +19,7 @@ import { migrateEventCooldownState } from "./saveMigrations/eventCooldowns";
 import { migrateCollaboratorOperationsState } from "./saveMigrations/collaboratorOperations";
 import { migrateTeacherTrainingState } from "./saveMigrations/teacherTraining";
 import { migrateCollaboratorPresetsState } from "./saveMigrations/collaboratorPresets";
+import { migrateSISAccreditationState } from "./saveMigrations/sisAccreditation";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
@@ -41,6 +42,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateCollaboratorOperationsState,
   migrateTeacherTrainingState,
   migrateCollaboratorPresetsState,
+  migrateSISAccreditationState,
 ];
 
 export function migrate(value: unknown): unknown {

@@ -11,6 +11,7 @@ import {
 import {
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
+  isSISTechnicianCourseUnlocked,
 } from "../content/upgrades";
 import { isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
@@ -210,6 +211,7 @@ export function bookTechnicianCourse(
   if (
     !collaborator ||
     !definition ||
+    !isSISTechnicianCourseUnlocked(state.upgrades) ||
     collaborator.assignment !== "instructor" ||
     !collaborator.forms.includes(formId) ||
     !collaborator.instructorForms.includes(formId) ||
@@ -269,6 +271,7 @@ export function processTechnicianCourseReservations(
       collaborator.training ||
       priorityQualificationTechnicianIds.has(collaborator.id) ||
       collaborator.assignment !== "instructor" ||
+      !isSISTechnicianCourseUnlocked(nextState.upgrades) ||
       nextState.school.currentMonth < reservation.eligibleMonth
     ) continue;
     const definition = getFormDefinition(reservation.formId);

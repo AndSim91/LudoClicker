@@ -1,7 +1,7 @@
 import type { UpgradeId, UpgradeLevels } from "../game/types";
 
 export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialContactCapTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialContactCapTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -87,6 +87,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+100% automazione per livello", effect: "automationMultiplier", effectPerLevel: 1, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 100 },
 
   { id: "technical-arena", category: "instructors", title: "Arena Tecnica", description: "Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di perdere atleti alla fine dell'anno e, con la giusta attenzione, li renderà sempre più competitivi.", effectLabel: "Livello 1: Sblocco \"Arena Tecnica\" · Livello 2: Durata Arena Tecnica da 120 a 60 secondi · Livello 3: Sblocco Corso Agonisti · Livello 4: Durata Corso Agonisti da 60 a 30 secondi", effect: "agonistCourseTier", effectPerLevel: 1, baseCost: 1_000, costGrowth: 1, levelCosts: [1_000, 2_000, 5_000, 7_500], maxLevel: 4, requiredHistoricMembers: 0 },
+  { id: "sis-accreditation", category: "instructors", title: "Accreditamento SIS", description: "La scuola attiva il canale ufficiale con la Scuola Internazionale Superiore e permette di candidare i propri Istruttori ai Corsi Tecnici.", effectLabel: "Sblocca le candidature ai Corsi Tecnici SIS", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
   { id: "agonist-course-intensity", category: "instructors", title: "Intensità agonistica", description: "Rende variabile la crescita del Corso Agonisti e ne aumenta il risultato massimo per Arena e Stile.", effectLabel: "+1 al bonus massimo casuale per caratteristica e livello · massimo +5", effect: "agonistCourseStatMaximum", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000], maxLevel: 4, requiredHistoricMembers: 0, requiredUpgradeLevels: { "technical-arena": 3 } },
   { id: "athletic-preparation", category: "instructors", title: "Preparazione atletica", description: "Da settembre a giugno, quando non hanno lezioni o corsi disponibili, gli Istruttori migliorano Arena o Stile degli atleti.", effectLabel: "Livello 1: sblocco · +25% efficacia per livello", effect: "athleticPreparationPower", effectPerLevel: 0.25, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredHistoricMembers: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
   { id: "instructor-versatility", category: "instructors", title: "Polivalenza didattica", description: "Permette agli Istruttori di apprendere rami d'arma oltre le proprie preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 2_000, costGrowth: 2, levelCosts: [2_000, 4_000], maxLevel: 2, requiredHistoricMembers: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
@@ -143,6 +144,7 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   "multi-site-coordination": 6_500,
   "instructor-versatility": 2_000,
   "technical-arena": 1_000,
+  "sis-accreditation": 5_000,
   "agonist-course-intensity": 5_000,
   "athletic-preparation": 2_500,
   "promiscuous-instructor": 5_000,
@@ -254,4 +256,8 @@ export function getPagoSportAllCourseSpeedBonus(levels: UpgradeLevels): number {
 
 export function getPagoSportTechnicianSpeedBonus(levels: UpgradeLevels): number {
   return (levels.pagosport ?? 0) >= 2 ? 0.5 : 0;
+}
+
+export function isSISTechnicianCourseUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "sisTechnicianCourseUnlock") >= 1;
 }

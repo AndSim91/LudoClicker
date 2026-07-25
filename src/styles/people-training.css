@@ -238,6 +238,103 @@
   background: var(--surface-muted);
 }
 
+.technician-course-control,
+.technician-course-gate,
+.technician-course-reservation {
+  padding: 9px;
+  border: 1px solid #c9b8e8;
+  border-radius: var(--radius-sm);
+  background: #faf7ff;
+}
+
+.technician-course-control {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.technician-course-heading {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #decff3;
+}
+
+.technician-course-heading > span:last-child,
+.technician-course-gate > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.technician-course-heading strong,
+.technician-course-gate strong {
+  color: #5f3b8f;
+  font-size: 11px;
+}
+
+.technician-course-heading small,
+.technician-course-gate small {
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.technician-course-badge {
+  display: grid;
+  min-width: 34px;
+  min-height: 24px;
+  place-items: center;
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: #fff;
+  background: #7650a8;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.technician-course-gate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-style: dashed;
+  background: #f7f3fc;
+}
+
+.technician-course-control .training-option-card:hover {
+  border-color: #8f6cbd;
+  background: #f4edfc;
+}
+
+.technician-course-control .training-option-card:focus-visible {
+  outline-color: color-mix(in srgb, #7650a8 45%, transparent);
+}
+
+.technician-course-control .training-option-card.is-selected {
+  border-color: #7650a8;
+  background: #f4edfc;
+  box-shadow: inset 3px 0 #7650a8;
+}
+
+.technician-course-control .training-option-card.is-selected .training-option-radio {
+  border-color: #7650a8;
+}
+
+.technician-course-control .training-option-card.is-selected .training-option-radio i {
+  background: #7650a8;
+}
+
+.technician-course-control .training-option-meta > strong {
+  color: #5f3b8f;
+}
+
+.technician-course-control > .training-start-button {
+  border-color: #7650a8;
+  background: #7650a8;
+}
+
 .instructor-panel {
   display: flex;
   min-width: 0;
