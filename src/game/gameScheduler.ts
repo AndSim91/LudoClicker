@@ -9,6 +9,7 @@ import {
 import type { GameState } from "./types";
 import { GAME_CONFIG } from "./config";
 import { getNextRealtimeEventCooldownDeadline } from "./eventCooldowns";
+import { gameDelayToWallDelay } from "./gameClock";
 
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
 const MAX_TIMEOUT_MS = 2_147_000_000;
@@ -114,7 +115,11 @@ export function getNextGameDeadline(state: GameState): number {
   return nextDeadline;
 }
 
-export function getNextGameTickDelay(state: GameState, now: number): number {
+export function getNextGameTickDelay(
+  state: GameState,
+  now: number,
+  gameSpeed = 1,
+): number {
   let nextDeadline = getNextGameDeadline(state);
   const hasEventAutomation = state.collaborators.some(
     (collaborator) => collaborator.assignment === "events",
@@ -130,5 +135,8 @@ export function getNextGameTickDelay(state: GameState, now: number): number {
   const requestedDelay = needsAutomationHeartbeat(state)
     ? Math.min(automationHeartbeatDelay, deadlineDelay)
     : deadlineDelay;
-  return Math.min(MAX_TIMEOUT_MS, requestedDelay);
+  return Math.min(
+    MAX_TIMEOUT_MS,
+    gameDelayToWallDelay(requestedDelay, gameSpeed),
+  );
 }

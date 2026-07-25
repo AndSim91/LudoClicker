@@ -53,6 +53,9 @@ export function App() {
     state,
     dispatch,
     getGameNow,
+    getPersistableState,
+    gameSpeed,
+    setGameSpeed,
     isPaused,
     togglePause,
     setTutorialPaused,
@@ -138,7 +141,10 @@ export function App() {
     setSelectedMessageId(null);
   };
   const exportSave = () => {
-    const blob = new Blob([exportGame(state)], { type: "application/json" });
+    const blob = new Blob(
+      [exportGame(getPersistableState(state))],
+      { type: "application/json" },
+    );
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -172,7 +178,7 @@ export function App() {
   }
 
   return (
-    <GameTimeProvider getNow={getGameNow} isPaused={isPaused}>
+    <GameTimeProvider getNow={getGameNow} isPaused={isPaused} speed={gameSpeed}>
       <div
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
@@ -296,6 +302,7 @@ export function App() {
         ) : activeView === "tournaments" ? (
           <TournamentsView
             state={state}
+            gameSpeed={gameSpeed}
             onOpenAthletes={() => setView("contacts")}
             onStartChronicles={(contactIds) => dispatch({
               type: "START_CHRONICLES_TOURNAMENT",
@@ -321,6 +328,8 @@ export function App() {
             availableLegendaryProfiles={
               getAvailableStandardLegendaryProfiles(state, getGameNow()).length
             }
+            gameSpeed={gameSpeed}
+            onGameSpeedChange={setGameSpeed}
             onAddContacts={(amount) => dispatch({ type: "ADMIN_ADD_CONTACTS", amount })}
             onAddMembers={(amount) => dispatch({ type: "ADMIN_ADD_MEMBERS", amount })}
             onAddEuros={(amount) => dispatch({ type: "ADMIN_ADD_EUROS", amount })}

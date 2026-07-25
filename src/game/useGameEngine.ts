@@ -8,7 +8,14 @@ import {
 } from "react";
 import { GAME_CONFIG } from "./config";
 import { gameReducer } from "./engine";
-import { freezeGameState } from "./offline";
+import {
+  changeGameClockSpeed,
+  createGameClockAnchor,
+  gameDelayToWallDelay,
+  normalizeGameSpeed,
+  readGameClock,
+} from "./gameClock";
+import { rebaseGameTimeline } from "./gameTimeline";
 import { loadGame, saveGame } from "./save";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
 import type { GameSaveStatus } from "./saveStatus";
@@ -18,35 +25,71 @@ import type { GameAction } from "./types";
 type PauseReason = "manual" | "tutorial";
 
 export function useGameEngine() {
-  const [state, dispatch] = useReducer(gameReducer, undefined, () => loadGame());
+  const [initialWallNow] = useState(() => Date.now());
+  const [state, dispatch] = useReducer(
+    gameReducer,
+    undefined,
+    () => loadGame(initialWallNow),
+  );
   const stateRef = useRef(state);
   const observedStateRef = useRef(state);
   const pausedAtRef = useRef<number | null>(null);
   const pauseReasonsRef = useRef(new Set<PauseReason>());
   const saveSchedulerRef = useRef<SaveScheduler | null>(null);
+  const clockRef = useRef(createGameClockAnchor(
+    state.lastSavedAt,
+    initialWallNow,
+  ));
   const [isPaused, setIsPaused] = useState(false);
+  const [gameSpeed, setGameSpeedState] = useState(1);
   const [saveStatus, setSaveStatus] = useState<GameSaveStatus>(() => ({
     phase: "pending",
     lastSavedAt: null,
-    nextAutoSaveAt: Date.now() + GAME_CONFIG.saveIntervalMs,
+    nextAutoSaveAt: initialWallNow + GAME_CONFIG.saveIntervalMs,
   }));
-  const persistGame = useCallback((currentState: typeof state, now = Date.now()) => {
-    const pausedAt = pausedAtRef.current;
-    const stateToSave = pausedAt === null
-      ? currentState
-      : freezeGameState(currentState, now, now - pausedAt);
-    const saved = saveGame(stateToSave, now);
+
+  const getGameNowAt = useCallback((wallNow: number) => (
+    pausedAtRef.current ?? readGameClock(clockRef.current, wallNow)
+  ), []);
+
+  const getGameNow = useCallback(
+    () => getGameNowAt(Date.now()),
+    [getGameNowAt],
+  );
+
+  const getPersistableState = useCallback((
+    currentState = stateRef.current,
+    wallNow = Date.now(),
+  ) => rebaseGameTimeline(
+    currentState,
+    getGameNowAt(wallNow),
+    wallNow,
+  ), [getGameNowAt]);
+
+  const persistGame = useCallback((currentState: typeof state, wallNow = Date.now()) => {
+    const saved = saveGame(
+      getPersistableState(currentState, wallNow),
+      wallNow,
+    );
     setSaveStatus((current) => ({
       ...current,
       phase: saved ? "saved" : "error",
-      lastSavedAt: saved ? now : current.lastSavedAt,
+      lastSavedAt: saved ? wallNow : current.lastSavedAt,
     }));
     return saved;
-  }, []);
+  }, [getPersistableState]);
 
   const dispatchAction = useCallback((action: GameAction) => {
-    if (action.type === "REPLACE_STATE" && pausedAtRef.current !== null) {
-      pausedAtRef.current = Date.now();
+    if (action.type === "REPLACE_STATE") {
+      const wallNow = Date.now();
+      clockRef.current = createGameClockAnchor(
+        action.state.lastSavedAt,
+        wallNow,
+        clockRef.current.speed,
+      );
+      if (pausedAtRef.current !== null) {
+        pausedAtRef.current = action.state.lastSavedAt;
+      }
     }
     dispatch(action);
   }, []);
@@ -69,17 +112,17 @@ export function useGameEngine() {
     let followUpId: number | undefined;
     let cancelled = false;
 
-    const schedule = (minimumDelay = 0) => {
+    const schedule = (minimumGameDelay = 0) => {
       if (cancelled || pausedAtRef.current !== null) return;
-      const now = Date.now();
+      const now = getGameNow();
       const delay = Math.max(
-        minimumDelay,
-        getNextGameTickDelay(stateRef.current, now),
+        gameDelayToWallDelay(minimumGameDelay, gameSpeed),
+        getNextGameTickDelay(stateRef.current, now, gameSpeed),
       );
       tickId = window.setTimeout(() => {
         if (cancelled || pausedAtRef.current !== null) return;
         const stateBeforeTick = stateRef.current;
-        dispatchAction({ type: "TICK", now: Date.now() });
+        dispatchAction({ type: "TICK", now: getGameNow() });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo
         // stesso oggetto di stato.
@@ -96,7 +139,7 @@ export function useGameEngine() {
       if (tickId !== undefined) window.clearTimeout(tickId);
       if (followUpId !== undefined) window.clearTimeout(followUpId);
     };
-  }, [dispatchAction, isPaused, state]);
+  }, [dispatchAction, gameSpeed, getGameNow, isPaused, state]);
 
   useEffect(() => {
     const saveScheduler = createSaveScheduler(stateRef.current, persistGame);
@@ -132,11 +175,6 @@ export function useGameEngine() {
     [],
   );
 
-  const getGameNow = useCallback(
-    () => pausedAtRef.current ?? Date.now(),
-    [],
-  );
-
   const setPauseReason = useCallback((reason: PauseReason, shouldPause: boolean) => {
     const reasons = pauseReasonsRef.current;
     const wasPaused = reasons.size > 0;
@@ -150,21 +188,35 @@ export function useGameEngine() {
     const remainsPaused = reasons.size > 0;
     if (wasPaused === remainsPaused) return;
 
-    const now = Date.now();
+    const wallNow = Date.now();
     const pausedAt = pausedAtRef.current;
 
     if (remainsPaused && pausedAt === null) {
-      dispatchAction({ type: "TICK", now });
-      pausedAtRef.current = now;
+      const gameNow = getGameNowAt(wallNow);
+      dispatchAction({ type: "TICK", now: gameNow });
+      pausedAtRef.current = gameNow;
       setIsPaused(true);
       return;
     }
 
     if (pausedAt === null) return;
-    dispatchAction({ type: "RESUME_FROM_PAUSE", now, elapsedMs: now - pausedAt });
+    clockRef.current = createGameClockAnchor(
+      pausedAt,
+      wallNow,
+      clockRef.current.speed,
+    );
     pausedAtRef.current = null;
     setIsPaused(false);
-  }, [dispatchAction]);
+  }, [dispatchAction, getGameNowAt]);
+
+  const setGameSpeed = useCallback((speed: number) => {
+    const normalizedSpeed = normalizeGameSpeed(speed);
+    const wallNow = Date.now();
+    clockRef.current = pausedAtRef.current === null
+      ? changeGameClockSpeed(clockRef.current, wallNow, normalizedSpeed)
+      : createGameClockAnchor(pausedAtRef.current, wallNow, normalizedSpeed);
+    setGameSpeedState(normalizedSpeed);
+  }, []);
 
   const togglePause = useCallback(() => {
     const reasons = pauseReasonsRef.current;
@@ -184,6 +236,9 @@ export function useGameEngine() {
     state,
     dispatch: dispatchAction,
     getGameNow,
+    getPersistableState,
+    gameSpeed,
+    setGameSpeed,
     isPaused,
     togglePause,
     setTutorialPaused,

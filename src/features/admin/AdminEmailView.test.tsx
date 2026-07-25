@@ -14,8 +14,10 @@ describe("AdminEmailView", () => {
     onAdvanceMonth = vi.fn(),
     currentMonth = 9,
     onAddSwords = vi.fn(),
+    gameSpeed = 1,
+    onGameSpeedChange = vi.fn(),
   ) => {
-    render(
+    return render(
       <AdminEmailView
         totalContacts={8}
         availableContacts={4}
@@ -26,6 +28,8 @@ describe("AdminEmailView", () => {
         damagedSwords={0}
         currentMonth={currentMonth}
         availableLegendaryProfiles={availableLegendaryProfiles}
+        gameSpeed={gameSpeed}
+        onGameSpeedChange={onGameSpeedChange}
         onAddContacts={onAddContacts}
         onAddMembers={onAddMembers}
         onAddEuros={onAddEuros}
@@ -53,6 +57,52 @@ describe("AdminEmailView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Passa a Gennaio" }));
 
     expect(onAdvanceMonth).toHaveBeenCalledOnce();
+  });
+
+  it("changes and resets the global game speed", () => {
+    const onGameSpeedChange = vi.fn();
+    const { rerender } = renderAdmin(
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      3,
+      vi.fn(),
+      9,
+      vi.fn(),
+      1,
+      onGameSpeedChange,
+    );
+
+    fireEvent.change(screen.getByRole("slider", { name: "Moltiplicatore" }), {
+      target: { value: "100" },
+    });
+    expect(onGameSpeedChange).toHaveBeenCalledWith(100);
+    expect(screen.getByRole("button", { name: "Ripristina 1×" })).toBeDisabled();
+
+    rerender(
+      <AdminEmailView
+        totalContacts={8}
+        availableContacts={4}
+        activeMembers={4}
+        euros={250}
+        totalSwords={6}
+        availableSwords={6}
+        damagedSwords={0}
+        currentMonth={9}
+        availableLegendaryProfiles={3}
+        gameSpeed={100}
+        onGameSpeedChange={onGameSpeedChange}
+        onAddContacts={vi.fn()}
+        onAddMembers={vi.fn()}
+        onAddEuros={vi.fn()}
+        onAddSwords={vi.fn()}
+        onAdvanceMonth={vi.fn()}
+        onScheduleLegendaryTrial={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Ripristina 1×" }));
+    expect(onGameSpeedChange).toHaveBeenLastCalledWith(1);
   });
 
   it("submits the manually entered changes", () => {

@@ -13,6 +13,8 @@ interface AdminEmailViewProps {
   damagedSwords: number;
   currentMonth: number;
   availableLegendaryProfiles: number;
+  gameSpeed: number;
+  onGameSpeedChange: (speed: number) => void;
   onAddContacts: (amount: number) => void;
   onAddMembers: (amount: number) => void;
   onAddEuros: (amount: number) => void;
@@ -31,6 +33,8 @@ export function AdminEmailView({
   damagedSwords,
   currentMonth,
   availableLegendaryProfiles,
+  gameSpeed,
+  onGameSpeedChange,
   onAddContacts,
   onAddMembers,
   onAddEuros,
@@ -156,21 +160,61 @@ export function AdminEmailView({
       <section className="admin-gameplay-tools" aria-labelledby="admin-time-title">
         <div className="admin-resource-heading">
           <span>Tempo di gioco</span>
-          <h2 id="admin-time-title">Calendario</h2>
-          <p>Forza una scadenza mensile usando le regole normali della partita.</p>
+          <h2 id="admin-time-title">Velocità e calendario</h2>
+          <p>Accelera la simulazione o forza una scadenza mensile.</p>
         </div>
-        <div className="admin-gameplay-action">
-          <div>
-            <strong>Passa da {currentMonthName} a {nextMonthName}</strong>
-            <p>
-              Elabora entrate, tornei, rinnovi annuali e automazioni legate
-              al cambio di mese. Le attività con una scadenza futura restano in corso.
-            </p>
+        <div className="admin-gameplay-actions">
+          <div className="admin-gameplay-action admin-speed-action">
+            <div>
+              <strong>Velocità globale della simulazione</strong>
+              <p>
+                Accelera in modo uniforme mesi, insegnamento, corsi, riparazioni,
+                eventi e tutte le altre scadenze di gioco.
+              </p>
+            </div>
+            <div className="admin-speed-controls">
+              <label htmlFor="admin-game-speed">
+                <span>
+                  Moltiplicatore
+                  <output htmlFor="admin-game-speed">{gameSpeed}×</output>
+                </span>
+                <input
+                  id="admin-game-speed"
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={gameSpeed}
+                  aria-label="Moltiplicatore"
+                  aria-valuetext={`${gameSpeed}×`}
+                  onChange={(event) => onGameSpeedChange(Number(event.target.value))}
+                />
+              </label>
+              <button
+                type="button"
+                disabled={gameSpeed === 1}
+                onClick={() => onGameSpeedChange(1)}
+              >
+                Ripristina 1×
+              </button>
+            </div>
+            <small>
+              Velocità attiva: {gameSpeed}×. Il valore torna a 1× ricaricando l'app.
+            </small>
           </div>
-          <button type="button" onClick={onAdvanceMonth}>
-            Passa a {nextMonthName}
-          </button>
-          <small>Il prossimo mese inizierà immediatamente.</small>
+          <div className="admin-gameplay-action">
+            <div>
+              <strong>Passa da {currentMonthName} a {nextMonthName}</strong>
+              <p>
+                Elabora entrate, tornei, rinnovi annuali e automazioni legate
+                al cambio di mese. Le attività con una scadenza futura restano in corso.
+              </p>
+            </div>
+            <button type="button" onClick={onAdvanceMonth}>
+              Passa a {nextMonthName}
+            </button>
+            <small>Il prossimo mese inizierà immediatamente.</small>
+          </div>
         </div>
       </section>
 

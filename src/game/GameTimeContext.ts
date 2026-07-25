@@ -3,6 +3,7 @@ import { createContext, useContext, useSyncExternalStore } from "react";
 export interface GameTimeSource {
   getNow: () => number;
   isPaused: boolean;
+  speed: number;
 }
 
 export const GameTimeContext = createContext<GameTimeSource | null>(null);
@@ -61,6 +62,5 @@ export function useGameTime(active: boolean, intervalMs: number): number {
     subscribed ? store.getSnapshot : getStaticSnapshot,
     getStaticSnapshot,
   );
-  if (source?.isPaused) return source.getNow();
-  return wallNow;
+  return source ? source.getNow() : wallNow;
 }
