@@ -713,9 +713,10 @@ lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
 I **Social** sviluppano la presenza online della scuola. La Redazione si evolve
 in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
-collaboratori già assegnati conservano incarico e Maestria. Le email hanno
-sempre priorità; in loro assenza la stessa potenza di scrittura produce un
-contenuto ogni 7.500 caratteri. Ogni contenuto effettua due tiri indipendenti:
+collaboratori già assegnati conservano incarico e Maestria. I contenuti Social
+avanzano sempre. Quando una email richiede scrittura, metà della potenza viene
+assegnata alla mail e l'altra metà continua a produrre contenuti; senza email,
+tutta la potenza produce un contenuto ogni 7.500 caratteri. Ogni contenuto effettua due tiri indipendenti:
 5% per ottenere un Follower e `min(5%, 0,5% + Follower × 0,01%)` per ottenere un
 contatto. Social non genera prove dirette, non migliora la qualità dei contatti
 e non accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le
@@ -734,7 +735,8 @@ Quando non esistono contatti disponibili:
 - compare una normale email interna con oggetto “Elenco contatti esaurito”;
 - il testo suggerisce di aprire il Calendario;
 - la produzione automatica di email si mette in pausa;
-- i collaboratori assegnati alla scrittura risultano “In attesa di destinatari”;
+- la riga email del settore Social resta vuota e grigia, mentre i contenuti
+  continuano ad avanzare;
 - nessun progresso viene perso.
 
 Questa situazione è intenzionale e rappresenta il principale collo di bottiglia
@@ -861,7 +863,7 @@ attività che hanno una propria scadenza futura non vengono completate in antici
 
 | Ruolo                | Funzione                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Redazione → Social   | scrive le email; dopo lo sblocco produce contenuti Social quando non ci sono email attive                           |
+| Redazione → Social   | produce sempre contenuti Social; durante la scrittura divide la forza lavoro al 50% con le email                    |
 | Eventi               | aumenta persone incontrate e contatti ottenuti                                                                     |
 | Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
@@ -890,8 +892,9 @@ I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input
 manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
 invia la mail appena raggiunge la lunghezza richiesta. Se è disattivato, anche i
 collaboratori si fermano sulla mail completa finché il giocatore non conferma
-l'invio. Dopo lo sblocco Social, quando non esiste una mail attiva, gli stessi
-collaboratori spostano automaticamente la produzione sui contenuti online.
+l'invio. Dopo lo sblocco Social, i collaboratori producono sempre contenuti
+online; durante la scrittura di una mail dividono equamente la potenza tra i
+due flussi.
 
 ### 9.5 Raccolta automatica dei contatti
 
@@ -1290,8 +1293,9 @@ tutorial in pausa. Allo sblocco i Follower vengono inizializzati alla Fama
 esistente, senza aumentarla una seconda volta.
 
 Un contenuto richiede 7.500 caratteri. La produzione avanza soltanto durante il
-gioco online e si interrompe, conservando il buffer, quando una email richiede
-la priorità. Al completamento vengono risolti separatamente:
+gioco online e non si interrompe quando una email richiede attenzione: in quel
+caso usa il 50% della forza lavoro, mentre il restante 50% scrive la mail. Al
+completamento vengono risolti separatamente:
 
 ```text
 probabilitàFollower = 5%

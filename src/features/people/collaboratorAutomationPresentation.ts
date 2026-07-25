@@ -22,6 +22,7 @@ export interface CollaboratorAutomationPresentation {
   progress?: number;
   progressLabel?: string;
   durationMs?: number;
+  inactive?: boolean;
 }
 
 function getTimedProgress(startedAt: number, completesAt: number, now: number): number {
@@ -80,6 +81,71 @@ function getProjectedEquipmentProgress({
   );
 }
 
+function getWritingAutomationRate(state: GameState, workShare = 1): number {
+  const productivity = state.collaborators.reduce(
+    (total, collaborator) => collaborator.assignment === "writing"
+      ? total + getCollaboratorProductivity(collaborator, "writing")
+      : total,
+    0,
+  );
+  return productivity *
+    GAME_CONFIG.collaboratorWritingPerSecond *
+    state.player.writingPower *
+    (1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier")) *
+    workShare;
+}
+
+export function getSocialContentAutomationPresentation(
+  state: GameState,
+  emailWriting: boolean,
+): CollaboratorAutomationPresentation {
+  const requiredCharacters = getSocialContentCharacters(state.upgrades);
+  const progress = Math.min(
+    100,
+    state.automation.socialContentBuffer / requiredCharacters * 100,
+  );
+  const writingRate = getWritingAutomationRate(state, emailWriting ? 0.5 : 1);
+  return {
+    title: "Contenuti Social",
+    detail: [
+      emailWriting ? "50% forza lavoro" : "",
+      `${formatPercent(getSocialFollowerChance(state.upgrades))} follower`,
+      `${formatPercent(getSocialContactChance(state.school.followers, state.upgrades))} contatto`,
+      `${formatCurrency(getMonthlySocialIncome(state))}/mese`,
+    ].filter(Boolean).join(" · "),
+    progress,
+    progressLabel: "Produzione dei prossimi contenuti Social",
+    durationMs: writingRate > 0
+      ? requiredCharacters / writingRate * 1_000
+      : undefined,
+  };
+}
+
+export function getEmailAutomationPresentation(
+  state: GameState,
+  activeEmail: ReturnType<typeof selectActiveEmail>,
+): CollaboratorAutomationPresentation {
+  if (!activeEmail) {
+    return {
+      title: "Scrittura email",
+      detail: "Nessuna email da scrivere",
+      inactive: true,
+    };
+  }
+  const activity = getCollaboratorAutomationPresentation({
+    state,
+    collaboratorId: "",
+    assignment: "writing",
+    now: state.automation.lastProcessedAt,
+    activeEmail,
+  });
+  return {
+    ...activity,
+    title: "Scrittura email",
+    detail: `${activeEmail.subject} · ${activity.detail ?? "Email in lavorazione"}`,
+  };
+}
+
 export function getCollaboratorAutomationPresentation({
   state,
   collaboratorId,
@@ -106,33 +172,15 @@ export function getCollaboratorAutomationPresentation({
       if (activeEmail) {
         return {
           title: activeEmail.subject,
-          detail: "Invio email in corso · i contenuti Social riprenderanno dopo",
+          detail: state.unlocks.social
+            ? "Invio email in corso · contenuti Social attivi"
+            : "Invio email in corso",
         };
       }
       if (!state.unlocks.social) {
         return { title: "In attesa", detail: "Nessuna email in scrittura" };
       }
-      const requiredCharacters = getSocialContentCharacters(state.upgrades);
-      const progress = Math.min(
-        100,
-        state.automation.socialContentBuffer / requiredCharacters * 100,
-      );
-      const writingRate = state.collaborators.reduce(
-        (total, collaborator) => collaborator.assignment === "writing"
-          ? total + getCollaboratorProductivity(collaborator, "writing")
-          : total,
-        0,
-      ) * GAME_CONFIG.collaboratorWritingPerSecond * state.player.writingPower *
-        (1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier"));
-      return {
-        title: "Contenuti Social",
-        detail: `${formatPercent(getSocialFollowerChance(state.upgrades))} follower · ${formatPercent(getSocialContactChance(state.school.followers, state.upgrades))} contatto · ${formatCurrency(getMonthlySocialIncome(state))}/mese`,
-        progress,
-        progressLabel: "Produzione dei prossimi contenuti Social",
-        durationMs: writingRate > 0
-          ? requiredCharacters / writingRate * 1_000
-          : undefined,
-      };
+      return getSocialContentAutomationPresentation(state, false);
     }
     const length = getEmailBuildLength(activeEmail);
     const progress = length === 0
@@ -140,18 +188,14 @@ export function getCollaboratorAutomationPresentation({
       : Math.min(100, Math.round((activeEmail.revealedCharacters / length) * 100));
     return {
       title: activeEmail.subject,
-      detail: "Scrittura email in corso...",
+      detail: state.unlocks.social
+        ? "Scrittura email in corso · 50% forza lavoro"
+        : "Scrittura email in corso...",
       progress,
       progressLabel: `Scrittura di ${activeEmail.subject}`,
       durationMs: length / Math.max(
         Number.EPSILON,
-        state.collaborators.reduce(
-          (total, collaborator) => collaborator.assignment === "writing"
-            ? total + getCollaboratorProductivity(collaborator, "writing")
-            : total,
-          0,
-        ) * GAME_CONFIG.collaboratorWritingPerSecond * state.player.writingPower *
-          (1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier")),
+        getWritingAutomationRate(state, state.unlocks.social ? 0.5 : 1),
       ) * 1_000,
     };
   }

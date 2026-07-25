@@ -129,7 +129,7 @@ export function processAutomation(
   }
   const activeEmail = selectActiveEmail(state);
   const wasWriting = activeEmail?.status === "writing";
-  const producingSocialContent = !activeEmail && state.unlocks.social;
+  const producingSocialContent = state.unlocks.social;
   const hasEditorialWork = wasWriting || producingSocialContent;
   const automationMultiplier =
     1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
@@ -141,11 +141,19 @@ export function processAutomation(
       state.player.writingPower *
       automationMultiplier
     : 0;
-  const writingTotal = state.automation.writingBuffer + generatedWriting;
-  const automatedCharacters = hasEditorialWork ? Math.floor(writingTotal) : 0;
+  const emailWorkShare = wasWriting && producingSocialContent ? 0.5 : wasWriting ? 1 : 0;
+  const socialWorkShare = producingSocialContent ? (wasWriting ? 0.5 : 1) : 0;
+  const writingTotal = state.automation.writingBuffer + generatedWriting * emailWorkShare;
+  const automatedEmailCharacters = wasWriting ? Math.floor(writingTotal) : 0;
   const socialContentCharacters = getSocialContentCharacters(state.upgrades);
   const socialContentTotal = state.automation.socialContentBuffer +
-    (producingSocialContent ? automatedCharacters : 0);
+    generatedWriting * socialWorkShare;
+  const automatedSocialCharacters = producingSocialContent
+    ? Math.max(
+        0,
+        Math.floor(socialContentTotal) - Math.floor(state.automation.socialContentBuffer),
+      )
+    : 0;
   const socialCycles = producingSocialContent
     ? Math.floor(socialContentTotal / socialContentCharacters)
     : 0;
@@ -169,8 +177,8 @@ export function processAutomation(
     automation: {
       ...state.automation,
       lastProcessedAt: now,
-      writingBuffer: hasEditorialWork
-        ? writingTotal - automatedCharacters
+      writingBuffer: wasWriting
+        ? writingTotal - automatedEmailCharacters
         : state.automation.writingBuffer,
       lessonBuffer: state.automation.lessonBuffer,
       socialContentBuffer: producingSocialContent
@@ -187,17 +195,24 @@ export function processAutomation(
       : state.school,
   };
 
-  if (automatedCharacters > 0) {
-    nextState = wasWriting
-      ? dependencies.writeCharacters(nextState, automatedCharacters, now, "automation")
-      : {
-          ...nextState,
-          statistics: {
-            ...nextState.statistics,
-            automatedCharacters:
-              nextState.statistics.automatedCharacters + automatedCharacters,
-          },
-        };
+  if (automatedEmailCharacters > 0) {
+    nextState = dependencies.writeCharacters(
+      nextState,
+      automatedEmailCharacters,
+      now,
+      "automation",
+    );
+  }
+
+  if (automatedSocialCharacters > 0) {
+    nextState = {
+      ...nextState,
+      statistics: {
+        ...nextState.statistics,
+        automatedCharacters:
+          nextState.statistics.automatedCharacters + automatedSocialCharacters,
+      },
+    };
   }
 
   if (socialCycles > 0) {

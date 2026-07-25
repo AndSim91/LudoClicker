@@ -1131,6 +1131,51 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
+  it("shows separate Social and email rows in the aggregate Social box", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-social-workstreams",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Social",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "writing" as const,
+      rarity: "rare" as const,
+    };
+    const state = {
+      ...initial,
+      emails: [],
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, collaborators: true, social: true },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: { ...initial.collaboratorManagement.targets, writing: 1 },
+      },
+    };
+    const props = {
+      onAssign: () => undefined,
+      onStartTraining: () => undefined,
+    };
+    const { rerender } = render(<PeopleView state={state} {...props} />);
+
+    let socialCard = screen.getByRole("heading", { name: "Social" }).closest("article");
+    expect(socialCard).not.toBeNull();
+    expect(within(socialCard!).getByLabelText("Contenuti Social")).toBeVisible();
+    const idleEmail = within(socialCard!).getByLabelText("Scrittura email inattiva");
+    expect(idleEmail).toHaveClass("is-inactive");
+    expect(within(idleEmail).getByText("Nessuna email da scrivere")).toBeVisible();
+
+    rerender(<PeopleView state={{ ...state, emails: initial.emails }} {...props} />);
+    socialCard = screen.getByRole("heading", { name: "Social" }).closest("article");
+    const activeEmail = within(socialCard!).getByLabelText("Scrittura email");
+    expect(activeEmail).not.toHaveClass("is-inactive");
+    expect(within(activeEmail).getByText(initial.emails[0].subject, { exact: false }))
+      .toBeVisible();
+    expect(within(socialCard!).getAllByText(/50% forza lavoro/)).toHaveLength(2);
+  });
+
   it("shows the aggregate equipment condition in the row and detail drawer", () => {
     const initial = createInitialState(1_000);
     const equipmentCollaborator = {

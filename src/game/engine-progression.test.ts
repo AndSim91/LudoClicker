@@ -172,6 +172,45 @@ describe("game engine: progression", () => {
     expect(automated.statistics.automatedCharacters).toBe(5);
   });
 
+  it("keeps Social active and splits the workforce evenly while writing email", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "collaborator-split",
+      contactId: initial.contacts[0].id,
+      displayName: "Giulia Ferrando",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "writing" as const,
+      rarity: "rare" as const,
+    };
+    const sharedState = {
+      ...initial,
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, collaborators: true, social: true },
+    };
+    const socialOnly = gameReducer(
+      { ...sharedState, contacts: [], emails: [] },
+      { type: "TICK", now: 2_000 },
+    );
+    const split = gameReducer(sharedState, { type: "TICK", now: 2_000 });
+    const initialEmail = selectActiveEmail(sharedState);
+    const splitEmail = selectActiveEmail(split);
+
+    expect(initialEmail?.status).toBe("writing");
+    expect(splitEmail?.revealedCharacters).toBeGreaterThan(
+      initialEmail?.revealedCharacters ?? 0,
+    );
+    expect(split.automation.socialContentBuffer).toBeCloseTo(
+      socialOnly.automation.socialContentBuffer / 2,
+    );
+    expect(
+      (splitEmail?.revealedCharacters ?? 0) -
+        (initialEmail?.revealedCharacters ?? 0) +
+        split.automation.writingBuffer,
+    ).toBeCloseTo(socialOnly.automation.socialContentBuffer / 2);
+  });
+
   it("turns Redazione work into Social content without immediate income or trials", () => {
     const initial = createInitialState(1_000);
     const socialCollaborator = {

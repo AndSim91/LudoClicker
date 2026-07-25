@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { Collaborator } from "../../game/types";
-import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
+import {
+  getCollaboratorAutomationPresentation,
+  getEmailAutomationPresentation,
+  getSocialContentAutomationPresentation,
+} from "./collaboratorAutomationPresentation";
 
 describe("getCollaboratorAutomationPresentation", () => {
   it("describes idle equipment as waiting and explains why", () => {
@@ -175,5 +179,43 @@ describe("getCollaboratorAutomationPresentation", () => {
     expect(presentation.progress).toBe(50);
     expect(presentation.progressLabel).toBe("Produzione dei prossimi contenuti Social");
     expect(presentation.durationMs).toBeGreaterThan(0);
+  });
+
+  it("exposes separate Social and email workstreams for the sector card", () => {
+    const initial = createInitialState(1_000);
+    const collaborator: Collaborator = {
+      id: "social-workstreams",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Social",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "writing",
+      rarity: "rare",
+    };
+    const state = {
+      ...initial,
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, social: true },
+    };
+    const activeEmail = state.emails[0];
+    const social = getSocialContentAutomationPresentation(state, true);
+    const email = getEmailAutomationPresentation(state, activeEmail);
+    const idleEmail = getEmailAutomationPresentation(
+      { ...state, emails: [] },
+      undefined,
+    );
+
+    expect(social.title).toBe("Contenuti Social");
+    expect(social.detail).toContain("50% forza lavoro");
+    expect(social.durationMs).toBeGreaterThan(0);
+    expect(email.title).toBe("Scrittura email");
+    expect(email.detail).toContain(activeEmail.subject);
+    expect(email.inactive).not.toBe(true);
+    expect(idleEmail).toMatchObject({
+      title: "Scrittura email",
+      detail: "Nessuna email da scrivere",
+      inactive: true,
+    });
   });
 });

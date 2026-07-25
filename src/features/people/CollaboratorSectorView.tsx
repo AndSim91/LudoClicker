@@ -19,7 +19,11 @@ import type {
 } from "../../game/types";
 import { AggregatedTeachingBar } from "./AggregatedTeachingBar";
 import { CollaboratorSectorPanel } from "./CollaboratorSectorPanel";
-import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
+import {
+  getCollaboratorAutomationPresentation,
+  getEmailAutomationPresentation,
+  getSocialContentAutomationPresentation,
+} from "./collaboratorAutomationPresentation";
 import {
   getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
@@ -145,8 +149,17 @@ function StandardSectorCard({
         activeEmail,
       })
     : { title: "In attesa", detail: "Nessun collaboratore assegnato" };
+  const socialActivities = role === "writing" && state.unlocks.social
+    ? [
+        getSocialContentAutomationPresentation(
+          state,
+          activeEmail?.status === "writing",
+        ),
+        getEmailAutomationPresentation(state, activeEmail),
+      ]
+    : undefined;
   return (
-    <article className={`collaborator-sector-card${assigned.length === 0 ? " is-empty" : ""}`}>
+    <article className={`collaborator-sector-card${assigned.length === 0 ? " is-empty" : ""}${socialActivities ? " has-workstreams" : ""}`}>
       <header>
         <span className="sector-card-icon"><Icon name={ROLE_PRESENTATION[role].icon} /></span>
         <span>
@@ -163,36 +176,74 @@ function StandardSectorCard({
         />
       </header>
 
-      <div className="sector-card-activity">
-        <span>
-          <strong>{activity.title}</strong>
-          {activity.detail ? <span>{activity.detail}</span> : null}
-        </span>
-        <SectorMasteryIndicator collaborators={assigned} role={role} />
-      </div>
-      {role === "equipment" ? (
-        <div className="sector-card-equipment">
-          <span className="sector-card-equipment-summary">
-            <small>Usura attrezzatura</small>
-            <strong>{Math.round(state.equipment.wear)}/100</strong>
-          </span>
-          <EquipmentConditionBar
-            equipment={state.equipment}
-            compact
-            ariaLabel="Condizione attrezzatura del settore Attrezzatura"
-          />
+      {socialActivities ? (
+        <div className="sector-card-workstreams">
+          {socialActivities.map((workstream, index) => (
+            <section
+              key={workstream.title}
+              className={`sector-card-workstream${workstream.inactive ? " is-inactive" : ""}`}
+              aria-label={workstream.inactive
+                ? `${workstream.title} inattiva`
+                : workstream.title}
+            >
+              <div className="sector-card-workstream-heading">
+                <span>
+                  <strong>{workstream.title}</strong>
+                  {workstream.detail ? <span>{workstream.detail}</span> : null}
+                </span>
+                {index === 0
+                  ? <SectorMasteryIndicator collaborators={assigned} role={role} />
+                  : null}
+              </div>
+              {workstream.progress === undefined ? (
+                <div className="sector-card-waiting"><span /></div>
+              ) : (
+                <div className="sector-card-progress">
+                  <ProgressBar
+                    label={workstream.progressLabel ?? workstream.title}
+                    value={workstream.progress}
+                    durationMs={workstream.durationMs}
+                  />
+                  <small>{Math.round(workstream.progress)}%</small>
+                </div>
+              )}
+            </section>
+          ))}
         </div>
-      ) : activity.progress === undefined ? (
-        <div className="sector-card-waiting" aria-label="Nessuna attività in corso"><span /></div>
       ) : (
-        <div className="sector-card-progress">
-          <ProgressBar
-            label={activity.progressLabel ?? activity.title}
-            value={activity.progress}
-            durationMs={activity.durationMs}
-          />
-          <small>{Math.round(activity.progress)}%</small>
-        </div>
+        <>
+          <div className="sector-card-activity">
+            <span>
+              <strong>{activity.title}</strong>
+              {activity.detail ? <span>{activity.detail}</span> : null}
+            </span>
+            <SectorMasteryIndicator collaborators={assigned} role={role} />
+          </div>
+          {role === "equipment" ? (
+            <div className="sector-card-equipment">
+              <span className="sector-card-equipment-summary">
+                <small>Usura attrezzatura</small>
+                <strong>{Math.round(state.equipment.wear)}/100</strong>
+              </span>
+              <EquipmentConditionBar
+                equipment={state.equipment}
+                compact
+                ariaLabel="Condizione attrezzatura del settore Attrezzatura"
+              />
+            </div>
+          ) : activity.progress === undefined ? (
+            <div className="sector-card-waiting" aria-label="Nessuna attività in corso"><span /></div>
+          ) : (
+            <div className="sector-card-progress">
+              <ProgressBar
+                label={activity.progressLabel ?? activity.title}
+                value={activity.progress}
+                durationMs={activity.durationMs}
+              />
+              <small>{Math.round(activity.progress)}%</small>
+            </div>
+          )}
+        </>
       )}
 
       <button

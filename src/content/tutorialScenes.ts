@@ -380,7 +380,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Contenuti, Follower e Sponsorizzazioni",
         body: [
-          "I collaboratori Social daranno sempre priorità alle Email. Quando non ci sono Email da scrivere, useranno le loro capacità per produrre contenuti online.",
+          "I collaboratori Social producono sempre contenuti online. Quando c'è una Email da scrivere, metà della forza lavoro passa alla scrittura e i contenuti avanzano al 50% della velocità.",
           "Ogni contenuto può generare Follower e nuovi Contatti. Ogni Follower ottenuto aumenta anche la Fama della scuola e migliora la possibilità di trovare sempre più Contatti nuovi.",
           "I Follower producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
           "Facile, no? Forse userò un Collaboratore Social per farmi ripartire la stampante..."

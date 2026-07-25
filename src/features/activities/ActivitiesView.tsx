@@ -97,7 +97,7 @@ export function ActivitiesView({ state: stateOverride }: { state?: GameState } =
       </section> : null}
 
       {state.unlocks.social ? <section className="social-panel" aria-label="Produzione Social">
-        <div><Icon name="contact" /><span><strong>Social</strong><small>{socialCollaborators} collaboratori · email prioritarie · nessun progresso offline</small></span></div>
+        <div><Icon name="contact" /><span><strong>Social</strong><small>{socialCollaborators} collaboratori · contenuti sempre attivi · 50% sulle email quando necessario · nessun progresso offline</small></span></div>
         <div className="social-metrics">
           <span><small>Follower</small><strong>{state.school.followers}</strong></span>
           <span><small>Nuovo follower</small><strong>{formatPercent(socialFollowerChance)}</strong></span>
