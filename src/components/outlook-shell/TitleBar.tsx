@@ -110,7 +110,7 @@ export function TitleBar({
         <EquipmentConditionBar
           equipment={equipment}
           compact
-          variant="battery"
+          variant="cylinder"
           ariaLabel="Condizione delle spade nella barra superiore"
         />
       </span>

@@ -29,6 +29,15 @@ export interface TournamentDefinition {
 
 const BASE_TIER_SLOTS = [30, 18, 8, 2] as const;
 
+export const TOURNAMENT_DIFFICULTY_MULTIPLIERS: Record<
+  Exclude<TournamentLevel, "school" | "chronicles">,
+  number
+> = {
+  academy: 150 / 125,
+  national: 200 / 150,
+  champions: 250 / 200,
+};
+
 export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinition> = {
   school: {
     id: "school",
@@ -41,7 +50,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Torneo Accademico Alpha",
     calendarMonth: 4,
     fieldSize: 64,
-    standard: 125,
+    standard: 150,
     npc: {
       rarityWeights: [["common", 0.65], ["rare", 0.30], ["ultra-rare", 0.05]],
       formWeights: [[1, 0.20], [2, 0.40], [3, 0.30], [4, 0.10]],
@@ -59,7 +68,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Torneo Nazionale",
     calendarMonth: 6,
     fieldSize: 64,
-    standard: 150,
+    standard: 200,
     npc: {
       rarityWeights: [["common", 0.35], ["rare", 0.50], ["ultra-rare", 0.15]],
       formWeights: [[3, 0.10], [4, 0.35], [5, 0.40], [6, 0.15]],
@@ -77,7 +86,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Champion's Arena",
     calendarMonth: 11,
     fieldSize: 64,
-    standard: 200,
+    standard: 250,
     npc: {
       rarityWeights: [["common", 0.40], ["rare", 0.52], ["ultra-rare", 0.08]],
       formWeights: [[4, 0.18], [5, 0.38], [6, 0.33], [7, 0.11]],

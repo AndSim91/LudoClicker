@@ -28,10 +28,32 @@ describe("EquipmentQuickPanel", () => {
     expect(
       screen.getByRole("progressbar", { name: "Condizione delle spade della scuola" }),
     ).toHaveClass("equipment-condition-bar", "is-aggregate");
-    expect(container.querySelector(".equipment-condition.is-battery")).toBeInTheDocument();
+    expect(container.querySelector(".equipment-condition.is-saber")).toBeInTheDocument();
+    expect(container.querySelector(".equipment-saber-outline")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Ripara tutto/ }));
+    const repairButton = screen.getByRole("button", { name: /Ripara tutto/ });
+    expect(repairButton.parentElement).toHaveClass(
+      "equipment-quick-metrics",
+      "has-maintenance-action",
+    );
+    fireEvent.click(repairButton);
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
+  });
+
+  it("hides the repair action completely when no maintenance is needed", () => {
+    const initial = createInitialState(1_000);
+    const { container } = render(
+      <EquipmentQuickPanel
+        state={initial}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: /Ripara|Manutenzione/ })).not.toBeInTheDocument();
+    expect(container.querySelector(".equipment-quick-metrics")).not.toHaveClass(
+      "has-maintenance-action",
+    );
   });
 
   it("offers x10 only when the school can afford ten swords", () => {

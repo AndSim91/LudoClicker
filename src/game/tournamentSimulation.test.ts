@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { SECRET_LEGENDARIES, type SecretLegendaryId } from "../content/secretLegendaries";
 import { getTournamentSchool } from "../content/tournamentSchools";
+import {
+  TOURNAMENT_DEFINITIONS,
+  TOURNAMENT_DIFFICULTY_MULTIPLIERS,
+} from "../content/tournaments";
 import { addAdminMembers } from "./adminFlow";
 import {
   getAthleteTournamentStats,
@@ -86,17 +90,44 @@ describe("secret legendary balancing", () => {
     };
   }
 
+  it("uses the new standards to boost every linked Secret Legendary", () => {
+    expect({
+      academy: TOURNAMENT_DEFINITIONS.academy.standard,
+      national: TOURNAMENT_DEFINITIONS.national.standard,
+      champions: TOURNAMENT_DEFINITIONS.champions.standard,
+    }).toEqual({ academy: 150, national: 200, champions: 250 });
+
+    const baselines: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
+      "marco-palena": [75, 90],
+      "lorenzo-todaro": [80, 80],
+      "pietro-scarica": [92, 94],
+      "daniele-panizza": [81, 62],
+      "sara-magnifico": [58, 87],
+      "piero-dipalo": [169, 169],
+      "daniele-maggi": [150, 150],
+      "simone-pedrazzi": [122, 145],
+    };
+    for (const id of Object.keys(baselines) as SecretLegendaryId[]) {
+      const profile = SECRET_LEGENDARIES[id];
+      const [arenaBase, styleBase] = baselines[id]!;
+      const level = getTournamentSchool(profile.schoolId!).level;
+      const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS[level];
+      expect(profile.arenaBase).toBeCloseTo(arenaBase * multiplier);
+      expect(profile.styleBase).toBeCloseTo(styleBase * multiplier);
+    }
+  });
+
   it("places the new linked profiles in the intended tournament bands", () => {
     const pietro = preparation("pietro-scarica");
     const daniele = preparation("daniele-panizza");
     const sara = preparation("sara-magnifico");
 
-    expect(pietro.arena).toBeCloseTo(179.4);
-    expect(pietro.style).toBeCloseTo(183.3);
-    expect(daniele.arena).toBeCloseTo(130.41);
-    expect(daniele.style).toBeCloseTo(99.82);
-    expect(sara.arena).toBeCloseTo(100.05);
-    expect(sara.style).toBeCloseTo(150.075);
+    expect(pietro.arena).toBeCloseTo(239.2);
+    expect(pietro.style).toBeCloseTo(244.4);
+    expect(daniele.arena).toBeCloseTo(156.492);
+    expect(daniele.style).toBeCloseTo(119.784);
+    expect(sara.arena).toBeCloseTo(120.06);
+    expect(sara.style).toBeCloseTo(180.09);
     expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level).toBe(
       "national",
     );
@@ -116,11 +147,13 @@ describe("secret legendary balancing", () => {
     });
   });
 
-  it("keeps explicitly entered values unchanged when they have no modifiers", () => {
-    expect(preparation("piero-dipalo")).toEqual({ arena: 169, style: 169 });
-    expect(preparation("daniele-maggi")).toEqual({ arena: 150, style: 150 });
+  it("applies circuit boosts before Form and experience modifiers", () => {
+    expect(preparation("piero-dipalo").arena).toBeCloseTo(225.333333);
+    expect(preparation("piero-dipalo").style).toBeCloseTo(225.333333);
+    expect(preparation("daniele-maggi")).toEqual({ arena: 180, style: 180 });
     expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
-    expect(preparation("simone-pedrazzi")).toEqual({ arena: 122, style: 145 });
+    expect(preparation("simone-pedrazzi").arena).toBeCloseTo(162.666667);
+    expect(preparation("simone-pedrazzi").style).toBeCloseTo(193.333333);
     expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level).toBe(
       "national",
     );
@@ -314,6 +347,15 @@ describe("tournament simulation", () => {
           (entry) => entry.schoolId && getTournamentSchool(entry.schoolId).level === "academy",
         ),
     ).toBe(true);
+    const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS.academy;
+    for (const entry of simulation.result.participants.filter(({ id }) => id.startsWith("npc-"))) {
+      expect(entry.arenaPreparation).toBeCloseTo(
+        getPreparation(entry.arenaBase, entry.numericForms, entry.experience) * multiplier,
+      );
+      expect(entry.stylePreparation).toBeCloseTo(
+        getPreparation(entry.styleBase, entry.numericForms, entry.experience) * multiplier,
+      );
+    }
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
   });
 

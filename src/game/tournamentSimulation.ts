@@ -8,6 +8,7 @@ import {
 import { getNpcSchoolPool, getTournamentSchool } from "../content/tournamentSchools";
 import {
   TOURNAMENT_DEFINITIONS,
+  TOURNAMENT_DIFFICULTY_MULTIPLIERS,
   getNextTournamentLevel,
   getTournamentReward,
   type TournamentNpcProfile,
@@ -391,7 +392,15 @@ function createNpcParticipants(
       sequence += 1;
     }
   });
-  return maybeInsertSecretLegendary(state, level, participants, cursor).map((participant) => {
+  const boostedParticipants = participants.map((participant) => {
+    const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS[level];
+    return {
+      ...participant,
+      arenaPreparation: participant.arenaPreparation * multiplier,
+      stylePreparation: participant.stylePreparation * multiplier,
+    };
+  });
+  return maybeInsertSecretLegendary(state, level, boostedParticipants, cursor).map((participant) => {
     if (
       participant.secretLegendaryId ||
       participant.schoolName !== state.school.name ||

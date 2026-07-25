@@ -127,12 +127,8 @@ export function App() {
   ]);
 
   const write = () => dispatch({ type: "WRITE", now: getGameNow() });
-  const buyOfficialSwords = (amount: 1 | 10 | 100) => {
-    const now = getGameNow();
-    for (let purchased = 0; purchased < amount; purchased += 1) {
-      dispatch({ type: "BUY_OFFICIAL_SWORD", now });
-    }
-  };
+  const buyOfficialSwords = (amount: 1 | 10 | 100) =>
+    dispatch({ type: "BUY_OFFICIAL_SWORD", amount, now: getGameNow() });
 
   const selectMessage = (messageId: string | null) => {
     if (messageId) dispatch({ type: "MARK_MESSAGE_READ", messageId });

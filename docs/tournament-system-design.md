@@ -415,9 +415,9 @@ I valori non sono cancelli rigidi:
 
 | Torneo | Standard competitivo |
 |---|---:|
-| Accademico | 125 |
-| Nazionale | 150 |
-| Champion's | 200 |
+| Accademico | 150 |
+| Nazionale | 200 |
+| Champion's | 250 |
 
 Curva indicativa desiderata nella statistica rilevante:
 
@@ -433,8 +433,8 @@ Curva indicativa desiderata nella statistica rilevante:
 
 Vincoli specifici:
 
-- preparazione 224 alla Champion's: circa 33% di vittoria;
-- preparazione 250 alla Champion's: fascia 88–92%;
+- preparazione 280 alla Champion's: circa 33% di vittoria;
+- preparazione 312,5 alla Champion's: fascia 88–92%;
 - Forma 1 eccezionale può raggiungere il podio Accademico, ma vincere deve essere statisticamente trascurabile;
 - Forma 5 inesperto può raggiungere la Champion's, ma il podio deve essere statisticamente trascurabile;
 - Forma 4, base 100, esperienza 20 produce 224;
@@ -448,15 +448,15 @@ Prima calibrazione con 500 Champion's indipendenti per valore, un atleta della s
 
 | Preparazione | Vittoria Arena | Podio Arena |
 |---:|---:|---:|
-| 200 | 0,4% | 11,0% |
-| 210 | 7,6% | 36,4% |
-| 220 | 24,0% | 66,2% |
-| 224 | 32,2% | 68,6% |
-| 230 | 52,8% | 84,6% |
-| 240 | 76,2% | 93,8% |
-| 250 | 90,2% | 97,2% |
+| 250 | 0,8% | 14,4% |
+| 262,5 | 5,0% | 34,2% |
+| 275 | 22,8% | 62,4% |
+| 280 | 32,8% | 75,8% |
+| 287,5 | 49,6% | 80,6% |
+| 300 | 75,2% | 92,4% |
+| 312,5 | 89,6% | 96,0% |
 
-La baseline centra i vincoli espliciti 224≈33% e 250≈90%. A quota 200 la vittoria rimane eccezionale, ma la probabilità di podio è tangibile e rispetta l'obiettivo “200 per entrare in classifica”. Il probe deve rimanere eseguibile separatamente dai test rapidi.
+La baseline centra i vincoli espliciti 280≈33% e 312,5≈90%. A quota 250 la vittoria rimane eccezionale, ma la probabilità di podio è tangibile e rispetta l'obiettivo “250 per entrare in classifica”. Il probe deve rimanere eseguibile separatamente dai test rapidi.
 
 ## 13. Generazione degli avversari
 
@@ -492,9 +492,9 @@ Intervalli di preparazione nella statistica di qualificazione:
 
 | Torneo | Ordinari | Contendenti | Favoriti | Élite |
 |---|---:|---:|---:|---:|
-| Accademico | 55–94 | 95–119 | 120–139 | 140–155 |
-| Nazionale | 75–114 | 115–144 | 145–169 | 170–185 |
-| Champion's | 100–154 | 155–189 | 190–214 | 215–230 |
+| Accademico | 66–112,8 | 114–142,8 | 144–166,8 | 168–186 |
+| Nazionale | 100–152 | 153,333–192 | 193,333–225,333 | 226,667–246,667 |
+| Champion's | 125–192,5 | 193,75–236,25 | 237,5–267,5 | 268,75–287,5 |
 
 I posti vengono divisi in modo uniforme tra qualificati principalmente Arena e principalmente Stile. La statistica secondaria viene generata liberamente; i profili bilanciati emergono senza una categoria artificiale.
 
@@ -522,6 +522,11 @@ Un profilo può fare riferimento all'ID di una scuola del catalogo e apparire
 soltanto nel livello del circuito assegnato a quella scuola. Un profilo ancora
 privo di scuola resta registrato ma non entra in alcun torneo. Al massimo un
 Leggendario Segreto appare nello stesso torneo.
+
+I valori base di ogni profilo collegato ricevono lo stesso aumento percentuale
+dello standard del circuito: +20% all'Accademico, +33,333% al Nazionale e +25%
+alla Champion's. I profili senza scuola, riservati alle Chronicles, restano
+invariati perché lo standard Chronicles non cambia.
 
 Condizione di sconfitta:
 
@@ -574,10 +579,10 @@ Una prova segreta in corso impedisce temporaneamente di fondare una nuova scuola
 - Accademia: Alpha;
 - Forma NPC: 4;
 - esperienza NPC fissa: 5;
-- Arena base: 75;
-- Stile base: 90;
-- preparazione Arena NPC: 120,750;
-- preparazione Stile NPC: 144,900;
+- Arena base: 90;
+- Stile base: 108;
+- preparazione Arena NPC: 144,900;
+- preparazione Stile NPC: 173,880;
 - specialità: Stile.
 
 #### Lorenzo Todaro
@@ -588,10 +593,10 @@ Una prova segreta in corso impedisce temporaneamente di fondare una nuova scuola
 - Accademia: Alpha;
 - Forma NPC: 5;
 - esperienza NPC fissa: 5;
-- Arena base: 80;
-- Stile base: 80;
-- preparazione Arena NPC: 138,000;
-- preparazione Stile NPC: 138,000;
+- Arena base: 96;
+- Stile base: 96;
+- preparazione Arena NPC: 165,600;
+- preparazione Stile NPC: 165,600;
 - specialità: completo.
 
 Come NPC esterni mantengono sempre Forma ed esperienza canoniche, indipendentemente dalle apparizioni.

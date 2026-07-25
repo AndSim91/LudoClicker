@@ -568,6 +568,60 @@
   border-radius: 3px;
   background: color-mix(in srgb, var(--equipment-healthy) 24%, var(--surface));
 }
+
+.equipment-condition.is-saber {
+  padding: 3px 5px;
+}
+
+.equipment-condition.is-saber .equipment-condition-bar {
+  position: relative;
+  height: auto;
+  aspect-ratio: 2320 / 184;
+  gap: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-mask-image: url("/assets/equipment/lightsaber-silhouette-mask.png");
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-image: url("/assets/equipment/lightsaber-silhouette-mask.png");
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+.equipment-saber-outline {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: var(--blue-600);
+  pointer-events: none;
+  -webkit-mask-image: url("/assets/equipment/lightsaber-outline-mask.png");
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-image: url("/assets/equipment/lightsaber-outline-mask.png");
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+.equipment-condition.is-cylinder {
+  padding: 0 2px;
+}
+
+.equipment-condition.is-cylinder .equipment-condition-bar {
+  height: 8px;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--equipment-healthy) 24%, transparent);
+  box-shadow: 0 0 3px color-mix(in srgb, currentColor 40%, transparent);
+}
 .equipment-condition-title {
   line-height: 1.2;
 }

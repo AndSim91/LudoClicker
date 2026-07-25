@@ -271,18 +271,29 @@ export function maintainEquipment(state: GameState): GameState {
   };
 }
 
-export function buyOfficialSword(state: GameState): GameState {
-  if (state.school.euros < GAME_CONFIG.officialSwordCost) return state;
+export function buyOfficialSword(state: GameState, rawAmount = 1): GameState {
+  const amount = Math.floor(rawAmount);
+  const totalCost = roundCurrency(GAME_CONFIG.officialSwordCost * amount);
+  const totalSwords = state.equipment.totalSwords + amount;
+  const availableSwords = state.equipment.availableSwords + amount;
+  if (
+    !Number.isSafeInteger(amount) ||
+    amount <= 0 ||
+    !Number.isFinite(totalCost) ||
+    !Number.isSafeInteger(totalSwords) ||
+    !Number.isSafeInteger(availableSwords) ||
+    state.school.euros < totalCost
+  ) return state;
   return {
     ...state,
     school: {
       ...state.school,
-      euros: state.school.euros - GAME_CONFIG.officialSwordCost,
+      euros: roundCurrency(state.school.euros - totalCost),
     },
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
-      totalSwords: state.equipment.totalSwords + 1,
-      availableSwords: state.equipment.availableSwords + 1,
+      totalSwords,
+      availableSwords,
     }),
   };
 }

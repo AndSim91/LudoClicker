@@ -700,7 +700,7 @@ export type GameAction =
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
-  | { type: "BUY_OFFICIAL_SWORD"; now: number }
+  | { type: "BUY_OFFICIAL_SWORD"; now: number; amount?: number }
   | {
       type: "ASSIGN_COLLABORATOR";
       collaboratorId: string;

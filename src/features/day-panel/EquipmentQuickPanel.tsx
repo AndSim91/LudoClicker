@@ -76,12 +76,16 @@ export function EquipmentQuickPanel({
         : "In ordine";
 
   let maintenanceLabel = `Ripara tutto \u00b7 ${formatCurrency(maintenanceCost)}`;
-  if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
-  else if (!hasRepairableEquipment) maintenanceLabel = "Manutenzione in attesa";
-  else if (state.school.euros < minimumMaintenanceCost) {
+  let maintenanceValue = formatCurrency(maintenanceCost);
+  if (!hasRepairableEquipment) {
+    maintenanceLabel = "Manutenzione in attesa";
+    maintenanceValue = "In attesa";
+  } else if (state.school.euros < minimumMaintenanceCost) {
     maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
+    maintenanceValue = "Fondi";
   } else if (state.school.euros < maintenanceCost) {
     maintenanceLabel = `Riparazione parziale \u00b7 ${formatCurrency(state.school.euros)}`;
+    maintenanceValue = formatCurrency(state.school.euros);
   }
 
   let automaticLabel = "Controllo automatico attivo";
@@ -105,23 +109,50 @@ export function EquipmentQuickPanel({
       <EquipmentConditionBar
         equipment={equipment}
         compact
-        variant="battery"
+        variant="saber"
         ariaLabel="Condizione delle spade della scuola"
       />
 
-      <div className="equipment-quick-metrics" aria-label="Dettaglio spade">
-        <span>
-          <small>In uso</small>
+      <div
+        className={`equipment-quick-metrics${needsMaintenance ? " has-maintenance-action" : ""}`}
+        aria-label="Legenda e manutenzione spade"
+      >
+        <span className="is-reserved">
+          <small>
+            <i aria-hidden="true" />
+            In uso
+          </small>
           <strong>{reservedSwords}</strong>
         </span>
-        <span>
-          <small>Usura</small>
+        <span className="is-load">
+          <small>
+            <i aria-hidden="true" />
+            Usura
+          </small>
           <strong>{Math.round(equipment.wear)} pt</strong>
         </span>
-        <span>
-          <small>Rotte</small>
+        <span className="is-broken">
+          <small>
+            <i aria-hidden="true" />
+            Rotte
+          </small>
           <strong>{damagedSwords}</strong>
         </span>
+        {needsMaintenance ? (
+          <button
+            className="equipment-maintenance-button"
+            type="button"
+            aria-label={maintenanceLabel}
+            disabled={!canMaintain}
+            onClick={onMaintainEquipment}
+          >
+            <small>
+              <Icon name="wrench" />
+              Ripara
+            </small>
+            <strong>{maintenanceValue}</strong>
+          </button>
+        ) : null}
       </div>
 
       {equipmentCollaborators > 0 ? (
@@ -142,16 +173,6 @@ export function EquipmentQuickPanel({
           ) : null}
         </div>
       ) : null}
-
-      <button
-        className="equipment-maintenance-button"
-        type="button"
-        disabled={!canMaintain}
-        onClick={onMaintainEquipment}
-      >
-        <Icon name="wrench" />
-        <span>{maintenanceLabel}</span>
-      </button>
 
       {showSupplier ? (
         <div className="equipment-purchase">

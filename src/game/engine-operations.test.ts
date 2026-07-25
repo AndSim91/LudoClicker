@@ -407,6 +407,19 @@ describe("game engine: operations", () => {
     expect(upgraded.equipment).toMatchObject({ totalSwords: 9, availableSwords: 9 });
   });
 
+  it("buys multiple official swords atomically", () => {
+    const initial = createInitialState(1_000);
+    const funded = { ...initial, school: { ...initial.school, euros: 3_300 } };
+    const purchased = gameReducer(funded, {
+      type: "BUY_OFFICIAL_SWORD",
+      amount: 10,
+      now: 2_000,
+    });
+
+    expect(purchased.school.euros).toBe(0);
+    expect(purchased.equipment).toMatchObject({ totalSwords: 16, availableSwords: 16 });
+  });
+
   it("does not buy an official sword without enough euros", () => {
     const initial = createInitialState(1_000);
     expect(gameReducer(initial, { type: "BUY_OFFICIAL_SWORD", now: 2_000 })).toBe(initial);

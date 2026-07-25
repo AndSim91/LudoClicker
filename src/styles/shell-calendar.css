@@ -294,7 +294,15 @@
 }
 
 .equipment-quick-card .equipment-condition {
-  color: var(--line-strong);
+  color: var(--equipment-healthy);
+}
+
+.equipment-quick-card.is-warning .equipment-condition {
+  color: var(--equipment-load);
+}
+
+.equipment-quick-card.is-critical .equipment-condition {
+  color: var(--equipment-broken);
 }
 
 .equipment-quick-card .equipment-condition-bar {
@@ -303,14 +311,19 @@
 
 .equipment-quick-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 9px 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface-muted);
 }
 
-.equipment-quick-metrics > span {
+.equipment-quick-metrics.has-maintenance-action {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.equipment-quick-metrics > span,
+.equipment-quick-metrics > button {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -319,18 +332,47 @@
   text-align: center;
 }
 
-.equipment-quick-metrics > span + span {
+.equipment-quick-metrics > * + * {
   border-left: 1px solid var(--line);
 }
 
 .equipment-quick-metrics small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   color: var(--ink-muted);
   font-size: 9px;
+  white-space: nowrap;
+}
+
+.equipment-quick-metrics small i {
+  display: block;
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--equipment-healthy);
+}
+
+.equipment-quick-metrics .is-reserved small i {
+  background: var(--equipment-reserved);
+}
+
+.equipment-quick-metrics .is-load small i {
+  background: var(--equipment-load);
+}
+
+.equipment-quick-metrics .is-broken small i {
+  background: var(--equipment-broken);
 }
 
 .equipment-quick-metrics strong {
+  overflow: hidden;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .equipment-auto-repair {
@@ -367,7 +409,6 @@
   background: var(--blue-600);
 }
 
-.equipment-maintenance-button,
 .equipment-purchase-button,
 .equipment-purchase-quantity {
   min-height: 31px;
@@ -377,25 +418,28 @@
 }
 
 .equipment-maintenance-button {
-  display: inline-flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 9px;
-  border: 1px solid var(--line-strong);
+  border: 0;
+  border-radius: 0;
   color: var(--blue-700);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--blue-600) 7%, var(--surface));
+  font: inherit;
+  cursor: pointer;
 }
 
-.equipment-maintenance-button svg {
-  width: 14px;
-  height: 14px;
+.equipment-maintenance-button small {
+  color: currentColor;
+  font-weight: 600;
+}
+
+.equipment-maintenance-button small svg {
+  width: 10px;
+  height: 10px;
 }
 
 .equipment-maintenance-button:disabled {
   color: var(--ink-muted);
   background: var(--surface-muted);
+  cursor: default;
 }
 
 .equipment-purchase {

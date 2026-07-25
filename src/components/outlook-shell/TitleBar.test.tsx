@@ -45,6 +45,8 @@ describe("TitleBar", () => {
     const pause = screen.getByRole("button", { name: "Pausa" });
     expect(fame).toHaveTextContent("Fama della scuola7");
     expect(equipmentIndicator).toHaveTextContent("Spade6/6");
+    expect(equipmentIndicator.querySelector(".equipment-condition.is-cylinder")).toBeInTheDocument();
+    expect(equipmentIndicator.querySelector(".equipment-saber-outline")).not.toBeInTheDocument();
     expect(equipmentIndicator.nextElementSibling).toBe(fame);
     expect(fame.nextElementSibling).toBe(pause);
     expect(pause.nextElementSibling).toBe(container.querySelector(".title-month"));

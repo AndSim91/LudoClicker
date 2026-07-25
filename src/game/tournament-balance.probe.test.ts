@@ -5,7 +5,7 @@ import { simulateTournament } from "./tournamentSimulation";
 const probe = import.meta.env.RUN_TOURNAMENT_BALANCE === "1" ? it : it.skip;
 
 probe("reports Champion's Arena win rates", () => {
-  const strengths = [200, 210, 220, 224, 230, 240, 250];
+  const strengths = [250, 262.5, 275, 280, 287.5, 300, 312.5];
   const runs = 500;
   const rates: Record<number, number> = {};
   const podiumRates: Record<number, number> = {};
@@ -36,6 +36,6 @@ probe("reports Champion's Arena win rates", () => {
     podiumRates[strength] = podiums / runs;
   }
   console.log("TOURNAMENT_BALANCE", JSON.stringify({ victories: rates, podiums: podiumRates }));
-  expect(rates[224]).toBeGreaterThan(0.20);
-  expect(rates[250]).toBeGreaterThan(0.75);
+  expect(rates[280]).toBeGreaterThan(0.20);
+  expect(rates[312.5]).toBeGreaterThan(0.75);
 }, 120_000);
