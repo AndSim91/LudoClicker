@@ -25,6 +25,7 @@ export function useGameEngine() {
   const pausedAtRef = useRef<number | null>(null);
   const pauseReasonsRef = useRef(new Set<PauseReason>());
   const saveSchedulerRef = useRef<SaveScheduler | null>(null);
+  const requestTickRescheduleRef = useRef<(() => void) | null>(null);
   const clockRef = useRef(createGameClockAnchor(state.lastSavedAt, initialWallNow));
   const [isPaused, setIsPaused] = useState(false);
   const [gameSpeed, setGameSpeedState] = useState(1);
@@ -79,6 +80,7 @@ export function useGameEngine() {
 
   useLayoutEffect(() => {
     stateRef.current = state;
+    requestTickRescheduleRef.current?.();
     if (observedStateRef.current !== state) {
       observedStateRef.current = state;
       saveSchedulerRef.current?.markDirty(state);
@@ -89,10 +91,13 @@ export function useGameEngine() {
     }
   }, [state]);
 
+  const hasProfile = Boolean(state.profile.displayName.trim());
+
   useEffect(() => {
-    if (isPaused || !state.profile.displayName.trim()) return;
+    if (isPaused || !hasProfile) return;
     let tickId: number | undefined;
     let followUpId: number | undefined;
+    let scheduledWallAt = Infinity;
     let cancelled = false;
 
     const schedule = (minimumGameDelay = 0) => {
@@ -102,7 +107,14 @@ export function useGameEngine() {
         gameDelayToWallDelay(minimumGameDelay, gameSpeed),
         getNextGameTickDelay(stateRef.current, now, gameSpeed),
       );
+      const nextWallAt = Date.now() + delay;
+      // Unrelated state updates must not restart or postpone the current deadline.
+      if (tickId !== undefined && nextWallAt >= scheduledWallAt - 1) return;
+      if (tickId !== undefined) window.clearTimeout(tickId);
+      scheduledWallAt = nextWallAt;
       tickId = window.setTimeout(() => {
+        tickId = undefined;
+        scheduledWallAt = Infinity;
         if (cancelled || pausedAtRef.current !== null) return;
         const stateBeforeTick = stateRef.current;
         dispatchAction({
@@ -120,13 +132,18 @@ export function useGameEngine() {
       }, delay);
     };
 
+    const requestReschedule = () => schedule();
+    requestTickRescheduleRef.current = requestReschedule;
     schedule();
     return () => {
       cancelled = true;
+      if (requestTickRescheduleRef.current === requestReschedule) {
+        requestTickRescheduleRef.current = null;
+      }
       if (tickId !== undefined) window.clearTimeout(tickId);
       if (followUpId !== undefined) window.clearTimeout(followUpId);
     };
-  }, [dispatchAction, gameSpeed, getGameNow, isPaused, state]);
+  }, [dispatchAction, gameSpeed, getGameNow, hasProfile, isPaused]);
 
   useEffect(() => {
     const saveScheduler = createSaveScheduler(stateRef.current, persistGame);

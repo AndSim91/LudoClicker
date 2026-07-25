@@ -25,6 +25,7 @@ import {
   isSummerBreak,
 } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
@@ -147,11 +148,12 @@ function InstructorTeachingSummary({
 
 export function InstructorCompactActivity({
   collaborator,
-  state,
+  state: stateOverride,
 }: {
   collaborator: Collaborator;
-  state: GameState;
+  state?: GameState;
 }) {
+  const state = useGameState(stateOverride);
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
   const now = useGameTime(
@@ -208,15 +210,16 @@ export function InstructorCompactActivity({
 
 export function TechnicianCourseControl({
   collaborator,
-  state,
+  state: stateOverride,
   onBookTechnicianCourse,
   variant = "default",
 }: {
   collaborator: Collaborator;
-  state: GameState;
+  state?: GameState;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   variant?: "default" | "compact";
 }) {
+  const state = useGameState(stateOverride);
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const [isSISExpanded, setIsSISExpanded] = useState(false);
   const reservation = collaborator.technicianCourseReservation;
@@ -325,14 +328,14 @@ export function TechnicianCourseControl({
 
 export function InstructorCompactTraining({
   collaborator,
-  state,
+  state: stateOverride,
   onStartTraining,
   onBookTechnicianCourse,
   collaboratorsById,
   showTechnicianCourse = true,
 }: {
   collaborator: Collaborator;
-  state: GameState;
+  state?: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
@@ -344,7 +347,7 @@ export function InstructorCompactTraining({
         personId={collaborator.id}
         displayName={collaborator.displayName}
         student={collaborator}
-        state={state}
+        state={stateOverride}
         collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
         variant="compact"
@@ -352,7 +355,7 @@ export function InstructorCompactTraining({
       {showTechnicianCourse ? (
         <TechnicianCourseControl
           collaborator={collaborator}
-          state={state}
+          state={stateOverride}
           onBookTechnicianCourse={onBookTechnicianCourse}
           variant="compact"
         />
@@ -363,17 +366,18 @@ export function InstructorCompactTraining({
 
 export function InstructorPanel({
   collaborator,
-  state,
+  state: stateOverride,
   onStartTraining,
   onBookTechnicianCourse,
   collaboratorsById,
 }: {
   collaborator: Collaborator;
-  state: GameState;
+  state?: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
+  const state = useGameState(stateOverride);
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
@@ -397,13 +401,13 @@ export function InstructorPanel({
         personId={collaborator.id}
         displayName={collaborator.displayName}
         student={collaborator}
-        state={state}
+        state={stateOverride}
         collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
       />
       <TechnicianCourseControl
         collaborator={collaborator}
-        state={state}
+        state={stateOverride}
         onBookTechnicianCourse={onBookTechnicianCourse}
       />
     </div>
@@ -414,7 +418,7 @@ export function TrainingControl({
   personId,
   displayName,
   student,
-  state,
+  state: stateOverride,
   onStartTraining,
   collaboratorsById,
   variant = "default",
@@ -422,11 +426,12 @@ export function TrainingControl({
   personId: string;
   displayName: string;
   student: FormStudent;
-  state: GameState;
+  state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
   variant?: "default" | "compact";
 }) {
+  const state = useGameState(stateOverride);
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const now = useGameTime(
     Boolean(student.training),

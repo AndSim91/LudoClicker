@@ -19,6 +19,7 @@ import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
+import { GameStateContext } from "../game/GameStateContext";
 import { GameTimeProvider } from "../game/GameTimeProvider";
 import { getAvailableSwords } from "../game/equipment";
 import { useGameEngine } from "../game/useGameEngine";
@@ -30,6 +31,14 @@ import {
   selectContactsAwaitingEmail,
   selectVisibleInboxMessages,
 } from "../game/selectors";
+import type {
+  AcquisitionEvent,
+  CollaboratorAssignment,
+  CollaboratorMasteryRole,
+  FormId,
+  RockPaperScissorsChoice,
+  UpgradeId,
+} from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
 import { useAppPreferences } from "./useAppPreferences";
 
@@ -126,15 +135,21 @@ export function App() {
     tutorial.isBlockingInput,
   ]);
 
-  const write = () => dispatch({ type: "WRITE", now: getGameNow() });
-  const buyOfficialSwords = (amount: 1 | 10 | 100) =>
-    dispatch({ type: "BUY_OFFICIAL_SWORD", amount, now: getGameNow() });
+  const write = useCallback(
+    () => dispatch({ type: "WRITE", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const buyOfficialSwords = useCallback(
+    (amount: 1 | 10 | 100) =>
+      dispatch({ type: "BUY_OFFICIAL_SWORD", amount, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
 
-  const selectMessage = (messageId: string | null) => {
+  const selectMessage = useCallback((messageId: string | null) => {
     if (messageId) dispatch({ type: "MARK_MESSAGE_READ", messageId });
     setSelectedMessageId(messageId);
-  };
-  const selectFolder = (folder: MailFolder) => {
+  }, [dispatch]);
+  const selectFolder = useCallback((folder: MailFolder) => {
     setMailFolder(folder);
     setSelectedMessageId(null);
     if (folder === "sent") {
@@ -148,47 +163,144 @@ export function App() {
         .at(-1);
       setSelectedSentEmailId(latestSent?.id ?? null);
     }
-  };
-  const openComposer = () => {
+  }, [state.emails]);
+  const openComposer = useCallback(() => {
     setView("mail");
     setMailFolder("inbox");
     setSelectedMessageId(null);
-  };
-  const exportSave = () => {
-    const blob = new Blob([exportGame(getPersistableState(state))], { type: "application/json" });
+  }, []);
+  const exportSave = useCallback(() => {
+    const blob = new Blob([exportGame(getPersistableState())], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `oggetto-nuovi-iscritti-${Date.now()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
-  };
-  const importSave = (raw: string) => {
+  }, [getPersistableState]);
+  const importSave = useCallback((raw: string) => {
     const imported = importGame(raw);
     if (!imported) return false;
     dispatch({ type: "REPLACE_STATE", state: imported });
     saveGame(imported);
     return true;
-  };
-  const resetSave = () => {
+  }, [dispatch]);
+  const resetSave = useCallback(() => {
     dispatch({ type: "REPLACE_STATE", state: resetGame() });
     setView("mail");
-  };
-  const updateProfileName = (displayName: string) => {
+  }, [dispatch]);
+  const updateProfileName = useCallback((displayName: string) => {
     dispatch({ type: "UPDATE_PROFILE_NAME", displayName });
-  };
-  const forceGameUpdate = () => {
+  }, [dispatch]);
+  const forceGameUpdate = useCallback(() => {
     if (!saveNow()) return;
     const updateUrl = new URL(window.location.href);
     updateUrl.searchParams.set("refresh", Date.now().toString());
     window.location.replace(updateUrl);
-  };
+  }, [saveNow]);
+
+  const openMembers = useCallback(() => setView("contacts"), []);
+  const markAllMessagesRead = useCallback(
+    () => dispatch({ type: "MARK_ALL_MESSAGES_READ" }),
+    [dispatch],
+  );
+  const setAutomaticEmailSending = useCallback(
+    (enabled: boolean) =>
+      dispatch({ type: "SET_AUTOMATIC_EMAIL_SENDING", enabled, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const buyUpgrade = useCallback(
+    (upgradeId: UpgradeId) => dispatch({ type: "BUY_UPGRADE", upgradeId, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const startAcquisitionEvent = useCallback(
+    (definitionId: AcquisitionEvent["definitionId"]) =>
+      dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const cancelAcquisitionEvent = useCallback(
+    (eventId: string) =>
+      dispatch({ type: "CANCEL_ACQUISITION_EVENT", eventId, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const assignCollaborator = useCallback(
+    (collaboratorId: string, assignment: CollaboratorAssignment) =>
+      dispatch({ type: "ASSIGN_COLLABORATOR", collaboratorId, assignment, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const incrementCollaboratorAssignment = useCallback(
+    (assignment: CollaboratorMasteryRole) =>
+      dispatch({ type: "INCREMENT_COLLABORATOR_ASSIGNMENT", assignment }),
+    [dispatch],
+  );
+  const decrementCollaboratorAssignment = useCallback(
+    (assignment: CollaboratorMasteryRole) =>
+      dispatch({ type: "DECREMENT_COLLABORATOR_ASSIGNMENT", assignment }),
+    [dispatch],
+  );
+  const startTraining = useCallback(
+    (personId: string, formId: FormId) =>
+      dispatch({ type: "START_FORM_TRAINING", personId, formId, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const bookTechnicianCourse = useCallback(
+    (collaboratorId: string, formId: FormId) =>
+      dispatch({ type: "BOOK_TECHNICIAN_COURSE", collaboratorId, formId, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const toggleMemberFavorite = useCallback(
+    (contactId: string) => dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId }),
+    [dispatch],
+  );
+  const cancelMemberEnrollment = useCallback(
+    (contactId: string) => dispatch({ type: "CANCEL_MEMBER_ENROLLMENT", contactId }),
+    [dispatch],
+  );
+  const startChronicles = useCallback(
+    (contactIds: string[]) =>
+      dispatch({ type: "START_CHRONICLES_TOURNAMENT", contactIds, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const playChroniclesHand = useCallback(
+    (choice: RockPaperScissorsChoice) =>
+      dispatch({ type: "PLAY_CHRONICLES_HAND", choice, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const addAdminContacts = useCallback(
+    (amount: number) => dispatch({ type: "ADMIN_ADD_CONTACTS", amount }),
+    [dispatch],
+  );
+  const addAdminMembers = useCallback(
+    (amount: number) => dispatch({ type: "ADMIN_ADD_MEMBERS", amount }),
+    [dispatch],
+  );
+  const addAdminEuros = useCallback(
+    (amount: number) => dispatch({ type: "ADMIN_ADD_EUROS", amount }),
+    [dispatch],
+  );
+  const addAdminSwords = useCallback(
+    (amount: number) => dispatch({ type: "ADMIN_ADD_SWORDS", amount }),
+    [dispatch],
+  );
+  const advanceAdminMonth = useCallback(
+    () => dispatch({ type: "ADMIN_ADVANCE_MONTH", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const scheduleAdminLegendaryTrial = useCallback(
+    () => dispatch({ type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const maintainEquipment = useCallback(
+    () => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
 
   if (!state.profile.displayName.trim()) {
     return <ProfileNameDialog onSubmit={updateProfileName} />;
   }
 
   return (
+    <GameStateContext.Provider value={state}>
     <GameTimeProvider getNow={getGameNow} isPaused={isPaused} speed={gameSpeed}>
       <div
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
@@ -208,7 +320,7 @@ export function App() {
         />
         <CommandBar
           onCompose={openComposer}
-          onMarkAllRead={() => dispatch({ type: "MARK_ALL_MESSAGES_READ" })}
+          onMarkAllRead={markAllMessagesRead}
           canMarkAllRead={
             view === "mail" &&
             mailFolder === "inbox" &&
@@ -216,18 +328,16 @@ export function App() {
           }
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
-          <AppRail view={activeView} state={state} onChange={setView} />
+          <AppRail view={activeView} onChange={setView} />
           {activeView === "mail" ? (
             <>
               <FolderPane
-                state={state}
                 folder={mailFolder}
                 onSelectFolder={selectFolder}
                 onOpenComposer={openComposer}
-                onOpenMembers={() => setView("contacts")}
+                onOpenMembers={openMembers}
               />
               <MessageList
-                state={state}
                 folder={mailFolder}
                 selectedMessageId={selectedMessageId}
                 selectedSentEmailId={selectedSentEmailId}
@@ -236,7 +346,7 @@ export function App() {
               />
               {mailFolder === "sent" ? (
                 selectedSentEmail ? (
-                  <SentMailDetail state={state} email={selectedSentEmail} />
+                  <SentMailDetail email={selectedSentEmail} />
                 ) : (
                   <main className="empty-composer">
                     <Icon name="send" />
@@ -248,96 +358,36 @@ export function App() {
                 <MessageDetail message={selectedMessage} />
               ) : (
                 <Composer
-                  state={state}
                   onWrite={write}
-                  onAutomaticSendingChange={(enabled) =>
-                    dispatch({
-                      type: "SET_AUTOMATIC_EMAIL_SENDING",
-                      enabled,
-                      now: getGameNow(),
-                    })
-                  }
+                  onAutomaticSendingChange={setAutomaticEmailSending}
                 />
               )}
             </>
           ) : activeView === "upgrades" ? (
-            <UpgradesView
-              state={state}
-              onBuyUpgrade={(upgradeId) =>
-                dispatch({ type: "BUY_UPGRADE", upgradeId, now: getGameNow() })
-              }
-            />
+            <UpgradesView onBuyUpgrade={buyUpgrade} />
           ) : activeView === "events" ? (
             <EventsView
-              state={state}
-              onStart={(definitionId) =>
-                dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: getGameNow() })
-              }
-              onCancel={(eventId) =>
-                dispatch({ type: "CANCEL_ACQUISITION_EVENT", eventId, now: getGameNow() })
-              }
+              onStart={startAcquisitionEvent}
+              onCancel={cancelAcquisitionEvent}
             />
           ) : activeView === "statistics" ? (
-            <ActivitiesView state={state} />
+            <ActivitiesView />
           ) : activeView === "contacts" ? (
             <PeopleView
-              state={state}
-              onAssign={(collaboratorId, assignment) =>
-                dispatch({
-                  type: "ASSIGN_COLLABORATOR",
-                  collaboratorId,
-                  assignment,
-                  now: getGameNow(),
-                })
-              }
-              onIncrementCollaboratorAssignment={(assignment) =>
-                dispatch({ type: "INCREMENT_COLLABORATOR_ASSIGNMENT", assignment })
-              }
-              onDecrementCollaboratorAssignment={(assignment) =>
-                dispatch({ type: "DECREMENT_COLLABORATOR_ASSIGNMENT", assignment })
-              }
-              onStartTraining={(personId, formId) =>
-                dispatch({
-                  type: "START_FORM_TRAINING",
-                  personId,
-                  formId,
-                  now: getGameNow(),
-                })
-              }
-              onBookTechnicianCourse={(collaboratorId, formId) =>
-                dispatch({
-                  type: "BOOK_TECHNICIAN_COURSE",
-                  collaboratorId,
-                  formId,
-                  now: getGameNow(),
-                })
-              }
-              onToggleFavorite={(contactId) =>
-                dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId })
-              }
-              onCancelEnrollment={(contactId) =>
-                dispatch({ type: "CANCEL_MEMBER_ENROLLMENT", contactId })
-              }
+              onAssign={assignCollaborator}
+              onIncrementCollaboratorAssignment={incrementCollaboratorAssignment}
+              onDecrementCollaboratorAssignment={decrementCollaboratorAssignment}
+              onStartTraining={startTraining}
+              onBookTechnicianCourse={bookTechnicianCourse}
+              onToggleFavorite={toggleMemberFavorite}
+              onCancelEnrollment={cancelMemberEnrollment}
             />
           ) : activeView === "tournaments" ? (
             <TournamentsView
-              state={state}
               gameSpeed={gameSpeed}
-              onOpenAthletes={() => setView("contacts")}
-              onStartChronicles={(contactIds) =>
-                dispatch({
-                  type: "START_CHRONICLES_TOURNAMENT",
-                  contactIds,
-                  now: getGameNow(),
-                })
-              }
-              onPlayChroniclesHand={(choice) =>
-                dispatch({
-                  type: "PLAY_CHRONICLES_HAND",
-                  choice,
-                  now: getGameNow(),
-                })
-              }
+              onOpenAthletes={openMembers}
+              onStartChronicles={startChronicles}
+              onPlayChroniclesHand={playChroniclesHand}
             />
           ) : activeView === "admin" ? (
             <AdminEmailView
@@ -354,27 +404,16 @@ export function App() {
               }
               gameSpeed={gameSpeed}
               onGameSpeedChange={setGameSpeed}
-              onAddContacts={(amount) => dispatch({ type: "ADMIN_ADD_CONTACTS", amount })}
-              onAddMembers={(amount) => dispatch({ type: "ADMIN_ADD_MEMBERS", amount })}
-              onAddEuros={(amount) => dispatch({ type: "ADMIN_ADD_EUROS", amount })}
-              onAddSwords={(amount) => dispatch({ type: "ADMIN_ADD_SWORDS", amount })}
-              onAdvanceMonth={() =>
-                dispatch({
-                  type: "ADMIN_ADVANCE_MONTH",
-                  now: getGameNow(),
-                })
-              }
-              onScheduleLegendaryTrial={() =>
-                dispatch({
-                  type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL",
-                  now: getGameNow(),
-                })
-              }
+              onAddContacts={addAdminContacts}
+              onAddMembers={addAdminMembers}
+              onAddEuros={addAdminEuros}
+              onAddSwords={addAdminSwords}
+              onAdvanceMonth={advanceAdminMonth}
+              onScheduleLegendaryTrial={scheduleAdminLegendaryTrial}
             />
           ) : (
             <OverviewView
               view={activeView}
-              state={state}
               onExport={exportSave}
               onImport={importSave}
               onReset={resetSave}
@@ -389,8 +428,7 @@ export function App() {
             />
           )}
           <DayPanel
-            state={state}
-            onMaintainEquipment={() => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() })}
+            onMaintainEquipment={maintainEquipment}
             onBuyOfficialSwords={buyOfficialSwords}
           />
         </div>
@@ -414,5 +452,6 @@ export function App() {
         />
       ) : null}
     </GameTimeProvider>
+    </GameStateContext.Provider>
   );
 }

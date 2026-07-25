@@ -1,5 +1,6 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
 import { getEmailBuildLength } from "../../content/emailBuild";
+import { useGameState } from "../../game/GameStateContext";
 import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
@@ -8,14 +9,15 @@ import { CampaignEmailContent } from "./CampaignEmailContent";
 import { LevelZeroProofreadText } from "./LevelZeroProofreadText";
 
 export function Composer({
-  state,
+  state: stateOverride,
   onWrite,
   onAutomaticSendingChange,
 }: {
-  state: GameState;
+  state?: GameState;
   onWrite: () => void;
   onAutomaticSendingChange: (enabled: boolean) => void;
 }) {
+  const state = useGameState(stateOverride);
   const email = selectActiveEmail(state);
   const contact = selectActiveContact(state);
   if (!email || !contact) {

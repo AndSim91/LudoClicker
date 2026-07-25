@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import {
   formatEventCooldownRemaining,
   getEventCooldownProgress,
@@ -32,14 +33,15 @@ function getEventProgress(event: AcquisitionEvent, now: number) {
 const EVENT_HISTORY_PAGE_SIZE = 100;
 
 export function EventsView({
-  state,
+  state: stateOverride,
   onStart,
   onCancel = () => undefined,
 }: {
-  state: GameState;
+  state?: GameState;
   onStart: (definitionId: AcquisitionEvent["definitionId"]) => void;
   onCancel?: (eventId: string) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [historyPage, setHistoryPage] = useState(0);
   const [fallbackNow] = useState(Date.now);
   const runningEvents = useMemo(

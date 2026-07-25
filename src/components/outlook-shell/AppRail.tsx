@@ -1,5 +1,6 @@
 import { Icon, type IconName } from "../common/Icon";
 import { isGameAreaUnlocked, type GameArea } from "../../game/progression";
+import { useGameState } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 
 export type AppView = GameArea | "admin";
@@ -25,13 +26,14 @@ const items: AppRailItem[] = [
 
 export function AppRail({
   view,
-  state,
+  state: stateOverride,
   onChange,
 }: {
   view: AppView;
-  state: GameState;
+  state?: GameState;
   onChange: (view: AppView) => void;
 }) {
+  const state = useGameState(stateOverride);
   const visibleItems = items.filter((item) => {
     if (item.devOnly) return import.meta.env.DEV;
     return isGameAreaUnlocked(item.id as GameArea, state);

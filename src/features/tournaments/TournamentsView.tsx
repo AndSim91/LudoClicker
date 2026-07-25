@@ -10,6 +10,7 @@ import type {
   TournamentResult,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
+import { useGameState } from "../../game/GameStateContext";
 import { ChroniclesView } from "./ChroniclesView";
 import {
   CHRONICLES_TOURNAMENT_LOADING_MS,
@@ -172,18 +173,19 @@ const TournamentsHall = memo(function TournamentsHall({
 });
 
 export function TournamentsView({
-  state,
+  state: stateOverride,
   gameSpeed = 1,
   onOpenAthletes = () => undefined,
   onStartChronicles = () => undefined,
   onPlayChroniclesHand = () => undefined,
 }: {
-  state: GameState;
+  state?: GameState;
   gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
   onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [tab, setTab] = useState<TournamentTab>("overview");
   const [selectedResultId, setSelectedResultId] = useState<string>();
   const [chroniclesLoading, setChroniclesLoading] = useState(false);
@@ -266,7 +268,7 @@ export function TournamentsView({
         <ChroniclesTournamentLoading durationMs={chroniclesLoadingMs} />
       ) : null}
       {!chroniclesLoading && visibleTab === "overview" ? (
-        <TournamentOverview state={state} onOpenResult={openResult} />
+        <TournamentOverview state={stateOverride} onOpenResult={openResult} />
       ) : null}
       {!chroniclesLoading && visibleTab === "results" ? (
         selectedResult ? (
@@ -305,7 +307,7 @@ export function TournamentsView({
           />
         ) : (
           <ChroniclesView
-            state={state}
+            state={stateOverride}
             onStartTournament={startChronicles}
             onPlayHand={onPlayChroniclesHand}
           />

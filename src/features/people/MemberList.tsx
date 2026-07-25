@@ -5,6 +5,7 @@ import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import { getAnnualFormTrainingLimit } from "../../content/upgrades";
+import { useGameState } from "../../game/GameStateContext";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
@@ -92,22 +93,25 @@ function SortableHeader({
 }
 
 export function MemberList({
-  state,
-  members,
+  state: stateOverride,
   collaboratorsByContactId,
   collaboratorsById,
   onStartTraining,
   onToggleFavorite,
   onCancelEnrollment,
 }: {
-  state: GameState;
-  members: Contact[];
+  state?: GameState;
   collaboratorsByContactId: Map<string, Collaborator>;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleFavorite: (contactId: string) => void;
   onCancelEnrollment: (contactId: string) => void;
 }) {
+  const state = useGameState(stateOverride);
+  const members = useMemo(
+    () => state.contacts.filter((contact) => contact.status === "enrolled"),
+    [state.contacts],
+  );
   const [requestedPage, setRequestedPage] = useState(0);
   const [sort, setSort] = useState<MemberSort | null>(null);
   const [search, setSearch] = useState("");
@@ -473,7 +477,7 @@ export function MemberList({
                   personId={contact.id}
                   displayName={`${contact.firstName} ${contact.lastName}`}
                   student={contact}
-                  state={state}
+                  state={stateOverride}
                   collaboratorsById={collaboratorsById}
                   onStartTraining={onStartTraining}
                 />

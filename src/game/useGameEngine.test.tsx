@@ -150,6 +150,22 @@ describe("useGameEngine pause", () => {
     expect(result.current.state.school.currentMonth).toBe(initialState.school.currentMonth + 1);
   });
 
+  it("keeps the existing timer when an update does not introduce an earlier deadline", () => {
+    const timeoutSpy = vi.spyOn(window, "setTimeout");
+    const { result } = renderHook(() => useGameEngine());
+    const scheduledTimeouts = timeoutSpy.mock.calls.length;
+
+    act(() =>
+      result.current.dispatch({
+        type: "UPDATE_PROFILE_NAME",
+        displayName: "Nuovo nome",
+      }),
+    );
+
+    expect(timeoutSpy).toHaveBeenCalledTimes(scheduledTimeouts);
+    timeoutSpy.mockRestore();
+  });
+
   it("advances the whole game clock one hundred times faster", () => {
     const { result } = renderHook(() => useGameEngine());
     const initialMonth = result.current.state.school.currentMonth;

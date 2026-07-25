@@ -1,6 +1,7 @@
 import { SHORT_GOALS, getShortGoalProgress, getShortGoalReward } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
+import { useGameState } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
@@ -45,7 +46,8 @@ function getTiming(notification: DayNotification, now: number): string {
   return phaseLabels[notification.phase];
 }
 
-function ShortGoalCard({ state }: { state: GameState }) {
+function ShortGoalCard({ state: stateOverride }: { state?: GameState }) {
+  const state = useGameState(stateOverride);
   const definition = SHORT_GOALS[state.shortGoal.definitionId];
   const progress = Math.min(state.shortGoal.target, getShortGoalProgress(state));
   return (
@@ -149,14 +151,15 @@ function DayNotificationEntry({
 }
 
 export function DayPanel({
-  state,
+  state: stateOverride,
   onMaintainEquipment = () => undefined,
   onBuyOfficialSwords = () => undefined,
 }: {
-  state: GameState;
+  state?: GameState;
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
+  const state = useGameState(stateOverride);
   const timeSource = useGameTimeSource();
   const [fallbackNow] = useState(Date.now);
   const [pausedNotification, setPausedNotification] = useState<{
@@ -196,9 +199,9 @@ export function DayPanel({
         <strong>La mia giornata</strong>
         <Icon name="calendar" />
       </div>
-      <ShortGoalCard state={state} />
+      <ShortGoalCard state={stateOverride} />
       <EquipmentQuickPanel
-        state={state}
+        state={stateOverride}
         onMaintainEquipment={onMaintainEquipment}
         onBuyOfficialSwords={onBuyOfficialSwords}
       />

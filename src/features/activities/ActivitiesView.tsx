@@ -7,6 +7,7 @@ import {
   getCollaboratorAssignmentLabel,
 } from "../../content/collaboratorRoles";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { getAverageWritingSeconds, getSourceSummaries } from "../../game/historyArchive";
 import {
   getMonthlySocialIncome,
@@ -37,7 +38,8 @@ const CONTACT_SOURCES: Array<[GameState["contacts"][number]["source"], string]> 
   ["collaborator", "Collaboratori"],
 ];
 
-export function ActivitiesView({ state }: { state: GameState }) {
+export function ActivitiesView({ state: stateOverride }: { state?: GameState } = {}) {
+  const state = useGameState(stateOverride);
   const assignedCounts = useMemo(() => {
     const counts = new Map<NonNullable<GameState["collaborators"][number]["assignment"]>, number>();
     for (const collaborator of state.collaborators) {

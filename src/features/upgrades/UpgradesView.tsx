@@ -21,6 +21,7 @@ import {
   type UpgradeDefinition,
 } from "../../content/upgrades";
 import { getGameMonthName } from "../../game/calendar";
+import { useGameState } from "../../game/GameStateContext";
 import { selectIncomePerMonth } from "../../game/selectors";
 import {
   getSocialContactChanceCap,
@@ -187,15 +188,16 @@ function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): Upgr
 
 function UpgradeNode({
   definition,
-  state,
+  state: stateOverride,
   selected,
   onSelect,
 }: {
   definition: UpgradeDefinition;
-  state: GameState;
+  state?: GameState;
   selected: boolean;
   onSelect: (anchor: HTMLButtonElement) => void;
 }) {
+  const state = useGameState(stateOverride);
   const level = state.upgrades[definition.id];
   const status = getUpgradeStatus(state, definition);
   const lockReason = getUpgradeLockReason(state, definition);
@@ -230,17 +232,18 @@ function UpgradeNode({
 
 function UpgradeDetailsDialog({
   definition,
-  state,
+  state: stateOverride,
   anchor,
   onClose,
   onBuy,
 }: {
   definition: UpgradeDefinition;
-  state: GameState;
+  state?: GameState;
   anchor: HTMLButtonElement;
   onClose: () => void;
   onBuy: () => void;
 }) {
+  const state = useGameState(stateOverride);
   const dialogRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState<{
@@ -381,12 +384,13 @@ function UpgradeDetailsDialog({
 }
 
 export function UpgradesView({
-  state,
+  state: stateOverride,
   onBuyUpgrade,
 }: {
-  state: GameState;
+  state?: GameState;
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [selection, setSelection] = useState<{
     upgradeId: UpgradeId;
     anchor: HTMLButtonElement;
@@ -512,7 +516,7 @@ export function UpgradesView({
                         <UpgradeNode
                           key={definition.id}
                           definition={definition}
-                          state={state}
+                          state={stateOverride}
                           selected={selection?.upgradeId === definition.id}
                           onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
                         />
@@ -529,7 +533,7 @@ export function UpgradesView({
       {selectedDefinition && selection ? (
         <UpgradeDetailsDialog
           definition={selectedDefinition}
-          state={state}
+          state={stateOverride}
           anchor={selection.anchor}
           onClose={closeDetails}
           onBuy={() => onBuyUpgrade(selectedDefinition.id)}

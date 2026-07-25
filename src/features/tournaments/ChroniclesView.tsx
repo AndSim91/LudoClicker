@@ -3,12 +3,13 @@ import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { SECRET_LEGENDARIES } from "../../content/secretLegendaries";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import type { GameState, RockPaperScissorsChoice } from "../../game/types";
 import { ChroniclesChoiceIcon, ChroniclesKeyIcon } from "./ChroniclesIcons";
 
 interface ChroniclesViewProps {
-  state: GameState;
+  state?: GameState;
   onStartTournament: (contactIds: string[]) => void;
   onPlayHand: (choice: RockPaperScissorsChoice) => void;
 }
@@ -26,7 +27,11 @@ const CHOICE_LABELS: Record<RockPaperScissorsChoice, string> = {
   scissors: "Forbice",
 };
 
-function ChroniclesDuel({ state, onPlayHand }: Pick<ChroniclesViewProps, "state" | "onPlayHand">) {
+function ChroniclesDuel({
+  state: stateOverride,
+  onPlayHand,
+}: Pick<ChroniclesViewProps, "state" | "onPlayHand">) {
+  const state = useGameState(stateOverride);
   const challenge = state.tournaments.chronicles.activeChallenge!;
   const profile = SECRET_LEGENDARIES[challenge.legendaryId];
   const displayName = `${profile.firstName} ${profile.lastName}`;
@@ -110,7 +115,12 @@ function ChroniclesDuel({ state, onPlayHand }: Pick<ChroniclesViewProps, "state"
   );
 }
 
-export function ChroniclesView({ state, onStartTournament, onPlayHand }: ChroniclesViewProps) {
+export function ChroniclesView({
+  state: stateOverride,
+  onStartTournament,
+  onPlayHand,
+}: ChroniclesViewProps) {
+  const state = useGameState(stateOverride);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [requestedPage, setRequestedPage] = useState(0);
   const [sort, setSort] = useState<ChroniclesSort>({
@@ -178,7 +188,7 @@ export function ChroniclesView({ state, onStartTournament, onPlayHand }: Chronic
 
   const chronicles = state.tournaments.chronicles;
   if (chronicles.activeChallenge) {
-    return <ChroniclesDuel state={state} onPlayHand={onPlayHand} />;
+    return <ChroniclesDuel state={stateOverride} onPlayHand={onPlayHand} />;
   }
   if (!chronicles.unlocked) {
     return (

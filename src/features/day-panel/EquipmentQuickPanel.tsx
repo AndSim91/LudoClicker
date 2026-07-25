@@ -4,6 +4,7 @@ import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import {
   getAvailableSwords,
   getEffectiveDamagedSwords,
@@ -28,14 +29,15 @@ function getAffordablePurchaseAmounts(euros: number): PurchaseAmount[] {
 }
 
 export function EquipmentQuickPanel({
-  state,
+  state: stateOverride,
   onMaintainEquipment,
   onBuyOfficialSwords,
 }: {
-  state: GameState;
+  state?: GameState;
   onMaintainEquipment: () => void;
   onBuyOfficialSwords: (amount: PurchaseAmount) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [purchaseIndex, setPurchaseIndex] = useState(0);
   const equipment = state.equipment;
   const availableSwords = getAvailableSwords(equipment);

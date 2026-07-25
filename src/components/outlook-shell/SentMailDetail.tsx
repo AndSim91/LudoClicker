@@ -1,4 +1,5 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
+import { useGameState } from "../../game/GameStateContext";
 import { selectSentEmailStatus } from "../../game/selectors";
 import type { CampaignEmail, GameState } from "../../game/types";
 import { formatDateTime } from "../../shared/formatters";
@@ -7,7 +8,14 @@ import { Icon } from "../common/Icon";
 import { CampaignEmailContent } from "./CampaignEmailContent";
 import { LevelZeroProofreadText } from "./LevelZeroProofreadText";
 
-export function SentMailDetail({ state, email }: { state: GameState; email: CampaignEmail }) {
+export function SentMailDetail({
+  state: stateOverride,
+  email,
+}: {
+  state?: GameState;
+  email: CampaignEmail;
+}) {
+  const state = useGameState(stateOverride);
   const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
   const status = selectSentEmailStatus(state, email);
   return (

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useGameState } from "../../game/GameStateContext";
 import { getInboxCategory, type InboxCategory } from "../../game/messages";
 import {
   selectActiveContact,
@@ -63,20 +64,21 @@ function InboxRow({
 }
 
 export function MessageList({
-  state,
+  state: stateOverride,
   folder,
   selectedMessageId,
   selectedSentEmailId,
   onSelectMessage,
   onSelectSentEmail,
 }: {
-  state: GameState;
+  state?: GameState;
   folder: MailFolder;
   selectedMessageId: string | null;
   selectedSentEmailId: string | null;
   onSelectMessage: (id: string | null) => void;
   onSelectSentEmail: (id: string) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [inboxCategory, setInboxCategory] = useState<InboxCategory>("focused");
   const [requestedSentPage, setRequestedSentPage] = useState(0);
   const activeEmail = selectActiveEmail(state);

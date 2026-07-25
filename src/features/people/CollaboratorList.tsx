@@ -15,6 +15,7 @@ import {
 } from "../../content/mastery";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
@@ -74,18 +75,19 @@ function CollaboratorSortableHeader({
 }
 
 export function CollaboratorList({
-  state,
+  state: stateOverride,
   onAssign,
   onStartTraining,
   onBookTechnicianCourse,
   collaboratorsById,
 }: {
-  state: GameState;
+  state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
+  const state = useGameState(stateOverride);
   const [requestedPage, setRequestedPage] = useState(0);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -417,7 +419,7 @@ export function CollaboratorList({
                     {collaborator.assignment === "instructor" ? (
                       <TechnicianCourseControl
                         collaborator={collaborator}
-                        state={state}
+                        state={stateOverride}
                         onBookTechnicianCourse={onBookTechnicianCourse}
                         variant="compact"
                       />
@@ -458,7 +460,7 @@ export function CollaboratorList({
 
                 <div className="collaborator-activity" data-label="Attività">
                   {collaborator.assignment === "instructor" ? (
-                    <InstructorCompactActivity collaborator={collaborator} state={state} />
+                    <InstructorCompactActivity collaborator={collaborator} state={stateOverride} />
                   ) : (
                     <>
                       <span className="collaborator-activity-title">
@@ -538,7 +540,7 @@ export function CollaboratorList({
                   {collaborator.assignment === "instructor" ? (
                     <InstructorCompactTraining
                       collaborator={collaborator}
-                      state={state}
+                      state={stateOverride}
                       onStartTraining={onStartTraining}
                       onBookTechnicianCourse={onBookTechnicianCourse}
                       collaboratorsById={collaboratorsById}
@@ -588,7 +590,7 @@ export function CollaboratorList({
 
       {selectedCollaborator && selectedAutomation ? (
         <CollaboratorDetailDrawer
-          state={state}
+          state={stateOverride}
           collaborator={selectedCollaborator}
           contact={contactsById.get(selectedCollaborator.contactId)}
           automation={selectedAutomation}

@@ -1,4 +1,5 @@
 import { selectContactsAwaitingEmail, selectUnreadMessages } from "../../game/selectors";
+import { useGameState } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { Icon } from "../common/Icon";
 import {
@@ -11,18 +12,19 @@ import {
 export type MailFolder = "inbox" | "sent";
 
 export function FolderPane({
-  state,
+  state: stateOverride,
   folder,
   onSelectFolder,
   onOpenComposer,
   onOpenMembers,
 }: {
-  state: GameState;
+  state?: GameState;
   folder: MailFolder;
   onSelectFolder: (folder: MailFolder) => void;
   onOpenComposer: () => void;
   onOpenMembers: () => void;
 }) {
+  const state = useGameState(stateOverride);
   const unread = selectUnreadMessages(state);
   const sent = state.statistics.emailsSent;
   const contactsAwaitingEmail = selectContactsAwaitingEmail(state);

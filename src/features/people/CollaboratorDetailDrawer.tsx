@@ -7,6 +7,7 @@ import {
 } from "../../content/collaboratorRoles";
 import { getCollaboratorBonusSummary } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
+import { useGameState } from "../../game/GameStateContext";
 import type {
   Collaborator,
   CollaboratorAssignment,
@@ -21,7 +22,7 @@ import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
 
 export function CollaboratorDetailDrawer({
-  state,
+  state: stateOverride,
   collaborator,
   contact,
   automation,
@@ -32,7 +33,7 @@ export function CollaboratorDetailDrawer({
   allowAssignment = true,
   onClose,
 }: {
-  state: GameState;
+  state?: GameState;
   collaborator: Collaborator;
   contact?: Contact;
   automation: CollaboratorAutomationPresentation;
@@ -43,6 +44,7 @@ export function CollaboratorDetailDrawer({
   allowAssignment?: boolean;
   onClose: () => void;
 }) {
+  const state = useGameState(stateOverride);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -164,7 +166,7 @@ export function CollaboratorDetailDrawer({
           {collaborator.assignment === "instructor" ? (
             <InstructorPanel
               collaborator={collaborator}
-              state={state}
+              state={stateOverride}
               onStartTraining={onStartTraining}
               onBookTechnicianCourse={onBookTechnicianCourse}
               collaboratorsById={collaboratorsById}
@@ -174,7 +176,7 @@ export function CollaboratorDetailDrawer({
               personId={collaborator.id}
               displayName={collaborator.displayName}
               student={collaborator}
-              state={state}
+              state={stateOverride}
               collaboratorsById={collaboratorsById}
               onStartTraining={onStartTraining}
             />

@@ -9,6 +9,7 @@ import {
 } from "../../content/mastery";
 import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail } from "../../game/selectors";
 import type {
@@ -35,7 +36,7 @@ function getInitials(displayName: string): string {
 }
 
 function SectorCollaboratorRow({
-  state,
+  state: stateOverride,
   collaborator,
   contact,
   now,
@@ -44,7 +45,7 @@ function SectorCollaboratorRow({
   onBookTechnicianCourse,
   onOpen,
 }: {
-  state: GameState;
+  state?: GameState;
   collaborator: Collaborator;
   contact?: Contact;
   now: number;
@@ -53,6 +54,7 @@ function SectorCollaboratorRow({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onOpen: () => void;
 }) {
+  const state = useGameState(stateOverride);
   const activeEmail = selectActiveEmail(state);
   const automation = collaborator.assignment === "instructor"
     ? undefined
@@ -113,7 +115,7 @@ function SectorCollaboratorRow({
 
       <div className="sector-roster-activity" data-label="Attività">
         {collaborator.assignment === "instructor" ? (
-          <InstructorCompactActivity collaborator={collaborator} state={state} />
+          <InstructorCompactActivity collaborator={collaborator} state={stateOverride} />
         ) : (
           <>
             <strong>{activity.title}</strong>
@@ -139,7 +141,7 @@ function SectorCollaboratorRow({
         <div className="sector-roster-training" data-label="Formazione">
           <InstructorCompactTraining
             collaborator={collaborator}
-            state={state}
+            state={stateOverride}
             collaboratorsById={collaboratorsById}
             onStartTraining={onStartTraining}
             onBookTechnicianCourse={onBookTechnicianCourse}
@@ -161,20 +163,21 @@ function SectorCollaboratorRow({
 }
 
 export function CollaboratorSectorPanel({
-  state,
+  state: stateOverride,
   role,
   collaboratorsById,
   onStartTraining,
   onBookTechnicianCourse,
   onClose,
 }: {
-  state: GameState;
+  state?: GameState;
   role: CollaboratorMasteryRole;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onClose: () => void;
 }) {
+  const state = useGameState(stateOverride);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const assigned = useMemo(
     () => state.collaborators.filter((collaborator) => collaborator.assignment === role),
@@ -264,7 +267,7 @@ export function CollaboratorSectorPanel({
               {assigned.map((collaborator) => (
                 <SectorCollaboratorRow
                   key={collaborator.id}
-                  state={state}
+                  state={stateOverride}
                   collaborator={collaborator}
                   contact={contactsById.get(collaborator.contactId)}
                   now={now}
@@ -281,7 +284,7 @@ export function CollaboratorSectorPanel({
 
       {selectedCollaborator && selectedAutomation ? (
         <CollaboratorDetailDrawer
-          state={state}
+          state={stateOverride}
           collaborator={selectedCollaborator}
           contact={contactsById.get(selectedCollaborator.contactId)}
           automation={selectedAutomation}

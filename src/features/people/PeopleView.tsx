@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
@@ -17,7 +18,7 @@ const ignoreFavoriteToggle = () => undefined;
 const ignoreCollaboratorAssignmentChange = () => undefined;
 
 export function PeopleView({
-  state,
+  state: stateOverride,
   onAssign,
   onStartTraining,
   onToggleFavorite,
@@ -26,7 +27,7 @@ export function PeopleView({
   onIncrementCollaboratorAssignment,
   onDecrementCollaboratorAssignment,
 }: {
-  state: GameState;
+  state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onToggleFavorite?: (contactId: string) => void;
@@ -35,6 +36,7 @@ export function PeopleView({
   onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
   onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
 }) {
+  const state = useGameState(stateOverride);
   const collaboratorsByContactId = useMemo(
     () =>
       new Map(state.collaborators.map((collaborator) => [collaborator.contactId, collaborator])),
@@ -78,7 +80,7 @@ export function PeopleView({
           </div>
           {showAggregateCollaborators ? (
             <CollaboratorSectorView
-              state={state}
+              state={stateOverride}
               collaboratorsById={collaboratorsById}
               onIncrement={onIncrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
               onDecrement={onDecrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
@@ -87,7 +89,7 @@ export function PeopleView({
             />
           ) : (
             <CollaboratorList
-              state={state}
+              state={stateOverride}
               onAssign={onAssign}
               onStartTraining={onStartTraining}
               onBookTechnicianCourse={onBookTechnicianCourse}
@@ -103,8 +105,7 @@ export function PeopleView({
           <span>{members.length}</span>
         </div>
         <MemberList
-          state={state}
-          members={members}
+          state={stateOverride}
           collaboratorsByContactId={collaboratorsByContactId}
           collaboratorsById={collaboratorsById}
           onStartTraining={onStartTraining}
@@ -113,7 +114,7 @@ export function PeopleView({
         />
       </section>
 
-      {showRarityOverview ? <RarityOverview state={state} /> : null}
+      {showRarityOverview ? <RarityOverview state={stateOverride} /> : null}
     </main>
   );
 }

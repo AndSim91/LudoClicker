@@ -5,6 +5,7 @@ import { EquipmentConditionBar } from "../../components/equipment/EquipmentCondi
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getFormDefinition } from "../../content/forms";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameState } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
@@ -102,7 +103,7 @@ function StaffingStepper({
 }
 
 function StandardSectorCard({
-  state,
+  state: stateOverride,
   role,
   actual,
   target,
@@ -112,7 +113,7 @@ function StandardSectorCard({
   onDecrement,
   onOpen,
 }: {
-  state: GameState;
+  state?: GameState;
   role: CollaboratorMasteryRole;
   actual: number;
   target: number;
@@ -122,6 +123,7 @@ function StandardSectorCard({
   onDecrement: () => void;
   onOpen: () => void;
 }) {
+  const state = useGameState(stateOverride);
   const label = getCollaboratorAssignmentLabel(role, state.unlocks.social);
   const assigned = state.collaborators.filter((collaborator) => collaborator.assignment === role);
   const activeEmail = selectActiveEmail(state);
@@ -207,7 +209,7 @@ function StandardSectorCard({
 }
 
 function InstructorSectorCard({
-  state,
+  state: stateOverride,
   actual,
   target,
   available,
@@ -217,7 +219,7 @@ function InstructorSectorCard({
   onOpen,
   onStartTraining,
 }: {
-  state: GameState;
+  state?: GameState;
   actual: number;
   target: number;
   available: number;
@@ -227,6 +229,7 @@ function InstructorSectorCard({
   onOpen: () => void;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
+  const state = useGameState(stateOverride);
   const isPaused = useGameTimeSource()?.isPaused ?? false;
   const instructors = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "instructor",
@@ -332,7 +335,7 @@ function InstructorSectorCard({
             {singleInstructorCourse ? (
               <InstructorCourseShortcut
                 course={singleInstructorCourse}
-                state={state}
+                state={stateOverride}
                 onStartTraining={onStartTraining}
               />
             ) : availableInstructorCourses.length > 0 ? (
@@ -427,20 +430,21 @@ function InstructorSectorCard({
 }
 
 export function CollaboratorSectorView({
-  state,
+  state: stateOverride,
   collaboratorsById,
   onIncrement,
   onDecrement,
   onStartTraining,
   onBookTechnicianCourse,
 }: {
-  state: GameState;
+  state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
   onIncrement: (assignment: CollaboratorMasteryRole) => void;
   onDecrement: (assignment: CollaboratorMasteryRole) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
 }) {
+  const state = useGameState(stateOverride);
   const [openRole, setOpenRole] = useState<CollaboratorMasteryRole | null>(null);
   const assignmentCounts = getCollaboratorAssignmentCounts(state);
   const available = state.collaborators.filter((collaborator) => collaborator.assignment === null).length;
@@ -466,7 +470,7 @@ export function CollaboratorSectorView({
       data-tutorial-region="collaborator-sectors"
     >
       <InstructorSectorCard
-        state={state}
+        state={stateOverride}
         actual={assignmentCounts.instructor}
         target={targets.instructor}
         available={available}
@@ -481,7 +485,7 @@ export function CollaboratorSectorView({
         {STANDARD_ROLES.map((role) => (
           <StandardSectorCard
             key={role}
-            state={state}
+            state={stateOverride}
             role={role}
             actual={assignmentCounts[role]}
             target={targets[role]}
@@ -500,7 +504,7 @@ export function CollaboratorSectorView({
 
       {openRole ? (
         <CollaboratorSectorPanel
-          state={state}
+          state={stateOverride}
           role={openRole}
           {...panelProps}
           onClose={() => setOpenRole(null)}
