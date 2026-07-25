@@ -62,4 +62,19 @@ describe("GameTimeProvider", () => {
       GAME_CONFIG.progressUpdateIntervalMs,
     );
   });
+
+  it("renders the virtual clock supplied by the game engine", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    const getNow = () => 1_000 + (Date.now() - 1_000) * 100;
+    render(
+      <GameTimeProvider getNow={getNow} isPaused={false} speed={100}>
+        <ClockProbe />
+      </GameTimeProvider>,
+    );
+
+    act(() => vi.advanceTimersByTime(GAME_CONFIG.progressUpdateIntervalMs));
+
+    expect(screen.getByLabelText("Tempo di gioco")).toHaveTextContent("26000");
+  });
 });

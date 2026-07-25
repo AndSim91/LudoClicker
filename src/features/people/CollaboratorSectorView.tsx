@@ -42,7 +42,7 @@ const ROLE_PRESENTATION: Record<
 > = {
   writing: {
     icon: "megaphone",
-    description: "Email prioritarie e produzione automatica di contenuti.",
+    description: "Gestione dei social media e comunicazione col pubblico.",
   },
   events: {
     icon: "calendar",
@@ -50,7 +50,7 @@ const ROLE_PRESENTATION: Record<
   },
   equipment: {
     icon: "wrench",
-    description: "Manutenzione dell'usura e riparazione delle spade.",
+    description: "Manutenzione e riparazione delle spade.",
   },
   instructor: {
     icon: "people",

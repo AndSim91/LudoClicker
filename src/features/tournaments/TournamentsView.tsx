@@ -9,6 +9,7 @@ import type {
   TournamentParticipant,
   TournamentResult,
 } from "../../game/types";
+import { gameDelayToWallDelay } from "../../game/gameClock";
 import { ChroniclesView } from "./ChroniclesView";
 import {
   CHRONICLES_TOURNAMENT_LOADING_MS,
@@ -172,11 +173,13 @@ const TournamentsHall = memo(function TournamentsHall({
 
 export function TournamentsView({
   state,
+  gameSpeed = 1,
   onOpenAthletes = () => undefined,
   onStartChronicles = () => undefined,
   onPlayChroniclesHand = () => undefined,
 }: {
   state: GameState;
+  gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
   onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
@@ -188,6 +191,10 @@ export function TournamentsView({
   const chroniclesStartTimerRef = useRef<number | undefined>(undefined);
   const onStartChroniclesRef = useRef(onStartChronicles);
   const chroniclesUnlocked = state.tournaments.chronicles.unlocked;
+  const chroniclesLoadingMs = gameDelayToWallDelay(
+    CHRONICLES_TOURNAMENT_LOADING_MS,
+    gameSpeed,
+  );
   const visibleTab = tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult =
@@ -227,7 +234,7 @@ export function TournamentsView({
       setTab("chronicles");
       setShowChroniclesResult(true);
       setChroniclesLoading(false);
-    }, CHRONICLES_TOURNAMENT_LOADING_MS);
+    }, chroniclesLoadingMs);
   };
 
   return (
@@ -255,7 +262,9 @@ export function TournamentsView({
         ) : null}
       </div>
 
-      {chroniclesLoading ? <ChroniclesTournamentLoading /> : null}
+      {chroniclesLoading ? (
+        <ChroniclesTournamentLoading durationMs={chroniclesLoadingMs} />
+      ) : null}
       {!chroniclesLoading && visibleTab === "overview" ? (
         <TournamentOverview state={state} onOpenResult={openResult} />
       ) : null}

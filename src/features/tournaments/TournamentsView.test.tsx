@@ -616,6 +616,40 @@ describe("TournamentsView", () => {
     }
   });
 
+  it("accelerates the Chronicles simulation delay with the global speed", () => {
+    vi.useFakeTimers();
+    try {
+      const initial = createStateWithForms();
+      const state = {
+        ...initial,
+        tournaments: {
+          ...initial.tournaments,
+          chronicles: { unlocked: true, keys: 1 },
+        },
+      };
+      const onStartChronicles = vi.fn();
+      const { container } = render(
+        <TournamentsView
+          state={state}
+          gameSpeed={100}
+          onStartChronicles={onStartChronicles}
+        />,
+      );
+      const view = within(container);
+
+      fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+      view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
+      fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
+
+      act(() => vi.advanceTimersByTime(49));
+      expect(onStartChronicles).not.toHaveBeenCalled();
+      act(() => vi.advanceTimersByTime(1));
+      expect(onStartChronicles).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sorts Chronicles athletes by Arena or Style and shows ten per page", () => {
     const initial = createStateWithForms(14);
     const enrolledContacts = initial.contacts.filter((contact) => contact.status === "enrolled");

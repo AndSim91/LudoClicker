@@ -45,6 +45,7 @@ describe("game scheduler", () => {
     expect(needsAutomationHeartbeat(state)).toBe(false);
     expect(getNextGameDeadline(state)).toBe(NOW + 60_000);
     expect(getNextGameTickDelay(state, NOW)).toBe(60_000);
+    expect(getNextGameTickDelay(state, NOW, 100)).toBe(600);
   });
 
   it("prioritizes active runtime deadlines over the monthly boundary", () => {

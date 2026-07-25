@@ -146,6 +146,55 @@ describe("useGameEngine pause", () => {
     );
   });
 
+  it("advances the whole game clock one hundred times faster", () => {
+    const { result } = renderHook(() => useGameEngine());
+    const initialMonth = result.current.state.school.currentMonth;
+
+    act(() => result.current.setGameSpeed(100));
+    expect(result.current.gameSpeed).toBe(100);
+
+    act(() => vi.advanceTimersByTime(599));
+    expect(result.current.state.school.currentMonth).toBe(initialMonth);
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.state.school.currentMonth).toBe(initialMonth + 1);
+  });
+
+  it("uses the accelerated clock for an activity already in progress", () => {
+    const { result } = renderHook(() => useGameEngine());
+
+    act(() => result.current.dispatch({
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: result.current.getGameNow(),
+    }));
+    act(() => vi.advanceTimersByTime(500));
+    act(() => result.current.setGameSpeed(100));
+
+    act(() => vi.advanceTimersByTime(94));
+    expect(result.current.state.acquisitionEvents[0].status).toBe("running");
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.state.acquisitionEvents[0].status).toBe("completed");
+  });
+
+  it("normalizes accelerated timestamps before saving", () => {
+    const { result } = renderHook(() => useGameEngine());
+
+    act(() => result.current.setGameSpeed(100));
+    act(() => result.current.dispatch({
+      type: "START_ACQUISITION_EVENT",
+      definitionId: "park-sparring",
+      now: result.current.getGameNow(),
+    }));
+    act(() => vi.advanceTimersByTime(50));
+    act(() => result.current.saveNow());
+
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    expect(stored.lastSavedAt).toBe(Date.now());
+    expect(stored.acquisitionEvents[0].resolvesAt - stored.lastSavedAt).toBe(5_000);
+  });
+
   it("autosaves the latest game state every minute", () => {
     const { result } = renderHook(() => useGameEngine());
 

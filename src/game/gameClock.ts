@@ -1,5 +1,5 @@
 export const MIN_GAME_SPEED = 1;
-export const MAX_GAME_SPEED = 10;
+export const MAX_GAME_SPEED = 100;
 
 export interface GameClockAnchor {
   gameNow: number;

@@ -4,21 +4,24 @@ import { ChroniclesKeyIcon } from "./ChroniclesIcons";
 export const CHRONICLES_TOURNAMENT_LOADING_MS = 5_000;
 
 const CHRONICLES_LOADING_PHASES = ["Gironi", "Eliminazione", "Classifica"] as const;
-const CHRONICLES_PHASE_DURATION_MS =
-  CHRONICLES_TOURNAMENT_LOADING_MS / CHRONICLES_LOADING_PHASES.length;
 
-export function ChroniclesTournamentLoading() {
+export function ChroniclesTournamentLoading({
+  durationMs = CHRONICLES_TOURNAMENT_LOADING_MS,
+}: {
+  durationMs?: number;
+}) {
   const [activePhase, setActivePhase] = useState(0);
 
   useEffect(() => {
+    const phaseDurationMs = durationMs / CHRONICLES_LOADING_PHASES.length;
     const timers = CHRONICLES_LOADING_PHASES.slice(1).map((_, index) =>
       window.setTimeout(
         () => setActivePhase(index + 1),
-        CHRONICLES_PHASE_DURATION_MS * (index + 1),
+        phaseDurationMs * (index + 1),
       ),
     );
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, []);
+  }, [durationMs]);
 
   return (
     <section
