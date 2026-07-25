@@ -8,6 +8,12 @@ import {
   formatExactCurrency,
   formatExactNumber,
 } from "./resourceFormatting";
+const equipment = {
+  totalSwords: 6,
+  availableSwords: 6,
+  damagedSwords: 0,
+  wear: 0,
+};
 
 afterEach(cleanup);
 
@@ -22,6 +28,7 @@ describe("TitleBar", () => {
         activeMembers={3}
         historicMembers={7}
         euros={120}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
@@ -32,16 +39,23 @@ describe("TitleBar", () => {
     );
     expect(screen.getByText("Iscritti attivi")).toBeVisible();
     const fame = screen.getByLabelText("Fama della scuola: 7");
+    const equipmentIndicator = screen.getByLabelText(
+      "Spade disponibili: 6 su 6; 0 rotte; 0 punti di usura",
+    );
     const pause = screen.getByRole("button", { name: "Pausa" });
     expect(fame).toHaveTextContent("Fama della scuola7");
+    expect(equipmentIndicator).toHaveTextContent("Spade6/6");
+    expect(equipmentIndicator.nextElementSibling).toBe(fame);
     expect(fame.nextElementSibling).toBe(pause);
     expect(pause.nextElementSibling).toBe(container.querySelector(".title-month"));
-    expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 1"))
-      .toHaveTextContent("SettembreAnno scolastico 1");
-    expect(screen.getByRole("progressbar", {
-      name: "Avanzamento di Settembre, anno scolastico 1",
-    }))
-      .toHaveAttribute("aria-valuenow", "50");
+    expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 1")).toHaveTextContent(
+      "SettembreAnno scolastico 1",
+    );
+    expect(
+      screen.getByRole("progressbar", {
+        name: "Avanzamento di Settembre, anno scolastico 1",
+      }),
+    ).toHaveAttribute("aria-valuenow", "50");
 
     rerender(
       <TitleBar
@@ -52,6 +66,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={7}
         euros={0}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
@@ -67,12 +82,14 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={7}
         euros={0}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
     );
-    expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 2"))
-      .toHaveTextContent("SettembreAnno scolastico 2");
+    expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 2")).toHaveTextContent(
+      "SettembreAnno scolastico 2",
+    );
   });
 
   it("compacts large resources without losing the exact accessible value", () => {
@@ -86,6 +103,7 @@ describe("TitleBar", () => {
         activeMembers={999_999}
         historicMembers={1_250_000}
         euros={euros}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
@@ -98,9 +116,9 @@ describe("TitleBar", () => {
       "aria-label",
       expect.stringContaining(formatExactCurrency(euros)),
     );
-    expect(container.querySelector(`strong[title="${formatExactCurrency(euros)}"]`)).toHaveTextContent(
-      formatCompactCurrency(euros).replace(/\u00a0/g, " "),
-    );
+    expect(
+      container.querySelector(`strong[title="${formatExactCurrency(euros)}"]`),
+    ).toHaveTextContent(formatCompactCurrency(euros).replace(/\u00a0/g, " "));
   });
 
   it("exposes the contacts counter as a dedicated tutorial region", () => {
@@ -113,13 +131,16 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={0}
         euros={25}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
     );
 
-    expect(screen.getByLabelText("Contatti da contattare: 2"))
-      .toHaveAttribute("data-tutorial-region", "contacts-counter");
+    expect(screen.getByLabelText("Contatti da contattare: 2")).toHaveAttribute(
+      "data-tutorial-region",
+      "contacts-counter",
+    );
   });
 
   it("shows Follower only after Social is available", () => {
@@ -133,13 +154,15 @@ describe("TitleBar", () => {
         historicMembers={0}
         followers={1_250}
         euros={0}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
     );
 
-    expect(screen.getByLabelText(`Follower Social: ${formatExactNumber(1_250)}`))
-      .toHaveTextContent(`Follower${formatCompactNumber(1_250)}`);
+    expect(screen.getByLabelText(`Follower Social: ${formatExactNumber(1_250)}`)).toHaveTextContent(
+      `Follower${formatCompactNumber(1_250)}`,
+    );
 
     rerender(
       <TitleBar
@@ -150,6 +173,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={0}
         euros={0}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
       />,
@@ -168,6 +192,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={0}
         euros={0}
+        equipment={equipment}
         isPaused={false}
         onTogglePause={onTogglePause}
       />,
@@ -185,11 +210,14 @@ describe("TitleBar", () => {
         activeMembers={0}
         historicMembers={0}
         euros={0}
+        equipment={equipment}
         isPaused
         onTogglePause={onTogglePause}
       />,
     );
-    expect(screen.getByRole("button", { name: "Riprendi" }))
-      .toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Riprendi" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });

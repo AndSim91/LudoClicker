@@ -11,10 +11,7 @@ function stateWithTrial(
   const initial = createInitialState(10_000);
   return {
     ...initial,
-    contacts: [
-      { ...initial.contacts[0], status: contactStatus },
-      ...initial.contacts.slice(1),
-    ],
+    contacts: [{ ...initial.contacts[0], status: contactStatus }, ...initial.contacts.slice(1)],
     scheduledTrials: [
       {
         id: "trial-day-panel",
@@ -81,8 +78,13 @@ describe("DayPanel", () => {
   it("exposes La mia giornata as a guided tutorial target", () => {
     render(<DayPanel state={createInitialState(1_000)} />);
 
-    expect(screen.getByLabelText("La mia giornata"))
-      .toHaveAttribute("data-tutorial-target", "true");
+    expect(screen.getByLabelText("La mia giornata")).toHaveAttribute(
+      "data-tutorial-target",
+      "true",
+    );
+    const mission = screen.getByLabelText("Obiettivo breve");
+    const equipment = screen.getByLabelText("Gestione attrezzatura");
+    expect(mission.nextElementSibling).toBe(equipment);
   });
 
   it("exposes only the tutorial trial row as the precise guided target", () => {
@@ -153,10 +155,14 @@ describe("DayPanel", () => {
     render(<DayPanel state={stateWithTrial(contactStatus, "completed")} />);
 
     expect(screen.getByText(label).closest(".appointment")).toHaveClass(className);
-    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ }))
-      .toHaveAttribute("aria-valuenow", "50");
-    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ }))
-      .toHaveAttribute("aria-valuetext", "5 secondi rimanenti");
+    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
+      "aria-valuenow",
+      "50",
+    );
+    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
+      "aria-valuetext",
+      "5 secondi rimanenti",
+    );
   });
 
   it.each([
@@ -213,8 +219,10 @@ describe("DayPanel", () => {
     });
 
     expect(screen.getByText("Iscritto")).toBeVisible();
-    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ }))
-      .toHaveAttribute("aria-valuetext", "5 secondi rimanenti");
+    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
+      "aria-valuetext",
+      "5 secondi rimanenti",
+    );
 
     fireEvent.mouseLeave(notificationRow!);
     expect(screen.queryByText("Iscritto")).not.toBeInTheDocument();
@@ -231,7 +239,9 @@ describe("DayPanel", () => {
       rarity: "ultra-rare" as const,
     };
 
-    render(<DayPanel state={{ ...initial, contacts: [directMember, ...initial.contacts.slice(1)] }} />);
+    render(
+      <DayPanel state={{ ...initial, contacts: [directMember, ...initial.contacts.slice(1)] }} />,
+    );
 
     expect(screen.getByText("Iscrizione diretta")).toBeVisible();
     expect(screen.getByText(`${directMember.firstName} ${directMember.lastName}`)).toHaveClass(
@@ -245,15 +255,19 @@ describe("DayPanel", () => {
     vi.setSystemTime(55_000);
     const initial = createInitialState(10_000);
 
-    render(<DayPanel state={{
-      ...initial,
-      tournaments: { ...initial.tournaments, results: [tournamentResult(50_000)] },
-    }} />);
+    render(
+      <DayPanel
+        state={{
+          ...initial,
+          tournaments: { ...initial.tournaments, results: [tournamentResult(50_000)] },
+        }}
+      />,
+    );
 
     expect(screen.getByText("Torneo Scolastico completato")).toBeVisible();
-    expect(screen.getByText(
-      "1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile",
-    )).toBeVisible();
+    expect(
+      screen.getByText("1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile"),
+    ).toBeVisible();
   });
 
   it("shows important events and lets their notification expire", () => {
@@ -264,13 +278,15 @@ describe("DayPanel", () => {
       ...initial,
       narrative: {
         ...initial.narrative,
-        history: [{
-          id: "story-day-panel",
-          definitionId: "unexpected-repair",
-          title: "Riparazione non programmata",
-          occurredAt: 50_000,
-          summary: "Una spada richiede ricambi.",
-        }],
+        history: [
+          {
+            id: "story-day-panel",
+            definitionId: "unexpected-repair",
+            title: "Riparazione non programmata",
+            occurredAt: 50_000,
+            summary: "Una spada richiede ricambi.",
+          },
+        ],
       },
     };
 

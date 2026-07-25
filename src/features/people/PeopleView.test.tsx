@@ -287,6 +287,12 @@ describe("PeopleView", () => {
     view.rerender(renderView(true));
     const sisHeading = screen.getByText("Scuola Internazionale Superiore");
     expect(sisHeading.closest(".technician-course-control")).toBeVisible();
+    const sisToggle = screen.getByRole("button", { name: /Scuola Internazionale Superiore/ });
+    expect(sisToggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();
+
+    fireEvent.click(sisToggle);
+    expect(sisToggle).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(screen.getByRole("button", { name: /Prenota SIS/ }));
     expect(onBookTechnicianCourse).toHaveBeenCalledWith(collaborator.id, "form-1");

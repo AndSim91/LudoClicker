@@ -1,8 +1,4 @@
-import {
-  SHORT_GOALS,
-  getShortGoalProgress,
-  getShortGoalReward,
-} from "../../content/shortGoals";
+import { SHORT_GOALS, getShortGoalProgress, getShortGoalReward } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
 import { useGameTime } from "../../game/GameTimeContext";
@@ -17,6 +13,7 @@ import {
   type DayNotificationKind,
   type DayNotificationPhase,
 } from "./dayNotifications";
+import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
 
 const phaseLabels: Record<DayNotificationPhase, string> = {
   scheduled: "",
@@ -66,7 +63,9 @@ function ShortGoalCard({ state }: { state: GameState }) {
         max={state.shortGoal.target}
       />
       <div className="short-goal-footer">
-        <span>{progress}/{state.shortGoal.target}</span>
+        <span>
+          {progress}/{state.shortGoal.target}
+        </span>
         <strong>Premio € {getShortGoalReward(state.shortGoal)}</strong>
       </div>
     </section>
@@ -87,27 +86,20 @@ function DayNotificationEntry({
   onResume: () => void;
 }) {
   const timing = getTiming(notification, now);
-  const expiryRemainingMs = notification.expiresAt === undefined
-    ? undefined
-    : Math.min(
-        DAY_NOTIFICATION_VISIBILITY_MS,
-        Math.max(0, notification.expiresAt - now),
-      );
-  const expiryProgress = expiryRemainingMs === undefined
-    ? undefined
-    : Math.max(
-        0,
-        Math.min(
-          100,
-          (expiryRemainingMs / DAY_NOTIFICATION_VISIBILITY_MS) * 100,
-        ),
-      );
-  const expiryRemainingSeconds = expiryRemainingMs === undefined
-    ? undefined
-    : Math.ceil(expiryRemainingMs / 1_000);
-  const expiryValueText = expiryRemainingSeconds === undefined
-    ? undefined
-    : `${expiryRemainingSeconds} ${expiryRemainingSeconds === 1 ? "secondo" : "secondi"} rimanenti`;
+  const expiryRemainingMs =
+    notification.expiresAt === undefined
+      ? undefined
+      : Math.min(DAY_NOTIFICATION_VISIBILITY_MS, Math.max(0, notification.expiresAt - now));
+  const expiryProgress =
+    expiryRemainingMs === undefined
+      ? undefined
+      : Math.max(0, Math.min(100, (expiryRemainingMs / DAY_NOTIFICATION_VISIBILITY_MS) * 100));
+  const expiryRemainingSeconds =
+    expiryRemainingMs === undefined ? undefined : Math.ceil(expiryRemainingMs / 1_000);
+  const expiryValueText =
+    expiryRemainingSeconds === undefined
+      ? undefined
+      : `${expiryRemainingSeconds} ${expiryRemainingSeconds === 1 ? "secondo" : "secondi"} rimanenti`;
   const personClassName = notification.person
     ? `rarity-name ${getRarityClassName(
         notification.person.rarity,
@@ -137,9 +129,9 @@ function DayNotificationEntry({
             <Icon name={notificationIcons[notification.kind]} />
             <span>{notification.title}</span>
           </strong>
-          {notification.person
-            ? <span className={personClassName}>{notification.person.displayName}</span>
-            : null}
+          {notification.person ? (
+            <span className={personClassName}>{notification.person.displayName}</span>
+          ) : null}
           <small>{notification.detail}</small>
         </div>
       </div>
@@ -156,7 +148,15 @@ function DayNotificationEntry({
   );
 }
 
-export function DayPanel({ state }: { state: GameState }) {
+export function DayPanel({
+  state,
+  onMaintainEquipment = () => undefined,
+  onBuyOfficialSwords = () => undefined,
+}: {
+  state: GameState;
+  onMaintainEquipment?: () => void;
+  onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
+}) {
   const now = useGameTime(true, GAME_CONFIG.progressUpdateIntervalMs);
   const [pausedNotification, setPausedNotification] = useState<{
     id: string;
@@ -174,9 +174,7 @@ export function DayPanel({ state }: { state: GameState }) {
           (notification) => notification.id !== pausedNotificationSnapshot.id,
         ),
         pausedNotificationSnapshot,
-      ].sort((left, right) =>
-        left.timestamp - right.timestamp || left.id.localeCompare(right.id)
-      )
+      ].sort((left, right) => left.timestamp - right.timestamp || left.id.localeCompare(right.id))
     : liveNotifications;
   const tutorialTrialNotificationId = state.scheduledTrials.find(
     (trial) => trial.tutorialSceneId === "first-event",
@@ -184,24 +182,34 @@ export function DayPanel({ state }: { state: GameState }) {
 
   return (
     <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
-      <div className="day-heading"><strong>La mia giornata</strong><Icon name="calendar" /></div>
+      <div className="day-heading">
+        <strong>La mia giornata</strong>
+        <Icon name="calendar" />
+      </div>
       <ShortGoalCard state={state} />
+      <EquipmentQuickPanel
+        state={state}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={onBuyOfficialSwords}
+      />
       {notifications.length === 0 ? (
         <div className="day-empty">
           <Icon name="clock" />
           <strong>Nessuna attività in corso</strong>
           <span>Prove, iscrizioni, tornei ed eventi importanti compariranno qui.</span>
         </div>
-      ) : notifications.map((notification) => (
-        <DayNotificationEntry
-          key={notification.id}
-          notification={notification}
-          now={pausedNotification?.id === notification.id ? pausedNotification.now : now}
-          isTutorialTrial={notification.id === `trial-${tutorialTrialNotificationId}`}
-          onPause={() => setPausedNotification({ id: notification.id, now })}
-          onResume={() => setPausedNotification(null)}
-        />
-      ))}
+      ) : (
+        notifications.map((notification) => (
+          <DayNotificationEntry
+            key={notification.id}
+            notification={notification}
+            now={pausedNotification?.id === notification.id ? pausedNotification.now : now}
+            isTutorialTrial={notification.id === `trial-${tutorialTrialNotificationId}`}
+            onPause={() => setPausedNotification({ id: notification.id, now })}
+            onResume={() => setPausedNotification(null)}
+          />
+        ))
+      )}
     </aside>
   );
 }

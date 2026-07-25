@@ -1,9 +1,6 @@
 import { memo } from "react";
 
-import {
-  getEffectiveDamagedSwords,
-  getReservedSwords,
-} from "../../game/equipment";
+import { getEffectiveDamagedSwords, getReservedSwords } from "../../game/equipment";
 import type { GameState } from "../../game/types";
 
 type EquipmentState = GameState["equipment"];
@@ -44,11 +41,13 @@ function EquipmentConditionBarView({
   equipment,
   title,
   compact = false,
+  variant = "default",
   ariaLabel = "Usura complessiva attrezzatura",
 }: {
   equipment: EquipmentState;
   title?: string;
   compact?: boolean;
+  variant?: "default" | "battery";
   ariaLabel?: string;
 }) {
   const totalSwords = Math.max(0, Math.floor(equipment.totalSwords));
@@ -62,14 +61,8 @@ function EquipmentConditionBarView({
   const totalWear = Math.min(totalCapacity, damagedSwords * 100 + normalLoad);
   const healthyCapacity = Math.max(0, repairableSwords * 100 - normalLoad);
   const brokenCapacity = Math.min(totalCapacity, damagedSwords * 100);
-  const reservedCapacity = Math.min(
-    totalCapacity - brokenCapacity,
-    reservedSwords * 100,
-  );
-  const loadCapacity = Math.min(
-    totalCapacity - brokenCapacity - reservedCapacity,
-    normalLoad,
-  );
+  const reservedCapacity = Math.min(totalCapacity - brokenCapacity, reservedSwords * 100);
+  const loadCapacity = Math.min(totalCapacity - brokenCapacity - reservedCapacity, normalLoad);
   const aggregateHealthyCapacity = Math.max(
     0,
     totalCapacity - brokenCapacity - reservedCapacity - loadCapacity,
@@ -86,7 +79,9 @@ function EquipmentConditionBarView({
   ].join(", ");
 
   return (
-    <div className={`equipment-condition${compact ? " is-compact" : ""}`}>
+    <div
+      className={`equipment-condition${compact ? " is-compact" : ""}${variant === "battery" ? " is-battery" : ""}`}
+    >
       {title ? <strong className="equipment-condition-title">{title}</strong> : null}
       <div
         className={`equipment-condition-bar${showIndividualSwords ? "" : " is-aggregate"}`}
@@ -97,50 +92,61 @@ function EquipmentConditionBarView({
         aria-valuenow={Math.round(totalWear)}
         aria-valuetext={valueText}
       >
-        {showIndividualSwords ? conditions.map((condition, index) => (
+        {showIndividualSwords ? (
+          conditions.map((condition, index) => (
             <span
               className={`equipment-sword-cell is-${condition.kind}`}
               title={getSwordTitle(condition, index)}
               key={index}
             >
               {condition.kind === "available" && condition.load > 0 ? (
-                <span
-                  className="equipment-sword-load"
-                  style={{ width: `${condition.load}%` }}
-                />
+                <span className="equipment-sword-load" style={{ width: `${condition.load}%` }} />
               ) : null}
             </span>
-          )) : (
-            <>
-              <span
-                className="equipment-condition-segment is-broken"
-                title={`Spade rotte: ${damagedSwords} · ${brokenCapacity} punti`}
-                style={{ width: capacityPercentage(brokenCapacity) }}
-              />
-              <span
-                className="equipment-condition-segment is-reserved"
-                title={`Spade riservate: ${reservedSwords} · ${reservedCapacity} punti`}
-                style={{ width: capacityPercentage(reservedCapacity) }}
-              />
-              <span
-                className="equipment-condition-segment is-load"
-                title={`Usura normale: ${Math.round(loadCapacity)} punti`}
-                style={{ width: capacityPercentage(loadCapacity) }}
-              />
-              <span
-                className="equipment-condition-segment is-healthy"
-                title={`Capacità disponibile: ${Math.round(aggregateHealthyCapacity)} punti`}
-                style={{ width: capacityPercentage(aggregateHealthyCapacity) }}
-              />
-            </>
-          )}
+          ))
+        ) : (
+          <>
+            <span
+              className="equipment-condition-segment is-broken"
+              title={`Spade rotte: ${damagedSwords} · ${brokenCapacity} punti`}
+              style={{ width: capacityPercentage(brokenCapacity) }}
+            />
+            <span
+              className="equipment-condition-segment is-reserved"
+              title={`Spade riservate: ${reservedSwords} · ${reservedCapacity} punti`}
+              style={{ width: capacityPercentage(reservedCapacity) }}
+            />
+            <span
+              className="equipment-condition-segment is-load"
+              title={`Usura normale: ${Math.round(loadCapacity)} punti`}
+              style={{ width: capacityPercentage(loadCapacity) }}
+            />
+            <span
+              className="equipment-condition-segment is-healthy"
+              title={`Capacità disponibile: ${Math.round(aggregateHealthyCapacity)} punti`}
+              style={{ width: capacityPercentage(aggregateHealthyCapacity) }}
+            />
+          </>
+        )}
       </div>
       {compact ? null : (
         <div className="equipment-condition-legend" aria-hidden="true">
-          <span className="is-load"><i />Usura <strong>{Math.round(normalLoad)} pt</strong></span>
-          <span className="is-broken"><i />Rotte <strong>{damagedSwords}</strong></span>
-          <span className="is-reserved"><i />Riservate <strong>{reservedSwords}</strong></span>
-          <span className="is-healthy"><i />Disponibile</span>
+          <span className="is-load">
+            <i />
+            Usura <strong>{Math.round(normalLoad)} pt</strong>
+          </span>
+          <span className="is-broken">
+            <i />
+            Rotte <strong>{damagedSwords}</strong>
+          </span>
+          <span className="is-reserved">
+            <i />
+            Riservate <strong>{reservedSwords}</strong>
+          </span>
+          <span className="is-healthy">
+            <i />
+            Disponibile
+          </span>
         </div>
       )}
     </div>

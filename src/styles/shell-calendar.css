@@ -41,7 +41,9 @@
   row-gap: 4px;
   min-height: 82px;
   padding: 13px 8px;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .appointment-entry {
@@ -217,4 +219,247 @@
 
 .add-event svg {
   width: 16px;
+}
+
+.equipment-quick-card {
+  margin: 8px 0 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--equipment-healthy);
+}
+
+.equipment-quick-card.is-warning {
+  box-shadow: inset 3px 0 0 var(--equipment-load);
+}
+
+.equipment-quick-card.is-critical {
+  box-shadow: inset 3px 0 0 var(--equipment-broken);
+}
+
+.equipment-quick-heading {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.equipment-quick-heading > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--blue-600);
+}
+
+.equipment-quick-heading > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.equipment-quick-heading small {
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.equipment-quick-heading strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equipment-quick-heading > b {
+  padding: 3px 6px;
+  border-radius: 999px;
+  color: var(--success);
+  background: color-mix(in srgb, var(--equipment-healthy) 12%, transparent);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.equipment-quick-card.is-warning .equipment-quick-heading > b {
+  color: var(--equipment-load);
+  background: color-mix(in srgb, var(--equipment-load) 12%, transparent);
+}
+
+.equipment-quick-card.is-critical .equipment-quick-heading > b {
+  color: var(--equipment-broken);
+  background: color-mix(in srgb, var(--equipment-broken) 12%, transparent);
+}
+
+.equipment-quick-card .equipment-condition {
+  color: var(--line-strong);
+}
+
+.equipment-quick-card .equipment-condition-bar {
+  height: 11px;
+}
+
+.equipment-quick-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 9px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
+.equipment-quick-metrics > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 6px;
+  text-align: center;
+}
+
+.equipment-quick-metrics > span + span {
+  border-left: 1px solid var(--line);
+}
+
+.equipment-quick-metrics small {
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.equipment-quick-metrics strong {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.equipment-auto-repair {
+  margin: 8px 0;
+}
+
+.equipment-auto-repair > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.equipment-auto-repair strong {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.equipment-auto-progress {
+  display: block;
+  height: 4px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.equipment-auto-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue-600);
+}
+
+.equipment-maintenance-button,
+.equipment-purchase-button,
+.equipment-purchase-quantity {
+  min-height: 31px;
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.equipment-maintenance-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  color: var(--blue-700);
+  background: var(--surface);
+}
+
+.equipment-maintenance-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.equipment-maintenance-button:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.equipment-purchase {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.equipment-purchase-quantity {
+  border: 1px solid var(--blue-600);
+  color: var(--blue-700);
+  background: var(--blue-050);
+  font-variant-numeric: tabular-nums;
+}
+
+.equipment-purchase-quantity:disabled {
+  border-color: var(--line);
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.equipment-purchase-button {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  color: white;
+  background: var(--blue-600);
+  text-align: left;
+}
+
+.equipment-purchase-button > svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.equipment-purchase-button > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.equipment-purchase-button strong,
+.equipment-purchase-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equipment-purchase-button small {
+  color: rgb(255 255 255 / 78%);
+  font-size: 8px;
+  font-weight: 400;
+}
+
+.equipment-purchase-button:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.equipment-purchase-button:disabled small {
+  color: var(--ink-muted);
 }

@@ -1,0 +1,187 @@
+import { useState } from "react";
+
+import { Icon } from "../../components/common/Icon";
+import { ProgressBar } from "../../components/common/ProgressBar";
+import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
+import { GAME_CONFIG } from "../../game/config";
+import {
+  getAvailableSwords,
+  getEffectiveDamagedSwords,
+  getEquipmentAutomaticRepairTarget,
+  getEquipmentAutomaticRepairUnitCost,
+  getEquipmentMaintenanceCost,
+  getEquipmentMinimumMaintenanceCost,
+  getReservedSwords,
+} from "../../game/equipment";
+import type { GameState } from "../../game/types";
+import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
+import { formatCurrency } from "../../shared/formatters";
+
+type PurchaseAmount = 1 | 10 | 100;
+
+const PURCHASE_AMOUNTS: readonly PurchaseAmount[] = [1, 10, 100];
+
+function getAffordablePurchaseAmounts(euros: number): PurchaseAmount[] {
+  return PURCHASE_AMOUNTS.filter(
+    (amount) => amount === 1 || euros >= GAME_CONFIG.officialSwordCost * amount,
+  );
+}
+
+export function EquipmentQuickPanel({
+  state,
+  onMaintainEquipment,
+  onBuyOfficialSwords,
+}: {
+  state: GameState;
+  onMaintainEquipment: () => void;
+  onBuyOfficialSwords: (amount: PurchaseAmount) => void;
+}) {
+  const [purchaseIndex, setPurchaseIndex] = useState(0);
+  const equipment = state.equipment;
+  const availableSwords = getAvailableSwords(equipment);
+  const damagedSwords = getEffectiveDamagedSwords(equipment);
+  const reservedSwords = getReservedSwords(equipment);
+  const maintenanceCost = getEquipmentMaintenanceCost(equipment);
+  const minimumMaintenanceCost = getEquipmentMinimumMaintenanceCost(equipment);
+  const needsMaintenance = equipment.wear > 0 || damagedSwords > 0;
+  const hasRepairableEquipment = damagedSwords > 0 || (equipment.wear > 0 && availableSwords > 0);
+  const canMaintain = hasRepairableEquipment && state.school.euros >= minimumMaintenanceCost;
+  const affordableAmounts = getAffordablePurchaseAmounts(state.school.euros);
+  const purchaseAmount = affordableAmounts[purchaseIndex % affordableAmounts.length];
+  const purchaseCost = GAME_CONFIG.officialSwordCost * purchaseAmount;
+  const canBuy = state.school.euros >= purchaseCost;
+  const showSupplier = isOfficialSwordSupplierVisible(state);
+  const equipmentCollaborators = state.collaborators.filter(
+    (collaborator) => collaborator.assignment === "equipment",
+  ).length;
+  const automaticTarget = getEquipmentAutomaticRepairTarget(equipment);
+  const automaticUnitCost = automaticTarget
+    ? getEquipmentAutomaticRepairUnitCost(automaticTarget)
+    : 0;
+  const automaticRepairBlocked =
+    automaticTarget !== undefined && state.school.euros < automaticUnitCost;
+  const automaticProgress =
+    automaticTarget === "sword"
+      ? Math.min(
+          100,
+          (state.automation.equipmentBuffer / GAME_CONFIG.equipmentSwordRepairWork) * 100,
+        )
+      : Math.min(100, state.automation.equipmentBuffer * 100);
+  const condition = damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
+  const conditionLabel =
+    damagedSwords > 0
+      ? `${damagedSwords} ${damagedSwords === 1 ? "rotta" : "rotte"}`
+      : equipment.wear > 0
+        ? `${Math.round(equipment.wear)} pt usura`
+        : "In ordine";
+
+  let maintenanceLabel = `Ripara tutto \u00b7 ${formatCurrency(maintenanceCost)}`;
+  if (!needsMaintenance) maintenanceLabel = "Manutenzione non necessaria";
+  else if (!hasRepairableEquipment) maintenanceLabel = "Manutenzione in attesa";
+  else if (state.school.euros < minimumMaintenanceCost) {
+    maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
+  } else if (state.school.euros < maintenanceCost) {
+    maintenanceLabel = `Riparazione parziale \u00b7 ${formatCurrency(state.school.euros)}`;
+  }
+
+  let automaticLabel = "Controllo automatico attivo";
+  if (automaticRepairBlocked) automaticLabel = "Riparazione automatica in attesa di fondi";
+  else if (automaticTarget === "sword") automaticLabel = "Riparazione automatica di una spada";
+  else if (automaticTarget === "wear") automaticLabel = "Riduzione automatica dell'usura";
+
+  return (
+    <section className={`equipment-quick-card is-${condition}`} aria-label="Gestione attrezzatura">
+      <div className="equipment-quick-heading">
+        <Icon name="wrench" />
+        <span>
+          <small>Attrezzatura</small>
+          <strong>
+            {availableSwords}/{equipment.totalSwords} spade libere
+          </strong>
+        </span>
+        <b>{conditionLabel}</b>
+      </div>
+
+      <EquipmentConditionBar
+        equipment={equipment}
+        compact
+        variant="battery"
+        ariaLabel="Condizione delle spade della scuola"
+      />
+
+      <div className="equipment-quick-metrics" aria-label="Dettaglio spade">
+        <span>
+          <small>In uso</small>
+          <strong>{reservedSwords}</strong>
+        </span>
+        <span>
+          <small>Usura</small>
+          <strong>{Math.round(equipment.wear)} pt</strong>
+        </span>
+        <span>
+          <small>Rotte</small>
+          <strong>{damagedSwords}</strong>
+        </span>
+      </div>
+
+      {equipmentCollaborators > 0 ? (
+        <div className="equipment-auto-repair">
+          <div>
+            <span>{automaticLabel}</span>
+            <strong>
+              {equipmentCollaborators} {equipmentCollaborators === 1 ? "addetto" : "addetti"}
+            </strong>
+          </div>
+          {automaticTarget && !automaticRepairBlocked ? (
+            <ProgressBar
+              className="equipment-auto-progress"
+              label={automaticLabel}
+              value={automaticProgress}
+              valueText={`${Math.round(automaticProgress)}% completato`}
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      <button
+        className="equipment-maintenance-button"
+        type="button"
+        disabled={!canMaintain}
+        onClick={onMaintainEquipment}
+      >
+        <Icon name="wrench" />
+        <span>{maintenanceLabel}</span>
+      </button>
+
+      {showSupplier ? (
+        <div className="equipment-purchase">
+          <button
+            className="equipment-purchase-quantity"
+            type="button"
+            disabled={affordableAmounts.length === 1}
+            aria-label={`Quantit\u00e0 acquisto: \u00d7${purchaseAmount}. Premi per cambiare`}
+            title={`Quantit\u00e0 disponibili: ${affordableAmounts.map((amount) => `\u00d7${amount}`).join(", ")}`}
+            onClick={() => setPurchaseIndex((index) => (index + 1) % affordableAmounts.length)}
+          >
+            {"\u00d7"}
+            {purchaseAmount}
+          </button>
+          <button
+            className="equipment-purchase-button"
+            type="button"
+            disabled={!canBuy}
+            onClick={() => onBuyOfficialSwords(purchaseAmount)}
+          >
+            <Icon name="plus" />
+            <span>
+              <strong>
+                Acquista {purchaseAmount === 1 ? "1 spada" : `${purchaseAmount} spade`}
+              </strong>
+              <small>Polaris EVO Basic - {formatCurrency(purchaseCost)}</small>
+            </span>
+          </button>
+        </div>
+      ) : null}
+    </section>
+  );
+}

@@ -9,7 +9,7 @@
 
 .title-bar {
   display: grid;
-  grid-template-columns: 52px 1fr auto 38px auto auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto auto 38px auto auto;
   align-items: center;
   color: white;
   background: var(--blue-700);
@@ -139,6 +139,56 @@
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.title-equipment {
+  display: grid;
+  min-width: 104px;
+  align-self: stretch;
+  grid-template-columns: auto 48px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-left: 1px solid rgb(255 255 255 / 18%);
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+
+.title-equipment-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1;
+}
+
+.title-equipment-copy small {
+  color: rgb(255 255 255 / 86%);
+  font-size: 9px;
+}
+
+.title-equipment-copy strong {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.title-equipment .equipment-condition {
+  color: rgb(255 255 255 / 72%);
+}
+
+.title-equipment .equipment-condition-bar {
+  height: 9px;
+  border-color: rgb(255 255 255 / 72%);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%) inset;
+}
+
+.title-equipment.is-critical .equipment-condition {
+  color: #ffb4ab;
+}
+
+.title-equipment.is-warning .equipment-condition {
+  color: #ffe08a;
 }
 
 .title-fame {

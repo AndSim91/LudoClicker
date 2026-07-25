@@ -220,6 +220,7 @@ function TechnicianCourseControl({
   variant?: "default" | "compact";
 }) {
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
+  const [isSISExpanded, setIsSISExpanded] = useState(false);
   const reservation = collaborator.technicianCourseReservation;
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const definitions = collaborator.forms.flatMap((formId) => {
@@ -260,14 +261,25 @@ function TechnicianCourseControl({
   }));
 
   return (
-    <div className={`training-control technician-course-control${variantClass}`}>
-      <div className="technician-course-heading">
+    <div
+      className={`training-control technician-course-control${isSISExpanded ? " is-expanded" : ""}${variantClass}`}
+    >
+      <button
+        type="button"
+        className="technician-course-heading"
+        aria-expanded={isSISExpanded}
+        onClick={() => setIsSISExpanded((expanded) => !expanded)}
+      >
         <span className="technician-course-badge">SIS</span>
-        <span>
-          <strong>Scuola Internazionale Superiore</strong>
-          <small>Candidatura esterna per la qualifica da Tecnico</small>
+        <span className="technician-course-heading-copy">
+          <strong>Corso Tecnici</strong>
         </span>
-      </div>
+        <span className="technician-course-toggle" aria-hidden="true">
+          {isSISExpanded ? "?" : "+"}
+        </span>
+      </button>
+      {isSISExpanded ? (
+        <>
       <div className="training-form-choice">
         {definitions.length > 1 ? (
           <TrainingOptionPicker
@@ -296,6 +308,8 @@ function TechnicianCourseControl({
             ? `Servono ${formatCurrency(cost)}`
             : `Prenota SIS · ${formatCurrency(cost)}`}
       </button>
+        </>
+      ) : null}
     </div>
   );
 }

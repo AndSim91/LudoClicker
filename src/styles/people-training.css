@@ -254,17 +254,27 @@
 .technician-course-heading {
   display: flex;
   grid-column: 1 / -1;
+  width: 100%;
   align-items: center;
   gap: 8px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.technician-course-control.is-expanded .technician-course-heading {
   margin-bottom: 2px;
   padding-bottom: 7px;
   border-bottom: 1px solid #decff3;
 }
 
-.technician-course-heading > span:last-child,
-.technician-course-gate > span:last-child {
+.technician-course-heading-copy {
   display: flex;
   min-width: 0;
+  flex: 1;
   flex-direction: column;
   gap: 1px;
 }
@@ -293,6 +303,32 @@
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.08em;
+}
+
+.technician-course-toggle {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  border: 1px solid #c9b8e8;
+  border-radius: 50%;
+  color: #5f3b8f;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.technician-course-heading:hover .technician-course-toggle {
+  border-color: #7650a8;
+  background: #f4edfc;
+}
+
+.technician-course-heading:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid color-mix(in srgb, #7650a8 45%, transparent);
+  outline-offset: 3px;
 }
 
 .technician-course-gate {

@@ -1,8 +1,11 @@
 import { Icon } from "../common/Icon";
+import { EquipmentConditionBar } from "../equipment/EquipmentConditionBar";
 import { ProgressBar } from "../common/ProgressBar";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
+import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
+import type { GameState } from "../../game/types";
 import {
   formatCompactCurrency,
   formatCompactNumber,
@@ -19,6 +22,7 @@ export function TitleBar({
   historicMembers,
   followers,
   euros,
+  equipment,
   isPaused,
   onTogglePause,
 }: {
@@ -30,13 +34,11 @@ export function TitleBar({
   historicMembers: number;
   followers?: number;
   euros: number;
+  equipment: GameState["equipment"];
   isPaused: boolean;
   onTogglePause: () => void;
 }) {
-  const liveNow = useGameTime(
-    providedNow === undefined,
-    GAME_CONFIG.progressUpdateIntervalMs,
-  );
+  const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
   const monthName = getGameMonthName(currentMonth);
   const currentSchoolYear = getSchoolYear(currentMonth);
@@ -44,6 +46,10 @@ export function TitleBar({
     100,
     Math.max(0, (1 - (nextMonthAt - now) / GAME_CONFIG.gameMonthMs) * 100),
   );
+  const availableSwords = getAvailableSwords(equipment);
+  const damagedSwords = getEffectiveDamagedSwords(equipment);
+  const equipmentStatus =
+    damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
 
   return (
     <header className="title-bar">
@@ -58,33 +64,65 @@ export function TitleBar({
         >
           <Icon name="contact" />
           <small>Contatti</small>
-          <strong title={formatExactNumber(contactsAwaitingEmail)}>{formatCompactNumber(contactsAwaitingEmail)}</strong>
+          <strong title={formatExactNumber(contactsAwaitingEmail)}>
+            {formatCompactNumber(contactsAwaitingEmail)}
+          </strong>
         </span>
-        <span className="title-resource" aria-label={`Iscritti attivi: ${formatExactNumber(activeMembers)}`}>
+        <span
+          className="title-resource"
+          aria-label={`Iscritti attivi: ${formatExactNumber(activeMembers)}`}
+        >
           <Icon name="people" />
           <small>Iscritti attivi</small>
-          <strong title={formatExactNumber(activeMembers)}>{formatCompactNumber(activeMembers)}</strong>
+          <strong title={formatExactNumber(activeMembers)}>
+            {formatCompactNumber(activeMembers)}
+          </strong>
         </span>
         {followers === undefined ? null : (
-          <span className="title-resource" aria-label={`Follower Social: ${formatExactNumber(followers)}`}>
+          <span
+            className="title-resource"
+            aria-label={`Follower Social: ${formatExactNumber(followers)}`}
+          >
             <Icon name="spark" />
             <small>Follower</small>
             <strong title={formatExactNumber(followers)}>{formatCompactNumber(followers)}</strong>
           </span>
         )}
-        <span className="title-resource" aria-label={`Disponibilità economica: ${formatExactCurrency(euros)}`}>
+        <span
+          className="title-resource"
+          aria-label={`Disponibilità economica: ${formatExactCurrency(euros)}`}
+        >
           <Icon name="coin" />
           <small>Disponibilità</small>
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
       </div>
       <span
+        className={`title-equipment is-${equipmentStatus}`}
+        aria-label={`Spade disponibili: ${availableSwords} su ${equipment.totalSwords}; ${damagedSwords} rotte; ${Math.round(equipment.wear)} punti di usura`}
+      >
+        <span className="title-equipment-copy">
+          <small>Spade</small>
+          <strong>
+            {availableSwords}/{equipment.totalSwords}
+          </strong>
+        </span>
+        <EquipmentConditionBar
+          equipment={equipment}
+          compact
+          variant="battery"
+          ariaLabel="Condizione delle spade nella barra superiore"
+        />
+      </span>
+      <span
         className="title-resource title-fame"
         aria-label={`Fama della scuola: ${formatExactNumber(historicMembers)}`}
       >
         <Icon name="flag" />
         <small>Fama della scuola</small>
-        <strong title={formatExactNumber(historicMembers)}>{formatCompactNumber(historicMembers)}</strong>
+        <strong title={formatExactNumber(historicMembers)}>
+          {formatCompactNumber(historicMembers)}
+        </strong>
       </span>
       <button
         className={isPaused ? "title-pause active" : "title-pause"}
@@ -112,7 +150,9 @@ export function TitleBar({
         />
       </span>
       <div className="window-controls" aria-hidden="true">
-        <span>—</span><span>□</span><span>×</span>
+        <span>—</span>
+        <span>□</span>
+        <span>×</span>
       </div>
     </header>
   );

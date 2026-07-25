@@ -23,7 +23,7 @@
   color: var(--blue-700);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -117,7 +117,7 @@
   padding: 0;
   border: 0;
   filter: blur(4px);
-  opacity: .55;
+  opacity: 0.55;
   pointer-events: none;
   user-select: none;
 }
@@ -133,7 +133,7 @@
   background: rgb(15 108 189 / 18%);
   font-size: clamp(24px, 4vw, 42px);
   font-weight: 700;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
   text-shadow: 0 2px 14px rgb(0 0 0 / 45%);
 }
 
@@ -544,6 +544,30 @@
   height: 8px;
 }
 
+.equipment-condition.is-battery {
+  position: relative;
+  padding-right: 4px;
+}
+
+.equipment-condition.is-battery::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 3px;
+  height: 42%;
+  border-radius: 0 2px 2px 0;
+  background: currentColor;
+  content: "";
+  transform: translateY(-50%);
+}
+
+.equipment-condition.is-battery .equipment-condition-bar {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--equipment-healthy) 24%, var(--surface));
+}
 .equipment-condition-title {
   line-height: 1.2;
 }
@@ -574,12 +598,11 @@
 }
 
 .equipment-condition-segment.is-reserved {
-  background:
-    repeating-linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--equipment-reserved) 82%, transparent) 0 4px,
-      var(--equipment-reserved) 4px 8px
-    );
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--equipment-reserved) 82%, transparent) 0 4px,
+    var(--equipment-reserved) 4px 8px
+  );
 }
 
 .equipment-condition-segment.is-load {
@@ -618,12 +641,11 @@
 
 .equipment-sword-cell.is-reserved {
   border-color: var(--equipment-reserved);
-  background:
-    repeating-linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--equipment-reserved) 82%, transparent) 0 4px,
-      var(--equipment-reserved) 4px 8px
-    );
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--equipment-reserved) 82%, transparent) 0 4px,
+    var(--equipment-reserved) 4px 8px
+  );
 }
 
 .equipment-sword-load {
