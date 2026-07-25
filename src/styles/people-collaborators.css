@@ -140,6 +140,7 @@
 .collaborator-copy {
   display: flex;
   min-width: 0;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   gap: 5px;
@@ -164,6 +165,23 @@
   gap: 5px;
   margin-top: 2px;
 }
+
+.collaborator-copy .technician-course-control {
+  align-self: stretch;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.collaborator-copy .technician-course-reservation {
+  align-self: stretch;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.collaborator-copy .technician-course-badge {
+  color: #fff;
+}
+
 
 .collaborator-copy .form-logo-item {
   min-width: 30px;

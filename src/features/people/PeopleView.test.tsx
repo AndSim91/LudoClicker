@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
-import type { FormBranch, FormId } from "../../game/types";
+import type { Collaborator, FormBranch, FormId } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
 afterEach(() => {
@@ -261,12 +261,12 @@ describe("PeopleView", () => {
     };
     const onBookTechnicianCourse = vi.fn();
 
-    const renderView = (sisUnlocked: boolean) => (
+    const renderView = (sisUnlocked: boolean, candidate: Collaborator = collaborator) => (
       <PeopleView
         state={{
           ...initial,
           school: { ...initial.school, euros: 1_000 },
-          collaborators: [collaborator],
+          collaborators: [candidate],
           unlocks: { ...initial.unlocks, collaborators: true, forms: true },
           upgrades: {
             ...initial.upgrades,
@@ -280,14 +280,18 @@ describe("PeopleView", () => {
     );
 
     const view = render(renderView(false));
-    expect(screen.queryByText("Scuola Internazionale Superiore")).not.toBeInTheDocument();
+    expect(screen.queryByText("Corso Tecnici")).not.toBeInTheDocument();
     expect(document.querySelector(".technician-course-control")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();
 
-    view.rerender(renderView(true));
-    const sisHeading = screen.getByText("Scuola Internazionale Superiore");
-    expect(sisHeading.closest(".technician-course-control")).toBeVisible();
-    const sisToggle = screen.getByRole("button", { name: /Scuola Internazionale Superiore/ });
+    view.unmount();
+    const unlockedView = render(renderView(true));
+    const sisHeading = screen.getByText("Corso Tecnici");
+    const sisControl = sisHeading.closest(".technician-course-control");
+    expect(sisControl).toBeVisible();
+    expect(sisControl?.parentElement).toHaveClass("collaborator-copy");
+    expect(sisControl?.previousElementSibling).toHaveClass("form-logo-strip");
+    const sisToggle = screen.getByRole("button", { name: /Corso Tecnici/ });
     expect(sisToggle).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();
 
@@ -296,6 +300,19 @@ describe("PeopleView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Prenota SIS/ }));
     expect(onBookTechnicianCourse).toHaveBeenCalledWith(collaborator.id, "form-1");
+
+    unlockedView.rerender(renderView(true, {
+      ...collaborator,
+      technicianCourseReservation: {
+        formId: "form-1",
+        bookedAt: 2_000,
+        eligibleMonth: 7,
+      },
+    }));
+    const reservationCard = screen.getByLabelText(/Corso Tecnico SIS prenotato: Forma 1/);
+    expect(reservationCard).toHaveClass("technician-course-reservation");
+    expect(within(reservationCard).getByText("SIS")).toBeVisible();
+    expect(within(reservationCard).getByText(/Prenotato .* Luglio, anno 1/)).toBeVisible();
   });
 
   it.each([7, 8])(

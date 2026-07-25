@@ -208,7 +208,7 @@ export function InstructorCompactActivity({
   );
 }
 
-function TechnicianCourseControl({
+export function TechnicianCourseControl({
   collaborator,
   state,
   onBookTechnicianCourse,
@@ -240,11 +240,22 @@ function TechnicianCourseControl({
     const definition = getFormDefinition(reservation.formId);
     const startMonth = getGameMonthName(reservation.eligibleMonth);
     const startYear = getGameYear(reservation.eligibleMonth);
+    const courseName = definition?.longName ?? reservation.formId;
+    const reservationDescription =
+      `Corso Tecnico SIS prenotato: ${courseName}. ` +
+      `Partenza da ${startMonth}, anno ${startYear}, appena il collaboratore \u00e8 libero.`;
     return (
-      <div className={`training-future technician-course-reservation${variantClass}`}>
-        <span>Corso Tecnico SIS prenotato</span>
-        <strong>{definition?.longName ?? reservation.formId}</strong>
-        <small>Partenza da {startMonth}, anno {startYear}, appena il collaboratore è libero.</small>
+      <div
+        className={`training-future technician-course-reservation${variantClass}`}
+        role="status"
+        aria-label={reservationDescription}
+        title={reservationDescription}
+      >
+        <span className="technician-course-badge" aria-hidden="true">SIS</span>
+        <span className="technician-course-reservation-copy">
+          <strong>{courseName}</strong>
+          <small>Prenotato &middot; {startMonth}, anno {startYear}</small>
+        </span>
       </div>
     );
   }
@@ -275,7 +286,7 @@ function TechnicianCourseControl({
           <strong>Corso Tecnici</strong>
         </span>
         <span className="technician-course-toggle" aria-hidden="true">
-          {isSISExpanded ? "?" : "+"}
+          {isSISExpanded ? "\u2212" : "+"}
         </span>
       </button>
       {isSISExpanded ? (
@@ -320,12 +331,14 @@ export function InstructorCompactTraining({
   onStartTraining,
   onBookTechnicianCourse,
   collaboratorsById,
+  showTechnicianCourse = true,
 }: {
   collaborator: Collaborator;
   state: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
+  showTechnicianCourse?: boolean;
 }) {
   return (
     <div className="instructor-compact-training" aria-label="Formazione istruttore">
@@ -338,12 +351,14 @@ export function InstructorCompactTraining({
         onStartTraining={onStartTraining}
         variant="compact"
       />
-      <TechnicianCourseControl
-        collaborator={collaborator}
-        state={state}
-        onBookTechnicianCourse={onBookTechnicianCourse}
-        variant="compact"
-      />
+      {showTechnicianCourse ? (
+        <TechnicianCourseControl
+          collaborator={collaborator}
+          state={state}
+          onBookTechnicianCourse={onBookTechnicianCourse}
+          variant="compact"
+        />
+      ) : null}
     </div>
   );
 }

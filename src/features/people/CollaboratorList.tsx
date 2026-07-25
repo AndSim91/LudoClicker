@@ -36,6 +36,7 @@ import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import {
   InstructorCompactActivity,
   InstructorCompactTraining,
+  TechnicianCourseControl,
 } from "./TrainingControl";
 
 const COLLABORATORS_PER_PAGE = 25;
@@ -413,6 +414,14 @@ export function CollaboratorList({
                       instructorForms={collaborator.instructorForms}
                       technicianForms={collaborator.technicianForms}
                     />
+                    {collaborator.assignment === "instructor" ? (
+                      <TechnicianCourseControl
+                        collaborator={collaborator}
+                        state={state}
+                        onBookTechnicianCourse={onBookTechnicianCourse}
+                        variant="compact"
+                      />
+                    ) : null}
                   </div>
                 </div>
 
@@ -533,6 +542,7 @@ export function CollaboratorList({
                       onStartTraining={onStartTraining}
                       onBookTechnicianCourse={onBookTechnicianCourse}
                       collaboratorsById={collaboratorsById}
+                      showTechnicianCourse={false}
                     />
                   ) : null}
                 </div>
