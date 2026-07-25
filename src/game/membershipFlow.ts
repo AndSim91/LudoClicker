@@ -125,7 +125,10 @@ export function cancelMemberEnrollment(
   contactId: string,
 ): GameState {
   const member = state.contacts.find(
-    (contact) => contact.id === contactId && contact.status === "enrolled",
+    (contact) =>
+      contact.id === contactId &&
+      contact.status === "enrolled" &&
+      contact.favorite !== true,
   );
   if (!member) return state;
 

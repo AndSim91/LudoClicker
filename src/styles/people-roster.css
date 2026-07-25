@@ -357,6 +357,13 @@
   color: #b42318;
 }
 
+.member-cancel-enrollment:disabled {
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .member-cancellation-backdrop {
   position: fixed;
   z-index: 1000;

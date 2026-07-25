@@ -1365,6 +1365,41 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
+  it("prevents cancelling the enrollment of a favorite athlete", () => {
+    const initial = createInitialState(1_000);
+    const favorite = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      favorite: true,
+    };
+    const onCancelEnrollment = vi.fn();
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [favorite, ...initial.contacts.slice(1)],
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onCancelEnrollment={onCancelEnrollment}
+      />,
+    );
+
+    const protectedCancellation = screen.getByRole("button", {
+      name: `Iscrizione protetta per ${favorite.firstName} ${favorite.lastName}: atleta preferito`,
+    });
+    expect(protectedCancellation).toBeDisabled();
+    expect(protectedCancellation).toHaveAttribute(
+      "title",
+      "Rimuovi l'atleta dai preferiti per annullare l'iscrizione",
+    );
+    fireEvent.click(protectedCancellation);
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(onCancelEnrollment).not.toHaveBeenCalled();
+  });
+
   it("replaces manual training with every possible next Form when an Instructor is assigned", () => {
     const initial = createInitialState(1_000);
     const enrolled = {

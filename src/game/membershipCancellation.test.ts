@@ -28,6 +28,27 @@ describe("manual enrollment cancellation", () => {
     expect(cancelled.statistics.membersDeparted).toBe(1);
   });
 
+  it("protects favorite members from manual cancellation", () => {
+    const initial = cancellableState();
+    const member = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      favorite: true,
+    };
+    const state = {
+      ...initial,
+      contacts: [member, ...initial.contacts.slice(1)],
+      school: { ...initial.school, activeMembers: 1, historicMembers: 7 },
+    };
+
+    const cancelled = cancelMemberEnrollment(state, member.id);
+
+    expect(cancelled).toBe(state);
+    expect(cancelled.contacts[0].status).toBe("enrolled");
+    expect(cancelled.school.activeMembers).toBe(1);
+    expect(cancelled.statistics.membersDeparted).toBe(0);
+  });
+
   it("retains all earned Legendary progress and allows a normal re-encounter", () => {
     const initial = cancellableState();
     const member: Contact = {

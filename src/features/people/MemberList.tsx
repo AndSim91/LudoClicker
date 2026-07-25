@@ -490,8 +490,13 @@ export function MemberList({
             <button
               type="button"
               className="member-cancel-enrollment"
-              aria-label={`Annulla l'iscrizione di ${contact.firstName} ${contact.lastName}`}
-              title="Annulla iscrizione"
+              aria-label={contact.favorite
+                ? `Iscrizione protetta per ${contact.firstName} ${contact.lastName}: atleta preferito`
+                : `Annulla l'iscrizione di ${contact.firstName} ${contact.lastName}`}
+              title={contact.favorite
+                ? "Rimuovi l'atleta dai preferiti per annullare l'iscrizione"
+                : "Annulla iscrizione"}
+              disabled={contact.favorite === true}
               onClick={(event) => {
                 cancellationTriggerRef.current = event.currentTarget;
                 setCancellationTarget(contact);

@@ -62,7 +62,7 @@ export const GAME_CONFIG = {
   agonistCourseDiscountedBaseCost: 500,
   agonistCourseDurationMs: 30_000,
   lessonImprovementIntervalMs: 60_000,
-  athleticPreparationFavoriteChance: 0.025,
+  athleticPreparationFavoriteChance: 0.05,
   socialBaseContentCharacters: 7_500,
   socialBaseFollowerChance: 0.05,
   socialBaseContactChance: 0.005,

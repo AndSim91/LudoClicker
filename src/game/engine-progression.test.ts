@@ -5,6 +5,7 @@ import {
   getCollaboratorProductivity,
 } from "../content/forms";
 import { UPGRADE_DEFINITIONS } from "../content/upgrades";
+import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import {
   getEmailBookingChance,
@@ -412,7 +413,7 @@ describe("game engine: progression", () => {
     expect(batch.improvements).toBe(4);
   });
 
-  it("uses the favorite pool on the configured rare-priority roll", () => {
+  it("uses the favorite pool on the configured 5% priority roll", () => {
     const initial = createInitialState(1_000);
     const favorite = {
       ...initial.contacts[0],
@@ -431,7 +432,10 @@ describe("game engine: progression", () => {
       styleBase: 50,
     };
     let seed = 0;
-    while (nextRandom(seed)[0] >= 0.025) seed += 1;
+    expect(GAME_CONFIG.athleticPreparationFavoriteChance).toBe(0.05);
+    while (
+      nextRandom(seed)[0] >= GAME_CONFIG.athleticPreparationFavoriteChance
+    ) seed += 1;
 
     const result = gameReducer({
       ...initial,
