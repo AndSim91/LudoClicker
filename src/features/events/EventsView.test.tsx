@@ -4,7 +4,10 @@ import { createInitialState } from "../../game/engine";
 import type { AcquisitionEvent } from "../../game/types";
 import { EventsView } from "./EventsView";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 describe("EventsView", () => {
   it("shows equipment condition and requests maintenance", () => {
@@ -301,6 +304,8 @@ describe("EventsView", () => {
   });
 
   it("shows a realtime cooldown and disables the event action", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
     const initial = createInitialState(1_000);
     const now = Date.now();
 
@@ -321,8 +326,12 @@ describe("EventsView", () => {
     />);
 
     expect(screen.getByRole("button", { name: "Disponibile tra 5 secondi" })).toBeDisabled();
-    expect(screen.getByRole("progressbar", { name: "Cooldown Sparring al parco" }))
-      .toHaveAttribute("aria-valuetext", "Disponibile tra 5 secondi");
+    const cooldownBar = screen.getByRole("progressbar", {
+      name: "Cooldown Sparring al parco",
+    });
+    expect(cooldownBar).toHaveAttribute("aria-valuetext", "Disponibile tra 5 secondi");
+    expect(cooldownBar).toHaveAttribute("aria-valuenow", "100");
+    expect(cooldownBar.firstElementChild).toHaveStyle({ width: "100%" });
   });
 
   it("shows calendar cooldowns in game months", () => {

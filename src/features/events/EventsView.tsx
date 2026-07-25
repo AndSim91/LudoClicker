@@ -142,7 +142,7 @@ export function EventsView({
             ? formatEventCooldownRemaining(cooldown, state, now)
             : "";
           const cooldownProgress = cooldown && onCooldown
-            ? getEventCooldownProgress(cooldown, state, now)
+            ? 100 - getEventCooldownProgress(cooldown, state, now)
             : 0;
           const lacksFunds = state.school.euros < definition.cost;
           const lacksMembers = state.school.activeMembers < definition.requiredMembers;
