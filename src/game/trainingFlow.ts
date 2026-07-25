@@ -101,9 +101,7 @@ export function assignCollaborator(
 export function getAgonistCourseCost(state: GameState): number {
   const arenaLevel = state.upgrades["technical-arena"] ?? 0;
   if (arenaLevel < 3) return GAME_CONFIG.technicalArenaBaseCost;
-  return arenaLevel >= 4
-    ? GAME_CONFIG.agonistCourseDiscountedBaseCost
-    : GAME_CONFIG.agonistCourseBaseCost;
+  return GAME_CONFIG.agonistCourseBaseCost;
 }
 
 export function startAgonistCourse(
@@ -181,11 +179,13 @@ export function startAgonistCourse(
     };
   }
 
-  const baseDuration = arenaLevel >= 3
-    ? GAME_CONFIG.agonistCourseDurationMs
-    : arenaLevel >= 2
-      ? GAME_CONFIG.technicalArenaImprovedDurationMs
-      : GAME_CONFIG.technicalArenaDurationMs;
+  const baseDuration = arenaLevel >= 4
+    ? GAME_CONFIG.agonistCourseImprovedDurationMs
+    : arenaLevel >= 3
+      ? GAME_CONFIG.agonistCourseDurationMs
+      : arenaLevel >= 2
+        ? GAME_CONFIG.technicalArenaImprovedDurationMs
+        : GAME_CONFIG.technicalArenaDurationMs;
   const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
   const training = scheduleTraining(
     state,

@@ -65,6 +65,23 @@ describe("UpgradesView", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("shows the Arena Tecnica progression for all four levels", () => {
+    render(
+      <UpgradesView
+        state={createInitialState(1_000)}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", {
+      name: /Apri dettagli Arena Tecnica/,
+    }));
+
+    expect(screen.getByText(
+      "Livello 1: Sblocco \"Arena Tecnica\" · Livello 2: Durata Arena Tecnica da 120 a 60 secondi · Livello 3: Sblocco Corso Agonisti · Livello 4: Durata Corso Agonisti da 60 a 30 secondi",
+    )).toBeVisible();
+  });
+
   it("requires every previous upgrade in the branch to be completed", () => {
     const initial = createInitialState(1_000);
     const state = {

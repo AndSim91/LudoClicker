@@ -1031,15 +1031,15 @@ Regole:
   competitivi.”;
 - al livello 1 Arena Tecnica costa **€1.000** e sblocca l'omonima formazione
   automatica, sempre attiva e non disabilitabile separatamente. La formazione
-  costa **€300 per atleta**, dura 42 secondi, non migliora le statistiche ma
+  costa **€300 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni;
 - il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a
-  **30 secondi**;
+  **60 secondi**;
 - il livello 3 costa **€5.000**, trasforma la formazione in **Corso Agonisti**,
   ne porta il costo base a **€1.000** e attiva integralmente i miglioramenti
-  permanenti di Arena e Stile; la durata base resta di 30 secondi;
-- il livello 4 costa **€7.500** e riduce il costo base del Corso Agonisti a
-  **€500**;
+  permanenti di Arena e Stile; la durata base resta di 60 secondi;
+- il livello 4 costa **€7.500** e porta la durata base del Corso Agonisti a
+  **30 secondi**;
 - l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un collaboratore
   inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
