@@ -35,7 +35,7 @@ const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
   lost: "Perso",
 };
 
-const MEMBERS_PER_PAGE = 75;
+const MEMBERS_PER_PAGE = 25;
 type MemberRarityFilter = "all" | Contact["rarity"];
 
 function uniqueSortedOptions(values: string[]): string[] {

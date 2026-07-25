@@ -278,7 +278,7 @@
 
 .aggregated-teaching-group {
   display: grid;
-  grid-template-columns: minmax(140px, .65fr) minmax(0, 1fr) 18px;
+  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 18px;
   align-items: center;
   gap: 8px;
 }

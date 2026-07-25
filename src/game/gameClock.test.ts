@@ -1,0 +1,32 @@
+import { describe, expect, it } from "vitest";
+import {
+  changeGameClockSpeed,
+  createGameClockAnchor,
+  gameDelayToWallDelay,
+  normalizeGameSpeed,
+  readGameClock,
+} from "./gameClock";
+
+describe("game clock", () => {
+  it("advances game time at the selected speed", () => {
+    const clock = createGameClockAnchor(10_000, 1_000, 5);
+
+    expect(readGameClock(clock, 1_400)).toBe(12_000);
+    expect(gameDelayToWallDelay(10_000, 5)).toBe(2_000);
+  });
+
+  it("keeps time continuous when its speed changes", () => {
+    const initial = createGameClockAnchor(10_000, 1_000, 1);
+    const accelerated = changeGameClockSpeed(initial, 1_500, 10);
+
+    expect(readGameClock(accelerated, 1_500)).toBe(10_500);
+    expect(readGameClock(accelerated, 1_600)).toBe(11_500);
+  });
+
+  it("accepts only integer speeds from 1x through 10x", () => {
+    expect(normalizeGameSpeed(-5)).toBe(1);
+    expect(normalizeGameSpeed(4.6)).toBe(5);
+    expect(normalizeGameSpeed(50)).toBe(10);
+    expect(normalizeGameSpeed(Number.NaN)).toBe(1);
+  });
+});

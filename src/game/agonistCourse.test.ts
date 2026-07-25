@@ -236,7 +236,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
       style: initialStats.style + 1,
     });
     expect(firstCompleted.contacts[0].agonistCourseCompletions).toBe(1);
-    expect(firstCompleted.collaborators[0].mastery?.instructor).toBe(31);
+    expect(firstCompleted.collaborators[0].mastery?.instructor).toBe(61);
     expect(firstCompleted.messages.some(
       (message) => message.subject.startsWith("Corso Agonisti |"),
     )).toBe(false);

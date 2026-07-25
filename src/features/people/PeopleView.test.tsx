@@ -478,17 +478,19 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(75);
+    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(25);
     expect(within(roster).getByText("Membro 0 Scalabile")).toBeVisible();
-    expect(within(roster).getByText("Pagina 1 di 3")).toBeVisible();
+    expect(within(roster).getByText("Pagina 1 di 7")).toBeVisible();
 
     fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
 
-    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(75);
+    expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(25);
     expect(within(roster).queryByText("Membro 0 Scalabile")).not.toBeInTheDocument();
-    expect(within(roster).getByText("Membro 75 Scalabile")).toBeVisible();
+    expect(within(roster).getByText("Membro 25 Scalabile")).toBeVisible();
 
-    fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
+    for (let page = 2; page < 7; page += 1) {
+      fireEvent.click(within(roster).getByRole("button", { name: "Successiva" }));
+    }
 
     expect(roster.querySelectorAll(".member-row:not(.people-head)")).toHaveLength(10);
     expect(within(roster).getByText("Membro 159 Scalabile")).toBeVisible();
