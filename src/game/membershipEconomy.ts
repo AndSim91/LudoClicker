@@ -1,16 +1,18 @@
-import { getUpgradeEffectTotal } from "../content/upgrades";
+import { getVisibleForms } from "../content/forms";
+import { getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { getMonthlySocialIncome } from "./social";
 import type { GameState } from "./types";
 
 export function getMonthlyMemberFees(state: GameState): number {
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
   const registeredFormCount = state.contacts.reduce((total, contact) => {
     if (contact.status !== "enrolled") return total;
     const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
-    return total + forms.length;
+    return total + getVisibleForms(forms, courseXUnlocked).length;
   }, 0);
 
   return state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +

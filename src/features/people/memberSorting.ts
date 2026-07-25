@@ -1,10 +1,11 @@
 import {
   getAvailableForms,
   getTrainingCourseTitle,
+  getVisibleForms,
 } from "../../content/forms";
 import {
   getContactPreparation,
-  hasCompletedCourseX,
+  hasUnlockedOfficialStats,
 } from "../../game/athleteStats";
 import { getMemberAnnualDepartureChance } from "../../game/formulas";
 import {
@@ -36,6 +37,7 @@ export interface MemberSortContext {
   technicalArenaLevel: number;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
+  courseXUnlocked: boolean;
   collaboratorsByContactId: ReadonlyMap<string, Collaborator>;
 }
 
@@ -53,7 +55,7 @@ export function getMemberVisibleScore(
   context: MemberSortContext,
 ): number | null {
   const forms = getMemberStudent(contact, context).forms;
-  if (!hasCompletedCourseX(forms)) return null;
+  if (!hasUnlockedOfficialStats(forms)) return null;
   return getContactPreparation(contact, forms)[key];
 }
 
@@ -63,6 +65,9 @@ export function getMemberNextFormLabel(
 ): string | null {
   if (context.collaboratorsByContactId.has(contact.id)) return "Collaboratore";
   if (contact.training) {
+    if (contact.training.formId === "course-x" && !context.courseXUnlocked) {
+      return "Formazione in corso";
+    }
     return getTrainingCourseTitle(
       contact.training.formId,
       context.technicalArenaLevel,
@@ -75,6 +80,7 @@ export function getMemberNextFormLabel(
     undefined,
     true,
     context.annualTrainingLimit,
+    context.courseXUnlocked,
   )[0];
   if (!nextForm) return null;
   return nextForm.longName;
@@ -86,6 +92,10 @@ const RARITY_RANK: Record<Contact["rarity"], number> = {
   "ultra-rare": 2,
   legendary: 3,
 };
+
+function getMemberRarityRank(contact: Contact): number {
+  return contact.secretLegendaryId ? 4 : RARITY_RANK[contact.rarity];
+}
 
 function getDisplayedRisk(contact: Contact, context: MemberSortContext): number {
   const student = getMemberStudent(contact, context);
@@ -133,14 +143,18 @@ function compareMembers(
       );
       break;
     case "rarity":
-      comparison = RARITY_RANK[left.rarity] - RARITY_RANK[right.rarity];
+      comparison = getMemberRarityRank(left) - getMemberRarityRank(right);
       break;
     case "path":
       {
         const leftForms = getMemberStudent(left, context).forms;
         const rightForms = getMemberStudent(right, context).forms;
-        comparison = leftForms.length - rightForms.length ||
-          compareText(formatFormPath(leftForms), formatFormPath(rightForms));
+        const leftPath = formatFormPath(leftForms, context.courseXUnlocked);
+        const rightPath = formatFormPath(rightForms, context.courseXUnlocked);
+        comparison =
+          getVisibleForms(leftForms, context.courseXUnlocked).length -
+            getVisibleForms(rightForms, context.courseXUnlocked).length ||
+          compareText(leftPath, rightPath);
       }
       break;
     case "arena":

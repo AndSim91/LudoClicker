@@ -4,6 +4,26 @@ import type { Collaborator } from "./types";
 import { buyUpgrade } from "./upgradeFlow";
 
 describe("buyUpgrade prerequisites", () => {
+  it("unlocks Progetto X for one euro only after Tocco DiGilo", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 10 },
+      upgrades: { ...initial.upgrades, pagosport: 3 },
+    };
+
+    expect(buyUpgrade(funded, "project-x")).toBe(funded);
+
+    const eligible = {
+      ...funded,
+      upgrades: { ...funded.upgrades, "divine-touch": 1 },
+    };
+    const upgraded = buyUpgrade(eligible, "project-x");
+
+    expect(upgraded.upgrades["project-x"]).toBe(1);
+    expect(upgraded.school.euros).toBe(9);
+  });
+
   it("blocks a later branch upgrade until every previous upgrade is complete", () => {
     const initial = createInitialState(1_000);
     const state = {

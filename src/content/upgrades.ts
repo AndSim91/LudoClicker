@@ -1,7 +1,7 @@
 import type { UpgradeId, UpgradeLevels } from "../game/types";
 
 export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialContactCapTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialContactCapTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock" | "courseXUnlock";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -16,6 +16,7 @@ export interface UpgradeDefinition {
   baseCost: number;
   costGrowth: number;
   levelCosts?: number[];
+  networkCostGrowth?: number;
   maxLevel: number;
   requiredHistoricMembers: number;
   requiredUnlock?: "social";
@@ -96,6 +97,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "tiamat-instructor", category: "instructors", title: "Istruttore Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 8_000, costGrowth: 1, levelCosts: [8_000, 13_000, 21_000, 34_000], maxLevel: 4, requiredHistoricMembers: 0, requiredUpgradeLevels: { "extra-form": 1 } },
   { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera la preparazione di Tecnici, Istruttori e atleti.", effectLabel: "Livello 1: +1 Forma annua · Livello 2: +50% velocità Corsi Tecnici · Livello 3: +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 55_000, costGrowth: 1, levelCosts: [55_000, 89_000, 144_000], maxLevel: 3, requiredHistoricMembers: 0, requiredUpgradeLevels: { "tiamat-instructor": 4 } },
   { id: "divine-touch", category: "instructors", title: "Tocco DiGilo", description: "L'insegnamento delle Forme da parte degli Istruttori raggiunge una velocità sovrumana.", effectLabel: "+9999% velocità di insegnamento", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: 1, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { pagosport: 3 } },
+  { id: "project-x", category: "instructors", title: "Progetto X", description: "Introduce un anno formativo dedicato a una Forma 1 più avanzata e ai rudimenti di Forma 2 applicati al combattimento in arena, dando agli allievi inesperti il tempo di affinare la tecnica.", effectLabel: "Sblocca Corso X tra Forma 1 e Forma 2 e le relative qualifiche da Istruttore e Tecnico", effect: "courseXUnlock", effectPerLevel: 1, baseCost: 1, costGrowth: 1, networkCostGrowth: 0, maxLevel: 1, requiredHistoricMembers: 0, requiredUpgradeLevels: { "divine-touch": 1 } },
 ];
 
 const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
@@ -152,6 +154,7 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   "tiamat-instructor": 8_000,
   pagosport: 55_000,
   "divine-touch": 1_000_000,
+  "project-x": 1,
 };
 
 export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG.map(
@@ -200,7 +203,7 @@ export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: numb
   const localCost = definition.levelCosts?.[currentLevel] ??
     definition.baseCost * definition.costGrowth ** currentLevel;
   return Math.round(
-    localCost * (1 + networkSchools * 0.15),
+    localCost * (1 + networkSchools * (definition.networkCostGrowth ?? 0.15)),
   );
 }
 
@@ -260,4 +263,8 @@ export function getPagoSportTechnicianSpeedBonus(levels: UpgradeLevels): number 
 
 export function isSISTechnicianCourseUnlocked(levels: UpgradeLevels): boolean {
   return getUpgradeEffectTotal(levels, "sisTechnicianCourseUnlock") >= 1;
+}
+
+export function isCourseXUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "courseXUnlock") >= 1;
 }

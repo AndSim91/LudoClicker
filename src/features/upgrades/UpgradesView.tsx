@@ -17,6 +17,7 @@ import {
   getUpgradeCost,
   getUpgradeEffectMaximum,
   getUpgradeEffectTotal,
+  isCourseXUnlocked,
   type UpgradeCategory,
   type UpgradeDefinition,
 } from "../../content/upgrades";
@@ -85,6 +86,9 @@ function getUpgradeBenefitsSummary(state: GameState) {
   }
   if (getPagoSportAllCourseSpeedBonus(state.upgrades) > 0) {
     benefits.push({ label: "Velocità di tutti i corsi", value: "+50%" });
+  }
+  if (isCourseXUnlocked(state.upgrades)) {
+    benefits.push({ label: "Corso X", value: "attivo" });
   }
   const agonistCourseMaximum = 1 + getUpgradeEffectTotal(
     state.upgrades,

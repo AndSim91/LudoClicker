@@ -1,6 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { FORM_DEFINITIONS } from "../../content/forms";
+import { createInitialState } from "../../game/engine";
+import { GameStateContext } from "../../game/GameStateContext";
 import { FormLogoStrip } from "./PersonPresentation";
 
 describe("nomi delle Forme", () => {
@@ -53,5 +55,29 @@ describe("nomi delle Forme", () => {
     expect(form).toHaveClass("technician-certified");
     expect(form.querySelector(".form-instructor-crown")).toHaveClass("is-technician");
     expect(form.querySelectorAll(".form-instructor-crown")).toHaveLength(1);
+  });
+
+  it("nasconde Corso X fino all'acquisto di Progetto X", () => {
+    const initial = createInitialState(1_000);
+    const { container, rerender } = render(
+      <GameStateContext.Provider value={initial}>
+        <FormLogoStrip forms={["form-1", "course-x", "form-2"]} />
+      </GameStateContext.Provider>,
+    );
+
+    expect(within(container).queryByText("CX")).not.toBeInTheDocument();
+    expect(within(container).getByLabelText("Forme conosciute: Forma 1, Forma 2")).toBeVisible();
+
+    const unlocked = {
+      ...initial,
+      upgrades: { ...initial.upgrades, "project-x": 1 },
+    };
+    rerender(
+      <GameStateContext.Provider value={unlocked}>
+        <FormLogoStrip forms={["form-1", "course-x", "form-2"]} />
+      </GameStateContext.Provider>,
+    );
+
+    expect(within(container).getByText("CX")).toBeVisible();
   });
 });

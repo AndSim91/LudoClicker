@@ -4,6 +4,7 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getFormDefinition } from "../../content/forms";
+import { isCourseXUnlocked } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
@@ -282,17 +283,18 @@ function InstructorSectorCard({
 }) {
   const state = useGameState(stateOverride);
   const isPaused = useGameTimeSource()?.isPaused ?? false;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const instructors = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "instructor",
   );
   const instructorIds = new Set(instructors.map((instructor) => instructor.id));
-  const entries = getInstructorTeachingEntries(state).filter((entry) =>
+  const entries = getInstructorTeachingEntries(state, courseXUnlocked).filter((entry) =>
     instructorIds.has(entry.instructorId),
   );
-  const coverage = getInstructorCoverageForms(instructors);
-  const technicianCoverage = getTechnicianCoverageForms(instructors);
-  const internalCourses = getInternalInstructorCourseEntries(instructors);
-  const availableInstructorCourses = getAvailableInstructorCourses(instructors);
+  const coverage = getInstructorCoverageForms(instructors, courseXUnlocked);
+  const technicianCoverage = getTechnicianCoverageForms(instructors, courseXUnlocked);
+  const internalCourses = getInternalInstructorCourseEntries(instructors, courseXUnlocked);
+  const availableInstructorCourses = getAvailableInstructorCourses(instructors, courseXUnlocked);
   const singleInstructorCourse = availableInstructorCourses.length === 1
     ? availableInstructorCourses[0]
     : undefined;
@@ -496,12 +498,13 @@ export function CollaboratorSectorView({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
 }) {
   const state = useGameState(stateOverride);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [openRole, setOpenRole] = useState<CollaboratorMasteryRole | null>(null);
   const assignmentCounts = getCollaboratorAssignmentCounts(state);
   const available = state.collaborators.filter((collaborator) => collaborator.assignment === null).length;
   const hasTimedWork = state.acquisitionEvents.some((event) => event.status === "running") ||
-    getInstructorTeachingEntries(state).length > 0 ||
-    getInternalInstructorCourseEntries(state.collaborators).length > 0 ||
+    getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
+    getInternalInstructorCourseEntries(state.collaborators, courseXUnlocked).length > 0 ||
     (
       state.collaborators.some((collaborator) => collaborator.assignment === "equipment") &&
       getEquipmentAutomaticRepairTarget(state.equipment) !== undefined

@@ -51,6 +51,7 @@ describe("game engine: operations", () => {
     const dueAt = 10_000;
     const withTrainedMember = {
       ...state,
+      upgrades: { ...state.upgrades, "project-x": 1 },
       contacts: [member, ...state.contacts.slice(1)],
       collaborators: [{
         id: "collaborator-trained-member",

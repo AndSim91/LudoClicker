@@ -1,11 +1,12 @@
-import { getFormDefinition } from "../../content/forms";
+import { getFormDefinition, getVisibleForms } from "../../content/forms";
 import { getMemberAnnualDepartureChance } from "../../game/formulas";
 import type { FormId, PersonRarity } from "../../game/types";
 
-export function formatFormPath(forms: FormId[]): string {
-  if (forms.length === 0) return "Da iniziare · Forma 1";
-  const latest = getFormDefinition(forms.at(-1)!);
-  return latest?.longName ?? forms.at(-1)!;
+export function formatFormPath(forms: FormId[], courseXUnlocked = true): string {
+  const visibleForms = getVisibleForms(forms, courseXUnlocked);
+  if (visibleForms.length === 0) return "Da iniziare · Forma 1";
+  const latest = getFormDefinition(visibleForms.at(-1)!);
+  return latest?.longName ?? visibleForms.at(-1)!;
 }
 
 export function getMemberDepartureRiskLabel(

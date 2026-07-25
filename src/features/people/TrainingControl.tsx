@@ -11,11 +11,13 @@ import {
   getTrainingCourseTitle,
   isInstructorForm,
   isAgonistCourse,
+  needsCourseXRecovery,
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
 import {
   getAnnualFormTrainingLimit,
+  isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
 } from "../../content/upgrades";
 import {
@@ -61,13 +63,14 @@ function getInstructorTeachingStudents(
 }
 
 function useInstructorTeachingEntries(state: GameState, instructorId: string) {
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   return useMemo(
     () => getInstructorTeachingStudents(
       state.contacts,
       state.collaborators,
       instructorId,
-    ),
-    [state.contacts, state.collaborators, instructorId],
+    ).filter((entry) => courseXUnlocked || entry.training.formId !== "course-x"),
+    [state.contacts, state.collaborators, instructorId, courseXUnlocked],
   );
 }
 
@@ -224,9 +227,13 @@ export function TechnicianCourseControl({
   const [isSISExpanded, setIsSISExpanded] = useState(false);
   const reservation = collaborator.technicianCourseReservation;
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const recoveryPending = courseXUnlocked && needsCourseXRecovery(collaborator.forms);
   const definitions = collaborator.forms.flatMap((formId) => {
     const definition = getFormDefinition(formId);
     return definition &&
+      (courseXUnlocked || formId !== "course-x") &&
+      !recoveryPending &&
       collaborator.instructorForms.includes(formId) &&
       !(collaborator.technicianForms ?? []).includes(formId)
       ? [definition]
@@ -237,7 +244,10 @@ export function TechnicianCourseControl({
   if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
     return null;
   }
-  if (reservation) {
+  if (reservation?.formId === "course-x" && !courseXUnlocked) {
+    return null;
+  }
+  if (reservation && (courseXUnlocked || reservation.formId !== "course-x")) {
     const definition = getFormDefinition(reservation.formId);
     const startMonth = getGameMonthName(reservation.eligibleMonth);
     const startYear = getGameYear(reservation.eligibleMonth);
@@ -439,6 +449,8 @@ export function TrainingControl({
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const recoveryPending = courseXUnlocked && needsCourseXRecovery(student.forms);
   const annualTrainingAvailable =
     getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
   const collaborator = collaboratorsById.get(personId);
@@ -449,6 +461,22 @@ export function TrainingControl({
 
   if (!state.unlocks.forms) {
     return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
+  }
+  if (student.training?.formId === "course-x" && !courseXUnlocked) {
+    const progress = getTrainingProgress(student.training, now);
+    const waitingForEquipment = student.training.status === "waitingForEquipment";
+    return (
+      <div className={`training-progress${variantClass}`}>
+        <span>Formazione precedente in corso</span>
+        <strong>{waitingForEquipment ? "In attesa di spade" : `${Math.round(progress)}%`}</strong>
+        <ProgressBar
+          className="training-progress-bar"
+          label={`Formazione di ${displayName}`}
+          value={progress}
+          durationMs={student.training.completesAt - student.training.startedAt}
+        />
+      </div>
+    );
   }
   if (student.training) {
     const definition = isAgonistCourse(student.training.formId)
@@ -504,6 +532,8 @@ export function TrainingControl({
     ? collaborator.forms.flatMap((formId) => {
         const definition = getFormDefinition(formId);
         return definition && isInstructorForm(formId) &&
+            (courseXUnlocked || formId !== "course-x") &&
+            !recoveryPending &&
             !collaborator.instructorForms.includes(formId)
           ? [definition]
           : [];
@@ -523,6 +553,7 @@ export function TrainingControl({
         branchCapacity,
         collaborator?.assignment !== "instructor",
         annualTrainingLimit,
+        courseXUnlocked,
       ).filter((definition) =>
         !definition.branch ||
         learnedBranches.size > 0 ||

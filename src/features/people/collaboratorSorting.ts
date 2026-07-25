@@ -1,5 +1,5 @@
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
-import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
+import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
 import type { Collaborator, Contact, GameState } from "../../game/types";
 import {
@@ -70,7 +70,7 @@ function getOfficialScore(
   context: CollaboratorSortContext,
 ): number | null {
   const contact = context.contactsById.get(collaborator.contactId);
-  if (!contact || !hasCompletedCourseX(collaborator.forms)) return null;
+  if (!contact || !hasUnlockedOfficialStats(collaborator.forms)) return null;
   return getContactPreparation(contact, collaborator.forms)[key];
 }
 

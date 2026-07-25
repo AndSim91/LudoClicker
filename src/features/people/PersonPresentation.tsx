@@ -1,5 +1,11 @@
 import { getFormLogo } from "../../content/formLogos";
-import { getFormDefinition, type FormDefinition } from "../../content/forms";
+import {
+  getFormDefinition,
+  getVisibleForms,
+  type FormDefinition,
+} from "../../content/forms";
+import { isCourseXUnlocked } from "../../content/upgrades";
+import { useOptionalGameState } from "../../game/GameStateContext";
 import type { FormId, PersonRarity } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 
@@ -16,7 +22,12 @@ export function FormLogoStrip({
   showLabels?: boolean;
   className?: string;
 }) {
-  const entries = forms.map((formId) => {
+  const state = useOptionalGameState();
+  const visibleForms = getVisibleForms(
+    forms,
+    state ? isCourseXUnlocked(state.upgrades) : true,
+  );
+  const entries = visibleForms.map((formId) => {
     const definition = getFormDefinition(formId);
     const logo = getFormLogo(formId);
     return {
@@ -81,9 +92,6 @@ export function PersonName({
   return (
     <strong className={`rarity-name ${getRarityClassName(rarity, secretLegendary)}`} data-label={label}>
       {displayName}
-      {secretLegendary
-        ? <span className="special-collaborator-badge secret">Segreto</span>
-        : null}
     </strong>
   );
 }

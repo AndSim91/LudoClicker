@@ -77,9 +77,10 @@ describe("instructor branch", () => {
       "tiamat-instructor",
       "pagosport",
       "divine-touch",
+      "project-x",
     ]);
     expect(instructors.map((definition) => definition.requiredHistoricMembers)).toEqual([
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     expect(instructors.map((definition) =>
       Array.from({ length: definition.maxLevel }, (_, level) =>
@@ -96,7 +97,15 @@ describe("instructor branch", () => {
       [8_000, 13_000, 21_000, 34_000],
       [55_000, 89_000, 144_000],
       [1_000_000],
+      [1],
     ]);
+  });
+
+  it("keeps Progetto X at the symbolic one-euro price across the school network", () => {
+    const projectX = UPGRADE_DEFINITIONS.find((definition) => definition.id === "project-x")!;
+
+    expect(getUpgradeCost(projectX, 0, 0)).toBe(1);
+    expect(getUpgradeCost(projectX, 0, 12)).toBe(1);
   });
 
   it("applies Tocco DiGilo's exact +9999% teaching speed", () => {

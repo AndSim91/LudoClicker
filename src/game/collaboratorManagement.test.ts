@@ -260,6 +260,7 @@ describe("collaborator aggregate management", () => {
     };
     const state: GameState = {
       ...initial,
+      upgrades: { ...initial.upgrades, "project-x": 1 },
       collaborators: [
         existing,
         duplicate,

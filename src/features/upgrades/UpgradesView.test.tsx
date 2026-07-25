@@ -42,7 +42,7 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Intensità agonistica/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Preparazione atletica/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(52);
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(54);
   });
 
   it("shows requirements, effect and disabled level-up action for a locked node", () => {

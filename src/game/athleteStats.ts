@@ -40,8 +40,8 @@ export function hasCompletedFormOne(forms: readonly FormId[]): boolean {
   return forms.includes("form-1");
 }
 
-export function hasCompletedCourseX(forms: readonly FormId[]): boolean {
-  return forms.includes("course-x");
+export function hasUnlockedOfficialStats(forms: readonly FormId[]): boolean {
+  return forms.includes("course-y");
 }
 
 export function getPreparation(

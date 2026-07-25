@@ -1,3 +1,4 @@
+import { PERSON_RARITIES } from "../content/rarities";
 import type { PersonRarity } from "../game/types";
 
 export type PresentedPersonRarity = PersonRarity | "secret-legendary";
@@ -14,4 +15,11 @@ export function getRarityClassName(
   secretLegendary = false,
 ): string {
   return `rarity-${getPresentedPersonRarity(rarity, secretLegendary)}`;
+}
+
+export function getPresentedRarityLabel(
+  rarity: PersonRarity,
+  secretLegendary = false,
+): string {
+  return secretLegendary ? "Leggendario Segreto" : PERSON_RARITIES[rarity].label;
 }

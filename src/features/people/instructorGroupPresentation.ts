@@ -30,6 +30,7 @@ function getRequestedInstructorId(training: FormTraining): string | undefined {
 
 export function getInstructorTeachingEntries(
   state: Pick<GameState, "contacts" | "collaborators">,
+  courseXUnlocked = true,
 ): InstructorTeachingEntry[] {
   return [
     ...state.contacts.flatMap((contact) => {
@@ -56,7 +57,7 @@ export function getInstructorTeachingEntries(
           }]
         : [];
     }),
-  ];
+  ].filter((entry) => courseXUnlocked || entry.training.formId !== "course-x");
 }
 
 export function getInstructorTrainingProgress(training: FormTraining, now: number): number {
@@ -80,28 +81,35 @@ export function getAggregateInstructorProgress(
 
 export function getInstructorCoverageForms(
   instructors: readonly Collaborator[],
+  courseXUnlocked = true,
 ): FormId[] {
   const certified = new Set<FormId>(
     instructors.flatMap((instructor) => instructor.instructorForms),
   );
   return FORM_DEFINITIONS.flatMap((definition) =>
-    certified.has(definition.id) ? [definition.id] : [],
+    (courseXUnlocked || definition.id !== "course-x") && certified.has(definition.id)
+      ? [definition.id]
+      : [],
   );
 }
 
 export function getTechnicianCoverageForms(
   instructors: readonly Collaborator[],
+  courseXUnlocked = true,
 ): FormId[] {
   const qualified = new Set<FormId>(
     instructors.flatMap((instructor) => instructor.technicianForms ?? []),
   );
   return FORM_DEFINITIONS.flatMap((definition) =>
-    qualified.has(definition.id) ? [definition.id] : [],
+    (courseXUnlocked || definition.id !== "course-x") && qualified.has(definition.id)
+      ? [definition.id]
+      : [],
   );
 }
 
 export function getInternalInstructorCourseEntries(
   collaborators: readonly Collaborator[],
+  courseXUnlocked = true,
 ): InternalInstructorCourseEntry[] {
   const collaboratorsById = new Map(
     collaborators.map((collaborator) => [collaborator.id, collaborator]),
@@ -114,7 +122,8 @@ export function getInternalInstructorCourseEntries(
     return training &&
       technician &&
       training.trainingPhase === "instructor" &&
-      training.formId !== "agonist-course"
+      training.formId !== "agonist-course" &&
+      (courseXUnlocked || training.formId !== "course-x")
       ? [{ trainee, technician, formId: training.formId, training }]
       : [];
   });
@@ -122,15 +131,19 @@ export function getInternalInstructorCourseEntries(
 
 export function getAvailableInstructorCourseCount(
   instructors: readonly Collaborator[],
+  courseXUnlocked = true,
 ): number {
-  return getAvailableInstructorCourses(instructors).length;
+  return getAvailableInstructorCourses(instructors, courseXUnlocked).length;
 }
 
 export function getAvailableInstructorCourses(
   instructors: readonly Collaborator[],
+  courseXUnlocked = true,
 ): AvailableInstructorCourse[] {
   return instructors.flatMap((instructor) =>
-    getMissingInstructorForms(instructor).map((formId) => ({ instructor, formId })),
+    getMissingInstructorForms(instructor)
+      .filter((formId) => courseXUnlocked || formId !== "course-x")
+      .map((formId) => ({ instructor, formId })),
   );
 }
 

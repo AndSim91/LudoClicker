@@ -7,8 +7,9 @@ import type {
   InboxMessage,
   ScheduledTrial,
 } from "./types";
-import { isInstructorForm } from "../content/forms";
+import { getVisibleForms, isInstructorForm } from "../content/forms";
 import { getCollaboratorProductivity } from "../content/forms";
+import { isCourseXUnlocked } from "../content/upgrades";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
@@ -82,6 +83,7 @@ export function canInstructorTeachForm(
   const instructor = getCollaboratorsById(state.collaborators).get(instructorId);
   return Boolean(
     instructor &&
+    (formId !== "course-x" || isCourseXUnlocked(state.upgrades)) &&
     instructor.assignment === "instructor" &&
     instructor.forms.includes(formId) &&
     (!isInstructorForm(formId) || instructor.instructorForms.includes(formId)),
@@ -92,8 +94,10 @@ export function compareInstructorTeachingPriority(
   left: Collaborator,
   right: Collaborator,
   teachingCounts: ReadonlyMap<string, number>,
+  courseXUnlocked = true,
 ): number {
-  return left.instructorForms.length - right.instructorForms.length ||
+  return getVisibleForms(left.instructorForms, courseXUnlocked).length -
+      getVisibleForms(right.instructorForms, courseXUnlocked).length ||
     (teachingCounts.get(left.id) ?? 0) -
       (teachingCounts.get(right.id) ?? 0) ||
     getCollaboratorProductivity(right, "instructor") -
@@ -119,7 +123,12 @@ export function selectAvailableInstructor(
       !busyInstructorIds.has(collaborator.id)
     )
     .sort((left, right) =>
-      compareInstructorTeachingPriority(left, right, teachingCounts)
+      compareInstructorTeachingPriority(
+        left,
+        right,
+        teachingCounts,
+        isCourseXUnlocked(state.upgrades),
+      )
     )[0];
 }
 

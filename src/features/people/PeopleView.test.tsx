@@ -166,7 +166,11 @@ describe("PeopleView", () => {
       ...initial,
       school: { ...initial.school, euros: 1_000 },
       collaborators,
-      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      upgrades: {
+        ...initial.upgrades,
+        "athletic-preparation": 1,
+        "project-x": 1,
+      },
       unlocks: { ...initial.unlocks, collaborators: true },
       automation: { ...initial.automation, lessonBuffer: 0.58 },
       collaboratorManagement: {
@@ -594,7 +598,7 @@ describe("PeopleView", () => {
       firstName: "Arena",
       lastName: "Alta",
       status: "enrolled" as const,
-      forms: ["course-x" as const],
+      forms: ["course-y" as const],
       arenaBase: 90,
       styleBase: 80,
       rarity: "common" as const,
@@ -605,7 +609,7 @@ describe("PeopleView", () => {
       firstName: "Arena",
       lastName: "Bassa",
       status: "enrolled" as const,
-      forms: ["course-x" as const],
+      forms: ["course-y" as const],
       arenaBase: 10,
       styleBase: 20,
       rarity: "rare" as const,
@@ -656,6 +660,60 @@ describe("PeopleView", () => {
     expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
   });
 
+  it("shows secret Legendaries as the highest official rarity without a name badge", () => {
+    const initial = createInitialState(1_000);
+    const regularLegendary = {
+      ...initial.contacts[0],
+      id: "regular-legendary-enrolled",
+      firstName: "Andrea",
+      lastName: "Simonazzi",
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+      specialProfileId: "andrea-simonazzi" as const,
+      secretLegendaryId: undefined,
+    };
+    const secretLegendary = {
+      ...initial.contacts[1],
+      id: "secret-enrolled",
+      firstName: "Enrico",
+      lastName: "Giovanetti",
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+      specialProfileId: "enrico-giovanetti" as const,
+      secretLegendaryId: "enrico-giovanetti" as const,
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [secretLegendary, regularLegendary],
+          school: { ...initial.school, activeMembers: 2 },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Iscritti" });
+    const row = within(roster).getByText("Enrico Giovanetti").closest(".member-row");
+
+    expect(row).not.toBeNull();
+    expect(within(row as HTMLElement).getByText("Leggendario Segreto")).toBeVisible();
+    expect(row?.querySelector(".special-collaborator-badge.secret")).not.toBeInTheDocument();
+
+    const raritySort = within(roster).getByRole("button", { name: "Ordina per Rarità" });
+    fireEvent.click(raritySort);
+    let rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Andrea Simonazzi");
+    expect(rows[1]).toHaveTextContent("Enrico Giovanetti");
+
+    fireEvent.click(raritySort);
+    rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Enrico Giovanetti");
+    expect(rows[1]).toHaveTextContent("Andrea Simonazzi");
+  });
+
   it("filters enrolled athletes using the values of their columns", () => {
     const initial = createInitialState(1_000);
     const members = [
@@ -677,7 +735,7 @@ describe("PeopleView", () => {
         email: "alba@example.test",
         status: "enrolled" as const,
         rarity: "common" as const,
-        forms: ["course-x" as const],
+        forms: ["course-y" as const],
         arenaBase: 90,
         styleBase: 70,
       },
@@ -689,7 +747,7 @@ describe("PeopleView", () => {
         email: "bruno@example.test",
         status: "enrolled" as const,
         rarity: "rare" as const,
-        forms: ["course-x" as const],
+        forms: ["course-y" as const],
         arenaBase: 20,
         styleBase: 30,
       },
@@ -937,7 +995,7 @@ describe("PeopleView", () => {
         contactId: initial.contacts[1].id,
         displayName: "Bruno Eventi",
         joinedAt: 1_000,
-        forms: ["course-x" as const],
+        forms: ["course-y" as const],
         instructorForms: [] as FormId[],
         assignment: "events" as const,
         rarity: "ultra-rare" as const,
@@ -1010,7 +1068,7 @@ describe("PeopleView", () => {
         contactId: "contact-alba",
         displayName: "Alba Esperta",
         joinedAt: 1_000,
-        forms: ["course-x" as const],
+        forms: ["course-y" as const],
         instructorForms: [] as FormId[],
         assignment: "writing" as const,
         rarity: "legendary" as const,
@@ -1020,7 +1078,7 @@ describe("PeopleView", () => {
         contactId: "contact-bruno",
         displayName: "Bruno Tecnico",
         joinedAt: 1_000,
-        forms: ["course-x" as const],
+        forms: ["course-y" as const],
         instructorForms: [] as FormId[],
         assignment: "equipment" as const,
         rarity: "ultra-rare" as const,
@@ -1384,7 +1442,7 @@ describe("PeopleView", () => {
     const enrolled = {
       ...initial.contacts[0],
       status: "enrolled" as const,
-      forms: ["course-x"] as FormId[],
+      forms: ["course-y"] as FormId[],
       arenaBase: 108.564,
       styleBase: 50,
     };
@@ -1804,6 +1862,7 @@ describe("PeopleView", () => {
           ),
           collaborators: [instructor],
           unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+          upgrades: { ...initial.upgrades, "project-x": 1 },
         }}
         onAssign={() => undefined}
         onStartTraining={onStartTraining}

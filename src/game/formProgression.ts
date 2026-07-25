@@ -16,8 +16,10 @@ export function getFormProgressionRank(formId: FormId): number {
 export function getAutomaticFormCandidates(student: {
   forms: FormId[];
   formBranchPreferences?: FormBranch[];
-}): FormId[] {
-  const core: FormId[] = ["form-1", "course-x", "form-2", "course-y"];
+}, courseXUnlocked = true): FormId[] {
+  const core: FormId[] = courseXUnlocked
+    ? ["form-1", "course-x", "form-2", "course-y"]
+    : ["form-1", "form-2", "course-y"];
   const nextCore = core.find((formId) => !student.forms.includes(formId));
   if (nextCore) return [nextCore];
 

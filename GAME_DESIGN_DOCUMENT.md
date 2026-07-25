@@ -220,8 +220,9 @@ sorgente di entrate ricorrenti. Non sono spendibili.
 Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**.
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
-singolo allievo**. Corso X e Corso Y concorrono al conteggio; il Corso Agonisti
-è escluso perché potenzia Arena e Stile ma non assegna un badge permanente. Ogni
+singolo allievo**. Corso Y concorre sempre al conteggio; Corso X vi concorre
+soltanto dopo lo sblocco di Progetto X. Il Corso Agonisti è escluso perché
+potenzia Arena e Stile ma non assegna un badge permanente. Ogni
 badge permanente può essere registrato una sola volta sullo stesso allievo: un
 duplicato rappresenta uno stato non valido e non viene corretto nel calcolo
 economico. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio
@@ -914,7 +915,7 @@ moltiplicatori del collaboratore. Il percorso è:
 
 ```text
 Forma 1
-  → Corso X
+  → Corso X [soltanto con Progetto X]
   → Forma 2
   → Corso Y
   → Forme 3, 4 e 5 in uno o più rami:
@@ -924,6 +925,16 @@ Forma 1
   → Forma 6
   → Forma 7
 ```
+
+Corso X è un anno formativo sperimentale della scuola di Genova, dedicato
+all'approfondimento della Forma 1 e all'introduzione dei rudimenti della Forma
+2 applicati al combattimento in arena. Offre agli allievi, spesso ancora
+inesperti, il tempo necessario per consolidare e affinare la tecnica.
+
+All'inizio della partita questo passaggio non fa parte del percorso: il gioco
+si comporta come se tra Forma 1 e Forma 2 non esistesse alcun corso. Corso X,
+i suoi badge, i controlli, i filtri e le qualifiche restano completamente
+nascosti finché non viene acquistato **Progetto X**.
 
 Ogni Forma ha un nome lungo, usato nei testi descrittivi, e un nome corto per le
 interfacce compatte:
@@ -946,6 +957,18 @@ reali delle Forme.
 Regole:
 
 - ogni iscritto può conoscere più Forme;
+- prima di Progetto X la progressione lineare è **Forma 1 → Forma 2**;
+- dopo Progetto X Corso X diventa obbligatorio e la progressione è
+  **Forma 1 → Corso X → Forma 2**;
+- i dati di Corso X già presenti in un salvataggio restano conservati ma
+  invisibili fino allo sblocco;
+- dopo lo sblocco, iscritti e collaboratori che possiedono Forma 2 o una Forma
+  successiva senza Corso X devono recuperarlo prima di iniziare qualsiasi altra
+  Forma, Arena Tecnica, Corso Agonisti, Corso Istruttori o Corso Tecnico;
+- il recupero rispetta costo, spade, slot annuali e condizioni didattiche
+  ordinarie; se una formazione è già attiva, attende la sua conclusione;
+- le statistiche ufficiali Arena e Stile diventano visibili soltanto dopo il
+  completamento di **Corso Y**;
 - ogni iscritto o collaboratore può iniziare al massimo una Forma per anno
   formativo; **Doppio Corso** porta questo limite a due e il livello 1 di
   **PagoSport** lo porta a tre;
@@ -1126,10 +1149,14 @@ Regole:
   che ogni potenziamento sia completato prima di accedere al successivo. L'ordine
   è **Polivalenza didattica
   → Istruttore Promisquo → Doppio Corso → Istruttore Tiamat → PagoSport → Tocco
-  DiGilo**;
-- **Tocco DiGilo** è l'ultimo potenziamento del ramo Istruttori: costa
+  DiGilo → Progetto X**;
+- **Tocco DiGilo** è il penultimo potenziamento del ramo Istruttori: costa
   **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore
   insegna le Forme agli allievi;
+- **Progetto X** è l'ultimo potenziamento del ramo Istruttori, richiede Tocco
+  DiGilo e costa **€1 simbolico**, senza maggiorazioni dovute alle scuole della
+  rete. Sblocca Corso X tra Forma 1 e Forma 2 e abilita i relativi percorsi da
+  Istruttore e, con Accreditamento SIS, da Tecnico;
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
 
@@ -1137,7 +1164,9 @@ Regole:
 
 Il **Tecnico** è una qualifica per singola Forma o Corso, non un nuovo incarico
 operativo. Il percorso è disponibile per ogni formazione che assegna un badge,
-inclusi Corso X e Corso Y, ma esclude il Corso Agonisti.
+inclusi Corso X e Corso Y, ma esclude il Corso Agonisti. I percorsi da
+Istruttore e Tecnico di Corso X sono disponibili soltanto dopo Progetto X; il
+Corso Tecnico continua a richiedere anche Accreditamento SIS.
 
 Regole:
 

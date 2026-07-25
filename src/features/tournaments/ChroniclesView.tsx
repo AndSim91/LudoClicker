@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { SECRET_LEGENDARIES } from "../../content/secretLegendaries";
-import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
+import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
@@ -149,7 +149,7 @@ export function ChroniclesView({
             contact.id,
             {
               values: getContactPreparation(contact, forms),
-              visible: hasCompletedCourseX(forms),
+              visible: hasUnlockedOfficialStats(forms),
             },
           ] as const;
         }),

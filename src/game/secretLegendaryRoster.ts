@@ -1,10 +1,17 @@
 import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import { isCourseXUnlocked } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import type { Contact, FormId, GameState, SecretLegendaryId } from "./types";
 
-export function getCanonicalSecretForms(numericForms: number): FormId[] {
+export function getCanonicalSecretForms(
+  numericForms: number,
+  courseXUnlocked = true,
+): FormId[] {
   const result: FormId[] = ["form-1"];
-  if (numericForms >= 2) result.push("course-x", "form-2");
+  if (numericForms >= 2) {
+    if (courseXUnlocked) result.push("course-x");
+    result.push("form-2");
+  }
   if (numericForms >= 3) result.push("course-y", "form-3-long");
   if (numericForms >= 4) result.push("form-4-long");
   if (numericForms >= 5) result.push("form-5-long");
@@ -34,7 +41,10 @@ export function createSecretLegendaryContact(
     rarity: "legendary",
     specialProfileId: id,
     secretLegendaryId: id,
-    forms: [...(retained?.forms ?? getCanonicalSecretForms(profile.numericForms))],
+    forms: [...(retained?.forms ?? getCanonicalSecretForms(
+      profile.numericForms,
+      isCourseXUnlocked(state.upgrades),
+    ))],
     formBranchPreferences: [...(retained?.formBranchPreferences ?? ["Spada Lunga"])],
     arenaBase: retained?.arenaBase ?? profile.arenaBase,
     styleBase: retained?.styleBase ?? profile.styleBase,

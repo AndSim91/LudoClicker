@@ -7,7 +7,7 @@ import {
 } from "../../content/tournaments";
 import {
   getContactPreparation,
-  hasCompletedCourseX,
+  hasUnlockedOfficialStats,
 } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
@@ -59,7 +59,7 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     state.contacts.map((contact) => {
       const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
       const preparation = getContactPreparation(contact, forms);
-      const visible = hasCompletedCourseX(forms);
+      const visible = hasUnlockedOfficialStats(forms);
       return [contact.id, { contact, preparation, visible }] as const;
     }),
   ), [collaboratorsByContactId, state.contacts]);

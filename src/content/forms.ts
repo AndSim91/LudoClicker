@@ -97,6 +97,21 @@ export function getFormDefinition(id: FormId) {
   return FORM_DEFINITIONS.find((definition) => definition.id === id);
 }
 
+export function getVisibleForms(
+  forms: readonly FormId[],
+  courseXUnlocked: boolean,
+): FormId[] {
+  return courseXUnlocked
+    ? [...forms]
+    : forms.filter((formId) => formId !== "course-x");
+}
+
+export function needsCourseXRecovery(forms: readonly FormId[]): boolean {
+  return !forms.includes("course-x") && forms.some((formId) =>
+    formId !== "form-1" && formId !== "course-x"
+  );
+}
+
 export const AGONIST_COURSE_ID = "agonist-course" as const;
 
 export function isAgonistCourse(id: TrainingCourseId): id is typeof AGONIST_COURSE_ID {
@@ -189,13 +204,23 @@ export function canTrainForm(
   maximumBranches = student.formBranchPreferences?.length ?? 1,
   restrictToPreferences = true,
   annualTrainingLimit = 1,
+  courseXUnlocked = true,
 ) {
   if (student.forms.includes(definition.id) || student.training) return false;
+  if (!courseXUnlocked && definition.id === "course-x") return false;
+  if (
+    courseXUnlocked &&
+    needsCourseXRecovery(student.forms) &&
+    definition.id !== "course-x"
+  ) return false;
   if (
     typeof currentYear === "number" &&
     getFormTrainingCount(student, currentYear) >= annualTrainingLimit
   ) return false;
-  if (definition.prerequisite && !student.forms.includes(definition.prerequisite)) return false;
+  const prerequisite = definition.id === "form-2" && !courseXUnlocked
+    ? "form-1"
+    : definition.prerequisite;
+  if (prerequisite && !student.forms.includes(prerequisite)) return false;
   if (
     definition.anyPrerequisite &&
     !definition.anyPrerequisite.some((formId) => student.forms.includes(formId))
@@ -225,6 +250,7 @@ export function getAvailableForms(
   maximumBranches?: number,
   restrictToPreferences?: boolean,
   annualTrainingLimit?: number,
+  courseXUnlocked = true,
 ) {
   return FORM_DEFINITIONS.filter((definition) =>
     canTrainForm(
@@ -234,6 +260,7 @@ export function getAvailableForms(
       maximumBranches,
       restrictToPreferences,
       annualTrainingLimit,
+      courseXUnlocked,
     )
   );
 }

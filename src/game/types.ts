@@ -237,7 +237,8 @@ export type UpgradeId =
   | "extra-form"
   | "tiamat-instructor"
   | "pagosport"
-  | "divine-touch";
+  | "divine-touch"
+  | "project-x";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
 

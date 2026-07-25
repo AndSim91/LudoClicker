@@ -517,6 +517,7 @@ describe("game engine: progression", () => {
       contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
+      upgrades: { ...initial.upgrades, "project-x": 1 },
     };
 
     const blocked = gameReducer(ready, { type: "START_FORM_TRAINING", personId: member.id, formId: "form-2", now: 2_000 });

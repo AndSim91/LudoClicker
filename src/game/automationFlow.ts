@@ -7,10 +7,12 @@ import {
   getFormTrainingCount,
   getStudentFormCost,
   isInstructorForm,
+  needsCourseXRecovery,
 } from "../content/forms";
 import {
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
+  isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import {
@@ -338,6 +340,7 @@ export function processAutomaticTeaching(
   if (!hasAutomaticInstructor) return state;
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   let nextState = state;
 
   const collaboratorContactIds = new Set(
@@ -378,7 +381,7 @@ export function processAutomaticTeaching(
   }
   const qualifiedFormCandidates = new Map(students.map((student) => [
     student.id,
-    getAutomaticFormCandidates(student).filter((formId) => {
+    getAutomaticFormCandidates(student, courseXUnlocked).filter((formId) => {
       const definition = getFormDefinition(formId);
       return Boolean(
         definition &&
@@ -389,6 +392,7 @@ export function processAutomaticTeaching(
           undefined,
           undefined,
           annualTrainingLimit,
+          courseXUnlocked,
         ) &&
         instructorsByForm.get(formId)?.some((instructor) => instructor.id !== student.id)
       );
@@ -408,6 +412,7 @@ export function processAutomaticTeaching(
         branchCapacity,
         false,
         annualTrainingLimit,
+        courseXUnlocked,
       ));
     }).map((collaborator) => collaborator.id),
   );
@@ -511,6 +516,23 @@ export function processAutomaticTeaching(
     }
 
     if (
+      courseXUnlocked &&
+      needsCourseXRecovery(student.forms) &&
+      !("acquiredAt" in student) &&
+      student.assignment === "instructor"
+    ) {
+      const startedState = startFormTraining(nextState, student.id, "course-x", now);
+      const startedStudent = startedState.collaborators.find(
+        (collaborator) => collaborator.id === student.id,
+      );
+      if (startedStudent?.training) {
+        nextState = startedState;
+        continue;
+      }
+    }
+
+    if (
+      (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
       qualifiedCandidates.length > 0 ||
       instructorsWithAvailablePersonalForms.has(student.id) ||
       (nextState.upgrades["technical-arena"] ?? 0) < 1
@@ -522,7 +544,12 @@ export function processAutomaticTeaching(
         (instructorLoads.get(candidate.id) ?? 0) < capacity
       )
       .sort((left, right) =>
-        compareInstructorTeachingPriority(left, right, instructorLoads)
+        compareInstructorTeachingPriority(
+          left,
+          right,
+          instructorLoads,
+          courseXUnlocked,
+        )
       )[0];
     if (!instructor) continue;
     const startedState = startAgonistCourse(

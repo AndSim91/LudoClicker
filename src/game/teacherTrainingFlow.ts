@@ -4,6 +4,7 @@ import {
   getCollaboratorProductivity,
   getInstructorQualificationDuration,
   getInternalInstructorQualificationCost,
+  needsCourseXRecovery,
   getTechnicianCourseCost,
   getTechnicianCourseDuration,
   isAgonistCourse,
@@ -12,6 +13,7 @@ import {
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   isSISTechnicianCourseUnlocked,
+  isCourseXUnlocked,
 } from "../content/upgrades";
 import { isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
@@ -213,9 +215,12 @@ export function bookTechnicianCourse(
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
   const definition = getFormDefinition(formId);
   const cost = definition ? getTechnicianCourseCost(definition.cost) : Infinity;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   if (
     !collaborator ||
     !definition ||
+    (!courseXUnlocked && formId === "course-x") ||
+    (courseXUnlocked && needsCourseXRecovery(collaborator?.forms ?? [])) ||
     !isSISTechnicianCourseUnlocked(state.upgrades) ||
     collaborator.assignment !== "instructor" ||
     !collaborator.forms.includes(formId) ||
@@ -273,6 +278,8 @@ export function processTechnicianCourseReservations(
     if (
       !collaborator ||
       !reservation ||
+      (!isCourseXUnlocked(nextState.upgrades) && reservation.formId === "course-x") ||
+      (isCourseXUnlocked(nextState.upgrades) && needsCourseXRecovery(collaborator.forms)) ||
       collaborator.training ||
       priorityQualificationTechnicianIds.has(collaborator.id) ||
       collaborator.assignment !== "instructor" ||
@@ -320,7 +327,10 @@ function getInstructorCourseDemand(state: GameState, formId: FormId): number {
     ),
     ...state.collaborators,
   ].filter((person) =>
-    !person.training && getAutomaticFormCandidates(person).includes(formId)
+    !person.training && getAutomaticFormCandidates(
+      person,
+      isCourseXUnlocked(state.upgrades),
+    ).includes(formId)
   ).length;
 }
 
@@ -329,6 +339,7 @@ function processInstructorQualifications(
   now: number,
 ): GameState {
   let nextState = state;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const activeTechnicianIds = new Set(
     state.collaborators.flatMap((collaborator) =>
       collaborator.training?.technicianId
@@ -348,6 +359,8 @@ function processInstructorQualifications(
       activeTechnicianIds.has(collaborator.id)
     ) return [];
     return collaborator.forms.flatMap((formId) =>
+      (!courseXUnlocked && formId === "course-x") ||
+      (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) ||
       collaborator.instructorForms.includes(formId)
         ? []
         : [{

@@ -13,7 +13,7 @@ import {
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
+import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
@@ -129,7 +129,7 @@ export function CollaboratorList({
       ) return false;
       if (
         statsFilter !== "all" &&
-        hasCompletedCourseX(collaborator.forms) !== (statsFilter === "visible")
+        hasUnlockedOfficialStats(collaborator.forms) !== (statsFilter === "visible")
       ) return false;
       if (levelFilter !== "all") {
         const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
@@ -376,7 +376,7 @@ export function CollaboratorList({
             const masteryProgress = collaborator.assignment
               ? getCollaboratorMasteryProgress(mastery[collaborator.assignment])
               : undefined;
-            const hasVisibleStats = hasCompletedCourseX(collaborator.forms);
+            const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms);
             const officialStats = contact && hasVisibleStats
               ? getContactPreparation(contact, collaborator.forms)
               : undefined;
@@ -500,7 +500,7 @@ export function CollaboratorList({
                     {officialStats ? (
                       <OfficialStatValue value={officialStats.arena} />
                     ) : (
-                      <strong className="member-stat-locked" title="Completa Corso X">???</strong>
+                      <strong className="member-stat-locked" title="Completa Corso Y">???</strong>
                     )}
                   </span>
                   <span>
@@ -508,7 +508,7 @@ export function CollaboratorList({
                     {officialStats ? (
                       <OfficialStatValue value={officialStats.style} />
                     ) : (
-                      <strong className="member-stat-locked" title="Completa Corso X">???</strong>
+                      <strong className="member-stat-locked" title="Completa Corso Y">???</strong>
                     )}
                   </span>
                 </div>

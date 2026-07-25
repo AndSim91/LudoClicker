@@ -9,6 +9,7 @@ import {
   getInstructorFormCost,
   getInstructorQualificationCost,
   getInstructorQualificationDuration,
+  needsCourseXRecovery,
   getTechnicianCourseDuration,
   getStudentFormCost,
   isInstructorForm,
@@ -18,6 +19,7 @@ import {
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
+  isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { getContactBaseStats } from "./athleteStats";
@@ -111,6 +113,7 @@ export function startAgonistCourse(
   now: number,
 ): GameState {
   const arenaLevel = state.upgrades["technical-arena"] ?? 0;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   if (
     arenaLevel < 1 ||
     !state.unlocks.forms ||
@@ -144,6 +147,7 @@ export function startAgonistCourse(
     !student ||
     !athleteContact ||
     !instructor ||
+    (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
     student.training ||
     remainingAnnualSlots <= 0 ||
     student.lastAgonistCourseYear === trainingYear ||
@@ -240,7 +244,15 @@ export function startFormTraining(
   now: number,
 ): GameState {
   if (!state.unlocks.forms) return state;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
+  const candidateForms = collaborator?.forms ?? state.contacts.find(
+    (candidate) => candidate.id === personId,
+  )?.forms ?? [];
+  if (
+    (!courseXUnlocked && formId === "course-x") ||
+    (courseXUnlocked && needsCourseXRecovery(candidateForms) && formId !== "course-x")
+  ) return state;
   const qualificationOnly = Boolean(
     collaborator?.assignment === "instructor" &&
     collaborator.forms.includes(formId) &&
@@ -330,6 +342,7 @@ export function startFormTraining(
       branchCapacity,
       collaborator?.assignment !== "instructor",
       annualTrainingLimit,
+      courseXUnlocked,
     ) ||
     !initialBranchCompatible ||
     state.school.euros < trainingCost

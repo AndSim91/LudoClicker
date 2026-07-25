@@ -297,7 +297,18 @@
 }
 
 .member-rarity {
+  display: block;
+  max-width: 100%;
   font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.people-row > .member-rarity-cell {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .member-favorite {

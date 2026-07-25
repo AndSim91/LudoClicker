@@ -3,6 +3,10 @@ import type { GameState } from "./types";
 
 export const GameStateContext = createContext<GameState | null>(null);
 
+export function useOptionalGameState(): GameState | null {
+  return useContext(GameStateContext);
+}
+
 /**
  * Reads the current game state without forwarding it through component props.
  * The optional override keeps leaf components independently testable.

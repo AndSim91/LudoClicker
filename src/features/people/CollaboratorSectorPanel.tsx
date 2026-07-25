@@ -7,7 +7,8 @@ import {
   createInitialCollaboratorMastery,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { getContactPreparation, hasCompletedCourseX } from "../../game/athleteStats";
+import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
+import { isCourseXUnlocked } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
@@ -73,7 +74,7 @@ function SectorCollaboratorRow({
   const masteryProgress = getCollaboratorMasteryProgress(
     mastery[collaborator.assignment ?? "instructor"],
   );
-  const officialStats = contact && hasCompletedCourseX(collaborator.forms)
+  const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms)
     ? getContactPreparation(contact, collaborator.forms)
     : undefined;
 
@@ -178,6 +179,7 @@ export function CollaboratorSectorPanel({
   onClose: () => void;
 }) {
   const state = useGameState(stateOverride);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const assigned = useMemo(
     () => state.collaborators.filter((collaborator) => collaborator.assignment === role),
@@ -187,7 +189,7 @@ export function CollaboratorSectorPanel({
     () => new Map(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
   );
-  const hasTimedWork = getInstructorTeachingEntries(state).length > 0 ||
+  const hasTimedWork = getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
     state.acquisitionEvents.some((event) => event.status === "running");
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const selectedCollaborator = selectedCollaboratorId
@@ -246,7 +248,7 @@ export function CollaboratorSectorPanel({
             role={role}
           />
           {role === "instructor" ? (
-            <span><strong>{getInstructorCoverageForms(assigned).length}</strong><small>Forme coperte</small></span>
+            <span><strong>{getInstructorCoverageForms(assigned, courseXUnlocked).length}</strong><small>Forme coperte</small></span>
           ) : null}
         </div>
 

@@ -4,7 +4,7 @@ import { Icon } from "../../components/common/Icon";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
-import { getAnnualFormTrainingLimit } from "../../content/upgrades";
+import { getAnnualFormTrainingLimit, isCourseXUnlocked } from "../../content/upgrades";
 import { useGameState } from "../../game/GameStateContext";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
@@ -13,9 +13,12 @@ import { TrainingControl } from "./TrainingControl";
 import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
 import {
   getContactPreparation,
-  hasCompletedCourseX,
+  hasUnlockedOfficialStats,
 } from "../../game/athleteStats";
-import { getRarityClassName } from "../../shared/rarityPresentation";
+import {
+  getPresentedRarityLabel,
+  getRarityClassName,
+} from "../../shared/rarityPresentation";
 import {
   getMemberNextFormLabel,
   getMemberStudent,
@@ -126,6 +129,7 @@ export function MemberList({
   const deferredSearch = useDeferredValue(search);
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const foundedSchools = state.network.schools.length;
   const immunityContext = useMemo(() => ({
     currentMonth,
@@ -138,6 +142,7 @@ export function MemberList({
       technicalArenaLevel: state.upgrades["technical-arena"] ?? 0,
       immunityContext,
       foundedSchools,
+      courseXUnlocked,
       collaboratorsByContactId,
     }),
     [
@@ -146,12 +151,16 @@ export function MemberList({
       annualTrainingLimit,
       state.upgrades,
       foundedSchools,
+      courseXUnlocked,
       immunityContext,
     ],
   );
   const filterOptions = useMemo(() => ({
     paths: uniqueSortedOptions(members.map((contact) =>
-      formatFormPath(getMemberStudent(contact, sortContext).forms)
+      formatFormPath(
+        getMemberStudent(contact, sortContext).forms,
+        sortContext.courseXUnlocked,
+      )
     )),
     statuses: uniqueSortedOptions(members.map((contact) =>
       getDisplayedMemberStatus(contact, sortContext)
@@ -166,7 +175,7 @@ export function MemberList({
     const minimumStyle = styleMinimum === "" ? undefined : Number(styleMinimum);
     return members.filter((contact) => {
       const student = getMemberStudent(contact, sortContext);
-      const path = formatFormPath(student.forms);
+      const path = formatFormPath(student.forms, sortContext.courseXUnlocked);
       const searchableText = `${contact.firstName} ${contact.lastName} ${contact.email}`
         .toLocaleLowerCase("it-IT");
       if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
@@ -402,7 +411,7 @@ export function MemberList({
           memberStudent,
           Boolean(collaborator),
         );
-        const hasVisibleStats = hasCompletedCourseX(memberForms);
+        const hasVisibleStats = hasUnlockedOfficialStats(memberForms);
         const preparation = hasVisibleStats
           ? getContactPreparation(contact, memberForms)
           : undefined;
@@ -430,15 +439,18 @@ export function MemberList({
                 </span>
               </span>
             </div>
-            <span data-label="Rarità">
+            <span className="member-rarity-cell" data-label="Rarità">
               <strong
                 className={`member-rarity rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}
               >
-                {PERSON_RARITIES[contact.rarity].label}
+                {getPresentedRarityLabel(
+                  contact.rarity,
+                  Boolean(contact.secretLegendaryId),
+                )}
               </strong>
             </span>
             <div className="member-path" data-label="Percorso">
-              <strong>{formatFormPath(memberForms)}</strong>
+              <strong>{formatFormPath(memberForms, courseXUnlocked)}</strong>
               <FormLogoStrip
                 forms={memberForms}
                 instructorForms={collaborator?.instructorForms}
@@ -449,14 +461,14 @@ export function MemberList({
               {preparation ? (
                 <OfficialStatValue value={preparation.arena} />
               ) : (
-                <span className="member-stat-locked" title="Completa Corso X">???</span>
+                <span className="member-stat-locked" title="Completa Corso Y">???</span>
               )}
             </span>
             <span className="member-stat" data-label="Stile">
               {preparation ? (
                 <OfficialStatValue value={preparation.style} />
               ) : (
-                <span className="member-stat-locked" title="Completa Corso X">???</span>
+                <span className="member-stat-locked" title="Completa Corso Y">???</span>
               )}
             </span>
             <span className="member-status" data-label="Stato">

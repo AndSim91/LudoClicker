@@ -5,8 +5,9 @@ import {
   COLLABORATOR_ASSIGNMENT_LABELS,
   getCollaboratorAssignmentLabel,
 } from "../../content/collaboratorRoles";
-import { getCollaboratorBonusSummary } from "../../content/forms";
+import { getCollaboratorBonusSummary, getVisibleForms } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
+import { isCourseXUnlocked } from "../../content/upgrades";
 import { useGameState } from "../../game/GameStateContext";
 import type {
   Collaborator,
@@ -45,6 +46,7 @@ export function CollaboratorDetailDrawer({
   onClose: () => void;
 }) {
   const state = useGameState(stateOverride);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -185,8 +187,8 @@ export function CollaboratorDetailDrawer({
 
         <section className="collaborator-detail-section collaborator-detail-certificates">
           <h3>Attestati da istruttore</h3>
-          <span>{collaborator.instructorForms.length} attestati</span>
-          <span>{collaborator.technicianForms?.length ?? 0} qualifiche da Tecnico</span>
+          <span>{getVisibleForms(collaborator.instructorForms, courseXUnlocked).length} attestati</span>
+          <span>{getVisibleForms(collaborator.technicianForms ?? [], courseXUnlocked).length} qualifiche da Tecnico</span>
         </section>
 
         {allowAssignment ? (

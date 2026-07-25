@@ -1,7 +1,9 @@
 import { COLLABORATOR_MASTERY_ROLES } from "../content/mastery";
 import {
   getCollaboratorProductivity,
+  getVisibleForms,
 } from "../content/forms";
+import { isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { getInstructorTeachingCounts, getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type {
@@ -79,11 +81,12 @@ export function getCollaboratorAssignmentCounts(
 function getInstructorCoverage(
   collaborators: GameState["collaborators"],
   excludedId?: string,
+  courseXUnlocked = true,
 ): Set<string> {
   return new Set(
     collaborators.flatMap((collaborator) =>
       collaborator.id !== excludedId && collaborator.assignment === "instructor"
-        ? collaborator.instructorForms
+        ? getVisibleForms(collaborator.instructorForms, courseXUnlocked)
         : []
     ),
   );
@@ -93,9 +96,10 @@ function compareInstructorSuitability(
   left: Collaborator,
   right: Collaborator,
   coveredForms: ReadonlySet<string>,
+  courseXUnlocked: boolean,
 ): number {
-  const leftScore = getInstructorSuitabilityScore(left, coveredForms);
-  const rightScore = getInstructorSuitabilityScore(right, coveredForms);
+  const leftScore = getInstructorSuitabilityScore(left, coveredForms, courseXUnlocked);
+  const rightScore = getInstructorSuitabilityScore(right, coveredForms, courseXUnlocked);
   for (let index = 0; index < leftScore.length; index += 1) {
     if (leftScore[index] !== rightScore[index]) {
       return rightScore[index] - leftScore[index];
@@ -107,18 +111,21 @@ function compareInstructorSuitability(
 function getInstructorSuitabilityScore(
   collaborator: Collaborator,
   coveredForms: ReadonlySet<string>,
+  courseXUnlocked: boolean,
 ): readonly number[] {
-  const newCoverage = collaborator.instructorForms.filter(
+  const instructorForms = getVisibleForms(collaborator.instructorForms, courseXUnlocked);
+  const forms = getVisibleForms(collaborator.forms, courseXUnlocked);
+  const newCoverage = instructorForms.filter(
     (formId) => !coveredForms.has(formId),
   ).length;
-  const certified = new Set(collaborator.instructorForms);
-  const certifiableForms = collaborator.forms.filter(
+  const certified = new Set(instructorForms);
+  const certifiableForms = forms.filter(
     (formId) => !certified.has(formId),
   ).length;
   return [
     newCoverage,
     certifiableForms,
-    collaborator.forms.length,
+    forms.length,
     collaborator.mastery?.instructor ?? 0,
     getCollaboratorProductivity(collaborator, "instructor"),
   ];
@@ -129,12 +136,14 @@ function compareRoleSuitability(
   right: Collaborator,
   role: CollaboratorMasteryRole,
   collaborators: GameState["collaborators"],
+  courseXUnlocked: boolean,
 ): number {
   if (role === "instructor") {
     return compareInstructorSuitability(
       left,
       right,
-      getInstructorCoverage(collaborators),
+      getInstructorCoverage(collaborators, undefined, courseXUnlocked),
+      courseXUnlocked,
     );
   }
   const productivityDifference =
@@ -150,6 +159,7 @@ function selectLeastEffectiveFreeCollaborator(
   collaborators: GameState["collaborators"],
   role: CollaboratorMasteryRole,
   busyIds: ReadonlySet<string>,
+  courseXUnlocked: boolean,
 ): Collaborator | undefined {
   const candidates = collaborators.filter(
     (collaborator) => collaborator.assignment === role && !busyIds.has(collaborator.id),
@@ -158,11 +168,13 @@ function selectLeastEffectiveFreeCollaborator(
     return candidates.sort((left, right) => {
       const leftScore = getInstructorSuitabilityScore(
         left,
-        getInstructorCoverage(collaborators, left.id),
+        getInstructorCoverage(collaborators, left.id, courseXUnlocked),
+        courseXUnlocked,
       );
       const rightScore = getInstructorSuitabilityScore(
         right,
-        getInstructorCoverage(collaborators, right.id),
+        getInstructorCoverage(collaborators, right.id, courseXUnlocked),
+        courseXUnlocked,
       );
       for (let index = 0; index < leftScore.length; index += 1) {
         if (leftScore[index] !== rightScore[index]) {
@@ -173,18 +185,19 @@ function selectLeastEffectiveFreeCollaborator(
     })[0];
   }
   return candidates.sort((left, right) =>
-    compareRoleSuitability(right, left, role, collaborators)
+    compareRoleSuitability(right, left, role, collaborators, courseXUnlocked)
   )[0];
 }
 
 function selectBestUnassignedCollaborator(
   collaborators: GameState["collaborators"],
   role: CollaboratorMasteryRole,
+  courseXUnlocked: boolean,
 ): Collaborator | undefined {
   return collaborators
     .filter((collaborator) => collaborator.assignment === null)
     .sort((left, right) =>
-      compareRoleSuitability(left, right, role, collaborators)
+      compareRoleSuitability(left, right, role, collaborators, courseXUnlocked)
     )[0];
 }
 
@@ -192,6 +205,7 @@ function rebalanceTargets(state: GameState): GameState {
   if (!state.collaboratorManagement.aggregateViewUnlocked) return state;
 
   const busyIds = getBusyCollaboratorIds(state);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const targets = sanitizeCollaboratorTargets(state.collaboratorManagement.targets);
   let collaborators = state.collaborators;
   let changed = false;
@@ -207,6 +221,7 @@ function rebalanceTargets(state: GameState): GameState {
         collaborators,
         role,
         busyIds,
+        courseXUnlocked,
       );
       if (!removable) break;
       collaborators = collaborators.map((collaborator) =>
@@ -225,7 +240,11 @@ function rebalanceTargets(state: GameState): GameState {
       (collaborator) => collaborator.assignment === role,
     ).length;
     while (assignedCount < targets[role]) {
-      const selected = selectBestUnassignedCollaborator(collaborators, role);
+      const selected = selectBestUnassignedCollaborator(
+        collaborators,
+        role,
+        courseXUnlocked,
+      );
       if (!selected) break;
       collaborators = collaborators.map((collaborator) =>
         collaborator.id === selected.id
