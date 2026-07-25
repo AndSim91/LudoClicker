@@ -115,10 +115,9 @@ export function getNextGameDeadline(state: GameState): number {
   return nextDeadline;
 }
 
-export function getNextGameTickDelay(
+export function getNextGameTickAt(
   state: GameState,
   now: number,
-  gameSpeed = 1,
 ): number {
   let nextDeadline = getNextGameDeadline(state);
   const hasEventAutomation = state.collaborators.some(
@@ -127,14 +126,18 @@ export function getNextGameTickDelay(
   if (hasEventAutomation) {
     nextDeadline = earlier(nextDeadline, getNextRealtimeEventCooldownDeadline(state, now));
   }
-  const deadlineDelay = Math.max(0, nextDeadline - now);
-  const automationHeartbeatDelay = Math.max(
-    0,
-    AUTOMATION_HEARTBEAT_MS - Math.max(0, now - state.automation.lastProcessedAt),
-  );
-  const requestedDelay = needsAutomationHeartbeat(state)
-    ? Math.min(automationHeartbeatDelay, deadlineDelay)
-    : deadlineDelay;
+  const heartbeatAt = needsAutomationHeartbeat(state)
+    ? state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS
+    : Infinity;
+  return Math.min(nextDeadline, heartbeatAt);
+}
+
+export function getNextGameTickDelay(
+  state: GameState,
+  now: number,
+  gameSpeed = 1,
+): number {
+  const requestedDelay = Math.max(0, getNextGameTickAt(state, now) - now);
   return Math.min(
     MAX_TIMEOUT_MS,
     gameDelayToWallDelay(requestedDelay, gameSpeed),

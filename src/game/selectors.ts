@@ -22,6 +22,7 @@ import {
   getDayTrials,
   getInstructorTeachingCounts,
   getRunningAcquisitionEvents,
+  getScheduledTrialsByStart,
 } from "./runtimeIndexes";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { GAME_CONFIG } from "./config";
-import { gameReducer } from "./engine";
+import { MAX_CATCH_UP_STEPS_PER_TICK, gameReducer } from "./engine";
 import {
   changeGameClockSpeed,
   createGameClockAnchor,
@@ -105,7 +105,11 @@ export function useGameEngine() {
       tickId = window.setTimeout(() => {
         if (cancelled || pausedAtRef.current !== null) return;
         const stateBeforeTick = stateRef.current;
-        dispatchAction({ type: "TICK", now: getGameNow() });
+        dispatchAction({
+          type: "TICK",
+          now: getGameNow(),
+          stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+        });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo
         // stesso oggetto di stato.

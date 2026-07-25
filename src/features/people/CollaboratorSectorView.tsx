@@ -373,6 +373,7 @@ function InstructorSectorCard({
                     <small>con il Tecnico {entry.technician.displayName}</small>
                   </span>
                   <ProgressBar
+                    className="internal-instructor-course-progress"
                     label={`Corso Istruttori interno di ${entry.trainee.displayName}`}
                     value={progress}
                     durationMs={entry.training.completesAt - entry.training.startedAt}

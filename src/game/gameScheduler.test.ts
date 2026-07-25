@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, gameReducer } from "./engine";
+import {
+  MAX_CATCH_UP_STEPS_PER_TICK,
+  createInitialState,
+  gameReducer,
+} from "./engine";
 import {
   AUTOMATION_HEARTBEAT_MS,
   getNextGameDeadline,
+  getNextGameTickAt,
   getNextGameTickDelay,
   needsAutomationHeartbeat,
 } from "./gameScheduler";
-import type { Collaborator, GameState } from "./types";
+import type { AcquisitionEvent, Collaborator, GameState } from "./types";
 
 const NOW = 10_000;
 
@@ -35,6 +40,29 @@ function stateAtNow(): GameState {
     ...state,
     school: { ...state.school, nextFeeAt: NOW + 60_000 },
     narrative: { ...state.narrative, nextEventAt: NOW + 120_000 },
+  };
+}
+
+function runningEvent(
+  id: string,
+  definitionId: AcquisitionEvent["definitionId"],
+  resolvesAt: number,
+): AcquisitionEvent {
+  return {
+    id,
+    definitionId,
+    title: "Evento " + id,
+    location: "Luogo test",
+    startedAt: NOW,
+    resolvesAt,
+    cost: 0,
+    peopleMet: 0,
+    demonstrationsGiven: 0,
+    contactReward: 0,
+    membersUsed: 0,
+    equipmentUsed: 0,
+    wearAdded: 0,
+    status: "running",
   };
 }
 
@@ -143,6 +171,7 @@ describe("game scheduler", () => {
       },
     };
 
+    expect(getNextGameTickAt(automated, NOW)).toBe(NOW + 400);
     expect(getNextGameTickDelay(automated, NOW)).toBe(400);
   });
 
@@ -170,6 +199,130 @@ describe("game scheduler", () => {
       oneHeartbeat.automation.lastProcessedAt,
     );
     expect(quarterTicks.statistics).toEqual(oneHeartbeat.statistics);
+  });
+
+  it("recovers multiple missed heartbeats without losing automation progress", () => {
+    const state = stateAtNow();
+    const automated: GameState = {
+      ...state,
+      collaborators: [collaborator("writing")],
+      unlocks: { ...state.unlocks, social: true },
+    };
+    let sequential = automated;
+    for (let second = 1; second <= 5; second += 1) {
+      sequential = gameReducer(sequential, {
+        type: "TICK",
+        now: NOW + second * AUTOMATION_HEARTBEAT_MS,
+      });
+    }
+
+    const delayed = gameReducer(automated, {
+      type: "TICK",
+      now: NOW + 5 * AUTOMATION_HEARTBEAT_MS,
+    });
+
+    expect(delayed).toEqual(sequential);
+  });
+
+  it("carries sub-heartbeat timer lateness into the next runtime tick", () => {
+    const state = stateAtNow();
+    const automated: GameState = {
+      ...state,
+      collaborators: [collaborator("writing")],
+      unlocks: { ...state.unlocks, social: true },
+    };
+    const firstHeartbeat = gameReducer(automated, {
+      type: "TICK",
+      now: NOW + AUTOMATION_HEARTBEAT_MS,
+    });
+
+    const lateRuntimeTick = gameReducer(automated, {
+      type: "TICK",
+      now: NOW + AUTOMATION_HEARTBEAT_MS + 100,
+      stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+    });
+
+    expect(lateRuntimeTick).toEqual(firstHeartbeat);
+    expect(
+      getNextGameTickDelay(
+        lateRuntimeTick,
+        NOW + AUTOMATION_HEARTBEAT_MS + 100,
+      ),
+    ).toBe(900);
+
+    const nextRuntimeTick = gameReducer(lateRuntimeTick, {
+      type: "TICK",
+      now: NOW + 2 * AUTOMATION_HEARTBEAT_MS,
+      stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+    });
+    const sequential = gameReducer(firstHeartbeat, {
+      type: "TICK",
+      now: NOW + 2 * AUTOMATION_HEARTBEAT_MS,
+    });
+
+    expect(nextRuntimeTick).toEqual(sequential);
+  });
+
+  it("resolves intermediate deadlines at their chronological timestamps", () => {
+    const state: GameState = {
+      ...stateAtNow(),
+      acquisitionEvents: [
+        runningEvent("first", "park-sparring", NOW + 1_000),
+        runningEvent("second", "public-demo", NOW + 2_500),
+      ],
+    };
+    let sequential = state;
+    for (const now of [NOW + 1_000, NOW + 2_500, NOW + 5_000]) {
+      sequential = gameReducer(sequential, { type: "TICK", now });
+    }
+
+    const delayed = gameReducer(state, { type: "TICK", now: NOW + 5_000 });
+
+    expect(delayed).toEqual(sequential);
+    expect(delayed.activities.eventCooldowns["park-sparring"]).toMatchObject({
+      startedAt: NOW + 1_000,
+    });
+    expect(delayed.activities.eventCooldowns["public-demo"]).toMatchObject({
+      startedAt: NOW + 2_500,
+    });
+  });
+
+  it("yields catch-up beyond the runtime budget without dropping queued time", () => {
+    const state = stateAtNow();
+    const automated: GameState = {
+      ...state,
+      collaborators: [collaborator("instructor")],
+      unlocks: { ...state.unlocks, forms: true },
+    };
+    const targetNow = NOW +
+      (MAX_CATCH_UP_STEPS_PER_TICK + 1) * AUTOMATION_HEARTBEAT_MS;
+
+    const partial = gameReducer(automated, {
+      type: "TICK",
+      now: targetNow,
+      stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+    });
+
+    expect(partial.automation.lastProcessedAt).toBe(
+      NOW + MAX_CATCH_UP_STEPS_PER_TICK * AUTOMATION_HEARTBEAT_MS,
+    );
+    expect(getNextGameTickDelay(partial, targetNow)).toBe(0);
+
+    const completed = gameReducer(partial, {
+      type: "TICK",
+      now: targetNow,
+      stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+    });
+    let sequential = automated;
+    for (let step = 1; step <= MAX_CATCH_UP_STEPS_PER_TICK + 1; step += 1) {
+      sequential = gameReducer(sequential, {
+        type: "TICK",
+        now: NOW + step * AUTOMATION_HEARTBEAT_MS,
+      });
+    }
+
+    expect(completed).toEqual(sequential);
+    expect(completed.automation.lastProcessedAt).toBe(targetNow);
   });
 
   it("wakes immediately for an overdue deadline", () => {

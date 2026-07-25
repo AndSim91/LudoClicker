@@ -22,6 +22,11 @@ import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
 import { compactGameHistory } from "./historyArchive";
+import {
+  AUTOMATION_HEARTBEAT_MS,
+  getNextGameTickAt,
+  needsAutomationHeartbeat,
+} from "./gameScheduler";
 import { notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
 import {
   completeShortGoal,
@@ -115,7 +120,7 @@ function advanceAutomation(
   return processAutomation(state, now, gainMultiplier, automationDependencies);
 }
 
-function tick(state: GameState, now: number, gainMultiplier: number): GameState {
+function tickStep(state: GameState, now: number, gainMultiplier: number): GameState {
   // La pausa aggiorna lastProcessedAt: questo intervallo rappresenta soltanto
   // il tempo di gioco attivo trascorso con l'assegnazione corrente.
   const masteryElapsedMs = Math.max(0, now - state.automation.lastProcessedAt);
@@ -186,6 +191,70 @@ function tick(state: GameState, now: number, gainMultiplier: number): GameState 
   return notifyPrestigeOffer(nextState, now);
 }
 
+export const MAX_CATCH_UP_STEPS_PER_TICK = 8;
+
+function completeTickStep(
+  state: GameState,
+  now: number,
+  gainMultiplier: number,
+): GameState {
+  const resolved = tickStep(state, now, gainMultiplier);
+  const reconciled = reconcileCollaboratorManagement(
+    recruitEnrolledLegendaryCollaborators(resolved, now),
+  );
+  const progressed = completeShortGoal(
+    grantAchievements(reconciled, now, gainMultiplier),
+    now,
+    gainMultiplier,
+  );
+  return compactChangedHistory(state, progressed, {
+    type: "TICK",
+    now,
+    gainMultiplier,
+  });
+}
+
+function tick(
+  state: GameState,
+  now: number,
+  gainMultiplier: number,
+  stepBudget?: number,
+): GameState {
+  let nextState = state;
+  let stalledAt: number | undefined;
+  const hasStepBudget = stepBudget !== undefined;
+  const maxSteps = stepBudget === undefined || !Number.isFinite(stepBudget)
+    ? Infinity
+    : Math.max(1, Math.floor(stepBudget));
+
+  for (let step = 0; step < maxSteps; step += 1) {
+    const cursor = nextState.automation.lastProcessedAt;
+    const scheduledAt = getNextGameTickAt(nextState, cursor);
+    const scheduledBoundary = Math.max(cursor, scheduledAt);
+    if (
+      step > 0 &&
+      hasStepBudget &&
+      scheduledBoundary > now &&
+      needsAutomationHeartbeat(nextState)
+    ) break;
+    let boundary = now <= cursor
+      ? now
+      : Math.min(now, scheduledBoundary);
+    if (stalledAt === cursor && boundary === cursor) {
+      boundary = Math.min(now, cursor + AUTOMATION_HEARTBEAT_MS);
+    }
+
+    const previousState = nextState;
+    nextState = completeTickStep(previousState, boundary, gainMultiplier);
+    if (boundary >= now) break;
+    stalledAt = boundary === cursor && nextState === previousState
+      ? cursor
+      : undefined;
+  }
+
+  return nextState;
+}
+
 const ACTION_HANDLERS = createGameActionHandlers({
   write,
   sendEmail,
@@ -214,6 +283,9 @@ function compactChangedHistory(
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   const nextState = dispatchGameAction(state, action, ACTION_HANDLERS);
+  if (action.type === "TICK" || action.type === "ADMIN_ADVANCE_MONTH") {
+    return nextState;
+  }
   const now = "now" in action ? action.now : state.lastSavedAt;
   const reconciledState = reconcileCollaboratorManagement(
     recruitEnrolledLegendaryCollaborators(nextState, now),
@@ -222,7 +294,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     return compactChangedHistory(state, reconciledState, action);
   }
 
-  const gainMultiplier = action.type === "TICK" ? (action.gainMultiplier ?? 1) : 1;
+  const gainMultiplier = 1;
   return compactChangedHistory(
     state,
     completeShortGoal(

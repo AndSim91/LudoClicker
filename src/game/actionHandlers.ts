@@ -40,7 +40,12 @@ export type GameActionHandlers = {
 export interface GameActionHandlerDependencies {
   write: (state: GameState, now: number) => GameState;
   sendEmail: (state: GameState, now: number) => GameState;
-  tick: (state: GameState, now: number, gainMultiplier: number) => GameState;
+  tick: (
+    state: GameState,
+    now: number,
+    gainMultiplier: number,
+    stepBudget?: number,
+  ) => GameState;
   startFormTraining: (
     state: GameState,
     personId: string,
@@ -71,6 +76,7 @@ export function createGameActionHandlers(
       state,
       action.now,
       action.gainMultiplier ?? 1,
+      action.stepBudget,
     ),
     RESUME_FROM_PAUSE: (state, action) => freezeGameState(
       state,

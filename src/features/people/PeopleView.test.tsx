@@ -279,6 +279,9 @@ describe("PeopleView", () => {
     expect(screen.getByRole("progressbar", {
       name: "Corso Istruttori interno di Aspirante Istruttore",
     })).toHaveAttribute("aria-valuenow", "50");
+    expect(screen.getByRole("progressbar", {
+      name: "Corso Istruttori interno di Aspirante Istruttore",
+    })).toHaveClass("internal-instructor-course-progress");
     expect(screen.queryByText(
       /esame (fallito|non superato)|probabilità dell'esame|rischio dell'esame/i,
     )).not.toBeInTheDocument();

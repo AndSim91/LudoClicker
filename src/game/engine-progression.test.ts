@@ -783,8 +783,10 @@ describe("game engine: progression", () => {
       { ...training, randomSeed: 1 },
       { type: "TICK", now: 12_000 },
     );
+    const teachingStoppedAt = student.training.completesAt;
     expect(studentFinished.collaborators[0].training?.completesAt).toBe(
-      12_000 + Math.round((slowTraining.completesAt - 12_000) / 3),
+      teachingStoppedAt +
+        Math.round((slowTraining.completesAt - teachingStoppedAt) / 3),
     );
   });
 
