@@ -293,17 +293,20 @@ export function startFormTraining(
     };
   }
   const instructorSelf = collaborator?.assignment === "instructor";
-  const instructorTrack = Boolean(instructorSelf && isInstructorForm(formId));
-  const instructor = !instructorSelf
+  // Durante l'anno didattico anche un Istruttore resta un possibile allievo:
+  // un collega qualificato gli insegna prima la Forma come atleta. In estate
+  // rimane invece disponibile il percorso combinato personale gia previsto.
+  const instructor = !instructorSelf || !isSummerBreak(state.school.currentMonth)
     ? selectAvailableInstructor(state, formId, personId)
     : undefined;
+  const instructorTrack = Boolean(
+    instructorSelf && !instructor && isInstructorForm(formId),
+  );
   const trainingCost = instructorTrack
     ? getInstructorFormCost(definition?.cost ?? 0)
-    : collaborator?.assignment === "instructor"
-      ? definition?.cost ?? 0
-      : instructor
-        ? getStudentFormCost(definition?.cost ?? 0)
-        : definition?.cost ?? 0;
+    : instructor
+      ? getStudentFormCost(definition?.cost ?? 0)
+      : definition?.cost ?? 0;
   const branchCapacity = collaborator?.assignment === "instructor"
     ? Math.min(3, 1 + (state.upgrades["instructor-versatility"] ?? 0))
     : undefined;

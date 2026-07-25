@@ -1002,6 +1002,13 @@ Regole:
 - chi non conosce ancora la Forma segue un percorso combinato composto dalla
   Forma da atleta e dal modulo da Istruttore: dura complessivamente il **150%**
   della Forma, paga il **350% del costo base** e consuma un solo slot annuale;
+- un Collaboratore assegnato come Istruttore resta eleggibile come allievo
+  dell'automazione: durante l'anno didattico, se un altro Istruttore possiede la
+  qualifica per la sua prossima Forma, completa prima la normale fase da atleta
+  con il costo ridotto al **75%**; se un Tecnico possiede la qualifica per la
+  stessa Forma, il successivo Corso Istruttori interno parte automaticamente al
+  **187,5%** del costo base. Le due fasi consumano complessivamente un solo slot
+  annuale; senza un Tecnico compatibile resta in attesa della qualifica;
 - le due parti del percorso combinato restano fasi separate: la Forma viene
   acquisita prima dell'attestato e ciascuna fase ha la propria verifica finale;
 - un Istruttore può iniziare o continuare una nuova formazione anche mentre

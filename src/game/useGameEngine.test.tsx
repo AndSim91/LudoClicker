@@ -5,8 +5,14 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
 import { needsAutomationHeartbeat } from "./gameScheduler";
 import { loadGame, saveGame } from "./save";
+import { decodeStoredSave } from "./saveCodec";
+import type { GameState } from "./types";
 import { useGameEngine } from "./useGameEngine";
 import { STORAGE_KEYS } from "../shared/storageKeys";
+
+function readStoredGame(): GameState {
+  return decodeStoredSave(localStorage.getItem(STORAGE_KEYS.gameSave)!) as GameState;
+}
 
 describe("useGameEngine pause", () => {
   beforeEach(() => {
@@ -192,7 +198,7 @@ describe("useGameEngine pause", () => {
     act(() => vi.advanceTimersByTime(50));
     act(() => result.current.saveNow());
 
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    const stored = readStoredGame();
     expect(stored.lastSavedAt).toBe(Date.now());
     expect(stored.acquisitionEvents[0].resolvesAt - stored.lastSavedAt).toBe(5_000);
   });
@@ -211,13 +217,13 @@ describe("useGameEngine pause", () => {
     expect(result.current.saveStatus.phase).toBe("pending");
 
     act(() => vi.advanceTimersByTime(59_999));
-    const beforeInterval = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    const beforeInterval = readStoredGame();
     expect(beforeInterval.profile.displayName).toBe("Andrea Ungaro");
     expect(beforeInterval.lastSavedAt).toBe(1_000);
 
     act(() => vi.advanceTimersByTime(1));
     act(() => vi.advanceTimersByTime(1));
-    const afterInterval = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    const afterInterval = readStoredGame();
     expect(afterInterval.profile.displayName).toBe("Legend");
     expect(afterInterval.lastSavedAt).toBe(61_000);
     expect(result.current.saveStatus).toMatchObject({
@@ -237,7 +243,7 @@ describe("useGameEngine pause", () => {
     );
     act(() => result.current.saveNow());
 
-    let stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    let stored = readStoredGame();
     expect(stored.profile.displayName).toBe("Salvataggio manuale");
     expect(result.current.saveStatus.phase).toBe("saved");
 
@@ -249,7 +255,7 @@ describe("useGameEngine pause", () => {
     );
     act(() => window.dispatchEvent(new PageTransitionEvent("pagehide")));
 
-    stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.gameSave)!);
+    stored = readStoredGame();
     expect(stored.profile.displayName).toBe("Salvataggio in uscita");
     expect(result.current.saveStatus.phase).toBe("saved");
   });

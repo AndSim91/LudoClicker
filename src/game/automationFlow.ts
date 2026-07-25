@@ -465,8 +465,6 @@ export function processAutomaticTeaching(
   });
   for (const student of students) {
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
-    const instructorStudent = !("acquiredAt" in student) &&
-      student.assignment === "instructor";
     const candidate = qualifiedCandidates.find((formId) => {
       const definition = getFormDefinition(formId);
       const instructor = instructorsByForm.get(formId)?.find(
@@ -482,7 +480,7 @@ export function processAutomaticTeaching(
         )
       );
     });
-    if (candidate && !instructorStudent) {
+    if (candidate) {
       const startedState = startFormTraining(nextState, student.id, candidate, now);
       nextState = startedState;
       const startedStudent = "acquiredAt" in student

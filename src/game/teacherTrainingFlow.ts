@@ -68,9 +68,14 @@ export function getInstructorTrainingWorkloadMultiplier(
 ): number | undefined {
   const track = getTrainingTrack(training);
   const phase = getTrainingPhase(training);
+  const participantIsInstructor = state.collaborators.some(
+    (collaborator) =>
+      collaborator.id === personId && collaborator.assignment === "instructor",
+  );
   const teacherTraining = phase === "instructor" ||
     phase === "technician" ||
-    track === "combined-instructor";
+    track === "combined-instructor" ||
+    (track === "athlete" && participantIsInstructor);
   if (!teacherTraining) return undefined;
   return hasActiveStudentLesson(state, personId) ||
     Boolean(

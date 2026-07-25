@@ -8,6 +8,7 @@ import { migrate as migrateSave } from "./saveMigrations";
 import { GAME_CONFIG } from "./config";
 import { compactTournamentHistory } from "./tournamentFlow";
 import { createSaveFailure, type SaveGameResult, type SaveOperation } from "./saveDiagnostics";
+import { decodeStoredSave, encodeStoredSave, normalizeStoredSave } from "./saveCodec";
 import type { GameState } from "./types";
 
 const SAVE_KEY = STORAGE_KEYS.gameSave;
@@ -35,7 +36,7 @@ function read(key: string): ReadResult {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return { state: null, incompatible: false };
-    const rawParsed: unknown = JSON.parse(raw);
+    const rawParsed = decodeStoredSave(raw);
     if (!isSaveCompatible(rawParsed)) {
       return { state: null, incompatible: true };
     }
@@ -80,7 +81,7 @@ export function loadGame(now = Date.now()): GameState {
 export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult {
   let serialized: string;
   try {
-    serialized = JSON.stringify({
+    serialized = encodeStoredSave({
       ...state,
       saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
       lastSavedAt: now,
@@ -114,7 +115,7 @@ export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult 
 
   if (currentResult) {
     const backupResult = runStorageOperation("write-backup", () =>
-      localStorage.setItem(BACKUP_KEY, currentResult),
+      localStorage.setItem(BACKUP_KEY, normalizeStoredSave(currentResult)),
     );
     if (typeof backupResult !== "undefined") return backupResult;
   }

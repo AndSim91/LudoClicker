@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState, gameReducer } from "./engine";
 import { exportGame, importGame, loadGame, resetGame, saveGame } from "./save";
+import { STORED_SAVE_PREFIX } from "./saveCodec";
 import { GAME_CONFIG } from "./config";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { getEmailBuildLength } from "../content/emailBuild";
@@ -88,8 +89,28 @@ describe("local save", () => {
     const state = createInitialState(1_000);
     saveGame({ ...state, school: { ...state.school, euros: 42 } }, 2_000);
 
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save"))
+      .toEqual(expect.stringMatching(new RegExp("^" + STORED_SAVE_PREFIX)));
     expect(loadGame(3_000).school.euros).toBe(42);
     expect(loadGame(3_000).lastSavedAt).toBe(3_000);
+  });
+
+  it("compresses a legacy primary before keeping it as the backup", () => {
+    const state = createInitialState(1_000);
+    localStorage.setItem(
+      "oggetto-nuovi-iscritti.save",
+      JSON.stringify({ ...state, school: { ...state.school, euros: 21 } }),
+    );
+
+    expect(saveGame(
+      { ...state, school: { ...state.school, euros: 42 } },
+      2_000,
+    )).toBe(true);
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup"))
+      .toEqual(expect.stringMatching(new RegExp("^" + STORED_SAVE_PREFIX)));
+
+    localStorage.removeItem("oggetto-nuovi-iscritti.save");
+    expect(loadGame(3_000).school.euros).toBe(21);
   });
 
   it("persists the player's disabled automatic email sending choice", () => {

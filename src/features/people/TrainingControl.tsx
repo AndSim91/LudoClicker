@@ -89,14 +89,12 @@ function getDisplayedTrainingCost(
   qualification: boolean,
 ): number {
   if (qualification) return getInstructorQualificationCost(definition.cost);
+  const availableInstructor = !isSummerBreak(state.school.currentMonth)
+    ? selectAvailableInstructor(state, definition.id, personId)
+    : undefined;
+  if (availableInstructor) return getStudentFormCost(definition.cost);
   if (collaborator?.assignment === "instructor" && isInstructorForm(definition.id)) {
     return getInstructorFormCost(definition.cost);
-  }
-  if (
-    collaborator?.assignment !== "instructor" &&
-    selectAvailableInstructor(state, definition.id, personId)
-  ) {
-    return getStudentFormCost(definition.cost);
   }
   return definition.cost;
 }
@@ -592,8 +590,7 @@ export function TrainingControl({
       definition,
       qualification,
     );
-    const hasInstructorDiscount =
-      !qualification && collaborator?.assignment !== "instructor" && cost < definition.cost;
+    const hasInstructorDiscount = !qualification && cost < definition.cost;
     return {
       definition,
       costLabel: formatCurrency(cost),
