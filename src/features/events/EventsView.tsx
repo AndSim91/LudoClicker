@@ -8,7 +8,7 @@ import {
   getEventCooldownProgress,
   isEventCooldownActive,
 } from "../../game/eventCooldowns";
-import { useGameTime } from "../../game/GameTimeContext";
+import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipment";
 import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import { FIRST_EVENT_TUTORIAL_SCENE_ID, isTutorialScenePending } from "../../game/tutorialProgress";
@@ -41,11 +41,19 @@ export function EventsView({
   onCancel?: (eventId: string) => void;
 }) {
   const [historyPage, setHistoryPage] = useState(0);
+  const [fallbackNow] = useState(Date.now);
   const runningEvents = useMemo(
     () => state.acquisitionEvents.filter((event) => event.status === "running"),
     [state.acquisitionEvents],
   );
-  const now = useGameTime(true, GAME_CONFIG.progressUpdateIntervalMs);
+  const timeSource = useGameTimeSource();
+  const referenceNow = timeSource?.getNow() ?? fallbackNow;
+  const hasTimedWork = runningEvents.length > 0 ||
+    Object.values(state.activities.eventCooldowns).some((cooldown) =>
+      isEventCooldownActive(cooldown, state, referenceNow)
+    );
+  const clockNow = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
+  const now = timeSource ? clockNow : clockNow || referenceNow;
   const runningByDefinition = useMemo(
     () => new Map(runningEvents.map((event) => [event.definitionId, event])),
     [runningEvents],

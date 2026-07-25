@@ -17,12 +17,11 @@ import {
   getActiveCampaignEmails,
   getAvailableContactCount,
   getCollaboratorsById,
-  getCompletedTrialsByStartDay,
   getContactsById,
   getContactsAwaitingEmailCount,
+  getDayTrials,
   getInstructorTeachingCounts,
   getRunningAcquisitionEvents,
-  getScheduledTrialsByStart,
 } from "./runtimeIndexes";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {
@@ -134,10 +133,7 @@ export function selectDayTrials(state: GameState, now: number): ScheduledTrial[]
     today.getMonth(),
     today.getDate(),
   ).getTime();
-  const completedToday = getCompletedTrialsByStartDay(state.scheduledTrials).get(startOfDay) ?? [];
-
-  return [...getScheduledTrialsByStart(state.scheduledTrials), ...completedToday]
-    .sort((left, right) => left.startsAt - right.startsAt);
+  return getDayTrials(state.scheduledTrials, startOfDay);
 }
 
 export function selectIncomePerMonth(state: GameState): number {

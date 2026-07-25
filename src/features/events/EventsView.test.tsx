@@ -7,9 +7,20 @@ import { EventsView } from "./EventsView";
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("EventsView", () => {
+  it("does not start the shared clock without running events or cooldowns", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
+
+    expect(intervalSpy).not.toHaveBeenCalled();
+  });
+
   it("shows zero when a completed event has no contact reward", () => {
     const initial = createInitialState(1_000);
     const event: AcquisitionEvent = {

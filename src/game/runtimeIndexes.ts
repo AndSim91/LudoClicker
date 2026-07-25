@@ -19,6 +19,14 @@ const completedTrialsByStartDayCache = new WeakMap<
   ScheduledTrial[],
   ReadonlyMap<number, ScheduledTrial[]>
 >();
+const dayTrialsCache = new WeakMap<
+  ScheduledTrial[],
+  Map<number, ScheduledTrial[]>
+>();
+const directEnrollmentContactsCache = new WeakMap<
+  Contact[],
+  WeakMap<ScheduledTrial[], Contact[]>
+>();
 const runningEventsCache = new WeakMap<AcquisitionEvent[], AcquisitionEvent[]>();
 const activeTrainingsCache = new WeakMap<TrainingPerson[], TrainingPerson[]>();
 const contactsByIdCache = new WeakMap<Contact[], ReadonlyMap<string, Contact>>();
@@ -124,6 +132,48 @@ export function getCompletedTrialsByStartDay(
   }
   completedTrialsByStartDayCache.set(trials, byDay);
   return byDay;
+}
+
+export function getDayTrials(
+  trials: ScheduledTrial[],
+  dayStart: number,
+): ScheduledTrial[] {
+  let byDay = dayTrialsCache.get(trials);
+  if (!byDay) {
+    byDay = new Map();
+    dayTrialsCache.set(trials, byDay);
+  }
+  const cached = byDay.get(dayStart);
+  if (cached) return cached;
+
+  const dayTrials = [
+    ...getScheduledTrialsByStart(trials),
+    ...(getCompletedTrialsByStartDay(trials).get(dayStart) ?? []),
+  ].sort((left, right) => left.startsAt - right.startsAt);
+  byDay.set(dayStart, dayTrials);
+  return dayTrials;
+}
+
+export function getDirectEnrollmentContacts(
+  contacts: Contact[],
+  trials: ScheduledTrial[],
+): Contact[] {
+  let byTrials = directEnrollmentContactsCache.get(contacts);
+  if (!byTrials) {
+    byTrials = new WeakMap();
+    directEnrollmentContactsCache.set(contacts, byTrials);
+  }
+  const cached = byTrials.get(trials);
+  if (cached) return cached;
+
+  const trialContactIds = new Set(trials.map((trial) => trial.contactId));
+  const directEnrollments = contacts
+    .filter((contact) => contact.status === "enrolled" && !trialContactIds.has(contact.id))
+    .sort((left, right) =>
+      right.acquiredAt - left.acquiredAt || left.id.localeCompare(right.id)
+    );
+  byTrials.set(trials, directEnrollments);
+  return directEnrollments;
 }
 
 export function getRunningAcquisitionEvents(

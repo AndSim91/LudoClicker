@@ -7,6 +7,7 @@ import { getFormDefinition } from "../../content/forms";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
+import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
 import { isSummerBreak } from "../../game/calendar";
 import { selectActiveEmail } from "../../game/selectors";
 import type {
@@ -445,7 +446,10 @@ export function CollaboratorSectorView({
   const hasTimedWork = state.acquisitionEvents.some((event) => event.status === "running") ||
     getInstructorTeachingEntries(state).length > 0 ||
     getInternalInstructorCourseEntries(state.collaborators).length > 0 ||
-    state.collaborators.some((collaborator) => collaborator.assignment === "equipment");
+    (
+      state.collaborators.some((collaborator) => collaborator.assignment === "equipment") &&
+      getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
+    );
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
   const panelProps = useMemo(() => ({

@@ -8,6 +8,7 @@ import { PeopleView } from "./PeopleView";
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("PeopleView", () => {
@@ -56,6 +57,45 @@ describe("PeopleView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Aumenta collaboratori in Redazione" }));
     expect(onIncrement).toHaveBeenCalledWith("writing");
+  });
+
+  it("does not animate an equipment sector when all equipment is already repaired", () => {
+    const initial = createInitialState(1_000);
+    const collaborator: Collaborator = {
+      id: "idle-equipment-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Attrezzatura",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      formBranchPreferences: [],
+      assignment: "equipment",
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare",
+    };
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [collaborator],
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: {
+              ...initial.collaboratorManagement.targets,
+              equipment: 1,
+            },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(intervalSpy).not.toHaveBeenCalled();
   });
 
   it("enables sector management only when the sector has assigned collaborators", () => {

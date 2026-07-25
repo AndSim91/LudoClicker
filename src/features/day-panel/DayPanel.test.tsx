@@ -72,9 +72,20 @@ function tournamentResult(completedAt: number): TournamentResult {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("DayPanel", () => {
+  it("does not start the shared clock without live notifications", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    render(<DayPanel state={createInitialState(1_000)} />);
+
+    expect(intervalSpy).not.toHaveBeenCalled();
+  });
+
   it("exposes La mia giornata as a guided tutorial target", () => {
     render(<DayPanel state={createInitialState(1_000)} />);
 

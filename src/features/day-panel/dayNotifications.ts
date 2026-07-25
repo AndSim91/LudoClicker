@@ -1,6 +1,10 @@
 import { NARRATIVE_EVENTS } from "../../content/narrativeEvents";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { GAME_CONFIG } from "../../game/config";
+import {
+  getContactsById,
+  getDirectEnrollmentContacts,
+} from "../../game/runtimeIndexes";
 import { selectDayTrials } from "../../game/selectors";
 import type {
   GameState,
@@ -97,8 +101,7 @@ function getTournamentSummary(result: TournamentResult): {
 }
 
 export function selectDayNotifications(state: GameState, now: number): DayNotification[] {
-  const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
-  const trialContactIds = new Set(state.scheduledTrials.map((trial) => trial.contactId));
+  const contactsById = getContactsById(state.contacts);
   const notifications: DayNotification[] = [];
 
   for (const trial of selectDayTrials(state, now)) {
@@ -136,14 +139,10 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
     });
   }
 
-  for (const contact of state.contacts) {
+  for (const contact of getDirectEnrollmentContacts(state.contacts, state.scheduledTrials)) {
+    if (contact.acquiredAt > now) continue;
     const expiresAt = contact.acquiredAt + DAY_NOTIFICATION_VISIBILITY_MS;
-    if (
-      contact.status !== "enrolled" ||
-      trialContactIds.has(contact.id) ||
-      contact.acquiredAt > now ||
-      now >= expiresAt
-    ) continue;
+    if (now >= expiresAt) break;
     notifications.push({
       id: `direct-enrollment-${contact.id}`,
       kind: "direct-enrollment",

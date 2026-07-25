@@ -10,6 +10,8 @@ import {
   getCollaboratorsByContactId,
   getContactsById,
   getInstructorTeachingCounts,
+  getDayTrials,
+  getDirectEnrollmentContacts,
   getScheduledTrials,
   getScheduledTrialsByStart,
 } from "./runtimeIndexes";
@@ -73,10 +75,40 @@ describe("runtime indexes", () => {
     expect(getAvailableContactCount(contacts)).toBe(2);
     const scheduled = getScheduledTrialsByStart(trials);
     const historyByDay = getCompletedTrialsByStartDay(trials);
+    const dayStart = new Date(2026, 6, 19).getTime();
+    const dayTrials = getDayTrials(trials, dayStart);
     expect(getScheduledTrialsByStart(trials)).toBe(scheduled);
     expect(getCompletedTrialsByStartDay(trials)).toBe(historyByDay);
+    expect(getDayTrials(trials, dayStart)).toBe(dayTrials);
     expect(scheduled.map((trial) => trial.id)).toEqual(["earlier", "later"]);
     expect([...historyByDay.values()].flat().map((trial) => trial.id)).toEqual(["today"]);
+    expect(dayTrials.map((trial) => trial.id)).toEqual(["today", "earlier", "later"]);
+  });
+
+  it("indexes direct enrollments once per contacts and trials pair", () => {
+    const initial = createInitialState(1_000);
+    const contacts = initial.contacts.slice(0, 3).map((contact, index) => ({
+      ...contact,
+      acquiredAt: 1_000 + index,
+      status: "enrolled" as const,
+    }));
+    const trials: ScheduledTrial[] = [{
+      id: "enrollment-with-trial",
+      contactId: contacts[1].id,
+      startsAt: 2_000,
+      resolvesAt: 3_000,
+      resultSeed: 1,
+      status: "completed",
+    }];
+
+    const directEnrollments = getDirectEnrollmentContacts(contacts, trials);
+
+    expect(getDirectEnrollmentContacts(contacts, trials)).toBe(directEnrollments);
+    expect(directEnrollments.map((contact) => contact.id)).toEqual([
+      contacts[2].id,
+      contacts[0].id,
+    ]);
+    expect(getDirectEnrollmentContacts(contacts, [...trials])).not.toBe(directEnrollments);
   });
 
   it("keeps the active draft in the count until its email is sent", () => {

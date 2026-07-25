@@ -99,10 +99,10 @@ export function useGameEngine() {
     if (observedStateRef.current !== state) {
       observedStateRef.current = state;
       saveSchedulerRef.current?.markDirty(state);
-      setSaveStatus((current) => ({
-        ...current,
-        phase: current.phase === "error" ? "error" : "pending",
-      }));
+      setSaveStatus((current) => {
+        const phase = current.phase === "error" ? "error" : "pending";
+        return current.phase === phase ? current : { ...current, phase };
+      });
     }
   }, [state]);
 

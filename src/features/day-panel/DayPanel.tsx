@@ -1,7 +1,7 @@
 import { SHORT_GOALS, getShortGoalProgress, getShortGoalReward } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
-import { useGameTime } from "../../game/GameTimeContext";
+import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon, type IconName } from "../../components/common/Icon";
@@ -157,12 +157,22 @@ export function DayPanel({
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
-  const now = useGameTime(true, GAME_CONFIG.progressUpdateIntervalMs);
+  const timeSource = useGameTimeSource();
+  const [fallbackNow] = useState(Date.now);
   const [pausedNotification, setPausedNotification] = useState<{
     id: string;
     now: number;
   } | null>(null);
-  const liveNotifications = selectDayNotifications(state, now);
+  const referenceNow = timeSource?.getNow() ?? fallbackNow;
+  const referenceNotifications = selectDayNotifications(state, referenceNow);
+  const clockNow = useGameTime(
+    referenceNotifications.length > 0,
+    GAME_CONFIG.progressUpdateIntervalMs,
+  );
+  const now = timeSource ? clockNow : clockNow || referenceNow;
+  const liveNotifications = now === referenceNow
+    ? referenceNotifications
+    : selectDayNotifications(state, now);
   const pausedNotificationSnapshot = pausedNotification
     ? selectDayNotifications(state, pausedNotification.now).find(
         (notification) => notification.id === pausedNotification.id,
