@@ -50,10 +50,7 @@ export function getSocialDoubleFollowerChance(levels: UpgradeLevels): number {
 }
 
 export function getSocialEventPromotionBonus(followers: number): number {
-  const completedSteps = Math.floor(
-    Math.max(0, followers) / GAME_CONFIG.socialEventPromotionFollowersPerStep,
-  );
-  return completedSteps * GAME_CONFIG.socialEventPromotionPerStep;
+  return Math.max(0, followers) * GAME_CONFIG.socialEventPromotionPerFollower;
 }
 
 export function getSocialFollowerValue(levels: UpgradeLevels): number {

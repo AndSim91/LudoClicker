@@ -1344,7 +1344,7 @@ Al completamento viene risolto il risultato Follower:
 
 ```text
 probabilitàFollower = 50%
-bonusAffluenzaEventi = floor(Follower / 1.000) × 5%
+bonusAffluenzaEventi = Follower × 0,005%
 renditaMensileSocial = Follower × valoreFollower × moltiplicatoreA.N.D.E.R.
 ```
 

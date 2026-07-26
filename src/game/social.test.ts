@@ -23,9 +23,11 @@ describe("Social", () => {
   });
 
   it("adds 5% Event promotion every 1,000 followers without a cap", () => {
-    expect(getSocialEventPromotionBonus(999)).toBe(0);
+    expect(getSocialEventPromotionBonus(100)).toBeCloseTo(0.005);
+    expect(getSocialEventPromotionBonus(500)).toBeCloseTo(0.025);
+    expect(getSocialEventPromotionBonus(999)).toBeCloseTo(0.04995);
     expect(getSocialEventPromotionBonus(1_000)).toBe(0.05);
-    expect(getSocialEventPromotionBonus(1_999)).toBe(0.05);
+    expect(getSocialEventPromotionBonus(1_500)).toBeCloseTo(0.075);
     expect(getSocialEventPromotionBonus(10_000)).toBe(0.5);
   });
 
