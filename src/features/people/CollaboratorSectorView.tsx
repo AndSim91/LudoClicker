@@ -3,7 +3,6 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
-import { getFormDefinition } from "../../content/forms";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameState } from "../../game/GameStateContext";
@@ -29,11 +28,11 @@ import {
   getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
   getInstructorCoverageForms,
-  getInstructorTrainingProgress,
   getInstructorTeachingEntries,
   getTechnicianCoverageForms,
 } from "./instructorGroupPresentation";
 import { InstructorCourseShortcut } from "./InstructorCourseShortcut";
+import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormLogoStrip } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 
@@ -445,33 +444,7 @@ function InstructorSectorCard({
             <strong>Corsi Istruttori interni</strong>
             <small>{internalCourses.length} in svolgimento</small>
           </div>
-          <div className="internal-instructor-course-list">
-            {internalCourses.map((entry) => {
-              const progress = getInstructorTrainingProgress(entry.training, now);
-              const formName = getFormDefinition(entry.formId)?.longName ?? entry.formId;
-              return (
-                <div className="internal-instructor-course" key={entry.trainee.id}>
-                  <FormLogoStrip
-                    className="sector-form-strip"
-                    forms={[entry.formId]}
-                    instructorForms={[entry.formId]}
-                    showLabels={false}
-                  />
-                  <span>
-                    <strong>{formName} · {entry.trainee.displayName}</strong>
-                    <small>con il Tecnico {entry.technician.displayName}</small>
-                  </span>
-                  <ProgressBar
-                    className="internal-instructor-course-progress"
-                    label={`Corso Istruttori interno di ${entry.trainee.displayName}`}
-                    value={progress}
-                    durationMs={entry.training.completesAt - entry.training.startedAt}
-                  />
-                  <strong>{Math.round(progress)}%</strong>
-                </div>
-              );
-            })}
-          </div>
+          <InternalInstructorCourseList entries={internalCourses} now={now} />
         </section>
       ) : null}
 

@@ -2,7 +2,7 @@ import { ANDREA_SIMONAZZI_ID } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { scaleCurrencyGain } from "./economy";
-import { completeEquipmentUse, reserveSwords } from "./equipment";
+import { completeEquipmentUse, getAvailableSwords, reserveSwords } from "./equipment";
 import { getEnrollmentChance } from "./formulas";
 import { nextRandom } from "./random";
 import {
@@ -11,27 +11,45 @@ import {
   updateLegendaryPityAfterTrial,
 } from "./legendaryPity";
 import { addMessage } from "./stateUpdates";
-import type { GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
+import type { Contact, GameState, ScheduledTrial, SpecialCollaboratorId } from "./types";
 import { hasSocialMemberRequirement, unlockSocialIfEligible } from "./unlocks";
 import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
+
+interface TrialEnrollmentGuaranteeContext {
+  contactsById: ReadonlyMap<string, Contact>;
+  recentTrials: readonly ScheduledTrial[];
+  legendaryPity: number;
+}
+
+function getLegendaryEnrollmentChanceAtPity(
+  state: GameState,
+  profileId: SpecialCollaboratorId,
+  legendaryPity: number,
+): number {
+  const previousAttempts = state.legendaryCollaborators.enrollmentAttempts[profileId] ?? 0;
+  return applyLegendaryPityBonus(
+    getEnrollmentChance(state, "legendary", previousAttempts),
+    legendaryPity,
+  );
+}
 
 export function getLegendaryEnrollmentChance(
   state: GameState,
   profileId: SpecialCollaboratorId,
 ): number {
-  const previousAttempts = state.legendaryCollaborators.enrollmentAttempts[profileId] ?? 0;
-  return applyLegendaryPityBonus(
-    getEnrollmentChance(state, "legendary", previousAttempts),
-    state.legendaryPity,
-  );
+  return getLegendaryEnrollmentChanceAtPity(state, profileId, state.legendaryPity);
 }
 
 function isTrialEnrollmentGuaranteed(
   state: GameState,
   trial: ScheduledTrial,
+  context: TrialEnrollmentGuaranteeContext = {
+    contactsById: getContactsById(state.contacts),
+    recentTrials: getCompletedTrialsByMostRecent(state.scheduledTrials),
+    legendaryPity: state.legendaryPity,
+  },
 ): boolean {
-  const contactsById = getContactsById(state.contacts);
-  const trialContact = contactsById.get(trial.contactId);
+  const trialContact = context.contactsById.get(trial.contactId);
   const specialProfileId = trialContact?.specialProfileId;
   if (specialProfileId) {
     if (state.legendaryCollaborators.enrolledProfileIds.includes(specialProfileId)) {
@@ -39,17 +57,16 @@ function isTrialEnrollmentGuaranteed(
     }
     return (
       (specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schools.length === 0) ||
-      getLegendaryEnrollmentChance(state, specialProfileId) >= 1
+      getLegendaryEnrollmentChanceAtPity(state, specialProfileId, context.legendaryPity) >= 1
     );
   }
 
-  const recentTrials = getCompletedTrialsByMostRecent(state.scheduledTrials);
-  const trialLossStreak = recentTrials.findIndex((candidate) =>
-    contactsById.get(candidate.contactId)?.status === "enrolled"
+  const trialLossStreak = context.recentTrials.findIndex(
+    (candidate) => context.contactsById.get(candidate.contactId)?.status === "enrolled",
   );
   const protectedEnrollment =
-    (trialLossStreak === -1 ? recentTrials.length : trialLossStreak) >=
-      GAME_CONFIG.conversionGuaranteeFailures;
+    (trialLossStreak === -1 ? context.recentTrials.length : trialLossStreak) >=
+    GAME_CONFIG.conversionGuaranteeFailures;
   return (
     state.school.historicMembers === 0 ||
     protectedEnrollment ||
@@ -57,73 +74,100 @@ function isTrialEnrollmentGuaranteed(
   );
 }
 
-export function processScheduledTrialStarts(
-  state: GameState,
-  now: number,
-): GameState {
+export function processScheduledTrialStarts(state: GameState, now: number): GameState {
   const trialsToStart = state.scheduledTrials
-    .filter((trial) =>
-      trial.status === "scheduled" &&
-      trial.equipmentUsed === undefined &&
-      trial.startsAt <= now
+    .filter(
+      (trial) =>
+        trial.status === "scheduled" && trial.equipmentUsed === undefined && trial.startsAt <= now,
     )
     .sort((left, right) => left.startsAt - right.startsAt);
   if (trialsToStart.length === 0) return state;
 
-  let nextState = state;
+  // Le decisioni restano sequenziali; gli elenchi vengono ricopiati una sola volta al commit.
+  const trialUpdates = new Map<string, ScheduledTrial>();
+  const contactUpdates = new Map<string, Contact>();
+  let contactsById: Map<string, Contact> | undefined;
+  let recentTrials: readonly ScheduledTrial[] | undefined;
+  let availableSwords = Math.floor(getAvailableSwords(state.equipment));
+  let reservedSwordsCount = 0;
+  let cancelledTrialsCount = 0;
+  let legendaryPity = state.legendaryPity;
+  let secretLegendaries = state.network.secretLegendaries;
+
+  const getGuaranteeContext = (): TrialEnrollmentGuaranteeContext => {
+    contactsById ??= new Map(getContactsById(state.contacts));
+    recentTrials ??= getCompletedTrialsByMostRecent(state.scheduledTrials);
+    return { contactsById, recentTrials, legendaryPity };
+  };
+
   for (const trial of trialsToStart) {
-    const reservedEquipment = reserveSwords(nextState.equipment, 1);
-    if (reservedEquipment) {
-      nextState = {
-        ...nextState,
-        equipment: reservedEquipment,
-        scheduledTrials: nextState.scheduledTrials.map((candidate) =>
-          candidate.id === trial.id ? { ...candidate, equipmentUsed: 1 } : candidate
-        ),
-      };
+    if (availableSwords > 0) {
+      availableSwords -= 1;
+      reservedSwordsCount += 1;
+      trialUpdates.set(trial.id, { ...trial, equipmentUsed: 1 });
       continue;
     }
 
-    if (isTrialEnrollmentGuaranteed(nextState, trial)) {
-      nextState = {
-        ...nextState,
-        scheduledTrials: nextState.scheduledTrials.map((candidate) =>
-          candidate.id === trial.id ? { ...candidate, equipmentUsed: 0 } : candidate
-        ),
-      };
+    if (isTrialEnrollmentGuaranteed(state, trial, getGuaranteeContext())) {
+      trialUpdates.set(trial.id, { ...trial, equipmentUsed: 0 });
       continue;
+    }
+
+    trialUpdates.set(trial.id, {
+      ...trial,
+      status: "cancelled",
+      cancellationReason: "equipment",
+    });
+    cancelledTrialsCount += 1;
+    legendaryPity = incrementLegendaryPity(legendaryPity);
+
+    const mutableContactsById = contactsById;
+    const contact = mutableContactsById?.get(trial.contactId);
+    if (contact && mutableContactsById) {
+      const lostContact: Contact = { ...contact, status: "lost" };
+      mutableContactsById.set(contact.id, lostContact);
+      contactUpdates.set(contact.id, lostContact);
     }
 
     const secretProgress = trial.secretLegendaryId
-      ? nextState.network.secretLegendaries[trial.secretLegendaryId]
+      ? secretLegendaries[trial.secretLegendaryId]
       : undefined;
-    nextState = {
-      ...nextState,
-      scheduledTrials: nextState.scheduledTrials.map((candidate) =>
-        candidate.id === trial.id
-          ? { ...candidate, status: "cancelled", cancellationReason: "equipment" }
-          : candidate
-      ),
-      contacts: nextState.contacts.map((contact) =>
-        contact.id === trial.contactId ? { ...contact, status: "lost" } : contact
-      ),
-      statistics: {
-        ...nextState.statistics,
-        contactsLost: nextState.statistics.contactsLost + 1,
-      },
-      legendaryPity: incrementLegendaryPity(nextState.legendaryPity),
-      network: trial.secretLegendaryId && secretProgress
-        ? {
-            ...nextState.network,
-            secretLegendaries: {
-              ...nextState.network.secretLegendaries,
-              [trial.secretLegendaryId]: { ...secretProgress, status: "external" },
-            },
-          }
-        : nextState.network,
-    };
+    if (trial.secretLegendaryId && secretProgress) {
+      if (secretLegendaries === state.network.secretLegendaries) {
+        secretLegendaries = { ...secretLegendaries };
+      }
+      secretLegendaries[trial.secretLegendaryId] = {
+        ...secretProgress,
+        status: "external",
+      };
+    }
   }
-  return nextState;
+
+  const equipment =
+    reservedSwordsCount > 0
+      ? (reserveSwords(state.equipment, reservedSwordsCount) ?? state.equipment)
+      : state.equipment;
+  return {
+    ...state,
+    equipment,
+    scheduledTrials: state.scheduledTrials.map((trial) => trialUpdates.get(trial.id) ?? trial),
+    contacts:
+      contactUpdates.size > 0
+        ? state.contacts.map((contact) => contactUpdates.get(contact.id) ?? contact)
+        : state.contacts,
+    statistics:
+      cancelledTrialsCount > 0
+        ? {
+            ...state.statistics,
+            contactsLost: state.statistics.contactsLost + cancelledTrialsCount,
+          }
+        : state.statistics,
+    legendaryPity,
+    network:
+      secretLegendaries === state.network.secretLegendaries
+        ? state.network
+        : { ...state.network, secretLegendaries },
+  };
 }
 
 export function resolveTrial(

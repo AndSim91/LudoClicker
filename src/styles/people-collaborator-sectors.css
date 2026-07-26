@@ -230,7 +230,25 @@
   background: color-mix(in srgb, #a78bfa 24%, var(--surface));
 }
 
-.internal-instructor-course-progress > span {
+.internal-instructor-course-progress:not(.is-segmented) > span {
+  display: block;
+  height: 100%;
+  background: #8b5cf6;
+}
+
+.internal-instructor-course-progress.is-segmented {
+  display: flex;
+  gap: 2px;
+}
+
+.internal-instructor-course-progress.is-segmented > .internal-instructor-course-segment {
+  min-width: 3px;
+  flex: 1 1 0;
+  overflow: hidden;
+  background: color-mix(in srgb, #a78bfa 24%, var(--surface));
+}
+
+.internal-instructor-course-segment > span {
   display: block;
   height: 100%;
   background: #8b5cf6;
@@ -1365,7 +1383,7 @@
     grid-template-columns: auto minmax(0, 1fr) 28px;
   }
 
-  .internal-instructor-course .progress-bar {
+  .internal-instructor-course .internal-instructor-course-progress {
     grid-column: 1 / -1;
     grid-row: 2;
   }
