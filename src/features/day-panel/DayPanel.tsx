@@ -14,6 +14,7 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   DAY_NOTIFICATION_VISIBILITY_MS,
+  orderDayNotifications,
   selectDayNotifications,
   type DayNotification,
   type DayNotificationKind,
@@ -93,14 +94,15 @@ function DayNotificationEntry({
   onResume: () => void;
 }) {
   const timing = getTiming(notification, now);
+  const expiryDurationMs = notification.expiryDurationMs ?? DAY_NOTIFICATION_VISIBILITY_MS;
   const expiryRemainingMs =
     notification.expiresAt === undefined
       ? undefined
-      : Math.min(DAY_NOTIFICATION_VISIBILITY_MS, Math.max(0, notification.expiresAt - now));
+      : Math.min(expiryDurationMs, Math.max(0, notification.expiresAt - now));
   const expiryProgress =
     expiryRemainingMs === undefined
       ? undefined
-      : Math.max(0, Math.min(100, (expiryRemainingMs / DAY_NOTIFICATION_VISIBILITY_MS) * 100));
+      : Math.max(0, Math.min(100, (expiryRemainingMs / expiryDurationMs) * 100));
   const expiryRemainingSeconds =
     expiryRemainingMs === undefined ? undefined : Math.ceil(expiryRemainingMs / 1_000);
   const expiryValueText =
@@ -147,7 +149,7 @@ function DayNotificationEntry({
           className="appointment-expiry"
           label={`Tempo residuo della notifica: ${accessibleSubject}`}
           value={expiryProgress}
-          durationMs={DAY_NOTIFICATION_VISIBILITY_MS}
+          durationMs={expiryDurationMs}
           valueText={expiryValueText}
         />
       )}
@@ -187,12 +189,12 @@ export function DayPanel({
       )
     : undefined;
   const notifications = pausedNotificationSnapshot
-    ? [
+    ? orderDayNotifications([
         ...liveNotifications.filter(
           (notification) => notification.id !== pausedNotificationSnapshot.id,
         ),
         pausedNotificationSnapshot,
-      ].sort((left, right) => left.timestamp - right.timestamp || left.id.localeCompare(right.id))
+      ])
     : liveNotifications;
   const tutorialTrialNotificationId = state.scheduledTrials.find(
     (trial) => trial.tutorialSceneId === "first-event",

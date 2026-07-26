@@ -2,6 +2,10 @@ import { NARRATIVE_EVENTS } from "../../content/narrativeEvents";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { GAME_CONFIG } from "../../game/config";
 import {
+  getLightInflationEventDescription,
+  LIGHT_INFLATION_EVENT_TITLE,
+} from "../../game/lightInflation";
+import {
   getContactsById,
   getDirectEnrollmentContacts,
 } from "../../game/runtimeIndexes";
@@ -37,11 +41,20 @@ export interface DayNotification {
   timestamp: number;
   startsAt?: number;
   expiresAt?: number;
+  expiryDurationMs?: number;
   person?: {
     displayName: string;
     rarity: PersonRarity;
     secretLegendary: boolean;
   };
+}
+
+export function orderDayNotifications(notifications: readonly DayNotification[]): DayNotification[] {
+  return [...notifications].sort((left, right) => {
+    if (left.id === "light-inflation") return -1;
+    if (right.id === "light-inflation") return 1;
+    return left.timestamp - right.timestamp || left.id.localeCompare(right.id);
+  });
 }
 
 const narrativeDefinitionsById = new Map(
@@ -103,6 +116,21 @@ function getTournamentSummary(result: TournamentResult): {
 export function selectDayNotifications(state: GameState, now: number): DayNotification[] {
   const contactsById = getContactsById(state.contacts);
   const notifications: DayNotification[] = [];
+  const lightInflationEvent = state.lightInflation.event;
+  const lightInflationNotification = lightInflationEvent
+    && lightInflationEvent.occurredAt <= now
+    && now < lightInflationEvent.visibleUntil
+    ? {
+        id: "light-inflation",
+        kind: "important-event" as const,
+        phase: "neutral" as const,
+        title: LIGHT_INFLATION_EVENT_TITLE,
+        detail: getLightInflationEventDescription(lightInflationEvent.cause),
+        timestamp: lightInflationEvent.occurredAt,
+        expiresAt: lightInflationEvent.visibleUntil,
+        expiryDurationMs: lightInflationEvent.visibleUntil - lightInflationEvent.occurredAt,
+      }
+    : undefined;
 
   for (const trial of selectDayTrials(state, now)) {
     const contact = contactsById.get(trial.contactId);
@@ -196,7 +224,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
     });
   }
 
-  return notifications.sort((left, right) =>
-    left.timestamp - right.timestamp || left.id.localeCompare(right.id)
+  return orderDayNotifications(
+    lightInflationNotification ? [lightInflationNotification, ...notifications] : notifications,
   );
 }

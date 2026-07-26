@@ -1,6 +1,11 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
+import {
+  getLightInflationEventDescription,
+  LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_TITLE,
+} from "../../game/lightInflation";
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DayPanel } from "./DayPanel";
 
@@ -66,6 +71,21 @@ function tournamentResult(completedAt: number): TournamentResult {
     qualifiers: [],
     rewards: [],
     secretLegendaryDefeatedIds: [],
+  };
+}
+
+function stateWithLightInflationEvent(occurredAt: number, visibleUntil: number): GameState {
+  const initial = createInitialState(1_000);
+  return {
+    ...initial,
+    lightInflation: {
+      ...initial.lightInflation,
+      event: {
+        cause: LIGHT_INFLATION_CAUSES[0],
+        occurredAt,
+        visibleUntil,
+      },
+    },
   };
 }
 
@@ -254,6 +274,45 @@ describe("DayPanel", () => {
     expect(screen.queryByText("Iscritto")).not.toBeInTheDocument();
   });
 
+  it("uses the full 20-second light inflation visibility window for the countdown", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(50_000);
+
+    render(<DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />);
+
+    const progress = screen.getByRole("progressbar", { name: /Tempo residuo/ });
+    expect(screen.getByText(LIGHT_INFLATION_EVENT_TITLE)).toBeVisible();
+    expect(progress).toHaveAttribute("aria-valuenow", "100");
+    expect(progress).toHaveAttribute("aria-valuetext", "20 secondi rimanenti");
+
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+
+    expect(progress).toHaveAttribute("aria-valuenow", "50");
+    expect(progress).toHaveAttribute("aria-valuetext", "10 secondi rimanenti");
+  });
+
+  it("keeps light inflation first while another notification is frozen on hover", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(55_000);
+    const trialState = stateWithTrial("enrolled", "completed");
+    const state: GameState = {
+      ...trialState,
+      lightInflation: stateWithLightInflationEvent(50_000, 70_000).lightInflation,
+    };
+
+    const { container } = render(<DayPanel state={state} />);
+    const trialRow = screen.getByText("Iscritto").closest(".appointment-entry");
+    expect(trialRow).not.toBeNull();
+
+    fireEvent.mouseEnter(trialRow!);
+
+    expect(container.querySelectorAll(".appointment-entry")[0]).toHaveTextContent(
+      LIGHT_INFLATION_EVENT_TITLE,
+    );
+  });
+
   it("shows an athlete enrolled without a trial", () => {
     vi.useFakeTimers();
     vi.setSystemTime(55_000);
@@ -326,5 +385,39 @@ describe("DayPanel", () => {
     });
 
     expect(screen.queryByText("Riparazione non programmata")).not.toBeInTheDocument();
+  });
+
+  it("shows Inflazione di Luce first until the core visibility deadline", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(55_000);
+    const initial = stateWithTrial("trialScheduled", "scheduled");
+    const cause = LIGHT_INFLATION_CAUSES[0];
+
+    render(
+      <DayPanel
+        state={{
+          ...initial,
+          lightInflation: {
+            ...initial.lightInflation,
+            event: { cause, occurredAt: 50_000, visibleUntil: 70_000 },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(LIGHT_INFLATION_EVENT_TITLE)).toBeVisible();
+    expect(screen.getByText(getLightInflationEventDescription(cause))).toBeVisible();
+    expect(
+      screen.getByText(LIGHT_INFLATION_EVENT_TITLE).closest(".appointment-entry"),
+    ).toBe(
+      screen.getByText("Lezione di prova").closest(".appointment-entry")?.previousElementSibling,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(15_000);
+    });
+
+    expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
+    expect(screen.getByText("Lezione di prova")).toBeVisible();
   });
 });

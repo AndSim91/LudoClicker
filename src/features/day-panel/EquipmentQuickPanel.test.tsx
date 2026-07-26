@@ -1,8 +1,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
+import { formatCurrency } from "../../shared/formatters";
 import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
+
+function renderedCurrency(value: number): string {
+  return formatCurrency(value).replace(/\s/g, " ");
+}
 
 afterEach(cleanup);
 
@@ -116,6 +122,43 @@ describe("EquipmentQuickPanel", () => {
     expect(screen.getByRole("button", { name: /Acquista 100 spade/ })).toBeEnabled();
   });
 
+  it("uses compounded light inflation for every purchase quantity and displayed cost", () => {
+    const initial = createInitialState(1_000);
+    const onBuyOfficialSwords = vi.fn();
+
+    render(
+      <EquipmentQuickPanel
+        state={{
+          ...initial,
+          school: { ...initial.school, euros: 40_000, peakActiveMembers: 15 },
+          lightInflation: { ...initial.lightInflation, priceMultiplier: 1.1 * 1.1 },
+        }}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={onBuyOfficialSwords}
+      />,
+    );
+
+    const quantityButton = screen.getByRole("button", { name: /Quantit. acquisto: .1/ });
+    expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toHaveTextContent(
+      renderedCurrency(330 * 1.1 * 1.1),
+    );
+
+    fireEvent.click(quantityButton);
+    expect(screen.getByRole("button", { name: /Acquista 10 spade/ })).toHaveTextContent(
+      renderedCurrency(330 * 1.1 * 1.1 * 10),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Acquista 10 spade/ }));
+
+    fireEvent.click(quantityButton);
+    expect(screen.getByRole("button", { name: /Acquista 100 spade/ })).toHaveTextContent(
+      renderedCurrency(330 * 1.1 * 1.1 * 100),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Acquista 100 spade/ }));
+
+    expect(onBuyOfficialSwords).toHaveBeenNthCalledWith(1, 10);
+    expect(onBuyOfficialSwords).toHaveBeenNthCalledWith(2, 100);
+  });
+
   it("keeps unavailable multipliers hidden when funds are insufficient", () => {
     const initial = createInitialState(1_000);
 
@@ -140,5 +183,36 @@ describe("EquipmentQuickPanel", () => {
     expect(quantityButton).toBeDisabled();
     expect(quantityButton.getAttribute("title")).toMatch(/1$/);
     expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toBeDisabled();
+  });
+
+  it("uses the current official sword price for quantity availability and displayed cost", () => {
+    const initial = createInitialState(1_000);
+
+    render(
+      <EquipmentQuickPanel
+        state={{
+          ...initial,
+          school: {
+            ...initial.school,
+            euros: GAME_CONFIG.officialSwordCost * 1.1 * 10,
+            peakActiveMembers: 15,
+          },
+          lightInflation: { ...initial.lightInflation, priceMultiplier: 1.1 },
+        }}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    const quantityButton = screen.getByRole("button", {
+      name: /Quantit. acquisto: .1/,
+    });
+    expect(quantityButton).toHaveAttribute("title", expect.stringContaining("10"));
+    expect(screen.getByText(/Polaris EVO Basic - 363,00/)).toBeVisible();
+
+    fireEvent.click(quantityButton);
+
+    expect(screen.getByRole("button", { name: /Acquista 10 spade/ })).toBeEnabled();
+    expect(screen.getByText(/Polaris EVO Basic - 3630,00/)).toBeVisible();
   });
 });
