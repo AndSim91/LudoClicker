@@ -23,6 +23,7 @@ import { migrateSISAccreditationState } from "./saveMigrations/sisAccreditation"
 import { migrateSecretLegendaryDifficultyState } from "./saveMigrations/secretLegendaryDifficulty";
 import { migrateProjectXState } from "./saveMigrations/projectX";
 import { migrateSocialAudienceState } from "./saveMigrations/socialAudience";
+import { migrateSecretLegendaryAppearanceState } from "./saveMigrations/secretLegendaryAppearances";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
@@ -49,6 +50,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateSecretLegendaryDifficultyState,
   migrateProjectXState,
   migrateSocialAudienceState,
+  migrateSecretLegendaryAppearanceState,
 ];
 
 export function migrate(value: unknown): unknown {

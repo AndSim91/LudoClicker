@@ -38,6 +38,10 @@ import { getSocialContentCharacters } from "./social";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
 import type {
+  TrainingStartPlan,
+  TrainingStartPlanFactory,
+} from "./trainingStartPlan";
+import type {
   FormId,
   GameState,
   InboxMessage,
@@ -108,6 +112,36 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     formsUnlocked: state.unlocks.forms,
     tournamentQualification: state.tournaments.qualification,
   });
+}
+
+function createSequentialTrainingStartPlan(
+  state: GameState,
+  now: number,
+  startFormTraining: AutomationFlowDependencies["startFormTraining"],
+  startAgonistCourse: AutomationFlowDependencies["startAgonistCourse"],
+): TrainingStartPlan {
+  let nextState = state;
+  const getStartedTraining = (personId: string) =>
+    nextState.collaborators.find((collaborator) => collaborator.id === personId)?.training ??
+    nextState.contacts.find((contact) => contact.id === personId)?.training;
+  return {
+    get availableEuros() {
+      return nextState.school.euros;
+    },
+    startFormTraining(personId, formId) {
+      nextState = startFormTraining(nextState, personId, formId, now);
+      const training = getStartedTraining(personId);
+      return training ? { training } : undefined;
+    },
+    startAgonistCourse(personId, instructorId) {
+      nextState = startAgonistCourse(nextState, personId, instructorId, now);
+      const training = getStartedTraining(personId);
+      return training ? { training } : undefined;
+    },
+    commit() {
+      return nextState;
+    },
+  };
 }
 
 export function processAutomation(
@@ -328,6 +362,7 @@ export function processAutomaticTeaching(
   startFormTraining: AutomationFlowDependencies["startFormTraining"],
   startAgonistCourse: AutomationFlowDependencies["startAgonistCourse"] = (currentState) =>
     currentState,
+  createTrainingPlan?: TrainingStartPlanFactory,
 ): GameState {
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (wasAutomaticTeachingNoOp(state)) return state;
@@ -341,8 +376,6 @@ export function processAutomaticTeaching(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  let nextState = state;
-
   const collaboratorContactIds = new Set(
     state.collaborators.map((collaborator) => collaborator.contactId),
   );
@@ -366,6 +399,14 @@ export function processAutomaticTeaching(
   const instructorLoads = new Map(
     getInstructorTeachingCounts(state.contacts, state.collaborators),
   );
+  const trainingPlan = createTrainingPlan
+    ? createTrainingPlan(state, now, instructorLoads)
+    : createSequentialTrainingStartPlan(
+        state,
+        now,
+        startFormTraining,
+        startAgonistCourse,
+      );
   const instructorsByForm = new Map<FormId, GameState["collaborators"]>();
   for (const instructor of state.collaborators) {
     if (
@@ -496,19 +537,15 @@ export function processAutomaticTeaching(
         definition &&
         instructor &&
         (
-          nextState.school.euros >= getStudentFormCost(definition.cost)
+          trainingPlan.availableEuros >= getStudentFormCost(definition.cost)
         )
       );
     });
     if (candidate) {
-      const startedState = startFormTraining(nextState, student.id, candidate, now);
-      nextState = startedState;
-      const startedStudent = "acquiredAt" in student
-        ? nextState.contacts.find((contact) => contact.id === student.id)
-        : nextState.collaborators.find((collaborator) => collaborator.id === student.id);
-      if (!startedStudent?.training) continue;
-      const instructorId = startedStudent.training.instructorId ??
-        startedStudent.training.requestedInstructorId;
+      const started = trainingPlan.startFormTraining(student.id, candidate);
+      if (!started) continue;
+      const instructorId = started.training.instructorId ??
+        started.training.requestedInstructorId;
       if (instructorId) {
         instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
       }
@@ -521,23 +558,17 @@ export function processAutomaticTeaching(
       !("acquiredAt" in student) &&
       student.assignment === "instructor"
     ) {
-      const startedState = startFormTraining(nextState, student.id, "course-x", now);
-      const startedStudent = startedState.collaborators.find(
-        (collaborator) => collaborator.id === student.id,
-      );
-      if (startedStudent?.training) {
-        nextState = startedState;
-        continue;
-      }
+      const started = trainingPlan.startFormTraining(student.id, "course-x");
+      if (started) continue;
     }
 
     if (
       (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
       qualifiedCandidates.length > 0 ||
       instructorsWithAvailablePersonalForms.has(student.id) ||
-      (nextState.upgrades["technical-arena"] ?? 0) < 1
+      (state.upgrades["technical-arena"] ?? 0) < 1
     ) continue;
-    const instructor = nextState.collaborators
+    const instructor = state.collaborators
       .filter((candidate) =>
         candidate.assignment === "instructor" &&
         !priorityQualificationTechnicianIds.has(candidate.id) &&
@@ -552,20 +583,12 @@ export function processAutomaticTeaching(
         )
       )[0];
     if (!instructor) continue;
-    const startedState = startAgonistCourse(
-      nextState,
-      student.id,
-      instructor.id,
-      now,
-    );
-    const startedStudent = "acquiredAt" in student
-      ? startedState.contacts.find((contact) => contact.id === student.id)
-      : startedState.collaborators.find((collaborator) => collaborator.id === student.id);
-    if (!startedStudent?.training) continue;
-    nextState = startedState;
+    const started = trainingPlan.startAgonistCourse(student.id, instructor.id);
+    if (!started) continue;
     instructorLoads.set(instructor.id, (instructorLoads.get(instructor.id) ?? 0) + 1);
   }
 
+  const nextState = trainingPlan.commit();
   if (nextState === state) rememberAutomaticTeachingNoOp(state);
   return nextState;
 }

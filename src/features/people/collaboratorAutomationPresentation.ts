@@ -119,7 +119,6 @@ export function getSocialContentAutomationPresentation(
         : "",
       `+${formatPercent(getSocialEventPromotionBonus(
         state.school.followers,
-        state.upgrades,
       ))} Eventi`,
       `${formatCurrency(getMonthlySocialIncome(state))}/mese`,
     ].filter(Boolean).join(" · "),

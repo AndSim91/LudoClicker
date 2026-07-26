@@ -6,7 +6,6 @@ import {
   getSocialContentCharacters,
   getSocialDoubleFollowerChance,
   getSocialEventPromotionBonus,
-  getSocialEventPromotionCap,
   getSocialFollowerChance,
   getSocialFollowerValue,
 } from "./social";
@@ -19,20 +18,15 @@ describe("Social", () => {
     expect(getSocialContentCharacters(levels)).toBe(100_000);
     expect(getSocialFollowerChance(levels)).toBe(0.5);
     expect(getSocialDoubleFollowerChance(levels)).toBe(0);
-    expect(getSocialEventPromotionBonus(0, levels)).toBe(0);
-    expect(getSocialEventPromotionCap(levels)).toBe(0.05);
+    expect(getSocialEventPromotionBonus(0)).toBe(0);
     expect(getSocialFollowerValue(levels)).toBe(0.1);
   });
 
-  it("turns followers into a capped Event promotion bonus", () => {
-    const levels = createInitialState(1_000).upgrades;
-
-    expect(getSocialEventPromotionBonus(100, levels)).toBeCloseTo(0.01);
-    expect(getSocialEventPromotionBonus(1_000, levels)).toBe(0.05);
-    expect(getSocialEventPromotionBonus(10_000, {
-      ...levels,
-      "social-content-distribution": 5,
-    })).toBe(0.3);
+  it("adds 5% Event promotion every 1,000 followers without a cap", () => {
+    expect(getSocialEventPromotionBonus(999)).toBe(0);
+    expect(getSocialEventPromotionBonus(1_000)).toBe(0.05);
+    expect(getSocialEventPromotionBonus(1_999)).toBe(0.05);
+    expect(getSocialEventPromotionBonus(10_000)).toBe(0.5);
   });
 
   it("uses the approved upgrade ladders", () => {
@@ -48,7 +42,6 @@ describe("Social", () => {
     expect(getSocialContentCharacters(maximum)).toBe(50_000);
     expect(getSocialFollowerChance(maximum)).toBe(0.95);
     expect(getSocialDoubleFollowerChance(maximum)).toBe(0.05);
-    expect(getSocialEventPromotionCap(maximum)).toBe(0.3);
     expect(getSocialFollowerValue(maximum)).toBe(0.5);
   });
 

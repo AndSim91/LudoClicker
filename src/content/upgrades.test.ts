@@ -4,6 +4,7 @@ import {
   createInitialUpgradeLevels,
   getAnnualFormTrainingLimit,
   getAgonistCourseMaximumStatGain,
+  getFirstIncompleteUpgradePrerequisite,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getUpgradeCost,
@@ -58,6 +59,25 @@ describe("speed upgrade effects", () => {
     expect(rate(firstHalf)).toBe(100);
     expect(rate(fullSpeed)).toBe(500);
     expect(rate(fullOrganization)).toBe(1_500);
+  });
+});
+
+describe("Social upgrade compatibility", () => {
+  it("keeps the retired promotion ID without blocking Sponsorships", () => {
+    const levels = {
+      ...createInitialUpgradeLevels(),
+      "social-content-synthesis": 5,
+      "social-editorial-plan": 5,
+    };
+    const retired = UPGRADE_DEFINITIONS.find(
+      (definition) => definition.id === "social-content-distribution",
+    )!;
+    const sponsorships = UPGRADE_DEFINITIONS.find(
+      (definition) => definition.id === "social-sponsorships",
+    )!;
+
+    expect(retired.hidden).toBe(true);
+    expect(getFirstIncompleteUpgradePrerequisite(levels, sponsorships)).toBeUndefined();
   });
 });
 

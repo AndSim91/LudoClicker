@@ -38,6 +38,7 @@ describe("tournament save migration", () => {
     expect(migrated.tournaments).toMatchObject({
       results: [],
       immuneContactIds: [],
+      ordinaryVictoryAchieved: false,
       championsVictoryCurrentSchool: false,
     });
     expect(migrated.network.secretLegendaries["marco-palena"].status).toBe("external");

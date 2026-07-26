@@ -19,14 +19,6 @@ const SOCIAL_FOLLOWER_CHANCES = [
   0.9,
   0.95,
 ] as const;
-const SOCIAL_EVENT_PROMOTION_CAPS = [
-  GAME_CONFIG.socialBaseEventPromotionCap,
-  0.1,
-  0.15,
-  0.2,
-  0.25,
-  0.3,
-] as const;
 const SOCIAL_FOLLOWER_VALUES = [
   GAME_CONFIG.socialBaseFollowerValue,
   0.2,
@@ -57,24 +49,11 @@ export function getSocialDoubleFollowerChance(levels: UpgradeLevels): number {
     : 0;
 }
 
-export function getSocialEventPromotionCap(levels: UpgradeLevels): number {
-  return SOCIAL_EVENT_PROMOTION_CAPS[
-    boundedLevel(
-      levels,
-      "social-content-distribution",
-      SOCIAL_EVENT_PROMOTION_CAPS.length - 1,
-    )
-  ];
-}
-
-export function getSocialEventPromotionBonus(
-  followers: number,
-  levels: UpgradeLevels,
-): number {
-  return Math.min(
-    getSocialEventPromotionCap(levels),
-    Math.max(0, followers) * GAME_CONFIG.socialEventPromotionPerFollower,
+export function getSocialEventPromotionBonus(followers: number): number {
+  const completedSteps = Math.floor(
+    Math.max(0, followers) / GAME_CONFIG.socialEventPromotionFollowersPerStep,
   );
+  return completedSteps * GAME_CONFIG.socialEventPromotionPerStep;
 }
 
 export function getSocialFollowerValue(levels: UpgradeLevels): number {

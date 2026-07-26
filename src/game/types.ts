@@ -584,6 +584,7 @@ export interface TournamentState {
   };
   immuneContactIds: string[];
   skippedSeasons: number[];
+  ordinaryVictoryAchieved: boolean;
   championsVictoryCurrentSchool: boolean;
   chronicles: ChroniclesProgress;
 }

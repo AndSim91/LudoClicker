@@ -196,6 +196,7 @@ describe("game engine: narrative", () => {
       upgrades: { ...initial.upgrades, "comfortable-keyboard": 2 },
       tournaments: {
         ...initial.tournaments,
+        ordinaryVictoryAchieved: true,
         championsVictoryCurrentSchool: true,
       },
     };
@@ -235,6 +236,7 @@ describe("game engine: narrative", () => {
     expect(founded.network.reputation).toBe(1);
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
+    expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
     expect(founded.player.writingPower).toBeCloseTo(1.375);
     expect(selectIncomePerMonth(founded)).toBeCloseTo(6.25);
     expect(getPrestigeRequirements(founded)).toEqual({ historicMembers: 300, collaborators: 10, events: 50 });

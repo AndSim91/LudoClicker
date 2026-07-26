@@ -13,7 +13,7 @@ export function getEventAttendanceBonus(state: GameState): number {
       (state.school.specialization === "eventi" ? 0.1 : 0) +
       state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool +
       (state.unlocks.social
-        ? getSocialEventPromotionBonus(state.school.followers, state.upgrades)
+        ? getSocialEventPromotionBonus(state.school.followers)
         : 0),
   );
 }

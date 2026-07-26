@@ -42,6 +42,7 @@ import {
   startAgonistCourse as beginAgonistCourse,
   startFormTraining as beginFormTraining,
 } from "./trainingFlow";
+import { createTrainingStartPlan } from "./trainingStartPlan";
 import {
   processPriorityInstructorQualifications,
   processTeacherTraining,
@@ -178,6 +179,7 @@ function tickStep(state: GameState, now: number, gainMultiplier: number): GameSt
     now,
     startFormTraining,
     startAgonistCourse,
+    createTrainingStartPlan,
   );
   nextState = processTeacherTraining(nextState, now);
   nextState = refreshTrainingDurations(nextState, now);

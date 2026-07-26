@@ -21,6 +21,7 @@ export interface UpgradeDefinition {
   requiredHistoricMembers: number;
   requiredUnlock?: "social";
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
+  hidden?: boolean;
 }
 
 export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; description: string }> = [
@@ -69,7 +70,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
 
   { id: "social-content-synthesis", category: "social", title: "Sintesi dei contenuti", description: "Una linea editoriale più precisa riduce i caratteri necessari per pubblicare un contenuto.", effectLabel: "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredHistoricMembers: 35, requiredUnlock: "social" },
   { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Contenuti più mirati aumentano la probabilità di ottenere nuovi follower.", effectLabel: "50% base → 60% → 70% → 80% → 90% → 95% con 5% di doppio follower", effect: "socialFollowerChanceTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredHistoricMembers: 50, requiredUnlock: "social" },
-  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Il pubblico Social aumenta l'affluenza agli Eventi, che restano l'unica fonte ripetibile di contatti.", effectLabel: "Cap affluenza Social +5% → +10% → +15% → +20% → +25% → +30%", effect: "socialEventPromotionTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredHistoricMembers: 75, requiredUnlock: "social" },
+  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Voce storica conservata per la compatibilità dei salvataggi.", effectLabel: "Sostituito dal bonus illimitato dei Follower", effect: "socialEventPromotionTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredHistoricMembers: 75, requiredUnlock: "social", hidden: true },
   { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Accordi pubblicitari più remunerativi aumentano il valore mensile di ogni follower.", effectLabel: "0,10 € base → 0,20 € → 0,30 € → 0,40 € → 0,50 €", effect: "socialFollowerValueTier", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 25_000, 75_000, 200_000], maxLevel: 4, requiredHistoricMembers: 100, requiredUnlock: "social" },
 
   { id: "pre-event-check", category: "equipment", title: "Controllo pre-evento", description: "I problemi vengono trovati prima di uscire.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 70, costGrowth: GROWTH, maxLevel: 5, requiredHistoricMembers: 5 },
@@ -181,7 +182,7 @@ export function getFirstIncompleteUpgradePrerequisite(
     return incompleteId ? getUpgradeDefinition(incompleteId) : undefined;
   }
   const categoryDefinitions = UPGRADE_DEFINITIONS.filter(
-    (upgrade) => upgrade.category === definition.category,
+    (upgrade) => upgrade.category === definition.category && !upgrade.hidden,
   );
   const definitionIndex = categoryDefinitions.findIndex(
     (upgrade) => upgrade.id === definition.id,

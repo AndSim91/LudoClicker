@@ -7,6 +7,7 @@ import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
 import {
   compactTournamentHistory,
+  didSchoolWinOrdinaryTournament,
   processTournamentAtMonthEnd,
   resolveSecretLegendaryDefeat,
   scheduleSecretLegendaryTrial,
@@ -26,6 +27,47 @@ function findSeed(predicate: (roll: number) => boolean): number {
 }
 
 describe("tournament history retention", () => {
+  it("records only Arena or Style victories from ordinary external tournaments", () => {
+    const initial = createInitialState(1_000, "Manager");
+    const owned = initial.contacts[0];
+    const result = (level: TournamentResult["level"], ownedWinner: boolean): TournamentResult => ({
+      id: `result-${level}`,
+      level,
+      season: 1,
+      completedAt: 1_000,
+      participants: [{
+        id: "winner",
+        ownedContactId: ownedWinner ? owned.id : undefined,
+        firstName: "Ada",
+        lastName: "Arena",
+        schoolName: "Scuola",
+        city: "Genova",
+        rarity: "rare",
+        numericForms: 1,
+        experience: 0,
+        arenaBase: 100,
+        styleBase: 100,
+        arenaPreparation: 100,
+        stylePreparation: 100,
+        condition: 1,
+      }],
+      matches: [],
+      groupStandings: [],
+      arenaRanking: ["winner"],
+      styleRanking: ["winner"],
+      arenaPodium: [],
+      stylePodium: [],
+      qualifiers: [],
+      rewards: [],
+      secretLegendaryDefeatedIds: [],
+    });
+
+    expect(didSchoolWinOrdinaryTournament(result("academy", true))).toBe(true);
+    expect(didSchoolWinOrdinaryTournament(result("national", false))).toBe(false);
+    expect(didSchoolWinOrdinaryTournament(result("school", true))).toBe(false);
+    expect(didSchoolWinOrdinaryTournament(result("chronicles", true))).toBe(false);
+  });
+
   it("does not process tournaments or notify the player before they are unlocked", () => {
     const initial = createInitialState(1_000, "Manager");
 

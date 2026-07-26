@@ -388,6 +388,7 @@ export function isValidGameState(value: unknown): value is GameState {
     && Array.isArray(state.tournaments?.missedTournaments)
     && Array.isArray(state.tournaments?.immuneContactIds)
     && Array.isArray(state.tournaments?.skippedSeasons)
+    && typeof state.tournaments?.ordinaryVictoryAchieved === "boolean"
     && typeof state.tournaments?.championsVictoryCurrentSchool === "boolean"
     && hasValidChroniclesProgress(state)
     && typeof state.network?.secretLegendaries === "object"

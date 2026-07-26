@@ -28,7 +28,6 @@ import {
   getSocialContentCharacters,
   getSocialDoubleFollowerChance,
   getSocialEventPromotionBonus,
-  getSocialEventPromotionCap,
   getSocialFollowerChance,
   getSocialFollowerValue,
 } from "../../game/social";
@@ -129,8 +128,7 @@ function getUpgradeBenefitsSummary(state: GameState) {
         label: "Promozione eventi",
         value: `+${formatUpgradePercentage(getSocialEventPromotionBonus(
           state.school.followers,
-          state.upgrades,
-        ))} · cap ${formatUpgradePercentage(getSocialEventPromotionCap(state.upgrades))}`,
+        ))} · 5% ogni 1.000 follower`,
       },
       {
         label: "Valore follower",
@@ -191,7 +189,8 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
 }
 
 function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): boolean {
-  return definition.category !== "social" || state.unlocks.social;
+  return !definition.hidden &&
+    (definition.category !== "social" || state.unlocks.social);
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -514,7 +513,8 @@ export function UpgradesView({
                 (category) => category.id !== "social" || state.unlocks.social,
               ).map((category) => {
                 const definitions = UPGRADE_DEFINITIONS.filter(
-                  (definition) => definition.category === category.id,
+                  (definition) =>
+                    definition.category === category.id && !definition.hidden,
                 );
                 return (
                   <section className="upgrade-branch" key={category.id} aria-labelledby={`upgrade-branch-${category.id}`}>

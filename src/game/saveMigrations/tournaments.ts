@@ -22,6 +22,7 @@ export function migrateTournamentState(state: MigratableState): MigratableState 
       missedTournaments: [],
       immuneContactIds: [],
       skippedSeasons: [],
+      ordinaryVictoryAchieved: false,
       championsVictoryCurrentSchool: false,
       chronicles: { unlocked: false, keys: 0 },
     },

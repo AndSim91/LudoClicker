@@ -222,6 +222,7 @@ function applyTournamentResult(
   );
   const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
+  const ordinaryTournamentWon = didSchoolWinOrdinaryTournament(resolvedResult);
   const chroniclesKeyEarned = didSchoolEarnChroniclesKey(resolvedResult);
   let nextState: GameState = {
     ...state,
@@ -245,6 +246,8 @@ function applyTournamentResult(
           }
         : undefined,
       immuneContactIds: nextLevel ? ownedQualifierIds : [],
+      ordinaryVictoryAchieved:
+        state.tournaments.ordinaryVictoryAchieved || ordinaryTournamentWon,
       championsVictoryCurrentSchool:
         state.tournaments.championsVictoryCurrentSchool || championOwned,
       chronicles: chroniclesKeyEarned
@@ -305,6 +308,17 @@ export function didSchoolEarnChroniclesKey(result: TournamentResult): boolean {
     (participant) => participant.id === result.styleRanking[0],
   );
   return Boolean(arenaWinner?.ownedContactId && styleWinner?.ownedContactId);
+}
+
+export function didSchoolWinOrdinaryTournament(result: TournamentResult): boolean {
+  if (result.level === "school" || result.level === "chronicles") return false;
+  const arenaWinner = result.participants.find(
+    (participant) => participant.id === result.arenaRanking[0],
+  );
+  const styleWinner = result.participants.find(
+    (participant) => participant.id === result.styleRanking[0],
+  );
+  return Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
 }
 
 export function startChroniclesTournament(

@@ -359,6 +359,48 @@ describe("tournament simulation", () => {
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
   });
 
+  it("uses 10% before the first ordinary victory and guarantees the first secret afterwards", () => {
+    const initial = createTournamentSchool();
+    const owned = getEligibleSchoolContacts(initial).slice(0, 6);
+    const beforeVictoryCounts = Array.from({ length: 80 }, (_, index) => {
+      const simulation = simulateTournament(
+        { ...initial, randomSeed: index + 1 },
+        "academy",
+        1,
+        421_000,
+        owned,
+      );
+      return simulation.result.participants.filter(
+        (participant) => participant.secretLegendaryId,
+      ).length;
+    });
+    const victorious = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        ordinaryVictoryAchieved: true,
+      },
+    };
+    const afterVictoryCounts = Array.from({ length: 80 }, (_, index) => {
+      const simulation = simulateTournament(
+        { ...victorious, randomSeed: index + 1 },
+        "academy",
+        2,
+        422_000,
+        owned,
+      );
+      return simulation.result.participants.filter(
+        (participant) => participant.secretLegendaryId,
+      ).length;
+    });
+
+    expect(beforeVictoryCounts).toContain(0);
+    expect(beforeVictoryCounts.some((count) => count >= 1)).toBe(true);
+    expect(beforeVictoryCounts.every((count) => count <= 2)).toBe(true);
+    expect(afterVictoryCounts.every((count) => count >= 1 && count <= 2)).toBe(true);
+    expect(afterVictoryCounts).toContain(2);
+  });
+
   it("leaves qualified absences vacant instead of generating replacement opponents", () => {
     const state = createTournamentSchool();
     const eligible = getEligibleSchoolContacts(state);

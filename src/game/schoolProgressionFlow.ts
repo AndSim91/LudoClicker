@@ -98,6 +98,10 @@ export function foundSchool(
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
     },
+    tournaments: {
+      ...fresh.tournaments,
+      ordinaryVictoryAchieved: state.tournaments.ordinaryVictoryAchieved,
+    },
     achievements: state.achievements,
     legendaryCollaborators: fresh.legendaryCollaborators,
     statistics: state.statistics,

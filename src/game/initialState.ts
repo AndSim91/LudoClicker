@@ -87,6 +87,7 @@ export function createInitialState(
       missedTournaments: [],
       immuneContactIds: [],
       skippedSeasons: [],
+      ordinaryVictoryAchieved: false,
       championsVictoryCurrentSchool: false,
       chronicles: { unlocked: false, keys: 0 },
     },

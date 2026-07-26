@@ -185,6 +185,7 @@ export function getChroniclesLegendaryIds(): readonly SecretLegendaryId[] {
 }
 
 export const SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.1;
+export const SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.2;
 
 export function getSecretLegendaryIdsForTournament(
   level: TournamentCircuitLevel,

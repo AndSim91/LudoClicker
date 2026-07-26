@@ -6,7 +6,6 @@ import {
   getMonthlySocialIncome,
   getSocialDoubleFollowerChance,
   getSocialEventPromotionBonus,
-  getSocialEventPromotionCap,
   getSocialFollowerChance,
 } from "../../game/social";
 import type { Collaborator, CollaboratorMasteryRole, GameState } from "../../game/types";
@@ -47,9 +46,8 @@ function getSectorStatistics(
           label: "Promozione eventi",
           value: `+${formatPercent(getSocialEventPromotionBonus(
             state.school.followers,
-            state.upgrades,
           ))}`,
-          detail: `cap ${formatPercent(getSocialEventPromotionCap(state.upgrades))}`,
+          detail: "5% ogni 1.000 follower · nessun limite",
         },
         {
           label: "Sponsorizzazioni",

@@ -520,8 +520,14 @@ il contrasto dell'interfaccia.
 
 Un profilo può fare riferimento all'ID di una scuola del catalogo e apparire
 soltanto nel livello del circuito assegnato a quella scuola. Un profilo ancora
-privo di scuola resta registrato ma non entra in alcun torneo. Al massimo un
-Leggendario Segreto appare nello stesso torneo.
+privo di scuola resta registrato ma non entra in alcun torneo. Prima che la
+scuola vinca per la prima volta Arena o Stile in un torneo ordinario, il primo
+Leggendario Segreto ha il 10% di probabilità di apparire. Dai tornei successivi
+alla prima vittoria, la sua presenza è garantita. Soltanto dopo l'apparizione
+del primo viene effettuato un secondo tiro indipendente: nel 20% dei casi entra
+anche un secondo Leggendario Segreto, se esiste un altro profilo esterno
+compatibile con quel livello del circuito. La prima vittoria è uno sblocco
+permanente della partita e resta valida anche dopo la fondazione di nuove scuole.
 
 I valori base di ogni profilo collegato ricevono lo stesso aumento percentuale
 dello standard del circuito: +20% all'Accademico, +33,333% al Nazionale e +25%

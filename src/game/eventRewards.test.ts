@@ -36,9 +36,14 @@ describe("event contact rewards", () => {
       ...promoted,
       upgrades: { ...promoted.upgrades, "social-content-distribution": 5 },
     };
+    const largeAudience = {
+      ...promoted,
+      school: { ...promoted.school, followers: 10_000 },
+    };
 
     expect(getExpectedEventContacts(promoted, sparring)).toBeCloseTo(0.3465);
-    expect(getExpectedEventContacts(expandedPromotion, sparring)).toBeCloseTo(0.363);
+    expect(getExpectedEventContacts(expandedPromotion, sparring)).toBeCloseTo(0.3465);
+    expect(getExpectedEventContacts(largeAudience, sparring)).toBeCloseTo(0.495);
     expect(promoted.contacts).toHaveLength(initial.contacts.length);
   });
 

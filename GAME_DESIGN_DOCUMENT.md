@@ -725,8 +725,8 @@ avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
 95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
 giocatore. Senza email, tutta la potenza produce contenuti. Un contenuto richiede
 100.000 caratteri e ha il 50% di probabilità base di ottenere un Follower.
-Social non crea mai Contatti: ogni 100 Follower aumenta invece dell'1%
-l'affluenza agli Eventi, entro il limite stabilito da Promozione degli eventi.
+Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del 5%
+l'affluenza agli Eventi, senza alcun limite massimo.
 Social non genera prove dirette, non migliora la qualità dei contatti e non
 accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le rette
 mensili, a partire da 0,10 € per Follower. Le campagne manuali del vecchio
@@ -1344,7 +1344,7 @@ Al completamento viene risolto il risultato Follower:
 
 ```text
 probabilitàFollower = 50%
-bonusAffluenzaEventi = min(capPromozioneEventi, Follower × 0,01%)
+bonusAffluenzaEventi = floor(Follower / 1.000) × 5%
 renditaMensileSocial = Follower × valoreFollower × moltiplicatoreA.N.D.E.R.
 ```
 
@@ -1357,7 +1357,6 @@ All'ultimo livello di Piano editoriale, un contenuto produce zero Follower nel
 | ------------------------- | ------------------------------------------------------------------ |
 | Sintesi dei contenuti     | 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri   |
 | Piano editoriale          | 50% → 60% → 70% → 80% → 90% → 95%; al massimo 5% di ottenerne due |
-| Promozione degli eventi   | cap affluenza +5% → +10% → +15% → +20% → +25% → +30%             |
 | Sponsorizzazioni          | 0,10 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €                       |
 
 ### 10.6 Attrezzatura

@@ -59,14 +59,21 @@ export function getTrainingPhase(training: FormTraining): FormTrainingPhase {
   return "athlete";
 }
 
-function hasActiveStudentLesson(state: GameState, collaboratorId: string): boolean {
-  return selectInstructorTeachingCount(state, collaboratorId) > 0;
+function hasActiveStudentLesson(
+  state: GameState,
+  collaboratorId: string,
+  teachingCounts?: ReadonlyMap<string, number>,
+): boolean {
+  return teachingCounts
+    ? (teachingCounts.get(collaboratorId) ?? 0) > 0
+    : selectInstructorTeachingCount(state, collaboratorId) > 0;
 }
 
 export function getInstructorTrainingWorkloadMultiplier(
   state: GameState,
   personId: string,
   training: FormTraining,
+  teachingCounts?: ReadonlyMap<string, number>,
 ): number | undefined {
   const track = getTrainingTrack(training);
   const phase = getTrainingPhase(training);
@@ -79,10 +86,10 @@ export function getInstructorTrainingWorkloadMultiplier(
     track === "combined-instructor" ||
     (track === "athlete" && participantIsInstructor);
   if (!teacherTraining) return undefined;
-  return hasActiveStudentLesson(state, personId) ||
+  return hasActiveStudentLesson(state, personId, teachingCounts) ||
     Boolean(
       training.technicianId &&
-      hasActiveStudentLesson(state, training.technicianId),
+      hasActiveStudentLesson(state, training.technicianId, teachingCounts),
     )
     ? GAME_CONFIG.instructorTrainingWhileTeachingDurationMultiplier
     : 1;
@@ -92,6 +99,7 @@ export function getTrainingDurationMultiplier(
   state: GameState,
   personId: string,
   training: FormTraining,
+  teachingCounts?: ReadonlyMap<string, number>,
 ): number {
   const track = getTrainingTrack(training);
   let speed = 1 + getPagoSportAllCourseSpeedBonus(state.upgrades);
@@ -109,6 +117,7 @@ export function getTrainingDurationMultiplier(
     state,
     personId,
     training,
+    teachingCounts,
   ) ?? 1;
   return workloadMultiplier / Math.max(1, speed);
 }
@@ -119,6 +128,7 @@ export function scheduleTraining(
   now: number,
   baseDurationMs: number,
   training: Omit<FormTraining, "startedAt" | "completesAt">,
+  teachingCounts?: ReadonlyMap<string, number>,
 ): FormTraining {
   const timingDraft: FormTraining = {
     ...training,
@@ -131,6 +141,7 @@ export function scheduleTraining(
     state,
     personId,
     timingDraft,
+    teachingCounts,
   );
   return {
     ...timingDraft,
@@ -143,6 +154,7 @@ export function scheduleTraining(
       state,
       personId,
       timingDraft,
+      teachingCounts,
     ),
   };
 }

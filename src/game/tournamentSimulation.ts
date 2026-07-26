@@ -2,6 +2,7 @@ import { PROSPECT_FIRST_NAMES, PROSPECT_LAST_NAMES } from "../content/prospectDi
 import {
   SECRET_LEGENDARIES,
   SECRET_LEGENDARY_APPEARANCE_CHANCE,
+  SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE,
   getChroniclesLegendaryIds,
   getSecretLegendaryIdsForTournament,
 } from "../content/secretLegendaries";
@@ -342,24 +343,32 @@ function createSecretParticipant(
   };
 }
 
-function maybeInsertSecretLegendary(
+function insertSecretLegendary(
   state: GameState,
   level: ScheduledExternalTournamentLevel,
   participants: TournamentParticipant[],
   cursor: RandomCursor,
-): TournamentParticipant[] {
-  if (roll(cursor) >= SECRET_LEGENDARY_APPEARANCE_CHANCE) return participants;
+  excludedIds: ReadonlySet<SecretLegendaryId>,
+): { participants: TournamentParticipant[]; insertedId?: SecretLegendaryId } {
   const candidates = getSecretLegendaryIdsForTournament(level).filter(
-    (id) => state.network.secretLegendaries[id]?.status === "external",
+    (id) =>
+      state.network.secretLegendaries[id]?.status === "external" &&
+      !excludedIds.has(id),
   );
-  if (candidates.length === 0 || participants.length === 0) return participants;
+  const replaceableIndexes = participants.flatMap((participant, index) =>
+    participant.secretLegendaryId ? [] : [index]
+  );
+  if (candidates.length === 0 || replaceableIndexes.length === 0) {
+    return { participants };
+  }
   const id = candidates[integer(cursor, 0, candidates.length - 1)];
   const secret = createSecretParticipant(id, cursor);
   const relevant =
     secret.qualificationDiscipline === "style" ? secret.stylePreparation : secret.arenaPreparation;
-  let replacementIndex = 0;
+  let replacementIndex = replaceableIndexes[0];
   let distance = Infinity;
-  participants.forEach((participant, index) => {
+  replaceableIndexes.forEach((index) => {
+    const participant = participants[index];
     const value =
       participant.qualificationDiscipline === "style"
         ? participant.stylePreparation
@@ -372,7 +381,33 @@ function maybeInsertSecretLegendary(
   });
   const result = [...participants];
   result[replacementIndex] = secret;
-  return result;
+  return { participants: result, insertedId: id };
+}
+
+function maybeInsertSecretLegendaries(
+  state: GameState,
+  level: ScheduledExternalTournamentLevel,
+  participants: TournamentParticipant[],
+  cursor: RandomCursor,
+): TournamentParticipant[] {
+  const firstAppears = state.tournaments.ordinaryVictoryAchieved ||
+    roll(cursor) < SECRET_LEGENDARY_APPEARANCE_CHANCE;
+  if (!firstAppears) return participants;
+
+  const first = insertSecretLegendary(state, level, participants, cursor, new Set());
+  if (
+    !first.insertedId ||
+    roll(cursor) >= SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE
+  ) {
+    return first.participants;
+  }
+  return insertSecretLegendary(
+    state,
+    level,
+    first.participants,
+    cursor,
+    new Set([first.insertedId]),
+  ).participants;
 }
 
 function createNpcParticipants(
@@ -400,7 +435,7 @@ function createNpcParticipants(
       stylePreparation: participant.stylePreparation * multiplier,
     };
   });
-  return maybeInsertSecretLegendary(state, level, boostedParticipants, cursor).map((participant) => {
+  return maybeInsertSecretLegendaries(state, level, boostedParticipants, cursor).map((participant) => {
     if (
       participant.secretLegendaryId ||
       participant.schoolName !== state.school.name ||

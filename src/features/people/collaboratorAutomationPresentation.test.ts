@@ -175,7 +175,7 @@ describe("getCollaboratorAutomationPresentation", () => {
     });
 
     expect(presentation.title).toBe("Contenuti Social");
-    expect(presentation.detail).toBe("50% follower · +1% Eventi · 10,00\u00a0€/mese");
+    expect(presentation.detail).toBe("50% follower · +0% Eventi · 10,00\u00a0€/mese");
     expect(presentation.progress).toBe(50);
     expect(presentation.progressLabel).toBe("Produzione dei prossimi contenuti Social");
     expect(presentation.durationMs).toBeGreaterThan(0);
