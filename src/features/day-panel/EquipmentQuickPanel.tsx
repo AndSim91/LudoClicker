@@ -12,9 +12,9 @@ import {
   getEquipmentAutomaticRepairUnitCost,
   getEquipmentMaintenanceCost,
   getEquipmentMinimumMaintenanceCost,
+  getOfficialSwordPurchaseCost,
   getReservedSwords,
 } from "../../game/equipment";
-import { getOfficialSwordUnitCost } from "../../game/lightInflation";
 import type { GameState } from "../../game/types";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import { formatCurrency } from "../../shared/formatters";
@@ -23,9 +23,9 @@ type PurchaseAmount = 1 | 10 | 100;
 
 const PURCHASE_AMOUNTS: readonly PurchaseAmount[] = [1, 10, 100];
 
-function getAffordablePurchaseAmounts(euros: number, unitCost: number): PurchaseAmount[] {
+function getAffordablePurchaseAmounts(state: GameState): PurchaseAmount[] {
   return PURCHASE_AMOUNTS.filter(
-    (amount) => amount === 1 || euros >= unitCost * amount,
+    (amount) => amount === 1 || state.school.euros >= getOfficialSwordPurchaseCost(state, amount),
   );
 }
 
@@ -49,10 +49,9 @@ export function EquipmentQuickPanel({
   const needsMaintenance = equipment.wear > 0 || damagedSwords > 0;
   const hasRepairableEquipment = damagedSwords > 0 || (equipment.wear > 0 && availableSwords > 0);
   const canMaintain = hasRepairableEquipment && state.school.euros >= minimumMaintenanceCost;
-  const officialSwordUnitCost = getOfficialSwordUnitCost(state);
-  const affordableAmounts = getAffordablePurchaseAmounts(state.school.euros, officialSwordUnitCost);
+  const affordableAmounts = getAffordablePurchaseAmounts(state);
   const purchaseAmount = affordableAmounts[purchaseIndex % affordableAmounts.length];
-  const purchaseCost = officialSwordUnitCost * purchaseAmount;
+  const purchaseCost = getOfficialSwordPurchaseCost(state, purchaseAmount);
   const canBuy = state.school.euros >= purchaseCost;
   const showSupplier = isOfficialSwordSupplierVisible(state);
   const equipmentCollaborators = state.collaborators.filter(

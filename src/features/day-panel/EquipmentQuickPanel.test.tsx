@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { formatCurrency } from "../../shared/formatters";
 import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
@@ -185,34 +184,48 @@ describe("EquipmentQuickPanel", () => {
     expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toBeDisabled();
   });
 
-  it("uses the current official sword price for quantity availability and displayed cost", () => {
+  it.each([
+    { amount: 1, euros: 363 },
+    { amount: 10, euros: 3_630 },
+    { amount: 100, euros: 36_300 },
+  ])("allows the exact inflated balance of %s sword(s)", ({ amount, euros }) => {
     const initial = createInitialState(1_000);
+    const onBuyOfficialSwords = vi.fn();
 
     render(
       <EquipmentQuickPanel
         state={{
           ...initial,
-          school: {
-            ...initial.school,
-            euros: GAME_CONFIG.officialSwordCost * 1.1 * 10,
-            peakActiveMembers: 15,
-          },
+          school: { ...initial.school, euros, peakActiveMembers: 15 },
           lightInflation: { ...initial.lightInflation, priceMultiplier: 1.1 },
         }}
         onMaintainEquipment={() => undefined}
-        onBuyOfficialSwords={() => undefined}
+        onBuyOfficialSwords={onBuyOfficialSwords}
       />,
     );
 
-    const quantityButton = screen.getByRole("button", {
-      name: /Quantit. acquisto: .1/,
-    });
-    expect(quantityButton).toHaveAttribute("title", expect.stringContaining("10"));
+    const quantityButton = screen.getByRole("button", { name: /Quantit. acquisto: .1/ });
+    expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toBeEnabled();
     expect(screen.getByText(/Polaris EVO Basic - 363,00/)).toBeVisible();
 
-    fireEvent.click(quantityButton);
+    if (amount === 1) {
+      expect(quantityButton).toBeDisabled();
+      expect(quantityButton).toHaveAttribute("title", expect.stringMatching(/×1$/));
+    } else {
+      expect(quantityButton).toBeEnabled();
+      expect(quantityButton).toHaveAttribute("title", expect.stringContaining(`×${amount}`));
+      for (let index = 0; index < Math.log10(amount); index += 1) {
+        fireEvent.click(quantityButton);
+      }
+    }
 
-    expect(screen.getByRole("button", { name: /Acquista 10 spade/ })).toBeEnabled();
-    expect(screen.getByText(/Polaris EVO Basic - 3630,00/)).toBeVisible();
+    const purchaseButton = screen.getByRole("button", {
+      name: amount === 1 ? /Acquista 1 spada/ : new RegExp(`Acquista ${amount} spade`),
+    });
+    expect(purchaseButton).toBeEnabled();
+    expect(purchaseButton).toHaveTextContent(renderedCurrency(363 * amount));
+    fireEvent.click(purchaseButton);
+
+    expect(onBuyOfficialSwords).toHaveBeenCalledWith(amount);
   });
 });
