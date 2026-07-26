@@ -113,10 +113,6 @@ export function getSocialContentAutomationPresentation(
   return {
     title: "Contenuti Social",
     detail: [
-      `${formatPercent(getSocialFollowerChance(state.upgrades))} follower`,
-      doubleFollowerChance > 0
-        ? `${formatPercent(doubleFollowerChance)} doppio`
-        : "",
       `+${formatPercent(getSocialEventPromotionBonus(
         state.school.followers,
       ))} Eventi`,
