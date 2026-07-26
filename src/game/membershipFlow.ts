@@ -12,6 +12,7 @@ import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
+import { processJanuaryLightInflation } from "./lightInflation";
 import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 
@@ -299,6 +300,7 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
         eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),
       },
     };
+    nextState = processJanuaryLightInflation(nextState, nextState.school.nextFeeAt - GAME_CONFIG.gameMonthMs);
     if (isSchoolYearDepartureMonth(currentMonth)) {
       nextState = processMemberDepartures(nextState, now + period);
     }

@@ -9,6 +9,10 @@ import {
   isSecretLegendaryId,
 } from "./legendaryAvailability";
 import type { GameState } from "./types";
+import {
+  LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+} from "./lightInflation";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
   "tutorial",
@@ -116,6 +120,27 @@ function hasValidEventCooldowns(state: Partial<GameState>): boolean {
           Number.isSafeInteger(cooldown.availableAtMonth) &&
           cooldown.availableAtMonth >= cooldown.startedMonthPosition;
   });
+}
+
+function hasValidLightInflation(state: Partial<GameState>): boolean {
+  const inflation = state.lightInflation;
+  return Boolean(
+    inflation &&
+    Number.isFinite(inflation.chancePercent) &&
+    inflation.chancePercent >= 0 && inflation.chancePercent <= 100 &&
+    Number.isFinite(inflation.priceMultiplier) && inflation.priceMultiplier >= 1 &&
+    (inflation.lastCheckedJanuaryMonth === undefined ||
+      (Number.isSafeInteger(inflation.lastCheckedJanuaryMonth) &&
+        inflation.lastCheckedJanuaryMonth >= 1)) &&
+    (inflation.event === undefined ||
+      (LIGHT_INFLATION_CAUSES.includes(
+        inflation.event.cause as typeof LIGHT_INFLATION_CAUSES[number],
+      ) &&
+        Number.isFinite(inflation.event.occurredAt) &&
+        Number.isFinite(inflation.event.visibleUntil) &&
+        inflation.event.visibleUntil - inflation.event.occurredAt ===
+          LIGHT_INFLATION_EVENT_VISIBILITY_MS))
+  );
 }
 
 function hasValidTraining(training: GameState["contacts"][number]["training"]): boolean {
@@ -375,6 +400,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.shortGoal?.startedAt === "number" &&
     typeof state.shortGoal?.completedCount === "number" &&
     typeof state.randomSeed === "number" &&
+    hasValidLightInflation(state) &&
     typeof state.profile?.displayName === "string" &&
     Number.isFinite(state.school?.euros) &&
     (state.school?.euros ?? -1) >= 0 &&

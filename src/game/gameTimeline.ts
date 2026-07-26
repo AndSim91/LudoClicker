@@ -109,6 +109,16 @@ export function rebaseGameTimeline(
       resolvesAt: event.resolvesAt + offsetMs,
     })),
     activities: { eventCooldowns },
+    lightInflation: {
+      ...state.lightInflation,
+      event: state.lightInflation.event
+        ? {
+            ...state.lightInflation.event,
+            occurredAt: state.lightInflation.event.occurredAt + offsetMs,
+            visibleUntil: state.lightInflation.event.visibleUntil + offsetMs,
+          }
+        : undefined,
+    },
     tournaments: {
       ...state.tournaments,
       results: state.tournaments.results.map((result) => ({

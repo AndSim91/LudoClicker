@@ -7,6 +7,7 @@ import type { GameState, LegendaryCollaboratorProgress } from "./types";
 import { createEmptyHistoryArchive } from "./historyArchive";
 import { createSecretLegendaryProgress } from "./legendaryAvailability";
 import { createInitialCollaboratorManagement } from "./collaboratorManagement";
+import { createInitialLightInflationState } from "./lightInflation";
 
 export function createInitialState(
   now = Date.now(),
@@ -80,6 +81,7 @@ export function createInitialState(
       damagedSwords: 0,
       wear: 0,
     },
+    lightInflation: createInitialLightInflationState(),
     legendaryPity: 0,
     legendaryCollaborators: initialContacts.progress,
     tournaments: {

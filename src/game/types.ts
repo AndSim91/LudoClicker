@@ -604,6 +604,20 @@ export interface HistoryArchive {
   completedEventsByDefinition: Partial<Record<AcquisitionEventId, number>>;
 }
 
+export interface LightInflationEvent {
+  cause: string;
+  occurredAt: number;
+  visibleUntil: number;
+}
+
+export interface LightInflationState {
+  chancePercent: number;
+  priceMultiplier: number;
+  /** Absolute January month already checked, so catch-up cannot roll twice. */
+  lastCheckedJanuaryMonth?: number;
+  event?: LightInflationEvent;
+}
+
 export interface GameState {
   version: number;
   saveCompatibilityVersion: number;
@@ -651,6 +665,7 @@ export interface GameState {
     damagedSwords: number;
     wear: number;
   };
+  lightInflation: LightInflationState;
   legendaryPity: number;
   legendaryCollaborators: LegendaryCollaboratorProgress;
   tournaments: TournamentState;

@@ -89,6 +89,16 @@ export function freezeGameState(
         ]),
       ),
     },
+    lightInflation: {
+      ...state.lightInflation,
+      event: state.lightInflation.event
+        ? {
+            ...state.lightInflation.event,
+            occurredAt: state.lightInflation.event.occurredAt + elapsedMs,
+            visibleUntil: state.lightInflation.event.visibleUntil + elapsedMs,
+          }
+        : undefined,
+    },
     narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
     automation: { ...state.automation, lastProcessedAt: now },
   };

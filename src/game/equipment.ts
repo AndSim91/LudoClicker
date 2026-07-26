@@ -1,5 +1,6 @@
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
+import { addLightInflationChance, getOfficialSwordUnitCost } from "./lightInflation";
 import type { GameState } from "./types";
 
 type EquipmentState = GameState["equipment"];
@@ -273,7 +274,7 @@ export function maintainEquipment(state: GameState): GameState {
 
 export function buyOfficialSword(state: GameState, rawAmount = 1): GameState {
   const amount = Math.floor(rawAmount);
-  const totalCost = roundCurrency(GAME_CONFIG.officialSwordCost * amount);
+  const totalCost = getOfficialSwordUnitCost(state) * amount;
   const totalSwords = state.equipment.totalSwords + amount;
   const availableSwords = state.equipment.availableSwords + amount;
   if (
@@ -288,12 +289,13 @@ export function buyOfficialSword(state: GameState, rawAmount = 1): GameState {
     ...state,
     school: {
       ...state.school,
-      euros: roundCurrency(state.school.euros - totalCost),
+      euros: state.school.euros - totalCost,
     },
     equipment: synchronizeEquipmentAvailability({
       ...state.equipment,
       totalSwords,
       availableSwords,
     }),
+    lightInflation: addLightInflationChance(state.lightInflation, amount),
   };
 }
