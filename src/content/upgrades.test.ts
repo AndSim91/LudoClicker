@@ -62,6 +62,17 @@ describe("speed upgrade effects", () => {
   });
 });
 
+describe("Event upgrade effects", () => {
+  it("caps the complete Event branch at the agreed +200%", () => {
+    const maximized = Object.fromEntries(
+      UPGRADE_DEFINITIONS.map((definition) => [definition.id, definition.maxLevel]),
+    ) as ReturnType<typeof createInitialUpgradeLevels>;
+
+    expect(getUpgradeEffectTotal(maximized, "eventContactsMultiplier")).toBeCloseTo(1.2);
+    expect(getUpgradeEffectTotal(maximized, "eventAttendanceMultiplier")).toBeCloseTo(0.8);
+  });
+});
+
 describe("Social upgrade compatibility", () => {
   it("keeps the retired promotion ID without blocking Sponsorships", () => {
     const levels = {

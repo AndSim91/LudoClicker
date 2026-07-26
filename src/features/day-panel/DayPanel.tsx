@@ -33,6 +33,7 @@ const phaseLabels: Record<DayNotificationPhase, string> = {
 
 const notificationIcons: Record<DayNotificationKind, IconName> = {
   trial: "calendar",
+  "trial-summary": "calendar",
   "direct-enrollment": "people",
   tournament: "trophy",
   "important-event": "flag",
@@ -199,14 +200,13 @@ export function DayPanel({
   const notifications = pausedNotificationSnapshot
     ? orderDayNotifications([
         ...liveNotifications.filter(
-          (notification) => notification.id !== pausedNotificationSnapshot.id,
+          (notification) => pausedNotificationSnapshot.kind === "trial-summary"
+            ? notification.kind !== "trial" && notification.kind !== "trial-summary"
+            : notification.id !== pausedNotificationSnapshot.id,
         ),
         pausedNotificationSnapshot,
       ])
     : liveNotifications;
-  const tutorialTrialNotificationId = state.scheduledTrials.find(
-    (trial) => trial.tutorialSceneId === "first-event",
-  )?.id;
 
   return (
     <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
@@ -234,7 +234,7 @@ export function DayPanel({
             now={pausedNotification?.id === notification.id
               ? pausedNotification.now
               : notification.clock === "wall" ? currentWallNow : now}
-            isTutorialTrial={notification.id === `trial-${tutorialTrialNotificationId}`}
+            isTutorialTrial={notification.tutorialTarget === true}
             onPause={() => notification.clock === "game" && setPausedNotification({ id: notification.id, now })}
             onResume={() => notification.clock === "game" && setPausedNotification(null)}
           />

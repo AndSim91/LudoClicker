@@ -6,7 +6,7 @@ import { GAME_CONFIG } from "./config";
 import {
   getEventAttendanceBonus,
   getEventCharismaBonus,
-  getEventCollaboratorBonus,
+  getEventCollaboratorMultiplier,
 } from "./eventRewards";
 import type { FormId, GameState, PersonRarity } from "./types";
 
@@ -60,7 +60,7 @@ export function getEventFunnelOutcome(
   attendanceVariance = 1,
 ) {
   const charismaMultiplier = 1 + getEventCharismaBonus(state);
-  const collaboratorMultiplier = 1 + getEventCollaboratorBonus(state);
+  const collaboratorMultiplier = getEventCollaboratorMultiplier(state);
   const attendanceMultiplier = 1 + getEventAttendanceBonus(state);
   const peopleMet = Math.max(
     1,

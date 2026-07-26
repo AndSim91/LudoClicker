@@ -9,6 +9,7 @@ import {
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DayPanel } from "./DayPanel";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
+import { DAY_TRIAL_NOTIFICATION_LIMIT } from "./dayNotifications";
 
 function stateWithTrial(
   contactStatus: ContactStatus,
@@ -28,6 +29,30 @@ function stateWithTrial(
         status: trialStatus,
       },
     ],
+  };
+}
+
+function stateWithScheduledTrials(count: number, tutorialTrialIndex?: number): GameState {
+  const initial = createInitialState(10_000);
+  const contacts = Array.from({ length: count }, (_, index) => ({
+    ...initial.contacts[0],
+    id: `day-panel-contact-${index}`,
+    firstName: "Atleta",
+    lastName: String(index + 1),
+    status: "trialScheduled" as const,
+  }));
+  return {
+    ...initial,
+    contacts,
+    scheduledTrials: contacts.map((contact, index) => ({
+      id: `day-panel-trial-${index}`,
+      contactId: contact.id,
+      startsAt: 20_000 + index,
+      resolvesAt: 50_000 + index,
+      resultSeed: index,
+      status: "scheduled" as const,
+      tutorialSceneId: index === tutorialTrialIndex ? "first-event" as const : undefined,
+    })),
   };
 }
 
@@ -175,6 +200,36 @@ describe("DayPanel", () => {
     render(<DayPanel state={stateWithTrial("trialScheduled", "scheduled")} />);
 
     expect(screen.getByText("In corso…")).toBeVisible();
+  });
+
+  it("keeps exactly ten trial rows separate", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(15_000);
+
+    render(<DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT)} />);
+
+    expect(screen.getAllByText("Lezione di prova")).toHaveLength(10);
+    expect(screen.queryByText("10 lezioni di prova")).not.toBeInTheDocument();
+  });
+
+  it("renders one tutorial-safe summary above ten trial notifications", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(15_000);
+
+    const { container } = render(
+      <DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT + 1, 0)} />,
+    );
+
+    expect(screen.getByText("11 lezioni di prova")).toBeVisible();
+    expect(screen.getByText("11 programmate")).toBeVisible();
+    expect(screen.getByText("00:05")).toBeVisible();
+    expect(screen.queryByText("Lezione di prova")).not.toBeInTheDocument();
+    expect(container.querySelectorAll(".day-notification-trial-summary")).toHaveLength(1);
+    expect(container.querySelectorAll(".day-notification-trial")).toHaveLength(0);
+    expect(container.querySelector(".day-notification-trial-summary")).toHaveAttribute(
+      "data-tutorial-target",
+      "true",
+    );
   });
 
   it("colors the attendee name according to their rarity", () => {

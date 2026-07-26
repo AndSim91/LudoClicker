@@ -197,9 +197,9 @@ describe("UpgradesView", () => {
     expect(within(summary).getByText("Caratteri per input:")).toBeVisible();
     expect(within(summary).getByText("3")).toBeVisible();
     expect(within(summary).getByText("Contatti:")).toBeVisible();
-    expect(within(summary).getByText("+30%")).toBeVisible();
+    expect(within(summary).getByText("+9%")).toBeVisible();
     expect(within(summary).getByText("Pubblico eventi:")).toBeVisible();
-    expect(within(summary).getByText("+20%")).toBeVisible();
+    expect(within(summary).getByText("+5%")).toBeVisible();
     expect(within(summary).getByText("Spade:")).toBeVisible();
     expect(within(summary).getByText("+4")).toBeVisible();
     expect(within(summary).getByText("Entrate:")).toBeVisible();

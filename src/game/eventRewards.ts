@@ -6,6 +6,9 @@ import { nextRandom } from "./random";
 import { getSocialEventPromotionBonus } from "./social";
 import type { GameState } from "./types";
 
+export const EVENT_CONTACT_BASE_SCALE = 25 / 27;
+export const EVENT_COLLABORATOR_EXPONENT = Math.log10(2);
+
 export function getEventAttendanceBonus(state: GameState): number {
   return Math.max(
     0,
@@ -22,19 +25,40 @@ export function getEventCharismaBonus(state: GameState): number {
   return Math.max(0, getUpgradeEffectTotal(state.upgrades, "eventContactsMultiplier"));
 }
 
-export function getEventCollaboratorBonus(state: GameState): number {
-  return state.collaborators
+export function getEventCollaboratorMultiplier(state: GameState): number {
+  const effectiveCollaborators = state.collaborators
     .filter((collaborator) => collaborator.assignment === "events")
     .reduce(
-      (total, collaborator) => total + getCollaboratorBaseProductivity(collaborator) * 0.1,
+      (total, collaborator) => total + getCollaboratorBaseProductivity(collaborator),
       0,
     );
+  return Math.max(1, effectiveCollaborators) ** EVENT_COLLABORATOR_EXPONENT;
+}
+
+export function getEventCollaboratorBonus(state: GameState): number {
+  return getEventCollaboratorMultiplier(state) - 1;
+}
+
+export function getEventMarketAvailability(state: GameState): number {
+  const depletedMembers = Math.max(
+    0,
+    state.school.activeMembers - GAME_CONFIG.eventContactProtectedActiveMembers,
+  );
+  const easyMarketMembers = Math.max(1, GAME_CONFIG.eventContactEasyMarketMembers);
+  return easyMarketMembers / (easyMarketMembers + depletedMembers);
 }
 
 export function getEventContactBonus(state: GameState): number {
-  return getEventAttendanceBonus(state) +
-    getEventCharismaBonus(state) +
-    getEventCollaboratorBonus(state);
+  const progressionMultiplier = 1 +
+    getEventAttendanceBonus(state) +
+    getEventCharismaBonus(state);
+  return getEventCollaboratorMultiplier(state) * progressionMultiplier - 1;
+}
+
+export function getEventContactMultiplier(state: GameState): number {
+  return EVENT_CONTACT_BASE_SCALE *
+    getEventMarketAvailability(state) *
+    (1 + getEventContactBonus(state));
 }
 
 export function getBaseExpectedEventContacts(
@@ -55,7 +79,7 @@ export function getExpectedEventContacts(
   state: GameState,
   definition: AcquisitionEventDefinition,
 ): number {
-  return getBaseExpectedEventContacts(definition) * (1 + getEventContactBonus(state));
+  return getBaseExpectedEventContacts(definition) * getEventContactMultiplier(state);
 }
 
 function rollIntegerInclusive(seed: number, minimum: number, maximum: number) {
@@ -96,13 +120,24 @@ export function rollEventContactReward(
   definition: AcquisitionEventDefinition,
 ) {
   const base = rollBaseReward(state.randomSeed, definition);
-  const bonus = rollExpectedAmount(
+  const marketAdjustedBaseScale = EVENT_CONTACT_BASE_SCALE *
+    getEventMarketAvailability(state);
+  const normalizedBase = rollExpectedAmount(
     base.nextSeed,
-    getBaseExpectedEventContacts(definition) * getEventContactBonus(state),
+    base.amount * marketAdjustedBaseScale,
+  );
+  const baseExpected = getBaseExpectedEventContacts(definition);
+  const additionalMultiplier = Math.max(
+    0,
+    getEventContactMultiplier(state) - marketAdjustedBaseScale,
+  );
+  const bonus = rollExpectedAmount(
+    normalizedBase.nextSeed,
+    baseExpected * additionalMultiplier,
   );
   return {
-    amount: base.amount + bonus.amount,
-    baseAmount: base.amount,
+    amount: normalizedBase.amount + bonus.amount,
+    baseAmount: normalizedBase.amount,
     bonusAmount: bonus.amount,
     nextSeed: bonus.nextSeed,
   };

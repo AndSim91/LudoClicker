@@ -329,21 +329,38 @@ export function processTechnicianCourseReservations(
   return nextState;
 }
 
-function getInstructorCourseDemand(state: GameState, formId: FormId): number {
+function getInstructorCourseDemandByForm(
+  state: GameState,
+  courseXUnlocked: boolean,
+): ReadonlyMap<FormId, number> {
   const collaboratorContactIds = new Set(
     state.collaborators.map((collaborator) => collaborator.contactId),
   );
-  return [
-    ...state.contacts.filter((contact) =>
-      contact.status === "enrolled" && !collaboratorContactIds.has(contact.id)
-    ),
-    ...state.collaborators,
-  ].filter((person) =>
-    !person.training && getAutomaticFormCandidates(
-      person,
-      isCourseXUnlocked(state.upgrades),
-    ).includes(formId)
-  ).length;
+  const demandByForm = new Map<FormId, number>();
+  const registerPersonDemand = (
+    person: GameState["contacts"][number] | GameState["collaborators"][number],
+  ) => {
+    if (person.training) return;
+    // Una persona conta una sola volta per Forma anche se un vecchio salvataggio
+    // contiene preferenze di ramo duplicate.
+    const requestedForms = new Set(
+      getAutomaticFormCandidates(person, courseXUnlocked),
+    );
+    for (const formId of requestedForms) {
+      demandByForm.set(formId, (demandByForm.get(formId) ?? 0) + 1);
+    }
+  };
+
+  for (const contact of state.contacts) {
+    if (
+      contact.status === "enrolled" &&
+      !collaboratorContactIds.has(contact.id)
+    ) registerPersonDemand(contact);
+  }
+  for (const collaborator of state.collaborators) {
+    registerPersonDemand(collaborator);
+  }
+  return demandByForm;
 }
 
 function processInstructorQualifications(
@@ -364,7 +381,7 @@ function processInstructorQualifications(
   );
   // Può aspirare alla qualifica soltanto un collaboratore già assegnato
   // al ruolo Istruttore; gli altri incarichi non entrano nella graduatoria.
-  const candidates = state.collaborators.flatMap((collaborator) => {
+  const qualificationCandidates = state.collaborators.flatMap((collaborator) => {
     if (
       collaborator.assignment !== "instructor" ||
       collaborator.training ||
@@ -379,11 +396,19 @@ function processInstructorQualifications(
             collaboratorId: collaborator.id,
             formId,
             rank: getFormProgressionRank(formId),
-            demand: getInstructorCourseDemand(state, formId),
             joinedAt: collaborator.joinedAt,
           }]
     );
-  }).sort((left, right) =>
+  });
+  if (qualificationCandidates.length === 0) return state;
+  const demandByForm = getInstructorCourseDemandByForm(
+    state,
+    courseXUnlocked,
+  );
+  const candidates = qualificationCandidates.map((candidate) => ({
+    ...candidate,
+    demand: demandByForm.get(candidate.formId) ?? 0,
+  })).sort((left, right) =>
     left.rank - right.rank ||
     right.demand - left.demand ||
     left.joinedAt - right.joinedAt ||

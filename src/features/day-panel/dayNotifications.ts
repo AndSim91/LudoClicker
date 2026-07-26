@@ -17,9 +17,11 @@ import type {
 } from "../../game/types";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
+export const DAY_TRIAL_NOTIFICATION_LIMIT = 10;
 
 export type DayNotificationKind =
   | "trial"
+  | "trial-summary"
   | "direct-enrollment"
   | "tournament"
   | "important-event";
@@ -44,6 +46,7 @@ export interface DayNotification {
   startsAt?: number;
   expiresAt?: number;
   expiryDurationMs?: number;
+  tutorialTarget?: boolean;
   person?: {
     displayName: string;
     rarity: PersonRarity;
@@ -62,6 +65,124 @@ export function orderDayNotifications(notifications: readonly DayNotification[])
 const narrativeDefinitionsById = new Map(
   NARRATIVE_EVENTS.map((definition) => [definition.id, definition]),
 );
+
+function formatTrialCount(
+  count: number,
+  singular: string,
+  plural: string,
+): string | undefined {
+  if (count === 0) return undefined;
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function selectTrialNotifications(state: GameState, gameNow: number): DayNotification[] {
+  const contactsById = getContactsById(state.contacts);
+  const individualNotifications: DayNotification[] = [];
+  let trialCount = 0;
+  let scheduledCount = 0;
+  let inProgressCount = 0;
+  let enrolledCount = 0;
+  let lostCount = 0;
+  let earliestTimestamp = Number.POSITIVE_INFINITY;
+  let earliestScheduledStart: number | undefined;
+  let tutorialTarget = false;
+
+  for (const trial of selectDayTrials(state, gameNow)) {
+    const contact = contactsById.get(trial.contactId);
+    const completed = trial.status === "completed";
+    const cancelled = trial.status === "cancelled";
+    const terminalTimestamp = cancelled ? trial.startsAt : trial.resolvesAt;
+    const expiresAt = completed || cancelled
+      ? terminalTimestamp + DAY_NOTIFICATION_VISIBILITY_MS
+      : undefined;
+    if (expiresAt !== undefined && gameNow >= expiresAt) continue;
+    const phase: DayNotificationPhase = cancelled
+      ? "lost"
+      : completed
+      ? contact?.status === "enrolled" ? "enrolled" : "lost"
+      : gameNow < trial.startsAt ? "scheduled" : "in-progress";
+    const timestamp = completed || cancelled ? terminalTimestamp : trial.startsAt;
+    trialCount += 1;
+    earliestTimestamp = Math.min(earliestTimestamp, timestamp);
+    tutorialTarget ||= trial.tutorialSceneId === "first-event";
+
+    switch (phase) {
+      case "scheduled":
+        scheduledCount += 1;
+        earliestScheduledStart = earliestScheduledStart === undefined
+          ? trial.startsAt
+          : Math.min(earliestScheduledStart, trial.startsAt);
+        break;
+      case "in-progress":
+        inProgressCount += 1;
+        break;
+      case "enrolled":
+        enrolledCount += 1;
+        break;
+      case "lost":
+        lostCount += 1;
+        break;
+      default:
+        break;
+    }
+
+    if (trialCount > DAY_TRIAL_NOTIFICATION_LIMIT) {
+      individualNotifications.length = 0;
+      continue;
+    }
+    individualNotifications.push({
+      id: `trial-${trial.id}`,
+      kind: "trial",
+      phase,
+      title: "Lezione di prova",
+      detail: cancelled
+        ? "Annullata: nessuna spada disponibile"
+        : "Ordine delle Onde",
+      clock: "game",
+      timestamp,
+      startsAt: trial.startsAt,
+      expiresAt,
+      tutorialTarget: trial.tutorialSceneId === "first-event",
+      person: contact
+        ? {
+            displayName: `${contact.firstName} ${contact.lastName}`,
+            rarity: contact.rarity,
+            secretLegendary: Boolean(contact.secretLegendaryId),
+          }
+        : undefined,
+    });
+  }
+
+  if (trialCount <= DAY_TRIAL_NOTIFICATION_LIMIT) return individualNotifications;
+
+  const phase: DayNotificationPhase = inProgressCount > 0
+    ? "in-progress"
+    : scheduledCount > 0
+    ? "scheduled"
+    : enrolledCount > 0 && lostCount === 0
+    ? "enrolled"
+    : lostCount > 0 && enrolledCount === 0
+    ? "lost"
+    : "neutral";
+  const detail = [
+    formatTrialCount(scheduledCount, "programmata", "programmate"),
+    formatTrialCount(inProgressCount, "in corso", "in corso"),
+    formatTrialCount(enrolledCount, "iscritto", "iscritti"),
+    formatTrialCount(lostCount, "non iscritto", "non iscritti"),
+  ].filter((item): item is string => item !== undefined).join(" · ");
+
+  return [{
+    id: "trial-summary",
+    kind: "trial-summary",
+    phase,
+    title: `${trialCount} lezioni di prova`,
+    detail,
+    clock: "game",
+    timestamp: earliestTimestamp,
+    startsAt: phase === "scheduled" ? earliestScheduledStart : undefined,
+    tutorialTarget,
+  }];
+}
 
 function getBestOwnedPosition(
   ranking: readonly string[],
@@ -120,8 +241,7 @@ export function selectDayNotifications(
   gameNow: number,
   wallNow = gameNow,
 ): DayNotification[] {
-  const contactsById = getContactsById(state.contacts);
-  const notifications: DayNotification[] = [];
+  const notifications = selectTrialNotifications(state, gameNow);
   const lightInflationEvent = state.lightInflation.event;
   const lightInflationNotification = lightInflationEvent
     && lightInflationEvent.occurredAt <= wallNow
@@ -138,42 +258,6 @@ export function selectDayNotifications(
         expiryDurationMs: lightInflationEvent.visibleUntil - lightInflationEvent.occurredAt,
       }
     : undefined;
-
-  for (const trial of selectDayTrials(state, gameNow)) {
-    const contact = contactsById.get(trial.contactId);
-    const completed = trial.status === "completed";
-    const cancelled = trial.status === "cancelled";
-    const terminalTimestamp = cancelled ? trial.startsAt : trial.resolvesAt;
-    const expiresAt = completed || cancelled
-      ? terminalTimestamp + DAY_NOTIFICATION_VISIBILITY_MS
-      : undefined;
-    if (expiresAt !== undefined && gameNow >= expiresAt) continue;
-    const phase: DayNotificationPhase = cancelled
-      ? "lost"
-      : completed
-      ? contact?.status === "enrolled" ? "enrolled" : "lost"
-      : gameNow < trial.startsAt ? "scheduled" : "in-progress";
-    notifications.push({
-      id: `trial-${trial.id}`,
-      kind: "trial",
-      phase,
-      title: "Lezione di prova",
-      detail: cancelled
-        ? "Annullata: nessuna spada disponibile"
-        : "Ordine delle Onde",
-      clock: "game",
-      timestamp: completed || cancelled ? terminalTimestamp : trial.startsAt,
-      startsAt: trial.startsAt,
-      expiresAt,
-      person: contact
-        ? {
-            displayName: `${contact.firstName} ${contact.lastName}`,
-            rarity: contact.rarity,
-            secretLegendary: Boolean(contact.secretLegendaryId),
-          }
-        : undefined,
-    });
-  }
 
   for (const contact of getDirectEnrollmentContacts(state.contacts, state.scheduledTrials)) {
     if (contact.acquiredAt > gameNow) continue;
@@ -235,7 +319,8 @@ export function selectDayNotifications(
     });
   }
 
-  return orderDayNotifications(
-    lightInflationNotification ? [lightInflationNotification, ...notifications] : notifications,
-  );
+  const visibleNotifications = lightInflationNotification
+    ? [lightInflationNotification, ...notifications]
+    : notifications;
+  return orderDayNotifications(visibleNotifications);
 }

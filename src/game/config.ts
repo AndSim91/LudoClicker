@@ -44,6 +44,8 @@ export const GAME_CONFIG = {
   equipmentLoadPerAgonistCourse: 20,
   equipmentBreakLoad: 100,
   eventWearMultiplier: 1,
+  eventContactProtectedActiveMembers: 10,
+  eventContactEasyMarketMembers: 1_000,
   equipmentMaximumUpgradeWearReduction: 0.5,
   equipmentMaximumEventMasteryWearReduction: 0.25,
   officialSwordCost: 330,

@@ -681,8 +681,14 @@ proveDimostrative = personeIncontrate
   × probabilitàProvaSulPosto
   × moltiplicatoreCarisma
 
-contattiOttenuti = estrazionePesataEvento
-  + bonusIndipendenteSulValoreMedio
+mediaContatti = mediaDistribuzioneEvento
+  × 25/27
+  × disponibilitàBacino
+  × efficaciaCollaboratori
+  × (1 + bonusAffluenza + bonusCarisma)
+
+efficaciaCollaboratori = max(1, sommaProduttivitàCollaboratoriEventi)^0,30103
+disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
 ```
 
 Le distribuzioni base sono:
@@ -706,11 +712,23 @@ Le distribuzioni base sono:
 | Sfida a Cthulhu                     | 25%: 40–44; 50%: 48–52; 25%: 56–60             |
 
 Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
-stessa probabilità. I bonus positivi di affluenza, Carisma e collaboratori
-generano un'aggiunta indipendente calcolata sul valore medio base. Possono
-quindi trasformare uno zero in un contatto o superare il massimo della
-distribuzione base, senza essere applicati due volte. L'interfaccia mostra solo
-indicazioni generiche di rischio e potenzialità, mai queste percentuali.
+stessa probabilità. La ricompensa estratta viene normalizzata stocasticamente
+con il fattore 25/27; questo porta il ciclo automatico iniziale di un
+collaboratore Novizio a 3 contatti medi al minuto senza eliminare i risultati
+interi. I bonus positivi di affluenza, Carisma e collaboratori generano poi
+un'aggiunta indipendente calcolata sul valore medio normalizzato. Possono quindi
+trasformare uno zero in un contatto o superare il massimo della distribuzione
+base, senza essere applicati due volte. L'interfaccia mostra solo indicazioni
+generiche di rischio e potenzialità, mai queste percentuali.
+
+Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
+applicano penalità; oltre quella soglia, ogni iscritto riduce progressivamente la
+capacità di trovare persone nuove. Se qualcuno lascia la scuola, la disponibilità
+risale perché quella persona, o una persona equivalente nella rappresentazione
+delle rarità non nominali, può tornare nel bacino futuro. La curva non raggiunge
+mai zero: con 5.000 iscritti conserva circa il 16,69% della produzione. Il bonus
+Follower resta nel moltiplicatore e può compensare la saturazione nel tempo.
+Questa regola è intenzionalmente interna e non viene mostrata nell'interfaccia.
 
 ### 8.3 Lezioni in palestra, Social e volantinaggio
 
@@ -913,6 +931,14 @@ I collaboratori assegnati agli Eventi possono:
 - aumentare il rendimento di un evento pianificato;
 - organizzare piccole attività ricorrenti;
 - produrre nuovi contatti tramite le attività automatiche previste.
+
+La forza complessiva del settore applica rendimenti decrescenti. Si somma la
+produttività base dei collaboratori assegnati e si eleva il risultato a
+`log10(2)`, cioè circa `0,30103`. Un collaboratore ordinario vale ×1, dieci
+valgono ×2 e cento valgono ×4. Ogni aggiunta resta positiva, ma il suo
+incremento, a parità di produttività individuale, è inferiore al precedente.
+Una squadra con forza inferiore a 1 usa comunque ×1, così gli eventi manuali
+non vengono penalizzati.
 
 Per ogni collaboratore libero, l'automazione prova gli eventi dal prezzo base
 più basso al più alto; a parità di prezzo sceglie quello con la media contatti
@@ -1275,15 +1301,23 @@ Influenza due passaggi degli eventi: la probabilità che una persona provi la
 disciplina sul posto e la probabilità che, dopo la prova dimostrativa, lasci il
 proprio indirizzo email.
 
-| Potenziamento                       | Effetto indicativo            |
-| ----------------------------------- | ----------------------------- |
-| Presentazione preparata             | +10% prove dimostrative       |
-| Biglietti con QR code               | +15% contatti agli eventi     |
-| Dimostrazione coordinata            | +20% qualità evento           |
-| Stand riconoscibile                 | +25% persone incontrate       |
-| Accoglienza dell'Ordine             | +15% indirizzi lasciati       |
-| Risposte alle domande difficili     | riduce contatti persi         |
-| “No, non è esattamente quella cosa” | bonus comico alle spiegazioni |
+| Potenziamento                       | Effetto per livello              |
+| ----------------------------------- | -------------------------------- |
+| Presentazione preparata             | +3% prove e contatti             |
+| Biglietti con QR code               | +4% prove e contatti             |
+| Dimostrazione coordinata            | +5% persone incontrate           |
+| Stand riconoscibile                 | +7% persone incontrate           |
+| Accoglienza dell'Ordine             | +4% prove e contatti             |
+| Risposte alle domande difficili     | +5% prove e contatti             |
+| “No, non è esattamente quella cosa” | +8% prove e contatti             |
+| Set da dimostrazione                | +4% persone incontrate           |
+
+Con tutti gli otto potenziamenti al livello 5, il ramo Eventi fornisce
+complessivamente +200%: +120% a prove e contatti e +80% all'affluenza. Con
+Follower a zero, Maestria Maestro e collaboratori ordinari, il riferimento di
+bilanciamento è circa 106 contatti al minuto con dieci collaboratori e 213 con
+cento. Il bonus Follower resta lineare e senza limite, quindi può superare
+questi riferimenti nel lunghissimo periodo.
 
 ### 10.2 Scrittura
 

@@ -355,6 +355,57 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     expect(trainee?.training?.formId).toBe("form-3-staff");
   });
 
+  it("counts duplicated legacy branch preferences only once in qualification demand", () => {
+    const initial = createInitialState(1_000, "", false);
+    const technician = instructor(
+      initial,
+      "legacy-demand-technician",
+      1_000,
+      ["form-3-long", "form-3-staff"],
+      ["form-3-long", "form-3-staff"],
+      ["form-3-long", "form-3-staff"],
+    );
+    const longCandidate = instructor(
+      initial,
+      "legacy-long-candidate",
+      1_500,
+      ["form-3-long"],
+      [],
+    );
+    const staffCandidate = instructor(
+      initial,
+      "legacy-staff-candidate",
+      2_000,
+      ["form-3-staff"],
+      [],
+    );
+    const coreForms = ["form-1", "course-x", "form-2", "course-y"] as FormId[];
+    const longStudent = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: coreForms,
+      formBranchPreferences: ["Spada Lunga" as const],
+    };
+    const legacyStaffStudent = {
+      ...initial.contacts[1],
+      status: "enrolled" as const,
+      forms: coreForms,
+      formBranchPreferences: ["Staffa" as const, "Staffa" as const],
+    };
+    const ready: GameState = {
+      ...initial,
+      contacts: [longStudent, legacyStaffStudent],
+      school: { ...initial.school, currentMonth: 9, euros: 5_000 },
+      collaborators: [technician, staffCandidate, longCandidate],
+    };
+
+    const started = processAutomaticInstructorQualifications(ready, 4_000);
+    const trainee = started.collaborators.find((collaborator) => collaborator.training);
+
+    expect(trainee?.id).toBe(longCandidate.id);
+    expect(trainee?.training?.formId).toBe("form-3-long");
+  });
+
   it("combines PagoSport and summer speed additively, then applies the teaching slowdown", () => {
     const initial = createInitialState(1_000, "", false);
     const technician = instructor(
