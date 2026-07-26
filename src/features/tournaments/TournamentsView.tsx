@@ -10,7 +10,7 @@ import type {
   TournamentResult,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { ChroniclesView } from "./ChroniclesView";
 import {
   CHRONICLES_TOURNAMENT_LOADING_MS,
@@ -185,7 +185,10 @@ export function TournamentsView({
   onStartChronicles?: (contactIds: string[]) => void;
   onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+    stateOverride,
+  );
   const [tab, setTab] = useState<TournamentTab>("overview");
   const [selectedResultId, setSelectedResultId] = useState<string>();
   const [chroniclesLoading, setChroniclesLoading] = useState(false);

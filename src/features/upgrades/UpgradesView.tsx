@@ -22,7 +22,7 @@ import {
   type UpgradeDefinition,
 } from "../../content/upgrades";
 import { getGameMonthName } from "../../game/calendar";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { selectIncomePerMonth } from "../../game/selectors";
 import {
   getSocialContentCharacters,
@@ -210,7 +210,10 @@ function UpgradeNode({
   selected: boolean;
   onSelect: (anchor: HTMLButtonElement) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const level = state.upgrades[definition.id];
   const status = getUpgradeStatus(state, definition);
   const lockReason = getUpgradeLockReason(state, definition);
@@ -256,7 +259,10 @@ function UpgradeDetailsDialog({
   onClose: () => void;
   onBuy: () => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const dialogRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState<{
@@ -403,7 +409,10 @@ export function UpgradesView({
   state?: GameState;
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const [selection, setSelection] = useState<{
     upgradeId: UpgradeId;
     anchor: HTMLButtonElement;

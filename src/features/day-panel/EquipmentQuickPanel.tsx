@@ -4,7 +4,7 @@ import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   getAvailableSwords,
   getEffectiveDamagedSwords,
@@ -38,7 +38,10 @@ export function EquipmentQuickPanel({
   onMaintainEquipment: () => void;
   onBuyOfficialSwords: (amount: PurchaseAmount) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["automation", "collaborators", "equipment", "lightInflation", "school"],
+    stateOverride,
+  );
   const [purchaseIndex, setPurchaseIndex] = useState(0);
   const equipment = state.equipment;
   const availableSwords = getAvailableSwords(equipment);

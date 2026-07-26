@@ -28,7 +28,21 @@ const directEnrollmentContactsCache = new WeakMap<
   WeakMap<ScheduledTrial[], Contact[]>
 >();
 const runningEventsCache = new WeakMap<AcquisitionEvent[], AcquisitionEvent[]>();
+const runningEventDefinitionIdsCache = new WeakMap<
+  AcquisitionEvent[],
+  ReadonlySet<AcquisitionEvent["definitionId"]>
+>();
+const busyEventCollaboratorIdsCache = new WeakMap<AcquisitionEvent[], ReadonlySet<string>>();
 const activeTrainingsCache = new WeakMap<TrainingPerson[], TrainingPerson[]>();
+const waitingTrainingsCache = new WeakMap<
+  Contact[],
+  WeakMap<Collaborator[], TrainingPerson[]>
+>();
+const sendingEmailDeadlineCache = new WeakMap<CampaignEmail[], number>();
+const pendingOutcomeDeadlineCache = new WeakMap<PendingEmailOutcome[], number>();
+const scheduledTrialDeadlineCache = new WeakMap<ScheduledTrial[], number>();
+const runningEventDeadlineCache = new WeakMap<AcquisitionEvent[], number>();
+const trainingDeadlineCache = new WeakMap<TrainingPerson[], number>();
 const contactsByIdCache = new WeakMap<Contact[], ReadonlyMap<string, Contact>>();
 const availableContactCountCache = new WeakMap<Contact[], number>();
 const contactsAwaitingEmailCountCache = new WeakMap<Contact[], number>();
@@ -55,6 +69,24 @@ function cachedFilter<T extends object>(
   return filtered;
 }
 
+function cacheDeadline<T extends object>(
+  cache: WeakMap<T[], number>,
+  values: T[],
+  readTimestamp: (value: T) => number | undefined,
+): number | undefined {
+  const cached = cache.get(values);
+  if (cached !== undefined) return cached === Infinity ? undefined : cached;
+  let deadline = Infinity;
+  for (const value of values) {
+    const timestamp = readTimestamp(value);
+    if (timestamp !== undefined && Number.isFinite(timestamp)) {
+      deadline = Math.min(deadline, timestamp);
+    }
+  }
+  cache.set(values, deadline);
+  return deadline === Infinity ? undefined : deadline;
+}
+
 export function getActiveCampaignEmails(emails: CampaignEmail[]): CampaignEmail[] {
   return cachedFilter(
     activeEmailsCache,
@@ -75,6 +107,14 @@ export function getSendingEmails(emails: CampaignEmail[]): CampaignEmail[] {
   );
 }
 
+export function getNextSendingEmailDeadline(emails: CampaignEmail[]): number | undefined {
+  return cacheDeadline(
+    sendingEmailDeadlineCache,
+    emails,
+    (email) => email.status === "sending" ? email.sendCompletesAt : undefined,
+  );
+}
+
 export function getPendingEmailOutcomes(
   outcomes: PendingEmailOutcome[],
 ): PendingEmailOutcome[] {
@@ -84,6 +124,16 @@ export function getPendingEmailOutcomes(
   if (cached) return cached;
   pendingOutcomesCache.set(outcomes, outcomes);
   return outcomes;
+}
+
+export function getNextPendingEmailOutcomeDeadline(
+  outcomes: PendingEmailOutcome[],
+): number | undefined {
+  return cacheDeadline(
+    pendingOutcomeDeadlineCache,
+    outcomes,
+    (outcome) => outcome.waitForTutorialEvent ? undefined : outcome.resolvesAt,
+  );
 }
 
 export function getScheduledTrials(trials: ScheduledTrial[]): ScheduledTrial[] {
@@ -98,6 +148,18 @@ export function getScheduledTrialsByStart(trials: ScheduledTrial[]): ScheduledTr
     .sort((left, right) => left.startsAt - right.startsAt);
   scheduledTrialsByStartCache.set(trials, scheduled);
   return scheduled;
+}
+
+export function getNextScheduledTrialDeadline(trials: ScheduledTrial[]): number | undefined {
+  return cacheDeadline(
+    scheduledTrialDeadlineCache,
+    trials,
+    (trial) => trial.status !== "scheduled"
+      ? undefined
+      : trial.equipmentUsed === undefined
+        ? trial.startsAt
+        : trial.resolvesAt,
+  );
 }
 
 export function getCompletedTrialsByMostRecent(
@@ -182,12 +244,79 @@ export function getRunningAcquisitionEvents(
   return cachedFilter(runningEventsCache, events, (event) => event.status === "running");
 }
 
+export function getRunningEventDefinitionIds(
+  events: AcquisitionEvent[],
+): ReadonlySet<AcquisitionEvent["definitionId"]> {
+  const cached = runningEventDefinitionIdsCache.get(events);
+  if (cached) return cached;
+  const ids = new Set(getRunningAcquisitionEvents(events).map((event) => event.definitionId));
+  runningEventDefinitionIdsCache.set(events, ids);
+  return ids;
+}
+
+export function getBusyEventCollaboratorIds(
+  events: AcquisitionEvent[],
+): ReadonlySet<string> {
+  const cached = busyEventCollaboratorIdsCache.get(events);
+  if (cached) return cached;
+  const ids = new Set(
+    getRunningAcquisitionEvents(events).flatMap(
+      (event) => event.collaboratorId ? [event.collaboratorId] : [],
+    ),
+  );
+  busyEventCollaboratorIdsCache.set(events, ids);
+  return ids;
+}
+
+export function getNextRunningEventDeadline(events: AcquisitionEvent[]): number | undefined {
+  return cacheDeadline(
+    runningEventDeadlineCache,
+    events,
+    (event) => event.status === "running" ? event.resolvesAt : undefined,
+  );
+}
+
 export function getPeopleInTraining<T extends TrainingPerson>(people: T[]): T[] {
   return cachedFilter(
     activeTrainingsCache as WeakMap<T[], T[]>,
     people,
     (person) => Boolean(person.training),
   );
+}
+
+export function getNextTrainingDeadline<T extends TrainingPerson>(
+  people: T[],
+): number | undefined {
+  return cacheDeadline(
+    trainingDeadlineCache as WeakMap<T[], number>,
+    people,
+    (person) => person.training?.status === "waitingForEquipment"
+      ? undefined
+      : person.training?.completesAt,
+  );
+}
+
+export function getWaitingTrainingsByPriority(
+  contacts: Contact[],
+  collaborators: Collaborator[],
+): TrainingPerson[] {
+  let byCollaborators = waitingTrainingsCache.get(contacts);
+  if (!byCollaborators) {
+    byCollaborators = new WeakMap();
+    waitingTrainingsCache.set(contacts, byCollaborators);
+  }
+  const cached = byCollaborators.get(collaborators);
+  if (cached) return cached;
+  const waiting = [
+    ...getPeopleInTraining(contacts),
+    ...getPeopleInTraining(collaborators),
+  ].filter((person) => person.training?.status === "waitingForEquipment")
+    .sort((left, right) =>
+      (left.training?.startedAt ?? 0) - (right.training?.startedAt ?? 0) ||
+      left.id.localeCompare(right.id)
+    );
+  byCollaborators.set(collaborators, waiting);
+  return waiting;
 }
 
 export function getContactsById(contacts: Contact[]): ReadonlyMap<string, Contact> {

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type CSSProperties } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Icon } from "../components/common/Icon";
 import { ProfileNameDialog } from "../components/ProfileNameDialog";
 import { AppRail, type AppView } from "../components/outlook-shell/AppRail";
@@ -18,9 +26,10 @@ import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
-import { GameStateContext } from "../game/GameStateContext";
+import { GameStateProvider } from "../game/GameStateContext";
 import { GameTimeProvider } from "../game/GameTimeProvider";
 import { getAvailableSwords } from "../game/equipment";
+import { getMessageThreadKey } from "../game/messages";
 import { useGameEngine } from "../game/useGameEngine";
 import { getAvailableStandardLegendaryProfiles } from "../game/legendaryAvailability";
 import { isGameAreaUnlocked } from "../game/progression";
@@ -28,7 +37,6 @@ import { exportGame, importGame, resetGame, saveGame } from "../game/save";
 import {
   selectAvailableContacts,
   selectContactsAwaitingEmail,
-  selectVisibleInboxMessages,
 } from "../game/selectors";
 import type {
   AcquisitionEvent,
@@ -40,6 +48,19 @@ import type {
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
 import { useAppPreferences } from "./useAppPreferences";
+
+const StableTitleBar = memo(TitleBar);
+const StableAppRail = memo(AppRail);
+const StableFolderPane = memo(FolderPane);
+const StableMessageList = memo(MessageList);
+const StableSentMailDetail = memo(SentMailDetail);
+const StableComposer = memo(Composer);
+const StableUpgradesView = memo(UpgradesView);
+const StableEventsView = memo(EventsView);
+const StablePeopleView = memo(PeopleView);
+const StableTournamentsView = memo(TournamentsView);
+const StableOverviewView = memo(OverviewView);
+const StableDayPanel = memo(DayPanel);
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -78,9 +99,21 @@ export function App() {
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedSentEmailId, setSelectedSentEmailId] = useState<string | null>(null);
   const { reduceMotion, setReduceMotion, darkMode, setDarkMode } = useAppPreferences();
-  const visibleInboxMessages = selectVisibleInboxMessages(state);
-  const selectedMessage = visibleInboxMessages.find((message) => message.id === selectedMessageId);
-  const selectedSentEmail = state.emails.find((email) => email.id === selectedSentEmailId);
+  const tournamentMessagesVisible = isGameAreaUnlocked("tournaments", state);
+  const visibleInboxMessages = useMemo(
+    () => tournamentMessagesVisible
+      ? state.messages
+      : state.messages.filter((message) => getMessageThreadKey(message) !== "tournaments"),
+    [state.messages, tournamentMessagesVisible],
+  );
+  const selectedMessage = useMemo(
+    () => visibleInboxMessages.find((message) => message.id === selectedMessageId),
+    [selectedMessageId, visibleInboxMessages],
+  );
+  const selectedSentEmail = useMemo(
+    () => state.emails.find((email) => email.id === selectedSentEmailId),
+    [selectedSentEmailId, state.emails],
+  );
   const activeView: AppView =
     view === "admin"
       ? import.meta.env.DEV
@@ -299,13 +332,13 @@ export function App() {
   }
 
   return (
-    <GameStateContext.Provider value={state}>
+    <GameStateProvider state={state}>
     <GameTimeProvider getNow={getGameNow} isPaused={isPaused} speed={gameSpeed}>
       <div
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
-        <TitleBar
+        <StableTitleBar
           currentMonth={state.school.currentMonth}
           nextMonthAt={state.school.nextFeeAt}
           contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
@@ -327,16 +360,16 @@ export function App() {
           }
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
-          <AppRail view={activeView} onChange={setView} />
+          <StableAppRail view={activeView} onChange={setView} />
           {activeView === "mail" ? (
             <>
-              <FolderPane
+              <StableFolderPane
                 folder={mailFolder}
                 onSelectFolder={selectFolder}
                 onOpenComposer={openComposer}
                 onOpenMembers={openMembers}
               />
-              <MessageList
+              <StableMessageList
                 folder={mailFolder}
                 selectedMessageId={selectedMessageId}
                 selectedSentEmailId={selectedSentEmailId}
@@ -345,7 +378,7 @@ export function App() {
               />
               {mailFolder === "sent" ? (
                 selectedSentEmail ? (
-                  <SentMailDetail email={selectedSentEmail} />
+                  <StableSentMailDetail email={selectedSentEmail} />
                 ) : (
                   <main className="empty-composer">
                     <Icon name="send" />
@@ -356,21 +389,21 @@ export function App() {
               ) : selectedMessage ? (
                 <MessageDetail message={selectedMessage} />
               ) : (
-                <Composer
+                <StableComposer
                   onWrite={write}
                   onAutomaticSendingChange={setAutomaticEmailSending}
                 />
               )}
             </>
           ) : activeView === "upgrades" ? (
-            <UpgradesView onBuyUpgrade={buyUpgrade} />
+            <StableUpgradesView onBuyUpgrade={buyUpgrade} />
           ) : activeView === "events" ? (
-            <EventsView
+            <StableEventsView
               onStart={startAcquisitionEvent}
               onCancel={cancelAcquisitionEvent}
             />
           ) : activeView === "contacts" ? (
-            <PeopleView
+            <StablePeopleView
               onAssign={assignCollaborator}
               onIncrementCollaboratorAssignment={incrementCollaboratorAssignment}
               onDecrementCollaboratorAssignment={decrementCollaboratorAssignment}
@@ -380,7 +413,7 @@ export function App() {
               onCancelEnrollment={cancelMemberEnrollment}
             />
           ) : activeView === "tournaments" ? (
-            <TournamentsView
+            <StableTournamentsView
               gameSpeed={gameSpeed}
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}
@@ -409,7 +442,7 @@ export function App() {
               onScheduleLegendaryTrial={scheduleAdminLegendaryTrial}
             />
           ) : (
-            <OverviewView
+            <StableOverviewView
               view={activeView}
               onExport={exportSave}
               onImport={importSave}
@@ -424,7 +457,7 @@ export function App() {
               onReduceMotionChange={setReduceMotion}
             />
           )}
-          <DayPanel
+          <StableDayPanel
             onMaintainEquipment={maintainEquipment}
             onBuyOfficialSwords={buyOfficialSwords}
           />
@@ -449,6 +482,6 @@ export function App() {
         />
       ) : null}
     </GameTimeProvider>
-    </GameStateContext.Provider>
+    </GameStateProvider>
   );
 }

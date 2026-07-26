@@ -1,14 +1,24 @@
 import {
   getActiveCampaignEmails,
-  getPendingEmailOutcomes,
-  getPeopleInTraining,
-  getRunningAcquisitionEvents,
-  getScheduledTrials,
-  getSendingEmails,
+  getNextPendingEmailOutcomeDeadline,
+  getNextRunningEventDeadline,
+  getNextScheduledTrialDeadline,
+  getNextSendingEmailDeadline,
+  getNextTrainingDeadline,
 } from "./runtimeIndexes";
 import type { GameState } from "./types";
 import { GAME_CONFIG } from "./config";
 import { getNextRealtimeEventCooldownDeadline } from "./eventCooldowns";
+import { hasActionableAutomaticEvents } from "./eventAutomationFlow";
+import {
+  hasActiveInstructorAthleticPreparation,
+  isAutomaticTeachingKnownIdle,
+} from "./automationFlow";
+import { isSummerBreak } from "./calendar";
+import {
+  getEquipmentAutomaticRepairTarget,
+  getEquipmentAutomaticRepairUnitCost,
+} from "./equipment";
 import { gameDelayToWallDelay } from "./gameClock";
 
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
@@ -20,41 +30,27 @@ function earlier(current: number, candidate: number | undefined): number {
     : Math.min(current, candidate);
 }
 
-function earliest<T>(
-  values: readonly T[],
-  readTimestamp: (value: T) => number | undefined,
-): number | undefined {
-  let result: number | undefined;
-  for (const value of values) {
-    const timestamp = readTimestamp(value);
-    if (
-      timestamp !== undefined &&
-      Number.isFinite(timestamp) &&
-      (result === undefined || timestamp < result)
-    ) {
-      result = timestamp;
-    }
-  }
-  return result;
-}
-
 export function needsAutomationHeartbeat(state: GameState): boolean {
   const hasWritingCampaign = getActiveCampaignEmails(state.emails)
     .some((email) => email.status === "writing");
-  const hasEnrolledAthlete = state.school.activeMembers > 0;
+  const instructorPreparationActive = hasActiveInstructorAthleticPreparation(state);
 
   return state.collaborators.some((collaborator) => {
     switch (collaborator.assignment) {
       case "writing":
         return hasWritingCampaign || state.unlocks.social;
       case "equipment":
-        return state.equipment.wear > 0 || state.equipment.damagedSwords > 0;
-      case "events":
+        {
+          const target = getEquipmentAutomaticRepairTarget(state.equipment);
+          return target !== undefined &&
+            state.school.euros >= getEquipmentAutomaticRepairUnitCost(target);
+        }
       case "instructor":
-        // Questi ruoli possono avviare nuovo lavoro dopo un cambio di stato.
-        return collaborator.assignment === "instructor"
-          ? hasEnrolledAthlete || state.unlocks.forms
-          : true;
+        return instructorPreparationActive;
+      case "events":
+        // Gli eventi sono discreti: il planner li riattiva sulle dipendenze o
+        // alla scadenza del cooldown, senza un controllo ogni secondo.
+        return false;
       default:
         return false;
     }
@@ -71,45 +67,27 @@ export function getNextGameDeadline(state: GameState): number {
   }
   nextDeadline = earlier(
     nextDeadline,
-    earliest(getSendingEmails(state.emails), (email) => email.sendCompletesAt),
+    getNextSendingEmailDeadline(state.emails),
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(
-      getPendingEmailOutcomes(state.pendingEmailOutcomes).filter(
-        (outcome) => !outcome.waitForTutorialEvent,
-      ),
-      (outcome) => outcome.resolvesAt,
-    ),
+    getNextPendingEmailOutcomeDeadline(state.pendingEmailOutcomes),
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(
-      getScheduledTrials(state.scheduledTrials),
-      (trial) => trial.equipmentUsed !== undefined ? trial.resolvesAt : trial.startsAt,
-    ),
+    getNextScheduledTrialDeadline(state.scheduledTrials),
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(getRunningAcquisitionEvents(state.acquisitionEvents), (event) => event.resolvesAt),
+    getNextRunningEventDeadline(state.acquisitionEvents),
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(
-      getPeopleInTraining(state.contacts),
-      (contact) => contact.training?.status === "waitingForEquipment"
-        ? undefined
-        : contact.training?.completesAt,
-    ),
+    getNextTrainingDeadline(state.contacts),
   );
   nextDeadline = earlier(
     nextDeadline,
-    earliest(
-      getPeopleInTraining(state.collaborators),
-      (collaborator) => collaborator.training?.status === "waitingForEquipment"
-        ? undefined
-        : collaborator.training?.completesAt,
-    ),
+    getNextTrainingDeadline(state.collaborators),
   );
 
   return nextDeadline;
@@ -124,7 +102,20 @@ export function getNextGameTickAt(
     (collaborator) => collaborator.assignment === "events",
   );
   if (hasEventAutomation) {
-    nextDeadline = earlier(nextDeadline, getNextRealtimeEventCooldownDeadline(state, now));
+    nextDeadline = hasActionableAutomaticEvents(state, now)
+      ? earlier(nextDeadline, now)
+      : earlier(nextDeadline, getNextRealtimeEventCooldownDeadline(state, now));
+  }
+  const hasInstructorAutomation = state.collaborators.some(
+    (collaborator) => collaborator.assignment === "instructor",
+  );
+  if (
+    hasInstructorAutomation &&
+    state.unlocks.forms &&
+    !isSummerBreak(state.school.currentMonth) &&
+    !isAutomaticTeachingKnownIdle(state)
+  ) {
+    nextDeadline = earlier(nextDeadline, now);
   }
   const heartbeatAt = needsAutomationHeartbeat(state)
     ? state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS

@@ -12,8 +12,16 @@ import {
   getInstructorTeachingCounts,
   getDayTrials,
   getDirectEnrollmentContacts,
+  getBusyEventCollaboratorIds,
+  getNextPendingEmailOutcomeDeadline,
+  getNextRunningEventDeadline,
+  getNextScheduledTrialDeadline,
+  getNextSendingEmailDeadline,
+  getNextTrainingDeadline,
+  getRunningEventDefinitionIds,
   getScheduledTrials,
   getScheduledTrialsByStart,
+  getWaitingTrainingsByPriority,
 } from "./runtimeIndexes";
 import { resolveTrial } from "./trialFlow";
 import type { Contact, ScheduledTrial } from "./types";
@@ -153,6 +161,68 @@ describe("runtime indexes", () => {
     expect(getInstructorTeachingCounts(contacts, initial.collaborators)).toBe(loads);
     expect(contactsById.get(contacts[0].id)).toBe(contacts[0]);
     expect(loads.get(instructorId)).toBe(2);
+  });
+
+  it("caches queue deadlines, event sets and chronological waiting lessons", () => {
+    const initial = createInitialState(1_000);
+    const emails = initial.emails.map((email) => ({
+      ...email,
+      status: "sending" as const,
+      sendCompletesAt: 4_000,
+    }));
+    const outcomes = [{
+      id: "outcome",
+      emailId: emails[0].id,
+      contactId: initial.contacts[0].id,
+      resolvesAt: 3_000,
+      result: "lost" as const,
+    }];
+    const trials: ScheduledTrial[] = [{
+      id: "trial",
+      contactId: initial.contacts[0].id,
+      startsAt: 2_000,
+      resolvesAt: 5_000,
+      resultSeed: 1,
+      status: "scheduled",
+    }];
+    const events = [{
+      id: "event",
+      definitionId: "park-sparring" as const,
+      title: "Evento",
+      location: "Test",
+      startedAt: 1_000,
+      resolvesAt: 6_000,
+      cost: 0,
+      peopleMet: 0,
+      demonstrationsGiven: 0,
+      contactReward: 0,
+      membersUsed: 0,
+      equipmentUsed: 0,
+      wearAdded: 0,
+      collaboratorId: "event-worker",
+      status: "running" as const,
+    }];
+    const contacts = initial.contacts.slice(0, 2).map((contact, index) => ({
+      ...contact,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 20 - index,
+        completesAt: index === 0 ? 7_000 : 8_000,
+        status: index === 0 ? "running" as const : "waitingForEquipment" as const,
+      },
+    }));
+
+    expect(getNextSendingEmailDeadline(emails)).toBe(4_000);
+    expect(getNextPendingEmailOutcomeDeadline(outcomes)).toBe(3_000);
+    expect(getNextScheduledTrialDeadline(trials)).toBe(2_000);
+    expect(getNextRunningEventDeadline(events)).toBe(6_000);
+    expect(getNextTrainingDeadline(contacts)).toBe(7_000);
+    expect(getRunningEventDefinitionIds(events)).toBe(getRunningEventDefinitionIds(events));
+    expect(getBusyEventCollaboratorIds(events)).toBe(getBusyEventCollaboratorIds(events));
+
+    const waiting = getWaitingTrainingsByPriority(contacts, initial.collaborators);
+    expect(getWaitingTrainingsByPriority(contacts, initial.collaborators)).toBe(waiting);
+    expect(waiting.map((person) => person.id)).toEqual([contacts[1].id]);
   });
 
   it("memoizes automatic-teaching no-ops but invalidates them on relevant input", () => {

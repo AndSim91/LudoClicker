@@ -1,6 +1,5 @@
 import {
   AGONIST_COURSE_ID,
-  FORM_BRANCHES,
   canTrainForm,
   getCollaboratorProductivity,
   getFormDefinition,
@@ -10,27 +9,18 @@ import {
   getInstructorQualificationCost,
   getInstructorQualificationDuration,
   needsCourseXRecovery,
-  getTechnicianCourseDuration,
   getStudentFormCost,
   isInstructorForm,
-  isAgonistCourse,
 } from "../content/forms";
 import {
-  getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
-import { getContactBaseStats } from "./athleteStats";
-import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
-import {
-  completeEquipmentUse,
-  getAvailableSwords,
-  reserveSwords,
-} from "./equipment";
+import { reserveSwords } from "./equipment";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
 import { getCollaboratorAssignmentCounts } from "./collaboratorManagement";
@@ -40,34 +30,29 @@ import {
   selectInstructorTeachingCount,
 } from "./selectors";
 import {
-  getTrainingDurationMultiplier,
-  getTrainingPhase,
-  getTrainingTrack,
   refreshTrainingDurations,
   scheduleTraining,
 } from "./teacherTrainingFlow";
+import { createTrainingStartPlan } from "./trainingStartPlan";
 import type {
   CollaboratorAssignment,
-  Contact,
-  FormBranch,
   FormId,
-  FormTraining,
   GameState,
-  InboxMessage,
 } from "./types";
+import {
+  chooseFormBranchPreferences,
+  resolveFormTraining,
+  resolveFormTrainingBatch,
+  type TrainingFlowDependencies,
+} from "./trainingResolution";
+import { getWaitingTrainingsByPriority } from "./runtimeIndexes";
 
-export interface TrainingFlowDependencies {
-  addMessage: (
-    state: GameState,
-    now: number,
-    subject: string,
-    preview: string,
-    tone?: InboxMessage["tone"],
-    category?: NonNullable<InboxMessage["category"]>,
-    threadKey?: InboxMessage["threadKey"],
-  ) => GameState;
-  recruitCollaborator: (state: GameState, contact: Contact, now: number) => GameState;
-}
+export {
+  chooseFormBranchPreferences,
+  resolveFormTraining,
+  resolveFormTrainingBatch,
+};
+export type { TrainingFlowDependencies };
 
 export function assignCollaborator(
   state: GameState,
@@ -427,381 +412,18 @@ export function startFormTraining(
   return refreshTrainingDurations(nextState, now);
 }
 
-export function chooseFormBranchPreferences(seed: number): {
-  preferences: FormBranch[];
-  nextSeed: number;
-} {
-  const [countRoll, seedAfterCount] = nextRandom(seed);
-  const count = countRoll < 0.65 ? 1 : countRoll < 0.95 ? 2 : 3;
-  const [startRoll, nextSeed] = nextRandom(seedAfterCount);
-  const start = Math.floor(startRoll * FORM_BRANCHES.length) % FORM_BRANCHES.length;
-  return {
-    preferences: Array.from(
-      { length: count },
-      (_, index) => FORM_BRANCHES[(start + index) % FORM_BRANCHES.length],
-    ),
-    nextSeed,
-  };
-}
-
-function getExamFailureChance(training: FormTraining): number | undefined {
-  const phase = getTrainingPhase(training);
-  if (phase === "athlete") return 0.55;
-  if (phase === "instructor") return 0.5;
-  if (phase === "technician") return 0.45;
-  return undefined;
-}
-
-function getFallbackTrainingBaseDuration(training: FormTraining): number {
-  const definition = isAgonistCourse(training.formId)
-    ? undefined
-    : getFormDefinition(training.formId);
-  if (!definition) return GAME_CONFIG.minimumTrainingDurationMs;
-  const phase = getTrainingPhase(training);
-  if (phase === "instructor") {
-    return getInstructorQualificationDuration(definition.durationMs);
-  }
-  if (phase === "technician") {
-    return getTechnicianCourseDuration(definition.durationMs);
-  }
-  return definition.durationMs;
-}
-
-function replacePersonTraining(
-  state: GameState,
-  personId: string,
-  training: FormTraining | undefined,
-): GameState {
-  return {
-    ...state,
-    contacts: state.contacts.map((contact) =>
-      contact.id === personId ? { ...contact, training } : contact
-    ),
-    collaborators: state.collaborators.map((collaborator) =>
-      collaborator.id === personId ? { ...collaborator, training } : collaborator
-    ),
-  };
-}
-
-function resolveHiddenExam(
-  state: GameState,
-  personId: string,
-  training: FormTraining,
-  now: number,
-): { state: GameState; passed: boolean } {
-  const failureChance = getExamFailureChance(training);
-  if (failureChance === undefined) return { state, passed: true };
-  const [roll, nextSeed] = nextRandom(state.randomSeed);
-  const rolledState = { ...state, randomSeed: nextSeed };
-  if (roll >= failureChance) return { state: rolledState, passed: true };
-
-  const baseDuration = training.trainingBaseDurationMs ??
-    getFallbackTrainingBaseDuration(training);
-  const durationMultiplier = getTrainingDurationMultiplier(state, personId, training);
-  const extensionMs = Math.max(
-    GAME_CONFIG.minimumTrainingDurationMs,
-    Math.round(baseDuration * 0.1 * durationMultiplier),
-  );
-  return {
-    state: replacePersonTraining(rolledState, personId, {
-      ...training,
-      completesAt: now + extensionMs,
-      examFailures: (training.examFailures ?? 0) + 1,
-      trainingBaseDurationMs: baseDuration,
-      trainingDurationMultiplier: durationMultiplier,
-    }),
-    passed: false,
-  };
-}
-
-export function resolveFormTraining(
-  state: GameState,
-  personId: string,
-  now: number,
-  dependencies: TrainingFlowDependencies,
-): GameState {
-  const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
-  const member = state.contacts.find((candidate) => candidate.id === personId);
-  const student = collaborator ?? member;
-  if (
-    !student?.training ||
-    student.training.status === "waitingForEquipment" ||
-    student.training.completesAt > now
-  ) return state;
-  const training = student.training;
-  const completedFormId = training.formId;
-  const exam = resolveHiddenExam(state, personId, training, now);
-  if (!exam.passed) return exam.state;
-  const examState = exam.state;
-
-  const phase = getTrainingPhase(training);
-  const definition = isAgonistCourse(completedFormId)
-    ? undefined
-    : getFormDefinition(completedFormId);
-  if (phase === "instructor") {
-    if (!collaborator || !definition || isAgonistCourse(completedFormId)) {
-      return replacePersonTraining(examState, personId, undefined);
-    }
-    const completedInstructorFormId = completedFormId;
-    const qualifiedState = {
-      ...examState,
-      collaborators: examState.collaborators.map((candidate) =>
-        candidate.id === collaborator.id
-          ? {
-              ...candidate,
-              instructorForms: candidate.instructorForms.includes(completedInstructorFormId)
-                ? candidate.instructorForms
-                : [...candidate.instructorForms, completedInstructorFormId],
-              training: undefined,
-            }
-          : candidate
-      ),
-    };
-    return dependencies.addMessage(
-      qualifiedState,
-      now,
-      "Corso Istruttori completato",
-      `${collaborator.displayName} ha ottenuto l'attestato per ${definition.longName}.`,
-      "positive",
-      "other",
-      "training",
-    );
-  }
-  if (phase === "technician") {
-    if (!collaborator || !definition || isAgonistCourse(completedFormId)) {
-      return replacePersonTraining(examState, personId, undefined);
-    }
-    const completedTechnicianFormId = completedFormId;
-    const technicianState = {
-      ...examState,
-      collaborators: examState.collaborators.map((candidate) =>
-        candidate.id === collaborator.id
-          ? {
-              ...candidate,
-              technicianForms: (candidate.technicianForms ?? []).includes(completedTechnicianFormId)
-                ? candidate.technicianForms
-                : [...(candidate.technicianForms ?? []), completedTechnicianFormId],
-              training: undefined,
-            }
-          : candidate
-      ),
-    };
-    return dependencies.addMessage(
-      technicianState,
-      now,
-      "Corso Tecnico completato",
-      `${collaborator.displayName} è ora Tecnico di ${definition.longName}.`,
-      "positive",
-      "other",
-      "training",
-    );
-  }
-
-  const completedEquipment = completeEquipmentUse(
-    examState.equipment,
-    training.equipmentUsed ?? 0,
-    (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
-  );
-  if (isAgonistCourse(completedFormId)) {
-    const athleteContact = collaborator
-      ? examState.contacts.find((contact) => contact.id === collaborator.contactId)
-      : member;
-    if (!athleteContact) return examState;
-    const grantsStats = training.agonistCourseGrantsStats ?? true;
-    if (!grantsStats) {
-      return {
-        ...examState,
-        equipment: completedEquipment,
-        contacts: examState.contacts.map((contact) => contact.id === athleteContact.id
-          ? { ...contact, training: collaborator ? contact.training : undefined }
-          : contact),
-        collaborators: collaborator
-          ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
-            ? { ...candidate, training: undefined }
-            : candidate)
-          : examState.collaborators,
-      };
-    }
-    const baseStats = getContactBaseStats(athleteContact);
-    const maximumGain = getAgonistCourseMaximumStatGain(examState.upgrades);
-    const [arenaRoll, afterArena] = nextRandom(examState.randomSeed);
-    const [styleRoll, nextSeed] = nextRandom(afterArena);
-    const slotsConsumed = Math.max(1, training.agonistCourseSlotsConsumed ?? 1);
-    const arenaGain = (1 + Math.floor(arenaRoll * maximumGain)) * slotsConsumed;
-    const styleGain = (1 + Math.floor(styleRoll * maximumGain)) * slotsConsumed;
-    const totalCompletions = (athleteContact.agonistCourseCompletions ?? 0) + 1;
-    const nextState: GameState = {
-      ...examState,
-      equipment: completedEquipment,
-      randomSeed: nextSeed,
-      contacts: examState.contacts.map((contact) => contact.id === athleteContact.id
-          ? {
-              ...contact,
-              training: collaborator ? contact.training : undefined,
-              arenaBase: baseStats.arena + arenaGain,
-              styleBase: baseStats.style + styleGain,
-              agonistCourseCompletions: totalCompletions,
-              agonistCourseArenaBonus:
-                (contact.agonistCourseArenaBonus ?? contact.agonistCourseCompletions ?? 0) +
-                arenaGain,
-              agonistCourseStyleBonus:
-                (contact.agonistCourseStyleBonus ?? contact.agonistCourseCompletions ?? 0) +
-                styleGain,
-            }
-          : contact),
-      collaborators: collaborator
-        ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
-          ? { ...candidate, training: undefined }
-          : candidate)
-        : examState.collaborators,
-    };
-    return nextState;
-  }
-  if (!definition || student.forms.includes(completedFormId)) return examState;
-  const completedForms = [...student.forms, completedFormId];
-  const preferenceResult = completedFormId === "course-y" &&
-      (student.formBranchPreferences?.length ?? 0) === 0
-    ? chooseFormBranchPreferences(examState.randomSeed)
-    : {
-        preferences: [...(student.formBranchPreferences ?? [])],
-        nextSeed: examState.randomSeed,
-      };
-  const combinedInstructorCourse = getTrainingTrack(training) === "combined-instructor";
-  const instructorPhase = combinedInstructorCourse && collaborator
-    ? scheduleTraining(
-        examState,
-        collaborator.id,
-        now,
-        getInstructorQualificationDuration(definition.durationMs) /
-          getCollaboratorProductivity(collaborator, "instructor"),
-        {
-          formId: completedFormId,
-          status: "running",
-          equipmentUsed: 0,
-          wearPerSword: 0,
-          includesInstructorCertification: true,
-          trainingTrack: "combined-instructor",
-          trainingPhase: "instructor",
-        },
-      )
-    : undefined;
-  let nextState: GameState = {
-    ...examState,
-    equipment: completedEquipment,
-    randomSeed: preferenceResult.nextSeed,
-    contacts: member && !collaborator
-      ? examState.contacts.map((candidate) => candidate.id === member.id
-        ? {
-            ...candidate,
-            forms: completedForms,
-            formBranchPreferences: preferenceResult.preferences,
-            training: undefined,
-          }
-        : candidate)
-      : examState.contacts,
-    collaborators: collaborator
-      ? examState.collaborators.map((candidate) => candidate.id === collaborator.id
-        ? {
-            ...candidate,
-            forms: completedForms,
-            formBranchPreferences: preferenceResult.preferences,
-            training: instructorPhase,
-          }
-        : candidate)
-      : examState.collaborators,
-    statistics: {
-      ...examState.statistics,
-      formsCompleted: examState.statistics.formsCompleted + 1,
-    },
-  };
-  if (instructorPhase) return nextState;
-  nextState = dependencies.addMessage(
-    nextState,
-    now,
-    student.training.instructorId
-      ? "Riepilogo formazione automatica"
-      : "Formazione completata",
-    `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha completato ${definition.longName}.`,
-    "positive",
-    "other",
-    "training",
-  );
-  if (
-    !member ||
-    collaborator ||
-    completedFormId !== "course-y" ||
-    member.rarity !== "ultra-rare"
-  ) return nextState;
-  const qualifiedMember = nextState.contacts.find((contact) => contact.id === member.id);
-  return qualifiedMember
-    ? dependencies.recruitCollaborator(nextState, qualifiedMember, now)
-    : nextState;
-}
-
 export function processWaitingTrainings(
   state: GameState,
   now: number,
 ): GameState {
-  const waitingIds = [...state.contacts, ...state.collaborators]
-    .filter((person) => person.training?.status === "waitingForEquipment")
-    .sort((left, right) =>
-      (left.training?.startedAt ?? 0) - (right.training?.startedAt ?? 0) ||
-      left.id.localeCompare(right.id)
-    )
-    .map((person) => person.id);
+  const waitingPeople = getWaitingTrainingsByPriority(
+    state.contacts,
+    state.collaborators,
+  );
+  if (waitingPeople.length === 0) return state;
 
-  let nextState = state;
-  for (const personId of waitingIds) {
-    const contact = nextState.contacts.find((candidate) => candidate.id === personId);
-    const collaborator = nextState.collaborators.find((candidate) => candidate.id === personId);
-    const person = collaborator ?? contact;
-    const waiting = person?.training;
-    if (!person || waiting?.status !== "waitingForEquipment") continue;
-
-    const requiredSwords = waiting.equipmentUsed ?? 1;
-    if (getAvailableSwords(nextState.equipment) < requiredSwords) continue;
-
-    nextState = {
-      ...nextState,
-      contacts: contact
-        ? nextState.contacts.map((candidate) => candidate.id === personId
-          ? { ...candidate, training: undefined }
-          : candidate)
-        : nextState.contacts,
-      collaborators: collaborator
-        ? nextState.collaborators.map((candidate) => candidate.id === personId
-          ? { ...candidate, training: undefined }
-          : candidate)
-        : nextState.collaborators,
-    };
-
-    nextState = isAgonistCourse(waiting.formId)
-      ? startAgonistCourse(
-          nextState,
-          personId,
-          waiting.requestedInstructorId ?? "",
-          now,
-        )
-      : startFormTraining(nextState, personId, waiting.formId, now);
-
-    const restarted = nextState.collaborators.find((candidate) => candidate.id === personId) ??
-      nextState.contacts.find((candidate) => candidate.id === personId);
-    if (!restarted?.training) {
-      nextState = {
-        ...nextState,
-        contacts: contact
-          ? nextState.contacts.map((candidate) => candidate.id === personId
-            ? { ...candidate, training: waiting }
-            : candidate)
-          : nextState.contacts,
-        collaborators: collaborator
-          ? nextState.collaborators.map((candidate) => candidate.id === personId
-            ? { ...candidate, training: waiting }
-            : candidate)
-          : nextState.collaborators,
-      };
-    }
-  }
-  return nextState;
+  const plan = createTrainingStartPlan(state, now);
+  for (const person of waitingPeople) plan.restartWaitingTraining(person.id);
+  return plan.commit();
 }
 

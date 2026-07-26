@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { createInitialState } from "./initialState";
+import { processAutomaticTeaching } from "./automationFlow";
 import { gameReducer } from "./engine";
 import { selectAvailableInstructor } from "./selectors";
+import { createTrainingStartPlan } from "./trainingStartPlan";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
 function instructor(
@@ -235,5 +237,42 @@ describe("automatic teaching rules", () => {
       training.requestedInstructorId === certified.id
     )).toBe(true);
     expect(secondTick.contacts.filter((contact) => contact.training)).toHaveLength(6);
+  });
+
+  it("reuses a known idle result across mastery-only updates and invalidates on equipment", () => {
+    const initial = teachingState();
+    const state: GameState = {
+      ...initial,
+      contacts: [],
+      collaborators: [instructor("idle", "legendary", ["form-1"])],
+    };
+    const createPlan = vi.fn(createTrainingStartPlan);
+    const startForm = (current: GameState) => current;
+    const startAgonist = (current: GameState) => current;
+
+    processAutomaticTeaching(state, 2_000, startForm, startAgonist, createPlan);
+    expect(createPlan).toHaveBeenCalledTimes(1);
+
+    const masteryOnly = {
+      ...state,
+      collaborators: state.collaborators.map((collaborator) => ({
+        ...collaborator,
+        mastery: {
+          ...collaborator.mastery!,
+          instructor: collaborator.mastery!.instructor + 1,
+        },
+      })),
+    };
+    processAutomaticTeaching(masteryOnly, 3_000, startForm, startAgonist, createPlan);
+    expect(createPlan).toHaveBeenCalledTimes(1);
+
+    processAutomaticTeaching(
+      { ...masteryOnly, equipment: { ...masteryOnly.equipment } },
+      4_000,
+      startForm,
+      startAgonist,
+      createPlan,
+    );
+    expect(createPlan).toHaveBeenCalledTimes(2);
   });
 });

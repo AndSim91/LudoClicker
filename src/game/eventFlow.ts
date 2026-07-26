@@ -18,12 +18,85 @@ import { addMessage } from "./stateUpdates";
 import { selectAvailableEventMembers } from "./selectors";
 import { startNextCampaign } from "./emailFlow";
 import { getArchivedCompletedEventCount } from "./historyArchive";
+import {
+  getBusyEventCollaboratorIds,
+  getCollaboratorsById,
+  getRunningEventDefinitionIds,
+} from "./runtimeIndexes";
 import { isGameAreaUnlocked } from "./progression";
 import {
   FIRST_EVENT_TUTORIAL_SCENE_ID,
   isTutorialScenePending,
 } from "./tutorialProgress";
-import type { AcquisitionEvent, GameState } from "./types";
+import type { AcquisitionEvent, Collaborator, GameState } from "./types";
+
+export interface EventStartCheckContext {
+  runningDefinitionIds: ReadonlySet<AcquisitionEvent["definitionId"]>;
+  busyCollaboratorIds: ReadonlySet<string>;
+  collaboratorsById: ReadonlyMap<string, Collaborator>;
+  availableMembers: number;
+  availableSwords: number;
+}
+
+export function createEventStartCheckContext(state: GameState): EventStartCheckContext {
+  return {
+    runningDefinitionIds: getRunningEventDefinitionIds(state.acquisitionEvents),
+    busyCollaboratorIds: getBusyEventCollaboratorIds(state.acquisitionEvents),
+    collaboratorsById: getCollaboratorsById(state.collaborators),
+    availableMembers: selectAvailableEventMembers(state),
+    availableSwords: getAvailableSwords(state.equipment),
+  };
+}
+
+function getEventStartDetails(
+  state: GameState,
+  definitionId: AcquisitionEvent["definitionId"],
+  now: number,
+  collaboratorId?: string,
+  checkContext = createEventStartCheckContext(state),
+) {
+  const definition = getAcquisitionEventDefinition(definitionId);
+  if (!definition || checkContext.runningDefinitionIds.has(definitionId)) return undefined;
+  const collaborator = collaboratorId
+    ? checkContext.collaboratorsById.get(collaboratorId)
+    : undefined;
+  if (
+    collaboratorId &&
+    (
+      collaborator?.assignment !== "events" ||
+      checkContext.busyCollaboratorIds.has(collaboratorId)
+    )
+  ) return undefined;
+  if (isEventCooldownActive(state.activities.eventCooldowns[definitionId], state, now)) {
+    return undefined;
+  }
+  if (
+    state.school.historicMembers < definition.unlockMembers ||
+    checkContext.availableMembers < definition.requiredMembers ||
+    checkContext.availableSwords < definition.requiredSwords
+  ) return undefined;
+
+  const masteryDefinition = collaborator
+    ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0)
+    : undefined;
+  const eventCost = Math.round(
+    definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1),
+  );
+  if (state.school.euros < eventCost) return undefined;
+  return { definition, masteryDefinition, eventCost };
+}
+
+export function canStartAcquisitionEvent(
+  state: GameState,
+  definitionId: AcquisitionEvent["definitionId"],
+  now: number,
+  collaboratorId?: string,
+  checkContext?: EventStartCheckContext,
+): boolean {
+  return Boolean(
+    getEventStartDetails(state, definitionId, now, collaboratorId, checkContext),
+  );
+}
 
 export function startAcquisitionEvent(
   state: GameState,
@@ -31,39 +104,10 @@ export function startAcquisitionEvent(
   now: number,
   collaboratorId?: string,
 ): GameState {
-  const definition = getAcquisitionEventDefinition(definitionId);
-  if (!definition) return state;
-  if (state.acquisitionEvents.some((event) =>
-    event.status === "running" && event.definitionId === definitionId
-  )) return state;
-  const collaborator = collaboratorId
-    ? state.collaborators.find((candidate) =>
-      candidate.id === collaboratorId && candidate.assignment === "events"
-    )
-    : undefined;
-  if (collaboratorId) {
-    if (
-      !collaborator ||
-      state.acquisitionEvents.some((event) =>
-        event.status === "running" && event.collaboratorId === collaboratorId
-      )
-    ) return state;
-  }
-  if (isEventCooldownActive(state.activities.eventCooldowns[definitionId], state, now)) {
-    return state;
-  }
-  if (state.school.historicMembers < definition.unlockMembers) return state;
-  if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
-  const availableSwords = getAvailableSwords(state.equipment);
-  if (availableSwords < definition.requiredSwords) return state;
-  const masteryDefinition = collaborator
-    ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0)
-    : undefined;
+  const details = getEventStartDetails(state, definitionId, now, collaboratorId);
+  if (!details) return state;
+  const { definition, masteryDefinition, eventCost } = details;
   const masteryBonus = masteryDefinition?.multiplier ?? 0;
-  const eventCost = Math.round(
-    definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1),
-  );
-  if (state.school.euros < eventCost) return state;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
   const attendanceVariance =

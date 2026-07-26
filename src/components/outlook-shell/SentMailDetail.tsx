@@ -1,5 +1,5 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { selectSentEmailStatus } from "../../game/selectors";
 import type { CampaignEmail, GameState } from "../../game/types";
 import { formatDateTime } from "../../shared/formatters";
@@ -15,7 +15,7 @@ export function SentMailDetail({
   state?: GameState;
   email: CampaignEmail;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["contacts"], stateOverride);
   const contact = state.contacts.find((candidate) => candidate.id === email.contactId);
   const status = selectSentEmailStatus(state, email);
   return (

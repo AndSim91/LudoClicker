@@ -75,42 +75,79 @@ export interface AutomationFlowDependencies {
 interface AutomaticTeachingNoOp {
   currentMonth: number;
   euros: number;
+  equipment: GameState["equipment"];
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
   tournamentQualification: GameState["tournaments"]["qualification"];
+  collaborators: Array<{
+    id: string;
+    assignment: GameState["collaborators"][number]["assignment"];
+    forms: GameState["collaborators"][number]["forms"];
+    instructorForms: GameState["collaborators"][number]["instructorForms"];
+    technicianForms: GameState["collaborators"][number]["technicianForms"];
+    formBranchPreferences: GameState["collaborators"][number]["formBranchPreferences"];
+    training: GameState["collaborators"][number]["training"];
+    lastFormTrainingYear: GameState["collaborators"][number]["lastFormTrainingYear"];
+    formTrainingYearCount: GameState["collaborators"][number]["formTrainingYearCount"];
+    lastAgonistCourseYear: GameState["collaborators"][number]["lastAgonistCourseYear"];
+  }>;
 }
 
-const automaticTeachingNoOpCache = new WeakMap<
-  GameState["contacts"],
-  WeakMap<GameState["collaborators"], AutomaticTeachingNoOp>
->();
+const automaticTeachingNoOpCache = new WeakMap<GameState["contacts"], AutomaticTeachingNoOp>();
 
-function wasAutomaticTeachingNoOp(state: GameState): boolean {
-  const cached = automaticTeachingNoOpCache
-    .get(state.contacts)
-    ?.get(state.collaborators);
+function hasSameAutomaticTeachingCollaborators(
+  cached: AutomaticTeachingNoOp["collaborators"],
+  current: GameState["collaborators"],
+): boolean {
+  return cached.length === current.length && cached.every((previous, index) => {
+    const collaborator = current[index];
+    return previous.id === collaborator.id &&
+      previous.assignment === collaborator.assignment &&
+      previous.forms === collaborator.forms &&
+      previous.instructorForms === collaborator.instructorForms &&
+      previous.technicianForms === collaborator.technicianForms &&
+      previous.formBranchPreferences === collaborator.formBranchPreferences &&
+      previous.training === collaborator.training &&
+      previous.lastFormTrainingYear === collaborator.lastFormTrainingYear &&
+      previous.formTrainingYearCount === collaborator.formTrainingYearCount &&
+      previous.lastAgonistCourseYear === collaborator.lastAgonistCourseYear;
+  });
+}
+
+export function isAutomaticTeachingKnownIdle(state: GameState): boolean {
+  const cached = automaticTeachingNoOpCache.get(state.contacts);
   return Boolean(
     cached &&
     cached.currentMonth === state.school.currentMonth &&
     cached.euros === state.school.euros &&
+    cached.equipment === state.equipment &&
     cached.upgrades === state.upgrades &&
     cached.formsUnlocked === state.unlocks.forms &&
-    cached.tournamentQualification === state.tournaments.qualification
+    cached.tournamentQualification === state.tournaments.qualification &&
+    hasSameAutomaticTeachingCollaborators(cached.collaborators, state.collaborators)
   );
 }
 
 function rememberAutomaticTeachingNoOp(state: GameState): void {
-  let byCollaborators = automaticTeachingNoOpCache.get(state.contacts);
-  if (!byCollaborators) {
-    byCollaborators = new WeakMap();
-    automaticTeachingNoOpCache.set(state.contacts, byCollaborators);
-  }
-  byCollaborators.set(state.collaborators, {
+  automaticTeachingNoOpCache.set(state.contacts, {
     currentMonth: state.school.currentMonth,
     euros: state.school.euros,
+    equipment: state.equipment,
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
     tournamentQualification: state.tournaments.qualification,
+    collaborators: state.collaborators.map((collaborator) => ({
+      id: collaborator.id,
+      assignment: collaborator.assignment,
+      forms: collaborator.forms,
+      instructorForms: collaborator.instructorForms,
+      technicianForms: collaborator.technicianForms,
+      formBranchPreferences: collaborator.formBranchPreferences,
+      training: collaborator.training,
+      lastFormTrainingYear: collaborator.lastFormTrainingYear,
+      formTrainingYearCount: collaborator.formTrainingYearCount,
+      lastAgonistCourseYear: collaborator.lastAgonistCourseYear,
+    })),
   });
 }
 
@@ -137,6 +174,9 @@ function createSequentialTrainingStartPlan(
       nextState = startAgonistCourse(nextState, personId, instructorId, now);
       const training = getStartedTraining(personId);
       return training ? { training } : undefined;
+    },
+    restartWaitingTraining() {
+      return undefined;
     },
     commit() {
       return nextState;
@@ -284,6 +324,29 @@ export function processAutomation(
  * automatica di Forme e Corso Agonisti, così un collaboratore contribuisce
  * soltanto se non sta insegnando e non è in formazione personale.
  */
+function getAvailableAthleticPreparationInstructors(state: GameState) {
+  const teachingCounts = getInstructorTeachingCounts(
+    state.contacts,
+    state.collaborators,
+  );
+  const priorityQualificationTechnicianIds =
+    getPriorityInstructorQualificationTechnicianIds(state);
+  return state.collaborators.filter(
+    (collaborator) =>
+      collaborator.assignment === "instructor" &&
+      !collaborator.training &&
+      !priorityQualificationTechnicianIds.has(collaborator.id) &&
+      (teachingCounts.get(collaborator.id) ?? 0) === 0,
+  );
+}
+
+export function hasActiveInstructorAthleticPreparation(state: GameState): boolean {
+  return (state.upgrades["athletic-preparation"] ?? 0) > 0 &&
+    !isSummerBreak(state.school.currentMonth) &&
+    state.contacts.some((contact) => contact.status === "enrolled") &&
+    getAvailableAthleticPreparationInstructors(state).length > 0;
+}
+
 export function processInstructorAthleticPreparation(
   state: GameState,
   elapsedMs: number,
@@ -306,19 +369,7 @@ export function processInstructorAthleticPreparation(
     (state.upgrades["athletic-preparation"] ?? 0) <= 0
   ) return state;
 
-  const teachingCounts = getInstructorTeachingCounts(
-    state.contacts,
-    state.collaborators,
-  );
-  const priorityQualificationTechnicianIds =
-    getPriorityInstructorQualificationTechnicianIds(state);
-  const availableInstructors = state.collaborators.filter(
-    (collaborator) =>
-      collaborator.assignment === "instructor" &&
-      !collaborator.training &&
-      !priorityQualificationTechnicianIds.has(collaborator.id) &&
-      (teachingCounts.get(collaborator.id) ?? 0) === 0,
-  );
+  const availableInstructors = getAvailableAthleticPreparationInstructors(state);
   if (availableInstructors.length === 0) return state;
 
   const productivity = availableInstructors.reduce(
@@ -365,14 +416,17 @@ export function processAutomaticTeaching(
   createTrainingPlan?: TrainingStartPlanFactory,
 ): GameState {
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
-  if (wasAutomaticTeachingNoOp(state)) return state;
+  if (isAutomaticTeachingKnownIdle(state)) return state;
   const priorityQualificationTechnicianIds =
     getPriorityInstructorQualificationTechnicianIds(state);
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
     collaborator.assignment === "instructor" &&
     !priorityQualificationTechnicianIds.has(collaborator.id)
   );
-  if (!hasAutomaticInstructor) return state;
+  if (!hasAutomaticInstructor) {
+    rememberAutomaticTeachingNoOp(state);
+    return state;
+  }
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);

@@ -10,7 +10,7 @@ import {
   hasUnlockedOfficialStats,
 } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   getEligibleSchoolContactsFromRoster,
   selectSchoolTournamentEntrantsFromRoster,
@@ -31,7 +31,10 @@ interface TournamentOverviewProps {
 }
 
 export function TournamentOverview({ state: stateOverride, onOpenResult }: TournamentOverviewProps) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+    stateOverride,
+  );
   const upcoming = findUpcomingTournament(state);
   const now = useGameTime(
     Boolean(upcoming),

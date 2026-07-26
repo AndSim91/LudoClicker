@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
@@ -37,7 +37,18 @@ export function PeopleView({
   onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
   onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "collaboratorManagement",
+      "collaborators",
+      "contacts",
+      "school",
+      "statistics",
+      "unlocks",
+      "upgrades",
+    ],
+    stateOverride,
+  );
   const collaboratorsByContactId = useMemo(
     () =>
       new Map(state.collaborators.map((collaborator) => [collaborator.contactId, collaborator])),

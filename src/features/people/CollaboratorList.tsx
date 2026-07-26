@@ -15,7 +15,7 @@ import {
 } from "../../content/mastery";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
@@ -87,7 +87,24 @@ export function CollaboratorList({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, GameState["collaborators"][number]>;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "acquisitionEvents",
+      "automation",
+      "collaboratorManagement",
+      "collaborators",
+      "contacts",
+      "emails",
+      "equipment",
+      "network",
+      "player",
+      "school",
+      "tournaments",
+      "unlocks",
+      "upgrades",
+    ],
+    stateOverride,
+  );
   const [requestedPage, setRequestedPage] = useState(0);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [search, setSearch] = useState("");

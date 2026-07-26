@@ -10,7 +10,7 @@ import {
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import { selectActiveEmail } from "../../game/selectors";
 import type {
@@ -56,7 +56,22 @@ function SectorCollaboratorRow({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onOpen: () => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "acquisitionEvents",
+      "automation",
+      "collaborators",
+      "contacts",
+      "emails",
+      "equipment",
+      "player",
+      "school",
+      "statistics",
+      "unlocks",
+      "upgrades",
+    ],
+    stateOverride,
+  );
   const activeEmail = selectActiveEmail(state);
   const automation = collaborator.assignment === "instructor"
     ? undefined
@@ -179,7 +194,22 @@ export function CollaboratorSectorPanel({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onClose: () => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "acquisitionEvents",
+      "automation",
+      "collaborators",
+      "contacts",
+      "emails",
+      "equipment",
+      "player",
+      "school",
+      "statistics",
+      "unlocks",
+      "upgrades",
+    ],
+    stateOverride,
+  );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const assigned = useMemo(

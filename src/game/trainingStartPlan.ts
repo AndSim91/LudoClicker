@@ -9,6 +9,7 @@ import {
   getInstructorQualificationCost,
   getInstructorQualificationDuration,
   getStudentFormCost,
+  isAgonistCourse,
   isInstructorForm,
   needsCourseXRecovery,
 } from "../content/forms";
@@ -20,7 +21,7 @@ import {
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
-import { reserveSwords } from "./equipment";
+import { getAvailableSwords, reserveSwords } from "./equipment";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import {
@@ -54,6 +55,7 @@ export interface TrainingStartPlan {
     personId: string,
     instructorId: string,
   ): TrainingStartResult | undefined;
+  restartWaitingTraining(personId: string): TrainingStartResult | undefined;
   commit(): GameState;
 }
 
@@ -122,6 +124,50 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     this.collaboratorsById.set(collaborator.id, collaborator);
     this.changedCollaboratorIds.add(collaborator.id);
     this.changed = true;
+  }
+
+  private updateTeachingCount(instructorId: string | undefined, delta: number): void {
+    if (!instructorId || delta === 0) return;
+    const nextCount = Math.max(0, (this.teachingCounts.get(instructorId) ?? 0) + delta);
+    if (nextCount === 0) this.teachingCounts.delete(instructorId);
+    else this.teachingCounts.set(instructorId, nextCount);
+  }
+
+  restartWaitingTraining(personId: string): TrainingStartResult | undefined {
+    const contact = this.contactsById.get(personId);
+    const collaborator = this.collaboratorsById.get(personId);
+    const person = collaborator ?? contact;
+    const waiting = person?.training;
+    if (!person || waiting?.status !== "waitingForEquipment") return undefined;
+
+    const requiredSwords = waiting.equipmentUsed ?? 1;
+    if (getAvailableSwords(this.equipment) < requiredSwords) return undefined;
+
+    const previousInstructorId = waiting.instructorId ?? waiting.requestedInstructorId;
+    this.updateTeachingCount(previousInstructorId, -1);
+    if (collaborator) this.updateCollaborator({ ...collaborator, training: undefined });
+    else if (contact) this.updateContact({ ...contact, training: undefined });
+
+    const restarted = isAgonistCourse(waiting.formId)
+      ? this.startAgonistCourse(personId, waiting.requestedInstructorId ?? "")
+      : this.startFormTraining(personId, waiting.formId);
+    if (restarted) {
+      this.updateTeachingCount(
+        restarted.training.instructorId ?? restarted.training.requestedInstructorId,
+        1,
+      );
+      return restarted;
+    }
+
+    const currentContact = this.contactsById.get(personId);
+    const currentCollaborator = this.collaboratorsById.get(personId);
+    if (currentCollaborator) {
+      this.updateCollaborator({ ...currentCollaborator, training: waiting });
+    } else if (currentContact) {
+      this.updateContact({ ...currentContact, training: waiting });
+    }
+    this.updateTeachingCount(previousInstructorId, 1);
+    return undefined;
   }
 
   private selectAvailableInstructor(

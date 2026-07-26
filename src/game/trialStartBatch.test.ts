@@ -145,4 +145,16 @@ describe("processScheduledTrialStarts", () => {
       expect(started.equipment.availableSwords).toBe(0);
     },
   );
+
+  it("keeps the same decisions when a large start queue is split into slices", () => {
+    const state = createTrialStartState(250, 125);
+    const allAtOnce = processScheduledTrialStarts(state, NOW);
+    let sliced = state;
+
+    for (let slice = 0; slice < 3; slice += 1) {
+      sliced = processScheduledTrialStarts(sliced, NOW, 100);
+    }
+
+    expect(sliced).toEqual(allAtOnce);
+  });
 });

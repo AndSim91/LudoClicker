@@ -8,7 +8,7 @@ import {
 import { getCollaboratorBonusSummary, getVisibleForms } from "../../content/forms";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { isCourseXUnlocked } from "../../content/upgrades";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type {
   Collaborator,
   CollaboratorAssignment,
@@ -45,7 +45,7 @@ export function CollaboratorDetailDrawer({
   allowAssignment?: boolean;
   onClose: () => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["equipment", "unlocks", "upgrades"], stateOverride);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

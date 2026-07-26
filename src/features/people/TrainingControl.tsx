@@ -27,7 +27,7 @@ import {
   isSummerBreak,
 } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
@@ -156,7 +156,10 @@ export function InstructorCompactActivity({
   collaborator: Collaborator;
   state?: GameState;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
   const now = useGameTime(
@@ -222,7 +225,10 @@ export function TechnicianCourseControl({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   variant?: "default" | "compact";
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const [isSISExpanded, setIsSISExpanded] = useState(false);
   const reservation = collaborator.technicianCourseReservation;
@@ -387,7 +393,10 @@ export function InstructorPanel({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const teachingCount = selectInstructorTeachingCount(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
@@ -441,7 +450,10 @@ export function TrainingControl({
   onStartTraining: (personId: string, formId: FormId) => void;
   variant?: "default" | "compact";
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const now = useGameTime(
     Boolean(student.training),

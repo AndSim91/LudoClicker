@@ -178,4 +178,21 @@ describe("trial resolution batching", () => {
         .toBe(resolved.equipment.totalSwords);
     },
   );
+
+  it("keeps enrollment, pity and message order across cooperative slices", () => {
+    const state = createTrialResolutionState(250);
+    const allAtOnce = resolveInBatch(state);
+    let sliced = state;
+
+    for (let offset = 0; offset < state.scheduledTrials.length; offset += 100) {
+      sliced = resolveTrialBatch(
+        sliced,
+        state.scheduledTrials.slice(offset, offset + 100),
+        NOW,
+        1,
+      );
+    }
+
+    expect(sliced).toEqual(allAtOnce);
+  });
 });

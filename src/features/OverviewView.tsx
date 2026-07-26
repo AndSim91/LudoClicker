@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
-import { useGameState } from "../game/GameStateContext";
+import { useGameStateSlices } from "../game/GameStateContext";
 import type { GameSaveStatus } from "../game/saveStatus";
 import type { GameState } from "../game/types";
 import { SaveStatusPanel } from "./settings/SaveStatusPanel";
@@ -44,7 +44,7 @@ export function OverviewView({
   reduceMotion,
   onReduceMotionChange,
 }: OverviewViewProps) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["profile", "version"], stateOverride);
   const [title, subtitle] = titles[view];
   const [importText, setImportText] = useState("");
   const [importStatus, setImportStatus] = useState("");

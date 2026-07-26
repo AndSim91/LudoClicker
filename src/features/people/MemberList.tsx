@@ -5,7 +5,7 @@ import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import { getAnnualFormTrainingLimit, isCourseXUnlocked } from "../../content/upgrades";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
@@ -110,7 +110,10 @@ export function MemberList({
   onToggleFavorite: (contactId: string) => void;
   onCancelEnrollment: (contactId: string) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["contacts", "network", "school", "tournaments", "upgrades"],
+    stateOverride,
+  );
   const members = useMemo(
     () => state.contacts.filter((contact) => contact.status === "enrolled"),
     [state.contacts],

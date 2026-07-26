@@ -27,10 +27,10 @@ describe("useGameEngine pause", () => {
     localStorage.clear();
   });
 
-  it("keeps the game clock and every remaining duration frozen", () => {
+  it("keeps the game clock and every remaining duration frozen", async () => {
     const { result } = renderHook(() => useGameEngine());
 
-    act(() => vi.advanceTimersByTime(250));
+    await act(async () => vi.advanceTimersByTimeAsync(250));
     act(() => result.current.togglePause());
 
     const pausedAt = result.current.state.automation.lastProcessedAt;
@@ -46,7 +46,7 @@ describe("useGameEngine pause", () => {
     );
     expect(result.current.state.acquisitionEvents[0].resolvesAt - pausedAt).toBe(10_000);
 
-    act(() => vi.advanceTimersByTime(GAME_CONFIG.saveIntervalMs));
+    await act(async () => vi.advanceTimersByTimeAsync(GAME_CONFIG.saveIntervalMs));
 
     expect(result.current.getGameNow()).toBe(pausedAt);
     expect(result.current.state.automation.lastProcessedAt).toBe(pausedAt);
@@ -219,9 +219,10 @@ describe("useGameEngine pause", () => {
     expect(stored.acquisitionEvents[0].resolvesAt - stored.lastSavedAt).toBe(5_000);
   });
 
-  it("autosaves the latest game state every minute", () => {
+  it("autosaves the latest game state every minute", async () => {
     const { result } = renderHook(() => useGameEngine());
 
+    await act(async () => vi.advanceTimersByTimeAsync(0));
     expect(result.current.saveStatus.phase).toBe("saved");
 
     act(() =>
@@ -232,13 +233,14 @@ describe("useGameEngine pause", () => {
     );
     expect(result.current.saveStatus.phase).toBe("pending");
 
-    act(() => vi.advanceTimersByTime(59_999));
+    await act(async () => vi.advanceTimersByTimeAsync(59_999));
     const beforeInterval = readStoredGame();
     expect(beforeInterval.profile.displayName).toBe("Andrea Ungaro");
     expect(beforeInterval.lastSavedAt).toBe(1_000);
 
-    act(() => vi.advanceTimersByTime(1));
-    act(() => vi.advanceTimersByTime(1));
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    await act(async () => vi.advanceTimersByTimeAsync(1));
     const afterInterval = readStoredGame();
     expect(afterInterval.profile.displayName).toBe("Legend");
     expect(afterInterval.lastSavedAt).toBe(61_000);

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { getInboxCategory, type InboxCategory } from "../../game/messages";
 import {
   selectActiveContact,
@@ -78,7 +78,10 @@ export function MessageList({
   onSelectMessage: (id: string | null) => void;
   onSelectSentEmail: (id: string) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["contacts", "emails", "messages", "network", "school"],
+    stateOverride,
+  );
   const [inboxCategory, setInboxCategory] = useState<InboxCategory>("focused");
   const [requestedSentPage, setRequestedSentPage] = useState(0);
   const activeEmail = selectActiveEmail(state);

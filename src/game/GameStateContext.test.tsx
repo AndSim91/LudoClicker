@@ -1,8 +1,13 @@
-import { renderHook } from "@testing-library/react";
-import type { PropsWithChildren } from "react";
+import { render, renderHook, screen } from "@testing-library/react";
+import { memo, type PropsWithChildren } from "react";
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
-import { GameStateContext, useGameState } from "./GameStateContext";
+import {
+  GameStateContext,
+  GameStateProvider,
+  useGameSelector,
+  useGameState,
+} from "./GameStateContext";
 
 describe("GameStateContext", () => {
   it("shares the game state without forwarding it as a component prop", () => {
@@ -26,5 +31,43 @@ describe("GameStateContext", () => {
     const { result } = renderHook(() => useGameState(override), { wrapper });
 
     expect(result.current).toBe(override);
+  });
+
+  it("does not render a selective consumer for unrelated runtime updates", () => {
+    const state = createInitialState(1_000, "Selector Player");
+    let renderCount = 0;
+    const EmailsCount = memo(function EmailsCount() {
+      renderCount += 1;
+      const count = useGameSelector((current) => current.emails.length);
+      return <span>{count}</span>;
+    });
+    const view = render(
+      <GameStateProvider state={state}>
+        <EmailsCount />
+      </GameStateProvider>,
+    );
+
+    view.rerender(
+      <GameStateProvider
+        state={{
+          ...state,
+          automation: { ...state.automation, lessonBuffer: 10 },
+        }}
+      >
+        <EmailsCount />
+      </GameStateProvider>,
+    );
+    expect(renderCount).toBe(1);
+
+    view.rerender(
+      <GameStateProvider state={{ ...state, emails: [...state.emails, {
+        ...state.emails[0],
+        id: "selector-email",
+      }] }}>
+        <EmailsCount />
+      </GameStateProvider>,
+    );
+    expect(screen.getByText(String(state.emails.length + 1))).toBeInTheDocument();
+    expect(renderCount).toBe(2);
   });
 });

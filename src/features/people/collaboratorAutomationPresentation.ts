@@ -10,9 +10,7 @@ import { selectActiveEmail } from "../../game/selectors";
 import {
   getMonthlySocialIncome,
   getSocialContentCharacters,
-  getSocialDoubleFollowerChance,
   getSocialEventPromotionBonus,
-  getSocialFollowerChance,
 } from "../../game/social";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
 import { formatCurrency, formatPercent } from "../../shared/formatters";
@@ -109,7 +107,6 @@ export function getSocialContentAutomationPresentation(
     state,
     emailWriting ? GAME_CONFIG.socialContentShareWhileWriting : 1,
   );
-  const doubleFollowerChance = getSocialDoubleFollowerChance(state.upgrades);
   return {
     title: "Contenuti Social",
     detail: [

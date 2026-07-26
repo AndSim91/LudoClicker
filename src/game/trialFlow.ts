@@ -1,6 +1,10 @@
 import { getAvailableSwords, reserveSwords } from "./equipment";
 import { incrementLegendaryPity } from "./legendaryPity";
-import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
+import {
+  getCompletedTrialsByMostRecent,
+  getContactsById,
+  getScheduledTrialsByStart,
+} from "./runtimeIndexes";
 import {
   isTrialEnrollmentGuaranteed,
   type TrialEnrollmentGuaranteeContext,
@@ -10,13 +14,20 @@ import type { Contact, GameState, ScheduledTrial } from "./types";
 
 export { getLegendaryEnrollmentChance } from "./trialEnrollment";
 
-export function processScheduledTrialStarts(state: GameState, now: number): GameState {
-  const trialsToStart = state.scheduledTrials
+export function processScheduledTrialStarts(
+  state: GameState,
+  now: number,
+  maxStarts = Infinity,
+): GameState {
+  const startLimit = Number.isFinite(maxStarts)
+    ? Math.max(0, Math.floor(maxStarts))
+    : Infinity;
+  const trialsToStart = getScheduledTrialsByStart(state.scheduledTrials)
     .filter(
       (trial) =>
-        trial.status === "scheduled" && trial.equipmentUsed === undefined && trial.startsAt <= now,
+        trial.equipmentUsed === undefined && trial.startsAt <= now,
     )
-    .sort((left, right) => left.startsAt - right.startsAt);
+    .slice(0, startLimit);
   if (trialsToStart.length === 0) return state;
 
   // Le decisioni restano sequenziali; gli elenchi vengono ricopiati una sola volta al commit.

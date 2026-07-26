@@ -2,7 +2,7 @@ import {
   getFormDefinition,
   getInstructorQualificationCost,
 } from "../../content/forms";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type { FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import type { AvailableInstructorCourse } from "./instructorGroupPresentation";
@@ -17,7 +17,7 @@ export function InstructorCourseShortcut({
   state?: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["school"], stateOverride);
   const definition = getFormDefinition(course.formId);
   if (!definition) return null;
 

@@ -8,7 +8,8 @@ import { migrate as migrateSave } from "./saveMigrations";
 import { GAME_CONFIG } from "./config";
 import { compactTournamentHistory } from "./tournamentFlow";
 import { createSaveFailure, type SaveGameResult, type SaveOperation } from "./saveDiagnostics";
-import { decodeStoredSave, encodeStoredSave, normalizeStoredSave } from "./saveCodec";
+import { decodeStoredSave, normalizeStoredSave } from "./saveCodec";
+import { prepareStoredGameSave } from "./savePreparation";
 import type { GameState } from "./types";
 
 const SAVE_KEY = STORAGE_KEYS.gameSave;
@@ -78,22 +79,7 @@ export function loadGame(now = Date.now()): GameState {
   return simulateOfflineProgress(reconciled, now).state;
 }
 
-export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult {
-  let serialized: string;
-  try {
-    serialized = encodeStoredSave({
-      ...state,
-      saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
-      lastSavedAt: now,
-    });
-  } catch (error) {
-    // Il gioco resta utilizzabile anche quando lo storage del browser è indisponibile.
-    return {
-      ok: false,
-      error: createSaveFailure("serialize", error, null),
-    };
-  }
-
+export function writePreparedGameSave(serialized: string): SaveGameResult {
   const runStorageOperation = <T>(
     operation: SaveOperation,
     callback: () => T,
@@ -126,6 +112,12 @@ export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult 
   if (typeof saveResult !== "undefined") return saveResult;
 
   return { ok: true };
+}
+
+export function trySaveGame(state: GameState, now = Date.now()): SaveGameResult {
+  const prepared = prepareStoredGameSave(state, now);
+  if (!prepared.ok) return prepared;
+  return writePreparedGameSave(prepared.serialized);
 }
 
 export function saveGame(state: GameState, now = Date.now()): boolean {

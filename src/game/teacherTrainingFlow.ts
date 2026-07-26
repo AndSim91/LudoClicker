@@ -23,6 +23,7 @@ import {
   getFormProgressionRank,
 } from "./formProgression";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
+import { getInstructorTeachingCounts, getPeopleInTraining } from "./runtimeIndexes";
 import { selectInstructorTeachingCount } from "./selectors";
 import type {
   FormId,
@@ -161,7 +162,12 @@ export function scheduleTraining(
 
 function refreshPersonTraining<
   Person extends { id: string; training?: FormTraining },
->(state: GameState, person: Person, now: number): Person {
+>(
+  state: GameState,
+  person: Person,
+  now: number,
+  teachingCounts: ReadonlyMap<string, number>,
+): Person {
   const originalTraining = person.training;
   const training = originalTraining &&
     !originalTraining.trainingTrack &&
@@ -183,11 +189,17 @@ function refreshPersonTraining<
   const previousMultiplier = training.trainingDurationMultiplier ??
     training.instructorTrainingDurationMultiplier ??
     1;
-  const nextMultiplier = getTrainingDurationMultiplier(state, person.id, training);
+  const nextMultiplier = getTrainingDurationMultiplier(
+    state,
+    person.id,
+    training,
+    teachingCounts,
+  );
   const nextWorkloadMultiplier = getInstructorTrainingWorkloadMultiplier(
     state,
     person.id,
     training,
+    teachingCounts,
   );
   if (
     training === originalTraining &&
@@ -209,13 +221,33 @@ function refreshPersonTraining<
 }
 
 export function refreshTrainingDurations(state: GameState, now: number): GameState {
-  const contacts = state.contacts.map((contact) => refreshPersonTraining(state, contact, now));
-  const collaborators = state.collaborators.map((collaborator) =>
-    refreshPersonTraining(state, collaborator, now)
-  );
-  const changed = contacts.some((contact, index) => contact !== state.contacts[index]) ||
-    collaborators.some((collaborator, index) => collaborator !== state.collaborators[index]);
-  return changed ? { ...state, contacts, collaborators } : state;
+  const contactsInTraining = getPeopleInTraining(state.contacts);
+  const collaboratorsInTraining = getPeopleInTraining(state.collaborators);
+  if (contactsInTraining.length === 0 && collaboratorsInTraining.length === 0) return state;
+
+  const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  const contactUpdates = new Map<string, GameState["contacts"][number]>();
+  const collaboratorUpdates = new Map<string, GameState["collaborators"][number]>();
+  for (const contact of contactsInTraining) {
+    const refreshed = refreshPersonTraining(state, contact, now, teachingCounts);
+    if (refreshed !== contact) contactUpdates.set(contact.id, refreshed);
+  }
+  for (const collaborator of collaboratorsInTraining) {
+    const refreshed = refreshPersonTraining(state, collaborator, now, teachingCounts);
+    if (refreshed !== collaborator) collaboratorUpdates.set(collaborator.id, refreshed);
+  }
+  if (contactUpdates.size === 0 && collaboratorUpdates.size === 0) return state;
+  return {
+    ...state,
+    contacts: contactUpdates.size === 0
+      ? state.contacts
+      : state.contacts.map((contact) => contactUpdates.get(contact.id) ?? contact),
+    collaborators: collaboratorUpdates.size === 0
+      ? state.collaborators
+      : state.collaborators.map(
+          (collaborator) => collaboratorUpdates.get(collaborator.id) ?? collaborator,
+        ),
+  };
 }
 
 export function bookTechnicianCourse(
@@ -270,6 +302,9 @@ export function processTechnicianCourseReservations(
   state: GameState,
   now: number,
 ): GameState {
+  if (!state.collaborators.some((collaborator) => collaborator.technicianCourseReservation)) {
+    return state;
+  }
   let nextState = state;
   const priorityQualificationTechnicianIds =
     getPriorityInstructorQualificationTechnicianIds(state);
@@ -379,6 +414,17 @@ function processInstructorQualifications(
   const formOrder = new Map(
     FORM_DEFINITIONS.map((definition, index) => [definition.id, index]),
   );
+  const availableTechnicianForms = new Set<FormId>();
+  for (const collaborator of state.collaborators) {
+    if (
+      collaborator.assignment !== "instructor" ||
+      activeTechnicianIds.has(collaborator.id)
+    ) continue;
+    for (const formId of collaborator.technicianForms ?? []) {
+      availableTechnicianForms.add(formId);
+    }
+  }
+  if (availableTechnicianForms.size === 0) return state;
   // Può aspirare alla qualifica soltanto un collaboratore già assegnato
   // al ruolo Istruttore; gli altri incarichi non entrano nella graduatoria.
   const qualificationCandidates = state.collaborators.flatMap((collaborator) => {
@@ -390,7 +436,8 @@ function processInstructorQualifications(
     return collaborator.forms.flatMap((formId) =>
       (!courseXUnlocked && formId === "course-x") ||
       (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) ||
-      collaborator.instructorForms.includes(formId)
+        collaborator.instructorForms.includes(formId) ||
+        !availableTechnicianForms.has(formId)
         ? []
         : [{
             collaboratorId: collaborator.id,

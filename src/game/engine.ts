@@ -37,7 +37,7 @@ import {
   addMessage,
 } from "./stateUpdates";
 import {
-  resolveFormTraining as completeFormTraining,
+  resolveFormTrainingBatch as completeFormTrainingBatch,
   processWaitingTrainings,
   startAgonistCourse as beginAgonistCourse,
   startFormTraining as beginFormTraining,
@@ -45,7 +45,7 @@ import {
 import { createTrainingStartPlan } from "./trainingStartPlan";
 import {
   processPriorityInstructorQualifications,
-  processTeacherTraining,
+  processTechnicianCourseReservations,
   refreshTrainingDurations,
 } from "./teacherTrainingFlow";
 import { processScheduledTrialStarts, resolveTrialBatch } from "./trialFlow";
@@ -92,8 +92,12 @@ function startFormTraining(
   return beginFormTraining(state, personId, formId, now);
 }
 
-function resolveFormTraining(state: GameState, personId: string, now: number): GameState {
-  return completeFormTraining(state, personId, now, trainingDependencies);
+function resolveFormTrainingBatch(
+  state: GameState,
+  personIds: readonly string[],
+  now: number,
+): GameState {
+  return completeFormTrainingBatch(state, personIds, now, trainingDependencies);
 }
 
 function startAgonistCourse(
@@ -120,12 +124,35 @@ function advanceAutomation(
   return processAutomation(state, now, gainMultiplier, automationDependencies);
 }
 
+interface TickStepResult {
+  state: GameState;
+  complete: boolean;
+  workProcessed: number;
+}
+
 function tickStep(
   state: GameState,
   now: number,
   gainMultiplier: number,
   wallNow: number,
-): GameState {
+  workBudget = Infinity,
+): TickStepResult {
+  let remainingWork = Number.isFinite(workBudget)
+    ? Math.max(0, Math.floor(workBudget))
+    : Infinity;
+  let workProcessed = 0;
+  const reserveWork = (available: number): number => {
+    const reserved = Math.min(available, remainingWork);
+    remainingWork -= reserved;
+    workProcessed += reserved;
+    return reserved;
+  };
+  const result = (currentState: GameState, complete: boolean): TickStepResult => ({
+    state: currentState,
+    complete,
+    workProcessed,
+  });
+
   // La pausa aggiorna lastProcessedAt: questo intervallo rappresenta soltanto
   // il tempo di gioco attivo trascorso con l'assegnazione corrente.
   const masteryElapsedMs = Math.max(0, now - state.automation.lastProcessedAt);
@@ -137,42 +164,68 @@ function tickStep(
   );
   nextState = advanceAutomation(nextState, now, gainMultiplier);
 
-  for (const email of getSendingEmails(nextState.emails)) {
-    if ((email.sendCompletesAt ?? Infinity) <= now) {
-      nextState = finalizeEmail(nextState, email.id, now);
-    }
+  const dueEmails = getSendingEmails(nextState.emails).filter(
+    (email) => (email.sendCompletesAt ?? Infinity) <= now,
+  );
+  const emailWork = reserveWork(dueEmails.length);
+  for (const email of dueEmails.slice(0, emailWork)) {
+    nextState = finalizeEmail(nextState, email.id, now);
   }
-  for (const outcome of getPendingEmailOutcomes(nextState.pendingEmailOutcomes)) {
-    if (!outcome.waitForTutorialEvent && outcome.resolvesAt <= now) {
-      nextState = resolveEmailOutcome(nextState, outcome, now);
-    }
-  }
-  for (const event of getRunningAcquisitionEvents(nextState.acquisitionEvents)) {
-    if (event.resolvesAt <= now) {
-      nextState = resolveAcquisitionEvent(nextState, event, now, gainMultiplier);
-    }
-  }
-  for (const contact of getPeopleInTraining(nextState.contacts)) {
-    if (
-      contact.training!.status !== "waitingForEquipment" &&
-      contact.training!.completesAt <= now
-    ) {
-      nextState = resolveFormTraining(nextState, contact.id, now);
-    }
-  }
-  for (const collaborator of getPeopleInTraining(nextState.collaborators)) {
-    if (
-      collaborator.training!.status !== "waitingForEquipment" &&
-      collaborator.training!.completesAt <= now
-    ) {
-      nextState = resolveFormTraining(nextState, collaborator.id, now);
-    }
-  }
+  if (emailWork < dueEmails.length) return result(nextState, false);
 
-  nextState = processScheduledTrialStarts(nextState, now);
+  const dueEmailOutcomes = getPendingEmailOutcomes(nextState.pendingEmailOutcomes).filter(
+    (outcome) => !outcome.waitForTutorialEvent && outcome.resolvesAt <= now,
+  );
+  const outcomeWork = reserveWork(dueEmailOutcomes.length);
+  for (const outcome of dueEmailOutcomes.slice(0, outcomeWork)) {
+    nextState = resolveEmailOutcome(nextState, outcome, now);
+  }
+  if (outcomeWork < dueEmailOutcomes.length) return result(nextState, false);
+
+  const dueAcquisitionEvents = getRunningAcquisitionEvents(nextState.acquisitionEvents).filter(
+    (event) => event.resolvesAt <= now,
+  );
+  const eventWork = reserveWork(dueAcquisitionEvents.length);
+  for (const event of dueAcquisitionEvents.slice(0, eventWork)) {
+    nextState = resolveAcquisitionEvent(nextState, event, now, gainMultiplier);
+  }
+  if (eventWork < dueAcquisitionEvents.length) return result(nextState, false);
+
+  const completedTrainingIds = [
+    ...getPeopleInTraining(nextState.contacts),
+    ...getPeopleInTraining(nextState.collaborators),
+  ].flatMap((person) =>
+    person.training!.status !== "waitingForEquipment" &&
+      person.training!.completesAt <= now
+      ? [person.id]
+      : []
+  );
+  const trainingWork = reserveWork(completedTrainingIds.length);
+  nextState = resolveFormTrainingBatch(
+    nextState,
+    completedTrainingIds.slice(0, trainingWork),
+    now,
+  );
+  if (trainingWork < completedTrainingIds.length) return result(nextState, false);
+
+  const dueTrialStarts = getScheduledTrials(nextState.scheduledTrials).filter(
+    (trial) => trial.equipmentUsed === undefined && trial.startsAt <= now,
+  );
+  const trialStartWork = reserveWork(dueTrialStarts.length);
+  nextState = processScheduledTrialStarts(nextState, now, trialStartWork);
+  if (trialStartWork < dueTrialStarts.length) return result(nextState, false);
+
   const trialsToResolve = getScheduledTrials(nextState.scheduledTrials)
     .filter((trial) => trial.resolvesAt <= now);
-  nextState = resolveTrialBatch(nextState, trialsToResolve, now, gainMultiplier);
+  const trialResolutionWork = reserveWork(trialsToResolve.length);
+  nextState = resolveTrialBatch(
+    nextState,
+    trialsToResolve.slice(0, trialResolutionWork),
+    now,
+    gainMultiplier,
+  );
+  if (trialResolutionWork < trialsToResolve.length) return result(nextState, false);
+
   nextState = processWaitingTrainings(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
@@ -184,7 +237,7 @@ function tickStep(
     startAgonistCourse,
     createTrainingStartPlan,
   );
-  nextState = processTeacherTraining(nextState, now);
+  nextState = processTechnicianCourseReservations(nextState, now);
   nextState = refreshTrainingDurations(nextState, now);
   nextState = processInstructorAthleticPreparation(
     nextState,
@@ -192,31 +245,37 @@ function tickStep(
   );
   nextState = processAutomaticEvents(nextState, now);
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
-  return notifyPrestigeOffer(nextState, now);
+  return result(notifyPrestigeOffer(nextState, now), true);
 }
 
 export const MAX_CATCH_UP_STEPS_PER_TICK = 8;
+export const MAX_SIMULTANEOUS_WORK_PER_SLICE = 100;
 
 function completeTickStep(
   state: GameState,
   now: number,
   gainMultiplier: number,
   wallNow: number,
-): GameState {
-  const resolved = tickStep(state, now, gainMultiplier, wallNow);
+  workBudget = Infinity,
+): TickStepResult {
+  const resolved = tickStep(state, now, gainMultiplier, wallNow, workBudget);
+  if (!resolved.complete) return resolved;
   const reconciled = reconcileCollaboratorManagement(
-    recruitEnrolledLegendaryCollaborators(resolved, now),
+    recruitEnrolledLegendaryCollaborators(resolved.state, now),
   );
   const progressed = completeShortGoal(
     grantAchievements(reconciled, now, gainMultiplier),
     now,
     gainMultiplier,
   );
-  return compactChangedHistory(state, progressed, {
-    type: "TICK",
-    now,
-    gainMultiplier,
-  });
+  return {
+    ...resolved,
+    state: compactChangedHistory(state, progressed, {
+      type: "TICK",
+      now,
+      gainMultiplier,
+    }),
+  };
 }
 
 function tick(
@@ -225,6 +284,7 @@ function tick(
   gainMultiplier: number,
   stepBudget?: number,
   wallNow = now,
+  workBudget = Infinity,
 ): GameState {
   let nextState = state;
   let stalledAt: number | undefined;
@@ -232,6 +292,9 @@ function tick(
   const maxSteps = stepBudget === undefined || !Number.isFinite(stepBudget)
     ? Infinity
     : Math.max(1, Math.floor(stepBudget));
+  let remainingWorkBudget = Number.isFinite(workBudget)
+    ? Math.max(1, Math.floor(workBudget))
+    : Infinity;
 
   for (let step = 0; step < maxSteps; step += 1) {
     const cursor = nextState.automation.lastProcessedAt;
@@ -251,8 +314,18 @@ function tick(
     }
 
     const previousState = nextState;
-    nextState = completeTickStep(previousState, boundary, gainMultiplier, wallNow);
+    const completedStep = completeTickStep(
+      previousState,
+      boundary,
+      gainMultiplier,
+      wallNow,
+      remainingWorkBudget,
+    );
+    nextState = completedStep.state;
+    remainingWorkBudget -= completedStep.workProcessed;
+    if (!completedStep.complete) break;
     if (boundary >= now) break;
+    if (remainingWorkBudget <= 0) break;
     stalledAt = boundary === cursor && nextState === previousState
       ? cursor
       : undefined;

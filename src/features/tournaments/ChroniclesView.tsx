@@ -3,7 +3,7 @@ import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { SECRET_LEGENDARIES } from "../../content/secretLegendaries";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import type { GameState, RockPaperScissorsChoice } from "../../game/types";
 import { ChroniclesChoiceIcon, ChroniclesKeyIcon } from "./ChroniclesIcons";
@@ -31,7 +31,10 @@ function ChroniclesDuel({
   state: stateOverride,
   onPlayHand,
 }: Pick<ChroniclesViewProps, "state" | "onPlayHand">) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+    stateOverride,
+  );
   const challenge = state.tournaments.chronicles.activeChallenge!;
   const profile = SECRET_LEGENDARIES[challenge.legendaryId];
   const displayName = `${profile.firstName} ${profile.lastName}`;
@@ -120,7 +123,10 @@ export function ChroniclesView({
   onStartTournament,
   onPlayHand,
 }: ChroniclesViewProps) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+    stateOverride,
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [requestedPage, setRequestedPage] = useState(0);
   const [sort, setSort] = useState<ChroniclesSort>({

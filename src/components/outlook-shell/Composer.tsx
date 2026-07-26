@@ -1,6 +1,6 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
 import { getEmailBuildLength } from "../../content/emailBuild";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameSelector } from "../../game/GameStateContext";
 import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
@@ -17,9 +17,21 @@ export function Composer({
   onWrite: () => void;
   onAutomaticSendingChange: (enabled: boolean) => void;
 }) {
-  const state = useGameState(stateOverride);
-  const email = selectActiveEmail(state);
-  const contact = selectActiveContact(state);
+  const selection = useGameSelector(
+    (state) => ({
+      email: selectActiveEmail(state),
+      contact: selectActiveContact(state),
+      writingPower: state.player.writingPower,
+      automaticSending: state.automation.autoSendEmails,
+    }),
+    stateOverride,
+    (left, right) =>
+      left.email === right.email &&
+      left.contact === right.contact &&
+      left.writingPower === right.writingPower &&
+      left.automaticSending === right.automaticSending,
+  );
+  const { email, contact } = selection;
   if (!email || !contact) {
     return (
       <main className="empty-composer">
@@ -31,7 +43,7 @@ export function Composer({
   }
   const buildLength = getEmailBuildLength(email);
   const displayedRevealedCharacters = Math.floor(email.revealedCharacters);
-  const displayedWritingPower = Math.round(state.player.writingPower);
+  const displayedWritingPower = Math.round(selection.writingPower);
   const readyToSend = email.status === "readyToSend";
   const bodyLabel = readyToSend
     ? "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare."
@@ -75,7 +87,7 @@ export function Composer({
           <span>Invio automatico</span>
           <input
             type="checkbox"
-            checked={state.automation.autoSendEmails}
+            checked={selection.automaticSending}
             onChange={(event) => onAutomaticSendingChange(event.currentTarget.checked)}
           />
         </label>

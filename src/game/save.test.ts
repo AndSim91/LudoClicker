@@ -10,6 +10,14 @@ import { createSaveScheduler } from "./saveScheduler";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { SECRET_LEGENDARY_IDS } from "../content/secretLegendaries";
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
 afterEach(() => {
   vi.useRealTimers();
 });
@@ -83,6 +91,85 @@ describe("local save", () => {
     expect(scheduler.flush(3_000)).toBe(true);
     expect(scheduler.isDirty()).toBe(false);
     expect(persist).toHaveBeenCalledTimes(2);
+  });
+
+  it("prepares automatic saves without invoking the synchronous persistence path", async () => {
+    const state = createInitialState(1_000);
+    const persist = vi.fn(() => true);
+    const preparation = deferred<{ commit: () => boolean }>();
+    const commit = vi.fn(() => true);
+    const prepare = vi.fn(() => preparation.promise);
+    const scheduler = createSaveScheduler(state, persist, prepare);
+
+    const saving = scheduler.flushInBackground(2_000);
+
+    expect(prepare).toHaveBeenCalledWith(state, 2_000);
+    expect(persist).not.toHaveBeenCalled();
+    expect(scheduler.isDirty()).toBe(true);
+
+    preparation.resolve({ commit });
+    await expect(saving).resolves.toBe(true);
+    expect(commit).toHaveBeenCalledOnce();
+    expect(scheduler.isDirty()).toBe(false);
+  });
+
+  it("discards an obsolete prepared revision and commits only the latest state", async () => {
+    const initial = createInitialState(1_000);
+    const latest = { ...initial, school: { ...initial.school, euros: 99 } };
+    const persist = vi.fn(() => true);
+    const preparations: Array<{
+      euros: number;
+      deferred: ReturnType<typeof deferred<{ commit: () => boolean }>>;
+    }> = [];
+    const committedEuros: number[] = [];
+    const scheduler = createSaveScheduler(
+      initial,
+      persist,
+      (state) => {
+        const pending = deferred<{ commit: () => boolean }>();
+        preparations.push({ euros: state.school.euros, deferred: pending });
+        return pending.promise;
+      },
+    );
+
+    const saving = scheduler.flushInBackground(2_000);
+    scheduler.markDirty(latest);
+    preparations[0].deferred.resolve({
+      commit: () => {
+        committedEuros.push(preparations[0].euros);
+        return true;
+      },
+    });
+    await Promise.resolve();
+
+    expect(preparations).toHaveLength(2);
+    preparations[1].deferred.resolve({
+      commit: () => {
+        committedEuros.push(preparations[1].euros);
+        return true;
+      },
+    });
+
+    await expect(saving).resolves.toBe(true);
+    expect(committedEuros).toEqual([99]);
+    expect(scheduler.isDirty()).toBe(false);
+  });
+
+  it("never lets an older background result overwrite a manual save", async () => {
+    const state = createInitialState(1_000);
+    const persist = vi.fn(() => true);
+    const preparation = deferred<{ commit: () => boolean }>();
+    const backgroundCommit = vi.fn(() => true);
+    const scheduler = createSaveScheduler(state, persist, () => preparation.promise);
+
+    const backgroundSave = scheduler.flushInBackground(2_000);
+    expect(scheduler.saveNow(3_000)).toBe(true);
+    preparation.resolve({ commit: backgroundCommit });
+
+    await expect(backgroundSave).resolves.toBe(false);
+    expect(persist).toHaveBeenCalledWith(state, 3_000);
+    expect(backgroundCommit).not.toHaveBeenCalled();
+    expect(scheduler.isDirty()).toBe(false);
   });
 
   it("round-trips the game state", () => {

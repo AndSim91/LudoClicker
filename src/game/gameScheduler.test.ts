@@ -144,6 +144,9 @@ describe("game scheduler", () => {
     const automated: GameState = {
       ...state,
       school: { ...state.school, activeMembers: 1 },
+      contacts: state.contacts.map((contact, index) =>
+        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+      ),
       collaborators: [collaborator("instructor")],
       upgrades: { ...state.upgrades, "athletic-preparation": 1 },
     };
@@ -173,6 +176,42 @@ describe("game scheduler", () => {
 
     expect(getNextGameTickAt(automated, NOW)).toBe(NOW + 400);
     expect(getNextGameTickDelay(automated, NOW)).toBe(400);
+  });
+
+  it("does not poll event automation while no event is feasible", () => {
+    const state = stateAtNow();
+    const blocked: GameState = {
+      ...state,
+      school: { ...state.school, euros: 0 },
+      collaborators: [collaborator("events")],
+      equipment: { ...state.equipment, availableSwords: 0 },
+      activities: {
+        eventCooldowns: {
+          "park-sparring": {
+            kind: "realtime",
+            startedAt: NOW,
+            availableAt: NOW + 30_000,
+          },
+        },
+      },
+    };
+
+    expect(needsAutomationHeartbeat(blocked)).toBe(false);
+    expect(getNextGameTickDelay(blocked, NOW)).toBe(30_000);
+  });
+
+  it("stops polling an instructor after the discrete teaching pass is known idle", () => {
+    const state = stateAtNow();
+    const unchecked: GameState = {
+      ...state,
+      collaborators: [collaborator("instructor")],
+      unlocks: { ...state.unlocks, forms: true },
+    };
+
+    expect(getNextGameTickDelay(unchecked, NOW)).toBe(0);
+    const checked = gameReducer(unchecked, { type: "TICK", now: NOW });
+    expect(needsAutomationHeartbeat(checked)).toBe(false);
+    expect(getNextGameTickDelay(checked, NOW)).toBe(60_000);
   });
 
   it("preserves automation progress when four ticks become one heartbeat", () => {
@@ -291,8 +330,12 @@ describe("game scheduler", () => {
     const state = stateAtNow();
     const automated: GameState = {
       ...state,
+      school: { ...state.school, activeMembers: 1 },
+      contacts: state.contacts.map((contact, index) =>
+        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+      ),
       collaborators: [collaborator("instructor")],
-      unlocks: { ...state.unlocks, forms: true },
+      upgrades: { ...state.upgrades, "athletic-preparation": 1 },
     };
     const targetNow = NOW +
       (MAX_CATCH_UP_STEPS_PER_TICK + 1) * AUTOMATION_HEARTBEAT_MS;

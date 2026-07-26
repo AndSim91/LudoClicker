@@ -1,6 +1,6 @@
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import { GAME_CONFIG } from "../../game/config";
 import type { GameState, ScheduledTrial } from "../../game/types";
@@ -39,7 +39,10 @@ export function CalendarView({
   state?: GameState;
   onOpenSentEmail: (emailId: string) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["contacts", "emails", "scheduledTrials", "school"],
+    stateOverride,
+  );
   const hasPendingTrials = state.scheduledTrials.some((trial) => trial.status === "scheduled");
   const now = useGameTime(
     true,

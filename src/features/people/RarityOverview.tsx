@@ -1,13 +1,13 @@
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getEmailBookingChance, getEnrollmentChance } from "../../game/formulas";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type { GameState, PersonRarity } from "../../game/types";
 import { formatPercent } from "../../shared/formatters";
 
 const RARITY_ORDER: PersonRarity[] = ["common", "rare", "ultra-rare", "legendary"];
 
 export function RarityOverview({ state: stateOverride }: { state?: GameState }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["collaborators", "school", "upgrades"], stateOverride);
   return (
     <section className="rarity-overview" aria-label="Sistema di rarità">
       <div>

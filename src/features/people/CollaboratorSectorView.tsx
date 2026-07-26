@@ -5,7 +5,7 @@ import { EquipmentConditionBar } from "../../components/equipment/EquipmentCondi
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
@@ -127,7 +127,23 @@ function StandardSectorCard({
   onDecrement: () => void;
   onOpen: () => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "acquisitionEvents",
+      "automation",
+      "collaboratorManagement",
+      "collaborators",
+      "contacts",
+      "emails",
+      "equipment",
+      "network",
+      "player",
+      "school",
+      "unlocks",
+      "upgrades",
+    ],
+    stateOverride,
+  );
   const label = getCollaboratorAssignmentLabel(role, state.unlocks.social);
   const assigned = state.collaborators.filter((collaborator) => collaborator.assignment === role);
   const activeEmail = selectActiveEmail(state);
@@ -280,7 +296,10 @@ function InstructorSectorCard({
   onOpen: () => void;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "network", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const isPaused = useGameTimeSource()?.isPaused ?? false;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const {
@@ -503,7 +522,10 @@ export function CollaboratorSectorView({
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "network", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [openRole, setOpenRole] = useState<CollaboratorMasteryRole | null>(null);
   const assignmentCounts = useMemo(

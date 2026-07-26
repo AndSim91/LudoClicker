@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { GAME_CONFIG } from "./config";
-import { MAX_CATCH_UP_STEPS_PER_TICK, gameReducer } from "./engine";
+import {
+  MAX_CATCH_UP_STEPS_PER_TICK,
+  MAX_SIMULTANEOUS_WORK_PER_SLICE,
+  gameReducer,
+} from "./engine";
 import {
   changeGameClockSpeed,
   createGameClockAnchor,
@@ -9,7 +13,9 @@ import {
   readGameClock,
 } from "./gameClock";
 import { rebaseGameTimeline } from "./gameTimeline";
-import { loadGame, trySaveGame } from "./save";
+import { createBackgroundSavePreparer } from "./backgroundSavePreparation";
+import { loadGame, trySaveGame, writePreparedGameSave } from "./save";
+import type { SaveGameResult } from "./saveDiagnostics";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
 import type { GameSaveStatus } from "./saveStatus";
 import { getNextGameTickDelay } from "./gameScheduler";
@@ -49,9 +55,8 @@ export function useGameEngine() {
     [getGameNowAt],
   );
 
-  const persistGame = useCallback(
-    (currentState: typeof state, wallNow = Date.now()) => {
-      const result = trySaveGame(getPersistableState(currentState, wallNow), wallNow);
+  const reportSaveResult = useCallback(
+    (result: SaveGameResult, wallNow: number) => {
       setSaveStatus((current) => ({
         ...current,
         phase: result.ok ? "saved" : "error",
@@ -60,7 +65,15 @@ export function useGameEngine() {
       }));
       return result.ok;
     },
-    [getPersistableState],
+    [],
+  );
+
+  const persistGame = useCallback(
+    (currentState: typeof state, wallNow = Date.now()) => {
+      const result = trySaveGame(getPersistableState(currentState, wallNow), wallNow);
+      return reportSaveResult(result, wallNow);
+    },
+    [getPersistableState, reportSaveResult],
   );
 
   const dispatchAction = useCallback((action: GameAction) => {
@@ -123,6 +136,7 @@ export function useGameEngine() {
           now: getGameNowAt(wallNow),
           wallNow,
           stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+          workBudget: MAX_SIMULTANEOUS_WORK_PER_SLICE,
         });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo
@@ -148,7 +162,24 @@ export function useGameEngine() {
   }, [dispatchAction, gameSpeed, getGameNow, getGameNowAt, hasProfile, isPaused]);
 
   useEffect(() => {
-    const saveScheduler = createSaveScheduler(stateRef.current, persistGame);
+    const backgroundPreparer = createBackgroundSavePreparer();
+    const saveScheduler = createSaveScheduler(
+      stateRef.current,
+      persistGame,
+      async (currentState, wallNow) => {
+        const result = await backgroundPreparer.prepare(
+          currentState,
+          getGameNowAt(wallNow),
+          wallNow,
+        );
+        return {
+          commit: () => reportSaveResult(
+            result.ok ? writePreparedGameSave(result.serialized) : result,
+            wallNow,
+          ),
+        };
+      },
+    );
     saveSchedulerRef.current = saveScheduler;
     const stopScheduler = saveScheduler.start(GAME_CONFIG.saveIntervalMs, (nextAutoSaveAt) =>
       setSaveStatus((current) => ({
@@ -156,7 +187,7 @@ export function useGameEngine() {
         nextAutoSaveAt,
       })),
     );
-    saveScheduler.flush();
+    void saveScheduler.flushInBackground();
     const saveOnExit = () => saveScheduler.saveNow();
     const saveWhenHidden = () => {
       if (document.visibilityState === "hidden") saveScheduler.saveNow();
@@ -166,6 +197,7 @@ export function useGameEngine() {
     document.addEventListener("visibilitychange", saveWhenHidden);
     return () => {
       stopScheduler();
+      backgroundPreparer.dispose();
       window.removeEventListener("beforeunload", saveOnExit);
       window.removeEventListener("pagehide", saveOnExit);
       document.removeEventListener("visibilitychange", saveWhenHidden);
@@ -173,7 +205,7 @@ export function useGameEngine() {
         saveSchedulerRef.current = null;
       }
     };
-  }, [persistGame]);
+  }, [getGameNowAt, persistGame, reportSaveResult]);
 
   const saveNow = useCallback(() => saveSchedulerRef.current?.saveNow() ?? false, []);
 

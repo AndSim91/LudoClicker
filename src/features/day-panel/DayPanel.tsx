@@ -6,7 +6,7 @@ import {
 } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
-import { useGameState } from "../../game/GameStateContext";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   useGameTime,
   useGameTimeSource,
@@ -58,7 +58,7 @@ function getTiming(notification: DayNotification, now: number): string {
 }
 
 function ShortGoalCard({ state: stateOverride }: { state?: GameState }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(["shortGoal", "statistics"], stateOverride);
   const definition = SHORT_GOALS[state.shortGoal.definitionId];
   const progress = Math.min(state.shortGoal.target, getShortGoalProgress(state));
   return (
@@ -171,7 +171,19 @@ export function DayPanel({
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
-  const state = useGameState(stateOverride);
+  const state = useGameStateSlices(
+    [
+      "contacts",
+      "lightInflation",
+      "narrative",
+      "scheduledTrials",
+      "school",
+      "shortGoal",
+      "statistics",
+      "tournaments",
+    ],
+    stateOverride,
+  );
   const timeSource = useGameTimeSource();
   const [fallbackNow] = useState(Date.now);
   const [pausedNotification, setPausedNotification] = useState<{
