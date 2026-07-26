@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { Collaborator, FormId, FormTraining } from "../../game/types";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
@@ -49,7 +49,7 @@ function courseEntry({
 }
 
 describe("InternalInstructorCourseList", () => {
-  it("groups shared Forms while keeping each individual progress segment", () => {
+  it("uses the standard aggregated-course layout for shared Forms", () => {
     const view = render(
       <InternalInstructorCourseList
         entries={[
@@ -79,20 +79,27 @@ describe("InternalInstructorCourseList", () => {
       />,
     );
 
-    expect(view.container.querySelectorAll(".internal-instructor-course")).toHaveLength(2);
-    expect(screen.getByText("Forma 5 Staffa · 2 corsi")).toBeVisible();
-    expect(screen.getByText("2 istruttori con 2 Tecnici")).toBeVisible();
-    expect(screen.getByText("Forma 4 Staffa · Aspirante Tre")).toBeVisible();
+    const list = view.container.querySelector(".aggregated-teaching-groups");
+    expect(list).toHaveClass("is-internal-instructor");
+    expect(list?.querySelectorAll(".aggregated-teaching-group")).toHaveLength(2);
+
+    const sharedGroup = screen.getByText("Forma 5 Staffa").closest(
+      ".aggregated-teaching-group",
+    );
+    expect(sharedGroup).not.toBeNull();
+    expect(within(sharedGroup as HTMLElement).getByText("2")).toBeVisible();
+    expect(screen.getByText("Forma 4 Staffa")).toBeVisible();
 
     const groupedProgress = screen.getByRole("progressbar", {
-      name: "Corsi Istruttori interni di Forma 5 Staffa: 2 corsi",
+      name: "Forma 5 Staffa: 2 corsi",
     });
+    expect(groupedProgress).toHaveClass("aggregated-teaching-bar");
     expect(groupedProgress).toHaveAttribute("aria-valuenow", "38");
     expect(groupedProgress).toHaveAttribute(
       "aria-valuetext",
-      "2 corsi · avanzamento medio 38%",
+      "2 corsi · 38%",
     );
-    expect(groupedProgress.querySelectorAll(".internal-instructor-course-segment")).toHaveLength(2);
+    expect(groupedProgress.querySelectorAll(".aggregated-teaching-segment")).toHaveLength(2);
     expect(screen.getByTitle(
       "Aspirante Uno · con il Tecnico Mario Rossi: 50%",
     ).firstElementChild).toHaveStyle({ width: "50%" });
@@ -101,7 +108,7 @@ describe("InternalInstructorCourseList", () => {
     ).firstElementChild).toHaveStyle({ width: "25%" });
 
     expect(screen.getByRole("progressbar", {
-      name: "Corso Istruttori interno di Aspirante Tre",
+      name: "Forma 4 Staffa: 1 corso",
     })).toHaveAttribute("aria-valuenow", "50");
   });
 });

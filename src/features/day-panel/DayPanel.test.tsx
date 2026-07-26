@@ -5,6 +5,7 @@ import {
   getLightInflationEventDescription,
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_TITLE,
+  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DayPanel } from "./DayPanel";
@@ -202,17 +203,17 @@ describe("DayPanel", () => {
     expect(screen.getByText("In corso…")).toBeVisible();
   });
 
-  it("keeps exactly ten trial rows separate", () => {
+  it("keeps exactly five trial rows separate", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);
 
     render(<DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT)} />);
 
-    expect(screen.getAllByText("Lezione di prova")).toHaveLength(10);
-    expect(screen.queryByText("10 lezioni di prova")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Lezione di prova")).toHaveLength(5);
+    expect(screen.queryByText("5 lezioni di prova")).not.toBeInTheDocument();
   });
 
-  it("renders one tutorial-safe summary above ten trial notifications", () => {
+  it("renders one tutorial-safe summary above five trial notifications", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);
 
@@ -220,8 +221,8 @@ describe("DayPanel", () => {
       <DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT + 1, 0)} />,
     );
 
-    expect(screen.getByText("11 lezioni di prova")).toBeVisible();
-    expect(screen.getByText("11 programmate")).toBeVisible();
+    expect(screen.getByText("6 lezioni di prova")).toBeVisible();
+    expect(screen.getByText("6 programmate")).toBeVisible();
     expect(screen.getByText("00:05")).toBeVisible();
     expect(screen.queryByText("Lezione di prova")).not.toBeInTheDocument();
     expect(container.querySelectorAll(".day-notification-trial-summary")).toHaveLength(1);
@@ -330,23 +331,30 @@ describe("DayPanel", () => {
     expect(screen.queryByText("Iscritto")).not.toBeInTheDocument();
   });
 
-  it("uses the full 20-second light inflation visibility window for the countdown", () => {
+  it("uses the full 60-second light inflation visibility window for the countdown", () => {
     vi.useFakeTimers();
     vi.setSystemTime(50_000);
 
-    render(<DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />);
+    render(
+      <DayPanel
+        state={stateWithLightInflationEvent(
+          50_000,
+          50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+        )}
+      />,
+    );
 
     const progress = screen.getByRole("progressbar", { name: /Tempo residuo/ });
     expect(screen.getByText(LIGHT_INFLATION_EVENT_TITLE)).toBeVisible();
     expect(progress).toHaveAttribute("aria-valuenow", "100");
-    expect(progress).toHaveAttribute("aria-valuetext", "20 secondi rimanenti");
+    expect(progress).toHaveAttribute("aria-valuetext", "60 secondi rimanenti");
 
     act(() => {
-      vi.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(30_000);
     });
 
     expect(progress).toHaveAttribute("aria-valuenow", "50");
-    expect(progress).toHaveAttribute("aria-valuetext", "10 secondi rimanenti");
+    expect(progress).toHaveAttribute("aria-valuetext", "30 secondi rimanenti");
   });
 
   it("keeps light inflation on the real clock at 100x and while the game is paused", () => {
@@ -359,22 +367,27 @@ describe("DayPanel", () => {
         isPaused={isPaused}
         speed={100}
       >
-        <DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />
+        <DayPanel
+          state={stateWithLightInflationEvent(
+            50_000,
+            50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+          )}
+        />
       </GameTimeProvider>
     );
     const { rerender } = render(renderPanel(false));
 
     act(() => {
-      vi.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(30_000);
     });
     expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
       "aria-valuetext",
-      "10 secondi rimanenti",
+      "30 secondi rimanenti",
     );
 
     rerender(renderPanel(true));
     act(() => {
-      vi.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(30_000);
     });
     expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
   });
@@ -382,16 +395,24 @@ describe("DayPanel", () => {
   it("removes light inflation at its real deadline even while hovered", () => {
     vi.useFakeTimers();
     vi.setSystemTime(50_000);
-    render(<DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />);
+    render(
+      <DayPanel
+        state={stateWithLightInflationEvent(
+          50_000,
+          50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+        )}
+      />,
+    );
 
     const row = screen.getByText(LIGHT_INFLATION_EVENT_TITLE).closest(".appointment-entry");
     expect(row).not.toBeNull();
     fireEvent.mouseEnter(row!);
     act(() => {
-      vi.advanceTimersByTime(20_000);
+      vi.advanceTimersByTime(LIGHT_INFLATION_EVENT_VISIBILITY_MS);
     });
 
     expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it("keeps light inflation first while another notification is frozen on hover", () => {
@@ -400,7 +421,10 @@ describe("DayPanel", () => {
     const trialState = stateWithTrial("enrolled", "completed");
     const state: GameState = {
       ...trialState,
-      lightInflation: stateWithLightInflationEvent(50_000, 70_000).lightInflation,
+      lightInflation: stateWithLightInflationEvent(
+        50_000,
+        50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+      ).lightInflation,
     };
 
     const { container } = render(<DayPanel state={state} />);
@@ -500,7 +524,11 @@ describe("DayPanel", () => {
           ...initial,
           lightInflation: {
             ...initial.lightInflation,
-            event: { cause, occurredAt: 50_000, visibleUntil: 70_000 },
+            event: {
+              cause,
+              occurredAt: 50_000,
+              visibleUntil: 50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+            },
           },
         }}
       />,
@@ -515,7 +543,7 @@ describe("DayPanel", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(15_000);
+      vi.advanceTimersByTime(55_000);
     });
 
     expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();

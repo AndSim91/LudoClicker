@@ -51,18 +51,26 @@ export function AggregatedTeachingBar({
   entries,
   now,
   technicalArenaLevel,
+  variant = "teaching",
 }: {
   entries: readonly InstructorTeachingEntry[];
   now: number;
   technicalArenaLevel: number;
+  variant?: "teaching" | "internal-instructor";
 }) {
   const groups = useMemo(
     () => groupInstructorTeachingEntries(entries),
     [entries],
   );
+  const internalInstructor = variant === "internal-instructor";
 
   return (
-    <div className="aggregated-teaching-groups" aria-label="Lezioni raggruppate per Forma">
+    <div
+      className={`aggregated-teaching-groups${internalInstructor ? " is-internal-instructor" : ""}`}
+      aria-label={internalInstructor
+        ? "Corsi Istruttori interni raggruppati per Forma"
+        : "Lezioni raggruppate per Forma"}
+    >
       {groups.map((group) => {
         const progress = getAggregateInstructorProgress(group.entries, now) ?? 0;
         const title = getTrainingCourseTitle(group.courseId, technicalArenaLevel);

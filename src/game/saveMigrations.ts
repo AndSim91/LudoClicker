@@ -25,6 +25,7 @@ import { migrateProjectXState } from "./saveMigrations/projectX";
 import { migrateSocialAudienceState } from "./saveMigrations/socialAudience";
 import { migrateSecretLegendaryAppearanceState } from "./saveMigrations/secretLegendaryAppearances";
 import { migrateLightInflationState } from "./saveMigrations/lightInflation";
+import { migrateLightInflationVisibilityState } from "./saveMigrations/lightInflationVisibility";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
@@ -53,6 +54,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateSocialAudienceState,
   migrateSecretLegendaryAppearanceState,
   migrateLightInflationState,
+  migrateLightInflationVisibilityState,
 ];
 
 export function migrate(value: unknown): unknown {

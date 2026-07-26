@@ -17,7 +17,7 @@ import type {
 } from "../../game/types";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
-export const DAY_TRIAL_NOTIFICATION_LIMIT = 10;
+export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
 
 export type DayNotificationKind =
   | "trial"

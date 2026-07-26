@@ -24,11 +24,6 @@ export interface InternalInstructorCourseEntry {
   training: FormTraining;
 }
 
-export interface InternalInstructorCourseGroup {
-  formId: FormId;
-  entries: InternalInstructorCourseEntry[];
-}
-
 interface InstructorTeachingEntriesCache {
   all: InstructorTeachingEntry[];
   withoutCourseX?: InstructorTeachingEntry[];
@@ -177,21 +172,6 @@ export function getInternalInstructorCourseEntries(
     (entry) => entry.training.formId !== "course-x",
   );
   return cached.withoutCourseX;
-}
-
-export function groupInternalInstructorCourseEntries(
-  entries: readonly InternalInstructorCourseEntry[],
-): InternalInstructorCourseGroup[] {
-  const groups = new Map<FormId, InternalInstructorCourseEntry[]>();
-  for (const entry of entries) {
-    const current = groups.get(entry.formId);
-    if (current) current.push(entry);
-    else groups.set(entry.formId, [entry]);
-  }
-  return [...groups].map(([formId, groupedEntries]) => ({
-    formId,
-    entries: groupedEntries,
-  }));
 }
 
 export function getAvailableInstructorCourseCount(

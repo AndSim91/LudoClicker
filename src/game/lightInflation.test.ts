@@ -6,6 +6,7 @@ import { createInitialState, gameReducer } from "./engine";
 import { rebaseGameTimeline } from "./gameTimeline";
 import {
   LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
   getOfficialSwordUnitCost,
   processJanuaryLightInflation,
 } from "./lightInflation";
@@ -96,7 +97,7 @@ describe("Inflazione di Luce", () => {
     expect(succeeded.lightInflation.priceMultiplier).toBe(1.1 * 1.1);
     expect(succeeded.lightInflation.event).toMatchObject({
       occurredAt: 5_000,
-      visibleUntil: 25_000,
+      visibleUntil: 5_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
     });
     expect(LIGHT_INFLATION_CAUSES).toContain(succeeded.lightInflation.event?.cause);
   });
@@ -135,7 +136,7 @@ describe("Inflazione di Luce", () => {
     expect(caughtUp.lightInflation.priceMultiplier).toBe(1.1);
     expect(caughtUp.lightInflation.event).toMatchObject({
       occurredAt: 5_000,
-      visibleUntil: 25_000,
+      visibleUntil: 5_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
     });
   });
 
@@ -178,7 +179,7 @@ describe("Inflazione di Luce", () => {
         event: {
           cause: LIGHT_INFLATION_CAUSES[0],
           occurredAt: 2_000,
-          visibleUntil: 22_000,
+          visibleUntil: 2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
         },
       },
     };
@@ -189,7 +190,7 @@ describe("Inflazione di Luce", () => {
     expect(rebased.lightInflation.event).toEqual({
       cause: LIGHT_INFLATION_CAUSES[0],
       occurredAt: 2_000,
-      visibleUntil: 22_000,
+      visibleUntil: 2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
     });
     expect(isValidGameState(rebased)).toBe(true);
   });
@@ -203,7 +204,7 @@ describe("Inflazione di Luce", () => {
         event: {
           cause: LIGHT_INFLATION_CAUSES[0],
           occurredAt: 2_000,
-          visibleUntil: 22_000,
+          visibleUntil: 2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
         },
       },
     };
@@ -215,9 +216,13 @@ describe("Inflazione di Luce", () => {
       expect.objectContaining({ id: "light-inflation" }),
     );
 
-    const afterDeadline = loadGame(25_000);
+    const afterDeadline = loadGame(2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS + 3_000);
     expect(afterDeadline.lightInflation.event).toEqual(state.lightInflation.event);
-    expect(selectDayNotifications(afterDeadline, afterDeadline.lastSavedAt, 25_000)).not.toContainEqual(
+    expect(selectDayNotifications(
+      afterDeadline,
+      afterDeadline.lastSavedAt,
+      2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS + 3_000,
+    )).not.toContainEqual(
       expect.objectContaining({ id: "light-inflation" }),
     );
   });

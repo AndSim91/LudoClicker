@@ -181,77 +181,14 @@
   gap: 2px;
 }
 
-.internal-instructor-courses-heading strong,
-.internal-instructor-course > span strong {
+.internal-instructor-courses-heading strong {
   color: var(--ink);
   font-size: 10px;
 }
 
-.internal-instructor-courses-heading small,
-.internal-instructor-course > span small {
+.internal-instructor-courses-heading small {
   color: var(--ink-muted);
   font-size: 8px;
-}
-
-.internal-instructor-course-list {
-  display: grid;
-  gap: 7px;
-}
-
-.internal-instructor-course {
-  display: grid;
-  grid-template-columns: auto minmax(120px, .55fr) minmax(100px, 1fr) 34px;
-  gap: 9px;
-  align-items: center;
-}
-
-.internal-instructor-course > span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-}
-
-.internal-instructor-course > strong {
-  color: var(--ink);
-  font-size: 9px;
-  text-align: right;
-}
-
-.internal-instructor-course .form-logo-strip {
-  flex-wrap: nowrap;
-}
-
-.internal-instructor-course-progress {
-  display: block;
-  min-width: 0;
-  height: 9px;
-  overflow: hidden;
-  border-radius: 2px;
-  background: color-mix(in srgb, #a78bfa 24%, var(--surface));
-}
-
-.internal-instructor-course-progress:not(.is-segmented) > span {
-  display: block;
-  height: 100%;
-  background: #8b5cf6;
-}
-
-.internal-instructor-course-progress.is-segmented {
-  display: flex;
-  gap: 2px;
-}
-
-.internal-instructor-course-progress.is-segmented > .internal-instructor-course-segment {
-  min-width: 3px;
-  flex: 1 1 0;
-  overflow: hidden;
-  background: color-mix(in srgb, #a78bfa 24%, var(--surface));
-}
-
-.internal-instructor-course-segment > span {
-  display: block;
-  height: 100%;
-  background: #8b5cf6;
 }
 
 .instructor-main-activity,
@@ -401,6 +338,20 @@
 
 .aggregated-teaching-segment.is-waiting {
   background: repeating-linear-gradient(135deg, var(--surface-muted) 0 4px, var(--line-strong) 4px 8px);
+}
+
+.aggregated-teaching-groups.is-internal-instructor {
+  margin-top: 0;
+}
+
+.aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar,
+.aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment {
+  background: color-mix(in srgb, #a78bfa 24%, var(--surface));
+}
+
+.aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar.is-compact > span,
+.aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment > span {
+  background: #8b5cf6;
 }
 
 .aggregated-teaching-empty {
@@ -1377,15 +1328,6 @@
 
   .internal-instructor-courses {
     grid-template-columns: 1fr;
-  }
-
-  .internal-instructor-course {
-    grid-template-columns: auto minmax(0, 1fr) 28px;
-  }
-
-  .internal-instructor-course .internal-instructor-course-progress {
-    grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   .aggregated-teaching-group {

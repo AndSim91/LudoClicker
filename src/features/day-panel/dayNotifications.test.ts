@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createInitialState } from "../../game/engine";
-import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_EVENT_TITLE } from "../../game/lightInflation";
+import {
+  LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_TITLE,
+  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+} from "../../game/lightInflation";
 import type { ContactStatus, GameState, ScheduledTrial } from "../../game/types";
 import {
   DAY_TRIAL_NOTIFICATION_LIMIT,
@@ -52,7 +56,7 @@ describe("selectDayNotifications", () => {
         event: {
           cause: LIGHT_INFLATION_CAUSES[0],
           occurredAt: 50_000,
-          visibleUntil: 70_000,
+          visibleUntil: 50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
         },
       },
     };
@@ -65,40 +69,39 @@ describe("selectDayNotifications", () => {
         id: "light-inflation",
         title: LIGHT_INFLATION_EVENT_TITLE,
         clock: "wall",
-        expiresAt: 70_000,
-        expiryDurationMs: 20_000,
+        expiresAt: 50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+        expiryDurationMs: LIGHT_INFLATION_EVENT_VISIBILITY_MS,
       }),
     );
-    expect(selectDayNotifications(state, 50_000, 70_000)).not.toContainEqual(
+    expect(selectDayNotifications(
+      state,
+      50_000,
+      50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+    )).not.toContainEqual(
       expect.objectContaining({ id: "light-inflation" }),
     );
   });
 
-  it("keeps ten trial notifications separate at the aggregation boundary", () => {
+  it("keeps five trial notifications separate at the aggregation boundary", () => {
     const state = stateWithTrialPhases(
       Array.from({ length: DAY_TRIAL_NOTIFICATION_LIMIT }, () => "scheduled" as const),
     );
 
     const notifications = selectDayNotifications(state, 100_000);
 
-    expect(notifications.filter((notification) => notification.kind === "trial")).toHaveLength(10);
+    expect(notifications.filter((notification) => notification.kind === "trial")).toHaveLength(5);
     expect(notifications).not.toContainEqual(
       expect.objectContaining({ kind: "trial-summary" }),
     );
   });
 
-  it("condenses more than ten trials into one minimal phase summary", () => {
+  it("condenses more than five trials into one minimal phase summary", () => {
     const state = stateWithTrialPhases([
       "scheduled",
       "scheduled",
-      "scheduled",
-      "in-progress",
-      "in-progress",
       "in-progress",
       "in-progress",
       "enrolled",
-      "enrolled",
-      "lost",
       "lost",
     ], 0);
     state.lightInflation = {
@@ -106,7 +109,7 @@ describe("selectDayNotifications", () => {
       event: {
         cause: LIGHT_INFLATION_CAUSES[0],
         occurredAt: 99_000,
-        visibleUntil: 120_000,
+        visibleUntil: 99_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
       },
     };
 
@@ -119,11 +122,11 @@ describe("selectDayNotifications", () => {
       id: "trial-summary",
       kind: "trial-summary",
       phase: "in-progress",
-      title: "11 lezioni di prova",
-      detail: "3 programmate · 4 in corso · 2 iscritti · 2 non iscritti",
+      title: "6 lezioni di prova",
+      detail: "2 programmate · 2 in corso · 1 iscritto · 1 non iscritto",
       tutorialTarget: true,
     }));
-    expect(state.scheduledTrials).toHaveLength(11);
+    expect(state.scheduledTrials).toHaveLength(6);
   });
 
   it("returns one notification for one hundred concurrent trials", () => {

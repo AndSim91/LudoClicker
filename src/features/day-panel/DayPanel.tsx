@@ -7,7 +7,11 @@ import {
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
 import { useGameState } from "../../game/GameStateContext";
-import { useGameTime, useGameTimeSource, useWallTime } from "../../game/GameTimeContext";
+import {
+  useGameTime,
+  useGameTimeSource,
+  useWallTimeUntil,
+} from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon, type IconName } from "../../components/common/Icon";
@@ -175,18 +179,18 @@ export function DayPanel({
     now: number;
   } | null>(null);
   const referenceGameNow = timeSource?.getNow() ?? fallbackNow;
-  const referenceWallNow = fallbackNow;
+  const wallClockDeadline = state.lightInflation.event?.visibleUntil;
+  const wallNow = useWallTimeUntil(
+    wallClockDeadline,
+    GAME_CONFIG.progressUpdateIntervalMs,
+  );
+  const referenceWallNow = wallNow || fallbackNow;
   const referenceNotifications = selectDayNotifications(state, referenceGameNow, referenceWallNow);
   const hasGameClockNotification = referenceNotifications.some((notification) => notification.clock === "game");
-  // Subscribe once when an event arrives after this component mounted; the shared clock then
-  // immediately confirms whether its absolute wall-clock deadline is still active.
-  const hasWallClockNotification = state.lightInflation.event !== undefined ||
-    referenceNotifications.some((notification) => notification.clock === "wall");
   const gameNow = useGameTime(
     hasGameClockNotification,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
-  const wallNow = useWallTime(hasWallClockNotification, GAME_CONFIG.progressUpdateIntervalMs);
   const now = timeSource ? gameNow : gameNow || referenceGameNow;
   const currentWallNow = wallNow || referenceWallNow;
   const liveNotifications = now === referenceGameNow && currentWallNow === referenceWallNow

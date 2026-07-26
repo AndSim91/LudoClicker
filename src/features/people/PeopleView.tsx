@@ -12,6 +12,7 @@ import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
 import { MemberList } from "./MemberList";
+import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 import { RarityOverview } from "./RarityOverview";
 
 const ignoreFavoriteToggle = () => undefined;
@@ -65,8 +66,11 @@ export function PeopleView({
     <main className="overview-view people-view">
       <header>
         <Icon name="people" />
-        <div>
-          <h1>Iscritti</h1>
+        <div className="people-page-heading">
+          <div className="people-page-title-row">
+            <h1>Iscritti</h1>
+            <MonthlyIncomeSummary state={state} />
+          </div>
           <p>Iscritti e Collaboratori delle Onde</p>
         </div>
       </header>

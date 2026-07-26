@@ -32,7 +32,7 @@ export function getLightInflationEventDescription(cause: string): string {
 
 const CHANCE_PER_SWORD = 10;
 const PRICE_INCREASE = 1.1;
-export const LIGHT_INFLATION_EVENT_VISIBILITY_MS = 20_000;
+export const LIGHT_INFLATION_EVENT_VISIBILITY_MS = 60_000;
 
 export function createInitialLightInflationState(): LightInflationState {
   return { chancePercent: 0, priceMultiplier: 1 };
