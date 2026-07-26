@@ -38,19 +38,19 @@ describe("event cooldowns", () => {
     expect(isEventCooldownActive(cooldown, targetMonth, 61_000)).toBe(false);
   });
 
-  it("formats annual cooldowns in game years", () => {
+  it("formats two-year cooldowns in game years", () => {
     const state = createInitialState(1_000);
     const megacon = getAcquisitionEventDefinition("megacon-genova")!;
     const cooldown = createEventCooldown(state, megacon, 2_000);
 
-    expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("1 anno");
+    expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("2 anni");
   });
 
-  it("formats two-year cooldowns in game years", () => {
+  it("formats cooldowns containing years and months", () => {
     const state = createInitialState(1_000);
     const lucca = getAcquisitionEventDefinition("lucca-comics")!;
     const cooldown = createEventCooldown(state, lucca, 2_000);
 
-    expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("2 anni");
+    expect(formatEventCooldownRemaining(cooldown, state, 2_000)).toBe("2 anni e 6 mesi");
   });
 });

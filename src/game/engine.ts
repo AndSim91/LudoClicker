@@ -15,7 +15,6 @@ import { reconcileCollaboratorManagement } from "./collaboratorManagement";
 import {
   finalizeEmail,
   resolveEmailOutcome,
-  startNextCampaign,
 } from "./emailFlow";
 import { resolveAcquisitionEvent } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
@@ -107,7 +106,6 @@ function startAgonistCourse(
 const automationDependencies = {
   addMessage,
   writeCharacters,
-  startNextCampaign,
   startFormTraining,
   startAgonistCourse,
 };

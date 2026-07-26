@@ -26,8 +26,8 @@ describe("EventsView", () => {
     const event: AcquisitionEvent = {
       id: "activity-without-contacts",
       definitionId: "park-sparring",
-      title: "Sparring al parco",
-      location: "Parco Carlo Alberto Dalla Chiesa",
+      title: "Volantinaggio",
+      location: "Centro di Genova",
       startedAt: 2_000,
       resolvesAt: 3_000,
       cost: 0,
@@ -47,13 +47,13 @@ describe("EventsView", () => {
     expect(screen.getByText("0 persone · 0 prove · 0 contatti")).toBeVisible();
   });
 
-  it("starts with only sparring and flyering at very low potential", () => {
+  it("starts with only flyering and park sparring at very low potential", () => {
     render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
 
     expect(screen.getAllByText("Potenzialità: Molto bassa")).toHaveLength(2);
-    expect(screen.getByRole("heading", { name: "Sparring al parco" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Volantinaggio" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Volantinaggio organizzato benissimo" }),
+      screen.getByRole("heading", { name: "Sparring al parco" }),
     ).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Lezioni all'aperto" })).not.toBeInTheDocument();
     expect(
@@ -67,7 +67,7 @@ describe("EventsView", () => {
     const initial = createInitialState(1_000);
     const { rerender } = render(<EventsView state={initial} onStart={() => undefined} />);
     const tutorialRow = screen
-      .getByRole("heading", { name: "Sparring al parco" })
+      .getByRole("heading", { name: "Volantinaggio" })
       .closest("article");
     expect(within(tutorialRow!).getByText("5 secondi")).toBeVisible();
     expect(tutorialRow).toHaveAttribute("data-tutorial-region", "park-sparring-event");
@@ -88,7 +88,7 @@ describe("EventsView", () => {
         onStart={() => undefined}
       />,
     );
-    const normalRow = screen.getByRole("heading", { name: "Sparring al parco" }).closest("article");
+    const normalRow = screen.getByRole("heading", { name: "Volantinaggio" }).closest("article");
     expect(within(normalRow!).getByText("10 secondi")).toBeVisible();
   });
 
@@ -234,7 +234,7 @@ describe("EventsView", () => {
 
     expect(screen.getByRole("button", { name: "Disponibile tra 5 secondi" })).toBeDisabled();
     const cooldownBar = screen.getByRole("progressbar", {
-      name: "Cooldown Sparring al parco",
+      name: "Cooldown Volantinaggio",
     });
     expect(cooldownBar).toHaveAttribute("aria-valuetext", "Disponibile tra 5 secondi");
     expect(cooldownBar).toHaveAttribute("aria-valuenow", "100");

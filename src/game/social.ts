@@ -5,25 +5,33 @@ import type { GameState, UpgradeLevels } from "./types";
 
 const SOCIAL_CONTENT_CHARACTERS = [
   GAME_CONFIG.socialBaseContentCharacters,
-  5_000,
-  3_500,
-  2_000,
-  1_000,
+  90_000,
+  80_000,
+  70_000,
+  60_000,
+  50_000,
 ] as const;
-const SOCIAL_CONTACT_CAPS = [
-  GAME_CONFIG.socialBaseContactChanceCap,
-  0.075,
+const SOCIAL_FOLLOWER_CHANCES = [
+  GAME_CONFIG.socialBaseFollowerChance,
+  0.6,
+  0.7,
+  0.8,
+  0.9,
+  0.95,
+] as const;
+const SOCIAL_EVENT_PROMOTION_CAPS = [
+  GAME_CONFIG.socialBaseEventPromotionCap,
   0.1,
   0.15,
   0.2,
   0.25,
+  0.3,
 ] as const;
 const SOCIAL_FOLLOWER_VALUES = [
   GAME_CONFIG.socialBaseFollowerValue,
-  0.05,
-  0.075,
-  0.1,
   0.2,
+  0.3,
+  0.4,
   0.5,
 ] as const;
 
@@ -38,28 +46,34 @@ export function getSocialContentCharacters(levels: UpgradeLevels): number {
 }
 
 export function getSocialFollowerChance(levels: UpgradeLevels): number {
-  const level = boundedLevel(
-    levels,
-    "social-editorial-plan",
-    5,
-  );
-  return GAME_CONFIG.socialBaseFollowerChance + level * 0.01;
-}
-
-export function getSocialContactChanceCap(levels: UpgradeLevels): number {
-  return SOCIAL_CONTACT_CAPS[
-    boundedLevel(levels, "social-content-distribution", SOCIAL_CONTACT_CAPS.length - 1)
+  return SOCIAL_FOLLOWER_CHANCES[
+    boundedLevel(levels, "social-editorial-plan", SOCIAL_FOLLOWER_CHANCES.length - 1)
   ];
 }
 
-export function getSocialContactChance(
+export function getSocialDoubleFollowerChance(levels: UpgradeLevels): number {
+  return boundedLevel(levels, "social-editorial-plan", 5) >= 5
+    ? GAME_CONFIG.socialDoubleFollowerChance
+    : 0;
+}
+
+export function getSocialEventPromotionCap(levels: UpgradeLevels): number {
+  return SOCIAL_EVENT_PROMOTION_CAPS[
+    boundedLevel(
+      levels,
+      "social-content-distribution",
+      SOCIAL_EVENT_PROMOTION_CAPS.length - 1,
+    )
+  ];
+}
+
+export function getSocialEventPromotionBonus(
   followers: number,
   levels: UpgradeLevels,
 ): number {
   return Math.min(
-    getSocialContactChanceCap(levels),
-    GAME_CONFIG.socialBaseContactChance +
-      Math.max(0, followers) * GAME_CONFIG.socialContactChancePerFollower,
+    getSocialEventPromotionCap(levels),
+    Math.max(0, followers) * GAME_CONFIG.socialEventPromotionPerFollower,
   );
 }
 

@@ -1144,7 +1144,7 @@ describe("PeopleView", () => {
           automation: {
             ...initial.automation,
             lessonBuffer: 0.25,
-            socialContentBuffer: 3_750,
+            socialContentBuffer: 50_000,
             equipmentBuffer: 0.75,
             lastImprovedAthlete: "Mario Rossi",
           },
@@ -1179,7 +1179,10 @@ describe("PeopleView", () => {
     expect(screen.getByText("Contenuti Social")).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("In attesa di un allievo")).toBeVisible();
-    expect(screen.getByText(/5% follower · 0,5% contatto/)).toBeVisible();
+    expect(screen.getByText(/50% follower · \+0% Eventi/)).toBeVisible();
+    const socialCard = screen.getByText("Contenuti Social").closest("article");
+    expect(socialCard).not.toBeNull();
+    expect(within(socialCard!).queryByText(/contatto/i)).not.toBeInTheDocument();
     expect(screen.getByText("Usura attrezzatura: 42")).toBeVisible();
     expect(screen.getByRole("progressbar", {
       name: "Condizione attrezzatura di Collaboratore 3",
@@ -1231,7 +1234,7 @@ describe("PeopleView", () => {
     expect(activeEmail).not.toHaveClass("is-inactive");
     expect(within(activeEmail).getByText(initial.emails[0].subject, { exact: false }))
       .toBeVisible();
-    expect(within(socialCard!).getAllByText(/50% forza lavoro/)).toHaveLength(2);
+    expect(within(socialCard!).queryByText(/forza lavoro/)).not.toBeInTheDocument();
   });
 
   it("shows the aggregate equipment condition in the row and detail drawer", () => {

@@ -159,7 +159,7 @@ describe("getCollaboratorAutomationPresentation", () => {
       emails: [],
       collaborators: [socialCollaborator],
       unlocks: { ...initial.unlocks, social: true },
-      automation: { ...initial.automation, socialContentBuffer: 3_750 },
+      automation: { ...initial.automation, socialContentBuffer: 50_000 },
       upgrades: {
         ...initial.upgrades,
         "automatic-signature": 1,
@@ -175,7 +175,7 @@ describe("getCollaboratorAutomationPresentation", () => {
     });
 
     expect(presentation.title).toBe("Contenuti Social");
-    expect(presentation.detail).toBe("5% follower · 1,5% contatto · 1,00\u00a0€/mese");
+    expect(presentation.detail).toBe("50% follower · +1% Eventi · 10,00\u00a0€/mese");
     expect(presentation.progress).toBe(50);
     expect(presentation.progressLabel).toBe("Produzione dei prossimi contenuti Social");
     expect(presentation.durationMs).toBeGreaterThan(0);
@@ -200,6 +200,10 @@ describe("getCollaboratorAutomationPresentation", () => {
     };
     const activeEmail = state.emails[0];
     const social = getSocialContentAutomationPresentation(state, true);
+    const fullSpeedSocial = getSocialContentAutomationPresentation(
+      { ...state, emails: [] },
+      false,
+    );
     const email = getEmailAutomationPresentation(state, activeEmail);
     const idleEmail = getEmailAutomationPresentation(
       { ...state, emails: [] },
@@ -207,10 +211,12 @@ describe("getCollaboratorAutomationPresentation", () => {
     );
 
     expect(social.title).toBe("Contenuti Social");
-    expect(social.detail).toContain("50% forza lavoro");
+    expect(social.detail).not.toContain("forza lavoro");
     expect(social.durationMs).toBeGreaterThan(0);
+    expect(social.durationMs).toBeCloseTo((fullSpeedSocial.durationMs ?? 0) * 20);
     expect(email.title).toBe("Scrittura email");
     expect(email.detail).toContain(activeEmail.subject);
+    expect(email.detail).not.toContain("forza lavoro");
     expect(email.inactive).not.toBe(true);
     expect(idleEmail).toMatchObject({
       title: "Scrittura email",

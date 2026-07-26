@@ -61,7 +61,7 @@ describe("App profile and navigation", () => {
     });
   });
 
-  it("guides the first unlocked Event through the free sparring", async () => {
+  it("guides the first unlocked Event through free flyering", async () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({
       ...initial,
@@ -90,13 +90,13 @@ describe("App profile and navigation", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
 
-    expect(screen.getByText("Avvia l'evento di sparring gratuito")).toBeVisible();
+    expect(screen.getByText("Avvia il volantinaggio gratuito")).toBeVisible();
     expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Partecipa gratis" }));
 
     await waitFor(() => {
-      expect(screen.queryByText("Avvia l'evento di sparring gratuito")).not.toBeInTheDocument();
+      expect(screen.queryByText("Avvia il volantinaggio gratuito")).not.toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Annulla evento" })).toBeVisible();
   });
@@ -133,7 +133,6 @@ describe("App profile and navigation", () => {
       "Iscritti",
       "Tornei",
       "Upgrade",
-      "Attività",
       "Impostazioni",
       "Admin",
     ]);

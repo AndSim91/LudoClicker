@@ -71,7 +71,6 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
     ["Iscritti", "Iscritti"],
     ["Tornei", "Tornei"],
     ["Upgrade", "Upgrade"],
-    ["Attività", "Attività"],
     ["Impostazioni", "Impostazioni"],
     ["Admin", "Admin"],
   ] as const;
@@ -110,10 +109,10 @@ test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", 
   await page.getByRole("button", { name: "Partecipa gratis" }).click();
 
   const sparring = page.getByRole("article").filter({
-    has: page.getByRole("heading", { name: "Sparring al parco" }),
+    has: page.getByRole("heading", { name: "Volantinaggio" }),
   });
   await expect(sparring.getByRole("button", { name: "Annulla evento" })).toBeVisible();
-  const progress = sparring.getByRole("progressbar", { name: "Avanzamento Sparring al parco" });
+  const progress = sparring.getByRole("progressbar", { name: "Avanzamento Volantinaggio" });
   await expect(progress).toBeVisible();
   const initialProgress = Number(await progress.getAttribute("aria-valuenow"));
   await expect.poll(

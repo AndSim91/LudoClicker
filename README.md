@@ -36,7 +36,7 @@ Il gioco non invia email e non accede a servizi esterni: destinatari, messaggi e
 - Posta in arrivo con stato letto/non letto;
 - Posta inviata cliccabile con stato del funnel;
 - shop Upgrade con entrate previste al minuto;
-- Eventi con sparring gratuito e dimostrazione programmata;
+- Eventi con volantinaggio gratuito e dimostrazione programmata;
 - conversione contatto → prova → iscritto → quote;
 - collaboratori, assegnazioni automatiche, Social e percorso delle Forme;
 - maestria dei collaboratori per ruolo, con cinque gradi e notifiche di avanzamento;

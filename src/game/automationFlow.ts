@@ -59,7 +59,6 @@ export interface AutomationFlowDependencies {
     now: number,
     source: "manual" | "automation",
   ) => GameState;
-  startNextCampaign: (state: GameState, now: number) => GameState;
   startFormTraining: (state: GameState, personId: string, formId: FormId, now: number) => GameState;
   startAgonistCourse: (
     state: GameState,
@@ -143,8 +142,16 @@ export function processAutomation(
       state.player.writingPower *
       automationMultiplier
     : 0;
-  const emailWorkShare = wasWriting && producingSocialContent ? 0.5 : wasWriting ? 1 : 0;
-  const socialWorkShare = producingSocialContent ? (wasWriting ? 0.5 : 1) : 0;
+  const emailWorkShare = wasWriting && producingSocialContent
+    ? GAME_CONFIG.socialEmailWritingShare
+    : wasWriting
+      ? 1
+      : 0;
+  const socialWorkShare = producingSocialContent
+    ? wasWriting
+      ? GAME_CONFIG.socialContentShareWhileWriting
+      : 1
+    : 0;
   const writingTotal = state.automation.writingBuffer + generatedWriting * emailWorkShare;
   const automatedEmailCharacters = wasWriting ? Math.floor(writingTotal) : 0;
   const socialContentCharacters = getSocialContentCharacters(state.upgrades);
@@ -218,7 +225,7 @@ export function processAutomation(
   }
 
   if (socialCycles > 0) {
-    const outcome = resolveSocialContentCycles(nextState, socialCycles, now);
+    const outcome = resolveSocialContentCycles(nextState, socialCycles);
     nextState = outcome.state;
     nextState = dependencies.addMessage(
       nextState,
@@ -229,17 +236,10 @@ export function processAutomation(
         outcome.followersGained > 0
           ? `${outcome.followersGained} ${outcome.followersGained === 1 ? "nuovo follower" : "nuovi follower"}.`
           : "Nessun nuovo follower in questo ciclo.",
-        outcome.contactsAcquired > 0
-          ? `${outcome.contactsAcquired} ${outcome.contactsAcquired === 1 ? "nuovo contatto" : "nuovi contatti"}.`
-          : "Nessun nuovo contatto in questo ciclo.",
       ].join(" "),
       "positive",
       "other",
-      "contacts",
     );
-    if (outcome.contactsAcquired > 0) {
-      nextState = dependencies.startNextCampaign(nextState, now);
-    }
   }
 
   return nextState;

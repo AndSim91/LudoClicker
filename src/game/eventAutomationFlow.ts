@@ -4,10 +4,6 @@ import { startAcquisitionEvent } from "./eventFlow";
 import { getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type { GameState } from "./types";
 
-const EVENT_PREFERENCE = ACQUISITION_EVENTS.filter(
-  (definition) => definition.id !== "park-sparring",
-);
-
 function expectedContacts(state: GameState, definition: (typeof ACQUISITION_EVENTS)[number]) {
   return getExpectedEventContacts(state, definition);
 }
@@ -25,12 +21,11 @@ export function processAutomaticEvents(state: GameState, now: number): GameState
   );
   if (idleCollaborators.length === 0) return state;
 
-  const candidates = [...EVENT_PREFERENCE].sort((left, right) =>
-    expectedContacts(state, right) - expectedContacts(state, left)
+  const candidates = [...ACQUISITION_EVENTS].sort((left, right) =>
+    left.cost - right.cost || expectedContacts(state, right) - expectedContacts(state, left)
   );
 
   for (const collaborator of idleCollaborators) {
-    let started = false;
     for (const definition of candidates) {
       const attempted = startAcquisitionEvent(
         nextState,
@@ -40,16 +35,8 @@ export function processAutomaticEvents(state: GameState, now: number): GameState
       );
       if (attempted === nextState) continue;
       nextState = attempted;
-      started = true;
       break;
     }
-    if (started) continue;
-    nextState = startAcquisitionEvent(
-      nextState,
-      "park-sparring",
-      now,
-      collaborator.id,
-    );
   }
 
   return nextState;

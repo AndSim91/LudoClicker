@@ -300,9 +300,9 @@ ferma.
 I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
 sblocca Social, partono dalla Fama già raggiunta e diventano visibili nella
 barra superiore. Non sono spendibili. Ogni nuovo Follower aggiunge anche un
-punto Fama, aumenta la probabilità dei contenuti Social di ottenere contatti e
-produce una rendita mensile da sponsorizzazioni. I Follower non modificano
-direttamente le prove o le iscrizioni.
+punto Fama, aumenta l'affluenza agli Eventi e produce una rendita mensile da
+sponsorizzazioni. I Follower non modificano direttamente le prove o le
+iscrizioni.
 
 ### 5.5 Email
 
@@ -620,6 +620,11 @@ questo intervallo iscritti e spade restano disponibili. Se l'evento viene
 annullato, il costo e le risorse sono ripristinati, non parte alcun conto alla
 rovescia e viene applicato soltanto il 25% del carico previsto.
 
+Quando l'evento viene avviato automaticamente da un collaboratore, la sua
+Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
+Iniziato 90%, Accademico 80%, Cavaliere 70% e Maestro 50%. La riduzione del
+tempo usa invece il normale bonus di produttività della Maestria.
+
 Le nuove spade possono essere acquistate dall'area Attività tramite **LamaDiLuce
 (Abridge S.r.l.)**, partner tecnico e fornitore ufficiale LudoSport. Il
 riferimento di gioco è la **Polaris EVO Basic combat-ready** a €330: costruzione
@@ -633,32 +638,30 @@ attivi mai raggiunto** e sblocca progressivamente cinque tier di potenzialità:
 **Molto bassa**, **Bassa**, **Media**, **Alta** e **Altissima**. Il record non
 diminuisce quando alcuni iscritti lasciano la scuola: se la scuola raggiunge 100
 iscritti e torna a 70, la fama resta 100 fino al superamento di quel picco.
-All'inizio sono visibili soltanto Sparring e Volantinaggio; l'interfaccia
+All'inizio sono visibili soltanto Volantinaggio e Sparring al parco; l'interfaccia
 anticipa esclusivamente il prossimo sblocco e non mostra previsioni numeriche
 sui contatti.
 
-| Evento                              | Sblocco |   Costo | Impiegati | Spade | Carico | Potenzialità |
-| ----------------------------------- | ------: | ------: | --------: | ----: | -----: | -----------: |
-| Sparring al parco                   |       0 |      €0 |         0 |     2 |     10 |  molto bassa |
-| Volantinaggio organizzato benissimo |       0 |     €40 |         1 |     2 |      0 |  molto bassa |
-| Lezioni all'aperto                  |       5 |    €120 |         2 |     4 |     20 |        bassa |
-| Evento sportivo                     |      10 |    €240 |         4 |     6 |     40 |        bassa |
-| Mele Comics                         |      20 |    €400 |         6 |     8 |     60 |        media |
-| CairoMix                            |      35 |    €640 |         8 |    10 |    100 |        media |
-| CogoComix                           |      60 |  €1.200 |        12 |    12 |    150 |         alta |
-| Burtomics                           |      90 |  €1.800 |        16 |    16 |    200 |         alta |
-| Genova Comics & Games               |     120 |  €2.600 |        20 |    20 |    250 |         alta |
-| Megacon Genova                      |     180 |  €4.200 |        28 |    24 |    500 |    altissima |
-| Lucca Comics & Games                |     250 |  €7.000 |        40 |    30 |    700 |    altissima |
-| Milan Games Week & Cartoomics       |     350 | €10.000 |        50 |    36 |  1.000 |    altissima |
+| Evento                              | Sblocco |       Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
+| ----------------------------------- | ------: | ----------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
+| Volantinaggio                       |       0 |          €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
+| Kata contro le onde del mare        |       5 |        €500 |  0,50 |         1 |     1 |     10 | 15 secondi |  molto bassa |
+| Sparring al parco                   |       0 |      €1.000 |  1,00 |         2 |     2 |     20 | 10 secondi |  molto bassa |
+| Lezioni all'aperto                  |       5 |      €1.500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
+| Oktoberfest                         |      15 |      €1.500 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
+| Evento sportivo                     |      10 |      €2.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
+| Mele Comics                         |      20 |      €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
+| CairoMix                            |      35 |      €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
+| CogoComix                           |      60 |      €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
+| Burtomics                           |      90 |      €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
+| Genova Comics & Games               |     120 |     €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
+| Megacon Genova                      |     180 |     €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
+| Lucca Comics & Games                |     250 |     €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
+| Milan Games Week & Cartoomics       |     350 |     €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Sfida a Cthulhu                     |     500 |  €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
 
-I conti alla rovescia sono: 5 secondi per Sparring, 10 secondi per
-Volantinaggio, 30 secondi per Lezioni all'aperto, un mese di gioco per Evento
-sportivo, tre mesi per Mele Comics e CairoMix, sei mesi per CogoComix e
-Burtomics, un anno per Genova Comics & Games e Megacon Genova, due anni per
-Lucca Comics & Games e Milan Games Week & Cartoomics. Un conto basato sul
-calendario scade all'inizio del mese di destinazione, anche quando il calendario
-viene avanzato dagli strumenti Admin.
+Un cooldown basato sul calendario scade all'inizio del mese di destinazione,
+anche quando il calendario viene avanzato dagli strumenti Admin.
 
 ### 8.2 Persone incontrate e contatti ottenuti
 
@@ -684,20 +687,23 @@ contattiOttenuti = estrazionePesataEvento
 
 Le distribuzioni base sono:
 
-| Evento                              | Distribuzione base dei contatti                                      |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| Sparring al parco                   | 50%: 0; 40%: 1; 10%: 2                                             |
-| Volantinaggio organizzato benissimo | 30%: 0; 67%: 1; 3%: 2                                              |
-| Lezioni all'aperto                  | 10%: 0; 50%: 1; 35%: 2; 5%: 3                                     |
-| Evento sportivo                     | 54%: 1; 36%: 2; 10%: 3                                             |
-| Mele Comics                         | 20%: 1; 35%: 2; 30%: 3; 14%: 4; 1%: 5                            |
-| CairoMix                            | 10%: 1; 20%: 2; 40%: 3; 20%: 4; 10%: 5                           |
-| CogoComix                           | 30%: 2–3; 50%: 4; 15%: 5–6; 5%: 7–10                               |
-| Burtomics                           | 23%: 3–4; 45%: 5–6; 22%: 7–8; 8%: 9–11; 2%: 12–15               |
-| Genova Comics & Games               | 11%: 4–5; 41%: 6–7; 36%: 8–10; 10%: 11–14; 2%: 15–20             |
-| Megacon Genova                      | 12%: 5–7; 17%: 8–10; 54%: 11–14; 15%: 15–19; 2%: 20–25           |
-| Lucca Comics & Games                | 18%: 10–12; 20%: 13–15; 48%: 16–18; 12%: 19–23; 2%: 24–30        |
-| Milan Games Week & Cartoomics       | 5%: 10–15; 18%: 16–22; 60%: 23–28; 12%: 29–34; 5%: 35–40         |
+| Evento                              | Distribuzione base dei contatti                 |
+| ----------------------------------- | ----------------------------------------------- |
+| Volantinaggio                       | 67%: 0; 33%: 1                                 |
+| Kata contro le onde del mare        | 50%: 0; 50%: 1                                 |
+| Sparring al parco                   | 20%: 0; 60%: 1; 20%: 2                         |
+| Lezioni all'aperto                  | 50%: 1; 50%: 2                                 |
+| Oktoberfest                         | 50%: 1; 50%: 2                                 |
+| Evento sportivo                     | 25%: 1; 50%: 2; 25%: 3                         |
+| Mele Comics                         | 25%: 1–2; 50%: 2–3; 25%: 3–4                   |
+| CairoMix                            | 10%: 1; 20%: 2; 40%: 3; 20%: 4; 10%: 5       |
+| CogoComix                           | 25%: 3–4; 50%: 5; 25%: 6–7                     |
+| Burtomics                           | 25%: 5–6; 50%: 7–8; 25%: 9–10                  |
+| Genova Comics & Games               | 25%: 7–8; 50%: 9–11; 25%: 12–13                |
+| Megacon Genova                      | 25%: 9–11; 50%: 12–14; 25%: 15–17              |
+| Lucca Comics & Games                | 25%: 10–12; 50%: 14–16; 25%: 18–20             |
+| Milan Games Week & Cartoomics       | 25%: 15–17; 50%: 18–22; 25%: 23–25             |
+| Sfida a Cthulhu                     | 25%: 40–44; 50%: 48–52; 25%: 56–60             |
 
 Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
 stessa probabilità. I bonus positivi di affluenza, Carisma e collaboratori
@@ -706,7 +712,7 @@ quindi trasformare uno zero in un contatto o superare il massimo della
 distribuzione base, senza essere applicati due volte. L'interfaccia mostra solo
 indicazioni generiche di rischio e potenzialità, mai queste percentuali.
 
-### 8.3 Lezioni in palestra, Social e sparring
+### 8.3 Lezioni in palestra, Social e volantinaggio
 
 La **lezione di prova in palestra** non genera nuovi indirizzi: consuma una
 prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per
@@ -715,18 +721,20 @@ lo scopo del gioco, ogni persona partecipa a una sola lezione.
 I **Social** sviluppano la presenza online della scuola. La Redazione si evolve
 in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
 collaboratori già assegnati conservano incarico e Maestria. I contenuti Social
-avanzano sempre. Quando una email richiede scrittura, metà della potenza viene
-assegnata alla mail e l'altra metà continua a produrre contenuti; senza email,
-tutta la potenza produce un contenuto ogni 7.500 caratteri. Ogni contenuto effettua due tiri indipendenti:
-5% per ottenere un Follower e `min(5%, 0,5% + Follower × 0,01%)` per ottenere un
-contatto. Social non genera prove dirette, non migliora la qualità dei contatti
-e non accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le
-rette mensili, a partire da 0,01 € per Follower. Le campagne manuali del vecchio
+avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
+95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
+giocatore. Senza email, tutta la potenza produce contenuti. Un contenuto richiede
+100.000 caratteri e ha il 50% di probabilità base di ottenere un Follower.
+Social non crea mai Contatti: ogni 100 Follower aumenta invece dell'1%
+l'affluenza agli Eventi, entro il limite stabilito da Promozione degli eventi.
+Social non genera prove dirette, non migliora la qualità dei contatti e non
+accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le rette
+mensili, a partire da 0,10 € per Follower. Le campagne manuali del vecchio
 sistema non esistono più.
 
-Lo **sparring esterno** è sempre disponibile come attività di sicurezza quando
-mancano contatti o denaro. Costa poco o nulla, ma produce soltanto pochi
-indirizzi.
+Il **Volantinaggio** è sempre disponibile come attività gratuita di sicurezza
+quando mancano contatti o denaro. Non richiede iscritti o spade, ma produce
+soltanto pochi indirizzi.
 
 ### 8.4 Esaurimento dei contatti
 
@@ -864,7 +872,7 @@ attività che hanno una propria scadenza futura non vengono completate in antici
 
 | Ruolo                | Funzione                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Redazione → Social   | produce sempre contenuti Social; durante la scrittura divide la forza lavoro al 50% con le email                    |
+| Redazione → Social   | produce sempre contenuti Social; durante la scrittura assegna internamente il 95% alle email e il 5% ai contenuti   |
 | Eventi               | aumenta persone incontrate e contatti ottenuti                                                                     |
 | Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
@@ -894,8 +902,9 @@ manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
 invia la mail appena raggiunge la lunghezza richiesta. Se è disattivato, anche i
 collaboratori si fermano sulla mail completa finché il giocatore non conferma
 l'invio. Dopo lo sblocco Social, i collaboratori producono sempre contenuti
-online; durante la scrittura di una mail dividono equamente la potenza tra i
-due flussi.
+online; durante la scrittura di una mail le danno priorità, assegnandole
+internamente il 95% della potenza e conservando il 5% per i contenuti. Le
+percentuali non sono esposte nell'interfaccia.
 
 ### 9.5 Raccolta automatica dei contatti
 
@@ -904,6 +913,12 @@ I collaboratori assegnati agli Eventi possono:
 - aumentare il rendimento di un evento pianificato;
 - organizzare piccole attività ricorrenti;
 - produrre nuovi contatti tramite le attività automatiche previste.
+
+Per ogni collaboratore libero, l'automazione prova gli eventi dal prezzo base
+più basso al più alto; a parità di prezzo sceglie quello con la media contatti
+più alta. Il Volantinaggio partecipa alla graduatoria ed è quindi normalmente la
+prima scelta. Eventi già in corso, in cooldown o non sostenibili per sblocchi,
+Euro, iscritti o spade vengono saltati.
 
 La raccolta automatica deve essere più lenta degli eventi gestiti attivamente,
 ma sufficiente a impedire un blocco totale nelle fasi avanzate.
@@ -1321,26 +1336,29 @@ produttività e Maestria. Si sblocca definitivamente a 35 iscritti attivi con un
 tutorial in pausa. Allo sblocco i Follower vengono inizializzati alla Fama
 esistente, senza aumentarla una seconda volta.
 
-Un contenuto richiede 7.500 caratteri. La produzione avanza soltanto durante il
-gioco online e non si interrompe quando una email richiede attenzione: in quel
-caso usa il 50% della forza lavoro, mentre il restante 50% scrive la mail. Al
-completamento vengono risolti separatamente:
+Un contenuto richiede inizialmente 100.000 caratteri. La produzione avanza
+soltanto durante il gioco online e non si interrompe quando una email richiede
+attenzione: in quel caso usa il 5% della forza lavoro, mentre il restante 95%
+scrive la mail. Questa ripartizione è interna e non viene mostrata al giocatore.
+Al completamento viene risolto il risultato Follower:
 
 ```text
-probabilitàFollower = 5%
-probabilitàContatto = min(capContatti, 0,5% + Follower × 0,01%)
+probabilitàFollower = 50%
+bonusAffluenzaEventi = min(capPromozioneEventi, Follower × 0,01%)
 renditaMensileSocial = Follower × valoreFollower × moltiplicatoreA.N.D.E.R.
 ```
 
-Ogni Follower ottenuto aumenta di 1 anche la Fama. Un contatto Social entra nel
-normale funnel email → prova → iscrizione senza bonus di rarità o conversione.
+Ogni Follower ottenuto aumenta di 1 anche la Fama. Social non crea mai Contatti:
+gli Eventi sono l'unica fonte ripetibile e beneficiano del bonus di affluenza.
+All'ultimo livello di Piano editoriale, un contenuto produce zero Follower nel
+5% dei casi, uno nel 90% e due nel 5%.
 
-| Potenziamento             | Progressione completa                                      |
-| ------------------------- | ---------------------------------------------------------- |
-| Sintesi dei contenuti     | 7.500 → 5.000 → 3.500 → 2.000 → 1.000 caratteri           |
-| Piano editoriale          | probabilità Follower 5% → 6% → 7% → 8% → 9% → 10%        |
-| Diffusione dei contenuti  | cap contatti 5% → 7,5% → 10% → 15% → 20% → 25%           |
-| Sponsorizzazioni          | 0,01 € → 0,05 € → 0,075 € → 0,10 € → 0,20 € → 0,50 €     |
+| Potenziamento             | Progressione completa                                              |
+| ------------------------- | ------------------------------------------------------------------ |
+| Sintesi dei contenuti     | 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri   |
+| Piano editoriale          | 50% → 60% → 70% → 80% → 90% → 95%; al massimo 5% di ottenerne due |
+| Promozione degli eventi   | cap affluenza +5% → +10% → +15% → +20% → +25% → +30%             |
+| Sponsorizzazioni          | 0,10 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €                       |
 
 ### 10.6 Attrezzatura
 
@@ -1397,7 +1415,7 @@ consigliata è:
 | Prima email                    | Posta inviata e statistiche minime            |
 | 3 email                        | comunicazione “Configurazione campagna”       |
 | Comunicazione completata       | Potenziamenti di Scrittura e Velocità         |
-| Primo esaurimento contatti     | Calendario, eventi e sparring esterno         |
+| Primo esaurimento contatti     | Calendario, eventi e volantinaggio gratuito   |
 | Prima prova prenotata          | report aggregato del funnel                   |
 | Primo iscritto                 | Euro e quote associative                      |
 | Primo Ultra Raro collaboratore | Iscritti, Collaboratori e assegnazioni        |
@@ -1626,7 +1644,7 @@ nel quale osservare l'avanzamento.
 4. **Primi Eventi e attrezzatura**\
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
    che le attività possono usurare o danneggiare le spade e richiede di avviare
-   lo **Sparring al parco** gratuito. Soltanto in questo passaggio lo sparring
+   il **Volantinaggio** gratuito. Soltanto in questo passaggio il volantinaggio
    dura 5 secondi e garantisce esattamente un nuovo contatto. La scena attende la
    fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
@@ -1974,7 +1992,7 @@ Non viene mostrato alcun riepilogo offline, perché lo stato operativo non cambi
   estrema;
 - il primo Ultra Raro deve comparire abbastanza presto da introdurre
   l'automazione senza spezzare il ritmo;
-- il primo evento e il primo sparring sono gratuiti e guidati.
+- il primo volantinaggio è gratuito e guidato.
 
 ### 19.3 Protezione dalla sfortuna
 
@@ -2399,7 +2417,7 @@ nell'applicazione.
 ### Esaurimento dei contatti
 
 È un collo di bottiglia interessante, ma può bloccare il giocatore. Deve sempre
-esistere lo sparring esterno come attività minima gratuita o quasi gratuita.
+esistere il volantinaggio come attività minima gratuita.
 
 ### Casualità della conversione
 
@@ -2460,11 +2478,14 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Gli eventi usano luoghi reali; meteo e giorno della settimana non influenzano
   i risultati.
 - I contatti possono esaurirsi.
-- Lo sparring esterno rimane una fonte gratuita o economica di pochi contatti.
-- A 35 iscritti attivi Redazione si evolve definitivamente in Social. In assenza
-  di email, 7.500 caratteri completano un contenuto con tiri indipendenti per un
-  Follower e un contatto. I Follower aumentano Fama e sponsorizzazioni mensili;
-  non esistono prove dirette, bonus di rarità o campagne manuali a pagamento.
+- Il volantinaggio rimane una fonte gratuita di pochi contatti e non richiede
+  iscritti o spade.
+- A 35 iscritti attivi Redazione si evolve definitivamente in Social. I
+  contenuti avanzano sempre, ma molto più lentamente mentre viene scritta una
+  email. Ogni contenuto richiede inizialmente 100.000 caratteri e può generare
+  Follower; Social non crea Contatti. I Follower aumentano Fama,
+  sponsorizzazioni mensili e affluenza agli Eventi, che restano la fonte
+  ripetibile di nuovi Contatti.
 - Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i
   Leggendari dall'iscrizione.
 - I collaboratori possono scrivere email e contenuti Social, partecipare agli
@@ -2569,7 +2590,7 @@ L'MVP è pronto quando il giocatore può:
 6. vedere una prova prenotata nel Calendario;
 7. risolvere la lezione in palestra e ottenere o perdere il potenziale iscritto;
 8. ottenere iscritti e incassare quote in Euro;
-9. terminare i contatti e utilizzare lo sparring esterno;
+9. terminare i contatti e utilizzare il volantinaggio gratuito;
 10. organizzare un evento e attraversare il funnel completo;
 11. ottenere nuovi contatti tramite Carisma;
 12. acquistare potenziamenti in Euro;

@@ -3,9 +3,10 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import {
   getMonthlySocialIncome,
-  getSocialContactChanceCap,
   getSocialContentCharacters,
-  getSocialContactChance,
+  getSocialDoubleFollowerChance,
+  getSocialEventPromotionBonus,
+  getSocialEventPromotionCap,
   getSocialFollowerChance,
   getSocialFollowerValue,
 } from "./social";
@@ -15,37 +16,39 @@ describe("Social", () => {
     const levels = createInitialState(1_000).upgrades;
 
     expect(GAME_CONFIG.socialUnlockMembers).toBe(35);
-    expect(getSocialContentCharacters(levels)).toBe(7_500);
-    expect(getSocialFollowerChance(levels)).toBe(0.05);
-    expect(getSocialContactChance(0, levels)).toBe(0.005);
-    expect(getSocialContactChanceCap(levels)).toBe(0.05);
-    expect(getSocialFollowerValue(levels)).toBe(0.01);
+    expect(getSocialContentCharacters(levels)).toBe(100_000);
+    expect(getSocialFollowerChance(levels)).toBe(0.5);
+    expect(getSocialDoubleFollowerChance(levels)).toBe(0);
+    expect(getSocialEventPromotionBonus(0, levels)).toBe(0);
+    expect(getSocialEventPromotionCap(levels)).toBe(0.05);
+    expect(getSocialFollowerValue(levels)).toBe(0.1);
   });
 
-  it("scales contact probability with followers up to the current cap", () => {
+  it("turns followers into a capped Event promotion bonus", () => {
     const levels = createInitialState(1_000).upgrades;
 
-    expect(getSocialContactChance(100, levels)).toBeCloseTo(0.015);
-    expect(getSocialContactChance(1_000, levels)).toBe(0.05);
-    expect(getSocialContactChance(10_000, {
+    expect(getSocialEventPromotionBonus(100, levels)).toBeCloseTo(0.01);
+    expect(getSocialEventPromotionBonus(1_000, levels)).toBe(0.05);
+    expect(getSocialEventPromotionBonus(10_000, {
       ...levels,
       "social-content-distribution": 5,
-    })).toBe(0.25);
+    })).toBe(0.3);
   });
 
   it("uses the approved upgrade ladders", () => {
     const levels = createInitialState(1_000).upgrades;
     const maximum = {
       ...levels,
-      "social-content-synthesis": 4,
+      "social-content-synthesis": 5,
       "social-editorial-plan": 5,
       "social-content-distribution": 5,
-      "social-sponsorships": 5,
+      "social-sponsorships": 4,
     };
 
-    expect(getSocialContentCharacters(maximum)).toBe(1_000);
-    expect(getSocialFollowerChance(maximum)).toBe(0.1);
-    expect(getSocialContactChanceCap(maximum)).toBe(0.25);
+    expect(getSocialContentCharacters(maximum)).toBe(50_000);
+    expect(getSocialFollowerChance(maximum)).toBe(0.95);
+    expect(getSocialDoubleFollowerChance(maximum)).toBe(0.05);
+    expect(getSocialEventPromotionCap(maximum)).toBe(0.3);
     expect(getSocialFollowerValue(maximum)).toBe(0.5);
   });
 
@@ -62,7 +65,7 @@ describe("Social", () => {
       },
     };
 
-    expect(getMonthlySocialIncome(state)).toBe(14);
+    expect(getMonthlySocialIncome(state)).toBe(140);
   });
 
   it("credits sponsorships with the monthly fees instead of content cycles", () => {
@@ -78,8 +81,8 @@ describe("Social", () => {
       now: state.school.nextFeeAt,
     });
 
-    expect(collected.school.euros).toBe(10);
-    expect(collected.statistics.eurosEarned).toBe(10);
+    expect(collected.school.euros).toBe(100);
+    expect(collected.statistics.eurosEarned).toBe(100);
     expect(collected.statistics.socialContentCycles).toBe(0);
   });
 });

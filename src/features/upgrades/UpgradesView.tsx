@@ -25,8 +25,10 @@ import { getGameMonthName } from "../../game/calendar";
 import { useGameState } from "../../game/GameStateContext";
 import { selectIncomePerMonth } from "../../game/selectors";
 import {
-  getSocialContactChanceCap,
   getSocialContentCharacters,
+  getSocialDoubleFollowerChance,
+  getSocialEventPromotionBonus,
+  getSocialEventPromotionCap,
   getSocialFollowerChance,
   getSocialFollowerValue,
 } from "../../game/social";
@@ -116,11 +118,19 @@ function getUpgradeBenefitsSummary(state: GameState) {
       },
       {
         label: "Follower per contenuto",
-        value: formatUpgradePercentage(getSocialFollowerChance(state.upgrades)),
+        value: [
+          formatUpgradePercentage(getSocialFollowerChance(state.upgrades)),
+          getSocialDoubleFollowerChance(state.upgrades) > 0
+            ? `${formatUpgradePercentage(getSocialDoubleFollowerChance(state.upgrades))} doppio`
+            : "",
+        ].filter(Boolean).join(" · "),
       },
       {
-        label: "Cap contatti Social",
-        value: formatUpgradePercentage(getSocialContactChanceCap(state.upgrades)),
+        label: "Promozione eventi",
+        value: `+${formatUpgradePercentage(getSocialEventPromotionBonus(
+          state.school.followers,
+          state.upgrades,
+        ))} · cap ${formatUpgradePercentage(getSocialEventPromotionCap(state.upgrades))}`,
       },
       {
         label: "Valore follower",

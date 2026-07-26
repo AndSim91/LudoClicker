@@ -7,7 +7,6 @@ export type GameArea =
   | "events"
   | "contacts"
   | "upgrades"
-  | "statistics"
   | "tournaments"
   | "settings";
 
@@ -26,10 +25,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
     return state.school.historicMembers >= GAME_CONFIG.tournamentUnlockMembers;
   }
   if (view === "upgrades") return state.unlocks.upgrades;
-  return state.statistics.eventsCompleted > 0 ||
-    state.equipment.wear > 0 ||
-    state.unlocks.collaborators ||
-    state.unlocks.social;
+  return false;
 }
 
 export function getPrestigeRequirements(state: GameState) {

@@ -619,7 +619,7 @@ describe("local save", () => {
       ...initial,
       school: {
         ...initial.school,
-        euros: 120,
+        euros: 1_500,
         activeMembers: 5,
         historicMembers: 5,
         peakActiveMembers: 5,

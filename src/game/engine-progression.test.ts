@@ -172,7 +172,7 @@ describe("game engine: progression", () => {
     expect(automated.statistics.automatedCharacters).toBe(5);
   });
 
-  it("keeps Social active and splits the workforce evenly while writing email", () => {
+  it("keeps Social active with 5% of the workforce while 95% writes email", () => {
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-split",
@@ -202,13 +202,13 @@ describe("game engine: progression", () => {
       initialEmail?.revealedCharacters ?? 0,
     );
     expect(split.automation.socialContentBuffer).toBeCloseTo(
-      socialOnly.automation.socialContentBuffer / 2,
+      socialOnly.automation.socialContentBuffer * 0.05,
     );
     expect(
       (splitEmail?.revealedCharacters ?? 0) -
         (initialEmail?.revealedCharacters ?? 0) +
         split.automation.writingBuffer,
-    ).toBeCloseTo(socialOnly.automation.socialContentBuffer / 2);
+    ).toBeCloseTo(socialOnly.automation.socialContentBuffer * 0.95);
   });
 
   it("turns Redazione work into Social content without immediate income or trials", () => {
@@ -240,7 +240,7 @@ describe("game engine: progression", () => {
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
         automation: {
           ...initial.automation,
-          socialContentBuffer: 7_495,
+          socialContentBuffer: 99_995,
         },
       },
       { type: "TICK", now: 2_000 },
@@ -257,12 +257,12 @@ describe("game engine: progression", () => {
     expect(automated.collaborators[0].mastery?.writing).toBe(1);
     expect(automated.statistics.socialContentCycles).toBe(1);
     expect(automated.automation.socialContentBuffer).toBe(0);
-    expect(automated.contacts).toHaveLength(automated.statistics.socialContacts);
-    expect(automated.contacts.every((contact) => contact.source === "social")).toBe(true);
+    expect(automated.contacts).toHaveLength(0);
+    expect(automated.statistics.socialContacts).toBe(0);
     expect(automated.scheduledTrials).toHaveLength(0);
   });
 
-  it("rolls Social followers and contacts independently", () => {
+  it("rolls zero, one or two followers without ever creating contacts", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -272,38 +272,43 @@ describe("game engine: progression", () => {
       unlocks: { ...initial.unlocks, social: true },
     };
     let followerSeed = 0;
-    let contactSeed = 0;
+    let noFollowerSeed = 0;
+    let doubleFollowerSeed = 0;
     for (let seed = 1; ; seed += 1) {
-      const [followerRoll, afterFollower] = nextRandom(seed);
-      const [contactRoll] = nextRandom(afterFollower);
-      if (followerRoll < 0.05 && contactRoll >= 0.05) followerSeed = seed;
-      if (followerRoll >= 0.05 && contactRoll < 0.05) contactSeed = seed;
-      if (followerSeed > 0 && contactSeed > 0) break;
+      const [followerRoll] = nextRandom(seed);
+      if (followerRoll >= 0.05 && followerRoll < 0.5) followerSeed = seed;
+      if (followerRoll >= 0.5) noFollowerSeed = seed;
+      if (followerRoll < 0.05) doubleFollowerSeed = seed;
+      if (followerSeed > 0 && noFollowerSeed > 0 && doubleFollowerSeed > 0) break;
     }
 
-    const followerOnly = resolveSocialContentCycles(
+    const follower = resolveSocialContentCycles(
       { ...state, randomSeed: followerSeed },
       1,
-      2_000,
     );
-    const contactOnly = resolveSocialContentCycles(
-      { ...state, randomSeed: contactSeed },
+    const noFollower = resolveSocialContentCycles(
+      { ...state, randomSeed: noFollowerSeed },
       1,
-      2_000,
+    );
+    const doubleFollower = resolveSocialContentCycles(
+      {
+        ...state,
+        randomSeed: doubleFollowerSeed,
+        upgrades: { ...state.upgrades, "social-editorial-plan": 5 },
+      },
+      1,
     );
 
-    expect(followerOnly).toMatchObject({ followersGained: 1, contactsAcquired: 0 });
-    expect(followerOnly.state.school.followers).toBe(1_001);
-    expect(followerOnly.state.school.historicMembers).toBe(
+    expect(follower.followersGained).toBe(1);
+    expect(follower.state.school.followers).toBe(1_001);
+    expect(follower.state.school.historicMembers).toBe(
       initial.school.historicMembers + 1,
     );
-    expect(contactOnly).toMatchObject({ followersGained: 0, contactsAcquired: 1 });
-    expect(contactOnly.state.school.followers).toBe(1_000);
-    expect(contactOnly.state.contacts[0]).toMatchObject({
-      source: "social",
-      status: "available",
-    });
-    expect(contactOnly.state.scheduledTrials).toHaveLength(0);
+    expect(noFollower.followersGained).toBe(0);
+    expect(doubleFollower.followersGained).toBe(2);
+    expect(doubleFollower.state.contacts).toHaveLength(0);
+    expect(doubleFollower.state.statistics.contactsAcquired).toBe(0);
+    expect(doubleFollower.state.statistics.socialContacts).toBe(0);
   });
 
   it("accelerates automatic repair as mastery grows and pays 75% of manual cost", () => {

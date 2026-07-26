@@ -24,11 +24,11 @@ export function getCollaboratorMasteryRoleLabel(
 }
 
 export const COLLABORATOR_MASTERY_LEVELS = [
-  { name: "Novizio", minimumXp: 0, multiplier: 0 },
-  { name: "Iniziato", minimumXp: 60, multiplier: 0.2 },
-  { name: "Accademico", minimumXp: 360, multiplier: 0.4 },
-  { name: "Cavaliere", minimumXp: 2_160, multiplier: 0.65 },
-  { name: "Maestro", minimumXp: 5_760, multiplier: 1 },
+  { name: "Novizio", minimumXp: 0, multiplier: 0, eventCostMultiplier: 1 },
+  { name: "Iniziato", minimumXp: 60, multiplier: 0.2, eventCostMultiplier: 0.9 },
+  { name: "Accademico", minimumXp: 360, multiplier: 0.4, eventCostMultiplier: 0.8 },
+  { name: "Cavaliere", minimumXp: 2_160, multiplier: 0.65, eventCostMultiplier: 0.7 },
+  { name: "Maestro", minimumXp: 5_760, multiplier: 1, eventCostMultiplier: 0.5 },
 ] as const;
 
 export const COLLABORATOR_MASTERY_XP_PER_SECOND = 1;

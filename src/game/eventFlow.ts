@@ -56,10 +56,13 @@ export function startAcquisitionEvent(
   if (selectAvailableEventMembers(state) < definition.requiredMembers) return state;
   const availableSwords = getAvailableSwords(state.equipment);
   if (availableSwords < definition.requiredSwords) return state;
-  const masteryBonus = collaborator
-    ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0).multiplier
-    : 0;
-  const eventCost = Math.round(definition.cost * (1 - masteryBonus));
+  const masteryDefinition = collaborator
+    ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0)
+    : undefined;
+  const masteryBonus = masteryDefinition?.multiplier ?? 0;
+  const eventCost = Math.round(
+    definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1),
+  );
   if (state.school.euros < eventCost) return state;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
@@ -176,7 +179,7 @@ export function resolveAcquisitionEvent(
   gainMultiplier: number,
 ): GameState {
   if (event.status !== "running") return state;
-  const source = event.definitionId === "park-sparring" ? "sparring" : "event";
+  const source = event.definitionId === "organized-flyering" ? "sparring" : "event";
   const scaledReward = event.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID
     ? {
         state,
@@ -252,8 +255,10 @@ export function resolveAcquisitionEvent(
       nextState,
       now,
       event.definitionId === "park-sparring"
-        ? "Nuovi contatti dallo sparring"
-        : "Contatti acquisiti alla dimostrazione",
+        ? "Nuovi contatti dal volantinaggio"
+        : event.definitionId === "organized-flyering"
+          ? "Nuovi contatti dallo sparring"
+          : "Contatti acquisiti alla dimostrazione",
       `${contacts.length} nuovi indirizzi sono disponibili per la campagna email.`,
       "positive",
       "other",

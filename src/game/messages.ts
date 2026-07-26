@@ -6,6 +6,7 @@ export type InboxCategory = NonNullable<InboxMessage["category"]>;
 type InboxThreadKey = NonNullable<InboxMessage["threadKey"]>;
 
 const SUBJECT_THREADS = new Map<string, InboxThreadKey>([
+  ["Nuovi contatti dal volantinaggio", "contacts"],
   ["Nuovi contatti dallo sparring", "contacts"],
   ["Contatti acquisiti alla dimostrazione", "contacts"],
   ["Nuovi contatti dai Social", "contacts"],

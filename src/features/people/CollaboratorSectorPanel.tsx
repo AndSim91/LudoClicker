@@ -23,9 +23,10 @@ import type {
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
-import { getInstructorCoverageForms, getInstructorTeachingEntries } from "./instructorGroupPresentation";
+import { getInstructorTeachingEntries } from "./instructorGroupPresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
+import { SectorStatisticsSummary } from "./SectorStatisticsSummary";
 import { InstructorCompactActivity, InstructorCompactTraining } from "./TrainingControl";
 
 function getInitials(displayName: string): string {
@@ -247,9 +248,11 @@ export function CollaboratorSectorPanel({
             collaborators={assigned}
             role={role}
           />
-          {role === "instructor" ? (
-            <span><strong>{getInstructorCoverageForms(assigned, courseXUnlocked).length}</strong><small>Forme coperte</small></span>
-          ) : null}
+          <SectorStatisticsSummary
+            state={state}
+            role={role}
+            collaborators={assigned}
+          />
         </div>
 
         <div className="sector-panel-content">

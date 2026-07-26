@@ -56,7 +56,9 @@ describe("UpgradesView", () => {
 
     expect(screen.getByRole("dialog", { name: "Sintesi dei contenuti" })).toBeVisible();
     expect(document.querySelector(".upgrade-dialog-backdrop")).not.toBeInTheDocument();
-    expect(screen.getByText("7.500 → 5.000 → 3.500 → 2.000 → 1.000 caratteri")).toBeVisible();
+    expect(screen.getByText(
+      "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri",
+    )).toBeVisible();
     expect(screen.getByText("Serve Fama della scuola 35")).toBeVisible();
     expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
     expect(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ })).not.toHaveClass("unaffordable");

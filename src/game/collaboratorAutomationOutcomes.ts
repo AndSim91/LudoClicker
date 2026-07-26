@@ -1,9 +1,8 @@
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
-import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { nextRandom } from "./random";
 import {
-  getSocialContactChance,
+  getSocialDoubleFollowerChance,
   getSocialFollowerChance,
 } from "./social";
 import type { GameState } from "./types";
@@ -91,13 +90,11 @@ export interface SocialContentOutcome {
   state: GameState;
   cycles: number;
   followersGained: number;
-  contactsAcquired: number;
 }
 
 export function resolveSocialContentCycles(
   state: GameState,
   cycleCount: number,
-  now: number,
 ): SocialContentOutcome {
   const cycles = Math.max(0, Math.floor(cycleCount));
   if (cycles === 0) {
@@ -105,29 +102,27 @@ export function resolveSocialContentCycles(
       state,
       cycles: 0,
       followersGained: 0,
-      contactsAcquired: 0,
     };
   }
 
   let nextSeed = state.randomSeed;
   let followers = state.school.followers;
   let followersGained = 0;
-  let contactsAcquired = 0;
+  const followerChance = getSocialFollowerChance(state.upgrades);
+  const doubleFollowerChance = getSocialDoubleFollowerChance(state.upgrades);
   for (let index = 0; index < cycles; index += 1) {
-    const followerChance = getSocialFollowerChance(state.upgrades);
-    const contactChance = getSocialContactChance(followers, state.upgrades);
-
     const [followerRoll, seedAfterFollower] = nextRandom(nextSeed);
-    const [contactRoll, seedAfterContact] = nextRandom(seedAfterFollower);
-    nextSeed = seedAfterContact;
-    if (followerRoll < followerChance) {
-      followers += 1;
-      followersGained += 1;
-    }
-    if (contactRoll < contactChance) contactsAcquired += 1;
+    nextSeed = seedAfterFollower;
+    const gained = followerRoll < doubleFollowerChance
+      ? 2
+      : followerRoll < followerChance
+        ? 1
+        : 0;
+    followers += gained;
+    followersGained += gained;
   }
 
-  let nextState: GameState = {
+  const nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
     school: {
@@ -143,28 +138,9 @@ export function resolveSocialContentCycles(
     },
   };
 
-  if (contactsAcquired > 0) {
-    const acquired = createAcquiredContacts(nextState, contactsAcquired, "social", now);
-    nextState = {
-      ...nextState,
-      randomSeed: acquired.nextSeed,
-      legendaryCollaborators: addLegendaryEncounters(
-        nextState.legendaryCollaborators,
-        acquired.contacts,
-      ),
-      contacts: mergeAcquiredContacts(nextState.contacts, acquired.contacts),
-      statistics: {
-        ...nextState.statistics,
-        contactsAcquired: nextState.statistics.contactsAcquired + contactsAcquired,
-        socialContacts: nextState.statistics.socialContacts + contactsAcquired,
-      },
-    };
-  }
-
   return {
     state: nextState,
     cycles,
     followersGained,
-    contactsAcquired,
   };
 }

@@ -240,7 +240,7 @@ describe("game engine: narrative", () => {
       ...initial,
       school: {
         ...initial.school,
-        euros: 200,
+        euros: 2_500,
         activeMembers: 5,
         peakActiveMembers: 5,
         historicMembers: 5,
@@ -253,7 +253,7 @@ describe("game engine: narrative", () => {
 
     expect(second.acquisitionEvents.filter((event) => event.status === "running")).toHaveLength(2);
     expect(second.equipment.availableSwords).toBe(0);
-    expect(second.acquisitionEvents.map((event) => event.membersUsed)).toEqual([2, 1]);
+    expect(second.acquisitionEvents.map((event) => event.membersUsed)).toEqual([2, 2]);
     expect(blockedByCapacity).toBe(second);
   });
 

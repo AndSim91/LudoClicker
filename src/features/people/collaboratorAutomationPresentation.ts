@@ -9,8 +9,9 @@ import {
 import { selectActiveEmail } from "../../game/selectors";
 import {
   getMonthlySocialIncome,
-  getSocialContactChance,
   getSocialContentCharacters,
+  getSocialDoubleFollowerChance,
+  getSocialEventPromotionBonus,
   getSocialFollowerChance,
 } from "../../game/social";
 import type { CollaboratorAssignment, GameState } from "../../game/types";
@@ -104,13 +105,22 @@ export function getSocialContentAutomationPresentation(
     100,
     state.automation.socialContentBuffer / requiredCharacters * 100,
   );
-  const writingRate = getWritingAutomationRate(state, emailWriting ? 0.5 : 1);
+  const writingRate = getWritingAutomationRate(
+    state,
+    emailWriting ? GAME_CONFIG.socialContentShareWhileWriting : 1,
+  );
+  const doubleFollowerChance = getSocialDoubleFollowerChance(state.upgrades);
   return {
     title: "Contenuti Social",
     detail: [
-      emailWriting ? "50% forza lavoro" : "",
       `${formatPercent(getSocialFollowerChance(state.upgrades))} follower`,
-      `${formatPercent(getSocialContactChance(state.school.followers, state.upgrades))} contatto`,
+      doubleFollowerChance > 0
+        ? `${formatPercent(doubleFollowerChance)} doppio`
+        : "",
+      `+${formatPercent(getSocialEventPromotionBonus(
+        state.school.followers,
+        state.upgrades,
+      ))} Eventi`,
       `${formatCurrency(getMonthlySocialIncome(state))}/mese`,
     ].filter(Boolean).join(" · "),
     progress,
@@ -188,14 +198,15 @@ export function getCollaboratorAutomationPresentation({
       : Math.min(100, Math.round((activeEmail.revealedCharacters / length) * 100));
     return {
       title: activeEmail.subject,
-      detail: state.unlocks.social
-        ? "Scrittura email in corso · 50% forza lavoro"
-        : "Scrittura email in corso...",
+      detail: "Scrittura email in corso...",
       progress,
       progressLabel: `Scrittura di ${activeEmail.subject}`,
       durationMs: length / Math.max(
         Number.EPSILON,
-        getWritingAutomationRate(state, state.unlocks.social ? 0.5 : 1),
+        getWritingAutomationRate(
+          state,
+          state.unlocks.social ? GAME_CONFIG.socialEmailWritingShare : 1,
+        ),
       ) * 1_000,
     };
   }

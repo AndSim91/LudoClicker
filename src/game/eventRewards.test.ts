@@ -20,9 +20,26 @@ describe("event contact rewards", () => {
       upgrades: { ...initial.upgrades, "coordinated-demo": 1 },
     };
 
-    expect(getExpectedEventContacts(initial, sparring)).toBeCloseTo(0.6);
-    expect(getExpectedEventContacts(contactsImproved, sparring)).toBeCloseTo(0.66);
-    expect(getExpectedEventContacts(attendanceImproved, sparring)).toBeCloseTo(0.72);
+    expect(getExpectedEventContacts(initial, sparring)).toBeCloseTo(0.33);
+    expect(getExpectedEventContacts(contactsImproved, sparring)).toBeCloseTo(0.363);
+    expect(getExpectedEventContacts(attendanceImproved, sparring)).toBeCloseTo(0.396);
+  });
+
+  it("uses followers to promote Events without creating contacts directly", () => {
+    const initial = createInitialState(1_000);
+    const promoted = {
+      ...initial,
+      school: { ...initial.school, followers: 1_000 },
+      unlocks: { ...initial.unlocks, social: true },
+    };
+    const expandedPromotion = {
+      ...promoted,
+      upgrades: { ...promoted.upgrades, "social-content-distribution": 5 },
+    };
+
+    expect(getExpectedEventContacts(promoted, sparring)).toBeCloseTo(0.3465);
+    expect(getExpectedEventContacts(expandedPromotion, sparring)).toBeCloseTo(0.363);
+    expect(promoted.contacts).toHaveLength(initial.contacts.length);
   });
 
   it("does not penalize contact rewards for worn equipment", () => {

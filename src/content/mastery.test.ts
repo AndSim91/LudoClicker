@@ -30,6 +30,13 @@ describe("collaborator mastery", () => {
       0.65,
       1,
     ]);
+    expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.eventCostMultiplier)).toEqual([
+      1,
+      0.9,
+      0.8,
+      0.7,
+      0.5,
+    ]);
     expect(COLLABORATOR_MASTERY_XP_PER_SECOND).toBe(1);
   });
 

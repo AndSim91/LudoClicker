@@ -151,7 +151,10 @@ export type AcquisitionEventId =
   | "genova-comics"
   | "megacon-genova"
   | "lucca-comics"
-  | "milan-games-week";
+  | "milan-games-week"
+  | "oktoberfest"
+  | "kata-sea-waves"
+  | "cthulhu-challenge";
 
 export interface AcquisitionEvent {
   id: string;

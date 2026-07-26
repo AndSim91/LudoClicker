@@ -37,7 +37,7 @@ describe("inbox message digests", () => {
   });
 
   it("groups different operational subjects into one thematic conversation", () => {
-    const sparring = addInboxMessage([], message("message-1", "Nuovi contatti dallo sparring"));
+    const sparring = addInboxMessage([], message("message-1", "Nuovi contatti dal volantinaggio"));
     const social = addInboxMessage(sparring, message("message-2", "Nuovi contatti dai Social"));
 
     expect(social).toHaveLength(1);

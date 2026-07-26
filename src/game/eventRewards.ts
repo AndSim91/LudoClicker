@@ -3,6 +3,7 @@ import { getCollaboratorBaseProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
+import { getSocialEventPromotionBonus } from "./social";
 import type { GameState } from "./types";
 
 export function getEventAttendanceBonus(state: GameState): number {
@@ -10,7 +11,10 @@ export function getEventAttendanceBonus(state: GameState): number {
     0,
     getUpgradeEffectTotal(state.upgrades, "eventAttendanceMultiplier") +
       (state.school.specialization === "eventi" ? 0.1 : 0) +
-      state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool,
+      state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool +
+      (state.unlocks.social
+        ? getSocialEventPromotionBonus(state.school.followers, state.upgrades)
+        : 0),
   );
 }
 

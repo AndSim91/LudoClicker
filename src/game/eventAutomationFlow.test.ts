@@ -38,14 +38,17 @@ function fundedEventState(): GameState {
 }
 
 describe("automatic collaborator events", () => {
-  it("starts one best feasible event per collaborator without duplicate definitions", () => {
+  it("starts the cheapest feasible events and uses expected contacts as the tie-breaker", () => {
     const automated = processAutomaticEvents(fundedEventState(), 2_000);
     const running = automated.acquisitionEvents.filter((event) => event.status === "running");
 
     expect(running).toHaveLength(2);
     expect(new Set(running.map((event) => event.collaboratorId)).size).toBe(2);
     expect(new Set(running.map((event) => event.definitionId)).size).toBe(2);
-    expect(running[0].definitionId).toBe("milan-games-week");
+    expect(running.map((event) => event.definitionId)).toEqual([
+      "park-sparring",
+      "kata-sea-waves",
+    ]);
   });
 
   it("cancels an event on reassignment, refunds its cost, and applies quarter wear", () => {
@@ -58,9 +61,9 @@ describe("automatic collaborator events", () => {
     expect(reassigned.acquisitionEvents).toHaveLength(0);
     expect(reassigned.school.euros).toBe(automated.school.euros + event.cost);
     expect(reassigned.equipment).toMatchObject({
-      availableSwords: 98,
-      damagedSwords: 2,
-      wear: 50,
+      availableSwords: 100,
+      damagedSwords: 0,
+      wear: 0,
     });
   });
 });

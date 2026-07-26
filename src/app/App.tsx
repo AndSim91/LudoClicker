@@ -10,7 +10,6 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
-import { ActivitiesView } from "../features/activities/ActivitiesView";
 import { AdminEmailView } from "../features/admin/AdminEmailView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
@@ -370,8 +369,6 @@ export function App() {
               onStart={startAcquisitionEvent}
               onCancel={cancelAcquisitionEvent}
             />
-          ) : activeView === "statistics" ? (
-            <ActivitiesView />
           ) : activeView === "contacts" ? (
             <PeopleView
               onAssign={assignCollaborator}

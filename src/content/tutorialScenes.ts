@@ -160,16 +160,16 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Eventi e attrezzatura",
         body: [
           "Gli Eventi portano il nostro sport fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra nella speranza che ci siano persone interessate a provare il nostro sport.",
-          "Ogni attività impegna iscritti e spade. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla!",
+          "Molte attività impegnano iscritti e spade. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla! Il Volantinaggio gratuito, invece, non richiede né iscritti né attrezzatura.",
         ],
         focusRegions: ["main"],
       },
       {
         id: "start-free-sparring",
         kind: "objective",
-        title: "Avvia l'evento di sparring gratuito",
+        title: "Avvia il volantinaggio gratuito",
         body: [
-          "Trova “Sparring al parco” e premi “Partecipa gratis”. Poi attendi il suo completamento.",
+          "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono iscritti o spade; poi attendi il suo completamento.",
         ],
         focusRegions: ["main", "park-sparring-action"],
         isComplete: ({ state }) => state.acquisitionEvents.some(
@@ -179,7 +179,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "wait-free-sparring",
         kind: "objective",
-        title: "Attendi la fine dello sparring",
+        title: "Attendi la fine del volantinaggio",
         body: [
           "Quante cose possiamo fare in cinque secondi? ...",
           "Scemo chi legge!",
@@ -199,7 +199,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
             (event) => event.tutorialSceneId === "first-event",
           )?.contactReward ?? GAME_CONFIG.tutorialSparringMinimumContacts;
           return [
-            `Lo sparring è finito: +${contactReward} ${contactReward === 1 ? "nuovo contatto" : "nuovi contatti"} per la scuola! Gli Eventi servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
+            `Il volantinaggio è finito: +${contactReward} ${contactReward === 1 ? "nuovo contatto" : "nuovi contatti"} per la scuola! Gli Eventi servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
             "Non si tratta ancora di iscritti veri e propri, dovremo inviare le email per invitarli in palestra e, se la prova va bene, la scuola avrà una nuova recluta!",
           ];
         },
@@ -368,8 +368,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "La Scuola diventa Social!",
         body: [
           "L’Ordine delle Onde ha raggiunto 35 iscritti attivi: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
-          "Da oggi i collaboratori non si limiteranno più a scrivere email: lavoreranno anche per aumentare i nostri Contatti e i nostri Follower. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
-          "Abbiamo chiesto loro di fare rete e hanno preso l’incarico molto sul serio: stanno contattando amici, sindacati, l’Ispettorato del Lavoro e perfino un certo Guardia di Finanza.",
+          "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri Follower e porteranno più pubblico agli Eventi. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
+          "Per trovare nuovi Contatti serviranno ancora gli Eventi. Abbiamo chiesto ai Social di promuoverli e hanno già preparato diciassette hashtag, tre balletti e un comunicato per un certo Guardia di Finanza.",
           "Dev’essere un influencer importante: lo nominano tutti.",
         ],
         focusRegions: ["main"],
@@ -380,8 +380,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Contenuti, Follower e Sponsorizzazioni",
         body: [
-          "I collaboratori Social producono sempre contenuti online. Quando c'è una Email da scrivere, metà della forza lavoro passa alla scrittura e i contenuti avanzano al 50% della velocità.",
-          "Ogni contenuto può generare Follower e nuovi Contatti. Ogni Follower ottenuto aumenta anche la Fama della scuola e migliora la possibilità di trovare sempre più Contatti nuovi.",
+          "I collaboratori Social producono sempre contenuti online. Quando c'è una Email da scrivere, le danno priorità senza interrompere completamente i contenuti.",
+          "Ogni contenuto può generare Follower. Ogni Follower aumenta anche la Fama della scuola e l'affluenza agli Eventi, che restano il modo per ottenere nuovi Contatti.",
           "I Follower producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
           "Facile, no? Forse userò un Collaboratore Social per farmi ripartire la stampante..."
         ],

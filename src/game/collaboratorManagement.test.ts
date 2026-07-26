@@ -77,7 +77,7 @@ describe("collaborator aggregate management", () => {
     const event = {
       id: "event-1",
       definitionId: "park-sparring" as const,
-      title: "Sparring al parco",
+      title: "Volantinaggio",
       location: "Parco",
       startedAt: 1_000,
       resolvesAt: 5_000,
@@ -126,7 +126,7 @@ describe("collaborator aggregate management", () => {
       acquisitionEvents: [{
         id: "event-1",
         definitionId: "park-sparring",
-        title: "Sparring al parco",
+        title: "Volantinaggio",
         location: "Parco",
         startedAt: 1_000,
         resolvesAt: 5_000,

@@ -339,6 +339,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["extra-form"] === "number" &&
     typeof state.upgrades?.pagosport === "number" &&
     typeof state.upgrades?.["divine-touch"] === "number" &&
+    typeof state.upgrades?.["project-x"] === "number" &&
     typeof state.upgrades?.["social-content-synthesis"] === "number" &&
     typeof state.upgrades?.["social-editorial-plan"] === "number" &&
     typeof state.upgrades?.["social-content-distribution"] === "number" &&

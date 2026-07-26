@@ -70,7 +70,7 @@ describe("game engine: operations", () => {
     expect(gameReducer(withTrainedMember, { type: "TICK", now: dueAt }).school.euros).toBe(75);
   });
 
-  it("resolves free park sparring into new usable contacts once", () => {
+  it("resolves free flyering into new usable contacts once", () => {
     const state = createInitialState(1_000);
     const started = gameReducer(state, {
       type: "START_ACQUISITION_EVENT",
@@ -93,9 +93,9 @@ describe("game engine: operations", () => {
     expect(completed.statistics.peopleMet).toBe(event.peopleMet);
     expect(completed.statistics.demonstrationsGiven).toBe(event.demonstrationsGiven);
     expect(completed.statistics.eventsCompleted).toBe(1);
-    expect(started.equipment.availableSwords).toBe(4);
+    expect(started.equipment.availableSwords).toBe(6);
     expect(completed.equipment.availableSwords).toBe(6);
-    expect(completed.equipment.wear).toBe(10);
+    expect(completed.equipment.wear).toBe(0);
     expect(tickedAgain.contacts).toHaveLength(completed.contacts.length);
   });
 
@@ -163,7 +163,7 @@ describe("game engine: operations", () => {
         ...initial.school,
         activeMembers: 5,
         historicMembers: 5,
-        euros: 120,
+        euros: 1_500,
       },
     };
     const started = gameReducer(ready, {
@@ -179,7 +179,7 @@ describe("game engine: operations", () => {
       now: 3_000,
     });
 
-    expect(cancelled.school.euros).toBe(120);
+    expect(cancelled.school.euros).toBe(1_500);
     expect(cancelled.equipment.availableSwords).toBe(6);
     expect(cancelled.equipment.wear).toBe(event.wearAdded * 0.25);
     expect(cancelled.activities.eventCooldowns["public-demo"]).toBeUndefined();
@@ -220,7 +220,7 @@ describe("game engine: operations", () => {
         ...initial.school,
         activeMembers: 20,
         historicMembers: 20,
-        euros: 800,
+        euros: 4_000,
       },
       equipment: {
         ...initial.equipment,
@@ -266,7 +266,7 @@ describe("game engine: operations", () => {
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 120, activeMembers: 5, peakActiveMembers: 5, historicMembers: 5 },
+      school: { ...state.school, euros: 1_500, activeMembers: 5, peakActiveMembers: 5, historicMembers: 5 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",
@@ -288,7 +288,7 @@ describe("game engine: operations", () => {
         activeMembers: 70,
         peakActiveMembers: 70,
         historicMembers: 100,
-        euros: 2_000,
+        euros: 7_500,
       },
       equipment: { ...initial.equipment, totalSwords: 16, availableSwords: 16 },
     };
