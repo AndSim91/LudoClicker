@@ -85,8 +85,8 @@ describe("collaborator mastery integration", () => {
       ...initial,
       school: {
         ...initial.school,
-        activeMembers: 1,
-        peakActiveMembers: 1,
+        activeMembers: 2,
+        peakActiveMembers: 2,
         euros: 1_000,
       },
       collaborators: [organizer],
@@ -103,7 +103,7 @@ describe("collaborator mastery integration", () => {
 
     expect(event.resolvesAt - event.startedAt).toBe(5_000);
     expect(event.cost).toBe(500);
-    expect(event.wearAdded).toBe(0);
+    expect(event.wearAdded).toBe(15);
     expect(started.school.euros).toBe(500);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });

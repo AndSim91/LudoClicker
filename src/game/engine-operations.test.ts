@@ -290,7 +290,7 @@ describe("game engine: operations", () => {
         historicMembers: 100,
         euros: 7_500,
       },
-      equipment: { ...initial.equipment, totalSwords: 16, availableSwords: 16 },
+      equipment: { ...initial.equipment, totalSwords: 20, availableSwords: 20 },
     };
 
     const started = gameReducer(famousSchool, {

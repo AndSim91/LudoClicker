@@ -387,7 +387,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     id: "cthulhu-challenge",
     title: "Sfida a Cthulhu",
     location: "R'lyeh",
-    description: "Una spedizione oltre ogni prudenza per affrontare l'orrore cosmico davanti a un pubblico irripetibile.",
+    description: "Una spedizione oltre ogni imprudenza per affrontare l'orrore cosmico davanti a un pubblico in mondovisione.",
     durationMs: STANDARD_EVENT_DURATION_MS,
     cost: 1_000_000,
     baseAttendance: 800,
