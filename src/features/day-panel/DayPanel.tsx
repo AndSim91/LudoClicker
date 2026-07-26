@@ -1,4 +1,9 @@
-import { SHORT_GOALS, getShortGoalProgress, getShortGoalReward } from "../../content/shortGoals";
+import {
+  SHORT_GOALS,
+  getShortGoalProgress,
+  getShortGoalReward,
+  isShortGoalActive,
+} from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
 import { useGameState } from "../../game/GameStateContext";
@@ -199,7 +204,7 @@ export function DayPanel({
         <strong>La mia giornata</strong>
         <Icon name="calendar" />
       </div>
-      <ShortGoalCard state={stateOverride} />
+      {isShortGoalActive(state) ? <ShortGoalCard state={stateOverride} /> : null}
       <EquipmentQuickPanel
         state={stateOverride}
         onMaintainEquipment={onMaintainEquipment}

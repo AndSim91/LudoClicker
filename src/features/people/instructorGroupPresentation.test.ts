@@ -61,9 +61,11 @@ describe("instructor group presentation", () => {
         instructorId: instructors[index].id,
       },
     }));
-    const entries = getInstructorTeachingEntries({ contacts, collaborators: instructors });
+    const state = { contacts, collaborators: instructors };
+    const entries = getInstructorTeachingEntries(state);
 
     expect(entries).toHaveLength(2);
+    expect(getInstructorTeachingEntries(state)).toBe(entries);
     expect(getAggregateInstructorProgress(entries, 1_500)).toBe(25);
   });
 });

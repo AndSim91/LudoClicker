@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
 import type { Collaborator, FormBranch, FormId } from "../../game/types";
@@ -57,6 +58,66 @@ describe("PeopleView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Aumenta collaboratori in Redazione" }));
     expect(onIncrement).toHaveBeenCalledWith("writing");
+  });
+
+  it("keeps the progress clock fluid for a high-volume teaching dashboard", () => {
+    const initial = createInitialState(1_000);
+    const instructor: Collaborator = {
+      id: "scale-instructor",
+      contactId: "scale-instructor-contact",
+      displayName: "Istruttore Scalabile",
+      joinedAt: 1_000,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      assignment: "instructor",
+      rarity: "ultra-rare",
+    };
+    const contacts = Array.from({ length: 100 }, (_, index) => ({
+      ...initial.contacts[index % initial.contacts.length],
+      id: `scale-student-${index}`,
+      email: `scale-student-${index}@example.invalid`,
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 101_000,
+        status: "running" as const,
+        instructorId: instructor.id,
+      },
+    }));
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts,
+          collaborators: [instructor],
+          school: { ...initial.school, activeMembers: contacts.length },
+          unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: {
+              ...initial.collaboratorManagement.targets,
+              instructor: 1,
+            },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole("progressbar", {
+      name: "Forma 1: 100 corsi",
+    })).toHaveClass("is-compact");
+    expect(intervalSpy.mock.calls.some(
+      ([, intervalMs]) => intervalMs === GAME_CONFIG.progressUpdateIntervalMs,
+    )).toBe(true);
+    expect(intervalSpy.mock.calls.some(
+      ([, intervalMs]) => intervalMs === GAME_CONFIG.gameTickMs,
+    )).toBe(false);
   });
 
   it("does not animate an equipment sector when all equipment is already repaired", () => {

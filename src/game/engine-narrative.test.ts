@@ -47,6 +47,41 @@ describe("game engine: narrative", () => {
     expect(repeated.school.euros).toBe(completed.school.euros);
   });
 
+  it("activates short goals only below 10,000 euros", () => {
+    const initial = createInitialState(1_000);
+    const inactive = gameReducer(
+      {
+        ...initial,
+        achievements: ["first-email" as const],
+        school: { ...initial.school, euros: 10_000 },
+        statistics: { ...initial.statistics, emailsSent: 3 },
+      },
+      { type: "TICK", now: 2_000 },
+    );
+
+    expect(inactive.school.euros).toBe(10_000);
+    expect(inactive.shortGoal).toMatchObject({
+      definitionId: "send-emails",
+      baseline: 3,
+      completedCount: 0,
+    });
+
+    const active = gameReducer(
+      {
+        ...inactive,
+        school: { ...inactive.school, euros: 9_999 },
+        statistics: { ...inactive.statistics, emailsSent: 6 },
+      },
+      { type: "TICK", now: 3_000 },
+    );
+
+    expect(active.school.euros).toBe(10_014);
+    expect(active.shortGoal).toMatchObject({
+      definitionId: "book-trials",
+      completedCount: 1,
+    });
+  });
+
   it("marks the whole inbox as read in one action", () => {
     const initial = createInitialState(1_000);
     const read = gameReducer(initial, { type: "MARK_ALL_MESSAGES_READ" });

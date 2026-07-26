@@ -4,6 +4,8 @@ import {
   createNextShortGoal,
   getShortGoalProgress,
   getShortGoalReward,
+  getShortGoalValue,
+  isShortGoalActive,
 } from "../content/shortGoals";
 import { formatCurrency } from "../shared/formatters";
 import { refreshWritingCampaignCopies } from "./campaignContent";
@@ -147,11 +149,26 @@ export function grantAchievements(
   return nextState;
 }
 
+export function synchronizeInactiveShortGoal(
+  state: GameState,
+  now: number,
+): GameState {
+  if (isShortGoalActive(state)) return state;
+  const baseline = getShortGoalValue(state, state.shortGoal.definitionId);
+  return baseline === state.shortGoal.baseline
+    ? state
+    : {
+        ...state,
+        shortGoal: { ...state.shortGoal, baseline, startedAt: now },
+      };
+}
+
 export function completeShortGoal(
   state: GameState,
   now: number,
   gainMultiplier: number,
 ): GameState {
+  if (!isShortGoalActive(state)) return synchronizeInactiveShortGoal(state, now);
   if (getShortGoalProgress(state) < state.shortGoal.target) return state;
 
   const definition = SHORT_GOALS[state.shortGoal.definitionId];

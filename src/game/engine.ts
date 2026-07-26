@@ -30,6 +30,7 @@ import { notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
 import {
   completeShortGoal,
   grantAchievements,
+  synchronizeInactiveShortGoal,
 } from "./schoolProgressionFlow";
 import {
   addAssignedCollaboratorMasteryExperience,
@@ -280,11 +281,12 @@ function compactChangedHistory(
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
-  const nextState = dispatchGameAction(state, action, ACTION_HANDLERS);
+  const now = "now" in action ? action.now : state.lastSavedAt;
+  const preparedState = synchronizeInactiveShortGoal(state, now);
+  const nextState = dispatchGameAction(preparedState, action, ACTION_HANDLERS);
   if (action.type === "TICK" || action.type === "ADMIN_ADVANCE_MONTH") {
     return nextState;
   }
-  const now = "now" in action ? action.now : state.lastSavedAt;
   const reconciledState = reconcileCollaboratorManagement(
     recruitEnrolledLegendaryCollaborators(nextState, now),
   );

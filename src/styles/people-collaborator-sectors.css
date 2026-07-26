@@ -285,6 +285,24 @@
   background: var(--surface-muted);
 }
 
+.aggregated-teaching-bar.is-compact {
+  display: block;
+}
+
+.aggregated-teaching-bar.is-compact > span {
+  display: block;
+  height: 100%;
+  background: var(--blue-600);
+}
+
+.aggregated-teaching-bar.is-compact.is-waiting {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--surface-muted) 0 4px,
+    var(--line-strong) 4px 8px
+  );
+}
+
 .aggregated-teaching-groups {
   display: grid;
   gap: 7px;

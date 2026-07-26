@@ -1,4 +1,5 @@
 import type { GameState, ShortGoalId, ShortGoalProgress, Statistics } from "../game/types";
+import { GAME_CONFIG } from "../game/config";
 
 type ShortGoalMetric = keyof Pick<
   Statistics,
@@ -90,6 +91,10 @@ export function getShortGoalValue(state: GameState, definitionId: ShortGoalId): 
 
 export function getShortGoalProgress(state: GameState): number {
   return Math.max(0, getShortGoalValue(state, state.shortGoal.definitionId) - state.shortGoal.baseline);
+}
+
+export function isShortGoalActive(state: GameState): boolean {
+  return state.school.euros < GAME_CONFIG.shortGoalActivationBalance;
 }
 
 export function getShortGoalReward(progress: ShortGoalProgress): number {

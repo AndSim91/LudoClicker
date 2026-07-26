@@ -98,6 +98,21 @@ describe("DayPanel", () => {
     expect(mission.nextElementSibling).toBe(equipment);
   });
 
+  it("shows wave missions only below 10,000 euros", () => {
+    const initial = createInitialState(1_000);
+    const { rerender } = render(
+      <DayPanel state={{ ...initial, school: { ...initial.school, euros: 10_000 } }} />,
+    );
+
+    expect(screen.queryByLabelText("Obiettivo breve")).not.toBeInTheDocument();
+
+    rerender(
+      <DayPanel state={{ ...initial, school: { ...initial.school, euros: 9_999.99 } }} />,
+    );
+
+    expect(screen.getByLabelText("Obiettivo breve")).toBeVisible();
+  });
+
   it("exposes only the tutorial trial row as the precise guided target", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);

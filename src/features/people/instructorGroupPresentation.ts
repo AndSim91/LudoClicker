@@ -24,6 +24,25 @@ export interface InternalInstructorCourseEntry {
   training: FormTraining;
 }
 
+interface InstructorTeachingEntriesCache {
+  all: InstructorTeachingEntry[];
+  withoutCourseX?: InstructorTeachingEntry[];
+}
+
+interface InternalInstructorCoursesCache {
+  all: InternalInstructorCourseEntry[];
+  withoutCourseX?: InternalInstructorCourseEntry[];
+}
+
+const instructorTeachingEntriesCache = new WeakMap<
+  GameState["contacts"],
+  WeakMap<GameState["collaborators"], InstructorTeachingEntriesCache>
+>();
+const internalInstructorCoursesCache = new WeakMap<
+  readonly Collaborator[],
+  InternalInstructorCoursesCache
+>();
+
 function getRequestedInstructorId(training: FormTraining): string | undefined {
   return training.instructorId ?? training.requestedInstructorId;
 }
@@ -32,32 +51,44 @@ export function getInstructorTeachingEntries(
   state: Pick<GameState, "contacts" | "collaborators">,
   courseXUnlocked = true,
 ): InstructorTeachingEntry[] {
-  return [
-    ...state.contacts.flatMap((contact) => {
-      if (!contact.training) return [];
+  let byCollaborators = instructorTeachingEntriesCache.get(state.contacts);
+  if (!byCollaborators) {
+    byCollaborators = new WeakMap();
+    instructorTeachingEntriesCache.set(state.contacts, byCollaborators);
+  }
+  let cached = byCollaborators.get(state.collaborators);
+  if (!cached) {
+    const all: InstructorTeachingEntry[] = [];
+    for (const contact of state.contacts) {
+      if (!contact.training) continue;
       const instructorId = getRequestedInstructorId(contact.training);
-      return instructorId
-        ? [{
-            id: contact.id,
-            displayName: `${contact.firstName} ${contact.lastName}`,
-            training: contact.training,
-            instructorId,
-          }]
-        : [];
-    }),
-    ...state.collaborators.flatMap((collaborator) => {
-      if (!collaborator.training) return [];
+      if (!instructorId) continue;
+      all.push({
+        id: contact.id,
+        displayName: `${contact.firstName} ${contact.lastName}`,
+        training: contact.training,
+        instructorId,
+      });
+    }
+    for (const collaborator of state.collaborators) {
+      if (!collaborator.training) continue;
       const instructorId = getRequestedInstructorId(collaborator.training);
-      return instructorId
-        ? [{
-            id: collaborator.id,
-            displayName: collaborator.displayName,
-            training: collaborator.training,
-            instructorId,
-          }]
-        : [];
-    }),
-  ].filter((entry) => courseXUnlocked || entry.training.formId !== "course-x");
+      if (!instructorId) continue;
+      all.push({
+        id: collaborator.id,
+        displayName: collaborator.displayName,
+        training: collaborator.training,
+        instructorId,
+      });
+    }
+    cached = { all };
+    byCollaborators.set(state.collaborators, cached);
+  }
+  if (courseXUnlocked) return cached.all;
+  cached.withoutCourseX ??= cached.all.filter(
+    (entry) => entry.training.formId !== "course-x",
+  );
+  return cached.withoutCourseX;
 }
 
 export function getInstructorTrainingProgress(training: FormTraining, now: number): number {
@@ -111,10 +142,18 @@ export function getInternalInstructorCourseEntries(
   collaborators: readonly Collaborator[],
   courseXUnlocked = true,
 ): InternalInstructorCourseEntry[] {
+  let cached = internalInstructorCoursesCache.get(collaborators);
+  if (cached) {
+    if (courseXUnlocked) return cached.all;
+    cached.withoutCourseX ??= cached.all.filter(
+      (entry) => entry.training.formId !== "course-x",
+    );
+    return cached.withoutCourseX;
+  }
   const collaboratorsById = new Map(
     collaborators.map((collaborator) => [collaborator.id, collaborator]),
   );
-  return collaborators.flatMap((trainee) => {
+  const all = collaborators.flatMap((trainee) => {
     const training = trainee.training;
     const technician = training?.technicianId
       ? collaboratorsById.get(training.technicianId)
@@ -122,11 +161,17 @@ export function getInternalInstructorCourseEntries(
     return training &&
       technician &&
       training.trainingPhase === "instructor" &&
-      training.formId !== "agonist-course" &&
-      (courseXUnlocked || training.formId !== "course-x")
+      training.formId !== "agonist-course"
       ? [{ trainee, technician, formId: training.formId, training }]
       : [];
   });
+  cached = { all };
+  internalInstructorCoursesCache.set(collaborators, cached);
+  if (courseXUnlocked) return all;
+  cached.withoutCourseX = all.filter(
+    (entry) => entry.training.formId !== "course-x",
+  );
+  return cached.withoutCourseX;
 }
 
 export function getAvailableInstructorCourseCount(

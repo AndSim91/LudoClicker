@@ -31,6 +31,7 @@ export const GAME_CONFIG = {
   monthlyMemberFee: 40,
   monthlyMemberFormBonus: 5,
   enrollmentBonus: 20,
+  shortGoalActivationBalance: 10_000,
   gameMonthMs: 60_000,
   secretLegendaryTrialDurationMs: 30_000,
   tutorialSparringDurationMs: 5_000,

@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { ProgressBar } from "../../components/common/ProgressBar";
 import { AGONIST_COURSE_LOGO, getFormLogo } from "../../content/formLogos";
 import {
   getFormDefinition,
@@ -11,6 +13,8 @@ import {
   getInstructorTrainingProgress,
   type InstructorTeachingEntry,
 } from "./instructorGroupPresentation";
+
+const MAX_DETAILED_TEACHING_COURSES = 24;
 
 function TeachingCourseLogo({
   courseId,
@@ -52,13 +56,29 @@ export function AggregatedTeachingBar({
   now: number;
   technicalArenaLevel: number;
 }) {
-  const groups = groupInstructorTeachingEntries(entries);
+  const groups = useMemo(
+    () => groupInstructorTeachingEntries(entries),
+    [entries],
+  );
 
   return (
     <div className="aggregated-teaching-groups" aria-label="Lezioni raggruppate per Forma">
       {groups.map((group) => {
         const progress = getAggregateInstructorProgress(group.entries, now) ?? 0;
         const title = getTrainingCourseTitle(group.courseId, technicalArenaLevel);
+        const courseCountLabel = `${group.entries.length} ${group.entries.length === 1 ? "corso" : "corsi"}`;
+        const compact = group.entries.length > MAX_DETAILED_TEACHING_COURSES;
+        const waitingCourseCount = compact
+          ? group.entries.reduce(
+              (count, entry) => count + Number(
+                entry.training.status === "waitingForEquipment",
+              ),
+              0,
+            )
+          : 0;
+        const waitingLabel = waitingCourseCount > 0
+          ? ` · ${waitingCourseCount} in attesa di spade`
+          : "";
         return (
           <div className="aggregated-teaching-group" key={group.courseId}>
             <span className="aggregated-teaching-course">
@@ -68,31 +88,41 @@ export function AggregatedTeachingBar({
               />
               <strong title={title}>{title}</strong>
             </span>
-            <span
-              className="aggregated-teaching-bar"
-              role="progressbar"
-              aria-label={`${title}: ${group.entries.length} ${group.entries.length === 1 ? "corso" : "corsi"}`}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={Math.round(progress)}
-              aria-valuetext={`${group.entries.length} ${group.entries.length === 1 ? "corso" : "corsi"} · ${Math.round(progress)}%`}
-            >
-              {group.entries.map((entry) => {
-                const entryProgress = getInstructorTrainingProgress(entry.training, now);
-                const waiting = entry.training.status === "waitingForEquipment";
-                return (
-                  <span
-                    className={`aggregated-teaching-segment${waiting ? " is-waiting" : ""}`}
-                    title={waiting
-                      ? `${entry.displayName}: in attesa di spade`
-                      : `${entry.displayName}: ${Math.round(entryProgress)}%`}
-                    key={`${entry.id}-${entry.training.startedAt}`}
-                  >
-                    <span style={{ width: `${entryProgress}%` }} />
-                  </span>
-                );
-              })}
-            </span>
+            {compact ? (
+              <ProgressBar
+                className={`aggregated-teaching-bar is-compact${waitingCourseCount === group.entries.length ? " is-waiting" : ""}`}
+                label={`${title}: ${courseCountLabel}`}
+                title={`${courseCountLabel} raggruppati · avanzamento medio ${Math.round(progress)}%${waitingLabel}`}
+                value={progress}
+                valueText={`${courseCountLabel} · avanzamento medio ${Math.round(progress)}%${waitingLabel}`}
+              />
+            ) : (
+              <span
+                className="aggregated-teaching-bar"
+                role="progressbar"
+                aria-label={`${title}: ${courseCountLabel}`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(progress)}
+                aria-valuetext={`${courseCountLabel} · ${Math.round(progress)}%`}
+              >
+                {group.entries.map((entry) => {
+                  const entryProgress = getInstructorTrainingProgress(entry.training, now);
+                  const waiting = entry.training.status === "waitingForEquipment";
+                  return (
+                    <span
+                      className={`aggregated-teaching-segment${waiting ? " is-waiting" : ""}`}
+                      title={waiting
+                        ? `${entry.displayName}: in attesa di spade`
+                        : `${entry.displayName}: ${Math.round(entryProgress)}%`}
+                      key={`${entry.id}-${entry.training.startedAt}`}
+                    >
+                      <span style={{ width: `${entryProgress}%` }} />
+                    </span>
+                  );
+                })}
+              </span>
+            )}
             <small>{group.entries.length}</small>
           </div>
         );

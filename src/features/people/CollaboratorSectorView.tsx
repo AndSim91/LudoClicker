@@ -284,22 +284,55 @@ function InstructorSectorCard({
   const state = useGameState(stateOverride);
   const isPaused = useGameTimeSource()?.isPaused ?? false;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const instructors = state.collaborators.filter(
-    (collaborator) => collaborator.assignment === "instructor",
-  );
-  const instructorIds = new Set(instructors.map((instructor) => instructor.id));
-  const entries = getInstructorTeachingEntries(state, courseXUnlocked).filter((entry) =>
-    instructorIds.has(entry.instructorId),
-  );
-  const coverage = getInstructorCoverageForms(instructors, courseXUnlocked);
-  const technicianCoverage = getTechnicianCoverageForms(instructors, courseXUnlocked);
-  const internalCourses = getInternalInstructorCourseEntries(instructors, courseXUnlocked);
-  const availableInstructorCourses = getAvailableInstructorCourses(instructors, courseXUnlocked);
-  const singleInstructorCourse = availableInstructorCourses.length === 1
-    ? availableInstructorCourses[0]
-    : undefined;
-  const instructorsTeaching = new Set(entries.map((entry) => entry.instructorId));
-  const idleInstructors = Math.max(0, instructors.length - instructorsTeaching.size);
+  const {
+    instructors,
+    entries,
+    coverage,
+    technicianCoverage,
+    internalCourses,
+    availableInstructorCourses,
+    singleInstructorCourse,
+    idleInstructors,
+  } = useMemo(() => {
+    const nextInstructors = state.collaborators.filter(
+      (collaborator) => collaborator.assignment === "instructor",
+    );
+    const instructorIds = new Set(
+      nextInstructors.map((instructor) => instructor.id),
+    );
+    const nextEntries = getInstructorTeachingEntries({
+      contacts: state.contacts,
+      collaborators: state.collaborators,
+    }, courseXUnlocked).filter((entry) => instructorIds.has(entry.instructorId));
+    const nextAvailableCourses = getAvailableInstructorCourses(
+      nextInstructors,
+      courseXUnlocked,
+    );
+    const instructorsTeaching = new Set(
+      nextEntries.map((entry) => entry.instructorId),
+    );
+    return {
+      instructors: nextInstructors,
+      entries: nextEntries,
+      coverage: getInstructorCoverageForms(nextInstructors, courseXUnlocked),
+      technicianCoverage: getTechnicianCoverageForms(
+        nextInstructors,
+        courseXUnlocked,
+      ),
+      internalCourses: getInternalInstructorCourseEntries(
+        nextInstructors,
+        courseXUnlocked,
+      ),
+      availableInstructorCourses: nextAvailableCourses,
+      singleInstructorCourse: nextAvailableCourses.length === 1
+        ? nextAvailableCourses[0]
+        : undefined,
+      idleInstructors: Math.max(
+        0,
+        nextInstructors.length - instructorsTeaching.size,
+      ),
+    };
+  }, [courseXUnlocked, state.collaborators, state.contacts]);
   const prepUnlocked = (state.upgrades["athletic-preparation"] ?? 0) > 0;
   const prepIsPrimary = entries.length === 0 && prepUnlocked && instructors.length > 0;
   const summerBreak = isSummerBreak(state.school.currentMonth);
@@ -500,15 +533,47 @@ export function CollaboratorSectorView({
   const state = useGameState(stateOverride);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [openRole, setOpenRole] = useState<CollaboratorMasteryRole | null>(null);
-  const assignmentCounts = getCollaboratorAssignmentCounts(state);
-  const available = state.collaborators.filter((collaborator) => collaborator.assignment === null).length;
-  const hasTimedWork = state.acquisitionEvents.some((event) => event.status === "running") ||
-    getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
-    getInternalInstructorCourseEntries(state.collaborators, courseXUnlocked).length > 0 ||
-    (
-      state.collaborators.some((collaborator) => collaborator.assignment === "equipment") &&
-      getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
-    );
+  const assignmentCounts = useMemo(
+    () => getCollaboratorAssignmentCounts(state),
+    [state],
+  );
+  const available = useMemo(
+    () => state.collaborators.filter(
+      (collaborator) => collaborator.assignment === null,
+    ).length,
+    [state.collaborators],
+  );
+  const teachingEntries = useMemo(
+    () => getInstructorTeachingEntries({
+      contacts: state.contacts,
+      collaborators: state.collaborators,
+    }, courseXUnlocked),
+    [courseXUnlocked, state.collaborators, state.contacts],
+  );
+  const internalInstructorCourses = useMemo(
+    () => getInternalInstructorCourseEntries(
+      state.collaborators,
+      courseXUnlocked,
+    ),
+    [courseXUnlocked, state.collaborators],
+  );
+  const hasTimedWork = useMemo(
+    () => state.acquisitionEvents.some((event) => event.status === "running") ||
+      teachingEntries.length > 0 ||
+      internalInstructorCourses.length > 0 ||
+      (
+        state.collaborators.some(
+          (collaborator) => collaborator.assignment === "equipment",
+        ) && getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
+      ),
+    [
+      internalInstructorCourses.length,
+      state.acquisitionEvents,
+      state.collaborators,
+      state.equipment,
+      teachingEntries.length,
+    ],
+  );
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
   const panelProps = useMemo(() => ({
