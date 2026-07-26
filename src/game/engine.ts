@@ -48,7 +48,7 @@ import {
   processTeacherTraining,
   refreshTrainingDurations,
 } from "./teacherTrainingFlow";
-import { processScheduledTrialStarts, resolveTrial } from "./trialFlow";
+import { processScheduledTrialStarts, resolveTrialBatch } from "./trialFlow";
 import { compactTournamentHistory } from "./tournamentFlow";
 import {
   getPendingEmailOutcomes,
@@ -170,11 +170,9 @@ function tickStep(
   }
 
   nextState = processScheduledTrialStarts(nextState, now);
-  for (const trial of getScheduledTrials(nextState.scheduledTrials)) {
-    if (trial.resolvesAt <= now) {
-      nextState = resolveTrial(nextState, trial, now, gainMultiplier);
-    }
-  }
+  const trialsToResolve = getScheduledTrials(nextState.scheduledTrials)
+    .filter((trial) => trial.resolvesAt <= now);
+  nextState = resolveTrialBatch(nextState, trialsToResolve, now, gainMultiplier);
   nextState = processWaitingTrainings(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
