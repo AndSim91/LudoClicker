@@ -89,16 +89,8 @@ export function freezeGameState(
         ]),
       ),
     },
-    lightInflation: {
-      ...state.lightInflation,
-      event: state.lightInflation.event
-        ? {
-            ...state.lightInflation.event,
-            occurredAt: state.lightInflation.event.occurredAt + elapsedMs,
-            visibleUntil: state.lightInflation.event.visibleUntil + elapsedMs,
-          }
-        : undefined,
-    },
+    // The event deadline is real time, so closing the game never preserves its remaining duration.
+    lightInflation: state.lightInflation,
     narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
     automation: { ...state.automation, lastProcessedAt: now },
   };

@@ -606,7 +606,9 @@ export interface HistoryArchive {
 
 export interface LightInflationEvent {
   cause: string;
+  /** Wall-clock timestamp: it must not be rebased with the accelerated game timeline. */
   occurredAt: number;
+  /** Absolute wall-clock deadline for the fixed 20-second notification window. */
   visibleUntil: number;
 }
 
@@ -704,7 +706,14 @@ export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "SEND_EMAIL"; now: number }
   | { type: "SET_AUTOMATIC_EMAIL_SENDING"; enabled: boolean; now: number }
-  | { type: "TICK"; now: number; gainMultiplier?: number; stepBudget?: number }
+  | {
+    type: "TICK";
+    now: number;
+    /** Real timestamp of this tick; legacy callers fall back to `now`. */
+    wallNow?: number;
+    gainMultiplier?: number;
+    stepBudget?: number;
+  }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }
   | { type: "ADMIN_ADD_CONTACTS"; amount: number }

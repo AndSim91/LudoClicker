@@ -5,7 +5,7 @@ import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_EVENT_TITLE } from "../../game/
 import { selectDayNotifications } from "./dayNotifications";
 
 describe("selectDayNotifications", () => {
-  it("shows light inflation only from its occurrence until its own 20-second expiry", () => {
+  it("uses wall time only for light inflation and preserves game time for other notifications", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -19,18 +19,19 @@ describe("selectDayNotifications", () => {
       },
     };
 
-    expect(selectDayNotifications(state, 49_999)).not.toContainEqual(
+    expect(selectDayNotifications(state, 90_000, 49_999)).not.toContainEqual(
       expect.objectContaining({ id: "light-inflation" }),
     );
-    expect(selectDayNotifications(state, 50_000)).toContainEqual(
+    expect(selectDayNotifications(state, 90_000, 50_000)).toContainEqual(
       expect.objectContaining({
         id: "light-inflation",
         title: LIGHT_INFLATION_EVENT_TITLE,
+        clock: "wall",
         expiresAt: 70_000,
         expiryDurationMs: 20_000,
       }),
     );
-    expect(selectDayNotifications(state, 70_000)).not.toContainEqual(
+    expect(selectDayNotifications(state, 50_000, 70_000)).not.toContainEqual(
       expect.objectContaining({ id: "light-inflation" }),
     );
   });

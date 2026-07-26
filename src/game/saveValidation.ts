@@ -138,6 +138,7 @@ function hasValidLightInflation(state: Partial<GameState>): boolean {
       ) &&
         Number.isFinite(inflation.event.occurredAt) &&
         Number.isFinite(inflation.event.visibleUntil) &&
+        // These fields are absolute wall-clock timestamps; only their fixed duration is validated.
         inflation.event.visibleUntil - inflation.event.occurredAt ===
           LIGHT_INFLATION_EVENT_VISIBILITY_MS))
   );

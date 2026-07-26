@@ -45,6 +45,7 @@ export interface GameActionHandlerDependencies {
     now: number,
     gainMultiplier: number,
     stepBudget?: number,
+    wallNow?: number,
   ) => GameState;
   startFormTraining: (
     state: GameState,
@@ -77,6 +78,7 @@ export function createGameActionHandlers(
       action.now,
       action.gainMultiplier ?? 1,
       action.stepBudget,
+      action.wallNow ?? action.now,
     ),
     RESUME_FROM_PAUSE: (state, action) => freezeGameState(
       state,

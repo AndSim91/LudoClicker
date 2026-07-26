@@ -7,7 +7,7 @@ import {
 import { GAME_CONFIG } from "../../game/config";
 import { useState } from "react";
 import { useGameState } from "../../game/GameStateContext";
-import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
+import { useGameTime, useGameTimeSource, useWallTime } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon, type IconName } from "../../components/common/Icon";
@@ -173,18 +173,26 @@ export function DayPanel({
     id: string;
     now: number;
   } | null>(null);
-  const referenceNow = timeSource?.getNow() ?? fallbackNow;
-  const referenceNotifications = selectDayNotifications(state, referenceNow);
-  const clockNow = useGameTime(
-    referenceNotifications.length > 0,
+  const referenceGameNow = timeSource?.getNow() ?? fallbackNow;
+  const referenceWallNow = fallbackNow;
+  const referenceNotifications = selectDayNotifications(state, referenceGameNow, referenceWallNow);
+  const hasGameClockNotification = referenceNotifications.some((notification) => notification.clock === "game");
+  // Subscribe once when an event arrives after this component mounted; the shared clock then
+  // immediately confirms whether its absolute wall-clock deadline is still active.
+  const hasWallClockNotification = state.lightInflation.event !== undefined ||
+    referenceNotifications.some((notification) => notification.clock === "wall");
+  const gameNow = useGameTime(
+    hasGameClockNotification,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
-  const now = timeSource ? clockNow : clockNow || referenceNow;
-  const liveNotifications = now === referenceNow
+  const wallNow = useWallTime(hasWallClockNotification, GAME_CONFIG.progressUpdateIntervalMs);
+  const now = timeSource ? gameNow : gameNow || referenceGameNow;
+  const currentWallNow = wallNow || referenceWallNow;
+  const liveNotifications = now === referenceGameNow && currentWallNow === referenceWallNow
     ? referenceNotifications
-    : selectDayNotifications(state, now);
+    : selectDayNotifications(state, now, currentWallNow);
   const pausedNotificationSnapshot = pausedNotification
-    ? selectDayNotifications(state, pausedNotification.now).find(
+    ? selectDayNotifications(state, pausedNotification.now, currentWallNow).find(
         (notification) => notification.id === pausedNotification.id,
       )
     : undefined;
@@ -223,10 +231,12 @@ export function DayPanel({
           <DayNotificationEntry
             key={notification.id}
             notification={notification}
-            now={pausedNotification?.id === notification.id ? pausedNotification.now : now}
+            now={pausedNotification?.id === notification.id
+              ? pausedNotification.now
+              : notification.clock === "wall" ? currentWallNow : now}
             isTutorialTrial={notification.id === `trial-${tutorialTrialNotificationId}`}
-            onPause={() => setPausedNotification({ id: notification.id, now })}
-            onResume={() => setPausedNotification(null)}
+            onPause={() => notification.clock === "game" && setPausedNotification({ id: notification.id, now })}
+            onResume={() => notification.clock === "game" && setPausedNotification(null)}
           />
         ))
       )}

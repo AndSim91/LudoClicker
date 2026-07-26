@@ -52,7 +52,7 @@ export function addLightInflationChance(
   };
 }
 
-export function processJanuaryLightInflation(state: GameState, now: number): GameState {
+export function processJanuaryLightInflation(state: GameState, wallNow: number): GameState {
   const januaryMonth = state.school.currentMonth;
   const inflation = state.lightInflation;
   if (januaryMonth % 12 !== 1 || inflation.lastCheckedJanuaryMonth === januaryMonth) return state;
@@ -81,8 +81,8 @@ export function processJanuaryLightInflation(state: GameState, now: number): Gam
       priceMultiplier: checked.priceMultiplier * PRICE_INCREASE,
       event: {
         cause,
-        occurredAt: now,
-        visibleUntil: now + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+        occurredAt: wallNow,
+        visibleUntil: wallNow + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
       },
     },
   };

@@ -272,7 +272,12 @@ function processMemberDepartures(
   );
 }
 
-export function collectFees(state: GameState, now: number, gainMultiplier: number): GameState {
+export function collectFees(
+  state: GameState,
+  now: number,
+  gainMultiplier: number,
+  wallNow = now,
+): GameState {
   if (now < state.school.nextFeeAt) return state;
   const periods = Math.floor((now - state.school.nextFeeAt) / GAME_CONFIG.gameMonthMs) + 1;
   let nextState = state;
@@ -300,7 +305,8 @@ export function collectFees(state: GameState, now: number, gainMultiplier: numbe
         eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),
       },
     };
-    nextState = processJanuaryLightInflation(nextState, nextState.school.nextFeeAt - GAME_CONFIG.gameMonthMs);
+    // A January crossed during catch-up still opens its notification now, not at its past game boundary.
+    nextState = processJanuaryLightInflation(nextState, wallNow);
     if (isSchoolYearDepartureMonth(currentMonth)) {
       nextState = processMemberDepartures(nextState, now + period);
     }

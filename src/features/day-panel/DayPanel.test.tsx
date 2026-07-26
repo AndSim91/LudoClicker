@@ -8,6 +8,7 @@ import {
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DayPanel } from "./DayPanel";
+import { GameTimeProvider } from "../../game/GameTimeProvider";
 
 function stateWithTrial(
   contactStatus: ContactStatus,
@@ -291,6 +292,51 @@ describe("DayPanel", () => {
 
     expect(progress).toHaveAttribute("aria-valuenow", "50");
     expect(progress).toHaveAttribute("aria-valuetext", "10 secondi rimanenti");
+  });
+
+  it("keeps light inflation on the real clock at 100x and while the game is paused", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(50_000);
+    const frozenGameNow = 5_000_000;
+    const renderPanel = (isPaused: boolean) => (
+      <GameTimeProvider
+        getNow={() => frozenGameNow + (Date.now() - 50_000) * 100}
+        isPaused={isPaused}
+        speed={100}
+      >
+        <DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />
+      </GameTimeProvider>
+    );
+    const { rerender } = render(renderPanel(false));
+
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
+      "aria-valuetext",
+      "10 secondi rimanenti",
+    );
+
+    rerender(renderPanel(true));
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
+  });
+
+  it("removes light inflation at its real deadline even while hovered", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(50_000);
+    render(<DayPanel state={stateWithLightInflationEvent(50_000, 70_000)} />);
+
+    const row = screen.getByText(LIGHT_INFLATION_EVENT_TITLE).closest(".appointment-entry");
+    expect(row).not.toBeNull();
+    fireEvent.mouseEnter(row!);
+    act(() => {
+      vi.advanceTimersByTime(20_000);
+    });
+
+    expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
   });
 
   it("keeps light inflation first while another notification is frozen on hover", () => {

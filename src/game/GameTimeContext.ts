@@ -55,12 +55,17 @@ export function useGameTimeSource(): GameTimeSource | null {
 
 export function useGameTime(active: boolean, intervalMs: number): number {
   const source = useGameTimeSource();
+  const wallNow = useWallTime(active && !source?.isPaused, intervalMs);
+  return source ? source.getNow() : wallNow;
+}
+
+/** A shared real-time clock for UI that must keep moving while the game is paused. */
+export function useWallTime(active: boolean, intervalMs: number): number {
   const store = getClockStore(intervalMs);
-  const subscribed = active && !source?.isPaused;
   const wallNow = useSyncExternalStore(
-    subscribed ? store.subscribe : subscribeToStaticClock,
-    subscribed ? store.getSnapshot : getStaticSnapshot,
+    active ? store.subscribe : subscribeToStaticClock,
+    active ? store.getSnapshot : getStaticSnapshot,
     getStaticSnapshot,
   );
-  return source ? source.getNow() : wallNow;
+  return wallNow;
 }

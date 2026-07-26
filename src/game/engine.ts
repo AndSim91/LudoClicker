@@ -120,7 +120,12 @@ function advanceAutomation(
   return processAutomation(state, now, gainMultiplier, automationDependencies);
 }
 
-function tickStep(state: GameState, now: number, gainMultiplier: number): GameState {
+function tickStep(
+  state: GameState,
+  now: number,
+  gainMultiplier: number,
+  wallNow: number,
+): GameState {
   // La pausa aggiorna lastProcessedAt: questo intervallo rappresenta soltanto
   // il tempo di gioco attivo trascorso con l'assegnazione corrente.
   const masteryElapsedMs = Math.max(0, now - state.automation.lastProcessedAt);
@@ -171,7 +176,7 @@ function tickStep(state: GameState, now: number, gainMultiplier: number): GameSt
     }
   }
   nextState = processWaitingTrainings(nextState, now);
-  nextState = collectFees(nextState, now, gainMultiplier);
+  nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
   nextState = processPriorityInstructorQualifications(nextState, now);
   nextState = processAutomaticTeaching(
@@ -198,8 +203,9 @@ function completeTickStep(
   state: GameState,
   now: number,
   gainMultiplier: number,
+  wallNow: number,
 ): GameState {
-  const resolved = tickStep(state, now, gainMultiplier);
+  const resolved = tickStep(state, now, gainMultiplier, wallNow);
   const reconciled = reconcileCollaboratorManagement(
     recruitEnrolledLegendaryCollaborators(resolved, now),
   );
@@ -220,6 +226,7 @@ function tick(
   now: number,
   gainMultiplier: number,
   stepBudget?: number,
+  wallNow = now,
 ): GameState {
   let nextState = state;
   let stalledAt: number | undefined;
@@ -246,7 +253,7 @@ function tick(
     }
 
     const previousState = nextState;
-    nextState = completeTickStep(previousState, boundary, gainMultiplier);
+    nextState = completeTickStep(previousState, boundary, gainMultiplier, wallNow);
     if (boundary >= now) break;
     stalledAt = boundary === cursor && nextState === previousState
       ? cursor

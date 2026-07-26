@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { selectDayNotifications } from "../features/day-panel/dayNotifications";
 import { GAME_CONFIG } from "./config";
 import { buyOfficialSword } from "./equipment";
 import { createInitialState, gameReducer } from "./engine";
@@ -11,8 +12,13 @@ import {
 import { migrate } from "./saveMigrations";
 import { isValidGameState } from "./saveValidation";
 import { freezeGameState } from "./offline";
+import { loadGame, saveGame } from "./save";
 
 describe("Inflazione di Luce", () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it("accumula 10 punti per spada, anche negli acquisti multipli, e rispetta il cap", () => {
     const initial = createInitialState(1_000);
     const funded = { ...initial, school: { ...initial.school, euros: 100_000 } };
@@ -109,7 +115,7 @@ describe("Inflazione di Luce", () => {
     expect(processJanuaryLightInflation(first, 6_000)).toBe(first);
   });
 
-  it("attraversa gennaio una sola volta durante un catch-up mensile", () => {
+  it("avvia la finestra reale del gennaio recuperato al wall clock del TICK", () => {
     const initial = createInitialState(1_000);
     const december = {
       ...initial,
@@ -118,10 +124,19 @@ describe("Inflazione di Luce", () => {
       lightInflation: { ...initial.lightInflation, chancePercent: 100 },
     };
 
-    const caughtUp = gameReducer(december, { type: "TICK", now: 122_000 });
+    const caughtUp = gameReducer(december, {
+      type: "TICK",
+      now: 122_000,
+      wallNow: 5_000,
+      gainMultiplier: 100,
+    });
 
     expect(caughtUp.lightInflation.lastCheckedJanuaryMonth).toBe(13);
     expect(caughtUp.lightInflation.priceMultiplier).toBe(1.1);
+    expect(caughtUp.lightInflation.event).toMatchObject({
+      occurredAt: 5_000,
+      visibleUntil: 25_000,
+    });
   });
 
   it("sceglie causa e avanzamento RNG in modo deterministico", () => {
@@ -154,7 +169,7 @@ describe("Inflazione di Luce", () => {
     expect(isValidGameState(migrated)).toBe(true);
   });
 
-  it("mantiene la finestra UI di 20 secondi durante pause e rebase del tempo", () => {
+  it("mantiene la deadline reale attraverso pausa e rebase", () => {
     const initial = createInitialState(1_000);
     const withEvent = {
       ...initial,
@@ -173,9 +188,37 @@ describe("Inflazione di Luce", () => {
 
     expect(rebased.lightInflation.event).toEqual({
       cause: LIGHT_INFLATION_CAUSES[0],
-      occurredAt: 10_000,
-      visibleUntil: 30_000,
+      occurredAt: 2_000,
+      visibleUntil: 22_000,
     });
     expect(isValidGameState(rebased)).toBe(true);
+  });
+
+  it("persists and reloads the absolute deadline without reviving an expired event", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      lightInflation: {
+        ...initial.lightInflation,
+        event: {
+          cause: LIGHT_INFLATION_CAUSES[0],
+          occurredAt: 2_000,
+          visibleUntil: 22_000,
+        },
+      },
+    };
+    expect(saveGame(state, 6_000)).toBe(true);
+
+    const beforeDeadline = loadGame(10_000);
+    expect(beforeDeadline.lightInflation.event).toEqual(state.lightInflation.event);
+    expect(selectDayNotifications(beforeDeadline, beforeDeadline.lastSavedAt, 10_000)).toContainEqual(
+      expect.objectContaining({ id: "light-inflation" }),
+    );
+
+    const afterDeadline = loadGame(25_000);
+    expect(afterDeadline.lightInflation.event).toEqual(state.lightInflation.event);
+    expect(selectDayNotifications(afterDeadline, afterDeadline.lastSavedAt, 25_000)).not.toContainEqual(
+      expect.objectContaining({ id: "light-inflation" }),
+    );
   });
 });

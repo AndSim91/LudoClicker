@@ -38,6 +38,8 @@ export interface DayNotification {
   phase: DayNotificationPhase;
   title: string;
   detail: string;
+  /** Game notifications may freeze on hover; wall-clock notifications cannot. */
+  clock: "game" | "wall";
   timestamp: number;
   startsAt?: number;
   expiresAt?: number;
@@ -113,26 +115,31 @@ function getTournamentSummary(result: TournamentResult): {
   };
 }
 
-export function selectDayNotifications(state: GameState, now: number): DayNotification[] {
+export function selectDayNotifications(
+  state: GameState,
+  gameNow: number,
+  wallNow = gameNow,
+): DayNotification[] {
   const contactsById = getContactsById(state.contacts);
   const notifications: DayNotification[] = [];
   const lightInflationEvent = state.lightInflation.event;
   const lightInflationNotification = lightInflationEvent
-    && lightInflationEvent.occurredAt <= now
-    && now < lightInflationEvent.visibleUntil
+    && lightInflationEvent.occurredAt <= wallNow
+    && wallNow < lightInflationEvent.visibleUntil
     ? {
         id: "light-inflation",
         kind: "important-event" as const,
         phase: "neutral" as const,
         title: LIGHT_INFLATION_EVENT_TITLE,
         detail: getLightInflationEventDescription(lightInflationEvent.cause),
+        clock: "wall" as const,
         timestamp: lightInflationEvent.occurredAt,
         expiresAt: lightInflationEvent.visibleUntil,
         expiryDurationMs: lightInflationEvent.visibleUntil - lightInflationEvent.occurredAt,
       }
     : undefined;
 
-  for (const trial of selectDayTrials(state, now)) {
+  for (const trial of selectDayTrials(state, gameNow)) {
     const contact = contactsById.get(trial.contactId);
     const completed = trial.status === "completed";
     const cancelled = trial.status === "cancelled";
@@ -140,12 +147,12 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
     const expiresAt = completed || cancelled
       ? terminalTimestamp + DAY_NOTIFICATION_VISIBILITY_MS
       : undefined;
-    if (expiresAt !== undefined && now >= expiresAt) continue;
+    if (expiresAt !== undefined && gameNow >= expiresAt) continue;
     const phase: DayNotificationPhase = cancelled
       ? "lost"
       : completed
       ? contact?.status === "enrolled" ? "enrolled" : "lost"
-      : now < trial.startsAt ? "scheduled" : "in-progress";
+      : gameNow < trial.startsAt ? "scheduled" : "in-progress";
     notifications.push({
       id: `trial-${trial.id}`,
       kind: "trial",
@@ -154,6 +161,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
       detail: cancelled
         ? "Annullata: nessuna spada disponibile"
         : "Ordine delle Onde",
+      clock: "game",
       timestamp: completed || cancelled ? terminalTimestamp : trial.startsAt,
       startsAt: trial.startsAt,
       expiresAt,
@@ -168,15 +176,16 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
   }
 
   for (const contact of getDirectEnrollmentContacts(state.contacts, state.scheduledTrials)) {
-    if (contact.acquiredAt > now) continue;
+    if (contact.acquiredAt > gameNow) continue;
     const expiresAt = contact.acquiredAt + DAY_NOTIFICATION_VISIBILITY_MS;
-    if (now >= expiresAt) break;
+    if (gameNow >= expiresAt) break;
     notifications.push({
       id: `direct-enrollment-${contact.id}`,
       kind: "direct-enrollment",
       phase: "enrolled",
       title: "Iscrizione diretta",
       detail: "Nuovo atleta entrato senza lezione di prova",
+      clock: "game",
       timestamp: contact.acquiredAt,
       expiresAt,
       person: {
@@ -189,7 +198,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
 
   for (const result of state.tournaments.results) {
     const expiresAt = result.completedAt + DAY_NOTIFICATION_VISIBILITY_MS;
-    if (result.completedAt > now || now >= expiresAt) continue;
+    if (result.completedAt > gameNow || gameNow >= expiresAt) continue;
     const summary = getTournamentSummary(result);
     notifications.push({
       id: `tournament-${result.id}`,
@@ -197,6 +206,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
       phase: summary.phase,
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,
       detail: summary.detail,
+      clock: "game",
       timestamp: result.completedAt,
       expiresAt,
     });
@@ -204,7 +214,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
 
   for (const event of state.narrative.history) {
     const expiresAt = event.occurredAt + DAY_NOTIFICATION_VISIBILITY_MS;
-    if (event.occurredAt > now || now >= expiresAt) continue;
+    if (event.occurredAt > gameNow || gameNow >= expiresAt) continue;
     const definition = narrativeDefinitionsById.get(event.definitionId);
     notifications.push({
       id: `important-event-${event.id}`,
@@ -212,6 +222,7 @@ export function selectDayNotifications(state: GameState, now: number): DayNotifi
       phase: definition?.tone === "positive" ? "positive" : "neutral",
       title: event.title,
       detail: event.summary,
+      clock: "game",
       timestamp: event.occurredAt,
       expiresAt,
       person: event.person

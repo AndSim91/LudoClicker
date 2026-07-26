@@ -117,9 +117,11 @@ export function useGameEngine() {
         scheduledWallAt = Infinity;
         if (cancelled || pausedAtRef.current !== null) return;
         const stateBeforeTick = stateRef.current;
+        const wallNow = Date.now();
         dispatchAction({
           type: "TICK",
-          now: getGameNow(),
+          now: getGameNowAt(wallNow),
+          wallNow,
           stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
         });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
@@ -143,7 +145,7 @@ export function useGameEngine() {
       if (tickId !== undefined) window.clearTimeout(tickId);
       if (followUpId !== undefined) window.clearTimeout(followUpId);
     };
-  }, [dispatchAction, gameSpeed, getGameNow, hasProfile, isPaused]);
+  }, [dispatchAction, gameSpeed, getGameNow, getGameNowAt, hasProfile, isPaused]);
 
   useEffect(() => {
     const saveScheduler = createSaveScheduler(stateRef.current, persistGame);
@@ -194,7 +196,7 @@ export function useGameEngine() {
 
       if (remainsPaused && pausedAt === null) {
         const gameNow = getGameNowAt(wallNow);
-        dispatchAction({ type: "TICK", now: gameNow });
+        dispatchAction({ type: "TICK", now: gameNow, wallNow });
         pausedAtRef.current = gameNow;
         setIsPaused(true);
         return;
