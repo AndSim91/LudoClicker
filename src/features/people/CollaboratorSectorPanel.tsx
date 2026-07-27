@@ -23,6 +23,11 @@ import type {
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
+import {
+  sortSectorCollaborators,
+  type SectorCollaboratorSort,
+  type SectorCollaboratorSortKey,
+} from "./collaboratorSorting";
 import { getInstructorTeachingEntries } from "./instructorGroupPresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
@@ -35,6 +40,35 @@ function getInitials(displayName: string): string {
     .map((part) => part[0])
     .slice(0, 2)
     .join("");
+}
+
+function SectorSortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+}: {
+  label: string;
+  sortKey: SectorCollaboratorSortKey;
+  sort: SectorCollaboratorSort | null;
+  onSort: (key: SectorCollaboratorSortKey) => void;
+}) {
+  const active = sort?.key === sortKey;
+  return (
+    <span role="columnheader" aria-sort={active ? sort.direction : "none"}>
+      <button
+        type="button"
+        className={`sector-roster-sort-button${active ? " is-active" : ""}`}
+        aria-label={`Ordina collaboratori per ${label}`}
+        onClick={() => onSort(sortKey)}
+      >
+        <span>{label}</span>
+        <span aria-hidden="true">
+          {active ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </span>
+  );
 }
 
 function SectorCollaboratorRow({
@@ -212,6 +246,7 @@ export function CollaboratorSectorPanel({
   );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
+  const [sort, setSort] = useState<SectorCollaboratorSort | null>(null);
   const assigned = useMemo(
     () => state.collaborators.filter((collaborator) => collaborator.assignment === role),
     [role, state.collaborators],
@@ -223,6 +258,17 @@ export function CollaboratorSectorPanel({
   const hasTimedWork = getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
     state.acquisitionEvents.some((event) => event.status === "running");
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
+  const sortContext = useMemo(() => ({
+    state,
+    contactsById,
+    activeEmail: selectActiveEmail(state),
+    now,
+    role,
+  }), [contactsById, now, role, state]);
+  const sortedAssigned = useMemo(
+    () => sortSectorCollaborators(assigned, sort, sortContext),
+    [assigned, sort, sortContext],
+  );
   const selectedCollaborator = selectedCollaboratorId
     ? state.collaborators.find((collaborator) => collaborator.id === selectedCollaboratorId)
     : undefined;
@@ -247,6 +293,31 @@ export function CollaboratorSectorPanel({
   const roleLabel = role === "instructor"
     ? "Istruttori"
     : getCollaboratorAssignmentLabel(role, state.unlocks.social);
+
+  const handleSort = (key: SectorCollaboratorSortKey) => {
+    setSort((current) => current?.key === key
+      ? {
+          key,
+          direction: current.direction === "ascending" ? "descending" : "ascending",
+        }
+      : { key, direction: "ascending" });
+  };
+
+  const selectSort = (key: SectorCollaboratorSortKey) => {
+    setSort((current) => ({
+      key,
+      direction: current?.direction ?? "ascending",
+    }));
+  };
+
+  const reverseSort = () => {
+    setSort((current) => current
+      ? {
+          ...current,
+          direction: current.direction === "ascending" ? "descending" : "ascending",
+        }
+      : current);
+  };
 
   return (
     <>
@@ -279,7 +350,7 @@ export function CollaboratorSectorPanel({
             role={role}
           />
           <SectorStatisticsSummary
-            state={state}
+            state={stateOverride}
             role={role}
             collaborators={assigned}
           />
@@ -294,12 +365,57 @@ export function CollaboratorSectorPanel({
             </div>
           ) : (
             <div className="sector-roster">
-              <div className="sector-roster-head" aria-hidden="true">
-                <span>Collaboratore</span><span>Maestria</span><span>Attività</span><span>Arena / Stile</span><span>Forme</span>
-                {role === "instructor" ? <span>Formazione</span> : null}
-                <span />
+              <div className="sector-roster-sort-mobile" aria-label="Ordina collaboratori del settore">
+                <label>
+                  <span>Ordina per</span>
+                  <select
+                    aria-label="Campo di ordinamento collaboratori del settore"
+                    value={sort?.key ?? ""}
+                    onChange={(event) => selectSort(event.target.value as SectorCollaboratorSortKey)}
+                  >
+                    <option value="" disabled>Seleziona</option>
+                    <option value="name">Collaboratore</option>
+                    <option value="mastery">Maestria</option>
+                    <option value="activity">Attività</option>
+                    <option value="arena">Arena</option>
+                    <option value="style">Stile</option>
+                    <option value="forms">Forme</option>
+                    {role === "instructor" ? <option value="training">Formazione</option> : null}
+                  </select>
+                </label>
+                <button type="button" disabled={!sort} onClick={reverseSort}>
+                  {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
+                </button>
               </div>
-              {assigned.map((collaborator) => (
+              <div className="sector-roster-head" role="row">
+                <SectorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />
+                <SectorSortableHeader label="Maestria" sortKey="mastery" sort={sort} onSort={handleSort} />
+                <SectorSortableHeader label="Attività" sortKey="activity" sort={sort} onSort={handleSort} />
+                <span
+                  className="sector-roster-stat-sort"
+                  role="columnheader"
+                  aria-sort={sort?.key === "arena" || sort?.key === "style" ? sort.direction : "none"}
+                >
+                  <button
+                    type="button"
+                    className={sort?.key === "arena" ? "is-active" : ""}
+                    aria-label="Ordina collaboratori per Arena"
+                    onClick={() => handleSort("arena")}
+                  >Arena {sort?.key === "arena" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+                  <button
+                    type="button"
+                    className={sort?.key === "style" ? "is-active" : ""}
+                    aria-label="Ordina collaboratori per Stile"
+                    onClick={() => handleSort("style")}
+                  >Stile {sort?.key === "style" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+                </span>
+                <SectorSortableHeader label="Forme" sortKey="forms" sort={sort} onSort={handleSort} />
+                {role === "instructor" ? (
+                  <SectorSortableHeader label="Formazione" sortKey="training" sort={sort} onSort={handleSort} />
+                ) : null}
+                <span aria-hidden="true" />
+              </div>
+              {sortedAssigned.map((collaborator) => (
                 <SectorCollaboratorRow
                   key={collaborator.id}
                   state={stateOverride}

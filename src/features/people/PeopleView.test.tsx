@@ -208,6 +208,121 @@ describe("PeopleView", () => {
     expect(within(eventsCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeDisabled();
   });
 
+  it("sorts every collaborator column in sector management and the teaching center", () => {
+    const initial = createInitialState(1_000);
+    const collaborators: Collaborator[] = [
+      {
+        id: "sector-alpha",
+        contactId: initial.contacts[0].id,
+        displayName: "Alpha Redazione",
+        joinedAt: 1_000,
+        forms: ["form-1", "course-y"],
+        instructorForms: [],
+        assignment: "writing",
+        mastery: { writing: 100, events: 0, equipment: 0, instructor: 0 },
+        rarity: "ultra-rare",
+      },
+      {
+        id: "sector-zeta",
+        contactId: initial.contacts[0].id,
+        displayName: "Zeta Redazione",
+        joinedAt: 1_001,
+        forms: ["form-1"],
+        instructorForms: [],
+        assignment: "writing",
+        mastery: { writing: 100, events: 0, equipment: 0, instructor: 0 },
+        rarity: "legendary",
+      },
+      {
+        id: "instructor-delta",
+        contactId: initial.contacts[0].id,
+        displayName: "Delta Istruttore",
+        joinedAt: 1_002,
+        forms: ["form-1", "course-y"],
+        instructorForms: ["form-1"],
+        assignment: "instructor",
+        mastery: { writing: 0, events: 0, equipment: 0, instructor: 200 },
+        rarity: "ultra-rare",
+      },
+      {
+        id: "instructor-beta",
+        contactId: initial.contacts[0].id,
+        displayName: "Beta Istruttore",
+        joinedAt: 1_003,
+        forms: ["form-1"],
+        instructorForms: ["form-1"],
+        assignment: "instructor",
+        mastery: { writing: 0, events: 0, equipment: 0, instructor: 20 },
+        rarity: "ultra-rare",
+      },
+    ];
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators,
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const writingCard = screen.getByRole("heading", { name: "Redazione" }).closest("article");
+    fireEvent.click(within(writingCard as HTMLElement).getByRole("button", { name: "Gestisci settore" }));
+    const writingDialog = screen.getByRole("dialog", { name: "Redazione" });
+    expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
+    const writingSortLabels = ["Collaboratore", "Maestria", "Attività", "Arena", "Stile", "Forme"];
+    writingSortLabels.forEach((label) => {
+      const button = within(writingDialog).getByRole("button", {
+        name: `Ordina collaboratori per ${label}`,
+      });
+      fireEvent.click(button);
+      expect(button.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "ascending");
+    });
+    const masterySort = within(writingDialog).getByRole("button", {
+      name: "Ordina collaboratori per Maestria",
+    });
+    fireEvent.click(masterySort);
+    expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
+    const nameSort = within(writingDialog).getByRole("button", {
+      name: "Ordina collaboratori per Collaboratore",
+    });
+    fireEvent.click(nameSort);
+    expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Alpha Redazione", "Apri dettagli di Zeta Redazione"]);
+    fireEvent.click(nameSort);
+    expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
+
+    fireEvent.click(within(writingDialog).getByRole("button", { name: "Chiudi pannello Redazione" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
+    const trainingSort = within(instructorDialog).getByRole("button", {
+      name: "Ordina collaboratori per Formazione",
+    });
+    fireEvent.click(trainingSort);
+    expect(trainingSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "ascending");
+
+    const mobileSort = within(instructorDialog).getByRole("combobox", {
+      name: "Campo di ordinamento collaboratori del settore",
+    });
+    fireEvent.change(mobileSort, { target: { value: "mastery" } });
+    expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Beta Istruttore", "Apri dettagli di Delta Istruttore"]);
+  });
+
   it("shows continuous athletic preparation and the single instructor course action", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 9 }, (_, index) => ({

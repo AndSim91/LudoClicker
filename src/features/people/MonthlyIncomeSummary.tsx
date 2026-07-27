@@ -1,10 +1,15 @@
 import { useId } from "react";
 import { getMonthlyMemberFees } from "../../game/membershipEconomy";
 import { getMonthlySocialIncome } from "../../game/social";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 
-export function MonthlyIncomeSummary({ state }: { state: GameState }) {
+export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
+  const state = useGameStateSlices(
+    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    stateOverride,
+  );
   const tooltipId = useId();
   const memberFees = getMonthlyMemberFees(state);
   const socialIncome = getMonthlySocialIncome(state);

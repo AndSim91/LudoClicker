@@ -1073,6 +1073,37 @@
   border-radius: var(--radius-md);
 }
 
+.sector-roster-sort-mobile {
+  display: none;
+}
+
+.sector-roster-sort-button,
+.sector-roster-stat-sort button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.sector-roster-sort-button:hover,
+.sector-roster-sort-button:focus-visible,
+.sector-roster-sort-button.is-active,
+.sector-roster-stat-sort button:hover,
+.sector-roster-stat-sort button:focus-visible,
+.sector-roster-stat-sort button.is-active {
+  color: var(--blue-700);
+}
+
+.sector-roster-stat-sort {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .sector-roster-head,
 .sector-roster-row {
   display: grid;
@@ -1283,6 +1314,47 @@
   }
 
   .sector-roster-head { display: none; }
+
+  .sector-roster-sort-mobile {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sector-roster-sort-mobile label {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    color: var(--ink-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+  }
+
+  .sector-roster-sort-mobile select,
+  .sector-roster-sort-mobile button {
+    min-height: 36px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 11px;
+    text-transform: none;
+  }
+
+  .sector-roster-sort-mobile select {
+    width: 100%;
+  }
+
+  .sector-roster-sort-mobile button {
+    padding: 0 10px;
+    color: var(--blue-700);
+  }
 
   .sector-roster-row {
     grid-template-columns: minmax(180px, 1.3fr) minmax(120px, .8fr) minmax(170px, 1fr) 100px minmax(90px, auto) 74px;

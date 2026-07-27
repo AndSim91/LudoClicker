@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../game/engine";
+import { CrashReporter } from "../game/crashReporting";
 import { OverviewView } from "./OverviewView";
 
 afterEach(() => cleanup());
@@ -113,6 +114,31 @@ describe("OverviewView settings", () => {
     expect(screen.getByText(/Le modifiche restano in memoria/)).toBeInTheDocument();
     expect(screen.getByText(/spazio di archiviazione del browser/)).toBeInTheDocument();
     expect(screen.getByText("Dettagli tecnici per il bugfix")).toBeInTheDocument();
+  });
+
+  it("shows and clears the latest local crash report", () => {
+    const reporter = new CrashReporter({
+      storage: localStorage,
+      now: () => 1_000,
+      createId: (() => {
+        const ids = ["session-1", "report-1"];
+        return () => ids.shift() ?? "generated-id";
+      })(),
+      heartbeatIntervalMs: 0,
+    });
+    reporter.start();
+    reporter.updateView("events");
+    reporter.recordError("javascript-error", new Error("runtime boom"));
+    reporter.stop();
+
+    render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
+
+    expect(screen.getByRole("heading", { name: "Crash registrato" })).toBeInTheDocument();
+    expect(screen.getByText(/Errore JavaScript non gestito/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Scarica report" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Elimina report" }));
+    expect(screen.getByRole("heading", { name: "Nessun crash registrato" }))
+      .toBeInTheDocument();
   });
 
   it("does not render prestige or school-foundation controls", () => {

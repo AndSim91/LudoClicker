@@ -26,8 +26,12 @@ import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
-import { GameStateProvider } from "../game/GameStateContext";
+import {
+  GameStateStoreProvider,
+  useGameStateStore,
+} from "../game/GameStateContext";
 import { GameTimeProvider } from "../game/GameTimeProvider";
+import { crashReporter } from "../game/crashReporting";
 import { getAvailableSwords } from "../game/equipment";
 import { getMessageThreadKey } from "../game/messages";
 import { useGameEngine } from "../game/useGameEngine";
@@ -95,6 +99,7 @@ export function App() {
     saveStatus,
     saveNow,
   } = useGameEngine();
+  const gameStateStore = useGameStateStore(state);
   const [view, setView] = useState<AppView>("mail");
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -123,6 +128,10 @@ export function App() {
       : isGameAreaUnlocked(view, state)
         ? view
         : "mail";
+
+  useEffect(() => {
+    crashReporter.updateView(activeView);
+  }, [activeView]);
   const navigateForTutorial = useCallback((targetView: string) => {
     if (targetView !== "mail") return;
     setView("mail");
@@ -333,7 +342,7 @@ export function App() {
   }
 
   return (
-    <GameStateProvider state={state}>
+    <GameStateStoreProvider value={gameStateStore}>
     <GameTimeProvider
       getNow={getGameNow}
       getWallNow={getWallNow}
@@ -488,6 +497,6 @@ export function App() {
         />
       ) : null}
     </GameTimeProvider>
-    </GameStateProvider>
+    </GameStateStoreProvider>
   );
 }

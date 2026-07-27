@@ -372,6 +372,160 @@
   white-space: nowrap;
 }
 
+.crash-report-card {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.crash-report-card.is-detected {
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--line));
+  background: color-mix(in srgb, var(--warning) 6%, var(--surface));
+}
+
+.crash-report-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--success);
+}
+
+.crash-report-card.is-detected .crash-report-icon {
+  background: var(--warning);
+}
+
+.crash-report-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.crash-report-copy {
+  min-width: 0;
+}
+
+.crash-report-copy h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.crash-report-copy p,
+.crash-report-note {
+  margin: 3px 0 0;
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.crash-report-copy code {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font: 11px/1.4 Consolas, monospace;
+}
+
+.crash-report-copy details {
+  margin-top: 6px;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.crash-report-copy summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.crash-report-actions {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.crash-report-actions button {
+  min-height: 34px;
+  white-space: nowrap;
+}
+
+.crash-report-note {
+  margin-top: 8px;
+}
+
+.app-crash-fallback {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  color: var(--ink);
+  background: var(--surface-muted);
+}
+
+.app-crash-fallback > section {
+  width: min(100%, 620px);
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--warning) 50%, var(--line));
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.app-crash-code {
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.app-crash-fallback h1 {
+  margin: 8px 0;
+  font-size: 26px;
+}
+
+.app-crash-fallback p {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.app-crash-fallback code {
+  display: block;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+  font: 12px/1.45 Consolas, monospace;
+}
+
+.app-crash-fallback section > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.app-crash-fallback button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--blue-600);
+  font-weight: 600;
+}
+
+.app-crash-fallback button.secondary {
+  color: var(--blue-700);
+  background: var(--surface);
+}
+
 @media (max-width: 980px) {
   .settings-columns {
     grid-template-columns: minmax(0, 1fr);
@@ -417,5 +571,16 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .crash-report-card {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .crash-report-actions {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }

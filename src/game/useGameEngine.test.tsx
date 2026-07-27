@@ -10,12 +10,44 @@ import {
 } from "./lightInflation";
 import { loadGame, saveGame } from "./save";
 import { decodeStoredSave } from "./saveCodec";
-import type { GameState } from "./types";
+import type { AcquisitionEvent, Collaborator, GameState } from "./types";
 import { useGameEngine } from "./useGameEngine";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 
 function readStoredGame(): GameState {
   return decodeStoredSave(localStorage.getItem(STORAGE_KEYS.gameSave)!) as GameState;
+}
+
+function queuedEvent(id: string, resolvesAt: number): AcquisitionEvent {
+  return {
+    id,
+    definitionId: "park-sparring",
+    title: `Evento ${id}`,
+    location: "Luogo test",
+    startedAt: resolvesAt - 1_000,
+    resolvesAt,
+    cost: 0,
+    peopleMet: 0,
+    demonstrationsGiven: 0,
+    contactReward: 0,
+    membersUsed: 0,
+    equipmentUsed: 0,
+    wearAdded: 0,
+    status: "running",
+  };
+}
+
+function eventCollaborator(): Collaborator {
+  return {
+    id: "events-1",
+    contactId: "events-contact-1",
+    displayName: "Eventi Test",
+    joinedAt: 1_000,
+    forms: [],
+    instructorForms: [],
+    assignment: "events",
+    rarity: "ultra-rare",
+  };
 }
 
 describe("useGameEngine pause", () => {
@@ -37,7 +69,7 @@ describe("useGameEngine pause", () => {
     await act(async () => vi.advanceTimersByTimeAsync(250));
     act(() => result.current.togglePause());
 
-    const pausedAt = result.current.state.automation.lastProcessedAt;
+    const pausedAt = result.current.getGameNow();
     const remainingMonthMs = result.current.state.school.nextFeeAt - pausedAt;
     expect(result.current.isPaused).toBe(true);
 
@@ -71,6 +103,63 @@ describe("useGameEngine pause", () => {
       result.current.state.acquisitionEvents[0].resolvesAt -
         result.current.state.automation.lastProcessedAt,
     ).toBe(10_000);
+  });
+
+  it("settles the queued events cooperatively at 50x without starting new ones", async () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const queuedEvents = Array.from(
+      { length: 250 },
+      (_, index) => queuedEvent(`queued-${index}`, 1_000),
+    );
+    const queuedState: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 400,
+        peakActiveMembers: 400,
+        historicMembers: 400,
+        euros: 100_000,
+      },
+      equipment: {
+        ...initial.equipment,
+        totalSwords: 100,
+        availableSwords: 100,
+      },
+      collaborators: [eventCollaborator()],
+      acquisitionEvents: [...queuedEvents, queuedEvent("future", 2_000)],
+      narrative: {
+        ...initial.narrative,
+        nextEventAt: 120_000,
+      },
+    };
+    const { result } = renderHook(() => useGameEngine());
+
+    act(() => result.current.dispatch({ type: "REPLACE_STATE", state: queuedState }));
+    act(() => result.current.setGameSpeed(50));
+    act(() => result.current.togglePause());
+    const pausedAt = result.current.getGameNow();
+
+    expect(result.current.isPaused).toBe(true);
+    expect(result.current.state.acquisitionEvents.filter(
+      (event) => event.status === "running",
+    )).toHaveLength(251);
+
+    for (let slice = 0; slice < 3; slice += 1) {
+      await act(async () => vi.advanceTimersByTimeAsync(0));
+    }
+
+    expect(result.current.getGameNow()).toBe(pausedAt);
+    expect(result.current.state.statistics.eventsCompleted).toBe(250);
+    expect(result.current.state.acquisitionEvents.filter(
+      (event) => event.status === "running",
+    ).map((event) => event.id)).toEqual(["future"]);
+
+    await act(async () => vi.advanceTimersByTimeAsync(10_000));
+
+    expect(result.current.getGameNow()).toBe(pausedAt);
+    expect(result.current.state.acquisitionEvents.find(
+      (event) => event.id === "future",
+    )?.status).toBe("running");
   });
 
   it("preserves the remaining light inflation visibility across pause and save", async () => {

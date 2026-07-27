@@ -8,6 +8,7 @@ import {
   getSocialEventPromotionBonus,
   getSocialFollowerChance,
 } from "../../game/social";
+import { useGameStateSlices } from "../../game/GameStateContext";
 import type { Collaborator, CollaboratorMasteryRole, GameState } from "../../game/types";
 import { formatCurrency, formatPercent } from "../../shared/formatters";
 import { getInstructorCoverageForms } from "./instructorGroupPresentation";
@@ -134,14 +135,18 @@ function getSectorStatistics(
 }
 
 export function SectorStatisticsSummary({
-  state,
+  state: stateOverride,
   role,
   collaborators,
 }: {
-  state: GameState;
+  state?: GameState;
   role: CollaboratorMasteryRole;
   collaborators: readonly Collaborator[];
 }) {
+  const state = useGameStateSlices(
+    ["equipment", "school", "statistics", "unlocks", "upgrades"],
+    stateOverride,
+  );
   return getSectorStatistics(state, role, collaborators).map((statistic) => (
     <span
       className="sector-panel-stat"

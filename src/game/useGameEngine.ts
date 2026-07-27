@@ -18,11 +18,17 @@ import { loadGame, trySaveGame, writePreparedGameSave } from "./save";
 import type { SaveGameResult } from "./saveDiagnostics";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
 import type { GameSaveStatus } from "./saveStatus";
-import { getNextGameTickDelay } from "./gameScheduler";
+import { getNextGameTickDelay, hasQueuedGameWorkAt } from "./gameScheduler";
 import { postponeLightInflationEvent } from "./lightInflation";
+import { crashReporter } from "./crashReporting";
 import type { GameAction } from "./types";
 
 type PauseReason = "manual" | "tutorial";
+
+interface PauseDrainRequest {
+  gameNow: number;
+  wallNow: number;
+}
 
 export function useGameEngine() {
   const [initialWallNow] = useState(() => Date.now());
@@ -32,6 +38,7 @@ export function useGameEngine() {
   const pausedAtRef = useRef<number | null>(null);
   const pausedWallAtRef = useRef<number | null>(null);
   const pauseReasonsRef = useRef(new Set<PauseReason>());
+  const pauseDrainRef = useRef<PauseDrainRequest | null>(null);
   const saveSchedulerRef = useRef<SaveScheduler | null>(null);
   const requestTickRescheduleRef = useRef<(() => void) | null>(null);
   const clockRef = useRef(createGameClockAnchor(state.lastSavedAt, initialWallNow));
@@ -89,6 +96,7 @@ export function useGameEngine() {
   );
 
   const dispatchAction = useCallback((action: GameAction) => {
+    crashReporter.recordAction(action);
     if (action.type === "REPLACE_STATE") {
       const wallNow = Date.now();
       clockRef.current = createGameClockAnchor(
@@ -99,6 +107,10 @@ export function useGameEngine() {
       if (pausedAtRef.current !== null) {
         pausedAtRef.current = action.state.lastSavedAt;
         pausedWallAtRef.current = wallNow;
+        pauseDrainRef.current = {
+          gameNow: action.state.lastSavedAt,
+          wallNow,
+        };
       }
     }
     dispatch(action);
@@ -106,6 +118,7 @@ export function useGameEngine() {
 
   useLayoutEffect(() => {
     stateRef.current = state;
+    crashReporter.updateGameState(state);
     requestTickRescheduleRef.current?.();
     if (observedStateRef.current !== state) {
       observedStateRef.current = state;
@@ -116,6 +129,10 @@ export function useGameEngine() {
       });
     }
   }, [state]);
+
+  useEffect(() => {
+    crashReporter.updateRuntimeState(gameSpeed, isPaused);
+  }, [gameSpeed, isPaused]);
 
   const hasProfile = Boolean(state.profile.displayName.trim());
 
@@ -226,6 +243,28 @@ export function useGameEngine() {
 
   const saveNow = useCallback(() => saveSchedulerRef.current?.saveNow() ?? false, []);
 
+  useEffect(() => {
+    const drain = pauseDrainRef.current;
+    if (!isPaused || drain === null) return;
+    if (!hasQueuedGameWorkAt(state, drain.gameNow)) {
+      pauseDrainRef.current = null;
+      return;
+    }
+
+    const drainId = window.setTimeout(() => {
+      if (pauseDrainRef.current !== drain || pausedAtRef.current !== drain.gameNow) return;
+      dispatchAction({
+        type: "TICK",
+        now: drain.gameNow,
+        wallNow: drain.wallNow,
+        stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
+        workBudget: MAX_SIMULTANEOUS_WORK_PER_SLICE,
+        allowAutomaticEventStarts: false,
+      });
+    }, 0);
+    return () => window.clearTimeout(drainId);
+  }, [dispatchAction, isPaused, state]);
+
   const setPauseReason = useCallback(
     (reason: PauseReason, shouldPause: boolean) => {
       const reasons = pauseReasonsRef.current;
@@ -245,9 +284,9 @@ export function useGameEngine() {
 
       if (remainsPaused && pausedAt === null) {
         const gameNow = getGameNowAt(wallNow);
-        dispatchAction({ type: "TICK", now: gameNow, wallNow });
         pausedAtRef.current = gameNow;
         pausedWallAtRef.current = wallNow;
+        pauseDrainRef.current = { gameNow, wallNow };
         setIsPaused(true);
         return;
       }
@@ -264,6 +303,7 @@ export function useGameEngine() {
       clockRef.current = createGameClockAnchor(pausedAt, wallNow, clockRef.current.speed);
       pausedAtRef.current = null;
       pausedWallAtRef.current = null;
+      pauseDrainRef.current = null;
       setIsPaused(false);
     },
     [dispatchAction, getGameNowAt],

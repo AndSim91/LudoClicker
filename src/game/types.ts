@@ -715,6 +715,8 @@ export type GameAction =
     stepBudget?: number;
     /** Maximum number of simultaneous queued operations handled before yielding. */
     workBudget?: number;
+    /** Disabled while settling a pause so queued work cannot start another event. */
+    allowAutomaticEventStarts?: boolean;
   }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }

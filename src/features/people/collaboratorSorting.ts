@@ -1,7 +1,13 @@
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
-import type { Collaborator, Contact, GameState } from "../../game/types";
+import { createInitialCollaboratorMastery } from "../../content/mastery";
+import type {
+  Collaborator,
+  CollaboratorMasteryRole,
+  Contact,
+  GameState,
+} from "../../game/types";
 import {
   getCollaboratorAutomationPresentation,
   type CollaboratorAutomationPresentation,
@@ -21,6 +27,31 @@ export interface CollaboratorSortContext {
   activeEmail: ReturnType<typeof selectActiveEmail>;
   now: number;
 }
+
+export type SectorCollaboratorSortKey =
+  | "name"
+  | "mastery"
+  | "activity"
+  | "arena"
+  | "style"
+  | "forms"
+  | "training";
+
+export interface SectorCollaboratorSort {
+  key: SectorCollaboratorSortKey;
+  direction: CollaboratorSortDirection;
+}
+
+export interface SectorCollaboratorSortContext extends CollaboratorSortContext {
+  role: CollaboratorMasteryRole;
+}
+
+const COLLABORATOR_RARITY_RANK: Record<Collaborator["rarity"], number> = {
+  common: 0,
+  rare: 1,
+  "ultra-rare": 2,
+  legendary: 3,
+};
 
 function compareText(left: string, right: string): number {
   return left.localeCompare(right, "it", { numeric: true, sensitivity: "base" });
@@ -106,6 +137,60 @@ export function sortCollaborators(
     }))
     .sort((left, right) =>
       compareNullable(left.value, right.value, sort.direction) ||
+      left.index - right.index
+    )
+    .map(({ collaborator }) => collaborator);
+}
+
+function getSectorSortValue(
+  collaborator: Collaborator,
+  key: SectorCollaboratorSortKey,
+  context: SectorCollaboratorSortContext,
+): string | number | null {
+  if (key === "mastery") {
+    const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
+    return mastery[context.role];
+  }
+  if (key === "forms") return collaborator.forms.length;
+  if (key === "training") {
+    if (collaborator.training) {
+      return collaborator.training.status === "waitingForEquipment" ? 1 : 0;
+    }
+    return collaborator.technicianCourseReservation ? 2 : null;
+  }
+  return getSortValue(collaborator, key, context);
+}
+
+function compareSectorFallback(
+  left: Collaborator,
+  right: Collaborator,
+  context: SectorCollaboratorSortContext,
+): number {
+  const leftContact = context.contactsById.get(left.contactId);
+  const rightContact = context.contactsById.get(right.contactId);
+  const leftRarity = leftContact?.secretLegendaryId
+    ? 4
+    : COLLABORATOR_RARITY_RANK[left.rarity];
+  const rightRarity = rightContact?.secretLegendaryId
+    ? 4
+    : COLLABORATOR_RARITY_RANK[right.rarity];
+  return rightRarity - leftRarity || compareText(left.displayName, right.displayName);
+}
+
+export function sortSectorCollaborators(
+  collaborators: readonly Collaborator[],
+  sort: SectorCollaboratorSort | null,
+  context: SectorCollaboratorSortContext,
+): Collaborator[] {
+  return collaborators
+    .map((collaborator, index) => ({
+      collaborator,
+      index,
+      value: sort ? getSectorSortValue(collaborator, sort.key, context) : null,
+    }))
+    .sort((left, right) =>
+      (sort ? compareNullable(left.value, right.value, sort.direction) : 0) ||
+      compareSectorFallback(left.collaborator, right.collaborator, context) ||
       left.index - right.index
     )
     .map(({ collaborator }) => collaborator);

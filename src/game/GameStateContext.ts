@@ -13,7 +13,7 @@ import type { GameState } from "./types";
 
 export const GameStateContext = createContext<GameState | null>(null);
 
-interface GameStateStore {
+export interface GameStateStore {
   getState(): GameState;
   subscribe(listener: () => void): () => void;
   publish(state: GameState): void;
@@ -21,6 +21,7 @@ interface GameStateStore {
 }
 
 const GameStateStoreContext = createContext<GameStateStore | null>(null);
+export const GameStateStoreProvider = GameStateStoreContext.Provider;
 const emptySubscribe = () => () => undefined;
 
 function createGameStateStore(initialState: GameState): GameStateStore {
@@ -55,12 +56,23 @@ export function GameStateProvider({
   state: GameState;
   children: ReactNode;
 }) {
+  const store = useGameStateStore(state);
+  return createElement(GameStateStoreProvider, { value: store }, children);
+}
+
+/**
+ * Tiene lo stato completo dentro App invece di inoltrarlo come prop a un
+ * componente. In sviluppo React 19.2 confronta le prop per le Performance
+ * Tracks: evitare qui il GameState impedisce la clonazione diagnostica di
+ * salvataggi molto grandi a ogni tick.
+ */
+export function useGameStateStore(state: GameState): GameStateStore {
   const [store] = useState(() => createGameStateStore(state));
   useLayoutEffect(() => {
     store.publish(state);
     store.notify();
   }, [state, store]);
-  return createElement(GameStateStoreContext.Provider, { value: store }, children);
+  return store;
 }
 
 export function useOptionalGameState(): GameState | null {

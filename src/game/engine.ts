@@ -136,6 +136,7 @@ function tickStep(
   gainMultiplier: number,
   wallNow: number,
   workBudget = Infinity,
+  allowAutomaticEventStarts = true,
 ): TickStepResult {
   let remainingWork = Number.isFinite(workBudget)
     ? Math.max(0, Math.floor(workBudget))
@@ -243,7 +244,9 @@ function tickStep(
     nextState,
     automationElapsedMs,
   );
-  nextState = processAutomaticEvents(nextState, now);
+  if (allowAutomaticEventStarts) {
+    nextState = processAutomaticEvents(nextState, now);
+  }
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
   return result(notifyPrestigeOffer(nextState, now), true);
 }
@@ -257,8 +260,16 @@ function completeTickStep(
   gainMultiplier: number,
   wallNow: number,
   workBudget = Infinity,
+  allowAutomaticEventStarts = true,
 ): TickStepResult {
-  const resolved = tickStep(state, now, gainMultiplier, wallNow, workBudget);
+  const resolved = tickStep(
+    state,
+    now,
+    gainMultiplier,
+    wallNow,
+    workBudget,
+    allowAutomaticEventStarts,
+  );
   if (!resolved.complete) return resolved;
   const reconciled = reconcileCollaboratorManagement(
     recruitEnrolledLegendaryCollaborators(resolved.state, now),
@@ -285,6 +296,7 @@ function tick(
   stepBudget?: number,
   wallNow = now,
   workBudget = Infinity,
+  allowAutomaticEventStarts = true,
 ): GameState {
   let nextState = state;
   let stalledAt: number | undefined;
@@ -298,7 +310,11 @@ function tick(
 
   for (let step = 0; step < maxSteps; step += 1) {
     const cursor = nextState.automation.lastProcessedAt;
-    const scheduledAt = getNextGameTickAt(nextState, cursor);
+    const scheduledAt = getNextGameTickAt(
+      nextState,
+      cursor,
+      allowAutomaticEventStarts,
+    );
     const scheduledBoundary = Math.max(cursor, scheduledAt);
     if (
       step > 0 &&
@@ -320,6 +336,7 @@ function tick(
       gainMultiplier,
       wallNow,
       remainingWorkBudget,
+      allowAutomaticEventStarts,
     );
     nextState = completedStep.state;
     remainingWorkBudget -= completedStep.workProcessed;

@@ -96,12 +96,13 @@ export function getNextGameDeadline(state: GameState): number {
 export function getNextGameTickAt(
   state: GameState,
   now: number,
+  allowAutomaticEventStarts = true,
 ): number {
   let nextDeadline = getNextGameDeadline(state);
   const hasEventAutomation = state.collaborators.some(
     (collaborator) => collaborator.assignment === "events",
   );
-  if (hasEventAutomation) {
+  if (hasEventAutomation && allowAutomaticEventStarts) {
     nextDeadline = hasActionableAutomaticEvents(state, now)
       ? earlier(nextDeadline, now)
       : earlier(nextDeadline, getNextRealtimeEventCooldownDeadline(state, now));
@@ -121,6 +122,10 @@ export function getNextGameTickAt(
     ? state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS
     : Infinity;
   return Math.min(nextDeadline, heartbeatAt);
+}
+
+export function hasQueuedGameWorkAt(state: GameState, now: number): boolean {
+  return state.automation.lastProcessedAt < now || getNextGameDeadline(state) <= now;
 }
 
 export function getNextGameTickDelay(

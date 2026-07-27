@@ -5,6 +5,7 @@ import { GAME_CONFIG } from "../game/config";
 import { useGameStateSlices } from "../game/GameStateContext";
 import type { GameSaveStatus } from "../game/saveStatus";
 import type { GameState } from "../game/types";
+import { CrashReportPanel } from "./settings/CrashReportPanel";
 import { SaveStatusPanel } from "./settings/SaveStatusPanel";
 
 type OverviewViewName = Extract<AppView, "settings">;
@@ -121,6 +122,8 @@ export function OverviewView({
                 <button type="button" onClick={onForceUpdate}>Controlla aggiornamenti</button>
               </div>
             </section>
+
+            <CrashReportPanel />
           </div>
         </div>
       </div>
