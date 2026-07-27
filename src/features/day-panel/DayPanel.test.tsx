@@ -8,7 +8,7 @@ import {
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
-import { DayPanel } from "./DayPanel";
+import { DAY_PANEL_MEDIA_QUERY, DayPanel } from "./DayPanel";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
 import { DAY_TRIAL_NOTIFICATION_LIMIT } from "./dayNotifications";
 
@@ -116,10 +116,41 @@ function stateWithLightInflationEvent(occurredAt: number, visibleUntil: number):
   };
 }
 
+function stubDayPanelMediaQuery(initialMatches: boolean) {
+  let matches = initialMatches;
+  const listeners = new Set<(event: MediaQueryListEvent) => void>();
+  const mediaQuery = {
+    media: DAY_PANEL_MEDIA_QUERY,
+    get matches() {
+      return matches;
+    },
+    onchange: null,
+    addEventListener: (_type: "change", listener: (event: MediaQueryListEvent) => void) => {
+      listeners.add(listener);
+    },
+    removeEventListener: (_type: "change", listener: (event: MediaQueryListEvent) => void) => {
+      listeners.delete(listener);
+    },
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => true,
+  } as MediaQueryList;
+  vi.stubGlobal("matchMedia", vi.fn(() => mediaQuery));
+
+  return {
+    setMatches(nextMatches: boolean) {
+      matches = nextMatches;
+      const event = { matches, media: DAY_PANEL_MEDIA_QUERY } as MediaQueryListEvent;
+      listeners.forEach((listener) => listener(event));
+    },
+  };
+}
+
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("DayPanel", () => {
@@ -231,6 +262,45 @@ describe("DayPanel", () => {
       "data-tutorial-target",
       "true",
     );
+  });
+
+  it("keeps 100 simultaneous trials condensed and updates their countdown once per second", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(15_000);
+    const intervalSpy = vi.spyOn(window, "setInterval");
+
+    const { container } = render(<DayPanel state={stateWithScheduledTrials(100)} />);
+
+    expect(DAY_TRIAL_NOTIFICATION_LIMIT).toBe(5);
+    expect(screen.getByText("100 lezioni di prova")).toBeVisible();
+    expect(screen.getByText("100 programmate")).toBeVisible();
+    expect(container.querySelectorAll(".appointment-entry")).toHaveLength(1);
+    expect(intervalSpy).toHaveBeenCalledWith(expect.any(Function), 1_000);
+
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    expect(screen.getByText("00:04")).toBeVisible();
+  });
+
+  it("does not mount the panel or its clocks below the responsive breakpoint", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(15_000);
+    const responsive = stubDayPanelMediaQuery(false);
+
+    render(<DayPanel state={stateWithScheduledTrials(100)} />);
+
+    expect(screen.queryByLabelText("La mia giornata")).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
+
+    act(() => responsive.setMatches(true));
+    expect(screen.getByLabelText("La mia giornata")).toBeVisible();
+    expect(screen.getByText("100 lezioni di prova")).toBeVisible();
+    expect(vi.getTimerCount()).toBe(1);
+
+    act(() => responsive.setMatches(false));
+    expect(screen.queryByLabelText("La mia giornata")).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it("colors the attendee name according to their rarity", () => {
@@ -357,7 +427,7 @@ describe("DayPanel", () => {
     expect(progress).toHaveAttribute("aria-valuetext", "30 secondi rimanenti");
   });
 
-  it("keeps light inflation on the real clock at 100x and while the game is paused", () => {
+  it("keeps light inflation on the real clock at 100x and freezes it while paused", () => {
     vi.useFakeTimers();
     vi.setSystemTime(50_000);
     const frozenGameNow = 5_000_000;
@@ -389,7 +459,11 @@ describe("DayPanel", () => {
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
-    expect(screen.queryByText(LIGHT_INFLATION_EVENT_TITLE)).not.toBeInTheDocument();
+    expect(screen.getByText(LIGHT_INFLATION_EVENT_TITLE)).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
+      "aria-valuetext",
+      "30 secondi rimanenti",
+    );
   });
 
   it("removes light inflation at its real deadline even while hovered", () => {

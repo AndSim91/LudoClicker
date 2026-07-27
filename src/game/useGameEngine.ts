@@ -19,6 +19,7 @@ import type { SaveGameResult } from "./saveDiagnostics";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
 import type { GameSaveStatus } from "./saveStatus";
 import { getNextGameTickDelay } from "./gameScheduler";
+import { postponeLightInflationEvent } from "./lightInflation";
 import type { GameAction } from "./types";
 
 type PauseReason = "manual" | "tutorial";
@@ -29,6 +30,7 @@ export function useGameEngine() {
   const stateRef = useRef(state);
   const observedStateRef = useRef(state);
   const pausedAtRef = useRef<number | null>(null);
+  const pausedWallAtRef = useRef<number | null>(null);
   const pauseReasonsRef = useRef(new Set<PauseReason>());
   const saveSchedulerRef = useRef<SaveScheduler | null>(null);
   const requestTickRescheduleRef = useRef<(() => void) | null>(null);
@@ -49,9 +51,19 @@ export function useGameEngine() {
 
   const getGameNow = useCallback(() => getGameNowAt(Date.now()), [getGameNowAt]);
 
+  const getWallNow = useCallback(
+    () => pausedWallAtRef.current ?? Date.now(),
+    [],
+  );
+
   const getPersistableState = useCallback(
-    (currentState = stateRef.current, wallNow = Date.now()) =>
-      rebaseGameTimeline(currentState, getGameNowAt(wallNow), wallNow),
+    (currentState = stateRef.current, wallNow = Date.now()) => {
+      const rebased = rebaseGameTimeline(currentState, getGameNowAt(wallNow), wallNow);
+      const pausedWallAt = pausedWallAtRef.current;
+      return pausedWallAt === null
+        ? rebased
+        : postponeLightInflationEvent(rebased, wallNow - pausedWallAt);
+    },
     [getGameNowAt],
   );
 
@@ -86,6 +98,7 @@ export function useGameEngine() {
       );
       if (pausedAtRef.current !== null) {
         pausedAtRef.current = action.state.lastSavedAt;
+        pausedWallAtRef.current = wallNow;
       }
     }
     dispatch(action);
@@ -167,8 +180,12 @@ export function useGameEngine() {
       stateRef.current,
       persistGame,
       async (currentState, wallNow) => {
+        const pausedWallAt = pausedWallAtRef.current;
+        const stateForSave = pausedWallAt === null
+          ? currentState
+          : postponeLightInflationEvent(currentState, wallNow - pausedWallAt);
         const result = await backgroundPreparer.prepare(
-          currentState,
+          stateForSave,
           getGameNowAt(wallNow),
           wallNow,
         );
@@ -230,13 +247,23 @@ export function useGameEngine() {
         const gameNow = getGameNowAt(wallNow);
         dispatchAction({ type: "TICK", now: gameNow, wallNow });
         pausedAtRef.current = gameNow;
+        pausedWallAtRef.current = wallNow;
         setIsPaused(true);
         return;
       }
 
       if (pausedAt === null) return;
+      const pausedWallAt = pausedWallAtRef.current;
+      if (pausedWallAt !== null) {
+        dispatchAction({
+          type: "RESUME_FROM_PAUSE",
+          now: pausedAt,
+          elapsedMs: wallNow - pausedWallAt,
+        });
+      }
       clockRef.current = createGameClockAnchor(pausedAt, wallNow, clockRef.current.speed);
       pausedAtRef.current = null;
+      pausedWallAtRef.current = null;
       setIsPaused(false);
     },
     [dispatchAction, getGameNowAt],
@@ -273,6 +300,7 @@ export function useGameEngine() {
     state,
     dispatch: dispatchAction,
     getGameNow,
+    getWallNow,
     getPersistableState,
     gameSpeed,
     setGameSpeed,

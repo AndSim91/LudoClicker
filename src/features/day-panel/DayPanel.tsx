@@ -5,7 +5,7 @@ import {
   isShortGoalActive,
 } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   useGameTime,
@@ -14,6 +14,7 @@ import {
 } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
+import { useMediaQuery } from "../../shared/useMediaQuery";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
@@ -25,6 +26,9 @@ import {
   type DayNotificationPhase,
 } from "./dayNotifications";
 import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
+
+export const DAY_PANEL_MEDIA_QUERY = "(min-width: 1301px)";
+const DAY_COUNTDOWN_UPDATE_INTERVAL_MS = 1_000;
 
 const phaseLabels: Record<DayNotificationPhase, string> = {
   scheduled: "",
@@ -57,8 +61,13 @@ function getTiming(notification: DayNotification, now: number): string {
   return phaseLabels[notification.phase];
 }
 
-function ShortGoalCard({ state: stateOverride }: { state?: GameState }) {
+const ShortGoalCard = memo(function ShortGoalCard({
+  state: stateOverride,
+}: {
+  state?: GameState;
+}) {
   const state = useGameStateSlices(["shortGoal", "statistics"], stateOverride);
+  if (!isShortGoalActive(state)) return null;
   const definition = SHORT_GOALS[state.shortGoal.definitionId];
   const progress = Math.min(state.shortGoal.target, getShortGoalProgress(state));
   return (
@@ -83,7 +92,7 @@ function ShortGoalCard({ state: stateOverride }: { state?: GameState }) {
       </div>
     </section>
   );
-}
+});
 
 function DayNotificationEntry({
   notification,
@@ -162,24 +171,13 @@ function DayNotificationEntry({
   );
 }
 
-export function DayPanel({
-  state: stateOverride,
-  onMaintainEquipment = () => undefined,
-  onBuyOfficialSwords = () => undefined,
-}: {
-  state?: GameState;
-  onMaintainEquipment?: () => void;
-  onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
-}) {
+function DayNotificationTimeline({ state: stateOverride }: { state?: GameState }) {
   const state = useGameStateSlices(
     [
       "contacts",
       "lightInflation",
       "narrative",
       "scheduledTrials",
-      "school",
-      "shortGoal",
-      "statistics",
       "tournaments",
     ],
     stateOverride,
@@ -191,20 +189,26 @@ export function DayPanel({
     now: number;
   } | null>(null);
   const referenceGameNow = timeSource?.getNow() ?? fallbackNow;
+  const referenceWallNow = timeSource?.getWallNow() ?? fallbackNow;
   const wallClockDeadline = state.lightInflation.event?.visibleUntil;
   const wallNow = useWallTimeUntil(
     wallClockDeadline,
     GAME_CONFIG.progressUpdateIntervalMs,
+    !timeSource?.isPaused,
   );
-  const referenceWallNow = wallNow || fallbackNow;
   const referenceNotifications = selectDayNotifications(state, referenceGameNow, referenceWallNow);
   const hasGameClockNotification = referenceNotifications.some((notification) => notification.clock === "game");
+  const hasSmoothGameClockProgress = referenceNotifications.some(
+    (notification) => notification.clock === "game" && notification.expiresAt !== undefined,
+  );
   const gameNow = useGameTime(
     hasGameClockNotification,
-    GAME_CONFIG.progressUpdateIntervalMs,
+    hasSmoothGameClockProgress
+      ? GAME_CONFIG.progressUpdateIntervalMs
+      : DAY_COUNTDOWN_UPDATE_INTERVAL_MS,
   );
   const now = timeSource ? gameNow : gameNow || referenceGameNow;
-  const currentWallNow = wallNow || referenceWallNow;
+  const currentWallNow = timeSource?.isPaused ? referenceWallNow : wallNow || referenceWallNow;
   const liveNotifications = now === referenceGameNow && currentWallNow === referenceWallNow
     ? referenceNotifications
     : selectDayNotifications(state, now, currentWallNow);
@@ -225,17 +229,7 @@ export function DayPanel({
     : liveNotifications;
 
   return (
-    <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
-      <div className="day-heading">
-        <strong>La mia giornata</strong>
-        <Icon name="calendar" />
-      </div>
-      {isShortGoalActive(state) ? <ShortGoalCard state={stateOverride} /> : null}
-      <EquipmentQuickPanel
-        state={stateOverride}
-        onMaintainEquipment={onMaintainEquipment}
-        onBuyOfficialSwords={onBuyOfficialSwords}
-      />
+    <>
       {notifications.length === 0 ? (
         <div className="day-empty">
           <Icon name="clock" />
@@ -256,6 +250,35 @@ export function DayPanel({
           />
         ))
       )}
+    </>
+  );
+}
+
+export function DayPanel({
+  state: stateOverride,
+  onMaintainEquipment = () => undefined,
+  onBuyOfficialSwords = () => undefined,
+}: {
+  state?: GameState;
+  onMaintainEquipment?: () => void;
+  onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
+}) {
+  const isVisible = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
+  if (!isVisible) return null;
+
+  return (
+    <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
+      <div className="day-heading">
+        <strong>La mia giornata</strong>
+        <Icon name="calendar" />
+      </div>
+      <ShortGoalCard state={stateOverride} />
+      <EquipmentQuickPanel
+        state={stateOverride}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={onBuyOfficialSwords}
+      />
+      <DayNotificationTimeline state={stateOverride} />
     </aside>
   );
 }

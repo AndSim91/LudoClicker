@@ -85,6 +85,7 @@ export function App() {
     state,
     dispatch,
     getGameNow,
+    getWallNow,
     getPersistableState,
     gameSpeed,
     setGameSpeed,
@@ -333,7 +334,12 @@ export function App() {
 
   return (
     <GameStateProvider state={state}>
-    <GameTimeProvider getNow={getGameNow} isPaused={isPaused} speed={gameSpeed}>
+    <GameTimeProvider
+      getNow={getGameNow}
+      getWallNow={getWallNow}
+      isPaused={isPaused}
+      speed={gameSpeed}
+    >
       <div
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}

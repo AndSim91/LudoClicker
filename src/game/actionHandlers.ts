@@ -15,7 +15,7 @@ import {
   decrementCollaboratorAssignment,
   incrementCollaboratorAssignment,
 } from "./collaboratorManagement";
-import { freezeGameState } from "./offline";
+import { postponeLightInflationEvent } from "./lightInflation";
 import { updateProfileName } from "./profileFlow";
 import { foundSchool } from "./schoolProgressionFlow";
 import {
@@ -82,9 +82,8 @@ export function createGameActionHandlers(
       action.wallNow ?? action.now,
       action.workBudget,
     ),
-    RESUME_FROM_PAUSE: (state, action) => freezeGameState(
+    RESUME_FROM_PAUSE: (state, action) => postponeLightInflationEvent(
       state,
-      action.now,
       action.elapsedMs,
     ),
     REPLACE_STATE: (_state, action) => action.state,

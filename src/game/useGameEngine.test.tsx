@@ -4,6 +4,10 @@ import { getEmailBuildLength } from "../content/emailBuild";
 import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./engine";
 import { needsAutomationHeartbeat } from "./gameScheduler";
+import {
+  LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+} from "./lightInflation";
 import { loadGame, saveGame } from "./save";
 import { decodeStoredSave } from "./saveCodec";
 import type { GameState } from "./types";
@@ -67,6 +71,49 @@ describe("useGameEngine pause", () => {
       result.current.state.acquisitionEvents[0].resolvesAt -
         result.current.state.automation.lastProcessedAt,
     ).toBe(10_000);
+  });
+
+  it("preserves the remaining light inflation visibility across pause and save", async () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    saveGame({
+      ...initial,
+      lightInflation: {
+        ...initial.lightInflation,
+        event: {
+          cause: LIGHT_INFLATION_CAUSES[0],
+          occurredAt: 1_000,
+          visibleUntil: 1_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+        },
+      },
+    }, 1_000);
+    const { result } = renderHook(() => useGameEngine());
+
+    await act(async () => vi.advanceTimersByTimeAsync(5_000));
+    act(() => result.current.togglePause());
+
+    const pausedWallNow = result.current.getWallNow();
+    const eventAtPause = result.current.state.lightInflation.event!;
+
+    await act(async () => vi.advanceTimersByTimeAsync(20_000));
+
+    expect(result.current.getWallNow()).toBe(pausedWallNow);
+    expect(result.current.state.lightInflation.event).toEqual(eventAtPause);
+    expect(result.current.getPersistableState().lightInflation.event).toEqual({
+      ...eventAtPause,
+      occurredAt: eventAtPause.occurredAt + 20_000,
+      visibleUntil: eventAtPause.visibleUntil + 20_000,
+    });
+
+    act(() => result.current.togglePause());
+
+    expect(result.current.state.lightInflation.event).toEqual({
+      ...eventAtPause,
+      occurredAt: eventAtPause.occurredAt + 20_000,
+      visibleUntil: eventAtPause.visibleUntil + 20_000,
+    });
+    expect(
+      result.current.state.lightInflation.event!.visibleUntil - result.current.getWallNow(),
+    ).toBe(eventAtPause.visibleUntil - pausedWallNow);
   });
 
   it("does not turn a tutorial pause into a manual pause when pressing resume", () => {

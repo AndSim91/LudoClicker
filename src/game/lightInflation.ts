@@ -52,6 +52,27 @@ export function addLightInflationChance(
   };
 }
 
+export function postponeLightInflationEvent(
+  state: GameState,
+  elapsedMs: number,
+): GameState {
+  const event = state.lightInflation.event;
+  const safeElapsedMs = Math.max(0, elapsedMs);
+  if (!event || safeElapsedMs === 0) return state;
+
+  return {
+    ...state,
+    lightInflation: {
+      ...state.lightInflation,
+      event: {
+        ...event,
+        occurredAt: event.occurredAt + safeElapsedMs,
+        visibleUntil: event.visibleUntil + safeElapsedMs,
+      },
+    },
+  };
+}
+
 export function processJanuaryLightInflation(state: GameState, wallNow: number): GameState {
   const januaryMonth = state.school.currentMonth;
   const inflation = state.lightInflation;

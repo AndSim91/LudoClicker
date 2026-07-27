@@ -606,9 +606,9 @@ export interface HistoryArchive {
 
 export interface LightInflationEvent {
   cause: string;
-  /** Wall-clock timestamp: it must not be rebased with the accelerated game timeline. */
+  /** Wall-clock timestamp, shifted only by explicit pauses. */
   occurredAt: number;
-  /** Absolute wall-clock deadline for the fixed 20-second notification window. */
+  /** Wall-clock deadline for the notification window, suspended while paused. */
   visibleUntil: number;
 }
 

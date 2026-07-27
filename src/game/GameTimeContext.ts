@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useSyncExternalStore } from "re
 
 export interface GameTimeSource {
   getNow: () => number;
+  getWallNow: () => number;
   isPaused: boolean;
   speed: number;
 }
@@ -74,10 +75,11 @@ export function useWallTime(active: boolean, intervalMs: number): number {
 export function useWallTimeUntil(
   deadline: number | undefined,
   intervalMs: number,
+  active = true,
 ): number {
   const store = getClockStore(intervalMs);
   const subscribeUntilDeadline = useCallback((listener: () => void) => {
-    if (deadline === undefined) return subscribeToStaticClock();
+    if (!active || deadline === undefined) return subscribeToStaticClock();
 
     let unsubscribe: () => void = () => undefined;
     unsubscribe = store.subscribe(() => {
@@ -86,11 +88,11 @@ export function useWallTimeUntil(
     });
     if (store.getSnapshot() >= deadline) unsubscribe();
     return unsubscribe;
-  }, [deadline, store]);
+  }, [active, deadline, store]);
 
   return useSyncExternalStore(
-    deadline === undefined ? subscribeToStaticClock : subscribeUntilDeadline,
-    deadline === undefined ? getStaticSnapshot : store.getSnapshot,
+    !active || deadline === undefined ? subscribeToStaticClock : subscribeUntilDeadline,
+    !active || deadline === undefined ? getStaticSnapshot : store.getSnapshot,
     getStaticSnapshot,
   );
 }
