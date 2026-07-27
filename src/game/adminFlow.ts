@@ -91,10 +91,10 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     };
   }
 
-  const historicMembers = amount > 0
-    ? Math.max(state.school.historicMembers + amount, resolvedActiveMembers)
-    : Math.max(state.school.historicMembers, resolvedActiveMembers);
-  if (!Number.isSafeInteger(resolvedActiveMembers) || !Number.isSafeInteger(historicMembers)) {
+  const fame = amount > 0
+    ? Math.max(state.school.fame + amount, resolvedActiveMembers)
+    : Math.max(state.school.fame, resolvedActiveMembers);
+  if (!Number.isSafeInteger(resolvedActiveMembers) || !Number.isSafeInteger(fame)) {
     return state;
   }
 
@@ -104,7 +104,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
       ...nextState.school,
       activeMembers: resolvedActiveMembers,
       peakActiveMembers: Math.max(nextState.school.peakActiveMembers, resolvedActiveMembers),
-      historicMembers,
+      fame,
     },
     unlocks: {
       ...nextState.unlocks,

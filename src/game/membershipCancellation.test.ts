@@ -17,14 +17,14 @@ describe("manual enrollment cancellation", () => {
     const state = {
       ...initial,
       contacts: [member, ...initial.contacts.slice(1)],
-      school: { ...initial.school, activeMembers: 1, historicMembers: 7 },
+      school: { ...initial.school, activeMembers: 1, fame: 7 },
     };
 
     const cancelled = cancelMemberEnrollment(state, member.id);
 
     expect(cancelled.contacts.find((contact) => contact.id === member.id)?.status).toBe("departed");
     expect(cancelled.school.activeMembers).toBe(0);
-    expect(cancelled.school.historicMembers).toBe(7);
+    expect(cancelled.school.fame).toBe(7);
     expect(cancelled.statistics.membersDeparted).toBe(1);
   });
 
@@ -38,7 +38,7 @@ describe("manual enrollment cancellation", () => {
     const state = {
       ...initial,
       contacts: [member, ...initial.contacts.slice(1)],
-      school: { ...initial.school, activeMembers: 1, historicMembers: 7 },
+      school: { ...initial.school, activeMembers: 1, fame: 7 },
     };
 
     const cancelled = cancelMemberEnrollment(state, member.id);
@@ -93,7 +93,7 @@ describe("manual enrollment cancellation", () => {
       ...initial,
       contacts: [member, student, ...initial.contacts.slice(2)],
       collaborators: [collaborator],
-      school: { ...initial.school, activeMembers: 2, historicMembers: 12 },
+      school: { ...initial.school, activeMembers: 2, fame: 12 },
       legendaryCollaborators: {
         ...initial.legendaryCollaborators,
         encounteredProfileIds: ["eva-parodi" as const],
@@ -165,7 +165,7 @@ describe("manual enrollment cancellation", () => {
     const state = {
       ...initial,
       contacts: [member, ...initial.contacts.slice(1)],
-      school: { ...initial.school, activeMembers: 1, historicMembers: 20 },
+      school: { ...initial.school, activeMembers: 1, fame: 20 },
       network: {
         ...initial.network,
         secretLegendaries: {

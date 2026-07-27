@@ -145,7 +145,7 @@ function enrollRewardContact(state: GameState, contactId: string, now: number): 
       ...state.school,
       activeMembers: nextActiveMembers,
       peakActiveMembers: Math.max(state.school.peakActiveMembers, nextActiveMembers),
-      historicMembers: state.school.historicMembers + 1,
+      fame: state.school.fame + 1,
     },
     unlocks: {
       ...state.unlocks,
@@ -191,7 +191,7 @@ export function applyTournamentRewards(
       ...state.school,
       euros: state.school.euros + euros,
       followers: state.school.followers + followers,
-      historicMembers: state.school.historicMembers + followers,
+      fame: state.school.fame + followers,
     },
     statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + euros },
   };

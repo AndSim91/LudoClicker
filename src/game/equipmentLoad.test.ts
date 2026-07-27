@@ -18,7 +18,7 @@ function enrolledState(now = 1_000): GameState {
       ...initial.school,
       activeMembers: 1,
       peakActiveMembers: 1,
-      historicMembers: 1,
+      fame: 1,
       euros: 1_000,
     },
     unlocks: { ...initial.unlocks, forms: true },
@@ -222,7 +222,7 @@ describe("prenotazione delle spade", () => {
         ...initial.school,
         activeMembers: 1,
         peakActiveMembers: 1,
-        historicMembers: 1,
+        fame: 1,
       },
       contacts: initial.contacts.map((contact, index) =>
         index === 0 ? { ...contact, status: "trialScheduled" as const } : contact
@@ -258,7 +258,7 @@ describe("prenotazione delle spade", () => {
         ...initial.school,
         activeMembers: 1,
         peakActiveMembers: 1,
-        historicMembers: 1,
+        fame: 1,
       },
       upgrades: Object.fromEntries(UPGRADE_DEFINITIONS.map((definition) => [
         definition.id,

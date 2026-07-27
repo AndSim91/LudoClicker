@@ -41,7 +41,7 @@ function createTrialResolutionState(trialCount: number): GameState {
       ...initial.school,
       activeMembers: 1,
       peakActiveMembers: 1,
-      historicMembers: 1,
+      fame: 1,
     },
     contacts,
     scheduledTrials,
@@ -121,7 +121,7 @@ describe("trial resolution batching", () => {
       ...state.school,
       activeMembers: 34,
       peakActiveMembers: 34,
-      historicMembers: 34,
+      fame: 34,
     };
     state.scheduledTrials = state.scheduledTrials.map((trial) => ({
       ...trial,
@@ -138,7 +138,7 @@ describe("trial resolution batching", () => {
     expect(resolved).toEqual(sequential);
     expect(resolved.school).toMatchObject({
       activeMembers: 36,
-      historicMembers: 36,
+      fame: 36,
       followers: 35,
     });
     expect(resolved.unlocks.social).toBe(true);

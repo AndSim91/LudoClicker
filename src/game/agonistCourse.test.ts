@@ -53,7 +53,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, historicMembers: 0, euros: 1_000 },
+      school: { ...initial.school, fame: 0, euros: 1_000 },
     };
 
     const unlocked = gameReducer(funded, {

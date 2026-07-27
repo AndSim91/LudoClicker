@@ -193,7 +193,7 @@ describe("Chronicles Legendary challenge", () => {
 
   it("recruits permanently, grants 500 bonus Fame and moves the second attempt forward", () => {
     const challenged = challengeState(true, true);
-    const originalFame = challenged.school.historicMembers;
+    const originalFame = challenged.school.fame;
     const won = playDecisiveMatch(challenged, true);
     const contact = won.contacts.find(
       (candidate) => candidate.secretLegendaryId === "enrico-giovanetti",
@@ -202,7 +202,7 @@ describe("Chronicles Legendary challenge", () => {
     expect(contact?.status).toBe("enrolled");
     expect(won.collaborators.some((collaborator) => collaborator.contactId === contact?.id)).toBe(true);
     expect(won.network.secretLegendaries["enrico-giovanetti"].status).toBe("enrolled");
-    expect(won.school.historicMembers).toBe(
+    expect(won.school.fame).toBe(
       originalFame + GAME_CONFIG.chroniclesLegendaryFameReward + 1,
     );
     expect(won.tournaments.chronicles.activeChallenge).toMatchObject({

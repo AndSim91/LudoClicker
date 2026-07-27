@@ -34,7 +34,7 @@ describe("FolderPane", () => {
           ...initial,
           school: {
             ...initial.school,
-            historicMembers: GAME_CONFIG.tournamentUnlockMembers,
+            fame: GAME_CONFIG.tournamentUnlockMembers,
           },
           messages: [tournamentMessage, ...initial.messages],
         }}

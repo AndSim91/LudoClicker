@@ -81,6 +81,25 @@ describe("history compaction thresholds", () => {
 
     expect(compactGameHistory(active)).toBe(active);
   });
+
+  it("archives terminal contacts as soon as no retained record references them", () => {
+    const initial = createInitialState(1_000, "", false);
+    const terminalContacts: Contact[] = ["lost", "departed"].map((status, index) => ({
+      ...initial.contacts[index],
+      id: `terminal-${index}`,
+      status: status as Contact["status"],
+    }));
+    const state = {
+      ...initial,
+      contacts: [...initial.contacts.slice(2), ...terminalContacts],
+    };
+
+    const compacted = compactGameHistory(state);
+
+    expect(compacted.contacts).toEqual(initial.contacts.slice(2));
+    expect(compacted.historyArchive.contactsBySource.tutorial.total).toBe(2);
+    expect(compactGameHistory(compacted)).toBe(compacted);
+  });
 });
 
 describe("bounded game history", () => {

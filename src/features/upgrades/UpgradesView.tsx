@@ -178,8 +178,8 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
   ) {
     return "Social non ancora sbloccato";
   }
-  if (state.school.historicMembers < definition.requiredHistoricMembers) {
-    return `Serve Fama della scuola ${definition.requiredHistoricMembers}`;
+  if (state.school.fame < definition.requiredFame) {
+    return `Serve Fama della scuola ${definition.requiredFame}`;
   }
   const prerequisite = getFirstIncompleteUpgradePrerequisite(
     state.upgrades,
@@ -388,7 +388,7 @@ function UpgradeDetailsDialog({
           <div><dt>Livello attuale</dt><dd>{level}/{definition.maxLevel}</dd></div>
           <div><dt>Effetto per livello</dt><dd>{definition.effectLabel}</dd></div>
           <div><dt>Costo</dt><dd>{completed ? "—" : formatCurrency(cost)}</dd></div>
-          <div><dt>Fama richiesta</dt><dd>{definition.requiredHistoricMembers || "Nessuna"}</dd></div>
+          <div><dt>Fama richiesta</dt><dd>{definition.requiredFame || "Nessuna"}</dd></div>
         </dl>
 
         <p className={`upgrade-dialog-status${canBuy || completed ? " positive" : ""}`}>

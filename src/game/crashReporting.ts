@@ -41,7 +41,7 @@ export interface CrashStateSummary {
   automationLastProcessedAt: number;
   currentMonth: number;
   activeMembers: number;
-  historicMembers: number;
+  fame: number;
   contacts: number;
   collaborators: number;
   emails: number;
@@ -179,7 +179,7 @@ function summarizeGameState(state: GameState): CrashStateSummary {
     automationLastProcessedAt: state.automation.lastProcessedAt,
     currentMonth: state.school.currentMonth,
     activeMembers: state.school.activeMembers,
-    historicMembers: state.school.historicMembers,
+    fame: state.school.fame,
     contacts: state.contacts.length,
     collaborators: state.collaborators.length,
     emails: state.emails.length,

@@ -23,7 +23,7 @@ it("probes 5 intense games", async () => {
     maxHours: Math.max(...times) / HOUR_MS,
     unreached: results.filter((result) => !result.reachedPrestige).map((result) => ({
       seed: result.seed,
-      members: result.state.school.historicMembers,
+      members: result.state.school.fame,
       collaborators: result.state.collaborators.length,
       events: result.state.statistics.eventsCompleted,
     })),

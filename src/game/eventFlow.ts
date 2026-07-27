@@ -71,7 +71,7 @@ function getEventStartDetails(
     return undefined;
   }
   if (
-    state.school.historicMembers < definition.unlockMembers ||
+    state.school.fame < definition.unlockMembers ||
     checkContext.availableMembers < definition.requiredMembers ||
     checkContext.availableSwords < definition.requiredSwords
   ) return undefined;

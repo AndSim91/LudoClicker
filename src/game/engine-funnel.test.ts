@@ -16,6 +16,7 @@ import {
   getMemberAnnualDepartureChance,
 } from "./formulas";
 import { departMembers } from "./membershipFlow";
+import { getArchivedContactCount } from "./historyArchive";
 import { selectActiveEmail } from "./selectors";
 import type { GameState } from "./types";
 
@@ -330,7 +331,7 @@ describe("game engine: funnel", () => {
       school: {
         ...initial.school,
         activeMembers: legendaryMembers.length,
-        historicMembers: legendaryMembers.length,
+        fame: legendaryMembers.length,
       },
     }, { type: "ADMIN_ADD_EUROS", amount: 1 });
 
@@ -417,7 +418,7 @@ describe("game engine: funnel", () => {
     const state = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, historicMembers: 1 },
+      school: { ...initial.school, fame: 1 },
       statistics: { ...initial.statistics, emailsSent: 1 },
       contacts: initial.contacts.map((contact) =>
         contact.id === email.contactId
@@ -520,7 +521,7 @@ describe("game engine: funnel", () => {
         ...initial.school,
         activeMembers: GAME_CONFIG.socialUnlockMembers - 1,
         peakActiveMembers: GAME_CONFIG.socialUnlockMembers - 1,
-        historicMembers: 80,
+        fame: 80,
       },
       contacts: initial.contacts.map((candidate) =>
         candidate.id === contact.id
@@ -534,7 +535,7 @@ describe("game engine: funnel", () => {
 
     expect(unlocked.unlocks.social).toBe(true);
     expect(unlocked.school.activeMembers).toBe(GAME_CONFIG.socialUnlockMembers);
-    expect(unlocked.school.historicMembers).toBe(81);
+    expect(unlocked.school.fame).toBe(81);
     expect(unlocked.school.followers).toBe(81);
   });
 
@@ -557,7 +558,7 @@ describe("game engine: funnel", () => {
     };
     const firstAttempt = gameReducer({
       ...initial,
-      school: { ...initial.school, historicMembers: 1 },
+      school: { ...initial.school, fame: 1 },
       contacts: initial.contacts.map((contact) =>
         contact.id === eva.id ? { ...eva, status: "trialScheduled" as const } : contact,
       ),
@@ -566,7 +567,7 @@ describe("game engine: funnel", () => {
     }, { type: "TICK", now: 2_000 });
     const protectedAttempt = gameReducer({
       ...initial,
-      school: { ...initial.school, historicMembers: 1 },
+      school: { ...initial.school, fame: 1 },
       contacts: initial.contacts.map((contact) =>
         contact.id === eva.id ? { ...eva, status: "trialScheduled" as const } : contact,
       ),
@@ -634,7 +635,7 @@ describe("game engine: funnel", () => {
           ...initial.school,
           activeMembers: 3,
           peakActiveMembers: 3,
-          historicMembers: 3,
+          fame: 3,
         },
         contacts: initial.contacts.map((contact) =>
           contact.id === andrea.id ? andrea : contact,
@@ -806,7 +807,8 @@ describe("game engine: funnel", () => {
       },
     }, { type: "TICK", now: 3_000 });
 
-    expect(secondRenewal.contacts.find((contact) => contact.id === januaryMember.id)?.status).toBe("departed");
+    expect(secondRenewal.contacts.find((contact) => contact.id === januaryMember.id)).toBeUndefined();
+    expect(getArchivedContactCount(secondRenewal.historyArchive)).toBe(4);
     expect(secondRenewal.statistics.membersDeparted).toBe(2);
   });
 
@@ -935,7 +937,7 @@ describe("game engine: funnel", () => {
         ...initial.school,
         activeMembers: 2,
         peakActiveMembers: 2,
-        historicMembers: 2,
+        fame: 2,
         currentMonth: 18,
         nextFeeAt: 2_000,
       },

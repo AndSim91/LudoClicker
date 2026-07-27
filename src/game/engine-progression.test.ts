@@ -25,7 +25,7 @@ describe("game engine: progression", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 200, historicMembers: 1 },
+      school: { ...initial.school, euros: 200, fame: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
     const first = gameReducer(funded, {
@@ -49,7 +49,7 @@ describe("game engine: progression", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 750, historicMembers: 20 },
+      school: { ...initial.school, euros: 750, fame: 20 },
       upgrades: {
         ...initial.upgrades,
         "pre-event-check": 5,
@@ -88,7 +88,7 @@ describe("game engine: progression", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 800, historicMembers: 1 },
+      school: { ...initial.school, euros: 800, fame: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
     const faster = [2_000, 2_100, 2_200, 2_300, 2_400].reduce(
@@ -250,8 +250,8 @@ describe("game engine: progression", () => {
     expect(automated.school.followers).toBe(
       1_000 + automated.statistics.socialFollowersGained,
     );
-    expect(automated.school.historicMembers).toBe(
-      initial.school.historicMembers + automated.statistics.socialFollowersGained,
+    expect(automated.school.fame).toBe(
+      initial.school.fame + automated.statistics.socialFollowersGained,
     );
     expect(automated.statistics.eurosEarned).toBe(0);
     expect(automated.collaborators[0].mastery?.writing).toBe(1);
@@ -301,8 +301,8 @@ describe("game engine: progression", () => {
 
     expect(follower.followersGained).toBe(1);
     expect(follower.state.school.followers).toBe(1_001);
-    expect(follower.state.school.historicMembers).toBe(
-      initial.school.historicMembers + 1,
+    expect(follower.state.school.fame).toBe(
+      initial.school.fame + 1,
     );
     expect(noFollower.followersGained).toBe(0);
     expect(doubleFollower.followersGained).toBe(2);

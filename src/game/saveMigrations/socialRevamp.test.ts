@@ -22,6 +22,7 @@ describe("Social revamp save migration", () => {
     legacy.version = 50;
     legacy.school.activeMembers = 35;
     legacy.school.historicMembers = 123;
+    delete legacy.school.fame;
     legacy.school.followers = 999;
     legacy.unlocks.social = false;
     legacy.upgrades["updated-page"] = 4;
@@ -60,7 +61,8 @@ describe("Social revamp save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.unlocks.social).toBe(true);
     expect(migrated.school.followers).toBe(123);
-    expect(migrated.school.historicMembers).toBe(123);
+    expect(migrated.school.fame).toBe(123);
+    expect(migrated.school).not.toHaveProperty("historicMembers");
     expect(migrated.collaborators[0].assignment).toBeNull();
     expect(migrated.collaborators[0].mastery).toEqual({
       writing: 120,
@@ -87,6 +89,7 @@ describe("Social revamp save migration", () => {
     legacy.version = 50;
     legacy.school.activeMembers = 34;
     legacy.school.historicMembers = 200;
+    delete legacy.school.fame;
     legacy.school.followers = 80;
     legacy.unlocks.social = true;
 

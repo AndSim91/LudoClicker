@@ -489,7 +489,7 @@ describe("tournament calendar and immunity", () => {
         ...state.school,
         currentMonth: 12,
         nextFeeAt: 61_000,
-        historicMembers: GAME_CONFIG.tournamentUnlockMembers,
+        fame: GAME_CONFIG.tournamentUnlockMembers,
       },
     };
     const processed = gameReducer(december, { type: "TICK", now: 61_000 });

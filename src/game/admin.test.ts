@@ -23,7 +23,7 @@ describe("admin resource actions", () => {
     expect(state.school).toMatchObject({
       activeMembers: GAME_CONFIG.socialUnlockMembers,
       peakActiveMembers: GAME_CONFIG.socialUnlockMembers,
-      historicMembers: GAME_CONFIG.socialUnlockMembers,
+      fame: GAME_CONFIG.socialUnlockMembers,
       euros: 10,
       followers: GAME_CONFIG.socialUnlockMembers,
     });
@@ -126,7 +126,7 @@ describe("admin resource actions", () => {
     const initial = createInitialState(1_000);
     const legacyState = {
       ...initial,
-      school: { ...initial.school, activeMembers: 4, historicMembers: 4 },
+      school: { ...initial.school, activeMembers: 4, fame: 4 },
     };
     const repaired = gameReducer(legacyState, { type: "ADMIN_ADD_MEMBERS", amount: 1 });
 

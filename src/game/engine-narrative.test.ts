@@ -168,7 +168,7 @@ describe("game engine: narrative", () => {
     }));
     const eligible = {
       ...initial,
-      school: { ...initial.school, activeMembers: 80, historicMembers: 150, euros: 500 },
+      school: { ...initial.school, activeMembers: 80, fame: 150, euros: 500 },
       contacts: initial.contacts.map((contact, index) => index === 0
         ? {
             ...contact,
@@ -215,7 +215,7 @@ describe("game engine: narrative", () => {
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
     expect(founded.school.activeMembers).toBe(0);
-    expect(founded.school.historicMembers).toBe(150);
+    expect(founded.school.fame).toBe(150);
     expect(founded.collaborators).toEqual([]);
     expect(founded.contacts).toHaveLength(5);
     expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual([]);
@@ -239,7 +239,7 @@ describe("game engine: narrative", () => {
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
     expect(founded.player.writingPower).toBeCloseTo(1.375);
     expect(selectIncomePerMonth(founded)).toBeCloseTo(6.25);
-    expect(getPrestigeRequirements(founded)).toEqual({ historicMembers: 300, collaborators: 10, events: 50 });
+    expect(getPrestigeRequirements(founded)).toEqual({ fame: 300, collaborators: 10, events: 50 });
 
     const postPrestigeEvent = {
       id: "post-prestige-contacts",
@@ -280,7 +280,7 @@ describe("game engine: narrative", () => {
         euros: 2_500,
         activeMembers: 5,
         peakActiveMembers: 5,
-        historicMembers: 5,
+        fame: 5,
       },
     };
 
@@ -339,7 +339,7 @@ describe("game engine: narrative", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, historicMembers: 1 },
+      school: { ...initial.school, fame: 1 },
       contacts: initial.contacts.map((contact, index) => ({
         ...contact,
         status: (index < 4 ? "lost" : index === 4 ? "trialScheduled" : contact.status) as typeof contact.status,
@@ -387,7 +387,7 @@ describe("game engine: narrative", () => {
     };
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 10_000, historicMembers: 15 },
+      school: { ...initial.school, euros: 10_000, fame: 15 },
       emails: [sentEmail, activeEmail],
     };
 

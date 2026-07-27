@@ -50,7 +50,7 @@ function recordMilestones(
   elapsedMs: number,
   milestones: EarlyGameMilestones,
 ): void {
-  if (milestones.firstMemberMs === undefined && state.school.historicMembers > 0) {
+  if (milestones.firstMemberMs === undefined && state.school.fame > 0) {
     milestones.firstMemberMs = elapsedMs;
   }
   if (

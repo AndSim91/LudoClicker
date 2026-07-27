@@ -38,8 +38,8 @@ describe("long-term automated balance simulation", () => {
     expect(relaxed).toHaveLength(GAME_COUNT);
     expect(new Set(intense.map((result) => result.state.createdAt)).size).toBe(GAME_COUNT);
     expect(new Set(relaxed.map((result) => result.state.createdAt)).size).toBe(GAME_COUNT);
-    expect(intense.every((result) => result.state.school.historicMembers > 0)).toBe(true);
-    expect(relaxed.every((result) => result.state.school.historicMembers > 0)).toBe(true);
+    expect(intense.every((result) => result.state.school.fame > 0)).toBe(true);
+    expect(relaxed.every((result) => result.state.school.fame > 0)).toBe(true);
   });
 
   it("does not make the first school available before the intended session targets", () => {
@@ -69,7 +69,7 @@ describe("long-term automated balance simulation", () => {
       ...state,
       school: {
         ...state.school,
-        historicMembers: requirements.historicMembers - 1,
+        fame: requirements.fame - 1,
       },
       collaborators: Array.from({ length: requirements.collaborators }, (_, index) => ({
         id: `collaborator-${index}`,
@@ -90,7 +90,7 @@ describe("long-term automated balance simulation", () => {
 
     state = {
       ...state,
-      school: { ...state.school, historicMembers: requirements.historicMembers },
+      school: { ...state.school, fame: requirements.fame },
       tournaments: {
         ...state.tournaments,
         championsVictoryCurrentSchool: true,

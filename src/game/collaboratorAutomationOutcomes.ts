@@ -128,7 +128,7 @@ export function resolveSocialContentCycles(
     school: {
       ...state.school,
       followers,
-      historicMembers: state.school.historicMembers + followersGained,
+      fame: state.school.fame + followersGained,
     },
     statistics: {
       ...state.statistics,

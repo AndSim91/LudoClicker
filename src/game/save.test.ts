@@ -9,6 +9,7 @@ import { EMAIL_TEMPLATES } from "../content/emailTemplates";
 import { createSaveScheduler } from "./saveScheduler";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { SECRET_LEGENDARY_IDS } from "../content/secretLegendaries";
+import { getArchivedContactCount } from "./historyArchive";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -225,7 +226,7 @@ describe("local save", () => {
       school: {
         ...initial.school,
         activeMembers: legendaryMembers.length,
-        historicMembers: legendaryMembers.length,
+        fame: legendaryMembers.length,
       },
     }, 2_000);
 
@@ -235,7 +236,7 @@ describe("local save", () => {
       .toEqual(legendaryMembers.map((contact) => contact.id));
   });
 
-  it("repairs old duplicated Legendary contacts without deleting linked records", () => {
+  it("drops an obsolete Legendary duplicate while preserving the enrolled record", () => {
     const initial = createInitialState(1_000, "", false);
     const base = initial.contacts[0];
     const lostEva = {
@@ -255,7 +256,7 @@ describe("local save", () => {
     saveGame({
       ...initial,
       contacts: [lostEva, enrolledEva, ...initial.contacts.slice(1)],
-      school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+      school: { ...initial.school, activeMembers: 1, fame: 1 },
     }, 2_000);
 
     const loaded = loadGame(3_000);
@@ -263,13 +264,14 @@ describe("local save", () => {
       contact.firstName === "Eva" && contact.lastName === "Parodi",
     );
 
-    expect(evaContacts).toHaveLength(2);
-    expect(evaContacts.filter((contact) =>
-      contact.specialProfileId === "eva-parodi" && contact.rarity === "legendary",
-    )).toHaveLength(1);
-    const repairedDuplicate = evaContacts.find((contact) => contact.id === "saved-eva-lost");
-    expect(repairedDuplicate?.rarity).toBe("ultra-rare");
-    expect(repairedDuplicate?.specialProfileId).toBeUndefined();
+    expect(evaContacts).toHaveLength(1);
+    expect(evaContacts[0]).toMatchObject({
+      id: "saved-eva-enrolled",
+      specialProfileId: "eva-parodi",
+      rarity: "legendary",
+      status: "enrolled",
+    });
+    expect(getArchivedContactCount(loaded.historyArchive)).toBe(1);
   });
 
   it("falls back to a fresh state when the save is corrupt", () => {
@@ -708,7 +710,7 @@ describe("local save", () => {
         ...initial.school,
         euros: 1_500,
         activeMembers: 5,
-        historicMembers: 5,
+        fame: 5,
         peakActiveMembers: 5,
       },
     }, {
@@ -755,7 +757,7 @@ describe("local save", () => {
     const legacy = JSON.parse(JSON.stringify({
       ...initial,
       version: 21,
-      school: { ...initial.school, activeMembers: 70, historicMembers: 100 },
+      school: { ...initial.school, activeMembers: 70, fame: 100 },
       statistics: { ...initial.statistics, membersDeparted: 30 },
       contacts: Array.from({ length: 30 }, (_, index) => ({
         ...initial.contacts[index % initial.contacts.length],
@@ -763,6 +765,8 @@ describe("local save", () => {
         status: "departed",
       })),
     }));
+    legacy.school.historicMembers = legacy.school.fame;
+    delete legacy.school.fame;
     delete legacy.school.peakActiveMembers;
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
 
@@ -942,6 +946,7 @@ describe("local save", () => {
     legacy.version = 32;
     legacy.school.activeMembers = 1;
     legacy.school.historicMembers = 3;
+    delete legacy.school.fame;
     legacy.contacts = legacy.contacts.map((contact: { status: string }, index: number) => ({
       ...contact,
       status: index < 3 ? "enrolled" : contact.status,
@@ -971,7 +976,8 @@ describe("local save", () => {
     expect(migrated.narrative.history).toHaveLength(GAME_CONFIG.narrativeHistoryLimit);
     expect(migrated.narrative.history[0].id).toBe("story-5");
     expect(migrated.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
-    expect(migrated.contacts.filter((contact) => contact.status === "departed")).toHaveLength(2);
+    expect(migrated.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
+    expect(getArchivedContactCount(migrated.historyArchive)).toBe(2);
   });
 
   it("repairs enrolled contacts left behind by missed renewals in version 33 saves", () => {
@@ -979,6 +985,7 @@ describe("local save", () => {
     legacy.version = 33;
     legacy.school.activeMembers = 1;
     legacy.school.historicMembers = 3;
+    delete legacy.school.fame;
     legacy.contacts = legacy.contacts.map((contact: { status: string }, index: number) => ({
       ...contact,
       status: index < 3 ? "enrolled" : contact.status,
@@ -1001,7 +1008,8 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.school.activeMembers).toBe(1);
     expect(migrated.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(1);
-    expect(migrated.contacts.filter((contact) => contact.status === "departed")).toHaveLength(2);
+    expect(migrated.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
+    expect(getArchivedContactCount(migrated.historyArchive)).toBe(2);
     expect(migrated.statistics.membersDeparted).toBe(2);
   });
 

@@ -40,7 +40,7 @@ function stateWithOneEnrolledAndSevenFailed(): GameState {
       ...initial.school,
       activeMembers: 1,
       peakActiveMembers: 1,
-      historicMembers: 1,
+      fame: 1,
     },
     legendaryCollaborators: {
       ...initial.legendaryCollaborators,

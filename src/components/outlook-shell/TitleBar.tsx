@@ -19,7 +19,7 @@ export function TitleBar({
   now: providedNow,
   contactsAwaitingEmail,
   activeMembers,
-  historicMembers,
+  fame,
   followers,
   euros,
   equipment,
@@ -31,7 +31,7 @@ export function TitleBar({
   now?: number;
   contactsAwaitingEmail: number;
   activeMembers: number;
-  historicMembers: number;
+  fame: number;
   followers?: number;
   euros: number;
   equipment: GameState["equipment"];
@@ -116,12 +116,12 @@ export function TitleBar({
       </span>
       <span
         className="title-resource title-fame"
-        aria-label={`Fama della scuola: ${formatExactNumber(historicMembers)}`}
+        aria-label={`Fama della scuola: ${formatExactNumber(fame)}`}
       >
         <Icon name="flag" />
         <small>Fama della scuola</small>
-        <strong title={formatExactNumber(historicMembers)}>
-          {formatCompactNumber(historicMembers)}
+        <strong title={formatExactNumber(fame)}>
+          {formatCompactNumber(fame)}
         </strong>
       </span>
       <button

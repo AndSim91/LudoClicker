@@ -157,7 +157,7 @@ describe("MessageList", () => {
           school: {
             ...initial.school,
             activeMembers: GAME_CONFIG.tournamentUnlockMembers,
-            historicMembers: GAME_CONFIG.tournamentUnlockMembers,
+            fame: GAME_CONFIG.tournamentUnlockMembers,
           },
           messages: [tournamentMessage, ...initial.messages],
         }}

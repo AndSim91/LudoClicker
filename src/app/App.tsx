@@ -358,7 +358,7 @@ export function App() {
           nextMonthAt={state.school.nextFeeAt}
           contactsAwaitingEmail={selectContactsAwaitingEmail(state)}
           activeMembers={state.school.activeMembers}
-          historicMembers={state.school.historicMembers}
+          fame={state.school.fame}
           followers={state.unlocks.social ? state.school.followers : undefined}
           euros={state.school.euros}
           isPaused={isPaused}

@@ -21,7 +21,7 @@ function stateWithInstructor(pagosport: number) {
   };
   return {
     ...initial,
-    school: { ...initial.school, currentMonth: 9, activeMembers: 1, historicMembers: 15, euros: 1_000 },
+    school: { ...initial.school, currentMonth: 9, activeMembers: 1, fame: 15, euros: 1_000 },
     contacts: [contact, ...initial.contacts.slice(1)],
     collaborators: [collaborator],
     unlocks: { ...initial.unlocks, forms: true, collaborators: true },

@@ -28,7 +28,7 @@ describe("buyUpgrade prerequisites", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
-      school: { ...initial.school, euros: 10_000, historicMembers: 100 },
+      school: { ...initial.school, euros: 10_000, fame: 100 },
     };
 
     expect(buyUpgrade(state, "quick-phrases")).toBe(state);
@@ -47,7 +47,7 @@ describe("buyUpgrade prerequisites", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 20_000, historicMembers: 15 },
+      school: { ...initial.school, euros: 20_000, fame: 15 },
     };
 
     const arena = buyUpgrade(funded, "technical-arena");
@@ -91,7 +91,7 @@ describe("buyUpgrade prerequisites", () => {
     };
     const state = {
       ...initial,
-      school: { ...initial.school, euros: 200_000, historicMembers: 15 },
+      school: { ...initial.school, euros: 200_000, fame: 15 },
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,

@@ -47,7 +47,7 @@ function createTrialState({
         ...initial.school,
         activeMembers: 1,
         peakActiveMembers: 1,
-        historicMembers: 1,
+        fame: 1,
       },
       contacts: initial.contacts.map((candidate) =>
         candidate.id === contact.id ? contact : candidate

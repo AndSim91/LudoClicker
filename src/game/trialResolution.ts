@@ -177,7 +177,7 @@ export function resolveStartedTrialBatch(
     }
 
     if (enrolled) {
-      const firstEnrollment = stateBeforeTrial.school.historicMembers === 0;
+      const firstEnrollment = stateBeforeTrial.school.fame === 0;
       const nextActiveMembers = nextState.school.activeMembers + 1;
       const socialUnlockedNow = !stateBeforeTrial.unlocks.social &&
         hasSocialMemberRequirement(nextActiveMembers);
@@ -190,7 +190,7 @@ export function resolveStartedTrialBatch(
             nextState.school.peakActiveMembers,
             nextState.school.activeMembers + 1,
           ),
-          historicMembers: nextState.school.historicMembers + 1,
+          fame: nextState.school.fame + 1,
           euros: nextState.school.euros + enrollmentBonus,
         },
         unlocks: {

@@ -110,7 +110,7 @@ describe("instructor branch", () => {
       "divine-touch",
       "project-x",
     ]);
-    expect(instructors.map((definition) => definition.requiredHistoricMembers)).toEqual([
+    expect(instructors.map((definition) => definition.requiredFame)).toEqual([
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     expect(instructors.map((definition) =>

@@ -210,9 +210,9 @@ sorgente di entrate ricorrenti. Non sono spendibili.
 
 - **Iscritti attivi:** membri attuali della scuola; possono aumentare o
   diminuire tramite eventi narrativi.
-- **Fama della scuola:** totale cumulativo delle iscrizioni ottenute nella
-  partita e nei cicli di prestigio. Non diminuisce quando un iscritto lascia o
-  viene rimosso dalla scuola.
+- **Fama della scuola:** punteggio cumulativo ottenuto da iscrizioni, Follower e
+  ricompense esplicite. Attraversa i cicli di prestigio e non diminuisce quando
+  un iscritto lascia o viene rimosso dalla scuola.
 - **Ultra Rari:** contatti rossi che diventano Collaboratori delle Onde dopo il
   Corso Y.
 
@@ -634,11 +634,10 @@ di produzione. L'acquisto è immediato per non introdurre microgestione
 logistica; la presentazione conserva un tono goliardico senza alterare i
 riferimenti reali del produttore.
 
-La fama della scuola è misurata attraverso il **record massimo di iscritti
-attivi mai raggiunto** e sblocca progressivamente cinque tier di potenzialità:
-**Molto bassa**, **Bassa**, **Media**, **Alta** e **Altissima**. Il record non
-diminuisce quando alcuni iscritti lasciano la scuola: se la scuola raggiunge 100
-iscritti e torna a 70, la fama resta 100 fino al superamento di quel picco.
+La **Fama della scuola** è il punteggio cumulativo permanente ottenuto da
+iscrizioni, Follower e ricompense esplicite. Sblocca progressivamente cinque
+tier di potenzialità: **Molto bassa**, **Bassa**, **Media**, **Alta** e
+**Altissima**. Non diminuisce quando alcuni iscritti lasciano la scuola.
 All'inizio sono visibili soltanto Volantinaggio e Sparring al parco;
 l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra
 previsioni numeriche sui contatti.
@@ -1158,8 +1157,10 @@ Regole:
   e annulla definitivamente l'iscrizione senza rimborso e senza ridurre la Fama
   della scuola. La formazione personale e le lezioni tenute dal collaboratore
   rimosso vengono interrotte;
-- gli iscritti non leggendari rimossi non possono tornare, ma email ed eventi
-  narrativi già avvenuti restano nello storico. I Leggendari conservano Forme,
+- gli iscritti non leggendari rimossi non possono tornare. La loro scheda viene
+  eliminata appena nessuna email, prova o attività ancora conservata la
+  referenzia; statistiche aggregate, email ed eventi narrativi già avvenuti
+  restano nello storico. I Leggendari conservano Forme,
   attestati, Maestria, Arena, Stile, esperienza nei tornei, Corsi Agonisti e
   anzianità; perdono soltanto incarico e automazione. I Leggendari ordinari
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
@@ -1932,9 +1933,10 @@ Il modulo appare come una procedura amministrativa ricevuta via email.
 - parte dell'attrezzatura e degli Euro locali;
 - collaboratori che rimangono assegnati alla scuola precedente.
 
-Gli iscritti della scuola precedente non vengono cancellati: passano allo
-storico e, nel modello provvisorio, contribuiscono a una piccola rendita di
-rete.
+Gli iscritti della scuola precedente non vengono conservati come schede
+individuali. La scuola fondata registra soltanto il numero di membri al
+trasferimento; Fama e statistiche cumulative restano disponibili senza creare
+uno storico nominativo.
 
 ### 17.5 Cosa rimane
 

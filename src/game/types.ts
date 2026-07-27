@@ -637,7 +637,7 @@ export interface GameState {
     specialization: SchoolSpecialization;
     activeMembers: number;
     peakActiveMembers: number;
-    historicMembers: number;
+    fame: number;
     euros: number;
     followers: number;
     currentMonth: number;

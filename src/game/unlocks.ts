@@ -17,7 +17,7 @@ export function unlockSocialIfEligible(state: GameState): GameState {
       // I follower iniziali fotografano la Fama gia ottenuta. Non generano
       // nuova Fama, altrimenti lo sblocco conterebbe due volte lo stesso
       // progresso.
-      followers: state.school.historicMembers,
+      followers: state.school.fame,
     },
     unlocks: {
       ...state.unlocks,

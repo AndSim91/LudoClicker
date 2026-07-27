@@ -58,7 +58,7 @@ export function isTrialEnrollmentGuaranteed(
     (trialLossStreak === -1 ? context.recentTrials.length : trialLossStreak) >=
     GAME_CONFIG.conversionGuaranteeFailures;
   return (
-    state.school.historicMembers === 0 ||
+    state.school.fame === 0 ||
     protectedEnrollment ||
     getEnrollmentChance(state, trialContact?.rarity ?? "common") >= 1
   );

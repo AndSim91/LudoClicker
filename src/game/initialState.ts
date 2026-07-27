@@ -45,7 +45,7 @@ export function createInitialState(
       specialization: "generale",
       activeMembers: 0,
       peakActiveMembers: 0,
-      historicMembers: 0,
+      fame: 0,
       euros: 0,
       followers: 0,
       currentMonth: 9,

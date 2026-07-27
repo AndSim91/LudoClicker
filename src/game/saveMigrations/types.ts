@@ -1,5 +1,10 @@
 import type { Collaborator, GameState } from "../types";
 
+export type MigratableSchool = Partial<GameState["school"]> & {
+  /** Campo usato dai salvataggi fino alla versione 64. */
+  historicMembers?: number;
+};
+
 type LegacyCollaborator = Omit<Collaborator, "assignment" | "mastery"> & {
   assignment: Collaborator["assignment"] | "social" | "lessons";
   autoTeachingEnabled?: boolean;
@@ -11,12 +16,13 @@ type LegacyCollaborator = Omit<Collaborator, "assignment" | "mastery"> & {
 
 export type MigratableState = Omit<
   Partial<GameState>,
-  "activities" | "automation" | "collaborators" | "statistics" | "upgrades"
+  "activities" | "automation" | "collaborators" | "school" | "statistics" | "upgrades"
 > & {
   version?: number;
   saveCompatibilityVersion?: number;
   automation?: Partial<GameState["automation"]> & { socialBuffer?: number };
   collaborators?: LegacyCollaborator[];
+  school?: MigratableSchool;
   statistics?: Partial<GameState["statistics"]> & {
     socialTrials?: number;
     socialCampaigns?: number;

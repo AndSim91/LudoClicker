@@ -350,7 +350,7 @@ describe("tournament reward effects", () => {
       school: {
         ...initial.school,
         activeMembers: initial.contacts.length,
-        historicMembers: initial.contacts.length,
+        fame: initial.contacts.length,
       },
     };
   }
@@ -387,7 +387,7 @@ describe("tournament reward effects", () => {
 
     expect(rewarded.school.euros).toBe(state.school.euros + 750);
     expect(rewarded.school.followers).toBe(state.school.followers + 7);
-    expect(rewarded.school.historicMembers).toBe(state.school.historicMembers + 7);
+    expect(rewarded.school.fame).toBe(state.school.fame + 7);
     expect(rewarded.statistics.socialFollowersGained)
       .toBe(state.statistics.socialFollowersGained);
   });

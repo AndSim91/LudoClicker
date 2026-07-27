@@ -90,7 +90,7 @@ export function foundSchool(
       accentColor: details.accentColor,
       motto: details.motto.trim(),
       specialization: details.specialization,
-      historicMembers: state.school.historicMembers,
+      fame: state.school.fame,
     },
     network: {
       reputation: state.network.reputation + 1,

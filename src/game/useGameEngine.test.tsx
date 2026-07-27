@@ -117,7 +117,7 @@ describe("useGameEngine pause", () => {
         ...initial.school,
         activeMembers: 400,
         peakActiveMembers: 400,
-        historicMembers: 400,
+        fame: 400,
         euros: 100_000,
       },
       equipment: {

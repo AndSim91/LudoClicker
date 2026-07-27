@@ -102,7 +102,7 @@ describe("EventsView", () => {
             ...initial.school,
             activeMembers: 60,
             peakActiveMembers: 60,
-            historicMembers: 60,
+            fame: 60,
           },
         }}
         onStart={() => undefined}
@@ -127,7 +127,7 @@ describe("EventsView", () => {
             ...initial.school,
             activeMembers: 70,
             peakActiveMembers: 70,
-            historicMembers: 100,
+            fame: 100,
           },
         }}
         onStart={() => undefined}
@@ -251,7 +251,7 @@ describe("EventsView", () => {
           school: {
             ...initial.school,
             activeMembers: 20,
-            historicMembers: 20,
+            fame: 20,
             nextFeeAt: Date.now() + 60_000,
           },
           activities: {
@@ -282,7 +282,7 @@ describe("EventsView", () => {
             ...initial.school,
             activeMembers: 10,
             peakActiveMembers: 10,
-            historicMembers: 10,
+            fame: 10,
             euros: 240,
           },
           equipment: { ...initial.equipment, availableSwords: 5, damagedSwords: 1 },

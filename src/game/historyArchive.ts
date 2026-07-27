@@ -100,9 +100,7 @@ export function compactGameHistory(state: GameState): GameState {
     GAME_CONFIG.recentCompletedEventsLimit,
     (event) => event.status === "completed",
   );
-  const shouldCompactContacts = hasMoreThan(
-    state.contacts,
-    GAME_CONFIG.recentTerminalContactsLimit,
+  const shouldCompactContacts = state.contacts.some(
     (contact) => contact.status === "lost" || contact.status === "departed",
   );
   if (!shouldCompactEmails && !shouldCompactTrials && !shouldCompactEvents && !shouldCompactContacts) {
@@ -164,15 +162,9 @@ export function compactGameHistory(state: GameState): GameState {
   for (const trial of retainedTrials) referencedContactIds.add(trial.contactId);
   for (const collaborator of state.collaborators) referencedContactIds.add(collaborator.contactId);
 
-  const terminalContactIds = newestIds(
-    state.contacts,
-    GAME_CONFIG.recentTerminalContactsLimit,
-    (contact) => contact.status === "lost" || contact.status === "departed",
-    (contact) => contact.id,
-  );
   const retainedContacts = state.contacts.filter((contact) => {
     const terminal = contact.status === "lost" || contact.status === "departed";
-    if (!terminal || referencedContactIds.has(contact.id) || terminalContactIds.has(contact.id)) {
+    if (!terminal || referencedContactIds.has(contact.id)) {
       return true;
     }
     archive.contactsBySource[contact.source].total += 1;

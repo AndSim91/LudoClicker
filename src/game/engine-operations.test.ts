@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PROSPECT_EMAIL_PROVIDERS } from "../content/prospectDirectory";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { GAME_CONFIG } from "./config";
+import { getCurrentSchoolContactCount } from "./historyArchive";
 import {
   createInitialState,
   gameReducer,
@@ -126,7 +127,8 @@ describe("game engine: operations", () => {
     expect(completed.acquisitionEvents[0].contactReward).toBe(0);
     expect(completed.acquisitionEvents[0].status).toBe("completed");
     expect(completed.statistics.eventsCompleted).toBe(1);
-    expect(completed.contacts).toHaveLength(state.contacts.length);
+    expect(completed.contacts).toHaveLength(1);
+    expect(getCurrentSchoolContactCount(completed)).toBe(state.contacts.length);
     expect(completed.messages).toHaveLength(messagesBeforeCompletion.length + 1);
     expect(completed.messages[0].subject).toBe("Attività operative disponibili");
   });
@@ -162,7 +164,7 @@ describe("game engine: operations", () => {
       school: {
         ...initial.school,
         activeMembers: 5,
-        historicMembers: 5,
+        fame: 5,
         euros: 1_500,
       },
     };
@@ -219,7 +221,7 @@ describe("game engine: operations", () => {
       school: {
         ...initial.school,
         activeMembers: 20,
-        historicMembers: 20,
+        fame: 20,
         euros: 4_000,
       },
       equipment: {
@@ -257,7 +259,7 @@ describe("game engine: operations", () => {
     const state = createInitialState(1_000);
     const notFamousEnough = {
       ...state,
-      school: { ...state.school, euros: 1_000, activeMembers: 4, peakActiveMembers: 4, historicMembers: 4 },
+      school: { ...state.school, euros: 1_000, activeMembers: 4, peakActiveMembers: 4, fame: 4 },
     };
     const blocked = gameReducer(notFamousEnough, {
       type: "START_ACQUISITION_EVENT",
@@ -266,7 +268,7 @@ describe("game engine: operations", () => {
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 1_500, activeMembers: 5, peakActiveMembers: 5, historicMembers: 5 },
+      school: { ...state.school, euros: 1_500, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",
@@ -287,7 +289,7 @@ describe("game engine: operations", () => {
         ...initial.school,
         activeMembers: 70,
         peakActiveMembers: 70,
-        historicMembers: 100,
+        fame: 100,
         euros: 7_500,
       },
       equipment: { ...initial.equipment, totalSwords: 20, availableSwords: 20 },
@@ -300,7 +302,7 @@ describe("game engine: operations", () => {
     });
 
     expect(started.acquisitionEvents).toHaveLength(1);
-    expect(started.school.historicMembers).toBe(100);
+    expect(started.school.fame).toBe(100);
   });
 
   it("repairs worn equipment by spending euros outside events", () => {
@@ -388,7 +390,7 @@ describe("game engine: operations", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 2_000, historicMembers: 20 },
+      school: { ...initial.school, euros: 2_000, fame: 20 },
       upgrades: {
         ...initial.upgrades,
         "pre-event-check": 5,
@@ -611,7 +613,7 @@ describe("game engine: operations", () => {
     };
     const reenrolled = gameReducer({
       ...returning,
-      school: { ...returning.school, historicMembers: 1 },
+      school: { ...returning.school, fame: 1 },
       contacts: returning.contacts.map((contact) =>
         contact.id === returnedContact.id
           ? { ...contact, status: "trialScheduled" as const }

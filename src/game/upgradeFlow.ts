@@ -16,7 +16,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
     currentLevel >= definition.maxLevel ||
     (definition.requiredUnlock !== undefined &&
       !state.unlocks[definition.requiredUnlock]) ||
-    state.school.historicMembers < definition.requiredHistoricMembers ||
+    state.school.fame < definition.requiredFame ||
     !hasCompletedUpgradePrerequisites(state.upgrades, definition)
   ) {
     return state;

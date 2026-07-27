@@ -167,8 +167,8 @@ function enrollLegendary(
       ...state.school,
       activeMembers,
       peakActiveMembers: Math.max(state.school.peakActiveMembers, activeMembers),
-      historicMembers:
-        state.school.historicMembers + 1 + GAME_CONFIG.chroniclesLegendaryFameReward,
+      fame:
+        state.school.fame + 1 + GAME_CONFIG.chroniclesLegendaryFameReward,
     },
     unlocks: {
       ...state.unlocks,

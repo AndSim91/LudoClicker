@@ -151,7 +151,7 @@ describe("event contact rewards", () => {
         ...initial.school,
         activeMembers,
         peakActiveMembers: 5_000,
-        historicMembers: 5_000,
+        fame: 5_000,
       },
     });
 
@@ -161,7 +161,7 @@ describe("event contact rewards", () => {
         ...initial.school,
         activeMembers: 10,
         peakActiveMembers: 10,
-        historicMembers: 10,
+        fame: 10,
       },
     })).toBe(1);
     expect(getEventMarketAvailability(withMembers(100))).toBeCloseTo(0.9174, 4);

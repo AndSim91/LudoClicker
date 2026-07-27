@@ -20,7 +20,7 @@ describe("UpgradesView", () => {
       <UpgradesView
         state={{
           ...initial,
-          school: { ...initial.school, historicMembers: 5 },
+          school: { ...initial.school, fame: 5 },
           unlocks: { ...initial.unlocks, social: true },
         }}
         onBuyUpgrade={() => undefined}
@@ -90,7 +90,7 @@ describe("UpgradesView", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
-      school: { ...initial.school, euros: 10_000, historicMembers: 100 },
+      school: { ...initial.school, euros: 10_000, fame: 100 },
     };
     const { rerender } = render(
       <UpgradesView state={state} onBuyUpgrade={() => undefined} />,

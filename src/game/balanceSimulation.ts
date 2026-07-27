@@ -95,7 +95,7 @@ function buyOneAffordableUpgrade(state: GameState, now: number): GameState {
     const cost = getUpgradeCost(definition, level, state.network.schools.length);
     if (
       level < definition.maxLevel &&
-      state.school.historicMembers >= definition.requiredHistoricMembers &&
+      state.school.fame >= definition.requiredFame &&
       state.school.euros >= cost
     ) {
       return dispatch(state, { type: "BUY_UPGRADE", upgradeId, now });

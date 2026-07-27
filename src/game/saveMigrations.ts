@@ -1,4 +1,5 @@
-import { INITIAL_SAVE_COMPATIBILITY_VERSION } from "./config";
+import { GAME_CONFIG, INITIAL_SAVE_COMPATIBILITY_VERSION } from "./config";
+import { compactGameHistory } from "./historyArchive";
 import { migrateContentState } from "./saveMigrations/content";
 import { migrateCoreState } from "./saveMigrations/core";
 import { normalizeLegacySave } from "./saveMigrations/normalize";
@@ -26,7 +27,9 @@ import { migrateSocialAudienceState } from "./saveMigrations/socialAudience";
 import { migrateSecretLegendaryAppearanceState } from "./saveMigrations/secretLegendaryAppearances";
 import { migrateLightInflationState } from "./saveMigrations/lightInflation";
 import { migrateLightInflationVisibilityState } from "./saveMigrations/lightInflationVisibility";
+import { migrateFameState } from "./saveMigrations/fame";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
+import type { GameState } from "./types";
 
 const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateCoreState,
@@ -55,7 +58,21 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateSecretLegendaryAppearanceState,
   migrateLightInflationState,
   migrateLightInflationVisibilityState,
+  migrateFameState,
 ];
+
+function canCompactHistory(state: MigratableState): boolean {
+  return state.version === GAME_CONFIG.version &&
+    Array.isArray(state.contacts) &&
+    Array.isArray(state.emails) &&
+    Array.isArray(state.pendingEmailOutcomes) &&
+    Array.isArray(state.scheduledTrials) &&
+    Array.isArray(state.acquisitionEvents) &&
+    Array.isArray(state.collaborators) &&
+    Boolean(state.historyArchive?.contactsBySource) &&
+    Boolean(state.historyArchive?.emails) &&
+    Boolean(state.historyArchive?.completedEventsByDefinition);
+}
 
 export function migrate(value: unknown): unknown {
   if (!value || typeof value !== "object") return value;
@@ -67,10 +84,13 @@ export function migrate(value: unknown): unknown {
   const normalized = normalizeLegacySave(migrated);
   // Saves created before the compatibility gate are part of the first
   // compatibility family and can continue through the explicit migrations.
-  return normalized.saveCompatibilityVersion === undefined
+  const compatible = normalized.saveCompatibilityVersion === undefined
     ? {
         ...normalized,
         saveCompatibilityVersion: INITIAL_SAVE_COMPATIBILITY_VERSION,
       }
     : normalized;
+  return canCompactHistory(compatible)
+    ? compactGameHistory(compatible as GameState)
+    : compatible;
 }

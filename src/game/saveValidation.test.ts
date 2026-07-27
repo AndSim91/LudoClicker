@@ -11,7 +11,7 @@ describe("save validation at extreme scale", () => {
         ...initial.school,
         activeMembers: 1_000_000_000,
         peakActiveMembers: 1_000_000_000,
-        historicMembers: 1_000_000_000,
+        fame: 1_000_000_000,
         followers: 1_000_000_000,
         euros: 2_000_000_000_000_000,
       },

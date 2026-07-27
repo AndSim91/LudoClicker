@@ -20,9 +20,9 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
       getShortGoalProgress(state) >= state.shortGoal.target
     );
   }
-  if (view === "contacts") return state.school.historicMembers > 0;
+  if (view === "contacts") return state.school.fame > 0;
   if (view === "tournaments") {
-    return state.school.historicMembers >= GAME_CONFIG.tournamentUnlockMembers;
+    return state.school.fame >= GAME_CONFIG.tournamentUnlockMembers;
   }
   if (view === "upgrades") return state.unlocks.upgrades;
   return false;
@@ -31,7 +31,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
 export function getPrestigeRequirements(state: GameState) {
   const cycle = state.network.schools.length + 1;
   return {
-    historicMembers: GAME_CONFIG.prestigeHistoricMembers * cycle,
+    fame: GAME_CONFIG.prestigeFame * cycle,
     collaborators: GAME_CONFIG.prestigeCollaborators + (cycle - 1) * 2,
     events: GAME_CONFIG.prestigeEvents * cycle,
   };
@@ -40,7 +40,7 @@ export function getPrestigeRequirements(state: GameState) {
 export function canFoundSchool(state: GameState): boolean {
   const requirements = getPrestigeRequirements(state);
   return (
-    state.school.historicMembers >= requirements.historicMembers &&
+    state.school.fame >= requirements.fame &&
     state.collaborators.length >= requirements.collaborators &&
     state.statistics.eventsCompleted >= requirements.events &&
     state.tournaments.championsVictoryCurrentSchool &&

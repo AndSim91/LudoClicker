@@ -106,7 +106,7 @@ function createExtremeState(size: number): GameState {
       ...base.school,
       activeMembers: LOGICAL_MEMBERS,
       peakActiveMembers: LOGICAL_MEMBERS,
-      historicMembers: LOGICAL_MEMBERS,
+      fame: LOGICAL_MEMBERS,
       euros: EXTREME_EUROS,
       nextFeeAt: NOW + 60_000,
     },
@@ -201,7 +201,7 @@ function runBenchmark(size: number): BenchmarkRow {
   expect(state.school).toMatchObject({
     activeMembers: LOGICAL_MEMBERS,
     peakActiveMembers: LOGICAL_MEMBERS,
-    historicMembers: LOGICAL_MEMBERS,
+    fame: LOGICAL_MEMBERS,
     euros: EXTREME_EUROS,
   });
   expect(state.statistics.contactsAcquired).toBe(LOGICAL_CONTACTS);

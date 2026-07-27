@@ -24,7 +24,7 @@ describe("game unlock rules", () => {
       school: {
         ...initial.school,
         activeMembers: GAME_CONFIG.socialUnlockMembers,
-        historicMembers: 47,
+        fame: 47,
       },
     };
 

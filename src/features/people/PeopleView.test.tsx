@@ -1068,7 +1068,7 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1, historicMembers: 1 },
+          school: { ...initial.school, activeMembers: 1, fame: 1 },
           contacts: initial.contacts.map((contact) =>
             contact.id === enrolled.id ? enrolled : contact,
           ),
