@@ -8,7 +8,7 @@ import type {
 } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { FormLogoStrip } from "../people/PersonPresentation";
-import { participantName } from "./tournamentPresentation";
+import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
 
 interface SchoolPreliminaryResultsProps {
   preliminary: SchoolTournamentPreliminary;
@@ -93,8 +93,7 @@ function PreliminaryRanking({
                 <tr key={participant.id}>
                   <td>{index + 1}</td>
                   <th scope="row">
-                    <strong>{participantName(participant)}</strong>
-                    <small>Qualificazione {label}</small>
+                    <TournamentParticipantIdentity participant={participant} />
                   </th>
                   <td>
                     <span

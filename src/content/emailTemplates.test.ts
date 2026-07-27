@@ -121,7 +121,7 @@ describe("email template archive", () => {
     expect(formatEmailSignature("Legend", "Ordine delle Onde", "Genova")).toBe(
       "Legend, Ordine delle Onde - Genova",
     );
-    expect(formatEmailSignature("Legend", "Ordine delle Onde — Genova", "Genova")).toBe(
+    expect(formatEmailSignature("Legend", "Ordine delle Onde - Genova", "Genova")).toBe(
       "Legend, Ordine delle Onde - Genova",
     );
     expect(

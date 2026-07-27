@@ -5,6 +5,7 @@ import {
   SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE,
   getChroniclesLegendaryIds,
   getSecretLegendaryIdsForTournament,
+  type SecretLegendaryProfile,
 } from "../content/secretLegendaries";
 import { getNpcSchoolPool, getTournamentSchool } from "../content/tournamentSchools";
 import {
@@ -782,6 +783,16 @@ function buildQualifiers(
   return qualifiers;
 }
 
+export function isSecretLegendaryDefeated(
+  specialty: SecretLegendaryProfile["specialty"],
+  lostToOwnedInArena: boolean,
+  beatenInStyle: boolean,
+): boolean {
+  if (specialty === "arena") return lostToOwnedInArena;
+  if (specialty === "style") return beatenInStyle;
+  return lostToOwnedInArena || beatenInStyle;
+}
+
 function findDefeatedSecretLegendaries(
   participants: readonly TournamentParticipant[],
   matches: readonly TournamentMatch[],
@@ -801,7 +812,15 @@ function findDefeatedSecretLegendaries(
     );
     const secretStyleIndex = styleRanking.indexOf(participant.id);
     const beatenInStyle = styleRanking.slice(0, secretStyleIndex).some((id) => ownedIds.has(id));
-    if (lostToOwnedInArena || beatenInStyle) defeated.add(participant.secretLegendaryId);
+    if (
+      isSecretLegendaryDefeated(
+        SECRET_LEGENDARIES[participant.secretLegendaryId].specialty,
+        lostToOwnedInArena,
+        beatenInStyle,
+      )
+    ) {
+      defeated.add(participant.secretLegendaryId);
+    }
   }
   return [...defeated];
 }

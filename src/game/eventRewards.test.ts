@@ -229,4 +229,24 @@ describe("event contact rewards", () => {
 
     expect(rescued).toMatchObject({ baseAmount: 0, bonusAmount: 1, amount: 1 });
   });
+
+  it("replaces zero with one while the school has fewer than four  collaborators", () => {
+    const initial = createInitialState(1_000);
+    const zeroRewardDefinition = {
+      ...sparring,
+      contactOutcomes: [{ weight: 1, min: 0, max: 0 }],
+    };
+    const withCollaborators = (count: number): GameState => ({
+      ...initial,
+      collaborators: Array.from({ length: count }, (_, index) => ({
+        ...eventCollaborator(index),
+        assignment: null,
+      })),
+    });
+
+    expect([0, 1, 2].map((count) =>
+      rollEventContactReward(withCollaborators(count), zeroRewardDefinition).amount
+    )).toEqual([1, 1, 1]);
+    expect(rollEventContactReward(withCollaborators(4), zeroRewardDefinition).amount).toBe(0);
+  });
 });

@@ -18,8 +18,10 @@ import {
 } from "./ChroniclesTournamentLoading";
 import { TournamentOverview } from "./TournamentOverview";
 import { TournamentResults } from "./TournamentResults";
+import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
+import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
 import { useVirtualRows } from "../../shared/useVirtualRows";
-import { levelShortLabel, participantName, type TournamentTab } from "./tournamentPresentation";
+import { levelShortLabel, type TournamentTab } from "./tournamentPresentation";
 
 const TOURNAMENT_HALL_ROW_HEIGHT = 274;
 
@@ -91,7 +93,7 @@ function TournamentHallDiscipline({
           {entries.map((entry) => (
             <li key={entry.id} className={entry.position === 1 ? "is-first" : ""}>
               <b>{entry.position}°</b>
-              <strong>{participantName(entry.participant)}</strong>
+              <TournamentParticipantIdentity participant={entry.participant} />
               <small>{entry.metric}</small>
             </li>
           ))}
@@ -106,11 +108,14 @@ function TournamentHallDiscipline({
 const TournamentsHall = memo(function TournamentsHall({
   results,
   schoolName,
+  schoolCity,
 }: {
   results: GameState["tournaments"]["results"];
   schoolName: string;
+  schoolCity: string;
 }) {
   const entries = useMemo(() => getTournamentHallRows(results), [results]);
+  const displaySchoolName = tournamentSchoolDisplayName(schoolName, schoolCity);
   const winnerCount = entries.reduce(
     (total, entry) => total + entry.arena.length + entry.style.length,
     0,
@@ -125,7 +130,7 @@ const TournamentsHall = memo(function TournamentsHall({
       <header>
         <div>
           <h2>Albo d'oro</h2>
-          <small>Solo vincitori di {schoolName}</small>
+          <small title={`Città: ${schoolCity}`}>Solo vincitori di {displaySchoolName}</small>
         </div>
         <span>{winnerCount} piazzamenti</span>
       </header>
@@ -149,7 +154,7 @@ const TournamentsHall = memo(function TournamentsHall({
                   </small>
                 </div>
               </div>
-              <em>{schoolName}</em>
+              <em title={`Città: ${schoolCity}`}>{displaySchoolName}</em>
             </header>
             <div className="tournament-hall-disciplines">
               <TournamentHallDiscipline discipline="arena" entries={entry.arena} />
@@ -288,7 +293,11 @@ export function TournamentsView({
         )
       ) : null}
       {!chroniclesLoading && visibleTab === "hall" ? (
-        <TournamentsHall results={state.tournaments.results} schoolName={state.school.name} />
+        <TournamentsHall
+          results={state.tournaments.results}
+          schoolName={state.school.name}
+          schoolCity={state.school.city}
+        />
       ) : null}
       {!chroniclesLoading && visibleTab === "chronicles" && chroniclesUnlocked ? (
         showChroniclesResult && latestChroniclesResult ? (

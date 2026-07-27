@@ -135,8 +135,13 @@ export function rollEventContactReward(
     normalizedBase.nextSeed,
     baseExpected * additionalMultiplier,
   );
+  const rolledAmount = normalizedBase.amount + bonus.amount;
+  const minimumAmount = state.collaborators.length <
+      GAME_CONFIG.eventZeroContactProtectionCollaboratorThreshold
+    ? 1
+    : 0;
   return {
-    amount: normalizedBase.amount + bonus.amount,
+    amount: Math.max(minimumAmount, rolledAmount),
     baseAmount: normalizedBase.amount,
     bonusAmount: bonus.amount,
     nextSeed: bonus.nextSeed,

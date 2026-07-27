@@ -29,10 +29,9 @@ potenziamenti aumentano progressivamente la velocità.
 Le email completate vengono inviate automaticamente per impostazione predefinita
 e invitano il destinatario a partecipare a una singola lezione di prova in
 palestra. Il giocatore può disattivare l'invio automatico per rileggere la mail
-completa e confermarla con un ulteriore input. Dopo un intervallo
-compresso, il contatto può prenotare oppure sparire definitivamente. Chi
-partecipa alla lezione ha un'alta probabilità, ma non la certezza, di
-iscriversi.
+completa e confermarla con un ulteriore input. Dopo un intervallo compresso, il
+contatto può prenotare oppure sparire definitivamente. Chi partecipa alla
+lezione ha un'alta probabilità, ma non la certezza, di iscriversi.
 
 I contatti non sono infiniti. Per continuare a inviare email bisogna organizzare
 eventi reali in luoghi di Genova. Ogni evento attira un certo numero di persone;
@@ -222,15 +221,15 @@ In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
 singolo allievo**. Corso Y concorre sempre al conteggio; Corso X vi concorre
 soltanto dopo lo sblocco di Progetto X. Il Corso Agonisti è escluso perché
-potenzia Arena e Stile ma non assegna un badge permanente. Ogni
-badge permanente può essere registrato una sola volta sullo stesso allievo: un
-duplicato rappresenta uno stato non valido e non viene corretto nel calcolo
-economico. Un mese dura **60 secondi reali** e segue il normale ciclo da Gennaio
-a Dicembre; dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile
-nella barra superiore, va da Settembre ad Agosto; la formazione si ferma a
-Luglio e Agosto e gli eventuali abbandoni vengono verificati nel passaggio tra
-Giugno e Luglio. Un evento positivo di passaparola può produrre più potenziali
-iscritti; un litigio o un mancato rinnovo può ridurre il totale.
+potenzia Arena e Stile ma non assegna un badge permanente. Ogni badge permanente
+può essere registrato una sola volta sullo stesso allievo: un duplicato
+rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un
+mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre;
+dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra
+superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e
+gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un
+evento positivo di passaparola può produrre più potenziali iscritti; un litigio
+o un mancato rinnovo può ridurre il totale.
 
 ### 5.2 Euro
 
@@ -272,15 +271,15 @@ I potenziamenti di Scrittura migliorano la prenotazione della prova fino al
 100%. I potenziamenti di Accoglienza fanno avanzare ogni rarità dalla propria
 probabilità base d'iscrizione al proprio massimo specifico.
 
-Il **Pity** è un contatore globale interno e non viene mostrato nell'interfaccia.
-Ogni prova in palestra che non produce un'iscrizione, comprese quelle annullate
-per mancanza di spade, aggiunge 1 al contatore. Nelle prove dei Leggendari
-ordinari e Segreti, ogni punto Pity aggiunge un punto percentuale alla
-probabilità già calcolata, fino al 100%. L'iscrizione di un Leggendario ordinario
-o Segreto riporta Pity a zero; l'iscrizione di qualunque altra rarità lo lascia
-invariato. Il bonus personale dei Leggendari resta separato: ogni loro precedente
-tentativo fallito aggiunge 3 punti percentuali entro il massimo ordinario del
-35%, poi si applica Pity oltre quel limite.
+Il **Pity** è un contatore globale interno e non viene mostrato
+nell'interfaccia. Ogni prova in palestra che non produce un'iscrizione, comprese
+quelle annullate per mancanza di spade, aggiunge 1 al contatore. Nelle prove dei
+Leggendari ordinari e Segreti, ogni punto Pity aggiunge un punto percentuale
+alla probabilità già calcolata, fino al 100%. L'iscrizione di un Leggendario
+ordinario o Segreto riporta Pity a zero; l'iscrizione di qualunque altra rarità
+lo lascia invariato. Il bonus personale dei Leggendari resta separato: ogni loro
+precedente tentativo fallito aggiunge 3 punti percentuali entro il massimo
+ordinario del 35%, poi si applica Pity oltre quel limite.
 
 Ogni contatto contiene:
 
@@ -344,9 +343,10 @@ avviato.
 
 Il carico viene applicato alla conclusione riuscita dell'attività ed è
 aggregato. Se un evento in corso viene annullato, si applica metà del carico
-previsto e non si ottengono contatti. Ogni 100 punti rompe una spada; più soglie superate rompono più spade
-e tutto il carico eccedente viene conservato. La manutenzione preventiva costa
-€2 per punto, mentre una spada già rotta costa €250 e torna da 100 a 0.
+previsto e non si ottengono contatti. Ogni 100 punti rompe una spada; più soglie
+superate rompono più spade e tutto il carico eccedente viene conservato. La
+manutenzione preventiva costa €2 per punto, mentre una spada già rotta costa
+€250 e torna da 100 a 0.
 
 I collaboratori assegnati all'Attrezzatura riducono prima il carico delle spade
 sane non riservate e poi riparano le spade rotte. Pagano il 75% dei costi
@@ -374,14 +374,14 @@ barra aggregata in formato compatto.
 
 Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
 
-| Evento | Descrizione breve | Effetto |
-| ------ | ----------------- | -------: |
-| Un piccolo disastro | Non so cosa sia successo, non sono stato io! | +30 carico e 1 spada rotta |
-| Spada caduta: Fanne 5 | Capita a tutti prima o poi... | +10 carico |
-| Il portaspade di legno perfetto | Direttamente dall'Ordine del Vento di Trieste, è stupendo! | -20 carico |
-| Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare... | -30 carico e 1 spada riparata |
-| Si può avere nera? | Certe domande dovrebbero non essere mai fatte. | +30 carico |
-| Un Pini al lavoro | Darth Modificus alla riscossa! | -30 carico |
+| Evento                             | Descrizione breve                                          |                       Effetto |
+| ---------------------------------- | ---------------------------------------------------------- | ----------------------------: |
+| Un piccolo disastro                | Non so cosa sia successo, non sono stato io!               |    +30 carico e 1 spada rotta |
+| Spada caduta: Fanne 5              | Capita a tutti prima o poi...                              |                    +10 carico |
+| Il portaspade di legno perfetto    | Direttamente dall'Ordine del Vento di Trieste, è stupendo! |                    -20 carico |
+| Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare...        | -30 carico e 1 spada riparata |
+| Si può avere nera?                 | Certe domande dovrebbero non essere mai fatte.             |                    +30 carico |
+| Un Pini al lavoro                  | Darth Modificus alla riscossa!                             |                    -30 carico |
 
 ### 5.7 Reputazione di rete
 
@@ -455,7 +455,8 @@ nella partita. Al completamento:
 
 1. il cursore si ferma alla fine del testo;
 2. con l'invio automatico attivo la mail parte subito; con l'opzione disattivata
-   resta completamente visibile finché il giocatore non preme un tasto o fa clic;
+   resta completamente visibile finché il giocatore non preme un tasto o fa
+   clic;
 3. compare per 250–400 ms lo stato Outlook “Invio in corso…”;
 4. la mail passa in Posta inviata;
 5. viene determinato e salvato l'esito ritardato
@@ -612,13 +613,13 @@ Ogni evento richiede:
 
 Non esiste un limite numerico separato agli eventi contemporanei. Il giocatore
 può avviarne più di uno finché restano disponibili sia gli iscritti sia le spade
-richieste; entrambe le risorse tornano disponibili al termine dell'attività.
-Al completamento parte un conto alla rovescia specifico prima che lo stesso
-evento possa essere selezionato di nuovo. I tempi brevi usano secondi reali;
-fiere e manifestazioni usano mesi o anni del calendario di gioco. Durante
-questo intervallo iscritti e spade restano disponibili. Se l'evento viene
-annullato, il costo e le risorse sono ripristinati, non parte alcun conto alla
-rovescia e viene applicato soltanto il 25% del carico previsto.
+richieste; entrambe le risorse tornano disponibili al termine dell'attività. Al
+completamento parte un conto alla rovescia specifico prima che lo stesso evento
+possa essere selezionato di nuovo. I tempi brevi usano secondi reali; fiere e
+manifestazioni usano mesi o anni del calendario di gioco. Durante questo
+intervallo iscritti e spade restano disponibili. Se l'evento viene annullato, il
+costo e le risorse sono ripristinati, non parte alcun conto alla rovescia e
+viene applicato soltanto il 25% del carico previsto.
 
 Quando l'evento viene avviato automaticamente da un collaboratore, la sua
 Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
@@ -638,27 +639,27 @@ attivi mai raggiunto** e sblocca progressivamente cinque tier di potenzialità:
 **Molto bassa**, **Bassa**, **Media**, **Alta** e **Altissima**. Il record non
 diminuisce quando alcuni iscritti lasciano la scuola: se la scuola raggiunge 100
 iscritti e torna a 70, la fama resta 100 fino al superamento di quel picco.
-All'inizio sono visibili soltanto Volantinaggio e Sparring al parco; l'interfaccia
-anticipa esclusivamente il prossimo sblocco e non mostra previsioni numeriche
-sui contatti.
+All'inizio sono visibili soltanto Volantinaggio e Sparring al parco;
+l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra
+previsioni numeriche sui contatti.
 
-| Evento                              | Sblocco |       Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
-| ----------------------------------- | ------: | ----------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
-| Volantinaggio                       |       0 |          €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
-| Kata contro le onde del mare        |       5 |        €500 |  0,50 |         1 |     1 |     10 | 15 secondi |  molto bassa |
-| Sparring al parco                   |       0 |      €1.000 |  1,00 |         2 |     2 |     20 | 10 secondi |  molto bassa |
-| Lezioni all'aperto                  |       5 |      €1.500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
-| Oktoberfest                         |      15 |      €1.500 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
-| Evento sportivo                     |      10 |      €2.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
-| Mele Comics                         |      20 |      €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
-| CairoMix                            |      35 |      €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
-| CogoComix                           |      60 |      €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
-| Burtomics                           |      90 |      €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
-| Genova Comics & Games               |     120 |     €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
-| Megacon Genova                      |     180 |     €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
-| Lucca Comics & Games                |     250 |     €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
-| Milan Games Week & Cartoomics       |     350 |     €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
-| Sfida a Cthulhu                     |     500 |  €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
+| Evento                        | Sblocco |      Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
+| ----------------------------- | ------: | ---------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
+| Volantinaggio                 |       0 |         €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
+| Kata contro le onde del mare  |       5 |       €500 |  0,50 |         1 |     1 |     10 | 15 secondi |  molto bassa |
+| Sparring al parco             |       0 |     €1.000 |  1,00 |         2 |     2 |     20 | 10 secondi |  molto bassa |
+| Lezioni all'aperto            |       5 |     €1.500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
+| Oktoberfest                   |      15 |     €1.500 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
+| Evento sportivo               |      10 |     €2.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
+| Mele Comics                   |      20 |     €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
+| CairoMix                      |      35 |     €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
+| CogoComix                     |      60 |     €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
+| Burtomics                     |      90 |     €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
+| Genova Comics & Games         |     120 |    €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
+| Megacon Genova                |     180 |    €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
+| Lucca Comics & Games          |     250 |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
+| Milan Games Week & Cartoomics |     350 |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Sfida a Cthulhu               |     500 | €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
 
 Un cooldown basato sul calendario scade all'inizio del mese di destinazione,
 anche quando il calendario viene avanzato dagli strumenti Admin.
@@ -666,8 +667,8 @@ anche quando il calendario viene avanzato dagli strumenti Admin.
 ### 8.2 Persone incontrate e contatti ottenuti
 
 Un evento determina separatamente l'affluenza e il numero di contatti. Le
-persone incontrate e le prove dimostrative conservano il funnel dell'evento;
-i contatti sono invece estratti da una distribuzione pesata specifica, scelta
+persone incontrate e le prove dimostrative conservano il funnel dell'evento; i
+contatti sono invece estratti da una distribuzione pesata specifica, scelta
 all'avvio e mostrata soltanto alla conclusione. L'usura delle spade non riduce
 più il risultato.
 
@@ -693,42 +694,45 @@ disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
 
 Le distribuzioni base sono:
 
-| Evento                              | Distribuzione base dei contatti                 |
-| ----------------------------------- | ----------------------------------------------- |
-| Volantinaggio                       | 67%: 0; 33%: 1                                 |
-| Kata contro le onde del mare        | 50%: 0; 50%: 1                                 |
-| Sparring al parco                   | 20%: 0; 60%: 1; 20%: 2                         |
-| Lezioni all'aperto                  | 50%: 1; 50%: 2                                 |
-| Oktoberfest                         | 50%: 1; 50%: 2                                 |
-| Evento sportivo                     | 25%: 1; 50%: 2; 25%: 3                         |
-| Mele Comics                         | 25%: 1–2; 50%: 2–3; 25%: 3–4                   |
-| CairoMix                            | 10%: 1; 20%: 2; 40%: 3; 20%: 4; 10%: 5       |
-| CogoComix                           | 25%: 3–4; 50%: 5; 25%: 6–7                     |
-| Burtomics                           | 25%: 5–6; 50%: 7–8; 25%: 9–10                  |
-| Genova Comics & Games               | 25%: 7–8; 50%: 9–11; 25%: 12–13                |
-| Megacon Genova                      | 25%: 9–11; 50%: 12–14; 25%: 15–17              |
-| Lucca Comics & Games                | 25%: 10–12; 50%: 14–16; 25%: 18–20             |
-| Milan Games Week & Cartoomics       | 25%: 15–17; 50%: 18–22; 25%: 23–25             |
-| Sfida a Cthulhu                     | 25%: 40–44; 50%: 48–52; 25%: 56–60             |
+| Evento                        | Distribuzione base dei contatti        |
+| ----------------------------- | -------------------------------------- |
+| Volantinaggio                 | 67%: 0; 33%: 1                         |
+| Kata contro le onde del mare  | 50%: 0; 50%: 1                         |
+| Sparring al parco             | 20%: 0; 60%: 1; 20%: 2                 |
+| Lezioni all'aperto            | 50%: 1; 50%: 2                         |
+| Oktoberfest                   | 50%: 1; 50%: 2                         |
+| Evento sportivo               | 25%: 1; 50%: 2; 25%: 3                 |
+| Mele Comics                   | 25%: 1–2; 50%: 2–3; 25%: 3–4           |
+| CairoMix                      | 10%: 1; 20%: 2; 40%: 3; 20%: 4; 10%: 5 |
+| CogoComix                     | 25%: 3–4; 50%: 5; 25%: 6–7             |
+| Burtomics                     | 25%: 5–6; 50%: 7–8; 25%: 9–10          |
+| Genova Comics & Games         | 25%: 7–8; 50%: 9–11; 25%: 12–13        |
+| Megacon Genova                | 25%: 9–11; 50%: 12–14; 25%: 15–17      |
+| Lucca Comics & Games          | 25%: 10–12; 50%: 14–16; 25%: 18–20     |
+| Milan Games Week & Cartoomics | 25%: 15–17; 50%: 18–22; 25%: 23–25     |
+| Sfida a Cthulhu               | 25%: 40–44; 50%: 48–52; 25%: 56–60     |
 
 Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
 stessa probabilità. La ricompensa estratta viene normalizzata stocasticamente
-con il fattore 25/27; questo porta il ciclo automatico iniziale di un
-collaboratore Novizio a 3 contatti medi al minuto senza eliminare i risultati
-interi. I bonus positivi di affluenza, Carisma e collaboratori generano poi
-un'aggiunta indipendente calcolata sul valore medio normalizzato. Possono quindi
-trasformare uno zero in un contatto o superare il massimo della distribuzione
-base, senza essere applicati due volte. L'interfaccia mostra solo indicazioni
-generiche di rischio e potenzialità, mai queste percentuali.
+con il fattore 25/27; prima della protezione iniziale contro gli esiti nulli,
+questo porta il ciclo automatico di un collaboratore Novizio a 3 contatti medi
+al minuto senza eliminare i risultati interi. I bonus positivi di affluenza,
+Carisma e collaboratori generano poi un'aggiunta indipendente calcolata sul
+valore medio normalizzato. Possono quindi trasformare uno zero in un contatto o
+superare il massimo della distribuzione base, senza essere applicati due volte.
+Finché la scuola ha meno di quattro collaboratori, ogni eventuale risultato
+finale di zero viene sostituito da un contatto. L'interfaccia mostra solo
+indicazioni generiche di rischio e potenzialità, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
-applicano penalità; oltre quella soglia, ogni iscritto riduce progressivamente la
-capacità di trovare persone nuove. Se qualcuno lascia la scuola, la disponibilità
-risale perché quella persona, o una persona equivalente nella rappresentazione
-delle rarità non nominali, può tornare nel bacino futuro. La curva non raggiunge
-mai zero: con 5.000 iscritti conserva circa il 16,69% della produzione. Il bonus
-Follower resta nel moltiplicatore e può compensare la saturazione nel tempo.
-Questa regola è intenzionalmente interna e non viene mostrata nell'interfaccia.
+applicano penalità; oltre quella soglia, ogni iscritto riduce progressivamente
+la capacità di trovare persone nuove. Se qualcuno lascia la scuola, la
+disponibilità risale perché quella persona, o una persona equivalente nella
+rappresentazione delle rarità non nominali, può tornare nel bacino futuro. La
+curva non raggiunge mai zero: con 5.000 iscritti conserva circa il 16,69% della
+produzione. Il bonus Follower resta nel moltiplicatore e può compensare la
+saturazione nel tempo. Questa regola è intenzionalmente interna e non viene
+mostrata nell'interfaccia.
 
 ### 8.3 Lezioni in palestra, Social e volantinaggio
 
@@ -741,14 +745,13 @@ in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
 collaboratori già assegnati conservano incarico e Maestria. I contenuti Social
 avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
 95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
-giocatore. Senza email, tutta la potenza produce contenuti. Un contenuto richiede
-100.000 caratteri e ha il 50% di probabilità base di ottenere un Follower.
-Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del 5%
-l'affluenza agli Eventi, senza alcun limite massimo.
-Social non genera prove dirette, non migliora la qualità dei contatti e non
-accredita denaro per ciclo. Le sponsorizzazioni vengono riscosse con le rette
-mensili, a partire da 0,10 € per Follower. Le campagne manuali del vecchio
-sistema non esistono più.
+giocatore. Senza email, tutta la potenza produce contenuti. Un contenuto
+richiede 100.000 caratteri e ha il 50% di probabilità base di ottenere un
+Follower. Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del
+5% l'affluenza agli Eventi, senza alcun limite massimo. Social non genera prove
+dirette, non migliora la qualità dei contatti e non accredita denaro per ciclo.
+Le sponsorizzazioni vengono riscosse con le rette mensili, a partire da 0,10 €
+per Follower. Le campagne manuali del vecchio sistema non esistono più.
 
 Il **Volantinaggio** è sempre disponibile come attività gratuita di sicurezza
 quando mancano contatti o denaro. Non richiede iscritti o spade, ma produce
@@ -802,12 +805,12 @@ atletica usa la Maestria Istruttore. I cinque gradi condividono la stessa curva
 di esperienza in tutti i ruoli:
 
 | Grado      | Tempo dal grado precedente | Tempo cumulativo | XP cumulativi | Bonus |
-|------------|----------------------------:|-----------------:|--------------:|------:|
-| Novizio    |                           — |                0 |             0 |    0% |
-| Iniziato   |                    1 minuto |         1 minuto |            60 |   20% |
-| Accademico |                    5 minuti |         6 minuti |           360 |   40% |
-| Cavaliere  |                   30 minuti |        36 minuti |         2.160 |   65% |
-| Maestro    |                       1 ora |     1 ora e 36 m |         5.760 |  100% |
+| ---------- | -------------------------: | ---------------: | ------------: | ----: |
+| Novizio    |                          — |                0 |             0 |    0% |
+| Iniziato   |                   1 minuto |         1 minuto |            60 |   20% |
+| Accademico |                   5 minuti |         6 minuti |           360 |   40% |
+| Cavaliere  |                  30 minuti |        36 minuti |         2.160 |   65% |
+| Maestro    |                      1 ora |     1 ora e 36 m |         5.760 |  100% |
 
 Durante il gioco attivo, ogni collaboratore assegnato riceve **1 XP al secondo**
 esclusivamente nella Maestria del proprio ruolo corrente, indipendentemente
@@ -829,15 +832,15 @@ Regole:
 - la vista aggregata mostra il rapporto **Non assegnati/Totali** e permette di
   aumentare o ridurre direttamente il numero desiderato di persone per ogni
   settore, senza legarsi alle identità dei singoli collaboratori;
-- quando cambia l'organico desiderato, i collaboratori liberi vengono
-  riallocati subito e quelli in eccesso restano non assegnati;
+- quando cambia l'organico desiderato, i collaboratori liberi vengono riallocati
+  subito e quelli in eccesso restano non assegnati;
 - un collaboratore impegnato in un evento o in una formazione conserva
   temporaneamente il proprio incarico, conclude l'attività e viene riallocato
   prima che possa avviarne un'altra automaticamente; i lavori continui e
   condivisi sono invece riassegnabili subito;
 - se un settore richiede più persone di quelle presenti, i posti mancanti
-  restano memorizzati e vengono occupati automaticamente dai nuovi
-  collaboratori liberi;
+  restano memorizzati e vengono occupati automaticamente dai nuovi collaboratori
+  liberi;
 - un collaboratore non leggendario può lasciare la scuola soltanto tramite
   eventi narrativi casuali;
 - i Leggendari non possono lasciare la scuola per inattività, mancato rinnovo o
@@ -884,13 +887,14 @@ normale.
 La stessa pagina può forzare il passaggio al mese successivo. Il comando porta
 la scadenza mensile all'istante corrente ed esegue la normale pipeline di gioco:
 entrate, tornei, rinnovi annuali, cambio del calendario e automazioni. Le
-attività che hanno una propria scadenza futura non vengono completate in anticipo.
+attività che hanno una propria scadenza futura non vengono completate in
+anticipo.
 
 ### 9.3 Ruoli
 
 | Ruolo                | Funzione                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Redazione → Social   | produce sempre contenuti Social; durante la scrittura assegna internamente il 95% alle email e il 5% ai contenuti   |
+| Redazione → Social   | produce sempre contenuti Social; durante la scrittura assegna internamente il 95% alle email e il 5% ai contenuti  |
 | Eventi               | aumenta persone incontrate e contatti ottenuti                                                                     |
 | Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
@@ -936,9 +940,9 @@ La forza complessiva del settore applica rendimenti decrescenti. Si somma la
 produttività base dei collaboratori assegnati e si eleva il risultato a
 `log10(2)`, cioè circa `0,30103`. Un collaboratore ordinario vale ×1, dieci
 valgono ×2 e cento valgono ×4. Ogni aggiunta resta positiva, ma il suo
-incremento, a parità di produttività individuale, è inferiore al precedente.
-Una squadra con forza inferiore a 1 usa comunque ×1, così gli eventi manuali
-non vengono penalizzati.
+incremento, a parità di produttività individuale, è inferiore al precedente. Una
+squadra con forza inferiore a 1 usa comunque ×1, così gli eventi manuali non
+vengono penalizzati.
 
 Per ogni collaboratore libero, l'automazione prova gli eventi dal prezzo base
 più basso al più alto; a parità di prezzo sceglie quello con la media contatti
@@ -968,14 +972,14 @@ Forma 1
 ```
 
 Corso X è un anno formativo sperimentale della scuola di Genova, dedicato
-all'approfondimento della Forma 1 e all'introduzione dei rudimenti della Forma
-2 applicati al combattimento in arena. Offre agli allievi, spesso ancora
+all'approfondimento della Forma 1 e all'introduzione dei rudimenti della Forma 2
+applicati al combattimento in arena. Offre agli allievi, spesso ancora
 inesperti, il tempo necessario per consolidare e affinare la tecnica.
 
-All'inizio della partita questo passaggio non fa parte del percorso: il gioco
-si comporta come se tra Forma 1 e Forma 2 non esistesse alcun corso. Corso X,
-i suoi badge, i controlli, i filtri e le qualifiche restano completamente
-nascosti finché non viene acquistato **Progetto X**.
+All'inizio della partita questo passaggio non fa parte del percorso: il gioco si
+comporta come se tra Forma 1 e Forma 2 non esistesse alcun corso. Corso X, i
+suoi badge, i controlli, i filtri e le qualifiche restano completamente nascosti
+finché non viene acquistato **Progetto X**.
 
 Ogni Forma ha un nome lungo, usato nei testi descrittivi, e un nome corto per le
 interfacce compatte:
@@ -999,8 +1003,8 @@ Regole:
 
 - ogni iscritto può conoscere più Forme;
 - prima di Progetto X la progressione lineare è **Forma 1 → Forma 2**;
-- dopo Progetto X Corso X diventa obbligatorio e la progressione è
-  **Forma 1 → Corso X → Forma 2**;
+- dopo Progetto X Corso X diventa obbligatorio e la progressione è **Forma 1 →
+  Corso X → Forma 2**;
 - i dati di Corso X già presenti in un salvataggio restano conservati ma
   invisibili fino allo sblocco;
 - dopo lo sblocco, iscritti e collaboratori che possiedono Forma 2 o una Forma
@@ -1032,25 +1036,25 @@ Regole:
   al completamento;
 - le descrizioni definitive dovranno usare terminologia LudoSport approvata.
 
-| Corso o Forma | Spade per atleta | Carico per spada |
-| ------------- | ----------------: | ----------------: |
-| Forma 1, Corso X, Forma 2 | 1 | 10 |
-| Corso Y | 2 | 10 |
-| Forme 3 e 4 Spada Lunga | 1 | 10 |
-| Forme 3 e 4 Staffa o Doppie Spade | 2 | 10 |
-| Forma 5 Spada Lunga | 1 | 32 |
-| Forma 5 Staffa o Doppie Spade | 2 | 32 |
-| Forma 6 | 2 | 20 |
-| Forma 7 | 3 | 20 |
-| Arena Tecnica / Corso Agonisti | da 1 a 3 secondo le Forme note | 20 |
+| Corso o Forma                     |               Spade per atleta | Carico per spada |
+| --------------------------------- | -----------------------------: | ---------------: |
+| Forma 1, Corso X, Forma 2         |                              1 |               10 |
+| Corso Y                           |                              2 |               10 |
+| Forme 3 e 4 Spada Lunga           |                              1 |               10 |
+| Forme 3 e 4 Staffa o Doppie Spade |                              2 |               10 |
+| Forma 5 Spada Lunga               |                              1 |               32 |
+| Forma 5 Staffa o Doppie Spade     |                              2 |               32 |
+| Forma 6                           |                              2 |               20 |
+| Forma 7                           |                              3 |               20 |
+| Arena Tecnica / Corso Agonisti    | da 1 a 3 secondo le Forme note |               20 |
 
 Forma 5 ha intenzionalmente il carico per spada più alto del gioco. Forma 6 e
 Forma 7 possono produrre più carico totale perché impiegano rispettivamente due
 e tre spade, ma non superano Forma 5 nell'aggressività della singola arma.
 
-Costi base: Forma 1 €50, Corso X €100, Forma 2 €250, Corso Y €500, Forma 3 €1.000,
-Forma 4 €1.500, Forma 5 €2.000, Forma 6 €3.000, Forma 7 €5.000. Lo scoglio
-economico principale inizia dopo Corso Y.
+Costi base: Forma 1 €50, Corso X €100, Forma 2 €250, Corso Y €500, Forma 3
+€1.000, Forma 4 €1.500, Forma 5 €2.000, Forma 6 €3.000, Forma 7 €5.000. Lo
+scoglio economico principale inizia dopo Corso Y.
 
 ### 9.7 Istruttori e attestati
 
@@ -1100,38 +1104,36 @@ Regole:
   **25%** e costano quindi il **75% del costo base**;
 - **Arena Tecnica** è il primo potenziamento del ramo Istruttori, è disponibile
   appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
-  “Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di perdere
-  atleti alla fine dell'anno e, con la giusta attenzione, li renderà sempre più
-  competitivi.”;
+  “Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di
+  perdere atleti alla fine dell'anno e, con la giusta attenzione, li renderà
+  sempre più competitivi.”;
 - al livello 1 Arena Tecnica costa **€1.000** e sblocca l'omonima formazione
   automatica, sempre attiva e non disabilitabile separatamente. La formazione
   costa **€300 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni;
-- il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a
-  **60 secondi**;
+- il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **60
+  secondi**;
 - il livello 3 costa **€5.000**, trasforma la formazione in **Corso Agonisti**,
   ne porta il costo base a **€1.000** e attiva integralmente i miglioramenti
   permanenti di Arena e Stile; la durata base resta di 60 secondi;
-- il livello 4 costa **€7.500** e porta la durata base del Corso Agonisti a
-  **30 secondi**;
-- l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un collaboratore
-  inserito nella coda automatica quando ha ancora uno slot
+- il livello 4 costa **€7.500** e porta la durata base del Corso Agonisti a **30
+  secondi**;
+- l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un
+  collaboratore inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
   automatico possiede le qualifiche per le sue prossime Forme;
-- iniziare Arena Tecnica o il Corso Agonisti consuma **tutti gli slot formativi annuali ancora
-  disponibili** e protegge subito l'atleta dal controllo degli abbandoni. Lo
-  stesso atleta non può
-  iniziarlo più di una volta nello stesso periodo luglio–giugno, anche quando i
-  potenziamenti gli concedono altri slot;
+- iniziare Arena Tecnica o il Corso Agonisti consuma **tutti gli slot formativi
+  annuali ancora disponibili** e protegge subito l'atleta dal controllo degli
+  abbandoni. Lo stesso atleta non può iniziarlo più di una volta nello stesso
+  periodo luglio–giugno, anche quando i potenziamenti gli concedono altri slot;
 - Arena Tecnica ai livelli 1 e 2 non modifica Arena, Stile o il totale storico
   dei Corsi Agonisti. Dal livello 3, completare il Corso Agonisti aumenta
-  permanentemente Arena e Stile. Senza
-  potenziamenti assegna **+1 Arena** e **+1 Stile**; **Intensità agonistica** ha
-  quattro livelli e aumenta il massimo casuale di entrambe le caratteristiche
-  fino a **+5**, mantenendo +1 come minimo. Il risultato casuale di ciascuna
-  caratteristica viene moltiplicato per il numero di slot residui consumati dal
-  corso. I bonus effettivi e il numero di completamenti si accumulano senza
-  limite negli anni successivi e sono
+  permanentemente Arena e Stile. Senza potenziamenti assegna **+1 Arena** e **+1
+  Stile**; **Intensità agonistica** ha quattro livelli e aumenta il massimo
+  casuale di entrambe le caratteristiche fino a **+5**, mantenendo +1 come
+  minimo. Il risultato casuale di ciascuna caratteristica viene moltiplicato per
+  il numero di slot residui consumati dal corso. I bonus effettivi e il numero
+  di completamenti si accumulano senza limite negli anni successivi e sono
   registrati nella riga dell'atleta, senza creare notifiche o messaggi
   nell'inbox;
 - i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
@@ -1163,12 +1165,13 @@ Regole:
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
   essere nuovamente sconfitti nel rispettivo torneo;
 - acquistare il livello 1 di Arena Tecnica sblocca subito **Polivalenza
-  didattica**; i livelli 2, 3 e 4 di Arena restano acquistabili in parallelo e non
-  bloccano il resto del ramo. Polivalenza didattica ha due livelli e permette di
-  apprendere fino a tutti e tre i rami d'arma;
-- il livello 3, insieme al Corso Agonisti, sblocca **Intensità agonistica**, un potenziamento parallelo
-  in quattro livelli che porta il bonus massimo casuale del Corso Agonisti da
-  +1 a +5 per ciascuna caratteristica senza bloccare gli altri potenziamenti;
+  didattica**; i livelli 2, 3 e 4 di Arena restano acquistabili in parallelo e
+  non bloccano il resto del ramo. Polivalenza didattica ha due livelli e
+  permette di apprendere fino a tutti e tre i rami d'arma;
+- il livello 3, insieme al Corso Agonisti, sblocca **Intensità agonistica**, un
+  potenziamento parallelo in quattro livelli che porta il bonus massimo casuale
+  del Corso Agonisti da +1 a +5 per ciascuna caratteristica senza bloccare gli
+  altri potenziamenti;
 - **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
   allievi contemporanei di ogni Istruttore;
 - **Doppio Corso** è un potenziamento unico del ramo Istruttori e concede a ogni
@@ -1183,14 +1186,12 @@ Regole:
   estivo;
 - **Accreditamento SIS** è un potenziamento unico e parallelo del ramo
   Istruttori: costa **€5.000**, richiede Arena Tecnica al livello 1 e sblocca la
-  possibilità di candidare gli Istruttori della scuola ai Corsi
-  Tecnici SIS;
+  possibilità di candidare gli Istruttori della scuola ai Corsi Tecnici SIS;
 - Accreditamento SIS, **Intensità agonistica** e **Preparazione atletica**
   restano paralleli; la sequenza didattica lineare dopo Arena Tecnica richiede
-  che ogni potenziamento sia completato prima di accedere al successivo. L'ordine
-  è **Polivalenza didattica
-  → Istruttore Promisquo → Doppio Corso → Istruttore Tiamat → PagoSport → Tocco
-  DiGilo → Progetto X**;
+  che ogni potenziamento sia completato prima di accedere al successivo.
+  L'ordine è **Polivalenza didattica → Istruttore Promisquo → Doppio Corso →
+  Istruttore Tiamat → PagoSport → Tocco DiGilo → Progetto X**;
 - **Tocco DiGilo** è il penultimo potenziamento del ramo Istruttori: costa
   **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore
   insegna le Forme agli allievi;
@@ -1219,18 +1220,18 @@ Regole:
 - lo stesso Collaboratore può ottenere più qualifiche da Tecnico;
 - il Corso Tecnico è esterno, si svolge alla **SIS — Scuola Internazionale
   Superiore** ed è tenuto dai Maestri Fondatori di LudoSport;
-- il corso costa il **1000% del costo base** e ha una durata base pari al
-  **500% della durata della Forma**;
+- il corso costa il **1000% del costo base** e ha una durata base pari al **500%
+  della durata della Forma**;
 - la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
-  agosto il corso parte immediatamente se il Collaboratore è libero; negli
-  altri mesi viene programmato per il luglio successivo. Se a luglio il
-  Collaboratore è impegnato, parte appena si libera, anche dopo l'estate;
+  agosto il corso parte immediatamente se il Collaboratore è libero; negli altri
+  mesi viene programmato per il luglio successivo. Se a luglio il Collaboratore
+  è impegnato, parte appena si libera, anche dopo l'estate;
 - un corso già iniziato continua senza limiti di calendario;
 - un Tecnico forma automaticamente un solo aspirante Istruttore alla volta per
   una Forma compatibile. L'aspirante deve essere assegnato come Istruttore,
   conoscere già la Forma come atleta e non possedere l'attestato;
-- il Corso Istruttori interno costa il **75% del normale Corso Istruttori**, cioè
-  il **187,5% del costo base**, e mantiene durata ed esame del modulo da
+- il Corso Istruttori interno costa il **75% del normale Corso Istruttori**,
+  cioè il **187,5% del costo base**, e mantiene durata ed esame del modulo da
   Istruttore;
 - la scelta automatica privilegia, nell'ordine, la Forma più bassa nella
   progressione, l'attestato più utile agli allievi in attesa e il Collaboratore
@@ -1253,11 +1254,11 @@ alcuna formazione durante l'anno scolastico appena concluso può lasciare la
 scuola. Le immunità degli atleti sono centralizzate e distinguono il controllo
 annuale dai futuri eventi imprevisti:
 
-| Motivo                                               | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza                                                                             |
-| ---------------------------------------------------- | --------------------------------: | ----------------: | ------------------------------------------------------------------------------------ |
-| Iscrizione effettuata da Gennaio ad Agosto           |                            Immune |            Immune | Inizio di Settembre                                                                  |
-| Qualificazione al prossimo torneo                    |                            Immune |            Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
-| Forma, Corso X/Y, Arena Tecnica o Corso Agonisti iniziato nell'anno |             Immune |       Vulnerabile | Successivo controllo annuale                                                         |
+| Motivo                                                              | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza                                                                             |
+| ------------------------------------------------------------------- | --------------------------------: | ----------------: | ------------------------------------------------------------------------------------ |
+| Iscrizione effettuata da Gennaio ad Agosto                          |                            Immune |            Immune | Inizio di Settembre                                                                  |
+| Qualificazione al prossimo torneo                                   |                            Immune |            Immune | Conclusione del torneo: resta protetto soltanto chi si qualifica a quello successivo |
+| Forma, Corso X/Y, Arena Tecnica o Corso Agonisti iniziato nell'anno |                            Immune |       Vulnerabile | Successivo controllo annuale                                                         |
 
 Le iscrizioni effettuate da Settembre a Dicembre non ricevono l'immunità da
 nuova iscrizione. Dopo la Champion's Arena la qualificazione viene azzerata: non
@@ -1301,16 +1302,16 @@ Influenza due passaggi degli eventi: la probabilità che una persona provi la
 disciplina sul posto e la probabilità che, dopo la prova dimostrativa, lasci il
 proprio indirizzo email.
 
-| Potenziamento                       | Effetto per livello              |
-| ----------------------------------- | -------------------------------- |
-| Presentazione preparata             | +3% prove e contatti             |
-| Biglietti con QR code               | +4% prove e contatti             |
-| Dimostrazione coordinata            | +5% persone incontrate           |
-| Stand riconoscibile                 | +7% persone incontrate           |
-| Accoglienza dell'Ordine             | +4% prove e contatti             |
-| Risposte alle domande difficili     | +5% prove e contatti             |
-| “No, non è esattamente quella cosa” | +8% prove e contatti             |
-| Set da dimostrazione                | +4% persone incontrate           |
+| Potenziamento                       | Effetto per livello    |
+| ----------------------------------- | ---------------------- |
+| Presentazione preparata             | +3% prove e contatti   |
+| Biglietti con QR code               | +4% prove e contatti   |
+| Dimostrazione coordinata            | +5% persone incontrate |
+| Stand riconoscibile                 | +7% persone incontrate |
+| Accoglienza dell'Ordine             | +4% prove e contatti   |
+| Risposte alle domande difficili     | +5% prove e contatti   |
+| “No, non è esattamente quella cosa” | +8% prove e contatti   |
+| Set da dimostrazione                | +4% persone incontrate |
 
 Con tutti gli otto potenziamenti al livello 5, il ramo Eventi fornisce
 complessivamente +200%: +120% a prove e contatti e +80% all'affluenza. Con
@@ -1387,11 +1388,11 @@ gli Eventi sono l'unica fonte ripetibile e beneficiano del bonus di affluenza.
 All'ultimo livello di Piano editoriale, un contenuto produce zero Follower nel
 5% dei casi, uno nel 90% e due nel 5%.
 
-| Potenziamento             | Progressione completa                                              |
-| ------------------------- | ------------------------------------------------------------------ |
-| Sintesi dei contenuti     | 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri   |
-| Piano editoriale          | 50% → 60% → 70% → 80% → 90% → 95%; al massimo 5% di ottenerne due |
-| Sponsorizzazioni          | 0,10 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €                       |
+| Potenziamento         | Progressione completa                                             |
+| --------------------- | ----------------------------------------------------------------- |
+| Sintesi dei contenuti | 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri    |
+| Piano editoriale      | 50% → 60% → 70% → 80% → 90% → 95%; al massimo 5% di ottenerne due |
+| Sponsorizzazioni      | 0,10 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €                        |
 
 ### 10.6 Attrezzatura
 
@@ -1678,8 +1679,8 @@ nel quale osservare l'avanzamento.
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
    che le attività possono usurare o danneggiare le spade e richiede di avviare
    il **Volantinaggio** gratuito. Soltanto in questo passaggio il volantinaggio
-   dura 5 secondi e garantisce esattamente un nuovo contatto. La scena attende la
-   fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
+   dura 5 secondi e garantisce esattamente un nuovo contatto. La scena attende
+   la fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
 
 5. **Nuova lezione prenotata** Dopo la spiegazione sull'aumento dei contatti,
@@ -1987,7 +1988,8 @@ dell'interruzione, conservando il tempo residuo.
 
 ### 18.3 Riepilogo
 
-Non viene mostrato alcun riepilogo offline, perché lo stato operativo non cambia.
+Non viene mostrato alcun riepilogo offline, perché lo stato operativo non
+cambia.
 
 ---
 

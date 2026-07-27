@@ -46,7 +46,7 @@ const DEFAULT_VIDEO_CAPTION = "Un assaggio video del nostro sport";
 const DEFAULT_DISCLAIMER =
   "Ricevi questo messaggio perché hai mostrato interesse per le attività dell'Ordine delle Onde.";
 
-export const FINAL_EMAIL_SIGNATURE = "Ordine delle Onde · LudoSport Genova";
+export const FINAL_EMAIL_SIGNATURE = "Ordine delle Onde - LudoSport Genova";
 
 interface FinalEmailTextEntry {
   key: FinalEmailTextKey;

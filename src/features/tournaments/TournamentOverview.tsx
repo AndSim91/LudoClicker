@@ -24,6 +24,7 @@ import {
   getUpcomingDelegationContactIds,
   monthShortLabel,
 } from "./tournamentPresentation";
+import { TournamentContactIdentity } from "./TournamentAthleteIdentity";
 
 interface TournamentOverviewProps {
   state?: GameState;
@@ -190,7 +191,11 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
                   <div key={contact.id}>
                     <b>{index + 1}</b>
                     <span>
-                      <strong>{contact.firstName} {contact.lastName}</strong>
+                      <TournamentContactIdentity
+                        contact={contact}
+                        schoolName={state.school.name}
+                        schoolCity={state.school.city}
+                      />
                       <small>{TOURNAMENT_DEFINITIONS[qualification.level].label} · anno {qualification.season}</small>
                     </span>
                     <strong>{visible ? preparation.arena.toFixed(3) : "???"}</strong>

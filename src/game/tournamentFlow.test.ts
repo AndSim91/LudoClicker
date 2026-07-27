@@ -222,7 +222,7 @@ describe("secret legendary tournament trials", () => {
     });
   });
 
-  it("starts Marco Palena's automatic 150-second trial without an email", () => {
+  it("starts Marco Palena's automatic 30-second trial without an email", () => {
     const initial = createInitialState(1_000, "Manager");
     const scheduled = scheduleSecretLegendaryTrial(initial, "marco-palena", 20_000);
     const contact = scheduled.contacts.at(-1)!;
@@ -234,8 +234,8 @@ describe("secret legendary tournament trials", () => {
       source: "tournament",
       status: "trialScheduled",
       secretLegendaryId: "marco-palena",
-      arenaBase: 75,
-      styleBase: 90,
+      arenaBase: 90,
+      styleBase: 108,
       tournamentExperience: 5,
     });
     expect(contact.forms).toContain("form-4-long");

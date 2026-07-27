@@ -13,14 +13,16 @@ export interface SecretLegendaryProfile {
   styleBase: number;
   numericForms: number;
   externalExperience: number;
-  specialty: "style" | "complete";
+  specialty: "arena" | "style" | "complete";
   recruitment?: "trial" | "never";
   defeatRewardEuros?: number;
 }
 
 // Per aggiungere un Leggendario Segreto basta aggiungere una voce al catalogo
 // e collegarla a una scuola esistente tramite schoolId. L'ID viene derivato
-// automaticamente dalla chiave del record.
+// automaticamente dalla chiave del record. I valori base qui configurati sono
+// fissi e includono già la ricalibrazione del circuito: la simulazione non deve
+// moltiplicarli nuovamente in base alla difficoltà media del torneo.
 export const SECRET_LEGENDARIES = {
   "marco-palena": {
     firstName: "Marco",

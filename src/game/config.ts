@@ -44,6 +44,7 @@ export const GAME_CONFIG = {
   equipmentLoadPerAgonistCourse: 20,
   equipmentBreakLoad: 100,
   eventWearMultiplier: 1,
+  eventZeroContactProtectionCollaboratorThreshold: 4,
   eventContactProtectedActiveMembers: 10,
   eventContactEasyMarketMembers: 1_000,
   equipmentMaximumUpgradeWearReduction: 0.5,

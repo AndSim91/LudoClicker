@@ -304,7 +304,7 @@ describe("TournamentsView", () => {
     );
     const a = participantById.get(bronzeMatch.participantAId)!;
     const b = participantById.get(bronzeMatch.participantBId)!;
-    const matchLabel = `${a.firstName} ${a.lastName} ${bronzeMatch.arenaScoreA} a ${bronzeMatch.arenaScoreB} ${b.firstName} ${b.lastName}`;
+    const matchLabel = `${a.firstName} ${a.lastName}, ${a.schoolName}, ${bronzeMatch.arenaScoreA} a ${bronzeMatch.arenaScoreB}, ${b.firstName} ${b.lastName}, ${b.schoolName}`;
 
     fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
     const bronzeButton = view.getByRole("button", { name: matchLabel });
@@ -334,7 +334,7 @@ describe("TournamentsView", () => {
     const expectedLabels = expectedSemifinalOrder.map((match) => {
       const a = participantById.get(match.participantAId)!;
       const b = participantById.get(match.participantBId)!;
-      return `${a.firstName} ${a.lastName} ${match.arenaScoreA} a ${match.arenaScoreB} ${b.firstName} ${b.lastName}`;
+      return `${a.firstName} ${a.lastName}, ${a.schoolName}, ${match.arenaScoreA} a ${match.arenaScoreB}, ${b.firstName} ${b.lastName}, ${b.schoolName}`;
     });
     const renderedLabels = [...container.querySelectorAll(".stage-semifinal .bracket-match")].map(
       (match) => match.getAttribute("aria-label"),
@@ -424,6 +424,48 @@ describe("TournamentsView", () => {
     expect(container.querySelectorAll(".results-podium-list span.is-owned").length).toBeGreaterThan(
       0,
     );
+    expect(container.querySelectorAll(".tournament-school-badge.is-owned").length).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it("keeps a Secret Legendary color and external school badge in tournament results", () => {
+    const initial = createStateWithForms();
+    const state = {
+      ...initial,
+      tournaments: { ...initial.tournaments, ordinaryVictoryAchieved: true },
+    };
+    const result = simulateTournament(
+      state,
+      "academy",
+      1,
+      181_000,
+      getEligibleSchoolContacts(state),
+    ).result;
+    const secret = result.participants.find((participant) => participant.secretLegendaryId)!;
+    const standing = result.groupStandings.find((entry) => entry.participantId === secret.id)!;
+    const renderedState = {
+      ...state,
+      tournaments: { ...state.tournaments, results: [result] },
+    };
+    const { container } = render(<TournamentsView state={renderedState} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
+    fireEvent.click(view.getByRole("tab", {
+      name: String.fromCharCode(65 + standing.groupIndex),
+    }));
+
+    const groupTable = within(container.querySelector<HTMLElement>(".group-table")!);
+    const name = groupTable.getByText(`${secret.firstName} ${secret.lastName}`);
+    const identity = name.closest<HTMLElement>(".tournament-athlete-identity")!;
+    const badge = within(identity).getByLabelText(
+      `Scuola: ${secret.schoolName}. Città: ${secret.city}`,
+    );
+    expect(name).toHaveClass("rarity-name", "rarity-secret-legendary");
+    expect(badge).toHaveTextContent(secret.schoolName);
+    expect(badge).toHaveAttribute("title", `Città: ${secret.city}`);
+    expect(badge).not.toHaveClass("is-owned");
   });
 
   it("shows the actual qualified athletes without treating a smaller team as incomplete", () => {

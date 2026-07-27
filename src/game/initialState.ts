@@ -38,7 +38,7 @@ export function createInitialState(
     randomSeed: initialContacts.nextSeed,
     profile: { displayName },
     school: {
-      name: "Ordine delle Onde — Genova",
+      name: "Ordine delle Onde",
       city: "Genova",
       accentColor: "#0f6cbd",
       motto: "Ogni onda comincia da un movimento",

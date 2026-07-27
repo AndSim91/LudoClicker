@@ -17,6 +17,11 @@ import { formatCurrency } from "../../shared/formatters";
 import { knockoutStageLabel, levelShortLabel, participantName } from "./tournamentPresentation";
 import { SchoolPreliminaryResults } from "./SchoolPreliminaryResults";
 import { ChroniclesKeyIcon } from "./ChroniclesIcons";
+import {
+  TournamentParticipantIdentity,
+  TournamentSchoolBadge,
+} from "./TournamentAthleteIdentity";
+import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
 
 const KNOCKOUT_STAGE_ORDER: TournamentMatch["stage"][] = [
   "round64",
@@ -68,7 +73,7 @@ function MatchCompetitor({
         .filter(Boolean)
         .join(" ")}
     >
-      <strong>{participantName(participant)}</strong>
+      <TournamentParticipantIdentity participant={participant} />
       <b>{score}</b>
       <small>{styleScore.toFixed(3)}</small>
     </span>
@@ -94,6 +99,12 @@ function BracketMatch({
 }) {
   const a = participantById.get(match.participantAId);
   const b = participantById.get(match.participantBId);
+  const schoolA = a
+    ? tournamentSchoolDisplayName(a.schoolName, a.city)
+    : "scuola non disponibile";
+  const schoolB = b
+    ? tournamentSchoolDisplayName(b.schoolName, b.city)
+    : "scuola non disponibile";
   return (
     <button
       type="button"
@@ -102,7 +113,7 @@ function BracketMatch({
         top: positionOffset === 0 ? `${position}%` : `calc(${position}% + ${positionOffset}px)`,
       }}
       onClick={onSelect}
-      aria-label={`${participantName(a)} ${match.arenaScoreA} a ${match.arenaScoreB} ${participantName(b)}`}
+      aria-label={`${participantName(a)}, ${schoolA}, ${match.arenaScoreA} a ${match.arenaScoreB}, ${participantName(b)}, ${schoolB}`}
     >
       <MatchCompetitor
         participant={a}
@@ -215,7 +226,9 @@ function PodiumList({
             className={participantById.get(entry.participantId)?.ownedContactId ? "is-owned" : ""}
           >
             <b>{entry.position}</b>
-            <em>{participantName(participantById.get(entry.participantId))}</em>
+            <TournamentParticipantIdentity
+              participant={participantById.get(entry.participantId)}
+            />
             <small>{entry.discipline === "style" ? entry.score.toFixed(3) : "Arena"}</small>
           </span>
         ))}
@@ -285,9 +298,11 @@ function TournamentRewards({
                     <strong>{reward.discipline === "arena" ? "Arena" : "Stile"}</strong>
                     <small>{reward.position}° posto</small>
                   </span>
-                  <b>{participantName(participant)}</b>
-                  <span>{formatCurrency(reward.euros)}</span>
-                  <span>{describeTournamentRewardBonus(reward)}</span>
+                  <TournamentParticipantIdentity participant={participant} />
+                  <span className="tournament-reward-value">{formatCurrency(reward.euros)}</span>
+                  <span className="tournament-reward-value">
+                    {describeTournamentRewardBonus(reward)}
+                  </span>
                 </article>
               );
             })}
@@ -364,6 +379,12 @@ export function TournamentResults({
     result.matches.find((match) => match.stage === "final");
   const selectedMatch =
     result.matches.find((match) => match.id === selectedMatchId) ?? defaultMatch;
+  const selectedParticipantA = selectedMatch
+    ? participantById.get(selectedMatch.participantAId)
+    : undefined;
+  const selectedParticipantB = selectedMatch
+    ? participantById.get(selectedMatch.participantBId)
+    : undefined;
   const finalMatch = result.matches.find((match) => match.stage === "final");
   const bronzeMatch = result.matches.find((match) => match.stage === "bronze");
   const champion = finalMatch ? participantById.get(finalMatch.winnerId) : undefined;
@@ -545,13 +566,8 @@ export function TournamentResults({
                             .join(" ")}
                         >
                           <td>{index + 1}</td>
-                          <th
-                            scope="row"
-                            className={
-                              participant?.rarity === "secret-legendary" ? "secret-legendary" : ""
-                            }
-                          >
-                            {participantName(participant)}
+                          <th scope="row">
+                            <TournamentParticipantIdentity participant={participant} />
                           </th>
                           <td>{standing.wins}</td>
                           <td>{standing.assaultPoints}</td>
@@ -566,9 +582,9 @@ export function TournamentResults({
               {selectedMatch ? (
                 <div className="selected-match-detail" aria-live="polite">
                   <span>
-                    <strong>
-                      {participantName(participantById.get(selectedMatch.participantAId))}
-                    </strong>
+                    <TournamentParticipantIdentity
+                      participant={selectedParticipantA}
+                    />
                     <small>Stile {selectedMatch.styleScoreA.toFixed(3)}</small>
                   </span>
                   <b>
@@ -577,9 +593,9 @@ export function TournamentResults({
                     {selectedMatch.arenaScoreB}
                   </b>
                   <span>
-                    <strong>
-                      {participantName(participantById.get(selectedMatch.participantBId))}
-                    </strong>
+                    <TournamentParticipantIdentity
+                      participant={selectedParticipantB}
+                    />
                     <small>Stile {selectedMatch.styleScoreB.toFixed(3)}</small>
                   </span>
                   <button
@@ -591,13 +607,25 @@ export function TournamentResults({
                   </button>
                   {showMatchDetail ? (
                     <div className="selected-match-expanded">
-                      <span>{participantById.get(selectedMatch.participantAId)?.schoolName}</span>
+                      {selectedParticipantA ? (
+                        <TournamentSchoolBadge
+                          schoolName={selectedParticipantA.schoolName}
+                          schoolCity={selectedParticipantA.city}
+                          owned={Boolean(selectedParticipantA.ownedContactId)}
+                        />
+                      ) : <span>Scuola non disponibile</span>}
                       <strong>
                         {selectedMatch.stage === "group"
                           ? `Girone ${groupLetter(selectedMatch.groupIndex ?? 0)}`
                           : knockoutStageLabel[selectedMatch.stage]}
                       </strong>
-                      <span>{participantById.get(selectedMatch.participantBId)?.schoolName}</span>
+                      {selectedParticipantB ? (
+                        <TournamentSchoolBadge
+                          schoolName={selectedParticipantB.schoolName}
+                          schoolCity={selectedParticipantB.city}
+                          owned={Boolean(selectedParticipantB.ownedContactId)}
+                        />
+                      ) : <span>Scuola non disponibile</span>}
                     </div>
                   ) : null}
                 </div>
@@ -657,8 +685,8 @@ export function TournamentResults({
                     })}
                     {champion ? (
                       <p className="arena-champion">
-                        <strong>{participantName(champion)}</strong>
-                        <span>Campione Arena</span>
+                        <TournamentParticipantIdentity participant={champion} />
+                        <span className="arena-champion-label">Campione Arena</span>
                       </p>
                     ) : null}
                   </div>

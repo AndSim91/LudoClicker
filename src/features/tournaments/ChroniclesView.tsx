@@ -7,6 +7,10 @@ import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import type { GameState, RockPaperScissorsChoice } from "../../game/types";
 import { ChroniclesChoiceIcon, ChroniclesKeyIcon } from "./ChroniclesIcons";
+import {
+  TournamentAthleteIdentity,
+  TournamentContactIdentity,
+} from "./TournamentAthleteIdentity";
 
 interface ChroniclesViewProps {
   state?: GameState;
@@ -48,7 +52,13 @@ function ChroniclesDuel({
         </div>
         <div>
           <h2 id="chronicles-duel-title">Sfida leggendaria</h2>
-          <strong>{displayName}</strong>
+          <TournamentAthleteIdentity
+            displayName={displayName}
+            rarity="secret-legendary"
+            schoolName="Chronicles of Ludosport"
+            schoolCity="Sede segreta"
+            owned={false}
+          />
           <p>Vinci 2 mani su 3 per farlo entrare nella tua scuola.</p>
           <small>Vittoria {challenge.discipline === "arena" ? "Arena" : "Stile"}</small>
         </div>
@@ -298,17 +308,19 @@ export function ChroniclesView({
                     disabled={full}
                     onChange={() => toggleSelection(contact.id)}
                   />
-                  <strong>
-                    {contact.firstName} {contact.lastName}
-                  </strong>
-                  <span>
+                  <TournamentContactIdentity
+                    contact={contact}
+                    schoolName={state.school.name}
+                    schoolCity={state.school.city}
+                  />
+                  <span className="chronicles-stat">
                     {preparation.visible ? (
                       <OfficialStatValue value={preparation.values.arena} />
                     ) : (
                       "???"
                     )}
                   </span>
-                  <span>
+                  <span className="chronicles-stat">
                     {preparation.visible ? (
                       <OfficialStatValue value={preparation.values.style} />
                     ) : (
@@ -365,11 +377,17 @@ export function ChroniclesView({
               return (
                 <li key={contact.id}>
                   <b>{index + 1}</b>
-                  <strong>
-                    {contact.firstName} {contact.lastName}
-                  </strong>
-                  <span>{preparation.visible ? preparation.values.arena.toFixed(3) : "???"}</span>
-                  <span>{preparation.visible ? preparation.values.style.toFixed(3) : "???"}</span>
+                  <TournamentContactIdentity
+                    contact={contact}
+                    schoolName={state.school.name}
+                    schoolCity={state.school.city}
+                  />
+                  <span className="chronicles-stat">
+                    {preparation.visible ? preparation.values.arena.toFixed(3) : "???"}
+                  </span>
+                  <span className="chronicles-stat">
+                    {preparation.visible ? preparation.values.style.toFixed(3) : "???"}
+                  </span>
                   <button
                     type="button"
                     onClick={() => toggleSelection(contact.id)}

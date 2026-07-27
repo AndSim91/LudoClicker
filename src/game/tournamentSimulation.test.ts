@@ -19,6 +19,7 @@ import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { departMembers } from "./membershipFlow";
 import {
   getEligibleSchoolContacts,
+  isSecretLegendaryDefeated,
   SCHOOL_TOURNAMENT_FIELD_SIZE,
   selectSchoolTournamentEntrants,
   simulateTournament,
@@ -115,6 +116,41 @@ describe("secret legendary balancing", () => {
       expect(profile.arenaBase).toBeCloseTo(arenaBase * multiplier);
       expect(profile.styleBase).toBeCloseTo(styleBase * multiplier);
     }
+  });
+
+  it("uses each fixed Secret Legendary value without applying tournament difficulty twice", () => {
+    const initial = createTournamentSchool();
+    const state = {
+      ...initial,
+      tournaments: { ...initial.tournaments, ordinaryVictoryAchieved: true },
+    };
+    const result = simulateTournament(
+      state,
+      "academy",
+      1,
+      421_000,
+      getEligibleSchoolContacts(state),
+    ).result;
+    const participant = result.participants.find((entry) => entry.secretLegendaryId)!;
+    const profile = SECRET_LEGENDARIES[participant.secretLegendaryId!];
+
+    expect(participant.arenaBase).toBe(profile.arenaBase);
+    expect(participant.styleBase).toBe(profile.styleBase);
+    expect(participant.arenaPreparation).toBeCloseTo(
+      getPreparation(profile.arenaBase, profile.numericForms, profile.externalExperience),
+    );
+    expect(participant.stylePreparation).toBeCloseTo(
+      getPreparation(profile.styleBase, profile.numericForms, profile.externalExperience),
+    );
+  });
+
+  it("respects Arena, Style and complete Secret Legendary specialties", () => {
+    expect(isSecretLegendaryDefeated("arena", true, false)).toBe(true);
+    expect(isSecretLegendaryDefeated("arena", false, true)).toBe(false);
+    expect(isSecretLegendaryDefeated("style", true, false)).toBe(false);
+    expect(isSecretLegendaryDefeated("style", false, true)).toBe(true);
+    expect(isSecretLegendaryDefeated("complete", true, false)).toBe(true);
+    expect(isSecretLegendaryDefeated("complete", false, true)).toBe(true);
   });
 
   it("places the new linked profiles in the intended tournament bands", () => {

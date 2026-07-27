@@ -529,10 +529,12 @@ anche un secondo Leggendario Segreto, se esiste un altro profilo esterno
 compatibile con quel livello del circuito. La prima vittoria è uno sblocco
 permanente della partita e resta valida anche dopo la fondazione di nuove scuole.
 
-I valori base di ogni profilo collegato ricevono lo stesso aumento percentuale
-dello standard del circuito: +20% all'Accademico, +33,333% al Nazionale e +25%
-alla Champion's. I profili senza scuola, riservati alle Chronicles, restano
-invariati perché lo standard Chronicles non cambia.
+Quando gli standard dei circuiti sono stati ricalibrati, anche i valori fissi
+dei profili collegati sono stati aumentati della stessa percentuale: +20%
+all'Accademico, +33,333% al Nazionale e +25% alla Champion's. Durante la
+simulazione questi valori vengono usati direttamente, indipendentemente dalla
+media del campo avversario e senza applicare nuovamente il moltiplicatore del
+torneo. I profili senza scuola, riservati alle Chronicles, restano invariati.
 
 Condizione di sconfitta:
 
@@ -544,7 +546,7 @@ Non conta una sconfitta inflitta da un'altra scuola.
 
 ### 14.1 Prova automatica
 
-Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una prova di 150 secondi nella scuola:
+Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una prova di 30 secondi nella scuola:
 
 Un profilo può disabilitare la prova con la regola `recruitment: "never"`.
 Daniele Maggi usa questa eccezione: resta sempre esterno e ogni sconfitta dona
@@ -553,7 +555,7 @@ Daniele Maggi usa questa eccezione: resta sempre esterno e ogni sconfitta dona
 Una nuova prova dello stesso Leggendario Segreto riutilizza il contatto esistente, senza crearne un doppione.
 
 ```text
-sconfitta → fine torneo → prova automatica 150 s → iscrizione o rifiuto
+sconfitta → fine torneo → prova automatica 30 s → iscrizione o rifiuto
 ```
 
 Non passa da contatto disponibile, email o prenotazione manuale.
@@ -575,7 +577,12 @@ Se la prova riesce:
 
 Una prova segreta in corso impedisce temporaneamente di fondare una nuova scuola.
 
-### 14.2 Profili iniziali
+### 14.2 Profili iniziali di riferimento
+
+Il catalogo dei Leggendari Segreti è una lista manuale in continua evoluzione.
+La fonte completa e aggiornata è `src/content/secretLegendaries.ts`; i profili
+seguenti documentano soltanto i riferimenti iniziali e non sono un elenco
+esaustivo.
 
 #### Marco Palena
 
@@ -654,6 +661,13 @@ Il torneo viene simulato e salvato automaticamente. Il giocatore può consultare
 - condizione generale;
 - qualificati e ripescaggi;
 - premi.
+
+In tutte le viste dei tornei, il nome di ogni atleta conserva il colore della
+propria rarità ed è accompagnato dal badge della scuola di appartenenza. Il
+badge della scuola del giocatore usa il blu principale dell'applicazione; le
+scuole esterne usano un badge neutro. Il badge mostra soltanto il nome
+dell'Ordine, senza aggiungere la città; passando il mouse sul badge, un tooltip
+indica la città o le città della scuola.
 
 Prima dell'incontro le probabilità vengono espresse qualitativamente:
 
@@ -751,7 +765,7 @@ I log completi degli incontri devono restare separati dai riepiloghi permanenti,
 - premi e +1 esperienza vengono assegnati una sola volta;
 - i risultati sono stabili dopo ricaricamento;
 - Palena e Todaro usano i profili canonici;
-- la prova segreta dura 150 secondi di gioco attivo;
+- la prova segreta dura 30 secondi di gioco attivo;
 - i parametri Monte Carlo rispettano gli obiettivi entro una tolleranza dichiarata;
 - le scelte ancora aperte sul prestigio non vengono anticipate nel codice.
 
