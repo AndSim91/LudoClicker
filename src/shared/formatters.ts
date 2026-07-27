@@ -2,6 +2,13 @@ const currencyFormatter = new Intl.NumberFormat("it-IT", {
   style: "currency",
   currency: "EUR",
 });
+const compactCurrencyFormatter = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 1,
+});
 const timeFormatter = new Intl.DateTimeFormat("it-IT", {
   hour: "2-digit",
   minute: "2-digit",
@@ -24,6 +31,10 @@ const percentFormatter = new Intl.NumberFormat("it-IT", {
 
 export function formatCurrency(value: number): string {
   return currencyFormatter.format(value);
+}
+
+export function formatCompactCurrency(value: number): string {
+  return compactCurrencyFormatter.format(value);
 }
 
 export function formatTime(value: number): string {

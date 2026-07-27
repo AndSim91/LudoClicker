@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createInitialState } from "../../game/engine";
+import type { Collaborator } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
 
@@ -45,20 +46,111 @@ describe("EquipmentQuickPanel", () => {
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
 
-  it("hides the repair action completely when no maintenance is needed", () => {
+  it("keeps the repair action mounted and disabled when maintenance is not needed", () => {
     const initial = createInitialState(1_000);
-    const { container } = render(
+    const fundedState = {
+      ...initial,
+      school: { ...initial.school, euros: 100 },
+    };
+    const onMaintainEquipment = vi.fn();
+    const { container, rerender } = render(
       <EquipmentQuickPanel
-        state={initial}
+        state={fundedState}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    const idleRepairButton = screen.getByRole("button", {
+      name: "Nessuna riparazione necessaria",
+    });
+    expect(idleRepairButton).toBeDisabled();
+    expect(idleRepairButton).toHaveTextContent("Ripara");
+    expect(idleRepairButton).toHaveTextContent("In ordine");
+    expect(container.querySelector(".equipment-quick-metrics")).toHaveClass(
+      "has-maintenance-action",
+    );
+
+    fireEvent.click(idleRepairButton);
+    expect(onMaintainEquipment).not.toHaveBeenCalled();
+
+    rerender(
+      <EquipmentQuickPanel
+        state={{
+          ...fundedState,
+          equipment: { ...initial.equipment, wear: 10 },
+        }}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    const activeRepairButton = screen.getByRole("button", { name: /Ripara tutto/ });
+    expect(activeRepairButton).toBe(idleRepairButton);
+    expect(activeRepairButton).toBeEnabled();
+
+    rerender(
+      <EquipmentQuickPanel
+        state={fundedState}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Nessuna riparazione necessaria" }),
+    ).toBe(idleRepairButton);
+    expect(idleRepairButton).toBeDisabled();
+  });
+
+  it("reserves the automatic repair progress space while there is no repair work", () => {
+    const initial = createInitialState(1_000);
+    const equipmentCollaborator: Collaborator = {
+      id: "equipment-quick-panel-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Attrezzatura",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      formBranchPreferences: [],
+      assignment: "equipment",
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare",
+    };
+    const idleState = {
+      ...initial,
+      school: { ...initial.school, euros: 100 },
+      collaborators: [equipmentCollaborator],
+    };
+    const { container, rerender } = render(
+      <EquipmentQuickPanel
+        state={idleState}
         onMaintainEquipment={() => undefined}
         onBuyOfficialSwords={() => undefined}
       />,
     );
 
-    expect(screen.queryByRole("button", { name: /Ripara|Manutenzione/ })).not.toBeInTheDocument();
-    expect(container.querySelector(".equipment-quick-metrics")).not.toHaveClass(
-      "has-maintenance-action",
+    const progressSlot = container.querySelector(".equipment-auto-progress-slot");
+    expect(progressSlot).toBeInTheDocument();
+    expect(
+      screen.queryByRole("progressbar", { name: "Riduzione automatica dell'usura" }),
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <EquipmentQuickPanel
+        state={{
+          ...idleState,
+          equipment: { ...idleState.equipment, wear: 10 },
+        }}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={() => undefined}
+      />,
     );
+
+    expect(container.querySelector(".equipment-auto-progress-slot")).toBe(progressSlot);
+    expect(
+      screen.getByRole("progressbar", { name: "Riduzione automatica dell'usura" }),
+    ).toBeVisible();
   });
 
   it("offers x10 only when the school can afford ten swords", () => {

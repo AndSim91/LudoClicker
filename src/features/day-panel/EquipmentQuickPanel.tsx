@@ -17,11 +17,15 @@ import {
 } from "../../game/equipment";
 import type { GameState } from "../../game/types";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCompactCurrency, formatCurrency } from "../../shared/formatters";
 
 type PurchaseAmount = 1 | 10 | 100;
 
 const PURCHASE_AMOUNTS: readonly PurchaseAmount[] = [1, 10, 100];
+
+function formatMaintenanceValue(value: number): string {
+  return value >= 1_000 ? formatCompactCurrency(value) : formatCurrency(value);
+}
 
 function getAffordablePurchaseAmounts(state: GameState): PurchaseAmount[] {
   return PURCHASE_AMOUNTS.filter(
@@ -82,16 +86,18 @@ export function EquipmentQuickPanel({
         : "In ordine";
 
   let maintenanceLabel = `Ripara tutto \u00b7 ${formatCurrency(maintenanceCost)}`;
-  let maintenanceValue = formatCurrency(maintenanceCost);
+  let maintenanceValue = formatMaintenanceValue(maintenanceCost);
   if (!hasRepairableEquipment) {
-    maintenanceLabel = "Manutenzione in attesa";
-    maintenanceValue = "In attesa";
+    maintenanceLabel = needsMaintenance
+      ? "Riparazione non disponibile"
+      : "Nessuna riparazione necessaria";
+    maintenanceValue = needsMaintenance ? "Bloccata" : "In ordine";
   } else if (state.school.euros < minimumMaintenanceCost) {
     maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
     maintenanceValue = "Fondi";
   } else if (state.school.euros < maintenanceCost) {
     maintenanceLabel = `Riparazione parziale \u00b7 ${formatCurrency(state.school.euros)}`;
-    maintenanceValue = formatCurrency(state.school.euros);
+    maintenanceValue = formatMaintenanceValue(state.school.euros);
   }
 
   let automaticLabel = "Controllo automatico attivo";
@@ -120,7 +126,7 @@ export function EquipmentQuickPanel({
       />
 
       <div
-        className={`equipment-quick-metrics${needsMaintenance ? " has-maintenance-action" : ""}`}
+        className="equipment-quick-metrics has-maintenance-action"
         aria-label="Legenda e manutenzione spade"
       >
         <span className="is-reserved">
@@ -144,39 +150,40 @@ export function EquipmentQuickPanel({
           </small>
           <strong>{damagedSwords}</strong>
         </span>
-        {needsMaintenance ? (
-          <button
-            className="equipment-maintenance-button"
-            type="button"
-            aria-label={maintenanceLabel}
-            disabled={!canMaintain}
-            onClick={onMaintainEquipment}
-          >
-            <small>
-              <Icon name="wrench" />
-              Ripara
-            </small>
-            <strong>{maintenanceValue}</strong>
-          </button>
-        ) : null}
+        <button
+          className="equipment-maintenance-button"
+          type="button"
+          aria-label={maintenanceLabel}
+          title={maintenanceLabel}
+          disabled={!canMaintain}
+          onClick={onMaintainEquipment}
+        >
+          <small>
+            <Icon name="wrench" />
+            Ripara
+          </small>
+          <strong>{maintenanceValue}</strong>
+        </button>
       </div>
 
       {equipmentCollaborators > 0 ? (
         <div className="equipment-auto-repair">
-          <div>
+          <div className="equipment-auto-repair-heading">
             <span>{automaticLabel}</span>
             <strong>
               {equipmentCollaborators} {equipmentCollaborators === 1 ? "addetto" : "addetti"}
             </strong>
           </div>
-          {automaticTarget && !automaticRepairBlocked ? (
-            <ProgressBar
-              className="equipment-auto-progress"
-              label={automaticLabel}
-              value={automaticProgress}
-              valueText={`${Math.round(automaticProgress)}% completato`}
-            />
-          ) : null}
+          <div className="equipment-auto-progress-slot">
+            {automaticTarget && !automaticRepairBlocked ? (
+              <ProgressBar
+                className="equipment-auto-progress"
+                label={automaticLabel}
+                value={automaticProgress}
+                valueText={`${Math.round(automaticProgress)}% completato`}
+              />
+            ) : null}
+          </div>
         </div>
       ) : null}
 
