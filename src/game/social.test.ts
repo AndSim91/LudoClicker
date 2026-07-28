@@ -36,9 +36,8 @@ describe("Social", () => {
     const maximum = {
       ...levels,
       "social-content-synthesis": 5,
-      "social-editorial-plan": 5,
-      "social-content-distribution": 5,
-      "social-sponsorships": 4,
+      "winning-advertising": 5,
+      "marketing-course": 5,
     };
 
     expect(getSocialContentCharacters(maximum)).toBe(50_000);
@@ -60,7 +59,7 @@ describe("Social", () => {
       },
     };
 
-    expect(getMonthlySocialIncome(state)).toBe(140);
+    expect(getMonthlySocialIncome(state)).toBe(120);
   });
 
   it("credits sponsorships with the monthly fees instead of content cycles", () => {

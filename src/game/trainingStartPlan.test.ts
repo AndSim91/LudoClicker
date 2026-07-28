@@ -201,8 +201,7 @@ describe("batched automatic teaching plan", () => {
       unlocks: { ...initial.unlocks, forms: true },
       upgrades: {
         ...initial.upgrades,
-        "promiscuous-instructor": 1,
-        "tiamat-instructor": 4,
+        "promiscuous-instructor": 5,
       },
     };
 

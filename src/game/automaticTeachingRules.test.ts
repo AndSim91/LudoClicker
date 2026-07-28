@@ -291,8 +291,7 @@ describe("automatic teaching rules", () => {
       },
       upgrades: {
         ...initial.upgrades,
-        "promiscuous-instructor": 1,
-        "tiamat-instructor": 4,
+        "promiscuous-instructor": 5,
       },
     };
 

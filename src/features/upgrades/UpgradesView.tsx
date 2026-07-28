@@ -84,8 +84,17 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Percorso iscrizioni", "enrollmentProgress");
   addPercentage("Automazione", "automationMultiplier");
   addPercentage("Entrate", "incomeMultiplier");
+  addPercentage("Quote mensili", "membershipIncomeMultiplier");
+  addPercentage("Costi corsi Istruttori/Tecnici", "courseCostReduction", "−");
   addPercentage("Usura", "equipmentWearReduction", "−");
   addPercentage("Manutenzione automatica", "equipmentAutomationMultiplier");
+  const preparedWorkMaximum = getEquipmentPreparedWorkMaximum(state);
+  if (preparedWorkMaximum > 0) {
+    benefits.push({
+      label: "Riserva manutenzione",
+      value: `${formatNumber(preparedWorkMaximum)} punti`,
+    });
+  }
   const annualFormLimit = getAnnualFormTrainingLimit(state.upgrades);
   if (annualFormLimit > 1) {
     benefits.push({ label: "Forme annue", value: formatNumber(annualFormLimit) });

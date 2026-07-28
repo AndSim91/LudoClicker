@@ -407,7 +407,7 @@ describe("game engine: operations", () => {
 
     expect(purchased.school.euros).toBe(1_670);
     expect(purchased.equipment).toMatchObject({ totalSwords: 7, availableSwords: 7 });
-    expect(upgraded.equipment).toMatchObject({ totalSwords: 9, availableSwords: 9 });
+    expect(upgraded.equipment).toMatchObject({ totalSwords: 7, availableSwords: 7 });
   });
 
   it("buys multiple official swords atomically", () => {

@@ -42,10 +42,10 @@ describe("game engine: progression", () => {
     expect(first.upgrades["prepared-presentation"]).toBe(1);
     expect(first.school.euros).toBe(150);
     expect(second.upgrades["prepared-presentation"]).toBe(2);
-    expect(second.school.euros).toBe(85);
+    expect(second.school.euros).toBe(50);
   });
 
-  it("adds purchased equipment capacity immediately", () => {
+  it("unlocks Banco da lavoro without creating free swords", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
@@ -63,15 +63,15 @@ describe("game engine: progression", () => {
       now: 2_000,
     });
 
-    expect(upgraded.equipment.totalSwords).toBe(8);
-    expect(upgraded.equipment.availableSwords).toBe(8);
+    expect(upgraded.equipment.totalSwords).toBe(6);
+    expect(upgraded.equipment.availableSwords).toBe(6);
   });
 
   it("allows buying an upgrade as soon as the balance covers its price", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 75 },
+      school: { ...initial.school, euros: 50 },
     };
 
     const purchased = gameReducer(funded, {
@@ -88,7 +88,7 @@ describe("game engine: progression", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 800, fame: 1 },
+      school: { ...initial.school, euros: 1_600, fame: 1 },
       unlocks: { ...initial.unlocks, upgrades: true },
     };
     const faster = [2_000, 2_100, 2_200, 2_300, 2_400].reduce(
@@ -106,7 +106,7 @@ describe("game engine: progression", () => {
     });
     const sparring = getAcquisitionEventDefinition("park-sparring")!;
 
-    expect(faster.player.writingPower).toBe(3);
+    expect(faster.player.writingPower).toBe(2);
     expect(getEventFunnelOutcome(charismatic, sparring).emailShareChance).toBeGreaterThan(
       getEventFunnelOutcome(faster, sparring).emailShareChance,
     );
@@ -123,9 +123,9 @@ describe("game engine: progression", () => {
       },
     };
 
-    expect(getEmailBookingChance(improved)).toBeCloseTo(0.464);
-    expect(getEnrollmentChance(improved)).toBeCloseTo(0.64);
-    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.158);
+    expect(getEmailBookingChance(improved)).toBeCloseTo(0.425714);
+    expect(getEnrollmentChance(improved)).toBeCloseTo(0.363);
+    expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.154);
 
     const maximized = {
       ...initial,
@@ -294,7 +294,7 @@ describe("game engine: progression", () => {
       {
         ...state,
         randomSeed: doubleFollowerSeed,
-        upgrades: { ...state.upgrades, "social-editorial-plan": 5 },
+        upgrades: { ...state.upgrades, "winning-advertising": 5 },
       },
       1,
     );
@@ -702,7 +702,7 @@ describe("game engine: progression", () => {
     expect(pagoSportTraining.collaborators[0].training?.completesAt).toBe(8_000);
   });
 
-  it("counts an Instructor's July course in the upcoming year and Extra Form adds one slot", () => {
+  it("counts an Instructor's July course in the upcoming year and group teaching adds one slot", () => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "instructor-extra-form",
@@ -748,7 +748,7 @@ describe("game engine: progression", () => {
     });
     const septemberWithExtraForm = {
       ...septemberState,
-      upgrades: { ...septemberState.upgrades, "extra-form": 1 },
+      upgrades: { ...septemberState.upgrades, "promiscuous-instructor": 6 },
     };
     const secondTraining = gameReducer(septemberWithExtraForm, {
       type: "START_FORM_TRAINING",
@@ -878,7 +878,7 @@ describe("game engine: progression", () => {
     expect(secondBlocked.school.euros).toBe(12.5);
   });
 
-  it("starts automatic teaching and fills six Tiamat slots", () => {
+  it("starts automatic teaching and fills six group-teaching slots", () => {
     const initial = createInitialState(1_000);
     const students = Array.from({ length: 8 }, (_, index) => ({
       ...initial.contacts[index % initial.contacts.length],
@@ -907,8 +907,7 @@ describe("game engine: progression", () => {
       unlocks: { ...initial.unlocks, forms: true },
       upgrades: {
         ...initial.upgrades,
-        "promiscuous-instructor": 1,
-        "tiamat-instructor": 4,
+        "promiscuous-instructor": 5,
         pagosport: 3,
       },
     };
@@ -917,7 +916,7 @@ describe("game engine: progression", () => {
       ...ready,
       upgrades: {
         ...ready.upgrades,
-        "tiamat-instructor": 0,
+        "promiscuous-instructor": 1,
       },
     }, { type: "TICK", now: 2_000 });
     const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });

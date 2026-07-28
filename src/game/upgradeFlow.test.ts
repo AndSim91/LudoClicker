@@ -1,23 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
 import type { Collaborator } from "./types";
-import { buyUpgrade } from "./upgradeFlow";
+import { buyUpgrade, discoverSecretUpgrade } from "./upgradeFlow";
 
 describe("buyUpgrade prerequisites", () => {
-  it("unlocks Progetto X for one euro only after Tocco DiGilo", () => {
+  it("buys Corso X for one euro only after its independent discovery", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
       school: { ...initial.school, euros: 10 },
-      upgrades: { ...initial.upgrades, pagosport: 3 },
     };
 
     expect(buyUpgrade(funded, "project-x")).toBe(funded);
 
-    const eligible = {
-      ...funded,
-      upgrades: { ...funded.upgrades, "divine-touch": 1 },
-    };
+    const eligible = discoverSecretUpgrade(funded, "project-x");
     const upgraded = buyUpgrade(eligible, "project-x");
 
     expect(upgraded.upgrades["project-x"]).toBe(1);
@@ -43,7 +39,7 @@ describe("buyUpgrade prerequisites", () => {
     expect(upgradedState.school.euros).toBeLessThan(eligibleState.school.euros);
   });
 
-  it("opens Polivalenza didattica after Arena Tecnica level one", () => {
+  it("opens Master of none after Percorso Tecnico level one", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
@@ -57,19 +53,20 @@ describe("buyUpgrade prerequisites", () => {
     expect(versatility.upgrades["technical-arena"]).toBe(1);
   });
 
-  it("opens Intensità agonistica only after unlocking Corso Agonisti", () => {
+  it("opens Intensità agonistica only after completing PagoSport", () => {
     const initial = createInitialState(1_000);
     const levelTwo = {
       ...initial,
       school: { ...initial.school, euros: 20_000 },
-      upgrades: { ...initial.upgrades, "technical-arena": 2 },
+      upgrades: { ...initial.upgrades, pagosport: 2 },
     };
 
     expect(buyUpgrade(levelTwo, "agonist-course-intensity")).toBe(levelTwo);
 
     const levelThree = {
       ...levelTwo,
-      upgrades: { ...levelTwo.upgrades, "technical-arena": 3 },
+      school: { ...levelTwo.school, euros: 200_000 },
+      upgrades: { ...levelTwo.upgrades, pagosport: 3 },
     };
     expect(buyUpgrade(levelThree, "agonist-course-intensity").upgrades["agonist-course-intensity"])
       .toBe(1);
@@ -95,7 +92,7 @@ describe("buyUpgrade prerequisites", () => {
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,
-        "tiamat-instructor": 4,
+        "athletic-preparation": 5,
         pagosport: 1,
       },
     };
@@ -103,6 +100,16 @@ describe("buyUpgrade prerequisites", () => {
     const upgraded = buyUpgrade(state, "pagosport");
     expect(upgraded.upgrades.pagosport).toBe(2);
     expect(upgraded.collaborators[0].instructorForms).toEqual([]);
+  });
+
+  it("does not allow direct purchases of retired hidden nodes", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 1_000 },
+    };
+
+    expect(buyUpgrade(funded, "social-editorial-plan")).toBe(funded);
   });
 
   it("enforces the Gadget sector, Social and catalog prerequisites", () => {

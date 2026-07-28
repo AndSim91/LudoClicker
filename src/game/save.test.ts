@@ -419,7 +419,7 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades["comfortable-keyboard"]).toBe(2);
     expect(migrated.upgrades["prepared-presentation"]).toBe(0);
-    expect(migrated.player.writingPower).toBe(3);
+    expect(migrated.player.writingPower).toBe(1.4);
   });
 
   it("migrates version 3 event funnel totals", () => {

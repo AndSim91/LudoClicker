@@ -25,7 +25,7 @@ function stateWithInstructor(pagosport: number) {
     contacts: [contact, ...initial.contacts.slice(1)],
     collaborators: [collaborator],
     unlocks: { ...initial.unlocks, forms: true, collaborators: true },
-    upgrades: { ...initial.upgrades, pagosport },
+    upgrades: { ...initial.upgrades, "sis-accreditation": 1, pagosport },
   };
 }
 

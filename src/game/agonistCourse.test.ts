@@ -140,8 +140,8 @@ describe("Arena Tecnica e Corso Agonisti", () => {
       ...initial,
       upgrades: {
         ...initial.upgrades,
-        "extra-form": 1,
-        pagosport: 2,
+        "promiscuous-instructor": 6,
+        pagosport: 1,
       },
     };
     const started = startAgonistCourse(
@@ -185,7 +185,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
       }],
       upgrades: {
         ...initial.upgrades,
-        "extra-form": 1,
+        "promiscuous-instructor": 6,
         pagosport: 1,
         "agonist-course-intensity": 1,
       },
