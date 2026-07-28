@@ -129,7 +129,7 @@ export function migrateProgressionState(state: MigratableState): MigratableState
               ? Math.max(mastery?.instructor ?? 0, mastery?.lessons ?? 0)
               : Number.isFinite(mastery?.[role])
                 ? mastery?.[role] ?? 0
-                : defaults[role],
+                : defaults[role] ?? 0,
           ),
         ]),
       ) as CollaboratorMastery;

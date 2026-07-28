@@ -14,6 +14,33 @@ describe("UpgradesView", () => {
       .not.toBeInTheDocument();
   });
 
+  it("reveals the seven Gadget upgrades only after the sector unlocks", () => {
+    const initial = createInitialState(1_000);
+    const { rerender } = render(
+      <UpgradesView state={initial} onBuyUpgrade={() => undefined} />,
+    );
+
+    expect(screen.queryByRole("heading", { name: "Gadget" })).not.toBeInTheDocument();
+
+    rerender(
+      <UpgradesView
+        state={{
+          ...initial,
+          unlocks: { ...initial.unlocks, gadget: true },
+        }}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Gadget" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Vetrina della scuola/ }))
+      .toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Negozio online/ }))
+      .toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Vendita abbinata/ }))
+      .toBeVisible();
+  });
+
   it("renders the complete upgrade catalog as eight connected branches", () => {
     const initial = createInitialState(1_000);
     render(

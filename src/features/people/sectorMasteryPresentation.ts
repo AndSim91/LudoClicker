@@ -17,7 +17,7 @@ export function getAverageSectorMastery(
 
   const averageXp = collaborators.reduce((total, collaborator) => {
     const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
-    return total + mastery[role];
+    return total + (mastery[role] ?? 0);
   }, 0) / collaborators.length;
 
   return {

@@ -10,13 +10,18 @@ import type { Collaborator } from "../../game/types";
 export function CollaboratorMasterySummary({
   collaborator,
   socialUnlocked = false,
+  gadgetUnlocked = false,
   defaultOpen = false,
 }: {
   collaborator: Collaborator;
   socialUnlocked?: boolean;
+  gadgetUnlocked?: boolean;
   defaultOpen?: boolean;
 }) {
   const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
+  const visibleRoles = COLLABORATOR_MASTERY_ROLES.filter(
+    (role) => role !== "gadget" || gadgetUnlocked,
+  );
   const activeRole = collaborator.assignment;
   const activeProgress = activeRole
     ? getCollaboratorMasteryProgress(mastery[activeRole])
@@ -41,11 +46,11 @@ export function CollaboratorMasterySummary({
         <small>
           {activeProgress
             ? `${activeXpLabel} · +${Math.round(activeProgress.definition.multiplier * 100)}%`
-            : "6 percorsi disponibili"}
+            : `${visibleRoles.length} percorsi disponibili`}
         </small>
       </summary>
       <div className="mastery-grid">
-        {COLLABORATOR_MASTERY_ROLES.map((role) => {
+        {visibleRoles.map((role) => {
           const progress = getCollaboratorMasteryProgress(mastery[role]);
           const active = collaborator.assignment === role;
           const xpLabel = progress.nextXp === undefined

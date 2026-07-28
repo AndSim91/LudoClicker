@@ -7,6 +7,11 @@ import {
   getEquipmentAutomaticRepairTarget,
 } from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
+import { GADGET_DEFINITIONS } from "../../content/gadgets";
+import {
+  getGadgetWorkDurationMs,
+  getGadgetWorkProgress,
+} from "../../game/gadgetEconomy";
 import {
   getMonthlySocialIncome,
   getSocialContentCharacters,
@@ -256,6 +261,42 @@ export function getCollaboratorAutomationPresentation({
 
   if (assignment === "instructor") {
     return { title: "Lezioni automatiche", detail: "Gestione formazione allievi" };
+  }
+
+  if (assignment === "gadget") {
+    const work = state.gadgets.activeWork;
+    if (work) {
+      const definition = GADGET_DEFINITIONS[work.productId];
+      const progress = getGadgetWorkProgress(state) ?? 0;
+      return {
+        title: work.kind === "development"
+          ? `Progetto ${definition.name}`
+          : `Revisione ${definition.name}`,
+        detail: progress > 0 ? "Lavorazione in corso..." : "In attesa di avanzamento",
+        progress,
+        progressLabel: work.kind === "development"
+          ? `Sviluppo di ${definition.name}`
+          : `Revisione di ${definition.name}`,
+        durationMs: getGadgetWorkDurationMs(state, work.productId, work.kind),
+      };
+    }
+    const minigame = state.gadgets.minigame;
+    if (minigame) {
+      return {
+        title: minigame.status === "result" ? "Qualità definita" : "Prototipo pronto",
+        detail: `${GADGET_DEFINITIONS[minigame.productId].name} · completa la prova qualità`,
+        progress: minigame.status === "result" ? 100 : undefined,
+      };
+    }
+    const productsInSale = Object.values(state.gadgets.products).filter(
+      (product) => product.accepted,
+    ).length;
+    return productsInSale > 0
+      ? {
+          title: "Vendita del catalogo",
+          detail: `${productsInSale} ${productsInSale === 1 ? "prodotto attivo" : "prodotti attivi"}`,
+        }
+      : { title: "In attesa", detail: "Nessun progetto Gadget attivo" };
   }
 
   return { title: "Non assegnato", detail: "Scegli un compito" };

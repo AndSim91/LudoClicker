@@ -19,6 +19,7 @@ export function createEmptyCollaboratorTargets(): Record<CollaboratorMasteryRole
     events: 0,
     equipment: 0,
     instructor: 0,
+    gadget: 0,
   };
 }
 
@@ -277,6 +278,7 @@ export function incrementCollaboratorAssignment(
 ): GameState {
   if (
     !state.collaboratorManagement.aggregateViewUnlocked ||
+    (assignment === "gadget" && !state.unlocks.gadget) ||
     !state.collaborators.some((collaborator) => collaborator.assignment === null)
   ) return state;
   return rebalanceTargets({
@@ -285,7 +287,7 @@ export function incrementCollaboratorAssignment(
       ...state.collaboratorManagement,
       targets: {
         ...state.collaboratorManagement.targets,
-        [assignment]: state.collaboratorManagement.targets[assignment] + 1,
+        [assignment]: (state.collaboratorManagement.targets[assignment] ?? 0) + 1,
       },
     },
   });
@@ -297,7 +299,8 @@ export function decrementCollaboratorAssignment(
 ): GameState {
   if (
     !state.collaboratorManagement.aggregateViewUnlocked ||
-    state.collaboratorManagement.targets[assignment] <= 0
+    (assignment === "gadget" && !state.unlocks.gadget) ||
+    (state.collaboratorManagement.targets[assignment] ?? 0) <= 0
   ) return state;
   return rebalanceTargets({
     ...state,
@@ -305,7 +308,7 @@ export function decrementCollaboratorAssignment(
       ...state.collaboratorManagement,
       targets: {
         ...state.collaboratorManagement.targets,
-        [assignment]: state.collaboratorManagement.targets[assignment] - 1,
+        [assignment]: (state.collaboratorManagement.targets[assignment] ?? 0) - 1,
       },
     },
   });

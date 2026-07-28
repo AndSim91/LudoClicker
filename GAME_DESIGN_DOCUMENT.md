@@ -898,6 +898,7 @@ anticipo.
 | Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
 | Istruttore           | insegna le Forme già attestate agli iscritti, una persona alla volta, e migliora la conversione prova → iscrizione |
+| Gadget               | sviluppa e revisiona i prototipi e gestisce le vendite automatiche del catalogo                                    |
 | Coordinamento        | funzione futura, non inclusa nell'MVP                                                                              |
 
 Il Preparatore Atletico opera solo durante il gioco online. La selezione è
@@ -1995,9 +1996,156 @@ cambia.
 
 ---
 
-## 19. Bilanciamento iniziale
+## 19. Settore Gadget
 
-### 19.1 Obiettivi temporali
+### 19.1 Sblocco e catalogo base
+
+Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
+prima volta la disciplina Arena del Torneo Accademico Alpha. Lo sblocco apre la
+vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
+il progetto Polsino. Il progetto deve comunque essere acquistato.
+
+Il catalogo base segue questo ordine:
+
+| Prodotto  | Costo progetto | Guadagno per pezzo al 100% | Lavoro base con P = 1 | Revisione |
+| --------- | --------------: | --------------------------: | ---------------------: | --------: |
+| Polsino   |        10.000 € |                        20 € |             60 minuti |   1.000 € |
+| Tazza     |        15.000 € |                        30 € |             90 minuti |   1.500 € |
+| Mutande   |        20.000 € |                        40 € |            120 minuti |   2.000 € |
+| Maglietta |        25.000 € |                        50 € |            150 minuti |   2.500 € |
+| Felpa     |        40.000 € |                        80 € |            240 minuti |   4.000 € |
+
+Ogni progetto successivo si sblocca automaticamente dopo 100 vendite
+complessive del prodotto precedente. Lo sblocco non ha un costo aggiuntivo, ma
+il nuovo progetto deve essere pagato e sviluppato. Spillette, Coppe, Premio
+Cu.Li. e Premio Piedozzi appartengono alla futura estensione degli Open e non
+fanno parte del catalogo base.
+
+### 19.2 Progettazione, revisione e Collaboratori
+
+Il laboratorio possiede un solo slot. Il costo viene scalato quando parte un
+progetto o una revisione, senza annullamento e senza rimborso. La produttività
+del settore è:
+
+```text
+P = somma della produttività dei Collaboratori assegnati a Gadget
+```
+
+Le rarità, la Maestria dell'incarico e i bonus globali di Forma 6 e Forma 7
+concorrono a `P`. I bonus specifici dei rami d'arma non modificano Gadget. Un
+Collaboratore assegnato guadagna 1 XP di Maestria Gadget al secondo, come negli
+altri incarichi.
+
+Il tempo effettivo di progettazione è `lavoroBase / P`; una revisione richiede
+un terzo del lavoro iniziale. I relativi potenziamenti moltiplicano la velocità.
+Con `P = 0` l'avanzamento si ferma senza perdere il lavoro già completato. Le
+vendite dei prodotti accettati continuano mentre il laboratorio sviluppa o
+revisiona un altro prodotto.
+
+Il primo tentativo di qualità è compreso nel progetto. Ogni nuovo tentativo
+richiede prima una revisione pari al 10% del costo del progetto. Il prodotto
+continua a essere venduto alla qualità precedente durante la revisione. La
+qualità memorizzata è sempre il massimo storico: un risultato peggiore non può
+ridurla. Al 100% le revisioni vengono disabilitate.
+
+### 19.3 Pubblico, vendite e guadagni
+
+Il pubblico totale raggiungibile è:
+
+```text
+pubblico = floor(iscrittiAttivi × coperturaIscritti
+  + follower × coperturaFollower)
+```
+
+La copertura iniziale è il 10% degli iscritti e lo 0% dei follower. Ogni
+persona del pubblico può comprare una volta ciascun prodotto, quindi la domanda
+residua è calcolata separatamente come
+`max(0, pubblico - pezziVendutiDelProdotto)`. Non esiste rigenerazione della
+domanda: se il pubblico scende sotto le vendite storiche, quel prodotto si
+ferma finché il pubblico non cresce di nuovo.
+
+La capacità commerciale condivisa dal catalogo è:
+
+```text
+tentativiAlMese = 5 × P × (1 + bonusGestioneOrdini)
+```
+
+I tentativi vengono distribuiti proporzionalmente alla domanda residua dei
+prodotti accettati e vendibili. La capacità che non trova domanda viene persa;
+le sole frazioni di vendita già maturate restano memorizzate fino a formare un
+pezzo intero. La conversione base dipende dalla qualità e viene interpolata
+linearmente tra questi punti:
+
+| Qualità | Conversione base |
+| ------: | ---------------: |
+|      0% |               0% |
+|     25% |              50% |
+|     50% |              75% |
+|     75% |              90% |
+|    100% |             100% |
+
+La Formazione commerciale aggiunge fino a 10 punti percentuali, con limite
+finale del 100%; un prodotto allo 0% resta comunque non vendibile. La Vendita
+abbinata genera in modo deterministico fino al 25% di pezzi aggiuntivi fra gli
+altri prodotti accettati, sempre entro la loro domanda residua.
+
+Il guadagno netto per pezzo è:
+
+```text
+guadagnoPezzo = costoProgetto / 500 × qualità / 100
+```
+
+Di conseguenza 500 vendite al 100% eguagliano il costo originario del progetto.
+I guadagni vengono accreditati continuamente e le vendite passate non vengono
+rivalutate quando la qualità aumenta. Nell'interfaccia del prodotto si mostrano
+soltanto qualità massima, pezzi venduti e guadagno cumulativo; margini, domanda
+residua, recupero dell'investimento e proiezioni restano interni.
+
+### 19.4 Prova qualità
+
+La prova qualità è un minigioco silenzioso a quattro corsie, comune ai cinque
+prodotti finché non verranno definite difficoltà specifiche:
+
+- 3 secondi di conto alla rovescia, 20 secondi di prova e 24 note senza note
+  simultanee;
+- corsie desktop: `←/A`, `↓/S`, `↑/W`, `→/D`;
+- input tramite tastiera, click sulla nota oppure pulsanti fissi e ampi per il
+  touch;
+- Perfect entro ±100 ms vale 100 punti, Good entro ±200 ms vale 70, Almost
+  entro ±320 ms vale 40, Miss vale 0;
+- ogni input errato o su una corsia vuota sottrae un punto qualità; le
+  ripetizioni automatiche della tastiera sono ignorate;
+- il risultato è la media dei punti delle 24 note meno gli errori, arrotondata
+  e limitata fra 0 e 100.
+
+Durante la prova il resto del gioco è in pausa. Perdita del focus, cambio di
+scheda e cambio di orientamento mettono in pausa anche il minigioco. Il seed e
+lo stato del tentativo sono salvati, così un reload non genera una nuova
+sequenza. Abbandonare assegna 0 al tentativo, senza rimborso e senza ridurre la
+qualità massima già ottenuta. Il primo risultato permette di accettare il
+prodotto o revisionarlo; un prodotto accettato resta in vendita per sempre. È
+possibile accettare qualità 0%, ma il prodotto non vende finché non migliora.
+
+### 19.5 Potenziamenti Gadget
+
+| Potenziamento              | Effetto massimo                                      | Costi per livello                                      | Requisito |
+| -------------------------- | ---------------------------------------------------- | ------------------------------------------------------ | --------- |
+| Vetrina della scuola       | iscritti 10% → 20% → 35% → 50% → 75% → 100%         | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €             | Gadget |
+| Negozio online             | follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € | Vetrina 2 e Social |
+| Strumenti di progettazione | +100% velocità sviluppo                              | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Gadget |
+| Laboratorio revisioni      | +100% velocità revisione                             | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Strumenti 2 |
+| Gestione degli ordini      | +100% capacità commerciale                           | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €          | Gadget |
+| Formazione commerciale     | +10 punti percentuali di conversione                 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 €         | Ordini 2 |
+| Vendita abbinata           | +25% vendite aggiuntive                              | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €        | Formazione 3 e Tazza sbloccata |
+
+Il ramo costa complessivamente 5.142.500 €. È visibile nella schermata Upgrade
+soltanto dopo lo sblocco del settore.
+
+---
+
+## 20. Bilanciamento iniziale
+
+### 20.1 Obiettivi temporali
 
 | Traguardo                  |           Tempo desiderato |
 | -------------------------- | -------------------------: |
@@ -2011,7 +2159,7 @@ cambia.
 | Automazione percepibile    |               30–60 minuti |
 | Primo prestigio            | 3–4 ore attive distribuite |
 
-### 19.2 Avvio consigliato
+### 20.2 Avvio consigliato
 
 - 5 contatti disponibili;
 - 1 carattere per input;
@@ -2031,7 +2179,7 @@ cambia.
   l'automazione senza spezzare il ritmo;
 - il primo volantinaggio è gratuito e guidato.
 
-### 19.3 Protezione dalla sfortuna
+### 20.3 Protezione dalla sfortuna
 
 - dopo una serie di funnel senza iscritti, aumenta temporaneamente la
   probabilità del passaggio più debole;
@@ -2043,9 +2191,9 @@ cambia.
 
 ---
 
-## 20. Salvataggio locale
+## 21. Salvataggio locale
 
-### 20.1 Strategia
+### 21.1 Strategia
 
 - `localStorage` per la prima versione;
 - salvataggio automatico ogni 10 secondi;
@@ -2055,7 +2203,7 @@ cambia.
 - export/import JSON nelle Impostazioni;
 - reset completo con doppia conferma.
 
-### 20.2 Stato minimo
+### 21.2 Stato minimo
 
 ```ts
 interface GameState {
@@ -2072,6 +2220,7 @@ interface GameState {
   collaborators: Collaborator[];
   legendaryPity: number;
   equipment: EquipmentItem[];
+  gadgets: GadgetState;
   calendar: CalendarEvent[];
   upgrades: UpgradeState[];
   statistics: StatisticsState;
@@ -2080,7 +2229,7 @@ interface GameState {
 }
 ```
 
-### 20.3 Sicurezza e privacy
+### 21.3 Sicurezza e privacy
 
 - nessuna connessione a Outlook;
 - nessun invio di email reali;
@@ -2092,9 +2241,9 @@ interface GameState {
 
 ---
 
-## 21. Architettura tecnica proposta
+## 22. Architettura tecnica proposta
 
-### 21.1 Stack
+### 22.1 Stack
 
 - Vite;
 - React;
@@ -2107,7 +2256,7 @@ interface GameState {
 
 Non serve un backend per la prima versione.
 
-### 21.2 Moduli
+### 22.2 Moduli
 
 ```text
 src/
@@ -2147,7 +2296,7 @@ src/
     global.css
 ```
 
-### 21.3 Motore di gioco
+### 22.3 Motore di gioco
 
 - tick visivo: `requestAnimationFrame`;
 - tick economico: 4 volte al secondo;
@@ -2160,7 +2309,7 @@ src/
 - contenuti e bilanciamento separati dal codice;
 - nessuna formula dipendente dal frame rate.
 
-### 21.4 Accessibilità e tastiera
+### 22.4 Accessibilità e tastiera
 
 Anche se il gioco usa tutta la tastiera:
 
@@ -2174,7 +2323,7 @@ Anche se il gioco usa tutta la tastiera:
 
 ---
 
-## 22. Modello dati essenziale
+## 23. Modello dati essenziale
 
 ### Contatto
 
@@ -2264,7 +2413,7 @@ interface ScheduledTrial {
 
 ---
 
-## 23. Audio e feedback
+## 24. Audio e feedback
 
 - audio completamente assente;
 - nessun effetto sonoro al click, alla scrittura o alla conversione;
@@ -2276,7 +2425,7 @@ interface ScheduledTrial {
 
 ---
 
-## 24. Traguardi
+## 25. Traguardi
 
 I traguardi appaiono come email amministrative o riconoscimenti interni.
 
@@ -2300,7 +2449,7 @@ sistema economico principale.
 
 ---
 
-## 25. Roadmap di produzione
+## 26. Roadmap di produzione
 
 ### Fase 1 — Prototipo del loop principale
 
@@ -2390,7 +2539,7 @@ sembra un'applicazione di posta reale.
 
 ---
 
-## 26. Test e criteri di accettazione
+## 27. Test e criteri di accettazione
 
 ### Input
 
@@ -2443,7 +2592,7 @@ sembra un'applicazione di posta reale.
 
 ---
 
-## 27. Rischi di design
+## 28. Rischi di design
 
 ### Camuffamento contro leggibilità
 
@@ -2487,7 +2636,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 
 ---
 
-## 28. Decisioni già approvate
+## 29. Decisioni già approvate
 
 - Le email sono completamente simulate.
 - L'interfaccia di riferimento è Outlook su Windows 11.
@@ -2533,6 +2682,11 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Ogni collaboratore svolge un incarico alla volta, può essere riassegnato
   liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
+- Gadget si sblocca con la prima vittoria della scuola all'Accademico Arena;
+  il Polsino resta un progetto a pagamento e ogni prodotto successivo richiede
+  100 vendite del precedente.
+- La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
+  Collaboratori e domanda storica governano le vendite automatiche.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non
   può essere messa in pausa.
 - Carisma e Scrittura sono statistiche fondamentali.
@@ -2571,7 +2725,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 
 ---
 
-## 29. Elementi ancora da fornire o validare
+## 30. Elementi ancora da fornire o validare
 
 Questi elementi non bloccano il prototipo, ma servono prima della versione
 completa:
@@ -2594,7 +2748,7 @@ completa:
 
 ---
 
-## 30. Fonti di riferimento
+## 31. Fonti di riferimento
 
 - Profilo ufficiale di LudoSport Genova – Ordine delle Onde:\
   https://ludosportplus.com/school-profile/ludosport-genova-ordine-delle-onde
@@ -2615,7 +2769,7 @@ completa:
 
 ---
 
-## 31. Definizione dell'MVP
+## 32. Definizione dell'MVP
 
 L'MVP è pronto quando il giocatore può:
 

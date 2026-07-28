@@ -20,6 +20,7 @@ import {
   getEquipmentAutomaticRepairUnitCost,
 } from "./equipment";
 import { gameDelayToWallDelay } from "./gameClock";
+import { hasGadgetRuntimeWork } from "./gadgetEconomy";
 
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
 const MAX_TIMEOUT_MS = 2_147_000_000;
@@ -47,6 +48,8 @@ export function needsAutomationHeartbeat(state: GameState): boolean {
         }
       case "instructor":
         return instructorPreparationActive;
+      case "gadget":
+        return hasGadgetRuntimeWork(state);
       case "events":
         // Gli eventi sono discreti: il planner li riattiva sulle dipendenze o
         // alla scadenza del cooldown, senza un controllo ogni secondo.

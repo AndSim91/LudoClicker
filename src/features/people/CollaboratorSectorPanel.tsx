@@ -98,6 +98,7 @@ function SectorCollaboratorRow({
       "contacts",
       "emails",
       "equipment",
+      "gadgets",
       "player",
       "school",
       "statistics",

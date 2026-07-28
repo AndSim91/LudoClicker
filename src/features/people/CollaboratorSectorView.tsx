@@ -62,6 +62,10 @@ const ROLE_PRESENTATION: Record<
     icon: "people",
     description: "Forme, Corso Agonisti e preparazione atletica quando disponibile.",
   },
+  gadget: {
+    icon: "gift",
+    description: "Sviluppo dei prototipi e vendita del catalogo Gadget.",
+  },
 };
 
 function StaffingStepper({
@@ -136,6 +140,7 @@ function StandardSectorCard({
       "contacts",
       "emails",
       "equipment",
+      "gadgets",
       "network",
       "player",
       "school",
@@ -297,7 +302,7 @@ function InstructorSectorCard({
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
   const state = useGameStateSlices(
-    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "network", "school", "unlocks", "upgrades"],
+    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const isPaused = useGameTimeSource()?.isPaused ?? false;
@@ -560,12 +565,13 @@ export function CollaboratorSectorView({
         state.collaborators.some(
           (collaborator) => collaborator.assignment === "equipment",
         ) && getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
-      ),
+      ) || Boolean(state.gadgets.activeWork),
     [
       internalInstructorCourses.length,
       state.acquisitionEvents,
       state.collaborators,
       state.equipment,
+      state.gadgets.activeWork,
       teachingEntries.length,
     ],
   );
@@ -586,7 +592,7 @@ export function CollaboratorSectorView({
       <InstructorSectorCard
         state={stateOverride}
         actual={assignmentCounts.instructor}
-        target={targets.instructor}
+        target={targets.instructor ?? 0}
         available={available}
         now={now}
         onIncrement={() => onIncrement("instructor")}
@@ -596,13 +602,16 @@ export function CollaboratorSectorView({
       />
 
       <div className="collaborator-sector-grid">
-        {STANDARD_ROLES.map((role) => (
+        {(state.unlocks.gadget
+          ? [...STANDARD_ROLES, "gadget" as const]
+          : STANDARD_ROLES
+        ).map((role) => (
           <StandardSectorCard
             key={role}
             state={stateOverride}
             role={role}
             actual={assignmentCounts[role]}
-            target={targets[role]}
+            target={targets[role] ?? 0}
             available={available}
             now={now}
             onIncrement={() => onIncrement(role)}
@@ -610,10 +619,12 @@ export function CollaboratorSectorView({
             onOpen={() => setOpenRole(role)}
           />
         ))}
-        <div className="collaborator-sector-placeholder" aria-hidden="true">
-          <Icon name="settings" />
-          <span>Coming soon...</span>
-        </div>
+        {!state.unlocks.gadget ? (
+          <div className="collaborator-sector-placeholder" aria-hidden="true">
+            <Icon name="settings" />
+            <span>Coming soon...</span>
+          </div>
+        ) : null}
       </div>
 
       {openRole ? (

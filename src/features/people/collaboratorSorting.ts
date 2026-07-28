@@ -149,7 +149,7 @@ function getSectorSortValue(
 ): string | number | null {
   if (key === "mastery") {
     const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
-    return mastery[context.role];
+    return mastery[context.role] ?? 0;
   }
   if (key === "forms") return collaborator.forms.length;
   if (key === "training") {

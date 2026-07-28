@@ -20,6 +20,7 @@ function migrateMastery(mastery?: LegacyMastery): CollaboratorMastery {
     writing: Math.max(0, mastery?.writing ?? defaults.writing),
     events: Math.max(0, mastery?.events ?? defaults.events),
     equipment: Math.max(0, mastery?.equipment ?? defaults.equipment),
+    gadget: Math.max(0, mastery?.gadget ?? defaults.gadget ?? 0),
     instructor: Math.max(
       0,
       mastery?.instructor ?? defaults.instructor,

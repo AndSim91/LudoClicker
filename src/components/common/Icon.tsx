@@ -31,6 +31,7 @@ export type IconName =
   | "check"
   | "close"
   | "warning"
+  | "gift"
   | "admin";
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -64,6 +65,7 @@ const paths: Record<IconName, React.ReactNode> = {
   check: <path d="m5 12 4 4L19 6" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
   warning: <><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></>,
+  gift: <><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12M4 5h16v4H4V5Z"/><path d="M12 5c-1-3-5-3-5-.5C7 6 9 6 12 6m0-1c1-3 5-3 5-.5 0 1.5-2 1.5-5 1.5"/></>,
   admin: <><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm-1 7c.6-2 1.9-3 4-3s3.4 1 4 3"/></>,
 };
 

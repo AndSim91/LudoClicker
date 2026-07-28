@@ -481,7 +481,13 @@ describe("local save", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.collaborators).toEqual([]);
     expect(migrated.automation.lastProcessedAt).toBe(5_000);
-    expect(migrated.unlocks).toEqual({ upgrades: true, collaborators: false, social: false, forms: false });
+    expect(migrated.unlocks).toEqual({
+      upgrades: true,
+      collaborators: false,
+      social: false,
+      forms: false,
+      gadget: false,
+    });
     expect(migrated.statistics.automatedCharacters).toBe(0);
   });
 
@@ -860,6 +866,7 @@ describe("local save", () => {
       events: 0,
       equipment: 0,
       instructor: 0,
+      gadget: 0,
     });
   });
 

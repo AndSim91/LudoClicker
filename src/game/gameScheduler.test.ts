@@ -30,6 +30,7 @@ function collaborator(assignment: Collaborator["assignment"]): Collaborator {
       events: 0,
       equipment: 0,
       instructor: 0,
+      gadget: 0,
     },
   };
 }
@@ -156,6 +157,37 @@ describe("game scheduler", () => {
     expect(getNextGameTickDelay(automated, NOW + 400)).toBe(
       AUTOMATION_HEARTBEAT_MS - 400,
     );
+  });
+
+  it("keeps the heartbeat active while Gadget work or sales can advance", () => {
+    const state = stateAtNow();
+    const working: GameState = {
+      ...state,
+      unlocks: { ...state.unlocks, gadget: true },
+      collaborators: [collaborator("gadget")],
+      gadgets: {
+        ...state.gadgets,
+        activeWork: {
+          productId: "wristband",
+          kind: "development",
+          completedWorkMs: 0,
+        },
+        products: {
+          ...state.gadgets.products,
+          wristband: {
+            ...state.gadgets.products.wristband,
+            unlocked: true,
+            projectPurchased: true,
+          },
+        },
+      },
+    };
+
+    expect(needsAutomationHeartbeat(working)).toBe(true);
+    expect(getNextGameTickDelay(working, NOW)).toBe(AUTOMATION_HEARTBEAT_MS);
+
+    const idle = { ...working, gadgets: { ...working.gadgets, activeWork: undefined } };
+    expect(needsAutomationHeartbeat(idle)).toBe(false);
   });
 
   it("wakes an event automator when the sparring cooldown expires", () => {

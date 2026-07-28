@@ -181,3 +181,59 @@ describe("instructor branch", () => {
     expect(getPagoSportAllCourseSpeedBonus(levels)).toBe(0.5);
   });
 });
+
+describe("Gadget branch", () => {
+  it("uses the seven approved upgrades, gates and exact level costs", () => {
+    const gadgets = UPGRADE_DEFINITIONS.filter(
+      (definition) => definition.category === "gadget",
+    );
+
+    expect(gadgets.map((definition) => definition.id)).toEqual([
+      "gadget-showcase",
+      "gadget-online-store",
+      "gadget-design-tools",
+      "gadget-revision-lab",
+      "gadget-order-management",
+      "gadget-sales-training",
+      "gadget-cross-selling",
+    ]);
+    expect(gadgets.map((definition) =>
+      Array.from({ length: definition.maxLevel }, (_, level) =>
+        getUpgradeCost(definition, level)
+      )
+    )).toEqual([
+      [2_500, 5_000, 10_000, 25_000, 50_000],
+      [5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000, 1_600_000],
+      [5_000, 10_000, 20_000, 40_000, 80_000],
+      [5_000, 10_000, 20_000, 40_000, 80_000],
+      [10_000, 20_000, 40_000, 80_000, 160_000],
+      [15_000, 30_000, 60_000, 120_000, 240_000],
+      [25_000, 50_000, 100_000, 200_000, 400_000],
+    ]);
+    expect(gadgets.reduce(
+      (total, definition) => total + Array.from(
+        { length: definition.maxLevel },
+        (_, level) => getUpgradeCost(definition, level),
+      ).reduce((sum, cost) => sum + cost, 0),
+      0,
+    )).toBe(5_142_500);
+    expect(gadgets[1].requiredUnlocks).toEqual(["gadget", "social"]);
+    expect(gadgets[1].requiredUpgradeLevels).toEqual({ "gadget-showcase": 2 });
+    expect(gadgets[3].requiredUpgradeLevels).toEqual({ "gadget-design-tools": 2 });
+    expect(gadgets[5].requiredUpgradeLevels).toEqual({ "gadget-order-management": 2 });
+    expect(gadgets[6].requiredUpgradeLevels).toEqual({ "gadget-sales-training": 3 });
+    expect(gadgets[6].requiredGadgetProduct).toBe("mug");
+  });
+
+  it("reaches the approved maximum operational bonuses", () => {
+    const maximum = Object.fromEntries(
+      UPGRADE_DEFINITIONS.map((definition) => [definition.id, definition.maxLevel]),
+    ) as ReturnType<typeof createInitialUpgradeLevels>;
+
+    expect(getUpgradeEffectTotal(maximum, "gadgetDevelopmentSpeed")).toBe(1);
+    expect(getUpgradeEffectTotal(maximum, "gadgetRevisionSpeed")).toBe(1);
+    expect(getUpgradeEffectTotal(maximum, "gadgetSalesCapacity")).toBe(1);
+    expect(getUpgradeEffectTotal(maximum, "gadgetSalesConversion")).toBe(0.1);
+    expect(getUpgradeEffectTotal(maximum, "gadgetCrossSell")).toBe(0.25);
+  });
+});

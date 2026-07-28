@@ -33,6 +33,11 @@ import {
 } from "../../game/social";
 import type { GameState, UpgradeId } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
+import { GADGET_DEFINITIONS } from "../../content/gadgets";
+import {
+  getGadgetFollowerReach,
+  getGadgetMemberReach,
+} from "../../game/gadgetEconomy";
 
 const categoryIcons: Record<UpgradeCategory, IconName> = {
   speed: "spark",
@@ -43,6 +48,7 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   equipment: "settings",
   organization: "tasks",
   instructors: "people",
+  gadget: "gift",
 };
 
 const numberFormatter = new Intl.NumberFormat("it-IT", {
@@ -138,6 +144,18 @@ function getUpgradeBenefitsSummary(state: GameState) {
       },
     );
   }
+  if (state.unlocks.gadget) {
+    benefits.push(
+      {
+        label: "Copertura iscritti Gadget",
+        value: formatUpgradePercentage(getGadgetMemberReach(state.upgrades)),
+      },
+      {
+        label: "Copertura follower Gadget",
+        value: formatUpgradePercentage(getGadgetFollowerReach(state.upgrades)),
+      },
+    );
+  }
 
   return benefits;
 }
@@ -166,17 +184,25 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
             ? "Arena Tecnica attiva"
             : "Corsi agonistici da sbloccare"
       }`;
+    case "gadget":
+      return `${formatUpgradePercentage(getGadgetMemberReach(state.upgrades))} iscritti · ${formatUpgradePercentage(getGadgetFollowerReach(state.upgrades))} follower`;
   }
 }
 
 type UpgradeStatus = "locked" | "available" | "completed";
 
 function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
+  const missingUnlock = definition.requiredUnlocks?.find(
+    (unlock) => !state.unlocks[unlock],
+  );
+  if (missingUnlock === "social") return "Social non ancora sbloccato";
+  if (missingUnlock === "gadget") return "Settore Gadget non ancora sbloccato";
+  if (missingUnlock) return "Funzione richiesta non ancora sbloccata";
   if (
-    definition.requiredUnlock !== undefined &&
-    !state.unlocks[definition.requiredUnlock]
+    definition.requiredGadgetProduct !== undefined &&
+    !state.gadgets.products[definition.requiredGadgetProduct].unlocked
   ) {
-    return "Social non ancora sbloccato";
+    return `Sblocca prima il progetto ${GADGET_DEFINITIONS[definition.requiredGadgetProduct].name}`;
   }
   if (state.school.fame < definition.requiredFame) {
     return `Serve Fama della scuola ${definition.requiredFame}`;
@@ -190,7 +216,14 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
 
 function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): boolean {
   return !definition.hidden &&
-    (definition.category !== "social" || state.unlocks.social);
+    (definition.category !== "social" || state.unlocks.social) &&
+    (definition.category !== "gadget" || state.unlocks.gadget);
+}
+
+function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
+  if (category === "social") return state.unlocks.social;
+  if (category === "gadget") return state.unlocks.gadget;
+  return true;
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -519,7 +552,7 @@ export function UpgradesView({
             </div>
             <div className="upgrade-tree-branches">
               {UPGRADE_CATEGORIES.filter(
-                (category) => category.id !== "social" || state.unlocks.social,
+                (category) => isUpgradeCategoryVisible(state, category.id),
               ).map((category) => {
                 const definitions = UPGRADE_DEFINITIONS.filter(
                   (definition) =>

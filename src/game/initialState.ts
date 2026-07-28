@@ -8,6 +8,7 @@ import { createEmptyHistoryArchive } from "./historyArchive";
 import { createSecretLegendaryProgress } from "./legendaryAvailability";
 import { createInitialCollaboratorManagement } from "./collaboratorManagement";
 import { createInitialLightInflationState } from "./lightInflation";
+import { createInitialGadgetState } from "./gadgetState";
 
 export function createInitialState(
   now = Date.now(),
@@ -82,6 +83,7 @@ export function createInitialState(
       wear: 0,
     },
     lightInflation: createInitialLightInflationState(),
+    gadgets: createInitialGadgetState(),
     legendaryPity: 0,
     legendaryCollaborators: initialContacts.progress,
     tournaments: {
@@ -127,7 +129,13 @@ export function createInitialState(
       narrativeEvents: 0,
     },
     historyArchive: createEmptyHistoryArchive(),
-    unlocks: { upgrades: false, collaborators: false, social: false, forms: false },
+    unlocks: {
+      upgrades: false,
+      collaborators: false,
+      social: false,
+      forms: false,
+      gadget: false,
+    },
     upgrades: createInitialUpgradeLevels(),
   };
 }

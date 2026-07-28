@@ -96,6 +96,7 @@ export function CollaboratorList({
       "contacts",
       "emails",
       "equipment",
+      "gadgets",
       "network",
       "player",
       "school",
@@ -127,8 +128,11 @@ export function CollaboratorList({
   ) && (
     state.equipment.wear > 0 || getEffectiveDamagedSwords(state.equipment) > 0
   );
+  const hasActiveGadgetWork = state.collaborators.some(
+    (collaborator) => collaborator.assignment === "gadget",
+  ) && Boolean(state.gadgets.activeWork);
   const now = useGameTime(
-    hasTimedAutomation || hasActiveEquipmentAutomation,
+    hasTimedAutomation || hasActiveEquipmentAutomation || hasActiveGadgetWork,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
   const filteredCollaborators = useMemo(() => {
@@ -367,7 +371,9 @@ export function CollaboratorList({
               >
                 <option value="all">Tutte le assegnazioni</option>
                 <option value="unassigned">Non assegnati</option>
-                {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+                {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
+                  .filter((value) => value !== "gadget" || state.unlocks.gadget)
+                  .map((value) => (
                   <option value={value} key={value}>
                     {getCollaboratorAssignmentLabel(
                       value as Exclude<CollaboratorAssignment, null>,
@@ -545,7 +551,9 @@ export function CollaboratorList({
                     )}
                   >
                     <option value="">Non assegnato</option>
-                    {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+                    {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
+                      .filter((value) => value !== "gadget" || state.unlocks.gadget)
+                      .map((value) => (
                       <option value={value} key={value}>
                         {getCollaboratorAssignmentLabel(
                           value as Exclude<CollaboratorAssignment, null>,

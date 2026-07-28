@@ -69,6 +69,7 @@ describe("Social revamp save migration", () => {
       events: 20,
       equipment: 50,
       instructor: 60,
+      gadget: 0,
     });
     expect(migrated.upgrades).not.toHaveProperty("updated-page");
     expect(migrated.upgrades["social-content-synthesis"]).toBe(0);

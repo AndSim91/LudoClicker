@@ -1,0 +1,647 @@
+.overview-view.gadget-view {
+  overflow-y: auto;
+  padding-bottom: 48px;
+  background:
+    radial-gradient(circle at 92% 0, color-mix(in srgb, var(--school-accent) 9%, transparent), transparent 28%),
+    var(--surface);
+}
+
+.gadget-view-heading {
+  max-width: 1160px;
+}
+
+.gadget-view-heading > svg {
+  color: var(--school-accent);
+}
+
+.gadget-overview {
+  display: grid;
+  grid-template-columns: minmax(150px, .75fr) minmax(150px, .75fr) minmax(260px, 1.5fr);
+  max-width: 1160px;
+  margin: 22px 0 26px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 5%);
+}
+
+.gadget-overview > div {
+  display: flex;
+  min-height: 94px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 22px;
+}
+
+.gadget-overview > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.gadget-overview small,
+.gadget-product-heading > span,
+.gadget-sales-stats small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.gadget-overview > div > strong {
+  color: var(--ink);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gadget-overview-work > strong {
+  font-size: 14px !important;
+}
+
+.gadget-overview-work .progress-bar {
+  width: 100%;
+}
+
+.gadget-overview > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 22px;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.gadget-catalog {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1160px;
+}
+
+.gadget-product-card {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 0 16px;
+  min-height: 250px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-top: 3px solid color-mix(in srgb, var(--school-accent) 45%, var(--line));
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 4%);
+}
+
+.gadget-product-card.is-selling {
+  border-top-color: var(--success);
+}
+
+.gadget-product-card.is-locked {
+  min-height: 150px;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  border-top-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.gadget-product-symbol {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  color: var(--blue-700);
+  background: var(--blue-050);
+  border: 1px solid color-mix(in srgb, var(--blue-600) 20%, var(--line));
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.is-locked .gadget-product-symbol {
+  color: var(--ink-muted);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.gadget-product-heading h2 {
+  margin: 3px 0 6px;
+  color: var(--ink);
+  font-size: 20px;
+}
+
+.gadget-product-heading p {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.gadget-quality,
+.gadget-sales-stats,
+.gadget-product-status,
+.gadget-product-actions {
+  grid-column: 1 / -1;
+}
+
+.gadget-quality {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.gadget-quality > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.gadget-quality strong {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.gadget-quality small {
+  color: var(--ink-muted);
+}
+
+.gadget-sales-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 15px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+}
+
+.gadget-sales-stats > span {
+  display: flex;
+  min-height: 58px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 14px;
+}
+
+.gadget-sales-stats > span + span {
+  border-left: 1px solid var(--line);
+}
+
+.gadget-sales-stats strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gadget-product-status {
+  display: flex;
+  min-height: 38px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 14px;
+}
+
+.gadget-product-status small {
+  color: var(--warning);
+}
+
+.gadget-status-pill {
+  width: fit-content;
+  padding: 4px 9px;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.gadget-status-pill.is-ready,
+.gadget-status-pill.is-selling {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--surface));
+}
+
+.gadget-status-pill.is-working {
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
+
+.gadget-status-pill.is-warning {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, var(--surface));
+}
+
+.gadget-product-actions,
+.gadget-result-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.gadget-product-actions button,
+.gadget-result-actions button,
+.gadget-minigame-shell footer button,
+.gadget-minigame-pause button {
+  min-height: 36px;
+  padding: 7px 13px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gadget-product-actions button.primary,
+.gadget-result-actions button.primary,
+.gadget-minigame-pause button.primary {
+  color: white;
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+}
+
+.gadget-product-actions button:disabled,
+.gadget-result-actions button:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  border-color: var(--line);
+}
+
+.gadget-quality-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.gadget-quality-complete svg {
+  width: 17px;
+  height: 17px;
+}
+
+.gadget-minigame-overlay {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  color: #f7fbff;
+  background: rgb(4 12 24 / 94%);
+  backdrop-filter: blur(8px);
+}
+
+.gadget-minigame-shell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(760px, 100%);
+  height: min(820px, calc(100dvh - 28px));
+  overflow: hidden;
+  background: #08182b;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 55%);
+}
+
+.gadget-minigame-shell > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.gadget-minigame-shell > header span {
+  color: #9bb1c9;
+  font-size: 11px;
+}
+
+.gadget-minigame-shell h2 {
+  margin: 2px 0 0;
+  font-size: 21px;
+}
+
+.gadget-minigame-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px 14px;
+}
+
+.gadget-minigame-stats strong {
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+
+.gadget-rhythm-board {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(4, 1fr);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  background:
+    linear-gradient(180deg, rgb(6 19 36 / 70%), rgb(12 37 65 / 92%)),
+    repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgb(255 255 255 / 7%) calc(25% - 1px) 25%);
+}
+
+.gadget-rhythm-lane {
+  border-right: 1px solid rgb(255 255 255 / 8%);
+}
+
+.gadget-target-line {
+  position: absolute;
+  right: 0;
+  top: 82%;
+  left: 0;
+  height: 3px;
+  background: #55c2ff;
+  box-shadow: 0 0 16px rgb(85 194 255 / 75%);
+}
+
+.gadget-falling-note {
+  position: absolute;
+  z-index: 3;
+  top: var(--note-top);
+  left: calc((var(--note-lane) * 25%) + 12.5%);
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  color: white;
+  background: #176fa6;
+  border: 2px solid #9ce0ff;
+  border-radius: 12px;
+  box-shadow: 0 7px 20px rgb(0 0 0 / 35%), 0 0 14px rgb(85 194 255 / 38%);
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 800;
+  touch-action: none;
+}
+
+.gadget-lane-controls {
+  position: absolute;
+  z-index: 4;
+  top: 82%;
+  right: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.gadget-lane-controls button {
+  display: flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  justify-self: center;
+  color: white;
+  background: rgb(4 19 34 / 86%);
+  border: 2px solid #55c2ff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgb(85 194 255 / 12%);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.gadget-lane-controls strong {
+  font-size: 21px;
+}
+
+.gadget-lane-controls span {
+  color: #8fc9ec;
+  font-size: 10px;
+}
+
+.gadget-countdown,
+.gadget-judgment {
+  position: absolute;
+  z-index: 5;
+  top: 39%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-shadow: 0 5px 25px rgb(0 0 0 / 80%);
+  font-size: clamp(54px, 12vw, 92px);
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.gadget-judgment {
+  top: 52%;
+  color: #9ce0ff;
+  font-size: 24px;
+}
+
+.gadget-minigame-shell > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 16px;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
+.gadget-minigame-shell > footer p {
+  margin: 0;
+  color: #9bb1c9;
+  font-size: 11px;
+}
+
+.gadget-minigame-shell > footer button {
+  flex: 0 0 auto;
+  color: #d6e2ee;
+  background: transparent;
+  border-color: rgb(255 255 255 / 25%);
+}
+
+.gadget-minigame-pause {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+  background: rgb(4 12 24 / 92%);
+}
+
+.gadget-minigame-pause h3 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.gadget-minigame-pause p {
+  color: #9bb1c9;
+}
+
+.gadget-minigame-result {
+  width: min(480px, 100%);
+  padding: 34px;
+  color: var(--ink);
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 50%);
+}
+
+.gadget-result-kicker {
+  color: var(--blue-600);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.gadget-minigame-result h2 {
+  margin: 5px 0 20px;
+}
+
+.gadget-result-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gadget-result-score strong {
+  color: var(--blue-700);
+  font-size: 64px;
+  line-height: 1;
+}
+
+.gadget-result-score span,
+.gadget-minigame-result > small {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.gadget-result-warning {
+  padding: 9px 12px;
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 9%, var(--surface));
+}
+
+.gadget-result-actions {
+  justify-content: center;
+  margin-top: 22px;
+}
+
+@media (max-width: 900px) {
+  .gadget-overview {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gadget-overview-work {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    border-left: 0 !important;
+  }
+
+  .gadget-catalog {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .overview-view.gadget-view {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .gadget-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .gadget-overview > div + div,
+  .gadget-overview-work {
+    grid-column: auto;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .gadget-product-card {
+    grid-template-columns: 50px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .gadget-product-symbol {
+    width: 48px;
+    height: 48px;
+  }
+
+  .gadget-product-actions,
+  .gadget-result-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gadget-product-actions button,
+  .gadget-result-actions button {
+    width: 100%;
+  }
+
+  .gadget-minigame-overlay {
+    padding: 0;
+  }
+
+  .gadget-minigame-shell {
+    width: 100%;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .gadget-minigame-shell > header {
+    align-items: flex-start;
+    padding: 10px 12px;
+  }
+
+  .gadget-minigame-shell h2 {
+    font-size: 17px;
+  }
+
+  .gadget-minigame-stats {
+    max-width: 190px;
+    gap: 3px 9px;
+  }
+
+  .gadget-falling-note {
+    width: 46px;
+    height: 46px;
+  }
+
+  .gadget-lane-controls button {
+    width: 56px;
+    height: 56px;
+  }
+
+  .gadget-minigame-shell > footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
+    padding: 8px 12px 10px;
+  }
+
+  .gadget-minigame-shell > footer button {
+    min-height: 40px;
+  }
+
+  .gadget-minigame-result {
+    min-height: 100dvh;
+    display: grid;
+    align-content: center;
+    border: 0;
+    border-radius: 0;
+  }
+}

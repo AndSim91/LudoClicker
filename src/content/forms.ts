@@ -40,6 +40,7 @@ export interface CollaboratorFormBonuses {
   events: number;
   equipment: number;
   instructor: number;
+  gadget: number;
   all: number;
 }
 
@@ -285,6 +286,7 @@ export function getCollaboratorFormBonuses(collaborator: Collaborator): Collabor
     events: 0,
     equipment: 0,
     instructor: 0,
+    gadget: 0,
     all: collaborator.forms.includes("form-7")
       ? 0.2
       : collaborator.forms.includes("form-6")

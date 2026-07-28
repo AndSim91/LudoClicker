@@ -21,6 +21,7 @@ import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
 import { compactGameHistory } from "./historyArchive";
+import { processGadgets } from "./gadgetFlow";
 import {
   AUTOMATION_HEARTBEAT_MS,
   getNextGameTickAt,
@@ -164,6 +165,7 @@ function tickStep(
     now,
   );
   nextState = advanceAutomation(nextState, now, gainMultiplier);
+  nextState = processGadgets(nextState, masteryElapsedMs, now);
 
   const dueEmails = getSendingEmails(nextState.emails).filter(
     (email) => (email.sendCompletesAt ?? Infinity) <= now,

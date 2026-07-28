@@ -8,10 +8,12 @@ export type GameArea =
   | "contacts"
   | "upgrades"
   | "tournaments"
+  | "gadget"
   | "settings";
 
 export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (view === "mail" || view === "settings") return true;
+  if (view === "gadget") return state.unlocks.gadget;
   if (state.network.schools.length > 0) return true;
 
   if (view === "events") {

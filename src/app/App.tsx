@@ -22,6 +22,7 @@ import { AdminEmailView } from "../features/admin/AdminEmailView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { TournamentsView } from "../features/tournaments/TournamentsView";
+import { GadgetsView } from "../features/gadgets/GadgetsView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
@@ -47,6 +48,7 @@ import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
   FormId,
+  GadgetProductId,
   RockPaperScissorsChoice,
   UpgradeId,
 } from "../game/types";
@@ -63,6 +65,7 @@ const StableUpgradesView = memo(UpgradesView);
 const StableEventsView = memo(EventsView);
 const StablePeopleView = memo(PeopleView);
 const StableTournamentsView = memo(TournamentsView);
+const StableGadgetsView = memo(GadgetsView);
 const StableOverviewView = memo(OverviewView);
 const StableDayPanel = memo(DayPanel);
 
@@ -96,6 +99,7 @@ export function App() {
     isPaused,
     togglePause,
     setTutorialPaused,
+    setGadgetPaused,
     saveStatus,
     saveNow,
   } = useGameEngine();
@@ -120,8 +124,12 @@ export function App() {
     () => state.emails.find((email) => email.id === selectedSentEmailId),
     [selectedSentEmailId, state.emails],
   );
-  const activeView: AppView =
-    view === "admin"
+  const hasActiveGadgetMinigame = state.unlocks.gadget &&
+    (state.gadgets.minigame?.status === "running" ||
+      state.gadgets.minigame?.status === "result");
+  const activeView: AppView = hasActiveGadgetMinigame
+    ? "gadget"
+    : view === "admin"
       ? import.meta.env.DEV
         ? "admin"
         : "mail"
@@ -149,6 +157,10 @@ export function App() {
   useLayoutEffect(() => {
     setTutorialPaused(tutorial.shouldPauseGame);
   }, [setTutorialPaused, tutorial.shouldPauseGame]);
+
+  useLayoutEffect(() => {
+    setGadgetPaused(state.gadgets.minigame?.status === "running");
+  }, [setGadgetPaused, state.gadgets.minigame?.status]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -336,6 +348,57 @@ export function App() {
     () => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const startGadgetProject = useCallback(
+    (productId: GadgetProductId) => dispatch({
+      type: "START_GADGET_PROJECT",
+      productId,
+      now: getGameNow(),
+    }),
+    [dispatch, getGameNow],
+  );
+  const startGadgetRevision = useCallback(
+    (productId: GadgetProductId) => dispatch({
+      type: "START_GADGET_REVISION",
+      productId,
+      now: getGameNow(),
+    }),
+    [dispatch, getGameNow],
+  );
+  const startGadgetMinigame = useCallback(
+    (productId: GadgetProductId) => dispatch({
+      type: "START_GADGET_MINIGAME",
+      productId,
+    }),
+    [dispatch],
+  );
+  const completeGadgetMinigame = useCallback(
+    (productId: GadgetProductId, score: number) => dispatch({
+      type: "COMPLETE_GADGET_MINIGAME",
+      productId,
+      score,
+    }),
+    [dispatch],
+  );
+  const dismissGadgetMinigameResult = useCallback(
+    (productId: GadgetProductId) => {
+      setView("gadget");
+      dispatch({
+        type: "DISMISS_GADGET_MINIGAME_RESULT",
+        productId,
+      });
+    },
+    [dispatch],
+  );
+  const acceptGadgetProduct = useCallback(
+    (productId: GadgetProductId) => {
+      setView("gadget");
+      dispatch({
+        type: "ACCEPT_GADGET_PRODUCT",
+        productId,
+      });
+    },
+    [dispatch],
+  );
 
   if (!state.profile.displayName.trim()) {
     return <ProfileNameDialog onSubmit={updateProfileName} />;
@@ -433,6 +496,15 @@ export function App() {
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}
               onPlayChroniclesHand={playChroniclesHand}
+            />
+          ) : activeView === "gadget" ? (
+            <StableGadgetsView
+              onStartProject={startGadgetProject}
+              onStartRevision={startGadgetRevision}
+              onStartMinigame={startGadgetMinigame}
+              onCompleteMinigame={completeGadgetMinigame}
+              onDismissMinigameResult={dismissGadgetMinigameResult}
+              onAccept={acceptGadgetProduct}
             />
           ) : activeView === "admin" ? (
             <AdminEmailView

@@ -36,10 +36,10 @@ describe("collaborator mastery integration", () => {
 
   it("advances only the currently assigned mastery for every collaborator", () => {
     const initial = createInitialState(1_000);
-    const assignments = ["writing", "events", "equipment", "instructor", null] as const;
+    const assignments = ["writing", "events", "equipment", "instructor", "gadget", null] as const;
     const collaborators = assignments.map((assignment, index) => ({
       id: `mastery-role-${index}`,
-      contactId: initial.contacts[index].id,
+      contactId: initial.contacts[index % initial.contacts.length].id,
       displayName: `Collaboratore ${index}`,
       joinedAt: 1_000,
       forms: [],
@@ -55,10 +55,11 @@ describe("collaborator mastery integration", () => {
     );
 
     expect(next.collaborators.map((collaborator) => collaborator.mastery)).toEqual([
-      { writing: 1.5, events: 0, equipment: 0, instructor: 0 },
-      { writing: 0, events: 1.5, equipment: 0, instructor: 0 },
-      { writing: 0, events: 0, equipment: 1.5, instructor: 0 },
-      { writing: 0, events: 0, equipment: 0, instructor: 1.5 },
+      { writing: 1.5, events: 0, equipment: 0, instructor: 0, gadget: 0 },
+      { writing: 0, events: 1.5, equipment: 0, instructor: 0, gadget: 0 },
+      { writing: 0, events: 0, equipment: 1.5, instructor: 0, gadget: 0 },
+      { writing: 0, events: 0, equipment: 0, instructor: 1.5, gadget: 0 },
+      { writing: 0, events: 0, equipment: 0, instructor: 0, gadget: 1.5 },
       createInitialCollaboratorMastery(),
     ]);
   });

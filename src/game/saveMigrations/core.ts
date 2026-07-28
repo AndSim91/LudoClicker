@@ -95,6 +95,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         collaborators: migrated.unlocks?.collaborators ?? false,
         social: migrated.unlocks?.social ?? false,
         forms: migrated.unlocks?.forms ?? false,
+        gadget: migrated.unlocks?.gadget ?? false,
       },
       statistics: {
         ...migrated.statistics,
@@ -130,6 +131,7 @@ export function migrateCoreState(state: MigratableState): MigratableState {
         collaborators: migrated.unlocks?.collaborators ?? false,
         social: migrated.unlocks?.social ?? false,
         forms: migrated.unlocks?.forms ?? false,
+        gadget: migrated.unlocks?.gadget ?? false,
       },
       statistics: {
         ...migrated.statistics,

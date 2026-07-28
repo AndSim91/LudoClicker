@@ -32,6 +32,7 @@ describe("collaborator management save migration", () => {
       events: 1,
       equipment: 0,
       instructor: 0,
+      gadget: 0,
     });
     expect(migrated.collaborators[0].assignment).toBe("events");
     expect(isValidGameState(migrated)).toBe(true);
@@ -61,6 +62,7 @@ describe("collaborator management save migration", () => {
       events: 1,
       equipment: 0,
       instructor: 1,
+      gadget: 0,
     });
     expect(migrated.collaboratorManagement).not.toHaveProperty("activePresetId");
     expect(migrated.collaboratorManagement).not.toHaveProperty("hasUnsavedChanges");

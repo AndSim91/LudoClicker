@@ -61,7 +61,7 @@ export function assignCollaborator(
   now = state.lastSavedAt,
 ): GameState {
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
-  if (!collaborator) return state;
+  if (!collaborator || (assignment === "gadget" && !state.unlocks.gadget)) return state;
   const reassignedState = {
     ...state,
     collaborators: state.collaborators.map((candidate) =>

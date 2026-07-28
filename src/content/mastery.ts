@@ -5,6 +5,7 @@ export const COLLABORATOR_MASTERY_ROLES: readonly CollaboratorMasteryRole[] = [
   "events",
   "equipment",
   "instructor",
+  "gadget",
 ];
 
 export const COLLABORATOR_MASTERY_ROLE_LABELS: Record<CollaboratorMasteryRole, string> = {
@@ -12,6 +13,7 @@ export const COLLABORATOR_MASTERY_ROLE_LABELS: Record<CollaboratorMasteryRole, s
   events: "Eventi",
   equipment: "Attrezzatura",
   instructor: "Istruttore",
+  gadget: "Gadget",
 };
 
 export function getCollaboratorMasteryRoleLabel(
@@ -39,11 +41,12 @@ export function createInitialCollaboratorMastery(): CollaboratorMastery {
     events: 0,
     equipment: 0,
     instructor: 0,
+    gadget: 0,
   };
 }
 
-export function getCollaboratorMasteryLevel(xp: number) {
-  const safeXp = Math.max(0, Number.isFinite(xp) ? xp : 0);
+export function getCollaboratorMasteryLevel(xp: number | undefined) {
+  const safeXp = Math.max(0, typeof xp === "number" && Number.isFinite(xp) ? xp : 0);
   let level = 0;
   for (let index = 1; index < COLLABORATOR_MASTERY_LEVELS.length; index += 1) {
     if (safeXp < COLLABORATOR_MASTERY_LEVELS[index].minimumXp) break;
@@ -52,16 +55,16 @@ export function getCollaboratorMasteryLevel(xp: number) {
   return level;
 }
 
-export function getCollaboratorMasteryDefinition(xp: number) {
+export function getCollaboratorMasteryDefinition(xp: number | undefined) {
   return COLLABORATOR_MASTERY_LEVELS[getCollaboratorMasteryLevel(xp)];
 }
 
-export function getCollaboratorMasteryMultiplier(xp: number): number {
+export function getCollaboratorMasteryMultiplier(xp: number | undefined): number {
   return 1 + getCollaboratorMasteryDefinition(xp).multiplier;
 }
 
-export function getCollaboratorMasteryProgress(xp: number) {
-  const safeXp = Math.max(0, Number.isFinite(xp) ? xp : 0);
+export function getCollaboratorMasteryProgress(xp: number | undefined) {
+  const safeXp = Math.max(0, typeof xp === "number" && Number.isFinite(xp) ? xp : 0);
   const level = getCollaboratorMasteryLevel(safeXp);
   const current = COLLABORATOR_MASTERY_LEVELS[level];
   const next = COLLABORATOR_MASTERY_LEVELS[level + 1];

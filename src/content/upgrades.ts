@@ -1,7 +1,7 @@
-import type { UpgradeId, UpgradeLevels } from "../game/types";
+import type { GadgetProductId, GameState, UpgradeId, UpgradeLevels } from "../game/types";
 
-export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialEventPromotionTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock" | "courseXUnlock";
+export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors" | "gadget";
+export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialEventPromotionTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock" | "courseXUnlock" | "gadgetMemberReachTier" | "gadgetFollowerReachTier" | "gadgetDevelopmentSpeed" | "gadgetRevisionSpeed" | "gadgetSalesCapacity" | "gadgetSalesConversion" | "gadgetCrossSell";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -19,8 +19,9 @@ export interface UpgradeDefinition {
   networkCostGrowth?: number;
   maxLevel: number;
   requiredFame: number;
-  requiredUnlock?: "social";
+  requiredUnlocks?: Array<keyof GameState["unlocks"]>;
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
+  requiredGadgetProduct?: GadgetProductId;
   hidden?: boolean;
 }
 
@@ -33,6 +34,7 @@ export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; des
   { id: "equipment", title: "Attrezzatura", description: "Riduce l'usura e amplia il materiale disponibile per gli eventi." },
   { id: "organization", title: "Organizzazione", description: "Migliora automazione, quote e coordinamento della scuola." },
   { id: "instructors", title: "Istruttori", description: "Amplia le armi insegnabili e il numero di allievi seguiti contemporaneamente." },
+  { id: "gadget", title: "Gadget", description: "Amplia il pubblico e rende più rapidi sviluppo, revisioni e vendite." },
 ];
 
 const GROWTH = 1.3;
@@ -68,10 +70,10 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "prepared-room", category: "welcome", title: "Sala preparata", description: "Ogni dettaglio della prima esperienza è al suo posto.", effectLabel: "+20% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.2, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredFame: 55 },
   { id: "memorable-experience", category: "welcome", title: "Esperienza memorabile", description: "La lezione di prova diventa qualcosa da raccontare.", effectLabel: "+30% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.3, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredFame: 85 },
 
-  { id: "social-content-synthesis", category: "social", title: "Sintesi dei contenuti", description: "Una linea editoriale più precisa riduce i caratteri necessari per pubblicare un contenuto.", effectLabel: "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: 35, requiredUnlock: "social" },
-  { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Contenuti più mirati aumentano la probabilità di ottenere nuovi follower.", effectLabel: "50% base → 60% → 70% → 80% → 90% → 95% con 5% di doppio follower", effect: "socialFollowerChanceTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: 50, requiredUnlock: "social" },
-  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Voce storica conservata per la compatibilità dei salvataggi.", effectLabel: "Sostituito dal bonus illimitato dei Follower", effect: "socialEventPromotionTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredFame: 75, requiredUnlock: "social", hidden: true },
-  { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Accordi pubblicitari più remunerativi aumentano il valore mensile di ogni follower.", effectLabel: "0,10 € base → 0,20 € → 0,30 € → 0,40 € → 0,50 €", effect: "socialFollowerValueTier", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 25_000, 75_000, 200_000], maxLevel: 4, requiredFame: 100, requiredUnlock: "social" },
+  { id: "social-content-synthesis", category: "social", title: "Sintesi dei contenuti", description: "Una linea editoriale più precisa riduce i caratteri necessari per pubblicare un contenuto.", effectLabel: "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: 35, requiredUnlocks: ["social"] },
+  { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Contenuti più mirati aumentano la probabilità di ottenere nuovi follower.", effectLabel: "50% base → 60% → 70% → 80% → 90% → 95% con 5% di doppio follower", effect: "socialFollowerChanceTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: 50, requiredUnlocks: ["social"] },
+  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Voce storica conservata per la compatibilità dei salvataggi.", effectLabel: "Sostituito dal bonus illimitato dei Follower", effect: "socialEventPromotionTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredFame: 75, requiredUnlocks: ["social"], hidden: true },
+  { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Accordi pubblicitari più remunerativi aumentano il valore mensile di ogni follower.", effectLabel: "0,10 € base → 0,20 € → 0,30 € → 0,40 € → 0,50 €", effect: "socialFollowerValueTier", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 25_000, 75_000, 200_000], maxLevel: 4, requiredFame: 100, requiredUnlocks: ["social"] },
 
   { id: "pre-event-check", category: "equipment", title: "Controllo pre-evento", description: "I problemi vengono trovati prima di uscire.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 70, costGrowth: GROWTH, maxLevel: 5, requiredFame: 5 },
   { id: "maintenance-kit", category: "equipment", title: "Kit di manutenzione", description: "Le riparazioni dei collaboratori diventano più efficaci.", effectLabel: "+15% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.15, baseCost: 130, costGrowth: GROWTH, maxLevel: 5, requiredFame: 15 },
@@ -99,6 +101,14 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera la preparazione di Tecnici, Istruttori e atleti.", effectLabel: "Livello 1: +1 Forma annua · Livello 2: +50% velocità Corsi Tecnici · Livello 3: +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 55_000, costGrowth: 1, levelCosts: [55_000, 89_000, 144_000], maxLevel: 3, requiredFame: 0, requiredUpgradeLevels: { "tiamat-instructor": 4 } },
   { id: "divine-touch", category: "instructors", title: "Tocco DiGilo", description: "L'insegnamento delle Forme da parte degli Istruttori raggiunge una velocità sovrumana.", effectLabel: "+9999% velocità di insegnamento", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: 1, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { pagosport: 3 } },
   { id: "project-x", category: "instructors", title: "Progetto X", description: "Introduce un anno formativo dedicato a una Forma 1 più avanzata e ai rudimenti di Forma 2 applicati al combattimento in arena, dando agli allievi inesperti il tempo di affinare la tecnica.", effectLabel: "Sblocca Corso X tra Forma 1 e Forma 2 e le relative qualifiche da Istruttore e Tecnico", effect: "courseXUnlock", effectPerLevel: 1, baseCost: 1, costGrowth: 1, networkCostGrowth: 0, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { "divine-touch": 1 } },
+
+  { id: "gadget-showcase", category: "gadget", title: "Vetrina della scuola", description: "Rende il catalogo visibile a una quota crescente degli iscritti.", effectLabel: "Pubblico iscritti: 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetMemberReachTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-online-store", category: "gadget", title: "Negozio online", description: "Porta il catalogo a una quota crescente dei follower della scuola.", effectLabel: "Pubblico follower: 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetFollowerReachTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000, 1_600_000], networkCostGrowth: 0, maxLevel: 9, requiredFame: 0, requiredUnlocks: ["gadget", "social"], requiredUpgradeLevels: { "gadget-showcase": 2 } },
+  { id: "gadget-design-tools", category: "gadget", title: "Strumenti di progettazione", description: "Riduce il tempo necessario a sviluppare il primo prototipo.", effectLabel: "+20% velocità di progettazione per livello · massimo +100%", effect: "gadgetDevelopmentSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-revision-lab", category: "gadget", title: "Laboratorio revisioni", description: "Accelera il lavoro che precede un nuovo tentativo di qualità.", effectLabel: "+20% velocità di revisione per livello · massimo +100%", effect: "gadgetRevisionSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-design-tools": 2 } },
+  { id: "gadget-order-management", category: "gadget", title: "Gestione degli ordini", description: "Aumenta il numero di tentativi commerciali gestiti ogni mese.", effectLabel: "+20% capacità commerciale per livello · massimo +100%", effect: "gadgetSalesCapacity", effectPerLevel: 0.2, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-sales-training", category: "gadget", title: "Formazione commerciale", description: "Aiuta i Collaboratori a convertire più tentativi in vendite effettive.", effectLabel: "+2 punti percentuali di conversione per livello · massimo +10", effect: "gadgetSalesConversion", effectPerLevel: 0.02, baseCost: 15_000, costGrowth: 1, levelCosts: [15_000, 30_000, 60_000, 120_000, 240_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-order-management": 2 } },
+  { id: "gadget-cross-selling", category: "gadget", title: "Vendita abbinata", description: "Una parte degli ordini genera automaticamente la vendita di un altro gadget disponibile.", effectLabel: "+5% vendite abbinate per livello · massimo +25%", effect: "gadgetCrossSell", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: 1, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-sales-training": 3 }, requiredGadgetProduct: "mug" },
 ];
 
 const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
@@ -156,6 +166,13 @@ const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
   pagosport: 55_000,
   "divine-touch": 1_000_000,
   "project-x": 1,
+  "gadget-showcase": 2_500,
+  "gadget-online-store": 5_000,
+  "gadget-design-tools": 5_000,
+  "gadget-revision-lab": 5_000,
+  "gadget-order-management": 10_000,
+  "gadget-sales-training": 15_000,
+  "gadget-cross-selling": 25_000,
 };
 
 export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG.map(

@@ -13,6 +13,7 @@ import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "./lightInflation";
+import { isValidGadgetState } from "./gadgetState";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
   "tutorial",
@@ -25,6 +26,28 @@ const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
 
 function isNonNegativeSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
+}
+
+const REQUIRED_COLLABORATOR_MASTERY_ROLES = [
+  "writing",
+  "events",
+  "equipment",
+  "instructor",
+] as const;
+
+function hasValidCollaboratorMastery(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const mastery = value as Record<string, unknown>;
+  return (
+    !("lessons" in mastery) &&
+    REQUIRED_COLLABORATOR_MASTERY_ROLES.every((role) =>
+      Number.isFinite(mastery[role]) && (mastery[role] as number) >= 0
+    ) &&
+    (
+      mastery.gadget === undefined ||
+      (Number.isFinite(mastery.gadget) && (mastery.gadget as number) >= 0)
+    )
+  );
 }
 
 export function getSaveCompatibilityVersion(value: unknown): number | null {
@@ -216,12 +239,14 @@ function hasValidChroniclesProgress(state: Partial<GameState>): boolean {
 
 function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   const management = state.collaboratorManagement;
+  const gadgetTarget = management?.targets?.gadget;
   return Boolean(
     management &&
     typeof management.aggregateViewUnlocked === "boolean" &&
-    COLLABORATOR_MASTERY_ROLES.every((role) =>
+    REQUIRED_COLLABORATOR_MASTERY_ROLES.every((role) =>
       isNonNegativeSafeInteger(management.targets?.[role])
-    )
+    ) &&
+    (gadgetTarget === undefined || isNonNegativeSafeInteger(gadgetTarget))
   );
 }
 
@@ -305,14 +330,7 @@ export function isValidGameState(value: unknown): value is GameState {
           isNonNegativeSafeInteger(progress.agonistCourseArenaBonus)) &&
         (progress.agonistCourseStyleBonus === undefined ||
           isNonNegativeSafeInteger(progress.agonistCourseStyleBonus)) &&
-        (progress.mastery === undefined || (
-          typeof progress.mastery === "object" &&
-          progress.mastery !== null &&
-          COLLABORATOR_MASTERY_ROLES.every((role) =>
-            Number.isFinite(progress.mastery?.[role]) &&
-            (progress.mastery?.[role] ?? 0) >= 0
-          )
-        )),
+        (progress.mastery === undefined || hasValidCollaboratorMastery(progress.mastery)),
       )
     ) &&
     Array.isArray(state.collaborators) &&
@@ -344,13 +362,7 @@ export function isValidGameState(value: unknown): value is GameState {
         (Number.isSafeInteger(collaborator.lastAgonistCourseYear) &&
           collaborator.lastAgonistCourseYear >= 1)) &&
       !("autoTeachingEnabled" in collaborator) &&
-      typeof collaborator.mastery === "object" &&
-      collaborator.mastery !== null &&
-      !("lessons" in collaborator.mastery) &&
-      COLLABORATOR_MASTERY_ROLES.every((role) =>
-        Number.isFinite(collaborator.mastery?.[role]) &&
-        (collaborator.mastery?.[role] ?? 0) >= 0
-      ) &&
+      hasValidCollaboratorMastery(collaborator.mastery) &&
       hasValidTraining(collaborator.training)
     ) &&
     hasValidCollaboratorManagement(state) &&
@@ -370,6 +382,13 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["social-editorial-plan"] === "number" &&
     typeof state.upgrades?.["social-content-distribution"] === "number" &&
     typeof state.upgrades?.["social-sponsorships"] === "number" &&
+    typeof state.upgrades?.["gadget-showcase"] === "number" &&
+    typeof state.upgrades?.["gadget-online-store"] === "number" &&
+    typeof state.upgrades?.["gadget-design-tools"] === "number" &&
+    typeof state.upgrades?.["gadget-revision-lab"] === "number" &&
+    typeof state.upgrades?.["gadget-order-management"] === "number" &&
+    typeof state.upgrades?.["gadget-sales-training"] === "number" &&
+    typeof state.upgrades?.["gadget-cross-selling"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.autoSendEmails === "boolean" &&
     typeof state.automation?.lessonBuffer === "number" &&
@@ -388,6 +407,8 @@ export function isValidGameState(value: unknown): value is GameState {
     hasValidHistoryArchive(state) &&
     typeof state.unlocks?.collaborators === "boolean" &&
     typeof state.unlocks?.forms === "boolean" &&
+    typeof state.unlocks?.gadget === "boolean" &&
+    isValidGadgetState(state.gadgets) &&
     Array.isArray(state.achievements) &&
     typeof state.narrative?.nextEventAt === "number" &&
     Array.isArray(state.narrative?.history) &&

@@ -26,6 +26,14 @@ import type { FormId, GameAction, GameState } from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
 import { buyUpgrade } from "./upgradeFlow";
 import { finishTutorialScene } from "./tutorialProgress";
+import {
+  acceptGadgetProduct,
+  completeGadgetMinigame,
+  dismissGadgetMinigameResult,
+  startGadgetMinigame,
+  startGadgetProject,
+  startGadgetRevision,
+} from "./gadgetFlow";
 
 type ActionType = GameAction["type"];
 type ActionByType<Type extends ActionType> = Extract<GameAction, { type: Type }>;
@@ -109,6 +117,29 @@ export function createGameActionHandlers(
     UPDATE_PROFILE_NAME: (state, action) => updateProfileName(state, action.displayName),
     FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now),
     BUY_UPGRADE: (state, action) => buyUpgrade(state, action.upgradeId),
+    START_GADGET_PROJECT: (state, action) => startGadgetProject(
+      state,
+      action.productId,
+    ),
+    START_GADGET_REVISION: (state, action) => startGadgetRevision(
+      state,
+      action.productId,
+    ),
+    START_GADGET_MINIGAME: (state, action) => startGadgetMinigame(
+      state,
+      action.productId,
+    ),
+    COMPLETE_GADGET_MINIGAME: (state, action) => completeGadgetMinigame(
+      state,
+      action.productId,
+      action.score,
+    ),
+    DISMISS_GADGET_MINIGAME_RESULT: (state, action) =>
+      dismissGadgetMinigameResult(state, action.productId),
+    ACCEPT_GADGET_PRODUCT: (state, action) => acceptGadgetProduct(
+      state,
+      action.productId,
+    ),
     MARK_MESSAGE_READ: (state, action) => markMessageRead(state, action.messageId),
     MARK_ALL_MESSAGES_READ: (state) => markAllMessagesRead(state),
     FINISH_TUTORIAL_SCENE: (state, action) => finishTutorialScene(

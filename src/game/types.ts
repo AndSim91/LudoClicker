@@ -136,6 +136,7 @@ export interface InboxMessage {
     | "progress"
     | "narrative"
     | "offline"
+    | "gadget"
     | "tournaments";
 }
 
@@ -241,7 +242,14 @@ export type UpgradeId =
   | "tiamat-instructor"
   | "pagosport"
   | "divine-touch"
-  | "project-x";
+  | "project-x"
+  | "gadget-showcase"
+  | "gadget-online-store"
+  | "gadget-design-tools"
+  | "gadget-revision-lab"
+  | "gadget-order-management"
+  | "gadget-sales-training"
+  | "gadget-cross-selling";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
 
@@ -323,14 +331,17 @@ export interface SchoolFoundationDetails {
 }
 
 export type CollaboratorAssignment =
-  "writing" | "events" | "equipment" | "instructor" | null;
+  "writing" | "events" | "equipment" | "instructor" | "gadget" | null;
 
 export type CollaboratorMasteryRole = Exclude<CollaboratorAssignment, null>;
-export type CollaboratorMastery = Record<CollaboratorMasteryRole, number>;
+export type CollaboratorMastery =
+  Record<Exclude<CollaboratorMasteryRole, "gadget">, number> &
+  Partial<Record<"gadget", number>>;
 
 export interface CollaboratorManagementState {
   aggregateViewUnlocked: boolean;
-  targets: Record<CollaboratorMasteryRole, number>;
+  targets: Record<Exclude<CollaboratorMasteryRole, "gadget">, number> &
+    Partial<Record<"gadget", number>>;
 }
 
 export type FormId =
@@ -620,6 +631,49 @@ export interface LightInflationState {
   event?: LightInflationEvent;
 }
 
+export type GadgetProductId =
+  | "wristband"
+  | "mug"
+  | "underwear"
+  | "tshirt"
+  | "hoodie";
+
+export type GadgetWorkKind = "development" | "revision";
+
+export interface GadgetProductState {
+  unlocked: boolean;
+  projectPurchased: boolean;
+  prototypeCompleted: boolean;
+  accepted: boolean;
+  quality: number;
+  unitsSold: number;
+  totalProfit: number;
+  salesRemainder: number;
+}
+
+export interface GadgetWorkState {
+  productId: GadgetProductId;
+  kind: GadgetWorkKind;
+  completedWorkMs: number;
+}
+
+export interface GadgetMinigameState {
+  productId: GadgetProductId;
+  kind: GadgetWorkKind;
+  seed: number;
+  previousQuality: number;
+  status: "ready" | "running" | "result";
+  score?: number;
+}
+
+export interface GadgetState {
+  products: Record<GadgetProductId, GadgetProductState>;
+  activeWork?: GadgetWorkState;
+  minigame?: GadgetMinigameState;
+  crossSellRemainder: number;
+  crossSellCursor: number;
+}
+
 export interface GameState {
   version: number;
   saveCompatibilityVersion: number;
@@ -668,6 +722,7 @@ export interface GameState {
     wear: number;
   };
   lightInflation: LightInflationState;
+  gadgets: GadgetState;
   legendaryPity: number;
   legendaryCollaborators: LegendaryCollaboratorProgress;
   tournaments: TournamentState;
@@ -698,6 +753,7 @@ export interface GameState {
     collaborators: boolean;
     social: boolean;
     forms: boolean;
+    gadget: boolean;
   };
   upgrades: UpgradeLevels;
 }
@@ -729,6 +785,12 @@ export type GameAction =
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
+  | { type: "START_GADGET_PROJECT"; productId: GadgetProductId; now: number }
+  | { type: "START_GADGET_REVISION"; productId: GadgetProductId; now: number }
+  | { type: "START_GADGET_MINIGAME"; productId: GadgetProductId }
+  | { type: "COMPLETE_GADGET_MINIGAME"; productId: GadgetProductId; score: number }
+  | { type: "DISMISS_GADGET_MINIGAME_RESULT"; productId: GadgetProductId }
+  | { type: "ACCEPT_GADGET_PRODUCT"; productId: GadgetProductId }
   | { type: "MARK_MESSAGE_READ"; messageId: string }
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }

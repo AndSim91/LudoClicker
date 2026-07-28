@@ -228,6 +228,20 @@ describe("useGameEngine pause", () => {
     expect(result.current.isPaused).toBe(false);
   });
 
+  it("keeps the game paused for the whole Gadget minigame", () => {
+    const { result } = renderHook(() => useGameEngine());
+
+    act(() => result.current.setGadgetPaused(true));
+    expect(result.current.isPaused).toBe(true);
+
+    act(() => result.current.setTutorialPaused(true));
+    act(() => result.current.setGadgetPaused(false));
+    expect(result.current.isPaused).toBe(true);
+
+    act(() => result.current.setTutorialPaused(false));
+    expect(result.current.isPaused).toBe(false);
+  });
+
   it("waits for the final send input while tutorial time stays frozen", () => {
     const { result } = renderHook(() => useGameEngine());
 

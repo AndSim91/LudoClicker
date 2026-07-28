@@ -5,6 +5,7 @@ export const COLLABORATOR_ASSIGNMENT_LABELS: Record<CollaboratorMasteryRole, str
   events: "Eventi",
   equipment: "Attrezzatura",
   instructor: "Istruttore",
+  gadget: "Gadget",
 };
 
 export function getCollaboratorAssignmentLabel(
@@ -20,4 +21,5 @@ export const AUTOMATION_ASSIGNMENTS: readonly CollaboratorMasteryRole[] = [
   "writing",
   "events",
   "equipment",
+  "gadget",
 ];

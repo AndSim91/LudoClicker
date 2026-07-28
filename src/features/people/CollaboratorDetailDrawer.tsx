@@ -159,6 +159,7 @@ export function CollaboratorDetailDrawer({
           <CollaboratorMasterySummary
             collaborator={collaborator}
             socialUnlocked={state.unlocks.social}
+            gadgetUnlocked={state.unlocks.gadget}
             defaultOpen
           />
         </section>
@@ -207,7 +208,9 @@ export function CollaboratorDetailDrawer({
               )}
             >
               <option value="">Non assegnato</option>
-              {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS).map((value) => (
+              {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
+                .filter((value) => value !== "gadget" || state.unlocks.gadget)
+                .map((value) => (
                 <option value={value} key={value}>
                   {getCollaboratorAssignmentLabel(
                     value as Exclude<CollaboratorAssignment, null>,
