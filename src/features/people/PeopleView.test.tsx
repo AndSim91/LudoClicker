@@ -391,6 +391,53 @@ describe("PeopleView", () => {
     expect(onStartTraining).toHaveBeenCalledWith("aggregate-instructor-0", "course-x");
   });
 
+  it("shows athletic preparation as active work in the individual collaborator list", () => {
+    const initial = createInitialState(1_000);
+    const instructor: Collaborator = {
+      id: "individual-preparation-instructor",
+      contactId: initial.contacts[1].id,
+      displayName: "Istruttore Preparatore",
+      joinedAt: 1_000,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      assignment: "instructor",
+      rarity: "ultra-rare",
+    };
+    const state = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
+      contacts: initial.contacts.map((contact, index) =>
+        index === 0 ? { ...contact, status: "enrolled" as const } : contact
+      ),
+      collaborators: [instructor],
+      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      unlocks: { ...initial.unlocks, collaborators: true },
+    };
+
+    render(
+      <GameTimeProvider getNow={() => 1_000} isPaused={false}>
+        <PeopleView
+          state={state}
+          onAssign={() => undefined}
+          onStartTraining={() => undefined}
+        />
+      </GameTimeProvider>,
+    );
+
+    const row = screen.getByText("Istruttore Preparatore").closest("article");
+    expect(row).not.toBeNull();
+    expect(within(row!).getByText("Preparazione atletica")).toBeVisible();
+    expect(within(row!).queryByText("In attesa di un allievo")).not.toBeInTheDocument();
+    expect(within(row!).getByRole("progressbar", {
+      name: "Preparazione atletica di Istruttore Preparatore",
+    })).toHaveClass("is-indeterminate");
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Filtra per attività" }), {
+      target: { value: "active" },
+    });
+    expect(screen.getByText("Istruttore Preparatore")).toBeVisible();
+  });
+
   it("shows Technician coverage and the active internal Instructor course", () => {
     const initial = createInitialState(1_000);
     const technician = {

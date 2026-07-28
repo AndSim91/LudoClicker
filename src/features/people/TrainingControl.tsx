@@ -28,7 +28,7 @@ import {
 } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
-import { useGameTime } from "../../game/GameTimeContext";
+import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -152,9 +152,11 @@ function InstructorTeachingSummary({
 export function InstructorCompactActivity({
   collaborator,
   state: stateOverride,
+  athleticPreparationActive = false,
 }: {
   collaborator: Collaborator;
   state?: GameState;
+  athleticPreparationActive?: boolean;
 }) {
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
@@ -162,12 +164,39 @@ export function InstructorCompactActivity({
   );
   const teaching = useInstructorTeachingEntries(state, collaborator.id);
   const capacity = selectInstructorCapacity(state);
+  const isPaused = useGameTimeSource()?.isPaused ?? false;
   const now = useGameTime(
     teaching.length > 0,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
 
   if (teaching.length === 0) {
+    if (athleticPreparationActive) {
+      return (
+        <div
+          className="instructor-compact-activity-list"
+          aria-label={`Attività di ${collaborator.displayName}`}
+        >
+          <span className="instructor-compact-activity is-athletic-preparation">
+            <span className="collaborator-activity-title">
+              <strong>Preparazione atletica</strong>
+              <small>Attività continuativa</small>
+            </span>
+            <span className="collaborator-activity-progress">
+              <strong>In corso</strong>
+              <ProgressBar
+                className="collaborator-progress-bar"
+                label={`Preparazione atletica di ${collaborator.displayName}`}
+                value={0}
+                valueText={isPaused ? "Attività in pausa" : "Attività continuativa"}
+                indeterminate
+                paused={isPaused}
+              />
+            </span>
+          </span>
+        </div>
+      );
+    }
     return (
       <div className="instructor-compact-activity-list" aria-label="Allievi seguiti">
         <span className="instructor-compact-activity is-waiting">

@@ -36,6 +36,7 @@ import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPri
 import {
   compareInstructorTeachingPriority,
   selectActiveEmail,
+  selectAthleticPreparationInstructorIds,
   selectInstructorCapacity,
 } from "./selectors";
 import { getSocialContentCharacters } from "./social";
@@ -338,26 +339,14 @@ export function processAutomation(
  * soltanto se non sta insegnando e non è in formazione personale.
  */
 function getAvailableAthleticPreparationInstructors(state: GameState) {
-  const teachingCounts = getInstructorTeachingCounts(
-    state.contacts,
-    state.collaborators,
-  );
-  const priorityQualificationTechnicianIds =
-    getPriorityInstructorQualificationTechnicianIds(state);
+  const activeInstructorIds = selectAthleticPreparationInstructorIds(state);
   return state.collaborators.filter(
-    (collaborator) =>
-      collaborator.assignment === "instructor" &&
-      !collaborator.training &&
-      !priorityQualificationTechnicianIds.has(collaborator.id) &&
-      (teachingCounts.get(collaborator.id) ?? 0) === 0,
+    (collaborator) => activeInstructorIds.has(collaborator.id),
   );
 }
 
 export function hasActiveInstructorAthleticPreparation(state: GameState): boolean {
-  return (state.upgrades["athletic-preparation"] ?? 0) > 0 &&
-    !isSummerBreak(state.school.currentMonth) &&
-    state.contacts.some((contact) => contact.status === "enrolled") &&
-    getAvailableAthleticPreparationInstructors(state).length > 0;
+  return selectAthleticPreparationInstructorIds(state).size > 0;
 }
 
 export function processInstructorAthleticPreparation(

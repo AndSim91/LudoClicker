@@ -1160,6 +1160,9 @@ Regole:
 - la Preparazione atletica è attiva da settembre a giugno ed è sospesa sia a
   luglio sia ad agosto; durante la sospensione la schermata aggregata dei
   Collaboratori mostra **Pausa estiva**;
+- nell'elenco individuale dei Collaboratori, un Istruttore che sta contribuendo
+  alla Preparazione atletica mostra la relativa barra attiva ed è considerato
+  **In corso**, non **In attesa di un allievo**;
 - disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
   terminare le lezioni già iniziate, ma non ne avvia altre;
 - annullare manualmente un'iscrizione è disponibile fin dall'inizio. La X nella

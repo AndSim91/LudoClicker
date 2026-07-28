@@ -13,6 +13,7 @@ import { isCourseXUnlocked } from "../content/upgrades";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
+import { isSummerBreak } from "./calendar";
 import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
@@ -73,6 +74,28 @@ export function selectInstructorCapacity(state: GameState): number {
 
 export function selectInstructorTeachingCount(state: GameState, instructorId: string): number {
   return getInstructorTeachingCounts(state.contacts, state.collaborators).get(instructorId) ?? 0;
+}
+
+export function selectAthleticPreparationInstructorIds(state: GameState): Set<string> {
+  const activeInstructorIds = new Set<string>();
+  if (
+    (state.upgrades["athletic-preparation"] ?? 0) <= 0 ||
+    isSummerBreak(state.school.currentMonth) ||
+    !state.contacts.some((contact) => contact.status === "enrolled")
+  ) return activeInstructorIds;
+
+  const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  const priorityQualificationTechnicianIds =
+    getPriorityInstructorQualificationTechnicianIds(state);
+  for (const collaborator of state.collaborators) {
+    if (
+      collaborator.assignment === "instructor" &&
+      !collaborator.training &&
+      !priorityQualificationTechnicianIds.has(collaborator.id) &&
+      (teachingCounts.get(collaborator.id) ?? 0) === 0
+    ) activeInstructorIds.add(collaborator.id);
+  }
+  return activeInstructorIds;
 }
 
 export function canInstructorTeachForm(

@@ -25,6 +25,7 @@ export interface CollaboratorSortContext {
   state: GameState;
   contactsById: ReadonlyMap<string, Contact>;
   activeEmail: ReturnType<typeof selectActiveEmail>;
+  athleticPreparationInstructorIds?: ReadonlySet<string>;
   now: number;
 }
 
@@ -90,7 +91,9 @@ function getActivityValue(
 ): number | null {
   if (collaborator.assignment === "instructor") {
     const teachingCount = selectInstructorTeachingCount(context.state, collaborator.id);
-    return teachingCount > 0 ? teachingCount : null;
+    return teachingCount > 0
+      ? teachingCount
+      : context.athleticPreparationInstructorIds?.has(collaborator.id) ? 1 : null;
   }
   return getAutomation(collaborator, context).progress ?? null;
 }

@@ -18,7 +18,11 @@ import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
-import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
+import {
+  selectActiveEmail,
+  selectAthleticPreparationInstructorIds,
+  selectInstructorTeachingCount,
+} from "../../game/selectors";
 import type {
   CollaboratorAssignment,
   Contact,
@@ -120,6 +124,7 @@ export function CollaboratorList({
     [state.contacts],
   );
   const activeEmail = selectActiveEmail(state);
+  const athleticPreparationInstructorIds = selectAthleticPreparationInstructorIds(state);
   const hasTimedAutomation = state.acquisitionEvents.some((event) =>
     event.status === "running" && event.collaboratorId !== undefined
   );
@@ -168,7 +173,8 @@ export function CollaboratorList({
           activeEmail,
         });
         const active = collaborator.assignment === "instructor"
-          ? selectInstructorTeachingCount(state, collaborator.id) > 0
+          ? selectInstructorTeachingCount(state, collaborator.id) > 0 ||
+            athleticPreparationInstructorIds.has(collaborator.id)
           : automation.progress !== undefined;
         if (active !== (activityFilter === "active")) return false;
       }
@@ -177,6 +183,7 @@ export function CollaboratorList({
   }, [
     activeEmail,
     activityFilter,
+    athleticPreparationInstructorIds,
     assignmentFilter,
     contactsById,
     deferredSearch,
@@ -189,8 +196,9 @@ export function CollaboratorList({
     state,
     contactsById,
     activeEmail,
+    athleticPreparationInstructorIds,
     now,
-  }), [activeEmail, contactsById, now, state]);
+  }), [activeEmail, athleticPreparationInstructorIds, contactsById, now, state]);
   const sortedCollaborators = useMemo(
     () => sortCollaborators(filteredCollaborators, sort, sortContext),
     [filteredCollaborators, sort, sortContext],
@@ -483,7 +491,11 @@ export function CollaboratorList({
 
                 <div className="collaborator-activity" data-label="Attività">
                   {collaborator.assignment === "instructor" ? (
-                    <InstructorCompactActivity collaborator={collaborator} state={stateOverride} />
+                    <InstructorCompactActivity
+                      collaborator={collaborator}
+                      state={stateOverride}
+                      athleticPreparationActive={athleticPreparationInstructorIds.has(collaborator.id)}
+                    />
                   ) : (
                     <>
                       <span className="collaborator-activity-title">
