@@ -64,7 +64,8 @@ export const GADGET_DEFINITIONS: Record<GadgetProductId, GadgetDefinition> = {
 export const GADGET_PROJECT_UNLOCK_SALES = 100;
 export const GADGET_REVISION_COST_RATE = 0.1;
 export const GADGET_REVISION_WORK_RATE = 1 / 3;
-export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 5;
+export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 5 / 10;
+export const GADGET_MARGINAL_SALES_SPEED_MULTIPLIER = 1 / 10;
 
 export const GADGET_MEMBER_REACH_LEVELS = [0.1, 0.2, 0.35, 0.5, 0.75, 1] as const;
 export const GADGET_FOLLOWER_REACH_LEVELS = [

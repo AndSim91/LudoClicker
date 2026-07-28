@@ -2070,23 +2070,29 @@ pubblico = floor(iscrittiAttivi × coperturaIscritti
 ```
 
 La copertura iniziale è il 10% degli iscritti e lo 0% dei follower. Ogni
-persona del pubblico può comprare una volta ciascun prodotto, quindi la domanda
-residua è calcolata separatamente come
+persona del pubblico alimenta una vendita ordinaria per ciascun prodotto,
+quindi la domanda ordinaria residua è calcolata separatamente come
 `max(0, pubblico - pezziVendutiDelProdotto)`. Non esiste rigenerazione della
-domanda: se il pubblico scende sotto le vendite storiche, quel prodotto si
-ferma finché il pubblico non cresce di nuovo.
+domanda ordinaria: se il pubblico scende sotto le vendite storiche, il prodotto
+passa alle sole vendite marginali finché il pubblico non cresce di nuovo.
 
-La capacità commerciale condivisa dal catalogo è:
+Indicando con `V` la precedente capacità commerciale condivisa dal catalogo,
+la nuova capacità ordinaria `N` e quella marginale sono:
 
 ```text
-tentativiAlMese = 5 × P × (1 + bonusGestioneOrdini)
+V = 5 × P × (1 + bonusGestioneOrdini)
+N = V / 10
+tentativiMarginaliAlMese = N / 10
 ```
 
-I tentativi vengono distribuiti proporzionalmente alla domanda residua dei
-prodotti accettati e vendibili. La capacità che non trova domanda viene persa;
-le sole frazioni di vendita già maturate restano memorizzate fino a formare un
-pezzo intero. La conversione base dipende dalla qualità e viene interpolata
-linearmente tra questi punti:
+I tentativi ordinari vengono distribuiti proporzionalmente alla domanda
+residua dei prodotti accettati e vendibili. In parallelo, la capacità marginale
+viene distribuita in parti uguali fra i prodotti che hanno già raggiunto il
+proprio pubblico: non ha un tetto di domanda e produce quindi vendite
+occasionali anche oltre la soglia. La capacità ordinaria che non trova domanda
+viene persa; le sole frazioni di vendita già maturate restano memorizzate fino
+a formare un pezzo intero. La conversione base dipende dalla qualità e viene
+interpolata linearmente tra questi punti:
 
 | Qualità | Conversione base |
 | ------: | ---------------: |
@@ -2099,7 +2105,8 @@ linearmente tra questi punti:
 La Formazione commerciale aggiunge fino a 10 punti percentuali, con limite
 finale del 100%; un prodotto allo 0% resta comunque non vendibile. La Vendita
 abbinata genera in modo deterministico fino al 25% di pezzi aggiuntivi fra gli
-altri prodotti accettati, sempre entro la loro domanda residua.
+altri prodotti accettati, sempre entro la loro domanda ordinaria residua: non
+può aggirare la velocità marginale.
 
 Il guadagno netto per pezzo è:
 
@@ -2698,7 +2705,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   il Polsino resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
-  Collaboratori e domanda storica governano le vendite automatiche.
+  Collaboratori, domanda ordinaria e vendite marginali governano il catalogo.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non
   può essere messa in pausa.
 - Carisma e Scrittura sono statistiche fondamentali.

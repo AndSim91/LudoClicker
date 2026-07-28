@@ -45,6 +45,7 @@ describe("GadgetsView", () => {
     expect(screen.getByRole("heading", { name: "Polsino" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Tazza" })).toBeVisible();
     expect(screen.getByText(/Si sblocca dopo 100 vendite di Polsino/)).toBeVisible();
+    expect(screen.getByText(/vendite occasionali, ma molto più lente/)).toBeVisible();
     expect(screen.queryByText(/recupero|margine|proiezione/i)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Avvia progetto/ }));

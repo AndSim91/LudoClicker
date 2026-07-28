@@ -188,6 +188,24 @@ describe("game scheduler", () => {
 
     const idle = { ...working, gadgets: { ...working.gadgets, activeWork: undefined } };
     expect(needsAutomationHeartbeat(idle)).toBe(false);
+
+    const marginalSales: GameState = {
+      ...idle,
+      gadgets: {
+        ...idle.gadgets,
+        products: {
+          ...idle.gadgets.products,
+          wristband: {
+            ...idle.gadgets.products.wristband,
+            prototypeCompleted: true,
+            accepted: true,
+            quality: 100,
+            unitsSold: 0,
+          },
+        },
+      },
+    };
+    expect(needsAutomationHeartbeat(marginalSales)).toBe(true);
   });
 
   it("wakes an event automator when the sparring cooldown expires", () => {

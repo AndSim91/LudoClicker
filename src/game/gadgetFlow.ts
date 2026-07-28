@@ -9,6 +9,7 @@ import {
 import {
   getGadgetAudience,
   getGadgetCrossSellRate,
+  getGadgetMarginalMonthlyAttemptCapacity,
   getGadgetMonthlyAttemptCapacity,
   getGadgetQualityConversion,
   getGadgetUnitProfit,
@@ -309,28 +310,50 @@ function applySales(
   };
 }
 
-function processPrimarySales(
+type GadgetSaleTier = "ordinary" | "marginal";
+
+function processPrimarySalesPool(
   state: GameState,
+  productsAtStart: GameState["gadgets"]["products"],
   attempts: number,
   audience: number,
+  tier: GadgetSaleTier,
 ): SaleResult {
-  let products = state.gadgets.products;
+  let products = productsAtStart;
   let revenue = 0;
   let units = 0;
+  // La fascia viene fissata all'inizio del tick: nello stesso intervallo un
+  // prodotto non può consumare sia capacità ordinaria sia marginale.
   const eligible = GADGET_PRODUCT_ORDER.filter((productId) => {
-    const product = products[productId];
-    return product.accepted && product.quality > 0 && product.unitsSold < audience;
+    const product = state.gadgets.products[productId];
+    if (
+      !product.accepted ||
+      product.quality <= 0 ||
+      product.unitsSold >= Number.MAX_SAFE_INTEGER
+    ) return false;
+    return tier === "ordinary"
+      ? product.unitsSold < audience
+      : product.unitsSold >= audience;
   });
-  const totalDemand = eligible.reduce(
-    (total, productId) => total + Math.max(0, audience - products[productId].unitsSold),
+  const totalWeight = eligible.reduce(
+    (total, productId) => total + (
+      tier === "ordinary"
+        ? Math.max(0, audience - state.gadgets.products[productId].unitsSold)
+        : 1
+    ),
     0,
   );
-  if (attempts <= 0 || totalDemand <= 0) return { products, revenue, units };
+  if (attempts <= 0 || totalWeight <= 0) return { products, revenue, units };
 
   for (const productId of eligible) {
     const product = products[productId];
-    const demand = Math.max(0, audience - product.unitsSold);
-    const allocatedAttempts = attempts * demand / totalDemand;
+    const demand = tier === "ordinary"
+      ? Math.max(0, audience - product.unitsSold)
+      : Math.max(0, Number.MAX_SAFE_INTEGER - product.unitsSold);
+    const weight = tier === "ordinary"
+      ? Math.max(0, audience - state.gadgets.products[productId].unitsSold)
+      : 1;
+    const allocatedAttempts = attempts * weight / totalWeight;
     const converted = allocatedAttempts * getGadgetQualityConversion(
       product.quality,
       state.upgrades,
@@ -350,6 +373,33 @@ function processPrimarySales(
     units += applied.units;
   }
   return { products, revenue, units };
+}
+
+function processPrimarySales(
+  state: GameState,
+  ordinaryAttempts: number,
+  marginalAttempts: number,
+  audience: number,
+): SaleResult {
+  const ordinary = processPrimarySalesPool(
+    state,
+    state.gadgets.products,
+    ordinaryAttempts,
+    audience,
+    "ordinary",
+  );
+  const marginal = processPrimarySalesPool(
+    state,
+    ordinary.products,
+    marginalAttempts,
+    audience,
+    "marginal",
+  );
+  return {
+    products: marginal.products,
+    revenue: roundCurrency(ordinary.revenue + marginal.revenue),
+    units: ordinary.units + marginal.units,
+  };
 }
 
 function processCrossSales(
@@ -484,9 +534,17 @@ function processGadgetSales(
   if (elapsedMs <= 0) return state;
   const monthlyCapacity = getGadgetMonthlyAttemptCapacity(state);
   if (monthlyCapacity <= 0) return state;
-  const attempts = elapsedMs / GAME_CONFIG.gameMonthMs * monthlyCapacity;
+  const elapsedMonths = elapsedMs / GAME_CONFIG.gameMonthMs;
+  const ordinaryAttempts = elapsedMonths * monthlyCapacity;
+  const marginalAttempts = elapsedMonths *
+    getGadgetMarginalMonthlyAttemptCapacity(state);
   const audience = getGadgetAudience(state);
-  const primary = processPrimarySales(state, attempts, audience);
+  const primary = processPrimarySales(
+    state,
+    ordinaryAttempts,
+    marginalAttempts,
+    audience,
+  );
   const cross = processCrossSales(state, primary.products, primary.units, audience);
   const revenue = roundCurrency(primary.revenue + cross.revenue);
   if (

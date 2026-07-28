@@ -14,6 +14,10 @@ import {
 } from "../../game/gadgetEconomy";
 import type { GadgetProductId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
+import {
+  GadgetProductArtwork,
+  GadgetWorkshopArtwork,
+} from "./GadgetArtwork";
 import { GadgetRhythmGame } from "./GadgetRhythmGame";
 
 const numberFormatter = new Intl.NumberFormat("it-IT", {
@@ -23,7 +27,8 @@ const numberFormatter = new Intl.NumberFormat("it-IT", {
 function ProductQuality({ quality }: { quality: number }) {
   return (
     <div className="gadget-quality" aria-label={`Qualità ${quality} su 100`}>
-      <span><strong>{quality}%</strong><small>Qualità</small></span>
+      <strong>{quality}%</strong>
+      <small>Qualità</small>
       <ProgressBar label="Qualità massima" value={quality} />
     </div>
   );
@@ -61,7 +66,8 @@ function GadgetProductCard({
   if (!product.unlocked) {
     return (
       <article className="gadget-product-card is-locked">
-        <div className="gadget-product-symbol" aria-hidden="true">?</div>
+        <span className="gadget-product-rail" aria-hidden="true" />
+        <GadgetProductArtwork productId={productId} locked />
         <div className="gadget-product-heading">
           <span>Progetto bloccato</span>
           <h2>{definition.name}</h2>
@@ -75,11 +81,17 @@ function GadgetProductCard({
     );
   }
 
+  const visualState = product.accepted
+    ? product.quality > 0 ? "is-selling" : "is-warning"
+    : work ? "is-working"
+      : minigame?.status === "ready" || product.prototypeCompleted
+        ? "is-prototype"
+        : "is-available";
+
   return (
-    <article className={`gadget-product-card${product.accepted ? " is-selling" : ""}`}>
-      <div className="gadget-product-symbol" aria-hidden="true">
-        {definition.name.slice(0, 2).toLocaleUpperCase("it-IT")}
-      </div>
+    <article className={`gadget-product-card ${visualState}`}>
+      <span className="gadget-product-rail" aria-hidden="true" />
+      <GadgetProductArtwork productId={productId} />
       <div className="gadget-product-heading">
         <span>{product.accepted ? "In catalogo" : product.projectPurchased ? "Prototipo" : "Progetto disponibile"}</span>
         <h2>{definition.name}</h2>
@@ -98,19 +110,19 @@ function GadgetProductCard({
       <div className="gadget-product-status">
         {work ? (
           <>
-            <span className="gadget-status-pill is-working">
+            <span className="gadget-status-label is-working">
               {work.kind === "development" ? "Progettazione in corso" : "Revisione in corso"}
             </span>
             {getGadgetProductivity(state) <= 0 ? <small>In pausa: assegna almeno un Collaboratore ai Gadget.</small> : null}
           </>
         ) : minigame?.status === "ready" ? (
-          <span className="gadget-status-pill is-ready">Prova qualità pronta</span>
+          <span className="gadget-status-label is-ready">Prova qualità pronta</span>
         ) : product.accepted && product.quality === 0 ? (
-          <span className="gadget-status-pill is-warning">Non vendibile</span>
+          <span className="gadget-status-label is-warning">Non vendibile</span>
         ) : product.accepted ? (
-          <span className="gadget-status-pill is-selling">Vendita automatica attiva</span>
+          <span className="gadget-status-label is-selling">Vendita automatica attiva</span>
         ) : product.prototypeCompleted ? (
-          <span className="gadget-status-pill is-ready">In attesa di approvazione</span>
+          <span className="gadget-status-label is-ready">In attesa di approvazione</span>
         ) : null}
       </div>
 
@@ -196,37 +208,52 @@ export function GadgetsView({
           <h1>Gadget</h1>
           <p>Progetta i prodotti della scuola e affidane la vendita ai Collaboratori.</p>
         </div>
+        <GadgetWorkshopArtwork />
       </header>
 
       <section className="gadget-overview" aria-label="Riepilogo Gadget">
-        <div>
-          <small>Pubblico raggiungibile</small>
-          <strong>{getGadgetAudience(state).toLocaleString("it-IT")}</strong>
+        <div className="gadget-overview-item">
+          <span className="gadget-overview-icon" aria-hidden="true"><Icon name="people" /></span>
+          <span>
+            <small>Pubblico raggiungibile</small>
+            <strong>{getGadgetAudience(state).toLocaleString("it-IT")}</strong>
+          </span>
         </div>
-        <div>
-          <small>Produttività Gadget</small>
-          <strong>{numberFormatter.format(productivity)}</strong>
+        <div className="gadget-overview-item">
+          <span className="gadget-overview-icon" aria-hidden="true"><Icon name="settings" /></span>
+          <span>
+            <small>Produttività Gadget</small>
+            <strong>{numberFormatter.format(productivity)}</strong>
+          </span>
         </div>
-        <div className="gadget-overview-work">
-          <small>Laboratorio</small>
-          {activeWork && workProgress !== undefined ? (
-            <>
-              <strong>
-                {activeWork.kind === "development" ? "Progetto" : "Revisione"} {GADGET_DEFINITIONS[activeWork.productId].name}
-              </strong>
-              <ProgressBar
-                label={`Avanzamento ${GADGET_DEFINITIONS[activeWork.productId].name}`}
-                value={workProgress}
-                paused={productivity <= 0}
-              />
-            </>
-          ) : minigame?.status === "ready" ? (
-            <strong>Prova qualità pronta</strong>
-          ) : (
-            <strong>Libero</strong>
-          )}
+        <div className="gadget-overview-item gadget-overview-work">
+          <span className="gadget-overview-icon" aria-hidden="true"><Icon name="flask" /></span>
+          <span>
+            <small>Laboratorio</small>
+            {activeWork && workProgress !== undefined ? (
+              <>
+                <strong>
+                  {activeWork.kind === "development" ? "Progetto" : "Revisione"} {GADGET_DEFINITIONS[activeWork.productId].name}
+                </strong>
+                <ProgressBar
+                  label={`Avanzamento ${GADGET_DEFINITIONS[activeWork.productId].name}`}
+                  value={workProgress}
+                  paused={productivity <= 0}
+                />
+              </>
+            ) : minigame?.status === "ready" ? (
+              <strong>Prova qualità pronta</strong>
+            ) : (
+              <strong>Libero</strong>
+            )}
+          </span>
         </div>
-        <p>I potenziamenti del settore si acquistano nella schermata Upgrade.</p>
+        <p>
+          <Icon name="info" />
+          Oltre il pubblico raggiungibile restano possibili vendite occasionali,
+          ma molto più lente. I potenziamenti del settore si acquistano nella
+          schermata Upgrade.
+        </p>
       </section>
 
       <section className="gadget-catalog" aria-label="Catalogo Gadget">

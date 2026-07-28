@@ -6,6 +6,7 @@ import {
   getGadgetWorkRequirement,
 } from "../content/gadgets";
 import { createInitialCollaboratorMastery } from "../content/mastery";
+import { GAME_CONFIG } from "./config";
 import {
   acceptGadgetProduct,
   completeGadgetMinigame,
@@ -16,7 +17,12 @@ import {
   unlockGadgetSector,
   unlockGadgetSectorFromTournamentResult,
 } from "./gadgetFlow";
-import { getGadgetAudience, getGadgetWorkSpeed } from "./gadgetEconomy";
+import {
+  getGadgetAudience,
+  getGadgetMarginalMonthlyAttemptCapacity,
+  getGadgetMonthlyAttemptCapacity,
+  getGadgetWorkSpeed,
+} from "./gadgetEconomy";
 import { createInitialState } from "./initialState";
 import type { Collaborator, GameState, TournamentResult } from "./types";
 
@@ -161,6 +167,81 @@ describe("Gadget flow", () => {
     expect(completeCurrentWork(staffed).gadgets.minigame?.status).toBe("ready");
   });
 
+  it.each([
+    { collaborators: 12, ordinaryIntervalMs: 10_000, marginalIntervalMs: 100_000 },
+    { collaborators: 15, ordinaryIntervalMs: 8_000, marginalIntervalMs: 80_000 },
+  ])(
+    "turns the old 0.8-1 second cadence into $ordinaryIntervalMs ms with $collaborators collaborators",
+    ({ collaborators, ordinaryIntervalMs, marginalIntervalMs }) => {
+      const initial = unlockedState();
+      const staffed: GameState = {
+        ...initial,
+        collaborators: Array.from(
+          { length: collaborators },
+          (_, index) => gadgetCollaborator(`gadget-collaborator-${index}`),
+        ),
+      };
+      const product = staffed.gadgets.products.wristband;
+      const selling: GameState = {
+        ...staffed,
+        gadgets: {
+          ...staffed.gadgets,
+          products: {
+            ...staffed.gadgets.products,
+            wristband: {
+              ...product,
+              projectPurchased: true,
+              prototypeCompleted: true,
+              accepted: true,
+              quality: 100,
+            },
+          },
+        },
+      };
+      const audience = getGadgetAudience(selling);
+      const marginal: GameState = {
+        ...selling,
+        gadgets: {
+          ...selling.gadgets,
+          products: {
+            ...selling.gadgets.products,
+            wristband: {
+              ...selling.gadgets.products.wristband,
+              unitsSold: audience,
+            },
+          },
+        },
+      };
+
+      expect(getGadgetMonthlyAttemptCapacity(selling)).toBeCloseTo(
+        GAME_CONFIG.gameMonthMs / ordinaryIntervalMs,
+      );
+      expect(getGadgetMarginalMonthlyAttemptCapacity(selling)).toBeCloseTo(
+        GAME_CONFIG.gameMonthMs / marginalIntervalMs,
+      );
+      expect(processGadgets(
+        selling,
+        ordinaryIntervalMs - 1,
+        ordinaryIntervalMs,
+      ).gadgets.products.wristband.unitsSold).toBe(0);
+      expect(processGadgets(
+        selling,
+        ordinaryIntervalMs,
+        ordinaryIntervalMs + 1,
+      ).gadgets.products.wristband.unitsSold).toBe(1);
+      expect(processGadgets(
+        marginal,
+        marginalIntervalMs - 1,
+        marginalIntervalMs,
+      ).gadgets.products.wristband.unitsSold).toBe(audience);
+      expect(processGadgets(
+        marginal,
+        marginalIntervalMs,
+        marginalIntervalMs + 1,
+      ).gadgets.products.wristband.unitsSold).toBe(audience + 1);
+    },
+  );
+
   it("sells from the shared audience and credits the quality-based net profit", () => {
     const initial = unlockedState();
     const product = initial.gadgets.products.wristband;
@@ -181,12 +262,16 @@ describe("Gadget flow", () => {
       },
     };
 
-    const sold = processGadgets(selling, 60_000, 61_000);
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    );
 
     expect(getGadgetAudience(selling)).toBe(1_000);
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(5);
-    expect(sold.gadgets.products.wristband.totalProfit).toBe(100);
-    expect(sold.school.euros).toBe(selling.school.euros + 100);
+    expect(sold.gadgets.products.wristband.unitsSold).toBe(1);
+    expect(sold.gadgets.products.wristband.totalProfit).toBe(20);
+    expect(sold.school.euros).toBe(selling.school.euros + 20);
   });
 
   it("keeps quality zero non-sellable and unlocks the next project at 100 sales", () => {
@@ -224,12 +309,16 @@ describe("Gadget flow", () => {
         },
       },
     };
-    const unlocked = processGadgets(nearlyUnlocked, 60_000, 61_000);
-    expect(unlocked.gadgets.products.wristband.unitsSold).toBe(104);
+    const unlocked = processGadgets(
+      nearlyUnlocked,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    );
+    expect(unlocked.gadgets.products.wristband.unitsSold).toBe(100);
     expect(unlocked.gadgets.products.mug.unlocked).toBe(true);
   });
 
-  it("stops at the historical audience limit and resumes only when it grows", () => {
+  it("continues beyond the audience through occasional marginal sales", () => {
     const initial = unlockedState();
     const audience = getGadgetAudience(initial);
     const saturated: GameState = {
@@ -250,9 +339,81 @@ describe("Gadget flow", () => {
       },
     };
 
-    expect(processGadgets(saturated, 60_000, 61_000).gadgets.products.wristband.unitsSold)
-      .toBe(audience);
+    const almostSold = processGadgets(
+      saturated,
+      GAME_CONFIG.gameMonthMs * 19,
+      1_141_000,
+    );
+    expect(almostSold.gadgets.products.wristband.unitsSold).toBe(audience);
 
+    const sold = processGadgets(
+      almostSold,
+      GAME_CONFIG.gameMonthMs,
+      1_201_000,
+    );
+    expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
+    expect(sold.gadgets.products.wristband.totalProfit).toBe(20);
+  });
+
+  it("keeps ordinary and marginal sales active for different products", () => {
+    const initial = unlockedState();
+    const audience = getGadgetAudience(initial);
+    const selling: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...initial.gadgets.products.wristband,
+            projectPurchased: true,
+            prototypeCompleted: true,
+            accepted: true,
+            quality: 100,
+            unitsSold: audience,
+          },
+          mug: {
+            ...initial.gadgets.products.mug,
+            unlocked: true,
+            projectPurchased: true,
+            prototypeCompleted: true,
+            accepted: true,
+            quality: 100,
+          },
+        },
+      },
+    };
+
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 20,
+      1_201_000,
+    );
+
+    expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
+    expect(sold.gadgets.products.mug.unitsSold).toBe(10);
+  });
+
+  it("returns a product to ordinary sales when its audience grows", () => {
+    const initial = unlockedState();
+    const audience = getGadgetAudience(initial);
+    const saturated: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...initial.gadgets.products.wristband,
+            projectPurchased: true,
+            prototypeCompleted: true,
+            accepted: true,
+            quality: 100,
+            unitsSold: audience,
+          },
+        },
+      },
+    };
     const largerAudience = {
       ...saturated,
       school: {
@@ -261,8 +422,11 @@ describe("Gadget flow", () => {
         peakActiveMembers: saturated.school.peakActiveMembers + 100,
       },
     };
-    expect(processGadgets(largerAudience, 60_000, 121_000).gadgets.products.wristband.unitsSold)
-      .toBe(audience + 5);
+    expect(processGadgets(
+      largerAudience,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    ).gadgets.products.wristband.unitsSold).toBe(audience + 1);
   });
 
   it("allows accepting a zero-quality prototype without making it sell", () => {
@@ -311,7 +475,11 @@ describe("Gadget flow", () => {
       },
     };
 
-    const sold = processGadgets(selling, 60_000, 61_000);
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 10,
+      601_000,
+    );
     const wristbands = sold.gadgets.products.wristband.unitsSold;
     const mugs = sold.gadgets.products.mug.unitsSold;
 
@@ -355,10 +523,14 @@ describe("Gadget flow", () => {
       },
     };
 
-    const sold = processGadgets(selling, 60_000, 61_000);
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 9,
+      541_000,
+    );
 
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(10);
+    expect(sold.gadgets.products.wristband.unitsSold).toBe(9);
     expect(sold.gadgets.products.mug.unitsSold).toBe(audience);
-    expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.5);
+    expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.25);
   });
 });

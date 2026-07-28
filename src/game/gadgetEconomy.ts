@@ -2,6 +2,7 @@ import {
   GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY,
   GADGET_DEFINITIONS,
   GADGET_FOLLOWER_REACH_LEVELS,
+  GADGET_MARGINAL_SALES_SPEED_MULTIPLIER,
   GADGET_MEMBER_REACH_LEVELS,
   GADGET_PRODUCT_ORDER,
   GADGET_QUALITY_CONVERSION_ANCHORS,
@@ -144,6 +145,13 @@ export function getGadgetMonthlyAttemptCapacity(state: GameState): number {
     capacityMultiplier;
 }
 
+export function getGadgetMarginalMonthlyAttemptCapacity(
+  state: GameState,
+): number {
+  return getGadgetMonthlyAttemptCapacity(state) *
+    GADGET_MARGINAL_SALES_SPEED_MULTIPLIER;
+}
+
 export function getGadgetCrossSellRate(upgrades: UpgradeLevels): number {
   return getUpgradeEffectTotal(upgrades, "gadgetCrossSell");
 }
@@ -155,7 +163,7 @@ export function getSellableGadgetProductIds(
     const product = state.gadgets.products[productId];
     return product.accepted &&
       product.quality > 0 &&
-      getGadgetRemainingDemand(state, productId) > 0;
+      product.unitsSold < Number.MAX_SAFE_INTEGER;
   });
 }
 
