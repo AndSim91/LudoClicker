@@ -4,8 +4,11 @@ import {
   decrementCollaboratorAssignment,
   getCollaboratorAssignmentCounts,
   incrementCollaboratorAssignment,
+  moveOperationalPriority,
   reconcileCollaboratorManagement,
+  setCollaboratorFallback,
 } from "./collaboratorManagement";
+import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import { createInitialState } from "./initialState";
 import { gameReducer } from "./engine";
 import type { Collaborator, CollaboratorAssignment, GameState } from "./types";
@@ -276,5 +279,113 @@ describe("collaborator aggregate management", () => {
     const incremented = incrementCollaboratorAssignment(state, "instructor");
     expect(incremented.collaborators.find((candidate) => candidate.id === varied.id)?.assignment)
       .toBe("instructor");
+  });
+
+  it("unlocks secondary shifts and operational priorities only at their upgrades", () => {
+    const initial = createInitialState(1_000);
+
+    expect(setCollaboratorFallback(initial, "events", "writing")).toBe(initial);
+    expect(moveOperationalPriority(initial, "equipment", "up")).toBe(initial);
+
+    const shiftsUnlocked = {
+      ...initial,
+      upgrades: { ...initial.upgrades, "collaborator-shifts": 1 },
+    };
+    const configured = setCollaboratorFallback(shiftsUnlocked, "events", "writing");
+    expect(configured.collaboratorManagement.fallbackAssignments).toEqual({
+      events: "writing",
+    });
+    expect(setCollaboratorFallback(configured, "events", "instructor")).toBe(configured);
+
+    const prioritiesUnlocked = {
+      ...configured,
+      upgrades: { ...configured.upgrades, "operational-priorities": 1 },
+    };
+    expect(
+      moveOperationalPriority(prioritiesUnlocked, "equipment", "up")
+        .collaboratorManagement.operationalPriorities,
+    ).toEqual(["writing", "equipment", "events", "instructor", "gadget"]);
+  });
+
+  it("uses Eventi as a secondary source only while no event is active", () => {
+    const initial = createInitialState(1_000);
+    const eventCollaborators = [collaborator(1, "events"), collaborator(2, "events")];
+    const configured: GameState = {
+      ...initial,
+      collaborators: eventCollaborators,
+      upgrades: { ...initial.upgrades, "collaborator-shifts": 5 },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        fallbackAssignments: { events: "writing" },
+      },
+    };
+    expect(getCollaboratorFallbackProductivity(configured, "writing")).toBeGreaterThan(0);
+
+    const runningEvent = {
+      id: "active-event",
+      definitionId: "park-sparring" as const,
+      title: "Sparring",
+      location: "Parco",
+      startedAt: 1_000,
+      resolvesAt: 5_000,
+      cost: 0,
+      peopleMet: 0,
+      demonstrationsGiven: 0,
+      contactReward: 0,
+      membersUsed: 0,
+      equipmentUsed: 0,
+      wearAdded: 0,
+      collaboratorId: eventCollaborators[0].id,
+      status: "running" as const,
+    };
+    expect(getCollaboratorFallbackProductivity({
+      ...configured,
+      acquisitionEvents: [runningEvent],
+    }, "writing")).toBe(0);
+  });
+
+  it("lets the chosen operational priority spend scarce euros first", () => {
+    const initial = createInitialState(1_000, "", false);
+    const student = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: [],
+    };
+    const instructor = {
+      ...collaborator(1, "instructor"),
+      forms: ["form-1"] as Collaborator["forms"],
+      instructorForms: ["form-1"] as Collaborator["instructorForms"],
+    };
+    const equipmentCollaborator = collaborator(2, "equipment");
+    const commonState: GameState = {
+      ...initial,
+      school: { ...initial.school, euros: 37.5 },
+      contacts: [student],
+      collaborators: [instructor, equipmentCollaborator],
+      unlocks: { ...initial.unlocks, forms: true, collaborators: true },
+      equipment: { ...initial.equipment, wear: 1 },
+      automation: {
+        ...initial.automation,
+        lastProcessedAt: 1_000,
+        equipmentBuffer: 1,
+      },
+      upgrades: { ...initial.upgrades, "operational-priorities": 1 },
+    };
+
+    const equipmentFirst = gameReducer(commonState, { type: "TICK", now: 2_500 });
+    expect(equipmentFirst.equipment.wear).toBe(0);
+    expect(equipmentFirst.school.euros).toBe(36);
+    expect(equipmentFirst.contacts[0].training).toBeUndefined();
+
+    const instructorFirst = gameReducer({
+      ...commonState,
+      collaboratorManagement: {
+        ...commonState.collaboratorManagement,
+        operationalPriorities: ["writing", "events", "instructor", "equipment", "gadget"],
+      },
+    }, { type: "TICK", now: 2_500 });
+    expect(instructorFirst.contacts[0].training?.status).toBe("running");
+    expect(instructorFirst.school.euros).toBe(0);
+    expect(instructorFirst.equipment.wear).toBe(1);
   });
 });

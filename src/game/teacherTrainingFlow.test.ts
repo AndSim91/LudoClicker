@@ -6,6 +6,7 @@ import {
   getInstructorQualificationCost,
   getInstructorQualificationDuration,
   getInternalInstructorQualificationCost,
+  getStudentFormCost,
   getTechnicianCourseCost,
   getTechnicianCourseDuration,
 } from "../content/forms";
@@ -18,6 +19,7 @@ import {
   processPriorityInstructorQualifications,
   processTechnicianCourseReservations,
 } from "./teacherTrainingFlow";
+import { startFormTraining } from "./trainingFlow";
 import type { Collaborator, FormId, GameState } from "./types";
 
 function instructor(
@@ -107,6 +109,80 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       3_000 + Math.round(expectedBaseDuration / 2),
     );
     expect(july.collaborators[0].formTrainingYearCount).toBeUndefined();
+  });
+
+  it("applies Il costo del Servizio only to Instructor and Technician qualifications", () => {
+    const initial = createInitialState(1_000, "", false);
+    const candidate = instructor(
+      initial,
+      "discount-candidate",
+      1_000,
+      ["form-1"],
+      ["form-1"],
+    );
+    const qualifyingState: GameState = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 9, euros: 1_000 },
+      collaborators: [candidate],
+      upgrades: {
+        ...initial.upgrades,
+        "sis-accreditation": 1,
+        "cost-of-service": 5,
+      },
+    };
+
+    const booked = bookTechnicianCourse(
+      qualifyingState,
+      candidate.id,
+      "form-1",
+      2_000,
+    );
+    expect(booked.school.euros).toBe(
+      1_000 - getTechnicianCourseCost(50) * 0.75,
+    );
+
+    const athlete = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+    };
+    const athleteState: GameState = {
+      ...qualifyingState,
+      contacts: [athlete],
+      school: { ...qualifyingState.school, euros: 100 },
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+    const training = startFormTraining(athleteState, athlete.id, "form-1", 2_000);
+    expect(training.school.euros).toBe(100 - getStudentFormCost(50));
+  });
+
+  it("accelerates SIS Technician courses by 10%, 20% and 30% after accreditation", () => {
+    const initial = createInitialState(1_000, "", false);
+    const reserved = {
+      ...instructor(initial, "sis-speed", 1_000, ["form-1"], ["form-1"]),
+      technicianCourseReservation: {
+        formId: "form-1" as const,
+        bookedAt: 1_500,
+        eligibleMonth: 9,
+      },
+    };
+    const stateAtLevel = (level: number): GameState => ({
+      ...initial,
+      school: { ...initial.school, currentMonth: 9 },
+      collaborators: [reserved],
+      upgrades: { ...initial.upgrades, "sis-accreditation": level },
+    });
+
+    const multipliers = [1, 2, 3, 4].map((level) =>
+      processTechnicianCourseReservations(stateAtLevel(level), 2_000)
+        .collaborators[0].training?.trainingDurationMultiplier
+    );
+    expect(multipliers).toEqual([
+      1,
+      1 / 1.1,
+      1 / 1.2,
+      1 / 1.3,
+    ]);
   });
 
   it("keeps a paid July booking queued while busy and starts it later", () => {

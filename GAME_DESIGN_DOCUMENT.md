@@ -184,7 +184,8 @@ flowchart LR
 1. Controllare prenotazioni, prove in palestra, iscritti, Euro e contatti
    rimasti.
 2. Assegnare collaboratori alle attività.
-3. Sbloccare o migliorare Carisma, Scrittura, Velocità, Social e Attrezzatura.
+3. Sbloccare o migliorare gli otto rami: Scrittura, Creatività, Carisma,
+   Accoglienza, Attrezzatura, Gadget, Insegnamento e Organizzazione.
 4. Pianificare eventi nel Calendario.
 5. Mantenere le spade disponibili e in buono stato.
 6. Preparare nuove campagne email.
@@ -236,7 +237,7 @@ o un mancato rinnovo può ridurre il totale.
 Gli **Euro (€)** sono l'unica risorsa spendibile. Provengono principalmente
 dalle quote periodiche degli iscritti e vengono usati per:
 
-- potenziamenti di Carisma, Scrittura e Velocità;
+- potenziamenti delle otto Aree di Attività;
 - campagne social;
 - manutenzione e miglioramento delle spade;
 - organizzazione di eventi;
@@ -267,9 +268,11 @@ iscriversi dopo la prova:
 | Ultra Raro  |     5,5% |                75% |          23,33% |                          17,5% |               50% | Dopo il Corso Y          |
 | Leggendario |       2% |               100% |             15% |                            15% |               35% | Subito dopo l'iscrizione |
 
-I potenziamenti di Scrittura migliorano la prenotazione della prova fino al
-100%. I potenziamenti di Accoglienza fanno avanzare ogni rarità dalla propria
-probabilità base d'iscrizione al proprio massimo specifico.
+I potenziamenti di Creatività fanno avanzare linearmente la prenotazione della
+prova dalla probabilità base fino a 85% per i Comuni, 90% per i Rari, 95% per
+gli Ultra Rari e 100% per i Leggendari. I potenziamenti di Accoglienza fanno
+avanzare ogni rarità dalla propria probabilità base d'iscrizione al proprio
+massimo specifico.
 
 Il **Pity** è un contatore globale interno e non viene mostrato
 nell'interfaccia. Ogni prova in palestra che non produce un'iscrizione, comprese
@@ -1015,8 +1018,8 @@ Regole:
 - le statistiche ufficiali Arena e Stile diventano visibili soltanto dopo il
   completamento di **Corso Y**;
 - ogni iscritto o collaboratore può iniziare al massimo una Forma per anno
-  formativo; **Doppio Corso** porta questo limite a due e il livello 1 di
-  **PagoSport** lo porta a tre;
+  formativo; il livello 6 di **Didattica di gruppo** porta questo limite a due
+  e il livello 1 di **PagoSport** lo porta a tre;
 - gli slot annuali delle Forme si rinnovano a luglio e coprono il periodo
   luglio–giugno: una Forma iniziata a luglio consuma quindi uno slot valido
   anche nel settembre immediatamente successivo;
@@ -1102,12 +1105,12 @@ Regole:
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
   dall'automazione e, con un Istruttore compatibile, ricevono una riduzione del
   **25%** e costano quindi il **75% del costo base**;
-- **Arena Tecnica** è il primo potenziamento del ramo Istruttori, è disponibile
+- **Percorso Tecnico** è il primo potenziamento del ramo Insegnamento, è disponibile
   appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
   “Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di
   perdere atleti alla fine dell'anno e, con la giusta attenzione, li renderà
   sempre più competitivi.”;
-- al livello 1 Arena Tecnica costa **€1.000** e sblocca l'omonima formazione
+- al livello 1 Percorso Tecnico costa **€1.000** e sblocca Arena Tecnica come formazione
   automatica, sempre attiva e non disabilitabile separatamente. La formazione
   costa **€300 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni;
@@ -1115,7 +1118,9 @@ Regole:
   secondi**;
 - il livello 3 costa **€5.000**, trasforma la formazione in **Corso Agonisti**,
   ne porta il costo base a **€1.000** e attiva integralmente i miglioramenti
-  permanenti di Arena e Stile; la durata base resta di 60 secondi;
+  permanenti di Arena e Stile; la durata base resta di 60 secondi e il logo
+  della formazione riceve una stella gialla nello stile delle qualifiche da
+  Istruttore;
 - il livello 4 costa **€7.500** e porta la durata base del Corso Agonisti a **30
   secondi**;
 - l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un
@@ -1143,25 +1148,26 @@ Regole:
   (**Leggendario Segreto → Leggendario → Ultra Raro → Raro → Comune**), la
   prossima formazione meno avanzata, i collaboratori e infine gli iscritti con
   `acquiredAt` meno recente. A parità completa conserva l'ordine originale;
-- quando Progetto X è sbloccato, Corso X precede ogni formazione successiva a
+- quando il Percorso Segreto Corso X è stato scoperto e acquistato, Corso X
+  precede ogni formazione successiva a
   Forma 1: chi ha completato Forma 1 ma non Corso X può ricevere soltanto Corso
   X finché non lo completa;
 - l'ordine operativo degli Istruttori è: riprendere le formazioni in attesa,
   tenere un Corso Istruttori interno se qualificati come Tecnici, avviare un
   Corso Tecnico SIS già prenotato e idoneo, assegnare tutte le Forme automatiche,
   usare la capienza residua per Arena Tecnica o Corso Agonisti e infine
-  contribuire alla Preparazione atletica. Le attività formative personali
+  contribuire alla Preparazione agonistica. Le attività formative personali
   restano compatibili con l'insegnamento secondo le regole di rallentamento;
 - tra gli Istruttori disponibili e compatibili, l'automazione privilegia chi ha
   meno Forme insegnabili, così da conservare la disponibilità degli Istruttori
   più avanzati per gli allievi che ne hanno bisogno; a parità distribuisce prima
   il carico corrente, poi sceglie l'Istruttore più produttivo e infine quello
   entrato prima nella scuola;
-- la Preparazione atletica è attiva da settembre a giugno ed è sospesa sia a
+- la Preparazione agonistica è attiva da settembre a giugno ed è sospesa sia a
   luglio sia ad agosto; durante la sospensione la schermata aggregata dei
   Collaboratori mostra **Pausa estiva**;
 - nell'elenco individuale dei Collaboratori, un Istruttore che sta contribuendo
-  alla Preparazione atletica mostra la relativa barra attiva ed è considerato
+  alla Preparazione agonistica mostra la relativa barra attiva ed è considerato
   **In corso**, non **In attesa di un allievo**;
 - disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
   terminare le lezioni già iniziate, ma non ne avvia altre;
@@ -1178,41 +1184,34 @@ Regole:
   anzianità; perdono soltanto incarico e automazione. I Leggendari ordinari
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
   essere nuovamente sconfitti nel rispettivo torneo;
-- acquistare il livello 1 di Arena Tecnica sblocca subito **Polivalenza
-  didattica**; i livelli 2, 3 e 4 di Arena restano acquistabili in parallelo e
-  non bloccano il resto del ramo. Polivalenza didattica ha due livelli e
-  permette di apprendere fino a tutti e tre i rami d'arma;
-- il livello 3, insieme al Corso Agonisti, sblocca **Intensità agonistica**, un
-  potenziamento parallelo in quattro livelli che porta il bonus massimo casuale
-  del Corso Agonisti da +1 a +5 per ciascuna caratteristica senza bloccare gli
-  altri potenziamenti;
-- **Istruttore Promisquo** è un potenziamento unico e porta da uno a due gli
-  allievi contemporanei di ogni Istruttore;
-- **Doppio Corso** è un potenziamento unico del ramo Istruttori e concede a ogni
-  atleta della scuola un secondo slot di formazione nel periodo luglio–giugno;
-- **Istruttore Tiamat** ha quattro livelli molto costosi e, dopo Istruttore
-  Promisquo, porta la capacità massima a sei allievi;
-- **PagoSport** segue Istruttore Tiamat: il livello 1 concede uno slot di
+- acquistare il livello 1 di Percorso Tecnico sblocca **Master of none**. I suoi
+  due livelli permettono agli Istruttori di accedere a uno e poi due rami d'arma
+  oltre le preferenze iniziali;
+- **Tu conosci la SIS?** segue Master of none: il livello 1 sblocca le
+  candidature ai Corsi Tecnici; i livelli 2, 3 e 4 aumentano la loro velocità
+  rispettivamente del 10%, 20% e 30%;
+- **Il costo del Servizio** ha cinque livelli e riduce del 5% per livello,
+  fino al 25%, soltanto i costi dei percorsi che assegnano un attestato da
+  Istruttore o una qualifica da Tecnico. Forme da atleta, Arena Tecnica e Corso
+  Agonisti non ricevono lo sconto;
+- **Didattica di gruppo** porta con i primi cinque livelli la capacità di ogni
+  Istruttore da due a sei allievi contemporanei; il sesto livello concede a
+  tutti un secondo slot di formazione nel periodo luglio–giugno;
+- **Preparazione agonistica** è successiva a Didattica di gruppo e richiede
+  anche Percorso Tecnico al livello 3. Il primo livello la sblocca; ogni livello
+  fornisce il 25% di efficacia;
+- **PagoSport** segue Preparazione agonistica: il livello 1 concede uno slot di
   formazione annuale aggiuntivo; il livello 2 aumenta del **50%** la velocità
   dei Corsi Tecnici; il livello 3 aumenta inoltre del **50%** la velocità di
   tutte le formazioni, comprese Forme, Corsi Istruttori, Corsi Tecnici, Arena
   Tecnica e Corso Agonisti. I bonus sono cumulativi e si sommano al raddoppio
   estivo;
-- **Accreditamento SIS** è un potenziamento unico e parallelo del ramo
-  Istruttori: costa **€5.000**, richiede Arena Tecnica al livello 1 e sblocca la
-  possibilità di candidare gli Istruttori della scuola ai Corsi Tecnici SIS;
-- Accreditamento SIS, **Intensità agonistica** e **Preparazione atletica**
-  restano paralleli; la sequenza didattica lineare dopo Arena Tecnica richiede
-  che ogni potenziamento sia completato prima di accedere al successivo.
-  L'ordine è **Polivalenza didattica → Istruttore Promisquo → Doppio Corso →
-  Istruttore Tiamat → PagoSport → Tocco DiGilo → Progetto X**;
-- **Tocco DiGilo** è il penultimo potenziamento del ramo Istruttori: costa
-  **€1.000.000** e aumenta del **9999%** la velocità con cui un Istruttore
-  insegna le Forme agli allievi;
-- **Progetto X** è l'ultimo potenziamento del ramo Istruttori, richiede Tocco
-  DiGilo e costa **€1 simbolico**, senza maggiorazioni dovute alle scuole della
-  rete. Sblocca Corso X tra Forma 1 e Forma 2 e abilita i relativi percorsi da
-  Istruttore e, con Accreditamento SIS, da Tecnico;
+- completare PagoSport sblocca **Intensità agonistica**, estensione in quattro
+  livelli che porta il massimo casuale del Corso Agonisti da +1 a +5 per
+  caratteristica, senza alterare il minimo +1;
+- **Corso X** e **ToccoDiGilo** non appartengono alla sequenza lineare: sono due
+  Percorsi Segreti indipendenti, inizialmente mostrati come `???`, e vengono
+  rivelati soltanto dalle rispettive condizioni narrative;
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
 
@@ -1221,12 +1220,13 @@ Regole:
 Il **Tecnico** è una qualifica per singola Forma o Corso, non un nuovo incarico
 operativo. Il percorso è disponibile per ogni formazione che assegna un badge,
 inclusi Corso X e Corso Y, ma esclude il Corso Agonisti. I percorsi da
-Istruttore e Tecnico di Corso X sono disponibili soltanto dopo Progetto X; il
-Corso Tecnico continua a richiedere anche Accreditamento SIS.
+Istruttore e Tecnico di Corso X sono disponibili soltanto dopo l'acquisto del
+Percorso Segreto Corso X; il Corso Tecnico continua a richiedere anche il primo
+livello di **Tu conosci la SIS?**.
 
 Regole:
 
-- la scuola deve avere acquistato **Accreditamento SIS** prima di poter
+- la scuola deve avere acquistato il livello 1 di **Tu conosci la SIS?** prima di poter
   prenotare o avviare un Corso Tecnico esterno;
 - può candidarsi soltanto un Collaboratore assegnato come Istruttore che abbia
   già completato la formazione come atleta e possieda il relativo attestato da
@@ -1234,7 +1234,7 @@ Regole:
 - lo stesso Collaboratore può ottenere più qualifiche da Tecnico;
 - il Corso Tecnico è esterno, si svolge alla **SIS — Scuola Internazionale
   Superiore** ed è tenuto dai Maestri Fondatori di LudoSport;
-- il corso costa il **1000% del costo base** e ha una durata base pari al **500%
+- il corso costa il **1000% del costo base** e ha una durata base pari al **1000%
   della durata della Forma**;
 - la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
   agosto il corso parte immediatamente se il Collaboratore è libero; negli altri
@@ -1247,6 +1247,10 @@ Regole:
 - il Corso Istruttori interno costa il **75% del normale Corso Istruttori**,
   cioè il **187,5% del costo base**, e mantiene durata ed esame del modulo da
   Istruttore;
+- **Il costo del Servizio** riduce fino al 25% sia questi Corsi Istruttori sia
+  i Corsi Tecnici SIS; non si applica ai percorsi da atleta;
+- i livelli 2–4 di **Tu conosci la SIS?** aumentano la velocità dei soli Corsi
+  Tecnici rispettivamente del 10%, 20% e 30%;
 - la scelta automatica privilegia, nell'ordine, la Forma più bassa nella
   progressione, l'attestato più utile agli allievi in attesa e il Collaboratore
   entrato prima nella scuola;
@@ -1310,149 +1314,188 @@ allo 0%.
 
 ## 10. Potenziamenti
 
-### 10.1 Carisma
+La schermata presenta otto rami pubblici, sempre nello stesso ordine:
+**Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
+Insegnamento e Organizzazione**. Ogni ramo contiene esattamente sette
+potenziamenti principali. Social non ha più un ramo separato: i suoi effetti
+sono distribuiti tra Scrittura e Creatività.
 
-Influenza due passaggi degli eventi: la probabilità che una persona provi la
-disciplina sul posto e la probabilità che, dopo la prova dimostrativa, lasci il
-proprio indirizzo email.
+I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
+scuola già fondata aggiunge il 15% ai prezzi di Scrittura, Creatività, Carisma,
+Accoglienza, Attrezzatura e Organizzazione. Gadget, Insegnamento, estensioni e
+Percorsi Segreti non ricevono questa maggiorazione. I prerequisiti tra nodi
+sono mostrati direttamente dall'interfaccia.
 
-| Potenziamento                       | Effetto per livello    |
-| ----------------------------------- | ---------------------- |
-| Presentazione preparata             | +3% prove e contatti   |
-| Biglietti con QR code               | +4% prove e contatti   |
-| Dimostrazione coordinata            | +5% persone incontrate |
-| Stand riconoscibile                 | +7% persone incontrate |
-| Accoglienza dell'Ordine             | +4% prove e contatti   |
-| Risposte alle domande difficili     | +5% prove e contatti   |
-| “No, non è esattamente quella cosa” | +8% prove e contatti   |
-| Set da dimostrazione                | +4% persone incontrate |
+### 10.1 Scrittura
 
-Con tutti gli otto potenziamenti al livello 5, il ramo Eventi fornisce
-complessivamente +200%: +120% a prove e contatti e +80% all'affluenza. Con
-Follower a zero, Maestria Maestro e collaboratori ordinari, il riferimento di
-bilanciamento è circa 106 contatti al minuto con dieci collaboratori e 213 con
-cento. Il bonus Follower resta lineare e senza limite, quindi può superare
-questi riferimenti nel lunghissimo periodo.
+Accelera la produzione manuale e automatica delle email e dei contenuti Social.
 
-### 10.2 Scrittura
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Tastiera comoda | +0,2 caratteri per input per livello; massimo +1 | 50 / 100 / 200 / 400 / 800 € |
+| Frasi rapide | +0,4 caratteri per input per livello; massimo +2 | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Firma automatica | +10% velocità Redazione/Social per livello; massimo +50% | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Campi intelligenti | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Sintesi dei contenuti | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Revisione istantanea | +15% velocità Redazione/Social per livello; massimo +75% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Fusione documenti | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
-Influenza sia il moltiplicatore generale di digitazione sia il tasso da email
-inviata a lezione di prova prenotata. Non modifica direttamente l'esito della
-lezione in palestra.
+### 10.2 Creatività
 
-| Potenziamento         | Effetto indicativo                               |
-| --------------------- | ------------------------------------------------ |
-| Controllo ortografico | +8% prenotazioni e rimozione dei refusi          |
-| Email professionale   | +12% prenotazioni e struttura ordinata           |
-| Invito personalizzato | +15% prenotazioni e testi da 250–450 caratteri   |
-| Call to action        | +15% prenotazioni, link e pulsanti               |
-| Impaginazione         | +10% prenotazioni e struttura CSS                |
-| Pubblicità vincente   | +20% prenotazioni e volantino completo           |
-| Corso di Marketing    | +35% prenotazioni e testi fino a 2.000 caratteri |
+Ogni livello concede un punto Creatività e fa avanzare linearmente la
+probabilità che una email ottenga una prova. I massimi sono 85% per i Comuni,
+90% per i Rari, 95% per gli Ultra Rari e 100% per i Leggendari.
 
-### 10.3 Accoglienza e qualità della lezione
+| Potenziamento | Effetto aggiuntivo | Costi per livello |
+| --- | --- | --- |
+| Controllo ortografico | nuovo catalogo email dal livello 1 | 50 / 100 / 200 / 400 / 800 € |
+| Email professionale | firma completa e struttura ordinata, ancora senza HTML | 100 / 200 / 400 / 800 / 1.600 € |
+| Invito personalizzato | nuovo catalogo e sblocco delle email HTML | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Call to action | link e pulsanti nei cataloghi successivi | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Impaginazione | struttura visiva completa | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Pubblicità vincente | probabilità Follower Social 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Corso di Marketing | valore mensile del Follower 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-Influenza la conversione finale da partecipante alla lezione in palestra a
-iscritto.
+### 10.3 Carisma
 
-| Potenziamento                   | Effetto indicativo                     |
-| ------------------------------- | -------------------------------------- |
-| Procedura di benvenuto          | +10% iscrizioni dopo la prova          |
-| Lezione introduttiva collaudata | +15% qualità lezione                   |
-| Materiale informativo chiaro    | +10% iscrizioni dopo la prova          |
-| Collaboratore dedicato          | bonus per ogni collaboratore assegnato |
-| Sala preparata                  | riduce gli esiti negativi narrativi    |
-| Esperienza memorabile           | moltiplicatore avanzato                |
+Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
 
-### 10.4 Velocità
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Presentazione preparata | +4% contatti dagli eventi | 50 / 100 / 200 / 400 / 800 € |
+| Biglietti con QR code | +4% contatti dagli eventi | 100 / 200 / 400 / 800 / 1.600 € |
+| Dimostrazione coordinata | +5% pubblico agli eventi | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Stand riconoscibile | +7% pubblico agli eventi | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Set da dimostrazione | +6% pubblico agli eventi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Risposte alle domande difficili | +6% contatti dagli eventi | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| No, non è esattamente quella cosa | +8% contatti dagli eventi | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-Influenza caratteri per pressione e automazione.
+### 10.4 Accoglienza
 
-| Potenziamento        | Effetto indicativo                    |
-| -------------------- | ------------------------------------- |
-| Tastiera comoda      | +1 carattere per input                |
-| Modelli di Outlook   | +1 carattere per input                |
-| Frasi rapide         | +2 caratteri per input                |
-| Firma automatica     | completa automaticamente la chiusura  |
-| Campi intelligenti   | completa nome e luogo automaticamente |
-| Revisione istantanea | moltiplica manuale e collaboratori    |
-| Fusione documenti    | grande bonus di fine ciclo            |
+Fa avanzare ogni rarità dalla propria probabilità base di iscrizione fino al
+massimo specifico. I progressi indicati sono quote del percorso base→massimo,
+non punti percentuali aggiunti direttamente al risultato finale.
 
-### 10.5 Social
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Procedura di benvenuto | +1% del percorso | 50 / 100 / 200 / 400 / 800 € |
+| Materiale informativo chiaro | +1,5% del percorso | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Lezione introduttiva collaudata | +2% del percorso | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Sala preparata | +2,5% del percorso e −1 secondo alla prova; durata minima 10 secondi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Collaboratore dedicato | +3% del percorso e +10% efficacia del contributo Istruttori | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Accoglienza dell'Ordine | +4% del percorso | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Esperienza memorabile | +6% del percorso e 5% di recuperare una prova fallita; massimo 25% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-Social è lo stadio evoluto della Redazione e usa la sua stessa assegnazione,
-produttività e Maestria. Si sblocca definitivamente a 35 iscritti attivi con un
-tutorial in pausa. Allo sblocco i Follower vengono inizializzati alla Fama
-esistente, senza aumentarla una seconda volta.
+Il recupero di Esperienza memorabile vale una sola volta per contatto, esclude i
+Leggendari Segreti e rimette il contatto tra i disponibili: serve quindi
+scrivere e inviare una nuova email prima della seconda prova.
 
-Un contenuto richiede inizialmente 100.000 caratteri. La produzione avanza
-soltanto durante il gioco online e non si interrompe quando una email richiede
-attenzione: in quel caso usa il 5% della forza lavoro, mentre il restante 95%
-scrive la mail. Questa ripartizione è interna e non viene mostrata al giocatore.
-Al completamento viene risolto il risultato Follower:
+### 10.5 Attrezzatura
 
-```text
-probabilitàFollower = 50%
-bonusAffluenzaEventi = Follower × 0,005%
-renditaMensileSocial = Follower × valoreFollower × moltiplicatoreA.N.D.E.R.
-```
+Riduce l'usura prodotta dalle attività programmate e accelera la manutenzione
+dei Collaboratori. Nessun potenziamento crea spade gratuite: le spade continuano
+a essere acquistate dal giocatore.
 
-Ogni Follower ottenuto aumenta di 1 anche la Fama. Social non crea mai Contatti:
-gli Eventi sono l'unica fonte ripetibile e beneficiano del bonus di affluenza.
-All'ultimo livello di Piano editoriale, un contenuto produce zero Follower nel
-5% dei casi, uno nel 90% e due nel 5%.
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Controllo prima dell'uso | −2% usura programmata | 100 / 200 / 400 / 800 / 1.600 € |
+| Kit di manutenzione | +10% velocità manutenzione automatica | 250 / 500 / 1.000 / 2.000 / 4.000 € |
+| Banco da lavoro | riserva lavoro pari al 2% dell'usura massima di tutte le spade; massimo 10% | 500 / 750 / 1.000 / 1.500 / 2.500 € |
+| Ricambi essenziali | −15 punti lavoro per riparare una spada rotta; da 150 a 75 | 1.000 / 2.000 / 4.000 / 8.000 / 16.000 € |
+| Lista di controllo | −4% usura programmata | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Registro dell'attrezzatura | +10% velocità manutenzione automatica | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Le abbiamo messe a posto tutte | −4% usura programmata | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-| Potenziamento         | Progressione completa                                             |
-| --------------------- | ----------------------------------------------------------------- |
-| Sintesi dei contenuti | 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri    |
-| Piano editoriale      | 50% → 60% → 70% → 80% → 90% → 95%; al massimo 5% di ottenerne due |
-| Sponsorizzazioni      | 0,10 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €                        |
+Il Banco da lavoro accumula produzione soltanto quando non ci sono guasti e non
+si riempie automaticamente all'acquisto. Il tetto segue dinamicamente il numero
+di spade e viene ridotto se la capacità cala. Ogni spada rappresenta 100 punti
+di usura massima: con sei spade, i cinque livelli conservano rispettivamente
+12, 24, 36, 48 e 60 punti lavoro. La riserva viene consumata prima del lavoro
+prodotto durante il guasto.
 
-### 10.6 Attrezzatura
+### 10.6 Gadget
 
-Influenza qualità e frequenza degli eventi e riduce il rischio di eventi
-narrativi negativi. Le spade disponibili determinano la capienza contemporanea
-insieme agli iscritti liberi.
+Il ramo conserva il bilanciamento economico specifico del Laboratorio Gadget e
+diventa visibile soltanto con lo sblocco del settore.
 
-| Potenziamento                    | Effetto indicativo        |
-| -------------------------------- | ------------------------- |
-| Controllo pre-evento             | meno guasti               |
-| Kit di manutenzione              | riparazioni più veloci    |
-| Rastrelliera ordinata            | più spade disponibili     |
-| Ricambi essenziali               | riduce tempi di fermo     |
-| Set da dimostrazione             | aumenta capienza eventi   |
-| Registro dell'attrezzatura       | automazione dei controlli |
-| “Le abbiamo messe a posto tutte” | moltiplicatore avanzato   |
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Vetrina della scuola | pubblico iscritti 10% → 20% → 35% → 50% → 75% → 100% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
+| Negozio online | pubblico follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
+| Strumenti di progettazione | +20% velocità sviluppo per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Laboratorio revisioni | +20% velocità revisione per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Gestione degli ordini | +20% capacità commerciale per livello; massimo +100% | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
+| Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
+| Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
-### 10.7 Organizzazione
+### 10.7 Insegnamento
 
-| Potenziamento            | Effetto indicativo                   |
-| ------------------------ | ------------------------------------ |
-| Calendario condiviso     | più eventi pianificabili             |
-| Turni dei collaboratori  | maggiore efficienza assegnazioni     |
-| Lista di controllo       | riduce imprevisti                    |
-| Modulo di iscrizione     | accredito e registrazione più rapidi |
-| A.N.D.E.R.               | automatizza notifiche e quote        |
-| Coordinamento multi-sede | bonus di prestigio                   |
+Il ramo ritarda volutamente la crescita atletica automatica. I primi nodi
+aprono l'Arena e sviluppano Istruttori e Tecnici; Preparazione agonistica e i
+potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 
-### 10.8 Costi
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→60 s; L3 Corso Agonisti con +1 Arena/+1 Stile; L4 durata 60→30 s | 1.000 / 2.000 / 5.000 / 7.500 € |
+| Master of none | +1 ramo d'arma accessibile agli Istruttori per livello | 2.000 / 4.000 € |
+| Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
+| Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
+| Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Preparazione agonistica | L1 sblocco della preparazione da settembre a giugno; +25% efficacia per livello | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
 
-Tutti i potenziamenti vengono acquistati esclusivamente in Euro. Non esistono
-rimborsi, ma nel lungo periodo è possibile comprare ogni ramo. La curva iniziale
-riprende la crescita graduale del gioco di riferimento:
+Al livello 3 di Percorso Tecnico, quando Arena Tecnica diventa Corso Agonisti,
+il logo della formazione riceve una stella gialla nello stesso stile usato per
+la qualifica da Istruttore. Il Corso Agonisti base assegna sempre +1/+1 in un
+anno. Soltanto dopo PagoSport 3 compare l'estensione **Intensità agonistica**:
+quattro livelli da 100.000 / 200.000 / 400.000 / 800.000 € portano il massimo
+casuale rispettivamente a +2/+2, +3/+3, +4/+4 e +5/+5.
 
-```text
-costoLivello = costoBase × crescita^(livelloCorrente)
-```
+### 10.8 Organizzazione
 
-Il prototipo usa normalmente una crescita di **1,30** per livello. I
-potenziamenti avanzati possono usare costi espliciti per livello; il prezzo
-massimo è **€1.000.000** per Tocco DiGilo.
+Coordina le Aree di Attività (AA), migliora le automazioni generiche e aumenta
+le entrate ricorrenti.
 
-Alcuni livelli richiedono anche soglie non spendibili, come numero di iscritti,
-eventi completati, collaboratori o Forme conosciute.
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Manuale operativo | +10% esperienza Maestria per livello; massimo +50% | 500 / 1.000 / 2.000 / 4.000 / 8.000 € |
+| Turni dei collaboratori | trasferisce a un settore secondario il 10% della produttività inattiva per livello; massimo 50% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Procedure standard | +5% velocità automazioni generiche per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Modulo di iscrizione | +5% entrate dalle quote per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Priorità operative | sblocca l'ordinamento con cui le AA consumano Euro, spade e risorse scarse | 25.000 € |
+| A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50%; richiede almeno una scuola fondata | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
-### 10.9 Sblocco progressivo
+Un settore principale è inattivo soltanto quando non ha lavoro reale da
+svolgere. Eventi è considerato attivo finché esiste un evento in corso, così i
+collaboratori non vengono contati contemporaneamente in due settori.
+L'Insegnamento può essere il settore principale di un turno, ma non quello
+secondario: insegnare richiede un incarico e le qualifiche appropriate.
+
+### 10.9 Percorsi Segreti
+
+La riga è sempre visibile. Prima della scoperta, ciascun nodo mostra `???`, un
+lucchetto e soltanto un indizio nel tooltip. Ogni percorso si scopre in modo
+indipendente: rivelarne uno non mostra il nome o la descrizione degli altri.
+Le condizioni effettive di scoperta sono ancora da definire.
+
+| Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
+| --- | --- | ---: | --- |
+| Corso X | sblocca Corso X e i relativi percorsi da Istruttore e Tecnico | 1 € | “Vincere il torneo più superbo dell'anno è solo l'inizio” |
+| ToccoDiGilo | +9999% velocità con cui gli Istruttori insegnano le Forme | 1.000.000 € | “Esistono forze più grandi di quanto avresti mai potuto immaginare” |
+
+Un vecchio salvataggio che possiede già uno dei due potenziamenti lo considera
+automaticamente scoperto. I due prezzi non ricevono maggiorazioni di rete.
+
+### 10.10 Costi e progressione
+
+Tutti i potenziamenti vengono acquistati esclusivamente in Euro e non sono
+rimborsabili. I costi sono elenchi espliciti per livello: non dipendono più da
+una formula generale implicita. Oltre agli Euro, un nodo può richiedere livelli
+precedenti, lo sblocco di Social o Gadget, un prodotto Gadget o almeno una
+scuola nella rete.
+
+### 10.11 Sblocco progressivo
 
 L'interfaccia non mostra tutti i sistemi dall'inizio. Una prima sequenza
 consigliata è:
@@ -1462,7 +1505,7 @@ consigliata è:
 | Avvio                          | sola composizione della mail e primi contatti |
 | Prima email                    | Posta inviata e statistiche minime            |
 | 3 email                        | comunicazione “Configurazione campagna”       |
-| Comunicazione completata       | Potenziamenti di Scrittura e Velocità         |
+| Comunicazione completata       | Potenziamenti di Scrittura e Creatività       |
 | Primo esaurimento contatti     | Calendario, eventi e volantinaggio gratuito   |
 | Prima prova prenotata          | report aggregato del funnel                   |
 | Primo iscritto                 | Euro e quote associative                      |
@@ -1475,7 +1518,7 @@ consigliata è:
 Le soglie sono configurabili e andranno calibrate per raggiungere il primo
 prestigio dopo circa 3–4 ore.
 
-### 10.10 Comunicazioni di sistema
+### 10.12 Comunicazioni di sistema
 
 Alcuni traguardi aprono una breve **comunicazione di sistema**, equivalente ai
 file di sistema del gioco di riferimento. Esempi:

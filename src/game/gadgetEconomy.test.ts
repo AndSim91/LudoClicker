@@ -8,6 +8,7 @@ import { createInitialState } from "./initialState";
 import {
   getGadgetAudience,
   getGadgetBaseQualityConversion,
+  getGadgetMonthlyAttemptCapacity,
   getGadgetQualityConversion,
   getGadgetUnitProfit,
 } from "./gadgetEconomy";
@@ -76,5 +77,34 @@ describe("Gadget economy", () => {
     expect(getGadgetWorkRequirement("wristband", "revision", "legendary")).toBe(
       getGadgetWorkRequirement("wristband", "revision", "common") * 1.75,
     );
+  });
+
+  it("applies generic school automation to monthly sales capacity", () => {
+    const initial = createInitialState(1_000, "Manager", false);
+    const state = {
+      ...initial,
+      collaborators: [{
+        id: "gadget-collaborator",
+        contactId: initial.contacts[0].id,
+        displayName: "Collaboratore Gadget",
+        joinedAt: 1_000,
+        forms: [],
+        instructorForms: [],
+        formBranchPreferences: [],
+        assignment: "gadget" as const,
+        rarity: "ultra-rare" as const,
+      }],
+    };
+    const baseCapacity = getGadgetMonthlyAttemptCapacity(state);
+    const automatedCapacity = getGadgetMonthlyAttemptCapacity({
+      ...state,
+      upgrades: {
+        ...state.upgrades,
+        "standard-procedures": 5,
+        "multi-site-coordination": 5,
+      },
+    });
+
+    expect(automatedCapacity).toBe(baseCapacity * 1.75);
   });
 });

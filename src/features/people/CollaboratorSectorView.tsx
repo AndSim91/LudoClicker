@@ -653,7 +653,7 @@ export function CollaboratorSectorView({
         <section className="collaborator-operations-control" aria-labelledby="fallback-sectors-title">
           <header>
             <h3 id="fallback-sectors-title">Turni dei collaboratori</h3>
-            <p>Se il settore principale è fermo, la produttività disponibile passa al settore secondario.</p>
+            <p>Se il settore principale è fermo, la produttività disponibile passa al settore secondario. L'Insegnamento richiede invece un incarico dedicato.</p>
           </header>
           <div className="collaborator-fallback-grid">
             {availableRoles.map((role) => (
@@ -668,7 +668,9 @@ export function CollaboratorSectorView({
                   )}
                 >
                   <option value="">Nessun settore secondario</option>
-                  {availableRoles.filter((candidate) => candidate !== role).map((candidate) => (
+                  {availableRoles.filter((candidate) =>
+                    candidate !== role && candidate !== "instructor"
+                  ).map((candidate) => (
                     <option value={candidate} key={candidate}>
                       {getCollaboratorAssignmentLabel(candidate, state.unlocks.social)}
                     </option>

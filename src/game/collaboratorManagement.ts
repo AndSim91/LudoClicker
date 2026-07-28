@@ -328,6 +328,7 @@ export function setCollaboratorFallback(
   if (
     getUpgradeEffectTotal(state.upgrades, "collaboratorFallbackTier") <= 0 ||
     fallback === assignment ||
+    fallback === "instructor" ||
     (fallback === "gadget" && !state.unlocks.gadget)
   ) return state;
   const fallbackAssignments = { ...(state.collaboratorManagement.fallbackAssignments ?? {}) };
