@@ -113,7 +113,7 @@ describe("game engine: progression", () => {
   });
 
   it("applies writing and welcome upgrades to conversion chances", () => {
-    const initial = createInitialState(1_000);
+    const initial = createInitialState(1_000, "", false);
     const improved = {
       ...initial,
       upgrades: {
@@ -124,7 +124,7 @@ describe("game engine: progression", () => {
     };
 
     expect(getEmailBookingChance(improved)).toBeCloseTo(0.425714);
-    expect(getEnrollmentChance(improved)).toBeCloseTo(0.363);
+    expect(getEnrollmentChance(improved)).toBeCloseTo(0.6325);
     expect(getEnrollmentChance(improved, "legendary")).toBeCloseTo(0.154);
 
     const maximized = {
@@ -386,7 +386,7 @@ describe("game engine: progression", () => {
       damagedSwords: 1,
       wear: 1,
     });
-    expect(repaired.automation.equipmentBuffer).toBe(0);
+    expect(repaired.automation.equipmentBuffer).toBeCloseTo(1 / 3);
     expect(repaired.school.euros).toBe(0);
   });
 

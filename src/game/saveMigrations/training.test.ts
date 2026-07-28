@@ -41,7 +41,7 @@ describe("Form training save migration", () => {
     expect(migrated.statistics.socialContentCycles).toBe(0);
   });
 
-  it("moves the first legacy Tiamat level to Istruttore Promisquo", () => {
+  it("merges the legacy Promiscuo and Tiamat levels into Didattica di gruppo", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 40;
     legacy.upgrades["tiamat-instructor"] = 5;
@@ -51,8 +51,8 @@ describe("Form training save migration", () => {
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.upgrades["promiscuous-instructor"]).toBe(1);
-    expect(migrated.upgrades["tiamat-instructor"]).toBe(4);
+    expect(migrated.upgrades["promiscuous-instructor"]).toBe(5);
+    expect(migrated.upgrades["tiamat-instructor"]).toBe(0);
     expect(migrated.upgrades.pagosport).toBe(0);
     expect(migrated.upgrades["divine-touch"]).toBe(0);
   });

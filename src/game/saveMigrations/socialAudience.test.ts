@@ -18,9 +18,11 @@ describe("Social audience save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.upgrades).toMatchObject({
       "social-content-synthesis": 4,
-      "social-editorial-plan": 5,
+      "social-editorial-plan": 0,
       "social-content-distribution": 3,
-      "social-sponsorships": 4,
+      "social-sponsorships": 0,
+      "winning-advertising": 5,
+      "marketing-course": 4,
     });
     expect(isValidGameState(migrated)).toBe(true);
   });

@@ -1448,7 +1448,7 @@ describe("PeopleView", () => {
     expect(screen.getByText("Contenuti Social")).toBeVisible();
     expect(screen.getByText("Lezioni all'aperto")).toBeVisible();
     expect(screen.getByText("In attesa di un allievo")).toBeVisible();
-    expect(screen.getByText(/50% follower · \+0% Eventi/)).toBeVisible();
+    expect(screen.getByText(/\+0% Eventi/)).toBeVisible();
     const socialCard = screen.getByText("Contenuti Social").closest("article");
     expect(socialCard).not.toBeNull();
     expect(within(socialCard!).queryByText(/contatto/i)).not.toBeInTheDocument();

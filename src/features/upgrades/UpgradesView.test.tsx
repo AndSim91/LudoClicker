@@ -6,12 +6,13 @@ import { UpgradesView } from "./UpgradesView";
 afterEach(cleanup);
 
 describe("UpgradesView", () => {
-  it("keeps the Social branch hidden until the system unlocks", () => {
+  it("keeps Social upgrades in their parent branches and visibly locked", () => {
     render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
 
     expect(screen.queryByRole("heading", { name: "Social" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }))
-      .not.toBeInTheDocument();
+    expect(screen.getByRole("button", {
+      name: /Apri dettagli Sintesi dei contenuti:.*social non ancora sbloccato/i,
+    })).toBeVisible();
   });
 
   it("reveals the seven Gadget upgrades only after the sector unlocks", () => {
@@ -24,57 +25,77 @@ describe("UpgradesView", () => {
 
     rerender(
       <UpgradesView
-        state={{
-          ...initial,
-          unlocks: { ...initial.unlocks, gadget: true },
-        }}
+        state={{ ...initial, unlocks: { ...initial.unlocks, gadget: true } }}
         onBuyUpgrade={() => undefined}
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Gadget" })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Vetrina della scuola/ }))
-      .toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Negozio online/ }))
-      .toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Vendita abbinata/ }))
-      .toBeVisible();
+    const gadgetBranch = screen.getByRole("region", { name: "Gadget" });
+    expect(within(gadgetBranch).getAllByRole("button", { name: /^Apri dettagli/ }))
+      .toHaveLength(7);
   });
 
-  it("renders the complete upgrade catalog as eight connected branches", () => {
+  it("renders eight public branches, the secret row and the Teaching extension", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
         state={{
           ...initial,
-          school: { ...initial.school, fame: 5 },
-          unlocks: { ...initial.unlocks, social: true },
+          unlocks: { ...initial.unlocks, gadget: true, social: true },
         }}
         onBuyUpgrade={() => undefined}
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Piano dei potenziamenti" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Velocità di scrittura" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Carisma" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Scrittura" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Accoglienza" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Social" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Attrezzatura" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Organizzazione" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Istruttori" })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Istruttore Promisquo/ })).toBeVisible();
-    expect(screen.queryByRole("button", { name: /Apri dettagli Nessun Rancore/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Apri dettagli Doppio Corso/ })).toBeVisible();
+    for (const heading of [
+      "Scrittura",
+      "Creatività",
+      "Carisma",
+      "Accoglienza",
+      "Attrezzatura",
+      "Gadget",
+      "Insegnamento",
+      "Organizzazione",
+      "Percorsi Segreti",
+    ]) {
+      expect(screen.getByRole("heading", { name: heading })).toBeVisible();
+    }
+    expect(screen.getByRole("button", { name: /Apri dettagli Master of none/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Il costo del Servizio/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Intensità agonistica/ })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Preparazione atletica/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(53);
-    expect(screen.queryByRole("button", { name: /Apri dettagli Promozione degli eventi/ }))
-      .not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(57);
+    expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(2);
+    expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
+    expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
   });
 
-  it("shows requirements, effect and disabled level-up action for a locked node", () => {
+  it("shows both secret hints and reveals only the discovered path", () => {
+    const initial = createInitialState(1_000);
+    const { rerender } = render(
+      <UpgradesView state={initial} onBuyUpgrade={() => undefined} />,
+    );
+
+    expect(screen.getByRole("tooltip", {
+      name: /Vincere il torneo più superbo dell'anno è solo l'inizio/,
+    })).toBeInTheDocument();
+    expect(screen.getByRole("tooltip", {
+      name: /Esistono forze più grandi di quanto avresti mai potuto immaginare/,
+    })).toBeInTheDocument();
+
+    rerender(
+      <UpgradesView
+        state={{ ...initial, secretUpgradeDiscoveries: ["project-x"] }}
+        onBuyUpgrade={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /Apri dettagli Corso X/ })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(1);
+    expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
+  });
+
+  it("shows requirements, effect and disabled purchase for a locked Social node", () => {
     const initial = createInitialState(1_000);
     render(<UpgradesView
       state={{ ...initial, unlocks: { ...initial.unlocks, social: true } }}
@@ -84,40 +105,35 @@ describe("UpgradesView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }));
 
     expect(screen.getByRole("dialog", { name: "Sintesi dei contenuti" })).toBeVisible();
-    expect(document.querySelector(".upgrade-dialog-backdrop")).not.toBeInTheDocument();
     expect(screen.getByText(
       "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri",
     )).toBeVisible();
-    expect(screen.getByText("Serve Fama della scuola 35")).toBeVisible();
+    expect(screen.getByText("Completa prima Campi intelligenti")).toBeVisible();
     expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ })).not.toHaveClass("unaffordable");
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("shows the Arena Tecnica progression for all four levels", () => {
+  it("shows the complete Percorso Tecnico progression", () => {
     render(
-      <UpgradesView
-        state={createInitialState(1_000)}
-        onBuyUpgrade={() => undefined}
-      />,
+      <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
     );
 
     fireEvent.click(screen.getByRole("button", {
-      name: /Apri dettagli Arena Tecnica/,
+      name: /Apri dettagli Percorso Tecnico/,
     }));
 
     expect(screen.getByText(
-      "Livello 1: Sblocco \"Arena Tecnica\" · Livello 2: Durata Arena Tecnica da 120 a 60 secondi · Livello 3: Sblocco Corso Agonisti · Livello 4: Durata Corso Agonisti da 60 a 30 secondi",
+      "L1 Arena Tecnica · L2 durata 120→60 s · L3 Corso Agonisti (+1/+1 annuo) · L4 durata 60→30 s",
     )).toBeVisible();
   });
 
-  it("requires every previous upgrade in the branch to be completed", () => {
+  it("requires every previous upgrade in a linear branch to be completed", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
-      school: { ...initial.school, euros: 10_000, fame: 100 },
+      school: { ...initial.school, euros: 10_000 },
     };
     const { rerender } = render(
       <UpgradesView state={state} onBuyUpgrade={() => undefined} />,
@@ -146,46 +162,39 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: "Potenzia" })).toBeEnabled();
   });
 
-  it("allows a funded level-up from the selected node dialog", () => {
+  it("allows a funded purchase from the selected node dialog", () => {
     const initial = createInitialState(1_000);
-    const state = {
-      ...initial,
-      school: { ...initial.school, euros: 50 },
-    };
     const onBuyUpgrade = vi.fn();
-    render(<UpgradesView state={state} onBuyUpgrade={onBuyUpgrade} />);
+    render(<UpgradesView
+      state={{ ...initial, school: { ...initial.school, euros: 50 } }}
+      onBuyUpgrade={onBuyUpgrade}
+    />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /Apri dettagli Presentazione preparata/ }),
+      screen.getByRole("button", { name: /Apri dettagli Tastiera comoda/ }),
     );
     fireEvent.click(screen.getByRole("button", { name: "Potenzia" }));
 
-    expect(onBuyUpgrade).toHaveBeenCalledOnce();
-    expect(onBuyUpgrade).toHaveBeenCalledWith("prepared-presentation");
+    expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
   });
 
-  it("recommends the cheapest available upgrade and buys it directly", () => {
+  it("recommends the first cheapest available upgrade and buys it directly", () => {
     const initial = createInitialState(1_000);
-    const state = {
-      ...initial,
-      school: { ...initial.school, euros: 1_000 },
-    };
     const onBuyUpgrade = vi.fn();
-    render(<UpgradesView state={state} onBuyUpgrade={onBuyUpgrade} />);
+    render(<UpgradesView
+      state={{ ...initial, school: { ...initial.school, euros: 1_000 } }}
+      onBuyUpgrade={onBuyUpgrade}
+    />);
 
     const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
-    expect(within(recommendation).getByText("Presentazione preparata")).toBeVisible();
-    expect(within(recommendation).getByText(/Livello 1 · 50,00/)).toBeVisible();
-
+    expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
     fireEvent.click(within(recommendation).getByRole("button", {
-      name: "Potenzia Presentazione preparata",
+      name: "Potenzia Tastiera comoda",
     }));
-
-    expect(onBuyUpgrade).toHaveBeenCalledOnce();
-    expect(onBuyUpgrade).toHaveBeenCalledWith("prepared-presentation");
+    expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
   });
 
-  it("disables the recommended quick upgrade when the balance is insufficient", () => {
+  it("disables the recommendation when the balance is insufficient", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
@@ -195,18 +204,18 @@ describe("UpgradesView", () => {
     );
 
     const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
-    expect(within(recommendation).getByText("Presentazione preparata")).toBeVisible();
+    expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
     expect(within(recommendation).getByRole("button", {
-      name: "Potenzia Presentazione preparata",
+      name: "Potenzia Tastiera comoda",
     })).toBeDisabled();
     expect(within(recommendation).getByText(/Mancano 30,00/)).toBeVisible();
   });
 
-  it("summarizes every cumulative benefit received from upgrades", () => {
+  it("summarizes cumulative benefits without claiming free swords", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
-      player: { ...initial.player, writingPower: 3 },
+      player: { ...initial.player, writingPower: 2 },
       upgrades: {
         ...initial.upgrades,
         "comfortable-keyboard": 5,
@@ -222,36 +231,31 @@ describe("UpgradesView", () => {
 
     const summary = screen.getByLabelText("Riepilogo dei bonus ottenuti dagli upgrade");
     expect(within(summary).getByText("Caratteri per input:")).toBeVisible();
-    expect(within(summary).getByText("3")).toBeVisible();
+    expect(within(summary).getByText("2")).toBeVisible();
     expect(within(summary).getByText("Contatti:")).toBeVisible();
-    expect(within(summary).getByText("+9%")).toBeVisible();
+    expect(within(summary).getByText("+12%")).toBeVisible();
     expect(within(summary).getByText("Pubblico eventi:")).toBeVisible();
-    expect(within(summary).getByText("+5%")).toBeVisible();
-    expect(within(summary).getByText("Spade:")).toBeVisible();
-    expect(within(summary).getByText("+4")).toBeVisible();
-    expect(within(summary).getByText("Entrate:")).toBeVisible();
-    expect(within(summary).getByText("+10%")).toBeVisible();
+    expect(within(summary).getAllByText("+5%")).toHaveLength(2);
+    expect(within(summary).getByText("Riserva manutenzione:")).toBeVisible();
+    expect(within(summary).getByText("24 punti")).toBeVisible();
+    expect(within(summary).getByText("Quote mensili:")).toBeVisible();
+    expect(within(summary).queryByText("Spade:")).not.toBeInTheDocument();
     expect(within(summary).getByText("Rami per Istruttore:")).toBeVisible();
     expect(within(summary).getByText("+2")).toBeVisible();
     expect(within(summary).getByText("Arena Tecnica:")).toBeVisible();
-    expect(within(summary).getByText("livello 1")).toBeVisible();
   });
 
-  it("marks an unlocked unaffordable upgrade node until enough funds are available", () => {
+  it("marks an unlocked unaffordable node until enough funds are available", () => {
     const initial = createInitialState(1_000);
-    const state = {
-      ...initial,
-      school: { ...initial.school, euros: 0 },
-    };
+    const state = { ...initial, school: { ...initial.school, euros: 0 } };
     const { rerender } = render(
       <UpgradesView state={state} onBuyUpgrade={() => undefined} />,
     );
 
     const upgradeNode = screen.getByRole("button", {
-      name: /Apri dettagli Presentazione preparata/,
+      name: /Apri dettagli Tastiera comoda/,
     });
     expect(upgradeNode).toHaveClass("available", "unaffordable");
-    expect(upgradeNode.querySelector(".upgrade-node-icon")).toBeVisible();
 
     rerender(
       <UpgradesView

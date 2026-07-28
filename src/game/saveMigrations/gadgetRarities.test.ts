@@ -5,6 +5,7 @@ import type { GameState } from "../types";
 import { migrateGadgetRarityState } from "./gadgetRarities";
 import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendaryCircuitBoostRemoval";
 import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
+import { migrateUpgradeRevampState } from "./upgradeRevamp";
 import type { MigratableState } from "./types";
 
 describe("Gadget rarity save migration", () => {
@@ -37,13 +38,15 @@ describe("Gadget rarity save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateSecretLegendaryBaseRebalanceState(
-      migrateSecretLegendaryCircuitBoostRemovalState(
-        migrateGadgetRarityState(legacy),
+    const migrated = migrateUpgradeRevampState(
+      migrateSecretLegendaryBaseRebalanceState(
+        migrateSecretLegendaryCircuitBoostRemovalState(
+          migrateGadgetRarityState(legacy),
+        ),
       ),
     ) as GameState;
 
-    expect(migrated.version).toBe(70);
+    expect(migrated.version).toBe(71);
     expect(migrated.gadgets.products.wristband.rarities.common).toMatchObject({
       unlocked: true,
       quality: 73,
