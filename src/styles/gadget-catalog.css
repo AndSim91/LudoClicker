@@ -388,10 +388,10 @@
 .gadget-rarity-row {
   --gadget-rarity-color: var(--rarity-common-accent);
   display: grid;
-  grid-template-columns: minmax(76px, .8fr) minmax(116px, 1.35fr) minmax(54px, .55fr) minmax(92px, .9fr);
+  grid-template-columns: minmax(68px, .78fr) minmax(90px, 1.18fr) minmax(46px, .5fr) minmax(78px, .82fr);
   min-height: 54px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 7px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -431,7 +431,7 @@
 
 .gadget-rarity-quality {
   display: grid;
-  grid-template-columns: auto minmax(50px, 1fr);
+  grid-template-columns: auto minmax(42px, 1fr);
   align-items: center;
   gap: 8px;
 }

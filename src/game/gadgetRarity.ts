@@ -74,10 +74,12 @@ export function getGadgetRarityUpgradeChance(
 }
 
 export function areSecretLegendaryGadgetRequirementsMet(
-  _state: GameState,
-  _productId: GadgetProductId,
+  state: GameState,
+  productId: GadgetProductId,
 ): boolean {
-  // TBD di design: ogni prodotto avrÃ  requisiti specifici. Finche non saranno
+  void state;
+  void productId;
+  // TBD di design: ogni prodotto avra requisiti specifici. Finche non saranno
   // definiti, il Leggendario Segreto resta intenzionalmente non ottenibile.
   return false;
 }
