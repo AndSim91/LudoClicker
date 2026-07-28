@@ -234,10 +234,10 @@ describe("secret legendary tournament trials", () => {
       source: "tournament",
       status: "trialScheduled",
       secretLegendaryId: "marco-palena",
-      arenaBase: 90,
-      styleBase: 108,
       tournamentExperience: 5,
     });
+    expect(contact.arenaBase).toBeCloseTo(140 / (1.4 * 1.15));
+    expect(contact.styleBase).toBeCloseTo(155 / (1.4 * 1.15));
     expect(contact.forms).toContain("form-4-long");
     expect(trial.resolvesAt - trial.startsAt).toBe(GAME_CONFIG.secretLegendaryTrialDurationMs);
     expect(scheduled.emails).toHaveLength(initial.emails.length);

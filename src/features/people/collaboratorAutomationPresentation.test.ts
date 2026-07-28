@@ -163,7 +163,17 @@ describe("getCollaboratorAutomationPresentation", () => {
             ...state.gadgets,
             products: {
               ...state.gadgets.products,
-              wristband: { ...wristband, quality },
+              wristband: {
+                ...wristband,
+                rarities: {
+                  ...wristband.rarities,
+                  common: {
+                    ...wristband.rarities.common,
+                    unlocked: true,
+                    quality,
+                  },
+                },
+              },
             },
           },
         },

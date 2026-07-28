@@ -2027,8 +2027,9 @@ Il catalogo base segue questo ordine:
 | Maglietta |        25.000 € |                        50 € |            150 minuti |   2.500 € |
 | Felpa     |        40.000 € |                        80 € |            240 minuti |   4.000 € |
 
-Ogni progetto successivo si sblocca automaticamente dopo 100 vendite
-complessive del prodotto precedente. Lo sblocco non ha un costo aggiuntivo, ma
+Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
+famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non
+ha un costo aggiuntivo, ma
 il nuovo progetto deve essere pagato e sviluppato. Spillette, Coppe, Premio
 Cu.Li. e Premio Piedozzi appartengono alla futura estensione degli Open e non
 fanno parte del catalogo base.
@@ -2048,17 +2049,28 @@ concorrono a `P`. I bonus specifici dei rami d'arma non modificano Gadget. Un
 Collaboratore assegnato guadagna 1 XP di Maestria Gadget al secondo, come negli
 altri incarichi.
 
-Il tempo effettivo di progettazione è `lavoroBase / P`; una revisione richiede
-un terzo del lavoro iniziale. I relativi potenziamenti moltiplicano la velocità.
+Il tempo effettivo di progettazione è `lavoroBase / P`; una revisione Comune
+richiede un terzo del lavoro iniziale. Costo e lavoro di revisione crescono in
+modo additivo del 25% per ogni livello di rarità: Comune ×1, Raro ×1,25, Ultra
+Raro ×1,50, Leggendario ×1,75 e Leggendario Segreto ×2. I relativi
+potenziamenti moltiplicano la velocità.
 Con `P = 0` l'avanzamento si ferma senza perdere il lavoro già completato. Le
 vendite dei prodotti accettati continuano mentre il laboratorio sviluppa o
 revisiona un altro prodotto.
 
 Il primo tentativo di qualità è compreso nel progetto. Ogni nuovo tentativo
-richiede prima una revisione pari al 10% del costo del progetto. Il prodotto
-continua a essere venduto alla qualità precedente durante la revisione. La
-qualità memorizzata è sempre il massimo storico: un risultato peggiore non può
-ridurla. Al 100% le revisioni vengono disabilitate.
+richiede prima una revisione pari al 10% del costo del progetto, moltiplicato
+per la rarità attuale. Il prodotto continua a essere venduto alla qualità
+precedente durante la revisione. La qualità memorizzata è sempre il massimo
+storico della singola rarità: un risultato peggiore non può ridurla. Al 100%
+le revisioni restano disponibili quando esiste una rarità successiva
+ottenibile; vengono disabilitate al 100% del Leggendario Segreto.
+
+Ogni prodotto possiede cinque varianti, nello stesso ordine delle rarità del
+gioco: Comune, Raro, Ultra Raro, Leggendario e Leggendario Segreto. Il primo
+prototipo nasce Comune. Ogni rarità sbloccata resta un oggetto vendibile
+indipendente e continua a generare vendite anche dopo l'arrivo dei livelli
+superiori.
 
 ### 19.3 Pubblico, vendite e guadagni
 
@@ -2070,11 +2082,12 @@ pubblico = floor(iscrittiAttivi × coperturaIscritti
 ```
 
 La copertura iniziale è il 10% degli iscritti e lo 0% dei follower. Ogni
-persona del pubblico alimenta una vendita ordinaria per ciascun prodotto,
-quindi la domanda ordinaria residua è calcolata separatamente come
-`max(0, pubblico - pezziVendutiDelProdotto)`. Non esiste rigenerazione della
-domanda ordinaria: se il pubblico scende sotto le vendite storiche, il prodotto
-passa alle sole vendite marginali finché il pubblico non cresce di nuovo.
+persona del pubblico alimenta una vendita ordinaria per ciascuna variante di
+rarità sbloccata, quindi la domanda ordinaria residua è calcolata separatamente
+come `max(0, pubblico - pezziVendutiDellaVariante)`. Non esiste rigenerazione
+della domanda ordinaria: se il pubblico scende sotto le vendite storiche, la
+variante passa alle sole vendite marginali finché il pubblico non cresce di
+nuovo.
 
 Indicando con `V` la precedente capacità commerciale condivisa dal catalogo,
 la nuova capacità ordinaria `N` e quella marginale sono:
@@ -2086,9 +2099,10 @@ tentativiMarginaliAlMese = N / 10
 ```
 
 I tentativi ordinari vengono distribuiti proporzionalmente alla domanda
-residua dei prodotti accettati e vendibili. In parallelo, la capacità marginale
-viene distribuita in parti uguali fra i prodotti che hanno già raggiunto il
-proprio pubblico: non ha un tetto di domanda e produce quindi vendite
+residua di tutte le varianti accettate e vendibili, usando un'unica capacità
+condivisa dal catalogo. In parallelo, la capacità marginale viene distribuita
+in parti uguali fra le varianti che hanno già raggiunto il proprio pubblico:
+non ha un tetto di domanda e produce quindi vendite
 occasionali anche oltre la soglia. La capacità ordinaria che non trova domanda
 viene persa; le sole frazioni di vendita già maturate restano memorizzate fino
 a formare un pezzo intero. La conversione base dipende dalla qualità e viene
@@ -2111,14 +2125,18 @@ può aggirare la velocità marginale.
 Il guadagno netto per pezzo è:
 
 ```text
-guadagnoPezzo = costoProgetto / 500 × qualità / 100
+guadagnoPezzo = costoProgetto / 500 × qualità / 100 × moltiplicatoreRarità
 ```
 
-Di conseguenza 500 vendite al 100% eguagliano il costo originario del progetto.
+Il moltiplicatore è ×1 per Comune, ×1,25 per Raro, ×1,50 per Ultra Raro,
+×1,75 per Leggendario e ×2 per Leggendario Segreto. Di conseguenza 500 vendite
+Comuni al 100% eguagliano il costo originario del progetto.
 I guadagni vengono accreditati continuamente e le vendite passate non vengono
-rivalutate quando la qualità aumenta. Nell'interfaccia del prodotto si mostrano
-soltanto qualità massima, pezzi venduti e guadagno cumulativo; margini, domanda
-residua, recupero dell'investimento e proiezioni restano interni.
+rivalutate quando la qualità aumenta. Nell'interfaccia ogni famiglia usa una
+sola card: mostra la foto della rarità più alta e una riga per ogni rarità
+sbloccata con qualità, pezzi venduti e guadagno cumulativo. Indicatore e barra
+di qualità usano il colore della rarità. Margini, domanda residua, probabilità
+di passaggio, recupero dell'investimento e proiezioni restano interni.
 
 ### 19.4 Prova qualità
 
@@ -2141,9 +2159,33 @@ Durante la prova il resto del gioco è in pausa. Perdita del focus, cambio di
 scheda e cambio di orientamento mettono in pausa anche il minigioco. Il seed e
 il tentativo pendente sono salvati, così un reload non genera una nuova
 sequenza. Abbandonare assegna 0 al tentativo, senza rimborso e senza ridurre la
-qualità massima già ottenuta. Il primo risultato permette di accettare il
+qualità massima già ottenuta; l'eventuale occasione di rarità viene consumata.
+Il primo risultato permette di accettare il
 prodotto o revisionarlo; un prodotto accettato resta in vendita per sempre. È
 possibile accettare qualità 0%, ma il prodotto non vende finché non migliora.
+
+All'avvio pagato di ogni revisione viene effettuata e salvata un'estrazione
+casuale nascosta usando soltanto vendite e qualità già accumulate dalla rarità
+attuale:
+
+```text
+probabilitàPassaggio = min(100%, floor(venduti / 10) × 1%
+  + floor(qualità / 10) × 2,5%)
+```
+
+Se l'estrazione riesce, la prova usa lo sfondo della rarità raggiungibile e
+mostra l'etichetta testuale `Occasione: <rarità>`, senza mostrare la
+percentuale. In assenza di occasione lo sfondo usa la rarità attuale. Un
+risultato strettamente superiore al 50% sblocca la nuova variante: la rarità
+precedente sale automaticamente al 100%, mentre quella nuova nasce con la
+qualità appena ottenuta ed entra subito in vendita se la famiglia è già in
+catalogo. Con 50% o meno la nuova rarità non viene sbloccata e un'altra
+revisione effettua una nuova estrazione.
+
+Il Leggendario Segreto applica la stessa estrazione soltanto dopo il
+superamento di requisiti specifici per prodotto. Tali requisiti sono ancora
+`TBD`; fino alla loro definizione il livello resta presente nei salvataggi e
+nel modello di gioco, ma non è ottenibile.
 
 ### 19.5 Potenziamenti Gadget
 

@@ -1,4 +1,5 @@
-import type { GadgetProductId } from "../game/types";
+import type { GadgetProductId, GadgetRarity } from "../game/types";
+import { GADGET_RARITIES } from "./gadgetRarities";
 
 export interface GadgetDefinition {
   id: GadgetProductId;
@@ -117,14 +118,24 @@ export function getNextGadgetProductId(
   return index >= 0 ? GADGET_PRODUCT_ORDER[index + 1] : undefined;
 }
 
-export function getGadgetRevisionCost(productId: GadgetProductId): number {
-  return Math.round(GADGET_DEFINITIONS[productId].projectCost * GADGET_REVISION_COST_RATE);
+export function getGadgetRevisionCost(
+  productId: GadgetProductId,
+  rarity: GadgetRarity = "common",
+): number {
+  return Math.round(
+    GADGET_DEFINITIONS[productId].projectCost *
+    GADGET_REVISION_COST_RATE *
+    GADGET_RARITIES[rarity].revisionMultiplier,
+  );
 }
 
 export function getGadgetWorkRequirement(
   productId: GadgetProductId,
   kind: "development" | "revision",
+  rarity: GadgetRarity = "common",
 ): number {
   const base = GADGET_DEFINITIONS[productId].developmentWorkMs;
-  return kind === "revision" ? base * GADGET_REVISION_WORK_RATE : base;
+  return kind === "revision"
+    ? base * GADGET_REVISION_WORK_RATE * GADGET_RARITIES[rarity].revisionMultiplier
+    : base;
 }

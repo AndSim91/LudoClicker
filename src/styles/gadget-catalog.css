@@ -165,6 +165,8 @@
 
 .gadget-product-card {
   --gadget-state-color: var(--blue-600);
+  --gadget-rarity-color: var(--rarity-common-accent);
+  --gadget-image-filter: grayscale(1) contrast(.95);
   position: relative;
   display: grid;
   grid-template-columns: 8px 148px minmax(0, 1fr);
@@ -181,11 +183,40 @@
   box-shadow: 0 4px 14px rgb(0 0 0 / 4%);
 }
 
+.gadget-view .rarity-common {
+  --gadget-rarity-color: var(--rarity-common-accent);
+  --gadget-image-filter: grayscale(1) contrast(.95);
+}
+
+.gadget-view .rarity-rare {
+  --gadget-rarity-color: var(--rarity-rare-accent);
+  --gadget-image-filter: none;
+}
+
+.gadget-view .rarity-ultra-rare {
+  --gadget-rarity-color: var(--rarity-ultra-rare-accent);
+  --gadget-image-filter: hue-rotate(48deg) saturate(1.22);
+}
+
+.gadget-view .rarity-legendary {
+  --gadget-rarity-color: var(--rarity-legendary-accent);
+  --gadget-image-filter: hue-rotate(178deg) saturate(.9) brightness(1.12);
+}
+
+.gadget-view .rarity-secret-legendary {
+  --gadget-rarity-color: var(--rarity-secret-legendary-accent);
+  --gadget-image-filter: hue-rotate(116deg) saturate(1.25);
+}
+
 .gadget-product-card.is-selling { --gadget-state-color: var(--success); }
 .gadget-product-card.is-warning { --gadget-state-color: var(--warning); }
 .gadget-product-card.is-prototype,
 .gadget-product-card.is-working,
 .gadget-product-card.is-available { --gadget-state-color: var(--blue-600); }
+
+.gadget-product-card.has-rarity {
+  --gadget-state-color: var(--gadget-rarity-color);
+}
 
 .gadget-product-card.is-selling,
 .gadget-product-card.is-warning,
@@ -256,6 +287,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: var(--gadget-image-filter, none);
 }
 
 .gadget-product-artwork.is-locked {
@@ -342,6 +374,109 @@
   height: 100%;
   border-radius: inherit;
   background: var(--gadget-state-color);
+}
+
+.gadget-rarity-list {
+  display: grid;
+  grid-column: 3;
+  grid-row: 2 / 5;
+  align-self: start;
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.gadget-rarity-row {
+  --gadget-rarity-color: var(--rarity-common-accent);
+  display: grid;
+  grid-template-columns: minmax(76px, .8fr) minmax(116px, 1.35fr) minmax(54px, .55fr) minmax(92px, .9fr);
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.gadget-rarity-row.is-current {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--gadget-rarity-color) 7%, transparent),
+    transparent 72%
+  );
+}
+
+.gadget-rarity-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.gadget-rarity-identity > span {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--gadget-rarity-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gadget-rarity-color) 14%, transparent);
+}
+
+.gadget-rarity-identity strong {
+  overflow: hidden;
+  color: var(--gadget-rarity-color);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+
+.gadget-rarity-quality {
+  display: grid;
+  grid-template-columns: auto minmax(50px, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.gadget-rarity-quality > span,
+.gadget-rarity-stat {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gadget-rarity-quality small,
+.gadget-rarity-stat small {
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.gadget-rarity-quality strong,
+.gadget-rarity-stat strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gadget-rarity-quality .progress-bar {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.gadget-rarity-quality .progress-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gadget-rarity-color);
 }
 
 .gadget-sales-stats {
@@ -587,8 +722,17 @@
   }
 
   .gadget-quality,
-  .gadget-sales-stats {
+  .gadget-sales-stats,
+  .gadget-rarity-list {
     grid-column: 2 / 4;
+  }
+
+  .gadget-rarity-list {
+    grid-row: 2 / 5;
+  }
+
+  .gadget-rarity-row {
+    grid-template-columns: minmax(92px, .8fr) minmax(120px, 1.2fr) minmax(54px, .55fr) minmax(90px, .8fr);
   }
 
   .gadget-product-status {
@@ -610,5 +754,17 @@
   .gadget-product-actions button,
   .gadget-result-actions button {
     width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .gadget-rarity-row {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 7px 12px;
+    padding: 9px 0;
+  }
+
+  .gadget-rarity-stat {
+    padding-left: 15px;
   }
 }

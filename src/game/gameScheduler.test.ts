@@ -170,6 +170,7 @@ describe("game scheduler", () => {
         activeWork: {
           productId: "wristband",
           kind: "development",
+          rarity: "common",
           completedWorkMs: 0,
         },
         products: {
@@ -199,8 +200,15 @@ describe("game scheduler", () => {
             ...idle.gadgets.products.wristband,
             prototypeCompleted: true,
             accepted: true,
-            quality: 100,
-            unitsSold: 0,
+            rarities: {
+              ...idle.gadgets.products.wristband.rarities,
+              common: {
+                ...idle.gadgets.products.wristband.rarities.common,
+                unlocked: true,
+                quality: 100,
+                unitsSold: 0,
+              },
+            },
           },
         },
       },

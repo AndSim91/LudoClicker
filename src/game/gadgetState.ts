@@ -1,7 +1,10 @@
 import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
+import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
+import { createInitialGadgetRarities } from "./gadgetRarity";
 import type {
   GadgetProductId,
   GadgetProductState,
+  GadgetRarity,
   GadgetState,
 } from "./types";
 
@@ -13,10 +16,7 @@ export function createInitialGadgetProductState(
     projectPurchased: false,
     prototypeCompleted: false,
     accepted: false,
-    quality: 0,
-    unitsSold: 0,
-    totalProfit: 0,
-    salesRemainder: 0,
+    rarities: createInitialGadgetRarities(),
   };
 }
 
@@ -41,6 +41,10 @@ function isProductId(value: unknown): value is GadgetProductId {
   return GADGET_PRODUCT_ORDER.includes(value as GadgetProductId);
 }
 
+function isGadgetRarity(value: unknown): value is GadgetRarity {
+  return GADGET_RARITY_ORDER.includes(value as GadgetRarity);
+}
+
 export function isValidGadgetState(value: unknown): value is GadgetState {
   if (!value || typeof value !== "object") return false;
   const state = value as Partial<GadgetState>;
@@ -53,12 +57,22 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
       typeof product.projectPurchased !== "boolean" ||
       typeof product.prototypeCompleted !== "boolean" ||
       typeof product.accepted !== "boolean" ||
-      !Number.isSafeInteger(product.quality) ||
-      product.quality < 0 || product.quality > 100 ||
-      !Number.isSafeInteger(product.unitsSold) || product.unitsSold < 0 ||
-      !isFiniteNonNegative(product.totalProfit) ||
-      !isFiniteNonNegative(product.salesRemainder) || product.salesRemainder >= 1
+      !product.rarities ||
+      typeof product.rarities !== "object"
     ) return false;
+    for (const rarity of GADGET_RARITY_ORDER) {
+      const rarityState = product.rarities[rarity];
+      if (
+        !rarityState ||
+        typeof rarityState.unlocked !== "boolean" ||
+        !Number.isSafeInteger(rarityState.quality) ||
+        rarityState.quality < 0 || rarityState.quality > 100 ||
+        !Number.isSafeInteger(rarityState.unitsSold) || rarityState.unitsSold < 0 ||
+        !isFiniteNonNegative(rarityState.totalProfit) ||
+        !isFiniteNonNegative(rarityState.salesRemainder) ||
+        rarityState.salesRemainder >= 1
+      ) return false;
+    }
   }
   if (
     !isFiniteNonNegative(state.crossSellRemainder) ||
@@ -69,11 +83,20 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
   if (state.activeWork && (
     !isProductId(state.activeWork.productId) ||
     (state.activeWork.kind !== "development" && state.activeWork.kind !== "revision") ||
+    !isGadgetRarity(state.activeWork.rarity) ||
+    (state.activeWork.opportunityRarity !== undefined &&
+      !isGadgetRarity(state.activeWork.opportunityRarity)) ||
     !isFiniteNonNegative(state.activeWork.completedWorkMs)
   )) return false;
   if (state.minigame && (
     !isProductId(state.minigame.productId) ||
     (state.minigame.kind !== "development" && state.minigame.kind !== "revision") ||
+    !isGadgetRarity(state.minigame.rarity) ||
+    (state.minigame.opportunityRarity !== undefined &&
+      !isGadgetRarity(state.minigame.opportunityRarity)) ||
+    (state.minigame.unlockedRarity !== undefined &&
+      (!isGadgetRarity(state.minigame.unlockedRarity) ||
+        state.minigame.status !== "result")) ||
     !Number.isSafeInteger(state.minigame.seed) ||
     !Number.isSafeInteger(state.minigame.previousQuality) ||
     state.minigame.previousQuality < 0 || state.minigame.previousQuality > 100 ||

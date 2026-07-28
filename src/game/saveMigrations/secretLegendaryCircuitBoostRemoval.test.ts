@@ -1,55 +1,55 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
-import { migrateTournamentStandardDifficultyState } from "./tournamentStandardDifficulty";
+import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendaryCircuitBoostRemoval";
 
-describe("tournament standard difficulty save migration", () => {
-  it("raises National Secret Legendary progress and leaves unchanged circuits intact", () => {
+describe("Secret Legendary circuit boost removal save migration", () => {
+  it("restores manual bases without changing Chronicles profiles", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
-    legacy.version = 66;
+    legacy.version = 68;
     legacy.contacts[0] = {
       ...legacy.contacts[0],
-      specialProfileId: "pietro-scarica",
-      secretLegendaryId: "pietro-scarica",
-      arenaBase: 120,
-      styleBase: 150,
-    };
-    legacy.contacts[1] = {
-      ...legacy.contacts[1],
       specialProfileId: "marco-palena",
       secretLegendaryId: "marco-palena",
       arenaBase: 90,
       styleBase: 108,
     };
+    legacy.contacts[1] = {
+      ...legacy.contacts[1],
+      specialProfileId: "pietro-scarica",
+      secretLegendaryId: "pietro-scarica",
+      arenaBase: 138,
+      styleBase: 141,
+    };
     legacy.legendaryCollaborators.retainedProgress["simone-pedrazzi"] = {
-      forms: ["form-1"],
+      forms: [],
       instructorForms: [],
       joinedAt: 1_000,
-      arenaBase: 160,
-      styleBase: 200,
+      arenaBase: 183,
+      styleBase: 217.5,
     };
     legacy.legendaryCollaborators.retainedProgress["francesco-d-addosio"] = {
-      forms: ["form-1"],
+      forms: [],
       instructorForms: [],
       joinedAt: 1_000,
       arenaBase: 1_200,
       styleBase: 1_200,
     };
 
-    const migrated = migrateTournamentStandardDifficultyState(legacy);
+    const migrated = migrateSecretLegendaryCircuitBoostRemovalState(legacy);
 
-    expect(migrated.version).toBe(67);
-    expect(migrated.contacts?.[0]).toMatchObject({ arenaBase: 135, styleBase: 168.75 });
-    expect(migrated.contacts?.[1]).toMatchObject({ arenaBase: 90, styleBase: 108 });
+    expect(migrated.version).toBe(69);
+    expect(migrated.contacts?.[0]).toMatchObject({ arenaBase: 75, styleBase: 90 });
+    expect(migrated.contacts?.[1]).toMatchObject({ arenaBase: 92, styleBase: 94 });
     expect(
       migrated.legendaryCollaborators?.retainedProgress["simone-pedrazzi"],
-    ).toMatchObject({ arenaBase: 180, styleBase: 225 });
+    ).toMatchObject({ arenaBase: 122, styleBase: 145 });
     expect(
       migrated.legendaryCollaborators?.retainedProgress["francesco-d-addosio"],
     ).toMatchObject({ arenaBase: 1_200, styleBase: 1_200 });
   });
 
-  it("keeps the historical step available before the later removal migration", () => {
+  it("cancels both historical boosts exactly once for older saves", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 58;
     legacy.legendaryCollaborators.retainedProgress["pietro-scarica"] = {

@@ -5,6 +5,9 @@ import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
 import { migrateGadgetState } from "./gadgets";
 import { migrateTournamentStandardDifficultyState } from "./tournamentStandardDifficulty";
+import { migrateGadgetRarityState } from "./gadgetRarities";
+import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendaryCircuitBoostRemoval";
+import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
 import type { MigratableState } from "./types";
 
 describe("Gadget save migration", () => {
@@ -33,11 +36,15 @@ describe("Gadget save migration", () => {
       ),
     };
 
-    const migrated = migrateTournamentStandardDifficultyState(
-      migrateGadgetState(legacy),
+    const migrated = migrateSecretLegendaryBaseRebalanceState(
+      migrateSecretLegendaryCircuitBoostRemovalState(
+        migrateGadgetRarityState(
+          migrateTournamentStandardDifficultyState(migrateGadgetState(legacy)),
+        ),
+      ),
     ) as GameState;
 
-    expect(migrated.version).toBe(67);
+    expect(migrated.version).toBe(70);
     expect(migrated.unlocks.gadget).toBe(false);
     expect(migrated.gadgets.products.wristband.unlocked).toBe(false);
     expect(migrated.collaborators[0].mastery?.gadget).toBe(0);

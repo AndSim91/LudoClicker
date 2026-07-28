@@ -1,4 +1,5 @@
-import type { GadgetProductId } from "../../game/types";
+import { getGadgetRarityClassName } from "../../content/gadgetRarities";
+import type { GadgetProductId, GadgetRarity } from "../../game/types";
 
 const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
   wristband: "/gadget-assets/polsino.webp",
@@ -10,14 +11,18 @@ const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
 
 export function GadgetProductArtwork({
   productId,
+  rarity = "common",
   locked = false,
 }: {
   productId: GadgetProductId;
+  rarity?: GadgetRarity;
   locked?: boolean;
 }) {
   return (
     <div
-      className={`gadget-product-artwork${locked ? " is-locked" : ""}`}
+      className={`gadget-product-artwork ${getGadgetRarityClassName(rarity)}${
+        locked ? " is-locked" : ""
+      }`}
       aria-hidden="true"
     >
       <img

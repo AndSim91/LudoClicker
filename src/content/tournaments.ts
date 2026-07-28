@@ -29,15 +29,6 @@ export interface TournamentDefinition {
 
 const BASE_TIER_SLOTS = [30, 18, 8, 2] as const;
 
-export const TOURNAMENT_DIFFICULTY_MULTIPLIERS: Record<
-  Exclude<TournamentLevel, "school" | "chronicles">,
-  number
-> = {
-  academy: 150 / 125,
-  national: 225 / 150,
-  champions: 300 / 200,
-};
-
 export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinition> = {
   school: {
     id: "school",

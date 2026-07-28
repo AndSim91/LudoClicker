@@ -8,10 +8,12 @@ import {
   GADGET_QUALITY_CONVERSION_ANCHORS,
   getGadgetWorkRequirement,
 } from "../content/gadgets";
+import { GADGET_RARITIES, GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import { getCollaboratorProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import type {
   GadgetProductId,
+  GadgetRarity,
   GadgetWorkKind,
   GameState,
   UpgradeLevels,
@@ -79,7 +81,7 @@ export function getGadgetWorkProgress(
 ): number | undefined {
   const work = state.gadgets.activeWork;
   if (!work) return undefined;
-  const required = getGadgetWorkRequirement(work.productId, work.kind);
+  const required = getGadgetWorkRequirement(work.productId, work.kind, work.rarity);
   return required <= 0
     ? 100
     : Math.min(100, Math.max(0, work.completedWorkMs / required * 100));
@@ -89,20 +91,23 @@ export function getGadgetWorkDurationMs(
   state: GameState,
   productId: GadgetProductId,
   kind: GadgetWorkKind,
+  rarity: GadgetRarity = "common",
 ): number {
   const speed = getGadgetWorkSpeed(state, kind);
   return speed > 0
-    ? getGadgetWorkRequirement(productId, kind) / speed
+    ? getGadgetWorkRequirement(productId, kind, rarity) / speed
     : Infinity;
 }
 
 export function getGadgetRemainingDemand(
   state: GameState,
   productId: GadgetProductId,
+  rarity: GadgetRarity,
 ): number {
   return Math.max(
     0,
-    getGadgetAudience(state) - state.gadgets.products[productId].unitsSold,
+    getGadgetAudience(state) -
+      state.gadgets.products[productId].rarities[rarity].unitsSold,
   );
 }
 
@@ -130,9 +135,11 @@ export function getGadgetQualityConversion(
 export function getGadgetUnitProfit(
   productId: GadgetProductId,
   quality: number,
+  rarity: GadgetRarity = "common",
 ): number {
   return GADGET_DEFINITIONS[productId].projectCost / 500 *
-    Math.max(0, Math.min(100, quality)) / 100;
+    Math.max(0, Math.min(100, quality)) / 100 *
+    GADGET_RARITIES[rarity].valueMultiplier;
 }
 
 export function getGadgetMonthlyAttemptCapacity(state: GameState): number {
@@ -156,18 +163,29 @@ export function getGadgetCrossSellRate(upgrades: UpgradeLevels): number {
   return getUpgradeEffectTotal(upgrades, "gadgetCrossSell");
 }
 
-export function getSellableGadgetProductIds(
+export interface SellableGadgetVariant {
+  productId: GadgetProductId;
+  rarity: GadgetRarity;
+}
+
+export function getSellableGadgetVariants(
   state: GameState,
-): GadgetProductId[] {
-  return GADGET_PRODUCT_ORDER.filter((productId) => {
+): SellableGadgetVariant[] {
+  return GADGET_PRODUCT_ORDER.flatMap((productId) => {
     const product = state.gadgets.products[productId];
-    return product.accepted &&
-      product.quality > 0 &&
-      product.unitsSold < Number.MAX_SAFE_INTEGER;
+    if (!product.accepted) return [];
+    return GADGET_RARITY_ORDER.flatMap((rarity) => {
+      const rarityState = product.rarities[rarity];
+      return rarityState.unlocked &&
+        rarityState.quality > 0 &&
+        rarityState.unitsSold < Number.MAX_SAFE_INTEGER
+        ? [{ productId, rarity }]
+        : [];
+    });
   });
 }
 
 export function hasGadgetRuntimeWork(state: GameState): boolean {
   if (!state.unlocks.gadget || getGadgetProductivity(state) <= 0) return false;
-  return Boolean(state.gadgets.activeWork) || getSellableGadgetProductIds(state).length > 0;
+  return Boolean(state.gadgets.activeWork) || getSellableGadgetVariants(state).length > 0;
 }

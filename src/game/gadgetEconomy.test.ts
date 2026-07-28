@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
+import {
+  GADGET_PRODUCT_ORDER,
+  getGadgetRevisionCost,
+  getGadgetWorkRequirement,
+} from "../content/gadgets";
 import { createInitialState } from "./initialState";
 import {
   getGadgetAudience,
@@ -53,5 +57,24 @@ describe("Gadget economy", () => {
       getGadgetUnitProfit(productId, 100)
     )).toEqual([20, 30, 40, 50, 80]);
     expect(getGadgetUnitProfit("hoodie", 75)).toBe(60);
+  });
+
+  it("adds 25% value, revision cost and revision duration at every rarity", () => {
+    expect([
+      "common",
+      "rare",
+      "ultra-rare",
+      "legendary",
+      "secret-legendary",
+    ].map((rarity) => getGadgetUnitProfit(
+      "wristband",
+      100,
+      rarity as Parameters<typeof getGadgetUnitProfit>[2],
+    ))).toEqual([20, 25, 30, 35, 40]);
+    expect(getGadgetRevisionCost("wristband", "rare")).toBe(1_250);
+    expect(getGadgetRevisionCost("wristband", "secret-legendary")).toBe(2_000);
+    expect(getGadgetWorkRequirement("wristband", "revision", "legendary")).toBe(
+      getGadgetWorkRequirement("wristband", "revision", "common") * 1.75,
+    );
   });
 });

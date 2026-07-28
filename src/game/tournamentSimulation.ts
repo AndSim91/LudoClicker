@@ -10,7 +10,6 @@ import {
 import { getNpcSchoolPool, getTournamentSchool } from "../content/tournamentSchools";
 import {
   TOURNAMENT_DEFINITIONS,
-  TOURNAMENT_DIFFICULTY_MULTIPLIERS,
   getNextTournamentLevel,
   getTournamentReward,
   type TournamentNpcProfile,
@@ -411,6 +410,42 @@ function maybeInsertSecretLegendaries(
   ).participants;
 }
 
+function normalizeNpcFieldToStandard(
+  participants: readonly TournamentParticipant[],
+  standard: number,
+): TournamentParticipant[] {
+  if (participants.length === 0) return [];
+  const arenaAverage = participants.reduce(
+    (total, participant) => total + participant.arenaPreparation,
+    0,
+  ) / participants.length;
+  const styleAverage = participants.reduce(
+    (total, participant) => total + participant.stylePreparation,
+    0,
+  ) / participants.length;
+
+  return participants.map((participant) => ({
+    ...participant,
+    arenaPreparation: participant.arenaPreparation * standard / arenaAverage,
+    stylePreparation: participant.stylePreparation * standard / styleAverage,
+  }));
+}
+
+function normalizeOrdinaryNpcsToStandard(
+  participants: readonly TournamentParticipant[],
+  standard: number,
+): TournamentParticipant[] {
+  const normalizedById = new Map(
+    normalizeNpcFieldToStandard(
+      participants.filter((participant) => !participant.secretLegendaryId),
+      standard,
+    ).map((participant) => [participant.id, participant]),
+  );
+  return participants.map(
+    (participant) => normalizedById.get(participant.id) ?? participant,
+  );
+}
+
 function createNpcParticipants(
   state: GameState,
   level: ScheduledExternalTournamentLevel,
@@ -428,15 +463,15 @@ function createNpcParticipants(
       sequence += 1;
     }
   });
-  const boostedParticipants = participants.map((participant) => {
-    const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS[level];
-    return {
-      ...participant,
-      arenaPreparation: participant.arenaPreparation * multiplier,
-      stylePreparation: participant.stylePreparation * multiplier,
-    };
-  });
-  return maybeInsertSecretLegendaries(state, level, boostedParticipants, cursor).map((participant) => {
+  const normalizedParticipants = normalizeNpcFieldToStandard(
+    participants,
+    TOURNAMENT_DEFINITIONS[level].standard,
+  );
+  const opponents = normalizeOrdinaryNpcsToStandard(
+    maybeInsertSecretLegendaries(state, level, normalizedParticipants, cursor),
+    TOURNAMENT_DEFINITIONS[level].standard,
+  );
+  return opponents.map((participant) => {
     if (
       participant.secretLegendaryId ||
       participant.schoolName !== state.school.name ||

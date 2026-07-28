@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SECRET_LEGENDARIES, type SecretLegendaryId } from "../content/secretLegendaries";
 import { getTournamentSchool } from "../content/tournamentSchools";
-import {
-  TOURNAMENT_DEFINITIONS,
-  TOURNAMENT_DIFFICULTY_MULTIPLIERS,
-} from "../content/tournaments";
+import { TOURNAMENT_DEFINITIONS } from "../content/tournaments";
 import { addAdminMembers } from "./adminFlow";
 import {
   getAthleteTournamentStats,
@@ -17,6 +14,7 @@ import { createInitialState, gameReducer } from "./engine";
 import { GAME_CONFIG } from "./config";
 import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { departMembers } from "./membershipFlow";
+import type { GameState } from "./types";
 import {
   getEligibleSchoolContacts,
   isSecretLegendaryDefeated,
@@ -33,6 +31,21 @@ function createTournamentSchool(memberCount = 6) {
     contacts: enrolled.contacts.map((contact) =>
       contact.status === "enrolled" ? { ...contact, forms: ["form-1" as const] } : contact,
     ),
+  };
+}
+
+function withoutExternalSecretLegendaries(state: GameState): GameState {
+  return {
+    ...state,
+    network: {
+      ...state.network,
+      secretLegendaries: Object.fromEntries(
+        Object.entries(state.network.secretLegendaries).map(([id, progress]) => [
+          id,
+          { ...progress, status: "enrolled" as const },
+        ]),
+      ) as GameState["network"]["secretLegendaries"],
+    },
   };
 }
 
@@ -91,30 +104,27 @@ describe("secret legendary balancing", () => {
     };
   }
 
-  it("uses the new standards to boost every linked Secret Legendary", () => {
+  it("uses the designer's effective targets independently from tournament standards", () => {
     expect({
       academy: TOURNAMENT_DEFINITIONS.academy.standard,
       national: TOURNAMENT_DEFINITIONS.national.standard,
       champions: TOURNAMENT_DEFINITIONS.champions.standard,
     }).toEqual({ academy: 150, national: 225, champions: 300 });
 
-    const baselines: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
-      "marco-palena": [75, 90],
-      "lorenzo-todaro": [80, 80],
-      "pietro-scarica": [92, 94],
-      "daniele-panizza": [81, 62],
-      "sara-magnifico": [58, 87],
-      "piero-dipalo": [169, 169],
-      "daniele-maggi": [150, 150],
-      "simone-pedrazzi": [122, 145],
+    const targets: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
+      "marco-palena": [140, 155],
+      "lorenzo-todaro": [151, 151],
+      "daniele-panizza": [155, 140],
+      "sara-magnifico": [130, 165],
+      "daniele-maggi": [140, 140],
+      "pietro-scarica": [220, 230],
+      "piero-dipalo": [200, 210],
+      "simone-pedrazzi": [200, 225],
     };
-    for (const id of Object.keys(baselines) as SecretLegendaryId[]) {
-      const profile = SECRET_LEGENDARIES[id];
-      const [arenaBase, styleBase] = baselines[id]!;
-      const level = getTournamentSchool(profile.schoolId!).level;
-      const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS[level];
-      expect(profile.arenaBase).toBeCloseTo(arenaBase * multiplier);
-      expect(profile.styleBase).toBeCloseTo(styleBase * multiplier);
+    for (const id of Object.keys(targets) as SecretLegendaryId[]) {
+      const [arena, style] = targets[id]!;
+      expect(preparation(id).arena).toBeCloseTo(arena);
+      expect(preparation(id).style).toBeCloseTo(style);
     }
   });
 
@@ -142,6 +152,15 @@ describe("secret legendary balancing", () => {
     expect(participant.stylePreparation).toBeCloseTo(
       getPreparation(profile.styleBase, profile.numericForms, profile.externalExperience),
     );
+    const ordinaryNpcs = result.participants.filter(({ id }) => id.startsWith("npc-"));
+    expect(
+      ordinaryNpcs.reduce((total, entry) => total + entry.arenaPreparation, 0) /
+        ordinaryNpcs.length,
+    ).toBeCloseTo(TOURNAMENT_DEFINITIONS.academy.standard, 10);
+    expect(
+      ordinaryNpcs.reduce((total, entry) => total + entry.stylePreparation, 0) /
+        ordinaryNpcs.length,
+    ).toBeCloseTo(TOURNAMENT_DEFINITIONS.academy.standard, 10);
   });
 
   it("respects Arena, Style and complete Secret Legendary specialties", () => {
@@ -158,12 +177,12 @@ describe("secret legendary balancing", () => {
     const daniele = preparation("daniele-panizza");
     const sara = preparation("sara-magnifico");
 
-    expect(pietro.arena).toBeCloseTo(269.1);
-    expect(pietro.style).toBeCloseTo(274.95);
-    expect(daniele.arena).toBeCloseTo(156.492);
-    expect(daniele.style).toBeCloseTo(119.784);
-    expect(sara.arena).toBeCloseTo(120.06);
-    expect(sara.style).toBeCloseTo(180.09);
+    expect(pietro.arena).toBeCloseTo(220);
+    expect(pietro.style).toBeCloseTo(230);
+    expect(daniele.arena).toBeCloseTo(155);
+    expect(daniele.style).toBeCloseTo(140);
+    expect(sara.arena).toBeCloseTo(130);
+    expect(sara.style).toBeCloseTo(165);
     expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level).toBe(
       "national",
     );
@@ -183,13 +202,11 @@ describe("secret legendary balancing", () => {
     });
   });
 
-  it("applies circuit boosts before Form and experience modifiers", () => {
-    expect(preparation("piero-dipalo").arena).toBeCloseTo(253.5);
-    expect(preparation("piero-dipalo").style).toBeCloseTo(253.5);
-    expect(preparation("daniele-maggi")).toEqual({ arena: 180, style: 180 });
+  it("applies only Form and experience modifiers to manual bases", () => {
+    expect(preparation("piero-dipalo")).toEqual({ arena: 200, style: 210 });
+    expect(preparation("daniele-maggi")).toEqual({ arena: 140, style: 140 });
     expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
-    expect(preparation("simone-pedrazzi").arena).toBeCloseTo(183);
-    expect(preparation("simone-pedrazzi").style).toBeCloseTo(217.5);
+    expect(preparation("simone-pedrazzi")).toEqual({ arena: 200, style: 225 });
     expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level).toBe(
       "national",
     );
@@ -383,17 +400,37 @@ describe("tournament simulation", () => {
           (entry) => entry.schoolId && getTournamentSchool(entry.schoolId).level === "academy",
         ),
     ).toBe(true);
-    const multiplier = TOURNAMENT_DIFFICULTY_MULTIPLIERS.academy;
-    for (const entry of simulation.result.participants.filter(({ id }) => id.startsWith("npc-"))) {
-      expect(entry.arenaPreparation).toBeCloseTo(
-        getPreparation(entry.arenaBase, entry.numericForms, entry.experience) * multiplier,
-      );
-      expect(entry.stylePreparation).toBeCloseTo(
-        getPreparation(entry.styleBase, entry.numericForms, entry.experience) * multiplier,
-      );
-    }
     expect(simulation.result.groupStandings.filter((entry) => entry.qualified)).toHaveLength(32);
   });
+
+  it.each([
+    { level: "academy" as const, standard: 150, qualifiers: 6 },
+    { level: "academy" as const, standard: 150, qualifiers: 12 },
+    { level: "national" as const, standard: 225, qualifiers: 6 },
+    { level: "national" as const, standard: 225, qualifiers: 12 },
+    { level: "champions" as const, standard: 300, qualifiers: 6 },
+    { level: "champions" as const, standard: 300, qualifiers: 12 },
+  ])(
+    "normalizes $level NPCs to standard $standard with $qualifiers school qualifiers",
+    ({ level, standard, qualifiers }) => {
+      const state = withoutExternalSecretLegendaries(createTournamentSchool(qualifiers));
+      const owned = getEligibleSchoolContacts(state).slice(0, qualifiers);
+      const result = simulateTournament(state, level, 1, 421_000, owned).result;
+      const npcs = result.participants.filter(({ id }) => id.startsWith("npc-"));
+      const arenaAverage = npcs.reduce(
+        (total, participant) => total + participant.arenaPreparation,
+        0,
+      ) / npcs.length;
+      const styleAverage = npcs.reduce(
+        (total, participant) => total + participant.stylePreparation,
+        0,
+      ) / npcs.length;
+
+      expect(npcs).toHaveLength(64 - qualifiers);
+      expect(arenaAverage).toBeCloseTo(standard, 10);
+      expect(styleAverage).toBeCloseTo(standard, 10);
+    },
+  );
 
   it("uses 10% before the first ordinary victory and guarantees the first secret afterwards", () => {
     const initial = createTournamentSchool();

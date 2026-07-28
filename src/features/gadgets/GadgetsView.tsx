@@ -6,13 +6,26 @@ import {
   GADGET_PROJECT_UNLOCK_SALES,
   getGadgetRevisionCost,
 } from "../../content/gadgets";
+import {
+  GADGET_RARITIES,
+  getGadgetRarityClassName,
+} from "../../content/gadgetRarities";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   getGadgetAudience,
   getGadgetProductivity,
   getGadgetWorkProgress,
 } from "../../game/gadgetEconomy";
-import type { GadgetProductId, GameState } from "../../game/types";
+import {
+  canRollNextGadgetRarity,
+  getHighestUnlockedGadgetRarity,
+  getUnlockedGadgetRarities,
+} from "../../game/gadgetRarity";
+import type {
+  GadgetProductId,
+  GadgetProductState,
+  GameState,
+} from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import {
   GadgetProductArtwork,
@@ -24,12 +37,45 @@ const numberFormatter = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 2,
 });
 
-function ProductQuality({ quality }: { quality: number }) {
+function GadgetRarityRows({ product }: { product: GadgetProductState }) {
+  const rarities = getUnlockedGadgetRarities(product);
+  const highestRarity = getHighestUnlockedGadgetRarity(product);
   return (
-    <div className="gadget-quality" aria-label={`Qualità ${quality} su 100`}>
-      <strong>{quality}%</strong>
-      <small>Qualità</small>
-      <ProgressBar label="Qualità massima" value={quality} />
+    <div className="gadget-rarity-list" aria-label="Rarità sbloccate">
+      {rarities.map((rarity) => {
+        const rarityState = product.rarities[rarity];
+        return (
+          <div
+            className={`gadget-rarity-row ${getGadgetRarityClassName(rarity)}${
+              rarity === highestRarity ? " is-current" : ""
+            }`}
+            key={rarity}
+          >
+            <div className="gadget-rarity-identity">
+              <span aria-hidden="true" />
+              <strong>{GADGET_RARITIES[rarity].label}</strong>
+            </div>
+            <div
+              className="gadget-rarity-quality"
+              aria-label={`${GADGET_RARITIES[rarity].label}: qualità ${rarityState.quality} su 100`}
+            >
+              <span><small>Qualità</small><strong>{rarityState.quality}%</strong></span>
+              <ProgressBar
+                label={`Qualità ${GADGET_RARITIES[rarity].label}`}
+                value={rarityState.quality}
+              />
+            </div>
+            <span className="gadget-rarity-stat">
+              <small>Venduti</small>
+              <strong>{rarityState.unitsSold.toLocaleString("it-IT")}</strong>
+            </span>
+            <span className="gadget-rarity-stat">
+              <small>Guadagnato</small>
+              <strong>{formatCurrency(rarityState.totalProfit)}</strong>
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -58,7 +104,14 @@ function GadgetProductCard({
     ? state.gadgets.minigame
     : undefined;
   const slotBusy = Boolean(state.gadgets.activeWork || state.gadgets.minigame);
-  const revisionCost = getGadgetRevisionCost(productId);
+  const highestRarity = getHighestUnlockedGadgetRarity(product);
+  const highestRarityState = product.rarities[highestRarity];
+  const canRollNextRarity = product.prototypeCompleted &&
+    canRollNextGadgetRarity(state, productId, highestRarity);
+  const canImproveQuality = product.prototypeCompleted && (
+    highestRarityState.quality < 100 || canRollNextRarity
+  );
+  const revisionCost = getGadgetRevisionCost(productId, highestRarity);
   const previousDefinition = definition.previousProductId
     ? GADGET_DEFINITIONS[definition.previousProductId]
     : undefined;
@@ -82,30 +135,25 @@ function GadgetProductCard({
   }
 
   const visualState = product.accepted
-    ? product.quality > 0 ? "is-selling" : "is-warning"
+    ? highestRarityState.quality > 0 ? "is-selling" : "is-warning"
     : work ? "is-working"
       : minigame?.status === "ready" || product.prototypeCompleted
         ? "is-prototype"
         : "is-available";
 
   return (
-    <article className={`gadget-product-card ${visualState}`}>
+    <article className={`gadget-product-card ${visualState} ${getGadgetRarityClassName(highestRarity)}${
+      product.prototypeCompleted ? " has-rarity" : ""
+    }`}>
       <span className="gadget-product-rail" aria-hidden="true" />
-      <GadgetProductArtwork productId={productId} />
+      <GadgetProductArtwork productId={productId} rarity={highestRarity} />
       <div className="gadget-product-heading">
         <span>{product.accepted ? "In catalogo" : product.projectPurchased ? "Prototipo" : "Progetto disponibile"}</span>
         <h2>{definition.name}</h2>
         <p>{definition.description}</p>
       </div>
 
-      {product.prototypeCompleted ? <ProductQuality quality={product.quality} /> : null}
-
-      {product.accepted ? (
-        <div className="gadget-sales-stats">
-          <span><small>Venduti</small><strong>{product.unitsSold.toLocaleString("it-IT")}</strong></span>
-          <span><small>Guadagnato</small><strong>{formatCurrency(product.totalProfit)}</strong></span>
-        </div>
-      ) : null}
+      {product.prototypeCompleted ? <GadgetRarityRows product={product} /> : null}
 
       <div className="gadget-product-status">
         {work ? (
@@ -117,7 +165,7 @@ function GadgetProductCard({
           </>
         ) : minigame?.status === "ready" ? (
           <span className="gadget-status-label is-ready">Prova qualità pronta</span>
-        ) : product.accepted && product.quality === 0 ? (
+        ) : product.accepted && highestRarityState.quality === 0 ? (
           <span className="gadget-status-label is-warning">Non vendibile</span>
         ) : product.accepted ? (
           <span className="gadget-status-label is-selling">Vendita automatica attiva</span>
@@ -145,7 +193,7 @@ function GadgetProductCard({
             <button type="button" className="primary" onClick={() => onAccept(productId)}>
               Metti in vendita
             </button>
-            {product.quality < 100 ? (
+            {canImproveQuality ? (
               <button
                 type="button"
                 disabled={slotBusy || state.school.euros < revisionCost}
@@ -155,7 +203,7 @@ function GadgetProductCard({
               </button>
             ) : null}
           </>
-        ) : product.quality < 100 ? (
+        ) : canImproveQuality ? (
           <button
             type="button"
             disabled={slotBusy || state.school.euros < revisionCost}
@@ -199,6 +247,21 @@ export function GadgetsView({
   const minigameProduct = minigame
     ? state.gadgets.products[minigame.productId]
     : undefined;
+  const minigameHighestRarity = minigameProduct
+    ? getHighestUnlockedGadgetRarity(minigameProduct)
+    : "common";
+  const minigameQuality = minigameProduct
+    ? minigameProduct.rarities[minigameHighestRarity].quality
+    : 0;
+  const minigameCanRevise = Boolean(
+    minigame && minigameProduct && (
+      minigameQuality < 100 ||
+      canRollNextGadgetRarity(state, minigame.productId, minigameHighestRarity)
+    ),
+  );
+  const minigameRevisionCost = minigame
+    ? getGadgetRevisionCost(minigame.productId, minigameHighestRarity)
+    : 0;
 
   return (
     <main className="overview-view gadget-view">
@@ -274,10 +337,11 @@ export function GadgetsView({
         <GadgetRhythmGame
           key={`${minigame.productId}-${minigame.seed}`}
           minigame={minigame}
-          quality={minigameProduct.quality}
+          quality={minigameQuality}
           accepted={minigameProduct.accepted}
-          revisionCost={getGadgetRevisionCost(minigame.productId)}
-          canAffordRevision={state.school.euros >= getGadgetRevisionCost(minigame.productId)}
+          revisionCost={minigameRevisionCost}
+          canRevise={minigameCanRevise}
+          canAffordRevision={state.school.euros >= minigameRevisionCost}
           onComplete={(score) => onCompleteMinigame(minigame.productId, score)}
           onAccept={() => onAccept(minigame.productId)}
           onRevision={() => onStartRevision(minigame.productId)}

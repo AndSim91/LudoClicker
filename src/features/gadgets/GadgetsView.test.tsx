@@ -1,7 +1,11 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/initialState";
-import type { GameState } from "../../game/types";
+import type {
+  GadgetProductState,
+  GadgetRarityState,
+  GameState,
+} from "../../game/types";
 import { GadgetsView } from "./GadgetsView";
 
 afterEach(cleanup);
@@ -36,6 +40,25 @@ function unlockedState(): GameState {
   };
 }
 
+function withCommonRarity(
+  product: GadgetProductState,
+  rarity: Partial<GadgetRarityState>,
+  productState: Partial<GadgetProductState> = {},
+): GadgetProductState {
+  return {
+    ...product,
+    ...productState,
+    rarities: {
+      ...product.rarities,
+      common: {
+        ...product.rarities.common,
+        unlocked: true,
+        ...rarity,
+      },
+    },
+  };
+}
+
 describe("GadgetsView", () => {
   it("shows the compact catalog information and starts the paid Polsino project", () => {
     const actions = handlers();
@@ -60,15 +83,11 @@ describe("GadgetsView", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 75,
-            unitsSold: 123,
-            totalProfit: 1_845,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 75, unitsSold: 123, totalProfit: 1_845 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
         },
       },
     };
@@ -91,6 +110,7 @@ describe("GadgetsView", () => {
         minigame: {
           productId: "wristband",
           kind: "revision",
+          rarity: "common",
           seed: 123,
           previousQuality: 75,
           status: "result",
@@ -98,12 +118,11 @@ describe("GadgetsView", () => {
         },
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            quality: 75,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 75 },
+            { projectPurchased: true, prototypeCompleted: true },
+          ),
         },
       },
     };
@@ -113,5 +132,76 @@ describe("GadgetsView", () => {
     expect(screen.getByRole("dialog", { name: /Polsino/ })).toBeVisible();
     expect(screen.getByText("20%")).toBeVisible();
     expect(screen.getByText("La qualità massima resta al 75%.")).toBeVisible();
+  });
+
+  it("shows one row per unlocked rarity and improves only the highest one", () => {
+    const initial = unlockedState();
+    const common = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 100, unitsSold: 180, totalProfit: 3_600 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const selling: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...common,
+            rarities: {
+              ...common.rarities,
+              rare: {
+                ...common.rarities.rare,
+                unlocked: true,
+                quality: 64,
+                unitsSold: 30,
+                totalProfit: 480,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    render(<GadgetsView state={selling} {...handlers()} />);
+
+    expect(screen.getByText("Comune")).toBeVisible();
+    expect(screen.getByText("Raro")).toBeVisible();
+    expect(screen.getByText("64%")).toBeVisible();
+    expect(screen.getByRole("button", { name: /Migliora qualità.*1250,00/ })).toBeVisible();
+    expect(document.querySelector(".gadget-product-card.rarity-rare")).toBeTruthy();
+    expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
+  });
+
+  it("announces the offered rarity in the rhythm game without showing its chance", () => {
+    const initial = unlockedState();
+    const product = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 80, unitsSold: 200 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const running: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: { ...initial.gadgets.products, wristband: product },
+        minigame: {
+          productId: "wristband",
+          kind: "revision",
+          rarity: "common",
+          opportunityRarity: "rare",
+          seed: 123,
+          previousQuality: 80,
+          status: "running",
+        },
+      },
+    };
+
+    render(<GadgetsView state={running} {...handlers()} />);
+
+    expect(screen.getByText("Occasione: Raro")).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Polsino" })).toHaveClass("rarity-rare");
+    expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
   });
 });

@@ -281,6 +281,7 @@
 }
 
 .gadget-minigame-overlay {
+  --gadget-rarity-color: var(--rarity-common-accent);
   position: fixed;
   z-index: 1200;
   inset: 0;
@@ -288,7 +289,7 @@
   place-items: center;
   padding: 14px;
   color: #f7fbff;
-  background: rgb(4 12 24 / 94%);
+  background: color-mix(in srgb, var(--gadget-rarity-color) 18%, rgb(4 12 24 / 96%));
   backdrop-filter: blur(8px);
 }
 
@@ -299,8 +300,8 @@
   width: min(760px, 100%);
   height: min(820px, calc(100dvh - 28px));
   overflow: hidden;
-  background: #08182b;
-  border: 1px solid rgb(255 255 255 / 16%);
+  background: color-mix(in srgb, var(--gadget-rarity-color) 17%, #08131f);
+  border: 1px solid color-mix(in srgb, var(--gadget-rarity-color) 48%, rgb(255 255 255 / 16%));
   border-radius: 8px;
   box-shadow: 0 24px 80px rgb(0 0 0 / 55%);
 }
@@ -317,6 +318,13 @@
 .gadget-minigame-shell > header span {
   color: #9bb1c9;
   font-size: 11px;
+}
+
+.gadget-minigame-shell > header .gadget-minigame-rarity {
+  color: color-mix(in srgb, var(--gadget-rarity-color) 58%, white);
+  font-weight: 700;
+  letter-spacing: .045em;
+  text-transform: uppercase;
 }
 
 .gadget-minigame-shell h2 {
@@ -345,7 +353,11 @@
   touch-action: none;
   user-select: none;
   background:
-    linear-gradient(180deg, rgb(6 19 36 / 70%), rgb(12 37 65 / 92%)),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--gadget-rarity-color) 9%, rgb(6 19 36 / 78%)),
+      color-mix(in srgb, var(--gadget-rarity-color) 28%, rgb(7 23 40 / 94%))
+    ),
     repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgb(255 255 255 / 7%) calc(25% - 1px) 25%);
 }
 
@@ -359,8 +371,8 @@
   top: 82%;
   left: 0;
   height: 3px;
-  background: #55c2ff;
-  box-shadow: 0 0 16px rgb(85 194 255 / 75%);
+  background: color-mix(in srgb, var(--gadget-rarity-color) 68%, white);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--gadget-rarity-color) 74%, transparent);
 }
 
 .gadget-falling-note {
@@ -374,10 +386,10 @@
   place-items: center;
   padding: 0;
   color: white;
-  background: #176fa6;
-  border: 2px solid #9ce0ff;
+  background: color-mix(in srgb, var(--gadget-rarity-color) 72%, #13293c);
+  border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 45%, white);
   border-radius: 12px;
-  box-shadow: 0 7px 20px rgb(0 0 0 / 35%), 0 0 14px rgb(85 194 255 / 38%);
+  box-shadow: 0 7px 20px rgb(0 0 0 / 35%), 0 0 14px color-mix(in srgb, var(--gadget-rarity-color) 48%, transparent);
   transform: translate(-50%, -50%);
   font-size: 22px;
   font-weight: 800;
@@ -406,9 +418,9 @@
   justify-self: center;
   color: white;
   background: rgb(4 19 34 / 86%);
-  border: 2px solid #55c2ff;
+  border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 68%, white);
   border-radius: 50%;
-  box-shadow: 0 0 0 5px rgb(85 194 255 / 12%);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gadget-rarity-color) 18%, transparent);
   pointer-events: auto;
   touch-action: none;
 }
@@ -418,7 +430,7 @@
 }
 
 .gadget-lane-controls span {
-  color: #8fc9ec;
+  color: color-mix(in srgb, var(--gadget-rarity-color) 48%, white);
   font-size: 10px;
 }
 
@@ -438,7 +450,7 @@
 
 .gadget-judgment {
   top: 52%;
-  color: #9ce0ff;
+  color: color-mix(in srgb, var(--gadget-rarity-color) 42%, white);
   font-size: 24px;
 }
 
@@ -497,7 +509,7 @@
 }
 
 .gadget-result-kicker {
-  color: var(--blue-600);
+  color: var(--gadget-rarity-color);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .07em;
@@ -515,7 +527,7 @@
 }
 
 .gadget-result-score strong {
-  color: var(--blue-700);
+  color: var(--gadget-rarity-color);
   font-size: 64px;
   line-height: 1;
 }

@@ -26,7 +26,7 @@ function getDifficultyMultiplier(
   return multipliers[getTournamentSchool(profile.schoolId).level];
 }
 
-function boost(value: number | undefined, multiplier: number): number | undefined {
+function scale(value: number | undefined, multiplier: number): number | undefined {
   return value === undefined ? value : value * multiplier;
 }
 
@@ -43,8 +43,8 @@ export function applySecretLegendaryDifficultyChange(
       ? contact
       : {
           ...contact,
-          arenaBase: boost(contact.arenaBase, multiplier),
-          styleBase: boost(contact.styleBase, multiplier),
+          arenaBase: scale(contact.arenaBase, multiplier),
+          styleBase: scale(contact.styleBase, multiplier),
         };
   });
   const retainedProgress = Object.fromEntries(
@@ -57,8 +57,8 @@ export function applySecretLegendaryDifficultyChange(
             ? progress
             : {
                 ...progress,
-                arenaBase: boost(progress.arenaBase, multiplier),
-                styleBase: boost(progress.styleBase, multiplier),
+                arenaBase: scale(progress.arenaBase, multiplier),
+                styleBase: scale(progress.styleBase, multiplier),
               },
         ];
       },

@@ -638,28 +638,45 @@ export type GadgetProductId =
   | "tshirt"
   | "hoodie";
 
+export type GadgetRarity =
+  | "common"
+  | "rare"
+  | "ultra-rare"
+  | "legendary"
+  | "secret-legendary";
+
 export type GadgetWorkKind = "development" | "revision";
 
-export interface GadgetProductState {
+export interface GadgetRarityState {
   unlocked: boolean;
-  projectPurchased: boolean;
-  prototypeCompleted: boolean;
-  accepted: boolean;
   quality: number;
   unitsSold: number;
   totalProfit: number;
   salesRemainder: number;
 }
 
+export interface GadgetProductState {
+  unlocked: boolean;
+  projectPurchased: boolean;
+  prototypeCompleted: boolean;
+  accepted: boolean;
+  rarities: Record<GadgetRarity, GadgetRarityState>;
+}
+
 export interface GadgetWorkState {
   productId: GadgetProductId;
   kind: GadgetWorkKind;
+  rarity: GadgetRarity;
+  opportunityRarity?: GadgetRarity;
   completedWorkMs: number;
 }
 
 export interface GadgetMinigameState {
   productId: GadgetProductId;
   kind: GadgetWorkKind;
+  rarity: GadgetRarity;
+  opportunityRarity?: GadgetRarity;
+  unlockedRarity?: GadgetRarity;
   seed: number;
   previousQuality: number;
   status: "ready" | "running" | "result";

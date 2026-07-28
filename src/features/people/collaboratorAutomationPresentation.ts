@@ -8,6 +8,7 @@ import {
 } from "../../game/equipment";
 import { selectActiveEmail } from "../../game/selectors";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
+import { GADGET_RARITY_ORDER } from "../../content/gadgetRarities";
 import {
   getGadgetWorkDurationMs,
   getGadgetWorkProgress,
@@ -277,7 +278,12 @@ export function getCollaboratorAutomationPresentation({
         progressLabel: work.kind === "development"
           ? `Sviluppo di ${definition.name}`
           : `Revisione di ${definition.name}`,
-        durationMs: getGadgetWorkDurationMs(state, work.productId, work.kind),
+        durationMs: getGadgetWorkDurationMs(
+          state,
+          work.productId,
+          work.kind,
+          work.rarity,
+        ),
       };
     }
     const minigame = state.gadgets.minigame;
@@ -292,7 +298,10 @@ export function getCollaboratorAutomationPresentation({
       (product) => product.accepted,
     );
     const productsInSale = acceptedProducts.filter(
-      (product) => product.quality > 0,
+      (product) => GADGET_RARITY_ORDER.some(
+        (rarity) => product.rarities[rarity].unlocked &&
+          product.rarities[rarity].quality > 0,
+      ),
     ).length;
     if (productsInSale > 0) {
       return {

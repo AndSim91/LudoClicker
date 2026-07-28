@@ -24,7 +24,13 @@ import {
   getGadgetWorkSpeed,
 } from "./gadgetEconomy";
 import { createInitialState } from "./initialState";
-import type { Collaborator, GameState, TournamentResult } from "./types";
+import type {
+  Collaborator,
+  GadgetProductState,
+  GadgetRarityState,
+  GameState,
+  TournamentResult,
+} from "./types";
 
 function gadgetCollaborator(id = "gadget-collaborator"): Collaborator {
   return {
@@ -54,9 +60,35 @@ function unlockedState(): GameState {
   }, 1_000);
 }
 
+function withCommonRarity(
+  product: GadgetProductState,
+  rarity: Partial<GadgetRarityState>,
+  productState: Partial<GadgetProductState> = {},
+): GadgetProductState {
+  return {
+    ...product,
+    ...productState,
+    rarities: {
+      ...product.rarities,
+      common: {
+        ...product.rarities.common,
+        unlocked: true,
+        ...rarity,
+      },
+    },
+  };
+}
+
+function commonRarity(
+  state: GameState,
+  productId: keyof GameState["gadgets"]["products"],
+): GadgetRarityState {
+  return state.gadgets.products[productId].rarities.common;
+}
+
 function completeCurrentWork(state: GameState): GameState {
   const work = state.gadgets.activeWork!;
-  const remaining = getGadgetWorkRequirement(work.productId, work.kind) -
+  const remaining = getGadgetWorkRequirement(work.productId, work.kind, work.rarity) -
     work.completedWorkMs;
   return processGadgets(state, remaining / getGadgetWorkSpeed(state, work.kind), 2_000);
 }
@@ -140,7 +172,7 @@ describe("Gadget flow", () => {
       "wristband",
       75,
     );
-    expect(firstResult.gadgets.products.wristband.quality).toBe(75);
+    expect(commonRarity(firstResult, "wristband").quality).toBe(75);
 
     const revisionStarted = startGadgetRevision(firstResult, "wristband");
     expect(revisionStarted.school.euros).toBe(
@@ -151,7 +183,7 @@ describe("Gadget flow", () => {
       "wristband",
       20,
     );
-    expect(revised.gadgets.products.wristband.quality).toBe(75);
+    expect(commonRarity(revised, "wristband").quality).toBe(75);
     expect(revised.gadgets.minigame?.score).toBe(20);
   });
 
@@ -188,13 +220,11 @@ describe("Gadget flow", () => {
           ...staffed.gadgets,
           products: {
             ...staffed.gadgets.products,
-            wristband: {
-              ...product,
-              projectPurchased: true,
-              prototypeCompleted: true,
-              accepted: true,
-              quality: 100,
-            },
+            wristband: withCommonRarity(
+              product,
+              { quality: 100 },
+              { projectPurchased: true, prototypeCompleted: true, accepted: true },
+            ),
           },
         },
       };
@@ -205,10 +235,10 @@ describe("Gadget flow", () => {
           ...selling.gadgets,
           products: {
             ...selling.gadgets.products,
-            wristband: {
-              ...selling.gadgets.products.wristband,
-              unitsSold: audience,
-            },
+            wristband: withCommonRarity(
+              selling.gadgets.products.wristband,
+              { unitsSold: audience },
+            ),
           },
         },
       };
@@ -219,26 +249,26 @@ describe("Gadget flow", () => {
       expect(getGadgetMarginalMonthlyAttemptCapacity(selling)).toBeCloseTo(
         GAME_CONFIG.gameMonthMs / marginalIntervalMs,
       );
-      expect(processGadgets(
+      expect(commonRarity(processGadgets(
         selling,
         ordinaryIntervalMs - 1,
         ordinaryIntervalMs,
-      ).gadgets.products.wristband.unitsSold).toBe(0);
-      expect(processGadgets(
+      ), "wristband").unitsSold).toBe(0);
+      expect(commonRarity(processGadgets(
         selling,
         ordinaryIntervalMs,
         ordinaryIntervalMs + 1,
-      ).gadgets.products.wristband.unitsSold).toBe(1);
-      expect(processGadgets(
+      ), "wristband").unitsSold).toBe(1);
+      expect(commonRarity(processGadgets(
         marginal,
         marginalIntervalMs - 1,
         marginalIntervalMs,
-      ).gadgets.products.wristband.unitsSold).toBe(audience);
-      expect(processGadgets(
+      ), "wristband").unitsSold).toBe(audience);
+      expect(commonRarity(processGadgets(
         marginal,
         marginalIntervalMs,
         marginalIntervalMs + 1,
-      ).gadgets.products.wristband.unitsSold).toBe(audience + 1);
+      ), "wristband").unitsSold).toBe(audience + 1);
     },
   );
 
@@ -251,13 +281,11 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...product,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-          },
+          wristband: withCommonRarity(
+            product,
+            { quality: 100 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
         },
       },
     };
@@ -269,8 +297,8 @@ describe("Gadget flow", () => {
     );
 
     expect(getGadgetAudience(selling)).toBe(1_000);
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(1);
-    expect(sold.gadgets.products.wristband.totalProfit).toBe(20);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(1);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
     expect(sold.school.euros).toBe(selling.school.euros + 20);
   });
 
@@ -283,17 +311,18 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...baseProduct,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 0,
-          },
+          wristband: withCommonRarity(
+            baseProduct,
+            { quality: 0 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
         },
       },
     };
-    expect(processGadgets(zeroQuality, 60_000, 61_000).gadgets.products.wristband.unitsSold).toBe(0);
+    expect(commonRarity(
+      processGadgets(zeroQuality, 60_000, 61_000),
+      "wristband",
+    ).unitsSold).toBe(0);
 
     const nearlyUnlocked: GameState = {
       ...zeroQuality,
@@ -301,11 +330,13 @@ describe("Gadget flow", () => {
         ...zeroQuality.gadgets,
         products: {
           ...zeroQuality.gadgets.products,
-          wristband: {
-            ...zeroQuality.gadgets.products.wristband,
-            quality: 100,
-            unitsSold: GADGET_PROJECT_UNLOCK_SALES - 1,
-          },
+          wristband: withCommonRarity(
+            zeroQuality.gadgets.products.wristband,
+            {
+              quality: 100,
+              unitsSold: GADGET_PROJECT_UNLOCK_SALES - 1,
+            },
+          ),
         },
       },
     };
@@ -314,7 +345,7 @@ describe("Gadget flow", () => {
       GAME_CONFIG.gameMonthMs,
       61_000,
     );
-    expect(unlocked.gadgets.products.wristband.unitsSold).toBe(100);
+    expect(commonRarity(unlocked, "wristband").unitsSold).toBe(100);
     expect(unlocked.gadgets.products.mug.unlocked).toBe(true);
   });
 
@@ -327,14 +358,11 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-            unitsSold: audience,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100, unitsSold: audience },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
         },
       },
     };
@@ -344,15 +372,15 @@ describe("Gadget flow", () => {
       GAME_CONFIG.gameMonthMs * 9,
       541_000,
     );
-    expect(almostSold.gadgets.products.wristband.unitsSold).toBe(audience);
+    expect(commonRarity(almostSold, "wristband").unitsSold).toBe(audience);
 
     const sold = processGadgets(
       almostSold,
       GAME_CONFIG.gameMonthMs,
       601_000,
     );
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
-    expect(sold.gadgets.products.wristband.totalProfit).toBe(20);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
   });
 
   it("keeps ordinary and marginal sales active for different products", () => {
@@ -364,22 +392,21 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-            unitsSold: audience,
-          },
-          mug: {
-            ...initial.gadgets.products.mug,
-            unlocked: true,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100, unitsSold: audience },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+          mug: withCommonRarity(
+            initial.gadgets.products.mug,
+            { quality: 100 },
+            {
+              unlocked: true,
+              projectPurchased: true,
+              prototypeCompleted: true,
+              accepted: true,
+            },
+          ),
         },
       },
     };
@@ -390,8 +417,8 @@ describe("Gadget flow", () => {
       601_000,
     );
 
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
-    expect(sold.gadgets.products.mug.unitsSold).toBe(10);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
+    expect(commonRarity(sold, "mug").unitsSold).toBe(10);
   });
 
   it("returns a product to ordinary sales when its audience grows", () => {
@@ -403,14 +430,11 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-            unitsSold: audience,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100, unitsSold: audience },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
         },
       },
     };
@@ -422,11 +446,11 @@ describe("Gadget flow", () => {
         peakActiveMembers: saturated.school.peakActiveMembers + 100,
       },
     };
-    expect(processGadgets(
+    expect(commonRarity(processGadgets(
       largerAudience,
       GAME_CONFIG.gameMonthMs,
       61_000,
-    ).gadgets.products.wristband.unitsSold).toBe(audience + 1);
+    ), "wristband").unitsSold).toBe(audience + 1);
   });
 
   it("allows accepting a zero-quality prototype without making it sell", () => {
@@ -439,8 +463,11 @@ describe("Gadget flow", () => {
     const accepted = acceptGadgetProduct(result, "wristband");
 
     expect(accepted.gadgets.products.wristband.accepted).toBe(true);
-    expect(accepted.gadgets.products.wristband.quality).toBe(0);
-    expect(processGadgets(accepted, 60_000, 10_000).gadgets.products.wristband.unitsSold).toBe(0);
+    expect(commonRarity(accepted, "wristband").quality).toBe(0);
+    expect(commonRarity(
+      processGadgets(accepted, 60_000, 10_000),
+      "wristband",
+    ).unitsSold).toBe(0);
   });
 
   it("uses one shared commercial pool and adds deterministic cross-sales", () => {
@@ -456,21 +483,21 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-          },
-          mug: {
-            ...initial.gadgets.products.mug,
-            unlocked: true,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+          mug: withCommonRarity(
+            initial.gadgets.products.mug,
+            { quality: 100 },
+            {
+              unlocked: true,
+              projectPurchased: true,
+              prototypeCompleted: true,
+              accepted: true,
+            },
+          ),
         },
       },
     };
@@ -480,13 +507,13 @@ describe("Gadget flow", () => {
       GAME_CONFIG.gameMonthMs * 5,
       301_000,
     );
-    const wristbands = sold.gadgets.products.wristband.unitsSold;
-    const mugs = sold.gadgets.products.mug.unitsSold;
+    const wristbands = commonRarity(sold, "wristband").unitsSold;
+    const mugs = commonRarity(sold, "mug").unitsSold;
 
     expect(wristbands + mugs).toBe(12);
     expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.5);
-    expect(sold.gadgets.products.wristband.totalProfit).toBe(120);
-    expect(sold.gadgets.products.mug.totalProfit).toBe(180);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(120);
+    expect(commonRarity(sold, "mug").totalProfit).toBe(180);
   });
 
   it("never turns a cross-sale into another unit of the same product", () => {
@@ -503,22 +530,21 @@ describe("Gadget flow", () => {
         ...initial.gadgets,
         products: {
           ...initial.gadgets.products,
-          wristband: {
-            ...initial.gadgets.products.wristband,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-          },
-          mug: {
-            ...initial.gadgets.products.mug,
-            unlocked: true,
-            projectPurchased: true,
-            prototypeCompleted: true,
-            accepted: true,
-            quality: 100,
-            unitsSold: audience,
-          },
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+          mug: withCommonRarity(
+            initial.gadgets.products.mug,
+            { quality: 100, unitsSold: audience },
+            {
+              unlocked: true,
+              projectPurchased: true,
+              prototypeCompleted: true,
+              accepted: true,
+            },
+          ),
         },
       },
     };
@@ -529,8 +555,162 @@ describe("Gadget flow", () => {
       271_000,
     );
 
-    expect(sold.gadgets.products.wristband.unitsSold).toBe(9);
-    expect(sold.gadgets.products.mug.unitsSold).toBe(audience);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(9);
+    expect(commonRarity(sold, "mug").unitsSold).toBe(audience);
     expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.25);
+  });
+
+  it("stores a guaranteed rarity opportunity and unlocks Rare only above 50%", () => {
+    const initial = unlockedState();
+    const ready: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100, unitsSold: 750 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+        },
+      },
+    };
+
+    const revision = startGadgetRevision(ready, "wristband");
+    expect(revision.gadgets.activeWork).toMatchObject({
+      rarity: "common",
+      opportunityRarity: "rare",
+    });
+
+    const result = completeGadgetMinigame(
+      startGadgetMinigame(completeCurrentWork(revision), "wristband"),
+      "wristband",
+      51,
+    );
+
+    expect(result.gadgets.minigame?.unlockedRarity).toBe("rare");
+    expect(commonRarity(result, "wristband").quality).toBe(100);
+    expect(result.gadgets.products.wristband.rarities.rare).toMatchObject({
+      unlocked: true,
+      quality: 51,
+      unitsSold: 0,
+      totalProfit: 0,
+    });
+  });
+
+  it("does not unlock the offered rarity at exactly 50%", () => {
+    const initial = unlockedState();
+    const ready: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 75, unitsSold: 830 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+        },
+      },
+    };
+
+    const result = completeGadgetMinigame(
+      startGadgetMinigame(
+        completeCurrentWork(startGadgetRevision(ready, "wristband")),
+        "wristband",
+      ),
+      "wristband",
+      50,
+    );
+
+    expect(result.gadgets.minigame?.opportunityRarity).toBe("rare");
+    expect(result.gadgets.minigame?.unlockedRarity).toBeUndefined();
+    expect(result.gadgets.products.wristband.rarities.rare.unlocked).toBe(false);
+    expect(commonRarity(result, "wristband").quality).toBe(75);
+  });
+
+  it("shares sales capacity across rarity variants and applies their value multiplier", () => {
+    const initial = unlockedState();
+    const product = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 100 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const selling: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...product,
+            rarities: {
+              ...product.rarities,
+              rare: { ...product.rarities.rare, unlocked: true, quality: 100 },
+            },
+          },
+        },
+      },
+    };
+
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    );
+
+    expect(commonRarity(sold, "wristband")).toMatchObject({
+      unitsSold: 1,
+      totalProfit: 20,
+    });
+    expect(sold.gadgets.products.wristband.rarities.rare).toMatchObject({
+      unitsSold: 1,
+      totalProfit: 25,
+    });
+    expect(sold.school.euros).toBe(selling.school.euros + 45);
+  });
+
+  it("unlocks the next Gadget from total family sales across rarities", () => {
+    const initial = unlockedState();
+    const product = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 100, unitsSold: 60 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const selling: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...product,
+            rarities: {
+              ...product.rarities,
+              rare: {
+                ...product.rarities.rare,
+                unlocked: true,
+                quality: 100,
+                unitsSold: 39,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const sold = processGadgets(
+      selling,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    );
+
+    expect(
+      commonRarity(sold, "wristband").unitsSold +
+        sold.gadgets.products.wristband.rarities.rare.unitsSold,
+    ).toBeGreaterThanOrEqual(GADGET_PROJECT_UNLOCK_SALES);
+    expect(sold.gadgets.products.mug.unlocked).toBe(true);
   });
 });

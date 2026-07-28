@@ -411,36 +411,23 @@ Un ripescato che non appartiene al vero podio riceve qualificazione e immunità,
 
 ## 12. Standard di difficoltà
 
-I valori non sono cancelli rigidi:
+Lo standard è la media aritmetica obiettivo della preparazione degli avversari
+ordinari, calcolata separatamente per Arena e Stile dopo Forme ed esperienza.
+Non comprende gli atleti della scuola, i posti vacanti o i Leggendari Segreti.
 
-| Torneo | Standard competitivo |
-|---|---:|
-| Accademico | 150 |
-| Nazionale | 225 |
-| Champion's | 300 |
+| Torneo | Media Arena | Media Stile |
+|---|---:|---:|
+| Accademico | 150 | 150 |
+| Nazionale | 225 | 225 |
+| Champion's | 300 | 300 |
 
-Curva indicativa desiderata nella statistica rilevante:
+Ogni campo viene normalizzato direttamente sul proprio standard, sia con sei
+sia con dodici qualificati della scuola. Lo standard non è una soglia rigida
+di vittoria: il torneo contiene comunque fasce inferiori e superiori alla media.
 
-| Scarto dallo standard | Probabilità obiettivo |
-|---:|---:|
-| 0 | circa 3% |
-| +15 | circa 9% |
-| +30 | circa 24% |
-| +36 | circa 33% |
-| +45 | circa 50% |
-| +60 | circa 75% |
-| +75 | circa 90% |
-
-Vincoli specifici:
-
-- preparazione 336 alla Champion's: circa 33% di vittoria;
-- preparazione 375 alla Champion's: fascia 88–92%;
-- Forma 1 eccezionale può raggiungere il podio Accademico, ma vincere deve essere statisticamente trascurabile;
-- Forma 5 inesperto può raggiungere la Champion's, ma il podio deve essere statisticamente trascurabile;
-- Forma 4, base 100, esperienza 20 produce 224;
-- Forma 7, esperienza 20 e basi alte deve essere il profilo favorito della competizione.
-
-Queste percentuali sono obiettivi della simulazione completa, non formule che impongono il vincitore.
+Le probabilità di vittoria dipendono dalla distribuzione completa, dalla
+condizione e dal tabellone. La baseline seguente è diagnostica e non modifica
+direttamente il risultato degli incontri.
 
 ### 12.1 Baseline Monte Carlo dell'implementazione
 
@@ -448,15 +435,17 @@ Prima calibrazione con 500 Champion's indipendenti per valore, un atleta della s
 
 | Preparazione | Vittoria Arena | Podio Arena |
 |---:|---:|---:|
-| 300 | 0,8% | 12,0% |
-| 315 | 6,4% | 38,0% |
-| 330 | 26,6% | 64,2% |
-| 336 | 34,8% | 72,2% |
-| 345 | 52,4% | 82,8% |
-| 360 | 74,4% | 90,6% |
-| 375 | 89,8% | 95,6% |
+| 425 | 1,0% | 18,0% |
+| 448 | 9,2% | 35,8% |
+| 469 | 20,6% | 58,0% |
+| 478 | 34,4% | 67,6% |
+| 490 | 45,6% | 74,6% |
+| 512 | 75,2% | 93,8% |
+| 533 | 90,0% | 98,0% |
 
-La baseline centra i vincoli espliciti 336≈33% e 375≈90%. A quota 300 la vittoria rimane eccezionale, ma la probabilità di podio è tangibile e rispetta l'obiettivo “300 per entrare in classifica”. Il probe deve rimanere eseguibile separatamente dai test rapidi.
+Con una media del campo pari a 300, la baseline colloca circa il 33% di
+vittoria a preparazione 478 e circa il 90% a preparazione 533. Il probe deve
+rimanere eseguibile separatamente dai test rapidi.
 
 ## 13. Generazione degli avversari
 
@@ -488,15 +477,23 @@ qualificati presenti ne vengono generati 52.
 | Favoriti | 8 |
 | Élite | 2 |
 
-Intervalli di preparazione nella statistica di qualificazione:
+Intervalli usati per selezionare la statistica principale prima della
+normalizzazione del campo:
 
 | Torneo | Ordinari | Contendenti | Favoriti | Élite |
 |---|---:|---:|---:|---:|
-| Accademico | 66–112,8 | 114–142,8 | 144–166,8 | 168–186 |
-| Nazionale | 112,5–171 | 172,5–216 | 217,5–253,5 | 255–277,5 |
-| Champion's | 150–231 | 232,5–283,5 | 285–321 | 322,5–345 |
+| Accademico | 55–94 | 95–119 | 120–139 | 140–155 |
+| Nazionale | 75–114 | 115–144 | 145–169 | 170–185 |
+| Champion's | 100–154 | 155–189 | 190–214 | 215–230 |
 
 I posti vengono divisi in modo uniforme tra qualificati principalmente Arena e principalmente Stile. La statistica secondaria viene generata liberamente; i profili bilanciati emergono senza una categoria artificiale.
+
+Dopo la selezione, Arena e Stile vengono normalizzati con due fattori
+indipendenti affinché la media degli NPC ordinari coincida esattamente con lo
+standard del torneo. La normalizzazione conserva i rapporti interni del campo.
+L'eventuale Leggendario Segreto viene inserito soltanto dopo questa operazione
+e non partecipa al calcolo della media; gli NPC ordinari rimasti vengono
+normalizzati nuovamente dopo la sostituzione.
 
 Nei tornei successivi gli NPC aggiuntivi necessari a sostituire i posti non conquistati dalla scuola vengono distribuiti proporzionalmente tra le quattro fasce, mantenendo almeno due profili Élite.
 
@@ -510,7 +507,8 @@ Nei tornei successivi gli NPC aggiuntivi necessari a sostituire i posti non conq
 
 Le percentuali descrivono i candidati. La selezione per fascia può far emergere più rarità elevate nei posti superiori senza modificare direttamente il tiro base.
 
-**Da calibrare:** composizione finale, coefficiente Arena e probabilità di profili oltre 230. La prima implementazione deve includere una simulazione ripetibile che produca un report delle probabilità.
+La composizione finale e le code della distribuzione restano monitorate con una
+simulazione ripetibile che produce un report delle probabilità.
 
 ## 14. Leggendari Segreti
 
@@ -529,12 +527,12 @@ anche un secondo Leggendario Segreto, se esiste un altro profilo esterno
 compatibile con quel livello del circuito. La prima vittoria è uno sblocco
 permanente della partita e resta valida anche dopo la fondazione di nuove scuole.
 
-Quando gli standard dei circuiti sono stati ricalibrati, anche i valori fissi
-dei profili collegati sono stati aumentati della stessa percentuale: +20%
-all'Accademico, +50% al Nazionale e +50% alla Champion's. Durante la
-simulazione questi valori vengono usati direttamente, indipendentemente dalla
-media del campo avversario e senza applicare nuovamente il moltiplicatore del
-torneo. I profili senza scuola, riservati alle Chronicles, restano invariati.
+I valori base dei profili sono configurati manualmente dal designer e non
+ricevono mai la normalizzazione o altri moltiplicatori legati al torneo. La
+preparazione finale applica soltanto le Forme e l'esperienza proprie del
+profilo. L'allineamento rispetto alla media del circuito è quindi una scelta di
+bilanciamento esplicita per ogni Leggendario Segreto. I profili senza scuola,
+riservati alle Chronicles, seguono la stessa regola.
 
 Condizione di sconfitta:
 
@@ -584,6 +582,21 @@ La fonte completa e aggiornata è `src/content/secretLegendaries.ts`; i profili
 seguenti documentano soltanto i riferimenti iniziali e non sono un elenco
 esaustivo.
 
+I target seguenti sono le preparazioni effettive dopo le Forme e l'esperienza
+canoniche del profilo. La media indicata è quella degli avversari ordinari del
+torneo e non modifica il Leggendario Segreto.
+
+| N. | Profilo | Torneo | Media Arena/Stile | Arena effettiva | Stile effettivo |
+|---:|---|---|---:|---:|---:|
+| 1. | Marco Palena | Accademico Alpha | 150 / 150 | 140 | 155 |
+| 2. | Lorenzo Todaro | Accademico Alpha | 150 / 150 | 151 | 151 |
+| 3. | Daniele Panizza | Accademico Alpha | 150 / 150 | 155 | 140 |
+| 4. | Sara Magnifico | Accademico Alpha | 150 / 150 | 130 | 165 |
+| 5. | Daniele Maggi | Accademico Alpha | 150 / 150 | 140 | 140 |
+| 6. | Pietro Scarica | Nazionale | 225 / 225 | 220 | 230 |
+| 7. | Piero Dipalo | Nazionale | 225 / 225 | 200 | 210 |
+| 8. | Simone Pedrazzi | Nazionale | 225 / 225 | 200 | 225 |
+
 #### Marco Palena
 
 - rarità: Leggendario Segreto;
@@ -592,10 +605,10 @@ esaustivo.
 - Accademia: Alpha;
 - Forma NPC: 4;
 - esperienza NPC fissa: 5;
-- Arena base: 90;
-- Stile base: 108;
-- preparazione Arena NPC: 144,900;
-- preparazione Stile NPC: 173,880;
+- Arena base: 86,957;
+- Stile base: 96,273;
+- preparazione Arena NPC: 140;
+- preparazione Stile NPC: 155;
 - specialità: Stile.
 
 #### Lorenzo Todaro
@@ -606,10 +619,10 @@ esaustivo.
 - Accademia: Alpha;
 - Forma NPC: 5;
 - esperienza NPC fissa: 5;
-- Arena base: 96;
-- Stile base: 96;
-- preparazione Arena NPC: 165,600;
-- preparazione Stile NPC: 165,600;
+- Arena base: 87,536;
+- Stile base: 87,536;
+- preparazione Arena NPC: 151;
+- preparazione Stile NPC: 151;
 - specialità: completo.
 
 Come NPC esterni mantengono sempre Forma ed esperienza canoniche, indipendentemente dalle apparizioni.

@@ -8,6 +8,10 @@ import {
 } from "react";
 import { GADGET_DEFINITIONS, GADGET_MINIGAME_CONFIG } from "../../content/gadgets";
 import {
+  GADGET_RARITIES,
+  getGadgetRarityClassName,
+} from "../../content/gadgetRarities";
+import {
   calculateGadgetQuality,
   createGadgetRhythmNotes,
   getGadgetTimingResult,
@@ -42,6 +46,7 @@ export function GadgetRhythmGame({
   quality,
   accepted,
   revisionCost,
+  canRevise,
   canAffordRevision,
   onComplete,
   onAccept,
@@ -52,6 +57,7 @@ export function GadgetRhythmGame({
   quality: number;
   accepted: boolean;
   revisionCost: number;
+  canRevise: boolean;
   canAffordRevision: boolean;
   onComplete: (score: number) => void;
   onAccept: () => void;
@@ -216,18 +222,29 @@ export function GadgetRhythmGame({
   const product = GADGET_DEFINITIONS[minigame.productId];
   if (minigame.status === "result") {
     const score = minigame.score ?? 0;
-    const improved = quality > minigame.previousQuality;
+    const unlockedRarity = minigame.unlockedRarity;
+    const improved = !unlockedRarity && quality > minigame.previousQuality;
+    const resultRarity = unlockedRarity ?? minigame.rarity;
     return (
-      <div className="gadget-minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="gadget-result-title">
+      <div
+        className={`gadget-minigame-overlay ${getGadgetRarityClassName(resultRarity)}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gadget-result-title"
+      >
         <section className="gadget-minigame-result">
-          <span className="gadget-result-kicker">Prova qualità completata</span>
+          <span className="gadget-result-kicker">
+            {unlockedRarity ? "Rarità sbloccata" : "Prova qualità completata"}
+          </span>
           <h2 id="gadget-result-title">{product.name}</h2>
           <div className="gadget-result-score" aria-label={`Risultato ${score} su 100`}>
             <strong>{score}%</strong>
             <span>risultato del tentativo</span>
           </div>
           <p>
-            {improved
+            {unlockedRarity
+              ? `${GADGET_RARITIES[minigame.rarity].label} sale al 100%. ${GADGET_RARITIES[unlockedRarity].label} entra automaticamente in catalogo con qualità ${score}%.`
+              : improved
               ? `Nuovo record: la qualità sale al ${quality}%.`
               : `La qualità massima resta al ${quality}%.`}
           </p>
@@ -238,7 +255,7 @@ export function GadgetRhythmGame({
             ) : (
               <>
                 <button type="button" className="primary" onClick={onAccept}>Metti in vendita</button>
-                {quality < 100 ? (
+                {canRevise ? (
                   <button type="button" onClick={onRevision} disabled={!canAffordRevision}>
                     Revisiona · {formatCurrency(revisionCost)}
                   </button>
@@ -246,7 +263,7 @@ export function GadgetRhythmGame({
               </>
             )}
           </div>
-          {!accepted && quality < 100 && !canAffordRevision ? (
+          {!accepted && canRevise && !canAffordRevision ? (
             <small>Fondi insufficienti per una revisione.</small>
           ) : null}
         </section>
@@ -261,13 +278,23 @@ export function GadgetRhythmGame({
     0,
     Math.ceil((GADGET_MINIGAME_CONFIG.durationMs - Math.max(0, timelineMs)) / 1_000),
   );
+  const playRarity = minigame.opportunityRarity ?? minigame.rarity;
 
   return (
-    <div className="gadget-minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="gadget-minigame-title">
+    <div
+      className={`gadget-minigame-overlay ${getGadgetRarityClassName(playRarity)}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gadget-minigame-title"
+    >
       <section className="gadget-minigame-shell">
         <header>
           <div>
-            <span>Prova qualità</span>
+            <span className="gadget-minigame-rarity">
+              {minigame.opportunityRarity
+                ? `Occasione: ${GADGET_RARITIES[minigame.opportunityRarity].label}`
+                : `Rarità: ${GADGET_RARITIES[minigame.rarity].label}`}
+            </span>
             <h2 id="gadget-minigame-title">{product.name}</h2>
           </div>
           <div className="gadget-minigame-stats" aria-live="polite">
