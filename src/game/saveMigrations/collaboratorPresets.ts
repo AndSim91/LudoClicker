@@ -24,6 +24,7 @@ export function migrateCollaboratorPresetsState(state: MigratableState): Migrata
     collaboratorManagement: {
       aggregateViewUnlocked: legacy?.aggregateViewUnlocked === true,
       targets: sanitizeCollaboratorTargets(legacy?.targets ?? defaults.targets),
+      operationalPriorities: defaults.operationalPriorities,
     },
   };
 }

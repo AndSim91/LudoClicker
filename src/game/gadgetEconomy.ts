@@ -11,6 +11,7 @@ import {
 import { GADGET_RARITIES, GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import { getCollaboratorProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
+import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import type {
   GadgetProductId,
   GadgetRarity,
@@ -55,7 +56,7 @@ export function getGadgetProductivity(state: GameState): number {
       ? total + getCollaboratorProductivity(collaborator, "gadget")
       : total,
     0,
-  );
+  ) + getCollaboratorFallbackProductivity(state, "gadget");
 }
 
 export function getGadgetDevelopmentSpeed(upgrades: UpgradeLevels): number {
@@ -73,7 +74,11 @@ export function getGadgetWorkSpeed(
   const upgradeSpeed = kind === "development"
     ? getGadgetDevelopmentSpeed(state.upgrades)
     : getGadgetRevisionSpeed(state.upgrades);
-  return getGadgetProductivity(state) * upgradeSpeed;
+  const genericAutomationBonus = getUpgradeEffectTotal(
+    state.upgrades,
+    "automationMultiplier",
+  );
+  return getGadgetProductivity(state) * (upgradeSpeed + genericAutomationBonus);
 }
 
 export function getGadgetWorkProgress(

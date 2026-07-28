@@ -75,6 +75,8 @@ export interface Contact {
   agonistCourseStyleBonus?: number;
   enrolledMonth?: number;
   favorite?: boolean;
+  /** Un contatto ordinario può ricevere al massimo una seconda prova. */
+  trialRetryUsed?: boolean;
 }
 
 export interface CampaignEmail {
@@ -228,13 +230,16 @@ export type UpgradeId =
   | "all-fixed"
   | "shared-calendar"
   | "collaborator-shifts"
+  | "standard-procedures"
   | "checklist"
   | "registration-form"
+  | "operational-priorities"
   | "order-secretariat"
   | "multi-site-coordination"
   | "instructor-versatility"
   | "technical-arena"
   | "sis-accreditation"
+  | "cost-of-service"
   | "agonist-course-intensity"
   | "athletic-preparation"
   | "promiscuous-instructor"
@@ -252,6 +257,8 @@ export type UpgradeId =
   | "gadget-cross-selling";
 
 export type UpgradeLevels = Record<UpgradeId, number>;
+
+export type SecretUpgradeId = "project-x" | "divine-touch";
 
 export type AchievementId =
   | "first-email"
@@ -342,6 +349,8 @@ export interface CollaboratorManagementState {
   aggregateViewUnlocked: boolean;
   targets: Record<Exclude<CollaboratorMasteryRole, "gadget">, number> &
     Partial<Record<"gadget", number>>;
+  operationalPriorities: CollaboratorMasteryRole[];
+  fallbackAssignments?: Partial<Record<CollaboratorMasteryRole, CollaboratorMasteryRole>>;
 }
 
 export type FormId =
@@ -380,6 +389,7 @@ export interface Collaborator {
   technicianCourseReservation?: TechnicianCourseReservation;
   formBranchPreferences?: FormBranch[];
   assignment: CollaboratorAssignment;
+  secondaryAssignment?: CollaboratorAssignment;
   mastery?: CollaboratorMastery;
   rarity: PersonRarity;
   specialProfileId?: SpecialCollaboratorId;
@@ -745,6 +755,7 @@ export interface GameState {
   tournaments: TournamentState;
   collaborators: Collaborator[];
   collaboratorManagement: CollaboratorManagementState;
+  secretUpgradeDiscoveries: SecretUpgradeId[];
   automation: {
     lastProcessedAt: number;
     autoSendEmails: boolean;
@@ -752,6 +763,7 @@ export interface GameState {
     lessonBuffer: number;
     socialContentBuffer: number;
     equipmentBuffer: number;
+    equipmentPreparedWork: number;
     offlineContactBuffer: number;
     lastImprovedAthlete?: string;
     lastImprovedAthleteId?: string;
@@ -826,6 +838,16 @@ export type GameAction =
   | {
       type: "DECREMENT_COLLABORATOR_ASSIGNMENT";
       assignment: CollaboratorMasteryRole;
+    }
+  | {
+      type: "SET_COLLABORATOR_FALLBACK";
+      assignment: CollaboratorMasteryRole;
+      fallback: CollaboratorMasteryRole | null;
+    }
+  | {
+      type: "MOVE_OPERATIONAL_PRIORITY";
+      assignment: CollaboratorMasteryRole;
+      direction: "up" | "down";
     }
   | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
   | { type: "CANCEL_MEMBER_ENROLLMENT"; contactId: string }

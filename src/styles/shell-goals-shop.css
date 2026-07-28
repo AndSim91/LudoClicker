@@ -533,6 +533,77 @@
   font-weight: 700;
 }
 
+.upgrade-node.mystery {
+  position: relative;
+}
+
+.upgrade-node.mystery .upgrade-node-icon {
+  border-style: dashed;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+.secret-upgrade-tooltip {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 7px);
+  left: 50%;
+  display: none;
+  width: 210px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow-flyout);
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: left;
+  transform: translateX(-50%);
+  white-space: normal;
+}
+
+.secret-upgrade-tooltip strong {
+  margin-bottom: 3px;
+  color: var(--ink-muted);
+  font-size: 8px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.upgrade-node.mystery:hover .secret-upgrade-tooltip,
+.upgrade-node.mystery:focus-visible .secret-upgrade-tooltip,
+.upgrade-node.mystery:focus .secret-upgrade-tooltip {
+  display: block;
+}
+
+.upgrade-branch-extension {
+  position: relative;
+  width: 116px;
+  margin: 5px 0 0 696px;
+  padding-top: 11px;
+  text-align: center;
+}
+
+.upgrade-branch-extension::before {
+  position: absolute;
+  top: -9px;
+  left: 54px;
+  width: 2px;
+  height: 20px;
+  background: var(--line-strong);
+  content: "";
+}
+
+.upgrade-branch-extension > small {
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.upgrade-branch-extension .upgrade-branch-nodes::before {
+  display: none;
+}
+
 .upgrade-dialog {
   position: fixed;
   z-index: 50;

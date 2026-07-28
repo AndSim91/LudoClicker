@@ -240,13 +240,18 @@ function hasValidChroniclesProgress(state: Partial<GameState>): boolean {
 function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   const management = state.collaboratorManagement;
   const gadgetTarget = management?.targets?.gadget;
+  const priorities = management?.operationalPriorities;
   return Boolean(
     management &&
     typeof management.aggregateViewUnlocked === "boolean" &&
     REQUIRED_COLLABORATOR_MASTERY_ROLES.every((role) =>
       isNonNegativeSafeInteger(management.targets?.[role])
     ) &&
-    (gadgetTarget === undefined || isNonNegativeSafeInteger(gadgetTarget))
+    (gadgetTarget === undefined || isNonNegativeSafeInteger(gadgetTarget)) &&
+    Array.isArray(priorities) &&
+    priorities.length === COLLABORATOR_MASTERY_ROLES.length &&
+    new Set(priorities).size === priorities.length &&
+    priorities.every((role) => COLLABORATOR_MASTERY_ROLES.includes(role))
   );
 }
 
@@ -266,6 +271,7 @@ export function isValidGameState(value: unknown): value is GameState {
       ) &&
       isUniqueFormIdList(contact.forms) &&
       (contact.favorite === undefined || typeof contact.favorite === "boolean") &&
+      (contact.trialRetryUsed === undefined || typeof contact.trialRetryUsed === "boolean") &&
       (contact.lastAgonistCourseYear === undefined ||
         (Number.isSafeInteger(contact.lastAgonistCourseYear) && contact.lastAgonistCourseYear >= 1)) &&
       (contact.agonistCourseCompletions === undefined ||
@@ -340,6 +346,11 @@ export function isValidGameState(value: unknown): value is GameState {
         collaborator.assignment === null ||
         COLLABORATOR_MASTERY_ROLES.includes(collaborator.assignment)
       ) &&
+      (
+        collaborator.secondaryAssignment === undefined ||
+        collaborator.secondaryAssignment === null ||
+        COLLABORATOR_MASTERY_ROLES.includes(collaborator.secondaryAssignment)
+      ) &&
       isUniqueFormIdList(collaborator.forms) &&
       isUniqueFormIdList(collaborator.instructorForms) &&
       isUniqueFormIdList(collaborator.technicianForms ?? []) &&
@@ -370,6 +381,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["instructor-versatility"] === "number" &&
     typeof state.upgrades?.["technical-arena"] === "number" &&
     typeof state.upgrades?.["sis-accreditation"] === "number" &&
+    typeof state.upgrades?.["cost-of-service"] === "number" &&
     typeof state.upgrades?.["agonist-course-intensity"] === "number" &&
     typeof state.upgrades?.["athletic-preparation"] === "number" &&
     typeof state.upgrades?.["promiscuous-instructor"] === "number" &&
@@ -382,6 +394,8 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["social-editorial-plan"] === "number" &&
     typeof state.upgrades?.["social-content-distribution"] === "number" &&
     typeof state.upgrades?.["social-sponsorships"] === "number" &&
+    typeof state.upgrades?.["standard-procedures"] === "number" &&
+    typeof state.upgrades?.["operational-priorities"] === "number" &&
     typeof state.upgrades?.["gadget-showcase"] === "number" &&
     typeof state.upgrades?.["gadget-online-store"] === "number" &&
     typeof state.upgrades?.["gadget-design-tools"] === "number" &&
@@ -393,6 +407,8 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.automation?.autoSendEmails === "boolean" &&
     typeof state.automation?.lessonBuffer === "number" &&
     typeof state.automation?.socialContentBuffer === "number" &&
+    typeof state.automation?.equipmentPreparedWork === "number" &&
+    state.automation.equipmentPreparedWork >= 0 &&
     typeof state.automation?.offlineContactBuffer === "number" &&
     (state.automation?.lastImprovedAthlete === undefined ||
       typeof state.automation.lastImprovedAthlete === "string") &&
@@ -408,6 +424,10 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.unlocks?.collaborators === "boolean" &&
     typeof state.unlocks?.forms === "boolean" &&
     typeof state.unlocks?.gadget === "boolean" &&
+    Array.isArray(state.secretUpgradeDiscoveries) &&
+    state.secretUpgradeDiscoveries.every(
+      (id) => id === "project-x" || id === "divine-touch",
+    ) &&
     isValidGadgetState(state.gadgets) &&
     Array.isArray(state.achievements) &&
     typeof state.narrative?.nextEventAt === "number" &&

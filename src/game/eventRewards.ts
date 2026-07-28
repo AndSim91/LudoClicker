@@ -2,6 +2,7 @@ import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorBaseProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import { nextRandom } from "./random";
 import { getSocialEventPromotionBonus } from "./social";
 import type { GameState } from "./types";
@@ -31,7 +32,7 @@ export function getEventCollaboratorMultiplier(state: GameState): number {
     .reduce(
       (total, collaborator) => total + getCollaboratorBaseProductivity(collaborator),
       0,
-    );
+    ) + getCollaboratorFallbackProductivity(state, "events");
   return Math.max(1, effectiveCollaborators) ** EVENT_COLLABORATOR_EXPONENT;
 }
 

@@ -1,4 +1,4 @@
-import { createInitialUpgradeLevels, getUpgradeEffectTotal } from "../../content/upgrades";
+import { createInitialUpgradeLevels } from "../../content/upgrades";
 import { GAME_CONFIG } from "../config";
 import { createSecretLegendaryProgress } from "../legendaryAvailability";
 import type { GameState } from "../types";
@@ -145,8 +145,9 @@ export function migrateCoreState(state: MigratableState): MigratableState {
       ...createInitialUpgradeLevels(),
       ...(migrated.upgrades ?? {}),
     };
-    const totalSwords =
-      GAME_CONFIG.initialSwords + Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
+    // Fino a questa migrazione la Rastrelliera assegnava due spade per livello.
+    const totalSwords = GAME_CONFIG.initialSwords +
+      Math.floor(Math.max(0, upgrades["organized-rack"] ?? 0)) * 2;
     migrated = {
       ...migrated,
       version: 9,

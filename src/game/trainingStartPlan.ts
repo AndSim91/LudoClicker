@@ -14,6 +14,7 @@ import {
   needsCourseXRecovery,
 } from "../content/forms";
 import {
+  applyQualifyingCourseDiscount,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
   isCourseXUnlocked,
@@ -347,7 +348,10 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     const student = collaborator ?? member;
     const definition = getFormDefinition(formId);
     if (qualificationOnly && collaborator && definition) {
-      const qualificationCost = getInstructorQualificationCost(definition.cost);
+      const qualificationCost = applyQualifyingCourseDiscount(
+        this.state.upgrades,
+        getInstructorQualificationCost(definition.cost),
+      );
       if (collaborator.training || this.euros < qualificationCost) return undefined;
       const training = scheduleTraining(
         this.state,
@@ -379,7 +383,10 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       instructorSelf && !instructor && isInstructorForm(formId),
     );
     const trainingCost = instructorTrack
-      ? getInstructorFormCost(definition?.cost ?? 0)
+      ? applyQualifyingCourseDiscount(
+          this.state.upgrades,
+          getInstructorFormCost(definition?.cost ?? 0),
+        )
       : instructor
         ? getStudentFormCost(definition?.cost ?? 0)
         : definition?.cost ?? 0;

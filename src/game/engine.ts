@@ -232,22 +232,29 @@ function tickStep(
   nextState = processWaitingTrainings(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
-  nextState = processPriorityInstructorQualifications(nextState, now);
-  nextState = processTechnicianCourseReservations(nextState, now);
-  nextState = processAutomaticTeaching(
-    nextState,
-    now,
-    startFormTraining,
-    startAgonistCourse,
-    createTrainingStartPlan,
-  );
-  nextState = refreshTrainingDurations(nextState, now);
-  nextState = processInstructorAthleticPreparation(
-    nextState,
-    automationElapsedMs,
-  );
-  if (allowAutomaticEventStarts) {
-    nextState = processAutomaticEvents(nextState, now);
+  const automaticOperationOrder = nextState.collaboratorManagement
+    .operationalPriorities.filter((role) => role === "instructor" || role === "events");
+  for (const role of automaticOperationOrder) {
+    if (role === "events") {
+      if (allowAutomaticEventStarts) {
+        nextState = processAutomaticEvents(nextState, now);
+      }
+      continue;
+    }
+    nextState = processPriorityInstructorQualifications(nextState, now);
+    nextState = processTechnicianCourseReservations(nextState, now);
+    nextState = processAutomaticTeaching(
+      nextState,
+      now,
+      startFormTraining,
+      startAgonistCourse,
+      createTrainingStartPlan,
+    );
+    nextState = refreshTrainingDurations(nextState, now);
+    nextState = processInstructorAthleticPreparation(
+      nextState,
+      automationElapsedMs,
+    );
   }
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
   return result(notifyPrestigeOffer(nextState, now), true);

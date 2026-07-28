@@ -1,7 +1,8 @@
 import { GAME_CONFIG } from "./config";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { roundCurrency } from "./economy";
 import { addLightInflationChance, getOfficialSwordUnitCost } from "./lightInflation";
-import type { GameState } from "./types";
+import type { GameState, UpgradeLevels } from "./types";
 
 type EquipmentState = GameState["equipment"];
 export type EquipmentAutomaticRepairTarget = "wear" | "sword";
@@ -9,6 +10,17 @@ const WORK_EPSILON = 1e-9;
 
 function clampCount(value: number, maximum: number) {
   return Math.min(maximum, Math.max(0, Math.floor(value)));
+}
+
+export function getPlannedEquipmentWear(
+  upgrades: UpgradeLevels,
+  baseWear: number,
+): number {
+  const reduction = Math.min(
+    GAME_CONFIG.equipmentMaximumUpgradeWearReduction,
+    getUpgradeEffectTotal(upgrades, "equipmentWearReduction"),
+  );
+  return Math.max(0, baseWear * (1 - reduction));
 }
 
 export function getEffectiveDamagedSwords(equipment: EquipmentState): number {
@@ -169,6 +181,8 @@ export function repairEquipment(
   equipment: EquipmentState,
   repairWork: number,
   availableEuros = Number.POSITIVE_INFINITY,
+  swordRepairWork: number = GAME_CONFIG.equipmentSwordRepairWork,
+  preserveRemainingWork = false,
 ): {
   equipment: EquipmentState;
   repairedWear: number;
@@ -192,7 +206,7 @@ export function repairEquipment(
 
     const workPerRepair = target === "wear"
       ? 1
-      : GAME_CONFIG.equipmentSwordRepairWork;
+      : Math.max(1, swordRepairWork);
     const unitCost = target === "wear" ? wearCost : swordCost;
     const maximumRepairs = target === "wear"
       ? Math.ceil(nextEquipment.wear)
@@ -222,10 +236,10 @@ export function repairEquipment(
 
   const remainingTarget = getEquipmentAutomaticRepairTarget(nextEquipment);
   const hasRemainingRepairs = nextEquipment.wear > 0 || nextEquipment.damagedSwords > 0;
-  if (!hasRemainingRepairs || (
+  if (!preserveRemainingWork && (!hasRemainingRepairs || (
     remainingTarget !== undefined &&
     remainingEuros + WORK_EPSILON < getEquipmentAutomaticRepairUnitCost(remainingTarget)
-  )) {
+  ))) {
     remainingWork = 0;
   }
   return {

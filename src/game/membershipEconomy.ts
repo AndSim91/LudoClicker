@@ -22,11 +22,13 @@ export function getMonthlyMemberFees(state: GameState): number {
 export function getMonthlyOperationalIncome(state: GameState): number {
   const networkMultiplier =
     1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const membershipIncome = (
-    getMonthlyMemberFees(state) +
-      state.network.schools.length * GAME_CONFIG.networkIncomePerSchool
-  ) * (1 + getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
-    networkMultiplier;
+  const recurringIncomeBonus = getUpgradeEffectTotal(state.upgrades, "incomeMultiplier");
+  const membershipIncome = getMonthlyMemberFees(state) *
+    (1 + getUpgradeEffectTotal(state.upgrades, "membershipIncomeMultiplier") +
+      recurringIncomeBonus);
+  const networkIncome = state.network.schools.length * GAME_CONFIG.networkIncomePerSchool *
+    (1 + recurringIncomeBonus);
 
-  return membershipIncome + getMonthlySocialIncome(state);
+  return (membershipIncome + networkIncome) * networkMultiplier +
+    getMonthlySocialIncome(state);
 }

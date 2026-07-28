@@ -1,7 +1,61 @@
 import type { GadgetProductId, GameState, UpgradeId, UpgradeLevels } from "../game/types";
 
-export type UpgradeCategory = "speed" | "charisma" | "writing" | "welcome" | "social" | "equipment" | "organization" | "instructors" | "gadget";
-export type UpgradeEffect = "writingPower" | "eventContactsMultiplier" | "eventAttendanceMultiplier" | "bookingMultiplier" | "enrollmentMultiplier" | "socialContentTier" | "socialFollowerChanceTier" | "socialEventPromotionTier" | "socialFollowerValueTier" | "equipmentWearReduction" | "totalSwords" | "automationMultiplier" | "incomeMultiplier" | "annualFormCapacity" | "instructorBranchCapacity" | "instructorStudentCapacity" | "instructorTeachingSpeed" | "agonistCourseTier" | "agonistCourseStatMaximum" | "athleticPreparationPower" | "sisTechnicianCourseUnlock" | "courseXUnlock" | "gadgetMemberReachTier" | "gadgetFollowerReachTier" | "gadgetDevelopmentSpeed" | "gadgetRevisionSpeed" | "gadgetSalesCapacity" | "gadgetSalesConversion" | "gadgetCrossSell";
+export type UpgradeCategory =
+  | "speed"
+  | "writing"
+  | "charisma"
+  | "welcome"
+  | "equipment"
+  | "gadget"
+  | "instructors"
+  | "organization"
+  | "secrets"
+  | "social";
+
+export type UpgradeEffect =
+  | "writingPower"
+  | "editorialAutomationMultiplier"
+  | "emailInitialProgress"
+  | "socialCopyShare"
+  | "creativityPoint"
+  | "eventContactsMultiplier"
+  | "eventAttendanceMultiplier"
+  | "enrollmentProgress"
+  | "trialDurationReductionMs"
+  | "instructorEnrollmentEffectiveness"
+  | "failedTrialRetryChance"
+  | "socialContentTier"
+  | "socialFollowerChanceTier"
+  | "socialEventPromotionTier"
+  | "socialFollowerValueTier"
+  | "equipmentWearReduction"
+  | "equipmentAutomationMultiplier"
+  | "equipmentPreparedWorkCapacity"
+  | "equipmentSwordRepairWorkReduction"
+  | "automationMultiplier"
+  | "masteryExperienceMultiplier"
+  | "collaboratorFallbackTier"
+  | "membershipIncomeMultiplier"
+  | "incomeMultiplier"
+  | "operationalPrioritiesUnlock"
+  | "annualFormCapacity"
+  | "instructorBranchCapacity"
+  | "instructorStudentCapacity"
+  | "instructorTeachingSpeed"
+  | "agonistCourseTier"
+  | "agonistCourseStatMaximum"
+  | "athleticPreparationPower"
+  | "sisTechnicianCourseUnlock"
+  | "courseCostReduction"
+  | "courseXUnlock"
+  | "gadgetMemberReachTier"
+  | "gadgetFollowerReachTier"
+  | "gadgetDevelopmentSpeed"
+  | "gadgetRevisionSpeed"
+  | "gadgetSalesCapacity"
+  | "gadgetSalesConversion"
+  | "gadgetCrossSell"
+  | "legacy";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -22,165 +76,123 @@ export interface UpgradeDefinition {
   requiredUnlocks?: Array<keyof GameState["unlocks"]>;
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
   requiredGadgetProduct?: GadgetProductId;
+  requiredNetworkSchools?: number;
   hidden?: boolean;
+  extension?: boolean;
+  secretHint?: string;
 }
 
-export const UPGRADE_CATEGORIES: Array<{ id: UpgradeCategory; title: string; description: string }> = [
-  { id: "speed", title: "Velocità di scrittura", description: "Aumenta i caratteri prodotti da input manuale e automazione." },
-  { id: "charisma", title: "Carisma", description: "Migliora pubblico, prove dimostrative e contatti durante gli eventi." },
-  { id: "writing", title: "Scrittura", description: "Aumenta la probabilità che una mail generi una prova in palestra." },
-  { id: "welcome", title: "Accoglienza", description: "Migliora la conversione da lezione di prova a nuovo iscritto." },
-  { id: "social", title: "Social", description: "Migliora contenuti, pubblico, contatti e sponsorizzazioni." },
-  { id: "equipment", title: "Attrezzatura", description: "Riduce l'usura e amplia il materiale disponibile per gli eventi." },
-  { id: "organization", title: "Organizzazione", description: "Migliora automazione, quote e coordinamento della scuola." },
-  { id: "instructors", title: "Istruttori", description: "Amplia le armi insegnabili e il numero di allievi seguiti contemporaneamente." },
+export const UPGRADE_CATEGORIES: Array<{
+  id: UpgradeCategory;
+  title: string;
+  description: string;
+}> = [
+  { id: "speed", title: "Scrittura", description: "Rende più rapida la produzione di email e contenuti Social." },
+  { id: "writing", title: "Creatività", description: "Migliora i cataloghi email e la probabilità di ottenere una prova." },
+  { id: "charisma", title: "Carisma", description: "Migliora pubblico, dimostrazioni e contatti durante gli eventi." },
+  { id: "welcome", title: "Accoglienza", description: "Migliora lezioni di prova e conversione in nuovi iscritti." },
+  { id: "equipment", title: "Attrezzatura", description: "Riduce l'usura programmata e automatizza la manutenzione." },
   { id: "gadget", title: "Gadget", description: "Amplia il pubblico e rende più rapidi sviluppo, revisioni e vendite." },
+  { id: "instructors", title: "Insegnamento", description: "Sviluppa Istruttori, Tecnici e preparazione agonistica." },
+  { id: "organization", title: "Organizzazione", description: "Coordina collaboratori, automazioni ed entrate ricorrenti." },
+  { id: "secrets", title: "Percorsi Segreti", description: "Alcuni percorsi si rivelano soltanto compiendo imprese particolari." },
 ];
 
-const GROWTH = 1.3;
+const LEVEL_GROWTH = 1;
+const noFame = 0;
 
 const UPGRADE_CATALOG: UpgradeDefinition[] = [
-  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+0,4 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.4, baseCost: 20, costGrowth: GROWTH, maxLevel: 5, requiredFame: 0 },
-  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+0,6 caratteri per input e livello", effect: "writingPower", effectPerLevel: 0.6, baseCost: 90, costGrowth: GROWTH, maxLevel: 5, requiredFame: 15 },
-  { id: "automatic-signature", category: "speed", title: "Firma automatica", description: "La chiusura delle mail non richiede più lavoro manuale.", effectLabel: "+20% automazione e +0,8 caratteri per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 0.8 }, baseCost: 160, costGrowth: GROWTH, maxLevel: 5, requiredFame: 25 },
-  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati più velocemente.", effectLabel: "+1 carattere per input e livello", effect: "writingPower", effectPerLevel: 1, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredFame: 40 },
-  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Manuale e collaboratori condividono una revisione rapidissima.", effectLabel: "+20% automazione e +1 carattere per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 1 }, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredFame: 60 },
-  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una procedura di fine ciclo moltiplica l'intera redazione.", effectLabel: "+20% automazione e +1 carattere per livello", effect: "automationMultiplier", effectPerLevel: 0.2, additionalEffectsPerLevel: { writingPower: 1 }, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredFame: 90 },
+  // Scrittura
+  { id: "comfortable-keyboard", category: "speed", title: "Tastiera comoda", description: "Una postazione più efficace rende ogni pressione più produttiva.", effectLabel: "+0,2 caratteri per input e livello · massimo +1", effect: "writingPower", effectPerLevel: 0.2, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: {} },
+  { id: "quick-phrases", category: "speed", title: "Frasi rapide", description: "Le formule più frequenti arrivano prima ancora di pensarle.", effectLabel: "+0,4 caratteri per input e livello · massimo +2", effect: "writingPower", effectPerLevel: 0.4, baseCost: 150, costGrowth: LEVEL_GROWTH, levelCosts: [150, 300, 600, 1_200, 2_400], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "comfortable-keyboard": 2 } },
+  { id: "automatic-signature", category: "speed", title: "Firma automatica", description: "La chiusura delle email non rallenta più il lavoro della Redazione.", effectLabel: "+10% velocità Redazione/Social per livello · massimo +50%", effect: "editorialAutomationMultiplier", effectPerLevel: 0.1, baseCost: 300, costGrowth: LEVEL_GROWTH, levelCosts: [300, 600, 1_200, 2_400, 4_800], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "quick-phrases": 2 } },
+  { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e dettagli pratici vengono compilati quando nasce una nuova email.", effectLabel: "Le nuove email partono al 5% per livello · massimo 25%", effect: "emailInitialProgress", effectPerLevel: 0.05, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "automatic-signature": 2 } },
+  { id: "social-content-synthesis", category: "speed", title: "Sintesi dei contenuti", description: "Riduce il lavoro necessario per pubblicare ciascun contenuto Social.", effectLabel: "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredUpgradeLevels: { "smart-fields": 2 } },
+  { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "La revisione condivisa accelera tutta la produzione editoriale.", effectLabel: "+15% velocità Redazione/Social per livello · massimo +75%", effect: "editorialAutomationMultiplier", effectPerLevel: 0.15, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "smart-fields": 3 } },
+  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Una parte del lavoro svolto sull'email alimenta anche i contenuti Social, senza rallentare l'email.", effectLabel: "Copia il 5% del lavoro email nei Social per livello · massimo 25%", effect: "socialCopyShare", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredUpgradeLevels: { "social-content-synthesis": 3, "instant-review": 3 } },
 
-  { id: "prepared-presentation", category: "charisma", title: "Presentazione preparata", description: "Spiegazioni più chiare trasformano incontri in contatti utili.", effectLabel: "+3% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.03, baseCost: 15, costGrowth: GROWTH, maxLevel: 5, requiredFame: 0 },
-  { id: "qr-cards", category: "charisma", title: "Biglietti con QR code", description: "Lasciare un indirizzo diventa immediato.", effectLabel: "+4% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.04, baseCost: 50, costGrowth: GROWTH, maxLevel: 5, requiredFame: 5 },
-  { id: "coordinated-demo", category: "charisma", title: "Dimostrazione coordinata", description: "Una presentazione ordinata migliora la qualità percepita.", effectLabel: "+5% persone incontrate per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.05, baseCost: 100, costGrowth: GROWTH, maxLevel: 5, requiredFame: 15 },
-  { id: "recognizable-stand", category: "charisma", title: "Stand riconoscibile", description: "Il pubblico capisce subito dove fermarsi.", effectLabel: "+7% persone incontrate per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.07, baseCost: 190, costGrowth: GROWTH, maxLevel: 5, requiredFame: 25 },
-  { id: "order-welcome", category: "charisma", title: "Accoglienza dell'Ordine", description: "La conversazione prosegue naturalmente fino allo scambio dei contatti.", effectLabel: "+4% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.04, baseCost: 320, costGrowth: GROWTH, maxLevel: 5, requiredFame: 40 },
-  { id: "difficult-questions", category: "charisma", title: "Risposte alle domande difficili", description: "Anche le domande più specifiche ricevono una risposta utile.", effectLabel: "+5% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.05, baseCost: 550, costGrowth: GROWTH, maxLevel: 5, requiredFame: 60 },
-  { id: "not-that-thing", category: "charisma", title: "No, non è esattamente quella cosa", description: "La spiegazione definitiva, sorprendentemente efficace.", effectLabel: "+8% prove e contatti per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.08, baseCost: 950, costGrowth: GROWTH, maxLevel: 5, requiredFame: 90 },
+  // Creatività
+  { id: "spell-check", category: "writing", title: "Controllo ortografico", description: "La stessa email viene ripulita da refusi ed errori grammaticali.", effectLabel: "+1 punto Creatività per livello · nuovo catalogo dal primo livello", effect: "creativityPoint", effectPerLevel: 1, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: {} },
+  { id: "professional-email", category: "writing", title: "Email professionale", description: "Firma completa, paragrafi ordinati e spaziature corrette, ancora senza HTML.", effectLabel: "+1 punto Creatività per livello", effect: "creativityPoint", effectPerLevel: 1, baseCost: 100, costGrowth: LEVEL_GROWTH, levelCosts: [100, 200, 400, 800, 1_600], maxLevel: 5, requiredFame: noFame },
+  { id: "personalized-invite", category: "writing", title: "Invito personalizzato", description: "Un nuovo catalogo più ricco introduce la struttura HTML.", effectLabel: "+1 punto Creatività per livello · sblocca le email HTML", effect: "creativityPoint", effectPerLevel: 1, baseCost: 150, costGrowth: LEVEL_GROWTH, levelCosts: [150, 300, 600, 1_200, 2_400], maxLevel: 5, requiredFame: noFame },
+  { id: "call-to-action", category: "writing", title: "Call to action", description: "Link e pulsanti rendono immediato il passo successivo.", effectLabel: "+1 punto Creatività per livello", effect: "creativityPoint", effectPerLevel: 1, baseCost: 300, costGrowth: LEVEL_GROWTH, levelCosts: [300, 600, 1_200, 2_400, 4_800], maxLevel: 5, requiredFame: noFame },
+  { id: "email-layout", category: "writing", title: "Impaginazione", description: "La campagna riceve una struttura visiva ordinata e riconoscibile.", effectLabel: "+1 punto Creatività per livello", effect: "creativityPoint", effectPerLevel: 1, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame },
+  { id: "winning-advertising", category: "writing", title: "Pubblicità vincente", description: "Il messaggio diventa un volantino completo e migliora anche la capacità dei contenuti Social di ottenere follower.", effectLabel: "+1 punto Creatività · follower Social 60% → 70% → 80% → 90% → 95%; al 5° livello 5% di follower doppio", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerChanceTier: 1 }, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "marketing-course", category: "writing", title: "Corso di Marketing", description: "La campagna completa spiega lo sport in profondità e aumenta il valore economico dei follower.", effectLabel: "+1 punto Creatività · valore follower 0,15 € → 0,20 € → 0,30 € → 0,40 € → 0,50 €", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerValueTier: 1 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
 
-  { id: "spell-check", category: "writing", title: "Controllo ortografico", description: "La stessa mail viene ripulita da refusi ed errori grammaticali.", effectLabel: "+8% prenotazioni · rimuove gli errori", effect: "bookingMultiplier", effectPerLevel: 0.08, baseCost: 25, costGrowth: GROWTH, maxLevel: 5, requiredFame: 0 },
-  { id: "professional-email", category: "writing", title: "Email professionale", description: "Firma completa, paragrafi ordinati e spaziature corrette.", effectLabel: "+12% prenotazioni · struttura professionale", effect: "bookingMultiplier", effectPerLevel: 0.12, baseCost: 60, costGrowth: GROWTH, maxLevel: 5, requiredFame: 5 },
-  { id: "personalized-invite", category: "writing", title: "Invito personalizzato", description: "Un nuovo set di email più lunghe parla meglio alla persona contattata.", effectLabel: "+15% prenotazioni · email da 250–450 caratteri", effect: "bookingMultiplier", effectPerLevel: 0.15, baseCost: 120, costGrowth: GROWTH, maxLevel: 5, requiredFame: 15 },
-  { id: "call-to-action", category: "writing", title: "Call to action", description: "Link e pulsanti rendono immediato il passo successivo.", effectLabel: "+15% prenotazioni · link e pulsanti", effect: "bookingMultiplier", effectPerLevel: 0.15, baseCost: 220, costGrowth: GROWTH, maxLevel: 5, requiredFame: 25 },
-  { id: "email-layout", category: "writing", title: "Impaginazione", description: "La mail riceve una struttura CSS ordinata e riconoscibile.", effectLabel: "+10% prenotazioni · CSS fino a 600 caratteri", effect: "bookingMultiplier", effectPerLevel: 0.1, baseCost: 380, costGrowth: GROWTH, maxLevel: 5, requiredFame: 40 },
-  { id: "winning-advertising", category: "writing", title: "Pubblicità vincente", description: "Il messaggio diventa un volantino completo con immagini e dettagli.", effectLabel: "+20% prenotazioni · volantino fino a 800 caratteri", effect: "bookingMultiplier", effectPerLevel: 0.2, baseCost: 650, costGrowth: GROWTH, maxLevel: 5, requiredFame: 60 },
-  { id: "marketing-course", category: "writing", title: "Corso di Marketing", description: "La mail spiega lo sport per filo e per segno con una campagna completa.", effectLabel: "+35% prenotazioni · testi fino a 2.000 caratteri", effect: "bookingMultiplier", effectPerLevel: 0.35, baseCost: 1100, costGrowth: GROWTH, maxLevel: 5, requiredFame: 90 },
+  // Carisma
+  { id: "prepared-presentation", category: "charisma", title: "Presentazione preparata", description: "Spiegazioni più chiare trasformano gli incontri in contatti utili.", effectLabel: "+4% contatti dagli eventi per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.04, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame },
+  { id: "qr-cards", category: "charisma", title: "Biglietti con QR code", description: "Lasciare un indirizzo diventa immediato.", effectLabel: "+4% contatti dagli eventi per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.04, baseCost: 100, costGrowth: LEVEL_GROWTH, levelCosts: [100, 200, 400, 800, 1_600], maxLevel: 5, requiredFame: noFame },
+  { id: "coordinated-demo", category: "charisma", title: "Dimostrazione coordinata", description: "Una presentazione ordinata trattiene più pubblico.", effectLabel: "+5% pubblico agli eventi per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.05, baseCost: 150, costGrowth: LEVEL_GROWTH, levelCosts: [150, 300, 600, 1_200, 2_400], maxLevel: 5, requiredFame: noFame },
+  { id: "recognizable-stand", category: "charisma", title: "Stand riconoscibile", description: "Il pubblico capisce subito dove fermarsi.", effectLabel: "+7% pubblico agli eventi per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.07, baseCost: 300, costGrowth: LEVEL_GROWTH, levelCosts: [300, 600, 1_200, 2_400, 4_800], maxLevel: 5, requiredFame: noFame },
+  { id: "demo-set", category: "charisma", title: "Set da dimostrazione", description: "Una dimostrazione più leggibile richiama più persone.", effectLabel: "+6% pubblico agli eventi per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.06, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame },
+  { id: "difficult-questions", category: "charisma", title: "Risposte alle domande difficili", description: "Anche le domande più specifiche ricevono una risposta utile.", effectLabel: "+6% contatti dagli eventi per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.06, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "not-that-thing", category: "charisma", title: "No, non è esattamente quella cosa", description: "La spiegazione definitiva, sorprendentemente efficace.", effectLabel: "+8% contatti dagli eventi per livello", effect: "eventContactsMultiplier", effectPerLevel: 0.08, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
 
-  { id: "welcome-procedure", category: "welcome", title: "Procedura di benvenuto", description: "Una prima lezione più curata facilita l'ingresso nel gruppo.", effectLabel: "+10% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.1, baseCost: 30, costGrowth: GROWTH, maxLevel: 5, requiredFame: 0 },
-  { id: "tested-intro", category: "welcome", title: "Lezione introduttiva collaudata", description: "La sequenza iniziale funziona anche con chi parte da zero.", effectLabel: "+15% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.15, baseCost: 80, costGrowth: GROWTH, maxLevel: 5, requiredFame: 8 },
-  { id: "clear-material", category: "welcome", title: "Materiale informativo chiaro", description: "Orari, costi e percorso sono facili da capire.", effectLabel: "+10% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.1, baseCost: 150, costGrowth: GROWTH, maxLevel: 5, requiredFame: 20 },
-  { id: "dedicated-helper", category: "welcome", title: "Collaboratore dedicato", description: "Una persona segue ogni nuovo partecipante.", effectLabel: "+15% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.15, baseCost: 280, costGrowth: GROWTH, maxLevel: 5, requiredFame: 35 },
-  { id: "prepared-room", category: "welcome", title: "Sala preparata", description: "Ogni dettaglio della prima esperienza è al suo posto.", effectLabel: "+20% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.2, baseCost: 500, costGrowth: GROWTH, maxLevel: 5, requiredFame: 55 },
-  { id: "memorable-experience", category: "welcome", title: "Esperienza memorabile", description: "La lezione di prova diventa qualcosa da raccontare.", effectLabel: "+30% iscrizioni per livello", effect: "enrollmentMultiplier", effectPerLevel: 0.3, baseCost: 900, costGrowth: GROWTH, maxLevel: 5, requiredFame: 85 },
+  // Accoglienza
+  { id: "welcome-procedure", category: "welcome", title: "Procedura di benvenuto", description: "Una prima lezione più curata facilita l'ingresso nel gruppo.", effectLabel: "+1% del percorso verso la probabilità massima per livello", effect: "enrollmentProgress", effectPerLevel: 0.01, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame },
+  { id: "clear-material", category: "welcome", title: "Materiale informativo chiaro", description: "Orari, costi e percorso sono facili da capire.", effectLabel: "+1,5% del percorso verso la probabilità massima per livello", effect: "enrollmentProgress", effectPerLevel: 0.015, baseCost: 150, costGrowth: LEVEL_GROWTH, levelCosts: [150, 300, 600, 1_200, 2_400], maxLevel: 5, requiredFame: noFame },
+  { id: "tested-intro", category: "welcome", title: "Lezione introduttiva collaudata", description: "La sequenza iniziale funziona anche con chi parte da zero.", effectLabel: "+2% del percorso verso la probabilità massima per livello", effect: "enrollmentProgress", effectPerLevel: 0.02, baseCost: 300, costGrowth: LEVEL_GROWTH, levelCosts: [300, 600, 1_200, 2_400, 4_800], maxLevel: 5, requiredFame: noFame },
+  { id: "prepared-room", category: "welcome", title: "Sala preparata", description: "Ogni dettaglio della prova è pronto prima dell'arrivo.", effectLabel: "+2,5% del percorso e −1 secondo alla prova per livello · minimo 10 secondi", effect: "enrollmentProgress", effectPerLevel: 0.025, additionalEffectsPerLevel: { trialDurationReductionMs: 1_000 }, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame },
+  { id: "dedicated-helper", category: "welcome", title: "Collaboratore dedicato", description: "Una persona segue ogni nuovo partecipante e valorizza il contributo degli Istruttori.", effectLabel: "+3% del percorso · +10% efficacia del contributo Istruttori per livello", effect: "enrollmentProgress", effectPerLevel: 0.03, additionalEffectsPerLevel: { instructorEnrollmentEffectiveness: 0.1 }, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame },
+  { id: "order-welcome", category: "welcome", title: "Accoglienza dell'Ordine", description: "La conversazione e la prova seguono un percorso coerente fino all'iscrizione.", effectLabel: "+4% del percorso verso la probabilità massima per livello", effect: "enrollmentProgress", effectPerLevel: 0.04, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "memorable-experience", category: "welcome", title: "Esperienza memorabile", description: "Una prova fallita può lasciare un contatto non segreto disponibile per un solo secondo tentativo.", effectLabel: "+6% del percorso · 5% di recupero dopo una prova fallita per livello · massimo 25%", effect: "enrollmentProgress", effectPerLevel: 0.06, additionalEffectsPerLevel: { failedTrialRetryChance: 0.05 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
 
-  { id: "social-content-synthesis", category: "social", title: "Sintesi dei contenuti", description: "Una linea editoriale più precisa riduce i caratteri necessari per pubblicare un contenuto.", effectLabel: "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: 35, requiredUnlocks: ["social"] },
-  { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Contenuti più mirati aumentano la probabilità di ottenere nuovi follower.", effectLabel: "50% base → 60% → 70% → 80% → 90% → 95% con 5% di doppio follower", effect: "socialFollowerChanceTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: 50, requiredUnlocks: ["social"] },
-  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Voce storica conservata per la compatibilità dei salvataggi.", effectLabel: "Sostituito dal bonus illimitato dei Follower", effect: "socialEventPromotionTier", effectPerLevel: 1, baseCost: 7_500, costGrowth: 1, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredFame: 75, requiredUnlocks: ["social"], hidden: true },
-  { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Accordi pubblicitari più remunerativi aumentano il valore mensile di ogni follower.", effectLabel: "0,10 € base → 0,20 € → 0,30 € → 0,40 € → 0,50 €", effect: "socialFollowerValueTier", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 25_000, 75_000, 200_000], maxLevel: 4, requiredFame: 100, requiredUnlocks: ["social"] },
+  // Attrezzatura
+  { id: "pre-event-check", category: "equipment", title: "Controllo prima dell'uso", description: "I problemi vengono trovati prima di iniziare un'attività programmata.", effectLabel: "−2% usura programmata per livello", effect: "equipmentWearReduction", effectPerLevel: 0.02, baseCost: 100, costGrowth: LEVEL_GROWTH, levelCosts: [100, 200, 400, 800, 1_600], maxLevel: 5, requiredFame: noFame },
+  { id: "maintenance-kit", category: "equipment", title: "Kit di manutenzione", description: "Gli strumenti giusti accelerano le riparazioni automatiche.", effectLabel: "+10% velocità manutenzione automatica per livello", effect: "equipmentAutomationMultiplier", effectPerLevel: 0.1, baseCost: 250, costGrowth: LEVEL_GROWTH, levelCosts: [250, 500, 1_000, 2_000, 4_000], maxLevel: 5, requiredFame: noFame },
+  { id: "organized-rack", category: "equipment", title: "Banco da lavoro", description: "Quando tutto è in ordine, i collaboratori preparano in anticipo lavoro di manutenzione da usare al prossimo guasto.", effectLabel: "Riserva massima pari al 2% dell'usura massima di tutte le spade per livello · massimo 10%", effect: "equipmentPreparedWorkCapacity", effectPerLevel: 0.02, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 750, 1_000, 1_500, 2_500], maxLevel: 5, requiredFame: noFame },
+  { id: "essential-parts", category: "equipment", title: "Ricambi essenziali", description: "I pezzi più comuni riducono il lavoro necessario per recuperare una spada rotta.", effectLabel: "−15 punti lavoro per spada rotta e livello · da 150 a 75", effect: "equipmentSwordRepairWorkReduction", effectPerLevel: 15, baseCost: 1_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000, 2_000, 4_000, 8_000, 16_000], maxLevel: 5, requiredFame: noFame },
+  { id: "checklist", category: "equipment", title: "Lista di controllo", description: "Le operazioni programmate consumano meno l'attrezzatura.", effectLabel: "−4% usura programmata per livello", effect: "equipmentWearReduction", effectPerLevel: 0.04, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame },
+  { id: "equipment-register", category: "equipment", title: "Registro dell'attrezzatura", description: "Controlli e interventi vengono coordinati con più efficienza.", effectLabel: "+10% velocità manutenzione automatica per livello", effect: "equipmentAutomationMultiplier", effectPerLevel: 0.1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "all-fixed", category: "equipment", title: "Le abbiamo messe a posto tutte", description: "Una dichiarazione finalmente supportata dai fatti.", effectLabel: "−4% usura programmata per livello", effect: "equipmentWearReduction", effectPerLevel: 0.04, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
 
-  { id: "pre-event-check", category: "equipment", title: "Controllo pre-evento", description: "I problemi vengono trovati prima di uscire.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 70, costGrowth: GROWTH, maxLevel: 5, requiredFame: 5 },
-  { id: "maintenance-kit", category: "equipment", title: "Kit di manutenzione", description: "Le riparazioni dei collaboratori diventano più efficaci.", effectLabel: "+15% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.15, baseCost: 130, costGrowth: GROWTH, maxLevel: 5, requiredFame: 15 },
-  { id: "organized-rack", category: "equipment", title: "Rastrelliera ordinata", description: "Più spade sono immediatamente disponibili.", effectLabel: "+2 spade per livello", effect: "totalSwords", effectPerLevel: 2, baseCost: 230, costGrowth: GROWTH, maxLevel: 5, requiredFame: 20 },
-  { id: "essential-parts", category: "equipment", title: "Ricambi essenziali", description: "L'usura incide meno sull'operatività.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 380, costGrowth: GROWTH, maxLevel: 5, requiredFame: 35 },
-  { id: "demo-set", category: "equipment", title: "Set da dimostrazione", description: "Gli eventi possono accogliere più persone.", effectLabel: "+4% persone agli eventi per livello", effect: "eventAttendanceMultiplier", effectPerLevel: 0.04, baseCost: 620, costGrowth: GROWTH, maxLevel: 5, requiredFame: 50 },
-  { id: "equipment-register", category: "equipment", title: "Registro dell'attrezzatura", description: "I controlli diventano parte dell'automazione.", effectLabel: "+20% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.2, baseCost: 950, costGrowth: GROWTH, maxLevel: 5, requiredFame: 70 },
-  { id: "all-fixed", category: "equipment", title: "Le abbiamo messe a posto tutte", description: "Una dichiarazione finalmente supportata dai fatti.", effectLabel: "-10% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.1, baseCost: 1500, costGrowth: GROWTH, maxLevel: 5, requiredFame: 100 },
+  // Gadget: il ramo già bilanciato resta invariato.
+  { id: "gadget-showcase", category: "gadget", title: "Vetrina della scuola", description: "Rende il catalogo visibile a una quota crescente degli iscritti.", effectLabel: "Pubblico iscritti: 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetMemberReachTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-online-store", category: "gadget", title: "Negozio online", description: "Porta il catalogo a una quota crescente dei follower della scuola.", effectLabel: "Pubblico follower: 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetFollowerReachTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000, 1_600_000], networkCostGrowth: 0, maxLevel: 9, requiredFame: noFame, requiredUnlocks: ["gadget", "social"], requiredUpgradeLevels: { "gadget-showcase": 2 } },
+  { id: "gadget-design-tools", category: "gadget", title: "Strumenti di progettazione", description: "Riduce il tempo necessario a sviluppare il primo prototipo.", effectLabel: "+20% velocità di progettazione per livello · massimo +100%", effect: "gadgetDevelopmentSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-revision-lab", category: "gadget", title: "Laboratorio revisioni", description: "Accelera il lavoro che precede un nuovo tentativo di qualità.", effectLabel: "+20% velocità di revisione per livello · massimo +100%", effect: "gadgetRevisionSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-design-tools": 2 } },
+  { id: "gadget-order-management", category: "gadget", title: "Gestione degli ordini", description: "Aumenta il numero di tentativi commerciali gestiti ogni mese.", effectLabel: "+20% capacità commerciale per livello · massimo +100%", effect: "gadgetSalesCapacity", effectPerLevel: 0.2, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
+  { id: "gadget-sales-training", category: "gadget", title: "Formazione commerciale", description: "Aiuta i Collaboratori a convertire più tentativi in vendite effettive.", effectLabel: "+2 punti percentuali di conversione per livello · massimo +10", effect: "gadgetSalesConversion", effectPerLevel: 0.02, baseCost: 15_000, costGrowth: LEVEL_GROWTH, levelCosts: [15_000, 30_000, 60_000, 120_000, 240_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-order-management": 2 } },
+  { id: "gadget-cross-selling", category: "gadget", title: "Vendita abbinata", description: "Una parte degli ordini genera automaticamente la vendita di un altro gadget disponibile.", effectLabel: "+5% vendite abbinate per livello · massimo +25%", effect: "gadgetCrossSell", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-sales-training": 3 }, requiredGadgetProduct: "mug" },
 
-  { id: "shared-calendar", category: "organization", title: "Calendario condiviso", description: "Preparazione e disponibilità sono più leggibili.", effectLabel: "+20% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.2, baseCost: 100, costGrowth: GROWTH, maxLevel: 5, requiredFame: 10 },
-  { id: "collaborator-shifts", category: "organization", title: "Turni dei collaboratori", description: "Le assegnazioni producono risultati più regolari.", effectLabel: "+40% automazione per livello", effect: "automationMultiplier", effectPerLevel: 0.4, baseCost: 200, costGrowth: GROWTH, maxLevel: 5, requiredFame: 20 },
-  { id: "checklist", category: "organization", title: "Lista di controllo", description: "Gli imprevisti diventano eccezioni documentate.", effectLabel: "-5% usura per livello", effect: "equipmentWearReduction", effectPerLevel: 0.05, baseCost: 350, costGrowth: GROWTH, maxLevel: 5, requiredFame: 35 },
-  { id: "registration-form", category: "organization", title: "Modulo di iscrizione", description: "Quote e registrazioni scorrono più rapidamente.", effectLabel: "+10% entrate per livello", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 600, costGrowth: GROWTH, maxLevel: 5, requiredFame: 50 },
-  { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Notifiche, quote e pratiche seguono una procedura stabile.", effectLabel: "+20% entrate per livello", effect: "incomeMultiplier", effectPerLevel: 0.2, baseCost: 1000, costGrowth: GROWTH, maxLevel: 5, requiredFame: 75 },
-  { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La struttura è pronta a sostenere una rete di scuole.", effectLabel: "+100% automazione per livello", effect: "automationMultiplier", effectPerLevel: 1, baseCost: 1800, costGrowth: GROWTH, maxLevel: 5, requiredFame: 100 },
+  // Insegnamento
+  { id: "technical-arena", category: "instructors", title: "Percorso Tecnico", description: "Apre prima l'Arena Tecnica e poi la trasforma nel Corso Agonisti.", effectLabel: "L1 Arena Tecnica · L2 durata 120→60 s · L3 Corso Agonisti (+1/+1 annuo) · L4 durata 60→30 s", effect: "agonistCourseTier", effectPerLevel: 1, baseCost: 1_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000, 2_000, 5_000, 7_500], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: {} },
+  { id: "instructor-versatility", category: "instructors", title: "Master of none", description: "Permette agli Istruttori di apprendere rami d'arma oltre le preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 2_000, costGrowth: LEVEL_GROWTH, levelCosts: [2_000, 4_000], networkCostGrowth: 0, maxLevel: 2, requiredFame: noFame, requiredUpgradeLevels: { "technical-arena": 1 } },
+  { id: "sis-accreditation", category: "instructors", title: "Tu conosci la SIS?", description: "Attiva le candidature alla Scuola Internazionale Superiore e accelera gradualmente i Corsi Tecnici.", effectLabel: "L1 candidature SIS · L2 +10% velocità · L3 +20% · L4 +30%", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, effectLevelCap: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { "instructor-versatility": 2 } },
+  { id: "cost-of-service", category: "instructors", title: "Il costo del Servizio", description: "Riduce il costo dei percorsi che assegnano un attestato da Istruttore o una qualifica da Tecnico.", effectLabel: "−5% costo dei corsi Istruttori/Tecnici per livello · massimo −25%", effect: "courseCostReduction", effectPerLevel: 0.05, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "sis-accreditation": 1 } },
+  { id: "promiscuous-instructor", category: "instructors", title: "Didattica di gruppo", description: "Aumenta fino a sei gli allievi seguiti contemporaneamente; l'ultimo livello concede un secondo corso annuale.", effectLabel: "L1–L5: capacità 2→6 allievi · L6: +1 corso annuale", effect: "instructorStudentCapacity", effectPerLevel: 1, effectLevelCap: 5, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 6, requiredFame: noFame, requiredUpgradeLevels: { "cost-of-service": 2 } },
+  { id: "athletic-preparation", category: "instructors", title: "Preparazione agonistica", description: "Da settembre a giugno gli Istruttori liberi migliorano Arena o Stile degli atleti.", effectLabel: "L1 sblocco · +25% efficacia per livello", effect: "athleticPreparationPower", effectPerLevel: 0.25, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "promiscuous-instructor": 6, "technical-arena": 3 } },
+  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera Tecnici, Istruttori e atleti.", effectLabel: "L1 +1 corso annuo · L2 +50% velocità Corsi Tecnici · L3 +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredUpgradeLevels: { "athletic-preparation": 5 } },
+  { id: "agonist-course-intensity", category: "instructors", title: "Intensità agonistica", description: "Estensione del PagoSport: aumenta il risultato massimo casuale del Corso Agonisti.", effectLabel: "Bonus massimo +2/+2 → +3/+3 → +4/+4 → +5/+5", effect: "agonistCourseStatMaximum", effectPerLevel: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000, 800_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { pagosport: 3 }, extension: true },
 
-  { id: "technical-arena", category: "instructors", title: "Arena Tecnica", description: "Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di perdere atleti alla fine dell'anno e, con la giusta attenzione, li renderà sempre più competitivi.", effectLabel: "Livello 1: Sblocco \"Arena Tecnica\" · Livello 2: Durata Arena Tecnica da 120 a 60 secondi · Livello 3: Sblocco Corso Agonisti · Livello 4: Durata Corso Agonisti da 60 a 30 secondi", effect: "agonistCourseTier", effectPerLevel: 1, baseCost: 1_000, costGrowth: 1, levelCosts: [1_000, 2_000, 5_000, 7_500], maxLevel: 4, requiredFame: 0 },
-  { id: "sis-accreditation", category: "instructors", title: "Accreditamento SIS", description: "La scuola attiva il canale ufficiale con la Scuola Internazionale Superiore e permette di candidare i propri Istruttori ai Corsi Tecnici.", effectLabel: "Sblocca le candidature ai Corsi Tecnici SIS", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
-  { id: "agonist-course-intensity", category: "instructors", title: "Intensità agonistica", description: "Rende variabile la crescita del Corso Agonisti e ne aumenta il risultato massimo per Arena e Stile.", effectLabel: "+1 al bonus massimo casuale per caratteristica e livello · massimo +5", effect: "agonistCourseStatMaximum", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000], maxLevel: 4, requiredFame: 0, requiredUpgradeLevels: { "technical-arena": 3 } },
-  { id: "athletic-preparation", category: "instructors", title: "Preparazione atletica", description: "Da settembre a giugno, quando non hanno lezioni o corsi disponibili, gli Istruttori migliorano Arena o Stile degli atleti.", effectLabel: "Livello 1: sblocco · +25% efficacia per livello", effect: "athleticPreparationPower", effectPerLevel: 0.25, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
-  { id: "instructor-versatility", category: "instructors", title: "Polivalenza didattica", description: "Permette agli Istruttori di apprendere rami d'arma oltre le proprie preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 2_000, costGrowth: 2, levelCosts: [2_000, 4_000], maxLevel: 2, requiredFame: 0, requiredUpgradeLevels: { "technical-arena": 1 } },
-  { id: "promiscuous-instructor", category: "instructors", title: "Istruttore Promisquo", description: "Un'organizzazione più flessibile permette a ogni Istruttore di seguire un allievo aggiuntivo.", effectLabel: "+1 allievo contemporaneo · massimo 2", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { "instructor-versatility": 2 } },
-  { id: "extra-form", category: "instructors", title: "Doppio Corso", description: "Aumenta per tutti gli atleti della scuola il numero di Forme apprendibili nello stesso anno formativo.", effectLabel: "+1 Forma apprendibile per atleta e anno", effect: "annualFormCapacity", effectPerLevel: 1, baseCost: 10_000, costGrowth: 1, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { "promiscuous-instructor": 1 } },
-  { id: "tiamat-instructor", category: "instructors", title: "Istruttore Tiamat", description: "Una metodologia avanzata permette a ogni Istruttore di seguire più allievi nello stesso momento.", effectLabel: "+1 allievo contemporaneo per livello · massimo 6", effect: "instructorStudentCapacity", effectPerLevel: 1, baseCost: 8_000, costGrowth: 1, levelCosts: [8_000, 13_000, 21_000, 34_000], maxLevel: 4, requiredFame: 0, requiredUpgradeLevels: { "extra-form": 1 } },
-  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera la preparazione di Tecnici, Istruttori e atleti.", effectLabel: "Livello 1: +1 Forma annua · Livello 2: +50% velocità Corsi Tecnici · Livello 3: +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 55_000, costGrowth: 1, levelCosts: [55_000, 89_000, 144_000], maxLevel: 3, requiredFame: 0, requiredUpgradeLevels: { "tiamat-instructor": 4 } },
-  { id: "divine-touch", category: "instructors", title: "Tocco DiGilo", description: "L'insegnamento delle Forme da parte degli Istruttori raggiunge una velocità sovrumana.", effectLabel: "+9999% velocità di insegnamento", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: 1, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { pagosport: 3 } },
-  { id: "project-x", category: "instructors", title: "Progetto X", description: "Introduce un anno formativo dedicato a una Forma 1 più avanzata e ai rudimenti di Forma 2 applicati al combattimento in arena, dando agli allievi inesperti il tempo di affinare la tecnica.", effectLabel: "Sblocca Corso X tra Forma 1 e Forma 2 e le relative qualifiche da Istruttore e Tecnico", effect: "courseXUnlock", effectPerLevel: 1, baseCost: 1, costGrowth: 1, networkCostGrowth: 0, maxLevel: 1, requiredFame: 0, requiredUpgradeLevels: { "divine-touch": 1 } },
+  // Organizzazione
+  { id: "shared-calendar", category: "organization", title: "Manuale operativo", description: "Procedure condivise fanno crescere più rapidamente la Maestria dei collaboratori.", effectLabel: "+10% esperienza Maestria per livello · massimo +50%", effect: "masteryExperienceMultiplier", effectPerLevel: 0.1, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 1_000, 2_000, 4_000, 8_000], maxLevel: 5, requiredFame: noFame },
+  { id: "collaborator-shifts", category: "organization", title: "Turni dei collaboratori", description: "Quando il settore principale è inattivo, una parte della produttività passa a un settore secondario scelto.", effectLabel: "Trasferisce il 10% della produttività per livello · massimo 50%", effect: "collaboratorFallbackTier", effectPerLevel: 0.1, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame },
+  { id: "standard-procedures", category: "organization", title: "Procedure standard", description: "Le automazioni ordinarie condividono passaggi e strumenti comuni.", effectLabel: "+5% velocità delle automazioni generiche per livello · massimo +25%", effect: "automationMultiplier", effectPerLevel: 0.05, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "registration-form", category: "organization", title: "Modulo di iscrizione", description: "Quote e registrazioni scorrono con meno dispersioni.", effectLabel: "+5% entrate dalle quote per livello · massimo +25%", effect: "membershipIncomeMultiplier", effectPerLevel: 0.05, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame },
+  { id: "operational-priorities", category: "organization", title: "Priorità operative", description: "Sblocca la scelta dell'ordine con cui le Aree di Attività consumano Euro e risorse scarse.", effectLabel: "Sblocca l'ordinamento delle priorità operative", effect: "operationalPrioritiesUnlock", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000], maxLevel: 1, requiredFame: noFame },
+  { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Notifiche, quote e pratiche seguono una procedura stabile.", effectLabel: "+10% a tutte le entrate ricorrenti per livello · massimo +50%", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
+  { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "La rete condivide strumenti e capacità operative tra le scuole.", effectLabel: "+10% velocità delle automazioni generiche per livello · massimo +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1 },
 
-  { id: "gadget-showcase", category: "gadget", title: "Vetrina della scuola", description: "Rende il catalogo visibile a una quota crescente degli iscritti.", effectLabel: "Pubblico iscritti: 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetMemberReachTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: 1, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
-  { id: "gadget-online-store", category: "gadget", title: "Negozio online", description: "Porta il catalogo a una quota crescente dei follower della scuola.", effectLabel: "Pubblico follower: 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100%", effect: "gadgetFollowerReachTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000, 1_600_000], networkCostGrowth: 0, maxLevel: 9, requiredFame: 0, requiredUnlocks: ["gadget", "social"], requiredUpgradeLevels: { "gadget-showcase": 2 } },
-  { id: "gadget-design-tools", category: "gadget", title: "Strumenti di progettazione", description: "Riduce il tempo necessario a sviluppare il primo prototipo.", effectLabel: "+20% velocità di progettazione per livello · massimo +100%", effect: "gadgetDevelopmentSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
-  { id: "gadget-revision-lab", category: "gadget", title: "Laboratorio revisioni", description: "Accelera il lavoro che precede un nuovo tentativo di qualità.", effectLabel: "+20% velocità di revisione per livello · massimo +100%", effect: "gadgetRevisionSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: 1, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-design-tools": 2 } },
-  { id: "gadget-order-management", category: "gadget", title: "Gestione degli ordini", description: "Aumenta il numero di tentativi commerciali gestiti ogni mese.", effectLabel: "+20% capacità commerciale per livello · massimo +100%", effect: "gadgetSalesCapacity", effectPerLevel: 0.2, baseCost: 10_000, costGrowth: 1, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: {} },
-  { id: "gadget-sales-training", category: "gadget", title: "Formazione commerciale", description: "Aiuta i Collaboratori a convertire più tentativi in vendite effettive.", effectLabel: "+2 punti percentuali di conversione per livello · massimo +10", effect: "gadgetSalesConversion", effectPerLevel: 0.02, baseCost: 15_000, costGrowth: 1, levelCosts: [15_000, 30_000, 60_000, 120_000, 240_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-order-management": 2 } },
-  { id: "gadget-cross-selling", category: "gadget", title: "Vendita abbinata", description: "Una parte degli ordini genera automaticamente la vendita di un altro gadget disponibile.", effectLabel: "+5% vendite abbinate per livello · massimo +25%", effect: "gadgetCrossSell", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: 1, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: 0, requiredUnlocks: ["gadget"], requiredUpgradeLevels: { "gadget-sales-training": 3 }, requiredGadgetProduct: "mug" },
+  // Percorsi Segreti
+  { id: "project-x", category: "secrets", title: "Corso X", description: "Introduce un anno formativo dedicato a una Forma 1 più avanzata e ai rudimenti di Forma 2 applicati al combattimento in arena.", effectLabel: "Sblocca Corso X e le relative qualifiche da Istruttore e Tecnico", effect: "courseXUnlock", effectPerLevel: 1, baseCost: 1, costGrowth: LEVEL_GROWTH, levelCosts: [1], networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, requiredUpgradeLevels: {}, secretHint: "Vincere il torneo più superbo dell'anno è solo l'inizio" },
+  { id: "divine-touch", category: "secrets", title: "ToccoDiGilo", description: "L'insegnamento delle Forme da parte degli Istruttori raggiunge una velocità sovrumana.", effectLabel: "+9999% velocità di insegnamento", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000_000], networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, requiredUpgradeLevels: {}, secretHint: "Esistono forze più grandi di quanto avresti mai potuto immaginare" },
+
+  // Nodi storici: restano nel formato del salvataggio, ma non producono più effetti.
+  { id: "social-editorial-plan", category: "social", title: "Piano editoriale", description: "Voce storica accorpata in Pubblicità vincente.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, maxLevel: 5, requiredFame: noFame, hidden: true },
+  { id: "social-content-distribution", category: "social", title: "Promozione degli eventi", description: "Voce storica conservata per la compatibilità dei salvataggi.", effectLabel: "Nessun effetto", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, maxLevel: 5, requiredFame: noFame, hidden: true },
+  { id: "social-sponsorships", category: "social", title: "Sponsorizzazioni", description: "Voce storica accorpata nel Corso di Marketing.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, maxLevel: 5, requiredFame: noFame, hidden: true },
+  { id: "extra-form", category: "instructors", title: "Doppio Corso", description: "Voce storica accorpata in Didattica di gruppo.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, hidden: true },
+  { id: "tiamat-instructor", category: "instructors", title: "Istruttore Tiamat", description: "Voce storica accorpata in Didattica di gruppo.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, hidden: true },
 ];
 
-const SHOP_BASE_COSTS: Record<UpgradeId, number> = {
-  "comfortable-keyboard": 75,
-  "quick-phrases": 400,
-  "automatic-signature": 800,
-  "smart-fields": 1_500,
-  "instant-review": 2_750,
-  "mail-merge": 5_000,
-  "prepared-presentation": 50,
-  "qr-cards": 150,
-  "coordinated-demo": 400,
-  "recognizable-stand": 800,
-  "order-welcome": 1_500,
-  "difficult-questions": 2_750,
-  "not-that-thing": 5_000,
-  "spell-check": 75,
-  "professional-email": 175,
-  "personalized-invite": 175,
-  "call-to-action": 400,
-  "email-layout": 850,
-  "winning-advertising": 1_600,
-  "marketing-course": 3_000,
-  "welcome-procedure": 75,
-  "tested-intro": 250,
-  "clear-material": 700,
-  "dedicated-helper": 1_300,
-  "prepared-room": 2_500,
-  "memorable-experience": 5_000,
-  "social-content-synthesis": 2_500,
-  "social-editorial-plan": 5_000,
-  "social-content-distribution": 7_500,
-  "social-sponsorships": 10_000,
-  "pre-event-check": 150,
-  "maintenance-kit": 400,
-  "organized-rack": 750,
-  "essential-parts": 1_300,
-  "demo-set": 2_500,
-  "equipment-register": 4_000,
-  "all-fixed": 6_500,
-  "shared-calendar": 250,
-  "collaborator-shifts": 700,
-  checklist: 1_300,
-  "registration-form": 2_500,
-  "order-secretariat": 4_000,
-  "multi-site-coordination": 6_500,
-  "instructor-versatility": 2_000,
-  "technical-arena": 1_000,
-  "sis-accreditation": 5_000,
-  "agonist-course-intensity": 5_000,
-  "athletic-preparation": 2_500,
-  "promiscuous-instructor": 5_000,
-  "extra-form": 10_000,
-  "tiamat-instructor": 8_000,
-  pagosport: 55_000,
-  "divine-touch": 1_000_000,
-  "project-x": 1,
-  "gadget-showcase": 2_500,
-  "gadget-online-store": 5_000,
-  "gadget-design-tools": 5_000,
-  "gadget-revision-lab": 5_000,
-  "gadget-order-management": 10_000,
-  "gadget-sales-training": 15_000,
-  "gadget-cross-selling": 25_000,
-};
-
-export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG.map(
-  (definition) => ({ ...definition, baseCost: SHOP_BASE_COSTS[definition.id] }),
-);
+export const UPGRADE_DEFINITIONS: UpgradeDefinition[] = UPGRADE_CATALOG;
 
 export function createInitialUpgradeLevels(): UpgradeLevels {
-  return Object.fromEntries(UPGRADE_DEFINITIONS.map((definition) => [definition.id, 0])) as UpgradeLevels;
+  return Object.fromEntries(
+    UPGRADE_DEFINITIONS.map((definition) => [definition.id, 0]),
+  ) as UpgradeLevels;
 }
 
 export function getUpgradeDefinition(id: UpgradeId) {
@@ -199,7 +211,10 @@ export function getFirstIncompleteUpgradePrerequisite(
     return incompleteId ? getUpgradeDefinition(incompleteId) : undefined;
   }
   const categoryDefinitions = UPGRADE_DEFINITIONS.filter(
-    (upgrade) => upgrade.category === definition.category && !upgrade.hidden,
+    (upgrade) =>
+      upgrade.category === definition.category &&
+      !upgrade.hidden &&
+      !upgrade.extension,
   );
   const definitionIndex = categoryDefinitions.findIndex(
     (upgrade) => upgrade.id === definition.id,
@@ -217,7 +232,11 @@ export function hasCompletedUpgradePrerequisites(
   return !getFirstIncompleteUpgradePrerequisite(levels, definition);
 }
 
-export function getUpgradeCost(definition: UpgradeDefinition, currentLevel: number, networkSchools = 0) {
+export function getUpgradeCost(
+  definition: UpgradeDefinition,
+  currentLevel: number,
+  networkSchools = 0,
+) {
   const localCost = definition.levelCosts?.[currentLevel] ??
     definition.baseCost * definition.costGrowth ** currentLevel;
   return Math.round(
@@ -238,7 +257,10 @@ export function getUpgradePrimaryEffectTotal(
   return effectiveLevel * definition.effectPerLevel;
 }
 
-export function getUpgradeEffectTotal(levels: UpgradeLevels, effect: UpgradeEffect): number {
+export function getUpgradeEffectTotal(
+  levels: UpgradeLevels,
+  effect: UpgradeEffect,
+): number {
   return UPGRADE_DEFINITIONS.reduce((total, definition) => {
     const effectPerLevel =
       (definition.effect === effect ? definition.effectPerLevel : 0) +
@@ -264,7 +286,8 @@ export function getUpgradeEffectMaximum(effect: UpgradeEffect): number {
 }
 
 export function getAnnualFormTrainingLimit(levels: UpgradeLevels): number {
-  return 1 + getUpgradeEffectTotal(levels, "annualFormCapacity");
+  return 1 + Number((levels["promiscuous-instructor"] ?? 0) >= 6) +
+    Number((levels.pagosport ?? 0) >= 1);
 }
 
 export function getAgonistCourseMaximumStatGain(levels: UpgradeLevels): number {
@@ -277,6 +300,50 @@ export function getPagoSportAllCourseSpeedBonus(levels: UpgradeLevels): number {
 
 export function getPagoSportTechnicianSpeedBonus(levels: UpgradeLevels): number {
   return (levels.pagosport ?? 0) >= 2 ? 0.5 : 0;
+}
+
+export function getSISTechnicianCourseSpeedBonus(levels: UpgradeLevels): number {
+  return Math.max(0, Math.min(3, (levels["sis-accreditation"] ?? 0) - 1)) * 0.1;
+}
+
+export function getQualifyingCourseCostMultiplier(levels: UpgradeLevels): number {
+  return 1 - Math.min(0.25, getUpgradeEffectTotal(levels, "courseCostReduction"));
+}
+
+export function applyQualifyingCourseDiscount(
+  levels: UpgradeLevels,
+  cost: number,
+): number {
+  return Math.round(cost * getQualifyingCourseCostMultiplier(levels) * 100) / 100;
+}
+
+export function getCreativityProgress(levels: UpgradeLevels): number {
+  return Math.min(1, getUpgradeEffectTotal(levels, "creativityPoint") / 35);
+}
+
+export function getTrialDurationMs(levels: UpgradeLevels, baseDurationMs: number): number {
+  return Math.max(
+    10_000,
+    baseDurationMs - getUpgradeEffectTotal(levels, "trialDurationReductionMs"),
+  );
+}
+
+export function getEquipmentPreparedWorkMaximum(state: Pick<GameState, "equipment" | "upgrades">): number {
+  return state.equipment.totalSwords * 100 * Math.min(
+    0.1,
+    getUpgradeEffectTotal(state.upgrades, "equipmentPreparedWorkCapacity"),
+  );
+}
+
+export function getEquipmentSwordRepairWork(levels: UpgradeLevels): number {
+  return Math.max(
+    75,
+    150 - getUpgradeEffectTotal(levels, "equipmentSwordRepairWorkReduction"),
+  );
+}
+
+export function isOperationalPrioritiesUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "operationalPrioritiesUnlock") >= 1;
 }
 
 export function isSISTechnicianCourseUnlocked(levels: UpgradeLevels): boolean {

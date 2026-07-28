@@ -10,6 +10,8 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import {
   UPGRADE_CATEGORIES,
   UPGRADE_DEFINITIONS,
+  getCreativityProgress,
+  getEquipmentPreparedWorkMaximum,
   getAnnualFormTrainingLimit,
   getFirstIncompleteUpgradePrerequisite,
   getPagoSportAllCourseSpeedBonus,
@@ -31,7 +33,7 @@ import {
   getSocialFollowerChance,
   getSocialFollowerValue,
 } from "../../game/social";
-import type { GameState, UpgradeId } from "../../game/types";
+import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
 import {
@@ -49,6 +51,7 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   organization: "tasks",
   instructors: "people",
   gadget: "gift",
+  secrets: "lock",
 };
 
 const numberFormatter = new Intl.NumberFormat("it-IT", {
@@ -78,12 +81,12 @@ function getUpgradeBenefitsSummary(state: GameState) {
 
   addPercentage("Contatti", "eventContactsMultiplier");
   addPercentage("Pubblico eventi", "eventAttendanceMultiplier");
-  addPercentage("Prenotazioni", "bookingMultiplier");
-  addPercentage("Iscrizioni", "enrollmentMultiplier");
+  addPercentage("Velocità Redazione/Social", "editorialAutomationMultiplier");
+  addPercentage("Percorso iscrizioni", "enrollmentProgress");
   addPercentage("Automazione", "automationMultiplier");
   addPercentage("Entrate", "incomeMultiplier");
   addPercentage("Usura", "equipmentWearReduction", "−");
-  addAmount("Spade", "totalSwords");
+  addPercentage("Manutenzione automatica", "equipmentAutomationMultiplier");
   addAmount("Forme annue", "annualFormCapacity");
   addAmount("Rami per Istruttore", "instructorBranchCapacity");
   addAmount("Allievi per Istruttore", "instructorStudentCapacity");
@@ -163,17 +166,15 @@ function getUpgradeBenefitsSummary(state: GameState) {
 function getCategorySummary(state: GameState, category: UpgradeCategory) {
   switch (category) {
     case "speed":
-      return `${state.player.writingPower} caratteri per input`;
+      return `${formatNumber(state.player.writingPower)} caratteri per input · +${Math.round(getUpgradeEffectTotal(state.upgrades, "editorialAutomationMultiplier") * 100)}% Redazione`;
     case "charisma":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "eventContactsMultiplier") * 100)}% contatti`;
     case "writing":
-      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "bookingMultiplier") * 100)}% prenotazioni`;
+      return `${Math.round(getCreativityProgress(state.upgrades) * 35)}/35 punti Creatività`;
     case "welcome":
-      return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") * 100)}% iscrizioni`;
-    case "social":
-      return `${formatNumber(getSocialContentCharacters(state.upgrades))} caratteri · ${formatUpgradePercentage(getSocialFollowerChance(state.upgrades))} follower`;
+      return `${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") * 100)}% del percorso iscrizioni`;
     case "equipment":
-      return `${state.equipment.totalSwords} spade · -${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura`;
+      return `−${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura · riserva ${formatNumber(getEquipmentPreparedWorkMaximum(state))}`;
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
@@ -186,18 +187,34 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
       }`;
     case "gadget":
       return `${formatUpgradePercentage(getGadgetMemberReach(state.upgrades))} iscritti · ${formatUpgradePercentage(getGadgetFollowerReach(state.upgrades))} follower`;
+    case "secrets":
+      return "Segui gli indizi per rivelare i percorsi";
+    case "social":
+      return "";
   }
 }
 
 type UpgradeStatus = "locked" | "available" | "completed";
 
 function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
+  if (
+    definition.secretHint !== undefined &&
+    !state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId)
+  ) return "Percorso segreto non ancora scoperto";
   const missingUnlock = definition.requiredUnlocks?.find(
     (unlock) => !state.unlocks[unlock],
   );
   if (missingUnlock === "social") return "Social non ancora sbloccato";
   if (missingUnlock === "gadget") return "Settore Gadget non ancora sbloccato";
   if (missingUnlock) return "Funzione richiesta non ancora sbloccata";
+  if (
+    definition.requiredNetworkSchools !== undefined &&
+    state.network.schools.length < definition.requiredNetworkSchools
+  ) {
+    return definition.requiredNetworkSchools === 1
+      ? "Fonda prima un'altra scuola"
+      : `Servono ${definition.requiredNetworkSchools} scuole fondate`;
+  }
   if (
     definition.requiredGadgetProduct !== undefined &&
     !state.gadgets.products[definition.requiredGadgetProduct].unlocked
@@ -216,6 +233,8 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
 
 function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): boolean {
   return !definition.hidden &&
+    (definition.category !== "secrets" ||
+      state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId)) &&
     (definition.category !== "social" || state.unlocks.social) &&
     (definition.category !== "gadget" || state.unlocks.gadget);
 }
@@ -244,7 +263,7 @@ function UpgradeNode({
   onSelect: (anchor: HTMLButtonElement) => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const level = state.upgrades[definition.id];
@@ -279,6 +298,28 @@ function UpgradeNode({
   );
 }
 
+function MysteryUpgradeNode({ definition }: { definition: UpgradeDefinition }) {
+  const tooltipId = `secret-upgrade-hint-${definition.id}`;
+  return (
+    <li className="upgrade-node-item secret-upgrade-node-item">
+      <button
+        type="button"
+        className="upgrade-node locked mystery"
+        aria-label="???"
+        aria-describedby={tooltipId}
+      >
+        <span className="upgrade-node-icon" aria-hidden="true"><Icon name="lock" /></span>
+        <span className="upgrade-node-level">Percorso segreto</span>
+        <strong>???</strong>
+        <span className="secret-upgrade-tooltip" id={tooltipId} role="tooltip">
+          <strong>Indizio</strong>
+          {definition.secretHint}
+        </span>
+      </button>
+    </li>
+  );
+}
+
 function UpgradeDetailsDialog({
   definition,
   state: stateOverride,
@@ -293,7 +334,7 @@ function UpgradeDetailsDialog({
   onBuy: () => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const dialogRef = useRef<HTMLElement>(null);
@@ -421,7 +462,14 @@ function UpgradeDetailsDialog({
           <div><dt>Livello attuale</dt><dd>{level}/{definition.maxLevel}</dd></div>
           <div><dt>Effetto per livello</dt><dd>{definition.effectLabel}</dd></div>
           <div><dt>Costo</dt><dd>{completed ? "—" : formatCurrency(cost)}</dd></div>
-          <div><dt>Fama richiesta</dt><dd>{definition.requiredFame || "Nessuna"}</dd></div>
+          <div>
+            <dt>Prerequisiti</dt>
+            <dd>{definition.requiredNetworkSchools
+              ? `${definition.requiredNetworkSchools} scuola fondata${definition.requiredNetworkSchools === 1 ? "" : "e"}`
+              : Object.keys(definition.requiredUpgradeLevels ?? {}).length > 0
+                ? "Indicati dallo stato del nodo"
+                : "Nessuno"}</dd>
+          </div>
         </dl>
 
         <p className={`upgrade-dialog-status${canBuy || completed ? " positive" : ""}`}>
@@ -443,7 +491,7 @@ export function UpgradesView({
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "unlocks", "upgrades"],
+    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const [selection, setSelection] = useState<{
@@ -464,6 +512,7 @@ export function UpgradesView({
   let completedCount = 0;
   let recommendedUpgrade: { definition: UpgradeDefinition; cost: number } | undefined;
   for (const definition of UPGRADE_DEFINITIONS) {
+    if (definition.category === "secrets") continue;
     if (!isUpgradeVisible(state, definition)) continue;
     const status = getUpgradeStatus(state, definition);
     if (status === "completed") {
@@ -556,7 +605,15 @@ export function UpgradesView({
               ).map((category) => {
                 const definitions = UPGRADE_DEFINITIONS.filter(
                   (definition) =>
-                    definition.category === category.id && !definition.hidden,
+                    definition.category === category.id &&
+                    !definition.hidden &&
+                    !definition.extension,
+                );
+                const extensions = UPGRADE_DEFINITIONS.filter(
+                  (definition) =>
+                    definition.category === category.id &&
+                    !definition.hidden &&
+                    definition.extension,
                 );
                 return (
                   <section className="upgrade-branch" key={category.id} aria-labelledby={`upgrade-branch-${category.id}`}>
@@ -568,16 +625,39 @@ export function UpgradesView({
                       </div>
                     </div>
                     <ol className="upgrade-branch-nodes">
-                      {definitions.map((definition) => (
-                        <UpgradeNode
-                          key={definition.id}
-                          definition={definition}
-                          state={stateOverride}
-                          selected={selection?.upgradeId === definition.id}
-                          onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
-                        />
-                      ))}
+                      {definitions.map((definition) =>
+                        category.id === "secrets" &&
+                        !state.secretUpgradeDiscoveries.includes(
+                          definition.id as SecretUpgradeId,
+                        ) ? (
+                          <MysteryUpgradeNode key={definition.id} definition={definition} />
+                        ) : (
+                          <UpgradeNode
+                            key={definition.id}
+                            definition={definition}
+                            state={stateOverride}
+                            selected={selection?.upgradeId === definition.id}
+                            onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
+                          />
+                        )
+                      )}
                     </ol>
+                    {extensions.length > 0 ? (
+                      <div className="upgrade-branch-extension">
+                        <small>Estensione del ramo</small>
+                        <ol className="upgrade-branch-nodes">
+                          {extensions.map((definition) => (
+                            <UpgradeNode
+                              key={definition.id}
+                              definition={definition}
+                              state={stateOverride}
+                              selected={selection?.upgradeId === definition.id}
+                              onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
+                            />
+                          ))}
+                        </ol>
+                      </div>
+                    ) : null}
                   </section>
                 );
               })}

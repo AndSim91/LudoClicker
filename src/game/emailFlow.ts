@@ -2,6 +2,8 @@ import {
   chooseEmailPresentationLevel,
   getEmailPresentationMix,
 } from "../content/emailPresentation";
+import { getEmailBuildLength } from "../content/emailBuild";
+import { getTrialDurationMs, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailBookingChance } from "./formulas";
 import { GAME_CONFIG } from "./config";
 import { createCampaign } from "./campaignContent";
@@ -33,7 +35,7 @@ export function startNextCampaign(state: GameState, now: number): GameState {
     presentationLevel = chooseEmailPresentationLevel(state.upgrades, roll);
     randomSeed = nextSeed;
   }
-  const email = createCampaign(
+  const createdEmail = createCampaign(
     nextContact,
     state.historyArchive.emails.count + state.emails.length,
     now,
@@ -42,6 +44,18 @@ export function startNextCampaign(state: GameState, now: number): GameState {
     state.school.name,
     state.school.city,
   );
+  const initialProgress = getUpgradeEffectTotal(
+    state.upgrades,
+    "emailInitialProgress",
+  );
+  const email = initialProgress > 0
+    ? {
+        ...createdEmail,
+        revealedCharacters: Math.floor(
+          getEmailBuildLength(createdEmail) * Math.min(0.25, initialProgress),
+        ),
+      }
+    : createdEmail;
   return {
     ...state,
     randomSeed,
@@ -167,7 +181,10 @@ export function resolveEmailOutcome(
     ),
     contactId: outcome.contactId,
     startsAt,
-    resolvesAt: startsAt + GAME_CONFIG.trialDurationMs,
+    resolvesAt: startsAt + getTrialDurationMs(
+      nextState.upgrades,
+      GAME_CONFIG.trialDurationMs,
+    ),
     resultSeed: Math.floor(resultSeed * 2_147_483_647),
     status: "scheduled",
     tutorialSceneId: outcome.tutorialSceneId,

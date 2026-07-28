@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import { synchronizeEquipmentAvailability } from "./equipment";
 import { startNextCampaign } from "./emailFlow";
+import { getTrialDurationMs } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
 import { departMembers } from "./membershipFlow";
@@ -170,7 +171,7 @@ export function scheduleAdminLegendaryTrial(state: GameState, now: number): Game
     ),
     contactId: contact.id,
     startsAt: now,
-    resolvesAt: now + GAME_CONFIG.trialDurationMs,
+    resolvesAt: now + getTrialDurationMs(state.upgrades, GAME_CONFIG.trialDurationMs),
     resultSeed: Math.floor(resultRoll * 2_147_483_647),
     status: "scheduled",
   };

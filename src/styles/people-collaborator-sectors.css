@@ -1551,3 +1551,87 @@
 @media (prefers-reduced-motion: reduce) {
   .collaborator-sector-panel { animation: none; }
 }
+.collaborator-operations-control {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.collaborator-operations-control > header h3,
+.collaborator-operations-control > header p {
+  margin: 0;
+}
+
+.collaborator-operations-control > header p {
+  margin-top: 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.collaborator-fallback-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.collaborator-fallback-grid label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.collaborator-fallback-grid select {
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.operational-priority-list {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.operational-priority-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.operational-priority-list li > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.operational-priority-list small {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--blue-600);
+}
+
+.operational-priority-list button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface-muted);
+}

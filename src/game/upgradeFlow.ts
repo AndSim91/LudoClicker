@@ -1,12 +1,21 @@
 import {
   getUpgradeCost,
   getUpgradeDefinition,
-  getUpgradeEffectTotal,
   hasCompletedUpgradePrerequisites,
 } from "../content/upgrades";
-import { synchronizeEquipmentAvailability } from "./equipment";
 import { getWritingPower } from "./formulas";
-import type { GameState, UpgradeId } from "./types";
+import type { GameState, SecretUpgradeId, UpgradeId } from "./types";
+
+export function discoverSecretUpgrade(
+  state: GameState,
+  upgradeId: SecretUpgradeId,
+): GameState {
+  if (state.secretUpgradeDiscoveries.includes(upgradeId)) return state;
+  return {
+    ...state,
+    secretUpgradeDiscoveries: [...state.secretUpgradeDiscoveries, upgradeId],
+  };
+}
 
 export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   const definition = getUpgradeDefinition(upgradeId);
@@ -15,6 +24,10 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   if (
     currentLevel >= definition.maxLevel ||
     definition.requiredUnlocks?.some((unlock) => !state.unlocks[unlock]) ||
+    (definition.requiredNetworkSchools !== undefined &&
+      state.network.schools.length < definition.requiredNetworkSchools) ||
+    (definition.secretHint !== undefined &&
+      !state.secretUpgradeDiscoveries.includes(upgradeId as SecretUpgradeId)) ||
     (definition.requiredGadgetProduct !== undefined &&
       !state.gadgets.products[definition.requiredGadgetProduct].unlocked) ||
     state.school.fame < definition.requiredFame ||
@@ -26,21 +39,10 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
-  const previousUpgradeSwords = Math.floor(getUpgradeEffectTotal(
-    state.upgrades,
-    "totalSwords",
-  ));
-  const upgradedSwords = Math.floor(getUpgradeEffectTotal(upgrades, "totalSwords"));
-  const addedSwords = Math.max(0, upgradedSwords - previousUpgradeSwords);
   const nextState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros - cost },
     upgrades,
-    equipment: synchronizeEquipmentAvailability({
-      ...state.equipment,
-      totalSwords: state.equipment.totalSwords + addedSwords,
-      availableSwords: state.equipment.availableSwords + addedSwords,
-    }),
   };
   return {
     ...nextState,

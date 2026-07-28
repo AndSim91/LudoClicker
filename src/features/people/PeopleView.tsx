@@ -27,6 +27,8 @@ export function PeopleView({
   onBookTechnicianCourse,
   onIncrementCollaboratorAssignment,
   onDecrementCollaboratorAssignment,
+  onSetCollaboratorFallback,
+  onMoveOperationalPriority,
 }: {
   state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
@@ -36,6 +38,14 @@ export function PeopleView({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
   onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
+  onSetCollaboratorFallback?: (
+    assignment: CollaboratorMasteryRole,
+    fallback: CollaboratorMasteryRole | null,
+  ) => void;
+  onMoveOperationalPriority?: (
+    assignment: CollaboratorMasteryRole,
+    direction: "up" | "down",
+  ) => void;
 }) {
   const state = useGameStateSlices(
     [
@@ -99,6 +109,8 @@ export function PeopleView({
               collaboratorsById={collaboratorsById}
               onIncrement={onIncrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
               onDecrement={onDecrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
+              onSetFallback={onSetCollaboratorFallback}
+              onMovePriority={onMoveOperationalPriority}
               onStartTraining={onStartTraining}
               onBookTechnicianCourse={onBookTechnicianCourse}
             />

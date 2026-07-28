@@ -21,6 +21,7 @@ const SOCIAL_FOLLOWER_CHANCES = [
 ] as const;
 const SOCIAL_FOLLOWER_VALUES = [
   GAME_CONFIG.socialBaseFollowerValue,
+  0.15,
   0.2,
   0.3,
   0.4,
@@ -39,12 +40,12 @@ export function getSocialContentCharacters(levels: UpgradeLevels): number {
 
 export function getSocialFollowerChance(levels: UpgradeLevels): number {
   return SOCIAL_FOLLOWER_CHANCES[
-    boundedLevel(levels, "social-editorial-plan", SOCIAL_FOLLOWER_CHANCES.length - 1)
+    boundedLevel(levels, "winning-advertising", SOCIAL_FOLLOWER_CHANCES.length - 1)
   ];
 }
 
 export function getSocialDoubleFollowerChance(levels: UpgradeLevels): number {
-  return boundedLevel(levels, "social-editorial-plan", 5) >= 5
+  return boundedLevel(levels, "winning-advertising", 5) >= 5
     ? GAME_CONFIG.socialDoubleFollowerChance
     : 0;
 }
@@ -55,7 +56,7 @@ export function getSocialEventPromotionBonus(followers: number): number {
 
 export function getSocialFollowerValue(levels: UpgradeLevels): number {
   return SOCIAL_FOLLOWER_VALUES[
-    boundedLevel(levels, "social-sponsorships", SOCIAL_FOLLOWER_VALUES.length - 1)
+    boundedLevel(levels, "marketing-course", SOCIAL_FOLLOWER_VALUES.length - 1)
   ];
 }
 

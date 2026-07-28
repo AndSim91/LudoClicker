@@ -107,6 +107,7 @@ export function migrateCollaboratorOperationsState(
       targets: validActivePresetId
         ? { ...migratedPresets[validActivePresetId].targets }
         : targets,
+      operationalPriorities: ["writing", "events", "equipment", "instructor", "gadget"],
     },
     legendaryCollaborators: state.legendaryCollaborators
       ? {

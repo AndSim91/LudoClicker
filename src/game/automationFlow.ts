@@ -11,10 +11,13 @@ import {
 } from "../content/forms";
 import {
   getAnnualFormTrainingLimit,
+  getEquipmentPreparedWorkMaximum,
+  getEquipmentSwordRepairWork,
   getUpgradeEffectTotal,
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
+import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import {
   improveRandomAthletes,
   resolveSocialContentCycles,
@@ -220,15 +223,19 @@ export function processAutomation(
   const wasWriting = activeEmail?.status === "writing";
   const producingSocialContent = state.unlocks.social;
   const hasEditorialWork = wasWriting || producingSocialContent;
-  const automationMultiplier =
-    1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
+  const genericAutomationBonus = getUpgradeEffectTotal(
+    state.upgrades,
+    "automationMultiplier",
+  );
+  const editorialAutomationMultiplier = 1 + genericAutomationBonus +
+    getUpgradeEffectTotal(state.upgrades, "editorialAutomationMultiplier");
 
   const generatedWriting = hasEditorialWork
     ? (elapsedMs / 1_000) *
       writingProductivity *
       GAME_CONFIG.collaboratorWritingPerSecond *
       state.player.writingPower *
-      automationMultiplier
+      editorialAutomationMultiplier
     : 0;
   const emailWorkShare = wasWriting && producingSocialContent
     ? GAME_CONFIG.socialEmailWritingShare
@@ -237,7 +244,9 @@ export function processAutomation(
       : 0;
   const socialWorkShare = producingSocialContent
     ? wasWriting
-      ? GAME_CONFIG.socialContentShareWhileWriting
+      ? GAME_CONFIG.socialContentShareWhileWriting +
+        GAME_CONFIG.socialEmailWritingShare *
+          getUpgradeEffectTotal(state.upgrades, "socialCopyShare")
       : 1
     : 0;
   const writingTotal = state.automation.writingBuffer + generatedWriting * emailWorkShare;
@@ -257,17 +266,44 @@ export function processAutomation(
   const equipmentRepairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
   const canRepairEquipment = equipmentRepairTarget !== undefined &&
     state.school.euros >= getEquipmentAutomaticRepairUnitCost(equipmentRepairTarget);
-  const equipmentTotal = canRepairEquipment
-    ? state.automation.equipmentBuffer +
-      (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
-        equipmentProductivity *
-        automationMultiplier
-    : state.automation.equipmentBuffer;
-  const equipmentRepair = repairEquipment(
-    state.equipment,
-    equipmentTotal,
-    state.school.euros,
+  const equipmentAutomationMultiplier = 1 + genericAutomationBonus +
+    getUpgradeEffectTotal(state.upgrades, "equipmentAutomationMultiplier");
+  const generatedEquipmentWork =
+    (elapsedMs / GAME_CONFIG.equipmentRepairIntervalMs) *
+    equipmentProductivity *
+    equipmentAutomationMultiplier;
+  const preparedWorkMaximum = getEquipmentPreparedWorkMaximum(state);
+  const currentPreparedWork = Math.min(
+    preparedWorkMaximum,
+    Math.max(0, state.automation.equipmentPreparedWork ?? 0),
   );
+  const equipmentWorkAvailable = equipmentRepairTarget === undefined
+    ? currentPreparedWork + state.automation.equipmentBuffer + generatedEquipmentWork
+    : currentPreparedWork + state.automation.equipmentBuffer +
+      (canRepairEquipment ? generatedEquipmentWork : 0);
+  const equipmentRepair = canRepairEquipment
+    ? repairEquipment(
+        state.equipment,
+        equipmentWorkAvailable,
+        state.school.euros,
+        getEquipmentSwordRepairWork(state.upgrades),
+        true,
+      )
+    : {
+        equipment: state.equipment,
+        repairedWear: 0,
+        repairedSwords: 0,
+        restoredCondition: 0,
+        eurosSpent: 0,
+        remainingWork: equipmentWorkAvailable,
+      };
+  const equipmentPreparedWork = Math.min(
+    preparedWorkMaximum,
+    equipmentRepair.remainingWork,
+  );
+  const equipmentBuffer = equipmentRepairTarget === undefined
+    ? 0
+    : Math.max(0, equipmentRepair.remainingWork - equipmentPreparedWork);
 
   let nextState: GameState = {
     ...state,
@@ -281,7 +317,8 @@ export function processAutomation(
       socialContentBuffer: producingSocialContent
         ? socialContentTotal - socialCycles * socialContentCharacters
         : state.automation.socialContentBuffer,
-      equipmentBuffer: equipmentRepair.remainingWork,
+      equipmentBuffer,
+      equipmentPreparedWork,
     },
     equipment: equipmentRepair.equipment,
     school: equipmentRepair.eurosSpent > 0
@@ -633,6 +670,8 @@ export function processAutomaticTeaching(
       rememberStartedTraining(student.id, started);
     }
   }
+  writingProductivity += getCollaboratorFallbackProductivity(state, "writing");
+  equipmentProductivity += getCollaboratorFallbackProductivity(state, "equipment");
 
   for (const student of students) {
     if (startedStudentIds.has(student.id)) continue;

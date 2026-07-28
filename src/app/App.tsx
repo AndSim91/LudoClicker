@@ -348,6 +348,18 @@ export function App() {
     () => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const setCollaboratorFallback = useCallback(
+    (
+      assignment: CollaboratorMasteryRole,
+      fallback: CollaboratorMasteryRole | null,
+    ) => dispatch({ type: "SET_COLLABORATOR_FALLBACK", assignment, fallback }),
+    [dispatch],
+  );
+  const moveOperationalPriority = useCallback(
+    (assignment: CollaboratorMasteryRole, direction: "up" | "down") =>
+      dispatch({ type: "MOVE_OPERATIONAL_PRIORITY", assignment, direction }),
+    [dispatch],
+  );
   const startGadgetProject = useCallback(
     (productId: GadgetProductId) => dispatch({
       type: "START_GADGET_PROJECT",
@@ -485,6 +497,8 @@ export function App() {
               onAssign={assignCollaborator}
               onIncrementCollaboratorAssignment={incrementCollaboratorAssignment}
               onDecrementCollaboratorAssignment={decrementCollaboratorAssignment}
+              onSetCollaboratorFallback={setCollaboratorFallback}
+              onMoveOperationalPriority={moveOperationalPriority}
               onStartTraining={startTraining}
               onBookTechnicianCourse={bookTechnicianCourse}
               onToggleFavorite={toggleMemberFavorite}

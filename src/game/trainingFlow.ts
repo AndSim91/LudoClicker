@@ -13,6 +13,7 @@ import {
   isInstructorForm,
 } from "../content/forms";
 import {
+  applyQualifyingCourseDiscount,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
   isCourseXUnlocked,
@@ -258,7 +259,10 @@ export function startFormTraining(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   if (qualificationOnly && collaborator && definition) {
-    const qualificationCost = getInstructorQualificationCost(definition.cost);
+    const qualificationCost = applyQualifyingCourseDiscount(
+      state.upgrades,
+      getInstructorQualificationCost(definition.cost),
+    );
     if (collaborator.training || state.school.euros < qualificationCost) return state;
     const training = scheduleTraining(
       state,
@@ -300,7 +304,10 @@ export function startFormTraining(
     instructorSelf && !instructor && isInstructorForm(formId),
   );
   const trainingCost = instructorTrack
-    ? getInstructorFormCost(definition?.cost ?? 0)
+    ? applyQualifyingCourseDiscount(
+        state.upgrades,
+        getInstructorFormCost(definition?.cost ?? 0),
+      )
     : instructor
       ? getStudentFormCost(definition?.cost ?? 0)
       : definition?.cost ?? 0;

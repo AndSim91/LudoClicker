@@ -5,6 +5,7 @@ import {
   getCollaboratorMasteryDefinition,
   getCollaboratorMasteryLevel,
 } from "../content/mastery";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { addInboxMessage } from "./messages";
 import { makeGameId } from "./ids";
 import type {
@@ -41,7 +42,8 @@ export function addAssignedCollaboratorMasteryExperience(
   now: number,
 ): GameState {
   const amount = (Math.max(0, elapsedMs) / 1_000) *
-    COLLABORATOR_MASTERY_XP_PER_SECOND;
+    COLLABORATOR_MASTERY_XP_PER_SECOND *
+    (1 + getUpgradeEffectTotal(state.upgrades, "masteryExperienceMultiplier"));
   if (!Number.isFinite(amount) || amount <= 0) return state;
 
   const leveledUp: Array<{

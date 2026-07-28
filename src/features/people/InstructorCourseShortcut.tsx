@@ -2,6 +2,7 @@ import {
   getFormDefinition,
   getInstructorQualificationCost,
 } from "../../content/forms";
+import { applyQualifyingCourseDiscount } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
@@ -17,11 +18,14 @@ export function InstructorCourseShortcut({
   state?: GameState;
   onStartTraining: (personId: string, formId: FormId) => void;
 }) {
-  const state = useGameStateSlices(["school"], stateOverride);
+  const state = useGameStateSlices(["school", "upgrades"], stateOverride);
   const definition = getFormDefinition(course.formId);
   if (!definition) return null;
 
-  const cost = getInstructorQualificationCost(definition.cost);
+  const cost = applyQualifyingCourseDiscount(
+    state.upgrades,
+    getInstructorQualificationCost(definition.cost),
+  );
   const trainingInProgress = Boolean(course.instructor.training);
   const lacksFunds = state.school.euros < cost;
   const actionLabel = trainingInProgress

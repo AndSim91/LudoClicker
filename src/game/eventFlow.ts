@@ -1,9 +1,9 @@
 import { getAcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorMasteryDefinition } from "../content/mastery";
-import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import {
   completeEquipmentUse,
+  getPlannedEquipmentWear,
   getAvailableSwords,
   reserveSwords,
 } from "./equipment";
@@ -143,12 +143,10 @@ export function startAcquisitionEvent(
     wearAdded: Math.max(
       0,
       Math.round(
-        definition.wearAdded *
-          GAME_CONFIG.eventWearMultiplier *
-          (1 - Math.min(
-            GAME_CONFIG.equipmentMaximumUpgradeWearReduction,
-            getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction"),
-          )) *
+        getPlannedEquipmentWear(
+          state.upgrades,
+          definition.wearAdded * GAME_CONFIG.eventWearMultiplier,
+        ) *
           (1 - Math.min(
             GAME_CONFIG.equipmentMaximumEventMasteryWearReduction,
             masteryBonus,

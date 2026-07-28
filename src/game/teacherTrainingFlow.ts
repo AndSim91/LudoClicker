@@ -10,8 +10,10 @@ import {
   isAgonistCourse,
 } from "../content/forms";
 import {
+  applyQualifyingCourseDiscount,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
+  getSISTechnicianCourseSpeedBonus,
   isSISTechnicianCourseUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
@@ -111,7 +113,8 @@ export function getTrainingDurationMultiplier(
     speed += 1;
   }
   if (track === "technician") {
-    speed += getPagoSportTechnicianSpeedBonus(state.upgrades);
+    speed += getPagoSportTechnicianSpeedBonus(state.upgrades) +
+      getSISTechnicianCourseSpeedBonus(state.upgrades);
   }
 
   const workloadMultiplier = getInstructorTrainingWorkloadMultiplier(
@@ -258,7 +261,12 @@ export function bookTechnicianCourse(
 ): GameState {
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
   const definition = getFormDefinition(formId);
-  const cost = definition ? getTechnicianCourseCost(definition.cost) : Infinity;
+  const cost = definition
+    ? applyQualifyingCourseDiscount(
+        state.upgrades,
+        getTechnicianCourseCost(definition.cost),
+      )
+    : Infinity;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   if (
     !collaborator ||
@@ -481,7 +489,10 @@ function processInstructorQualifications(
       )
       .sort((left, right) => left.joinedAt - right.joinedAt || left.id.localeCompare(right.id))[0];
     if (!technician) continue;
-    const cost = getInternalInstructorQualificationCost(definition.cost);
+    const cost = applyQualifyingCourseDiscount(
+      nextState.upgrades,
+      getInternalInstructorQualificationCost(definition.cost),
+    );
     if (nextState.school.euros < cost) break;
 
     const training = scheduleTraining(

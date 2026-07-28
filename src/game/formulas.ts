@@ -1,4 +1,7 @@
-import { getUpgradeEffectMaximum, getUpgradeEffectTotal } from "../content/upgrades";
+import {
+  getCreativityProgress,
+  getUpgradeEffectTotal,
+} from "../content/upgrades";
 import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorBaseProductivity } from "../content/forms";
 import { PERSON_RARITIES } from "../content/rarities";
@@ -18,9 +21,20 @@ export function getEmailBookingChance(
   state: GameState,
   rarity: PersonRarity = "common",
 ) {
-  const specializationBonus = state.school.specialization === "accoglienza" ? 0.1 : 0;
-  const multiplier = 1 + getUpgradeEffectTotal(state.upgrades, "bookingMultiplier") + specializationBonus;
-  return clamp(PERSON_RARITIES[rarity].baseTrialBookingChance * multiplier, 0.01, 1);
+  const maximumChance: Record<PersonRarity, number> = {
+    common: 0.85,
+    rare: 0.9,
+    "ultra-rare": 0.95,
+    legendary: 1,
+  };
+  const progress = clamp(
+    getCreativityProgress(state.upgrades) +
+      (state.school.specialization === "accoglienza" ? 0.1 : 0),
+    0,
+    1,
+  );
+  const baseChance = PERSON_RARITIES[rarity].baseTrialBookingChance;
+  return baseChance + (maximumChance[rarity] - baseChance) * progress;
 }
 
 export function getEnrollmentChance(
@@ -31,13 +45,14 @@ export function getEnrollmentChance(
   const instructorProductivity = state.collaborators
     .filter((collaborator) => collaborator.assignment === "instructor")
     .reduce((total, collaborator) => total + getCollaboratorBaseProductivity(collaborator), 0);
-  const maximumUpgradeEffect = getUpgradeEffectMaximum("enrollmentMultiplier");
+  const instructorEffectiveness = 1 + getUpgradeEffectTotal(
+    state.upgrades,
+    "instructorEnrollmentEffectiveness",
+  );
   const improvementProgress = clamp(
-    (
-      getUpgradeEffectTotal(state.upgrades, "enrollmentMultiplier") +
-      instructorProductivity * 0.1 +
-      (state.school.specialization === "accoglienza" ? 0.1 : 0)
-    ) / maximumUpgradeEffect,
+    getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") +
+      instructorProductivity * 0.1 * instructorEffectiveness +
+      (state.school.specialization === "accoglienza" ? 0.1 : 0),
     0,
     1,
   );

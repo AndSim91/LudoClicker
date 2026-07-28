@@ -33,6 +33,7 @@ import { migrateTournamentStandardDifficultyState } from "./saveMigrations/tourn
 import { migrateGadgetRarityState } from "./saveMigrations/gadgetRarities";
 import { migrateSecretLegendaryCircuitBoostRemovalState } from "./saveMigrations/secretLegendaryCircuitBoostRemoval";
 import { migrateSecretLegendaryBaseRebalanceState } from "./saveMigrations/secretLegendaryBaseRebalance";
+import { migrateUpgradeRevampState } from "./saveMigrations/upgradeRevamp";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 import type { GameState } from "./types";
 
@@ -69,6 +70,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateGadgetRarityState,
   migrateSecretLegendaryCircuitBoostRemovalState,
   migrateSecretLegendaryBaseRebalanceState,
+  migrateUpgradeRevampState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

@@ -3,7 +3,11 @@ import {
   getCollaboratorProductivity,
   getVisibleForms,
 } from "../content/forms";
-import { isCourseXUnlocked } from "../content/upgrades";
+import {
+  getUpgradeEffectTotal,
+  isCourseXUnlocked,
+  isOperationalPrioritiesUnlocked,
+} from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { getInstructorTeachingCounts, getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type {
@@ -27,6 +31,8 @@ export function createInitialCollaboratorManagement(): CollaboratorManagementSta
   return {
     aggregateViewUnlocked: false,
     targets: createEmptyCollaboratorTargets(),
+    operationalPriorities: ["writing", "events", "equipment", "instructor", "gadget"],
+    fallbackAssignments: {},
   };
 }
 
@@ -312,6 +318,48 @@ export function decrementCollaboratorAssignment(
       },
     },
   });
+}
+
+export function setCollaboratorFallback(
+  state: GameState,
+  assignment: CollaboratorMasteryRole,
+  fallback: CollaboratorMasteryRole | null,
+): GameState {
+  if (
+    getUpgradeEffectTotal(state.upgrades, "collaboratorFallbackTier") <= 0 ||
+    fallback === assignment ||
+    (fallback === "gadget" && !state.unlocks.gadget)
+  ) return state;
+  const fallbackAssignments = { ...(state.collaboratorManagement.fallbackAssignments ?? {}) };
+  if (fallback === null) delete fallbackAssignments[assignment];
+  else fallbackAssignments[assignment] = fallback;
+  return {
+    ...state,
+    collaboratorManagement: {
+      ...state.collaboratorManagement,
+      fallbackAssignments,
+    },
+  };
+}
+
+export function moveOperationalPriority(
+  state: GameState,
+  assignment: CollaboratorMasteryRole,
+  direction: "up" | "down",
+): GameState {
+  if (!isOperationalPrioritiesUnlocked(state.upgrades)) return state;
+  const priorities = [...state.collaboratorManagement.operationalPriorities];
+  const index = priorities.indexOf(assignment);
+  const nextIndex = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || nextIndex < 0 || nextIndex >= priorities.length) return state;
+  [priorities[index], priorities[nextIndex]] = [priorities[nextIndex], priorities[index]];
+  return {
+    ...state,
+    collaboratorManagement: {
+      ...state.collaboratorManagement,
+      operationalPriorities: priorities,
+    },
+  };
 }
 
 export function reconcileCollaboratorManagement(state: GameState): GameState {

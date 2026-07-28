@@ -16,6 +16,7 @@ import {
   type FormStudent,
 } from "../../content/forms";
 import {
+  applyQualifyingCourseDiscount,
   getAnnualFormTrainingLimit,
   isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
@@ -92,13 +93,21 @@ function getDisplayedTrainingCost(
   definition: FormDefinition,
   qualification: boolean,
 ): number {
-  if (qualification) return getInstructorQualificationCost(definition.cost);
+  if (qualification) {
+    return applyQualifyingCourseDiscount(
+      state.upgrades,
+      getInstructorQualificationCost(definition.cost),
+    );
+  }
   const availableInstructor = !isSummerBreak(state.school.currentMonth)
     ? selectAvailableInstructor(state, definition.id, personId)
     : undefined;
   if (availableInstructor) return getStudentFormCost(definition.cost);
   if (collaborator?.assignment === "instructor" && isInstructorForm(definition.id)) {
-    return getInstructorFormCost(definition.cost);
+    return applyQualifyingCourseDiscount(
+      state.upgrades,
+      getInstructorFormCost(definition.cost),
+    );
   }
   return definition.cost;
 }
@@ -309,11 +318,19 @@ export function TechnicianCourseControl({
   if (!sisUnlocked) return null;
   const selected = definitions.find((definition) => definition.id === selectedFormId) ??
     (definitions.length === 1 ? definitions[0] : undefined);
-  const cost = selected ? getTechnicianCourseCost(selected.cost) : 0;
+  const cost = selected
+    ? applyQualifyingCourseDiscount(
+        state.upgrades,
+        getTechnicianCourseCost(selected.cost),
+      )
+    : 0;
   const lacksFunds = selected ? state.school.euros < cost : false;
   const options = definitions.map((definition) => ({
     definition,
-    costLabel: formatCurrency(getTechnicianCourseCost(definition.cost)),
+    costLabel: formatCurrency(applyQualifyingCourseDiscount(
+      state.upgrades,
+      getTechnicianCourseCost(definition.cost),
+    )),
     contextLabel: "Corso Tecnico SIS",
   }));
 

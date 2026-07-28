@@ -21,6 +21,7 @@ export type IconName =
   | "attach"
   | "chevron"
   | "clock"
+  | "lock"
   | "spark"
   | "coin"
   | "contact"
@@ -57,6 +58,7 @@ const paths: Record<IconName, React.ReactNode> = {
   attach: <path d="m8 12 6.8-6.8a3 3 0 0 1 4.2 4.2l-8.5 8.5a5 5 0 0 1-7.1-7.1L12 2.2" />,
   chevron: <path d="m8 10 4 4 4-4" />,
   clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
+  lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></>,
   spark: <><path d="m12 3 1.2 4.2L17 9l-3.8 1.8L12 15l-1.2-4.2L7 9l3.8-1.8L12 3Z"/><path d="m5 15 .7 2.3L8 18l-2.3.7L5 21l-.7-2.3L2 18l2.3-.7L5 15Zm14-2 .7 2.3 2.3.7-2.3.7L19 19l-.7-2.3L16 16l2.3-.7L19 13Z"/></>,
   coin: <><ellipse cx="12" cy="7" rx="8" ry="4"/><path d="M4 7v5c0 2.2 3.6 4 8 4s8-1.8 8-4V7m-16 5v5c0 2.2 3.6 4 8 4s8-1.8 8-4v-5"/></>,
   contact: <><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-5 3.4-7 8-7s7.3 2 8 7"/></>,

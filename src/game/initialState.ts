@@ -97,6 +97,7 @@ export function createInitialState(
     },
     collaborators: [],
     collaboratorManagement: createInitialCollaboratorManagement(),
+    secretUpgradeDiscoveries: [],
     automation: {
       lastProcessedAt: now,
       autoSendEmails: true,
@@ -104,6 +105,7 @@ export function createInitialState(
       lessonBuffer: 0,
       socialContentBuffer: 0,
       equipmentBuffer: 0,
+      equipmentPreparedWork: 0,
       offlineContactBuffer: 0,
     },
     statistics: {

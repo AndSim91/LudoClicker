@@ -9,7 +9,7 @@ import {
 import { getAgonistCourseMaximumStatGain } from "../content/upgrades";
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
-import { completeEquipmentUse } from "./equipment";
+import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
 import { nextRandom } from "./random";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import {
@@ -287,7 +287,10 @@ function resolveAgonistCourse(
   const completedEquipment = completeEquipmentUse(
     context.state.equipment,
     training.equipmentUsed ?? 0,
-    (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
+    getPlannedEquipmentWear(
+      context.state.upgrades,
+      (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
+    ),
   );
   const grantsStats = training.agonistCourseGrantsStats ?? true;
   if (!grantsStats) {
@@ -426,7 +429,10 @@ function resolveTraining(
     equipment: completeEquipmentUse(
       context.state.equipment,
       training.equipmentUsed ?? 0,
-      (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
+      getPlannedEquipmentWear(
+        context.state.upgrades,
+        (training.equipmentUsed ?? 0) * (training.wearPerSword ?? 0),
+      ),
     ),
     randomSeed: preferenceResult.nextSeed,
     statistics: {

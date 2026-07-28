@@ -1,7 +1,8 @@
 import { recruitCollaborator } from "./collaboratorFlow";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
-import { completeEquipmentUse } from "./equipment";
+import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
 import { getEnrollmentChance } from "./formulas";
 import { updateLegendaryPityAfterTrial } from "./legendaryPity";
 import { nextRandom } from "./random";
@@ -73,7 +74,8 @@ export function resolveStartedTrialBatch(
     if (!trial || trial.status !== "scheduled" || trial.equipmentUsed === undefined) continue;
 
     const stateBeforeTrial = nextState;
-    const [enrollmentRoll] = nextRandom(trial.resultSeed);
+    const [enrollmentRoll, retrySeed] = nextRandom(trial.resultSeed);
+    const [retryRoll] = nextRandom(retrySeed);
     const trialContact = contactsById.get(trial.contactId);
     const specialProfileId = trialContact?.specialProfileId;
     const alreadyEnrolledLegendary = specialProfileId
@@ -94,6 +96,18 @@ export function resolveStartedTrialBatch(
           stateBeforeTrial,
           trialContact?.rarity ?? "common",
         );
+    const recoveredForSecondAttempt = Boolean(
+      !enrolled &&
+      !alreadyEnrolledLegendary &&
+      trialContact &&
+      !trialContact.secretLegendaryId &&
+      !trial.secretLegendaryId &&
+      !trialContact.trialRetryUsed &&
+      retryRoll < getUpgradeEffectTotal(
+        stateBeforeTrial.upgrades,
+        "failedTrialRetryChance",
+      ),
+    );
     const legendaryCollaborators = specialProfileId
       ? {
           ...stateBeforeTrial.legendaryCollaborators,
@@ -115,8 +129,13 @@ export function resolveStartedTrialBatch(
     const resolvedContact: Contact | undefined = trialContact
       ? {
           ...trialContact,
-          status: enrolled ? "enrolled" : "lost",
+          status: enrolled
+            ? "enrolled"
+            : recoveredForSecondAttempt
+              ? "available"
+              : "lost",
           enrolledMonth: enrolled ? stateBeforeTrial.school.currentMonth : undefined,
+          trialRetryUsed: recoveredForSecondAttempt || trialContact.trialRetryUsed,
         }
       : undefined;
 
@@ -133,17 +152,18 @@ export function resolveStartedTrialBatch(
       equipment: completeEquipmentUse(
         stateBeforeTrial.equipment,
         trial.equipmentUsed,
-        trial.equipmentUsed === 0
+        getPlannedEquipmentWear(stateBeforeTrial.upgrades, trial.equipmentUsed === 0
           ? 0
           : trial.secretLegendaryId
             ? GAME_CONFIG.equipmentLoadPerSecretLegendaryTrial
-            : GAME_CONFIG.equipmentLoadPerTrial,
+            : GAME_CONFIG.equipmentLoadPerTrial),
       ),
       legendaryCollaborators,
       statistics: {
         ...stateBeforeTrial.statistics,
         trialsCompleted: stateBeforeTrial.statistics.trialsCompleted + 1,
-        contactsLost: stateBeforeTrial.statistics.contactsLost + (enrolled ? 0 : 1),
+        contactsLost: stateBeforeTrial.statistics.contactsLost +
+          (enrolled || recoveredForSecondAttempt ? 0 : 1),
         membersEnrolled: stateBeforeTrial.statistics.membersEnrolled + (enrolled ? 1 : 0),
         eurosEarned:
           stateBeforeTrial.statistics.eurosEarned + (enrolled ? enrollmentBonus : 0),
@@ -222,6 +242,16 @@ export function resolveStartedTrialBatch(
       if (resolvedContact?.rarity === "legendary") {
         nextState = recruitCollaborator(nextState, resolvedContact, now);
       }
+    } else if (recoveredForSecondAttempt && resolvedContact) {
+      nextState = addMessage(
+        nextState,
+        now,
+        "Un secondo tentativo",
+        `${resolvedContact.firstName} ${resolvedContact.lastName} non si è iscritto, ma ha accettato di ricevere un nuovo invito per un'ultima prova.`,
+        "neutral",
+        "other",
+        "contacts",
+      );
     }
 
     resolvedCount += 1;
