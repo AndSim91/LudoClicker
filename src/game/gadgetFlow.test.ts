@@ -168,8 +168,8 @@ describe("Gadget flow", () => {
   });
 
   it.each([
-    { collaborators: 12, ordinaryIntervalMs: 10_000, marginalIntervalMs: 100_000 },
-    { collaborators: 15, ordinaryIntervalMs: 8_000, marginalIntervalMs: 80_000 },
+    { collaborators: 12, ordinaryIntervalMs: 5_000, marginalIntervalMs: 50_000 },
+    { collaborators: 15, ordinaryIntervalMs: 4_000, marginalIntervalMs: 40_000 },
   ])(
     "turns the old 0.8-1 second cadence into $ordinaryIntervalMs ms with $collaborators collaborators",
     ({ collaborators, ordinaryIntervalMs, marginalIntervalMs }) => {
@@ -264,8 +264,8 @@ describe("Gadget flow", () => {
 
     const sold = processGadgets(
       selling,
-      GAME_CONFIG.gameMonthMs * 2,
-      121_000,
+      GAME_CONFIG.gameMonthMs,
+      61_000,
     );
 
     expect(getGadgetAudience(selling)).toBe(1_000);
@@ -311,8 +311,8 @@ describe("Gadget flow", () => {
     };
     const unlocked = processGadgets(
       nearlyUnlocked,
-      GAME_CONFIG.gameMonthMs * 2,
-      121_000,
+      GAME_CONFIG.gameMonthMs,
+      61_000,
     );
     expect(unlocked.gadgets.products.wristband.unitsSold).toBe(100);
     expect(unlocked.gadgets.products.mug.unlocked).toBe(true);
@@ -341,15 +341,15 @@ describe("Gadget flow", () => {
 
     const almostSold = processGadgets(
       saturated,
-      GAME_CONFIG.gameMonthMs * 19,
-      1_141_000,
+      GAME_CONFIG.gameMonthMs * 9,
+      541_000,
     );
     expect(almostSold.gadgets.products.wristband.unitsSold).toBe(audience);
 
     const sold = processGadgets(
       almostSold,
       GAME_CONFIG.gameMonthMs,
-      1_201_000,
+      601_000,
     );
     expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
     expect(sold.gadgets.products.wristband.totalProfit).toBe(20);
@@ -386,8 +386,8 @@ describe("Gadget flow", () => {
 
     const sold = processGadgets(
       selling,
-      GAME_CONFIG.gameMonthMs * 20,
-      1_201_000,
+      GAME_CONFIG.gameMonthMs * 10,
+      601_000,
     );
 
     expect(sold.gadgets.products.wristband.unitsSold).toBe(audience + 1);
@@ -424,8 +424,8 @@ describe("Gadget flow", () => {
     };
     expect(processGadgets(
       largerAudience,
-      GAME_CONFIG.gameMonthMs * 2,
-      121_000,
+      GAME_CONFIG.gameMonthMs,
+      61_000,
     ).gadgets.products.wristband.unitsSold).toBe(audience + 1);
   });
 
@@ -477,8 +477,8 @@ describe("Gadget flow", () => {
 
     const sold = processGadgets(
       selling,
-      GAME_CONFIG.gameMonthMs * 10,
-      601_000,
+      GAME_CONFIG.gameMonthMs * 5,
+      301_000,
     );
     const wristbands = sold.gadgets.products.wristband.unitsSold;
     const mugs = sold.gadgets.products.mug.unitsSold;
@@ -525,8 +525,8 @@ describe("Gadget flow", () => {
 
     const sold = processGadgets(
       selling,
-      GAME_CONFIG.gameMonthMs * 9,
-      541_000,
+      GAME_CONFIG.gameMonthMs * 4.5,
+      271_000,
     );
 
     expect(sold.gadgets.products.wristband.unitsSold).toBe(9);

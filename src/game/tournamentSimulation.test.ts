@@ -96,7 +96,7 @@ describe("secret legendary balancing", () => {
       academy: TOURNAMENT_DEFINITIONS.academy.standard,
       national: TOURNAMENT_DEFINITIONS.national.standard,
       champions: TOURNAMENT_DEFINITIONS.champions.standard,
-    }).toEqual({ academy: 150, national: 200, champions: 250 });
+    }).toEqual({ academy: 150, national: 225, champions: 300 });
 
     const baselines: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
       "marco-palena": [75, 90],
@@ -158,8 +158,8 @@ describe("secret legendary balancing", () => {
     const daniele = preparation("daniele-panizza");
     const sara = preparation("sara-magnifico");
 
-    expect(pietro.arena).toBeCloseTo(239.2);
-    expect(pietro.style).toBeCloseTo(244.4);
+    expect(pietro.arena).toBeCloseTo(269.1);
+    expect(pietro.style).toBeCloseTo(274.95);
     expect(daniele.arena).toBeCloseTo(156.492);
     expect(daniele.style).toBeCloseTo(119.784);
     expect(sara.arena).toBeCloseTo(120.06);
@@ -184,12 +184,12 @@ describe("secret legendary balancing", () => {
   });
 
   it("applies circuit boosts before Form and experience modifiers", () => {
-    expect(preparation("piero-dipalo").arena).toBeCloseTo(225.333333);
-    expect(preparation("piero-dipalo").style).toBeCloseTo(225.333333);
+    expect(preparation("piero-dipalo").arena).toBeCloseTo(253.5);
+    expect(preparation("piero-dipalo").style).toBeCloseTo(253.5);
     expect(preparation("daniele-maggi")).toEqual({ arena: 180, style: 180 });
     expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
-    expect(preparation("simone-pedrazzi").arena).toBeCloseTo(162.666667);
-    expect(preparation("simone-pedrazzi").style).toBeCloseTo(193.333333);
+    expect(preparation("simone-pedrazzi").arena).toBeCloseTo(183);
+    expect(preparation("simone-pedrazzi").style).toBeCloseTo(217.5);
     expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level).toBe(
       "national",
     );

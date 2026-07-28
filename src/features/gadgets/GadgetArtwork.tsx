@@ -1,64 +1,12 @@
 import type { GadgetProductId } from "../../game/types";
 
-function ProductSvg({ productId }: { productId: GadgetProductId }) {
-  const commonProps = {
-    viewBox: "0 0 120 100",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2.2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-
-  switch (productId) {
-    case "wristband":
-      return (
-        <svg {...commonProps}>
-          <ellipse cx="60" cy="38" rx="38" ry="17" />
-          <path d="M22 38v18c0 9.4 17 17 38 17s38-7.6 38-17V38" />
-          <path d="M29 46c7 6.2 18 9.8 31 9.8S84 52.2 91 46" />
-          <path d="M45 24v29M75 24v29" />
-          <path d="M51 33c6-3 12-3 18 0" opacity=".45" />
-        </svg>
-      );
-    case "mug":
-      return (
-        <svg {...commonProps}>
-          <path d="M27 24h53v45c0 9-10.6 16-26.5 16S27 78 27 69V24Z" />
-          <ellipse cx="53.5" cy="24" rx="26.5" ry="7" />
-          <path d="M80 35h7c11 0 14 8 14 17s-4 17-16 17h-5" />
-          <path d="M80 43h6c5 0 7 3.7 7 9s-2.5 9-8 9h-5" />
-          <path d="M42 48h23M46 56h15" opacity=".45" />
-        </svg>
-      );
-    case "underwear":
-      return (
-        <svg {...commonProps}>
-          <path d="M20 24c25 5 55 5 80 0l-4 16c-3 21-14 36-31 45H55C38 76 27 61 24 40l-4-16Z" />
-          <path d="M23 33c24 5 50 5 74 0" />
-          <path d="M43 39c2 18 7 31 17 44M77 39c-2 18-7 31-17 44" />
-          <path d="M31 28v9M89 28v9" opacity=".45" />
-        </svg>
-      );
-    case "tshirt":
-      return (
-        <svg {...commonProps}>
-          <path d="m43 20-8 4-19 17 12 17 12-9v36h40V49l12 9 12-17-19-17-8-4" />
-          <path d="M43 20c2 10 8 15 17 15s15-5 17-15" />
-          <path d="M50 68h20M50 75h20" opacity=".45" />
-        </svg>
-      );
-    case "hoodie":
-      return (
-        <svg {...commonProps}>
-          <path d="M42 27 30 31 17 51l13 10 10-12v37h40V49l10 12 13-10-13-20-12-4" />
-          <path d="M42 27C43 13 50 6 60 6s17 7 18 21c-5-5-11-7-18-7s-13 2-18 7Z" />
-          <path d="M51 25v23M69 25v23" />
-          <path d="M45 67c10-7 20-7 30 0v11H45V67Z" />
-        </svg>
-      );
-  }
-}
+const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
+  wristband: "/gadget-assets/polsino.webp",
+  mug: "/gadget-assets/tazza.webp",
+  underwear: "/gadget-assets/mutande.webp",
+  tshirt: "/gadget-assets/maglietta.webp",
+  hoodie: "/gadget-assets/felpa.webp",
+};
 
 export function GadgetProductArtwork({
   productId,
@@ -72,7 +20,15 @@ export function GadgetProductArtwork({
       className={`gadget-product-artwork${locked ? " is-locked" : ""}`}
       aria-hidden="true"
     >
-      <ProductSvg productId={productId} />
+      <img
+        src={PRODUCT_ARTWORK_URLS[productId]}
+        alt=""
+        width="126"
+        height="126"
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+      />
     </div>
   );
 }

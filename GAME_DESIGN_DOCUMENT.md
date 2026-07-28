@@ -2081,7 +2081,7 @@ la nuova capacità ordinaria `N` e quella marginale sono:
 
 ```text
 V = 5 × P × (1 + bonusGestioneOrdini)
-N = V / 10
+N = V / 5
 tentativiMarginaliAlMese = N / 10
 ```
 

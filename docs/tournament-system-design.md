@@ -416,25 +416,25 @@ I valori non sono cancelli rigidi:
 | Torneo | Standard competitivo |
 |---|---:|
 | Accademico | 150 |
-| Nazionale | 200 |
-| Champion's | 250 |
+| Nazionale | 225 |
+| Champion's | 300 |
 
 Curva indicativa desiderata nella statistica rilevante:
 
 | Scarto dallo standard | Probabilità obiettivo |
 |---:|---:|
 | 0 | circa 3% |
-| +10 | circa 9% |
-| +20 | circa 24% |
-| +24 | circa 33% |
-| +30 | circa 50% |
-| +40 | circa 75% |
-| +50 | circa 90% |
+| +15 | circa 9% |
+| +30 | circa 24% |
+| +36 | circa 33% |
+| +45 | circa 50% |
+| +60 | circa 75% |
+| +75 | circa 90% |
 
 Vincoli specifici:
 
-- preparazione 280 alla Champion's: circa 33% di vittoria;
-- preparazione 312,5 alla Champion's: fascia 88–92%;
+- preparazione 336 alla Champion's: circa 33% di vittoria;
+- preparazione 375 alla Champion's: fascia 88–92%;
 - Forma 1 eccezionale può raggiungere il podio Accademico, ma vincere deve essere statisticamente trascurabile;
 - Forma 5 inesperto può raggiungere la Champion's, ma il podio deve essere statisticamente trascurabile;
 - Forma 4, base 100, esperienza 20 produce 224;
@@ -448,15 +448,15 @@ Prima calibrazione con 500 Champion's indipendenti per valore, un atleta della s
 
 | Preparazione | Vittoria Arena | Podio Arena |
 |---:|---:|---:|
-| 250 | 0,8% | 14,4% |
-| 262,5 | 5,0% | 34,2% |
-| 275 | 22,8% | 62,4% |
-| 280 | 32,8% | 75,8% |
-| 287,5 | 49,6% | 80,6% |
-| 300 | 75,2% | 92,4% |
-| 312,5 | 89,6% | 96,0% |
+| 300 | 0,8% | 12,0% |
+| 315 | 6,4% | 38,0% |
+| 330 | 26,6% | 64,2% |
+| 336 | 34,8% | 72,2% |
+| 345 | 52,4% | 82,8% |
+| 360 | 74,4% | 90,6% |
+| 375 | 89,8% | 95,6% |
 
-La baseline centra i vincoli espliciti 280≈33% e 312,5≈90%. A quota 250 la vittoria rimane eccezionale, ma la probabilità di podio è tangibile e rispetta l'obiettivo “250 per entrare in classifica”. Il probe deve rimanere eseguibile separatamente dai test rapidi.
+La baseline centra i vincoli espliciti 336≈33% e 375≈90%. A quota 300 la vittoria rimane eccezionale, ma la probabilità di podio è tangibile e rispetta l'obiettivo “300 per entrare in classifica”. Il probe deve rimanere eseguibile separatamente dai test rapidi.
 
 ## 13. Generazione degli avversari
 
@@ -493,8 +493,8 @@ Intervalli di preparazione nella statistica di qualificazione:
 | Torneo | Ordinari | Contendenti | Favoriti | Élite |
 |---|---:|---:|---:|---:|
 | Accademico | 66–112,8 | 114–142,8 | 144–166,8 | 168–186 |
-| Nazionale | 100–152 | 153,333–192 | 193,333–225,333 | 226,667–246,667 |
-| Champion's | 125–192,5 | 193,75–236,25 | 237,5–267,5 | 268,75–287,5 |
+| Nazionale | 112,5–171 | 172,5–216 | 217,5–253,5 | 255–277,5 |
+| Champion's | 150–231 | 232,5–283,5 | 285–321 | 322,5–345 |
 
 I posti vengono divisi in modo uniforme tra qualificati principalmente Arena e principalmente Stile. La statistica secondaria viene generata liberamente; i profili bilanciati emergono senza una categoria artificiale.
 
@@ -531,7 +531,7 @@ permanente della partita e resta valida anche dopo la fondazione di nuove scuole
 
 Quando gli standard dei circuiti sono stati ricalibrati, anche i valori fissi
 dei profili collegati sono stati aumentati della stessa percentuale: +20%
-all'Accademico, +33,333% al Nazionale e +25% alla Champion's. Durante la
+all'Accademico, +50% al Nazionale e +50% alla Champion's. Durante la
 simulazione questi valori vengono usati direttamente, indipendentemente dalla
 media del campo avversario e senza applicare nuovamente il moltiplicatore del
 torneo. I profili senza scuola, riservati alle Chronicles, restano invariati.

@@ -4,6 +4,7 @@ import { createInitialState } from "../initialState";
 import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
 import { migrateGadgetState } from "./gadgets";
+import { migrateTournamentStandardDifficultyState } from "./tournamentStandardDifficulty";
 import type { MigratableState } from "./types";
 
 describe("Gadget save migration", () => {
@@ -32,9 +33,11 @@ describe("Gadget save migration", () => {
       ),
     };
 
-    const migrated = migrateGadgetState(legacy) as GameState;
+    const migrated = migrateTournamentStandardDifficultyState(
+      migrateGadgetState(legacy),
+    ) as GameState;
 
-    expect(migrated.version).toBe(66);
+    expect(migrated.version).toBe(67);
     expect(migrated.unlocks.gadget).toBe(false);
     expect(migrated.gadgets.products.wristband.unlocked).toBe(false);
     expect(migrated.collaborators[0].mastery?.gadget).toBe(0);

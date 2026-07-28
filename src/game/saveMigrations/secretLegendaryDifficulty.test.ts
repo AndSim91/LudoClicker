@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { TOURNAMENT_DIFFICULTY_MULTIPLIERS } from "../../content/tournaments";
 import { createInitialState } from "../initialState";
 import { migrateSecretLegendaryDifficultyState } from "./secretLegendaryDifficulty";
 
@@ -32,18 +31,14 @@ describe("Secret Legendary difficulty save migration", () => {
     const migrated = migrateSecretLegendaryDifficultyState(legacy);
 
     expect(migrated.version).toBe(59);
-    expect(migrated.contacts?.[0].arenaBase).toBeCloseTo(
-      75 * TOURNAMENT_DIFFICULTY_MULTIPLIERS.academy,
-    );
-    expect(migrated.contacts?.[0].styleBase).toBeCloseTo(
-      90 * TOURNAMENT_DIFFICULTY_MULTIPLIERS.academy,
-    );
+    expect(migrated.contacts?.[0].arenaBase).toBeCloseTo(75 * (150 / 125));
+    expect(migrated.contacts?.[0].styleBase).toBeCloseTo(90 * (150 / 125));
     expect(
       migrated.legendaryCollaborators?.retainedProgress["pietro-scarica"]?.arenaBase,
-    ).toBeCloseTo(100 * TOURNAMENT_DIFFICULTY_MULTIPLIERS.national);
+    ).toBeCloseTo(100 * (200 / 150));
     expect(
       migrated.legendaryCollaborators?.retainedProgress["pietro-scarica"]?.styleBase,
-    ).toBeCloseTo(120 * TOURNAMENT_DIFFICULTY_MULTIPLIERS.national);
+    ).toBeCloseTo(120 * (200 / 150));
     expect(
       migrated.legendaryCollaborators?.retainedProgress["francesco-d-addosio"]?.arenaBase,
     ).toBe(1_200);
