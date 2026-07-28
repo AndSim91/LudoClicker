@@ -266,7 +266,7 @@ export function processAutomation(
     ? Math.floor(socialContentTotal / socialContentCharacters)
     : 0;
   const equipmentRepairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
-  const canRepairEquipment = equipmentRepairTarget !== undefined &&
+  const canGenerateEquipmentWork = equipmentRepairTarget === undefined ||
     state.school.euros >= getEquipmentAutomaticRepairUnitCost(equipmentRepairTarget);
   const equipmentAutomationMultiplier = 1 + genericAutomationBonus +
     getUpgradeEffectTotal(state.upgrades, "equipmentAutomationMultiplier");
@@ -279,33 +279,16 @@ export function processAutomation(
     preparedWorkMaximum,
     Math.max(0, state.automation.equipmentPreparedWork ?? 0),
   );
-  const equipmentWorkAvailable = equipmentRepairTarget === undefined
-    ? currentPreparedWork + state.automation.equipmentBuffer + generatedEquipmentWork
-    : currentPreparedWork + state.automation.equipmentBuffer +
-      (canRepairEquipment ? generatedEquipmentWork : 0);
-  const equipmentRepair = canRepairEquipment
-    ? repairEquipment(
-        state.equipment,
-        equipmentWorkAvailable,
-        state.school.euros,
-        getEquipmentSwordRepairWork(state.upgrades),
-        true,
+  const equipmentPreparedWork = equipmentRepairTarget === undefined
+    ? Math.min(
+        preparedWorkMaximum,
+        currentPreparedWork + state.automation.equipmentBuffer + generatedEquipmentWork,
       )
-    : {
-        equipment: state.equipment,
-        repairedWear: 0,
-        repairedSwords: 0,
-        restoredCondition: 0,
-        eurosSpent: 0,
-        remainingWork: equipmentWorkAvailable,
-      };
-  const equipmentPreparedWork = Math.min(
-    preparedWorkMaximum,
-    equipmentRepair.remainingWork,
-  );
+    : currentPreparedWork;
   const equipmentBuffer = equipmentRepairTarget === undefined
     ? 0
-    : Math.max(0, equipmentRepair.remainingWork - equipmentPreparedWork);
+    : Math.max(0, state.automation.equipmentBuffer) +
+      (canGenerateEquipmentWork ? generatedEquipmentWork : 0);
 
   let nextState: GameState = {
     ...state,
@@ -322,13 +305,8 @@ export function processAutomation(
       equipmentBuffer,
       equipmentPreparedWork,
     },
-    equipment: equipmentRepair.equipment,
-    school: equipmentRepair.eurosSpent > 0
-      ? {
-          ...state.school,
-          euros: roundCurrency(state.school.euros - equipmentRepair.eurosSpent),
-        }
-      : state.school,
+    equipment: state.equipment,
+    school: state.school,
   };
 
   if (automatedEmailCharacters > 0) {
@@ -370,6 +348,86 @@ export function processAutomation(
   }
 
   return nextState;
+}
+
+export function processAutomaticEquipmentRepair(state: GameState): GameState {
+  const preparedWorkMaximum = getEquipmentPreparedWorkMaximum(state);
+  const preparedWork = Math.min(
+    preparedWorkMaximum,
+    Math.max(0, state.automation.equipmentPreparedWork ?? 0),
+  );
+  const bufferedWork = Math.max(0, state.automation.equipmentBuffer);
+  const target = getEquipmentAutomaticRepairTarget(state.equipment);
+
+  if (!target) {
+    const nextPreparedWork = Math.min(
+      preparedWorkMaximum,
+      preparedWork + bufferedWork,
+    );
+    if (
+      nextPreparedWork === state.automation.equipmentPreparedWork &&
+      bufferedWork === 0
+    ) return state;
+    return {
+      ...state,
+      automation: {
+        ...state.automation,
+        equipmentPreparedWork: nextPreparedWork,
+        equipmentBuffer: 0,
+      },
+    };
+  }
+
+  if (
+    preparedWork + bufferedWork <= 0 ||
+    state.school.euros < getEquipmentAutomaticRepairUnitCost(target)
+  ) {
+    return preparedWork === state.automation.equipmentPreparedWork
+      ? state
+      : {
+          ...state,
+          automation: {
+            ...state.automation,
+            equipmentPreparedWork: preparedWork,
+          },
+        };
+  }
+
+  const availableWork = preparedWork + bufferedWork;
+  const repaired = repairEquipment(
+    state.equipment,
+    availableWork,
+    state.school.euros,
+    getEquipmentSwordRepairWork(state.upgrades),
+    true,
+  );
+  const consumedWork = Math.max(0, availableWork - repaired.remainingWork);
+  const remainingPreparedWork = Math.max(0, preparedWork - consumedWork);
+  const remainingBufferedWork = Math.max(
+    0,
+    repaired.remainingWork - remainingPreparedWork,
+  );
+  const stillDamaged = getEquipmentAutomaticRepairTarget(repaired.equipment) !== undefined;
+  const nextPreparedWork = stillDamaged
+    ? remainingPreparedWork
+    : Math.min(preparedWorkMaximum, repaired.remainingWork);
+  const nextBufferedWork = stillDamaged ? remainingBufferedWork : 0;
+
+  return {
+    ...state,
+    automation: {
+      ...state.automation,
+      equipmentPreparedWork: nextPreparedWork,
+      equipmentBuffer: nextBufferedWork,
+    },
+    equipment: repaired.equipment,
+    school: repaired.eurosSpent > 0
+      ? {
+          ...state.school,
+          euros: roundCurrency(state.school.euros - repaired.eurosSpent),
+        }
+      : state.school,
+  };
 }
 
 /**

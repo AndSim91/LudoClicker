@@ -18,9 +18,7 @@ function isPrimarySectorIdle(
     case "writing":
       return selectActiveEmail(state)?.status !== "writing" && !state.unlocks.social;
     case "events":
-      return !state.acquisitionEvents.some(
-        (event) => event.status === "running" && event.collaboratorId === collaborator.id,
-      );
+      return !state.acquisitionEvents.some((event) => event.status === "running");
     case "equipment":
       return getEquipmentAutomaticRepairTarget(state.equipment) === undefined;
     case "gadget":

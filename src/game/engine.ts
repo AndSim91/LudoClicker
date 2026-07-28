@@ -3,6 +3,7 @@ import {
   dispatchGameAction,
 } from "./actionHandlers";
 import {
+  processAutomaticEquipmentRepair,
   processAutomaticTeaching,
   processAutomation,
   processInstructorAthleticPreparation,
@@ -229,18 +230,22 @@ function tickStep(
   );
   if (trialResolutionWork < trialsToResolve.length) return result(nextState, false);
 
-  nextState = processWaitingTrainings(nextState, now);
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
-  const automaticOperationOrder = nextState.collaboratorManagement
-    .operationalPriorities.filter((role) => role === "instructor" || role === "events");
+  const automaticOperationOrder = nextState.collaboratorManagement.operationalPriorities;
   for (const role of automaticOperationOrder) {
+    if (role === "equipment") {
+      nextState = processAutomaticEquipmentRepair(nextState);
+      continue;
+    }
     if (role === "events") {
       if (allowAutomaticEventStarts) {
         nextState = processAutomaticEvents(nextState, now);
       }
       continue;
     }
+    if (role !== "instructor") continue;
+    nextState = processWaitingTrainings(nextState, now);
     nextState = processPriorityInstructorQualifications(nextState, now);
     nextState = processTechnicianCourseReservations(nextState, now);
     nextState = processAutomaticTeaching(

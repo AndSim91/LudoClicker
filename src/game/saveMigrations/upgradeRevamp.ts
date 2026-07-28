@@ -73,6 +73,7 @@ export function migrateUpgradeRevampState(state: MigratableState): MigratableSta
           operationalPriorities: sanitizePriorities(
             state.collaboratorManagement.operationalPriorities,
           ),
+          fallbackAssignments: state.collaboratorManagement.fallbackAssignments ?? {},
         }
       : state.collaboratorManagement,
     automation: {

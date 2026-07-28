@@ -148,10 +148,9 @@ export function getGadgetUnitProfit(
 }
 
 export function getGadgetMonthlyAttemptCapacity(state: GameState): number {
-  const capacityMultiplier = 1 + getUpgradeEffectTotal(
-    state.upgrades,
-    "gadgetSalesCapacity",
-  );
+  const capacityMultiplier = 1 +
+    getUpgradeEffectTotal(state.upgrades, "gadgetSalesCapacity") +
+    getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
   return getGadgetProductivity(state) *
     GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY *
     capacityMultiplier;

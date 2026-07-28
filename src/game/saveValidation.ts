@@ -8,7 +8,7 @@ import {
   isCataloguedLegendaryId,
   isSecretLegendaryId,
 } from "./legendaryAvailability";
-import type { GameState } from "./types";
+import type { CollaboratorMasteryRole, GameState } from "./types";
 import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
@@ -241,6 +241,15 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   const management = state.collaboratorManagement;
   const gadgetTarget = management?.targets?.gadget;
   const priorities = management?.operationalPriorities;
+  const fallbackAssignments = management?.fallbackAssignments;
+  const validFallbackAssignments = fallbackAssignments === undefined || (
+    typeof fallbackAssignments === "object" &&
+    Object.entries(fallbackAssignments).every(([source, target]) =>
+      COLLABORATOR_MASTERY_ROLES.includes(source as CollaboratorMasteryRole) &&
+      COLLABORATOR_MASTERY_ROLES.includes(target as CollaboratorMasteryRole) &&
+      source !== target
+    )
+  );
   return Boolean(
     management &&
     typeof management.aggregateViewUnlocked === "boolean" &&
@@ -251,7 +260,8 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
     Array.isArray(priorities) &&
     priorities.length === COLLABORATOR_MASTERY_ROLES.length &&
     new Set(priorities).size === priorities.length &&
-    priorities.every((role) => COLLABORATOR_MASTERY_ROLES.includes(role))
+    priorities.every((role) => COLLABORATOR_MASTERY_ROLES.includes(role)) &&
+    validFallbackAssignments
   );
 }
 

@@ -17,7 +17,6 @@ import {
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getUpgradeCost,
-  getUpgradeEffectMaximum,
   getUpgradeEffectTotal,
   isCourseXUnlocked,
   type UpgradeCategory,
@@ -87,7 +86,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Entrate", "incomeMultiplier");
   addPercentage("Usura", "equipmentWearReduction", "−");
   addPercentage("Manutenzione automatica", "equipmentAutomationMultiplier");
-  addAmount("Forme annue", "annualFormCapacity");
+  const annualFormLimit = getAnnualFormTrainingLimit(state.upgrades);
+  if (annualFormLimit > 1) {
+    benefits.push({ label: "Forme annue", value: formatNumber(annualFormLimit) });
+  }
   addAmount("Rami per Istruttore", "instructorBranchCapacity");
   addAmount("Allievi per Istruttore", "instructorStudentCapacity");
   addPercentage("Velocità insegnamento", "instructorTeachingSpeed");
@@ -178,7 +180,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "organization":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
-      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/${1 + getUpgradeEffectMaximum("annualFormCapacity")} · ${
+      return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/3 · ${
         (state.upgrades["technical-arena"] ?? 0) >= 3
           ? `Corso Agonisti fino a +${1 + getUpgradeEffectTotal(state.upgrades, "agonistCourseStatMaximum")}`
           : (state.upgrades["technical-arena"] ?? 0) >= 1

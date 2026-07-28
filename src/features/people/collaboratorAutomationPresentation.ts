@@ -6,6 +6,7 @@ import {
   getUpgradeEffectTotal,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
+import { getCollaboratorFallbackProductivity } from "../../game/collaboratorFallback";
 import {
   getEffectiveDamagedSwords,
   getEquipmentAutomaticRepairTarget,
@@ -51,12 +52,13 @@ function getAutomationCycleDurationMs(
       ? total + getCollaboratorProductivity(collaborator, assignment)
       : total,
     0,
-  );
+  ) + getCollaboratorFallbackProductivity(state, assignment);
   if (productivity <= 0) return undefined;
-  const automationMultiplier = 1 + getUpgradeEffectTotal(
-    state.upgrades,
-    "automationMultiplier",
-  );
+  const automationMultiplier = 1 +
+    getUpgradeEffectTotal(state.upgrades, "automationMultiplier") +
+    (assignment === "equipment"
+      ? getUpgradeEffectTotal(state.upgrades, "equipmentAutomationMultiplier")
+      : 0);
   const effectiveProductivity = productivity * automationMultiplier;
   if (assignment === "equipment") {
     return GAME_CONFIG.equipmentRepairIntervalMs * work / effectiveProductivity;
@@ -96,11 +98,15 @@ function getWritingAutomationRate(state: GameState, workShare = 1): number {
       ? total + getCollaboratorProductivity(collaborator, "writing")
       : total,
     0,
-  );
+  ) + getCollaboratorFallbackProductivity(state, "writing");
   return productivity *
     GAME_CONFIG.collaboratorWritingPerSecond *
     state.player.writingPower *
-    (1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier")) *
+    (
+      1 +
+      getUpgradeEffectTotal(state.upgrades, "automationMultiplier") +
+      getUpgradeEffectTotal(state.upgrades, "editorialAutomationMultiplier")
+    ) *
     workShare;
 }
 
@@ -115,7 +121,11 @@ export function getSocialContentAutomationPresentation(
   );
   const writingRate = getWritingAutomationRate(
     state,
-    emailWriting ? GAME_CONFIG.socialContentShareWhileWriting : 1,
+    emailWriting
+      ? GAME_CONFIG.socialContentShareWhileWriting +
+        GAME_CONFIG.socialEmailWritingShare *
+          getUpgradeEffectTotal(state.upgrades, "socialCopyShare")
+      : 1,
   );
   return {
     title: "Contenuti Social",
