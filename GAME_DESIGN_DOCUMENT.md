@@ -1138,11 +1138,20 @@ Regole:
   nell'inbox;
 - i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
   non ricevono la riduzione applicata alle Forme insegnate;
-- l'automazione ordina gli allievi per rischio effettivo di abbandono annuale
-  decrescente; a parità privilegia gli allievi preferiti, poi i collaboratori,
-  poi la prossima formazione secondo la progressione dalla Forma 1 verso l'alto,
-  includendo il Corso Agonisti come fallback, e infine il contatto con
-  `acquiredAt` più recente; a parità completa conserva l'ordine originale;
+- l'automazione ordina gli allievi privilegiando, nell'ordine: gli atleti
+  preferiti, il rischio effettivo di abbandono annuale più alto, la rarità
+  (**Leggendario Segreto → Leggendario → Ultra Raro → Raro → Comune**), la
+  prossima formazione meno avanzata, i collaboratori e infine gli iscritti con
+  `acquiredAt` meno recente. A parità completa conserva l'ordine originale;
+- quando Progetto X è sbloccato, Corso X precede ogni formazione successiva a
+  Forma 1: chi ha completato Forma 1 ma non Corso X può ricevere soltanto Corso
+  X finché non lo completa;
+- l'ordine operativo degli Istruttori è: riprendere le formazioni in attesa,
+  tenere un Corso Istruttori interno se qualificati come Tecnici, avviare un
+  Corso Tecnico SIS già prenotato e idoneo, assegnare tutte le Forme automatiche,
+  usare la capienza residua per Arena Tecnica o Corso Agonisti e infine
+  contribuire alla Preparazione atletica. Le attività formative personali
+  restano compatibili con l'insegnamento secondo le regole di rallentamento;
 - tra gli Istruttori disponibili e compatibili, l'automazione privilegia chi ha
   meno Forme insegnabili, così da conservare la disponibilità degli Istruttori
   più avanzati per gli allievi che ne hanno bisogno; a parità distribuisce prima

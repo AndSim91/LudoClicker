@@ -233,6 +233,7 @@ function tickStep(
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
   nextState = reconcileCollaboratorManagement(nextState);
   nextState = processPriorityInstructorQualifications(nextState, now);
+  nextState = processTechnicianCourseReservations(nextState, now);
   nextState = processAutomaticTeaching(
     nextState,
     now,
@@ -240,7 +241,6 @@ function tickStep(
     startAgonistCourse,
     createTrainingStartPlan,
   );
-  nextState = processTechnicianCourseReservations(nextState, now);
   nextState = refreshTrainingDurations(nextState, now);
   nextState = processInstructorAthleticPreparation(
     nextState,

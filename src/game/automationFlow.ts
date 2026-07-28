@@ -27,6 +27,10 @@ import {
   repairEquipment,
 } from "./equipment";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
+import {
+  compareAutomaticTeachingStudentPriority,
+  getAutomaticTeachingRarityPriority,
+} from "./automaticTeachingPriority";
 import { getMemberAnnualDepartureChance } from "./formulas";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import {
@@ -81,6 +85,7 @@ interface AutomaticTeachingNoOp {
   tournamentQualification: GameState["tournaments"]["qualification"];
   collaborators: Array<{
     id: string;
+    contactId: string;
     assignment: GameState["collaborators"][number]["assignment"];
     forms: GameState["collaborators"][number]["forms"];
     instructorForms: GameState["collaborators"][number]["instructorForms"];
@@ -90,6 +95,8 @@ interface AutomaticTeachingNoOp {
     lastFormTrainingYear: GameState["collaborators"][number]["lastFormTrainingYear"];
     formTrainingYearCount: GameState["collaborators"][number]["formTrainingYearCount"];
     lastAgonistCourseYear: GameState["collaborators"][number]["lastAgonistCourseYear"];
+    rarity: GameState["collaborators"][number]["rarity"];
+    specialProfileId: GameState["collaborators"][number]["specialProfileId"];
   }>;
 }
 
@@ -102,6 +109,7 @@ function hasSameAutomaticTeachingCollaborators(
   return cached.length === current.length && cached.every((previous, index) => {
     const collaborator = current[index];
     return previous.id === collaborator.id &&
+      previous.contactId === collaborator.contactId &&
       previous.assignment === collaborator.assignment &&
       previous.forms === collaborator.forms &&
       previous.instructorForms === collaborator.instructorForms &&
@@ -110,7 +118,9 @@ function hasSameAutomaticTeachingCollaborators(
       previous.training === collaborator.training &&
       previous.lastFormTrainingYear === collaborator.lastFormTrainingYear &&
       previous.formTrainingYearCount === collaborator.formTrainingYearCount &&
-      previous.lastAgonistCourseYear === collaborator.lastAgonistCourseYear;
+      previous.lastAgonistCourseYear === collaborator.lastAgonistCourseYear &&
+      previous.rarity === collaborator.rarity &&
+      previous.specialProfileId === collaborator.specialProfileId;
   });
 }
 
@@ -138,6 +148,7 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     tournamentQualification: state.tournaments.qualification,
     collaborators: state.collaborators.map((collaborator) => ({
       id: collaborator.id,
+      contactId: collaborator.contactId,
       assignment: collaborator.assignment,
       forms: collaborator.forms,
       instructorForms: collaborator.instructorForms,
@@ -147,6 +158,8 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
       lastFormTrainingYear: collaborator.lastFormTrainingYear,
       formTrainingYearCount: collaborator.formTrainingYearCount,
       lastAgonistCourseYear: collaborator.lastAgonistCourseYear,
+      rarity: collaborator.rarity,
+      specialProfileId: collaborator.specialProfileId,
     })),
   });
 }
@@ -474,9 +487,13 @@ export function processAutomaticTeaching(
       else instructorsByForm.set(formId, [instructor]);
     }
   }
+  const automaticFormCandidates = new Map(students.map((student) => [
+    student.id,
+    getAutomaticFormCandidates(student, courseXUnlocked),
+  ]));
   const qualifiedFormCandidates = new Map(students.map((student) => [
     student.id,
-    getAutomaticFormCandidates(student, courseXUnlocked).filter((formId) => {
+    (automaticFormCandidates.get(student.id) ?? []).filter((formId) => {
       const definition = getFormDefinition(formId);
       return Boolean(
         definition &&
@@ -555,29 +572,44 @@ export function processAutomaticTeaching(
         state.network.schools.length,
       )
       : 0;
-    const candidate = qualifiedFormCandidates.get(student.id)?.[0];
+    const candidate = automaticFormCandidates.get(student.id)?.[0];
     return [student.id, {
       departureRisk,
       isFavorite: "acquiredAt" in student
         ? student.favorite === true
         : favoriteContactIds.has(student.contactId),
+      rarityPriority: getAutomaticTeachingRarityPriority(student),
       isCollaborator: !("acquiredAt" in student),
       formPriority: candidate
         ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
         : Number.MAX_SAFE_INTEGER,
       acquiredAt: contact?.acquiredAt ?? 0,
+      originalOrder: originalOrder.get(student.id)!,
     }];
   }));
   students.sort((left, right) => {
     const leftPriority = studentPriorities.get(left.id)!;
     const rightPriority = studentPriorities.get(right.id)!;
-    return Number(rightPriority.isFavorite) - Number(leftPriority.isFavorite) ||
-      rightPriority.departureRisk - leftPriority.departureRisk ||
-      Number(rightPriority.isCollaborator) - Number(leftPriority.isCollaborator) ||
-      leftPriority.formPriority - rightPriority.formPriority ||
-      rightPriority.acquiredAt - leftPriority.acquiredAt ||
-      originalOrder.get(left.id)! - originalOrder.get(right.id)!;
+    return compareAutomaticTeachingStudentPriority(leftPriority, rightPriority);
   });
+
+  const startedStudentIds = new Set<string>();
+  const rememberStartedTraining = (
+    studentId: string,
+    started: ReturnType<TrainingStartPlan["startFormTraining"]>,
+  ): boolean => {
+    if (!started) return false;
+    startedStudentIds.add(studentId);
+    const instructorId = started.training.instructorId ??
+      started.training.requestedInstructorId;
+    if (instructorId) {
+      instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
+    }
+    return true;
+  };
+
+  // Prima vengono tentate tutte le Forme, nell'ordine degli allievi.
+  // Arena Tecnica e Corso Agonisti usano soltanto la capienza rimasta.
   for (const student of students) {
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
     const candidate = qualifiedCandidates.find((formId) => {
@@ -598,11 +630,7 @@ export function processAutomaticTeaching(
     if (candidate) {
       const started = trainingPlan.startFormTraining(student.id, candidate);
       if (!started) continue;
-      const instructorId = started.training.instructorId ??
-        started.training.requestedInstructorId;
-      if (instructorId) {
-        instructorLoads.set(instructorId, (instructorLoads.get(instructorId) ?? 0) + 1);
-      }
+      rememberStartedTraining(student.id, started);
       continue;
     }
 
@@ -613,9 +641,13 @@ export function processAutomaticTeaching(
       student.assignment === "instructor"
     ) {
       const started = trainingPlan.startFormTraining(student.id, "course-x");
-      if (started) continue;
+      rememberStartedTraining(student.id, started);
     }
+  }
 
+  for (const student of students) {
+    if (startedStudentIds.has(student.id)) continue;
+    const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
     if (
       (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
       qualifiedCandidates.length > 0 ||
@@ -639,6 +671,7 @@ export function processAutomaticTeaching(
     if (!instructor) continue;
     const started = trainingPlan.startAgonistCourse(student.id, instructor.id);
     if (!started) continue;
+    startedStudentIds.add(student.id);
     instructorLoads.set(instructor.id, (instructorLoads.get(instructor.id) ?? 0) + 1);
   }
 

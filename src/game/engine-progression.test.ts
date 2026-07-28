@@ -1025,7 +1025,7 @@ describe("game engine: progression", () => {
       .toBeUndefined();
   });
 
-  it("prioritizes collaborators after favorite members within the same effective risk", () => {
+  it("prioritizes collaborators after rarity and formation within the same earlier criteria", () => {
     const initial = createInitialState(1_000);
     const favorite = {
       ...initial.contacts[0],
@@ -1049,7 +1049,7 @@ describe("game engine: progression", () => {
       status: "enrolled" as const,
       forms: [] as FormId[],
       favorite: false,
-      rarity: "common" as const,
+      rarity: "legendary" as const,
     };
     const instructor = {
       id: "collaborator-priority-instructor",
@@ -1069,7 +1069,7 @@ describe("game engine: progression", () => {
       forms: [] as FormId[],
       instructorForms: [] as FormId[],
       assignment: null,
-      rarity: "common" as const,
+      rarity: "legendary" as const,
     };
     const ready = {
       ...initial,
@@ -1090,7 +1090,7 @@ describe("game engine: progression", () => {
       .toBeUndefined();
   });
 
-  it("uses the most recent acquiredAt as the final automatic priority", () => {
+  it("uses the oldest acquiredAt as the final automatic priority", () => {
     const initial = createInitialState(1_000);
     const older = {
       ...initial.contacts[0],
@@ -1130,9 +1130,9 @@ describe("game engine: progression", () => {
 
     const teaching = gameReducer(ready, { type: "TICK", now: 2_000 });
 
-    expect(teaching.contacts.find((contact) => contact.id === newer.id)?.training?.formId)
+    expect(teaching.contacts.find((contact) => contact.id === older.id)?.training?.formId)
       .toBe("form-1");
-    expect(teaching.contacts.find((contact) => contact.id === older.id)?.training)
+    expect(teaching.contacts.find((contact) => contact.id === newer.id)?.training)
       .toBeUndefined();
   });
 

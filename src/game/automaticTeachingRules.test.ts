@@ -115,6 +115,77 @@ describe("automatic teaching rules", () => {
     expect(training?.instructorId).toBe(unrelatedCertificate.id);
   });
 
+  it("fills automatic Forms before using remaining capacity for the Agonist Course", () => {
+    const initial = teachingState();
+    const favoriteAgonistCandidate = {
+      ...branchStudent(initial.contacts[0], "favorite-agonist-candidate"),
+      favorite: true,
+    };
+    const formStudent = {
+      ...initial.contacts[1],
+      id: "form-student",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      favorite: false,
+      training: undefined,
+    };
+    const formOneInstructor = instructor("form-one-only", "legendary", ["form-1"]);
+    const state: GameState = {
+      ...initial,
+      contacts: [favoriteAgonistCandidate, formStudent],
+      collaborators: [formOneInstructor],
+    };
+
+    const processed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(processed.contacts.find((contact) => contact.id === formStudent.id)?.training)
+      .toMatchObject({
+        formId: "form-1",
+        instructorId: formOneInstructor.id,
+      });
+    expect(processed.contacts.find(
+      (contact) => contact.id === favoriteAgonistCandidate.id,
+    )?.training).toBeUndefined();
+  });
+
+  it("uses the less advanced next Form to order equal Agonist candidates", () => {
+    const initial = teachingState();
+    const advanced = {
+      ...branchStudent(initial.contacts[0], "advanced-agonist-candidate"),
+      acquiredAt: 1_000,
+      rarity: "legendary" as const,
+      forms: [
+        "form-1",
+        "course-x",
+        "form-2",
+        "course-y",
+        "form-3-staff",
+        "form-4-staff",
+      ] as FormId[],
+    };
+    const lessAdvanced = {
+      ...branchStudent(initial.contacts[1], "less-advanced-agonist-candidate"),
+      acquiredAt: 1_000,
+      rarity: "legendary" as const,
+    };
+    const unrelatedInstructor = instructor("unrelated-instructor", "legendary", ["form-1"]);
+    const state: GameState = {
+      ...initial,
+      contacts: [advanced, lessAdvanced],
+      collaborators: [unrelatedInstructor],
+    };
+
+    const processed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(processed.contacts.find((contact) => contact.id === lessAdvanced.id)?.training)
+      .toMatchObject({
+        formId: "agonist-course",
+        instructorId: unrelatedInstructor.id,
+      });
+    expect(processed.contacts.find((contact) => contact.id === advanced.id)?.training)
+      .toBeUndefined();
+  });
+
   it("uses the less versatile instructor for the Agonist Course", () => {
     const initial = teachingState();
     const student = branchStudent(initial.contacts[0], "staff-student");

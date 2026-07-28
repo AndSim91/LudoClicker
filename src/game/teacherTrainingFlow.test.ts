@@ -143,6 +143,49 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     expect(september.collaborators[0].training?.trainingTrack).toBe("technician");
   });
 
+  it("starts an eligible SIS booking before assigning a new automatic Form", () => {
+    const initial = createInitialState(1_000, "", false);
+    const sisCandidate = {
+      ...instructor(initial, "sis-priority-candidate", 1_000, ["form-1"], ["form-1"]),
+      technicianCourseReservation: {
+        formId: "form-1" as const,
+        bookedAt: 1_500,
+        eligibleMonth: 9,
+      },
+    };
+    const formTeacher = {
+      ...instructor(
+        initial,
+        "form-teacher",
+        2_000,
+        ["form-1", "form-2"],
+        ["form-1", "form-2"],
+      ),
+      lastFormTrainingYear: 1,
+      formTrainingYearCount: 1,
+    };
+    const ready: GameState = {
+      ...initial,
+      contacts: [],
+      school: { ...initial.school, currentMonth: 9, euros: 10_000 },
+      collaborators: [sisCandidate, formTeacher],
+      unlocks: { ...initial.unlocks, forms: true, collaborators: true },
+      upgrades: { ...initial.upgrades, "sis-accreditation": 1 },
+    };
+
+    const processed = gameReducer(ready, { type: "TICK", now: 2_000 });
+    const processedCandidate = processed.collaborators.find(
+      (collaborator) => collaborator.id === sisCandidate.id,
+    );
+
+    expect(processedCandidate?.technicianCourseReservation).toBeUndefined();
+    expect(processedCandidate?.training).toMatchObject({
+      formId: "form-1",
+      trainingTrack: "technician",
+      trainingPhase: "technician",
+    });
+  });
+
   it("uses one trainee per Tecnico and respects the lowest progression first", () => {
     const initial = createInitialState(1_000, "", false);
     const technician = instructor(
