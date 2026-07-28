@@ -219,6 +219,8 @@ export function processAutomation(
       equipmentProductivity += getCollaboratorProductivity(collaborator);
     }
   }
+  writingProductivity += getCollaboratorFallbackProductivity(state, "writing");
+  equipmentProductivity += getCollaboratorFallbackProductivity(state, "equipment");
   const activeEmail = selectActiveEmail(state);
   const wasWriting = activeEmail?.status === "writing";
   const producingSocialContent = state.unlocks.social;
@@ -670,9 +672,6 @@ export function processAutomaticTeaching(
       rememberStartedTraining(student.id, started);
     }
   }
-  writingProductivity += getCollaboratorFallbackProductivity(state, "writing");
-  equipmentProductivity += getCollaboratorFallbackProductivity(state, "equipment");
-
   for (const student of students) {
     if (startedStudentIds.has(student.id)) continue;
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];

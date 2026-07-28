@@ -31,6 +31,9 @@ function TeachingCourseLogo({
           src={AGONIST_COURSE_LOGO.assetPath}
           alt={`${title} — emblema generato`}
         />
+        {technicalArenaLevel >= 3 ? (
+          <span className="agonist-course-star" aria-hidden="true">★</span>
+        ) : null}
       </span>
     );
   }

@@ -1635,3 +1635,23 @@
   color: var(--ink);
   background: var(--surface-muted);
 }
+.aggregated-teaching-course-logo {
+  position: relative;
+}
+
+.agonist-course-star {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  border: 1px solid #9b6d00;
+  border-radius: 50%;
+  color: #5f4300;
+  background: #ffd84a;
+  box-shadow: 0 0 0 2px var(--surface);
+  font-size: 8px;
+  line-height: 1;
+}

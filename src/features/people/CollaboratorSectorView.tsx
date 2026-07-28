@@ -79,8 +79,6 @@ function StaffingStepper({
   available,
   onIncrement,
   onDecrement,
-  onSetFallback,
-  onMovePriority,
 }: {
   label: string;
   actual: number;
@@ -523,6 +521,8 @@ export function CollaboratorSectorView({
   collaboratorsById,
   onIncrement,
   onDecrement,
+  onSetFallback,
+  onMovePriority,
   onStartTraining,
   onBookTechnicianCourse,
 }: {

@@ -1,6 +1,10 @@
 import { getEmailBuildLength } from "../../content/emailBuild";
 import { getCollaboratorProductivity } from "../../content/forms";
-import { getUpgradeEffectTotal } from "../../content/upgrades";
+import {
+  getEquipmentPreparedWorkMaximum,
+  getEquipmentSwordRepairWork,
+  getUpgradeEffectTotal,
+} from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import {
   getEffectiveDamagedSwords,
@@ -226,6 +230,16 @@ export function getCollaboratorAutomationPresentation({
   if (assignment === "equipment") {
     const damagedSwords = getEffectiveDamagedSwords(state.equipment);
     if (state.equipment.wear <= 0 && damagedSwords <= 0) {
+      const maximum = getEquipmentPreparedWorkMaximum(state);
+      if (maximum > 0) {
+        const prepared = Math.min(maximum, state.automation.equipmentPreparedWork ?? 0);
+        return {
+          title: "Banco da lavoro",
+          detail: `${Math.floor(prepared)}/${Math.floor(maximum)} punti manutenzione preparati`,
+          progress: maximum > 0 ? prepared / maximum * 100 : 0,
+          progressLabel: "Riserva del Banco da lavoro",
+        };
+      }
       return { title: "In attesa", detail: "Attrezzatura in ordine" };
     }
     const repairTarget = getEquipmentAutomaticRepairTarget(state.equipment);
@@ -236,7 +250,9 @@ export function getCollaboratorAutomationPresentation({
       };
     }
     const isRepairingSword = repairTarget === "sword";
-    const requiredWork = isRepairingSword ? GAME_CONFIG.equipmentSwordRepairWork : 1;
+    const requiredWork = isRepairingSword
+      ? getEquipmentSwordRepairWork(state.upgrades)
+      : 1;
     const durationMs = getAutomationCycleDurationMs(state, "equipment", requiredWork);
     const progress = getProjectedEquipmentProgress({
       buffer: state.automation.equipmentBuffer,
