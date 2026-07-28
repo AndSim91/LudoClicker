@@ -2120,7 +2120,7 @@ prodotti finché non verranno definite difficoltà specifiche:
 
 Durante la prova il resto del gioco è in pausa. Perdita del focus, cambio di
 scheda e cambio di orientamento mettono in pausa anche il minigioco. Il seed e
-lo stato del tentativo sono salvati, così un reload non genera una nuova
+il tentativo pendente sono salvati, così un reload non genera una nuova
 sequenza. Abbandonare assegna 0 al tentativo, senza rimborso e senza ridurre la
 qualità massima già ottenuta. Il primo risultato permette di accettare il
 prodotto o revisionarlo; un prodotto accettato resta in vendita per sempre. È

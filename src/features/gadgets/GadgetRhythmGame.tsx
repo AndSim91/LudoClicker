@@ -106,7 +106,9 @@ export function GadgetRhythmGame({
 
   const resumeRun = useCallback(() => {
     if (pausedAtRef.current === undefined) return;
-    totalPausedMsRef.current += performance.now() - pausedAtRef.current;
+    if (startedAtRef.current !== undefined) {
+      totalPausedMsRef.current += performance.now() - pausedAtRef.current;
+    }
     pausedAtRef.current = undefined;
     setPaused(false);
   }, []);

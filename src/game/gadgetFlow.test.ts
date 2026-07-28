@@ -149,6 +149,18 @@ describe("Gadget flow", () => {
     expect(revised.gadgets.minigame?.score).toBe(20);
   });
 
+  it("pauses paid development at zero productivity and resumes without losing work", () => {
+    const initial = unlockedState();
+    const withoutStaff = { ...initial, collaborators: [] };
+    const paid = startGadgetProject(withoutStaff, "wristband");
+    const paused = processGadgets(paid, 60_000, 61_000);
+
+    expect(paused.gadgets.activeWork?.completedWorkMs).toBe(0);
+
+    const staffed = { ...paused, collaborators: [gadgetCollaborator()] };
+    expect(completeCurrentWork(staffed).gadgets.minigame?.status).toBe("ready");
+  });
+
   it("sells from the shared audience and credits the quality-based net profit", () => {
     const initial = unlockedState();
     const product = initial.gadgets.products.wristband;
@@ -215,6 +227,42 @@ describe("Gadget flow", () => {
     const unlocked = processGadgets(nearlyUnlocked, 60_000, 61_000);
     expect(unlocked.gadgets.products.wristband.unitsSold).toBe(104);
     expect(unlocked.gadgets.products.mug.unlocked).toBe(true);
+  });
+
+  it("stops at the historical audience limit and resumes only when it grows", () => {
+    const initial = unlockedState();
+    const audience = getGadgetAudience(initial);
+    const saturated: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...initial.gadgets.products.wristband,
+            projectPurchased: true,
+            prototypeCompleted: true,
+            accepted: true,
+            quality: 100,
+            unitsSold: audience,
+          },
+        },
+      },
+    };
+
+    expect(processGadgets(saturated, 60_000, 61_000).gadgets.products.wristband.unitsSold)
+      .toBe(audience);
+
+    const largerAudience = {
+      ...saturated,
+      school: {
+        ...saturated.school,
+        activeMembers: saturated.school.activeMembers + 100,
+        peakActiveMembers: saturated.school.peakActiveMembers + 100,
+      },
+    };
+    expect(processGadgets(largerAudience, 60_000, 121_000).gadgets.products.wristband.unitsSold)
+      .toBe(audience + 5);
   });
 
   it("allows accepting a zero-quality prototype without making it sell", () => {

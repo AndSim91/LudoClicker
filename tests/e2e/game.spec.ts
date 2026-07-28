@@ -81,6 +81,49 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
   }
 });
 
+test("completa la prova qualità Gadget con controlli touch accessibili", async ({ page }) => {
+  const state = createProgressedGameSave();
+  state.school.euros = 50_000;
+  state.unlocks.gadget = true;
+  state.gadgets.products.wristband = {
+    ...state.gadgets.products.wristband,
+    unlocked: true,
+    projectPurchased: true,
+  };
+  state.gadgets.minigame = {
+    productId: "wristband",
+    kind: "development",
+    seed: 12_345,
+    previousQuality: 0,
+    status: "ready",
+  };
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installGameSave(page, state);
+  await page.goto("/");
+  await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
+
+  await page.getByRole("button", { name: "Gadget", exact: true }).click();
+  await page.getByRole("button", { name: "Avvia prova qualità" }).click();
+
+  const minigame = page.getByRole("dialog", { name: "Polsino" });
+  await expect(minigame).toBeVisible();
+  const laneControls = minigame.getByRole("button", { name: /^Corsia/ });
+  await expect(laneControls).toHaveCount(4);
+  for (let lane = 0; lane < 4; lane += 1) {
+    const box = await laneControls.nth(lane).boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(50);
+    expect(box?.height).toBeGreaterThanOrEqual(50);
+  }
+
+  await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
+  await expect(page.getByText("La qualità massima resta al 0%.")).toBeVisible();
+  await page.getByRole("button", { name: "Metti in vendita" }).click();
+
+  await expect(page.getByText("Non vendibile")).toBeVisible();
+  await expect(page.getByText("Venduti")).toBeVisible();
+  await expect(page.getByText("Guadagnato")).toBeVisible();
+});
+
 test("completa e invia una mail senza invio automatico", async ({ page }) => {
   await openProgressedGame(page);
   await page.getByRole("button", { name: "Riprendi" }).click();

@@ -125,6 +125,64 @@ describe("getCollaboratorAutomationPresentation", () => {
     expect(presentation.progress).toBeCloseTo(1.222_222, 6);
   });
 
+  it("keeps an accepted zero-quality Gadget out of active sales", () => {
+    const initial = createInitialState(1_000);
+    const gadgetCollaborator: Collaborator = {
+      id: "gadget-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Gadget",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "gadget",
+      rarity: "rare",
+    };
+    const wristband = {
+      ...initial.gadgets.products.wristband,
+      accepted: true,
+      projectPurchased: true,
+      prototypeCompleted: true,
+    };
+    const state = {
+      ...initial,
+      collaborators: [gadgetCollaborator],
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband,
+        },
+      },
+    };
+
+    const getPresentation = (quality: number) =>
+      getCollaboratorAutomationPresentation({
+        state: {
+          ...state,
+          gadgets: {
+            ...state.gadgets,
+            products: {
+              ...state.gadgets.products,
+              wristband: { ...wristband, quality },
+            },
+          },
+        },
+        collaboratorId: gadgetCollaborator.id,
+        assignment: "gadget",
+        now: 1_000,
+        activeEmail: undefined,
+      });
+
+    expect(getPresentation(0)).toEqual({
+      title: "In attesa",
+      detail: "Nessun prodotto vendibile",
+    });
+    expect(getPresentation(75)).toEqual({
+      title: "Vendita del catalogo",
+      detail: "1 prodotto attivo",
+    });
+  });
+
   it("shows Social content progress and its monthly return after Redazione evolves", () => {
     const initial = createInitialState(1_000);
     const socialCollaborator: Collaborator = {

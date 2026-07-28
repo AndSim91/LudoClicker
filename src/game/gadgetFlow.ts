@@ -220,6 +220,8 @@ export function acceptGadgetProduct(
   const product = state.gadgets.products[productId];
   const minigame = state.gadgets.minigame;
   if (
+    !state.unlocks.gadget ||
+    !product?.unlocked ||
     !product?.projectPurchased ||
     !product.prototypeCompleted ||
     product.accepted ||

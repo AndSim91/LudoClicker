@@ -288,13 +288,22 @@ export function getCollaboratorAutomationPresentation({
         progress: minigame.status === "result" ? 100 : undefined,
       };
     }
-    const productsInSale = Object.values(state.gadgets.products).filter(
+    const acceptedProducts = Object.values(state.gadgets.products).filter(
       (product) => product.accepted,
+    );
+    const productsInSale = acceptedProducts.filter(
+      (product) => product.quality > 0,
     ).length;
-    return productsInSale > 0
+    if (productsInSale > 0) {
+      return {
+        title: "Vendita del catalogo",
+        detail: `${productsInSale} ${productsInSale === 1 ? "prodotto attivo" : "prodotti attivi"}`,
+      };
+    }
+    return acceptedProducts.length > 0
       ? {
-          title: "Vendita del catalogo",
-          detail: `${productsInSale} ${productsInSale === 1 ? "prodotto attivo" : "prodotti attivi"}`,
+          title: "In attesa",
+          detail: "Nessun prodotto vendibile",
         }
       : { title: "In attesa", detail: "Nessun progetto Gadget attivo" };
   }
