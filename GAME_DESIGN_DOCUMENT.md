@@ -1725,6 +1725,14 @@ nel quale osservare l'avanzamento.
    Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si
    sistemano quasi da sole.
 
+10. **Il Laboratorio Gadget** Alla prima vittoria della scuola nell'Accademico
+    Arena, una scena in pausa annuncia lo sblocco e guida il giocatore ad aprire
+    **Gadget**. Il riepilogo spiega pubblico raggiungibile, produttività e ruolo
+    dei Collaboratori; il catalogo introduce acquisto del progetto, sviluppo,
+    prova qualità, vendita automatica, rarità aggiuntive e sblocco del prodotto
+    successivo dopo 100 vendite complessive della famiglia. Il tutorial non
+    obbliga a spendere fondi o assegnare subito un Collaboratore.
+
 L'evidenziazione deve restare coerente con l'interfaccia ispirata a Windows:
 niente frecce luminose o decorazioni estranee, ma contorni di focus, oscuramento
 e sfocatura controllata delle aree non necessarie.
@@ -2015,7 +2023,10 @@ cambia.
 Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
 prima volta la disciplina Arena del Torneo Accademico Alpha. Lo sblocco apre la
 vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
-il progetto Polsino. Il progetto deve comunque essere acquistato.
+il progetto Polsino. Il progetto deve comunque essere acquistato. Una scena
+tutorial salvata e non ripetibile presenta il settore, mantiene il tempo in pausa
+e richiede soltanto di aprire la nuova vista prima di illustrare riepilogo e
+catalogo.
 
 Il catalogo base segue questo ordine:
 

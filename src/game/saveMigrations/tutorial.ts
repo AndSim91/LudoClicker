@@ -1,4 +1,4 @@
-import { TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
+import { LEGACY_TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
 import type { MigratableState } from "./types";
 
 export function migrateTutorialState(state: MigratableState): MigratableState {
@@ -8,9 +8,9 @@ export function migrateTutorialState(state: MigratableState): MigratableState {
     ...state,
     version: 47,
     // Le partite già avviate non devono ricevere retroattivamente il capitolo
-    // introduttivo. Le nuove partite partono invece con un progresso vuoto.
+    // introduttivo. I tutorial aggiunti in seguito restano invece disponibili.
     tutorial: {
-      completedSceneIds: TUTORIAL_SCENE_IDS.filter(
+      completedSceneIds: LEGACY_TUTORIAL_SCENE_IDS.filter(
         (sceneId) => sceneId !== "social-evolution",
       ),
       skippedSceneIds: [],

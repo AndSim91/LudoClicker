@@ -37,6 +37,25 @@ export function TutorialLayer({
   ), [focusRegionKey, hiddenRegionKey]);
 
   useEffect(() => {
+    if (!step.scrollToRegion) return;
+    const target = document.querySelector<HTMLElement>(
+      `[data-tutorial-region="${step.scrollToRegion}"]`,
+    );
+    const scrollContainer = target?.closest<HTMLElement>("main");
+    if (target && scrollContainer?.scrollTo) {
+      const targetRect = target.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollTop + targetRect.top - containerRect.top,
+        left: scrollContainer.scrollLeft,
+        behavior: "auto",
+      });
+      return;
+    }
+    target?.scrollIntoView?.({ block: "start", inline: "nearest" });
+  }, [step.scrollToRegion]);
+
+  useEffect(() => {
     if (step.kind === "dialog") continueButtonRef.current?.focus();
   }, [step]);
 

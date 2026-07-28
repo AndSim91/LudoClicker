@@ -10,7 +10,11 @@ interface AppRailItem {
   label: string;
   icon: IconName;
   devOnly?: boolean;
-  tutorialRegion?: "events-navigation" | "contacts-navigation" | "upgrades-navigation";
+  tutorialRegion?:
+    | "events-navigation"
+    | "contacts-navigation"
+    | "upgrades-navigation"
+    | "gadget-navigation";
 }
 
 const items: AppRailItem[] = [
@@ -18,7 +22,7 @@ const items: AppRailItem[] = [
   { id: "events", label: "Eventi", icon: "flag", tutorialRegion: "events-navigation" },
   { id: "contacts", label: "Iscritti", icon: "people", tutorialRegion: "contacts-navigation" },
   { id: "tournaments", label: "Tornei", icon: "trophy" },
-  { id: "gadget", label: "Gadget", icon: "gift" },
+  { id: "gadget", label: "Gadget", icon: "gift", tutorialRegion: "gadget-navigation" },
   { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },
   { id: "settings", label: "Impostazioni", icon: "settings" },
   { id: "admin", label: "Admin", icon: "admin", devOnly: true },

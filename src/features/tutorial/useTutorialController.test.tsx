@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useCallback, useState } from "react";
 import { describe, expect, it } from "vitest";
+import { LEGACY_TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
 import { gameReducer } from "../../game/engine";
 import { createInitialState } from "../../game/initialState";
 import type { GameAction, GameState } from "../../game/types";
@@ -119,6 +120,17 @@ function useTutorialHarness() {
         },
       };
     }),
+    unlockGadgets: () => setState((current) => ({
+      ...current,
+      tutorial: {
+        completedSceneIds: [...LEGACY_TUTORIAL_SCENE_IDS],
+        skippedSceneIds: [],
+      },
+      unlocks: {
+        ...current.unlocks,
+        gadget: true,
+      },
+    })),
   };
 }
 
@@ -279,6 +291,37 @@ describe("useTutorialController", () => {
 
     await waitFor(() => {
       expect(result.current.state.tutorial.completedSceneIds).toContain("first-legendary");
+    });
+    expect(result.current.tutorial.activeScene).toBeNull();
+    expect(result.current.tutorial.shouldPauseGame).toBe(false);
+  });
+
+  it("explains the Gadget laboratory and persists completion", async () => {
+    const { result } = renderHook(() => useTutorialHarness());
+
+    act(() => result.current.unlockGadgets());
+
+    await waitFor(() => {
+      expect(result.current.tutorial.activeScene?.id).toBe("gadget-laboratory");
+    });
+    expect(result.current.tutorial.activeStep?.id).toBe("gadget-unlocked");
+    expect(result.current.tutorial.shouldPauseGame).toBe(true);
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("open-gadgets");
+    expect(result.current.tutorial.activeStep?.kind).toBe("objective");
+
+    act(() => result.current.setActiveView("gadget"));
+    await waitFor(() => {
+      expect(result.current.tutorial.activeStep?.id).toBe("gadget-workshop");
+    });
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("gadget-catalog-flow");
+
+    act(() => result.current.tutorial.continueScene());
+    await waitFor(() => {
+      expect(result.current.state.tutorial.completedSceneIds).toContain("gadget-laboratory");
     });
     expect(result.current.tutorial.activeScene).toBeNull();
     expect(result.current.tutorial.shouldPauseGame).toBe(false);

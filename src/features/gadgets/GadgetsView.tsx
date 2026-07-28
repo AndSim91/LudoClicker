@@ -274,7 +274,12 @@ export function GadgetsView({
         <GadgetWorkshopArtwork />
       </header>
 
-      <section className="gadget-overview" aria-label="Riepilogo Gadget">
+      <section
+        className="gadget-overview"
+        aria-label="Riepilogo Gadget"
+        data-tutorial-region="gadget-overview"
+        data-tutorial-target="true"
+      >
         <div className="gadget-overview-item">
           <span className="gadget-overview-icon" aria-hidden="true"><Icon name="people" /></span>
           <span>
@@ -319,7 +324,12 @@ export function GadgetsView({
         </p>
       </section>
 
-      <section className="gadget-catalog" aria-label="Catalogo Gadget">
+      <section
+        className="gadget-catalog"
+        aria-label="Catalogo Gadget"
+        data-tutorial-region="gadget-catalog"
+        data-tutorial-target="true"
+      >
         {GADGET_PRODUCT_ORDER.map((productId) => (
           <GadgetProductCard
             key={productId}

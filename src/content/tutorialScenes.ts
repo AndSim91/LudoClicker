@@ -10,9 +10,12 @@ export const TUTORIAL_REGION_IDS = [
   "events-navigation",
   "contacts-navigation",
   "upgrades-navigation",
+  "gadget-navigation",
   "folders",
   "messages",
   "main",
+  "gadget-overview",
+  "gadget-catalog",
   "composer-header",
   "composer-recipient",
   "composer-body",
@@ -27,7 +30,7 @@ export const TUTORIAL_REGION_IDS = [
 
 export type TutorialRegionId = typeof TUTORIAL_REGION_IDS[number];
 
-export const TUTORIAL_SCENE_IDS = [
+export const LEGACY_TUTORIAL_SCENE_IDS = [
   "first-invitation",
   "first-event",
   "first-trial",
@@ -35,6 +38,11 @@ export const TUTORIAL_SCENE_IDS = [
   "first-enrollment",
   "collaborator-sectors",
   "social-evolution",
+] as const;
+
+export const TUTORIAL_SCENE_IDS = [
+  ...LEGACY_TUTORIAL_SCENE_IDS,
+  "gadget-laboratory",
 ] as const;
 
 export type TutorialSceneId = typeof TUTORIAL_SCENE_IDS[number];
@@ -58,6 +66,7 @@ interface TutorialStepBase {
   body: TutorialBody;
   focusRegions: RegionSelection;
   hiddenRegions?: RegionSelection;
+  scrollToRegion?: TutorialRegionId;
   navigateTo?: string;
   cardPlacement?: "left";
 }
@@ -415,6 +424,61 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         isComplete: ({ state }) => state.collaborators.some(
           (collaborator) => collaborator.assignment === "writing",
         ),
+      },
+    ],
+  },
+  {
+    id: "gadget-laboratory",
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.unlocks.gadget,
+    steps: [
+      {
+        id: "gadget-unlocked",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il Laboratorio dei Gadget è aperto",
+        body: [
+          "La prima vittoria all'Accademico non si scorda mai. E per renderla ancora più iconica, abbiamo sbloccato i Gadget!",
+          "Il primo progetto è già disponibile, ma dovrai acquistarlo e svilupparlo prima di metterlo in catalogo.",
+        ],
+        focusRegions: ["navigation", "gadget-navigation"],
+      },
+      {
+        id: "open-gadgets",
+        kind: "objective",
+        title: "Apri Gadget",
+        body: [
+          "Seleziona Gadget nella barra laterale per entrare nel laboratorio.",
+        ],
+        focusRegions: ({ activeView }) =>
+          activeView === "gadget"
+            ? ["main"]
+            : ["navigation", "gadget-navigation"],
+        isComplete: ({ activeView }) => activeView === "gadget",
+      },
+      {
+        id: "gadget-workshop",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il motore del capitalismo",
+        body: [
+          "La Produttività della sezione Gadget è la somma del lavoro dei Collaboratori assegnati al settore. Senza di loro, progetti e revisioni restano fermi.",
+          "Il Pubblico raggiungibile indica quante persone puoi rendere partecipi del nostro splendido lavoro. Iscritti e, con gli Upgrade, Follower lo fanno crescere; oltre quella soglia restano possibili vendite occasionali, ma più lente.",
+        ],
+        focusRegions: ["main", "gadget-overview"],
+      },
+      {
+        id: "gadget-catalog-flow",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Dal progetto alle borse di studio",
+        body: [
+          "Acquista un progetto, attendi lo sviluppo e affronta la prova qualità. Quando accetti il risultato, il prodotto entra in vendita automatica.",
+          "Una qualità più alta aumenta la possibilità di vendita ed anche il guadagno per unità venduta.",
+          "Migliorare la qualità dei prodotti potrebbe anche sbloccare nuove rarità!",
+        ],
+        focusRegions: ["main", "gadget-catalog"],
+        scrollToRegion: "gadget-catalog",
       },
     ],
   },

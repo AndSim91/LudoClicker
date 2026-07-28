@@ -30,6 +30,7 @@ describe("TutorialLayer", () => {
       { sceneId: "collaborator-sectors", stepId: "open-collaborator-sectors", activeView: "mail", target: "contacts-navigation" },
       { sceneId: "social-evolution", stepId: "open-collaborators", activeView: "mail", target: "contacts-navigation" },
       { sceneId: "social-evolution", stepId: "assign-social-collaborator", activeView: "contacts", target: "collaborator-social-assignment" },
+      { sceneId: "gadget-laboratory", stepId: "open-gadgets", activeView: "mail", target: "gadget-navigation" },
     ];
 
     for (const expectation of expectations) {
@@ -101,6 +102,29 @@ describe("TutorialLayer", () => {
       },
       activeView: "contacts",
     })).toBe(true);
+  });
+
+  it("starts the paused Gadget tutorial only after the permanent unlock", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "gadget-laboratory")!;
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const unlocked = {
+      ...initial,
+      unlocks: { ...initial.unlocks, gadget: true },
+    };
+    const workshopStep = scene.steps.find(({ id }) => id === "gadget-workshop")!;
+    const catalogStep = scene.steps.find(({ id }) => id === "gadget-catalog-flow")!;
+
+    expect(scene.pauseWhileActive).toBe(true);
+    expect(scene.canStart({ state: initial, activeView: "mail" })).toBe(false);
+    expect(scene.canStart({ state: unlocked, activeView: "mail" })).toBe(true);
+    expect(resolveTutorialRegions(workshopStep.focusRegions, {
+      state: unlocked,
+      activeView: "gadget",
+    })).toContain("gadget-overview");
+    expect(resolveTutorialRegions(catalogStep.focusRegions, {
+      state: unlocked,
+      activeView: "gadget",
+    })).toContain("gadget-catalog");
   });
 
   it("keeps the selected region in focus and disables the others", () => {
@@ -235,6 +259,36 @@ describe("TutorialLayer", () => {
     expect(upgrades.inert).toBe(false);
   });
 
+  it("highlights the Gadget navigation target while asking to open it", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "gadget-laboratory")!;
+    const step = scene.steps.find(({ id }) => id === "open-gadgets")!;
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const state = {
+      ...initial,
+      unlocks: { ...initial.unlocks, gadget: true },
+    };
+    render(
+      <>
+        <AppRail view="mail" state={state} onChange={vi.fn()} />
+        <div className="workspace"><main>Contenuto</main></div>
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={1}
+          context={{ state, activeView: "mail" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    const gadget = screen.getByRole("button", { name: "Gadget" });
+    expect(gadget).toHaveAttribute("data-tutorial-region", "gadget-navigation");
+    expect(gadget).toHaveAttribute("data-tutorial-target", "true");
+    expect(gadget).toHaveAttribute("data-tutorial-treatment", "focus");
+    expect(gadget.inert).toBe(false);
+  });
+
   it("focuses the mail header containing Andrea during the rarity explanation", () => {
     const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-legendary")!;
     const step = scene.steps[0];
@@ -293,5 +347,71 @@ describe("TutorialLayer", () => {
     expect(container.querySelector(".tutorial-layer")).toHaveClass("is-card-left");
     expect(tutorialCard).toHaveTextContent("Un Leggendario è per sempre");
     expect(tutorialCard).toHaveTextContent("Collezionali tutti!");
+  });
+
+  it("scrolls the Gadget catalog into view for its explanation", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "gadget-laboratory")!;
+    const step = scene.steps.find(({ id }) => id === "gadget-catalog-flow")!;
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const state = {
+      ...initial,
+      unlocks: { ...initial.unlocks, gadget: true },
+    };
+    const scrollTo = vi.fn();
+    const scrollIntoView = vi.fn();
+    const previousScrollTo = HTMLElement.prototype.scrollTo;
+    const previousScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: scrollTo,
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    try {
+      render(
+        <>
+          <div className="workspace">
+            <main>
+              <section data-tutorial-region="gadget-catalog">Catalogo</section>
+            </main>
+          </div>
+          <TutorialLayer
+            scene={scene}
+            step={step}
+            stepIndex={3}
+            context={{ state, activeView: "gadget" }}
+            onContinue={vi.fn()}
+            onSkip={vi.fn()}
+          />
+        </>,
+      );
+
+      expect(scrollTo).toHaveBeenCalledWith({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    } finally {
+      if (previousScrollTo) {
+        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+          configurable: true,
+          value: previousScrollTo,
+        });
+      } else {
+        delete (HTMLElement.prototype as Partial<HTMLElement>).scrollTo;
+      }
+      if (previousScrollIntoView) {
+        Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+          configurable: true,
+          value: previousScrollIntoView,
+        });
+      } else {
+        delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
+      }
+    }
   });
 });
