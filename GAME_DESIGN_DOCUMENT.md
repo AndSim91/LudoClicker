@@ -221,7 +221,7 @@ Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
 singolo allievo**. Corso Y concorre sempre al conteggio; Corso X vi concorre
-soltanto dopo lo sblocco di Progetto X. Il Corso Agonisti è escluso perché
+soltanto dopo l'acquisto del relativo Percorso Segreto. Il Corso Agonisti è escluso perché
 potenzia Arena e Stile ma non assegna un badge permanente. Ogni badge permanente
 può essere registrato una sola volta sullo stesso allievo: un duplicato
 rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un
@@ -418,7 +418,7 @@ crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
 Formula iniziale:
 
 ```text
-potenzaScrittura = 1 + livelliVelocità
+potenzaScrittura = 1 + bonusTastieraComoda + bonusFrasiRapide
 
 caratteriPerInput = floor(
   potenzaScrittura
@@ -963,7 +963,7 @@ moltiplicatori del collaboratore. Il percorso è:
 
 ```text
 Forma 1
-  → Corso X [soltanto con Progetto X]
+  → Corso X [soltanto con il relativo Percorso Segreto]
   → Forma 2
   → Corso Y
   → Forme 3, 4 e 5 in uno o più rami:
@@ -982,7 +982,7 @@ inesperti, il tempo necessario per consolidare e affinare la tecnica.
 All'inizio della partita questo passaggio non fa parte del percorso: il gioco si
 comporta come se tra Forma 1 e Forma 2 non esistesse alcun corso. Corso X, i
 suoi badge, i controlli, i filtri e le qualifiche restano completamente nascosti
-finché non viene acquistato **Progetto X**.
+finché non viene scoperto e acquistato il Percorso Segreto **Corso X**.
 
 Ogni Forma ha un nome lungo, usato nei testi descrittivi, e un nome corto per le
 interfacce compatte:
@@ -1005,8 +1005,8 @@ reali delle Forme.
 Regole:
 
 - ogni iscritto può conoscere più Forme;
-- prima di Progetto X la progressione lineare è **Forma 1 → Forma 2**;
-- dopo Progetto X Corso X diventa obbligatorio e la progressione è **Forma 1 →
+- prima del Percorso Segreto Corso X la progressione lineare è **Forma 1 → Forma 2**;
+- dopo il suo acquisto Corso X diventa obbligatorio e la progressione è **Forma 1 →
   Corso X → Forma 2**;
 - i dati di Corso X già presenti in un salvataggio restano conservati ma
   invisibili fino allo sblocco;
@@ -1730,7 +1730,7 @@ nel quale osservare l'avanzamento.
    sbloccano soltanto al completamento di questa missione.
 
 3. **Configurazione campagna**\
-   È la prima comunicazione di sistema manuale e sblocca Scrittura e Velocità.
+   È la prima comunicazione di sistema manuale e sblocca Scrittura e Creatività.
 
 4. **Primi Eventi e attrezzatura**\
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
@@ -2804,9 +2804,9 @@ qualunque funzione che possa far credere di inviare davvero email.
   Collaboratori, domanda ordinaria e vendite marginali governano il catalogo.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non
   può essere messa in pausa.
-- Carisma e Scrittura sono statistiche fondamentali.
-- Accoglienza, Velocità, Social, Attrezzatura e Organizzazione completano il
-  sistema.
+- Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
+  Insegnamento e Organizzazione sono gli otto rami pubblici; Social usa gli
+  effetti integrati nei primi due.
 - Il carico delle spade aumenta tramite corsi, prove, eventi e imprevisti
   narrativi; ogni soglia di 100 rompe una spada.
 - Una prova con iscrizione garantita al 100% si conclude anche senza spade
