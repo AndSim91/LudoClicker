@@ -701,6 +701,7 @@ export interface ReptileActiveEdition {
   startedAt: number;
   lastProgressAt: number;
   assignments: ReptileSectorAssignments;
+  powerSnapshot: Record<ReptileSector, number>;
   previousAssignments: Record<string, CollaboratorAssignment>;
   minigame: ReptileMinigameProgress;
   sectors?: Record<ReptileSector, ReptileSectorProgress>;

@@ -303,6 +303,9 @@ function hasValidReptileProgress(state: Partial<GameState>): boolean {
   });
   return validStatus && validMinigame && validSectors &&
     assigned.length === new Set(assigned).size &&
+    REPTILE_SECTORS.every((sector) =>
+      Number.isFinite(edition.powerSnapshot?.[sector]) && edition.powerSnapshot[sector] >= 0
+    ) &&
     Number.isFinite(edition.startedAt) && Number.isFinite(edition.lastProgressAt) &&
     Number.isSafeInteger(edition.teamCount) && edition.teamCount >= 16 && edition.teamCount <= 512;
 }

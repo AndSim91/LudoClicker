@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../../content/mastery";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
@@ -10,6 +11,7 @@ import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendar
 import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
 import { migrateReptileState } from "./reptile";
+import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
 import type { MigratableState } from "./types";
 
 describe("Gadget save migration", () => {
@@ -38,17 +40,19 @@ describe("Gadget save migration", () => {
       ),
     };
 
-    const migrated = migrateReptileState(migrateUpgradeRevampState(
-      migrateSecretLegendaryBaseRebalanceState(
-        migrateSecretLegendaryCircuitBoostRemovalState(
-          migrateGadgetRarityState(
-            migrateTournamentStandardDifficultyState(migrateGadgetState(legacy)),
+    const migrated = migrateFirstCollaboratorTutorialState(
+      migrateReptileState(migrateUpgradeRevampState(
+        migrateSecretLegendaryBaseRebalanceState(
+          migrateSecretLegendaryCircuitBoostRemovalState(
+            migrateGadgetRarityState(
+              migrateTournamentStandardDifficultyState(migrateGadgetState(legacy)),
+            ),
           ),
         ),
-      ),
-    )) as GameState;
+      )),
+    ) as GameState;
 
-    expect(migrated.version).toBe(72);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.unlocks.gadget).toBe(false);
     expect(migrated.gadgets.products.wristband.unlocked).toBe(false);
     expect(migrated.collaborators[0].mastery?.gadget).toBe(0);

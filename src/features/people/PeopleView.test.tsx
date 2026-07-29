@@ -14,6 +14,39 @@ afterEach(() => {
 });
 
 describe("PeopleView", () => {
+  it("marks the complete collaborator section as a tutorial target", () => {
+    const initial = createInitialState(1_000);
+    const collaborator: Collaborator = {
+      id: "tutorial-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Tutorial",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: null,
+      rarity: "legendary",
+    };
+    const { container } = render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [collaborator],
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const tutorialTarget = container.querySelector<HTMLElement>(
+      '[data-tutorial-region="collaborator-section"]',
+    );
+    expect(tutorialTarget).toHaveAttribute("data-tutorial-target", "true");
+    expect(tutorialTarget).toContainElement(
+      screen.getByRole("region", { name: "Collaboratori delle Onde" }),
+    );
+  });
+
   it("replaces the individual list with an operational dashboard after the aggregate unlock", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 9 }, (_, index) => ({

@@ -96,7 +96,11 @@ export function PeopleView({
         </div>
       </header>
       {showCollaborators ? (
-        <section className="people-section">
+        <section
+          className="people-section"
+          data-tutorial-region="collaborator-section"
+          data-tutorial-target="true"
+        >
           <div className="people-section-heading is-inline-count">
             <h2>Collaboratori</h2>
             <span>{showAggregateCollaborators

@@ -298,7 +298,7 @@ function allocateTierSlots(npcCount: number, tiers: readonly TournamentTier[]): 
     slots[slots.length - 1] += needed;
     for (let index = 0; index < needed; index += 1) {
       const donor = slots.findIndex(
-        (value, tierIndex) => tierIndex < slots.length - 1 && value > 1,
+        (value, tierIndex) => tierIndex < slots.length - 1 && value > 0,
       );
       if (donor >= 0) slots[donor] -= 1;
     }
@@ -846,6 +846,66 @@ export function createChampionsOpenAthletes(
     cursor,
   );
   return { participants, nextSeed: cursor.seed };
+}
+
+export function createChampionsOpenAthletePairs(
+  state: GameState,
+  teamCount: number,
+  seed: number,
+): { pairs: [TournamentParticipant, TournamentParticipant][]; nextSeed: number } {
+  const cursor: RandomCursor = { seed };
+  const count = Math.max(0, Math.floor(teamCount));
+  const profile = TOURNAMENT_DEFINITIONS.champions.npc!;
+  const slots = allocateTierSlots(count, profile.tiers);
+  const participants: TournamentParticipant[] = [];
+  let sequence = 0;
+  profile.tiers.forEach((tier, tierIndex) => {
+    for (let index = 0; index < slots[tierIndex]; index += 1) {
+      participants.push(
+        createNpcInTier("champions", profile, tier, "arena", cursor, sequence++),
+        createNpcInTier("champions", profile, tier, "style", cursor, sequence++),
+      );
+    }
+  });
+  let normalized = normalizeNpcFieldToStandard(
+    participants,
+    TOURNAMENT_DEFINITIONS.champions.standard,
+  );
+  normalized = normalizeOrdinaryNpcsToStandard(
+    maybeInsertSecretLegendaries(state, "champions", normalized, cursor),
+    TOURNAMENT_DEFINITIONS.champions.standard,
+  );
+  normalized = ensureUniqueParticipantNames(normalized, cursor);
+
+  for (let index = 0; index + 1 < normalized.length; index += 2) {
+    if (!normalized[index].secretLegendaryId || !normalized[index + 1].secretLegendaryId) continue;
+    const replacement = normalized.findIndex(
+      (entry, candidate) => candidate > index + 1 && !entry.secretLegendaryId,
+    );
+    if (replacement >= 0) {
+      [normalized[index + 1], normalized[replacement]] =
+        [normalized[replacement], normalized[index + 1]];
+    }
+  }
+
+  const pairs: [TournamentParticipant, TournamentParticipant][] = [];
+  for (let index = 0; index + 1 < normalized.length; index += 2) {
+    const first = normalized[index];
+    const second = normalized[index + 1];
+    const anchor = first.secretLegendaryId
+      ? first
+      : second.secretLegendaryId
+        ? second
+        : first;
+    const alignSchool = (participant: TournamentParticipant): TournamentParticipant => ({
+      ...participant,
+      schoolId: anchor.schoolId,
+      schoolName: anchor.schoolName,
+      city: anchor.city,
+    });
+    pairs.push([alignSchool(first), alignSchool(second)]);
+  }
+  return { pairs, nextSeed: cursor.seed };
 }
 
 function findDefeatedSecretLegendaries(

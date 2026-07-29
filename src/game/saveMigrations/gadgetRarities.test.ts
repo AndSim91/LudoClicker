@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
@@ -7,6 +8,7 @@ import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendar
 import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
 import { migrateReptileState } from "./reptile";
+import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
 import type { MigratableState } from "./types";
 
 describe("Gadget rarity save migration", () => {
@@ -39,15 +41,17 @@ describe("Gadget rarity save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateReptileState(migrateUpgradeRevampState(
-      migrateSecretLegendaryBaseRebalanceState(
-        migrateSecretLegendaryCircuitBoostRemovalState(
-          migrateGadgetRarityState(legacy),
+    const migrated = migrateFirstCollaboratorTutorialState(
+      migrateReptileState(migrateUpgradeRevampState(
+        migrateSecretLegendaryBaseRebalanceState(
+          migrateSecretLegendaryCircuitBoostRemovalState(
+            migrateGadgetRarityState(legacy),
+          ),
         ),
-      ),
-    )) as GameState;
+      )),
+    ) as GameState;
 
-    expect(migrated.version).toBe(72);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.gadgets.products.wristband.rarities.common).toMatchObject({
       unlocked: true,
       quality: 73,

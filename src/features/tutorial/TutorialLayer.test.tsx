@@ -27,6 +27,8 @@ describe("TutorialLayer", () => {
       { sceneId: "first-trial", stepId: "trial-booked", activeView: "mail", target: "first-trial-row" },
       { sceneId: "first-legendary", stepId: "legendary-rarities", activeView: "mail", target: "composer-header" },
       { sceneId: "first-enrollment", stepId: "open-upgrades", activeView: "events", target: "upgrades-navigation" },
+      { sceneId: "first-collaborator", stepId: "open-first-collaborator", activeView: "mail", target: "contacts-navigation" },
+      { sceneId: "first-collaborator", stepId: "assign-first-collaborator", activeView: "contacts", target: "collaborator-section" },
       { sceneId: "collaborator-sectors", stepId: "open-collaborator-sectors", activeView: "mail", target: "contacts-navigation" },
       { sceneId: "social-evolution", stepId: "open-collaborators", activeView: "mail", target: "contacts-navigation" },
       { sceneId: "social-evolution", stepId: "assign-social-collaborator", activeView: "contacts", target: "collaborator-social-assignment" },
@@ -41,6 +43,51 @@ describe("TutorialLayer", () => {
         activeView: expectation.activeView,
       })).toContain(expectation.target);
     }
+  });
+
+  it("presents the first collaborator and completes only after assigning that person", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-collaborator")!;
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const firstCollaborator = {
+      id: "first-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Primo Collaboratore",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: null,
+      rarity: "legendary" as const,
+    };
+    const secondCollaborator = {
+      ...firstCollaborator,
+      id: "second-collaborator",
+      displayName: "Secondo Collaboratore",
+      joinedAt: 2_000,
+      assignment: "events" as const,
+    };
+    const available = {
+      ...initial,
+      collaborators: [firstCollaborator, secondCollaborator],
+    };
+    const introduction = scene.steps.find(({ id }) => id === "collaborator-introduction")!;
+    const assignment = scene.steps.find(({ id }) => id === "assign-first-collaborator")!;
+
+    expect(scene.pauseWhileActive).toBe(true);
+    expect(scene.canStart({ state: initial, activeView: "mail" })).toBe(false);
+    expect(scene.canStart({ state: available, activeView: "mail" })).toBe(true);
+    expect(introduction.body).toEqual([
+      "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una sola delle Aree di Attività disponibili alla volta e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace!",
+    ]);
+    expect(assignment.kind).toBe("objective");
+    if (assignment.kind !== "objective") return;
+    expect(assignment.isComplete({ state: available, activeView: "contacts" })).toBe(false);
+    expect(assignment.isComplete({
+      state: {
+        ...available,
+        collaborators: [{ ...firstCollaborator, assignment: "writing" }, secondCollaborator],
+      },
+      activeView: "contacts",
+    })).toBe(true);
   });
 
   it("starts the paused aggregate tutorial only after the permanent unlock", () => {

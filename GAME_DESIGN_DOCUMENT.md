@@ -1509,7 +1509,7 @@ consigliata è:
 | Primo esaurimento contatti     | Calendario, eventi e volantinaggio gratuito   |
 | Prima prova prenotata          | report aggregato del funnel                   |
 | Primo iscritto                 | Euro e quote associative                      |
-| Primo Ultra Raro collaboratore | Iscritti, Collaboratori e assegnazioni        |
+| Primo Collaboratore delle Onde | Iscritti, Collaboratori e assegnazioni        |
 | 35 iscritti attivi             | Redazione si evolve in Social                 |
 | 20 iscritti                    | Attrezzatura e usura narrativa                |
 | 50 iscritti                    | Forme dei collaboratori                       |
@@ -1713,10 +1713,11 @@ Ogni passaggio dichiara quali aree dell'interfaccia restano a fuoco, quali
 vengono oscurate e sfocate e quali possono essere nascoste. Il completamento o
 il salto di una scena viene salvato, così la stessa scena non si ripete dopo il
 caricamento. Quando un obiettivo richiede di agire su un controllo preciso, quel
-controllo deve essere evidenziato direttamente con contrasto e pulsazione:
-mantenere visibile la sola sezione che lo contiene non è considerato
-sufficiente. Gli obiettivi di attesa evidenziano invece la scheda o il pannello
-nel quale osservare l'avanzamento.
+controllo deve essere evidenziato direttamente con contrasto e pulsazione.
+Quando invece il giocatore deve scegliere liberamente fra più controlli
+equivalenti, viene evidenziata l'intera sezione che contiene le alternative.
+Gli obiettivi di attesa evidenziano la scheda o il pannello nel quale osservare
+l'avanzamento.
 
 ### Sequenza iniziale
 
@@ -1761,8 +1762,18 @@ nel quale osservare l'avanzamento.
    Leggendari. Il dialogo ricorda che i Leggendari sono profili unici e si
    chiude con **“Collezionali tutti!”**.
 
-8. **Una mano in più** Il primo Ultra Raro che completa il Corso Y introduce
-   l'automazione.
+8. **Una mano in più** Alla comparsa del primo Collaboratore delle Onde, la
+   scena resta in pausa e attende la conclusione degli eventuali tutorial già
+   attivi. Se il primo iscritto è anche un Collaboratore, viene quindi concluso
+   prima il tutorial del primo iscritto. A.N.D.E.R. invita poi ad aprire
+   **Iscritti**; se la pagina è già aperta, questo obiettivo viene superato
+   automaticamente. L'intera sezione **Collaboratori** viene evidenziata mentre
+   una panoramica testuale presenta Redazione, Eventi, Attrezzatura e
+   Istruttore, il limite di un solo incarico alla volta e la Maestria specifica
+   accumulata lavorando. La scena termina soltanto quando il primo Collaboratore
+   riceve un incarico liberamente scelto; un incarico già presente conta come
+   completamento e **Salta** resta sempre disponibile. I salvataggi precedenti
+   all'introduzione della scena la registrano come già saltata.
 
 9. **Le spade non si sistemano da sole** Introduce attrezzatura e manutenzione.
    Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si
@@ -2258,9 +2269,136 @@ soltanto dopo lo sblocco del settore.
 
 ---
 
-## 20. Bilanciamento iniziale
+## 20. Torneo Open Reptile
 
-### 20.1 Obiettivi temporali
+### 20.1 Identità, sblocco e calendario
+
+Il **Torneo Reptile** è il primo torneo Open organizzato dalla scuola di
+Genova. Non appartiene alla progressione Rated tra Nazionale e Champion's. Si
+sblocca quando, nella stessa edizione del Torneo Nazionale, atleti della scuola
+vincono sia Arena sia Stile.
+
+La preparazione può iniziare in qualunque mese, ma una nuova edizione può
+essere disputata una sola volta per anno scolastico. Quando tutti i settori
+hanno terminato, il giocatore deve prenotare il palazzetto pagando subito
+10.000 €. La prenotazione non è rimborsabile e non può essere annullata. Se il
+mese corrente è luglio il torneo parte subito; altrimenti viene fissato al
+luglio successivo. Partecipanti e spade sono fotografati soltanto all'avvio
+effettivo, dopo le partenze annuali di giugno. Conclusa l'edizione, la prossima
+preparazione è disponibile dal settembre seguente.
+
+### 20.2 Preparazione coordinata
+
+Tutti i Collaboratori non assegnati come Istruttori devono essere distribuiti
+fra Social, Attrezzature, Gadget ed Eventi, con almeno una persona per settore.
+Gli incarichi ordinari si fermano fino al termine della preparazione; al 100%
+di tutti e quattro i settori vengono ripristinati. Potenza, Maestria, rarità e
+bonus di Forma sono fotografati all'avvio; i miglioramenti ottenuti durante il
+lavoro valgono dall'edizione successiva.
+
+I carichi base con 16 team sono rispettivamente 4, 6, 2 e 4. Il moltiplicatore
+del carico vale ×1 / ×1,5 / ×2 / ×2,5 / ×3 / ×3,5 per 16 / 32 / 64 / 128 /
+256 / 512 team. Indicando con `R = potenza / carico`:
+
+```text
+qualitàGrezza = clamp(50 × R, 0, 100)
+coordinamento = 0,5 + qualitàGrezzaPeggiore / 200
+bonusEventi = 1 + qualitàEventiCoordinata / 200
+durataBase = 6 mesi di gioco / R
+```
+
+Il coordinamento modifica qualità e velocità di tutti. Il bonus Eventi si
+applica a Social, Attrezzature e Gadget, ma non a Eventi stesso. La qualità
+finale resta fra 0 e 100 ed è descritta come Disastrosa, Insufficiente,
+Adeguata, Buona o Eccellente a intervalli di 20 punti. Il tempo impiegato non
+riduce la qualità: un settore debole procede più lentamente e costituisce il
+collo di bottiglia condiviso.
+
+### 20.3 Mini-gioco di coordinamento
+
+Prima dell'avanzamento temporale il giocatore può saltare il mini-gioco con
+modificatore 0 oppure affrontare un unico tentativo di 30 secondi. Appaiono 50
+cerchi, al massimo tre contemporaneamente e senza sovrapposizioni:
+
+- cerchio colpito: +1%;
+- cerchio scaduto: −0,5%;
+- click o tap nell'area di gioco ma fuori dai cerchi: −1%;
+- penalità complessive limitate a −50%; risultato finale fra −50% e +50%.
+
+Il modificatore moltiplica sia velocità sia qualità di ogni settore. Perdita
+del focus o cambio scheda mette in pausa la prova; la ripresa usa tre secondi
+di conto alla rovescia. Abbandono o reload trasformano tutti i cerchi rimasti
+in errori. Click sull'interfaccia esterna all'area non producono penalità.
+
+### 20.4 Fama e partecipazione
+
+La fama del Reptile usa XP separati dalla fama della scuola, parte da 0 ed è
+limitata a 3.000. I livelli 0–5 richiedono intervalli di 500 XP e generano
+rispettivamente 16, 32, 64, 128, 256 e 512 team. Social seleziona linearmente
+da un minimo di due team di Genova fino a metà del tabellone, sempre entro le
+coppie realmente formabili con iscritti attivi che possiedono Forma 1. Eventi
+sposta la selezione da casuale verso i migliori atleti, valutati al 50% Arena e
+50% Stile. Le coppie di Genova sono costruite in modo equilibrato ma non
+perfettamente deterministico; ogni team esterno contiene due atleti della
+stessa scuola.
+
+Al termine, Social, Gadget ed Eventi assegnano `2 × qualità − 100` punti;
+Attrezzature assegna `4 × qualità − 200`. La somma, arrotondata una sola volta,
+può variare da −500 a +500 e viene applicata soltanto alla conclusione.
+Attrezzature usa prima `qualità × min(1, spadeLibere / spadeRichieste)`.
+
+### 20.5 Simulazione sportiva
+
+Arena e Stile del team sono la media dei due atleti; la potenza di assalto è
+la media 50/50 dei due valori. Ogni team riceve una sola condizione triangolare
+fissa per l'intero torneo. Ogni assalto applica invece una variazione fresca di
+incontro fra −5% e +5%, decisività 18 e probabilità limitata fra 5% e 95%.
+Ogni sfida è alla meglio dei cinque, quindi termina a 3 punti.
+
+Gli esterni usano profilo, rarità, Forme, esperienza, scuole e tier della
+Champion's Arena adattati alle coppie, incluse almeno due squadre Elite quando
+il campo lo consente. Le apparizioni dei Leggendari Segreti seguono le regole
+dei tornei ordinari e ricevono un compagno generato della stessa scuola. La
+difficoltà parte dallo standard Champion's e viene moltiplicata
+cumulativamente per ×1,1 dopo ogni vittoria di un team di Genova; il nuovo
+valore vale da tutte le edizioni successive.
+
+La fase svizzera usa `max(5, log2(team))` turni: 5 fino a 32 team, poi 6 / 7 /
+8 / 9. Il primo turno è casuale evitando la stessa scuola quando possibile;
+i successivi preferiscono stesso record, differenza punti simile e nessun
+rematch. La classifica usa vittorie, forza avversari, differenza punti, scontro
+diretto e sorteggio deterministico. Le prime 16 entrano nel tabellone 1ª–16ª,
+2ª–15ª e così via, con finale per il terzo posto.
+
+### 20.6 Economia, premi e persistenza
+
+Servono due spade per ogni team, inclusi gli esterni. Le spade libere della
+scuola vengono usate per prime; le mancanti sono noleggiate a 100 € ciascuna.
+Ogni spada della scuola impiegata riceve 20 punti usura. Gadget può generare al
+massimo 1.000 € lordi per team, moltiplicati per la sua qualità. Social genera
+`floor(team × qualità / 100)` follower. Il riepilogo separa entrate Gadget,
+palazzetto, noleggio e risultato netto; i costi finali possono portare il saldo
+della scuola sotto zero. L'edizione completata conta come un Evento.
+
+Ogni atleta di Genova nei migliori 16 riceve +1 Arena e +1 Stile permanenti.
+Il bonus non si somma: quarto, terzo, secondo e vincitore ricevono
+rispettivamente +2, +3, +4 e +5 totali. I bonus dei Leggendari restano nel
+normale progresso conservato dal prestigio.
+
+La simulazione completa viene generata una volta sola all'avvio di luglio e
+salvata prima della presentazione. Le schermate mostrano nell'ordine Social,
+Attrezzature, Gadget, Eventi, turni svizzeri, classifica, eliminatorie e recap;
+possono essere saltate. Costi e premi sono protetti da un flag idempotente. Il
+recap dettagliato più recente resta visibile fino a una nuova preparazione;
+l'albo conserva per ogni edizione anno, scuola e nomi dei due vincitori. Il
+prestigio azzera sblocco, fama, vittorie, preparazione, prenotazione, recap e
+albo Reptile; una prenotazione pendente viene persa senza rimborso.
+
+---
+
+## 21. Bilanciamento iniziale
+
+### 21.1 Obiettivi temporali
 
 | Traguardo                  |           Tempo desiderato |
 | -------------------------- | -------------------------: |
@@ -2274,7 +2412,7 @@ soltanto dopo lo sblocco del settore.
 | Automazione percepibile    |               30–60 minuti |
 | Primo prestigio            | 3–4 ore attive distribuite |
 
-### 20.2 Avvio consigliato
+### 21.2 Avvio consigliato
 
 - 5 contatti disponibili;
 - 1 carattere per input;
@@ -2294,7 +2432,7 @@ soltanto dopo lo sblocco del settore.
   l'automazione senza spezzare il ritmo;
 - il primo volantinaggio è gratuito e guidato.
 
-### 20.3 Protezione dalla sfortuna
+### 21.3 Protezione dalla sfortuna
 
 - dopo una serie di funnel senza iscritti, aumenta temporaneamente la
   probabilità del passaggio più debole;
@@ -2306,9 +2444,9 @@ soltanto dopo lo sblocco del settore.
 
 ---
 
-## 21. Salvataggio locale
+## 22. Salvataggio locale
 
-### 21.1 Strategia
+### 22.1 Strategia
 
 - `localStorage` per la prima versione;
 - salvataggio automatico ogni 10 secondi;
@@ -2318,7 +2456,7 @@ soltanto dopo lo sblocco del settore.
 - export/import JSON nelle Impostazioni;
 - reset completo con doppia conferma.
 
-### 21.2 Stato minimo
+### 22.2 Stato minimo
 
 ```ts
 interface GameState {
@@ -2336,6 +2474,7 @@ interface GameState {
   legendaryPity: number;
   equipment: EquipmentItem[];
   gadgets: GadgetState;
+  tournaments: TournamentState; // include Open Reptile, recap e albo d'oro
   calendar: CalendarEvent[];
   upgrades: UpgradeState[];
   statistics: StatisticsState;
@@ -2344,7 +2483,7 @@ interface GameState {
 }
 ```
 
-### 21.3 Sicurezza e privacy
+### 22.3 Sicurezza e privacy
 
 - nessuna connessione a Outlook;
 - nessun invio di email reali;
@@ -2356,9 +2495,9 @@ interface GameState {
 
 ---
 
-## 22. Architettura tecnica proposta
+## 23. Architettura tecnica proposta
 
-### 22.1 Stack
+### 23.1 Stack
 
 - Vite;
 - React;
@@ -2371,7 +2510,7 @@ interface GameState {
 
 Non serve un backend per la prima versione.
 
-### 22.2 Moduli
+### 23.2 Moduli
 
 ```text
 src/
@@ -2411,7 +2550,7 @@ src/
     global.css
 ```
 
-### 22.3 Motore di gioco
+### 23.3 Motore di gioco
 
 - tick visivo: `requestAnimationFrame`;
 - tick economico: 4 volte al secondo;
@@ -2424,7 +2563,7 @@ src/
 - contenuti e bilanciamento separati dal codice;
 - nessuna formula dipendente dal frame rate.
 
-### 22.4 Accessibilità e tastiera
+### 23.4 Accessibilità e tastiera
 
 Anche se il gioco usa tutta la tastiera:
 
@@ -2438,7 +2577,7 @@ Anche se il gioco usa tutta la tastiera:
 
 ---
 
-## 23. Modello dati essenziale
+## 24. Modello dati essenziale
 
 ### Contatto
 
@@ -2528,7 +2667,7 @@ interface ScheduledTrial {
 
 ---
 
-## 24. Audio e feedback
+## 25. Audio e feedback
 
 - audio completamente assente;
 - nessun effetto sonoro al click, alla scrittura o alla conversione;
@@ -2540,7 +2679,7 @@ interface ScheduledTrial {
 
 ---
 
-## 25. Traguardi
+## 26. Traguardi
 
 I traguardi appaiono come email amministrative o riconoscimenti interni.
 
@@ -2564,7 +2703,7 @@ sistema economico principale.
 
 ---
 
-## 26. Roadmap di produzione
+## 27. Roadmap di produzione
 
 ### Fase 1 — Prototipo del loop principale
 
@@ -2654,7 +2793,7 @@ sembra un'applicazione di posta reale.
 
 ---
 
-## 27. Test e criteri di accettazione
+## 28. Test e criteri di accettazione
 
 ### Input
 
@@ -2707,7 +2846,7 @@ sembra un'applicazione di posta reale.
 
 ---
 
-## 28. Rischi di design
+## 29. Rischi di design
 
 ### Camuffamento contro leggibilità
 
@@ -2751,7 +2890,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 
 ---
 
-## 29. Decisioni già approvate
+## 30. Decisioni già approvate
 
 - Le email sono completamente simulate.
 - L'interfaccia di riferimento è Outlook su Windows 11.
@@ -2840,7 +2979,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 
 ---
 
-## 30. Elementi ancora da fornire o validare
+## 31. Elementi ancora da fornire o validare
 
 Questi elementi non bloccano il prototipo, ma servono prima della versione
 completa:
@@ -2863,7 +3002,7 @@ completa:
 
 ---
 
-## 31. Fonti di riferimento
+## 32. Fonti di riferimento
 
 - Profilo ufficiale di LudoSport Genova – Ordine delle Onde:\
   https://ludosportplus.com/school-profile/ludosport-genova-ordine-delle-onde
@@ -2884,7 +3023,7 @@ completa:
 
 ---
 
-## 32. Definizione dell'MVP
+## 33. Definizione dell'MVP
 
 L'MVP è pronto quando il giocatore può:
 

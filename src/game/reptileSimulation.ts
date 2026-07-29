@@ -1,5 +1,5 @@
 import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
-import { ARENA_DECISIVENESS, createChampionsOpenAthletes } from "./tournamentSimulation";
+import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
 import { getAvailableSwords } from "./equipment";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
@@ -192,32 +192,18 @@ function createHomeTeams(
   ));
 }
 
-function avoidLegendaryPairing(participants: TournamentParticipant[]): TournamentParticipant[] {
-  const result = [...participants];
-  for (let index = 0; index + 1 < result.length; index += 2) {
-    if (!result[index].secretLegendaryId || !result[index + 1].secretLegendaryId) continue;
-    const replacement = result.findIndex(
-      (entry, candidate) => candidate > index + 1 && !entry.secretLegendaryId,
-    );
-    if (replacement >= 0) [result[index + 1], result[replacement]] = [result[replacement], result[index + 1]];
-  }
-  return result;
-}
-
 function createExternalTeams(
   state: GameState,
   count: number,
   cursor: RandomCursor,
 ): ReptileTeam[] {
   if (count <= 0) return [];
-  const generated = createChampionsOpenAthletes(state, count * 2, cursor.seed);
+  const generated = createChampionsOpenAthletePairs(state, count, cursor.seed);
   cursor.seed = generated.nextSeed;
-  const participants = avoidLegendaryPairing(generated.participants);
   const difficultyMultiplier = 1.1 ** state.tournaments.reptile.victories;
   const teams: ReptileTeam[] = [];
   for (let index = 0; index < count; index += 1) {
-    const first = participants[index * 2];
-    const second = participants[index * 2 + 1];
+    const [first, second] = generated.pairs[index];
     teams.push(createTeam(
       `reptile-external-${index}-${cursor.seed >>> 0}`,
       first.schoolName,

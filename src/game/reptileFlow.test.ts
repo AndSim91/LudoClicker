@@ -14,10 +14,12 @@ import {
   skipReptilePresentation,
   startReptileTournamentIfDue,
 } from "./reptileFlow";
+import { unlockReptileFromTournamentResult } from "./reptileUnlock";
 import type {
   Collaborator,
   GameState,
   ReptileSectorAssignments,
+  TournamentResult,
 } from "./types";
 
 const STARTED_AT = 10_000;
@@ -79,6 +81,30 @@ function createReptileReadyState(fameXp = 0): GameState {
 }
 
 describe("Torneo Reptile", () => {
+  it("si sblocca soltanto vincendo Arena e Stile nello stesso Nazionale", () => {
+    const state = createInitialState(STARTED_AT, "Manager");
+    const national = {
+      level: "national",
+      participants: [
+        { id: "arena", ownedContactId: "home-a" },
+        { id: "style", ownedContactId: "home-b" },
+      ],
+      arenaRanking: ["arena"],
+      styleRanking: ["style"],
+    } as TournamentResult;
+    const unlocked = unlockReptileFromTournamentResult(state, national, STARTED_AT);
+    expect(unlocked.tournaments.reptile.unlocked).toBe(true);
+
+    const splitVictory = unlockReptileFromTournamentResult(state, {
+      ...national,
+      participants: [
+        national.participants[0],
+        { ...national.participants[1], ownedContactId: undefined },
+      ],
+    }, STARTED_AT);
+    expect(splitVictory).toBe(state);
+  });
+
   it("usa i cap confermati per il mini-gioco e le potenze di due della fama", () => {
     expect(calculateReptileMinigameModifier(50, 0, 0)).toBe(50);
     expect(calculateReptileMinigameModifier(0, 50, 0)).toBe(-25);
@@ -129,6 +155,9 @@ describe("Torneo Reptile", () => {
     );
     expect(completed.school.followers).toBe(result.economy.followersGained);
     expect(completed.equipment.damagedSwords).toBeGreaterThan(0);
+    expect(completed.statistics.eventsCompleted).toBe(
+      presenting.statistics.eventsCompleted + 1,
+    );
 
     const secondAttempt = skipReptilePresentation(completed, STARTED_AT + 1_000_000_003);
     expect(secondAttempt).toBe(completed);

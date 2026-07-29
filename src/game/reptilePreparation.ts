@@ -102,6 +102,24 @@ function hasValidAssignments(
     eligibleIds.every((id) => assignedIds.includes(id));
 }
 
+function calculatePowerSnapshot(
+  state: GameState,
+  assignments: ReptileSectorAssignments,
+): Record<ReptileSector, number> {
+  const collaboratorsById = new Map(state.collaborators.map((entry) => [entry.id, entry]));
+  return Object.fromEntries(REPTILE_SECTORS.map((sector) => {
+    const role = REPTILE_ROLE_BY_SECTOR[sector];
+    let power = assignments[sector].reduce((total, id) => {
+      const collaborator = collaboratorsById.get(id);
+      return total + (collaborator ? getCollaboratorProductivity(collaborator, role) : 0);
+    }, 0);
+    if (sector === "social") {
+      power *= 1 + Math.min(1, Math.max(0, state.school.followers) * 0.00005);
+    }
+    return [sector, power];
+  })) as Record<ReptileSector, number>;
+}
+
 export function canStartReptilePreparation(state: GameState): boolean {
   const reptile = state.tournaments.reptile;
   return reptile.unlocked &&
@@ -136,6 +154,7 @@ export function startReptilePreparation(
     assignments: Object.fromEntries(
       REPTILE_SECTORS.map((sector) => [sector, [...assignments[sector]]]),
     ) as ReptileSectorAssignments,
+    powerSnapshot: calculatePowerSnapshot(state, assignments),
     previousAssignments,
     minigame: {
       status: "ready",
@@ -177,19 +196,8 @@ function calculateSectorProgress(
   edition: ReptileActiveEdition,
   modifierPercent: number,
 ): Record<ReptileSector, ReptileSectorProgress> {
-  const collaboratorsById = new Map(state.collaborators.map((entry) => [entry.id, entry]));
   const loadMultiplier = getReptileTeamLoadMultiplier(edition.teamCount);
-  const powers = Object.fromEntries(REPTILE_SECTORS.map((sector) => {
-    const role = REPTILE_ROLE_BY_SECTOR[sector];
-    let power = edition.assignments[sector].reduce((total, id) => {
-      const collaborator = collaboratorsById.get(id);
-      return total + (collaborator ? getCollaboratorProductivity(collaborator, role) : 0);
-    }, 0);
-    if (sector === "social") {
-      power *= 1 + Math.min(1, Math.max(0, state.school.followers) * 0.00005);
-    }
-    return [sector, power];
-  })) as Record<ReptileSector, number>;
+  const powers = edition.powerSnapshot;
   const loads = Object.fromEntries(
     REPTILE_SECTORS.map((sector) => [sector, BASE_LOAD_BY_SECTOR[sector] * loadMultiplier]),
   ) as Record<ReptileSector, number>;

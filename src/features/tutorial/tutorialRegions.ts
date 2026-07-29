@@ -24,6 +24,7 @@ const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   "park-sparring-action": '[data-tutorial-region="park-sparring-action"]',
   "day-panel": ".day-panel",
   "first-trial-row": '[data-tutorial-region="first-trial-row"]',
+  "collaborator-section": '[data-tutorial-region="collaborator-section"]',
   "collaborator-social-assignment": '[data-tutorial-region="collaborator-social-assignment"]',
   "collaborator-sectors": '[data-tutorial-region="collaborator-sectors"]',
   status: ".status-bar",

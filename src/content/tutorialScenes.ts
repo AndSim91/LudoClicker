@@ -23,6 +23,7 @@ export const TUTORIAL_REGION_IDS = [
   "park-sparring-action",
   "day-panel",
   "first-trial-row",
+  "collaborator-section",
   "collaborator-social-assignment",
   "collaborator-sectors",
   "status",
@@ -40,8 +41,11 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
   "social-evolution",
 ] as const;
 
+export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
+
 export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
+  FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
 ] as const;
 
@@ -317,6 +321,58 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Gli Upgrade si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
         ],
         focusRegions: ["main"],
+      },
+    ],
+  },
+  {
+    id: FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.collaborators.length > 0,
+    steps: [
+      {
+        id: "collaborator-introduction",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Una mano in più",
+        body: [
+          "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una sola delle Aree di Attività disponibili alla volta e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace!",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "open-first-collaborator",
+        kind: "objective",
+        title: "Apri la pagina Iscritti",
+        body: [
+          "Apri Iscritti dalla barra laterale per raggiungere la sezione Collaboratori.",
+        ],
+        focusRegions: ({ activeView }) =>
+          activeView === "contacts"
+            ? ["main", "collaborator-section"]
+            : ["navigation", "contacts-navigation"],
+        isComplete: ({ activeView }) => activeView === "contacts",
+      },
+      {
+        id: "collaborator-areas",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Aree di Attività",
+        body: [
+          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. Redazione automatizza la compilazione delle email ai contatti; Eventi organizza le attività fuori dalla scuola per farla crescere; Attrezzatura serve per la manutenzione e riparazione delle spade della scuola; Istruttore serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
+        ],
+        focusRegions: ["main", "collaborator-section"],
+        scrollToRegion: "collaborator-section",
+      },
+      {
+        id: "assign-first-collaborator",
+        kind: "objective",
+        title: "Assegna il tuo primo collaboratore",
+        body: [
+          "Usa il menu di assegnazione per scegliere l'Area di Attività che preferisci per il tuo primo Collaboratore.",
+        ],
+        focusRegions: ["main", "collaborator-section"],
+        scrollToRegion: "collaborator-section",
+        isComplete: ({ state }) => Boolean(state.collaborators[0]?.assignment),
       },
     ],
   },

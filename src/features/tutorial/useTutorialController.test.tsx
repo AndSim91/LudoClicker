@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { LEGACY_TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
 import { gameReducer } from "../../game/engine";
 import { createInitialState } from "../../game/initialState";
-import type { GameAction, GameState } from "../../game/types";
+import type { Collaborator, GameAction, GameState } from "../../game/types";
 import { useTutorialController } from "./useTutorialController";
 
 function useTutorialHarness() {
@@ -120,6 +120,49 @@ function useTutorialHarness() {
         },
       };
     }),
+    showFirstCollaborator: (
+      firstEnrollmentFinished = true,
+      assignment: Collaborator["assignment"] = null,
+    ) => setState((current) => ({
+      ...current,
+      contacts: current.contacts.map((contact, index) => index === 0
+        ? { ...contact, status: "enrolled" as const }
+        : contact),
+      school: { ...current.school, activeMembers: 1 },
+      collaborators: [{
+        id: "first-tutorial-collaborator",
+        contactId: current.contacts[0].id,
+        displayName: "Primo Collaboratore",
+        joinedAt: 2_000,
+        forms: [],
+        instructorForms: [],
+        assignment,
+        rarity: "legendary" as const,
+      }],
+      statistics: {
+        ...current.statistics,
+        membersEnrolled: 1,
+        collaboratorsRecruited: 1,
+      },
+      unlocks: { ...current.unlocks, collaborators: true },
+      tutorial: {
+        completedSceneIds: [
+          "first-invitation",
+          "first-event",
+          "first-trial",
+          "first-legendary",
+          ...(firstEnrollmentFinished ? ["first-enrollment"] : []),
+        ],
+        skippedSceneIds: [],
+      },
+    })),
+    assignFirstCollaborator: (assignment: Exclude<Collaborator["assignment"], null>) =>
+      setState((current) => gameReducer(current, {
+        type: "ASSIGN_COLLABORATOR",
+        collaboratorId: current.collaborators[0].id,
+        assignment,
+        now: 2_500,
+      })),
     unlockGadgets: () => setState((current) => ({
       ...current,
       tutorial: {
@@ -294,6 +337,71 @@ describe("useTutorialController", () => {
     });
     expect(result.current.tutorial.activeScene).toBeNull();
     expect(result.current.tutorial.shouldPauseGame).toBe(false);
+  });
+
+  it("queues the first collaborator after the first enrollment and waits for its assignment", async () => {
+    const { result } = renderHook(() => useTutorialHarness());
+
+    act(() => result.current.showFirstCollaborator(false));
+
+    await waitFor(() => {
+      expect(result.current.tutorial.activeScene?.id).toBe("first-enrollment");
+    });
+    expect(result.current.tutorial.activeStep?.id).toBe("first-fee");
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("open-upgrades");
+
+    act(() => result.current.setActiveView("upgrades"));
+    await waitFor(() => {
+      expect(result.current.tutorial.activeStep?.id).toBe("upgrade-tree");
+    });
+
+    act(() => result.current.tutorial.continueScene());
+    await waitFor(() => {
+      expect(result.current.tutorial.activeScene?.id).toBe("first-collaborator");
+    });
+    expect(result.current.tutorial.activeStep?.id).toBe("collaborator-introduction");
+    expect(result.current.tutorial.shouldPauseGame).toBe(true);
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("open-first-collaborator");
+
+    act(() => result.current.setActiveView("contacts"));
+    await waitFor(() => {
+      expect(result.current.tutorial.activeStep?.id).toBe("collaborator-areas");
+    });
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("assign-first-collaborator");
+    expect(result.current.tutorial.shouldPauseGame).toBe(true);
+
+    act(() => result.current.assignFirstCollaborator("events"));
+    await waitFor(() => {
+      expect(result.current.state.tutorial.completedSceneIds).toContain("first-collaborator");
+    });
+    expect(result.current.state.collaborators[0].assignment).toBe("events");
+    expect(result.current.tutorial.activeScene).toBeNull();
+    expect(result.current.tutorial.shouldPauseGame).toBe(false);
+  });
+
+  it("skips navigation when Iscritti is already open and accepts an existing assignment", async () => {
+    const { result } = renderHook(() => useTutorialHarness());
+
+    act(() => result.current.setActiveView("contacts"));
+    act(() => result.current.showFirstCollaborator(true, "writing"));
+
+    await waitFor(() => {
+      expect(result.current.tutorial.activeScene?.id).toBe("first-collaborator");
+    });
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("collaborator-areas");
+
+    act(() => result.current.tutorial.continueScene());
+    await waitFor(() => {
+      expect(result.current.state.tutorial.completedSceneIds).toContain("first-collaborator");
+    });
+    expect(result.current.tutorial.activeScene).toBeNull();
   });
 
   it("explains the Gadget laboratory and persists completion", async () => {

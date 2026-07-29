@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 import type { GameState } from "../types";
@@ -15,7 +16,7 @@ describe("migrazione Torneo Reptile", () => {
     delete (legacy.tournaments as Partial<GameState["tournaments"]>).reptile;
 
     const migrated = migrate(legacy) as GameState;
-    expect(migrated.version).toBe(72);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.tournaments.reptile).toEqual({
       unlocked: false,
       fameXp: 0,

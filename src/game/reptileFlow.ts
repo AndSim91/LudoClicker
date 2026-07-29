@@ -128,6 +128,7 @@ function applyReptileResult(
       eurosEarned: state.statistics.eurosEarned + result.economy.gadgetGross,
       socialFollowersGained:
         state.statistics.socialFollowersGained + result.economy.followersGained,
+      eventsCompleted: state.statistics.eventsCompleted + 1,
     },
     tournaments: {
       ...state.tournaments,
