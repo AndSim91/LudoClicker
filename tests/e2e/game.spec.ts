@@ -68,7 +68,7 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
 
   const areas = [
     ["Eventi", "Eventi"],
-    ["Iscritti", "Iscritti"],
+    ["Scuola", "Scuola"],
     ["Tornei", "Tornei"],
     ["Upgrade", "Upgrade"],
     ["Impostazioni", "Impostazioni"],
@@ -93,6 +93,7 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   state.gadgets.minigame = {
     productId: "wristband",
     kind: "development",
+    rarity: "common",
     seed: 12_345,
     previousQuality: 0,
     status: "ready",
@@ -196,7 +197,7 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
   await installGameSave(page, state);
   await page.goto("/");
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
-  await page.getByRole("button", { name: "Iscritti", exact: true }).click();
+  await page.getByRole("button", { name: "Scuola", exact: true }).click();
 
   const aggregateView = page.getByRole("region", {
     name: "Gestione aggregata dei collaboratori",
@@ -211,7 +212,9 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
   await aggregateView.getByRole("button", { name: "Apri centro didattico" }).click();
   const instructorPanel = page.getByRole("dialog", { name: "Istruttori" });
   await expect(instructorPanel).toBeVisible();
-  await expect(instructorPanel.getByText("Formazione", { exact: true })).toBeVisible();
+  await expect(instructorPanel.getByRole("button", {
+    name: "Ordina collaboratori per Formazione",
+  })).toBeVisible();
   await expect(instructorPanel.getByLabel("Formazione istruttore")).toBeVisible();
   await instructorPanel.getByRole("button", { name: "Chiudi pannello Istruttori" }).click();
 
@@ -241,7 +244,7 @@ test("acquista un Upgrade, salva e mantiene il livello dopo il reload", async ({
   await saveNow(page);
   const stored = await readStoredGameSave(page);
   expect(stored.upgrades["comfortable-keyboard"]).toBe(1);
-  expect(stored.school.euros).toBe(4_925);
+  expect(stored.school.euros).toBe(4_950);
 
   await page.reload();
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
@@ -258,14 +261,19 @@ test("gestisce preferiti e cancellazione iscrizione con conferma accessibile", a
   if (!member) throw new Error("La fixture deve contenere almeno un iscritto cancellabile");
   const displayName = `${member.firstName} ${member.lastName}`;
 
-  await page.getByRole("button", { name: "Iscritti", exact: true }).click();
+  await page.getByRole("button", { name: "Scuola", exact: true }).click();
   const favorite = page.getByRole("button", {
     name: `Aggiungi ${displayName} ai preferiti`,
   });
   await favorite.click();
-  await expect(page.getByRole("button", {
+  const removeFavorite = page.getByRole("button", {
     name: `Rimuovi ${displayName} dai preferiti`,
-  })).toHaveAttribute("aria-pressed", "true");
+  });
+  await expect(removeFavorite).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", {
+    name: `Iscrizione protetta per ${displayName}: atleta preferito`,
+  })).toBeDisabled();
+  await removeFavorite.click();
 
   const cancelEnrollment = page.getByRole("button", {
     name: `Annulla l'iscrizione di ${displayName}`,

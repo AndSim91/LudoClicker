@@ -342,9 +342,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "open-first-collaborator",
         kind: "objective",
-        title: "Apri la pagina Iscritti",
+        title: "Apri la pagina Scuola",
         body: [
-          "Apri Iscritti dalla barra laterale per raggiungere la sezione Collaboratori.",
+          "Apri Scuola dalla barra laterale per raggiungere la sezione Collaboratori.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -398,7 +398,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la gestione dei Collaboratori",
         body: [
-          "Apri Iscritti dalla barra laterale per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
+          "Apri Scuola dalla barra laterale per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -455,9 +455,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "open-collaborators",
         kind: "objective",
-        title: "Apri la pagina Iscritti",
+        title: "Apri la pagina Scuola",
         body: [
-          "Premi su Iscritti nella barra laterale e raggiungi l'elenco dei Collaboratori delle Onde.",
+          "Premi su Scuola nella barra laterale e raggiungi l'elenco dei Collaboratori delle Onde.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"

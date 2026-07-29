@@ -89,7 +89,7 @@ export function PeopleView({
         <Icon name="people" />
         <div className="people-page-heading">
           <div className="people-page-title-row">
-            <h1>Iscritti</h1>
+            <h1>Scuola</h1>
             <MonthlyIncomeSummary state={stateOverride} />
           </div>
           <p>Iscritti e Collaboratori delle Onde</p>

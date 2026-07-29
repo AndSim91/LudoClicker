@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { TUTORIAL_SCENE_IDS } from "../../../src/content/tutorialScenes";
 import { createShortGoalFromStatistics } from "../../../src/content/shortGoals";
 import { createInitialState, gameReducer } from "../../../src/game/engine";
+import { decodeStoredSave } from "../../../src/game/saveCodec";
 import type { GameState } from "../../../src/game/types";
 import { STORAGE_KEYS } from "../../../src/shared/storageKeys";
 
@@ -51,9 +52,10 @@ export async function installGameSave(page: Page, state: GameState): Promise<voi
 }
 
 export async function readStoredGameSave(page: Page): Promise<GameState> {
-  return page.evaluate((saveKey) => {
+  const serializedState = await page.evaluate((saveKey) => {
     const serializedState = localStorage.getItem(saveKey);
     if (!serializedState) throw new Error("Salvataggio Playwright non trovato");
-    return JSON.parse(serializedState) as GameState;
+    return serializedState;
   }, STORAGE_KEYS.gameSave);
+  return decodeStoredSave(serializedState) as GameState;
 }

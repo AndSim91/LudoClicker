@@ -413,7 +413,7 @@ describe("game engine: progression", () => {
       contacts: [athlete],
       collaborators: [lessonCollaborator],
       automation: { ...initial.automation, lessonBuffer: 0.99 },
-      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
     }, { type: "TICK", now: 2_000 });
     const improved = automated.contacts[0];
 
@@ -496,7 +496,7 @@ describe("game engine: progression", () => {
         assignment: "instructor" as const,
         rarity: "rare" as const,
       }],
-      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
     }, { type: "TICK", now: 2_000 });
 
     expect(result.automation.lastImprovedAthleteId).toBe("favorite-athlete");

@@ -35,7 +35,7 @@ describe("UpgradesView", () => {
       .toHaveLength(7);
   });
 
-  it("renders eight public branches, the secret row and the Teaching extension", () => {
+  it("renders eight public branches, the secret row and the merged Teaching row", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
@@ -62,12 +62,23 @@ describe("UpgradesView", () => {
     }
     expect(screen.getByRole("button", { name: /Apri dettagli Master of none/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Il costo del Servizio/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Apri dettagli Intensità agonistica/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(57);
+    expect(screen.queryByRole("button", { name: /Apri dettagli Preparazione agonistica/ }))
+      .not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(56);
     expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
+
+    const teachingBranch = screen.getByRole("region", { name: "Insegnamento" });
+    const teachingButtons = within(teachingBranch).getAllByRole("button", {
+      name: /^Apri dettagli/,
+    });
+    expect(teachingButtons).toHaveLength(7);
+    expect(teachingButtons[5]).toHaveAccessibleName(/Apri dettagli Nessun Rancore/);
+    expect(teachingButtons[6]).toHaveAccessibleName(/Apri dettagli PagoSport/);
+    expect(within(teachingButtons[5]).getByText("Rancor", { selector: "em" })).toBeVisible();
   });
 
   it("shows both secret hints and reveals only the discovered path", () => {

@@ -378,7 +378,7 @@ describe("PeopleView", () => {
       collaborators,
       upgrades: {
         ...initial.upgrades,
-        "athletic-preparation": 1,
+        "agonist-course-intensity": 1,
         "project-x": 1,
       },
       unlocks: { ...initial.unlocks, collaborators: true },
@@ -443,7 +443,7 @@ describe("PeopleView", () => {
         index === 0 ? { ...contact, status: "enrolled" as const } : contact
       ),
       collaborators: [instructor],
-      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
@@ -642,7 +642,7 @@ describe("PeopleView", () => {
             ...initial,
             school: { ...initial.school, currentMonth },
             collaborators: [instructor],
-            upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+            upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
             unlocks: { ...initial.unlocks, collaborators: true },
             collaboratorManagement: {
               ...initial.collaboratorManagement,
@@ -697,7 +697,7 @@ describe("PeopleView", () => {
             contact.id === student.id ? student : contact,
           ),
           collaborators: [instructor],
-          upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+          upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
           unlocks: { ...initial.unlocks, collaborators: true },
           collaboratorManagement: {
             ...initial.collaboratorManagement,
@@ -1127,7 +1127,7 @@ describe("PeopleView", () => {
       name: `Guadagno al mese: ${formatCurrency(memberFees + socialIncome)}`,
     });
     expect(income).toBeVisible();
-    const pageHeader = screen.getByRole("heading", { name: "Iscritti", level: 1 })
+    const pageHeader = screen.getByRole("heading", { name: "Scuola", level: 1 })
       .closest("header");
     expect(pageHeader).toContainElement(income);
     expect(screen.getByRole("heading", { name: "Iscritti attivi" }).parentElement)
@@ -1185,7 +1185,7 @@ describe("PeopleView", () => {
     const onAssign = vi.fn();
     render(<PeopleView state={state} onAssign={onAssign} onStartTraining={() => undefined} />);
 
-    expect(screen.getByRole("heading", { name: "Iscritti" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
     expect(screen.queryByRole("tab", { name: /Potenziali interessati/ })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
       "ComuneComparsa: 80%Prova dopo la mail: 40%",

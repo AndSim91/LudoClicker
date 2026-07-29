@@ -115,7 +115,7 @@ describe("FolderPane", () => {
 
     const pane = within(container);
     fireEvent.click(pane.getByRole("button", { name: /Contatti/ }));
-    fireEvent.click(pane.getByRole("button", { name: /Iscritti/ }));
+    fireEvent.click(pane.getByRole("button", { name: /Scuola/ }));
 
     expect(onOpenComposer).toHaveBeenCalledOnce();
     expect(onOpenMembers).toHaveBeenCalledOnce();

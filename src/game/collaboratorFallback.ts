@@ -1,5 +1,8 @@
 import { getCollaboratorProductivity } from "../content/forms";
-import { getUpgradeEffectTotal } from "../content/upgrades";
+import {
+  getUpgradeEffectTotal,
+  isAthleticPreparationUnlocked,
+} from "../content/upgrades";
 import { isSummerBreak } from "./calendar";
 import { getEquipmentAutomaticRepairTarget } from "./equipment";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
@@ -32,7 +35,7 @@ function isPrimarySectorIdle(
       ).get(collaborator.id) ?? 0;
       if (teaching > 0) return false;
       const preparationActive =
-        (state.upgrades["athletic-preparation"] ?? 0) > 0 &&
+        isAthleticPreparationUnlocked(state.upgrades) &&
         !isSummerBreak(state.school.currentMonth) &&
         state.contacts.some((contact) => contact.status === "enrolled");
       return !preparationActive;

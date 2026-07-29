@@ -130,7 +130,7 @@ describe("App profile and navigation", () => {
     expect(Array.from(navigation.querySelectorAll("button"), (button) => button.textContent)).toEqual([
       "Posta",
       "Eventi",
-      "Iscritti",
+      "Scuola",
       "Tornei",
       "Upgrade",
       "Impostazioni",
@@ -197,8 +197,8 @@ describe("App profile and navigation", () => {
     fireEvent.click(folders.getByRole("button", { name: /Contatti/ }));
     expect(screen.getByRole("button", { name: /Corpo del messaggio/ })).toBeVisible();
 
-    fireEvent.click(folders.getByRole("button", { name: /Iscritti/ }));
-    expect(screen.getByRole("heading", { name: "Iscritti" })).toBeVisible();
+    fireEvent.click(folders.getByRole("button", { name: /Scuola/ }));
+    expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
   });
 
   it("opens the development-only email catalog editor", () => {

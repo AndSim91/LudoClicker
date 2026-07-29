@@ -61,10 +61,12 @@ export interface UpgradeDefinition {
   id: UpgradeId;
   category: UpgradeCategory;
   title: string;
+  emphasizedTitlePart?: string;
   description: string;
   effectLabel: string;
   effect: UpgradeEffect;
   effectPerLevel: number;
+  effectStartingLevel?: number;
   effectLevelCap?: number;
   additionalEffectsPerLevel?: Partial<Record<UpgradeEffect, number>>;
   baseCost: number;
@@ -162,9 +164,9 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "sis-accreditation", category: "instructors", title: "Tu conosci la SIS?", description: "Attiva le candidature alla Scuola Internazionale Superiore e accelera gradualmente i Corsi Tecnici.", effectLabel: "L1 candidature SIS · L2 +10% velocità · L3 +20% · L4 +30%", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, effectLevelCap: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { "instructor-versatility": 2 } },
   { id: "cost-of-service", category: "instructors", title: "Il costo del Servizio", description: "Riduce il costo dei percorsi che assegnano un attestato da Istruttore o una qualifica da Tecnico.", effectLabel: "−5% costo dei corsi Istruttori/Tecnici per livello · massimo −25%", effect: "courseCostReduction", effectPerLevel: 0.05, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "sis-accreditation": 1 } },
   { id: "promiscuous-instructor", category: "instructors", title: "Didattica di gruppo", description: "Aumenta fino a sei gli allievi seguiti contemporaneamente; l'ultimo livello concede un secondo corso annuale.", effectLabel: "L1–L5: capacità 2→6 allievi · L6: +1 corso annuale", effect: "instructorStudentCapacity", effectPerLevel: 1, effectLevelCap: 5, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 6, requiredFame: noFame, requiredUpgradeLevels: { "cost-of-service": 2 } },
-  { id: "athletic-preparation", category: "instructors", title: "Preparazione agonistica", description: "Da settembre a giugno gli Istruttori liberi migliorano Arena o Stile degli atleti.", effectLabel: "L1 sblocco · +25% efficacia per livello", effect: "athleticPreparationPower", effectPerLevel: 0.25, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "promiscuous-instructor": 6, "technical-arena": 3 } },
-  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera Tecnici, Istruttori e atleti.", effectLabel: "L1 +1 corso annuo · L2 +50% velocità Corsi Tecnici · L3 +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredUpgradeLevels: { "athletic-preparation": 5 } },
-  { id: "agonist-course-intensity", category: "instructors", title: "Intensità agonistica", description: "Estensione del PagoSport: aumenta il risultato massimo casuale del Corso Agonisti.", effectLabel: "Bonus massimo +2/+2 → +3/+3 → +4/+4 → +5/+5", effect: "agonistCourseStatMaximum", effectPerLevel: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000, 800_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { pagosport: 3 }, extension: true },
+  { id: "athletic-preparation", category: "instructors", title: "Preparazione agonistica", description: "Voce storica accorpata in Nessun Rancore.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, maxLevel: 5, requiredFame: noFame, hidden: true },
+  { id: "agonist-course-intensity", category: "instructors", title: "Nessun Rancore", emphasizedTitlePart: "Rancor", description: "Sblocca Preparazione agonistica e ne aumenta l'efficacia insieme al risultato massimo del Corso Agonisti.", effectLabel: "L1 Preparazione agonistica · L2–L6 +1/+1 massimo Corso Agonisti e +10% efficacia Preparazione agonistica per livello", effect: "agonistCourseStatMaximum", effectPerLevel: 1, effectStartingLevel: 2, additionalEffectsPerLevel: { athleticPreparationPower: 0.1 }, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000, 800_000], networkCostGrowth: 0, maxLevel: 6, requiredFame: noFame, requiredUpgradeLevels: { "promiscuous-instructor": 6, "technical-arena": 3 } },
+  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Amplia il piano formativo e accelera Tecnici, Istruttori e atleti.", effectLabel: "L1 +1 corso annuo · L2 +50% velocità Corsi Tecnici · L3 +50% velocità di tutti i corsi", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredUpgradeLevels: { "agonist-course-intensity": 6 } },
 
   // Organizzazione
   { id: "shared-calendar", category: "organization", title: "Manuale operativo", description: "Procedure condivise fanno crescere più rapidamente la Maestria dei collaboratori.", effectLabel: "+10% esperienza Maestria per livello · massimo +50%", effect: "masteryExperienceMultiplier", effectPerLevel: 0.1, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 1_000, 2_000, 4_000, 8_000], maxLevel: 5, requiredFame: noFame },
@@ -250,9 +252,13 @@ export function getUpgradePrimaryEffectTotal(
 ): number {
   const definition = getUpgradeDefinition(upgradeId);
   if (!definition) return 0;
-  const effectiveLevel = Math.min(
+  const cappedLevel = Math.min(
     levels[upgradeId] ?? 0,
     definition.effectLevelCap ?? definition.maxLevel,
+  );
+  const effectiveLevel = Math.max(
+    0,
+    cappedLevel - (definition.effectStartingLevel ?? 1) + 1,
   );
   return effectiveLevel * definition.effectPerLevel;
 }
@@ -265,9 +271,13 @@ export function getUpgradeEffectTotal(
     const effectPerLevel =
       (definition.effect === effect ? definition.effectPerLevel : 0) +
       (definition.additionalEffectsPerLevel?.[effect] ?? 0);
-    const effectiveLevel = Math.min(
+    const cappedLevel = Math.min(
       levels[definition.id] ?? 0,
       definition.effectLevelCap ?? definition.maxLevel,
+    );
+    const effectiveLevel = Math.max(
+      0,
+      cappedLevel - (definition.effectStartingLevel ?? 1) + 1,
     );
     return total + effectiveLevel * effectPerLevel;
   }, 0);
@@ -278,10 +288,15 @@ export function getUpgradeEffectMaximum(effect: UpgradeEffect): number {
     const effectPerLevel =
       (definition.effect === effect ? definition.effectPerLevel : 0) +
       (definition.additionalEffectsPerLevel?.[effect] ?? 0);
-    return total + Math.min(
+    const cappedLevel = Math.min(
       definition.maxLevel,
       definition.effectLevelCap ?? definition.maxLevel,
-    ) * effectPerLevel;
+    );
+    const effectiveLevel = Math.max(
+      0,
+      cappedLevel - (definition.effectStartingLevel ?? 1) + 1,
+    );
+    return total + effectiveLevel * effectPerLevel;
   }, 0);
 }
 
@@ -291,7 +306,11 @@ export function getAnnualFormTrainingLimit(levels: UpgradeLevels): number {
 }
 
 export function getAgonistCourseMaximumStatGain(levels: UpgradeLevels): number {
-  return Math.min(5, 1 + getUpgradeEffectTotal(levels, "agonistCourseStatMaximum"));
+  return Math.min(6, 1 + getUpgradeEffectTotal(levels, "agonistCourseStatMaximum"));
+}
+
+export function isAthleticPreparationUnlocked(levels: UpgradeLevels): boolean {
+  return (levels["agonist-course-intensity"] ?? 0) >= 1;
 }
 
 export function getPagoSportAllCourseSpeedBonus(levels: UpgradeLevels): number {

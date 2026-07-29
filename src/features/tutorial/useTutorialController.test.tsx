@@ -385,7 +385,7 @@ describe("useTutorialController", () => {
     expect(result.current.tutorial.shouldPauseGame).toBe(false);
   });
 
-  it("skips navigation when Iscritti is already open and accepts an existing assignment", async () => {
+  it("skips navigation when Scuola is already open and accepts an existing assignment", async () => {
     const { result } = renderHook(() => useTutorialHarness());
 
     act(() => result.current.setActiveView("contacts"));

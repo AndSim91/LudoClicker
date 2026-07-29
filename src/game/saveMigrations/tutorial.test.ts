@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { LEGACY_TUTORIAL_SCENE_IDS } from "../../content/tutorialScenes";
+import {
+  FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
+  LEGACY_TUTORIAL_SCENE_IDS,
+} from "../../content/tutorialScenes";
 import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
@@ -17,7 +20,7 @@ describe("tutorial save migration", () => {
       completedSceneIds: LEGACY_TUTORIAL_SCENE_IDS.filter(
         (sceneId) => sceneId !== "social-evolution",
       ),
-      skippedSceneIds: [],
+      skippedSceneIds: [FIRST_COLLABORATOR_TUTORIAL_SCENE_ID],
     });
     expect(migrated.tutorial.completedSceneIds).not.toContain("gadget-laboratory");
   });

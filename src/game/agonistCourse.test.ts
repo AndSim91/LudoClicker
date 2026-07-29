@@ -187,7 +187,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
         ...initial.upgrades,
         "promiscuous-instructor": 6,
         pagosport: 1,
-        "agonist-course-intensity": 1,
+        "agonist-course-intensity": 2,
       },
     };
 
@@ -324,7 +324,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     const initial = arenaState(3);
     const boosted = {
       ...initial,
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 4 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 6 },
     };
     const [arenaRoll, afterArena] = nextRandom(boosted.randomSeed);
     const [styleRoll, expectedSeed] = nextRandom(afterArena);
@@ -338,8 +338,8 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     const completed = gameReducer(started, { type: "TICK", now: 62_000 });
 
     expect(getContactBaseStats(completed.contacts[0])).toEqual({
-      arena: initialStats.arena + 1 + Math.floor(arenaRoll * 5),
-      style: initialStats.style + 1 + Math.floor(styleRoll * 5),
+      arena: initialStats.arena + 1 + Math.floor(arenaRoll * 6),
+      style: initialStats.style + 1 + Math.floor(styleRoll * 6),
     });
     expect(completed.randomSeed).toBe(expectedSeed);
   });

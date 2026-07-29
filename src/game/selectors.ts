@@ -9,7 +9,10 @@ import type {
 } from "./types";
 import { getVisibleForms, isInstructorForm } from "../content/forms";
 import { getCollaboratorProductivity } from "../content/forms";
-import { isCourseXUnlocked } from "../content/upgrades";
+import {
+  isAthleticPreparationUnlocked,
+  isCourseXUnlocked,
+} from "../content/upgrades";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
@@ -77,7 +80,7 @@ export function selectInstructorTeachingCount(state: GameState, instructorId: st
 export function selectAthleticPreparationInstructorIds(state: GameState): Set<string> {
   const activeInstructorIds = new Set<string>();
   if (
-    (state.upgrades["athletic-preparation"] ?? 0) <= 0 ||
+    !isAthleticPreparationUnlocked(state.upgrades) ||
     isSummerBreak(state.school.currentMonth) ||
     !state.contacts.some((contact) => contact.status === "enrolled")
   ) return activeInstructorIds;

@@ -20,7 +20,7 @@ interface AppRailItem {
 const items: AppRailItem[] = [
   { id: "mail", label: "Posta", icon: "mail" },
   { id: "events", label: "Eventi", icon: "flag", tutorialRegion: "events-navigation" },
-  { id: "contacts", label: "Iscritti", icon: "people", tutorialRegion: "contacts-navigation" },
+  { id: "contacts", label: "Scuola", icon: "people", tutorialRegion: "contacts-navigation" },
   { id: "tournaments", label: "Tornei", icon: "trophy" },
   { id: "gadget", label: "Gadget", icon: "gift", tutorialRegion: "gadget-navigation" },
   { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },

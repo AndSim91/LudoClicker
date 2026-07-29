@@ -53,23 +53,42 @@ describe("buyUpgrade prerequisites", () => {
     expect(versatility.upgrades["technical-arena"]).toBe(1);
   });
 
-  it("opens Intensità agonistica only after completing PagoSport", () => {
+  it("opens Nessun Rancore after Didattica di gruppo and Percorso Tecnico", () => {
     const initial = createInitialState(1_000);
-    const levelTwo = {
+    const locked = {
       ...initial,
-      school: { ...initial.school, euros: 20_000 },
-      upgrades: { ...initial.upgrades, pagosport: 2 },
+      school: { ...initial.school, euros: 200_000 },
     };
 
-    expect(buyUpgrade(levelTwo, "agonist-course-intensity")).toBe(levelTwo);
+    expect(buyUpgrade(locked, "agonist-course-intensity")).toBe(locked);
 
-    const levelThree = {
-      ...levelTwo,
-      school: { ...levelTwo.school, euros: 200_000 },
-      upgrades: { ...levelTwo.upgrades, pagosport: 3 },
+    const eligible = {
+      ...locked,
+      upgrades: {
+        ...locked.upgrades,
+        "promiscuous-instructor": 6,
+        "technical-arena": 3,
+      },
     };
-    expect(buyUpgrade(levelThree, "agonist-course-intensity").upgrades["agonist-course-intensity"])
+    expect(buyUpgrade(eligible, "agonist-course-intensity").upgrades["agonist-course-intensity"])
       .toBe(1);
+  });
+
+  it("opens PagoSport only after completing Nessun Rancore", () => {
+    const initial = createInitialState(1_000);
+    const levelFive = {
+      ...initial,
+      school: { ...initial.school, euros: 200_000 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
+    };
+
+    expect(buyUpgrade(levelFive, "pagosport")).toBe(levelFive);
+
+    const levelSix = {
+      ...levelFive,
+      upgrades: { ...levelFive.upgrades, "agonist-course-intensity": 6 },
+    };
+    expect(buyUpgrade(levelSix, "pagosport").upgrades.pagosport).toBe(1);
   });
 
   it("does not grant Instructor certificates when PagoSport reaches level two", () => {
@@ -92,7 +111,7 @@ describe("buyUpgrade prerequisites", () => {
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,
-        "athletic-preparation": 5,
+        "agonist-course-intensity": 6,
         pagosport: 1,
       },
     };

@@ -332,7 +332,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       },
       collaborators: [technician, trainee],
       unlocks: { ...initial.unlocks, forms: true, collaborators: true },
-      upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
       automation: { ...initial.automation, lessonBuffer: 0.99 },
     };
 

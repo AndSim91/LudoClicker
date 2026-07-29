@@ -125,7 +125,7 @@ describe("event contact rewards", () => {
     expect(gains.every((gain, index) => index === 0 || gain < gains[index - 1])).toBe(true);
   });
 
-  it("balances automated Events around 3, 106 and 213 contacts per minute", () => {
+  it("balances automated Events around 3, 104 and 207 contacts per minute", () => {
     const initial = createInitialState(1_000);
     const oneCollaborator = withEventCollaborators(initial, 1);
     const kata = getAcquisitionEventDefinition("kata-sea-waves")!;
@@ -139,8 +139,8 @@ describe("event contact rewards", () => {
     const hundredMaxed = maximizeEventUpgrades(withEventCollaborators(initial, 100));
 
     expect(noviceCycleContacts).toBeCloseTo(3);
-    expect(getMasterEventContactsPerMinute(tenMaxed)).toBeCloseTo(106.46, 1);
-    expect(getMasterEventContactsPerMinute(hundredMaxed)).toBeCloseTo(212.92, 1);
+    expect(getMasterEventContactsPerMinute(tenMaxed)).toBeCloseTo(103.68, 1);
+    expect(getMasterEventContactsPerMinute(hundredMaxed)).toBeCloseTo(207.36, 1);
   });
 
   it("depletes the hidden contact market using active members and restores it after departures", () => {
@@ -181,9 +181,9 @@ describe("event contact rewards", () => {
       school: { ...depleted.school, followers },
     });
 
-    expect(getMasterEventContactsPerMinute(withFollowers(0))).toBeCloseTo(17.77, 1);
-    expect(getMasterEventContactsPerMinute(withFollowers(100_000))).toBeCloseTo(47.39, 1);
-    expect(getMasterEventContactsPerMinute(withFollowers(300_000))).toBeCloseTo(106.64, 1);
+    expect(getMasterEventContactsPerMinute(withFollowers(0))).toBeCloseTo(17.31, 1);
+    expect(getMasterEventContactsPerMinute(withFollowers(100_000))).toBeCloseTo(46.16, 1);
+    expect(getMasterEventContactsPerMinute(withFollowers(300_000))).toBeCloseTo(103.85, 1);
   });
 
   it("applies market depletion to actual random rewards, not only expected values", () => {

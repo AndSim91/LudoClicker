@@ -14,6 +14,7 @@ import {
   getEquipmentPreparedWorkMaximum,
   getEquipmentSwordRepairWork,
   getUpgradeEffectTotal,
+  isAthleticPreparationUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
@@ -465,7 +466,7 @@ export function processInstructorAthleticPreparation(
   if (
     safeElapsedMs <= 0 ||
     isSummerBreak(state.school.currentMonth) ||
-    (state.upgrades["athletic-preparation"] ?? 0) <= 0
+    !isAthleticPreparationUnlocked(state.upgrades)
   ) return state;
 
   const availableInstructors = getAvailableAthleticPreparationInstructors(state);

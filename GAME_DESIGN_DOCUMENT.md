@@ -1101,7 +1101,7 @@ Regole:
 - se nessun Collaboratore è assegnato al ruolo di Istruttore, il singolo allievo
   può iniziare manualmente la prossima Forma pagando il costo base;
 - se almeno un Collaboratore è assegnato al ruolo di Istruttore, il comando
-  manuale scompare e la pagina Iscritti mostra al suo posto tutte le prossime
+  manuale scompare e la pagina Scuola mostra al suo posto tutte le prossime
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
   dall'automazione e, con un Istruttore compatibile, ricevono una riduzione del
   **25%** e costano quindi il **75% del costo base**;
@@ -1134,9 +1134,10 @@ Regole:
 - Arena Tecnica ai livelli 1 e 2 non modifica Arena, Stile o il totale storico
   dei Corsi Agonisti. Dal livello 3, completare il Corso Agonisti aumenta
   permanentemente Arena e Stile. Senza potenziamenti assegna **+1 Arena** e **+1
-  Stile**; **Intensità agonistica** ha quattro livelli e aumenta il massimo
-  casuale di entrambe le caratteristiche fino a **+5**, mantenendo +1 come
-  minimo. Il risultato casuale di ciascuna caratteristica viene moltiplicato per
+  Stile**; **Nessun *Rancor*e** sblocca al livello 1 la Preparazione agonistica.
+  Dal livello 2 al 6 aumenta di +1/+1 per livello il massimo casuale del Corso
+  Agonisti, fino a **+6**, mantenendo +1 come minimo. Il risultato casuale di
+  ciascuna caratteristica viene moltiplicato per
   il numero di slot residui consumati dal corso. I bonus effettivi e il numero
   di completamenti si accumulano senza limite negli anni successivi e sono
   registrati nella riga dell'atleta, senza creare notifiche o messaggi
@@ -1172,7 +1173,7 @@ Regole:
 - disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
   terminare le lezioni già iniziate, ma non ne avvia altre;
 - annullare manualmente un'iscrizione è disponibile fin dall'inizio. La X nella
-  riga di ogni persona nella schermata Iscritti richiede una conferma esplicita
+  riga di ogni persona nella schermata Scuola richiede una conferma esplicita
   e annulla definitivamente l'iscrizione senza rimborso e senza ridurre la Fama
   della scuola. La formazione personale e le lezioni tenute dal collaboratore
   rimosso vengono interrotte;
@@ -1197,18 +1198,18 @@ Regole:
 - **Didattica di gruppo** porta con i primi cinque livelli la capacità di ogni
   Istruttore da due a sei allievi contemporanei; il sesto livello concede a
   tutti un secondo slot di formazione nel periodo luglio–giugno;
-- **Preparazione agonistica** è successiva a Didattica di gruppo e richiede
-  anche Percorso Tecnico al livello 3. Il primo livello la sblocca; ogni livello
-  fornisce il 25% di efficacia;
-- **PagoSport** segue Preparazione agonistica: il livello 1 concede uno slot di
+- **Nessun *Rancor*e** è successivo a Didattica di gruppo e richiede anche
+  Percorso Tecnico al livello 3. Il livello 1 sblocca Preparazione agonistica;
+  ciascun livello dal 2 al 6 aumenta di +1/+1 il massimo casuale del Corso
+  Agonisti e aggiunge il 10% di efficacia alla Preparazione agonistica. Al
+  livello 6 il massimo casuale arriva a +6/+6 e l'efficacia aggiuntiva al 50%;
+- **PagoSport** compare dopo **Nessun *Rancor*e** e richiede il completamento
+  dei suoi sei livelli: il livello 1 concede uno slot di
   formazione annuale aggiuntivo; il livello 2 aumenta del **50%** la velocità
   dei Corsi Tecnici; il livello 3 aumenta inoltre del **50%** la velocità di
   tutte le formazioni, comprese Forme, Corsi Istruttori, Corsi Tecnici, Arena
   Tecnica e Corso Agonisti. I bonus sono cumulativi e si sommano al raddoppio
   estivo;
-- completare PagoSport sblocca **Intensità agonistica**, estensione in quattro
-  livelli che porta il massimo casuale del Corso Agonisti da +1 a +5 per
-  caratteristica, senza alterare il minimo +1;
 - **Corso X** e **ToccoDiGilo** non appartengono alla sequenza lineare: sono due
   Percorsi Segreti indipendenti, inizialmente mostrati come `???`, e vengono
   rivelati soltanto dalle rispettive condizioni narrative;
@@ -1441,15 +1442,16 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
-| Preparazione agonistica | L1 sblocco della preparazione da settembre a giugno; +25% efficacia per livello | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Nessun *Rancor*e | L1 sblocca Preparazione agonistica; L2–L6 +1/+1 al massimo del Corso Agonisti e +10% efficacia Preparazione agonistica per livello | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 € |
 | PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
 
 Al livello 3 di Percorso Tecnico, quando Arena Tecnica diventa Corso Agonisti,
 il logo della formazione riceve una stella gialla nello stesso stile usato per
 la qualifica da Istruttore. Il Corso Agonisti base assegna sempre +1/+1 in un
-anno. Soltanto dopo PagoSport 3 compare l'estensione **Intensità agonistica**:
-quattro livelli da 100.000 / 200.000 / 400.000 / 800.000 € portano il massimo
-casuale rispettivamente a +2/+2, +3/+3, +4/+4 e +5/+5.
+anno. **Nessun *Rancor*e** ha sei livelli da 25.000 / 50.000 / 100.000 /
+200.000 / 400.000 / 800.000 €: il primo sblocca Preparazione agonistica; i
+successivi cinque portano progressivamente il massimo casuale a +6/+6 e
+l'efficacia aggiuntiva della preparazione al 50%.
 
 ### 10.8 Organizzazione
 
@@ -1509,7 +1511,7 @@ consigliata è:
 | Primo esaurimento contatti     | Calendario, eventi e volantinaggio gratuito   |
 | Prima prova prenotata          | report aggregato del funnel                   |
 | Primo iscritto                 | Euro e quote associative                      |
-| Primo Collaboratore delle Onde | Iscritti, Collaboratori e assegnazioni        |
+| Primo Collaboratore delle Onde | Scuola, Collaboratori e assegnazioni          |
 | 35 iscritti attivi             | Redazione si evolve in Social                 |
 | 20 iscritti                    | Attrezzatura e usura narrativa                |
 | 50 iscritti                    | Forme dei collaboratori                       |
@@ -1586,7 +1588,7 @@ informazioni del progetto.
 | Posta indesiderata      | eventi comici, anomalie e messaggi narrativi        |
 | Archivio                | statistiche delle vecchie scuole                    |
 | Calendario              | eventi e lezioni di prova                           |
-| Iscritti                | iscritti e collaboratori                            |
+| Scuola                  | iscritti e collaboratori                            |
 | Attività / To Do        | manutenzione, social e progetti                     |
 | Impostazioni            | opzioni reali, export e reset salvataggio           |
 | Ricerca                 | filtri e statistiche avanzate                       |
@@ -1653,7 +1655,7 @@ Mostra:
 
 Creare un evento usa un modulo simile a un vero appuntamento Outlook.
 
-### 12.3 Iscritti
+### 12.3 Scuola
 
 Due viste:
 
@@ -1766,7 +1768,7 @@ l'avanzamento.
    scena resta in pausa e attende la conclusione degli eventuali tutorial già
    attivi. Se il primo iscritto è anche un Collaboratore, viene quindi concluso
    prima il tutorial del primo iscritto. A.N.D.E.R. invita poi ad aprire
-   **Iscritti**; se la pagina è già aperta, questo obiettivo viene superato
+   **Scuola**; se la pagina è già aperta, questo obiettivo viene superato
    automaticamente. L'intera sezione **Collaboratori** viene evidenziata mentre
    una panoramica testuale presenta Redazione, Eventi, Attrezzatura e
    Istruttore, il limite di un solo incarico alla volta e la Maestria specifica
@@ -2753,7 +2755,7 @@ manuale.
 ### Fase 4 — Camuffamento Outlook completo
 
 - layout fedele a Windows 11;
-- Posta, Calendario, Iscritti e Attività;
+- Posta, Calendario, Scuola e Attività;
 - notifiche e finestre coerenti;
 - contenuti ludici interamente diegetici;
 - supporto 1366×768 e 1920×1080;
@@ -2895,7 +2897,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Le email sono completamente simulate.
 - L'interfaccia di riferimento è Outlook su Windows 11.
 - Il camuffamento richiesto è del 99%.
-- Posta, Calendario, Iscritti e altri elementi possono ospitare meccaniche di
+- Posta, Calendario, Scuola e altri elementi possono ospitare meccaniche di
   gioco.
 - Ogni input parte da un carattere e viene migliorato con i potenziamenti.
 - Solo i click nel corpo della mail producono caratteri.

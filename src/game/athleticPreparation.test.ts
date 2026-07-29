@@ -45,7 +45,7 @@ function preparationState(upgradeLevel: number): GameState {
     },
     upgrades: {
       ...initial.upgrades,
-      "athletic-preparation": upgradeLevel,
+      "agonist-course-intensity": upgradeLevel,
     },
   };
 }

@@ -17,6 +17,7 @@ import {
   getTrialDurationMs,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  isAthleticPreparationUnlocked,
 } from "./upgrades";
 
 function levelsWith(values: Partial<Record<UpgradeId, number>>) {
@@ -43,7 +44,7 @@ function costsFor(category: (typeof UPGRADE_CATEGORIES)[number]["id"]) {
 }
 
 describe("upgrade catalog", () => {
-  it("contains eight public branches of seven upgrades plus the secret row", () => {
+  it("contains eight public branches plus the secret row", () => {
     expect(UPGRADE_CATEGORIES.map((category) => category.id)).toEqual([
       "speed",
       "writing",
@@ -144,7 +145,7 @@ describe("upgrade catalog", () => {
       "sis-accreditation": [5_000, 10_000, 20_000, 40_000],
       "cost-of-service": [2_500, 5_000, 10_000, 25_000, 50_000],
       "promiscuous-instructor": [10_000, 25_000, 50_000, 100_000, 200_000, 400_000],
-      "athletic-preparation": [25_000, 50_000, 100_000, 200_000, 400_000],
+      "agonist-course-intensity": [25_000, 50_000, 100_000, 200_000, 400_000, 800_000],
       pagosport: [100_000, 200_000, 400_000],
     });
     const gadget = definitionsFor("gadget")[0];
@@ -221,24 +222,30 @@ describe("branch effects", () => {
 });
 
 describe("Teaching branch", () => {
-  it("uses the agreed seven-step order and keeps Intensità agonistica as an extension", () => {
+  it("merges Preparazione agonistica into Nessun Rancore before PagoSport", () => {
     expect(definitionsFor("instructors").map((definition) => definition.id)).toEqual([
       "technical-arena",
       "instructor-versatility",
       "sis-accreditation",
       "cost-of-service",
       "promiscuous-instructor",
-      "athletic-preparation",
+      "agonist-course-intensity",
       "pagosport",
     ]);
     const intensity = UPGRADE_DEFINITIONS.find(
       (definition) => definition.id === "agonist-course-intensity",
     )!;
-    expect(intensity.extension).toBe(true);
-    expect(intensity.requiredUpgradeLevels).toEqual({ pagosport: 3 });
+    expect(intensity.title).toBe("Nessun Rancore");
+    expect(intensity.emphasizedTitlePart).toBe("Rancor");
+    expect(intensity.maxLevel).toBe(6);
+    expect(intensity.effectStartingLevel).toBe(2);
+    expect(intensity.requiredUpgradeLevels).toEqual({
+      "promiscuous-instructor": 6,
+      "technical-arena": 3,
+    });
     expect(Array.from({ length: intensity.maxLevel }, (_, level) =>
       getUpgradeCost(intensity, level)
-    )).toEqual([100_000, 200_000, 400_000, 800_000]);
+    )).toEqual([25_000, 50_000, 100_000, 200_000, 400_000, 800_000]);
   });
 
   it("applies SIS speed, course discounts, group teaching and PagoSport cumulatively", () => {
@@ -255,11 +262,20 @@ describe("Teaching branch", () => {
     expect(getPagoSportAllCourseSpeedBonus(levels)).toBe(0.5);
   });
 
-  it("raises Corso Agonisti from +1/+1 to at most +5/+5", () => {
-    expect(getAgonistCourseMaximumStatGain(createInitialUpgradeLevels())).toBe(1);
-    expect(getAgonistCourseMaximumStatGain(
-      levelsWith({ "agonist-course-intensity": 4 }),
-    )).toBe(5);
+  it("unlocks preparation at level one and applies both bonuses from levels two to six", () => {
+    const initial = createInitialUpgradeLevels();
+    const levelOne = levelsWith({ "agonist-course-intensity": 1 });
+    const levelTwo = levelsWith({ "agonist-course-intensity": 2 });
+    const levelSix = levelsWith({ "agonist-course-intensity": 6 });
+
+    expect(isAthleticPreparationUnlocked(initial)).toBe(false);
+    expect(isAthleticPreparationUnlocked(levelOne)).toBe(true);
+    expect(getAgonistCourseMaximumStatGain(levelOne)).toBe(1);
+    expect(getUpgradeEffectTotal(levelOne, "athleticPreparationPower")).toBe(0);
+    expect(getAgonistCourseMaximumStatGain(levelTwo)).toBe(2);
+    expect(getUpgradeEffectTotal(levelTwo, "athleticPreparationPower")).toBeCloseTo(0.1);
+    expect(getAgonistCourseMaximumStatGain(levelSix)).toBe(6);
+    expect(getUpgradeEffectTotal(levelSix, "athleticPreparationPower")).toBeCloseTo(0.5);
   });
 });
 

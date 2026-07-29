@@ -5,6 +5,7 @@ import { EquipmentConditionBar } from "../../components/equipment/EquipmentCondi
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
   getUpgradeEffectTotal,
+  isAthleticPreparationUnlocked,
   isCourseXUnlocked,
   isOperationalPrioritiesUnlocked,
 } from "../../content/upgrades";
@@ -360,7 +361,7 @@ function InstructorSectorCard({
       ),
     };
   }, [courseXUnlocked, state.collaborators, state.contacts]);
-  const prepUnlocked = (state.upgrades["athletic-preparation"] ?? 0) > 0;
+  const prepUnlocked = isAthleticPreparationUnlocked(state.upgrades);
   const prepIsPrimary = entries.length === 0 && prepUnlocked && instructors.length > 0;
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const preparationIsActive = !summerBreak && idleInstructors > 0;

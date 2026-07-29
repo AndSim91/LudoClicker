@@ -482,7 +482,7 @@ describe("useGameEngine pause", () => {
             rarity: "ultra-rare",
           },
         ],
-        upgrades: { ...initial.upgrades, "athletic-preparation": 1 },
+        upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
       },
       1_000,
     );
