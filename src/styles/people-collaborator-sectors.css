@@ -191,6 +191,20 @@
   font-size: 8px;
 }
 
+.instructor-teaching-overflow {
+  grid-template-columns: minmax(145px, .22fr) minmax(0, 1fr);
+  background: color-mix(in srgb, var(--blue-600) 4%, var(--surface));
+}
+
+.instructor-teaching-overflow > .aggregated-teaching-groups {
+  grid-template-columns: repeat(var(--teaching-overflow-columns, 1), minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: column;
+  column-gap: 14px;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
 .instructor-main-activity,
 .instructor-coverage {
   min-width: 0;
@@ -1450,6 +1464,14 @@
 
   .internal-instructor-courses {
     grid-template-columns: 1fr;
+  }
+
+  .instructor-teaching-overflow > .aggregated-teaching-groups {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-flow: row;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   .aggregated-teaching-group {

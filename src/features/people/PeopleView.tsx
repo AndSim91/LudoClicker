@@ -85,8 +85,10 @@ export function PeopleView({
 
   return (
     <main className="overview-view people-view">
-      <header>
-        <Icon name="people" />
+      <header className="people-hero">
+        <span className="people-page-mark" aria-hidden="true">
+          <Icon name="people" />
+        </span>
         <div className="people-page-heading">
           <div className="people-page-title-row">
             <h1>Scuola</h1>
@@ -94,6 +96,17 @@ export function PeopleView({
           </div>
           <p>Iscritti e Collaboratori delle Onde</p>
         </div>
+        <svg
+          className="people-hero-waves"
+          viewBox="0 0 520 96"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0 78 C108 38 207 93 315 49 C387 20 451 13 520 9" />
+          <path d="M0 87 C111 47 209 101 321 57 C394 28 457 21 520 17" />
+          <path d="M0 96 C117 57 216 108 328 65 C400 37 462 30 520 25" />
+          <path d="M42 96 C151 70 232 111 342 72 C410 48 468 41 520 35" />
+        </svg>
       </header>
       {showCollaborators ? (
         <section

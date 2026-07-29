@@ -154,6 +154,96 @@ describe("PeopleView", () => {
     )).toBe(false);
   });
 
+  it("uses the empty internal-course area for teaching overflow without hiding active preparation", () => {
+    const initial = createInitialState(1_000);
+    const courseIds: FormId[] = [
+      "form-1",
+      "form-2",
+      "form-3-long",
+      "form-4-long",
+      "form-3-staff",
+      "form-4-staff",
+      "form-3-double",
+    ];
+    const instructors: Collaborator[] = courseIds.map((formId, index) => ({
+      id: `overflow-instructor-${index}`,
+      contactId: `overflow-instructor-contact-${index}`,
+      displayName: `Istruttore Overflow ${index}`,
+      joinedAt: 1_000 + index,
+      forms: [formId],
+      instructorForms: [formId],
+      technicianForms: index === 0 ? ["form-1"] : [],
+      formBranchPreferences: [],
+      assignment: "instructor",
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare",
+    }));
+    const contacts = courseIds.map((formId, index) => ({
+      ...initial.contacts[index % initial.contacts.length],
+      id: `overflow-student-${index}`,
+      firstName: "Allievo",
+      lastName: `${index + 1}`,
+      email: `overflow-student-${index}@example.invalid`,
+      status: "enrolled" as const,
+      training: {
+        formId,
+        startedAt: 1_000,
+        completesAt: 101_000,
+        status: "running" as const,
+        instructorId: instructors[index].id,
+      },
+    }));
+    const idleInstructor: Collaborator = {
+      ...instructors[0],
+      id: "overflow-idle-instructor",
+      contactId: "overflow-idle-instructor-contact",
+      displayName: "Istruttore libero",
+      technicianForms: [],
+    };
+    const renderView = (withActivePreparation: boolean) => (
+      <GameTimeProvider getNow={() => 51_000} isPaused={false}>
+        <PeopleView
+          state={{
+            ...initial,
+            contacts,
+            collaborators: withActivePreparation
+              ? [...instructors, idleInstructor]
+              : instructors,
+            school: { ...initial.school, activeMembers: contacts.length, currentMonth: 1 },
+            upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
+            unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+            collaboratorManagement: {
+              ...initial.collaboratorManagement,
+              aggregateViewUnlocked: true,
+              targets: {
+                ...initial.collaboratorManagement.targets,
+                instructor: instructors.length,
+              },
+            },
+          }}
+          onAssign={() => undefined}
+          onStartTraining={() => undefined}
+        />
+      </GameTimeProvider>
+    );
+    const view = render(renderView(false));
+
+    const overflowArea = screen.getByRole("region", { name: "Altre lezioni in corso" });
+    expect(within(overflowArea).getAllByRole("progressbar")).toHaveLength(4);
+    expect(within(overflowArea).getByText("Forma 4 Spada Lunga")).toBeVisible();
+    expect(screen.queryByRole("region", { name: "Corsi Istruttori interni" }))
+      .not.toBeInTheDocument();
+
+    view.rerender(renderView(true));
+
+    expect(screen.queryByRole("region", { name: "Altre lezioni in corso" }))
+      .not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Corsi Istruttori interni" })).toBeVisible();
+    expect(screen.getByRole("progressbar", {
+      name: "Preparazione atletica continuativa",
+    })).toHaveClass("is-indeterminate");
+  });
+
   it("does not animate an equipment sector when all equipment is already repaired", () => {
     const initial = createInitialState(1_000);
     const collaborator: Collaborator = {

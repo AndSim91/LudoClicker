@@ -1,0 +1,607 @@
+.overview-view.people-view {
+  --school-page-accent: var(--school-accent, var(--blue-600));
+  --school-page-ink: #102a4c;
+  --school-page-energy: #e79b06;
+  padding: 20px 18px 52px;
+  background: var(--surface);
+}
+
+.people-view > .people-hero {
+  position: relative;
+  min-height: 96px;
+  align-items: center;
+  gap: 20px;
+  overflow: visible;
+  margin: 0;
+  padding: 16px 22px 18px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--school-page-accent) 22%, var(--line));
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+  isolation: isolate;
+}
+
+.people-page-mark {
+  z-index: 1;
+  display: grid;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--school-page-accent) 76%, #fff);
+  border-radius: 8px;
+  color: #fff;
+  background: var(--school-page-accent);
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--school-page-accent) 22%, transparent);
+}
+
+.people-page-mark svg {
+  width: 31px;
+  height: 31px;
+}
+
+.people-page-heading {
+  z-index: 1;
+}
+
+.people-page-title-row {
+  gap: 14px;
+}
+
+.people-view .people-page-heading h1 {
+  color: var(--school-page-ink);
+  font-size: clamp(30px, 2.5vw, 36px);
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.people-view .people-page-heading p {
+  margin-top: 6px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.people-hero-waves {
+  position: absolute;
+  z-index: 0;
+  right: -2px;
+  bottom: -1px;
+  width: min(48%, 590px);
+  height: 100%;
+  color: var(--school-page-accent);
+  opacity: 0.24;
+  pointer-events: none;
+}
+
+.people-hero-waves path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.people-view .people-monthly-income-trigger {
+  min-height: 34px;
+  padding: 6px 12px;
+  border-color: color-mix(in srgb, var(--success) 32%, var(--line));
+  border-radius: 7px;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--success) 7%, transparent);
+}
+
+.people-view .people-monthly-income-trigger strong {
+  font-size: 13px;
+}
+
+.people-section {
+  margin-top: 20px;
+}
+
+.people-section-heading {
+  position: relative;
+  min-height: 42px;
+  padding: 0 2px 10px;
+  border-bottom: 2px solid color-mix(in srgb, var(--school-page-accent) 88%, var(--line));
+}
+
+.people-section-heading h2 {
+  color: var(--school-page-ink);
+  font-size: 22px;
+  font-weight: 680;
+  letter-spacing: -0.025em;
+}
+
+.people-section-heading span {
+  min-width: 32px;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--school-page-accent) 12%, var(--line));
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--school-page-ink) 72%, var(--ink-muted));
+  background: color-mix(in srgb, var(--school-page-accent) 6%, var(--surface));
+  font-size: 12px;
+}
+
+.people-view .collaborator-sector-view {
+  gap: 16px;
+  padding-top: 14px;
+}
+
+.people-view .instructor-sector-card,
+.people-view .collaborator-sector-card {
+  border-color: color-mix(in srgb, var(--school-page-accent) 23%, var(--line));
+  border-radius: 10px;
+  box-shadow: 0 5px 15px color-mix(in srgb, var(--school-page-ink) 7%, transparent);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.people-view .instructor-sector-card {
+  border-color: color-mix(in srgb, var(--school-page-accent) 58%, var(--line));
+  box-shadow:
+    inset 4px 0 var(--school-page-accent),
+    0 8px 22px color-mix(in srgb, var(--school-page-accent) 11%, transparent);
+}
+
+.people-view .collaborator-sector-card:hover {
+  border-color: color-mix(in srgb, var(--school-page-accent) 48%, var(--line));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--school-page-ink) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.people-view .instructor-sector-card > header {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  padding: 14px 18px 13px 21px;
+  background: color-mix(in srgb, var(--school-page-accent) 5%, var(--surface));
+}
+
+.people-view .collaborator-sector-card > header {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  padding: 13px 15px 12px;
+  background: color-mix(in srgb, var(--school-page-accent) 2.5%, var(--surface));
+}
+
+.people-view .sector-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: var(--school-page-accent);
+  background: color-mix(in srgb, var(--school-page-accent) 8%, var(--surface));
+}
+
+.people-view .sector-card-icon.is-primary {
+  width: 42px;
+  height: 42px;
+  color: #fff;
+  background: var(--school-page-accent);
+}
+
+.people-view .instructor-sector-title > span {
+  color: var(--school-page-accent);
+  font-size: 10px;
+}
+
+.people-view .instructor-sector-card h3 {
+  color: var(--school-page-ink);
+  font-size: 18px;
+  font-weight: 680;
+}
+
+.people-view .collaborator-sector-card h3 {
+  color: var(--school-page-ink);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.people-view .instructor-sector-title small,
+.people-view .collaborator-sector-card header > span:nth-child(2) > small {
+  font-size: 11px;
+}
+
+.people-view .collaborator-sector-card header > span:nth-child(2) > small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.people-view .sector-staffing-stepper {
+  grid-template-columns: 38px minmax(44px, auto) 38px;
+  border-radius: 6px;
+}
+
+.people-view .sector-staffing-stepper button {
+  min-height: 38px;
+}
+
+.people-view .instructor-main-activity,
+.people-view .instructor-coverage {
+  padding: 16px 18px;
+}
+
+.people-view .instructor-main-activity-stage {
+  height: 130px;
+}
+
+.people-view .instructor-main-activity small,
+.people-view .instructor-coverage small,
+.people-view .instructor-main-activity-stage > p {
+  font-size: 10px;
+}
+
+.people-view .instructor-main-activity-stage > p strong,
+.people-view .instructor-coverage-forms > span > strong {
+  font-size: 11px;
+}
+
+.people-view .aggregated-teaching-segment {
+  background: color-mix(in srgb, var(--school-page-energy) 15%, var(--surface));
+}
+
+.people-view .instructor-main-activity-stage .aggregated-teaching-segment > span,
+.people-view .instructor-main-activity-stage .aggregated-teaching-bar.is-compact > span {
+  background: var(--school-page-energy);
+}
+
+.people-view .collaborator-sector-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 14px;
+}
+
+.people-view .collaborator-sector-placeholder {
+  display: none;
+}
+
+.people-view .collaborator-sector-card {
+  min-height: 218px;
+  grid-template-rows: auto minmax(78px, 1fr) auto 38px;
+}
+
+.people-view .collaborator-sector-card.has-workstreams {
+  grid-template-rows: auto 1fr 38px;
+}
+
+.people-view .sector-card-activity {
+  padding: 15px 15px 10px;
+}
+
+.people-view .sector-card-workstreams {
+  grid-template-rows: repeat(2, minmax(70px, 1fr));
+}
+
+.people-view .sector-card-workstream {
+  gap: 8px;
+  padding: 10px 15px;
+}
+
+.people-view .sector-card-workstream-heading > span > span {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.people-view .sector-card-workstream-heading > span > strong {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.people-view .sector-card-workstream .sector-card-progress,
+.people-view .sector-card-workstream .sector-card-waiting {
+  padding: 0;
+}
+
+.people-view .sector-card-workstream .sector-mastery-average .progress-bar-circular {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+}
+
+.people-view .sector-card-workstream .sector-mastery-average .progress-bar-circular > span {
+  width: 20px;
+  height: 20px;
+}
+
+.people-view .sector-card-progress,
+.people-view .sector-card-waiting {
+  padding: 0 15px 12px;
+}
+
+.people-view .sector-card-equipment {
+  padding: 0 15px 12px;
+}
+
+.people-view .sector-manage-button {
+  min-height: 38px;
+  border-radius: 0 0 9px 9px;
+  font-size: 11px;
+}
+
+.people-view .sector-card-activity > span:first-child > strong {
+  font-size: 13px;
+}
+
+.people-view .sector-card-activity > span > span {
+  font-size: 10px;
+}
+
+.people-view .sector-mastery-average small {
+  font-size: 9px;
+}
+
+.people-view .sector-mastery-average strong {
+  font-size: 11px;
+}
+
+.people-view .sector-card-progress small,
+.people-view .sector-card-waiting small,
+.people-view .sector-card-equipment-summary {
+  font-size: 10px;
+}
+
+.people-view .sector-card-equipment-summary strong {
+  font-size: 11px;
+}
+
+.people-view .sector-manage-button:hover:not(:disabled) {
+  color: var(--school-page-accent);
+  background: color-mix(in srgb, var(--school-page-accent) 6%, var(--surface));
+}
+
+.people-view .people-table {
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid color-mix(in srgb, var(--school-page-accent) 20%, var(--line));
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--school-page-ink) 6%, transparent);
+}
+
+.people-view .people-head {
+  color: color-mix(in srgb, var(--school-page-ink) 70%, var(--ink-muted));
+  background: color-mix(in srgb, var(--school-page-accent) 5%, var(--surface));
+  font-size: 11px;
+}
+
+.people-view .member-filter-row {
+  background: color-mix(in srgb, var(--school-page-accent) 2%, var(--surface));
+}
+
+.people-view .member-filter-row input,
+.people-view .member-filter-row select {
+  min-height: 32px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.people-view .member-filter-summary {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 11px;
+}
+
+.people-view .member-row:not(.people-head) {
+  transition: background-color 120ms ease;
+}
+
+.people-view .member-row:not(.people-head):hover {
+  background: color-mix(in srgb, var(--school-page-accent) 3.5%, var(--surface));
+}
+
+.people-view .rarity-overview {
+  overflow: hidden;
+  margin-top: 20px;
+  border-color: color-mix(in srgb, var(--school-page-accent) 20%, var(--line));
+  border-radius: 10px;
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--school-page-ink) 5%, transparent);
+}
+
+.people-view .rarity-overview > div {
+  background: color-mix(in srgb, var(--school-page-accent) 6%, var(--surface));
+}
+
+@media (min-width: 1181px) {
+  .people-view .member-row.people-head {
+    display: grid;
+  }
+
+  .people-view .member-sort-mobile {
+    display: none;
+  }
+
+  .people-view .member-filter-row,
+  .people-view .member-row,
+  .people-view .member-row:not(.people-head) {
+    grid-template-columns:
+      minmax(180px, 1.2fr)
+      minmax(92px, 0.55fr)
+      minmax(160px, 1.05fr)
+      minmax(68px, 0.42fr)
+      minmax(68px, 0.42fr)
+      minmax(104px, 0.65fr)
+      minmax(218px, 1.45fr)
+      38px;
+  }
+
+  .people-view .member-filter-row {
+    gap: 0;
+    padding: 0;
+  }
+
+  .people-view .member-row:not(.people-head) {
+    position: static;
+    min-height: 76px;
+    gap: 0;
+    padding: 0;
+  }
+
+  .people-view .member-row.people-head {
+    min-height: 50px;
+  }
+
+  .people-view .member-row > * {
+    overflow: hidden;
+    padding: 0 10px;
+  }
+
+  .people-view .member-row > .member-training-cell {
+    grid-column: auto;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .people-view .member-row > .member-cancel-enrollment {
+    position: static;
+    padding: 0;
+  }
+
+  .people-view .member-row > [data-label]::before {
+    display: none;
+  }
+
+  .people-view .member-row > strong[data-label] {
+    display: flex;
+  }
+}
+
+@media (max-width: 920px) {
+  .overview-view.people-view {
+    padding: 16px 14px 44px;
+  }
+
+  .people-view > .people-hero {
+    min-height: 86px;
+    padding: 14px 16px;
+  }
+
+  .people-page-mark {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+
+  .people-hero-waves {
+    width: 58%;
+    opacity: 0.13;
+  }
+
+  .people-view .people-page-heading h1 {
+    font-size: 27px;
+  }
+
+  .people-view .collaborator-sector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .people-view .instructor-sector-card > header {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .people-view .collaborator-sector-card > header {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .people-view .instructor-sector-card > header .sector-staffing-stepper,
+  .people-view .collaborator-sector-card > header .sector-staffing-stepper {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .overview-view.people-view {
+    padding: 12px 10px 38px;
+  }
+
+  .people-view > .people-hero {
+    align-items: flex-start;
+    gap: 11px;
+    padding: 14px;
+  }
+
+  .people-page-mark {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .people-page-mark svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .people-page-title-row {
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .people-view .people-page-heading h1 {
+    width: 100%;
+    font-size: 25px;
+  }
+
+  .people-view .people-monthly-income-trigger {
+    min-height: 28px;
+  }
+
+  .people-hero-waves {
+    right: -110px;
+    width: 88%;
+  }
+
+  .people-section {
+    margin-top: 16px;
+  }
+
+  .people-section-heading h2 {
+    font-size: 18px;
+  }
+
+  .people-view .collaborator-sector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .people-view .collaborator-sector-card:hover {
+    transform: none;
+  }
+
+  .people-view .rarity-overview {
+    border-radius: 8px;
+  }
+
+  .people-view .member-row:not(.people-head) > .member-name {
+    grid-column: 1 / -1;
+    padding-right: 30px;
+  }
+
+  .people-view .member-email {
+    max-width: min(220px, 100%);
+    overflow: hidden;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+:root[data-theme="dark"] .overview-view.people-view {
+  --school-page-ink: #edf4fb;
+  --school-page-energy: #ffc24b;
+}
+
+:root[data-theme="dark"] .people-view > .people-hero,
+:root[data-theme="dark"] .people-view .instructor-sector-card,
+:root[data-theme="dark"] .people-view .collaborator-sector-card,
+:root[data-theme="dark"] .people-view .people-table,
+:root[data-theme="dark"] .people-view .rarity-overview {
+  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .people-view .instructor-sector-card,
+  .people-view .collaborator-sector-card,
+  .people-view .member-row:not(.people-head) {
+    transition: none;
+  }
+}

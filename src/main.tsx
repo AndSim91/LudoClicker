@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from "./shared/storageKeys";
 import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/people-collaborator-sectors.css";
+import "./styles/people-school.css";
 
 initializeCrashReporting();
 

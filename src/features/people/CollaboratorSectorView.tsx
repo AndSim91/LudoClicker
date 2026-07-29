@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
@@ -24,6 +24,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { AggregatedTeachingBar } from "./AggregatedTeachingBar";
+import { groupInstructorTeachingEntries } from "./aggregatedTeachingPresentation";
 import { CollaboratorSectorPanel } from "./CollaboratorSectorPanel";
 import {
   getCollaboratorAutomationPresentation,
@@ -47,6 +48,9 @@ const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "events",
   "equipment",
 ];
+
+const PRIMARY_TEACHING_GROUP_LIMIT = 3;
+const TEACHING_OVERFLOW_ROWS = 3;
 
 const ROLE_PRESENTATION: Record<
   CollaboratorMasteryRole,
@@ -367,6 +371,25 @@ function InstructorSectorCard({
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const preparationIsActive = !summerBreak && idleInstructors > 0;
   const internalCourseAreaAvailable = technicianCoverage.length > 0 || internalCourses.length > 0;
+  const teachingGroups = useMemo(
+    () => groupInstructorTeachingEntries(entries),
+    [entries],
+  );
+  const athleticPreparationIsActive = prepUnlocked && !prepIsPrimary && preparationIsActive;
+  const canUseTeachingOverflowArea = internalCourseAreaAvailable
+    && internalCourses.length === 0
+    && !athleticPreparationIsActive
+    && teachingGroups.length > PRIMARY_TEACHING_GROUP_LIMIT;
+  const primaryTeachingEntries = canUseTeachingOverflowArea
+    ? teachingGroups.slice(0, PRIMARY_TEACHING_GROUP_LIMIT).flatMap((group) => group.entries)
+    : entries;
+  const overflowTeachingEntries = canUseTeachingOverflowArea
+    ? teachingGroups.slice(PRIMARY_TEACHING_GROUP_LIMIT).flatMap((group) => group.entries)
+    : [];
+  const overflowTeachingColumns = Math.min(
+    4,
+    Math.ceil((teachingGroups.length - PRIMARY_TEACHING_GROUP_LIMIT) / TEACHING_OVERFLOW_ROWS),
+  );
 
   return (
     <article className="instructor-sector-card">
@@ -405,7 +428,7 @@ function InstructorSectorCard({
             {entries.length > 0 ? (
               <>
                 <AggregatedTeachingBar
-                  entries={entries}
+                  entries={primaryTeachingEntries}
                   now={now}
                   agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
                 />
@@ -471,7 +494,25 @@ function InstructorSectorCard({
         </section>
       </div>
 
-      {internalCourseAreaAvailable ? (
+      {canUseTeachingOverflowArea ? (
+        <section
+          className="internal-instructor-courses instructor-teaching-overflow"
+          aria-label="Altre lezioni in corso"
+          style={{
+            "--teaching-overflow-columns": overflowTeachingColumns,
+          } as CSSProperties}
+        >
+          <div className="internal-instructor-courses-heading">
+            <strong>Altre lezioni in corso</strong>
+            <small>Tutte le Forme restano visibili</small>
+          </div>
+          <AggregatedTeachingBar
+            entries={overflowTeachingEntries}
+            now={now}
+            agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
+          />
+        </section>
+      ) : internalCourseAreaAvailable ? (
         <section className="internal-instructor-courses" aria-label="Corsi Istruttori interni">
           <div className="internal-instructor-courses-heading">
             <strong>Corsi Istruttori interni</strong>
