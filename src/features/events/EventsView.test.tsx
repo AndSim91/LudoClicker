@@ -47,18 +47,17 @@ describe("EventsView", () => {
     expect(screen.getByText("0 persone · 0 prove · 0 contatti")).toBeVisible();
   });
 
-  it("starts with only flyering and park sparring at very low potential", () => {
+  it("starts with only flyering and sea kata at very low potential", () => {
     render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
 
     expect(screen.getAllByText("Potenzialità: Molto bassa")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Volantinaggio" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Sparring al parco" }),
+      screen.getByRole("heading", { name: "Kata contro le onde del mare" }),
     ).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Sparring al parco" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Lezioni all'aperto" })).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Prossimo sblocco: Lezioni all'aperto a 5 Fama."),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Prossimo sblocco:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Previsione:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/persone →/)).not.toBeInTheDocument();
   });

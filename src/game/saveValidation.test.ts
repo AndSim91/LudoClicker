@@ -31,13 +31,20 @@ describe("save validation at extreme scale", () => {
     ["fractional followers", { followers: 1.5 }],
     ["negative followers", { followers: -1 }],
     ["infinite euros", { euros: Infinity }],
-    ["negative euros", { euros: -1 }],
   ])("rejects %s", (_label, schoolPatch) => {
     const initial = createInitialState(1_000, "", false);
     expect(isValidGameState({
       ...initial,
       school: { ...initial.school, ...schoolPatch },
     })).toBe(false);
+  });
+
+  it("accepts a finite negative balance caused by Reptile completion costs", () => {
+    const initial = createInitialState(1_000, "", false);
+    expect(isValidGameState({
+      ...initial,
+      school: { ...initial.school, euros: -1 },
+    })).toBe(true);
   });
 });
 

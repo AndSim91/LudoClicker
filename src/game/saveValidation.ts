@@ -8,7 +8,7 @@ import {
   isCataloguedLegendaryId,
   isSecretLegendaryId,
 } from "./legendaryAvailability";
-import type { CollaboratorMasteryRole, GameState } from "./types";
+import type { CollaboratorMasteryRole, GameState, ReptileSector } from "./types";
 import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
@@ -265,6 +265,48 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
   );
 }
 
+const REPTILE_SECTORS: readonly ReptileSector[] = [
+  "social",
+  "equipment",
+  "gadget",
+  "events",
+];
+
+function hasValidReptileProgress(state: Partial<GameState>): boolean {
+  const reptile = state.tournaments?.reptile;
+  if (!reptile) return false;
+  if (
+    typeof reptile.unlocked !== "boolean" ||
+    !isNonNegativeSafeInteger(reptile.fameXp) || reptile.fameXp > 3_000 ||
+    !isNonNegativeSafeInteger(reptile.victories) ||
+    !Number.isSafeInteger(reptile.nextPreparationSchoolYear) ||
+    reptile.nextPreparationSchoolYear < 1 ||
+    !Array.isArray(reptile.hall)
+  ) return false;
+  const edition = reptile.activeEdition;
+  if (!edition) return true;
+  const validStatus = ["minigame", "preparing", "ready", "booked", "presenting"]
+    .includes(edition.status);
+  const assigned = REPTILE_SECTORS.flatMap((sector) => edition.assignments?.[sector] ?? []);
+  const validMinigame = ["ready", "running", "completed", "skipped"]
+    .includes(edition.minigame?.status) &&
+    Number.isFinite(edition.minigame?.modifierPercent) &&
+    edition.minigame.modifierPercent >= -50 && edition.minigame.modifierPercent <= 50;
+  const validSectors = edition.sectors === undefined || REPTILE_SECTORS.every((sector) => {
+    const progress = edition.sectors?.[sector];
+    return Boolean(
+      progress &&
+      Number.isFinite(progress.quality) && progress.quality >= 0 && progress.quality <= 100 &&
+      Number.isFinite(progress.progress) && progress.progress >= 0 && progress.progress <= 1 &&
+      Number.isFinite(progress.durationMs) && progress.durationMs > 0,
+    );
+  });
+  return validStatus && validMinigame && validSectors &&
+    assigned.length === new Set(assigned).size &&
+    Number.isFinite(edition.startedAt) && Number.isFinite(edition.lastProgressAt) &&
+    Number.isSafeInteger(edition.teamCount) && edition.teamCount >= 16 && edition.teamCount <= 512;
+}
+
 export function isValidGameState(value: unknown): value is GameState {
   if (!value || typeof value !== "object") return false;
   const state = value as Partial<GameState>;
@@ -455,7 +497,6 @@ export function isValidGameState(value: unknown): value is GameState {
     hasValidLightInflation(state) &&
     typeof state.profile?.displayName === "string" &&
     Number.isFinite(state.school?.euros) &&
-    (state.school?.euros ?? -1) >= 0 &&
     typeof state.school?.currentMonth === "number" &&
     typeof state.school?.city === "string" &&
     typeof state.school?.accentColor === "string" &&
@@ -469,6 +510,7 @@ export function isValidGameState(value: unknown): value is GameState {
     && typeof state.tournaments?.ordinaryVictoryAchieved === "boolean"
     && typeof state.tournaments?.championsVictoryCurrentSchool === "boolean"
     && hasValidChroniclesProgress(state)
+    && hasValidReptileProgress(state)
     && typeof state.network?.secretLegendaries === "object"
   );
 }

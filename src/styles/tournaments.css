@@ -4,6 +4,460 @@
   font-size: 13px;
 }
 
+/* Torneo Reptile --------------------------------------------------------- */
+.reptile-view {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.reptile-hero,
+.reptile-setup-card,
+.reptile-preparation-dashboard,
+.reptile-recap,
+.reptile-hall,
+.reptile-locked-card {
+  border: 1px solid var(--border-color, #d8d8d8);
+  border-radius: 16px;
+  background: var(--surface-color, #fff);
+  padding: 22px;
+  box-shadow: 0 8px 26px rgb(0 0 0 / 6%);
+}
+
+.reptile-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  color: #fff;
+  border: 0;
+  background:
+    radial-gradient(circle at 82% 10%, rgb(137 255 80 / 28%), transparent 32%),
+    linear-gradient(135deg, #13261a, #245632 62%, #397547);
+}
+
+.reptile-hero h2,
+.reptile-locked-card h2,
+.reptile-recap h2 {
+  margin: 5px 0 8px;
+}
+
+.reptile-hero p,
+.reptile-hero span {
+  color: rgb(255 255 255 / 78%);
+}
+
+.reptile-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 10px;
+  min-width: min(430px, 48%);
+}
+
+.reptile-hero-stats > div {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 14px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 12px;
+  background: rgb(0 0 0 / 16%);
+}
+
+.reptile-hero-stats strong {
+  font-size: 1.55rem;
+}
+
+.reptile-setup-card > header,
+.reptile-preparation-dashboard > header,
+.reptile-recap > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.reptile-setup-card h3,
+.reptile-preparation-dashboard h3,
+.reptile-hall h3 {
+  margin: 0 0 6px;
+}
+
+.reptile-collaborator-assignment {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 10px;
+}
+
+.reptile-collaborator-assignment label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 10px;
+}
+
+.reptile-collaborator-assignment label > span {
+  display: grid;
+  gap: 2px;
+}
+
+.reptile-collaborator-assignment small,
+.reptile-match-list small,
+.reptile-standing-table small,
+.reptile-hall small {
+  color: var(--text-secondary, #666);
+}
+
+.reptile-collaborator-assignment select {
+  max-width: 145px;
+}
+
+.reptile-sector-counts,
+.reptile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.reptile-sector-counts span {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgb(45 112 61 / 10%);
+}
+
+.reptile-warning,
+.reptile-booked-note,
+.reptile-equipment-note {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgb(194 118 0 / 10%);
+}
+
+.reptile-sector-cards,
+.reptile-recap-grid,
+.reptile-sector-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reptile-sector-cards article,
+.reptile-recap-grid article,
+.reptile-sector-summary > div {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 12px;
+}
+
+.reptile-sector-cards article > div,
+.reptile-sector-summary > div {
+  display: grid;
+  gap: 3px;
+}
+
+.reptile-sector-cards strong,
+.reptile-recap-grid strong,
+.reptile-sector-summary strong {
+  font-size: 1.3rem;
+}
+
+.reptile-sector-cards progress {
+  width: 100%;
+  accent-color: #397547;
+}
+
+.reptile-booking-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color, #ddd);
+}
+
+.reptile-recap-grid {
+  margin: 18px 0;
+}
+
+.reptile-sector-summary > div {
+  background: rgb(45 112 61 / 7%);
+}
+
+.reptile-hall > div {
+  display: grid;
+  grid-template-columns: 90px 1fr minmax(180px, auto);
+  gap: 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-color, #ddd);
+}
+
+.reptile-minigame-overlay,
+.reptile-presentation-overlay {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  color: #eef8ef;
+  background: rgb(5 15 8 / 92%);
+}
+
+.reptile-minigame-shell,
+.reptile-presentation-shell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(1080px, 100%);
+  height: min(760px, 100%);
+  overflow: hidden;
+  border: 1px solid rgb(153 239 136 / 30%);
+  border-radius: 18px;
+  background: linear-gradient(160deg, #15251a, #0c1710);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 48%);
+}
+
+.reptile-minigame-shell > header,
+.reptile-presentation-shell > header,
+.reptile-minigame-shell > footer,
+.reptile-presentation-shell > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.reptile-minigame-shell h2,
+.reptile-presentation-shell h2 {
+  margin: 4px 0 0;
+}
+
+.reptile-minigame-score {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.reptile-circle-board {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  touch-action: manipulation;
+  cursor: crosshair;
+  background:
+    linear-gradient(rgb(126 230 119 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(126 230 119 / 5%) 1px, transparent 1px),
+    radial-gradient(circle, #244b2f, #102017 70%);
+  background-size: 44px 44px, 44px 44px, auto;
+}
+
+.reptile-target-circle {
+  position: absolute;
+  width: clamp(54px, 8vw, 78px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 5px solid #b7ff8b;
+  border-radius: 50%;
+  color: #122016;
+  background: #72df65;
+  box-shadow: 0 0 0 7px rgb(183 255 139 / 15%), 0 0 28px rgb(114 223 101 / 45%);
+  animation: reptile-target-in 160ms ease-out;
+  touch-action: manipulation;
+}
+
+.reptile-target-circle span {
+  font-weight: 800;
+}
+
+@keyframes reptile-target-in {
+  from { transform: translate(-50%, -50%) scale(.45); opacity: .3; }
+}
+
+.reptile-resume-countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(4rem, 14vw, 8rem);
+  font-weight: 900;
+  background: rgb(6 17 10 / 72%);
+}
+
+.reptile-minigame-pause {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 28px;
+  text-align: center;
+  background: rgb(5 13 8 / 94%);
+}
+
+.reptile-presentation-content {
+  overflow: auto;
+  padding: 20px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.reptile-interlude-copy {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  margin: 0;
+  padding: 40px;
+  text-align: center;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  line-height: 1.45;
+}
+
+.reptile-match-list {
+  display: grid;
+  gap: 8px;
+}
+
+.reptile-match-list article {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 14px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 10px;
+}
+
+.reptile-match-list article > div:last-child {
+  text-align: right;
+}
+
+.reptile-match-list article > div {
+  display: grid;
+}
+
+.reptile-match-list .is-home-match {
+  border-color: rgb(154 240 130 / 50%);
+  background: rgb(89 160 77 / 13%);
+}
+
+.reptile-standing-table {
+  display: grid;
+  gap: 3px;
+}
+
+.reptile-standing-table > div {
+  display: grid;
+  grid-template-columns: 42px minmax(240px, 1fr) 70px 60px 70px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
+
+.reptile-standing-table > div:nth-child(odd) {
+  background: rgb(255 255 255 / 5%);
+}
+
+.reptile-standing-table .is-qualified {
+  color: #d8ffc7;
+  background: rgb(109 198 84 / 16%);
+}
+
+.reptile-presentation-shell .reptile-recap {
+  color: var(--text-primary, #17201a);
+}
+
+@media (max-width: 820px) {
+  .reptile-hero,
+  .reptile-setup-card > header,
+  .reptile-preparation-dashboard > header,
+  .reptile-recap > header {
+    display: grid;
+  }
+
+  .reptile-hero-stats,
+  .reptile-sector-cards,
+  .reptile-recap-grid,
+  .reptile-sector-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+  }
+
+  .reptile-booking-card {
+    grid-template-columns: 1fr;
+  }
+
+  .reptile-minigame-overlay,
+  .reptile-presentation-overlay {
+    padding: 0;
+  }
+
+  .reptile-minigame-shell,
+  .reptile-presentation-shell {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .reptile-minigame-shell > header,
+  .reptile-minigame-shell > footer,
+  .reptile-presentation-shell > header,
+  .reptile-presentation-shell > footer {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .reptile-minigame-score {
+    justify-content: flex-start;
+  }
+
+  .reptile-standing-table > div {
+    grid-template-columns: 34px minmax(160px, 1fr) 48px 45px;
+  }
+
+  .reptile-standing-table > div > span:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .reptile-hero-stats,
+  .reptile-sector-cards,
+  .reptile-recap-grid,
+  .reptile-sector-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .reptile-collaborator-assignment label,
+  .reptile-hall > div {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .reptile-collaborator-assignment label {
+    display: grid;
+  }
+
+  .reptile-collaborator-assignment select {
+    max-width: none;
+    width: 100%;
+  }
+
+  .reptile-target-circle {
+    width: 58px;
+  }
+}
+
 .tournaments-view > header {
   margin-bottom: 8px;
   padding-bottom: 0;

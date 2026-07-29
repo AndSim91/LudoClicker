@@ -94,6 +94,13 @@ export function createInitialState(
       ordinaryVictoryAchieved: false,
       championsVictoryCurrentSchool: false,
       chronicles: { unlocked: false, keys: 0 },
+      reptile: {
+        unlocked: false,
+        fameXp: 0,
+        victories: 0,
+        nextPreparationSchoolYear: 1,
+        hall: [],
+      },
     },
     collaborators: [],
     collaboratorManagement: createInitialCollaboratorManagement(),

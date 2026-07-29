@@ -3,10 +3,23 @@ import { getBaseExpectedEventContacts } from "../game/eventRewards";
 import { ACQUISITION_EVENTS, getUnlockedAcquisitionEvents } from "./events";
 
 describe("acquisition event progression", () => {
-  it("starts with only free flyering and park sparring", () => {
+  it("starts with only free flyering and sea kata", () => {
     expect(getUnlockedAcquisitionEvents(0).map((event) => event.id)).toEqual([
       "park-sparring",
-      "organized-flyering",
+      "kata-sea-waves",
+    ]);
+  });
+
+  it("uses the agreed early progression and costs", () => {
+    expect(ACQUISITION_EVENTS.slice(0, 4).map((event) => [
+      event.id,
+      event.unlockMembers,
+      event.cost,
+    ])).toEqual([
+      ["park-sparring", 0, 0],
+      ["kata-sea-waves", 0, 100],
+      ["organized-flyering", 5, 500],
+      ["public-demo", 5, 1_000],
     ]);
   });
 
@@ -97,8 +110,8 @@ describe("acquisition event progression", () => {
     expect(ACQUISITION_EVENTS.every((event) => event.durationMs === 10_000)).toBe(true);
     expect(ACQUISITION_EVENTS.map((event) => event.cooldown)).toEqual([
       { kind: "realtime", durationMs: 5_000 },
-      { kind: "realtime", durationMs: 15_000 },
       { kind: "realtime", durationMs: 10_000 },
+      { kind: "realtime", durationMs: 15_000 },
       { kind: "realtime", durationMs: 30_000 },
       { kind: "calendar", months: 1 },
       { kind: "calendar", months: 1 },

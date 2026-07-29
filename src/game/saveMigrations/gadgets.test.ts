@@ -9,6 +9,7 @@ import { migrateGadgetRarityState } from "./gadgetRarities";
 import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendaryCircuitBoostRemoval";
 import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
+import { migrateReptileState } from "./reptile";
 import type { MigratableState } from "./types";
 
 describe("Gadget save migration", () => {
@@ -37,7 +38,7 @@ describe("Gadget save migration", () => {
       ),
     };
 
-    const migrated = migrateUpgradeRevampState(
+    const migrated = migrateReptileState(migrateUpgradeRevampState(
       migrateSecretLegendaryBaseRebalanceState(
         migrateSecretLegendaryCircuitBoostRemovalState(
           migrateGadgetRarityState(
@@ -45,9 +46,9 @@ describe("Gadget save migration", () => {
           ),
         ),
       ),
-    ) as GameState;
+    )) as GameState;
 
-    expect(migrated.version).toBe(71);
+    expect(migrated.version).toBe(72);
     expect(migrated.unlocks.gadget).toBe(false);
     expect(migrated.gadgets.products.wristband.unlocked).toBe(false);
     expect(migrated.collaborators[0].mastery?.gadget).toBe(0);

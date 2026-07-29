@@ -50,6 +50,7 @@ import type {
   FormId,
   GadgetProductId,
   RockPaperScissorsChoice,
+  ReptileSectorAssignments,
   UpgradeId,
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
@@ -100,6 +101,7 @@ export function App() {
     togglePause,
     setTutorialPaused,
     setGadgetPaused,
+    setReptilePaused,
     saveStatus,
     saveNow,
   } = useGameEngine();
@@ -127,8 +129,15 @@ export function App() {
   const hasActiveGadgetMinigame = state.unlocks.gadget &&
     (state.gadgets.minigame?.status === "running" ||
       state.gadgets.minigame?.status === "result");
+  const reptileStatus = state.tournaments.reptile.activeEdition?.status;
+  const hasBlockingReptileFlow =
+    (reptileStatus === "minigame" &&
+      state.tournaments.reptile.activeEdition?.minigame.status === "running") ||
+    reptileStatus === "presenting";
   const activeView: AppView = hasActiveGadgetMinigame
     ? "gadget"
+    : hasBlockingReptileFlow
+      ? "tournaments"
     : view === "admin"
       ? import.meta.env.DEV
         ? "admin"
@@ -161,6 +170,10 @@ export function App() {
   useLayoutEffect(() => {
     setGadgetPaused(state.gadgets.minigame?.status === "running");
   }, [setGadgetPaused, state.gadgets.minigame?.status]);
+
+  useLayoutEffect(() => {
+    setReptilePaused(hasBlockingReptileFlow);
+  }, [hasBlockingReptileFlow, setReptilePaused]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -348,6 +361,48 @@ export function App() {
     () => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const startReptilePreparation = useCallback(
+    (assignments: ReptileSectorAssignments) => dispatch({
+      type: "START_REPTILE_PREPARATION",
+      assignments,
+      now: getGameNow(),
+    }),
+    [dispatch, getGameNow],
+  );
+  const startReptileMinigame = useCallback(
+    () => dispatch({ type: "START_REPTILE_MINIGAME", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const completeReptileMinigame = useCallback(
+    (hits: number, misses: number, outsideClicks: number) => dispatch({
+      type: "COMPLETE_REPTILE_MINIGAME",
+      hits,
+      misses,
+      outsideClicks,
+      now: getGameNow(),
+    }),
+    [dispatch, getGameNow],
+  );
+  const skipReptileMinigame = useCallback(
+    () => dispatch({ type: "SKIP_REPTILE_MINIGAME", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const cancelReptilePreparation = useCallback(
+    () => dispatch({ type: "CANCEL_REPTILE_PREPARATION", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const bookReptileVenue = useCallback(
+    () => dispatch({ type: "BOOK_REPTILE_VENUE", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const advanceReptilePresentation = useCallback(
+    () => dispatch({ type: "ADVANCE_REPTILE_PRESENTATION", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
+  const skipReptilePresentation = useCallback(
+    () => dispatch({ type: "SKIP_REPTILE_PRESENTATION", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
   const setCollaboratorFallback = useCallback(
     (
       assignment: CollaboratorMasteryRole,
@@ -510,6 +565,14 @@ export function App() {
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}
               onPlayChroniclesHand={playChroniclesHand}
+              onStartReptilePreparation={startReptilePreparation}
+              onStartReptileMinigame={startReptileMinigame}
+              onCompleteReptileMinigame={completeReptileMinigame}
+              onSkipReptileMinigame={skipReptileMinigame}
+              onCancelReptilePreparation={cancelReptilePreparation}
+              onBookReptileVenue={bookReptileVenue}
+              onAdvanceReptilePresentation={advanceReptilePresentation}
+              onSkipReptilePresentation={skipReptilePresentation}
             />
           ) : activeView === "gadget" ? (
             <StableGadgetsView

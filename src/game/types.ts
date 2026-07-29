@@ -589,6 +589,144 @@ export interface ChroniclesProgress {
   activeChallenge?: ChroniclesChallenge;
 }
 
+export type ReptileSector = "social" | "equipment" | "gadget" | "events";
+
+export type ReptileSectorAssignments = Record<ReptileSector, string[]>;
+
+export interface ReptileMinigameProgress {
+  status: "ready" | "running" | "completed" | "skipped";
+  startedAt?: number;
+  hits: number;
+  misses: number;
+  outsideClicks: number;
+  modifierPercent: number;
+}
+
+export interface ReptileSectorProgress {
+  assignedCollaboratorIds: string[];
+  load: number;
+  effectivePower: number;
+  rawQuality: number;
+  quality: number;
+  durationMs: number;
+  progress: number;
+}
+
+export interface ReptileAthlete {
+  id: string;
+  ownedContactId?: string;
+  secretLegendaryId?: SecretLegendaryId;
+  firstName: string;
+  lastName: string;
+  rarity: PersonRarity | "secret-legendary";
+  arena: number;
+  style: number;
+}
+
+export interface ReptileTeam {
+  id: string;
+  schoolId?: TournamentSchoolId;
+  schoolName: string;
+  city: string;
+  home: boolean;
+  athletes: [ReptileAthlete, ReptileAthlete];
+  arena: number;
+  style: number;
+  condition: number;
+  tieBreaker: number;
+}
+
+export type ReptileKnockoutStage =
+  "round16" | "quarterfinal" | "semifinal" | "bronze" | "final";
+
+export interface ReptileMatch {
+  id: string;
+  phase: "swiss" | ReptileKnockoutStage;
+  round: number;
+  teamAId: string;
+  teamBId: string;
+  scoreA: number;
+  scoreB: number;
+  winnerId: string;
+}
+
+export interface ReptileStanding {
+  rank: number;
+  teamId: string;
+  wins: number;
+  losses: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  opponentsWins: number;
+  qualified: boolean;
+}
+
+export interface ReptileEconomyResult {
+  venueCost: number;
+  gadgetGross: number;
+  rentedSwords: number;
+  rentalCost: number;
+  usedSchoolSwords: number;
+  swordWear: number;
+  netResult: number;
+  followersGained: number;
+  fameDelta: number;
+  fameBefore: number;
+  fameAfter: number;
+}
+
+export interface ReptileTournamentResult {
+  id: string;
+  schoolYear: number;
+  completedAt: number;
+  teamCount: number;
+  swissRounds: number;
+  teams: ReptileTeam[];
+  matches: ReptileMatch[];
+  standings: ReptileStanding[];
+  top16TeamIds: string[];
+  podiumTeamIds: [string, string, string, string];
+  sectorQualities: Record<ReptileSector, number>;
+  minigameModifierPercent: number;
+  economy: ReptileEconomyResult;
+  difficultyMultiplier: number;
+  rewardsApplied: boolean;
+}
+
+export interface ReptileActiveEdition {
+  id: string;
+  schoolYear: number;
+  teamCount: number;
+  status: "minigame" | "preparing" | "ready" | "booked" | "presenting";
+  startedAt: number;
+  lastProgressAt: number;
+  assignments: ReptileSectorAssignments;
+  previousAssignments: Record<string, CollaboratorAssignment>;
+  minigame: ReptileMinigameProgress;
+  sectors?: Record<ReptileSector, ReptileSectorProgress>;
+  bookedAt?: number;
+  scheduledMonth?: number;
+  result?: ReptileTournamentResult;
+  presentationStep: number;
+}
+
+export interface ReptileHallEntry {
+  schoolYear: number;
+  teamId: string;
+  schoolName: string;
+  athleteNames: [string, string];
+}
+
+export interface ReptileProgress {
+  unlocked: boolean;
+  fameXp: number;
+  victories: number;
+  nextPreparationSchoolYear: number;
+  activeEdition?: ReptileActiveEdition;
+  latestRecap?: ReptileTournamentResult;
+  hall: ReptileHallEntry[];
+}
+
 export interface TournamentState {
   results: TournamentResult[];
   missedTournaments: {
@@ -608,6 +746,7 @@ export interface TournamentState {
   ordinaryVictoryAchieved: boolean;
   championsVictoryCurrentSchool: boolean;
   chronicles: ChroniclesProgress;
+  reptile: ReptileProgress;
 }
 
 export interface HistorySourceSummary {
@@ -878,4 +1017,22 @@ export type GameAction =
       type: "PLAY_CHRONICLES_HAND";
       choice: RockPaperScissorsChoice;
       now: number;
-    };
+    }
+  | {
+      type: "START_REPTILE_PREPARATION";
+      assignments: ReptileSectorAssignments;
+      now: number;
+    }
+  | { type: "START_REPTILE_MINIGAME"; now: number }
+  | {
+      type: "COMPLETE_REPTILE_MINIGAME";
+      hits: number;
+      misses: number;
+      outsideClicks: number;
+      now: number;
+    }
+  | { type: "SKIP_REPTILE_MINIGAME"; now: number }
+  | { type: "CANCEL_REPTILE_PREPARATION"; now: number }
+  | { type: "BOOK_REPTILE_VENUE"; now: number }
+  | { type: "ADVANCE_REPTILE_PRESENTATION"; now: number }
+  | { type: "SKIP_REPTILE_PRESENTATION"; now: number };

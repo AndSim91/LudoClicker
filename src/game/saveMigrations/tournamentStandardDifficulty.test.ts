@@ -62,7 +62,7 @@ describe("tournament standard difficulty save migration", () => {
 
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
-    expect(migrated.version).toBe(71);
+    expect(migrated.version).toBe(72);
     expect(
       migrated.legendaryCollaborators.retainedProgress["pietro-scarica"]?.arenaBase,
     ).toBeCloseTo(220 / (1.5 * 1.3) + 8);

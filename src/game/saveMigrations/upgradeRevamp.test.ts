@@ -3,6 +3,7 @@ import { createInitialState } from "../initialState";
 import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
+import { migrateReptileState } from "./reptile";
 import type { MigratableState } from "./types";
 
 describe("upgrade revamp save migration", () => {
@@ -36,9 +37,9 @@ describe("upgrade revamp save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateUpgradeRevampState(legacy) as GameState;
+    const migrated = migrateReptileState(migrateUpgradeRevampState(legacy)) as GameState;
 
-    expect(migrated.version).toBe(71);
+    expect(migrated.version).toBe(72);
     expect(migrated.upgrades).toMatchObject({
       "social-editorial-plan": 0,
       "winning-advertising": 3,

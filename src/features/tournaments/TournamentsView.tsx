@@ -8,6 +8,7 @@ import type {
   TournamentDiscipline,
   TournamentParticipant,
   TournamentResult,
+  ReptileSectorAssignments,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -22,6 +23,7 @@ import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
 import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
 import { useVirtualRows } from "../../shared/useVirtualRows";
 import { levelShortLabel, type TournamentTab } from "./tournamentPresentation";
+import { ReptileView } from "./ReptileView";
 
 const TOURNAMENT_HALL_ROW_HEIGHT = 274;
 
@@ -183,15 +185,31 @@ export function TournamentsView({
   onOpenAthletes = () => undefined,
   onStartChronicles = () => undefined,
   onPlayChroniclesHand = () => undefined,
+  onStartReptilePreparation = () => undefined,
+  onStartReptileMinigame = () => undefined,
+  onCompleteReptileMinigame = () => undefined,
+  onSkipReptileMinigame = () => undefined,
+  onCancelReptilePreparation = () => undefined,
+  onBookReptileVenue = () => undefined,
+  onAdvanceReptilePresentation = () => undefined,
+  onSkipReptilePresentation = () => undefined,
 }: {
   state?: GameState;
   gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
   onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
+  onStartReptilePreparation?: (assignments: ReptileSectorAssignments) => void;
+  onStartReptileMinigame?: () => void;
+  onCompleteReptileMinigame?: (hits: number, misses: number, outsideClicks: number) => void;
+  onSkipReptileMinigame?: () => void;
+  onCancelReptilePreparation?: () => void;
+  onBookReptileVenue?: () => void;
+  onAdvanceReptilePresentation?: () => void;
+  onSkipReptilePresentation?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+    ["collaborators", "contacts", "equipment", "network", "school", "tournaments", "upgrades"],
     stateOverride,
   );
   const [tab, setTab] = useState<TournamentTab>("overview");
@@ -205,7 +223,11 @@ export function TournamentsView({
     CHRONICLES_TOURNAMENT_LOADING_MS,
     gameSpeed,
   );
-  const visibleTab = tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
+  const blockingReptileFlow = state.tournaments.reptile.activeEdition?.status === "presenting" ||
+    state.tournaments.reptile.activeEdition?.minigame.status === "running";
+  const visibleTab = blockingReptileFlow
+    ? "open"
+    : tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult =
     state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
@@ -265,6 +287,9 @@ export function TournamentsView({
         <TabButton active={visibleTab === "hall"} onClick={() => setTab("hall")}>
           Albo d'oro
         </TabButton>
+        <TabButton active={visibleTab === "open"} onClick={() => setTab("open")}>
+          Open
+        </TabButton>
         {chroniclesUnlocked ? (
           <TabButton active={visibleTab === "chronicles"} onClick={() => setTab("chronicles")}>
             Chronicles
@@ -297,6 +322,19 @@ export function TournamentsView({
           results={state.tournaments.results}
           schoolName={state.school.name}
           schoolCity={state.school.city}
+        />
+      ) : null}
+      {!chroniclesLoading && visibleTab === "open" ? (
+        <ReptileView
+          state={state}
+          onStartPreparation={onStartReptilePreparation}
+          onStartMinigame={onStartReptileMinigame}
+          onCompleteMinigame={onCompleteReptileMinigame}
+          onSkipMinigame={onSkipReptileMinigame}
+          onCancelPreparation={onCancelReptilePreparation}
+          onBookVenue={onBookReptileVenue}
+          onAdvancePresentation={onAdvanceReptilePresentation}
+          onSkipPresentation={onSkipReptilePresentation}
         />
       ) : null}
       {!chroniclesLoading && visibleTab === "chronicles" && chroniclesUnlocked ? (

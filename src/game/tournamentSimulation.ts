@@ -828,6 +828,26 @@ export function isSecretLegendaryDefeated(
   return lostToOwnedInArena || beatenInStyle;
 }
 
+/**
+ * Espone al circuito Open lo stesso generatore, gli stessi tier e le stesse
+ * apparizioni leggendarie della Champion's Arena. Il chiamante si occupa poi
+ * di aggregare gli atleti in coppie della stessa scuola.
+ */
+export function createChampionsOpenAthletes(
+  state: GameState,
+  count: number,
+  seed: number,
+): { participants: TournamentParticipant[]; nextSeed: number } {
+  const cursor: RandomCursor = { seed };
+  const participants = createNpcParticipants(
+    state,
+    "champions",
+    Math.max(0, Math.floor(count)),
+    cursor,
+  );
+  return { participants, nextSeed: cursor.seed };
+}
+
 function findDefeatedSecretLegendaries(
   participants: readonly TournamentParticipant[],
   matches: readonly TournamentMatch[],

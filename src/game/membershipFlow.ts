@@ -15,6 +15,7 @@ import { nextRandom } from "./random";
 import { processJanuaryLightInflation } from "./lightInflation";
 import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
+import { processReptileCalendarTransition } from "./reptileFlow";
 
 export function departMembers(
   state: GameState,
@@ -310,6 +311,8 @@ export function collectFees(
     if (isSchoolYearDepartureMonth(currentMonth)) {
       nextState = processMemberDepartures(nextState, now + period);
     }
+    nextState = processReptileCalendarTransition(nextState, now + period);
+    if (nextState.tournaments.reptile.activeEdition?.status === "presenting") break;
   }
   return nextState;
 }

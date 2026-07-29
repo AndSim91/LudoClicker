@@ -641,16 +641,16 @@ La **Fama della scuola** è il punteggio cumulativo permanente ottenuto da
 iscrizioni, Follower e ricompense esplicite. Sblocca progressivamente cinque
 tier di potenzialità: **Molto bassa**, **Bassa**, **Media**, **Alta** e
 **Altissima**. Non diminuisce quando alcuni iscritti lasciano la scuola.
-All'inizio sono visibili soltanto Volantinaggio e Sparring al parco;
+All'inizio sono visibili soltanto Volantinaggio e Kata contro le onde del mare;
 l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra
 previsioni numeriche sui contatti.
 
 | Evento                        | Sblocco |      Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
 | ----------------------------- | ------: | ---------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
 | Volantinaggio                 |       0 |         €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
-| Kata contro le onde del mare  |       5 |       €500 |  0,50 |         1 |     1 |     10 | 15 secondi |  molto bassa |
-| Sparring al parco             |       0 |     €1.000 |  1,00 |         2 |     2 |     20 | 10 secondi |  molto bassa |
-| Lezioni all'aperto            |       5 |     €1.500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
+| Kata contro le onde del mare  |       0 |       €100 |  0,50 |         1 |     1 |     10 | 10 secondi |  molto bassa |
+| Sparring al parco             |       5 |       €500 |  1,00 |         2 |     2 |     20 | 15 secondi |  molto bassa |
+| Lezioni all'aperto            |       5 |     €1.000 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
 | Oktoberfest                   |      15 |     €1.500 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
 | Evento sportivo               |      10 |     €2.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
 | Mele Comics                   |      20 |     €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |

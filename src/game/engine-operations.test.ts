@@ -268,7 +268,7 @@ describe("game engine: operations", () => {
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 1_500, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
+      school: { ...state.school, euros: 1_000, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",

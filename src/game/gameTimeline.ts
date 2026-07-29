@@ -117,6 +117,40 @@ export function rebaseGameTimeline(
         ...result,
         completedAt: result.completedAt + offsetMs,
       })),
+      reptile: {
+        ...state.tournaments.reptile,
+        activeEdition: state.tournaments.reptile.activeEdition
+          ? {
+              ...state.tournaments.reptile.activeEdition,
+              startedAt: state.tournaments.reptile.activeEdition.startedAt + offsetMs,
+              lastProgressAt: state.tournaments.reptile.activeEdition.lastProgressAt + offsetMs,
+              bookedAt: shiftOptional(
+                state.tournaments.reptile.activeEdition.bookedAt,
+                offsetMs,
+              ),
+              minigame: {
+                ...state.tournaments.reptile.activeEdition.minigame,
+                startedAt: shiftOptional(
+                  state.tournaments.reptile.activeEdition.minigame.startedAt,
+                  offsetMs,
+                ),
+              },
+              result: state.tournaments.reptile.activeEdition.result
+                ? {
+                    ...state.tournaments.reptile.activeEdition.result,
+                    completedAt:
+                      state.tournaments.reptile.activeEdition.result.completedAt + offsetMs,
+                  }
+                : undefined,
+            }
+          : undefined,
+        latestRecap: state.tournaments.reptile.latestRecap
+          ? {
+              ...state.tournaments.reptile.latestRecap,
+              completedAt: state.tournaments.reptile.latestRecap.completedAt + offsetMs,
+            }
+          : undefined,
+      },
     },
     legendaryCollaborators: {
       ...state.legendaryCollaborators,

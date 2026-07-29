@@ -24,6 +24,7 @@ import type {
   TournamentResult,
 } from "./types";
 import { unlockGadgetSectorFromTournamentResult } from "./gadgetFlow";
+import { unlockReptileFromTournamentResult } from "./reptileUnlock";
 
 const LEVEL_BY_CALENDAR_MONTH: Partial<Record<number, TournamentLevel>> = {
   12: "school",
@@ -265,6 +266,7 @@ function applyTournamentResult(
     resolvedResult,
     now,
   );
+  nextState = unlockReptileFromTournamentResult(nextState, resolvedResult, now);
   nextState = applyTournamentRewards(nextState, resolvedResult, now);
   for (const id of resolvedResult.secretLegendaryDefeatedIds) {
     nextState = resolveSecretLegendaryDefeat(nextState, id, now);

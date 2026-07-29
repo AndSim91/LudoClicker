@@ -25,6 +25,13 @@ export function migrateTournamentState(state: MigratableState): MigratableState 
       ordinaryVictoryAchieved: false,
       championsVictoryCurrentSchool: false,
       chronicles: { unlocked: false, keys: 0 },
+      reptile: {
+        unlocked: false,
+        fameXp: 0,
+        victories: 0,
+        nextPreparationSchoolYear: 1,
+        hall: [],
+      },
     },
     network: state.network ? {
       ...state.network,

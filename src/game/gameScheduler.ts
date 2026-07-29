@@ -21,6 +21,7 @@ import {
 } from "./equipment";
 import { gameDelayToWallDelay } from "./gameClock";
 import { hasGadgetRuntimeWork } from "./gadgetEconomy";
+import { isReptilePreparationWorkActive } from "./reptilePreparation";
 
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
 const MAX_TIMEOUT_MS = 2_147_000_000;
@@ -32,6 +33,7 @@ function earlier(current: number, candidate: number | undefined): number {
 }
 
 export function needsAutomationHeartbeat(state: GameState): boolean {
+  if (state.tournaments.reptile.activeEdition?.status === "preparing") return true;
   const hasWritingCampaign = getActiveCampaignEmails(state.emails)
     .some((email) => email.status === "writing");
   const instructorPreparationActive = hasActiveInstructorAthleticPreparation(state);
@@ -102,6 +104,9 @@ export function getNextGameTickAt(
   allowAutomaticEventStarts = true,
 ): number {
   let nextDeadline = getNextGameDeadline(state);
+  if (isReptilePreparationWorkActive(state)) {
+    nextDeadline = earlier(nextDeadline, state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS);
+  }
   const hasEventAutomation = state.collaborators.some(
     (collaborator) => collaborator.assignment === "events",
   );
