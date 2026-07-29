@@ -483,6 +483,20 @@
   font-size: 13px;
 }
 
+.open-tournaments {
+  min-width: 0;
+}
+
+.open-tournament-tabs {
+  width: 100%;
+  max-width: none;
+  margin-bottom: 16px;
+}
+
+.open-tournament-tabs button {
+  min-height: 36px;
+}
+
 .tournament-overview,
 .tournament-athletes-view,
 .tournament-results-view {

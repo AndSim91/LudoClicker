@@ -27,6 +27,8 @@ import { ReptileView } from "./ReptileView";
 
 const TOURNAMENT_HALL_ROW_HEIGHT = 274;
 
+type OpenTournamentTab = "reptile" | "chronicles";
+
 type TournamentHallWinner = {
   id: string;
   participant: TournamentParticipant;
@@ -213,6 +215,7 @@ export function TournamentsView({
     stateOverride,
   );
   const [tab, setTab] = useState<TournamentTab>("overview");
+  const [openTournamentTab, setOpenTournamentTab] = useState<OpenTournamentTab>("reptile");
   const [selectedResultId, setSelectedResultId] = useState<string>();
   const [chroniclesLoading, setChroniclesLoading] = useState(false);
   const [showChroniclesResult, setShowChroniclesResult] = useState(false);
@@ -225,9 +228,8 @@ export function TournamentsView({
   );
   const blockingReptileFlow = state.tournaments.reptile.activeEdition?.status === "presenting" ||
     state.tournaments.reptile.activeEdition?.minigame.status === "running";
-  const visibleTab = blockingReptileFlow
-    ? "open"
-    : tab === "chronicles" && !chroniclesUnlocked ? "overview" : tab;
+  const visibleTab = blockingReptileFlow ? "open" : tab;
+  const visibleOpenTournamentTab = blockingReptileFlow ? "reptile" : openTournamentTab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult =
     state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
@@ -263,7 +265,8 @@ export function TournamentsView({
       chroniclesStartTimerRef.current = undefined;
       onStartChroniclesRef.current(pendingContactIds);
       setSelectedResultId(undefined);
-      setTab("chronicles");
+      setTab("open");
+      setOpenTournamentTab("chronicles");
       setShowChroniclesResult(true);
       setChroniclesLoading(false);
     }, chroniclesLoadingMs);
@@ -290,11 +293,6 @@ export function TournamentsView({
         <TabButton active={visibleTab === "open"} onClick={() => setTab("open")}>
           Open
         </TabButton>
-        {chroniclesUnlocked ? (
-          <TabButton active={visibleTab === "chronicles"} onClick={() => setTab("chronicles")}>
-            Chronicles
-          </TabButton>
-        ) : null}
       </div>
 
       {chroniclesLoading ? (
@@ -325,43 +323,61 @@ export function TournamentsView({
         />
       ) : null}
       {!chroniclesLoading && visibleTab === "open" ? (
-        <ReptileView
-          state={state}
-          onStartPreparation={onStartReptilePreparation}
-          onStartMinigame={onStartReptileMinigame}
-          onCompleteMinigame={onCompleteReptileMinigame}
-          onSkipMinigame={onSkipReptileMinigame}
-          onCancelPreparation={onCancelReptilePreparation}
-          onBookVenue={onBookReptileVenue}
-          onAdvancePresentation={onAdvanceReptilePresentation}
-          onSkipPresentation={onSkipReptilePresentation}
-        />
-      ) : null}
-      {!chroniclesLoading && visibleTab === "chronicles" && chroniclesUnlocked ? (
-        showChroniclesResult && latestChroniclesResult ? (
-          <TournamentResults
-            result={latestChroniclesResult}
-            results={[latestChroniclesResult]}
-            onSelectResult={() => undefined}
-            onBackToOverview={() => setTab("overview")}
-            onViewQualified={onOpenAthletes}
-            knownFormsByContactId={knownFormsByContactId}
-            continuationAction={{
-              label:
-                state.tournaments.chronicles.activeChallenge?.tournamentResultId ===
-                latestChroniclesResult.id
-                  ? "Sfida Finale"
-                  : "Prossimo Torneo",
-              onClick: () => setShowChroniclesResult(false),
-            }}
-          />
-        ) : (
-          <ChroniclesView
-            state={stateOverride}
-            onStartTournament={startChronicles}
-            onPlayHand={onPlayChroniclesHand}
-          />
-        )
+        <section className="open-tournaments" aria-label="Tornei Open">
+          <div className="people-tabs open-tournament-tabs" role="tablist" aria-label="Tornei Open">
+            <TabButton
+              active={visibleOpenTournamentTab === "reptile"}
+              onClick={() => setOpenTournamentTab("reptile")}
+            >
+              Reptile
+            </TabButton>
+            {chroniclesUnlocked ? (
+              <TabButton
+                active={visibleOpenTournamentTab === "chronicles"}
+                onClick={() => setOpenTournamentTab("chronicles")}
+              >
+                Chronicles
+              </TabButton>
+            ) : null}
+          </div>
+
+          {visibleOpenTournamentTab === "reptile" ? (
+            <ReptileView
+              state={state}
+              onStartPreparation={onStartReptilePreparation}
+              onStartMinigame={onStartReptileMinigame}
+              onCompleteMinigame={onCompleteReptileMinigame}
+              onSkipMinigame={onSkipReptileMinigame}
+              onCancelPreparation={onCancelReptilePreparation}
+              onBookVenue={onBookReptileVenue}
+              onAdvancePresentation={onAdvanceReptilePresentation}
+              onSkipPresentation={onSkipReptilePresentation}
+            />
+          ) : showChroniclesResult && latestChroniclesResult ? (
+            <TournamentResults
+              result={latestChroniclesResult}
+              results={[latestChroniclesResult]}
+              onSelectResult={() => undefined}
+              onBackToOverview={() => setTab("overview")}
+              onViewQualified={onOpenAthletes}
+              knownFormsByContactId={knownFormsByContactId}
+              continuationAction={{
+                label:
+                  state.tournaments.chronicles.activeChallenge?.tournamentResultId ===
+                  latestChroniclesResult.id
+                    ? "Sfida Finale"
+                    : "Prossimo Torneo",
+                onClick: () => setShowChroniclesResult(false),
+              }}
+            />
+          ) : (
+            <ChroniclesView
+              state={stateOverride}
+              onStartTournament={startChronicles}
+              onPlayHand={onPlayChroniclesHand}
+            />
+          )}
+        </section>
       ) : null}
     </main>
   );

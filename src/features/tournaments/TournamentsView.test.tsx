@@ -47,6 +47,13 @@ function createCompletedTournamentState() {
   };
 }
 
+function openChronicles(view: ReturnType<typeof within>) {
+  const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));
+  fireEvent.click(mainTabs.getByRole("tab", { name: "Open" }));
+  const openTabs = within(view.getByRole("tablist", { name: "Tornei Open" }));
+  fireEvent.click(openTabs.getByRole("tab", { name: "Chronicles" }));
+}
+
 describe("TournamentsView", () => {
   it("shows the tournament overview without duplicating the athletes page", () => {
     const state = createStateWithForms();
@@ -610,9 +617,14 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={createStateWithForms()} />);
     const view = within(container);
 
-    expect(view.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+    const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));
+    expect(mainTabs.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+    fireEvent.click(mainTabs.getByRole("tab", { name: "Open" }));
+    const openTabs = within(view.getByRole("tablist", { name: "Tornei Open" }));
+    expect(openTabs.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+    expect(openTabs.getByRole("tab", { name: "Reptile" })).toHaveAttribute("aria-selected", "true");
     expect(view.queryByText("Chronicles of Ludosport")).not.toBeInTheDocument();
-    expect(view.getByText("Calendario della stagione")).toBeVisible();
+    expect(view.getByRole("heading", { name: "Torneo Reptile" })).toBeVisible();
   });
 
   it("selects exactly six athletes and dispatches Chronicles only after five seconds", () => {
@@ -632,8 +644,9 @@ describe("TournamentsView", () => {
       );
       const view = within(container);
 
-      expect(view.getByRole("tab", { name: "Chronicles" })).toBeVisible();
-      fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+      expect(within(view.getByRole("tablist", { name: "Sezioni tornei" }))
+        .queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+      openChronicles(view);
       view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
       expect(view.getByText("6 / 6")).toBeVisible();
       fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
@@ -679,7 +692,7 @@ describe("TournamentsView", () => {
       );
       const view = within(container);
 
-      fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+      openChronicles(view);
       view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
       fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
 
@@ -715,7 +728,7 @@ describe("TournamentsView", () => {
     };
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
-    fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+    openChronicles(view);
 
     const availableRows = () => [
       ...container.querySelectorAll<HTMLElement>(".chronicles-roster-list label"),
@@ -761,7 +774,7 @@ describe("TournamentsView", () => {
         <TournamentsView state={state} onStartChronicles={onStartChronicles} />,
       );
       const view = within(container);
-      fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+      openChronicles(view);
       view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
       fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
 
@@ -839,7 +852,7 @@ describe("TournamentsView", () => {
         <TournamentsView state={state} onStartChronicles={onStartChronicles} />,
       );
       const view = within(container);
-      fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+      openChronicles(view);
       view.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
       fireEvent.click(view.getByRole("button", { name: "Avvia le Chronicles" }));
       act(() => vi.advanceTimersByTime(5_000));
@@ -906,7 +919,7 @@ describe("TournamentsView", () => {
     );
     const view = within(container);
 
-    fireEvent.click(view.getByRole("tab", { name: "Chronicles" }));
+    openChronicles(view);
     fireEvent.click(view.getByRole("button", { name: "Gioca Carta" }));
 
     expect(view.getByRole("heading", { name: "Sfida leggendaria" })).toBeVisible();

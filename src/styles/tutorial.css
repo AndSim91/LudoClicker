@@ -124,15 +124,7 @@
     0 8px 24px rgb(15 57 92 / 30%);
 }
 
-.workspace > main[data-tutorial-treatment="focus"]:has(
-  [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"]
-) {
-  z-index: auto;
-  box-shadow: none;
-}
-
 [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"] {
-  z-index: 5001;
   border-radius: 4px;
   background: var(--surface);
   box-shadow:
