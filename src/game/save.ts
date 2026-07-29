@@ -33,10 +33,8 @@ interface ReadResult {
   incompatible: boolean;
 }
 
-function read(key: string): ReadResult {
+function parseStoredSave(raw: string): ReadResult {
   try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return { state: null, incompatible: false };
     const rawParsed = decodeStoredSave(raw);
     if (!isSaveCompatible(rawParsed)) {
       return { state: null, incompatible: true };
@@ -58,13 +56,28 @@ function read(key: string): ReadResult {
   }
 }
 
-function discardStoredSaves(): void {
+function read(key: string): ReadResult {
   try {
-    localStorage.removeItem(SAVE_KEY);
-    localStorage.removeItem(BACKUP_KEY);
+    const raw = localStorage.getItem(key);
+    return raw ? parseStoredSave(raw) : { state: null, incompatible: false };
   } catch {
     // Il gioco può comunque ripartire in memoria se lo storage non è disponibile.
+    return { state: null, incompatible: false };
   }
+}
+
+function createStoredSaveProtectionFailure(serializedLength: number): SaveGameResult {
+  return {
+    ok: false,
+    error: {
+      reason: "stored-save-protected",
+      operation: "protect-existing",
+      errorName: "StoredSaveRejected",
+      errorMessage:
+        "Il salvataggio esistente non ha superato la decodifica, la migrazione o la validazione.",
+      serializedLength,
+    },
+  };
 }
 
 export function loadGame(now = Date.now()): GameState {
@@ -72,7 +85,6 @@ export function loadGame(now = Date.now()): GameState {
   const backup = primary.state ? { state: null, incompatible: false } : read(BACKUP_KEY);
   const saved = primary.state ?? backup.state;
   if (!saved) {
-    if (primary.incompatible || backup.incompatible) discardStoredSaves();
     return createInitialState(now);
   }
   const reconciled = compactTournamentHistory(recruitEnrolledLegendaryCollaborators(saved, now));
@@ -99,7 +111,41 @@ export function writePreparedGameSave(serialized: string): SaveGameResult {
     return currentResult;
   }
 
+  if (!currentResult) {
+    const storedBackupResult = runStorageOperation("read-backup", () =>
+      localStorage.getItem(BACKUP_KEY),
+    );
+    if (typeof storedBackupResult !== "string" && storedBackupResult !== null) {
+      return storedBackupResult;
+    }
+    if (storedBackupResult && !parseStoredSave(storedBackupResult).state) {
+      return createStoredSaveProtectionFailure(serialized.length);
+    }
+  }
+
   if (currentResult) {
+    const currentSave = parseStoredSave(currentResult);
+    if (!currentSave.state) {
+      const storedBackupResult = runStorageOperation("read-backup", () =>
+        localStorage.getItem(BACKUP_KEY),
+      );
+      if (typeof storedBackupResult !== "string" && storedBackupResult !== null) {
+        return storedBackupResult;
+      }
+      const validBackup = storedBackupResult
+        ? parseStoredSave(storedBackupResult).state
+        : null;
+      if (!validBackup) return createStoredSaveProtectionFailure(serialized.length);
+
+      // Se il caricamento ha recuperato la partita dal backup, ripristiniamo il
+      // principale senza sostituire il backup valido con quello corrotto.
+      const recoveredSaveResult = runStorageOperation("write-primary", () =>
+        localStorage.setItem(SAVE_KEY, serialized),
+      );
+      if (typeof recoveredSaveResult !== "undefined") return recoveredSaveResult;
+      return { ok: true };
+    }
+
     const backupResult = runStorageOperation("write-backup", () =>
       localStorage.setItem(BACKUP_KEY, normalizeStoredSave(currentResult)),
     );

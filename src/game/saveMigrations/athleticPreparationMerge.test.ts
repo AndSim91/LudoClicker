@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
+import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
 
 function legacySave(preparationLevel: number, rancoreLevel: number): GameState {
@@ -27,6 +28,8 @@ describe("Nessun Rancore save migration", () => {
     expect(fromPreparation.upgrades["athletic-preparation"]).toBe(0);
     expect(fromRancore.upgrades["agonist-course-intensity"]).toBe(5);
     expect(fromRancore.upgrades["athletic-preparation"]).toBe(0);
+    expect(isValidGameState(fromPreparation)).toBe(true);
+    expect(isValidGameState(fromRancore)).toBe(true);
   });
 
   it("leaves the sixth merged level available as new progression", () => {

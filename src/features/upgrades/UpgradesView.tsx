@@ -81,7 +81,7 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Contatti", "eventContactsMultiplier");
   addPercentage("Pubblico eventi", "eventAttendanceMultiplier");
   addPercentage("Velocità Redazione/Social", "editorialAutomationMultiplier");
-  addPercentage("Percorso iscrizioni", "enrollmentProgress");
+  addPercentage("Possibilità Iscrizioni", "enrollmentProgress");
   addPercentage("Automazione", "automationMultiplier");
   addPercentage("Entrate", "incomeMultiplier");
   addPercentage("Quote mensili", "membershipIncomeMultiplier");
@@ -184,7 +184,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "writing":
       return `${Math.round(getCreativityProgress(state.upgrades) * 35)}/35 punti Creatività`;
     case "welcome":
-      return `${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") * 100)}% del percorso iscrizioni`;
+      return `${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") * 100)}% della possibilità di Iscrizione`;
     case "equipment":
       return `−${Math.round(getUpgradeEffectTotal(state.upgrades, "equipmentWearReduction") * 100)}% usura · riserva ${formatNumber(getEquipmentPreparedWorkMaximum(state))}`;
     case "organization":

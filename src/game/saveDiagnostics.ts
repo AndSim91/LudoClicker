@@ -1,7 +1,17 @@
 export type SaveFailureReason =
-  "quota-exceeded" | "storage-access-denied" | "storage-unavailable" | "serialization-failed";
+  | "quota-exceeded"
+  | "storage-access-denied"
+  | "storage-unavailable"
+  | "serialization-failed"
+  | "stored-save-protected";
 
-export type SaveOperation = "serialize" | "read-current" | "write-backup" | "write-primary";
+export type SaveOperation =
+  | "serialize"
+  | "read-current"
+  | "read-backup"
+  | "write-backup"
+  | "write-primary"
+  | "protect-existing";
 
 export interface SaveFailure {
   reason: SaveFailureReason;

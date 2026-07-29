@@ -274,15 +274,27 @@ describe("local save", () => {
     expect(getArchivedContactCount(loaded.historyArchive)).toBe(1);
   });
 
-  it("falls back to a fresh state when the save is corrupt", () => {
+  it("falls back in memory without overwriting a corrupt save", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
 
     const state = loadGame(5_000);
     expect(state.createdAt).toBe(5_000);
     expect(state.contacts).toHaveLength(5);
+    expect(saveGame(state, 6_000)).toBe(false);
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBe("not-json");
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBeNull();
   });
 
-  it("forces a fresh game and discards incompatible saves", () => {
+  it("does not overwrite the only remaining corrupt backup", () => {
+    localStorage.setItem("oggetto-nuovi-iscritti.save.backup", "not-json");
+
+    const state = loadGame(5_000);
+    expect(saveGame(state, 6_000)).toBe(false);
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBeNull();
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBe("not-json");
+  });
+
+  it("keeps incompatible saves protected until an explicit reset", () => {
     const state = createInitialState(1_000, "Andrea Ungaro");
     const incompatible = {
       ...state,
@@ -296,8 +308,31 @@ describe("local save", () => {
 
     expect(restarted.createdAt).toBe(5_000);
     expect(restarted.school.euros).toBe(0);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBeNull();
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBeNull();
+    expect(saveGame(restarted, 6_000)).toBe(false);
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save"))
+      .toBe(JSON.stringify(incompatible));
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup"))
+      .toBe(JSON.stringify(incompatible));
+  });
+
+  it("restores a valid backup without replacing it with a corrupt primary", () => {
+    const state = createInitialState(1_000);
+    const backup = JSON.stringify({
+      ...state,
+      school: { ...state.school, euros: 21 },
+    });
+    localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
+    localStorage.setItem("oggetto-nuovi-iscritti.save.backup", backup);
+
+    const recovered = loadGame(2_000);
+    expect(recovered.school.euros).toBe(21);
+    expect(saveGame(
+      { ...recovered, school: { ...recovered.school, euros: 42 } },
+      3_000,
+    )).toBe(true);
+
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBe(backup);
+    expect(loadGame(4_000).school.euros).toBe(42);
   });
 
   it("keeps legacy saves in the first compatibility family", () => {

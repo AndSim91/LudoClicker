@@ -23,13 +23,17 @@ const FAILURE_LABELS: Record<SaveFailureReason, string> = {
   "storage-unavailable": "l'archiviazione locale del browser non \u00e8 disponibile",
   "serialization-failed":
     "i dati della partita non possono essere convertiti nel formato di salvataggio",
+  "stored-save-protected":
+    "il salvataggio esistente non ha superato il caricamento ed è stato protetto",
 };
 
 const OPERATION_LABELS: Record<SaveOperation, string> = {
   serialize: "preparazione dei dati",
   "read-current": "lettura del salvataggio esistente",
+  "read-backup": "lettura della copia di sicurezza",
   "write-backup": "creazione della copia di sicurezza",
   "write-primary": "scrittura del salvataggio principale",
+  "protect-existing": "protezione del salvataggio esistente",
 };
 
 function getFailureSummary(error: SaveFailure | null): string {
@@ -100,7 +104,9 @@ export function SaveStatusPanel({ status, onSaveNow }: SaveStatusPanelProps) {
           </details>
         )}
         <small>
-          {status.phase === "error"
+          {status.error?.reason === "stored-save-protected"
+            ? "Il salvataggio originale è ancora nel browser e non è stato sovrascritto."
+            : status.phase === "error"
             ? "Le modifiche restano in memoria finché questa pagina rimane aperta."
             : `Prossimo salvataggio ${formatCountdown(status.nextAutoSaveAt - now)}`}
         </small>

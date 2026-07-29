@@ -452,6 +452,22 @@ describe("useGameEngine pause", () => {
     setItemSpy.mockRestore();
   });
 
+  it("blocks the initial autosave when loading an invalid stored save", async () => {
+    localStorage.setItem(STORAGE_KEYS.gameSave, "not-json");
+
+    const { result } = renderHook(() => useGameEngine());
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+
+    expect(result.current.saveStatus).toMatchObject({
+      phase: "error",
+      error: {
+        reason: "stored-save-protected",
+        operation: "protect-existing",
+      },
+    });
+    expect(localStorage.getItem(STORAGE_KEYS.gameSave)).toBe("not-json");
+  });
+
   it("uses a one-second heartbeat while continuous automation is active", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     saveGame(

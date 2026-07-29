@@ -116,6 +116,32 @@ describe("OverviewView settings", () => {
     expect(screen.getByText("Dettagli tecnici per il bugfix")).toBeInTheDocument();
   });
 
+  it("confirms that a rejected stored save was not overwritten", () => {
+    render(
+      <OverviewView
+        view="settings"
+        state={createInitialState(1_000)}
+        {...callbacks}
+        saveStatus={{
+          ...callbacks.saveStatus,
+          phase: "error",
+          error: {
+            reason: "stored-save-protected",
+            operation: "protect-existing",
+            errorName: "StoredSaveRejected",
+            errorMessage: "Invalid migrated state",
+            serializedLength: 512_000,
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/salvataggio esistente non ha superato il caricamento/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/salvataggio originale è ancora nel browser/))
+      .toBeInTheDocument();
+  });
+
   it("shows and clears the latest local crash report", () => {
     const reporter = new CrashReporter({
       storage: localStorage,
