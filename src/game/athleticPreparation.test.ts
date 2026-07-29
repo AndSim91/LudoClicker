@@ -56,14 +56,14 @@ describe("instructor athletic preparation", () => {
     expect(locked.contacts[0].arenaBase).toBe(10);
     expect(locked.contacts[0].styleBase).toBe(10);
 
-    const active = gameReducer(preparationState(1), { type: "TICK", now: 2_000 });
+    const active = gameReducer(preparationState(5), { type: "TICK", now: 2_000 });
     expect((active.contacts[0].arenaBase ?? 0) + (active.contacts[0].styleBase ?? 0))
       .toBe(21);
     expect(active.collaborators[0].mastery?.instructor).toBe(1);
   });
 
   it("uses only instructors with no active teaching or personal training", () => {
-    const state = preparationState(1);
+    const state = preparationState(5);
     const busyStudent = {
       ...state.contacts[0],
       training: {
@@ -87,7 +87,7 @@ describe("instructor athletic preparation", () => {
   it.each([7, 8])(
     "pauses athletic preparation during summer month %i",
     (currentMonth) => {
-      const state = preparationState(1);
+      const state = preparationState(5);
       const paused = gameReducer({
         ...state,
         school: { ...state.school, currentMonth },

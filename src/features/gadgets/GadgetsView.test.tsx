@@ -6,7 +6,15 @@ import type {
   GadgetRarityState,
   GameState,
 } from "../../game/types";
+import { GadgetProductArtwork } from "./GadgetArtwork";
 import { GadgetsView } from "./GadgetsView";
+
+vi.mock("./GadgetArtwork", () => ({
+  GadgetProductArtwork: vi.fn(({ productId }: { productId: string }) => (
+    <div data-testid={`gadget-artwork-${productId}`} />
+  )),
+  GadgetWorkshopArtwork: () => <div data-testid="gadget-workshop-artwork" />,
+}));
 
 afterEach(cleanup);
 
@@ -60,6 +68,47 @@ function withCommonRarity(
 }
 
 describe("GadgetsView", () => {
+  it("rerenders only the product card whose compact data changed", () => {
+    const state = unlockedState();
+    const actions = handlers();
+    const view = render(<GadgetsView state={state} {...actions} />);
+    const artwork = vi.mocked(GadgetProductArtwork);
+    artwork.mockClear();
+    const updatedWristband = {
+      ...state.gadgets.products.wristband,
+      rarities: {
+        ...state.gadgets.products.wristband.rarities,
+        common: {
+          ...state.gadgets.products.wristband.rarities.common,
+          unitsSold: 1,
+        },
+      },
+    };
+
+    view.rerender(
+      <GadgetsView
+        state={{
+          ...state,
+          contacts: Array.from({ length: 1_000 }, (_, index) => ({
+            ...state.contacts[0],
+            id: `stress-contact-${index}`,
+          })),
+          gadgets: {
+            ...state.gadgets,
+            products: {
+              ...state.gadgets.products,
+              wristband: updatedWristband,
+            },
+          },
+        }}
+        {...actions}
+      />,
+    );
+
+    expect(artwork).toHaveBeenCalledTimes(1);
+    expect(artwork.mock.calls[0][0]).toMatchObject({ productId: "wristband" });
+  });
+
   it("shows the compact catalog information and starts the paid Polsino project", () => {
     const actions = handlers();
     render(<GadgetsView state={unlockedState()} {...actions} />);
@@ -172,6 +221,43 @@ describe("GadgetsView", () => {
     expect(screen.getByRole("button", { name: /Migliora qualità.*1250,00/ })).toBeVisible();
     expect(document.querySelector(".gadget-product-card.rarity-rare")).toBeTruthy();
     expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
+  });
+
+  it("uses the left rail as progress toward a guaranteed next rarity", () => {
+    const initial = unlockedState();
+    const product = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 93, unitsSold: 163 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const selling: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: { ...initial.gadgets.products, wristband: product },
+      },
+    };
+
+    render(<GadgetsView state={selling} {...handlers()} />);
+
+    const rail = screen.getByRole("progressbar", {
+      name: "Progresso verso lo sblocco sicuro di Raro",
+    });
+    expect(rail).toHaveAttribute("aria-valuenow", "38.5");
+    expect(rail.style.getPropertyValue("--gadget-current-rarity-color"))
+      .toBe("var(--rarity-common-accent)");
+    expect(rail.style.getPropertyValue("--gadget-next-rarity-color"))
+      .toBe("var(--rarity-rare-accent)");
+    expect(rail.style.getPropertyValue("--gadget-rarity-progress"))
+      .toBe("38.5%");
+    expect(rail).toHaveAttribute("tabindex", "0");
+    const tooltip = screen.getByRole("tooltip", {
+      name: "Possibilità di salto a Raro: 38,5%",
+    });
+    expect(rail).toHaveAttribute("aria-describedby", tooltip.id);
+    expect(rail.querySelector(".gadget-product-rail-fill")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Migliora qualità/ }))
+      .not.toHaveAttribute("style");
   });
 
   it("announces the offered rarity in the rhythm game without showing its chance", () => {

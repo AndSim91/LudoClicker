@@ -16,10 +16,11 @@ import {
   applyQualifyingCourseDiscount,
   getAnnualFormTrainingLimit,
   getUpgradeEffectTotal,
+  isAgonistCourseUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
-import { GAME_CONFIG } from "./config";
+import { GAME_CONFIG, getTechnicalArenaDurationMs } from "./config";
 import { roundCurrency } from "./economy";
 import { reserveSwords } from "./equipment";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
@@ -87,9 +88,8 @@ export function assignCollaborator(
 }
 
 export function getAgonistCourseCost(state: GameState): number {
-  const arenaLevel = state.upgrades["technical-arena"] ?? 0;
-  if (arenaLevel < 3) return GAME_CONFIG.technicalArenaBaseCost;
-  return GAME_CONFIG.agonistCourseBaseCost;
+  if (isAgonistCourseUnlocked(state.upgrades)) return GAME_CONFIG.agonistCourseBaseCost;
+  return GAME_CONFIG.technicalArenaBaseCost;
 }
 
 export function startAgonistCourse(
@@ -99,6 +99,7 @@ export function startAgonistCourse(
   now: number,
 ): GameState {
   const arenaLevel = state.upgrades["technical-arena"] ?? 0;
+  const agonistCourseUnlocked = isAgonistCourseUnlocked(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   if (
     arenaLevel < 1 ||
@@ -128,7 +129,7 @@ export function startAgonistCourse(
   const remainingAnnualSlots = annualTrainingLimit - usedAnnualSlots;
   const capacity = selectInstructorCapacity(state);
   const cost = getAgonistCourseCost(state);
-  const agonistCourseGrantsStats = arenaLevel >= 3;
+  const agonistCourseGrantsStats = agonistCourseUnlocked;
   if (
     !student ||
     !athleteContact ||
@@ -169,13 +170,9 @@ export function startAgonistCourse(
     };
   }
 
-  const baseDuration = arenaLevel >= 4
-    ? GAME_CONFIG.agonistCourseImprovedDurationMs
-    : arenaLevel >= 3
-      ? GAME_CONFIG.agonistCourseDurationMs
-      : arenaLevel >= 2
-        ? GAME_CONFIG.technicalArenaImprovedDurationMs
-        : GAME_CONFIG.technicalArenaDurationMs;
+  const baseDuration = agonistCourseUnlocked
+    ? GAME_CONFIG.agonistCourseDurationMs
+    : getTechnicalArenaDurationMs(arenaLevel);
   const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
   const training = scheduleTraining(
     state,

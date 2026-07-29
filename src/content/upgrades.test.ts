@@ -17,6 +17,7 @@ import {
   getTrialDurationMs,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
 } from "./upgrades";
 
@@ -140,12 +141,23 @@ describe("upgrade catalog", () => {
       "gadget-cross-selling": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
     expect(costsFor("instructors")).toEqual({
-      "technical-arena": [1_000, 2_000, 5_000, 7_500],
+      "technical-arena": [1_000, 2_000, 5_000, 7_500, 10_000],
       "instructor-versatility": [2_000, 4_000],
       "sis-accreditation": [5_000, 10_000, 20_000, 40_000],
       "cost-of-service": [2_500, 5_000, 10_000, 25_000, 50_000],
       "promiscuous-instructor": [10_000, 25_000, 50_000, 100_000, 200_000, 400_000],
-      "agonist-course-intensity": [25_000, 50_000, 100_000, 200_000, 400_000, 800_000],
+      "agonist-course-intensity": [
+        25_000,
+        50_000,
+        100_000,
+        200_000,
+        400_000,
+        800_000,
+        1_600_000,
+        3_200_000,
+        6_400_000,
+        12_800_000,
+      ],
       pagosport: [100_000, 200_000, 400_000],
     });
     const gadget = definitionsFor("gadget")[0];
@@ -237,15 +249,25 @@ describe("Teaching branch", () => {
     )!;
     expect(intensity.title).toBe("Nessun Rancore");
     expect(intensity.emphasizedTitlePart).toBe("Rancor");
-    expect(intensity.maxLevel).toBe(6);
-    expect(intensity.effectStartingLevel).toBe(2);
+    expect(intensity.maxLevel).toBe(10);
     expect(intensity.requiredUpgradeLevels).toEqual({
       "promiscuous-instructor": 6,
       "technical-arena": 3,
     });
     expect(Array.from({ length: intensity.maxLevel }, (_, level) =>
       getUpgradeCost(intensity, level)
-    )).toEqual([25_000, 50_000, 100_000, 200_000, 400_000, 800_000]);
+    )).toEqual([
+      25_000,
+      50_000,
+      100_000,
+      200_000,
+      400_000,
+      800_000,
+      1_600_000,
+      3_200_000,
+      6_400_000,
+      12_800_000,
+    ]);
   });
 
   it("applies SIS speed, course discounts, group teaching and PagoSport cumulatively", () => {
@@ -262,20 +284,33 @@ describe("Teaching branch", () => {
     expect(getPagoSportAllCourseSpeedBonus(levels)).toBe(0.5);
   });
 
-  it("unlocks preparation at level one and applies both bonuses from levels two to six", () => {
+  it("unlocks the course at level one and applies the two progressions at their levels", () => {
     const initial = createInitialUpgradeLevels();
     const levelOne = levelsWith({ "agonist-course-intensity": 1 });
     const levelTwo = levelsWith({ "agonist-course-intensity": 2 });
+    const levelFour = levelsWith({ "agonist-course-intensity": 4 });
+    const levelFive = levelsWith({ "agonist-course-intensity": 5 });
     const levelSix = levelsWith({ "agonist-course-intensity": 6 });
+    const levelNine = levelsWith({ "agonist-course-intensity": 9 });
+    const levelTen = levelsWith({ "agonist-course-intensity": 10 });
 
+    expect(isAgonistCourseUnlocked(initial)).toBe(false);
+    expect(isAgonistCourseUnlocked(levelOne)).toBe(true);
     expect(isAthleticPreparationUnlocked(initial)).toBe(false);
-    expect(isAthleticPreparationUnlocked(levelOne)).toBe(true);
+    expect(isAthleticPreparationUnlocked(levelOne)).toBe(false);
     expect(getAgonistCourseMaximumStatGain(levelOne)).toBe(1);
     expect(getUpgradeEffectTotal(levelOne, "athleticPreparationPower")).toBe(0);
     expect(getAgonistCourseMaximumStatGain(levelTwo)).toBe(2);
-    expect(getUpgradeEffectTotal(levelTwo, "athleticPreparationPower")).toBeCloseTo(0.1);
-    expect(getAgonistCourseMaximumStatGain(levelSix)).toBe(6);
-    expect(getUpgradeEffectTotal(levelSix, "athleticPreparationPower")).toBeCloseTo(0.5);
+    expect(getAgonistCourseMaximumStatGain(levelFour)).toBe(4);
+    expect(isAthleticPreparationUnlocked(levelFour)).toBe(false);
+    expect(isAthleticPreparationUnlocked(levelFive)).toBe(true);
+    expect(getUpgradeEffectTotal(levelFive, "athleticPreparationPower")).toBe(0);
+    expect(getAgonistCourseMaximumStatGain(levelSix)).toBe(4);
+    expect(getUpgradeEffectTotal(levelSix, "athleticPreparationPower")).toBeCloseTo(0.1);
+    expect(getAgonistCourseMaximumStatGain(levelNine)).toBe(4);
+    expect(getUpgradeEffectTotal(levelNine, "athleticPreparationPower")).toBeCloseTo(0.4);
+    expect(getAgonistCourseMaximumStatGain(levelTen)).toBe(5);
+    expect(getUpgradeEffectTotal(levelTen, "athleticPreparationPower")).toBeCloseTo(0.5);
   });
 });
 

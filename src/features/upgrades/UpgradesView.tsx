@@ -12,12 +12,14 @@ import {
   UPGRADE_DEFINITIONS,
   getCreativityProgress,
   getEquipmentPreparedWorkMaximum,
+  getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
   getFirstIncompleteUpgradePrerequisite,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  isAgonistCourseUnlocked,
   isCourseXUnlocked,
   type UpgradeCategory,
   type UpgradeDefinition,
@@ -112,10 +114,7 @@ function getUpgradeBenefitsSummary(state: GameState) {
   if (isCourseXUnlocked(state.upgrades)) {
     benefits.push({ label: "Corso X", value: "attivo" });
   }
-  const agonistCourseMaximum = 1 + getUpgradeEffectTotal(
-    state.upgrades,
-    "agonistCourseStatMaximum",
-  );
+  const agonistCourseMaximum = getAgonistCourseMaximumStatGain(state.upgrades);
   if (agonistCourseMaximum > 1) {
     benefits.push({
       label: "Bonus Corso Agonisti",
@@ -125,9 +124,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
 
   const agonistCourseTier = getUpgradeEffectTotal(state.upgrades, "agonistCourseTier");
   if (agonistCourseTier > 0) {
+    const agonistCourseUnlocked = isAgonistCourseUnlocked(state.upgrades);
     benefits.push({
-      label: agonistCourseTier >= 3 ? "Corso Agonisti" : "Arena Tecnica",
-      value: `livello ${agonistCourseTier}`,
+      label: agonistCourseUnlocked ? "Corso Agonisti" : "Arena Tecnica",
+      value: agonistCourseUnlocked ? "attivo" : `livello ${agonistCourseTier}`,
     });
   }
   if (state.unlocks.social) {
@@ -191,8 +191,8 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "automationMultiplier") * 100)}% automazione`;
     case "instructors":
       return `Forme annue ${getAnnualFormTrainingLimit(state.upgrades)}/3 · ${
-        (state.upgrades["technical-arena"] ?? 0) >= 3
-          ? `Corso Agonisti fino a +${1 + getUpgradeEffectTotal(state.upgrades, "agonistCourseStatMaximum")}`
+        isAgonistCourseUnlocked(state.upgrades)
+          ? `Corso Agonisti fino a +${getAgonistCourseMaximumStatGain(state.upgrades)}`
           : (state.upgrades["technical-arena"] ?? 0) >= 1
             ? "Arena Tecnica attiva"
             : "Corsi agonistici da sbloccare"

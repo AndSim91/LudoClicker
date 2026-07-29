@@ -74,6 +74,6 @@ describe("PagoSport", () => {
     expect(started).toBe(state);
     expect(actuallyStarted.school.euros).toBe(825);
     expect(actuallyStarted.collaborators[0].training?.completesAt).toBe(15_333);
-    expect(getAgonistCourseCost(state)).toBe(300);
+    expect(getAgonistCourseCost(state)).toBe(500);
   });
 });

@@ -194,11 +194,11 @@ export function getAvailableInstructorCourses(
 
 export function getInstructorTeachingTitle(
   entry: InstructorTeachingEntry,
-  technicalArenaLevel: number,
+  agonistCourseUnlocked: boolean,
 ): string {
   return getTrainingCourseTitle(
     entry.training.formId,
-    technicalArenaLevel,
+    agonistCourseUnlocked,
     entry.training.agonistCourseGrantsStats,
   );
 }

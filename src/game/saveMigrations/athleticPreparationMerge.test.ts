@@ -24,17 +24,17 @@ describe("Nessun Rancore save migration", () => {
     const fromRancore = migrate(legacySave(1, 4)) as GameState;
 
     expect(fromPreparation.version).toBe(GAME_CONFIG.version);
-    expect(fromPreparation.upgrades["agonist-course-intensity"]).toBe(4);
+    expect(fromPreparation.upgrades["agonist-course-intensity"]).toBe(8);
     expect(fromPreparation.upgrades["athletic-preparation"]).toBe(0);
-    expect(fromRancore.upgrades["agonist-course-intensity"]).toBe(5);
+    expect(fromRancore.upgrades["agonist-course-intensity"]).toBe(9);
     expect(fromRancore.upgrades["athletic-preparation"]).toBe(0);
     expect(isValidGameState(fromPreparation)).toBe(true);
     expect(isValidGameState(fromRancore)).toBe(true);
   });
 
-  it("leaves the sixth merged level available as new progression", () => {
+  it("leaves the tenth level available as new progression", () => {
     const migrated = migrate(legacySave(5, 4)) as GameState;
 
-    expect(migrated.upgrades["agonist-course-intensity"]).toBe(5);
+    expect(migrated.upgrades["agonist-course-intensity"]).toBe(9);
   });
 });

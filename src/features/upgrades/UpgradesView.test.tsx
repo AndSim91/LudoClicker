@@ -136,7 +136,21 @@ describe("UpgradesView", () => {
     }));
 
     expect(screen.getByText(
-      "L1 Arena Tecnica · L2 durata 120→60 s · L3 Corso Agonisti (+1/+1 annuo) · L4 durata 60→30 s",
+      "L1 Arena Tecnica · L2 durata 120→100 s · L3 durata 100→80 s · L4 durata 80→60 s · L5 durata 60→40 s",
+    )).toBeVisible();
+  });
+
+  it("shows the complete Nessun Rancore progression", () => {
+    render(
+      <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", {
+      name: /Apri dettagli Nessun Rancore/,
+    }));
+
+    expect(screen.getByText(
+      "L1 Corso Agonisti (€1.000, 60 s) · L2–L4 massimo fino a +4/+4 · L5 Preparazione agonistica · L6–L9 +10% efficacia · L10 +10% efficacia e massimo +5/+5",
     )).toBeVisible();
   });
 

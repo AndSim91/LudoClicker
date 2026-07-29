@@ -68,7 +68,7 @@ describe("offline progress disabled", () => {
         assignment: "instructor" as const,
         rarity: "legendary" as const,
       }],
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
     };
     const result = simulateOfflineProgress(state, 121_000);
 

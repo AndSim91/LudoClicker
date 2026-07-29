@@ -9,6 +9,8 @@ import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseR
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
 import { migrateReptileState } from "./reptile";
 import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
+import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
+import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
 import type { MigratableState } from "./types";
 
 describe("Gadget rarity save migration", () => {
@@ -41,14 +43,18 @@ describe("Gadget rarity save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateFirstCollaboratorTutorialState(
-      migrateReptileState(migrateUpgradeRevampState(
-        migrateSecretLegendaryBaseRebalanceState(
-          migrateSecretLegendaryCircuitBoostRemovalState(
-            migrateGadgetRarityState(legacy),
-          ),
+    const migrated = migrateAgonistCourseProgressionState(
+      migrateAthleticPreparationMergeState(
+        migrateFirstCollaboratorTutorialState(
+          migrateReptileState(migrateUpgradeRevampState(
+            migrateSecretLegendaryBaseRebalanceState(
+              migrateSecretLegendaryCircuitBoostRemovalState(
+                migrateGadgetRarityState(legacy),
+              ),
+            ),
+          )),
         ),
-      )),
+      ),
     ) as GameState;
 
     expect(migrated.version).toBe(GAME_CONFIG.version);

@@ -57,6 +57,7 @@ function teachingState(): GameState {
     upgrades: {
       ...initial.upgrades,
       "technical-arena": 3,
+      "agonist-course-intensity": 1,
     },
   };
 }

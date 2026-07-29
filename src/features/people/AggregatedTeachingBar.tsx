@@ -18,12 +18,12 @@ const MAX_DETAILED_TEACHING_COURSES = 24;
 
 function TeachingCourseLogo({
   courseId,
-  technicalArenaLevel,
+  agonistCourseUnlocked,
 }: {
   courseId: TrainingCourseId;
-  technicalArenaLevel: number;
+  agonistCourseUnlocked: boolean;
 }) {
-  const title = getTrainingCourseTitle(courseId, technicalArenaLevel);
+  const title = getTrainingCourseTitle(courseId, agonistCourseUnlocked);
   if (isAgonistCourse(courseId)) {
     return (
       <span className="aggregated-teaching-course-logo" title={title}>
@@ -31,7 +31,7 @@ function TeachingCourseLogo({
           src={AGONIST_COURSE_LOGO.assetPath}
           alt={`${title} — emblema generato`}
         />
-        {technicalArenaLevel >= 3 ? (
+        {agonistCourseUnlocked ? (
           <span className="agonist-course-star" aria-hidden="true">★</span>
         ) : null}
       </span>
@@ -53,12 +53,12 @@ function TeachingCourseLogo({
 export function AggregatedTeachingBar({
   entries,
   now,
-  technicalArenaLevel,
+  agonistCourseUnlocked,
   variant = "teaching",
 }: {
   entries: readonly InstructorTeachingEntry[];
   now: number;
-  technicalArenaLevel: number;
+  agonistCourseUnlocked: boolean;
   variant?: "teaching" | "internal-instructor";
 }) {
   const groups = useMemo(
@@ -76,7 +76,7 @@ export function AggregatedTeachingBar({
     >
       {groups.map((group) => {
         const progress = getAggregateInstructorProgress(group.entries, now) ?? 0;
-        const title = getTrainingCourseTitle(group.courseId, technicalArenaLevel);
+        const title = getTrainingCourseTitle(group.courseId, agonistCourseUnlocked);
         const courseCountLabel = `${group.entries.length} ${group.entries.length === 1 ? "corso" : "corsi"}`;
         const compact = group.entries.length > MAX_DETAILED_TEACHING_COURSES;
         const waitingCourseCount = compact
@@ -95,7 +95,7 @@ export function AggregatedTeachingBar({
             <span className="aggregated-teaching-course">
               <TeachingCourseLogo
                 courseId={group.courseId}
-                technicalArenaLevel={technicalArenaLevel}
+                agonistCourseUnlocked={agonistCourseUnlocked}
               />
               <strong title={title}>{title}</strong>
             </span>

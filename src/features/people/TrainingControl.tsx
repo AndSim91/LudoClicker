@@ -18,6 +18,7 @@ import {
 import {
   applyQualifyingCourseDiscount,
   getAnnualFormTrainingLimit,
+  isAgonistCourseUnlocked,
   isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
 } from "../../content/upgrades";
@@ -115,11 +116,11 @@ function getDisplayedTrainingCost(
 function InstructorTeachingSummary({
   entries,
   now,
-  technicalArenaLevel,
+  agonistCourseUnlocked,
 }: {
   entries: InstructorTeachingEntry[];
   now: number;
-  technicalArenaLevel: number;
+  agonistCourseUnlocked: boolean;
 }) {
   return (
     <div className="instructor-teaching" aria-label="Allievi in formazione">
@@ -136,7 +137,7 @@ function InstructorTeachingSummary({
               <small>
                 {getTrainingCourseTitle(
                   entry.training.formId,
-                  technicalArenaLevel,
+                  agonistCourseUnlocked,
                   entry.training.agonistCourseGrantsStats,
                 )}
                 {definition?.branch ? ` · ${definition.branch}` : ""}
@@ -232,7 +233,7 @@ export function InstructorCompactActivity({
               <strong>{entry.displayName}</strong>
               <small>{getTrainingCourseTitle(
                 entry.training.formId,
-                state.upgrades["technical-arena"] ?? 0,
+                isAgonistCourseUnlocked(state.upgrades),
                 entry.training.agonistCourseGrantsStats,
               )}</small>
             </span>
@@ -459,7 +460,7 @@ export function InstructorPanel({
         ? <InstructorTeachingSummary
             entries={teaching}
             now={now}
-            technicalArenaLevel={state.upgrades["technical-arena"] ?? 0}
+            agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
           />
         : <small>In attesa del prossimo allievo compatibile.</small>}
       <TrainingControl
@@ -553,7 +554,7 @@ export function TrainingControl({
         ? `Corso Tecnico SIS · ${definition?.longName ?? "Forma"}`
         : getTrainingCourseTitle(
             student.training.formId,
-            state.upgrades["technical-arena"] ?? 0,
+            isAgonistCourseUnlocked(state.upgrades),
             student.training.agonistCourseGrantsStats,
           );
     const progress = getTrainingProgress(student.training, now);

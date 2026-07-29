@@ -6,6 +6,8 @@ import type { GameState } from "../types";
 import { migrateUpgradeRevampState } from "./upgradeRevamp";
 import { migrateReptileState } from "./reptile";
 import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
+import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
+import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
 import type { MigratableState } from "./types";
 
 describe("upgrade revamp save migration", () => {
@@ -39,8 +41,12 @@ describe("upgrade revamp save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateFirstCollaboratorTutorialState(
-      migrateReptileState(migrateUpgradeRevampState(legacy)),
+    const migrated = migrateAgonistCourseProgressionState(
+      migrateAthleticPreparationMergeState(
+        migrateFirstCollaboratorTutorialState(
+          migrateReptileState(migrateUpgradeRevampState(legacy)),
+        ),
+      ),
     ) as GameState;
 
     expect(migrated.version).toBe(GAME_CONFIG.version);

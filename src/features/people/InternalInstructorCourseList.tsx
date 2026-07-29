@@ -23,7 +23,7 @@ export function InternalInstructorCourseList({
     <AggregatedTeachingBar
       entries={progressEntries}
       now={now}
-      technicalArenaLevel={0}
+      agonistCourseUnlocked={false}
       variant="internal-instructor"
     />
   );

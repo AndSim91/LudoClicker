@@ -76,19 +76,19 @@ describe("buyUpgrade prerequisites", () => {
 
   it("opens PagoSport only after completing Nessun Rancore", () => {
     const initial = createInitialState(1_000);
-    const levelFive = {
+    const levelNine = {
       ...initial,
       school: { ...initial.school, euros: 200_000 },
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 9 },
     };
 
-    expect(buyUpgrade(levelFive, "pagosport")).toBe(levelFive);
+    expect(buyUpgrade(levelNine, "pagosport")).toBe(levelNine);
 
-    const levelSix = {
-      ...levelFive,
-      upgrades: { ...levelFive.upgrades, "agonist-course-intensity": 6 },
+    const levelTen = {
+      ...levelNine,
+      upgrades: { ...levelNine.upgrades, "agonist-course-intensity": 10 },
     };
-    expect(buyUpgrade(levelSix, "pagosport").upgrades.pagosport).toBe(1);
+    expect(buyUpgrade(levelTen, "pagosport").upgrades.pagosport).toBe(1);
   });
 
   it("does not grant Instructor certificates when PagoSport reaches level two", () => {
@@ -111,7 +111,7 @@ describe("buyUpgrade prerequisites", () => {
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,
-        "agonist-course-intensity": 6,
+        "agonist-course-intensity": 10,
         pagosport: 1,
       },
     };

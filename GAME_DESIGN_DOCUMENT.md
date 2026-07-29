@@ -1107,22 +1107,20 @@ Regole:
   **25%** e costano quindi il **75% del costo base**;
 - **Percorso Tecnico** è il primo potenziamento del ramo Insegnamento, è disponibile
   appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
-  “Sblocca i corsi per atleti agonisti: protegge la scuola dal rischio di
-  perdere atleti alla fine dell'anno e, con la giusta attenzione, li renderà
-  sempre più competitivi.”;
+  “Sblocca Arena Tecnica e ne riduce progressivamente la durata.”;
 - al livello 1 Percorso Tecnico costa **€1.000** e sblocca Arena Tecnica come formazione
   automatica, sempre attiva e non disabilitabile separatamente. La formazione
-  costa **€300 per atleta**, dura 120 secondi, non migliora le statistiche ma
+  costa **€500 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni;
-- il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **60
+- il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **100
   secondi**;
-- il livello 3 costa **€5.000**, trasforma la formazione in **Corso Agonisti**,
-  ne porta il costo base a **€1.000** e attiva integralmente i miglioramenti
-  permanenti di Arena e Stile; la durata base resta di 60 secondi e il logo
-  della formazione riceve una stella gialla nello stile delle qualifiche da
-  Istruttore;
-- il livello 4 costa **€7.500** e porta la durata base del Corso Agonisti a **30
+- il livello 3 costa **€5.000** e porta la durata base di Arena Tecnica a **80
   secondi**;
+- il livello 4 costa **€7.500** e porta la durata base di Arena Tecnica a **60
+  secondi**;
+- il livello 5 costa **€10.000** e porta la durata base di Arena Tecnica a **40
+  secondi**. Il costo della formazione resta **€500 per atleta** a tutti i
+  livelli;
 - l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un
   collaboratore inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
@@ -1131,12 +1129,13 @@ Regole:
   annuali ancora disponibili** e protegge subito l'atleta dal controllo degli
   abbandoni. Lo stesso atleta non può iniziarlo più di una volta nello stesso
   periodo luglio–giugno, anche quando i potenziamenti gli concedono altri slot;
-- Arena Tecnica ai livelli 1 e 2 non modifica Arena, Stile o il totale storico
-  dei Corsi Agonisti. Dal livello 3, completare il Corso Agonisti aumenta
-  permanentemente Arena e Stile. Senza potenziamenti assegna **+1 Arena** e **+1
-  Stile**; **Nessun *Rancor*e** sblocca al livello 1 la Preparazione agonistica.
-  Dal livello 2 al 6 aumenta di +1/+1 per livello il massimo casuale del Corso
-  Agonisti, fino a **+6**, mantenendo +1 come minimo. Il risultato casuale di
+- Arena Tecnica non modifica Arena, Stile o il totale storico dei Corsi
+  Agonisti. **Nessun *Rancor*e** al livello 1 la sostituisce con il **Corso
+  Agonisti**, che costa **€1.000 per atleta**, dura **60 secondi**, riceve una
+  stella gialla nel logo e aumenta permanentemente Arena e Stile. Il corso
+  assegna almeno **+1 Arena** e **+1 Stile**. I livelli 2, 3 e 4 di Nessun
+  *Rancor*e aumentano il massimo rispettivamente a +2/+2, +3/+3 e +4/+4; il
+  livello 10 lo porta a **+5/+5**. Il risultato casuale di
   ciascuna caratteristica viene moltiplicato per
   il numero di slot residui consumati dal corso. I bonus effettivi e il numero
   di completamenti si accumulano senza limite negli anni successivi e sono
@@ -1199,12 +1198,14 @@ Regole:
   Istruttore da due a sei allievi contemporanei; il sesto livello concede a
   tutti un secondo slot di formazione nel periodo luglio–giugno;
 - **Nessun *Rancor*e** è successivo a Didattica di gruppo e richiede anche
-  Percorso Tecnico al livello 3. Il livello 1 sblocca Preparazione agonistica;
-  ciascun livello dal 2 al 6 aumenta di +1/+1 il massimo casuale del Corso
-  Agonisti e aggiunge il 10% di efficacia alla Preparazione agonistica. Al
-  livello 6 il massimo casuale arriva a +6/+6 e l'efficacia aggiuntiva al 50%;
+  Percorso Tecnico al livello 3. Il livello 1 sblocca il Corso Agonisti, che
+  sostituisce Arena Tecnica; i livelli 2, 3 e 4 aumentano di +1/+1 il suo
+  massimo casuale, fino a +4/+4. Il livello 5 sblocca Preparazione agonistica;
+  i livelli dal 6 al 9 ne aumentano l'efficacia del 10% ciascuno. Il livello 10
+  aggiunge un ulteriore 10% di efficacia e porta il massimo del Corso Agonisti
+  a +5/+5. L'efficacia aggiuntiva massima della preparazione è quindi del 50%;
 - **PagoSport** compare dopo **Nessun *Rancor*e** e richiede il completamento
-  dei suoi sei livelli: il livello 1 concede uno slot di
+  dei suoi dieci livelli: il livello 1 concede uno slot di
   formazione annuale aggiuntivo; il livello 2 aumenta del **50%** la velocità
   dei Corsi Tecnici; il livello 3 aumenta inoltre del **50%** la velocità di
   tutte le formazioni, comprese Forme, Corsi Istruttori, Corsi Tecnici, Arena
@@ -1437,21 +1438,21 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
-| Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→60 s; L3 Corso Agonisti con +1 Arena/+1 Stile; L4 durata 60→30 s | 1.000 / 2.000 / 5.000 / 7.500 € |
+| Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
 | Master of none | +1 ramo d'arma accessibile agli Istruttori per livello | 2.000 / 4.000 € |
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
-| Nessun *Rancor*e | L1 sblocca Preparazione agonistica; L2–L6 +1/+1 al massimo del Corso Agonisti e +10% efficacia Preparazione agonistica per livello | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 € |
+| Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
 | PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
 
-Al livello 3 di Percorso Tecnico, quando Arena Tecnica diventa Corso Agonisti,
-il logo della formazione riceve una stella gialla nello stesso stile usato per
-la qualifica da Istruttore. Il Corso Agonisti base assegna sempre +1/+1 in un
-anno. **Nessun *Rancor*e** ha sei livelli da 25.000 / 50.000 / 100.000 /
-200.000 / 400.000 / 800.000 €: il primo sblocca Preparazione agonistica; i
-successivi cinque portano progressivamente il massimo casuale a +6/+6 e
-l'efficacia aggiuntiva della preparazione al 50%.
+Al livello 1 di Nessun *Rancor*e, Arena Tecnica diventa Corso Agonisti e il
+logo della formazione riceve una stella gialla nello stesso stile usato per la
+qualifica da Istruttore. Il Corso Agonisti base assegna sempre almeno +1/+1 in
+un anno. I livelli 2–4 ne portano progressivamente il massimo a +4/+4; il
+livello 5 sblocca Preparazione agonistica; i livelli 6–10 portano l'efficacia
+aggiuntiva della preparazione al 50%, mentre il livello 10 porta anche il
+massimo del corso a +5/+5.
 
 ### 10.8 Organizzazione
 
@@ -2239,6 +2240,13 @@ attuale:
 probabilitàPassaggio = min(100%, floor(venduti / 10) × 1%
   + floor(qualità / 10) × 2,5%)
 ```
+
+La barra verticale a sinistra della scheda prodotto rappresenta questo valore:
+si riempie dal basso verso l'alto usando il colore della rarità successiva e,
+quando è piena, l'occasione di raggiungerla è garantita. La qualità del
+prodotto resta invece rappresentata soltanto nella riga della singola rarità.
+Passando sulla barra con il mouse, o raggiungendola da tastiera, un tooltip
+mostra la percentuale esatta e la rarità di destinazione.
 
 Se l'estrazione riesce, la prova usa lo sfondo della rarità raggiungibile e
 mostra l'etichetta testuale `Occasione: <rarità>`, senza mostrare la

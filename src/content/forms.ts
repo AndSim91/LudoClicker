@@ -121,11 +121,11 @@ export function isAgonistCourse(id: TrainingCourseId): id is typeof AGONIST_COUR
 
 export function getTrainingCourseTitle(
   id: TrainingCourseId,
-  technicalArenaLevel = 3,
+  agonistCourseUnlocked = true,
   agonistCourseGrantsStats?: boolean,
 ): string {
   if (!isAgonistCourse(id)) return getFormDefinition(id)?.longName ?? "Formazione";
-  const grantsStats = agonistCourseGrantsStats ?? technicalArenaLevel >= 3;
+  const grantsStats = agonistCourseGrantsStats ?? agonistCourseUnlocked;
   return grantsStats ? "Corso Agonisti" : "Arena Tecnica";
 }
 

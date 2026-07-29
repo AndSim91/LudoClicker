@@ -5,6 +5,7 @@ import { EquipmentConditionBar } from "../../components/equipment/EquipmentCondi
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
   getUpgradeEffectTotal,
+  isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
   isOperationalPrioritiesUnlocked,
@@ -404,7 +405,7 @@ function InstructorSectorCard({
               <AggregatedTeachingBar
                 entries={entries}
                 now={now}
-                technicalArenaLevel={state.upgrades["technical-arena"] ?? 0}
+                agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
               />
               <p>
                 <strong>{entries.length} {entries.length === 1 ? "corso attivo" : "corsi attivi"}</strong>

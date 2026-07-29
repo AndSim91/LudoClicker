@@ -498,7 +498,7 @@ describe("useGameEngine pause", () => {
             rarity: "ultra-rare",
           },
         ],
-        upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
+        upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
       },
       1_000,
     );

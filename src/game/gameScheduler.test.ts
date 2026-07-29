@@ -149,7 +149,7 @@ describe("game scheduler", () => {
         index === 0 ? { ...contact, status: "enrolled" as const } : contact
       ),
       collaborators: [collaborator("instructor")],
-      upgrades: { ...state.upgrades, "agonist-course-intensity": 1 },
+      upgrades: { ...state.upgrades, "agonist-course-intensity": 5 },
     };
 
     expect(needsAutomationHeartbeat(automated)).toBe(true);
@@ -393,7 +393,7 @@ describe("game scheduler", () => {
         index === 0 ? { ...contact, status: "enrolled" as const } : contact
       ),
       collaborators: [collaborator("instructor")],
-      upgrades: { ...state.upgrades, "agonist-course-intensity": 1 },
+      upgrades: { ...state.upgrades, "agonist-course-intensity": 5 },
     };
     const targetNow = NOW +
       (MAX_CATCH_UP_STEPS_PER_TICK + 1) * AUTOMATION_HEARTBEAT_MS;

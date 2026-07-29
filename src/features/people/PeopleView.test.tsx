@@ -378,7 +378,7 @@ describe("PeopleView", () => {
       collaborators,
       upgrades: {
         ...initial.upgrades,
-        "agonist-course-intensity": 1,
+        "agonist-course-intensity": 5,
         "project-x": 1,
       },
       unlocks: { ...initial.unlocks, collaborators: true },
@@ -443,7 +443,7 @@ describe("PeopleView", () => {
         index === 0 ? { ...contact, status: "enrolled" as const } : contact
       ),
       collaborators: [instructor],
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
+      upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
       unlocks: { ...initial.unlocks, collaborators: true },
     };
 
@@ -642,7 +642,7 @@ describe("PeopleView", () => {
             ...initial,
             school: { ...initial.school, currentMonth },
             collaborators: [instructor],
-            upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
+            upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
             unlocks: { ...initial.unlocks, collaborators: true },
             collaboratorManagement: {
               ...initial.collaboratorManagement,
@@ -697,7 +697,7 @@ describe("PeopleView", () => {
             contact.id === student.id ? student : contact,
           ),
           collaborators: [instructor],
-          upgrades: { ...initial.upgrades, "agonist-course-intensity": 1 },
+          upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
           unlocks: { ...initial.unlocks, collaborators: true },
           collaboratorManagement: {
             ...initial.collaboratorManagement,

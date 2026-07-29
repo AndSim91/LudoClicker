@@ -245,7 +245,81 @@
   min-height: 100%;
   justify-self: center;
   border-radius: 999px;
-  background: var(--gadget-state-color);
+  background: var(--line);
+}
+
+.gadget-product-rail.is-rarity-progress {
+  --gadget-current-rarity-color: var(--gadget-rarity-color);
+  --gadget-next-rarity-color: var(--gadget-rarity-color);
+  --gadget-rarity-progress: 0%;
+  background: color-mix(
+    in srgb,
+    var(--gadget-current-rarity-color) 18%,
+    var(--line)
+  );
+  box-shadow: inset 0 0 0 1px color-mix(
+    in srgb,
+    var(--gadget-current-rarity-color) 24%,
+    transparent
+  );
+  cursor: help;
+}
+
+.gadget-product-rail-fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--gadget-rarity-progress);
+  border-radius: inherit;
+  background: linear-gradient(
+    0deg,
+    var(--gadget-next-rarity-color),
+    color-mix(in srgb, var(--gadget-next-rarity-color) 68%, white)
+  );
+  box-shadow: 0 0 8px color-mix(
+    in srgb,
+    var(--gadget-next-rarity-color) 42%,
+    transparent
+  );
+  transition: height 180ms ease;
+}
+
+.gadget-rarity-progress-tooltip {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: calc(100% + 12px);
+  width: max-content;
+  max-width: min(240px, calc(100vw - 64px));
+  padding: 7px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow-flyout);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(4px, -50%);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.gadget-product-rail.is-rarity-progress:hover .gadget-rarity-progress-tooltip,
+.gadget-product-rail.is-rarity-progress:focus .gadget-rarity-progress-tooltip,
+.gadget-product-rail.is-rarity-progress:focus-visible .gadget-rarity-progress-tooltip {
+  opacity: 1;
+  transform: translate(0, -50%);
+  visibility: visible;
+}
+
+.gadget-product-rail.is-rarity-progress:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
 }
 
 .gadget-product-rail::before {
@@ -256,10 +330,22 @@
   height: 10px;
   border: 2px solid var(--surface);
   border-radius: 50%;
-  background: var(--gadget-state-color);
+  background: var(--line-strong);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--gadget-state-color) 30%, transparent);
   content: "";
   transform: translate(-50%, -1px);
+}
+
+.gadget-product-rail.is-rarity-progress::before {
+  z-index: 1;
+  background: var(--gadget-next-rarity-color);
+}
+
+.gadget-product-rail.is-rarity-progress::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0 -8px;
+  content: "";
 }
 
 .gadget-product-artwork {

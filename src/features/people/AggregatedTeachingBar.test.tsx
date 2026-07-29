@@ -56,7 +56,7 @@ describe("AggregatedTeachingBar", () => {
           },
         ]}
         now={16_000}
-        technicalArenaLevel={3}
+        agonistCourseUnlocked
       />,
     );
 
@@ -78,7 +78,7 @@ describe("AggregatedTeachingBar", () => {
       <AggregatedTeachingBar
         entries={entries}
         now={1_500}
-        technicalArenaLevel={3}
+        agonistCourseUnlocked
       />,
     );
 
@@ -128,7 +128,7 @@ describe.runIf(runTeachingRenderBenchmark)("AggregatedTeachingBar scale benchmar
       <AggregatedTeachingBar
         entries={entries}
         now={51_000}
-        technicalArenaLevel={3}
+        agonistCourseUnlocked
       />,
     );
     const initialNodeCount = view.container.querySelectorAll("*").length;
@@ -139,7 +139,7 @@ describe.runIf(runTeachingRenderBenchmark)("AggregatedTeachingBar scale benchmar
         <AggregatedTeachingBar
           entries={entries}
           now={51_000 + update * 250}
-          technicalArenaLevel={3}
+          agonistCourseUnlocked
         />,
       );
     }

@@ -34,7 +34,7 @@ export interface MemberSort {
 export interface MemberSortContext {
   currentTrainingYear: number;
   annualTrainingLimit: number;
-  technicalArenaLevel: number;
+  agonistCourseUnlocked: boolean;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   courseXUnlocked: boolean;
@@ -70,7 +70,7 @@ export function getMemberNextFormLabel(
     }
     return getTrainingCourseTitle(
       contact.training.formId,
-      context.technicalArenaLevel,
+      context.agonistCourseUnlocked,
       contact.training.agonistCourseGrantsStats,
     );
   }

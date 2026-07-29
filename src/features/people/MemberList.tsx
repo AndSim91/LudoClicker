@@ -4,7 +4,11 @@ import { Icon } from "../../components/common/Icon";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
-import { getAnnualFormTrainingLimit, isCourseXUnlocked } from "../../content/upgrades";
+import {
+  getAnnualFormTrainingLimit,
+  isAgonistCourseUnlocked,
+  isCourseXUnlocked,
+} from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
@@ -142,7 +146,7 @@ export function MemberList({
     () => ({
       currentTrainingYear: getFormTrainingYear(currentMonth),
       annualTrainingLimit,
-      technicalArenaLevel: state.upgrades["technical-arena"] ?? 0,
+      agonistCourseUnlocked: isAgonistCourseUnlocked(state.upgrades),
       immunityContext,
       foundedSchools,
       courseXUnlocked,
