@@ -379,7 +379,7 @@
   position: absolute;
   z-index: 3;
   top: var(--note-top);
-  left: calc((var(--note-lane) * 25%) + 12.5%);
+  left: var(--note-left);
   display: grid;
   width: 48px;
   height: 48px;

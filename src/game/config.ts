@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 75,
+  version: 76,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -31,7 +31,8 @@ export const GAME_CONFIG = {
   monthlyMemberFee: 40,
   monthlyMemberFormBonus: 5,
   enrollmentBonus: 20,
-  shortGoalActivationBalance: 10_000,
+  shortGoalActivationBalance: 5_000,
+  shortGoalReactivationDelayMs: 60_000,
   gameMonthMs: 60_000,
   secretLegendaryTrialDurationMs: 30_000,
   tutorialSparringDurationMs: 5_000,

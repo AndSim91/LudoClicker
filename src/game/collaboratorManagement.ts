@@ -162,14 +162,16 @@ function compareRoleSuitability(
     left.id.localeCompare(right.id);
 }
 
-function selectLeastEffectiveFreeCollaborator(
+function selectLeastEffectiveCollaborator(
   collaborators: GameState["collaborators"],
   role: CollaboratorMasteryRole,
-  busyIds: ReadonlySet<string>,
   courseXUnlocked: boolean,
+  eligibleIds?: ReadonlySet<string>,
 ): Collaborator | undefined {
   const candidates = collaborators.filter(
-    (collaborator) => collaborator.assignment === role && !busyIds.has(collaborator.id),
+    (collaborator) =>
+      collaborator.assignment === role &&
+      (!eligibleIds || eligibleIds.has(collaborator.id)),
   );
   if (role === "instructor") {
     return candidates.sort((left, right) => {
@@ -196,6 +198,73 @@ function selectLeastEffectiveFreeCollaborator(
   )[0];
 }
 
+export function getInstructorPendingReleaseIds(
+  state: GameState,
+): ReadonlySet<string> {
+  if (!state.collaboratorManagement.aggregateViewUnlocked) return new Set();
+
+  const instructorTarget = sanitizeTarget(
+    state.collaboratorManagement.targets.instructor,
+  );
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const pendingIds = new Set<string>();
+  let collaborators = state.collaborators;
+  let assignedCount = collaborators.filter(
+    (collaborator) => collaborator.assignment === "instructor",
+  ).length;
+  while (assignedCount > instructorTarget) {
+    const removable = selectLeastEffectiveCollaborator(
+      collaborators,
+      "instructor",
+      courseXUnlocked,
+    );
+    if (!removable) break;
+    pendingIds.add(removable.id);
+    collaborators = collaborators.map((collaborator) =>
+      collaborator.id === removable.id
+        ? { ...collaborator, assignment: null }
+        : collaborator
+    );
+    assignedCount -= 1;
+  }
+
+  return pendingIds;
+}
+
+function cancelPendingWaitingTrainings(
+  state: GameState,
+  pendingReleaseIds: ReadonlySet<string>,
+): GameState {
+  if (pendingReleaseIds.size === 0) return state;
+  const shouldCancel = (
+    personId: string,
+    training: GameState["contacts"][number]["training"],
+  ) =>
+    training?.status === "waitingForEquipment" &&
+    (
+      pendingReleaseIds.has(personId) ||
+      pendingReleaseIds.has(
+        training.instructorId ?? training.requestedInstructorId ?? "",
+      )
+    );
+  const contacts = state.contacts.map((contact) =>
+    shouldCancel(contact.id, contact.training)
+      ? { ...contact, training: undefined }
+      : contact
+  );
+  const collaborators = state.collaborators.map((collaborator) =>
+    shouldCancel(collaborator.id, collaborator.training)
+      ? { ...collaborator, training: undefined }
+      : collaborator
+  );
+  const changed = contacts.some(
+    (contact, index) => contact !== state.contacts[index],
+  ) || collaborators.some(
+    (collaborator, index) => collaborator !== state.collaborators[index],
+  );
+  return changed ? { ...state, contacts, collaborators } : state;
+}
+
 function selectBestUnassignedCollaborator(
   collaborators: GameState["collaborators"],
   role: CollaboratorMasteryRole,
@@ -211,32 +280,75 @@ function selectBestUnassignedCollaborator(
 function rebalanceTargets(state: GameState): GameState {
   if (!state.collaboratorManagement.aggregateViewUnlocked) return state;
 
-  const busyIds = getBusyCollaboratorIds(state);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const targets = sanitizeCollaboratorTargets(state.collaboratorManagement.targets);
-  let collaborators = state.collaborators;
-  let changed = false;
+  const targetsChanged = COLLABORATOR_MASTERY_ROLES.some(
+    (role) => targets[role] !== state.collaboratorManagement.targets[role],
+  );
+  const stateWithSanitizedTargets = targetsChanged
+    ? {
+        ...state,
+        collaboratorManagement: {
+          ...state.collaboratorManagement,
+          targets,
+        },
+      }
+    : state;
+  const pendingReleaseIds = getInstructorPendingReleaseIds(
+    stateWithSanitizedTargets,
+  );
+  const preparedState = cancelPendingWaitingTrainings(
+    stateWithSanitizedTargets,
+    pendingReleaseIds,
+  );
+  const busyIds = getBusyCollaboratorIds(preparedState);
+  let collaborators = preparedState.collaborators;
+  let changed = preparedState !== state;
 
-  // Prima rilascia soltanto persone libere dai settori sopra il target.
-  // Chi sta lavorando conserva il settore finché l'attività non termina.
+  // Negli altri settori resta valida la selezione tra le persone già libere.
+  // Per gli Istruttori, invece, il check-out viene deciso subito: chi sta
+  // insegnando termina le lezioni correnti senza riceverne di nuove.
   for (const role of COLLABORATOR_MASTERY_ROLES) {
-    let assignedCount = collaborators.filter(
-      (collaborator) => collaborator.assignment === role,
-    ).length;
-    while (assignedCount > targets[role]) {
-      const removable = selectLeastEffectiveFreeCollaborator(
-        collaborators,
-        role,
-        busyIds,
-        courseXUnlocked,
+    if (role !== "instructor") {
+      let assignedCount = collaborators.filter(
+        (collaborator) => collaborator.assignment === role,
+      ).length;
+      const freeCollaboratorIds = new Set(
+        collaborators.flatMap((collaborator) =>
+          busyIds.has(collaborator.id) ? [] : [collaborator.id]
+        ),
       );
-      if (!removable) break;
+      while (assignedCount > targets[role]) {
+        const removable = selectLeastEffectiveCollaborator(
+          collaborators,
+          role,
+          courseXUnlocked,
+          freeCollaboratorIds,
+        );
+        if (!removable) break;
+        collaborators = collaborators.map((collaborator) =>
+          collaborator.id === removable.id
+            ? { ...collaborator, assignment: null }
+            : collaborator
+        );
+        freeCollaboratorIds.delete(removable.id);
+        assignedCount -= 1;
+        changed = true;
+      }
+      continue;
+    }
+    for (const collaboratorId of pendingReleaseIds) {
+      const removable = collaborators.find(
+        (collaborator) =>
+          collaborator.id === collaboratorId &&
+          collaborator.assignment === role,
+      );
+      if (!removable || busyIds.has(removable.id)) continue;
       collaborators = collaborators.map((collaborator) =>
         collaborator.id === removable.id
           ? { ...collaborator, assignment: null }
           : collaborator
       );
-      assignedCount -= 1;
       changed = true;
     }
   }
@@ -263,15 +375,12 @@ function rebalanceTargets(state: GameState): GameState {
     }
   }
 
-  const targetsChanged = COLLABORATOR_MASTERY_ROLES.some(
-    (role) => targets[role] !== state.collaboratorManagement.targets[role],
-  );
-  return changed || targetsChanged
+  return changed
     ? {
-        ...state,
+        ...preparedState,
         collaborators,
         collaboratorManagement: {
-          ...state.collaboratorManagement,
+          ...preparedState.collaboratorManagement,
           targets,
         },
       }
@@ -282,10 +391,15 @@ export function incrementCollaboratorAssignment(
   state: GameState,
   assignment: CollaboratorMasteryRole,
 ): GameState {
+  const assignedCount = getCollaboratorAssignmentCounts(state)[assignment];
+  const currentTarget = state.collaboratorManagement.targets[assignment] ?? 0;
   if (
     !state.collaboratorManagement.aggregateViewUnlocked ||
     (assignment === "gadget" && !state.unlocks.gadget) ||
-    !state.collaborators.some((collaborator) => collaborator.assignment === null)
+    (
+      assignedCount <= currentTarget &&
+      !state.collaborators.some((collaborator) => collaborator.assignment === null)
+    )
   ) return state;
   return rebalanceTargets({
     ...state,
@@ -293,7 +407,7 @@ export function incrementCollaboratorAssignment(
       ...state.collaboratorManagement,
       targets: {
         ...state.collaboratorManagement.targets,
-        [assignment]: (state.collaboratorManagement.targets[assignment] ?? 0) + 1,
+        [assignment]: currentTarget + 1,
       },
     },
   });

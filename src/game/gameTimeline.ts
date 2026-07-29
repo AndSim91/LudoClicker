@@ -180,6 +180,10 @@ export function rebaseGameTimeline(
     shortGoal: {
       ...state.shortGoal,
       startedAt: state.shortGoal.startedAt + offsetMs,
+      reactivationStartedAt: shiftOptional(
+        state.shortGoal.reactivationStartedAt,
+        offsetMs,
+      ),
     },
   };
 }

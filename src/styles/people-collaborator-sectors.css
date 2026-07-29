@@ -264,6 +264,39 @@
   margin-top: 12px;
 }
 
+.instructor-main-activity-stage {
+  display: flex;
+  height: 130px;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.instructor-main-activity-stage.is-idle {
+  justify-content: center;
+}
+
+.instructor-main-activity-stage > .aggregated-teaching-groups {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.internal-instructor-courses > .aggregated-teaching-groups {
+  height: 98px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.internal-instructor-courses > .aggregated-teaching-groups.is-empty {
+  align-content: center;
+}
+
 .aggregated-teaching-group {
   display: grid;
   grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 18px;
@@ -355,10 +388,27 @@
 }
 
 .aggregated-teaching-empty {
+  display: flex;
   width: 100%;
+  min-height: 28px;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 8px;
 }
 
-.instructor-main-activity > p {
+.aggregated-teaching-empty > span {
+  height: 9px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--surface-muted);
+}
+
+.aggregated-teaching-empty > small {
+  flex: 0 0 auto;
+}
+
+.instructor-main-activity-stage > p {
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -367,7 +417,7 @@
   font-size: 8px;
 }
 
-.instructor-main-activity > p strong {
+.instructor-main-activity-stage > p strong {
   color: var(--ink);
   font-size: 9px;
 }
@@ -388,7 +438,7 @@
   background: var(--surface-muted);
 }
 
-.instructor-main-activity > .progress-bar,
+.instructor-main-activity-stage > .progress-bar,
 .instructor-preparation-row .progress-bar,
 .sector-card-progress .progress-bar,
 .sector-roster-mastery .progress-bar,
@@ -399,11 +449,11 @@
   background: var(--blue-100);
 }
 
-.instructor-main-activity > .progress-bar {
+.instructor-main-activity-stage > .progress-bar {
   margin-top: 13px;
 }
 
-.instructor-main-activity > .progress-bar > span,
+.instructor-main-activity-stage > .progress-bar > span,
 .instructor-preparation-row .progress-bar > span,
 .sector-card-progress .progress-bar > span,
 .sector-roster-mastery .progress-bar > span,

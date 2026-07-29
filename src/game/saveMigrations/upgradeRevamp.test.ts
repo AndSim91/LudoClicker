@@ -8,6 +8,7 @@ import { migrateReptileState } from "./reptile";
 import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
 import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
 import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
+import { migrateShortGoalAvailabilityState } from "./shortGoalAvailability";
 import type { MigratableState } from "./types";
 
 describe("upgrade revamp save migration", () => {
@@ -41,10 +42,12 @@ describe("upgrade revamp save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateAgonistCourseProgressionState(
-      migrateAthleticPreparationMergeState(
-        migrateFirstCollaboratorTutorialState(
-          migrateReptileState(migrateUpgradeRevampState(legacy)),
+    const migrated = migrateShortGoalAvailabilityState(
+      migrateAgonistCourseProgressionState(
+        migrateAthleticPreparationMergeState(
+          migrateFirstCollaboratorTutorialState(
+            migrateReptileState(migrateUpgradeRevampState(legacy)),
+          ),
         ),
       ),
     ) as GameState;

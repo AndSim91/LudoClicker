@@ -47,38 +47,112 @@ describe("game engine: narrative", () => {
     expect(repeated.school.euros).toBe(completed.school.euros);
   });
 
-  it("activates short goals only below 10,000 euros", () => {
+  it("hides a zero-progress short goal at exactly 5,000 euros", () => {
     const initial = createInitialState(1_000);
     const inactive = gameReducer(
       {
         ...initial,
-        achievements: ["first-email" as const],
-        school: { ...initial.school, euros: 10_000 },
-        statistics: { ...initial.statistics, emailsSent: 3 },
+        school: { ...initial.school, euros: 5_000 },
       },
       { type: "TICK", now: 2_000 },
     );
 
-    expect(inactive.school.euros).toBe(10_000);
+    expect(inactive.school.euros).toBe(5_000);
     expect(inactive.shortGoal).toMatchObject({
       definitionId: "send-emails",
-      baseline: 3,
+      baseline: 0,
       completedCount: 0,
+      isActive: false,
     });
+  });
 
-    const active = gameReducer(
+  it("reactivates a hidden short goal after 60 continuous seconds below 5,000 euros", () => {
+    const initial = createInitialState(1_000);
+    const inactive = gameReducer(
+      { ...initial, school: { ...initial.school, euros: 5_000 } },
+      { type: "TICK", now: 2_000 },
+    );
+    const waiting = gameReducer(
       {
         ...inactive,
-        school: { ...inactive.school, euros: 9_999 },
-        statistics: { ...inactive.statistics, emailsSent: 6 },
+        achievements: ["first-email" as const],
+        school: { ...inactive.school, euros: 4_999 },
+        statistics: { ...inactive.statistics, emailsSent: 2 },
+      },
+      { type: "TICK", now: 3_000 },
+    );
+    const almostReady = gameReducer(waiting, { type: "TICK", now: 62_999 });
+    const active = gameReducer(almostReady, { type: "TICK", now: 63_000 });
+
+    expect(waiting.shortGoal).toMatchObject({
+      baseline: 2,
+      isActive: false,
+      reactivationStartedAt: 3_000,
+    });
+    expect(almostReady.shortGoal.isActive).toBe(false);
+    expect(active.shortGoal).toMatchObject({
+      baseline: 2,
+      isActive: true,
+    });
+    expect(active.shortGoal.reactivationStartedAt).toBeUndefined();
+  });
+
+  it("restarts the reactivation timer if the balance returns to 5,000 euros", () => {
+    const initial = createInitialState(1_000);
+    const inactive = gameReducer(
+      { ...initial, school: { ...initial.school, euros: 5_000 } },
+      { type: "TICK", now: 2_000 },
+    );
+    const firstWait = gameReducer(
+      { ...inactive, school: { ...inactive.school, euros: 4_999 } },
+      { type: "TICK", now: 3_000 },
+    );
+    const reset = gameReducer(
+      { ...firstWait, school: { ...firstWait.school, euros: 5_000 } },
+      { type: "TICK", now: 32_000 },
+    );
+    const secondWait = gameReducer(
+      { ...reset, school: { ...reset.school, euros: 4_999 } },
+      { type: "TICK", now: 33_000 },
+    );
+    const almostReady = gameReducer(secondWait, { type: "TICK", now: 92_999 });
+    const active = gameReducer(almostReady, { type: "TICK", now: 93_000 });
+
+    expect(reset.shortGoal.reactivationStartedAt).toBeUndefined();
+    expect(secondWait.shortGoal.reactivationStartedAt).toBe(33_000);
+    expect(almostReady.shortGoal.isActive).toBe(false);
+    expect(active.shortGoal.isActive).toBe(true);
+  });
+
+  it("keeps a progressed short goal active above 5,000 euros until completion", () => {
+    const initial = createInitialState(1_000);
+    const protectedGoal = gameReducer(
+      {
+        ...initial,
+        achievements: ["first-email" as const],
+        school: { ...initial.school, euros: 5_000 },
+        statistics: { ...initial.statistics, emailsSent: 1 },
+      },
+      { type: "TICK", now: 2_000 },
+    );
+
+    const completed = gameReducer(
+      {
+        ...protectedGoal,
+        statistics: { ...protectedGoal.statistics, emailsSent: 3 },
       },
       { type: "TICK", now: 3_000 },
     );
 
-    expect(active.school.euros).toBe(10_014);
-    expect(active.shortGoal).toMatchObject({
+    expect(protectedGoal.shortGoal).toMatchObject({
+      definitionId: "send-emails",
+      isActive: true,
+    });
+    expect(completed.school.euros).toBe(5_015);
+    expect(completed.shortGoal).toMatchObject({
       definitionId: "book-trials",
       completedCount: 1,
+      isActive: false,
     });
   });
 

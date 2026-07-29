@@ -8,6 +8,7 @@ import {
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, ScheduledTrial } from "../../game/types";
 import {
+  DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
   selectDayNotifications,
 } from "./dayNotifications";
@@ -93,6 +94,55 @@ describe("selectDayNotifications", () => {
     expect(notifications).not.toContainEqual(
       expect.objectContaining({ kind: "trial-summary" }),
     );
+  });
+
+  it("groups even one ordinary trial after the school has reached five members", () => {
+    const state = stateWithTrialPhases(["scheduled"]);
+    state.school = {
+      ...state.school,
+      activeMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+      peakActiveMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+    };
+
+    expect(selectDayNotifications(state, 100_000)).toEqual([
+      expect.objectContaining({
+        id: "trial-summary",
+        kind: "trial-summary",
+        title: "1 lezione di prova",
+        detail: "1 programmata",
+      }),
+    ]);
+  });
+
+  it("keeps Legendary and Secret Legendary trials outside the ordinary group", () => {
+    const state = stateWithTrialPhases(["scheduled", "scheduled", "scheduled"]);
+    state.school = {
+      ...state.school,
+      activeMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+      peakActiveMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+    };
+    state.contacts[1] = { ...state.contacts[1], rarity: "legendary" };
+    state.contacts[2] = {
+      ...state.contacts[2],
+      rarity: "legendary",
+      secretLegendaryId: "marco-palena",
+    };
+    state.scheduledTrials[2] = {
+      ...state.scheduledTrials[2],
+      secretLegendaryId: "marco-palena",
+    };
+
+    const notifications = selectDayNotifications(state, 100_000);
+
+    expect(notifications.filter((notification) => notification.kind === "trial-summary"))
+      .toEqual([expect.objectContaining({ title: "1 lezione di prova" })]);
+    expect(notifications.filter((notification) => notification.kind === "trial"))
+      .toEqual([
+        expect.objectContaining({ person: expect.objectContaining({ displayName: "Atleta 2" }) }),
+        expect.objectContaining({
+          person: expect.objectContaining({ displayName: "Atleta 3", secretLegendary: true }),
+        }),
+      ]);
   });
 
   it("condenses more than five trials into one minimal phase summary", () => {

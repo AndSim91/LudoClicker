@@ -592,6 +592,11 @@ termine dell'attesa manca una spada, la prova è annullata come una mancata
 iscrizione; se l'iscrizione è garantita al 100%, la prova si svolge invece senza
 spada e senza aggiungere carico.
 
+Una volta raggiunto il massimo storico di 5 iscritti, **La mia giornata**
+raggruppa in un unico riepilogo tutte le lezioni di prova ordinarie visibili,
+anche quando ce n'è soltanto una. Le prove dei Leggendari e dei Leggendari
+Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
+
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 soltanto nelle statistiche aggregate del funnel.
 
@@ -1069,6 +1074,9 @@ Regole:
 
 - l'assegnazione al ruolo è gratuita e non converte automaticamente le Forme
   pregresse;
+- nessun Collaboratore può figurare contemporaneamente come docente e allievo
+  della stessa formazione; i percorsi erogati direttamente dal sistema non
+  assegnano un `instructorId` umano;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate;
   ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
 - chi conosce già una Forma completa un Corso Istruttori pari al **50% della
@@ -1125,6 +1133,9 @@ Regole:
   collaboratore inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
   automatico possiede le qualifiche per le sue prossime Forme;
+- l'Istruttore che segue Arena Tecnica o il Corso Agonisti deve essere una
+  persona diversa dall'allievo: un Collaboratore assegnato come Istruttore può
+  partecipare soltanto se un altro Istruttore disponibile lo segue;
 - iniziare Arena Tecnica o il Corso Agonisti consuma **tutti gli slot formativi
   annuali ancora disponibili** e protegge subito l'atleta dal controllo degli
   abbandoni. Lo stesso atleta non può iniziarlo più di una volta nello stesso
@@ -1609,6 +1620,15 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Conversione: pannello “Statistiche campagna”;
 - Spade disponibili: calendario risorse o elenco Attività;
 - Prestigio: email formale ricevuta dalla rete LudoSport.
+
+La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quando il
+saldo raggiunge o supera **5.000 €**, una missione ancora a zero progresso si
+nasconde. Se possiede già almeno un punto di progresso, rimane invece attiva
+fino al completamento; la missione successiva applica nuovamente la regola del
+saldo. Una missione nascosta torna attiva soltanto dopo **60 secondi continui di
+tempo di gioco** con un saldo inferiore a 5.000 €. Tornare a 5.000 € o più
+azzera il conteggio. Il timer resta interno e non viene mostrato al giocatore;
+le azioni compiute mentre la missione è nascosta non ne aumentano il progresso.
 
 ### 11.5 Animazioni
 

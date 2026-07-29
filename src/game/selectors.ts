@@ -13,6 +13,7 @@ import {
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
+import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
@@ -55,6 +56,9 @@ export function selectAvailableEventMembers(state: GameState): number {
 
 export function selectBusyInstructorIds(state: GameState): Set<string> {
   const busy = getPriorityInstructorQualificationTechnicianIds(state);
+  for (const collaboratorId of getInstructorPendingReleaseIds(state)) {
+    busy.add(collaboratorId);
+  }
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
   const capacity = selectInstructorCapacity(state);
   for (const collaborator of state.collaborators) {
@@ -86,11 +90,13 @@ export function selectAthleticPreparationInstructorIds(state: GameState): Set<st
   ) return activeInstructorIds;
 
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   const priorityQualificationTechnicianIds =
     getPriorityInstructorQualificationTechnicianIds(state);
   for (const collaborator of state.collaborators) {
     if (
       collaborator.assignment === "instructor" &&
+      !pendingReleaseIds.has(collaborator.id) &&
       !collaborator.training &&
       !priorityQualificationTechnicianIds.has(collaborator.id) &&
       (teachingCounts.get(collaborator.id) ?? 0) === 0
@@ -109,6 +115,7 @@ export function canInstructorTeachForm(
     instructor &&
     (formId !== "course-x" || isCourseXUnlocked(state.upgrades)) &&
     instructor.assignment === "instructor" &&
+    !getInstructorPendingReleaseIds(state).has(instructor.id) &&
     instructor.forms.includes(formId) &&
     (!isInstructorForm(formId) || instructor.instructorForms.includes(formId)),
   );

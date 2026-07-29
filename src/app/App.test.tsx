@@ -75,6 +75,7 @@ describe("App profile and navigation", () => {
         target: 2,
         startedAt: Date.now(),
         completedCount: 1,
+        isActive: true,
       },
     });
     render(<App />);

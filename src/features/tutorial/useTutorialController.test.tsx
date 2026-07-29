@@ -53,6 +53,7 @@ function useTutorialHarness() {
         target: 2,
         startedAt: 1_500,
         completedCount: 1,
+        isActive: true,
       },
     })),
     startFreeSparring: () => setState((current) => gameReducer(current, {

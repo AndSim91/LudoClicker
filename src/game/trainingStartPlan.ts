@@ -21,6 +21,7 @@ import {
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
+import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { GAME_CONFIG, getTechnicalArenaDurationMs } from "./config";
 import { roundCurrency } from "./economy";
 import { getAvailableSwords, reserveSwords } from "./equipment";
@@ -79,6 +80,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
   private readonly collaboratorContactIds: Set<string>;
   private readonly changedContactIds = new Set<string>();
   private readonly changedCollaboratorIds = new Set<string>();
+  private readonly pendingReleaseIds: ReadonlySet<string>;
   private readonly priorityQualificationTechnicianIds: Set<string>;
   private readonly capacity: number;
   private readonly courseXUnlocked: boolean;
@@ -101,6 +103,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     this.collaboratorContactIds = new Set(
       state.collaborators.map((collaborator) => collaborator.contactId),
     );
+    this.pendingReleaseIds = getInstructorPendingReleaseIds(state);
     this.priorityQualificationTechnicianIds =
       getPriorityInstructorQualificationTechnicianIds(state);
     this.capacity = selectInstructorCapacity(state);
@@ -141,10 +144,17 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     const waiting = person?.training;
     if (!person || waiting?.status !== "waitingForEquipment") return undefined;
 
+    const previousInstructorId = waiting.instructorId ?? waiting.requestedInstructorId;
+    if (isAgonistCourse(waiting.formId) && previousInstructorId === personId) {
+      this.updateTeachingCount(previousInstructorId, -1);
+      if (collaborator) this.updateCollaborator({ ...collaborator, training: undefined });
+      else if (contact) this.updateContact({ ...contact, training: undefined });
+      return undefined;
+    }
+
     const requiredSwords = waiting.equipmentUsed ?? 1;
     if (getAvailableSwords(this.equipment) < requiredSwords) return undefined;
 
-    const previousInstructorId = waiting.instructorId ?? waiting.requestedInstructorId;
     this.updateTeachingCount(previousInstructorId, -1);
     if (collaborator) this.updateCollaborator({ ...collaborator, training: undefined });
     else if (contact) this.updateContact({ ...contact, training: undefined });
@@ -180,6 +190,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       .filter((collaborator) =>
         collaborator.id !== studentId &&
         collaborator.assignment === "instructor" &&
+        !this.pendingReleaseIds.has(collaborator.id) &&
         (formId !== "course-x" || this.courseXUnlocked) &&
         collaborator.forms.includes(formId) &&
         (!isInstructorForm(formId) || collaborator.instructorForms.includes(formId)) &&
@@ -232,7 +243,10 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       !student ||
       !athleteContact ||
       !instructor ||
+      instructor.id === personId ||
       instructor.assignment !== "instructor" ||
+      this.pendingReleaseIds.has(instructor.id) ||
+      (collaborator ? this.pendingReleaseIds.has(collaborator.id) : false) ||
       (this.courseXUnlocked && needsCourseXRecovery(student.forms)) ||
       student.training ||
       remainingAnnualSlots <= 0 ||
@@ -313,6 +327,9 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
   ): TrainingStartResult | undefined {
     if (!this.state.unlocks.forms) return undefined;
     const collaborator = this.collaboratorsById.get(personId);
+    if (collaborator && this.pendingReleaseIds.has(collaborator.id)) {
+      return undefined;
+    }
     const candidateForms = collaborator?.forms ?? this.contactsById.get(personId)?.forms ?? [];
     if (
       (!this.courseXUnlocked && formId === "course-x") ||

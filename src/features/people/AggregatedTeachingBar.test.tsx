@@ -38,6 +38,24 @@ describe("aggregated teaching groups", () => {
 });
 
 describe("AggregatedTeachingBar", () => {
+  it("keeps an explicit empty state when no course is running", () => {
+    const view = render(
+      <AggregatedTeachingBar
+        entries={[]}
+        now={1_500}
+        agonistCourseUnlocked={false}
+        variant="internal-instructor"
+        emptyLabel="Nessun Corso Istruttori in svolgimento"
+      />,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Nessun Corso Istruttori in svolgimento",
+    );
+    expect(view.container.querySelector(".aggregated-teaching-groups"))
+      .toHaveClass("is-internal-instructor", "is-empty");
+  });
+
   it("shows the dedicated Corso Agonisti logo instead of the trophy", () => {
     render(
       <AggregatedTeachingBar

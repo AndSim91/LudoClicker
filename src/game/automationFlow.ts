@@ -19,6 +19,7 @@ import {
 } from "../content/upgrades";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
+import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import {
   improveRandomAthletes,
   resolveSocialContentCycles,
@@ -84,6 +85,7 @@ export interface AutomationFlowDependencies {
 interface AutomaticTeachingNoOp {
   currentMonth: number;
   euros: number;
+  instructorTarget: number;
   equipment: GameState["equipment"];
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
@@ -135,6 +137,7 @@ export function isAutomaticTeachingKnownIdle(state: GameState): boolean {
     cached &&
     cached.currentMonth === state.school.currentMonth &&
     cached.euros === state.school.euros &&
+    cached.instructorTarget === state.collaboratorManagement.targets.instructor &&
     cached.equipment === state.equipment &&
     cached.upgrades === state.upgrades &&
     cached.formsUnlocked === state.unlocks.forms &&
@@ -147,6 +150,7 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
   automaticTeachingNoOpCache.set(state.contacts, {
     currentMonth: state.school.currentMonth,
     euros: state.school.euros,
+    instructorTarget: state.collaboratorManagement.targets.instructor,
     equipment: state.equipment,
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
@@ -517,10 +521,12 @@ export function processAutomaticTeaching(
 ): GameState {
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (isAutomaticTeachingKnownIdle(state)) return state;
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   const priorityQualificationTechnicianIds =
     getPriorityInstructorQualificationTechnicianIds(state);
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
     collaborator.assignment === "instructor" &&
+    !pendingReleaseIds.has(collaborator.id) &&
     !priorityQualificationTechnicianIds.has(collaborator.id)
   );
   if (!hasAutomaticInstructor) {
@@ -542,6 +548,7 @@ export function processAutomaticTeaching(
     ),
     ...state.collaborators.filter((collaborator) =>
       !collaborator.training &&
+      !pendingReleaseIds.has(collaborator.id) &&
       getFormTrainingCount(collaborator, trainingYear) < annualTrainingLimit
     ),
   ];
@@ -565,6 +572,7 @@ export function processAutomaticTeaching(
   for (const instructor of state.collaborators) {
     if (
       instructor.assignment !== "instructor" ||
+      pendingReleaseIds.has(instructor.id) ||
       priorityQualificationTechnicianIds.has(instructor.id)
     ) continue;
     for (const formId of instructor.forms) {
@@ -599,7 +607,10 @@ export function processAutomaticTeaching(
   ]));
   const instructorsWithAvailablePersonalForms = new Set(
     state.collaborators.filter((collaborator) => {
-      if (collaborator.assignment !== "instructor") return false;
+      if (
+        collaborator.assignment !== "instructor" ||
+        pendingReleaseIds.has(collaborator.id)
+      ) return false;
       const branchCapacity = Math.min(
         3,
         1 + (state.upgrades["instructor-versatility"] ?? 0),
@@ -742,7 +753,9 @@ export function processAutomaticTeaching(
     ) continue;
     const instructor = state.collaborators
       .filter((candidate) =>
+        candidate.id !== student.id &&
         candidate.assignment === "instructor" &&
+        !pendingReleaseIds.has(candidate.id) &&
         !priorityQualificationTechnicianIds.has(candidate.id) &&
         (instructorLoads.get(candidate.id) ?? 0) < capacity
       )

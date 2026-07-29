@@ -496,6 +496,9 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.shortGoal?.target === "number" &&
     typeof state.shortGoal?.startedAt === "number" &&
     typeof state.shortGoal?.completedCount === "number" &&
+    typeof state.shortGoal?.isActive === "boolean" &&
+    (state.shortGoal.reactivationStartedAt === undefined ||
+      typeof state.shortGoal.reactivationStartedAt === "number") &&
     typeof state.randomSeed === "number" &&
     hasValidLightInflation(state) &&
     typeof state.profile?.displayName === "string" &&

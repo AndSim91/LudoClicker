@@ -178,6 +178,7 @@ function DayNotificationTimeline({ state: stateOverride }: { state?: GameState }
       "lightInflation",
       "narrative",
       "scheduledTrials",
+      "school",
       "tournaments",
     ],
     stateOverride,
@@ -221,7 +222,11 @@ function DayNotificationTimeline({ state: stateOverride }: { state?: GameState }
     ? orderDayNotifications([
         ...liveNotifications.filter(
           (notification) => pausedNotificationSnapshot.kind === "trial-summary"
-            ? notification.kind !== "trial" && notification.kind !== "trial-summary"
+            ? notification.kind !== "trial-summary" && (
+                notification.kind !== "trial" ||
+                notification.person?.rarity === "legendary" ||
+                notification.person?.secretLegendary === true
+              )
             : notification.id !== pausedNotificationSnapshot.id,
         ),
         pausedNotificationSnapshot,

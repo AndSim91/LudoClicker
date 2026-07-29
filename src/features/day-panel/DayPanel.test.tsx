@@ -10,7 +10,10 @@ import {
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DAY_PANEL_MEDIA_QUERY, DayPanel } from "./DayPanel";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
-import { DAY_TRIAL_NOTIFICATION_LIMIT } from "./dayNotifications";
+import {
+  DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+  DAY_TRIAL_NOTIFICATION_LIMIT,
+} from "./dayNotifications";
 
 function stateWithTrial(
   contactStatus: ContactStatus,
@@ -176,17 +179,18 @@ describe("DayPanel", () => {
     expect(mission.nextElementSibling).toBe(equipment);
   });
 
-  it("shows wave missions only below 10,000 euros", () => {
+  it("hides wave missions when the engine marks them as inactive", () => {
     const initial = createInitialState(1_000);
     const { rerender } = render(
-      <DayPanel state={{ ...initial, school: { ...initial.school, euros: 10_000 } }} />,
+      <DayPanel state={{
+        ...initial,
+        shortGoal: { ...initial.shortGoal, isActive: false },
+      }} />,
     );
 
     expect(screen.queryByLabelText("Obiettivo breve")).not.toBeInTheDocument();
 
-    rerender(
-      <DayPanel state={{ ...initial, school: { ...initial.school, euros: 9_999.99 } }} />,
-    );
+    rerender(<DayPanel state={initial} />);
 
     expect(screen.getByLabelText("Obiettivo breve")).toBeVisible();
   });
@@ -242,6 +246,30 @@ describe("DayPanel", () => {
 
     expect(screen.getAllByText("Lezione di prova")).toHaveLength(5);
     expect(screen.queryByText("5 lezioni di prova")).not.toBeInTheDocument();
+  });
+
+  it("renders the ordinary group separately from Legendary trials after five members", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(15_000);
+    const state = stateWithScheduledTrials(2);
+    state.school = {
+      ...state.school,
+      activeMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+      peakActiveMembers: DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
+    };
+    state.contacts[1] = { ...state.contacts[1], rarity: "legendary" };
+
+    render(<DayPanel state={state} />);
+
+    expect(screen.getByText("1 lezione di prova")).toBeVisible();
+    expect(screen.getByText("1 programmata")).toBeVisible();
+    expect(screen.getAllByText("Lezione di prova")).toHaveLength(1);
+    expect(screen.getByText("Atleta 2")).toHaveClass("rarity-legendary");
+
+    const ordinaryGroup = screen.getByText("1 lezione di prova").closest(".appointment-entry");
+    expect(ordinaryGroup).not.toBeNull();
+    fireEvent.mouseEnter(ordinaryGroup!);
+    expect(screen.getByText("Atleta 2")).toBeVisible();
   });
 
   it("renders one tutorial-safe summary above five trial notifications", () => {

@@ -4,7 +4,11 @@ import { getContactBaseStats } from "./athleteStats";
 import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
-import { getAgonistCourseCost, startAgonistCourse } from "./trainingFlow";
+import {
+  getAgonistCourseCost,
+  processWaitingTrainings,
+  startAgonistCourse,
+} from "./trainingFlow";
 import { nextRandom } from "./random";
 import type { Collaborator, Contact, GameState } from "./types";
 
@@ -314,7 +318,7 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     });
   });
 
-  it("allows a fully trained Instructor collaborator to use the course", () => {
+  it("requires a different Instructor for a fully trained Instructor collaborator", () => {
     const initial = arenaState(3, 1);
     const instructorContact: Contact = {
       ...initial.contacts[0],
@@ -337,12 +341,67 @@ describe("Arena Tecnica e Corso Agonisti", () => {
       collaborators: [instructorStudent],
     };
 
-    const started = gameReducer(ready, { type: "TICK", now: 2_000 });
+    expect(startAgonistCourse(
+      ready,
+      instructorStudent.id,
+      instructorStudent.id,
+      2_000,
+    )).toBe(ready);
+
+    const colleague: Collaborator = {
+      ...initial.collaborators[0],
+      id: "instructor-colleague",
+      contactId: "instructor-colleague-contact",
+      displayName: "Istruttore collega",
+      joinedAt: 800,
+      assignment: "instructor",
+    };
+    const started = gameReducer(
+      { ...ready, collaborators: [instructorStudent, colleague] },
+      { type: "TICK", now: 2_000 },
+    );
 
     expect(started.collaborators[0].training).toMatchObject({
       formId: "agonist-course",
-      instructorId: instructorStudent.id,
+      instructorId: colleague.id,
     });
+  });
+
+  it("clears a legacy waiting course that assigned the Instructor to themselves", () => {
+    const initial = arenaState(3, 1);
+    const instructorContact: Contact = {
+      ...initial.contacts[0],
+      id: "legacy-self-course-contact",
+      rarity: "legendary",
+    };
+    const instructorStudent: Collaborator = {
+      ...initial.collaborators[0],
+      id: "legacy-self-course-instructor",
+      contactId: instructorContact.id,
+      forms: completedPath,
+      instructorForms: completedPath,
+      assignment: "instructor",
+      training: {
+        formId: "agonist-course",
+        startedAt: 1_000,
+        completesAt: 1_000,
+        status: "waitingForEquipment",
+        requestedInstructorId: "legacy-self-course-instructor",
+        equipmentUsed: 1,
+        wearPerSword: 10,
+      },
+      rarity: "legendary",
+    };
+    const waiting = {
+      ...initial,
+      contacts: [instructorContact],
+      collaborators: [instructorStudent],
+    };
+
+    const repaired = processWaitingTrainings(waiting, 2_000);
+
+    expect(repaired.collaborators[0].training).toBeUndefined();
+    expect(repaired.school.euros).toBe(waiting.school.euros);
   });
 
   it("uses deterministic random gains up to five with maximum intensity", () => {

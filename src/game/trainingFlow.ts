@@ -25,7 +25,10 @@ import { roundCurrency } from "./economy";
 import { reserveSwords } from "./equipment";
 import { cancelAutomatedEventForCollaborator } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
-import { getCollaboratorAssignmentCounts } from "./collaboratorManagement";
+import {
+  getCollaboratorAssignmentCounts,
+  getInstructorPendingReleaseIds,
+} from "./collaboratorManagement";
 import {
   selectAvailableInstructor,
   selectInstructorCapacity,
@@ -123,6 +126,7 @@ export function startAgonistCourse(
     collaborator.id === instructorId &&
     collaborator.assignment === "instructor"
   );
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const usedAnnualSlots = student ? getFormTrainingCount(student, trainingYear) : 0;
@@ -134,6 +138,9 @@ export function startAgonistCourse(
     !student ||
     !athleteContact ||
     !instructor ||
+    instructor.id === personId ||
+    pendingReleaseIds.has(instructor.id) ||
+    (collaborator ? pendingReleaseIds.has(collaborator.id) : false) ||
     (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
     student.training ||
     remainingAnnualSlots <= 0 ||
@@ -229,6 +236,10 @@ export function startFormTraining(
   if (!state.unlocks.forms) return state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const collaborator = state.collaborators.find((candidate) => candidate.id === personId);
+  if (
+    collaborator &&
+    getInstructorPendingReleaseIds(state).has(collaborator.id)
+  ) return state;
   const candidateForms = collaborator?.forms ?? state.contacts.find(
     (candidate) => candidate.id === personId,
   )?.forms ?? [];

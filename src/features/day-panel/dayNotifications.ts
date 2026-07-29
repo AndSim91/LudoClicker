@@ -18,6 +18,7 @@ import type {
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
+export const DAY_TRIAL_GROUPING_UNLOCK_MEMBERS = 5;
 
 export type DayNotificationKind =
   | "trial"
@@ -77,7 +78,12 @@ function formatTrialCount(
 
 function selectTrialNotifications(state: GameState, gameNow: number): DayNotification[] {
   const contactsById = getContactsById(state.contacts);
-  const individualNotifications: DayNotification[] = [];
+  const specialTrialNotifications: DayNotification[] = [];
+  const ordinaryTrialNotifications: DayNotification[] = [];
+  const groupOrdinaryTrialsByDefault = Math.max(
+    state.school.activeMembers,
+    state.school.peakActiveMembers,
+  ) >= DAY_TRIAL_GROUPING_UNLOCK_MEMBERS;
   let trialCount = 0;
   let scheduledCount = 0;
   let inProgressCount = 0;
@@ -102,6 +108,36 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       ? contact?.status === "enrolled" ? "enrolled" : "lost"
       : gameNow < trial.startsAt ? "scheduled" : "in-progress";
     const timestamp = completed || cancelled ? terminalTimestamp : trial.startsAt;
+    const isSpecialTrial = contact?.rarity === "legendary" ||
+      Boolean(contact?.secretLegendaryId) ||
+      Boolean(trial.secretLegendaryId);
+    const notification: DayNotification = {
+      id: `trial-${trial.id}`,
+      kind: "trial",
+      phase,
+      title: "Lezione di prova",
+      detail: cancelled
+        ? "Annullata: nessuna spada disponibile"
+        : "Ordine delle Onde",
+      clock: "game",
+      timestamp,
+      startsAt: trial.startsAt,
+      expiresAt,
+      tutorialTarget: trial.tutorialSceneId === "first-event",
+      person: contact
+        ? {
+            displayName: `${contact.firstName} ${contact.lastName}`,
+            rarity: contact.rarity,
+            secretLegendary: Boolean(contact.secretLegendaryId),
+          }
+        : undefined,
+    };
+
+    if (isSpecialTrial) {
+      specialTrialNotifications.push(notification);
+      continue;
+    }
+
     trialCount += 1;
     earliestTimestamp = Math.min(earliestTimestamp, timestamp);
     tutorialTarget ||= trial.tutorialSceneId === "first-event";
@@ -126,34 +162,18 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
         break;
     }
 
+    if (groupOrdinaryTrialsByDefault) continue;
     if (trialCount > DAY_TRIAL_NOTIFICATION_LIMIT) {
-      individualNotifications.length = 0;
+      ordinaryTrialNotifications.length = 0;
       continue;
     }
-    individualNotifications.push({
-      id: `trial-${trial.id}`,
-      kind: "trial",
-      phase,
-      title: "Lezione di prova",
-      detail: cancelled
-        ? "Annullata: nessuna spada disponibile"
-        : "Ordine delle Onde",
-      clock: "game",
-      timestamp,
-      startsAt: trial.startsAt,
-      expiresAt,
-      tutorialTarget: trial.tutorialSceneId === "first-event",
-      person: contact
-        ? {
-            displayName: `${contact.firstName} ${contact.lastName}`,
-            rarity: contact.rarity,
-            secretLegendary: Boolean(contact.secretLegendaryId),
-          }
-        : undefined,
-    });
+    ordinaryTrialNotifications.push(notification);
   }
 
-  if (trialCount <= DAY_TRIAL_NOTIFICATION_LIMIT) return individualNotifications;
+  if (trialCount === 0) return specialTrialNotifications;
+  if (!groupOrdinaryTrialsByDefault && trialCount <= DAY_TRIAL_NOTIFICATION_LIMIT) {
+    return [...specialTrialNotifications, ...ordinaryTrialNotifications];
+  }
 
   const phase: DayNotificationPhase = inProgressCount > 0
     ? "in-progress"
@@ -171,11 +191,11 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     formatTrialCount(lostCount, "non iscritto", "non iscritti"),
   ].filter((item): item is string => item !== undefined).join(" · ");
 
-  return [{
+  return [...specialTrialNotifications, {
     id: "trial-summary",
     kind: "trial-summary",
     phase,
-    title: `${trialCount} lezioni di prova`,
+    title: trialCount === 1 ? "1 lezione di prova" : `${trialCount} lezioni di prova`,
     detail,
     clock: "game",
     timestamp: earliestTimestamp,

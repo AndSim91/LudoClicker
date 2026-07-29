@@ -55,11 +55,13 @@ export function AggregatedTeachingBar({
   now,
   agonistCourseUnlocked,
   variant = "teaching",
+  emptyLabel = "Nessun corso in svolgimento",
 }: {
   entries: readonly InstructorTeachingEntry[];
   now: number;
   agonistCourseUnlocked: boolean;
   variant?: "teaching" | "internal-instructor";
+  emptyLabel?: string;
 }) {
   const groups = useMemo(
     () => groupInstructorTeachingEntries(entries),
@@ -69,11 +71,17 @@ export function AggregatedTeachingBar({
 
   return (
     <div
-      className={`aggregated-teaching-groups${internalInstructor ? " is-internal-instructor" : ""}`}
+      className={`aggregated-teaching-groups${internalInstructor ? " is-internal-instructor" : ""}${groups.length === 0 ? " is-empty" : ""}`}
       aria-label={internalInstructor
         ? "Corsi Istruttori interni raggruppati per Forma"
         : "Lezioni raggruppate per Forma"}
     >
+      {groups.length === 0 ? (
+        <div className="aggregated-teaching-empty" role="status">
+          <span aria-hidden="true" />
+          <small>{emptyLabel}</small>
+        </div>
+      ) : null}
       {groups.map((group) => {
         const progress = getAggregateInstructorProgress(group.entries, now) ?? 0;
         const title = getTrainingCourseTitle(group.courseId, agonistCourseUnlocked);

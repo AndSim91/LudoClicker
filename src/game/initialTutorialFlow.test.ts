@@ -144,6 +144,7 @@ describe("initial tutorial progression", () => {
         target: 2,
         startedAt: 1_500,
         completedCount: 1,
+        isActive: true,
       },
     };
 

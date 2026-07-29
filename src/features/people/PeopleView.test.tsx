@@ -516,23 +516,25 @@ describe("PeopleView", () => {
       assignment: null,
     }));
 
-    render(
+    const state = {
+      ...initial,
+      collaborators: [technician, trainee, ...otherCollaborators],
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+      },
+    };
+    const renderView = (collaborators: Collaborator[]) => (
       <GameTimeProvider getNow={() => 6_000} isPaused>
         <PeopleView
-          state={{
-            ...initial,
-            collaborators: [technician, trainee, ...otherCollaborators],
-            unlocks: { ...initial.unlocks, collaborators: true, forms: true },
-            collaboratorManagement: {
-              ...initial.collaboratorManagement,
-              aggregateViewUnlocked: true,
-            },
-          }}
+          state={{ ...state, collaborators }}
           onAssign={() => undefined}
           onStartTraining={() => undefined}
         />
-      </GameTimeProvider>,
+      </GameTimeProvider>
     );
+    const view = render(renderView(state.collaborators));
 
     expect(screen.getByTitle("Forma 1 · Qualifica da Tecnico")).toBeVisible();
     expect(screen.getByText("Corsi Istruttori interni")).toBeVisible();
@@ -546,6 +548,24 @@ describe("PeopleView", () => {
     expect(screen.queryByText(
       /esame (fallito|non superato)|probabilità dell'esame|rischio dell'esame/i,
     )).not.toBeInTheDocument();
+
+    view.rerender(renderView([
+      technician,
+      {
+        ...trainee,
+        instructorForms: ["form-1"],
+        training: undefined,
+      },
+      ...otherCollaborators,
+    ]));
+
+    const stableInternalCourses = screen.getByRole("region", {
+      name: "Corsi Istruttori interni",
+    });
+    expect(within(stableInternalCourses).getByText("Nessuno in svolgimento")).toBeVisible();
+    expect(within(stableInternalCourses).getByRole("status")).toHaveTextContent(
+      "Nessun Corso Istruttori in svolgimento",
+    );
   });
 
   it("allows booking an eligible Technician course from the Instructor card", () => {

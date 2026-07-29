@@ -23,6 +23,11 @@ describe("game timeline", () => {
           },
         },
       },
+      shortGoal: {
+        ...state.shortGoal,
+        isActive: false,
+        reactivationStartedAt: 12_000,
+      },
     };
 
     const rebased = rebaseGameTimeline(withRuntimeWork, 20_000, 2_000);
@@ -40,5 +45,6 @@ describe("game timeline", () => {
     });
     expect(rebased.contacts[0].acquiredAt).toBe(state.contacts[0].acquiredAt - 18_000);
     expect(rebased.messages[0].receivedAt).toBe(state.messages[0].receivedAt - 18_000);
+    expect(rebased.shortGoal.reactivationStartedAt).toBe(-6_000);
   });
 });

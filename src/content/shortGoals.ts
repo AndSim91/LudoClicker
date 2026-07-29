@@ -82,6 +82,7 @@ export function createInitialEmailMission(
     target: definition.baseTarget,
     startedAt: now,
     completedCount: 0,
+    isActive: true,
   };
 }
 
@@ -94,7 +95,7 @@ export function getShortGoalProgress(state: GameState): number {
 }
 
 export function isShortGoalActive(state: GameState): boolean {
-  return state.school.euros < GAME_CONFIG.shortGoalActivationBalance;
+  return state.shortGoal.isActive;
 }
 
 export function getShortGoalReward(progress: ShortGoalProgress): number {
@@ -107,7 +108,10 @@ export function createNextShortGoal(
   completedCount: number,
   now: number,
 ): ShortGoalProgress {
-  return createShortGoalFromStatistics(state.statistics, completedCount, now);
+  return {
+    ...createShortGoalFromStatistics(state.statistics, completedCount, now),
+    isActive: state.school.euros < GAME_CONFIG.shortGoalActivationBalance,
+  };
 }
 
 export function createShortGoalFromStatistics(
@@ -124,5 +128,6 @@ export function createShortGoalFromStatistics(
     target: definition.baseTarget + cycle * definition.targetGrowth,
     startedAt: now,
     completedCount,
+    isActive: true,
   };
 }

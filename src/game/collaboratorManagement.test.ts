@@ -243,6 +243,149 @@ describe("collaborator aggregate management", () => {
       .toBeNull();
   });
 
+  it("lets instructors finish current lessons without assigning new ones during check-out", () => {
+    const initial = createInitialState(1_000, "", false);
+    const activeInstructor = {
+      ...collaborator(1, "instructor"),
+      forms: ["form-1"] as Collaborator["forms"],
+      instructorForms: ["form-1"] as Collaborator["instructorForms"],
+    };
+    const lesson = (id: string, completesAt: number) => ({
+      ...initial.contacts[0],
+      id,
+      status: "enrolled" as const,
+      forms: [] as Collaborator["forms"],
+      training: {
+        formId: "agonist-course" as const,
+        startedAt: 1_000,
+        completesAt,
+        status: "running" as const,
+        instructorId: activeInstructor.id,
+        equipmentUsed: 0,
+        wearPerSword: 0,
+        agonistCourseGrantsStats: false,
+      },
+    });
+    const waitingStudent = {
+      ...initial.contacts[0],
+      id: "waiting-student",
+      status: "enrolled" as const,
+      forms: [] as Collaborator["forms"],
+      training: undefined,
+    };
+    const checkingOut: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        activeMembers: 3,
+        currentMonth: 9,
+        euros: 10_000,
+      },
+      contacts: [
+        lesson("first-lesson", 2_000),
+        lesson("last-lesson", 10_000),
+        waitingStudent,
+      ],
+      collaborators: [activeInstructor],
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          instructor: 0,
+        },
+      },
+      unlocks: { ...initial.unlocks, forms: true },
+      upgrades: {
+        ...initial.upgrades,
+        "technical-arena": 3,
+        "promiscuous-instructor": 1,
+      },
+    };
+
+    const afterFirstLesson = gameReducer(checkingOut, { type: "TICK", now: 2_000 });
+
+    expect(afterFirstLesson.contacts.find((contact) => contact.id === "first-lesson")?.training)
+      .toBeUndefined();
+    expect(afterFirstLesson.contacts.find((contact) => contact.id === "last-lesson")?.training)
+      .toBeDefined();
+    expect(afterFirstLesson.contacts.find((contact) => contact.id === waitingStudent.id)?.training)
+      .toBeUndefined();
+    expect(afterFirstLesson.collaborators[0].assignment).toBe("instructor");
+
+    const afterLastLesson = gameReducer(afterFirstLesson, { type: "TICK", now: 10_000 });
+
+    expect(afterLastLesson.contacts.find((contact) => contact.id === "last-lesson")?.training)
+      .toBeUndefined();
+    expect(afterLastLesson.collaborators[0].assignment).toBeNull();
+  });
+
+  it("cancels lessons still waiting for equipment when their instructor checks out", () => {
+    const initial = createInitialState(1_000);
+    const activeInstructor = collaborator(1, "instructor");
+    const waitingStudent = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 1_000,
+        status: "waitingForEquipment" as const,
+        requestedInstructorId: activeInstructor.id,
+        equipmentUsed: 1,
+        wearPerSword: 10,
+      },
+    };
+    const state: GameState = {
+      ...initial,
+      contacts: [waitingStudent],
+      collaborators: [activeInstructor],
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          instructor: 1,
+        },
+      },
+    };
+
+    const checkedOut = decrementCollaboratorAssignment(state, "instructor");
+
+    expect(checkedOut.contacts[0].training).toBeUndefined();
+    expect(checkedOut.collaborators[0].assignment).toBeNull();
+  });
+
+  it("can cancel a pending instructor check-out without a free collaborator", () => {
+    const initial = createInitialState(1_000);
+    const busyInstructor = {
+      ...collaborator(1, "instructor"),
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 10_000,
+        status: "running" as const,
+      },
+    };
+    const state: GameState = {
+      ...initial,
+      collaborators: [busyInstructor],
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          instructor: 0,
+        },
+      },
+    };
+
+    const restored = incrementCollaboratorAssignment(state, "instructor");
+
+    expect(restored.collaboratorManagement.targets.instructor).toBe(1);
+    expect(restored.collaborators[0].assignment).toBe("instructor");
+  });
+
   it("prioritizes new certified coverage when adding an instructor", () => {
     const initial = createInitialState(1_000);
     const existing = {

@@ -366,6 +366,7 @@ function InstructorSectorCard({
   const prepIsPrimary = entries.length === 0 && prepUnlocked && instructors.length > 0;
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const preparationIsActive = !summerBreak && idleInstructors > 0;
+  const internalCourseAreaAvailable = technicianCoverage.length > 0 || internalCourses.length > 0;
 
   return (
     <article className="instructor-sector-card">
@@ -400,37 +401,39 @@ function InstructorSectorCard({
                   : "Preparazione atletica in corso..."
                 : "In attesa"}</strong>
           </div>
-          {entries.length > 0 ? (
-            <>
-              <AggregatedTeachingBar
-                entries={entries}
-                now={now}
-                agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
-              />
-              <p>
-                <strong>{entries.length} {entries.length === 1 ? "corso attivo" : "corsi attivi"}</strong>
-              </p>
-            </>
-          ) : prepIsPrimary && summerBreak ? (
-            <div className="instructor-empty-progress">
-              <span />
-              <small>Preparazione atletica sospesa</small>
-            </div>
-          ) : prepIsPrimary ? (
-            <>
-              <ProgressBar
-                className="instructor-preparation-loop"
-                label="Preparazione atletica continuativa"
-                value={0}
-                valueText={isPaused ? "Attività in pausa" : "Attività continuativa"}
-                indeterminate
-                paused={isPaused}
-              />
-              <p><strong>{idleInstructors} istruttori disponibili</strong><span>Attività continuativa</span></p>
-            </>
-          ) : (
-            <div className="instructor-empty-progress"><span /><small>Nessun allievo compatibile</small></div>
-          )}
+          <div className={`instructor-main-activity-stage${entries.length > 0 ? " is-teaching" : " is-idle"}`}>
+            {entries.length > 0 ? (
+              <>
+                <AggregatedTeachingBar
+                  entries={entries}
+                  now={now}
+                  agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
+                />
+                <p>
+                  <strong>{entries.length} {entries.length === 1 ? "corso attivo" : "corsi attivi"}</strong>
+                </p>
+              </>
+            ) : prepIsPrimary && summerBreak ? (
+              <div className="instructor-empty-progress">
+                <span />
+                <small>Preparazione atletica sospesa</small>
+              </div>
+            ) : prepIsPrimary ? (
+              <>
+                <ProgressBar
+                  className="instructor-preparation-loop"
+                  label="Preparazione atletica continuativa"
+                  value={0}
+                  valueText={isPaused ? "Attività in pausa" : "Attività continuativa"}
+                  indeterminate
+                  paused={isPaused}
+                />
+                <p><strong>{idleInstructors} istruttori disponibili</strong><span>Attività continuativa</span></p>
+              </>
+            ) : (
+              <div className="instructor-empty-progress"><span /><small>Nessun allievo compatibile</small></div>
+            )}
+          </div>
         </section>
 
         <section className="instructor-coverage">
@@ -468,11 +471,13 @@ function InstructorSectorCard({
         </section>
       </div>
 
-      {internalCourses.length > 0 ? (
-        <section className="internal-instructor-courses" aria-label="Corsi Istruttori interni in svolgimento">
+      {internalCourseAreaAvailable ? (
+        <section className="internal-instructor-courses" aria-label="Corsi Istruttori interni">
           <div className="internal-instructor-courses-heading">
             <strong>Corsi Istruttori interni</strong>
-            <small>{internalCourses.length} in svolgimento</small>
+            <small>{internalCourses.length > 0
+              ? `${internalCourses.length} in svolgimento`
+              : "Nessuno in svolgimento"}</small>
           </div>
           <InternalInstructorCourseList entries={internalCourses} now={now} />
         </section>

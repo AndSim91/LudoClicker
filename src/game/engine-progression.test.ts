@@ -1234,6 +1234,7 @@ describe("game engine: progression", () => {
     const ready = {
       ...initial,
       school: { ...initial.school, currentMonth: 21, euros: 5_000 },
+      shortGoal: { ...initial.shortGoal, isActive: false },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
     };

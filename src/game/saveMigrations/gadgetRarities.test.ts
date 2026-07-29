@@ -11,6 +11,7 @@ import { migrateReptileState } from "./reptile";
 import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
 import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
 import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
+import { migrateShortGoalAvailabilityState } from "./shortGoalAvailability";
 import type { MigratableState } from "./types";
 
 describe("Gadget rarity save migration", () => {
@@ -43,16 +44,18 @@ describe("Gadget rarity save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateAgonistCourseProgressionState(
-      migrateAthleticPreparationMergeState(
-        migrateFirstCollaboratorTutorialState(
-          migrateReptileState(migrateUpgradeRevampState(
-            migrateSecretLegendaryBaseRebalanceState(
-              migrateSecretLegendaryCircuitBoostRemovalState(
-                migrateGadgetRarityState(legacy),
+    const migrated = migrateShortGoalAvailabilityState(
+      migrateAgonistCourseProgressionState(
+        migrateAthleticPreparationMergeState(
+          migrateFirstCollaboratorTutorialState(
+            migrateReptileState(migrateUpgradeRevampState(
+              migrateSecretLegendaryBaseRebalanceState(
+                migrateSecretLegendaryCircuitBoostRemovalState(
+                  migrateGadgetRarityState(legacy),
+                ),
               ),
-            ),
-          )),
+            )),
+          ),
         ),
       ),
     ) as GameState;

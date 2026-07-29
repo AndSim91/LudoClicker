@@ -18,6 +18,7 @@ import {
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { isSummerBreak } from "./calendar";
+import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import {
@@ -268,6 +269,7 @@ export function bookTechnicianCourse(
       )
     : Infinity;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   if (
     !collaborator ||
     !definition ||
@@ -275,6 +277,7 @@ export function bookTechnicianCourse(
     (courseXUnlocked && needsCourseXRecovery(collaborator?.forms ?? [])) ||
     !isSISTechnicianCourseUnlocked(state.upgrades) ||
     collaborator.assignment !== "instructor" ||
+    pendingReleaseIds.has(collaborator.id) ||
     !collaborator.forms.includes(formId) ||
     !collaborator.instructorForms.includes(formId) ||
     (collaborator.technicianForms ?? []).includes(formId) ||
@@ -314,6 +317,7 @@ export function processTechnicianCourseReservations(
     return state;
   }
   let nextState = state;
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   const priorityQualificationTechnicianIds =
     getPriorityInstructorQualificationTechnicianIds(state);
   const reservations = state.collaborators
@@ -338,6 +342,7 @@ export function processTechnicianCourseReservations(
       collaborator.training ||
       priorityQualificationTechnicianIds.has(collaborator.id) ||
       collaborator.assignment !== "instructor" ||
+      pendingReleaseIds.has(collaborator.id) ||
       !isSISTechnicianCourseUnlocked(nextState.upgrades) ||
       nextState.school.currentMonth < reservation.eligibleMonth
     ) continue;
@@ -412,6 +417,7 @@ function processInstructorQualifications(
 ): GameState {
   let nextState = state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const pendingReleaseIds = getInstructorPendingReleaseIds(state);
   const activeTechnicianIds = new Set(
     state.collaborators.flatMap((collaborator) =>
       collaborator.training?.technicianId
@@ -426,6 +432,7 @@ function processInstructorQualifications(
   for (const collaborator of state.collaborators) {
     if (
       collaborator.assignment !== "instructor" ||
+      pendingReleaseIds.has(collaborator.id) ||
       activeTechnicianIds.has(collaborator.id)
     ) continue;
     for (const formId of collaborator.technicianForms ?? []) {
@@ -438,6 +445,7 @@ function processInstructorQualifications(
   const qualificationCandidates = state.collaborators.flatMap((collaborator) => {
     if (
       collaborator.assignment !== "instructor" ||
+      pendingReleaseIds.has(collaborator.id) ||
       collaborator.training ||
       activeTechnicianIds.has(collaborator.id)
     ) return [];
@@ -484,6 +492,7 @@ function processInstructorQualifications(
       .filter((collaborator) =>
         collaborator.id !== candidate.collaboratorId &&
         collaborator.assignment === "instructor" &&
+        !pendingReleaseIds.has(collaborator.id) &&
         !usedTechnicianIds.has(collaborator.id) &&
         (collaborator.technicianForms ?? []).includes(candidate.formId)
       )

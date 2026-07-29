@@ -94,6 +94,16 @@ export function getNextGameDeadline(state: GameState): number {
     nextDeadline,
     getNextTrainingDeadline(state.collaborators),
   );
+  if (
+    !state.shortGoal.isActive &&
+    state.school.euros < GAME_CONFIG.shortGoalActivationBalance &&
+    state.shortGoal.reactivationStartedAt !== undefined
+  ) {
+    nextDeadline = earlier(
+      nextDeadline,
+      state.shortGoal.reactivationStartedAt + GAME_CONFIG.shortGoalReactivationDelayMs,
+    );
+  }
 
   return nextDeadline;
 }

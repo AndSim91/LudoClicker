@@ -159,12 +159,61 @@ export function synchronizeInactiveShortGoal(
 ): GameState {
   if (isShortGoalActive(state)) return state;
   const baseline = getShortGoalValue(state, state.shortGoal.definitionId);
-  return baseline === state.shortGoal.baseline
+  const reactivationStartedAt = state.school.euros < GAME_CONFIG.shortGoalActivationBalance
+    ? state.shortGoal.reactivationStartedAt ?? now
+    : undefined;
+  return baseline === state.shortGoal.baseline &&
+      reactivationStartedAt === state.shortGoal.reactivationStartedAt
     ? state
     : {
         ...state,
-        shortGoal: { ...state.shortGoal, baseline, startedAt: now },
+        shortGoal: {
+          ...state.shortGoal,
+          baseline,
+          reactivationStartedAt,
+        },
       };
+}
+
+export function refreshShortGoalAvailability(
+  state: GameState,
+  now: number,
+): GameState {
+  if (isShortGoalActive(state)) {
+    const hasProgress = getShortGoalProgress(state) >= 1;
+    if (state.school.euros < GAME_CONFIG.shortGoalActivationBalance || hasProgress) {
+      return state;
+    }
+    return {
+      ...state,
+      shortGoal: {
+        ...state.shortGoal,
+        baseline: getShortGoalValue(state, state.shortGoal.definitionId),
+        startedAt: now,
+        isActive: false,
+        reactivationStartedAt: undefined,
+      },
+    };
+  }
+
+  const synchronized = synchronizeInactiveShortGoal(state, now);
+  const reactivationStartedAt = synchronized.shortGoal.reactivationStartedAt;
+  if (
+    synchronized.school.euros >= GAME_CONFIG.shortGoalActivationBalance ||
+    reactivationStartedAt === undefined ||
+    now - reactivationStartedAt < GAME_CONFIG.shortGoalReactivationDelayMs
+  ) {
+    return synchronized;
+  }
+  return {
+    ...synchronized,
+    shortGoal: {
+      ...synchronized.shortGoal,
+      startedAt: now,
+      isActive: true,
+      reactivationStartedAt: undefined,
+    },
+  };
 }
 
 export function completeShortGoal(
@@ -172,23 +221,24 @@ export function completeShortGoal(
   now: number,
   gainMultiplier: number,
 ): GameState {
-  if (!isShortGoalActive(state)) return synchronizeInactiveShortGoal(state, now);
-  if (getShortGoalProgress(state) < state.shortGoal.target) return state;
+  const available = refreshShortGoalAvailability(state, now);
+  if (!isShortGoalActive(available)) return available;
+  if (getShortGoalProgress(available) < available.shortGoal.target) return available;
 
-  const definition = SHORT_GOALS[state.shortGoal.definitionId];
-  const reward = scaleCurrencyGain(getShortGoalReward(state.shortGoal), gainMultiplier);
-  const completedCount = state.shortGoal.completedCount + 1;
+  const definition = SHORT_GOALS[available.shortGoal.definitionId];
+  const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal), gainMultiplier);
+  const completedCount = available.shortGoal.completedCount + 1;
   const rewarded: GameState = {
-    ...state,
-    school: { ...state.school, euros: state.school.euros + reward },
+    ...available,
+    school: { ...available.school, euros: available.school.euros + reward },
     statistics: {
-      ...state.statistics,
-      eurosEarned: state.statistics.eurosEarned + reward,
+      ...available.statistics,
+      eurosEarned: available.statistics.eurosEarned + reward,
     },
   };
   const nextGoal = createNextShortGoal(rewarded, completedCount, now);
   const nextDefinition = SHORT_GOALS[nextGoal.definitionId];
-  const progressed = definition.id === "send-emails" && state.shortGoal.completedCount === 0
+  const progressed = definition.id === "send-emails" && available.shortGoal.completedCount === 0
     ? addMessage(
         { ...rewarded, shortGoal: nextGoal },
         now,

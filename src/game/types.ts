@@ -308,6 +308,8 @@ export interface ShortGoalProgress {
   target: number;
   startedAt: number;
   completedCount: number;
+  isActive: boolean;
+  reactivationStartedAt?: number;
 }
 
 export interface TutorialProgress {

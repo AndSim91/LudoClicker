@@ -323,7 +323,7 @@ export function GadgetRhythmGame({
                 key={note.id}
                 tabIndex={-1}
                 style={{
-                  "--note-lane": note.lane,
+                  "--note-left": `${note.lane * 25 + 12.5}%`,
                   "--note-top": `${top}%`,
                 } as CSSProperties}
                 onPointerDown={(event) => {

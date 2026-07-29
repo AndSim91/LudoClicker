@@ -77,6 +77,22 @@ describe("game scheduler", () => {
     expect(getNextGameTickDelay(state, NOW, 100)).toBe(600);
   });
 
+  it("wakes an idle game when a hidden short goal is ready to reactivate", () => {
+    const state = stateAtNow();
+    const waiting: GameState = {
+      ...state,
+      school: { ...state.school, euros: 4_999 },
+      shortGoal: {
+        ...state.shortGoal,
+        isActive: false,
+        reactivationStartedAt: NOW - 30_000,
+      },
+    };
+
+    expect(getNextGameDeadline(waiting)).toBe(NOW + 30_000);
+    expect(getNextGameTickDelay(waiting, NOW)).toBe(30_000);
+  });
+
   it("prioritizes active runtime deadlines over the monthly boundary", () => {
     const state = stateAtNow();
     const withEvent: GameState = {

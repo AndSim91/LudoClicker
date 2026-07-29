@@ -116,6 +116,16 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
     expect(box?.height).toBeGreaterThanOrEqual(50);
   }
 
+  const board = minigame.getByLabel("Quattro corsie della prova qualità");
+  const fallingNote = minigame.getByRole("button", { name: /^Nota corsia/ }).first();
+  await expect(fallingNote).toBeVisible({ timeout: 4_000 });
+  const boardBox = await board.boundingBox();
+  const noteBox = await fallingNote.boundingBox();
+  expect(boardBox).not.toBeNull();
+  expect(noteBox).not.toBeNull();
+  expect(noteBox!.x + noteBox!.width / 2).toBeGreaterThan(boardBox!.x);
+  expect(noteBox!.x + noteBox!.width / 2).toBeLessThan(boardBox!.x + boardBox!.width);
+
   await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
   await expect(page.getByText("La qualità massima resta al 0%.")).toBeVisible();
   await page.getByRole("button", { name: "Metti in vendita" }).click();
