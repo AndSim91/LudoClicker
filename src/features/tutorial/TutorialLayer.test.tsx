@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   resolveTutorialRegions,
@@ -8,6 +8,7 @@ import {
 import { AppRail } from "../../components/outlook-shell/AppRail";
 import { Composer } from "../../components/outlook-shell/Composer";
 import { createInitialState } from "../../game/initialState";
+import "../../styles/tutorial.css";
 import { TutorialLayer } from "./TutorialLayer";
 
 describe("TutorialLayer", () => {
@@ -273,11 +274,107 @@ describe("TutorialLayer", () => {
     expect(events).toHaveAttribute("data-tutorial-target", "true");
     expect(events).toHaveAttribute("data-tutorial-treatment", "focus");
     expect(events.inert).toBe(false);
+    expect(getComputedStyle(navigation).zIndex).toBe("auto");
+    expect(getComputedStyle(events).zIndex).toBe("5001");
     expect(mail).not.toHaveAttribute("data-tutorial-treatment");
     expect(container.querySelector("main")).toHaveAttribute(
       "data-tutorial-treatment",
       "muted",
     );
+  });
+
+  it("highlights Events when the navigation target mounts after the tutorial", async () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-event")!;
+    const step = scene.steps.find(({ id }) => id === "open-events")!;
+    const lockedState = createInitialState(1_000, "Andrea Ungaro");
+    const unlockedState = {
+      ...lockedState,
+      shortGoal: {
+        ...lockedState.shortGoal,
+        completedCount: 1,
+      },
+    };
+    const { container, rerender } = render(
+      <>
+        <AppRail view="mail" state={lockedState} onChange={vi.fn()} />
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={0}
+          context={{ state: unlockedState, activeView: "mail" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    expect(container.querySelector(
+      '[data-tutorial-region="events-navigation"]',
+    )).toBeNull();
+
+    rerender(
+      <>
+        <AppRail view="mail" state={unlockedState} onChange={vi.fn()} />
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={0}
+          context={{ state: unlockedState, activeView: "mail" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    const navigation = container.querySelector<HTMLElement>(".app-rail")!;
+    const events = container.querySelector<HTMLElement>(
+      '[data-tutorial-region="events-navigation"]',
+    )!;
+    await waitFor(() => {
+      expect(events).toHaveAttribute("data-tutorial-treatment", "focus");
+      expect(getComputedStyle(navigation).zIndex).toBe("auto");
+      expect(getComputedStyle(events).zIndex).toBe("5001");
+    });
+  });
+
+  it("keeps only the collaborator section visible during its assignment objective", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-collaborator")!;
+    const step = scene.steps.find(({ id }) => id === "assign-first-collaborator")!;
+    const { container } = render(
+      <>
+        <div className="workspace">
+          <main className="overview-view people-view">
+            <header>Scuola</header>
+            <section data-tutorial-region="collaborator-section" data-tutorial-target="true">
+              Collaboratori
+            </section>
+            <section>Iscritti attivi</section>
+          </main>
+        </div>
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={3}
+          context={{ state: createInitialState(1_000, "Andrea Ungaro"), activeView: "contacts" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    const main = container.querySelector<HTMLElement>(".people-view")!;
+    const collaborators = container.querySelector<HTMLElement>(
+      '[data-tutorial-region="collaborator-section"]',
+    )!;
+    const members = screen.getByText("Iscritti attivi");
+
+    expect(main).toHaveAttribute("data-tutorial-treatment", "focus");
+    expect(collaborators).toHaveAttribute("data-tutorial-treatment", "focus");
+    expect(getComputedStyle(main).zIndex).toBe("auto");
+    expect(getComputedStyle(main).boxShadow).toBe("none");
+    expect(getComputedStyle(collaborators).zIndex).toBe("5001");
+    expect(getComputedStyle(members).opacity).toBe("0.26");
+    expect(getComputedStyle(members).pointerEvents).toBe("none");
   });
 
   it("highlights the Upgrade navigation target while asking to open it", () => {

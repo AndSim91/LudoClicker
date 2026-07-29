@@ -65,6 +65,7 @@
 .app-rail[data-tutorial-treatment="focus"]:has(
   .rail-item[data-tutorial-target][data-tutorial-treatment="focus"]
 ) {
+  z-index: auto;
   box-shadow: none;
 }
 
@@ -75,6 +76,7 @@
 }
 
 .rail-item[data-tutorial-target][data-tutorial-treatment="focus"] {
+  z-index: 5001;
   color: white;
   background: var(--blue-600);
   box-shadow:
@@ -124,7 +126,24 @@
     0 8px 24px rgb(15 57 92 / 30%);
 }
 
+.people-view[data-tutorial-treatment="focus"]:has(
+  > [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"]
+) {
+  z-index: auto;
+  box-shadow: none;
+}
+
+.people-view[data-tutorial-treatment="focus"]:has(
+  > [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"]
+) > :not([data-tutorial-region="collaborator-section"]) {
+  filter: blur(3px) grayscale(.35) brightness(.72);
+  opacity: .26;
+  pointer-events: none;
+  user-select: none;
+}
+
 [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"] {
+  z-index: 5001;
   border-radius: 4px;
   background: var(--surface);
   box-shadow:
@@ -327,6 +346,12 @@
 }
 
 :root[data-theme="dark"] [data-tutorial-treatment="muted"] {
+  filter: blur(3px) grayscale(.35) brightness(.55);
+}
+
+:root[data-theme="dark"] .people-view[data-tutorial-treatment="focus"]:has(
+  > [data-tutorial-region="collaborator-section"][data-tutorial-treatment="focus"]
+) > :not([data-tutorial-region="collaborator-section"]) {
   filter: blur(3px) grayscale(.35) brightness(.55);
 }
 

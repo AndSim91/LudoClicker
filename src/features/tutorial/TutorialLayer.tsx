@@ -31,10 +31,31 @@ export function TutorialLayer({
   const focusRegionKey = focusRegions.join(",");
   const hiddenRegionKey = hiddenRegions.join(",");
 
-  useEffect(() => applyTutorialTreatments(
-    focusRegionKey ? focusRegionKey.split(",") as TutorialRegionId[] : [],
-    hiddenRegionKey ? hiddenRegionKey.split(",") as TutorialRegionId[] : [],
-  ), [focusRegionKey, hiddenRegionKey]);
+  useEffect(() => {
+    const focused = focusRegionKey
+      ? focusRegionKey.split(",") as TutorialRegionId[]
+      : [];
+    const hidden = hiddenRegionKey
+      ? hiddenRegionKey.split(",") as TutorialRegionId[]
+      : [];
+    let isObserving = true;
+    let restoreTreatments = applyTutorialTreatments(focused, hidden);
+    const observer = new MutationObserver((mutations) => {
+      if (!isObserving || typeof document === "undefined") return;
+      if (!mutations.some(({ addedNodes, removedNodes }) =>
+        addedNodes.length > 0 || removedNodes.length > 0
+      )) return;
+      restoreTreatments();
+      restoreTreatments = applyTutorialTreatments(focused, hidden);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      isObserving = false;
+      observer.disconnect();
+      restoreTreatments();
+    };
+  }, [focusRegionKey, hiddenRegionKey]);
 
   useEffect(() => {
     if (!step.scrollToRegion) return;
