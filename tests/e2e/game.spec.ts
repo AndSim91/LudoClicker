@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { GADGET_MINIGAME_CONFIG } from "../../src/content/gadgets";
+import { GADGET_MINIGAME_DIFFICULTIES } from "../../src/content/gadgets";
 import { createGadgetRhythmNotes } from "../../src/game/gadgetMinigame";
 import {
   createProgressedGameSave,
@@ -140,7 +140,7 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   expect(noteBox!.x + noteBox!.width / 2).toBeGreaterThan(boardBox!.x);
   expect(noteBox!.x + noteBox!.width / 2).toBeLessThan(boardBox!.x + boardBox!.width);
 
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1_200);
   await expect(fallingNote).toHaveAttribute("class", spawnClass ?? "");
   expect(await fallingNote.getAttribute("style")).not.toBe(spawnPosition);
 
@@ -160,7 +160,8 @@ test("mostra accordi su corsie diverse alle rarità Gadget più alte", async ({ 
       targetCounts.set(note.targetAtMs, (targetCounts.get(note.targetAtMs) ?? 0) + 1);
     }
     return [...targetCounts].some(
-      ([targetAtMs, count]) => count > 1 && targetAtMs <= GADGET_MINIGAME_CONFIG.travelMs + 600,
+      ([targetAtMs, count]) =>
+        count > 1 && targetAtMs <= GADGET_MINIGAME_DIFFICULTIES["secret-legendary"].travelMs + 600,
     );
   });
   expect(earlyChordSeed).toBeDefined();
@@ -209,7 +210,7 @@ test("mostra accordi su corsie diverse alle rarità Gadget più alte", async ({ 
         }),
       { timeout: 5_000 },
     )
-    .toBeGreaterThanOrEqual(2);
+    .toBe(2);
 
   await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
 });

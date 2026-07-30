@@ -84,7 +84,7 @@ export function createInitialState(
       wear: 0,
     },
     lightInflation: createInitialLightInflationState(),
-    gadgets: createInitialGadgetState(),
+    gadgets: createInitialGadgetState(9),
     legendaryPity: 0,
     legendaryCollaborators: initialContacts.progress,
     tournaments: {

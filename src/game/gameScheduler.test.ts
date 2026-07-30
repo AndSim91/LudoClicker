@@ -206,7 +206,7 @@ describe("game scheduler", () => {
     const idle = { ...working, gadgets: { ...working.gadgets, activeWork: undefined } };
     expect(needsAutomationHeartbeat(idle)).toBe(false);
 
-    const marginalSales: GameState = {
+    const extraSales: GameState = {
       ...idle,
       gadgets: {
         ...idle.gadgets,
@@ -229,7 +229,7 @@ describe("game scheduler", () => {
         },
       },
     };
-    expect(needsAutomationHeartbeat(marginalSales)).toBe(true);
+    expect(needsAutomationHeartbeat(extraSales)).toBe(true);
   });
 
   it("wakes an event automator when the sparring cooldown expires", () => {

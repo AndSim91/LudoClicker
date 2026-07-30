@@ -38,6 +38,7 @@ import { getAvailableSwords } from "../game/equipment";
 import { getMessageThreadKey } from "../game/messages";
 import { useGameEngine } from "../game/useGameEngine";
 import { getAvailableStandardLegendaryProfiles } from "../game/legendaryAvailability";
+import { getGadgetFamilyUnitsSold } from "../game/gadgetRarity";
 import { isGameAreaUnlocked } from "../game/progression";
 import { exportGame, importGame, resetGame, saveGame } from "../game/save";
 import {
@@ -370,6 +371,10 @@ export function App() {
     () => dispatch({ type: "MAINTAIN_EQUIPMENT", now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const resetAdminGadgetSales = useCallback(
+    () => dispatch({ type: "ADMIN_RESET_GADGET_SALES" }),
+    [dispatch],
+  );
   const startReptilePreparation = useCallback(
     (assignments: ReptileSectorAssignments) => dispatch({
       type: "START_REPTILE_PREPARATION",
@@ -607,6 +612,10 @@ export function App() {
               availableLegendaryProfiles={
                 getAvailableStandardLegendaryProfiles(state, getGameNow()).length
               }
+              gadgetUnitsSold={Object.values(state.gadgets.products).reduce(
+                (total, product) => total + getGadgetFamilyUnitsSold(product),
+                0,
+              )}
               gameSpeed={gameSpeed}
               onGameSpeedChange={setGameSpeed}
               onAddContacts={addAdminContacts}
@@ -615,6 +624,7 @@ export function App() {
               onAddSwords={addAdminSwords}
               onAdvanceMonth={advanceAdminMonth}
               onScheduleLegendaryTrial={scheduleAdminLegendaryTrial}
+              onResetGadgetSales={resetAdminGadgetSales}
             />
           ) : (
             <StableOverviewView

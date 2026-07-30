@@ -65,8 +65,8 @@ export const GADGET_DEFINITIONS: Record<GadgetProductId, GadgetDefinition> = {
 export const GADGET_PROJECT_UNLOCK_SALES = 100;
 export const GADGET_REVISION_COST_RATE = 0.1;
 export const GADGET_REVISION_WORK_RATE = 1 / 3;
-export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 5 / 5;
-export const GADGET_MARGINAL_SALES_SPEED_MULTIPLIER = 1 / 10;
+export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 2;
+export const GADGET_EXTRA_SALES_SPEED_MULTIPLIER = 0.3;
 
 export const GADGET_MEMBER_REACH_LEVELS = [0.1, 0.2, 0.35, 0.5, 0.75, 1] as const;
 export const GADGET_FOLLOWER_REACH_LEVELS = [
@@ -84,8 +84,7 @@ export const GADGET_QUALITY_CONVERSION_ANCHORS = [
 export const GADGET_MINIGAME_CONFIG = {
   countdownMs: 3_000,
   durationMs: 20_000,
-  noteCount: 24,
-  travelMs: 2_400,
+  noteCount: 18,
   firstTargetMs: 1_400,
   lastTargetMs: 19_000,
   targetPositionPercent: 82,
@@ -104,41 +103,41 @@ export const GADGET_MINIGAME_CONFIG = {
 
 export interface GadgetMinigameDifficulty {
   noteCount: number;
+  travelMs: number;
   chordChance: number;
-  tripleChordChance: number;
   minimumChordGroups: number;
 }
 
 export const GADGET_MINIGAME_DIFFICULTIES = {
   common: {
-    noteCount: 24,
+    noteCount: 18,
+    travelMs: 3_400,
     chordChance: 0,
-    tripleChordChance: 0,
     minimumChordGroups: 0,
   },
   rare: {
-    noteCount: 28,
+    noteCount: 24,
+    travelMs: 2_900,
     chordChance: 0,
-    tripleChordChance: 0,
     minimumChordGroups: 0,
   },
   "ultra-rare": {
-    noteCount: 32,
-    chordChance: 0.18,
-    tripleChordChance: 0,
+    noteCount: 30,
+    travelMs: 2_400,
+    chordChance: 0.12,
     minimumChordGroups: 1,
   },
   legendary: {
     noteCount: 36,
-    chordChance: 0.28,
-    tripleChordChance: 0.06,
-    minimumChordGroups: 2,
+    travelMs: 1_900,
+    chordChance: 0.25,
+    minimumChordGroups: 3,
   },
   "secret-legendary": {
-    noteCount: 40,
-    chordChance: 0.38,
-    tripleChordChance: 0.14,
-    minimumChordGroups: 3,
+    noteCount: 44,
+    travelMs: 1_500,
+    chordChance: 0.4,
+    minimumChordGroups: 5,
   },
 } as const satisfies Record<GadgetRarity, GadgetMinigameDifficulty>;
 

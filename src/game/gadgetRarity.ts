@@ -17,6 +17,7 @@ export function createInitialGadgetRarityState(): GadgetRarityState {
     unlocked: false,
     quality: 0,
     unitsSold: 0,
+    extraUnitsSold: 0,
     totalProfit: 0,
     salesRemainder: 0,
   };
@@ -51,6 +52,12 @@ export function getGadgetFamilyUnitsSold(product: GadgetProductState): number {
     (total, rarity) => total + product.rarities[rarity].unitsSold,
     0,
   );
+}
+
+export function getGadgetAudienceUnitsSold(
+  rarityState: GadgetRarityState,
+): number {
+  return Math.max(0, rarityState.unitsSold - rarityState.extraUnitsSold);
 }
 
 export function getGadgetFamilyProfit(product: GadgetProductState): number {

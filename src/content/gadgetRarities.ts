@@ -25,25 +25,25 @@ export const GADGET_RARITIES: Record<GadgetRarity, GadgetRarityDefinition> = {
   rare: {
     id: "rare",
     label: "Raro",
-    valueMultiplier: 1.25,
+    valueMultiplier: 1.5,
     revisionMultiplier: 1.25,
   },
   "ultra-rare": {
     id: "ultra-rare",
     label: "Ultra Raro",
-    valueMultiplier: 1.5,
+    valueMultiplier: 2,
     revisionMultiplier: 1.5,
   },
   legendary: {
     id: "legendary",
     label: "Leggendario",
-    valueMultiplier: 1.75,
+    valueMultiplier: 2.5,
     revisionMultiplier: 1.75,
   },
   "secret-legendary": {
     id: "secret-legendary",
     label: "Leggendario Segreto",
-    valueMultiplier: 2,
+    valueMultiplier: 3,
     revisionMultiplier: 2,
   },
 };

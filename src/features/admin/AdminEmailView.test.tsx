@@ -16,6 +16,8 @@ describe("AdminEmailView", () => {
     onAddSwords = vi.fn(),
     gameSpeed = 1,
     onGameSpeedChange = vi.fn(),
+    onResetGadgetSales = vi.fn(),
+    gadgetUnitsSold = 12,
   ) => {
     return render(
       <AdminEmailView
@@ -28,6 +30,7 @@ describe("AdminEmailView", () => {
         damagedSwords={0}
         currentMonth={currentMonth}
         availableLegendaryProfiles={availableLegendaryProfiles}
+        gadgetUnitsSold={gadgetUnitsSold}
         gameSpeed={gameSpeed}
         onGameSpeedChange={onGameSpeedChange}
         onAddContacts={onAddContacts}
@@ -36,6 +39,7 @@ describe("AdminEmailView", () => {
         onAddSwords={onAddSwords}
         onAdvanceMonth={onAdvanceMonth}
         onScheduleLegendaryTrial={onScheduleLegendaryTrial}
+        onResetGadgetSales={onResetGadgetSales}
       />,
     );
   };
@@ -110,6 +114,7 @@ describe("AdminEmailView", () => {
         damagedSwords={0}
         currentMonth={9}
         availableLegendaryProfiles={3}
+        gadgetUnitsSold={12}
         gameSpeed={10}
         onGameSpeedChange={onGameSpeedChange}
         onAddContacts={vi.fn()}
@@ -118,6 +123,7 @@ describe("AdminEmailView", () => {
         onAddSwords={vi.fn()}
         onAdvanceMonth={vi.fn()}
         onScheduleLegendaryTrial={vi.fn()}
+        onResetGadgetSales={vi.fn()}
       />,
     );
     expect(screen.getByRole("button", { name: "Imposta velocità 10×" })).toHaveAttribute(
@@ -172,6 +178,31 @@ describe("AdminEmailView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Avvia prova Leggendario" }));
 
     expect(onScheduleLegendaryTrial).toHaveBeenCalledOnce();
+  });
+
+  it("resets Gadget sale counts from the Admin tools", () => {
+    const onResetGadgetSales = vi.fn();
+    renderAdmin(
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      3,
+      vi.fn(),
+      9,
+      vi.fn(),
+      1,
+      vi.fn(),
+      onResetGadgetSales,
+      42,
+    );
+
+    expect(screen.getByText("Pezzi attualmente registrati: 42")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", {
+      name: "Azzera conteggi prodotti Gadget",
+    }));
+
+    expect(onResetGadgetSales).toHaveBeenCalledOnce();
   });
 
   it("disables the Legendary trial when the current school has no available profiles", () => {

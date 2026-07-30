@@ -90,6 +90,6 @@ export function migrateGadgetRarityState(
         : undefined,
       crossSellRemainder: legacy.crossSellRemainder ?? 0,
       crossSellCursor: legacy.crossSellCursor ?? 0,
-    },
+    } as unknown as GameState["gadgets"],
   };
 }

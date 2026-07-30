@@ -42,7 +42,10 @@ describe("Gadget quality minigame", () => {
       return notes.length;
     });
 
-    expect(noteCounts).toEqual([24, 28, 32, 36, 40]);
+    expect(noteCounts).toEqual([18, 24, 30, 36, 44]);
+    expect(
+      GADGET_RARITY_ORDER.map((rarity) => GADGET_MINIGAME_DIFFICULTIES[rarity].travelMs),
+    ).toEqual([3_400, 2_900, 2_400, 1_900, 1_500]);
   });
 
   it("creates deterministic chords only at the higher rarities", () => {
@@ -60,7 +63,7 @@ describe("Gadget quality minigame", () => {
             (group) => new Set(group.map((note) => note.lane)).size === group.length,
           ),
         ).toBe(true);
-        expect(Math.max(...groups.map((group) => group.length))).toBeLessThanOrEqual(3);
+        expect(Math.max(...groups.map((group) => group.length))).toBeLessThanOrEqual(2);
         expect(createGadgetRhythmNotes(seed, rarity)).toEqual(notes);
       }
     }

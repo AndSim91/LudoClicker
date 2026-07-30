@@ -15,6 +15,7 @@ interface AdminEmailViewProps {
   damagedSwords: number;
   currentMonth: number;
   availableLegendaryProfiles: number;
+  gadgetUnitsSold: number;
   gameSpeed: number;
   onGameSpeedChange: (speed: number) => void;
   onAddContacts: (amount: number) => void;
@@ -23,6 +24,7 @@ interface AdminEmailViewProps {
   onAddSwords: (amount: number) => void;
   onAdvanceMonth: () => void;
   onScheduleLegendaryTrial: () => void;
+  onResetGadgetSales: () => void;
 }
 
 export function AdminEmailView({
@@ -35,6 +37,7 @@ export function AdminEmailView({
   damagedSwords,
   currentMonth,
   availableLegendaryProfiles,
+  gadgetUnitsSold,
   gameSpeed,
   onGameSpeedChange,
   onAddContacts,
@@ -43,6 +46,7 @@ export function AdminEmailView({
   onAddSwords,
   onAdvanceMonth,
   onScheduleLegendaryTrial,
+  onResetGadgetSales,
 }: AdminEmailViewProps) {
   const [contactAmount, setContactAmount] = useState("1");
   const [memberAmount, setMemberAmount] = useState("1");
@@ -239,8 +243,8 @@ export function AdminEmailView({
       <section className="admin-gameplay-tools" aria-labelledby="admin-gameplay-title">
         <div className="admin-resource-heading">
           <span>Flussi di gioco</span>
-          <h2 id="admin-gameplay-title">Prove in palestra</h2>
-          <p>Avvia casi reali senza creare iscrizioni dirette.</p>
+          <h2 id="admin-gameplay-title">Scenari di test</h2>
+          <p>Avvia prove in palestra senza creare iscrizioni dirette o ripristina i dati Gadget.</p>
         </div>
         <div className="admin-gameplay-action">
           <div>
@@ -262,6 +266,24 @@ export function AdminEmailView({
               ? `Profili disponibili: ${availableLegendaryProfiles}`
               : "Nessun profilo Leggendario disponibile nella scuola corrente."}
           </small>
+        </div>
+        <div className="admin-gameplay-action">
+          <div>
+            <strong>Conteggi vendite Gadget</strong>
+            <p>
+              {"Azzera le unit\u00e0 vendute di ogni prodotto e rarit\u00e0 per ripetere i test "}
+              di vendita e riparte da zero anche la classifica ricavi Gadget del mese. Euro disponibili,
+              progetti e guadagni cumulativi restano invariati.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={gadgetUnitsSold === 0}
+            onClick={onResetGadgetSales}
+          >
+            Azzera conteggi prodotti Gadget
+          </button>
+          <small>Pezzi attualmente registrati: {gadgetUnitsSold.toLocaleString("it-IT")}</small>
         </div>
       </section>
     </main>

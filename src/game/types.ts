@@ -806,6 +806,8 @@ export interface GadgetRarityState {
   unlocked: boolean;
   quality: number;
   unitsSold: number;
+  /** Vendite oltre il pubblico raggiungibile, escluse dal consumo di domanda futura. */
+  extraUnitsSold: number;
   totalProfit: number;
   salesRemainder: number;
 }
@@ -816,6 +818,11 @@ export interface GadgetProductState {
   prototypeCompleted: boolean;
   accepted: boolean;
   rarities: Record<GadgetRarity, GadgetRarityState>;
+}
+
+export interface GadgetMonthlyRevenueState {
+  month: number;
+  totals: Record<GadgetProductId, number>;
 }
 
 export interface GadgetWorkState {
@@ -844,6 +851,7 @@ export interface GadgetState {
   minigame?: GadgetMinigameState;
   crossSellRemainder: number;
   crossSellCursor: number;
+  monthlyRevenue: GadgetMonthlyRevenueState;
 }
 
 export interface GameState {
@@ -954,6 +962,7 @@ export type GameAction =
   | { type: "ADMIN_ADD_MEMBERS"; amount: number }
   | { type: "ADMIN_ADD_EUROS"; amount: number }
   | { type: "ADMIN_ADD_SWORDS"; amount: number }
+  | { type: "ADMIN_RESET_GADGET_SALES" }
   | { type: "ADMIN_ADVANCE_MONTH"; now: number }
   | { type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL"; now: number }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }

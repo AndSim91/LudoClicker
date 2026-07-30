@@ -14,6 +14,8 @@ export function markAllMessagesRead(state: GameState): GameState {
   if (!state.messages.some((message) => message.unread)) return state;
   return {
     ...state,
-    messages: state.messages.map((message) => ({ ...message, unread: false })),
+    messages: state.messages.map((message) =>
+      message.unread ? { ...message, unread: false } : message,
+    ),
   };
 }

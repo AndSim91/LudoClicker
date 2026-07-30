@@ -93,6 +93,59 @@ describe("PeopleView", () => {
     expect(onIncrement).toHaveBeenCalledWith("writing");
   });
 
+  it("shows the live monthly Gadget market in the aggregate dashboard", () => {
+    const initial = createInitialState(1_000);
+    const gadgetCollaborator: Collaborator = {
+      id: "gadget-market-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Gadget",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "gadget",
+      rarity: "legendary",
+    };
+    const monthlyRevenue = {
+      ...initial.gadgets.monthlyRevenue,
+      totals: { ...initial.gadgets.monthlyRevenue.totals, mug: 4_820 },
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [gadgetCollaborator],
+          unlocks: {
+            ...initial.unlocks,
+            collaborators: true,
+            gadget: true,
+          },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: {
+              ...initial.collaboratorManagement.targets,
+              gadget: 1,
+            },
+          },
+          gadgets: { ...initial.gadgets, monthlyRevenue },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const market = screen.getByRole("region", {
+      name: "Classifica ricavi Gadget del mese",
+    });
+    expect(within(market).getByText("Classifica ricavi")).toBeVisible();
+    expect(within(market).getByText("4.820 €")).toBeVisible();
+    expect(within(market).getByRole("progressbar", {
+      name: "Quota ricavi Tazza",
+    })).toHaveValue(100);
+    expect(within(market).getByText("Leader")).toBeVisible();
+  });
+
   it("keeps the progress clock fluid for a high-volume teaching dashboard", () => {
     const initial = createInitialState(1_000);
     const instructor: Collaborator = {
@@ -426,6 +479,16 @@ describe("PeopleView", () => {
     expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
       .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
+    const resetWritingSort = within(writingDialog).getByRole("button", {
+      name: "Ripristina ordinamento redazione",
+    });
+    expect(resetWritingSort).toBeEnabled();
+    fireEvent.click(resetWritingSort);
+    expect(nameSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "none");
+    expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
+    expect(resetWritingSort).toBeDisabled();
 
     fireEvent.click(within(writingDialog).getByRole("button", { name: "Chiudi pannello Redazione" }));
     fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
@@ -1145,6 +1208,15 @@ describe("PeopleView", () => {
     expect(rows[1]).toHaveTextContent("Arena Bassa");
     expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
     expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
+
+    const resetSort = within(roster).getByRole("button", {
+      name: "Ripristina ordinamento iscritti",
+    });
+    fireEvent.click(resetSort);
+    rows = roster.querySelectorAll(".member-row:not(.people-head)");
+    expect(rows[0]).toHaveTextContent("Punteggio Nascosto");
+    expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "none");
+    expect(resetSort).toBeDisabled();
   });
 
   it("shows secret Legendaries as the highest official rarity without a name badge", () => {
@@ -1606,6 +1678,16 @@ describe("PeopleView", () => {
     expect(rows[0]).toHaveTextContent("Bruno Tecnico");
     expect(rows[1]).toHaveTextContent("Alba Esperta");
     expect(rows[2]).toHaveTextContent("Carla Base");
+
+    const resetSort = within(roster).getByRole("button", {
+      name: "Ripristina ordinamento collaboratori",
+    });
+    fireEvent.click(resetSort);
+    rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Carla Base");
+    expect(rows[1]).toHaveTextContent("Alba Esperta");
+    expect(rows[2]).toHaveTextContent("Bruno Tecnico");
+    expect(resetSort).toBeDisabled();
   });
 
   it("shows every collaborator automation progress without the Corso Agonisti box", () => {

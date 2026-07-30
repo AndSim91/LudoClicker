@@ -15,6 +15,7 @@ import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
+import { hasGadgetRuntimeWork } from "../../game/gadgetEconomy";
 import { isSummerBreak } from "../../game/calendar";
 import {
   selectActiveEmail,
@@ -46,6 +47,7 @@ import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormLogoStrip } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
+import { GadgetRevenueRanking } from "./GadgetRevenueRanking";
 
 const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "writing",
@@ -191,7 +193,7 @@ function StandardSectorCard({
       ]
     : undefined;
   return (
-    <article className={`collaborator-sector-card${assigned.length === 0 ? " is-empty" : ""}${socialActivities ? " has-workstreams" : ""}`}>
+    <article className={`collaborator-sector-card${assigned.length === 0 ? " is-empty" : ""}${socialActivities ? " has-workstreams" : ""}${role === "gadget" ? " is-gadget-ranking" : ""}`}>
       <header>
         <span className="sector-card-icon"><Icon name={ROLE_PRESENTATION[role].icon} /></span>
         <span>
@@ -208,7 +210,13 @@ function StandardSectorCard({
         />
       </header>
 
-      {socialActivities ? (
+      {role === "gadget" ? (
+        <GadgetRevenueRanking
+          monthlyRevenue={state.gadgets.monthlyRevenue}
+          currentMonth={state.school.currentMonth}
+          mastery={<SectorMasteryIndicator collaborators={assigned} role={role} />}
+        />
+      ) : socialActivities ? (
         <div className="sector-card-workstreams">
           {socialActivities.map((workstream, index) => (
             <section
@@ -529,7 +537,7 @@ export function CollaboratorSectorView({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
 }) {
   const state = useGameStateSlices(
-    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "network", "school", "unlocks", "upgrades"],
+    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
@@ -565,26 +573,15 @@ export function CollaboratorSectorView({
     ),
     [courseXUnlocked, state.collaborators],
   );
-  const hasTimedWork = useMemo(
-    () => state.acquisitionEvents.some((event) => event.status === "running") ||
-      teachingEntries.length > 0 ||
-      internalInstructorCourses.length > 0 ||
-      technicianCourses.length > 0 ||
-      (
-        state.collaborators.some(
-          (collaborator) => collaborator.assignment === "equipment",
-        ) && getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
-      ) || Boolean(state.gadgets.activeWork),
-    [
-      internalInstructorCourses.length,
-      state.acquisitionEvents,
-      state.collaborators,
-      state.equipment,
-      state.gadgets.activeWork,
-      teachingEntries.length,
-      technicianCourses.length,
-    ],
-  );
+  const hasTimedWork = state.acquisitionEvents.some((event) => event.status === "running") ||
+    teachingEntries.length > 0 ||
+    internalInstructorCourses.length > 0 ||
+    technicianCourses.length > 0 ||
+    (
+      state.collaborators.some(
+        (collaborator) => collaborator.assignment === "equipment",
+      ) && getEquipmentAutomaticRepairTarget(state.equipment) !== undefined
+    ) || hasGadgetRuntimeWork(state);
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
   const availableRoles: CollaboratorMasteryRole[] = state.unlocks.gadget

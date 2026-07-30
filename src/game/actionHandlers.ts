@@ -4,6 +4,7 @@ import {
   addAdminEuros,
   addAdminMembers,
   addAdminSwords,
+  resetAdminGadgetSales,
   scheduleAdminLegendaryTrial,
 } from "./adminFlow";
 import { buyOfficialSword, maintainEquipment } from "./equipment";
@@ -124,6 +125,7 @@ export function createGameActionHandlers(
     ADMIN_ADD_MEMBERS: (state, action) => addAdminMembers(state, action.amount),
     ADMIN_ADD_EUROS: (state, action) => addAdminEuros(state, action.amount),
     ADMIN_ADD_SWORDS: (state, action) => addAdminSwords(state, action.amount),
+    ADMIN_RESET_GADGET_SALES: (state) => resetAdminGadgetSales(state),
     ADMIN_ADVANCE_MONTH: (state, action) => Number.isFinite(action.now)
       ? dependencies.tick({
           ...state,

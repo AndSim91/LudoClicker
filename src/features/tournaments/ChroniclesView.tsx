@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
+import { TableSortResetButton } from "../../components/common/TableSortResetButton";
 import { SECRET_LEGENDARIES } from "../../content/secretLegendaries";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import type { GameState, RockPaperScissorsChoice } from "../../game/types";
+import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { ChroniclesChoiceIcon, ChroniclesKeyIcon } from "./ChroniclesIcons";
 import {
   TournamentAthleteIdentity,
@@ -23,6 +25,11 @@ const CHRONICLES_ATHLETES_PER_PAGE = 10;
 type ChroniclesSort = {
   key: "arena" | "style";
   direction: "ascending" | "descending";
+};
+const CHRONICLES_SORT_KEYS = ["arena", "style"] as const;
+const CHRONICLES_DEFAULT_SORT: ChroniclesSort = {
+  key: "arena",
+  direction: "descending",
 };
 
 const CHOICE_LABELS: Record<RockPaperScissorsChoice, string> = {
@@ -139,10 +146,17 @@ export function ChroniclesView({
   );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [requestedPage, setRequestedPage] = useState(0);
-  const [sort, setSort] = useState<ChroniclesSort>({
-    key: "arena",
-    direction: "descending",
+  const {
+    sort,
+    setSort,
+    resetSort,
+    isDefaultSort,
+  } = usePersistentTableSort<ChroniclesSort>({
+    storageId: "chronicles-athletes",
+    allowedKeys: CHRONICLES_SORT_KEYS,
+    defaultSort: CHRONICLES_DEFAULT_SORT,
   });
+  const activeSort = sort ?? CHRONICLES_DEFAULT_SORT;
   const eligible = useMemo(
     () => getEligibleSchoolContactsFromRoster(state.contacts, state.collaborators),
     [state.collaborators, state.contacts],
@@ -180,11 +194,11 @@ export function ChroniclesView({
         if (leftPreparation.visible !== rightPreparation.visible) {
           return leftPreparation.visible ? -1 : 1;
         }
-        const leftValue = leftPreparation.values[sort.key];
-        const rightValue = rightPreparation.values[sort.key];
+        const leftValue = leftPreparation.values[activeSort.key];
+        const rightValue = rightPreparation.values[activeSort.key];
         const scoreComparison = leftValue - rightValue;
         if (scoreComparison !== 0) {
-          return sort.direction === "ascending" ? scoreComparison : -scoreComparison;
+          return activeSort.direction === "ascending" ? scoreComparison : -scoreComparison;
         }
         return `${left.firstName} ${left.lastName}`.localeCompare(
           `${right.firstName} ${right.lastName}`,
@@ -192,7 +206,7 @@ export function ChroniclesView({
           { sensitivity: "base" },
         );
       }),
-    [eligible, preparationByContactId, sort],
+    [activeSort, eligible, preparationByContactId],
   );
   const pageCount = Math.max(1, Math.ceil(sortedEligible.length / CHRONICLES_ATHLETES_PER_PAGE));
   const page = Math.min(requestedPage, pageCount - 1);
@@ -239,13 +253,35 @@ export function ChroniclesView({
   const handleSort = (key: ChroniclesSort["key"]) => {
     setRequestedPage(0);
     setSort((current) =>
-      current.key === key
+      (current ?? CHRONICLES_DEFAULT_SORT).key === key
         ? {
             key,
-            direction: current.direction === "ascending" ? "descending" : "ascending",
+            direction: (current ?? CHRONICLES_DEFAULT_SORT).direction === "ascending"
+              ? "descending"
+              : "ascending",
           }
         : { key, direction: "descending" },
     );
+  };
+  const selectSort = (key: ChroniclesSort["key"]) => {
+    setRequestedPage(0);
+    setSort((current) => ({
+      key,
+      direction: current?.key === key ? current.direction : "descending",
+    }));
+  };
+  const reverseSort = () => {
+    setRequestedPage(0);
+    setSort((current) => ({
+      ...(current ?? CHRONICLES_DEFAULT_SORT),
+      direction: (current ?? CHRONICLES_DEFAULT_SORT).direction === "ascending"
+        ? "descending"
+        : "ascending",
+    }));
+  };
+  const resetSorting = () => {
+    setRequestedPage(0);
+    resetSort();
   };
   const canStart =
     chronicles.keys > 0 && activeSelectedIds.length === GAME_CONFIG.chroniclesTeamSize;
@@ -270,13 +306,38 @@ export function ChroniclesView({
             <h3 id="chronicles-available-title">Atleti disponibili</h3>
             <span>{eligible.length} atleti</span>
           </header>
+          <div className="chronicles-sort-controls table-sort-controls" aria-label="Ordina atleti">
+            <label>
+              <span>Ordina per</span>
+              <select
+                aria-label="Campo di ordinamento atleti"
+                value={activeSort.key}
+                onChange={(event) => selectSort(event.target.value as ChroniclesSort["key"])}
+              >
+                <option value="arena">Arena</option>
+                <option value="style">Stile</option>
+              </select>
+            </label>
+            <button type="button" onClick={reverseSort}>
+              {activeSort.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
+            </button>
+            <TableSortResetButton
+              disabled={isDefaultSort}
+              label="atleti delle Chronicles"
+              onReset={resetSorting}
+            />
+          </div>
           <div className="chronicles-roster-head">
             <span>Atleta</span>
             {(["arena", "style"] as const).map((key) => {
               const label = key === "arena" ? "Arena" : "Stile";
-              const active = sort.key === key;
+              const active = activeSort.key === key;
               return (
-                <span key={key} role="columnheader" aria-sort={active ? sort.direction : "none"}>
+                <span
+                  key={key}
+                  role="columnheader"
+                  aria-sort={active ? activeSort.direction : "none"}
+                >
                   <button
                     type="button"
                     className={active ? "is-active" : ""}
@@ -285,7 +346,7 @@ export function ChroniclesView({
                   >
                     {label}
                     <i aria-hidden="true">
-                      {active ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
+                      {active ? (activeSort.direction === "ascending" ? "↑" : "↓") : "↕"}
                     </i>
                   </button>
                 </span>

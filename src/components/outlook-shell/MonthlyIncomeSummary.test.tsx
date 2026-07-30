@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createInitialState } from "../../game/engine";
-import type { Collaborator, FormId } from "../../game/types";
+import type { Collaborator, FormId, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 
@@ -51,7 +51,7 @@ describe("MonthlyIncomeSummary", () => {
     expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");
   });
 
-  it("includes estimated Gadget sales after the sector is unlocked", () => {
+  it("includes estimated Gadget sales from a version-78 hot state", () => {
     const initial = createInitialState(1_000);
     const product = initial.gadgets.products.wristband;
     const gadgetCollaborator: Collaborator = {
@@ -64,42 +64,46 @@ describe("MonthlyIncomeSummary", () => {
       assignment: "gadget",
       rarity: "ultra-rare",
     };
-
-    render(
-      <MonthlyIncomeSummary
-        state={{
-          ...initial,
-          school: { ...initial.school, activeMembers: 10 },
-          collaborators: [gadgetCollaborator],
-          unlocks: { ...initial.unlocks, gadget: true },
-          gadgets: {
-            ...initial.gadgets,
-            products: {
-              ...initial.gadgets.products,
-              wristband: {
-                ...product,
+    const hotState: GameState = {
+      ...initial,
+      version: 78,
+      school: { ...initial.school, activeMembers: 10 },
+      collaborators: [gadgetCollaborator],
+      unlocks: { ...initial.unlocks, gadget: true },
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...product,
+            unlocked: true,
+            projectPurchased: true,
+            prototypeCompleted: true,
+            accepted: true,
+            rarities: {
+              ...product.rarities,
+              common: {
+                ...product.rarities.common,
                 unlocked: true,
-                projectPurchased: true,
-                prototypeCompleted: true,
-                accepted: true,
-                rarities: {
-                  ...product.rarities,
-                  common: {
-                    ...product.rarities.common,
-                    unlocked: true,
-                    quality: 100,
-                  },
-                },
+                quality: 100,
               },
             },
           },
-        }}
+        },
+      },
+    };
+    delete (hotState.gadgets as Partial<GameState["gadgets"]>).monthlyRevenue;
+
+    render(
+      <MonthlyIncomeSummary
+        state={hotState}
       />,
     );
 
     expect(screen.getByLabelText(/Entrate mensili: 420,00/)).toBeVisible();
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
+    expect(hotState.gadgets.monthlyRevenue).toBeUndefined();
     expect(tooltip).toHaveTextContent(/20,00\s*€/);
   });
 });

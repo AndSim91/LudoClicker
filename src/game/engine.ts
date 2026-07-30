@@ -22,6 +22,7 @@ import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
 import { compactGameHistory } from "./historyArchive";
+import { markAllMessagesRead } from "./inboxFlow";
 import { processGadgets } from "./gadgetFlow";
 import {
   getReptileAssignedCollaboratorIds,
@@ -423,7 +424,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   }
 
   const gainMultiplier = 1;
-  return compactChangedHistory(
+  const processedState = compactChangedHistory(
     state,
     completeShortGoal(
       grantAchievements(reconciledState, now, gainMultiplier),
@@ -432,4 +433,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     ),
     action,
   );
+  return action.type === "MARK_ALL_MESSAGES_READ"
+    ? markAllMessagesRead(processedState)
+    : processedState;
 }

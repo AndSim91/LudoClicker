@@ -10,6 +10,9 @@ import { departMembers } from "./membershipFlow";
 import { nextRandom } from "./random";
 import type { GameState, ScheduledTrial } from "./types";
 import { unlockSocialIfEligible } from "./unlocks";
+import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
+import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
+import { createInitialGadgetMonthlyRevenueState } from "./gadgetRevenue";
 
 export function addAdminContacts(state: GameState, rawAmount: number): GameState {
   const amount = Math.trunc(rawAmount);
@@ -141,6 +144,42 @@ export function addAdminSwords(state: GameState, rawAmount: number): GameState {
       totalSwords,
       availableSwords,
     }),
+  };
+}
+
+export function resetAdminGadgetSales(state: GameState): GameState {
+  return {
+    ...state,
+    gadgets: {
+      ...state.gadgets,
+      products: Object.fromEntries(
+        GADGET_PRODUCT_ORDER.map((productId) => {
+          const product = state.gadgets.products[productId];
+          return [
+            productId,
+            {
+              ...product,
+              rarities: Object.fromEntries(
+                GADGET_RARITY_ORDER.map((rarity) => [
+                  rarity,
+                  {
+                    ...product.rarities[rarity],
+                    unitsSold: 0,
+                    extraUnitsSold: 0,
+                    salesRemainder: 0,
+                  },
+                ]),
+              ) as typeof product.rarities,
+            },
+          ];
+        }),
+      ) as GameState["gadgets"]["products"],
+      crossSellRemainder: 0,
+      crossSellCursor: 0,
+      monthlyRevenue: createInitialGadgetMonthlyRevenueState(
+        state.school.currentMonth,
+      ),
+    },
   };
 }
 

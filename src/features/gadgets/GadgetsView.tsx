@@ -378,8 +378,9 @@ export function GadgetsView({
         </div>
         <p>
           <Icon name="info" />
-          Oltre il pubblico raggiungibile restano possibili vendite occasionali,
-          ma molto più lente. I potenziamenti del settore si acquistano nella
+          Oltre il pubblico raggiungibile continuano vendite extra per regali,
+          sostituzioni e acquisti ripetuti. Non consumano il pubblico che diventerà
+          raggiungibile in futuro. I potenziamenti del settore si acquistano nella
           schermata Upgrade.
         </p>
       </section>

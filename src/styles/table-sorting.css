@@ -1,0 +1,79 @@
+.table-sort-controls {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.table-sort-controls label {
+  display: flex;
+  min-width: 170px;
+  flex: 1 1 190px;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.table-sort-controls select,
+.table-sort-controls > button {
+  min-height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--blue-700);
+  font-size: 11px;
+  text-transform: none;
+}
+
+.table-sort-controls select {
+  width: 100%;
+  padding: 0 8px;
+  color: var(--ink);
+}
+
+.table-sort-controls > button {
+  padding: 0 10px;
+}
+
+.table-sort-controls > button:hover:not(:disabled),
+.table-sort-controls > button:focus-visible {
+  border-color: var(--blue-600);
+  background: var(--blue-050);
+}
+
+.table-sort-controls > button:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+  opacity: 0.55;
+}
+
+.table-sort-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.table-sort-reset-button > span {
+  font-size: 15px;
+  line-height: 1;
+}
+
+@media (max-width: 560px) {
+  .table-sort-controls label {
+    flex-basis: 100%;
+  }
+
+  .table-sort-controls > button {
+    flex: 1 1 0;
+  }
+}

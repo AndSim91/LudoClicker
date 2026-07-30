@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { TableSortResetButton } from "../../components/common/TableSortResetButton";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
   COLLABORATOR_MASTERY_LEVELS,
@@ -33,6 +34,7 @@ import {
   getPresentedPersonRarity,
   getRarityClassName,
 } from "../../shared/rarityPresentation";
+import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import {
@@ -53,6 +55,22 @@ import {
 type InstructorRarityFilter = "all" | ReturnType<typeof getPresentedPersonRarity>;
 type InstructorActivityFilter = "all" | "active" | "waiting";
 type InstructorTrainingFilter = "all" | "active" | "reserved" | "available";
+const SECTOR_SORT_KEYS = [
+  "name",
+  "mastery",
+  "activity",
+  "arena",
+  "style",
+  "forms",
+] as const satisfies readonly SectorCollaboratorSortKey[];
+const INSTRUCTOR_SORT_KEYS = [
+  ...SECTOR_SORT_KEYS,
+  "instructor-training",
+] as const satisfies readonly SectorCollaboratorSortKey[];
+const INSTRUCTOR_TECHNICIAN_SORT_KEYS = [
+  ...INSTRUCTOR_SORT_KEYS,
+  "technician-training",
+] as const satisfies readonly SectorCollaboratorSortKey[];
 
 function getInitials(displayName: string): string {
   return displayName
@@ -349,8 +367,22 @@ export function CollaboratorSectorPanel({
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const technicianTrainingUnlocked = role === "instructor" &&
     isSISTechnicianCourseUnlocked(state.upgrades);
+  const allowedSortKeys = role === "instructor"
+    ? technicianTrainingUnlocked
+      ? INSTRUCTOR_TECHNICIAN_SORT_KEYS
+      : INSTRUCTOR_SORT_KEYS
+    : SECTOR_SORT_KEYS;
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SectorCollaboratorSort | null>(null);
+  const {
+    sort,
+    setSort,
+    resetSort,
+    isDefaultSort,
+  } = usePersistentTableSort<SectorCollaboratorSort>({
+    storageId: `collaborator-sector.${role}`,
+    allowedKeys: allowedSortKeys,
+    defaultSort: null,
+  });
   const [search, setSearch] = useState("");
   const [rarityFilter, setRarityFilter] = useState<InstructorRarityFilter>("all");
   const [activityFilter, setActivityFilter] = useState<InstructorActivityFilter>("all");
@@ -475,6 +507,9 @@ export function CollaboratorSectorPanel({
           direction: current.direction === "ascending" ? "descending" : "ascending",
         }
       : current);
+  };
+  const resetSorting = () => {
+    resetSort();
   };
 
   const hasActiveFilters = search !== "" || rarityFilter !== "all" ||
@@ -608,7 +643,10 @@ export function CollaboratorSectorPanel({
                   </button>
                 </div>
               ) : null}
-              <div className="sector-roster-sort-mobile" aria-label="Ordina collaboratori del settore">
+              <div
+                className="sector-roster-sort-mobile table-sort-controls"
+                aria-label="Ordina collaboratori del settore"
+              >
                 <label>
                   <span>Ordina per</span>
                   <select
@@ -634,6 +672,11 @@ export function CollaboratorSectorPanel({
                 <button type="button" disabled={!sort} onClick={reverseSort}>
                   {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
                 </button>
+                <TableSortResetButton
+                  disabled={isDefaultSort}
+                  label={roleLabel.toLocaleLowerCase("it-IT")}
+                  onReset={resetSorting}
+                />
               </div>
               <div className="sector-roster-head" role="row">
                 {role === "instructor" ? (

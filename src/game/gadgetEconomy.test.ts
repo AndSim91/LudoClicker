@@ -60,7 +60,7 @@ describe("Gadget economy", () => {
     expect(getGadgetUnitProfit("hoodie", 75)).toBe(60);
   });
 
-  it("adds 25% value, revision cost and revision duration at every rarity", () => {
+  it("adds 50% value per rarity while revision costs still grow by 25%", () => {
     expect([
       "common",
       "rare",
@@ -71,7 +71,7 @@ describe("Gadget economy", () => {
       "wristband",
       100,
       rarity as Parameters<typeof getGadgetUnitProfit>[2],
-    ))).toEqual([20, 25, 30, 35, 40]);
+    ))).toEqual([20, 30, 40, 50, 60]);
     expect(getGadgetRevisionCost("wristband", "rare")).toBe(1_250);
     expect(getGadgetRevisionCost("wristband", "secret-legendary")).toBe(2_000);
     expect(getGadgetWorkRequirement("wristband", "revision", "legendary")).toBe(

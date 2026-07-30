@@ -749,6 +749,20 @@ describe("TournamentsView", () => {
     fireEvent.click(view.getByRole("button", { name: "Successiva" }));
     expect(availableRows()).toHaveLength(4);
     expect(view.getByText("Pagina 2 di 2")).toBeVisible();
+
+    const resetSort = view.getByRole("button", {
+      name: "Ripristina ordinamento atleti delle Chronicles",
+    });
+    fireEvent.click(resetSort);
+    expect(availableRows()).toHaveLength(10);
+    expect(availableRows()[0]).toHaveTextContent(
+      `${enrolledContacts.at(-1)!.firstName} ${enrolledContacts.at(-1)!.lastName}`,
+    );
+    expect(view.getByRole("columnheader", { name: "Arena" })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    );
+    expect(resetSort).toBeDisabled();
   });
 
   it("opens the themed Chronicles result inside Chronicles and returns to athlete selection", () => {

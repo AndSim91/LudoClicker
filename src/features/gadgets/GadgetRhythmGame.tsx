@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { GADGET_DEFINITIONS, GADGET_MINIGAME_CONFIG } from "../../content/gadgets";
+import {
+  GADGET_DEFINITIONS,
+  GADGET_MINIGAME_CONFIG,
+  GADGET_MINIGAME_DIFFICULTIES,
+} from "../../content/gadgets";
 import { GADGET_RARITIES, getGadgetRarityClassName } from "../../content/gadgetRarities";
 import {
   calculateGadgetQuality,
@@ -139,19 +143,17 @@ export function GadgetRhythmGame({
   onContinue: () => void;
 }) {
   const playRarity = minigame.opportunityRarity ?? minigame.rarity;
+  const travelMs = GADGET_MINIGAME_DIFFICULTIES[playRarity].travelMs;
   const notes = useMemo(
     () =>
       createGadgetRhythmNotes(minigame.seed, playRarity).map((note) => ({
         ...note,
         designStage:
           DESIGN_STAGES[
-            getDesignStageIndex(
-              (note.targetAtMs - GADGET_MINIGAME_CONFIG.travelMs) /
-                GADGET_MINIGAME_CONFIG.durationMs,
-            )
+            getDesignStageIndex((note.targetAtMs - travelMs) / GADGET_MINIGAME_CONFIG.durationMs)
           ],
       })),
-    [minigame.seed, playRarity],
+    [minigame.seed, playRarity, travelMs],
   );
   const [timelineMs, setTimelineMs] = useState(-GADGET_MINIGAME_CONFIG.countdownMs);
   const timelineRef = useRef(timelineMs);
@@ -450,9 +452,7 @@ export function GadgetRhythmGame({
           <div className="gadget-target-line" aria-hidden="true" />
           {notes.map((note) => {
             if (judgments[note.id]) return null;
-            const progress =
-              (timelineMs - (note.targetAtMs - GADGET_MINIGAME_CONFIG.travelMs)) /
-              GADGET_MINIGAME_CONFIG.travelMs;
+            const progress = (timelineMs - (note.targetAtMs - travelMs)) / travelMs;
             if (progress < -0.08 || progress > 1.15) return null;
             const top = Math.max(
               -6,

@@ -61,18 +61,14 @@ function createChordGroupSizes(
 
   while (remainingNotes > 0) {
     const [chordRoll, afterChord] = nextRandom(randomSeed);
-    const [tripleRoll, afterTriple] = nextRandom(afterChord);
-    randomSeed = afterTriple;
+    randomSeed = afterChord;
     const missingMinimumChords = difficulty.minimumChordGroups - chordGroups;
     const remainingChordSlots = Math.floor(remainingNotes / 2);
     const mustCreateChord = missingMinimumChords > 0 && remainingChordSlots <= missingMinimumChords;
     let groupSize = 1;
 
     if (remainingNotes >= 2 && (mustCreateChord || chordRoll < difficulty.chordChance)) {
-      groupSize =
-        !mustCreateChord && remainingNotes >= 3 && tripleRoll < difficulty.tripleChordChance
-          ? 3
-          : 2;
+      groupSize = 2;
       chordGroups += 1;
     }
 

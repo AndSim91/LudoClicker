@@ -1,6 +1,7 @@
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { Icon } from "../../components/common/Icon";
+import { TableSortResetButton } from "../../components/common/TableSortResetButton";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
@@ -32,6 +33,7 @@ import {
   getPresentedRarityLabel,
   getRarityClassName,
 } from "../../shared/rarityPresentation";
+import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import {
   getMemberNextFormLabel,
   getMemberStudent,
@@ -53,6 +55,15 @@ const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
 };
 
 const MEMBERS_PER_PAGE = 25;
+const MEMBER_SORT_KEYS = [
+  "name",
+  "rarity",
+  "path",
+  "arena",
+  "style",
+  "status",
+  "next-form",
+] as const satisfies readonly MemberSortKey[];
 type MemberRarityFilter = "all" | Contact["rarity"];
 
 function uniqueSortedOptions(values: string[]): string[] {
@@ -145,7 +156,16 @@ export function MemberList({
     [state.contacts],
   );
   const [requestedPage, setRequestedPage] = useState(0);
-  const [sort, setSort] = useState<MemberSort | null>(null);
+  const {
+    sort,
+    setSort,
+    resetSort,
+    isDefaultSort,
+  } = usePersistentTableSort<MemberSort>({
+    storageId: "members",
+    allowedKeys: MEMBER_SORT_KEYS,
+    defaultSort: null,
+  });
   const [search, setSearch] = useState("");
   const [rarityFilter, setRarityFilter] = useState<MemberRarityFilter>("all");
   const [pathFilter, setPathFilter] = useState("all");
@@ -280,6 +300,10 @@ export function MemberList({
       : current,
     );
   };
+  const resetSorting = () => {
+    setRequestedPage(0);
+    resetSort();
+  };
   const updateFilter = (update: () => void) => {
     setRequestedPage(0);
     update();
@@ -307,7 +331,7 @@ export function MemberList({
 
   return (
     <section className="people-table member-development-list" aria-label="Iscritti">
-      <div className="member-sort-mobile" aria-label="Ordina iscritti">
+      <div className="member-sort-mobile table-sort-controls" aria-label="Ordina iscritti">
         <label>
           <span>Ordina per</span>
           <select
@@ -328,6 +352,11 @@ export function MemberList({
         <button type="button" disabled={!sort} onClick={reverseSort}>
           {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
         </button>
+        <TableSortResetButton
+          disabled={isDefaultSort}
+          label="iscritti"
+          onReset={resetSorting}
+        />
       </div>
       <div className="people-row people-head member-row">
         <SortableHeader label="Nome" sortKey="name" sort={sort} onSort={handleSort} />

@@ -72,6 +72,50 @@ describe("admin resource actions", () => {
       .toBeLessThanOrEqual(reduced.equipment.totalSwords);
   });
 
+  it("resets Gadget sale counts without removing earned money or product profit", () => {
+    const initial = createInitialState(1_000);
+    const wristband = initial.gadgets.products.wristband;
+    const state = gameReducer({
+      ...initial,
+      school: { ...initial.school, euros: 7_500 },
+      gadgets: {
+        ...initial.gadgets,
+        crossSellRemainder: 0.6,
+        crossSellCursor: 3,
+        monthlyRevenue: {
+          ...initial.gadgets.monthlyRevenue,
+          totals: { ...initial.gadgets.monthlyRevenue.totals, wristband: 500 },
+        },
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...wristband,
+            rarities: {
+              ...wristband.rarities,
+              common: {
+                ...wristband.rarities.common,
+                unitsSold: 25,
+                extraUnitsSold: 5,
+                totalProfit: 500,
+                salesRemainder: 0.75,
+              },
+            },
+          },
+        },
+      },
+    }, { type: "ADMIN_RESET_GADGET_SALES" });
+
+    expect(state.school.euros).toBe(7_500);
+    expect(state.gadgets.products.wristband.rarities.common).toMatchObject({
+      unitsSold: 0,
+      extraUnitsSold: 0,
+      totalProfit: 500,
+      salesRemainder: 0,
+    });
+    expect(state.gadgets).toMatchObject({ crossSellRemainder: 0, crossSellCursor: 0 });
+    expect(state.gadgets.monthlyRevenue).toEqual(initial.gadgets.monthlyRevenue);
+  });
+
   it("advances one month through the same pipeline as a natural monthly deadline", () => {
     const initial = gameReducer(createInitialState(1_000), {
       type: "ADMIN_ADD_MEMBERS",

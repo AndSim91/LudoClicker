@@ -2,7 +2,7 @@ import {
   GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY,
   GADGET_DEFINITIONS,
   GADGET_FOLLOWER_REACH_LEVELS,
-  GADGET_MARGINAL_SALES_SPEED_MULTIPLIER,
+  GADGET_EXTRA_SALES_SPEED_MULTIPLIER,
   GADGET_MEMBER_REACH_LEVELS,
   GADGET_PRODUCT_ORDER,
   GADGET_QUALITY_CONVERSION_ANCHORS,
@@ -12,6 +12,7 @@ import { GADGET_RARITIES, GADGET_RARITY_ORDER } from "../content/gadgetRarities"
 import { getCollaboratorProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
+import { getGadgetAudienceUnitsSold } from "./gadgetRarity";
 import type {
   GadgetProductId,
   GadgetRarity,
@@ -112,7 +113,9 @@ export function getGadgetRemainingDemand(
   return Math.max(
     0,
     getGadgetAudience(state) -
-      state.gadgets.products[productId].rarities[rarity].unitsSold,
+      getGadgetAudienceUnitsSold(
+        state.gadgets.products[productId].rarities[rarity],
+      ),
   );
 }
 
@@ -156,11 +159,11 @@ export function getGadgetMonthlyAttemptCapacity(state: GameState): number {
     capacityMultiplier;
 }
 
-export function getGadgetMarginalMonthlyAttemptCapacity(
+export function getGadgetExtraMonthlyAttemptCapacity(
   state: GameState,
 ): number {
   return getGadgetMonthlyAttemptCapacity(state) *
-    GADGET_MARGINAL_SALES_SPEED_MULTIPLIER;
+    GADGET_EXTRA_SALES_SPEED_MULTIPLIER;
 }
 
 export function getGadgetCrossSellRate(upgrades: UpgradeLevels): number {

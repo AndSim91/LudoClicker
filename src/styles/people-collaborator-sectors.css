@@ -873,6 +873,167 @@
   grid-template-rows: auto 1fr 34px;
 }
 
+.collaborator-sector-card.is-gadget-ranking {
+  grid-template-rows: auto minmax(188px, 1fr) 34px;
+  box-shadow:
+    inset 3px 0 var(--blue-600),
+    0 2px 7px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.gadget-ranking-body {
+  display: flex;
+  min-width: 0;
+  min-height: 188px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 9px 8px 14px;
+  overflow: hidden;
+}
+
+.gadget-ranking-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gadget-ranking-heading > span:first-child {
+  min-width: 0;
+}
+
+.gadget-ranking-heading > span:first-child > strong,
+.gadget-ranking-heading > span:first-child > small {
+  display: block;
+}
+
+.gadget-ranking-heading > span:first-child > strong {
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gadget-ranking-heading > span:first-child > small {
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gadget-ranking-heading .sector-mastery-average small {
+  display: none;
+}
+
+.gadget-ranking-heading .sector-mastery-average .progress-bar-circular {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+}
+
+.gadget-ranking-heading .sector-mastery-average .progress-bar-circular > span {
+  width: 15px;
+  height: 15px;
+}
+
+.gadget-ranking-list {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.gadget-ranking-list li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 14px minmax(48px, 1.25fr) auto minmax(34px, .85fr) 37px 31px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gadget-ranking-list li:last-child {
+  border-bottom: 0;
+}
+
+.gadget-ranking-list li.is-leader {
+  border: 1px solid color-mix(in srgb, var(--blue-600) 28%, var(--line));
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--blue-050) 72%, var(--surface));
+}
+
+.gadget-ranking-position {
+  color: var(--ink);
+  font-size: 10px;
+  text-align: center;
+}
+
+.gadget-ranking-list li.is-leader .gadget-ranking-position,
+.gadget-ranking-list li.is-leader .gadget-ranking-share,
+.gadget-ranking-status {
+  color: var(--blue-700);
+}
+
+.gadget-ranking-name {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gadget-ranking-revenue {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.gadget-ranking-progress {
+  width: 100%;
+  height: 5px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  appearance: none;
+  background: var(--surface-muted);
+}
+
+.gadget-ranking-progress::-webkit-progress-bar {
+  border-radius: inherit;
+  background: var(--surface-muted);
+}
+
+.gadget-ranking-progress::-webkit-progress-value {
+  border-radius: inherit;
+  background: var(--blue-600);
+}
+
+.gadget-ranking-progress::-moz-progress-bar {
+  border-radius: inherit;
+  background: var(--blue-600);
+}
+
+.gadget-ranking-share {
+  color: var(--blue-800);
+  font-size: 9px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gadget-ranking-status {
+  overflow: hidden;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .collaborator-sector-card.is-empty {
   background: var(--surface-muted);
 }

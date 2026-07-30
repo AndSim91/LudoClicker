@@ -163,6 +163,20 @@ describe("game engine: narrative", () => {
     expect(read.messages.every((message) => !message.unread)).toBe(true);
   });
 
+  it("also reads secondary notifications materialized by the same action", () => {
+    const initial = createInitialState(1_000);
+    const withPendingAchievement = {
+      ...initial,
+      statistics: { ...initial.statistics, emailsSent: 1 },
+    };
+
+    const read = gameReducer(withPendingAchievement, { type: "MARK_ALL_MESSAGES_READ" });
+
+    expect(read.achievements).toContain("first-email");
+    expect(read.messages.some((message) => message.category === "other")).toBe(true);
+    expect(read.messages.every((message) => !message.unread)).toBe(true);
+  });
+
   it("resolves a due narrative event once and schedules the next one", () => {
     const initial = createInitialState(1_000);
     const due = {

@@ -2,6 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { TableSortResetButton } from "../../components/common/TableSortResetButton";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import {
   COLLABORATOR_ASSIGNMENT_LABELS,
@@ -31,6 +32,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
+import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import {
@@ -46,6 +48,13 @@ import {
 } from "./TrainingControl";
 
 const COLLABORATORS_PER_PAGE = 25;
+const COLLABORATOR_SORT_KEYS = [
+  "name",
+  "assignment",
+  "activity",
+  "arena",
+  "style",
+] as const satisfies readonly CollaboratorSortKey[];
 type CollaboratorFilter = "all" | "unassigned" | Exclude<CollaboratorAssignment, null>;
 type ActivityFilter = "all" | "active" | "waiting";
 type StatsFilter = "all" | "visible" | "locked";
@@ -118,7 +127,16 @@ export function CollaboratorList({
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all");
   const [statsFilter, setStatsFilter] = useState<StatsFilter>("all");
   const [levelFilter, setLevelFilter] = useState("all");
-  const [sort, setSort] = useState<CollaboratorSort | null>(null);
+  const {
+    sort,
+    setSort,
+    resetSort,
+    isDefaultSort,
+  } = usePersistentTableSort<CollaboratorSort>({
+    storageId: "collaborators",
+    allowedKeys: COLLABORATOR_SORT_KEYS,
+    defaultSort: null,
+  });
   const deferredSearch = useDeferredValue(search);
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
@@ -264,6 +282,10 @@ export function CollaboratorList({
       : current,
     );
   };
+  const resetSorting = () => {
+    setRequestedPage(0);
+    resetSort();
+  };
 
   return (
     <section className="collaborator-list" aria-label="Collaboratori delle Onde">
@@ -278,7 +300,10 @@ export function CollaboratorList({
         </div>
       ) : (
         <div className="collaborator-table">
-          <div className="collaborator-sort-mobile" aria-label="Ordina collaboratori">
+          <div
+            className="collaborator-sort-mobile table-sort-controls"
+            aria-label="Ordina collaboratori"
+          >
             <label>
               <span>Ordina per</span>
               <select
@@ -297,6 +322,11 @@ export function CollaboratorList({
             <button type="button" disabled={!sort} onClick={reverseSort}>
               {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
             </button>
+            <TableSortResetButton
+              disabled={isDefaultSort}
+              label="collaboratori"
+              onReset={resetSorting}
+            />
           </div>
           <div className="collaborator-table-head">
             <CollaboratorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />

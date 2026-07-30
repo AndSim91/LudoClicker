@@ -528,12 +528,12 @@ lo diventano immediatamente dopo l'iscrizione.
 
 Per il primo prototipo:
 
-| Passaggio                        |                                                                                                                   Tempo suggerito |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------: |
-| Esito dell'email                 |                                                                                                                        10 secondi |
-| Attesa della lezione in palestra |                                                                                                                        1–5 minuti |
-| Esito della lezione              |                                                                                                              immediato al termine |
-| Bonus di iscrizione              |                                                                                                                   immediato (€20) |
+| Passaggio                        |                                                                  Tempo suggerito |
+| -------------------------------- | -------------------------------------------------------------------------------: |
+| Esito dell'email                 |                                                                       10 secondi |
+| Attesa della lezione in palestra |                                                                       1–5 minuti |
+| Esito della lezione              |                                                             immediato al termine |
+| Bonus di iscrizione              |                                                                  immediato (€20) |
 | Accredito della quota mensile    | al cambio mese (€40 base + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
@@ -1361,15 +1361,15 @@ sono mostrati direttamente dall'interfaccia.
 
 Accelera la produzione manuale e automatica delle email e dei contenuti Social.
 
-| Potenziamento         | Effetto completo                                                                                     | Costi per livello                               |
-| --------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Tastiera comoda       | +0,2 caratteri per input per livello; massimo +1                                                     | 50 / 100 / 200 / 400 / 800 €                    |
-| Frasi rapide          | +0,4 caratteri per input per livello; massimo +2                                                     | 150 / 300 / 600 / 1.200 / 2.400 €               |
-| Firma automatica      | +10% velocità Redazione/Social per livello; massimo +50%                                             | 300 / 600 / 1.200 / 2.400 / 4.800 €             |
-| Campi intelligenti    | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create | 600 / 1.200 / 2.400 / 4.800 / 9.600 €           |
-| Sintesi dei contenuti | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri          | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 €      |
-| Revisione istantanea  | +15% velocità Redazione/Social per livello; massimo +75%                                             | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 €      |
-| Fusione documenti     | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25%      | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Tastiera comoda | +0,2 caratteri per input per livello; massimo +1 | 50 / 100 / 200 / 400 / 800 € |
+| Frasi rapide | +0,4 caratteri per input per livello; massimo +2 | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Firma automatica | +10% velocità Redazione/Social per livello; massimo +50% | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Campi intelligenti | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Sintesi dei contenuti | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Revisione istantanea | +15% velocità Redazione/Social per livello; massimo +75% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Fusione documenti | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 ### 10.2 Creatività
 
@@ -1377,28 +1377,28 @@ Ogni livello concede un punto Creatività e fa avanzare linearmente la
 probabilità che una email ottenga una prova. I massimi sono 85% per i Comuni,
 90% per i Rari, 95% per gli Ultra Rari e 100% per i Leggendari.
 
-| Potenziamento         | Effetto aggiuntivo                                                                                 | Costi per livello                              |
-| --------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Controllo ortografico | nuovo catalogo email dal livello 1                                                                 | 50 / 100 / 200 / 400 / 800 €                   |
-| Email professionale   | firma completa e struttura ordinata, ancora senza HTML                                             | 100 / 200 / 400 / 800 / 1.600 €                |
-| Invito personalizzato | nuovo catalogo e sblocco delle email HTML                                                          | 150 / 300 / 600 / 1.200 / 2.400 €              |
-| Call to action        | link e pulsanti nei cataloghi successivi                                                           | 300 / 600 / 1.200 / 2.400 / 4.800 €            |
-| Impaginazione         | struttura visiva completa                                                                          | 600 / 1.200 / 2.400 / 4.800 / 9.600 €          |
-| Pubblicità vincente   | probabilità Follower Social 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €    |
-| Corso di Marketing    | valore mensile del Follower 0,15 → 0,20 → 0,30 → 0,40 → 0,50 €                                     | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Potenziamento | Effetto aggiuntivo | Costi per livello |
+| --- | --- | --- |
+| Controllo ortografico | nuovo catalogo email dal livello 1 | 50 / 100 / 200 / 400 / 800 € |
+| Email professionale | firma completa e struttura ordinata, ancora senza HTML | 100 / 200 / 400 / 800 / 1.600 € |
+| Invito personalizzato | nuovo catalogo e sblocco delle email HTML | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Call to action | link e pulsanti nei cataloghi successivi | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Impaginazione | struttura visiva completa | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Pubblicità vincente | probabilità Follower Social 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Corso di Marketing | valore mensile del Follower 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
 ### 10.3 Carisma
 
 Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
 
-| Potenziamento                     | Effetto per livello       | Costi per livello                              |
-| --------------------------------- | ------------------------- | ---------------------------------------------- |
-| Presentazione preparata           | +4% contatti dagli eventi | 50 / 100 / 200 / 400 / 800 €                   |
-| Biglietti con QR code             | +4% contatti dagli eventi | 100 / 200 / 400 / 800 / 1.600 €                |
-| Dimostrazione coordinata          | +5% pubblico agli eventi  | 150 / 300 / 600 / 1.200 / 2.400 €              |
-| Stand riconoscibile               | +7% pubblico agli eventi  | 300 / 600 / 1.200 / 2.400 / 4.800 €            |
-| Set da dimostrazione              | +6% pubblico agli eventi  | 600 / 1.200 / 2.400 / 4.800 / 9.600 €          |
-| Risposte alle domande difficili   | +6% contatti dagli eventi | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €    |
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Presentazione preparata | +4% contatti dagli eventi | 50 / 100 / 200 / 400 / 800 € |
+| Biglietti con QR code | +4% contatti dagli eventi | 100 / 200 / 400 / 800 / 1.600 € |
+| Dimostrazione coordinata | +5% pubblico agli eventi | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Stand riconoscibile | +7% pubblico agli eventi | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Set da dimostrazione | +6% pubblico agli eventi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Risposte alle domande difficili | +6% contatti dagli eventi | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | No, non è esattamente quella cosa | +8% contatti dagli eventi | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
 ### 10.4 Accoglienza
@@ -1407,15 +1407,15 @@ Fa avanzare ogni rarità dalla propria probabilità base di iscrizione fino al
 massimo specifico. I progressi indicati sono quote del percorso base→massimo,
 non punti percentuali aggiunti direttamente al risultato finale.
 
-| Potenziamento                   | Effetto per livello                                                  | Costi per livello                              |
-| ------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------- |
-| Procedura di benvenuto          | +1% del percorso                                                     | 50 / 100 / 200 / 400 / 800 €                   |
-| Materiale informativo chiaro    | +1,5% del percorso                                                   | 150 / 300 / 600 / 1.200 / 2.400 €              |
-| Lezione introduttiva collaudata | +2% del percorso                                                     | 300 / 600 / 1.200 / 2.400 / 4.800 €            |
-| Sala preparata                  | +2,5% del percorso e −1 secondo alla prova; durata minima 10 secondi | 600 / 1.200 / 2.400 / 4.800 / 9.600 €          |
-| Collaboratore dedicato          | +3% del percorso e +10% efficacia del contributo Istruttori          | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 €     |
-| Accoglienza dell'Ordine         | +4% del percorso                                                     | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €    |
-| Esperienza memorabile           | +6% del percorso e 5% di recuperare una prova fallita; massimo 25%   | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Procedura di benvenuto | +1% del percorso | 50 / 100 / 200 / 400 / 800 € |
+| Materiale informativo chiaro | +1,5% del percorso | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Lezione introduttiva collaudata | +2% del percorso | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Sala preparata | +2,5% del percorso e −1 secondo alla prova; durata minima 10 secondi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Collaboratore dedicato | +3% del percorso e +10% efficacia del contributo Istruttori | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Accoglienza dell'Ordine | +4% del percorso | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Esperienza memorabile | +6% del percorso e 5% di recuperare una prova fallita; massimo 25% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
 Il recupero di Esperienza memorabile vale una sola volta per contatto, esclude i
 Leggendari Segreti e rimette il contatto tra i disponibili: serve quindi
@@ -1427,15 +1427,15 @@ Riduce l'usura prodotta dalle attività programmate e accelera la manutenzione
 dei Collaboratori. Nessun potenziamento crea spade gratuite: le spade continuano
 a essere acquistate dal giocatore.
 
-| Potenziamento                  | Effetto per livello                                                         | Costi per livello                              |
-| ------------------------------ | --------------------------------------------------------------------------- | ---------------------------------------------- |
-| Controllo prima dell'uso       | −2% usura programmata                                                       | 100 / 200 / 400 / 800 / 1.600 €                |
-| Kit di manutenzione            | +10% velocità manutenzione automatica                                       | 250 / 500 / 1.000 / 2.000 / 4.000 €            |
-| Banco da lavoro                | riserva lavoro pari al 2% dell'usura massima di tutte le spade; massimo 10% | 500 / 750 / 1.000 / 1.500 / 2.500 €            |
-| Ricambi essenziali             | −15 punti lavoro per riparare una spada rotta; da 150 a 75                  | 1.000 / 2.000 / 4.000 / 8.000 / 16.000 €       |
-| Lista di controllo             | −4% usura programmata                                                       | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 €     |
-| Registro dell'attrezzatura     | +10% velocità manutenzione automatica                                       | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €    |
-| Le abbiamo messe a posto tutte | −4% usura programmata                                                       | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Potenziamento | Effetto per livello | Costi per livello |
+| --- | --- | --- |
+| Controllo prima dell'uso | −2% usura programmata | 100 / 200 / 400 / 800 / 1.600 € |
+| Kit di manutenzione | +10% velocità manutenzione automatica | 250 / 500 / 1.000 / 2.000 / 4.000 € |
+| Banco da lavoro | riserva lavoro pari al 2% dell'usura massima di tutte le spade; massimo 10% | 500 / 750 / 1.000 / 1.500 / 2.500 € |
+| Ricambi essenziali | −15 punti lavoro per riparare una spada rotta; da 150 a 75 | 1.000 / 2.000 / 4.000 / 8.000 / 16.000 € |
+| Lista di controllo | −4% usura programmata | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Registro dell'attrezzatura | +10% velocità manutenzione automatica | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Le abbiamo messe a posto tutte | −4% usura programmata | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
 Il Banco da lavoro accumula produzione soltanto quando non ci sono guasti e non
 si riempie automaticamente all'acquisto. Il tetto segue dinamicamente il numero
@@ -1449,15 +1449,15 @@ prodotto durante il guasto.
 Il ramo conserva il bilanciamento economico specifico del Laboratorio Gadget e
 diventa visibile soltanto con lo sblocco del settore.
 
-| Potenziamento              | Effetto completo                                                         | Costi per livello                                                                      |
-| -------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Vetrina della scuola       | pubblico iscritti 10% → 20% → 35% → 50% → 75% → 100%                     | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €                                             |
-| Negozio online             | pubblico follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
-| Strumenti di progettazione | +20% velocità sviluppo per livello; massimo +100%                        | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €                                            |
-| Laboratorio revisioni      | +20% velocità revisione per livello; massimo +100%                       | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €                                            |
-| Gestione degli ordini      | +20% capacità commerciale per livello; massimo +100%                     | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €                                          |
-| Formazione commerciale     | +2 punti percentuali di conversione per livello; massimo +10             | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 €                                         |
-| Vendita abbinata           | +5% vendite abbinate per livello; massimo +25%                           | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €                                        |
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Vetrina della scuola | pubblico iscritti 10% → 20% → 35% → 50% → 75% → 100% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
+| Negozio online | pubblico follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
+| Strumenti di progettazione | +20% velocità sviluppo per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Laboratorio revisioni | +20% velocità revisione per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Gestione degli ordini | +20% capacità commerciale per livello; massimo +100% | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
+| Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
+| Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 ### 10.7 Insegnamento
 
@@ -1465,15 +1465,15 @@ Il ramo ritarda volutamente la crescita atletica automatica. I primi nodi
 aprono l'Arena e sviluppano Istruttori e Tecnici; Preparazione agonistica e i
 potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 
-| Potenziamento         | Effetto completo                                                                                                                                                                      | Costi per livello                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Percorso Tecnico      | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 €                                                                   | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 €                                                                   |
-| Master of none        | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 €                                                                  |
-| Tu conosci la SIS?    | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici                                                                                                                    | 5.000 / 10.000 / 20.000 / 40.000 €                                                                         |
-| Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25%                                                                                 | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €                                                                 |
-| Didattica di gruppo   | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale                                                                                                                         | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €                                                   |
-| Nessun *Rancor*e      | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5                                   | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
-| PagoSport             | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi                                                                                                | 100.000 / 200.000 / 400.000 €                                                                              |
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
+| Master of none | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 € |
+| Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
+| Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
+| Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
+| PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
 
 Al livello 1 di Nessun *Rancor*e, Arena Tecnica diventa Corso Agonisti e il
 logo della formazione riceve una stella gialla nello stesso stile usato per la
@@ -1488,14 +1488,14 @@ massimo del corso a +5/+5.
 Coordina le Aree di Attività (AA), migliora le automazioni generiche e aumenta
 le entrate ricorrenti.
 
-| Potenziamento            | Effetto completo                                                                                  | Costi per livello                               |
-| ------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Manuale operativo        | +10% esperienza Maestria per livello; massimo +50%                                                | 500 / 1.000 / 2.000 / 4.000 / 8.000 €           |
-| Turni dei collaboratori  | trasferisce a un settore secondario il 10% della produttività inattiva per livello; massimo 50%   | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 €      |
-| Procedure standard       | +5% velocità automazioni generiche per livello; massimo +25%                                      | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €     |
-| Modulo di iscrizione     | +5% entrate dalle quote per livello; massimo +25%                                                 | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €     |
-| Priorità operative       | sblocca l'ordinamento con cui le AA consumano Euro, spade e risorse scarse                        | 25.000 €                                        |
-| A.N.D.E.R.               | +10% a tutte le entrate ricorrenti per livello; massimo +50%                                      | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 €  |
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Manuale operativo | +10% esperienza Maestria per livello; massimo +50% | 500 / 1.000 / 2.000 / 4.000 / 8.000 € |
+| Turni dei collaboratori | trasferisce a un settore secondario il 10% della produttività inattiva per livello; massimo 50% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Procedure standard | +5% velocità automazioni generiche per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Modulo di iscrizione | +5% entrate dalle quote per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Priorità operative | sblocca l'ordinamento con cui le AA consumano Euro, spade e risorse scarse | 25.000 € |
+| A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50%; richiede almeno una scuola fondata | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 Un settore principale è inattivo soltanto quando non ha lavoro reale da
@@ -1511,10 +1511,10 @@ lucchetto e soltanto un indizio nel tooltip. Ogni percorso si scopre in modo
 indipendente: rivelarne uno non mostra il nome o la descrizione degli altri.
 Le condizioni effettive di scoperta sono ancora da definire.
 
-| Percorso dopo la scoperta | Effetto                                                       |      Prezzo | Indizio prima della scoperta                                        |
-| ------------------------- | ------------------------------------------------------------- | ----------: | ------------------------------------------------------------------- |
-| Corso X                   | sblocca Corso X e i relativi percorsi da Istruttore e Tecnico |         1 € | “Vincere il torneo più superbo dell'anno è solo l'inizio”           |
-| ToccoDiGilo               | +9999% velocità con cui gli Istruttori insegnano le Forme     | 1.000.000 € | “Esistono forze più grandi di quanto avresti mai potuto immaginare” |
+| Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
+| --- | --- | ---: | --- |
+| Corso X | sblocca Corso X e i relativi percorsi da Istruttore e Tecnico | 1 € | “Vincere il torneo più superbo dell'anno è solo l'inizio” |
+| ToccoDiGilo | +9999% velocità con cui gli Istruttori insegnano le Forme | 1.000.000 € | “Esistono forze più grandi di quanto avresti mai potuto immaginare” |
 
 Un vecchio salvataggio che possiede già uno dei due potenziamenti lo considera
 automaticamente scoperto. I due prezzi non ricevono maggiorazioni di rete.
@@ -2156,12 +2156,12 @@ catalogo.
 Il catalogo base segue questo ordine:
 
 | Prodotto  | Costo progetto | Guadagno per pezzo al 100% | Lavoro base con P = 1 | Revisione |
-| --------- | -------------: | -------------------------: | --------------------: | --------: |
-| Polsino   |       10.000 € |                       20 € |             60 minuti |   1.000 € |
-| Tazza     |       15.000 € |                       30 € |             90 minuti |   1.500 € |
-| Mutande   |       20.000 € |                       40 € |            120 minuti |   2.000 € |
-| Maglietta |       25.000 € |                       50 € |            150 minuti |   2.500 € |
-| Felpa     |       40.000 € |                       80 € |            240 minuti |   4.000 € |
+| --------- | --------------: | --------------------------: | ---------------------: | --------: |
+| Polsino   |        10.000 € |                        20 € |             60 minuti |   1.000 € |
+| Tazza     |        15.000 € |                        30 € |             90 minuti |   1.500 € |
+| Mutande   |        20.000 € |                        40 € |            120 minuti |   2.000 € |
+| Maglietta |        25.000 € |                        50 € |            150 minuti |   2.500 € |
+| Felpa     |        40.000 € |                        80 € |            240 minuti |   4.000 € |
 
 Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
 famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non
@@ -2219,27 +2219,28 @@ pubblico = floor(iscrittiAttivi × coperturaIscritti
 
 La copertura iniziale è il 10% degli iscritti e lo 0% dei follower. Ogni
 persona del pubblico alimenta una vendita ordinaria per ciascuna variante di
-rarità sbloccata, quindi la domanda ordinaria residua è calcolata separatamente
-come `max(0, pubblico - pezziVendutiDellaVariante)`. Non esiste rigenerazione
-della domanda ordinaria: se il pubblico scende sotto le vendite storiche, la
-variante passa alle sole vendite marginali finché il pubblico non cresce di
-nuovo.
+rarità sbloccata, quindi la domanda residua è calcolata separatamente come
+`max(0, pubblico - venditeAlPubblicoDellaVariante)`. Le vendite extra oltre il
+pubblico sono registrate in un conteggio separato: aumentano vendite totali,
+ricavi, sblocchi e probabilità di rarità, ma non consumano il pubblico che
+diventerà raggiungibile in futuro. Se il pubblico scende sotto le vendite
+ordinarie già effettuate, la variante passa alle sole vendite extra finché il
+pubblico non cresce di nuovo.
 
-Indicando con `V` la precedente capacità commerciale condivisa dal catalogo,
-la nuova capacità ordinaria `N` e quella marginale sono:
+La capacità ordinaria condivisa dal catalogo e quella extra sono:
 
 ```text
-V = 5 × P × (1 + bonusGestioneOrdini)
-N = V / 5
-tentativiMarginaliAlMese = N / 10
+tentativiOrdinariAlMese = 2 × P × (1 + bonusCapacità)
+tentativiExtraAlMese = tentativiOrdinariAlMese × 30%
 ```
 
-I tentativi ordinari vengono distribuiti proporzionalmente alla domanda
-residua di tutte le varianti accettate e vendibili, usando un'unica capacità
-condivisa dal catalogo. In parallelo, la capacità marginale viene distribuita
+Il bonus capacità somma Gestione degli ordini e i bonus alle automazioni
+generiche. I tentativi ordinari vengono distribuiti proporzionalmente alla
+domanda residua di tutte le varianti accettate e vendibili, usando un'unica
+capacità condivisa dal catalogo. In parallelo, la capacità extra viene distribuita
 in parti uguali fra le varianti che hanno già raggiunto il proprio pubblico:
-non ha un tetto di domanda e produce quindi vendite
-occasionali anche oltre la soglia. La capacità ordinaria che non trova domanda
+non ha un tetto di domanda e rappresenta regali, sostituzioni e acquisti
+ripetuti anche oltre la soglia. La capacità ordinaria che non trova domanda
 viene persa; le sole frazioni di vendita già maturate restano memorizzate fino
 a formare un pezzo intero. La conversione base dipende dalla qualità e viene
 interpolata linearmente tra questi punti:
@@ -2256,7 +2257,7 @@ La Formazione commerciale aggiunge fino a 10 punti percentuali, con limite
 finale del 100%; un prodotto allo 0% resta comunque non vendibile. La Vendita
 abbinata genera in modo deterministico fino al 25% di pezzi aggiuntivi fra gli
 altri prodotti accettati, sempre entro la loro domanda ordinaria residua: non
-può aggirare la velocità marginale.
+può aggirare la capacità delle vendite extra.
 
 Il guadagno netto per pezzo è:
 
@@ -2264,9 +2265,11 @@ Il guadagno netto per pezzo è:
 guadagnoPezzo = costoProgetto / 500 × qualità / 100 × moltiplicatoreRarità
 ```
 
-Il moltiplicatore è ×1 per Comune, ×1,25 per Raro, ×1,50 per Ultra Raro,
-×1,75 per Leggendario e ×2 per Leggendario Segreto. Di conseguenza 500 vendite
-Comuni al 100% eguagliano il costo originario del progetto.
+Il moltiplicatore cresce del 50% per livello: ×1 per Comune, ×1,50 per Raro,
+×2 per Ultra Raro, ×2,50 per Leggendario e ×3 per Leggendario Segreto. Di
+conseguenza 500 vendite Comuni al 100% eguagliano il costo originario del
+progetto, mentre le rarità superiori lo recuperano più rapidamente. Costi e
+tempi di revisione mantengono invece gli scatti del 25%.
 I guadagni vengono accreditati continuamente e le vendite passate non vengono
 rivalutate quando la qualità aumenta. Nell'interfaccia ogni famiglia usa una
 sola card: mostra la foto della rarità più alta e una riga per ogni rarità
@@ -2277,6 +2280,15 @@ mostra invece, nel dettaglio delle entrate mensili e solo dopo lo sblocco del
 settore, una stima Gadget ottenuta proiettando per un mese le regole reali di
 vendita sul catalogo, sul pubblico, sui Collaboratori e sui potenziamenti
 correnti.
+
+Nella lista Collaboratori aggregata, la box del settore usa la **Classifica
+ricavi Gadget** del mese in corso. Le cinque famiglie sono ordinate per ricavi,
+aggregando tutte le rarità di ciascun prodotto; ogni riga mostra il valore, la
+quota percentuale sul catalogo e una barra proporzionale. Il primo prodotto è
+evidenziato come leader e la classifica cambia subito a ogni vendita effettiva.
+I ricavi mensili vengono azzerati al cambio mese. Il comando admin **Azzera
+conteggi prodotti Gadget** azzera anche questa classifica, senza ridurre Euro
+disponibili, guadagni cumulativi, progetti o rarità sbloccate.
 
 ### 19.4 Prova qualità
 
@@ -2294,18 +2306,18 @@ dipende dalla rarità che il tentativo sta cercando di ottenere, non dal prodott
 - il risultato è la media dei punti di tutte le note del tentativo meno gli
   errori, arrotondata e limitata fra 0 e 100.
 
-| Rarità              | Pressioni totali | Accordi simultanei                                                 |
-| ------------------- | ---------------: | ------------------------------------------------------------------ |
-| Comune              |               24 | nessuno                                                            |
-| Raro                |               28 | nessuno                                                            |
-| Ultra Raro          |               32 | coppie con probabilità 18%, almeno una per prova                   |
-| Leggendario         |               36 | coppie con probabilità 28%, almeno due; triple con probabilità 6%  |
-| Leggendario Segreto |               40 | coppie con probabilità 38%, almeno tre; triple con probabilità 14% |
+| Rarità | Pressioni totali | Tempo di discesa | Accordi simultanei |
+| --- | ---: | ---: | --- |
+| Comune | 18 | 3.400 ms | nessuno |
+| Raro | 24 | 2.900 ms | nessuno |
+| Ultra Raro | 30 | 2.400 ms | coppie con probabilità 12%, almeno una per prova |
+| Leggendario | 36 | 1.900 ms | coppie con probabilità 25%, almeno tre per prova |
+| Leggendario Segreto | 44 | 1.500 ms | coppie con probabilità 40%, almeno cinque per prova |
 
 Le note simultanee usano sempre corsie diverse e condividono lo stesso istante
 bersaglio. Il totale delle pressioni resta quello indicato in tabella: un accordo
 raggruppa più note, non ne aggiunge oltre il totale. La prima e l'ultima nota
-sono sempre singole.
+sono sempre singole e nessun accordo può contenere più di due note.
 
 Ogni nota riceve lo stile Concept, Logo, Render 3D o Prototipo quando appare,
 in base alla fase globale raggiunta dal minigioco in quell'istante. Lo stile
@@ -2353,15 +2365,15 @@ nel modello di gioco, ma non è ottenibile.
 
 ### 19.5 Potenziamenti Gadget
 
-| Potenziamento              | Effetto massimo                                                 | Costi per livello                                                                      | Requisito                      |
-| -------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------ |
-| Vetrina della scuola       | iscritti 10% → 20% → 35% → 50% → 75% → 100%                     | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €                                             | Gadget                         |
-| Negozio online             | follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € | Vetrina 2 e Social             |
-| Strumenti di progettazione | +100% velocità sviluppo                                         | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €                                            | Gadget                         |
-| Laboratorio revisioni      | +100% velocità revisione                                        | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €                                            | Strumenti 2                    |
-| Gestione degli ordini      | +100% capacità commerciale                                      | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €                                          | Gadget                         |
-| Formazione commerciale     | +10 punti percentuali di conversione                            | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 €                                         | Ordini 2                       |
-| Vendita abbinata           | +25% vendite aggiuntive                                         | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €                                        | Formazione 3 e Tazza sbloccata |
+| Potenziamento              | Effetto massimo                                      | Costi per livello                                      | Requisito |
+| -------------------------- | ---------------------------------------------------- | ------------------------------------------------------ | --------- |
+| Vetrina della scuola       | iscritti 10% → 20% → 35% → 50% → 75% → 100%         | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €             | Gadget |
+| Negozio online             | follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € | Vetrina 2 e Social |
+| Strumenti di progettazione | +100% velocità sviluppo                              | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Gadget |
+| Laboratorio revisioni      | +100% velocità revisione                             | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Strumenti 2 |
+| Gestione degli ordini      | +100% capacità commerciale                           | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €          | Gadget |
+| Formazione commerciale     | +10 punti percentuali di conversione                 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 €         | Ordini 2 |
+| Vendita abbinata           | +25% vendite aggiuntive                              | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €        | Formazione 3 e Tazza sbloccata |
 
 Il ramo costa complessivamente 5.142.500 €. È visibile nella schermata Upgrade
 soltanto dopo lo sblocco del settore.
@@ -2689,7 +2701,13 @@ interface Contact {
   email: string;
   source: "event" | "sparring" | "social" | "collaborator" | "tutorial";
   acquiredAt: number;
-  status: "available" | "writing" | "invited" | "trialScheduled" | "enrolled" | "lost";
+  status:
+    | "available"
+    | "writing"
+    | "invited"
+    | "trialScheduled"
+    | "enrolled"
+    | "lost";
   tags: string[];
 }
 ```
@@ -3034,7 +3052,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   il Polsino resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
-  Collaboratori, domanda ordinaria e vendite marginali governano il catalogo.
+  Collaboratori, domanda ordinaria e vendite extra governano il catalogo.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non
   può essere messa in pausa.
 - Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,

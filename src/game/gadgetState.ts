@@ -1,6 +1,7 @@
 import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
 import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import { createInitialGadgetRarities } from "./gadgetRarity";
+import { createInitialGadgetMonthlyRevenueState } from "./gadgetRevenue";
 import type {
   GadgetProductId,
   GadgetProductState,
@@ -20,7 +21,7 @@ export function createInitialGadgetProductState(
   };
 }
 
-export function createInitialGadgetState(): GadgetState {
+export function createInitialGadgetState(currentMonth = 9): GadgetState {
   return {
     products: Object.fromEntries(
       GADGET_PRODUCT_ORDER.map((productId) => [
@@ -30,6 +31,7 @@ export function createInitialGadgetState(): GadgetState {
     ) as Record<GadgetProductId, GadgetProductState>,
     crossSellRemainder: 0,
     crossSellCursor: 0,
+    monthlyRevenue: createInitialGadgetMonthlyRevenueState(currentMonth),
   };
 }
 
@@ -68,6 +70,9 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
         !Number.isSafeInteger(rarityState.quality) ||
         rarityState.quality < 0 || rarityState.quality > 100 ||
         !Number.isSafeInteger(rarityState.unitsSold) || rarityState.unitsSold < 0 ||
+        !Number.isSafeInteger(rarityState.extraUnitsSold) ||
+        rarityState.extraUnitsSold < 0 ||
+        rarityState.extraUnitsSold > rarityState.unitsSold ||
         !isFiniteNonNegative(rarityState.totalProfit) ||
         !isFiniteNonNegative(rarityState.salesRemainder) ||
         rarityState.salesRemainder >= 1
@@ -80,6 +85,16 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
     !Number.isSafeInteger(state.crossSellCursor) ||
     (state.crossSellCursor ?? -1) < 0
   ) return false;
+  if (
+    !state.monthlyRevenue ||
+    !Number.isSafeInteger(state.monthlyRevenue.month) ||
+    state.monthlyRevenue.month < 1 ||
+    !state.monthlyRevenue.totals
+  ) return false;
+  for (const productId of GADGET_PRODUCT_ORDER) {
+    const total = state.monthlyRevenue.totals[productId];
+    if (!isFiniteNonNegative(total)) return false;
+  }
   if (state.activeWork && (
     !isProductId(state.activeWork.productId) ||
     (state.activeWork.kind !== "development" && state.activeWork.kind !== "revision") ||

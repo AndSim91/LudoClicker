@@ -16,6 +16,7 @@ import { processJanuaryLightInflation } from "./lightInflation";
 import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 import { processReptileCalendarTransition } from "./reptileFlow";
+import { resetGadgetMonthlyRevenueForMonth } from "./gadgetRevenue";
 
 export function departMembers(
   state: GameState,
@@ -301,6 +302,10 @@ export function collectFees(
         currentMonth: currentMonth + 1,
         nextFeeAt: nextState.school.nextFeeAt + GAME_CONFIG.gameMonthMs,
       },
+      gadgets: resetGadgetMonthlyRevenueForMonth(
+        nextState.gadgets,
+        currentMonth + 1,
+      ),
       statistics: {
         ...nextState.statistics,
         eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),

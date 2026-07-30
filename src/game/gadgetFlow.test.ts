@@ -20,7 +20,7 @@ import {
 import { getEstimatedMonthlyGadgetIncome } from "./gadgetIncomeEstimate";
 import {
   getGadgetAudience,
-  getGadgetMarginalMonthlyAttemptCapacity,
+  getGadgetExtraMonthlyAttemptCapacity,
   getGadgetMonthlyAttemptCapacity,
   getGadgetWorkSpeed,
 } from "./gadgetEconomy";
@@ -201,11 +201,11 @@ describe("Gadget flow", () => {
   });
 
   it.each([
-    { collaborators: 12, ordinaryIntervalMs: 5_000, marginalIntervalMs: 50_000 },
-    { collaborators: 15, ordinaryIntervalMs: 4_000, marginalIntervalMs: 40_000 },
+    { collaborators: 12, ordinaryIntervalMs: 2_500, extraIntervalMs: 25_000 / 3 },
+    { collaborators: 15, ordinaryIntervalMs: 2_000, extraIntervalMs: 20_000 / 3 },
   ])(
-    "turns the old 0.8-1 second cadence into $ordinaryIntervalMs ms with $collaborators collaborators",
-    ({ collaborators, ordinaryIntervalMs, marginalIntervalMs }) => {
+    "uses the strengthened commercial cadence of $ordinaryIntervalMs ms with $collaborators collaborators",
+    ({ collaborators, ordinaryIntervalMs, extraIntervalMs }) => {
       const initial = unlockedState();
       const staffed: GameState = {
         ...initial,
@@ -230,7 +230,7 @@ describe("Gadget flow", () => {
         },
       };
       const audience = getGadgetAudience(selling);
-      const marginal: GameState = {
+      const extra: GameState = {
         ...selling,
         gadgets: {
           ...selling.gadgets,
@@ -247,8 +247,8 @@ describe("Gadget flow", () => {
       expect(getGadgetMonthlyAttemptCapacity(selling)).toBeCloseTo(
         GAME_CONFIG.gameMonthMs / ordinaryIntervalMs,
       );
-      expect(getGadgetMarginalMonthlyAttemptCapacity(selling)).toBeCloseTo(
-        GAME_CONFIG.gameMonthMs / marginalIntervalMs,
+      expect(getGadgetExtraMonthlyAttemptCapacity(selling)).toBeCloseTo(
+        GAME_CONFIG.gameMonthMs / extraIntervalMs,
       );
       expect(commonRarity(processGadgets(
         selling,
@@ -261,14 +261,14 @@ describe("Gadget flow", () => {
         ordinaryIntervalMs + 1,
       ), "wristband").unitsSold).toBe(1);
       expect(commonRarity(processGadgets(
-        marginal,
-        marginalIntervalMs - 1,
-        marginalIntervalMs,
+        extra,
+        extraIntervalMs - 1,
+        extraIntervalMs,
       ), "wristband").unitsSold).toBe(audience);
       expect(commonRarity(processGadgets(
-        marginal,
-        marginalIntervalMs,
-        marginalIntervalMs + 1,
+        extra,
+        extraIntervalMs,
+        extraIntervalMs + 1,
       ), "wristband").unitsSold).toBe(audience + 1);
     },
   );
@@ -298,10 +298,11 @@ describe("Gadget flow", () => {
     );
 
     expect(getGadgetAudience(selling)).toBe(1_000);
-    expect(commonRarity(sold, "wristband").unitsSold).toBe(1);
-    expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
-    expect(sold.school.euros).toBe(selling.school.euros + 20);
-    expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(20);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(2);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(40);
+    expect(sold.school.euros).toBe(selling.school.euros + 40);
+    expect(sold.gadgets.monthlyRevenue.totals.wristband).toBe(40);
+    expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(40);
   });
 
   it("keeps quality zero non-sellable and unlocks the next project at 100 sales", () => {
@@ -347,11 +348,11 @@ describe("Gadget flow", () => {
       GAME_CONFIG.gameMonthMs,
       61_000,
     );
-    expect(commonRarity(unlocked, "wristband").unitsSold).toBe(100);
+    expect(commonRarity(unlocked, "wristband").unitsSold).toBe(101);
     expect(unlocked.gadgets.products.mug.unlocked).toBe(true);
   });
 
-  it("continues beyond the audience through occasional marginal sales", () => {
+  it("continues beyond the audience through extra sales", () => {
     const initial = unlockedState();
     const audience = getGadgetAudience(initial);
     const saturated: GameState = {
@@ -371,22 +372,23 @@ describe("Gadget flow", () => {
 
     const almostSold = processGadgets(
       saturated,
-      GAME_CONFIG.gameMonthMs * 9,
+      GAME_CONFIG.gameMonthMs * 1.5,
       541_000,
     );
     expect(commonRarity(almostSold, "wristband").unitsSold).toBe(audience);
 
     const sold = processGadgets(
       almostSold,
-      GAME_CONFIG.gameMonthMs,
+      GAME_CONFIG.gameMonthMs / 6,
       601_000,
     );
     expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
+    expect(commonRarity(sold, "wristband").extraUnitsSold).toBe(1);
     expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
     expect(getEstimatedMonthlyGadgetIncome(almostSold)).toBe(20);
   });
 
-  it("keeps ordinary and marginal sales active for different products", () => {
+  it("keeps ordinary and extra sales active for different products", () => {
     const initial = unlockedState();
     const audience = getGadgetAudience(initial);
     const selling: GameState = {
@@ -420,8 +422,9 @@ describe("Gadget flow", () => {
       601_000,
     );
 
-    expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
-    expect(commonRarity(sold, "mug").unitsSold).toBe(10);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 6);
+    expect(commonRarity(sold, "wristband").extraUnitsSold).toBe(6);
+    expect(commonRarity(sold, "mug").unitsSold).toBe(20);
   });
 
   it("returns a product to ordinary sales when its audience grows", () => {
@@ -453,7 +456,53 @@ describe("Gadget flow", () => {
       largerAudience,
       GAME_CONFIG.gameMonthMs,
       61_000,
-    ), "wristband").unitsSold).toBe(audience + 1);
+    ), "wristband").unitsSold).toBe(audience + 2);
+  });
+
+  it("keeps extra sales separate when the reachable audience grows", () => {
+    const initial = unlockedState();
+    const audience = getGadgetAudience(initial);
+    const saturated: GameState = {
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100, unitsSold: audience },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+        },
+      },
+    };
+    const withExtraSale = processGadgets(
+      saturated,
+      GAME_CONFIG.gameMonthMs * 2,
+      121_000,
+    );
+    expect(commonRarity(withExtraSale, "wristband")).toMatchObject({
+      unitsSold: audience + 1,
+      extraUnitsSold: 1,
+    });
+
+    const largerAudience: GameState = {
+      ...withExtraSale,
+      school: {
+        ...withExtraSale.school,
+        activeMembers: withExtraSale.school.activeMembers + 100,
+        peakActiveMembers: withExtraSale.school.peakActiveMembers + 100,
+      },
+    };
+    const soldToNewAudience = processGadgets(
+      largerAudience,
+      GAME_CONFIG.gameMonthMs,
+      181_000,
+    );
+    expect(commonRarity(soldToNewAudience, "wristband")).toMatchObject({
+      unitsSold: audience + 3,
+      extraUnitsSold: 1,
+    });
   });
 
   it("allows accepting a zero-quality prototype without making it sell", () => {
@@ -513,10 +562,10 @@ describe("Gadget flow", () => {
     const wristbands = commonRarity(sold, "wristband").unitsSold;
     const mugs = commonRarity(sold, "mug").unitsSold;
 
-    expect(wristbands + mugs).toBe(12);
-    expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.5);
-    expect(commonRarity(sold, "wristband").totalProfit).toBe(120);
-    expect(commonRarity(sold, "mug").totalProfit).toBe(180);
+    expect(wristbands + mugs).toBe(25);
+    expect(sold.gadgets.crossSellRemainder).toBe(0);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(260);
+    expect(commonRarity(sold, "mug").totalProfit).toBe(360);
   });
 
   it("never turns a cross-sale into another unit of the same product", () => {
@@ -558,9 +607,12 @@ describe("Gadget flow", () => {
       271_000,
     );
 
-    expect(commonRarity(sold, "wristband").unitsSold).toBe(9);
-    expect(commonRarity(sold, "mug").unitsSold).toBe(audience);
-    expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.25);
+    expect(commonRarity(sold, "wristband").unitsSold).toBe(23);
+    expect(commonRarity(sold, "mug")).toMatchObject({
+      unitsSold: audience + 5,
+      extraUnitsSold: 5,
+    });
+    expect(sold.gadgets.crossSellRemainder).toBeCloseTo(0.75);
   });
 
   it("stores a guaranteed rarity opportunity and unlocks Rare only above 50%", () => {
@@ -665,14 +717,14 @@ describe("Gadget flow", () => {
     );
 
     expect(commonRarity(sold, "wristband")).toMatchObject({
-      unitsSold: 1,
-      totalProfit: 20,
+      unitsSold: 2,
+      totalProfit: 40,
     });
     expect(sold.gadgets.products.wristband.rarities.rare).toMatchObject({
-      unitsSold: 1,
-      totalProfit: 25,
+      unitsSold: 2,
+      totalProfit: 60,
     });
-    expect(sold.school.euros).toBe(selling.school.euros + 45);
+    expect(sold.school.euros).toBe(selling.school.euros + 100);
   });
 
   it("unlocks the next Gadget from total family sales across rarities", () => {

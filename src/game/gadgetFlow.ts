@@ -14,7 +14,7 @@ import {
 import {
   getGadgetAudience,
   getGadgetCrossSellRate,
-  getGadgetMarginalMonthlyAttemptCapacity,
+  getGadgetExtraMonthlyAttemptCapacity,
   getGadgetMonthlyAttemptCapacity,
   getGadgetQualityConversion,
   getGadgetUnitProfit,
@@ -24,10 +24,12 @@ import {
 } from "./gadgetEconomy";
 import {
   canRollNextGadgetRarity,
+  getGadgetAudienceUnitsSold,
   getGadgetFamilyUnitsSold,
   getGadgetRarityUpgradeChance,
   getHighestUnlockedGadgetRarity,
 } from "./gadgetRarity";
+import { recordGadgetMonthlyRevenue } from "./gadgetRevenue";
 import { roundCurrency } from "./economy";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
@@ -369,6 +371,7 @@ function applySales(
   productId: GadgetProductId,
   rarity: GadgetRarity,
   units: number,
+  extra = false,
 ): SaleResult {
   if (units <= 0) return { products, revenue: 0, units: 0 };
   const product = products[productId];
@@ -386,6 +389,7 @@ function applySales(
           [rarity]: {
             ...rarityState,
             unitsSold: rarityState.unitsSold + units,
+            extraUnitsSold: rarityState.extraUnitsSold + (extra ? units : 0),
             totalProfit: roundCurrency(rarityState.totalProfit + revenue),
           },
         },
@@ -396,7 +400,7 @@ function applySales(
   };
 }
 
-type GadgetSaleTier = "ordinary" | "marginal";
+type GadgetSaleTier = "ordinary" | "extra";
 
 function processPrimarySalesPool(
   state: GameState,
@@ -409,19 +413,22 @@ function processPrimarySalesPool(
   let revenue = 0;
   let units = 0;
   // La fascia viene fissata all'inizio del tick: nello stesso intervallo un
-  // prodotto non può consumare sia capacità ordinaria sia marginale.
+  // prodotto non può consumare sia capacità ordinaria sia extra.
   const eligible = getSellableGadgetVariants(state).filter(({ productId, rarity }) => {
     const rarityState = state.gadgets.products[productId].rarities[rarity];
+    const audienceUnitsSold = getGadgetAudienceUnitsSold(rarityState);
     return tier === "ordinary"
-      ? rarityState.unitsSold < audience
-      : rarityState.unitsSold >= audience;
+      ? audienceUnitsSold < audience
+      : audienceUnitsSold >= audience;
   });
   const totalWeight = eligible.reduce(
     (total, { productId, rarity }) => total + (
       tier === "ordinary"
         ? Math.max(
             0,
-            audience - state.gadgets.products[productId].rarities[rarity].unitsSold,
+            audience - getGadgetAudienceUnitsSold(
+              state.gadgets.products[productId].rarities[rarity],
+            ),
           )
         : 1
     ),
@@ -433,12 +440,14 @@ function processPrimarySalesPool(
     const product = products[productId];
     const rarityState = product.rarities[rarity];
     const demand = tier === "ordinary"
-      ? Math.max(0, audience - rarityState.unitsSold)
+      ? Math.max(0, audience - getGadgetAudienceUnitsSold(rarityState))
       : Math.max(0, Number.MAX_SAFE_INTEGER - rarityState.unitsSold);
     const weight = tier === "ordinary"
       ? Math.max(
           0,
-          audience - state.gadgets.products[productId].rarities[rarity].unitsSold,
+          audience - getGadgetAudienceUnitsSold(
+            state.gadgets.products[productId].rarities[rarity],
+          ),
         )
       : 1;
     const allocatedAttempts = attempts * weight / totalWeight;
@@ -461,7 +470,7 @@ function processPrimarySalesPool(
         },
       },
     };
-    const applied = applySales(products, productId, rarity, sold);
+    const applied = applySales(products, productId, rarity, sold, tier === "extra");
     products = applied.products;
     revenue = roundCurrency(revenue + applied.revenue);
     units += applied.units;
@@ -472,7 +481,7 @@ function processPrimarySalesPool(
 function processPrimarySales(
   state: GameState,
   ordinaryAttempts: number,
-  marginalAttempts: number,
+  extraAttempts: number,
   audience: number,
 ): SaleResult {
   const ordinary = processPrimarySalesPool(
@@ -482,17 +491,17 @@ function processPrimarySales(
     audience,
     "ordinary",
   );
-  const marginal = processPrimarySalesPool(
+  const extra = processPrimarySalesPool(
     state,
     ordinary.products,
-    marginalAttempts,
+    extraAttempts,
     audience,
-    "marginal",
+    "extra",
   );
   return {
-    products: marginal.products,
-    revenue: roundCurrency(ordinary.revenue + marginal.revenue),
-    units: ordinary.units + marginal.units,
+    products: extra.products,
+    revenue: roundCurrency(ordinary.revenue + extra.revenue),
+    units: ordinary.units + extra.units,
   };
 }
 
@@ -529,12 +538,14 @@ function processCrossSales(
   );
   const eligible = catalogVariants.filter(
     ({ productId, rarity }) =>
-      products[productId].rarities[rarity].unitsSold < audience &&
+      getGadgetAudienceUnitsSold(products[productId].rarities[rarity]) < audience &&
       primarySources.some((source) => source.productId !== productId),
   );
   const totalDemand = eligible.reduce(
     (total, { productId, rarity }) =>
-      total + audience - products[productId].rarities[rarity].unitsSold,
+      total + audience - getGadgetAudienceUnitsSold(
+        products[productId].rarities[rarity],
+      ),
     0,
   );
   const capacity = Math.min(wholeCapacity, totalDemand);
@@ -569,7 +580,7 @@ function processCrossSales(
   let allocated = 0;
   for (const variant of rotated) {
     const rarityState = products[variant.productId].rarities[variant.rarity];
-    const demand = audience - rarityState.unitsSold;
+    const demand = audience - getGadgetAudienceUnitsSold(rarityState);
     const share = Math.min(demand, Math.floor(capacity * demand / totalDemand));
     allocations.set(variantKey(variant), share);
     allocated += share;
@@ -579,7 +590,7 @@ function processCrossSales(
     let distributed = false;
     for (const variant of rotated) {
       const rarityState = products[variant.productId].rarities[variant.rarity];
-      const demand = audience - rarityState.unitsSold;
+      const demand = audience - getGadgetAudienceUnitsSold(rarityState);
       const key = variantKey(variant);
       const current = allocations.get(key) ?? 0;
       if (current >= demand) continue;
@@ -657,13 +668,12 @@ function processGadgetSales(
   if (monthlyCapacity <= 0) return state;
   const elapsedMonths = elapsedMs / GAME_CONFIG.gameMonthMs;
   const ordinaryAttempts = elapsedMonths * monthlyCapacity;
-  const marginalAttempts = elapsedMonths *
-    getGadgetMarginalMonthlyAttemptCapacity(state);
+  const extraAttempts = elapsedMonths * getGadgetExtraMonthlyAttemptCapacity(state);
   const audience = getGadgetAudience(state);
   const primary = processPrimarySales(
     state,
     ordinaryAttempts,
-    marginalAttempts,
+    extraAttempts,
     audience,
   );
   const cross = processCrossSales(state, primary.products, primary.units, audience);
@@ -674,6 +684,17 @@ function processGadgetSales(
     cross.remainder === state.gadgets.crossSellRemainder
   ) return state;
 
+  const gadgetsWithSales = recordGadgetMonthlyRevenue(
+    {
+      ...state.gadgets,
+      products: cross.products,
+      crossSellRemainder: cross.remainder,
+      crossSellCursor: cross.cursor,
+    },
+    state.gadgets.products,
+    cross.products,
+    state.school.currentMonth,
+  );
   const soldState: GameState = {
     ...state,
     school: {
@@ -685,10 +706,7 @@ function processGadgetSales(
       eurosEarned: roundCurrency(state.statistics.eurosEarned + revenue),
     },
     gadgets: {
-      ...state.gadgets,
-      products: cross.products,
-      crossSellRemainder: cross.remainder,
-      crossSellCursor: cross.cursor,
+      ...gadgetsWithSales,
     },
   };
   return unlockProductsFromSales(soldState, now);
