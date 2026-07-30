@@ -15,7 +15,9 @@ import {
 } from "../content/forms";
 import {
   applyQualifyingCourseDiscount,
+  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
+  getInstructorBranchCapacityBonus,
   getUpgradeEffectTotal,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
@@ -89,6 +91,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
   private readonly priorityQualificationTechnicianIds: Set<string>;
   private readonly capacity: number;
   private readonly courseXUnlocked: boolean;
+  private readonly unrestrictedFormBranches: boolean;
   private readonly trainingYear: number;
   private readonly annualTrainingLimit: number;
   private equipment: GameState["equipment"];
@@ -113,6 +116,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       getPriorityInstructorQualificationTechnicianIds(state);
     this.capacity = selectInstructorCapacity(state);
     this.courseXUnlocked = isCourseXUnlocked(state.upgrades);
+    this.unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
     this.trainingYear = getFormTrainingYear(state.school.currentMonth);
     this.annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
     this.equipment = state.equipment;
@@ -418,16 +422,19 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       : instructor
         ? getStudentFormCost(definition?.cost ?? 0)
         : definition?.cost ?? 0;
-    const branchCapacity = collaborator?.assignment === "instructor"
-      ? Math.min(3, 1 + (this.state.upgrades["instructor-versatility"] ?? 0))
-      : undefined;
+    const branchCapacity = this.unrestrictedFormBranches
+      ? 3
+      : collaborator?.assignment === "instructor"
+        ? Math.min(3, 1 + getInstructorBranchCapacityBonus(this.state.upgrades))
+        : undefined;
     const instructorLearnedBranches = new Set(
       collaborator?.forms.flatMap((learnedFormId) => {
         const branch = getFormDefinition(learnedFormId)?.branch;
         return branch ? [branch] : [];
       }) ?? [],
     );
-    const initialBranchCompatible = !definition?.branch ||
+    const initialBranchCompatible = this.unrestrictedFormBranches ||
+      !definition?.branch ||
       instructorLearnedBranches.size > 0 ||
       !collaborator?.formBranchPreferences?.length ||
       collaborator.formBranchPreferences.includes(definition.branch);
@@ -439,7 +446,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         definition,
         this.trainingYear,
         branchCapacity,
-        collaborator?.assignment !== "instructor",
+        !this.unrestrictedFormBranches && collaborator?.assignment !== "instructor",
         this.annualTrainingLimit,
         this.courseXUnlocked,
       ) ||

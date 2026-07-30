@@ -11,6 +11,7 @@ import {
 } from "../content/forms";
 import {
   applyQualifyingCourseDiscount,
+  areAllFormBranchesUnlocked,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getSISTechnicianCourseSpeedBonus,
@@ -381,6 +382,7 @@ function getInstructorCourseDemandByForm(
   state: GameState,
   courseXUnlocked: boolean,
 ): ReadonlyMap<FormId, number> {
+  const unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
   const collaboratorContactIds = new Set(
     state.collaborators.map((collaborator) => collaborator.contactId),
   );
@@ -392,7 +394,7 @@ function getInstructorCourseDemandByForm(
     // Una persona conta una sola volta per Forma anche se un vecchio salvataggio
     // contiene preferenze di ramo duplicate.
     const requestedForms = new Set(
-      getAutomaticFormCandidates(person, courseXUnlocked),
+      getAutomaticFormCandidates(person, courseXUnlocked, unrestrictedFormBranches),
     );
     for (const formId of requestedForms) {
       demandByForm.set(formId, (demandByForm.get(formId) ?? 0) + 1);

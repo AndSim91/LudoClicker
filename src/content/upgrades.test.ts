@@ -3,6 +3,7 @@ import type { GameState, UpgradeId } from "../game/types";
 import {
   UPGRADE_CATEGORIES,
   UPGRADE_DEFINITIONS,
+  areAllFormBranchesUnlocked,
   createInitialUpgradeLevels,
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
@@ -10,11 +11,13 @@ import {
   getEquipmentPreparedWorkMaximum,
   getEquipmentSwordRepairWork,
   getFirstIncompleteUpgradePrerequisite,
+  getInstructorBranchCapacityBonus,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getQualifyingCourseCostMultiplier,
   getSISTechnicianCourseSpeedBonus,
   getTrialDurationMs,
+  getTrainingExamSuccessChanceBonus,
   getUpgradeCost,
   getUpgradeEffectTotal,
   isAgonistCourseUnlocked,
@@ -142,7 +145,7 @@ describe("upgrade catalog", () => {
     });
     expect(costsFor("instructors")).toEqual({
       "technical-arena": [1_000, 2_000, 5_000, 7_500, 10_000],
-      "instructor-versatility": [2_000, 4_000],
+      "instructor-versatility": [2_000, 4_000, 8_000, 16_000, 32_000],
       "sis-accreditation": [5_000, 10_000, 20_000, 40_000],
       "cost-of-service": [2_500, 5_000, 10_000, 25_000, 50_000],
       "promiscuous-instructor": [10_000, 25_000, 50_000, 100_000, 200_000, 400_000],
@@ -234,6 +237,28 @@ describe("branch effects", () => {
 });
 
 describe("Teaching branch", () => {
+  it("keeps the first two Master of none levels and adds the three new effects", () => {
+    const firstLevel = levelsWith({ "instructor-versatility": 1 });
+    const secondLevel = levelsWith({ "instructor-versatility": 2 });
+    const thirdLevel = levelsWith({ "instructor-versatility": 3 });
+    const fourthLevel = levelsWith({ "instructor-versatility": 4 });
+    const fifthLevel = levelsWith({ "instructor-versatility": 5 });
+    const sis = UPGRADE_DEFINITIONS.find(
+      (definition) => definition.id === "sis-accreditation",
+    )!;
+
+    expect(getInstructorBranchCapacityBonus(firstLevel)).toBe(1);
+    expect(getInstructorBranchCapacityBonus(secondLevel)).toBe(2);
+    expect(getInstructorBranchCapacityBonus(fifthLevel)).toBe(2);
+    expect(getTrainingExamSuccessChanceBonus(secondLevel)).toBe(0);
+    expect(getTrainingExamSuccessChanceBonus(thirdLevel)).toBeCloseTo(0.1);
+    expect(getTrainingExamSuccessChanceBonus(fourthLevel)).toBeCloseTo(0.2);
+    expect(getTrainingExamSuccessChanceBonus(fifthLevel)).toBeCloseTo(0.2);
+    expect(areAllFormBranchesUnlocked(fourthLevel)).toBe(false);
+    expect(areAllFormBranchesUnlocked(fifthLevel)).toBe(true);
+    expect(sis.requiredUpgradeLevels).toEqual({ "instructor-versatility": 5 });
+  });
+
   it("merges Preparazione agonistica into Nessun Rancore before PagoSport", () => {
     expect(definitionsFor("instructors").map((definition) => definition.id)).toEqual([
       "technical-arena",

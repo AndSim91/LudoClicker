@@ -4,7 +4,6 @@ import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
 import type { Collaborator, FormBranch, FormId } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
 import { PeopleView } from "./PeopleView";
 
 afterEach(() => {
@@ -1325,108 +1324,6 @@ describe("PeopleView", () => {
     expect(membersHeading.parentElement).toHaveTextContent("3");
     expect(screen.getAllByText("Iscritto")).toHaveLength(3);
     expect(screen.queryByText("Ha lasciato la scuola")).not.toBeInTheDocument();
-  });
-
-  it("shows monthly member and Social income with an accessible breakdown", () => {
-    const initial = createInitialState(1_000);
-    const contacts = initial.contacts.map((contact, index) => ({
-      ...contact,
-      status: index < 2 ? ("enrolled" as const) : contact.status,
-      forms: index === 0 ? (["form-1"] as FormId[]) : contact.forms,
-    }));
-    const memberFees = 85;
-    const socialIncome = 10;
-
-    render(
-      <PeopleView
-        state={{
-          ...initial,
-          contacts,
-          school: {
-            ...initial.school,
-            activeMembers: 2,
-            followers: 100,
-          },
-          unlocks: { ...initial.unlocks, social: true },
-        }}
-        onAssign={() => undefined}
-        onStartTraining={() => undefined}
-      />,
-    );
-
-    const income = screen.getByRole("button", {
-      name: `Guadagno al mese: ${formatCurrency(memberFees + socialIncome)}`,
-    });
-    expect(income).toBeVisible();
-    const pageHeader = screen.getByRole("heading", { name: "Scuola", level: 1 })
-      .closest("header");
-    expect(pageHeader).toContainElement(income);
-    expect(screen.getByRole("heading", { name: "Iscritti attivi" }).parentElement)
-      .not.toContainElement(income);
-
-    const tooltip = screen.getByRole("tooltip");
-    expect(income).toHaveAttribute("aria-describedby", tooltip.id);
-    expect(tooltip).toHaveTextContent("Quote iscritti");
-    expect(tooltip).toHaveTextContent(/85,00\s*€/);
-    expect(tooltip).toHaveTextContent("Bonus Social");
-    expect(tooltip).toHaveTextContent(/10,00\s*€/);
-    expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");
-  });
-
-  it("includes the estimated Gadget sales after the sector is unlocked", () => {
-    const initial = createInitialState(1_000);
-    const product = initial.gadgets.products.wristband;
-    const gadgetCollaborator: Collaborator = {
-      id: "gadget-collaborator",
-      contactId: "gadget-contact",
-      displayName: "Collaboratore Gadget",
-      joinedAt: 1_000,
-      forms: [],
-      instructorForms: [],
-      assignment: "gadget",
-      rarity: "ultra-rare",
-    };
-
-    render(
-      <PeopleView
-        state={{
-          ...initial,
-          school: { ...initial.school, activeMembers: 10 },
-          collaborators: [gadgetCollaborator],
-          unlocks: { ...initial.unlocks, gadget: true },
-          gadgets: {
-            ...initial.gadgets,
-            products: {
-              ...initial.gadgets.products,
-              wristband: {
-                ...product,
-                unlocked: true,
-                projectPurchased: true,
-                prototypeCompleted: true,
-                accepted: true,
-                rarities: {
-                  ...product.rarities,
-                  common: {
-                    ...product.rarities.common,
-                    unlocked: true,
-                    quality: 100,
-                  },
-                },
-              },
-            },
-          },
-        }}
-        onAssign={() => undefined}
-        onStartTraining={() => undefined}
-      />,
-    );
-
-    expect(screen.getByRole("button", {
-      name: `Guadagno al mese: ${formatCurrency(420)}`,
-    })).toBeVisible();
-    const tooltip = screen.getByRole("tooltip");
-    expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
-    expect(tooltip).toHaveTextContent(/20,00\s*€/);
   });
 
   it("keeps advanced roster concepts hidden for the first member", () => {

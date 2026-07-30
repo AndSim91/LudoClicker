@@ -6,7 +6,9 @@ import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import {
+  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
+  getInstructorBranchCapacityBonus,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
 } from "../../content/upgrades";
@@ -169,8 +171,9 @@ export function MemberList({
       agonistCourseUnlocked: isAgonistCourseUnlocked(state.upgrades),
       instructorBranchCapacity: Math.min(
         3,
-        1 + state.upgrades["instructor-versatility"],
+        1 + getInstructorBranchCapacityBonus(state.upgrades),
       ),
+      unrestrictedFormBranches: areAllFormBranchesUnlocked(state.upgrades),
       immunityContext,
       foundedSchools,
       courseXUnlocked,

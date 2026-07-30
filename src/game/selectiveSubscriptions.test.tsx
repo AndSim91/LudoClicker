@@ -7,6 +7,7 @@ import type { Collaborator, GameState } from "./types";
 import { CollaboratorSectorPanel } from "../features/people/CollaboratorSectorPanel";
 import { CollaboratorSectorView } from "../features/people/CollaboratorSectorView";
 import { PeopleView } from "../features/people/PeopleView";
+import { MonthlyIncomeSummary } from "../components/outlook-shell/MonthlyIncomeSummary";
 
 afterEach(cleanup);
 
@@ -39,7 +40,7 @@ function createWriterState(): { state: GameState; writer: Collaborator } {
 }
 
 describe("selective game subscriptions", () => {
-  it("refreshes People income and unlock state when only their indirect slices change", () => {
+  it("refreshes monthly income and People unlock state when indirect slices change", () => {
     const initial = createInitialState(1_000, "Test", false);
     const state = {
       ...initial,
@@ -47,12 +48,13 @@ describe("selective game subscriptions", () => {
     };
     const view = (currentState: GameState) => (
       <GameStateProvider state={currentState}>
+        <MonthlyIncomeSummary />
         <PeopleView onAssign={ignore} onStartTraining={ignore} />
       </GameStateProvider>
     );
     const rendered = render(view(state));
 
-    expect(screen.getByRole("button", { name: /Guadagno al mese: 40,00/ })).toBeVisible();
+    expect(screen.getByLabelText(/Entrate mensili: 40,00/)).toBeVisible();
     expect(screen.queryByText("Collaboratori")).not.toBeInTheDocument();
 
     rendered.rerender(view({
@@ -61,7 +63,7 @@ describe("selective game subscriptions", () => {
       unlocks: { ...state.unlocks, collaborators: true },
     }));
 
-    expect(screen.getByRole("button", { name: /Guadagno al mese: 80,00/ })).toBeVisible();
+    expect(screen.getByLabelText(/Entrate mensili: 80,00/)).toBeVisible();
     expect(screen.getByText("Collaboratori")).toBeVisible();
   });
 

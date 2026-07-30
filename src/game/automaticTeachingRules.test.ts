@@ -116,6 +116,26 @@ describe("automatic teaching rules", () => {
     expect(training?.instructorId).toBe(unrelatedCertificate.id);
   });
 
+  it("automatically teaches a non-preferred branch at Master of none level five", () => {
+    const initial = teachingState();
+    const student = branchStudent(initial.contacts[0], "long-student", "Spada Lunga");
+    const staffInstructor = instructor("staff-instructor", "legendary", ["form-3-staff"]);
+    const state: GameState = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1 },
+      contacts: [student],
+      collaborators: [staffInstructor],
+      upgrades: { ...initial.upgrades, "instructor-versatility": 5 },
+    };
+
+    const processed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(processed.contacts[0].training).toMatchObject({
+      formId: "form-3-staff",
+      instructorId: staffInstructor.id,
+    });
+  });
+
   it("fills automatic Forms before using remaining capacity for the Agonist Course", () => {
     const initial = teachingState();
     const favoriteAgonistCandidate = {

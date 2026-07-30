@@ -110,6 +110,72 @@ describe("esami di formazione nascosti", () => {
     expect(technicianFailure.collaborators[0].training?.completesAt).toBe(12_000);
   });
 
+  it("applies each Master of none exam bonus to athletes, Instructors and Technicians", () => {
+    const initial = createInitialState(1_000, "", false);
+    const athleteTraining: FormTraining = {
+      formId: "form-1",
+      startedAt: 1_000,
+      completesAt: 2_000,
+      status: "running",
+      trainingTrack: "athlete",
+      trainingPhase: "athlete",
+      trainingBaseDurationMs: 20_000,
+      trainingDurationMultiplier: 1,
+    };
+    const athlete = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      training: athleteTraining,
+    };
+    const resolveAthlete = (level: number, randomSeed: number) => gameReducer({
+      ...initial,
+      contacts: [athlete],
+      collaborators: [],
+      upgrades: { ...initial.upgrades, "instructor-versatility": level },
+      randomSeed,
+    }, { type: "TICK", now: 2_000 });
+
+    expect(resolveAthlete(0, 58).contacts[0].forms).toEqual([]);
+    expect(resolveAthlete(3, 58).contacts[0].forms).toEqual(["form-1"]);
+    expect(resolveAthlete(3, 18).contacts[0].forms).toEqual([]);
+    expect(resolveAthlete(4, 18).contacts[0].forms).toEqual(["form-1"]);
+
+    const instructorTraining: FormTraining = {
+      ...athleteTraining,
+      trainingTrack: "instructor",
+      trainingPhase: "instructor",
+      trainingBaseDurationMs: 10_000,
+    };
+    const resolveCollaborator = (
+      level: number,
+      randomSeed: number,
+      training: FormTraining,
+    ) => gameReducer({
+      ...initial,
+      contacts: [],
+      collaborators: [qualifiedCollaborator(initial, training)],
+      upgrades: { ...initial.upgrades, "instructor-versatility": level },
+      randomSeed,
+    }, { type: "TICK", now: 2_000 });
+
+    expect(resolveCollaborator(0, 14, instructorTraining).collaborators[0].instructorForms)
+      .toEqual([]);
+    expect(resolveCollaborator(3, 14, instructorTraining).collaborators[0].instructorForms)
+      .toEqual(["form-1"]);
+
+    const technicianTraining: FormTraining = {
+      ...instructorTraining,
+      trainingTrack: "technician",
+      trainingPhase: "technician",
+      trainingBaseDurationMs: 100_000,
+    };
+    expect(resolveCollaborator(0, 18, technicianTraining).collaborators[0].technicianForms)
+      .toEqual([]);
+    expect(resolveCollaborator(3, 18, technicianTraining).collaborators[0].technicianForms)
+      .toEqual(["form-1"]);
+  });
+
   it("runs the combined Instructor path as two independent phases and one annual slot", () => {
     const initial = createInitialState(1_000, "", false);
     const collaborator: Collaborator = {

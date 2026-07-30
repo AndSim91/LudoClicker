@@ -17,7 +17,9 @@ import {
 } from "../../content/forms";
 import {
   applyQualifyingCourseDiscount,
+  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
+  getInstructorBranchCapacityBonus,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
@@ -710,9 +712,12 @@ export function TrainingControl({
           : [];
       })
     : [];
-  const branchCapacity = collaborator?.assignment === "instructor"
-    ? Math.min(3, 1 + state.upgrades["instructor-versatility"])
-    : undefined;
+  const unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
+  const branchCapacity = unrestrictedFormBranches
+    ? 3
+    : collaborator?.assignment === "instructor"
+      ? Math.min(3, 1 + getInstructorBranchCapacityBonus(state.upgrades))
+      : undefined;
   const learnedBranches = new Set(collaborator?.forms.flatMap((formId) => {
     const branch = getFormDefinition(formId)?.branch;
     return branch ? [branch] : [];
@@ -722,10 +727,11 @@ export function TrainingControl({
         student,
         trainingYear,
         branchCapacity,
-        collaborator?.assignment !== "instructor",
+        !unrestrictedFormBranches && collaborator?.assignment !== "instructor",
         annualTrainingLimit,
         courseXUnlocked,
       ).filter((definition) =>
+        unrestrictedFormBranches ||
         !definition.branch ||
         learnedBranches.size > 0 ||
         !collaborator?.formBranchPreferences?.length ||

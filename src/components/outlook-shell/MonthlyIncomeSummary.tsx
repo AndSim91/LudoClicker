@@ -31,16 +31,16 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
 
   return (
     <div className="title-monthly-income">
-      <button
-        type="button"
-        className="title-monthly-income-trigger"
+      <span
+        tabIndex={0}
+        className="title-resource title-monthly-income-trigger"
         aria-label={`Entrate mensili: ${formatCurrency(monthlyIncome)}`}
         aria-describedby={tooltipId}
       >
         <Icon name="trend" />
         <small>Entrate mensili</small>
         <strong>{formatCurrency(monthlyIncome)}</strong>
-      </button>
+      </span>
       <div className="title-monthly-income-tooltip" id={tooltipId} role="tooltip">
         <p>Dettaglio mensile</p>
         <dl>

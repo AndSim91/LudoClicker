@@ -10,6 +10,7 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import {
   UPGRADE_CATEGORIES,
   UPGRADE_DEFINITIONS,
+  areAllFormBranchesUnlocked,
   getCreativityProgress,
   getEquipmentPreparedWorkMaximum,
   getAgonistCourseMaximumStatGain,
@@ -102,6 +103,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
     benefits.push({ label: "Forme annue", value: formatNumber(annualFormLimit) });
   }
   addAmount("Rami per Istruttore", "instructorBranchCapacity");
+  addPercentage("Superamento corsi", "trainingExamSuccessChance");
+  if (areAllFormBranchesUnlocked(state.upgrades)) {
+    benefits.push({ label: "Rami dopo Corso Y", value: "tutti" });
+  }
   addAmount("Allievi per Istruttore", "instructorStudentCapacity");
   addPercentage("Velocità insegnamento", "instructorTeachingSpeed");
   addPercentage("Efficacia Preparazione agonistica", "athleticPreparationPower");

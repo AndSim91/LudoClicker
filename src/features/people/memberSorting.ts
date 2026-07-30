@@ -36,6 +36,7 @@ export interface MemberSortContext {
   annualTrainingLimit: number;
   agonistCourseUnlocked: boolean;
   instructorBranchCapacity: number;
+  unrestrictedFormBranches: boolean;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   courseXUnlocked: boolean;
@@ -76,14 +77,16 @@ export function getMemberNextFormLabel(
     );
   }
   const collaborator = context.collaboratorsByContactId.get(contact.id);
-  const branchCapacity = collaborator?.assignment === "instructor"
-    ? context.instructorBranchCapacity
-    : undefined;
+  const branchCapacity = context.unrestrictedFormBranches
+    ? 3
+    : collaborator?.assignment === "instructor"
+      ? context.instructorBranchCapacity
+      : undefined;
   const nextForm = getAvailableForms(
     student,
     context.currentTrainingYear,
     branchCapacity,
-    collaborator?.assignment !== "instructor",
+    !context.unrestrictedFormBranches && collaborator?.assignment !== "instructor",
     context.annualTrainingLimit,
     context.courseXUnlocked,
   )[0];

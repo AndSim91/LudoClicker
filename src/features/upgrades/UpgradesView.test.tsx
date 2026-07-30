@@ -140,6 +140,20 @@ describe("UpgradesView", () => {
     )).toBeVisible();
   });
 
+  it("shows the complete Master of none progression", () => {
+    render(
+      <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", {
+      name: /Apri dettagli Master of none/,
+    }));
+
+    expect(screen.getByText(
+      "L1–L2 +1 ramo per Istruttore · L3 +10 punti percentuali di successo dei corsi · L4 +20 · L5 tutti i rami dopo Corso Y",
+    )).toBeVisible();
+  });
+
   it("shows the complete Nessun Rancore progression", () => {
     render(
       <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
@@ -248,7 +262,7 @@ describe("UpgradesView", () => {
         "coordinated-demo": 1,
         "organized-rack": 2,
         "registration-form": 1,
-        "instructor-versatility": 2,
+        "instructor-versatility": 5,
         "technical-arena": 1,
       },
     };
@@ -267,6 +281,10 @@ describe("UpgradesView", () => {
     expect(within(summary).queryByText("Spade:")).not.toBeInTheDocument();
     expect(within(summary).getByText("Rami per Istruttore:")).toBeVisible();
     expect(within(summary).getByText("+2")).toBeVisible();
+    expect(within(summary).getByText("Superamento corsi:")).toBeVisible();
+    expect(within(summary).getByText("+20%")).toBeVisible();
+    expect(within(summary).getByText("Rami dopo Corso Y:")).toBeVisible();
+    expect(within(summary).getByText("tutti")).toBeVisible();
     expect(within(summary).getByText("Arena Tecnica:")).toBeVisible();
   });
 

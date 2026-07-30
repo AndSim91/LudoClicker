@@ -14,7 +14,9 @@ import {
 } from "../content/forms";
 import {
   applyQualifyingCourseDiscount,
+  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
+  getInstructorBranchCapacityBonus,
   getUpgradeEffectTotal,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
@@ -325,16 +327,20 @@ export function startFormTraining(
     : instructor
       ? getStudentFormCost(definition?.cost ?? 0)
       : definition?.cost ?? 0;
-  const branchCapacity = collaborator?.assignment === "instructor"
-    ? Math.min(3, 1 + (state.upgrades["instructor-versatility"] ?? 0))
-    : undefined;
+  const unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
+  const branchCapacity = unrestrictedFormBranches
+    ? 3
+    : collaborator?.assignment === "instructor"
+      ? Math.min(3, 1 + getInstructorBranchCapacityBonus(state.upgrades))
+      : undefined;
   const instructorLearnedBranches = new Set(
     collaborator?.forms.flatMap((learnedFormId) => {
       const branch = getFormDefinition(learnedFormId)?.branch;
       return branch ? [branch] : [];
     }) ?? [],
   );
-  const initialBranchCompatible = !definition?.branch ||
+  const initialBranchCompatible = unrestrictedFormBranches ||
+    !definition?.branch ||
     instructorLearnedBranches.size > 0 ||
     !collaborator?.formBranchPreferences?.length ||
     collaborator.formBranchPreferences.includes(definition.branch);
@@ -346,7 +352,7 @@ export function startFormTraining(
       definition,
       trainingYear,
       branchCapacity,
-      collaborator?.assignment !== "instructor",
+      !unrestrictedFormBranches && collaborator?.assignment !== "instructor",
       annualTrainingLimit,
       courseXUnlocked,
     ) ||

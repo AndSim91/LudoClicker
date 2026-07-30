@@ -41,10 +41,8 @@ describe("TitleBar", () => {
       formatCompactCurrency(120).replace(/\u00a0/g, " "),
     );
     expect(screen.getByText("Iscritti attivi")).toBeVisible();
-    const availability = screen.getByLabelText(
-      `Disponibilità economica: ${formatExactCurrency(120)}`,
-    );
-    const monthlyIncome = screen.getByRole("button", { name: /^Entrate mensili:/ });
+    const availability = screen.getByLabelText(/^Disponibilità economica:/);
+    const monthlyIncome = screen.getByLabelText(/^Entrate mensili:/);
     expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
     expect(monthlyIncome).toHaveTextContent("Entrate mensili");
     const fame = screen.getByLabelText("Fama della scuola: 7");

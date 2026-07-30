@@ -53,6 +53,28 @@ describe("buyUpgrade prerequisites", () => {
     expect(versatility.upgrades["technical-arena"]).toBe(1);
   });
 
+  it("requires all five Master of none levels before Tu conosci la SIS?", () => {
+    const initial = createInitialState(1_000);
+    const levelFour = {
+      ...initial,
+      school: { ...initial.school, euros: 50_000 },
+      upgrades: {
+        ...initial.upgrades,
+        "technical-arena": 1,
+        "instructor-versatility": 4,
+      },
+    };
+
+    expect(buyUpgrade(levelFour, "sis-accreditation")).toBe(levelFour);
+
+    const levelFive = buyUpgrade(levelFour, "instructor-versatility");
+    const sis = buyUpgrade(levelFive, "sis-accreditation");
+
+    expect(levelFive.upgrades["instructor-versatility"]).toBe(5);
+    expect(levelFive.school.euros).toBe(18_000);
+    expect(sis.upgrades["sis-accreditation"]).toBe(1);
+  });
+
   it("opens Nessun Rancore after Didattica di gruppo and Percorso Tecnico", () => {
     const initial = createInitialState(1_000);
     const locked = {

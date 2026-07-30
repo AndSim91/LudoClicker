@@ -1111,6 +1111,9 @@ Regole:
 - gli esami finali sono un sistema interno e non vengono comunicati
   nell'interfaccia: il rischio di non superarli è **50%** per Forme e Corsi da
   atleta, **45%** per i Corsi Istruttori e **40%** per i Corsi Tecnici;
+- i livelli 3 e 4 di **Master of none** aumentano di 10 punti percentuali
+  ciascuno la possibilità di superare ogni esame da atleta, Istruttore o
+  Tecnico, per un bonus massimo di 20 punti percentuali;
 - ogni verifica non superata prolunga soltanto la fase interessata del **10%**
   della sua durata originaria; la verifica viene ripetuta al nuovo termine senza
   mostrare probabilità, fallimenti o messaggi al giocatore;
@@ -1207,11 +1210,15 @@ Regole:
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
   essere nuovamente sconfitti nel rispettivo torneo;
 - acquistare il livello 1 di Percorso Tecnico sblocca **Master of none**. I suoi
-  due livelli permettono agli Istruttori di accedere a uno e poi due rami d'arma
-  oltre le preferenze iniziali;
-- **Tu conosci la SIS?** segue Master of none: il livello 1 sblocca le
-  candidature ai Corsi Tecnici; i livelli 2, 3 e 4 aumentano la loro velocità
-  rispettivamente del 10%, 20% e 30%;
+  primi due livelli permettono agli Istruttori di accedere a uno e poi due rami
+  d'arma oltre le preferenze iniziali. I livelli 3 e 4 aumentano rispettivamente
+  di 10 e 20 punti percentuali la possibilità di superare gli esami da atleta,
+  Istruttore e Tecnico. Il quinto livello permette a ogni allievo che ha
+  completato Corso Y di scegliere liberamente fra tutti i rami d'arma, ignorando
+  le preferenze personali;
+- **Tu conosci la SIS?** segue il quinto livello di Master of none: il livello 1
+  sblocca le candidature ai Corsi Tecnici; i livelli 2, 3 e 4 aumentano la loro
+  velocità rispettivamente del 10%, 20% e 30%;
 - **Il costo del Servizio** ha cinque livelli e riduce del 5% per livello,
   fino al 25%, soltanto i costi dei percorsi che assegnano un attestato da
   Istruttore o una qualifica da Tecnico. Forme da atleta, Arena Tecnica e Corso
@@ -1461,7 +1468,7 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
 | Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
-| Master of none | +1 ramo d'arma accessibile agli Istruttori per livello | 2.000 / 4.000 € |
+| Master of none | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 € |
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |

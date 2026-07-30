@@ -146,62 +146,15 @@
   display: flex;
   height: 100%;
   align-items: center;
-  margin: 0 4px;
 }
 
 .title-monthly-income-trigger {
-  display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
-  grid-template-rows: 1fr 1fr;
-  min-width: 132px;
-  max-width: 172px;
-  height: 26px;
-  align-items: center;
-  column-gap: 6px;
-  padding: 2px 9px;
-  border: 1px solid rgb(188 238 205 / 58%);
-  border-radius: 6px;
-  color: white;
-  background: rgb(23 141 70 / 34%);
   cursor: help;
-  font: inherit;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  text-align: left;
-}
-
-.title-monthly-income-trigger:hover,
-.title-monthly-income-trigger:focus-visible {
-  border-color: rgb(215 250 226 / 82%);
-  background: rgb(23 141 70 / 48%);
 }
 
 .title-monthly-income-trigger:focus-visible {
   outline: 2px solid white;
   outline-offset: 1px;
-}
-
-.title-monthly-income-trigger svg {
-  grid-row: 1 / -1;
-  width: 16px;
-  height: 16px;
-  color: #bceecd;
-}
-
-.title-monthly-income-trigger small {
-  color: rgb(230 255 238 / 88%);
-  font-size: 8px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.title-monthly-income-trigger strong {
-  min-width: 0;
-  overflow: hidden;
-  font-size: 11px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .title-monthly-income-tooltip {
@@ -331,6 +284,96 @@
 .window-controls span {
   display: grid;
   place-items: center;
+}
+
+@media (max-width: 1180px) {
+  .title-bar {
+    grid-template-columns: 52px minmax(0, 1fr) auto auto 38px auto;
+  }
+
+  .window-controls {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .title-bar {
+    grid-template-columns: 52px minmax(0, 1fr) auto 38px auto;
+  }
+
+  .title-equipment {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .title-bar {
+    grid-template-columns: 52px minmax(0, 1fr) 38px auto;
+  }
+
+  .title-fame {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .title-bar {
+    grid-template-columns: 40px minmax(0, 1fr) 32px 90px;
+  }
+
+  .title-resources {
+    gap: 2px;
+    padding-left: 2px;
+  }
+
+  .title-resources > .title-resource {
+    display: none;
+  }
+
+  .title-resources > .title-balance {
+    display: grid;
+    min-width: 82px;
+    padding: 0 6px;
+  }
+
+  .title-monthly-income {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .title-monthly-income-trigger {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 7px;
+  }
+
+  .title-pause {
+    width: 32px;
+  }
+
+  .title-month {
+    min-width: 0;
+    padding-inline: 4px;
+  }
+
+  .title-month-copy small {
+    display: none;
+  }
+
+  .title-bar:has(
+    [data-tutorial-region="contacts-counter"][data-tutorial-treatment="focus"]
+  ) .title-resources > [data-tutorial-region="contacts-counter"] {
+    display: grid;
+  }
+
+  .title-bar:has(
+    [data-tutorial-region="contacts-counter"][data-tutorial-treatment="focus"]
+  ) .title-balance,
+  .title-bar:has(
+    [data-tutorial-region="contacts-counter"][data-tutorial-treatment="focus"]
+  ) .title-monthly-income {
+    display: none;
+  }
 }
 
 .command-bar {

@@ -10,9 +10,11 @@ import {
   needsCourseXRecovery,
 } from "../content/forms";
 import {
+  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
   getEquipmentPreparedWorkMaximum,
   getEquipmentSwordRepairWork,
+  getInstructorBranchCapacityBonus,
   getUpgradeEffectTotal,
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
@@ -536,6 +538,7 @@ export function processAutomaticTeaching(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
   const collaboratorContactIds = new Set(
     state.collaborators.map((collaborator) => collaborator.contactId),
   );
@@ -584,7 +587,7 @@ export function processAutomaticTeaching(
   }
   const automaticFormCandidates = new Map(students.map((student) => [
     student.id,
-    getAutomaticFormCandidates(student, courseXUnlocked),
+    getAutomaticFormCandidates(student, courseXUnlocked, unrestrictedFormBranches),
   ]));
   const qualifiedFormCandidates = new Map(students.map((student) => [
     student.id,
@@ -596,8 +599,8 @@ export function processAutomaticTeaching(
           student,
           definition,
           trainingYear,
-          undefined,
-          undefined,
+          unrestrictedFormBranches ? 3 : undefined,
+          !unrestrictedFormBranches,
           annualTrainingLimit,
           courseXUnlocked,
         ) &&
@@ -611,10 +614,9 @@ export function processAutomaticTeaching(
         collaborator.assignment !== "instructor" ||
         pendingReleaseIds.has(collaborator.id)
       ) return false;
-      const branchCapacity = Math.min(
-        3,
-        1 + (state.upgrades["instructor-versatility"] ?? 0),
-      );
+      const branchCapacity = unrestrictedFormBranches
+        ? 3
+        : Math.min(3, 1 + getInstructorBranchCapacityBonus(state.upgrades));
       return FORM_DEFINITIONS.some((definition) => canTrainForm(
         collaborator,
         definition,

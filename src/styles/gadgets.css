@@ -354,7 +354,7 @@
     var(--gadget-rarity-color) 20%,
     rgb(255 255 255 / 7%)
   );
-  --gadget-note-surface: color-mix(in srgb, var(--gadget-rarity-color) 24%, #0a1a29);
+  --gadget-note-surface: color-mix(in srgb, var(--gadget-rarity-color) 36%, #0a1a29);
   position: relative;
   display: grid;
   min-height: 0;
@@ -566,6 +566,7 @@
   background-image: url("/gadget-assets/process/command-phases.webp");
   background-repeat: no-repeat;
   background-size: 200% 200%;
+  filter: var(--gadget-image-filter, grayscale(1) contrast(0.95));
   opacity: 0.94;
   content: "";
 }
@@ -708,7 +709,11 @@
   gap: 4px;
   justify-self: center;
   color: white;
-  background: rgb(4 19 34 / 92%);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--gadget-rarity-color) 70%, #314052),
+    color-mix(in srgb, var(--gadget-rarity-color) 42%, #041322)
+  );
   border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 68%, white);
   border-radius: 50%;
   box-shadow:

@@ -1,4 +1,4 @@
-import { BRANCH_FORM_IDS } from "../content/forms";
+import { BRANCH_FORM_IDS, FORM_BRANCHES } from "../content/forms";
 import type { FormBranch, FormId } from "./types";
 
 export function getFormProgressionRank(formId: FormId): number {
@@ -16,7 +16,7 @@ export function getFormProgressionRank(formId: FormId): number {
 export function getAutomaticFormCandidates(student: {
   forms: FormId[];
   formBranchPreferences?: FormBranch[];
-}, courseXUnlocked = true): FormId[] {
+}, courseXUnlocked = true, unrestrictedFormBranches = false): FormId[] {
   const core: FormId[] = courseXUnlocked
     ? ["form-1", "course-x", "form-2", "course-y"]
     : ["form-1", "form-2", "course-y"];
@@ -31,8 +31,10 @@ export function getAutomaticFormCandidates(student: {
   if (completedFormFive && !student.forms.includes("form-6")) return ["form-6"];
   if (completedFormFive && !student.forms.includes("form-7")) return ["form-7"];
 
-  const preferredBranches = student.formBranchPreferences ?? [];
-  const orderedBranches = preferredBranches.slice().sort((left, right) => {
+  const eligibleBranches = unrestrictedFormBranches
+    ? FORM_BRANCHES
+    : student.formBranchPreferences ?? [];
+  const orderedBranches = eligibleBranches.slice().sort((left, right) => {
     const startedLeft = BRANCH_FORM_IDS[left].some((formId) => student.forms.includes(formId));
     const startedRight = BRANCH_FORM_IDS[right].some((formId) => student.forms.includes(formId));
     return Number(startedRight) - Number(startedLeft);

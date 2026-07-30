@@ -1294,7 +1294,7 @@ describe("game engine: progression", () => {
     expect(new Set(preferences).size).toBe(preferences.length);
   });
 
-  it("uses Polivalenza didattica to unlock additional Instructor weapon branches", () => {
+  it("keeps the original Master of none branch unlocks for Instructors", () => {
     const initial = createInitialState(1_000);
     const instructor = {
       id: "versatile-instructor",
@@ -1334,6 +1334,56 @@ describe("game engine: progression", () => {
     expect(blocked).toBe(ready);
     expect(unlocked.collaborators[0].training?.formId).toBe("form-3-staff");
     expect(unlocked.school.euros).toBe(1_500);
+  });
+
+  it("unlocks every weapon branch for all students at Master of none level five", () => {
+    const initial = createInitialState(1_000);
+    const member = {
+      ...initial.contacts[0],
+      id: "versatile-student",
+      status: "enrolled" as const,
+      forms: ["form-1", "course-x", "form-2", "course-y"] as FormId[],
+      formBranchPreferences: ["Spada Lunga" as const],
+      lastFormTrainingYear: 1,
+    };
+    const instructor = {
+      id: "staff-instructor",
+      contactId: "external-staff-instructor",
+      displayName: "Istruttore Staffa",
+      joinedAt: 1_000,
+      forms: ["form-3-staff"] as FormId[],
+      instructorForms: ["form-3-staff"] as FormId[],
+      formBranchPreferences: ["Staffa" as const],
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, currentMonth: 21, euros: 5_000 },
+      shortGoal: { ...initial.shortGoal, isActive: false },
+      contacts: [member],
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+    const blocked = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: member.id,
+      formId: "form-3-staff",
+      now: 2_000,
+    });
+    const unlocked = gameReducer({
+      ...ready,
+      upgrades: { ...ready.upgrades, "instructor-versatility": 5 },
+    }, {
+      type: "START_FORM_TRAINING",
+      personId: member.id,
+      formId: "form-3-staff",
+      now: 2_000,
+    });
+
+    expect(blocked).toBe(ready);
+    expect(unlocked.contacts[0].training?.formId).toBe("form-3-staff");
+    expect(unlocked.school.euros).toBe(4_250);
   });
 
   it("creates an Ultra Rare collaborator at Course Y and applies rarity bonuses", () => {
