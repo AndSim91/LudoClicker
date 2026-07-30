@@ -9,6 +9,10 @@ const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
   hoodie: "/gadget-assets/felpa.webp",
 };
 
+const PROCESS_STAGES = ["concept", "logo", "render", "prototype"] as const;
+
+export type GadgetProcessStage = (typeof PROCESS_STAGES)[number];
+
 export function GadgetProductArtwork({
   productId,
   rarity = "common",
@@ -38,17 +42,49 @@ export function GadgetProductArtwork({
   );
 }
 
+export function GadgetProcessArtwork({
+  productId,
+  activeStage,
+}: {
+  productId: GadgetProductId;
+  activeStage: number;
+}) {
+  return (
+    <div className="gadget-process-artwork" aria-hidden="true">
+      {PROCESS_STAGES.map((stage, index) => (
+        <span
+          className={`gadget-process-product-stage is-${stage} ${
+            index < activeStage
+              ? "is-complete"
+              : index === activeStage
+                ? "is-active"
+                : "is-upcoming"
+          }`}
+          key={stage}
+        >
+          <img
+            src={PRODUCT_ARTWORK_URLS[productId]}
+            alt=""
+            width="512"
+            height="512"
+            decoding="async"
+            draggable={false}
+          />
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function GadgetWorkshopArtwork() {
   return (
-    <svg
-      className="gadget-workshop-artwork"
-      viewBox="0 0 440 128"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg className="gadget-workshop-artwork" viewBox="0 0 440 128" fill="none" aria-hidden="true">
       <g stroke="currentColor" strokeWidth="1">
         <path d="M0 18h440M0 46h440M0 74h440M0 102h440" opacity=".16" />
-        <path d="M28 0v128M84 0v128M140 0v128M196 0v128M252 0v128M308 0v128M364 0v128M420 0v128" opacity=".12" />
+        <path
+          d="M28 0v128M84 0v128M140 0v128M196 0v128M252 0v128M308 0v128M364 0v128M420 0v128"
+          opacity=".12"
+        />
         <path d="m238 15 112 88" opacity=".28" />
         <path d="m254 7 112 88" opacity=".18" />
       </g>
@@ -56,7 +92,11 @@ export function GadgetWorkshopArtwork() {
         <path d="m310 95 75-76 11 11-75 76-22 10 11-21Z" strokeWidth="2.2" opacity=".42" />
         <path d="m310 95 11 11M385 19l11 11" strokeWidth="1.5" opacity=".3" />
         <path d="m191 91 24-68 86 30-24 68-86-30Z" strokeWidth="2" opacity=".32" />
-        <path d="m209 86 4-12m8 15 4-12m8 15 4-12m8 15 4-12m8 15 4-12" strokeWidth="1.5" opacity=".3" />
+        <path
+          d="m209 86 4-12m8 15 4-12m8 15 4-12m8 15 4-12m8 15 4-12"
+          strokeWidth="1.5"
+          opacity=".3"
+        />
       </g>
     </svg>
   );

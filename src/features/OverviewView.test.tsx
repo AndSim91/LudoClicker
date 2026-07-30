@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../game/engine";
 import { CrashReporter } from "../game/crashReporting";
@@ -35,16 +35,24 @@ describe("OverviewView settings", () => {
     expect(callbacks.onReset).toHaveBeenCalledOnce();
   });
 
-  it("imports pasted JSON and reports success", () => {
+  it("imports a selected JSON file and reports success", async () => {
     render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Incolla qui il contenuto esportato"), {
-      target: { value: '{"version":11}' },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Importa salvataggio" }));
+    const input = screen.getByLabelText("File JSON");
+    const file = new File(['{"version":11}'], "salvataggio.json", { type: "application/json" });
+    const importButton = screen.getByRole("button", { name: "Importa salvataggio" });
 
-    expect(callbacks.onImport).toHaveBeenCalledWith('{"version":11}');
+    expect(input).toHaveAttribute("accept", ".json,application/json");
+    expect(importButton).toBeDisabled();
+    fireEvent.change(input, {
+      target: { files: [file] },
+    });
+    expect(importButton).toBeEnabled();
+    fireEvent.click(importButton);
+
+    await waitFor(() => expect(callbacks.onImport).toHaveBeenCalledWith('{"version":11}'));
     expect(screen.getByText("Salvataggio importato correttamente.")).toBeInTheDocument();
+    expect(importButton).toBeDisabled();
   });
 
   it("updates the email signature name", () => {

@@ -16,21 +16,20 @@ export function LevelZeroProofreadText({
   let cursor = 0;
 
   ranges.forEach((range) => {
-    if (range.start >= visibleLength) return;
+    if (range.end > visibleLength) return;
     if (range.start > cursor) {
       content.push(text.slice(cursor, Math.min(range.start, visibleLength)));
     }
-    const end = Math.min(range.end, visibleLength);
     content.push(
       <span
         key={`${range.start}-${range.end}`}
         className="level-zero-grammar-error"
         title="Possibile errore grammaticale"
       >
-        {text.slice(range.start, end)}
+        {text.slice(range.start, range.end)}
       </span>,
     );
-    cursor = end;
+    cursor = range.end;
   });
 
   if (cursor < visibleLength) content.push(text.slice(cursor, visibleLength));

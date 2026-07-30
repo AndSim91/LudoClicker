@@ -2,7 +2,11 @@
   overflow-y: auto;
   padding-bottom: 48px;
   background:
-    radial-gradient(circle at 92% 0, color-mix(in srgb, var(--school-accent) 9%, transparent), transparent 28%),
+    radial-gradient(
+      circle at 92% 0,
+      color-mix(in srgb, var(--school-accent) 9%, transparent),
+      transparent 28%
+    ),
     var(--surface);
 }
 
@@ -16,7 +20,7 @@
 
 .gadget-overview {
   display: grid;
-  grid-template-columns: minmax(150px, .75fr) minmax(150px, .75fr) minmax(260px, 1.5fr);
+  grid-template-columns: minmax(150px, 0.75fr) minmax(150px, 0.75fr) minmax(260px, 1.5fr);
   max-width: 1160px;
   margin: 22px 0 26px;
   border: 1px solid var(--line);
@@ -43,7 +47,7 @@
   color: var(--ink-muted);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -113,7 +117,7 @@
   border-radius: 50%;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: .06em;
+  letter-spacing: 0.06em;
 }
 
 .is-locked .gadget-product-symbol {
@@ -323,7 +327,7 @@
 .gadget-minigame-shell > header .gadget-minigame-rarity {
   color: color-mix(in srgb, var(--gadget-rarity-color) 58%, white);
   font-weight: 700;
-  letter-spacing: .045em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
@@ -345,6 +349,12 @@
 }
 
 .gadget-rhythm-board {
+  --gadget-blueprint-line: color-mix(
+    in srgb,
+    var(--gadget-rarity-color) 20%,
+    rgb(255 255 255 / 7%)
+  );
+  --gadget-note-surface: color-mix(in srgb, var(--gadget-rarity-color) 24%, #0a1a29);
   position: relative;
   display: grid;
   min-height: 0;
@@ -353,52 +363,344 @@
   touch-action: none;
   user-select: none;
   background:
+    radial-gradient(
+      circle at 50% 78%,
+      color-mix(in srgb, var(--gadget-rarity-color) 18%, transparent),
+      transparent 36%
+    ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--gadget-rarity-color) 9%, rgb(6 19 36 / 78%)),
-      color-mix(in srgb, var(--gadget-rarity-color) 28%, rgb(7 23 40 / 94%))
+      color-mix(in srgb, var(--gadget-rarity-color) 8%, rgb(5 18 34 / 94%)),
+      color-mix(in srgb, var(--gadget-rarity-color) 22%, rgb(5 21 39 / 98%))
     ),
-    repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgb(255 255 255 / 7%) calc(25% - 1px) 25%);
+    linear-gradient(var(--gadget-blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gadget-blueprint-line) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    22px 22px,
+    22px 22px;
+}
+
+.gadget-process-artwork,
+.gadget-design-stages {
+  position: absolute;
+  inset: 0 0 18%;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  pointer-events: none;
+}
+
+.gadget-process-artwork {
+  z-index: 1;
+}
+
+.gadget-process-product-stage {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  opacity: 0.64;
+  transition:
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.gadget-process-product-stage.is-active {
+  opacity: 1;
+}
+
+.gadget-process-product-stage.is-upcoming {
+  opacity: 0.2;
+  filter: saturate(0.35);
+}
+
+.gadget-process-product-stage img {
+  display: block;
+  width: min(49%, 330px);
+  height: auto;
+  max-height: 184%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(ellipse 58% 48% at center, #000 44%, transparent 100%);
+  mask-image: radial-gradient(ellipse 58% 48% at center, #000 44%, transparent 100%);
+  pointer-events: none;
+}
+
+.gadget-process-product-stage.is-concept img {
+  opacity: 0.18;
+  filter: grayscale(1) invert(1) contrast(2.15) brightness(0.76);
+}
+
+.gadget-process-product-stage.is-logo img {
+  opacity: 0.2;
+  filter: grayscale(1) invert(1) contrast(2.45) brightness(0.82);
+}
+
+.gadget-process-product-stage.is-render img {
+  opacity: 0.24;
+  filter: grayscale(1) invert(1) sepia(0.35) saturate(2.2) hue-rotate(160deg) contrast(1.65)
+    brightness(0.9);
+}
+
+.gadget-process-product-stage.is-prototype img {
+  opacity: 0.3;
+  filter: grayscale(0.82) invert(1) sepia(0.4) saturate(2.8) hue-rotate(160deg) contrast(1.5)
+    brightness(0.96);
+}
+
+.gadget-design-stages {
+  z-index: 2;
+}
+
+.gadget-design-stages::before {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 16px;
+  width: 1px;
+  background: color-mix(in srgb, var(--gadget-rarity-color) 52%, rgb(255 255 255 / 22%));
+  content: "";
+}
+
+.gadget-design-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 14px;
+  border-bottom: 1px dashed
+    color-mix(in srgb, var(--gadget-rarity-color) 20%, rgb(255 255 255 / 10%));
+}
+
+.gadget-design-stage:last-child {
+  border-bottom: 0;
+}
+
+.gadget-design-stage-dot {
+  position: relative;
+  z-index: 1;
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  background: #7893ad;
+  border: 1px solid #b7c9d9;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgb(6 20 35 / 76%);
+}
+
+.gadget-design-stage-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 7px;
+  padding: 3px 5px;
+  color: #7893ad;
+  background: rgb(6 20 35 / 62%);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.gadget-design-stage-label .gadget-stage-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.gadget-design-stage.is-active .gadget-design-stage-dot {
+  background: color-mix(in srgb, var(--gadget-rarity-color) 60%, white);
+  border-color: white;
+  box-shadow:
+    0 0 0 3px rgb(6 20 35 / 80%),
+    0 0 13px color-mix(in srgb, var(--gadget-rarity-color) 82%, transparent);
+}
+
+.gadget-design-stage.is-active .gadget-design-stage-label {
+  color: color-mix(in srgb, var(--gadget-rarity-color) 56%, white);
+}
+
+.gadget-design-stage.is-complete .gadget-design-stage-dot {
+  background: color-mix(in srgb, var(--gadget-rarity-color) 36%, #8299ad);
 }
 
 .gadget-rhythm-lane {
+  position: relative;
+  z-index: 3;
   border-right: 1px solid rgb(255 255 255 / 8%);
 }
 
 .gadget-target-line {
   position: absolute;
+  z-index: 6;
   right: 0;
   top: 82%;
   left: 0;
   height: 3px;
   background: color-mix(in srgb, var(--gadget-rarity-color) 68%, white);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--gadget-rarity-color) 74%, transparent);
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--gadget-rarity-color) 74%, transparent),
+    0 8px 24px rgb(0 0 0 / 42%);
 }
 
 .gadget-falling-note {
   position: absolute;
-  z-index: 3;
+  z-index: 7;
   top: var(--note-top);
   left: var(--note-left);
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   place-items: center;
   padding: 0;
   color: white;
-  background: color-mix(in srgb, var(--gadget-rarity-color) 72%, #13293c);
-  border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 45%, white);
-  border-radius: 12px;
-  box-shadow: 0 7px 20px rgb(0 0 0 / 35%), 0 0 14px color-mix(in srgb, var(--gadget-rarity-color) 48%, transparent);
+  background: var(--gadget-note-surface);
+  border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 48%, white);
+  border-radius: 11px;
+  box-shadow:
+    0 7px 20px rgb(0 0 0 / 40%),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 0 13px color-mix(in srgb, var(--gadget-rarity-color) 42%, transparent);
   transform: translate(-50%, -50%);
-  font-size: 22px;
-  font-weight: 800;
   touch-action: none;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.gadget-falling-note::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.58;
+  content: "";
+}
+
+.gadget-falling-note.is-concept::before {
+  background: repeating-linear-gradient(-14deg, transparent 0 6px, rgb(255 255 255 / 12%) 6px 7px);
+}
+
+.gadget-falling-note.is-logo::before {
+  background:
+    radial-gradient(circle at 22% 24%, rgb(255 255 255 / 24%) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 74%, rgb(255 255 255 / 24%) 0 1px, transparent 2px);
+}
+
+.gadget-falling-note.is-render::before {
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 20%),
+    transparent 44% 62%,
+    rgb(0 0 0 / 16%)
+  );
+}
+
+.gadget-falling-note.is-prototype::before {
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 5px);
+}
+
+.gadget-note-arrow {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 70%));
+}
+
+.gadget-direction-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gadget-note-stage-mark {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  color: color-mix(in srgb, var(--gadget-rarity-color) 42%, white);
+  opacity: 0.72;
+}
+
+.gadget-note-stage-mark .gadget-stage-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.gadget-hit-burst {
+  position: absolute;
+  z-index: 7;
+  top: 82%;
+  left: var(--hit-left);
+  width: 58px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.gadget-hit-burst::before {
+  position: absolute;
+  right: 3px;
+  bottom: 0;
+  left: 3px;
+  height: 5px;
+  background: color-mix(in srgb, var(--gadget-rarity-color) 66%, white);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--gadget-rarity-color) 82%, transparent);
+  animation: gadget-material-deposit 340ms ease-out both;
+  content: "";
+}
+
+.gadget-hit-burst i {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: color-mix(in srgb, var(--gadget-rarity-color) 48%, white);
+  box-shadow: 0 0 8px currentColor;
+  animation: gadget-material-spark 420ms ease-out both;
+}
+
+.gadget-hit-burst i:nth-child(2) {
+  animation-delay: 35ms;
+  --spark-x: -19px;
+}
+
+.gadget-hit-burst i:nth-child(3) {
+  animation-delay: 65ms;
+  --spark-x: 19px;
+}
+
+@keyframes gadget-material-deposit {
+  from {
+    opacity: 1;
+    transform: scaleX(0.14);
+  }
+  to {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes gadget-material-spark {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--spark-x, 0px)), -22px) scale(0.35);
+  }
 }
 
 .gadget-lane-controls {
   position: absolute;
-  z-index: 4;
+  z-index: 8;
   top: 82%;
   right: 0;
   left: 0;
@@ -417,16 +719,21 @@
   gap: 4px;
   justify-self: center;
   color: white;
-  background: rgb(4 19 34 / 86%);
+  background: rgb(4 19 34 / 92%);
   border: 2px solid color-mix(in srgb, var(--gadget-rarity-color) 68%, white);
   border-radius: 50%;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gadget-rarity-color) 18%, transparent);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--gadget-rarity-color) 18%, transparent),
+    0 9px 20px rgb(0 0 0 / 36%);
   pointer-events: auto;
   touch-action: none;
 }
 
 .gadget-lane-controls strong {
-  font-size: 21px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
 }
 
 .gadget-lane-controls span {
@@ -437,7 +744,7 @@
 .gadget-countdown,
 .gadget-judgment {
   position: absolute;
-  z-index: 5;
+  z-index: 9;
   top: 39%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -512,7 +819,7 @@
   color: var(--gadget-rarity-color);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: .07em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -628,9 +935,47 @@
     gap: 3px 9px;
   }
 
+  .gadget-process-product-stage img {
+    width: min(66%, 260px);
+    max-height: 176%;
+  }
+
+  .gadget-design-stages::before {
+    left: 8px;
+  }
+
+  .gadget-design-stage {
+    padding-left: 6px;
+  }
+
+  .gadget-design-stage-label {
+    gap: 3px;
+    margin-left: 5px;
+    padding: 2px 3px;
+    font-size: 7px;
+    letter-spacing: 0.035em;
+  }
+
+  .gadget-design-stage-label .gadget-stage-icon {
+    width: 10px;
+    height: 10px;
+  }
+
   .gadget-falling-note {
     width: 46px;
     height: 46px;
+  }
+
+  .gadget-note-arrow {
+    width: 28px;
+    height: 28px;
+  }
+
+  .gadget-note-stage-mark {
+    top: 3px;
+    right: 3px;
+    width: 11px;
+    height: 11px;
   }
 
   .gadget-lane-controls button {
@@ -655,5 +1000,17 @@
     align-content: center;
     border: 0;
     border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gadget-process-product-stage {
+    transition: none;
+  }
+
+  .gadget-hit-burst::before,
+  .gadget-hit-burst i {
+    animation: none;
+    opacity: 0;
   }
 }

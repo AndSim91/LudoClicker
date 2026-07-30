@@ -2036,7 +2036,7 @@ describe("PeopleView", () => {
     );
   });
 
-  it("offers an Instructor collaborator only the next student Form in the members list", () => {
+  it("hides manual Form controls from an Instructor collaborator while an instructor is assigned", () => {
     const initial = createInitialState(1_000);
     const enrolled = {
       ...initial.contacts[0],
@@ -2082,12 +2082,9 @@ describe("PeopleView", () => {
     expect(trainingCell).not.toHaveTextContent("Forma 1");
     expect(trainingCell).not.toHaveTextContent("Corso Istruttori");
     expect(trainingCell).not.toHaveTextContent("Qualifica inclusa");
-    fireEvent.click(within(trainingCell!).getByRole("button", { name: /Paga e avvia/ }));
-    expect(onStartTraining).toHaveBeenCalledWith(
-      "instructor-member",
-      "form-2",
-      "student-only",
-    );
+    expect(within(trainingCell!).queryByRole("button", { name: /Paga e avvia/ })).not.toBeInTheDocument();
+    expect(within(trainingCell!).queryByRole("radio")).not.toBeInTheDocument();
+    expect(onStartTraining).not.toHaveBeenCalled();
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {

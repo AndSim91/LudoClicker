@@ -74,6 +74,29 @@ describe("CampaignEmailContent", () => {
     ).toEqual(["perchè", "provore", "Udosport"]);
   });
 
+  it("waits for an incorrect word to be fully typed before marking it", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const body = "Ciao Nome, puoi provore questo sport.";
+    const email = {
+      ...initial.emails[0],
+      body,
+      presentationLevel: 0 as const,
+    };
+    const errorEnd = body.indexOf("provore") + "provore".length;
+    const { container, rerender } = render(
+      <CampaignEmailContent email={email} revealedCharacters={errorEnd - 1} />,
+    );
+
+    expect(container.querySelector(".level-zero-grammar-error")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Email in formato Bozza disastrata")).toHaveTextContent(
+      body.slice(0, errorEnd - 1),
+    );
+
+    rerender(<CampaignEmailContent email={email} revealedCharacters={errorEnd} />);
+
+    expect(container.querySelector(".level-zero-grammar-error")).toHaveTextContent("provore");
+  });
+
   it("renders catalog 2 as plain text with its complete signature", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const body = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 2);

@@ -733,7 +733,7 @@ export function TrainingControl({
     return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Percorso completato alla {latestForm?.longName ?? "ultima Forma"}</strong></div>;
   }
 
-  if (!collaborator && hasAssignedInstructor) {
+  if (hasAssignedInstructor && (variant === "roster" || !collaborator)) {
     return (
       <div className={`training-future${variantClass}`}>
         <span>

@@ -1,11 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/initialState";
-import type {
-  GadgetProductState,
-  GadgetRarityState,
-  GameState,
-} from "../../game/types";
+import type { GadgetProductState, GadgetRarityState, GameState } from "../../game/types";
 import { GadgetProductArtwork } from "./GadgetArtwork";
 import { GadgetsView } from "./GadgetsView";
 
@@ -13,6 +9,9 @@ vi.mock("./GadgetArtwork", () => ({
   GadgetProductArtwork: vi.fn(({ productId }: { productId: string }) => (
     <div data-testid={`gadget-artwork-${productId}`} />
   )),
+  GadgetProcessArtwork: ({ productId }: { productId: string }) => (
+    <div data-testid={`gadget-process-artwork-${productId}`} />
+  ),
   GadgetWorkshopArtwork: () => <div data-testid="gadget-workshop-artwork" />,
 }));
 
@@ -244,20 +243,20 @@ describe("GadgetsView", () => {
       name: "Progresso verso lo sblocco sicuro di Raro",
     });
     expect(rail).toHaveAttribute("aria-valuenow", "38.5");
-    expect(rail.style.getPropertyValue("--gadget-current-rarity-color"))
-      .toBe("var(--rarity-common-accent)");
-    expect(rail.style.getPropertyValue("--gadget-next-rarity-color"))
-      .toBe("var(--rarity-rare-accent)");
-    expect(rail.style.getPropertyValue("--gadget-rarity-progress"))
-      .toBe("38.5%");
+    expect(rail.style.getPropertyValue("--gadget-current-rarity-color")).toBe(
+      "var(--rarity-common-accent)",
+    );
+    expect(rail.style.getPropertyValue("--gadget-next-rarity-color")).toBe(
+      "var(--rarity-rare-accent)",
+    );
+    expect(rail.style.getPropertyValue("--gadget-rarity-progress")).toBe("38.5%");
     expect(rail).toHaveAttribute("tabindex", "0");
     const tooltip = screen.getByRole("tooltip", {
       name: "Possibilità di salto a Raro: 38,5%",
     });
     expect(rail).toHaveAttribute("aria-describedby", tooltip.id);
     expect(rail.querySelector(".gadget-product-rail-fill")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Migliora qualità/ }))
-      .not.toHaveAttribute("style");
+    expect(screen.getByRole("button", { name: /Migliora qualità/ })).not.toHaveAttribute("style");
   });
 
   it("announces the offered rarity in the rhythm game without showing its chance", () => {
@@ -288,6 +287,14 @@ describe("GadgetsView", () => {
 
     expect(screen.getByText("Occasione: Raro")).toBeVisible();
     expect(screen.getByRole("dialog", { name: "Polsino" })).toHaveClass("rarity-rare");
+    expect(screen.getByTestId("gadget-process-artwork-wristband")).toBeInTheDocument();
+    expect(screen.getByText("Concept")).toBeVisible();
+    expect(screen.getByText("Logo")).toBeVisible();
+    expect(screen.getByText("Render 3D")).toBeVisible();
+    expect(screen.getByText("Prototipo")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Corsia 1: ← oppure A" }).querySelector("svg"),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
   });
 });

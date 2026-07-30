@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
@@ -47,14 +47,28 @@ export function OverviewView({
 }: OverviewViewProps) {
   const state = useGameStateSlices(["profile", "version"], stateOverride);
   const [title, subtitle] = titles[view];
-  const [importText, setImportText] = useState("");
+  const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState("");
+  const importInputRef = useRef<HTMLInputElement>(null);
   const [resetArmed, setResetArmed] = useState(false);
 
-  const importSave = () => {
-    const success = onImport(importText);
-    setImportStatus(success ? "Salvataggio importato correttamente." : "Il testo non contiene un salvataggio valido.");
-    if (success) setImportText("");
+  const importSave = async () => {
+    if (!importFile) return;
+
+    let raw: string;
+    try {
+      raw = await importFile.text();
+    } catch {
+      setImportStatus("Impossibile leggere il file selezionato.");
+      return;
+    }
+
+    const success = onImport(raw);
+    setImportStatus(success ? "Salvataggio importato correttamente." : "Il file non contiene un salvataggio valido.");
+    if (success) {
+      setImportFile(null);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
   };
 
   const reset = () => {
@@ -107,8 +121,8 @@ export function OverviewView({
               <details className="settings-import-row">
                 <summary><span><strong>Importa salvataggio</strong><small>Ripristina una copia esportata in precedenza.</small></span><Icon name="chevron" /></summary>
                 <div className="settings-import-content">
-                  <label className="import-field"><span>Contenuto JSON</span><textarea value={importText} onChange={(event) => setImportText(event.target.value)} placeholder="Incolla qui il contenuto esportato" /></label>
-                  <button type="button" className="secondary" disabled={!importText.trim()} onClick={importSave}>Importa salvataggio</button>
+                  <label className="import-field"><span>File JSON</span><input ref={importInputRef} type="file" accept=".json,application/json" onChange={(event) => { setImportFile(event.target.files?.[0] ?? null); setImportStatus(""); }} /></label>
+                  <button type="button" className="secondary" disabled={!importFile} onClick={importSave}>Importa salvataggio</button>
                   {importStatus ? <p role="status" className="settings-status">{importStatus}</p> : null}
                 </div>
               </details>
