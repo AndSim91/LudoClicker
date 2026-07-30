@@ -141,6 +141,128 @@
   white-space: nowrap;
 }
 
+.title-monthly-income {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  margin: 0 4px;
+}
+
+.title-monthly-income-trigger {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  grid-template-rows: 1fr 1fr;
+  min-width: 132px;
+  max-width: 172px;
+  height: 26px;
+  align-items: center;
+  column-gap: 6px;
+  padding: 2px 9px;
+  border: 1px solid rgb(188 238 205 / 58%);
+  border-radius: 6px;
+  color: white;
+  background: rgb(23 141 70 / 34%);
+  cursor: help;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: left;
+}
+
+.title-monthly-income-trigger:hover,
+.title-monthly-income-trigger:focus-visible {
+  border-color: rgb(215 250 226 / 82%);
+  background: rgb(23 141 70 / 48%);
+}
+
+.title-monthly-income-trigger:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 1px;
+}
+
+.title-monthly-income-trigger svg {
+  grid-row: 1 / -1;
+  width: 16px;
+  height: 16px;
+  color: #bceecd;
+}
+
+.title-monthly-income-trigger small {
+  color: rgb(230 255 238 / 88%);
+  font-size: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.title-monthly-income-trigger strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title-monthly-income-tooltip {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  right: 0;
+  width: max-content;
+  min-width: 230px;
+  max-width: calc(100vw - 32px);
+  padding: 11px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow-flyout);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+  visibility: hidden;
+}
+
+.title-monthly-income:hover .title-monthly-income-tooltip,
+.title-monthly-income:focus-within .title-monthly-income-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.title-monthly-income-tooltip p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.title-monthly-income-tooltip dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.title-monthly-income-tooltip dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.title-monthly-income-tooltip dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.title-monthly-income-tooltip dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .title-equipment {
   display: grid;
   min-width: 104px;

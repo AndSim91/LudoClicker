@@ -39,7 +39,8 @@ export type UpgradeEffect =
   | "incomeMultiplier"
   | "operationalPrioritiesUnlock"
   | "annualFormCapacity"
-  | "instructorBranchCapacity"
+  | "trainingExamSuccessChance"
+  | "unrestrictedFormBranches"
   | "instructorStudentCapacity"
   | "instructorTeachingSpeed"
   | "agonistCourseTier"
@@ -161,8 +162,28 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
 
   // Insegnamento
   { id: "technical-arena", category: "instructors", title: "Percorso Tecnico", description: "Sblocca Arena Tecnica e ne riduce progressivamente la durata.", effectLabel: "L1 Arena Tecnica · L2 durata 120→100 s · L3 durata 100→80 s · L4 durata 80→60 s · L5 durata 60→40 s", effect: "agonistCourseTier", effectPerLevel: 1, baseCost: 1_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000, 2_000, 5_000, 7_500, 10_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: {} },
-  { id: "instructor-versatility", category: "instructors", title: "Master of none", description: "Permette agli Istruttori di apprendere rami d'arma oltre le preferenze iniziali.", effectLabel: "+1 ramo d'arma accessibile per livello", effect: "instructorBranchCapacity", effectPerLevel: 1, baseCost: 2_000, costGrowth: LEVEL_GROWTH, levelCosts: [2_000, 4_000], networkCostGrowth: 0, maxLevel: 2, requiredFame: noFame, requiredUpgradeLevels: { "technical-arena": 1 } },
-  { id: "sis-accreditation", category: "instructors", title: "Tu conosci la SIS?", description: "Attiva le candidature alla Scuola Internazionale Superiore e accelera gradualmente i Corsi Tecnici.", effectLabel: "L1 candidature SIS · L2 +10% velocità · L3 +20% · L4 +30%", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, effectLevelCap: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { "instructor-versatility": 2 } },
+  {
+    id: "instructor-versatility",
+    category: "instructors",
+    title: "Master of none",
+    description: "Aumenta la probabilità di superare gli esami e, al livello massimo, libera la scelta dei rami d'arma dopo Corso Y.",
+    effectLabel: "L1 +10 punti percentuali agli esami · L2 +20 · L3 tutti i rami dopo Corso Y",
+    effect: "trainingExamSuccessChance",
+    effectPerLevel: 0,
+    effectsByLevel: [
+      { trainingExamSuccessChance: 0.1 },
+      { trainingExamSuccessChance: 0.1 },
+      { unrestrictedFormBranches: 1 },
+    ],
+    baseCost: 2_000,
+    costGrowth: LEVEL_GROWTH,
+    levelCosts: [2_000, 4_000, 8_000],
+    networkCostGrowth: 0,
+    maxLevel: 3,
+    requiredFame: noFame,
+    requiredUpgradeLevels: { "technical-arena": 1 },
+  },
+  { id: "sis-accreditation", category: "instructors", title: "Tu conosci la SIS?", description: "Attiva le candidature alla Scuola Internazionale Superiore e accelera gradualmente i Corsi Tecnici.", effectLabel: "L1 candidature SIS · L2 +10% velocità · L3 +20% · L4 +30%", effect: "sisTechnicianCourseUnlock", effectPerLevel: 1, effectLevelCap: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000], networkCostGrowth: 0, maxLevel: 4, requiredFame: noFame, requiredUpgradeLevels: { "instructor-versatility": 3 } },
   { id: "cost-of-service", category: "instructors", title: "Il costo del Servizio", description: "Riduce il costo dei percorsi che assegnano un attestato da Istruttore o una qualifica da Tecnico.", effectLabel: "−5% costo dei corsi Istruttori/Tecnici per livello · massimo −25%", effect: "courseCostReduction", effectPerLevel: 0.05, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 25_000, 50_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUpgradeLevels: { "sis-accreditation": 1 } },
   { id: "promiscuous-instructor", category: "instructors", title: "Didattica di gruppo", description: "Aumenta fino a sei gli allievi seguiti contemporaneamente; l'ultimo livello concede un secondo corso annuale.", effectLabel: "L1–L5: capacità 2→6 allievi · L6: +1 corso annuale", effect: "instructorStudentCapacity", effectPerLevel: 1, effectLevelCap: 5, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 6, requiredFame: noFame, requiredUpgradeLevels: { "cost-of-service": 2 } },
   { id: "athletic-preparation", category: "instructors", title: "Preparazione agonistica", description: "Voce storica accorpata in Nessun Rancore.", effectLabel: "Effetto trasferito", effect: "legacy", effectPerLevel: 0, baseCost: 0, costGrowth: LEVEL_GROWTH, maxLevel: 5, requiredFame: noFame, hidden: true },
@@ -340,6 +361,14 @@ export function getUpgradeEffectMaximum(effect: UpgradeEffect): number {
       getDefinitionEffectTotal(definition, definition.maxLevel, effect),
     0,
   );
+}
+
+export function getTrainingExamSuccessChanceBonus(levels: UpgradeLevels): number {
+  return getUpgradeEffectTotal(levels, "trainingExamSuccessChance");
+}
+
+export function areAllFormBranchesUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "unrestrictedFormBranches") > 0;
 }
 
 export function getAnnualFormTrainingLimit(levels: UpgradeLevels): number {

@@ -13,7 +13,6 @@ import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
 import { MemberList } from "./MemberList";
-import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 import { RarityOverview } from "./RarityOverview";
 
 const ignoreFavoriteToggle = () => undefined;
@@ -97,7 +96,6 @@ export function PeopleView({
         <div className="people-page-heading">
           <div className="people-page-title-row">
             <h1>Scuola</h1>
-            <MonthlyIncomeSummary state={stateOverride} />
           </div>
           <p>Iscritti e Collaboratori delle Onde</p>
         </div>

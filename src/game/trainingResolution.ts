@@ -6,7 +6,10 @@ import {
   getTechnicianCourseDuration,
   isAgonistCourse,
 } from "../content/forms";
-import { getAgonistCourseMaximumStatGain } from "../content/upgrades";
+import {
+  getAgonistCourseMaximumStatGain,
+  getTrainingExamSuccessChanceBonus,
+} from "../content/upgrades";
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
 import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
@@ -169,12 +172,23 @@ function replacePersonTraining(
   if (collaborator) updateCollaborator(context, { ...collaborator, training });
 }
 
-function getExamFailureChance(training: FormTraining): number | undefined {
+function getExamFailureChance(
+  state: GameState,
+  training: FormTraining,
+): number | undefined {
   const phase = getTrainingPhase(training);
-  if (phase === "athlete") return 0.55;
-  if (phase === "instructor") return 0.5;
-  if (phase === "technician") return 0.45;
-  return undefined;
+  const baseFailureChance = phase === "athlete"
+    ? 0.55
+    : phase === "instructor"
+      ? 0.5
+      : phase === "technician"
+        ? 0.45
+        : undefined;
+  if (baseFailureChance === undefined) return undefined;
+  return Math.max(
+    0,
+    baseFailureChance - getTrainingExamSuccessChanceBonus(state.upgrades),
+  );
 }
 
 function getFallbackTrainingBaseDuration(training: FormTraining): number {
@@ -197,7 +211,7 @@ function resolveHiddenExam(
   personId: string,
   training: FormTraining,
 ): boolean {
-  const failureChance = getExamFailureChance(training);
+  const failureChance = getExamFailureChance(context.state, training);
   if (failureChance === undefined) return true;
   const [roll, nextSeed] = nextRandom(context.state.randomSeed);
   context.state = { ...context.state, randomSeed: nextSeed };

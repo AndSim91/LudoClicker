@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
+import { createInitialState } from "../../game/engine";
 import { TitleBar } from "./TitleBar";
 import {
   formatCompactCurrency,
@@ -14,6 +15,7 @@ const equipment = {
   damagedSwords: 0,
   wear: 0,
 };
+const monthlyIncomeState = createInitialState(1_000, "Test", false);
 
 afterEach(cleanup);
 
@@ -28,6 +30,7 @@ describe("TitleBar", () => {
         activeMembers={3}
         fame={7}
         euros={120}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -38,6 +41,12 @@ describe("TitleBar", () => {
       formatCompactCurrency(120).replace(/\u00a0/g, " "),
     );
     expect(screen.getByText("Iscritti attivi")).toBeVisible();
+    const availability = screen.getByLabelText(
+      `Disponibilità economica: ${formatExactCurrency(120)}`,
+    );
+    const monthlyIncome = screen.getByRole("button", { name: /^Entrate mensili:/ });
+    expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
+    expect(monthlyIncome).toHaveTextContent("Entrate mensili");
     const fame = screen.getByLabelText("Fama della scuola: 7");
     const equipmentIndicator = screen.getByLabelText(
       "Spade disponibili: 6 su 6; 0 rotte; 0 punti di usura",
@@ -68,6 +77,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={7}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -84,6 +94,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={7}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -105,6 +116,7 @@ describe("TitleBar", () => {
         activeMembers={999_999}
         fame={1_250_000}
         euros={euros}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -133,6 +145,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={0}
         euros={25}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -156,6 +169,7 @@ describe("TitleBar", () => {
         fame={0}
         followers={1_250}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -175,6 +189,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={0}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={() => undefined}
@@ -194,6 +209,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={0}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused={false}
         onTogglePause={onTogglePause}
@@ -212,6 +228,7 @@ describe("TitleBar", () => {
         activeMembers={0}
         fame={0}
         euros={0}
+        monthlyIncomeState={monthlyIncomeState}
         equipment={equipment}
         isPaused
         onTogglePause={onTogglePause}

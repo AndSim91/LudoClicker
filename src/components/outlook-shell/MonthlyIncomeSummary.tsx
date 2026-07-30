@@ -5,6 +5,7 @@ import { getMonthlySocialIncome } from "../../game/social";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
+import { Icon } from "../common/Icon";
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
   const state = useGameStateSlices(
@@ -29,17 +30,18 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
   const monthlyIncome = memberFees + socialIncome + gadgetIncome;
 
   return (
-    <div className="people-monthly-income">
+    <div className="title-monthly-income">
       <button
         type="button"
-        className="people-monthly-income-trigger"
-        aria-label={`Guadagno al mese: ${formatCurrency(monthlyIncome)}`}
+        className="title-monthly-income-trigger"
+        aria-label={`Entrate mensili: ${formatCurrency(monthlyIncome)}`}
         aria-describedby={tooltipId}
       >
+        <Icon name="trend" />
+        <small>Entrate mensili</small>
         <strong>{formatCurrency(monthlyIncome)}</strong>
-        <small>al mese</small>
       </button>
-      <div className="people-monthly-income-tooltip" id={tooltipId} role="tooltip">
+      <div className="title-monthly-income-tooltip" id={tooltipId} role="tooltip">
         <p>Dettaglio mensile</p>
         <dl>
           <div>

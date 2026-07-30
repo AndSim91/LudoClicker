@@ -6,6 +6,7 @@ import { GAME_CONFIG } from "../../game/config";
 import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
+import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 import {
   formatCompactCurrency,
   formatCompactNumber,
@@ -22,6 +23,7 @@ export function TitleBar({
   fame,
   followers,
   euros,
+  monthlyIncomeState,
   equipment,
   isPaused,
   onTogglePause,
@@ -34,6 +36,7 @@ export function TitleBar({
   fame: number;
   followers?: number;
   euros: number;
+  monthlyIncomeState?: GameState;
   equipment: GameState["equipment"];
   isPaused: boolean;
   onTogglePause: () => void;
@@ -96,6 +99,7 @@ export function TitleBar({
           <small>Disponibilità</small>
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
+        <MonthlyIncomeSummary state={monthlyIncomeState} />
       </div>
       <span
         className={`title-equipment is-${equipmentStatus}`}
