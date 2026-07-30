@@ -73,6 +73,7 @@ export function createInitialState(
     tutorial: {
       completedSceneIds: [],
       skippedSceneIds: [],
+      triggeredSceneIds: [],
     },
     shortGoal: createInitialShortGoal(now),
     activities: { eventCooldowns: {} },

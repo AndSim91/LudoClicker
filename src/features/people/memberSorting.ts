@@ -35,6 +35,7 @@ export interface MemberSortContext {
   currentTrainingYear: number;
   annualTrainingLimit: number;
   agonistCourseUnlocked: boolean;
+  instructorBranchCapacity: number;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   courseXUnlocked: boolean;
@@ -63,22 +64,26 @@ export function getMemberNextFormLabel(
   contact: Contact,
   context: MemberSortContext,
 ): string | null {
-  if (context.collaboratorsByContactId.has(contact.id)) return "Collaboratore";
-  if (contact.training) {
-    if (contact.training.formId === "course-x" && !context.courseXUnlocked) {
+  const student = getMemberStudent(contact, context);
+  if (student.training) {
+    if (student.training.formId === "course-x" && !context.courseXUnlocked) {
       return "Formazione in corso";
     }
     return getTrainingCourseTitle(
-      contact.training.formId,
+      student.training.formId,
       context.agonistCourseUnlocked,
-      contact.training.agonistCourseGrantsStats,
+      student.training.agonistCourseGrantsStats,
     );
   }
+  const collaborator = context.collaboratorsByContactId.get(contact.id);
+  const branchCapacity = collaborator?.assignment === "instructor"
+    ? context.instructorBranchCapacity
+    : undefined;
   const nextForm = getAvailableForms(
-    contact,
+    student,
     context.currentTrainingYear,
-    undefined,
-    true,
+    branchCapacity,
+    collaborator?.assignment !== "instructor",
     context.annualTrainingLimit,
     context.courseXUnlocked,
   )[0];

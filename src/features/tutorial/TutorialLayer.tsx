@@ -98,14 +98,15 @@ export function TutorialLayer({
         className="tutorial-card"
         role={step.kind === "dialog" ? "dialog" : "status"}
         aria-modal={step.kind === "dialog" ? "true" : undefined}
-        aria-labelledby="tutorial-step-title"
+        aria-labelledby={step.title ? "tutorial-step-title" : undefined}
+        aria-label={!step.title && step.kind === "dialog" ? step.speaker : undefined}
         aria-describedby="tutorial-step-copy"
       >
         <header>
           {step.kind === "dialog" ? <span>{step.speaker}</span> : <span>Obiettivo guidato</span>}
           <small>{stepIndex + 1} / {scene.steps.length}</small>
         </header>
-        <h2 id="tutorial-step-title">{step.title}</h2>
+        {step.title ? <h2 id="tutorial-step-title">{step.title}</h2> : null}
         <div id="tutorial-step-copy" className="tutorial-copy">
           {body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
         </div>

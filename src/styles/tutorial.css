@@ -282,6 +282,10 @@
   line-height: 1.2;
 }
 
+.tutorial-card > header + .tutorial-copy {
+  margin-top: 11px;
+}
+
 .tutorial-copy {
   display: grid;
   gap: 9px;

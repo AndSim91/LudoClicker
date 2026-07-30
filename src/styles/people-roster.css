@@ -645,12 +645,6 @@
   font-weight: 600;
 }
 
-.member-collaborator-label {
-  color: var(--ink-muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-
 .form-logo-strip {
   display: flex;
   min-width: 0;

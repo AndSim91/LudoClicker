@@ -1804,11 +1804,13 @@ describe("PeopleView", () => {
     expect(within(region).queryByRole("button", { name: "Paga attestati" })).not.toBeInTheDocument();
   });
 
-  it("also shows collaborators in the members list without training controls", () => {
+  it("shows collaborator status and manual Form training in the members list", () => {
     const initial = createInitialState(1_000);
     const enrolled = { ...initial.contacts[0], status: "enrolled" as const, forms: [] as FormId[] };
+    const onStartTraining = vi.fn();
     const state = {
       ...initial,
+      school: { ...initial.school, euros: 250 },
       contacts: initial.contacts.map((contact) =>
         contact.id === enrolled.id ? enrolled : contact,
       ),
@@ -1824,11 +1826,11 @@ describe("PeopleView", () => {
           rarity: enrolled.rarity,
         },
       ],
-      unlocks: { ...initial.unlocks, collaborators: true },
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
     };
 
     render(
-      <PeopleView state={state} onAssign={() => undefined} onStartTraining={() => undefined} />,
+      <PeopleView state={state} onAssign={() => undefined} onStartTraining={onStartTraining} />,
     );
 
     const collaborators = screen.getByRole("region", { name: "Collaboratori delle Onde" });
@@ -1844,12 +1846,14 @@ describe("PeopleView", () => {
     expect(memberFormLogo).toHaveClass("instructor-certified");
     expect(memberFormLogo).toHaveTextContent("♛");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
-    expect(memberRow?.querySelector(".member-training-cell")).toHaveTextContent(
-      /^Collaboratore$/,
+    expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
+      "IscrittoCollaboratore",
     );
-    expect(within(members).queryByRole("combobox", {
-      name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
-    })).not.toBeInTheDocument();
+    const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
+    expect(trainingCell).toHaveTextContent("Forma 2");
+    expect(trainingCell?.querySelector(".training-control")).toHaveClass("training-roster");
+    fireEvent.click(within(trainingCell!).getByRole("button", { name: /Paga e avvia/ }));
+    expect(onStartTraining).toHaveBeenCalledWith("collaborator-1", "form-2");
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {

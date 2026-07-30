@@ -42,10 +42,12 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 ] as const;
 
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
+export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
 
 export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
+  COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
 ] as const;
 
@@ -66,7 +68,6 @@ type TutorialBody =
 
 interface TutorialStepBase {
   id: string;
-  title: string;
   body: TutorialBody;
   focusRegions: RegionSelection;
   hiddenRegions?: RegionSelection;
@@ -78,10 +79,12 @@ interface TutorialStepBase {
 export interface TutorialDialogStep extends TutorialStepBase {
   kind: "dialog";
   speaker: string;
+  title?: string;
 }
 
 export interface TutorialObjectiveStep extends TutorialStepBase {
   kind: "objective";
+  title: string;
   isComplete: (context: TutorialRuntimeContext) => boolean;
 }
 
@@ -373,6 +376,26 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         focusRegions: ["main", "collaborator-section"],
         scrollToRegion: "collaborator-section",
         isComplete: ({ state }) => Boolean(state.collaborators[0]?.assignment),
+      },
+    ],
+  },
+  {
+    id: COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => Boolean(
+      state.tutorial.triggeredSceneIds?.includes(
+        COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+      ),
+    ),
+    steps: [
+      {
+        id: "collaborator-teaching-discount",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        body: [
+          "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+        ],
+        focusRegions: ["main"],
       },
     ],
   },

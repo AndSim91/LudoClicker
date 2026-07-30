@@ -56,6 +56,7 @@ function getDisplayedMemberStatus(
   contact: Contact,
   context: MemberSortContext,
 ): string {
+  if (context.collaboratorsByContactId.has(contact.id)) return "Collaboratore";
   const student = getMemberStudent(contact, context);
   const immunity = getAthleteImmunityStatus(
     context.immunityContext,
@@ -147,6 +148,10 @@ export function MemberList({
       currentTrainingYear: getFormTrainingYear(currentMonth),
       annualTrainingLimit,
       agonistCourseUnlocked: isAgonistCourseUnlocked(state.upgrades),
+      instructorBranchCapacity: Math.min(
+        3,
+        1 + state.upgrades["instructor-versatility"],
+      ),
       immunityContext,
       foundedSchools,
       courseXUnlocked,
@@ -412,12 +417,6 @@ export function MemberList({
         const collaborator = collaboratorsByContactId.get(contact.id);
         const memberStudent = collaborator ?? contact;
         const memberForms = memberStudent.forms;
-        const immunity = getAthleteImmunityStatus(
-          immunityContext,
-          contact,
-          memberStudent,
-          Boolean(collaborator),
-        );
         const hasVisibleStats = hasUnlockedOfficialStats(memberForms);
         const preparation = hasVisibleStats
           ? getContactPreparation(contact, memberForms)
@@ -480,27 +479,18 @@ export function MemberList({
             </span>
             <span className="member-status" data-label="Stato">
               <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
-              <small>
-                {immunity.message ?? getMemberDepartureRiskLabel(
-                  memberForms,
-                  contact.rarity,
-                  state.network.schools.length,
-                )}
-              </small>
+              <small>{getDisplayedMemberStatus(contact, sortContext)}</small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">
-              {collaborator ? (
-                <strong className="member-collaborator-label">Collaboratore</strong>
-              ) : (
-                <TrainingControl
-                  personId={contact.id}
-                  displayName={`${contact.firstName} ${contact.lastName}`}
-                  student={contact}
-                  state={stateOverride}
-                  collaboratorsById={collaboratorsById}
-                  onStartTraining={onStartTraining}
-                />
-              )}
+              <TrainingControl
+                personId={collaborator?.id ?? contact.id}
+                displayName={`${contact.firstName} ${contact.lastName}`}
+                student={memberStudent}
+                state={stateOverride}
+                collaboratorsById={collaboratorsById}
+                onStartTraining={onStartTraining}
+                variant="roster"
+              />
               {(contact.agonistCourseCompletions ?? 0) > 0 ? (
                 <small className="member-agonist-course-message">
                   Corso Agonisti | Potenziale totale +{

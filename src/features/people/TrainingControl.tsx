@@ -495,7 +495,7 @@ export function TrainingControl({
   state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "roster";
 }) {
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
@@ -516,7 +516,11 @@ export function TrainingControl({
   const hasAssignedInstructor = state.collaborators.some(
     (candidate) => candidate.assignment === "instructor",
   );
-  const variantClass = variant === "compact" ? " training-compact" : "";
+  const variantClass = variant === "compact"
+    ? " training-compact"
+    : variant === "roster"
+      ? " training-roster"
+      : "";
 
   if (!state.unlocks.forms) {
     return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
@@ -700,7 +704,7 @@ export function TrainingControl({
   });
 
   return (
-    <div className={`training-control${variantClass}`}>
+    <div className={`training-control${variantClass}${needsSelection ? " has-options" : ""}`}>
       <div className="training-form-choice">
         {needsSelection ? (
           <TrainingOptionPicker

@@ -238,6 +238,96 @@
   background: var(--surface-muted);
 }
 
+.training-control.training-roster {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.training-roster.has-options {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 7px;
+}
+
+.training-roster .training-form-choice,
+.training-roster .training-option-picker {
+  gap: 5px;
+}
+
+.training-roster .training-option-picker-label {
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.training-roster .training-option-list {
+  max-height: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  overflow: visible;
+}
+
+.training-roster.training-control .training-option-card {
+  min-height: 54px;
+  grid-template-columns: 28px minmax(0, 1fr) 12px;
+  gap: 6px;
+  padding: 6px;
+}
+
+.training-roster .training-option-card > img {
+  width: 28px;
+  height: 28px;
+}
+
+.training-roster .training-option-copy > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 9px;
+  line-height: 1.15;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.training-roster .training-option-copy > small,
+.training-roster .training-option-meta > small {
+  font-size: 7px;
+}
+
+.training-roster .training-option-meta > strong {
+  font-size: 8px;
+}
+
+.training-roster.training-control > .training-start-button {
+  min-width: 148px;
+  min-height: 32px;
+  justify-self: end;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .training-roster .training-option-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .training-roster.training-control,
+  .training-roster.has-options {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .training-roster.training-control > .training-start-button {
+    width: 100%;
+    justify-self: stretch;
+  }
+}
+
 .technician-course-control,
 .technician-course-gate,
 .technician-course-reservation {

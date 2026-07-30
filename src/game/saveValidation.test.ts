@@ -48,6 +48,26 @@ describe("save validation at extreme scale", () => {
   });
 });
 
+describe("tutorial save validation", () => {
+  it("accepts legacy saves without situational triggers and validates new trigger lists", () => {
+    const initial = createInitialState(1_000, "", false);
+    const legacyTutorial = {
+      completedSceneIds: initial.tutorial.completedSceneIds,
+      skippedSceneIds: initial.tutorial.skippedSceneIds,
+    };
+
+    expect(isValidGameState({ ...initial, tutorial: legacyTutorial })).toBe(true);
+    expect(isValidGameState({
+      ...initial,
+      tutorial: { ...initial.tutorial, triggeredSceneIds: ["collaborator-teaching"] },
+    })).toBe(true);
+    expect(isValidGameState({
+      ...initial,
+      tutorial: { ...initial.tutorial, triggeredSceneIds: [42] },
+    })).toBe(false);
+  });
+});
+
 describe("Legendary save invariants", () => {
   it.each([-1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
     "rejects invalid Pity values (%s)",

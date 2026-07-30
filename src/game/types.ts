@@ -315,6 +315,7 @@ export interface ShortGoalProgress {
 export interface TutorialProgress {
   completedSceneIds: string[];
   skippedSceneIds: string[];
+  triggeredSceneIds?: string[];
 }
 
 export type SchoolSpecialization = "generale" | "redazione" | "eventi" | "accoglienza";

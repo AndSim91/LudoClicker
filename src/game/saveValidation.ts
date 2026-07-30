@@ -491,6 +491,10 @@ export function isValidGameState(value: unknown): value is GameState {
     state.tutorial.completedSceneIds.every((sceneId) => typeof sceneId === "string") &&
     Array.isArray(state.tutorial?.skippedSceneIds) &&
     state.tutorial.skippedSceneIds.every((sceneId) => typeof sceneId === "string") &&
+    (state.tutorial.triggeredSceneIds === undefined || (
+      Array.isArray(state.tutorial.triggeredSceneIds) &&
+      state.tutorial.triggeredSceneIds.every((sceneId) => typeof sceneId === "string")
+    )) &&
     typeof state.shortGoal?.definitionId === "string" &&
     typeof state.shortGoal?.baseline === "number" &&
     typeof state.shortGoal?.target === "number" &&

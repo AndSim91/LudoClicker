@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
+  COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
   resolveTutorialRegions,
   TUTORIAL_SCENES,
   type TutorialRegionId,
@@ -173,6 +174,35 @@ describe("TutorialLayer", () => {
       state: unlocked,
       activeView: "gadget",
     })).toContain("gadget-catalog");
+  });
+
+  it("renders the compact teaching message without adding unrequested copy", () => {
+    const scene = TUTORIAL_SCENES.find(
+      ({ id }) => id === COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+    )!;
+    const step = scene.steps[0];
+    const state = createInitialState(1_000, "Andrea Ungaro");
+
+    const { unmount } = render(
+      <>
+        <main data-tutorial-region="main">Scuola</main>
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={0}
+          context={{ state, activeView: "contacts" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    expect(screen.getByRole("dialog", { name: "A.N.D.E.R." })).toBeVisible();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.getByText(
+      "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+    )).toBeVisible();
+    unmount();
   });
 
   it("keeps the selected region in focus and disables the others", () => {

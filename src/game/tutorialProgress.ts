@@ -1,4 +1,5 @@
 import { createInitialEmailMission } from "../content/shortGoals";
+import type { TutorialSceneId } from "../content/tutorialScenes";
 import type { GameState } from "./types";
 
 export const FIRST_EVENT_TUTORIAL_SCENE_ID = "first-event" as const;
@@ -11,6 +12,24 @@ export function isTutorialScenePending(state: GameState, sceneId: string): boole
 export function isTutorialSceneFinished(state: GameState, sceneId: string): boolean {
   return state.tutorial.completedSceneIds.includes(sceneId) ||
     state.tutorial.skippedSceneIds.includes(sceneId);
+}
+
+export function triggerTutorialScene(
+  state: GameState,
+  sceneId: TutorialSceneId,
+): GameState {
+  if (
+    isTutorialSceneFinished(state, sceneId) ||
+    state.tutorial.triggeredSceneIds?.includes(sceneId)
+  ) return state;
+
+  return {
+    ...state,
+    tutorial: {
+      ...state.tutorial,
+      triggeredSceneIds: [...(state.tutorial.triggeredSceneIds ?? []), sceneId],
+    },
+  };
 }
 
 export function finishTutorialScene(
@@ -44,6 +63,9 @@ export function finishTutorialScene(
       ...state.tutorial,
       completedSceneIds,
       skippedSceneIds,
+      triggeredSceneIds: state.tutorial.triggeredSceneIds?.filter(
+        (triggeredSceneId) => triggeredSceneId !== sceneId,
+      ),
     },
     shortGoal: startsInitialEmailMission
       ? createInitialEmailMission(
