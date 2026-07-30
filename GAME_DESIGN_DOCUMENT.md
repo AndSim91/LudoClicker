@@ -2253,7 +2253,11 @@ rivalutate quando la qualità aumenta. Nell'interfaccia ogni famiglia usa una
 sola card: mostra la foto della rarità più alta e una riga per ogni rarità
 sbloccata con qualità, pezzi venduti e guadagno cumulativo. Indicatore e barra
 di qualità usano il colore della rarità. Margini, domanda residua, probabilità
-di passaggio, recupero dell'investimento e proiezioni restano interni.
+di passaggio e recupero dell'investimento restano interni. La pagina Scuola
+mostra invece, nel dettaglio delle entrate mensili e solo dopo lo sblocco del
+settore, una stima Gadget ottenuta proiettando per un mese le regole reali di
+vendita sul catalogo, sul pubblico, sui Collaboratori e sui potenziamenti
+correnti.
 
 ### 19.4 Prova qualità
 

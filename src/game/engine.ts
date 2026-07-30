@@ -66,6 +66,7 @@ import {
 } from "./runtimeIndexes";
 import type {
   FormId,
+  FormTrainingStartMode,
   GameAction,
   GameState,
   LegendaryCollaboratorProgress,
@@ -95,8 +96,9 @@ function startFormTraining(
   personId: string,
   formId: FormId,
   now: number,
+  mode?: FormTrainingStartMode,
 ): GameState {
-  return beginFormTraining(state, personId, formId, now);
+  return beginFormTraining(state, personId, formId, now, mode);
 }
 
 function resolveFormTrainingBatch(

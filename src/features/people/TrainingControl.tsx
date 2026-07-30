@@ -37,7 +37,12 @@ import {
   selectInstructorTeachingCount,
 } from "../../game/selectors";
 import { getTrainingPhase } from "../../game/teacherTrainingFlow";
-import type { Collaborator, FormId, GameState } from "../../game/types";
+import type {
+  Collaborator,
+  FormId,
+  FormTrainingStartMode,
+  GameState,
+} from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { TrainingFormPreview } from "./PersonPresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
@@ -93,6 +98,7 @@ function getDisplayedTrainingCost(
   collaborator: Collaborator | undefined,
   definition: FormDefinition,
   qualification: boolean,
+  mode: FormTrainingStartMode,
 ): number {
   if (qualification) {
     return applyQualifyingCourseDiscount(
@@ -104,7 +110,11 @@ function getDisplayedTrainingCost(
     ? selectAvailableInstructor(state, definition.id, personId)
     : undefined;
   if (availableInstructor) return getStudentFormCost(definition.cost);
-  if (collaborator?.assignment === "instructor" && isInstructorForm(definition.id)) {
+  if (
+    mode === "standard" &&
+    collaborator?.assignment === "instructor" &&
+    isInstructorForm(definition.id)
+  ) {
     return applyQualifyingCourseDiscount(
       state.upgrades,
       getInstructorFormCost(definition.cost),
@@ -488,14 +498,20 @@ export function TrainingControl({
   onStartTraining,
   collaboratorsById,
   variant = "default",
+  trainingMode = "standard",
 }: {
   personId: string;
   displayName: string;
   student: FormStudent;
   state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
-  onStartTraining: (personId: string, formId: FormId) => void;
+  onStartTraining: (
+    personId: string,
+    formId: FormId,
+    mode?: FormTrainingStartMode,
+  ) => void;
   variant?: "default" | "compact" | "roster";
+  trainingMode?: FormTrainingStartMode;
 }) {
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
@@ -586,12 +602,14 @@ export function TrainingControl({
   }
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const summerInstructorTraining = summerBreak &&
+    trainingMode === "standard" &&
     collaborator?.assignment === "instructor";
   if (summerBreak && !summerInstructorTraining) {
     return <div className={`training-locked${variantClass}`}><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
   }
 
-  const qualificationDefinitions = collaborator?.assignment === "instructor"
+  const qualificationDefinitions = trainingMode === "standard" &&
+      collaborator?.assignment === "instructor"
     ? collaborator.forms.flatMap((formId) => {
         const definition = getFormDefinition(formId);
         return definition && isInstructorForm(formId) &&
@@ -667,6 +685,7 @@ export function TrainingControl({
         collaborator,
         selected,
         selectedIsQualification,
+        trainingMode,
       )
     : 0;
   const actionLabel = !selected
@@ -688,6 +707,7 @@ export function TrainingControl({
       collaborator,
       definition,
       qualification,
+      trainingMode,
     );
     const hasInstructorDiscount = !qualification && cost < definition.cost;
     return {
@@ -725,7 +745,14 @@ export function TrainingControl({
         type="button"
         className="training-start-button"
         disabled={!selected || state.school.euros < selectedCost}
-        onClick={() => selected && onStartTraining(personId, selected.id)}
+        onClick={() => {
+          if (!selected) return;
+          if (trainingMode === "student-only") {
+            onStartTraining(personId, selected.id, trainingMode);
+            return;
+          }
+          onStartTraining(personId, selected.id);
+        }}
       >
         {actionLabel}
       </button>

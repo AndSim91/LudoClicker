@@ -1,4 +1,5 @@
-import { useId } from "react";
+import { useId, useMemo } from "react";
+import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyMemberFees } from "../../game/membershipEconomy";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -7,13 +8,25 @@ import { formatCurrency } from "../../shared/formatters";
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
   const state = useGameStateSlices(
-    ["collaborators", "contacts", "school", "unlocks", "upgrades"],
+    [
+      "collaboratorManagement",
+      "collaborators",
+      "contacts",
+      "gadgets",
+      "school",
+      "unlocks",
+      "upgrades",
+    ],
     stateOverride,
   );
   const tooltipId = useId();
   const memberFees = getMonthlyMemberFees(state);
   const socialIncome = getMonthlySocialIncome(state);
-  const monthlyIncome = memberFees + socialIncome;
+  const gadgetIncome = useMemo(
+    () => getEstimatedMonthlyGadgetIncome(state),
+    [state],
+  );
+  const monthlyIncome = memberFees + socialIncome + gadgetIncome;
 
   return (
     <div className="people-monthly-income">
@@ -37,6 +50,12 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <dt>Bonus Social</dt>
             <dd>{formatCurrency(socialIncome)}</dd>
           </div>
+          {state.unlocks.gadget ? (
+            <div>
+              <dt>Vendite Gadget (stima)</dt>
+              <dd>{formatCurrency(gadgetIncome)}</dd>
+            </div>
+          ) : null}
         </dl>
       </div>
     </div>

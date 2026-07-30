@@ -49,6 +49,7 @@ import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
   FormId,
+  FormTrainingStartMode,
   GadgetProductId,
   RockPaperScissorsChoice,
   ReptileSectorAssignments,
@@ -308,8 +309,14 @@ export function App() {
     [dispatch],
   );
   const startTraining = useCallback(
-    (personId: string, formId: FormId) =>
-      dispatch({ type: "START_FORM_TRAINING", personId, formId, now: getGameNow() }),
+    (personId: string, formId: FormId, mode?: FormTrainingStartMode) =>
+      dispatch({
+        type: "START_FORM_TRAINING",
+        personId,
+        formId,
+        now: getGameNow(),
+        ...(mode ? { mode } : {}),
+      }),
     [dispatch, getGameNow],
   );
   const bookTechnicianCourse = useCallback(

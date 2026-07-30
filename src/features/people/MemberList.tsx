@@ -1,6 +1,7 @@
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { Icon } from "../../components/common/Icon";
+import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
@@ -10,7 +11,13 @@ import {
   isCourseXUnlocked,
 } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
-import type { Collaborator, Contact, FormId, GameState } from "../../game/types";
+import type {
+  Collaborator,
+  Contact,
+  FormId,
+  FormTrainingStartMode,
+  GameState,
+} from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
@@ -55,8 +62,16 @@ function uniqueSortedOptions(values: string[]): string[] {
 function getDisplayedMemberStatus(
   contact: Contact,
   context: MemberSortContext,
+  socialUnlocked: boolean,
 ): string {
-  if (context.collaboratorsByContactId.has(contact.id)) return "Collaboratore";
+  const collaborator = context.collaboratorsByContactId.get(contact.id);
+  if (collaborator) {
+    if (!collaborator.assignment) return "Collaboratore non assegnato";
+    const assignmentLabel = collaborator.assignment === "equipment"
+      ? "Attrezzature"
+      : getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked);
+    return `Collaboratore ${assignmentLabel}`;
+  }
   const student = getMemberStudent(contact, context);
   const immunity = getAthleteImmunityStatus(
     context.immunityContext,
@@ -111,12 +126,16 @@ export function MemberList({
   state?: GameState;
   collaboratorsByContactId: Map<string, Collaborator>;
   collaboratorsById: Map<string, Collaborator>;
-  onStartTraining: (personId: string, formId: FormId) => void;
+  onStartTraining: (
+    personId: string,
+    formId: FormId,
+    mode?: FormTrainingStartMode,
+  ) => void;
   onToggleFavorite: (contactId: string) => void;
   onCancelEnrollment: (contactId: string) => void;
 }) {
   const state = useGameStateSlices(
-    ["contacts", "network", "school", "tournaments", "upgrades"],
+    ["contacts", "network", "school", "tournaments", "unlocks", "upgrades"],
     stateOverride,
   );
   const members = useMemo(
@@ -175,12 +194,12 @@ export function MemberList({
       )
     )),
     statuses: uniqueSortedOptions(members.map((contact) =>
-      getDisplayedMemberStatus(contact, sortContext)
+      getDisplayedMemberStatus(contact, sortContext, state.unlocks.social)
     )),
     nextForms: uniqueSortedOptions(members.map((contact) =>
       getMemberNextFormLabel(contact, sortContext) ?? "Nessuna Forma disponibile"
     )),
-  }), [members, sortContext]);
+  }), [members, sortContext, state.unlocks.social]);
   const filteredMembers = useMemo(() => {
     const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
     const minimumArena = arenaMinimum === "" ? undefined : Number(arenaMinimum);
@@ -203,7 +222,7 @@ export function MemberList({
       }
       if (
         statusFilter !== "all" &&
-        getDisplayedMemberStatus(contact, sortContext) !== statusFilter
+        getDisplayedMemberStatus(contact, sortContext, state.unlocks.social) !== statusFilter
       ) return false;
       const nextForm = getMemberNextFormLabel(contact, sortContext) ??
         "Nessuna Forma disponibile";
@@ -219,6 +238,7 @@ export function MemberList({
     rarityFilter,
     sortContext,
     statusFilter,
+    state.unlocks.social,
     styleMinimum,
   ]);
   const sortedMembers = useMemo(
@@ -479,7 +499,9 @@ export function MemberList({
             </span>
             <span className="member-status" data-label="Stato">
               <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
-              <small>{getDisplayedMemberStatus(contact, sortContext)}</small>
+              <small>
+                {getDisplayedMemberStatus(contact, sortContext, state.unlocks.social)}
+              </small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">
               <TrainingControl
@@ -490,6 +512,7 @@ export function MemberList({
                 collaboratorsById={collaboratorsById}
                 onStartTraining={onStartTraining}
                 variant="roster"
+                trainingMode="student-only"
               />
               {(contact.agonistCourseCompletions ?? 0) > 0 ? (
                 <small className="member-agonist-course-message">

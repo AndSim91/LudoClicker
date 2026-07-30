@@ -686,6 +686,52 @@ describe("game engine: progression", () => {
     });
   });
 
+  it("starts an Instructor collaborator as a student when explicitly requested", () => {
+    const initial = createInitialState(1_000);
+    const collaborator = {
+      id: "student-only-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Allievo",
+      joinedAt: 1_000,
+      forms: ["form-1" as const],
+      instructorForms: [] as FormId[],
+      assignment: "instructor" as const,
+      rarity: "legendary" as const,
+    };
+    const ready = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 9, euros: 1_000 },
+      collaborators: [collaborator],
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+
+    const qualificationBlocked = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: collaborator.id,
+      formId: "form-1",
+      now: 2_000,
+      mode: "student-only",
+    });
+    const studentTraining = gameReducer(ready, {
+      type: "START_FORM_TRAINING",
+      personId: collaborator.id,
+      formId: "form-2",
+      now: 2_000,
+      mode: "student-only",
+    });
+
+    expect(qualificationBlocked).toBe(ready);
+    expect(studentTraining.school.euros).toBe(750);
+    expect(studentTraining.collaborators[0].training).toMatchObject({
+      formId: "form-2",
+      trainingTrack: "athlete",
+      trainingPhase: "athlete",
+    });
+    expect(studentTraining.collaborators[0].training?.instructorId).toBeUndefined();
+    expect(studentTraining.collaborators[0].training?.includesInstructorCertification)
+      .toBeUndefined();
+  });
+
   it.each([19, 20])("charges 350% and doubles a combined Instructor course during summer month %i", (currentMonth) => {
     const initial = createInitialState(1_000);
     const instructor = {

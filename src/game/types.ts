@@ -27,6 +27,8 @@ export type FormTrainingTrack =
   | "technician"
   | "agonist";
 
+export type FormTrainingStartMode = "standard" | "student-only";
+
 export type FormTrainingPhase = "athlete" | "instructor" | "technician" | "agonist";
 
 export interface FormTraining {
@@ -999,6 +1001,7 @@ export type GameAction =
       personId: string;
       formId: FormId;
       now: number;
+      mode?: FormTrainingStartMode;
     }
   | {
       type: "BOOK_TECHNICIAN_COURSE";

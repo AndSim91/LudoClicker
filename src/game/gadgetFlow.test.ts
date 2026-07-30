@@ -17,6 +17,7 @@ import {
   unlockGadgetSector,
   unlockGadgetSectorFromTournamentResult,
 } from "./gadgetFlow";
+import { getEstimatedMonthlyGadgetIncome } from "./gadgetIncomeEstimate";
 import {
   getGadgetAudience,
   getGadgetMarginalMonthlyAttemptCapacity,
@@ -300,6 +301,7 @@ describe("Gadget flow", () => {
     expect(commonRarity(sold, "wristband").unitsSold).toBe(1);
     expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
     expect(sold.school.euros).toBe(selling.school.euros + 20);
+    expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(20);
   });
 
   it("keeps quality zero non-sellable and unlocks the next project at 100 sales", () => {
@@ -381,6 +383,7 @@ describe("Gadget flow", () => {
     );
     expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
     expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
+    expect(getEstimatedMonthlyGadgetIncome(almostSold)).toBe(20);
   });
 
   it("keeps ordinary and marginal sales active for different products", () => {

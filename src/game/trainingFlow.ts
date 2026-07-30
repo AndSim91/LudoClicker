@@ -42,6 +42,7 @@ import { createTrainingStartPlan } from "./trainingStartPlan";
 import type {
   CollaboratorAssignment,
   FormId,
+  FormTrainingStartMode,
   GameState,
 } from "./types";
 import {
@@ -232,6 +233,7 @@ export function startFormTraining(
   personId: string,
   formId: FormId,
   now: number,
+  mode: FormTrainingStartMode = "standard",
 ): GameState {
   if (!state.unlocks.forms) return state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
@@ -247,13 +249,16 @@ export function startFormTraining(
     (!courseXUnlocked && formId === "course-x") ||
     (courseXUnlocked && needsCourseXRecovery(candidateForms) && formId !== "course-x")
   ) return state;
+  const studentOnly = mode === "student-only";
   const qualificationOnly = Boolean(
+    !studentOnly &&
     collaborator?.assignment === "instructor" &&
     collaborator.forms.includes(formId) &&
     isInstructorForm(formId) &&
     !collaborator.instructorForms.includes(formId),
   );
   const canTrainAsInstructorInSummer = Boolean(
+    !studentOnly &&
     collaborator?.assignment === "instructor" && isInstructorForm(formId),
   );
   if (isSummerBreak(state.school.currentMonth) && !canTrainAsInstructorInSummer) return state;
@@ -309,6 +314,7 @@ export function startFormTraining(
     ? selectAvailableInstructor(state, formId, personId)
     : undefined;
   const instructorTrack = Boolean(
+    !studentOnly &&
     instructorSelf && !instructor && isInstructorForm(formId),
   );
   const trainingCost = instructorTrack
@@ -357,6 +363,7 @@ export function startFormTraining(
       requestedInstructorId: instructor?.id,
       equipmentUsed: definition.requiredSwords,
       wearPerSword: definition.loadPerSword,
+      trainingTrack: studentOnly ? "athlete" as const : undefined,
     };
     return {
       ...state,

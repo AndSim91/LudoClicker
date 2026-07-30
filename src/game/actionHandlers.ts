@@ -25,7 +25,12 @@ import {
   assignCollaborator,
 } from "./trainingFlow";
 import { bookTechnicianCourse } from "./teacherTrainingFlow";
-import type { FormId, GameAction, GameState } from "./types";
+import type {
+  FormId,
+  FormTrainingStartMode,
+  GameAction,
+  GameState,
+} from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
 import { buyUpgrade } from "./upgradeFlow";
 import { finishTutorialScene, triggerTutorialScene } from "./tutorialProgress";
@@ -79,6 +84,7 @@ export interface GameActionHandlerDependencies {
     personId: string,
     formId: FormId,
     now: number,
+    mode?: FormTrainingStartMode,
   ) => GameState;
 }
 
@@ -216,6 +222,7 @@ export function createGameActionHandlers(
         action.personId,
         action.formId,
         action.now,
+        action.mode,
       );
       const trainingBefore = collaboratorBefore?.training ?? memberBefore?.training;
       const trainingAfter = collaboratorBefore

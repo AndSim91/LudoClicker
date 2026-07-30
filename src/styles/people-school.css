@@ -8,6 +8,7 @@
 
 .people-view > .people-hero {
   position: relative;
+  z-index: 2;
   min-height: 96px;
   align-items: center;
   gap: 20px;
@@ -143,9 +144,18 @@
     0 8px 22px color-mix(in srgb, var(--school-page-accent) 11%, transparent);
 }
 
-.people-view .collaborator-sector-card:hover {
+.people-view .collaborator-sector-card {
   border-color: color-mix(in srgb, var(--school-page-accent) 48%, var(--line));
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--school-page-ink) 10%, transparent);
+  box-shadow:
+    inset 3px 0 var(--school-page-accent),
+    0 6px 18px color-mix(in srgb, var(--school-page-accent) 10%, transparent);
+}
+
+.people-view .collaborator-sector-card:hover {
+  border-color: color-mix(in srgb, var(--school-page-accent) 68%, var(--line));
+  box-shadow:
+    inset 3px 0 var(--school-page-accent),
+    0 8px 20px color-mix(in srgb, var(--school-page-accent) 14%, transparent);
   transform: translateY(-1px);
 }
 
@@ -165,8 +175,9 @@
   width: 34px;
   height: 34px;
   border-radius: 6px;
-  color: var(--school-page-accent);
-  background: color-mix(in srgb, var(--school-page-accent) 8%, var(--surface));
+  color: #fff;
+  background: var(--school-page-accent);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--school-page-accent) 18%, transparent);
 }
 
 .people-view .sector-card-icon.is-primary {
@@ -273,7 +284,7 @@
   padding: 10px 15px;
 }
 
-.people-view .sector-card-workstream-heading > span > span {
+.people-view .sector-card-workstream-heading > span:first-child > span {
   display: block;
   overflow: hidden;
   margin-top: 3px;
@@ -283,7 +294,7 @@
   white-space: nowrap;
 }
 
-.people-view .sector-card-workstream-heading > span > strong {
+.people-view .sector-card-workstream-heading > span:first-child > strong {
   font-size: 12px;
   line-height: 1.25;
 }
@@ -544,6 +555,11 @@
 
   .people-view .people-monthly-income-trigger {
     min-height: 28px;
+  }
+
+  .people-view .people-monthly-income-tooltip {
+    right: auto;
+    left: 0;
   }
 
   .people-hero-waves {

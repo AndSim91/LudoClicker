@@ -173,6 +173,61 @@ describe("batched automatic teaching plan", () => {
     ).toBe(3);
   });
 
+  it("preserves student-only training while waiting for equipment", () => {
+    const initial = createInitialState(1_000, "", false);
+    const collaborator = {
+      ...instructor("student-only-instructor", ["form-1"], 1_000),
+      instructorForms: [] as FormId[],
+    };
+    const state: GameState = {
+      ...initial,
+      collaborators: [collaborator],
+      school: {
+        ...initial.school,
+        currentMonth: 9,
+        euros: 1_000,
+      },
+      equipment: {
+        totalSwords: 0,
+        availableSwords: 0,
+        damagedSwords: 0,
+        wear: 0,
+      },
+      unlocks: { ...initial.unlocks, forms: true },
+    };
+    const waitingPlan = createTrainingStartPlan(state, NOW, new Map());
+
+    waitingPlan.startFormTraining(collaborator.id, "form-2", "student-only");
+    const waitingState = waitingPlan.commit();
+    expect(waitingState.collaborators[0].training).toMatchObject({
+      formId: "form-2",
+      status: "waitingForEquipment",
+      trainingTrack: "athlete",
+    });
+
+    const restartPlan = createTrainingStartPlan({
+      ...waitingState,
+      equipment: {
+        totalSwords: 1,
+        availableSwords: 1,
+        damagedSwords: 0,
+        wear: 0,
+      },
+    }, NOW + 1_000, new Map());
+    restartPlan.restartWaitingTraining(collaborator.id);
+    const restartedState = restartPlan.commit();
+
+    expect(restartedState.school.euros).toBe(750);
+    expect(restartedState.collaborators[0].training).toMatchObject({
+      formId: "form-2",
+      status: "running",
+      trainingTrack: "athlete",
+      trainingPhase: "athlete",
+    });
+    expect(restartedState.collaborators[0].training?.includesInstructorCertification)
+      .toBeUndefined();
+  });
+
   it("starts 1,000 members without changing capacity or economy rules", () => {
     const initial = createInitialState(1_000, "", false);
     const template = initial.contacts[0];

@@ -40,6 +40,7 @@ import type {
   Contact,
   FormId,
   FormTraining,
+  FormTrainingStartMode,
   GameState,
 } from "./types";
 
@@ -53,7 +54,11 @@ export interface TrainingStartResult {
  */
 export interface TrainingStartPlan {
   readonly availableEuros: number;
-  startFormTraining(personId: string, formId: FormId): TrainingStartResult | undefined;
+  startFormTraining(
+    personId: string,
+    formId: FormId,
+    mode?: FormTrainingStartMode,
+  ): TrainingStartResult | undefined;
   startAgonistCourse(
     personId: string,
     instructorId: string,
@@ -161,7 +166,11 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
 
     const restarted = isAgonistCourse(waiting.formId)
       ? this.startAgonistCourse(personId, waiting.requestedInstructorId ?? "")
-      : this.startFormTraining(personId, waiting.formId);
+      : this.startFormTraining(
+          personId,
+          waiting.formId,
+          waiting.trainingTrack === "athlete" ? "student-only" : "standard",
+        );
     if (restarted) {
       this.updateTeachingCount(
         restarted.training.instructorId ?? restarted.training.requestedInstructorId,
@@ -324,6 +333,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
   startFormTraining(
     personId: string,
     formId: FormId,
+    mode: FormTrainingStartMode = "standard",
   ): TrainingStartResult | undefined {
     if (!this.state.unlocks.forms) return undefined;
     const collaborator = this.collaboratorsById.get(personId);
@@ -340,13 +350,16 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       )
     ) return undefined;
 
+    const studentOnly = mode === "student-only";
     const qualificationOnly = Boolean(
+      !studentOnly &&
       collaborator?.assignment === "instructor" &&
       collaborator.forms.includes(formId) &&
       isInstructorForm(formId) &&
       !collaborator.instructorForms.includes(formId),
     );
     const canTrainAsInstructorInSummer = Boolean(
+      !studentOnly &&
       collaborator?.assignment === "instructor" && isInstructorForm(formId),
     );
     if (
@@ -394,6 +407,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       ? this.selectAvailableInstructor(formId, personId)
       : undefined;
     const instructorTrack = Boolean(
+      !studentOnly &&
       instructorSelf && !instructor && isInstructorForm(formId),
     );
     const trainingCost = instructorTrack
@@ -443,6 +457,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         requestedInstructorId: instructor?.id,
         equipmentUsed: definition.requiredSwords,
         wearPerSword: definition.loadPerSword,
+        trainingTrack: studentOnly ? "athlete" : undefined,
       };
       if (member) this.updateContact({ ...member, training });
       if (collaborator) this.updateCollaborator({ ...collaborator, training });

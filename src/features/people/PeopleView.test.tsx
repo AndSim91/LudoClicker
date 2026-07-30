@@ -1285,6 +1285,63 @@ describe("PeopleView", () => {
     expect(tooltip).toHaveTextContent(/85,00\s*€/);
     expect(tooltip).toHaveTextContent("Bonus Social");
     expect(tooltip).toHaveTextContent(/10,00\s*€/);
+    expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");
+  });
+
+  it("includes the estimated Gadget sales after the sector is unlocked", () => {
+    const initial = createInitialState(1_000);
+    const product = initial.gadgets.products.wristband;
+    const gadgetCollaborator: Collaborator = {
+      id: "gadget-collaborator",
+      contactId: "gadget-contact",
+      displayName: "Collaboratore Gadget",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "gadget",
+      rarity: "ultra-rare",
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          school: { ...initial.school, activeMembers: 10 },
+          collaborators: [gadgetCollaborator],
+          unlocks: { ...initial.unlocks, gadget: true },
+          gadgets: {
+            ...initial.gadgets,
+            products: {
+              ...initial.gadgets.products,
+              wristband: {
+                ...product,
+                unlocked: true,
+                projectPurchased: true,
+                prototypeCompleted: true,
+                accepted: true,
+                rarities: {
+                  ...product.rarities,
+                  common: {
+                    ...product.rarities.common,
+                    unlocked: true,
+                    quality: 100,
+                  },
+                },
+              },
+            },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole("button", {
+      name: `Guadagno al mese: ${formatCurrency(420)}`,
+    })).toBeVisible();
+    const tooltip = screen.getByRole("tooltip");
+    expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
+    expect(tooltip).toHaveTextContent(/20,00\s*€/);
   });
 
   it("keeps advanced roster concepts hidden for the first member", () => {
@@ -1858,7 +1915,7 @@ describe("PeopleView", () => {
           joinedAt: 1_000,
           forms: ["form-1" as const],
           instructorForms: ["form-1" as const],
-          assignment: "writing" as const,
+          assignment: "equipment" as const,
           rarity: enrolled.rarity,
         },
       ],
@@ -1883,13 +1940,71 @@ describe("PeopleView", () => {
     expect(memberFormLogo).toHaveTextContent("♛");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
     expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
-      "IscrittoCollaboratore",
+      "IscrittoCollaboratore Attrezzature",
     );
     const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
     expect(trainingCell).toHaveTextContent("Forma 2");
     expect(trainingCell?.querySelector(".training-control")).toHaveClass("training-roster");
     fireEvent.click(within(trainingCell!).getByRole("button", { name: /Paga e avvia/ }));
-    expect(onStartTraining).toHaveBeenCalledWith("collaborator-1", "form-2");
+    expect(onStartTraining).toHaveBeenCalledWith(
+      "collaborator-1",
+      "form-2",
+      "student-only",
+    );
+  });
+
+  it("offers an Instructor collaborator only the next student Form in the members list", () => {
+    const initial = createInitialState(1_000);
+    const enrolled = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+    };
+    const onStartTraining = vi.fn();
+    const state = {
+      ...initial,
+      school: { ...initial.school, currentMonth: 9, euros: 250 },
+      contacts: initial.contacts.map((contact) =>
+        contact.id === enrolled.id ? enrolled : contact,
+      ),
+      collaborators: [
+        {
+          id: "instructor-member",
+          contactId: enrolled.id,
+          displayName: `${enrolled.firstName} ${enrolled.lastName}`,
+          joinedAt: 1_000,
+          forms: ["form-1" as const],
+          instructorForms: [] as FormId[],
+          assignment: "instructor" as const,
+          rarity: enrolled.rarity,
+        },
+      ],
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+    };
+
+    render(
+      <PeopleView state={state} onAssign={() => undefined} onStartTraining={onStartTraining} />,
+    );
+
+    const members = screen.getByRole("region", { name: "Iscritti" });
+    const memberRow = within(members)
+      .getByText(`${enrolled.firstName} ${enrolled.lastName}`)
+      .closest(".member-row");
+    const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
+
+    expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
+      "IscrittoCollaboratore Istruttore",
+    );
+    expect(trainingCell).toHaveTextContent("Forma 2");
+    expect(trainingCell).not.toHaveTextContent("Forma 1");
+    expect(trainingCell).not.toHaveTextContent("Corso Istruttori");
+    expect(trainingCell).not.toHaveTextContent("Qualifica inclusa");
+    fireEvent.click(within(trainingCell!).getByRole("button", { name: /Paga e avvia/ }));
+    expect(onStartTraining).toHaveBeenCalledWith(
+      "instructor-member",
+      "form-2",
+      "student-only",
+    );
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {
@@ -1959,7 +2074,11 @@ describe("PeopleView", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /Forma 1/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Paga e avvia/ }));
-    expect(onStartTraining).toHaveBeenCalledWith(enrolled.id, "form-1");
+    expect(onStartTraining).toHaveBeenCalledWith(
+      enrolled.id,
+      "form-1",
+      "student-only",
+    );
   });
 
   it("places cancellation at the row end and asks for confirmation in a modal", () => {

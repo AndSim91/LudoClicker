@@ -6,6 +6,7 @@ import type {
   CollaboratorAssignment,
   CollaboratorMasteryRole,
   FormId,
+  FormTrainingStartMode,
   GameState,
 } from "../../game/types";
 import { isCollaboratorAreaVisible } from "../../game/unlocks";
@@ -32,7 +33,11 @@ export function PeopleView({
 }: {
   state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
-  onStartTraining: (personId: string, formId: FormId) => void;
+  onStartTraining: (
+    personId: string,
+    formId: FormId,
+    mode?: FormTrainingStartMode,
+  ) => void;
   onToggleFavorite?: (contactId: string) => void;
   onCancelEnrollment?: (contactId: string) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;

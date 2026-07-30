@@ -221,7 +221,6 @@
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 0 16px 8px;
   scrollbar-color: color-mix(in srgb, var(--instructor-lane-accent) 28%, transparent) transparent;
   scrollbar-gutter: stable;
@@ -975,7 +974,7 @@
   min-width: 0;
 }
 
-.sector-card-workstream-heading > span > strong {
+.sector-card-workstream-heading > span:first-child > strong {
   display: block;
   overflow: hidden;
   color: var(--ink);
@@ -985,7 +984,7 @@
   white-space: nowrap;
 }
 
-.sector-card-workstream-heading > span > span {
+.sector-card-workstream-heading > span:first-child > span {
   display: -webkit-box;
   overflow: hidden;
   margin-top: 3px;
