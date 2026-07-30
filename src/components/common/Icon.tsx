@@ -35,6 +35,8 @@ export type IconName =
   | "gift"
   | "info"
   | "flask"
+  | "book"
+  | "ludowiki"
   | "admin";
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -72,6 +74,8 @@ const paths: Record<IconName, React.ReactNode> = {
   gift: <><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12M4 5h16v4H4V5Z"/><path d="M12 5c-1-3-5-3-5-.5C7 6 9 6 12 6m0-1c1-3 5-3 5-.5 0 1.5-2 1.5-5 1.5"/></>,
   info: <><circle cx="12" cy="12" r="9"/><path d="M12 10v6m0-9h.01"/></>,
   flask: <><path d="M9 3h6m-5 0v6L4.5 18.2A1.9 1.9 0 0 0 6.1 21h11.8a1.9 1.9 0 0 0 1.6-2.8L14 9V3"/><path d="M7.5 16h9"/></>,
+  book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"/></>,
+  ludowiki: <><path d="M3.5 6.5A3.5 3.5 0 0 1 7 3h4v17H7a3.5 3.5 0 0 0-3.5 1.5v-15Z"/><path d="M20.5 9v12.5A3.5 3.5 0 0 0 17 20h-4V3h2"/><path d="M7 8h2m-2 4h2"/><path d="m19 2 .8 2.2L22 5l-2.2.8L19 8l-.8-2.2L16 5l2.2-.8L19 2Z"/></>,
   admin: <><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Zm-1 7c.6-2 1.9-3 4-3s3.4 1 4 3"/></>,
 };
 

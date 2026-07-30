@@ -34,6 +34,11 @@ interface InternalInstructorCoursesCache {
   withoutCourseX?: InternalInstructorCourseEntry[];
 }
 
+interface TechnicianCoursesCache {
+  all: InstructorTeachingEntry[];
+  withoutCourseX?: InstructorTeachingEntry[];
+}
+
 const instructorTeachingEntriesCache = new WeakMap<
   GameState["contacts"],
   WeakMap<GameState["collaborators"], InstructorTeachingEntriesCache>
@@ -41,6 +46,10 @@ const instructorTeachingEntriesCache = new WeakMap<
 const internalInstructorCoursesCache = new WeakMap<
   readonly Collaborator[],
   InternalInstructorCoursesCache
+>();
+const technicianCoursesCache = new WeakMap<
+  readonly Collaborator[],
+  TechnicianCoursesCache
 >();
 
 function getRequestedInstructorId(training: FormTraining): string | undefined {
@@ -169,6 +178,35 @@ export function getInternalInstructorCourseEntries(
   internalInstructorCoursesCache.set(collaborators, cached);
   if (courseXUnlocked) return all;
   cached.withoutCourseX = all.filter(
+    (entry) => entry.training.formId !== "course-x",
+  );
+  return cached.withoutCourseX;
+}
+
+export function getTechnicianCourseEntries(
+  collaborators: readonly Collaborator[],
+  courseXUnlocked = true,
+): InstructorTeachingEntry[] {
+  let cached = technicianCoursesCache.get(collaborators);
+  if (!cached) {
+    const all = collaborators.flatMap((trainee) => {
+      const training = trainee.training;
+      const isTechnicianCourse = training?.trainingPhase === "technician" ||
+        training?.trainingTrack === "technician";
+      return training && isTechnicianCourse
+        ? [{
+            id: trainee.id,
+            displayName: trainee.displayName,
+            training,
+            instructorId: trainee.id,
+          }]
+        : [];
+    });
+    cached = { all };
+    technicianCoursesCache.set(collaborators, cached);
+  }
+  if (courseXUnlocked) return cached.all;
+  cached.withoutCourseX ??= cached.all.filter(
     (entry) => entry.training.formId !== "course-x",
   );
   return cached.withoutCourseX;

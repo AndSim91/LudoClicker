@@ -107,9 +107,10 @@ describe("App profile and navigation", () => {
     render(<App />);
 
     const navigation = screen.getByRole("navigation", { name: "Applicazioni" });
-    expect(navigation.querySelectorAll("button")).toHaveLength(3);
+    expect(navigation.querySelectorAll("button")).toHaveLength(4);
     expect(Array.from(navigation.querySelectorAll("button"), (button) => button.textContent)).toEqual([
       "Posta",
+      "LudoWiki",
       "Impostazioni",
       "Admin",
     ]);
@@ -134,6 +135,7 @@ describe("App profile and navigation", () => {
       "Scuola",
       "Tornei",
       "Upgrade",
+      "LudoWiki",
       "Impostazioni",
       "Admin",
     ]);
@@ -212,6 +214,16 @@ describe("App profile and navigation", () => {
     expect(screen.getByText("DEV ONLY")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Passa a Ottobre" }));
     expect(screen.getByRole("button", { name: "Passa a Novembre" })).toBeVisible();
+  });
+
+  it("opens the development-only LudoWiki", () => {
+    saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "LudoWiki" }));
+
+    expect(screen.getByRole("heading", { name: "LudoWiki" })).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Ludodex" })).toHaveAttribute("aria-selected", "true");
   });
 
   it("keeps the same day panel mounted when changing page", () => {

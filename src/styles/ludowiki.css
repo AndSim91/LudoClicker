@@ -1,0 +1,957 @@
+.overview-view.ludowiki-view {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  padding: 20px 24px 0;
+}
+
+.ludowiki-view > header {
+  gap: 13px;
+  margin: 0;
+  padding: 0 0 14px;
+  border-bottom: 0;
+}
+
+.ludowiki-view > header > svg {
+  width: 28px;
+  height: 28px;
+  color: var(--blue-600);
+}
+
+.ludowiki-view > header h1 {
+  font-size: 25px;
+}
+
+.ludowiki-view > header p {
+  max-width: 720px;
+  font-size: 13px;
+}
+
+.ludowiki-tabs {
+  display: flex;
+  gap: 24px;
+  min-height: 43px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ludowiki-tabs button {
+  position: relative;
+  padding: 0 4px;
+  color: var(--ink-muted);
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ludowiki-tabs button:hover,
+.ludowiki-tabs button.is-active {
+  color: var(--blue-700);
+}
+
+.ludowiki-tabs button.is-active::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: var(--school-accent, var(--blue-600));
+  content: "";
+}
+
+.ludowiki-content,
+.ludodex-layout,
+.ludowiki-manual-layout {
+  min-width: 0;
+  min-height: 0;
+}
+
+.ludodex-layout,
+.ludowiki-manual-layout {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(310px, 0.78fr) minmax(420px, 1.45fr);
+}
+
+.ludodex-catalog,
+.ludowiki-chapters {
+  min-width: 0;
+  min-height: 0;
+  padding: 18px 18px 0 0;
+  border-right: 1px solid var(--line);
+}
+
+.ludodex-catalog {
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+}
+
+.ludodex-progress-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.ludodex-progress-copy strong {
+  color: var(--rarity-legendary-name);
+  font-size: 13px;
+}
+
+.ludodex-progress {
+  height: 4px;
+  margin: 8px 0 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+.ludodex-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--school-accent, var(--blue-600));
+  transition: width 180ms ease;
+}
+
+.ludowiki-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  background: var(--surface);
+}
+
+.ludowiki-search:focus-within {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 1px var(--focus);
+}
+
+.ludowiki-search svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.ludowiki-search input {
+  min-width: 0;
+  flex: 1;
+  padding: 7px 0;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.ludodex-filters {
+  display: flex;
+  gap: 4px;
+  padding: 10px 0;
+}
+
+.ludodex-filters button {
+  min-height: 30px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.ludodex-filters button:hover {
+  border-color: var(--blue-600);
+  color: var(--blue-700);
+}
+
+.ludodex-filters button.is-active {
+  border-color: var(--school-accent, var(--blue-600));
+  color: white;
+  background: var(--school-accent, var(--blue-600));
+}
+
+.ludodex-list {
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+.ludodex-row {
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  grid-template-columns: 46px minmax(0, 1fr) 19px;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+
+.ludodex-row:hover {
+  background: var(--surface-muted);
+}
+
+.ludodex-row.is-selected {
+  box-shadow: inset 3px 0 var(--school-accent, var(--blue-600));
+  background: var(--blue-050);
+}
+
+.ludodex-row > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--ink-soft);
+}
+
+.ludodex-row.is-discovered > svg {
+  color: var(--rarity-legendary-accent);
+}
+
+.ludodex-row-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ludodex-row-copy small {
+  color: var(--ink-soft);
+  font-size: 9px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.ludodex-row-copy strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ludodex-row.is-discovered .ludodex-row-copy strong {
+  color: var(--rarity-legendary-name);
+}
+
+.ludodex-row-copy > span {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ludodex-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--ink-soft);
+  background: var(--surface-muted);
+}
+
+.ludodex-mark.is-discovered {
+  border-color: var(--rarity-legendary-avatar-border);
+  color: var(--rarity-legendary-avatar-text);
+  background: var(--rarity-legendary-avatar-background);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 42%);
+}
+
+.ludodex-mark span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ludodex-mark svg {
+  width: 20px;
+  height: 20px;
+}
+
+.ludodex-mark.is-large {
+  width: 118px;
+  height: 118px;
+}
+
+.ludodex-mark.is-large span {
+  font-size: 34px;
+}
+
+.ludodex-mark.is-large svg {
+  width: 36px;
+  height: 36px;
+}
+
+.ludodex-dossier {
+  min-width: 0;
+  overflow-y: auto;
+  padding: 28px 30px 48px;
+}
+
+.ludodex-dossier-identity {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ludodex-dossier-identity > div {
+  min-width: 0;
+}
+
+.ludodex-dossier-identity small,
+.ludodex-dossier > small,
+.ludowiki-article > header small {
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.ludodex-dossier h2 {
+  margin: 5px 0 9px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.ludodex-dossier-identity p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ludodex-dossier-identity p svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ludodex-dossier-identity .rarity-legendary {
+  color: var(--rarity-legendary-name);
+}
+
+.ludodex-dossier-identity .rarity-secret-legendary {
+  color: var(--rarity-secret-legendary-name);
+}
+
+.ludodex-discovery-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success);
+  font-size: 12px;
+}
+
+.ludodex-discovery-status svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ludodex-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  margin: 22px 0;
+  border: 1px solid var(--line);
+}
+
+.ludodex-stats > div {
+  display: flex;
+  min-width: 0;
+  min-height: 76px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 15px;
+}
+
+.ludodex-stats > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.ludodex-stats span {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.ludodex-stats strong {
+  font-size: 20px;
+}
+
+.ludodex-acquisition-info {
+  margin: 0;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.ludodex-acquisition-info > div {
+  display: grid;
+  grid-template-columns: minmax(175px, .72fr) minmax(0, 1.28fr);
+  gap: 20px;
+  padding: 13px 15px;
+}
+
+.ludodex-acquisition-info > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.ludodex-acquisition-info dt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ludodex-acquisition-info dt svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--school-accent, var(--blue-600));
+}
+
+.ludodex-acquisition-info dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ludodex-biography h3,
+.ludowiki-article h3 {
+  margin: 0 0 11px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ludodex-biography {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.ludodex-biography p {
+  max-width: 640px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.ludodex-permanence-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--rarity-legendary-accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--rarity-legendary-mail-background) 42%, var(--surface));
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ludodex-permanence-note > svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--rarity-legendary-name);
+}
+
+.ludodex-permanence-note span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ludodex-dossier.is-locked,
+.ludodex-dossier.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.ludodex-dossier.is-locked h2,
+.ludodex-dossier.is-empty h2 {
+  margin-top: 8px;
+}
+
+.ludodex-dossier.is-locked > p,
+.ludodex-dossier.is-empty > p {
+  max-width: 460px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.ludodex-dossier.is-locked .ludodex-mark {
+  margin-bottom: 18px;
+}
+
+.ludodex-dossier.is-locked .ludodex-permanence-note {
+  max-width: 500px;
+  text-align: left;
+}
+
+.ludodex-dossier.is-empty > svg {
+  width: 46px;
+  height: 46px;
+  color: var(--ink-soft);
+}
+
+.ludowiki-manual-layout {
+  grid-template-columns: minmax(260px, .64fr) minmax(480px, 1.7fr);
+}
+
+.ludowiki-chapters {
+  overflow-y: auto;
+  padding-top: 18px;
+}
+
+.ludowiki-chapters > .ludowiki-search {
+  margin: 0 14px 16px 0;
+}
+
+.ludowiki-chapters nav section {
+  margin-bottom: 14px;
+}
+
+.ludowiki-chapters nav h3 {
+  margin: 0;
+  padding: 7px 10px;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.ludowiki-chapters nav button {
+  display: flex;
+  width: 100%;
+  min-height: 45px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 14px 7px 11px;
+  border-left: 3px solid transparent;
+  color: var(--ink);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
+.ludowiki-chapters nav button:hover {
+  background: var(--surface-muted);
+}
+
+.ludowiki-chapters nav button.is-active {
+  border-left-color: var(--school-accent, var(--blue-600));
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
+
+.ludowiki-chapters nav button span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ludowiki-chapters nav button small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ludowiki-article {
+  min-width: 0;
+  overflow-y: auto;
+  padding: 24px 34px 60px;
+}
+
+.ludowiki-article > header {
+  max-width: 900px;
+}
+
+.ludowiki-article > header h2 {
+  margin: 4px 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.ludowiki-article > header p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ludowiki-diagram {
+  max-width: 900px;
+  margin: 22px 0;
+  padding: 18px 20px 11px;
+  border-block: 1px solid var(--line);
+}
+
+.ludowiki-diagram > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(100px, 1fr));
+  align-items: start;
+}
+
+.ludowiki-diagram-part {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  align-items: center;
+}
+
+.ludowiki-diagram-part:last-child {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ludowiki-diagram-part > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--ink-soft);
+}
+
+.ludowiki-step {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.ludowiki-step > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 3px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--blue-700);
+  background: var(--surface);
+}
+
+.ludowiki-step svg {
+  width: 21px;
+  height: 21px;
+}
+
+.ludowiki-step strong {
+  font-size: 11px;
+}
+
+.ludowiki-step small {
+  max-width: 110px;
+  color: var(--ink-muted);
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.ludowiki-diagram figcaption {
+  margin-top: 12px;
+  color: var(--ink-soft);
+  font-size: 9px;
+  text-align: center;
+}
+
+.ludowiki-article > section,
+.ludowiki-article > footer,
+.ludowiki-note {
+  max-width: 900px;
+}
+
+.ludowiki-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  border: 1px solid var(--line);
+}
+
+.ludowiki-numbers > div {
+  display: flex;
+  min-height: 82px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.ludowiki-numbers > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.ludowiki-numbers span,
+.ludowiki-numbers small {
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.ludowiki-numbers strong {
+  color: var(--blue-700);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ludowiki-rules {
+  margin-top: 22px;
+}
+
+.ludowiki-rules ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ludowiki-example,
+.ludowiki-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--blue-600) 38%, var(--line));
+  background: var(--blue-050);
+}
+
+.ludowiki-example > svg,
+.ludowiki-note > svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  color: var(--blue-700);
+}
+
+.ludowiki-example h3 {
+  margin-bottom: 5px;
+}
+
+.ludowiki-example p {
+  margin: 2px 0;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.ludowiki-note {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.ludowiki-note span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ludowiki-article > footer {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.ludowiki-article > footer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 14px;
+  margin-top: 7px;
+}
+
+.ludowiki-article > footer button {
+  padding: 0;
+  color: var(--blue-700);
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ludowiki-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.ludowiki-empty svg {
+  width: 27px;
+  height: 27px;
+  margin-bottom: 4px;
+  color: var(--ink-soft);
+}
+
+.ludowiki-empty strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.ludowiki-empty span {
+  font-size: 10px;
+}
+
+@media (max-width: 1100px) {
+  .overview-view.ludowiki-view {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .ludodex-layout {
+    grid-template-columns: minmax(280px, .8fr) minmax(360px, 1.2fr);
+  }
+
+  .ludowiki-manual-layout {
+    grid-template-columns: minmax(230px, .62fr) minmax(400px, 1.38fr);
+  }
+
+  .ludodex-dossier,
+  .ludowiki-article {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+
+  .ludodex-stats {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .overview-view.ludowiki-view {
+    display: block;
+    overflow-y: auto;
+    padding: 14px 12px 48px;
+  }
+
+  .ludowiki-view > header {
+    align-items: flex-start;
+  }
+
+  .ludowiki-view > header h1 {
+    font-size: 21px;
+  }
+
+  .ludowiki-tabs {
+    position: sticky;
+    top: -14px;
+    z-index: 2;
+    background: var(--surface);
+  }
+
+  .ludodex-layout,
+  .ludowiki-manual-layout {
+    display: block;
+    height: auto;
+  }
+
+  .ludodex-catalog,
+  .ludowiki-chapters {
+    max-height: none;
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .ludodex-list {
+    max-height: 330px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ludodex-dossier,
+  .ludowiki-article {
+    overflow: visible;
+    padding: 24px 0 20px;
+  }
+
+  .ludodex-dossier-identity {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .ludodex-mark.is-large {
+    width: 78px;
+    height: 78px;
+  }
+
+  .ludodex-mark.is-large span {
+    font-size: 24px;
+  }
+
+  .ludodex-dossier h2 {
+    font-size: 20px;
+  }
+
+  .ludodex-acquisition-info > div {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .ludowiki-chapters {
+    max-height: 330px;
+    padding-bottom: 12px;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ludowiki-chapters > .ludowiki-search {
+    margin-right: 0;
+  }
+
+  .ludowiki-diagram {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .ludowiki-diagram > div {
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+    gap: 20px 4px;
+  }
+
+  .ludowiki-diagram-part:nth-child(2) > svg {
+    display: none;
+  }
+
+  .ludowiki-numbers {
+    grid-template-columns: 1fr;
+  }
+
+  .ludowiki-numbers > div + div {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ludodex-progress span {
+    transition: none;
+  }
+}

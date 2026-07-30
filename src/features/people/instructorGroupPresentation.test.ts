@@ -8,6 +8,7 @@ import {
   getAvailableInstructorCourses,
   getInstructorCoverageForms,
   getInstructorTeachingEntries,
+  getTechnicianCourseEntries,
 } from "./instructorGroupPresentation";
 
 function instructor(id: string, instructorForms: Collaborator["instructorForms"]): Collaborator {
@@ -67,5 +68,33 @@ describe("instructor group presentation", () => {
     expect(entries).toHaveLength(2);
     expect(getInstructorTeachingEntries(state)).toBe(entries);
     expect(getAggregateInstructorProgress(entries, 1_500)).toBe(25);
+  });
+
+  it("includes active Technician courses but excludes SIS reservations", () => {
+    const active = {
+      ...instructor("active", ["form-1"]),
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 11_000,
+        status: "running" as const,
+        trainingTrack: "technician" as const,
+        trainingPhase: "technician" as const,
+      },
+    };
+    const reserved = {
+      ...instructor("reserved", ["form-1"]),
+      technicianCourseReservation: {
+        formId: "form-1" as const,
+        bookedAt: 1_000,
+        eligibleMonth: 7,
+      },
+    };
+    const collaborators = [active, reserved];
+
+    const entries = getTechnicianCourseEntries(collaborators);
+
+    expect(entries.map((entry) => entry.id)).toEqual([active.id]);
+    expect(getTechnicianCourseEntries(collaborators)).toBe(entries);
   });
 });

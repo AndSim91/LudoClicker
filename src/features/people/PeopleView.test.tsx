@@ -154,7 +154,7 @@ describe("PeopleView", () => {
     )).toBe(false);
   });
 
-  it("uses the empty internal-course area for teaching overflow without hiding active preparation", () => {
+  it("keeps every Allievi course in one scrollable lane with athletic preparation last", () => {
     const initial = createInitialState(1_000);
     const courseIds: FormId[] = [
       "form-1",
@@ -228,17 +228,17 @@ describe("PeopleView", () => {
     );
     const view = render(renderView(false));
 
-    const overflowArea = screen.getByRole("region", { name: "Altre lezioni in corso" });
-    expect(within(overflowArea).getAllByRole("progressbar")).toHaveLength(4);
-    expect(within(overflowArea).getByText("Forma 4 Spada Lunga")).toBeVisible();
-    expect(screen.queryByRole("region", { name: "Corsi Istruttori interni" }))
+    const allieviLane = screen.getByRole("region", { name: "Corsi Allievi" });
+    expect(within(allieviLane).getAllByRole("progressbar")).toHaveLength(8);
+    expect(within(allieviLane).getByText("Forma 4 Spada Lunga")).toBeVisible();
+    expect(screen.queryByRole("region", { name: "Altre lezioni in corso" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Corsi Istruttori" }))
       .not.toBeInTheDocument();
 
     view.rerender(renderView(true));
 
-    expect(screen.queryByRole("region", { name: "Altre lezioni in corso" }))
-      .not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Corsi Istruttori interni" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Corsi Allievi" })).toBeVisible();
     expect(screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     })).toHaveClass("is-indeterminate");
@@ -446,7 +446,7 @@ describe("PeopleView", () => {
       .toEqual(["Apri dettagli di Beta Istruttore", "Apri dettagli di Delta Istruttore"]);
   });
 
-  it("shows continuous athletic preparation and the single instructor course action", () => {
+  it("shows continuous athletic preparation and a stable instructor-course counter", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 9 }, (_, index) => ({
       id: `aggregate-instructor-${index}`,
@@ -461,10 +461,12 @@ describe("PeopleView", () => {
       rarity: "ultra-rare" as const,
     }));
 
-    const onStartTraining = vi.fn();
     const state = {
       ...initial,
       school: { ...initial.school, euros: 1_000 },
+      contacts: initial.contacts.map((contact, index) =>
+        index === 0 ? { ...contact, status: "enrolled" as const } : contact,
+      ),
       collaborators,
       upgrades: {
         ...initial.upgrades,
@@ -476,6 +478,10 @@ describe("PeopleView", () => {
       collaboratorManagement: {
         ...initial.collaboratorManagement,
         aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          instructor: 1,
+        },
       },
     };
     const renderView = (isPaused: boolean) => (
@@ -483,13 +489,13 @@ describe("PeopleView", () => {
         <PeopleView
           state={state}
           onAssign={() => undefined}
-          onStartTraining={onStartTraining}
+          onStartTraining={() => undefined}
         />
       </GameTimeProvider>
     );
     const view = render(renderView(false));
 
-    expect(screen.getByText("Preparazione atletica in corso...")).toBeVisible();
+    expect(screen.getByRole("region", { name: "Corsi Allievi" })).toBeVisible();
     expect(document.querySelector(".instructor-preparation-row")).not.toBeInTheDocument();
     expect(screen.queryByText("Attività principale")).not.toBeInTheDocument();
     expect(screen.queryByText("Attività del gruppo")).not.toBeInTheDocument();
@@ -506,12 +512,13 @@ describe("PeopleView", () => {
     expect(screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     })).toHaveAttribute("aria-valuetext", "Attività in pausa");
-    expect(screen.getByText("Corso Istruttori disponibile")).toBeVisible();
-    expect(screen.getByText("Istruttore Operativo")).toBeVisible();
+    expect(screen.getByText("Corsi Istruttori disponibili · 1")).toBeVisible();
 
-    const courseAction = screen.getByRole("button", { name: /Avvia Corso Istruttori/ });
+    const courseAction = screen.getByRole("button", {
+      name: "Apri 1 Corsi Istruttori disponibili",
+    });
     fireEvent.click(courseAction);
-    expect(onStartTraining).toHaveBeenCalledWith("aggregate-instructor-0", "course-x");
+    expect(screen.getByRole("dialog", { name: "Istruttori" })).toBeVisible();
   });
 
   it("shows athletic preparation as active work in the individual collaborator list", () => {
@@ -561,7 +568,7 @@ describe("PeopleView", () => {
     expect(screen.getByText("Istruttore Preparatore")).toBeVisible();
   });
 
-  it("shows Technician coverage and the active internal Instructor course", () => {
+  it("shows active Instructor and Technician courses in separate semantic lanes", () => {
     const initial = createInitialState(1_000);
     const technician = {
       id: "aggregate-technician",
@@ -606,13 +613,33 @@ describe("PeopleView", () => {
       assignment: null,
     }));
 
+    const technicianTrainee = {
+      ...technician,
+      id: "aggregate-technician-trainee",
+      contactId: "technician-trainee-contact",
+      displayName: "Aspirante Tecnico",
+      joinedAt: 2_500,
+      technicianForms: [] as FormId[],
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 21_000,
+        status: "running" as const,
+        trainingTrack: "technician" as const,
+        trainingPhase: "technician" as const,
+      },
+    };
     const state = {
       ...initial,
-      collaborators: [technician, trainee, ...otherCollaborators],
+      collaborators: [technician, trainee, technicianTrainee, ...otherCollaborators],
       unlocks: { ...initial.unlocks, collaborators: true, forms: true },
       collaboratorManagement: {
         ...initial.collaboratorManagement,
         aggregateViewUnlocked: true,
+        targets: {
+          ...initial.collaboratorManagement.targets,
+          instructor: 3,
+        },
       },
     };
     const renderView = (collaborators: Collaborator[]) => (
@@ -627,14 +654,21 @@ describe("PeopleView", () => {
     const view = render(renderView(state.collaborators));
 
     expect(screen.getByTitle("Forma 1 · Qualifica da Tecnico")).toBeVisible();
-    expect(screen.getByText("Corsi Istruttori interni")).toBeVisible();
-    const internalCourseProgress = screen.getByRole("progressbar", {
+    const instructorLane = screen.getByRole("region", { name: "Corsi Istruttori" });
+    const internalCourseProgress = within(instructorLane).getByRole("progressbar", {
       name: "Forma 1: 1 corso",
     });
     expect(internalCourseProgress).toHaveAttribute("aria-valuenow", "50");
     expect(internalCourseProgress).toHaveClass("aggregated-teaching-bar");
     expect(internalCourseProgress.closest(".aggregated-teaching-groups"))
       .toHaveClass("is-internal-instructor");
+    const technicianLane = screen.getByRole("region", { name: "Corsi Tecnici" });
+    const technicianCourseProgress = within(technicianLane).getByRole("progressbar", {
+      name: "Forma 1: 1 corso",
+    });
+    expect(technicianCourseProgress).toHaveAttribute("aria-valuenow", "25");
+    expect(technicianCourseProgress.closest(".aggregated-teaching-groups"))
+      .toHaveClass("is-technician");
     expect(screen.queryByText(
       /esame (fallito|non superato)|probabilità dell'esame|rischio dell'esame/i,
     )).not.toBeInTheDocument();
@@ -646,16 +680,16 @@ describe("PeopleView", () => {
         instructorForms: ["form-1"],
         training: undefined,
       },
+      { ...technicianTrainee, training: undefined },
       ...otherCollaborators,
     ]));
 
-    const stableInternalCourses = screen.getByRole("region", {
-      name: "Corsi Istruttori interni",
-    });
-    expect(within(stableInternalCourses).getByText("Nessuno in svolgimento")).toBeVisible();
-    expect(within(stableInternalCourses).getByRole("status")).toHaveTextContent(
-      "Nessun Corso Istruttori in svolgimento",
-    );
+    expect(screen.queryByRole("region", { name: "Corsi Istruttori" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Corsi Tecnici" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByText("Nessun Corso Istruttori in svolgimento"))
+      .not.toBeInTheDocument();
   });
 
   it("allows booking an eligible Technician course from the Instructor card", () => {
@@ -765,11 +799,12 @@ describe("PeopleView", () => {
       );
 
       expect(screen.getByText("Pausa estiva")).toBeVisible();
-      expect(screen.getByText("Preparazione atletica sospesa")).toBeVisible();
-      expect(screen.queryByText("Preparazione atletica in corso...")).not.toBeInTheDocument();
-      expect(screen.queryByRole("progressbar", {
-        name: "Preparazione atletica continuativa",
-      })).not.toBeInTheDocument();
+      const preparationBar = screen.getByRole("progressbar", {
+        name: "Preparazione atletica in pausa",
+      });
+      expect(preparationBar).toHaveClass("is-inactive");
+      expect(preparationBar).not.toHaveClass("is-indeterminate");
+      expect(preparationBar).toHaveAttribute("aria-valuetext", "Pausa estiva");
     },
   );
 
@@ -819,7 +854,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("In attesa · tutti gli istruttori stanno insegnando")).toBeVisible();
+    expect(within(screen.getByRole("region", { name: "Corsi Allievi" }))
+      .getByText("In attesa")).toBeVisible();
     const preparationBar = screen.getByRole("progressbar", {
       name: "Preparazione atletica in attesa",
     });

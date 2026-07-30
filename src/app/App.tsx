@@ -23,6 +23,7 @@ import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { TournamentsView } from "../features/tournaments/TournamentsView";
 import { GadgetsView } from "../features/gadgets/GadgetsView";
+import { LudoWikiView } from "../features/ludowiki/LudoWikiView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
@@ -67,6 +68,7 @@ const StableEventsView = memo(EventsView);
 const StablePeopleView = memo(PeopleView);
 const StableTournamentsView = memo(TournamentsView);
 const StableGadgetsView = memo(GadgetsView);
+const StableLudoWikiView = memo(LudoWikiView);
 const StableOverviewView = memo(OverviewView);
 const StableDayPanel = memo(DayPanel);
 
@@ -138,9 +140,9 @@ export function App() {
     ? "gadget"
     : hasBlockingReptileFlow
       ? "tournaments"
-    : view === "admin"
+    : view === "admin" || view === "ludowiki"
       ? import.meta.env.DEV
-        ? "admin"
+        ? view
         : "mail"
       : isGameAreaUnlocked(view, state)
         ? view
@@ -583,6 +585,8 @@ export function App() {
               onDismissMinigameResult={dismissGadgetMinigameResult}
               onAccept={acceptGadgetProduct}
             />
+          ) : activeView === "ludowiki" ? (
+            <StableLudoWikiView />
           ) : activeView === "admin" ? (
             <AdminEmailView
               totalContacts={state.contacts.length}

@@ -1714,6 +1714,34 @@ Presentate come report di campagna:
 - rendimento collaboratori;
 - andamento nel tempo.
 
+### 12.6 LudoWiki (solo ambiente di sviluppo)
+
+La LudoWiki è una pagina sperimentale disponibile soltanto nelle build di
+sviluppo, come la pagina Admin. Finché il lavoro è in corso non deve comparire
+nella navigazione delle build di produzione.
+
+Contiene due aree:
+
+- **Ludodex**: collezione permanente dei Leggendari reclutabili, cioè delle
+  persone uniche con nome e cognome fissi. Un dossier viene scoperto alla prima
+  iscrizione in qualunque scuola e resta disponibile dopo abbandoni o nuove
+  fondazioni. Le voci non scoperte non rivelano nome, statistiche o provenienza.
+  I dossier scoperti mostrano soltanto i valori base di Arena e Stile, senza
+  Forme numeriche o esperienza tornei, e predispongono uno spazio dedicato a una
+  futura breve biografia dell'atleta. Ogni dossier indica inoltre la scuola di
+  appartenenza iniziale, il luogo d'incontro e il metodo di acquisizione. I
+  Leggendari ordinari appartengono inizialmente a LudoSport Genova - Ordine
+  delle Onde; per i Leggendari Segreti questi dati derivano dalla scuola e dal
+  torneo configurati, oppure dalle Chronicles of Ludosport.
+- **Manuale di gioco**: versione consultabile e orientata al giocatore delle
+  spiegazioni introdotte dai tutorial. Usa numeri correnti, esempi e schemi
+  visivi, ma non espone identificativi interni, dettagli di implementazione o
+  protezioni dalla sfortuna intenzionalmente nascoste.
+
+Il completamento del Ludodex considera soltanto Leggendari che possono davvero
+iscriversi: un avversario dichiaratamente non reclutabile non può rendere
+impossibile il 100% della collezione.
+
 ---
 
 ## 13. Tutorial narrativo e interattivo
@@ -2045,6 +2073,7 @@ uno storico nominativo.
 - bonus permanenti;
 - modelli email sbloccati;
 - traguardi;
+- scoperte del Ludodex e progressi permanenti dei Leggendari;
 - un collaboratore mentore selezionato, se sbloccato.
 
 Bonus iniziale consigliato per la prima fondazione: almeno **+25%** alla

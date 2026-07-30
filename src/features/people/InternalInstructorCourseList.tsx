@@ -25,7 +25,6 @@ export function InternalInstructorCourseList({
       now={now}
       agonistCourseUnlocked={false}
       variant="internal-instructor"
-      emptyLabel="Nessun Corso Istruttori in svolgimento"
     />
   );
 }

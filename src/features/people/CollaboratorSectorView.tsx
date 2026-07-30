@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
@@ -16,7 +16,10 @@ import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
 import { isSummerBreak } from "../../game/calendar";
-import { selectActiveEmail } from "../../game/selectors";
+import {
+  selectActiveEmail,
+  selectAthleticPreparationInstructorIds,
+} from "../../game/selectors";
 import type {
   Collaborator,
   CollaboratorMasteryRole,
@@ -36,9 +39,10 @@ import {
   getInternalInstructorCourseEntries,
   getInstructorCoverageForms,
   getInstructorTeachingEntries,
+  getTechnicianCourseEntries,
   getTechnicianCoverageForms,
 } from "./instructorGroupPresentation";
-import { InstructorCourseShortcut } from "./InstructorCourseShortcut";
+import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormLogoStrip } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
@@ -48,9 +52,6 @@ const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "events",
   "equipment",
 ];
-
-const PRIMARY_TEACHING_GROUP_LIMIT = 3;
-const TEACHING_OVERFLOW_ROWS = 3;
 
 const ROLE_PRESENTATION: Record<
   CollaboratorMasteryRole,
@@ -299,7 +300,6 @@ function InstructorSectorCard({
   onIncrement,
   onDecrement,
   onOpen,
-  onStartTraining,
 }: {
   state?: GameState;
   actual: number;
@@ -309,7 +309,6 @@ function InstructorSectorCard({
   onIncrement: () => void;
   onDecrement: () => void;
   onOpen: () => void;
-  onStartTraining: (personId: string, formId: FormId) => void;
 }) {
   const state = useGameStateSlices(
     ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
@@ -323,9 +322,8 @@ function InstructorSectorCard({
     coverage,
     technicianCoverage,
     internalCourses,
+    technicianCourses,
     availableInstructorCourses,
-    singleInstructorCourse,
-    idleInstructors,
   } = useMemo(() => {
     const nextInstructors = state.collaborators.filter(
       (collaborator) => collaborator.assignment === "instructor",
@@ -341,9 +339,6 @@ function InstructorSectorCard({
       nextInstructors,
       courseXUnlocked,
     );
-    const instructorsTeaching = new Set(
-      nextEntries.map((entry) => entry.instructorId),
-    );
     return {
       instructors: nextInstructors,
       entries: nextEntries,
@@ -356,39 +351,29 @@ function InstructorSectorCard({
         nextInstructors,
         courseXUnlocked,
       ),
-      availableInstructorCourses: nextAvailableCourses,
-      singleInstructorCourse: nextAvailableCourses.length === 1
-        ? nextAvailableCourses[0]
-        : undefined,
-      idleInstructors: Math.max(
-        0,
-        nextInstructors.length - instructorsTeaching.size,
+      technicianCourses: getTechnicianCourseEntries(
+        nextInstructors,
+        courseXUnlocked,
       ),
+      availableInstructorCourses: nextAvailableCourses,
     };
   }, [courseXUnlocked, state.collaborators, state.contacts]);
   const prepUnlocked = isAthleticPreparationUnlocked(state.upgrades);
-  const prepIsPrimary = entries.length === 0 && prepUnlocked && instructors.length > 0;
   const summerBreak = isSummerBreak(state.school.currentMonth);
-  const preparationIsActive = !summerBreak && idleInstructors > 0;
-  const internalCourseAreaAvailable = technicianCoverage.length > 0 || internalCourses.length > 0;
+  const showAthleticPreparation = prepUnlocked && instructors.length > 0;
+  const activePreparationInstructorCount = selectAthleticPreparationInstructorIds(state).size;
+  const preparationIsActive = !summerBreak && activePreparationInstructorCount > 0;
   const teachingGroups = useMemo(
     () => groupInstructorTeachingEntries(entries),
     [entries],
   );
-  const athleticPreparationIsActive = prepUnlocked && !prepIsPrimary && preparationIsActive;
-  const canUseTeachingOverflowArea = internalCourseAreaAvailable
-    && internalCourses.length === 0
-    && !athleticPreparationIsActive
-    && teachingGroups.length > PRIMARY_TEACHING_GROUP_LIMIT;
-  const primaryTeachingEntries = canUseTeachingOverflowArea
-    ? teachingGroups.slice(0, PRIMARY_TEACHING_GROUP_LIMIT).flatMap((group) => group.entries)
-    : entries;
-  const overflowTeachingEntries = canUseTeachingOverflowArea
-    ? teachingGroups.slice(PRIMARY_TEACHING_GROUP_LIMIT).flatMap((group) => group.entries)
-    : [];
-  const overflowTeachingColumns = Math.min(
-    4,
-    Math.ceil((teachingGroups.length - PRIMARY_TEACHING_GROUP_LIMIT) / TEACHING_OVERFLOW_ROWS),
+  const internalCourseGroupCount = useMemo(
+    () => new Set(internalCourses.map((entry) => entry.formId)).size,
+    [internalCourses],
+  );
+  const technicianCourseGroupCount = useMemo(
+    () => groupInstructorTeachingEntries(technicianCourses).length,
+    [technicianCourses],
   );
 
   return (
@@ -412,52 +397,74 @@ function InstructorSectorCard({
         />
       </header>
 
-      <div className="instructor-operations-grid">
-        <section className="instructor-main-activity">
-          <div>
-            <span className="sector-status-dot" aria-hidden="true" />
-            <strong>{entries.length > 0
-              ? "Insegnamento in corso..."
-              : prepIsPrimary
-                ? summerBreak
-                  ? "Pausa estiva"
-                  : "Preparazione atletica in corso..."
-                : "In attesa"}</strong>
-          </div>
-          <div className={`instructor-main-activity-stage${entries.length > 0 ? " is-teaching" : " is-idle"}`}>
+      <div className="instructor-sector-body">
+        <div className="instructor-activity-well">
+          <InstructorActivityLane
+            title="Corsi Allievi"
+            tone="student"
+            rowCount={teachingGroups.length + Number(showAthleticPreparation)}
+          >
             {entries.length > 0 ? (
-              <>
-                <AggregatedTeachingBar
-                  entries={primaryTeachingEntries}
-                  now={now}
-                  agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
-                />
-                <p>
-                  <strong>{entries.length} {entries.length === 1 ? "corso attivo" : "corsi attivi"}</strong>
-                </p>
-              </>
-            ) : prepIsPrimary && summerBreak ? (
-              <div className="instructor-empty-progress">
-                <span />
-                <small>Preparazione atletica sospesa</small>
-              </div>
-            ) : prepIsPrimary ? (
-              <>
+              <AggregatedTeachingBar
+                entries={entries}
+                now={now}
+                agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
+              />
+            ) : null}
+            {showAthleticPreparation ? (
+              <div className={`athletic-preparation-course${preparationIsActive ? "" : " is-inactive"}`}>
+                <span className="athletic-preparation-course-logo" aria-hidden="true">
+                  <Icon name="trend" />
+                </span>
+                <strong>Preparazione atletica</strong>
                 <ProgressBar
-                  className="instructor-preparation-loop"
-                  label="Preparazione atletica continuativa"
+                  className={`instructor-preparation-loop${preparationIsActive ? "" : " is-inactive"}`}
+                  label={summerBreak
+                    ? "Preparazione atletica in pausa"
+                    : preparationIsActive
+                      ? "Preparazione atletica continuativa"
+                      : "Preparazione atletica in attesa"}
                   value={0}
-                  valueText={isPaused ? "Attività in pausa" : "Attività continuativa"}
-                  indeterminate
+                  valueText={summerBreak
+                    ? "Pausa estiva"
+                    : !preparationIsActive
+                      ? "In attesa di istruttori disponibili"
+                      : isPaused
+                        ? "Attività in pausa"
+                        : "Attività continuativa"}
+                  indeterminate={preparationIsActive}
                   paused={isPaused}
                 />
-                <p><strong>{idleInstructors} istruttori disponibili</strong><span>Attività continuativa</span></p>
-              </>
-            ) : (
-              <div className="instructor-empty-progress"><span /><small>Nessun allievo compatibile</small></div>
-            )}
-          </div>
-        </section>
+                <small>{summerBreak
+                  ? "Pausa estiva"
+                  : preparationIsActive
+                    ? "∞"
+                    : "In attesa"}</small>
+              </div>
+            ) : null}
+          </InstructorActivityLane>
+
+          <InstructorActivityLane
+            title="Corsi Istruttori"
+            tone="instructor"
+            rowCount={internalCourseGroupCount}
+          >
+            <InternalInstructorCourseList entries={internalCourses} now={now} />
+          </InstructorActivityLane>
+
+          <InstructorActivityLane
+            title="Corsi Tecnici"
+            tone="technician"
+            rowCount={technicianCourseGroupCount}
+          >
+            <AggregatedTeachingBar
+              entries={technicianCourses}
+              now={now}
+              agonistCourseUnlocked={false}
+              variant="technician"
+            />
+          </InstructorActivityLane>
+        </div>
 
         <section className="instructor-coverage">
           <div className="instructor-coverage-forms">
@@ -469,92 +476,24 @@ function InstructorSectorCard({
               technicianForms={technicianCoverage}
               showLabels={false}
             />
-            {coverage.length === 0 ? <small>Forma gli istruttori per ampliare la copertura.</small> : null}
           </div>
           <div className="instructor-coverage-actions">
             <SectorMasteryIndicator collaborators={instructors} role="instructor" />
-            {singleInstructorCourse ? (
-              <InstructorCourseShortcut
-                course={singleInstructorCourse}
-                state={stateOverride}
-                onStartTraining={onStartTraining}
-              />
-            ) : availableInstructorCourses.length > 0 ? (
-              <button
-                type="button"
-                className="instructor-courses-link"
-                aria-label={`Apri ${availableInstructorCourses.length} Corsi Istruttori disponibili`}
-                onClick={onOpen}
-              >
-                Corsi Istruttori disponibili
-                <Icon name="arrowRight" />
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="instructor-courses-link"
+              aria-label={availableInstructorCourses.length > 0
+                ? `Apri ${availableInstructorCourses.length} Corsi Istruttori disponibili`
+                : "Nessun Corso Istruttori disponibile"}
+              onClick={onOpen}
+              disabled={availableInstructorCourses.length === 0}
+            >
+              Corsi Istruttori disponibili · {availableInstructorCourses.length}
+              <Icon name="arrowRight" />
+            </button>
           </div>
         </section>
       </div>
-
-      {canUseTeachingOverflowArea ? (
-        <section
-          className="internal-instructor-courses instructor-teaching-overflow"
-          aria-label="Altre lezioni in corso"
-          style={{
-            "--teaching-overflow-columns": overflowTeachingColumns,
-          } as CSSProperties}
-        >
-          <div className="internal-instructor-courses-heading">
-            <strong>Altre lezioni in corso</strong>
-            <small>Tutte le Forme restano visibili</small>
-          </div>
-          <AggregatedTeachingBar
-            entries={overflowTeachingEntries}
-            now={now}
-            agonistCourseUnlocked={isAgonistCourseUnlocked(state.upgrades)}
-          />
-        </section>
-      ) : internalCourseAreaAvailable ? (
-        <section className="internal-instructor-courses" aria-label="Corsi Istruttori interni">
-          <div className="internal-instructor-courses-heading">
-            <strong>Corsi Istruttori interni</strong>
-            <small>{internalCourses.length > 0
-              ? `${internalCourses.length} in svolgimento`
-              : "Nessuno in svolgimento"}</small>
-          </div>
-          <InternalInstructorCourseList entries={internalCourses} now={now} />
-        </section>
-      ) : null}
-
-      {prepUnlocked && instructors.length > 0 && !prepIsPrimary ? (
-        <div className="instructor-preparation-row">
-          <span className="sector-card-icon"><Icon name="trend" /></span>
-          <span>
-            <strong>Preparazione atletica</strong>
-            <small>{summerBreak
-              ? "Pausa estiva"
-              : idleInstructors > 0
-                ? `Attività secondaria · ${idleInstructors} istruttori senza lezioni`
-                : "In attesa · tutti gli istruttori stanno insegnando"}</small>
-          </span>
-          <ProgressBar
-            className={`instructor-preparation-loop${preparationIsActive ? "" : " is-inactive"}`}
-            label={summerBreak
-              ? "Preparazione atletica in pausa"
-              : preparationIsActive
-                ? "Preparazione atletica continuativa"
-                : "Preparazione atletica in attesa"}
-            value={0}
-            valueText={summerBreak
-              ? "Pausa estiva"
-              : !preparationIsActive
-                ? "In attesa di istruttori disponibili"
-              : isPaused
-                ? "Attività in pausa"
-                : "Attività continuativa"}
-            indeterminate={preparationIsActive}
-            paused={isPaused}
-          />
-        </div>
-      ) : null}
 
       <button type="button" className="sector-manage-button is-primary" onClick={onOpen}>
         Apri centro didattico
@@ -619,10 +558,18 @@ export function CollaboratorSectorView({
     ),
     [courseXUnlocked, state.collaborators],
   );
+  const technicianCourses = useMemo(
+    () => getTechnicianCourseEntries(
+      state.collaborators,
+      courseXUnlocked,
+    ),
+    [courseXUnlocked, state.collaborators],
+  );
   const hasTimedWork = useMemo(
     () => state.acquisitionEvents.some((event) => event.status === "running") ||
       teachingEntries.length > 0 ||
       internalInstructorCourses.length > 0 ||
+      technicianCourses.length > 0 ||
       (
         state.collaborators.some(
           (collaborator) => collaborator.assignment === "equipment",
@@ -635,6 +582,7 @@ export function CollaboratorSectorView({
       state.equipment,
       state.gadgets.activeWork,
       teachingEntries.length,
+      technicianCourses.length,
     ],
   );
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
@@ -668,7 +616,6 @@ export function CollaboratorSectorView({
         onIncrement={() => onIncrement("instructor")}
         onDecrement={() => onDecrement("instructor")}
         onOpen={() => setOpenRole("instructor")}
-        onStartTraining={onStartTraining}
       />
 
       <div className="collaborator-sector-grid">

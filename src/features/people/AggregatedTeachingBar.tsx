@@ -55,33 +55,30 @@ export function AggregatedTeachingBar({
   now,
   agonistCourseUnlocked,
   variant = "teaching",
-  emptyLabel = "Nessun corso in svolgimento",
 }: {
   entries: readonly InstructorTeachingEntry[];
   now: number;
   agonistCourseUnlocked: boolean;
-  variant?: "teaching" | "internal-instructor";
-  emptyLabel?: string;
+  variant?: "teaching" | "internal-instructor" | "technician";
 }) {
   const groups = useMemo(
     () => groupInstructorTeachingEntries(entries),
     [entries],
   );
   const internalInstructor = variant === "internal-instructor";
+  const technician = variant === "technician";
+
+  if (groups.length === 0) return null;
 
   return (
     <div
-      className={`aggregated-teaching-groups${internalInstructor ? " is-internal-instructor" : ""}${groups.length === 0 ? " is-empty" : ""}`}
+      className={`aggregated-teaching-groups${internalInstructor ? " is-internal-instructor" : ""}${technician ? " is-technician" : ""}`}
       aria-label={internalInstructor
-        ? "Corsi Istruttori interni raggruppati per Forma"
+        ? "Corsi Istruttori raggruppati per Forma"
+        : technician
+          ? "Corsi Tecnici raggruppati per Forma"
         : "Lezioni raggruppate per Forma"}
     >
-      {groups.length === 0 ? (
-        <div className="aggregated-teaching-empty" role="status">
-          <span aria-hidden="true" />
-          <small>{emptyLabel}</small>
-        </div>
-      ) : null}
       {groups.map((group) => {
         const progress = getAggregateInstructorProgress(group.entries, now) ?? 0;
         const title = getTrainingCourseTitle(group.courseId, agonistCourseUnlocked);
@@ -142,7 +139,7 @@ export function AggregatedTeachingBar({
                 })}
               </span>
             )}
-            <small>{group.entries.length}</small>
+            <small>{courseCountLabel}</small>
           </div>
         );
       })}

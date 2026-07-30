@@ -16,6 +16,9 @@
 }
 
 .instructor-sector-card {
+  display: grid;
+  height: 420px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
   border-color: color-mix(in srgb, var(--blue-600) 72%, var(--line));
   box-shadow:
@@ -159,10 +162,74 @@
   font-weight: 600;
 }
 
-.instructor-operations-grid {
+.instructor-sector-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(240px, .8fr);
+  min-height: 0;
+  grid-template-areas: "activity coverage";
+  grid-template-columns: minmax(0, 2.25fr) minmax(300px, 1fr);
   min-width: 0;
+}
+
+.instructor-activity-well {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  grid-area: activity;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.instructor-activity-lane {
+  --instructor-lane-accent: var(--blue-600);
+  --instructor-lane-tint: var(--blue-050);
+  display: grid;
+  min-width: 0;
+  min-height: 64px;
+  flex: 0 1 var(--instructor-lane-basis);
+  grid-template-rows: 32px minmax(0, 1fr);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 3px 0 var(--instructor-lane-accent);
+  background: color-mix(in srgb, var(--instructor-lane-tint) 72%, var(--surface));
+}
+
+.instructor-activity-lane.is-instructor {
+  --instructor-lane-accent: #2f8a57;
+  --instructor-lane-tint: color-mix(in srgb, #2f8a57 10%, var(--surface));
+}
+
+.instructor-activity-lane.is-technician {
+  --instructor-lane-accent: #8b5cf6;
+  --instructor-lane-tint: color-mix(in srgb, #8b5cf6 10%, var(--surface));
+}
+
+.instructor-activity-lane > h4 {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  margin: 0;
+  padding: 7px 16px 3px;
+  color: var(--instructor-lane-accent);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.instructor-activity-lane-body {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px 8px;
+  scrollbar-color: color-mix(in srgb, var(--instructor-lane-accent) 28%, transparent) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.instructor-activity-lane-body > .aggregated-teaching-groups {
+  margin-top: 0;
 }
 
 .internal-instructor-courses {
@@ -205,8 +272,7 @@
   scrollbar-gutter: auto;
 }
 
-.instructor-main-activity,
-.instructor-coverage {
+.instructor-main-activity {
   min-width: 0;
   padding: 13px 16px;
 }
@@ -313,7 +379,7 @@
 
 .aggregated-teaching-group {
   display: grid;
-  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 18px;
+  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 48px;
   align-items: center;
   gap: 8px;
 }
@@ -366,7 +432,7 @@
   color: var(--ink-muted);
   font-size: 8px;
   font-variant-numeric: tabular-nums;
-  text-align: center;
+  text-align: right;
 }
 
 .aggregated-teaching-segment {
@@ -393,11 +459,21 @@
 
 .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar,
 .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment {
-  background: color-mix(in srgb, #a78bfa 24%, var(--surface));
+  background: color-mix(in srgb, #2f8a57 18%, var(--surface));
 }
 
 .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar.is-compact > span,
 .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment > span {
+  background: #2f8a57;
+}
+
+.aggregated-teaching-groups.is-technician .aggregated-teaching-bar,
+.aggregated-teaching-groups.is-technician .aggregated-teaching-segment {
+  background: color-mix(in srgb, #8b5cf6 18%, var(--surface));
+}
+
+.aggregated-teaching-groups.is-technician .aggregated-teaching-bar.is-compact > span,
+.aggregated-teaching-groups.is-technician .aggregated-teaching-segment > span {
   background: #8b5cf6;
 }
 
@@ -420,6 +496,64 @@
 
 .aggregated-teaching-empty > small {
   flex: 0 0 auto;
+}
+
+.athletic-preparation-course {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.athletic-preparation-course-logo {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--blue-700);
+  background: var(--surface);
+}
+
+.athletic-preparation-course-logo svg {
+  width: 15px;
+  height: 15px;
+}
+
+.athletic-preparation-course > strong {
+  grid-column: 1;
+  min-width: 0;
+  padding-left: 35px;
+  margin-left: -35px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.athletic-preparation-course > .progress-bar {
+  grid-column: 2;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--blue-100);
+}
+
+.athletic-preparation-course > small {
+  grid-column: 3;
+  color: var(--blue-700);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.athletic-preparation-course.is-inactive > small {
+  color: var(--ink-muted);
 }
 
 .instructor-main-activity-stage > p {
@@ -453,6 +587,7 @@
 }
 
 .instructor-main-activity-stage > .progress-bar,
+.athletic-preparation-course > .progress-bar,
 .instructor-preparation-row .progress-bar,
 .sector-card-progress .progress-bar,
 .sector-roster-mastery .progress-bar,
@@ -468,6 +603,7 @@
 }
 
 .instructor-main-activity-stage > .progress-bar > span,
+.athletic-preparation-course > .progress-bar > span,
 .instructor-preparation-row .progress-bar > span,
 .sector-card-progress .progress-bar > span,
 .sector-roster-mastery .progress-bar > span,
@@ -494,10 +630,21 @@
 }
 
 .instructor-coverage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, .9fr);
-  align-items: start;
-  gap: 16px;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  grid-area: coverage;
+  flex-direction: column;
+  gap: 14px;
+  padding: 17px 18px;
+  overflow: hidden;
+  border-left: 1px solid var(--line);
+  background: color-mix(in srgb, var(--blue-050) 48%, var(--surface));
+}
+
+.instructor-coverage-forms {
+  min-width: 0;
+  min-height: 0;
 }
 
 .instructor-coverage-forms > span > strong {
@@ -510,16 +657,19 @@
 .instructor-coverage-actions {
   display: flex;
   min-width: 0;
+  margin-top: auto;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
 .instructor-courses-link {
   display: inline-flex;
   min-height: 28px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 4px;
   padding: 2px 0;
   color: var(--blue-700);
@@ -527,10 +677,10 @@
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
-  text-align: right;
+  text-align: left;
 }
 
-.instructor-courses-link:hover {
+.instructor-courses-link:hover:not(:disabled) {
   color: var(--blue-600);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1137,6 +1287,11 @@
   border-radius: var(--radius-md);
 }
 
+.instructor-courses-link:disabled {
+  color: var(--ink-soft);
+  cursor: default;
+}
+
 .sector-roster-sort-mobile {
   display: none;
 }
@@ -1446,6 +1601,10 @@
 @media (max-width: 720px) {
   .collaborator-sector-view { gap: 10px; }
 
+  .instructor-sector-card {
+    height: 780px;
+  }
+
   .instructor-sector-card > header,
   .collaborator-sector-card > header {
     grid-template-columns: 32px minmax(0, 1fr);
@@ -1459,7 +1618,47 @@
     width: 100%;
   }
 
-  .instructor-operations-grid { grid-template-columns: 1fr; }
+  .instructor-sector-body {
+    grid-template-areas:
+      "coverage"
+      "activity";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .instructor-coverage {
+    max-height: 230px;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .instructor-coverage-actions {
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 10px;
+  }
+
+  .instructor-courses-link {
+    min-width: 0;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .instructor-activity-lane > h4 {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .instructor-activity-lane-body {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
   .instructor-main-activity { border-right: 0; border-bottom: 1px solid var(--line); }
 
   .internal-instructor-courses {
@@ -1475,7 +1674,12 @@
   }
 
   .aggregated-teaching-group {
-    grid-template-columns: minmax(94px, .9fr) minmax(64px, 1fr) 18px;
+    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 48px;
+    gap: 6px;
+  }
+
+  .athletic-preparation-course {
+    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 48px;
     gap: 6px;
   }
 
@@ -1509,6 +1713,20 @@
   }
 
   .sector-form-strip .form-instructor-crown { font-size: 6px; }
+
+  .instructor-coverage .sector-form-strip {
+    gap: 4px;
+  }
+
+  .instructor-coverage .sector-form-strip .form-logo-item {
+    min-width: 24px;
+  }
+
+  .instructor-coverage .sector-form-strip .form-logo-mark,
+  .instructor-coverage .sector-form-strip .form-logo-mark img {
+    width: 24px;
+    height: 24px;
+  }
 
   .instructor-preparation-row {
     grid-template-columns: 30px minmax(0, 1fr);

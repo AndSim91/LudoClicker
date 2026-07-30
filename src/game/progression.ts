@@ -6,13 +6,14 @@ export type GameArea =
   | "mail"
   | "events"
   | "contacts"
+  | "ludowiki"
   | "upgrades"
   | "tournaments"
   | "gadget"
   | "settings";
 
 export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
-  if (view === "mail" || view === "settings") return true;
+  if (view === "mail" || view === "ludowiki" || view === "settings") return true;
   if (view === "gadget") return state.unlocks.gadget;
   if (state.network.schools.length > 0) return true;
 

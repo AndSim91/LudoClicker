@@ -87,7 +87,7 @@ describe("InternalInstructorCourseList", () => {
       ".aggregated-teaching-group",
     );
     expect(sharedGroup).not.toBeNull();
-    expect(within(sharedGroup as HTMLElement).getByText("2")).toBeVisible();
+    expect(within(sharedGroup as HTMLElement).getByText("2 corsi")).toBeVisible();
     expect(screen.getByText("Forma 4 Staffa")).toBeVisible();
 
     const groupedProgress = screen.getByRole("progressbar", {
