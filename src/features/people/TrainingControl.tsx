@@ -269,12 +269,14 @@ export function TechnicianCourseControl({
   onBookTechnicianCourse,
   variant = "default",
   showUnavailableState = false,
+  presentation = "collapsible",
 }: {
   collaborator: Collaborator;
   state?: GameState;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   variant?: "default" | "compact";
   showUnavailableState?: boolean;
+  presentation?: "collapsible" | "inline";
 }) {
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
@@ -282,6 +284,8 @@ export function TechnicianCourseControl({
   );
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const [isSISExpanded, setIsSISExpanded] = useState(false);
+  const isInline = presentation === "inline";
+  const isExpanded = isInline || isSISExpanded;
   const reservation = collaborator.technicianCourseReservation;
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
@@ -356,52 +360,59 @@ export function TechnicianCourseControl({
 
   return (
     <div
-      className={`training-control technician-course-control${isSISExpanded ? " is-expanded" : ""}${variantClass}`}
+      className={[
+        "training-control technician-course-control",
+        isExpanded ? " is-expanded" : "",
+        isInline ? " is-inline" : "",
+        variantClass,
+      ].join("")}
     >
-      <button
-        type="button"
-        className="technician-course-heading"
-        aria-expanded={isSISExpanded}
-        onClick={() => setIsSISExpanded((expanded) => !expanded)}
-      >
-        <span className="technician-course-badge">SIS</span>
-        <span className="technician-course-heading-copy">
-          <strong>Corso Tecnici</strong>
-        </span>
-        <span className="technician-course-toggle" aria-hidden="true">
-          {isSISExpanded ? "\u2212" : "+"}
-        </span>
-      </button>
-      {isSISExpanded ? (
+      {isInline ? null : (
+        <button
+          type="button"
+          className="technician-course-heading"
+          aria-expanded={isSISExpanded}
+          onClick={() => setIsSISExpanded((expanded) => !expanded)}
+        >
+          <span className="technician-course-badge">SIS</span>
+          <span className="technician-course-heading-copy">
+            <strong>Corso Tecnici</strong>
+          </span>
+          <span className="technician-course-toggle" aria-hidden="true">
+            {isSISExpanded ? "\u2212" : "+"}
+          </span>
+        </button>
+      )}
+      {isExpanded ? (
         <>
-      <div className="training-form-choice">
-        {definitions.length > 1 ? (
-          <TrainingOptionPicker
-            displayName={collaborator.displayName}
-            label="Scegli il percorso da Tecnico"
-            options={options}
-            selectedFormId={selectedFormId}
-            onSelect={setSelectedFormId}
-          />
-        ) : selected ? (
-          <>
-            <span className="training-form-label">Percorso Tecnico alla SIS</span>
-            <TrainingFormPreview definition={selected} />
-          </>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        className="training-start-button"
-        disabled={!selected || lacksFunds}
-        onClick={() => selected && onBookTechnicianCourse(collaborator.id, selected.id)}
-      >
-        {!selected
-          ? "Seleziona una Forma"
-          : lacksFunds
-            ? `Servono ${formatCurrency(cost)}`
-            : `Prenota SIS · ${formatCurrency(cost)}`}
-      </button>
+          <div className="training-form-choice">
+            {definitions.length > 1 ? (
+              <TrainingOptionPicker
+                displayName={collaborator.displayName}
+                label="Scegli il percorso da Tecnico"
+                options={options}
+                selectedFormId={selectedFormId}
+                onSelect={setSelectedFormId}
+              />
+            ) : selected ? (
+              <>
+                <span className="training-form-label">Percorso Tecnico alla SIS</span>
+                <TrainingFormPreview definition={selected} />
+              </>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            className="training-start-button"
+            disabled={!selected || lacksFunds}
+            onClick={() => selected && onBookTechnicianCourse(collaborator.id, selected.id)}
+          >
+            {!selected
+              ? "Seleziona una Forma"
+              : lacksFunds
+                ? `Servono ${formatCurrency(cost)}`
+                : `Prenota SIS · ${formatCurrency(cost)}`}
+          </button>
         </>
       ) : null}
     </div>
@@ -473,6 +484,7 @@ export function InstructorTechnicianTraining({
       onBookTechnicianCourse={onBookTechnicianCourse}
       variant="compact"
       showUnavailableState
+      presentation="inline"
     />
   );
 }

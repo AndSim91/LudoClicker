@@ -765,6 +765,7 @@ describe("PeopleView", () => {
     const sisHeading = screen.getByText("Corso Tecnici");
     const sisControl = sisHeading.closest(".technician-course-control");
     expect(sisControl).toBeVisible();
+    expect(sisControl).not.toHaveClass("is-inline");
     expect(sisControl?.parentElement).toHaveClass("collaborator-copy");
     expect(sisControl?.previousElementSibling).toHaveClass("form-logo-strip");
     const sisToggle = screen.getByRole("button", { name: /Corso Tecnici/ });
@@ -805,11 +806,6 @@ describe("PeopleView", () => {
       assignment: "instructor",
       mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
       rarity: "ultra-rare",
-      technicianCourseReservation: {
-        formId: "form-1",
-        bookedAt: 2_000,
-        eligibleMonth: 7,
-      },
     };
 
     render(
@@ -842,8 +838,14 @@ describe("PeopleView", () => {
     expect(within(teachingCenter).getByRole("button", {
       name: "Ordina collaboratori per Formazione Tecnici",
     })).toBeVisible();
-    expect(within(teachingCenter).getByLabelText("Formazione Tecnici"))
-      .toContainElement(within(teachingCenter).getByLabelText(/Corso Tecnico SIS prenotato: Forma 1/));
+    const technicianTraining = within(teachingCenter).getByLabelText("Formazione Tecnici");
+    expect(within(technicianTraining).queryByRole("button", { name: /Corso Tecnici/ }))
+      .not.toBeInTheDocument();
+    expect(within(technicianTraining).queryByText("Corso Tecnici")).not.toBeInTheDocument();
+    expect(technicianTraining.querySelector(".technician-course-control"))
+      .toHaveClass("is-inline", "is-expanded");
+    expect(within(technicianTraining).getByRole("button", { name: /Prenota SIS|Servono/ }))
+      .toBeVisible();
   });
 
   it.each([7, 8])(

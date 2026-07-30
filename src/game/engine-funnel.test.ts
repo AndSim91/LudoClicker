@@ -213,6 +213,7 @@ describe("game engine: funnel", () => {
     )).toBe(true);
     expect(state.contacts[8].rarity).toBe("legendary");
     expect(state.contacts[8].specialProfileId).toBe("andrea-simonazzi");
+    expect(state.contacts[8].email).toBe("andrea.simonazzi@ludosport.net");
     expect(state.legendaryCollaborators.encounteredProfileIds).toContain("andrea-simonazzi");
   });
 

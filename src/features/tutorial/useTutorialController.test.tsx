@@ -99,7 +99,7 @@ function useTutorialHarness() {
         id: "andrea-ninth-contact",
         firstName: "Andrea",
         lastName: "Simonazzi",
-        email: "andrea.simonazzi@yabadabadoo.it",
+        email: "andrea.simonazzi@ludosport.net",
         status: "writing" as const,
         rarity: "legendary" as const,
         specialProfileId: "andrea-simonazzi" as const,

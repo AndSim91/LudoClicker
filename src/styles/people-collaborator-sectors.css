@@ -1442,7 +1442,7 @@
     minmax(105px, .45fr)
     minmax(160px, .7fr)
     minmax(210px, 1fr)
-    minmax(180px, .85fr)
+    minmax(210px, 1fr)
     74px;
 }
 
@@ -1552,6 +1552,37 @@
 }
 
 .sector-roster-mastery .progress-bar { width: 100%; margin-top: 2px; }
+
+.sector-roster-training {
+  --training-lane-accent: var(--blue-600);
+  --training-lane-tint: var(--blue-050);
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  box-shadow: inset 3px 0 var(--training-lane-accent);
+  background: color-mix(in srgb, var(--training-lane-tint) 72%, var(--surface));
+}
+
+.sector-roster-training.is-instructor-training {
+  --training-lane-accent: #2f8a57;
+  --training-lane-tint: color-mix(in srgb, #2f8a57 10%, var(--surface));
+}
+
+.sector-roster-training.is-technician-training {
+  --training-lane-accent: #8b5cf6;
+  --training-lane-tint: color-mix(in srgb, #8b5cf6 10%, var(--surface));
+}
+
+.sector-roster-training > * {
+  width: 100%;
+}
+
+.sector-roster-training.is-technician-training > .technician-course-reservation {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
 
 .sector-roster-training .instructor-compact-training {
   margin: 0;
@@ -1747,7 +1778,7 @@
       100px
       minmax(150px, .8fr)
       minmax(190px, 1fr)
-      minmax(170px, .9fr)
+      minmax(190px, 1fr)
       66px;
   }
 }

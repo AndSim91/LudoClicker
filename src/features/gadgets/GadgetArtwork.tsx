@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { getGadgetRarityClassName } from "../../content/gadgetRarities";
 import type { GadgetProductId, GadgetRarity } from "../../game/types";
 
@@ -42,7 +43,7 @@ export function GadgetProductArtwork({
   );
 }
 
-export function GadgetProcessArtwork({
+export const GadgetProcessArtwork = memo(function GadgetProcessArtwork({
   productId,
   activeStage,
 }: {
@@ -74,7 +75,7 @@ export function GadgetProcessArtwork({
       ))}
     </div>
   );
-}
+});
 
 export function GadgetWorkshopArtwork() {
   return (

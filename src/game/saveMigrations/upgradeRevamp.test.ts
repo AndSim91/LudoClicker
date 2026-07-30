@@ -9,6 +9,7 @@ import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutori
 import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
 import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
 import { migrateShortGoalAvailabilityState } from "./shortGoalAvailability";
+import { migrateLegendaryEmailState } from "./legendaryEmails";
 import type { MigratableState } from "./types";
 
 describe("upgrade revamp save migration", () => {
@@ -42,11 +43,13 @@ describe("upgrade revamp save migration", () => {
       },
     } as unknown as MigratableState;
 
-    const migrated = migrateShortGoalAvailabilityState(
-      migrateAgonistCourseProgressionState(
-        migrateAthleticPreparationMergeState(
-          migrateFirstCollaboratorTutorialState(
-            migrateReptileState(migrateUpgradeRevampState(legacy)),
+    const migrated = migrateLegendaryEmailState(
+      migrateShortGoalAvailabilityState(
+        migrateAgonistCourseProgressionState(
+          migrateAthleticPreparationMergeState(
+            migrateFirstCollaboratorTutorialState(
+              migrateReptileState(migrateUpgradeRevampState(legacy)),
+            ),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import { createRandomProspect } from "../content/prospectDirectory";
+import { createLegendaryEmailAddress } from "../content/emailAddresses";
 import { PERSON_RARITIES } from "../content/rarities";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { GAME_CONFIG } from "./config";
@@ -146,7 +147,10 @@ export function createInitialContacts(
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, legendaryProfile);
-    const { firstName, lastName, email } = generated;
+    const { firstName, lastName } = generated;
+    const email = legendaryProfile
+      ? createLegendaryEmailAddress(firstName, lastName)
+      : generated.email;
     nextSeed = advanceRandomSeed(nextSeed, 3);
     const rarity = legendaryProfile ? "legendary" as const : ordinary!.rarity;
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, legendaryProfile?.id);
@@ -238,7 +242,10 @@ export function createAcquiredContacts(
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);
-    const { firstName, lastName, email } = generated;
+    const { firstName, lastName } = generated;
+    const email = specialProfile
+      ? createLegendaryEmailAddress(firstName, lastName)
+      : generated.email;
     nextSeed = advanceRandomSeed(nextSeed, 3);
     const rolledRarity = specialProfile
       ? "legendary" as const
@@ -261,7 +268,7 @@ export function createAcquiredContacts(
       id,
       firstName: returningContact?.firstName ?? firstName,
       lastName: returningContact?.lastName ?? lastName,
-      email: returningContact?.email ?? email,
+      email: specialProfile ? email : returningContact?.email ?? email,
       source,
       acquiredAt: now,
       status: "available" as const,

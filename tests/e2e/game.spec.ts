@@ -63,8 +63,10 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
   await openProgressedGame(page);
 
   await expect(page.getByLabel("Iscritti attivi: 20")).toBeVisible();
-  await expect(page.locator('[aria-label^="Disponibilità economica:"]'))
-    .toHaveAttribute("aria-label", /5000,00/);
+  await expect(page.locator('[aria-label^="Disponibilità economica:"]')).toHaveAttribute(
+    "aria-label",
+    /5000,00/,
+  );
 
   const areas = [
     ["Eventi", "Eventi"],
@@ -119,10 +121,15 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   const board = minigame.getByLabel("Quattro corsie della prova qualità");
   const fallingNote = minigame.getByRole("button", { name: /^Nota corsia/ }).first();
   await expect(fallingNote).toBeVisible({ timeout: 4_000 });
+  const noteArrow = fallingNote.locator(".gadget-note-arrow .gadget-direction-icon");
+  await expect(noteArrow).toBeVisible();
   const boardBox = await board.boundingBox();
   const noteBox = await fallingNote.boundingBox();
+  const arrowBox = await noteArrow.boundingBox();
   expect(boardBox).not.toBeNull();
   expect(noteBox).not.toBeNull();
+  expect(arrowBox?.width).toBeGreaterThanOrEqual(28);
+  expect(arrowBox?.height).toBeGreaterThanOrEqual(28);
   expect(noteBox!.x + noteBox!.width / 2).toBeGreaterThan(boardBox!.x);
   expect(noteBox!.x + noteBox!.width / 2).toBeLessThan(boardBox!.x + boardBox!.width);
 
@@ -157,7 +164,9 @@ test("completa e invia una mail senza invio automatico", async ({ page }) => {
   await expect(page.getByText(/Bozza per/).first()).toBeVisible();
 });
 
-test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", async ({ page }) => {
+test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", async ({
+  page,
+}) => {
   await openProgressedGame(page, false);
   await page.getByRole("button", { name: "Eventi", exact: true }).click();
   await page.getByRole("button", { name: "Partecipa gratis" }).click();
@@ -169,32 +178,28 @@ test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", 
   const progress = sparring.getByRole("progressbar", { name: "Avanzamento Volantinaggio" });
   await expect(progress).toBeVisible();
   const initialProgress = Number(await progress.getAttribute("aria-valuenow"));
-  await expect.poll(
-    async () => Number(await progress.getAttribute("aria-valuenow")),
-    { timeout: 3_000 },
-  ).toBeGreaterThan(initialProgress);
+  await expect
+    .poll(async () => Number(await progress.getAttribute("aria-valuenow")), { timeout: 3_000 })
+    .toBeGreaterThan(initialProgress);
 });
 
 test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ page }) => {
   const state = createProgressedGameSave();
-  const andrea = state.contacts.find(
-    (contact) => contact.specialProfileId === "andrea-simonazzi",
-  );
+  const andrea = state.contacts.find((contact) => contact.specialProfileId === "andrea-simonazzi");
   if (!andrea) throw new Error("La fixture deve contenere Andrea Simonazzi");
   state.collaborators = Array.from({ length: 9 }, (_, index) => ({
     id: `aggregate-${index}`,
     contactId: index === 0 ? andrea.id : `aggregate-contact-${index}`,
-    displayName: index === 0
-      ? `${andrea.firstName} ${andrea.lastName}`
-      : `Collaboratore Aggregato ${index}`,
+    displayName:
+      index === 0 ? `${andrea.firstName} ${andrea.lastName}` : `Collaboratore Aggregato ${index}`,
     joinedAt: state.createdAt + index,
     forms: [],
     instructorForms: [],
     formBranchPreferences: [],
     assignment: null,
     mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
-    rarity: index === 0 ? "legendary" as const : "ultra-rare" as const,
-    specialProfileId: index === 0 ? "andrea-simonazzi" as const : undefined,
+    rarity: index === 0 ? ("legendary" as const) : ("ultra-rare" as const),
+    specialProfileId: index === 0 ? ("andrea-simonazzi" as const) : undefined,
   }));
   state.unlocks.collaborators = true;
   state.collaboratorManagement.aggregateViewUnlocked = true;
@@ -222,13 +227,17 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
   await aggregateView.getByRole("button", { name: "Apri centro didattico" }).click();
   const instructorPanel = page.getByRole("dialog", { name: "Istruttori" });
   await expect(instructorPanel).toBeVisible();
-  await expect(instructorPanel.getByRole("button", {
-    name: "Ordina collaboratori per Formazione Istruttore",
-  })).toBeVisible();
+  await expect(
+    instructorPanel.getByRole("button", {
+      name: "Ordina collaboratori per Formazione Istruttore",
+    }),
+  ).toBeVisible();
   await expect(instructorPanel.getByLabel("Formazione Istruttore", { exact: true })).toBeVisible();
-  await expect(instructorPanel.getByRole("button", {
-    name: "Ordina collaboratori per Formazione Tecnici",
-  })).toHaveCount(0);
+  await expect(
+    instructorPanel.getByRole("button", {
+      name: "Ordina collaboratori per Formazione Tecnici",
+    }),
+  ).toHaveCount(0);
   await expect(instructorPanel.getByLabel("Filtra istruttori per rarità")).toBeVisible();
   await instructorPanel.getByRole("button", { name: "Chiudi pannello Istruttori" }).click();
 
@@ -264,7 +273,9 @@ test("acquista un Upgrade, salva e mantiene il livello dopo il reload", async ({
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
   await page.getByRole("button", { name: "Pausa" }).click();
   await page.getByRole("button", { name: "Upgrade", exact: true }).click();
-  await expect(page.getByRole("button", { name: /Apri dettagli Tastiera comoda: livello 1 di 5/ })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Apri dettagli Tastiera comoda: livello 1 di 5/ }),
+  ).toBeVisible();
 });
 
 test("gestisce preferiti e cancellazione iscrizione con conferma accessibile", async ({ page }) => {
@@ -284,9 +295,11 @@ test("gestisce preferiti e cancellazione iscrizione con conferma accessibile", a
     name: `Rimuovi ${displayName} dai preferiti`,
   });
   await expect(removeFavorite).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", {
-    name: `Iscrizione protetta per ${displayName}: atleta preferito`,
-  })).toBeDisabled();
+  await expect(
+    page.getByRole("button", {
+      name: `Iscrizione protetta per ${displayName}: atleta preferito`,
+    }),
+  ).toBeDisabled();
   await removeFavorite.click();
 
   const cancelEnrollment = page.getByRole("button", {

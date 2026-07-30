@@ -39,6 +39,7 @@ import { migrateFirstCollaboratorTutorialState } from "./saveMigrations/firstCol
 import { migrateAthleticPreparationMergeState } from "./saveMigrations/athleticPreparationMerge";
 import { migrateAgonistCourseProgressionState } from "./saveMigrations/agonistCourseProgression";
 import { migrateShortGoalAvailabilityState } from "./saveMigrations/shortGoalAvailability";
+import { migrateLegendaryEmailState } from "./saveMigrations/legendaryEmails";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 import type { GameState } from "./types";
 
@@ -81,6 +82,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateAthleticPreparationMergeState,
   migrateAgonistCourseProgressionState,
   migrateShortGoalAvailabilityState,
+  migrateLegendaryEmailState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

@@ -13,7 +13,7 @@ function createAndreaContact(now: number): Contact {
     id: "ludodex-andrea",
     firstName: "Andrea",
     lastName: "Simonazzi",
-    email: "andrea.simonazzi@example.test",
+    email: "andrea.simonazzi@ludosport.net",
     source: "tournament",
     acquiredAt: now,
     status: "enrolled",

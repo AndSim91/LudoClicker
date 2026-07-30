@@ -1,4 +1,5 @@
 import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import { createLegendaryEmailAddress } from "../content/emailAddresses";
 import { isCourseXUnlocked } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import type { Contact, FormId, GameState, SecretLegendaryId } from "./types";
@@ -34,7 +35,7 @@ export function createSecretLegendaryContact(
     id: makeGameId("secret", now, id),
     firstName: profile.firstName,
     lastName: profile.lastName,
-    email: `${id}@chronicles.ludosport`,
+    email: createLegendaryEmailAddress(profile.firstName, profile.lastName),
     source: "tournament",
     acquiredAt: now,
     status,

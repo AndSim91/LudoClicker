@@ -341,6 +341,13 @@
   grid-template-columns: minmax(0, 1fr) max-content;
 }
 
+.technician-course-control.is-inline {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 .technician-course-reservation {
   display: grid;
   min-width: 0;

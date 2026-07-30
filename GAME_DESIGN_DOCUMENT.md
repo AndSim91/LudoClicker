@@ -294,6 +294,10 @@ Ogni contatto contiene:
 - stato: disponibile, in scrittura, invitato, prova prenotata, convertito o
   perso.
 
+Tutti i profili Leggendari, ordinari e Segreti, usano un indirizzo nel formato
+`nome.cognome@ludosport.net`; gli altri contatti mantengono i provider fittizi
+del catalogo.
+
 I contatti sono una risorsa limitante. Se finiscono, la produzione di email si
 ferma.
 

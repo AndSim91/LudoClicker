@@ -545,6 +545,7 @@ describe("game engine: operations", () => {
       contact.specialProfileId === "eva-parodi",
     )).toMatchObject({
       id: previousEncounter.id,
+      email: "eva.parodi@ludosport.net",
       rarity: "legendary",
       status: "available",
     });

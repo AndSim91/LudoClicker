@@ -231,6 +231,7 @@ describe("secret legendary tournament trials", () => {
     expect(contact).toMatchObject({
       firstName: "Marco",
       lastName: "Palena",
+      email: "marco.palena@ludosport.net",
       source: "tournament",
       status: "trialScheduled",
       secretLegendaryId: "marco-palena",

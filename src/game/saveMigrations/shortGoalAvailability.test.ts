@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../initialState";
+import { GAME_CONFIG } from "../config";
 import { migrate } from "../saveMigrations";
 import { isValidGameState } from "../saveValidation";
 import type { GameState, ShortGoalProgress } from "../types";
@@ -37,7 +38,7 @@ describe("short-goal availability save migration", () => {
     (euros, emailsSent, expectedActive) => {
       const migrated = migrate(version75Save(euros, emailsSent)) as GameState;
 
-      expect(migrated.version).toBe(76);
+      expect(migrated.version).toBe(GAME_CONFIG.version);
       expect(migrated.shortGoal.isActive).toBe(expectedActive);
       expect(migrated.shortGoal.reactivationStartedAt).toBeUndefined();
       expect(isValidGameState(migrated)).toBe(true);

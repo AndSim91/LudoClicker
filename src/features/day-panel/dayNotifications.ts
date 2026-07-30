@@ -5,6 +5,7 @@ import {
   getLightInflationEventDescription,
   LIGHT_INFLATION_EVENT_TITLE,
 } from "../../game/lightInflation";
+import { isGameAreaUnlocked } from "../../game/progression";
 import {
   getContactsById,
   getDirectEnrollmentContacts,
@@ -15,6 +16,7 @@ import type {
   PersonRarity,
   TournamentResult,
 } from "../../game/types";
+import { findUpcomingTournament } from "../tournaments/tournamentPresentation";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
@@ -300,12 +302,32 @@ export function selectDayNotifications(
     });
   }
 
+  const upcomingTournament = isGameAreaUnlocked("tournaments", state)
+    ? findUpcomingTournament(state)
+    : undefined;
+  if (
+    upcomingTournament?.absoluteMonth === state.school.currentMonth &&
+    gameNow < upcomingTournament.occursAt
+  ) {
+    const definition = TOURNAMENT_DEFINITIONS[upcomingTournament.level];
+    notifications.push({
+      id: `tournament-${upcomingTournament.level}-${upcomingTournament.season}`,
+      kind: "tournament",
+      phase: "scheduled",
+      title: `${definition.label} in arrivo`,
+      detail: "Si disputa alla fine del mese.",
+      clock: "game",
+      timestamp: upcomingTournament.occursAt,
+      startsAt: upcomingTournament.occursAt,
+    });
+  }
+
   for (const result of state.tournaments.results) {
     const expiresAt = result.completedAt + DAY_NOTIFICATION_VISIBILITY_MS;
     if (result.completedAt > gameNow || gameNow >= expiresAt) continue;
     const summary = getTournamentSummary(result);
     notifications.push({
-      id: `tournament-${result.id}`,
+      id: `tournament-${result.level}-${result.season}`,
       kind: "tournament",
       phase: summary.phase,
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,
