@@ -30,6 +30,8 @@ export const GAME_CONFIG = {
   sendDelayMs: 350,
   monthlyMemberFee: 40,
   monthlyMemberFormBonus: 5,
+  monthlyMemberInstructorBonus: 10,
+  monthlyMemberTechnicianBonus: 20,
   enrollmentBonus: 20,
   shortGoalActivationBalance: 5_000,
   shortGoalReactivationDelayMs: 60_000,

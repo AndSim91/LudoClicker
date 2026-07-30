@@ -220,6 +220,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       "Il risultato non è sempre garantito, anche dopo una prova prenotata.",
       "Un'iscrizione Leggendaria rende subito disponibile anche il Collaboratore.",
       "Il bonus di iscrizione è separato dalla quota ricorrente mensile.",
+      `Per ogni Forma o corso, un attestato da Istruttore aggiunge € ${GAME_CONFIG.monthlyMemberInstructorBonus}; una qualifica da Tecnico porta il bonus a € ${GAME_CONFIG.monthlyMemberTechnicianBonus} e sostituisce quello da Istruttore.`,
     ],
     example: {
       title: "Esempio: iscritto con 2 Forme",
@@ -267,6 +268,8 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { label: "Mese di gioco", value: seconds(GAME_CONFIG.gameMonthMs), detail: "tempo attivo di base" },
       { label: "Quota base", value: `€ ${GAME_CONFIG.monthlyMemberFee}`, detail: "per iscritto attivo" },
       { label: "Bonus formazione", value: `+ € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "per ogni Forma o corso" },
+      { label: "Bonus Istruttore", value: `+ € ${GAME_CONFIG.monthlyMemberInstructorBonus}`, detail: "per ogni attestato" },
+      { label: "Bonus Tecnico", value: `+ € ${GAME_CONFIG.monthlyMemberTechnicianBonus}`, detail: "al posto del bonus Istruttore" },
     ],
     rules: [
       "Le rette considerano soltanto gli iscritti attivi.",

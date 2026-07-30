@@ -166,23 +166,6 @@
   margin-top: 2px;
 }
 
-.collaborator-copy .technician-course-control {
-  align-self: stretch;
-  width: 100%;
-  margin-top: 2px;
-}
-
-.collaborator-copy .technician-course-reservation {
-  align-self: stretch;
-  width: 100%;
-  margin-top: 2px;
-}
-
-.collaborator-copy .technician-course-badge {
-  color: #fff;
-}
-
-
 .collaborator-copy .form-logo-item {
   min-width: 30px;
   gap: 2px;
@@ -425,6 +408,30 @@
 .collaborator-row-actions button:hover,
 .collaborator-row-actions button[aria-pressed="true"] {
   background: var(--blue-050);
+}
+
+.collaborator-technician-training {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 10px 12px 12px;
+  border-top: 1px solid color-mix(in srgb, #8b5cf6 28%, var(--line));
+  background: color-mix(in srgb, #8b5cf6 5%, var(--surface));
+}
+
+.collaborator-technician-training:empty {
+  display: none;
+}
+
+.collaborator-technician-training > .technician-course-control,
+.collaborator-technician-training > .technician-course-reservation,
+.collaborator-technician-training > .training-locked {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+}
+
+.collaborator-technician-training .technician-course-control.is-expanded {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .instructor-compact-training {

@@ -9,14 +9,30 @@ export function getMonthlyMemberFees(state: GameState): number {
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
-  const registeredFormCount = state.contacts.reduce((total, contact) => {
+  const trainingBonuses = state.contacts.reduce((total, contact) => {
     if (contact.status !== "enrolled") return total;
-    const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
-    return total + getVisibleForms(forms, courseXUnlocked).length;
+    const collaborator = collaboratorsByContactId.get(contact.id);
+    const forms = getVisibleForms(collaborator?.forms ?? contact.forms, courseXUnlocked);
+    if (!collaborator) {
+      return total + forms.length * GAME_CONFIG.monthlyMemberFormBonus;
+    }
+
+    const technicianForms = new Set(
+      getVisibleForms(collaborator.technicianForms ?? [], courseXUnlocked),
+    );
+    const instructorOnlyForms = getVisibleForms(
+      collaborator.instructorForms,
+      courseXUnlocked,
+    ).filter((formId) => !technicianForms.has(formId));
+
+    return total +
+      forms.length * GAME_CONFIG.monthlyMemberFormBonus +
+      instructorOnlyForms.length * GAME_CONFIG.monthlyMemberInstructorBonus +
+      technicianForms.size * GAME_CONFIG.monthlyMemberTechnicianBonus;
   }, 0);
 
   return state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
-    registeredFormCount * GAME_CONFIG.monthlyMemberFormBonus;
+    trainingBonuses;
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {

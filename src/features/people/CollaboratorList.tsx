@@ -13,6 +13,7 @@ import {
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
+import { isSISTechnicianCourseUnlocked } from "../../content/upgrades";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -447,14 +448,6 @@ export function CollaboratorList({
                       instructorForms={collaborator.instructorForms}
                       technicianForms={collaborator.technicianForms}
                     />
-                    {collaborator.assignment === "instructor" ? (
-                      <TechnicianCourseControl
-                        collaborator={collaborator}
-                        state={stateOverride}
-                        onBookTechnicianCourse={onBookTechnicianCourse}
-                        variant="compact"
-                      />
-                    ) : null}
                   </div>
                 </div>
 
@@ -596,6 +589,21 @@ export function CollaboratorList({
                     Dettagli
                   </button>
                 </div>
+
+                {collaborator.assignment === "instructor" &&
+                isSISTechnicianCourseUnlocked(state.upgrades) ? (
+                  <div
+                    className="collaborator-technician-training"
+                    aria-label="Formazione Tecnici"
+                  >
+                    <TechnicianCourseControl
+                      collaborator={collaborator}
+                      state={stateOverride}
+                      onBookTechnicianCourse={onBookTechnicianCourse}
+                      showUnavailableState
+                    />
+                  </div>
+                ) : null}
               </article>
             );
           })}

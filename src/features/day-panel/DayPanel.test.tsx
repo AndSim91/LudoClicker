@@ -562,21 +562,42 @@ describe("DayPanel", () => {
     expect(screen.getByText("Nuovo atleta entrato senza lezione di prova")).toBeVisible();
   });
 
-  it("shows the Arena and Stile winners for a completed school tournament", () => {
+  it("shows the tournament countdown and then its Arena and Stile winners", () => {
     vi.useFakeTimers();
     vi.setSystemTime(55_000);
     const initial = createInitialState(10_000);
+    const upcomingState: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        currentMonth: 12,
+        nextFeeAt: 60_000,
+        fame: 6,
+      },
+    };
 
-    render(
+    const { rerender } = render(<DayPanel state={upcomingState} />);
+
+    expect(screen.getByText("Torneo Scolastico in arrivo")).toBeVisible();
+    expect(screen.getByText("00:05")).toBeVisible();
+    expect(screen.getByText("Si disputa alla fine del mese.")).toBeVisible();
+
+    rerender(
       <DayPanel
         state={{
-          ...initial,
-          tournaments: { ...initial.tournaments, results: [tournamentResult(50_000)] },
+          ...upcomingState,
+          school: {
+            ...upcomingState.school,
+            currentMonth: 13,
+            nextFeeAt: 120_000,
+          },
+          tournaments: { ...initial.tournaments, results: [tournamentResult(55_000)] },
         }}
       />,
     );
 
     expect(screen.getByText("Torneo Scolastico completato")).toBeVisible();
+    expect(screen.queryByText("Torneo Scolastico in arrivo")).not.toBeInTheDocument();
     expect(
       screen.getByText("1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile"),
     ).toBeVisible();

@@ -8,6 +8,7 @@ import {
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, ScheduledTrial } from "../../game/types";
 import {
+  DAY_NOTIFICATION_VISIBILITY_MS,
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
   selectDayNotifications,
@@ -192,5 +193,140 @@ describe("selectDayNotifications", () => {
         detail: "100 in corso",
       }),
     ]);
+  });
+
+  it("keeps the current month's tournament visible until it starts", () => {
+    const initial = createInitialState(10_000);
+    const state: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        currentMonth: 12,
+        nextFeeAt: 70_000,
+        fame: 6,
+      },
+    };
+
+    expect(selectDayNotifications(state, 60_000)).toContainEqual({
+      id: "tournament-school-1",
+      kind: "tournament",
+      phase: "scheduled",
+      title: "Torneo Scolastico in arrivo",
+      detail: "Si disputa alla fine del mese.",
+      clock: "game",
+      timestamp: 70_000,
+      startsAt: 70_000,
+    });
+    expect(selectDayNotifications(state, 70_000)).not.toContainEqual(
+      expect.objectContaining({ id: "tournament-school-1" }),
+    );
+  });
+
+  it("does not announce a locked tournament or one in a future month", () => {
+    const initial = createInitialState(10_000);
+    const decemberState: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        currentMonth: 12,
+        nextFeeAt: 70_000,
+      },
+    };
+    const unlockedNovemberState: GameState = {
+      ...decemberState,
+      school: {
+        ...decemberState.school,
+        currentMonth: 11,
+        fame: 6,
+      },
+    };
+
+    expect(selectDayNotifications(decemberState, 60_000)).not.toContainEqual(
+      expect.objectContaining({ kind: "tournament" }),
+    );
+    expect(selectDayNotifications(unlockedNovemberState, 60_000)).not.toContainEqual(
+      expect.objectContaining({ kind: "tournament" }),
+    );
+  });
+
+  it("replaces the tournament countdown with the result for ten seconds", () => {
+    const initial = createInitialState(10_000);
+    const completedAt = 70_000;
+    const result = {
+      id: "school-result",
+      level: "school" as const,
+      season: 1,
+      completedAt,
+      participants: [],
+      matches: [],
+      groupStandings: [],
+      arenaRanking: [],
+      styleRanking: [],
+      arenaPodium: [],
+      stylePodium: [],
+      qualifiers: [],
+      rewards: [],
+      secretLegendaryDefeatedIds: [],
+    };
+    const completedState: GameState = {
+      ...initial,
+      school: {
+        ...initial.school,
+        currentMonth: 13,
+        nextFeeAt: 130_000,
+        fame: 6,
+      },
+      tournaments: {
+        ...initial.tournaments,
+        results: [result],
+      },
+    };
+
+    expect(selectDayNotifications(completedState, completedAt)).toContainEqual(
+      expect.objectContaining({
+        id: "tournament-school-1",
+        phase: "neutral",
+        title: "Torneo Scolastico completato",
+        expiresAt: completedAt + DAY_NOTIFICATION_VISIBILITY_MS,
+      }),
+    );
+    expect(
+      selectDayNotifications(completedState, completedAt + DAY_NOTIFICATION_VISIBILITY_MS),
+    ).not.toContainEqual(expect.objectContaining({ id: "tournament-school-1" }));
+  });
+
+  it("keeps multiple Chronicles results in the same season distinct", () => {
+    const initial = createInitialState(10_000);
+    const baseResult = {
+      level: "chronicles" as const,
+      season: 1,
+      completedAt: 70_000,
+      participants: [],
+      matches: [],
+      groupStandings: [],
+      arenaRanking: [],
+      styleRanking: [],
+      arenaPodium: [],
+      stylePodium: [],
+      qualifiers: [],
+      rewards: [],
+      secretLegendaryDefeatedIds: [],
+    };
+    const state: GameState = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        results: [
+          { ...baseResult, id: "chronicles-a" },
+          { ...baseResult, id: "chronicles-b", completedAt: 71_000 },
+        ],
+      },
+    };
+
+    expect(
+      selectDayNotifications(state, 72_000)
+        .filter((notification) => notification.kind === "tournament")
+        .map((notification) => notification.id),
+    ).toEqual(["tournament-chronicles-a", "tournament-chronicles-b"]);
   });
 });

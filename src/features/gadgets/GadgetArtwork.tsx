@@ -10,6 +10,14 @@ const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
   hoodie: "/gadget-assets/felpa.webp",
 };
 
+const PROCESS_ARTWORK_URLS: Record<GadgetProductId, string> = {
+  wristband: "/gadget-assets/process/polsino-phases.webp",
+  mug: "/gadget-assets/process/tazza-phases.webp",
+  underwear: "/gadget-assets/process/mutande-phases.webp",
+  tshirt: "/gadget-assets/process/maglietta-phases.webp",
+  hoodie: "/gadget-assets/process/felpa-phases.webp",
+};
+
 const PROCESS_STAGES = ["concept", "logo", "render", "prototype"] as const;
 
 export type GadgetProcessStage = (typeof PROCESS_STAGES)[number];
@@ -63,13 +71,9 @@ export const GadgetProcessArtwork = memo(function GadgetProcessArtwork({
           }`}
           key={stage}
         >
-          <img
-            src={PRODUCT_ARTWORK_URLS[productId]}
-            alt=""
-            width="512"
-            height="512"
-            decoding="async"
-            draggable={false}
+          <span
+            className="gadget-process-product-image"
+            style={{ backgroundImage: `url(${PROCESS_ARTWORK_URLS[productId]})` }}
           />
         </span>
       ))}

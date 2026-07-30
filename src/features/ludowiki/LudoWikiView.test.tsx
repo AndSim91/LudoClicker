@@ -118,6 +118,8 @@ describe("LudoWikiView", () => {
     expect(screen.getByRole("heading", { name: "Prove e iscrizioni" })).toBeVisible();
     expect(screen.getByText("15 s")).toBeVisible();
     expect(screen.getByText("€ 40 + (2 × € 5) = € 50 al mese")).toBeVisible();
+    expect(screen.getByText(/un attestato da Istruttore aggiunge € 10/)).toBeVisible();
+    expect(screen.getByText(/una qualifica da Tecnico porta il bonus a € 20/)).toBeVisible();
     expect(screen.getByRole("figure", { name: "Schema del flusso: Prove e iscrizioni" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Rarità e Leggendari" }));

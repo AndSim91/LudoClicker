@@ -766,8 +766,8 @@ describe("PeopleView", () => {
     const sisControl = sisHeading.closest(".technician-course-control");
     expect(sisControl).toBeVisible();
     expect(sisControl).not.toHaveClass("is-inline");
-    expect(sisControl?.parentElement).toHaveClass("collaborator-copy");
-    expect(sisControl?.previousElementSibling).toHaveClass("form-logo-strip");
+    expect(sisControl?.parentElement).toHaveClass("collaborator-technician-training");
+    expect(sisControl?.parentElement).toHaveAttribute("aria-label", "Formazione Tecnici");
     const sisToggle = screen.getByRole("button", { name: /Corso Tecnici/ });
     expect(sisToggle).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();

@@ -71,6 +71,41 @@ describe("game engine: operations", () => {
     expect(gameReducer(withTrainedMember, { type: "TICK", now: dueAt }).school.euros).toBe(75);
   });
 
+  it("adds the highest monthly qualification bonus for each instructor form", () => {
+    const state = createInitialState(1_000);
+    const member = {
+      ...state.contacts[0],
+      status: "enrolled" as const,
+      forms: ["form-1" as const, "form-2" as const],
+    };
+    const dueAt = 10_000;
+    const withQualifiedMember = {
+      ...state,
+      contacts: [member, ...state.contacts.slice(1)],
+      collaborators: [{
+        id: "collaborator-qualified-member",
+        contactId: member.id,
+        displayName: `${member.firstName} ${member.lastName}`,
+        joinedAt: 2_000,
+        forms: [...member.forms],
+        instructorForms: [...member.forms],
+        technicianForms: ["form-2" as const],
+        assignment: "instructor" as const,
+        rarity: "legendary" as const,
+      }],
+      school: { ...state.school, activeMembers: 1, nextFeeAt: dueAt },
+    };
+    const expectedFee =
+      GAME_CONFIG.monthlyMemberFee +
+      2 * GAME_CONFIG.monthlyMemberFormBonus +
+      GAME_CONFIG.monthlyMemberInstructorBonus +
+      GAME_CONFIG.monthlyMemberTechnicianBonus;
+
+    expect(selectIncomePerMonth(withQualifiedMember)).toBe(expectedFee);
+    expect(gameReducer(withQualifiedMember, { type: "TICK", now: dueAt }).school.euros)
+      .toBe(expectedFee);
+  });
+
   it("resolves free flyering into new usable contacts once", () => {
     const state = createInitialState(1_000);
     const started = gameReducer(state, {

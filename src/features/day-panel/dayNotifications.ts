@@ -327,7 +327,9 @@ export function selectDayNotifications(
     if (result.completedAt > gameNow || gameNow >= expiresAt) continue;
     const summary = getTournamentSummary(result);
     notifications.push({
-      id: `tournament-${result.level}-${result.season}`,
+      id: result.level === "chronicles"
+        ? `tournament-${result.id}`
+        : `tournament-${result.level}-${result.season}`,
       kind: "tournament",
       phase: summary.phase,
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,

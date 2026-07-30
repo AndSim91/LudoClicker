@@ -399,7 +399,7 @@
   display: grid;
   min-height: 0;
   place-items: center;
-  opacity: 0.64;
+  opacity: 0.72;
   transition:
     opacity 180ms ease,
     filter 180ms ease;
@@ -410,42 +410,35 @@
 }
 
 .gadget-process-product-stage.is-upcoming {
-  opacity: 0.2;
+  opacity: 0.18;
   filter: saturate(0.35);
 }
 
-.gadget-process-product-stage img {
+.gadget-process-product-image {
   display: block;
-  width: min(49%, 330px);
-  height: auto;
-  max-height: 184%;
-  object-fit: contain;
-  mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(ellipse 58% 48% at center, #000 44%, transparent 100%);
-  mask-image: radial-gradient(ellipse 58% 48% at center, #000 44%, transparent 100%);
+  height: min(96%, 150px);
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 32%);
+  filter: var(--gadget-image-filter, grayscale(1) contrast(0.95));
   pointer-events: none;
 }
 
-.gadget-process-product-stage.is-concept img {
-  opacity: 0.18;
-  filter: grayscale(1) invert(1) contrast(2.15) brightness(0.76);
+.gadget-process-product-stage.is-concept .gadget-process-product-image {
+  background-position: 0 0;
 }
 
-.gadget-process-product-stage.is-logo img {
-  opacity: 0.2;
-  filter: grayscale(1) invert(1) contrast(2.45) brightness(0.82);
+.gadget-process-product-stage.is-logo .gadget-process-product-image {
+  background-position: 100% 0;
 }
 
-.gadget-process-product-stage.is-render img {
-  opacity: 0.24;
-  filter: grayscale(1) invert(1) sepia(0.35) saturate(2.2) hue-rotate(160deg) contrast(1.65)
-    brightness(0.9);
+.gadget-process-product-stage.is-render .gadget-process-product-image {
+  background-position: 0 100%;
 }
 
-.gadget-process-product-stage.is-prototype img {
-  opacity: 0.3;
-  filter: grayscale(0.82) invert(1) sepia(0.4) saturate(2.8) hue-rotate(160deg) contrast(1.5)
-    brightness(0.96);
+.gadget-process-product-stage.is-prototype .gadget-process-product-image {
+  background-position: 100% 100%;
 }
 
 .gadget-design-stages {
@@ -569,32 +562,28 @@
 .gadget-falling-note::before {
   position: absolute;
   z-index: -1;
-  inset: 0;
-  opacity: 0.58;
+  inset: -7px;
+  background-image: url("/gadget-assets/process/command-phases.webp");
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  opacity: 0.94;
   content: "";
 }
 
 .gadget-falling-note.is-concept::before {
-  background: repeating-linear-gradient(-14deg, transparent 0 6px, rgb(255 255 255 / 12%) 6px 7px);
+  background-position: 0 0;
 }
 
 .gadget-falling-note.is-logo::before {
-  background:
-    radial-gradient(circle at 22% 24%, rgb(255 255 255 / 24%) 0 1px, transparent 2px),
-    radial-gradient(circle at 78% 74%, rgb(255 255 255 / 24%) 0 1px, transparent 2px);
+  background-position: 100% 0;
 }
 
 .gadget-falling-note.is-render::before {
-  background: linear-gradient(
-    135deg,
-    rgb(255 255 255 / 20%),
-    transparent 44% 62%,
-    rgb(0 0 0 / 16%)
-  );
+  background-position: 0 100%;
 }
 
 .gadget-falling-note.is-prototype::before {
-  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 5px);
+  background-position: 100% 100%;
 }
 
 .gadget-note-arrow {
@@ -935,9 +924,8 @@
     gap: 3px 9px;
   }
 
-  .gadget-process-product-stage img {
-    width: min(66%, 260px);
-    max-height: 176%;
+  .gadget-process-product-image {
+    height: min(94%, 118px);
   }
 
   .gadget-design-stages::before {

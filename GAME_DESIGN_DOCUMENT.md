@@ -225,7 +225,10 @@ soltanto dopo l'acquisto del relativo Percorso Segreto. Il Corso Agonisti è esc
 potenzia Arena e Stile ma non assegna un badge permanente. Ogni badge permanente
 può essere registrato una sola volta sullo stesso allievo: un duplicato
 rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un
-mese dura **60 secondi reali** e segue il normale ciclo da Gennaio a Dicembre;
+attestato da Istruttore aggiunge **€10** per la relativa Forma o corso; una
+qualifica da Tecnico porta quel bonus a **€20**, sostituendo il bonus da
+Istruttore della stessa formazione. Un mese dura **60 secondi reali** e segue il
+normale ciclo da Gennaio a Dicembre;
 dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra
 superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e
 gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un
@@ -531,7 +534,7 @@ Per il primo prototipo:
 | Attesa della lezione in palestra |                                                                       1–5 minuti |
 | Esito della lezione              |                                                             immediato al termine |
 | Bonus di iscrizione              |                                                                  immediato (€20) |
-| Accredito della quota mensile    | al cambio mese (€40 base + €5 per Forma o corso permanente del singolo iscritto) |
+| Accredito della quota mensile    | al cambio mese (€40 base + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
 La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono
@@ -600,6 +603,10 @@ Una volta raggiunto il massimo storico di 5 iscritti, **La mia giornata**
 raggruppa in un unico riepilogo tutte le lezioni di prova ordinarie visibili,
 anche quando ce n'è soltanto una. Le prove dei Leggendari e dei Leggendari
 Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
+
+Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
+notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
+del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 soltanto nelle statistiche aggregate del funnel.
@@ -1807,8 +1814,9 @@ l'avanzamento.
    dialogo.
 
 6. **Primo bonus e quota associativa** Introduce il bonus immediato di €20, la
-   quota mensile base di €40, il bonus di €5 per ogni Forma o corso permanente e
-   il finanziamento dei potenziamenti.
+   quota mensile base di €40, il bonus di €5 per ogni Forma o corso permanente,
+   i bonus di €10 per un attestato da Istruttore o €20 per una qualifica da
+   Tecnico sulla stessa formazione e il finanziamento dei potenziamenti.
 
 7. **Il primo Leggendario** Quando Andrea Simonazzi diventa il nono contatto e
    la sua email entra in scrittura, il gioco torna in **Posta**, mette in
@@ -2489,8 +2497,9 @@ albo Reptile; una prenotazione pendente viene persa senza rimborso.
   Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 base per iscritto attivo, più €5 per ogni Forma o corso
-  permanente registrato sul singolo allievo, a ogni mese di gioco; il Corso
-  Agonisti è escluso;
+  permanente registrato sul singolo allievo, più €10 per ogni attestato da
+  Istruttore oppure €20 per ogni qualifica da Tecnico sulla stessa formazione, a
+  ogni mese di gioco; il Corso Agonisti è escluso;
 - durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno
   scolastico Settembre–Agosto sempre visibile;
 - il primo iscritto può essere assistito dal tutorial per evitare sfortuna
