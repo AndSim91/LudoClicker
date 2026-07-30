@@ -138,7 +138,21 @@ export function GadgetRhythmGame({
   onRevision: () => void;
   onContinue: () => void;
 }) {
-  const notes = useMemo(() => createGadgetRhythmNotes(minigame.seed), [minigame.seed]);
+  const playRarity = minigame.opportunityRarity ?? minigame.rarity;
+  const notes = useMemo(
+    () =>
+      createGadgetRhythmNotes(minigame.seed, playRarity).map((note) => ({
+        ...note,
+        designStage:
+          DESIGN_STAGES[
+            getDesignStageIndex(
+              (note.targetAtMs - GADGET_MINIGAME_CONFIG.travelMs) /
+                GADGET_MINIGAME_CONFIG.durationMs,
+            )
+          ],
+      })),
+    [minigame.seed, playRarity],
+  );
   const [timelineMs, setTimelineMs] = useState(-GADGET_MINIGAME_CONFIG.countdownMs);
   const timelineRef = useRef(timelineMs);
   const judgmentsRef = useRef(new Map<number, NoteJudgment>());
@@ -372,7 +386,6 @@ export function GadgetRhythmGame({
     0,
     Math.ceil((GADGET_MINIGAME_CONFIG.durationMs - Math.max(0, timelineMs)) / 1_000),
   );
-  const playRarity = minigame.opportunityRarity ?? minigame.rarity;
   const runProgress = Math.max(0, Math.min(0.999, timelineMs / GADGET_MINIGAME_CONFIG.durationMs));
   const activeDesignStage = getDesignStageIndex(runProgress);
 
@@ -445,11 +458,10 @@ export function GadgetRhythmGame({
               -6,
               Math.min(94, progress * GADGET_MINIGAME_CONFIG.targetPositionPercent),
             );
-            const designStage = DESIGN_STAGES[getDesignStageIndex(progress)];
             return (
               <button
                 type="button"
-                className={`gadget-falling-note is-${designStage.id}`}
+                className={`gadget-falling-note is-${note.designStage.id}`}
                 key={note.id}
                 tabIndex={-1}
                 style={
@@ -465,7 +477,7 @@ export function GadgetRhythmGame({
                 aria-label={`Nota corsia ${note.lane + 1}`}
               >
                 <span className="gadget-note-stage-mark">
-                  <GadgetStageIcon stage={designStage.id} />
+                  <GadgetStageIcon stage={note.designStage.id} />
                 </span>
                 <span className="gadget-note-arrow">
                   <LaneArrowIcon lane={note.lane} />

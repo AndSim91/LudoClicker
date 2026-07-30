@@ -99,7 +99,6 @@ export function TitleBar({
           <small>Disponibilità</small>
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
-        <MonthlyIncomeSummary state={monthlyIncomeState} />
       </div>
       <span
         className={`title-equipment is-${equipmentStatus}`}
@@ -128,6 +127,7 @@ export function TitleBar({
           {formatCompactNumber(fame)}
         </strong>
       </span>
+      <MonthlyIncomeSummary state={monthlyIncomeState} />
       <button
         className={isPaused ? "title-pause active" : "title-pause"}
         type="button"

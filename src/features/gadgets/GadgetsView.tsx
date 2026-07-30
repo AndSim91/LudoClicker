@@ -125,6 +125,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   const nextRarity = canRollNextRarity
     ? getNextGadgetRarity(highestRarity)
     : undefined;
+  const hasMaximumRarity = product.prototypeCompleted && !nextRarity;
   const rarityProgressPercent = nextRarity
     ? Math.round(
         getGadgetRarityUpgradeChance(product, highestRarity) * 10_000,
@@ -177,7 +178,9 @@ const GadgetProductCard = memo(function GadgetProductCard({
       product.prototypeCompleted ? " has-rarity" : ""
     }`}>
       <span
-        className={`gadget-product-rail${nextRarity ? " is-rarity-progress" : ""}`}
+        className={`gadget-product-rail${nextRarity ? " is-rarity-progress" : ""}${
+          hasMaximumRarity ? " is-maximum-rarity" : ""
+        }`}
         role={nextRarity ? "progressbar" : undefined}
         aria-label={nextRarity
           ? `Progresso verso lo sblocco sicuro di ${GADGET_RARITIES[nextRarity].label}`

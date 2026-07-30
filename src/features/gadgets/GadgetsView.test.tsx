@@ -259,6 +259,60 @@ describe("GadgetsView", () => {
     expect(screen.getByRole("button", { name: /Migliora qualità/ })).not.toHaveAttribute("style");
   });
 
+  it("colors the left rail as soon as the maximum obtainable rarity is unlocked", () => {
+    const initial = unlockedState();
+    const product = withCommonRarity(
+      initial.gadgets.products.wristband,
+      { quality: 100 },
+      { projectPurchased: true, prototypeCompleted: true, accepted: true },
+    );
+    const withLegendaryQuality = (quality: number): GameState => ({
+      ...initial,
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: {
+            ...product,
+            rarities: {
+              ...product.rarities,
+              rare: { ...product.rarities.rare, unlocked: true, quality: 100 },
+              "ultra-rare": {
+                ...product.rarities["ultra-rare"],
+                unlocked: true,
+                quality: 100,
+              },
+              legendary: {
+                ...product.rarities.legendary,
+                unlocked: true,
+                quality,
+              },
+            },
+          },
+        },
+      },
+    });
+    const actions = handlers();
+    const view = render(<GadgetsView state={withLegendaryQuality(99)} {...actions} />);
+    const productCard = screen.getByRole("heading", { name: "Polsino" }).closest("article");
+
+    expect(productCard).toHaveClass("rarity-legendary");
+    expect(productCard?.querySelector(".gadget-product-rail")).toHaveClass(
+      "is-maximum-rarity",
+    );
+    expect(screen.getByRole("button", { name: /Migliora qualità/ })).toBeVisible();
+    expect(screen.queryByRole("progressbar", {
+      name: "Progresso verso lo sblocco sicuro di Leggendario Segreto",
+    })).not.toBeInTheDocument();
+
+    view.rerender(<GadgetsView state={withLegendaryQuality(100)} {...actions} />);
+
+    expect(productCard?.querySelector(".gadget-product-rail")).toHaveClass(
+      "is-maximum-rarity",
+    );
+    expect(screen.getByText("Qualità massima")).toBeVisible();
+  });
+
   it("announces the offered rarity in the rhythm game without showing its chance", () => {
     const initial = unlockedState();
     const product = withCommonRarity(

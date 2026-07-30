@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { GADGET_MINIGAME_CONFIG } from "../../src/content/gadgets";
+import { createGadgetRhythmNotes } from "../../src/game/gadgetMinigame";
 import {
   createProgressedGameSave,
   E2E_PLAYER_NAME,
@@ -121,6 +123,11 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   const board = minigame.getByLabel("Quattro corsie della prova qualità");
   const fallingNote = minigame.getByRole("button", { name: /^Nota corsia/ }).first();
   await expect(fallingNote).toBeVisible({ timeout: 4_000 });
+  await expect
+    .poll(async () => (await fallingNote.getAttribute("style")) ?? "")
+    .not.toContain("--note-top: -6%");
+  const spawnClass = await fallingNote.getAttribute("class");
+  const spawnPosition = await fallingNote.getAttribute("style");
   const noteArrow = fallingNote.locator(".gadget-note-arrow .gadget-direction-icon");
   await expect(noteArrow).toBeVisible();
   const boardBox = await board.boundingBox();
@@ -133,6 +140,10 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   expect(noteBox!.x + noteBox!.width / 2).toBeGreaterThan(boardBox!.x);
   expect(noteBox!.x + noteBox!.width / 2).toBeLessThan(boardBox!.x + boardBox!.width);
 
+  await page.waitForTimeout(800);
+  await expect(fallingNote).toHaveAttribute("class", spawnClass ?? "");
+  expect(await fallingNote.getAttribute("style")).not.toBe(spawnPosition);
+
   await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
   await expect(page.getByText("La qualità massima resta al 0%.")).toBeVisible();
   await page.getByRole("button", { name: "Metti in vendita" }).click();
@@ -140,6 +151,67 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   await expect(page.getByText("Non vendibile")).toBeVisible();
   await expect(page.getByText("Venduti")).toBeVisible();
   await expect(page.getByText("Guadagnato")).toBeVisible();
+});
+
+test("mostra accordi su corsie diverse alle rarità Gadget più alte", async ({ page }) => {
+  const earlyChordSeed = Array.from({ length: 500 }, (_, index) => index + 1).find((seed) => {
+    const targetCounts = new Map<number, number>();
+    for (const note of createGadgetRhythmNotes(seed, "secret-legendary")) {
+      targetCounts.set(note.targetAtMs, (targetCounts.get(note.targetAtMs) ?? 0) + 1);
+    }
+    return [...targetCounts].some(
+      ([targetAtMs, count]) => count > 1 && targetAtMs <= GADGET_MINIGAME_CONFIG.travelMs + 600,
+    );
+  });
+  expect(earlyChordSeed).toBeDefined();
+
+  const state = createProgressedGameSave();
+  state.unlocks.gadget = true;
+  state.gadgets.products.wristband = {
+    ...state.gadgets.products.wristband,
+    unlocked: true,
+    projectPurchased: true,
+  };
+  state.gadgets.minigame = {
+    productId: "wristband",
+    kind: "revision",
+    rarity: "legendary",
+    opportunityRarity: "secret-legendary",
+    seed: earlyChordSeed!,
+    previousQuality: 80,
+    status: "ready",
+  };
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await installGameSave(page, state);
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Gadget", exact: true }).click();
+  await page.getByRole("button", { name: "Avvia prova qualità" }).click();
+
+  const minigame = page.getByRole("dialog", { name: "Polsino" });
+  await expect(minigame).toHaveClass(/rarity-secret-legendary/);
+  const fallingNotes = minigame.getByRole("button", { name: /^Nota corsia/ });
+  await expect
+    .poll(
+      async () =>
+        fallingNotes.evaluateAll((elements) => {
+          const groups = new Map<string, Set<string>>();
+          for (const element of elements) {
+            const htmlElement = element as HTMLElement;
+            const top = htmlElement.style.getPropertyValue("--note-top");
+            const left = htmlElement.style.getPropertyValue("--note-left");
+            if (!top || top === "-6%") continue;
+            const lanes = groups.get(top) ?? new Set<string>();
+            lanes.add(left);
+            groups.set(top, lanes);
+          }
+          return Math.max(0, ...[...groups.values()].map((lanes) => lanes.size));
+        }),
+      { timeout: 5_000 },
+    )
+    .toBeGreaterThanOrEqual(2);
+
+  await minigame.getByRole("button", { name: "Abbandona il tentativo" }).click();
 });
 
 test("completa e invia una mail senza invio automatico", async ({ page }) => {

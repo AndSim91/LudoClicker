@@ -70,16 +70,7 @@ export const GADGET_MARGINAL_SALES_SPEED_MULTIPLIER = 1 / 10;
 
 export const GADGET_MEMBER_REACH_LEVELS = [0.1, 0.2, 0.35, 0.5, 0.75, 1] as const;
 export const GADGET_FOLLOWER_REACH_LEVELS = [
-  0,
-  0.01,
-  0.03,
-  0.05,
-  0.1,
-  0.2,
-  0.35,
-  0.5,
-  0.75,
-  1,
+  0, 0.01, 0.03, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1,
 ] as const;
 
 export const GADGET_QUALITY_CONVERSION_ANCHORS = [
@@ -111,9 +102,47 @@ export const GADGET_MINIGAME_CONFIG = {
   },
 } as const;
 
-export function getNextGadgetProductId(
-  productId: GadgetProductId,
-): GadgetProductId | undefined {
+export interface GadgetMinigameDifficulty {
+  noteCount: number;
+  chordChance: number;
+  tripleChordChance: number;
+  minimumChordGroups: number;
+}
+
+export const GADGET_MINIGAME_DIFFICULTIES = {
+  common: {
+    noteCount: 24,
+    chordChance: 0,
+    tripleChordChance: 0,
+    minimumChordGroups: 0,
+  },
+  rare: {
+    noteCount: 28,
+    chordChance: 0,
+    tripleChordChance: 0,
+    minimumChordGroups: 0,
+  },
+  "ultra-rare": {
+    noteCount: 32,
+    chordChance: 0.18,
+    tripleChordChance: 0,
+    minimumChordGroups: 1,
+  },
+  legendary: {
+    noteCount: 36,
+    chordChance: 0.28,
+    tripleChordChance: 0.06,
+    minimumChordGroups: 2,
+  },
+  "secret-legendary": {
+    noteCount: 40,
+    chordChance: 0.38,
+    tripleChordChance: 0.14,
+    minimumChordGroups: 3,
+  },
+} as const satisfies Record<GadgetRarity, GadgetMinigameDifficulty>;
+
+export function getNextGadgetProductId(productId: GadgetProductId): GadgetProductId | undefined {
   const index = GADGET_PRODUCT_ORDER.indexOf(productId);
   return index >= 0 ? GADGET_PRODUCT_ORDER[index + 1] : undefined;
 }
@@ -124,8 +153,8 @@ export function getGadgetRevisionCost(
 ): number {
   return Math.round(
     GADGET_DEFINITIONS[productId].projectCost *
-    GADGET_REVISION_COST_RATE *
-    GADGET_RARITIES[rarity].revisionMultiplier,
+      GADGET_REVISION_COST_RATE *
+      GADGET_RARITIES[rarity].revisionMultiplier,
   );
 }
 

@@ -43,7 +43,7 @@ describe("TitleBar", () => {
     expect(screen.getByText("Iscritti attivi")).toBeVisible();
     const availability = screen.getByLabelText(/^Disponibilità economica:/);
     const monthlyIncome = screen.getByLabelText(/^Entrate mensili:/);
-    expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
+    expect(availability.closest(".title-resources")).toBeInTheDocument();
     expect(monthlyIncome).toHaveTextContent("Entrate mensili");
     const fame = screen.getByLabelText("Fama della scuola: 7");
     const equipmentIndicator = screen.getByLabelText(
@@ -55,7 +55,8 @@ describe("TitleBar", () => {
     expect(equipmentIndicator.querySelector(".equipment-condition.is-cylinder")).toBeInTheDocument();
     expect(equipmentIndicator.querySelector(".equipment-saber-outline")).not.toBeInTheDocument();
     expect(equipmentIndicator.nextElementSibling).toBe(fame);
-    expect(fame.nextElementSibling).toBe(pause);
+    expect(fame.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
+    expect(monthlyIncome.closest(".title-monthly-income")?.nextElementSibling).toBe(pause);
     expect(pause.nextElementSibling).toBe(container.querySelector(".title-month"));
     expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 1")).toHaveTextContent(
       "SettembreAnno scolastico 1",

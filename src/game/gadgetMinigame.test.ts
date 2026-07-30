@@ -1,10 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { GADGET_MINIGAME_CONFIG } from "../content/gadgets";
+import { GADGET_MINIGAME_CONFIG, GADGET_MINIGAME_DIFFICULTIES } from "../content/gadgets";
+import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import {
   calculateGadgetQuality,
   createGadgetRhythmNotes,
   getGadgetTimingResult,
+  type GadgetRhythmNote,
 } from "./gadgetMinigame";
+
+function groupNotesByTarget(notes: readonly GadgetRhythmNote[]): GadgetRhythmNote[][] {
+  const groups = new Map<number, GadgetRhythmNote[]>();
+
+  for (const note of notes) {
+    const group = groups.get(note.targetAtMs) ?? [];
+    group.push(note);
+    groups.set(note.targetAtMs, group);
+  }
+
+  return [...groups.values()];
+}
 
 describe("Gadget quality minigame", () => {
   it("creates a deterministic neutral sequence without simultaneous notes", () => {
@@ -17,6 +31,46 @@ describe("Gadget quality minigame", () => {
     expect(first).toHaveLength(GADGET_MINIGAME_CONFIG.noteCount);
     expect(new Set(first.map((note) => note.targetAtMs)).size).toBe(first.length);
     expect(first.every((note) => note.lane >= 0 && note.lane <= 3)).toBe(true);
+  });
+
+  it("increases the note count by rarity while keeping the same time window", () => {
+    const noteCounts = GADGET_RARITY_ORDER.map((rarity) => {
+      const notes = createGadgetRhythmNotes(12_345, rarity);
+      expect(notes).toHaveLength(GADGET_MINIGAME_DIFFICULTIES[rarity].noteCount);
+      expect(notes[0]?.targetAtMs).toBe(GADGET_MINIGAME_CONFIG.firstTargetMs);
+      expect(notes.at(-1)?.targetAtMs).toBe(GADGET_MINIGAME_CONFIG.lastTargetMs);
+      return notes.length;
+    });
+
+    expect(noteCounts).toEqual([24, 28, 32, 36, 40]);
+  });
+
+  it("creates deterministic chords only at the higher rarities", () => {
+    for (const rarity of GADGET_RARITY_ORDER) {
+      const difficulty = GADGET_MINIGAME_DIFFICULTIES[rarity];
+
+      for (const seed of [1, 17, 999, 12_345, 54_321, 999_999]) {
+        const notes = createGadgetRhythmNotes(seed, rarity);
+        const groups = groupNotesByTarget(notes);
+        const chordGroups = groups.filter((group) => group.length > 1);
+
+        expect(chordGroups.length).toBeGreaterThanOrEqual(difficulty.minimumChordGroups);
+        expect(
+          chordGroups.every(
+            (group) => new Set(group.map((note) => note.lane)).size === group.length,
+          ),
+        ).toBe(true);
+        expect(Math.max(...groups.map((group) => group.length))).toBeLessThanOrEqual(3);
+        expect(createGadgetRhythmNotes(seed, rarity)).toEqual(notes);
+      }
+    }
+
+    expect(
+      new Set(createGadgetRhythmNotes(12_345, "common").map((note) => note.targetAtMs)).size,
+    ).toBe(GADGET_MINIGAME_DIFFICULTIES.common.noteCount);
+    expect(
+      new Set(createGadgetRhythmNotes(12_345, "rare").map((note) => note.targetAtMs)).size,
+    ).toBe(GADGET_MINIGAME_DIFFICULTIES.rare.noteCount);
   });
 
   it("uses the confirmed timing windows", () => {

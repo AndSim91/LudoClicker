@@ -265,6 +265,15 @@
   cursor: help;
 }
 
+.gadget-product-rail.is-maximum-rarity {
+  background: var(--gadget-rarity-color);
+  box-shadow: 0 0 8px color-mix(
+    in srgb,
+    var(--gadget-rarity-color) 32%,
+    transparent
+  );
+}
+
 .gadget-product-rail-fill {
   position: absolute;
   right: 0;
@@ -339,6 +348,10 @@
 .gadget-product-rail.is-rarity-progress::before {
   z-index: 1;
   background: var(--gadget-next-rarity-color);
+}
+
+.gadget-product-rail.is-maximum-rarity::before {
+  background: var(--gadget-rarity-color);
 }
 
 .gadget-product-rail.is-rarity-progress::after {
