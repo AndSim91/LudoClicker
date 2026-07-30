@@ -3,6 +3,8 @@ import { Icon } from "../../components/common/Icon";
 import { getGameMonthName } from "../../game/calendar";
 import { formatCurrency } from "../../shared/formatters";
 
+const ADMIN_GAME_SPEED_SHORTCUTS = [1, 5, 10] as const;
+
 interface AdminEmailViewProps {
   totalContacts: number;
   availableContacts: number;
@@ -173,23 +175,39 @@ export function AdminEmailView({
               </p>
             </div>
             <div className="admin-speed-controls">
-              <label htmlFor="admin-game-speed">
-                <span>
-                  Moltiplicatore
-                  <output htmlFor="admin-game-speed">{gameSpeed}×</output>
-                </span>
-                <input
-                  id="admin-game-speed"
-                  type="range"
-                  min="1"
-                  max="100"
-                  step="1"
-                  value={gameSpeed}
-                  aria-label="Moltiplicatore"
-                  aria-valuetext={`${gameSpeed}×`}
-                  onChange={(event) => onGameSpeedChange(Number(event.target.value))}
-                />
-              </label>
+              <div className="admin-speed-picker">
+                <label htmlFor="admin-game-speed">
+                  <span>
+                    Moltiplicatore
+                    <output htmlFor="admin-game-speed">{gameSpeed}×</output>
+                  </span>
+                  <input
+                    id="admin-game-speed"
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="1"
+                    value={gameSpeed}
+                    aria-label="Moltiplicatore"
+                    aria-valuetext={`${gameSpeed}×`}
+                    onChange={(event) => onGameSpeedChange(Number(event.target.value))}
+                  />
+                </label>
+                <div className="admin-speed-steps" role="group" aria-label="Velocità selezionabili">
+                  {ADMIN_GAME_SPEED_SHORTCUTS.map((speed) => (
+                    <button
+                      key={speed}
+                      type="button"
+                      className="admin-speed-step"
+                      aria-label={`Imposta velocità ${speed}×`}
+                      aria-pressed={gameSpeed === speed}
+                      onClick={() => onGameSpeedChange(speed)}
+                    >
+                      {speed}×
+                    </button>
+                  ))}
+                </div>
+              </div>
               <button
                 type="button"
                 disabled={gameSpeed === 1}

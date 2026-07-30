@@ -74,10 +74,29 @@ describe("AdminEmailView", () => {
       onGameSpeedChange,
     );
 
-    fireEvent.change(screen.getByRole("slider", { name: "Moltiplicatore" }), {
-      target: { value: "100" },
+    const slider = screen.getByRole("slider", { name: "Moltiplicatore" });
+    expect(slider).toHaveAttribute("min", "1");
+    expect(slider).toHaveAttribute("max", "10");
+    expect(slider).toHaveAttribute("step", "1");
+    expect(screen.getAllByText("1×")).toHaveLength(2);
+    expect(screen.getByText("5×")).toBeVisible();
+    expect(screen.getByText("10×")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Imposta velocità 1×" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    fireEvent.change(slider, {
+      target: { value: "4" },
     });
-    expect(onGameSpeedChange).toHaveBeenCalledWith(100);
+    expect(onGameSpeedChange).toHaveBeenCalledWith(4);
+
+    fireEvent.change(slider, {
+      target: { value: "10" },
+    });
+    expect(onGameSpeedChange).toHaveBeenLastCalledWith(10);
+    fireEvent.click(screen.getByRole("button", { name: "Imposta velocità 5×" }));
+    expect(onGameSpeedChange).toHaveBeenLastCalledWith(5);
     expect(screen.getByRole("button", { name: "Ripristina 1×" })).toBeDisabled();
 
     rerender(
@@ -91,7 +110,7 @@ describe("AdminEmailView", () => {
         damagedSwords={0}
         currentMonth={9}
         availableLegendaryProfiles={3}
-        gameSpeed={100}
+        gameSpeed={10}
         onGameSpeedChange={onGameSpeedChange}
         onAddContacts={vi.fn()}
         onAddMembers={vi.fn()}
@@ -100,6 +119,10 @@ describe("AdminEmailView", () => {
         onAdvanceMonth={vi.fn()}
         onScheduleLegendaryTrial={vi.fn()}
       />,
+    );
+    expect(screen.getByRole("button", { name: "Imposta velocità 10×" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
     );
     fireEvent.click(screen.getByRole("button", { name: "Ripristina 1×" }));
     expect(onGameSpeedChange).toHaveBeenLastCalledWith(1);

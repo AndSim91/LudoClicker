@@ -145,6 +145,7 @@
 }
 
 .people-view .collaborator-sector-card {
+  overflow: hidden;
   border-color: color-mix(in srgb, var(--school-page-accent) 48%, var(--line));
   box-shadow:
     inset 3px 0 var(--school-page-accent),

@@ -268,11 +268,13 @@ export function TechnicianCourseControl({
   state: stateOverride,
   onBookTechnicianCourse,
   variant = "default",
+  showUnavailableState = false,
 }: {
   collaborator: Collaborator;
   state?: GameState;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   variant?: "default" | "compact";
+  showUnavailableState?: boolean;
 }) {
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
@@ -325,8 +327,15 @@ export function TechnicianCourseControl({
       </div>
     );
   }
-  if (!onBookTechnicianCourse || definitions.length === 0) return null;
   if (!sisUnlocked) return null;
+  if (!onBookTechnicianCourse || definitions.length === 0) {
+    return showUnavailableState ? (
+      <div className={`training-locked${variantClass}`}>
+        <span>Formazione Tecnici</span>
+        <strong>Nessun percorso disponibile</strong>
+      </div>
+    ) : null;
+  }
   const selected = definitions.find((definition) => definition.id === selectedFormId) ??
     (definitions.length === 1 ? definitions[0] : undefined);
   const cost = selected
@@ -396,6 +405,75 @@ export function TechnicianCourseControl({
         </>
       ) : null}
     </div>
+  );
+}
+
+export function InstructorQualificationTraining({
+  collaborator,
+  state,
+  onStartTraining,
+  collaboratorsById,
+}: {
+  collaborator: Collaborator;
+  state?: GameState;
+  onStartTraining: (personId: string, formId: FormId) => void;
+  collaboratorsById: Map<string, Collaborator>;
+}) {
+  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
+    return (
+      <div className="training-locked training-compact">
+        <span>Formazione Istruttore</span>
+        <strong>Disponibile al termine del Corso Tecnico</strong>
+      </div>
+    );
+  }
+  return (
+    <TrainingControl
+      personId={collaborator.id}
+      displayName={collaborator.displayName}
+      student={collaborator}
+      state={state}
+      collaboratorsById={collaboratorsById}
+      onStartTraining={onStartTraining}
+      variant="compact"
+    />
+  );
+}
+
+export function InstructorTechnicianTraining({
+  collaborator,
+  state,
+  onStartTraining,
+  onBookTechnicianCourse,
+  collaboratorsById,
+}: {
+  collaborator: Collaborator;
+  state?: GameState;
+  onStartTraining: (personId: string, formId: FormId) => void;
+  onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
+  collaboratorsById: Map<string, Collaborator>;
+}) {
+  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
+    return (
+      <TrainingControl
+        personId={collaborator.id}
+        displayName={collaborator.displayName}
+        student={collaborator}
+        state={state}
+        collaboratorsById={collaboratorsById}
+        onStartTraining={onStartTraining}
+        variant="compact"
+      />
+    );
+  }
+  return (
+    <TechnicianCourseControl
+      collaborator={collaborator}
+      state={state}
+      onBookTechnicianCourse={onBookTechnicianCourse}
+      variant="compact"
+      showUnavailableState
+    />
   );
 }
 

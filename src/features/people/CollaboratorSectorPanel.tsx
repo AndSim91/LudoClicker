@@ -1,18 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
+  COLLABORATOR_MASTERY_LEVELS,
   createInitialCollaboratorMastery,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
+import { PERSON_RARITIES } from "../../content/rarities";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
-import { isCourseXUnlocked } from "../../content/upgrades";
+import {
+  isCourseXUnlocked,
+  isSISTechnicianCourseUnlocked,
+} from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
-import { selectActiveEmail } from "../../game/selectors";
+import {
+  selectActiveEmail,
+  selectAthleticPreparationInstructorIds,
+  selectInstructorTeachingCount,
+} from "../../game/selectors";
 import type {
   Collaborator,
   CollaboratorMasteryRole,
@@ -20,7 +29,10 @@ import type {
   FormId,
   GameState,
 } from "../../game/types";
-import { getRarityClassName } from "../../shared/rarityPresentation";
+import {
+  getPresentedPersonRarity,
+  getRarityClassName,
+} from "../../shared/rarityPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import {
@@ -32,7 +44,15 @@ import { getInstructorTeachingEntries } from "./instructorGroupPresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { SectorStatisticsSummary } from "./SectorStatisticsSummary";
-import { InstructorCompactActivity, InstructorCompactTraining } from "./TrainingControl";
+import {
+  InstructorCompactActivity,
+  InstructorQualificationTraining,
+  InstructorTechnicianTraining,
+} from "./TrainingControl";
+
+type InstructorRarityFilter = "all" | ReturnType<typeof getPresentedPersonRarity>;
+type InstructorActivityFilter = "all" | "active" | "waiting";
+type InstructorTrainingFilter = "all" | "active" | "reserved" | "available";
 
 function getInitials(displayName: string): string {
   return displayName
@@ -71,6 +91,47 @@ function SectorSortableHeader({
   );
 }
 
+function SectorIdentitySortableHeader({
+  sort,
+  onSort,
+}: {
+  sort: SectorCollaboratorSort | null;
+  onSort: (key: SectorCollaboratorSortKey) => void;
+}) {
+  const options: Array<{ label: string; sortKey: SectorCollaboratorSortKey }> = [
+    { label: "Collaboratore", sortKey: "name" },
+    { label: "Arena", sortKey: "arena" },
+    { label: "Stile", sortKey: "style" },
+    { label: "Forme", sortKey: "forms" },
+  ];
+  const active = options.some(({ sortKey }) => sort?.key === sortKey);
+  return (
+    <span
+      className="sector-roster-identity-sort"
+      role="columnheader"
+      aria-sort={active ? sort?.direction : "none"}
+    >
+      {options.map(({ label, sortKey }) => {
+        const optionActive = sort?.key === sortKey;
+        return (
+          <button
+            type="button"
+            className={`sector-roster-sort-button${optionActive ? " is-active" : ""}`}
+            aria-label={`Ordina collaboratori per ${label}`}
+            onClick={() => onSort(sortKey)}
+            key={sortKey}
+          >
+            <span>{label}</span>
+            <span aria-hidden="true">
+              {optionActive ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
+            </span>
+          </button>
+        );
+      })}
+    </span>
+  );
+}
+
 function SectorCollaboratorRow({
   state: stateOverride,
   collaborator,
@@ -79,6 +140,7 @@ function SectorCollaboratorRow({
   collaboratorsById,
   onStartTraining,
   onBookTechnicianCourse,
+  showTechnicianTraining,
   onOpen,
 }: {
   state?: GameState;
@@ -88,6 +150,7 @@ function SectorCollaboratorRow({
   collaboratorsById: Map<string, Collaborator>;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
+  showTechnicianTraining: boolean;
   onOpen: () => void;
 }) {
   const state = useGameStateSlices(
@@ -128,10 +191,11 @@ function SectorCollaboratorRow({
   const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms)
     ? getContactPreparation(contact, collaborator.forms)
     : undefined;
+  const isInstructor = collaborator.assignment === "instructor";
 
   return (
     <article
-      className={`sector-roster-row${collaborator.assignment === "instructor" ? " is-instructor" : ""} ${getRarityClassName(
+      className={`sector-roster-row${isInstructor ? " is-instructor" : ""}${showTechnicianTraining ? " has-technician-training" : ""} ${getRarityClassName(
         collaborator.rarity,
         Boolean(contact?.secretLegendaryId),
       )}`}
@@ -146,14 +210,29 @@ function SectorCollaboratorRow({
         >
           {getInitials(collaborator.displayName)}
         </span>
-        <span>
+        <div className="sector-roster-identity-copy">
           <PersonName
             displayName={collaborator.displayName}
             rarity={collaborator.rarity}
             secretLegendary={Boolean(contact?.secretLegendaryId)}
           />
           {contact ? <small>{contact.email}</small> : null}
-        </span>
+          {isInstructor ? (
+            <div className="sector-roster-identity-details">
+              <div className="sector-roster-stats" aria-label="Valori Arena e Stile">
+                <span><small>Arena</small>{officialStats ? <OfficialStatValue value={officialStats.arena} /> : <strong>???</strong>}</span>
+                <span><small>Stile</small>{officialStats ? <OfficialStatValue value={officialStats.style} /> : <strong>???</strong>}</span>
+              </div>
+              <FormLogoStrip
+                className="sector-form-strip"
+                forms={collaborator.forms}
+                instructorForms={collaborator.instructorForms}
+                technicianForms={collaborator.technicianForms}
+                showLabels={false}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="sector-roster-mastery" data-label="Maestria">
@@ -176,22 +255,44 @@ function SectorCollaboratorRow({
         )}
       </div>
 
-      <div className="sector-roster-stats" data-label="Arena / Stile">
-        <span><small>Arena</small>{officialStats ? <OfficialStatValue value={officialStats.arena} /> : <strong>???</strong>}</span>
-        <span><small>Stile</small>{officialStats ? <OfficialStatValue value={officialStats.style} /> : <strong>???</strong>}</span>
-      </div>
+      {!isInstructor ? (
+        <>
+          <div className="sector-roster-stats" data-label="Arena / Stile">
+            <span><small>Arena</small>{officialStats ? <OfficialStatValue value={officialStats.arena} /> : <strong>???</strong>}</span>
+            <span><small>Stile</small>{officialStats ? <OfficialStatValue value={officialStats.style} /> : <strong>???</strong>}</span>
+          </div>
+          <FormLogoStrip
+            className="sector-form-strip"
+            forms={collaborator.forms}
+            instructorForms={collaborator.instructorForms}
+            technicianForms={collaborator.technicianForms}
+            showLabels={false}
+          />
+        </>
+      ) : null}
 
-      <FormLogoStrip
-        className="sector-form-strip"
-        forms={collaborator.forms}
-        instructorForms={collaborator.instructorForms}
-        technicianForms={collaborator.technicianForms}
-        showLabels={false}
-      />
+      {isInstructor ? (
+        <div
+          className="sector-roster-training is-instructor-training"
+          data-label="Formazione Istruttore"
+          aria-label="Formazione Istruttore"
+        >
+          <InstructorQualificationTraining
+            collaborator={collaborator}
+            state={stateOverride}
+            collaboratorsById={collaboratorsById}
+            onStartTraining={onStartTraining}
+          />
+        </div>
+      ) : null}
 
-      {collaborator.assignment === "instructor" ? (
-        <div className="sector-roster-training" data-label="Formazione">
-          <InstructorCompactTraining
+      {isInstructor && showTechnicianTraining ? (
+        <div
+          className="sector-roster-training is-technician-training"
+          data-label="Formazione Tecnici"
+          aria-label="Formazione Tecnici"
+        >
+          <InstructorTechnicianTraining
             collaborator={collaborator}
             state={stateOverride}
             collaboratorsById={collaboratorsById}
@@ -246,8 +347,16 @@ export function CollaboratorSectorPanel({
     stateOverride,
   );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const technicianTrainingUnlocked = role === "instructor" &&
+    isSISTechnicianCourseUnlocked(state.upgrades);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [sort, setSort] = useState<SectorCollaboratorSort | null>(null);
+  const [search, setSearch] = useState("");
+  const [rarityFilter, setRarityFilter] = useState<InstructorRarityFilter>("all");
+  const [activityFilter, setActivityFilter] = useState<InstructorActivityFilter>("all");
+  const [trainingFilter, setTrainingFilter] = useState<InstructorTrainingFilter>("all");
+  const [masteryFilter, setMasteryFilter] = useState("all");
+  const deferredSearch = useDeferredValue(search);
   const assigned = useMemo(
     () => state.collaborators.filter((collaborator) => collaborator.assignment === role),
     [role, state.collaborators],
@@ -256,6 +365,53 @@ export function CollaboratorSectorPanel({
     () => new Map(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
   );
+  const athleticPreparationInstructorIds = useMemo(
+    () => selectAthleticPreparationInstructorIds(state),
+    [state],
+  );
+  const filteredAssigned = useMemo(() => {
+    if (role !== "instructor") return assigned;
+    const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
+    return assigned.filter((collaborator) => {
+      const contact = contactsById.get(collaborator.contactId);
+      const searchableText = `${collaborator.displayName} ${contact?.email ?? ""}`
+        .toLocaleLowerCase("it-IT");
+      if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
+      const presentedRarity = getPresentedPersonRarity(
+        collaborator.rarity,
+        Boolean(contact?.secretLegendaryId),
+      );
+      if (rarityFilter !== "all" && presentedRarity !== rarityFilter) return false;
+      if (masteryFilter !== "all") {
+        const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
+        const level = getCollaboratorMasteryProgress(mastery.instructor).level;
+        if (level !== Number(masteryFilter)) return false;
+      }
+      if (activityFilter !== "all") {
+        const active = selectInstructorTeachingCount(state, collaborator.id) > 0 ||
+          athleticPreparationInstructorIds.has(collaborator.id);
+        if (active !== (activityFilter === "active")) return false;
+      }
+      if (trainingFilter === "active" && !collaborator.training) return false;
+      if (trainingFilter === "reserved" && !collaborator.technicianCourseReservation) return false;
+      if (
+        trainingFilter === "available" &&
+        (collaborator.training || collaborator.technicianCourseReservation)
+      ) return false;
+      return true;
+    });
+  }, [
+    activityFilter,
+    assigned,
+    athleticPreparationInstructorIds,
+    contactsById,
+    deferredSearch,
+    masteryFilter,
+    rarityFilter,
+    role,
+    state,
+    trainingFilter,
+  ]);
   const hasTimedWork = getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
     state.acquisitionEvents.some((event) => event.status === "running");
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
@@ -263,12 +419,13 @@ export function CollaboratorSectorPanel({
     state,
     contactsById,
     activeEmail: selectActiveEmail(state),
+    athleticPreparationInstructorIds,
     now,
     role,
-  }), [contactsById, now, role, state]);
+  }), [athleticPreparationInstructorIds, contactsById, now, role, state]);
   const sortedAssigned = useMemo(
-    () => sortSectorCollaborators(assigned, sort, sortContext),
-    [assigned, sort, sortContext],
+    () => sortSectorCollaborators(filteredAssigned, sort, sortContext),
+    [filteredAssigned, sort, sortContext],
   );
   const selectedCollaborator = selectedCollaboratorId
     ? state.collaborators.find((collaborator) => collaborator.id === selectedCollaboratorId)
@@ -320,6 +477,16 @@ export function CollaboratorSectorPanel({
       : current);
   };
 
+  const hasActiveFilters = search !== "" || rarityFilter !== "all" ||
+    activityFilter !== "all" || trainingFilter !== "all" || masteryFilter !== "all";
+  const resetFilters = () => {
+    setSearch("");
+    setRarityFilter("all");
+    setActivityFilter("all");
+    setTrainingFilter("all");
+    setMasteryFilter("all");
+  };
+
   return (
     <>
       <button
@@ -329,7 +496,7 @@ export function CollaboratorSectorPanel({
         onClick={onClose}
       />
       <aside
-        className={`collaborator-sector-panel${role === "instructor" ? " is-instructor" : ""}`}
+        className={`collaborator-sector-panel${role === "instructor" ? " is-instructor" : ""}${technicianTrainingUnlocked ? " has-technician-training" : ""}`}
         role="dialog"
         aria-labelledby="sector-panel-title"
       >
@@ -366,6 +533,81 @@ export function CollaboratorSectorPanel({
             </div>
           ) : (
             <div className="sector-roster">
+              {role === "instructor" ? (
+                <div className="sector-roster-filters" aria-label="Filtri istruttori">
+                  <label className="sector-roster-search-filter">
+                    <span className="sr-only">Cerca istruttore</span>
+                    <input
+                      type="search"
+                      aria-label="Filtra istruttori per nome o email"
+                      placeholder="Nome o email"
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    <span className="sr-only">Rarità istruttore</span>
+                    <select
+                      aria-label="Filtra istruttori per rarità"
+                      value={rarityFilter}
+                      onChange={(event) => setRarityFilter(event.target.value as InstructorRarityFilter)}
+                    >
+                      <option value="all">Tutte le rarità</option>
+                      {Object.entries(PERSON_RARITIES).map(([value, definition]) => (
+                        <option value={value} key={value}>Rarità: {definition.label}</option>
+                      ))}
+                      <option value="secret-legendary">Rarità: Leggendario Segreto</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span className="sr-only">Maestria istruttore</span>
+                    <select
+                      aria-label="Filtra istruttori per maestria"
+                      value={masteryFilter}
+                      onChange={(event) => setMasteryFilter(event.target.value)}
+                    >
+                      <option value="all">Tutte le maestrie</option>
+                      {COLLABORATOR_MASTERY_LEVELS.map((level, index) => (
+                        <option value={index} key={level.name}>Maestria: {level.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span className="sr-only">Attività istruttore</span>
+                    <select
+                      aria-label="Filtra istruttori per attività"
+                      value={activityFilter}
+                      onChange={(event) => setActivityFilter(event.target.value as InstructorActivityFilter)}
+                    >
+                      <option value="all">Tutte le attività</option>
+                      <option value="active">Con allievi o preparazione</option>
+                      <option value="waiting">In attesa</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span className="sr-only">Formazione personale istruttore</span>
+                    <select
+                      aria-label="Filtra istruttori per formazione"
+                      value={trainingFilter}
+                      onChange={(event) => setTrainingFilter(event.target.value as InstructorTrainingFilter)}
+                    >
+                      <option value="all">Tutte le formazioni</option>
+                      <option value="active">Formazione in corso</option>
+                      {technicianTrainingUnlocked ? (
+                        <option value="reserved">Corso Tecnico prenotato</option>
+                      ) : null}
+                      <option value="available">Nessuna formazione</option>
+                    </select>
+                  </label>
+                  <span className="sector-roster-filter-summary" aria-live="polite">
+                    <strong>{filteredAssigned.length}</strong>
+                    <small>di {assigned.length}</small>
+                  </span>
+                  <button type="button" disabled={!hasActiveFilters} onClick={resetFilters}>
+                    Azzera
+                  </button>
+                </div>
+              ) : null}
               <div className="sector-roster-sort-mobile" aria-label="Ordina collaboratori del settore">
                 <label>
                   <span>Ordina per</span>
@@ -381,7 +623,12 @@ export function CollaboratorSectorPanel({
                     <option value="arena">Arena</option>
                     <option value="style">Stile</option>
                     <option value="forms">Forme</option>
-                    {role === "instructor" ? <option value="training">Formazione</option> : null}
+                    {role === "instructor" ? (
+                      <option value="instructor-training">Formazione Istruttore</option>
+                    ) : null}
+                    {technicianTrainingUnlocked ? (
+                      <option value="technician-training">Formazione Tecnici</option>
+                    ) : null}
                   </select>
                 </label>
                 <button type="button" disabled={!sort} onClick={reverseSort}>
@@ -389,30 +636,43 @@ export function CollaboratorSectorPanel({
                 </button>
               </div>
               <div className="sector-roster-head" role="row">
-                <SectorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />
+                {role === "instructor" ? (
+                  <SectorIdentitySortableHeader sort={sort} onSort={handleSort} />
+                ) : (
+                  <SectorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />
+                )}
                 <SectorSortableHeader label="Maestria" sortKey="mastery" sort={sort} onSort={handleSort} />
                 <SectorSortableHeader label="Attività" sortKey="activity" sort={sort} onSort={handleSort} />
-                <span
-                  className="sector-roster-stat-sort"
-                  role="columnheader"
-                  aria-sort={sort?.key === "arena" || sort?.key === "style" ? sort.direction : "none"}
-                >
-                  <button
-                    type="button"
-                    className={sort?.key === "arena" ? "is-active" : ""}
-                    aria-label="Ordina collaboratori per Arena"
-                    onClick={() => handleSort("arena")}
-                  >Arena {sort?.key === "arena" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
-                  <button
-                    type="button"
-                    className={sort?.key === "style" ? "is-active" : ""}
-                    aria-label="Ordina collaboratori per Stile"
-                    onClick={() => handleSort("style")}
-                  >Stile {sort?.key === "style" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
-                </span>
-                <SectorSortableHeader label="Forme" sortKey="forms" sort={sort} onSort={handleSort} />
+                {role !== "instructor" ? (
+                  <>
+                    <span
+                      className="sector-roster-stat-sort"
+                      role="columnheader"
+                      aria-sort={sort?.key === "arena" || sort?.key === "style" ? sort.direction : "none"}
+                    >
+                      <button
+                        type="button"
+                        className={sort?.key === "arena" ? "is-active" : ""}
+                        aria-label="Ordina collaboratori per Arena"
+                        onClick={() => handleSort("arena")}
+                      >Arena {sort?.key === "arena" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+                      <button
+                        type="button"
+                        className={sort?.key === "style" ? "is-active" : ""}
+                        aria-label="Ordina collaboratori per Stile"
+                        onClick={() => handleSort("style")}
+                      >Stile {sort?.key === "style" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
+                    </span>
+                    <SectorSortableHeader label="Forme" sortKey="forms" sort={sort} onSort={handleSort} />
+                  </>
+                ) : null}
                 {role === "instructor" ? (
-                  <SectorSortableHeader label="Formazione" sortKey="training" sort={sort} onSort={handleSort} />
+                  <>
+                    <SectorSortableHeader label="Formazione Istruttore" sortKey="instructor-training" sort={sort} onSort={handleSort} />
+                    {technicianTrainingUnlocked ? (
+                      <SectorSortableHeader label="Formazione Tecnici" sortKey="technician-training" sort={sort} onSort={handleSort} />
+                    ) : null}
+                  </>
                 ) : null}
                 <span aria-hidden="true" />
               </div>
@@ -426,9 +686,17 @@ export function CollaboratorSectorPanel({
                   collaboratorsById={collaboratorsById}
                   onStartTraining={onStartTraining}
                   onBookTechnicianCourse={onBookTechnicianCourse}
+                  showTechnicianTraining={technicianTrainingUnlocked}
                   onOpen={() => setSelectedCollaboratorId(collaborator.id)}
                 />
               ))}
+              {sortedAssigned.length === 0 ? (
+                <div className="sector-roster-filter-empty">
+                  <strong>Nessun istruttore corrisponde ai filtri</strong>
+                  <span>Modifica i criteri oppure azzera i filtri.</span>
+                  <button type="button" onClick={resetFilters}>Azzera filtri</button>
+                </div>
+              ) : null}
             </div>
           )}
         </div>

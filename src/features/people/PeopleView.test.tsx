@@ -376,7 +376,7 @@ describe("PeopleView", () => {
         instructorForms: ["form-1"],
         assignment: "instructor",
         mastery: { writing: 0, events: 0, equipment: 0, instructor: 20 },
-        rarity: "ultra-rare",
+        rarity: "rare",
       },
     ];
     render(
@@ -432,10 +432,38 @@ describe("PeopleView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
     const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
     const trainingSort = within(instructorDialog).getByRole("button", {
-      name: "Ordina collaboratori per Formazione",
+      name: "Ordina collaboratori per Formazione Istruttore",
     });
     fireEvent.click(trainingSort);
     expect(trainingSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "ascending");
+    expect(within(instructorDialog).queryByRole("button", {
+      name: "Ordina collaboratori per Formazione Tecnici",
+    })).not.toBeInTheDocument();
+    expect(within(instructorDialog).queryByRole("option", {
+      name: "Corso Tecnico prenotato",
+    })).not.toBeInTheDocument();
+
+    const firstInstructorIdentity = within(instructorDialog)
+      .getAllByRole("button", { name: /Apri dettagli di/ })[0]
+      .closest(".sector-roster-row")
+      ?.querySelector(".sector-roster-identity");
+    expect(firstInstructorIdentity).not.toBeNull();
+    expect(within(firstInstructorIdentity as HTMLElement).getByLabelText(/Forme conosciute:/)).toBeVisible();
+    expect(within(firstInstructorIdentity as HTMLElement).getByLabelText("Valori Arena e Stile")).toBeVisible();
+
+    fireEvent.change(within(instructorDialog).getByRole("combobox", {
+      name: "Filtra istruttori per rarità",
+    }), { target: { value: "rare" } });
+    expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ })
+      .map((button) => button.getAttribute("aria-label")))
+      .toEqual(["Apri dettagli di Beta Istruttore"]);
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera" }));
+    fireEvent.change(within(instructorDialog).getByRole("searchbox", {
+      name: "Filtra istruttori per nome o email",
+    }), { target: { value: "Delta" } });
+    expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
+      .toHaveLength(1);
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera" }));
 
     const mobileSort = within(instructorDialog).getByRole("combobox", {
       name: "Campo di ordinamento collaboratori del settore",
@@ -761,6 +789,61 @@ describe("PeopleView", () => {
     expect(reservationCard).toHaveClass("technician-course-reservation");
     expect(within(reservationCard).getByText("SIS")).toBeVisible();
     expect(within(reservationCard).getByText(/Prenotato .* Luglio, anno 1/)).toBeVisible();
+  });
+
+  it("separates Instructor and Technician training after the SIS unlock", () => {
+    const initial = createInitialState(1_000);
+    const instructor: Collaborator = {
+      id: "teaching-center-sis-candidate",
+      contactId: initial.contacts[0].id,
+      displayName: "Candidata Centro SIS",
+      joinedAt: 1_000,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      technicianForms: [],
+      formBranchPreferences: [],
+      assignment: "instructor",
+      mastery: { writing: 0, events: 0, equipment: 0, instructor: 0 },
+      rarity: "ultra-rare",
+      technicianCourseReservation: {
+        formId: "form-1",
+        bookedAt: 2_000,
+        eligibleMonth: 7,
+      },
+    };
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [instructor],
+          unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+          upgrades: { ...initial.upgrades, "sis-accreditation": 1 },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: {
+              ...initial.collaboratorManagement.targets,
+              instructor: 1,
+            },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onBookTechnicianCourse={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    const teachingCenter = screen.getByRole("dialog", { name: "Istruttori" });
+    expect(within(teachingCenter).getByRole("button", {
+      name: "Ordina collaboratori per Formazione Istruttore",
+    })).toBeVisible();
+    expect(within(teachingCenter).getByRole("button", {
+      name: "Ordina collaboratori per Formazione Tecnici",
+    })).toBeVisible();
+    expect(within(teachingCenter).getByLabelText("Formazione Tecnici"))
+      .toContainElement(within(teachingCenter).getByLabelText(/Corso Tecnico SIS prenotato: Forma 1/));
   });
 
   it.each([7, 8])(

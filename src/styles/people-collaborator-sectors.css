@@ -1286,6 +1286,88 @@
   border-radius: var(--radius-md);
 }
 
+.sector-roster-filters {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.2fr) repeat(4, minmax(120px, .8fr)) 48px 64px;
+  min-height: 50px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.sector-roster-filters label { min-width: 0; }
+
+.sector-roster-filters input,
+.sector-roster-filters select,
+.sector-roster-filters > button {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 9px;
+}
+
+.sector-roster-filters input { padding: 0 9px; }
+
+.sector-roster-filters > button {
+  color: var(--blue-700);
+  font-weight: 600;
+}
+
+.sector-roster-filters > button:disabled {
+  color: var(--ink-muted);
+  opacity: .55;
+  cursor: default;
+}
+
+.sector-roster-filter-summary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  color: var(--ink-muted);
+}
+
+.sector-roster-filter-summary strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.sector-roster-filter-summary small {
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+.sector-roster-filter-empty {
+  display: grid;
+  min-height: 150px;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 20px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.sector-roster-filter-empty strong { color: var(--ink); font-size: 11px; }
+.sector-roster-filter-empty span { font-size: 9px; }
+
+.sector-roster-filter-empty button {
+  min-height: 30px;
+  margin-top: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--blue-600);
+  color: var(--blue-700);
+  background: var(--surface);
+  font-size: 9px;
+  font-weight: 600;
+}
+
 .instructor-courses-link:disabled {
   color: var(--ink-soft);
   cursor: default;
@@ -1322,6 +1404,19 @@
   gap: 7px;
 }
 
+.sector-roster-identity-sort {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 9px;
+}
+
+.sector-roster-identity-sort .sector-roster-sort-button:not(:first-child) {
+  color: var(--ink-soft);
+  font-size: 7px;
+}
+
 .sector-roster-head,
 .sector-roster-row {
   display: grid;
@@ -1333,12 +1428,21 @@
 .collaborator-sector-panel.is-instructor .sector-roster-head,
 .sector-roster-row.is-instructor {
   grid-template-columns:
-    minmax(190px, 1.05fr)
-    minmax(105px, .55fr)
-    minmax(180px, .9fr)
-    105px
-    minmax(110px, .65fr)
-    minmax(185px, 1fr)
+    minmax(260px, 1.25fr)
+    minmax(105px, .5fr)
+    minmax(170px, .8fr)
+    minmax(250px, 1.2fr)
+    74px;
+}
+
+.collaborator-sector-panel.is-instructor.has-technician-training .sector-roster-head,
+.sector-roster-row.is-instructor.has-technician-training {
+  grid-template-columns:
+    minmax(255px, 1.15fr)
+    minmax(105px, .45fr)
+    minmax(160px, .7fr)
+    minmax(210px, 1fr)
+    minmax(180px, .85fr)
     74px;
 }
 
@@ -1352,7 +1456,7 @@
   text-transform: uppercase;
 }
 
-.sector-roster-head span,
+.sector-roster-head > span,
 .sector-roster-row > * {
   min-width: 0;
   padding: 9px 10px;
@@ -1364,6 +1468,8 @@
   border-bottom: 1px solid var(--line);
   box-shadow: inset 2px 0 var(--collaborator-accent, var(--line-strong));
 }
+
+.sector-roster-row.is-instructor { min-height: 118px; }
 
 .sector-roster-row:last-child { border-bottom: 0; }
 .sector-roster-row.rarity-common { --collaborator-accent: var(--rarity-common-accent); }
@@ -1385,13 +1491,46 @@
   font-size: 10px;
 }
 
-.sector-roster-identity > span:last-child,
+.sector-roster-identity-copy,
 .sector-roster-mastery,
 .sector-roster-activity {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 3px;
+}
+
+.sector-roster-row.is-instructor .sector-roster-identity {
+  align-items: flex-start;
+}
+
+.sector-roster-identity-details {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 4px;
+}
+
+.sector-roster-identity-details .sector-roster-stats {
+  width: 76px;
+  flex: 0 0 76px;
+}
+
+.sector-roster-identity-details .sector-form-strip {
+  min-width: 90px;
+  flex: 1;
+}
+
+.sector-roster-identity-details .sector-form-strip .form-logo-item {
+  min-width: 22px;
+}
+
+.sector-roster-identity-details .sector-form-strip .form-logo-mark,
+.sector-roster-identity-details .sector-form-strip .form-logo-mark img {
+  width: 22px;
+  height: 22px;
 }
 
 .sector-roster-identity strong,
@@ -1418,6 +1557,13 @@
   margin: 0;
   padding: 0;
   border-top: 0;
+}
+
+.sector-roster-training > .training-control,
+.sector-roster-training > .training-progress,
+.sector-roster-training > .training-future,
+.sector-roster-training > .training-locked {
+  margin: 0;
 }
 
 .sector-roster-stats {
@@ -1533,6 +1679,12 @@
 
   .sector-roster-head { display: none; }
 
+  .sector-roster-filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sector-roster-search-filter { grid-column: span 2; }
+
   .sector-roster-sort-mobile {
     display: flex;
     align-items: flex-end;
@@ -1581,12 +1733,21 @@
   .collaborator-sector-panel.is-instructor .sector-roster-head,
   .sector-roster-row.is-instructor {
     grid-template-columns:
-      minmax(150px, 1fr)
+      minmax(210px, 1.05fr)
       100px
-      minmax(150px, .9fr)
-      90px
-      minmax(90px, .65fr)
-      minmax(160px, 1fr)
+      minmax(150px, .8fr)
+      minmax(220px, 1fr)
+      66px;
+  }
+
+  .collaborator-sector-panel.is-instructor.has-technician-training .sector-roster-head,
+  .sector-roster-row.is-instructor.has-technician-training {
+    grid-template-columns:
+      minmax(210px, 1.05fr)
+      100px
+      minmax(150px, .8fr)
+      minmax(190px, 1fr)
+      minmax(170px, .9fr)
       66px;
   }
 }
@@ -1763,6 +1924,12 @@
   .sector-panel-tabs button { flex: 1 0 auto; padding: 0 8px; }
   .sector-panel-content { padding: 10px 10px 24px; }
 
+  .sector-roster-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sector-roster-search-filter { grid-column: 1 / -1; }
+
   .sector-roster { border: 0; overflow: visible; }
 
   .sector-roster-row {
@@ -1791,8 +1958,8 @@
   .sector-roster-identity { grid-column: 1; }
   .sector-roster-mastery { grid-column: 2; grid-row: 1; min-width: 100px; }
   .sector-roster-activity { grid-column: 1 / -1; border-top: 1px solid var(--line); }
-  .sector-roster-stats { grid-column: 1; border-top: 1px solid var(--line); }
-  .sector-roster-details { grid-column: 2; border-top: 1px solid var(--line); }
+  .sector-roster-row > .sector-roster-stats { grid-column: 1; border-top: 1px solid var(--line); }
+  .sector-roster-row > .sector-roster-details { grid-column: 2; border-top: 1px solid var(--line); }
 
   .sector-roster-row > .sector-form-strip {
     grid-column: 1 / -1;
@@ -1801,24 +1968,27 @@
     border-top: 1px solid var(--line);
   }
 
-  .sector-roster-row.is-instructor .sector-roster-stats {
+  .sector-roster-row.is-instructor .sector-roster-identity,
+  .sector-roster-row.is-instructor .sector-roster-mastery,
+  .sector-roster-row.is-instructor .sector-roster-activity,
+  .sector-roster-row.is-instructor .sector-roster-training,
+  .sector-roster-row.is-instructor .sector-roster-details {
     grid-column: 1 / -1;
-    grid-row: 3;
+    grid-row: auto;
   }
 
-  .sector-roster-row.is-instructor > .sector-form-strip {
-    grid-row: 4;
-  }
-
-  .sector-roster-row.is-instructor .sector-roster-training {
-    grid-column: 1 / -1;
-    grid-row: 5;
+  .sector-roster-row.is-instructor .sector-roster-mastery,
+  .sector-roster-row.is-instructor .sector-roster-activity,
+  .sector-roster-row.is-instructor .sector-roster-training,
+  .sector-roster-row.is-instructor .sector-roster-details {
     border-top: 1px solid var(--line);
   }
 
+  .sector-roster-row.is-instructor .sector-roster-training {
+    min-width: 0;
+  }
+
   .sector-roster-row.is-instructor .sector-roster-details {
-    grid-column: 1 / -1;
-    grid-row: 6;
     justify-content: flex-end;
   }
 
