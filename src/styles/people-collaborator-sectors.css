@@ -874,10 +874,18 @@
 }
 
 .collaborator-sector-card.is-gadget-ranking {
-  grid-template-rows: auto minmax(188px, 1fr) 34px;
+  grid-template-rows: auto minmax(188px, max-content) minmax(0, 1fr) 34px;
   box-shadow:
     inset 3px 0 var(--blue-600),
     0 2px 7px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.collaborator-sector-card.is-gadget-ranking > .gadget-ranking-body {
+  grid-row: 2;
+}
+
+.collaborator-sector-card.is-gadget-ranking > .sector-manage-button {
+  grid-row: 4;
 }
 
 .gadget-ranking-body {
@@ -922,21 +930,6 @@
   font-size: 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.gadget-ranking-heading .sector-mastery-average small {
-  display: none;
-}
-
-.gadget-ranking-heading .sector-mastery-average .progress-bar-circular {
-  width: 22px;
-  height: 22px;
-  flex-basis: 22px;
-}
-
-.gadget-ranking-heading .sector-mastery-average .progress-bar-circular > span {
-  width: 15px;
-  height: 15px;
 }
 
 .gadget-ranking-list {
