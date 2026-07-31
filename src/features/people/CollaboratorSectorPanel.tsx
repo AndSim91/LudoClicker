@@ -413,7 +413,9 @@ export function CollaboratorSectorPanel({
         collaborator.rarity,
         Boolean(contact?.secretLegendaryId),
       );
-      if (rarityFilter !== "all" && presentedRarity !== rarityFilter) return false;
+      const matchesRarity = presentedRarity === rarityFilter ||
+        (rarityFilter === "legendary" && presentedRarity === "secret-legendary");
+      if (rarityFilter !== "all" && !matchesRarity) return false;
       if (masteryFilter !== "all") {
         const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
         const level = getCollaboratorMasteryProgress(mastery.instructor).level;

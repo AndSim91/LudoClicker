@@ -46,6 +46,10 @@ import type {
   GameState,
 } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
+import {
+  getInstructorCoverageForms,
+  getTechnicianCoverageForms,
+} from "./instructorGroupPresentation";
 import { TrainingFormPreview } from "./PersonPresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
 
@@ -291,6 +295,13 @@ export function TechnicianCourseControl({
   const reservation = collaborator.technicianCourseReservation;
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const technicianCoverage = useMemo(
+    () => new Set(getTechnicianCoverageForms(
+      state.collaborators.filter((candidate) => candidate.assignment === "instructor"),
+      courseXUnlocked,
+    )),
+    [courseXUnlocked, state.collaborators],
+  );
   const recoveryPending = courseXUnlocked && needsCourseXRecovery(collaborator.forms);
   const definitions = collaborator.forms.flatMap((formId) => {
     const definition = getFormDefinition(formId);
@@ -358,6 +369,7 @@ export function TechnicianCourseControl({
       getTechnicianCourseCost(definition.cost),
     )),
     contextLabel: "Corso Tecnico SIS",
+    coverage: technicianCoverage.has(definition.id) ? "covered" as const : "uncovered" as const,
   }));
 
   return (
@@ -617,6 +629,13 @@ export function TrainingControl({
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const instructorCoverage = useMemo(
+    () => new Set(getInstructorCoverageForms(
+      state.collaborators.filter((candidate) => candidate.assignment === "instructor"),
+      courseXUnlocked,
+    )),
+    [courseXUnlocked, state.collaborators],
+  );
   const recoveryPending = courseXUnlocked && needsCourseXRecovery(student.forms);
   const annualTrainingAvailable =
     getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
@@ -809,6 +828,9 @@ export function TrainingControl({
     return {
       definition,
       costLabel: formatCurrency(cost),
+      coverage: qualification
+        ? instructorCoverage.has(definition.id) ? "covered" as const : "uncovered" as const
+        : undefined,
       contextLabel: qualification
         ? "Corso Istruttori"
         : hasInstructorDiscount

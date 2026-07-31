@@ -205,6 +205,38 @@ describe("TutorialLayer", () => {
     unmount();
   });
 
+  it("keeps explanation dialogs above the elevated collaborator target", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-collaborator")!;
+    const step = scene.steps.find(({ id }) => id === "collaborator-areas")!;
+    const { container, unmount } = render(
+      <>
+        <main className="overview-view people-view">
+          <section data-tutorial-region="collaborator-section" data-tutorial-target="true">
+            Collaboratori
+          </section>
+        </main>
+        <TutorialLayer
+          scene={scene}
+          step={step}
+          stepIndex={2}
+          context={{ state: createInitialState(1_000, "Andrea Ungaro"), activeView: "contacts" }}
+          onContinue={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      </>,
+    );
+
+    const layer = container.querySelector<HTMLElement>(".tutorial-layer")!;
+    const collaborators = container.querySelector<HTMLElement>(
+      '[data-tutorial-region="collaborator-section"]',
+    )!;
+
+    expect(layer).toHaveClass("is-dialog");
+    expect(getComputedStyle(layer).zIndex).toBe("6000");
+    expect(getComputedStyle(collaborators).zIndex).toBe("5001");
+    unmount();
+  });
+
   it("keeps the selected region in focus and disables the others", () => {
     const scene = TUTORIAL_SCENES[0];
     const step = scene.steps[0];

@@ -99,6 +99,12 @@
   font-size: 11px;
 }
 
+.training-option-picker-hint {
+  color: var(--warning);
+  font-size: 9px;
+  font-weight: 600;
+}
+
 .training-option-list {
   display: grid;
   max-height: 190px;
@@ -141,6 +147,18 @@
   border-color: var(--blue-600);
   background: var(--blue-050);
   box-shadow: inset 3px 0 var(--blue-600);
+}
+
+.training-control .training-option-card.is-uncovered {
+  border-color: color-mix(in srgb, var(--warning) 55%, var(--line));
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+  box-shadow: inset 3px 0 var(--warning);
+}
+
+.training-control .training-option-card.is-selected.is-uncovered {
+  border-color: var(--blue-600);
+  background: var(--blue-050);
+  box-shadow: inset 3px 0 var(--warning), 0 0 0 1px var(--blue-600);
 }
 
 .training-option-card > img {
@@ -194,6 +212,11 @@
 .training-option-meta > small {
   color: var(--ink-muted);
   font-size: 8px;
+}
+
+.training-option-meta > .training-option-coverage {
+  color: var(--warning);
+  font-weight: 700;
 }
 
 .training-option-radio {

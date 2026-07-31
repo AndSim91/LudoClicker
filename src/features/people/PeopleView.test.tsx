@@ -536,6 +536,92 @@ describe("PeopleView", () => {
       .toEqual(["Apri dettagli di Beta Istruttore", "Apri dettagli di Delta Istruttore"]);
   });
 
+  it("includes Secret Legendaries in the base Legendary instructor filter", () => {
+    const initial = createInitialState(1_000);
+    const regularLegendary = {
+      ...initial.contacts[0],
+      id: "teaching-regular-legendary",
+      firstName: "Andrea",
+      lastName: "Simonazzi",
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+      specialProfileId: "andrea-simonazzi" as const,
+      secretLegendaryId: undefined,
+    };
+    const secretLegendary = {
+      ...initial.contacts[1],
+      id: "teaching-secret-legendary",
+      firstName: "Enrico",
+      lastName: "Giovanetti",
+      status: "enrolled" as const,
+      rarity: "legendary" as const,
+      specialProfileId: "enrico-giovanetti" as const,
+      secretLegendaryId: "enrico-giovanetti" as const,
+    };
+    const collaborators: Collaborator[] = [
+      {
+        id: "teaching-regular-collaborator",
+        contactId: regularLegendary.id,
+        displayName: "Andrea Simonazzi",
+        joinedAt: 1_000,
+        forms: [],
+        instructorForms: [],
+        assignment: "instructor",
+        rarity: "legendary",
+        specialProfileId: "andrea-simonazzi",
+      },
+      {
+        id: "teaching-secret-collaborator",
+        contactId: secretLegendary.id,
+        displayName: "Enrico Giovanetti",
+        joinedAt: 1_001,
+        forms: [],
+        instructorForms: [],
+        assignment: "instructor",
+        rarity: "legendary",
+        specialProfileId: "enrico-giovanetti",
+      },
+    ];
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts: [regularLegendary, secretLegendary],
+          collaborators,
+          school: { ...initial.school, activeMembers: 2 },
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
+    const rarityFilter = within(instructorDialog).getByRole("combobox", {
+      name: /^Filtra istruttori per rarit/,
+    });
+
+    fireEvent.change(rarityFilter, { target: { value: "legendary" } });
+    expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
+      .toHaveLength(2);
+    expect(within(instructorDialog).getByRole("button", {
+      name: "Apri dettagli di Enrico Giovanetti",
+    })).toBeVisible();
+
+    fireEvent.change(rarityFilter, { target: { value: "secret-legendary" } });
+    expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
+      .toHaveLength(1);
+    expect(within(instructorDialog).getByRole("button", {
+      name: "Apri dettagli di Enrico Giovanetti",
+    })).toBeVisible();
+  });
+
   it("shows continuous athletic preparation and a stable instructor-course counter", () => {
     const initial = createInitialState(1_000);
     const collaborators = Array.from({ length: 9 }, (_, index) => ({
