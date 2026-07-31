@@ -63,6 +63,22 @@ function teachingState(): GameState {
 }
 
 describe("automatic teaching rules", () => {
+  it("persists the automatic teaching toggle through the reducer", () => {
+    const initialState = teachingState();
+
+    const disabledState = gameReducer(initialState, {
+      type: "SET_AUTOMATIC_TEACHING",
+      enabled: false,
+    });
+    expect(disabledState.automation.autoTeachingEnabled).toBe(false);
+
+    const enabledState = gameReducer(disabledState, {
+      type: "SET_AUTOMATIC_TEACHING",
+      enabled: true,
+    });
+    expect(enabledState.automation.autoTeachingEnabled).toBe(true);
+  });
+
   it("does not start automatic courses while the global teaching toggle is disabled", () => {
     const initial = teachingState();
     const student = {

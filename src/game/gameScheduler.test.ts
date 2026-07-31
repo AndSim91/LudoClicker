@@ -175,6 +175,25 @@ describe("game scheduler", () => {
     );
   });
 
+  it("does not poll automatic teaching while the global toggle is disabled", () => {
+    const state = stateAtNow();
+    const pausedTeaching: GameState = {
+      ...state,
+      collaborators: [collaborator("instructor")],
+      unlocks: { ...state.unlocks, forms: true },
+      automation: { ...state.automation, autoTeachingEnabled: false },
+    };
+
+    expect(getNextGameTickAt(pausedTeaching, NOW)).toBe(NOW + 60_000);
+    expect(getNextGameTickDelay(pausedTeaching, NOW)).toBe(60_000);
+
+    const progressed = gameReducer(pausedTeaching, {
+      type: "TICK",
+      now: NOW + 1_000,
+    });
+    expect(progressed.automation.lastProcessedAt).toBe(NOW + 1_000);
+  });
+
   it("keeps the heartbeat active while Gadget work or sales can advance", () => {
     const state = stateAtNow();
     const working: GameState = {

@@ -130,6 +130,7 @@ export function getNextGameTickAt(
   );
   if (
     hasInstructorAutomation &&
+    state.automation.autoTeachingEnabled &&
     state.unlocks.forms &&
     !isSummerBreak(state.school.currentMonth) &&
     !isAutomaticTeachingKnownIdle(state)
