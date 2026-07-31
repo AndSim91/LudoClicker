@@ -535,7 +535,7 @@ describe("TournamentsView", () => {
     expect(view.queryByText("Completato · stagione 1")).not.toBeInTheDocument();
   });
 
-  it("shows only school winners and separates each tournament by level", () => {
+  it("shows only first-place school winners from the compact hall", () => {
     const initial = createStateWithForms();
     const simulation = simulateTournament(
       initial,
@@ -570,7 +570,15 @@ describe("TournamentsView", () => {
     };
     const state = {
       ...initial,
-      tournaments: { ...initial.tournaments, results: [result] },
+      tournaments: {
+        ...initial.tournaments,
+        results: [result],
+        hall: [{
+          level: result.level,
+          season: result.season,
+          arenaWinner: `${schoolWinner.firstName} ${schoolWinner.lastName}`,
+        }],
+      },
     };
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
@@ -582,7 +590,7 @@ describe("TournamentsView", () => {
     expect(view.getByRole("heading", { name: "Arena" })).toBeVisible();
     expect(view.getByRole("heading", { name: "Stile" })).toBeVisible();
     expect(view.getByText(`${schoolWinner.firstName} ${schoolWinner.lastName}`)).toBeVisible();
-    expect(view.getByText("Nessun vincitore della scuola")).toBeVisible();
+    expect(view.getByText("Nessuna vittoria della scuola")).toBeVisible();
     expect(
       view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`),
     ).not.toBeInTheDocument();
@@ -590,16 +598,16 @@ describe("TournamentsView", () => {
 
   it("keeps tournament cards at their fixed height with a long virtualized history", () => {
     const { state, result } = createCompletedTournamentState();
-    const results = Array.from({ length: 24 }, (_, index) => ({
-      ...result,
-      id: `${result.id}-${index}`,
+    const hall = Array.from({ length: 24 }, (_, index) => ({
+      level: result.level,
       season: index + 1,
+      arenaWinner: `Vincitore ${index + 1}`,
     }));
     const { container } = render(
       <TournamentsView
         state={{
           ...state,
-          tournaments: { ...state.tournaments, results },
+          tournaments: { ...state.tournaments, hall },
         }}
       />,
     );
@@ -610,7 +618,7 @@ describe("TournamentsView", () => {
     const cards = container.querySelectorAll<HTMLElement>(".tournament-hall-tournament");
     expect(cards).toHaveLength(18);
     expect(getComputedStyle(cards[0]).flexShrink).toBe("0");
-    expect(getComputedStyle(cards[0]).flexBasis).toBe("274px");
+    expect(getComputedStyle(cards[0]).flexBasis).toBe("150px");
   });
 
   it("keeps Chronicles completely hidden until it is unlocked", () => {

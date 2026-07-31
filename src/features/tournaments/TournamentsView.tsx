@@ -6,12 +6,12 @@ import type {
   GameState,
   RockPaperScissorsChoice,
   TournamentDiscipline,
-  TournamentParticipant,
+  TournamentHallEntry,
   TournamentResult,
   ReptileSectorAssignments,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
-import { useGameStateSlices } from "../../game/GameStateContext";
+import { useGameSelector, useGameStateSlices } from "../../game/GameStateContext";
 import { ChroniclesView } from "./ChroniclesView";
 import {
   CHRONICLES_TOURNAMENT_LOADING_MS,
@@ -19,71 +19,40 @@ import {
 } from "./ChroniclesTournamentLoading";
 import { TournamentOverview } from "./TournamentOverview";
 import { TournamentResults } from "./TournamentResults";
-import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
-import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
 import { useVirtualRows } from "../../shared/useVirtualRows";
 import { levelShortLabel, type TournamentTab } from "./tournamentPresentation";
 import { ReptileView } from "./ReptileView";
 
-const TOURNAMENT_HALL_ROW_HEIGHT = 274;
+const TOURNAMENT_HALL_ROW_HEIGHT = 150;
 
 type OpenTournamentTab = "reptile" | "chronicles";
-
-type TournamentHallWinner = {
-  id: string;
-  participant: TournamentParticipant;
-  position: 1 | 2 | 3;
-  metric: string;
-};
 
 type TournamentHallRow = {
   id: string;
   label: string;
   level: string;
   season: number;
-  arena: TournamentHallWinner[];
-  style: TournamentHallWinner[];
+  arenaWinner?: string;
+  styleWinner?: string;
 };
 
-function buildTournamentHallDiscipline(
-  result: GameState["tournaments"]["results"][number],
-  discipline: TournamentDiscipline,
-): TournamentHallWinner[] {
-  const participantById = new Map(
-    result.participants.map((participant) => [participant.id, participant]),
-  );
-  const podium = discipline === "arena" ? result.arenaPodium : result.stylePodium;
-  return podium
-    .map((entry): TournamentHallWinner | undefined => {
-      const participant = participantById.get(entry.participantId);
-      if (!participant?.ownedContactId) return undefined;
-      return {
-        id: `${result.id}-${entry.discipline}-${entry.position}`,
-        participant,
-        position: entry.position,
-        metric: discipline === "arena" ? "Arena" : entry.score.toFixed(3),
-      };
-    })
-    .filter((entry): entry is TournamentHallWinner => Boolean(entry));
-}
-
-function getTournamentHallRows(results: GameState["tournaments"]["results"]): TournamentHallRow[] {
-  return [...results].reverse().map((result) => ({
-    id: result.id,
-    label: TOURNAMENT_DEFINITIONS[result.level].label,
-    level: levelShortLabel[result.level],
-    season: result.season,
-    arena: buildTournamentHallDiscipline(result, "arena"),
-    style: buildTournamentHallDiscipline(result, "style"),
+function getTournamentHallRows(hall: readonly TournamentHallEntry[]): TournamentHallRow[] {
+  return [...hall].reverse().map((entry) => ({
+    id: `${entry.level}-${entry.season}`,
+    label: TOURNAMENT_DEFINITIONS[entry.level].label,
+    level: levelShortLabel[entry.level],
+    season: entry.season,
+    arenaWinner: entry.arenaWinner,
+    styleWinner: entry.styleWinner,
   }));
 }
 
 function TournamentHallDiscipline({
   discipline,
-  entries,
+  winner,
 }: {
   discipline: TournamentDiscipline;
-  entries: readonly TournamentHallWinner[];
+  winner?: string;
 }) {
   const label = discipline === "arena" ? "Arena" : "Stile";
   return (
@@ -92,36 +61,26 @@ function TournamentHallDiscipline({
         <Icon name={discipline === "arena" ? "trophy" : "spark"} />
         <h4>{label}</h4>
       </header>
-      {entries.length > 0 ? (
-        <ol className="tournament-hall-podium">
-          {entries.map((entry) => (
-            <li key={entry.id} className={entry.position === 1 ? "is-first" : ""}>
-              <b>{entry.position}°</b>
-              <TournamentParticipantIdentity participant={entry.participant} />
-              <small>{entry.metric}</small>
-            </li>
-          ))}
-        </ol>
+      {winner ? (
+        <div className="tournament-hall-winner">
+          <b>1°</b>
+          <strong>{winner}</strong>
+        </div>
       ) : (
-        <p className="tournament-hall-empty-discipline">Nessun vincitore della scuola</p>
+        <p className="tournament-hall-empty-discipline">Nessuna vittoria della scuola</p>
       )}
     </section>
   );
 }
 
 const TournamentsHall = memo(function TournamentsHall({
-  results,
-  schoolName,
-  schoolCity,
+  hall,
 }: {
-  results: GameState["tournaments"]["results"];
-  schoolName: string;
-  schoolCity: string;
+  hall: readonly TournamentHallEntry[];
 }) {
-  const entries = useMemo(() => getTournamentHallRows(results), [results]);
-  const displaySchoolName = tournamentSchoolDisplayName(schoolName, schoolCity);
+  const entries = useMemo(() => getTournamentHallRows(hall), [hall]);
   const winnerCount = entries.reduce(
-    (total, entry) => total + entry.arena.length + entry.style.length,
+    (total, entry) => total + Number(Boolean(entry.arenaWinner)) + Number(Boolean(entry.styleWinner)),
     0,
   );
   const virtualRows = useVirtualRows({
@@ -134,9 +93,9 @@ const TournamentsHall = memo(function TournamentsHall({
       <header>
         <div>
           <h2>Albo d'oro</h2>
-          <small title={`Città: ${schoolCity}`}>Solo vincitori di {displaySchoolName}</small>
+          <small>Solo vittorie della scuola</small>
         </div>
-        <span>{winnerCount} piazzamenti</span>
+        <span>{winnerCount} {winnerCount === 1 ? "vittoria" : "vittorie"}</span>
       </header>
       <div className="virtualized-tournament-hall" onScroll={virtualRows.onScroll}>
         {virtualRows.paddingTop > 0 ? (
@@ -158,11 +117,10 @@ const TournamentsHall = memo(function TournamentsHall({
                   </small>
                 </div>
               </div>
-              <em title={`Città: ${schoolCity}`}>{displaySchoolName}</em>
             </header>
             <div className="tournament-hall-disciplines">
-              <TournamentHallDiscipline discipline="arena" entries={entry.arena} />
-              <TournamentHallDiscipline discipline="style" entries={entry.style} />
+              <TournamentHallDiscipline discipline="arena" winner={entry.arenaWinner} />
+              <TournamentHallDiscipline discipline="style" winner={entry.styleWinner} />
             </div>
           </article>
         ))}
@@ -178,6 +136,61 @@ const TournamentsHall = memo(function TournamentsHall({
         ) : null}
       </div>
     </section>
+  );
+});
+
+function selectTournamentContactForms(state: GameState): GameState["contacts"] {
+  return state.contacts;
+}
+
+function haveSameTournamentContactForms(
+  left: GameState["contacts"],
+  right: GameState["contacts"],
+): boolean {
+  return left.length === right.length && left.every((contact, index) =>
+    contact.id === right[index].id && contact.forms === right[index].forms
+  );
+}
+
+const StoredTournamentResults = memo(function StoredTournamentResults({
+  state: stateOverride,
+  result,
+  results,
+  onSelectResult,
+  onBackToOverview,
+  onViewQualified,
+  continuationAction,
+}: {
+  state?: GameState;
+  result: TournamentResult;
+  results: readonly TournamentResult[];
+  onSelectResult: (resultId: string) => void;
+  onBackToOverview: () => void;
+  onViewQualified: () => void;
+  continuationAction?: {
+    label: string;
+    onClick: () => void;
+  };
+}) {
+  const contacts = useGameSelector(
+    selectTournamentContactForms,
+    stateOverride,
+    haveSameTournamentContactForms,
+  );
+  const knownFormsByContactId = useMemo(
+    () => new Map(contacts.map((contact) => [contact.id, contact.forms] as const)),
+    [contacts],
+  );
+  return (
+    <TournamentResults
+      result={result}
+      results={results}
+      onSelectResult={onSelectResult}
+      onBackToOverview={onBackToOverview}
+      onViewQualified={onViewQualified}
+      knownFormsByContactId={knownFormsByContactId}
+      continuationAction={continuationAction}
+    />
   );
 });
 
@@ -211,7 +224,7 @@ export function TournamentsView({
   onSkipReptilePresentation?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["collaborators", "contacts", "equipment", "network", "school", "tournaments", "upgrades"],
+    ["tournaments"],
     stateOverride,
   );
   const [tab, setTab] = useState<TournamentTab>("overview");
@@ -236,10 +249,6 @@ export function TournamentsView({
   const latestChroniclesResult = [...state.tournaments.results]
     .reverse()
     .find((result) => result.level === "chronicles");
-  const knownFormsByContactId = useMemo(
-    () => new Map(state.contacts.map((contact) => [contact.id, contact.forms] as const)),
-    [state.contacts],
-  );
   const openResult = (result: TournamentResult) => {
     setSelectedResultId(result.id);
     setTab("results");
@@ -303,24 +312,20 @@ export function TournamentsView({
       ) : null}
       {!chroniclesLoading && visibleTab === "results" ? (
         selectedResult ? (
-          <TournamentResults
+          <StoredTournamentResults
+            state={stateOverride}
             result={selectedResult}
             results={state.tournaments.results}
             onSelectResult={setSelectedResultId}
             onBackToOverview={() => setTab("overview")}
             onViewQualified={onOpenAthletes}
-            knownFormsByContactId={knownFormsByContactId}
           />
         ) : (
           <p className="empty-tournaments tournament-empty-page">Nessun torneo disputato.</p>
         )
       ) : null}
       {!chroniclesLoading && visibleTab === "hall" ? (
-        <TournamentsHall
-          results={state.tournaments.results}
-          schoolName={state.school.name}
-          schoolCity={state.school.city}
-        />
+        <TournamentsHall hall={state.tournaments.hall} />
       ) : null}
       {!chroniclesLoading && visibleTab === "open" ? (
         <section className="open-tournaments" aria-label="Tornei Open">
@@ -343,7 +348,7 @@ export function TournamentsView({
 
           {visibleOpenTournamentTab === "reptile" ? (
             <ReptileView
-              state={state}
+              state={stateOverride}
               onStartPreparation={onStartReptilePreparation}
               onStartMinigame={onStartReptileMinigame}
               onCompleteMinigame={onCompleteReptileMinigame}
@@ -354,13 +359,13 @@ export function TournamentsView({
               onSkipPresentation={onSkipReptilePresentation}
             />
           ) : showChroniclesResult && latestChroniclesResult ? (
-            <TournamentResults
+            <StoredTournamentResults
+              state={stateOverride}
               result={latestChroniclesResult}
               results={[latestChroniclesResult]}
               onSelectResult={() => undefined}
               onBackToOverview={() => setTab("overview")}
               onViewQualified={onOpenAthletes}
-              knownFormsByContactId={knownFormsByContactId}
               continuationAction={{
                 label:
                   state.tournaments.chronicles.activeChallenge?.tournamentResultId ===

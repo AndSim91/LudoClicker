@@ -769,7 +769,9 @@ Follower. Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del
 5% l'affluenza agli Eventi, senza alcun limite massimo. Social non genera prove
 dirette, non migliora la qualità dei contatti e non accredita denaro per ciclo.
 Le sponsorizzazioni vengono riscosse con le rette mensili, a partire da 0,10 €
-per Follower. Le campagne manuali del vecchio sistema non esistono più.
+per Follower. Il completamento dei contenuti aggiorna Follower e statistiche ma
+non genera email interne: la posta è riservata a informazioni operative o
+narrative importanti. Le campagne manuali del vecchio sistema non esistono più.
 
 Il **Volantinaggio** è sempre disponibile come attività gratuita di sicurezza
 quando mancano contatti o denaro. Non richiede iscritti o spade, ma produce

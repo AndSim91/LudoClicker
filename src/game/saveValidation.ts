@@ -28,6 +28,31 @@ function isNonNegativeSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
+const TOURNAMENT_LEVELS = new Set([
+  "school",
+  "academy",
+  "national",
+  "champions",
+  "chronicles",
+]);
+
+function hasValidTournamentHall(state: Partial<GameState>): boolean {
+  const hall = state.tournaments?.hall;
+  return Array.isArray(hall) && hall.every((entry) => {
+    const arenaWinner = entry?.arenaWinner;
+    const styleWinner = entry?.styleWinner;
+    return Boolean(
+      entry &&
+      TOURNAMENT_LEVELS.has(entry.level) &&
+      Number.isSafeInteger(entry.season) &&
+      entry.season >= 1 &&
+      (arenaWinner === undefined || (typeof arenaWinner === "string" && arenaWinner.trim())) &&
+      (styleWinner === undefined || (typeof styleWinner === "string" && styleWinner.trim())) &&
+      (arenaWinner !== undefined || styleWinner !== undefined),
+    );
+  });
+}
+
 const REQUIRED_COLLABORATOR_MASTERY_ROLES = [
   "writing",
   "events",
@@ -514,6 +539,7 @@ export function isValidGameState(value: unknown): value is GameState {
     Array.isArray(state.network?.schools) &&
     typeof state.network?.prestigeOfferSent === "boolean"
     && Array.isArray(state.tournaments?.results)
+    && hasValidTournamentHall(state)
     && Array.isArray(state.tournaments?.missedTournaments)
     && Array.isArray(state.tournaments?.immuneContactIds)
     && Array.isArray(state.tournaments?.skippedSeasons)

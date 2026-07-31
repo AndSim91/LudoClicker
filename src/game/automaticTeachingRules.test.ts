@@ -334,7 +334,7 @@ describe("automatic teaching rules", () => {
     const initial = teachingState();
     const state: GameState = {
       ...initial,
-      contacts: [],
+      contacts: [{ ...initial.contacts[0], status: "lost" }],
       collaborators: [instructor("idle", "legendary", ["form-1"])],
     };
     const createPlan = vi.fn(createTrainingStartPlan);
@@ -357,13 +357,52 @@ describe("automatic teaching rules", () => {
     processAutomaticTeaching(masteryOnly, 3_000, startForm, startAgonist, createPlan);
     expect(createPlan).toHaveBeenCalledTimes(1);
 
+    const contactsRecreated = {
+      ...masteryOnly,
+      contacts: masteryOnly.contacts.map((contact) => ({ ...contact })),
+    };
     processAutomaticTeaching(
-      { ...masteryOnly, equipment: { ...masteryOnly.equipment } },
+      contactsRecreated,
+      3_500,
+      startForm,
+      startAgonist,
+      createPlan,
+    );
+    expect(createPlan).toHaveBeenCalledTimes(1);
+
+    processAutomaticTeaching(
+      { ...contactsRecreated, equipment: { ...contactsRecreated.equipment } },
       4_000,
       startForm,
       startAgonist,
       createPlan,
     );
     expect(createPlan).toHaveBeenCalledTimes(2);
+  });
+
+  it("stops Agonist Course checks when the remaining budget cannot pay one", () => {
+    const initial = teachingState();
+    const candidates = Array.from({ length: 100 }, (_, index) => ({
+      ...branchStudent(initial.contacts[index % initial.contacts.length], `candidate-${index}`),
+      acquiredAt: index,
+    }));
+    const state: GameState = {
+      ...initial,
+      school: { ...initial.school, activeMembers: candidates.length, euros: 999 },
+      contacts: candidates,
+      collaborators: [instructor("agonist-instructor", "legendary", ["form-1"])],
+    };
+    const startForm = vi.fn((current: GameState) => current);
+    const startAgonist = vi.fn((current: GameState) => current);
+
+    const processed = processAutomaticTeaching(
+      state,
+      2_000,
+      startForm,
+      startAgonist,
+    );
+
+    expect(processed).toBe(state);
+    expect(startAgonist).not.toHaveBeenCalled();
   });
 });

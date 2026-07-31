@@ -664,7 +664,11 @@ Per gli atleti della scuola mostra:
 
 ### 15.3 Risultati
 
-Il torneo viene simulato e salvato automaticamente. Il giocatore può consultare:
+Il torneo viene simulato e salvato automaticamente. I dettagli completi restano
+consultabili soltanto per l'ultima stagione competitiva. Un nuovo risultato
+dello stesso livello e della stessa stagione sovrascrive il precedente; delle
+Chronicles viene conservato soltanto il risultato più recente. Il giocatore può
+consultare:
 
 - riepilogo;
 - gironi;
@@ -692,16 +696,17 @@ Prima dell'incontro le probabilità vengono espresse qualitativamente:
 
 ### 15.4 Albo d'Oro
 
-Ogni podio registra:
+L'Albo d'Oro è uno storico permanente ma volutamente minimale. Registra una
+voce soltanto quando la scuola del giocatore vince Arena o Stile e conserva:
 
-- atleta;
-- scuola;
 - stagione;
 - torneo;
-- posizione;
-- Arena o Stile;
-- Forma ed esperienza al momento;
-- valutazione o risultato finale.
+- nome del vincitore Arena, se appartiene alla scuola;
+- nome del vincitore Stile, se appartiene alla scuola.
+
+Non conserva partecipanti, podi completi, scuole avversarie, punteggi, Forme o
+esperienza. L'appartenenza alla scuola viene determinata dall'ID dell'iscritto,
+non dal nome testuale della scuola.
 
 ## 16. Ordine di risoluzione
 

@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 79,
+  version: 80,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -90,7 +90,6 @@ export const GAME_CONFIG = {
   recentEmailsLimit: 500,
   recentCompletedTrialsLimit: 500,
   recentCompletedEventsLimit: 200,
-  recentTournamentResultsLimit: 24,
   recentMissedTournamentsLimit: 48,
   chroniclesTeamSize: 6,
   chroniclesLegendaryFameReward: 500,

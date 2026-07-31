@@ -1,11 +1,26 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { memo, Profiler, type PropsWithChildren } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
-import type { CampaignEmail, InboxMessage } from "../../game/types";
+import {
+  GameStateStoreProvider,
+  useGameStateStore,
+} from "../../game/GameStateContext";
+import type { CampaignEmail, GameState, InboxMessage } from "../../game/types";
 import { MessageList } from "./MessageList";
 
 afterEach(cleanup);
+
+const StableMessageList = memo(MessageList);
+
+function StableStoreHarness({
+  state,
+  children,
+}: PropsWithChildren<{ state: GameState }>) {
+  const store = useGameStateStore(state);
+  return <GameStateStoreProvider value={store}>{children}</GameStateStoreProvider>;
+}
 
 function message(
   id: string,
@@ -170,5 +185,49 @@ describe("MessageList", () => {
     );
 
     expect(screen.getByText(tournamentMessage.subject)).toBeVisible();
+  });
+
+  it("does not render the large sent archive again for irrelevant contact updates", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const onRender = vi.fn();
+    const child = (
+      <Profiler id="sent-list" onRender={onRender}>
+        <StableMessageList
+          folder="sent"
+          selectedMessageId={null}
+          selectedSentEmailId={null}
+          onSelectMessage={vi.fn()}
+          onSelectSentEmail={vi.fn()}
+        />
+      </Profiler>
+    );
+    const view = render(<StableStoreHarness state={initial}>{child}</StableStoreHarness>);
+    expect(onRender).toHaveBeenCalledTimes(1);
+
+    const recreatedContacts: GameState = {
+      ...initial,
+      contacts: initial.contacts.map((contact) => ({
+        ...contact,
+        forms: [...contact.forms],
+      })),
+    };
+    view.rerender(
+      <StableStoreHarness state={recreatedContacts}>{child}</StableStoreHarness>,
+    );
+    expect(onRender).toHaveBeenCalledTimes(1);
+
+    view.rerender(
+      <StableStoreHarness
+        state={{
+          ...recreatedContacts,
+          contacts: recreatedContacts.contacts.map((contact, index) =>
+            index === 0 ? { ...contact, status: "lost" } : contact
+          ),
+        }}
+      >
+        {child}
+      </StableStoreHarness>,
+    );
+    expect(onRender).toHaveBeenCalledTimes(2);
   });
 });

@@ -257,6 +257,9 @@ describe("game engine: progression", () => {
     expect(automated.statistics.eurosEarned).toBe(0);
     expect(automated.collaborators[0].mastery?.writing).toBe(1);
     expect(automated.statistics.socialContentCycles).toBe(1);
+    expect(
+      automated.messages.some((message) => message.subject === "Contenuti Social pubblicati"),
+    ).toBe(false);
     expect(automated.automation.socialContentBuffer).toBe(0);
     expect(automated.contacts).toHaveLength(0);
     expect(automated.statistics.socialContacts).toBe(0);

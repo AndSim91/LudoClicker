@@ -19,6 +19,7 @@ export function migrateTournamentState(state: MigratableState): MigratableState 
     }),
     tournaments: {
       results: [],
+      hall: [],
       missedTournaments: [],
       immuneContactIds: [],
       skippedSeasons: [],

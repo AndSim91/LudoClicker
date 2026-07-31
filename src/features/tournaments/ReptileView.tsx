@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
+import { useGameSelector } from "../../game/GameStateContext";
 import {
   REPTILE_SECTORS,
   REPTILE_SECTOR_LABELS,
@@ -219,8 +220,25 @@ function createDefaultAssignments(collaborators: readonly Collaborator[]): Recor
   ]));
 }
 
+function selectReptileViewState(state: GameState): GameState {
+  return state;
+}
+
+function haveSameReptileViewState(left: GameState, right: GameState): boolean {
+  return left.tournaments.reptile === right.tournaments.reptile &&
+    left.school.currentMonth === right.school.currentMonth &&
+    left.school.euros === right.school.euros &&
+    left.collaborators.length === right.collaborators.length &&
+    left.collaborators.every((collaborator, index) => {
+      const current = right.collaborators[index];
+      return collaborator.id === current.id &&
+        collaborator.displayName === current.displayName &&
+        collaborator.assignment === current.assignment;
+    });
+}
+
 export function ReptileView({
-  state,
+  state: stateOverride,
   onStartPreparation,
   onStartMinigame,
   onCompleteMinigame,
@@ -230,7 +248,7 @@ export function ReptileView({
   onAdvancePresentation,
   onSkipPresentation,
 }: {
-  state: GameState;
+  state?: GameState;
   onStartPreparation: (assignments: ReptileSectorAssignments) => void;
   onStartMinigame: () => void;
   onCompleteMinigame: (hits: number, misses: number, outsideClicks: number) => void;
@@ -240,6 +258,11 @@ export function ReptileView({
   onAdvancePresentation: () => void;
   onSkipPresentation: () => void;
 }) {
+  const state = useGameSelector(
+    selectReptileViewState,
+    stateOverride,
+    haveSameReptileViewState,
+  );
   const reptile = state.tournaments.reptile;
   const edition = reptile.activeEdition;
   const eligibleCollaborators = useMemo(

@@ -10,7 +10,7 @@ import {
   hasUnlockedOfficialStats,
 } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
-import { useGameStateSlices } from "../../game/GameStateContext";
+import { useGameSelector } from "../../game/GameStateContext";
 import {
   getEligibleSchoolContactsFromRoster,
   selectSchoolTournamentEntrantsFromRoster,
@@ -31,10 +31,30 @@ interface TournamentOverviewProps {
   onOpenResult: (result: TournamentResult) => void;
 }
 
+function selectTournamentOverviewState(state: GameState): GameState {
+  return state;
+}
+
+function haveSameTournamentOverviewState(left: GameState, right: GameState): boolean {
+  return left.contacts === right.contacts &&
+    left.tournaments === right.tournaments &&
+    left.school.currentMonth === right.school.currentMonth &&
+    left.school.name === right.school.name &&
+    left.school.city === right.school.city &&
+    left.collaborators.length === right.collaborators.length &&
+    left.collaborators.every((collaborator, index) => {
+      const current = right.collaborators[index];
+      return collaborator.id === current.id &&
+        collaborator.contactId === current.contactId &&
+        collaborator.forms === current.forms;
+    });
+}
+
 export function TournamentOverview({ state: stateOverride, onOpenResult }: TournamentOverviewProps) {
-  const state = useGameStateSlices(
-    ["collaborators", "contacts", "network", "school", "tournaments", "upgrades"],
+  const state = useGameSelector(
+    selectTournamentOverviewState,
     stateOverride,
+    haveSameTournamentOverviewState,
   );
   const upcoming = findUpcomingTournament(state);
   const now = useGameTime(

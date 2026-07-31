@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { useGameStateSlices } from "../../game/GameStateContext";
+import { useGameSelector } from "../../game/GameStateContext";
 import { getInboxCategory, type InboxCategory } from "../../game/messages";
+import { isGameAreaUnlocked } from "../../game/progression";
 import {
   selectActiveContact,
   selectActiveEmail,
@@ -33,6 +34,61 @@ function getSentEmailStatus(
 }
 
 const SENT_EMAILS_PER_PAGE = 75;
+
+function selectMessageListState(state: GameState): GameState {
+  return state;
+}
+
+function getActiveDraftPresentation(state: GameState) {
+  const email = selectActiveEmail(state);
+  const contact = email
+    ? state.contacts.find((candidate) => candidate.id === email.contactId)
+    : undefined;
+  return {
+    emailId: email?.id,
+    subject: email?.subject,
+    status: email?.status,
+    createdAt: email?.createdAt,
+    contactId: contact?.id,
+    firstName: contact?.firstName,
+    lastName: contact?.lastName,
+    rarity: contact?.rarity,
+    secretLegendaryId: contact?.secretLegendaryId,
+  };
+}
+
+function haveSameInboxPresentation(left: GameState, right: GameState): boolean {
+  if (left.messages !== right.messages) return false;
+  if (
+    isGameAreaUnlocked("tournaments", left) !==
+    isGameAreaUnlocked("tournaments", right)
+  ) return false;
+  const previous = getActiveDraftPresentation(left);
+  const current = getActiveDraftPresentation(right);
+  return previous.emailId === current.emailId &&
+    previous.subject === current.subject &&
+    previous.status === current.status &&
+    previous.createdAt === current.createdAt &&
+    previous.contactId === current.contactId &&
+    previous.firstName === current.firstName &&
+    previous.lastName === current.lastName &&
+    previous.rarity === current.rarity &&
+    previous.secretLegendaryId === current.secretLegendaryId;
+}
+
+function haveSameSentPresentation(left: GameState, right: GameState): boolean {
+  return left.emails === right.emails &&
+    left.contacts.length === right.contacts.length &&
+    left.contacts.every((contact, index) => {
+      const current = right.contacts[index];
+      return contact.id === current.id &&
+        contact.status === current.status &&
+        contact.firstName === current.firstName &&
+        contact.lastName === current.lastName &&
+        contact.rarity === current.rarity &&
+        contact.secretLegendaryId === current.secretLegendaryId;
+    });
+}
 
 function InboxRow({
   message,
@@ -78,9 +134,10 @@ export function MessageList({
   onSelectMessage: (id: string | null) => void;
   onSelectSentEmail: (id: string) => void;
 }) {
-  const state = useGameStateSlices(
-    ["contacts", "emails", "messages", "network", "school"],
+  const state = useGameSelector(
+    selectMessageListState,
     stateOverride,
+    folder === "inbox" ? haveSameInboxPresentation : haveSameSentPresentation,
   );
   const [inboxCategory, setInboxCategory] = useState<InboxCategory>("focused");
   const [requestedSentPage, setRequestedSentPage] = useState(0);

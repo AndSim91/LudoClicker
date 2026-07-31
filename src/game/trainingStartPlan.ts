@@ -198,26 +198,30 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     formId: FormId,
     studentId?: string,
   ): Collaborator | undefined {
-    return this.state.collaborators
-      .map((collaborator) => this.collaboratorsById.get(collaborator.id) ?? collaborator)
-      .filter((collaborator) =>
-        collaborator.id !== studentId &&
-        collaborator.assignment === "instructor" &&
-        !this.pendingReleaseIds.has(collaborator.id) &&
-        (formId !== "course-x" || this.courseXUnlocked) &&
-        collaborator.forms.includes(formId) &&
-        (!isInstructorForm(formId) || collaborator.instructorForms.includes(formId)) &&
-        !this.priorityQualificationTechnicianIds.has(collaborator.id) &&
-        (this.teachingCounts.get(collaborator.id) ?? 0) < this.capacity
-      )
-      .sort((left, right) =>
+    let selected: Collaborator | undefined;
+    for (const stored of this.state.collaborators) {
+      const collaborator = this.collaboratorsById.get(stored.id) ?? stored;
+      if (
+        collaborator.id === studentId ||
+        collaborator.assignment !== "instructor" ||
+        this.pendingReleaseIds.has(collaborator.id) ||
+        (formId === "course-x" && !this.courseXUnlocked) ||
+        !collaborator.forms.includes(formId) ||
+        (isInstructorForm(formId) && !collaborator.instructorForms.includes(formId)) ||
+        this.priorityQualificationTechnicianIds.has(collaborator.id) ||
+        (this.teachingCounts.get(collaborator.id) ?? 0) >= this.capacity
+      ) continue;
+      if (
+        !selected ||
         compareInstructorTeachingPriority(
-          left,
-          right,
+          collaborator,
+          selected,
           this.teachingCounts,
           this.courseXUnlocked,
-        )
-      )[0];
+        ) < 0
+      ) selected = collaborator;
+    }
+    return selected;
   }
 
   startAgonistCourse(

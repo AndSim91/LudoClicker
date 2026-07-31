@@ -25,6 +25,10 @@ import type {
 } from "./types";
 import { unlockGadgetSectorFromTournamentResult } from "./gadgetFlow";
 import { unlockReptileFromTournamentResult } from "./reptileUnlock";
+import {
+  compactDetailedTournamentResults,
+  replaceTournamentHallEntry,
+} from "./tournamentHistory";
 
 const LEVEL_BY_CALENDAR_MONTH: Partial<Record<number, TournamentLevel>> = {
   12: "school",
@@ -34,9 +38,7 @@ const LEVEL_BY_CALENDAR_MONTH: Partial<Record<number, TournamentLevel>> = {
 };
 
 export function compactTournamentHistory(state: GameState): GameState {
-  const results = state.tournaments.results.slice(
-    -GAME_CONFIG.recentTournamentResultsLimit,
-  );
+  const results = compactDetailedTournamentResults(state.tournaments.results);
   const missedTournaments = state.tournaments.missedTournaments.slice(
     -GAME_CONFIG.recentMissedTournamentsLimit,
   );
@@ -234,9 +236,11 @@ function applyTournamentResult(
       : contact),
     tournaments: {
       ...state.tournaments,
-      results: [...state.tournaments.results, resolvedResult].slice(
-        -GAME_CONFIG.recentTournamentResultsLimit,
-      ),
+      results: compactDetailedTournamentResults([
+        ...state.tournaments.results,
+        resolvedResult,
+      ]),
+      hall: replaceTournamentHallEntry(state.tournaments.hall, resolvedResult),
       qualification: nextLevel && ownedQualifierIds.length > 0
         ? {
             level: nextLevel as Exclude<TournamentLevel, "school">,

@@ -49,6 +49,7 @@ import {
 import { getSocialContentCharacters } from "./social";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
+import { getAgonistCourseCost } from "./trainingFlow";
 import type {
   TrainingStartPlan,
   TrainingStartPlanFactory,
@@ -92,6 +93,21 @@ interface AutomaticTeachingNoOp {
   upgrades: GameState["upgrades"];
   formsUnlocked: boolean;
   tournamentQualification: GameState["tournaments"]["qualification"];
+  contacts: Array<{
+    id: string;
+    status: GameState["contacts"][number]["status"];
+    forms: GameState["contacts"][number]["forms"];
+    formBranchPreferences: GameState["contacts"][number]["formBranchPreferences"];
+    trainingInstructorId?: string;
+    trainingTechnicianId?: string;
+    trainingFormId?: string;
+    lastFormTrainingYear: GameState["contacts"][number]["lastFormTrainingYear"];
+    formTrainingYearCount: GameState["contacts"][number]["formTrainingYearCount"];
+    lastAgonistCourseYear: GameState["contacts"][number]["lastAgonistCourseYear"];
+    favorite: GameState["contacts"][number]["favorite"];
+    rarity: GameState["contacts"][number]["rarity"];
+    acquiredAt: number;
+  }>;
   collaborators: Array<{
     id: string;
     contactId: string;
@@ -100,7 +116,9 @@ interface AutomaticTeachingNoOp {
     instructorForms: GameState["collaborators"][number]["instructorForms"];
     technicianForms: GameState["collaborators"][number]["technicianForms"];
     formBranchPreferences: GameState["collaborators"][number]["formBranchPreferences"];
-    training: GameState["collaborators"][number]["training"];
+    trainingInstructorId?: string;
+    trainingTechnicianId?: string;
+    trainingFormId?: string;
     lastFormTrainingYear: GameState["collaborators"][number]["lastFormTrainingYear"];
     formTrainingYearCount: GameState["collaborators"][number]["formTrainingYearCount"];
     lastAgonistCourseYear: GameState["collaborators"][number]["lastAgonistCourseYear"];
@@ -109,7 +127,43 @@ interface AutomaticTeachingNoOp {
   }>;
 }
 
-const automaticTeachingNoOpCache = new WeakMap<GameState["contacts"], AutomaticTeachingNoOp>();
+const automaticTeachingNoOpCache = new WeakMap<
+  GameState["historyArchive"],
+  AutomaticTeachingNoOp
+>();
+
+function getAutomaticTeachingTrainingSnapshot(
+  training: GameState["contacts"][number]["training"],
+) {
+  return {
+    trainingInstructorId: training?.instructorId ?? training?.requestedInstructorId,
+    trainingTechnicianId: training?.technicianId,
+    trainingFormId: training?.formId,
+  };
+}
+
+function hasSameAutomaticTeachingContacts(
+  cached: AutomaticTeachingNoOp["contacts"],
+  current: GameState["contacts"],
+): boolean {
+  return cached.length === current.length && cached.every((previous, index) => {
+    const contact = current[index];
+    const training = getAutomaticTeachingTrainingSnapshot(contact.training);
+    return previous.id === contact.id &&
+      previous.status === contact.status &&
+      previous.forms === contact.forms &&
+      previous.formBranchPreferences === contact.formBranchPreferences &&
+      previous.trainingInstructorId === training.trainingInstructorId &&
+      previous.trainingTechnicianId === training.trainingTechnicianId &&
+      previous.trainingFormId === training.trainingFormId &&
+      previous.lastFormTrainingYear === contact.lastFormTrainingYear &&
+      previous.formTrainingYearCount === contact.formTrainingYearCount &&
+      previous.lastAgonistCourseYear === contact.lastAgonistCourseYear &&
+      previous.favorite === contact.favorite &&
+      previous.rarity === contact.rarity &&
+      previous.acquiredAt === contact.acquiredAt;
+  });
+}
 
 function hasSameAutomaticTeachingCollaborators(
   cached: AutomaticTeachingNoOp["collaborators"],
@@ -117,6 +171,7 @@ function hasSameAutomaticTeachingCollaborators(
 ): boolean {
   return cached.length === current.length && cached.every((previous, index) => {
     const collaborator = current[index];
+    const training = getAutomaticTeachingTrainingSnapshot(collaborator.training);
     return previous.id === collaborator.id &&
       previous.contactId === collaborator.contactId &&
       previous.assignment === collaborator.assignment &&
@@ -124,7 +179,9 @@ function hasSameAutomaticTeachingCollaborators(
       previous.instructorForms === collaborator.instructorForms &&
       previous.technicianForms === collaborator.technicianForms &&
       previous.formBranchPreferences === collaborator.formBranchPreferences &&
-      previous.training === collaborator.training &&
+      previous.trainingInstructorId === training.trainingInstructorId &&
+      previous.trainingTechnicianId === training.trainingTechnicianId &&
+      previous.trainingFormId === training.trainingFormId &&
       previous.lastFormTrainingYear === collaborator.lastFormTrainingYear &&
       previous.formTrainingYearCount === collaborator.formTrainingYearCount &&
       previous.lastAgonistCourseYear === collaborator.lastAgonistCourseYear &&
@@ -134,7 +191,7 @@ function hasSameAutomaticTeachingCollaborators(
 }
 
 export function isAutomaticTeachingKnownIdle(state: GameState): boolean {
-  const cached = automaticTeachingNoOpCache.get(state.contacts);
+  const cached = automaticTeachingNoOpCache.get(state.historyArchive);
   return Boolean(
     cached &&
     cached.currentMonth === state.school.currentMonth &&
@@ -144,12 +201,13 @@ export function isAutomaticTeachingKnownIdle(state: GameState): boolean {
     cached.upgrades === state.upgrades &&
     cached.formsUnlocked === state.unlocks.forms &&
     cached.tournamentQualification === state.tournaments.qualification &&
+    hasSameAutomaticTeachingContacts(cached.contacts, state.contacts) &&
     hasSameAutomaticTeachingCollaborators(cached.collaborators, state.collaborators)
   );
 }
 
 function rememberAutomaticTeachingNoOp(state: GameState): void {
-  automaticTeachingNoOpCache.set(state.contacts, {
+  automaticTeachingNoOpCache.set(state.historyArchive, {
     currentMonth: state.school.currentMonth,
     euros: state.school.euros,
     instructorTarget: state.collaboratorManagement.targets.instructor,
@@ -157,6 +215,19 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
     upgrades: state.upgrades,
     formsUnlocked: state.unlocks.forms,
     tournamentQualification: state.tournaments.qualification,
+    contacts: state.contacts.map((contact) => ({
+      id: contact.id,
+      status: contact.status,
+      forms: contact.forms,
+      formBranchPreferences: contact.formBranchPreferences,
+      ...getAutomaticTeachingTrainingSnapshot(contact.training),
+      lastFormTrainingYear: contact.lastFormTrainingYear,
+      formTrainingYearCount: contact.formTrainingYearCount,
+      lastAgonistCourseYear: contact.lastAgonistCourseYear,
+      favorite: contact.favorite,
+      rarity: contact.rarity,
+      acquiredAt: contact.acquiredAt,
+    })),
     collaborators: state.collaborators.map((collaborator) => ({
       id: collaborator.id,
       contactId: collaborator.contactId,
@@ -165,7 +236,7 @@ function rememberAutomaticTeachingNoOp(state: GameState): void {
       instructorForms: collaborator.instructorForms,
       technicianForms: collaborator.technicianForms,
       formBranchPreferences: collaborator.formBranchPreferences,
-      training: collaborator.training,
+      ...getAutomaticTeachingTrainingSnapshot(collaborator.training),
       lastFormTrainingYear: collaborator.lastFormTrainingYear,
       formTrainingYearCount: collaborator.formTrainingYearCount,
       lastAgonistCourseYear: collaborator.lastAgonistCourseYear,
@@ -339,19 +410,6 @@ export function processAutomation(
   if (socialCycles > 0) {
     const outcome = resolveSocialContentCycles(nextState, socialCycles);
     nextState = outcome.state;
-    nextState = dependencies.addMessage(
-      nextState,
-      now,
-      "Contenuti Social pubblicati",
-      [
-        `${outcome.cycles === 1 ? "Un contenuto pubblicato" : `${outcome.cycles} contenuti pubblicati`}.`,
-        outcome.followersGained > 0
-          ? `${outcome.followersGained} ${outcome.followersGained === 1 ? "nuovo follower" : "nuovi follower"}.`
-          : "Nessun nuovo follower in questo ciclo.",
-      ].join(" "),
-      "positive",
-      "other",
-    );
   }
 
   return nextState;
@@ -710,6 +768,7 @@ export function processAutomaticTeaching(
 
   // Prima vengono tentate tutte le Forme, nell'ordine degli allievi.
   // Arena Tecnica e Corso Agonisti usano soltanto la capienza rimasta.
+  const agonistCourseCost = getAgonistCourseCost(state);
   for (const student of students) {
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
     const candidate = qualifiedCandidates.find((formId) => {
@@ -753,23 +812,32 @@ export function processAutomaticTeaching(
       instructorsWithAvailablePersonalForms.has(student.id) ||
       (state.upgrades["technical-arena"] ?? 0) < 1
     ) continue;
-    const instructor = state.collaborators
-      .filter((candidate) =>
-        candidate.id !== student.id &&
-        candidate.assignment === "instructor" &&
-        !pendingReleaseIds.has(candidate.id) &&
-        !priorityQualificationTechnicianIds.has(candidate.id) &&
-        (instructorLoads.get(candidate.id) ?? 0) < capacity
-      )
-      .sort((left, right) =>
+    if (trainingPlan.availableEuros < agonistCourseCost) break;
+    let instructor: GameState["collaborators"][number] | undefined;
+    let hasAvailableInstructor = false;
+    for (const candidate of state.collaborators) {
+      if (
+        candidate.assignment !== "instructor" ||
+        pendingReleaseIds.has(candidate.id) ||
+        priorityQualificationTechnicianIds.has(candidate.id) ||
+        (instructorLoads.get(candidate.id) ?? 0) >= capacity
+      ) continue;
+      hasAvailableInstructor = true;
+      if (candidate.id === student.id) continue;
+      if (
+        !instructor ||
         compareInstructorTeachingPriority(
-          left,
-          right,
+          candidate,
+          instructor,
           instructorLoads,
           courseXUnlocked,
-        )
-      )[0];
-    if (!instructor) continue;
+        ) < 0
+      ) instructor = candidate;
+    }
+    if (!instructor) {
+      if (!hasAvailableInstructor) break;
+      continue;
+    }
     const started = trainingPlan.startAgonistCourse(student.id, instructor.id);
     if (!started) continue;
     startedStudentIds.add(student.id);
