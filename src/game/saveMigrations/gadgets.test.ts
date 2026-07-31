@@ -2,20 +2,10 @@ import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../../content/mastery";
 import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
+import { migrate } from "../saveMigrations";
 import { isValidGameState } from "../saveValidation";
 import type { GameState } from "../types";
 import { migrateGadgetState } from "./gadgets";
-import { migrateTournamentStandardDifficultyState } from "./tournamentStandardDifficulty";
-import { migrateGadgetRarityState } from "./gadgetRarities";
-import { migrateSecretLegendaryCircuitBoostRemovalState } from "./secretLegendaryCircuitBoostRemoval";
-import { migrateSecretLegendaryBaseRebalanceState } from "./secretLegendaryBaseRebalance";
-import { migrateUpgradeRevampState } from "./upgradeRevamp";
-import { migrateReptileState } from "./reptile";
-import { migrateFirstCollaboratorTutorialState } from "./firstCollaboratorTutorial";
-import { migrateAthleticPreparationMergeState } from "./athleticPreparationMerge";
-import { migrateAgonistCourseProgressionState } from "./agonistCourseProgression";
-import { migrateShortGoalAvailabilityState } from "./shortGoalAvailability";
-import { migrateLegendaryEmailState } from "./legendaryEmails";
 import type { MigratableState } from "./types";
 
 describe("Gadget save migration", () => {
@@ -44,25 +34,7 @@ describe("Gadget save migration", () => {
       ),
     };
 
-    const migrated = migrateLegendaryEmailState(
-      migrateShortGoalAvailabilityState(
-        migrateAgonistCourseProgressionState(
-          migrateAthleticPreparationMergeState(
-            migrateFirstCollaboratorTutorialState(
-              migrateReptileState(migrateUpgradeRevampState(
-                migrateSecretLegendaryBaseRebalanceState(
-                  migrateSecretLegendaryCircuitBoostRemovalState(
-                    migrateGadgetRarityState(
-                      migrateTournamentStandardDifficultyState(migrateGadgetState(legacy)),
-                    ),
-                  ),
-                ),
-              )),
-            ),
-          ),
-        ),
-      ),
-    ) as GameState;
+    const migrated = migrate(legacy) as GameState;
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.unlocks.gadget).toBe(false);

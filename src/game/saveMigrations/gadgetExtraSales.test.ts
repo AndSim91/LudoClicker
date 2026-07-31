@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_CONFIG } from "../config";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
 import { isValidGameState } from "../saveValidation";
@@ -48,7 +49,7 @@ describe("Gadget extra-sales migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated.version).toBe(79);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(isValidGameState(migrated)).toBe(true);
     expect(migrated.gadgets.products.wristband.rarities.common).toMatchObject({
       unitsSold: 125,
