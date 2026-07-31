@@ -378,10 +378,15 @@ export function GadgetsView({
         </div>
         <p>
           <Icon name="info" />
-          Oltre il pubblico raggiungibile continuano vendite extra per regali,
-          sostituzioni e acquisti ripetuti. Non consumano il pubblico che diventerà
-          raggiungibile in futuro. I potenziamenti del settore si acquistano nella
-          schermata Upgrade.
+          <span className="gadget-overview-note-full">
+            Oltre il pubblico raggiungibile continuano vendite extra per regali,
+            sostituzioni e acquisti ripetuti. Non consumano il pubblico che diventerà
+            raggiungibile in futuro. I potenziamenti del settore si acquistano nella
+            schermata Upgrade.
+          </span>
+          <span className="gadget-overview-note-mobile">
+            Le vendite extra non consumano il pubblico futuro. Potenziamenti in Upgrade.
+          </span>
         </p>
       </section>
 

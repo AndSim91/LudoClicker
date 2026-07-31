@@ -580,6 +580,13 @@ describe("DayPanel", () => {
 
     expect(screen.getByText("Torneo Scolastico in arrivo")).toBeVisible();
     expect(screen.getByText("00:05")).toBeVisible();
+    const upcomingTournament = screen
+      .getByText("Torneo Scolastico in arrivo")
+      .closest(".appointment-entry");
+    expect(upcomingTournament).toHaveClass("day-notification-tournament");
+    expect(
+      upcomingTournament?.querySelector(".tournament-notification-scoreboard"),
+    ).toHaveTextContent("00:05Al via");
     expect(screen.getByText("Si disputa alla fine del mese.")).toBeVisible();
 
     rerender(
@@ -598,6 +605,14 @@ describe("DayPanel", () => {
 
     expect(screen.getByText("Torneo Scolastico completato")).toBeVisible();
     expect(screen.queryByText("Torneo Scolastico in arrivo")).not.toBeInTheDocument();
+    const completedTournament = screen
+      .getByText("Torneo Scolastico completato")
+      .closest(".appointment-entry");
+    expect(completedTournament).toHaveClass("day-notification-tournament");
+    expect(
+      completedTournament?.querySelector(".tournament-notification-scoreboard"),
+    ).toHaveTextContent("FineNovità");
+    expect(completedTournament?.querySelector(".appointment-expiry")).toBeVisible();
     expect(
       screen.getByText("1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile"),
     ).toBeVisible();

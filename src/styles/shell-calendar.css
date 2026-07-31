@@ -207,6 +207,86 @@
   font-size: 11px;
 }
 
+.day-notification-tournament {
+  padding: 8px 0;
+}
+
+.appointment-tournament {
+  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-rows: minmax(88px, auto);
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
+  color: #1f1f1f;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgb(31 31 31 / 10%);
+}
+
+.tournament-notification-scoreboard {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  color: #ffffff;
+  background: #111111;
+  text-align: center;
+}
+
+.tournament-notification-scoreboard svg {
+  width: 23px;
+  height: 23px;
+  margin-bottom: 7px;
+}
+
+.tournament-notification-scoreboard strong {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.tournament-notification-scoreboard span {
+  margin-top: 4px;
+  color: inherit;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.appointment-tournament .appointment-copy {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  gap: 4px;
+  padding: 13px 12px 18px;
+}
+
+.appointment-tournament .appointment-title {
+  color: #1f1f1f;
+  font-size: 12px;
+}
+
+.appointment-tournament .appointment-copy > small {
+  color: #616161;
+}
+
+.day-notification-tournament .appointment-expiry {
+  position: relative;
+  z-index: 1;
+  height: 3px;
+  margin: -12px 14px 9px 78px;
+  color: #111111;
+  background: #dedede;
+}
+
 .add-event {
   display: inline-flex;
   align-items: center;

@@ -232,6 +232,31 @@
   background: #1c3044;
 }
 
+:root[data-theme="dark"] .appointment-tournament {
+  border-color: #f5f5f5;
+  color: #f5f5f5;
+  background: #111111;
+  box-shadow: 0 5px 14px rgb(0 0 0 / 28%);
+}
+
+:root[data-theme="dark"] .tournament-notification-scoreboard {
+  color: #111111;
+  background: #f5f5f5;
+}
+
+:root[data-theme="dark"] .appointment-tournament .appointment-title {
+  color: #f5f5f5;
+}
+
+:root[data-theme="dark"] .appointment-tournament .appointment-copy > small {
+  color: #c8c8c8;
+}
+
+:root[data-theme="dark"] .day-notification-tournament .appointment-expiry {
+  color: #f5f5f5;
+  background: #383838;
+}
+
 :root[data-theme="dark"] .trial-status.iscritto {
   color: var(--success);
   background: #173326;

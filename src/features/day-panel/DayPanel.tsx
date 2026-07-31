@@ -132,6 +132,9 @@ function DayNotificationEntry({
   const accessibleSubject = notification.person
     ? `${notification.title} di ${notification.person.displayName}`
     : notification.title;
+  const isTournament = notification.kind === "tournament";
+  const tournamentScore = notification.phase === "scheduled" ? timing : "Fine";
+  const tournamentStatus = notification.phase === "scheduled" ? "Al via" : timing;
 
   return (
     <div
@@ -142,14 +145,24 @@ function DayNotificationEntry({
       onMouseLeave={onResume}
     >
       <div
-        className={`appointment appointment-${notification.phase}`}
+        className={`appointment appointment-${notification.phase}${isTournament ? " appointment-tournament" : ""}`}
         aria-label={`${accessibleSubject}: ${timing}`}
       >
-        <span className="appointment-timing">{timing}</span>
-        <i />
+        {isTournament ? (
+          <div className="tournament-notification-scoreboard" aria-hidden="true">
+            <Icon name="trophy" />
+            <strong>{tournamentScore}</strong>
+            <span>{tournamentStatus}</span>
+          </div>
+        ) : (
+          <>
+            <span className="appointment-timing">{timing}</span>
+            <i />
+          </>
+        )}
         <div className="appointment-copy">
           <strong className="appointment-title">
-            <Icon name={notificationIcons[notification.kind]} />
+            {isTournament ? null : <Icon name={notificationIcons[notification.kind]} />}
             <span>{notification.title}</span>
           </strong>
           {notification.person ? (
