@@ -9,6 +9,7 @@ describe("GadgetRevenueRanking", () => {
   it("ordina i prodotti per ricavi mensili e mette in evidenza il leader", () => {
     const monthlyRevenue = createInitialGadgetMonthlyRevenueState(9);
     monthlyRevenue.totals = {
+      ...monthlyRevenue.totals,
       mug: 4_820,
       hoodie: 4_120,
       tshirt: 2_310,
@@ -27,7 +28,7 @@ describe("GadgetRevenueRanking", () => {
     expect(screen.getByText("Classifica ricavi")).toBeVisible();
     expect(screen.getByText("Maestro")).toBeVisible();
     const rows = screen.getAllByRole("listitem");
-    expect(rows).toHaveLength(5);
+    expect(rows).toHaveLength(10);
     expect(rows[0]).toHaveTextContent("1Tazza4.820 €34,8%Leader");
     expect(rows[1]).toHaveTextContent("2Felpa4.120 €29,7%");
     expect(rows[2]).toHaveTextContent("3Maglietta2.310 €16,7%");
@@ -48,6 +49,6 @@ describe("GadgetRevenueRanking", () => {
     );
 
     expect(screen.queryByText("Leader")).not.toBeInTheDocument();
-    expect(screen.getAllByText("0,0%")).toHaveLength(5);
+    expect(screen.getAllByText("0,0%")).toHaveLength(10);
   });
 });

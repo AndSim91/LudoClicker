@@ -3,22 +3,32 @@ import { getGadgetRarityClassName } from "../../content/gadgetRarities";
 import type { GadgetProductId, GadgetRarity } from "../../game/types";
 
 const PRODUCT_ARTWORK_URLS: Record<GadgetProductId, string> = {
+  keychain: "/gadget-assets/portachiavi.webp",
+  "sticker-set": "/gadget-assets/set-adesivi.webp",
   wristband: "/gadget-assets/polsino.webp",
   mug: "/gadget-assets/tazza.webp",
-  underwear: "/gadget-assets/mutande.webp",
   tshirt: "/gadget-assets/maglietta.webp",
+  cap: "/gadget-assets/cappellino.webp",
+  underwear: "/gadget-assets/mutande.webp",
+  "sports-tshirt": "/gadget-assets/maglietta-sportiva.webp",
   hoodie: "/gadget-assets/felpa.webp",
+  "custom-hilt": "/gadget-assets/elsa-personalizzata.webp",
 };
 
 const PROCESS_ARTWORK_URLS: Record<GadgetProductId, string> = {
+  keychain: "/gadget-assets/process/portachiavi-phases.webp",
+  "sticker-set": "/gadget-assets/process/set-adesivi-phases.webp",
   wristband: "/gadget-assets/process/polsino-phases.webp",
   mug: "/gadget-assets/process/tazza-phases.webp",
-  underwear: "/gadget-assets/process/mutande-phases.webp",
   tshirt: "/gadget-assets/process/maglietta-phases.webp",
+  cap: "/gadget-assets/process/cappellino-phases.webp",
+  underwear: "/gadget-assets/process/mutande-phases.webp",
+  "sports-tshirt": "/gadget-assets/process/maglietta-sportiva-phases.webp",
   hoodie: "/gadget-assets/process/felpa-phases.webp",
+  "custom-hilt": "/gadget-assets/process/elsa-personalizzata-phases.webp",
 };
 
-const PROCESS_STAGES = ["concept", "logo", "render", "prototype"] as const;
+const PROCESS_STAGES = ["sketch", "concept", "render", "prototype"] as const;
 
 export type GadgetProcessStage = (typeof PROCESS_STAGES)[number];
 

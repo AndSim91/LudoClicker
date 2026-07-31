@@ -145,7 +145,7 @@ export function getGadgetUnitProfit(
   quality: number,
   rarity: GadgetRarity = "common",
 ): number {
-  return GADGET_DEFINITIONS[productId].projectCost / 500 *
+  return GADGET_DEFINITIONS[productId].unitProfitAtMaxQuality *
     Math.max(0, Math.min(100, quality)) / 100 *
     GADGET_RARITIES[rarity].valueMultiplier;
 }

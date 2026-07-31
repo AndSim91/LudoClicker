@@ -795,11 +795,16 @@ export interface LightInflationState {
 }
 
 export type GadgetProductId =
+  | "keychain"
+  | "sticker-set"
   | "wristband"
   | "mug"
-  | "underwear"
   | "tshirt"
-  | "hoodie";
+  | "cap"
+  | "underwear"
+  | "sports-tshirt"
+  | "hoodie"
+  | "custom-hilt";
 
 export type GadgetRarity =
   | "common"

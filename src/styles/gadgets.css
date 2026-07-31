@@ -425,11 +425,11 @@
   pointer-events: none;
 }
 
-.gadget-process-product-stage.is-concept .gadget-process-product-image {
+.gadget-process-product-stage.is-sketch .gadget-process-product-image {
   background-position: 0 0;
 }
 
-.gadget-process-product-stage.is-logo .gadget-process-product-image {
+.gadget-process-product-stage.is-concept .gadget-process-product-image {
   background-position: 100% 0;
 }
 
@@ -571,11 +571,11 @@
   content: "";
 }
 
-.gadget-falling-note.is-concept::before {
+.gadget-falling-note.is-sketch::before {
   background-position: 0 0;
 }
 
-.gadget-falling-note.is-logo::before {
+.gadget-falling-note.is-concept::before {
   background-position: 100% 0;
 }
 

@@ -218,7 +218,7 @@ describe("GadgetsView", () => {
     expect(screen.getByText("Comune")).toBeVisible();
     expect(screen.getByText("Raro")).toBeVisible();
     expect(screen.getByText("64%")).toBeVisible();
-    expect(screen.getByRole("button", { name: /Migliora qualità.*1250,00/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Migliora qualità.*625,00/ })).toBeVisible();
     expect(document.querySelector(".gadget-product-card.rarity-rare")).toBeTruthy();
     expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
   });
@@ -344,7 +344,7 @@ describe("GadgetsView", () => {
     expect(screen.getByRole("dialog", { name: "Polsino" })).toHaveClass("rarity-rare");
     expect(screen.getByTestId("gadget-process-artwork-wristband")).toBeInTheDocument();
     expect(screen.getByText("Concept")).toBeVisible();
-    expect(screen.getByText("Logo")).toBeVisible();
+    expect(screen.getByText("Bozza")).toBeVisible();
     expect(screen.getByText("Render 3D")).toBeVisible();
     expect(screen.getByText("Prototipo")).toBeVisible();
     expect(

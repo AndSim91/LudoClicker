@@ -2150,20 +2150,28 @@ cambia.
 Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
 prima volta la disciplina Arena del Torneo Accademico Alpha. Lo sblocco apre la
 vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
-il progetto Polsino. Il progetto deve comunque essere acquistato. Una scena
+il progetto Portachiavi. Il progetto deve comunque essere acquistato. Una scena
 tutorial salvata e non ripetibile presenta il settore, mantiene il tempo in pausa
 e richiede soltanto di aprire la nuova vista prima di illustrare riepilogo e
 catalogo.
 
 Il catalogo base segue questo ordine:
 
-| Prodotto  | Costo progetto | Guadagno per pezzo al 100% | Lavoro base con P = 1 | Revisione |
-| --------- | --------------: | --------------------------: | ---------------------: | --------: |
-| Polsino   |        10.000 € |                        20 € |             60 minuti |   1.000 € |
-| Tazza     |        15.000 € |                        30 € |             90 minuti |   1.500 € |
-| Mutande   |        20.000 € |                        40 € |            120 minuti |   2.000 € |
-| Maglietta |        25.000 € |                        50 € |            150 minuti |   2.500 € |
-| Felpa     |        40.000 € |                        80 € |            240 minuti |   4.000 € |
+| Prodotto                 | Costo progetto | Guadagno per pezzo al 100% | Lavoro base con P = 1 | Revisione Comune |
+| ------------------------ | --------------: | --------------------------: | ---------------------: | ----------------: |
+| Portachiavi              |         1.000 € |                         5 € |             10 minuti |           100 € |
+| Set di Adesivi           |         2.000 € |                        10 € |             30 minuti |           250 € |
+| Polsino                  |         5.000 € |                        15 € |             60 minuti |           500 € |
+| Tazza                    |        10.000 € |                        20 € |             75 minuti |         1.000 € |
+| Maglietta                |        15.000 € |                        30 € |             90 minuti |         1.500 € |
+| Cappellino               |        20.000 € |                        35 € |            100 minuti |         2.000 € |
+| Mutande (boxer sportivi) |        25.000 € |                        20 € |            120 minuti |         2.500 € |
+| Maglietta Sportiva       |        30.000 € |                        35 € |            120 minuti |         3.000 € |
+| Felpa                    |        40.000 € |                        40 € |            150 minuti |         4.000 € |
+| Elsa personalizzata      |        50.000 € |                       100 € |            300 minuti |         5.000 € |
+
+L'Elsa personalizzata è un prodotto solo premium: appartiene al catalogo Gadget
+ma non introduce effetti di gioco sulle armi o sull'equipaggiamento.
 
 Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
 famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non
@@ -2197,8 +2205,8 @@ vendite dei prodotti accettati continuano mentre il laboratorio sviluppa o
 revisiona un altro prodotto.
 
 Il primo tentativo di qualità è compreso nel progetto. Ogni nuovo tentativo
-richiede prima una revisione pari al 10% del costo del progetto, moltiplicato
-per la rarità attuale. Il prodotto continua a essere venduto alla qualità
+richiede prima la revisione Comune indicata nel catalogo, moltiplicata per la
+rarità attuale. Il prodotto continua a essere venduto alla qualità
 precedente durante la revisione. La qualità memorizzata è sempre il massimo
 storico della singola rarità: un risultato peggiore non può ridurla. Al 100%
 le revisioni restano disponibili quando esiste una rarità successiva
@@ -2264,13 +2272,15 @@ può aggirare la capacità delle vendite extra.
 Il guadagno netto per pezzo è:
 
 ```text
-guadagnoPezzo = costoProgetto / 500 × qualità / 100 × moltiplicatoreRarità
+guadagnoPezzo = guadagnoBasePezzo × qualità / 100 × moltiplicatoreRarità
 ```
 
+`guadagnoBasePezzo` è il valore esplicito della colonna "Guadagno per pezzo al
+100%" del catalogo e non viene ricavato dal costo del progetto.
+
 Il moltiplicatore cresce del 50% per livello: ×1 per Comune, ×1,50 per Raro,
-×2 per Ultra Raro, ×2,50 per Leggendario e ×3 per Leggendario Segreto. Di
-conseguenza 500 vendite Comuni al 100% eguagliano il costo originario del
-progetto, mentre le rarità superiori lo recuperano più rapidamente. Costi e
+×2 per Ultra Raro, ×2,50 per Leggendario e ×3 per Leggendario Segreto. La
+redditività base resta quindi quella definita per ciascun prodotto; costi e
 tempi di revisione mantengono invece gli scatti del 25%.
 I guadagni vengono accreditati continuamente e le vendite passate non vengono
 rivalutate quando la qualità aumenta. Nell'interfaccia ogni famiglia usa una
@@ -2284,7 +2294,7 @@ vendita sul catalogo, sul pubblico, sui Collaboratori e sui potenziamenti
 correnti.
 
 Nella lista Collaboratori aggregata, la box del settore usa la **Classifica
-ricavi Gadget** del mese in corso. Le cinque famiglie sono ordinate per ricavi,
+ricavi Gadget** del mese in corso. Le dieci famiglie sono ordinate per ricavi,
 aggregando tutte le rarità di ciascun prodotto; ogni riga mostra il valore, la
 quota percentuale sul catalogo e una barra proporzionale. Il primo prodotto è
 evidenziato come leader e la classifica cambia subito a ogni vendita effettiva.
@@ -2321,7 +2331,7 @@ bersaglio. Il totale delle pressioni resta quello indicato in tabella: un accord
 raggruppa più note, non ne aggiunge oltre il totale. La prima e l'ultima nota
 sono sempre singole e nessun accordo può contenere più di due note.
 
-Ogni nota riceve lo stile Concept, Logo, Render 3D o Prototipo quando appare,
+Ogni nota riceve lo stile Bozza, Concept, Render 3D o Prototipo quando appare,
 in base alla fase globale raggiunta dal minigioco in quell'istante. Lo stile
 rimane invariato per tutta la discesa, anche se nel frattempo inizia la fase
 successiva.
@@ -3051,7 +3061,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   liberamente e non ha livelli.
 - Non esiste un limite massimo di collaboratori.
 - Gadget si sblocca con la prima vittoria della scuola all'Accademico Arena;
-  il Polsino resta un progetto a pagamento e ogni prodotto successivo richiede
+  il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
   Collaboratori, domanda ordinaria e vendite extra governano il catalogo.

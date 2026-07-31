@@ -208,7 +208,9 @@ const GadgetProductCard = memo(function GadgetProductCard({
       </span>
       <GadgetProductArtwork productId={productId} rarity={highestRarity} />
       <div className="gadget-product-heading">
-        <span>{product.accepted ? "In catalogo" : product.projectPurchased ? "Prototipo" : "Progetto disponibile"}</span>
+        <span>{definition.premiumOnly
+          ? "Solo premium"
+          : product.accepted ? "In catalogo" : product.projectPurchased ? "Prototipo" : "Progetto disponibile"}</span>
         <h2>{definition.name}</h2>
         <p>{definition.description}</p>
       </div>

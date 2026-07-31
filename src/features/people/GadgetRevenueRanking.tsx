@@ -1,14 +1,8 @@
 import { GADGET_DEFINITIONS, GADGET_PRODUCT_ORDER } from "../../content/gadgets";
-import type { GadgetMonthlyRevenueState, GadgetProductId } from "../../game/types";
+import type { GadgetMonthlyRevenueState } from "../../game/types";
 import type { ReactNode } from "react";
 
-const RANKING_PRODUCT_ORDER: readonly GadgetProductId[] = [
-  "mug",
-  "hoodie",
-  "tshirt",
-  "underwear",
-  "wristband",
-];
+const RANKING_PRODUCT_ORDER = GADGET_PRODUCT_ORDER;
 
 function formatRevenue(value: number): string {
   const rounded = Math.max(0, Math.round(value));

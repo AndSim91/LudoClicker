@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createInitialCollaboratorMastery } from "../../content/mastery";
 import { createInitialState } from "../../game/engine";
@@ -69,5 +69,17 @@ describe("ReptileView", () => {
       gadget: ["C"],
       events: ["D"],
     });
+  });
+
+  it("cambia pagina dentro la sezione senza aprire dialog", () => {
+    const { container } = render(<ReptileView state={unlockedState()} {...handlers()} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Panoramica: Disponibile" }));
+    expect(view.getByRole("heading", { name: "Un Open costruito passo dopo passo" })).toBeVisible();
+
+    fireEvent.click(view.getByRole("tab", { name: "Preparazione: Disponibile" }));
+    expect(view.getByRole("heading", { name: "Distribuisci i collaboratori" })).toBeVisible();
+    expect(view.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

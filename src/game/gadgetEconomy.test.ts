@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  GADGET_DEFINITIONS,
   GADGET_PRODUCT_ORDER,
   getGadgetRevisionCost,
   getGadgetWorkRequirement,
@@ -53,11 +54,24 @@ describe("Gadget economy", () => {
     })).toBe(0);
   });
 
-  it("recovers every project cost in 500 sales at maximum quality", () => {
+  it("uses the approved catalog order and explicit maximum-quality profits", () => {
+    expect(GADGET_PRODUCT_ORDER).toEqual([
+      "keychain",
+      "sticker-set",
+      "wristband",
+      "mug",
+      "tshirt",
+      "cap",
+      "underwear",
+      "sports-tshirt",
+      "hoodie",
+      "custom-hilt",
+    ]);
     expect(GADGET_PRODUCT_ORDER.map((productId) =>
       getGadgetUnitProfit(productId, 100)
-    )).toEqual([20, 30, 40, 50, 80]);
-    expect(getGadgetUnitProfit("hoodie", 75)).toBe(60);
+    )).toEqual([5, 10, 15, 20, 30, 35, 20, 35, 40, 100]);
+    expect(getGadgetUnitProfit("hoodie", 75)).toBe(30);
+    expect(GADGET_DEFINITIONS["custom-hilt"].premiumOnly).toBe(true);
   });
 
   it("adds 50% value per rarity while revision costs still grow by 25%", () => {
@@ -71,9 +85,9 @@ describe("Gadget economy", () => {
       "wristband",
       100,
       rarity as Parameters<typeof getGadgetUnitProfit>[2],
-    ))).toEqual([20, 30, 40, 50, 60]);
-    expect(getGadgetRevisionCost("wristband", "rare")).toBe(1_250);
-    expect(getGadgetRevisionCost("wristband", "secret-legendary")).toBe(2_000);
+    ))).toEqual([15, 22.5, 30, 37.5, 45]);
+    expect(getGadgetRevisionCost("wristband", "rare")).toBe(625);
+    expect(getGadgetRevisionCost("wristband", "secret-legendary")).toBe(1_000);
     expect(getGadgetWorkRequirement("wristband", "revision", "legendary")).toBe(
       getGadgetWorkRequirement("wristband", "revision", "common") * 1.75,
     );

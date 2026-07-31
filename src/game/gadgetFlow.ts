@@ -64,8 +64,8 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
       ...state.gadgets,
       products: {
         ...state.gadgets.products,
-        wristband: {
-          ...state.gadgets.products.wristband,
+        keychain: {
+          ...state.gadgets.products.keychain,
           unlocked: true,
         },
       },
@@ -75,7 +75,7 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
     unlockedState,
     now,
     "Laboratorio Gadget sbloccato",
-    "La vittoria nel Torneo Accademico ha aperto il settore Gadget. Acquista il progetto del Polsino e assegna Collaboratori al nuovo incarico per svilupparlo.",
+    "La vittoria nel Torneo Accademico ha aperto il settore Gadget. Acquista il progetto del Portachiavi e assegna Collaboratori al nuovo incarico per svilupparlo.",
     "positive",
     "focused",
     "gadget",

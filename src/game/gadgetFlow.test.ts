@@ -49,7 +49,7 @@ function gadgetCollaborator(id = "gadget-collaborator"): Collaborator {
 
 function unlockedState(): GameState {
   const initial = createInitialState(1_000, "Manager");
-  return unlockGadgetSector({
+  const state = unlockGadgetSector({
     ...initial,
     school: {
       ...initial.school,
@@ -59,6 +59,23 @@ function unlockedState(): GameState {
     },
     collaborators: [gadgetCollaborator()],
   }, 1_000);
+
+  // Questi test verificano il ciclo completo del Polsino; lo rendiamo
+  // disponibile esplicitamente, perché il primo prodotto del catalogo ora è
+  // il Portachiavi.
+  return {
+    ...state,
+    gadgets: {
+      ...state.gadgets,
+      products: {
+        ...state.gadgets.products,
+        wristband: {
+          ...state.gadgets.products.wristband,
+          unlocked: true,
+        },
+      },
+    },
+  };
 }
 
 function withCommonRarity(
@@ -299,10 +316,10 @@ describe("Gadget flow", () => {
 
     expect(getGadgetAudience(selling)).toBe(1_000);
     expect(commonRarity(sold, "wristband").unitsSold).toBe(2);
-    expect(commonRarity(sold, "wristband").totalProfit).toBe(40);
-    expect(sold.school.euros).toBe(selling.school.euros + 40);
-    expect(sold.gadgets.monthlyRevenue.totals.wristband).toBe(40);
-    expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(40);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(30);
+    expect(sold.school.euros).toBe(selling.school.euros + 30);
+    expect(sold.gadgets.monthlyRevenue.totals.wristband).toBe(30);
+    expect(getEstimatedMonthlyGadgetIncome(selling)).toBe(30);
   });
 
   it("keeps quality zero non-sellable and unlocks the next project at 100 sales", () => {
@@ -384,8 +401,8 @@ describe("Gadget flow", () => {
     );
     expect(commonRarity(sold, "wristband").unitsSold).toBe(audience + 1);
     expect(commonRarity(sold, "wristband").extraUnitsSold).toBe(1);
-    expect(commonRarity(sold, "wristband").totalProfit).toBe(20);
-    expect(getEstimatedMonthlyGadgetIncome(almostSold)).toBe(20);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(15);
+    expect(getEstimatedMonthlyGadgetIncome(almostSold)).toBe(15);
   });
 
   it("keeps ordinary and extra sales active for different products", () => {
@@ -564,8 +581,8 @@ describe("Gadget flow", () => {
 
     expect(wristbands + mugs).toBe(25);
     expect(sold.gadgets.crossSellRemainder).toBe(0);
-    expect(commonRarity(sold, "wristband").totalProfit).toBe(260);
-    expect(commonRarity(sold, "mug").totalProfit).toBe(360);
+    expect(commonRarity(sold, "wristband").totalProfit).toBe(195);
+    expect(commonRarity(sold, "mug").totalProfit).toBe(240);
   });
 
   it("never turns a cross-sale into another unit of the same product", () => {
@@ -718,13 +735,13 @@ describe("Gadget flow", () => {
 
     expect(commonRarity(sold, "wristband")).toMatchObject({
       unitsSold: 2,
-      totalProfit: 40,
+      totalProfit: 30,
     });
     expect(sold.gadgets.products.wristband.rarities.rare).toMatchObject({
       unitsSold: 2,
-      totalProfit: 60,
+      totalProfit: 45,
     });
-    expect(sold.school.euros).toBe(selling.school.euros + 100);
+    expect(sold.school.euros).toBe(selling.school.euros + 75);
   });
 
   it("unlocks the next Gadget from total family sales across rarities", () => {

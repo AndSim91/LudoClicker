@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Icon } from "../../components/common/Icon";
 import type { ReptileMinigameProgress } from "../../game/types";
 
 const CIRCLE_COUNT = 50;
@@ -204,65 +205,66 @@ export function ReptileCircleGame({
   const remainingSeconds = Math.max(0, Math.ceil((GAME_DURATION_MS - elapsedMs) / 1_000));
 
   return (
-    <div className="reptile-minigame-overlay" role="dialog" aria-modal="true" aria-labelledby="reptile-minigame-title">
-      <section className="reptile-minigame-shell">
-        <header>
-          <div>
-            <span>Torneo Reptile · coordinamento</span>
-            <h2 id="reptile-minigame-title">Prendi il ritmo dell'organizzazione</h2>
-          </div>
-          <div className="reptile-minigame-score" aria-live="polite">
-            <span>Colpiti <strong>{hits.size}</strong></span>
-            <span>Persi <strong>{misses.size}</strong></span>
-            <span>Fuori <strong>{outsideClicks}</strong></span>
-            <span>Tempo <strong>{remainingSeconds}s</strong></span>
-          </div>
-        </header>
-        <div
-          className="reptile-circle-board"
-          onPointerDown={(event) => {
-            if (paused || resumeCountdown > 0 || event.target !== event.currentTarget) return;
-            setOutsideClicks((current) => {
-              outsideClicksRef.current = current + 1;
-              return current + 1;
-            });
-          }}
-          aria-label="Area di gioco: tocca esclusivamente i cerchi attivi"
-        >
-          {activeCircles.map((circle) => (
-            <button
-              type="button"
-              className="reptile-target-circle"
-              key={circle.id}
-              style={{ left: `${circle.x}%`, top: `${circle.y}%` } as CSSProperties}
-              onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                setHits((current) => {
-                  const next = new Set(current).add(circle.id);
-                  hitsRef.current = next;
-                  return next;
-                });
-              }}
-              aria-label={`Cerchio ${circle.id + 1}`}
-            >
-              <span>{circle.id + 1}</span>
-            </button>
-          ))}
-          {resumeCountdown > 0 ? <div className="reptile-resume-countdown">{resumeCountdown}</div> : null}
+    <section className="reptile-minigame-page" aria-labelledby="reptile-minigame-title">
+      <header className="reptile-panel-heading">
+        <div>
+          <span className="reptile-section-kicker">02 · Coordinamento</span>
+          <h2 id="reptile-minigame-title">Prendi il ritmo dell'organizzazione</h2>
+          <p>Colpisci i cerchi attivi prima che scompaiano. Il risultato modifica tutti i settori.</p>
         </div>
-        <footer>
-          <p>Ogni cerchio vale +1%. Un cerchio perso vale −0,5%; un clic fuori vale −1%.</p>
-          <button type="button" onClick={() => finish(true)}>Abbandona il tentativo</button>
-        </footer>
-        {paused ? (
-          <div className="reptile-minigame-pause" role="alertdialog" aria-modal="true">
-            <h3>Gioco in pausa</h3>
-            <p>Alla ripresa avrai tre secondi prima che i cerchi tornino attivi.</p>
-            <button type="button" className="primary" onClick={resume}>Riprendi</button>
-          </div>
-        ) : null}
-      </section>
-    </div>
+        <button type="button" className="secondary" onClick={pause} disabled={paused}>
+          <Icon name="pause" /> Pausa
+        </button>
+      </header>
+      <div className="reptile-minigame-score" aria-live="polite">
+        <span><small>Colpiti</small><strong>{hits.size}</strong></span>
+        <span><small>Persi</small><strong>{misses.size}</strong></span>
+        <span><small>Fuori</small><strong>{outsideClicks}</strong></span>
+        <span><small>Tempo</small><strong>{remainingSeconds}s</strong></span>
+      </div>
+      <div
+        className={`reptile-circle-board${paused ? " is-paused" : ""}`}
+        onPointerDown={(event) => {
+          if (paused || resumeCountdown > 0 || event.target !== event.currentTarget) return;
+          setOutsideClicks((current) => {
+            outsideClicksRef.current = current + 1;
+            return current + 1;
+          });
+        }}
+        aria-label="Area di gioco: tocca esclusivamente i cerchi attivi"
+      >
+        {activeCircles.map((circle) => (
+          <button
+            type="button"
+            className="reptile-target-circle"
+            key={circle.id}
+            style={{ left: `${circle.x}%`, top: `${circle.y}%` } as CSSProperties}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setHits((current) => {
+                const next = new Set(current).add(circle.id);
+                hitsRef.current = next;
+                return next;
+              });
+            }}
+            aria-label={`Cerchio ${circle.id + 1}`}
+          >
+            <span>{circle.id + 1}</span>
+          </button>
+        ))}
+        {resumeCountdown > 0 ? <div className="reptile-resume-countdown">{resumeCountdown}</div> : null}
+      </div>
+      {paused ? (
+        <div className="reptile-minigame-pause" role="status" aria-live="polite">
+          <div><h3>Gioco in pausa</h3><p>Alla ripresa avrai tre secondi prima che i cerchi tornino attivi.</p></div>
+          <button type="button" className="primary" onClick={resume}>Riprendi <Icon name="play" /></button>
+        </div>
+      ) : null}
+      <footer className="reptile-minigame-footer">
+        <p>Ogni cerchio vale +1%. Un cerchio perso vale −0,5%; un clic fuori vale −1%.</p>
+        <button type="button" className="text-button" onClick={() => finish(true)}>Abbandona il tentativo</button>
+      </footer>
+    </section>
   );
 }

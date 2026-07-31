@@ -232,29 +232,33 @@
   background: #1c3044;
 }
 
+:root[data-theme="dark"] .day-notification-tournament {
+  --tournament-accent: #454c54;
+  --tournament-border: #69717a;
+  --tournament-ink: #f0f2f4;
+  --tournament-muted: #c7cbd0;
+  --tournament-surface: #1f2327;
+  --tournament-track: #59616a;
+}
+
 :root[data-theme="dark"] .appointment-tournament {
-  border-color: #f5f5f5;
-  color: #f5f5f5;
-  background: #111111;
   box-shadow: 0 5px 14px rgb(0 0 0 / 28%);
 }
 
 :root[data-theme="dark"] .tournament-notification-scoreboard {
-  color: #111111;
-  background: #f5f5f5;
+  color: #ffffff;
 }
 
 :root[data-theme="dark"] .appointment-tournament .appointment-title {
-  color: #f5f5f5;
+  color: var(--tournament-ink);
 }
 
 :root[data-theme="dark"] .appointment-tournament .appointment-copy > small {
-  color: #c8c8c8;
+  color: var(--tournament-muted);
 }
 
 :root[data-theme="dark"] .day-notification-tournament .appointment-expiry {
-  color: #f5f5f5;
-  background: #383838;
+  color: #c7ccd1;
 }
 
 :root[data-theme="dark"] .trial-status.iscritto {

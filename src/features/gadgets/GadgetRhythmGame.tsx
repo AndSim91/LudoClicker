@@ -27,8 +27,8 @@ const DESIGN_STAGES: readonly {
   id: GadgetProcessStage;
   label: string;
 }[] = [
+  { id: "sketch", label: "Bozza" },
   { id: "concept", label: "Concept" },
-  { id: "logo", label: "Logo" },
   { id: "render", label: "Render 3D" },
   { id: "prototype", label: "Prototipo" },
 ];
@@ -84,12 +84,12 @@ function GadgetStageIcon({ stage }: { stage: GadgetProcessStage }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {stage === "concept" ? (
+      {stage === "sketch" ? (
         <>
           <path d="m4 20 4.2-1 10.7-10.7-3.2-3.2L5 15.8 4 20Z" />
           <path d="m14.8 6 3.2 3.2M5 15.8 8.2 19" />
         </>
-      ) : stage === "logo" ? (
+      ) : stage === "concept" ? (
         <>
           <path d="M5 18 8 6l8 2 3 10-7 3-7-3Z" />
           <circle cx="8" cy="6" r="1.5" />

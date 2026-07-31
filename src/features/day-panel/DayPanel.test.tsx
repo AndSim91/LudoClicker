@@ -609,9 +609,15 @@ describe("DayPanel", () => {
       .getByText("Torneo Scolastico completato")
       .closest(".appointment-entry");
     expect(completedTournament).toHaveClass("day-notification-tournament");
-    expect(
-      completedTournament?.querySelector(".tournament-notification-scoreboard"),
-    ).toHaveTextContent("FineNovità");
+    const completedScoreboard = completedTournament?.querySelector(
+      ".tournament-notification-scoreboard",
+    );
+    expect(completedScoreboard).toHaveTextContent("Fine");
+    expect(completedScoreboard).not.toHaveTextContent("Novità");
+    expect(completedTournament?.querySelector(".appointment-tournament")).toHaveAttribute(
+      "aria-label",
+      "Torneo Scolastico completato: Fine",
+    );
     expect(completedTournament?.querySelector(".appointment-expiry")).toBeVisible();
     expect(
       screen.getByText("1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile"),

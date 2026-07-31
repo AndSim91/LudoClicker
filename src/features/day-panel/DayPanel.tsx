@@ -134,7 +134,9 @@ function DayNotificationEntry({
     : notification.title;
   const isTournament = notification.kind === "tournament";
   const tournamentScore = notification.phase === "scheduled" ? timing : "Fine";
-  const tournamentStatus = notification.phase === "scheduled" ? "Al via" : timing;
+  const tournamentStatus = notification.phase === "scheduled" ? "Al via" : undefined;
+  const accessibleTiming =
+    isTournament && notification.phase !== "scheduled" ? "Fine" : timing;
 
   return (
     <div
@@ -146,13 +148,13 @@ function DayNotificationEntry({
     >
       <div
         className={`appointment appointment-${notification.phase}${isTournament ? " appointment-tournament" : ""}`}
-        aria-label={`${accessibleSubject}: ${timing}`}
+        aria-label={`${accessibleSubject}: ${accessibleTiming}`}
       >
         {isTournament ? (
           <div className="tournament-notification-scoreboard" aria-hidden="true">
             <Icon name="trophy" />
             <strong>{tournamentScore}</strong>
-            <span>{tournamentStatus}</span>
+            {tournamentStatus ? <span>{tournamentStatus}</span> : null}
           </div>
         ) : (
           <>

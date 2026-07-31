@@ -100,10 +100,10 @@ describe("MonthlyIncomeSummary", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/Entrate mensili: 420,00/)).toBeVisible();
+    expect(screen.getByLabelText(/Entrate mensili: 415,00/)).toBeVisible();
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
     expect(hotState.gadgets.monthlyRevenue).toBeUndefined();
-    expect(tooltip).toHaveTextContent(/20,00\s*€/);
+    expect(tooltip).toHaveTextContent(/15,00\s*€/);
   });
 });

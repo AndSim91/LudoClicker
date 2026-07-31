@@ -23,7 +23,7 @@ export function migrateGadgetState(state: MigratableState): MigratableState {
     didOwnedAthleteWinAcademyArena,
   );
   const gadgets = createInitialGadgetState();
-  if (gadgetUnlocked) gadgets.products.wristband.unlocked = true;
+  if (gadgetUnlocked) gadgets.products.keychain.unlocked = true;
 
   const retainedProgress = Object.fromEntries(
     Object.entries(state.legendaryCollaborators?.retainedProgress ?? {}).map(
