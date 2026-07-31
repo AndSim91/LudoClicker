@@ -347,7 +347,10 @@ describe("useGameEngine pause", () => {
     expect(result.current.state.acquisitionEvents[0].status).toBe("running");
 
     act(() => vi.advanceTimersByTime(1));
-    expect(result.current.state.acquisitionEvents[0].status).toBe("completed");
+    expect(result.current.state.acquisitionEvents).toHaveLength(0);
+    expect(
+      result.current.state.historyArchive.completedEventsByDefinition["park-sparring"],
+    ).toBe(1);
   });
 
   it("normalizes accelerated timestamps before saving", () => {

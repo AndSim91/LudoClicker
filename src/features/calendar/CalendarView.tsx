@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import { GAME_CONFIG } from "../../game/config";
+import { getContactsById } from "../../game/runtimeIndexes";
 import type { GameState, ScheduledTrial } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 
@@ -40,10 +42,33 @@ export function CalendarView({
   onOpenSentEmail: (emailId: string) => void;
 }) {
   const state = useGameStateSlices(
-    ["contacts", "emails", "scheduledTrials", "school"],
+    ["contacts", "emails", "scheduledTrials"],
     stateOverride,
   );
-  const hasPendingTrials = state.scheduledTrials.some((trial) => trial.status === "scheduled");
+  const trialPresentation = useMemo(() => {
+    let scheduledCount = 0;
+    let completedCount = 0;
+    for (const trial of state.scheduledTrials) {
+      if (trial.status === "scheduled") scheduledCount += 1;
+      else if (trial.status === "completed") completedCount += 1;
+    }
+    return {
+      scheduledCount,
+      completedCount,
+      sortedTrials: [...state.scheduledTrials].sort((left, right) =>
+        right.startsAt - left.startsAt
+      ),
+    };
+  }, [state.scheduledTrials]);
+  const contactsById = getContactsById(state.contacts);
+  const emailsByContactId = useMemo(() => {
+    const emails = new Map<string, GameState["emails"][number]>();
+    for (const email of state.emails) {
+      if (!emails.has(email.contactId)) emails.set(email.contactId, email);
+    }
+    return emails;
+  }, [state.emails]);
+  const hasPendingTrials = trialPresentation.scheduledCount > 0;
   const now = useGameTime(
     true,
     hasPendingTrials ? GAME_CONFIG.progressUpdateIntervalMs : 60_000,
@@ -62,11 +87,11 @@ export function CalendarView({
       <section className="calendar-summary" aria-label="Riepilogo lezioni di prova">
         <div>
           <span>Lezioni pianificate</span>
-          <strong>{state.scheduledTrials.filter((trial) => trial.status === "scheduled").length}</strong>
+          <strong>{trialPresentation.scheduledCount}</strong>
         </div>
         <div>
           <span>Lezioni completate</span>
-          <strong>{state.scheduledTrials.filter((trial) => trial.status === "completed").length}</strong>
+          <strong>{trialPresentation.completedCount}</strong>
         </div>
       </section>
 
@@ -78,12 +103,10 @@ export function CalendarView({
             <span>Le prenotazioni generate dalle email appariranno qui.</span>
           </div>
         ) : (
-          state.scheduledTrials
-            .slice()
-            .sort((a, b) => b.startsAt - a.startsAt)
+          trialPresentation.sortedTrials
             .map((trial) => {
-              const contact = state.contacts.find((candidate) => candidate.id === trial.contactId);
-              const email = state.emails.find((candidate) => candidate.contactId === trial.contactId);
+              const contact = contactsById.get(trial.contactId);
+              const email = emailsByContactId.get(trial.contactId);
               const status = getTrialStatus(trial, contact?.status, now);
               const progress = getTrialProgress(trial, now);
               const startsInSeconds = Math.max(0, Math.ceil((trial.startsAt - now) / 1_000));

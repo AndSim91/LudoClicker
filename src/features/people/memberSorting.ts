@@ -136,50 +136,120 @@ function compareNullable<T>(
   return direction === "ascending" ? comparison : -comparison;
 }
 
-function compareMembers(
-  left: Contact,
-  right: Contact,
+interface MemberSortProjection {
+  numericValue: number | null;
+  textValue: string | null;
+  secondaryTextValue: string | null;
+}
+
+interface MemberSortEntry extends MemberSortProjection {
+  member: Contact;
+  index: number;
+}
+
+const memberSortProjectionCaches = new WeakMap<
+  MemberSortContext,
+  Map<MemberSortKey, WeakMap<Contact, MemberSortProjection>>
+>();
+
+function createMemberSortProjection(
+  member: Contact,
   sort: MemberSort,
   context: MemberSortContext,
-): number {
-  let comparison = 0;
+): MemberSortProjection {
+  let numericValue: number | null = null;
+  let textValue: string | null = null;
+  let secondaryTextValue: string | null = null;
   switch (sort.key) {
     case "name":
-      comparison = compareText(
-        `${left.firstName} ${left.lastName}`,
-        `${right.firstName} ${right.lastName}`,
-      );
+      textValue = `${member.firstName} ${member.lastName}`;
       break;
     case "rarity":
-      comparison = getMemberRarityRank(left) - getMemberRarityRank(right);
+      numericValue = getMemberRarityRank(member);
       break;
     case "path":
       {
-        const leftForms = getMemberStudent(left, context).forms;
-        const rightForms = getMemberStudent(right, context).forms;
-        const leftPath = formatFormPath(leftForms, context.courseXUnlocked);
-        const rightPath = formatFormPath(rightForms, context.courseXUnlocked);
-        comparison =
-          getVisibleForms(leftForms, context.courseXUnlocked).length -
-            getVisibleForms(rightForms, context.courseXUnlocked).length ||
-          compareText(leftPath, rightPath);
+        const forms = getMemberStudent(member, context).forms;
+        numericValue = getVisibleForms(forms, context.courseXUnlocked).length;
+        secondaryTextValue = formatFormPath(forms, context.courseXUnlocked);
       }
       break;
     case "arena":
     case "style":
+      numericValue = getMemberVisibleScore(member, sort.key, context);
+      break;
+    case "status":
+      numericValue = getDisplayedRisk(member, context);
+      break;
+    case "next-form":
+      textValue = getMemberNextFormLabel(member, context);
+      break;
+  }
+  return {
+    numericValue,
+    textValue,
+    secondaryTextValue,
+  };
+}
+
+function getMemberSortProjection(
+  member: Contact,
+  sort: MemberSort,
+  context: MemberSortContext,
+): MemberSortProjection {
+  let cachesByKey = memberSortProjectionCaches.get(context);
+  if (!cachesByKey) {
+    cachesByKey = new Map();
+    memberSortProjectionCaches.set(context, cachesByKey);
+  }
+  let cache = cachesByKey.get(sort.key);
+  if (!cache) {
+    cache = new WeakMap();
+    cachesByKey.set(sort.key, cache);
+  }
+  const cached = cache.get(member);
+  if (cached) return cached;
+  const projection = createMemberSortProjection(member, sort, context);
+  cache.set(member, projection);
+  return projection;
+}
+
+function compareMemberSortEntries(
+  left: MemberSortEntry,
+  right: MemberSortEntry,
+  sort: MemberSort,
+): number {
+  let comparison = 0;
+  switch (sort.key) {
+    case "name":
+      comparison = compareText(left.textValue ?? "", right.textValue ?? "");
+      break;
+    case "rarity":
+      comparison = (left.numericValue ?? 0) - (right.numericValue ?? 0);
+      break;
+    case "path":
+      comparison =
+        (left.numericValue ?? 0) - (right.numericValue ?? 0) ||
+        compareText(
+          left.secondaryTextValue ?? "",
+          right.secondaryTextValue ?? "",
+        );
+      break;
+    case "arena":
+    case "style":
       return compareNullable(
-        getMemberVisibleScore(left, sort.key, context),
-        getMemberVisibleScore(right, sort.key, context),
+        left.numericValue,
+        right.numericValue,
         (leftScore, rightScore) => leftScore - rightScore,
         sort.direction,
       );
     case "status":
-      comparison = getDisplayedRisk(left, context) - getDisplayedRisk(right, context);
+      comparison = (left.numericValue ?? 0) - (right.numericValue ?? 0);
       break;
     case "next-form":
       return compareNullable(
-        getMemberNextFormLabel(left, context),
-        getMemberNextFormLabel(right, context),
+        left.textValue,
+        right.textValue,
         compareText,
         sort.direction,
       );
@@ -194,9 +264,13 @@ export function sortMembers(
 ): Contact[] {
   if (!sort) return members;
   return members
-    .map((member, index) => ({ member, index }))
+    .map((member, index) => ({
+      member,
+      index,
+      ...getMemberSortProjection(member, sort, context),
+    }))
     .sort((left, right) =>
-      compareMembers(left.member, right.member, sort, context) || left.index - right.index
+      compareMemberSortEntries(left, right, sort) || left.index - right.index
     )
     .map(({ member }) => member);
 }

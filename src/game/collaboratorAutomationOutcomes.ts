@@ -11,14 +11,21 @@ export function improveRandomAthletes(
   state: GameState,
   improvementCount: number,
 ): { state: GameState; improvements: number } {
-  const enrolledIndices = state.contacts.flatMap((contact, index) =>
-    contact.status === "enrolled" ? [index] : []
-  );
-  const nextIndices = enrolledIndices.filter((index) =>
-    state.contacts[index].id !== state.automation.lastImprovedAthleteId
-  );
-  const availableIndices = nextIndices.length > 0 ? nextIndices : enrolledIndices;
-  if (improvementCount <= 0 || availableIndices.length === 0) {
+  const enrolledIndices: number[] = [];
+  const favoriteIndices: number[] = [];
+  const enrolledPositionById = new Map<string, number>();
+  const favoritePositionById = new Map<string, number>();
+  for (let index = 0; index < state.contacts.length; index += 1) {
+    const contact = state.contacts[index];
+    if (contact.status !== "enrolled") continue;
+    enrolledPositionById.set(contact.id, enrolledIndices.length);
+    enrolledIndices.push(index);
+    if (contact.favorite === true) {
+      favoritePositionById.set(contact.id, favoriteIndices.length);
+      favoriteIndices.push(index);
+    }
+  }
+  if (improvementCount <= 0 || enrolledIndices.length === 0) {
     return { state, improvements: 0 };
   }
 
@@ -33,24 +40,35 @@ export function improveRandomAthletes(
     const [athleteRoll, seedAfterAthlete] = nextRandom(seedAfterFavorite);
     const [statRoll, seedAfterStat] = nextRandom(seedAfterAthlete);
     nextSeed = seedAfterStat;
-    const nextEligibleIndices = enrolledIndices.filter((contactIndex) =>
-      contacts[contactIndex].id !== previousAthleteId
-    );
-    const nextAvailableIndices = nextEligibleIndices.length > 0
-      ? nextEligibleIndices
-      : enrolledIndices;
-    if (nextAvailableIndices.length === 0) break;
-    const nextFavoriteIndices = nextAvailableIndices.filter((contactIndex) =>
-      contacts[contactIndex].favorite === true
-    );
+    const storedPreviousEnrolledPosition = previousAthleteId
+      ? enrolledPositionById.get(previousAthleteId)
+      : undefined;
+    const previousEnrolledPosition = storedPreviousEnrolledPosition !== undefined &&
+        enrolledIndices.length > 1
+      ? storedPreviousEnrolledPosition
+      : undefined;
+    const previousFavoritePosition = previousAthleteId
+        && previousEnrolledPosition !== undefined
+      ? favoritePositionById.get(previousAthleteId)
+      : undefined;
+    const availableFavoriteCount = favoriteIndices.length -
+      (previousFavoritePosition === undefined ? 0 : 1);
     const candidateIndices =
-      favoriteRoll < GAME_CONFIG.athleticPreparationFavoriteChance && nextFavoriteIndices.length > 0
-        ? nextFavoriteIndices
-        : nextAvailableIndices;
-    const candidatePosition = Math.min(
-      candidateIndices.length - 1,
-      Math.floor(athleteRoll * candidateIndices.length),
+      favoriteRoll < GAME_CONFIG.athleticPreparationFavoriteChance && availableFavoriteCount > 0
+        ? favoriteIndices
+        : enrolledIndices;
+    const excludedPosition = candidateIndices === favoriteIndices
+      ? previousFavoritePosition
+      : previousEnrolledPosition;
+    const candidateCount = candidateIndices.length -
+      (excludedPosition === undefined ? 0 : 1);
+    const rolledPosition = Math.min(
+      candidateCount - 1,
+      Math.floor(athleteRoll * candidateCount),
     );
+    const candidatePosition = excludedPosition !== undefined && rolledPosition >= excludedPosition
+      ? rolledPosition + 1
+      : rolledPosition;
     const contactIndex = candidateIndices[candidatePosition];
     const contact = contacts[contactIndex];
     const stats = getContactBaseStats(contact);

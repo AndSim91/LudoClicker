@@ -128,10 +128,10 @@ describe("bounded game history", () => {
     expect(compacted.contacts).toContain(activeContact);
     expect(compacted.emails).toHaveLength(500);
     expect(compacted.scheduledTrials).toHaveLength(500);
-    expect(compacted.acquisitionEvents).toHaveLength(200);
+    expect(compacted.acquisitionEvents).toHaveLength(0);
     expect(compacted.historyArchive.emails.count).toBe(300);
     expect(compacted.historyArchive.completedTrials).toBe(300);
-    expect(compacted.historyArchive.completedEventsByDefinition["themed-event"]).toBe(600);
+    expect(compacted.historyArchive.completedEventsByDefinition["themed-event"]).toBe(800);
     expect(getAverageWritingSeconds(
       compacted.emails,
       compacted.historyArchive.emails,
@@ -186,6 +186,6 @@ describe("bounded game history", () => {
 
     expect(replaced.emails).toHaveLength(500);
     expect(replaced.scheduledTrials).toHaveLength(500);
-    expect(replaced.acquisitionEvents).toHaveLength(200);
+    expect(replaced.acquisitionEvents).toHaveLength(0);
   });
 });

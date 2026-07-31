@@ -33,6 +33,15 @@ const DESIGN_STAGES: readonly {
   { id: "prototype", label: "Prototipo" },
 ];
 
+const TOUCH_FIRST_DEVICE_QUERY = "(hover: none) and (pointer: coarse)";
+
+function shouldPauseOnWindowBlur(): boolean {
+  return (
+    typeof window.matchMedia !== "function" ||
+    !window.matchMedia(TOUCH_FIRST_DEVICE_QUERY).matches
+  );
+}
+
 interface NoteJudgment {
   judgment: GadgetTimingJudgment;
   points: number;
@@ -262,7 +271,9 @@ export function GadgetRhythmGame({
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") pauseRun("Scheda non attiva");
     };
-    const handleBlur = () => pauseRun("Finestra non attiva");
+    const handleBlur = () => {
+      if (shouldPauseOnWindowBlur()) pauseRun("Finestra non attiva");
+    };
     const handleOrientation = () => pauseRun("Orientamento cambiato");
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("blur", handleBlur);

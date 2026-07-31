@@ -333,8 +333,7 @@
   padding: 0 4px 14px;
 }
 
-.section-title h2,
-.event-history h2 {
+.section-title h2 {
   margin: 0;
   font-size: 17px;
   font-weight: 600;
@@ -896,40 +895,5 @@
   display: flex;
   gap: 16px;
   color: var(--blue-700);
-  font-size: 11px;
-}
-
-.event-history {
-  max-width: none;
-  margin-top: 32px;
-}
-
-.event-history > h2 {
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-.event-history > div {
-  display: grid;
-  grid-template-columns: 32px 1fr auto;
-  align-items: center;
-  min-height: 58px;
-  border-bottom: 1px solid var(--line);
-}
-
-.event-history svg {
-  width: 18px;
-  color: var(--success);
-}
-
-.event-history span {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.event-history small,
-.event-history time {
-  color: var(--ink-muted);
   font-size: 11px;
 }

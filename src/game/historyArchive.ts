@@ -95,9 +95,7 @@ export function compactGameHistory(state: GameState): GameState {
     GAME_CONFIG.recentCompletedTrialsLimit,
     (trial) => trial.status === "completed" || trial.status === "cancelled",
   );
-  const shouldCompactEvents = hasMoreThan(
-    state.acquisitionEvents,
-    GAME_CONFIG.recentCompletedEventsLimit,
+  const shouldCompactEvents = state.acquisitionEvents.some(
     (event) => event.status === "completed",
   );
   const shouldCompactContacts = state.contacts.some(
@@ -143,14 +141,8 @@ export function compactGameHistory(state: GameState): GameState {
     return false;
   });
 
-  const retainedEventIds = newestIds(
-    state.acquisitionEvents,
-    GAME_CONFIG.recentCompletedEventsLimit,
-    (event) => event.status === "completed",
-    (event) => event.id,
-  );
   const retainedEvents = state.acquisitionEvents.filter((event) => {
-    if (event.status !== "completed" || retainedEventIds.has(event.id)) return true;
+    if (event.status !== "completed") return true;
     archive.completedEventsByDefinition[event.definitionId] =
       (archive.completedEventsByDefinition[event.definitionId] ?? 0) + 1;
     return false;

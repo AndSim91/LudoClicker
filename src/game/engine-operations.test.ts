@@ -159,8 +159,8 @@ describe("game engine: operations", () => {
       now: event.resolvesAt,
     });
 
-    expect(completed.acquisitionEvents[0].contactReward).toBe(0);
-    expect(completed.acquisitionEvents[0].status).toBe("completed");
+    expect(completed.acquisitionEvents).toHaveLength(0);
+    expect(completed.historyArchive.completedEventsByDefinition["park-sparring"]).toBe(1);
     expect(completed.statistics.eventsCompleted).toBe(1);
     expect(completed.contacts).toHaveLength(1);
     expect(getCurrentSchoolContactCount(completed)).toBe(state.contacts.length);

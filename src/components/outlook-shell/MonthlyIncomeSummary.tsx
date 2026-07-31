@@ -1,31 +1,49 @@
-import { useId, useMemo } from "react";
+import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyMemberFees } from "../../game/membershipEconomy";
 import { getMonthlySocialIncome } from "../../game/social";
-import { useGameStateSlices } from "../../game/GameStateContext";
+import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import { Icon } from "../common/Icon";
 
+interface MonthlyIncomePresentation {
+  memberFees: number;
+  socialIncome: number;
+  gadgetIncome: number;
+  gadgetUnlocked: boolean;
+}
+
+function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
+  return {
+    memberFees: getMonthlyMemberFees(state),
+    socialIncome: getMonthlySocialIncome(state),
+    gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
+    gadgetUnlocked: state.unlocks.gadget,
+  };
+}
+
+function isSameMonthlyIncomePresentation(
+  left: MonthlyIncomePresentation,
+  right: MonthlyIncomePresentation,
+): boolean {
+  return left.memberFees === right.memberFees &&
+    left.socialIncome === right.socialIncome &&
+    left.gadgetIncome === right.gadgetIncome &&
+    left.gadgetUnlocked === right.gadgetUnlocked;
+}
+
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
-  const state = useGameStateSlices(
-    [
-      "collaboratorManagement",
-      "collaborators",
-      "contacts",
-      "gadgets",
-      "school",
-      "unlocks",
-      "upgrades",
-    ],
-    stateOverride,
-  );
   const tooltipId = useId();
-  const memberFees = getMonthlyMemberFees(state);
-  const socialIncome = getMonthlySocialIncome(state);
-  const gadgetIncome = useMemo(
-    () => getEstimatedMonthlyGadgetIncome(state),
-    [state],
+  const {
+    memberFees,
+    socialIncome,
+    gadgetIncome,
+    gadgetUnlocked,
+  } = useGameSelector(
+    selectMonthlyIncomePresentation,
+    stateOverride,
+    isSameMonthlyIncomePresentation,
   );
   const monthlyIncome = memberFees + socialIncome + gadgetIncome;
 
@@ -52,7 +70,7 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <dt>Bonus Social</dt>
             <dd>{formatCurrency(socialIncome)}</dd>
           </div>
-          {state.unlocks.gadget ? (
+          {gadgetUnlocked ? (
             <div>
               <dt>Vendite Gadget (stima)</dt>
               <dd>{formatCurrency(gadgetIncome)}</dd>

@@ -15,7 +15,11 @@ vi.mock("./GadgetArtwork", () => ({
   GadgetWorkshopArtwork: () => <div data-testid="gadget-workshop-artwork" />,
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 const handlers = () => ({
   onStartProject: vi.fn(),
@@ -61,6 +65,24 @@ function withCommonRarity(
         ...product.rarities.common,
         unlocked: true,
         ...rarity,
+      },
+    },
+  };
+}
+
+function runningMinigameState(): GameState {
+  const initial = unlockedState();
+  return {
+    ...initial,
+    gadgets: {
+      ...initial.gadgets,
+      minigame: {
+        productId: "wristband",
+        kind: "development",
+        rarity: "common",
+        seed: 123,
+        previousQuality: 0,
+        status: "running",
       },
     },
   };
@@ -351,5 +373,34 @@ describe("GadgetsView", () => {
       screen.getByRole("button", { name: "Corsia 1: ← oppure A" }).querySelector("svg"),
     ).toBeInTheDocument();
     expect(screen.queryByText(/probabilità/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps the rhythm controls visible after a transient blur on touch devices", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: query === "(hover: none) and (pointer: coarse)",
+      })),
+    );
+    render(<GadgetsView state={runningMinigameState()} {...handlers()} />);
+    fireEvent(window, new Event("blur"));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Corsia/ })).toHaveLength(4);
+  });
+
+  it("still pauses the touch rhythm game when the page is actually hidden", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: query === "(hover: none) and (pointer: coarse)",
+      })),
+    );
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+
+    render(<GadgetsView state={runningMinigameState()} {...handlers()} />);
+    fireEvent(document, new Event("visibilitychange"));
+
+    expect(screen.getByRole("alertdialog", { name: "Scheda non attiva" })).toBeVisible();
   });
 });

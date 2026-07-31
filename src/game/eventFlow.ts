@@ -246,11 +246,17 @@ export function resolveAcquisitionEvent(
       event.equipmentUsed ?? 0,
       event.wearAdded ?? 0,
     ),
-    acquisitionEvents: rewardState.acquisitionEvents.map((candidate) =>
-      candidate.id === event.id
-        ? { ...candidate, contactReward, status: "completed" }
-        : candidate,
+    acquisitionEvents: rewardState.acquisitionEvents.filter(
+      (candidate) => candidate.id !== event.id,
     ),
+    historyArchive: {
+      ...rewardState.historyArchive,
+      completedEventsByDefinition: {
+        ...rewardState.historyArchive.completedEventsByDefinition,
+        [event.definitionId]:
+          (rewardState.historyArchive.completedEventsByDefinition[event.definitionId] ?? 0) + 1,
+      },
+    },
     activities: definition
       ? {
           ...rewardState.activities,

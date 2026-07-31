@@ -14,7 +14,7 @@ import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipm
 import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import { FIRST_EVENT_TUTORIAL_SCENE_ID, isTutorialScenePending } from "../../game/tutorialProgress";
 import type { AcquisitionEvent, GameState } from "../../game/types";
-import { formatCurrency, formatTime } from "../../shared/formatters";
+import { formatCurrency } from "../../shared/formatters";
 
 function quantityLabel(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
@@ -29,8 +29,6 @@ function getEventProgress(event: AcquisitionEvent, now: number) {
   if (duration <= 0) return 100;
   return Math.min(100, Math.max(0, ((now - event.startedAt) / duration) * 100));
 }
-
-const EVENT_HISTORY_PAGE_SIZE = 100;
 
 export function EventsView({
   state: stateOverride,
@@ -56,7 +54,6 @@ export function EventsView({
     ],
     stateOverride,
   );
-  const [historyPage, setHistoryPage] = useState(0);
   const [fallbackNow] = useState(Date.now);
   const runningEvents = useMemo(
     () => state.acquisitionEvents.filter((event) => event.status === "running"),
@@ -73,16 +70,6 @@ export function EventsView({
   const runningByDefinition = useMemo(
     () => new Map(runningEvents.map((event) => [event.definitionId, event])),
     [runningEvents],
-  );
-  const completedEvents = useMemo(
-    () => state.acquisitionEvents.filter((event) => event.status === "completed").reverse(),
-    [state.acquisitionEvents],
-  );
-  const historyPageCount = Math.max(1, Math.ceil(completedEvents.length / EVENT_HISTORY_PAGE_SIZE));
-  const effectiveHistoryPage = Math.min(historyPage, historyPageCount - 1);
-  const visibleHistory = completedEvents.slice(
-    effectiveHistoryPage * EVENT_HISTORY_PAGE_SIZE,
-    (effectiveHistoryPage + 1) * EVENT_HISTORY_PAGE_SIZE,
   );
   const availableMembers = selectAvailableEventMembers(state);
   const availableSwords = getAvailableSwords(state.equipment);
@@ -248,46 +235,6 @@ export function EventsView({
           );
         })}
       </section>
-      {completedEvents.length > 0 ? (
-        <section className="event-history">
-          <h2>Attività completate</h2>
-          {visibleHistory.map((event) => (
-            <div key={event.id}>
-              <Icon name="flag" />
-              <span>
-                <strong>{event.title}</strong>
-                <small>
-                  {quantityLabel(event.peopleMet ?? 0, "persona", "persone")} ·{" "}
-                  {quantityLabel(event.demonstrationsGiven ?? 0, "prova", "prove")} ·{" "}
-                  {quantityLabel(event.contactReward ?? 0, "contatto", "contatti")}
-                </small>
-              </span>
-              <time>{formatTime(event.resolvesAt)}</time>
-            </div>
-          ))}
-          {historyPageCount > 1 ? (
-            <nav className="list-pagination" aria-label="Pagine attività completate">
-              <button
-                type="button"
-                disabled={effectiveHistoryPage === 0}
-                onClick={() => setHistoryPage((page) => Math.max(0, page - 1))}
-              >
-                Più recenti
-              </button>
-              <span>
-                Pagina {effectiveHistoryPage + 1} di {historyPageCount}
-              </span>
-              <button
-                type="button"
-                disabled={effectiveHistoryPage >= historyPageCount - 1}
-                onClick={() => setHistoryPage((page) => Math.min(historyPageCount - 1, page + 1))}
-              >
-                Meno recenti
-              </button>
-            </nav>
-          ) : null}
-        </section>
-      ) : null}
     </main>
   );
 }

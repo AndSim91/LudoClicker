@@ -5,6 +5,7 @@ import {
 } from "../content/forms";
 import { createInitialState } from "./initialState";
 import { gameReducer } from "./engine";
+import { improveRandomAthletes } from "./collaboratorAutomationOutcomes";
 import type { Collaborator, GameState } from "./types";
 
 function instructor(
@@ -105,5 +106,60 @@ describe("instructor athletic preparation", () => {
 
     expect(getInstructorAthleticPreparationProductivity(certified))
       .toBeGreaterThan(getInstructorAthleticPreparationProductivity(knownOnly));
+  });
+
+  it("keeps large preparation batches deterministic while reusing athlete pools", () => {
+    const initial = preparationState(5);
+    const contacts = Array.from({ length: 4 }, (_, index) => ({
+      ...initial.contacts[0],
+      id: `late-member-${index}`,
+      firstName: "Late",
+      lastName: `Member ${index}`,
+      email: `late-${index}@example.invalid`,
+      status: "enrolled" as const,
+      favorite: index === 1,
+      arenaBase: 50,
+      styleBase: 50,
+    }));
+    const result = improveRandomAthletes({
+      ...initial,
+      contacts,
+      randomSeed: 123_456_789,
+      automation: {
+        ...initial.automation,
+        lastImprovedAthleteId: contacts[1].id,
+      },
+    }, 25);
+
+    expect(result.improvements).toBe(25);
+    expect(result.state.randomSeed).toBe(51_939_292);
+    expect(result.state.automation.lastImprovedAthleteId).toBe("late-member-1");
+    expect(result.state.contacts.map((contact) => [contact.arenaBase, contact.styleBase]))
+      .toEqual([[52, 52], [54, 54], [55, 52], [52, 54]]);
+  });
+
+  it("can improve the same athlete repeatedly when it is the only eligible one", () => {
+    const initial = preparationState(5);
+    const onlyAthlete = {
+      ...initial.contacts[0],
+      id: "only-athlete",
+      status: "enrolled" as const,
+      arenaBase: 10,
+      styleBase: 10,
+    };
+    const result = improveRandomAthletes({
+      ...initial,
+      contacts: [onlyAthlete],
+      automation: {
+        ...initial.automation,
+        lastImprovedAthleteId: onlyAthlete.id,
+      },
+    }, 3);
+
+    expect(result.improvements).toBe(3);
+    expect(
+      (result.state.contacts[0].arenaBase ?? 0) +
+      (result.state.contacts[0].styleBase ?? 0),
+    ).toBe(23);
   });
 });

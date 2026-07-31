@@ -59,11 +59,8 @@ export function PeopleView({
       "collaboratorManagement",
       "collaborators",
       "contacts",
-      "automation",
-      "school",
       "statistics",
       "unlocks",
-      "upgrades",
     ],
     stateOverride,
   );

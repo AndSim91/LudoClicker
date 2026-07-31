@@ -37,7 +37,6 @@ import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import {
   getMemberNextFormLabel,
   getMemberStudent,
-  getMemberVisibleScore,
   sortMembers,
   type MemberSort,
   type MemberSortContext,
@@ -66,10 +65,20 @@ const MEMBER_SORT_KEYS = [
 ] as const satisfies readonly MemberSortKey[];
 type MemberRarityFilter = "all" | Contact["rarity"];
 
-function uniqueSortedOptions(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) =>
+function sortedOptions(values: ReadonlySet<string>): string[] {
+  return [...values].sort((left, right) =>
     left.localeCompare(right, "it", { numeric: true, sensitivity: "base" })
   );
+}
+
+interface MemberPresentation {
+  contact: Contact;
+  student: Contact | Collaborator;
+  path: string;
+  searchableText: string;
+  status: string;
+  nextForm: string;
+  preparation?: ReturnType<typeof getContactPreparation>;
 }
 
 function getDisplayedMemberStatus(
@@ -97,6 +106,34 @@ function getDisplayedMemberStatus(
     contact.rarity,
     context.foundedSchools,
   );
+}
+
+function createMemberPresentationReader(
+  context: MemberSortContext,
+  socialUnlocked: boolean,
+): (contact: Contact) => MemberPresentation {
+  const cache = new WeakMap<Contact, MemberPresentation>();
+  return (contact) => {
+    const cached = cache.get(contact);
+    if (cached) return cached;
+    const student = getMemberStudent(contact, context);
+    const hasVisibleStats = hasUnlockedOfficialStats(student.forms);
+    const presentation: MemberPresentation = {
+      contact,
+      student,
+      path: formatFormPath(student.forms, context.courseXUnlocked),
+      searchableText: `${contact.firstName} ${contact.lastName} ${contact.email}`
+        .toLocaleLowerCase("it-IT"),
+      status: getDisplayedMemberStatus(contact, context, socialUnlocked),
+      nextForm: getMemberNextFormLabel(contact, context) ??
+        "Nessuna Forma disponibile",
+      preparation: hasVisibleStats
+        ? getContactPreparation(contact, student.forms)
+        : undefined,
+    };
+    cache.set(contact, presentation);
+    return presentation;
+  };
 }
 
 function SortableHeader({
@@ -209,59 +246,63 @@ export function MemberList({
       immunityContext,
     ],
   );
-  const filterOptions = useMemo(() => ({
-    paths: uniqueSortedOptions(members.map((contact) =>
-      formatFormPath(
-        getMemberStudent(contact, sortContext).forms,
-        sortContext.courseXUnlocked,
-      )
-    )),
-    statuses: uniqueSortedOptions(members.map((contact) =>
-      getDisplayedMemberStatus(contact, sortContext, state.unlocks.social)
-    )),
-    nextForms: uniqueSortedOptions(members.map((contact) =>
-      getMemberNextFormLabel(contact, sortContext) ?? "Nessuna Forma disponibile"
-    )),
-  }), [members, sortContext, state.unlocks.social]);
+  const getMemberPresentation = useMemo(
+    () => createMemberPresentationReader(sortContext, state.unlocks.social),
+    [sortContext, state.unlocks.social],
+  );
+  const memberPresentations = useMemo(
+    () => members.map(getMemberPresentation),
+    [getMemberPresentation, members],
+  );
+  const filterOptions = useMemo(() => {
+    const paths = new Set<string>();
+    const statuses = new Set<string>();
+    const nextForms = new Set<string>();
+    for (const presentation of memberPresentations) {
+      paths.add(presentation.path);
+      statuses.add(presentation.status);
+      nextForms.add(presentation.nextForm);
+    }
+    return {
+      paths: sortedOptions(paths),
+      statuses: sortedOptions(statuses),
+      nextForms: sortedOptions(nextForms),
+    };
+  }, [memberPresentations]);
   const filteredMembers = useMemo(() => {
     const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
     const minimumArena = arenaMinimum === "" ? undefined : Number(arenaMinimum);
     const minimumStyle = styleMinimum === "" ? undefined : Number(styleMinimum);
-    return members.filter((contact) => {
-      const student = getMemberStudent(contact, sortContext);
-      const path = formatFormPath(student.forms, sortContext.courseXUnlocked);
-      const searchableText = `${contact.firstName} ${contact.lastName} ${contact.email}`
-        .toLocaleLowerCase("it-IT");
-      if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
-      if (rarityFilter !== "all" && contact.rarity !== rarityFilter) return false;
-      if (pathFilter !== "all" && path !== pathFilter) return false;
+    const filtered: Contact[] = [];
+    for (const presentation of memberPresentations) {
+      const { contact } = presentation;
+      if (normalizedSearch && !presentation.searchableText.includes(normalizedSearch)) continue;
+      if (rarityFilter !== "all" && contact.rarity !== rarityFilter) continue;
+      if (pathFilter !== "all" && presentation.path !== pathFilter) continue;
       if (minimumArena !== undefined) {
-        const arena = getMemberVisibleScore(contact, "arena", sortContext);
-        if (arena === null || arena < minimumArena) return false;
+        const arena = presentation.preparation?.arena ?? null;
+        if (arena === null || arena < minimumArena) continue;
       }
       if (minimumStyle !== undefined) {
-        const style = getMemberVisibleScore(contact, "style", sortContext);
-        if (style === null || style < minimumStyle) return false;
+        const style = presentation.preparation?.style ?? null;
+        if (style === null || style < minimumStyle) continue;
       }
       if (
         statusFilter !== "all" &&
-        getDisplayedMemberStatus(contact, sortContext, state.unlocks.social) !== statusFilter
-      ) return false;
-      const nextForm = getMemberNextFormLabel(contact, sortContext) ??
-        "Nessuna Forma disponibile";
-      if (nextFormFilter !== "all" && nextForm !== nextFormFilter) return false;
-      return true;
-    });
+        presentation.status !== statusFilter
+      ) continue;
+      if (nextFormFilter !== "all" && presentation.nextForm !== nextFormFilter) continue;
+      filtered.push(contact);
+    }
+    return filtered;
   }, [
     arenaMinimum,
     deferredSearch,
-    members,
+    memberPresentations,
     nextFormFilter,
     pathFilter,
     rarityFilter,
-    sortContext,
     statusFilter,
-    state.unlocks.social,
     styleMinimum,
   ]);
   const sortedMembers = useMemo(
@@ -466,13 +507,11 @@ export function MemberList({
         <button type="button" onClick={resetFilters}>Azzera filtri</button>
       </div>
       {visibleMembers.map((contact) => {
+        const presentation = getMemberPresentation(contact);
         const collaborator = collaboratorsByContactId.get(contact.id);
-        const memberStudent = collaborator ?? contact;
+        const memberStudent = presentation.student;
         const memberForms = memberStudent.forms;
-        const hasVisibleStats = hasUnlockedOfficialStats(memberForms);
-        const preparation = hasVisibleStats
-          ? getContactPreparation(contact, memberForms)
-          : undefined;
+        const preparation = presentation.preparation;
         return (
           <div className="people-row member-row" key={contact.id}>
             <div className="member-name" data-label="Nome">
@@ -508,7 +547,7 @@ export function MemberList({
               </strong>
             </span>
             <div className="member-path" data-label="Percorso">
-              <strong>{formatFormPath(memberForms, courseXUnlocked)}</strong>
+              <strong>{presentation.path}</strong>
               <FormLogoStrip
                 forms={memberForms}
                 instructorForms={collaborator?.instructorForms}
@@ -531,9 +570,7 @@ export function MemberList({
             </span>
             <span className="member-status" data-label="Stato">
               <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
-              <small>
-                {getDisplayedMemberStatus(contact, sortContext, state.unlocks.social)}
-              </small>
+              <small>{presentation.status}</small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">
               <TrainingControl

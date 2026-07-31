@@ -21,19 +21,19 @@ describe("EventsView", () => {
     expect(intervalSpy).not.toHaveBeenCalled();
   });
 
-  it("shows zero when a completed event has no contact reward", () => {
+  it("does not render completed activity history", () => {
     const initial = createInitialState(1_000);
     const event: AcquisitionEvent = {
       id: "activity-without-contacts",
       definitionId: "park-sparring",
-      title: "Volantinaggio",
+      title: "Attività storica",
       location: "Centro di Genova",
       startedAt: 2_000,
       resolvesAt: 3_000,
       cost: 0,
       peopleMet: 0,
       demonstrationsGiven: 0,
-      contactReward: undefined as unknown as number,
+      contactReward: 0,
       membersUsed: 0,
       equipmentUsed: 0,
       wearAdded: 0,
@@ -44,7 +44,9 @@ describe("EventsView", () => {
       <EventsView state={{ ...initial, acquisitionEvents: [event] }} onStart={() => undefined} />,
     );
 
-    expect(screen.getByText("0 persone · 0 prove · 0 contatti")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Attività completate" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByText("Attività storica")).not.toBeInTheDocument();
   });
 
   it("starts with only flyering and sea kata at very low potential", () => {

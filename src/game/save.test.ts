@@ -457,7 +457,7 @@ describe("local save", () => {
     expect(migrated.player.writingPower).toBe(1.4);
   });
 
-  it("migrates version 3 event funnel totals", () => {
+  it("migrates version 3 running event funnel totals", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 3;
     delete legacy.statistics.peopleMet;
@@ -472,7 +472,7 @@ describe("local save", () => {
         resolvesAt: 3_000,
         cost: 0,
         contactReward: 2,
-        status: "completed",
+        status: "running",
       },
     ];
     localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
