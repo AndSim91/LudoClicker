@@ -314,6 +314,7 @@ export function processTechnicianCourseReservations(
   state: GameState,
   now: number,
 ): GameState {
+  if (!state.automation.autoTeachingEnabled) return state;
   if (!state.collaborators.some((collaborator) => collaborator.technicianCourseReservation)) {
     return state;
   }
@@ -417,6 +418,7 @@ function processInstructorQualifications(
   state: GameState,
   now: number,
 ): GameState {
+  if (!state.automation.autoTeachingEnabled) return state;
   let nextState = state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);

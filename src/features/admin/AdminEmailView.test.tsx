@@ -80,7 +80,7 @@ describe("AdminEmailView", () => {
 
     const slider = screen.getByRole("slider", { name: "Moltiplicatore" });
     expect(slider).toHaveAttribute("min", "1");
-    expect(slider).toHaveAttribute("max", "10");
+    expect(slider).toHaveAttribute("max", "20");
     expect(slider).toHaveAttribute("step", "1");
     expect(screen.getAllByText("1×")).toHaveLength(2);
     expect(screen.getByText("5×")).toBeVisible();
@@ -96,9 +96,11 @@ describe("AdminEmailView", () => {
     expect(onGameSpeedChange).toHaveBeenCalledWith(4);
 
     fireEvent.change(slider, {
-      target: { value: "10" },
+      target: { value: "20" },
     });
-    expect(onGameSpeedChange).toHaveBeenLastCalledWith(10);
+    expect(onGameSpeedChange).toHaveBeenLastCalledWith(20);
+    fireEvent.click(screen.getByRole("button", { name: /20/ }));
+    expect(onGameSpeedChange).toHaveBeenLastCalledWith(20);
     fireEvent.click(screen.getByRole("button", { name: "Imposta velocità 5×" }));
     expect(onGameSpeedChange).toHaveBeenLastCalledWith(5);
     expect(screen.getByRole("button", { name: "Ripristina 1×" })).toBeDisabled();
@@ -115,7 +117,7 @@ describe("AdminEmailView", () => {
         currentMonth={9}
         availableLegendaryProfiles={3}
         gadgetUnitsSold={12}
-        gameSpeed={10}
+        gameSpeed={20}
         onGameSpeedChange={onGameSpeedChange}
         onAddContacts={vi.fn()}
         onAddMembers={vi.fn()}
@@ -126,7 +128,7 @@ describe("AdminEmailView", () => {
         onResetGadgetSales={vi.fn()}
       />,
     );
-    expect(screen.getByRole("button", { name: "Imposta velocità 10×" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /20/ })).toHaveAttribute(
       "aria-pressed",
       "true",
     );

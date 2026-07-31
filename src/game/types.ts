@@ -925,6 +925,7 @@ export interface GameState {
   automation: {
     lastProcessedAt: number;
     autoSendEmails: boolean;
+    autoTeachingEnabled: boolean;
     writingBuffer: number;
     lessonBuffer: number;
     socialContentBuffer: number;
@@ -957,6 +958,7 @@ export type GameAction =
   | { type: "WRITE"; now: number }
   | { type: "SEND_EMAIL"; now: number }
   | { type: "SET_AUTOMATIC_EMAIL_SENDING"; enabled: boolean; now: number }
+  | { type: "SET_AUTOMATIC_TEACHING"; enabled: boolean }
   | {
     type: "TICK";
     now: number;

@@ -1108,8 +1108,7 @@ Regole:
   acquisita prima dell'attestato e ciascuna fase ha la propria verifica finale;
 - un Istruttore può iniziare o continuare una nuova formazione anche mentre
   insegna; in questo caso la durata è tripla rispetto alla velocità normale e
-  torna normale quando non ha più allievi attivi o l'insegnamento automatico
-  viene disabilitato;
+  torna normale quando non ha più allievi attivi;
 - gli esami finali sono un sistema interno e non vengono comunicati
   nell'interfaccia: il rischio di non superarli è **50%** per Forme e Corsi da
   atleta, **45%** per i Corsi Istruttori e **40%** per i Corsi Tecnici;
@@ -1133,7 +1132,7 @@ Regole:
   appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
   “Sblocca Arena Tecnica e ne riduce progressivamente la durata.”;
 - al livello 1 Percorso Tecnico costa **€1.000** e sblocca Arena Tecnica come formazione
-  automatica, sempre attiva e non disabilitabile separatamente. La formazione
+  automatica soggetta al toggle globale dell'insegnamento. La formazione
   costa **€500 per atleta**, dura 120 secondi, non migliora le statistiche ma
   protegge subito l'allievo dal controllo annuale degli abbandoni;
 - il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **100
@@ -1185,6 +1184,11 @@ Regole:
   usare la capienza residua per Arena Tecnica o Corso Agonisti e infine
   contribuire alla Preparazione agonistica. Le attività formative personali
   restano compatibili con l'insegnamento secondo le regole di rallentamento;
+- il toggle **Insegnamento automatico** è attivo di default e viene salvato.
+  Disattivarlo impedisce nuovi avvii automatici di Forme, Arena Tecnica, Corso
+  Agonisti, Corsi Istruttori interni e Corsi Tecnici SIS; le formazioni già in
+  corso terminano normalmente e le prenotazioni SIS restano in coda. La
+  Preparazione atletica continua a essere un'attività separata;
 - tra gli Istruttori disponibili e compatibili, l'automazione privilegia chi ha
   meno Forme insegnabili, così da conservare la disponibilità degli Istruttori
   più avanzati per gli allievi che ne hanno bisogno; a parità distribuisce prima
@@ -1196,8 +1200,6 @@ Regole:
 - nell'elenco individuale dei Collaboratori, un Istruttore che sta contribuendo
   alla Preparazione agonistica mostra la relativa barra attiva ed è considerato
   **In corso**, non **In attesa di un allievo**;
-- disattivare l'automazione del singolo Istruttore o riassegnarlo lascia
-  terminare le lezioni già iniziate, ma non ne avvia altre;
 - annullare manualmente un'iscrizione è disponibile fin dall'inizio. La X nella
   riga di ogni persona nella schermata Scuola richiede una conferma esplicita
   e annulla definitivamente l'iscrizione senza rimborso e senza ridurre la Fama

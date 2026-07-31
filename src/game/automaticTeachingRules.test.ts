@@ -63,6 +63,29 @@ function teachingState(): GameState {
 }
 
 describe("automatic teaching rules", () => {
+  it("does not start automatic courses while the global teaching toggle is disabled", () => {
+    const initial = teachingState();
+    const student = {
+      ...initial.contacts[0],
+      id: "paused-teaching-student",
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      training: undefined,
+    };
+    const formOneInstructor = instructor("paused-teaching-instructor", "legendary", ["form-1"]);
+    const state: GameState = {
+      ...initial,
+      contacts: [student],
+      collaborators: [formOneInstructor],
+      automation: { ...initial.automation, autoTeachingEnabled: false },
+    };
+
+    const processed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(processed.contacts[0].training).toBeUndefined();
+    expect(processed.collaborators[0].training).toBeUndefined();
+  });
+
   it("waits for a busy certified instructor instead of using the Agonist Course", () => {
     const initial = teachingState();
     const waiting = branchStudent(initial.contacts[0], "waiting");

@@ -110,6 +110,7 @@ export function createInitialState(
     automation: {
       lastProcessedAt: now,
       autoSendEmails: true,
+      autoTeachingEnabled: true,
       writingBuffer: 0,
       lessonBuffer: 0,
       socialContentBuffer: 0,

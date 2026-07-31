@@ -107,6 +107,13 @@ export function createGameActionHandlers(
         ? dependencies.sendEmail(nextState, action.now)
         : nextState;
     },
+    SET_AUTOMATIC_TEACHING: (state, action) => ({
+      ...state,
+      automation: {
+        ...state.automation,
+        autoTeachingEnabled: action.enabled,
+      },
+    }),
     TICK: (state, action) => dependencies.tick(
       state,
       action.now,

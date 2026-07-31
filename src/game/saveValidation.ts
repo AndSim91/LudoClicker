@@ -485,6 +485,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.upgrades?.["gadget-cross-selling"] === "number" &&
     typeof state.automation?.lastProcessedAt === "number" &&
     typeof state.automation?.autoSendEmails === "boolean" &&
+    typeof state.automation?.autoTeachingEnabled === "boolean" &&
     typeof state.automation?.lessonBuffer === "number" &&
     typeof state.automation?.socialContentBuffer === "number" &&
     typeof state.automation?.equipmentPreparedWork === "number" &&

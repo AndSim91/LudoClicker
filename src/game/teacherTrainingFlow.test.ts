@@ -46,6 +46,50 @@ function instructor(
 }
 
 describe("Tecnici e Corsi Istruttori interni", () => {
+  it("keeps every automatic teaching path paused, including queued SIS courses", () => {
+    const initial = createInitialState(1_000, "", false);
+    const technician = {
+      ...instructor(
+        initial,
+        "paused-technician",
+        1_000,
+        ["form-1"],
+        ["form-1"],
+        ["form-1"],
+      ),
+      technicianCourseReservation: {
+        formId: "form-1" as const,
+        bookedAt: 1_500,
+        eligibleMonth: 9,
+      },
+    };
+    const trainee = instructor(initial, "paused-trainee", 2_000, ["form-1"], []);
+    const student = {
+      ...initial.contacts[0],
+      status: "enrolled" as const,
+      forms: [] as FormId[],
+      training: undefined,
+    };
+    const state: GameState = {
+      ...initial,
+      contacts: [student],
+      school: { ...initial.school, currentMonth: 9, activeMembers: 1, euros: 10_000 },
+      collaborators: [technician, trainee],
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+      upgrades: { ...initial.upgrades, "sis-accreditation": 1 },
+      automation: { ...initial.automation, autoTeachingEnabled: false },
+    };
+
+    const processed = gameReducer(state, { type: "TICK", now: 2_000 });
+
+    expect(processed.contacts[0].training).toBeUndefined();
+    expect(processed.collaborators[0].training).toBeUndefined();
+    expect(processed.collaborators[0].technicianCourseReservation).toEqual(
+      technician.technicianCourseReservation,
+    );
+    expect(processed.collaborators[1].training).toBeUndefined();
+  });
+
   it("uses the agreed cost and duration percentages", () => {
     expect(getInstructorQualificationCost(100)).toBe(250);
     expect(getInstructorFormCost(100)).toBe(350);

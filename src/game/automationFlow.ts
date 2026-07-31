@@ -579,6 +579,7 @@ export function processAutomaticTeaching(
     currentState,
   createTrainingPlan?: TrainingStartPlanFactory,
 ): GameState {
+  if (!state.automation.autoTeachingEnabled) return state;
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (isAutomaticTeachingKnownIdle(state)) return state;
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);

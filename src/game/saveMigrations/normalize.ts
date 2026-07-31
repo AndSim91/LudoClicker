@@ -186,5 +186,15 @@ export function normalizeLegacySave(state: MigratableState): MigratableState {
     };
   }
 
+  if (migrated.automation) {
+    migrated = {
+      ...migrated,
+      automation: {
+        ...migrated.automation,
+        autoTeachingEnabled: migrated.automation.autoTeachingEnabled ?? true,
+      },
+    };
+  }
+
   return normalizeLegendaryAssignments(migrated);
 }

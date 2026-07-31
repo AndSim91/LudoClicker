@@ -149,7 +149,7 @@
 }
 
 .people-view .instructor-sector-card > header {
-  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
   padding: 14px 18px 13px 21px;
   background: color-mix(in srgb, var(--school-page-accent) 5%, var(--surface));
 }
@@ -509,6 +509,11 @@
   .people-view .collaborator-sector-card > header .sector-staffing-stepper {
     grid-column: 1 / -1;
     width: 100%;
+  }
+
+  .people-view .instructor-auto-teaching-toggle {
+    grid-column: 2;
+    justify-self: start;
   }
 
   .overview-view.people-view {

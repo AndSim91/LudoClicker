@@ -54,6 +54,7 @@ const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "events",
   "equipment",
 ];
+const ignoreAutomaticTeachingToggle = () => undefined;
 
 const ROLE_PRESENTATION: Record<
   CollaboratorMasteryRole,
@@ -308,6 +309,7 @@ function InstructorSectorCard({
   onIncrement,
   onDecrement,
   onOpen,
+  onToggleAutomaticTeaching,
 }: {
   state?: GameState;
   actual: number;
@@ -317,9 +319,10 @@ function InstructorSectorCard({
   onIncrement: () => void;
   onDecrement: () => void;
   onOpen: () => void;
+  onToggleAutomaticTeaching: (enabled: boolean) => void;
 }) {
   const state = useGameStateSlices(
-    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
+    ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const isPaused = useGameTimeSource()?.isPaused ?? false;
@@ -395,6 +398,18 @@ function InstructorSectorCard({
             ? ROLE_PRESENTATION.instructor.description
             : "Forme e Corso Agonisti."}</small>
         </span>
+        <label className={`instructor-auto-teaching-toggle${state.automation.autoTeachingEnabled ? "" : " is-disabled"}`}>
+          <span>
+            <strong>Insegnamento automatico</strong>
+            <small>{state.automation.autoTeachingEnabled ? "Istruttori e Tecnici attivi" : "Corsi automatici in pausa"}</small>
+          </span>
+          <input
+            type="checkbox"
+            aria-label="Insegnamento automatico"
+            checked={state.automation.autoTeachingEnabled}
+            onChange={(event) => onToggleAutomaticTeaching(event.target.checked)}
+          />
+        </label>
         <StaffingStepper
           label="Istruttori"
           actual={actual}
@@ -520,6 +535,7 @@ export function CollaboratorSectorView({
   onMovePriority,
   onStartTraining,
   onBookTechnicianCourse,
+  onToggleAutomaticTeaching,
 }: {
   state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
@@ -535,9 +551,10 @@ export function CollaboratorSectorView({
   ) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
+  onToggleAutomaticTeaching?: (enabled: boolean) => void;
 }) {
   const state = useGameStateSlices(
-    ["acquisitionEvents", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
+    ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
@@ -613,6 +630,7 @@ export function CollaboratorSectorView({
         onIncrement={() => onIncrement("instructor")}
         onDecrement={() => onDecrement("instructor")}
         onOpen={() => setOpenRole("instructor")}
+        onToggleAutomaticTeaching={onToggleAutomaticTeaching ?? ignoreAutomaticTeachingToggle}
       />
 
       <div className="collaborator-sector-grid">

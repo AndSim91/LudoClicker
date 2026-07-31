@@ -20,4 +20,19 @@ describe("automatic email sending save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.automation.autoSendEmails).toBe(true);
   });
+
+  it("enables automatic teaching for existing saves", () => {
+    const current = createInitialState(1_000);
+    const legacyAutomation: Partial<GameState["automation"]> = { ...current.automation };
+    delete legacyAutomation.autoTeachingEnabled;
+    const legacy = {
+      ...current,
+      version: GAME_CONFIG.version,
+      automation: legacyAutomation,
+    };
+
+    const migrated = migrate(legacy) as GameState;
+
+    expect(migrated.automation.autoTeachingEnabled).toBe(true);
+  });
 });

@@ -17,11 +17,13 @@ import { RarityOverview } from "./RarityOverview";
 
 const ignoreFavoriteToggle = () => undefined;
 const ignoreCollaboratorAssignmentChange = () => undefined;
+const ignoreAutomaticTeachingToggle = () => undefined;
 
 export function PeopleView({
   state: stateOverride,
   onAssign,
   onStartTraining,
+  onToggleAutomaticTeaching,
   onToggleFavorite,
   onCancelEnrollment,
   onBookTechnicianCourse,
@@ -37,6 +39,7 @@ export function PeopleView({
     formId: FormId,
     mode?: FormTrainingStartMode,
   ) => void;
+  onToggleAutomaticTeaching?: (enabled: boolean) => void;
   onToggleFavorite?: (contactId: string) => void;
   onCancelEnrollment?: (contactId: string) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
@@ -56,6 +59,7 @@ export function PeopleView({
       "collaboratorManagement",
       "collaborators",
       "contacts",
+      "automation",
       "school",
       "statistics",
       "unlocks",
@@ -133,6 +137,7 @@ export function PeopleView({
               onMovePriority={onMoveOperationalPriority}
               onStartTraining={onStartTraining}
               onBookTechnicianCourse={onBookTechnicianCourse}
+              onToggleAutomaticTeaching={onToggleAutomaticTeaching ?? ignoreAutomaticTeachingToggle}
             />
           ) : (
             <CollaboratorList

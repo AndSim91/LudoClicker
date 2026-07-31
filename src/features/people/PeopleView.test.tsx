@@ -13,6 +13,46 @@ afterEach(() => {
 });
 
 describe("PeopleView", () => {
+  it("exposes the global automatic teaching toggle in the Instructor center", () => {
+    const initial = createInitialState(1_000, "", false);
+    const instructor: Collaborator = {
+      id: "toggle-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Toggle",
+      joinedAt: 1_000,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      assignment: "instructor",
+      rarity: "ultra-rare",
+    };
+    const onToggleAutomaticTeaching = vi.fn();
+
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [instructor],
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: { ...initial.collaboratorManagement.targets, instructor: 1 },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleAutomaticTeaching={onToggleAutomaticTeaching}
+      />,
+    );
+
+    const toggle = screen.getByRole("checkbox", { name: "Insegnamento automatico" });
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+
+    expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
+  });
+
   it("marks the complete collaborator section as a tutorial target", () => {
     const initial = createInitialState(1_000);
     const collaborator: Collaborator = {

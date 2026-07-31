@@ -3,7 +3,8 @@ import { Icon } from "../../components/common/Icon";
 import { getGameMonthName } from "../../game/calendar";
 import { formatCurrency } from "../../shared/formatters";
 
-const ADMIN_GAME_SPEED_SHORTCUTS = [1, 5, 10] as const;
+const ADMIN_GAME_SPEED_MAX = 20;
+const ADMIN_GAME_SPEED_SHORTCUTS = [1, 5, 10, 20] as const;
 
 interface AdminEmailViewProps {
   totalContacts: number;
@@ -189,7 +190,7 @@ export function AdminEmailView({
                     id="admin-game-speed"
                     type="range"
                     min="1"
-                    max="10"
+                    max={ADMIN_GAME_SPEED_MAX}
                     step="1"
                     value={gameSpeed}
                     aria-label="Moltiplicatore"

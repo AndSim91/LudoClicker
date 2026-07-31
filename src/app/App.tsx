@@ -280,6 +280,10 @@ export function App() {
       dispatch({ type: "SET_AUTOMATIC_EMAIL_SENDING", enabled, now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const setAutomaticTeaching = useCallback(
+    (enabled: boolean) => dispatch({ type: "SET_AUTOMATIC_TEACHING", enabled }),
+    [dispatch],
+  );
   const buyUpgrade = useCallback(
     (upgradeId: UpgradeId) => dispatch({ type: "BUY_UPGRADE", upgradeId, now: getGameNow() }),
     [dispatch, getGameNow],
@@ -570,6 +574,7 @@ export function App() {
               onMoveOperationalPriority={moveOperationalPriority}
               onStartTraining={startTraining}
               onBookTechnicianCourse={bookTechnicianCourse}
+              onToggleAutomaticTeaching={setAutomaticTeaching}
               onToggleFavorite={toggleMemberFavorite}
               onCancelEnrollment={cancelMemberEnrollment}
             />
