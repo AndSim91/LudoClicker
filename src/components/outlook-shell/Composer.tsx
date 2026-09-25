@@ -45,11 +45,12 @@ export function Composer({
   const displayedRevealedCharacters = Math.floor(email.revealedCharacters);
   const displayedWritingPower = Math.round(selection.writingPower);
   const readyToSend = email.status === "readyToSend";
+  const progressPercent = Math.min(100, (email.revealedCharacters / Math.max(1, buildLength)) * 100);
   const bodyLabel = readyToSend
     ? "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare."
     : "Corpo del messaggio. Premi un tasto o fai clic per continuare a scrivere.";
   return (
-    <main className="composer">
+    <main className="composer" data-email-status={email.status}>
       <div className="composer-tabs"><button className="active" type="button">Messaggio</button><button type="button">Inserisci</button><button type="button">Opzioni</button><button type="button">Formato testo</button><span /><button type="button" disabled={!readyToSend} onClick={onWrite}><Icon name="send" /> Invia</button><button type="button" disabled><Icon name="attach" /> Allega</button></div>
       <div className="format-bar"><select aria-label="Tipo di carattere" defaultValue="Segoe UI"><option>Segoe UI</option></select><select aria-label="Dimensione carattere" defaultValue="11"><option>11</option></select><b>G</b><i>I</i><u>S</u><span>☷</span><span>≡</span><span>↗</span></div>
       <div
@@ -83,6 +84,8 @@ export function Composer({
         {email.status === "sending" ? <div className="sending-toast"><Icon name="send" /> Invio in corso…</div> : null}
       </div>
       <div className="composer-status">
+        {/* Decorative: the exact count stays in the text on the right. */}
+        <span className="composer-progress" aria-hidden="true" style={{ width: `${progressPercent}%` }} />
         <label className="composer-auto-send-toggle">
           <span>Invio automatico</span>
           <input

@@ -136,4 +136,25 @@ describe("Composer", () => {
     expect(screen.getByLabelText("Composizione HTML della mail")).toBeVisible();
     expect(screen.getByLabelText("Codice HTML scritto")).toHaveTextContent("<!doctype html>");
   });
+
+  it("draws the email progress as a decorative line and exposes the email status", () => {
+    const initial = createInitialState(1_000);
+    const activeEmail = initial.emails[0];
+    const state = {
+      ...initial,
+      emails: initial.emails.map((email) =>
+        email.id === activeEmail.id ? { ...email, revealedCharacters: 10 } : email,
+      ),
+    };
+
+    const { container } = render(
+      <Composer state={state} onWrite={() => undefined} onAutomaticSendingChange={() => undefined} />,
+    );
+
+    const line = container.querySelector<HTMLElement>(".composer-progress")!;
+    expect(line).toHaveAttribute("aria-hidden", "true");
+    expect(parseFloat(line.style.width)).toBeGreaterThan(0);
+    expect(parseFloat(line.style.width)).toBeLessThan(100);
+    expect(container.querySelector(".composer")).toHaveAttribute("data-email-status", "writing");
+  });
 });

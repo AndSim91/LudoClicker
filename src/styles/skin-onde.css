@@ -275,3 +275,44 @@
 :root[data-theme="dark"] .person-avatar.rarity-secret-legendary {
   box-shadow: inset 0 0 0 1px var(--rarity-secret-legendary-avatar-border), 0 0 16px rgb(255 169 156 / 55%);
 }
+
+/* ---- Posta: the composer is the stage ------------------------------------ */
+
+/* The caret is a lit saber tip and leaves a short glow on the freshest words.
+   The trail uses screen blending, so it only brightens the text under it. */
+:root[data-theme="dark"] .mail-body .text-caret {
+  position: relative;
+  width: 2px;
+  background: var(--onde-wave);
+  box-shadow: 0 0 6px var(--onde-wave), 0 0 14px rgb(108 211 214 / 60%);
+}
+
+:root[data-theme="dark"] .mail-body .text-caret::before {
+  position: absolute;
+  right: 100%;
+  bottom: -0.1em;
+  width: 5em;
+  height: 1.4em;
+  border-radius: 0.3em;
+  background: linear-gradient(90deg, transparent, rgb(108 211 214 / 28%));
+  content: "";
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] .composer-progress {
+  height: 3px;
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+  box-shadow: 0 0 10px rgb(108 211 214 / 55%);
+}
+
+/* A finished email turns gold: one more key sends it. */
+:root[data-theme="dark"] .composer[data-email-status="readyToSend"] .composer-progress {
+  background: var(--onde-gold-bright);
+  box-shadow: 0 0 12px rgb(240 184 90 / 65%);
+}
+
+:root[data-theme="dark"] .composer[data-email-status="readyToSend"] .composer-status em {
+  color: var(--onde-gold-bright);
+  font-weight: 600;
+}

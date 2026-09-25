@@ -328,6 +328,7 @@
 }
 
 .composer-status {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -342,6 +343,16 @@
 .composer-status em {
   margin-left: 20px;
   font-style: normal;
+}
+
+/* Email progress drawn along the top edge of the status bar. */
+.composer-progress {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--blue-600);
+  transition: width 80ms linear;
 }
 
 .composer-auto-send-toggle {
