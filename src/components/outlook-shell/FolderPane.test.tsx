@@ -1,7 +1,7 @@
 import { fireEvent, render, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
-import { createInitialState } from "../../game/engine";
+import { createInitialState, gameReducer } from "../../game/engine";
 import type { InboxMessage } from "../../game/types";
 import { FolderPane } from "./FolderPane";
 import { formatExactCurrency } from "./resourceFormatting";
@@ -120,5 +120,23 @@ describe("FolderPane", () => {
     expect(onOpenComposer).toHaveBeenCalledOnce();
     expect(onOpenMembers).toHaveBeenCalledOnce();
     expect(pane.getByText(/Disponibilit/).closest("button")).toBeNull();
+  });
+
+  it("shows the monthly income under the balance only once there is some", () => {
+    const empty = createInitialState(1_000);
+    const withMembers = gameReducer(empty, { type: "ADMIN_ADD_MEMBERS", amount: 3 });
+    const renderPane = (state: typeof empty) =>
+      render(
+        <FolderPane
+          state={state}
+          folder="inbox"
+          onSelectFolder={() => undefined}
+          onOpenComposer={() => undefined}
+          onOpenMembers={() => undefined}
+        />,
+      ).container;
+
+    expect(renderPane(empty).querySelector(".resource-delta")).toBeNull();
+    expect(renderPane(withMembers).querySelector(".resource-delta")).toHaveTextContent(/^\+.+ al mese$/);
   });
 });
