@@ -90,6 +90,9 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   test.setTimeout(60_000);
   const state = createProgressedGameSave();
   state.school.euros = 50_000;
+  // Mix every rarity so each name colour is checked on tables, chips and day-panel cards.
+  const rarities = ["common", "rare", "ultra-rare", "legendary"] as const;
+  state.contacts = state.contacts.map((contact, index) => ({ ...contact, rarity: rarities[index % 4] }));
   state.unlocks.gadget = true;
   state.gadgets.products.wristband = {
     ...state.gadgets.products.wristband,
