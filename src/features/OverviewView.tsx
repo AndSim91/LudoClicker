@@ -26,6 +26,8 @@ interface OverviewViewProps {
   onUpdateProfileName: (displayName: string) => void;
   darkMode: boolean;
   onDarkModeChange: (enabled: boolean) => void;
+  ondeMode: boolean;
+  onOndeModeChange: (enabled: boolean) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
 }
@@ -42,6 +44,8 @@ export function OverviewView({
   onUpdateProfileName,
   darkMode,
   onDarkModeChange,
+  ondeMode,
+  onOndeModeChange,
   reduceMotion,
   onReduceMotionChange,
 }: OverviewViewProps) {
@@ -108,6 +112,7 @@ export function OverviewView({
 
             <section className="settings-section" aria-labelledby="settings-appearance-title">
               <h2 id="settings-appearance-title">Aspetto</h2>
+              <label className="settings-toggle-row"><span><strong>Modalità Onde</strong><small>Veste da gioco dell'Ordine delle Onde. Premi F9 per passare subito alla vista ufficio e tornare indietro.</small></span><input type="checkbox" checked={ondeMode} onChange={(event) => onOndeModeChange(event.target.checked)} /></label>
               <label className="settings-toggle-row"><span><strong>Tema scuro</strong><small>Usa superfici blu-notte per una lettura più riposante.</small></span><input type="checkbox" checked={darkMode} onChange={(event) => onDarkModeChange(event.target.checked)} /></label>
               <label className="settings-toggle-row"><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /></label>
             </section>

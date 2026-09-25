@@ -1,0 +1,98 @@
+/*
+ * Modalità Onde: game skin layered on top of the dark theme.
+ * data-skin="onde" always comes with data-theme="dark" (see useAppPreferences),
+ * so every hard-coded dark override already applies; here we only repaint
+ * tokens and the few chrome surfaces that define the mood.
+ * Imported last: same specificity as the dark rules, so order wins.
+ */
+:root[data-skin="onde"] {
+  --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --onde-glow: #5ee6ff;
+  --onde-deep: #06101c;
+
+  --blue-700: #7fe3ff;
+  --blue-600: #0b7fae;
+  --blue-500: #34d3ff;
+  --blue-100: #123353;
+  --blue-050: #0d2640;
+  --ink: #e8f3ff;
+  --ink-muted: #9fb6cf;
+  --ink-soft: #7890aa;
+  --line: #1d3550;
+  --line-strong: #2a4a6b;
+  --surface: #0a1726;
+  --surface-muted: #0f2033;
+  --surface-rail: var(--onde-deep);
+  --focus: var(--onde-glow);
+  --success: #4be3a0;
+  --warning: #ff8f6b;
+  --equipment-healthy: #4be3a0;
+  --shadow-flyout: 0 12px 36px rgb(0 0 0 / 50%), 0 0 0 1px rgb(94 230 255 / 10%);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+:root[data-skin="onde"] body,
+:root[data-skin="onde"] .application-shell {
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgb(52 211 255 / 10%), transparent 60%),
+    var(--surface);
+}
+
+:root[data-skin="onde"] .title-bar {
+  background: linear-gradient(90deg, #06223d, #0b3a5e 55%, #0b6f99);
+  box-shadow: inset 0 -1px 0 rgb(94 230 255 / 35%);
+}
+
+:root[data-skin="onde"] .primary-command {
+  background: linear-gradient(135deg, #0b7fae, #0aa4c9);
+  box-shadow: 0 0 18px rgb(52 211 255 / 30%);
+}
+
+:root[data-skin="onde"] .rail-item:hover,
+:root[data-skin="onde"] .command:hover:not(:disabled),
+:root[data-skin="onde"] .icon-command:hover,
+:root[data-skin="onde"] .upgrade-command:hover:not(:disabled),
+:root[data-skin="onde"] .message-row:hover {
+  background: #12283f;
+}
+
+:root[data-skin="onde"] .rail-item.active,
+:root[data-skin="onde"] .message-row.selected,
+:root[data-skin="onde"] .folder:hover,
+:root[data-skin="onde"] .folder.active,
+:root[data-skin="onde"] .resource-link:hover,
+:root[data-skin="onde"] .mastery-entry.active,
+:root[data-skin="onde"] .upgrade-row.recommended,
+:root[data-skin="onde"] .trial-card > button:hover:not(:disabled) {
+  background: #133a5c;
+}
+
+:root[data-skin="onde"] .rail-item.active {
+  color: var(--onde-glow);
+  box-shadow: inset 3px 0 0 var(--onde-glow);
+}
+
+:root[data-skin="onde"] .upgrade-command {
+  border-color: #1f5577;
+  background: #0f2a42;
+}
+
+:root[data-skin="onde"] h1,
+:root[data-skin="onde"] h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+:root[data-skin="onde"] h1 {
+  text-shadow: 0 0 24px rgb(52 211 255 / 25%);
+}
+
+:root[data-skin="onde"] .next-tournament {
+  border-color: var(--line-strong);
+}
+
+/* Common recipients: the dark theme's grey chip is unreadable with light text. */
+:root[data-skin="onde"] {
+  --rarity-common-mail-background: #22384f;
+}

@@ -1415,7 +1415,7 @@
   border: 1px solid #b7d6f4;
   border-left: 6px solid var(--blue-600);
   background:
-    linear-gradient(112deg, var(--surface) 0 62%, rgb(229 241 251 / 78%) 100%), var(--surface);
+    linear-gradient(112deg, var(--surface) 0 62%, var(--blue-100) 100%), var(--surface);
 }
 
 .next-tournament::after {

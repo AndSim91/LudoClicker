@@ -204,29 +204,29 @@ describe("App profile and navigation", () => {
     expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
   });
 
-  it("opens the development-only email catalog editor", () => {
+  it("opens the development-only email catalog editor", async () => {
     saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Admin" }));
 
-    expect(screen.getByRole("heading", { name: "Admin" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Admin" })).toBeVisible();
     expect(screen.getByText("DEV ONLY")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Passa a Ottobre" }));
     expect(screen.getByRole("button", { name: "Passa a Novembre" })).toBeVisible();
   });
 
-  it("opens the development-only LudoWiki", () => {
+  it("opens the development-only LudoWiki", async () => {
     saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "LudoWiki" }));
 
-    expect(screen.getByRole("heading", { name: "LudoWiki" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "LudoWiki" })).toBeVisible();
     expect(screen.getByRole("tab", { name: "Ludodex" })).toHaveAttribute("aria-selected", "true");
   });
 
-  it("keeps the same day panel mounted when changing page", () => {
+  it("keeps the same day panel mounted when changing page", async () => {
     saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
     render(<App />);
 
@@ -234,7 +234,18 @@ describe("App profile and navigation", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Admin" }));
 
-    expect(screen.getByRole("heading", { name: "Admin" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Admin" })).toBeVisible();
     expect(screen.getAllByRole("complementary", { name: "La mia giornata" })).toHaveLength(1);
+  });
+
+  it("switches between Modalità Onde and the office view with F9", () => {
+    saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
+    render(<App />);
+
+    expect(document.documentElement.dataset.skin).toBe("onde");
+    fireEvent.keyDown(window, { key: "F9" });
+    expect(document.documentElement.dataset.skin).toBe("ufficio");
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(screen.getByText(/0 \/ \d+ caratteri/)).toBeVisible();
   });
 });

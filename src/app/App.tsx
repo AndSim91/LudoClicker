@@ -1,5 +1,7 @@
 import {
+  lazy,
   memo,
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -18,12 +20,8 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
-import { AdminEmailView } from "../features/admin/AdminEmailView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
-import { TournamentsView } from "../features/tournaments/TournamentsView";
-import { GadgetsView } from "../features/gadgets/GadgetsView";
-import { LudoWikiView } from "../features/ludowiki/LudoWikiView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
@@ -65,6 +63,12 @@ const StableFolderPane = memo(FolderPane);
 const StableMessageList = memo(MessageList);
 const StableSentMailDetail = memo(SentMailDetail);
 const StableComposer = memo(Composer);
+// ponytail: lazy-load only the late-game views; core mail/upgrade views stay in the main chunk.
+const AdminEmailView = lazy(() => import("../features/admin/AdminEmailView").then((module) => ({ default: module.AdminEmailView })));
+const TournamentsView = lazy(() => import("../features/tournaments/TournamentsView").then((module) => ({ default: module.TournamentsView })));
+const GadgetsView = lazy(() => import("../features/gadgets/GadgetsView").then((module) => ({ default: module.GadgetsView })));
+const LudoWikiView = lazy(() => import("../features/ludowiki/LudoWikiView").then((module) => ({ default: module.LudoWikiView })));
+const BOSS_KEY = "F9";
 const StableUpgradesView = memo(UpgradesView);
 const StableEventsView = memo(EventsView);
 const StablePeopleView = memo(PeopleView);
@@ -114,7 +118,19 @@ export function App() {
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedSentEmailId, setSelectedSentEmailId] = useState<string | null>(null);
-  const { reduceMotion, setReduceMotion, darkMode, setDarkMode } = useAppPreferences();
+  const { reduceMotion, setReduceMotion, darkMode, setDarkMode, ondeMode, setOndeMode } =
+    useAppPreferences();
+
+  useEffect(() => {
+    // Boss key: F9 swaps between Modalità Onde and the Outlook camouflage.
+    const handleBossKey = (event: KeyboardEvent) => {
+      if (event.key !== BOSS_KEY || event.repeat) return;
+      event.preventDefault();
+      setOndeMode((enabled) => !enabled);
+    };
+    window.addEventListener("keydown", handleBossKey);
+    return () => window.removeEventListener("keydown", handleBossKey);
+  }, [setOndeMode]);
   const tournamentMessagesVisible = isGameAreaUnlocked("tournaments", state);
   const visibleInboxMessages = useMemo(
     () => tournamentMessagesVisible
@@ -188,6 +204,7 @@ export function App() {
         !state.profile.displayName.trim() ||
         tutorial.isBlockingInput ||
         event.repeat ||
+        event.key === BOSS_KEY ||
         isWindowsKey(event) ||
         targetConsumesKeyboard(event.target)
       )
@@ -524,6 +541,7 @@ export function App() {
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
           <StableAppRail view={activeView} onChange={setView} />
+          <Suspense fallback={null}>
           {activeView === "mail" ? (
             <>
               <StableFolderPane
@@ -643,10 +661,13 @@ export function App() {
               onUpdateProfileName={updateProfileName}
               darkMode={darkMode}
               onDarkModeChange={setDarkMode}
+              ondeMode={ondeMode}
+              onOndeModeChange={setOndeMode}
               reduceMotion={reduceMotion}
               onReduceMotionChange={setReduceMotion}
             />
           )}
+          </Suspense>
           <StableDayPanel
             onMaintainEquipment={maintainEquipment}
             onBuyOfficialSwords={buyOfficialSwords}
