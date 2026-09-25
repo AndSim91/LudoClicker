@@ -3096,7 +3096,7 @@
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .tournament-hall-tournament > header h3 {
@@ -3143,7 +3143,7 @@
 .tournament-hall-discipline > header svg {
   width: 18px;
   height: 18px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .tournament-hall-discipline.is-style > header svg {

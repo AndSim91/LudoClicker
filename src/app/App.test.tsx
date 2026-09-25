@@ -242,10 +242,18 @@ describe("App profile and navigation", () => {
     saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
     render(<App />);
 
-    expect(document.documentElement.dataset.skin).toBe("onde");
+    expect(document.documentElement.dataset.theme).toBe("dark");
     fireEvent.keyDown(window, { key: "F9" });
-    expect(document.documentElement.dataset.skin).toBe("ufficio");
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(screen.getByText(/0 \/ \d+ caratteri/)).toBeVisible();
+  });
+
+  it("migrates the old separate Onde preference into the dark theme", () => {
+    saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
+    localStorage.setItem("oggetto-nuovi-iscritti.skin", "ufficio");
+    render(<App />);
+
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.skin")).toBeNull();
   });
 });

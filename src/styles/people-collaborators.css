@@ -809,7 +809,7 @@
   width: 32px;
   height: 32px;
   margin-bottom: 12px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .people-empty strong {

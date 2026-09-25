@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 
+// ponytail: one-off migration from the short-lived separate "skin" preference.
+const LEGACY_SKIN_KEY = "oggetto-nuovi-iscritti.skin";
+
+function readInitialDarkMode(): boolean {
+  const legacySkin = localStorage.getItem(LEGACY_SKIN_KEY);
+  if (legacySkin !== null) return legacySkin !== "ufficio";
+  // The dark theme is Modalità Onde, the default look; light is the Outlook camouflage.
+  return localStorage.getItem(STORAGE_KEYS.theme) !== "light";
+}
+
 export function useAppPreferences() {
   const [reduceMotion, setReduceMotion] = useState(
     () => localStorage.getItem(STORAGE_KEYS.reduceMotion) === "true",
   );
-  const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem(STORAGE_KEYS.theme) === "dark",
-  );
-  // Modalità Onde is the default game skin; "ufficio" is the Outlook camouflage.
-  const [ondeMode, setOndeMode] = useState(
-    () => localStorage.getItem(STORAGE_KEYS.skin) !== "ufficio",
-  );
+  const [darkMode, setDarkMode] = useState(readInitialDarkMode);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.reduceMotion, String(reduceMotion));
@@ -19,18 +23,14 @@ export function useAppPreferences() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
-    localStorage.setItem(STORAGE_KEYS.skin, ondeMode ? "onde" : "ufficio");
-    // Onde builds on the dark theme overrides, then repaints the tokens on top.
-    document.documentElement.dataset.theme = darkMode || ondeMode ? "dark" : "light";
-    document.documentElement.dataset.skin = ondeMode ? "onde" : "ufficio";
-  }, [darkMode, ondeMode]);
+    localStorage.removeItem(LEGACY_SKIN_KEY);
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+  }, [darkMode]);
 
   return {
     reduceMotion,
     setReduceMotion,
     darkMode,
     setDarkMode,
-    ondeMode,
-    setOndeMode,
   };
 }

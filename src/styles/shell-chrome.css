@@ -510,7 +510,7 @@
 }
 
 .rail-item.active {
-  color: var(--blue-600);
+  color: var(--accent-ink);
   background: var(--blue-050);
 }
 
@@ -583,7 +583,7 @@
 }
 
 .folder.active {
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .folder-glyph {

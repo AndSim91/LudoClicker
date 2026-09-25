@@ -1,98 +1,246 @@
 /*
- * Modalità Onde: game skin layered on top of the dark theme.
- * data-skin="onde" always comes with data-theme="dark" (see useAppPreferences),
- * so every hard-coded dark override already applies; here we only repaint
- * tokens and the few chrome surfaces that define the mood.
- * Imported last: same specificity as the dark rules, so order wins.
+ * Tema scuro = Modalità Onde.
+ * Palette taken from the "Ordine delle Onde" artwork (public/assets/onde-wave*.webp):
+ *   abyss #021e33 · deep navy #0a3a57 · ocean #0e4563 · teal band #177c89
+ *   wave teal #5cc8cc · foam cream #fbf1dc · saber gold #e0a64a
+ * Loaded after responsive.css so it wins over the generic dark overrides at equal
+ * specificity. The light theme stays the Outlook camouflage (F9 swaps them).
+ *
+ * Contrast (WCAG) on --surface #0a3a57:
+ *   --ink 10.7:1 · --ink-muted 8.6:1 · --ink-soft 6.7:1 · --accent-ink 6.8:1
+ *   white on --blue-600 5.9:1 · navy on gold 7.7:1
+ * tests/e2e/contrast.spec.ts keeps every visible text at AA.
  */
-:root[data-skin="onde"] {
+:root[data-theme="dark"] {
   --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
-  --onde-glow: #5ee6ff;
-  --onde-deep: #06101c;
 
-  --blue-700: #7fe3ff;
-  --blue-600: #0b7fae;
-  --blue-500: #34d3ff;
-  --blue-100: #123353;
-  --blue-050: #0d2640;
-  --ink: #e8f3ff;
-  --ink-muted: #9fb6cf;
-  --ink-soft: #7890aa;
-  --line: #1d3550;
-  --line-strong: #2a4a6b;
-  --surface: #0a1726;
-  --surface-muted: #0f2033;
-  --surface-rail: var(--onde-deep);
-  --focus: var(--onde-glow);
-  --success: #4be3a0;
-  --warning: #ff8f6b;
-  --equipment-healthy: #4be3a0;
-  --shadow-flyout: 0 12px 36px rgb(0 0 0 / 50%), 0 0 0 1px rgb(94 230 255 / 10%);
+  --onde-abyss: #021e33;
+  --onde-groove: #04263f;
+  --onde-hover: #104d6b;
+  --onde-selected: #124f6c;
+  --onde-teal: #177c89;
+  --onde-wave: #6cd3d6;
+  --onde-foam: #fbf1dc;
+  --onde-gold: #e0a64a;
+  --onde-gold-bright: #f0b85a;
+  --onde-on-gold: #0a1f33;
+
+  /* Surfaces: abyss rail < navy canvas < ocean panels. */
+  --surface-rail: var(--onde-abyss);
+  --surface: #0a3a57;
+  --surface-muted: #0e4563;
+  --blue-050: #104b6a;
+  --blue-100: #145573;
+
+  /* Foam-coloured text, warm instead of clinical white. */
+  --ink: var(--onde-foam);
+  --ink-muted: #d9dcc8;
+  --ink-soft: #a9c7c6;
+
+  /* --blue-600 is a button fill (white text), --accent-ink is the text accent. */
+  --blue-700: var(--onde-wave);
+  --blue-600: #146f7b;
+  --blue-500: var(--onde-wave);
+  --accent-ink: var(--onde-wave);
+  --focus: var(--onde-gold-bright);
+
+  --line: #2a6280;
+  --line-strong: #3c7b96;
+
+  --success: #7fdcae;
+  --warning: #f3a36f;
+  --equipment-load: var(--onde-gold-bright);
+  --equipment-broken: #ff8a80;
+  --equipment-reserved: #9fb9bd;
+  --equipment-healthy: #7fdcae;
+
+  /* Rarity chips: name colour at least 5:1 on each tint. */
+  --rarity-common-mail-background: #1d5470;
+  --rarity-rare-mail-background: #17507a;
+  --rarity-ultra-rare-mail-background: #3f2c66;
+  --rarity-legendary-mail-background: #5a4418;
+  --rarity-secret-legendary-mail-background: #5c2530;
+
+  --shadow-flyout: 0 12px 36px rgb(1 12 22 / 60%), 0 0 0 1px rgb(92 200 204 / 16%);
   --radius-sm: 4px;
   --radius-md: 8px;
 }
 
-:root[data-skin="onde"] body,
-:root[data-skin="onde"] .application-shell {
+/* ---- Chrome ---------------------------------------------------------- */
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .application-shell {
   background:
-    radial-gradient(1200px 500px at 85% -10%, rgb(52 211 255 / 10%), transparent 60%),
+    radial-gradient(1100px 520px at 60% -12%, rgb(3 73 101 / 70%), transparent 65%),
     var(--surface);
 }
 
-:root[data-skin="onde"] .title-bar {
-  background: linear-gradient(90deg, #06223d, #0b3a5e 55%, #0b6f99);
-  box-shadow: inset 0 -1px 0 rgb(94 230 255 / 35%);
+/* Title bar: abyss to ocean, sealed by a gold saber line. */
+:root[data-theme="dark"] .title-bar {
+  background: linear-gradient(90deg, var(--onde-abyss), #03324d 55%, #034965);
+  box-shadow: inset 0 -1px 0 rgb(224 166 74 / 45%);
 }
 
-:root[data-skin="onde"] .primary-command {
-  background: linear-gradient(135deg, #0b7fae, #0aa4c9);
-  box-shadow: 0 0 18px rgb(52 211 255 / 30%);
+:root[data-theme="dark"] .title-resource small {
+  color: #e6f4f1;
 }
 
-:root[data-skin="onde"] .rail-item:hover,
-:root[data-skin="onde"] .command:hover:not(:disabled),
-:root[data-skin="onde"] .icon-command:hover,
-:root[data-skin="onde"] .upgrade-command:hover:not(:disabled),
-:root[data-skin="onde"] .message-row:hover {
-  background: #12283f;
+/* The one call to action on every screen is gold, like the saber. */
+:root[data-theme="dark"] .primary-command {
+  color: var(--onde-on-gold);
+  background: linear-gradient(135deg, var(--onde-gold), var(--onde-gold-bright));
+  box-shadow: 0 0 0 1px rgb(251 241 220 / 25%), 0 4px 18px rgb(224 166 74 / 28%);
 }
 
-:root[data-skin="onde"] .rail-item.active,
-:root[data-skin="onde"] .message-row.selected,
-:root[data-skin="onde"] .folder:hover,
-:root[data-skin="onde"] .folder.active,
-:root[data-skin="onde"] .resource-link:hover,
-:root[data-skin="onde"] .mastery-entry.active,
-:root[data-skin="onde"] .upgrade-row.recommended,
-:root[data-skin="onde"] .trial-card > button:hover:not(:disabled) {
-  background: #133a5c;
+:root[data-theme="dark"] .primary-command:hover {
+  background: var(--onde-gold-bright);
 }
 
-:root[data-skin="onde"] .rail-item.active {
-  color: var(--onde-glow);
-  box-shadow: inset 3px 0 0 var(--onde-glow);
+:root[data-theme="dark"] .app-rail {
+  background: var(--onde-abyss);
 }
 
-:root[data-skin="onde"] .upgrade-command {
-  border-color: #1f5577;
-  background: #0f2a42;
+/* The wave rises behind the empty lower half of the folders. The asset fades to
+   transparent at both ends, so it never sits behind the footer text. */
+:root[data-theme="dark"] .folder-pane {
+  background:
+    url("/assets/onde-wave-strip.webp") center bottom 40px / 100% auto no-repeat,
+    var(--surface-muted);
 }
 
-:root[data-skin="onde"] h1,
-:root[data-skin="onde"] h2 {
+:root[data-theme="dark"] .rail-item:hover,
+:root[data-theme="dark"] .command:hover:not(:disabled),
+:root[data-theme="dark"] .icon-command:hover,
+:root[data-theme="dark"] .upgrade-command:hover:not(:disabled),
+:root[data-theme="dark"] .message-row:hover {
+  background: var(--onde-hover);
+}
+
+:root[data-theme="dark"] .rail-item.active,
+:root[data-theme="dark"] .message-row.selected,
+:root[data-theme="dark"] .folder:hover,
+:root[data-theme="dark"] .folder.active,
+:root[data-theme="dark"] .resource-link:hover,
+:root[data-theme="dark"] .mastery-entry.active,
+:root[data-theme="dark"] .upgrade-row.recommended,
+:root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {
+  background: var(--onde-selected);
+}
+
+/* Selection is marked in gold, so it never competes with teal links. */
+:root[data-theme="dark"] .rail-item.active {
+  color: var(--onde-gold-bright);
+  box-shadow: inset 3px 0 0 var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .message-row.selected,
+:root[data-theme="dark"] .folder.active {
+  box-shadow: inset 3px 0 0 var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-command {
+  border-color: var(--line-strong);
+  background: var(--blue-050);
+}
+
+:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
+:root[data-theme="dark"] .event-row > button:hover:not(:disabled, .event-cancel-button) {
+  background: #0e5f6c;
+}
+
+:root[data-theme="dark"] .event-row > button.event-cancel-button:hover:not(:disabled) {
+  background: #8f1d24;
+}
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2 {
   font-family: var(--font-display);
   letter-spacing: 0.01em;
 }
 
-:root[data-skin="onde"] h1 {
-  text-shadow: 0 0 24px rgb(52 211 255 / 25%);
+:root[data-theme="dark"] h1 {
+  text-shadow: 0 0 26px rgb(92 200 204 / 25%);
 }
 
-:root[data-skin="onde"] .next-tournament {
+:root[data-theme="dark"] ::placeholder {
+  color: var(--ink-soft);
+  opacity: 1;
+}
+
+/* Disabled controls stay readable: dimmed, never lost. */
+:root[data-theme="dark"] button:disabled {
+  color: var(--ink-soft);
+}
+
+:root[data-theme="dark"] .table-sort-controls > button:disabled {
+  opacity: 0.8;
+}
+
+/* ---- Start screen ---------------------------------------------------- */
+
+:root[data-theme="dark"] .profile-gate {
+  background:
+    url("/assets/onde-wave.webp") center 62% / cover no-repeat,
+    #012a43;
+}
+
+:root[data-theme="dark"] .profile-dialog {
+  border-color: rgb(224 166 74 / 45%);
+  background: rgb(10 58 87 / 94%);
+  box-shadow: 0 24px 70px rgb(1 12 22 / 55%);
+}
+
+/* ---- Progress and status surfaces the dark theme hard-codes ---------- */
+
+:root[data-theme="dark"] .trial-progress,
+:root[data-theme="dark"] .event-progress,
+:root[data-theme="dark"] .mastery-track,
+:root[data-theme="dark"] .training-progress > div,
+:root[data-theme="dark"] .social-progress,
+:root[data-theme="dark"] .progress-dots i {
+  background: var(--onde-groove);
+}
+
+:root[data-theme="dark"] .appointment-enrolled,
+:root[data-theme="dark"] .appointment-positive,
+:root[data-theme="dark"] .trial-status.iscritto {
+  background: #145449;
+}
+
+:root[data-theme="dark"] .appointment-lost,
+:root[data-theme="dark"] .trial-status.perso {
+  background: #4f2c36;
+}
+
+:root[data-theme="dark"] .appointment-neutral {
+  background: #11506f;
+}
+
+:root[data-theme="dark"] .next-tournament {
   border-color: var(--line-strong);
 }
 
-/* Common recipients: the dark theme's grey chip is unreadable with light text. */
-:root[data-skin="onde"] {
-  --rarity-common-mail-background: #22384f;
+:root[data-theme="dark"] .save-assurance.is-pending {
+  border-color: color-mix(in srgb, var(--onde-gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--onde-gold) 12%, var(--surface));
+}
+
+:root[data-theme="dark"] .save-assurance.is-pending .save-assurance-icon {
+  color: var(--onde-on-gold);
+  background: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .settings-data-row.is-danger strong,
+:root[data-theme="dark"] .settings-layout button.danger-link {
+  border-color: var(--equipment-broken);
+  color: var(--equipment-broken);
+}
+
+:root[data-theme="dark"] .level-zero-grammar-error {
+  color: #ffa39a;
+  text-decoration-color: var(--equipment-broken);
+}
+
+:root[data-theme="dark"] .equipment-purchase-button small {
+  color: #ffffff;
 }

@@ -257,7 +257,7 @@
 }
 
 .instructor-activity-lane {
-  --instructor-lane-accent: var(--blue-600);
+  --instructor-lane-accent: var(--accent-ink);
   --instructor-lane-tint: var(--blue-050);
   display: grid;
   min-width: 0;
@@ -756,7 +756,7 @@
 }
 
 .instructor-courses-link:hover:not(:disabled) {
-  color: var(--blue-600);
+  color: var(--accent-ink);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1784,7 +1784,7 @@
 .sector-roster-mastery .progress-bar { width: 100%; margin-top: 2px; }
 
 .sector-roster-training {
-  --training-lane-accent: var(--blue-600);
+  --training-lane-accent: var(--accent-ink);
   --training-lane-tint: var(--blue-050);
   display: flex;
   align-self: stretch;
@@ -1917,7 +1917,7 @@
   text-align: center;
 }
 
-.sector-panel-empty svg { width: 24px; height: 24px; color: var(--blue-600); }
+.sector-panel-empty svg { width: 24px; height: 24px; color: var(--accent-ink); }
 .sector-panel-empty strong { color: var(--ink); font-size: 12px; }
 .sector-panel-empty span { max-width: 360px; font-size: 9px; line-height: 1.4; }
 

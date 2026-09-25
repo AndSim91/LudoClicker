@@ -23,7 +23,7 @@
 
 .status.enrolled { color: var(--success); }
 .status.lost { color: var(--warning); }
-.status.writing { color: var(--blue-600); }
+.status.writing { color: var(--accent-ink); }
 
 .statistics-grid {
   max-width: 760px;
@@ -67,7 +67,7 @@
 .social-panel svg {
   width: 24px;
   height: 24px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .automation-heading > div > span,
@@ -206,7 +206,7 @@
 
 .section-heading svg {
   width: 24px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .section-heading span {
@@ -518,7 +518,7 @@
   width: 32px;
   height: 32px;
   margin-bottom: 14px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .calendar-empty strong {

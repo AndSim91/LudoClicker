@@ -118,19 +118,18 @@ export function App() {
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedSentEmailId, setSelectedSentEmailId] = useState<string | null>(null);
-  const { reduceMotion, setReduceMotion, darkMode, setDarkMode, ondeMode, setOndeMode } =
-    useAppPreferences();
+  const { reduceMotion, setReduceMotion, darkMode, setDarkMode } = useAppPreferences();
 
   useEffect(() => {
-    // Boss key: F9 swaps between Modalità Onde and the Outlook camouflage.
+    // Boss key: F9 swaps between Modalità Onde (dark) and the Outlook camouflage (light).
     const handleBossKey = (event: KeyboardEvent) => {
       if (event.key !== BOSS_KEY || event.repeat) return;
       event.preventDefault();
-      setOndeMode((enabled) => !enabled);
+      setDarkMode((enabled) => !enabled);
     };
     window.addEventListener("keydown", handleBossKey);
     return () => window.removeEventListener("keydown", handleBossKey);
-  }, [setOndeMode]);
+  }, [setDarkMode]);
   const tournamentMessagesVisible = isGameAreaUnlocked("tournaments", state);
   const visibleInboxMessages = useMemo(
     () => tournamentMessagesVisible
@@ -661,8 +660,6 @@ export function App() {
               onUpdateProfileName={updateProfileName}
               darkMode={darkMode}
               onDarkModeChange={setDarkMode}
-              ondeMode={ondeMode}
-              onOndeModeChange={setOndeMode}
               reduceMotion={reduceMotion}
               onReduceMotionChange={setReduceMotion}
             />

@@ -159,7 +159,7 @@
 
 .network-heading svg {
   width: 24px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .network-heading span {
@@ -485,7 +485,7 @@
 .event-capacity-note svg {
   width: 18px;
   flex: 0 0 auto;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .event-capacity-note span {
@@ -801,7 +801,7 @@
 }
 
 .event-notice svg {
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .event-notice div {

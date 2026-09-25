@@ -16,7 +16,7 @@
 .ludowiki-view > header > svg {
   width: 28px;
   height: 28px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .ludowiki-view > header h1 {

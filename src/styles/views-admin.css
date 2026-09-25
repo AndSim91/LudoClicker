@@ -24,7 +24,7 @@
 .overview-view > header > svg {
   width: 32px;
   height: 32px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .overview-view h1 {

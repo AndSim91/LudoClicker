@@ -19,7 +19,7 @@
   width: 29px;
   height: 29px;
   margin-bottom: 14px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .day-empty strong {
@@ -92,7 +92,7 @@
 }
 
 .appointment-entry-neutral .appointment-expiry {
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .appointment-timing {
@@ -300,7 +300,7 @@
   gap: 6px;
   margin-top: 16px;
   padding: 8px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
   background: transparent;
 }
 
@@ -336,7 +336,7 @@
 .equipment-quick-heading > svg {
   width: 18px;
   height: 18px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .equipment-quick-heading > span {

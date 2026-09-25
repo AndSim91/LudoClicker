@@ -15,6 +15,8 @@
   --surface-muted: #f7f7f7;
   --surface-rail: #fafafa;
   --focus: #0f6cbd;
+  /* Blue used as text or accent line; skins may split it from the button fill. */
+  --accent-ink: var(--blue-600);
   --success: #107c10;
   --warning: #c43e1c;
   --equipment-load: #c99324;

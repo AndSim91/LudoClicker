@@ -24,7 +24,7 @@
 .empty-composer svg {
   width: 42px;
   height: 42px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .empty-composer h1 {

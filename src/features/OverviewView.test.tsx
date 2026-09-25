@@ -22,8 +22,6 @@ describe("OverviewView settings", () => {
     onUpdateProfileName: vi.fn(),
     darkMode: false,
     onDarkModeChange: vi.fn(),
-    ondeMode: false,
-    onOndeModeChange: vi.fn(),
     reduceMotion: false,
     onReduceMotionChange: vi.fn(),
   };

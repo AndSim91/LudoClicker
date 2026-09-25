@@ -27,7 +27,7 @@
 
 .list-tabs button.active {
   border-bottom-color: var(--blue-600);
-  color: var(--blue-600);
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -197,7 +197,7 @@
 
 .composer-tabs > button.active {
   border-bottom-color: var(--blue-600);
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .composer-tabs > span {
@@ -324,7 +324,7 @@
 
 .sending-toast svg {
   width: 17px;
-  color: var(--blue-600);
+  color: var(--accent-ink);
 }
 
 .composer-status {
