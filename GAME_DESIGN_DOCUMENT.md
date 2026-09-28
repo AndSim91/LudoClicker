@@ -3388,6 +3388,12 @@ svizzera, tabellone, premi e fama) con tre differenze:
 
 - nome «Torneo della Superba» nella scheda Tornei, nei messaggi e nel recap;
   nell'albo d'oro ogni edizione indica se era Reptile o Superba;
+- grafica completamente diversa: il verde del Reptile lascia il posto alla
+  vetrata del logo del torneo (rossi e arancioni del tramonto, blu notte e teal
+  del mare di Genova, sabbia della Lanterna, oro), con il logo nell'intestazione,
+  lo sfondo a vetrata (`public/assets/superba-glass.svg`, logo
+  `superba-logo.webp`), bordi neri a piombo e titoli con carattere classico
+  (`.reptile-view.is-superba` in `tournaments.css`);
 - avversari più forti: la difficoltà del Reptile (standard Champion's × 1,1 per
   ogni vittoria precedente di Genova) viene moltiplicata per **1,25**;
 - se vince un team di Genova, si scopre il Percorso Segreto **Corso X** (10.9),

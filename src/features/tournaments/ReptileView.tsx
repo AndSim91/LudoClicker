@@ -149,6 +149,9 @@ function ReptileHero({
   return (
     <section className="reptile-hero" aria-labelledby="reptile-title">
       <div className="reptile-hero-copy">
+        {superba ? (
+          <img className="superba-hero-logo" src="/assets/superba-logo.webp" alt="Logo del Torneo della Superba" />
+        ) : null}
         <span className="reptile-hero-kicker">Open · Genova</span>
         <h2 id="reptile-title">{tournamentName}</h2>
         <p>
@@ -174,7 +177,7 @@ function ReptileHero({
           <Icon name="trend" />
           <span>Difficoltà</span>
           <strong>{Math.round(difficulty)}</strong>
-          <small>Champion&apos;s × {(1.1 ** reptile.victories).toFixed(2)}</small>
+          <small>Champion&apos;s × {(difficulty / TOURNAMENT_DEFINITIONS.champions.standard).toFixed(2)}</small>
         </div>
       </div>
     </section>
@@ -235,7 +238,7 @@ function ReptileShell({
   children: ReactNode;
 }) {
   return (
-    <div className="reptile-view">
+    <div className={superba ? "reptile-view is-superba" : "reptile-view"}>
       <ReptileHero reptile={reptile} superba={superba} edition={reptile.activeEdition} activePage={activePage} />
       <ReptileStepper reptile={reptile} activePage={activePage} onPageChange={onPageChange} />
       <div

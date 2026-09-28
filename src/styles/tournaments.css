@@ -9,25 +9,81 @@
   --reptile-bg: #07120d;
   --reptile-surface: #0e2016;
   --reptile-surface-soft: #11291b;
-  --reptile-line: rgb(151 210 164 / 22%);
-  --reptile-line-strong: rgb(183 255 104 / 58%);
+  --reptile-line: rgb(var(--reptile-line-rgb) / 22%);
+  --reptile-line-strong: rgb(var(--reptile-acid-rgb) / 58%);
   --reptile-ink: #effff1;
   --reptile-muted: #a8c5ad;
   --reptile-soft: #789781;
   --reptile-accent: #1fd071;
   --reptile-acid: #b7ff68;
+  --reptile-on-accent: #07120d;
+  --reptile-bg-rgb: 7 18 13;
+  --reptile-accent-rgb: 31 208 113;
+  --reptile-acid-rgb: 183 255 104;
+  --reptile-line-rgb: 151 210 164;
+  --reptile-surface-rgb: 14 32 22;
+  --reptile-backdrop: url("/assets/reptile-smoke-backdrop.png");
   display: grid;
   gap: 14px;
   min-width: 0;
   color: var(--reptile-ink);
   background-color: var(--reptile-bg);
   background-image:
-    linear-gradient(180deg, rgb(7 18 13 / 12%), rgb(7 18 13 / 78%)),
-    url("/assets/reptile-smoke-backdrop.png");
+    linear-gradient(180deg, rgb(var(--reptile-bg-rgb) / 12%), rgb(var(--reptile-bg-rgb) / 78%)),
+    var(--reptile-backdrop);
   background-position: center top;
   background-size: cover;
-  border: 1px solid rgb(31 208 113 / 28%);
+  border: 1px solid rgb(var(--reptile-accent-rgb) / 28%);
   box-shadow: 0 18px 50px rgb(0 0 0 / 18%);
+}
+
+/* Torneo della Superba: after the transformation the Open drops the green Reptile
+ * look for the stained-glass palette of its logo (sunset reds, Genoa night blues,
+ * lighthouse sand, gold). Only variables change, so every panel follows. */
+.reptile-view.is-superba {
+  --reptile-bg: #071c33;
+  --reptile-surface: #0b2740;
+  --reptile-surface-soft: #0f3149;
+  --reptile-ink: #fbf3e1;
+  --reptile-muted: #e2d3b3;
+  --reptile-soft: #bcae90;
+  --reptile-accent: #df5b08;
+  --reptile-acid: #fab600;
+  --reptile-on-accent: #071c33;
+  --reptile-bg-rgb: 7 28 51;
+  --reptile-accent-rgb: 223 91 8;
+  --reptile-acid-rgb: 250 182 0;
+  --reptile-line-rgb: 226 211 179;
+  --reptile-surface-rgb: 11 39 64;
+  --reptile-backdrop: url("/assets/superba-glass.svg");
+  border: 3px solid #000;
+  outline: 2px solid rgb(250 182 0 / 55%);
+  outline-offset: -6px;
+}
+
+.reptile-view.is-superba .reptile-hero {
+  border-bottom: 3px solid #000;
+}
+
+.reptile-view.is-superba .reptile-stepper button:hover:not(:disabled),
+.reptile-view.is-superba .reptile-stepper button:focus-visible {
+  background: #0a465b;
+}
+
+.reptile-view.is-superba h2,
+.reptile-view.is-superba .reptile-hero h2,
+.reptile-view.is-superba h3 {
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  letter-spacing: .02em;
+}
+
+.superba-hero-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #000, 0 0 0 5px rgb(250 182 0 / 70%), 0 10px 30px rgb(0 0 0 / 45%);
 }
 
 .reptile-view button,
@@ -55,10 +111,10 @@
   min-height: 206px;
   padding: 30px 32px;
   overflow: hidden;
-  border-bottom: 1px solid rgb(183 255 104 / 18%);
+  border-bottom: 1px solid rgb(var(--reptile-acid-rgb) / 18%);
   background:
-    linear-gradient(90deg, rgb(7 18 13 / 96%) 0%, rgb(7 18 13 / 76%) 43%, rgb(7 18 13 / 20%) 100%),
-    url("/assets/reptile-smoke-backdrop.png") center / cover;
+    linear-gradient(90deg, rgb(var(--reptile-bg-rgb) / 96%) 0%, rgb(var(--reptile-bg-rgb) / 76%) 43%, rgb(var(--reptile-bg-rgb) / 20%) 100%),
+    var(--reptile-backdrop) center / cover;
 }
 
 .reptile-hero-copy {
@@ -112,9 +168,9 @@
   gap: 4px;
   min-height: 126px;
   padding: 16px;
-  border: 1px solid rgb(183 255 104 / 26%);
+  border: 1px solid rgb(var(--reptile-acid-rgb) / 26%);
   border-radius: 7px;
-  background: rgb(7 18 13 / 58%);
+  background: rgb(var(--reptile-bg-rgb) / 58%);
 }
 
 .reptile-hero-stats svg {
@@ -141,7 +197,7 @@
   overflow-x: auto;
   border-top: 1px solid var(--reptile-line);
   border-bottom: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 74%);
+  background: rgb(var(--reptile-bg-rgb) / 74%);
 }
 
 .reptile-stepper button {
@@ -166,11 +222,11 @@
 .reptile-stepper button:hover:not(:disabled),
 .reptile-stepper button:focus-visible {
   color: var(--reptile-ink);
-  background: rgb(31 208 113 / 12%);
+  background: rgb(var(--reptile-accent-rgb) / 12%);
 }
 
 .reptile-stepper button.is-active {
-  color: #07120d;
+  color: var(--reptile-on-accent);
   background: var(--reptile-accent);
 }
 
@@ -216,7 +272,7 @@
 .reptile-step-locked {
   min-width: 0;
   border: 1px solid var(--reptile-line);
-  background: rgb(14 32 22 / 88%);
+  background: rgb(var(--reptile-surface-rgb) / 88%);
 }
 
 .reptile-panel,
@@ -256,7 +312,7 @@
 .reptile-count-mark {
   flex: 0 0 auto;
   padding: 7px 10px;
-  border: 1px solid rgb(183 255 104 / 44%);
+  border: 1px solid rgb(var(--reptile-acid-rgb) / 44%);
   color: var(--reptile-acid);
   font-size: 11px;
   font-weight: 700;
@@ -293,7 +349,7 @@
 
 .reptile-view button.primary {
   border: 1px solid var(--reptile-accent);
-  color: #07120d;
+  color: var(--reptile-on-accent);
   background: var(--reptile-accent);
 }
 
@@ -304,13 +360,13 @@
 }
 
 .reptile-view button.secondary {
-  border: 1px solid rgb(183 255 104 / 48%);
+  border: 1px solid rgb(var(--reptile-acid-rgb) / 48%);
   color: var(--reptile-acid);
   background: transparent;
 }
 
 .reptile-view button.secondary:hover:not(:disabled) {
-  background: rgb(183 255 104 / 12%);
+  background: rgb(var(--reptile-acid-rgb) / 12%);
 }
 
 .reptile-view button.text-button {
@@ -373,7 +429,7 @@
 }
 
 .reptile-dossier {
-  background: rgb(7 18 13 / 70%);
+  background: rgb(var(--reptile-bg-rgb) / 70%);
 }
 
 .reptile-dossier > header {
@@ -382,7 +438,7 @@
   justify-content: space-between;
   gap: 10px;
   padding-bottom: 15px;
-  border-bottom: 1px solid rgb(183 255 104 / 36%);
+  border-bottom: 1px solid rgb(var(--reptile-acid-rgb) / 36%);
 }
 
 .reptile-dossier > header span {
@@ -444,7 +500,7 @@
   min-width: 0;
   padding: 12px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 45%);
+  background: rgb(var(--reptile-bg-rgb) / 45%);
 }
 
 .reptile-collaborator-assignment label:hover,
@@ -458,7 +514,7 @@
   width: 29px;
   height: 29px;
   place-items: center;
-  border: 1px solid rgb(31 208 113 / 55%);
+  border: 1px solid rgb(var(--reptile-accent-rgb) / 55%);
   color: var(--reptile-acid);
 }
 
@@ -494,7 +550,7 @@
 .reptile-view select {
   min-height: 34px;
   padding: 0 9px;
-  border: 1px solid rgb(183 255 104 / 35%);
+  border: 1px solid rgb(var(--reptile-acid-rgb) / 35%);
   border-radius: 3px;
   color: var(--reptile-ink);
   background: var(--reptile-surface);
@@ -513,7 +569,7 @@
   gap: 9px;
   padding: 10px;
   border-top: 1px solid var(--reptile-line-strong);
-  background: rgb(31 208 113 / 7%);
+  background: rgb(var(--reptile-accent-rgb) / 7%);
 }
 
 .reptile-sector-counts > div > span:last-child {
@@ -537,7 +593,7 @@
   padding: 11px 13px;
   border-left: 2px solid var(--reptile-acid);
   color: var(--reptile-muted);
-  background: rgb(183 255 104 / 8%);
+  background: rgb(var(--reptile-acid-rgb) / 8%);
   line-height: 1.5;
 }
 
@@ -575,7 +631,7 @@
 .reptile-sector-progress-list article {
   padding: 13px 14px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 38%);
+  background: rgb(var(--reptile-bg-rgb) / 38%);
 }
 
 .reptile-sector-progress-heading {
@@ -654,7 +710,7 @@
   gap: 3px;
   padding: 13px;
   border-top: 1px solid var(--reptile-line-strong);
-  background: rgb(31 208 113 / 7%);
+  background: rgb(var(--reptile-accent-rgb) / 7%);
 }
 
 .reptile-coordination-rules strong {
@@ -683,7 +739,7 @@
   min-width: 0;
   padding: 22px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 78%);
+  background: rgb(var(--reptile-bg-rgb) / 78%);
 }
 
 .reptile-minigame-page > .reptile-panel-heading {
@@ -700,7 +756,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 12px;
   border: 1px solid var(--reptile-line);
-  background: rgb(14 32 22 / 86%);
+  background: rgb(var(--reptile-surface-rgb) / 86%);
 }
 
 .reptile-minigame-score > span {
@@ -731,12 +787,12 @@
   overflow: hidden;
   touch-action: manipulation;
   cursor: crosshair;
-  border: 1px solid rgb(31 208 113 / 44%);
+  border: 1px solid rgb(var(--reptile-accent-rgb) / 44%);
   background:
-    linear-gradient(rgb(31 208 113 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(31 208 113 / 8%) 1px, transparent 1px),
-    radial-gradient(circle at 50% 45%, rgb(31 208 113 / 18%), transparent 65%),
-    #07120d;
+    linear-gradient(rgb(var(--reptile-accent-rgb) / 8%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--reptile-accent-rgb) / 8%) 1px, transparent 1px),
+    radial-gradient(circle at 50% 45%, rgb(var(--reptile-accent-rgb) / 18%), transparent 65%),
+    var(--reptile-on-accent);
   background-size: 40px 40px, 40px 40px, auto, auto;
 }
 
@@ -752,9 +808,9 @@
   transform: translate(-50%, -50%);
   border: 3px solid var(--reptile-acid);
   border-radius: 50%;
-  color: #07120d;
+  color: var(--reptile-on-accent);
   background: var(--reptile-accent);
-  box-shadow: 0 0 0 7px rgb(183 255 104 / 14%), 0 0 28px rgb(31 208 113 / 48%);
+  box-shadow: 0 0 0 7px rgb(var(--reptile-acid-rgb) / 14%), 0 0 28px rgb(var(--reptile-accent-rgb) / 48%);
   animation: reptile-target-in 160ms ease-out;
   touch-action: manipulation;
 }
@@ -775,7 +831,7 @@
   color: var(--reptile-acid);
   font-size: clamp(4rem, 14vw, 8rem);
   font-weight: 900;
-  background: rgb(7 18 13 / 72%);
+  background: rgb(var(--reptile-bg-rgb) / 72%);
 }
 
 .reptile-minigame-pause {
@@ -785,8 +841,8 @@
   gap: 18px;
   margin-top: 12px;
   padding: 14px 16px;
-  border: 1px solid rgb(183 255 104 / 44%);
-  background: rgb(183 255 104 / 8%);
+  border: 1px solid rgb(var(--reptile-acid-rgb) / 44%);
+  background: rgb(var(--reptile-acid-rgb) / 8%);
 }
 
 .reptile-minigame-pause h3,
@@ -821,7 +877,7 @@
   min-width: 0;
   padding: 22px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 78%);
+  background: rgb(var(--reptile-bg-rgb) / 78%);
 }
 
 .reptile-presentation-phases {
@@ -862,7 +918,7 @@
   padding: 20px;
   border-top: 1px solid var(--reptile-line);
   border-bottom: 1px solid var(--reptile-line);
-  background: rgb(14 32 22 / 50%);
+  background: rgb(var(--reptile-surface-rgb) / 50%);
 }
 
 .reptile-interlude-copy {
@@ -894,7 +950,7 @@
   gap: 14px;
   padding: 11px 14px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 38%);
+  background: rgb(var(--reptile-bg-rgb) / 38%);
 }
 
 .reptile-match-list article > div {
@@ -914,8 +970,8 @@
 }
 
 .reptile-match-list .is-home-match {
-  border-color: rgb(183 255 104 / 57%);
-  background: rgb(31 208 113 / 12%);
+  border-color: rgb(var(--reptile-acid-rgb) / 57%);
+  background: rgb(var(--reptile-accent-rgb) / 12%);
 }
 
 .reptile-standing-table {
@@ -972,7 +1028,7 @@
 
 .reptile-standing-table .is-qualified {
   color: var(--reptile-ink);
-  background: rgb(31 208 113 / 13%);
+  background: rgb(var(--reptile-accent-rgb) / 13%);
 }
 
 .reptile-results-page,
@@ -1017,7 +1073,7 @@
 
 .reptile-bracket-match {
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 52%);
+  background: rgb(var(--reptile-bg-rgb) / 52%);
 }
 
 .reptile-bracket-match > div {
@@ -1048,7 +1104,7 @@
 
 .reptile-bracket-match > div.is-winner {
   color: var(--reptile-ink);
-  background: rgb(31 208 113 / 16%);
+  background: rgb(var(--reptile-accent-rgb) / 16%);
 }
 
 .reptile-bracket-match > div.is-winner b {
@@ -1102,7 +1158,7 @@
   min-width: 0;
   padding: 13px;
   border: 1px solid var(--reptile-line);
-  background: rgb(7 18 13 / 42%);
+  background: rgb(var(--reptile-bg-rgb) / 42%);
 }
 
 .reptile-recap-grid small,
@@ -1142,7 +1198,7 @@
 }
 
 .reptile-hall-panel {
-  background: rgb(7 18 13 / 72%);
+  background: rgb(var(--reptile-bg-rgb) / 72%);
 }
 
 .reptile-hall-list {
@@ -1172,8 +1228,8 @@
   gap: 22px;
   padding: 30px;
   background:
-    linear-gradient(90deg, rgb(7 18 13 / 92%), rgb(7 18 13 / 55%)),
-    url("/assets/reptile-smoke-backdrop.png") center / cover;
+    linear-gradient(90deg, rgb(var(--reptile-bg-rgb) / 92%), rgb(var(--reptile-bg-rgb) / 55%)),
+    var(--reptile-backdrop) center / cover;
 }
 
 .reptile-step-locked > svg {
@@ -1197,7 +1253,7 @@
   padding: 0 16px;
   border: 1px solid var(--reptile-accent);
   border-radius: 4px;
-  color: #07120d;
+  color: var(--reptile-on-accent);
   background: var(--reptile-accent);
   font-weight: 700;
 }
