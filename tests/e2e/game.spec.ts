@@ -412,3 +412,22 @@ test("salva profilo e preferenze e li ripristina dopo il reload", async ({ page 
   await expect(page.getByLabel("Riduci animazioni")).toBeChecked();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
+
+test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", async ({ page }) => {
+  const state = createProgressedGameSave();
+  state.tournaments.nationalTitlesCurrentSchool = 1;
+  await installGameSave(page, state);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Pausa" }).click();
+  await page.getByRole("button", { name: "Impostazioni", exact: true }).click();
+
+  await expect(page.getByText("Titolo nazionale (Arena o Stile)")).toBeVisible();
+  await page.getByLabel("Nome della scuola").fill("Onde di Levante");
+  await page.getByLabel("Città").fill("La Spezia");
+  await page.getByRole("button", { name: "Fonda la nuova scuola" }).click();
+  await page.getByRole("button", { name: "Conferma: fonda la scuola" }).click();
+
+  await expect(page.getByText(/Onde di Levante · v/)).toBeVisible();
+  await expect(page.getByText(`${state.school.name} · Sede madre`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Fonda la nuova scuola" })).toBeDisabled();
+});

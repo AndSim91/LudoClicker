@@ -60,45 +60,22 @@ describe("long-term automated balance simulation", () => {
     }
   });
 
-  it("keeps the prestige gate exact and exposes the offer only when all requirements are met", () => {
+  it("opens the prestige with one national title in Arena or Style, and offers it once", () => {
     const startedAt = 1_700_000_000_000;
-    let state = createInitialState(startedAt, "Prestige gate test");
-    const requirements = getPrestigeRequirements(state);
-
-    state = {
+    const state = createInitialState(startedAt, "Prestige gate test");
+    expect(getPrestigeRequirements(state)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
+    expect(canFoundSchool({
       ...state,
-      school: {
-        ...state.school,
-        fame: requirements.fame - 1,
-      },
-      collaborators: Array.from({ length: requirements.collaborators }, (_, index) => ({
-        id: `collaborator-${index}`,
-        contactId: `contact-${index}`,
-        displayName: `Collaboratore ${index}`,
-        joinedAt: startedAt,
-        forms: [],
-        instructorForms: [],
-        assignment: null,
-        rarity: "rare" as const,
-      })),
-      statistics: {
-        ...state.statistics,
-        eventsCompleted: requirements.events,
-      },
-    };
-    expect(canFoundSchool(state)).toBe(false);
+      tournaments: { ...state.tournaments, championsVictoryCurrentSchool: true },
+    })).toBe(false);
 
-    state = {
+    const titled = {
       ...state,
-      school: { ...state.school, fame: requirements.fame },
-      tournaments: {
-        ...state.tournaments,
-        championsVictoryCurrentSchool: true,
-      },
+      tournaments: { ...state.tournaments, nationalTitlesCurrentSchool: 1 },
     };
-    const ready = gameReducer(state, { type: "TICK", now: startedAt + 1_000 });
+    const ready = gameReducer(titled, { type: "TICK", now: startedAt + 1_000 });
     expect(canFoundSchool(ready)).toBe(true);
     expect(ready.network.prestigeOfferSent).toBe(true);
-    expect(ready.messages.some((message) => message.subject === "Richiesta apertura nuova scuola")).toBe(true);
+    expect(ready.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
   });
 });

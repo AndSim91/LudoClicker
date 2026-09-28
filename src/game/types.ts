@@ -341,6 +341,11 @@ export interface FoundedSchool {
   emailsSent: number;
   eventsCompleted: number;
   transferredAt: number;
+  /** Fixed monthly rent the school pays to the network after the foundation. */
+  monthlyRent?: number;
+  championsWin?: boolean;
+  /** Won the Reptile, or the Superba it became: same tournament, one bonus. */
+  reptileWin?: "reptile" | "superba";
 }
 
 export interface SchoolFoundationDetails {
@@ -772,6 +777,8 @@ export interface TournamentState {
   skippedSeasons: number[];
   ordinaryVictoryAchieved: boolean;
   championsVictoryCurrentSchool: boolean;
+  /** National titles (Arena or Style) won by the current school: one opens the prestige. */
+  nationalTitlesCurrentSchool?: number;
   chronicles: ChroniclesProgress;
   reptile: ReptileProgress;
 }

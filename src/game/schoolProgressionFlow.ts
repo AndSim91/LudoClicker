@@ -1,3 +1,4 @@
+import { getFoundationRentPreview } from "./networkRent";
 import { getNewAchievements } from "../content/achievements";
 import {
   SHORT_GOALS,
@@ -60,6 +61,10 @@ function prepareLegendaryProgressForNewSchool(
   };
 }
 
+function formatRent(value: number): string {
+  return `${new Intl.NumberFormat("it-IT", { maximumFractionDigits: 0 }).format(value)} €`;
+}
+
 export function foundSchool(
   state: GameState,
   details: SchoolFoundationDetails,
@@ -68,6 +73,7 @@ export function foundSchool(
   if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
   const legendaryProgress = prepareLegendaryProgressForNewSchool(state);
   const fresh = createInitialState(now, state.profile.displayName, false, legendaryProgress);
+  const rent = getFoundationRentPreview(state);
   const archivedSchool = {
     id: makeGameId("school", now, state.network.schools.length),
     name: state.school.name,
@@ -78,6 +84,9 @@ export function foundSchool(
     emailsSent: state.statistics.emailsSent,
     eventsCompleted: state.statistics.eventsCompleted,
     transferredAt: now,
+    monthlyRent: rent.rent,
+    championsWin: rent.championsWin,
+    ...(rent.reptileWin ? { reptileWin: rent.reptileWin } : {}),
   };
   const nextState: GameState = {
     ...fresh,
@@ -93,7 +102,9 @@ export function foundSchool(
       fame: state.school.fame,
     },
     network: {
-      reputation: state.network.reputation + 1,
+      // Reputation grows with how far the school went: it will unlock special events.
+      reputation: state.network.reputation + 1 +
+        (rent.championsWin ? 1 : 0) + (rent.reptileWin ? 1 : 0),
       schools: [...state.network.schools, archivedSchool],
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
@@ -115,7 +126,7 @@ export function foundSchool(
     refreshWritingCampaignCopies(nextState),
     now,
     `Nuova scuola fondata: ${details.name.trim()}`,
-    `La sede di ${details.city.trim()} è operativa. Bonus permanente di rete: +${Math.round((state.network.schools.length + 1) * GAME_CONFIG.prestigeBonusPerSchool * 100)}%.`,
+    `La sede di ${details.city.trim()} è operativa. ${state.school.name} entra nella Rete dell'Ordine e ti verserà ${formatRent(rent.rent)} al mese. Bonus permanente di rete: +${Math.round((state.network.schools.length + 1) * GAME_CONFIG.prestigeBonusPerSchool * 100)}%.`,
     "system",
   );
   return {

@@ -265,8 +265,8 @@ solo per i Collaboratori).
 Il Percorso Segreto «Corso X» si scopre vincendo il Torneo della Superba (vedi 10.9 e 20.7).
 
 La somma delle quote è poi moltiplicata dai
-potenziamenti di entrate e da +25% per ogni scuola fondata, e ogni scuola
-fondata aggiunge €5 al mese di entrata di rete. Un mese dura **60 secondi
+potenziamenti di entrate e da +5% per ogni scuola fondata; a questa si somma
+la rendita fissa delle scuole della Rete dell'Ordine (§ 17.6). Un mese dura **60 secondi
 reali** e segue il normale ciclo da Gennaio a Dicembre;
 dopo Dicembre torna Gennaio. La partita inizia a Settembre. L'anno scolastico,
 sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
@@ -506,14 +506,19 @@ caduta: Fanne 5», «Si può avere nera?») o 6 (gli altri tre).
 La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo
 crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
 
-Nel codice la Reputazione cresce di 1 a ogni fondazione, ma i bonus permanenti
-dipendono dal numero di scuole fondate: +25% per scuola a caratteri per input,
-quote e entrate di rete e affluenza agli eventi, più €5 al mese di entrata di
-rete per scuola. Il numero di scuole aumenta anche i requisiti del prestigio
-successivo, il costo di alcuni potenziamenti e dello 0,5% per scuola la
-probabilità di abbandono degli allievi con Forma 7.
+La Reputazione non si spende: è un valore che misura quanto è cresciuta la rete
+e servirà a sbloccare eventi e modalità di gioco speciali. A ogni fondazione
+cresce di 1, più 1 se la scuola lasciata ha vinto la Champion's Arena e 1 se ha
+vinto il Torneo Reptile (o la Superba in cui si è trasformato) (`foundSchool`, `src/game/schoolProgressionFlow.ts`).
+È mostrata in Impostazioni → Rete dell'Ordine.
 
-> **Da implementare:** il valore di Reputazione di rete non viene letto da nessuna regola di gioco e non cresce con lo sviluppo delle scuole dopo la fondazione.
+I bonus permanenti dipendono invece dal numero di scuole fondate: +5% per
+scuola a caratteri per input, quote e affluenza agli eventi
+(`prestigeBonusPerSchool = 0,05`), più la rendita fissa di ogni scuola (§ 17.6).
+Il numero di scuole aumenta anche il costo di alcuni potenziamenti e dello
+0,5% per scuola la probabilità di abbandono degli allievi con Forma 7.
+
+> **Da implementare:** nessun evento o gameplay speciale è ancora sbloccato dalla Reputazione.
 
 ---
 
@@ -576,7 +581,7 @@ Valori effettivi della prima curva:
 | Tastiera comoda e Frasi rapide al massimo |                   4 |
 | Come sopra, con Flusso al tetto ×5        |                  20 |
 
-Le scuole fondate (+25% ciascuna) e la specializzazione Redazione (+10%)
+Le scuole fondate (+5% ciascuna) e la specializzazione Redazione (+10%)
 moltiplicano ulteriormente la potenza.
 
 #### Flusso e Frase perfetta
@@ -953,7 +958,7 @@ disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
 
 Le prove dimostrative non sono mai meno dei contatti estratti e le persone
 incontrate mai meno delle prove. `bonusAffluenza` somma i potenziamenti
-Carisma di pubblico, +10% con la specializzazione Eventi, +25% per scuola
+Carisma di pubblico, +10% con la specializzazione Eventi, +5% per scuola
 fondata e, con i Social attivi, +5% ogni 1.000 Follower; `bonusCarisma` somma
 i potenziamenti Carisma sui contatti. La variabilità casuale è estratta tra i
 limiti propri di ogni evento (per esempio 0,35–2,5 per lo Sparring al parco).
@@ -1240,7 +1245,7 @@ preferiti ancora disponibili.
 ```text
 caratteriAutomaticiAlSecondo = 5
   × Σ produttivitàCollaboratori   // (1 + bonus Forma 6/7 + bonus Doppia spada corta) × rarità × Maestria
-  × potenzaScrittura              // include già il bonus di rete (+25% per scuola fondata)
+  × potenzaScrittura              // include già il bonus di rete (+5% per scuola fondata)
   × (1 + bonusAutomazioniGeneriche + bonusRedazione)
 ```
 
@@ -2782,27 +2787,20 @@ di gioco**.
 
 L'offerta di fondare una nuova scuola arriva tramite una comunicazione di
 sistema ("Richiesta apertura nuova scuola", inviata una sola volta per ciclo)
-quando sono soddisfatti requisiti come:
+appena la scuola corrente **vince un Torneo Nazionale**, di Arena o di Stile
+(`prestigeNationalTitles = 1`, `getPrestigeRequirements` in
+`src/game/progression.ts`). Conta solo la vittoria di un atleta della scuola
+corrente; i titoli vengono contati in `nationalTitlesCurrentSchool` e ripartono
+da zero nella nuova scuola. In più nessun Leggendario Segreto deve avere una
+prova in corso.
 
-- soglia di Fama della scuola;
-- numero minimo di collaboratori;
-- almeno un certo numero di eventi completati;
-- livello minimo di organizzazione;
-- disponibilità di attrezzatura;
-- reputazione sufficiente.
+Il Nazionale arriva dopo Cronache, qualificazioni e Regionale, quindi richiede
+atleti con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
+il requisito, il titolo nazionale non aumenta la rendita (§ 17.6). Il
+requisito non cresce con le scuole fondate: a crescere è il costo dei
+potenziamenti (§ 17.6).
 
-> **Da implementare:** livello minimo di organizzazione, disponibilità di attrezzatura e reputazione non sono requisiti nel codice.
-
-Soglia del primo ciclo: 150 di Fama, 8 collaboratori, 25 eventi completati e
-almeno una vittoria (Arena o Stile) di un atleta della scuola corrente alla
-Champion's Arena. In più nessun Leggendario Segreto deve avere una prova in
-corso. La Fama cresce di 1 per ogni iscrizione, ma anche con i follower e con
-i premi dei tornei, quindi non coincide con gli iscritti totali.
-
-Ogni ciclo successivo (`ciclo = scuole fondate + 1`) richiede Fama
-`150 × ciclo`, collaboratori `8 + 2 × (ciclo − 1)` ed eventi completati
-`25 × ciclo`. Fama ed eventi completati sono cumulativi e restano dopo la
-fondazione, mentre i collaboratori ripartono da zero.
+> **Da implementare:** il simulatore di bilanciamento non gioca i tornei, quindi la durata reale del ciclo fino al Nazionale non è ancora misurata.
 
 Il prestigio è una scelta volontaria. A differenza del gioco di riferimento, il
 primo prestigio deve concedere immediatamente un bonus permanente chiaramente
@@ -2830,9 +2828,16 @@ specializzazioni sono quattro:
 | Eventi           | +10% di pubblico agli eventi                                                     |
 | Accoglienza      | +10 punti di avanzamento verso le probabilità massime di prenotazione della prova e di iscrizione |
 
-Il modulo appare come una procedura amministrativa ricevuta via email.
+Il modulo si trova in Impostazioni → **Rete dell'Ordine**
+(`src/features/settings/NetworkPanel.tsx`): nome, città, specializzazione
+(Redazione, Eventi o Accoglienza), colore e motto facoltativo. Il pulsante
+«Fonda la nuova scuola» resta disabilitato finché il requisito non è raggiunto e
+chiede una seconda conferma prima di fondare. Il pannello mostra anche la
+Reputazione, il requisito (Titolo nazionale 0/1), l'anteprima della rendita
+«Se fondi ora» e l'elenco delle scuole della rete, con la prima indicata come
+«Sede madre».
 
-> **Da implementare:** non esiste alcuna schermata o modulo per fondare la scuola. L'azione `FOUND_SCHOOL` esiste nella logica, ma nessun componente la invia; il messaggio di offerta rimanda alle Impostazioni, che non contengono la procedura. Manca anche la lista di città.
+> **Da implementare:** manca la lista di città.
 
 ### 17.4 Cosa si azzera
 
@@ -2856,8 +2861,8 @@ Simonazzi, che è garantito solo nella prima scuola.
 
 Gli iscritti della scuola precedente non vengono conservati come schede
 individuali. La scuola fondata registra soltanto nome, città, motto,
-specializzazione, numero di membri al trasferimento, email inviate ed eventi
-completati; Fama e statistiche cumulative restano disponibili senza creare
+specializzazione, numero di membri al trasferimento, email inviate, eventi
+completati, rendita mensile e vittorie di Champion's Arena e Reptile/Superba; Fama e statistiche cumulative restano disponibili senza creare
 uno storico nominativo.
 
 ### 17.5 Cosa rimane
@@ -2872,8 +2877,9 @@ uno storico nominativo.
 - scoperte del Ludodex e progressi permanenti dei Leggendari;
 - un collaboratore mentore selezionato, se sbloccato.
 
-Nel codice restano: Fama, scuole fondate, Reputazione di rete (+1 a ogni
-fondazione, ma nessun sistema la legge), statistiche cumulative, messaggi della
+Nel codice restano: Fama, scuole fondate con la loro rendita, Reputazione di
+rete (§ 5.7), Percorsi Segreti scoperti, trasformazione del Reptile in Torneo
+della Superba, statistiche cumulative, messaggi della
 Posta, traguardi, obiettivo breve in corso, Leggendari incontrati (Ludodex),
 progressi dei Leggendari iscritti (Forme, attestati da Istruttore e Tecnico,
 statistiche e bonus dei Corsi Agonisti), stato dei Leggendari Segreti, il flag
@@ -2886,15 +2892,17 @@ velocità complessiva del nuovo ciclo oppure un vantaggio equivalente distribuit
 tra Carisma, Scrittura ed entrate. Il valore è provvisorio, ma l'effetto deve
 essere immediato.
 
-Nel codice ogni scuola fondata vale **+25%** (`prestigeBonusPerSchool = 0,25`),
-cumulativo e immediato, applicato a:
+Nel codice il premio principale è la **rendita** della scuola lasciata
+(§ 17.6), che parte subito dal primo mese. In più ogni scuola fondata vale
+**+5%** (`prestigeBonusPerSchool = 0,05`), cumulativo e immediato, applicato a:
 
-- potenza di scrittura (moltiplicatore `1 + 0,25 × scuole`);
-- pubblico degli eventi (+25 punti percentuali per scuola);
-- entrate mensili delle quote e della rete (moltiplicatore `1 + 0,25 × scuole`;
-  le entrate Social ne sono escluse).
+- potenza di scrittura (moltiplicatore `1 + 0,05 × scuole`);
+- pubblico degli eventi (+5 punti percentuali per scuola);
+- entrate mensili delle quote (moltiplicatore `1 + 0,05 × scuole`; le entrate
+  Social e la rendita di rete ne sono escluse).
 
-Il messaggio di fondazione indica il bonus totale di rete raggiunto.
+Il messaggio di fondazione indica la rendita della scuola lasciata e il bonus
+totale di rete raggiunto.
 
 ### 17.6 Progressione infinita
 
@@ -2912,24 +2920,35 @@ Nel codice, per ogni scuola fondata:
 - **costi:** il costo dei potenziamenti cresce del 15% (`× (1 + 0,15 ×
   scuole)`), tranne quelli con crescita di rete azzerata (ramo Gadget, ramo
   Istruttori, Percorsi Segreti e pochi altri);
-- **obiettivi:** crescono i requisiti del ciclo successivo (§ 17.2);
-- **pubblico raggiungibile:** +25% di pubblico agli eventi;
+- **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
+- **pubblico raggiungibile:** +5% di pubblico agli eventi;
 - **complessità organizzativa:** il potenziamento Coordinamento multi-sede
   richiede almeno una scuola fondata;
-- **moltiplicatori permanenti:** +25% a scrittura ed entrate mensili;
+- **moltiplicatori permanenti:** +5% a scrittura e quote mensili;
 - gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
   a fine anno.
 
 > **Da implementare:** nessun aumento del numero di attività simultanee.
 
-La rete delle scuole precedenti produce un piccolo contributo passivo e appare
-nell'Archivio come struttura organizzativa, non come mappa fantasy.
+Ogni scuola lasciata entra nella **Rete dell'Ordine** e versa ogni mese una
+rendita **fissa**, calcolata al momento della fondazione
+(`getFoundationRentPreview`, `src/game/networkRent.ts`):
 
-Il contributo passivo è di 5 € al mese per scuola fondata
-(`networkIncomePerSchool`), aumentato dai bonus alle entrate ricorrenti e dal
-moltiplicatore di rete.
+```
+rendita = arrotonda(quote mensili degli iscritti × quota)
+quota   = 25% + 25% se ha vinto la Champion's Arena
+              + 25% se ha vinto il Torneo Reptile o della Superba
+```
 
-> **Da implementare:** le scuole precedenti non sono mostrate in nessuna schermata (nessun Archivio della rete).
+La quota arriva al massimo al **75%**. Ogni torneo conta una sola volta:
+vincere più volte la Champion's Arena non aggiunge nulla, e Reptile e Superba
+sono lo stesso torneo con un altro nome. Il Nazionale è il requisito del
+prestigio e non aumenta la rendita (`networkRentBonusPerTournament = 0,25`).
+Aspettare prima di fondare rende la scuola più ricca per sempre: più iscritti,
+Forme più alte, Champions e Reptile vinti. La rendita non è toccata da moltiplicatori e si
+somma alle entrate mensili (`getMonthlyOperationalIncome`); il riepilogo delle
+entrate la mostra come «Rete dell'Ordine». Le scuole fondate prima della
+versione 85 ricevono `membri al trasferimento × 40 € × 25%`.
 
 ---
 
@@ -3490,7 +3509,7 @@ arrivare entro 45 minuti in ogni partita simulata.
   alla chiusura o al cambio di scheda (`beforeunload`, `pagehide`, pagina
   nascosta), con il pulsante «Salva ora» delle Impostazioni e subito dopo un
   import;
-- schema versionato (versione attuale 84) più una versione di compatibilità:
+- schema versionato (versione attuale 85) più una versione di compatibilità:
   i salvataggi più vecchi vengono migrati, quelli incompatibili non vengono
   sovrascritti finché il giocatore non azzera la partita;
 - prima di ogni scrittura il salvataggio precedente viene copiato in
@@ -3509,7 +3528,7 @@ Campi di primo livello di `GameState` (`src/game/types.ts`):
 
 ```ts
 interface GameState {
-  version: number; // 84
+  version: number; // 85
   saveCompatibilityVersion: number;
   createdAt: number;
   lastSavedAt: number;
@@ -4124,8 +4143,10 @@ manuale.
 
 Un reset che richiede più cicli prima di produrre un vantaggio concreto crea una
 fase morta. La prima nuova scuola deve offrire immediatamente un bonus
-significativo e visibile. Nel codice ogni scuola fondata aggiunge +25% a quote
-e reddito di rete e €5 di reddito di rete al mese.
+significativo e visibile. Nel codice la scuola lasciata versa subito una
+rendita fissa pari al 25% delle sue quote (fino al 75% con Champion's Arena e
+Reptile/Superba), e ogni scuola
+fondata aggiunge +5% a scrittura, quote e pubblico.
 
 ### Quantità di testi
 

@@ -106,35 +106,20 @@
   border: 1px solid var(--line);
 }
 
-.prestige-coming-soon {
-  position: relative;
-  overflow: hidden;
-}
-
-.prestige-disabled-content {
+.foundation-fields {
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
-  filter: blur(4px);
-  opacity: 0.55;
-  pointer-events: none;
-  user-select: none;
 }
 
-.prestige-coming-soon-label {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  background: rgb(15 108 189 / 18%);
-  font-size: clamp(24px, 4vw, 42px);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 14px rgb(0 0 0 / 45%);
+.foundation-form button.danger {
+  border-color: #a4262c;
+  background: #a4262c;
+}
+
+.school-archive article > div:last-child {
+  align-items: flex-end;
 }
 
 .network-heading,
@@ -934,4 +919,27 @@
 .event-meta svg {
   width: 13px;
   height: 13px;
+}
+
+@media (max-width: 640px) {
+  .prestige-requirements,
+  .foundation-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .prestige-requirements > div + div {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .prestige-requirements > div {
+    min-height: 64px;
+    padding: 10px 16px;
+  }
+
+  .network-heading,
+  .school-archive article {
+    flex-wrap: wrap;
+    padding-inline: 16px;
+  }
 }

@@ -8,6 +8,7 @@ import {
   getPrestigeRequirements,
 } from "./engine";
 import { selectIncomePerMonth } from "./selectors";
+import { getMonthlyMemberFees } from "./membershipEconomy";
 import { formatCurrency } from "../shared/formatters";
 
 describe("game engine: narrative", () => {
@@ -287,10 +288,13 @@ describe("game engine: narrative", () => {
         ...initial.tournaments,
         ordinaryVictoryAchieved: true,
         championsVictoryCurrentSchool: true,
+        nationalTitlesCurrentSchool: 2,
       },
     };
 
     expect(canFoundSchool(eligible)).toBe(true);
+    // 25% of the member fees, +25 points for the Champion's Arena; the national titles add nothing.
+    const expectedRent = Math.round(getMonthlyMemberFees(eligible) * 0.5);
     const offered = gameReducer(eligible, { type: "TICK", now: 2_000 });
     const offeredAgain = gameReducer(offered, { type: "TICK", now: 2_000 });
     const founded = gameReducer(offeredAgain, {
@@ -324,13 +328,20 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    expect(founded.network.reputation).toBe(1);
+    expect(founded.network.reputation).toBe(2);
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
+    expect(founded.network.schools[0]).toMatchObject({
+      monthlyRent: expectedRent,
+      championsWin: true,
+    });
+    expect(founded.network.schools[0].reptileWin).toBeUndefined();
+    expect(founded.tournaments.nationalTitlesCurrentSchool).toBeUndefined();
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
-    expect(founded.player.writingPower).toBeCloseTo(1.375);
-    expect(selectIncomePerMonth(founded)).toBeCloseTo(6.25);
-    expect(getPrestigeRequirements(founded)).toEqual({ fame: 300, collaborators: 10, events: 50 });
+    expect(founded.player.writingPower).toBeCloseTo(1.1 * (1 + GAME_CONFIG.prestigeBonusPerSchool));
+    // The new school has no members yet: its income is the fixed rent of the old one.
+    expect(selectIncomePerMonth(founded)).toBe(expectedRent);
+    expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
 
     const postPrestigeEvent = {
       id: "post-prestige-contacts",

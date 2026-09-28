@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyMemberFees } from "../../game/membershipEconomy";
+import { getMonthlyNetworkRent } from "../../game/networkRent";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
@@ -12,6 +13,7 @@ interface MonthlyIncomePresentation {
   socialIncome: number;
   gadgetIncome: number;
   gadgetUnlocked: boolean;
+  networkRent: number;
 }
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
@@ -20,6 +22,7 @@ function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresent
     socialIncome: getMonthlySocialIncome(state),
     gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
     gadgetUnlocked: state.unlocks.gadget,
+    networkRent: getMonthlyNetworkRent(state),
   };
 }
 
@@ -30,7 +33,8 @@ function isSameMonthlyIncomePresentation(
   return left.memberFees === right.memberFees &&
     left.socialIncome === right.socialIncome &&
     left.gadgetIncome === right.gadgetIncome &&
-    left.gadgetUnlocked === right.gadgetUnlocked;
+    left.gadgetUnlocked === right.gadgetUnlocked &&
+    left.networkRent === right.networkRent;
 }
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
@@ -40,12 +44,13 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
     socialIncome,
     gadgetIncome,
     gadgetUnlocked,
+    networkRent,
   } = useGameSelector(
     selectMonthlyIncomePresentation,
     stateOverride,
     isSameMonthlyIncomePresentation,
   );
-  const monthlyIncome = memberFees + socialIncome + gadgetIncome;
+  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent;
 
   return (
     <div className="title-monthly-income">
@@ -74,6 +79,12 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <div>
               <dt>Vendite Gadget (stima)</dt>
               <dd>{formatCurrency(gadgetIncome)}</dd>
+            </div>
+          ) : null}
+          {networkRent > 0 ? (
+            <div>
+              <dt>Rete dell'Ordine</dt>
+              <dd>{formatCurrency(networkRent)}</dd>
             </div>
           ) : null}
         </dl>

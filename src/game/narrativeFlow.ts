@@ -140,7 +140,7 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
     ready,
     now,
     "Richiesta apertura nuova scuola",
-    "La rete ha approvato la fondazione di una nuova sede. Completa la procedura nelle Impostazioni quando desideri trasferirti.",
+    "La vittoria al Nazionale convince la rete: puoi fondare una nuova sede dell'Ordine. La scuola che lasci continuerà a versarti una rendita mensile, tanto più alta quanto più è cresciuta. Trovi la procedura in Impostazioni → Rete dell'Ordine; più aspetti, più la rendita sarà ricca.",
     "system",
   );
 }

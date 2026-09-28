@@ -31,22 +31,18 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   return false;
 }
 
+/** The only gate of the prestige: a national title (Arena or Style) won by this school. */
 export function getPrestigeRequirements(state: GameState) {
-  const cycle = state.network.schools.length + 1;
   return {
-    fame: GAME_CONFIG.prestigeFame * cycle,
-    collaborators: GAME_CONFIG.prestigeCollaborators + (cycle - 1) * 2,
-    events: GAME_CONFIG.prestigeEvents * cycle,
+    nationalTitles: GAME_CONFIG.prestigeNationalTitles,
+    currentNationalTitles: state.tournaments.nationalTitlesCurrentSchool ?? 0,
   };
 }
 
 export function canFoundSchool(state: GameState): boolean {
   const requirements = getPrestigeRequirements(state);
   return (
-    state.school.fame >= requirements.fame &&
-    state.collaborators.length >= requirements.collaborators &&
-    state.statistics.eventsCompleted >= requirements.events &&
-    state.tournaments.championsVictoryCurrentSchool &&
+    requirements.currentNationalTitles >= requirements.nationalTitles &&
     !Object.values(state.network.secretLegendaries).some(
       (progress) => progress.status === "trial",
     )

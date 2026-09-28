@@ -148,9 +148,12 @@ export function getMonthlyOperationalIncome(state: GameState): number {
   const membershipIncome = getMonthlyMemberFees(state) *
     (1 + getUpgradeEffectTotal(state.upgrades, "membershipIncomeMultiplier") +
       recurringIncomeBonus);
-  const networkIncome = state.network.schools.length * GAME_CONFIG.networkIncomePerSchool *
-    (1 + recurringIncomeBonus);
+  // Rents of the schools in the network are fixed: no multiplier touches them.
+  const networkRent = state.network.schools.reduce(
+    (total, school) => total + (school.monthlyRent ?? 0),
+    0,
+  );
 
-  return (membershipIncome + networkIncome) * networkMultiplier +
+  return membershipIncome * networkMultiplier + networkRent +
     getMonthlySocialIncome(state);
 }

@@ -52,6 +52,7 @@ import type {
   GadgetProductId,
   RockPaperScissorsChoice,
   ReptileSectorAssignments,
+  SchoolFoundationDetails,
   UpgradeId,
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
@@ -280,6 +281,9 @@ export function App() {
   const updateProfileName = useCallback((displayName: string) => {
     dispatch({ type: "UPDATE_PROFILE_NAME", displayName });
   }, [dispatch]);
+  const foundSchool = useCallback((details: SchoolFoundationDetails) => {
+    dispatch({ type: "FOUND_SCHOOL", details, now: getGameNow() });
+  }, [dispatch, getGameNow]);
   const forceGameUpdate = useCallback(() => {
     if (!saveNow()) return;
     const updateUrl = new URL(window.location.href);
@@ -664,6 +668,7 @@ export function App() {
               onDarkModeChange={setDarkMode}
               reduceMotion={reduceMotion}
               onReduceMotionChange={setReduceMotion}
+              onFoundSchool={foundSchool}
             />
           )}
           </Suspense>

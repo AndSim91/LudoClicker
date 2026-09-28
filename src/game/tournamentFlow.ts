@@ -24,7 +24,7 @@ import type {
   TournamentResult,
 } from "./types";
 import { unlockGadgetSectorFromTournamentResult } from "./gadgetFlow";
-import { discoverCourseXFromTournamentResult, unlockReptileFromTournamentResult } from "./reptileUnlock";
+import { unlockReptileFromTournamentResult } from "./reptileUnlock";
 import {
   compactDetailedTournamentResults,
   replaceTournamentHallEntry,
@@ -226,6 +226,8 @@ function applyTournamentResult(
   );
   const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
+  const nationalOwned = resolvedResult.level === "national" &&
+    Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   const ordinaryTournamentWon = didSchoolWinOrdinaryTournament(resolvedResult);
   const chroniclesKeyEarned = didSchoolEarnChroniclesKey(resolvedResult);
   let nextState: GameState = {
@@ -256,6 +258,8 @@ function applyTournamentResult(
         state.tournaments.ordinaryVictoryAchieved || ordinaryTournamentWon,
       championsVictoryCurrentSchool:
         state.tournaments.championsVictoryCurrentSchool || championOwned,
+      nationalTitlesCurrentSchool:
+        (state.tournaments.nationalTitlesCurrentSchool ?? 0) + (nationalOwned ? 1 : 0),
       chronicles: chroniclesKeyEarned
         ? {
             ...state.tournaments.chronicles,
@@ -271,7 +275,6 @@ function applyTournamentResult(
     now,
   );
   nextState = unlockReptileFromTournamentResult(nextState, resolvedResult, now);
-  nextState = discoverCourseXFromTournamentResult(nextState, resolvedResult, now);
   nextState = applyTournamentRewards(nextState, resolvedResult, now);
   for (const id of resolvedResult.secretLegendaryDefeatedIds) {
     nextState = resolveSecretLegendaryDefeat(nextState, id, now);

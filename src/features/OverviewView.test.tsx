@@ -24,7 +24,28 @@ describe("OverviewView settings", () => {
     onDarkModeChange: vi.fn(),
     reduceMotion: false,
     onReduceMotionChange: vi.fn(),
+    onFoundSchool: vi.fn(),
   };
+
+  it("founds a new school only after the national title and a second click", () => {
+    const locked = createInitialState(1_000);
+    const { unmount } = render(<OverviewView view="settings" state={locked} {...callbacks} />);
+    expect(screen.getByRole("button", { name: "Fonda la nuova scuola" })).toBeDisabled();
+    unmount();
+
+    const ready = { ...locked, tournaments: { ...locked.tournaments, nationalTitlesCurrentSchool: 1 } };
+    render(<OverviewView view="settings" state={ready} {...callbacks} />);
+    fireEvent.change(screen.getByLabelText("Nome della scuola"), { target: { value: "Onde di Levante" } });
+    fireEvent.change(screen.getByLabelText("Città"), { target: { value: "La Spezia" } });
+    fireEvent.click(screen.getByRole("button", { name: "Fonda la nuova scuola" }));
+    expect(callbacks.onFoundSchool).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Conferma: fonda la scuola" }));
+    expect(callbacks.onFoundSchool).toHaveBeenCalledWith(expect.objectContaining({
+      name: "Onde di Levante",
+      city: "La Spezia",
+      specialization: "redazione",
+    }));
+  });
 
   it("requires a second explicit click before resetting", () => {
     render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
@@ -175,11 +196,16 @@ describe("OverviewView settings", () => {
       .toBeInTheDocument();
   });
 
-  it("does not render prestige or school-foundation controls", () => {
-    render(<OverviewView view="settings" state={createInitialState(1_000)} {...callbacks} />);
+  it("lists the network schools with their fixed rent", () => {
+    const initial = createInitialState(1_000);
+    const school = {
+      id: "school-1", name: "Ordine delle Onde", city: "Genova", motto: "", specialization: "generale" as const,
+      membersAtTransfer: 120, emailsSent: 0, eventsCompleted: 0, transferredAt: 1_000, monthlyRent: 1_450, championsWin: true, reptileWin: "superba" as const,
+    };
+    render(<OverviewView view="settings" state={{ ...initial, network: { ...initial.network, schools: [school] } }} {...callbacks} />);
 
     expect(screen.queryByText("Coming Soon")).not.toBeInTheDocument();
-    expect(screen.queryByText("Rete delle scuole")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Fonda la nuova scuola" })).not.toBeInTheDocument();
+    expect(screen.getByText("Ordine delle Onde · Sede madre")).toBeInTheDocument();
+    expect(screen.getByText(/120 iscritti · Champions · Superba/)).toBeInTheDocument();
   });
 });
