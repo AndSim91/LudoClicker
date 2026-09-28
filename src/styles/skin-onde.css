@@ -50,7 +50,7 @@
   --success: #7fdcae;
   --warning: #f3a36f;
   --equipment-load: var(--onde-gold-bright);
-  --equipment-broken: #ff8a80;
+  --equipment-broken: #ffa39a;
   --equipment-reserved: #9fb9bd;
   --equipment-healthy: #7fdcae;
 
@@ -315,4 +315,129 @@
 :root[data-theme="dark"] .composer[data-email-status="readyToSend"] .composer-status em {
   color: var(--onde-gold-bright);
   font-weight: 600;
+}
+
+/* ---- Eventi: each activity is a card, its risk is a coloured edge --------- */
+
+:root[data-theme="dark"] .event-list {
+  display: grid;
+  gap: 12px;
+  border-top: 0;
+}
+
+:root[data-theme="dark"] .event-row {
+  --risk-color: var(--success);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--risk-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .event-row[data-risk="medio"] {
+  --risk-color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .event-row[data-risk="alto"] {
+  --risk-color: var(--equipment-broken);
+}
+
+:root[data-theme="dark"] .event-row[data-state="running"] {
+  border-color: var(--onde-wave);
+  box-shadow: 0 0 0 1px rgb(108 211 214 / 35%), 0 0 22px rgb(108 211 214 / 18%);
+}
+
+:root[data-theme="dark"] .event-meta > span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: var(--blue-050);
+}
+
+:root[data-theme="dark"] .event-meta > .event-risk {
+  color: var(--risk-color);
+}
+
+:root[data-theme="dark"] .event-progress > span {
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+  box-shadow: 0 0 8px rgb(108 211 214 / 55%);
+}
+
+:root[data-theme="dark"] .event-cooldown-progress > span {
+  background: var(--line-strong);
+  box-shadow: none;
+}
+
+/* ---- Scuola: rows light up under the pointer ------------------------------ */
+
+:root[data-theme="dark"] .member-row:not(.people-head):hover,
+:root[data-theme="dark"] .collaborator-row:hover {
+  background: var(--onde-hover);
+}
+
+/* ---- Upgrade: a glowing tree ---------------------------------------------- */
+
+/* Completed: teal, the colour of mastery. */
+:root[data-theme="dark"] .upgrade-node.completed .upgrade-node-icon {
+  border-color: var(--onde-wave);
+  color: #ffffff;
+  background: var(--blue-600);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 12px rgb(108 211 214 / 55%);
+}
+
+/* Buyable now: gold, the colour of the next action. */
+:root[data-theme="dark"] .upgrade-node.available:not(.unaffordable) .upgrade-node-icon {
+  border-color: var(--onde-gold-bright);
+  color: var(--onde-on-gold);
+  background: var(--onde-gold-bright);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 14px rgb(240 184 90 / 55%);
+}
+
+/* Unlocked but too expensive: an outline, not an alarm. */
+:root[data-theme="dark"] .upgrade-node.available.unaffordable .upgrade-node-icon {
+  border-color: var(--equipment-broken);
+  color: var(--equipment-broken);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .upgrade-node-item:has(> .upgrade-node.completed):not(:last-child)::after {
+  background: var(--onde-wave);
+  box-shadow: 0 0 8px rgb(108 211 214 / 60%);
+}
+
+:root[data-theme="dark"] .upgrade-tree-legend i.available {
+  border-color: var(--onde-gold-bright);
+  background: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-tree-legend i.completed {
+  border-color: var(--onde-wave);
+  background: var(--onde-wave);
+}
+
+/* ---- Tornei: gold is for trophies and winners ----------------------------- */
+/* Reptile keeps its own green identity on purpose; only the ordinary season
+   screens are aligned with the Onde palette here. */
+
+:root[data-theme="dark"] .next-tournament-icon {
+  border-color: var(--onde-gold-bright);
+  color: var(--onde-gold-bright);
+  box-shadow: 0 0 16px rgb(240 184 90 / 30%);
+}
+
+/* The light theme draws these dividers in pale blue, which glares on navy. */
+:root[data-theme="dark"] .next-tournament-countdown {
+  border-right-color: var(--line-strong);
+  border-left-color: var(--line-strong);
+}
+
+:root[data-theme="dark"] .bracket-match > span.is-owned {
+  box-shadow: inset 3px 0 var(--onde-wave);
+}
+
+:root[data-theme="dark"] .bracket-match > span.is-winner b {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .tournament-hall h2 {
+  color: var(--onde-gold-bright);
 }

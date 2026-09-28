@@ -448,6 +448,18 @@
   flex: 0 0 116px;
 }
 
+/* A completed node lights the stretch of branch that leads to the next one. */
+.upgrade-node-item:has(> .upgrade-node.completed):not(:last-child)::after {
+  position: absolute;
+  z-index: -1;
+  top: 14px;
+  left: 54px;
+  width: 116px;
+  height: 2px;
+  background: var(--success);
+  content: "";
+}
+
 .upgrade-node {
   display: flex;
   width: 108px;
@@ -507,20 +519,22 @@
 
 .upgrade-node-level {
   color: var(--ink-muted);
-  font-size: 8px;
+  font-size: 9px;
   font-variant-numeric: tabular-nums;
 }
 
+/* Two readable lines instead of one truncated line of 9px text. */
 .upgrade-node strong {
-  display: block;
+  display: -webkit-box;
   width: 100%;
+  min-height: 2.3em;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: var(--ink);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.15;
 }
 
 .upgrade-node.locked strong,

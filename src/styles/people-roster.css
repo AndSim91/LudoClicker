@@ -801,3 +801,14 @@
     width: 100%;
   }
 }
+
+/* Same rarity edge as the collaborator rows; commons stay unmarked. */
+.member-row.rarity-rare { box-shadow: inset 3px 0 var(--rarity-rare-accent); }
+.member-row.rarity-ultra-rare { box-shadow: inset 3px 0 var(--rarity-ultra-rare-accent); }
+.member-row.rarity-legendary { box-shadow: inset 3px 0 var(--rarity-legendary-accent); }
+.member-row.rarity-secret-legendary { box-shadow: inset 3px 0 var(--rarity-secret-legendary-accent); }
+
+.rarity-overview article { border-top: 3px solid var(--rarity-common-accent); }
+.rarity-overview article.rare { border-top-color: var(--rarity-rare-accent); }
+.rarity-overview article.ultra-rare { border-top-color: var(--rarity-ultra-rare-accent); }
+.rarity-overview article.legendary { border-top-color: var(--rarity-legendary-accent); }

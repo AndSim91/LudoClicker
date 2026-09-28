@@ -16,6 +16,8 @@ import { FIRST_EVENT_TUTORIAL_SCENE_ID, isTutorialScenePending } from "../../gam
 import type { AcquisitionEvent, GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 
+const POTENTIAL_LEVELS = ["Molto bassa", "Bassa", "Media", "Alta", "Altissima"] as const;
+
 function quantityLabel(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
@@ -168,6 +170,8 @@ export function EventsView({
             <article
               className="event-row"
               key={definition.id}
+              data-risk={definition.risk.toLocaleLowerCase("it-IT")}
+              data-state={matching ? "running" : onCooldown ? "cooldown" : disabled ? "blocked" : "ready"}
               data-tutorial-region={
                 definition.id === "park-sparring" ? "park-sparring-event" : undefined
               }
@@ -175,15 +179,25 @@ export function EventsView({
             >
               <div className="event-copy">
                 <div className="event-meta">
-                  <span>{Math.round(displayedDurationMs / 1_000)} secondi</span>
-                  <span>Rischio {definition.risk.toLocaleLowerCase("it-IT")}</span>
-                  <span>{memberRequirement(definition.requiredMembers)}</span>
-                  <span>{definition.requiredSwords} spade</span>
+                  <span><Icon name="clock" />{Math.round(displayedDurationMs / 1_000)} secondi</span>
+                  <span className="event-risk"><Icon name="warning" />Rischio {definition.risk.toLocaleLowerCase("it-IT")}</span>
+                  <span><Icon name="people" />{memberRequirement(definition.requiredMembers)}</span>
+                  <span><Icon name="wrench" />{definition.requiredSwords} spade</span>
                 </div>
                 <h2>{definition.title}</h2>
                 <strong>{definition.location}</strong>
                 <p>{definition.description}</p>
-                <small className="event-potential">Potenzialità: {definition.potential}</small>
+                <small className="event-potential">
+                  <span className="event-potential-meter" aria-hidden="true">
+                    {POTENTIAL_LEVELS.map((level, index) => (
+                      <i
+                        key={level}
+                        className={index <= POTENTIAL_LEVELS.indexOf(definition.potential) ? "is-on" : undefined}
+                      />
+                    ))}
+                  </span>
+                  Potenzialità: {definition.potential}
+                </small>
                 {matching ? (
                   <div className="event-progress-block">
                     <div className="event-progress-label">

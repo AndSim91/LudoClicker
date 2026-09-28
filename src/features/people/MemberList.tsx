@@ -513,7 +513,10 @@ export function MemberList({
         const memberForms = memberStudent.forms;
         const preparation = presentation.preparation;
         return (
-          <div className="people-row member-row" key={contact.id}>
+          <div
+            className={`people-row member-row ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}
+            key={contact.id}
+          >
             <div className="member-name" data-label="Nome">
               <button
                 type="button"

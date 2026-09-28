@@ -852,9 +852,35 @@
 }
 
 .event-potential {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--success);
   font-weight: 600;
+}
+
+/* Five-step signal meter next to the potential label. */
+.event-potential-meter {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.event-potential-meter i {
+  width: 4px;
+  border-radius: 1px;
+  background: var(--line-strong);
+}
+
+.event-potential-meter i:nth-child(1) { height: 4px; }
+.event-potential-meter i:nth-child(2) { height: 6px; }
+.event-potential-meter i:nth-child(3) { height: 8px; }
+.event-potential-meter i:nth-child(4) { height: 10px; }
+.event-potential-meter i:nth-child(5) { height: 12px; }
+
+.event-potential-meter i.is-on {
+  background: currentcolor;
 }
 
 .event-progress-block {
@@ -893,7 +919,19 @@
 
 .event-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   color: var(--blue-700);
   font-size: 11px;
+}
+
+.event-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.event-meta svg {
+  width: 13px;
+  height: 13px;
 }
