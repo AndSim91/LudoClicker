@@ -1,5 +1,6 @@
 import { GAME_CONFIG } from "../game/config";
 import { isGameAreaUnlocked } from "../game/progression";
+import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
 import type { GameState } from "../game/types";
 
 export const TUTORIAL_REGION_IDS = [
@@ -188,9 +189,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono iscritti o spade; poi attendi il suo completamento.",
         ],
         focusRegions: ["main", "park-sparring-action"],
-        isComplete: ({ state }) => state.acquisitionEvents.some(
-          (event) => event.tutorialSceneId === "first-event",
-        ),
+        isComplete: ({ state }) => hasCompletedTutorialSparring(state) ||
+          state.acquisitionEvents.some((event) => event.tutorialSceneId === "first-event"),
       },
       {
         id: "wait-free-sparring",
@@ -201,9 +201,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Scemo chi legge!",
         ],
         focusRegions: ["main", "park-sparring-event"],
-        isComplete: ({ state }) => state.acquisitionEvents.some(
-          (event) => event.tutorialSceneId === "first-event" && event.status === "completed",
-        ),
+        isComplete: ({ state }) => hasCompletedTutorialSparring(state),
       },
       {
         id: "contacts-increased",
@@ -230,9 +228,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         ],
         focusRegions: ["day-panel"],
         navigateTo: "mail",
-        isComplete: ({ state }) => state.scheduledTrials.some(
-          (trial) => trial.tutorialSceneId === "first-event" && trial.status === "scheduled",
-        ),
+        // A booked trial is counted for good; the trial itself moves on from
+        // "scheduled" after a few seconds, so its status cannot be the signal.
+        isComplete: ({ state }) => state.statistics.trialsBooked >= 1,
       },
     ],
   },

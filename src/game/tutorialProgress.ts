@@ -4,6 +4,13 @@ import type { GameState } from "./types";
 
 export const FIRST_EVENT_TUTORIAL_SCENE_ID = "first-event" as const;
 
+// Completed events leave `acquisitionEvents` (moved to the history archive in
+// save v82), so the archive count is the lasting proof. The first flyering run
+// while the Events tutorial is pending is always the tutorial one.
+export function hasCompletedTutorialSparring(state: GameState): boolean {
+  return (state.historyArchive.completedEventsByDefinition["park-sparring"] ?? 0) > 0;
+}
+
 export function isTutorialScenePending(state: GameState, sceneId: string): boolean {
   return !state.tutorial.completedSceneIds.includes(sceneId) &&
     !state.tutorial.skippedSceneIds.includes(sceneId);
