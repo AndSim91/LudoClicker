@@ -2079,10 +2079,10 @@ Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
 nessun Leggendario Segreto deve avere una prova in corso. Dopo la prima
 fondazione tutte le pagine, tranne Gadget, restano visibili fin dall'inizio.
 
-> **Da implementare:** statistiche minime dopo la prima email e report aggregato del funnel dopo la prima prova non esistono; il messaggio “Richiesta apertura nuova scuola” rimanda alle Impostazioni, ma nessuna schermata offre ancora il comando per fondare la scuola.
+> **Da implementare:** statistiche minime dopo la prima email e report aggregato del funnel dopo la prima prova non esistono.
 
-Le soglie sono configurabili e andranno calibrate per raggiungere il primo
-prestigio dopo circa 3–4 ore.
+Il primo prestigio (primo titolo nazionale) è calibrato per arrivare in
+**60–90 minuti** di gioco attivo (§ 21).
 
 ### 10.12 Comunicazioni di sistema
 
@@ -2801,8 +2801,11 @@ eventi negativi consecutivi: se gli ultimi 2 eventi dello storico sono negativi
 Ogni nuova partita inizia presso **LudoSport Genova – Ordine delle Onde**.
 
 Il primo ciclo racconta la crescita del giocatore da collaboratore operativo a
-persona capace di coordinare una scuola e deve durare indicativamente **3–4 ore
-di gioco**.
+persona capace di coordinare una scuola e deve durare indicativamente **60–90
+minuti di gioco attivo**. Con il simulatore di bilanciamento (strategia
+«competitive», che forma gli iscritti e partecipa ai tornei) il primo titolo
+nazionale arriva a circa 83 minuti a ritmo intenso e 70–107 minuti a ritmo
+tranquillo.
 
 ### 17.2 Sblocco
 
@@ -2846,9 +2849,14 @@ specializzazioni sono quattro:
 | Specializzazione | Effetto                                                                          |
 | ---------------- | -------------------------------------------------------------------------------- |
 | Generale         | nessuno (valore della scuola iniziale)                                           |
-| Redazione        | potenza di scrittura ×1,1                                                        |
-| Eventi           | +10% di pubblico agli eventi                                                     |
-| Accoglienza      | +10 punti di avanzamento verso le probabilità massime di prenotazione della prova e di iscrizione |
+| Redazione        | ogni nuova email parte già al 20% (in più di Campi intelligenti) e il Flusso cala a metà velocità |
+| Eventi           | lo stesso evento può svolgersi due volte in contemporanea (pulsante «Avvia un secondo turno») |
+| Accoglienza      | ogni prova fallita di un contatto ordinario si ripete una volta; abbandoni di fine anno −25% |
+
+Ogni specializzazione cambia il modo di giocare invece di dare un bonus
+percentuale (piano 3.6). Costanti in `GAME_CONFIG`: `redazioneEmailHeadStart`
+0,2, `redazioneFlowDrainScale` 0,5, `eventiParallelRuns` 2,
+`accoglienzaDepartureScale` 0,75.
 
 Il modulo si trova in Impostazioni → **Rete dell'Ordine**
 (`src/features/settings/NetworkPanel.tsx`): nome, città, specializzazione
@@ -2981,7 +2989,8 @@ versione 85 ricevono `membri al trasferimento × 40 € × 25%`.
 
 ### 18.1 Regole
 
-Quando il gioco viene chiuso o messo in pausa, il calendario e tutte le attività
+Scelta di design confermata il 28/09: nessun progresso offline. Quando il gioco
+viene chiuso o messo in pausa, il calendario e tutte le attività
 temporizzate restano fermi. Non vengono prodotti caratteri, contenuti Social,
 Follower, contatti, rette o sponsorizzazioni e non viene creato alcun riepilogo
 offline. Alla ripresa tutte le scadenze vengono spostate in avanti della durata
@@ -3464,7 +3473,7 @@ Reptile al livello 2 diventano subito Superba
 | Primo evento               |            entro 20 minuti |
 | Primo collaboratore        |               20–40 minuti |
 | Automazione percepibile    |               30–60 minuti |
-| Primo prestigio            | 3–4 ore attive distribuite |
+| Primo prestigio            | 60–90 minuti attivi        |
 
 La tabella resta un obiettivo di design. Il test automatico
 `src/game/balance.test.ts` ne controlla una parte simulando 120 partite a 6
@@ -3472,6 +3481,18 @@ input al secondo con volantinaggio continuo: il 90° percentile del primo
 iscritto deve restare entro 8 minuti, quello del primo potenziamento
 (Presentazione preparata) entro 10 minuti, e il primo collaboratore deve
 arrivare entro 45 minuti in ogni partita simulata.
+
+Il primo prestigio è misurato da `src/game/long-term-balance.test.ts` con il
+simulatore (`simulateBalanceGame`, strategia predefinita «competitive»: assegna
+Istruttori, fa seguire le Forme a tutti gli iscritti e le Forme successive ai 12
+atleti migliori, compra la catena di Insegnamento e le spade per le formazioni in
+attesa). Il test richiede che il primo titolo nazionale non arrivi prima di 60
+minuti e che la mediana a ritmo intenso resti entro 90. Gli standard dei tornei
+sono stati tarati di conseguenza: Accademico 90 e Nazionale 110 (erano 150 e
+225), Champion's resta 300. Il ritmo è scandito dal calendario (un Nazionale ogni
+12 minuti), quindi i tempi arrivano a gradini: 71, 83, 95, 107 minuti. La
+strategia «basic» (solo scrittura, eventi e potenziamenti del funnel) resta
+disponibile come opzione.
 
 ### 21.2 Avvio consigliato
 
@@ -4281,10 +4302,9 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome
   scelto dal giocatore.
 
-  > **Da implementare:** la fondazione esiste solo nella logica di gioco;
-  > nessuna schermata permette di avviarla.
+  La fondazione si avvia da Impostazioni → Rete dell'Ordine (§ 17.3).
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
-- Il primo prestigio deve arrivare dopo circa 3–4 ore e offrire subito un bonus
+- Il primo prestigio deve arrivare dopo circa 60–90 minuti e offrire subito un bonus
   significativo.
 - Il gioco è infinito.
 - Il progresso offline è attivo.

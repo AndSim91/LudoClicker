@@ -50,12 +50,13 @@ export function startNextCampaign(state: GameState, now: number): GameState {
     state.upgrades,
     "emailInitialProgress",
   );
-  const email = initialProgress > 0
+  // Redazione schools start every email further on, on top of the upgrades.
+  const startShare = Math.min(0.25, initialProgress) +
+    (state.school.specialization === "redazione" ? GAME_CONFIG.redazioneEmailHeadStart : 0);
+  const email = startShare > 0
     ? {
         ...createdEmail,
-        revealedCharacters: Math.floor(
-          getEmailBuildLength(createdEmail) * Math.min(0.25, initialProgress),
-        ),
+        revealedCharacters: Math.floor(getEmailBuildLength(createdEmail) * startShare),
       }
     : createdEmail;
   return {

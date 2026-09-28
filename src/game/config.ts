@@ -107,6 +107,11 @@ export const GAME_CONFIG = {
   // Champion's Arena, Reptile/Superba and Chronicles add 25 points each: up to 100% of the fees.
   networkRentBonusPerTournament: 0.25,
   prestigeBonusPerSchool: 0.05,
+  // Specializations chosen at the foundation of a new school.
+  redazioneEmailHeadStart: 0.2,
+  redazioneFlowDrainScale: 0.5,
+  eventiParallelRuns: 2,
+  accoglienzaDepartureScale: 0.75,
   saveIntervalMs: 60_000,
   recentEmailsLimit: 500,
   recentCompletedTrialsLimit: 500,

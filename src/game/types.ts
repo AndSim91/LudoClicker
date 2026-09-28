@@ -102,6 +102,8 @@ export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface WritingFlow {
   meter: number;
   updatedAt: number;
+  /** Redazione schools lose the Flusso more slowly (0.5). */
+  drainScale?: number;
 }
 
 export interface PendingEmailOutcome {

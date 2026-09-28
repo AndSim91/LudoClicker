@@ -11,7 +11,7 @@ import {
   getEventCharismaBonus,
   getEventCollaboratorMultiplier,
 } from "./eventRewards";
-import type { FormId, GameState, PersonRarity } from "./types";
+import type { FormId, GameState, PersonRarity, SchoolSpecialization } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -28,8 +28,7 @@ export function getEmailBookingChance(
     legendary: 1,
   };
   const progress = clamp(
-    getCreativityProgress(state.upgrades) +
-      (state.school.specialization === "accoglienza" ? 0.1 : 0),
+    getCreativityProgress(state.upgrades),
     0,
     1,
   );
@@ -51,8 +50,7 @@ export function getEnrollmentChance(
   );
   const improvementProgress = clamp(
     getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") +
-      instructorProductivity * 0.1 * instructorEffectiveness +
-      (state.school.specialization === "accoglienza" ? 0.1 : 0),
+      instructorProductivity * 0.1 * instructorEffectiveness,
     0,
     1,
   );
@@ -101,8 +99,7 @@ export function getEventFunnelOutcome(
 export function getWritingPower(state: GameState) {
   const localPower = 1 + getUpgradeEffectTotal(state.upgrades, "writingPower");
   const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const specializationMultiplier = state.school.specialization === "redazione" ? 1.1 : 1;
-  return localPower * networkMultiplier * specializationMultiplier;
+  return localPower * networkMultiplier;
 }
 
 const ANNUAL_DEPARTURE_CHANCE_BY_FORM = [0.8, 0.65, 0.5, 0.35, 0.25, 0.15, 0.1, 0.05] as const;
@@ -111,8 +108,11 @@ export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
   foundedSchools = 0,
+  specialization?: SchoolSpecialization,
 ): number {
   if (rarity === "legendary") return 0;
+  // Accoglienza schools keep more members at the end of the year.
+  const scale = specialization === "accoglienza" ? GAME_CONFIG.accoglienzaDepartureScale : 1;
 
   const highestForm = forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);
@@ -124,8 +124,7 @@ export function getMemberAnnualDepartureChance(
         Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool,
       0,
       1,
-    ) * 1_000) / 1_000;
+    ) * scale * 1_000) / 1_000;
   }
-  const ordinaryChance = ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)];
-  return ordinaryChance;
+  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)] * scale;
 }

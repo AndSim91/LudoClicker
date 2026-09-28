@@ -8,9 +8,10 @@ import {
 
 const GAME_COUNT = 2;
 const INTENSE_HORIZON_MS = 2 * 60 * 60_000;
-const RELAXED_HORIZON_MS = 4 * 60 * 60_000;
-const INTENSE_MINIMUM_MS = 2 * 60 * 60_000;
-const RELAXED_MINIMUM_MS = 4 * 60 * 60_000;
+const RELAXED_HORIZON_MS = 2 * 60 * 60_000;
+// First prestige (first National title): 60–90 minutes of active play.
+const MINIMUM_MS = 60 * 60_000;
+const INTENSE_MAXIMUM_MS = 90 * 60_000;
 
 function seeds(count: number): number[] {
   return Array.from({ length: count }, (_, index) => index + 1);
@@ -42,21 +43,18 @@ describe("long-term automated balance simulation", () => {
     expect(relaxed.every((result) => result.state.school.fame > 0)).toBe(true);
   });
 
-  it("does not make the first school available before the intended session targets", () => {
+  it("opens the first prestige within the intended session targets", () => {
     const intenseTimes = reachedTimes(intense);
     const relaxedTimes = reachedTimes(relaxed);
 
-    if (intenseTimes.length > 0) {
-      expect.soft(
-        percentile(intenseTimes, 0.1),
-        "P10 del primo prestigio intenso: target minimo 2 ore",
-      ).toBeGreaterThanOrEqual(INTENSE_MINIMUM_MS);
-    }
+    expect(intenseTimes, "ogni partita intensa arriva al primo Nazionale").toHaveLength(GAME_COUNT);
+    expect.soft(percentile(intenseTimes, 0.1), "P10 del primo prestigio: almeno 60 minuti")
+      .toBeGreaterThanOrEqual(MINIMUM_MS);
+    expect.soft(percentile(intenseTimes, 0.5), "mediana del primo prestigio intenso: entro 90 minuti")
+      .toBeLessThanOrEqual(INTENSE_MAXIMUM_MS);
     if (relaxedTimes.length > 0) {
-      expect.soft(
-        percentile(relaxedTimes, 0.1),
-        "P10 del primo prestigio tranquillo: target minimo 4 ore",
-      ).toBeGreaterThanOrEqual(RELAXED_MINIMUM_MS);
+      expect.soft(percentile(relaxedTimes, 0.1), "P10 del primo prestigio tranquillo: almeno 60 minuti")
+        .toBeGreaterThanOrEqual(MINIMUM_MS);
     }
   });
 

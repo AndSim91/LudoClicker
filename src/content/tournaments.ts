@@ -41,7 +41,9 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Torneo Accademico Alpha",
     calendarMonth: 4,
     fieldSize: 64,
-    standard: 150,
+    // Academy and National are tuned so the first National title (the prestige
+    // gate) arrives around 80–90 minutes of active play (balanceSimulation).
+    standard: 90,
     npc: {
       rarityWeights: [["common", 0.65], ["rare", 0.30], ["ultra-rare", 0.05]],
       formWeights: [[1, 0.20], [2, 0.40], [3, 0.30], [4, 0.10]],
@@ -59,7 +61,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Torneo Nazionale",
     calendarMonth: 6,
     fieldSize: 64,
-    standard: 225,
+    standard: 110,
     npc: {
       rarityWeights: [["common", 0.35], ["rare", 0.50], ["ultra-rare", 0.15]],
       formWeights: [[3, 0.10], [4, 0.35], [5, 0.40], [6, 0.15]],

@@ -56,7 +56,15 @@ function getEventStartDetails(
   checkContext = createEventStartCheckContext(state),
 ) {
   const definition = getAcquisitionEventDefinition(definitionId);
-  if (!definition || checkContext.runningDefinitionIds.has(definitionId)) return undefined;
+  if (!definition) return undefined;
+  // Eventi schools can run the same event twice at once.
+  if (
+    checkContext.runningDefinitionIds.has(definitionId) &&
+    (state.school.specialization !== "eventi" ||
+      state.acquisitionEvents.filter(
+        (event) => event.status === "running" && event.definitionId === definitionId,
+      ).length >= GAME_CONFIG.eventiParallelRuns)
+  ) return undefined;
   const collaborator = collaboratorId
     ? checkContext.collaboratorsById.get(collaboratorId)
     : undefined;

@@ -11,6 +11,7 @@ import {
 } from "../../game/eventCooldowns";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipment";
+import { canStartAcquisitionEvent } from "../../game/eventFlow";
 import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import { FIRST_EVENT_TUTORIAL_SCENE_ID, isTutorialScenePending } from "../../game/tutorialProgress";
 import type { AcquisitionEvent, GameState } from "../../game/types";
@@ -139,6 +140,9 @@ export function EventsView({
             lacksEquipment &&
             damagedSwords > 0 &&
             availableSwords + damagedSwords >= definition.requiredSwords;
+          // Eventi schools can start the same event a second time while it runs.
+          const canRunAgain = Boolean(matching) && state.school.specialization === "eventi" &&
+            canStartAcquisitionEvent(state, definition.id, now);
           const progress = matching ? getEventProgress(matching, now) : 0;
           const displayedDurationMs = matching
             ? matching.resolvesAt - matching.startedAt
@@ -245,6 +249,13 @@ export function EventsView({
               >
                 {action}
               </button>
+              {canRunAgain ? (
+                <button type="button" onClick={() => onStart(definition.id)}>
+                  {definition.cost === 0
+                    ? "Avvia un secondo turno"
+                    : `Avvia un secondo turno · ${formatCurrency(definition.cost)}`}
+                </button>
+              ) : null}
             </article>
           );
         })}

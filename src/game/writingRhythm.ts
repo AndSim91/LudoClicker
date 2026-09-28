@@ -24,9 +24,10 @@ export function getFlowMeterAt(flow: WritingFlow | undefined, now: number): numb
   const idleMs = Math.max(0, now - flow.updatedAt);
   const graceMs = Math.min(idleMs, GAME_CONFIG.flowGraceMs);
   const pauseMs = Math.max(0, idleMs - GAME_CONFIG.flowGraceMs);
-  const drained =
+  const drained = (flow.drainScale ?? 1) * (
     (graceMs / 1_000) * GAME_CONFIG.flowDrainPerSecond +
-    (pauseMs / 1_000) * GAME_CONFIG.flowPauseDrainPerSecond;
+    (pauseMs / 1_000) * GAME_CONFIG.flowPauseDrainPerSecond
+  );
   return Math.min(GAME_CONFIG.flowMeterMax, Math.max(0, flow.meter - drained));
 }
 
@@ -54,6 +55,7 @@ export function applyFlowInput(
   flow: WritingFlow | undefined,
   now: number,
   cap: number = GAME_CONFIG.flowMaxMultiplier,
+  drainScale = 1,
 ): WritingFlow {
   return {
     meter: Math.min(
@@ -61,6 +63,7 @@ export function applyFlowInput(
       getFlowMeterAt(flow, now) + GAME_CONFIG.flowGainPerInput,
     ),
     updatedAt: now,
+    ...(drainScale === 1 ? {} : { drainScale }),
   };
 }
 

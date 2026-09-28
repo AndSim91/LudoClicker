@@ -77,7 +77,12 @@ export function writeCharacters(
 export function write(state: GameState, now: number): GameState {
   // Locked Flusso (cap ×1): plain one-step writing, nothing stored.
   const flowCap = getFlowCap(state.upgrades);
-  const flow = flowCap > 1 ? applyFlowInput(state.player.flow, now, flowCap) : undefined;
+  const flow = flowCap > 1 ? applyFlowInput(
+    state.player.flow,
+    now,
+    flowCap,
+    state.school.specialization === "redazione" ? GAME_CONFIG.redazioneFlowDrainScale : 1,
+  ) : undefined;
   let amount = state.player.writingPower * (flow ? getFlowMultiplier(flow.meter, flowCap) : 1);
   let perfectPhrase = false;
 

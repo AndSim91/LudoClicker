@@ -338,7 +338,7 @@ describe("game engine: narrative", () => {
     expect(founded.network.schools[0].reptileWin).toBeUndefined();
     expect(founded.tournaments.nationalTitlesCurrentSchool).toBeUndefined();
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
-    expect(founded.player.writingPower).toBeCloseTo(1.1 * (1 + GAME_CONFIG.prestigeBonusPerSchool));
+    expect(founded.player.writingPower).toBeCloseTo(1 + GAME_CONFIG.prestigeBonusPerSchool);
     // The new school has no members yet: its income is the fixed rent of the old one.
     expect(selectIncomePerMonth(founded)).toBe(expectedRent);
     expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });

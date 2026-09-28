@@ -220,6 +220,7 @@ function processMemberDepartures(
       forms,
       member.rarity,
       state.network.schools.length,
+      state.school.specialization,
     );
     if (roll < departureChance) departedIds.add(member.id);
   }

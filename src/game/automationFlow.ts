@@ -729,6 +729,7 @@ export function processAutomaticTeaching(
         student.forms,
         contact.rarity,
         state.network.schools.length,
+        state.school.specialization,
       )
       : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];

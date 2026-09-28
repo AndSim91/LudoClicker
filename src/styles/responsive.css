@@ -32,9 +32,14 @@
     grid-column: 2;
   }
 
-  .event-row > button {
+  .event-row > button,
+  .event-row > button + button {
     grid-column: 1;
     justify-self: start;
+  }
+
+  .event-row:has(> button + button) > .event-copy {
+    grid-row: auto;
   }
 
   .event-capacity-note {

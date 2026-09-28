@@ -8,9 +8,9 @@ import type { GameState, SchoolFoundationDetails, SchoolSpecialization } from ".
 import { formatCurrency, formatDateTime } from "../../shared/formatters";
 
 const SPECIALIZATIONS: [SchoolSpecialization, string][] = [
-  ["redazione", "Redazione · +10% scrittura"],
-  ["eventi", "Eventi · +10% pubblico"],
-  ["accoglienza", "Accoglienza · +10% conversioni"],
+  ["redazione", "Redazione · email già al 20%, Flusso più stabile"],
+  ["eventi", "Eventi · stesso evento due volte insieme"],
+  ["accoglienza", "Accoglienza · seconda prova, −25% abbandoni"],
 ];
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;

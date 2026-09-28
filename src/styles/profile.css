@@ -816,6 +816,19 @@
   border-bottom: 1px solid var(--line);
 }
 
+.event-row > button + button {
+  grid-column: 2;
+  align-self: start;
+}
+
+.event-row:has(> button + button) > .event-copy {
+  grid-row: span 2;
+}
+
+.event-row:has(> button + button) > button:first-of-type {
+  align-self: end;
+}
+
 .event-copy {
   min-width: 0;
 }

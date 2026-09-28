@@ -84,7 +84,8 @@ describe("upgrade revamp mechanics", () => {
       ...initial,
       school: { ...initial.school, specialization: "accoglienza" as const },
     };
-    expect(getEmailBookingChance(specialized, "common")).toBeCloseTo(0.445);
+    // Accoglienza now works through retries and departures, not the booking chance.
+    expect(getEmailBookingChance(specialized, "common")).toBe(getEmailBookingChance(initial, "common"));
   });
 
   it("recovers one ordinary failed trial once and requires a new email", () => {

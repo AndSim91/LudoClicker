@@ -109,7 +109,7 @@ describe("secret legendary balancing", () => {
       academy: TOURNAMENT_DEFINITIONS.academy.standard,
       national: TOURNAMENT_DEFINITIONS.national.standard,
       champions: TOURNAMENT_DEFINITIONS.champions.standard,
-    }).toEqual({ academy: 150, national: 225, champions: 300 });
+    }).toEqual({ academy: 90, national: 110, champions: 300 });
 
     const targets: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
       "marco-palena": [140, 155],
@@ -404,10 +404,10 @@ describe("tournament simulation", () => {
   });
 
   it.each([
-    { level: "academy" as const, standard: 150, qualifiers: 6 },
-    { level: "academy" as const, standard: 150, qualifiers: 12 },
-    { level: "national" as const, standard: 225, qualifiers: 6 },
-    { level: "national" as const, standard: 225, qualifiers: 12 },
+    { level: "academy" as const, standard: 90, qualifiers: 6 },
+    { level: "academy" as const, standard: 90, qualifiers: 12 },
+    { level: "national" as const, standard: 110, qualifiers: 6 },
+    { level: "national" as const, standard: 110, qualifiers: 12 },
     { level: "champions" as const, standard: 300, qualifiers: 6 },
     { level: "champions" as const, standard: 300, qualifiers: 12 },
   ])(

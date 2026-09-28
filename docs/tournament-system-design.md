@@ -417,9 +417,14 @@ Non comprende gli atleti della scuola, i posti vacanti o i Leggendari Segreti.
 
 | Torneo | Media Arena | Media Stile |
 |---|---:|---:|
-| Accademico | 150 | 150 |
-| Nazionale | 225 | 225 |
+| Accademico | 90 | 90 |
+| Nazionale | 110 | 110 |
 | Champion's | 300 | 300 |
+
+Dal 28/09 Accademico e Nazionale sono stati abbassati (erano 150 e 225) perché
+il primo titolo nazionale, che sblocca il prestigio, arrivi in 60–90 minuti di
+gioco attivo; i Leggendari Segreti hanno mantenuto i valori sotto, quindi ora
+sono nettamente sopra la media del loro torneo.
 
 Ogni campo viene normalizzato direttamente sul proprio standard, sia con sei
 sia con dodici qualificati della scuola. Lo standard non è una soglia rigida
@@ -588,14 +593,14 @@ torneo e non modifica il Leggendario Segreto.
 
 | N. | Profilo | Torneo | Media Arena/Stile | Arena effettiva | Stile effettivo |
 |---:|---|---|---:|---:|---:|
-| 1. | Marco Palena | Accademico Alpha | 150 / 150 | 140 | 155 |
-| 2. | Lorenzo Todaro | Accademico Alpha | 150 / 150 | 151 | 151 |
-| 3. | Daniele Panizza | Accademico Alpha | 150 / 150 | 155 | 140 |
-| 4. | Sara Magnifico | Accademico Alpha | 150 / 150 | 130 | 165 |
-| 5. | Daniele Maggi | Accademico Alpha | 150 / 150 | 140 | 140 |
-| 6. | Pietro Scarica | Nazionale | 225 / 225 | 220 | 230 |
-| 7. | Piero Dipalo | Nazionale | 225 / 225 | 200 | 210 |
-| 8. | Simone Pedrazzi | Nazionale | 225 / 225 | 200 | 225 |
+| 1. | Marco Palena | Accademico Alpha | 90 / 90 | 140 | 155 |
+| 2. | Lorenzo Todaro | Accademico Alpha | 90 / 90 | 151 | 151 |
+| 3. | Daniele Panizza | Accademico Alpha | 90 / 90 | 155 | 140 |
+| 4. | Sara Magnifico | Accademico Alpha | 90 / 90 | 130 | 165 |
+| 5. | Daniele Maggi | Accademico Alpha | 90 / 90 | 140 | 140 |
+| 6. | Pietro Scarica | Nazionale | 110 / 110 | 220 | 230 |
+| 7. | Piero Dipalo | Nazionale | 110 / 110 | 200 | 210 |
+| 8. | Simone Pedrazzi | Nazionale | 110 / 110 | 200 | 225 |
 
 #### Marco Palena
 
