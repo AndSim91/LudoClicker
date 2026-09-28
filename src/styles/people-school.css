@@ -606,3 +606,9 @@
     transition: none;
   }
 }
+
+/* The gym illustration belongs to Modalità Onde only: the light theme stays a
+   plausible Outlook window (see skin-onde.css). */
+.gym-scene {
+  display: none;
+}

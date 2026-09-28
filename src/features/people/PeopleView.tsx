@@ -12,6 +12,7 @@ import type {
 import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
+import { GymScene } from "./GymScene";
 import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
 
@@ -112,6 +113,7 @@ export function PeopleView({
           <path d="M42 96 C151 70 232 111 342 72 C410 48 468 41 520 35" />
         </svg>
       </header>
+      <GymScene state={stateOverride} />
       {showCollaborators ? (
         <section
           className="people-section"
