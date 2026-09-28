@@ -264,6 +264,26 @@ solo per i Collaboratori).
 
 Il Percorso Segreto «Corso X» si scopre vincendo il Torneo della Superba (vedi 10.9 e 20.7).
 
+**Quota della scuola.** La quota base sale quando la scuola corrente raggiunge
+per la prima volta un certo numero di iscritti attivi (`membershipFeeTiers` in
+`GAME_CONFIG`, `getMemberFee` in `src/game/membershipEconomy.ts`):
+
+| Record di iscritti attivi | Quota base |
+| ------------------------- | ---------: |
+| meno di 25                |       €40 |
+| 25                        |       €50 |
+| 50                        |       €60 |
+| 100                       |       €80 |
+| 250                       |      €120 |
+| 500                       |      €160 |
+
+Conta il record della scuola (`peakActiveMembers`): la quota non scende più,
+anche se a giugno qualcuno lascia, e riparte da €40 in una nuova scuola. Ogni
+nuova soglia è annunciata una volta con l'email «Quota mensile: X €», che
+indica anche la soglia successiva. Si applica solo alla quota base: i bonus di
+Forme, Istruttori e Tecnici non cambiano. Poiché la rendita della Rete si
+calcola sulle quote (§ 17.6), anche la scuola lasciata ne beneficia.
+
 La somma delle quote è poi moltiplicata dai
 potenziamenti di entrate e da +5% per ogni scuola fondata; a questa si somma
 la rendita fissa delle scuole della Rete dell'Ordine (§ 17.6). Un mese dura **60 secondi
@@ -731,7 +751,7 @@ Per il primo prototipo:
 | Durata della lezione di prova    | 15 secondi (−1 secondo per livello di Sala preparata, minimo 10); Leggendario Segreto 30 secondi |
 | Esito della lezione              |                                                             immediato al termine |
 | Bonus di iscrizione              |                                                                  immediato (€20) |
-| Accredito della quota mensile    | al cambio mese (€40 base + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
+| Accredito della quota mensile    | al cambio mese (€40–160 base secondo il record di iscritti + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
 La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono
@@ -3465,7 +3485,8 @@ arrivare entro 45 minuti in ogni partita simulata.
 - prenotazione e iscrizione dipendono dalla rarità secondo la tabella dei
   Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;
-- quota ricorrente: €40 base per iscritto attivo, più €5 per ogni Forma o corso
+- quota ricorrente: €40 base per iscritto attivo (fino a €160 con il record di
+  iscritti, § 5), più €5 per ogni Forma o corso
   permanente registrato sul singolo allievo, più €10 per ogni attestato da
   Istruttore oppure €20 per ogni qualifica da Tecnico sulla stessa formazione, a
   ogni mese di gioco; il Corso Agonisti è escluso e il Corso X conta solo dopo
@@ -4305,8 +4326,8 @@ completa:
 6. lista di battute o riferimenti interni all'Ordine delle Onde;
 7. conferma sull'eventuale uso di persone reali come personaggi;
 8. revisione dei valori di bilanciamento dopo il primo prototipo;
-9. importo e frequenza compressa delle quote associative (oggi €40 al mese di
-   gioco da 60 secondi, più i bonus per Forme e qualifiche, e €20 una tantum
+9. importo e frequenza compressa delle quote associative (oggi da €40 a €160 al
+   mese di gioco da 60 secondi secondo il record di iscritti, più i bonus per Forme e qualifiche, e €20 una tantum
    all'iscrizione);
 10. ritmo con cui il 5,5% di Ultra Rari introduce i primi collaboratori (oggi
     il primo collaboratore è Andrea Simonazzi, 10° contatto garantito; gli Ultra

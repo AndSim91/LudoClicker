@@ -34,7 +34,7 @@ import {
   getNextGameTickAt,
   needsAutomationHeartbeat,
 } from "./gameScheduler";
-import { notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
+import { announceMembershipFeeTier, notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
 import {
   completeShortGoal,
   grantAchievements,
@@ -279,7 +279,7 @@ function tickStep(
     );
   }
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
-  return result(notifyPrestigeOffer(nextState, now), true);
+  return result(notifyPrestigeOffer(announceMembershipFeeTier(nextState, now), now), true);
 }
 
 export const MAX_CATCH_UP_STEPS_PER_TICK = 8;

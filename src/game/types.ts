@@ -906,6 +906,8 @@ export interface GameState {
     specialization: SchoolSpecialization;
     activeMembers: number;
     peakActiveMembers: number;
+    /** Fee tiers already announced by email in the current school. */
+    feeTiersAnnounced?: number;
     fame: number;
     euros: number;
     followers: number;

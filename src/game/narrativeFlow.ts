@@ -144,3 +144,20 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
     "system",
   );
 }
+
+export function announceMembershipFeeTier(state: GameState, now: number): GameState {
+  const tiers = GAME_CONFIG.membershipFeeTiers;
+  const reached = tiers.filter((tier) => state.school.peakActiveMembers >= tier.members).length;
+  if (reached <= (state.school.feeTiersAnnounced ?? 0)) return state;
+  const tier = tiers[reached - 1];
+  const next = tiers[reached];
+  return addMessage(
+    { ...state, school: { ...state.school, feeTiersAnnounced: reached } },
+    now,
+    `Quota mensile: ${tier.fee} €`,
+    `La scuola ha raggiunto ${tier.members} iscritti attivi: da questo mese la quota base di ogni iscritto sale a ${tier.fee} € e non scenderà più, anche se qualcuno lascia.${next ? ` Prossima soglia: ${next.members} iscritti, quota ${next.fee} €.` : " È la quota più alta dell'Ordine."}`,
+    "positive",
+    "focused",
+    "progress",
+  );
+}

@@ -214,7 +214,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Durata prova", value: seconds(GAME_CONFIG.trialDurationMs), detail: "durata base visibile" },
       { label: "Bonus immediato", value: `€ ${GAME_CONFIG.enrollmentBonus}`, detail: "accreditato all'iscrizione" },
-      { label: "Quota mensile", value: `€ ${GAME_CONFIG.monthlyMemberFee} + € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "base più ogni Forma o corso" },
+      { label: "Quota mensile", value: `€ ${GAME_CONFIG.monthlyMemberFee} + € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "base iniziale più ogni Forma o corso" },
     ],
     rules: [
       "Il risultato non è sempre garantito, anche dopo una prova prenotata.",
@@ -266,13 +266,14 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Mese di gioco", value: seconds(GAME_CONFIG.gameMonthMs), detail: "tempo attivo di base" },
-      { label: "Quota base", value: `€ ${GAME_CONFIG.monthlyMemberFee}`, detail: "per iscritto attivo" },
+      { label: "Quota base", value: `€ ${GAME_CONFIG.monthlyMemberFee} → € ${GAME_CONFIG.membershipFeeTiers.at(-1)!.fee}`, detail: "sale con il record di iscritti" },
       { label: "Bonus formazione", value: `+ € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "per ogni Forma o corso" },
       { label: "Bonus Istruttore", value: `+ € ${GAME_CONFIG.monthlyMemberInstructorBonus}`, detail: "per ogni attestato" },
       { label: "Bonus Tecnico", value: `+ € ${GAME_CONFIG.monthlyMemberTechnicianBonus}`, detail: "al posto del bonus Istruttore" },
     ],
     rules: [
       "Le rette considerano soltanto gli iscritti attivi.",
+      `La quota base sale quando la scuola raggiunge per la prima volta ${GAME_CONFIG.membershipFeeTiers.map((tier) => `${tier.members} iscritti (€ ${tier.fee})`).join(", ")}; non scende più, anche se qualcuno lascia, e riparte da € ${GAME_CONFIG.monthlyMemberFee} in una nuova scuola.`,
       "La formazione aumenta le entrate ma richiede tempo, denaro e attrezzatura.",
       "Follower e scuole fondate aggiungono altre entrate ricorrenti quando i sistemi sono sbloccati.",
     ],

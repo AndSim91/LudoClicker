@@ -14,9 +14,8 @@ interface MemberFeeContributionCacheEntry {
 interface MonthlyMemberFeesCache {
   contacts: GameState["contacts"];
   collaborators: GameState["collaborators"];
-  activeMembers: number;
   courseXUnlocked: boolean;
-  value: number;
+  trainingBonuses: number;
 }
 
 const memberFeeContributionCache = new WeakMap<
@@ -102,11 +101,20 @@ function haveSameMemberFeeQualifications(
   return true;
 }
 
+/** Base fee per member, set by the record of active members of the current school. */
+export function getMemberFee(peakActiveMembers: number): number {
+  let fee: number = GAME_CONFIG.monthlyMemberFee;
+  for (const tier of GAME_CONFIG.membershipFeeTiers) {
+    if (peakActiveMembers >= tier.members) fee = tier.fee;
+  }
+  return fee;
+}
+
 export function getMonthlyMemberFees(state: GameState): number {
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const baseFees = state.school.activeMembers * getMemberFee(state.school.peakActiveMembers);
   if (
     monthlyMemberFeesCache?.contacts === state.contacts &&
-    monthlyMemberFeesCache.activeMembers === state.school.activeMembers &&
     monthlyMemberFeesCache.courseXUnlocked === courseXUnlocked &&
     haveSameMemberFeeQualifications(
       monthlyMemberFeesCache.collaborators,
@@ -114,7 +122,7 @@ export function getMonthlyMemberFees(state: GameState): number {
     )
   ) {
     monthlyMemberFeesCache.collaborators = state.collaborators;
-    return monthlyMemberFeesCache.value;
+    return baseFees + monthlyMemberFeesCache.trainingBonuses;
   }
 
   const collaboratorsByContactId = new Map(
@@ -129,16 +137,13 @@ export function getMonthlyMemberFees(state: GameState): number {
     );
   }, 0);
 
-  const value = state.school.activeMembers * GAME_CONFIG.monthlyMemberFee +
-    trainingBonuses;
   monthlyMemberFeesCache = {
     contacts: state.contacts,
     collaborators: state.collaborators,
-    activeMembers: state.school.activeMembers,
     courseXUnlocked,
-    value,
+    trainingBonuses,
   };
-  return value;
+  return baseFees + trainingBonuses;
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {

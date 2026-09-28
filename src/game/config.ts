@@ -39,6 +39,15 @@ export const GAME_CONFIG = {
   perfectPhraseMaxChance: 0.05,
   perfectPhraseMaxCharacters: 60,
   monthlyMemberFee: 40,
+  // The base fee grows with the record of active members of the current school
+  // and never goes back down: 40 € up to ×4 at 500 members.
+  membershipFeeTiers: [
+    { members: 25, fee: 50 },
+    { members: 50, fee: 60 },
+    { members: 100, fee: 80 },
+    { members: 250, fee: 120 },
+    { members: 500, fee: 160 },
+  ],
   monthlyMemberFormBonus: 5,
   monthlyMemberInstructorBonus: 10,
   monthlyMemberTechnicianBonus: 20,
