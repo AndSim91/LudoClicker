@@ -58,7 +58,7 @@ export function NetworkPanel({
           <span>Se fondi ora</span>
           <strong>{formatCurrency(preview.rent)}/mese</strong>
           <small>
-            {percent(preview.share)} di {formatCurrency(preview.memberFees)} di quote · max {percent(GAME_CONFIG.networkRentShare + 2 * GAME_CONFIG.networkRentBonusPerTournament)} con Champions e {tournamentName}
+            {percent(preview.share)} di {formatCurrency(preview.memberFees)} di quote · max {percent(GAME_CONFIG.networkRentShare + 3 * GAME_CONFIG.networkRentBonusPerTournament)} con Champions, {tournamentName} e Chronicles
           </small>
         </div>
         <div>
@@ -78,6 +78,7 @@ export function NetworkPanel({
                   {school.city} · {school.membersAtTransfer} iscritti
                   {school.championsWin ? " · Champions" : ""}
                   {school.reptileWin === "superba" ? " · Superba" : school.reptileWin ? " · Reptile" : ""}
+                  {school.chroniclesWin ? " · Chronicles" : ""}
                 </small>
               </div>
               <div>

@@ -509,7 +509,8 @@ crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
 La Reputazione non si spende: è un valore che misura quanto è cresciuta la rete
 e servirà a sbloccare eventi e modalità di gioco speciali. A ogni fondazione
 cresce di 1, più 1 se la scuola lasciata ha vinto la Champion's Arena e 1 se ha
-vinto il Torneo Reptile (o la Superba in cui si è trasformato) (`foundSchool`, `src/game/schoolProgressionFlow.ts`).
+vinto il Torneo Reptile (o la Superba in cui si è trasformato) e 1 se ha vinto
+le Chronicles of Ludosport (`foundSchool`, `src/game/schoolProgressionFlow.ts`).
 È mostrata in Impostazioni → Rete dell'Ordine.
 
 I bonus permanenti dipendono invece dal numero di scuole fondate: +5% per
@@ -2794,8 +2795,9 @@ corrente; i titoli vengono contati in `nationalTitlesCurrentSchool` e ripartono
 da zero nella nuova scuola. In più nessun Leggendario Segreto deve avere una
 prova in corso.
 
-Il Nazionale arriva dopo Cronache, qualificazioni e Regionale, quindi richiede
-atleti con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
+Il Nazionale arriva dopo il Torneo Scolastico e l'Accademico Alpha,
+con le qualificazioni, e ha avversari da Forma 3 a 6, quindi richiede atleti
+con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
 il requisito, il titolo nazionale non aumenta la rendita (§ 17.6). Il
 requisito non cresce con le scuole fondate: a crescere è il costo dei
 potenziamenti (§ 17.6).
@@ -2862,7 +2864,8 @@ Simonazzi, che è garantito solo nella prima scuola.
 Gli iscritti della scuola precedente non vengono conservati come schede
 individuali. La scuola fondata registra soltanto nome, città, motto,
 specializzazione, numero di membri al trasferimento, email inviate, eventi
-completati, rendita mensile e vittorie di Champion's Arena e Reptile/Superba; Fama e statistiche cumulative restano disponibili senza creare
+completati, rendita mensile e vittorie di Champion's Arena, Reptile/Superba e
+Chronicles; Fama e statistiche cumulative restano disponibili senza creare
 uno storico nominativo.
 
 ### 17.5 Cosa rimane
@@ -2938,14 +2941,16 @@ rendita **fissa**, calcolata al momento della fondazione
 rendita = arrotonda(quote mensili degli iscritti × quota)
 quota   = 25% + 25% se ha vinto la Champion's Arena
               + 25% se ha vinto il Torneo Reptile o della Superba
+              + 25% se ha vinto le Chronicles of Ludosport (Arena o Stile)
 ```
 
-La quota arriva al massimo al **75%**. Ogni torneo conta una sola volta:
-vincere più volte la Champion's Arena non aggiunge nulla, e Reptile e Superba
-sono lo stesso torneo con un altro nome. Il Nazionale è il requisito del
+Con tutti e tre i tornei la quota arriva al **100%**. Ogni torneo conta una
+sola volta: vincere più volte la Champion's Arena non aggiunge nulla, e
+Reptile e Superba sono lo stesso torneo con un altro nome. La vittoria nelle
+Chronicles è registrata in `chroniclesVictoryCurrentSchool`. Il Nazionale è il requisito del
 prestigio e non aumenta la rendita (`networkRentBonusPerTournament = 0,25`).
 Aspettare prima di fondare rende la scuola più ricca per sempre: più iscritti,
-Forme più alte, Champions e Reptile vinti. La rendita non è toccata da moltiplicatori e si
+Forme più alte, tornei vinti. La rendita non è toccata da moltiplicatori e si
 somma alle entrate mensili (`getMonthlyOperationalIncome`); il riepilogo delle
 entrate la mostra come «Rete dell'Ordine». Le scuole fondate prima della
 versione 85 ricevono `membri al trasferimento × 40 € × 25%`.
@@ -4144,8 +4149,8 @@ manuale.
 Un reset che richiede più cicli prima di produrre un vantaggio concreto crea una
 fase morta. La prima nuova scuola deve offrire immediatamente un bonus
 significativo e visibile. Nel codice la scuola lasciata versa subito una
-rendita fissa pari al 25% delle sue quote (fino al 75% con Champion's Arena e
-Reptile/Superba), e ogni scuola
+rendita fissa pari al 25% delle sue quote (fino al 100% con Champion's Arena,
+Reptile/Superba e Chronicles), e ogni scuola
 fondata aggiunge +5% a scrittura, quote e pubblico.
 
 ### Quantità di testi

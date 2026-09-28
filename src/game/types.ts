@@ -346,6 +346,7 @@ export interface FoundedSchool {
   championsWin?: boolean;
   /** Won the Reptile, or the Superba it became: same tournament, one bonus. */
   reptileWin?: "reptile" | "superba";
+  chroniclesWin?: boolean;
 }
 
 export interface SchoolFoundationDetails {
@@ -779,6 +780,7 @@ export interface TournamentState {
   championsVictoryCurrentSchool: boolean;
   /** National titles (Arena or Style) won by the current school: one opens the prestige. */
   nationalTitlesCurrentSchool?: number;
+  chroniclesVictoryCurrentSchool?: boolean;
   chronicles: ChroniclesProgress;
   reptile: ReptileProgress;
 }

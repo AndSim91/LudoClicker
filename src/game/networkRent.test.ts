@@ -19,7 +19,7 @@ const school = (monthlyRent?: number): FoundedSchool => ({
   ...(monthlyRent === undefined ? {} : { monthlyRent }),
 });
 
-it("prices the rent at 25% of the fees, +25 points each for Champion's and Reptile/Superba", () => {
+it("prices the rent at 25% of the fees, +25 points each for Champion's, Reptile/Superba and Chronicles", () => {
   const initial = addAdminMembers(createInitialState(1_000, "Tester"), 40);
   const fees = getMonthlyMemberFees(initial);
   const titled = { ...initial, tournaments: { ...initial.tournaments, nationalTitlesCurrentSchool: 3 } };
@@ -32,13 +32,14 @@ it("prices the rent at 25% of the fees, +25 points each for Champion's and Repti
     tournaments: {
       ...titled.tournaments,
       championsVictoryCurrentSchool: true,
+      chroniclesVictoryCurrentSchool: true,
       reptile: { ...initial.tournaments.reptile, hall: [win(false), win(true), win(true)] },
     },
   };
   const preview = getFoundationRentPreview(decorated);
-  expect(preview.share).toBeCloseTo(0.75);
+  expect(preview.share).toBeCloseTo(1);
   expect(preview.reptileWin).toBe("superba");
-  expect(preview.rent).toBe(Math.round(fees * 0.75));
+  expect(preview.rent).toBe(Math.round(fees));
 });
 
 it("adds the fixed rents to the monthly income without multipliers", () => {

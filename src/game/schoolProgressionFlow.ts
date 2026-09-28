@@ -87,6 +87,7 @@ export function foundSchool(
     monthlyRent: rent.rent,
     championsWin: rent.championsWin,
     ...(rent.reptileWin ? { reptileWin: rent.reptileWin } : {}),
+    ...(rent.chroniclesWin ? { chroniclesWin: true } : {}),
   };
   const nextState: GameState = {
     ...fresh,
@@ -104,7 +105,8 @@ export function foundSchool(
     network: {
       // Reputation grows with how far the school went: it will unlock special events.
       reputation: state.network.reputation + 1 +
-        (rent.championsWin ? 1 : 0) + (rent.reptileWin ? 1 : 0),
+        (rent.championsWin ? 1 : 0) + (rent.reptileWin ? 1 : 0) +
+        (rent.chroniclesWin ? 1 : 0),
       schools: [...state.network.schools, archivedSchool],
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,

@@ -437,12 +437,12 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Titoli nazionali", value: `${GAME_CONFIG.prestigeNationalTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
       { label: "Rendita", value: `${Math.round(GAME_CONFIG.networkRentShare * 100)}%`, detail: "delle quote mensili al momento della fondazione" },
-      { label: "Bonus rendita", value: `+${Math.round(GAME_CONFIG.networkRentBonusPerTournament * 100)}% / +${Math.round(GAME_CONFIG.networkRentBonusPerTournament * 100)}%`, detail: "Champion's Arena e Reptile o Superba, una volta ciascuno: al massimo 75%" },
+      { label: "Bonus rendita", value: `+${Math.round(GAME_CONFIG.networkRentBonusPerTournament * 100)}% per torneo`, detail: "Champion's Arena, Reptile o Superba, Chronicles: una volta ciascuno, fino al 100%" },
     ],
     rules: [
       "Serve una vittoria al Torneo Nazionale, in Arena o in Stile, con la scuola corrente.",
       "La rendita della scuola lasciata è fissa: non cambia più dopo la fondazione.",
-      "Il Nazionale serve solo a sbloccare la fondazione; vincere più volte Champion's Arena o Reptile non aggiunge altro.",
+      "Il Nazionale serve solo a sbloccare la fondazione; vincere più volte lo stesso torneo non aggiunge altro.",
       "Il Ludodex e i progressi permanenti dei Leggendari non vengono cancellati.",
     ],
     related: ["economia-scuola", "tornei", "rarita-leggendari"],

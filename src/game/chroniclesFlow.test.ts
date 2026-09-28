@@ -12,6 +12,7 @@ import { GAME_CONFIG } from "./config";
 import { createInitialState } from "./initialState";
 import { nextRandom } from "./random";
 import {
+  applyTournamentResult,
   didSchoolEarnChroniclesKey,
   startChroniclesTournament,
 } from "./tournamentFlow";
@@ -158,6 +159,16 @@ describe("Chronicles tournament", () => {
 
     expect(didSchoolEarnChroniclesKey(ownedFirst(base, true, true))).toBe(true);
     expect(didSchoolEarnChroniclesKey(ownedFirst(base, true, false))).toBe(false);
+  });
+
+  it("remembers a Chronicles title of the current school for the network rent", () => {
+    const state = teamState();
+    const base = simulateTournament(state, "chronicles", 1, 10_000, getEligibleSchoolContacts(state)).result;
+    const won = applyTournamentResult(state, ownedFirst(base, false, true), state.randomSeed, 10_000);
+    const lost = applyTournamentResult(state, ownedFirst(base, false, false), state.randomSeed, 10_000);
+
+    expect(won.tournaments.chroniclesVictoryCurrentSchool).toBe(true);
+    expect(lost.tournaments.chroniclesVictoryCurrentSchool).toBeUndefined();
   });
 });
 

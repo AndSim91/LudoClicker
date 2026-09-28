@@ -95,7 +95,7 @@ export const GAME_CONFIG = {
   prestigeNationalTitles: 1,
   // The school left behind pays this share of its monthly member fees, for good.
   networkRentShare: 0.25,
-  // Champion's Arena and Reptile/Superba add 25 points each: at most 75% of the fees.
+  // Champion's Arena, Reptile/Superba and Chronicles add 25 points each: up to 100% of the fees.
   networkRentBonusPerTournament: 0.25,
   prestigeBonusPerSchool: 0.05,
   saveIntervalMs: 60_000,

@@ -204,7 +204,7 @@ function recordMissedTournament(
   "neutral", "focused", "tournaments");
 }
 
-function applyTournamentResult(
+export function applyTournamentResult(
   state: GameState,
   result: TournamentResult,
   nextSeed: number,
@@ -227,6 +227,8 @@ function applyTournamentResult(
   const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   const nationalOwned = resolvedResult.level === "national" &&
+    Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
+  const chroniclesOwned = resolvedResult.level === "chronicles" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   const ordinaryTournamentWon = didSchoolWinOrdinaryTournament(resolvedResult);
   const chroniclesKeyEarned = didSchoolEarnChroniclesKey(resolvedResult);
@@ -260,6 +262,9 @@ function applyTournamentResult(
         state.tournaments.championsVictoryCurrentSchool || championOwned,
       nationalTitlesCurrentSchool:
         (state.tournaments.nationalTitlesCurrentSchool ?? 0) + (nationalOwned ? 1 : 0),
+      ...(state.tournaments.chroniclesVictoryCurrentSchool || chroniclesOwned
+        ? { chroniclesVictoryCurrentSchool: true }
+        : {}),
       chronicles: chroniclesKeyEarned
         ? {
             ...state.tournaments.chronicles,

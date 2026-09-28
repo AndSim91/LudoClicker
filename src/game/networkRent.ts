@@ -5,15 +5,17 @@ import type { FoundedSchool, GameState } from "./types";
 /*
  * Rete dell'Ordine: every school left behind with the prestige keeps paying a
  * fixed monthly rent, set at the moment of the foundation. The share of its
- * fees starts at 25% and grows by 25 points for the Champion's Arena and 25 for
- * the Reptile (or the Superba it became), once each: at most 75%. The national
- * title is the requirement of the prestige, so it adds nothing.
+ * fees starts at 25% and grows by 25 points each for the Champion's Arena, the
+ * Reptile (or the Superba it became) and the Chronicles of Ludosport, once
+ * each: up to 100%. The national title is the requirement of the prestige, so
+ * it adds nothing.
  */
 
 export interface FoundationRentPreview {
   memberFees: number;
   championsWin: boolean;
   reptileWin?: FoundedSchool["reptileWin"];
+  chroniclesWin: boolean;
   share: number;
   rent: number;
 }
@@ -27,10 +29,11 @@ function getReptileWin(state: GameState): FoundedSchool["reptileWin"] {
 export function getFoundationRentPreview(state: GameState): FoundationRentPreview {
   const championsWin = state.tournaments.championsVictoryCurrentSchool;
   const reptileWin = getReptileWin(state);
-  const share = GAME_CONFIG.networkRentShare +
-    ((championsWin ? 1 : 0) + (reptileWin ? 1 : 0)) * GAME_CONFIG.networkRentBonusPerTournament;
+  const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
+  const wins = [championsWin, reptileWin, chroniclesWin].filter(Boolean).length;
+  const share = GAME_CONFIG.networkRentShare + wins * GAME_CONFIG.networkRentBonusPerTournament;
   const memberFees = getMonthlyMemberFees(state);
-  return { memberFees, championsWin, reptileWin, share, rent: Math.round(memberFees * share) };
+  return { memberFees, championsWin, reptileWin, chroniclesWin, share, rent: Math.round(memberFees * share) };
 }
 
 export function getMonthlyNetworkRent(state: Pick<GameState, "network">): number {
