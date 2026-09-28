@@ -531,7 +531,8 @@ describe("game engine: operations", () => {
       status: "lost" as const,
       specialProfileId: evaProfile.id,
     };
-    const padding = initial.contacts.slice(0, 3).map((contact, index) => ({
+    // Fills the queue up to Andrea (10th contact), so the next one is a free roll.
+    const padding = initial.contacts.slice(0, 4).map((contact, index) => ({
       ...contact,
       id: `reencounter-padding-${index}`,
       status: "available" as const,
@@ -595,7 +596,8 @@ describe("game engine: operations", () => {
 
   it("restores a returning Legendary's Forms and Instructor certificates", () => {
     const initial = createInitialState(1_000, "", false);
-    const padding = initial.contacts.slice(0, 4).map((contact, index) => ({
+    // Fills the queue up to Andrea (10th contact), so the next one is a free roll.
+    const padding = initial.contacts.slice(0, 5).map((contact, index) => ({
       ...contact,
       id: `return-padding-${index}`,
       status: "lost" as const,

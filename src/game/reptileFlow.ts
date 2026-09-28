@@ -1,7 +1,10 @@
 import { getContactBaseStats } from "./athleteStats";
 import { getSchoolYear } from "./calendar";
 import { applyEquipmentWear } from "./equipment";
+import { getReptileFameLevel } from "./reptilePreparation";
 import { simulateReptileTournament } from "./reptileSimulation";
+import { discoverCourseXFromSuperbaVictory } from "./reptileUnlock";
+import { GAME_CONFIG } from "./config";
 import { resolveSecretLegendaryDefeat } from "./tournamentFlow";
 import { addMessage } from "./stateUpdates";
 import type {
@@ -146,6 +149,7 @@ function applyReptileResult(
           athleteNames: winner.athletes.map(
             (athlete) => `${athlete.firstName} ${athlete.lastName}`,
           ) as [string, string],
+          ...(result.superba ? { superba: true } : {}),
         }],
       },
     },
@@ -153,15 +157,33 @@ function applyReptileResult(
   for (const id of getDefeatedSecretLegendaryIds(result)) {
     nextState = resolveSecretLegendaryDefeat(nextState, id as Parameters<typeof resolveSecretLegendaryDefeat>[1], now);
   }
-  return addMessage(
+  const tournamentName = result.superba ? "Torneo della Superba" : "Torneo Reptile";
+  nextState = addMessage(
     nextState,
     now,
-    "Torneo Reptile completato",
+    `${tournamentName} completato`,
     `${result.teamCount} team partecipanti · ${result.economy.followersGained} nuovi follower · variazione fama ${result.economy.fameDelta >= 0 ? "+" : ""}${result.economy.fameDelta}.`,
     schoolWon ? "positive" : "neutral",
     "focused",
     "tournaments",
   );
+  if (result.superba && schoolWon) nextState = discoverCourseXFromSuperbaVictory(nextState, now);
+  // Enough Reptile fame turns the Open, for good, into the Torneo della Superba.
+  if (
+    !nextState.network.superbaTournament &&
+    getReptileFameLevel(result.economy.fameAfter) >= GAME_CONFIG.superbaReptileFameLevel
+  ) {
+    nextState = addMessage(
+      { ...nextState, network: { ...nextState.network, superbaTournament: true } },
+      now,
+      "Nasce il Torneo della Superba",
+      "La fama del Reptile ha superato Genova: dalla prossima edizione l'Open della scuola diventa per sempre il Torneo della Superba, con avversari più forti. Chi lo vince scopre un Percorso Segreto.",
+      "positive",
+      "focused",
+      "tournaments",
+    );
+  }
+  return nextState;
 }
 
 export function advanceReptilePresentation(state: GameState, now: number): GameState {

@@ -1,3 +1,4 @@
+import { isSuperbaTournament } from "../../game/reptileUnlock";
 import { useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
@@ -131,28 +132,32 @@ function getEditionStatusLabel(edition: ReptileActiveEdition | undefined): strin
 
 function ReptileHero({
   reptile,
+  superba,
   edition,
   activePage,
 }: {
   reptile: GameState["tournaments"]["reptile"];
+  superba: boolean;
   edition?: ReptileActiveEdition;
   activePage: ReptilePage;
 }) {
-  const difficulty = TOURNAMENT_DEFINITIONS.champions.standard * 1.1 ** reptile.victories;
+  const tournamentName = superba ? "Torneo della Superba" : "Torneo Reptile";
+  const difficulty = TOURNAMENT_DEFINITIONS.champions.standard * 1.1 ** reptile.victories *
+    (superba ? GAME_CONFIG.superbaDifficultyMultiplier : 1);
   const teamCount = edition?.teamCount ?? getReptileTeamCount(reptile.fameXp);
   const pageLabel = REPTILE_PAGES.find((page) => page.id === activePage)?.label ?? "Panoramica";
   return (
     <section className="reptile-hero" aria-labelledby="reptile-title">
       <div className="reptile-hero-copy">
         <span className="reptile-hero-kicker">Open · Genova</span>
-        <h2 id="reptile-title">Torneo Reptile</h2>
+        <h2 id="reptile-title">{tournamentName}</h2>
         <p>
           Un torneo a coppie con gironi svizzeri, migliori 16 alla fase finale e sfide alla meglio
           dei cinque.
         </p>
         <span className="reptile-hero-current">Pagina: {pageLabel} · {getEditionStatusLabel(edition)}</span>
       </div>
-      <div className="reptile-hero-stats" aria-label="Metriche del Torneo Reptile">
+      <div className="reptile-hero-stats" aria-label={`Metriche del ${tournamentName}`}>
         <div>
           <Icon name="spark" />
           <span>Fama</span>
@@ -218,18 +223,20 @@ function ReptileStepper({
 
 function ReptileShell({
   reptile,
+  superba,
   activePage,
   onPageChange,
   children,
 }: {
   reptile: GameState["tournaments"]["reptile"];
+  superba: boolean;
   activePage: ReptilePage;
   onPageChange: (page: ReptilePage) => void;
   children: ReactNode;
 }) {
   return (
     <div className="reptile-view">
-      <ReptileHero reptile={reptile} edition={reptile.activeEdition} activePage={activePage} />
+      <ReptileHero reptile={reptile} superba={superba} edition={reptile.activeEdition} activePage={activePage} />
       <ReptileStepper reptile={reptile} activePage={activePage} onPageChange={onPageChange} />
       <div
         id={`reptile-panel-${activePage}`}
@@ -264,7 +271,7 @@ function ReptileDossier({
       <header>
         <div>
           <span>Dossier evento</span>
-          <h3>Open Reptile</h3>
+          <h3>{isSuperbaTournament(state) ? "Open della Superba" : "Open Reptile"}</h3>
         </div>
         <Icon name="flag" />
       </header>
@@ -326,7 +333,7 @@ function ReptileOverviewPage({
           <span className="reptile-status-mark">{getEditionStatusLabel(edition)}</span>
         </header>
         <p>
-          Il Reptile mette insieme quattro settori della scuola. La loro qualità determina la
+          {isSuperbaTournament(state) ? "La Superba" : "Il Reptile"} mette insieme quattro settori della scuola. La loro qualità determina la
           preparazione, il pubblico, le entrate Gadget e la forza con cui la squadra affronta il
           torneo.
         </p>
@@ -758,7 +765,7 @@ function ReptileRecap({
       <header className="reptile-panel-heading">
         <div>
           <span className="reptile-section-kicker">Edizione conclusa · anno scolastico {result.schoolYear}</span>
-          <h2 id={titleId}>{teamLabel(winner)} vince il Torneo Reptile</h2>
+          <h2 id={titleId}>{teamLabel(winner)} vince il {result.superba ? "Torneo della Superba" : "Torneo Reptile"}</h2>
           <p>{winner?.schoolName} · {winner?.city}</p>
         </div>
         <span className="reptile-winner-mark"><Icon name="trophy" /></span>
@@ -841,7 +848,7 @@ function ReptilePresentation({
     content = <ReptileMatchRows matches={matches} teamsById={teamsById} />;
   } else {
     phaseIndex = 4;
-    title = "Il Torneo Reptile è concluso";
+    title = result.superba ? "Il Torneo della Superba è concluso" : "Il Torneo Reptile è concluso";
     content = <ReptileRecap result={result} />;
   }
   const phases = ["Settori", "Gironi svizzeri", "Classifica", "Fase finale", "Recap"];
@@ -923,10 +930,10 @@ function ReptileRecapPage({ reptile }: { reptile: GameState["tournaments"]["rept
     <div className="reptile-recap-page">
       <ReptileRecap result={reptile.latestRecap} />
       <section className="reptile-hall-panel">
-        <header className="reptile-panel-heading"><div><span className="reptile-section-kicker">Memoria del torneo</span><h2>Albo d&apos;oro Reptile</h2></div><span className="reptile-count-mark">{reptile.hall.length} edizioni</span></header>
+        <header className="reptile-panel-heading"><div><span className="reptile-section-kicker">Memoria del torneo</span><h2>Albo d&apos;oro</h2></div><span className="reptile-count-mark">{reptile.hall.length} edizioni</span></header>
         {reptile.hall.length > 0 ? (
           <div className="reptile-hall-list">
-            {[...reptile.hall].reverse().map((entry) => <div key={`${entry.schoolYear}-${entry.teamId}`}><b>Anno {entry.schoolYear}</b><span>{entry.athleteNames.join(" / ")}</span><small>{entry.schoolName}</small></div>)}
+            {[...reptile.hall].reverse().map((entry) => <div key={`${entry.schoolYear}-${entry.teamId}`}><b>Anno {entry.schoolYear} · {entry.superba ? "Superba" : "Reptile"}</b><span>{entry.athleteNames.join(" / ")}</span><small>{entry.schoolName}</small></div>)}
           </div>
         ) : <p className="reptile-inline-note">L&apos;albo d&apos;oro è ancora vuoto.</p>}
       </section>
@@ -940,6 +947,7 @@ function selectReptileViewState(state: GameState): GameState {
 
 function haveSameReptileViewState(left: GameState, right: GameState): boolean {
   return left.tournaments.reptile === right.tournaments.reptile &&
+    left.network.superbaTournament === right.network.superbaTournament &&
     left.school.currentMonth === right.school.currentMonth &&
     left.school.euros === right.school.euros &&
     left.collaborators.length === right.collaborators.length &&
@@ -1039,7 +1047,7 @@ export function ReptileView({
   }
 
   return (
-    <ReptileShell reptile={reptile} activePage={visiblePage} onPageChange={navigate}>
+    <ReptileShell reptile={reptile} superba={isSuperbaTournament(state)} activePage={visiblePage} onPageChange={navigate}>
       {pageContent}
     </ReptileShell>
   );

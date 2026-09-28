@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 83,
+  version: 84,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -107,6 +107,9 @@ export const GAME_CONFIG = {
   reptileSwordRentalCost: 100,
   reptileSwordWear: 20,
   reptileMaximumGadgetGrossPerTeam: 1_000,
+  // Reptile fame level at which the Open becomes, for good, the Torneo della Superba.
+  superbaReptileFameLevel: 2,
+  superbaDifficultyMultiplier: 1.25,
 } as const;
 
 export function getTechnicalArenaDurationMs(level: number): number {

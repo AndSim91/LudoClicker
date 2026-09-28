@@ -10,6 +10,23 @@ export function didWinBothNationalDisciplines(result: TournamentResult): boolean
   );
 }
 
+export function isSuperbaTournament(state: Pick<GameState, "network">): boolean {
+  return state.network.superbaTournament === true;
+}
+
+export function getReptileTournamentName(state: Pick<GameState, "network">): string {
+  return isSuperbaTournament(state) ? "Torneo della Superba" : "Torneo Reptile";
+}
+
+/** Winning the Torneo della Superba reveals the secret Corso X, bought for 1 €. */
+export function discoverCourseXFromSuperbaVictory(state: GameState, now: number): GameState {
+  if (state.secretUpgradeDiscoveries.includes("project-x")) return state;
+  return addMessage({
+    ...state,
+    secretUpgradeDiscoveries: [...state.secretUpgradeDiscoveries, "project-x"],
+  }, now, "Percorso Segreto scoperto", "La vittoria al Torneo della Superba apre una strada nuova: tra i Percorsi Segreti degli Upgrade ora compare Corso X, acquistabile per 1 €.", "positive", "focused", "progress");
+}
+
 export function unlockReptileFromTournamentResult(
   state: GameState,
   result: TournamentResult,
@@ -22,5 +39,5 @@ export function unlockReptileFromTournamentResult(
       ...state.tournaments,
       reptile: { ...state.tournaments.reptile, unlocked: true },
     },
-  }, now, "Torneo Reptile sbloccato", "La vittoria nazionale in Arena e Stile permette alla scuola di organizzare il suo primo torneo Open a coppie.", "positive", "focused", "tournaments");
+  }, now, `${getReptileTournamentName(state)} sbloccato`, "La vittoria nazionale in Arena e Stile permette alla scuola di organizzare il suo primo torneo Open a coppie.", "positive", "focused", "tournaments");
 }

@@ -224,7 +224,7 @@ export function TournamentsView({
   onSkipReptilePresentation?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["tournaments"],
+    ["tournaments", "network"],
     stateOverride,
   );
   const [tab, setTab] = useState<TournamentTab>("overview");
@@ -334,7 +334,7 @@ export function TournamentsView({
               active={visibleOpenTournamentTab === "reptile"}
               onClick={() => setOpenTournamentTab("reptile")}
             >
-              Reptile
+              {state.network.superbaTournament ? "Superba" : "Reptile"}
             </TabButton>
             {chroniclesUnlocked ? (
               <TabButton

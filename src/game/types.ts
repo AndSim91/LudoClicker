@@ -697,6 +697,8 @@ export interface ReptileEconomyResult {
 }
 
 export interface ReptileTournamentResult {
+  /** Played as Torneo della Superba (tougher field, Corso X for the winner). */
+  superba?: boolean;
   id: string;
   schoolYear: number;
   completedAt: number;
@@ -737,6 +739,8 @@ export interface ReptileHallEntry {
   teamId: string;
   schoolName: string;
   athleteNames: [string, string];
+  /** Edition played as Torneo della Superba. */
+  superba?: boolean;
 }
 
 export interface ReptileProgress {
@@ -911,6 +915,8 @@ export interface GameState {
     schools: FoundedSchool[];
     prestigeOfferSent: boolean;
     secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
+    /** The Reptile has become the Torneo della Superba: permanent, kept by every new school. */
+    superbaTournament?: boolean;
   };
   contacts: Contact[];
   emails: CampaignEmail[];

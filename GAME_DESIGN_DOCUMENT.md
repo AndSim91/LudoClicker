@@ -262,7 +262,7 @@ qualifica da Tecnico porta quel bonus a **€20**, sostituendo il bonus da
 Istruttore della stessa formazione (i bonus da Istruttore e Tecnico valgono
 solo per i Collaboratori).
 
-> **Da implementare:** il Percorso Segreto «Corso X» non può oggi essere scoperto: nessuna condizione di gioco chiama la scoperta dei Percorsi Segreti, quindi Corso X resta di fatto inaccessibile.
+Il Percorso Segreto «Corso X» si scopre vincendo il Torneo della Superba (vedi 10.9 e 20.7).
 
 La somma delle quote è poi moltiplicata dai
 potenziamenti di entrate e da +25% per ogni scuola fondata, e ogni scuola
@@ -1611,11 +1611,12 @@ Regole:
   estivo;
 - **Corso X** e **ToccoDiGilo** non appartengono alla sequenza lineare: sono due
   Percorsi Segreti indipendenti, inizialmente mostrati come `???` con un
-  indizio, e vengono rivelati soltanto dalle rispettive condizioni narrative.
+  indizio, e vengono rivelati soltanto dalle rispettive condizioni (10.9):
+  Corso X vincendo il Torneo della Superba, ToccoDiGilo dopo la Sfida di Cthulhu.
   Corso X costa €1; ToccoDiGilo costa €1.000.000 e aumenta del 9.999% la
   velocità delle Forme insegnate dagli Istruttori;
 
-> **Da implementare:** le condizioni di scoperta dei Percorsi Segreti non esistono: `discoverSecretUpgrade` non viene mai chiamata dal gioco, quindi Corso X e ToccoDiGilo restano `???`.
+> **Da implementare:** la scoperta di ToccoDiGilo, legata alla Sfida di Cthulhu che è ancora da sviluppare.
 
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
@@ -1995,10 +1996,18 @@ più almeno una scuola fondata.
 La riga è sempre visibile. Prima della scoperta, ciascun nodo mostra `???`, un
 lucchetto e soltanto un indizio nel tooltip. Ogni percorso si scopre in modo
 indipendente: rivelarne uno non mostra il nome o la descrizione degli altri.
-Le condizioni effettive di scoperta sono ancora da definire. Un percorso non
-scoperto non si può acquistare e non viene conteggiato fra i nodi disponibili.
+Un percorso non scoperto non si può acquistare e non viene conteggiato fra i
+nodi disponibili. Una volta scoperto resta scoperto anche nelle scuole fondate
+dopo (il livello acquistato invece si azzera con la fondazione).
 
-> **Da implementare:** nessuna condizione di gioco scopre i Percorsi Segreti: la funzione di scoperta esiste ma il gioco non la richiama mai, quindi Corso X e ToccoDiGilo restano `???` in una nuova partita.
+- **Corso X** si scopre quando la scuola vince il **Torneo della Superba**
+  (20.7), cioè il Reptile dopo la sua trasformazione. Arriva un messaggio
+  «Percorso Segreto scoperto» e il nodo diventa acquistabile a 1 €. La scoperta
+  resta valida in tutte le scuole fondate dopo: lì Corso X è acquistabile a 1 €
+  fin da subito (`reptileUnlock.ts`, `reptileFlow.ts`).
+- **ToccoDiGilo** si scoprirà completando la **Sfida di Cthulhu**.
+
+> **Da implementare:** la scoperta di ToccoDiGilo, legata alla Sfida di Cthulhu che è ancora da sviluppare.
 
 | Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
 | --- | --- | ---: | --- |
@@ -3364,6 +3373,31 @@ l'albo conserva per ogni edizione anno, scuola e nomi dei due vincitori. Il
 prestigio azzera sblocco, fama, vittorie, preparazione, prenotazione, recap e
 albo Reptile; una prenotazione pendente viene persa senza rimborso.
 
+### 20.7 Torneo della Superba
+
+Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 2**
+(1.000 XP, tabellone da 64 team), l'Open si trasforma **per sempre** nel
+**Torneo della Superba**. Arriva il messaggio «Nasce il Torneo della Superba» e
+la trasformazione vale dall'edizione successiva. Non torna indietro se la fama
+scende e resta anche nelle scuole fondate dopo (`network.superbaTournament`):
+lì, una volta sbloccato l'Open con la vittoria nazionale in Arena e Stile, è già
+la Superba.
+
+La Superba segue tutte le regole del Reptile (preparazione, mini-gioco, fase
+svizzera, tabellone, premi e fama) con tre differenze:
+
+- nome «Torneo della Superba» nella scheda Tornei, nei messaggi e nel recap;
+  nell'albo d'oro ogni edizione indica se era Reptile o Superba;
+- avversari più forti: la difficoltà del Reptile (standard Champion's × 1,1 per
+  ogni vittoria precedente di Genova) viene moltiplicata per **1,25**;
+- se vince un team di Genova, si scopre il Percorso Segreto **Corso X** (10.9),
+  acquistabile a 1 €.
+
+I salvataggi che all'aggiornamento alla versione 84 avevano già la fama del
+Reptile al livello 2 diventano subito Superba
+(`saveMigrations/reptileSuperba.ts`). Costanti in `GAME_CONFIG`:
+`superbaReptileFameLevel` = 2, `superbaDifficultyMultiplier` = 1,25.
+
 ---
 
 ## 21. Bilanciamento iniziale
@@ -3450,7 +3484,7 @@ arrivare entro 45 minuti in ogni partita simulata.
   alla chiusura o al cambio di scheda (`beforeunload`, `pagehide`, pagina
   nascosta), con il pulsante «Salva ora» delle Impostazioni e subito dopo un
   import;
-- schema versionato (versione attuale 83) più una versione di compatibilità:
+- schema versionato (versione attuale 84) più una versione di compatibilità:
   i salvataggi più vecchi vengono migrati, quelli incompatibili non vengono
   sovrascritti finché il giocatore non azzera la partita;
 - prima di ogni scrittura il salvataggio precedente viene copiato in
@@ -3469,7 +3503,7 @@ Campi di primo livello di `GameState` (`src/game/types.ts`):
 
 ```ts
 interface GameState {
-  version: number; // 83
+  version: number; // 84
   saveCompatibilityVersion: number;
   createdAt: number;
   lastSavedAt: number;

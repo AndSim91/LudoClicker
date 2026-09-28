@@ -45,6 +45,7 @@ import { migrateGadgetMonthlyRevenueState } from "./saveMigrations/gadgetMonthly
 import { migrateGadgetCatalogState } from "./saveMigrations/gadgetCatalog";
 import { migrateEventHistoryRemovalState } from "./saveMigrations/eventHistoryRemoval";
 import { migrateWritingRhythmUpgradesState } from "./saveMigrations/writingRhythmUpgrades";
+import { migrateReptileSuperbaState } from "./saveMigrations/reptileSuperba";
 import { migrateLeanHistoryState } from "./saveMigrations/leanHistory";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 import type { GameState } from "./types";
@@ -95,6 +96,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateGadgetCatalogState,
   migrateEventHistoryRemovalState,
   migrateWritingRhythmUpgradesState,
+  migrateReptileSuperbaState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

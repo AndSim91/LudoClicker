@@ -281,7 +281,8 @@ describe("game engine: narrative", () => {
         enrolledProfileIds: ["eva-parodi" as const],
       },
       statistics: { ...initial.statistics, eventsCompleted: 25, emailsSent: 30 },
-      upgrades: { ...initial.upgrades, "comfortable-keyboard": 2 },
+      upgrades: { ...initial.upgrades, "comfortable-keyboard": 2, "project-x": 1 },
+      secretUpgradeDiscoveries: ["project-x" as const],
       tournaments: {
         ...initial.tournaments,
         ordinaryVictoryAchieved: true,
@@ -321,6 +322,8 @@ describe("game engine: narrative", () => {
       expect.arrayContaining(initial.legendaryCollaborators.encounteredProfileIds),
     );
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
+    expect(founded.upgrades["project-x"]).toBe(0);
+    expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
     expect(founded.network.reputation).toBe(1);
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);

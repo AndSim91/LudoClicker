@@ -163,6 +163,61 @@ describe("Torneo Reptile", () => {
     expect(secondAttempt).toBe(completed);
   });
 
+  it("diventa per sempre il Torneo della Superba al livello 2 di fama", () => {
+    const presenting = startReptileTournamentIfDue(
+      bookReptileVenue(createReptileReadyState(), STARTED_AT + 1_000_000_001),
+      STARTED_AT + 1_000_000_001,
+    );
+    const edition = presenting.tournaments.reptile.activeEdition!;
+    const famous = {
+      ...presenting,
+      tournaments: {
+        ...presenting.tournaments,
+        reptile: {
+          ...presenting.tournaments.reptile,
+          activeEdition: {
+            ...edition,
+            result: { ...edition.result!, economy: { ...edition.result!.economy, fameAfter: 1_000 } },
+          },
+        },
+      },
+    };
+    const completed = skipReptilePresentation(famous, STARTED_AT + 1_000_000_002);
+    expect(completed.network.superbaTournament).toBe(true);
+    expect(completed.messages.some((message) => message.subject === "Nasce il Torneo della Superba")).toBe(true);
+    expect(completed.secretUpgradeDiscoveries).toEqual([]);
+  });
+
+  it("vincere la Superba scopre Corso X e lo segna nell'albo", () => {
+    const ready = createReptileReadyState();
+    const superba = { ...ready, network: { ...ready.network, superbaTournament: true } };
+    const presenting = startReptileTournamentIfDue(
+      bookReptileVenue(superba, STARTED_AT + 1_000_000_001),
+      STARTED_AT + 1_000_000_001,
+    );
+    const edition = presenting.tournaments.reptile.activeEdition!;
+    const result = edition.result!;
+    expect(result.superba).toBe(true);
+    const homeTeam = result.teams.find((team) => team.home)!;
+    const won = {
+      ...presenting,
+      tournaments: {
+        ...presenting.tournaments,
+        reptile: {
+          ...presenting.tournaments.reptile,
+          activeEdition: {
+            ...edition,
+            result: { ...result, podiumTeamIds: [homeTeam.id, ...result.podiumTeamIds.filter((id) => id !== homeTeam.id)].slice(0, 4) as typeof result.podiumTeamIds },
+          },
+        },
+      },
+    };
+    const completed = skipReptilePresentation(won, STARTED_AT + 1_000_000_002);
+    expect(completed.secretUpgradeDiscoveries).toContain("project-x");
+    expect(completed.tournaments.reptile.hall.at(-1)?.superba).toBe(true);
+    expect(completed.messages.some((message) => message.subject === "Torneo della Superba completato")).toBe(true);
+  });
+
   it("scala fino a 512 team mantenendo nove turni svizzeri", () => {
     const ready = createReptileReadyState(2_500);
     const booked = bookReptileVenue(ready, STARTED_AT + 1_000_000_001);

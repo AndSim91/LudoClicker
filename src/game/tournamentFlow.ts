@@ -24,7 +24,7 @@ import type {
   TournamentResult,
 } from "./types";
 import { unlockGadgetSectorFromTournamentResult } from "./gadgetFlow";
-import { unlockReptileFromTournamentResult } from "./reptileUnlock";
+import { discoverCourseXFromTournamentResult, unlockReptileFromTournamentResult } from "./reptileUnlock";
 import {
   compactDetailedTournamentResults,
   replaceTournamentHallEntry,
@@ -271,6 +271,7 @@ function applyTournamentResult(
     now,
   );
   nextState = unlockReptileFromTournamentResult(nextState, resolvedResult, now);
+  nextState = discoverCourseXFromTournamentResult(nextState, resolvedResult, now);
   nextState = applyTournamentRewards(nextState, resolvedResult, now);
   for (const id of resolvedResult.secretLegendaryDefeatedIds) {
     nextState = resolveSecretLegendaryDefeat(nextState, id, now);

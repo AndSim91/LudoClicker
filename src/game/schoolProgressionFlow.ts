@@ -97,12 +97,15 @@ export function foundSchool(
       schools: [...state.network.schools, archivedSchool],
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
+      ...(state.network.superbaTournament ? { superbaTournament: true } : {}),
     },
     tournaments: {
       ...fresh.tournaments,
       ordinaryVictoryAchieved: state.tournaments.ordinaryVictoryAchieved,
     },
     achievements: state.achievements,
+    // A discovered secret path stays known in every later school; only its level resets.
+    secretUpgradeDiscoveries: state.secretUpgradeDiscoveries,
     legendaryCollaborators: fresh.legendaryCollaborators,
     statistics: state.statistics,
     messages: state.messages,

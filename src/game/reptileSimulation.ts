@@ -1,3 +1,4 @@
+import { isSuperbaTournament } from "./reptileUnlock";
 import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
 import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
 import { getAvailableSwords } from "./equipment";
@@ -192,6 +193,12 @@ function createHomeTeams(
   ));
 }
 
+/** ×1,1 per earlier school victory, and a tougher field once it is the Superba. */
+export function getReptileDifficultyMultiplier(state: Pick<GameState, "tournaments" | "network">): number {
+  return 1.1 ** state.tournaments.reptile.victories *
+    (isSuperbaTournament(state) ? GAME_CONFIG.superbaDifficultyMultiplier : 1);
+}
+
 function createExternalTeams(
   state: GameState,
   count: number,
@@ -200,7 +207,7 @@ function createExternalTeams(
   if (count <= 0) return [];
   const generated = createChampionsOpenAthletePairs(state, count, cursor.seed);
   cursor.seed = generated.nextSeed;
-  const difficultyMultiplier = 1.1 ** state.tournaments.reptile.victories;
+  const difficultyMultiplier = getReptileDifficultyMultiplier(state);
   const teams: ReptileTeam[] = [];
   for (let index = 0; index < count; index += 1) {
     const [first, second] = generated.pairs[index];
@@ -497,7 +504,8 @@ export function simulateReptileTournament(
       fameBefore,
       fameAfter,
     },
-    difficultyMultiplier: 1.1 ** state.tournaments.reptile.victories,
+    difficultyMultiplier: getReptileDifficultyMultiplier(state),
+    superba: isSuperbaTournament(state),
     rewardsApplied: false,
   };
   return { result, nextSeed: cursor.seed };
