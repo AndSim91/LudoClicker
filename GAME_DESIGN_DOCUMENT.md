@@ -21,17 +21,20 @@ una simulazione quasi perfetta di Outlook per Windows 11.
 Il giocatore collabora inizialmente con **LudoSport Genova – Ordine delle Onde**
 e deve trovare nuovi potenziali interessati, ottenere i loro indirizzi email,
 scrivere inviti e trasformare i contatti in iscritti. Ogni pressione della
-tastiera inserisce il carattere successivo di un'email prestabilita,
-indipendentemente dal tasto premuto. Anche un click nel corpo della mail
-inserisce un carattere. All'inizio ogni input produce un solo carattere; i
-potenziamenti aumentano progressivamente la velocità.
+tastiera inserisce i caratteri successivi di un'email prestabilita,
+indipendentemente dal tasto premuto (esclusi F9, il tasto Windows e la
+ripetizione automatica di un tasto tenuto premuto). Anche un click nel corpo
+della mail conta come input. All'inizio ogni input produce un solo carattere; i
+potenziamenti di Scrittura aumentano i caratteri per input e sbloccano il
+Flusso e la Frase perfetta.
 
 Le email completate vengono inviate automaticamente per impostazione predefinita
 e invitano il destinatario a partecipare a una singola lezione di prova in
 palestra. Il giocatore può disattivare l'invio automatico per rileggere la mail
 completa e confermarla con un ulteriore input. Dopo un intervallo compresso, il
 contatto può prenotare oppure sparire definitivamente. Chi partecipa alla
-lezione ha un'alta probabilità, ma non la certezza, di iscriversi.
+lezione ha una probabilità di iscriversi che dipende dalla sua rarità, ma non
+la certezza.
 
 I contatti non sono infiniti. Per continuare a inviare email bisogna organizzare
 eventi reali in luoghi di Genova. Ogni evento attira un certo numero di persone;
@@ -41,17 +44,24 @@ una porzione si iscrive. Carisma, Scrittura, Social, organizzazione,
 collaboratori e attrezzatura migliorano fasi diverse del funnel.
 
 Gli iscritti generano periodicamente **Euro** tramite le quote associative. Gli
-Euro sono l'unica risorsa spendibile. Gli iscritti **Ultra Rari** diventano
-Collaboratori delle Onde dopo il Corso Y e possono essere assegnati liberamente
-alla scrittura, agli eventi, ai social o alla manutenzione. Possono apprendere
-le Forme LudoSport seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` e i tre
-rami Spada Lunga, Staffa e Doppia spada corta.
+Euro sono l'unica valuta spendibile. Gli iscritti **Ultra Rari** diventano
+Collaboratori delle Onde dopo il Corso Y, i **Leggendari** subito
+all'iscrizione; i collaboratori possono essere assegnati liberamente a
+Redazione (che diventa Social a 35 iscritti attivi), Eventi, Attrezzatura,
+Istruttore e Gadget. Gli iscritti possono apprendere le Forme LudoSport
+seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` (il Corso X esiste solo
+dopo l'acquisto del relativo Percorso Segreto) e i tre rami Spada Lunga, Staffa
+e Doppia spada corta.
 
-Raggiunta una dimensione significativa, al giocatore viene proposto di
-trasferirsi e fondare una nuova scuola, scegliendone nome e sede. Questa è la
-meccanica di prestigio: una parte dei progressi locali riparte, mentre
-l'esperienza accumulata e la rete delle scuole fondate forniscono bonus
-permanenti. Il gioco non ha un finale e può continuare indefinitamente.
+Raggiunti i requisiti di Fama, collaboratori, eventi completati e una vittoria
+(Arena o Stile) di un proprio atleta alla Champion's Arena, al giocatore viene
+proposto di trasferirsi e fondare una nuova scuola, scegliendone nome, città, motto, colore e specializzazione.
+Questa è la meccanica di prestigio: una parte dei progressi locali riparte,
+mentre la Fama, i progressi dei Leggendari iscritti e la rete delle scuole
+fondate forniscono bonus permanenti. Il gioco non ha un finale e può continuare
+indefinitamente.
+
+> **Da implementare:** la fondazione esiste solo come azione del motore (`FOUND_SCHOOL`): il messaggio di offerta rimanda alle Impostazioni, ma nessuna schermata permette di inserire i dati e confermare il trasferimento.
 
 ---
 
@@ -74,11 +84,13 @@ Il giocatore deve sentirsi contemporaneamente:
 1. **Camuffamento credibile**\
    A colpo d'occhio il gioco deve sembrare Outlook per Windows 11. Le
    informazioni ludiche devono essere presentate come normali elementi di posta,
-   calendario, contatti e attività.
+   calendario, contatti e attività. F9 alterna in ogni momento la veste Outlook
+   chiara e il tema scuro «Modalità Onde».
 
 2. **Input immediato e soddisfacente**\
    Qualunque tasto utile fa avanzare il testo. Non si può sbagliare a scrivere.
-   Il giocatore deve poter martellare la tastiera come in Hacker Typer.
+   Il giocatore deve poter martellare la tastiera come in Hacker Typer: conta
+   ogni pressione distinta, mentre un tasto tenuto premuto non ripete l'input.
 
 3. **Una catena produttiva leggibile**\
    Eventi generano pubblico; il pubblico genera prove dimostrative; le prove
@@ -103,7 +115,11 @@ Il giocatore deve sentirsi contemporaneamente:
 7. **Svelamento progressivo**\
    Il gioco comincia quasi vuoto. Nuove cartelle, funzioni e sistemi di Outlook
    compaiono soltanto quando il giocatore raggiunge traguardi comprensibili o
-   completa speciali comunicazioni interne manuali.
+   completa speciali comunicazioni interne manuali. Nella scuola iniziale:
+   Upgrade e Scuola dopo il primo iscritto, Contatti dalla prima Fama, Eventi
+   dopo l'obiettivo «Tre inviti in partenza» (3 email inviate), Tornei da 6 di
+   Fama; dalla seconda
+   scuola in poi tutte le aree principali sono aperte fin dall'inizio.
 
 ### 2.3 Tono
 
@@ -144,6 +160,8 @@ Esempio di escalation:
   pianificare eventi e preparare un prestigio.
 - **Ritorno idle:** riepilogo dei progressi maturati mentre il gioco era chiuso.
 
+> **Da implementare:** oggi il gioco non matura progressi a gioco chiuso: alla riapertura tutti i timer (quote, email, prove, eventi, corsi, eventi narrativi) vengono traslati del tempo trascorso e la partita riprende esattamente da dove era stata lasciata, senza riepilogo.
+
 ---
 
 ## 4. Struttura dell'esperienza
@@ -153,9 +171,9 @@ flowchart LR
     A["Evento esterno"] --> B["Persone presenti"]
     B -->|Carisma| C["Prove dimostrative"]
     C -->|Carisma| D["Contatti email"]
-    D --> E["Email da scrivere"]
-    E -->|Scrittura| F["Lezioni prenotate"]
-    F -->|Qualità della prova| G["Iscritti"]
+    D -->|Scrittura| E["Email da scrivere"]
+    E -->|Creatività| F["Lezioni prenotate"]
+    F -->|Accoglienza| G["Iscritti"]
     G --> H["Quote in Euro"]
     G -->|Ultra Raro o Leggendario| I["Collaboratori delle Onde"]
     I --> A
@@ -168,16 +186,24 @@ flowchart LR
 
 1. Il giocatore apre una bozza già indirizzata a un contatto disponibile.
 2. Preme tasti o clicca nel corpo della mail.
-3. Ogni input rivela il prossimo carattere del testo prestabilito.
+3. Ogni input rivela i prossimi `writingPower` caratteri del testo prestabilito
+   (moltiplicati dal Flusso e, con una certa probabilità, estesi da una Frase
+   perfetta, quando sbloccati).
 4. Quando il corpo è completo, la mail viene inviata automaticamente se il
-   relativo toggle è attivo; altrimenti resta pronta fino al successivo input.
+   toggle «Invio automatico» (attivo per impostazione predefinita) è acceso;
+   altrimenti resta pronta fino al successivo input o al pulsante Invia.
+   L'invio mostra «Invio in corso…» per 0,35 secondi.
 5. Il contatto viene consumato e viene programmato l'esito ritardato dell'invito
-   alla prova in palestra.
+   alla prova in palestra (10 secondi). Se la prova viene prenotata, la lezione
+   inizia dopo 30 secondi e dura 15 secondi di base.
 6. Se esiste un altro contatto, si apre immediatamente una nuova mail.
 7. Il giocatore può continuare a premere tasti senza interrompersi: il sistema
    passa da una mail alla successiva in modo trasparente.
 8. Se i contatti sono terminati, Outlook mostra una comunicazione plausibile che
-   invita a pianificare un evento o a partecipare a uno sparring esterno.
+   invita a pianificare un evento o a partecipare a uno sparring esterno. Il
+   riquadro di scrittura mostra «Nessuna bozza disponibile — Hai utilizzato
+   tutti i contatti disponibili. Le prossime fonti arrivano dalle attività
+   esterne.»; nel tutorial la prima fonte è l'evento gratuito «Volantinaggio».
 
 ### 4.2 Loop gestionale
 
@@ -195,8 +221,12 @@ flowchart LR
 1. Far crescere l'Ordine delle Onde.
 2. Costruire una squadra di collaboratori specializzati.
 3. Automatizzare raccolta contatti, scrittura e manutenzione.
-4. Raggiungere la soglia per ricevere l'offerta di fondare una nuova scuola.
-5. Scegliere città e nome della scuola.
+4. Raggiungere la soglia per ricevere l'offerta di fondare una nuova scuola:
+   Fama pari a 150 × ciclo, 8 collaboratori (+2 per ogni scuola già fondata),
+   25 × ciclo eventi completati, una vittoria di un proprio atleta alla
+   Champion's Arena nella scuola corrente e nessun Leggendario Segreto in prova.
+5. Scegliere città, nome, motto, colore e specializzazione della scuola
+   (Generale, Redazione, Eventi o Accoglienza).
 6. Trasferire l'esperienza permanente alla nuova sede.
 7. Ripetere con costi, numeri e moltiplicatori crescenti.
 
@@ -209,56 +239,90 @@ flowchart LR
 Gli **Iscritti** sono il punteggio principale, la dimensione della scuola e una
 sorgente di entrate ricorrenti. Non sono spendibili.
 
-- **Iscritti attivi:** membri attuali della scuola; possono aumentare o
-  diminuire tramite eventi narrativi.
-- **Fama della scuola:** punteggio cumulativo ottenuto da iscrizioni, Follower e
-  ricompense esplicite. Attraversa i cicli di prestigio e non diminuisce quando
-  un iscritto lascia o viene rimosso dalla scuola.
-- **Ultra Rari:** contatti rossi che diventano Collaboratori delle Onde dopo il
+- **Iscritti attivi:** membri attuali della scuola; aumentano con le
+  iscrizioni e diminuiscono con gli abbandoni annuali o quando il giocatore
+  annulla l'iscrizione di un allievo (non preferito).
+- **Fama della scuola:** punteggio cumulativo ottenuto da iscrizioni (+1),
+  Follower (+1 ciascuno) e ricompense esplicite (per esempio +500 per un
+  Leggendario ottenuto nelle Chronicles). Attraversa i cicli di prestigio e non
+  diminuisce quando un iscritto lascia o viene rimosso dalla scuola.
+- **Ultra Rari:** contatti viola che diventano Collaboratori delle Onde dopo il
   Corso Y.
 
 Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**.
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
 singolo allievo**. Corso Y concorre sempre al conteggio; Corso X vi concorre
-soltanto dopo l'acquisto del relativo Percorso Segreto. Il Corso Agonisti è escluso perché
+soltanto dopo l'acquisto del relativo Percorso Segreto («Corso X», costo €1). Il Corso Agonisti è escluso perché
 potenzia Arena e Stile ma non assegna un badge permanente. Ogni badge permanente
 può essere registrato una sola volta sullo stesso allievo: un duplicato
 rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un
 attestato da Istruttore aggiunge **€10** per la relativa Forma o corso; una
 qualifica da Tecnico porta quel bonus a **€20**, sostituendo il bonus da
-Istruttore della stessa formazione. Un mese dura **60 secondi reali** e segue il
-normale ciclo da Gennaio a Dicembre;
-dopo Dicembre torna Gennaio. L'anno scolastico, sempre visibile nella barra
-superiore, va da Settembre ad Agosto; la formazione si ferma a Luglio e Agosto e
-gli eventuali abbandoni vengono verificati nel passaggio tra Giugno e Luglio. Un
-evento positivo di passaparola può produrre più potenziali iscritti; un litigio
-o un mancato rinnovo può ridurre il totale.
+Istruttore della stessa formazione (i bonus da Istruttore e Tecnico valgono
+solo per i Collaboratori).
+
+> **Da implementare:** il Percorso Segreto «Corso X» non può oggi essere scoperto: nessuna condizione di gioco chiama la scoperta dei Percorsi Segreti, quindi Corso X resta di fatto inaccessibile.
+
+La somma delle quote è poi moltiplicata dai
+potenziamenti di entrate e da +25% per ogni scuola fondata, e ogni scuola
+fondata aggiunge €5 al mese di entrata di rete. Un mese dura **60 secondi
+reali** e segue il normale ciclo da Gennaio a Dicembre;
+dopo Dicembre torna Gennaio. La partita inizia a Settembre. L'anno scolastico,
+sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
+si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel
+passaggio tra Giugno e Luglio. La probabilità annuale di abbandono dipende
+dalla Forma più alta raggiunta (80% senza Forme, poi 65%, 50%, 35%, 25%, 15%,
+10%; con la Forma 7 scende a 2,5% per i Comuni, 0,5% per i Rari e 0,25% per gli
+Ultra Rari, +0,5% per ogni scuola fondata); i Leggendari non abbandonano mai.
+Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
+«Passaparola inatteso» produce 2 nuovi contatti, non iscritti.
+
+> **Da implementare:** nessun evento narrativo casuale riduce oggi gli iscritti (non esiste un «litigio»); la riduzione avviene solo con gli abbandoni annuali o con l'annullamento manuale.
 
 ### 5.2 Euro
 
-Gli **Euro (€)** sono l'unica risorsa spendibile. Provengono principalmente
-dalle quote periodiche degli iscritti e vengono usati per:
+Gli **Euro (€)** sono l'unica valuta spendibile; la partita parte da €0.
+Provengono principalmente dalle quote periodiche degli iscritti e dal bonus di
+iscrizione, poi da sponsorizzazioni dei Follower, entrate di rete, vendite di
+Gadget, premi di tornei, obiettivi brevi, traguardi ed eventi narrativi. Vengono
+usati per:
 
 - potenziamenti delle otto Aree di Attività;
-- campagne social;
-- manutenzione e miglioramento delle spade;
+- manutenzione e riparazione delle spade e acquisto di nuove spade dal
+  fornitore ufficiale;
 - organizzazione di eventi;
-- strumenti amministrativi e organizzativi.
+- corsi di Forma, qualifiche da Istruttore e Tecnico, Arena tecnica e Corso
+  Agonisti;
+- progetti e produzione di Gadget;
+- sede e noleggio spade per il torneo Reptile.
+
+> **Da implementare:** le campagne social a pagamento e gli strumenti amministrativi acquistabili non esistono: il Social avanza solo tramite collaboratori e potenziamenti.
+
+L'unica altra risorsa consumabile è la **Chiave delle Chronicles**, guadagnata
+nei tornei e spesa per affrontare una sfida Chronicles con una squadra di 6
+atleti.
 
 Gli iscritti possono fungere da requisito di sblocco, ma non vengono mai
 consumati per acquistare qualcosa.
 
 ### 5.3 Contatti
 
-I Contatti sono indirizzi email inventati ottenuti attraverso eventi, lezioni di
-prova, social e collaboratori.
+I Contatti sono indirizzi email inventati. La partita parte con 5 contatti
+iniziali; gli altri si ottengono con gli eventi (compresi Sparring al parco e
+Volantinaggio), con gli eventi narrativi e come premi dei tornei.
 
-Nella scuola iniziale i primi otto contatti sono sempre Comuni. Il nono contatto
-è sempre Andrea Simonazzi, il primo Leggendario della partita; dal decimo
-contatto si sbloccano le estrazioni Rare, Ultra Rare e Leggendarie. Nelle scuole
+> **Da implementare:** il Social non genera contatti: produce solo Follower, anche se il messaggio di sblocco parla di «follower e contatti».
+
+Nella scuola iniziale i primi nove contatti sono sempre Comuni. Il decimo
+contatto è sempre Andrea Simonazzi, il primo Leggendario della partita, la cui
+prova nella scuola iniziale si conclude sempre con l'iscrizione; dall'undicesimo contatto si
+sbloccano le estrazioni Rare, Ultra Rare e Leggendarie. Nelle scuole
 successive tutte le rarità sono disponibili fin dal primo contatto e Andrea
-torna nel normale pool Leggendario.
+torna nel normale pool Leggendario. Ogni Leggendario ordinario è un profilo
+unico: se l'estrazione Leggendaria non trova profili liberi, il contatto
+diventa Ultra Raro. Alla fondazione di una nuova scuola i Leggendari iscritti
+tornano disponibili conservando Forme e qualifiche.
 
 Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità
 determina la probabilità di prenotare una prova dopo la mail e quella di
@@ -275,7 +339,18 @@ I potenziamenti di Creatività fanno avanzare linearmente la prenotazione della
 prova dalla probabilità base fino a 85% per i Comuni, 90% per i Rari, 95% per
 gli Ultra Rari e 100% per i Leggendari. I potenziamenti di Accoglienza fanno
 avanzare ogni rarità dalla propria probabilità base d'iscrizione al proprio
-massimo specifico.
+massimo specifico; allo stesso avanzamento contribuiscono i collaboratori
+Istruttori (10% della loro produttività ciascuno) e la specializzazione
+Accoglienza (+10%, che vale anche per la prenotazione).
+
+Esistono inoltre protezioni contro le serie sfortunate: la prima email della
+partita prenota sempre la prova; dopo 4 email consecutive senza prenotazione la
+successiva prenota sicuramente; la prima prova con Fama 0 si conclude sempre con
+un'iscrizione; dopo 4 prove consecutive senza iscrizione la successiva prova di
+un contatto ordinario è garantita. Il potenziamento «Esperienza memorabile»
+(Accoglienza) dà inoltre il 5% per livello (massimo 25%) di rimettere
+disponibile, una sola volta, un contatto non iscritto dopo la prova (esclusi i
+Leggendari Segreti), che riceverà così una seconda email.
 
 Il **Pity** è un contatore globale interno e non viene mostrato
 nell'interfaccia. Ogni prova in palestra che non produce un'iscrizione, comprese
@@ -291,15 +366,19 @@ Ogni contatto contiene:
 
 - nome e cognome generati;
 - indirizzo email fittizio;
-- fonte del contatto;
+- fonte del contatto (iniziale, sparring, evento, collaboratore/evento
+  narrativo, torneo);
 - data di acquisizione;
+- rarità, Forme registrate e statistiche atletiche di Arena e Stile;
 - eventuali tag tecnici o narrativi;
-- stato: disponibile, in scrittura, invitato, prova prenotata, convertito o
-  perso.
+- stato: disponibile, in scrittura, invitato, prova prenotata, iscritto, uscito
+  (iscritto che ha lasciato la scuola) o perso.
+
+> **Da implementare:** i contatti non hanno tag tecnici o narrativi.
 
 Tutti i profili Leggendari, ordinari e Segreti, usano un indirizzo nel formato
 `nome.cognome@ludosport.net`; gli altri contatti mantengono i provider fittizi
-del catalogo.
+del catalogo. Le email partono sempre dal mittente `genova@ludosport.net`.
 
 I contatti sono una risorsa limitante. Se finiscono, la produzione di email si
 ferma.
@@ -307,9 +386,11 @@ ferma.
 ### 5.4 Follower
 
 I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
-sblocca Social, partono dalla Fama già raggiunta e diventano visibili nella
-barra superiore. Non sono spendibili. Ogni nuovo Follower aggiunge anche un
-punto Fama, aumenta l'affluenza agli Eventi e produce una rendita mensile da
+sblocca Social (35 iscritti attivi), partono dalla Fama già raggiunta, senza
+generare nuova Fama, e diventano visibili nella barra superiore. Non sono
+spendibili. Si ottengono dai cicli di contenuti dei collaboratori Social e dai
+premi dei tornei. Ogni nuovo Follower aggiunge anche un punto Fama, aumenta
+l'affluenza agli Eventi (+0,005% per Follower) e produce una rendita mensile da
 sponsorizzazioni. I Follower non modificano direttamente le prove o le
 iscrizioni.
 
@@ -317,52 +398,72 @@ iscrizioni.
 
 Stati possibili:
 
-- bozza;
-- in scrittura;
-- completata;
-- inviata;
-- in attesa dell'esito;
+- in scrittura (la bozza nasce già in questo stato);
+- pronta per l'invio (completata);
+- in invio;
+- inviata, in attesa dell'esito;
 - prova prenotata;
 - contatto perso.
 
 Non esistono follow-up né conversazioni di risposta: ogni contatto riceve una
-sola mail e viene poi convertito o eliminato.
+sola mail e viene poi convertito o eliminato. L'unica eccezione è il secondo
+invito concesso da «Esperienza memorabile», che rimette il contatto tra i
+disponibili per una nuova mail.
 
 ### 5.5 Collaboratori
 
 I Collaboratori delle Onde sono iscritti che decidono di aiutare attivamente la
 scuola. Sono una sottocategoria degli Iscritti e non una valuta separata.
+Diventano collaboratori solo gli Ultra Rari che completano il Corso Y e i
+Leggendari al momento dell'iscrizione (con produttività doppia). Le
+assegnazioni possibili sono Redazione (Social dopo lo sblocco), Eventi,
+Attrezzatura, Istruttore e Gadget.
 
 ### 5.6 Attrezzatura
 
-Le spade della scuola sono gestite come inventario operativo:
+Le spade della scuola sono gestite come inventario operativo. La scuola parte
+con 6 spade; altre si comprano dal fornitore ufficiale (visibile da 15 iscritti
+attivi di picco) a €330 l'una, prezzo che l'«Inflazione di Luce» può aumentare
+del 10% alla volta. Ogni spada è:
 
-- disponibili;
-- riservate da corsi, lezioni di prova o eventi;
-- cariche di usura;
-- in manutenzione;
-- rotte e temporaneamente inutilizzabili.
+- disponibile;
+- riservata da corsi, lezioni di prova o eventi;
+- rotta e temporaneamente inutilizzabile.
+
+L'usura non appartiene a una singola spada: è un carico aggregato distribuito
+sulle spade sane.
+
+> **Da implementare:** non esiste uno stato «in manutenzione»: la manutenzione manuale è istantanea e quella automatica lavora sul carico aggregato senza bloccare spade.
 
 Le spade impongono una capienza operativa: quelle riservate non sono disponibili
 fino alla conclusione dell'attività. Corsi e Corso Agonisti restano in attesa se
 non possono riservare tutte le spade richieste, senza consumare denaro, tempo o
 capienza dell'Istruttore. Una lezione di prova viene invece annullata allo
 scadere dell'attesa, tranne quando l'iscrizione è garantita al 100%: in quel
-caso si conclude senza usare né caricare una spada. Un evento non può essere
-avviato.
+caso si conclude senza usare né caricare una spada. Un evento senza spade
+sufficienti non può essere avviato. Una prova annullata per mancanza di spade
+fa perdere il contatto.
 
 Il carico viene applicato alla conclusione riuscita dell'attività ed è
-aggregato. Se un evento in corso viene annullato, si applica metà del carico
-previsto e non si ottengono contatti. Ogni 100 punti rompe una spada; più soglie
-superate rompono più spade e tutto il carico eccedente viene conservato. La
-manutenzione preventiva costa €2 per punto, mentre una spada già rotta costa
-€250 e torna da 100 a 0.
+aggregato (2 punti per una lezione di prova, 40 per la prova di un Leggendario
+Segreto, 20 per spada nel Corso Agonisti; i potenziamenti possono ridurlo fino
+al 50%). Se un evento in corso viene annullato, il costo viene rimborsato, si
+applica un quarto del carico previsto e non si ottengono contatti. Ogni 100
+punti rompe una spada; più soglie superate rompono più spade, ma un'attività non
+può rompere più spade di quante ne usava, e tutto il carico eccedente viene
+conservato. La manutenzione preventiva costa €2 per punto, mentre una spada già
+rotta costa €250 e torna da 100 a 0. La manutenzione manuale ripara prima le
+spade rotte e poi, se nessuna resta rotta, riduce il carico.
 
 I collaboratori assegnati all'Attrezzatura riducono prima il carico delle spade
 sane non riservate e poi riparano le spade rotte. Pagano il 75% dei costi
 manuali, ottenendo uno sconto del 25%: €187,50 per spada e €1,50 per punto.
 Producono un punto-lavoro ogni 1,5 secondi base; una spada completa richiede 150
-punti-lavoro, pur ripristinando 100 punti di condizione.
+punti-lavoro (riducibili fino a 75 con i potenziamenti), pur ripristinando 100
+punti di condizione. Quando non c'è nulla da riparare, i potenziamenti
+permettono di accumulare lavoro preparato fino al 10% della capacità totale.
+Se mancano gli Euro per la prossima unità di lavoro, la riparazione automatica
+resta in attesa di fondi.
 
 La manutenzione può procedere mentre corsi, prove o eventi sono attivi, ma
 interviene soltanto sulle spade non riservate. Le spade rotte sono sempre
@@ -374,13 +475,17 @@ appena la spada riparata diventa disponibile.
 
 L'interfaccia rappresenta la capacità complessiva come una barra divisa in un
 blocco da 100 punti per ogni spada della scuola. Il rosso indica una spada
-rotta, il grigio una spada riservata e temporaneamente non riparabile, l'oro il
-carico normale ancora rimovibile e lo spazio vuoto la condizione sana residua.
-Il riepilogo numerico mostra l'usura totale includendo 100 punti per ogni spada
-rotta. Fino a 20 spade i blocchi restano individuali; da 21 spade in poi la
-barra diventa continua e aggrega proporzionalmente le quattro condizioni. Nella
-scheda dei Collaboratori assegnati all'Attrezzatura viene usata sempre la stessa
-barra aggregata in formato compatto.
+rotta, il grigio a righe una spada riservata e temporaneamente non riparabile,
+l'oro il carico normale ancora rimovibile e il verde la condizione sana
+residua. Il valore accessibile della barra conta 100 punti per ogni spada
+rotta; i riepiloghi numerici visibili mostrano separatamente spade libere su
+totali, spade rotte, spade in uso e punti di usura normale. Fino a 20 spade i
+blocchi restano individuali; da 21 spade in poi la barra diventa continua e
+aggrega proporzionalmente le quattro condizioni. Nella barra superiore, nel
+pannello rapido Attrezzatura e nelle schede dei Collaboratori assegnati
+all'Attrezzatura viene usata sempre la barra aggregata in formato compatto.
+
+> **Da implementare:** tutte le barre oggi presenti nell'interfaccia usano il formato compatto, quindi la vista a blocchi individuali (fino a 20 spade) non compare in nessuna schermata.
 
 Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
 
@@ -390,13 +495,25 @@ Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
 | Spada caduta: Fanne 5              | Capita a tutti prima o poi...                              |                    +10 carico |
 | Il portaspade di legno perfetto    | Direttamente dall'Ordine del Vento di Trieste, è stupendo! |                    -20 carico |
 | Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare...        | -30 carico e 1 spada riparata |
-| Si può avere nera?                 | Certe domande dovrebbero non essere mai fatte.             |                    +30 carico |
+| Si può avere nera?                 | Certe domande dovrebbero non essere mai fatte...           |                    +30 carico |
 | Un Pini al lavoro                  | Darth Modificus alla riscossa!                             |                    -30 carico |
+
+Richiedono almeno 2 iscritti attivi («Un piccolo disastro»), 4 («Spada
+caduta: Fanne 5», «Si può avere nera?») o 6 (gli altri tre).
 
 ### 5.7 Reputazione di rete
 
 La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo
 crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
+
+Nel codice la Reputazione cresce di 1 a ogni fondazione, ma i bonus permanenti
+dipendono dal numero di scuole fondate: +25% per scuola a caratteri per input,
+quote e entrate di rete e affluenza agli eventi, più €5 al mese di entrata di
+rete per scuola. Il numero di scuole aumenta anche i requisiti del prestigio
+successivo, il costo di alcuni potenziamenti e dello 0,5% per scuola la
+probabilità di abbandono degli allievi con Forma 7.
+
+> **Da implementare:** il valore di Reputazione di rete non viene letto da nessuna regola di gioco e non cresce con lo sviluppo delle scuole dopo la fondazione.
 
 ---
 
@@ -405,12 +522,18 @@ crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
 ### 6.1 Regole di input
 
 - Il gioco ascolta gli eventi `keydown` quando la vista di composizione è attiva
-  e nessun controllo dell'interfaccia richiede l'input.
-- Ogni tasto, inclusi modificatori e tasti di navigazione, produce una sola
-  unità di input; `event.repeat` viene ignorato.
-- Un click nel corpo produce lo stesso avanzamento.
-- I click su cartelle, menu, Calendario, Contatti e altre opzioni eseguono la
-  loro funzione e non scrivono.
+  (Posta, cartella Posta in arrivo, nessun messaggio aperto), il nome del
+  profilo è stato inserito, il tutorial non blocca l'input e il focus non si
+  trova su un controllo che consuma la tastiera (pulsanti, campi, menu a
+  tendina, link, testo modificabile).
+- Ogni tasto, inclusi Ctrl, Alt e i tasti di navigazione, produce una sola
+  unità di input; `event.repeat` viene ignorato. Fanno eccezione Shift, il
+  tasto Windows/Meta e F9, che alterna la Modalità Onde e non scrive.
+- Un click nel corpo produce lo stesso avanzamento; a mail completa anche il
+  pulsante **Invia** della barra di composizione la spedisce.
+- I click su cartelle, barra laterale (Eventi, Scuola, Tornei, Gadget,
+  Upgrade, Impostazioni), menu e altre opzioni eseguono la loro funzione e non
+  scrivono.
 - Le combinazioni di sistema e del browser non devono essere bloccate, anche
   quando il relativo `keydown` fa avanzare il testo.
 - Tenere premuto un tasto conta come una singola pressione.
@@ -419,31 +542,64 @@ crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
   preme non viene registrato.
 - L'input manuale rimane utile nelle fasi avanzate perché la stessa potenza di
   scrittura moltiplica anche il lavoro dei collaboratori.
+- Un input senza bozza aperta (per esempio con i contatti esauriti) va perso e
+  non alimenta il Flusso.
 
 ### 6.2 Caratteri per input
 
-Formula iniziale:
+Formula attuale:
 
 ```text
-potenzaScrittura = 1 + bonusTastieraComoda + bonusFrasiRapide
+potenzaScrittura = (1 + bonusTastieraComoda + bonusFrasiRapide)
+  × (1 + 0,25 × scuoleFondate)
+  × 1,1 se la specializzazione è Redazione
 
-caratteriPerInput = floor(
-  potenzaScrittura
-  × moltiplicatoreScrittura
-  × moltiplicatoreForme
-  × moltiplicatorePrestigio
-)
+caratteriPerInput = potenzaScrittura
+  × moltiplicatoreFlusso
+  + eventuale Frase perfetta
 ```
 
-Valori consigliati per la prima curva:
+Tastiera comoda aggiunge 0,2 caratteri per livello (massimo +1) e Frasi rapide
+0,4 per livello (massimo +2). Il valore non viene arrotondato: i caratteri
+frazionari si accumulano e la composizione mostra il conteggio arrotondato per
+difetto e la potenza per input arrotondata.
 
-| Fase                | Caratteri per input |
-| ------------------- | ------------------: |
-| Inizio              |                   1 |
-| Primo potenziamento |                   2 |
-| Inizio automazione  |                 3–5 |
-| Metà ciclo          |                8–15 |
-| Fine ciclo          |               25–50 |
+> **Da implementare:** il `moltiplicatoreForme` della formula originaria (bonus di scrittura legato alle Forme) non esiste nel codice.
+
+Valori effettivi della prima curva:
+
+| Fase                                      | Caratteri per input |
+| ----------------------------------------- | ------------------: |
+| Inizio                                    |                   1 |
+| Tastiera comoda livello 1                 |                 1,2 |
+| Tastiera comoda al massimo                |                   2 |
+| Tastiera comoda e Frasi rapide al massimo |                   4 |
+| Come sopra, con Flusso al tetto ×5        |                  20 |
+
+Le scuole fondate (+25% ciascuna) e la specializzazione Redazione (+10%)
+moltiplicano ulteriormente la potenza.
+
+#### Flusso e Frase perfetta
+
+Entrambe le meccaniche sono bloccate all'inizio e riguardano solo l'input
+manuale.
+
+- **Flusso** (nodo di estensione **Ritmo di battitura**, 4 livelli: €100,
+  €250, €600, €1.500; richiede Tastiera comoda 2). Ogni input aggiunge 2 punti
+  a un indicatore da 0 a 100; ogni 25 punti il moltiplicatore sale di un
+  gradino e l'indicatore si ferma al valore che corrisponde al tetto attuale.
+  Il primo livello fissa il tetto a ×2 e ogni livello successivo lo alza di 1,
+  fino a ×5. Nei primi 1,5 secondi senza input l'indicatore scende
+  di 5 punti al secondo, poi di 40 punti al secondo.
+- **Frase perfetta** (nodo di estensione **Frasi fatte**, 5 livelli: €400,
+  €800, €1.600, €3.200, €6.400; richiede Ritmo di battitura 2). Con almeno un
+  livello, ogni input ha una probabilità di completare subito la frase in
+  corso (fino al prossimo `.`, `!`, `?`, a capo o, nel sorgente HTML, `>`), per
+  un massimo di 60 caratteri. La probabilità è 0,25% per livello di Frasi
+  fatte, più 0,15% per livello di Tastiera comoda, Frasi rapide e Campi
+  intelligenti e 0,3% per livello di Revisione istantanea, con un massimo del
+  5%. L'estrazione dipende dalla mail e dal numero di input, non dal seme
+  casuale condiviso.
 
 ### 6.3 Rapporto tra scrittura manuale e automatica
 
@@ -455,6 +611,11 @@ migliorano contemporaneamente:
 - caratteri prodotti dai Collaboratori delle Onde;
 - efficacia di eventuali strumenti automatici futuri.
 
+I collaboratori usano la potenza di scrittura (5 caratteri al secondo per punto
+di produttività, moltiplicati per `potenzaScrittura` e per i bonus di
+automazione), ma non beneficiano di Flusso e Frase perfetta, che restano legati
+all'input manuale.
+
 Questo collegamento impedisce che la potenza manuale diventi un ramo morto dopo
 lo sblocco dell'automazione.
 
@@ -465,43 +626,64 @@ nella partita. Al completamento:
 
 1. il cursore si ferma alla fine del testo;
 2. con l'invio automatico attivo la mail parte subito; con l'opzione disattivata
-   resta completamente visibile finché il giocatore non preme un tasto o fa
-   clic;
-3. compare per 250–400 ms lo stato Outlook “Invio in corso…”;
+   resta completamente visibile finché il giocatore non preme un tasto, fa
+   clic o preme **Invia** (i collaboratori non la spediscono);
+3. compare per 350 ms lo stato Outlook “Invio in corso…”;
 4. la mail passa in Posta inviata;
 5. viene determinato e salvato l'esito ritardato
    `prenota la prova / contatto perso`;
-6. si apre la mail successiva entro 300–600 ms;
+6. si apre subito la mail successiva, se esiste un contatto disponibile;
 7. non viene riprodotto alcun suono.
+
+Al primo invio arriva anche il messaggio di sistema “Configurazione campagna
+completata”.
 
 Decidere l'esito al momento dell'invio impedisce di cambiare il risultato
 ricaricando la pagina. L'esito della successiva lezione in palestra viene invece
-determinato quando la lezione viene risolta.
+determinato quando la lezione viene risolta: il numero casuale è fissato alla
+prenotazione, ma la probabilità viene calcolata con lo stato della scuola al
+termine della prova.
 
 ### 6.5 Lunghezza delle email
 
-La progressione dei testi delle email segue otto livelli:
+La progressione dei testi delle email segue otto livelli. Il catalogo contiene
+100 idee (una per email, assegnate a rotazione); da una banca di frasi arrivano
+le parti aggiuntive. Ogni punto Creatività acquistato nel potenziamento del
+livello (0–5) aggiunge una frase o un punto elenco, quindi la lunghezza cresce
+con i punti. Le lunghezze indicate vanno da 0 a 5 punti e variano un poco con i
+nomi di destinatario e giocatore.
 
-| Livello | Potenziamento         | Formato e lunghezza                                                   |
-| ------: | --------------------- | --------------------------------------------------------------------- |
-|       0 | Nessun potenziamento  | Testo breve con piccoli refusi, 150–200 caratteri                     |
-|       1 | Controllo ortografico | Stesso testo senza errori                                             |
-|       2 | Email professionale   | Firma completa, struttura e spaziatura coerenti, ancora in plain text |
-|       3 | Invito personalizzato | Nuovo set di testi, 250–450 caratteri                                 |
-|       4 | Call to action        | Link e pulsanti, massimo 500 caratteri                                |
-|       5 | Impaginazione         | Struttura CSS, massimo 600 caratteri                                  |
-|       6 | Pubblicità vincente   | Volantino completo con immagini, massimo 800 caratteri                |
-|       7 | Corso di Marketing    | Presentazione approfondita, massimo 2.000 caratteri                   |
+| Livello | Potenziamento         | Formato e lunghezza                                                                                                              |
+| ------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+|       0 | Nessun potenziamento  | “Bozza disastrata”: inizio della bozza (almeno 70 caratteri di frasi intere) con errori grossolani generati da dizionario, circa 80–175 caratteri |
+|       1 | Controllo ortografico | Bozza completa corretta + una riga breve per punto, circa 145–300 caratteri                                                     |
+|       2 | Email professionale   | Oggetto professionale, apertura, invito, una frase cortese per punto, “Un saluto,” e firma completa; plain text, circa 220–680 caratteri |
+|       3 | Invito personalizzato | HTML: logo, titolo, gancio iniziale, 3 punti elenco + 1 per punto; testo circa 470–850, sorgente circa 1.600–2.050 caratteri   |
+|       4 | Call to action        | + etichetta d'invito all'azione, immagine principale, blocco “come prenotare”; testo circa 580–960, sorgente circa 1.900–2.300 |
+|       5 | Impaginazione         | + scheda CONTATTI, copy da campagna; testo circa 630–1.010, sorgente circa 2.100–2.550                                           |
+|       6 | Pubblicità vincente   | + sezione video “DA VEDERE”, oggetto da campagna, P.S.; testo circa 750–1.140, sorgente circa 2.550–2.980                        |
+|       7 | Corso di Marketing    | + didascalia del video e piè di pagina con avviso; testo circa 880–1.270, sorgente circa 2.900–3.320                             |
 
-Il corpo iniziale usa il formato `Ciao {nome},` seguito dal testo e dal solo
-nome del giocatore. Il primo controllo ortografico rimuove gli errori senza
-cambiare il messaggio; i livelli successivi aggiungono struttura, contenuto e
-strumenti di conversione in modo progressivo.
+Al livello 0 gli errori coinvolgono circa il 28% delle parole (almeno 3 nel
+corpo e 1 nell'oggetto); nomi del destinatario e del giocatore sono protetti.
+Gli errori sono deterministici (stessa mail, stessi errori) e le loro posizioni
+vengono salvate con la mail per mostrarne la sottolineatura.
+
+Il corpo dei livelli 0 e 1 usa il formato `Ciao {nome},` seguito dal testo,
+senza firma. Dal livello 2 compaiono “Un saluto,” e la firma
+`{giocatore}, {Ordine} - {città}`. Il primo controllo ortografico rimuove gli
+errori senza cambiare il messaggio; i livelli successivi aggiungono struttura,
+contenuto e strumenti di conversione in modo progressivo.
+
+Quando si acquista il primo potenziamento di un nuovo livello, le nuove email
+scelgono il nuovo catalogo con probabilità pari a punti acquistati / 5 e
+altrimenti usano il livello precedente; con 5 punti usano solo il nuovo.
 
 Ai livelli 0, 1 e 2 ogni input rivela subito il testo della mail in plain text.
 Dal livello 3, **Invito personalizzato**, gli input scrivono invece il sorgente
-HTML: la composizione mostra il codice in un riquadro secondario e l'anteprima
-reale della mail in un riquadro più grande e preponderante.
+HTML: la composizione mostra l'anteprima reale della mail (“Anteprima mail”) e,
+sotto, il codice in un riquadro secondario (“Codice HTML”). Da questo livello la
+lunghezza da scrivere è quella del sorgente HTML, non del solo testo.
 
 ---
 
@@ -515,11 +697,19 @@ Ogni email inviata crea un esito futuro con due possibili risultati:
 - il contatto non converte e sparisce definitivamente.
 
 Non vengono mostrate risposte personali e non esistono follow-up. Se la prova
-viene prenotata, il sistema crea una presenza nel Calendario. Quando la lezione
-si conclude, viene risolto un secondo esito:
+viene prenotata, il sistema crea una lezione di prova visibile in **La mia
+giornata** e nello stato della mail in Posta inviata. Quando la lezione si
+conclude, viene risolto un secondo esito:
 
 - la persona si iscrive;
 - la persona non si iscrive e sparisce definitivamente.
+
+Eccezione: con **Esperienza memorabile** (5% per livello, massimo 25%) un
+contatto non iscritto può tornare disponibile per un'ultima email e un'ultima
+prova (una sola volta, mai per i Leggendari Segreti); lo segnala il messaggio
+“Un secondo tentativo”.
+
+> **Da implementare:** non esiste una vista Calendario nel gioco (il componente `CalendarView` c'è ma non è collegato all'interfaccia).
 
 Gli Ultra Rari diventano Collaboratori delle Onde dopo il Corso Y; i Leggendari
 lo diventano immediatamente dopo l'iscrizione.
@@ -531,7 +721,8 @@ Per il primo prototipo:
 | Passaggio                        |                                                                  Tempo suggerito |
 | -------------------------------- | -------------------------------------------------------------------------------: |
 | Esito dell'email                 |                                                                       10 secondi |
-| Attesa della lezione in palestra |                                                                       1–5 minuti |
+| Attesa della lezione in palestra |                                                                       30 secondi |
+| Durata della lezione di prova    | 15 secondi (−1 secondo per livello di Sala preparata, minimo 10); Leggendario Segreto 30 secondi |
 | Esito della lezione              |                                                             immediato al termine |
 | Bonus di iscrizione              |                                                                  immediato (€20) |
 | Accredito della quota mensile    | al cambio mese (€40 base + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
@@ -547,50 +738,70 @@ logica.
 ### 7.3 Formule di conversione
 
 ```text
-probabilitàPrenotazione = clamp(
-  prenotazioneBase
-  × moltiplicatoreScrittura
-  × moltiplicatoreReputazione
-  × bonusPrestigio,
-  minimo,
-  massimo
+progressoCreatività = clamp(
+  puntiCreatività / 35
+  + 0,10 se la specializzazione è Accoglienza,
+  0, 1
 )
+probabilitàPrenotazione = prenotazioneBase
+  + (prenotazioneMassima − prenotazioneBase) × progressoCreatività
 
+miglioramentoIscrizione = clamp(
+  bonusAccoglienza
+  + produttivitàIstruttori × 0,10 × (1 + efficaciaIstruttori)
+  + 0,10 se la specializzazione è Accoglienza,
+  0, 1
+)
 probabilitàIscrizioneDopoProva = clamp(
-  iscrizioneBaseDopoProva
-  × qualitàLezione
-  × bonusAccoglienza
-  × efficaciaCollaboratori
-  × statoAttrezzatura
-  × bonusPrestigio,
-  minimo,
-  massimo
+  iscrizioneBase
+  + (iscrizioneMassima − iscrizioneBase) × miglioramentoIscrizione
+  + 3% × tentativiPrecedenti (solo Leggendari),
+  iscrizioneBase,
+  iscrizioneMassima
 )
 
-probabilitàIscrizioneLeggendario = clamp(
-  probabilitàIscrizioneDopoProva
-  + bonusTentativiPersonali
-  + Pity / 100,
-  0,
+probabilitàIscrizioneLeggendario = min(
+  probabilitàIscrizioneDopoProva + Pity / 100,
   1
 )
 ```
 
-I valori di prenotazione e iscrizione dipendono dalla rarità e sono definiti
-nella tabella dei Contatti. La prima email e la quinta dopo quattro fallimenti
-consecutivi conservano la protezione tutorial/anti-sfortuna.
+| Rarità      | Prenotazione base → massima | Iscrizione base → massima |
+| ----------- | --------------------------: | ------------------------: |
+| Comune      |                   40% → 85% |              62,5% → 100% |
+| Raro        |                   50% → 90% |                 40% → 90% |
+| Ultra Raro  |                   75% → 95% |             23,33% → 50% |
+| Leggendario |                 100% → 100% |                 15% → 35% |
+
+Il Pity aumenta di 1 a ogni prova non conclusa con un'iscrizione (anche se
+annullata per mancanza di spade) e si azzera quando si iscrive un Leggendario.
+
+> **Da implementare:** i fattori moltiplicativi della formula originaria (moltiplicatore di scrittura e di reputazione, bonus prestigio, qualità della lezione, stato dell'attrezzatura) non entrano nelle probabilità di prenotazione e iscrizione.
+
+I valori di prenotazione e iscrizione dipendono dalla rarità (tabella qui sopra,
+definita in `rarities.ts`). La prima email e la quinta dopo quattro email perse
+consecutive prenotano sempre la prova. Allo stesso modo la prima iscrizione
+della scuola (Fama 0) e la quinta prova dopo quattro prove consecutive senza
+iscrizione sono garantite; Andrea Simonazzi si iscrive sempre finché non è stata
+fondata alcuna scuola.
 
 ### 7.4 Comunicazione degli esiti
 
 Gli esiti positivi vengono comunicati come messaggi automatici interni, non come
 risposte dei destinatari:
 
-- “Nuovo iscritto registrato”;
+- “Nuovo iscritto registrato” (“Primo iscritto registrato” la prima volta);
 - “Quota associativa accreditata”;
 - “Nuovo collaboratore disponibile”.
 
+> **Da implementare:** non esiste un messaggio “Quota associativa accreditata”; al cambio mese le quote compaiono solo come numero fluttuante “Quote mensili”.
+
+Nuovi iscritti, Flusso e Frase perfetta generano anche numeri fluttuanti di
+feedback (per l'iscritto: “+1 iscritto · +20 €” con nome e rarità; oltre tre
+iscrizioni simultanee un unico “+N iscritti”).
+
 Le prenotazioni delle lezioni di prova non generano messaggi in Posta in arrivo:
-sono visibili nel Calendario e nello stato dell'email inviata.
+sono visibili in La mia giornata e nello stato dell'email inviata.
 
 Nel prototipo l'attesa è fissata a 30 secondi. La prova ordinaria dura 15
 secondi, riserva una spada e aggiunge 2 punti di carico alla conclusione. La
@@ -601,7 +812,9 @@ spada e senza aggiungere carico.
 
 Una volta raggiunto il massimo storico di 5 iscritti, **La mia giornata**
 raggruppa in un unico riepilogo tutte le lezioni di prova ordinarie visibili,
-anche quando ce n'è soltanto una. Le prove dei Leggendari e dei Leggendari
+anche quando ce n'è soltanto una. Prima di quella soglia il riepilogo compare
+solo quando le prove ordinarie visibili sono più di 5. Le prove concluse o
+annullate restano visibili per 10 secondi. Le prove dei Leggendari e dei Leggendari
 Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
@@ -609,7 +822,9 @@ notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
 del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
-soltanto nelle statistiche aggregate del funnel.
+nelle statistiche aggregate del funnel, nello stato della mail inviata e, per
+le prove, per 10 secondi in La mia giornata (“non iscritto” oppure “Annullata:
+nessuna spada disponibile”).
 
 ---
 
@@ -622,17 +837,26 @@ tempo compresso. Esistono eventi fissi ed eventi che compaiono casualmente.
 Nella prima versione gli esiti sono automatici: il sistema decisionale verrà
 valutato successivamente.
 
+> **Da implementare:** gli eventi si avviano dalla vista **Eventi** della barra laterale (che compare dopo il primo obiettivo breve), non da un Calendario; esistono solo i 15 eventi fissi della tabella, nessun evento di acquisizione casuale.
+
 Ogni evento richiede:
 
 - un numero di iscritti da impiegare;
 - un numero di spade da impiegare;
-- una durata base di 10 secondi, riducibile dalla Maestria del collaboratore;
+- una durata base di 10 secondi, divisa per (1 + bonus di Maestria Eventi del
+  collaboratore che lo avvia); il primo Volantinaggio del tutorial dura 5
+  secondi;
 - un costo in Euro;
+- una Fama della scuola almeno pari alla soglia di sblocco;
 - eventuali requisiti di Carisma, Social o Attrezzatura.
 
+> **Da implementare:** non esistono requisiti di Carisma, Social o Attrezzatura per avviare un evento, oltre a iscritti, spade disponibili, Euro, Fama e cooldown.
+
 Non esiste un limite numerico separato agli eventi contemporanei. Il giocatore
-può avviarne più di uno finché restano disponibili sia gli iscritti sia le spade
-richieste; entrambe le risorse tornano disponibili al termine dell'attività. Al
+può avviarne più di uno, purché diversi tra loro (lo stesso evento non può
+essere in corso due volte e ogni collaboratore ne gestisce uno alla volta),
+finché restano disponibili sia gli iscritti sia le spade richieste; entrambe le
+risorse tornano disponibili al termine dell'attività. Al
 completamento parte un conto alla rovescia specifico prima che lo stesso evento
 possa essere selezionato di nuovo. I tempi brevi usano secondi reali; fiere e
 manifestazioni usano mesi o anni del calendario di gioco. Durante questo
@@ -643,7 +867,10 @@ viene applicato soltanto il 25% del carico previsto.
 Quando l'evento viene avviato automaticamente da un collaboratore, la sua
 Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
 Iniziato 90%, Accademico 80%, Cavaliere 70% e Maestro 50%. La riduzione del
-tempo usa invece il normale bonus di produttività della Maestria.
+tempo usa invece il normale bonus di produttività della Maestria (+20%, +40%,
++65%, +100%: un Maestro dimezza la durata), che riduce anche il carico
+dell'evento fino a un massimo del 25%. Gli eventi avviati dal giocatore pagano
+sempre il prezzo pieno.
 
 Le nuove spade possono essere acquistate dall'area Attività tramite **LamaDiLuce
 (Abridge S.r.l.)**, partner tecnico e fornitore ufficiale LudoSport. Il
@@ -653,13 +880,27 @@ di produzione. L'acquisto è immediato per non introdurre microgestione
 logistica; la presentazione conserva un tono goliardico senza alterare i
 riferimenti reali del produttore.
 
+Nel codice l'acquisto si trova nel pannello Attrezzatura di **La mia giornata**,
+compare quando il massimo storico raggiunge 15 iscritti (o la scuola possiede
+già più delle 6 spade iniziali) e permette di comprare 1, 10 o 100 spade. Il
+prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: ogni spada
+acquistata aggiunge 10 punti percentuali (massimo 100%) alla probabilità che a
+Gennaio il prezzo salga del 10% (“Lama di Luce aumenta i costi delle spade…”);
+dopo l'aumento la probabilità torna a zero.
+
+> **Da implementare:** l'interfaccia mostra solo “Polaris EVO Basic” e il prezzo; il nome LamaDiLuce (Abridge S.r.l.) e la descrizione del prodotto non compaiono nel pannello di acquisto.
+
 La **Fama della scuola** è il punteggio cumulativo permanente ottenuto da
 iscrizioni, Follower e ricompense esplicite. Sblocca progressivamente cinque
 tier di potenzialità: **Molto bassa**, **Bassa**, **Media**, **Alta** e
 **Altissima**. Non diminuisce quando alcuni iscritti lasciano la scuola.
 All'inizio sono visibili soltanto Volantinaggio e Kata contro le onde del mare;
 l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra
-previsioni numeriche sui contatti.
+previsioni numeriche sui contatti. Ogni evento mostra durata, rischio (Basso,
+Medio, Alto), iscritti e spade richiesti e la potenzialità come indicatore a
+cinque tacche.
+
+> **Da implementare:** la vista Eventi mostra solo gli eventi già sbloccati dalla Fama e non anticipa il prossimo sblocco.
 
 | Evento                        | Sblocco |      Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
 | ----------------------------- | ------: | ---------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
@@ -691,14 +932,14 @@ all'avvio e mostrata soltanto alla conclusione. L'usura delle spade non riduce
 più il risultato.
 
 ```text
-personeIncontrate = capienzaBase
+personeIncontrate = max(1, round(capienzaBase
   × variabilitàCasuale
-  × bonusAffluenza
-  × efficaciaCollaboratori
+  × (1 + bonusAffluenza)
+  × efficaciaCollaboratori))
 
-proveDimostrative = personeIncontrate
+proveDimostrative = max(1, round(personeIncontrate
   × probabilitàProvaSulPosto
-  × moltiplicatoreCarisma
+  × (1 + bonusCarisma)))
 
 mediaContatti = mediaDistribuzioneEvento
   × 25/27
@@ -709,6 +950,13 @@ mediaContatti = mediaDistribuzioneEvento
 efficaciaCollaboratori = max(1, sommaProduttivitàCollaboratoriEventi)^0,30103
 disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
 ```
+
+Le prove dimostrative non sono mai meno dei contatti estratti e le persone
+incontrate mai meno delle prove. `bonusAffluenza` somma i potenziamenti
+Carisma di pubblico, +10% con la specializzazione Eventi, +25% per scuola
+fondata e, con i Social attivi, +5% ogni 1.000 Follower; `bonusCarisma` somma
+i potenziamenti Carisma sui contatti. La variabilità casuale è estratta tra i
+limiti propri di ogni evento (per esempio 0,35–2,5 per lo Sparring al parco).
 
 Le distribuzioni base sono:
 
@@ -739,7 +987,8 @@ Carisma e collaboratori generano poi un'aggiunta indipendente calcolata sul
 valore medio normalizzato. Possono quindi trasformare uno zero in un contatto o
 superare il massimo della distribuzione base, senza essere applicati due volte.
 Finché la scuola ha meno di quattro collaboratori, ogni eventuale risultato
-finale di zero viene sostituito da un contatto. L'interfaccia mostra solo
+finale di zero viene sostituito da un contatto; il Volantinaggio del tutorial
+garantisce sempre un contatto. L'interfaccia mostra solo
 indicazioni generiche di rischio e potenzialità, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
@@ -763,13 +1012,17 @@ in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
 collaboratori già assegnati conservano incarico e Maestria. I contenuti Social
 avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
 95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
-giocatore. Senza email, tutta la potenza produce contenuti. Un contenuto
-richiede 100.000 caratteri e ha il 50% di probabilità base di ottenere un
-Follower. Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del
+giocatore. Senza email, tutta la potenza produce contenuti. **Fusione
+documenti** copia inoltre nei contenuti il 5% per livello (massimo 25%) della
+quota destinata alla mail, senza rallentarla. Un contenuto richiede 100.000
+caratteri (fino a 50.000 con Sintesi dei contenuti) e ha il 50% di probabilità
+base di ottenere un Follower (fino al 95% con Pubblicità vincente, che al 5°
+livello aggiunge il 5% di Follower doppio). Ogni Follower aggiunge anche 1 punto
+di Fama. Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del
 5% l'affluenza agli Eventi, senza alcun limite massimo. Social non genera prove
 dirette, non migliora la qualità dei contatti e non accredita denaro per ciclo.
 Le sponsorizzazioni vengono riscosse con le rette mensili, a partire da 0,10 €
-per Follower. Il completamento dei contenuti aggiorna Follower e statistiche ma
+per Follower (fino a 0,50 € con Corso di Marketing). Il completamento dei contenuti aggiorna Follower e statistiche ma
 non genera email interne: la posta è riservata a informazioni operative o
 narrative importanti. Le campagne manuali del vecchio sistema non esistono più.
 
@@ -789,6 +1042,13 @@ Quando non esistono contatti disponibili:
   continuano ad avanzare;
 - nessun progresso viene perso.
 
+> **Da implementare:** non viene inviata alcuna email interna “Elenco contatti esaurito”. Al suo posto la composizione mostra “Nessuna bozza disponibile” con il testo “Hai utilizzato tutti i contatti disponibili. Le prossime fonti arrivano dalle attività esterne.”, senza rimandi a un Calendario.
+
+La riga del settore di scrittura mostra “Scrittura email · Nessuna email da
+scrivere” come inattiva; i caratteri già accumulati dai collaboratori restano
+nel buffer. Appena un evento porta nuovi contatti, la bozza successiva si apre
+automaticamente.
+
 Questa situazione è intenzionale e rappresenta il principale collo di bottiglia
 strategico.
 
@@ -800,7 +1060,10 @@ strategico.
 
 Comuni e Rari non diventano Collaboratori delle Onde. Gli Ultra Rari diventano
 collaboratori dopo aver completato il **Corso Y**. I Leggendari diventano
-collaboratori fin dall'iscrizione.
+collaboratori fin dall'iscrizione. Il passaggio è automatico e certo: all'arrivo
+di ogni nuovo collaboratore la Posta riceve il messaggio **Nuovo collaboratore
+disponibile**. Nella produttività di ogni ruolo un Leggendario vale ×2, un Ultra
+Raro ×1.
 
 La probabilità può aumentare con:
 
@@ -809,6 +1072,8 @@ La probabilità può aumentare con:
 - reputazione;
 - progetti interni;
 - potenziamenti organizzativi.
+
+> **Da implementare:** nel codice le probabilità di rarità dei contatti sono fisse (Leggendario 2%, Ultra Raro 5,5%, Raro 12,5%) e il reclutamento non ha probabilità; nessuno di questi fattori le modifica.
 
 ### 9.2 Dati e regole
 
@@ -820,9 +1085,9 @@ Ogni collaboratore possiede:
 - stato e assegnazione attuale.
 
 Ogni collaboratore accumula inoltre una **Maestria** separata per ciascun ruolo
-operativo: Redazione/Social, Eventi, Attrezzatura e Istruttore. La Preparazione
-atletica usa la Maestria Istruttore. I cinque gradi condividono la stessa curva
-di esperienza in tutti i ruoli:
+operativo: Redazione/Social, Eventi, Attrezzatura, Istruttore e Gadget. La
+Preparazione atletica usa la Maestria Istruttore. I cinque gradi condividono la
+stessa curva di esperienza in tutti i ruoli:
 
 | Grado      | Tempo dal grado precedente | Tempo cumulativo | XP cumulativi | Bonus |
 | ---------- | -------------------------: | ---------------: | ------------: | ----: |
@@ -832,9 +1097,17 @@ di esperienza in tutti i ruoli:
 | Cavaliere  |                  30 minuti |        36 minuti |         2.160 |   65% |
 | Maestro    |                      1 ora |     1 ora e 36 m |         5.760 |  100% |
 
+Il bonus moltiplica la produttività del collaboratore in Redazione/Social,
+Attrezzatura, Gadget e Istruttore (velocità delle lezioni e Preparazione
+atletica). Negli **Eventi** la Maestria non aumenta la forza del settore:
+riduce invece il costo degli eventi avviati automaticamente da quel
+collaboratore del 10%, 20%, 30% e 50% (da Iniziato a Maestro). Anche il bonus
+degli Istruttori alla conversione prova → iscrizione ignora la Maestria.
+
 Durante il gioco attivo, ogni collaboratore assegnato riceve **1 XP al secondo**
 esclusivamente nella Maestria del proprio ruolo corrente, indipendentemente
-dall'attività svolta. Un collaboratore non assegnato non riceve XP; cambiando
+dall'attività svolta; **Manuale operativo** aumenta questo ritmo del 10% per
+livello, fino a +50%. Un collaboratore non assegnato non riceve XP; cambiando
 ruolo, inizia ad avanzare nel nuovo percorso e conserva gli XP già guadagnati
 negli altri. Il progresso non avanza mentre il gioco è chiuso. Il passaggio di
 grado viene comunicato tramite un messaggio automatico nella Posta.
@@ -849,36 +1122,58 @@ Regole:
 - al raggiungimento del nono collaboratore si sblocca definitivamente la vista
   aggregata per settori, accompagnata da un tutorial che mette il gioco in
   pausa; la vista individuale non torna disponibile anche se l'organico scende;
-- la vista aggregata mostra il rapporto **Non assegnati/Totali** e permette di
+- la vista aggregata mostra il rapporto **Non assegnati/Totali** (accanto al
+  titolo, nella forma «X/Y liberi») e permette di
   aumentare o ridurre direttamente il numero desiderato di persone per ogni
-  settore, senza legarsi alle identità dei singoli collaboratori;
+  settore, senza legarsi alle identità dei singoli collaboratori; un posto in
+  più può essere aggiunto soltanto se esiste almeno un collaboratore non
+  assegnato;
 - quando cambia l'organico desiderato, i collaboratori liberi vengono riallocati
-  subito e quelli in eccesso restano non assegnati;
+  subito e quelli in eccesso restano non assegnati; per ogni settore esce per
+  primo il collaboratore meno efficace e entra il più adatto tra i non
+  assegnati;
 - un collaboratore impegnato in un evento o in una formazione conserva
   temporaneamente il proprio incarico, conclude l'attività e viene riallocato
   prima che possa avviarne un'altra automaticamente; i lavori continui e
   condivisi sono invece riassegnabili subito;
-- se un settore richiede più persone di quelle presenti, i posti mancanti
-  restano memorizzati e vengono occupati automaticamente dai nuovi collaboratori
-  liberi;
+- un Istruttore in eccesso conclude le lezioni già avviate ma non riceve nuovi
+  allievi; le formazioni ancora in attesa di spade che lo coinvolgono vengono
+  annullate;
+- se un settore richiede più persone di quelle presenti (per esempio dopo
+  un'uscita dall'organico), i posti mancanti restano memorizzati e vengono
+  occupati automaticamente dai nuovi collaboratori liberi;
+- **Turni dei collaboratori** permette di scegliere per ogni settore un settore
+  secondario (mai Istruttore): quando il settore principale è inattivo, il
+  10% per livello della produttività (massimo 50%) passa al secondario;
+- **Priorità operative** sblocca l'ordinamento con cui i settori consumano Euro
+  e risorse scarse a ogni ciclo (ordine iniziale: Redazione, Eventi,
+  Attrezzatura, Istruttore, Gadget);
 - un collaboratore non leggendario può lasciare la scuola soltanto tramite
   eventi narrativi casuali;
+
+> **Da implementare:** nessun evento narrativo rimuove iscritti o collaboratori; oggi un collaboratore può lasciare la scuola soltanto con l'annullamento manuale dell'iscrizione (vedi 9.7).
+
 - i Leggendari non possono lasciare la scuola per inattività, mancato rinnovo o
   altri eventi generici.
 
 Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 
-- Andrea Simonazzi è garantito come 9° contatto nella scuola iniziale; nelle
+- Andrea Simonazzi è garantito come 10° contatto nella scuola iniziale (i primi
+  nove sono sempre Comuni) e la sua iscrizione dopo la prova è garantita; nelle
   scuole successive la sua comparsa torna casuale come per ogni altro
   Leggendario, senza garanzie di prenotazione o iscrizione;
 - la probabilità annuale di abbandono di tutti i Leggendari è sempre 0%,
   indipendentemente dalla formazione e dal numero di scuole fondate;
 - l'unico modo previsto per perdere un Leggendario sarà un evento narrativo
   dedicato, non ancora implementato; finché l'evento non esiste, un Leggendario
-  iscritto resta nella scuola per sempre;
+  iscritto lascia la scuola soltanto se il giocatore ne annulla manualmente
+  l'iscrizione (vedi 9.7);
+
+> **Da implementare:** l'evento narrativo dedicato all'abbandono di un Leggendario non esiste nel codice.
+
 - la probabilità di comparsa del pool Leggendario è 2% per ogni nuovo contatto
-  idoneo: dal decimo nella scuola iniziale e fin dal primo nelle scuole
-  successive;
+  idoneo: dall'undicesimo nella scuola iniziale (il decimo è Andrea) e fin dal
+  primo nelle scuole successive;
 - Pity modifica allo stesso modo le prove dei Leggendari ordinari e Segreti;
   raggiunto il 100%, la prova è garantita e può concludersi anche senza spade;
 - ogni profilo Leggendario è unico: finché esiste già come contatto attivo,
@@ -890,16 +1185,18 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - se nessun profilo del pool è disponibile, qualsiasi nuova assegnazione
   Leggendaria genera invece un Ultra Raro dello stesso tipo di premio;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della
-  nuova scuola;
-- dopo l'eventuale abbandono causato dall'evento dedicato tornano disponibili
+  nuova scuola; chi era iscritto conserva per un futuro incontro Forme,
+  attestati, qualifiche da Tecnico, preferenze, anzianità, Arena, Stile e Corsi
+  Agonisti, ma non la Maestria né l'esperienza nei tornei;
+- dopo l'abbandono (oggi soltanto per annullamento manuale) tornano disponibili
   per incontri futuri;
-- una nuova iscrizione successiva all'evento dedicato ripristina integralmente
-  Forme, attestati da Istruttore, anzianità e storico formativo; l'incarico
-  operativo torna invece non assegnato.
+- una nuova iscrizione successiva all'abbandono ripristina integralmente
+  Forme, attestati da Istruttore e da Tecnico, Maestria, anzianità e storico
+  formativo; l'incarico operativo torna invece non assegnato.
 
 La pagina **Admin**, disponibile soltanto in sviluppo, può avviare direttamente
-la prova in palestra di un profilo Leggendario scelto casualmente tra quelli
-ancora disponibili. Il comando non iscrive il personaggio: crea una prova della
+la prova in palestra di un profilo Leggendario ordinario (non Segreto) scelto
+casualmente tra quelli ancora disponibili. Il comando non iscrive il personaggio: crea una prova della
 durata ordinaria, che usa le stesse probabilità di conversione, le stesse regole
 di unicità e lo stesso reclutamento automatico dei Leggendari del flusso
 normale.
@@ -916,29 +1213,42 @@ anticipo.
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Redazione → Social   | produce sempre contenuti Social; durante la scrittura assegna internamente il 95% alle email e il 5% ai contenuti  |
 | Eventi               | aumenta persone incontrate e contatti ottenuti                                                                     |
-| Preparatore Atletico | migliora Arena o Stile degli iscritti evitando ripetizioni consecutive                                             |
+| Preparatore Atletico | non è più un ruolo separato: è il compito di riserva degli Istruttori liberi (Preparazione atletica)               |
 | Attrezzatura         | controlla e ripristina le spade                                                                                    |
 | Istruttore           | insegna le Forme già attestate agli iscritti, una persona alla volta, e migliora la conversione prova → iscrizione |
 | Gadget               | sviluppa e revisiona i prototipi e gestisce le vendite automatiche del catalogo                                    |
 | Coordinamento        | funzione futura, non inclusa nell'MVP                                                                              |
 
-Il Preparatore Atletico opera solo durante il gioco online. La selezione è
+La Preparazione atletica (Preparazione agonistica) si sblocca con il livello 5
+di **Nessun *Rancor*e** ed è svolta dagli Istruttori che non stanno insegnando,
+non sono in formazione e non stanno tenendo un Corso Istruttori interno come
+Tecnici. Ogni Istruttore produce un miglioramento al minuto per ogni punto di
+produttività (bonus Staffa e Forme 6/7 contano solo se attestati, più rarità e
+Maestria Istruttore), moltiplicato per le automazioni generiche e per
+l'efficacia di Nessun *Rancor*e. Ogni miglioramento assegna +1 Arena oppure +1
+Stile (50% ciascuno) a un iscritto.
+
+La Preparazione atletica opera solo durante il gioco online. La selezione è
 casuale senza priorità legata alla debolezza dell'atleta e impedisce di
 scegliere lo stesso iscritto nel potenziamento immediatamente successivo, salvo
-il caso in cui sia l'unico iscritto disponibile. Nel 97,5% dei casi il tiro usa
-tutti gli iscritti disponibili; nel restante 2,5% usa soltanto gli iscritti nei
+il caso in cui sia l'unico iscritto disponibile. Nel 95% dei casi il tiro usa
+tutti gli iscritti disponibili; nel restante 5% usa soltanto gli iscritti nei
 preferiti ancora disponibili.
 
 ### 9.4 Scrittura automatica
 
 ```text
-caratteriAutomaticiAlSecondo = velocitàBaseCollaboratore
-  × collaboratoriAssegnati
-  × potenzaScrittura
-  × bonusForma
-  × bonusScritturaScuola
-  × moltiplicatorePrestigio
+caratteriAutomaticiAlSecondo = 5
+  × Σ produttivitàCollaboratori   // (1 + bonus Forma 6/7 + bonus Doppia spada corta) × rarità × Maestria
+  × potenzaScrittura              // include già il bonus di rete (+25% per scuola fondata)
+  × (1 + bonusAutomazioniGeneriche + bonusRedazione)
 ```
+
+La velocità base è `GAME_CONFIG.collaboratorWritingPerSecond` = 5 caratteri al
+secondo per punto di produttività. Il bonus di rete del prestigio non è un
+fattore separato: è già contenuto nella potenza di scrittura. I bonus Redazione
+vengono da **Firma automatica** e **Revisione istantanea**, quelli generici da
+**Procedure standard** e **Coordinamento multi-sede**.
 
 I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input
 manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
@@ -947,7 +1257,10 @@ collaboratori si fermano sulla mail completa finché il giocatore non conferma
 l'invio. Dopo lo sblocco Social, i collaboratori producono sempre contenuti
 online; durante la scrittura di una mail le danno priorità, assegnandole
 internamente il 95% della potenza e conservando il 5% per i contenuti. Le
-percentuali non sono esposte nell'interfaccia.
+percentuali non sono esposte nell'interfaccia. **Fusione documenti** copia
+inoltre nei contenuti il 5% per livello (massimo 25%) del lavoro destinato alla
+mail, senza sottrarlo alla mail. Quando nessuna mail è in scrittura, compresa
+una mail completa in attesa di invio manuale, tutta la potenza va ai contenuti.
 
 ### 9.5 Raccolta automatica dei contatti
 
@@ -963,7 +1276,13 @@ produttività base dei collaboratori assegnati e si eleva il risultato a
 valgono ×2 e cento valgono ×4. Ogni aggiunta resta positiva, ma il suo
 incremento, a parità di produttività individuale, è inferiore al precedente. Una
 squadra con forza inferiore a 1 usa comunque ×1, così gli eventi manuali non
-vengono penalizzati.
+vengono penalizzati. La produttività usata qui comprende Forme (Spada Lunga,
+Forma 6/7) e rarità ma non la Maestria; il moltiplicatore aumenta sia le
+persone incontrate sia la probabilità di ottenere il contatto, in tutti gli
+eventi.
+
+Ogni collaboratore Eventi libero avvia da solo un evento alla volta; il costo
+dell'evento è ridotto dalla sua Maestria Eventi (−10%, −20%, −30%, −50%).
 
 Per ogni collaboratore libero, l'automazione prova gli eventi dal prezzo base
 più basso al più alto; a parità di prezzo sceglie quello con la media contatti
@@ -1042,19 +1361,26 @@ Regole:
   luglio–giugno: una Forma iniziata a luglio consuma quindi uno slot valido
   anche nel settembre immediatamente successivo;
 - Luglio e Agosto sono pausa estiva per tutte le Forme degli atleti, che pur
-  avendo ricevuto i nuovi slot non possono usarli fino a settembre; i Corsi
-  Istruttori e i Corsi Tecnici possono invece iniziare o proseguire e in questi
-  due mesi avanzano al **200% della velocità normale**;
+  avendo ricevuto i nuovi slot non possono usarli fino a settembre (le Forme
+  già avviate proseguono; anche Arena Tecnica e Corso Agonisti non partono in
+  questi mesi); i Corsi Istruttori, i percorsi combinati e i Corsi Tecnici
+  possono invece iniziare o proseguire e in questi due mesi avanzano al **200%
+  della velocità normale**;
 - l'anno scolastico ordinario resta da Settembre ad Agosto;
 - completare un solo ramo fino alla Forma 5 è sufficiente per accedere alla
   Forma 6;
-- durante Corso Y ogni allievo sviluppa automaticamente da una a tre preferenze
-  fra Spada Lunga, Staffa e Doppia spada corta;
+- al completamento di Corso Y ogni allievo sviluppa automaticamente da una a
+  tre preferenze fra Spada Lunga, Staffa e Doppia spada corta (una nel 65% dei
+  casi, due nel 30%, tre nel 5%; i rami sono consecutivi nell'ordine circolare
+  Spada Lunga → Staffa → Doppia spada corta, a partire da uno casuale);
+- un iscritto può apprendere tanti rami quante sono le sue preferenze;
 - gli altri rami preferiti restano percorsi facoltativi che l'automazione può
   completare dopo la Forma 7;
 - la formazione richiede Euro e/o tempo, ma non livelli personali;
 - ogni corso riserva le spade per tutta la sua durata e applica il carico solo
-  al completamento;
+  al completamento; se le spade libere non bastano, la formazione resta **In
+  attesa di spade** e viene pagata soltanto quando parte davvero;
+- i moduli da Istruttore e i Corsi Tecnici non usano spade;
 - le descrizioni definitive dovranno usare terminologia LudoSport approvata.
 
 | Corso o Forma                     |               Spade per atleta | Carico per spada |
@@ -1077,6 +1403,24 @@ Costi base: Forma 1 €50, Corso X €100, Forma 2 €250, Corso Y €500, Forma
 €1.000, Forma 4 €1.500, Forma 5 €2.000, Forma 6 €3.000, Forma 7 €5.000. Lo
 scoglio economico principale inizia dopo Corso Y.
 
+Durate base: Forma 1 20 s, Corso X 25 s, Forma 2 30 s, Corso Y 35 s, Forma 3
+40 s, Forma 4 45 s, Forma 5 50 s, Forma 6 60 s, Forma 7 75 s. Quando un
+Istruttore insegna, la durata viene divisa per la sua produttività da
+Istruttore (Forme, rarità e Maestria).
+
+Bonus dei collaboratori per Forma completata (per ramo conta solo la Forma più
+alta):
+
+| Forma   | Spada Lunga | Staffa                     | Doppia spada corta    |
+| ------- | ----------- | -------------------------- | --------------------- |
+| Forma 3 | +15% Eventi | +15% Preparazione atletica | +10% Redazione/Social |
+| Forma 4 | +30% Eventi | +30% Preparazione atletica | +20% Redazione/Social |
+| Forma 5 | +50% Eventi | +50% Preparazione atletica | +35% Redazione/Social |
+
+Forma 6 aggiunge +10% e Forma 7 +20% a ogni incarico (non cumulativi). I bonus
+Staffa e i bonus di Forma 6/7 sulla Preparazione atletica valgono solo se il
+collaboratore possiede anche l'attestato da Istruttore di quella Forma.
+
 ### 9.7 Istruttori e attestati
 
 Un Collaboratore delle Onde può essere assegnato al ruolo di **Istruttore**.
@@ -1092,11 +1436,15 @@ Regole:
   assegnano un `instructorId` umano;
 - un Istruttore può insegnare soltanto le Forme già completate e qualificate;
   ogni Forma, inclusi Corso X e Corso Y, richiede la relativa qualifica;
-- chi conosce già una Forma completa un Corso Istruttori pari al **50% della
-  durata base della Forma** e paga il **250% del costo base**;
+- chi conosce già una Forma completa un Corso Istruttori pari al **75% della
+  durata base della Forma** e paga il **250% del costo base**; il Corso
+  Istruttori non consuma slot annuali;
 - chi non conosce ancora la Forma segue un percorso combinato composto dalla
-  Forma da atleta e dal modulo da Istruttore: dura complessivamente il **150%**
-  della Forma, paga il **350% del costo base** e consuma un solo slot annuale;
+  Forma da atleta e dal modulo da Istruttore: dura complessivamente il **175%**
+  della Forma (100% + 75%), paga subito il **350% del costo base** e consuma un
+  solo slot annuale;
+- in entrambi i casi la durata viene divisa per la produttività da Istruttore
+  del collaboratore stesso;
 - un Collaboratore assegnato come Istruttore resta eleggibile come allievo
   dell'automazione: durante l'anno didattico, se un altro Istruttore possiede la
   qualifica per la sua prossima Forma, completa prima la normale fase da atleta
@@ -1110,8 +1458,9 @@ Regole:
   insegna; in questo caso la durata è tripla rispetto alla velocità normale e
   torna normale quando non ha più allievi attivi;
 - gli esami finali sono un sistema interno e non vengono comunicati
-  nell'interfaccia: il rischio di non superarli è **50%** per Forme e Corsi da
-  atleta, **45%** per i Corsi Istruttori e **40%** per i Corsi Tecnici;
+  nell'interfaccia: il rischio di non superarli è **55%** per Forme e Corsi da
+  atleta, **50%** per i Corsi Istruttori (anche interni e modulo del percorso
+  combinato) e **45%** per i Corsi Tecnici;
 - i livelli 3 e 4 di **Master of none** aumentano di 10 punti percentuali
   ciascuno la possibilità di superare ogni esame da atleta, Istruttore o
   Tecnico, per un bonus massimo di 20 punti percentuali;
@@ -1128,6 +1477,13 @@ Regole:
   Forme che l'atleta può apprendere; le lezioni vengono avviate soltanto
   dall'automazione e, con un Istruttore compatibile, ricevono una riduzione del
   **25%** e costano quindi il **75% del costo base**;
+- il comando manuale resta invece nella scheda di dettaglio dei Collaboratori:
+  un Istruttore può avviare da lì il proprio Corso Istruttori, il percorso
+  combinato o la prenotazione del Corso Tecnico;
+- la durata di una Forma insegnata viene divisa per la produttività da
+  Istruttore del docente e, se acquistato, per la velocità di **ToccoDiGilo**;
+  la durata di Arena Tecnica e Corso Agonisti viene divisa per la produttività
+  da Istruttore del docente;
 - **Percorso Tecnico** è il primo potenziamento del ramo Insegnamento, è disponibile
   appena si sbloccano gli upgrade e non richiede Fama della scuola. Descrizione:
   “Sblocca Arena Tecnica e ne riduce progressivamente la durata.”;
@@ -1147,7 +1503,9 @@ Regole:
 - l'automazione propone Arena Tecnica o il Corso Agonisti a un atleta o a un
   collaboratore inserito nella coda automatica quando ha ancora uno slot
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
-  automatico possiede le qualifiche per le sue prossime Forme;
+  automatico possiede le qualifiche per le sue prossime Forme; un Collaboratore
+  assegnato come Istruttore lo riceve soltanto se non ha più alcuna Forma
+  personale disponibile. Nessuno dei due corsi parte a luglio o agosto;
 - l'Istruttore che segue Arena Tecnica o il Corso Agonisti deve essere una
   persona diversa dall'allievo: un Collaboratore assegnato come Istruttore può
   partecipare soltanto se un altro Istruttore disponibile lo segue;
@@ -1205,6 +1563,8 @@ Regole:
   e annulla definitivamente l'iscrizione senza rimborso e senza ridurre la Fama
   della scuola. La formazione personale e le lezioni tenute dal collaboratore
   rimosso vengono interrotte;
+- gli atleti segnati come preferiti non possono essere rimossi: la X resta
+  disattivata finché non vengono tolti dai preferiti;
 - gli iscritti non leggendari rimossi non possono tornare. La loro scheda viene
   eliminata appena nessuna email, prova o attività ancora conservata la
   referenzia; statistiche aggregate, email ed eventi narrativi già avvenuti
@@ -1214,8 +1574,10 @@ Regole:
   tornano nel normale bacino di acquisizione, mentre i Leggendari Segreti devono
   essere nuovamente sconfitti nel rispettivo torneo;
 - acquistare il livello 1 di Percorso Tecnico sblocca **Master of none**. I suoi
-  primi due livelli permettono agli Istruttori di accedere a uno e poi due rami
-  d'arma oltre le preferenze iniziali. I livelli 3 e 4 aumentano rispettivamente
+  primi due livelli portano da uno a due e poi a tre i rami d'arma che un
+  Collaboratore assegnato come Istruttore può apprendere, anche oltre le
+  preferenze iniziali (il primo ramo deve comunque essere fra le preferenze).
+  I livelli 3 e 4 aumentano rispettivamente
   di 10 e 20 punti percentuali la possibilità di superare gli esami da atleta,
   Istruttore e Tecnico. Il quinto livello permette a ogni allievo che ha
   completato Corso Y di scegliere liberamente fra tutti i rami d'arma, ignorando
@@ -1223,13 +1585,16 @@ Regole:
 - **Tu conosci la SIS?** segue il quinto livello di Master of none: il livello 1
   sblocca le candidature ai Corsi Tecnici; i livelli 2, 3 e 4 aumentano la loro
   velocità rispettivamente del 10%, 20% e 30%;
-- **Il costo del Servizio** ha cinque livelli e riduce del 5% per livello,
+- **Il costo del Servizio** richiede il livello 1 di **Tu conosci la SIS?**, ha
+  cinque livelli e riduce del 5% per livello,
   fino al 25%, soltanto i costi dei percorsi che assegnano un attestato da
   Istruttore o una qualifica da Tecnico. Forme da atleta, Arena Tecnica e Corso
   Agonisti non ricevono lo sconto;
-- **Didattica di gruppo** porta con i primi cinque livelli la capacità di ogni
-  Istruttore da due a sei allievi contemporanei; il sesto livello concede a
-  tutti un secondo slot di formazione nel periodo luglio–giugno;
+- **Didattica di gruppo** richiede il livello 2 del Costo del Servizio e porta
+  con i primi cinque livelli la capacità di ogni Istruttore da un allievo
+  (base) a due, tre, quattro, cinque e infine sei allievi contemporanei; il
+  sesto livello concede a tutti un secondo slot di formazione nel periodo
+  luglio–giugno;
 - **Nessun *Rancor*e** è successivo a Didattica di gruppo e richiede anche
   Percorso Tecnico al livello 3. Il livello 1 sblocca il Corso Agonisti, che
   sostituisce Arena Tecnica; i livelli 2, 3 e 4 aumentano di +1/+1 il suo
@@ -1245,8 +1610,13 @@ Regole:
   Tecnica e Corso Agonisti. I bonus sono cumulativi e si sommano al raddoppio
   estivo;
 - **Corso X** e **ToccoDiGilo** non appartengono alla sequenza lineare: sono due
-  Percorsi Segreti indipendenti, inizialmente mostrati come `???`, e vengono
-  rivelati soltanto dalle rispettive condizioni narrative;
+  Percorsi Segreti indipendenti, inizialmente mostrati come `???` con un
+  indizio, e vengono rivelati soltanto dalle rispettive condizioni narrative.
+  Corso X costa €1; ToccoDiGilo costa €1.000.000 e aumenta del 9.999% la
+  velocità delle Forme insegnate dagli Istruttori;
+
+> **Da implementare:** le condizioni di scoperta dei Percorsi Segreti non esistono: `discoverSecretUpgrade` non viene mai chiamata dal gioco, quindi Corso X e ToccoDiGilo restano `???`.
+
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
 
@@ -1274,7 +1644,8 @@ Regole:
 - la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
   agosto il corso parte immediatamente se il Collaboratore è libero; negli altri
   mesi viene programmato per il luglio successivo. Se a luglio il Collaboratore
-  è impegnato, parte appena si libera, anche dopo l'estate;
+  è impegnato, parte appena si libera, anche dopo l'estate; ogni Collaboratore
+  può avere una sola prenotazione alla volta;
 - un corso già iniziato continua senza limiti di calendario;
 - un Tecnico forma automaticamente un solo aspirante Istruttore alla volta per
   una Forma compatibile. L'aspirante deve essere assegnato come Istruttore,
@@ -1293,6 +1664,11 @@ Regole:
   coinvolti in queste formazioni. Se il partecipante o, nel corso interno, il
   Tecnico sta anche insegnando, la durata residua diventa tripla; la penalità
   non si cumula se entrambi insegnano;
+- finché tiene un Corso Istruttori interno, il Tecnico conclude le lezioni già
+  avviate ma non riceve nuovi allievi, non avvia un proprio Corso Tecnico e non
+  contribuisce alla Preparazione atletica;
+- la durata del Corso Tecnico e del Corso Istruttori interno viene divisa per la
+  produttività da Istruttore del partecipante;
 - sulla singola Forma la corona dorata identifica l'attestato da Istruttore; la
   qualifica da Tecnico la sostituisce con una corona glicine;
 - nella schermata aggregata, **Forme insegnabili** usa la corona glicine quando
@@ -1303,8 +1679,9 @@ Regole:
 ### 9.8 Abbandono degli iscritti ignorati
 
 Nel passaggio tra Giugno e Luglio, un iscritto vulnerabile che non ha iniziato
-alcuna formazione durante l'anno scolastico appena concluso può lasciare la
-scuola. Le immunità degli atleti sono centralizzate e distinguono il controllo
+alcuna formazione durante l'anno formativo appena concluso (luglio–giugno) può
+lasciare la scuola. Gli abbandoni vengono riepilogati in un messaggio della
+Posta e registrati nello storico come evento narrativo **Mancato rinnovo**. Le immunità degli atleti sono centralizzate e distinguono il controllo
 annuale dai futuri eventi imprevisti:
 
 | Motivo                                                              | Controllo annuale Giugno → Luglio | Eventi imprevisti | Scadenza                                                                             |
@@ -1345,21 +1722,43 @@ Ultra Rari aumentano di **0,5 punti percentuali**. Per esempio, nella seconda
 scuola diventano rispettivamente 3%, 1% e 0,75%. I Leggendari restano sempre
 allo 0%.
 
+Il codice arrotonda la probabilità di Forma 7 al decimo di punto percentuale:
+per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
+**0,8%** nella seconda (1,3% nella terza).
+
 ---
 
 ## 10. Potenziamenti
 
-La schermata presenta otto rami pubblici, sempre nello stesso ordine:
-**Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
-Insegnamento e Organizzazione**. Ogni ramo contiene esattamente sette
-potenziamenti principali. Social non ha più un ramo separato: i suoi effetti
-sono distribuiti tra Scrittura e Creatività.
+La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
+ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
+Insegnamento e Organizzazione**, seguiti dalla riga dei **Percorsi Segreti**.
+Ogni ramo contiene esattamente sette potenziamenti principali; Scrittura ha in
+più un'**estensione del ramo** con due nodi (Ritmo di battitura e Frasi
+fatte), mostrata sotto i sette principali. Il ramo Gadget compare soltanto
+dopo lo sblocco del settore. Social non ha più un ramo separato: i suoi
+effetti sono distribuiti tra Scrittura e Creatività.
+
+La pagina mostra anche le entrate del mese, il saldo, un riepilogo **Bonus
+totali** degli effetti già ottenuti e, alla radice dell'albero, un **Upgrade
+raccomandato**,
+cioè il nodo disponibile più economico, acquistabile con un clic. Selezionando
+un nodo si apre un riquadro con descrizione, livello, effetto, costo del
+livello successivo e stato dei requisiti.
 
 I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
-scuola già fondata aggiunge il 15% ai prezzi di Scrittura, Creatività, Carisma,
-Accoglienza, Attrezzatura e Organizzazione. Gadget, Insegnamento, estensioni e
-Percorsi Segreti non ricevono questa maggiorazione. I prerequisiti tra nodi
-sono mostrati direttamente dall'interfaccia.
+scuola già fondata aggiunge il 15% ai prezzi di Scrittura (estensione
+compresa), Creatività, Carisma, Accoglienza, Attrezzatura e Organizzazione:
+con n scuole fondate il prezzo è moltiplicato per 1 + 0,15 × n e arrotondato
+all'euro. Gadget, Insegnamento e Percorsi Segreti non ricevono questa
+maggiorazione.
+
+I prerequisiti seguono due regole. Un nodo che dichiara requisiti espliciti
+richiede soltanto quei livelli (riportati sotto ciascuna tabella). Un nodo che
+non ne dichiara richiede invece che **tutti i nodi precedenti dello stesso
+ramo siano al livello massimo**: Creatività, Carisma, Accoglienza,
+Attrezzatura e Organizzazione si sbloccano quindi in sequenza stretta. Il nodo
+bloccato indica il primo requisito mancante («Completa prima …»).
 
 ### 10.1 Scrittura
 
@@ -1367,29 +1766,65 @@ Accelera la produzione manuale e automatica delle email e dei contenuti Social.
 
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
-| Tastiera comoda | +0,2 caratteri per input per livello; massimo +1 | 50 / 100 / 200 / 400 / 800 € |
-| Frasi rapide | +0,4 caratteri per input per livello; massimo +2 | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Tastiera comoda | +0,2 caratteri per input per livello; massimo +1. Con Frasi fatte: +0,15% Frase perfetta per livello | 50 / 100 / 200 / 400 / 800 € |
+| Frasi rapide | +0,4 caratteri per input per livello; massimo +2. Con Frasi fatte: +0,15% Frase perfetta per livello | 150 / 300 / 600 / 1.200 / 2.400 € |
 | Firma automatica | +10% velocità Redazione/Social per livello; massimo +50% | 300 / 600 / 1.200 / 2.400 / 4.800 € |
-| Campi intelligenti | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Campi intelligenti | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create. Con Frasi fatte: +0,15% Frase perfetta per livello | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
 | Sintesi dei contenuti | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
-| Revisione istantanea | +15% velocità Redazione/Social per livello; massimo +75% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Revisione istantanea | +15% velocità Redazione/Social per livello; massimo +75%. Con Frasi fatte: +0,3% Frase perfetta per livello | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Fusione documenti | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+
+Prerequisiti: Tastiera comoda nessuno; Frasi rapide richiede Tastiera comoda 2;
+Firma automatica richiede Frasi rapide 2; Campi intelligenti richiede Firma
+automatica 2; Sintesi dei contenuti richiede Campi intelligenti 2 e lo sblocco
+di Social; Revisione istantanea richiede Campi intelligenti 3; Fusione
+documenti richiede Sintesi dei contenuti 3, Revisione istantanea 3 e Social.
+
+I caratteri per input partono da 1 e sommano i bonus dei nodi; il totale è poi
+moltiplicato per 1 + 0,25 × scuole fondate e per 1,1 con la specializzazione
+Redazione. La velocità Redazione/Social si somma ai bonus
+generici di automazione dell'Organizzazione.
+
+**Estensione del ramo.** Le due meccaniche di ritmo della scrittura manuale
+partono bloccate e si acquistano qui:
+
+| Potenziamento | Effetto completo | Costi per livello |
+| --- | --- | --- |
+| Ritmo di battitura | sblocca il **Flusso**: tetto del moltiplicatore ×2 al livello 1, poi +1 per livello fino a ×5 al livello 4 | 100 / 250 / 600 / 1.500 € |
+| Frasi fatte | sblocca la **Frase perfetta**: +0,25% per livello; insieme ai bonus degli altri nodi di Scrittura arriva al massimo del 5% | 400 / 800 / 1.600 / 3.200 / 6.400 € |
+
+Ritmo di battitura richiede Tastiera comoda 2; Frasi fatte richiede Ritmo di
+battitura 2. Finché Frasi fatte è a livello 0, i bonus Frase perfetta degli
+altri nodi non hanno effetto. A rami completi la somma è esattamente 5%
+(1,25% Frasi fatte + 0,75% ciascuno per Tastiera comoda, Frasi rapide e Campi
+intelligenti + 1,5% Revisione istantanea).
 
 ### 10.2 Creatività
 
-Ogni livello concede un punto Creatività e fa avanzare linearmente la
-probabilità che una email ottenga una prova. I massimi sono 85% per i Comuni,
-90% per i Rari, 95% per gli Ultra Rari e 100% per i Leggendari.
+Ogni livello concede un punto Creatività (35 in tutto) e fa avanzare
+linearmente la probabilità che una email ottenga una prova, dalla base della
+rarità fino al massimo: 85% per i Comuni, 90% per i Rari, 95% per gli Ultra
+Rari e 100% per i Leggendari. La specializzazione Accoglienza aggiunge il 10%
+del percorso.
+
+Ogni nodo apre il catalogo email del livello successivo (1–7). Il primo
+livello acquistato di un nodo fa scrivere il 20% delle nuove email con il
+nuovo catalogo e l'80% con quello precedente; ogni livello sposta un altro 20%,
+fino al 100% al livello 5. I punti del nodo (0–5) allungano inoltre le email
+del suo catalogo di una frase ciascuno.
 
 | Potenziamento | Effetto aggiuntivo | Costi per livello |
 | --- | --- | --- |
-| Controllo ortografico | nuovo catalogo email dal livello 1 | 50 / 100 / 200 / 400 / 800 € |
-| Email professionale | firma completa e struttura ordinata, ancora senza HTML | 100 / 200 / 400 / 800 / 1.600 € |
-| Invito personalizzato | nuovo catalogo e sblocco delle email HTML | 150 / 300 / 600 / 1.200 / 2.400 € |
-| Call to action | link e pulsanti nei cataloghi successivi | 300 / 600 / 1.200 / 2.400 / 4.800 € |
-| Impaginazione | struttura visiva completa | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
-| Pubblicità vincente | probabilità Follower Social 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
-| Corso di Marketing | valore mensile del Follower 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Controllo ortografico | catalogo 1: la bozza perde refusi ed errori ma mantiene battute e tono | 50 / 100 / 200 / 400 / 800 € |
+| Email professionale | catalogo 2: firma completa e struttura ordinata, ancora senza HTML | 100 / 200 / 400 / 800 / 1.600 € |
+| Invito personalizzato | catalogo 3: prime email HTML (card della lezione con gancio, dettagli a punti e pulsanti) | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Call to action | catalogo 4: testo più lungo con i dettagli della prova | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Impaginazione | catalogo 5: tono promozionale più fluido | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Pubblicità vincente | catalogo 6: oggetti promozionali e sezione video; probabilità Follower Social 50% → 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Corso di Marketing | catalogo 7: email finale HTML; valore mensile del Follower 0,10 → 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+
+Prerequisiti: Controllo ortografico nessuno; ogni nodo successivo richiede
+tutti i precedenti al livello 5.
 
 ### 10.3 Carisma
 
@@ -1404,6 +1839,10 @@ Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
 | Set da dimostrazione | +6% pubblico agli eventi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
 | Risposte alle domande difficili | +6% contatti dagli eventi | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | No, non è esattamente quella cosa | +8% contatti dagli eventi | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+
+A rami completi: +110% contatti dagli eventi e +90% pubblico. Prerequisiti:
+Presentazione preparata nessuno; ogni nodo successivo richiede tutti i
+precedenti al livello 5.
 
 ### 10.4 Accoglienza
 
@@ -1421,9 +1860,18 @@ non punti percentuali aggiunti direttamente al risultato finale.
 | Accoglienza dell'Ordine | +4% del percorso | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Esperienza memorabile | +6% del percorso e 5% di recuperare una prova fallita; massimo 25% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
+A ramo completo il percorso raggiunge il 100%. Al percorso si sommano anche il
+contributo degli Istruttori (10% della loro produttività, potenziato da
+Collaboratore dedicato) e il 10% della specializzazione Accoglienza, con tetto
+complessivo al 100%. La durata base della prova è 15 secondi, quindi Sala
+preparata al livello 5 la porta esattamente al minimo di 10 secondi.
+Prerequisiti: Procedura di benvenuto nessuno; ogni nodo successivo richiede
+tutti i precedenti al livello 5.
+
 Il recupero di Esperienza memorabile vale una sola volta per contatto, esclude i
-Leggendari Segreti e rimette il contatto tra i disponibili: serve quindi
-scrivere e inviare una nuova email prima della seconda prova.
+Leggendari Segreti (e i Leggendari già iscritti) e rimette il contatto tra i
+disponibili: serve quindi scrivere e inviare una nuova email prima della
+seconda prova.
 
 ### 10.5 Attrezzatura
 
@@ -1448,6 +1896,12 @@ di usura massima: con sei spade, i cinque livelli conservano rispettivamente
 12, 24, 36, 48 e 60 punti lavoro. La riserva viene consumata prima del lavoro
 prodotto durante il guasto.
 
+A ramo completo l'usura programmata scende del 50%, che è anche il tetto
+massimo della riduzione da potenziamenti; la velocità di manutenzione
+automatica sale del 100%, sommata ai bonus generici di automazione
+dell'Organizzazione. Prerequisiti: Controllo prima dell'uso nessuno; ogni nodo
+successivo richiede tutti i precedenti al livello 5.
+
 ### 10.6 Gadget
 
 Il ramo conserva il bilanciamento economico specifico del Laboratorio Gadget e
@@ -1462,6 +1916,15 @@ diventa visibile soltanto con lo sblocco del settore.
 | Gestione degli ordini | +20% capacità commerciale per livello; massimo +100% | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
 | Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
 | Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+
+Tutti i nodi richiedono lo sblocco del settore Gadget. Prerequisiti ulteriori:
+Negozio online richiede Vetrina della scuola 2 e lo sblocco di Social;
+Laboratorio revisioni richiede Strumenti di progettazione 2; Formazione
+commerciale richiede Gestione degli ordini 2; Vendita abbinata richiede
+Formazione commerciale 3 e il progetto Tazza già sbloccato. Vetrina della
+scuola, Strumenti di progettazione e Gestione degli ordini non hanno
+prerequisiti. La capacità commerciale riceve anche i bonus generici di
+automazione dell'Organizzazione.
 
 ### 10.7 Insegnamento
 
@@ -1478,6 +1941,15 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 | Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
 | PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
+
+Prerequisiti: Percorso Tecnico nessuno; Master of none richiede Percorso
+Tecnico 1; Tu conosci la SIS? richiede Master of none 5; Il costo del Servizio
+richiede Tu conosci la SIS? 1; Didattica di gruppo richiede Il costo del
+Servizio 2; Nessun *Rancor*e richiede Didattica di gruppo 6 e Percorso
+Tecnico 3; PagoSport richiede Nessun *Rancor*e 10. I rami d'arma per
+Istruttore partono da 1 e arrivano al massimo a 3; gli allievi contemporanei
+partono da 1; i corsi annuali arrivano al massimo a 3 (base, Didattica di
+gruppo 6 e PagoSport 1).
 
 Al livello 1 di Nessun *Rancor*e, Arena Tecnica diventa Corso Agonisti e il
 logo della formazione riceve una stella gialla nello stesso stile usato per la
@@ -1507,13 +1979,26 @@ svolgere. Eventi è considerato attivo finché esiste un evento in corso, così 
 collaboratori non vengono contati contemporaneamente in due settori.
 L'Insegnamento può essere il settore principale di un turno, ma non quello
 secondario: insegnare richiede un incarico e le qualifiche appropriate.
+Redazione è inattiva solo se non c'è un'email in scrittura e Social non è
+ancora sbloccato; Istruttore è inattivo se non insegna, non è in formazione e
+non c'è Preparazione agonistica attiva.
+
+Le automazioni generiche (Procedure standard e Coordinamento multi-sede, fino
+a +75% insieme) accelerano Redazione/Social, manutenzione dell'attrezzatura,
+sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica. Prerequisiti: Manuale operativo
+nessuno; ogni nodo successivo richiede tutti i precedenti al livello massimo
+(Priorità operative ha un solo livello); Coordinamento multi-sede richiede in
+più almeno una scuola fondata.
 
 ### 10.9 Percorsi Segreti
 
 La riga è sempre visibile. Prima della scoperta, ciascun nodo mostra `???`, un
 lucchetto e soltanto un indizio nel tooltip. Ogni percorso si scopre in modo
 indipendente: rivelarne uno non mostra il nome o la descrizione degli altri.
-Le condizioni effettive di scoperta sono ancora da definire.
+Le condizioni effettive di scoperta sono ancora da definire. Un percorso non
+scoperto non si può acquistare e non viene conteggiato fra i nodi disponibili.
+
+> **Da implementare:** nessuna condizione di gioco scopre i Percorsi Segreti: la funzione di scoperta esiste ma il gioco non la richiama mai, quindi Corso X e ToccoDiGilo restano `???` in una nuova partita.
 
 | Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
 | --- | --- | ---: | --- |
@@ -1528,28 +2013,38 @@ automaticamente scoperto. I due prezzi non ricevono maggiorazioni di rete.
 Tutti i potenziamenti vengono acquistati esclusivamente in Euro e non sono
 rimborsabili. I costi sono elenchi espliciti per livello: non dipendono più da
 una formula generale implicita. Oltre agli Euro, un nodo può richiedere livelli
-precedenti, lo sblocco di Social o Gadget, un prodotto Gadget o almeno una
-scuola nella rete.
+precedenti, lo sblocco di Social o Gadget, un prodotto Gadget, almeno una
+scuola nella rete oppure, per i Percorsi Segreti, la scoperta del percorso. Il
+formato prevede anche un requisito di Fama, ma oggi nessun nodo lo usa (vale
+0 per tutti). Ogni acquisto aggiorna subito i caratteri per input.
 
 ### 10.11 Sblocco progressivo
 
-L'interfaccia non mostra tutti i sistemi dall'inizio. Una prima sequenza
-consigliata è:
+L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 
-| Traguardo                      | Sblocco diegetico                             |
-| ------------------------------ | --------------------------------------------- |
-| Avvio                          | sola composizione della mail e primi contatti |
-| Prima email                    | Posta inviata e statistiche minime            |
-| 3 email                        | comunicazione “Configurazione campagna”       |
-| Comunicazione completata       | Potenziamenti di Scrittura e Creatività       |
-| Primo esaurimento contatti     | Calendario, eventi e volantinaggio gratuito   |
-| Prima prova prenotata          | report aggregato del funnel                   |
-| Primo iscritto                 | Euro e quote associative                      |
-| Primo Collaboratore delle Onde | Scuola, Collaboratori e assegnazioni          |
-| 35 iscritti attivi             | Redazione si evolve in Social                 |
-| 20 iscritti                    | Attrezzatura e usura narrativa                |
-| 50 iscritti                    | Forme dei collaboratori                       |
-| 150 iscritti                   | procedura per fondare una nuova scuola        |
+| Traguardo                                  | Sblocco                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| Avvio                                      | Posta (composizione, Posta in arrivo, Posta inviata), Impostazioni, 5 contatti iniziali, 6 spade |
+| Prima email inviata                        | messaggio di sistema “Configurazione campagna completata”; la prima email garantisce una prova |
+| Missione “Tre inviti in partenza” (3 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
+| Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
+| Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
+| 6 punti Fama                               | pagina Tornei                                                            |
+| 10 email inviate                           | riepilogo delle rarità nella pagina Scuola (compare prima se c'è già un iscritto non Comune o un Collaboratore) |
+| 10° contatto della scuola iniziale         | Andrea Simonazzi e, dal contatto successivo, le rarità avanzate         |
+| 15 iscritti attivi (massimo raggiunto)     | fornitore ufficiale di spade                                             |
+| Primo Collaboratore delle Onde             | sezione Collaboratori e assegnazioni                                     |
+| 9 Collaboratori                            | gestione aggregata per settore                                           |
+| 35 iscritti attivi                         | Redazione si evolve in Social                                            |
+| Prima vittoria nell'Accademico Arena       | settore e pagina Gadget                                                  |
+| Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Richiesta apertura nuova scuola” |
+
+I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
+Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
+nessun Leggendario Segreto deve avere una prova in corso. Dopo la prima
+fondazione tutte le pagine, tranne Gadget, restano visibili fin dall'inizio.
+
+> **Da implementare:** statistiche minime dopo la prima email e report aggregato del funnel dopo la prima prova non esistono; il messaggio “Richiesta apertura nuova scuola” rimanda alle Impostazioni, ma nessuna schermata offre ancora il comando per fondare la scuola.
 
 Le soglie sono configurabili e andranno calibrate per raggiungere il primo
 prestigio dopo circa 3–4 ore.
@@ -1575,6 +2070,14 @@ Queste comunicazioni:
 - impediscono che il progresso idle faccia saltare l'introduzione di una nuova
   meccanica.
 
+Oggi i traguardi producono soltanto normali messaggi di sistema nella Posta in
+arrivo (per esempio “Configurazione campagna completata” dopo la prima email,
+“La Redazione si è evoluta in Social” a 35 iscritti attivi, “Richiesta
+apertura nuova scuola”), mentre l'introduzione delle nuove meccaniche è
+affidata alle scene di tutorial (sezione 13).
+
+> **Da implementare:** comunicazioni da scrivere manualmente con la meccanica di tastiera che sbloccano una funzione al completamento; gli sblocchi avvengono direttamente al raggiungimento del traguardo.
+
 ---
 
 ## 11. Interfaccia Outlook per Windows 11
@@ -1589,6 +2092,14 @@ Il gioco deve raggiungere un camuffamento percepito del 99%:
 - mantiene colori, spaziatura e gerarchia visiva plausibili;
 - tutta l'interazione ludica avviene dentro elementi credibili di Outlook.
 
+Il camuffamento è affidato al tema chiaro. L'aspetto predefinito è il tema
+scuro **Modalità Onde**, con i colori dell'Ordine delle Onde; il tasto **F9**
+passa istantaneamente dalla Modalità Onde alla vista chiara da ufficio e
+viceversa, e la scelta resta salvata nel browser. Lo stesso interruttore è
+presente in Impostazioni › Aspetto, insieme a **Riduci animazioni**.
+
+> **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Disponibilità in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
+
 Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come
 prodotto ufficiale Microsoft. Per una distribuzione pubblica è preferibile usare
 icone ricreate o generiche e inserire una nota di non affiliazione nelle
@@ -1597,20 +2108,32 @@ informazioni del progetto.
 ### 11.2 Struttura dello schermo
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ Barra titolo / Ricerca / Controlli finestra                                │
-├────┬────────────────┬─────────────────────────┬─────────────────────────────┤
-│App │ Cartelle       │ Elenco messaggi         │ Lettura / Composizione      │
-│rail│                │                         │                             │
-│    │ Posta in arrivo│ Oggetto                 │ A: nome@email.test          │
-│    │ Bozze          │ Mittente                │ Oggetto: ...                │
-│    │ Inviata        │ Data                    │                             │
-│    │ Contatti       │                         │ Corpo della mail            │
-│    │                │                         │                             │
-├────┴────────────────┴─────────────────────────┴─────────────────────────────┤
-│ Stato sincronizzazione / digitazione / elementi                            │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│ Barra titolo: menu / Contatti · Iscritti · Follower · Disponibilità / Spade / Fama /    │
+│ Pausa / Mese corrente / controlli finestra                                               │
+├──────────────────────────────────────────────────────────────────────────────────────────┤
+│ Barra comandi: Nuovo messaggio / Elimina / Sposta in / Segna tutto come letto / Cerca    │
+├────┬────────────────┬──────────────────┬──────────────────────────┬──────────────────────┤
+│App │ Cartelle       │ Elenco messaggi  │ Lettura / Composizione   │ La mia giornata      │
+│rail│                │                  │                          │                      │
+│    │ Posta in arrivo│ Oggetto          │ A: nome@email.test       │ Missioni delle Onde  │
+│    │ Posta inviata  │ Mittente         │ Oggetto: ...             │ Attrezzatura         │
+│    │ ───────        │ Data             │                          │ Notifiche del giorno │
+│    │ Contatti       │                  │ Corpo della mail         │                      │
+│    │ Scuola         │                  │                          │                      │
+│    │ Disponibilità  │                  │                          │                      │
+├────┴────────────────┴──────────────────┴──────────────────────────┴──────────────────────┤
+│ Stato messaggi / Profilo / Connesso localmente / Scuola · versione                       │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+L'app rail contiene, nell'ordine, Posta, Eventi, Scuola, Tornei, Gadget,
+Upgrade e Impostazioni; ciascuna voce compare solo quando la sua area è
+sbloccata (sezione 10.11). Nelle build di sviluppo si aggiungono LudoWiki e
+Admin. La colonna **La mia giornata** resta visibile in tutte le pagine, ma
+viene nascosta sotto i 1.301 pixel di larghezza della finestra. Le cartelle e
+l'elenco messaggi appaiono soltanto nella pagina Posta; le altre pagine
+occupano l'intera area centrale.
 
 ### 11.3 Mappatura tra Outlook e gioco
 
@@ -1629,19 +2152,40 @@ informazioni del progetto.
 | Cartelle personalizzate | rami di potenziamento                               |
 | Conteggi non letti      | risorse disponibili e notifiche                     |
 
+Nel codice attuale la Posta in arrivo è divisa nelle schede **Evidenziata**
+(che contiene anche l'email in scrittura) e **Altra**; eventi narrativi e
+notifiche di sistema finiscono lì. La Posta inviata elenca le campagne
+inviate e ne mostra il contenuto. Iscritti e Collaboratori sono nella pagina
+Scuola, le opzioni reali (profilo, tema, riduzione animazioni, esportazione,
+importazione, azzeramento e aggiornamento) in Impostazioni, i rami di
+potenziamento nella pagina Upgrade. Il conteggio accanto a Posta in arrivo
+mostra i messaggi non letti.
+
+> **Da implementare:** cartelle Bozze, Posta indesiderata, Archivio e cartelle personalizzate, le pagine Calendario e Attività/To Do e una Ricerca funzionante (il pulsante Cerca non fa nulla); oggi prove ed eventi del giorno compaiono in La mia giornata.
+
 ### 11.4 Presentazione dei valori
 
 I numeri del gioco vengono nascosti in elementi plausibili:
 
-- Contatti disponibili: conteggio accanto alla cartella Contatti;
-- Esiti in attesa: conteggio accanto a Posta inviata o Calendario;
-- Euro disponibili: saldo in un report amministrativo o nella cartella Quote;
-- Iscritti: gruppo contatti “Iscritti attivi”;
-- Collaboratori: gruppo contatti “Collaboratori delle Onde”;
+- Contatti da contattare: contatore **Contatti** nella barra del titolo e riga
+  Contatti sotto le cartelle (apre la composizione);
+- Esiti in attesa: prove prenotate e notifiche nella colonna La mia giornata;
+- Euro disponibili: contatore **Disponibilità** nella barra del titolo e riga
+  Disponibilità sotto le cartelle, con le entrate mensili (“+… al mese”);
+- Iscritti: contatore **Iscritti** nella barra del titolo, riga Scuola sotto le
+  cartelle e sezione “Iscritti attivi” della pagina Scuola;
+- Collaboratori: sezione “Collaboratori” della pagina Scuola;
+- Follower: contatore nella barra del titolo dopo lo sblocco di Social;
+- Fama: contatore nella barra del titolo;
 - Caratteri al secondo: stato “Sincronizzazione” nella barra inferiore;
 - Conversione: pannello “Statistiche campagna”;
-- Spade disponibili: calendario risorse o elenco Attività;
-- Prestigio: email formale ricevuta dalla rete LudoSport.
+- Spade disponibili: indicatore **Spade** (disponibili/totali, con barra di
+  condizione) nella barra del titolo e riquadro attrezzatura in La mia
+  giornata;
+- Prestigio: email formale “Richiesta apertura nuova scuola” ricevuta quando i
+  requisiti sono soddisfatti.
+
+> **Da implementare:** la barra inferiore mostra solo testi statici (stato dei messaggi, profilo, connessione, scuola e versione) e non la velocità di scrittura; non esiste un pannello “Statistiche campagna” con la conversione.
 
 La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quando il
 saldo raggiunge o supera **5.000 €**, una missione ancora a zero progresso si
@@ -1663,6 +2207,14 @@ le azioni compiute mentre la missione è nascosta non ne aumentano il progresso.
 - eventuali accenti acquatici dell'Ordine delle Onde limitati a dettagli quasi
   invisibili.
 
+Eccezione voluta: un livello di feedback mostra brevi **numeri fluttuanti**
+per ogni nuovo iscritto (“+1 iscritto · +20 €”, colorato per rarità; al
+massimo tre alla volta), per le quote mensili incassate, per ogni nuovo
+gradino del Flusso (“Flusso ×3”) e per la Frase perfetta. Gli accenti
+acquatici sono pieni nella Modalità Onde (tema scuro predefinito) e restano
+discreti solo nel tema chiaro. L'opzione **Riduci animazioni** disattiva
+transizioni, barre animate e cursore lampeggiante.
+
 ### 11.6 Risoluzioni target
 
 - primaria: 1920×1080;
@@ -1670,9 +2222,19 @@ le azioni compiute mentre la missione è nascosta non ne aumentano il progresso.
 - minima supportata: 1280×720;
 - nessuna interfaccia mobile nella prima versione.
 
+Sotto i 1.301 pixel di larghezza la colonna La mia giornata viene nascosta,
+quindi alla risoluzione minima (1280×720) Missioni delle Onde, riquadro
+attrezzatura e notifiche del giorno non sono visibili.
+
 ---
 
 ## 12. Navigazione e schermate
+
+Le pagine realmente raggiungibili dall'app rail sono Posta, Eventi, Scuola,
+Tornei, Gadget, Upgrade e Impostazioni (più LudoWiki e Admin nelle build di
+sviluppo). Impostazioni raccoglie stato del salvataggio, nome del profilo,
+tema (Modalità Onde) e Riduci animazioni, versione, esportazione, importazione
+e azzeramento della partita, controllo aggiornamenti e segnalazione dei crash.
 
 ### 12.1 Posta
 
@@ -1686,6 +2248,12 @@ Azioni:
 - controllare campagne;
 - aprire comunicazioni di sblocco.
 
+La composizione ha l'interruttore **Invio automatico**: attivo, la bozza
+completata parte da sola; disattivo, si invia con un ultimo tasto o con il
+pulsante **Invia**. Dopo l'acquisto di Ritmo di battitura la composizione
+mostra anche l'indicatore del Flusso. La Posta in arrivo è divisa in
+**Evidenziata** e **Altra**; la Posta inviata mostra le campagne già spedite.
+
 ### 12.2 Calendario
 
 Mostra:
@@ -1698,12 +2266,19 @@ Mostra:
 
 Creare un evento usa un modulo simile a un vero appuntamento Outlook.
 
+> **Da implementare:** non esiste una pagina Calendario raggiungibile dalla navigazione (il componente CalendarView è presente nel codice ma non viene mostrato). Gli eventi si avviano dalla pagina **Eventi**, un catalogo di attività esterne con contatti da contattare, iscritti e spade disponibili e un pulsante per partecipare, senza modulo di appuntamento; prove e avvenimenti del giorno compaiono nella colonna La mia giornata.
+
 ### 12.3 Scuola
 
-Due viste:
+Un'unica pagina, in quest'ordine:
 
-- Iscritti;
-- Collaboratori.
+- la palestra illustrata, che cresce con la scuola;
+- Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
+  assegnazioni, che dal nono Collaboratore diventa una gestione aggregata per
+  settore con i tasti + e −, i settori secondari e le priorità operative;
+- Iscritti attivi;
+- riepilogo delle rarità (dopo 10 email inviate, un iscritto non Comune o il
+  primo Collaboratore).
 
 La scheda di un collaboratore presenta statistiche e Forme come informazioni di
 profilo e formazione.
@@ -1720,6 +2295,8 @@ Gestisce:
 
 I costi appaiono come “Persone richieste” o “Collaboratori coinvolti”.
 
+> **Da implementare:** non esiste una pagina Attività. Oggi la manutenzione delle spade e l'acquisto di spade ufficiali stanno nel riquadro attrezzatura di La mia giornata, gli eventi nella pagina Eventi, i contenuti Social sono prodotti dai Collaboratori assegnati, i potenziamenti nella pagina Upgrade.
+
 ### 12.5 Statistiche
 
 Presentate come report di campagna:
@@ -1735,6 +2312,8 @@ Presentate come report di campagna:
 - conversione aggregata delle email;
 - rendimento collaboratori;
 - andamento nel tempo.
+
+> **Da implementare:** non esiste una pagina Statistiche; i dati sono raccolti internamente, ma all'interfaccia arrivano solo pochi riepiloghi sparsi (conteggio della Posta inviata, riepilogo rarità e indicatori dei settori nella pagina Scuola).
 
 ### 12.6 LudoWiki (solo ambiente di sviluppo)
 
@@ -1795,71 +2374,109 @@ l'avanzamento.
 ### Sequenza iniziale
 
 1. **Benvenuto nell'Ordine delle Onde**\
-   Introduce il contesto e assegna i primi 5 contatti fittizi.
+   Parte appena il giocatore ha scelto il proprio nome. Due dialoghi di
+   A.N.D.E.R. (“Il primo giorno da Preside” e “Una mail al giorno...”)
+   introducono il contesto; la partita parte con i primi 5 contatti fittizi.
 
 2. **Prima campagna inviti**\
-   Chiede di scrivere premendo qualunque tasto mentre il tempo resta fermo. La
-   scena termina quando la bozza passa a “Invio in corso...”; a quel punto il
-   tempo riparte e inizia la missione di tre email ulteriori. Gli Eventi si
-   sbloccano soltanto al completamento di questa missione.
+   L'obiettivo “Invia la tua prima mail” chiede di scrivere premendo qualunque
+   tasto mentre il tempo resta fermo, e spiega che con Invio automatico
+   disattivo si invia con un ultimo tasto o clic. La scena termina quando la
+   bozza passa a “Invio in corso...”; a quel punto il tempo riparte e inizia la
+   missione “Tre inviti in partenza”, che conta tre email ulteriori rispetto a
+   quelle già inviate o in invio. Gli Eventi si sbloccano soltanto al
+   completamento di questa missione.
 
 3. **Configurazione campagna**\
    È la prima comunicazione di sistema manuale e sblocca Scrittura e Creatività.
 
+   > **Da implementare:** “Configurazione campagna completata” è oggi un semplice messaggio di sistema che arriva in Posta in arrivo all'invio della prima email, senza scrittura manuale né sblocchi; la pagina Upgrade (con tutti i rami pubblici) si sblocca al primo iscritto.
+
 4. **Primi Eventi e attrezzatura**\
-   Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi, spiega
-   che le attività possono usurare o danneggiare le spade e richiede di avviare
-   il **Volantinaggio** gratuito. Soltanto in questo passaggio il volantinaggio
-   dura 5 secondi e garantisce esattamente un nuovo contatto. La scena attende
+   Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi
+   (evidenziando la voce nell'app rail), spiega che le attività possono usurare
+   o danneggiare le spade e richiede di avviare il **Volantinaggio** gratuito
+   con “Partecipa gratis”. Soltanto in questo passaggio il volantinaggio dura 5
+   secondi e garantisce esattamente un nuovo contatto. La scena non ferma il
+   tempo durante gli obiettivi (solo i dialoghi lo mettono in pausa), attende
    la fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
 
 5. **Nuova lezione prenotata** Dopo la spiegazione sull'aumento dei contatti,
-   **Continua** riporta automaticamente il giocatore in **Posta**. Una delle
-   email della campagna iniziale garantisce una prova soltanto in questo
-   momento; quando la prova compare in **La mia giornata** con il conto alla
-   rovescia, un dialogo introduce il passaggio email → prova in palestra →
-   possibile iscrizione. Il pannello resta leggibile sotto il velo del tutorial,
-   mentre l'intera riga della prova viene portata in primo piano ed evidenziata.
-   La prima sequenza di tutorial termina premendo **Continua** in questo
-   dialogo.
+   **Continua** riporta automaticamente il giocatore in **Posta** con
+   l'obiettivo “Osserva La mia giornata”. Gli esiti delle email inviate durante
+   la missione restano in sospeso: alla fine del volantinaggio del tutorial la
+   prima email inviata (che ha sempre una prova garantita) diventa subito una
+   prova prenotata, mentre le altre ricevono il proprio esito, con il ritardo
+   originale, solo al termine di questa scena. Quando la prova compare in **La
+   mia giornata** con il conto alla rovescia, un dialogo in pausa (“Lezioni di
+   prova”) introduce il passaggio email → prova in palestra → possibile
+   iscrizione. Il pannello resta leggibile sotto il velo del tutorial, mentre
+   l'intera riga della prova viene portata in primo piano ed evidenziata. La
+   prima sequenza di tutorial termina premendo **Continua** in questo dialogo.
 
-6. **Primo bonus e quota associativa** Introduce il bonus immediato di €20, la
-   quota mensile base di €40, il bonus di €5 per ogni Forma o corso permanente,
-   i bonus di €10 per un attestato da Istruttore o €20 per una qualifica da
-   Tecnico sulla stessa formazione e il finanziamento dei potenziamenti.
+6. **Primo bonus e quota associativa** Al primo iscritto, il dialogo
+   “Habemus inscriptum!” introduce il bonus immediato di €20, la quota mensile
+   base di €40, il bonus di €5 per ogni Forma o corso, i bonus di €10 per un
+   attestato da Istruttore o €20 per una qualifica da Tecnico sulla stessa
+   formazione e il finanziamento dei potenziamenti. Segue l'obiettivo di aprire
+   **Upgrade** dall'app rail e un dialogo che presenta l'albero dei
+   potenziamenti.
 
-7. **Il primo Leggendario** Quando Andrea Simonazzi diventa il nono contatto e
-   la sua email entra in scrittura, il gioco torna in **Posta**, mette in
-   evidenza la zona superiore della mail con il destinatario e spiega le quattro
-   rarità. Da questo momento possono apparire contatti Rari, Ultra Rari e
-   Leggendari. Il dialogo ricorda che i Leggendari sono profili unici e si
-   chiude con **“Collezionali tutti!”**.
+7. **Il primo Leggendario** Quando Andrea Simonazzi diventa il decimo contatto
+   della scuola iniziale e la sua email entra in scrittura, il gioco torna in
+   **Posta**, mette in evidenza la zona superiore della mail con il destinatario
+   e spiega le quattro rarità. I primi nove contatti sono sempre Comuni; dal
+   contatto successivo ad Andrea possono apparire contatti Rari, Ultra Rari e
+   Leggendari. Il dialogo ricorda che i Leggendari sono profili unici, che
+   iscrivendosi diventano subito Collaboratori delle Onde, e si chiude con
+   **“Collezionali tutti!”**. La scena riguarda solo la prima scuola.
 
 8. **Una mano in più** Alla comparsa del primo Collaboratore delle Onde, la
    scena resta in pausa e attende la conclusione degli eventuali tutorial già
    attivi. Se il primo iscritto è anche un Collaboratore, viene quindi concluso
    prima il tutorial del primo iscritto. A.N.D.E.R. invita poi ad aprire
    **Scuola**; se la pagina è già aperta, questo obiettivo viene superato
-   automaticamente. L'intera sezione **Collaboratori** viene evidenziata mentre
-   una panoramica testuale presenta Redazione, Eventi, Attrezzatura e
-   Istruttore, il limite di un solo incarico alla volta e la Maestria specifica
-   accumulata lavorando. La scena termina soltanto quando il primo Collaboratore
-   riceve un incarico liberamente scelto; un incarico già presente conta come
-   completamento e **Salta** resta sempre disponibile. I salvataggi precedenti
-   all'introduzione della scena la registrano come già saltata.
+   automaticamente. Il dialogo iniziale ricorda il limite di un solo incarico
+   alla volta e la Maestria accumulata lavorando; poi l'intera sezione
+   **Collaboratori** viene evidenziata mentre una panoramica testuale presenta
+   Redazione, Eventi, Attrezzatura e Istruttore. La scena termina soltanto
+   quando il primo Collaboratore riceve un incarico liberamente scelto; un
+   incarico già presente conta come completamento e **Salta** resta sempre
+   disponibile. I salvataggi precedenti all'introduzione della scena la
+   registrano come già saltata.
 
-9. **Le spade non si sistemano da sole** Introduce attrezzatura e manutenzione.
-   Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si
-   sistemano quasi da sole.
+9. **Collaboratori e insegnamento** La prima volta che si avvia la formazione
+   di un iscritto avendo già almeno un Collaboratore, un breve dialogo in pausa
+   suggerisce di impiegare i Collaboratori nell'insegnamento, anche per lo
+   sconto sui corsi.
 
-10. **Il Laboratorio Gadget** Alla prima vittoria della scuola nell'Accademico
-    Arena, una scena in pausa annuncia lo sblocco e guida il giocatore ad aprire
-    **Gadget**. Il riepilogo spiega pubblico raggiungibile, produttività e ruolo
-    dei Collaboratori; il catalogo introduce acquisto del progetto, sviluppo,
-    prova qualità, vendita automatica, rarità aggiuntive e sblocco del prodotto
-    successivo dopo 100 vendite complessive della famiglia. Il tutorial non
-    obbliga a spendere fondi o assegnare subito un Collaboratore.
+10. **Una squadra che cresce** Al nono Collaboratore la gestione passa alla
+    vista aggregata per settore: la scena spiega il cambio, chiede di aprire
+    **Scuola** e mostra come usare + e − nei riquadri dei settori, precisando
+    che chi è impegnato in un Evento o in una formazione cambia incarico solo
+    dopo averlo concluso.
+
+11. **La Scuola diventa Social!** A 35 iscritti attivi la scena spiega
+    contenuti, Follower (che aumentano Fama e affluenza agli Eventi) e
+    sponsorizzazioni mensili, chiede di aprire **Scuola** e di assegnare almeno
+    un Collaboratore ai Social.
+
+12. **Le spade non si sistemano da sole** Introduce attrezzatura e manutenzione.
+    Più avanti si scopre che, tecnicamente, con abbastanza collaboratori si
+    sistemano quasi da sole.
+
+    > **Da implementare:** non esiste una scena dedicata all'attrezzatura; usura e danni sono citati solo nel dialogo “Eventi e attrezzatura” del passo 4.
+
+13. **Il Laboratorio Gadget** Alla prima vittoria di un atleta della scuola
+    nell'Accademico Arena, una scena in pausa annuncia lo sblocco e guida il
+    giocatore ad aprire **Gadget**. Il riepilogo spiega pubblico raggiungibile,
+    produttività e ruolo dei Collaboratori; il catalogo introduce acquisto del
+    progetto, sviluppo, prova qualità, vendita automatica, legame fra qualità,
+    probabilità di vendita e guadagno, e rarità aggiuntive. Lo sblocco del
+    prodotto successivo dopo 100 vendite complessive della famiglia esiste nel
+    gioco ma non è spiegato dalla scena. Il tutorial non obbliga a spendere
+    fondi o assegnare subito un Collaboratore.
 
 L'evidenziazione deve restare coerente con l'interfaccia ispirata a Windows:
 niente frecce luminose o decorazioni estranee, ma contorni di focus, oscuramento
@@ -1869,67 +2486,126 @@ e sfocatura controllata delle aree non necessarie.
 
 ## 14. Contenuti email
 
-### 14.1 Archivio previsto
+### 14.1 Archivio
 
-La prima versione completa contiene almeno 100 modelli unici, divisi in cinque
-fasi da 20:
+Il catalogo contiene **100 email**, una per idea (`src/content/emailCatalog.ts`).
+Non esistono più fasi di tono legate al singolo modello: la stessa idea viene
+riscritta in otto **livelli di presentazione** (0–7), dalla bozza goliardica
+alla campagna HTML, e il livello dipende dai potenziamenti Creatività comprati
+(§ 14.3). Le cinque fasi da 20 modelli previste inizialmente (realistico,
+caloroso, pubblicitario, comico, surreale) sono state sostituite da questa
+progressione.
 
-| Fase | Tono                        |
-| ---- | --------------------------- |
-| 1    | realistico e professionale  |
-| 2    | caloroso e personale        |
-| 3    | creativo e pubblicitario    |
-| 4    | audace e comico             |
-| 5    | surreale ma ancora efficace |
+Le idee vengono usate a rotazione e in ordine fisso: la nuova email usa
+l'idea numero `(email archiviate + email correnti) mod 100`, quindi ogni
+contatto riceve l'idea successiva a quella dell'email precedente.
+
+Il testo è composto da due sole fonti:
+
+- il catalogo, con l'idea di ogni email;
+- la banca di frasi (`src/content/emailPhrases.ts`), che fornisce le parti
+  aggiuntive di ogni livello: righe brevi della bozza (10), frasi cortesi (10),
+  ganci caldi (10) e da campagna (10), punti elenco informativi (10) e incisivi
+  (10), inviti all'azione caldi (6) e da campagna (8), blocchi di prenotazione
+  (4 + 4), P.S. (8) e oggetti da campagna (8).
+
+Le frasi vengono prese in modo deterministico a partire da una posizione che
+dipende dall'idea (`indice × 3`), così due email dello stesso livello
+raramente si somigliano. Ai livelli 1 e 2 una frase viene saltata se l'email
+dice già la stessa cosa (gratuità, abiti, attrezzatura, esperienza).
 
 ### 14.2 Struttura del modello
 
-Ogni modello contiene:
+Ogni voce del catalogo contiene:
 
 - identificativo;
-- fase minima;
-- categoria;
-- oggetto;
-- corpo;
-- intervallo di lunghezza;
-- bonus o penalità impliciti;
-- tag del destinatario;
-- peso di selezione;
-- variabili inseribili.
+- oggetto della bozza (`draftSubject`, livelli 0–1);
+- testo corretto della bozza (`draft`, livelli 0–1): gli errori del livello 0
+  non vanno scritti nel catalogo, li aggiunge il gioco;
+- oggetto curato (`subject`, livelli 2–7);
+- apertura (`opening`) e invito (`invitation`) della versione curata.
 
-Variabili previste:
+Variabili supportate:
 
 ```text
-{{nome}}
-{{cognome}}
-{{nomeCompleto}}
-{{fonteContatto}}
-{{nomeEvento}}
-{{dataEvento}}
-{{nomeScuola}}
-{{città}}
-{{nomeCollaboratore}}
+{{firstName}}
+{{senderName}}
+{{orderName}}
+{{city}}
 ```
 
-### 14.3 Esempio provvisorio realistico
+`{{firstName}}` è il nome del destinatario, `{{senderName}}` il nome del
+profilo del giocatore, `{{orderName}}` e `{{city}}` il nome e la città della
+scuola corrente. La firma dal livello 2 è `<giocatore>, <Ordine> - <città>`.
 
-**Oggetto:** Ti va di provare LudoSport a Genova?
+> **Da implementare:** le variabili previste `{{cognome}}`, `{{nomeCompleto}}`, `{{fonteContatto}}`, `{{nomeEvento}}`, `{{dataEvento}}` e `{{nomeCollaboratore}}` e i campi fase minima, categoria, intervallo di lunghezza, bonus impliciti, tag del destinatario e peso di selezione non esistono nel modello.
 
-> Ciao {{nome}},\
-> ci siamo conosciuti durante {{nomeEvento}} e mi ha fatto piacere raccontarti
-> qualcosa di LudoSport. L'Ordine delle Onde organizza lezioni di prova a Genova
-> per chi vuole scoprire una disciplina sportiva originale, dinamica e
-> accessibile anche a chi parte da zero.
+### 14.3 Livelli di presentazione ed esempio reale
+
+| Livello | Nome                  | Potenziamento          | Contenuto                                                                                                                                  |
+| ------: | --------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+|       0 | Bozza disastrata      | nessuno                | oggetto della bozza; `Ciao <nome>,` e solo le prime frasi della bozza, fino ad almeno 70 caratteri; errori grossolani generati              |
+|       1 | Controllo ortografico | Controllo ortografico  | bozza completa e corretta, stesso oggetto scherzoso, + una riga breve per punto                                                            |
+|       2 | Email professionale   | Email professionale    | oggetto curato; saluto, apertura e invito + una frase cortese per punto; `Un saluto,` e firma completa; testo semplice, senza HTML        |
+|       3 | Card della lezione    | Invito personalizzato  | prima email HTML: logo e titolo, gancio caldo prima dell'apertura, invito, 3 punti elenco + uno per punto, firma; oggetto `<Nome>, <oggetto>` |
+|       4 | Dettagli della prova  | Call to action         | come il 3 con etichetta dell'invito all'azione, immagine della lezione e blocco "come prenotare"                                           |
+|       5 | Contatti              | Impaginazione          | tono da campagna (ganci, punti elenco, inviti e prenotazione incisivi) e card Contatti con `genova@ludosport.net`                          |
+|       6 | Sezione video         | Pubblicità vincente    | oggetto da campagna, card video con titolo e P.S. in fondo                                                                                 |
+|       7 | Mail finale HTML      | Corso di Marketing     | didascalia del video e piè di pagina con la nota sul perché si riceve il messaggio                                                                              |
+
+Ogni potenziamento del ramo ha 5 livelli; ogni livello comprato è un **punto
+Creatività** del catalogo corrispondente. Il livello di un'email dipende dal
+catalogo più alto sbloccato: con `k` punti in quel catalogo, ogni nuova email
+usa il nuovo livello con probabilità `k / 5` e il livello precedente negli
+altri casi; con 5 punti usa sempre il nuovo. La **lunghezza** cresce con i
+punti del catalogo del livello scelto (`expansion`, da 0 a 5): ai livelli 1 e 2
+ogni punto aggiunge una frase, dal livello 3 ogni punto aggiunge un punto
+elenco. Il livello 0 non riceve espansioni.
+
+Livello 0: gli errori sono generati a partire dal testo corretto
+(`src/content/levelZeroTypos.ts`). Circa una parola su 3,5 (28%) viene
+storpiata, con almeno tre errori nel corpo e uno nell'oggetto: si preferiscono
+errori da dizionario (accenti, H, stile SMS, doppie, parole storpiate), altrimenti
+si invertono due lettere interne di una parola di almeno 5 lettere. Il nome del
+destinatario e quello del giocatore non vengono mai toccati. La scelta è
+deterministica (stessa email, stessi errori) e le posizioni degli errori sono
+salvate in `CampaignEmail.typos`, così l'interfaccia li sottolinea senza un
+secondo elenco.
+
+Dal livello 3 in poi ciò che il giocatore scrive è il **sorgente HTML**
+dell'email: stile, tag e testo diventano visibili solo quando i relativi
+caratteri sono stati scritti, quindi la lunghezza da scrivere comprende anche
+il markup. Ai livelli 0–2 si scrive soltanto il testo.
+
+L'email già in scrittura non cambia livello quando si compra un potenziamento;
+il suo testo viene ricalcolato solo se cambiano il nome del profilo o la scuola
+(fondazione).
+
+**Esempio reale.** Idea `prima-prova`, livello 1 con 1 punto Creatività:
+
+**Oggetto:** PROVA GRATIS (non è una truffa giuro)
+
+> Ciao {{firstName}},\
+> Vieni a provare LudoSport, lo sport con le spade che fanno luce e tanti suoni
+> magici. Siamo quasi tutti bravi e nessuno ha mai perso un braccio in modo
+> definitivo per ora. Prova gratis, giuro.
+
+Stessa idea, livello 2 con 1 punto (le prime due frasi cortesi vengono saltate
+perché l'invito parla già di gratuità e abiti):
+
+**Oggetto:** Una lezione di prova con l'Ordine delle Onde
+
+> Ciao {{firstName}},
 >
-> Se ti va di partecipare, rispondi pure a questa mail: ti invieremo tutte le
-> informazioni sulla prossima prova.
+> grazie per l'interesse dimostrato durante il nostro incontro. La nostra
+> disciplina unisce tecnica, controllo e collaborazione in un ambiente
+> accessibile anche a chi parte da zero. Ti invitiamo a una lezione gratuita:
+> servono soltanto abiti comodi e curiosità. Le spade e tutta l'attrezzatura
+> sono messe a disposizione dalla scuola.
 >
-> A presto,\
-> {{nomeScuola}}
-
-Questo testo è un segnaposto. L'email di esempio fornita dal committente
-definirà tono, informazioni obbligatorie, firma e call to action della prima
-fascia di contenuti.
+> Un saluto,
+>
+> {{senderName}}, Ordine delle Onde - Genova
 
 ### 14.4 Regole editoriali
 
@@ -1955,6 +2631,12 @@ Servono almeno:
 - 10 comunicazioni di sistema che sbloccano funzioni;
 - 10 riepiloghi e report diegetici.
 
+Oggi le comunicazioni della Posta sono scritte direttamente nel codice, nei
+punti che le generano (circa 28 richiami di `addMessage` in `src/game`), con
+tre toni: sistema, positivo e neutro. Gli eventi narrativi sono 12 (§ 16).
+
+> **Da implementare:** non esiste una banca di comunicazioni separata con le quantità indicate, né una categoria di messaggi comici distinta.
+
 ---
 
 ## 15. Generazione dei destinatari
@@ -1964,41 +2646,83 @@ Servono almeno:
 Tutti i destinatari vengono generati localmente. Non si utilizzano indirizzi
 reali.
 
-Formato consigliato:
+Formato usato per i contatti ordinari:
 
 ```text
-nome.cognome@example.test
-iniziale.cognome@example.test
-nickname@example.test
+nome.cognome@<provider inventato>
 ```
 
-Il dominio `.test` è riservato a scopi di test e rende evidente a livello
-tecnico che gli indirizzi non sono reali.
+La parte locale è `nome.cognome` in minuscolo, senza accenti e con i nomi
+composti uniti da punti. Il provider viene estratto fra cinque domini di
+fantasia: `cmail.com`, `hotlook.it`, `yabadabadoo.it`, `gspot.com`,
+`postacenere.it`. I profili Leggendari usano invece `nome.cognome@ludosport.net`
+e il mittente delle campagne è `genova@ludosport.net`.
+
+> **Da implementare:** il formato previsto con dominio `@example.test`, le varianti `iniziale.cognome` e i nickname non sono usati.
 
 ### 15.2 Generatore
 
-Il generatore combina:
+Il generatore (`src/content/prospectDirectory.ts`, `src/game/contacts.ts`)
+combina:
 
-- liste italiane di nomi;
-- liste italiane di cognomi;
-- occasionali nickname plausibili;
-- fonte del contatto;
-- fascia di interesse;
-- qualità;
+- una lista italiana di 64 nomi;
+- una lista italiana di 60 cognomi, estratti in modo indipendente dal nome;
+- il provider email di fantasia;
+- fonte del contatto (tutorial, sparring, evento, Social, collaboratore,
+  torneo);
+- rarità (Comune, Raro, Ultra Raro, Leggendario), che fa da qualità del
+  contatto;
+- statistiche di base di Arena e Stile;
 - data di acquisizione.
+
+Nella scuola iniziale i primi 9 contatti sono Comuni e il 10° è sempre Andrea
+Simonazzi (`guaranteedAndreaContactPosition = 10`).
+
+> **Da implementare:** la fascia di interesse non viene generata.
 
 I nomi reali pubblicati sui portali LudoSport non vengono usati automaticamente
 come personaggi. Potranno essere aggiunti in seguito solo con approvazione
-esplicita.
+esplicita. I Leggendari hanno già nome e cognome fissi: 8 profili della scuola
+di Genova (`src/content/specialCollaborators.ts`) e i Leggendari Segreti
+(`src/content/secretLegendaries.ts`).
 
 ---
 
 ## 16. Eventi casuali
 
-Gli eventi casuali arrivano come email o modifiche al Calendario. Nella prima
-versione il loro esito è automatico; in seguito potranno offrire scelte. Possono
-aumentare o diminuire iscritti, Euro, contatti, collaboratori e stato
-dell'attrezzatura.
+Gli eventi casuali (eventi narrativi, `src/content/narrativeEvents.ts`) arrivano
+come messaggi nella Posta. Il loro esito è automatico; in seguito potranno
+offrire scelte. Ne avviene uno ogni 2–5 mesi di gioco (120.000–300.000 ms,
+estratti a caso), solo se la scuola ha almeno un iscritto attivo. L'evento è
+estratto in modo uniforme fra quelli il cui minimo di iscritti attivi è
+raggiunto. Possono aggiungere contatti (con fonte "collaboratore"), Euro,
+carico di usura dell'attrezzatura, spade rotte o riparate; non modificano
+iscritti né collaboratori. Lo storico conserva gli ultimi 30 eventi.
+
+Eventi presenti nel codice:
+
+| Evento                                      | Tipo     | Iscritti minimi | Effetto                         |
+| ------------------------------------------- | -------- | --------------: | ------------------------------- |
+| Passaparola inatteso                        | positivo |               1 | +2 contatti                     |
+| Contributo straordinario                    | positivo |               3 | +1.000 €                        |
+| Davvero hai degli amici?                    | positivo |               5 | +3 contatti                     |
+| Un nuovo Sabersmith all'orizzonte?          | positivo |               6 | −30 carico, 1 spada riparata    |
+| Un piccolo disastro                         | negativo |               2 | +30 carico, +1 spada rotta      |
+| Spada caduta: Fanne 5                       | negativo |               4 | +10 carico                      |
+| Si può avere nera?                          | negativo |               4 | +30 carico                      |
+| I fogli di calcolo INCOM hanno i giorni contati | assurdo  |          15 | +5 contatti                     |
+| Piedozzi ha fatto scalpore                  | assurdo  |              30 | +10 contatti                    |
+| Il portaspade di legno perfetto             | assurdo  |               6 | −20 carico                      |
+| Un Pini al lavoro                           | assurdo  |               6 | −30 carico                      |
+| Mancato rinnovo                             | negativo |               — | non estratto: registrato quando un iscritto lascia la scuola alle partenze annuali |
+
+Evento separato, **Inflazione di Luce**: ogni gennaio c'è una probabilità di
+aumento del prezzo delle spade ufficiali pari al 10% per ogni spada acquistata
+dall'ultimo aumento (massimo 100%). Se scatta, il prezzo viene moltiplicato per
+1,1, la probabilità torna a 0 e un avviso con la causa resta visibile per 60
+secondi.
+
+Elenchi previsti dal design:
 
 ### Positivi
 
@@ -2026,9 +2750,12 @@ dell'attrezzatura.
 - un contatto chiede se la spada è inclusa nell'abbonamento della palestra;
 - un evento genera più collaboratori che partecipanti.
 
+> **Da implementare:** gli eventi degli elenchi previsti (positivi, negativi leggeri e assurdi avanzati) non esistono come tali; nel codice ci sono solo quelli della tabella sopra, nessuno dei quali modifica il Calendario, iscritti o collaboratori.
+
 Gli eventi negativi non devono cancellare grandi quantità di progresso. Devono
 creare variazione, non frustrazione. Una protezione impedisce lunghe serie di
-eventi negativi consecutivi.
+eventi negativi consecutivi: se gli ultimi 2 eventi dello storico sono negativi
+(compresi i Mancati rinnovi), il successivo non può essere negativo.
 
 ---
 
@@ -2045,17 +2772,28 @@ di gioco**.
 ### 17.2 Sblocco
 
 L'offerta di fondare una nuova scuola arriva tramite una comunicazione di
-sistema manuale quando sono soddisfatti requisiti come:
+sistema ("Richiesta apertura nuova scuola", inviata una sola volta per ciclo)
+quando sono soddisfatti requisiti come:
 
-- soglia di Iscritti totali;
+- soglia di Fama della scuola;
 - numero minimo di collaboratori;
 - almeno un certo numero di eventi completati;
 - livello minimo di organizzazione;
 - disponibilità di attrezzatura;
 - reputazione sufficiente.
 
-Soglia del primo ciclo: 150 iscritti, 8 collaboratori, 25 eventi completati e
-almeno una vittoria alla Champion's Arena.
+> **Da implementare:** livello minimo di organizzazione, disponibilità di attrezzatura e reputazione non sono requisiti nel codice.
+
+Soglia del primo ciclo: 150 di Fama, 8 collaboratori, 25 eventi completati e
+almeno una vittoria (Arena o Stile) di un atleta della scuola corrente alla
+Champion's Arena. In più nessun Leggendario Segreto deve avere una prova in
+corso. La Fama cresce di 1 per ogni iscrizione, ma anche con i follower e con
+i premi dei tornei, quindi non coincide con gli iscritti totali.
+
+Ogni ciclo successivo (`ciclo = scuole fondate + 1`) richiede Fama
+`150 × ciclo`, collaboratori `8 + 2 × (ciclo − 1)` ed eventi completati
+`25 × ciclo`. Fama ed eventi completati sono cumulativi e restano dopo la
+fondazione, mentre i collaboratori ripartono da zero.
 
 Il prestigio è una scelta volontaria. A differenza del gioco di riferimento, il
 primo prestigio deve concedere immediatamente un bonus permanente chiaramente
@@ -2071,7 +2809,21 @@ Il giocatore sceglie:
 - motto facoltativo;
 - specializzazione iniziale.
 
+Nel codice (`foundSchool`, `src/game/schoolProgressionFlow.ts`) nome e città
+sono testi liberi e obbligatori, il colore di accento è un valore libero,
+applicato all'interfaccia come `--school-accent`, e il motto è facoltativo. Le
+specializzazioni sono quattro:
+
+| Specializzazione | Effetto                                                                          |
+| ---------------- | -------------------------------------------------------------------------------- |
+| Generale         | nessuno (valore della scuola iniziale)                                           |
+| Redazione        | potenza di scrittura ×1,1                                                        |
+| Eventi           | +10% di pubblico agli eventi                                                     |
+| Accoglienza      | +10 punti di avanzamento verso le probabilità massime di prenotazione della prova e di iscrizione |
+
 Il modulo appare come una procedura amministrativa ricevuta via email.
+
+> **Da implementare:** non esiste alcuna schermata o modulo per fondare la scuola. L'azione `FOUND_SCHOOL` esiste nella logica, ma nessun componente la invia; il messaggio di offerta rimanda alle Impostazioni, che non contengono la procedura. Manca anche la lista di città.
 
 ### 17.4 Cosa si azzera
 
@@ -2082,9 +2834,21 @@ Il modulo appare come una procedura amministrativa ricevuta via email.
 - parte dell'attrezzatura e degli Euro locali;
 - collaboratori che rimangono assegnati alla scuola precedente.
 
+Nel codice la nuova scuola riparte dallo stato iniziale di una partita, con
+queste eccezioni (§ 17.5). Si azzerano quindi anche: **tutti** i potenziamenti
+(compresi i cataloghi email, che tornano al livello 0), l'archivio delle email
+inviate, gli Euro (0), l'attrezzatura (6 spade), follower e iscritti attivi,
+**tutti** i collaboratori (non restano alla scuola precedente: spariscono),
+gli sblocchi (Potenziamenti, Collaboratori, Social, Forme, Gadget) con il
+settore Gadget, prove ed eventi in corso, tornei ordinari, Cronache e Torneo
+Reptile, eventi narrativi, Inflazione di Luce, scoperte dei Percorsi Segreti e
+progressi del tutorial. I nuovi contatti iniziali non includono Andrea
+Simonazzi, che è garantito solo nella prima scuola.
+
 Gli iscritti della scuola precedente non vengono conservati come schede
-individuali. La scuola fondata registra soltanto il numero di membri al
-trasferimento; Fama e statistiche cumulative restano disponibili senza creare
+individuali. La scuola fondata registra soltanto nome, città, motto,
+specializzazione, numero di membri al trasferimento, email inviate ed eventi
+completati; Fama e statistiche cumulative restano disponibili senza creare
 uno storico nominativo.
 
 ### 17.5 Cosa rimane
@@ -2099,10 +2863,29 @@ uno storico nominativo.
 - scoperte del Ludodex e progressi permanenti dei Leggendari;
 - un collaboratore mentore selezionato, se sbloccato.
 
+Nel codice restano: Fama, scuole fondate, Reputazione di rete (+1 a ogni
+fondazione, ma nessun sistema la legge), statistiche cumulative, messaggi della
+Posta, traguardi, obiettivo breve in corso, Leggendari incontrati (Ludodex),
+progressi dei Leggendari iscritti (Forme, attestati da Istruttore e Tecnico,
+statistiche e bonus dei Corsi Agonisti), stato dei Leggendari Segreti, il flag
+della prima vittoria in un torneo ordinario, nome del profilo e seme casuale.
+
+> **Da implementare:** l'archivio delle email inviate si azzera (restano solo i messaggi della Posta); i modelli email sbloccati non restano, perché i potenziamenti Creatività ripartono da zero; non esiste il collaboratore mentore.
+
 Bonus iniziale consigliato per la prima fondazione: almeno **+25%** alla
 velocità complessiva del nuovo ciclo oppure un vantaggio equivalente distribuito
 tra Carisma, Scrittura ed entrate. Il valore è provvisorio, ma l'effetto deve
 essere immediato.
+
+Nel codice ogni scuola fondata vale **+25%** (`prestigeBonusPerSchool = 0,25`),
+cumulativo e immediato, applicato a:
+
+- potenza di scrittura (moltiplicatore `1 + 0,25 × scuole`);
+- pubblico degli eventi (+25 punti percentuali per scuola);
+- entrate mensili delle quote e della rete (moltiplicatore `1 + 0,25 × scuole`;
+  le entrate Social ne sono escluse).
+
+Il messaggio di fondazione indica il bonus totale di rete raggiunto.
 
 ### 17.6 Progressione infinita
 
@@ -2115,8 +2898,29 @@ Ogni scuola fondata aumenta:
 - complessità organizzativa;
 - moltiplicatori permanenti.
 
+Nel codice, per ogni scuola fondata:
+
+- **costi:** il costo dei potenziamenti cresce del 15% (`× (1 + 0,15 ×
+  scuole)`), tranne quelli con crescita di rete azzerata (ramo Gadget, ramo
+  Istruttori, Percorsi Segreti e pochi altri);
+- **obiettivi:** crescono i requisiti del ciclo successivo (§ 17.2);
+- **pubblico raggiungibile:** +25% di pubblico agli eventi;
+- **complessità organizzativa:** il potenziamento Coordinamento multi-sede
+  richiede almeno una scuola fondata;
+- **moltiplicatori permanenti:** +25% a scrittura ed entrate mensili;
+- gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
+  a fine anno.
+
+> **Da implementare:** nessun aumento del numero di attività simultanee.
+
 La rete delle scuole precedenti produce un piccolo contributo passivo e appare
 nell'Archivio come struttura organizzativa, non come mappa fantasy.
+
+Il contributo passivo è di 5 € al mese per scuola fondata
+(`networkIncomePerSchool`), aumentato dai bonus alle entrate ricorrenti e dal
+moltiplicatore di rete.
+
+> **Da implementare:** le scuole precedenti non sono mostrate in nessuna schermata (nessun Archivio della rete).
 
 ---
 
@@ -2129,6 +2933,15 @@ temporizzate restano fermi. Non vengono prodotti caratteri, contenuti Social,
 Follower, contatti, rette o sponsorizzazioni e non viene creato alcun riepilogo
 offline. Alla ripresa tutte le scadenze vengono spostate in avanti della durata
 dell'interruzione, conservando il tempo residuo.
+
+Al caricamento (`freezeGameState`, `src/game/offline.ts`) vengono spostati:
+scadenza mensile, formazioni di iscritti e collaboratori, invii ed esiti delle
+email, prove programmate, eventi in corso, attese degli eventi in tempo reale e
+prossimo evento narrativo. Sviluppo e vendite Gadget ripartono dal momento del
+caricamento. L'avviso dell'Inflazione di Luce usa invece il tempo reale: viene
+prolungato durante una pausa del gioco aperto, ma non dopo una chiusura.
+
+> **Da implementare:** la preparazione del Torneo Reptile non viene congelata alla chiusura: il suo ultimo avanzamento (`lastProgressAt`) non viene spostato, quindi al primo aggiornamento dopo il caricamento i settori avanzano anche per il tempo in cui il gioco era chiuso.
 
 ### 18.2 Limiti
 
@@ -2195,13 +3008,19 @@ P = somma della produttività dei Collaboratori assegnati a Gadget
 Le rarità, la Maestria dell'incarico e i bonus globali di Forma 6 e Forma 7
 concorrono a `P`. I bonus specifici dei rami d'arma non modificano Gadget. Un
 Collaboratore assegnato guadagna 1 XP di Maestria Gadget al secondo, come negli
-altri incarichi.
+altri incarichi. A `P` si aggiunge la quota dei Collaboratori che hanno Gadget
+come settore secondario quando il loro settore principale è inattivo
+(potenziamento Turni dei collaboratori, 10% per livello, massimo 50%).
 
 Il tempo effettivo di progettazione è `lavoroBase / P`; una revisione Comune
 richiede un terzo del lavoro iniziale. Costo e lavoro di revisione crescono in
 modo additivo del 25% per ogni livello di rarità: Comune ×1, Raro ×1,25, Ultra
 Raro ×1,50, Leggendario ×1,75 e Leggendario Segreto ×2. I relativi
-potenziamenti moltiplicano la velocità.
+potenziamenti moltiplicano la velocità:
+
+```text
+velocità = P × (1 + bonusSviluppoORevisione + bonusAutomazioniGeneriche)
+```
 Con `P = 0` l'avanzamento si ferma senza perdere il lavoro già completato. Le
 vendite dei prodotti accettati continuano mentre il laboratorio sviluppa o
 revisiona un altro prodotto.
@@ -2212,7 +3031,9 @@ rarità attuale. Il prodotto continua a essere venduto alla qualità
 precedente durante la revisione. La qualità memorizzata è sempre il massimo
 storico della singola rarità: un risultato peggiore non può ridurla. Al 100%
 le revisioni restano disponibili quando esiste una rarità successiva
-ottenibile; vengono disabilitate al 100% del Leggendario Segreto.
+ottenibile; vengono disabilitate al 100% del Leggendario Segreto. Finché il
+Leggendario Segreto non è ottenibile (§ 19.4), le revisioni si fermano già al
+100% del Leggendario.
 
 Ogni prodotto possiede cinque varianti, nello stesso ordine delle rarità del
 gioco: Comune, Raro, Ultra Raro, Leggendario e Leggendario Segreto. Il primo
@@ -2390,7 +3211,9 @@ nel modello di gioco, ma non è ottenibile.
 | Vendita abbinata           | +25% vendite aggiuntive                              | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €        | Formazione 3 e Tazza sbloccata |
 
 Il ramo costa complessivamente 5.142.500 €. È visibile nella schermata Upgrade
-soltanto dopo lo sblocco del settore.
+soltanto dopo lo sblocco del settore. I costi del ramo non crescono con le
+scuole fondate. Gli effetti crescono per livello: +20% di velocità o capacità,
++2 punti di conversione e +5% di vendite abbinate.
 
 ---
 
@@ -2412,6 +3235,10 @@ luglio successivo. Partecipanti e spade sono fotografati soltanto all'avvio
 effettivo, dopo le partenze annuali di giugno. Conclusa l'edizione, la prossima
 preparazione è disponibile dal settembre seguente.
 
+Per avviare la preparazione servono almeno 4 Collaboratori non Istruttori.
+Finché il palazzetto non è prenotato, la preparazione può essere annullata: i
+Collaboratori tornano agli incarichi precedenti e non c'è alcun costo.
+
 ### 20.2 Preparazione coordinata
 
 Tutti i Collaboratori non assegnati come Istruttori devono essere distribuiti
@@ -2419,7 +3246,13 @@ fra Social, Attrezzature, Gadget ed Eventi, con almeno una persona per settore.
 Gli incarichi ordinari si fermano fino al termine della preparazione; al 100%
 di tutti e quattro i settori vengono ripristinati. Potenza, Maestria, rarità e
 bonus di Forma sono fotografati all'avvio; i miglioramenti ottenuti durante il
-lavoro valgono dall'edizione successiva.
+lavoro valgono dall'edizione successiva. Durante la preparazione gli
+incarichi dei Collaboratori non possono essere modificati.
+
+La potenza di un settore è la somma della produttività dei Collaboratori
+assegnati, calcolata sull'incarico corrispondente (Social usa la Redazione).
+La potenza Social è inoltre moltiplicata per `1 + min(1, follower × 0,00005)`,
+cioè fino al doppio con 20.000 follower.
 
 I carichi base con 16 team sono rispettivamente 4, 6, 2 e 4. Il moltiplicatore
 del carico vale ×1 / ×1,5 / ×2 / ×2,5 / ×3 / ×3,5 per 16 / 32 / 64 / 128 /
@@ -2430,12 +3263,14 @@ qualitàGrezza = clamp(50 × R, 0, 100)
 coordinamento = 0,5 + qualitàGrezzaPeggiore / 200
 bonusEventi = 1 + qualitàEventiCoordinata / 200
 durataBase = 6 mesi di gioco / R
+qualità = clamp(qualitàGrezza × coordinamento × bonusEventi × (1 + modificatore), 0, 100)
+durata = durataBase / (coordinamento × bonusEventi × (1 + modificatore))
 ```
 
 Il coordinamento modifica qualità e velocità di tutti. Il bonus Eventi si
 applica a Social, Attrezzature e Gadget, ma non a Eventi stesso. La qualità
-finale resta fra 0 e 100 ed è descritta come Disastrosa, Insufficiente,
-Adeguata, Buona o Eccellente a intervalli di 20 punti. Il tempo impiegato non
+finale resta fra 0 e 100 ed è descritta come Disastroso, Insufficiente,
+Adeguato, Buono o Eccellente a intervalli di 20 punti. Il tempo impiegato non
 riduce la qualità: un settore debole procede più lentamente e costituisce il
 collo di bottiglia condiviso.
 
@@ -2463,9 +3298,12 @@ rispettivamente 16, 32, 64, 128, 256 e 512 team. Social seleziona linearmente
 da un minimo di due team di Genova fino a metà del tabellone, sempre entro le
 coppie realmente formabili con iscritti attivi che possiedono Forma 1. Eventi
 sposta la selezione da casuale verso i migliori atleti, valutati al 50% Arena e
-50% Stile. Le coppie di Genova sono costruite in modo equilibrato ma non
-perfettamente deterministico; ogni team esterno contiene due atleti della
-stessa scuola.
+50% Stile: ogni atleta ha peso `1 + qualitàEventi/100 × forza × 9`, dove la
+forza va da 0 (ultimo) a 1 (migliore); con Eventi al 100% vengono presi
+direttamente i migliori. Le coppie di Genova sono costruite in modo equilibrato
+ma non perfettamente deterministico: la metà più forte viene abbinata alla metà
+più debole in ordine inverso, con scambi casuali fra posizioni vicine. Ogni
+team esterno contiene due atleti della stessa scuola.
 
 Al termine, Social, Gadget ed Eventi assegnano `2 × qualità − 100` punti;
 Attrezzature assegna `4 × qualità − 200`. La somma, arrotondata una sola volta,
@@ -2482,7 +3320,8 @@ Ogni sfida è alla meglio dei cinque, quindi termina a 3 punti.
 
 Gli esterni usano profilo, rarità, Forme, esperienza, scuole e tier della
 Champion's Arena adattati alle coppie, incluse almeno due squadre Elite quando
-il campo lo consente. Le apparizioni dei Leggendari Segreti seguono le regole
+il campo lo consente. Ogni team esterno è specializzato: a caso, una delle due
+discipline riceve ×1,15 e l'altra ×0,85. Le apparizioni dei Leggendari Segreti seguono le regole
 dei tornei ordinari e ricevono un compagno generato della stessa scuola. La
 difficoltà parte dallo standard Champion's e viene moltiplicata
 cumulativamente per ×1,1 dopo ogni vittoria di un team di Genova; il nuovo
@@ -2490,16 +3329,20 @@ valore vale da tutte le edizioni successive.
 
 La fase svizzera usa `max(5, log2(team))` turni: 5 fino a 32 team, poi 6 / 7 /
 8 / 9. Il primo turno è casuale evitando la stessa scuola quando possibile;
-i successivi preferiscono stesso record, differenza punti simile e nessun
-rematch. La classifica usa vittorie, forza avversari, differenza punti, scontro
+i successivi preferiscono stesso record, scuole diverse, differenza punti
+simile e nessun rematch. La classifica usa vittorie, forza avversari, differenza punti, scontro
 diretto e sorteggio deterministico. Le prime 16 entrano nel tabellone 1ª–16ª,
-2ª–15ª e così via, con finale per il terzo posto.
+2ª–15ª e così via, con finale per il terzo posto. Il tabellone è ordinato
+(1–16, 8–9, 4–13, 5–12, 2–15, 7–10, 3–14, 6–11), quindi prima e seconda possono
+incontrarsi solo in finale.
 
 ### 20.6 Economia, premi e persistenza
 
 Servono due spade per ogni team, inclusi gli esterni. Le spade libere della
 scuola vengono usate per prime; le mancanti sono noleggiate a 100 € ciascuna.
-Ogni spada della scuola impiegata riceve 20 punti usura. Gadget può generare al
+Ogni spada della scuola impiegata aggiunge 20 punti al carico di usura
+dell'attrezzatura; ogni 100 punti di carico si rompe una spada, al massimo
+quante ne sono state impiegate. Gadget può generare al
 massimo 1.000 € lordi per team, moltiplicati per la sua qualità. Social genera
 `floor(team × qualità / 100)` follower. Il riepilogo separa entrate Gadget,
 palazzetto, noleggio e risultato netto; i costi finali possono portare il saldo
@@ -2508,7 +3351,9 @@ della scuola sotto zero. L'edizione completata conta come un Evento.
 Ogni atleta di Genova nei migliori 16 riceve +1 Arena e +1 Stile permanenti.
 Il bonus non si somma: quarto, terzo, secondo e vincitore ricevono
 rispettivamente +2, +3, +4 e +5 totali. I bonus dei Leggendari restano nel
-normale progresso conservato dal prestigio.
+normale progresso conservato dal prestigio. Ogni atleta di Genova che partecipa
+guadagna anche 1 punto di esperienza da torneo. I Leggendari Segreti battuti da
+un team di Genova vengono risolti come nei tornei ordinari.
 
 La simulazione completa viene generata una volta sola all'avvio di luglio e
 salvata prima della presentazione. Le schermate mostrano nell'ordine Social,
@@ -2537,34 +3382,55 @@ albo Reptile; una prenotazione pendente viene persa senza rimborso.
 | Automazione percepibile    |               30–60 minuti |
 | Primo prestigio            | 3–4 ore attive distribuite |
 
+La tabella resta un obiettivo di design. Il test automatico
+`src/game/balance.test.ts` ne controlla una parte simulando 120 partite a 6
+input al secondo con volantinaggio continuo: il 90° percentile del primo
+iscritto deve restare entro 8 minuti, quello del primo potenziamento
+(Presentazione preparata) entro 10 minuti, e il primo collaboratore deve
+arrivare entro 45 minuti in ogni partita simulata.
+
 ### 21.2 Avvio consigliato
 
-- 5 contatti disponibili;
-- 1 carattere per input;
+- 5 contatti disponibili (i primi 9 contatti della scuola iniziale sono
+  sempre Comuni);
+- 1 carattere per input; Flusso e Frase perfetta restano bloccati finché non
+  si acquistano i nodi «Ritmo di battitura» e «Frasi fatte»;
 - 0 collaboratori;
 - 6 spade disponibili;
+- €0 in cassa; la partita parte a Settembre del primo anno scolastico;
 - prenotazione e iscrizione dipendono dalla rarità secondo la tabella dei
   Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 base per iscritto attivo, più €5 per ogni Forma o corso
   permanente registrato sul singolo allievo, più €10 per ogni attestato da
   Istruttore oppure €20 per ogni qualifica da Tecnico sulla stessa formazione, a
-  ogni mese di gioco; il Corso Agonisti è escluso;
+  ogni mese di gioco; il Corso Agonisti è escluso e il Corso X conta solo dopo
+  che è stato sbloccato;
 - durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno
-  scolastico Settembre–Agosto sempre visibile;
-- il primo iscritto può essere assistito dal tutorial per evitare sfortuna
-  estrema;
-- il primo Ultra Raro deve comparire abbastanza presto da introdurre
-  l'automazione senza spezzare il ritmo;
-- il primo volantinaggio è gratuito e guidato.
+  scolastico Settembre–Agosto sempre visibile nella barra del titolo;
+- la prima email inviata ottiene sempre una prova e il primo iscritto è
+  garantito: finché la Fama è 0 ogni prova ordinaria si conclude con
+  l'iscrizione;
+- l'automazione non arriva da un Ultra Raro casuale: il 10° contatto della
+  scuola iniziale è sempre Andrea Simonazzi (Leggendario), con prenotazione al
+  100% e iscrizione garantita; all'iscrizione diventa il primo collaboratore.
+  Rari, Ultra Rari e altri Leggendari compaiono solo dall'11° contatto;
+- il volantinaggio è sempre gratuito; il primo è guidato dal tutorial, dura 5
+  secondi e porta sempre 1 contatto (normalmente dà 1 contatto solo nel 33%
+  dei casi).
 
 ### 21.3 Protezione dalla sfortuna
 
-- dopo una serie di funnel senza iscritti, aumenta temporaneamente la
-  probabilità del passaggio più debole;
-- il bonus non viene mostrato esplicitamente;
-- viene azzerato alla prima conversione;
-- gli eventi tutorial hanno un risultato minimo garantito;
+- la protezione agisce separatamente su ogni passaggio e non è un aumento
+  graduale: dopo 4 email consecutive perse la successiva ottiene sicuramente
+  una prova; dopo 4 prove consecutive senza iscrizione la successiva si
+  conclude sicuramente con l'iscrizione;
+- il bonus non viene mostrato esplicitamente (la LudoWiki dice solo che le
+  protezioni esistono);
+- la serie si azzera alla prima prenotazione o iscrizione del passaggio
+  interessato;
+- gli eventi tutorial hanno un risultato minimo garantito (il primo
+  volantinaggio porta sempre 1 contatto);
 - il giocatore non può rimanere senza contatti e senza alcun modo gratuito di
   ottenerne altri.
 
@@ -2574,50 +3440,98 @@ albo Reptile; una prenotazione pendente viene persa senza rimborso.
 
 ### 22.1 Strategia
 
-- `localStorage` per la prima versione;
-- salvataggio automatico ogni 10 secondi;
-- salvataggio dopo invio email, acquisto, assegnazione, evento e prestigio;
-- schema versionato;
-- backup precedente mantenuto per recupero;
+- `localStorage`, chiave `oggetto-nuovi-iscritti.save`, con il testo JSON
+  compresso tramite lz-string (prefisso `lz-string-v1:`); i vecchi salvataggi
+  in JSON semplice restano leggibili;
+- salvataggio automatico ogni 60 secondi, preparato in background in un Web
+  Worker quando disponibile;
+- non si salva dopo ogni singola azione: ogni modifica segna la partita come
+  «da salvare», e oltre al salvataggio periodico la partita viene salvata
+  alla chiusura o al cambio di scheda (`beforeunload`, `pagehide`, pagina
+  nascosta), con il pulsante «Salva ora» delle Impostazioni e subito dopo un
+  import;
+- schema versionato (versione attuale 83) più una versione di compatibilità:
+  i salvataggi più vecchi vengono migrati, quelli incompatibili non vengono
+  sovrascritti finché il giocatore non azzera la partita;
+- prima di ogni scrittura il salvataggio precedente viene copiato in
+  `oggetto-nuovi-iscritti.save.backup`; se il principale è corrotto si carica
+  il backup, e un backup valido non viene mai sostituito da un principale
+  corrotto;
 - export/import JSON nelle Impostazioni;
-- reset completo con doppia conferma.
+- reset completo con doppia conferma: «Azzera partita» e poi «Conferma
+  azzeramento»; il reset cancella principale e backup;
+- le Impostazioni mostrano lo stato del salvataggio (ultimo salvataggio,
+  countdown del prossimo, eventuale errore con dettagli tecnici).
 
 ### 22.2 Stato minimo
 
+Campi di primo livello di `GameState` (`src/game/types.ts`):
+
 ```ts
 interface GameState {
-  version: number;
+  version: number; // 83
+  saveCompatibilityVersion: number;
   createdAt: number;
   lastSavedAt: number;
-  school: SchoolState;
-  network: NetworkState;
-  player: PlayerState;
+  randomSeed: number;
+  profile: { displayName: string };
+  school: {
+    name; city; accentColor; motto; specialization;
+    activeMembers; peakActiveMembers; fame; euros; followers;
+    currentMonth; nextFeeAt;
+  };
+  player: { writingPower: number; flow?: WritingFlow; perfectPhrases?: number };
+  network: { reputation; schools: FoundedSchool[]; prestigeOfferSent; secretLegendaries };
   contacts: Contact[];
-  messages: Message[];
+  emails: CampaignEmail[];
   pendingEmailOutcomes: PendingEmailOutcome[];
   scheduledTrials: ScheduledTrial[];
-  collaborators: Collaborator[];
-  legendaryPity: number;
-  equipment: EquipmentItem[];
+  messages: InboxMessage[];
+  acquisitionEvents: AcquisitionEvent[];
+  activities: { eventCooldowns };
+  equipment: { totalSwords; availableSwords; damagedSwords; wear }; // contatori, non oggetti
+  lightInflation: LightInflationState;
   gadgets: GadgetState;
-  tournaments: TournamentState; // include Open Reptile, recap e albo d'oro
-  calendar: CalendarEvent[];
-  upgrades: UpgradeState[];
-  statistics: StatisticsState;
-  settings: SettingsState;
-  randomSeed: string;
+  legendaryPity: number;
+  legendaryCollaborators: LegendaryCollaboratorProgress;
+  tournaments: TournamentState; // include Chronicles, Open Reptile, recap e albo d'oro
+  collaborators: Collaborator[];
+  collaboratorManagement: CollaboratorManagementState;
+  secretUpgradeDiscoveries: SecretUpgradeId[];
+  automation: { lastProcessedAt; autoSendEmails; autoTeachingEnabled; ...buffer };
+  achievements: AchievementId[];
+  narrative: { nextEventAt; history: NarrativeEventRecord[] };
+  tutorial: TutorialProgress;
+  shortGoal: ShortGoalProgress;
+  statistics: Statistics;
+  historyArchive: HistoryArchive; // riepiloghi compatti dello storico
+  unlocks: { upgrades; collaborators; social; forms; gadget };
+  upgrades: Record<UpgradeId, number>; // livello per nodo
 }
 ```
+
+Non esiste un calendario separato: prove, eventi e scadenze vivono nei
+rispettivi elenchi. Le preferenze (tema, Riduci animazioni, ordinamento delle
+tabelle) sono salvate a parte in `localStorage` e non fanno parte di
+`GameState`.
 
 ### 22.3 Sicurezza e privacy
 
 - nessuna connessione a Outlook;
 - nessun invio di email reali;
 - nessun accesso alla rubrica;
-- nessun testo digitato dall'utente viene memorizzato;
-- nessun indirizzo email reale viene generato;
-- nessun backend nella prima versione;
-- tutto il progresso rimane nel browser dell'utente.
+- nessun tasto premuto viene memorizzato: ogni input conta solo come
+  avanzamento del testo; vengono salvati soltanto i testi inseriti di proposito
+  nei campi, cioè il nome del profilo (usato nella firma) e i dati della nuova
+  scuola alla fondazione;
+- gli indirizzi dei contatti ordinari usano domini inventati (cmail.com,
+  hotlook.it, yabadabadoo.it, gspot.com, postacenere.it); il mittente
+  (`genova@ludosport.net`) e i Leggendari usano invece il dominio
+  `ludosport.net`;
+- nessun backend e nessuna richiesta di rete da parte del gioco;
+- tutto il progresso rimane nel browser dell'utente; anche gli eventuali report
+  di crash restano in `localStorage` e si possono solo scaricare dalle
+  Impostazioni.
 
 ---
 
@@ -2626,67 +3540,114 @@ interface GameState {
 ### 23.1 Stack
 
 - Vite;
-- React;
+- React 19;
 - TypeScript;
-- CSS Modules o CSS organizzato per componenti;
-- stato applicativo tramite store leggero o reducer centralizzato;
-- Vitest per test unitari;
-- Playwright per flussi end-to-end;
+- CSS semplice organizzato per area in `src/styles` (nessun CSS Module), con
+  token in `tokens.css` e il tema scuro Modalità Onde in `skin-onde.css`;
+- stato applicativo tramite reducer centralizzato (`gameReducer` in
+  `src/game/engine.ts`, gestori in `actionHandlers.ts`) esposto con un
+  contesto React (`GameStateContext`);
+- lz-string per comprimere il salvataggio e un Web Worker per prepararlo;
+- Vitest (con Testing Library e jsdom) per test unitari;
+- Playwright (Chromium) per flussi end-to-end;
 - ESLint e Prettier.
 
-Non serve un backend per la prima versione.
+Non c'è un backend.
 
 ### 23.2 Moduli
 
+Struttura reale (file principali):
+
 ```text
 src/
+  main.tsx
   app/
-    App.tsx
-    routes.ts
+    App.tsx                 # vista attiva in uno stato React, nessun router
+    AppErrorBoundary.tsx
+    useAppPreferences.ts
   game/
-    engine.ts
-    actions.ts
+    engine.ts               # gameReducer
+    actionHandlers.ts       # un gestore per ogni GameAction
+    initialState.ts
+    config.ts               # GAME_CONFIG
+    types.ts
     selectors.ts
     formulas.ts
-    offline.ts
     random.ts
-    save.ts
-    migrations.ts
+    gameClock.ts
+    gameScheduler.ts
+    useGameEngine.ts
+    emailFlow.ts, trialFlow.ts, eventFlow.ts, trainingFlow.ts,
+    automationFlow.ts, gadgetFlow.ts, tournamentFlow.ts, reptileFlow.ts,
+    chroniclesFlow.ts, narrativeFlow.ts, schoolProgressionFlow.ts, ...
+    offline.ts
+    save.ts, saveCodec.ts, saveScheduler.ts, saveWorker.ts, saveValidation.ts
+    saveMigrations.ts
+    saveMigrations/         # una migrazione per argomento
   features/
-    mail/
+    OverviewView.tsx        # Impostazioni
+    admin/                  # solo sviluppo
     calendar/
-    contacts/
-    collaborators/
-    equipment/
-    upgrades/
-    prestige/
-    statistics/
+    day-panel/              # La mia giornata, obiettivo breve, spade
+    events/
+    feedback/
+    gadgets/
+    ludowiki/               # solo sviluppo
+    people/                 # Scuola: iscritti, collaboratori, palestra
+    settings/
+    tournaments/
     tutorial/
+    upgrades/
   content/
-    emailTemplates.ts
-    notificationTemplates.ts
-    names.ts
-    events.ts
-    upgrades.ts
+    emailCatalog.ts, emailPhrases.ts, emailTemplates.ts, finalEmail.ts,
+    levelZeroTypos.ts, prospectDirectory.ts, events.ts, narrativeEvents.ts,
+    upgrades.ts, achievements.ts, forms.ts, rarities.ts,
+    specialCollaborators.ts, secretLegendaries.ts, tournaments.ts,
+    tournamentSchools.ts, gadgets.ts, gymStages.ts, tutorialScenes.ts,
+    shortGoals.ts, ludowiki.ts, ...
   components/
-    outlook-shell/
+    outlook-shell/          # barra del titolo, barra app, posta, composer
     common/
+    equipment/
+  shared/
   styles/
     tokens.css
     global.css
+    skin-onde.css, shell*.css, people*.css, ...
+tests/
+  e2e/
 ```
+
+La posta vive in `components/outlook-shell`, contatti e collaboratori in
+`features/people`, l'attrezzatura in `features/day-panel` e
+`components/equipment`; i nomi dei contatti sono in `prospectDirectory.ts` e
+le notifiche sono scritte direttamente nei moduli di gioco.
+
+> **Da implementare:** non esistono moduli dedicati a prestigio e statistiche
+> (`features/prestige`, `features/statistics`); `features/calendar/CalendarView`
+> esiste ma non è montata in nessuna schermata.
 
 ### 23.3 Motore di gioco
 
-- tick visivo: `requestAnimationFrame`;
-- tick economico: 4 volte al secondo;
+- aggiornamento visivo: orologi condivisi che rinfrescano barre e countdown
+  ogni 250 ms; `requestAnimationFrame` è usato solo nei minigiochi (Gadget e
+  Open Reptile);
+- tick economico a scadenza: l'azione `TICK` viene programmata per la prossima
+  scadenza utile (esito email, prova, evento, quota mensile, formazione,
+  evento narrativo…), con un battito di 1 secondo solo quando c'è automazione
+  continua da far avanzare; i recuperi lunghi vengono elaborati a blocchi;
+- orologio di gioco con pausa (pulsante nella barra del titolo; il tutorial e
+  i minigiochi mettono in pausa da soli) e velocità regolabile dal pannello
+  Admin in sviluppo;
 - formule pure e testabili;
 - azioni timestampate;
-- casualità con seed persistente;
+- casualità con seed numerico persistente (`randomSeed`);
 - esito `prenotazione / contatto perso` determinato all'invio;
-- esito `iscrizione / prova non convertita` determinato alla risoluzione della
-  lezione;
-- contenuti e bilanciamento separati dal codice;
+- esito `iscrizione / prova non convertita` calcolato alla risoluzione della
+  lezione a partire da un `resultSeed` salvato alla prenotazione;
+- contenuti e bilanciamento separati dalla logica: moduli TypeScript in
+  `src/content` e costanti in `GAME_CONFIG` (`src/game/config.ts`), non file di
+  dati esterni;
 - nessuna formula dipendente dal frame rate.
 
 ### 23.4 Accessibilità e tastiera
@@ -2698,8 +3659,16 @@ Anche se il gioco usa tutta la tastiera:
 - scorciatoie del browser non devono essere intercettate;
 - il focus del corpo della mail deve essere evidente ma discreto;
 - contrasto e dimensioni devono restare leggibili;
-- deve esistere un'opzione per ridurre le animazioni;
-- il gioco deve distinguere input di scrittura e navigazione.
+- deve esistere un'opzione per ridurre le animazioni (nel codice: «Riduci
+  animazioni» nelle Impostazioni, rispettata anche `prefers-reduced-motion`);
+- il gioco deve distinguere input di scrittura e navigazione: i tasti non
+  scrivono quando il focus è su pulsanti, link, campi, menu o elementi
+  modificabili, né fuori da Posta in arrivo o con un messaggio aperto.
+
+Nel codice il gestore globale della scrittura non blocca i tasti (nessun
+`preventDefault`); il solo tasto intercettato a livello globale è F9,
+che alterna Modalità Onde e tema Outlook; Tab quindi naviga ma, fuori dagli
+elementi interattivi, conta anche come input di scrittura.
 
 ---
 
@@ -2713,7 +3682,7 @@ interface Contact {
   firstName: string;
   lastName: string;
   email: string;
-  source: "event" | "sparring" | "social" | "collaborator" | "tutorial";
+  source: "tutorial" | "sparring" | "event" | "social" | "collaborator" | "tournament";
   acquiredAt: number;
   status:
     | "available"
@@ -2721,10 +3690,22 @@ interface Contact {
     | "invited"
     | "trialScheduled"
     | "enrolled"
+    | "departed"
     | "lost";
-  tags: string[];
+  rarity: "common" | "rare" | "ultra-rare" | "legendary";
+  specialProfileId?: SpecialCollaboratorId; // Leggendari con profilo fisso
+  secretLegendaryId?: SecretLegendaryId;
+  forms: FormId[];
+  training?: FormTraining;
+  enrolledMonth?: number;
+  favorite?: boolean;
+  trialRetryUsed?: boolean; // seconda prova già concessa
+  // statistiche da atleta: arenaBase, styleBase, tournamentExperience,
+  // formBranchPreferences, contatori annuali di Forme e Corso Agonisti
 }
 ```
+
+Non esistono `tags`: le informazioni sono campi espliciti.
 
 ### Email
 
@@ -2738,37 +3719,65 @@ interface CampaignEmail {
   revealedCharacters: number;
   createdAt: number;
   sentAt?: number;
-  status: "draft" | "writing" | "sent" | "trialBooked" | "lost";
+  sendCompletesAt?: number;
+  presentationLevel: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  status: "writing" | "readyToSend" | "sending" | "sent" | "trialBooked" | "lost";
+  typos?: { subject: [number, number][]; body: [number, number][] }; // livello 0
 }
 ```
+
+Ai livelli 0–2 `revealedCharacters` avanza sul corpo; ai livelli 3–7 sul
+sorgente HTML completo generato da oggetto e corpo.
 
 ### Collaboratore
 
 ```ts
 interface Collaborator {
   id: string;
+  contactId: string;
   displayName: string;
   joinedAt: number;
-  forms: FormQualification[];
-  assignment: CollaboratorAssignment | null;
+  forms: FormId[];
+  instructorForms: FormId[];
+  technicianForms?: FormId[];
+  technicianCourseReservation?: TechnicianCourseReservation;
+  assignment: "writing" | "events" | "equipment" | "instructor" | "gadget" | null;
+  secondaryAssignment?: CollaboratorAssignment; // incarico di riserva
+  mastery?: CollaboratorMastery; // esperienza per settore
+  rarity: PersonRarity;
+  specialProfileId?: SpecialCollaboratorId;
+  training?: FormTraining;
 }
 ```
 
 ### Evento
 
 ```ts
-interface GameEvent {
+interface AcquisitionEvent {
   id: string;
-  definitionId: string;
+  definitionId: AcquisitionEventId;
   title: string;
-  startsAt: number;
-  endsAt: number;
-  assignedCollaboratorIds: string[];
-  assignedEquipmentIds: string[];
-  status: "planned" | "running" | "completed";
-  resolvedOutcome?: EventOutcome;
+  location: string;
+  startedAt: number;
+  resolvesAt: number;
+  cost: number;
+  peopleMet: number;
+  demonstrationsGiven: number;
+  contactReward: number;
+  membersUsed: number;
+  equipmentUsed: number; // numero di spade, non oggetti
+  wearAdded: number;
+  collaboratorId?: string; // al massimo un collaboratore
+  status: "running" | "completed";
+  tutorialSceneId?: "first-event";
 }
 ```
+
+L'esito dell'evento (persone, prove dimostrative, contatti) è calcolato
+all'avvio e salvato nell'evento stesso.
+
+> **Da implementare:** eventi pianificati in anticipo (stato `planned`) e
+> assegnazione di più collaboratori o di spade specifiche allo stesso evento.
 
 ### Esiti del funnel
 
@@ -2779,6 +3788,8 @@ interface PendingEmailOutcome {
   contactId: string;
   resolvesAt: number;
   result: "trialBooked" | "lost";
+  tutorialSceneId?: "first-event";
+  waitForTutorialEvent?: boolean;
 }
 
 interface ScheduledTrial {
@@ -2786,10 +3797,17 @@ interface ScheduledTrial {
   contactId: string;
   startsAt: number;
   resolvesAt: number;
-  resultSeed: string;
-  status: "scheduled" | "completed";
+  resultSeed: number;
+  status: "scheduled" | "completed" | "cancelled";
+  equipmentUsed?: number; // 0 = prova garantita avviata senza spada
+  cancellationReason?: "equipment";
+  secretLegendaryId?: SecretLegendaryId;
+  tutorialSceneId?: "first-event";
 }
 ```
+
+Una prova non garantita viene annullata (`cancelled`, contatto perso) se al
+suo inizio non c'è una spada disponibile.
 
 ---
 
@@ -2797,7 +3815,9 @@ interface ScheduledTrial {
 
 - audio completamente assente;
 - nessun effetto sonoro al click, alla scrittura o alla conversione;
-- feedback solo visivo;
+- feedback solo visivo: numeri fluttuanti per nuovo iscritto (con rarità e
+  bonus), Flusso, Frase perfetta e quote mensili; pieni in Modalità Onde,
+  discreti nel tema Outlook e nascosti con «Riduci animazioni»;
 - nessuna richiesta di autorizzazione audio;
 - nessun avvio automatico di media;
 - eventuale audio futuro deve essere opzionale e disattivato per impostazione
@@ -2807,25 +3827,31 @@ interface ScheduledTrial {
 
 ## 26. Traguardi
 
-I traguardi appaiono come email amministrative o riconoscimenti interni.
+I traguardi appaiono come email di sistema nella Posta in arrivo (scheda
+«Altra»), con oggetto «Traguardo: <titolo>».
 
-Esempi:
+I 12 traguardi presenti (`src/content/achievements.ts`):
 
-- Prima email inviata;
-- Primo iscritto;
-- Dieci inviti senza una prenotazione, ma senza perdere l'ottimismo;
-- Primo evento completato;
-- Cento contatti raccolti;
-- Prima spada rimessa in ordine;
-- Primo collaboratore;
-- Prima Forma sbloccata da un collaboratore;
-- Mille email inviate;
-- Prima nuova scuola fondata;
-- “Nessun riferimento legalmente riconoscibile”;
-- Rete di dieci scuole.
+- Prima email inviata (1 email inviata) — €5;
+- Primo iscritto (1 iscrizione) — €10;
+- Dieci inviti e immutato ottimismo (10 email inviate senza nessuna prova
+  prenotata) — €10;
+- Primo evento completato (almeno 1 evento concluso e 1 contatto ottenuto) —
+  €5;
+- Cento contatti raccolti — €25;
+- Prima manutenzione completata — €5;
+- Primo collaboratore — €10;
+- Prima Forma completata — €15;
+- Mille email inviate — €100;
+- Prima nuova scuola fondata — €50;
+- “Nessun riferimento legalmente riconoscibile” (20 edizioni di CogoComix
+  completate) — €20;
+- Rete di dieci scuole — €250.
 
-I traguardi possono dare piccoli bonus permanenti, ma non devono diventare il
-sistema economico principale.
+Ogni traguardo si ottiene una sola volta e dà un premio una tantum in Euro, non
+un bonus permanente: resta così un sistema secondario rispetto all'economia
+principale. Traguardi e statistiche si conservano quando si fonda una nuova
+scuola.
 
 ---
 
@@ -2860,6 +3886,11 @@ email per almeno 15 minuti senza errori bloccanti.
 - attrezzatura di base;
 - esaurimento e recupero contatti.
 
+> **Da implementare:** il calendario navigabile: il componente
+> `CalendarView` esiste ma non è raggiungibile; oggi prove e scadenze si vedono
+> nel pannello laterale «La mia giornata», mostrato solo con finestre larghe
+> almeno 1301 px.
+
 **Criterio di completamento:** la catena eventi → prove dimostrative → contatti
 → email → lezioni in palestra → iscritti → Euro è completa.
 
@@ -2879,7 +3910,9 @@ manuale.
 ### Fase 4 — Camuffamento Outlook completo
 
 - layout fedele a Windows 11;
-- Posta, Calendario, Scuola e Attività;
+- Posta, Calendario, Scuola e Attività (nel codice la barra delle app mostra
+  Posta, Eventi, Scuola, Tornei, Gadget, Upgrade e Impostazioni, che compaiono
+  man mano che vengono sbloccate; LudoWiki e Admin solo in sviluppo);
 - notifiche e finestre coerenti;
 - contenuti ludici interamente diegetici;
 - supporto 1366×768 e 1920×1080;
@@ -2898,6 +3931,9 @@ sembra un'applicazione di posta reale.
 - protezione dalla sfortuna;
 - statistiche.
 
+> **Da implementare:** una schermata di statistiche generali; i contatori di
+> `statistics` esistono ma servono a traguardi, obiettivi brevi e riepiloghi.
+
 ### Fase 6 — Prestigio e offline
 
 - fondazione nuova scuola;
@@ -2907,6 +3943,15 @@ sembra un'applicazione di posta reale.
 - migrazioni del salvataggio;
 - export e import.
 
+> **Da implementare:** l'interfaccia di fondazione: la logica (`FOUND_SCHOOL`,
+> requisiti, bonus di rete, email «Richiesta apertura nuova scuola») c'è, ma
+> nessuna schermata la attiva e le Impostazioni non mostrano controlli di
+> prestigio.
+
+> **Da implementare:** il progresso offline: alla riapertura la partita resta
+> congelata e tutte le scadenze vengono spostate avanti del tempo di chiusura
+> (`src/game/offline.ts`). Migrazioni ed export/import sono presenti.
+
 ### Fase 7 — Rifinitura
 
 - test completi;
@@ -2914,7 +3959,8 @@ sembra un'applicazione di posta reale.
 - ottimizzazione;
 - revisione dei testi;
 - verifica del camuffamento;
-- nota di non affiliazione per marchi esterni;
+- nota di non affiliazione per marchi esterni (oggi presente solo nel
+  `README.md`, non nel gioco);
 - preparazione alla pubblicazione.
 
 ---
@@ -2923,15 +3969,23 @@ sembra un'applicazione di posta reale.
 
 ### Input
 
-- ogni `keydown` non ripetuto avanza il testo quando la composizione è attiva;
+- ogni `keydown` non ripetuto avanza il testo quando la composizione è attiva
+  (Posta in arrivo, nessun messaggio aperto, nome profilo inserito, tutorial
+  che non blocca l'input);
 - il testo ottenuto è sempre quello previsto;
-- anche modificatori e tasti di navigazione possono avanzare il testo senza
-  bloccare il loro comportamento normale;
+- anche Ctrl, Alt, frecce e Tab possono avanzare il testo senza bloccare il
+  loro comportamento normale; Shift, il tasto Windows/Meta e F9 non scrivono,
+  e nessun tasto scrive se il focus è su pulsanti, link o campi;
 - tenere premuto un tasto conta una sola volta;
 - le scorciatoie del browser funzionano;
 - un click fuori dal corpo non scrive;
 - un click nel corpo scrive;
 - l'automazione e l'input manuale non duplicano caratteri.
+
+Copertura attuale: `tests/e2e/game.spec.ts` verifica che un tasto e un clic
+nel corpo scrivano (2 caratteri) e che una mail completata si invii anche
+senza invio automatico. Ripetizione, modificatori, clic fuori dal corpo e
+scorciatoie non hanno un test automatico.
 
 ### Economia
 
@@ -2944,7 +3998,14 @@ sembra un'applicazione di posta reale.
 - il contatore dei mesi avanza anche quando non ci sono iscritti attivi;
 - i collaboratori non possono svolgere due incarichi incompatibili;
 - gli iscritti possono aumentare o diminuire soltanto tramite esiti ed eventi
-  validi.
+  validi (oltre alla cancellazione manuale dell'iscrizione, che richiede
+  conferma e non è possibile sui preferiti).
+
+Copertura attuale: `src/game/engine-funnel.test.ts` («determines and stores
+the first email outcome exactly once», «collects periodic fees without
+duplicating a period», «advances game months even without active members»)
+e `src/game/membershipCancellation.test.ts`; l'e2e «acquista un Upgrade, salva
+e mantiene il livello dopo il reload» controlla che l'acquisto scali gli Euro.
 
 ### Offline
 
@@ -2954,6 +4015,14 @@ sembra un'applicazione di posta reale.
 - il riepilogo corrisponde alle variazioni reali;
 - orologi anomali non producono valori negativi o infiniti.
 
+> **Da implementare:** questi criteri presuppongono un progresso offline che
+> il codice non ha. Oggi la chiusura congela la partita: quote, esiti email,
+> prove, eventi, cooldown in tempo reale, formazioni ed eventi narrativi vengono
+> spostati avanti del tempo trascorso, senza limite e senza riepilogo; un
+> intervallo negativo viene trattato come zero. Lo verifica
+> `src/game/offline.test.ts` («freezes fees and shifts every active deadline»,
+> «does not cap or process long closures»).
+
 ### Salvataggio
 
 - una partita può essere ricaricata;
@@ -2962,6 +4031,14 @@ sembra un'applicazione di posta reale.
 - export e import producono lo stesso stato;
 - il reset richiede conferma esplicita.
 
+Copertura attuale: `src/game/save.test.ts` (round-trip, backup valido
+ripristinato senza sovrascriverlo con un principale corrotto, salvataggi
+incompatibili protetti fino al reset, migrazioni dalla versione 1 in poi,
+«exports and imports the same valid state», reset di principale e backup),
+`src/game/saveCodec.test.ts`, `src/features/OverviewView.test.tsx` («requires a
+second explicit click before resetting») e gli e2e che salvano e ricaricano la
+pagina.
+
 ### Interfaccia
 
 - è utilizzabile a 1366×768 senza elementi essenziali nascosti;
@@ -2969,6 +4046,12 @@ sembra un'applicazione di posta reale.
 - i valori sono leggibili senza rompere il camuffamento;
 - tutte le funzioni principali sono raggiungibili da tastiera;
 - non viene riprodotto audio.
+
+Copertura attuale: `tests/e2e/contrast.spec.ts` controlla il contrasto AA della
+Modalità Onde a 1600×900; `tests/e2e/game.spec.ts` apre tutte le aree
+sbloccate e prova il minigioco Gadget anche a 390×844 con controlli touch. La
+risoluzione 1366×768 e la navigazione completa da tastiera non hanno un test
+automatico. Nel codice non esiste alcuna riproduzione audio.
 
 ---
 
@@ -3001,7 +4084,8 @@ manuale.
 
 Un reset che richiede più cicli prima di produrre un vantaggio concreto crea una
 fase morta. La prima nuova scuola deve offrire immediatamente un bonus
-significativo e visibile.
+significativo e visibile. Nel codice ogni scuola fondata aggiunge +25% a quote
+e reddito di rete e €5 di reddito di rete al mese.
 
 ### Quantità di testi
 
@@ -3026,18 +4110,34 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Ogni input parte da un carattere e viene migliorato con i potenziamenti.
 - Solo i click nel corpo della mail producono caratteri.
 - Ogni tasto conta una volta; tenere premuto non genera ripetizioni.
-- L'invio è automatico e apre subito la mail successiva.
-- Le email e i relativi modelli sono scelti automaticamente e possono ripetersi.
+- L'invio è automatico e apre subito la mail successiva (dopo circa 0,35
+  secondi di «Invio in corso…»). L'interruttore «Invio automatico» nel
+  composer, attivo per impostazione predefinita, permette di disattivarlo: in
+  quel caso la mail completata si invia con un ulteriore tasto o clic.
+- Le email e i relativi modelli sono scelti automaticamente e possono ripetersi:
+  i 100 modelli del catalogo si susseguono in ordine ciclico e il livello di
+  presentazione dipende dai potenziamenti Creatività.
 - Oggetto, destinatario, saluto, corpo, firma e allegati fanno parte del testo
-  da generare.
+  da generare. Nel codice destinatario e oggetto sono già compilati
+  nell'intestazione; ai livelli 0–2 si scrive il corpo (saluto incluso, firma
+  dal livello 2), ai livelli 3–7 il sorgente HTML completo, che contiene anche
+  l'oggetto. Non ci sono allegati (il pulsante «Allega» è disattivato).
 - Ogni contatto riceve una sola mail; non esistono follow-up né risposte
-  personali.
+  personali. Eccezione: con «Esperienza memorabile» (5% per livello) un
+  contatto ordinario che non si iscrive può tornare disponibile una sola volta
+  per un nuovo invito e una seconda prova.
 - Il funnel è: evento → persone → prove dimostrative → contatti → email → prova
   in palestra → iscritti.
-- Ogni persona partecipa a una sola lezione di prova in palestra.
+- Ogni persona partecipa a una sola lezione di prova in palestra, salvo la
+  seconda prova di «Esperienza memorabile» e i Leggendari, che possono
+  ripresentarsi in seguito.
 - Gli iscritti non sono spendibili e generano periodicamente quote in Euro.
-- Gli Euro sono l'unica valuta spendibile.
+- Gli Euro sono l'unica valuta spendibile (le chiavi delle Chronicles si
+  consumano per iscriversi a quel torneo, ma non si comprano).
 - Gli iscritti possono aumentare o diminuire tramite eventi narrativi casuali.
+  Nel codice gli eventi narrativi positivi portano contatti, Euro o riparazioni
+  ma non iscritti; gli iscritti calano con il «Mancato rinnovo», con le
+  partenze annuali e con la cancellazione manuale.
 - Gli eventi possono essere fissi o casuali e usano tempo compresso.
 - Gli eventi iniziali hanno esito automatico; un sistema decisionale potrà
   essere aggiunto in futuro.
@@ -3059,8 +4159,10 @@ qualunque funzione che possa far credere di inviare davvero email.
 - I collaboratori assegnati alle spade riducono prima il carico sulle spade sane
   e poi riparano quelle rotte; una spada richiede 150 punti-lavoro da 1,5
   secondi ciascuno.
-- Ogni collaboratore svolge un incarico alla volta, può essere riassegnato
-  liberamente e non ha livelli.
+- Ogni collaboratore svolge un incarico alla volta (con un eventuale incarico
+  di riserva quando il principale non ha lavoro) e può essere riassegnato
+  liberamente. Non ha un livello generale, ma accumula maestria per settore:
+  Novizio, Iniziato, Accademico, Cavaliere, Maestro.
 - Non esiste un limite massimo di collaboratori.
 - Gadget si sblocca con la prima vittoria della scuola all'Accademico Arena;
   il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
@@ -3068,40 +4170,57 @@ qualunque funzione che possa far credere di inviare davvero email.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei
   Collaboratori, domanda ordinaria e vendite extra governano il catalogo.
 - I collaboratori scrivono sulla stessa mail visibile e la loro automazione non
-  può essere messa in pausa.
+  può essere messa in pausa (si ferma solo con la pausa generale del gioco;
+  invio automatico e insegnamento automatico si possono invece disattivare).
 - Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
   Insegnamento e Organizzazione sono gli otto rami pubblici; Social usa gli
   effetti integrati nei primi due.
 - Il carico delle spade aumenta tramite corsi, prove, eventi e imprevisti
   narrativi; ogni soglia di 100 rompe una spada.
 - Una prova con iscrizione garantita al 100% si conclude anche senza spade
-  disponibili e in quel caso non aggiunge carico.
-- Ogni prova fallita aumenta Pity di 1; Pity aggiunge altrettanti punti
+  disponibili e in quel caso non aggiunge carico. Una prova non garantita senza
+  spade viene annullata e il contatto è perso.
+- Ogni prova fallita (anche se annullata per mancanza di spade) aumenta Pity
+  di 1; Pity aggiunge altrettanti punti
   percentuali alle prove Leggendarie e si azzera soltanto quando si iscrive un
   Leggendario ordinario o Segreto.
 - I potenziamenti non sono rimborsabili, ma nel tempo si può acquistare tutto.
 - Le Forme seguono `1 → X → 2 → Y → 3/4/5 → 6 → 7`, con rami Spada Lunga, Staffa
   e Doppia spada corta.
-- Le Forme sono potenziamenti narrativi dei collaboratori e non simulazioni
+- Le Forme sono potenziamenti narrativi di iscritti e collaboratori e non simulazioni
   tecniche del combattimento.
 - Le funzioni vengono introdotte progressivamente tramite comunicazioni di
   sistema manuali.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome
   scelto dal giocatore.
+
+  > **Da implementare:** la fondazione esiste solo nella logica di gioco;
+  > nessuna schermata permette di avviarla.
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
 - Il primo prestigio deve arrivare dopo circa 3–4 ore e offrire subito un bonus
   significativo.
 - Il gioco è infinito.
 - Il progresso offline è attivo.
+
+  > **Da implementare:** nel codice il progresso offline non c'è: a gioco
+  > chiuso la partita resta congelata e le scadenze vengono spostate avanti.
 - Sono previsti almeno 100 testi email.
-- I destinatari sono inventati.
+- I destinatari sono inventati (i contatti ordinari hanno nomi e domini email
+  inventati; i Leggendari hanno profili con nome fisso e indirizzo
+  @ludosport.net).
 - La lingua è soltanto italiana.
-- I riferimenti diretti a Star Wars devono essere evitati.
+- I riferimenti diretti a Star Wars devono essere evitati (l'evento narrativo
+  «Un Pini al lavoro» cita però «Darth Modificus»).
 - Il gioco non ha audio.
-- Non esiste una modalità di emergenza.
-- Il target è desktop.
+- Non esiste una modalità di emergenza separata; F9 alterna la Modalità Onde
+  (tema scuro) e l'aspetto Outlook chiaro, e nel codice è indicato come «boss
+  key».
+- Il target è desktop (il layout ha comunque regole responsive: il pannello «La
+  mia giornata» sparisce sotto i 1301 px e il minigioco Gadget è testato anche
+  su schermo da telefono).
 - Il salvataggio resta nel browser.
-- Lo stack tecnico può essere scelto liberamente.
+- Lo stack tecnico può essere scelto liberamente (scelto: Vite, React,
+  TypeScript, vedi §23.1).
 
 ---
 
@@ -3111,20 +4230,34 @@ Questi elementi non bloccano il prototipo, ma servono prima della versione
 completa:
 
 1. email reale di esempio per definire il tono della prima fascia;
-2. firma esatta da usare nelle email simulate;
+2. firma esatta da usare nelle email simulate (oggi, dal livello 2: nome del
+   profilo seguito da «Ordine delle Onde - Genova» o dai dati della scuola
+   attuale);
 3. informazioni pratiche che devono sempre comparire negli inviti;
 4. eventuali logo e materiali grafici autorizzati;
 5. terminologia ufficiale desiderata per le sette Forme;
 6. lista di battute o riferimenti interni all'Ordine delle Onde;
 7. conferma sull'eventuale uso di persone reali come personaggi;
 8. revisione dei valori di bilanciamento dopo il primo prototipo;
-9. importo e frequenza compressa delle quote associative;
-10. ritmo con cui il 5,5% di Ultra Rari introduce i primi collaboratori;
+9. importo e frequenza compressa delle quote associative (oggi €40 al mese di
+   gioco da 60 secondi, più i bonus per Forme e qualifiche, e €20 una tantum
+   all'iscrizione);
+10. ritmo con cui il 5,5% di Ultra Rari introduce i primi collaboratori (oggi
+    il primo collaboratore è Andrea Simonazzi, 10° contatto garantito; gli Ultra
+    Rari compaiono con probabilità 5,5% solo dall'11° contatto);
 11. regole di accesso multiplo ai tre rami delle Forme 3/4/5;
-12. elenco iniziale degli eventi e dei luoghi reali di Genova;
+12. elenco iniziale degli eventi e dei luoghi reali di Genova (oggi 15 eventi
+    in `src/content/events.ts`, quasi tutti in luoghi reali della Liguria e
+    oltre, dal Volantinaggio nel centro di Genova a Lucca Comics & Games e Milan
+    Games Week; fa eccezione la Sfida a Cthulhu, ambientata a R'lyeh);
 13. nomi e comportamento definitivo delle spade reali;
-14. elementi esatti mantenuti o azzerati dal prestigio;
-15. durata massima definitiva del progresso offline.
+14. elementi esatti mantenuti o azzerati dal prestigio (oggi la logica conserva
+    Fama, traguardi, statistiche, messaggi, obiettivo breve, stato dei
+    Leggendari Segreti, vittoria ordinaria ai tornei e i progressi dei
+    Leggendari iscritti; tutto il resto, Euro e potenziamenti compresi,
+    riparte da zero);
+15. durata massima definitiva del progresso offline (oggi non c'è progresso
+    offline: la partita si congela alla chiusura).
 
 ---
 
@@ -3158,7 +4291,8 @@ L'MVP è pronto quando il giocatore può:
 3. scrivere email premendo tasti o cliccando nel corpo;
 4. inviare automaticamente almeno dieci modelli diversi;
 5. aspettare l'esito delle email senza ricevere risposte personali;
-6. vedere una prova prenotata nel Calendario;
+6. vedere una prova prenotata nel Calendario (oggi nel pannello «La mia
+   giornata»);
 7. risolvere la lezione in palestra e ottenere o perdere il potenziale iscritto;
 8. ottenere iscritti e incassare quote in Euro;
 9. terminare i contatti e utilizzare il volantinaggio gratuito;
@@ -3166,9 +4300,14 @@ L'MVP è pronto quando il giocatore può:
 11. ottenere nuovi contatti tramite Carisma;
 12. acquistare potenziamenti in Euro;
 13. completare una comunicazione di sistema e sbloccare una funzione;
-14. ottenere un Ultra Raro, completare il Corso Y e assegnarlo;
+14. ottenere un Ultra Raro, completare il Corso Y e assegnarlo (nel codice il
+    primo collaboratore assegnabile è Andrea Simonazzi, Leggendario che diventa
+    collaboratore all'iscrizione; la strada Ultra Raro + Corso Y resta valida
+    per i successivi);
 15. osservare un collaboratore scrivere sulla stessa mail;
 16. chiudere e riaprire il browser senza perdere i progressi.
 
 Il prestigio, i 100 testi, tutte le Forme, i social avanzati e la rete infinita
-appartengono alla versione completa successiva all'MVP.
+appartengono alla versione completa successiva all'MVP. Nel codice attuale i
+100 testi, tutte le Forme e Social sono già presenti; il prestigio esiste solo
+nella logica, senza interfaccia per avviarlo.

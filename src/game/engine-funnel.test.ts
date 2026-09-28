@@ -177,9 +177,9 @@ describe("game engine: funnel", () => {
     expect(selectActiveEmail(waiting)?.sendCompletesAt).toBeUndefined();
   });
 
-  it("guarantees Andrea Simonazzi as the ninth contact in the initial school", () => {
+  it("guarantees Andrea Simonazzi as the tenth contact in the initial school", () => {
     const initial = createInitialState(1_000);
-    const padding = initial.contacts.slice(0, 3).map((contact, index) => ({
+    const padding = initial.contacts.slice(0, 4).map((contact, index) => ({
       ...contact,
       id: `padding-${index}`,
       status: "available" as const,
@@ -208,24 +208,24 @@ describe("game engine: funnel", () => {
       automation: { ...initial.automation, lastProcessedAt: 2_000 },
     }, { type: "TICK", now: 2_000 });
 
-    expect(state.contacts.slice(0, 8).every((contact) =>
+    expect(state.contacts.slice(0, 9).every((contact) =>
       contact.rarity === "common"
     )).toBe(true);
-    expect(state.contacts[8].rarity).toBe("legendary");
-    expect(state.contacts[8].specialProfileId).toBe("andrea-simonazzi");
-    expect(state.contacts[8].email).toBe("andrea.simonazzi@ludosport.net");
+    expect(state.contacts[9].rarity).toBe("legendary");
+    expect(state.contacts[9].specialProfileId).toBe("andrea-simonazzi");
+    expect(state.contacts[9].email).toBe("andrea.simonazzi@ludosport.net");
     expect(state.legendaryCollaborators.encounteredProfileIds).toContain("andrea-simonazzi");
   });
 
-  it("does not guarantee Andrea Simonazzi as the ninth contact in later schools", () => {
+  it("does not guarantee Andrea Simonazzi as the tenth contact in later schools", () => {
     const initial = createInitialState(1_000, "", false);
-    const padding = initial.contacts.slice(0, 3).map((contact, index) => ({
+    const padding = initial.contacts.slice(0, 4).map((contact, index) => ({
       ...contact,
       id: `later-school-padding-${index}`,
       status: "available" as const,
     }));
     const event = {
-      id: "later-school-ninth-contact",
+      id: "later-school-tenth-contact",
       definitionId: "public-demo" as const,
       title: "Dimostrazione pubblica",
       location: "Trieste",
@@ -262,8 +262,8 @@ describe("game engine: funnel", () => {
       automation: { ...initial.automation, lastProcessedAt: 2_000 },
     }, { type: "TICK", now: 2_000 });
 
-    expect(state.contacts).toHaveLength(9);
-    expect(state.contacts[8].specialProfileId).not.toBe("andrea-simonazzi");
+    expect(state.contacts).toHaveLength(10);
+    expect(state.contacts[9].specialProfileId).not.toBe("andrea-simonazzi");
   });
 
   it("allows Ultra Rare and Legendary contacts only after Andrea in the initial school", () => {
@@ -282,14 +282,14 @@ describe("game engine: funnel", () => {
       amount: 200,
     });
 
-    expect(generated.contacts[8].specialProfileId).toBe("andrea-simonazzi");
-    expect(generated.contacts.slice(0, 8).every((contact) =>
+    expect(generated.contacts[9].specialProfileId).toBe("andrea-simonazzi");
+    expect(generated.contacts.slice(0, 9).every((contact) =>
       contact.rarity === "common"
     )).toBe(true);
-    expect(generated.contacts.slice(9).some((contact) =>
+    expect(generated.contacts.slice(10).some((contact) =>
       contact.rarity === "rare"
     )).toBe(true);
-    expect(generated.contacts.slice(9).some((contact) =>
+    expect(generated.contacts.slice(10).some((contact) =>
       contact.rarity === "ultra-rare" || contact.rarity === "legendary"
     )).toBe(true);
   });
@@ -320,7 +320,7 @@ describe("game engine: funnel", () => {
 
   it("repairs every enrolled Legendary regardless of how the state was produced", () => {
     const initial = createInitialState(1_000);
-    const legendaryMembers = initial.contacts.slice(0, 3).map((contact, index) => ({
+    const legendaryMembers = initial.contacts.slice(0, 4).map((contact, index) => ({
       ...contact,
       id: `enrolled-legendary-${index}`,
       status: "enrolled" as const,

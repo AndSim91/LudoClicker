@@ -27,7 +27,7 @@ const STANDARD_LUDODEX_LEGENDARIES: LudodexLegendary[] = SPECIAL_COLLABORATORS.m
     ...profile,
     kind: "standard",
     foundAt: profile.id === "andrea-simonazzi"
-      ? "9° contatto della scuola iniziale"
+      ? `${GAME_CONFIG.guaranteedAndreaContactPosition}° contatto della scuola iniziale`
       : "Nuovi contatti, dopo lo sblocco delle rarità avanzate",
     acquisition: "Invia l'email, completa la prova in palestra e ottieni l'iscrizione.",
   }),

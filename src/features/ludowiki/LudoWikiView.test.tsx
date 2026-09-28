@@ -69,7 +69,7 @@ describe("LudoWikiView", () => {
     expect(screen.queryByText("Forme e corsi conservati")).not.toBeInTheDocument();
     expect(screen.queryByText("Scoperta permanente")).not.toBeInTheDocument();
     expect(screen.getByText("LudoSport Genova - Ordine delle Onde")).toBeVisible();
-    expect(screen.getByText("9° contatto della scuola iniziale")).toBeVisible();
+    expect(screen.getByText("10° contatto della scuola iniziale")).toBeVisible();
     expect(screen.getByText("Invia l'email, completa la prova in palestra e ottieni l'iscrizione.")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Biografia" })).toBeVisible();
     expect(screen.getByText("La biografia di questo atleta sarà aggiunta in un secondo momento.")).toBeVisible();

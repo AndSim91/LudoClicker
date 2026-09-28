@@ -96,7 +96,7 @@ function useTutorialHarness() {
       ].map((contact) => ({ ...contact, status: "invited" as const }));
       const andrea = {
         ...current.contacts[0],
-        id: "andrea-ninth-contact",
+        id: "andrea-tenth-contact",
         firstName: "Andrea",
         lastName: "Simonazzi",
         email: "andrea.simonazzi@ludosport.net",
@@ -343,7 +343,7 @@ describe("useTutorialController", () => {
     expect(result.current.tutorial.activeStep?.id).toBe("open-events");
   });
 
-  it("returns to Mail and explains rarities when Andrea becomes the ninth draft", async () => {
+  it("returns to Mail and explains rarities when Andrea becomes the tenth draft", async () => {
     const { result } = renderHook(() => useTutorialHarness());
 
     act(() => result.current.setActiveView("events"));
