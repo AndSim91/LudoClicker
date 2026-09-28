@@ -234,6 +234,11 @@
   background: #11506f;
 }
 
+:root[data-theme="dark"] .sent-status.prova-in-palestra,
+:root[data-theme="dark"] .campaign-status.prova-in-palestra {
+  color: var(--onde-gold-bright);
+}
+
 :root[data-theme="dark"] .next-tournament {
   border-color: var(--line-strong);
 }
@@ -506,4 +511,116 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   filter: drop-shadow(0 0 3px #f0b85a) drop-shadow(0 0 8px #f0b85a);
+}
+
+/* ---- Posta: Flusso di scrittura ------------------------------------------- */
+
+:root[data-theme="dark"] .composer-flow-office,
+:root[data-theme="dark"] .composer-flow[data-multiplier="1"] .composer-flow-office {
+  display: none;
+}
+
+:root[data-theme="dark"] .composer-flow-game {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:root[data-theme="dark"] .composer-flow-game b {
+  min-width: 52px;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+:root[data-theme="dark"] .composer-flow-track {
+  position: relative;
+  width: 84px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, transparent 0 24.5%, var(--surface) 24.5% 25.5%, transparent 25.5% 49.5%, var(--surface) 49.5% 50.5%, transparent 50.5% 74.5%, var(--surface) 74.5% 75.5%, transparent 75.5%),
+    var(--onde-groove);
+}
+
+:root[data-theme="dark"] .composer-flow-track > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+  transition: width 120ms linear;
+}
+
+:root[data-theme="dark"] .composer-flow:not([data-multiplier="1"]) .composer-flow-game b {
+  color: var(--onde-wave);
+}
+
+:root[data-theme="dark"] .composer-flow[data-multiplier="4"] .composer-flow-track > span,
+:root[data-theme="dark"] .composer-flow[data-multiplier="5"] .composer-flow-track > span {
+  background: linear-gradient(90deg, var(--onde-wave), var(--onde-gold-bright));
+  box-shadow: 0 0 10px rgb(240 184 90 / 60%);
+}
+
+:root[data-theme="dark"] .composer-flow[data-multiplier="5"] .composer-flow-game b {
+  color: var(--onde-gold-bright);
+  text-shadow: 0 0 8px rgb(240 184 90 / 50%);
+}
+
+/* Floating feedback, Modalità Onde: no box, big glowing numbers that rise and burst. */
+:root[data-theme="dark"] .feedback-pop {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--onde-foam);
+  font-family: var(--font-display);
+  font-size: 16px;
+  text-shadow: 0 0 10px currentColor, 0 2px 4px var(--onde-abyss);
+  animation: feedback-rise 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+:root[data-theme="dark"] .feedback-pop b { font-weight: 700; }
+:root[data-theme="dark"] .feedback-pop small { color: var(--onde-foam); font-size: 11px; text-shadow: 0 1px 3px var(--onde-abyss); }
+:root[data-theme="dark"] .feedback-pop.is-fees b,
+:root[data-theme="dark"] .feedback-pop.is-perfect b { color: var(--onde-gold-bright); font-size: 18px; }
+:root[data-theme="dark"] .feedback-pop.is-flow b { color: var(--onde-wave); font-size: 18px; }
+
+/* The rarity burst: a ring in the member's rarity colour behind the label. */
+:root[data-theme="dark"] .feedback-pop.is-member::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  animation: feedback-burst 0.7s ease-out forwards;
+}
+:root[data-theme="dark"] .feedback-pop.rarity-common { color: var(--rarity-common-name); }
+:root[data-theme="dark"] .feedback-pop.rarity-rare { color: var(--rarity-rare-name); }
+:root[data-theme="dark"] .feedback-pop.rarity-ultra-rare { color: var(--rarity-ultra-rare-name); }
+:root[data-theme="dark"] .feedback-pop.rarity-legendary { color: var(--rarity-legendary-name); }
+:root[data-theme="dark"] .feedback-pop.rarity-secret-legendary { color: var(--rarity-secret-legendary-name); }
+
+@keyframes feedback-rise {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
+  12% { opacity: 1; transform: translate(-50%, -70%) scale(1.15); }
+  25%, 70% { opacity: 1; transform: translate(-50%, -110%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -190%) scale(0.95); }
+}
+
+/* Title-bar numbers have no room above: those pops drop into the page instead. */
+:root[data-theme="dark"] .feedback-pop.from-top { animation-name: feedback-drop; }
+
+@keyframes feedback-drop {
+  0% { opacity: 0; transform: translate(-50%, -90%) scale(0.7); }
+  12% { opacity: 1; transform: translate(-50%, -40%) scale(1.15); }
+  25%, 70% { opacity: 1; transform: translate(-50%, -20%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, 50%) scale(0.95); }
+}
+
+@keyframes feedback-burst {
+  0% { opacity: 0.9; transform: scale(0.3); }
+  100% { opacity: 0; transform: scale(2.2); }
 }

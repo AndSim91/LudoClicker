@@ -1,0 +1,53 @@
+/* Floating feedback (plan 2.3). Light theme: a small fading label, nothing that
+ * would betray the Outlook camouflage. Modalità Onde makes it loud in skin-onde.css. */
+.feedback-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.feedback-pop {
+  position: fixed;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 2px 8px;
+  border: 1px solid var(--line, #d1d1d1);
+  border-radius: 4px;
+  background: var(--surface, #fff);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 12%);
+  color: var(--ink, #242424);
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  animation: feedback-fade 1.6s ease-out forwards;
+}
+
+.feedback-pop small {
+  color: var(--ink-muted, #616161);
+  font-size: 11px;
+}
+
+.feedback-pop.is-fees b { color: #0e700e; }
+
+/* In the camouflage the status bar already says "Velocità ×N": no extra pop. */
+:root:not([data-theme="dark"]) .feedback-pop.is-flow { display: none; }
+.feedback-pop.rarity-common b { color: var(--rarity-common-name); }
+.feedback-pop.rarity-rare b { color: var(--rarity-rare-name); }
+.feedback-pop.rarity-ultra-rare b { color: var(--rarity-ultra-rare-name); }
+.feedback-pop.rarity-legendary b { color: var(--rarity-legendary-name); }
+.feedback-pop.rarity-secret-legendary b { color: var(--rarity-secret-legendary-name); }
+
+@keyframes feedback-fade {
+  0% { opacity: 0; transform: translate(-50%, -30%); }
+  15%, 70% { opacity: 1; transform: translate(-50%, -80%); }
+  100% { opacity: 0; transform: translate(-50%, -90%); }
+}
+
+/* "Riduci animazioni" and the OS preference turn the pops off entirely. */
+.reduce-motion .feedback-layer { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .feedback-layer { display: none; }
+}

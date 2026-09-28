@@ -30,7 +30,7 @@ export type FinalEmailTextKey =
   | "signature"
   | "disclaimer";
 
-const DEFAULT_DETAILS = [
+export const DEFAULT_DETAILS = [
   "Una prova introduttiva per conoscere il percorso.",
   "Un ambiente guidato, aperto anche a chi parte da zero.",
   "Un gruppo pronto ad accompagnarti passo dopo passo, con esercizi graduali e indicazioni semplici.",

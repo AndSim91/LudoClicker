@@ -1,5 +1,6 @@
 import { EMAIL_TEMPLATES, resolveEmailTemplateCopy } from "../content/emailTemplates";
 import { getEmailBuildLength } from "../content/emailBuild";
+import { getEmailExpansion } from "../content/emailPresentation";
 import type { CampaignEmail, InboxMessage, Contact, GameState } from "./types";
 import { makeGameId } from "./ids";
 
@@ -11,6 +12,7 @@ export function createCampaign(
   presentationLevel: CampaignEmail["presentationLevel"] = 0,
   orderName = "Ordine delle Onde",
   city = "Genova",
+  expansion?: number,
 ): CampaignEmail {
   const template = EMAIL_TEMPLATES[campaignIndex % EMAIL_TEMPLATES.length];
   const copy = resolveEmailTemplateCopy(
@@ -20,6 +22,7 @@ export function createCampaign(
     presentationLevel,
     orderName,
     city,
+    expansion,
   );
   return {
     id: makeGameId("email", now, campaignIndex),
@@ -61,6 +64,7 @@ export function refreshWritingCampaignCopies(state: GameState): GameState {
         email.presentationLevel,
         state.school.name,
         state.school.city,
+        getEmailExpansion(state.upgrades, email.presentationLevel),
       );
       const updatedEmail = {
         ...email,

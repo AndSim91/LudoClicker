@@ -5,6 +5,7 @@ import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon } from "../common/Icon";
+import { WritingFlowMeter } from "./WritingFlowMeter";
 import { CampaignEmailContent } from "./CampaignEmailContent";
 import { LevelZeroProofreadText } from "./LevelZeroProofreadText";
 
@@ -99,6 +100,7 @@ export function Composer({
           : readyToSend
             ? "Mail completa · premi un tasto o fai clic per inviare"
             : "Digitazione in corso…"}</em>
+        <WritingFlowMeter state={stateOverride} />
         <span className="composer-status-count">{displayedRevealedCharacters} / {buildLength} caratteri · {displayedWritingPower} per input</span>
       </div>
     </main>

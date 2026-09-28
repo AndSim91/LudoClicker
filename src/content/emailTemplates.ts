@@ -3,7 +3,8 @@ import {
   getEmailCopyOverride,
   renderEmailCopyTokens,
 } from "./emailOverrides";
-import { buildFinalEmailBody } from "./finalEmail";
+import { buildFinalEmailBody, DEFAULT_DETAILS } from "./finalEmail";
+import { hasLevelZeroProofreadingError } from "./levelZeroProofreading";
 
 export interface EmailTemplate {
   id: string;
@@ -14,6 +15,7 @@ export interface EmailTemplate {
     presentationLevel?: EmailPresentationLevel,
     orderName?: string,
     city?: string,
+    expansion?: number,
   ) => string;
 }
 
@@ -326,6 +328,82 @@ In palestra alterniamo regole, postura, esercizi individuali, lavoro in coppia e
 
 L'Ordine delle Onde ti aspetta con una lezione gratuita, attrezzatura disponibile e persone pronte a spiegarti da dove cominciare. Se hai letto fin qui, la curiosità ha già fatto il primo allenamento.`;
 
+/*
+ * Email a blocchi (plan 2.4): the length follows the Creatività points bought
+ * for the current catalog. `expansion` is 0–5 (the points of that level's
+ * upgrade); level 0 is only the misspelled nucleus, every point adds a block.
+ */
+export const MAX_EMAIL_EXPANSION = 5;
+
+// Level 1: the whole corrected draft plus one short line per point.
+const DRAFT_BLOCKS = [
+  "Ti aspettiamo!",
+  "Porta abiti comodi.",
+  "Al materiale pensiamo noi.",
+  "Nessun obbligo, promesso.",
+  "Rispondi pure a questa mail.",
+] as const;
+
+// Level 2: one more full sentence per point in the invitation paragraph.
+const COMPACT_BLOCKS = [
+  "Ti spieghiamo tutto sul posto, passo dopo passo.",
+  "Bastano abiti comodi e un po' di curiosità.",
+  "Non sarai l'unica persona alla prima lezione.",
+  "L'attrezzatura la mette a disposizione la scuola.",
+  "Dopo la prova decidi con calma, senza obblighi.",
+] as const;
+
+// Levels 3–7: one more detail bullet per point.
+const DETAIL_BLOCKS = [
+  "Attrezzatura fornita dalla scuola per tutta la prova.",
+  "Regole di sicurezza chiare fin dal primo minuto.",
+  "Tre armi sportive da scoprire nel tempo: lama singola, doppia lama e staffa.",
+  "Sette Forme di combattimento, ognuna con il suo ritmo.",
+  "Tornei e incontri con altre scuole per chi vuole mettersi alla prova.",
+] as const;
+
+function clampExpansion(expansion: number): number {
+  return Math.min(MAX_EMAIL_EXPANSION, Math.max(0, Math.floor(expansion)));
+}
+
+function rotatedBlocks<T>(blocks: readonly T[], index: number): T[] {
+  const start = index % blocks.length;
+  return [...blocks.slice(start), ...blocks.slice(0, start)];
+}
+
+function splitSentences(text: string): string[] {
+  return (text.match(/[^.!?]+(?:[.!?]+|$)/gu) ?? [])
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Shapes a level 0–1 body ("Ciao X,\n<text>"). Level 0 keeps the sentences up to
+ * the first misspelling, so the shortest draft still shows what the spell check
+ * fixes; level 1 restores the whole corrected draft and adds one line per point.
+ */
+function shapeCompactBody(
+  body: string,
+  level: EmailPresentationLevel,
+  expansion: number,
+  index: number,
+): string {
+  const lineBreak = body.indexOf("\n");
+  if (lineBreak < 0) return body;
+  const greeting = body.slice(0, lineBreak);
+  const sentences = splitSentences(body.slice(lineBreak + 1));
+  if (sentences.length === 0) return body;
+  if (level === 0) {
+    // Checked on the joined prefix: some error patterns look ahead to the next sentence.
+    let kept = 1;
+    while (kept < sentences.length && !hasLevelZeroProofreadingError(sentences.slice(0, kept).join(" "))) {
+      kept += 1;
+    }
+    return `${greeting}\n${sentences.slice(0, kept).join(" ")}`;
+  }
+  return `${greeting}\n${[...sentences, ...rotatedBlocks(DRAFT_BLOCKS, index).slice(0, clampExpansion(expansion))].join(" ")}`;
+}
+
 export function capitalize(value: string) {
   return value ? `${value[0].toLocaleUpperCase("it-IT")}${value.slice(1)}` : value;
 }
@@ -343,13 +421,21 @@ function bodyForLevel(
   firstName: string,
   level: EmailPresentationLevel,
   emailSignature: string,
+  expansion: number,
 ) {
   const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
   if (level <= 1) return `Ciao ${firstName},\n${compact}`;
+  const blocks = clampExpansion(expansion);
+  const invitation = cleanCatalogCopy(copy.invitation);
   return buildFinalEmailBody(firstName, {
     title: cleanCatalogCopy(copy.subject),
     opening: cleanCatalogCopy(copy.opening),
-    invitation: cleanCatalogCopy(copy.invitation),
+    invitation: level === 2
+      ? [invitation, ...rotatedBlocks(COMPACT_BLOCKS, index).slice(0, blocks)].join(" ")
+      : invitation,
+    details: level >= 3
+      ? [...DEFAULT_DETAILS, ...rotatedBlocks(DETAIL_BLOCKS, index).slice(0, blocks)]
+      : undefined,
     signature: emailSignature,
   }, level);
 }
@@ -363,12 +449,14 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = EMAIL_CATALOG.map((copy, index) 
     presentationLevel = 0,
     orderName = DEFAULT_ORDER_NAME,
     city = DEFAULT_CITY,
+    expansion = MAX_EMAIL_EXPANSION,
   ) => bodyForLevel(
     copy,
     index,
     name,
     presentationLevel,
     formatEmailSignature(senderName, orderName, city),
+    expansion,
   ),
 }));
 
@@ -379,10 +467,11 @@ export function getDefaultEmailTemplateCopy(
   presentationLevel: EmailPresentationLevel,
   orderName = DEFAULT_ORDER_NAME,
   city = DEFAULT_CITY,
+  expansion = MAX_EMAIL_EXPANSION,
 ): ResolvedEmailTemplateCopy {
   return {
     subject: template.subject,
-    body: template.body(firstName, senderName, presentationLevel, orderName, city),
+    body: template.body(firstName, senderName, presentationLevel, orderName, city, expansion),
   };
 }
 
@@ -393,6 +482,34 @@ export function resolveEmailTemplateCopy(
   presentationLevel: EmailPresentationLevel,
   orderName = DEFAULT_ORDER_NAME,
   city = DEFAULT_CITY,
+  expansion = MAX_EMAIL_EXPANSION,
+): ResolvedEmailTemplateCopy {
+  const copy = resolveFullEmailTemplateCopy(
+    template,
+    firstName,
+    senderName,
+    presentationLevel,
+    orderName,
+    city,
+    expansion,
+  );
+  // A hand-edited level 1 override is kept as written; level 0 is always the nucleus.
+  if (
+    presentationLevel > 1 ||
+    (presentationLevel === 1 && getEmailCopyOverride(template.id, 1))
+  ) return copy;
+  const index = Math.max(0, EMAIL_CATALOG.findIndex((entry) => entry.id === template.id));
+  return { ...copy, body: shapeCompactBody(copy.body, presentationLevel, expansion, index) };
+}
+
+function resolveFullEmailTemplateCopy(
+  template: EmailTemplate,
+  firstName: string,
+  senderName: string,
+  presentationLevel: EmailPresentationLevel,
+  orderName: string,
+  city: string,
+  expansion: number,
 ): ResolvedEmailTemplateCopy {
   const defaults = getDefaultEmailTemplateCopy(
     template,
@@ -401,6 +518,7 @@ export function resolveEmailTemplateCopy(
     presentationLevel,
     orderName,
     city,
+    expansion,
   );
   const override = getEmailCopyOverride(template.id, presentationLevel);
   if (override) {

@@ -81,6 +81,17 @@ function auditContrast(): ContrastFailure[] {
   return failures;
 }
 
+// Entry animations start from opacity 0: audit only once the finite ones are done.
+async function audit(page: Page) {
+  await page.evaluate(() => Promise.race([
+    Promise.all(document.getAnimations()
+      .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+      .map((animation) => animation.finished.catch(() => undefined))),
+    new Promise((resolve) => setTimeout(resolve, 2_000)),
+  ]));
+  return page.evaluate(auditContrast);
+}
+
 async function openArea(page: Page, name: string) {
   await page.getByRole("button", { name, exact: true }).first().click();
   await page.waitForTimeout(500);
@@ -104,33 +115,33 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   for (let input = 0; input < 40; input += 1) await page.keyboard.press("a");
 
-  const report: Record<string, ContrastFailure[]> = { Posta: await page.evaluate(auditContrast) };
+  const report: Record<string, ContrastFailure[]> = { Posta: await audit(page) };
   for (const area of ["Eventi", "Scuola", "Tornei", "Upgrade", "Gadget", "Impostazioni"]) {
     await openArea(page, area);
-    report[area] = await page.evaluate(auditContrast);
+    report[area] = await audit(page);
   }
 
   await openArea(page, "Tornei");
   for (const tab of ["Risultati", "Albo d'oro", "Open"]) {
     await page.getByRole("tab", { name: tab }).click();
     await page.waitForTimeout(300);
-    report[`Tornei · ${tab}`] = await page.evaluate(auditContrast);
+    report[`Tornei · ${tab}`] = await audit(page);
   }
 
   await openArea(page, "Scuola");
   await page.getByRole("button", { name: "Dettagli" }).first().click();
   await page.waitForTimeout(500); // let the drawer finish fading in
-  report["Scuola · Dettagli"] = await page.evaluate(auditContrast);
+  report["Scuola · Dettagli"] = await audit(page);
   await page.keyboard.press("Escape");
 
   await openArea(page, "Eventi");
   await page.getByRole("button", { name: /Partecipa/ }).first().click();
   await page.waitForTimeout(500);
-  report["Eventi · in corso"] = await page.evaluate(auditContrast);
+  report["Eventi · in corso"] = await audit(page);
 
   await openArea(page, "Posta");
   await page.getByRole("button", { name: /Posta inviata/ }).first().click();
-  report["Posta inviata"] = await page.evaluate(auditContrast);
+  report["Posta inviata"] = await audit(page);
 
   const failures = Object.entries(report).flatMap(([screen, items]) =>
     items.map((item) => ({ screen, ...item })),

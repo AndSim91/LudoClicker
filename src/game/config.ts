@@ -28,6 +28,17 @@ export const GAME_CONFIG = {
   minimumTrainingDurationMs: 1_000,
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,
+  // Flusso (manual writing rhythm): see writingRhythm.ts.
+  flowMeterMax: 100,
+  flowGainPerInput: 2,
+  flowDrainPerSecond: 5,
+  flowGraceMs: 1_500,
+  flowPauseDrainPerSecond: 40,
+  flowMaxMultiplier: 5,
+  // Frase perfetta: chance per manual input, raised by Scrittura upgrades.
+  perfectPhraseBaseChance: 0.01,
+  perfectPhraseMaxChance: 0.1,
+  perfectPhraseMaxCharacters: 60,
   monthlyMemberFee: 40,
   monthlyMemberFormBonus: 5,
   monthlyMemberInstructorBonus: 10,

@@ -226,11 +226,13 @@ test("completa e invia una mail senza invio automatico", async ({ page }) => {
     name: "Corpo del messaggio. Premi un tasto o fai clic per continuare a scrivere.",
   });
   await composer.click();
-  await page.keyboard.type("a".repeat(totalCharacters - 1));
-
   const completedComposer = page.getByRole("button", {
     name: "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare.",
   });
+  // Flusso writes more than one character per key: type until the draft is complete.
+  for (let typed = 1; typed < totalCharacters && !(await completedComposer.isVisible()); typed += 1) {
+    await page.keyboard.press("a");
+  }
   await expect(completedComposer).toBeVisible();
   await completedComposer.click();
   await expect(page.getByRole("button", { name: /Posta inviata 1/ })).toBeVisible();

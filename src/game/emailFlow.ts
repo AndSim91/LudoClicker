@@ -1,5 +1,6 @@
 import {
   chooseEmailPresentationLevel,
+  getEmailExpansion,
   getEmailPresentationMix,
 } from "../content/emailPresentation";
 import { getEmailBuildLength } from "../content/emailBuild";
@@ -43,6 +44,7 @@ export function startNextCampaign(state: GameState, now: number): GameState {
     presentationLevel,
     state.school.name,
     state.school.city,
+    getEmailExpansion(state.upgrades, presentationLevel),
   );
   const initialProgress = getUpgradeEffectTotal(
     state.upgrades,

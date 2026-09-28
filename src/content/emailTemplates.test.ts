@@ -6,6 +6,17 @@ import {
   resolveEmailTemplateCopy,
 } from "./emailTemplates";
 import { hasLevelZeroProofreadingError } from "./levelZeroProofreading";
+import { getEmailBuildLength } from "./emailBuild";
+import type { CampaignEmail, EmailPresentationLevel } from "../game/types";
+
+function createEmailForLength(
+  template: (typeof EMAIL_TEMPLATES)[number],
+  presentationLevel: EmailPresentationLevel,
+  expansion: number,
+) {
+  const copy = resolveEmailTemplateCopy(template, "Giulia", "Andrea", presentationLevel, undefined, undefined, expansion);
+  return { ...copy, presentationLevel } as CampaignEmail;
+}
 
 describe("email template archive", () => {
   it("keeps every campaign copy in one editable catalog", () => {
@@ -127,5 +138,26 @@ describe("email template archive", () => {
     expect(
       EMAIL_TEMPLATES[0].body("Nome", "Legend", 2, "Ordine del Faro", "Trieste"),
     ).toContain("Legend, Ordine del Faro - Trieste");
+  });
+});
+
+describe("email a blocchi", () => {
+  const average = (level: EmailPresentationLevel, expansion: number) => {
+    const lengths = EMAIL_TEMPLATES.map((template) =>
+      getEmailBuildLength(createEmailForLength(template, level, expansion)),
+    );
+    return lengths.reduce((sum, length) => sum + length, 0) / lengths.length;
+  };
+
+  it("keeps level zero short and grows every catalog with each Creatività point", () => {
+    expect(average(0, 0)).toBeLessThan(130);
+    for (const level of [1, 2, 3, 4, 5, 6, 7] as const) {
+      for (let expansion = 1; expansion <= 5; expansion += 1) {
+        expect(average(level, expansion)).toBeGreaterThan(average(level, expansion - 1));
+      }
+    }
+    expect(average(1, 1)).toBeGreaterThan(average(0, 0));
+    expect(average(2, 1)).toBeGreaterThan(average(1, 5));
+    expect(average(3, 1)).toBeGreaterThan(average(2, 5));
   });
 });

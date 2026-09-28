@@ -55,6 +55,7 @@ import type {
   UpgradeId,
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
+import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
@@ -517,6 +518,7 @@ export function App() {
         className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
+        <GameFeedbackLayer />
         <StableTitleBar
           currentMonth={state.school.currentMonth}
           nextMonthAt={state.school.nextFeeAt}

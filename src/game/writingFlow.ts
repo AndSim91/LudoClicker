@@ -2,6 +2,13 @@ import { getEmailBuildLength } from "../content/emailBuild";
 import { GAME_CONFIG } from "./config";
 import { selectActiveEmail } from "./selectors";
 import type { GameState } from "./types";
+import {
+  applyFlowInput,
+  getFlowMultiplier,
+  getPerfectPhraseChance,
+  getPerfectPhraseLength,
+  getPerfectPhraseRoll,
+} from "./writingRhythm";
 
 export function sendEmail(state: GameState, now: number): GameState {
   const email = selectActiveEmail(state);
@@ -67,5 +74,29 @@ export function writeCharacters(
 }
 
 export function write(state: GameState, now: number): GameState {
-  return writeCharacters(state, state.player.writingPower, now, "manual");
+  const flow = applyFlowInput(state.player.flow, now);
+  let amount = state.player.writingPower * getFlowMultiplier(flow.meter);
+  let perfectPhrase = false;
+
+  const email = selectActiveEmail(state);
+  if (email?.status === "writing") {
+    const roll = getPerfectPhraseRoll(email.id, state.statistics.inputs);
+    if (roll < getPerfectPhraseChance(state)) {
+      const phrase = getPerfectPhraseLength(email, email.revealedCharacters + amount);
+      perfectPhrase = phrase > 0;
+      amount += phrase;
+    }
+  }
+
+  const written = writeCharacters(state, amount, now, "manual");
+  // No draft to work on: the input is lost and the rhythm is not rewarded.
+  if (written === state) return state;
+  return {
+    ...written,
+    player: {
+      ...written.player,
+      flow,
+      perfectPhrases: (written.player.perfectPhrases ?? 0) + (perfectPhrase ? 1 : 0),
+    },
+  };
 }

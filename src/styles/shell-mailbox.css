@@ -341,8 +341,12 @@
 }
 
 .composer-status em {
+  min-width: 0;
   margin-left: 20px;
+  overflow: hidden;
   font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Email progress drawn along the top edge of the status bar. */
@@ -431,4 +435,27 @@
 
 .progress-dots i.on {
   background: var(--blue-500);
+}
+
+/* Flusso di scrittura (WritingFlowMeter): Outlook-like text in the light theme. */
+.composer-flow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.composer-flow + .composer-status-count {
+  margin-left: 14px;
+}
+
+.composer-flow[data-multiplier="1"] .composer-flow-office,
+.composer-flow-game {
+  display: none;
+}
+
+.composer-flow-office {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
 }

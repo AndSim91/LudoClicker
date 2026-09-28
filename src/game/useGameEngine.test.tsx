@@ -257,11 +257,12 @@ describe("useGameEngine pause", () => {
       });
     });
 
-    act(() => {
-      for (let input = 0; input < writingInputs; input += 1) {
+    // Flusso can write several characters per input: stop as soon as the draft is complete.
+    for (let input = 0; input < writingInputs && result.current.state.emails[0].status === "writing"; input += 1) {
+      act(() => {
         result.current.dispatch({ type: "WRITE", now: result.current.getGameNow() });
-      }
-    });
+      });
+    }
 
     expect(result.current.getGameNow()).toBe(pausedAt);
     expect(result.current.state.emails[0].status).toBe("readyToSend");

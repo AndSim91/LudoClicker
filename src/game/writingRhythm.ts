@@ -1,0 +1,77 @@
+import { getEmailBuildSource } from "../content/emailBuild";
+import { getUpgradeEffectTotal } from "../content/upgrades";
+import { GAME_CONFIG } from "./config";
+import type { CampaignEmail, GameState, WritingFlow } from "./types";
+
+/*
+ * Rhythm mechanics of manual writing (plan points 2.1 and 2.2).
+ *
+ * Flusso: every manual input fills a 0–100 meter; the meter drains slowly while
+ * the player keeps typing and fast after a short pause. Each quarter of the
+ * meter adds one step of multiplier, from ×1 to ×5.
+ *
+ * Frase perfetta: a small chance per input to finish the current sentence at
+ * once. The roll is derived from the email and the input count, so it never
+ * consumes the shared random seed that events, trials and tournaments rely on.
+ */
+
+export function getFlowMeterAt(flow: WritingFlow | undefined, now: number): number {
+  if (!flow) return 0;
+  const idleMs = Math.max(0, now - flow.updatedAt);
+  const graceMs = Math.min(idleMs, GAME_CONFIG.flowGraceMs);
+  const pauseMs = Math.max(0, idleMs - GAME_CONFIG.flowGraceMs);
+  const drained =
+    (graceMs / 1_000) * GAME_CONFIG.flowDrainPerSecond +
+    (pauseMs / 1_000) * GAME_CONFIG.flowPauseDrainPerSecond;
+  return Math.min(GAME_CONFIG.flowMeterMax, Math.max(0, flow.meter - drained));
+}
+
+export function getFlowMultiplier(meter: number): number {
+  const step = GAME_CONFIG.flowMeterMax / (GAME_CONFIG.flowMaxMultiplier - 1);
+  return Math.min(GAME_CONFIG.flowMaxMultiplier, 1 + Math.floor(meter / step));
+}
+
+export function applyFlowInput(flow: WritingFlow | undefined, now: number): WritingFlow {
+  return {
+    meter: Math.min(
+      GAME_CONFIG.flowMeterMax,
+      getFlowMeterAt(flow, now) + GAME_CONFIG.flowGainPerInput,
+    ),
+    updatedAt: now,
+  };
+}
+
+export function getPerfectPhraseChance(state: Pick<GameState, "upgrades">): number {
+  return Math.min(
+    GAME_CONFIG.perfectPhraseMaxChance,
+    GAME_CONFIG.perfectPhraseBaseChance +
+      getUpgradeEffectTotal(state.upgrades, "perfectPhraseChance"),
+  );
+}
+
+// FNV-1a over the email id and the input count: stable for tests and saves.
+export function getPerfectPhraseRoll(emailId: string, inputCount: number): number {
+  let hash = 0x811c9dc5;
+  for (const character of `${emailId}:${inputCount}`) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0) / 0x1_0000_0000;
+}
+
+const SENTENCE_END = /[.!?\n>]/;
+
+/**
+ * Characters needed, from `position`, to reach the end of the sentence being
+ * written (or of the HTML tag, for the coded levels), capped so a single lucky
+ * input cannot write half an email.
+ */
+export function getPerfectPhraseLength(email: CampaignEmail, position: number): number {
+  const source = getEmailBuildSource(email);
+  const start = Math.max(0, Math.floor(position));
+  const limit = Math.min(source.length, start + GAME_CONFIG.perfectPhraseMaxCharacters);
+  for (let index = start; index < limit; index += 1) {
+    if (SENTENCE_END.test(source[index])) return index + 1 - start;
+  }
+  return limit - start;
+}

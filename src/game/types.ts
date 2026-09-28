@@ -97,6 +97,11 @@ export interface CampaignEmail {
 
 export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+export interface WritingFlow {
+  meter: number;
+  updatedAt: number;
+}
+
 export interface PendingEmailOutcome {
   id: string;
   emailId: string;
@@ -892,6 +897,10 @@ export interface GameState {
   };
   player: {
     writingPower: number;
+    /** Manual writing rhythm; absent in saves made before the Flusso existed. */
+    flow?: WritingFlow;
+    /** Count of Frase perfetta bonuses, used by the UI to spot new ones. */
+    perfectPhrases?: number;
   };
   network: {
     reputation: number;

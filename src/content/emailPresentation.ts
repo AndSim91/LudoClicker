@@ -110,3 +110,12 @@ export function chooseEmailPresentationLevel(
   const mix = getEmailPresentationMix(upgrades);
   return roll < mix.newCatalogShare ? mix.newLevel : mix.previousLevel;
 }
+
+/** Creatività points bought for the catalog of `level`: how many blocks its emails get. */
+export function getEmailExpansion(
+  upgrades: UpgradeLevels,
+  level: EmailPresentationLevel,
+): number {
+  if (level === 0) return 0;
+  return clampPurchasedLevels(upgrades[EMAIL_CATALOG_STAGES[level - 1].upgradeId] ?? 0);
+}

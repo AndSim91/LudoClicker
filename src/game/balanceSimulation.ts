@@ -20,6 +20,7 @@ export interface BalanceSimulationOptions {
   pace: BalancePace;
   horizonMs: number;
   tickMs?: number;
+  onTick?: (state: GameState, elapsedMs: number) => void;
 }
 
 export interface BalanceSimulationResult {
@@ -147,6 +148,7 @@ export function simulateBalanceGame({
   pace,
   horizonMs,
   tickMs = SIMULATION_TICK_MS,
+  onTick,
 }: BalanceSimulationOptions): BalanceSimulationResult {
   const startedAt = SIMULATION_START_MS + seed * 100_000;
   let state = createInitialState(startedAt, `Simulazione ${seed}`);
@@ -173,6 +175,7 @@ export function simulateBalanceGame({
     if (selectActiveEmail(state)?.status === "readyToSend") {
       state = dispatch(state, { type: "SEND_EMAIL", now });
     }
+    onTick?.(state, elapsedMs);
     if (prestigeReadyAtMs === undefined && canFoundSchool(state)) {
       prestigeReadyAtMs = elapsedMs;
       break;
