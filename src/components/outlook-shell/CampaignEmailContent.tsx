@@ -54,6 +54,7 @@ export function CampaignEmailContent({
       {level === 0 ? (
         <LevelZeroProofreadText
           text={email.body}
+          typos={email.typos?.body}
           revealedCharacters={textRevealedCharacters}
           showCaret={showCaret}
         />

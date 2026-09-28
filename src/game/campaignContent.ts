@@ -34,6 +34,7 @@ export function createCampaign(
     createdAt: now,
     presentationLevel,
     status: "writing",
+    ...(copy.typos ? { typos: copy.typos } : {}),
   };
 }
 
@@ -70,6 +71,7 @@ export function refreshWritingCampaignCopies(state: GameState): GameState {
         ...email,
         subject: copy.subject,
         body: copy.body,
+        typos: copy.typos,
       };
       return {
         ...updatedEmail,

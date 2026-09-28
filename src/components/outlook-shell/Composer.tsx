@@ -65,7 +65,7 @@ export function Composer({
           data-tutorial-region="composer-recipient"
           data-tutorial-target="true"
         >{contact.firstName} {contact.lastName} &lt;{contact.email}&gt;</mark></div>
-        <div><span>Oggetto:</span><strong>{email.presentationLevel === 0 ? <LevelZeroProofreadText text={email.subject} /> : email.subject}</strong></div>
+        <div><span>Oggetto:</span><strong>{email.presentationLevel === 0 ? <LevelZeroProofreadText text={email.subject} typos={email.typos?.subject} /> : email.subject}</strong></div>
       </div>
       <div
         className="mail-body"

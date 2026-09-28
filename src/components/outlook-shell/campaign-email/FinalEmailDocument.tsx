@@ -232,6 +232,14 @@ export function FinalEmailDocument({
             />
           </footer>
         ) : null}
+
+        {/* Typed last, so it sits at the very bottom like a real P.S. */}
+        <TypedFinalBlock
+          section={section("postscript")}
+          className="final-email-postscript"
+          revealedCharacters={revealedCharacters}
+          showCaret={showCaret}
+        />
       </div>
     </div>
   );

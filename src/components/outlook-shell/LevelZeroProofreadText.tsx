@@ -3,15 +3,20 @@ import { getLevelZeroProofreadingErrorRanges } from "../../content/levelZeroProo
 
 export function LevelZeroProofreadText({
   text,
+  typos,
   revealedCharacters = text.length,
   showCaret = false,
 }: {
   text: string;
+  /** Positions saved with the email; older saves fall back to the legacy word list. */
+  typos?: [number, number][];
   revealedCharacters?: number;
   showCaret?: boolean;
 }) {
   const visibleLength = Math.max(0, Math.min(text.length, revealedCharacters));
-  const ranges = getLevelZeroProofreadingErrorRanges(text);
+  const ranges = typos
+    ? typos.map(([start, end]) => ({ start, end }))
+    : getLevelZeroProofreadingErrorRanges(text);
   const content: ReactNode[] = [];
   let cursor = 0;
 

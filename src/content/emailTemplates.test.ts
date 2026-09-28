@@ -19,82 +19,72 @@ function createEmailForLength(
 }
 
 describe("email template archive", () => {
-  it("keeps every campaign copy in one editable catalog", () => {
+  it("keeps every campaign in one catalog written in correct Italian", () => {
     expect(EMAIL_CATALOG).toHaveLength(100);
-    expect(EMAIL_CATALOG.every((entry) => entry.shortDraft.length > 0)).toBe(true);
-    expect(EMAIL_CATALOG.every((entry) => entry.shortClean.length > 0)).toBe(true);
-    expect(EMAIL_CATALOG.every((entry) => entry.opening.length > 0 && entry.invitation.length > 0)).toBe(true);
-    expect(EMAIL_CATALOG[0].shortDraft).toContain("Vieni a provore Udosport");
-    expect(EMAIL_CATALOG[0].shortClean).toContain("Vieni a provare LudoSport");
+    expect(new Set(EMAIL_CATALOG.map((entry) => entry.id)).size).toBe(100);
+    for (const entry of EMAIL_CATALOG) {
+      for (const field of [entry.draftSubject, entry.draft, entry.subject, entry.opening, entry.invitation]) {
+        expect(field.trim().length, entry.id).toBeGreaterThan(0);
+      }
+      // Errors are generated at level 0: the catalog itself stays clean.
+      expect(hasLevelZeroProofreadingError(`${entry.draftSubject}\n${entry.draft}`), entry.id).toBe(false);
+    }
   });
 
   it("contains one hundred unique simulated campaigns", () => {
-    const ids = new Set(EMAIL_TEMPLATES.map((template) => template.id));
     const subjects = new Set(EMAIL_TEMPLATES.map((template) => template.subject));
-    const bodies = new Set(
-      EMAIL_TEMPLATES.map((template) => template.body("Nome", "Andrea Ungaro")),
-    );
-
+    const drafts = new Set(EMAIL_TEMPLATES.map((template) => template.body("Nome", "Andrea Ungaro")));
     expect(EMAIL_TEMPLATES).toHaveLength(100);
-    expect(ids.size).toBe(100);
     expect(subjects.size).toBe(100);
-    expect(bodies.size).toBe(100);
-    expect([...bodies].every((body) => body.length >= 135 && body.length <= 200)).toBe(true);
-    expect([...bodies].every((body) => !body.includes("…"))).toBe(true);
-    expect([...bodies].every((body) => !body.includes("..."))).toBe(true);
-    expect([...bodies].some((body) => body.includes("Udosport") && body.includes("provore"))).toBe(true);
-    expect([...bodies].every((body) => !body.includes("La prova e"))).toBe(true);
-    expect([...bodies].every((body) => !body.includes("LudoSport Genova"))).toBe(true);
-    expect([...bodies].every((body) => !body.endsWith("Andrea Ungaro"))).toBe(true);
-
-    const firstDraft = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro");
-    const firstClean = EMAIL_TEMPLATES[0].body("Nome", "Andrea Ungaro", 1);
-    expect(firstDraft).toContain("Vieni a provore Udosport in palestra");
-    expect(firstClean).toContain("Vieni a provare LudoSport in palestra");
-    expect(firstDraft).not.toContain("Un saluto,");
-    expect(firstClean).not.toContain("Un saluto,");
+    expect(drafts.size).toBe(100);
   });
 
-  it("keeps at least one underlined error in every level zero email", () => {
-    const draftsWithoutErrors = EMAIL_TEMPLATES.flatMap((template) => {
-      const draft = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", 0);
-      return hasLevelZeroProofreadingError(draft.body) ? [] : [template.id];
-    });
-
-    expect(draftsWithoutErrors).toEqual([]);
+  it("fills level 0 with gross, underlined errors but never touches the names", () => {
+    for (const template of EMAIL_TEMPLATES) {
+      const draft = resolveEmailTemplateCopy(template, "Giulia", "Andrea Ungaro", 0);
+      const words = draft.body.match(/\p{L}+/gu)!.length;
+      expect(draft.typos!.body.length, template.id).toBeGreaterThanOrEqual(Math.max(3, Math.floor(words / 5)));
+      expect(draft.typos!.subject.length, template.id).toBeGreaterThanOrEqual(1);
+      expect(draft.body.startsWith("Ciao Giulia,") || draft.body.startsWith("CIAO Giulia,") || /^\S+ Giulia,/.test(draft.body), template.id).toBe(true);
+      expect(draft.body).not.toContain("Andrea Ungaro");
+      expect(draft.body).not.toContain("Un saluto,");
+      expect(draft.body.length, template.id).toBeLessThanOrEqual(220);
+    }
+    const first = resolveEmailTemplateCopy(EMAIL_TEMPLATES[0], "Giulia", "Andrea", 0);
+    expect(resolveEmailTemplateCopy(EMAIL_TEMPLATES[0], "Giulia", "Andrea", 0)).toEqual(first);
   });
 
-  it("removes the signoff from level 0 and 1 overrides", () => {
+  it("restores the whole corrected draft at level 1 and adds lines without repeating it", () => {
+    for (const [index, template] of EMAIL_TEMPLATES.entries()) {
+      const clean = resolveEmailTemplateCopy(template, "Giulia", "Andrea Ungaro", 1, undefined, undefined, 5);
+      expect(clean.typos).toBeUndefined();
+      expect(clean.body).toContain(EMAIL_CATALOG[index].draft);
+      expect(clean.subject).toBe(EMAIL_CATALOG[index].draftSubject);
+      const added = clean.body.slice(clean.body.indexOf(EMAIL_CATALOG[index].draft) + EMAIL_CATALOG[index].draft.length);
+      if (/gratis|gratuit/i.test(EMAIL_CATALOG[index].draft)) expect(added, template.id).not.toMatch(/gratis/i);
+    }
+  });
+
+  it("never repeats the same sentence inside an email", () => {
+    for (const level of [1, 2, 3, 4, 5, 6, 7] as const) {
+      for (const template of EMAIL_TEMPLATES) {
+        const body = template.body("Giulia", "Andrea Ungaro", level);
+        const sentences = body.split(/(?<=[.!?])\s+|\n+/).map((line) => line.trim()).filter((line) => line.length > 12);
+        expect(new Set(sentences).size, `${level}:${template.id}`).toBe(sentences.length);
+      }
+    }
+  });
+
+  it("personalizes the subject from level 3 and turns it into a campaign hook from level 6", () => {
     const template = EMAIL_TEMPLATES[0];
-    const draft = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", 0);
-    const clean = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", 1);
-
-    expect(draft.body).not.toContain("Un saluto,");
-    expect(clean.body).not.toContain("Un saluto,");
-    expect(draft.body).not.toContain("Andrea Ungaro");
-    expect(clean.body).not.toContain("Andrea Ungaro");
-  });
-
-  it("removes every intentional proofreading error from level one onward", () => {
-    const copiesWithErrors = ([1, 2, 3, 4, 5, 6, 7] as const).flatMap((level) =>
-      EMAIL_TEMPLATES.flatMap((template) => {
-        const copy = resolveEmailTemplateCopy(template, "Nome", "Andrea Ungaro", level);
-        return hasLevelZeroProofreadingError(`${copy.subject}\n${copy.body}`)
-          ? [`${level}:${template.id}`]
-          : [];
-      }),
-    );
-
-    expect(copiesWithErrors).toEqual([]);
-
-    const correctedInvite = resolveEmailTemplateCopy(
-      EMAIL_TEMPLATES.find((template) => template.id === "invito-concreto")!,
-      "Roberto",
-      "Andrea Ungaro",
-      1,
-    );
-    expect(correctedInvite.body).toContain("impugni una spada e provi");
-    expect(correctedInvite.body).not.toContain("spadda");
+    expect(resolveEmailTemplateCopy(template, "Giulia", "Andrea", 2).subject).toBe(template.subject);
+    expect(resolveEmailTemplateCopy(template, "Giulia", "Andrea", 3).subject).toBe("Giulia, una lezione di prova con l'Ordine delle Onde");
+    for (const level of [6, 7] as const) {
+      const copy = resolveEmailTemplateCopy(template, "Giulia", "Andrea", level);
+      expect(copy.subject).toContain("Giulia");
+      expect(copy.body).toContain("P.S.");
+    }
+    expect(template.body("Giulia", "Andrea", 5)).not.toContain("P.S.");
   });
 
   it("progresses from cleaned short copy to the marketing course", () => {
@@ -117,7 +107,7 @@ describe("email template archive", () => {
     expect(layoutBodies.every((body) => body.length <= 1_300)).toBe(true);
     expect(flyerBodies.every((body) => body.length <= 3_000)).toBe(true);
     expect(marketingBodies.every((body) => body.length <= 4_000)).toBe(true);
-    expect(marketingBodies.every((body) => body.includes("COME PRENOTARE"))).toBe(true);
+    expect(marketingBodies.every((body) => body.includes("PRENOTA ORA"))).toBe(true);
     expect(marketingBodies.every((body) => body.includes("DA VEDERE"))).toBe(true);
   });
 

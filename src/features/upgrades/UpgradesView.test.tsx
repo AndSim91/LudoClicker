@@ -66,7 +66,9 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.queryByRole("button", { name: /Apri dettagli Preparazione agonistica/ }))
       .not.toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(56);
+    // 56 branch nodes + the two Scrittura extensions (Ritmo di battitura, Frasi fatte).
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(58);
+    expect(screen.getByRole("button", { name: /Apri dettagli Ritmo di battitura/ })).toBeVisible();
     expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();

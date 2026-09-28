@@ -58,9 +58,11 @@ describe("CampaignEmailContent", () => {
   it("marks level zero grammar errors like a spell checker", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const body = "Ciao Nome, la prova è gratuita perchè puoi provore Udosport.";
+    // Legacy save: no stored positions, the old word list finds the errors.
     const email = {
       ...initial.emails[0],
       body,
+      typos: undefined,
       presentationLevel: 0 as const,
       revealedCharacters: body.length,
     };
@@ -77,9 +79,11 @@ describe("CampaignEmailContent", () => {
   it("waits for an incorrect word to be fully typed before marking it", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const body = "Ciao Nome, puoi provore questo sport.";
+    const start = body.indexOf("provore");
     const email = {
       ...initial.emails[0],
       body,
+      typos: { subject: [], body: [[start, start + "provore".length]] as [number, number][] },
       presentationLevel: 0 as const,
     };
     const errorEnd = body.indexOf("provore") + "provore".length;
@@ -162,8 +166,9 @@ describe("CampaignEmailContent", () => {
       "src",
       "/email-assets/ordine-onde.png",
     );
-    expect(screen.getByText(/grazie per l'interesse dimostrato durante il nostro incontro/)).toBeVisible();
-    expect(screen.getByText(/COME PRENOTARE/)).toBeVisible();
+    expect(screen.getByText(/grazie per l'interesse dimostrato durante il nostro incontro/i)).toBeVisible();
+    expect(screen.getByText(/PRENOTA ORA/)).toBeVisible();
+    expect(screen.getByText(/^P\.S\./)).toBeVisible();
     expect(screen.getByText("DA VEDERE")).toBeVisible();
     expect(screen.queryByText(/Andrea Ungaro · Ordine delle Onde/)).not.toBeInTheDocument();
   });

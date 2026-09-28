@@ -28,6 +28,7 @@ describe("final HTML email model", () => {
       "signoff",
       "signature",
       "disclaimer",
+      "postscript",
     ]);
   });
 

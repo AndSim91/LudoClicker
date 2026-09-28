@@ -1,4 +1,4 @@
-import { getPerfectPhraseChance } from "../../game/writingRhythm";
+import { getFlowCap, getPerfectPhraseChance } from "../../game/writingRhythm";
 import {
   useCallback,
   useEffect,
@@ -72,8 +72,13 @@ function formatUpgradePercentage(value: number) {
 function getUpgradeBenefitsSummary(state: GameState) {
   const benefits = [
     { label: "Caratteri per input", value: formatNumber(state.player.writingPower) },
-    { label: "Frase perfetta", value: `${(getPerfectPhraseChance(state) * 100).toLocaleString("it-IT", { maximumFractionDigits: 1 })}%` },
   ];
+  const perfectPhraseChance = getPerfectPhraseChance(state);
+  if (perfectPhraseChance > 0) {
+    benefits.push({ label: "Frase perfetta", value: `${(perfectPhraseChance * 100).toLocaleString("it-IT", { maximumFractionDigits: 1 })}%` });
+  }
+  const flowCap = getFlowCap(state.upgrades);
+  if (flowCap > 1) benefits.push({ label: "Flusso massimo", value: `×${flowCap}` });
   const addPercentage = (label: string, effect: Parameters<typeof getUpgradeEffectTotal>[1], sign = "+") => {
     const total = getUpgradeEffectTotal(state.upgrades, effect);
     if (total > 0) benefits.push({ label, value: `${sign}${formatUpgradePercentage(total)}` });

@@ -93,7 +93,7 @@ describe("lean history migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated).toMatchObject({ version: 82 });
+    expect(migrated).toMatchObject({ version: 83 });
     expect(isValidGameState(migrated)).toBe(true);
     expect(migrated.tournaments.results.map((entry) => entry.id)).toEqual([
       "current-school-replay",

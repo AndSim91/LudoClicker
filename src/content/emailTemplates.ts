@@ -1,10 +1,32 @@
 import type { EmailPresentationLevel } from "../game/types";
+import { EMAIL_CATALOG } from "./emailCatalog";
 import {
-  getEmailCopyOverride,
-  renderEmailCopyTokens,
-} from "./emailOverrides";
-import { buildFinalEmailBody, DEFAULT_DETAILS } from "./finalEmail";
-import { hasLevelZeroProofreadingError } from "./levelZeroProofreading";
+  COURTEOUS_LINES,
+  DRAFT_LINES,
+  INFO_DETAILS,
+  MARKETING_BOOKINGS,
+  MARKETING_CALLS,
+  MARKETING_HOOKS,
+  MARKETING_SUBJECTS,
+  POSTSCRIPTS,
+  PUNCHY_DETAILS,
+  WARM_BOOKINGS,
+  WARM_CALLS,
+  WARM_HOOKS,
+  pickPhrase,
+  pickPhrases,
+} from "./emailPhrases";
+import { buildFinalEmailBody } from "./finalEmail";
+import { addLevelZeroTypos, type TypoRange } from "./levelZeroTypos";
+
+export { EMAIL_CATALOG };
+
+/*
+ * How an email grows with the Creatività catalogs (levels 0–7). The text comes
+ * from two places only: the catalog (one idea per email, emailCatalog.ts) and
+ * the phrase bank (emailPhrases.ts). `expansion` is the number of points (0–5)
+ * bought in the upgrade of the email's level: each point adds one phrase.
+ */
 
 export interface EmailTemplate {
   id: string;
@@ -22,21 +44,30 @@ export interface EmailTemplate {
 export interface ResolvedEmailTemplateCopy {
   subject: string;
   body: string;
+  /** Level 0 only: where the generated spelling errors are, for the underline. */
+  typos?: { subject: TypoRange[]; body: TypoRange[] };
 }
 
 export interface EmailCatalogEntry {
   id: string;
+  /** Joke subject of the draft (levels 0–1). */
+  draftSubject: string;
+  /** Correct draft text of levels 0–1; level 0 errors are generated. */
+  draft: string;
+  /** Subject of the professional catalogs (level 2 onward). */
   subject: string;
-  shortDraft: string;
-  shortClean: string;
   opening: string;
   invitation: string;
 }
 
-type TemplateCopy = EmailCatalogEntry;
+export const MAX_EMAIL_EXPANSION = 5;
 
 const DEFAULT_ORDER_NAME = "Ordine delle Onde";
 const DEFAULT_CITY = "Genova";
+// Level 0 keeps only the start of the draft: at least this many characters.
+const LEVEL_ZERO_MIN_CHARACTERS = 70;
+// Base bullets of the HTML catalogs, before the Creatività points add more.
+const BASE_DETAILS = 3;
 
 export function formatEmailSignature(
   senderName: string,
@@ -48,327 +79,18 @@ export function formatEmailSignature(
   const escapedCity = location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const normalizedOrder = orderName
     .trim()
-    .replace(new RegExp(`\\s*[\\-\u2013\u2014]\\s*${escapedCity}$`, "iu"), "")
+    .replace(new RegExp(`\\s*[\\-–—]\\s*${escapedCity}$`, "iu"), "")
     .trim();
   const school = [normalizedOrder, location].filter(Boolean).join(" - ");
   return [player, school].filter(Boolean).join(", ");
 }
 
-const MOJIBAKE_REPAIRS: Array<[string, string]> = [
-  ["Ã ", "à"],
-  ["Ã¨", "è"],
-  ["Ã©", "é"],
-  ["Ã¬", "ì"],
-  ["Ã²", "ò"],
-  ["Ã¹", "ù"],
-  ["Ã€", "À"],
-  ["Ãˆ", "È"],
-  ["Ã‰", "É"],
-  ["ÃŒ", "Ì"],
-  ["Ã’", "Ò"],
-  ["Ã™", "Ù"],
-  ["Â ", " "],
-  ["Â°", "°"],
-  ["Â", ""],
-  ["â‚¬", "€"],
-  ["â€™", "’"],
-  ["â€“", "–"],
-  ["â€¦", "…"],
-];
-
-function repairEncoding(value: string): string {
-  return MOJIBAKE_REPAIRS.reduce(
-    (result, [broken, fixed]) => result.replaceAll(broken, fixed),
-    value,
-  );
+export function capitalize(value: string) {
+  return value ? `${value[0].toLocaleUpperCase("it-IT")}${value.slice(1)}` : value;
 }
 
-function cleanDraftCopy(value: string): string {
-  return repairEncoding(value)
-    .replace(/\bprovore\b/gi, "provare")
-    .replace(/\bUdosport\b/g, "LudoSport")
-    .replace(/\bfiga\b/gi, "figo")
-    .replace(/\bdivertenta\b/gi, "divertente")
-    .replace(/\bCiaoo\b/gi, "Ciao")
-    .replace(/\bpalestrra\b/gi, "palestra")
-    .replace(/\bproova\b/gi, "prova")
-    .replace(/\bspadde\b/gi, "spade")
-    .replace(/\bspadda\b/gi, "spada")
-    .replace(/\bgrupoo\b/gi, "gruppo")
-    .replace(/\blezzione\b/gi, "lezione")
-    .replace(/\bgratiss\b/gi, "gratis")
-    .replace(/\bsporrt\b/gi, "sport")
-    .replace(/\bmovimmenti?\b/gi, (match) => match.endsWith("i") ? "movimenti" : "movimento")
-    .replace(/\bsicureza\b/gi, "sicurezza")
-    .replace(/\besperiensa\b/gi, "esperienza")
-    .replace(/\bprimma\b/gi, "prima")
-    .replace(/\bvienni\b/gi, "vieni")
-    .replace(/\bperssone\b/gi, "persone")
-    .replace(/\bperssona\b/gi, "persona")
-    .replace(/\ballenamneto\b/gi, "allenamento")
-    .replace(/\besercizzi\b/gi, "esercizi")
-    .replace(/\bmaterialle\b/gi, "materiale")
-    .replace(/\binparare\b/gi, "imparare")
-    .replace(/\babiamo\b/gi, "abbiamo")
-    .replace(/\bqesta\b/gi, "questa")
-    .replace(/\btuto\b/gi, "tutto")
-    .replace(/\bance\b/gi, "anche")
-    .replace(/\bsollo\b/gi, "solo")
-    .replace(/\bsenpre\b/gi, "sempre")
-    .replace(/\bqundo\b/gi, "quando")
-    .replace(/\bsensa\b/gi, "senza")
-    .replace(/\bminnuti\b/gi, "minuti")
-    .replace(/\bmenntre\b/gi, "mentre")
-    .replace(/\bcalccoli\b/gi, "calcoli")
-    .replace(/\bvestitti\b/gi, "vestiti")
-    .replace(/\bprincipanti\b/gi, "principianti")
-    .replace(/\bstatitiche\b/gi, "statistiche")
-    .replace(/\bcommisione\b/gi, "commissione")
-    .replace(/\buficiale\b/gi, "ufficiale")
-    .replace(/\bmettodo\b/gi, "metodo")
-    .replace(/\bprotezzioni\b/gi, "protezioni")
-    .replace(/\be (gratis|gratuita|figo|divertenta|uno sport|una sfida|un modo)\b/gi, "è $1")
-    .replace(/\bapparte\b/gi, "a parte")
-    .replace(/\bperchè(?!\p{L})/giu, "perché")
-    .replace(/\bfinchè(?!\p{L})/giu, "finché")
-    .replace(/\bpurchè(?!\p{L})/giu, "purché")
-    .replace(/\bperche\b/gi, "perché")
-    .replace(/\bfinche\b/gi, "finché")
-    .replace(/\bpiu\b/gi, "più")
-    .replace(/\bqualita\b/gi, "qualità")
-    .replace(/\bcuriosita\b/gi, "curiosità")
-    .replace(/\battivita\b/gi, "attività")
-    .replace(/\bunita\b/gi, "unità")
-    .replace(/\bun p[oò](?!\p{L})'?/giu, "un po'")
-    .replace(/c'(?:Ã¨|è) l'hanno/gi, "ce l'hanno")
-    .replace(/\bcontrolla\b(?=\s+te\b)/gi, "controlli")
-    .replace(/\bsi ricarica\b(?=\s+con\b)/gi, "si ricarichi")
-    .replace(/\bnon sbriciolano\b/gi, "non si sbriciolino")
-    .replace(/\burgentino\b/gi, "urgentemente")
-    .replace(/\bera\b(?=\s+tutto calcolato\b)/gi, "fosse")
-    .replace(/\bnecessita\b(?=\s+spade\b)/gi, "necessita di")
-    .replace(/\bFuture scuole\b/g, "Scuole future")
-    .replace(/\bli abbiamo chiesto\b/gi, "gliel'abbiamo chiesto")
-    .replace(/\busa\b(?=,?\s+possibilmente\b)/gi, "usi")
-    .replace(/\bvieni\b(?=\.\s+Se non rispondi\b)/gi, "venga")
-    .replace(/\bportare\b(?=\s+biscotti\b)/gi, "porta")
-    .replace(/c'era/gi, "c'era")
-    .replace(/[^\S\r\n]{2,}/g, " ")
-    .replace(/\n /g, "\n")
-    .trim();
-}
-
-function cleanCatalogCopy(value: string): string {
-  return repairEncoding(value).replace(/[^\S\r\n]{2,}/g, " ").trim();
-}
-
-function normalizeEmailSignoff(
-  body: string,
-  senderName: string,
-  presentationLevel: EmailPresentationLevel,
-): string {
-  const legacySuffix = senderName ? `\n\n${senderName}` : "";
-  const signoffSuffix = "\n\nUn saluto,";
-
-  if (presentationLevel <= 1) {
-    if (legacySuffix && body.endsWith(legacySuffix)) {
-      return body.slice(0, -legacySuffix.length).trimEnd();
-    }
-    if (body.endsWith(signoffSuffix)) {
-      return body.slice(0, -signoffSuffix.length).trimEnd();
-    }
-    return body;
-  }
-
-  if (!legacySuffix || !body.endsWith(legacySuffix)) return body;
-  return `${body.slice(0, -legacySuffix.length)}${signoffSuffix}`;
-}
-
-/**
- * Catalogo unico modificabile a mano: shortDraft è il livello 0, shortClean
- * i livelli 1-2, mentre opening e invitation alimentano i livelli 3-7.
- */
-export const EMAIL_CATALOG: TemplateCopy[] = [
-  { id: "prima-prova", subject: "Una lezione di prova con l'Ordine delle Onde", shortDraft: "Vieni a provore Udosport in palestra: è uno sport figa e divertenta, adatto a tutti. La prova è gratuita e non serve esperienza.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e non serve esperienza.", opening: "grazie per l'interesse dimostrato durante il nostro incontro. La nostra disciplina unisce tecnica, controllo e collaborazione in un ambiente accessibile anche a chi parte da zero.", invitation: "Ti invitiamo a una lezione gratuita: servono soltanto abiti comodi e curiosità." },
-  { id: "disciplina-originale", subject: "Scopri una disciplina sportiva originale a Genova", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e non serve esperienza.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e non serve esperienza.", opening: "all'Ordine delle Onde alleniamo coordinazione, precisione e rispetto dell'avversario attraverso un'attività sportiva fuori dall'ordinario.", invitation: "La prima lezione è gratuita e tutto il materiale necessario viene fornito dalla scuola." },
-  { id: "sicurezza-prima", subject: "Sicurezza e tecnica nella tua prima lezione", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e non serve esperienza.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e non serve esperienza.", opening: "ogni nuovo partecipante comincia dalle regole di sicurezza e dai movimenti fondamentali, seguito passo dopo passo da chi conduce la lezione.", invitation: "Se vuoi vedere come lavoriamo, possiamo riservarti un posto alla prossima prova." },
-  { id: "gruppo-genova", subject: "Conosci il nostro gruppo di Genova", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e non serve esperienza.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e non serve esperienza.", opening: "siamo un gruppo di persone con esperienze diverse, unite dal piacere di allenarsi e imparare insieme con continuità.", invitation: "Vieni a conoscere la scuola durante una lezione introduttiva senza impegno." },
-  { id: "coordinazione", subject: "Tecnica, coordinazione e una prova gratuita", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e non serve esperienza.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e non serve esperienza.", opening: "la lezione alterna esercizi individuali, lavoro in coppia e momenti dedicati alla comprensione della tecnica.", invitation: "Non è richiesta alcuna esperienza precedente: la prova è pensata proprio per cominciare." },
-  { id: "dopo-evento", subject: "Grazie per essere passato a trovarci", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e non serve esperienza.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e non serve esperienza.", opening: "è stato un piacere incontrarti e raccontarti qualcosa della nostra scuola. Vedere una dimostrazione è utile, ma provare in prima persona chiarisce davvero l'attività.", invitation: "Ti aspettiamo volentieri per una lezione introduttiva gratuita." },
-  { id: "materiale-fornito", subject: "Per la prima prova pensiamo noi all'attrezzatura", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e non serve esperienza.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e non serve esperienza.", opening: "per partecipare non occorre acquistare o portare attrezzatura: la scuola mette a disposizione tutto ciò che serve per iniziare in sicurezza.", invitation: "Porta abiti comodi e ti guideremo attraverso i primi esercizi." },
-  { id: "allenamento-completo", subject: "Un allenamento per corpo e concentrazione", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e non serve esperienza.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e non serve esperienza.", opening: "questa disciplina richiede presenza, coordinazione e capacità di osservare chi si ha di fronte, con un lavoro fisico graduale e completo.", invitation: "Puoi sperimentarlo direttamente con una prova gratuita in palestra." },
-  { id: "prima-volta", subject: "La prima volta si comincia dalle basi", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e non serve esperienza.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e non serve esperienza.", opening: "la lezione introduttiva è costruita per chi non ha mai impugnato una spada: sicurezza, postura e movimenti fondamentali vengono spiegati con calma.", invitation: "Possiamo tenerti un posto al prossimo appuntamento." },
-  { id: "orari-gruppo", subject: "Vieni a conoscere gli allenamenti dell'Ordine", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e non serve esperienza.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e non serve esperienza.", opening: "gli allenamenti seguono un percorso progressivo e il gruppo accoglie regolarmente persone interessate a provare per la prima volta.", invitation: "Con una tua conferma ti comunicheremo il prossimo orario disponibile." },
-  { id: "ambiente-accogliente", subject: "Una palestra in cui imparare insieme", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "la qualità dell'allenamento dipende anche dall'ambiente: attenzione reciproca, rispetto e disponibilità ad aiutarsi fanno parte di ogni incontro.", invitation: "La lezione di prova è il modo migliore per conoscere direttamente il gruppo." },
-  { id: "controllo-movimento", subject: "Allena controllo, precisione e movimento", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "il percorso tecnico sviluppa controllo del gesto, gestione della distanza e capacità di prendere decisioni in movimento.", invitation: "Ti proponiamo una prima lezione guidata e completamente gratuita." },
-  { id: "nessuna-esperienza", subject: "Non serve esperienza per iniziare", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "molte persone arrivano da noi senza alcuna esperienza in discipline simili. Il programma iniziale è costruito per accompagnarle in modo graduale.", invitation: "Se sei curioso, prenota una prova e pensa soltanto a divertirti imparando." },
-  { id: "attivita-settimanale", subject: "Una nuova attività per la tua settimana", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "inserire un allenamento diverso nella propria settimana può essere un buon modo per ritrovare energia e concentrazione.", invitation: "Vieni a verificare di persona se l'Ordine delle Onde fa per te." },
-  { id: "domande-prima", subject: "Tutte le domande sono benvenute", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "prima di cominciare è normale avere domande su sicurezza, preparazione fisica e svolgimento della lezione. Dedichiamo sempre tempo a rispondere.", invitation: "Puoi venire a una prova gratuita e valutare con calma l'esperienza." },
-  { id: "percorso-progressivo", subject: "Un percorso tecnico costruito un passo alla volta", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "ogni lezione aggiunge competenze nuove a una base chiara, senza richiedere di imparare tutto immediatamente.", invitation: "La prova introduttiva ti mostrerà il primo tratto del percorso." },
-  { id: "prova-senza-impegno", subject: "Prova gratuita e senza impegno a Genova", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "la prima partecipazione serve a conoscere persone, spazi e metodo di allenamento prima di prendere qualunque decisione.", invitation: "Rispondi con la tua disponibilità e organizzeremo la visita." },
-  { id: "movimento-strategia", subject: "Movimento e strategia nello stesso allenamento", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "gli esercizi combinano gesto atletico, lettura della situazione e collaborazione con compagni sempre diversi.", invitation: "Ti invitiamo a sperimentare questa combinazione durante una lezione gratuita." },
-  { id: "scuola-aperta", subject: "La scuola è aperta a nuovi partecipanti", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "in questo periodo stiamo accogliendo persone interessate a iniziare un percorso regolare insieme al gruppo di Genova.", invitation: "Saremmo felici di presentarti l'attività durante la prossima prova." },
-  { id: "invito-aperto", subject: "Il tuo invito all'Ordine delle Onde", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e l'attrezzatura viene fornita dalla scuola.", opening: "la porta della palestra è aperta a chi vuole allenare presenza, controllo e coordinazione in un contesto accogliente.", invitation: "Il percorso può iniziare con una singola lezione gratuita." },
-  { id: "lunedi-luminoso", subject: "Un modo diverso di vivere il lunedì sera", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "ci sono lunedì che terminano sul divano e lunedì in cui si impara qualcosa di completamente nuovo insieme a un gruppo motivato.", invitation: "Noi preferiamo i secondi: vieni a provarne uno gratuitamente." },
-  { id: "curiosita-inizio", subject: "La curiosità è già un ottimo inizio", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "non occorre sapere esattamente cosa aspettarsi. La curiosità basta per entrare in palestra; alle spiegazioni, alla sicurezza e alle spade pensiamo noi.", invitation: "Prenota la tua prima lezione e lascia che il resto diventi esperienza." },
-  { id: "routine-nuova", subject: "La tua routine potrebbe usare una spada in più", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "una settimana ben organizzata ha spazio per lavoro, riposo e almeno un'attività capace di sorprendere davvero.", invitation: "Aggiungi una prova gratuita e osserva l'effetto sulla routine." },
-  { id: "precisione-divertente", subject: "La precisione può essere molto divertente", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "ripetere un movimento finché diventa naturale è soddisfacente; farlo con un gruppo e una spada rende il processo decisamente più interessante.", invitation: "Vieni a scoprire quanto durante la prossima lezione introduttiva." },
-  { id: "serata-diversa", subject: "Una serata diversa, senza cambiare città", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "Genova offre molti modi di passare una serata. Pochi includono tecnica, movimento e una sala piena di persone con spade luminose.", invitation: "La prima visita è gratuita e non richiede preparazione." },
-  { id: "sfida-accessibile", subject: "Una sfida nuova, ma accessibile", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "imparare una disciplina nuova mette alla prova coordinazione e attenzione, ma un buon metodo rende ogni passaggio comprensibile.", invitation: "Comincia dalle basi con una lezione pensata per principianti." },
-  { id: "energia-gruppo", subject: "Porta energia, al resto pensa il gruppo", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "il gruppo fornisce spiegazioni, materiali e compagni di allenamento. Da parte tua serve soltanto la disponibilità a metterti in gioco.", invitation: "Ti teniamo volentieri un posto per la prossima prova." },
-  { id: "imparare-muovendosi", subject: "Impara qualcosa di nuovo mentre ti muovi", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "alcune competenze si studiano seduti; altre richiedono spazio, attenzione e la soddisfazione di vedere subito un movimento migliorare.", invitation: "Vieni a provare la seconda categoria con noi." },
-  { id: "tempo-ben-speso", subject: "Novanta minuti molto diversi dal solito", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "una lezione passa tra spiegazioni, esercizi e confronto con il gruppo, lasciando la sensazione concreta di avere imparato qualcosa.", invitation: "Scopri se è il modo giusto di usare una delle tue prossime serate." },
-  { id: "concentrazione-attiva", subject: "Concentrazione, ma senza stare fermi", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e puoi iniziare con calma, anche senza esperienza.", opening: "la disciplina richiede attenzione continua, perché distanza, ritmo e intenzione cambiano mentre ci si muove.", invitation: "Una prova gratuita vale più di qualunque descrizione." },
-  { id: "gruppo-che-cresce", subject: "Il gruppo di Genova sta crescendo", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "nuove persone portano domande, stili di apprendimento e occasioni di allenamento diverse per tutti.", invitation: "Se vuoi farne parte, il primo passo è una lezione introduttiva." },
-  { id: "eleganza-movimento", subject: "Quando il movimento diventa preciso", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "all'inizio ogni gesto richiede attenzione; poi coordinazione e controllo iniziano a trasformarlo in qualcosa di sorprendentemente elegante.", invitation: "Vieni a vedere questo percorso cominciare dalla prima lezione." },
-  { id: "prova-pratica", subject: "Meno teoria, più prova pratica", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "potremmo continuare a descrivere l'attività per molte righe, ma nessun testo sostituisce la sensazione del primo esercizio riuscito.", invitation: "Per questo preferiamo invitarti direttamente in palestra." },
-  { id: "posto-riservato", subject: "C'è un posto disponibile alla prossima prova", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "abbiamo preparato una lezione introduttiva con il tempo necessario per seguire chi arriva per la prima volta.", invitation: "Se l'orario è compatibile, quel posto può essere tuo." },
-  { id: "allenare-decisioni", subject: "Allena il corpo e la capacità di decidere", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "ogni esercizio richiede di osservare, scegliere e muoversi con controllo, mantenendo sempre attenzione alla persona di fronte.", invitation: "Prova gratuitamente questo tipo di allenamento." },
-  { id: "settimana-memorabile", subject: "Rendi questa settimana un po' più memorabile", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "non tutte le settimane devono assomigliarsi. A volte basta inserire un'esperienza nuova nel punto giusto.", invitation: "Noi proponiamo una lezione, un gruppo accogliente e diverse spade pronte." },
-  { id: "inizio-semplice", subject: "Cominciare è più semplice di quanto sembri", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "non servono acquisti, conoscenze speciali o preparazione anticipata. Si arriva, si ascoltano le regole e si comincia dalle basi.", invitation: "Conferma la tua presenza e penseremo all'organizzazione." },
-  { id: "disciplina-condivisa", subject: "Una disciplina che si impara insieme", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "i progressi individuali crescono grazie al lavoro con il gruppo, al confronto e alla disponibilità reciproca.", invitation: "Vieni a conoscere le persone che rendono possibile questo percorso." },
-  { id: "invito-concreto", subject: "Un invito concreto per la prossima lezione", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "abbiamo spazio, attrezzatura e una sequenza introduttiva pronta per chi vuole capire davvero come funziona l'attività.", invitation: "Manca soltanto la tua conferma." },
-  { id: "buona-storia", subject: "Potrebbe diventare una buona storia da raccontare", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: rispondi per conoscere il prossimo orario.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: rispondi per conoscere il prossimo orario.", opening: "molte passioni iniziano con una decisione piccola: accettare un invito, entrare in una sala e provare qualcosa che non era previsto.", invitation: "Questa può iniziare con una lezione gratuita." },
-  { id: "divano", subject: "Una proposta che il tuo divano non approverà", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "il tuo divano sostiene che questa settimana non sia il momento giusto per provare qualcosa di nuovo. Abbiamo esaminato la sua posizione e non siamo d'accordo.", invitation: "Vieni a conoscere l'Ordine delle Onde con una prova gratuita." },
-  { id: "agenda-spada", subject: "Abbiamo trovato uno spazio libero nella tua agenda", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "tra impegni, notifiche e cose rimandate esiste probabilmente un'ora in cui potresti imparare a usare una spada in sicurezza.", invitation: "Ti proponiamo di occuparla con una lezione introduttiva." },
-  { id: "scarpe-comode", subject: "Abiti comodi, scarpe pulite, ottime intenzioni", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "la lista per iniziare è sorprendentemente breve. Non comprende talenti segreti, mantelli o dichiarazioni solenni.", invitation: "Porta questi tre elementi e al resto penserà il gruppo." },
-  { id: "riunione-movimento", subject: "Una riunione in cui è consentito muoversi", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "abbiamo tavoli solo quando servono, nessuna presentazione di quarantadue diapositive e parecchio spazio per allenarsi.", invitation: "Partecipa alla prossima riunione non amministrativa dell'Ordine." },
-  { id: "mercoledi-epico", subject: "Il mercoledì può ancora migliorare", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "le probabilità che una normale serata migliori dopo aver impugnato una spada luminosa sono oggetto di uno studio interno molto ottimista.", invitation: "Contribuisci ai dati partecipando a una prova gratuita." },
-  { id: "coordinazione-caffe", subject: "La coordinazione non si ottiene soltanto col caffè", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "il caffè aiuta molte attività, ma distanza, precisione e controllo richiedono un metodo leggermente più strutturato.", invitation: "Abbiamo preparato quel metodo per la tua prima lezione." },
-  { id: "nessun-prescelto", subject: "Non cerchiamo prescelti, accettiamo principianti", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "la selezione ufficiale richiede soltanto curiosità, rispetto delle regole e disponibilità a imparare con gli altri.", invitation: "Se soddisfi questi severissimi requisiti, la prova è gratuita." },
-  { id: "manuale-non-incluso", subject: "Il manuale è incluso nelle spiegazioni", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "non riceverai un volume di istruzioni da studiare la sera prima. Le regole arrivano in palestra, nel momento in cui servono.", invitation: "Tu occupati di arrivare; noi ci occupiamo della sequenza." },
-  { id: "spazio-personale", subject: "Impara a gestire lo spazio personale con precisione", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "la distanza è una cosa seria, soprattutto quando entrambe le persone stanno cercando di capire un esercizio con una spada.", invitation: "La prima lezione parte proprio da questo principio." },
-  { id: "progetto-segreto", subject: "Un progetto non particolarmente segreto", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e il gruppo ti segue passo dopo passo.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e il gruppo ti segue passo dopo passo.", opening: "stiamo costruendo un gruppo sempre più preparato e accogliente. Il progetto è visibile ogni settimana in palestra e non richiede autorizzazioni speciali.", invitation: "Puoi osservarlo da vicino durante una prova gratuita." },
-  { id: "notifica-utile", subject: "Questa notifica potrebbe essere utile davvero", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "in mezzo a promemoria e messaggi automatici, eccone uno con un risultato concreto: una nuova esperienza sportiva a Genova.", invitation: "Apri metaforicamente l'allegato e vieni alla prima lezione." },
-  { id: "postura-eroica", subject: "La postura eroica arriva dopo quella corretta", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "prima si impara a stare in equilibrio, poi a muoversi con controllo. L'aspetto spettacolare è una conseguenza, non un requisito.", invitation: "Comincia dalla versione corretta durante la prova introduttiva." },
-  { id: "palestra-senza-draghi", subject: "Palestra verificata: nessun drago presente", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "abbiamo controllato lo spazio, preparato le spade e confermato che gli unici ostacoli saranno esercizi graduali e qualche movimento nuovo.", invitation: "La situazione è quindi adatta a una prima lezione." },
-  { id: "livello-curiosita", subject: "Il tuo livello di curiosità sembra sufficiente", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "il sistema non richiede test d'ingresso. Una domanda sincera sull'attività è già un indicatore più che adeguato.", invitation: "Converti la curiosità in esperienza con una prova gratuita." },
-  { id: "impegno-ragionevole", subject: "Una quantità ragionevole di avventura", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "non chiediamo viaggi lontani né equipaggiamento raro. La palestra è a Genova e tutte le spade tornano nell'armadio a fine lezione.", invitation: "Accetta l'avventura logisticamente sostenibile." },
-  { id: "modulo-entusiasmo", subject: "Il modulo entusiasmo può essere compilato sul posto", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "non serve preparare un discorso. È consentito arrivare prudentemente curiosi e diventare entusiasti soltanto dopo aver provato.", invitation: "Abbiamo riservato questa opzione alla prossima lezione." },
-  { id: "piano-b", subject: "Un ottimo piano B per la solita serata", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "se il piano A consiste nel ripetere esattamente la settimana precedente, proponiamo un'alternativa con movimento, tecnica e persone nuove.", invitation: "Il piano B comincia con una prova senza impegno." },
-  { id: "statistica-sorrisi", subject: "Le nostre statistiche indicano molti sorrisi", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "il report non è stato sottoposto a revisione accademica, ma il gruppo sembra uscire dagli allenamenti con energia e parecchi argomenti da raccontare.", invitation: "Puoi verificare personalmente il campione." },
-  { id: "spada-assegnata", subject: "Una spada potrebbe essere temporaneamente assegnata a te", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "l'ufficio attrezzatura conferma la disponibilità di materiale per una nuova persona, previa normale spiegazione delle regole di sicurezza.", invitation: "Conferma la prova e completeremo l'assegnazione." },
-  { id: "decisione-semplice", subject: "La decisione più semplice della settimana", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: bastano abiti comodi e la voglia di provare.", opening: "non devi scegliere un percorso completo oggi. Devi soltanto decidere se una singola lezione gratuita merita una serata.", invitation: "Noi pensiamo di sì e siamo pronti a dimostrarlo." },
-  { id: "protocollo-curiosita", subject: "Protocollo interno per la gestione della curiosità", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e la palestra si trova a Genova.", opening: "la tua richiesta informale è stata classificata come interesse potenzialmente trasformabile in allenamento concreto.", invitation: "La procedura raccomandata prevede una lezione gratuita e nessun ulteriore modulo." },
-  { id: "verbale-spade", subject: "Verbale sintetico sulla disponibilità delle spade", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e la palestra si trova a Genova.", opening: "il controllo inventario si è concluso positivamente: esiste attrezzatura sufficiente per accogliere almeno una nuova persona motivata.", invitation: "Ti proponiamo di associare il tuo nome a una delle disponibilità." },
-  { id: "foglio-calcolo", subject: "Il foglio di calcolo suggerisce una prova", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e la palestra si trova a Genova.", opening: "dopo un numero non necessario di formule, la colonna conclusioni restituisce un risultato sorprendentemente leggibile: dovresti venire in palestra.", invitation: "Possiamo trasformare la cella in un appuntamento reale." },
-  { id: "comitato-lunedi", subject: "Delibera del comitato per il miglioramento del lunedì", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e la palestra si trova a Genova.", opening: "il comitato ha stabilito che movimento, concentrazione e spade luminose costituiscono un aggiornamento accettabile alla normale routine.", invitation: "La delibera entra in vigore con la tua prima lezione." },
-  { id: "ticket-esperienza", subject: "Ticket aperto: nuova esperienza da configurare", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e la palestra si trova a Genova.", opening: "la richiesta è stata presa in carico. Mancano soltanto una data, abiti comodi e la presenza dell'utente interessato.", invitation: "Conferma la disponibilità per permetterci di chiudere il ticket con successo." },
-  { id: "audit-divano", subject: "Audit indipendente sulle prestazioni del divano", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e la palestra si trova a Genova.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e la palestra si trova a Genova.", opening: "l'analisi ha rilevato un'eccessiva specializzazione nel riposo e nessun contributo alla coordinazione dinamica.", invitation: "Si raccomanda una compensazione tramite lezione di prova." },
-  { id: "circolare-movimento", subject: "Circolare n. 12: introduzione al movimento controllato", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e la palestra si trova a Genova.", opening: "la circolare stabilisce che tutti i nuovi partecipanti inizino da esercizi chiari, sicuri e progressivi sotto supervisione.", invitation: "Puoi partecipare alla prossima applicazione pratica della circolare." },
-  { id: "budget-zero", subject: "Preventivo approvato: costo della prima prova € 0", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e la palestra si trova a Genova.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e la palestra si trova a Genova.", opening: "la voce di spesa relativa alla lezione introduttiva è stata verificata e rimane ostinatamente pari a zero.", invitation: "Il budget non sembra quindi un motivo valido per rimandare." },
-  { id: "riunione-operativa", subject: "Convocazione a riunione operativa senza sedie", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e la palestra si trova a Genova.", opening: "l'ordine del giorno comprende sicurezza, postura, distanza e primi esercizi. La riunione si svolgerà quasi interamente in movimento.", invitation: "La tua partecipazione è facoltativa ma fortemente incoraggiata." },
-  { id: "allegato-invisibile", subject: "Allegato: una serata diversa dal solito", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e la palestra si trova a Genova.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e la palestra si trova a Genova.", opening: "l'allegato non compare perché è composto da spazio, persone e attività fisica. Per aprirlo è necessario presentarsi in palestra.", invitation: "Possiamo programmare l'accesso gratuito." },
-  { id: "kpi-coordinazione", subject: "Aggiornamento KPI: coordinazione migliorabile", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "gli indicatori disponibili suggeriscono margini di crescita interessanti nella gestione di distanza, equilibrio e precisione.", invitation: "È disponibile un intervento formativo introduttivo senza costi." },
-  { id: "approvazione-unanime", subject: "Invito approvato all'unanimità", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "tutti i membri presenti, incluse alcune spade correttamente riposte, hanno espresso parere favorevole alla tua visita.", invitation: "Resta da individuare soltanto la data della prova." },
-  { id: "procedura-abiti", subject: "Procedura semplificata per gli abiti comodi", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "la documentazione richiesta è stata ridotta a una sola indicazione: indossa qualcosa che permetta di muoverti liberamente.", invitation: "Ogni altro elemento necessario sarà fornito sul posto." },
-  { id: "registro-presenze", subject: "Uno spazio vuoto nel registro presenze", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "il registro della prossima lezione contiene una riga ancora disponibile e il reparto pianificazione vorrebbe usarla in modo produttivo.", invitation: "Possiamo inserire il tuo nome senza alcun impegno successivo." },
-  { id: "conformita-sicurezza", subject: "Verifica di conformità completata", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "regole, attrezzatura e sequenza introduttiva sono state controllate. Il sistema è pronto ad accogliere una persona alla prima esperienza.", invitation: "Occorre soltanto confermare chi sarà quella persona." },
-  { id: "memo-precisione", subject: "Memo: la precisione richiede pratica", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "la teoria sostiene che i movimenti migliorino ripetendoli con attenzione. La palestra dispone degli strumenti per verificare questa ipotesi.", invitation: "Sei invitato a partecipare alla sperimentazione gratuita." },
-  { id: "istanza-novita", subject: "Istanza di novità settimanale accettata", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "la richiesta implicita di rendere la settimana meno prevedibile è stata valutata e approvata senza osservazioni.", invitation: "L'azione correttiva prevista è una lezione dell'Ordine delle Onde." },
-  { id: "piano-formazione", subject: "Piano formativo individuale: prima voce disponibile", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "il piano può iniziare con sicurezza, fondamentali e semplici esercizi in coppia, senza prerequisiti nascosti.", invitation: "La prima voce del piano è offerta gratuitamente." },
-  { id: "notifica-sistema", subject: "Notifica di sistema: curiosità ancora attiva", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "il sistema ha rilevato che l'interesse mostrato non è ancora stato convertito in esperienza diretta.", invitation: "Premi metaforicamente Conferma partecipando a una prova." },
-  { id: "chiusura-pratica", subject: "Azione richiesta per chiudere la pratica", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e ogni esercizio aiuta a imparare divertendoti.", opening: "la pratica resta aperta finché non scopri se questa disciplina ti piace davvero. Ulteriori email non possono sostituire il test sul campo.", invitation: "Completa il processo con una singola lezione gratuita." },
-  { id: "rete-onde", subject: "La rete cresce una persona curiosa alla volta", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "ogni scuola, gruppo e percorso tecnico comincia dall'arrivo di persone disposte a provare seriamente qualcosa di nuovo.", invitation: "La tua prima lezione può essere il prossimo punto della rete." },
-  { id: "cento-inviti", subject: "Questo invito ha superato numerosi controlli qualità", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "dopo molte campagne abbiamo imparato che chiarezza, accoglienza e una prova concreta funzionano meglio di qualunque promessa esagerata.", invitation: "Per questo ti proponiamo semplicemente di venire in palestra." },
-  { id: "ordine-espansione", subject: "L'Ordine delle Onde continua ad espandersi", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "più persone significano più compagni di allenamento, più occasioni di confronto e una comunità capace di sostenere nuovi progetti.", invitation: "Puoi conoscere questa fase di crescita con una lezione gratuita." },
-  { id: "esperienza-consolidata", subject: "Un metodo consolidato per chi comincia oggi", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "abbiamo accolto molti principianti e migliorato nel tempo spiegazioni, materiali e progressione della prima lezione.", invitation: "Ora quel metodo è pronto anche per te." },
-  { id: "nuova-sede-futuro", subject: "Le prossime scuole iniziano dalle lezioni di oggi", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "una rete non nasce dai documenti strategici, ma dalle persone che entrano, imparano e decidono di costruire qualcosa insieme.", invitation: "Vieni a vedere da vicino come comincia il processo." },
-  { id: "collaborazione-reale", subject: "Collaborazione reale, non soltanto una parola", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "il gruppo cresce perché le persone si allenano, si aiutano e a volte scelgono di contribuire anche all'organizzazione della scuola.", invitation: "La prima tappa rimane una semplice prova gratuita." },
-  { id: "forme-percorso", subject: "Un percorso che continua oltre la prima Forma", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "le competenze si costruiscono in sequenza e aprono nel tempo possibilità diverse, senza saltare le basi che rendono tutto il resto utile.", invitation: "Scopri l'inizio del percorso durante la lezione introduttiva." },
-  { id: "qualita-crescita", subject: "Crescere mantenendo la qualità della prima lezione", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "anche mentre il gruppo aumenta, ogni nuova persona deve ricevere tempo, spiegazioni chiare e un'esperienza sicura.", invitation: "Abbiamo preparato tutto questo per la tua visita." },
-  { id: "reputazione-costruita", subject: "La reputazione si costruisce in palestra", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "eventi e messaggi possono farci conoscere, ma sono le lezioni ben condotte e le persone soddisfatte a far crescere davvero la scuola.", invitation: "Ti invitiamo a valutare personalmente il nostro lavoro." },
-  { id: "generazione-contatti", subject: "Da contatto a compagno di allenamento", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita: vieni a vedere di persona se questo sport fa per te.", opening: "un indirizzo in elenco è soltanto l'inizio. Il passaggio importante avviene quando ci si incontra, si prova e si condivide una lezione.", invitation: "Trasforma questo messaggio in un incontro reale." },
-  { id: "automazione-umana", subject: "Anche l'automazione ha bisogno di persone", shortDraft: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Vieni a provare LudoSport in palestra: è uno sport figo e divertente, adatto a tutti. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "procedure e strumenti accelerano l'organizzazione, ma il valore della scuola continua a dipendere da chi si presenta e partecipa con attenzione.", invitation: "Per questo il tuo posto alla prova conta ancora." },
-  { id: "evento-prossimo", subject: "Dall'evento alla palestra, il passo successivo", shortDraft: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Scopri LudoSport in palestra: movimento, tecnica e sfide nuove per la tua settimana. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "ci siamo incontrati fuori dalla scuola; ora puoi conoscere il contesto in cui tecnica e gruppo crescono settimana dopo settimana.", invitation: "Completa il percorso con una lezione introduttiva." },
-  { id: "attrezzatura-pronta", subject: "Attrezzatura controllata, gruppo pronto", shortDraft: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Prova una disciplina diversa, con spade luminose, esercizi graduali e un gruppo accogliente. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "il registro segnala spade disponibili, usura sotto controllo e persone pronte a seguire chi comincia.", invitation: "È un buon momento per programmare la tua prova." },
-  { id: "social-realta", subject: "Hai visto il post, ora prova la realtà", shortDraft: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Allena corpo e concentrazione in un ambiente sicuro, aperto a chi comincia davvero. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "immagini e video mostrano soltanto una parte dell'attività. Distanza, ritmo e collaborazione si comprendono davvero solo muovendosi.", invitation: "Passa dalla schermata alla palestra con una prova gratuita." },
-  { id: "scuola-organizzata", subject: "Una scuola organizzata per accoglierti", shortDraft: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Se vuoi cambiare routine, vieni a conoscere uno sport fatto di precisione, ritmo e collaborazione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "calendario, materiale e sequenza introduttiva sono coordinati per rendere semplice l'arrivo di una nuova persona.", invitation: "Scegli di presentarti; al resto penserà la procedura." },
-  { id: "dati-positivi", subject: "I dati sono positivi, ma preferiamo le persone", shortDraft: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "La prima lezione è un modo semplice per capire se LudoSport può diventare la tua nuova attività. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "conversioni e report indicano che molti partecipanti apprezzano la prova. Nessuna percentuale, però, può decidere al posto tuo.", invitation: "Vieni a raccogliere il dato più importante: la tua esperienza." },
-  { id: "onda-successiva", subject: "Ogni gruppo prepara l'onda successiva", shortDraft: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Impara i movimenti, affronta nuove sfide e divertiti insieme al gruppo di Genova. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "chi ha iniziato ieri oggi aiuta i nuovi arrivati, e questa continuità rende possibile una crescita che non perde il senso del gruppo.", invitation: "La prossima onda può cominciare dalla tua prima lezione." },
-  { id: "programma-maturo", subject: "Un programma maturo che accoglie ancora principianti", shortDraft: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "In palestra trovi istruttori, compagni e tutto il materiale per iniziare senza preparazione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "il percorso tecnico può diventare avanzato, ma conserva sempre un ingresso chiaro per chi entra per la prima volta.", invitation: "Quel punto di ingresso è disponibile gratuitamente." },
-  { id: "invito-rete", subject: "Invito ufficiale dalla rete dell'Ordine", shortDraft: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Una prova gratuita ti mostra come tecnica e movimento possono diventare un allenamento completo. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "la scuola di Genova continua a essere il punto di partenza per nuovi allenamenti, collaborazioni e progetti futuri.", invitation: "Conosci il punto di partenza durante la prossima prova." },
-  { id: "ultima-mail-prima-prova", subject: "L'ultima cosa da fare è venire a provare", shortDraft: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", shortClean: "Porta curiosità e abiti comodi: al resto pensiamo noi durante la tua prima lezione. La prova è gratuita e ti aspettiamo per un incontro senza impegno.", opening: "abbiamo scritto, organizzato, controllato l'attrezzatura e preparato il gruppo. Tutto ciò che poteva essere completato a distanza è completo.", invitation: "Resta soltanto una lezione gratuita con il tuo nome." },
-];
-
-export const MEDIUM_APPENDIXES = [
-  "La prova è gratuita e aperta anche a chi parte da zero.",
-  "Puoi venire senza attrezzatura e decidere con calma dopo aver provato.",
-  "Ti spiegheremo tutto sul posto, con esercizi graduali e sicuri.",
-  "Bastano abiti comodi e la curiosità di fare qualcosa di diverso.",
-] as const;
-
-export const FORMS_AND_WEAPONS_APPENDIX = `
-
-Il percorso non si ferma alla prima lezione. LudoSport è un sistema di combattimento sportivo con tre armi: lama singola, doppia lama e staffa. Ogni arma cambia distanza, ritmo e modo di occupare lo spazio, ma tutte si imparano con controllo, ascolto e rispetto.
-
-Le sette Forme aggiungono linguaggi diversi: difesa, velocità, fluidità, cambi di direzione e gestione della distanza. Non è necessario scegliere tutto subito: la progressione serve proprio a scoprire quale modo di muoversi ti incuriosisce di più.`;
-
-export const PREMIUM_APPENDIX = `
-
-Il Light Saber Combat è uno sport completo: allena gambe, postura, coordinazione, attenzione e capacità di prendere decisioni mentre il corpo è in movimento. Una parata non è soltanto un gesto da ricordare; è il risultato di distanza, tempo, angolo e lettura della persona davanti a te. La parte sorprendente è che questi elementi diventano comprensibili prima di quanto immagini, perché ogni esercizio aggiunge un tassello concreto.
-
-LudoSport organizza il percorso attorno a sette Forme di combattimento. La Forma 1 costruisce una base protetta e leggibile; le Forme successive esplorano velocità, pressione, fluidità, cambi di altezza e linee più complesse. Il risultato non è una coreografia da ripetere a memoria, ma un vocabolario tecnico che puoi studiare, adattare e riconoscere anche quando il ritmo cambia.
-
-Le armi sportive seguono la stessa logica. La lama singola è il punto di partenza più intuitivo; la doppia lama apre un gioco di continuità e controllo; la staffa mette alla prova spazio, traiettorie e presenza. Il combattimento resta codificato e controllato: la tecnica è la prima forma di sicurezza, e la sicurezza permette di allenarsi con più libertà, non con meno entusiasmo.
-
-In palestra alterniamo spiegazione, esercizi individuali, lavoro in coppia e confronto con persone che hanno livelli diversi. È un ambiente in cui puoi arrivare curioso, sbagliare una sequenza, ridere del tuo primo passo laterale e tornare la settimana dopo con una domanda nuova. Non serve recitare la parte dell'eroe: basta presentarsi, ascoltare e lasciare che il corpo impari.
-
-La scuola mette a disposizione il materiale necessario per cominciare. Porta abiti comodi, scarpe da palestra e la disponibilità a fare qualcosa che non assomiglia alla solita attività settimanale. Potresti scoprire uno sport; potresti trovare una comunità; potresti semplicemente uscire dalla palestra con una nuova Forma preferita e il sospetto che il lunedì sera sia stato rivalutato.`;
-
-export const MARKETING_APPENDIX = `
-
-Se questa email fosse una mappa, la prima prova sarebbe il punto in cui compare la luce. Da lì impari a stare nello spazio, muovere il corpo con intenzione e leggere ciò che succede prima di reagire.
-
-Le sette Forme LudoSport sono prospettive diverse su attacco, difesa, ritmo e controllo. Non sono una gara da finire in fretta: una Forma può sembrarti naturale, un'altra può regalarti il problema tecnico che non sapevi di voler risolvere.
-
-La lama singola costruisce una base versatile, la doppia lama chiede continuità e coordinazione, la staffa apre linee e distanze nuove. Le proverai nel tempo, quando avrai una base abbastanza solida da apprezzare davvero le differenze.
-
-In palestra alterniamo regole, postura, esercizi individuali, lavoro in coppia e confronto. Il gesto è controllato, il rispetto è reale e il gruppo rende più leggero anche il momento in cui la tua parata arriva al terzo tentativo.
-
-L'Ordine delle Onde ti aspetta con una lezione gratuita, attrezzatura disponibile e persone pronte a spiegarti da dove cominciare. Se hai letto fin qui, la curiosità ha già fatto il primo allenamento.`;
-
-/*
- * Email a blocchi (plan 2.4): the length follows the Creatività points bought
- * for the current catalog. `expansion` is 0–5 (the points of that level's
- * upgrade); level 0 is only the misspelled nucleus, every point adds a block.
- */
-export const MAX_EMAIL_EXPANSION = 5;
-
-// Level 1: the whole corrected draft plus one short line per point.
-const DRAFT_BLOCKS = [
-  "Ti aspettiamo!",
-  "Porta abiti comodi.",
-  "Al materiale pensiamo noi.",
-  "Nessun obbligo, promesso.",
-  "Rispondi pure a questa mail.",
-] as const;
-
-// Level 2: one more full sentence per point in the invitation paragraph.
-const COMPACT_BLOCKS = [
-  "Ti spieghiamo tutto sul posto, passo dopo passo.",
-  "Bastano abiti comodi e un po' di curiosità.",
-  "Non sarai l'unica persona alla prima lezione.",
-  "L'attrezzatura la mette a disposizione la scuola.",
-  "Dopo la prova decidi con calma, senza obblighi.",
-] as const;
-
-// Levels 3–7: one more detail bullet per point.
-const DETAIL_BLOCKS = [
-  "Attrezzatura fornita dalla scuola per tutta la prova.",
-  "Regole di sicurezza chiare fin dal primo minuto.",
-  "Tre armi sportive da scoprire nel tempo: lama singola, doppia lama e staffa.",
-  "Sette Forme di combattimento, ognuna con il suo ritmo.",
-  "Tornei e incontri con altre scuole per chi vuole mettersi alla prova.",
-] as const;
-
-function clampExpansion(expansion: number): number {
-  return Math.min(MAX_EMAIL_EXPANSION, Math.max(0, Math.floor(expansion)));
-}
-
-function rotatedBlocks<T>(blocks: readonly T[], index: number): T[] {
-  const start = index % blocks.length;
-  return [...blocks.slice(start), ...blocks.slice(0, start)];
+function lowerFirst(value: string) {
+  return value ? `${value[0].toLocaleLowerCase("it-IT")}${value.slice(1)}` : value;
 }
 
 function splitSentences(text: string): string[] {
@@ -377,103 +99,125 @@ function splitSentences(text: string): string[] {
     .filter(Boolean);
 }
 
-/**
- * Shapes a level 0–1 body ("Ciao X,\n<text>"). Level 0 keeps the sentences up to
- * the first misspelling, so the shortest draft still shows what the spell check
- * fixes; level 1 restores the whole corrected draft and adds one line per point.
- */
-function shapeCompactBody(
-  body: string,
-  level: EmailPresentationLevel,
-  expansion: number,
-  index: number,
-): string {
-  const lineBreak = body.indexOf("\n");
-  if (lineBreak < 0) return body;
-  const greeting = body.slice(0, lineBreak);
-  const sentences = splitSentences(body.slice(lineBreak + 1));
-  if (sentences.length === 0) return body;
-  if (level === 0) {
-    // Checked on the joined prefix: some error patterns look ahead to the next sentence.
-    let kept = 1;
-    while (kept < sentences.length && !hasLevelZeroProofreadingError(sentences.slice(0, kept).join(" "))) {
-      kept += 1;
-    }
-    return `${greeting}\n${sentences.slice(0, kept).join(" ")}`;
+interface CopyContext {
+  firstName: string;
+  senderName: string;
+  orderName: string;
+  city: string;
+  expansion: number;
+}
+
+function fill(text: string, context: CopyContext): string {
+  return text
+    .replaceAll("{{firstName}}", context.firstName)
+    .replaceAll("{{senderName}}", context.senderName)
+    .replaceAll("{{orderName}}", context.orderName)
+    .replaceAll("{{city}}", context.city);
+}
+
+function levelZeroCopy(entry: EmailCatalogEntry, index: number, context: CopyContext): ResolvedEmailTemplateCopy {
+  const sentences = splitSentences(fill(entry.draft, context));
+  let nucleus = "";
+  for (const sentence of sentences) {
+    nucleus = nucleus ? `${nucleus} ${sentence}` : sentence;
+    if (nucleus.length >= LEVEL_ZERO_MIN_CHARACTERS) break;
   }
-  return `${greeting}\n${[...sentences, ...rotatedBlocks(DRAFT_BLOCKS, index).slice(0, clampExpansion(expansion))].join(" ")}`;
+  const protectedWords = [...context.firstName.split(/\s+/), ...context.senderName.split(/\s+/)];
+  const subject = addLevelZeroTypos(fill(entry.draftSubject, context), `${entry.id}:subject`, {
+    protectedWords,
+    minimum: 1,
+  });
+  const body = addLevelZeroTypos(`Ciao ${context.firstName},\n${nucleus}`, `${entry.id}:body:${index}`, {
+    protectedWords,
+  });
+  return {
+    subject: subject.text,
+    body: body.text,
+    typos: { subject: subject.ranges, body: body.ranges },
+  };
 }
 
-export function capitalize(value: string) {
-  return value ? `${value[0].toLocaleUpperCase("it-IT")}${value.slice(1)}` : value;
+function levelOneCopy(entry: EmailCatalogEntry, index: number, context: CopyContext): ResolvedEmailTemplateCopy {
+  const draft = fill(entry.draft, context);
+  const lines = pickPhrases(DRAFT_LINES, index, context.expansion, draft);
+  return {
+    subject: fill(entry.draftSubject, context),
+    body: `Ciao ${context.firstName},\n${[draft, ...lines].join(" ")}`,
+  };
 }
 
-export function expandedOpening(copy: TemplateCopy, index: number, firstName: string) {
-  const opening = cleanCatalogCopy(copy.opening);
-  const invitation = cleanCatalogCopy(copy.invitation);
-  const appendix = cleanCatalogCopy(MEDIUM_APPENDIXES[index % MEDIUM_APPENDIXES.length]);
-  return `Ciao ${firstName},\n\n${capitalize(opening)}\n\n${invitation} ${appendix}`;
-}
-
-function bodyForLevel(
-  copy: TemplateCopy,
+function catalogCopy(
+  entry: EmailCatalogEntry,
   index: number,
-  firstName: string,
   level: EmailPresentationLevel,
-  emailSignature: string,
-  expansion: number,
-) {
-  const compact = level === 0 ? copy.shortDraft : cleanDraftCopy(copy.shortClean);
-  if (level <= 1) return `Ciao ${firstName},\n${compact}`;
-  const blocks = clampExpansion(expansion);
-  const invitation = cleanCatalogCopy(copy.invitation);
-  return buildFinalEmailBody(firstName, {
-    title: cleanCatalogCopy(copy.subject),
-    opening: cleanCatalogCopy(copy.opening),
-    invitation: level === 2
-      ? [invitation, ...rotatedBlocks(COMPACT_BLOCKS, index).slice(0, blocks)].join(" ")
-      : invitation,
-    details: level >= 3
-      ? [...DEFAULT_DETAILS, ...rotatedBlocks(DETAIL_BLOCKS, index).slice(0, blocks)]
-      : undefined,
-    signature: emailSignature,
-  }, level);
+  context: CopyContext,
+): ResolvedEmailTemplateCopy {
+  const marketing = level >= 5;
+  const opening = fill(entry.opening, context);
+  const invitation = fill(entry.invitation, context);
+  const signature = formatEmailSignature(context.senderName, context.orderName, context.city);
+
+  if (level === 2) {
+    const lines = pickPhrases(COURTEOUS_LINES, index, context.expansion, `${opening} ${invitation}`);
+    return {
+      subject: entry.subject,
+      body: buildFinalEmailBody(context.firstName, {
+        opening,
+        invitation: [invitation, ...lines].join(" "),
+        signature,
+      }, level),
+    };
+  }
+
+  // Levels 3–7: a hook opens the intro, details grow with the points.
+  const hook = fill(pickPhrase(marketing ? MARKETING_HOOKS : WARM_HOOKS, index), context);
+  const details = pickPhrases(
+    marketing ? PUNCHY_DETAILS : INFO_DETAILS,
+    index,
+    BASE_DETAILS + context.expansion,
+  );
+  const subject = level >= 6
+    ? fill(pickPhrase(MARKETING_SUBJECTS, index), context)
+    : `${context.firstName}, ${lowerFirst(entry.subject)}`;
+  return {
+    subject,
+    body: buildFinalEmailBody(context.firstName, {
+      title: entry.subject,
+      opening: `${hook} ${capitalize(opening)}`,
+      invitation,
+      details,
+      mainLabel: pickPhrase(marketing ? MARKETING_CALLS : WARM_CALLS, index),
+      booking: pickPhrase(marketing ? MARKETING_BOOKINGS : WARM_BOOKINGS, index),
+      postscript: pickPhrase(POSTSCRIPTS, index),
+      signature,
+    }, level),
+  };
 }
 
-export const EMAIL_TEMPLATES: EmailTemplate[] = EMAIL_CATALOG.map((copy, index) => ({
-  id: copy.id,
-  subject: copy.subject,
+function buildEmailCopy(
+  index: number,
+  level: EmailPresentationLevel,
+  context: CopyContext,
+): ResolvedEmailTemplateCopy {
+  const entry = EMAIL_CATALOG[index];
+  const clamped = { ...context, expansion: Math.min(MAX_EMAIL_EXPANSION, Math.max(0, Math.floor(context.expansion))) };
+  if (level === 0) return levelZeroCopy(entry, index, clamped);
+  if (level === 1) return levelOneCopy(entry, index, clamped);
+  return catalogCopy(entry, index, level, clamped);
+}
+
+export const EMAIL_TEMPLATES: EmailTemplate[] = EMAIL_CATALOG.map((entry, index) => ({
+  id: entry.id,
+  subject: entry.subject,
   body: (
-    name,
+    firstName,
     senderName,
     presentationLevel = 0,
     orderName = DEFAULT_ORDER_NAME,
     city = DEFAULT_CITY,
     expansion = MAX_EMAIL_EXPANSION,
-  ) => bodyForLevel(
-    copy,
-    index,
-    name,
-    presentationLevel,
-    formatEmailSignature(senderName, orderName, city),
-    expansion,
-  ),
+  ) => buildEmailCopy(index, presentationLevel, { firstName, senderName, orderName, city, expansion }).body,
 }));
-
-export function getDefaultEmailTemplateCopy(
-  template: EmailTemplate,
-  firstName: string,
-  senderName: string,
-  presentationLevel: EmailPresentationLevel,
-  orderName = DEFAULT_ORDER_NAME,
-  city = DEFAULT_CITY,
-  expansion = MAX_EMAIL_EXPANSION,
-): ResolvedEmailTemplateCopy {
-  return {
-    subject: template.subject,
-    body: template.body(firstName, senderName, presentationLevel, orderName, city, expansion),
-  };
-}
 
 export function resolveEmailTemplateCopy(
   template: EmailTemplate,
@@ -484,68 +228,6 @@ export function resolveEmailTemplateCopy(
   city = DEFAULT_CITY,
   expansion = MAX_EMAIL_EXPANSION,
 ): ResolvedEmailTemplateCopy {
-  const copy = resolveFullEmailTemplateCopy(
-    template,
-    firstName,
-    senderName,
-    presentationLevel,
-    orderName,
-    city,
-    expansion,
-  );
-  // A hand-edited level 1 override is kept as written; level 0 is always the nucleus.
-  if (
-    presentationLevel > 1 ||
-    (presentationLevel === 1 && getEmailCopyOverride(template.id, 1))
-  ) return copy;
   const index = Math.max(0, EMAIL_CATALOG.findIndex((entry) => entry.id === template.id));
-  return { ...copy, body: shapeCompactBody(copy.body, presentationLevel, expansion, index) };
-}
-
-function resolveFullEmailTemplateCopy(
-  template: EmailTemplate,
-  firstName: string,
-  senderName: string,
-  presentationLevel: EmailPresentationLevel,
-  orderName: string,
-  city: string,
-  expansion: number,
-): ResolvedEmailTemplateCopy {
-  const defaults = getDefaultEmailTemplateCopy(
-    template,
-    firstName,
-    senderName,
-    presentationLevel,
-    orderName,
-    city,
-    expansion,
-  );
-  const override = getEmailCopyOverride(template.id, presentationLevel);
-  if (override) {
-    return {
-      subject: renderEmailCopyTokens(override.subject, firstName, senderName),
-      body: presentationLevel === 1
-        ? renderEmailCopyTokens(override.body, firstName, senderName)
-        : normalizeEmailSignoff(
-            renderEmailCopyTokens(override.body, firstName, senderName),
-            senderName,
-            presentationLevel,
-          ),
-    };
-  }
-  if (presentationLevel === 1) {
-    const draftOverride = getEmailCopyOverride(template.id, 0);
-    if (draftOverride) {
-      const renderedBody = renderEmailCopyTokens(draftOverride.body, firstName, senderName);
-      return {
-        subject: cleanDraftCopy(renderEmailCopyTokens(draftOverride.subject, firstName, senderName)),
-        body: normalizeEmailSignoff(
-          cleanDraftCopy(renderedBody),
-          senderName,
-          presentationLevel,
-        ),
-      };
-    }
-  }
-  return defaults;
+  return buildEmailCopy(index, presentationLevel, { firstName, senderName, orderName, city, expansion });
 }

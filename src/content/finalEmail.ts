@@ -8,6 +8,9 @@ export interface FinalEmailCopyContext {
   invitation: string;
   signature?: string;
   details?: readonly string[];
+  mainLabel?: string;
+  booking?: string;
+  postscript?: string;
   contacts?: readonly string[];
   videoTitle?: string;
   videoCaption?: string;
@@ -28,9 +31,10 @@ export type FinalEmailTextKey =
   | "videoCaption"
   | "signoff"
   | "signature"
-  | "disclaimer";
+  | "disclaimer"
+  | "postscript";
 
-export const DEFAULT_DETAILS = [
+const DEFAULT_DETAILS = [
   "Una prova introduttiva per conoscere il percorso.",
   "Un ambiente guidato, aperto anche a chi parte da zero.",
   "Un gruppo pronto ad accompagnarti passo dopo passo, con esercizi graduali e indicazioni semplici.",
@@ -41,6 +45,10 @@ const DEFAULT_CONTACTS = [
   "Rispondi direttamente a questa email",
 ] as const;
 
+const DEFAULT_MAIN_LABEL = "UNISCITI A LUDOSPORT!";
+const DEFAULT_BOOKING =
+  "COME PRENOTARE\nScrivici per ricevere le informazioni aggiornate e scegliere il prossimo appuntamento.";
+const DEFAULT_POSTSCRIPT = "P.S. Porta un amico: le spade sono più belle in coppia.";
 const DEFAULT_VIDEO_TITLE = "Guarda il movimento in azione";
 const DEFAULT_VIDEO_CAPTION = "Un assaggio video del nostro sport";
 const DEFAULT_DISCLAIMER =
@@ -86,7 +94,7 @@ export function buildFinalEmailTextEntries(
   if (level >= 4) {
     entries.push({
       key: "mainLabel",
-      text: "UNISCITI A LUDOSPORT!",
+      text: context.mainLabel?.trim() || DEFAULT_MAIN_LABEL,
     });
   }
   if (level >= 3) {
@@ -95,7 +103,7 @@ export function buildFinalEmailTextEntries(
   if (level >= 4) {
     entries.push({
       key: "booking",
-      text: "COME PRENOTARE\nScrivici per ricevere le informazioni aggiornate e scegliere il prossimo appuntamento.",
+      text: context.booking?.trim() || DEFAULT_BOOKING,
     });
   }
   if (level >= 5) {
@@ -113,6 +121,10 @@ export function buildFinalEmailTextEntries(
   entries.push({ key: "signoff", text: "Un saluto," });
   if (level >= 2) entries.push({ key: "signature", text: signature });
   if (level >= 7) entries.push({ key: "disclaimer", text: disclaimer });
+  // Last on purpose: drafts saved before the P.S. existed keep their section keys.
+  if (level >= 6) {
+    entries.push({ key: "postscript", text: context.postscript?.trim() || DEFAULT_POSTSCRIPT });
+  }
   return entries;
 }
 
@@ -236,6 +248,7 @@ export function buildEmailHtmlSource({
       <img src="/email-assets/ordine-onde.png" alt="Ordine delle Onde">
       ${renderParagraph("final-email-disclaimer", textSection(sections, "disclaimer"))}
     </footer>` : ""}
+    ${renderParagraph("final-email-postscript", textSection(sections, "postscript"))}
   </div>
 </div>`;
 }

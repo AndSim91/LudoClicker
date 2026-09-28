@@ -1,17 +1,21 @@
 import { getEmailBuildSource } from "../content/emailBuild";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
-import type { CampaignEmail, GameState, WritingFlow } from "./types";
+import type { CampaignEmail, GameState, UpgradeLevels, WritingFlow } from "./types";
 
 /*
  * Rhythm mechanics of manual writing (plan points 2.1 and 2.2).
  *
- * Flusso: every manual input fills a 0–100 meter; the meter drains slowly while
- * the player keeps typing and fast after a short pause. Each quarter of the
- * meter adds one step of multiplier, from ×1 to ×5.
+ * Both start locked: the game opens plain and mechanical, and the rhythm is
+ * bought in the Scrittura branch extension.
  *
- * Frase perfetta: a small chance per input to finish the current sentence at
- * once. The roll is derived from the email and the input count, so it never
+ * Flusso ("Ritmo di battitura"): every manual input fills a meter that drains
+ * slowly while the player keeps typing and fast after a short pause. Every 25
+ * points add one step of multiplier; each upgrade level raises the cap by one,
+ * from ×2 up to ×5.
+ *
+ * Frase perfetta ("Frasi fatte"): a small chance per input to finish the
+ * current sentence at once. The roll is derived from the email and the input count, so it never
  * consumes the shared random seed that events, trials and tournaments rely on.
  */
 
@@ -26,15 +30,34 @@ export function getFlowMeterAt(flow: WritingFlow | undefined, now: number): numb
   return Math.min(GAME_CONFIG.flowMeterMax, Math.max(0, flow.meter - drained));
 }
 
-export function getFlowMultiplier(meter: number): number {
-  const step = GAME_CONFIG.flowMeterMax / (GAME_CONFIG.flowMaxMultiplier - 1);
-  return Math.min(GAME_CONFIG.flowMaxMultiplier, 1 + Math.floor(meter / step));
+// Meter points per multiplier step (25 with the default config).
+const FLOW_STEP = GAME_CONFIG.flowMeterMax / (GAME_CONFIG.flowMaxMultiplier - 1);
+
+/** Highest multiplier the upgrades allow: 1 means the Flusso is still locked. */
+export function getFlowCap(upgrades: UpgradeLevels): number {
+  return Math.min(
+    GAME_CONFIG.flowMaxMultiplier,
+    1 + getUpgradeEffectTotal(upgrades, "flowMaxMultiplier"),
+  );
 }
 
-export function applyFlowInput(flow: WritingFlow | undefined, now: number): WritingFlow {
+/** Meter points needed to reach the cap: the bar is full at the current cap. */
+export function getFlowMeterLimit(cap: number): number {
+  return Math.max(0, cap - 1) * FLOW_STEP;
+}
+
+export function getFlowMultiplier(meter: number, cap: number = GAME_CONFIG.flowMaxMultiplier): number {
+  return Math.min(cap, 1 + Math.floor(meter / FLOW_STEP));
+}
+
+export function applyFlowInput(
+  flow: WritingFlow | undefined,
+  now: number,
+  cap: number = GAME_CONFIG.flowMaxMultiplier,
+): WritingFlow {
   return {
     meter: Math.min(
-      GAME_CONFIG.flowMeterMax,
+      getFlowMeterLimit(cap),
       getFlowMeterAt(flow, now) + GAME_CONFIG.flowGainPerInput,
     ),
     updatedAt: now,
@@ -42,10 +65,10 @@ export function applyFlowInput(flow: WritingFlow | undefined, now: number): Writ
 }
 
 export function getPerfectPhraseChance(state: Pick<GameState, "upgrades">): number {
+  if ((state.upgrades["stock-phrases"] ?? 0) < 1) return 0;
   return Math.min(
     GAME_CONFIG.perfectPhraseMaxChance,
-    GAME_CONFIG.perfectPhraseBaseChance +
-      getUpgradeEffectTotal(state.upgrades, "perfectPhraseChance"),
+    getUpgradeEffectTotal(state.upgrades, "perfectPhraseChance"),
   );
 }
 

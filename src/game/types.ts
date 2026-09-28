@@ -93,6 +93,8 @@ export interface CampaignEmail {
   sendCompletesAt?: number;
   presentationLevel: EmailPresentationLevel;
   status: "writing" | "readyToSend" | "sending" | "sent" | "trialBooked" | "lost";
+  /** Level 0: positions of the generated spelling errors, for the underline. */
+  typos?: { subject: [number, number][]; body: [number, number][] };
 }
 
 export type EmailPresentationLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -199,6 +201,8 @@ export type AcquisitionEventCooldown =
 
 export type UpgradeId =
   | "comfortable-keyboard"
+  | "writing-rhythm"
+  | "stock-phrases"
   | "quick-phrases"
   | "automatic-signature"
   | "smart-fields"

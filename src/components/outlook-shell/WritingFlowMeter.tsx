@@ -1,23 +1,35 @@
+import type { CSSProperties } from "react";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameSelector } from "../../game/GameStateContext";
 import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
-import { getFlowMeterAt, getFlowMultiplier } from "../../game/writingRhythm";
+import {
+  getFlowCap,
+  getFlowMeterAt,
+  getFlowMeterLimit,
+  getFlowMultiplier,
+} from "../../game/writingRhythm";
 
 // Own component so the clock that animates the drain re-renders only this
 // meter, never the whole composer.
 export function WritingFlowMeter({ state: stateOverride }: { state?: GameState }) {
   const flow = useGameSelector((state) => state.player.flow, stateOverride);
-  const clockNow = useGameTime(Boolean(flow), GAME_CONFIG.progressUpdateIntervalMs);
+  const cap = useGameSelector((state) => getFlowCap(state.upgrades), stateOverride);
+  const clockNow = useGameTime(Boolean(flow) && cap > 1, GAME_CONFIG.progressUpdateIntervalMs);
+  // Locked until "Ritmo di battitura" is bought.
+  if (cap <= 1) return null;
   const now = flow ? Math.max(clockNow, flow.updatedAt) : clockNow;
   const meter = getFlowMeterAt(flow, now);
-  const multiplier = getFlowMultiplier(meter);
-  const percent = Math.round((meter / GAME_CONFIG.flowMeterMax) * 100);
+  const multiplier = getFlowMultiplier(meter, cap);
+  // The bar is full at the current cap and split into one segment per step.
+  const percent = Math.min(100, Math.round((meter / getFlowMeterLimit(cap)) * 100));
 
   return (
     <span
       className="composer-flow"
       data-multiplier={multiplier}
+      data-max={multiplier === cap ? "true" : undefined}
+      style={{ "--flow-steps": cap - 1 } as CSSProperties}
       role="meter"
       aria-label={`Flusso di scrittura ×${multiplier}`}
       aria-valuemin={0}

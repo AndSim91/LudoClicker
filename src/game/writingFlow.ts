@@ -4,6 +4,7 @@ import { selectActiveEmail } from "./selectors";
 import type { GameState } from "./types";
 import {
   applyFlowInput,
+  getFlowCap,
   getFlowMultiplier,
   getPerfectPhraseChance,
   getPerfectPhraseLength,
@@ -74,8 +75,10 @@ export function writeCharacters(
 }
 
 export function write(state: GameState, now: number): GameState {
-  const flow = applyFlowInput(state.player.flow, now);
-  let amount = state.player.writingPower * getFlowMultiplier(flow.meter);
+  // Locked Flusso (cap ×1): plain one-step writing, nothing stored.
+  const flowCap = getFlowCap(state.upgrades);
+  const flow = flowCap > 1 ? applyFlowInput(state.player.flow, now, flowCap) : undefined;
+  let amount = state.player.writingPower * (flow ? getFlowMultiplier(flow.meter, flowCap) : 1);
   let perfectPhrase = false;
 
   const email = selectActiveEmail(state);
@@ -95,7 +98,7 @@ export function write(state: GameState, now: number): GameState {
     ...written,
     player: {
       ...written.player,
-      flow,
+      ...(flow ? { flow } : {}),
       perfectPhrases: (written.player.perfectPhrases ?? 0) + (perfectPhrase ? 1 : 0),
     },
   };

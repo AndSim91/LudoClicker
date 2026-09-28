@@ -540,7 +540,8 @@
   overflow: hidden;
   border-radius: 3px;
   background:
-    linear-gradient(90deg, transparent 0 24.5%, var(--surface) 24.5% 25.5%, transparent 25.5% 49.5%, var(--surface) 49.5% 50.5%, transparent 50.5% 74.5%, var(--surface) 74.5% 75.5%, transparent 75.5%),
+    /* One segment per unlocked step (--flow-steps, set by WritingFlowMeter). */
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / var(--flow-steps, 4) - 1px), var(--surface) calc(100% / var(--flow-steps, 4) - 1px) calc(100% / var(--flow-steps, 4))),
     var(--onde-groove);
 }
 
@@ -555,13 +556,12 @@
   color: var(--onde-wave);
 }
 
-:root[data-theme="dark"] .composer-flow[data-multiplier="4"] .composer-flow-track > span,
-:root[data-theme="dark"] .composer-flow[data-multiplier="5"] .composer-flow-track > span {
+:root[data-theme="dark"] .composer-flow[data-max] .composer-flow-track > span {
   background: linear-gradient(90deg, var(--onde-wave), var(--onde-gold-bright));
   box-shadow: 0 0 10px rgb(240 184 90 / 60%);
 }
 
-:root[data-theme="dark"] .composer-flow[data-multiplier="5"] .composer-flow-game b {
+:root[data-theme="dark"] .composer-flow[data-max] .composer-flow-game b {
   color: var(--onde-gold-bright);
   text-shadow: 0 0 8px rgb(240 184 90 / 50%);
 }

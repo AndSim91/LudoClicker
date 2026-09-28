@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 82,
+  version: 83,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -36,8 +36,7 @@ export const GAME_CONFIG = {
   flowPauseDrainPerSecond: 40,
   flowMaxMultiplier: 5,
   // Frase perfetta: chance per manual input, raised by Scrittura upgrades.
-  perfectPhraseBaseChance: 0.01,
-  perfectPhraseMaxChance: 0.1,
+  perfectPhraseMaxChance: 0.05,
   perfectPhraseMaxCharacters: 60,
   monthlyMemberFee: 40,
   monthlyMemberFormBonus: 5,

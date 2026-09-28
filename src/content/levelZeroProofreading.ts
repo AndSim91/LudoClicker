@@ -1,3 +1,5 @@
+// Legacy: underlines level 0 emails saved before the errors were generated with
+// their positions (levelZeroTypos.ts). Do not extend: new errors go in TYPOS.
 export interface ProofreadingErrorRange {
   start: number;
   end: number;

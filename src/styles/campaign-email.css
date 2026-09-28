@@ -560,6 +560,17 @@
   line-height: 1.6;
 }
 
+/* The P.S. of levels 6–7, typed last at the bottom of the paper. */
+.final-email-postscript {
+  max-width: 520px;
+  margin: 20px auto 24px !important;
+  padding: 0 16px;
+  color: #3d3d3d;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 @media (max-width: 760px) {
   .campaign-email-final {
     margin-right: -8px;
