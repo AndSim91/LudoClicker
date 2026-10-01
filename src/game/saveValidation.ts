@@ -362,6 +362,13 @@ export function isValidGameState(value: unknown): value is GameState {
         isNonNegativeSafeInteger(contact.agonistCourseStyleBonus)) &&
       hasValidTraining(contact.training)
     ) &&
+    (state.availableContactPool === undefined ||
+      (Array.isArray(state.availableContactPool) &&
+        state.availableContactPool.every((entry) =>
+          CONTACT_SOURCES.includes(entry.source) &&
+          (entry.rarity === "common" || entry.rarity === "rare" || entry.rarity === "ultra-rare") &&
+          Number.isSafeInteger(entry.count) && entry.count > 0
+        ))) &&
     Array.isArray(state.emails) &&
     state.emails.every((email) =>
       Number.isInteger(email.presentationLevel) &&

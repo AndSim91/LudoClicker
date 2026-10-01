@@ -114,6 +114,8 @@ export const GAME_CONFIG = {
   accoglienzaDepartureScale: 0.75,
   saveIntervalMs: 60_000,
   recentEmailsLimit: 500,
+  /** Available contacts kept as objects; the ordinary ones beyond it become counters. */
+  materialAvailableContactsLimit: 100,
   recentCompletedTrialsLimit: 500,
   recentMissedTournamentsLimit: 48,
   chroniclesTeamSize: 6,

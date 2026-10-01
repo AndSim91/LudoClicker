@@ -32,12 +32,25 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
   }
 
   let remaining = Math.abs(amount);
+  // Pooled contacts are the newest: they go first.
+  const pool = [...(state.availableContactPool ?? [])];
+  while (remaining > 0 && pool.length > 0) {
+    const last = pool[pool.length - 1];
+    const removed = Math.min(remaining, last.count);
+    remaining -= removed;
+    if (removed === last.count) pool.pop();
+    else pool[pool.length - 1] = { ...last, count: last.count - removed };
+  }
   const contacts = state.contacts.filter((contact) => {
     if (contact.status !== "available" || remaining === 0) return true;
     remaining -= 1;
     return false;
   });
-  return contacts.length === state.contacts.length ? state : { ...state, contacts };
+  const poolChanged = pool.length !== (state.availableContactPool?.length ?? 0) ||
+    pool.some((entry, index) => entry !== state.availableContactPool?.[index]);
+  return contacts.length === state.contacts.length && !poolChanged
+    ? state
+    : { ...state, contacts, availableContactPool: pool.length > 0 ? pool : undefined };
 }
 
 export function addAdminMembers(state: GameState, rawAmount: number): GameState {

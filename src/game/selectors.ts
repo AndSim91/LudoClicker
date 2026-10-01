@@ -1,3 +1,4 @@
+import { getPooledContactCount } from "./historyArchive";
 import type {
   CampaignEmail,
   Collaborator,
@@ -41,11 +42,11 @@ export function selectActiveContact(state: GameState): Contact | undefined {
 }
 
 export function selectAvailableContacts(state: GameState): number {
-  return getAvailableContactCount(state.contacts);
+  return getAvailableContactCount(state.contacts) + getPooledContactCount(state);
 }
 
 export function selectContactsAwaitingEmail(state: GameState): number {
-  return getContactsAwaitingEmailCount(state.contacts);
+  return getContactsAwaitingEmailCount(state.contacts) + getPooledContactCount(state);
 }
 
 export function selectAvailableEventMembers(state: GameState): number {

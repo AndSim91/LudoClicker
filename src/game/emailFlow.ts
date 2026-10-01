@@ -8,6 +8,7 @@ import { getTrialDurationMs, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailBookingChance } from "./formulas";
 import { GAME_CONFIG } from "./config";
 import { createCampaign } from "./campaignContent";
+import { materializePooledContact } from "./contacts";
 import { makeGameId } from "./ids";
 import { nextRandom, randomBetween } from "./random";
 import { addMessage } from "./stateUpdates";
@@ -23,10 +24,15 @@ import type {
   ScheduledTrial,
 } from "./types";
 
-export function startNextCampaign(state: GameState, now: number): GameState {
-  if (selectActiveEmail(state)) return state;
-  const nextContact = state.contacts.find((contact) => contact.status === "available");
-  if (!nextContact) return state;
+export function startNextCampaign(currentState: GameState, now: number): GameState {
+  if (selectActiveEmail(currentState)) return currentState;
+  let state = currentState;
+  let nextContact = state.contacts.find((contact) => contact.status === "available");
+  if (!nextContact) {
+    const pooled = materializePooledContact(state, now);
+    if (!pooled) return state;
+    ({ state, contact: nextContact } = pooled);
+  }
 
   const mix = getEmailPresentationMix(state.upgrades);
   let presentationLevel = mix.newLevel;

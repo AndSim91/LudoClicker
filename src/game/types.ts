@@ -81,6 +81,13 @@ export interface Contact {
   trialRetryUsed?: boolean;
 }
 
+/** Ordinary available contacts beyond the material limit, oldest first (Fase 7.4). */
+export interface AvailableContactPoolEntry {
+  source: Contact["source"];
+  rarity: Exclude<PersonRarity, "legendary">;
+  count: number;
+}
+
 export interface CampaignEmail {
   id: string;
   contactId: string;
@@ -932,6 +939,7 @@ export interface GameState {
     superbaTournament?: boolean;
   };
   contacts: Contact[];
+  availableContactPool?: AvailableContactPoolEntry[];
   emails: CampaignEmail[];
   pendingEmailOutcomes: PendingEmailOutcome[];
   scheduledTrials: ScheduledTrial[];

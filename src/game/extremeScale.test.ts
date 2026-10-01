@@ -274,16 +274,19 @@ describe.runIf(runExtremeBenchmark)("extreme logical scale benchmark", () => {
   }, 60_000);
 });
 
-// Fase 7.1: every member is a real enrolled contact, as the game creates them.
+// Fase 7.1: every member is a real enrolled contact, as the game creates them,
+// plus as many contacts waiting for an email.
 // Add 1_000_000 once members are aggregated (7.5): today it needs ~400 MB.
 const MEMBER_SIZES = [1_000, 10_000, 100_000] as const;
 const TARGETS = { tickMs: 4, monthEndMs: 16, mainThreadSaveMs: 50 };
 
 function runMemberBenchmark(members: number) {
-  const created = gameReducer(createInitialState(NOW, "Stress test", false), {
+  const withMembers = gameReducer(createInitialState(NOW, "Stress test", false), {
     type: "ADMIN_ADD_MEMBERS",
     amount: members,
   });
+  // As many contacts waiting for an email: beyond the limit they become counters (7.4).
+  const created = gameReducer(withMembers, { type: "ADMIN_ADD_CONTACTS", amount: members });
   let state: GameState = {
     ...created,
     automation: { ...created.automation, lastProcessedAt: NOW },
@@ -322,6 +325,7 @@ function runMemberBenchmark(members: number) {
 
   const row = {
     members,
+    contactObjects: year.contacts.length,
     tickMs: ticks.milliseconds / 10,
     monthEndMs: slowestMonthEndMs,
     rawStateMiB: JSON.stringify(year).length / 1024 / 1024,

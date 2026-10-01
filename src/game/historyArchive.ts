@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from "./config";
 import type {
   AcquisitionEventId,
+  AvailableContactPoolEntry,
   CampaignEmail,
   Contact,
   GameState,
@@ -80,8 +81,50 @@ export function getArchivedContactCount(archive: HistoryArchive): number {
   );
 }
 
+export function getPooledContactCount(state: Pick<GameState, "availableContactPool">): number {
+  let count = 0;
+  for (const entry of state.availableContactPool ?? []) count += entry.count;
+  return count;
+}
+
 export function getCurrentSchoolContactCount(state: GameState): number {
-  return getArchivedContactCount(state.historyArchive) + state.contacts.length;
+  return getArchivedContactCount(state.historyArchive) + state.contacts.length +
+    getPooledContactCount(state);
+}
+
+function isPoolable(contact: Contact): contact is Contact & {
+  rarity: AvailableContactPoolEntry["rarity"];
+} {
+  return contact.status === "available" &&
+    contact.rarity !== "legendary" &&
+    !contact.specialProfileId &&
+    !contact.secretLegendaryId &&
+    !contact.trialRetryUsed &&
+    !contact.favorite;
+}
+
+/**
+ * Keeps the oldest available contacts as objects and turns the ordinary ones beyond
+ * the limit into counters: their name and stats are rolled again when their email starts.
+ */
+export function poolExcessAvailableContacts(state: GameState): GameState {
+  const pool = [...(state.availableContactPool ?? [])];
+  let available = 0;
+  const contacts = state.contacts.filter((contact) => {
+    if (contact.status !== "available") return true;
+    available += 1;
+    if (available <= GAME_CONFIG.materialAvailableContactsLimit || !isPoolable(contact)) return true;
+    const last = pool[pool.length - 1];
+    if (last?.source === contact.source && last.rarity === contact.rarity) {
+      pool[pool.length - 1] = { ...last, count: last.count + 1 };
+    } else {
+      pool.push({ source: contact.source, rarity: contact.rarity, count: 1 });
+    }
+    return false;
+  });
+  return contacts.length === state.contacts.length
+    ? state
+    : { ...state, contacts, availableContactPool: pool };
 }
 
 export function compactGameHistory(state: GameState): GameState {

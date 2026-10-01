@@ -21,7 +21,8 @@ import { resolveAcquisitionEvent } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
-import { compactGameHistory } from "./historyArchive";
+import { compactGameHistory, poolExcessAvailableContacts } from "./historyArchive";
+import { GAME_CONFIG } from "./config";
 import { markAllMessagesRead } from "./inboxFlow";
 import { processGadgets } from "./gadgetFlow";
 import {
@@ -59,6 +60,7 @@ import {
 import { processScheduledTrialStarts, resolveTrialBatch } from "./trialFlow";
 import { compactTournamentHistory } from "./tournamentFlow";
 import {
+  getAvailableContactCount,
   getPendingEmailOutcomes,
   getPeopleInTraining,
   getRunningAcquisitionEvents,
@@ -401,9 +403,14 @@ function compactChangedHistory(
     previous.statistics.trialsCompleted !== next.statistics.trialsCompleted ||
     previous.statistics.eventsCompleted !== next.statistics.eventsCompleted;
   const adminRemovedMembers = action.type === "ADMIN_ADD_MEMBERS" && action.amount < 0;
-  const compacted = terminalHistoryChanged || adminRemovedMembers || action.type === "REPLACE_STATE"
+  const archived = terminalHistoryChanged || adminRemovedMembers || action.type === "REPLACE_STATE"
     ? compactGameHistory(next)
     : next;
+  // Cheap check: the count is cached per contacts array.
+  const compacted =
+    getAvailableContactCount(archived.contacts) > GAME_CONFIG.materialAvailableContactsLimit
+      ? poolExcessAvailableContacts(archived)
+      : archived;
   return action.type === "REPLACE_STATE"
     ? compactTournamentHistory(compacted)
     : compacted;

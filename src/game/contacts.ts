@@ -309,3 +309,45 @@ export function mergeAcquiredContacts(
     ...acquiredContacts.filter((contact) => !existingIds.has(contact.id)),
   ];
 }
+
+/** Turns the oldest pooled contact back into an available contact (Fase 7.4). */
+export function materializePooledContact(
+  state: GameState,
+  now: number,
+): { state: GameState; contact: Contact } | undefined {
+  const [entry, ...rest] = state.availableContactPool ?? [];
+  if (!entry) return undefined;
+  const { firstName, lastName, email } = createRandomProspect(state.randomSeed);
+  const stats = rollAthleteBaseStats(advanceRandomSeed(state.randomSeed, 3), entry.rarity);
+  let suffix = state.contacts.length;
+  const ids = new Set(state.contacts.map((contact) => contact.id));
+  while (ids.has(makeGameId("contact", now, `pool-${suffix}`))) suffix += 1;
+  const contact: Contact = {
+    id: makeGameId("contact", now, `pool-${suffix}`),
+    firstName,
+    lastName,
+    email,
+    source: entry.source,
+    acquiredAt: now,
+    status: "available",
+    rarity: entry.rarity,
+    forms: [],
+    arenaBase: stats.arena,
+    styleBase: stats.style,
+    tournamentExperience: 0,
+    agonistCourseCompletions: 0,
+    agonistCourseArenaBonus: 0,
+    agonistCourseStyleBonus: 0,
+    formBranchPreferences: [],
+  };
+  const pool = entry.count > 1 ? [{ ...entry, count: entry.count - 1 }, ...rest] : rest;
+  return {
+    contact,
+    state: {
+      ...state,
+      randomSeed: stats.nextSeed,
+      contacts: [...state.contacts, contact],
+      availableContactPool: pool.length > 0 ? pool : undefined,
+    },
+  };
+}
