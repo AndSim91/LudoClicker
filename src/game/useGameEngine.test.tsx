@@ -432,6 +432,23 @@ describe("useGameEngine pause", () => {
     expect(result.current.saveStatus.phase).toBe("saved");
   });
 
+  it("saves a hidden tab off the synchronous path", async () => {
+    const { result } = renderHook(() => useGameEngine());
+    act(() => result.current.saveNow());
+    act(() =>
+      result.current.dispatch({ type: "UPDATE_PROFILE_NAME", displayName: "Scheda nascosta" }),
+    );
+    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    expect(readStoredGame().profile.displayName).not.toBe("Scheda nascosta");
+
+    await vi.waitFor(() =>
+      expect(readStoredGame().profile.displayName).toBe("Scheda nascosta"),
+    );
+    visibility.mockRestore();
+  });
+
   it("reports a storage failure without pretending the game is saved", () => {
     const { result } = renderHook(() => useGameEngine());
     const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {

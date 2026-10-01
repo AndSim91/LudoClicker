@@ -31,7 +31,12 @@ function isHiddenMessageSubject(subject: string): boolean {
 interface ReadResult {
   state: GameState | null;
   incompatible: boolean;
+  raw?: string;
 }
+
+// Primary save already validated in this session (loaded or written by us):
+// the same string is copied to the backup without decoding it again.
+let verifiedPrimarySave: string | null = null;
 
 function parseStoredSave(raw: string): ReadResult {
   try {
@@ -59,7 +64,7 @@ function parseStoredSave(raw: string): ReadResult {
 function read(key: string): ReadResult {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? parseStoredSave(raw) : { state: null, incompatible: false };
+    return raw ? { ...parseStoredSave(raw), raw } : { state: null, incompatible: false };
   } catch {
     // Il gioco può comunque ripartire in memoria se lo storage non è disponibile.
     return { state: null, incompatible: false };
@@ -84,6 +89,7 @@ export function loadGame(now = Date.now()): GameState {
   const primary = read(SAVE_KEY);
   const backup = primary.state ? { state: null, incompatible: false } : read(BACKUP_KEY);
   const saved = primary.state ?? backup.state;
+  verifiedPrimarySave = primary.state ? primary.raw ?? null : null;
   if (!saved) {
     return createInitialState(now);
   }
@@ -124,8 +130,7 @@ export function writePreparedGameSave(serialized: string): SaveGameResult {
   }
 
   if (currentResult) {
-    const currentSave = parseStoredSave(currentResult);
-    if (!currentSave.state) {
+    if (currentResult !== verifiedPrimarySave && !parseStoredSave(currentResult).state) {
       const storedBackupResult = runStorageOperation("read-backup", () =>
         localStorage.getItem(BACKUP_KEY),
       );
@@ -143,6 +148,7 @@ export function writePreparedGameSave(serialized: string): SaveGameResult {
         localStorage.setItem(SAVE_KEY, serialized),
       );
       if (typeof recoveredSaveResult !== "undefined") return recoveredSaveResult;
+      verifiedPrimarySave = serialized;
       return { ok: true };
     }
 
@@ -157,6 +163,7 @@ export function writePreparedGameSave(serialized: string): SaveGameResult {
   );
   if (typeof saveResult !== "undefined") return saveResult;
 
+  verifiedPrimarySave = serialized;
   return { ok: true };
 }
 
@@ -205,6 +212,7 @@ export function importGame(raw: string): GameState | null {
 }
 
 export function resetGame(now = Date.now()): GameState {
+  verifiedPrimarySave = null;
   localStorage.removeItem(SAVE_KEY);
   localStorage.removeItem(BACKUP_KEY);
   return createInitialState(now);

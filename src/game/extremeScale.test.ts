@@ -1,7 +1,10 @@
 import { ACHIEVEMENTS } from "../content/achievements";
 import { describe, expect, it } from "vitest";
 import { createInitialState, gameReducer } from "./engine";
+import { GAME_CONFIG } from "./config";
 import { compactGameHistory } from "./historyArchive";
+import { loadGame, writePreparedGameSave } from "./save";
+import { prepareStoredGameSave } from "./savePreparation";
 import {
   getActiveCampaignEmails,
   getAvailableContactCount,
@@ -106,6 +109,8 @@ function createExtremeState(size: number): GameState {
       ...base.school,
       activeMembers: LOGICAL_MEMBERS,
       peakActiveMembers: LOGICAL_MEMBERS,
+      // Already announced: an idle tick must keep returning the same state.
+      feeTiersAnnounced: GAME_CONFIG.membershipFeeTiers.length,
       fame: LOGICAL_MEMBERS,
       euros: EXTREME_EUROS,
       nextFeeAt: NOW + 60_000,
@@ -217,12 +222,12 @@ function runBenchmark(size: number): BenchmarkRow {
     activeContact: undefined,
     availableContacts: 0,
     availableEventMembers: LOGICAL_MEMBERS,
-    incomePerMonth: LOGICAL_MEMBERS * 40,
+    incomePerMonth: LOGICAL_MEMBERS * 160, // top fee tier (3.1)
     lastEmailStatus: "Perso",
   });
   expect(compaction.value).not.toBe(state);
-  expect(coldTick.value).toBe(compaction.value);
-  expect(warmTicks.value).toBe(compaction.value);
+  // The first tick may settle one-off state (the initial short goal); idle ticks after it must not.
+  expect(warmTicks.value).toBe(coldTick.value);
   expect(warmTicks.value.contacts.length).toBeLessThanOrEqual(500);
   expect(warmTicks.value.emails.length).toBeLessThanOrEqual(500);
   expect(warmTicks.value.historyArchive.contactsBySource.event.total).toBe(
@@ -267,4 +272,83 @@ describe.runIf(runExtremeBenchmark)("extreme logical scale benchmark", () => {
       ),
     );
   }, 60_000);
+});
+
+// Fase 7.1: every member is a real enrolled contact, as the game creates them.
+// Add 1_000_000 once members are aggregated (7.5): today it needs ~400 MB.
+const MEMBER_SIZES = [1_000, 10_000, 100_000] as const;
+const TARGETS = { tickMs: 4, monthEndMs: 16, mainThreadSaveMs: 50 };
+
+function runMemberBenchmark(members: number) {
+  const created = gameReducer(createInitialState(NOW, "Stress test", false), {
+    type: "ADMIN_ADD_MEMBERS",
+    amount: members,
+  });
+  let state: GameState = {
+    ...created,
+    automation: { ...created.automation, lastProcessedAt: NOW },
+  };
+  state = gameReducer(state, { type: "TICK", now: NOW + 1_000, gainMultiplier: 1 });
+  const ticks = elapsedMs(() => {
+    let ticked = state;
+    for (let second = 2; second <= 11; second += 1) {
+      ticked = gameReducer(ticked, { type: "TICK", now: NOW + second * 1_000, gainMultiplier: 1 });
+    }
+    return ticked;
+  });
+
+  // Twelve month ends cover the yearly departure roll.
+  let slowestMonthEndMs = 0;
+  let year = ticks.value;
+  for (let month = 0; month < 12; month += 1) {
+    const monthEnd = elapsedMs(() =>
+      gameReducer(year, { type: "ADMIN_ADVANCE_MONTH", now: NOW + 20_000 + month }),
+    );
+    slowestMonthEndMs = Math.max(slowestMonthEndMs, monthEnd.milliseconds);
+    year = monthEnd.value;
+  }
+
+  const prepared = elapsedMs(() => prepareStoredGameSave(year, NOW + 30_000));
+  expect(prepared.value.ok).toBe(true);
+  if (!prepared.value.ok) throw new Error("save preparation failed");
+  const serialized = prepared.value.serialized;
+  localStorage.clear();
+  expect(writePreparedGameSave(serialized).ok).toBe(true);
+  // The second autosave is the steady state: it also moves the previous save to the backup.
+  const write = elapsedMs(() => writePreparedGameSave(serialized));
+  expect(write.value.ok).toBe(true);
+  const load = elapsedMs(() => loadGame(NOW + 40_000));
+  expect(load.value.school.activeMembers).toBe(year.school.activeMembers);
+
+  const row = {
+    members,
+    tickMs: ticks.milliseconds / 10,
+    monthEndMs: slowestMonthEndMs,
+    rawStateMiB: JSON.stringify(year).length / 1024 / 1024,
+    storedKChars: serialized.length / 1_000,
+    workerSaveMs: prepared.milliseconds,
+    mainThreadSaveMs: write.milliseconds,
+    loadMs: load.milliseconds,
+  };
+  return {
+    ...row,
+    withinTargets: row.tickMs <= TARGETS.tickMs &&
+      row.monthEndMs <= TARGETS.monthEndMs &&
+      row.mainThreadSaveMs <= TARGETS.mainThreadSaveMs,
+  };
+}
+
+describe.runIf(runExtremeBenchmark)("material members benchmark", () => {
+  it("reports engine and save cost per enrolled member count", () => {
+    const report = MEMBER_SIZES.map(runMemberBenchmark);
+    console.info(
+      "MEMBER_SCALE_REPORT",
+      JSON.stringify(TARGETS),
+      "\n" + report
+        .map((row) => Object.entries(row)
+          .map(([key, value]) => `${key}=${typeof value === "number" ? Number(value.toFixed(1)) : value}`)
+          .join(" "))
+        .join("\n"),
+    );
+  }, 600_000);
 });

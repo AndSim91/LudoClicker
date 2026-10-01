@@ -285,6 +285,15 @@ describe("local save", () => {
     expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBeNull();
   });
 
+  it("still validates a primary replaced after this session saved it", () => {
+    const state = createInitialState(5_000, "Andrea Ungaro");
+    expect(saveGame(state, 6_000)).toBe(true);
+    localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
+
+    expect(saveGame(state, 7_000)).toBe(false);
+    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBe("not-json");
+  });
+
   it("does not overwrite the only remaining corrupt backup", () => {
     localStorage.setItem("oggetto-nuovi-iscritti.save.backup", "not-json");
 

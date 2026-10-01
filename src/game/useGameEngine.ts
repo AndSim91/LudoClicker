@@ -222,9 +222,15 @@ export function useGameEngine() {
       })),
     );
     void saveScheduler.flushInBackground();
-    const saveOnExit = () => saveScheduler.saveNow();
+    // Closing the page still saves synchronously, but only when something changed:
+    // beforeunload and pagehide both fire, and the second call must cost nothing.
+    const saveOnExit = () => saveScheduler.flush();
+    // Hiding the tab (tab switch, minimise) prepares the save in the worker, so the
+    // main thread never compresses a large state. ponytail: a hidden tab killed
+    // before the worker answers loses the progress since the last save; a sync save
+    // here would freeze the page for seconds on large saves.
     const saveWhenHidden = () => {
-      if (document.visibilityState === "hidden") saveScheduler.saveNow();
+      if (document.visibilityState === "hidden") void saveScheduler.flushInBackground();
     };
     window.addEventListener("beforeunload", saveOnExit);
     window.addEventListener("pagehide", saveOnExit);
