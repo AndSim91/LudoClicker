@@ -14,6 +14,7 @@ import {
   isCourseXUnlocked,
 } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
+import { getGroupedMemberCount } from "../../game/memberGroups";
 import type {
   Collaborator,
   Contact,
@@ -185,9 +186,10 @@ export function MemberList({
   onCancelEnrollment: (contactId: string) => void;
 }) {
   const state = useGameStateSlices(
-    ["contacts", "network", "school", "tournaments", "unlocks", "upgrades"],
+    ["contacts", "memberGroups", "network", "school", "tournaments", "unlocks", "upgrades"],
     stateOverride,
   );
+  const groupedMembers = getGroupedMemberCount(state);
   const members = useMemo(
     () => state.contacts.filter((contact) => contact.status === "enrolled"),
     [state.contacts],
@@ -504,6 +506,11 @@ export function MemberList({
       </div>
       <div className="member-filter-summary">
         <span>{filteredMembers.length} di {members.length} iscritti</span>
+        {groupedMembers > 0 ? (
+          <span title="Iscritti senza storia personale: ricevono nome e scheda quando iniziano un corso.">
+            + {groupedMembers} senza scheda
+          </span>
+        ) : null}
         <button type="button" onClick={resetFilters}>Azzera filtri</button>
       </div>
       {visibleMembers.map((contact) => {

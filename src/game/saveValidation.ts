@@ -369,6 +369,18 @@ export function isValidGameState(value: unknown): value is GameState {
           (entry.rarity === "common" || entry.rarity === "rare" || entry.rarity === "ultra-rare") &&
           Number.isSafeInteger(entry.count) && entry.count > 0
         ))) &&
+    (state.memberGroups === undefined ||
+      (Array.isArray(state.memberGroups) &&
+        state.memberGroups.every((group) =>
+          CONTACT_SOURCES.includes(group.source) &&
+          (group.rarity === "common" || group.rarity === "rare" || group.rarity === "ultra-rare") &&
+          isUniqueFormIdList(group.forms) &&
+          (group.recentEnrolledMonth === undefined || Number.isSafeInteger(group.recentEnrolledMonth)) &&
+          (group.lastFormTrainingYear === undefined || Number.isSafeInteger(group.lastFormTrainingYear)) &&
+          (group.formTrainingYearCount === undefined ||
+            isNonNegativeSafeInteger(group.formTrainingYearCount)) &&
+          Number.isSafeInteger(group.count) && group.count > 0
+        ))) &&
     Array.isArray(state.emails) &&
     state.emails.every((email) =>
       Number.isInteger(email.presentationLevel) &&

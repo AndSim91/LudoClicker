@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from "./config";
+import { getGroupedMemberCount } from "./memberGroups";
 import type {
   AcquisitionEventId,
   AvailableContactPoolEntry,
@@ -89,7 +90,7 @@ export function getPooledContactCount(state: Pick<GameState, "availableContactPo
 
 export function getCurrentSchoolContactCount(state: GameState): number {
   return getArchivedContactCount(state.historyArchive) + state.contacts.length +
-    getPooledContactCount(state);
+    getPooledContactCount(state) + getGroupedMemberCount(state);
 }
 
 function isPoolable(contact: Contact): contact is Contact & {

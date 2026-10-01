@@ -13,6 +13,7 @@ interface MemberFeeContributionCacheEntry {
 
 interface MonthlyMemberFeesCache {
   contacts: GameState["contacts"];
+  memberGroups: GameState["memberGroups"];
   collaborators: GameState["collaborators"];
   courseXUnlocked: boolean;
   trainingBonuses: number;
@@ -115,6 +116,7 @@ export function getMonthlyMemberFees(state: GameState): number {
   const baseFees = state.school.activeMembers * getMemberFee(state.school.peakActiveMembers);
   if (
     monthlyMemberFeesCache?.contacts === state.contacts &&
+    monthlyMemberFeesCache.memberGroups === state.memberGroups &&
     monthlyMemberFeesCache.courseXUnlocked === courseXUnlocked &&
     haveSameMemberFeeQualifications(
       monthlyMemberFeesCache.collaborators,
@@ -135,10 +137,13 @@ export function getMonthlyMemberFees(state: GameState): number {
       collaboratorsByContactId.get(contact.id),
       courseXUnlocked,
     );
-  }, 0);
+  }, 0) + (state.memberGroups ?? []).reduce((total, group) =>
+    total + group.count * countVisibleForms(group.forms, courseXUnlocked) *
+      GAME_CONFIG.monthlyMemberFormBonus, 0);
 
   monthlyMemberFeesCache = {
     contacts: state.contacts,
+    memberGroups: state.memberGroups,
     collaborators: state.collaborators,
     courseXUnlocked,
     trainingBonuses,

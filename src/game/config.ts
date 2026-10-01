@@ -116,6 +116,8 @@ export const GAME_CONFIG = {
   recentEmailsLimit: 500,
   /** Available contacts kept as objects; the ordinary ones beyond it become counters. */
   materialAvailableContactsLimit: 100,
+  /** Enrolled members kept as objects; the ordinary ones beyond it are grouped. */
+  materialEnrolledMembersLimit: 2_000,
   recentCompletedTrialsLimit: 500,
   recentMissedTournamentsLimit: 48,
   chroniclesTeamSize: 6,

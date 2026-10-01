@@ -8,6 +8,7 @@ import { isSchoolYearDepartureMonth } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
+import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { addMessage } from "./stateUpdates";
@@ -207,7 +208,7 @@ function processMemberDepartures(
     return contact.status === "enrolled" &&
       !isAthleteImmuneFromDeparture(immunity, "annual-rollout");
   });
-  if (eligibleMembers.length === 0) return state;
+  if (eligibleMembers.length === 0 && !state.memberGroups?.length) return state;
 
   let nextSeed = state.randomSeed;
   const departedIds = new Set<string>();
@@ -224,20 +225,30 @@ function processMemberDepartures(
     );
     if (roll < departureChance) departedIds.add(member.id);
   }
-  if (departedIds.size === 0) return { ...state, randomSeed: nextSeed };
-
   const departed = eligibleMembers.filter((member) => departedIds.has(member.id));
+  const materialUpdated: GameState = departedIds.size > 0
+    ? departMembers({ ...state, randomSeed: nextSeed }, departedIds, true, "annual-rollout")
+    : { ...state, randomSeed: nextSeed };
+  const grouped = departGroupedMembers(materialUpdated, (group) =>
+    getMemberAnnualDepartureChance(
+      group.forms,
+      group.rarity,
+      state.network.schools.length,
+      state.school.specialization,
+    ));
+  const updated = grouped.state;
+  const totalDeparted = departed.length + grouped.departed;
+  if (totalDeparted === 0) return updated;
   const names = departed
     .slice(0, 3)
     .map((member) => `${member.firstName} ${member.lastName}`)
     .join(", ");
-  const others = departed.length > 3 ? ` e altri ${departed.length - 3}` : "";
-  const updated: GameState = departMembers(
-    { ...state, randomSeed: nextSeed },
-    departedIds,
-    true,
-    "annual-rollout",
-  );
+  const shown = Math.min(3, departed.length);
+  const others = totalDeparted <= shown
+    ? ""
+    : shown > 0
+      ? ` e altri ${totalDeparted - shown}`
+      : `${totalDeparted} iscritti`;
   const withNarrative: GameState = {
     ...updated,
     narrative: {
@@ -265,10 +276,10 @@ function processMemberDepartures(
   return addMessage(
     withNarrative,
     now,
-    departed.length === 1
+    totalDeparted === 1
       ? "Un iscritto ha lasciato la scuola"
-      : `${departed.length} iscritti hanno lasciato la scuola`,
-    `${names}${others} ${departed.length === 1 ? "ha" : "hanno"} lasciato la scuola dopo un anno senza formazione. Ogni Forma completata riduce questo rischio.`,
+      : `${totalDeparted} iscritti hanno lasciato la scuola`,
+    `${names}${others} ${totalDeparted === 1 ? "ha" : "hanno"} lasciato la scuola dopo un anno senza formazione. Ogni Forma completata riduce questo rischio.`,
     "neutral",
     "focused",
     "departures",

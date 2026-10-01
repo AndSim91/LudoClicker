@@ -49,6 +49,7 @@ import {
 import { getSocialContentCharacters } from "./social";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
+import { materializeGroupedMembers } from "./memberGroups";
 import { getAgonistCourseCost } from "./trainingFlow";
 import type {
   TrainingStartPlan,
@@ -571,14 +572,42 @@ export function processInstructorAthleticPreparation(
   };
 }
 
+/**
+ * Fase 7.5: grouped members fill the free course places, least trained first, so the
+ * planner below sees them as people. The ones left without a course are grouped again.
+ */
+function materializeMembersForCourses(state: GameState, now: number): GameState {
+  if (!state.memberGroups?.length) return state;
+  const capacity = selectInstructorCapacity(state);
+  const loads = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  let freePlaces = 0;
+  for (const collaborator of state.collaborators) {
+    if (collaborator.assignment !== "instructor") continue;
+    freePlaces += Math.max(0, capacity - (loads.get(collaborator.id) ?? 0));
+  }
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualLimit = getAnnualFormTrainingLimit(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const unrestricted = areAllFormBranchesUnlocked(state.upgrades);
+  return materializeGroupedMembers(
+    state,
+    freePlaces,
+    now,
+    (left, right) => left.forms.length - right.forms.length,
+    (group) => getFormTrainingCount(group, trainingYear) < annualLimit &&
+      getAutomaticFormCandidates(group, courseXUnlocked, unrestricted).length > 0,
+  );
+}
+
 export function processAutomaticTeaching(
-  state: GameState,
+  initialState: GameState,
   now: number,
   startFormTraining: AutomationFlowDependencies["startFormTraining"],
   startAgonistCourse: AutomationFlowDependencies["startAgonistCourse"] = (currentState) =>
     currentState,
   createTrainingPlan?: TrainingStartPlanFactory,
 ): GameState {
+  let state = initialState;
   if (!state.automation.autoTeachingEnabled) return state;
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (isAutomaticTeachingKnownIdle(state)) return state;
@@ -594,6 +623,7 @@ export function processAutomaticTeaching(
     rememberAutomaticTeachingNoOp(state);
     return state;
   }
+  state = materializeMembersForCourses(state, now);
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);

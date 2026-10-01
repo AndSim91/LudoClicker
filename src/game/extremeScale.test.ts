@@ -4,6 +4,7 @@ import { createInitialState, gameReducer } from "./engine";
 import { GAME_CONFIG } from "./config";
 import { compactGameHistory } from "./historyArchive";
 import { loadGame, writePreparedGameSave } from "./save";
+import { countEnrolledContacts, getGroupedMemberCount } from "./memberGroups";
 import { prepareStoredGameSave } from "./savePreparation";
 import {
   getActiveCampaignEmails,
@@ -276,8 +277,8 @@ describe.runIf(runExtremeBenchmark)("extreme logical scale benchmark", () => {
 
 // Fase 7.1: every member is a real enrolled contact, as the game creates them,
 // plus as many contacts waiting for an email.
-// Add 1_000_000 once members are aggregated (7.5): today it needs ~400 MB.
-const MEMBER_SIZES = [1_000, 10_000, 100_000] as const;
+// Beyond the material limits members are grouped (7.5) and contacts pooled (7.4).
+const MEMBER_SIZES = [1_000, 10_000, 100_000, 1_000_000] as const;
 const TARGETS = { tickMs: 4, monthEndMs: 16, mainThreadSaveMs: 50 };
 
 function runMemberBenchmark(members: number) {
@@ -320,12 +321,15 @@ function runMemberBenchmark(members: number) {
   // The second autosave is the steady state: it also moves the previous save to the backup.
   const write = elapsedMs(() => writePreparedGameSave(serialized));
   expect(write.value.ok).toBe(true);
+  expect(countEnrolledContacts(year.contacts) + getGroupedMemberCount(year))
+    .toBe(year.school.activeMembers);
   const load = elapsedMs(() => loadGame(NOW + 40_000));
   expect(load.value.school.activeMembers).toBe(year.school.activeMembers);
 
   const row = {
     members,
     contactObjects: year.contacts.length,
+    activeMembers: year.school.activeMembers,
     tickMs: ticks.milliseconds / 10,
     monthEndMs: slowestMonthEndMs,
     rawStateMiB: JSON.stringify(year).length / 1024 / 1024,

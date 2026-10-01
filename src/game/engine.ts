@@ -23,6 +23,7 @@ import { createInitialState as buildInitialState } from "./initialState";
 import { collectFees } from "./membershipFlow";
 import { compactGameHistory, poolExcessAvailableContacts } from "./historyArchive";
 import { GAME_CONFIG } from "./config";
+import { countEnrolledContacts, groupExcessMembers } from "./memberGroups";
 import { markAllMessagesRead } from "./inboxFlow";
 import { processGadgets } from "./gadgetFlow";
 import {
@@ -407,10 +408,14 @@ function compactChangedHistory(
     ? compactGameHistory(next)
     : next;
   // Cheap check: the count is cached per contacts array.
-  const compacted =
+  const pooled =
     getAvailableContactCount(archived.contacts) > GAME_CONFIG.materialAvailableContactsLimit
       ? poolExcessAvailableContacts(archived)
       : archived;
+  const compacted =
+    countEnrolledContacts(pooled.contacts) > GAME_CONFIG.materialEnrolledMembersLimit
+      ? groupExcessMembers(pooled)
+      : pooled;
   return action.type === "REPLACE_STATE"
     ? compactTournamentHistory(compacted)
     : compacted;

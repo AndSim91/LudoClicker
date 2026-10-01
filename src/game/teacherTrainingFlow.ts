@@ -411,6 +411,13 @@ function getInstructorCourseDemandByForm(
   for (const collaborator of state.collaborators) {
     registerPersonDemand(collaborator);
   }
+  for (const group of state.memberGroups ?? []) {
+    for (const formId of new Set(
+      getAutomaticFormCandidates(group, courseXUnlocked, unrestrictedFormBranches),
+    )) {
+      demandByForm.set(formId, (demandByForm.get(formId) ?? 0) + group.count);
+    }
+  }
   return demandByForm;
 }
 

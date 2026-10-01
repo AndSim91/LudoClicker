@@ -7,6 +7,11 @@ import { getTrialDurationMs } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
 import { departMembers } from "./membershipFlow";
+import {
+  addGroupedMembers,
+  getGroupedMemberCount,
+  removeGroupedMembers,
+} from "./memberGroups";
 import { nextRandom } from "./random";
 import type { GameState, ScheduledTrial } from "./types";
 import { unlockSocialIfEligible } from "./unlocks";
@@ -19,7 +24,16 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
   if (!Number.isSafeInteger(amount) || amount === 0) return state;
 
   if (amount > 0) {
-    const acquired = createAcquiredContacts(state, amount, "event", state.lastSavedAt);
+    // Beyond the material limit the new contacts go straight into the pool (Fase 7.4).
+    const material = Math.min(amount, GAME_CONFIG.materialAvailableContactsLimit);
+    const acquired = createAcquiredContacts(state, material, "event", state.lastSavedAt);
+    const pool = amount > material
+      ? [...(state.availableContactPool ?? []), {
+          source: "event" as const,
+          rarity: "common" as const,
+          count: amount - material,
+        }]
+      : state.availableContactPool;
     return startNextCampaign({
       ...state,
       randomSeed: acquired.nextSeed,
@@ -27,6 +41,7 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
         state.legendaryCollaborators,
         acquired.contacts,
       ),
+      availableContactPool: pool,
       contacts: mergeAcquiredContacts(state.contacts, acquired.contacts),
     }, state.lastSavedAt);
   }
@@ -59,14 +74,18 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
 
   const nextActiveMembers = Math.max(0, state.school.activeMembers + amount);
   const enrolledContacts = state.contacts.filter((contact) => contact.status === "enrolled");
+  const groupedMembers = getGroupedMemberCount(state);
+  const currentMembers = enrolledContacts.length + groupedMembers;
   let nextState = state;
   let resolvedActiveMembers = nextActiveMembers;
 
-  if (enrolledContacts.length < nextActiveMembers) {
-    const missingMembers = nextActiveMembers - enrolledContacts.length;
+  if (currentMembers < nextActiveMembers) {
+    const missingMembers = nextActiveMembers - currentMembers;
+    // Beyond the material limit new members go straight into a group (Fase 7.5).
+    const materialMembers = Math.min(missingMembers, GAME_CONFIG.materialEnrolledMembersLimit);
     const acquired = createAcquiredContacts(
       state,
-      missingMembers,
+      materialMembers,
       "event",
       state.lastSavedAt,
     );
@@ -92,16 +111,28 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
         ],
       },
     };
-  } else if (enrolledContacts.length > nextActiveMembers) {
-    const requestedDepartures = enrolledContacts.length - nextActiveMembers;
-    const departingIds = enrolledContacts
+    nextState = addGroupedMembers(nextState, {
+      rarity: "common",
+      source: "event",
+      forms: [],
+      enrolledMonth: state.school.currentMonth,
+    }, missingMembers - materialMembers);
+  } else if (currentMembers > nextActiveMembers) {
+    const fromGroups = Math.min(groupedMembers, currentMembers - nextActiveMembers);
+    const requestedDepartures = currentMembers - nextActiveMembers - fromGroups;
+    const departingIds = requestedDepartures === 0 ? [] : enrolledContacts
       .filter((contact) => contact.rarity !== "legendary")
       .slice(-requestedDepartures)
       .map((contact) => contact.id);
-    nextState = departMembers(state, departingIds, false, "data-reconciliation");
+    nextState = departMembers(
+      removeGroupedMembers(state, fromGroups),
+      departingIds,
+      false,
+      "data-reconciliation",
+    );
     resolvedActiveMembers = nextState.contacts.filter(
       (contact) => contact.status === "enrolled",
-    ).length;
+    ).length + getGroupedMemberCount(nextState);
     nextState = {
       ...nextState,
       statistics: state.statistics,

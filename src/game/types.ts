@@ -88,6 +88,23 @@ export interface AvailableContactPoolEntry {
   count: number;
 }
 
+/**
+ * Ordinary members with no individual history beyond the material limit (Fase 7.5).
+ * Only the fields that change a rule are kept; name and stats are rolled again
+ * when a member of the group becomes an object.
+ */
+export interface MemberGroup {
+  rarity: Exclude<PersonRarity, "legendary">;
+  source: Contact["source"];
+  forms: FormId[];
+  /** Set only while the enrollment still protects from the yearly departures. */
+  recentEnrolledMonth?: number;
+  /** Set only while it still counts for this year's courses or protections. */
+  lastFormTrainingYear?: number;
+  formTrainingYearCount?: number;
+  count: number;
+}
+
 export interface CampaignEmail {
   id: string;
   contactId: string;
@@ -940,6 +957,7 @@ export interface GameState {
   };
   contacts: Contact[];
   availableContactPool?: AvailableContactPoolEntry[];
+  memberGroups?: MemberGroup[];
   emails: CampaignEmail[];
   pendingEmailOutcomes: PendingEmailOutcome[];
   scheduledTrials: ScheduledTrial[];
