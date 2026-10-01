@@ -7,6 +7,7 @@ import { getTrialDurationMs } from "../content/upgrades";
 import { makeGameId } from "./ids";
 import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
 import { departMembers } from "./membershipFlow";
+import { addToContactPool } from "./historyArchive";
 import {
   addGroupedMembers,
   getGroupedMemberCount,
@@ -28,11 +29,7 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
     const material = Math.min(amount, GAME_CONFIG.materialAvailableContactsLimit);
     const acquired = createAcquiredContacts(state, material, "event", state.lastSavedAt);
     const pool = amount > material
-      ? [...(state.availableContactPool ?? []), {
-          source: "event" as const,
-          rarity: "common" as const,
-          count: amount - material,
-        }]
+      ? addToContactPool(state.availableContactPool, "event", "common", amount - material)
       : state.availableContactPool;
     return startNextCampaign({
       ...state,
@@ -47,7 +44,7 @@ export function addAdminContacts(state: GameState, rawAmount: number): GameState
   }
 
   let remaining = Math.abs(amount);
-  // Pooled contacts are the newest: they go first.
+  // Pooled contacts go first: they have no history to lose.
   const pool = [...(state.availableContactPool ?? [])];
   while (remaining > 0 && pool.length > 0) {
     const last = pool[pool.length - 1];

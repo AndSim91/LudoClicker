@@ -93,6 +93,20 @@ export function getCurrentSchoolContactCount(state: GameState): number {
     getPooledContactCount(state) + getGroupedMemberCount(state);
 }
 
+/** One counter per source and rarity: the pool never grows with the number of contacts. */
+export function addToContactPool(
+  pool: readonly AvailableContactPoolEntry[] | undefined,
+  source: AvailableContactPoolEntry["source"],
+  rarity: AvailableContactPoolEntry["rarity"],
+  count: number,
+): AvailableContactPoolEntry[] {
+  const next = [...(pool ?? [])];
+  const index = next.findIndex((entry) => entry.source === source && entry.rarity === rarity);
+  if (index >= 0) next[index] = { ...next[index], count: next[index].count + count };
+  else next.push({ source, rarity, count });
+  return next;
+}
+
 function isPoolable(contact: Contact): contact is Contact & {
   rarity: AvailableContactPoolEntry["rarity"];
 } {
@@ -107,20 +121,16 @@ function isPoolable(contact: Contact): contact is Contact & {
 /**
  * Keeps the oldest available contacts as objects and turns the ordinary ones beyond
  * the limit into counters: their name and stats are rolled again when their email starts.
+ * ponytail: the pool forgets the arrival order; the next contact is drawn in proportion.
  */
 export function poolExcessAvailableContacts(state: GameState): GameState {
-  const pool = [...(state.availableContactPool ?? [])];
+  let pool = state.availableContactPool ?? [];
   let available = 0;
   const contacts = state.contacts.filter((contact) => {
     if (contact.status !== "available") return true;
     available += 1;
     if (available <= GAME_CONFIG.materialAvailableContactsLimit || !isPoolable(contact)) return true;
-    const last = pool[pool.length - 1];
-    if (last?.source === contact.source && last.rarity === contact.rarity) {
-      pool[pool.length - 1] = { ...last, count: last.count + 1 };
-    } else {
-      pool.push({ source: contact.source, rarity: contact.rarity, count: 1 });
-    }
+    pool = addToContactPool(pool, contact.source, contact.rarity, 1);
     return false;
   });
   return contacts.length === state.contacts.length

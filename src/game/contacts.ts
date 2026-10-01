@@ -310,15 +310,21 @@ export function mergeAcquiredContacts(
   ];
 }
 
-/** Turns the oldest pooled contact back into an available contact (Fase 7.4). */
+/** Turns a pooled contact back into an available contact (Fase 7.4). */
 export function materializePooledContact(
   state: GameState,
   now: number,
 ): { state: GameState; contact: Contact } | undefined {
-  const [entry, ...rest] = state.availableContactPool ?? [];
-  if (!entry) return undefined;
-  const { firstName, lastName, email } = createRandomProspect(state.randomSeed);
-  const stats = rollAthleteBaseStats(advanceRandomSeed(state.randomSeed, 3), entry.rarity);
+  const pool = state.availableContactPool ?? [];
+  const total = pool.reduce((sum, entry) => sum + entry.count, 0);
+  if (total === 0) return undefined;
+  // Drawn in proportion to the counters, so rarities keep their odds.
+  const [roll, afterRoll] = nextRandom(state.randomSeed);
+  let target = Math.floor(roll * total);
+  const entryIndex = pool.findIndex((entry) => (target -= entry.count) < 0);
+  const entry = pool[entryIndex];
+  const { firstName, lastName, email } = createRandomProspect(afterRoll);
+  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity);
   let suffix = state.contacts.length;
   const ids = new Set(state.contacts.map((contact) => contact.id));
   while (ids.has(makeGameId("contact", now, `pool-${suffix}`))) suffix += 1;
@@ -340,14 +346,17 @@ export function materializePooledContact(
     agonistCourseStyleBonus: 0,
     formBranchPreferences: [],
   };
-  const pool = entry.count > 1 ? [{ ...entry, count: entry.count - 1 }, ...rest] : rest;
+  const remaining = pool.flatMap((candidate, index) =>
+    index !== entryIndex
+      ? [candidate]
+      : candidate.count > 1 ? [{ ...candidate, count: candidate.count - 1 }] : []);
   return {
     contact,
     state: {
       ...state,
       randomSeed: stats.nextSeed,
       contacts: [...state.contacts, contact],
-      availableContactPool: pool.length > 0 ? pool : undefined,
+      availableContactPool: remaining.length > 0 ? remaining : undefined,
     },
   };
 }
