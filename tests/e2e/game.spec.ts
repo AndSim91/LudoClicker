@@ -67,7 +67,7 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
   await expect(page.getByLabel("Iscritti attivi: 20")).toBeVisible();
   await expect(page.locator('[aria-label^="Disponibilità economica:"]')).toHaveAttribute(
     "aria-label",
-    /5000,00/,
+    /5\.000,00/,
   );
 
   const areas = [

@@ -168,7 +168,7 @@ describe("GadgetsView", () => {
     expect(screen.getByText("Venduti")).toBeVisible();
     expect(screen.getByText("123")).toBeVisible();
     expect(screen.getByText("Guadagnato")).toBeVisible();
-    expect(screen.getByText(/1845,00/)).toBeVisible();
+    expect(screen.getByText(/1\.845,00/)).toBeVisible();
     expect(screen.getByText("75%")).toBeVisible();
   });
 

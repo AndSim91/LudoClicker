@@ -1,12 +1,17 @@
+// Explicit options: ICU versions disagree on grouping 4-digit numbers ("5000"
+// in Node, "5.000" in Chrome) and on the minimum fraction digits of compact
+// currencies (piano 6.2).
 const currencyFormatter = new Intl.NumberFormat("it-IT", {
   style: "currency",
   currency: "EUR",
+  useGrouping: true,
 });
 const compactCurrencyFormatter = new Intl.NumberFormat("it-IT", {
   style: "currency",
   currency: "EUR",
   notation: "compact",
   compactDisplay: "short",
+  minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
 const timeFormatter = new Intl.DateTimeFormat("it-IT", {
