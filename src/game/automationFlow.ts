@@ -467,6 +467,10 @@ export function processAutomaticEquipmentRepair(state: GameState): GameState {
     getEquipmentSwordRepairWork(state.upgrades),
     true,
   );
+  // Lavoro insufficiente per anche una sola riparazione: restituire lo stesso
+  // stato evita che il tick scambi un oggetto nuovo per progresso e resti
+  // fermo sullo stesso istante (il lavoro non maturerebbe mai).
+  if (repaired.eurosSpent === 0) return state;
   const consumedWork = Math.max(0, availableWork - repaired.remainingWork);
   const remainingPreparedWork = Math.max(0, preparedWork - consumedWork);
   const remainingBufferedWork = Math.max(

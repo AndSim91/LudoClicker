@@ -211,4 +211,18 @@ describe("upgrade revamp mechanics", () => {
     expect(repaired.automation.equipmentPreparedWork).toBeGreaterThan(49);
     expect(repaired.automation.equipmentPreparedWork).toBeLessThan(51);
   });
+
+  it("leaves state untouched when prepared work cannot repair a single unit", () => {
+    const initial = createInitialState(0, "Test");
+    const state: GameState = {
+      ...initial,
+      school: { ...initial.school, euros: 1_000 },
+      upgrades: { ...createInitialUpgradeLevels(), "organized-rack": 5 },
+      equipment: { ...initial.equipment, totalSwords: 6, availableSwords: 6, wear: 5 },
+      automation: { ...initial.automation, equipmentPreparedWork: 0.86, equipmentBuffer: 0 },
+    };
+
+    // Un oggetto nuovo qui bloccava il tempo di gioco (salvataggio di Matteo, ottobre 2026).
+    expect(processAutomaticEquipmentRepair(state)).toBe(state);
+  });
 });
