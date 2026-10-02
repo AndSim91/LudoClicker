@@ -4,6 +4,7 @@ import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
 import { useGameStateSlices } from "../game/GameStateContext";
 import type { GameSaveStatus } from "../game/saveStatus";
+import type { ReputationSpending } from "../game/reputation";
 import type { GameState, SchoolFoundationDetails } from "../game/types";
 import { CrashReportPanel } from "./settings/CrashReportPanel";
 import { NetworkPanel } from "./settings/NetworkPanel";
@@ -29,7 +30,7 @@ interface OverviewViewProps {
   onDarkModeChange: (enabled: boolean) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
-  onFoundSchool: (details: SchoolFoundationDetails) => void;
+  onFoundSchool: (details: SchoolFoundationDetails, spending: ReputationSpending) => void;
 }
 
 export function OverviewView({

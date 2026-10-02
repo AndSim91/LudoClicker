@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
-import { getMonthlyMemberFees } from "../../game/membershipEconomy";
-import { getMonthlyNetworkRent } from "../../game/networkRent";
+import { getMonthlyMembershipIncome } from "../../game/membershipEconomy";
+import { getMonthlyNetworkRent } from "../../game/reputation";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
@@ -18,7 +18,7 @@ interface MonthlyIncomePresentation {
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
   return {
-    memberFees: getMonthlyMemberFees(state),
+    memberFees: getMonthlyMembershipIncome(state),
     socialIncome: getMonthlySocialIncome(state),
     gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
     gadgetUnlocked: state.unlocks.gadget,

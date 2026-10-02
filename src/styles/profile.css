@@ -956,3 +956,72 @@
     padding-inline: 16px;
   }
 }
+
+.reputation-shop {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 22px 0 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.reputation-shop legend {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  font-weight: 600;
+}
+
+.reputation-shop legend span {
+  color: var(--blue-700);
+  font-size: 12px;
+}
+
+.reputation-shop legend .over-budget {
+  color: #a4262c;
+}
+
+.reputation-shop > p {
+  margin: 0 0 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.reputation-shop label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.reputation-shop label span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.reputation-shop label small {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.reputation-shop input {
+  width: 72px;
+  min-height: 34px;
+  flex: none;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  text-align: right;
+}
+
+.reputation-shop .reputation-rent {
+  border-bottom: 0;
+}

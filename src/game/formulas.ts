@@ -11,6 +11,7 @@ import {
   getEventCharismaBonus,
   getEventCollaboratorMultiplier,
 } from "./eventRewards";
+import { getReputationMultiplier } from "./reputation";
 import type { FormId, GameState, PersonRarity, SchoolSpecialization } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -32,7 +33,12 @@ export function getEmailBookingChance(
     0,
     1,
   );
-  const baseChance = PERSON_RARITIES[rarity].baseTrialBookingChance;
+  // Reputation raises the base chance (+10% a point); the upgrades of the school
+  // still close the gap to the maximum.
+  const baseChance = Math.min(
+    maximumChance[rarity],
+    PERSON_RARITIES[rarity].baseTrialBookingChance * getReputationMultiplier(state, "trialBooking"),
+  );
   return baseChance + (maximumChance[rarity] - baseChance) * progress;
 }
 
@@ -58,11 +64,15 @@ export function getEnrollmentChance(
     ? previousFailures * GAME_CONFIG.legendaryEnrollmentChancePerFailure
     : 0;
   const definition = PERSON_RARITIES[rarity];
-  const improvedChance = definition.baseEnrollmentChance +
-    (definition.maxEnrollmentChance - definition.baseEnrollmentChance) * improvementProgress;
+  const baseChance = Math.min(
+    definition.maxEnrollmentChance,
+    definition.baseEnrollmentChance * getReputationMultiplier(state, "enrollment"),
+  );
+  const improvedChance = baseChance +
+    (definition.maxEnrollmentChance - baseChance) * improvementProgress;
   return clamp(
     improvedChance + failureBonus,
-    definition.baseEnrollmentChance,
+    baseChance,
     definition.maxEnrollmentChance,
   );
 }
@@ -98,8 +108,7 @@ export function getEventFunnelOutcome(
 
 export function getWritingPower(state: GameState) {
   const localPower = 1 + getUpgradeEffectTotal(state.upgrades, "writingPower");
-  const networkMultiplier = 1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  return localPower * networkMultiplier;
+  return localPower * getReputationMultiplier(state, "writing");
 }
 
 const ANNUAL_DEPARTURE_CHANCE_BY_FORM = [0.8, 0.65, 0.5, 0.35, 0.25, 0.15, 0.1, 0.05] as const;

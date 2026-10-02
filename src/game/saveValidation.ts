@@ -14,6 +14,7 @@ import {
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "./lightInflation";
 import { isValidGadgetState } from "./gadgetState";
+import { REPUTATION_UPGRADE_IDS } from "./reputation";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
   "tutorial",
@@ -168,6 +169,18 @@ function hasValidEventCooldowns(state: Partial<GameState>): boolean {
           Number.isSafeInteger(cooldown.availableAtMonth) &&
           cooldown.availableAtMonth >= cooldown.startedMonthPosition;
   });
+}
+
+function hasValidReputationUpgrades(state: Partial<GameState>): boolean {
+  const upgrades = state.network?.reputationUpgrades;
+  if (upgrades === undefined) return true;
+  if (!upgrades || typeof upgrades !== "object") return false;
+  return Object.entries(upgrades).every(([id, level]) =>
+    (REPUTATION_UPGRADE_IDS as readonly string[]).includes(id) &&
+    Number.isSafeInteger(level) &&
+    (level as number) >= 0 &&
+    (level as number) <= GAME_CONFIG.reputationUpgradeMaxLevel
+  );
 }
 
 function hasValidLightInflation(state: Partial<GameState>): boolean {
@@ -555,7 +568,8 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.school?.currentMonth === "number" &&
     typeof state.school?.city === "string" &&
     typeof state.school?.accentColor === "string" &&
-    typeof state.network?.reputation === "number" &&
+    Number.isSafeInteger(state.network?.reputation) && (state.network?.reputation ?? -1) >= 0 &&
+    hasValidReputationUpgrades(state) &&
     Array.isArray(state.network?.schools) &&
     typeof state.network?.prestigeOfferSent === "boolean"
     && Array.isArray(state.tournaments?.results)

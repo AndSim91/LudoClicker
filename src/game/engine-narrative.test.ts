@@ -8,7 +8,6 @@ import {
   getPrestigeRequirements,
 } from "./engine";
 import { selectIncomePerMonth } from "./selectors";
-import { getMonthlyMemberFees } from "./membershipEconomy";
 import { formatCurrency } from "../shared/formatters";
 
 describe("game engine: narrative", () => {
@@ -293,8 +292,6 @@ describe("game engine: narrative", () => {
     };
 
     expect(canFoundSchool(eligible)).toBe(true);
-    // 25% of the member fees, +25 points for the Champion's Arena; the national titles add nothing.
-    const expectedRent = Math.round(getMonthlyMemberFees(eligible) * 0.5);
     const offered = gameReducer(eligible, { type: "TICK", now: 2_000 });
     const offeredAgain = gameReducer(offered, { type: "TICK", now: 2_000 });
     const founded = gameReducer(offeredAgain, {
@@ -308,7 +305,8 @@ describe("game engine: narrative", () => {
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
     expect(founded.school.activeMembers).toBe(0);
-    expect(founded.school.fame).toBe(150);
+    // The Fama belongs to the school: the new one starts from zero.
+    expect(founded.school.fame).toBe(0);
     expect(founded.collaborators).toEqual([]);
     expect(founded.contacts).toHaveLength(5);
     expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual([]);
@@ -328,19 +326,20 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    expect(founded.network.reputation).toBe(2);
+    // 150 Fama earns no point; the Champion's Arena adds one. Nothing spent.
+    expect(founded.network.reputation).toBe(1);
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
     expect(founded.network.schools[0]).toMatchObject({
-      monthlyRent: expectedRent,
+      monthlyRent: 0,
       championsWin: true,
     });
     expect(founded.network.schools[0].reptileWin).toBeUndefined();
     expect(founded.tournaments.nationalTitlesCurrentSchool).toBeUndefined();
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
-    expect(founded.player.writingPower).toBeCloseTo(1 + GAME_CONFIG.prestigeBonusPerSchool);
-    // The new school has no members yet: its income is the fixed rent of the old one.
-    expect(selectIncomePerMonth(founded)).toBe(expectedRent);
+    // Founding alone gives no bonus: only the Reputation spent does.
+    expect(founded.player.writingPower).toBeCloseTo(1);
+    expect(selectIncomePerMonth(founded)).toBe(0);
     expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
 
     const postPrestigeEvent = {

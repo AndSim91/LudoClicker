@@ -1,3 +1,4 @@
+import type { ReputationSpending, ReputationUpgradeLevels } from "./reputation";
 import type { SecretLegendaryId } from "../content/secretLegendaries";
 import type { TournamentSchoolId } from "../content/tournamentSchools";
 
@@ -367,7 +368,7 @@ export interface FoundedSchool {
   emailsSent: number;
   eventsCompleted: number;
   transferredAt: number;
-  /** Fixed monthly rent the school pays to the network after the foundation. */
+  /** Fixed monthly rent locked with Reputation points at the foundation. */
   monthlyRent?: number;
   championsWin?: boolean;
   /** Won the Reptile, or the Superba it became: same tournament, one bonus. */
@@ -948,7 +949,10 @@ export interface GameState {
     perfectPhrases?: number;
   };
   network: {
+    /** Reputation points still to spend: the only value carried to the next school. */
     reputation: number;
+    /** Permanent Reputation upgrades, 0–50 points each (src/game/reputation.ts). */
+    reputationUpgrades?: ReputationUpgradeLevels;
     schools: FoundedSchool[];
     prestigeOfferSent: boolean;
     secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
@@ -1039,7 +1043,7 @@ export type GameAction =
   | { type: "ADMIN_ADVANCE_MONTH"; now: number }
   | { type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL"; now: number }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
-  | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number }
+  | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number; spending?: ReputationSpending }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "START_GADGET_PROJECT"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_REVISION"; productId: GadgetProductId; now: number }

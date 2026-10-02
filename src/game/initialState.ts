@@ -55,6 +55,7 @@ export function createInitialState(
     player: { writingPower: 1 },
     network: {
       reputation: 0,
+      reputationUpgrades: {},
       schools: [],
       prestigeOfferSent: false,
       secretLegendaries: createSecretLegendaryProgress(),

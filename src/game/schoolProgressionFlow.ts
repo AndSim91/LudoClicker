@@ -1,4 +1,3 @@
-import { getFoundationRentPreview } from "./networkRent";
 import { getNewAchievements } from "../content/achievements";
 import {
   SHORT_GOALS,
@@ -16,6 +15,15 @@ import { getWritingPower } from "./formulas";
 import { makeGameId } from "./ids";
 import { createInitialState } from "./initialState";
 import { canFoundSchool } from "./progression";
+import {
+  NO_REPUTATION_SPENDING,
+  REPUTATION_UPGRADE_IDS,
+  getPrestigeReputationPreview,
+  getReputationLevel,
+  getSpentReputation,
+  isValidReputationSpending,
+  type ReputationSpending,
+} from "./reputation";
 import { addMessage } from "./stateUpdates";
 import type {
   GameState,
@@ -69,11 +77,16 @@ export function foundSchool(
   state: GameState,
   details: SchoolFoundationDetails,
   now: number,
+  spending: ReputationSpending = NO_REPUTATION_SPENDING,
 ): GameState {
   if (!canFoundSchool(state) || !details.name.trim() || !details.city.trim()) return state;
+  const rent = getPrestigeReputationPreview(state);
+  const availableReputation = state.network.reputation + rent.points;
+  if (!isValidReputationSpending(state, spending, availableReputation)) return state;
   const legendaryProgress = prepareLegendaryProgressForNewSchool(state);
   const fresh = createInitialState(now, state.profile.displayName, false, legendaryProgress);
-  const rent = getFoundationRentPreview(state);
+  // Points in the rent are consumed: they lock a fixed rent from this school only.
+  const monthlyRent = Math.round(rent.rentPerPoint * spending.rent);
   const archivedSchool = {
     id: makeGameId("school", now, state.network.schools.length),
     name: state.school.name,
@@ -84,7 +97,7 @@ export function foundSchool(
     emailsSent: state.statistics.emailsSent,
     eventsCompleted: state.statistics.eventsCompleted,
     transferredAt: now,
-    monthlyRent: rent.rent,
+    monthlyRent,
     championsWin: rent.championsWin,
     ...(rent.reptileWin ? { reptileWin: rent.reptileWin } : {}),
     ...(rent.chroniclesWin ? { chroniclesWin: true } : {}),
@@ -100,13 +113,13 @@ export function foundSchool(
       accentColor: details.accentColor,
       motto: details.motto.trim(),
       specialization: details.specialization,
-      fame: state.school.fame,
     },
     network: {
-      // Reputation grows with how far the school went: it will unlock special events.
-      reputation: state.network.reputation + 1 +
-        (rent.championsWin ? 1 : 0) + (rent.reptileWin ? 1 : 0) +
-        (rent.chroniclesWin ? 1 : 0),
+      reputation: availableReputation - getSpentReputation(spending),
+      reputationUpgrades: Object.fromEntries(REPUTATION_UPGRADE_IDS.map((id) => [
+        id,
+        getReputationLevel(state, id) + (spending.upgrades[id] ?? 0),
+      ])),
       schools: [...state.network.schools, archivedSchool],
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
@@ -128,7 +141,9 @@ export function foundSchool(
     refreshWritingCampaignCopies(nextState),
     now,
     `Nuova scuola fondata: ${details.name.trim()}`,
-    `La sede di ${details.city.trim()} è operativa. ${state.school.name} entra nella Rete dell'Ordine e ti verserà ${formatRent(rent.rent)} al mese. Bonus permanente di rete: +${Math.round((state.network.schools.length + 1) * GAME_CONFIG.prestigeBonusPerSchool * 100)}%.`,
+    `La sede di ${details.city.trim()} è operativa. ${state.school.name} entra nella Rete dell'Ordine` +
+      (monthlyRent > 0 ? ` e ti verserà ${formatRent(monthlyRent)} al mese.` : ".") +
+      ` Reputazione guadagnata: ${rent.points} punti, ${availableReputation - getSpentReputation(spending)} ancora da spendere.`,
     "system",
   );
   return {

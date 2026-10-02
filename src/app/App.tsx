@@ -39,6 +39,7 @@ import { getAvailableStandardLegendaryProfiles } from "../game/legendaryAvailabi
 import { getGadgetFamilyUnitsSold } from "../game/gadgetRarity";
 import { isGameAreaUnlocked } from "../game/progression";
 import { exportGame, importGame, resetGame, saveGame } from "../game/save";
+import type { ReputationSpending } from "../game/reputation";
 import {
   selectAvailableContacts,
   selectContactsAwaitingEmail,
@@ -281,8 +282,8 @@ export function App() {
   const updateProfileName = useCallback((displayName: string) => {
     dispatch({ type: "UPDATE_PROFILE_NAME", displayName });
   }, [dispatch]);
-  const foundSchool = useCallback((details: SchoolFoundationDetails) => {
-    dispatch({ type: "FOUND_SCHOOL", details, now: getGameNow() });
+  const foundSchool = useCallback((details: SchoolFoundationDetails, spending: ReputationSpending) => {
+    dispatch({ type: "FOUND_SCHOOL", details, spending, now: getGameNow() });
   }, [dispatch, getGameNow]);
   const forceGameUpdate = useCallback(() => {
     if (!saveNow()) return;

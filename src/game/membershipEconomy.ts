@@ -1,5 +1,6 @@
 import { getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { getMonthlyNetworkRent, getReputationMultiplier } from "./reputation";
 import { getMonthlySocialIncome } from "./social";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
@@ -151,19 +152,16 @@ export function getMonthlyMemberFees(state: GameState): number {
   return baseFees + trainingBonuses;
 }
 
-export function getMonthlyOperationalIncome(state: GameState): number {
-  const networkMultiplier =
-    1 + state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool;
-  const recurringIncomeBonus = getUpgradeEffectTotal(state.upgrades, "incomeMultiplier");
-  const membershipIncome = getMonthlyMemberFees(state) *
+/** Member fees with every multiplier: upgrades of the school and Reputation. */
+export function getMonthlyMembershipIncome(state: GameState): number {
+  return getMonthlyMemberFees(state) *
     (1 + getUpgradeEffectTotal(state.upgrades, "membershipIncomeMultiplier") +
-      recurringIncomeBonus);
-  // Rents of the schools in the network are fixed: no multiplier touches them.
-  const networkRent = state.network.schools.reduce(
-    (total, school) => total + (school.monthlyRent ?? 0),
-    0,
-  );
+      getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
+    getReputationMultiplier(state, "membershipFees");
+}
 
-  return membershipIncome * networkMultiplier + networkRent +
+export function getMonthlyOperationalIncome(state: GameState): number {
+  // Rents of the schools in the network are fixed: no multiplier touches them.
+  return getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
     getMonthlySocialIncome(state);
 }

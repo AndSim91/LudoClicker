@@ -428,7 +428,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Crescita",
     title: "Rete e nuove scuole",
     summary: "Prestigio, requisiti di fondazione e progressi permanenti.",
-    introduction: "Fondare una nuova scuola riavvia il ciclo locale ma amplia la Rete dell'Ordine: la scuola che lasci continua a versarti una rendita mensile fissa, calcolata sul punto in cui l'hai lasciata. Reputazione e traguardi permanenti continuano ad accompagnarti.",
+    introduction: "Fondare una nuova scuola riavvia il ciclo locale, Fama compresa, e ti dà punti Reputazione: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in potenziamenti permanenti o in una rendita fissa dalla scuola che lasci.",
     steps: [
       { icon: "trend", label: "Requisiti", detail: "Completa il ciclo" },
       { icon: "trophy", label: "Nazionale", detail: "Vinci Arena o Stile" },
@@ -437,13 +437,16 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Titoli nazionali", value: `${GAME_CONFIG.prestigeNationalTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
-      { label: "Rendita", value: `${Math.round(GAME_CONFIG.networkRentShare * 100)}%`, detail: "delle quote mensili al momento della fondazione" },
-      { label: "Bonus rendita", value: `+${Math.round(GAME_CONFIG.networkRentBonusPerTournament * 100)}% per torneo`, detail: "Champion's Arena, Reptile o Superba, Chronicles: una volta ciascuno, fino al 100%" },
+      { label: "Reputazione", value: "½ √(Fama/100)", detail: "+1 per Champion's Arena, Reptile o Superba e Chronicles vinti" },
+      { label: "Potenziamenti", value: `+${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: `fino a ${GAME_CONFIG.reputationUpgradeMaxLevel} punti ciascuno, mai azzerati` },
+      { label: "Rendita", value: `${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: "del valore di rendita della scuola lasciata (iscritti × 40 € × 10%)" },
     ],
     rules: [
       "Serve una vittoria al Torneo Nazionale, in Arena o in Stile, con la scuola corrente.",
-      "La rendita della scuola lasciata è fissa: non cambia più dopo la fondazione.",
+      "La spesa è definitiva. I punti nei potenziamenti restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
+      "La rendita non ha tetto: è dove spendere la Reputazione quando i potenziamenti sono al massimo.",
       "Il Nazionale serve solo a sbloccare la fondazione; vincere più volte lo stesso torneo non aggiunge altro.",
+      "Torneo della Superba e Corso X, una volta sbloccati, restano per sempre.",
       "Il Ludodex e i progressi permanenti dei Leggendari non vengono cancellati.",
     ],
     related: ["economia-scuola", "tornei", "rarita-leggendari"],

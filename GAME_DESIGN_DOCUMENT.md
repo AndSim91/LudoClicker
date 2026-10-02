@@ -523,23 +523,55 @@ caduta: Fanne 5», «Si può avere nera?») o 6 (gli altri tre).
 
 ### 5.7 Reputazione di rete
 
-La **Reputazione di rete** è la risorsa permanente ottenuta fondando e facendo
-crescere nuove scuole. Aumenta i moltiplicatori globali dopo il prestigio.
+La **Reputazione di rete** è l'unico valore che passa da una scuola all'altra
+(decisione del 02/10, piano 6.19). La Fama invece appartiene alla scuola: sblocca
+i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 
-La Reputazione non si spende: è un valore che misura quanto è cresciuta la rete
-e servirà a sbloccare eventi e modalità di gioco speciali. A ogni fondazione
-cresce di 1, più 1 se la scuola lasciata ha vinto la Champion's Arena e 1 se ha
-vinto il Torneo Reptile (o la Superba in cui si è trasformato) e 1 se ha vinto
-le Chronicles of Ludosport (`foundSchool`, `src/game/schoolProgressionFlow.ts`).
-È mostrata in Impostazioni → Rete dell'Ordine.
+**Punti guadagnati** alla fondazione (`getPrestigeReputationPreview`,
+`src/game/reputation.ts`):
 
-I bonus permanenti dipendono invece dal numero di scuole fondate: +5% per
-scuola a caratteri per input, quote e affluenza agli eventi
-(`prestigeBonusPerSchool = 0,05`), più la rendita fissa di ogni scuola (§ 17.6).
-Il numero di scuole aumenta anche il costo di alcuni potenziamenti e dello
-0,5% per scuola la probabilità di abbandono degli allievi con Forma 7.
+```
+punti = arrotonda per difetto(√(Fama / 100) / 2)
+      + 1 se la scuola lasciata ha vinto la Champion's Arena
+      + 1 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
+      + 1 se ha vinto le Chronicles of Ludosport
+```
 
-> **Da implementare:** nessun evento o gameplay speciale è ancora sbloccato dalla Reputazione.
+Per esempio Fama 10.000 dà 5 punti, Fama 30.000 ne dà 8.
+
+**Spesa.** I punti si spendono alla fondazione, nel modulo di Impostazioni →
+Rete dell'Ordine; la spesa è definitiva e i punti non spesi restano per la
+fondazione successiva. Ogni punto vale **+10% del valore base**
+(`reputationStep = 0,1`); i potenziamenti della scuola si applicano sopra.
+
+| Potenziamento             | Valore base aumentato                                                         |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| Compilazione email        | caratteri per input (`getWritingPower`)                                        |
+| Lezioni di prova          | probabilità base di prenotare una prova, fino al massimo della rarità          |
+| Iscrizioni                | probabilità base di iscrizione dopo la prova, fino al massimo della rarità     |
+| Quote mensili             | quote degli iscritti (non Social, non rendita)                                 |
+| Formazione allievi        | velocità dei corsi di atleti e agonisti (non Istruttori e Tecnici)             |
+| Capacità di miglioramento | miglioramenti della Preparazione atletica                                      |
+| Rendita della rete        | si consuma: vedi sotto                                                         |
+
+I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+500%,
+`reputationUpgradeMaxLevel`) e non si azzerano mai
+(`network.reputationUpgrades`). La **rendita della rete** si consuma: ogni
+punto blocca il 10% del valore di rendita della scuola che si sta lasciando,
+`iscritti × 40 € × 10%` (`networkRentValueShare`), come rendita mensile fissa
+di quella scuola. I punti non restano come livelli: alla fondazione successiva
+la rendita riparte da 0% e si calcola sulla nuova scuola, sommandosi alle
+precedenti. La rendita non ha tetto: è dove spendere la Reputazione quando i
+potenziamenti sono al massimo. Esempio: 125 iscritti valgono 500 €; 5 punti
+bloccano 250 € al mese.
+
+Il numero di scuole fondate non dà più bonus (il vecchio +5% per scuola è stato
+tolto): aumenta solo il costo di alcuni potenziamenti e dello 0,5% per scuola
+la probabilità di abbandono degli allievi con Forma 7.
+
+Salvataggi precedenti (v86): la Reputazione accumulata diventa punti da
+spendere e le rendite automatiche delle scuole già fondate vanno a zero; la
+Fama si azzera al prossimo prestigio.
 
 ---
 
@@ -2821,7 +2853,7 @@ prova in corso.
 Il Nazionale arriva dopo il Torneo Scolastico e l'Accademico Alpha,
 con le qualificazioni, e ha avversari da Forma 3 a 6, quindi richiede atleti
 con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
-il requisito, il titolo nazionale non aumenta la rendita (§ 17.6). Il
+il requisito, il titolo nazionale non dà punti Reputazione (§ 5.7). Il
 requisito non cresce con le scuole fondate: a crescere è il costo dei
 potenziamenti (§ 17.6).
 
@@ -2862,10 +2894,14 @@ Il modulo si trova in Impostazioni → **Rete dell'Ordine**
 (`src/features/settings/NetworkPanel.tsx`): nome, città, specializzazione
 (Redazione, Eventi o Accoglienza), colore e motto facoltativo. Il pulsante
 «Fonda la nuova scuola» resta disabilitato finché il requisito non è raggiunto e
-chiede una seconda conferma prima di fondare. Il pannello mostra anche la
-Reputazione, il requisito (Titolo nazionale 0/1), l'anteprima della rendita
-«Se fondi ora» e l'elenco delle scuole della rete, con la prima indicata come
-«Sede madre».
+chiede una seconda conferma prima di fondare. Il pannello mostra anche i punti
+Reputazione da spendere, il requisito (Titolo nazionale 0/1), i punti
+guadagnati «Se fondi ora» (dalla Fama e dai tornei), la rendita della rete e
+l'elenco delle scuole, con la prima indicata come «Sede madre». Sotto i campi
+della scuola c'è la spesa dei punti: un campo per ciascuno dei sei
+potenziamenti permanenti, con il valore attuale e quello dopo la spesa, e uno
+per la rendita con l'importo mensile che bloccherà. Il pulsante resta
+disabilitato se i punti assegnati superano quelli disponibili.
 
 > **Da implementare:** manca la lista di città.
 
@@ -2885,8 +2921,8 @@ inviate, gli Euro (0), l'attrezzatura (6 spade), follower e iscritti attivi,
 **tutti** i collaboratori (non restano alla scuola precedente: spariscono),
 gli sblocchi (Potenziamenti, Collaboratori, Social, Forme, Gadget) con il
 settore Gadget, prove ed eventi in corso, tornei ordinari, Cronache e Torneo
-Reptile, eventi narrativi, Inflazione di Luce, scoperte dei Percorsi Segreti e
-progressi del tutorial. I nuovi contatti iniziali non includono Andrea
+Reptile, eventi narrativi, Inflazione di Luce, **Fama**, livelli dei Percorsi
+Segreti e progressi del tutorial. I nuovi contatti iniziali non includono Andrea
 Simonazzi, che è garantito solo nella prima scuola.
 
 Gli iscritti della scuola precedente non vengono conservati come schede
@@ -2908,13 +2944,21 @@ uno storico nominativo.
 - scoperte del Ludodex e progressi permanenti dei Leggendari;
 - un collaboratore mentore selezionato, se sbloccato.
 
-Nel codice restano: Fama, scuole fondate con la loro rendita, Reputazione di
-rete (§ 5.7), Percorsi Segreti scoperti, trasformazione del Reptile in Torneo
-della Superba, statistiche cumulative, messaggi della
+Nel codice restano: scuole fondate con la loro rendita, Reputazione di
+rete con i suoi potenziamenti (§ 5.7), Percorsi Segreti scoperti (Corso X
+compreso), trasformazione del Reptile in Torneo della Superba, statistiche
+cumulative, messaggi della
 Posta, traguardi, obiettivo breve in corso, Leggendari incontrati (Ludodex),
 progressi dei Leggendari iscritti (Forme, attestati da Istruttore e Tecnico,
 statistiche e bonus dei Corsi Agonisti), stato dei Leggendari Segreti, il flag
 della prima vittoria in un torneo ordinario, nome del profilo e seme casuale.
+
+I Leggendari Segreti reclutati in una scuola precedente (con progressi
+conservati) entrano tra i leggendari ordinari: nelle scuole successive possono
+comparire a caso nella coda dei contatti, con le loro statistiche, senza
+tornei né prove speciali (`getUnlockedSecretLegendaries`, `src/game/contacts.ts`).
+Il Ludodex conta come scoperti sia gli iscritti attuali sia i leggendari con
+progressi conservati, quindi non si svuota col prestigio.
 
 > **Da implementare:** l'archivio delle email inviate si azzera (restano solo i messaggi della Posta); i modelli email sbloccati non restano, perché i potenziamenti Creatività ripartono da zero; non esiste il collaboratore mentore.
 
@@ -2923,17 +2967,11 @@ velocità complessiva del nuovo ciclo oppure un vantaggio equivalente distribuit
 tra Carisma, Scrittura ed entrate. Il valore è provvisorio, ma l'effetto deve
 essere immediato.
 
-Nel codice il premio principale è la **rendita** della scuola lasciata
-(§ 17.6), che parte subito dal primo mese. In più ogni scuola fondata vale
-**+5%** (`prestigeBonusPerSchool = 0,05`), cumulativo e immediato, applicato a:
+Nel codice il premio è la **Reputazione** (§ 5.7): i punti spesi alla
+fondazione valgono subito dal primo mese della nuova scuola. Il messaggio di
+fondazione indica la rendita bloccata e i punti guadagnati e rimasti.
 
-- potenza di scrittura (moltiplicatore `1 + 0,05 × scuole`);
-- pubblico degli eventi (+5 punti percentuali per scuola);
-- entrate mensili delle quote (moltiplicatore `1 + 0,05 × scuole`; le entrate
-  Social e la rendita di rete ne sono escluse).
-
-Il messaggio di fondazione indica la rendita della scuola lasciata e il bonus
-totale di rete raggiunto.
+> **Da bilanciare:** al primo Nazionale (circa 83 minuti) la simulazione arriva a 120–270 di Fama, sotto i 400 che servono per il primo punto: chi fonda appena può guadagna punti solo dai tornei.
 
 ### 17.6 Progressione infinita
 
@@ -2952,36 +2990,20 @@ Nel codice, per ogni scuola fondata:
   scuole)`), tranne quelli con crescita di rete azzerata (ramo Gadget, ramo
   Istruttori, Percorsi Segreti e pochi altri);
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
-- **pubblico raggiungibile:** +5% di pubblico agli eventi;
 - **complessità organizzativa:** il potenziamento Coordinamento multi-sede
   richiede almeno una scuola fondata;
-- **moltiplicatori permanenti:** +5% a scrittura e quote mensili;
+- **moltiplicatori permanenti:** solo quelli comprati con la Reputazione (§ 5.7);
 - gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
   a fine anno.
 
 > **Da implementare:** nessun aumento del numero di attività simultanee.
 
-Ogni scuola lasciata entra nella **Rete dell'Ordine** e versa ogni mese una
-rendita **fissa**, calcolata al momento della fondazione
-(`getFoundationRentPreview`, `src/game/networkRent.ts`):
-
-```
-rendita = arrotonda(quote mensili degli iscritti × quota)
-quota   = 25% + 25% se ha vinto la Champion's Arena
-              + 25% se ha vinto il Torneo Reptile o della Superba
-              + 25% se ha vinto le Chronicles of Ludosport (Arena o Stile)
-```
-
-Con tutti e tre i tornei la quota arriva al **100%**. Ogni torneo conta una
-sola volta: vincere più volte la Champion's Arena non aggiunge nulla, e
-Reptile e Superba sono lo stesso torneo con un altro nome. La vittoria nelle
-Chronicles è registrata in `chroniclesVictoryCurrentSchool`. Il Nazionale è il requisito del
-prestigio e non aumenta la rendita (`networkRentBonusPerTournament = 0,25`).
-Aspettare prima di fondare rende la scuola più ricca per sempre: più iscritti,
-Forme più alte, tornei vinti. La rendita non è toccata da moltiplicatori e si
-somma alle entrate mensili (`getMonthlyOperationalIncome`); il riepilogo delle
-entrate la mostra come «Rete dell'Ordine». Le scuole fondate prima della
-versione 85 ricevono `membri al trasferimento × 40 € × 25%`.
+Ogni scuola lasciata entra nella **Rete dell'Ordine**. Versa una rendita
+mensile fissa solo se alla fondazione si spendono punti Reputazione nella
+rendita (§ 5.7): ogni punto vale `iscritti × 40 € × 10% × 10%`. La rendita non
+è toccata da moltiplicatori e si somma alle entrate mensili
+(`getMonthlyOperationalIncome`); il riepilogo delle entrate la mostra come
+«Rete dell'Ordine».
 
 ---
 

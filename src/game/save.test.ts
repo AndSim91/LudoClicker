@@ -615,6 +615,7 @@ describe("local save", () => {
     expect(migrated.school.specialization).toBe("generale");
     expect(migrated.network).toEqual({
       reputation: 0,
+      reputationUpgrades: {},
       schools: [],
       prestigeOfferSent: false,
       secretLegendaries: Object.fromEntries(SECRET_LEGENDARY_IDS.map((id) => [

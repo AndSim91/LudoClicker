@@ -39,7 +39,7 @@ describe("completed event history removal migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated.version).toBe(85);
+    expect(migrated.version).toBe(86);
     expect(migrated.acquisitionEvents).toEqual([running]);
     expect(migrated.historyArchive.completedEventsByDefinition["themed-event"]).toBe(3);
     expect(legacy.acquisitionEvents).toEqual([completed, running]);

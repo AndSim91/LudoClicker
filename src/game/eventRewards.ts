@@ -14,7 +14,6 @@ export function getEventAttendanceBonus(state: GameState): number {
   return Math.max(
     0,
     getUpgradeEffectTotal(state.upgrades, "eventAttendanceMultiplier") +
-      state.network.schools.length * GAME_CONFIG.prestigeBonusPerSchool +
       (state.unlocks.social
         ? getSocialEventPromotionBonus(state.school.followers)
         : 0),

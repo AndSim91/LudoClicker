@@ -147,7 +147,7 @@ export function createGameActionHandlers(
       action.now,
     ),
     UPDATE_PROFILE_NAME: (state, action) => updateProfileName(state, action.displayName),
-    FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now),
+    FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now, action.spending),
     BUY_UPGRADE: (state, action) => buyUpgrade(state, action.upgradeId),
     START_GADGET_PROJECT: (state, action) => startGadgetProject(
       state,

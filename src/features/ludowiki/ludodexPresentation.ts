@@ -29,7 +29,11 @@ function getMostRelevantContact(
 export function getDiscoveredLegendaryIds(
   state: Pick<GameState, "legendaryCollaborators">,
 ): ReadonlySet<SpecialCollaboratorId> {
-  return new Set(state.legendaryCollaborators.enrolledProfileIds);
+  // Enrolled now, or in an earlier school (their progress is kept): the Ludodex survives the prestige.
+  return new Set([
+    ...state.legendaryCollaborators.enrolledProfileIds,
+    ...Object.keys(state.legendaryCollaborators.retainedProgress) as SpecialCollaboratorId[],
+  ]);
 }
 
 export function getLegendaryDossier(

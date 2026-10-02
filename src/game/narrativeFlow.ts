@@ -140,7 +140,7 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
     ready,
     now,
     "Richiesta apertura nuova scuola",
-    "La vittoria al Nazionale convince la rete: puoi fondare una nuova sede dell'Ordine. La scuola che lasci continuerà a versarti una rendita mensile, tanto più alta quanto più è cresciuta. Trovi la procedura in Impostazioni → Rete dell'Ordine; più aspetti, più la rendita sarà ricca.",
+    "La vittoria al Nazionale convince la rete: puoi fondare una nuova sede dell'Ordine. La Fama di questa scuola diventa Reputazione, da spendere in potenziamenti permanenti o in una rendita da questa sede; la nuova scuola ripartirà da zero. Trovi la procedura in Impostazioni → Rete dell'Ordine; più aspetti, più Reputazione guadagnerai.",
     "system",
   );
 }

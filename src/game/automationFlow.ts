@@ -60,6 +60,7 @@ import type {
   GameState,
   InboxMessage,
 } from "./types";
+import { getReputationMultiplier } from "./reputation";
 
 export interface AutomationFlowDependencies {
   addMessage: (
@@ -549,7 +550,8 @@ export function processInstructorAthleticPreparation(
   const automationMultiplier =
     1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
   const preparationMultiplier =
-    1 + getUpgradeEffectTotal(state.upgrades, "athleticPreparationPower");
+    (1 + getUpgradeEffectTotal(state.upgrades, "athleticPreparationPower")) *
+    getReputationMultiplier(state, "athleticPreparation");
   const total = state.automation.lessonBuffer +
     (safeElapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
       productivity *

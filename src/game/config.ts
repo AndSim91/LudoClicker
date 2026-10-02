@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 85,
+  version: 86,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -102,11 +102,11 @@ export const GAME_CONFIG = {
   narrativeNegativeStreakLimit: 2,
   // Prestige: one national title (Arena or Style) opens the foundation of a new school.
   prestigeNationalTitles: 1,
-  // The school left behind pays this share of its monthly member fees, for good.
-  networkRentShare: 0.25,
-  // Champion's Arena, Reptile/Superba and Chronicles add 25 points each: up to 100% of the fees.
-  networkRentBonusPerTournament: 0.25,
-  prestigeBonusPerSchool: 0.05,
+  // Reputazione di rete (src/game/reputation.ts): +10% of the base value per point.
+  reputationStep: 0.1,
+  reputationUpgradeMaxLevel: 50,
+  // Rent value of a school left behind: members × base fee × this share.
+  networkRentValueShare: 0.1,
   // Specializations chosen at the foundation of a new school.
   redazioneEmailHeadStart: 0.2,
   redazioneFlowDrainScale: 0.5,

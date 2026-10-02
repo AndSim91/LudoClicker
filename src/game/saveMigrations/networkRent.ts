@@ -1,4 +1,7 @@
 import { GAME_CONFIG } from "../config";
+
+// Share used by the v85 rents; v86 replaced them with the Reputation rent.
+const V85_NETWORK_RENT_SHARE = 0.25;
 import type { MigratableState } from "./types";
 
 /** Schools founded before the rents existed pay 25% of a plain fee per member at transfer. */
@@ -14,7 +17,7 @@ export function migrateNetworkRentState(state: MigratableState): MigratableState
             ? {
                 ...school,
                 monthlyRent: Math.round(
-                  school.membersAtTransfer * GAME_CONFIG.monthlyMemberFee * GAME_CONFIG.networkRentShare,
+                  school.membersAtTransfer * GAME_CONFIG.monthlyMemberFee * V85_NETWORK_RENT_SHARE,
                 ),
               }
             : school),
