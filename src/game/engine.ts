@@ -378,7 +378,10 @@ function tick(
     if (!completedStep.complete) break;
     if (boundary >= now) break;
     if (remainingWorkBudget <= 0) break;
-    stalledAt = boundary === cursor && nextState === previousState
+    // Passo fermo sullo stesso istante senza lavoro discreto: al prossimo si
+    // forza il battito. L'identità dello stato non basta, perché una funzione
+    // che lo ricrea senza cambiarlo fermerebbe il tempo per sempre (6.29).
+    stalledAt = boundary === cursor && completedStep.workProcessed === 0
       ? cursor
       : undefined;
   }
