@@ -104,6 +104,8 @@ export const GAME_CONFIG = {
   prestigeNationalTitles: 1,
   // Reputazione di rete (src/game/reputation.ts): +10% of the base value per point.
   reputationStep: 0.1,
+  // The national title that unlocks the prestige is worth one point by itself.
+  reputationNationalTitlePoints: 1,
   reputationUpgradeMaxLevel: 50,
   // Rent value of a school left behind: members × base fee × this share.
   networkRentValueShare: 0.1,

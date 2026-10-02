@@ -326,8 +326,8 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    // 150 Fama earns no point; the Champion's Arena adds one. Nothing spent.
-    expect(founded.network.reputation).toBe(1);
+    // 150 Fama earns no point; the national title and the Champion's Arena one each. Nothing spent.
+    expect(founded.network.reputation).toBe(2);
     expect(founded.network.schools).toHaveLength(1);
     expect(founded.network.schools[0].membersAtTransfer).toBe(80);
     expect(founded.network.schools[0]).toMatchObject({

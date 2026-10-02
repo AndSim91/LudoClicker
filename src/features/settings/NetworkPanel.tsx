@@ -80,7 +80,7 @@ export function NetworkPanel({
           <span>Se fondi ora</span>
           <strong>+{points(preview.points)}</strong>
           <small>
-            {preview.famePoints} dalla Fama ({state.school.fame.toLocaleString("it-IT")}) · {tournamentPoints} dai tornei
+            {preview.famePoints} dalla Fama ({state.school.fame.toLocaleString("it-IT")}) · {tournamentPoints} dai tornei, Nazionale compreso
           </small>
         </div>
         <div>

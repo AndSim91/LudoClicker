@@ -41,9 +41,11 @@ function readySchool(base: GameState = createInitialState(1_000, "Tester")): Gam
   };
 }
 
-it("earns half of √(Fama/100) points, +1 for each kind of tournament won", () => {
+it("earns 1 point for the national title, half of √(Fama/100), +1 for each kind of tournament won", () => {
   const ready = readySchool();
-  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 5, points: 5, rentPerPoint: 50 });
+  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 5, points: 6, rentPerPoint: 50 });
+  // Founding as soon as possible still earns the point of the national title.
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 200 } }).points).toBe(1);
 
   const win = { schoolYear: 2, teamId: "home", schoolName: ready.school.name, athleteNames: ["A", "B"] as [string, string], superba: true };
   const decorated: GameState = {
@@ -55,33 +57,33 @@ it("earns half of √(Fama/100) points, +1 for each kind of tournament won", () 
       reptile: { ...ready.tournaments.reptile, hall: [win, win] },
     },
   };
-  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 8, reptileWin: "superba" });
+  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 9, reptileWin: "superba" });
 });
 
 it("spends points for good: permanent upgrades stay, rent points only lock this school's rent", () => {
-  const first = foundSchool(readySchool(), details, 2_000, { upgrades: { writing: 2 }, rent: 3 });
+  const first = foundSchool(readySchool(), details, 2_000, { upgrades: { writing: 2 }, rent: 4 });
   expect(first.network.reputation).toBe(0);
   expect(first.network.reputationUpgrades?.writing).toBe(2);
   expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.2);
   expect(first.player.writingPower).toBeCloseTo(1.2);
-  // 125 members × 40 € × 10% = 500 € of rent value; 3 points = 30% = 150 €.
-  expect(first.network.schools[0].monthlyRent).toBe(150);
+  // 125 members × 40 € × 10% = 500 € of rent value; 4 points = 40% = 200 €.
+  expect(first.network.schools[0].monthlyRent).toBe(200);
   expect(first.school.fame).toBe(0);
 
   // The next school starts again from 0% rent: 5 more points add 50% of its own value.
   const second = foundSchool(readySchool(first), details, 3_000, { upgrades: {}, rent: 5 });
-  expect(second.network.schools.map((entry) => entry.monthlyRent)).toEqual([150, 250]);
+  expect(second.network.schools.map((entry) => entry.monthlyRent)).toEqual([200, 250]);
   expect(second.network.reputationUpgrades?.writing).toBe(2);
 
   // No rent points: no new rent, the old ones stay.
   const third = foundSchool(readySchool(second), details, 4_000);
-  expect(getMonthlyNetworkRent(third)).toBe(400);
-  expect(third.network.reputation).toBe(5);
+  expect(getMonthlyNetworkRent(third)).toBe(450);
+  expect(third.network.reputation).toBe(7);
 });
 
 it("refuses the foundation when the spending is not covered or exceeds a cap", () => {
   const ready = readySchool();
-  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 6 })).toBe(ready);
+  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 7 })).toBe(ready);
   expect(foundSchool(ready, details, 2_000, { upgrades: { training: -1 }, rent: 0 })).toBe(ready);
   const nearlyMaxed = {
     ...ready,

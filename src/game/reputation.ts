@@ -3,9 +3,9 @@ import type { FoundedSchool, GameState } from "./types";
 
 /*
  * Reputazione di rete (6.19): the only value that travels from a school to the
- * next one. The prestige earns half of √(Fama / 100) points, +1 each for the
- * Champion's Arena, the Reptile (or the Superba it became) and the Chronicles
- * won by the school left behind. Points are spent at the foundation, for good:
+ * next one. The prestige earns 1 point for the national title that unlocked it,
+ * half of √(Fama / 100) points, +1 each for the Champion's Arena, the Reptile
+ * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
  * - six permanent upgrades, +10% of their base value per point, up to 50 points;
  * - the network rent, which is consumed: each point locks 10% of the rent value
  *   of the school being left (members × base fee × 10%) as a fixed monthly
@@ -83,7 +83,8 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
     championsWin,
     reptileWin,
     chroniclesWin,
-    points: famePoints + [championsWin, reptileWin, chroniclesWin].filter(Boolean).length,
+    points: GAME_CONFIG.reputationNationalTitlePoints + famePoints +
+      [championsWin, reptileWin, chroniclesWin].filter(Boolean).length,
     rentPerPoint: rentValue * GAME_CONFIG.reputationStep,
   };
 }

@@ -531,13 +531,15 @@ i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 `src/game/reputation.ts`):
 
 ```
-punti = arrotonda per difetto(√(Fama / 100) / 2)
+punti = 1 per il titolo nazionale che sblocca il prestigio
+      + arrotonda per difetto(√(Fama / 100) / 2)
       + 1 se la scuola lasciata ha vinto la Champion's Arena
       + 1 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
       + 1 se ha vinto le Chronicles of Ludosport
 ```
 
-Per esempio Fama 10.000 dà 5 punti, Fama 30.000 ne dà 8.
+Per esempio, senza altri tornei, Fama 200 dà 1 punto, Fama 10.000 ne dà 6 e
+Fama 30.000 ne dà 9 (`reputationNationalTitlePoints = 1`).
 
 **Spesa.** I punti si spendono alla fondazione, nel modulo di Impostazioni →
 Rete dell'Ordine; la spesa è definitiva e i punti non spesi restano per la
@@ -2853,7 +2855,7 @@ prova in corso.
 Il Nazionale arriva dopo il Torneo Scolastico e l'Accademico Alpha,
 con le qualificazioni, e ha avversari da Forma 3 a 6, quindi richiede atleti
 con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
-il requisito, il titolo nazionale non dà punti Reputazione (§ 5.7). Il
+il requisito, il titolo nazionale vale 1 punto Reputazione fisso (§ 5.7). Il
 requisito non cresce con le scuole fondate: a crescere è il costo dei
 potenziamenti (§ 17.6).
 
@@ -2971,7 +2973,10 @@ Nel codice il premio è la **Reputazione** (§ 5.7): i punti spesi alla
 fondazione valgono subito dal primo mese della nuova scuola. Il messaggio di
 fondazione indica la rendita bloccata e i punti guadagnati e rimasti.
 
-> **Da bilanciare:** al primo Nazionale (circa 83 minuti) la simulazione arriva a 120–270 di Fama, sotto i 400 che servono per il primo punto: chi fonda appena può guadagna punti solo dai tornei.
+Al primo Nazionale (circa 83 minuti) la simulazione arriva a 120–270 di Fama:
+nessun punto dalla Fama, ma il punto fisso del Nazionale garantisce almeno +10%
+alla prima fondazione. Dalla Fama arriva 1 punto verso le 2,5 ore e 2 verso le
+5 ore.
 
 ### 17.6 Progressione infinita
 

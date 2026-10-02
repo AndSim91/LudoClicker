@@ -37,8 +37,8 @@ describe("OverviewView settings", () => {
     render(<OverviewView view="settings" state={ready} {...callbacks} />);
     fireEvent.change(screen.getByLabelText("Nome della scuola"), { target: { value: "Onde di Levante" } });
     fireEvent.change(screen.getByLabelText("Città"), { target: { value: "La Spezia" } });
-    // No Fama and no tournament: no point to spend, so one point on the rent blocks the foundation.
-    fireEvent.change(screen.getByLabelText(/Rendita della rete/), { target: { value: "1" } });
+    // No Fama and no other tournament: only the point of the national title, so two block the foundation.
+    fireEvent.change(screen.getByLabelText(/Rendita della rete/), { target: { value: "2" } });
     expect(screen.getByRole("button", { name: "Fonda la nuova scuola" })).toBeDisabled();
     fireEvent.change(screen.getByLabelText(/Rendita della rete/), { target: { value: "0" } });
     fireEvent.click(screen.getByRole("button", { name: "Fonda la nuova scuola" }));
