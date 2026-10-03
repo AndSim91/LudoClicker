@@ -169,8 +169,13 @@
   background: var(--blue-050);
 }
 
-:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled) {
+:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
+:root[data-theme="dark"] .event-row > button:hover:not(:disabled, .event-cancel-button) {
   background: #0e5f6c;
+}
+
+:root[data-theme="dark"] .event-row > button.event-cancel-button:hover:not(:disabled) {
+  background: #8f1d24;
 }
 
 :root[data-theme="dark"] h1,
@@ -319,6 +324,56 @@
 :root[data-theme="dark"] .composer[data-email-status="readyToSend"] .composer-status em {
   color: var(--onde-gold-bright);
   font-weight: 600;
+}
+
+/* ---- Eventi: each activity is a card, its risk is a coloured edge --------- */
+
+:root[data-theme="dark"] .event-list {
+  display: grid;
+  gap: 12px;
+  border-top: 0;
+}
+
+:root[data-theme="dark"] .event-row {
+  --risk-color: var(--success);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--risk-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .event-row[data-risk="medio"] {
+  --risk-color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .event-row[data-risk="alto"] {
+  --risk-color: var(--equipment-broken);
+}
+
+:root[data-theme="dark"] .event-row[data-state="running"] {
+  border-color: var(--onde-wave);
+  box-shadow: 0 0 0 1px rgb(108 211 214 / 35%), 0 0 22px rgb(108 211 214 / 18%);
+}
+
+:root[data-theme="dark"] .event-meta > span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: var(--blue-050);
+}
+
+:root[data-theme="dark"] .event-meta > .event-risk {
+  color: var(--risk-color);
+}
+
+:root[data-theme="dark"] .event-progress > span {
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+  box-shadow: 0 0 8px rgb(108 211 214 / 55%);
+}
+
+:root[data-theme="dark"] .event-cooldown-progress > span {
+  background: var(--line-strong);
+  box-shadow: none;
 }
 
 /* ---- Scuola: rows light up under the pointer ------------------------------ */
