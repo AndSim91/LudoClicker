@@ -6,6 +6,12 @@
 .final-duel-layer {
   --duel-a: var(--accent-ink);
   --duel-b: var(--warning);
+  /* Blade colour follows the athlete's rarity. */
+  --blade-common: #b9c6ca;
+  --blade-rare: #3d8bff;
+  --blade-ultra-rare: #a463f2;
+  --blade-legendary: #f5b700;
+  --blade-secret-legendary: #e5322d;
   position: fixed;
   z-index: 150;
   inset: 0;
@@ -159,7 +165,8 @@
 
 .final-duel-track {
   position: relative;
-  height: 24px;
+  height: 72px;
+  overflow: hidden;
   border-radius: 12px;
   background: linear-gradient(
     90deg,
@@ -169,20 +176,36 @@
   );
 }
 
-.final-duel-knot {
+/* The crossing point. Base rule = end of the assault: blades on the OH side. */
+.final-duel-blades {
   position: absolute;
-  top: 3px;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  border: 2px solid var(--surface);
-  border-radius: 50%;
-  background: var(--ink);
-  animation: final-duel-push 1.6s ease-in-out var(--delay) both;
+  top: 50%;
+  width: 0;
+  height: 0;
+  animation: final-duel-clash 1.6s ease-in-out var(--delay) both;
 }
 
-.final-duel-assaults li.is-a .final-duel-knot { left: 10%; background: var(--duel-a); }
-.final-duel-assaults li.is-b .final-duel-knot { left: 90%; background: var(--duel-b); }
+.final-duel-assaults li.is-a .final-duel-blades { left: 80%; transform: rotate(14deg); }
+.final-duel-assaults li.is-b .final-duel-blades { left: 20%; transform: rotate(-14deg); }
+
+/* Hilt at the bottom, the fighter's side; blade lit in the rarity colour. */
+.final-duel-blade {
+  --blade: var(--blade-a);
+  position: absolute;
+  top: -42px;
+  left: -2.5px;
+  width: 5px;
+  height: 84px;
+  border-radius: 3px;
+  background: linear-gradient(0deg, #3b4248 0 20%, var(--blade) 20%);
+  box-shadow: 0 0 6px var(--blade);
+  transform: rotate(50deg);
+}
+
+.final-duel-blade.is-b {
+  --blade: var(--blade-b);
+  transform: rotate(-50deg);
+}
 
 .final-duel-assault-outcome {
   grid-column: 1 / -1;
@@ -271,11 +294,12 @@
 
 @keyframes final-duel-fade { from { opacity: 0; } }
 @keyframes final-duel-rise { from { opacity: 0; transform: translateY(10px); } }
-@keyframes final-duel-push {
-  0% { left: 50%; }
-  25% { left: 38%; }
-  50% { left: 62%; }
-  75% { left: 45%; }
+@keyframes final-duel-clash {
+  0% { left: 50%; transform: none; }
+  20% { left: 43%; transform: rotate(-5deg); }
+  40% { left: 57%; transform: rotate(5deg); }
+  55% { left: 47%; transform: rotate(-3deg); }
+  70% { left: 51%; transform: none; }
 }
 
 /* Modalità Onde: deeper stage, our athlete glows. */
@@ -299,6 +323,10 @@
 
 :root[data-theme="dark"] .final-duel-verdict.is-ours {
   color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .final-duel-blade {
+  box-shadow: 0 0 6px var(--blade), 0 0 16px var(--blade);
 }
 
 @keyframes final-duel-glow {

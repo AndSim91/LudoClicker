@@ -4077,6 +4077,13 @@ fine, Esc o «Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
 2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
 la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts`).
 
+Decisione del 04/10: ogni assalto è un duello di due spade illuminate, del
+colore della rarità dell'atleta (comune argento, raro blu, ultra raro viola,
+leggendario oro, leggendario segreto rosso). Partono incrociate al centro, si
+scontrano e finiscono dal lato di chi **subisce** il colpo («OH» nel gergo
+LudoSport): il punto va all'altro. Sotto: «OH a X · punto a Y · 1–0», con il
+punteggio progressivo.
+
 ---
 
 ## 26. Traguardi

@@ -49,6 +49,11 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
   const winner = match.winnerId === a.id ? a : b;
   const ownWinner = Boolean(winner.ownedContactId);
   const nameOf = (side: "a" | "b") => participantName(side === "a" ? a : b);
+  const blades = {
+    "--blade-a": `var(--blade-${a.rarity})`,
+    "--blade-b": `var(--blade-${b.rarity})`,
+  } as CSSProperties;
+  const running = { a: 0, b: 0 };
 
   return (
     <div
@@ -75,20 +80,30 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
               <span>Assalti · al meglio dei 3</span>
               <strong>{match.arenaScoreB}</strong>
             </div>
-            <ol className="final-duel-assaults">
-              {sequence.map((side, index) => (
-                <li
-                  key={index}
-                  className={`is-${side}`}
-                  style={{ "--delay": `${index * ASSAULT_SECONDS}s` } as CSSProperties}
-                >
-                  <span className="final-duel-assault-label">Assalto {index + 1}</span>
-                  <span className="final-duel-track" aria-hidden="true">
-                    <span className="final-duel-knot" />
-                  </span>
-                  <span className="final-duel-assault-outcome">Punto a {nameOf(side)}</span>
-                </li>
-              ))}
+            <ol className="final-duel-assaults" style={blades}>
+              {sequence.map((side, index) => {
+                running[side] += 1;
+                const hit = side === "a" ? "b" : "a";
+                return (
+                  <li
+                    key={index}
+                    className={`is-${side}`}
+                    style={{ "--delay": `${index * ASSAULT_SECONDS}s` } as CSSProperties}
+                  >
+                    <span className="final-duel-assault-label">Assalto {index + 1}</span>
+                    {/* Crossed blades end on the side of whoever takes the OH. */}
+                    <span className="final-duel-track" aria-hidden="true">
+                      <span className="final-duel-blades">
+                        <span className="final-duel-blade is-a" />
+                        <span className="final-duel-blade is-b" />
+                      </span>
+                    </span>
+                    <span className="final-duel-assault-outcome">
+                      OH a {nameOf(hit)} · punto a {nameOf(side)} · {running.a}–{running.b}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
             <div className="final-duel-style" style={{ "--delay": endDelay } as CSSProperties}>
               <span>Voto di Stile dei giudici</span>
