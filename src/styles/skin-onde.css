@@ -426,6 +426,17 @@
   background: var(--onde-gold-bright);
 }
 
+:root[data-theme="dark"] .upgrade-tree-legend i.unaffordable {
+  border-color: var(--equipment-broken);
+  background: transparent;
+}
+
+:root[data-theme="dark"] .upgrade-branch.complete .upgrade-branch-icon {
+  border-color: var(--onde-wave);
+  background: var(--blue-600);
+  box-shadow: 0 0 12px rgb(108 211 214 / 45%);
+}
+
 :root[data-theme="dark"] .upgrade-tree-legend i.completed {
   border-color: var(--onde-wave);
   background: var(--onde-wave);

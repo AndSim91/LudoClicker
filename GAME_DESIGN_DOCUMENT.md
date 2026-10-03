@@ -1837,17 +1837,20 @@ La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
 Insegnamento e Organizzazione**, seguiti dalla riga dei **Percorsi Segreti**.
 Ogni ramo contiene esattamente sette potenziamenti principali; Scrittura ha in
-più un'**estensione del ramo** con due nodi (Ritmo di battitura e Frasi
-fatte), mostrata sotto i sette principali. Il ramo Gadget compare soltanto
+più un **ramo laterale** con due nodi (Ritmo di battitura e Frasi
+fatte), mostrato sotto Tastiera comoda, da cui dipende. Il ramo Gadget compare soltanto
 dopo lo sblocco del settore. Social non ha più un ramo separato: i suoi
 effetti sono distribuiti tra Scrittura e Creatività.
 
-La pagina mostra anche le entrate del mese, il saldo, un riepilogo **Bonus
-totali** degli effetti già ottenuti e, alla radice dell'albero, un **Upgrade
-raccomandato**,
-cioè il nodo disponibile più economico, acquistabile con un clic. Selezionando
-un nodo si apre un riquadro con descrizione, livello, effetto, costo del
-livello successivo e stato dei requisiti.
+In alto a destra la pagina propone **il più economico** tra i nodi
+disponibili, acquistabile con un clic («Compra · prezzo»). Sotto, una riga
+riassume quanti nodi sono completati e spiega la legenda (da comprare, fondi
+insufficienti, bloccati, completati); il riepilogo **Bonus totali** degli
+effetti già ottenuti è una tendina chiusa. Ogni nodo non completato mostra
+livello e prezzo del livello successivo («2/5 · 600 €»); un nodo completato
+mostra solo la spunta, e un ramo tutto completato accende la propria icona.
+Selezionando un nodo si apre un riquadro con descrizione, livello, effetto e
+prerequisiti esatti; il pulsante d'acquisto riporta il prezzo.
 
 I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
 scuola già fondata aggiunge il 15% ai prezzi di Scrittura (estensione
@@ -1861,7 +1864,8 @@ richiede soltanto quei livelli (riportati sotto ciascuna tabella). Un nodo che
 non ne dichiara richiede invece che **tutti i nodi precedenti dello stesso
 ramo siano al livello massimo**: Creatività, Carisma, Accoglienza,
 Attrezzatura e Organizzazione si sbloccano quindi in sequenza stretta. Il nodo
-bloccato indica il primo requisito mancante («Completa prima …»).
+bloccato indica il primo requisito mancante («Completa prima …», oppure
+«Porta prima … al livello N» quando basta un livello).
 
 ### 10.1 Scrittura
 
@@ -1888,7 +1892,7 @@ moltiplicato per 1 + 0,25 × scuole fondate e per 1,1 con la specializzazione
 Redazione. La velocità Redazione/Social si somma ai bonus
 generici di automazione dell'Organizzazione.
 
-**Estensione del ramo.** Le due meccaniche di ritmo della scrittura manuale
+**Ramo laterale.** Le due meccaniche di ritmo della scrittura manuale
 partono bloccate e si acquistano qui:
 
 | Potenziamento | Effetto completo | Costi per livello |

@@ -336,9 +336,9 @@ test("acquista un Upgrade, salva e mantiene il livello dopo il reload", async ({
   await page.getByRole("button", { name: /Apri dettagli Tastiera comoda: livello 0 di 5/ }).click();
 
   const dialog = page.getByRole("dialog", { name: "Tastiera comoda" });
-  await expect(dialog).toContainText("Livello attuale0/5");
-  await dialog.getByRole("button", { name: "Potenzia" }).click();
-  await expect(dialog).toContainText("Livello attuale1/5");
+  await expect(dialog).toContainText("Livello0 di 5");
+  await dialog.getByRole("button", { name: /^Compra ·/ }).click();
+  await expect(dialog).toContainText("Livello1 di 5");
 
   await saveNow(page);
   const stored = await readStoredGameSave(page);

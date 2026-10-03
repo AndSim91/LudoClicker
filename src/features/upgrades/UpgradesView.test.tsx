@@ -121,8 +121,8 @@ describe("UpgradesView", () => {
     expect(screen.getByText(
       "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri",
     )).toBeVisible();
-    expect(screen.getByText("Completa prima Campi intelligenti")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
+    expect(screen.getByText("Porta prima Campi intelligenti al livello 2")).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Compra ·/ })).toBeDisabled();
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -184,7 +184,7 @@ describe("UpgradesView", () => {
       screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
     );
     expect(screen.getByText("Completa prima Presentazione preparata")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Potenzia" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Compra ·/ })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Chiudi dettagli" }));
     rerender(
@@ -199,8 +199,7 @@ describe("UpgradesView", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
     );
-    expect(screen.getByText("Pronto per il livello successivo")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Potenzia" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^Compra ·/ })).toBeEnabled();
   });
 
   it("allows a funded purchase from the selected node dialog", () => {
@@ -214,7 +213,7 @@ describe("UpgradesView", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Apri dettagli Tastiera comoda/ }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "Potenzia" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Compra ·/ }));
 
     expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
   });
@@ -227,10 +226,10 @@ describe("UpgradesView", () => {
       onBuyUpgrade={onBuyUpgrade}
     />);
 
-    const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
+    const recommendation = screen.getByRole("region", { name: "Il più economico" });
     expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
     fireEvent.click(within(recommendation).getByRole("button", {
-      name: "Potenzia Tastiera comoda",
+      name: "Compra Tastiera comoda",
     }));
     expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
   });
@@ -244,10 +243,10 @@ describe("UpgradesView", () => {
       />,
     );
 
-    const recommendation = screen.getByRole("region", { name: "Upgrade raccomandato" });
+    const recommendation = screen.getByRole("region", { name: "Il più economico" });
     expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
     expect(within(recommendation).getByRole("button", {
-      name: "Potenzia Tastiera comoda",
+      name: "Compra Tastiera comoda",
     })).toBeDisabled();
     expect(within(recommendation).getByText(/Mancano 30,00/)).toBeVisible();
   });
@@ -271,23 +270,24 @@ describe("UpgradesView", () => {
     render(<UpgradesView state={state} onBuyUpgrade={() => undefined} />);
 
     const summary = screen.getByLabelText("Riepilogo dei bonus ottenuti dagli upgrade");
-    expect(within(summary).getByText("Caratteri per input:")).toBeVisible();
+    (summary as HTMLDetailsElement).open = true;
+    expect(within(summary).getByText("Caratteri per input")).toBeVisible();
     expect(within(summary).getByText("2")).toBeVisible();
-    expect(within(summary).getByText("Contatti:")).toBeVisible();
+    expect(within(summary).getByText("Contatti")).toBeVisible();
     expect(within(summary).getByText("+12%")).toBeVisible();
-    expect(within(summary).getByText("Pubblico eventi:")).toBeVisible();
+    expect(within(summary).getByText("Pubblico eventi")).toBeVisible();
     expect(within(summary).getAllByText("+5%")).toHaveLength(2);
-    expect(within(summary).getByText("Riserva manutenzione:")).toBeVisible();
+    expect(within(summary).getByText("Riserva manutenzione")).toBeVisible();
     expect(within(summary).getByText("24 punti")).toBeVisible();
-    expect(within(summary).getByText("Quote mensili:")).toBeVisible();
-    expect(within(summary).queryByText("Spade:")).not.toBeInTheDocument();
-    expect(within(summary).getByText("Rami per Istruttore:")).toBeVisible();
+    expect(within(summary).getByText("Quote mensili")).toBeVisible();
+    expect(within(summary).queryByText("Spade")).not.toBeInTheDocument();
+    expect(within(summary).getByText("Rami per Istruttore")).toBeVisible();
     expect(within(summary).getByText("+2")).toBeVisible();
-    expect(within(summary).getByText("Superamento corsi:")).toBeVisible();
+    expect(within(summary).getByText("Superamento corsi")).toBeVisible();
     expect(within(summary).getByText("+20%")).toBeVisible();
-    expect(within(summary).getByText("Rami dopo Corso Y:")).toBeVisible();
+    expect(within(summary).getByText("Rami dopo Corso Y")).toBeVisible();
     expect(within(summary).getByText("tutti")).toBeVisible();
-    expect(within(summary).getByText("Arena Tecnica:")).toBeVisible();
+    expect(within(summary).getByText("Arena Tecnica")).toBeVisible();
   });
 
   it("marks an unlocked unaffordable node until enough funds are available", () => {
