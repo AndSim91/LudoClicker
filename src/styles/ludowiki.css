@@ -271,6 +271,13 @@
   box-shadow: inset 0 0 0 2px rgb(255 255 255 / 42%);
 }
 
+.ludodex-mark.is-encountered {
+  border-style: dashed;
+  border-color: var(--rarity-legendary-avatar-border);
+  color: var(--ink);
+  background: var(--surface);
+}
+
 .ludodex-mark span {
   font-size: 14px;
   font-weight: 700;
@@ -356,6 +363,13 @@
   align-items: center;
   gap: 6px;
   color: var(--success);
+  font-size: 12px;
+}
+
+.ludodex-dossier-identity .ludodex-enrollment-count {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-muted);
   font-size: 12px;
 }
 

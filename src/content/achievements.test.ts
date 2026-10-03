@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../game/config";
 import { describe, expect, it } from "vitest";
 import { addAdminMembers } from "../game/adminFlow";
 import { getCareer } from "../game/career";
@@ -74,7 +75,7 @@ describe("achievements", () => {
       tournaments: { ...initial.tournaments, nationalTitlesCurrentSchool: 2, championsVictoryCurrentSchool: true },
     };
     const migrated = migrate(saved) as GameState;
-    expect(migrated.version).toBe(87);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.achievements).toEqual(["persistent-invites"]);
     expect(getCareer(migrated)).toMatchObject({ nationalTitles: 2, championsWins: 1 });
   });

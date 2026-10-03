@@ -27,6 +27,8 @@ export function createProgressedGameSave(now = Date.now()): GameState {
       completedSceneIds: [],
       skippedSceneIds: [...TUTORIAL_SCENE_IDS],
     },
+    // Like the tutorial: the moments reached while preparing the save are already seen.
+    moments: { seen: state.moments.seen, queue: [] },
     automation: {
       ...state.automation,
       autoSendEmails: false,

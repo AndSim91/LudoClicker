@@ -1,3 +1,4 @@
+import { addLegendaryEncounter, addLegendaryEnrollment } from "./contacts";
 import {
   SECRET_LEGENDARIES,
   getChroniclesLegendaryIds,
@@ -181,17 +182,10 @@ function enrollLegendary(
       contactsAcquired: state.statistics.contactsAcquired + (existing ? 0 : 1),
       membersEnrolled: state.statistics.membersEnrolled + 1,
     },
-    legendaryCollaborators: {
-      ...state.legendaryCollaborators,
-      encounteredProfileIds: [...new Set([
-        ...state.legendaryCollaborators.encounteredProfileIds,
-        id,
-      ])],
-      enrolledProfileIds: [...new Set([
-        ...state.legendaryCollaborators.enrolledProfileIds,
-        id,
-      ])],
-    },
+    legendaryCollaborators: addLegendaryEnrollment(
+      addLegendaryEncounter(state.legendaryCollaborators, id),
+      id,
+    ),
     network: {
       ...state.network,
       secretLegendaries: {

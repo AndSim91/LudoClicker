@@ -49,6 +49,7 @@ import { migrateReptileSuperbaState } from "./saveMigrations/reptileSuperba";
 import { migrateNetworkRentState } from "./saveMigrations/networkRent";
 import { migrateReputationShopState } from "./saveMigrations/reputationShop";
 import { migrateCareerAchievementsState } from "./saveMigrations/careerAchievements";
+import { migrateMomentsState } from "./saveMigrations/moments";
 import { migrateLeanHistoryState } from "./saveMigrations/leanHistory";
 import type { MigratableState, SaveMigrationStage } from "./saveMigrations/types";
 import type { GameState } from "./types";
@@ -103,6 +104,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateNetworkRentState,
   migrateReputationShopState,
   migrateCareerAchievementsState,
+  migrateMomentsState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config";
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
@@ -93,7 +94,7 @@ describe("lean history migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated).toMatchObject({ version: 87 });
+    expect(migrated).toMatchObject({ version: GAME_CONFIG.version });
     expect(isValidGameState(migrated)).toBe(true);
     expect(migrated.tournaments.results.map((entry) => entry.id)).toEqual([
       "current-school-replay",

@@ -36,6 +36,7 @@ import {
   getNextGameTickAt,
   needsAutomationHeartbeat,
 } from "./gameScheduler";
+import { queueMoments } from "./moments";
 import { announceMembershipFeeTier, notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
 import {
   completeShortGoal,
@@ -310,7 +311,7 @@ function completeTickStep(
     ? recruited
     : reconcileCollaboratorManagement(recruited);
   const progressed = completeShortGoal(
-    grantAchievements(reconciled, now),
+    queueMoments(grantAchievements(reconciled, now)),
     now,
     gainMultiplier,
   );
@@ -443,7 +444,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     state,
     completeShortGoal(
       // A refused action leaves the state as it was: no achievement either.
-      reconciledState === preparedState ? reconciledState : grantAchievements(reconciledState, now),
+      reconciledState === preparedState ? reconciledState : queueMoments(grantAchievements(reconciledState, now)),
       now,
       gainMultiplier,
     ),

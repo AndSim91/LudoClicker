@@ -2384,18 +2384,21 @@ Presentate come report di campagna:
 
 > **Da implementare:** non esiste una pagina Statistiche; i dati sono raccolti internamente, ma all'interfaccia arrivano solo pochi riepiloghi sparsi (conteggio della Posta inviata, riepilogo rarità e indicatori dei settori nella pagina Scuola).
 
-### 12.6 LudoWiki (solo ambiente di sviluppo)
+### 12.6 LudoWiki
 
-La LudoWiki è una pagina sperimentale disponibile soltanto nelle build di
-sviluppo, come la pagina Admin. Finché il lavoro è in corso non deve comparire
-nella navigazione delle build di produzione.
+La LudoWiki compare nella barra laterale con il primo traguardo (§ 26); nelle
+build di sviluppo è sempre visibile.
 
-Contiene due aree:
+Contiene tre aree: Ludodex, Traguardi (§ 26) e Manuale di gioco.
 
 - **Ludodex**: collezione permanente dei Leggendari reclutabili, cioè delle
-  persone uniche con nome e cognome fissi. Un dossier viene scoperto alla prima
-  iscrizione in qualunque scuola e resta disponibile dopo abbandoni o nuove
-  fondazioni. Le voci non scoperte non rivelano nome, statistiche o provenienza.
+  persone uniche con nome e cognome fissi. Ogni voce ha tre stati (piano 4.2):
+  *mai incontrato* (nessun nome, statistica o provenienza), *incontrato*
+  (scheda parziale con nome, rarità e luogo d'incontro, senza scena) e
+  *iscritto* (dossier completo, sbloccato dalla prima iscrizione in qualunque
+  scuola, con la scena animata del § 25.1). Il dossier resta dopo abbandoni o
+  nuove fondazioni; da lì in poi si aggiornano solo le statistiche, come
+  «Iscritto N volte» (`legendaryCollaborators.enrollmentCounts`).
   I dossier scoperti mostrano soltanto i valori base di Arena e Stile, senza
   Forme numeriche o esperienza tornei, e predispongono uno spazio dedicato a una
   futura breve biografia dell'atleta. Ogni dossier indica inoltre la scuola di
@@ -3955,6 +3958,29 @@ suo inizio non c'è una spada disponibile.
 - nessun avvio automatico di media;
 - eventuale audio futuro deve essere opzionale e disattivato per impostazione
   predefinita.
+
+### 25.1 Momenti animati
+
+Decisione del 03/10 (piano 4.2). Scene a schermo che celebrano i momenti
+chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
+
+- **Nasce il Consiglio delle Onde**: il primo collaboratore;
+- **un Leggendario entra nell'Ordine**: ogni Leggendario alla sua prima
+  iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
+- **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
+  Superba) e Chronicles of Ludosport;
+- **una nuova sede per l'Ordine**: la prima fondazione.
+
+La scena dura 6,5 secondi e il gioco resta in pausa; si salta con «Salta» o
+Esc. Stile adattivo: spettacolare in Modalità Onde, comunicazione d'ufficio nel
+tema Outlook; con «Riduci animazioni» resta l'ultimo fotogramma. Non c'è una
+galleria per rivederle. Più momenti insieme si mettono in coda; il tutorial
+aspetta che la coda sia vuota.
+
+Implementazione: `src/game/moments.ts` (condizioni e coda in
+`GameState.moments`, `seen` e `queue`), `src/features/moments/`. Salvataggi
+precedenti (v88): quello che il salvataggio ha già raggiunto conta come visto e
+ogni Leggendario già iscritto vale una iscrizione.
 
 ---
 

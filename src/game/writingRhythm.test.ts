@@ -117,7 +117,7 @@ it("adds the two new Scrittura nodes to older saves", () => {
   delete upgrades["writing-rhythm"];
   delete upgrades["stock-phrases"];
   const migrated = migrate({ ...initial, version: 82, upgrades }) as typeof initial;
-  expect(migrated.version).toBe(87);
+  expect(migrated.version).toBe(GAME_CONFIG.version);
   expect(migrated.upgrades["writing-rhythm"]).toBe(0);
   expect(migrated.upgrades["stock-phrases"]).toBe(0);
 });

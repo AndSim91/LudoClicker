@@ -59,6 +59,7 @@ import type {
 import { APP_VERSION } from "../shared/appVersion";
 import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { AchievementToast } from "../features/feedback/AchievementToast";
+import { MomentLayer } from "../features/moments/MomentLayer";
 import { useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
@@ -114,6 +115,7 @@ export function App() {
     setTutorialPaused,
     setGadgetPaused,
     setReptilePaused,
+    setMomentPaused,
     saveStatus,
     saveNow,
   } = useGameEngine();
@@ -200,6 +202,12 @@ export function App() {
     setReptilePaused(hasBlockingReptileFlow);
   }, [hasBlockingReptileFlow, setReptilePaused]);
 
+  const activeMoment = state.moments.queue[0];
+  useLayoutEffect(() => {
+    setMomentPaused(activeMoment !== undefined);
+  }, [activeMoment, setMomentPaused]);
+  const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -208,6 +216,7 @@ export function App() {
         selectedMessageId !== null ||
         !state.profile.displayName.trim() ||
         tutorial.isBlockingInput ||
+        activeMoment !== undefined ||
         event.repeat ||
         event.key === BOSS_KEY ||
         isWindowsKey(event) ||
@@ -219,6 +228,7 @@ export function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
+    activeMoment,
     activeView,
     dispatch,
     getGameNow,
@@ -691,7 +701,9 @@ export function App() {
           </b>
         </footer>
       </div>
-      {tutorial.activeScene && tutorial.activeStep ? (
+      {activeMoment !== undefined ? (
+        <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />
+      ) : tutorial.activeScene && tutorial.activeStep ? (
         <TutorialLayer
           scene={tutorial.activeScene}
           step={tutorial.activeStep}

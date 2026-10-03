@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createProgressedGameSave, installGameSave } from "./support/gameSave";
+import { SECRET_LEGENDARY_IDS } from "../../src/content/secretLegendaries";
 
 test.use({ viewport: { width: 1600, height: 900 } });
 
@@ -98,8 +99,10 @@ async function openArea(page: Page, name: string) {
 }
 
 test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   const state = createProgressedGameSave();
+  const moments = ["legendary:eva-parodi", `legendary:${SECRET_LEGENDARY_IDS[0]}`, "victory:national", "council", "foundation"];
+  state.moments = { seen: moments, queue: moments };
   state.school.euros = 50_000;
   // Mix every rarity so each name colour is checked on tables, chips and day-panel cards.
   const rarities = ["common", "rare", "ultra-rare", "legendary"] as const;
@@ -113,9 +116,17 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   await installGameSave(page, state);
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const report: Record<string, ContrastFailure[]> = {};
+  // Animated moments (4.2): audit each one after its text has faded in, then skip it.
+  for (const moment of moments) {
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.waitForTimeout(4_300);
+    report[`Momento · ${moment}`] = await page.evaluate(auditContrast);
+    await page.getByRole("button", { name: /Salta/ }).click();
+  }
   for (let input = 0; input < 40; input += 1) await page.keyboard.press("a");
 
-  const report: Record<string, ContrastFailure[]> = { Posta: await audit(page) };
+  report.Posta = await audit(page);
   for (const area of ["Eventi", "Scuola", "Tornei", "Upgrade", "Gadget", "Impostazioni"]) {
     await openArea(page, area);
     report[area] = await audit(page);

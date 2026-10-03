@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config";
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../initialState";
 import { migrate } from "../saveMigrations";
@@ -39,7 +40,7 @@ describe("completed event history removal migration", () => {
 
     const migrated = migrate(legacy) as GameState;
 
-    expect(migrated.version).toBe(87);
+    expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.acquisitionEvents).toEqual([running]);
     expect(migrated.historyArchive.completedEventsByDefinition["themed-event"]).toBe(3);
     expect(legacy.acquisitionEvents).toEqual([completed, running]);

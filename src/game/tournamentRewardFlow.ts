@@ -1,4 +1,4 @@
-import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
+import { addLegendaryEncounters, addLegendaryEnrollment, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
@@ -157,15 +157,7 @@ function enrollRewardContact(state: GameState, contactId: string, now: number): 
       membersEnrolled: state.statistics.membersEnrolled + 1,
     },
     legendaryCollaborators: nextContact.specialProfileId
-      ? {
-          ...state.legendaryCollaborators,
-          enrolledProfileIds: [
-            ...new Set([
-              ...state.legendaryCollaborators.enrolledProfileIds,
-              nextContact.specialProfileId,
-            ]),
-        ],
-      }
+      ? addLegendaryEnrollment(state.legendaryCollaborators, nextContact.specialProfileId)
       : state.legendaryCollaborators,
   };
   const unlockedState = unlockSocialIfEligible(nextState);

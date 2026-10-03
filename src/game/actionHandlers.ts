@@ -1,3 +1,4 @@
+import { dismissMoment } from "./moments";
 import { COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID } from "../content/tutorialScenes";
 import {
   addAdminContacts,
@@ -174,6 +175,7 @@ export function createGameActionHandlers(
     ),
     MARK_MESSAGE_READ: (state, action) => markMessageRead(state, action.messageId),
     MARK_ALL_MESSAGES_READ: (state) => markAllMessagesRead(state),
+    DISMISS_MOMENT: (state) => dismissMoment(state),
     FINISH_TUTORIAL_SCENE: (state, action) => finishTutorialScene(
       state,
       action.sceneId,

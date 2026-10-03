@@ -1,3 +1,4 @@
+import { addLegendaryEnrollment } from "./contacts";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
@@ -111,7 +112,7 @@ export function resolveStartedTrialBatch(
           "failedTrialRetryChance",
         )),
     );
-    const legendaryCollaborators = specialProfileId
+    const attempted = specialProfileId
       ? {
           ...stateBeforeTrial.legendaryCollaborators,
           enrollmentAttempts: {
@@ -120,14 +121,11 @@ export function resolveStartedTrialBatch(
               (stateBeforeTrial.legendaryCollaborators.enrollmentAttempts[specialProfileId] ?? 0) +
               1,
           },
-          enrolledProfileIds: enrolled
-            ? [...new Set([
-                ...stateBeforeTrial.legendaryCollaborators.enrolledProfileIds,
-                specialProfileId,
-              ])]
-            : stateBeforeTrial.legendaryCollaborators.enrolledProfileIds,
         }
       : stateBeforeTrial.legendaryCollaborators;
+    const legendaryCollaborators = specialProfileId && enrolled
+      ? addLegendaryEnrollment(attempted, specialProfileId)
+      : attempted;
     const completedTrial: ScheduledTrial = { ...trial, status: "completed" };
     const resolvedContact: Contact | undefined = trialContact
       ? {

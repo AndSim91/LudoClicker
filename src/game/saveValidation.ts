@@ -435,6 +435,7 @@ export function isValidGameState(value: unknown): value is GameState {
     Array.isArray(state.legendaryCollaborators?.enrolledProfileIds) &&
     typeof state.legendaryCollaborators?.enrollmentAttempts === "object" &&
     typeof state.legendaryCollaborators?.retainedProgress === "object" &&
+    Object.values(state.legendaryCollaborators?.enrollmentCounts ?? {}).every(isNonNegativeSafeInteger) &&
     Object.values(state.legendaryCollaborators?.retainedProgress ?? {}).every((progress) =>
       Boolean(
         progress &&
@@ -542,6 +543,10 @@ export function isValidGameState(value: unknown): value is GameState {
       (id) => id === "project-x" || id === "divine-touch",
     ) &&
     isValidGadgetState(state.gadgets) &&
+    Array.isArray(state.moments?.seen) &&
+    state.moments.seen.every((key) => typeof key === "string") &&
+    Array.isArray(state.moments?.queue) &&
+    state.moments.queue.every((key) => typeof key === "string") &&
     Array.isArray(state.achievements) &&
     state.achievements.every((key) => typeof key === "string") &&
     (state.statistics?.career === undefined || Object.values(state.statistics.career)

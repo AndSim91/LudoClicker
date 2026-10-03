@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "./config";
 import { expect, it } from "vitest";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { getDiscoveredLegendaryIds } from "../features/ludowiki/ludodexPresentation";
@@ -108,7 +109,7 @@ it("turns the old reputation into points and stops the automatic rents (v86)", (
   const initial = createInitialState(1_000, "Tester");
   const saved = { ...initial, version: 85, network: { ...initial.network, reputation: 4, reputationUpgrades: undefined, schools: [school(1_000)] } };
   const migrated = migrate(saved) as GameState;
-  expect(migrated.version).toBe(87);
+  expect(migrated.version).toBe(GAME_CONFIG.version);
   expect(migrated.network.reputation).toBe(4);
   expect(migrated.network.reputationUpgrades).toEqual({});
   expect(migrated.network.schools[0].monthlyRent).toBe(0);

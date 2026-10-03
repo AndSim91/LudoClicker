@@ -68,6 +68,7 @@ export function createInitialState(
     messages: [createWelcomeMessage(now)],
     acquisitionEvents: [],
     achievements: [],
+    moments: { seen: [], queue: [] },
     narrative: {
       nextEventAt: now + GAME_CONFIG.narrativeEventMinMs,
       history: [],

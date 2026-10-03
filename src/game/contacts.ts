@@ -120,6 +120,22 @@ export function addLegendaryEncounter(
   };
 }
 
+/** A Leggendario joins the current school: enrolled now, one more enrollment in the save (4.2). */
+export function addLegendaryEnrollment(
+  progress: LegendaryCollaboratorProgress,
+  profileId: SpecialCollaboratorId,
+): LegendaryCollaboratorProgress {
+  if (progress.enrolledProfileIds.includes(profileId)) return progress;
+  return {
+    ...progress,
+    enrolledProfileIds: [...progress.enrolledProfileIds, profileId],
+    enrollmentCounts: {
+      ...progress.enrollmentCounts,
+      [profileId]: (progress.enrollmentCounts?.[profileId] ?? 0) + 1,
+    },
+  };
+}
+
 export function addLegendaryEncounters(
   progress: LegendaryCollaboratorProgress,
   contacts: Contact[],

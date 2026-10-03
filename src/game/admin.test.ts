@@ -225,6 +225,9 @@ describe("admin resource actions", () => {
     expect(resolved.collaborators.some(
       (collaborator) => collaborator.specialProfileId === contact.specialProfileId,
     )).toBe(true);
+    // 4.2: first enrollment ever → its scene, then the Consiglio delle Onde.
+    expect(resolved.legendaryCollaborators.enrollmentCounts?.[contact.specialProfileId!]).toBe(1);
+    expect(resolved.moments.queue).toEqual([`legendary:${contact.specialProfileId}`, "council"]);
   });
 
   it("never schedules the same Legendary profile twice", () => {

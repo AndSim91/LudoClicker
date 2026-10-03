@@ -1,0 +1,395 @@
+/*
+ * Momenti animati (4.2). Outlook skin: an office notice with a progress line.
+ * Modalità Onde: a full-screen scene. Keyframes animate *from* the hidden state,
+ * so the base rules are the final frame and «Riduci animazioni» shows it still.
+ * The scene lasts 6.5 s (MOMENT_DURATION_MS in MomentLayer.tsx).
+ */
+.moment-layer {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 28%);
+  animation: moment-fade 0.3s ease-out both;
+}
+
+.moment-art,
+.moment-skip-onde {
+  display: none;
+}
+
+.moment-card {
+  position: relative;
+  width: min(500px, 100%);
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 26px 28px 22px;
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 25px 60px rgb(0 0 0 / 28%);
+  animation: moment-card-in 0.35s ease-out both;
+}
+
+.moment-progress {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--blue-100);
+}
+
+.moment-progress span {
+  display: block;
+  height: 100%;
+  background: var(--blue-600);
+  transform-origin: left;
+  animation: moment-progress 6.5s linear both;
+}
+
+.moment-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.moment-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  place-items: center;
+  border-radius: 6px;
+  color: #7a5200;
+  background: #fff2bd;
+}
+
+.moment-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.moment-kicker {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.moment-title {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.moment-body {
+  margin: 14px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.moment-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 18px;
+}
+
+.moment-skip {
+  min-height: 36px;
+  padding: 0 18px;
+  border: 1px solid var(--blue-600);
+  border-radius: 4px;
+  color: #ffffff;
+  background: var(--blue-600);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@keyframes moment-fade { from { opacity: 0; } }
+@keyframes moment-card-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } }
+@keyframes moment-progress { from { transform: scaleX(0); } }
+
+/* ---------- Modalità Onde ---------- */
+:root[data-theme="dark"] .moment-layer {
+  --moment-accent: var(--onde-gold-bright);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 64px 24px 48px;
+  background: radial-gradient(ellipse at 50% 35%, #0a3a57 0%, var(--onde-abyss) 70%);
+  animation-duration: 0.5s;
+}
+
+:root[data-theme="dark"] .moment-layer.is-council { --moment-accent: var(--onde-wave); }
+:root[data-theme="dark"] .moment-layer.is-secret { --moment-accent: #ff8a7a; }
+
+:root[data-theme="dark"] .moment-art {
+  display: block;
+  width: min(460px, 86vw);
+  height: 100%;
+  max-height: 46vh;
+  align-self: end;
+}
+
+:root[data-theme="dark"] .moment-card {
+  position: static;
+  width: min(820px, 100%);
+  overflow: visible;
+  padding: 0;
+  border-radius: 0;
+  color: var(--onde-foam);
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  animation: none;
+}
+
+:root[data-theme="dark"] .moment-progress,
+:root[data-theme="dark"] .moment-icon,
+:root[data-theme="dark"] .moment-skip-office {
+  display: none;
+}
+
+:root[data-theme="dark"] .moment-skip-onde {
+  display: inline;
+}
+
+:root[data-theme="dark"] .moment-heading {
+  display: block;
+}
+
+:root[data-theme="dark"] .moment-kicker {
+  display: block;
+  color: var(--onde-wave);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: moment-text 0.6s ease-out 3.3s both;
+}
+
+:root[data-theme="dark"] .moment-title {
+  margin-top: 6px;
+  color: var(--moment-accent);
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.05;
+  animation: moment-title 0.8s ease-out 2.8s both;
+}
+
+:root[data-theme="dark"] .moment-body {
+  margin-top: 10px;
+  color: var(--ink-muted);
+  font-size: 18px;
+  animation: moment-text 0.6s ease-out 3.6s both;
+}
+
+:root[data-theme="dark"] .moment-actions {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  padding: 0;
+}
+
+:root[data-theme="dark"] .moment-skip {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  color: var(--onde-foam);
+  background: rgb(2 30 51 / 70%);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+@keyframes moment-text { from { opacity: 0; transform: translateY(14px); } }
+@keyframes moment-title { from { opacity: 0; transform: scale(1.15); } }
+
+/* Council: the table rises, the first seat lights up. */
+.moment-glow { fill: rgb(108 211 214 / 12%); }
+.moment-ring { fill: none; stroke: #2a6280; stroke-width: 2; }
+.moment-table { fill: #04263f; stroke: var(--onde-wave); stroke-width: 2; }
+.moment-wave { fill: none; stroke: var(--onde-wave); stroke-width: 5; stroke-linecap: round; }
+.moment-wave.is-soft { stroke: var(--onde-foam); stroke-width: 3; opacity: 0.7; }
+.moment-seat { fill: #0e4563; stroke: #3c7b96; }
+.moment-seat.is-on { fill: var(--onde-gold); stroke: var(--onde-foam); stroke-width: 2; animation: moment-seat 0.6s ease-out 2.2s both; }
+.moment-halo {
+  fill: none;
+  stroke: var(--onde-gold-bright);
+  stroke-width: 3;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moment-halo 1.6s ease-out 2.2s both;
+}
+.moment-rise { animation: moment-rise 1.1s ease-out 0.3s both; }
+
+@keyframes moment-rise { from { opacity: 0; transform: translateY(60px); } }
+@keyframes moment-seat { from { fill: #0e4563; } }
+@keyframes moment-halo {
+  0% { opacity: 0; transform: scale(0.4); }
+  35% { opacity: 0.9; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* Legendary: a pillar of light, the card flips in. Red for a Leggendario Segreto. */
+.moment-legendary-art {
+  position: relative;
+  --moment-card-from: #f8df8b;
+  --moment-card-to: #c99324;
+  --moment-card-ink: #3d2a00;
+  --moment-light: rgb(240 184 90 / 60%);
+}
+
+.moment-layer.is-secret .moment-legendary-art {
+  --moment-card-from: #ffb3a8;
+  --moment-card-to: #e25a4d;
+  --moment-card-ink: #3a0603;
+  --moment-light: rgb(255 120 100 / 55%);
+}
+
+.moment-pillar {
+  position: absolute;
+  inset: 0 30%;
+  background: linear-gradient(to top, var(--moment-light), transparent);
+  filter: blur(18px);
+  opacity: 0.6;
+  transform-origin: 50% 100%;
+  animation: moment-pillar 1.2s ease-out both;
+}
+
+.moment-spark {
+  position: absolute;
+  bottom: 12%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--moment-accent);
+  opacity: 0;
+  animation: moment-spark 2.4s ease-out 1.4s 2 both;
+}
+.moment-spark.is-0 { left: 30%; }
+.moment-spark.is-1 { left: 40%; animation-delay: 1.8s; }
+.moment-spark.is-2 { left: 58%; animation-delay: 1.6s; }
+.moment-spark.is-3 { left: 68%; animation-delay: 2.1s; }
+.moment-spark.is-4 { left: 49%; animation-delay: 2.4s; }
+
+.moment-card-flip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  width: min(250px, 60vw);
+  height: min(330px, 42vh);
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  border: 3px solid var(--onde-foam);
+  border-radius: 18px;
+  color: var(--moment-card-ink);
+  background: linear-gradient(160deg, var(--moment-card-from), var(--moment-card-to));
+  box-shadow: 0 0 60px var(--moment-light);
+  transform: translate(-50%, -50%);
+  animation: moment-card-flip 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1) 1.1s both;
+}
+
+.moment-card-number { align-self: flex-start; font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.moment-card-initials {
+  display: grid;
+  width: 46%;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 4px solid var(--moment-card-ink);
+  border-radius: 50%;
+  background: var(--onde-foam);
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+}
+.moment-card-flip strong { font-family: var(--font-display); font-size: 26px; line-height: 1; text-align: center; }
+.moment-card-rarity { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.moment-card-stats { margin-top: auto; font-size: 14px; }
+
+@keyframes moment-pillar { from { opacity: 0; transform: scaleY(0); } }
+@keyframes moment-spark {
+  0% { opacity: 0; transform: translateY(0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-180px); }
+}
+@keyframes moment-card-flip {
+  from { opacity: 0; transform: translate(-50%, -50%) perspective(900px) rotateY(90deg) scale(0.8); }
+  70% { opacity: 1; transform: translate(-50%, -50%) perspective(900px) rotateY(-8deg) scale(1.04); }
+}
+
+/* Victory: two blades cross, a flash, the cup rises. */
+.moment-rays path { fill: rgb(224 166 74 / 30%); }
+.moment-rays { opacity: 0.55; animation: moment-fade 1.2s ease-out 1.6s both; }
+.moment-blade-glow { stroke-width: 16; stroke-linecap: round; opacity: 0.35; }
+.moment-blade-core { stroke-width: 6; stroke-linecap: round; }
+.moment-blade { transform-box: view-box; }
+.moment-blade.is-left { transform-origin: 120px 310px; transform: rotate(35deg); animation: moment-blade-left 1.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.3s both; }
+.moment-blade.is-right { transform-origin: 280px 310px; transform: rotate(-35deg); animation: moment-blade-right 1.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.3s both; }
+.moment-blade.is-left .moment-blade-glow { stroke: var(--onde-wave); }
+.moment-blade.is-left .moment-blade-core { stroke: #e8fbfb; }
+.moment-blade.is-right .moment-blade-glow { stroke: var(--onde-gold); }
+.moment-blade.is-right .moment-blade-core { stroke: #fff6e4; }
+.moment-flash {
+  fill: #fff6e4;
+  filter: blur(8px);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moment-flash 1s ease-out 1.3s both;
+}
+.moment-trophy path,
+.moment-trophy rect { fill: var(--onde-gold); stroke: var(--onde-foam); stroke-width: 2; }
+.moment-trophy .moment-trophy-handle { fill: none; stroke: var(--onde-gold); stroke-width: 6; }
+.moment-trophy { animation: moment-rise 1s ease-out 1.8s both; }
+
+@keyframes moment-blade-left { from { transform: rotate(-25deg); } }
+@keyframes moment-blade-right { from { transform: rotate(25deg); } }
+@keyframes moment-flash {
+  0% { opacity: 0; transform: scale(0.2); }
+  20% { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 0; transform: scale(2.4); }
+}
+
+/* Foundation: the route from the old school to the new one. */
+.moment-foundation-art { position: relative; }
+.moment-foundation-art svg { width: 100%; height: 100%; }
+.moment-grid { stroke: #0e4563; stroke-width: 1; }
+.moment-route {
+  fill: none;
+  stroke: var(--onde-gold-bright);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: moment-route 2s ease-in-out 0.4s both;
+}
+.moment-city { stroke: var(--onde-foam); stroke-width: 3; }
+.moment-city.is-old { fill: var(--onde-wave); opacity: 0.7; }
+.moment-city.is-new {
+  fill: #9a7bd0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moment-pop 0.6s ease-out 2.3s both;
+}
+.moment-city-label {
+  position: absolute;
+  max-width: 42%;
+  color: var(--onde-foam);
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.2;
+  animation: moment-text 0.6s ease-out 2.6s both;
+}
+.moment-city-label.is-old { bottom: 4%; left: 2%; color: var(--ink-muted); animation-delay: 0.3s; }
+.moment-city-label.is-new { top: 4%; right: 2%; text-align: right; }
+
+@keyframes moment-route { from { stroke-dashoffset: 1; } }
+@keyframes moment-pop { from { transform: scale(0); } 70% { transform: scale(1.4); } }

@@ -36,6 +36,25 @@ export function getDiscoveredLegendaryIds(
   ]);
 }
 
+/** Never met, met but never enrolled (partial card), or enrolled at least once (full dossier). */
+export type LudodexStatus = "unknown" | "encountered" | "enrolled";
+
+export function getLudodexStatus(
+  state: Pick<GameState, "legendaryCollaborators">,
+  discoveredIds: ReadonlySet<SpecialCollaboratorId>,
+  profileId: SpecialCollaboratorId,
+): LudodexStatus {
+  if (discoveredIds.has(profileId)) return "enrolled";
+  return state.legendaryCollaborators.encounteredProfileIds.includes(profileId) ? "encountered" : "unknown";
+}
+
+export function getLegendaryEnrollmentCount(
+  state: Pick<GameState, "legendaryCollaborators">,
+  profileId: SpecialCollaboratorId,
+): number {
+  return Math.max(1, state.legendaryCollaborators.enrollmentCounts?.[profileId] ?? 0);
+}
+
 export function getLegendaryDossier(
   state: Pick<GameState, "contacts" | "legendaryCollaborators">,
   legendary: LudodexLegendary,

@@ -46,6 +46,23 @@ describe("LudoWikiView", () => {
     expect(screen.queryByText("Andrea Simonazzi")).not.toBeInTheDocument();
   });
 
+  it("shows a met but never enrolled Leggendario as a partial card (4.2)", () => {
+    const initial = createInitialState(1_000, "Verifica UI");
+    const state = {
+      ...initial,
+      legendaryCollaborators: {
+        ...initial.legendaryCollaborators,
+        encounteredProfileIds: ["andrea-simonazzi" as const],
+      },
+    };
+    render(<LudoWikiView state={state} />);
+
+    expect(screen.getByText(`0 / ${LUDODEX_LEGENDARIES.length}`)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Andrea Simonazzi" })).toBeVisible();
+    expect(screen.getByText("Incontrato · mai iscritto")).toBeVisible();
+    expect(screen.queryByText("Arena base")).not.toBeInTheDocument();
+  });
+
   it("opens a discovered dossier with base stats and a biography placeholder", () => {
     const now = 2_000;
     const initial = createInitialState(now, "Verifica UI");

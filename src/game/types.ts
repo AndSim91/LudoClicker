@@ -458,6 +458,8 @@ export interface LegendaryCollaboratorProgress {
   enrolledProfileIds: SpecialCollaboratorId[];
   enrollmentAttempts: Partial<Record<SpecialCollaboratorId, number>>;
   retainedProgress: Partial<Record<SpecialCollaboratorId, RetainedLegendaryProgress>>;
+  /** Times each Leggendario joined one of the player's schools, over the whole save (4.2). */
+  enrollmentCounts?: Partial<Record<SpecialCollaboratorId, number>>;
 }
 
 export interface Statistics {
@@ -484,6 +486,9 @@ export interface Statistics {
   /** Cumulative counters for the achievements (src/game/career.ts); absent before v87. */
   career?: CareerStatistics;
 }
+
+/** "council", "foundation", `victory:${level}` or `legendary:${profileId}` (src/game/moments.ts). */
+export type MomentKey = string;
 
 export interface CareerStatistics {
   perfectPhrases: number;
@@ -1004,6 +1009,8 @@ export interface GameState {
     lastImprovedAthleteId?: string;
   };
   achievements: AchievementKey[];
+  /** Animated moments (4.2): each plays once per save; the queue waits to be shown. */
+  moments: { seen: MomentKey[]; queue: MomentKey[] };
   narrative: {
     nextEventAt: number;
     history: NarrativeEventRecord[];
@@ -1060,6 +1067,7 @@ export type GameAction =
   | { type: "MARK_MESSAGE_READ"; messageId: string }
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }
+  | { type: "DISMISS_MOMENT" }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
   | { type: "BUY_OFFICIAL_SWORD"; now: number; amount?: number }
   | {
