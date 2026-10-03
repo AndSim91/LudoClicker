@@ -19,10 +19,10 @@ describe("CampaignEmailContent", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Composizione HTML della mail")).toBeVisible();
-    expect(screen.getByLabelText("Anteprima della mail in costruzione")).toBeVisible();
+    expect(screen.getByLabelText("Composizione HTML dell'email")).toBeVisible();
+    expect(screen.getByLabelText("Anteprima dell'email in costruzione")).toBeVisible();
     expect(screen.getByLabelText("Codice HTML scritto")).toHaveTextContent("<!doctype html>");
-    expect(screen.queryByRole("img", { name: "Struttura della mail in costruzione" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Struttura dell'email in costruzione" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Ciao/)).not.toBeInTheDocument();
   });
 
@@ -41,7 +41,7 @@ describe("CampaignEmailContent", () => {
 
     const label = ["Bozza disastrata", "Controllo ortografico", "Email professionale"][level];
     expect(screen.getByLabelText(`Email in formato ${label}`)).toBeVisible();
-    expect(screen.queryByLabelText("Composizione HTML della mail")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Composizione HTML dell'email")).not.toBeInTheDocument();
   });
 
   it("reveals the initial campaign as plain text after the structure is built", () => {
@@ -121,7 +121,7 @@ describe("CampaignEmailContent", () => {
     );
     expect(screen.queryByText(EMAIL_TEMPLATES[0].subject)).not.toBeInTheDocument();
     expect(screen.queryByText("IL PROSSIMO PASSO")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Composizione HTML della mail")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Composizione HTML dell'email")).not.toBeInTheDocument();
   });
 
   it("keeps the HTML preview silent while only the first source characters are written", () => {

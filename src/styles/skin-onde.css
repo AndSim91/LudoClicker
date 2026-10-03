@@ -12,7 +12,11 @@
  * tests/e2e/contrast.spec.ts keeps every visible text at AA.
  */
 :root[data-theme="dark"] {
-  --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  /* Fase 8: Barlow for text, Barlow Semi Condensed for titles and numbers. Only
+     400/500/600 are bundled, so every heavier weight in the CSS renders as 600. */
+  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Barlow Semi Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-body);
 
   --onde-abyss: #021e33;
   --onde-groove: #04263f;

@@ -1,4 +1,5 @@
 import { getOfficialStatPresentation } from "../../shared/officialStatColor";
+import { formatStat } from "../../shared/formatters";
 
 export function OfficialStatValue({ value }: { value: number }) {
   const presentation = getOfficialStatPresentation(value);
@@ -9,7 +10,7 @@ export function OfficialStatValue({ value }: { value: number }) {
       style={presentation.style}
       data-outlined={presentation.outlined || undefined}
     >
-      {value.toFixed(3)}
+      {formatStat(value)}
     </strong>
   );
 }

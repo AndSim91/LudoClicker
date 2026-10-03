@@ -16,7 +16,7 @@ export function EmailStructurePreview({
     <div
       className={`email-structure-preview email-structure-level-${level}`}
       role="img"
-      aria-label="Struttura della mail in costruzione"
+      aria-label="Struttura dell'email in costruzione"
     >
       <div className="email-structure-canvas" aria-hidden="true">
         {hasFrame ? (

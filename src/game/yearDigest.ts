@@ -1,5 +1,6 @@
 import { getSchoolYear } from "./calendar";
 import { makeGameId } from "./ids";
+import { NOTICE_SENDER } from "./stateUpdates";
 import type { GameState, InboxMessage, YearDigestCounts } from "./types";
 
 /*
@@ -94,7 +95,7 @@ function createDigestMessage(
 ): InboxMessage {
   return {
     id: makeGameId("digest", now, schoolYear),
-    sender: "Ordine delle Onde",
+    sender: NOTICE_SENDER,
     subject: `Riepilogo dell'anno scolastico ${schoolYear}`,
     preview: describeDigest(counts),
     receivedAt: now,

@@ -134,10 +134,10 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "draft-ready",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Una mail al giorno...",
+        title: "Un'email al giorno...",
         body: [
           "Ho predisposto qualche contatto email a cui scrivere. Li ho trovati scrivendo lettere a caso fino a notte fonda, dovresti ringraziarmi.",
-          "Ora scrivi una bella mail pubblicitaria da spedire, il messaggio verrà inviato automaticamente poi dovremo solo attendere una risposta...",
+          "Ora scrivi una bella email pubblicitaria da spedire, il messaggio verrà inviato automaticamente poi dovremo solo attendere una risposta...",
         ],
         focusRegions: ["main"],
       },
@@ -162,7 +162,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Eventi",
         body: [
-          "La prima missione è completata. Ora apri la pagina Eventi dalla barra delle applicazioni per organizzare nuove attività per la scuola.",
+          "La prima missione è completata. Ora apri la pagina Eventi dalla barra a sinistra per organizzare nuove attività per la scuola.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "events"
@@ -247,7 +247,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         body: [
           "Come puoi vedere, una delle tue precedenti email ha avuto effetto: la prima prova in palestra è ora prenotata!",
           "La sezione “La mia giornata” è molto utile per tenere traccia di tutti gli avvenimenti dell'Ordine delle Onde, tra cui scoprire se la prova avrà successo o meno.",
-          "Ora non ti resta che continuare a mandare mail e fare eventi fino a che qualcuno non si iscriverà...",
+          "Ora non ti resta che continuare a mandare email e fare eventi fino a che qualcuno non si iscriverà...",
           "Conto su di te!"
         ],
         focusRegions: ["day-panel", "first-trial-row"],
@@ -293,7 +293,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Habemus inscriptum!",
         body: [
-          `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nella nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
+          `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nelle nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
           `Ogni Forma o corso conosciuti dal singolo iscritto aggiunge ${GAME_CONFIG.monthlyMemberFormBonus}€ alla quota mensile. È così che la scuola finanzia i suoi miglioramenti.`,
           `Per ogni Forma o corso, l'attestato da Istruttore aggiunge ${GAME_CONFIG.monthlyMemberInstructorBonus}€ alla quota; la qualifica da Tecnico porta questo bonus a ${GAME_CONFIG.monthlyMemberTechnicianBonus}€.`,
           `Pensavi che solo la tua Black Card fosse costosa?`,
@@ -305,7 +305,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri gli Upgrade",
         body: [
-          "Usa la barra delle applicazioni a sinistra e apri Upgrade.",
+          "Usa la barra a sinistra e apri Upgrade.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "upgrades"
@@ -319,7 +319,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Sviluppare l'Ordine delle Onde",
         body: [
-          "Nella pagine Upgrade puoi spendere i fondi della scuola per migliorare scrittura, prove, eventi e automazioni.",
+          "Nella pagina Upgrade puoi spendere i fondi della scuola per migliorare scrittura, prove, eventi e automazioni.",
           "Gli Upgrade si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
         ],
         focusRegions: ["main"],
@@ -346,7 +346,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Scuola",
         body: [
-          "Apri Scuola dalla barra laterale per raggiungere la sezione Collaboratori.",
+          "Apri Scuola dalla barra a sinistra per raggiungere la sezione Collaboratori.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -420,7 +420,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la gestione dei Collaboratori",
         body: [
-          "Apri Scuola dalla barra laterale per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
+          "Apri Scuola dalla barra a sinistra per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -479,7 +479,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Scuola",
         body: [
-          "Premi su Scuola nella barra laterale e raggiungi l'elenco dei Collaboratori delle Onde.",
+          "Premi su Scuola nella barra a sinistra e raggiungi l'elenco dei Collaboratori delle Onde.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -526,7 +526,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri Gadget",
         body: [
-          "Seleziona Gadget nella barra laterale per entrare nel laboratorio.",
+          "Seleziona Gadget nella barra a sinistra per entrare nel laboratorio.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "gadget"
@@ -551,7 +551,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Dal progetto alle borse di studio",
         body: [
-          "Acquista un progetto, attendi lo sviluppo e affronta la prova qualità. Quando accetti il risultato, il prodotto entra in vendita automatica.",
+          "Acquista un progetto, attendi lo sviluppo e affronta il collaudo. Quando accetti il risultato, il prodotto entra in vendita automatica.",
           "Una qualità più alta aumenta la possibilità di vendita ed anche il guadagno per unità venduta.",
           "Migliorare la qualità dei prodotti potrebbe anche sbloccare nuove rarità!",
         ],

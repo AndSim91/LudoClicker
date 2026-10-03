@@ -65,7 +65,7 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
   await openProgressedGame(page);
 
   await expect(page.getByLabel("Iscritti attivi: 20")).toBeVisible();
-  await expect(page.locator('[aria-label^="Disponibilità economica:"]')).toHaveAttribute(
+  await expect(page.locator('[aria-label^="Fondi:"]')).toHaveAttribute(
     "aria-label",
     /5\.000,00/,
   );
@@ -85,7 +85,7 @@ test("carica il salvataggio predefinito e apre tutte le aree sbloccate", async (
   }
 });
 
-test("completa la prova qualità Gadget con controlli touch accessibili", async ({ page }) => {
+test("completa il collaudo Gadget con controlli touch accessibili", async ({ page }) => {
   const state = createProgressedGameSave();
   state.school.euros = 50_000;
   state.unlocks.gadget = true;
@@ -108,7 +108,7 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();
 
   await page.getByRole("button", { name: "Gadget", exact: true }).click();
-  await page.getByRole("button", { name: "Avvia prova qualità" }).click();
+  await page.getByRole("button", { name: "Avvia collaudo" }).click();
 
   const minigame = page.getByRole("dialog", { name: "Polsino" });
   await expect(minigame).toBeVisible();
@@ -120,7 +120,7 @@ test("completa la prova qualità Gadget con controlli touch accessibili", async 
     expect(box?.height).toBeGreaterThanOrEqual(50);
   }
 
-  const board = minigame.getByLabel("Quattro corsie della prova qualità");
+  const board = minigame.getByLabel("Quattro corsie del collaudo");
   const fallingNote = minigame.getByRole("button", { name: /^Nota corsia/ }).first();
   await expect(fallingNote).toBeVisible({ timeout: 4_000 });
   await expect
@@ -187,7 +187,7 @@ test("mostra accordi su corsie diverse alle rarità Gadget più alte", async ({ 
   await page.goto("/");
 
   await page.getByRole("button", { name: "Gadget", exact: true }).click();
-  await page.getByRole("button", { name: "Avvia prova qualità" }).click();
+  await page.getByRole("button", { name: "Avvia collaudo" }).click();
 
   const minigame = page.getByRole("dialog", { name: "Polsino" });
   await expect(minigame).toHaveClass(/rarity-secret-legendary/);
@@ -227,7 +227,7 @@ test("completa e invia una mail senza invio automatico", async ({ page }) => {
   });
   await composer.click();
   const completedComposer = page.getByRole("button", {
-    name: "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare.",
+    name: "Corpo del messaggio. Email completata. Premi un tasto o fai clic per inviare.",
   });
   // Flusso writes more than one character per key: type until the draft is complete.
   for (let typed = 1; typed < totalCharacters && !(await completedComposer.isVisible()); typed += 1) {

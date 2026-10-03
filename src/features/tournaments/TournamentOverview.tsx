@@ -25,6 +25,7 @@ import {
   monthShortLabel,
 } from "./tournamentPresentation";
 import { TournamentContactIdentity } from "./TournamentAthleteIdentity";
+import { formatStat } from "../../shared/formatters";
 
 interface TournamentOverviewProps {
   state?: GameState;
@@ -218,15 +219,15 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
                       />
                       <small>{TOURNAMENT_DEFINITIONS[qualification.level].label} · anno {qualification.season}</small>
                     </span>
-                    <strong>{visible ? preparation.arena.toFixed(3) : "???"}</strong>
-                    <strong>{visible ? preparation.style.toFixed(3) : "???"}</strong>
+                    <strong>{visible ? formatStat(preparation.arena) : "???"}</strong>
+                    <strong>{visible ? formatStat(preparation.style) : "???"}</strong>
                   </div>
                 ))}
               </div>
               <footer>
                 <strong>Media squadra</strong>
-                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : (officialQualified.reduce((sum, entry) => sum + entry.preparation.arena, 0) / officialQualified.length).toFixed(3)}</span>
-                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : (officialQualified.reduce((sum, entry) => sum + entry.preparation.style, 0) / officialQualified.length).toFixed(3)}</span>
+                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : formatStat(officialQualified.reduce((sum, entry) => sum + entry.preparation.arena, 0) / officialQualified.length)}</span>
+                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : formatStat(officialQualified.reduce((sum, entry) => sum + entry.preparation.style, 0) / officialQualified.length)}</span>
               </footer>
             </>
           ) : (

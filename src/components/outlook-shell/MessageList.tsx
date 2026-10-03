@@ -308,7 +308,7 @@ export function MessageList({
         </>
       ) : (
         <div className="mailbox-empty">
-          <strong>Nessuna mail inviata</strong>
+          <strong>Nessuna email inviata</strong>
           <span>Le campagne completate appariranno in questa cartella.</span>
         </div>
       )}

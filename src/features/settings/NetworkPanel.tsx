@@ -137,7 +137,7 @@ export function NetworkPanel({
         <p>
           {trialPending
             ? "Completa prima la prova del leggendario in corso."
-            : `${state.school.name} entrerà nella rete. La nuova scuola riparte da zero, Fama compresa: restano la Reputazione con i suoi potenziamenti, Torneo della Superba, Corso X e Ludodex.`}
+            : `${state.school.name} entrerà nella rete. La nuova scuola riparte da zero, Fama compresa: restano la Reputazione con i suoi Upgrade, Torneo della Superba, Corso X e Ludodex.`}
         </p>
         <fieldset className="foundation-fields" disabled={!ready} onChange={() => setArmed(false)}>
           <label>Nome della scuola<input name="name" required maxLength={60} /></label>
@@ -157,7 +157,7 @@ export function NetworkPanel({
             Spendi la Reputazione
             <span className={left < 0 ? "over-budget" : undefined}>{points(left)} da spendere su {available}</span>
           </legend>
-          <p>La spesa è definitiva. Ogni punto vale +{Math.round(GAME_CONFIG.reputationStep * 100)}% del valore base, fino a {GAME_CONFIG.reputationUpgradeMaxLevel} punti per potenziamento.</p>
+          <p>La spesa è definitiva. Ogni punto vale +{Math.round(GAME_CONFIG.reputationStep * 100)}% del valore base, fino a {GAME_CONFIG.reputationUpgradeMaxLevel} punti per Upgrade.</p>
           {REPUTATION_UPGRADE_IDS.map((id) => {
             const level = getReputationLevel(state, id);
             const added = allocation[id] ?? 0;

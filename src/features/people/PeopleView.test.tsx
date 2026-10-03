@@ -237,7 +237,7 @@ describe("PeopleView", () => {
     expect(within(market).getByRole("progressbar", {
       name: "Quota ricavi Tazza",
     })).toHaveValue(100);
-    expect(within(market).getByText("Leader")).toBeVisible();
+    expect(within(market).getByText("In testa")).toBeVisible();
   });
 
   it("keeps the progress clock fluid for a high-volume teaching dashboard", () => {
@@ -1648,19 +1648,19 @@ describe("PeopleView", () => {
     expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
     expect(screen.queryByRole("tab", { name: /Potenziali interessati/ })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "ComuneComparsa: 80%Prova dopo la mail: 40%",
+      "ComuneComparsa: 80%Prova dopo l'email: 40%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Ultra RaroComparsa: 5,5%Prova dopo la mail: 75%",
+      "Ultra RaroComparsa: 5,5%Prova dopo l'email: 75%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "LeggendarioComparsa: 2%Prova dopo la mail: 100%",
+      "LeggendarioComparsa: 2%Prova dopo l'email: 100%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Effettiva base mail → iscritto: 25%",
+      "Effettiva base email → iscritto: 25%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Effettiva base mail → iscritto: 17,5%",
+      "Effettiva base email → iscritto: 17,5%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" }))
       .not.toHaveTextContent("Pity");
@@ -2295,8 +2295,8 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    const arena = within(roster).getByText("108.564");
-    const style = within(roster).getByText("50.000");
+    const arena = within(roster).getByText("109");
+    const style = within(roster).getByText("50");
     expect(arena.style.getPropertyValue("--official-stat-from")).toBe("var(--official-stat-100)");
     expect(arena.style.getPropertyValue("--official-stat-to")).toBe("var(--official-stat-150)");
     expect(arena).toHaveClass("official-stat-value");

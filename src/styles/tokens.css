@@ -1,6 +1,8 @@
 :root {
   color-scheme: light;
   font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  /* Counters and money do not jump around as they change. */
+  font-variant-numeric: tabular-nums;
   --blue-700: #0f5fab;
   --blue-600: #0f6cbd;
   --blue-500: #1473e6;
@@ -126,4 +128,12 @@
   --official-stat-225: #ffb4ab;
   --official-stat-300: #69d2e7;
   --official-stat-outline: #0753c5;
+}
+
+/* Form controls follow the theme's typeface (browsers default them to the system font). */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }

@@ -100,7 +100,7 @@ export function AdminEmailView({
           </label>
           <button type="submit" disabled={!canAddContacts}>Modifica contatti</button>
           <small>
-            Totali: {totalContacts} &middot; disponibili: {availableContacts}. {"Un contatto pu\u00f2 essere usato subito per avviare una nuova mail."}
+            Totali: {totalContacts} &middot; disponibili: {availableContacts}. {"Un contatto pu\u00f2 essere usato subito per avviare una nuova email."}
           </small>
         </form>
         <form
@@ -159,7 +159,7 @@ export function AdminEmailView({
           </label>
           <button type="submit" disabled={!canAddSwords}>Modifica spade</button>
           <small>
-            Totali: {totalSwords} &middot; disponibili: {availableSwords} &middot; danneggiate: {damagedSwords}
+            Totali: {totalSwords} &middot; disponibili: {availableSwords} &middot; rotte: {damagedSwords}
           </small>
         </form>
       </section>

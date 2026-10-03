@@ -12,7 +12,7 @@ export function RarityOverview({ state: stateOverride }: { state?: GameState }) 
     <section className="rarity-overview" aria-label="Sistema di rarità">
       <div>
         <strong>Probabilità e rarità</strong>
-        <span>Valori base ed efficacia attuale con i tuoi potenziamenti</span>
+        <span>Valori base ed efficacia attuale con i tuoi Upgrade</span>
       </div>
       {RARITY_ORDER.map((rarity) => {
         const definition = PERSON_RARITIES[rarity];
@@ -20,12 +20,12 @@ export function RarityOverview({ state: stateOverride }: { state?: GameState }) 
           <article className={rarity === "common" ? undefined : rarity} key={rarity}>
             <strong>{definition.label}</strong>
             <span>Comparsa: {formatPercent(definition.queueAppearanceChance)}</span>
-            <span>Prova dopo la mail: {formatPercent(getEmailBookingChance(state, rarity))}</span>
+            <span>Prova dopo l'email: {formatPercent(getEmailBookingChance(state, rarity))}</span>
             <span>
               Iscrizione: {formatPercent(definition.baseEnrollmentChance)} base · {formatPercent(getEnrollmentChance(state, rarity))} attuale · max {formatPercent(definition.maxEnrollmentChance)}
             </span>
             <span>
-              Effettiva base mail → iscritto: {formatPercent(definition.baseTrialBookingChance * definition.baseEnrollmentChance)}
+              Effettiva base email → iscritto: {formatPercent(definition.baseTrialBookingChance * definition.baseEnrollmentChance)}
             </span>
             <span>{definition.collaboratorDescription}</span>
           </article>

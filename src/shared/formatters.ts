@@ -34,8 +34,28 @@ const percentFormatter = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 2,
 });
 
+const wholeCurrencyFormatter = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  useGrouping: true,
+  maximumFractionDigits: 0,
+});
+const statFormatter = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 0, useGrouping: true });
+const voteFormatter = new Intl.NumberFormat("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Cents only below 10.000 €: above that they are noise (Fase 8). */
 export function formatCurrency(value: number): string {
-  return currencyFormatter.format(value);
+  return (Math.abs(value) >= 10_000 ? wholeCurrencyFormatter : currencyFormatter).format(value);
+}
+
+/** Arena and Stile values are shown as whole numbers: 1.822, not 1822.400. */
+export function formatStat(value: number): string {
+  return statFormatter.format(value);
+}
+
+/** A judge's Stile vote, 0–10, with two decimals: 7,35. */
+export function formatVote(value: number): string {
+  return voteFormatter.format(value);
 }
 
 export function formatCompactCurrency(value: number): string {

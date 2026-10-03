@@ -312,7 +312,7 @@ export function resolveAcquisitionEvent(
       nextState,
       now + 1,
       "Attività operative disponibili",
-      "Il primo evento ha attivato registro operativo, attrezzatura e traguardi. La nuova area è comparsa nella barra laterale.",
+      "Il primo evento ha attivato registro operativo, attrezzatura e traguardi. La nuova area è comparsa nella barra a sinistra.",
       "system",
     );
   }

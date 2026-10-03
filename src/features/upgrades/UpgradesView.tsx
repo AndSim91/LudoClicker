@@ -580,16 +580,16 @@ export function UpgradesView({
       <header className="upgrade-page-header">
         <Icon name="spark" />
         <div><h1>Upgrade</h1><p>Sviluppa la scuola seguendo i rami del piano di crescita</p></div>
-        <div className="upgrade-page-summary" aria-label="Risorse per i potenziamenti">
+        <div className="upgrade-page-summary" aria-label="Risorse per gli Upgrade">
           <div><span>Entrate di {monthName}</span><strong>{formatCurrency(incomePerMonth)} <small>al mese</small></strong></div>
-          <div><span>Disponibilità attuale</span><strong>{formatCurrency(state.school.euros)}</strong></div>
+          <div><span>Fondi</span><strong>{formatCurrency(state.school.euros)}</strong></div>
         </div>
       </header>
 
       <section className="upgrade-tree-section" aria-labelledby="upgrade-tree-title">
         <div className="upgrade-tree-heading">
           <div>
-            <h2 id="upgrade-tree-title">Piano dei potenziamenti</h2>
+            <h2 id="upgrade-tree-title">Piano degli Upgrade</h2>
             <p>Seleziona un nodo per vedere effetto, costo e requisiti.</p>
           </div>
           <div className="upgrade-tree-legend" aria-label="Legenda stati">
@@ -608,7 +608,7 @@ export function UpgradesView({
           </ul>
         </div>
 
-        <div className="upgrade-tree-scroll" tabIndex={0} aria-label="Diagramma dei potenziamenti, scorribile orizzontalmente">
+        <div className="upgrade-tree-scroll" tabIndex={0} aria-label="Diagramma degli Upgrade, scorribile orizzontalmente">
           <div className="upgrade-tree-canvas">
             <div className="upgrade-tree-root">
               <span aria-hidden="true"><Icon name="spark" /></span>

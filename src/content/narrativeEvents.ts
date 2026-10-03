@@ -25,7 +25,7 @@ export const MISSED_RENEWAL_EVENT = {
 
 export const NARRATIVE_EVENTS: NarrativeEventDefinition[] = [
   { id: "word-of-mouth", title: "Passaparola inatteso", description: "Un iscritto ha parlato della scuola a diverse persone interessate alla fermata del Bus.", tone: "positive", kind: "positive", minMembers: 1, contactDelta: 2 },
-  { id: "extra-donation", title: "Contributo straordinario", description: "Una donazione anonima da parte di uno sconosciuto che ci vede in difficoltà. E' un programmatore e sta creando un gioco clicker sulla sua scuola di scherma", tone: "positive", kind: "positive", minMembers: 3, euroDelta: 1000 },
+  { id: "extra-donation", title: "Contributo straordinario", description: "Una donazione anonima da parte di uno sconosciuto che ci vede in difficoltà. È un programmatore e sta creando un gioco clicker sulla sua scuola di scherma", tone: "positive", kind: "positive", minMembers: 3, euroDelta: 1000 },
   { id: "friends-at-training", title: "Davvero hai degli amici?", description: "Un nostro iscritto ci ha dato i contatti di alcuni suoi amici per una prova", tone: "positive", kind: "positive", minMembers: 5, contactDelta: 3 },
   MISSED_RENEWAL_EVENT,
   { id: "unexpected-repair", title: "Un piccolo disastro", description: "Non so cosa sia successo, non sono stato io!", tone: "neutral", kind: "negative", minMembers: 2, wearDelta: 30, damagedSwordsDelta: 1 },

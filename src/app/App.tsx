@@ -604,7 +604,7 @@ export function App() {
                 ) : (
                   <main className="empty-composer">
                     <Icon name="send" />
-                    <h1>Nessuna mail inviata</h1>
+                    <h1>Nessuna email inviata</h1>
                     <p>Completa una campagna per visualizzarne qui il contenuto e lo stato.</p>
                   </main>
                 )

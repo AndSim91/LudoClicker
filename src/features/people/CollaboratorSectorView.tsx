@@ -665,7 +665,7 @@ export function CollaboratorSectorView({
         {!state.unlocks.gadget ? (
           <div className="collaborator-sector-placeholder" aria-hidden="true">
             <Icon name="settings" />
-            <span>Coming soon...</span>
+            <span>In arrivo</span>
           </div>
         ) : null}
       </div>

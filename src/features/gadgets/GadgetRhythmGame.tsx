@@ -239,7 +239,7 @@ export function GadgetRhythmGame({
       }
       if (changed) {
         setCombo(0);
-        setLastJudgment("Miss");
+        setLastJudgment("Mancato");
         publishJudgments();
       }
     },
@@ -316,7 +316,7 @@ export function GadgetRhythmGame({
         return next;
       });
       setLastJudgment(
-        timing.judgment === "perfect" ? "Perfect" : timing.judgment === "good" ? "Good" : "Almost",
+        timing.judgment === "perfect" ? "Perfetto" : timing.judgment === "good" ? "Bene" : "Quasi",
       );
     },
     [minigame.status, notes, paused, publishJudgments],
@@ -349,7 +349,7 @@ export function GadgetRhythmGame({
       >
         <section className="gadget-minigame-result">
           <span className="gadget-result-kicker">
-            {unlockedRarity ? "Rarità sbloccata" : "Prova qualità completata"}
+            {unlockedRarity ? "Rarità sbloccata" : "Collaudo completato"}
           </span>
           <h2 id="gadget-result-title">{product.name}</h2>
           <div className="gadget-result-score" aria-label={`Risultato ${score} su 100`}>
@@ -435,7 +435,7 @@ export function GadgetRhythmGame({
           </div>
         </header>
 
-        <div className="gadget-rhythm-board" aria-label="Quattro corsie della prova qualità">
+        <div className="gadget-rhythm-board" aria-label="Quattro corsie del collaudo">
           <GadgetProcessArtwork productId={minigame.productId} activeStage={activeDesignStage} />
           <div className="gadget-design-stages" aria-hidden="true">
             {DESIGN_STAGES.map((stage, index) => (

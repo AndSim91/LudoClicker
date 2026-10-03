@@ -128,9 +128,11 @@ export function formatTournamentCountdown(remainingMs: number): string {
   const hours = Math.floor((totalSeconds % 86_400) / 3_600);
   const minutes = Math.floor((totalSeconds % 3_600) / 60);
   const seconds = totalSeconds % 60;
-  if (days > 0) return `${days}g ${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`;
-  if (hours > 0) return `${hours}h ${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
-  return `${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
+  const pad = (value: number) => value.toString().padStart(2, "0");
+  // A clock, as on a scoreboard: 1:36, 2:05:09; days only past 24 hours (Fase 8).
+  if (days > 0) return `${days} g ${hours} h`;
+  if (hours > 0) return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+  return `${minutes}:${pad(seconds)}`;
 }
 
 export function getResultForLevelAndSeason(

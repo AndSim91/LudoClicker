@@ -405,7 +405,7 @@ describe("game engine: funnel", () => {
 
     expect(sent.emails.find((candidate) => candidate.id === email.id)?.status).toBe("sent");
     expect(sent.messages.find((message) => message.subject === "Configurazione campagna completata")?.sender)
-      .toBe("Ordine delle Onde");
+      .toBe("A.N.D.E.R.");
     expect(sent.pendingEmailOutcomes).toHaveLength(1);
     expect(sent.pendingEmailOutcomes[0].result).toBe("trialBooked");
     expect(sent.statistics.emailsSent).toBe(1);

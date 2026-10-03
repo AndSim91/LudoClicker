@@ -23,7 +23,7 @@ export const EMAIL_PRESENTATION_LEVELS: Record<
 > = {
   0: {
     label: "Bozza disastrata",
-    description: "Una mail breve, simpatica e piena di refusi, errori e italiano creativo.",
+    description: "Un'email breve, simpatica e piena di refusi, errori e italiano creativo.",
   },
   1: {
     label: "Controllo ortografico",
@@ -43,14 +43,14 @@ export const EMAIL_PRESENTATION_LEVELS: Record<
   },
   5: {
     label: "Contatti",
-    description: "La stessa idea diventa una mail più fluida, elegante e persuasiva.",
+    description: "La stessa idea diventa un'email più fluida, elegante e persuasiva.",
   },
   6: {
     label: "Sezione video",
     description: "Un testo lungo, entusiasta e curioso spiega perché vale la pena cominciare.",
   },
   7: {
-    label: "Mail finale HTML",
+    label: "Email finale HTML",
     description: "Il massimo splendore: testo approfondito, gerarchia visiva e grafica da campagna.",
   },
 };

@@ -195,7 +195,7 @@ describe("App profile and navigation", () => {
     const folders = within(folderPane!);
 
     fireEvent.click(folders.getByRole("button", { name: /Posta inviata/ }));
-    expect(screen.getByRole("heading", { name: "Nessuna mail inviata" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Nessuna email inviata" })).toBeVisible();
 
     fireEvent.click(folders.getByRole("button", { name: /Contatti/ }));
     expect(screen.getByRole("button", { name: /Corpo del messaggio/ })).toBeVisible();

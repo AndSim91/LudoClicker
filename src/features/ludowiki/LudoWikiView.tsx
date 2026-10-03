@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
+import { formatStat } from "../../shared/formatters";
 import {
   LUDODEX_LEGENDARIES,
   LUDOWIKI_CHAPTER_GROUPS,
@@ -103,7 +104,7 @@ function LudodexListRow({
         <strong>{status === "unknown" ? "???" : getLegendaryName(legendary)}</strong>
         {dossier ? (
           <span>
-            Arena base {dossier.arenaBase.toFixed(1)} · Stile base {dossier.styleBase.toFixed(1)}
+            Arena base {formatStat(dossier.arenaBase)} · Stile base {formatStat(dossier.styleBase)}
           </span>
         ) : status === "encountered" ? (
           <span>Incontrato · si apre alla prima iscrizione</span>

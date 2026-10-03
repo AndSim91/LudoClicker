@@ -41,7 +41,7 @@ describe("TitleBar", () => {
       formatCompactCurrency(120).replace(/\u00a0/g, " "),
     );
     expect(screen.getByText("Iscritti attivi")).toBeVisible();
-    const availability = screen.getByLabelText(/^Disponibilità economica:/);
+    const availability = screen.getByLabelText(/^Fondi:/);
     const monthlyIncome = screen.getByLabelText(/^Entrate mensili:/);
     expect(availability.closest(".title-resources")).toBeInTheDocument();
     expect(monthlyIncome).toHaveTextContent("Entrate mensili");

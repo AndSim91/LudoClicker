@@ -2194,7 +2194,7 @@ passa istantaneamente dalla Modalità Onde alla vista chiara da ufficio e
 viceversa, e la scelta resta salvata nel browser. Lo stesso interruttore è
 presente in Impostazioni › Aspetto, insieme a **Riduci animazioni**.
 
-> **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Disponibilità in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
+> **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Fondi in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
 
 Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come
 prodotto ufficiale Microsoft. Per una distribuzione pubblica è preferibile usare
@@ -2205,7 +2205,7 @@ informazioni del progetto.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│ Barra titolo: menu / Contatti · Iscritti · Follower · Disponibilità / Spade / Fama /    │
+│ Barra titolo: menu / Contatti · Iscritti · Follower · Fondi / Spade / Fama /            │
 │ Pausa / Mese corrente / controlli finestra                                               │
 ├──────────────────────────────────────────────────────────────────────────────────────────┤
 │ Barra comandi: Nuovo messaggio / Elimina / Sposta in / Segna tutto come letto / Cerca    │
@@ -2215,9 +2215,9 @@ informazioni del progetto.
 │    │ Posta in arrivo│ Oggetto          │ A: nome@email.test       │ Missioni delle Onde  │
 │    │ Posta inviata  │ Mittente         │ Oggetto: ...             │ Attrezzatura         │
 │    │ ───────        │ Data             │                          │ Notifiche del giorno │
-│    │ Contatti       │                  │ Corpo della mail         │                      │
+│    │ Contatti       │                  │ Corpo dell'email         │                      │
 │    │ Scuola         │                  │                          │                      │
-│    │ Disponibilità  │                  │                          │                      │
+│    │ Fondi          │                  │                          │                      │
 ├────┴────────────────┴──────────────────┴──────────────────────────┴──────────────────────┤
 │ Stato messaggi / Profilo / Connesso localmente / Scuola · versione                       │
 └──────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2266,8 +2266,8 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Contatti da contattare: contatore **Contatti** nella barra del titolo e riga
   Contatti sotto le cartelle (apre la composizione);
 - Esiti in attesa: prove prenotate e notifiche nella colonna La mia giornata;
-- Euro disponibili: contatore **Disponibilità** nella barra del titolo e riga
-  Disponibilità sotto le cartelle, con le entrate mensili (“+… al mese”);
+- Euro disponibili: contatore **Fondi** nella barra del titolo e riga Fondi
+  sotto le cartelle, con le entrate mensili (“+… al mese”);
 - Iscritti: contatore **Iscritti** nella barra del titolo, riga Scuola sotto le
   cartelle e sezione “Iscritti attivi” della pagina Scuola;
 - Collaboratori: sezione “Collaboratori” della pagina Scuola;
@@ -2282,6 +2282,30 @@ I numeri del gioco vengono nascosti in elementi plausibili:
   requisiti sono soddisfatti.
 
 > **Da implementare:** la barra inferiore mostra solo testi statici (stato dei messaggi, profilo, connessione, scuola e versione) e non la velocità di scrittura; non esiste un pannello “Statistiche campagna” con la conversione.
+
+Come si scrivono i numeri (Fase 8): Arena e Stile sono interi (1.822, non
+1822.400); il voto di Stile di un assalto, da 0 a 10, ha due decimali (7,35);
+gli importi perdono i centesimi da 10.000 € in su; i conti alla rovescia sono
+un orologio (1:36, 2:05:09, oltre il giorno «3 g 4 h»). Tutte le cifre sono
+tabellari, così restano allineate in colonna.
+
+### 11.4.1 Caratteri, voce e glossario
+
+La Modalità Onde usa **Barlow** per il testo e **Barlow Semi Condensed** per
+titoli e numeri, inclusi nel gioco (pesi 400, 500 e 600) perché ogni computer
+mostri le stesse lettere; il tema Outlook resta su Segoe UI.
+
+Avvisi, riepiloghi e traguardi nella Posta li firma **A.N.D.E.R.**, l'assistente
+della scuola; le email della campagna e il benvenuto mantengono i loro mittenti.
+La voce è ironica per circa il 60% e asciutta per il 40%; i messaggi di sistema
+(salvataggi, errori, impostazioni) restano asciutti. Un avviso non supera due
+frasi e non spiega regole: quelle stanno nella LudoWiki.
+
+Un nome per ogni cosa: **email** (non «mail»), **barra a sinistra**, **Upgrade**
+(non «potenziamento»), **spade rotte** e **usura**, **fondi**, **prova** per la
+lezione di prova e **collaudo** per il controllo dei Gadget, **Preside** per chi
+gioca. Le etichette sono in italiano (Perfetto, Bene, Quasi, Mancato; Riepilogo;
+In testa; In arrivo).
 
 La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quando il
 saldo raggiunge o supera **5.000 €**, una missione ancora a zero progresso si

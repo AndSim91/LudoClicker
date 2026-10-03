@@ -185,7 +185,7 @@ export function getCollaboratorAutomationPresentation({
     if (activeEmail?.status === "readyToSend") {
       return {
         title: activeEmail.subject,
-        detail: "Mail completa · in attesa dell'invio del giocatore",
+        detail: "Email completa · aspetta che il Preside la invii",
         progress: 100,
         progressLabel: `Scrittura di ${activeEmail.subject} completata`,
       };
@@ -273,7 +273,7 @@ export function getCollaboratorAutomationPresentation({
     });
     return {
       title: isRepairingSword
-        ? `Spade danneggiate: ${damagedSwords}`
+        ? `Spade rotte: ${damagedSwords}`
         : `Usura attrezzatura: ${Math.round(state.equipment.wear)}`,
       detail: isRepairingSword
         ? "Riparazione spade in corso..."
@@ -316,7 +316,7 @@ export function getCollaboratorAutomationPresentation({
     if (minigame) {
       return {
         title: minigame.status === "result" ? "Qualità definita" : "Prototipo pronto",
-        detail: `${GADGET_DEFINITIONS[minigame.productId].name} · completa la prova qualità`,
+        detail: `${GADGET_DEFINITIONS[minigame.productId].name} · completa il collaudo`,
         progress: minigame.status === "result" ? 100 : undefined,
       };
     }

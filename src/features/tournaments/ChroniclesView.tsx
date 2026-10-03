@@ -13,6 +13,7 @@ import {
   TournamentAthleteIdentity,
   TournamentContactIdentity,
 } from "./TournamentAthleteIdentity";
+import { formatStat } from "../../shared/formatters";
 
 interface ChroniclesViewProps {
   state?: GameState;
@@ -444,10 +445,10 @@ export function ChroniclesView({
                     schoolCity={state.school.city}
                   />
                   <span className="chronicles-stat">
-                    {preparation.visible ? preparation.values.arena.toFixed(3) : "???"}
+                    {preparation.visible ? formatStat(preparation.values.arena) : "???"}
                   </span>
                   <span className="chronicles-stat">
-                    {preparation.visible ? preparation.values.style.toFixed(3) : "???"}
+                    {preparation.visible ? formatStat(preparation.values.style) : "???"}
                   </span>
                   <button
                     type="button"

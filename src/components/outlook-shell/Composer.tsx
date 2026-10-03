@@ -48,7 +48,7 @@ export function Composer({
   const readyToSend = email.status === "readyToSend";
   const progressPercent = Math.min(100, (email.revealedCharacters / Math.max(1, buildLength)) * 100);
   const bodyLabel = readyToSend
-    ? "Corpo del messaggio. Mail completata. Premi un tasto o fai clic per inviare."
+    ? "Corpo del messaggio. Email completata. Premi un tasto o fai clic per inviare."
     : "Corpo del messaggio. Premi un tasto o fai clic per continuare a scrivere.";
   return (
     <main className="composer" data-email-status={email.status}>
@@ -98,7 +98,7 @@ export function Composer({
         <em>{email.status === "sending"
           ? "Invio in corso…"
           : readyToSend
-            ? "Mail completa · premi un tasto o fai clic per inviare"
+            ? "Email completa · premi un tasto o fai clic per inviare"
             : "Digitazione in corso…"}</em>
         <WritingFlowMeter state={stateOverride} />
         <span className="composer-status-count">{displayedRevealedCharacters} / {buildLength} caratteri · {displayedWritingPower} per input</span>

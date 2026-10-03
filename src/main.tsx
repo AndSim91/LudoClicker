@@ -4,6 +4,12 @@ import { App } from "./app/App";
 import { AppErrorBoundary } from "./app/AppErrorBoundary";
 import { initializeCrashReporting } from "./game/crashReporting";
 import { STORAGE_KEYS } from "./shared/storageKeys";
+// Modalità Onde typefaces (Fase 8), bundled so every computer shows the same letters.
+import "@fontsource/barlow/400.css";
+import "@fontsource/barlow/400-italic.css";
+import "@fontsource/barlow/500.css";
+import "@fontsource/barlow/600.css";
+import "@fontsource/barlow-semi-condensed/600.css";
 import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/people-collaborator-sectors.css";

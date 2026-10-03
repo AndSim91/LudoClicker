@@ -95,7 +95,7 @@ function getSectorStatistics(
         value: `${formatCount(availableSwords)}/${formatCount(state.equipment.totalSwords)}`,
       },
       {
-        label: "Disponibilità",
+        label: "Spade pronte",
         value: formatPercent(ratio(availableSwords, state.equipment.totalSwords)),
       },
       {

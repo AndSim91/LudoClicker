@@ -24,12 +24,12 @@ export function HtmlEmailSourcePreview({
   return (
     <div
       className={`email-source-workspace email-source-workspace-level-${email.presentationLevel}`}
-      aria-label="Composizione HTML della mail"
+      aria-label="Composizione HTML dell'email"
       data-email-source-length={source.length}
       data-email-source-revealed={visibleCharacters}
     >
-      <section className="email-source-preview" aria-label="Anteprima della mail in costruzione">
-        <span className="email-source-panel-label">Anteprima mail</span>
+      <section className="email-source-preview" aria-label="Anteprima dell'email in costruzione">
+        <span className="email-source-panel-label">Anteprima email</span>
         <div
           className="email-source-preview-canvas"
           dangerouslySetInnerHTML={{ __html: visibleSource }}

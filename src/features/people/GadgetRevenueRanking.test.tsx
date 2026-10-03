@@ -29,7 +29,7 @@ describe("GadgetRevenueRanking", () => {
     expect(screen.getByText("Maestro")).toBeVisible();
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(10);
-    expect(rows[0]).toHaveTextContent("1Tazza4.820 €34,8%Leader");
+    expect(rows[0]).toHaveTextContent("1Tazza4.820 €34,8%In testa");
     expect(rows[1]).toHaveTextContent("2Felpa4.120 €29,7%");
     expect(rows[2]).toHaveTextContent("3Maglietta2.310 €16,7%");
     expect(rows[3]).toHaveTextContent("4Mutande1.480 €10,7%");
@@ -48,7 +48,7 @@ describe("GadgetRevenueRanking", () => {
       />,
     );
 
-    expect(screen.queryByText("Leader")).not.toBeInTheDocument();
+    expect(screen.queryByText("In testa")).not.toBeInTheDocument();
     expect(screen.getAllByText("0,0%")).toHaveLength(10);
   });
 });

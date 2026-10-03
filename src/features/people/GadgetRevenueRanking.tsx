@@ -70,7 +70,7 @@ export function GadgetRevenueRanking({
               />
               <strong className="gadget-ranking-share">{formatShare(share)}</strong>
               <span className="gadget-ranking-status">
-                {isLeader ? "Leader" : null}
+                {isLeader ? "In testa" : null}
               </span>
             </li>
           );

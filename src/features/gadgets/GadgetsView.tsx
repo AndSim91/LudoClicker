@@ -226,7 +226,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
             {!hasProductivity ? <small>In pausa: assegna almeno un Collaboratore ai Gadget.</small> : null}
           </>
         ) : minigame?.status === "ready" ? (
-          <span className="gadget-status-label is-ready">Prova qualità pronta</span>
+          <span className="gadget-status-label is-ready">Collaudo pronto</span>
         ) : product.accepted && highestRarityState.quality === 0 ? (
           <span className="gadget-status-label is-warning">Non vendibile</span>
         ) : product.accepted ? (
@@ -248,7 +248,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
           </button>
         ) : minigame?.status === "ready" ? (
           <button type="button" className="primary" onClick={() => onStartMinigame(productId)}>
-            Avvia prova qualità
+            Avvia collaudo
           </button>
         ) : work || minigame ? null : !product.prototypeCompleted ? null : !product.accepted ? (
           <>
@@ -372,7 +372,7 @@ export function GadgetsView({
                 />
               </>
             ) : minigame?.status === "ready" ? (
-              <strong>Prova qualità pronta</strong>
+              <strong>Collaudo pronto</strong>
             ) : (
               <strong>Libero</strong>
             )}

@@ -226,7 +226,7 @@ export function resolveStartedTrialBatch(
         now,
         firstEnrollment ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
         firstEnrollment
-          ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Scuola e Upgrade sono ora disponibili nella barra laterale.`
+          ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Scuola e Upgrade sono ora disponibili nella barra a sinistra.`
           : `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile è di € ${getMemberFee(nextState.school.peakActiveMembers).toFixed(2).replace(".", ",")} e aumenta di € ${GAME_CONFIG.monthlyMemberFormBonus.toFixed(2).replace(".", ",")} per ogni Forma o corso registrato.`,
         "positive",
         firstEnrollment ? "focused" : "other",

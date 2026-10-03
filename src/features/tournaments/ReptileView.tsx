@@ -38,7 +38,7 @@ const REPTILE_PAGES: readonly {
   { id: "preparation", label: "Preparazione", icon: "wrench" },
   { id: "coordination", label: "Coordinamento", icon: "play" },
   { id: "bracket", label: "Tabellone", icon: "trophy" },
-  { id: "recap", label: "Recap", icon: "flag" },
+  { id: "recap", label: "Riepilogo", icon: "flag" },
 ];
 
 const ASSIGNMENT_LABEL: Record<Exclude<Collaborator["assignment"], null>, string> = {
@@ -169,7 +169,7 @@ function ReptileHero({
         </div>
         <div>
           <Icon name="people" />
-          <span>Team previsti</span>
+          <span>Squadre previste</span>
           <strong>{teamCount}</strong>
           <small>{reptile.victories} vittorie della scuola</small>
         </div>
@@ -282,7 +282,7 @@ function ReptileDossier({
         <div><dt>Sede</dt><dd>{state.school.city}</dd></div>
         <div><dt>Periodo</dt><dd>{schedule}</dd></div>
         <div><dt>Costo palazzetto</dt><dd>{formatCurrency(GAME_CONFIG.reptileVenueCost)}</dd></div>
-        <div><dt>Formato</dt><dd>Swiss · top 16 · best-of-five</dd></div>
+        <div><dt>Formato</dt><dd>Gironi svizzeri, poi le migliori 16 al meglio dei cinque</dd></div>
         <div><dt>Squadra</dt><dd>Due atleti della stessa scuola</dd></div>
       </dl>
     </aside>
@@ -344,7 +344,7 @@ function ReptileOverviewPage({
           <li><b>01</b><span><strong>Preparazione</strong><small>Distribuisci i collaboratori e fai crescere i settori.</small></span></li>
           <li><b>02</b><span><strong>Coordinamento</strong><small>Un solo ritmo comune può migliorare o peggiorare il risultato.</small></span></li>
           <li><b>03</b><span><strong>Tabellone</strong><small>Gironi svizzeri, classifica e fase finale a 16 squadre.</small></span></li>
-          <li><b>04</b><span><strong>Recap</strong><small>Leggi fama, pubblico, risultato economico e albo d&apos;oro.</small></span></li>
+          <li><b>04</b><span><strong>Riepilogo</strong><small>Leggi fama, pubblico, risultato economico e albo d&apos;oro.</small></span></li>
         </ol>
         <footer className="reptile-panel-actions">
           <button type="button" className="primary" onClick={() => onNavigate(nextPage)}>
@@ -854,7 +854,7 @@ function ReptilePresentation({
     title = result.superba ? "Il Torneo della Superba è concluso" : "Il Torneo Reptile è concluso";
     content = <ReptileRecap result={result} />;
   }
-  const phases = ["Settori", "Gironi svizzeri", "Classifica", "Fase finale", "Recap"];
+  const phases = ["Settori", "Gironi svizzeri", "Classifica", "Fase finale", "Riepilogo"];
   return (
     <section className="reptile-presentation-page" aria-labelledby="reptile-presentation-title">
       <header className="reptile-panel-heading">

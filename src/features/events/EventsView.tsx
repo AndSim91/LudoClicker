@@ -117,8 +117,8 @@ export function EventsView({
             </strong>
             <small>
               {damagedSwords > 0
-                ? `${quantityLabel(damagedSwords, "spada danneggiata", "spade danneggiate")}. Riparale da La mia giornata.`
-                : "Le spade impegnate tornano disponibili a fine attivita."}
+                ? `${quantityLabel(damagedSwords, "spada rotta", "spade rotte")}. ${damagedSwords === 1 ? "Riparala" : "Riparale"} da La mia giornata.`
+                : "Le spade impegnate tornano in rastrelliera a fine evento."}
             </small>
           </span>
         </div>

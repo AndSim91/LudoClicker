@@ -133,7 +133,7 @@ describe("Composer", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Composizione HTML della mail")).toBeVisible();
+    expect(screen.getByLabelText("Composizione HTML dell'email")).toBeVisible();
     expect(screen.getByLabelText("Codice HTML scritto")).toHaveTextContent("<!doctype html>");
   });
 

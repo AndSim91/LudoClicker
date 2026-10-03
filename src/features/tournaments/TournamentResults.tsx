@@ -13,7 +13,7 @@ import {
   getTournamentRewardBonus,
   getTournamentRewardFollowers,
 } from "../../game/tournamentRewardFlow";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCurrency, formatVote } from "../../shared/formatters";
 import { knockoutStageLabel, levelShortLabel, participantName } from "./tournamentPresentation";
 import { SchoolPreliminaryResults } from "./SchoolPreliminaryResults";
 import { FinalDuelLayer } from "./FinalDuelLayer";
@@ -77,7 +77,7 @@ function MatchCompetitor({
     >
       <TournamentParticipantIdentity participant={participant} />
       <b>{score}</b>
-      <small>{styleScore.toFixed(3)}</small>
+      <small>{formatVote(styleScore)}</small>
     </span>
   );
 }
@@ -231,7 +231,7 @@ function PodiumList({
             <TournamentParticipantIdentity
               participant={participantById.get(entry.participantId)}
             />
-            <small>{entry.discipline === "style" ? entry.score.toFixed(3) : "Arena"}</small>
+            <small>{entry.discipline === "style" ? formatVote(entry.score) : "Arena"}</small>
           </span>
         ))}
       </div>
@@ -581,7 +581,7 @@ export function TournamentResults({
                           </th>
                           <td>{standing.wins}</td>
                           <td>{standing.assaultPoints}</td>
-                          <td>{standing.styleAverage.toFixed(3)}</td>
+                          <td>{formatVote(standing.styleAverage)}</td>
                           <td>{standing.qualified ? "Avanza" : "Eliminato"}</td>
                         </tr>
                       );
@@ -595,7 +595,7 @@ export function TournamentResults({
                     <TournamentParticipantIdentity
                       participant={selectedParticipantA}
                     />
-                    <small>Stile {selectedMatch.styleScoreA.toFixed(3)}</small>
+                    <small>Stile {formatVote(selectedMatch.styleScoreA)}</small>
                   </span>
                   <b>
                     {selectedMatch.arenaScoreA}
@@ -606,7 +606,7 @@ export function TournamentResults({
                     <TournamentParticipantIdentity
                       participant={selectedParticipantB}
                     />
-                    <small>Stile {selectedMatch.styleScoreB.toFixed(3)}</small>
+                    <small>Stile {formatVote(selectedMatch.styleScoreB)}</small>
                   </span>
                   <button
                     type="button"

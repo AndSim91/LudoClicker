@@ -79,8 +79,8 @@ describe("LudoWikiView", () => {
     expect(screen.getByText(`1 / ${LUDODEX_LEGENDARIES.length}`)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Andrea Simonazzi" })).toBeVisible();
     expect(screen.getByText("Attualmente nella scuola")).toBeVisible();
-    expect(screen.getByLabelText("Valori di base")).toHaveTextContent("Arena base80.000");
-    expect(screen.getByLabelText("Valori di base")).toHaveTextContent("Stile base70.000");
+    expect(screen.getByLabelText("Valori di base")).toHaveTextContent("Arena base80");
+    expect(screen.getByLabelText("Valori di base")).toHaveTextContent("Stile base70");
     expect(screen.queryByText("Forme numeriche")).not.toBeInTheDocument();
     expect(screen.queryByText("Esperienza tornei")).not.toBeInTheDocument();
     expect(screen.queryByText("Forme e corsi conservati")).not.toBeInTheDocument();
@@ -122,8 +122,8 @@ describe("LudoWikiView", () => {
 
     render(<LudoWikiView state={state} />);
     expect(screen.getByText("Conservato dalla Rete delle scuole")).toBeVisible();
-    expect(screen.getByText("90.000")).toBeVisible();
-    expect(screen.getByText("80.000")).toBeVisible();
+    expect(screen.getByText("90")).toBeVisible();
+    expect(screen.getByText("80")).toBeVisible();
     expect(screen.queryByText("Scoperta permanente")).not.toBeInTheDocument();
   });
 

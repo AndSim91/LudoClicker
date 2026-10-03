@@ -13,6 +13,9 @@ import type {
   InboxMessage,
 } from "./types";
 
+/** A.N.D.E.R., the school AI, signs every notice, digest and milestone (Fase 8). */
+export const NOTICE_SENDER = "A.N.D.E.R.";
+
 export function addMessage(
   state: GameState,
   now: number,
@@ -24,7 +27,7 @@ export function addMessage(
 ): GameState {
   const message: InboxMessage = {
     id: makeGameId("message", now, state.messages.length),
-    sender: "Ordine delle Onde",
+    sender: NOTICE_SENDER,
     subject,
     preview,
     receivedAt: now,

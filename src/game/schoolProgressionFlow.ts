@@ -271,7 +271,7 @@ export function completeShortGoal(
         { ...rewarded, shortGoal: nextGoal },
         now,
         "Ufficio Eventi disponibile",
-        "Hai completato la missione dei tre inviti. L'area Eventi è ora disponibile nella barra laterale.",
+        "Hai completato la missione dei tre inviti. L'area Eventi è ora disponibile nella barra a sinistra.",
         "system",
       )
     : { ...rewarded, shortGoal: nextGoal };

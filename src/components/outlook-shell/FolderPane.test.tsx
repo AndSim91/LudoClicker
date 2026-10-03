@@ -119,7 +119,7 @@ describe("FolderPane", () => {
 
     expect(onOpenComposer).toHaveBeenCalledOnce();
     expect(onOpenMembers).toHaveBeenCalledOnce();
-    expect(pane.getByText(/Disponibilit/).closest("button")).toBeNull();
+    expect(pane.getByText("Fondi").closest("button")).toBeNull();
   });
 
   it("shows the monthly income under the balance only once there is some", () => {

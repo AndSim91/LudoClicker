@@ -404,7 +404,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Competizioni",
     title: "Gadget",
     summary: "Dal progetto alla qualità, fino alle vendite automatiche.",
-    introduction: "Il Laboratorio Gadget converte Produttività in prodotti vendibili. Ogni articolo deve essere acquistato, sviluppato e sottoposto a una prova qualità prima di entrare nel catalogo.",
+    introduction: "Il Laboratorio Gadget converte Produttività in prodotti vendibili. Ogni articolo va acquistato, sviluppato e collaudato prima di entrare nel catalogo.",
     steps: [
       { icon: "coin", label: "Progetto", detail: "Acquista il prodotto" },
       { icon: "wrench", label: "Sviluppo", detail: "Consuma Produttività" },
@@ -428,7 +428,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Crescita",
     title: "Rete e nuove scuole",
     summary: "Prestigio, requisiti di fondazione e progressi permanenti.",
-    introduction: "Fondare una nuova scuola riavvia il ciclo locale, Fama compresa, e ti dà punti Reputazione: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in potenziamenti permanenti o in una rendita fissa dalla scuola che lasci.",
+    introduction: "Fondare una nuova scuola riavvia il ciclo locale, Fama compresa, e ti dà punti Reputazione: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in Upgrade permanenti o in una rendita fissa dalla scuola che lasci.",
     steps: [
       { icon: "trend", label: "Requisiti", detail: "Completa il ciclo" },
       { icon: "trophy", label: "Nazionale", detail: "Vinci Arena o Stile" },
@@ -443,8 +443,8 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     rules: [
       "Serve una vittoria al Torneo Nazionale, in Arena o in Stile, con la scuola corrente.",
-      "La spesa è definitiva. I punti nei potenziamenti restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
-      "La rendita non ha tetto: è dove spendere la Reputazione quando i potenziamenti sono al massimo.",
+      "La spesa è definitiva. I punti negli Upgrade restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
+      "La rendita non ha tetto: è dove spendere la Reputazione quando gli Upgrade sono al massimo.",
       "Il Nazionale serve solo a sbloccare la fondazione; vincere più volte lo stesso torneo non aggiunge altro.",
       "Torneo della Superba e Corso X, una volta sbloccati, restano per sempre.",
       "Il Ludodex e i progressi permanenti dei Leggendari non vengono cancellati.",

@@ -22,7 +22,7 @@ export function decodeStoredSave(raw: string): unknown {
     : raw;
 
   if (typeof serialized !== "string") {
-    throw new Error("Il salvataggio compresso non pu? essere decodificato.");
+    throw new Error("Il salvataggio compresso non può essere decodificato.");
   }
 
   return JSON.parse(serialized);

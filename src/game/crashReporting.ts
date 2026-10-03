@@ -215,7 +215,7 @@ function getCrashSummary(reason: CrashReason): string {
     case "unexpected-termination":
       return "La sessione precedente si è interrotta senza una chiusura regolare.";
     case "unhandled-rejection":
-      return "Una operazione asincrona è terminata con un errore non gestito.";
+      return "Un'operazione asincrona è terminata con un errore non gestito.";
     case "react-error":
       return "React ha intercettato un errore durante il rendering dell'interfaccia.";
     default:

@@ -50,7 +50,7 @@ export function FolderPane({
       <div className="folder-rule" />
       <button type="button" className="resource-row resource-link" onClick={onOpenComposer}><Icon name="contact" /><span className="resource-copy"><small>Contatti</small><b title={formatExactNumber(contactsAwaitingEmail)}>{formatCompactNumber(contactsAwaitingEmail)}</b></span></button>
       <button type="button" className="resource-row resource-link" onClick={onOpenMembers}><Icon name="people" /><span className="resource-copy"><small>Scuola</small><b title={formatExactNumber(activeMembers)}>{formatCompactNumber(activeMembers)}</b></span></button>
-      <div className="resource-row"><Icon name="coin" /><span className="resource-copy"><small>Disponibilità</small><b title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</b>{monthlyIncome > 0 ? <em className="resource-delta" title={`Entrate mensili: ${formatExactCurrency(monthlyIncome)}`}>+{formatCompactCurrency(monthlyIncome)} al mese</em> : null}</span></div>
+      <div className="resource-row"><Icon name="coin" /><span className="resource-copy"><small>Fondi</small><b title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</b>{monthlyIncome > 0 ? <em className="resource-delta" title={`Entrate mensili: ${formatExactCurrency(monthlyIncome)}`}>+{formatCompactCurrency(monthlyIncome)} al mese</em> : null}</span></div>
       <div className="folder-note">{state.school.name}</div>
     </aside>
   );

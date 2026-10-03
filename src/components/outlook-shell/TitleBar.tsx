@@ -93,10 +93,10 @@ export function TitleBar({
         )}
         <span
           className="title-resource title-balance"
-          aria-label={`Disponibilità economica: ${formatExactCurrency(euros)}`}
+          aria-label={`Fondi: ${formatExactCurrency(euros)}`}
         >
           <Icon name="coin" />
-          <small>Disponibilità</small>
+          <small>Fondi</small>
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
       </div>

@@ -45,7 +45,7 @@ describe("getCollaboratorAutomationPresentation", () => {
 
     expect(presentation).toMatchObject({
       title: activeEmail.subject,
-      detail: "Mail completa · in attesa dell'invio del giocatore",
+      detail: "Email completa · aspetta che il Preside la invii",
       progress: 100,
     });
   });
