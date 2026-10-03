@@ -70,6 +70,8 @@ describe("Guarda la finale (4.3)", () => {
     expect(selectDayNotifications(state, 70_000)).toContainEqual(
       expect.objectContaining({ finalResultId: "national-83" }),
     );
+    // No spoiler: the winners stay hidden until the final is watched.
+    expect(selectDayNotifications(state, 70_000).find((n) => n.finalResultId)?.detail).toBe("");
   });
 
   it("plays the final, closes with Esc or Chiudi and leads to the results", () => {

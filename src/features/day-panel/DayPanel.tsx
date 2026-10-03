@@ -173,6 +173,16 @@ function DayNotificationEntry({
             <span className={personClassName}>{notification.person.displayName}</span>
           ) : null}
           {notification.detail ? <small>{notification.detail}</small> : null}
+          {notification.finalResultId && onWatchFinal ? (
+            <button
+              type="button"
+              className="day-watch-final"
+              onClick={() => onWatchFinal(notification.finalResultId!)}
+            >
+              <Icon name="play" />
+              Guarda la finale
+            </button>
+          ) : null}
           {notification.progress ? (
             <div className="appointment-pips" aria-hidden="true">
               {getDayProgressPips(notification.progress).map((pip, index) => (
@@ -186,16 +196,6 @@ function DayNotificationEntry({
           ) : null}
         </div>
       </div>
-      {notification.finalResultId && onWatchFinal ? (
-        <button
-          type="button"
-          className="day-watch-final"
-          onClick={() => onWatchFinal(notification.finalResultId!)}
-        >
-          <Icon name="play" />
-          Guarda la finale
-        </button>
-      ) : null}
       {expiryProgress === undefined ? null : (
         <ProgressBar
           className="appointment-expiry"

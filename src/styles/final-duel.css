@@ -477,7 +477,9 @@
 }
 
 .day-watch-final {
-  margin: 0 0 10px 12px;
+  align-self: flex-start;
+  margin: 4px 0 6px;
+  white-space: nowrap;
 }
 
 .day-watch-final svg {

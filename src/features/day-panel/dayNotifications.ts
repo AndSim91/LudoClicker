@@ -370,11 +370,11 @@ export function selectDayNotifications(
       kind: "tournament",
       phase: summary.phase,
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,
-      detail: summary.detail,
       clock: "game",
       timestamp: result.completedAt,
       expiresAt,
-      ...(getOwnedFinal(result) ? { finalResultId: result.id } : {}),
+      // With one of ours in the final, the winners would spoil «Guarda la finale».
+      ...(getOwnedFinal(result) ? { detail: "", finalResultId: result.id } : { detail: summary.detail }),
     });
   }
 

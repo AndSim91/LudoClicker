@@ -902,8 +902,9 @@ Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
 notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
 del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
-Se nella finale di Arena combatte un nostro atleta, la notifica ha il
-pulsante **«Guarda la finale»** (§ 25.2).
+Se nella finale di Arena combatte un nostro atleta, la notifica non dice chi
+ha vinto (sarebbe uno spoiler): al posto dell'esito c'è il pulsante
+**«Guarda la finale»** (§ 25.2).
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 nelle statistiche aggregate del funnel, nello stato della mail inviata e, per
