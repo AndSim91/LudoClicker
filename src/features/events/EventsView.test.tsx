@@ -52,7 +52,7 @@ describe("EventsView", () => {
   it("starts with only flyering and sea kata at very low potential", () => {
     render(<EventsView state={createInitialState(1_000)} onStart={() => undefined} />);
 
-    expect(screen.getAllByText("Potenzialità: Molto bassa")).toHaveLength(2);
+    expect(screen.getAllByLabelText("Resa: Molto bassa")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Volantinaggio" })).toBeVisible();
     expect(
       screen.getByRole("heading", { name: "Kata contro le onde del mare" }),
@@ -113,7 +113,7 @@ describe("EventsView", () => {
     expect(screen.getByRole("heading", { name: "Mele Comics" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "CairoMix" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "CogoComix" })).toBeVisible();
-    expect(screen.getByText("Potenzialità: Alta")).toBeVisible();
+    expect(screen.getAllByLabelText("Resa: Alta")[0]).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Burtomics" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Fama della scuola/)).not.toBeInTheDocument();
   });
@@ -169,11 +169,11 @@ describe("EventsView", () => {
       />,
     );
 
-    expect(screen.getByText("3/5 iscritti disponibili")).toBeVisible();
     const equipmentPanel = screen.getByRole("region", {
       name: "Risorse disponibili per gli eventi",
     });
-    expect(within(equipmentPanel).getByText("2/6 spade disponibili")).toBeVisible();
+    expect(equipmentPanel).toHaveTextContent("3 iscritti liberi su 5");
+    expect(equipmentPanel).toHaveTextContent("2 spade pronte");
   });
 
   it("offers cancellation for a running event", () => {
@@ -204,7 +204,7 @@ describe("EventsView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Annulla evento" }));
+    fireEvent.click(screen.getByRole("button", { name: "Annulla" }));
 
     expect(onCancel).toHaveBeenCalledWith(event.id);
   });
@@ -233,11 +233,11 @@ describe("EventsView", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Disponibile tra 5 secondi" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Di nuovo tra 5 secondi" })).toBeDisabled();
     const cooldownBar = screen.getByRole("progressbar", {
       name: "Cooldown Volantinaggio",
     });
-    expect(cooldownBar).toHaveAttribute("aria-valuetext", "Disponibile tra 5 secondi");
+    expect(cooldownBar).toHaveAttribute("aria-valuetext", "Di nuovo tra 5 secondi");
     expect(cooldownBar).toHaveAttribute("aria-valuenow", "100");
     expect(cooldownBar.firstElementChild).toHaveStyle({ width: "100%" });
   });
@@ -269,7 +269,7 @@ describe("EventsView", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Disponibile tra 3 mesi" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Di nuovo tra 3 mesi" })).toBeDisabled();
     expect(screen.getByRole("progressbar", { name: "Cooldown Mele Comics" })).toBeVisible();
   });
 
@@ -295,8 +295,8 @@ describe("EventsView", () => {
     const equipmentPanel = screen.getByRole("region", {
       name: "Risorse disponibili per gli eventi",
     });
-    expect(within(equipmentPanel).getByText("5/6 spade disponibili")).toBeVisible();
-    expect(screen.getByText("1 spada rotta. Riparala da La mia giornata.")).toBeVisible();
+    expect(equipmentPanel).toHaveTextContent("5 spade pronte, 1 rotta");
+    expect(within(equipmentPanel).getByTitle("1 spada rotta: riparala da La mia giornata.")).toBeVisible();
     expect(within(equipmentPanel).queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -315,8 +315,8 @@ describe("EventsView", () => {
     const equipmentPanel = screen.getByRole("region", {
       name: "Risorse disponibili per gli eventi",
     });
-    expect(within(equipmentPanel).getByText("0/6 spade disponibili")).toBeVisible();
-    expect(screen.getByText("6 spade rotte. Riparale da La mia giornata.")).toBeVisible();
+    expect(equipmentPanel).toHaveTextContent("0 spade pronte, 6 rotte");
+    expect(within(equipmentPanel).getByTitle("6 spade rotte: riparale da La mia giornata.")).toBeVisible();
   });
 
   it("does not show calendar date boxes in the event list", () => {

@@ -973,9 +973,18 @@ tier di potenzialità: **Molto bassa**, **Bassa**, **Media**, **Alta** e
 **Altissima**. Non diminuisce quando alcuni iscritti lasciano la scuola.
 All'inizio sono visibili soltanto Volantinaggio e Kata contro le onde del mare;
 l'interfaccia anticipa esclusivamente il prossimo sblocco e non mostra
-previsioni numeriche sui contatti. Ogni evento mostra durata, rischio (Basso,
-Medio, Alto), iscritti e spade richiesti e la potenzialità come indicatore a
-cinque tacche.
+previsioni numeriche sui contatti. Ogni evento è una riga: nome, luogo e una
+frase che racconta com'è stare lì; accanto quattro dati, **Esito** (Sicuro,
+Variabile, Imprevedibile: è il vecchio rischio Basso, Medio, Alto, cioè quanto
+varia il numero di contatti), **Serve** (iscritti e spade), **Dura** e **Resa**
+(la potenzialità come cinque tacche); a destra un solo pulsante con il costo
+(«Partecipa · 500 €»). In corso: barra sottile e «finisce tra 0:06», con
+«Annulla» come link. In attesa o bloccato il pulsante lascia il posto al motivo
+(«Di nuovo tra 2 mesi», «Servono 8 iscritti liberi»). In alto una riga sola:
+contatti da invitare, iscritti liberi, spade pronte (le spiegazioni al
+passaggio del mouse). Le descrizioni degli eventi sono state riscritte con
+Andrea nella Fase 8; nei testi si dice «spada illuminata» o «spada luminosa»,
+mai «spada di luce».
 
 > **Da implementare:** la vista Eventi mostra solo gli eventi già sbloccati dalla Fama e non anticipa il prossimo sblocco.
 
@@ -1066,7 +1075,7 @@ superare il massimo della distribuzione base, senza essere applicati due volte.
 Finché la scuola ha meno di quattro collaboratori, ogni eventuale risultato
 finale di zero viene sostituito da un contatto; il Volantinaggio del tutorial
 garantisce sempre un contatto. L'interfaccia mostra solo
-indicazioni generiche di rischio e potenzialità, mai queste percentuali.
+indicazioni generiche di esito e resa, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
 applicano penalità; oltre quella soglia, ogni iscritto riduce progressivamente

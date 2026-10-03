@@ -250,7 +250,7 @@ test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", 
   const sparring = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Volantinaggio" }),
   });
-  await expect(sparring.getByRole("button", { name: "Annulla evento" })).toBeVisible();
+  await expect(sparring.getByRole("button", { name: "Annulla" })).toBeVisible();
   const progress = sparring.getByRole("progressbar", { name: "Avanzamento Volantinaggio" });
   await expect(progress).toBeVisible();
   const initialProgress = Number(await progress.getAttribute("aria-valuenow"));

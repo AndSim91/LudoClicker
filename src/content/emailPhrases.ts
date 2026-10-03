@@ -66,7 +66,7 @@ export const WARM_HOOKS: EmailPhrase[] = [
 
 /** Livelli 5–7: ganci da campagna, con un pizzico di ironia. */
 export const MARKETING_HOOKS: EmailPhrase[] = [
-  { text: "c'è chi sogna di impugnare una spada di luce. E c'è chi lo fa ogni settimana." },
+  { text: "c'è chi sogna di impugnare una spada illuminata. E c'è chi lo fa ogni settimana." },
   { text: "novanta minuti, una spada luminosa e la sensazione di essere dentro il film giusto." },
   { text: "la tua settimana ha bisogno di più luce. Letteralmente." },
   { text: "tre armi, sette Forme, un gruppo che non vede l'ora di conoscerti. Manchi solo tu." },

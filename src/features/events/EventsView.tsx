@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { ACQUISITION_EVENTS } from "../../content/events";
+import { ACQUISITION_EVENTS, type AcquisitionEventDefinition } from "../../content/events";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
@@ -15,13 +14,26 @@ import { canStartAcquisitionEvent } from "../../game/eventFlow";
 import { selectAvailableEventMembers, selectContactsAwaitingEmail } from "../../game/selectors";
 import { FIRST_EVENT_TUTORIAL_SCENE_ID, isTutorialScenePending } from "../../game/tutorialProgress";
 import type { AcquisitionEvent, GameState } from "../../game/types";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCurrency, formatList } from "../../shared/formatters";
+
+function formatClockSeconds(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
 const POTENTIAL_LEVELS = ["Molto bassa", "Bassa", "Media", "Alta", "Altissima"] as const;
+
+// Fase 8: the «risk» is how much the number of contacts varies, not a danger.
+const OUTCOME_LABELS: Record<AcquisitionEventDefinition["risk"], string> = {
+  Basso: "Sicuro",
+  Medio: "Variabile",
+  Alto: "Imprevedibile",
+};
 
 function quantityLabel(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
+
+const count = (value: number) => value.toLocaleString("it-IT");
 
 function memberRequirement(count: number) {
   return quantityLabel(count, "iscritto", "iscritti");
@@ -85,44 +97,29 @@ export function EventsView({
   );
   return (
     <main className="overview-view events-view">
-      <header>
-        <Icon name="flag" />
+      {/* Fase 8: one line of numbers; the explanations sit in each number's tooltip. */}
+      <header className="events-heading">
         <div>
           <h1>Eventi</h1>
-          <p>Attività esterne per incontrare persone e raccogliere nuovi contatti</p>
+          <p>Farsi vedere fuori dalla palestra.</p>
         </div>
+        <section className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
+          <span title="Ogni nuovo indirizzo riceve una sola campagna email.">
+            <strong>{count(selectContactsAwaitingEmail(state))}</strong> contatti da invitare
+          </span>
+          <span title="Gli iscritti impegnati tornano liberi a fine evento.">
+            <strong>{count(availableMembers)}</strong> iscritti liberi su {count(state.school.activeMembers)}
+          </span>
+          <span
+            title={damagedSwords > 0
+              ? `${quantityLabel(damagedSwords, "spada rotta", "spade rotte")}: ${damagedSwords === 1 ? "riparala" : "riparale"} da La mia giornata.`
+              : "Le spade impegnate tornano in rastrelliera a fine evento."}
+          >
+            <strong>{count(availableSwords)}</strong> spade pronte
+            {damagedSwords > 0 ? <em>, {count(damagedSwords)} {damagedSwords === 1 ? "rotta" : "rotte"}</em> : null}
+          </span>
+        </section>
       </header>
-      <div className="event-notice">
-        <Icon name="contact" />
-        <div>
-          <strong>{selectContactsAwaitingEmail(state)} contatti da contattare</strong>
-          <span>Ogni nuovo indirizzo può ricevere una sola campagna email.</span>
-        </div>
-      </div>
-      <section className="event-capacity-note" aria-label="Risorse disponibili per gli eventi">
-        <div>
-          <Icon name="people" />
-          <span>
-            <strong>
-              {availableMembers}/{state.school.activeMembers} iscritti disponibili
-            </strong>
-            <small>Gli iscritti impegnati tornano disponibili a fine evento.</small>
-          </span>
-        </div>
-        <div>
-          <Icon name="settings" />
-          <span>
-            <strong>
-              {availableSwords}/{state.equipment.totalSwords} spade disponibili
-            </strong>
-            <small>
-              {damagedSwords > 0
-                ? `${quantityLabel(damagedSwords, "spada rotta", "spade rotte")}. ${damagedSwords === 1 ? "Riparala" : "Riparale"} da La mia giornata.`
-                : "Le spade impegnate tornano in rastrelliera a fine evento."}
-            </small>
-          </span>
-        </div>
-      </section>
       <section className="event-list">
         {visibleEvents.map((definition) => {
           const matching = runningByDefinition.get(definition.id);
@@ -159,16 +156,21 @@ export function EventsView({
             definition.cost === 0
               ? "Partecipa gratis"
               : `Partecipa · ${formatCurrency(definition.cost)}`;
-          if (matching) action = "Annulla evento";
-          else if (onCooldown) action = `Disponibile tra ${cooldownRemaining}`;
+          if (matching) action = "Annulla";
+          else if (onCooldown) action = `Di nuovo tra ${cooldownRemaining}`;
           else if (lacksMembers)
-            action = `Richiede ${memberRequirement(definition.requiredMembers)}`;
+            action = `Servono ${memberRequirement(definition.requiredMembers)}`;
           else if (lacksAvailableMembers)
             action = `Servono ${memberRequirement(definition.requiredMembers)} liberi`;
           else if (needsRepairForEvent)
             action = `Ripara ${quantityLabel(damagedSwords, "spada", "spade")}`;
-          else if (lacksEquipment) action = `Richiede ${definition.requiredSwords} spade`;
+          else if (lacksEquipment) action = `Servono ${quantityLabel(definition.requiredSwords, "spada", "spade")}`;
           else if (lacksFunds) action = `Servono ${formatCurrency(definition.cost)}`;
+          const needs = formatList([
+            definition.requiredMembers > 0 ? memberRequirement(definition.requiredMembers) : "",
+            definition.requiredSwords > 0 ? quantityLabel(definition.requiredSwords, "spada", "spade") : "",
+          ].filter(Boolean)) || "Niente";
+          const potentialStep = POTENTIAL_LEVELS.indexOf(definition.potential);
 
           return (
             <article
@@ -182,52 +184,28 @@ export function EventsView({
               data-tutorial-target={definition.id === "park-sparring" ? "true" : undefined}
             >
               <div className="event-copy">
-                <div className="event-meta">
-                  <span><Icon name="clock" />{Math.round(displayedDurationMs / 1_000)} secondi</span>
-                  <span className="event-risk"><Icon name="warning" />Rischio {definition.risk.toLocaleLowerCase("it-IT")}</span>
-                  <span><Icon name="people" />{memberRequirement(definition.requiredMembers)}</span>
-                  <span><Icon name="wrench" />{definition.requiredSwords} spade</span>
+                <div className="event-title">
+                  <h2>{definition.title}</h2>
+                  <span>{definition.location}</span>
                 </div>
-                <h2>{definition.title}</h2>
-                <strong>{definition.location}</strong>
                 <p>{definition.description}</p>
-                <small className="event-potential">
-                  <span className="event-potential-meter" aria-hidden="true">
-                    {POTENTIAL_LEVELS.map((level, index) => (
-                      <i
-                        key={level}
-                        className={index <= POTENTIAL_LEVELS.indexOf(definition.potential) ? "is-on" : undefined}
-                      />
-                    ))}
-                  </span>
-                  Potenzialità: {definition.potential}
-                </small>
                 {matching ? (
                   <div className="event-progress-block">
-                    <div className="event-progress-label">
-                      <span>Attività in corso</span>
-                      <strong>
-                        {remainingSeconds} s rimanenti · {Math.round(progress)}%
-                      </strong>
-                    </div>
                     <ProgressBar
                       className="event-progress"
                       label={`Avanzamento ${definition.title}`}
                       value={progress}
                       durationMs={matching.resolvesAt - matching.startedAt}
                     />
+                    <span>finisce tra {formatClockSeconds(remainingSeconds)}</span>
                   </div>
                 ) : cooldown && onCooldown ? (
                   <div className="event-progress-block event-cooldown-block">
-                    <div className="event-progress-label">
-                      <span>In attesa del prossimo evento</span>
-                      <strong>{cooldownRemaining}</strong>
-                    </div>
                     <ProgressBar
                       className="event-progress event-cooldown-progress"
                       label={`Cooldown ${definition.title}`}
                       value={cooldownProgress}
-                      valueText={`Disponibile tra ${cooldownRemaining}`}
+                      valueText={`Di nuovo tra ${cooldownRemaining}`}
                       durationMs={
                         cooldown.kind === "realtime"
                           ? cooldown.availableAt - cooldown.startedAt
@@ -237,6 +215,20 @@ export function EventsView({
                   </div>
                 ) : null}
               </div>
+              <dl className="event-facts">
+                <dt>Esito</dt>
+                <dd>{OUTCOME_LABELS[definition.risk]}</dd>
+                <dt>Serve</dt>
+                <dd>{needs}</dd>
+                <dt>Dura</dt>
+                <dd>{Math.round(displayedDurationMs / 1_000)} secondi</dd>
+                <dt>Resa</dt>
+                <dd className="event-potential" aria-label={`Resa: ${definition.potential}`} title={definition.potential}>
+                  {POTENTIAL_LEVELS.map((level, index) => (
+                    <i key={level} className={index <= potentialStep ? "is-on" : undefined} />
+                  ))}
+                </dd>
+              </dl>
               <button
                 className={matching ? "event-cancel-button" : undefined}
                 type="button"
@@ -252,8 +244,8 @@ export function EventsView({
               {canRunAgain ? (
                 <button type="button" onClick={() => onStart(definition.id)}>
                   {definition.cost === 0
-                    ? "Avvia un secondo turno"
-                    : `Avvia un secondo turno · ${formatCurrency(definition.cost)}`}
+                    ? "Secondo turno"
+                    : `Secondo turno · ${formatCurrency(definition.cost)}`}
                 </button>
               ) : null}
             </article>

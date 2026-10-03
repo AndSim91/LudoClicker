@@ -38,18 +38,6 @@
     justify-self: start;
   }
 
-  .event-row:has(> button + button) > .event-copy {
-    grid-row: auto;
-  }
-
-  .event-capacity-note {
-    grid-template-columns: 1fr;
-  }
-
-  .event-capacity-note > div + div {
-    border-top: 1px solid var(--line);
-    border-left: 0;
-  }
 
   .event-equipment-supplier {
     margin-left: 0;
@@ -93,7 +81,6 @@
 :root[data-theme="dark"] .short-goal-card,
 :root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
-:root[data-theme="dark"] .event-notice,
 :root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary {
   border-color: #2f5b80;
@@ -102,7 +89,6 @@
 :root[data-theme="dark"] .short-goal-card,
 :root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
-:root[data-theme="dark"] .event-notice,
 :root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary,
 :root[data-theme="dark"] .network-heading {
@@ -138,7 +124,6 @@
 }
 
 :root[data-theme="dark"] .folder-pane,
-:root[data-theme="dark"] .event-capacity-note,
 :root[data-theme="dark"] .report-head,
 :root[data-theme="dark"] .table-head,
 :root[data-theme="dark"] .people-head,
@@ -151,7 +136,6 @@
 :root[data-theme="dark"] .settings-sheet button:disabled,
 :root[data-theme="dark"] .foundation-form button:disabled,
 :root[data-theme="dark"] .upgrade-row button:disabled,
-:root[data-theme="dark"] .event-row > button:disabled,
 :root[data-theme="dark"] .training-control > .training-start-button:disabled,
 :root[data-theme="dark"] .social-panel > button:disabled,
 :root[data-theme="dark"] .profile-dialog button:disabled {
@@ -201,8 +185,7 @@
   background: #12283d;
 }
 
-:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
-:root[data-theme="dark"] .event-row > button:hover:not(:disabled) {
+:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled) {
   background: #3e8cda;
 }
 
