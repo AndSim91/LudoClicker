@@ -78,7 +78,7 @@ describe("Guarda la finale (4.3)", () => {
 
     expect(screen.getByRole("dialog", { name: "Finale" })).toBeVisible();
     expect(screen.getByText("La tua scuola")).toBeVisible();
-    expect(screen.getAllByText(/^Punto a /)).toHaveLength(3);
+    expect(screen.getAllByText(/^OH a .* · punto a /)).toHaveLength(3);
     expect(screen.getByText("Niccolò Prova vince la finale 2 a 1")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Mostra il risultato" }));
     expect(screen.queryByRole("button", { name: "Mostra il risultato" })).not.toBeInTheDocument();
