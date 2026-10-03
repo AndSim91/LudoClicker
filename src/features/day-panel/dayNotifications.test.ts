@@ -11,6 +11,7 @@ import {
   DAY_NOTIFICATION_VISIBILITY_MS,
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
+  getDayProgressPips,
   selectDayNotifications,
 } from "./dayNotifications";
 
@@ -175,9 +176,26 @@ describe("selectDayNotifications", () => {
       phase: "in-progress",
       title: "6 lezioni di prova",
       detail: "2 in programma, 2 in palestra, 1 iscritto e 1 senza iscrizione",
+      progress: { done: 2, live: 2, waiting: 2 },
       tutorialTarget: true,
     }));
     expect(state.scheduledTrials).toHaveLength(6);
+  });
+
+  it("shows progress pips only while a trial is in the gym, capped and never losing the live ones", () => {
+    const scheduledOnly = stateWithTrialPhases(Array.from({ length: 6 }, () => "scheduled" as const));
+    expect(selectDayNotifications(scheduledOnly, 100_000)[0].progress).toBeUndefined();
+    expect(selectDayNotifications(stateWithTrialPhases(["in-progress"]), 100_000)[0].progress)
+      .toEqual({ done: 0, live: 1, waiting: 0 });
+
+    expect(getDayProgressPips({ done: 1, live: 2, waiting: 1 }))
+      .toEqual(["done", "live", "live", "waiting"]);
+    const crowded = getDayProgressPips({ done: 0, live: 1, waiting: 99 });
+    expect(crowded).toHaveLength(8);
+    expect(crowded.filter((pip) => pip === "live")).toHaveLength(1);
+    expect(getDayProgressPips({ done: 50, live: 30, waiting: 20 })).toEqual([
+      "done", "done", "done", "done", "live", "live", "waiting", "waiting",
+    ]);
   });
 
   it("returns one notification for one hundred concurrent trials", () => {

@@ -878,6 +878,13 @@ riepilogo delle prove, «Iscritto al volo»), su richiesta di Andrea (Fase 8).
 Le prenotazioni delle lezioni di prova non generano messaggi in Posta in arrivo:
 sono visibili in La mia giornata e nello stato dell'email inviata.
 
+Finché almeno una prova è in palestra, la sua notifica in La mia giornata mostra
+una tacca per lezione: piene e ferme quelle concluse, piene con una scia di luce
+quelle in palestra, vuote quelle in programma. Oltre 8 lezioni le tacche restano
+8 in proporzione (almeno una in palestra) e i numeri veri sono nel testo. In
+Outlook la scia è più lenta e tenue; con la riduzione del movimento si ferma
+(`getDayProgressPips` in `dayNotifications.ts`).
+
 Nel prototipo l'attesa è fissata a 30 secondi. La prova ordinaria dura 15
 secondi, riserva una spada e aggiunge 2 punti di usura alla conclusione. La
 prova di un Leggendario Segreto dura 30 secondi e aggiunge 40 punti. Se al

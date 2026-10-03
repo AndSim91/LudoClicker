@@ -23,6 +23,8 @@ import { formatList } from "../../shared/formatters";
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
 export const DAY_TRIAL_GROUPING_UNLOCK_MEMBERS = 5;
+/** Beyond this the pips scale down: the detail line still carries the real counts. */
+export const DAY_PROGRESS_PIP_LIMIT = 8;
 
 export type DayNotificationKind =
   | "trial"
@@ -54,11 +56,39 @@ export interface DayNotification {
   tutorialTarget?: boolean;
   /** A finished tournament whose Arena final had one of our athletes: «Guarda la finale» (4.3). */
   finalResultId?: string;
+  /** Only while something is in the gym: one pip per trial, the live ones animate. */
+  progress?: DayNotificationProgress;
   person?: {
     displayName: string;
     rarity: PersonRarity;
     secretLegendary: boolean;
   };
+}
+
+export interface DayNotificationProgress {
+  done: number;
+  live: number;
+  waiting: number;
+}
+
+export type DayProgressPip = keyof DayNotificationProgress;
+
+/** Pips in reading order (done, live, waiting), at most DAY_PROGRESS_PIP_LIMIT; live never rounds away. */
+export function getDayProgressPips(
+  { done, live, waiting }: DayNotificationProgress,
+  limit = DAY_PROGRESS_PIP_LIMIT,
+): DayProgressPip[] {
+  const total = done + live + waiting;
+  if (total > limit) {
+    live = Math.max(live > 0 ? 1 : 0, Math.round((live * limit) / total));
+    waiting = Math.min(limit - live, Math.round((waiting * limit) / total));
+    done = limit - live - waiting;
+  }
+  return [
+    ...Array<DayProgressPip>(done).fill("done"),
+    ...Array<DayProgressPip>(live).fill("live"),
+    ...Array<DayProgressPip>(waiting).fill("waiting"),
+  ];
 }
 
 export function orderDayNotifications(notifications: readonly DayNotification[]): DayNotification[] {
@@ -129,6 +159,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       startsAt: trial.startsAt,
       expiresAt,
       tutorialTarget: trial.tutorialSceneId === "first-event",
+      progress: phase === "in-progress" ? { done: 0, live: 1, waiting: 0 } : undefined,
       person: contact
         ? {
             displayName: `${contact.firstName} ${contact.lastName}`,
@@ -205,6 +236,9 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     clock: "game",
     timestamp: earliestTimestamp,
     startsAt: phase === "scheduled" ? earliestScheduledStart : undefined,
+    progress: inProgressCount > 0
+      ? { done: enrolledCount + lostCount, live: inProgressCount, waiting: scheduledCount }
+      : undefined,
     tutorialTarget,
   }];
 }

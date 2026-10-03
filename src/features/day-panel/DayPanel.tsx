@@ -5,7 +5,7 @@ import {
   isShortGoalActive,
 } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
-import { memo, useState } from "react";
+import { memo, useState, type CSSProperties } from "react";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   useGameTime,
@@ -19,6 +19,7 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   DAY_NOTIFICATION_VISIBILITY_MS,
+  getDayProgressPips,
   orderDayNotifications,
   selectDayNotifications,
   type DayNotification,
@@ -172,6 +173,17 @@ function DayNotificationEntry({
             <span className={personClassName}>{notification.person.displayName}</span>
           ) : null}
           {notification.detail ? <small>{notification.detail}</small> : null}
+          {notification.progress ? (
+            <div className="appointment-pips" aria-hidden="true">
+              {getDayProgressPips(notification.progress).map((pip, index) => (
+                <div
+                  key={index}
+                  className={`appointment-pip appointment-pip-${pip}`}
+                  style={{ "--pip-index": index } as CSSProperties}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
       {notification.finalResultId && onWatchFinal ? (
