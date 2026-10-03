@@ -283,7 +283,7 @@ function DayNotificationTimeline({
         <div className="day-empty">
           <Icon name="clock" />
           <strong>Giornata tranquilla</strong>
-          <span>Goditela. Qui compaiono prove, tornei ed eventi in corso.</span>
+          <span>Goditela finchè dura. Qui compaiono prove, tornei ed eventi in corso.</span>
         </div>
       ) : (
         notifications.map((notification) => (
