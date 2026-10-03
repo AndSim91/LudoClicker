@@ -100,12 +100,14 @@ function DayNotificationEntry({
   isTutorialTrial,
   onPause,
   onResume,
+  onWatchFinal,
 }: {
   notification: DayNotification;
   now: number;
   isTutorialTrial: boolean;
   onPause: () => void;
   onResume: () => void;
+  onWatchFinal?: (resultId: string) => void;
 }) {
   const timing = getTiming(notification, now);
   const expiryDurationMs = notification.expiryDurationMs ?? DAY_NOTIFICATION_VISIBILITY_MS;
@@ -173,6 +175,16 @@ function DayNotificationEntry({
           <small>{notification.detail}</small>
         </div>
       </div>
+      {notification.finalResultId && onWatchFinal ? (
+        <button
+          type="button"
+          className="day-watch-final"
+          onClick={() => onWatchFinal(notification.finalResultId!)}
+        >
+          <Icon name="play" />
+          Guarda la finale
+        </button>
+      ) : null}
       {expiryProgress === undefined ? null : (
         <ProgressBar
           className="appointment-expiry"
@@ -186,7 +198,13 @@ function DayNotificationEntry({
   );
 }
 
-function DayNotificationTimeline({ state: stateOverride }: { state?: GameState }) {
+function DayNotificationTimeline({
+  state: stateOverride,
+  onWatchFinal,
+}: {
+  state?: GameState;
+  onWatchFinal?: (resultId: string) => void;
+}) {
   const state = useGameStateSlices(
     [
       "contacts",
@@ -267,6 +285,7 @@ function DayNotificationTimeline({ state: stateOverride }: { state?: GameState }
             isTutorialTrial={notification.tutorialTarget === true}
             onPause={() => notification.clock === "game" && setPausedNotification({ id: notification.id, now })}
             onResume={() => notification.clock === "game" && setPausedNotification(null)}
+            onWatchFinal={onWatchFinal}
           />
         ))
       )}
@@ -278,10 +297,12 @@ export function DayPanel({
   state: stateOverride,
   onMaintainEquipment = () => undefined,
   onBuyOfficialSwords = () => undefined,
+  onWatchFinal,
 }: {
   state?: GameState;
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
+  onWatchFinal?: (resultId: string) => void;
 }) {
   const isVisible = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
   if (!isVisible) return null;
@@ -298,7 +319,7 @@ export function DayPanel({
         onMaintainEquipment={onMaintainEquipment}
         onBuyOfficialSwords={onBuyOfficialSwords}
       />
-      <DayNotificationTimeline state={stateOverride} />
+      <DayNotificationTimeline state={stateOverride} onWatchFinal={onWatchFinal} />
     </aside>
   );
 }

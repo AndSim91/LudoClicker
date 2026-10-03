@@ -17,6 +17,7 @@ import type {
   TournamentResult,
 } from "../../game/types";
 import { findUpcomingTournament } from "../tournaments/tournamentPresentation";
+import { getOwnedFinal } from "../tournaments/finalDuel";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
@@ -50,6 +51,8 @@ export interface DayNotification {
   expiresAt?: number;
   expiryDurationMs?: number;
   tutorialTarget?: boolean;
+  /** A finished tournament whose Arena final had one of our athletes: «Guarda la finale» (4.3). */
+  finalResultId?: string;
   person?: {
     displayName: string;
     rarity: PersonRarity;
@@ -337,6 +340,7 @@ export function selectDayNotifications(
       clock: "game",
       timestamp: result.completedAt,
       expiresAt,
+      ...(getOwnedFinal(result) ? { finalResultId: result.id } : {}),
     });
   }
 

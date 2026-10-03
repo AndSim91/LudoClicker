@@ -54,12 +54,14 @@ import type {
   RockPaperScissorsChoice,
   ReptileSectorAssignments,
   SchoolFoundationDetails,
+  TournamentResult,
   UpgradeId,
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
 import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { AchievementToast } from "../features/feedback/AchievementToast";
 import { MomentLayer } from "../features/moments/MomentLayer";
+import { FinalDuelLayer } from "../features/tournaments/FinalDuelLayer";
 import { useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
@@ -207,6 +209,14 @@ export function App() {
     setMomentPaused(activeMoment !== undefined);
   }, [activeMoment, setMomentPaused]);
   const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
+  // A snapshot: the result may leave the detailed history while the final plays.
+  const [watchedFinal, setWatchedFinal] = useState<TournamentResult>();
+  const closeFinal = useCallback(() => setWatchedFinal(undefined), []);
+  const tournamentResults = state.tournaments.results;
+  const watchFinal = useCallback(
+    (resultId: string) => setWatchedFinal(tournamentResults.find((result) => result.id === resultId)),
+    [tournamentResults],
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -217,6 +227,7 @@ export function App() {
         !state.profile.displayName.trim() ||
         tutorial.isBlockingInput ||
         activeMoment !== undefined ||
+        watchedFinal !== undefined ||
         event.repeat ||
         event.key === BOSS_KEY ||
         isWindowsKey(event) ||
@@ -229,6 +240,7 @@ export function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
     activeMoment,
+    watchedFinal,
     activeView,
     dispatch,
     getGameNow,
@@ -690,6 +702,7 @@ export function App() {
           <StableDayPanel
             onMaintainEquipment={maintainEquipment}
             onBuyOfficialSwords={buyOfficialSwords}
+            onWatchFinal={watchFinal}
           />
         </div>
         <footer className="status-bar">
@@ -701,6 +714,7 @@ export function App() {
           </b>
         </footer>
       </div>
+      {watchedFinal ? <FinalDuelLayer result={watchedFinal} onClose={closeFinal} /> : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />
       ) : tutorial.activeScene && tutorial.activeStep ? (

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createProgressedGameSave, installGameSave } from "./support/gameSave";
+import { createOwnedFinalResult, createProgressedGameSave, installGameSave } from "./support/gameSave";
 import { SECRET_LEGENDARY_IDS } from "../../src/content/secretLegendaries";
 
 test.use({ viewport: { width: 1600, height: 900 } });
@@ -99,10 +99,11 @@ async function openArea(page: Page, name: string) {
 }
 
 test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   const state = createProgressedGameSave();
   const moments = ["legendary:eva-parodi", `legendary:${SECRET_LEGENDARY_IDS[0]}`, "victory:national", "council", "foundation"];
   state.moments = { seen: moments, queue: moments };
+  state.tournaments.results = [createOwnedFinalResult(state.lastSavedAt - 60_000)];
   state.school.euros = 50_000;
   // Mix every rarity so each name colour is checked on tables, chips and day-panel cards.
   const rarities = ["common", "rare", "ultra-rare", "legendary"] as const;
@@ -143,6 +144,13 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
     await page.getByRole("tab", { name: tab }).click();
     await page.waitForTimeout(300);
     report[`Tornei · ${tab}`] = await audit(page);
+    if (tab === "Risultati") {
+      // «Guarda la finale» (4.3): audit the duel once it has played out.
+      await page.getByRole("button", { name: "Guarda la finale" }).click();
+      await page.waitForTimeout(7_500);
+      report["Tornei · Finale"] = await page.evaluate(auditContrast);
+      await page.getByRole("button", { name: "Chiudi", exact: true }).click();
+    }
   }
 
   await openArea(page, "Scuola");

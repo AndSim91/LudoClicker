@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../../content/tournaments";
 import type {
   TournamentMatch,
@@ -16,6 +16,8 @@ import {
 import { formatCurrency } from "../../shared/formatters";
 import { knockoutStageLabel, levelShortLabel, participantName } from "./tournamentPresentation";
 import { SchoolPreliminaryResults } from "./SchoolPreliminaryResults";
+import { FinalDuelLayer } from "./FinalDuelLayer";
+import { getOwnedFinal } from "./finalDuel";
 import { ChroniclesKeyIcon } from "./ChroniclesIcons";
 import {
   TournamentParticipantIdentity,
@@ -330,6 +332,9 @@ export function TournamentResults({
   const [selectedMatchId, setSelectedMatchId] = useState<string>();
   const [showMatchDetail, setShowMatchDetail] = useState(false);
   const [preliminaryResultId, setPreliminaryResultId] = useState<string>();
+  const [watchingFinal, setWatchingFinal] = useState(false);
+  const closeFinal = useCallback(() => setWatchingFinal(false), []);
+  const ownedFinal = getOwnedFinal(result);
   const tournamentTabRef = useRef<HTMLButtonElement>(null);
   const preliminaryTabRef = useRef<HTMLButtonElement>(null);
   const participantById = useMemo(
@@ -440,6 +445,11 @@ export function TournamentResults({
           </>
         ) : null}
         <strong>Completato</strong>
+        {ownedFinal ? (
+          <button type="button" className="results-watch-final" onClick={() => setWatchingFinal(true)}>
+            Guarda la finale
+          </button>
+        ) : null}
         <label>
           <span>Cambia torneo</span>
           <select
@@ -735,6 +745,9 @@ export function TournamentResults({
           <TournamentRewards result={result} participantById={participantById} />
         </div>
       )}
+      {watchingFinal && ownedFinal ? (
+        <FinalDuelLayer result={result} onClose={closeFinal} />
+      ) : null}
       {continuationAction ? (
         <footer className="tournament-results-continuation">
           <button type="button" onClick={continuationAction.onClick}>

@@ -1,0 +1,337 @@
+/*
+ * «Guarda la finale» (4.3). Theme tokens keep it sober in Outlook and lit in
+ * Modalità Onde. Keyframes animate *from* the hidden state: the base rules are
+ * the end of the final, which «Mostra il risultato» and «Riduci animazioni» show.
+ */
+.final-duel-layer {
+  --duel-a: var(--accent-ink);
+  --duel-b: var(--warning);
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 35%);
+  animation: final-duel-fade 0.25s ease-out both;
+}
+
+.final-duel {
+  display: flex;
+  width: min(1040px, 100%);
+  max-height: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 18px;
+  overflow: auto;
+  padding: 22px 26px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 25px 60px rgb(0 0 0 / 28%);
+}
+
+.final-duel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.final-duel header small {
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.final-duel h2 {
+  margin: 2px 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: 30px;
+}
+
+.final-duel-close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ink-muted);
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.final-duel-ring {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 240px;
+  gap: 22px;
+  align-items: start;
+}
+
+.final-duel-fighter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+
+.final-duel-fighter small {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.final-duel-fighter.is-owned {
+  border: 2px solid var(--accent-ink);
+}
+
+.final-duel-fighter.is-owned small {
+  color: var(--accent-ink);
+}
+
+.final-duel-fighter > span {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.final-duel-center {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.final-duel-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  animation: final-duel-rise 0.5s ease-out var(--delay) both;
+}
+
+.final-duel-score strong {
+  font-family: var(--font-display, inherit);
+  font-size: 52px;
+  line-height: 1;
+}
+
+.final-duel-score strong:first-child { color: var(--duel-a); }
+.final-duel-score strong:last-child { color: var(--duel-b); }
+
+.final-duel-score span {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.final-duel-assaults {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.final-duel-assaults li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  animation: final-duel-rise 0.3s ease-out var(--delay) both;
+}
+
+.final-duel-assault-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.final-duel-track {
+  position: relative;
+  height: 24px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--duel-a) 35%, transparent),
+    transparent 50%,
+    color-mix(in srgb, var(--duel-b) 35%, transparent)
+  );
+}
+
+.final-duel-knot {
+  position: absolute;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--ink);
+  animation: final-duel-push 1.6s ease-in-out var(--delay) both;
+}
+
+.final-duel-assaults li.is-a .final-duel-knot { left: 10%; background: var(--duel-a); }
+.final-duel-assaults li.is-b .final-duel-knot { left: 90%; background: var(--duel-b); }
+
+.final-duel-assault-outcome {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  animation: final-duel-fade 0.4s ease-out calc(var(--delay) + 1.6s) both;
+}
+
+.final-duel-style {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  animation: final-duel-rise 0.4s ease-out var(--delay) both;
+}
+
+.final-duel-style > span:first-child {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.final-duel-vote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.final-duel-vote-bar {
+  height: 10px;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--line);
+}
+
+.final-duel-vote-bar span {
+  display: block;
+  height: 100%;
+  background: var(--duel-a);
+}
+
+.final-duel-vote.is-b .final-duel-vote-bar span { background: var(--duel-b); }
+
+.final-duel-verdict {
+  margin: 4px 0 0;
+  font-family: var(--font-display, inherit);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
+  animation: final-duel-rise 0.5s ease-out calc(var(--delay) + 0.3s) both;
+}
+
+.final-duel-verdict.is-ours { color: var(--accent-ink); }
+
+.final-duel footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.final-duel footer button {
+  min-height: 36px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.final-duel footer button.is-primary {
+  border-color: var(--blue-600);
+  color: #ffffff;
+  background: var(--blue-600);
+  font-weight: 600;
+}
+
+.final-duel-layer.is-revealed * {
+  animation: none !important;
+}
+
+@keyframes final-duel-fade { from { opacity: 0; } }
+@keyframes final-duel-rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes final-duel-push {
+  0% { left: 50%; }
+  25% { left: 38%; }
+  50% { left: 62%; }
+  75% { left: 45%; }
+}
+
+/* Modalità Onde: deeper stage, our athlete glows. */
+:root[data-theme="dark"] .final-duel-layer {
+  --duel-b: #f3a36f;
+  background: rgb(2 30 51 / 82%);
+}
+
+:root[data-theme="dark"] .final-duel {
+  border-color: var(--line);
+  background: radial-gradient(ellipse at 50% 0%, #0e4563 0%, var(--surface) 60%);
+}
+
+:root[data-theme="dark"] .final-duel-fighter {
+  background: var(--onde-groove);
+}
+
+:root[data-theme="dark"] .final-duel-fighter.is-owned {
+  animation: final-duel-glow 2.4s ease-in-out infinite;
+}
+
+:root[data-theme="dark"] .final-duel-verdict.is-ours {
+  color: var(--onde-gold-bright);
+}
+
+@keyframes final-duel-glow {
+  50% { box-shadow: 0 0 26px rgb(108 211 214 / 50%); }
+}
+
+@media (max-width: 860px) {
+  .final-duel-ring { grid-template-columns: 1fr; }
+}
+
+/* Entry points: the «Torneo completato» notification and Tornei › Risultati. */
+.day-watch-final,
+.results-context .results-watch-final {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--blue-600);
+  border-radius: 4px;
+  color: #ffffff;
+  background: var(--blue-600);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.day-watch-final {
+  margin: 0 0 10px 12px;
+}
+
+.day-watch-final svg {
+  width: 14px;
+  height: 14px;
+}

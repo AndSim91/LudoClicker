@@ -880,6 +880,8 @@ Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
 notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
 del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
+Se la finale di Arena ha visto in pedana un nostro atleta, la notifica ha il
+pulsante **«Guarda la finale»** (§ 25.2).
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 nelle statistiche aggregate del funnel, nello stato della mail inviata e, per
@@ -3981,6 +3983,19 @@ Implementazione: `src/game/moments.ts` (condizioni e coda in
 `GameState.moments`, `seen` e `queue`), `src/features/moments/`. Salvataggi
 precedenti (v88): quello che il salvataggio ha già raggiunto conta come visto e
 ogni Leggendario già iscritto vale una iscrizione.
+
+### 25.2 Guarda la finale
+
+Decisione del 03/10 (piano 4.3). Solo le finali di Arena con almeno un nostro
+atleta si possono guardare: dal pulsante «Guarda la finale» nella notifica
+«Torneo completato» di La mia giornata e, siccome quel pannello è nascosto
+sotto i 1301 px e la notifica dura 10 secondi, anche dall'intestazione di
+Tornei › Risultati. Il gioco **non** si ferma. La finestra mostra i due atleti
+(il nostro evidenziato), gli assalti uno alla volta (2 secondi ciascuno), poi
+il voto di Stile dei giudici e il verdetto; «Mostra il risultato» salta alla
+fine, Esc o «Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
+2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
+la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts`).
 
 ---
 

@@ -3,7 +3,7 @@ import { TUTORIAL_SCENE_IDS } from "../../../src/content/tutorialScenes";
 import { createShortGoalFromStatistics } from "../../../src/content/shortGoals";
 import { createInitialState, gameReducer } from "../../../src/game/engine";
 import { decodeStoredSave } from "../../../src/game/saveCodec";
-import type { GameState } from "../../../src/game/types";
+import type { GameState, TournamentParticipant, TournamentResult } from "../../../src/game/types";
 import { STORAGE_KEYS } from "../../../src/shared/storageKeys";
 
 export const E2E_PLAYER_NAME = "Giulia Playwright";
@@ -60,4 +60,50 @@ export async function readStoredGameSave(page: Page): Promise<GameState> {
     return serializedState;
   }, STORAGE_KEYS.gameSave);
   return decodeStoredSave(serializedState) as GameState;
+}
+
+/** A Nazionale whose Arena final had one of our athletes, for «Guarda la finale» (4.3). */
+export function createOwnedFinalResult(completedAt: number): TournamentResult {
+  const participant = (id: string, firstName: string, lastName: string, owned: boolean): TournamentParticipant => ({
+    id,
+    ...(owned ? { ownedContactId: `contact-${id}` } : {}),
+    firstName,
+    lastName,
+    schoolName: owned ? "Ordine delle Onde" : "Ordine di Minerva",
+    city: owned ? "Genova" : "Roma",
+    rarity: owned ? "rare" : "common",
+    numericForms: 6,
+    experience: 2,
+    arenaBase: 400,
+    styleBase: 380,
+    arenaPreparation: 1_844,
+    stylePreparation: 1_811,
+    condition: 0.92,
+  });
+  return {
+    id: "national-final-e2e",
+    level: "national",
+    season: 1,
+    completedAt,
+    participants: [participant("a", "Niccolò", "Efrati", true), participant("b", "Giulia", "Moretti", false)],
+    matches: [{
+      id: "match-final-0-7",
+      stage: "final",
+      participantAId: "a",
+      participantBId: "b",
+      arenaScoreA: 2,
+      arenaScoreB: 1,
+      styleScoreA: 7.8,
+      styleScoreB: 7.1,
+      winnerId: "a",
+    }],
+    groupStandings: [],
+    arenaRanking: ["a", "b"],
+    styleRanking: ["a", "b"],
+    arenaPodium: [],
+    stylePodium: [],
+    qualifiers: [],
+    rewards: [],
+    secretLegendaryDefeatedIds: [],
+  };
 }
