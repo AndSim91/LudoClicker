@@ -112,6 +112,14 @@
   color: #e6f4f1;
 }
 
+:root[data-theme="dark"] .title-balance {
+  border-left-color: rgb(224 166 74 / 55%);
+}
+
+:root[data-theme="dark"] .title-balance strong {
+  color: var(--onde-gold-bright);
+}
+
 /* The one call to action on every screen is gold, like the saber. */
 :root[data-theme="dark"] .primary-command {
   color: var(--onde-on-gold);

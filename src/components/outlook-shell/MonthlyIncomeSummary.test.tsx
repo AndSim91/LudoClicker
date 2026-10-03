@@ -40,7 +40,7 @@ describe("MonthlyIncomeSummary", () => {
       `Entrate mensili: ${formatCurrency(memberFees + socialIncome)}`,
     );
     expect(income).not.toHaveAttribute("role", "button");
-    expect(income).toHaveTextContent("Al mese");
+    expect(income).toHaveTextContent("al mese");
 
     const tooltip = screen.getByRole("tooltip");
     expect(income).toHaveAttribute("aria-describedby", tooltip.id);

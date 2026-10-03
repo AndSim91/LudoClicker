@@ -44,7 +44,7 @@ describe("TitleBar", () => {
     const availability = screen.getByLabelText(/^Fondi:/);
     const monthlyIncome = screen.getByLabelText(/^Entrate mensili:/);
     expect(availability.closest(".title-resources")).toBeInTheDocument();
-    expect(monthlyIncome).toHaveTextContent("Al mese");
+    expect(monthlyIncome).toHaveTextContent("al mese");
     const fame = screen.getByLabelText("Fama della scuola: 7");
     const equipmentIndicator = screen.getByLabelText(
       "Spade disponibili: 6 su 6; 0 rotte; 0 punti di usura",
@@ -55,8 +55,9 @@ describe("TitleBar", () => {
     expect(equipmentIndicator.querySelector(".equipment-condition.is-cylinder")).toBeInTheDocument();
     expect(equipmentIndicator.querySelector(".equipment-saber-outline")).not.toBeInTheDocument();
     expect(equipmentIndicator.nextElementSibling).toBe(fame);
-    expect(fame.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
-    expect(monthlyIncome.closest(".title-monthly-income")?.nextElementSibling).toBe(pause);
+    // Fondi and «al mese» read together (Fase 8).
+    expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
+    expect(fame.nextElementSibling).toBe(pause);
     expect(pause.nextElementSibling).toBe(container.querySelector(".title-month"));
     expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 1")).toHaveTextContent(
       "SettembreAnno scolastico 1",

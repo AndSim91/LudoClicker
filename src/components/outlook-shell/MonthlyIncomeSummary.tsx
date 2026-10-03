@@ -60,8 +60,8 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
         aria-label={`Entrate mensili: ${formatCurrency(monthlyIncome)}`}
         aria-describedby={tooltipId}
       >
-        <small>Al mese</small>
         <strong>+{formatCompactCurrency(monthlyIncome)}</strong>
+        <small>al mese</small>
       </span>
       <div className="title-monthly-income-tooltip" id={tooltipId} role="tooltip">
         <p>Dettaglio mensile</p>
