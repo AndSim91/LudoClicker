@@ -993,15 +993,15 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 | Lezioni all'aperto            |       5 |       €500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
 | Oktoberfest                   |      15 |       €750 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
 | Evento sportivo               |      10 |     €1.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
-| Mele Comics                   |      20 |     €1.250 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
-| CairoMix                      |      35 |     €1.500 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
-| CogoComix                     |      60 |     €2.500 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
-| Burtomics                     |      90 |     €3.750 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
-| Genova Comics & Games         |     120 |     €5.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
-| Megacon Genova                |     180 |     €6.500 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
-| Lucca Comics & Games          |     250 |     €7.500 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
-| Milan Games Week & Cartoomics |     350 |    €10.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
-| Sfida a Cthulhu               |     500 |   €500.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
+| Mele Comics                   |      20 |     €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
+| CairoMix                      |      35 |     €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
+| CogoComix                     |      60 |     €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
+| Burtomics                     |      90 |     €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
+| Genova Comics & Games         |     120 |    €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
+| Megacon Genova                |     180 |    €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
+| Lucca Comics & Games          |     250 |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
+| Milan Games Week & Cartoomics |     350 |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Sfida a Cthulhu               |     500 | €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
 
 Un cooldown basato sul calendario scade all'inizio del mese di destinazione,
 anche quando il calendario viene avanzato dagli strumenti Admin.
