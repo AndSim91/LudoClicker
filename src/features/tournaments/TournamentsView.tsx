@@ -208,8 +208,11 @@ export function TournamentsView({
   onBookReptileVenue = () => undefined,
   onAdvanceReptilePresentation = () => undefined,
   onSkipReptilePresentation = () => undefined,
+  focusResultId,
 }: {
   state?: GameState;
+  /** Opens straight on this result in Risultati (from «Mostra i risultati» of the final). */
+  focusResultId?: string;
   gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
@@ -227,9 +230,9 @@ export function TournamentsView({
     ["tournaments", "network"],
     stateOverride,
   );
-  const [tab, setTab] = useState<TournamentTab>("overview");
+  const [tab, setTab] = useState<TournamentTab>(focusResultId ? "results" : "overview");
   const [openTournamentTab, setOpenTournamentTab] = useState<OpenTournamentTab>("reptile");
-  const [selectedResultId, setSelectedResultId] = useState<string>();
+  const [selectedResultId, setSelectedResultId] = useState(focusResultId);
   const [chroniclesLoading, setChroniclesLoading] = useState(false);
   const [showChroniclesResult, setShowChroniclesResult] = useState(false);
   const chroniclesStartTimerRef = useRef<number | undefined>(undefined);

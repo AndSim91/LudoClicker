@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import type { TournamentParticipant, TournamentResult } from "../../game/types";
 import { getAssaultSequence, getOwnedFinal } from "./finalDuel";
@@ -28,8 +28,16 @@ function FighterCard({ participant, side }: { participant: TournamentParticipant
  * «Guarda la finale» (4.3): the Arena final with one of the player's athletes,
  * assault by assault, then the style vote. The game keeps running underneath.
  */
-export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; onClose: () => void }) {
-  const [revealed, setRevealed] = useState(false);
+export function FinalDuelLayer({
+  result,
+  onClose,
+  onShowResults = onClose,
+}: {
+  result: TournamentResult;
+  onClose: () => void;
+  /** Opens this tournament in Tornei › Risultati; already there, it just closes. */
+  onShowResults?: () => void;
+}) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const final = getOwnedFinal(result);
 
@@ -59,7 +67,7 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
 
   return (
     <div
-      className={`final-duel-layer${revealed ? " is-revealed" : ""}`}
+      className="final-duel-layer"
       role="dialog"
       aria-modal="true"
       aria-labelledby="final-duel-title"
@@ -132,9 +140,7 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
           <FighterCard participant={b} side="b" />
         </div>
         <footer>
-          {revealed ? null : (
-            <button type="button" onClick={() => setRevealed(true)}>Mostra il risultato</button>
-          )}
+          <button type="button" onClick={onShowResults}>Mostra i risultati</button>
           <button type="button" className="is-primary" onClick={onClose}>Chiudi</button>
         </footer>
       </div>

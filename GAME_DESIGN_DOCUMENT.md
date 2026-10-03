@@ -4083,8 +4083,9 @@ atleta si possono guardare: dal pulsante «Guarda la finale» nella notifica
 sotto i 1301 px e la notifica dura 10 secondi, anche dall'intestazione di
 Tornei › Risultati. Il gioco **non** si ferma. La finestra mostra i due atleti
 (il nostro evidenziato), gli assalti uno alla volta (3 secondi ciascuno), poi
-il voto di Stile dei giudici e il verdetto; «Mostra il risultato» salta alla
-fine, Esc o «Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
+il voto di Stile dei giudici e il verdetto; «Mostra i risultati» apre quel
+torneo in Tornei › Risultati (da lì la finestra si chiude e basta), Esc o
+«Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
 2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
 la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts`).
 

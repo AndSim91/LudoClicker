@@ -1,7 +1,7 @@
 /*
  * «Guarda la finale» (4.3). Theme tokens keep it sober in Outlook and lit in
  * Modalità Onde. Keyframes animate *from* the hidden state: the base rules are
- * the end of the final, which «Mostra il risultato» and «Riduci animazioni» show.
+ * the end of the final, which «Riduci animazioni» shows.
  */
 .final-duel-layer {
   --duel-a: var(--accent-ink);
@@ -365,12 +365,6 @@
   color: #ffffff;
   background: var(--blue-600);
   font-weight: 600;
-}
-
-.final-duel-layer.is-revealed *,
-.final-duel-layer.is-revealed *::before,
-.final-duel-layer.is-revealed *::after {
-  animation: none !important;
 }
 
 @keyframes final-duel-fade { from { opacity: 0; } }

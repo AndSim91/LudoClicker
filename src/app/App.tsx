@@ -212,6 +212,20 @@ export function App() {
   // A snapshot: the result may leave the detailed history while the final plays.
   const [watchedFinal, setWatchedFinal] = useState<TournamentResult>();
   const closeFinal = useCallback(() => setWatchedFinal(undefined), []);
+  // A new key remounts Tornei on the result even when it is already open.
+  const [tournamentFocus, setTournamentFocus] = useState<{ resultId?: string; key: number }>();
+  const showFinalResults = useCallback(() => {
+    if (!watchedFinal) return;
+    const resultId = watchedFinal.id;
+    setTournamentFocus((previous) => ({ resultId, key: (previous?.key ?? 0) + 1 }));
+    setWatchedFinal(undefined);
+    setView("tournaments");
+  }, [watchedFinal]);
+  // From the rail Tornei opens as usual: the focus served its one visit.
+  const changeView = useCallback((next: AppView) => {
+    setTournamentFocus((focus) => focus && { key: focus.key });
+    setView(next);
+  }, []);
   const tournamentResults = state.tournaments.results;
   const watchFinal = useCallback(
     (resultId: string) => setWatchedFinal(tournamentResults.find((result) => result.id === resultId)),
@@ -581,7 +595,7 @@ export function App() {
           }
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
-          <StableAppRail view={activeView} onChange={setView} />
+          <StableAppRail view={activeView} onChange={changeView} />
           <Suspense fallback={null}>
           {activeView === "mail" ? (
             <>
@@ -641,6 +655,8 @@ export function App() {
             />
           ) : activeView === "tournaments" ? (
             <StableTournamentsView
+              key={tournamentFocus?.key}
+              focusResultId={tournamentFocus?.resultId}
               gameSpeed={gameSpeed}
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}
@@ -725,7 +741,7 @@ export function App() {
           </b>
         </footer>
       </div>
-      {watchedFinal ? <FinalDuelLayer result={watchedFinal} onClose={closeFinal} /> : null}
+      {watchedFinal ? <FinalDuelLayer result={watchedFinal} onClose={closeFinal} onShowResults={showFinalResults} /> : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />
       ) : tutorial.activeScene && tutorial.activeStep ? (

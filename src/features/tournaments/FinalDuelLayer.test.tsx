@@ -72,16 +72,17 @@ describe("Guarda la finale (4.3)", () => {
     );
   });
 
-  it("plays the final and closes with Esc or Chiudi", () => {
+  it("plays the final, closes with Esc or Chiudi and leads to the results", () => {
     const onClose = vi.fn();
-    render(<FinalDuelLayer result={result(true)} onClose={onClose} />);
+    const onShowResults = vi.fn();
+    render(<FinalDuelLayer result={result(true)} onClose={onClose} onShowResults={onShowResults} />);
 
     expect(screen.getByRole("dialog", { name: "Finale" })).toBeVisible();
     expect(screen.getByText("La tua scuola")).toBeVisible();
     expect(screen.getAllByText(/^OH a .* · punto a /)).toHaveLength(3);
     expect(screen.getByText("Niccolò Prova vince la finale 2 a 1")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "Mostra il risultato" }));
-    expect(screen.queryByRole("button", { name: "Mostra il risultato" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Mostra i risultati" }));
+    expect(onShowResults).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(window, { key: "Escape" });
     fireEvent.click(screen.getByRole("button", { name: "Chiudi" }));
     expect(onClose).toHaveBeenCalledTimes(2);
