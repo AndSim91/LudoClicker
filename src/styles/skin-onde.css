@@ -83,6 +83,11 @@
   --rarity-secret-legendary-mail-background: #5c2530;
   --rarity-secret-legendary-accent: #ffa99c;
 
+  /* Fase 8: day-panel cards and the text colours of the sword states. */
+  --day-card: #0a3a57;
+  --equipment-broken-ink: var(--equipment-broken);
+  --equipment-load-ink: var(--equipment-load);
+
   --shadow-flyout: 0 12px 36px rgb(1 12 22 / 60%), 0 0 0 1px rgb(92 200 204 / 16%);
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -142,7 +147,6 @@
 :root[data-theme="dark"] .message-row.selected,
 :root[data-theme="dark"] .folder:hover,
 :root[data-theme="dark"] .folder.active,
-:root[data-theme="dark"] .resource-link:hover,
 :root[data-theme="dark"] .mastery-entry.active,
 :root[data-theme="dark"] .upgrade-row.recommended,
 :root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {
@@ -266,10 +270,6 @@
 :root[data-theme="dark"] .level-zero-grammar-error {
   color: #ffa39a;
   text-decoration-color: var(--equipment-broken);
-}
-
-:root[data-theme="dark"] .equipment-purchase-button small {
-  color: #ffffff;
 }
 
 /* Aura: the rarer the person, the stronger the glow around the avatar. */

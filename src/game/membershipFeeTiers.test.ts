@@ -22,6 +22,6 @@ it("announces the highest new fee tier once", () => {
 
   const announcements = again.messages.filter((message) => message.subject.startsWith("Quota mensile"));
   expect(announcements.map((message) => message.subject)).toEqual(["Quota mensile: 60 €"]);
-  expect(announcements[0].preview).toContain("Prossima soglia: 100 iscritti, quota 80 €");
+  expect(announcements[0].preview).toContain("Prossimo scalino a 100.");
   expect(again.school.feeTiersAnnounced).toBe(2);
 });

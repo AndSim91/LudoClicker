@@ -110,7 +110,7 @@ describe("selectDayNotifications", () => {
         id: "trial-summary",
         kind: "trial-summary",
         title: "1 lezione di prova",
-        detail: "1 programmata",
+        detail: "1 in programma",
       }),
     ]);
   });
@@ -174,7 +174,7 @@ describe("selectDayNotifications", () => {
       kind: "trial-summary",
       phase: "in-progress",
       title: "6 lezioni di prova",
-      detail: "2 programmate · 2 in corso · 1 iscritto · 1 non iscritto",
+      detail: "2 in programma, 2 in palestra, 1 iscritto e 1 senza iscrizione",
       tutorialTarget: true,
     }));
     expect(state.scheduledTrials).toHaveLength(6);
@@ -190,7 +190,7 @@ describe("selectDayNotifications", () => {
         kind: "trial-summary",
         phase: "in-progress",
         title: "100 lezioni di prova",
-        detail: "100 in corso",
+        detail: "100 in palestra",
       }),
     ]);
   });
@@ -212,7 +212,7 @@ describe("selectDayNotifications", () => {
       kind: "tournament",
       phase: "scheduled",
       title: "Torneo Scolastico in arrivo",
-      detail: "Si disputa alla fine del mese.",
+      detail: "Si combatte a fine mese: c'è ancora tempo per allenarsi.",
       clock: "game",
       timestamp: 70_000,
       startsAt: 70_000,

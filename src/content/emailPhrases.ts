@@ -119,7 +119,7 @@ export const WARM_CALLS: EmailPhrase[] = [
 /** Livelli 5–7: inviti all'azione da campagna. */
 export const MARKETING_CALLS: EmailPhrase[] = [
   { text: "ACCENDI LA TUA SPADA" },
-  { text: "IL TUO POSTO IN PEDANA È PRONTO" },
+  { text: "IL TUO POSTO IN PALESTRA È PRONTO" },
   { text: "SCRIVI LA TUA PRIMA FORMA" },
   { text: "ENTRA NELL'ORDINE" },
   { text: "LA LUCE È DALLA TUA PARTE" },
@@ -160,7 +160,7 @@ export const POSTSCRIPTS: EmailPhrase[] = [
 export const MARKETING_SUBJECTS: EmailPhrase[] = [
   { text: "{{firstName}}, la tua spada è pronta" },
   { text: "{{firstName}}, una sera di luce a {{city}}?" },
-  { text: "Il tuo posto in pedana ti aspetta, {{firstName}}" },
+  { text: "Il tuo posto in palestra ti aspetta, {{firstName}}" },
   { text: "{{firstName}}, sei a una lezione dal primo duello" },
   { text: "Accendi la settimana, {{firstName}}" },
   { text: "{{firstName}}, {{orderName}} ti ha scelto" },

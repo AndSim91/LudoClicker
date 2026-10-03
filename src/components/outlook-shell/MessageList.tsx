@@ -12,6 +12,7 @@ import type { CampaignEmail, Contact, GameState, InboxMessage } from "../../game
 import { formatTime } from "../../shared/formatters";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import type { MailFolder } from "./FolderPane";
+import { Icon } from "../common/Icon";
 
 function time(value: number) {
   return formatTime(value);
@@ -90,6 +91,10 @@ function haveSameSentPresentation(left: GameState, right: GameState): boolean {
     });
 }
 
+function initial(name: string): string {
+  return name.trim().charAt(0).toUpperCase();
+}
+
 function InboxRow({
   message,
   selected,
@@ -105,13 +110,14 @@ function InboxRow({
       className={`message-row ${message.unread ? "unread" : "read"}${selected ? " selected" : ""}`}
       onClick={onSelect}
     >
-      <i className={message.unread ? "unread-dot" : "read-dot"} />
+      {/* Fase 8: nearly every notice is A.N.D.E.R.'s, so the sender is an initial, not a line. */}
+      <span className="message-avatar" aria-hidden="true">{initial(message.sender)}</span>
       <span className="message-copy">
-        <strong>{message.sender}</strong>
-        <span>
+        <span className="sr-only">{message.sender}: </span>
+        <strong>
           {message.subject}
           {(message.stackCount ?? 1) > 1 ? ` · ${message.stackCount} aggiornamenti` : ""}
-        </span>
+        </strong>
         <small>{message.preview}</small>
       </span>
       <time>{time(message.receivedAt)}</time>
@@ -213,7 +219,6 @@ export function MessageList({
             </button>
           </>
         ) : <button className="active" type="button">Tutte</button>}
-        <span>{folder === "inbox" ? "Per priorità" : "Per data⌄"}</span>
       </div>
       <div className="date-label">Oggi</div>
       {folder === "inbox" ? (
@@ -224,12 +229,11 @@ export function MessageList({
               className={selectedMessageId === null ? "message-row selected" : "message-row"}
               onClick={() => onSelectMessage(null)}
             >
-              <i className="unread-dot" />
+              <span className="message-avatar is-draft" aria-hidden="true"><Icon name="send" /></span>
               <span className="message-copy">
                 <strong className={`rarity-name ${getRarityClassName(activeContact.rarity, Boolean(activeContact.secretLegendaryId))}`}>
                   Bozza per {activeContact.firstName} {activeContact.lastName}
                 </strong>
-                <span>{activeEmail.subject}</span>
                 <small>{activeEmail.status === "sending"
                   ? "Invio in corso…"
                   : activeEmail.status === "readyToSend"
@@ -274,7 +278,7 @@ export function MessageList({
               key={email.id}
               onClick={() => onSelectSentEmail(email.id)}
             >
-              <i className="read-dot" />
+              <span className="message-avatar is-sent" aria-hidden="true">{contact ? initial(contact.firstName) : "?"}</span>
               <span className="message-copy">
                 <strong className={contact ? `rarity-name ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}` : undefined}>
                   {contact?.firstName} {contact?.lastName}

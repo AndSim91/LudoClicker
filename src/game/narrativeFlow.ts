@@ -132,8 +132,8 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
   return addMessage(
     ready,
     now,
-    "Richiesta apertura nuova scuola",
-    "La vittoria al Nazionale convince la rete: puoi fondare una nuova sede dell'Ordine. La Fama di questa scuola diventa Reputazione, da spendere in potenziamenti permanenti o in una rendita da questa sede; la nuova scuola ripartirà da zero. Trovi la procedura in Impostazioni → Rete dell'Ordine; più aspetti, più Reputazione guadagnerai.",
+    "Campioni d'Italia",
+    `${state.school.name} vince il Nazionale. La Rete ora ti lascia aprire una nuova scuola: quando vuoi, è in Impostazioni, e più aspetti più Reputazione porti con te.`,
     "system",
   );
 }
@@ -148,7 +148,7 @@ export function announceMembershipFeeTier(state: GameState, now: number): GameSt
     { ...state, school: { ...state.school, feeTiersAnnounced: reached } },
     now,
     `Quota mensile: ${tier.fee} €`,
-    `La scuola ha raggiunto ${tier.members} iscritti attivi: da questo mese la quota base di ogni iscritto sale a ${tier.fee} € e non scenderà più, anche se qualcuno lascia.${next ? ` Prossima soglia: ${next.members} iscritti, quota ${next.fee} €.` : " È la quota più alta dell'Ordine."}`,
+    `${tier.members.toLocaleString("it-IT")} iscritti: da questo mese ognuno paga ${tier.fee} €, e indietro non si torna.${next ? ` Prossimo scalino a ${next.members.toLocaleString("it-IT")}.` : " È la quota più alta dell'Ordine."}`,
     "positive",
     "focused",
     "progress",

@@ -24,7 +24,7 @@ describe("game engine: narrative", () => {
     expect(earned.achievements).toContain("emails:bronze");
     expect(earned.school.euros).toBe(initial.school.euros);
     expect(earned.messages.some((message) =>
-      message.subject === "Traguardo sbloccato: La tastiera chiede pietà · Bronzo")).toBe(true);
+      message.subject === "Nuovo traguardo: La tastiera chiede pietà · Bronzo")).toBe(true);
     expect(repeated).toBe(earned);
     expect(repeated.achievements.filter((id) => id === "emails:bronze")).toHaveLength(1);
   });
@@ -43,8 +43,8 @@ describe("game engine: narrative", () => {
     expect(completed.school.euros).toBe(15);
     expect(completed.shortGoal.definitionId).toBe("book-trials");
     expect(completed.shortGoal.completedCount).toBe(1);
-    expect(completed.messages[0].subject).toBe("Obiettivo completato: Tre inviti in partenza");
-    expect(completed.messages[0].preview).toContain("Agenda in movimento");
+    expect(completed.messages[0].subject).toBe("Missione compiuta: Tre inviti in partenza");
+    expect(completed.messages[0].preview).toMatch(/\+15,00\s€\.$/);
     expect(repeated.school.euros).toBe(completed.school.euros);
   });
 
@@ -300,8 +300,8 @@ describe("game engine: narrative", () => {
       details: { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3", motto: "Verso il largo", specialization: "redazione" },
     });
 
-    expect(offered.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
-    expect(offeredAgain.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
+    expect(offered.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
+    expect(offeredAgain.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
     expect(founded.school.activeMembers).toBe(0);

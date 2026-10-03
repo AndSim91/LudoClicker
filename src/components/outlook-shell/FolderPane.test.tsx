@@ -1,10 +1,9 @@
 import { fireEvent, render, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
-import { createInitialState, gameReducer } from "../../game/engine";
+import { createInitialState } from "../../game/engine";
 import type { InboxMessage } from "../../game/types";
 import { FolderPane } from "./FolderPane";
-import { formatExactCurrency } from "./resourceFormatting";
 
 describe("FolderPane", () => {
   it("excludes locked tournament notifications from the inbox counter", () => {
@@ -66,7 +65,7 @@ describe("FolderPane", () => {
     expect(contactsRow).toHaveTextContent("Contatti5");
   });
 
-  it("compacts every sidebar counter and keeps the full balance available on hover", () => {
+  it("compacts every sidebar counter and keeps the exact value on hover", () => {
     const initial = createInitialState(1_000);
     const euros = 99_999_999_088;
     const availableContact = initial.contacts.find((contact) => contact.status === "available");
@@ -92,10 +91,8 @@ describe("FolderPane", () => {
 
     expect(rows[0]).toHaveTextContent(/1,2K/);
     expect(rows[1]).toHaveTextContent(/1\s+Mln/);
-    expect(rows[2]).toHaveTextContent(/100\s+Mld\s+€/);
-    expect(container.querySelector(`b[title="${formatExactCurrency(euros)}"]`)).toHaveTextContent(
-      /100\s+Mld\s+€/,
-    );
+    expect(rows).toHaveLength(2);
+    expect(container.querySelector('b[title="999.999"]')).toHaveTextContent(/1\s+Mln/);
   });
 
   it("opens the composer and members from their resource rows", () => {
@@ -115,28 +112,11 @@ describe("FolderPane", () => {
 
     const pane = within(container);
     fireEvent.click(pane.getByRole("button", { name: /Contatti/ }));
-    fireEvent.click(pane.getByRole("button", { name: /Scuola/ }));
+    fireEvent.click(pane.getByRole("button", { name: /Iscritti/ }));
 
     expect(onOpenComposer).toHaveBeenCalledOnce();
     expect(onOpenMembers).toHaveBeenCalledOnce();
-    expect(pane.getByText("Fondi").closest("button")).toBeNull();
-  });
-
-  it("shows the monthly income under the balance only once there is some", () => {
-    const empty = createInitialState(1_000);
-    const withMembers = gameReducer(empty, { type: "ADMIN_ADD_MEMBERS", amount: 3 });
-    const renderPane = (state: typeof empty) =>
-      render(
-        <FolderPane
-          state={state}
-          folder="inbox"
-          onSelectFolder={() => undefined}
-          onOpenComposer={() => undefined}
-          onOpenMembers={() => undefined}
-        />,
-      ).container;
-
-    expect(renderPane(empty).querySelector(".resource-delta")).toBeNull();
-    expect(renderPane(withMembers).querySelector(".resource-delta")).toHaveTextContent(/^\+.+ al mese$/);
+    // Funds live in the title bar only (Fase 8).
+    expect(pane.queryByText("Fondi")).toBeNull();
   });
 });

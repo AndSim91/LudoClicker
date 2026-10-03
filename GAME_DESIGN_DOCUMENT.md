@@ -850,16 +850,16 @@ fondata alcuna scuola.
 Gli esiti positivi vengono comunicati come messaggi automatici interni, non come
 risposte dei destinatari:
 
-- “Primo iscritto registrato”, solo la prima volta;
-- “Quota associativa accreditata”;
-- “Nuovo collaboratore disponibile” per il primo collaboratore, e “Nuovo
-  collaboratore Leggendario: Nome” per ogni Leggendario.
+- “Habemus inscriptum!”, solo per il primo iscritto;
+- “Quota mensile: N €” a ogni nuovo scalino di quota;
+- “Nome entra nel Consiglio” per il primo collaboratore e per ogni
+  Leggendario.
 
 **Riepilogo dell'anno scolastico** (piano 4.1, decisione del 03/10). Le notizie
 di routine non arrivano più una per una: nuovi iscritti, Forme completate
 (anche quelle insegnate in automatico), contatti acquisiti, nuovi collaboratori
 ordinari, eventi narrativi e abbandoni (solo il numero, senza nomi) si sommano
-in un unico messaggio per anno scolastico, «Riepilogo dell'anno scolastico N».
+in un unico messaggio per anno scolastico, «L'anno scolastico N in breve».
 Compare in Evidenziata con la prima novità dell'anno, si aggiorna una volta al
 mese senza tornare in cima e mostra i numeri in riquadri; a fine anno (o alla
 fondazione di una nuova scuola) si chiude e passa in Altra. I numeri sono
@@ -895,7 +895,7 @@ Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
 notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
 del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
-Se la finale di Arena ha visto in pedana un nostro atleta, la notifica ha il
+Se nella finale di Arena combatte un nostro atleta, la notifica ha il
 pulsante **«Guarda la finale»** (§ 25.2).
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
@@ -2121,7 +2121,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | Traguardo                                  | Sblocco                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | Avvio                                      | Posta (composizione, Posta in arrivo, Posta inviata), Impostazioni, 5 contatti iniziali, 6 spade |
-| Prima email inviata                        | messaggio di sistema “Configurazione campagna completata”; la prima email garantisce una prova |
+| Prima email inviata                        | messaggio “Partita la prima email”; la prima email garantisce una prova |
 | Missione “Tre inviti in partenza” (3 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
 | Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
 | Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
@@ -2133,7 +2133,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | 9 Collaboratori                            | gestione aggregata per settore                                           |
 | 35 iscritti attivi                         | Redazione si evolve in Social                                            |
 | Prima vittoria nell'Accademico Arena       | settore e pagina Gadget                                                  |
-| Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Richiesta apertura nuova scuola” |
+| Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Campioni d'Italia” |
 
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
 Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
@@ -2167,9 +2167,9 @@ Queste comunicazioni:
   meccanica.
 
 Oggi i traguardi producono soltanto normali messaggi di sistema nella Posta in
-arrivo (per esempio “Configurazione campagna completata” dopo la prima email,
-“La Redazione si è evoluta in Social” a 35 iscritti attivi, “Richiesta
-apertura nuova scuola”), mentre l'introduzione delle nuove meccaniche è
+arrivo (per esempio “Partita la prima email” dopo la prima email,
+“La Redazione diventa Social” a 35 iscritti attivi, “Campioni
+d'Italia”), mentre l'introduzione delle nuove meccaniche è
 affidata alle scene di tutorial (sezione 13).
 
 > **Da implementare:** comunicazioni da scrivere manualmente con la meccanica di tastiera che sbloccano una funzione al completamento; gli sblocchi avvengono direttamente al raggiungimento del traguardo.
@@ -2266,10 +2266,11 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Contatti da contattare: contatore **Contatti** nella barra del titolo e riga
   Contatti sotto le cartelle (apre la composizione);
 - Esiti in attesa: prove prenotate e notifiche nella colonna La mia giornata;
-- Euro disponibili: contatore **Fondi** nella barra del titolo e riga Fondi
-  sotto le cartelle, con le entrate mensili (“+… al mese”);
-- Iscritti: contatore **Iscritti** nella barra del titolo, riga Scuola sotto le
-  cartelle e sezione “Iscritti attivi” della pagina Scuola;
+- Euro disponibili: contatore **Fondi** nella barra del titolo, seguito da
+  **Al mese** con le entrate mensili (il dettaglio al passaggio del mouse);
+- Iscritti: contatore **Iscritti** nella barra del titolo, riga Iscritti sotto le
+  cartelle (apre la pagina Scuola) e sezione “Iscritti attivi” della pagina
+  Scuola;
 - Collaboratori: sezione “Collaboratori” della pagina Scuola;
 - Follower: contatore nella barra del titolo dopo lo sblocco di Social;
 - Fama: contatore nella barra del titolo;
@@ -2278,8 +2279,8 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Spade disponibili: indicatore **Spade** (disponibili/totali, con barra di
   condizione) nella barra del titolo e riquadro attrezzatura in La mia
   giornata;
-- Prestigio: email formale “Richiesta apertura nuova scuola” ricevuta quando i
-  requisiti sono soddisfatti.
+- Prestigio: messaggio “Campioni d'Italia” ricevuto quando i requisiti sono
+  soddisfatti.
 
 > **Da implementare:** la barra inferiore mostra solo testi statici (stato dei messaggi, profilo, connessione, scuola e versione) e non la velocità di scrittura; non esiste un pannello “Statistiche campagna” con la conversione.
 
@@ -2300,6 +2301,19 @@ della scuola; le email della campagna e il benvenuto mantengono i loro mittenti.
 La voce è ironica per circa il 60% e asciutta per il 40%; i messaggi di sistema
 (salvataggi, errori, impostazioni) restano asciutti. Un avviso non supera due
 frasi e non spiega regole: quelle stanno nella LudoWiki.
+
+Avvisi della Posta e notifiche di La mia giornata (Fase 8, prima schermata):
+le prime volte e gli sblocchi hanno una battuta; quelli che tornano spesso
+(tornei, quote, maestrie, corsi, notifiche della giornata) solo un'ironia
+velata. Le cartelle mostrano Posta in arrivo con i non letti, Posta inviata
+senza conteggio e due scorciatoie, Contatti e Iscritti; i Fondi stanno solo
+nella barra del titolo. Ogni messaggio dell'elenco ha l'iniziale del mittente,
+l'oggetto e una riga di anteprima. Nel riquadro Spade di La mia giornata ci
+sono un numero grande (spade libere), la barra, una riga di contesto, il
+pulsante Ripara e il link per acquistare.
+
+Dove si combatte si dice **arena** (in LudoSport è un cerchio di 7 metri di
+diametro), dove ci si allena **palestra** o **scuola**; mai «pedana».
 
 Un nome per ogni cosa: **email** (non «mail»), **barra a sinistra**, **Upgrade**
 (non «potenziamento»), **spade rotte** e **usura**, **fondi**, **prova** per la
@@ -2518,7 +2532,7 @@ l'avanzamento.
 3. **Configurazione campagna**\
    È la prima comunicazione di sistema manuale e sblocca Scrittura e Creatività.
 
-   > **Da implementare:** “Configurazione campagna completata” è oggi un semplice messaggio di sistema che arriva in Posta in arrivo all'invio della prima email, senza scrittura manuale né sblocchi; la pagina Upgrade (con tutti i rami pubblici) si sblocca al primo iscritto.
+   > **Da implementare:** “Partita la prima email” è oggi un semplice messaggio di sistema che arriva in Posta in arrivo all'invio della prima email, senza scrittura manuale né sblocchi; la pagina Upgrade (con tutti i rami pubblici) si sblocca al primo iscritto.
 
 4. **Primi Eventi e attrezzatura**\
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi
@@ -2903,7 +2917,7 @@ tranquillo.
 ### 17.2 Sblocco
 
 L'offerta di fondare una nuova scuola arriva tramite una comunicazione di
-sistema ("Richiesta apertura nuova scuola", inviata una sola volta per ciclo)
+sistema ("Campioni d'Italia", inviata una sola volta per ciclo)
 appena la scuola corrente **vince un Torneo Nazionale**, di Arena o di Stile
 (`prestigeNationalTitles = 1`, `getPrestigeRequirements` in
 `src/game/progression.ts`). Conta solo la vittoria di un atleta della scuola
@@ -4232,7 +4246,7 @@ sembra un'applicazione di posta reale.
 - export e import.
 
 > **Da implementare:** l'interfaccia di fondazione: la logica (`FOUND_SCHOOL`,
-> requisiti, bonus di rete, email «Richiesta apertura nuova scuola») c'è, ma
+> requisiti, bonus di rete, messaggio «Campioni d'Italia») c'è, ma
 > nessuna schermata la attiva e le Impostazioni non mostrano controlli di
 > prestigio.
 

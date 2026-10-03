@@ -137,8 +137,8 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     nextState = addMessage(
       nextState,
       now,
-      "Configurazione campagna completata",
-      "Hai inviato la tua prima email! Il sistema registrerà eventuali risposte e appuntamenti automaticamente senza interrompere la stesura delle tue prossime email",
+      "Partita la prima email",
+      "Adesso si aspetta. Le risposte arrivano da sole: tu intanto continua a scrivere.",
       "system",
     );
   }

@@ -48,6 +48,13 @@ export function formatCurrency(value: number): string {
   return (Math.abs(value) >= 10_000 ? wholeCurrencyFormatter : currencyFormatter).format(value);
 }
 
+const listFormatter = new Intl.ListFormat("it-IT", { type: "conjunction" });
+
+/** «a, b e c». */
+export function formatList(items: readonly string[]): string {
+  return listFormatter.format(items);
+}
+
 /** Arena and Stile values are shown as whole numbers: 1.822, not 1822.400. */
 export function formatStat(value: number): string {
   return statFormatter.format(value);

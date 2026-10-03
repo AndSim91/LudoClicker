@@ -235,7 +235,7 @@ describe("DayPanel", () => {
 
     render(<DayPanel state={stateWithTrial("trialScheduled", "scheduled")} />);
 
-    expect(screen.getByText("In corso…")).toBeVisible();
+    expect(screen.getByText("In palestra")).toBeVisible();
   });
 
   it("keeps exactly five trial rows separate", () => {
@@ -262,7 +262,7 @@ describe("DayPanel", () => {
     render(<DayPanel state={state} />);
 
     expect(screen.getByText("1 lezione di prova")).toBeVisible();
-    expect(screen.getByText("1 programmata")).toBeVisible();
+    expect(screen.getByText("1 in programma")).toBeVisible();
     expect(screen.getAllByText("Lezione di prova")).toHaveLength(1);
     expect(screen.getByText("Atleta 2")).toHaveClass("rarity-legendary");
 
@@ -281,7 +281,7 @@ describe("DayPanel", () => {
     );
 
     expect(screen.getByText("6 lezioni di prova")).toBeVisible();
-    expect(screen.getByText("6 programmate")).toBeVisible();
+    expect(screen.getByText("6 in programma")).toBeVisible();
     expect(screen.getByText("00:05")).toBeVisible();
     expect(screen.queryByText("Lezione di prova")).not.toBeInTheDocument();
     expect(container.querySelectorAll(".day-notification-trial-summary")).toHaveLength(1);
@@ -301,7 +301,7 @@ describe("DayPanel", () => {
 
     expect(DAY_TRIAL_NOTIFICATION_LIMIT).toBe(5);
     expect(screen.getByText("100 lezioni di prova")).toBeVisible();
-    expect(screen.getByText("100 programmate")).toBeVisible();
+    expect(screen.getByText("100 in programma")).toBeVisible();
     expect(container.querySelectorAll(".appointment-entry")).toHaveLength(1);
     expect(intervalSpy).toHaveBeenCalledWith(expect.any(Function), 1_000);
 
@@ -382,7 +382,7 @@ describe("DayPanel", () => {
     });
 
     expect(screen.queryByText(label)).not.toBeInTheDocument();
-    expect(screen.getByText("Nessuna attività in corso")).toBeVisible();
+    expect(screen.getByText("Giornata tranquilla")).toBeVisible();
   });
 
   it("pauses a trial countdown while hovering its notification", () => {
@@ -402,7 +402,7 @@ describe("DayPanel", () => {
     expect(screen.getByText("00:05")).toBeVisible();
 
     fireEvent.mouseLeave(trialRow!);
-    expect(screen.getByText("In corso…")).toBeVisible();
+    expect(screen.getByText("In palestra")).toBeVisible();
   });
 
   it("pauses a notification expiry bar while hovering its notification", () => {
@@ -555,11 +555,11 @@ describe("DayPanel", () => {
       <DayPanel state={{ ...initial, contacts: [directMember, ...initial.contacts.slice(1)] }} />,
     );
 
-    expect(screen.getByText("Iscrizione diretta")).toBeVisible();
+    expect(screen.getByText("Iscritto al volo")).toBeVisible();
     expect(screen.getByText(`${directMember.firstName} ${directMember.lastName}`)).toHaveClass(
       "rarity-ultra-rare",
     );
-    expect(screen.getByText("Nuovo atleta entrato senza lezione di prova")).toBeVisible();
+    expect(screen.getByText("Saltata la prova: ha firmato e basta.")).toBeVisible();
   });
 
   it("shows the tournament countdown and then its Arena and Stile winners", () => {
@@ -587,7 +587,7 @@ describe("DayPanel", () => {
     expect(
       upcomingTournament?.querySelector(".tournament-notification-scoreboard"),
     ).toHaveTextContent("00:05Al via");
-    expect(screen.getByText("Si disputa alla fine del mese.")).toBeVisible();
+    expect(screen.getByText("Si combatte a fine mese: c'è ancora tempo per allenarsi.")).toBeVisible();
 
     rerender(
       <DayPanel
@@ -620,7 +620,7 @@ describe("DayPanel", () => {
     );
     expect(completedTournament?.querySelector(".appointment-expiry")).toBeVisible();
     expect(
-      screen.getByText("1° posto Arena: Ada Arena | 1° posto Stile: Stella Stile"),
+      screen.getByText("Vincono Ada Arena in Arena e Stella Stile nello Stile."),
     ).toBeVisible();
   });
 

@@ -276,10 +276,12 @@ function resolveInstructorOrTechnicianPhase(
   context.state = context.dependencies.addMessage(
     context.state,
     context.now,
-    phase === "instructor" ? "Corso Istruttori completato" : "Corso Tecnico completato",
     phase === "instructor"
-      ? `${collaborator.displayName} ha ottenuto l'attestato per ${definition.longName}.`
-      : `${collaborator.displayName} è ora Tecnico di ${definition.longName}.`,
+      ? `${collaborator.displayName} insegna ${definition.longName}`
+      : `${collaborator.displayName}, Tecnico di ${definition.longName}`,
+    phase === "instructor"
+      ? `Attestato in tasca: da oggi ${definition.longName} la spiega a chi entra.`
+      : "Corso finito. Adesso sa anche perché si fa così.",
     "positive",
     "other",
     "training",
@@ -461,8 +463,8 @@ function resolveTraining(
   if (!training.instructorId) context.state = context.dependencies.addMessage(
     context.state,
     context.now,
-    "Formazione completata",
-    `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha completato ${definition.longName}.`,
+    `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha finito ${definition.longName}`,
+    "Una Forma in più nel repertorio.",
     "positive",
     "other",
     "training",

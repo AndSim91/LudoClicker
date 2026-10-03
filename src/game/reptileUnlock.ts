@@ -24,7 +24,7 @@ export function discoverCourseXFromSuperbaVictory(state: GameState, now: number)
   return addMessage({
     ...state,
     secretUpgradeDiscoveries: [...state.secretUpgradeDiscoveries, "project-x"],
-  }, now, "Percorso Segreto scoperto", "La vittoria al Torneo della Superba apre una strada nuova: tra i Percorsi Segreti degli Upgrade ora compare Corso X, acquistabile per 1 €.", "positive", "focused", "progress");
+  }, now, "Percorso Segreto: Corso X", "Battuta la Superba, negli Upgrade compare Corso X. Costa 1 €. Sì, uno.", "positive", "focused", "progress");
 }
 
 export function unlockReptileFromTournamentResult(
@@ -39,5 +39,5 @@ export function unlockReptileFromTournamentResult(
       ...state.tournaments,
       reptile: { ...state.tournaments.reptile, unlocked: true },
     },
-  }, now, `${getReptileTournamentName(state)} sbloccato`, "La vittoria nazionale in Arena e Stile permette alla scuola di organizzare il suo primo torneo Open a coppie.", "positive", "focused", "tournaments");
+  }, now, "La scuola organizza un torneo", `Arena e Stile al Nazionale aprono la strada: ora puoi organizzare il primo ${getReptileTournamentName(state)}, a coppie.`, "positive", "focused", "tournaments");
 }

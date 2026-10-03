@@ -121,8 +121,8 @@ export function createChroniclesVictoryChallenge(
   return addMessage(
     challenged,
     now,
-    `Sfida leggendaria: ${profile.firstName} ${profile.lastName}`,
-    `Hai conquistato ${disciplines.length === 2 ? "Arena e Stile" : disciplines[0] === "arena" ? "l'Arena" : "lo Stile"} nelle Chronicles. Hai ${disciplines.length} ${disciplines.length === 1 ? "tentativo" : "tentativi"} al meglio delle tre.`,
+    `Sfida a ${profile.firstName} ${profile.lastName}`,
+    `${disciplines.length === 2 ? "Arena e Stile vinte" : disciplines[0] === "arena" ? "Arena vinta" : "Stile vinto"} nelle Chronicles: ${disciplines.length === 1 ? "un tentativo" : "due tentativi"}, al meglio delle tre, per convincerlo a venire a scuola.`,
     "positive",
     "focused",
     "tournaments",
@@ -234,7 +234,7 @@ export function playChroniclesHand(
       nextState,
       now,
       `${profile.firstName} ${profile.lastName} entra nella scuola`,
-      `Sfida vinta e bonus di ${GAME_CONFIG.chroniclesLegendaryFameReward} Fama assegnato. Il Leggendario Segreto è ora un atleta e collaboratore permanente.`,
+      `Sfida vinta, +${GAME_CONFIG.chroniclesLegendaryFameReward} Fama. Da oggi è atleta e collaboratore, per sempre.`,
       "positive",
       "focused",
       "tournaments",
@@ -254,8 +254,8 @@ export function playChroniclesHand(
       ? `${profile.firstName} ${profile.lastName}: secondo tentativo`
       : `${profile.firstName} ${profile.lastName} resta indipendente`,
     queued.length > 0
-      ? "La prima sfida è persa, ma la seconda vittoria nelle Chronicles permette di ritentare subito contro lo stesso Leggendario."
-      : "Non restano tentativi: dovrai conquistare una futura edizione delle Chronicles per sfidarlo di nuovo.",
+      ? "Persa la prima. La seconda vittoria nelle Chronicles vale un'altra mano, subito."
+      : "Tentativi finiti. Ci si rivede alle prossime Chronicles.",
     queued.length > 0 ? "positive" : "neutral",
     "focused",
     "tournaments",

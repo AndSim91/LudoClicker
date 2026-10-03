@@ -83,8 +83,8 @@ export function addAssignedCollaboratorMasteryExperience(
     (currentState, collaborator) => addMessage(
       currentState,
       now,
-      `Maestria raggiunta: ${collaborator.displayName}`,
-      `${collaborator.displayName} è ora ${collaborator.levelName} in ${getCollaboratorMasteryRoleLabel(collaborator.role, currentState.unlocks.social)}. Bonus del settore: +${Math.round(collaborator.multiplier * 100)}%.`,
+      `${collaborator.displayName}, ${collaborator.levelName} in ${getCollaboratorMasteryRoleLabel(collaborator.role, currentState.unlocks.social)}`,
+      `Il settore va il ${Math.round(collaborator.multiplier * 100)}% più spedito, e qualcuno comincia a chiedere consigli.`,
       "positive",
       "other",
       "collaborators",

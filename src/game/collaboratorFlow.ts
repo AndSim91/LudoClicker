@@ -62,8 +62,10 @@ export function recruitCollaborator(
   return addMessage(
     nextState,
     now + 1,
-    legendary ? `Nuovo collaboratore Leggendario: ${collaborator.displayName}` : "Nuovo collaboratore disponibile",
-    `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in ${editorialSector}, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
+    `${collaborator.displayName} entra nel Consiglio`,
+    legendary
+      ? "Un Leggendario tra i collaboratori. Non succede tutti i giorni: mettilo dove serve di più."
+      : `Primo collaboratore dell'Ordine. Mettilo in ${editorialSector}, agli Eventi, in Attrezzatura o in palestra: più resta nello stesso posto, più diventa bravo.`,
     "positive",
     "focused",
     "collaborators",

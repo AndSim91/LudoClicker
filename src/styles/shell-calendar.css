@@ -24,30 +24,30 @@
 
 .day-empty strong {
   color: var(--ink);
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .day-empty span {
-  margin-top: 7px;
-  font-size: 11px;
+  margin-top: 6px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
+/* Fase 8: a card with a background, title left, time right, one line under it. */
 .appointment {
   display: grid;
-  grid-template-columns: 3px minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  column-gap: 9px;
-  row-gap: 4px;
-  min-height: 82px;
-  padding: 13px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--day-card, #f3f3f3);
   transition:
     background-color 180ms ease,
     color 180ms ease;
 }
 
 .appointment-entry {
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
   animation: appointment-entry-arrive 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -65,8 +65,8 @@
 
 .appointment-expiry {
   display: block;
-  height: 5px;
-  margin: 0 8px 7px;
+  height: 3px;
+  margin: 4px 14px 0;
   overflow: hidden;
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 12%, transparent);
@@ -99,19 +99,11 @@
   grid-column: 2;
   grid-row: 1;
   align-self: start;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
   white-space: nowrap;
-}
-
-.appointment > i {
-  grid-column: 1;
-  grid-row: 1 / -1;
-  border-radius: 2px;
-  background: var(--blue-500);
-  transition: background-color 180ms ease;
 }
 
 .appointment-in-progress .appointment-timing {
@@ -122,10 +114,6 @@
   background: #edf7ee;
 }
 
-.appointment-enrolled > i {
-  background: var(--success);
-}
-
 .appointment-enrolled .appointment-timing {
   color: var(--success);
 }
@@ -134,20 +122,12 @@
   background: #fdf0f0;
 }
 
-.appointment-lost > i {
-  background: var(--warning);
-}
-
 .appointment-lost .appointment-timing {
   color: var(--warning);
 }
 
 .appointment-positive {
   background: #edf7ee;
-}
-
-.appointment-positive > i {
-  background: var(--success);
 }
 
 .appointment-positive .appointment-timing {
@@ -164,8 +144,8 @@
 
 .appointment-copy {
   display: flex;
-  grid-column: 2;
-  grid-row: 2;
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
   flex-direction: column;
   gap: 3px;
@@ -174,7 +154,9 @@
 .appointment-title {
   display: flex;
   align-items: flex-start;
-  gap: 5px;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
   min-width: 0;
   overflow: visible;
   line-height: 1.3;
@@ -204,7 +186,12 @@
 .appointment span,
 .appointment small {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 13px;
+}
+
+.appointment-title > span {
+  color: var(--ink);
+  font-size: 14px;
 }
 
 .day-notification-tournament {
@@ -224,11 +211,9 @@
   min-height: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--tournament-border);
-  border-radius: 4px;
+  border-radius: 10px;
   color: var(--tournament-ink);
   background: var(--tournament-surface);
-  box-shadow: 0 2px 7px rgb(45 49 53 / 9%);
 }
 
 .tournament-notification-scoreboard {
@@ -252,20 +237,16 @@
 }
 
 .tournament-notification-scoreboard strong {
-  font-size: 12px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  text-transform: uppercase;
 }
 
 .tournament-notification-scoreboard span {
   margin-top: 4px;
   color: inherit;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 12px;
   line-height: 1.1;
-  text-transform: uppercase;
 }
 
 .appointment-tournament .appointment-copy {
@@ -278,7 +259,6 @@
 
 .appointment-tournament .appointment-title {
   color: var(--tournament-ink);
-  font-size: 12px;
 }
 
 .appointment-tournament .appointment-copy > small {
@@ -308,181 +288,79 @@
   width: 16px;
 }
 
+/* Fase 8: one number, one line, one filled button. */
 .equipment-quick-card {
-  margin: 8px 0 12px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: inset 3px 0 0 var(--equipment-healthy);
-}
-
-.equipment-quick-card.is-warning {
-  box-shadow: inset 3px 0 0 var(--equipment-load);
-}
-
-.equipment-quick-card.is-critical {
-  box-shadow: inset 3px 0 0 var(--equipment-broken);
+  margin: 4px 0 12px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--day-card, #f3f3f3);
 }
 
 .equipment-quick-heading {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.equipment-quick-heading > svg {
-  width: 18px;
-  height: 18px;
-  color: var(--accent-ink);
-}
-
-.equipment-quick-heading > span {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.equipment-quick-heading small {
-  color: var(--ink-muted);
-  font-size: 9px;
+.equipment-quick-heading h3 {
+  margin: 0;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.equipment-quick-heading strong {
-  overflow: hidden;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .equipment-quick-heading > b {
-  padding: 3px 6px;
-  border-radius: 999px;
-  color: var(--success);
-  background: color-mix(in srgb, var(--equipment-healthy) 12%, transparent);
-  font-size: 9px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
-}
-
-.equipment-quick-card.is-warning .equipment-quick-heading > b {
-  color: var(--equipment-load);
-  background: color-mix(in srgb, var(--equipment-load) 12%, transparent);
 }
 
 .equipment-quick-card.is-critical .equipment-quick-heading > b {
-  color: var(--equipment-broken);
-  background: color-mix(in srgb, var(--equipment-broken) 12%, transparent);
+  color: var(--equipment-broken-ink, #c4314b);
 }
 
-.equipment-quick-card .equipment-condition {
-  color: var(--equipment-healthy);
+.equipment-quick-card.is-warning .equipment-quick-heading > b {
+  color: var(--equipment-load-ink, #8a5a00);
 }
 
-.equipment-quick-card.is-warning .equipment-condition {
-  color: var(--equipment-load);
+.equipment-quick-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0 10px;
 }
 
-.equipment-quick-card.is-critical .equipment-condition {
-  color: var(--equipment-broken);
+.equipment-quick-total strong {
+  font-family: var(--font-display, inherit);
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.equipment-quick-total span {
+  white-space: nowrap;
+}
+
+.equipment-quick-total span,
+.equipment-quick-note {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.equipment-quick-note {
+  margin: 8px 0 0;
+  line-height: 1.4;
 }
 
 .equipment-quick-card .equipment-condition-bar {
-  height: 11px;
-}
-
-.equipment-quick-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 9px 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--surface-muted);
-}
-
-.equipment-quick-metrics.has-maintenance-action {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.equipment-quick-metrics > span,
-.equipment-quick-metrics > button {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-  padding: 7px 6px;
-  text-align: center;
-}
-
-.equipment-quick-metrics > * + * {
-  border-left: 1px solid var(--line);
-}
-
-.equipment-quick-metrics small {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  color: var(--ink-muted);
-  font-size: 9px;
-  white-space: nowrap;
-}
-
-.equipment-quick-metrics small i {
-  display: block;
-  width: 5px;
-  height: 5px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--equipment-healthy);
-}
-
-.equipment-quick-metrics .is-reserved small i {
-  background: var(--equipment-reserved);
-}
-
-.equipment-quick-metrics .is-load small i {
-  background: var(--equipment-load);
-}
-
-.equipment-quick-metrics .is-broken small i {
-  background: var(--equipment-broken);
-}
-
-.equipment-quick-metrics strong {
-  overflow: hidden;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.equipment-auto-repair {
-  margin: 8px 0;
-}
-
-.equipment-auto-repair-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--ink-muted);
-  font-size: 9px;
-}
-
-.equipment-auto-repair strong {
-  color: var(--ink);
-  white-space: nowrap;
+  height: 10px;
 }
 
 .equipment-auto-progress-slot {
-  height: 9px;
-  padding-top: 5px;
+  height: 4px;
+  margin-top: 8px;
 }
 
 .equipment-auto-progress {
@@ -490,152 +368,80 @@
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--line);
+  background: color-mix(in srgb, var(--accent-ink) 18%, transparent);
 }
 
 .equipment-auto-progress > span {
   display: block;
   height: 100%;
   border-radius: inherit;
+  background: var(--accent-ink);
+}
+
+.equipment-quick-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.equipment-maintenance-button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 17px;
+  color: white;
   background: var(--blue-600);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.equipment-maintenance-button:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.equipment-maintenance-button:focus-visible,
+.equipment-purchase button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Nothing to do: the button steps back to plain text. */
+.equipment-maintenance-button:disabled {
+  padding: 0;
+  color: var(--ink-muted);
+  background: transparent;
+  font-weight: 400;
+}
+
+.equipment-purchase {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
 }
 
 .equipment-purchase-button,
 .equipment-purchase-quantity {
-  min-height: 31px;
-  border-radius: var(--radius-md);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.equipment-maintenance-button {
-  margin: 3px;
-  padding: 4px 2px;
-  border: 1px solid var(--blue-700);
-  border-radius: calc(var(--radius-sm) - 1px);
-  color: white;
-  background: linear-gradient(180deg, var(--blue-600), var(--blue-700));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 1px 2px rgb(20 69 120 / 18%);
-  font: inherit;
-  cursor: pointer;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
-}
-
-.equipment-maintenance-button small {
-  gap: 4px;
-  color: rgb(255 255 255 / 86%);
-  font-weight: 600;
-}
-
-.equipment-maintenance-button small svg {
-  width: 11px;
-  height: 11px;
-}
-
-.equipment-maintenance-button strong {
-  font-size: 9px;
-  letter-spacing: -0.01em;
-}
-
-.equipment-maintenance-button:not(:disabled):hover {
-  border-color: var(--blue-700);
-  background: var(--blue-700);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 2px 4px rgb(20 69 120 / 24%);
-  transform: translateY(-1px);
-}
-
-.equipment-maintenance-button:not(:disabled):active {
-  box-shadow: inset 0 1px 2px rgb(15 49 87 / 22%);
-  transform: translateY(0);
-}
-
-.equipment-maintenance-button:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--blue-600) 45%, white);
-  outline-offset: 1px;
-}
-
-.equipment-maintenance-button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-  box-shadow: none;
-  cursor: default;
-}
-
-.equipment-maintenance-button:disabled small {
-  color: var(--ink-muted);
-}
-
-.equipment-purchase {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 6px;
-  margin-top: 7px;
+  padding: 4px 0;
+  text-align: left;
+  color: var(--accent-ink);
+  background: transparent;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .equipment-purchase-quantity {
-  border: 1px solid var(--blue-600);
-  color: var(--blue-700);
-  background: var(--blue-050);
+  min-width: 28px;
+  text-decoration: none;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
+.equipment-purchase-button:disabled,
 .equipment-purchase-quantity:disabled {
-  border-color: var(--line);
   color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
-.equipment-purchase-button {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 8px;
-  color: white;
-  background: var(--blue-600);
-  text-align: left;
-}
-
-.equipment-purchase-button > svg {
-  flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
-}
-
-.equipment-purchase-button > span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.equipment-purchase-button strong,
-.equipment-purchase-button small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.equipment-purchase-button small {
-  color: rgb(255 255 255 / 78%);
-  font-size: 8px;
-  font-weight: 400;
-}
-
-.equipment-purchase-button:disabled {
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
-.equipment-purchase-button:disabled small {
-  color: var(--ink-muted);
+  text-decoration: none;
 }

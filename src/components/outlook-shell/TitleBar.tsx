@@ -65,7 +65,6 @@ export function TitleBar({
           data-tutorial-region="contacts-counter"
           aria-label={`Contatti da contattare: ${formatExactNumber(contactsAwaitingEmail)}`}
         >
-          <Icon name="contact" />
           <small>Contatti</small>
           <strong title={formatExactNumber(contactsAwaitingEmail)}>
             {formatCompactNumber(contactsAwaitingEmail)}
@@ -75,8 +74,7 @@ export function TitleBar({
           className="title-resource"
           aria-label={`Iscritti attivi: ${formatExactNumber(activeMembers)}`}
         >
-          <Icon name="people" />
-          <small>Iscritti attivi</small>
+          <small>Iscritti</small>
           <strong title={formatExactNumber(activeMembers)}>
             {formatCompactNumber(activeMembers)}
           </strong>
@@ -86,8 +84,7 @@ export function TitleBar({
             className="title-resource"
             aria-label={`Follower Social: ${formatExactNumber(followers)}`}
           >
-            <Icon name="spark" />
-            <small>Follower</small>
+              <small>Follower</small>
             <strong title={formatExactNumber(followers)}>{formatCompactNumber(followers)}</strong>
           </span>
         )}
@@ -95,7 +92,6 @@ export function TitleBar({
           className="title-resource title-balance"
           aria-label={`Fondi: ${formatExactCurrency(euros)}`}
         >
-          <Icon name="coin" />
           <small>Fondi</small>
           <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
         </span>
@@ -107,7 +103,7 @@ export function TitleBar({
         <span className="title-equipment-copy">
           <small>Spade</small>
           <strong>
-            {availableSwords}/{equipment.totalSwords}
+            {formatExactNumber(availableSwords)} su {formatExactNumber(equipment.totalSwords)}
           </strong>
         </span>
         <EquipmentConditionBar
@@ -121,8 +117,7 @@ export function TitleBar({
         className="title-resource title-fame"
         aria-label={`Fama della scuola: ${formatExactNumber(fame)}`}
       >
-        <Icon name="flag" />
-        <small>Fama della scuola</small>
+        <small>Fama</small>
         <strong title={formatExactNumber(fame)}>
           {formatCompactNumber(fame)}
         </strong>

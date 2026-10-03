@@ -18,6 +18,7 @@ import type {
 } from "../../game/types";
 import { findUpcomingTournament } from "../tournaments/tournamentPresentation";
 import { getOwnedFinal } from "../tournaments/finalDuel";
+import { formatList } from "../../shared/formatters";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
@@ -121,9 +122,8 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       kind: "trial",
       phase,
       title: "Lezione di prova",
-      detail: cancelled
-        ? "Annullata: nessuna spada disponibile"
-        : "Ordine delle Onde",
+      // The timing column already says where the trial stands (Fase 8).
+      detail: cancelled ? "Annullata: nessuna spada libera da prestare." : "",
       clock: "game",
       timestamp,
       startsAt: trial.startsAt,
@@ -189,12 +189,12 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     : lostCount > 0 && enrolledCount === 0
     ? "lost"
     : "neutral";
-  const detail = [
-    formatTrialCount(scheduledCount, "programmata", "programmate"),
-    formatTrialCount(inProgressCount, "in corso", "in corso"),
+  const detail = formatList([
+    formatTrialCount(scheduledCount, "in programma", "in programma"),
+    formatTrialCount(inProgressCount, "in palestra", "in palestra"),
     formatTrialCount(enrolledCount, "iscritto", "iscritti"),
-    formatTrialCount(lostCount, "non iscritto", "non iscritti"),
-  ].filter((item): item is string => item !== undefined).join(" · ");
+    formatTrialCount(lostCount, "senza iscrizione", "senza iscrizione"),
+  ].filter((item): item is string => item !== undefined));
 
   return [...specialTrialNotifications, {
     id: "trial-summary",
@@ -230,7 +230,7 @@ function getTournamentSummary(result: TournamentResult): {
     );
     if (arenaWinner && styleWinner) {
       return {
-        detail: `1° posto Arena: ${arenaWinner.firstName} ${arenaWinner.lastName} | 1° posto Stile: ${styleWinner.firstName} ${styleWinner.lastName}`,
+        detail: `Vincono ${arenaWinner.firstName} ${arenaWinner.lastName} in Arena e ${styleWinner.firstName} ${styleWinner.lastName} nello Stile.`,
         phase: "positive",
       };
     }
@@ -244,17 +244,17 @@ function getTournamentSummary(result: TournamentResult): {
   const arenaPosition = getBestOwnedPosition(result.arenaRanking, ownedParticipantIds);
   const stylePosition = getBestOwnedPosition(result.styleRanking, ownedParticipantIds);
   const placements = [
-    arenaPosition ? `Arena ${arenaPosition}°` : undefined,
-    stylePosition ? `Stile ${stylePosition}°` : undefined,
+    arenaPosition ? `${arenaPosition}° in Arena` : undefined,
+    stylePosition ? `${stylePosition}° nello Stile` : undefined,
   ].filter((placement): placement is string => Boolean(placement));
   if (placements.length === 0) {
     return {
-      detail: "Risultato registrato senza atleti della scuola in classifica.",
+      detail: "Nessuno dei nostri in classifica. Esperienza, la chiamano.",
       phase: "neutral",
     };
   }
   return {
-    detail: `Miglior piazzamento: ${placements.join(" · ")}.`,
+    detail: `I nostri migliori: ${formatList(placements)}.`,
     phase: arenaPosition && arenaPosition <= 3 || stylePosition && stylePosition <= 3
       ? "positive"
       : "neutral",
@@ -292,8 +292,8 @@ export function selectDayNotifications(
       id: `direct-enrollment-${contact.id}`,
       kind: "direct-enrollment",
       phase: "enrolled",
-      title: "Iscrizione diretta",
-      detail: "Nuovo atleta entrato senza lezione di prova",
+      title: "Iscritto al volo",
+      detail: "Saltata la prova: ha firmato e basta.",
       clock: "game",
       timestamp: contact.acquiredAt,
       expiresAt,
@@ -318,7 +318,7 @@ export function selectDayNotifications(
       kind: "tournament",
       phase: "scheduled",
       title: `${definition.label} in arrivo`,
-      detail: "Si disputa alla fine del mese.",
+      detail: "Si combatte a fine mese: c'è ancora tempo per allenarsi.",
       clock: "game",
       timestamp: upcomingTournament.occursAt,
       startsAt: upcomingTournament.occursAt,

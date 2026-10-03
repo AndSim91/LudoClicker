@@ -4,6 +4,7 @@ const compactNumber = new Intl.NumberFormat("it-IT", {
   notation: "compact",
   compactDisplay: "short",
   maximumFractionDigits: 1,
+  useGrouping: true,
 });
 
 const compactCurrency = new Intl.NumberFormat("it-IT", {

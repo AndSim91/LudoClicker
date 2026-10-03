@@ -82,7 +82,7 @@ describe("initial tutorial progression", () => {
     });
     expect(isGameAreaUnlocked("events", progressed)).toBe(true);
     expect(progressed.messages.some(
-      (message) => message.subject === "Ufficio Eventi disponibile",
+      (message) => message.subject === "Si esce dalla palestra",
     )).toBe(true);
 
     expect(progressed.pendingEmailOutcomes).toHaveLength(4);

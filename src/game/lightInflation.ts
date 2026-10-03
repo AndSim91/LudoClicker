@@ -27,7 +27,7 @@ export const LIGHT_INFLATION_CAUSES = [
 export const LIGHT_INFLATION_EVENT_TITLE = "Inflazione di Luce";
 
 export function getLightInflationEventDescription(cause: string): string {
-  return `Lama di Luce aumenta i costi delle spade a causa ${cause}`;
+  return `Lama di Luce aumenta i costi delle spade a causa ${cause}.`;
 }
 
 const CHANCE_PER_SWORD = 10;

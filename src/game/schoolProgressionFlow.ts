@@ -9,7 +9,7 @@ import {
   getShortGoalValue,
   isShortGoalActive,
 } from "../content/shortGoals";
-import { formatCurrency } from "../shared/formatters";
+import { formatCurrency, formatList } from "../shared/formatters";
 import { refreshWritingCampaignCopies } from "./campaignContent";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
@@ -150,10 +150,10 @@ export function foundSchool(
   const announced = addMessage(
     refreshWritingCampaignCopies(nextState),
     now,
-    `Nuova scuola fondata: ${details.name.trim()}`,
-    `La sede di ${details.city.trim()} è operativa. ${state.school.name} entra nella Rete dell'Ordine` +
-      (monthlyRent > 0 ? ` e ti verserà ${formatRent(monthlyRent)} al mese.` : ".") +
-      ` Reputazione guadagnata: ${rent.points} punti, ${availableReputation - getSpentReputation(spending)} ancora da spendere.`,
+    `${details.city.trim()} ha una scuola`,
+    `${state.school.name} entra nella Rete` +
+      (monthlyRent > 0 ? ` e ti versa ${formatRent(monthlyRent)} al mese, puntuale come una quota.` : ".") +
+      ` Reputazione +${rent.points}, ${availableReputation - getSpentReputation(spending)} punti ancora da spendere.`,
     "system",
   );
   return {
@@ -171,10 +171,10 @@ export function grantAchievements(state: GameState, now: number): GameState {
   return addMessage(
     unlocked,
     now,
-    earned.length === 1 ? `Traguardo sbloccato: ${names[0]}` : `${earned.length} traguardi sbloccati`,
+    earned.length === 1 ? `Nuovo traguardo: ${names[0]}` : `${earned.length} traguardi in un colpo`,
     earned.length === 1
-      ? "Lo trovi nella bacheca dei Traguardi della LudoWiki."
-      : `${names.slice(0, 3).join(", ")}${earned.length > 3 ? ` e altri ${earned.length - 3}` : ""}. Li trovi nella bacheca dei Traguardi della LudoWiki.`,
+      ? "Già appeso in bacheca, nella LudoWiki."
+      : `${formatList(earned.length > 3 ? [...names.slice(0, 3), `altri ${earned.length - 3}`] : names)}. La bacheca della LudoWiki comincia a riempirsi.`,
     "system",
     "other",
     "progress",
@@ -265,21 +265,20 @@ export function completeShortGoal(
     },
   };
   const nextGoal = createNextShortGoal(rewarded, completedCount, now);
-  const nextDefinition = SHORT_GOALS[nextGoal.definitionId];
   const progressed = definition.id === "send-emails" && available.shortGoal.completedCount === 0
     ? addMessage(
         { ...rewarded, shortGoal: nextGoal },
         now,
-        "Ufficio Eventi disponibile",
-        "Hai completato la missione dei tre inviti. L'area Eventi è ora disponibile nella barra a sinistra.",
+        "Si esce dalla palestra",
+        "Tre inviti, missione compiuta. Ora la scuola può farsi vedere in giro: Eventi è nella barra a sinistra.",
         "system",
       )
     : { ...rewarded, shortGoal: nextGoal };
   return addMessage(
     progressed,
     now,
-    `Obiettivo completato: ${definition.title}`,
-    `${definition.completionNarrative} Premio operativo: ${formatCurrency(reward)}. Prossima priorità: ${nextDefinition.title}.`,
+    `Missione compiuta: ${definition.title}`,
+    `${definition.completionNarrative} +${formatCurrency(reward)}.`,
     "positive",
     "other",
     "progress",

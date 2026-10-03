@@ -29,8 +29,7 @@ describe("collaborator mastery integration", () => {
 
     expect(next.collaborators[0].mastery?.writing).toBe(60);
     expect(next.messages.some((message) =>
-      message.subject === "Maestria raggiunta: Giulia Ferrando" &&
-      message.preview.includes("Iniziato in Scrittura")
+      message.subject === "Giulia Ferrando, Iniziato in Scrittura"
     )).toBe(true);
   });
 

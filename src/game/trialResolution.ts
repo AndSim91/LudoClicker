@@ -1,3 +1,4 @@
+import { formatCurrency } from "../shared/formatters";
 import { addLegendaryEnrollment } from "./contacts";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { getUpgradeEffectTotal } from "../content/upgrades";
@@ -6,7 +7,6 @@ import { scaleCurrencyGain } from "./economy";
 import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
 import { getEnrollmentChance } from "./formulas";
 import { updateLegendaryPityAfterTrial } from "./legendaryPity";
-import { getMemberFee } from "./membershipEconomy";
 import { nextRandom } from "./random";
 import { getCompletedTrialsByMostRecent, getContactsById } from "./runtimeIndexes";
 import { addMessage } from "./stateUpdates";
@@ -224,20 +224,17 @@ export function resolveStartedTrialBatch(
       if (firstEnrollment) nextState = addMessage(
         nextState,
         now,
-        firstEnrollment ? "Primo iscritto registrato" : "Nuovo iscritto registrato",
-        firstEnrollment
-          ? `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. I registri Scuola e Upgrade sono ora disponibili nella barra a sinistra.`
-          : `Bonus di iscrizione di € ${enrollmentBonus.toFixed(2).replace(".", ",")} accreditato. La quota mensile è di € ${getMemberFee(nextState.school.peakActiveMembers).toFixed(2).replace(".", ",")} e aumenta di € ${GAME_CONFIG.monthlyMemberFormBonus.toFixed(2).replace(".", ",")} per ogni Forma o corso registrato.`,
+        "Habemus inscriptum!",
+        `Il primo iscritto ha pagato: +${formatCurrency(enrollmentBonus)}. Nella barra a sinistra si sono accese Scuola e Upgrade.`,
         "positive",
-        firstEnrollment ? "focused" : "other",
-        firstEnrollment ? undefined : "members",
+        "focused",
       );
       if (socialUnlockedNow) {
         nextState = addMessage(
           nextState,
           now + 1,
-          "La Redazione si è evoluta in Social",
-          "La scuola ha raggiunto 35 iscritti attivi. I collaboratori Social possono ora produrre contenuti, ottenere follower e contatti e alimentare le sponsorizzazioni mensili.",
+          "La Redazione diventa Social",
+          "35 iscritti: abbastanza per avere un pubblico. I collaboratori Social ora portano follower, contatti e sponsor.",
           "system",
         );
       }
@@ -248,8 +245,8 @@ export function resolveStartedTrialBatch(
       nextState = addMessage(
         nextState,
         now,
-        "Un secondo tentativo",
-        `${resolvedContact.firstName} ${resolvedContact.lastName} non si è iscritto, ma ha accettato di ricevere un nuovo invito per un'ultima prova.`,
+        `${resolvedContact.firstName} ${resolvedContact.lastName} ci deve pensare`,
+        "Niente iscrizione, per ora. Ha accettato un ultimo invito.",
         "neutral",
         "other",
         "contacts",

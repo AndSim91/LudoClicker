@@ -144,7 +144,7 @@ describe("trial resolution batching", () => {
     expect(resolved.unlocks.social).toBe(true);
     expect(
       resolved.messages.filter((message) =>
-        message.subject === "La Redazione si è evoluta in Social"
+        message.subject === "La Redazione diventa Social"
       ),
     ).toHaveLength(1);
   });

@@ -14,7 +14,7 @@ describe("Torneo della Superba e Corso X", () => {
 
     const discovered = discoverCourseXFromSuperbaVictory(state, 2_000);
     expect(discovered.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    expect(discovered.messages[0].subject).toBe("Percorso Segreto scoperto");
+    expect(discovered.messages[0].subject).toBe("Percorso Segreto: Corso X");
     const bought = buyUpgrade(discovered, "project-x");
     expect(bought.upgrades["project-x"]).toBe(1);
     expect(bought.school.euros).toBe(9);

@@ -29,8 +29,8 @@ describe("EquipmentQuickPanel", () => {
       />,
     );
 
-    expect(screen.getByText("5/6 spade libere")).toBeVisible();
-    expect(screen.getByText("45 pt usura")).toBeVisible();
+    expect(container.querySelector(".equipment-quick-total")).toHaveTextContent("5libere su 6");
+    expect(screen.getByText("45 pt di usura")).toBeVisible();
     expect(
       screen.getByRole("progressbar", { name: "Condizione delle spade della scuola" }),
     ).toHaveClass("equipment-condition-bar", "is-aggregate");
@@ -38,10 +38,7 @@ describe("EquipmentQuickPanel", () => {
     expect(container.querySelector(".equipment-saber-outline")).toBeInTheDocument();
 
     const repairButton = screen.getByRole("button", { name: /Ripara tutto/ });
-    expect(repairButton.parentElement).toHaveClass(
-      "equipment-quick-metrics",
-      "has-maintenance-action",
-    );
+    expect(repairButton.parentElement).toHaveClass("equipment-quick-actions");
     fireEvent.click(repairButton);
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
@@ -65,11 +62,8 @@ describe("EquipmentQuickPanel", () => {
       name: "Nessuna riparazione necessaria",
     });
     expect(idleRepairButton).toBeDisabled();
-    expect(idleRepairButton).toHaveTextContent("Ripara");
-    expect(idleRepairButton).toHaveTextContent("In ordine");
-    expect(container.querySelector(".equipment-quick-metrics")).toHaveClass(
-      "has-maintenance-action",
-    );
+    expect(idleRepairButton).toHaveTextContent("Niente da riparare");
+    expect(container.querySelector(".equipment-quick-heading")).toHaveTextContent("In ordine");
 
     fireEvent.click(idleRepairButton);
     expect(onMaintainEquipment).not.toHaveBeenCalled();
@@ -298,7 +292,8 @@ describe("EquipmentQuickPanel", () => {
 
     const quantityButton = screen.getByRole("button", { name: /Quantit. acquisto: .1/ });
     expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toBeEnabled();
-    expect(screen.getByText(/Polaris EVO Basic - 363,00/)).toBeVisible();
+    expect(screen.getByRole("button", { name: /Acquista 1 spada/ }))
+      .toHaveAttribute("title", expect.stringMatching(/^Polaris EVO Basic, 363,00/));
 
     if (amount === 1) {
       expect(quantityButton).toBeDisabled();

@@ -404,7 +404,7 @@ describe("game engine: funnel", () => {
     });
 
     expect(sent.emails.find((candidate) => candidate.id === email.id)?.status).toBe("sent");
-    expect(sent.messages.find((message) => message.subject === "Configurazione campagna completata")?.sender)
+    expect(sent.messages.find((message) => message.subject === "Partita la prima email")?.sender)
       .toBe("A.N.D.E.R.");
     expect(sent.pendingEmailOutcomes).toHaveLength(1);
     expect(sent.pendingEmailOutcomes[0].result).toBe("trialBooked");
@@ -503,7 +503,7 @@ describe("game engine: funnel", () => {
     expect(state.collaborators).toHaveLength(0);
     expect(state.unlocks.forms).toBe(true);
     expect(state.unlocks.collaborators).toBe(false);
-    expect(state.messages.some((message) => message.subject === "Nuovo collaboratore disponibile")).toBe(false);
+    expect(state.messages.some((message) => message.subject.endsWith("entra nel Consiglio"))).toBe(false);
   });
 
   it("starts Social with one Follower per Fame point when a trial reaches the unlock", () => {
@@ -590,8 +590,8 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.collaborators).toHaveLength(1);
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
     expect(protectedAttempt.unlocks.forms).toBe(true);
-    expect(protectedAttempt.messages.find((message) => message.subject === "Nuovo collaboratore Leggendario: Eva Parodi")?.preview)
-      .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
+    expect(protectedAttempt.messages.find((message) => message.subject === "Eva Parodi entra nel Consiglio")?.preview)
+      .toBe("Un Leggendario tra i collaboratori. Non succede tutti i giorni: mettilo dove serve di più.");
   });
 
   it("applies the same enrollment progression to Andrea and every other Legendary", () => {

@@ -235,8 +235,9 @@ test("completa e invia una mail senza invio automatico", async ({ page }) => {
   }
   await expect(completedComposer).toBeVisible();
   await completedComposer.click();
-  await expect(page.getByRole("button", { name: /Posta inviata 1/ })).toBeVisible();
   await expect(page.getByText(/Bozza per/).first()).toBeVisible();
+  await page.getByRole("button", { name: "Posta inviata", exact: true }).click();
+  await expect(page.locator(".sent-row")).toHaveCount(1);
 });
 
 test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", async ({

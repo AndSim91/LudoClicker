@@ -1,3 +1,4 @@
+import { formatCurrency, formatList } from "../shared/formatters";
 import { addCareer } from "./career";
 import {
   SECRET_LEGENDARIES,
@@ -166,7 +167,7 @@ export function resolveSecretLegendaryDefeat(
     rewardedState,
     now,
     `${profile.firstName} ${profile.lastName} mantiene la promessa`,
-    `Dopo la sconfitta ha donato € ${euros.toLocaleString("it-IT")} alla scuola. Non chiederà di iscriversi e potrà essere affrontato di nuovo.`,
+    `Ha perso e ha pagato: ${formatCurrency(euros)} alla scuola. Non si iscrive, ma la rivincita resta aperta.`,
     "positive",
     "focused",
     "tournaments",
@@ -199,9 +200,9 @@ function recordMissedTournament(
         { level, season, reason },
       ].slice(-GAME_CONFIG.recentMissedTournamentsLimit),
     },
-  }, now, `${label} non disputato`, reason === "insufficient-members"
-    ? `La scuola non ha raggiunto ${GAME_CONFIG.tournamentMinimumMembers} iscritti attivi con Forma 1. La stagione competitiva termina qui.`
-    : "Nessun atleta della scuola si è qualificato per questa competizione.",
+  }, now, `${label} saltato`, reason === "insufficient-members"
+    ? `Servono ${GAME_CONFIG.tournamentMinimumMembers} iscritti con Forma 1. Per quest'anno si guarda dagli spalti.`
+    : "Nessuno dei nostri si è qualificato. Si tifa dagli spalti.",
   "neutral", "focused", "tournaments");
 }
 
@@ -295,8 +296,8 @@ export function applyTournamentResult(
     nextState = addMessage(
       nextState,
       now + 1,
-      "Chiave delle Chronicles conquistata",
-      "La scuola ha vinto Arena e Stile nella stessa Champion's Arena. La chiave può essere usata in qualsiasi momento dalla scheda Chronicles.",
+      "La chiave delle Chronicles",
+      "Arena e Stile nella stessa Champion's Arena: la porta è aperta. La chiave non scade, usala quando vuoi dalla scheda Chronicles.",
       "positive",
       "focused",
       "tournaments",
@@ -314,12 +315,10 @@ export function applyTournamentResult(
     nextState,
     now,
     `${label} completato`,
-    `${ownedQualifierIds.length} atlet${ownedQualifierIds.length === 1 ? "a qualificato" : "i qualificati"}` +
-      `${rewardEuros > 0 || rewardDetails.length > 0
-        ? `. Premi: € ${rewardEuros.toLocaleString("it-IT")}${rewardDetails.length > 0
-          ? ` · ${rewardDetails.join(" · ")}`
-          : ""}.`
-        : "."}`,
+    `${ownedQualifierIds.length === 1 ? "Uno dei nostri" : `${ownedQualifierIds.length} dei nostri`} in gara.` +
+      (rewardEuros > 0 || rewardDetails.length > 0
+        ? ` Si torna a casa con ${formatList([...(rewardEuros > 0 ? [formatCurrency(rewardEuros)] : []), ...rewardDetails])}.`
+        : ""),
     ownedQualifierIds.length > 0 || championOwned ? "positive" : "neutral",
     "focused",
     "tournaments",

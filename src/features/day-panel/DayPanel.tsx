@@ -32,7 +32,7 @@ const DAY_COUNTDOWN_UPDATE_INTERVAL_MS = 1_000;
 
 const phaseLabels: Record<DayNotificationPhase, string> = {
   scheduled: "",
-  "in-progress": "In corso…",
+  "in-progress": "In palestra",
   enrolled: "Iscritto",
   lost: "Non iscritto",
   positive: "Novità",
@@ -55,6 +55,8 @@ function formatCountdown(milliseconds: number) {
 }
 
 function getTiming(notification: DayNotification, now: number): string {
+  // The title already says it ("Iscritto al volo").
+  if (notification.kind === "direct-enrollment") return "";
   if (notification.phase === "scheduled" && notification.startsAt !== undefined) {
     return formatCountdown(notification.startsAt - now);
   }
@@ -159,10 +161,7 @@ function DayNotificationEntry({
             {tournamentStatus ? <span>{tournamentStatus}</span> : null}
           </div>
         ) : (
-          <>
-            <span className="appointment-timing">{timing}</span>
-            <i />
-          </>
+          <span className="appointment-timing">{timing}</span>
         )}
         <div className="appointment-copy">
           <strong className="appointment-title">
@@ -172,7 +171,7 @@ function DayNotificationEntry({
           {notification.person ? (
             <span className={personClassName}>{notification.person.displayName}</span>
           ) : null}
-          <small>{notification.detail}</small>
+          {notification.detail ? <small>{notification.detail}</small> : null}
         </div>
       </div>
       {notification.finalResultId && onWatchFinal ? (
@@ -271,8 +270,8 @@ function DayNotificationTimeline({
       {notifications.length === 0 ? (
         <div className="day-empty">
           <Icon name="clock" />
-          <strong>Nessuna attività in corso</strong>
-          <span>Prove, iscrizioni, tornei ed eventi importanti compariranno qui.</span>
+          <strong>Giornata tranquilla</strong>
+          <span>Goditela. Qui compaiono prove, tornei ed eventi in corso.</span>
         </div>
       ) : (
         notifications.map((notification) => (

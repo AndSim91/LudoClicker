@@ -96,7 +96,7 @@ function createDigestMessage(
   return {
     id: makeGameId("digest", now, schoolYear),
     sender: NOTICE_SENDER,
-    subject: `Riepilogo dell'anno scolastico ${schoolYear}`,
+    subject: `L'anno scolastico ${schoolYear} in breve`,
     preview: describeDigest(counts),
     receivedAt: now,
     tone: "neutral",

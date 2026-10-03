@@ -22,7 +22,7 @@
   padding: 0 11px;
   border-bottom: 2px solid transparent;
   background: transparent;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .list-tabs button.active {
@@ -31,25 +31,20 @@
   font-weight: 600;
 }
 
-.list-tabs span {
-  margin-left: auto;
-  color: var(--ink-muted);
-  font-size: 11px;
-}
-
 .date-label {
-  padding: 9px 18px 5px;
+  padding: 10px 16px 4px;
   color: var(--ink-muted);
   font-size: 12px;
 }
 
+/* Fase 8: avatar, subject, one line of preview. */
 .message-row {
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
   width: 100%;
-  min-height: 102px;
-  padding: 12px 12px 11px;
+  padding: 11px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--surface);
   text-align: left;
@@ -66,28 +61,42 @@
 
 .message-row time {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
-.unread-dot,
-.read-dot {
-  width: 8px;
-  height: 8px;
-  margin-top: 4px;
-  border: 1px solid #8a8886;
+.message-avatar {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
   border-radius: 50%;
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1.5px currentcolor;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.unread-dot {
-  border-color: var(--blue-500);
-  background: var(--blue-500);
+.message-row.unread .message-avatar {
+  color: white;
+  background: var(--blue-600);
+  box-shadow: none;
+}
+
+.message-avatar.is-sent {
+  color: var(--ink-muted);
+}
+
+.message-avatar svg {
+  width: 16px;
+  height: 16px;
 }
 
 .message-copy {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .message-copy strong,
@@ -99,7 +108,8 @@
 }
 
 .message-copy strong {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .message-row.read .message-copy strong {
@@ -107,16 +117,12 @@
 }
 
 .message-copy span {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .message-copy small {
   color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.sent-row {
-  min-height: 91px;
+  font-size: 13px;
 }
 
 .sent-status {
@@ -478,21 +484,28 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   background: var(--surface-muted);
 }
 
+/* Number first, label under it. */
 .year-digest dt {
+  order: 1;
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .year-digest dd {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--font-display, inherit);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.year-digest small {
+  order: 2;
 }
 
 .year-digest small {

@@ -74,6 +74,6 @@ describe("long-term automated balance simulation", () => {
     const ready = gameReducer(titled, { type: "TICK", now: startedAt + 1_000 });
     expect(canFoundSchool(ready)).toBe(true);
     expect(ready.network.prestigeOfferSent).toBe(true);
-    expect(ready.messages.filter((message) => message.subject === "Richiesta apertura nuova scuola")).toHaveLength(1);
+    expect(ready.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
   });
 });

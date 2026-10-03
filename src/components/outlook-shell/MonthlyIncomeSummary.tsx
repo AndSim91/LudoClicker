@@ -6,7 +6,7 @@ import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
-import { Icon } from "../common/Icon";
+import { formatCompactCurrency } from "./resourceFormatting";
 
 interface MonthlyIncomePresentation {
   memberFees: number;
@@ -60,9 +60,8 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
         aria-label={`Entrate mensili: ${formatCurrency(monthlyIncome)}`}
         aria-describedby={tooltipId}
       >
-        <Icon name="trend" />
-        <small>Entrate mensili</small>
-        <strong>{formatCurrency(monthlyIncome)}</strong>
+        <small>Al mese</small>
+        <strong>+{formatCompactCurrency(monthlyIncome)}</strong>
       </span>
       <div className="title-monthly-income-tooltip" id={tooltipId} role="tooltip">
         <p>Dettaglio mensile</p>

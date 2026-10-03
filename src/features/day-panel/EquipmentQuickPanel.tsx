@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { GAME_CONFIG } from "../../game/config";
@@ -78,26 +77,27 @@ export function EquipmentQuickPanel({
         )
       : Math.min(100, state.automation.equipmentBuffer * 100);
   const condition = damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
+  const count = (value: number) => value.toLocaleString("it-IT");
   const conditionLabel =
     damagedSwords > 0
-      ? `${damagedSwords} ${damagedSwords === 1 ? "rotta" : "rotte"}`
+      ? `${count(damagedSwords)} ${damagedSwords === 1 ? "rotta" : "rotte"}`
       : equipment.wear > 0
-        ? `${Math.round(equipment.wear)} pt usura`
+        ? `${Math.round(equipment.wear)} pt di usura`
         : "In ordine";
 
   let maintenanceLabel = `Ripara tutto \u00b7 ${formatCurrency(maintenanceCost)}`;
-  let maintenanceValue = formatMaintenanceValue(maintenanceCost);
+  let maintenanceText = `Ripara \u00b7 ${formatMaintenanceValue(maintenanceCost)}`;
   if (!hasRepairableEquipment) {
     maintenanceLabel = needsMaintenance
       ? "Riparazione non disponibile"
       : "Nessuna riparazione necessaria";
-    maintenanceValue = needsMaintenance ? "Bloccata" : "In ordine";
+    maintenanceText = needsMaintenance ? "Riparazione bloccata" : "Niente da riparare";
   } else if (state.school.euros < minimumMaintenanceCost) {
     maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
-    maintenanceValue = "Fondi";
+    maintenanceText = "Fondi insufficienti";
   } else if (state.school.euros < maintenanceCost) {
     maintenanceLabel = `Riparazione parziale \u00b7 ${formatCurrency(state.school.euros)}`;
-    maintenanceValue = formatMaintenanceValue(state.school.euros);
+    maintenanceText = `Ripara \u00b7 ${formatMaintenanceValue(state.school.euros)}`;
   }
 
   let automaticLabel = "Controllo automatico attivo";
@@ -105,18 +105,26 @@ export function EquipmentQuickPanel({
   else if (automaticTarget === "sword") automaticLabel = "Riparazione automatica di una spada";
   else if (automaticTarget === "wear") automaticLabel = "Riduzione automatica dell'usura";
 
+  // Fase 8: one big number, one line of context, one filled button.
+  const note = [
+    reservedSwords > 0 ? `${count(reservedSwords)} in uso.` : "",
+    equipmentCollaborators > 0
+      ? automaticRepairBlocked
+        ? "Gli addetti aspettano i fondi per riparare."
+        : `${count(equipmentCollaborators)} ${equipmentCollaborators === 1 ? "addetto ripara" : "addetti riparano"} da ${equipmentCollaborators === 1 ? "solo" : "soli"}.`
+      : "",
+  ].filter(Boolean).join(" ");
+
   return (
     <section className={`equipment-quick-card is-${condition}`} aria-label="Gestione attrezzatura">
       <div className="equipment-quick-heading">
-        <Icon name="wrench" />
-        <span>
-          <small>Attrezzatura</small>
-          <strong>
-            {availableSwords}/{equipment.totalSwords} spade libere
-          </strong>
-        </span>
+        <h3>Spade</h3>
         <b>{conditionLabel}</b>
       </div>
+      <p className="equipment-quick-total">
+        <strong>{count(availableSwords)}</strong>
+        <span>libere su {count(equipment.totalSwords)}</span>
+      </p>
 
       <EquipmentConditionBar
         equipment={equipment}
@@ -125,31 +133,21 @@ export function EquipmentQuickPanel({
         ariaLabel="Condizione delle spade della scuola"
       />
 
-      <div
-        className="equipment-quick-metrics has-maintenance-action"
-        aria-label="Legenda e manutenzione spade"
-      >
-        <span className="is-reserved">
-          <small>
-            <i aria-hidden="true" />
-            In uso
-          </small>
-          <strong>{reservedSwords}</strong>
-        </span>
-        <span className="is-load">
-          <small>
-            <i aria-hidden="true" />
-            Usura
-          </small>
-          <strong>{Math.round(equipment.wear)} pt</strong>
-        </span>
-        <span className="is-broken">
-          <small>
-            <i aria-hidden="true" />
-            Rotte
-          </small>
-          <strong>{damagedSwords}</strong>
-        </span>
+      {note ? <p className="equipment-quick-note">{note}</p> : null}
+      {equipmentCollaborators > 0 ? (
+        <div className="equipment-auto-progress-slot">
+          {automaticTarget && !automaticRepairBlocked ? (
+            <ProgressBar
+              className="equipment-auto-progress"
+              label={automaticLabel}
+              value={automaticProgress}
+              valueText={`${Math.round(automaticProgress)}% completato`}
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="equipment-quick-actions">
         <button
           className="equipment-maintenance-button"
           type="button"
@@ -158,64 +156,33 @@ export function EquipmentQuickPanel({
           disabled={!canMaintain}
           onClick={onMaintainEquipment}
         >
-          <small>
-            <Icon name="wrench" />
-            Ripara
-          </small>
-          <strong>{maintenanceValue}</strong>
+          {maintenanceText}
         </button>
+        {showSupplier ? (
+          <span className="equipment-purchase">
+            <button
+              className="equipment-purchase-button"
+              type="button"
+              disabled={!canBuy}
+              title={`Polaris EVO Basic, ${formatCurrency(getOfficialSwordPurchaseCost(state, 1))} l'una`}
+              onClick={() => onBuyOfficialSwords(purchaseAmount)}
+            >
+              Acquista {purchaseAmount === 1 ? "1 spada" : `${purchaseAmount} spade`} {"\u00b7"} {formatCurrency(purchaseCost)}
+            </button>
+            <button
+              className="equipment-purchase-quantity"
+              type="button"
+              disabled={affordableAmounts.length === 1}
+              aria-label={`Quantit\u00e0 acquisto: \u00d7${purchaseAmount}. Premi per cambiare`}
+              title={`Quantit\u00e0 disponibili: ${affordableAmounts.map((amount) => `\u00d7${amount}`).join(", ")}`}
+              onClick={() => setPurchaseIndex((index) => (index + 1) % affordableAmounts.length)}
+            >
+              {"\u00d7"}
+              {purchaseAmount}
+            </button>
+          </span>
+        ) : null}
       </div>
-
-      {equipmentCollaborators > 0 ? (
-        <div className="equipment-auto-repair">
-          <div className="equipment-auto-repair-heading">
-            <span>{automaticLabel}</span>
-            <strong>
-              {equipmentCollaborators} {equipmentCollaborators === 1 ? "addetto" : "addetti"}
-            </strong>
-          </div>
-          <div className="equipment-auto-progress-slot">
-            {automaticTarget && !automaticRepairBlocked ? (
-              <ProgressBar
-                className="equipment-auto-progress"
-                label={automaticLabel}
-                value={automaticProgress}
-                valueText={`${Math.round(automaticProgress)}% completato`}
-              />
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {showSupplier ? (
-        <div className="equipment-purchase">
-          <button
-            className="equipment-purchase-quantity"
-            type="button"
-            disabled={affordableAmounts.length === 1}
-            aria-label={`Quantit\u00e0 acquisto: \u00d7${purchaseAmount}. Premi per cambiare`}
-            title={`Quantit\u00e0 disponibili: ${affordableAmounts.map((amount) => `\u00d7${amount}`).join(", ")}`}
-            onClick={() => setPurchaseIndex((index) => (index + 1) % affordableAmounts.length)}
-          >
-            {"\u00d7"}
-            {purchaseAmount}
-          </button>
-          <button
-            className="equipment-purchase-button"
-            type="button"
-            disabled={!canBuy}
-            onClick={() => onBuyOfficialSwords(purchaseAmount)}
-          >
-            <Icon name="plus" />
-            <span>
-              <strong>
-                Acquista {purchaseAmount === 1 ? "1 spada" : `${purchaseAmount} spade`}
-              </strong>
-              <small>Polaris EVO Basic - {formatCurrency(purchaseCost)}</small>
-            </span>
-          </button>
-        </div>
-      ) : null}
     </section>
   );
 }

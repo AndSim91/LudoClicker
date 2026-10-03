@@ -167,7 +167,7 @@ describe("game engine: operations", () => {
     // The event itself sends nothing: only the unlock and the first achievement (Sempre in piazza).
     expect(completed.messages.filter((message) => message.threadKey !== "progress"))
       .toHaveLength(messagesBeforeCompletion.length + 1);
-    expect(completed.messages.some((message) => message.subject === "Attività operative disponibili")).toBe(true);
+    expect(completed.messages.some((message) => message.subject === "Primo evento archiviato")).toBe(true);
   });
 
   it("cancels a running event with quarter wear, no cooldown, and no contacts", () => {

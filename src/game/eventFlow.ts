@@ -311,8 +311,8 @@ export function resolveAcquisitionEvent(
     nextState = addMessage(
       nextState,
       now + 1,
-      "Attività operative disponibili",
-      "Il primo evento ha attivato registro operativo, attrezzatura e traguardi. La nuova area è comparsa nella barra a sinistra.",
+      "Primo evento archiviato",
+      "Le spade tornano a fine evento, non sempre intere. Le tieni d'occhio in La mia giornata.",
       "system",
     );
   }

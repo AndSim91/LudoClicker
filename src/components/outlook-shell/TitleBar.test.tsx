@@ -40,18 +40,18 @@ describe("TitleBar", () => {
     expect(screen.getByLabelText("Situazione del gioco")).toHaveTextContent(
       formatCompactCurrency(120).replace(/\u00a0/g, " "),
     );
-    expect(screen.getByText("Iscritti attivi")).toBeVisible();
+    expect(screen.getByText("Iscritti")).toBeVisible();
     const availability = screen.getByLabelText(/^Fondi:/);
     const monthlyIncome = screen.getByLabelText(/^Entrate mensili:/);
     expect(availability.closest(".title-resources")).toBeInTheDocument();
-    expect(monthlyIncome).toHaveTextContent("Entrate mensili");
+    expect(monthlyIncome).toHaveTextContent("Al mese");
     const fame = screen.getByLabelText("Fama della scuola: 7");
     const equipmentIndicator = screen.getByLabelText(
       "Spade disponibili: 6 su 6; 0 rotte; 0 punti di usura",
     );
     const pause = screen.getByRole("button", { name: "Pausa" });
-    expect(fame).toHaveTextContent("Fama della scuola7");
-    expect(equipmentIndicator).toHaveTextContent("Spade6/6");
+    expect(fame).toHaveTextContent("Fama7");
+    expect(equipmentIndicator).toHaveTextContent("Spade6 su 6");
     expect(equipmentIndicator.querySelector(".equipment-condition.is-cylinder")).toBeInTheDocument();
     expect(equipmentIndicator.querySelector(".equipment-saber-outline")).not.toBeInTheDocument();
     expect(equipmentIndicator.nextElementSibling).toBe(fame);

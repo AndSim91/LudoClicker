@@ -15,7 +15,7 @@ function YearDigest({ counts }: { counts: YearDigestCounts }) {
           </div>
         ))}
       </dl>
-      <p>Le notifiche di routine non arrivano più una per una: si sommano qui ogni mese. A fine anno scolastico il riepilogo si chiude e passa in Altra.</p>
+      <p>Si aggiorna da solo ogni mese, così le novità di tutti i giorni non ti riempiono la Posta. A fine anno passa in Altra.</p>
     </>
   );
 }
@@ -25,7 +25,7 @@ export function MessageDetail({ message }: { message: InboxMessage }) {
   return (
     <main className="message-detail">
       <div className="detail-toolbar"><button type="button" disabled>Rispondi</button><button type="button" disabled>Inoltra</button><button type="button" disabled><Icon name="archive" /> Archivia</button></div>
-      <div className="detail-heading"><div className="sender-avatar">OO</div><div><h1>{message.subject}{(message.stackCount ?? 1) > 1 ? ` (${message.stackCount})` : ""}</h1><strong>{message.sender}</strong><span>A: Ordine delle Onde</span></div><time>{formatDateTime(message.receivedAt)}</time></div>
+      <div className="detail-heading"><div className="sender-avatar" aria-hidden="true">{message.sender.trim().charAt(0).toUpperCase()}</div><div><h1>{message.subject}{(message.stackCount ?? 1) > 1 ? ` (${message.stackCount})` : ""}</h1><strong>{message.sender}</strong><span>A: Ordine delle Onde</span></div><time>{formatDateTime(message.receivedAt)}</time></div>
       <article>{message.digest ? <YearDigest counts={message.digest} /> : <p>{message.preview}</p>}{isWelcome ? <><p>Per scrivere non devi cercare i tasti giusti: qualunque pressione valida rivela il carattere successivo del messaggio già preparato.</p><p>Seleziona la bozza nell'elenco e inizia a digitare.</p></> : null}</article>
     </main>
   );

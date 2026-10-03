@@ -24,7 +24,6 @@
   place-items: center;
   color: white;
   background: transparent;
-  border-left: 1px solid rgb(255 255 255 / 18%);
 }
 
 .title-pause svg {
@@ -50,7 +49,6 @@
   min-width: 174px;
   padding: 0 14px 3px;
   text-align: center;
-  border-inline: 1px solid rgb(255 255 255 / 18%);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
@@ -64,12 +62,13 @@
 }
 
 .title-month-copy strong {
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .title-month-copy small {
-  color: rgb(255 255 255 / 78%);
-  font-size: 10px;
+  color: rgb(255 255 255 / 80%);
+  font-size: 12px;
   font-weight: 400;
 }
 
@@ -102,40 +101,31 @@
   min-width: 0;
   align-items: center;
   gap: 4px;
-  padding-left: 10px;
+  padding-left: 6px;
 }
 
+/* Fase 8: label and value on one line, no icons, no separators. */
 .title-resource {
-  display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
-  grid-template-rows: 1fr 1fr;
-  column-gap: 5px;
-  min-width: 86px;
-  max-width: 160px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
   padding: 0 10px;
-  border-left: 1px solid rgb(255 255 255 / 18%);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
-.title-resource svg {
-  grid-row: 1 / -1;
-  align-self: center;
-  width: 16px;
-  height: 16px;
-  color: rgb(255 255 255 / 78%);
-}
-
 .title-resource small {
-  color: rgb(255 255 255 / 86%);
-  font-size: 10px;
+  color: rgb(255 255 255 / 80%);
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .title-resource strong {
   min-width: 0;
   overflow: hidden;
-  font-size: 13px;
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -218,13 +208,11 @@
 
 .title-equipment {
   display: grid;
-  min-width: 104px;
   align-self: stretch;
-  grid-template-columns: auto 48px;
+  grid-template-columns: auto 40px;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
-  border-left: 1px solid rgb(255 255 255 / 18%);
+  padding: 0 10px;
   color: white;
   font-variant-numeric: tabular-nums;
 }
@@ -232,18 +220,19 @@
 .title-equipment-copy {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  gap: 1px;
+  align-items: baseline;
+  gap: 6px;
   line-height: 1;
 }
 
 .title-equipment-copy small {
-  color: rgb(255 255 255 / 86%);
-  font-size: 9px;
+  color: rgb(255 255 255 / 80%);
+  font-size: 12px;
 }
 
 .title-equipment-copy strong {
-  font-size: 11px;
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -267,7 +256,7 @@
 }
 
 .title-fame {
-  min-width: 112px;
+  min-width: 0;
 }
 
 .title-menu:hover {
@@ -557,7 +546,8 @@
 
 .folder {
   display: grid;
-  grid-template-columns: 24px 1fr 24px;
+  grid-template-columns: 24px 1fr auto;
+  column-gap: 4px;
   align-items: center;
   width: 100%;
   min-height: 38px;
@@ -574,7 +564,15 @@
 
 .folder b {
   text-align: right;
-  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+/* Contatti and Iscritti: shortcuts styled as folders, their count is not news. */
+.folder.resource-row b {
+  color: var(--ink-muted);
+  font-weight: 400;
 }
 
 .folder:hover,
@@ -592,69 +590,13 @@
 
 .folder-rule {
   height: 1px;
-  margin: 18px 8px;
+  margin: 12px 8px;
   background: var(--line);
-}
-
-/* Label above, big value below: nothing is truncated at sidebar width. */
-.resource-row {
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr);
-  align-items: center;
-  column-gap: 6px;
-  min-height: 50px;
-  padding: 4px 8px;
-}
-
-.resource-link {
-  width: 100%;
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-}
-
-.resource-link:hover {
-  background: #e8f1fb;
-}
-
-.resource-row svg {
-  width: 19px;
-  height: 19px;
-}
-
-.resource-copy {
-  display: grid;
-  min-width: 0;
-  line-height: 1.2;
-}
-
-.resource-copy small {
-  color: var(--ink-muted);
-  font-size: 11px;
-}
-
-.resource-copy b {
-  overflow: hidden;
-  font-family: var(--font-display, inherit);
-  font-size: 18px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resource-delta {
-  color: var(--success);
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 600;
 }
 
 .folder-note {
   margin-top: auto;
   padding: 10px 8px 2px;
-  border-top: 1px solid var(--line);
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }

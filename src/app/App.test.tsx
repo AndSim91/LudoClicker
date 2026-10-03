@@ -57,7 +57,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByText("0/3")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Eventi" })).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Posta inviata 1" })).toBeVisible();
+      expect(screen.getAllByText("Partita la prima email").length).toBeGreaterThan(0);
     });
   });
 
@@ -200,7 +200,7 @@ describe("App profile and navigation", () => {
     fireEvent.click(folders.getByRole("button", { name: /Contatti/ }));
     expect(screen.getByRole("button", { name: /Corpo del messaggio/ })).toBeVisible();
 
-    fireEvent.click(folders.getByRole("button", { name: /Scuola/ }));
+    fireEvent.click(folders.getByRole("button", { name: /Iscritti/ }));
     expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
   });
 

@@ -74,8 +74,8 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
   return addMessage(
     unlockedState,
     now,
-    "Laboratorio Gadget sbloccato",
-    "La vittoria nel Torneo Accademico ha aperto il settore Gadget. Acquista il progetto del Portachiavi e assegna Collaboratori al nuovo incarico per svilupparlo.",
+    "Apre il Laboratorio Gadget",
+    "Col Torneo Accademico è arrivata anche un'idea: i portachiavi. Compra il progetto e mettici qualche collaboratore.",
     "positive",
     "focused",
     "gadget",
@@ -648,8 +648,8 @@ function unlockProductsFromSales(state: GameState, now: number): GameState {
     nextState = addMessage(
       nextState,
       now,
-      `${GADGET_DEFINITIONS[nextProductId].name}: nuovo progetto disponibile`,
-      `Le vendite di ${GADGET_DEFINITIONS[productId].name} hanno sbloccato un nuovo progetto nel Laboratorio Gadget.`,
+      `Nuovo progetto: ${GADGET_DEFINITIONS[nextProductId].name}`,
+      `${GADGET_DEFINITIONS[productId].name}: vendite oltre le attese. Il Laboratorio ha già pronta l'idea successiva.`,
       "positive",
       "other",
       "gadget",

@@ -21,7 +21,7 @@ describe("Riepilogo dell'anno scolastico (4.1)", () => {
     const october = syncYearDigest(grow(opened, 10, { membersEnrolled: 5, contactsAcquired: 40 }), 2_000);
     const digest = october.messages[0];
     expect(digest).toMatchObject({
-      subject: "Riepilogo dell'anno scolastico 1",
+      subject: "L'anno scolastico 1 in breve",
       preview: "+5 iscritti · 40 contatti",
       category: "focused",
       unread: true,
@@ -47,9 +47,9 @@ describe("Riepilogo dell'anno scolastico (4.1)", () => {
     const spring = syncYearDigest(grow(opened, 12, { membersEnrolled: 2 }), 2_000);
     const nextYear = syncYearDigest(grow(spring, 21, { membersDeparted: 38 }), 3_000);
 
-    const closed = nextYear.messages.find((message) => message.subject === "Riepilogo dell'anno scolastico 1");
+    const closed = nextYear.messages.find((message) => message.subject === "L'anno scolastico 1 in breve");
     expect(closed).toMatchObject({ category: "other", digest: { members: 2, departures: 38 } });
     expect(nextYear.yearDigest).toMatchObject({ schoolYear: 2 });
-    expect(nextYear.messages.some((message) => message.subject === "Riepilogo dell'anno scolastico 2")).toBe(false);
+    expect(nextYear.messages.some((message) => message.subject === "L'anno scolastico 2 in breve")).toBe(false);
   });
 });
