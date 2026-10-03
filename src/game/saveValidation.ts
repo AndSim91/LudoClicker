@@ -299,7 +299,14 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
     priorities.length === COLLABORATOR_MASTERY_ROLES.length &&
     new Set(priorities).size === priorities.length &&
     priorities.every((role) => COLLABORATOR_MASTERY_ROLES.includes(role)) &&
-    validFallbackAssignments
+    validFallbackAssignments &&
+    (management.automaticShares === undefined || (
+      typeof management.automaticShares === "object" &&
+      Object.entries(management.automaticShares).every(([role, share]) =>
+        COLLABORATOR_MASTERY_ROLES.includes(role as CollaboratorMasteryRole) &&
+        isNonNegativeSafeInteger(share)
+      )
+    ))
   );
 }
 

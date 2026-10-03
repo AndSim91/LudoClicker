@@ -360,6 +360,15 @@ export function App() {
       dispatch({ type: "DECREMENT_COLLABORATOR_ASSIGNMENT", assignment }),
     [dispatch],
   );
+  const toggleAutomaticAssignment = useCallback(
+    (enabled: boolean) => dispatch({ type: "SET_AUTOMATIC_ASSIGNMENT", enabled }),
+    [dispatch],
+  );
+  const changeAutomaticShare = useCallback(
+    (assignment: CollaboratorMasteryRole, delta: number) =>
+      dispatch({ type: "CHANGE_AUTOMATIC_SHARE", assignment, delta }),
+    [dispatch],
+  );
   const startTraining = useCallback(
     (personId: string, formId: FormId, mode?: FormTrainingStartMode) =>
       dispatch({
@@ -620,6 +629,8 @@ export function App() {
               onAssign={assignCollaborator}
               onIncrementCollaboratorAssignment={incrementCollaboratorAssignment}
               onDecrementCollaboratorAssignment={decrementCollaboratorAssignment}
+              onToggleAutomaticAssignment={toggleAutomaticAssignment}
+              onChangeAutomaticShare={changeAutomaticShare}
               onSetCollaboratorFallback={setCollaboratorFallback}
               onMoveOperationalPriority={moveOperationalPriority}
               onStartTraining={startTraining}

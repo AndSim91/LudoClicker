@@ -9,6 +9,7 @@ import {
   isOperationalPrioritiesUnlocked,
 } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { isReptilePreparationWorkActive } from "./reptilePreparation";
 import { getInstructorTeachingCounts, getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type {
   Collaborator,
@@ -76,7 +77,7 @@ export function getBusyCollaboratorIds(state: GameState): ReadonlySet<string> {
 }
 
 export function getCollaboratorAssignmentCounts(
-  state: GameState,
+  state: Pick<GameState, "collaborators">,
 ): Record<CollaboratorMasteryRole, number> {
   const counts = createEmptyCollaboratorTargets();
   for (const collaborator of state.collaborators) {
@@ -395,6 +396,7 @@ export function incrementCollaboratorAssignment(
   const currentTarget = state.collaboratorManagement.targets[assignment] ?? 0;
   if (
     !state.collaboratorManagement.aggregateViewUnlocked ||
+    state.collaboratorManagement.automaticShares ||
     (assignment === "gadget" && !state.unlocks.gadget) ||
     (
       assignedCount <= currentTarget &&
@@ -419,6 +421,7 @@ export function decrementCollaboratorAssignment(
 ): GameState {
   if (
     !state.collaboratorManagement.aggregateViewUnlocked ||
+    state.collaboratorManagement.automaticShares ||
     (assignment === "gadget" && !state.unlocks.gadget) ||
     (state.collaboratorManagement.targets[assignment] ?? 0) <= 0
   ) return state;
@@ -477,6 +480,95 @@ export function moveOperationalPriority(
   };
 }
 
+/* ---- «Assegnazione automatica» (4.7) ---- */
+
+export const AUTOMATIC_SHARE_STEP = 5;
+const AUTOMATIC_SHARE_MAX = 100;
+
+export function getAutomaticAssignmentRoles(state: Pick<GameState, "unlocks">): CollaboratorMasteryRole[] {
+  return COLLABORATOR_MASTERY_ROLES.filter((role) => role !== "gadget" || state.unlocks.gadget);
+}
+
+function withTargetsFromAssignments(state: GameState): GameState {
+  return {
+    ...state,
+    collaboratorManagement: {
+      ...state.collaboratorManagement,
+      targets: getCollaboratorAssignmentCounts(state),
+    },
+  };
+}
+
+/**
+ * Gives every free collaborator a sector: the one furthest below its share,
+ * with the best suited free person for it. Assigned collaborators never move.
+ */
+function assignFreeCollaboratorsAutomatically(state: GameState): GameState {
+  const shares = state.collaboratorManagement.automaticShares;
+  if (!shares || isReptilePreparationWorkActive(state)) return state;
+  if (!state.collaborators.some((collaborator) => collaborator.assignment === null)) return state;
+  const roles = getAutomaticAssignmentRoles(state).filter((role) => (shares[role] ?? 0) > 0);
+  const totalShare = roles.reduce((total, role) => total + (shares[role] ?? 0), 0);
+  if (totalShare === 0) return state;
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const counts = getCollaboratorAssignmentCounts(state);
+  let assigned = Object.values(counts).reduce((total, count) => total + count, 0);
+  let collaborators = state.collaborators;
+  // ponytail: one sort per assignment, O(free × n log n); fine for hundreds of collaborators.
+  for (;;) {
+    assigned += 1;
+    const role = roles.reduce((best, candidate) =>
+      (shares[candidate] ?? 0) / totalShare * assigned - counts[candidate] >
+        (shares[best] ?? 0) / totalShare * assigned - counts[best]
+        ? candidate
+        : best,
+    );
+    const selected = selectBestUnassignedCollaborator(collaborators, role, courseXUnlocked);
+    if (!selected) break;
+    collaborators = collaborators.map((collaborator) =>
+      collaborator.id === selected.id ? { ...collaborator, assignment: role } : collaborator
+    );
+    counts[role] += 1;
+  }
+  return withTargetsFromAssignments({ ...state, collaborators });
+}
+
+/** On: the shares are the proportions the player left (equal if nobody is assigned). Off: hands back control. */
+export function setAutomaticAssignment(state: GameState, enabled: boolean): GameState {
+  const { automaticShares, ...management } = state.collaboratorManagement;
+  if (enabled === Boolean(automaticShares)) return state;
+  if (!enabled) return withTargetsFromAssignments({ ...state, collaboratorManagement: management });
+  const roles = getAutomaticAssignmentRoles(state);
+  const counts = getCollaboratorAssignmentCounts(state);
+  const total = roles.reduce((sum, role) => sum + counts[role], 0);
+  const shares = Object.fromEntries(roles.map((role) => [
+    role,
+    total > 0 ? Math.round(counts[role] / total * AUTOMATIC_SHARE_MAX) : AUTOMATIC_SHARE_STEP * 4,
+  ]));
+  return assignFreeCollaboratorsAutomatically({
+    ...state,
+    collaboratorManagement: { ...management, automaticShares: shares },
+  });
+}
+
+export function changeAutomaticShare(
+  state: GameState,
+  role: CollaboratorMasteryRole,
+  delta: number,
+): GameState {
+  const shares = state.collaboratorManagement.automaticShares;
+  if (!shares || !getAutomaticAssignmentRoles(state).includes(role)) return state;
+  const next = Math.max(0, Math.min(AUTOMATIC_SHARE_MAX, (shares[role] ?? 0) + Math.sign(delta) * AUTOMATIC_SHARE_STEP));
+  if (next === (shares[role] ?? 0)) return state;
+  return assignFreeCollaboratorsAutomatically({
+    ...state,
+    collaboratorManagement: {
+      ...state.collaboratorManagement,
+      automaticShares: { ...shares, [role]: next },
+    },
+  });
+}
+
 export function reconcileCollaboratorManagement(state: GameState): GameState {
   const shouldUnlock = state.collaboratorManagement.aggregateViewUnlocked ||
     state.collaborators.length >= GAME_CONFIG.collaboratorAggregateUnlockCount;
@@ -492,5 +584,7 @@ export function reconcileCollaboratorManagement(state: GameState): GameState {
           targets: getCollaboratorAssignmentCounts(state),
         },
       };
-  return rebalanceTargets(unlockedState);
+  return unlockedState.collaboratorManagement.automaticShares
+    ? assignFreeCollaboratorsAutomatically(unlockedState)
+    : rebalanceTargets(unlockedState);
 }

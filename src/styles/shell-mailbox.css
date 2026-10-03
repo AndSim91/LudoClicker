@@ -359,7 +359,8 @@
   transition: width 80ms linear;
 }
 
-.composer-auto-send-toggle {
+.composer-auto-send-toggle,
+.switch-toggle {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -368,7 +369,8 @@
   cursor: pointer;
 }
 
-.composer-auto-send-toggle input {
+.composer-auto-send-toggle input,
+.switch-toggle input {
   position: relative;
   width: 32px;
   height: 16px;
@@ -380,7 +382,8 @@
   cursor: pointer;
 }
 
-.composer-auto-send-toggle input::after {
+.composer-auto-send-toggle input::after,
+.switch-toggle input::after {
   position: absolute;
   top: 1px;
   left: 1px;
@@ -392,16 +395,19 @@
   transition: transform 120ms ease;
 }
 
-.composer-auto-send-toggle input:checked {
+.composer-auto-send-toggle input:checked,
+.switch-toggle input:checked {
   border-color: var(--blue-600);
   background: var(--blue-600);
 }
 
-.composer-auto-send-toggle input:checked::after {
+.composer-auto-send-toggle input:checked::after,
+.switch-toggle input:checked::after {
   transform: translateX(16px);
 }
 
-.composer-auto-send-toggle input:focus-visible {
+.composer-auto-send-toggle input:focus-visible,
+.switch-toggle input:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

@@ -10,6 +10,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { isCollaboratorAreaVisible } from "../../game/unlocks";
+import { AutomaticAssignmentControl } from "./AutomaticAssignmentControl";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
 import { GymScene } from "./GymScene";
@@ -32,6 +33,8 @@ export function PeopleView({
   onDecrementCollaboratorAssignment,
   onSetCollaboratorFallback,
   onMoveOperationalPriority,
+  onToggleAutomaticAssignment,
+  onChangeAutomaticShare,
 }: {
   state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
@@ -54,6 +57,8 @@ export function PeopleView({
     assignment: CollaboratorMasteryRole,
     direction: "up" | "down",
   ) => void;
+  onToggleAutomaticAssignment?: (enabled: boolean) => void;
+  onChangeAutomaticShare?: (assignment: CollaboratorMasteryRole, delta: number) => void;
 }) {
   const state = useGameStateSlices(
     [
@@ -126,6 +131,13 @@ export function PeopleView({
               ? `${availableCollaborators}/${state.collaborators.length} liberi`
               : state.collaborators.length}</span>
           </div>
+          {onToggleAutomaticAssignment && onChangeAutomaticShare ? (
+            <AutomaticAssignmentControl
+              state={stateOverride}
+              onToggle={onToggleAutomaticAssignment}
+              onChangeShare={onChangeAutomaticShare}
+            />
+          ) : null}
           {showAggregateCollaborators ? (
             <CollaboratorSectorView
               state={stateOverride}

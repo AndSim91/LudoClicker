@@ -387,6 +387,8 @@ export interface CollaboratorManagementState {
     Partial<Record<"gadget", number>>;
   operationalPriorities: CollaboratorMasteryRole[];
   fallbackAssignments?: Partial<Record<CollaboratorMasteryRole, CollaboratorMasteryRole>>;
+  /** «Assegnazione automatica» (4.7): present = on; relative weight of each sector. */
+  automaticShares?: Partial<Record<CollaboratorMasteryRole, number>>;
 }
 
 export type FormId =
@@ -1068,6 +1070,8 @@ export type GameAction =
   | { type: "MARK_ALL_MESSAGES_READ" }
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }
   | { type: "DISMISS_MOMENT" }
+  | { type: "SET_AUTOMATIC_ASSIGNMENT"; enabled: boolean }
+  | { type: "CHANGE_AUTOMATIC_SHARE"; assignment: CollaboratorMasteryRole; delta: number }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
   | { type: "BUY_OFFICIAL_SWORD"; now: number; amount?: number }
   | {

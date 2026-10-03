@@ -120,6 +120,7 @@ export function CollaboratorList({
     ],
     stateOverride,
   );
+  const automaticAssignment = Boolean(state.collaboratorManagement.automaticShares);
   const [requestedPage, setRequestedPage] = useState(0);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -580,6 +581,8 @@ export function CollaboratorList({
                       : undefined}
                     data-tutorial-target={state.unlocks.social ? "true" : undefined}
                     value={collaborator.assignment ?? ""}
+                    disabled={automaticAssignment}
+                    title={automaticAssignment ? "Gestita dall'Assegnazione automatica" : undefined}
                     onChange={(event) => onAssign(
                       collaborator.id,
                       (event.target.value || null) as CollaboratorAssignment,
@@ -671,6 +674,7 @@ export function CollaboratorList({
           automation={selectedAutomation}
           collaboratorsById={collaboratorsById}
           onAssign={onAssign}
+          allowAssignment={!automaticAssignment}
           onStartTraining={onStartTraining}
           onBookTechnicianCourse={onBookTechnicianCourse}
           onClose={() => setSelectedCollaboratorId(null)}

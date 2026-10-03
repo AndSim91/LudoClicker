@@ -87,6 +87,7 @@ function StaffingStepper({
   actual,
   target,
   available,
+  locked,
   onIncrement,
   onDecrement,
 }: {
@@ -94,16 +95,17 @@ function StaffingStepper({
   actual: number;
   target: number;
   available: number;
+  locked: boolean;
   onIncrement: () => void;
   onDecrement: () => void;
 }) {
-  const transitioning = actual !== target;
+  const transitioning = !locked && actual !== target;
   return (
     <div className="sector-staffing-stepper" aria-label={`Collaboratori in ${label}`}>
       <button
         type="button"
         onClick={onDecrement}
-        disabled={target <= 0}
+        disabled={locked || target <= 0}
         aria-label={`Riduci collaboratori in ${label}`}
       >
         <Icon name="minus" />
@@ -115,7 +117,7 @@ function StaffingStepper({
       <button
         type="button"
         onClick={onIncrement}
-        disabled={available <= 0}
+        disabled={locked || available <= 0}
         aria-label={`Aumenta collaboratori in ${label}`}
       >
         <Icon name="plus" />
@@ -130,6 +132,7 @@ function StandardSectorCard({
   actual,
   target,
   available,
+  locked,
   now,
   onIncrement,
   onDecrement,
@@ -140,6 +143,7 @@ function StandardSectorCard({
   actual: number;
   target: number;
   available: number;
+  locked: boolean;
   now: number;
   onIncrement: () => void;
   onDecrement: () => void;
@@ -206,6 +210,7 @@ function StandardSectorCard({
           actual={actual}
           target={target}
           available={available}
+          locked={locked}
           onIncrement={onIncrement}
           onDecrement={onDecrement}
         />
@@ -305,6 +310,7 @@ function InstructorSectorCard({
   actual,
   target,
   available,
+  locked,
   now,
   onIncrement,
   onDecrement,
@@ -315,6 +321,7 @@ function InstructorSectorCard({
   actual: number;
   target: number;
   available: number;
+  locked: boolean;
   now: number;
   onIncrement: () => void;
   onDecrement: () => void;
@@ -415,6 +422,7 @@ function InstructorSectorCard({
           actual={actual}
           target={target}
           available={available}
+          locked={locked}
           onIncrement={onIncrement}
           onDecrement={onDecrement}
         />
@@ -601,6 +609,7 @@ export function CollaboratorSectorView({
     ) || hasGadgetRuntimeWork(state);
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
+  const automaticAssignment = Boolean(state.collaboratorManagement.automaticShares);
   const availableRoles: CollaboratorMasteryRole[] = state.unlocks.gadget
     ? ["writing", "events", "equipment", "instructor", "gadget"]
     : ["writing", "events", "equipment", "instructor"];
@@ -626,6 +635,7 @@ export function CollaboratorSectorView({
         actual={assignmentCounts.instructor}
         target={targets.instructor ?? 0}
         available={available}
+        locked={automaticAssignment}
         now={now}
         onIncrement={() => onIncrement("instructor")}
         onDecrement={() => onDecrement("instructor")}
@@ -645,6 +655,7 @@ export function CollaboratorSectorView({
             actual={assignmentCounts[role]}
             target={targets[role] ?? 0}
             available={available}
+            locked={automaticAssignment}
             now={now}
             onIncrement={() => onIncrement(role)}
             onDecrement={() => onDecrement(role)}

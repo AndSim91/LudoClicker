@@ -15,9 +15,11 @@ import { cancelMemberEnrollment } from "./membershipFlow";
 import { toggleMemberFavorite } from "./memberPreferences";
 import { playChroniclesHand } from "./chroniclesFlow";
 import {
+  changeAutomaticShare,
   decrementCollaboratorAssignment,
   incrementCollaboratorAssignment,
   moveOperationalPriority,
+  setAutomaticAssignment,
   setCollaboratorFallback,
 } from "./collaboratorManagement";
 import { postponeLightInflationEvent } from "./lightInflation";
@@ -176,6 +178,9 @@ export function createGameActionHandlers(
     MARK_MESSAGE_READ: (state, action) => markMessageRead(state, action.messageId),
     MARK_ALL_MESSAGES_READ: (state) => markAllMessagesRead(state),
     DISMISS_MOMENT: (state) => dismissMoment(state),
+    SET_AUTOMATIC_ASSIGNMENT: (state, action) => setAutomaticAssignment(state, action.enabled),
+    CHANGE_AUTOMATIC_SHARE: (state, action) =>
+      changeAutomaticShare(state, action.assignment, action.delta),
     FINISH_TUTORIAL_SCENE: (state, action) => finishTutorialScene(
       state,
       action.sceneId,

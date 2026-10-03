@@ -1204,6 +1204,16 @@ Regole:
 - se un settore richiede più persone di quelle presenti (per esempio dopo
   un'uscita dall'organico), i posti mancanti restano memorizzati e vengono
   occupati automaticamente dai nuovi collaboratori liberi;
+- **Assegnazione automatica** (piano 4.7, decisione del 03/10): un interruttore
+  sopra la sezione, disponibile in entrambe le viste. All'accensione fotografa
+  le proporzioni lasciate dal giocatore (in parti uguali se nessuno è
+  assegnato); da quel momento ogni collaboratore libero o nuovo va nel settore
+  più lontano dalla sua quota, scegliendo il più adatto tra i liberi, e chi è
+  già assegnato non si sposta mai. Le quote restano modificabili a passi del
+  5% e valgono per i prossimi arrivi. Mentre è accesa, assegnazioni
+  individuali e organici per settore sono bloccati; spegnendola si torna al
+  controllo manuale con l'organico attuale come obiettivo
+  (`collaboratorManagement.automaticShares`, `src/game/collaboratorManagement.ts`);
 - **Turni dei collaboratori** permette di scegliere per ogni settore un settore
   secondario (mai Istruttore): quando il settore principale è inattivo, il
   10% per livello della produttività (massimo 50%) passa al secondario;

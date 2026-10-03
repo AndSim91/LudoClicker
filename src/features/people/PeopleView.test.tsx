@@ -53,6 +53,60 @@ describe("PeopleView", () => {
     expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
   });
 
+  it("offers the automatic assignment switch and locks the manual choice while on (4.7)", () => {
+    const initial = createInitialState(1_000, "", false);
+    const member: Collaborator = {
+      id: "auto-collaborator",
+      contactId: initial.contacts[0].id,
+      displayName: "Collaboratore Auto",
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: "writing",
+      rarity: "ultra-rare",
+    };
+    const onToggle = vi.fn();
+    const onChangeShare = vi.fn();
+    const state = {
+      ...initial,
+      collaborators: [member],
+      unlocks: { ...initial.unlocks, collaborators: true },
+    };
+    const { rerender } = render(
+      <PeopleView
+        state={state}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleAutomaticAssignment={onToggle}
+        onChangeAutomaticShare={onChangeShare}
+      />,
+    );
+    const toggle = screen.getByRole("checkbox", { name: "Assegnazione automatica" });
+    expect(toggle).not.toBeChecked();
+    expect(screen.getByRole("combobox", { name: "Assegnazione" })).toBeEnabled();
+    fireEvent.click(toggle);
+    expect(onToggle).toHaveBeenCalledWith(true);
+
+    rerender(
+      <PeopleView
+        state={{
+          ...state,
+          collaboratorManagement: {
+            ...state.collaboratorManagement,
+            automaticShares: { writing: 100, events: 0, equipment: 0, instructor: 0 },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleAutomaticAssignment={onToggle}
+        onChangeAutomaticShare={onChangeShare}
+      />,
+    );
+    expect(screen.getByRole("combobox", { name: "Assegnazione" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /Aumenta la quota di Eventi/ }));
+    expect(onChangeShare).toHaveBeenCalledWith("events", 1);
+  });
+
   it("marks the complete collaborator section as a tutorial target", () => {
     const initial = createInitialState(1_000);
     const collaborator: Collaborator = {
