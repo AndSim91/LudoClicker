@@ -450,10 +450,10 @@ del 10% alla volta. Ogni spada è:
 - riservata da corsi, lezioni di prova o eventi;
 - rotta e temporaneamente inutilizzabile.
 
-L'usura non appartiene a una singola spada: è un carico aggregato distribuito
+L'usura non appartiene a una singola spada: è un valore aggregato distribuito
 sulle spade sane.
 
-> **Da implementare:** non esiste uno stato «in manutenzione»: la manutenzione manuale è istantanea e quella automatica lavora sul carico aggregato senza bloccare spade.
+> **Da implementare:** non esiste uno stato «in manutenzione»: la manutenzione manuale è istantanea e quella automatica lavora sull'usura aggregata senza bloccare spade.
 
 Le spade impongono una capienza operativa: quelle riservate non sono disponibili
 fino alla conclusione dell'attività. Corsi e Corso Agonisti restano in attesa se
@@ -464,18 +464,18 @@ caso si conclude senza usare né caricare una spada. Un evento senza spade
 sufficienti non può essere avviato. Una prova annullata per mancanza di spade
 fa perdere il contatto.
 
-Il carico viene applicato alla conclusione riuscita dell'attività ed è
-aggregato (2 punti per una lezione di prova, 40 per la prova di un Leggendario
+L'usura viene applicata alla conclusione riuscita dell'attività ed è
+aggregata (2 punti per una lezione di prova, 40 per la prova di un Leggendario
 Segreto, 20 per spada nel Corso Agonisti; i potenziamenti possono ridurlo fino
 al 50%). Se un evento in corso viene annullato, il costo viene rimborsato, si
-applica un quarto del carico previsto e non si ottengono contatti. Ogni 100
+applica un quarto dell'usura prevista e non si ottengono contatti. Ogni 100
 punti rompe una spada; più soglie superate rompono più spade, ma un'attività non
-può rompere più spade di quante ne usava, e tutto il carico eccedente viene
+può rompere più spade di quante ne usava, e tutta l'usura eccedente viene
 conservato. La manutenzione preventiva costa €2 per punto, mentre una spada già
 rotta costa €250 e torna da 100 a 0. La manutenzione manuale ripara prima le
-spade rotte e poi, se nessuna resta rotta, riduce il carico.
+spade rotte e poi, se nessuna resta rotta, riduce l'usura.
 
-I collaboratori assegnati all'Attrezzatura riducono prima il carico delle spade
+I collaboratori assegnati all'Attrezzatura riducono prima l'usura delle spade
 sane non riservate e poi riparano le spade rotte. Pagano il 75% dei costi
 manuali, ottenendo uno sconto del 25%: €187,50 per spada e €1,50 per punto.
 Producono un punto-lavoro ogni 1,5 secondi base; una spada completa richiede 150
@@ -488,15 +488,15 @@ resta in attesa di fondi.
 La manutenzione può procedere mentre corsi, prove o eventi sono attivi, ma
 interviene soltanto sulle spade non riservate. Le spade rotte sono sempre
 riparabili perché non possono essere in uso. Se tutte le spade sane sono
-impegnate, il carico residuo resta in attesa; le riparazioni parziali già
+impegnate, l'usura residua resta in attesa; le riparazioni parziali già
 possibili non modificano il numero di spade prenotate. In questo caso il
-collaboratore può riparare una spada rotta e torna subito al carico residuo non
+collaboratore può riparare una spada rotta e torna subito all'usura residua non
 appena la spada riparata diventa disponibile.
 
 L'interfaccia rappresenta la capacità complessiva come una barra divisa in un
 blocco da 100 punti per ogni spada della scuola. Il rosso indica una spada
 rotta, il grigio a righe una spada riservata e temporaneamente non riparabile,
-l'oro il carico normale ancora rimovibile e il verde la condizione sana
+l'oro l'usura normale ancora rimovibile e il verde la condizione sana
 residua. Il valore accessibile della barra conta 100 punti per ogni spada
 rotta; i riepiloghi numerici visibili mostrano separatamente spade libere su
 totali, spade rotte, spade in uso e punti di usura normale. Fino a 20 spade i
@@ -511,12 +511,12 @@ Gli imprevisti narrativi dell'Attrezzatura sostituiscono quelli precedenti:
 
 | Evento                             | Descrizione breve                                          |                       Effetto |
 | ---------------------------------- | ---------------------------------------------------------- | ----------------------------: |
-| Un piccolo disastro                | Non so cosa sia successo, non sono stato io!               |    +30 carico e 1 spada rotta |
-| Spada caduta: Fanne 5              | Capita a tutti prima o poi...                              |                    +10 carico |
-| Il portaspade di legno perfetto    | Direttamente dall'Ordine del Vento di Trieste, è stupendo! |                    -20 carico |
-| Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare...        | -30 carico e 1 spada riparata |
-| Si può avere nera?                 | Certe domande dovrebbero non essere mai fatte...           |                    +30 carico |
-| Un Pini al lavoro                  | Darth Modificus alla riscossa!                             |                    -30 carico |
+| Un piccolo disastro                | Non so cosa sia successo, non sono stato io!               |    +30 usura e 1 spada rotta |
+| Spada caduta: Fanne 5              | Capita a tutti prima o poi...                              |                    +10 usura |
+| Il portaspade di legno perfetto    | Direttamente dall'Ordine del Vento di Trieste, è stupendo! |                    -20 usura |
+| Un nuovo Sabersmith all’orizzonte? | Sembra proprio che uno dei nostri sappia saldare...        | -30 usura e 1 spada riparata |
+| Si può avere nera?                 | Certe domande dovrebbero non essere mai fatte...           |                    +30 usura |
+| Un Pini al lavoro                  | Darth Modificus alla riscossa!                             |                    -30 usura |
 
 Richiedono almeno 2 iscritti attivi («Un piccolo disastro»), 4 («Spada
 caduta: Fanne 5», «Si può avere nera?») o 6 (gli altri tre).
@@ -879,11 +879,11 @@ Le prenotazioni delle lezioni di prova non generano messaggi in Posta in arrivo:
 sono visibili in La mia giornata e nello stato dell'email inviata.
 
 Nel prototipo l'attesa è fissata a 30 secondi. La prova ordinaria dura 15
-secondi, riserva una spada e aggiunge 2 punti di carico alla conclusione. La
+secondi, riserva una spada e aggiunge 2 punti di usura alla conclusione. La
 prova di un Leggendario Segreto dura 30 secondi e aggiunge 40 punti. Se al
 termine dell'attesa manca una spada, la prova è annullata come una mancata
 iscrizione; se l'iscrizione è garantita al 100%, la prova si svolge invece senza
-spada e senza aggiungere carico.
+spada e senza aggiungere usura.
 
 Una volta raggiunto il massimo storico di 5 iscritti, **La mia giornata**
 raggruppa in un unico riepilogo tutte le lezioni di prova ordinarie visibili,
@@ -939,13 +939,13 @@ possa essere selezionato di nuovo. I tempi brevi usano secondi reali; fiere e
 manifestazioni usano mesi o anni del calendario di gioco. Durante questo
 intervallo iscritti e spade restano disponibili. Se l'evento viene annullato, il
 costo e le risorse sono ripristinati, non parte alcun conto alla rovescia e
-viene applicato soltanto il 25% del carico previsto.
+viene applicato soltanto il 25% dell'usura prevista.
 
 Quando l'evento viene avviato automaticamente da un collaboratore, la sua
 Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
 Iniziato 90%, Accademico 80%, Cavaliere 70% e Maestro 50%. La riduzione del
 tempo usa invece il normale bonus di produttività della Maestria (+20%, +40%,
-+65%, +100%: un Maestro dimezza la durata), che riduce anche il carico
++65%, +100%: un Maestro dimezza la durata), che riduce anche l'usura
 dell'evento fino a un massimo del 25%. Gli eventi avviati dal giocatore pagano
 sempre il prezzo pieno.
 
@@ -985,7 +985,7 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 
 > **Da implementare:** la vista Eventi mostra solo gli eventi già sbloccati dalla Fama e non anticipa il prossimo sblocco.
 
-| Evento                        | Sblocco |      Costo | Media | Impiegati | Spade | Carico | Cooldown   | Potenzialità |
+| Evento                        | Sblocco |      Costo | Media | Impiegati | Spade | Usura  | Cooldown   | Potenzialità |
 | ----------------------------- | ------: | ---------: | ----: | --------: | ----: | -----: | ---------- | -----------: |
 | Volantinaggio                 |       0 |         €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
 | Kata contro le onde del mare  |       0 |       €100 |  0,50 |         1 |     1 |     10 | 10 secondi |  molto bassa |
@@ -1472,13 +1472,13 @@ Regole:
 - gli altri rami preferiti restano percorsi facoltativi che l'automazione può
   completare dopo la Forma 7;
 - la formazione richiede Euro e/o tempo, ma non livelli personali;
-- ogni corso riserva le spade per tutta la sua durata e applica il carico solo
+- ogni corso riserva le spade per tutta la sua durata e applica l'usura solo
   al completamento; se le spade libere non bastano, la formazione resta **In
   attesa di spade** e viene pagata soltanto quando parte davvero;
 - i moduli da Istruttore e i Corsi Tecnici non usano spade;
 - le descrizioni definitive dovranno usare terminologia LudoSport approvata.
 
-| Corso o Forma                     |               Spade per atleta | Carico per spada |
+| Corso o Forma                     |               Spade per atleta |  Usura per spada |
 | --------------------------------- | -----------------------------: | ---------------: |
 | Forma 1, Corso X, Forma 2         |                              1 |               10 |
 | Corso Y                           |                              2 |               10 |
@@ -1490,8 +1490,8 @@ Regole:
 | Forma 7                           |                              3 |               20 |
 | Arena Tecnica / Corso Agonisti    | da 1 a 3 secondo le Forme note |               20 |
 
-Forma 5 ha intenzionalmente il carico per spada più alto del gioco. Forma 6 e
-Forma 7 possono produrre più carico totale perché impiegano rispettivamente due
+Forma 5 ha intenzionalmente l'usura per spada più alta del gioco. Forma 6 e
+Forma 7 possono produrre più usura totale perché impiegano rispettivamente due
 e tre spade, ma non superano Forma 5 nell'aggressività della singola arma.
 
 Costi base: Forma 1 €50, Corso X €100, Forma 2 €250, Corso Y €500, Forma 3
@@ -2850,7 +2850,7 @@ offrire scelte. Ne avviene uno ogni 2–5 mesi di gioco (120.000–300.000 ms,
 estratti a caso), solo se la scuola ha almeno un iscritto attivo. L'evento è
 estratto in modo uniforme fra quelli il cui minimo di iscritti attivi è
 raggiunto. Possono aggiungere contatti (con fonte "collaboratore"), Euro,
-carico di usura dell'attrezzatura, spade rotte o riparate; non modificano
+usura dell'attrezzatura, spade rotte o riparate; non modificano
 iscritti né collaboratori. Lo storico conserva gli ultimi 30 eventi.
 
 Eventi presenti nel codice:
@@ -2860,14 +2860,14 @@ Eventi presenti nel codice:
 | Passaparola inatteso                        | positivo |               1 | +2 contatti                     |
 | Contributo straordinario                    | positivo |               3 | +1.000 €                        |
 | Davvero hai degli amici?                    | positivo |               5 | +3 contatti                     |
-| Un nuovo Sabersmith all'orizzonte?          | positivo |               6 | −30 carico, 1 spada riparata    |
-| Un piccolo disastro                         | negativo |               2 | +30 carico, +1 spada rotta      |
-| Spada caduta: Fanne 5                       | negativo |               4 | +10 carico                      |
-| Si può avere nera?                          | negativo |               4 | +30 carico                      |
+| Un nuovo Sabersmith all'orizzonte?          | positivo |               6 | −30 usura, 1 spada riparata    |
+| Un piccolo disastro                         | negativo |               2 | +30 usura, +1 spada rotta      |
+| Spada caduta: Fanne 5                       | negativo |               4 | +10 usura                       |
+| Si può avere nera?                          | negativo |               4 | +30 usura                       |
 | I fogli di calcolo INCOM hanno i giorni contati | assurdo  |          15 | +5 contatti                     |
 | Piedozzi ha fatto scalpore                  | assurdo  |              30 | +10 contatti                    |
-| Il portaspade di legno perfetto             | assurdo  |               6 | −20 carico                      |
-| Un Pini al lavoro                           | assurdo  |               6 | −30 carico                      |
+| Il portaspade di legno perfetto             | assurdo  |               6 | −20 usura                       |
+| Un Pini al lavoro                           | assurdo  |               6 | −30 usura                       |
 | Mancato rinnovo                             | negativo |               — | non estratto: registrato quando un iscritto lascia la scuola alle partenze annuali |
 
 Evento separato, **Inflazione di Luce**: ogni gennaio c'è una probabilità di
@@ -3514,8 +3514,8 @@ incontrarsi solo in finale.
 
 Servono due spade per ogni team, inclusi gli esterni. Le spade libere della
 scuola vengono usate per prime; le mancanti sono noleggiate a 100 € ciascuna.
-Ogni spada della scuola impiegata aggiunge 20 punti al carico di usura
-dell'attrezzatura; ogni 100 punti di carico si rompe una spada, al massimo
+Ogni spada della scuola impiegata aggiunge 20 punti all'usura
+dell'attrezzatura; ogni 100 punti di usura si rompe una spada, al massimo
 quante ne sono state impiegate. Gadget può generare al
 massimo 1.000 € lordi per team, moltiplicati per la sua qualità. Social genera
 `floor(team × qualità / 100)` follower. Il riepilogo separa entrate Gadget,
@@ -4472,7 +4472,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   Leggendari dall'iscrizione.
 - I collaboratori possono scrivere email e contenuti Social, partecipare agli
   eventi, gestire lezioni e spade.
-- I collaboratori assegnati alle spade riducono prima il carico sulle spade sane
+- I collaboratori assegnati alle spade riducono prima l'usura delle spade sane
   e poi riparano quelle rotte; una spada richiede 150 punti-lavoro da 1,5
   secondi ciascuno.
 - Ogni collaboratore svolge un incarico alla volta (con un eventuale incarico
@@ -4491,10 +4491,10 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
   Insegnamento e Organizzazione sono gli otto rami pubblici; Social usa gli
   effetti integrati nei primi due.
-- Il carico delle spade aumenta tramite corsi, prove, eventi e imprevisti
+- L'usura delle spade aumenta tramite corsi, prove, eventi e imprevisti
   narrativi; ogni soglia di 100 rompe una spada.
 - Una prova con iscrizione garantita al 100% si conclude anche senza spade
-  disponibili e in quel caso non aggiunge carico. Una prova non garantita senza
+  disponibili e in quel caso non aggiunge usura. Una prova non garantita senza
   spade viene annullata e il contatto è perso.
 - Ogni prova fallita (anche se annullata per mancanza di spade) aumenta Pity
   di 1; Pity aggiunge altrettanti punti

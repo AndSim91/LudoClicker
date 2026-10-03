@@ -63,7 +63,7 @@ export function processNarrativeEvent(
     : definition.description;
   const equipmentEffects = [
     definition.wearDelta
-      ? `${definition.wearDelta > 0 ? "+" : ""}${definition.wearDelta} carico`
+      ? `${definition.wearDelta > 0 ? "+" : ""}${definition.wearDelta} usura`
       : undefined,
     definition.damagedSwordsDelta
       ? `+${definition.damagedSwordsDelta} spada rotta`

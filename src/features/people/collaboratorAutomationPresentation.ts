@@ -281,7 +281,7 @@ export function getCollaboratorAutomationPresentation({
       progress,
       progressLabel: isRepairingSword
         ? "Progresso riparazione spada"
-        : "Progresso riduzione carico",
+        : "Progresso riduzione usura",
       durationMs,
     };
   }
