@@ -1,3 +1,4 @@
+import { createInitialCareerStatistics } from "./career";
 import { createInitialUpgradeLevels } from "../content/upgrades";
 import { createInitialShortGoal } from "../content/shortGoals";
 import { GAME_CONFIG } from "./config";
@@ -140,6 +141,7 @@ export function createInitialState(
       socialFollowersGained: 0,
       formsCompleted: 0,
       narrativeEvents: 0,
+      career: createInitialCareerStatistics(),
     },
     historyArchive: createEmptyHistoryArchive(),
     unlocks: {

@@ -543,6 +543,9 @@ export function isValidGameState(value: unknown): value is GameState {
     ) &&
     isValidGadgetState(state.gadgets) &&
     Array.isArray(state.achievements) &&
+    state.achievements.every((key) => typeof key === "string") &&
+    (state.statistics?.career === undefined || Object.values(state.statistics.career)
+      .every((value) => value === undefined || Number.isFinite(value))) &&
     typeof state.narrative?.nextEventAt === "number" &&
     Array.isArray(state.narrative?.history) &&
     Array.isArray(state.tutorial?.completedSceneIds) &&

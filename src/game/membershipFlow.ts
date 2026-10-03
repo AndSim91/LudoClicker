@@ -1,3 +1,4 @@
+import { recordCareer } from "./career";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
   getAthleteImmunityStatus,
@@ -326,7 +327,11 @@ export function collectFees(
     // A January crossed during catch-up still opens its notification now, not at its past game boundary.
     nextState = processJanuaryLightInflation(nextState, wallNow);
     if (isSchoolYearDepartureMonth(currentMonth)) {
+      const departedBefore = nextState.statistics.membersDeparted;
       nextState = processMemberDepartures(nextState, now + period);
+      nextState = recordCareer(nextState, {
+        largestYearlyDeparture: nextState.statistics.membersDeparted - departedBefore,
+      });
     }
     nextState = processReptileCalendarTransition(nextState, now + period);
     if (nextState.tournaments.reptile.activeEdition?.status === "presenting") break;

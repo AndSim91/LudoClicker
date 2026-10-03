@@ -1,3 +1,4 @@
+import { addCareer } from "./career";
 import {
   SECRET_LEGENDARIES,
   type SecretLegendaryProfile,
@@ -274,6 +275,11 @@ export function applyTournamentResult(
         : state.tournaments.chronicles,
     },
   };
+  nextState = addCareer(nextState, {
+    nationalTitles: nationalOwned ? 1 : 0,
+    championsWins: championOwned ? 1 : 0,
+    chroniclesWins: chroniclesOwned ? 1 : 0,
+  });
   nextState = unlockGadgetSectorFromTournamentResult(
     nextState,
     resolvedResult,

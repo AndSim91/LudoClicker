@@ -310,7 +310,7 @@ function completeTickStep(
     ? recruited
     : reconcileCollaboratorManagement(recruited);
   const progressed = completeShortGoal(
-    grantAchievements(reconciled, now, gainMultiplier),
+    grantAchievements(reconciled, now),
     now,
     gainMultiplier,
   );
@@ -442,7 +442,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   const processedState = compactChangedHistory(
     state,
     completeShortGoal(
-      grantAchievements(reconciledState, now, gainMultiplier),
+      // A refused action leaves the state as it was: no achievement either.
+      reconciledState === preparedState ? reconciledState : grantAchievements(reconciledState, now),
       now,
       gainMultiplier,
     ),

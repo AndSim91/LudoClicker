@@ -24,7 +24,8 @@ describe("admin resource actions", () => {
       activeMembers: GAME_CONFIG.socialUnlockMembers,
       peakActiveMembers: GAME_CONFIG.socialUnlockMembers,
       fame: GAME_CONFIG.socialUnlockMembers,
-      euros: 10,
+      // Achievements give no reward (4.4).
+      euros: 0,
       followers: GAME_CONFIG.socialUnlockMembers,
     });
     expect(state.unlocks).toMatchObject({ upgrades: true, social: true, forms: true });

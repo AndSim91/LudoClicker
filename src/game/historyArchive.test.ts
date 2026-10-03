@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACHIEVEMENTS } from "../content/achievements";
+import { SECRET_ACHIEVEMENTS } from "../content/achievements";
 import { addAdminMembers } from "./adminFlow";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
@@ -144,7 +144,7 @@ describe("bounded game history", () => {
     const retainedContactIds = new Set(compacted.contacts.map((contact) => contact.id));
     expect(compacted.emails.every((email) => retainedContactIds.has(email.contactId))).toBe(true);
     expect(
-      ACHIEVEMENTS.find((item) => item.id === "no-recognizable-reference")?.condition(compacted),
+      SECRET_ACHIEVEMENTS.find((item) => item.id === "no-recognizable-reference")?.condition(compacted),
     ).toBe(true);
   });
 

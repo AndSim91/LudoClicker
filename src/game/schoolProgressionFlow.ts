@@ -1,4 +1,6 @@
-import { getNewAchievements } from "../content/achievements";
+import { addCareer, getSchoolGadgetsSold, recordCareer } from "./career";
+import { getSchoolYear } from "./calendar";
+import { describeAchievementKey, getNewAchievementKeys } from "../content/achievements";
 import {
   SHORT_GOALS,
   createNextShortGoal,
@@ -133,7 +135,14 @@ export function foundSchool(
     // A discovered secret path stays known in every later school; only its level resets.
     secretUpgradeDiscoveries: state.secretUpgradeDiscoveries,
     legendaryCollaborators: fresh.legendaryCollaborators,
-    statistics: state.statistics,
+    statistics: recordCareer(addCareer(state, {
+      reputationEarned: rent.points,
+      perfectPhrases: state.player.perfectPhrases ?? 0,
+      gadgetsSold: getSchoolGadgetsSold(state),
+    }), {
+      maxRentPoints: spending.rent,
+      earliestFoundationYear: getSchoolYear(state.school.currentMonth),
+    }).statistics,
     messages: state.messages,
     shortGoal: state.shortGoal,
   };
@@ -152,36 +161,23 @@ export function foundSchool(
   };
 }
 
-export function grantAchievements(
-  state: GameState,
-  now: number,
-  gainMultiplier: number,
-): GameState {
-  const earned = getNewAchievements(state);
+/** Unlocks the achievements reached (4.4): no reward, one Posta message per batch. */
+export function grantAchievements(state: GameState, now: number): GameState {
+  const earned = getNewAchievementKeys(state);
   if (earned.length === 0) return state;
-  const reward = scaleCurrencyGain(
-    earned.reduce((total, definition) => total + definition.euroReward, 0),
-    gainMultiplier,
+  const unlocked: GameState = { ...state, achievements: [...state.achievements, ...earned] };
+  const names = earned.map(describeAchievementKey);
+  return addMessage(
+    unlocked,
+    now,
+    earned.length === 1 ? `Traguardo sbloccato: ${names[0]}` : `${earned.length} traguardi sbloccati`,
+    earned.length === 1
+      ? "Lo trovi nella bacheca dei Traguardi della LudoWiki."
+      : `${names.slice(0, 3).join(", ")}${earned.length > 3 ? ` e altri ${earned.length - 3}` : ""}. Li trovi nella bacheca dei Traguardi della LudoWiki.`,
+    "system",
+    "other",
+    "progress",
   );
-  let nextState: GameState = {
-    ...state,
-    achievements: [...state.achievements, ...earned.map((definition) => definition.id)],
-    school: { ...state.school, euros: state.school.euros + reward },
-    statistics: { ...state.statistics, eurosEarned: state.statistics.eurosEarned + reward },
-  };
-  for (const definition of earned) {
-    const achievementReward = scaleCurrencyGain(definition.euroReward, gainMultiplier);
-    nextState = addMessage(
-      nextState,
-      now,
-      `Traguardo: ${definition.title}`,
-      `${definition.description} Premio amministrativo: ${formatCurrency(achievementReward)}.`,
-      "system",
-      "other",
-      "progress",
-    );
-  }
-  return nextState;
 }
 
 export function synchronizeInactiveShortGoal(

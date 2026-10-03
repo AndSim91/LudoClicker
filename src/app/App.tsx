@@ -58,6 +58,7 @@ import type {
 } from "../game/types";
 import { APP_VERSION } from "../shared/appVersion";
 import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
+import { AchievementToast } from "../features/feedback/AchievementToast";
 import { useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
@@ -160,7 +161,9 @@ export function App() {
     ? "gadget"
     : hasBlockingReptileFlow
       ? "tournaments"
-    : view === "admin" || view === "ludowiki"
+    : view === "ludowiki"
+      ? import.meta.env.DEV || state.achievements.length > 0 ? view : "mail"
+    : view === "admin"
       ? import.meta.env.DEV
         ? view
         : "mail"
@@ -524,6 +527,7 @@ export function App() {
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
         <GameFeedbackLayer />
+        <AchievementToast />
         <StableTitleBar
           currentMonth={state.school.currentMonth}
           nextMonthAt={state.school.nextFeeAt}

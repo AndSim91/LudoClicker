@@ -1,3 +1,4 @@
+import { addCareer } from "./career";
 import {
   FORM_BRANCHES,
   getCollaboratorProductivity,
@@ -341,7 +342,7 @@ function resolveAgonistCourse(
   if (collaborator) updateCollaborator(context, { ...collaborator, training: undefined });
   transitionTeachingLoad(context, training, undefined);
   context.state = {
-    ...context.state,
+    ...addCareer(context.state, { agonistCourses: 1 }),
     equipment: completedEquipment,
     randomSeed: nextSeed,
   };

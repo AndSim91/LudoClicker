@@ -121,6 +121,12 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
     report[area] = await audit(page);
   }
 
+  // The first achievements unlock on the first ticks: the LudoWiki is in the rail.
+  await openArea(page, "LudoWiki");
+  await page.getByRole("tab", { name: "Traguardi" }).click();
+  await page.waitForTimeout(300);
+  report["LudoWiki · Traguardi"] = await audit(page);
+
   await openArea(page, "Tornei");
   for (const tab of ["Risultati", "Albo d'oro", "Open"]) {
     await page.getByRole("tab", { name: tab }).click();

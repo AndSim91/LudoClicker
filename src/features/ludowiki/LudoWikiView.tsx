@@ -9,14 +9,15 @@ import {
   type LudoWikiChapter,
   type LudoWikiVisualIcon,
 } from "../../content/ludowiki";
-import { useGameStateSlices } from "../../game/GameStateContext";
+import { useGameState } from "../../game/GameStateContext";
+import { AchievementsSection } from "./AchievementsSection";
 import type { GameState, SpecialCollaboratorId } from "../../game/types";
 import {
   getDiscoveredLegendaryIds,
   getLegendaryDossier,
 } from "./ludodexPresentation";
 
-type LudoWikiSection = "ludodex" | "manual";
+type LudoWikiSection = "ludodex" | "achievements" | "manual";
 type LudodexFilter = "all" | "discovered";
 
 const wikiIconNames: Record<LudoWikiVisualIcon, IconName> = {
@@ -389,20 +390,25 @@ function ManualSection() {
 }
 
 export function LudoWikiView({ state: stateOverride }: { state?: GameState }) {
-  const state = useGameStateSlices(["contacts", "legendaryCollaborators"], stateOverride);
+  const state = useGameState(stateOverride);
   const [section, setSection] = useState<LudoWikiSection>("ludodex");
   return (
     <main className="overview-view ludowiki-view">
       <header>
         <Icon name="ludowiki" />
-        <div><h1>LudoWiki</h1><p>Enciclopedia tecnica del gioco e memoria permanente dei Leggendari iscritti.</p></div>
+        <div><h1>LudoWiki</h1><p>Enciclopedia del gioco, Ludodex dei Leggendari e bacheca dei traguardi della tua partita.</p></div>
       </header>
       <div className="ludowiki-tabs" role="tablist" aria-label="Sezioni LudoWiki">
         <button type="button" role="tab" aria-selected={section === "ludodex"} className={section === "ludodex" ? "is-active" : ""} onClick={() => setSection("ludodex")}>Ludodex</button>
+        <button type="button" role="tab" aria-selected={section === "achievements"} className={section === "achievements" ? "is-active" : ""} onClick={() => setSection("achievements")}>Traguardi</button>
         <button type="button" role="tab" aria-selected={section === "manual"} className={section === "manual" ? "is-active" : ""} onClick={() => setSection("manual")}>Manuale di gioco</button>
       </div>
       <div className="ludowiki-content" role="tabpanel">
-        {section === "ludodex" ? <LudodexSection state={state} /> : <ManualSection />}
+        {section === "ludodex"
+          ? <LudodexSection state={state} />
+          : section === "achievements"
+            ? <AchievementsSection state={state} />
+            : <ManualSection />}
       </div>
     </main>
   );

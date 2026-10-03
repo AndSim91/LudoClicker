@@ -11,7 +11,7 @@ import { selectIncomePerMonth } from "./selectors";
 import { formatCurrency } from "../shared/formatters";
 
 describe("game engine: narrative", () => {
-  it("grants each achievement and its reward only once", () => {
+  it("grants each achievement only once, without reward", () => {
     const initial = createInitialState(1_000);
     const qualifying = {
       ...initial,
@@ -21,11 +21,12 @@ describe("game engine: narrative", () => {
     const earned = gameReducer(qualifying, { type: "TICK", now: 2_000 });
     const repeated = gameReducer(earned, { type: "TICK", now: 2_000 });
 
-    expect(earned.achievements).toContain("first-email");
-    expect(earned.school.euros).toBe(5);
-    expect(earned.messages.some((message) => message.subject === "Traguardo: Prima email inviata")).toBe(true);
-    expect(repeated.school.euros).toBe(earned.school.euros);
-    expect(repeated.achievements.filter((id) => id === "first-email")).toHaveLength(1);
+    expect(earned.achievements).toContain("emails:bronze");
+    expect(earned.school.euros).toBe(initial.school.euros);
+    expect(earned.messages.some((message) =>
+      message.subject === "Traguardo sbloccato: La tastiera chiede pietà · Bronzo")).toBe(true);
+    expect(repeated).toBe(earned);
+    expect(repeated.achievements.filter((id) => id === "emails:bronze")).toHaveLength(1);
   });
 
   it("rotates short goals and grants each narrative reward only once", () => {
@@ -172,7 +173,7 @@ describe("game engine: narrative", () => {
 
     const read = gameReducer(withPendingAchievement, { type: "MARK_ALL_MESSAGES_READ" });
 
-    expect(read.achievements).toContain("first-email");
+    expect(read.achievements).toContain("emails:bronze");
     expect(read.messages.some((message) => message.category === "other")).toBe(true);
     expect(read.messages.every((message) => !message.unread)).toBe(true);
   });

@@ -495,7 +495,8 @@ describe("game engine: funnel", () => {
 
     expect(state.school.activeMembers).toBe(1);
     expect(state.school.peakActiveMembers).toBe(1);
-    expect(state.school.euros).toBe(GAME_CONFIG.enrollmentBonus + 15);
+    // Achievements give no reward (4.4).
+    expect(state.school.euros).toBe(GAME_CONFIG.enrollmentBonus);
     expect(state.unlocks.upgrades).toBe(true);
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);

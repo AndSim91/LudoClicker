@@ -1,4 +1,4 @@
-import { ACHIEVEMENTS } from "../content/achievements";
+import { ALL_ACHIEVEMENT_KEYS } from "../content/achievements";
 import { describe, expect, it } from "vitest";
 import { createInitialState, gameReducer } from "./engine";
 import { GAME_CONFIG } from "./config";
@@ -122,7 +122,7 @@ function createExtremeState(size: number): GameState {
     scheduledTrials: [],
     acquisitionEvents: [],
     collaborators: [],
-    achievements: ACHIEVEMENTS.map((achievement) => achievement.id),
+    achievements: [...ALL_ACHIEVEMENT_KEYS],
     network: { ...base.network, prestigeOfferSent: true },
     narrative: { ...base.narrative, nextEventAt: NOW + 300_000 },
     statistics: {

@@ -298,19 +298,8 @@ export type UpgradeLevels = Record<UpgradeId, number>;
 
 export type SecretUpgradeId = "project-x" | "divine-touch";
 
-export type AchievementId =
-  | "first-email"
-  | "first-member"
-  | "persistent-invites"
-  | "first-event"
-  | "hundred-contacts"
-  | "first-maintenance"
-  | "first-collaborator"
-  | "first-form"
-  | "thousand-emails"
-  | "first-school"
-  | "ten-schools"
-  | "no-recognizable-reference";
+/** An unlocked achievement: "<id>:<tier>" for tiered ones, "<id>" for secrets (src/content/achievements.ts). */
+export type AchievementKey = string;
 
 export type NarrativeEventId =
   | "word-of-mouth"
@@ -492,6 +481,23 @@ export interface Statistics {
   socialFollowersGained: number;
   formsCompleted: number;
   narrativeEvents: number;
+  /** Cumulative counters for the achievements (src/game/career.ts); absent before v87. */
+  career?: CareerStatistics;
+}
+
+export interface CareerStatistics {
+  perfectPhrases: number;
+  agonistCourses: number;
+  nationalTitles: number;
+  championsWins: number;
+  reptileWins: number;
+  chroniclesWins: number;
+  reputationEarned: number;
+  gadgetsSold: number;
+  largestYearlyDeparture: number;
+  maxRentPoints: number;
+  /** School year (1 = first) of the earliest foundation; absent before any. */
+  earliestFoundationYear?: number;
 }
 
 export type TournamentLevel = "school" | "academy" | "national" | "champions" | "chronicles";
@@ -997,7 +1003,7 @@ export interface GameState {
     lastImprovedAthlete?: string;
     lastImprovedAthleteId?: string;
   };
-  achievements: AchievementId[];
+  achievements: AchievementKey[];
   narrative: {
     nextEventAt: number;
     history: NarrativeEventRecord[];

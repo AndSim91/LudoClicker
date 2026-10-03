@@ -24,7 +24,7 @@ const items: AppRailItem[] = [
   { id: "tournaments", label: "Tornei", icon: "trophy" },
   { id: "gadget", label: "Gadget", icon: "gift", tutorialRegion: "gadget-navigation" },
   { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },
-  { id: "ludowiki", label: "LudoWiki", icon: "ludowiki", devOnly: true },
+  { id: "ludowiki", label: "LudoWiki", icon: "ludowiki" },
   { id: "settings", label: "Impostazioni", icon: "settings" },
   { id: "admin", label: "Admin", icon: "admin", devOnly: true },
 ];
@@ -39,10 +39,12 @@ export function AppRail({
   onChange: (view: AppView) => void;
 }) {
   const state = useGameStateSlices(
-    ["network", "school", "shortGoal", "statistics", "unlocks"],
+    ["network", "school", "shortGoal", "statistics", "unlocks", "achievements"],
     stateOverride,
   );
   const visibleItems = items.filter((item) => {
+    // The LudoWiki opens to everyone with the first achievement (4.4).
+    if (item.id === "ludowiki") return import.meta.env.DEV || state.achievements.length > 0;
     if (item.devOnly) return import.meta.env.DEV;
     return isGameAreaUnlocked(item.id as GameArea, state);
   });

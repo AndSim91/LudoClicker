@@ -305,7 +305,7 @@ Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
 Gli **Euro (€)** sono l'unica valuta spendibile; la partita parte da €0.
 Provengono principalmente dalle quote periodiche degli iscritti e dal bonus di
 iscrizione, poi da sponsorizzazioni dei Follower, entrate di rete, vendite di
-Gadget, premi di tornei, obiettivi brevi, traguardi ed eventi narrativi. Vengono
+Gadget, premi di tornei, obiettivi brevi ed eventi narrativi. Vengono
 usati per:
 
 - potenziamenti delle otto Aree di Attività;
@@ -3960,31 +3960,91 @@ suo inizio non c'è una spada disponibile.
 
 ## 26. Traguardi
 
-I traguardi appaiono come email di sistema nella Posta in arrivo (scheda
-«Altra»), con oggetto «Traguardo: <titolo>».
+Decisione del 03/10 (piano 4.4): traguardi nello stile degli obiettivi di
+Xbox e PlayStation, **solo da collezionare, senza premi**. Valgono per tutta la
+partita: restano dopo il prestigio. Catalogo in `src/content/achievements.ts`:
+30 traguardi a tre livelli (bronzo, argento, oro) e 10 segreti a livello
+unico, 100 in tutto.
 
-I 12 traguardi presenti (`src/content/achievements.ts`):
+Le chiavi sbloccate stanno in `achievements` (`"<id>:<livello>"`, o l'id per i
+segreti). Il controllo (`grantAchievements`, `src/game/schoolProgressionFlow.ts`)
+gira a ogni tick e dopo ogni azione che cambia lo stato; un'azione rifiutata
+non sblocca nulla. Quando una misura supera più soglie insieme si sbloccano
+tutti i livelli raggiunti. Ogni gruppo di sblocchi manda un solo messaggio
+nella Posta («Altra», filo «progress») e una notifica (`AchievementToast`):
+riquadro sobrio in basso a destra in tema Outlook, pillola dorata animata in
+Modalità Onde; più sblocchi insieme diventano una notifica sola («N nuovi
+traguardi»).
 
-- Prima email inviata (1 email inviata) — €5;
-- Primo iscritto (1 iscrizione) — €10;
-- Dieci inviti e immutato ottimismo (10 email inviate senza nessuna prova
-  prenotata) — €10;
-- Primo evento completato (almeno 1 evento concluso e 1 contatto ottenuto) —
-  €5;
-- Cento contatti raccolti — €25;
-- Prima manutenzione completata — €5;
-- Primo collaboratore — €10;
-- Prima Forma completata — €15;
-- Mille email inviate — €100;
-- Prima nuova scuola fondata — €50;
-- “Nessun riferimento legalmente riconoscibile” (20 edizioni di CogoComix
-  completate) — €20;
-- Rete di dieci scuole — €250.
+La **bacheca** è la scheda «Traguardi» della LudoWiki
+(`src/features/ludowiki/AchievementsSection.tsx`): riepilogo (ottenuti su
+100, ori, argenti, bronzi, completamento), filtri per categoria, una tessera
+per traguardo con medaglia, soglie e avanzamento verso il livello successivo,
+e il dettaglio dei tre livelli. I segreti non sbloccati mostrano solo
+«Traguardo segreto». La LudoWiki compare nella barra laterale col primo
+traguardo sbloccato (prima era visibile solo in sviluppo).
 
-Ogni traguardo si ottiene una sola volta e dà un premio una tantum in Euro, non
-un bonus permanente: resta così un sistema secondario rispetto all'economia
-principale. Traguardi e statistiche si conservano quando si fonda una nuova
-scuola.
+| Categoria | Traguardo | Misura | Bronzo | Argento | Oro |
+| --- | --- | --- | --- | --- | --- |
+| Posta | La tastiera chiede pietà | Email inviate | 1 | 1.000 | 10.000 |
+| Posta | Dita d'acciaio | Input di scrittura | 1.000 | 100.000 | 10 milioni |
+| Posta | Frase perfetta | Frasi perfette | 10 | 250 | 5.000 |
+| Posta | La redazione lavora per te | Caratteri scritti dai collaboratori | 100.000 | 10 milioni | 1 miliardo |
+| Scuola | Porte aperte | Iscrizioni totali | 1 | 10.000 | 1 milione |
+| Scuola | Una scuola che respira | Record di iscritti attivi in una scuola | 100 | 10.000 | 1 milione |
+| Scuola | Lezioni di prova | Prove completate | 10 | 5.000 | 100.000 |
+| Scuola | Rubrica infinita | Contatti acquisiti | 100 | 10.000 | 1 milione |
+| Scuola | Strette di mano | Persone incontrate agli eventi | 1.000 | 100.000 | 10 milioni |
+| Scuola | Sempre in piazza | Eventi completati | 1 | 500 | 10.000 |
+| Scuola | Bilancio in attivo | Euro guadagnati | 10.000 € | 10 milioni € | 10 miliardi € |
+| Scuola | Virale | Follower guadagnati | 1.000 | 100.000 | 10 milioni |
+| Scuola | Spade sempre affilate | Manutenzioni | 1 | 5.000 | 100.000 |
+| Formazione | Dalla Forma 1 alla 7 | Forme completate | 1 | 1.000 | 25.000 |
+| Formazione | Il cerchio si chiude | Iscritti con Forma 7 in una scuola | 1 | 50 | 500 |
+| Formazione | Spirito agonistico | Corsi Agonisti completati | 10 | 500 | 10.000 |
+| Collaboratori | Il Consiglio delle Onde | Collaboratori reclutati | 1 | 100 | 1.000 |
+| Collaboratori | Maestri | Collaboratori al livello Maestro | 1 | 25 | 250 |
+| Collaboratori | Chi insegna, impara due volte | Collaboratori con attestato di Istruttore | 1 | 50 | 500 |
+| Tornei | Campione d'Italia | Titoli nazionali | 1 | 5 | 20 |
+| Tornei | Arena dei Campioni | Champion's Arena vinte | 1 | 3 | 10 |
+| Tornei | Re della Superba | Reptile o Superba vinti | 1 | 3 | 10 |
+| Tornei | Scrivere le Cronache | Chronicles vinte | 1 | 3 | 10 |
+| Tornei | Cacciatore di Segreti | Leggendari Segreti reclutati | 1 | 5 | 14 |
+| Rete | La Rete dell'Ordine | Scuole fondate | 1 | 5 | 10 |
+| Rete | Nome che pesa | Punti Reputazione guadagnati | 10 | 100 | 1.000 |
+| Rete | Vivere di rendita | Rendita della rete al mese | 1.000 € | 100.000 € | 10 milioni € |
+| Rete | Al massimo | Potenziamenti Reputazione a 50 punti | 1 | 3 | 6 |
+| Leggendari | Collezionista di leggende | Leggendari iscritti almeno una volta | 5 | 15 | 22 |
+| Gadget | Bottega delle Onde | Gadget venduti | 1.000 | 100.000 | 10 milioni |
+
+**Segreti** (livello unico; nome e condizione nascosti fino allo sblocco):
+
+1. **Nessun riferimento legalmente riconoscibile:** Venti eventi a tema gestiti con impeccabile prudenza narrativa.
+2. **Dieci inviti e immutato ottimismo:** Dieci email inviate senza che nessuno abbia ancora prenotato una prova.
+3. **Ospite d'onore:** Andrea Simonazzi si è iscritto all'Ordine.
+4. **Inflazione galoppante:** Cinque Inflazioni di Luce sulle spade della stessa scuola.
+5. **Armeria abbandonata:** Mille spade rotte nello stesso momento.
+6. **Tutto sulla rete:** Venti punti Reputazione nella rendita in una sola fondazione.
+7. **Ritorno in palestra:** Un Leggendario Segreto già reclutato è ricomparso tra i contatti di una nuova scuola.
+8. **Partenza a razzo:** Una nuova scuola fondata entro il secondo anno scolastico.
+9. **Esodo:** Cento iscritti persi in un solo fine anno.
+10. **Leggenda vivente:** Un Leggendario con Forma 7 e gli attestati di Istruttore e di Tecnico.
+
+I contatori che il gioco non teneva per tutta la partita stanno in
+`statistics.career` (`src/game/career.ts`): frasi perfette, corsi agonisti,
+titoli nazionali, Champion's Arena, Reptile/Superba e Chronicles vinti,
+Reputazione guadagnata, gadget venduti, il fine anno con più abbandoni, i
+punti nella rendita di una sola fondazione e l'anno scolastico della prima
+fondazione. Frasi perfette e gadget della scuola corrente si sommano al
+contatore alla fondazione.
+
+Salvataggi precedenti (v87): i vecchi traguardi spariscono (i livelli
+corrispondenti si risbloccano al primo tick) tranne i due diventati segreti
+(«Dieci inviti e immutato ottimismo», «Nessun riferimento legalmente
+riconoscibile»); i contatori ripartono da quello che il salvataggio sa ancora
+(titoli e vittorie dalle scuole fondate e da quella corrente, Reputazione da
+punti e potenziamenti, corsi agonisti dagli iscritti). Gli euro dei vecchi
+traguardi non vengono più dati.
 
 ---
 

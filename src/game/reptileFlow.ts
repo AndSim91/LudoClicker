@@ -1,3 +1,4 @@
+import { addCareer } from "./career";
 import { getContactBaseStats } from "./athleteStats";
 import { getSchoolYear } from "./calendar";
 import { applyEquipmentWear } from "./equipment";
@@ -154,6 +155,7 @@ function applyReptileResult(
       },
     },
   };
+  nextState = addCareer(nextState, { reptileWins: schoolWon ? 1 : 0 });
   for (const id of getDefeatedSecretLegendaryIds(result)) {
     nextState = resolveSecretLegendaryDefeat(nextState, id as Parameters<typeof resolveSecretLegendaryDefeat>[1], now);
   }

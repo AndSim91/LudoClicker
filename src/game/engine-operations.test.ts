@@ -164,8 +164,10 @@ describe("game engine: operations", () => {
     expect(completed.statistics.eventsCompleted).toBe(1);
     expect(completed.contacts).toHaveLength(1);
     expect(getCurrentSchoolContactCount(completed)).toBe(state.contacts.length);
-    expect(completed.messages).toHaveLength(messagesBeforeCompletion.length + 1);
-    expect(completed.messages[0].subject).toBe("Attività operative disponibili");
+    // The event itself sends nothing: only the unlock and the first achievement (Sempre in piazza).
+    expect(completed.messages.filter((message) => message.threadKey !== "progress"))
+      .toHaveLength(messagesBeforeCompletion.length + 1);
+    expect(completed.messages.some((message) => message.subject === "Attività operative disponibili")).toBe(true);
   });
 
   it("cancels a running event with quarter wear, no cooldown, and no contacts", () => {
@@ -351,7 +353,7 @@ describe("game engine: operations", () => {
     const maintained = gameReducer(worn, { type: "MAINTAIN_EQUIPMENT", now: 2_000 });
     const repeated = gameReducer(maintained, { type: "MAINTAIN_EQUIPMENT", now: 3_000 });
 
-    expect(maintained.school.euros).toBe(25);
+    expect(maintained.school.euros).toBe(20);
     expect(maintained.equipment.wear).toBe(0);
     expect(maintained.statistics.maintenanceCompleted).toBe(1);
     expect(repeated).toBe(maintained);
@@ -396,7 +398,7 @@ describe("game engine: operations", () => {
       { type: "MAINTAIN_EQUIPMENT", now: 4_000 },
     );
 
-    expect(maintained.school.euros).toBe(5);
+    expect(maintained.school.euros).toBe(0);
     expect(maintained.equipment).toMatchObject({
       availableSwords: 6,
       damagedSwords: 0,

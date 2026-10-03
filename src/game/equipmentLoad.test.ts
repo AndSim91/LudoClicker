@@ -149,7 +149,7 @@ describe("carico aggregato delle spade", () => {
       damagedSwords: 0,
       wear: 0,
     });
-    expect(maintained.school.euros).toBe(5);
+    expect(maintained.school.euros).toBe(0);
   });
 
   it("conserva il lavoro automatico se tutte le spade sane sono in uso", () => {
