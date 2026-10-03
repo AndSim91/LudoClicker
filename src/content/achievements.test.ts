@@ -51,7 +51,7 @@ describe("achievements", () => {
     const base = addAdminMembers(createInitialState(1_000), 125);
     const ready: GameState = {
       ...base,
-      school: { ...base.school, fame: 10_000 },
+      school: { ...base.school, fame: 5_000 },
       player: { ...base.player, perfectPhrases: 7 },
       tournaments: { ...base.tournaments, nationalTitlesCurrentSchool: 1 },
     };

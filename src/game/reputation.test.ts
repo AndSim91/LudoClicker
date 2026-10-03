@@ -37,16 +37,19 @@ function readySchool(base: GameState = createInitialState(1_000, "Tester")): Gam
   const withMembers = addAdminMembers(base, 125 - base.school.activeMembers);
   return {
     ...withMembers,
-    school: { ...withMembers.school, fame: 10_000 },
+    school: { ...withMembers.school, fame: 5_000 },
     tournaments: { ...withMembers.tournaments, nationalTitlesCurrentSchool: 1 },
   };
 }
 
-it("earns 1 point for the national title, half of √(Fama/100), +1 for each kind of tournament won", () => {
+it("earns 1 point for the national title, √(Fama/200), +1 for each kind of tournament won", () => {
   const ready = readySchool();
   expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 5, points: 6, rentPerPoint: 50 });
   // Founding as soon as possible still earns the point of the national title.
-  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 200 } }).points).toBe(1);
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 199 } }).points).toBe(1);
+  // The n-th point of the Fama arrives at 200 × n² (200, 800, 1.800 …).
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 200 } }).famePoints).toBe(1);
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 10_000 } }).famePoints).toBe(7);
 
   const win = { schoolYear: 2, teamId: "home", schoolName: ready.school.name, athleteNames: ["A", "B"] as [string, string], superba: true };
   const decorated: GameState = {

@@ -532,14 +532,14 @@ i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 
 ```
 punti = 1 per il titolo nazionale che sblocca il prestigio
-      + arrotonda per difetto(√(Fama / 100) / 2)
+      + arrotonda per difetto(√(Fama / 200))
       + 1 se la scuola lasciata ha vinto la Champion's Arena
       + 1 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
       + 1 se ha vinto le Chronicles of Ludosport
 ```
 
-Per esempio, senza altri tornei, Fama 200 dà 1 punto, Fama 10.000 ne dà 6 e
-Fama 30.000 ne dà 9 (`reputationNationalTitlePoints = 1`).
+Per esempio, senza altri tornei, Fama 199 dà 1 punto, Fama 10.000 ne dà 8 e
+Fama 30.000 ne dà 13 (`reputationNationalTitlePoints = 1`).
 
 **Spesa.** I punti si spendono alla fondazione, nel modulo di Impostazioni →
 Rete dell'Ordine; la spesa è definitiva e i punti non spesi restano per la
