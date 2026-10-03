@@ -18,7 +18,7 @@ export function SectorMasteryIndicator({
     ? average.progress.definition.name
     : "—";
   const progressLabel = collaborators.length === 0
-    ? "Nessun collaboratore assegnato"
+    ? "Nessuno qui, per ora."
     : nextLevel
       ? `Maestria media verso ${nextLevel.name}`
       : "Maestria media al livello massimo";

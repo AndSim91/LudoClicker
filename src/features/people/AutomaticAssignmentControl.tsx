@@ -44,8 +44,8 @@ export function AutomaticAssignmentControl({
         </label>
         <p id="automatic-assignment-help">
           {shares
-            ? "I collaboratori liberi e i nuovi arrivati vanno nel settore più lontano dalla sua quota, scegliendo chi è più portato. Chi è già assegnato resta dov'è."
-            : "Attivala per mantenere le proporzioni attuali dei settori anche con i nuovi collaboratori."}
+            ? "Liberi e nuovi arrivati vanno dove manca più gente, e ci va chi è più portato. Chi ha già un posto non si muove."
+            : "Tiene le proporzioni dei settori anche con i nuovi arrivati."}
         </p>
       </header>
       {shares ? (

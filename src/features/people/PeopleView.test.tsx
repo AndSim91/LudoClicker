@@ -178,8 +178,8 @@ describe("PeopleView", () => {
     expect(screen.getByRole("region", { name: "Gestione aggregata dei collaboratori" })).toBeVisible();
     expect(screen.queryByText("Collaboratore Aggregato 0")).not.toBeInTheDocument();
     expect(screen.queryByText(/Preset/)).not.toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Gestisci settore" })).toHaveLength(3);
-    screen.getAllByRole("button", { name: "Gestisci settore" }).forEach((button) => {
+    expect(screen.getAllByRole("button", { name: /^Gestisci (?!Istruttori)/ })).toHaveLength(3);
+    screen.getAllByRole("button", { name: /^Gestisci (?!Istruttori)/ }).forEach((button) => {
       expect(button).toBeDisabled();
     });
 
@@ -469,12 +469,12 @@ describe("PeopleView", () => {
     const writingCard = screen.getByRole("heading", { name: "Redazione" }).closest("article");
     expect(writingCard).not.toBeNull();
     expect(writingCard).not.toHaveClass("is-empty");
-    expect(within(writingCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeEnabled();
+    expect(within(writingCard as HTMLElement).getByRole("button", { name: /^Gestisci / })).toBeEnabled();
 
     const eventsCard = screen.getByRole("heading", { name: "Eventi" }).closest("article");
     expect(eventsCard).not.toBeNull();
     expect(eventsCard).toHaveClass("is-empty");
-    expect(within(eventsCard as HTMLElement).getByRole("button", { name: "Gestisci settore" })).toBeDisabled();
+    expect(within(eventsCard as HTMLElement).getByRole("button", { name: /^Gestisci / })).toBeDisabled();
   });
 
   it("sorts every collaborator column in sector management and the teaching center", () => {
@@ -542,7 +542,7 @@ describe("PeopleView", () => {
     );
 
     const writingCard = screen.getByRole("heading", { name: "Redazione" }).closest("article");
-    fireEvent.click(within(writingCard as HTMLElement).getByRole("button", { name: "Gestisci settore" }));
+    fireEvent.click(within(writingCard as HTMLElement).getByRole("button", { name: /^Gestisci / }));
     const writingDialog = screen.getByRole("dialog", { name: "Redazione" });
     expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
@@ -585,7 +585,7 @@ describe("PeopleView", () => {
     expect(resetWritingSort).toBeDisabled();
 
     fireEvent.click(within(writingDialog).getByRole("button", { name: "Chiudi pannello Redazione" }));
-    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
     const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
     const trainingSort = within(instructorDialog).getByRole("button", {
       name: "Ordina collaboratori per Formazione Istruttore",
@@ -695,7 +695,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
     const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
     const rarityFilter = within(instructorDialog).getByRole("combobox", {
       name: /^Filtra istruttori per rarit/,
@@ -1072,7 +1072,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Apri centro didattico" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
     const teachingCenter = screen.getByRole("dialog", { name: "Istruttori" });
     expect(within(teachingCenter).getByRole("button", {
       name: "Ordina collaboratori per Formazione Istruttore",
@@ -1381,7 +1381,7 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    const labels = ["Nome", "Rarità", "Percorso", "Arena", "Stile", "Stato", "Prossima Forma"];
+    const labels = ["Nome", "Rarità", "Percorso", "Arena", "Stile", "Ruolo", "Prossimo passo"];
     for (const label of labels) {
       expect(within(roster).getByRole("button", { name: `Ordina per ${label}` })).toBeVisible();
     }
@@ -1597,7 +1597,6 @@ describe("PeopleView", () => {
     expect(membersHeading).toBeVisible();
     expect(membersHeading.parentElement).toHaveClass("is-inline-count");
     expect(membersHeading.parentElement).toHaveTextContent("3");
-    expect(screen.getAllByText("Iscritto")).toHaveLength(3);
     expect(screen.queryByText("Ha lasciato la scuola")).not.toBeInTheDocument();
   });
 
@@ -2082,7 +2081,7 @@ describe("PeopleView", () => {
       .closest(".member-row");
     expect(athleteRow).not.toBeNull();
     const courseMessage = within(athleteRow as HTMLElement).getByText(
-      "Corso Agonisti | Potenziale totale +6",
+      "Potenziale totale +6",
     );
     expect(courseMessage).toBeVisible();
     expect(courseMessage.closest(".member-training-cell")).not.toBeNull();
@@ -2207,7 +2206,7 @@ describe("PeopleView", () => {
     expect(memberFormLogo).toHaveTextContent("♛");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
     expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
-      "IscrittoCollaboratore Attrezzature",
+      "Collaboratore Attrezzatura",
     );
     const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
     expect(trainingCell).toHaveTextContent("Forma 2");
@@ -2260,7 +2259,7 @@ describe("PeopleView", () => {
     const trainingCell = memberRow?.querySelector<HTMLElement>(".member-training-cell");
 
     expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
-      "IscrittoCollaboratore Istruttore",
+      "Collaboratore Istruttore",
     );
     expect(trainingCell).toHaveTextContent("Forma 2");
     expect(trainingCell).not.toHaveTextContent("Forma 1");
@@ -2332,7 +2331,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Rischio abbandono - alto")).toBeVisible();
+    expect(screen.getByText("Rischio di abbandono alto", { selector: ".member-status small" })).toBeVisible();
     expect(
       screen.queryByRole("combobox", { name: `Formazione per ${displayName}` }),
     ).not.toBeInTheDocument();
@@ -2548,9 +2547,9 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getAllByText("Rischio abbandono - alto")).toHaveLength(1);
-    expect(screen.getAllByText("Rischio abbandono - medio")).toHaveLength(1);
-    expect(screen.getAllByText("Rischio abbandono - basso")).toHaveLength(1);
+    expect(screen.getAllByText("Rischio di abbandono alto", { selector: ".member-status small" })).toHaveLength(1);
+    expect(screen.getAllByText("Rischio di abbandono medio", { selector: ".member-status small" })).toHaveLength(1);
+    expect(screen.getAllByText("Rischio di abbandono basso", { selector: ".member-status small" })).toHaveLength(1);
     expect(screen.queryByText(/Rischio annuo se ignorato/)).not.toBeInTheDocument();
     expect(
       within(screen.getByRole("region", { name: "Iscritti" })).queryByText(/abbandono.*%/i),
@@ -2577,8 +2576,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Nuova iscrizione")).toBeVisible();
-    expect(screen.queryByText(/Rischio abbandono/)).not.toBeInTheDocument();
+    expect(screen.getByText("Nuova iscrizione", { selector: ".member-status small" })).toBeVisible();
+    expect(screen.queryByText(/Rischio di abbandono/)).not.toBeInTheDocument();
   });
 
   it("shows no risk after a member completes form training this school year", () => {
@@ -2604,7 +2603,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Corso in palestra")).toBeVisible();
+    expect(screen.getByText("Corso in palestra", { selector: ".member-status small" })).toBeVisible();
     expect(screen.queryByText(/Seguito quest'anno/)).not.toBeInTheDocument();
   });
 

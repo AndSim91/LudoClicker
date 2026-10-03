@@ -767,7 +767,7 @@ export function TrainingControl({
       return <div className={`training-locked${variantClass}`}><strong>Corsi annuali completati</strong></div>;
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
-    return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Percorso completato alla {latestForm?.longName ?? "ultima Forma"}</strong></div>;
+    return <div className={`training-locked${variantClass}`}><strong title={`Fino alla ${latestForm?.longName ?? "ultima Forma"}`}>Percorso completato</strong></div>;
   }
 
   if (hasAssignedInstructor && (variant === "roster" || !collaborator)) {

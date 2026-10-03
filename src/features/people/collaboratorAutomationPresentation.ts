@@ -273,10 +273,10 @@ export function getCollaboratorAutomationPresentation({
     });
     return {
       title: isRepairingSword
-        ? `Spade rotte: ${damagedSwords}`
+        ? `${damagedSwords.toLocaleString("it-IT")} ${damagedSwords === 1 ? "spada rotta" : "spade rotte"}`
         : `Usura attrezzatura: ${Math.round(state.equipment.wear)}`,
       detail: isRepairingSword
-        ? "Riparazione spade in corso..."
+        ? "Una alla volta, le stanno riparando."
         : "Cura dell'attrezzatura in corso...",
       progress,
       progressLabel: isRepairingSword

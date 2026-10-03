@@ -300,7 +300,7 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
   await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Eventi" }).click();
   await aggregateView.getByRole("button", { name: "Aumenta collaboratori in Istruttori" }).click();
 
-  await aggregateView.getByRole("button", { name: "Apri centro didattico" }).click();
+  await aggregateView.getByRole("button", { name: "Gestisci Istruttori" }).click();
   const instructorPanel = page.getByRole("dialog", { name: "Istruttori" });
   await expect(instructorPanel).toBeVisible();
   await expect(

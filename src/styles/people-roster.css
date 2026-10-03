@@ -53,7 +53,7 @@
   border-radius: 999px;
   background: var(--surface-muted);
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-align: center;
 }
@@ -145,7 +145,7 @@
 
 .rarity-overview span {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -247,7 +247,7 @@
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .member-filter-row input {
@@ -263,7 +263,7 @@
   padding: 0 10px;
   border-bottom: 1px solid var(--line);
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .member-filter-summary button {
@@ -272,14 +272,14 @@
   border: 0;
   background: transparent;
   color: var(--blue-700);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .member-filter-empty {
   padding: 28px 18px;
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -304,7 +304,7 @@
 
 .member-email {
   max-width: 100%;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .member-rarity {
@@ -433,10 +433,8 @@
 
 .member-cancellation-dialog header span:not(.member-cancellation-icon) {
   color: #a4262c;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .member-cancellation-dialog h2 {
@@ -538,7 +536,7 @@
 
 .member-path > strong {
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
@@ -567,7 +565,7 @@
   align-items: center;
   gap: 2px;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.1;
   text-align: center;
   white-space: normal;
@@ -597,13 +595,13 @@
 
 .form-logo-empty {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
 .member-training-cell > small {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .member-status {
@@ -619,7 +617,7 @@
 
 .member-status > small {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.25;
   white-space: normal;
 }
@@ -655,7 +653,7 @@
 .people-head {
   color: var(--ink-muted);
   background: var(--surface-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -694,10 +692,8 @@
     flex-direction: column;
     gap: 5px;
     color: var(--ink-muted);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
   }
 
   .member-sort-mobile select,
@@ -765,10 +761,8 @@
     margin-bottom: 5px;
     color: var(--ink-muted);
     content: attr(data-label);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
   }
 
   .people-view .member-row > strong[data-label] {
@@ -949,7 +943,7 @@
 
 .member-card-stats dt {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .member-card-stats dd {
@@ -979,4 +973,10 @@
 .member-card .form-logo-item img {
   width: 22px;
   height: 22px;
+}
+
+/* Fase 8: «Leggendario» stays on one line now that the text is 12 px. */
+.member-rarity-cell {
+  overflow-wrap: normal;
+  white-space: nowrap;
 }

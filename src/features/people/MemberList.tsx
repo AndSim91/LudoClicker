@@ -110,9 +110,7 @@ function getDisplayedMemberStatus(
   const collaborator = context.collaboratorsByContactId.get(contact.id);
   if (collaborator) {
     if (!collaborator.assignment) return "Collaboratore non assegnato";
-    const assignmentLabel = collaborator.assignment === "equipment"
-      ? "Attrezzature"
-      : getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked);
+    const assignmentLabel = getCollaboratorAssignmentLabel(collaborator.assignment, socialUnlocked);
     return `Collaboratore ${assignmentLabel}`;
   }
   const student = getMemberStudent(contact, context);
@@ -434,9 +432,9 @@ export function MemberList({
         <SortableHeader label="Percorso" sortKey="path" sort={sort} onSort={handleSort} />
         <SortableHeader label="Arena" sortKey="arena" sort={sort} onSort={handleSort} />
         <SortableHeader label="Stile" sortKey="style" sort={sort} onSort={handleSort} />
-        <SortableHeader label="Stato" sortKey="status" sort={sort} onSort={handleSort} />
+        <SortableHeader label="Ruolo" sortKey="status" sort={sort} onSort={handleSort} />
         <SortableHeader
-          label="Prossima Forma"
+          label="Prossimo passo"
           sortKey="next-form"
           sort={sort}
           onSort={handleSort}
@@ -487,7 +485,7 @@ export function MemberList({
             min="0"
             step="0.001"
             aria-label="Filtra iscritti per Arena minima"
-            placeholder="Arena min."
+            placeholder="Min."
             value={arenaMinimum}
             onChange={(event) => updateFilter(() => setArenaMinimum(event.target.value))}
           />
@@ -499,7 +497,7 @@ export function MemberList({
             min="0"
             step="0.001"
             aria-label="Filtra iscritti per Stile minimo"
-            placeholder="Stile min."
+            placeholder="Min."
             value={styleMinimum}
             onChange={(event) => updateFilter(() => setStyleMinimum(event.target.value))}
           />
@@ -511,9 +509,9 @@ export function MemberList({
             value={statusFilter}
             onChange={(event) => updateFilter(() => setStatusFilter(event.target.value))}
           >
-            <option value="all">Tutti gli stati</option>
+            <option value="all">Tutti i ruoli</option>
             {filterOptions.statuses.map((status) => (
-              <option value={status} key={status}>Stato: {status}</option>
+              <option value={status} key={status}>{status}</option>
             ))}
           </select>
         </label>
@@ -532,13 +530,19 @@ export function MemberList({
         </label>
       </div>
       <div className="member-filter-summary">
-        <span>{filteredMembers.length} di {members.length} iscritti</span>
+        <span>
+          {filteredMembers.length === members.length
+            ? `${members.length.toLocaleString("it-IT")} iscritti`
+            : `${filteredMembers.length.toLocaleString("it-IT")} di ${members.length.toLocaleString("it-IT")} iscritti`}
+        </span>
         {groupedMembers > 0 ? (
-          <span title="Iscritti senza storia personale: ricevono nome e scheda quando iniziano un corso.">
-            + {groupedMembers} senza scheda
+          <span title="Ancora senza scheda: nome e storia arrivano al primo corso.">
+            + {groupedMembers.toLocaleString("it-IT")} senza scheda
           </span>
         ) : null}
-        <button type="button" onClick={resetFilters}>Azzera filtri</button>
+        {filteredMembers.length === members.length ? null : (
+          <button type="button" onClick={resetFilters}>Azzera filtri</button>
+        )}
         <span className="member-view-switch" role="group" aria-label="Vista degli iscritti">
           <button type="button" aria-pressed={view === "table"} onClick={() => changeView("table")}>
             <Icon name="menu" />Tabella
@@ -600,7 +604,7 @@ export function MemberList({
             />
             {(contact.agonistCourseCompletions ?? 0) > 0 ? (
               <small className="member-agonist-course-message">
-                Corso Agonisti | Potenziale totale +{
+                Potenziale totale +{
                   (contact.agonistCourseArenaBonus ?? contact.agonistCourseCompletions ?? 0) +
                   (contact.agonistCourseStyleBonus ?? contact.agonistCourseCompletions ?? 0)
                 }
@@ -675,7 +679,8 @@ export function MemberList({
               )}
             </span>
             <span className="member-status" data-label="Stato">
-              <span>{CONTACT_STATUS_LABELS[contact.status]}</span>
+              {/* Every row here is an active member: only other states are worth a word. */}
+              {contact.status === "enrolled" ? null : <span>{CONTACT_STATUS_LABELS[contact.status]}</span>}
               <small>{presentation.status}</small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">

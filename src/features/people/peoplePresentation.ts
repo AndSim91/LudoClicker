@@ -15,8 +15,8 @@ export function getMemberDepartureRiskLabel(
   foundedSchools: number,
 ): string {
   const annualDepartureChance = getMemberAnnualDepartureChance(forms, rarity, foundedSchools);
-  if (annualDepartureChance >= 0.5) return "Rischio abbandono - alto";
-  if (annualDepartureChance >= 0.15) return "Rischio abbandono - medio";
-  if (annualDepartureChance > 0) return "Rischio abbandono - basso";
+  if (annualDepartureChance >= 0.5) return "Rischio di abbandono alto";
+  if (annualDepartureChance >= 0.15) return "Rischio di abbandono medio";
+  if (annualDepartureChance > 0) return "Rischio di abbandono basso";
   return "Nessun rischio";
 }

@@ -45,7 +45,7 @@
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .collaborator-table-filters input {
@@ -60,7 +60,7 @@
 .collaborator-filter-empty {
   padding: 28px 18px;
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -70,7 +70,7 @@
   border-bottom: 1px solid var(--line);
   background: var(--surface-muted);
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -157,7 +157,7 @@
 
 .collaborator-copy .rarity-address {
   max-width: 100%;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .collaborator-copy .form-logo-strip {
@@ -173,7 +173,7 @@
 
 .collaborator-copy .form-logo-item > span:last-child {
   max-width: 48px;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .form-logo-mark {
@@ -212,7 +212,7 @@
 .collaborator-activity-title > strong {
   overflow: hidden;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -223,7 +223,7 @@
   display: -webkit-box;
   overflow: hidden;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -291,7 +291,7 @@
   overflow: hidden;
   min-width: 0;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -318,7 +318,7 @@
 
 .collaborator-activity-progress > strong {
   color: var(--blue-700);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -353,7 +353,7 @@
 
 .collaborator-official-stats small {
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .collaborator-official-stats strong {
@@ -370,10 +370,8 @@
 .collaborator-assignment > span {
   display: none;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: .03em;
-  text-transform: uppercase;
 }
 
 .collaborator-row .collaborator-assignment select,
@@ -385,7 +383,7 @@
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .collaborator-row-actions {
@@ -401,7 +399,7 @@
   border-radius: var(--radius-sm);
   color: var(--blue-700);
   background: var(--surface);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -455,7 +453,7 @@
   justify-content: space-between;
   gap: 6px;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .instructor-compact-certification button {
@@ -465,7 +463,7 @@
   border-radius: var(--radius-sm);
   color: #fff;
   background: var(--blue-600);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -484,7 +482,7 @@
 .training-compact .training-form-label,
 .training-compact .training-option-picker-label {
   display: block;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .training-compact .training-form-preview {
@@ -497,11 +495,11 @@
 }
 
 .training-compact .training-form-preview strong {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .training-compact .training-form-preview small {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .training-compact .training-option-list {
@@ -523,22 +521,22 @@
 }
 
 .training-compact .training-option-copy > strong {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .training-compact .training-option-copy > small,
 .training-compact .training-option-meta > small {
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .training-compact .training-option-meta > strong {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .training-compact.training-control > .training-start-button {
   width: 100%;
   min-height: 30px;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .training-progress.training-compact,
@@ -550,7 +548,7 @@
 .training-locked.training-compact > span,
 .training-progress.training-compact > strong,
 .training-locked.training-compact > strong {
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.3;
 }
 
@@ -670,7 +668,7 @@
 
 .collaborator-detail-identity > div:last-child > span:not(.rarity-address) {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .collaborator-detail-current {
@@ -702,14 +700,14 @@
 .collaborator-detail-current span,
 .collaborator-detail-current small {
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
 .collaborator-detail-current strong {
   overflow: hidden;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
   text-overflow: ellipsis;
 }
@@ -747,10 +745,8 @@
   display: block;
   margin: 0 0 10px;
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: .03em;
-  text-transform: uppercase;
 }
 
 .collaborator-detail-profile .form-logo-strip {
@@ -759,7 +755,7 @@
 
 .collaborator-detail-profile .form-bonus-summary {
   color: var(--blue-700);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -787,7 +783,7 @@
 
 .collaborator-detail-certificates span {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .collaborator-detail-assignment {
@@ -841,10 +837,8 @@
     flex-direction: column;
     gap: 5px;
     color: var(--ink-muted);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: .03em;
-    text-transform: uppercase;
   }
 
   .collaborator-sort-mobile select,
@@ -854,7 +848,7 @@
     border-radius: var(--radius-sm);
     background: var(--surface);
     color: var(--ink);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: none;
   }
 
@@ -897,10 +891,8 @@
     margin-bottom: 6px;
     color: var(--ink-muted);
     content: attr(data-label);
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: .03em;
-    text-transform: uppercase;
   }
 
   .collaborator-row > .collaborator-identity {

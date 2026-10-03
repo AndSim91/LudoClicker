@@ -104,7 +104,7 @@ export function PeopleView({
           <div className="people-page-title-row">
             <h1>Scuola</h1>
           </div>
-          <p>Iscritti e Collaboratori delle Onde</p>
+          <p>Servizio, cura, rispetto. Il resto lo fanno i collaboratori.</p>
         </div>
         <svg
           className="people-hero-waves"

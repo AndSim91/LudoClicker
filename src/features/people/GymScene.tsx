@@ -149,7 +149,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
         <strong>{current.name}</strong>
         <span>
           {next
-            ? `Prossimo traguardo: ${next.name.toLocaleLowerCase("it-IT")} a ${next.threshold} ${next.threshold === 1 ? "iscritto attivo" : "iscritti attivi"}`
+            ? `Prossimo traguardo: ${next.name.toLocaleLowerCase("it-IT")}, a ${next.threshold.toLocaleString("it-IT")} ${next.threshold === 1 ? "iscritto" : "iscritti"}`
             : "La sede è al completo"}
         </span>
       </figcaption>

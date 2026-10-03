@@ -62,23 +62,23 @@ const ROLE_PRESENTATION: Record<
 > = {
   writing: {
     icon: "megaphone",
-    description: "Gestione dei social media e comunicazione col pubblico.",
+    description: "Post, video e follower. Qualcuno deve pur rispondere ai commenti.",
   },
   events: {
     icon: "calendar",
-    description: "Organizzazione degli eventi e acquisizione di nuovi contatti.",
+    description: "Portano la scuola fuori dalla palestra e tornano con i contatti.",
   },
   equipment: {
     icon: "wrench",
-    description: "Manutenzione e riparazione delle spade.",
+    description: "Riparano le spade. Ce n'è sempre almeno una rotta.",
   },
   instructor: {
     icon: "people",
-    description: "Forme, Corso Agonisti e preparazione atletica quando disponibile.",
+    description: "Insegnano le Forme e preparano gli agonisti. Con pazienza infinita.",
   },
   gadget: {
     icon: "gift",
-    description: "Sviluppo dei prototipi e vendita del catalogo Gadget.",
+    description: "Inventano, collaudano e vendono i Gadget della scuola.",
   },
 };
 
@@ -187,7 +187,7 @@ function StandardSectorCard({
         now,
         activeEmail,
       })
-    : { title: "In attesa", detail: "Nessun collaboratore assegnato" };
+    : { title: "In attesa", detail: "Nessuno qui, per ora." };
   const socialActivities = role === "writing" && state.unlocks.social
     ? [
         getSocialContentAutomationPresentation(
@@ -295,10 +295,11 @@ function StandardSectorCard({
       <button
         type="button"
         className="sector-manage-button"
+        aria-label={`Gestisci ${label}`}
         disabled={assigned.length === 0}
         onClick={onOpen}
       >
-        Gestisci settore
+        Gestisci
         <Icon name="arrowRight" />
       </button>
     </article>
@@ -526,8 +527,8 @@ function InstructorSectorCard({
         </section>
       </div>
 
-      <button type="button" className="sector-manage-button is-primary" onClick={onOpen}>
-        Apri centro didattico
+      <button type="button" className="sector-manage-button is-primary" aria-label="Gestisci Istruttori" onClick={onOpen}>
+        Gestisci
         <Icon name="arrowRight" />
       </button>
     </article>
@@ -673,8 +674,8 @@ export function CollaboratorSectorView({
       {fallbackUnlocked && onSetFallback ? (
         <section className="collaborator-operations-control" aria-labelledby="fallback-sectors-title">
           <header>
-            <h3 id="fallback-sectors-title">Turni dei collaboratori</h3>
-            <p>Se il settore principale è fermo, la produttività disponibile passa al settore secondario. L'Insegnamento richiede invece un incarico dedicato.</p>
+            <h3 id="fallback-sectors-title">Turni</h3>
+            <p>Quando un settore è fermo, i suoi collaboratori danno una mano a un altro. Gli Istruttori no: insegnare è un lavoro a tempo pieno.</p>
           </header>
           <div className="collaborator-fallback-grid">
             {availableRoles.map((role) => (
@@ -688,7 +689,7 @@ export function CollaboratorSectorView({
                     (event.target.value || null) as CollaboratorMasteryRole | null,
                   )}
                 >
-                  <option value="">Nessun settore secondario</option>
+                  <option value="">Nessuno</option>
                   {availableRoles.filter((candidate) =>
                     candidate !== role && candidate !== "instructor"
                   ).map((candidate) => (
@@ -706,8 +707,8 @@ export function CollaboratorSectorView({
       {prioritiesUnlocked && onMovePriority ? (
         <section className="collaborator-operations-control" aria-labelledby="operational-priorities-title">
           <header>
-            <h3 id="operational-priorities-title">Priorità operative</h3>
-            <p>L'ordine decide chi usa per primo Euro, spade e altre risorse disponibili.</p>
+            <h3 id="operational-priorities-title">Chi ha la precedenza</h3>
+            <p>Quando fondi e spade non bastano per tutti, si serve prima chi sta in alto.</p>
           </header>
           <ol className="operational-priority-list">
             {state.collaboratorManagement.operationalPriorities

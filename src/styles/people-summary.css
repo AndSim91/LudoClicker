@@ -133,10 +133,8 @@
   border-width: 1px;
   border-style: solid;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
 }
 
 .collaborator-copy .special-collaborator-badge:not(.secret),
@@ -150,7 +148,7 @@
 .collaborator-copy small,
 .collaborator-row label > span {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .collaborator-copy .form-bonus-summary {
@@ -195,14 +193,14 @@
 
 .collaborator-mastery summary > span {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .collaborator-mastery summary > strong {
   overflow: hidden;
   color: var(--blue-700);
-  font-size: 10px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -210,7 +208,7 @@
 .collaborator-mastery summary > small {
   grid-column: 2;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .mastery-grid {
@@ -239,7 +237,7 @@
 .mastery-entry > strong {
   overflow: hidden;
   color: var(--blue-700);
-  font-size: 10px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -247,7 +245,7 @@
 .mastery-entry > small {
   overflow: hidden;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

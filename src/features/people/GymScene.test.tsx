@@ -17,7 +17,7 @@ describe("GymScene", () => {
     render(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 0 } }} />);
 
     expect(screen.getByText("Palestra vuota")).toBeInTheDocument();
-    expect(screen.getByText("Prossimo traguardo: primo allievo a 1 iscritto attivo")).toBeInTheDocument();
+    expect(screen.getByText("Prossimo traguardo: primo allievo, a 1 iscritto")).toBeInTheDocument();
   });
 
   it("shows every rarity the school has before filling the mat by member share", () => {

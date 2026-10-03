@@ -565,7 +565,7 @@ export function CollaboratorSectorPanel({
           {assigned.length === 0 ? (
             <div className="sector-panel-empty">
               <Icon name="people" />
-              <strong>Nessun collaboratore assegnato</strong>
+              <strong>Nessuno qui, per ora.</strong>
               <span>Usa il pulsante + nella box del settore per assegnarne uno.</span>
             </div>
           ) : (

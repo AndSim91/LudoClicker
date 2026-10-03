@@ -13,7 +13,7 @@
 .training-future > span,
 .training-control label > span {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .training-locked strong,
@@ -44,7 +44,7 @@
 .training-form-label {
   display: none;
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .training-form-preview {
@@ -82,7 +82,7 @@
 .training-form-preview small {
   overflow: hidden;
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -96,12 +96,12 @@
 
 .training-option-picker-label {
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .training-option-picker-hint {
   color: var(--warning);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -179,7 +179,7 @@
 
 .training-option-copy > strong {
   overflow: hidden;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -188,7 +188,7 @@
 .training-option-copy > small {
   overflow: hidden;
   color: var(--ink-muted);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -205,13 +205,13 @@
 
 .training-option-meta > strong {
   color: var(--blue-700);
-  font-size: 9px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 .training-option-meta > small {
   color: var(--ink-muted);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .training-option-meta > .training-option-coverage {
@@ -282,7 +282,7 @@
 
 .training-roster .training-option-picker-label {
   color: var(--ink);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.25;
 }
@@ -309,7 +309,7 @@
 .training-roster .training-option-copy > strong {
   display: -webkit-box;
   overflow: hidden;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.15;
   text-overflow: clip;
   white-space: normal;
@@ -319,18 +319,18 @@
 
 .training-roster .training-option-copy > small,
 .training-roster .training-option-meta > small {
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .training-roster .training-option-meta > strong {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .training-roster.training-control > .training-start-button {
   min-width: 148px;
   min-height: 32px;
   justify-self: end;
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -385,7 +385,7 @@
   min-height: 20px;
   padding: 2px 5px;
   color: #fff;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .technician-course-reservation-copy {
@@ -404,13 +404,13 @@
 
 .technician-course-reservation-copy strong {
   color: #5f3b8f;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
 .technician-course-reservation-copy small {
   color: var(--ink-muted);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.25;
 }
 
@@ -446,13 +446,13 @@
 .technician-course-heading strong,
 .technician-course-gate strong {
   color: #5f3b8f;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .technician-course-heading small,
 .technician-course-gate small {
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .technician-course-badge {
@@ -464,9 +464,8 @@
   border-radius: 999px;
   color: #fff;
   background: #7650a8;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
 }
 
 .technician-course-toggle {
@@ -596,7 +595,7 @@
 .instructor-panel-heading > span > small,
 .instructor-panel > small {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.35;
 }
 
@@ -618,7 +617,7 @@
 
 .instructor-certification-copy small {
   color: var(--ink-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .instructor-certification-copy strong {
@@ -633,7 +632,7 @@
   border-radius: var(--radius-sm);
   color: #fff;
   background: var(--blue-600);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -649,7 +648,7 @@
   align-items: center;
   gap: 6px !important;
   color: var(--blue-700);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -680,7 +679,7 @@
 .instructor-student-copy strong {
   overflow: hidden;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -688,14 +687,14 @@
 .instructor-student-copy small {
   overflow: hidden;
   color: var(--ink-muted);
-  font-size: 9px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .instructor-student-progress {
   color: var(--blue-700);
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 

@@ -1240,10 +1240,12 @@ Regole:
   (`collaboratorManagement.automaticShares`, `src/game/collaboratorManagement.ts`);
 - **Turni dei collaboratori** permette di scegliere per ogni settore un settore
   secondario (mai Istruttore): quando il settore principale è inattivo, il
-  10% per livello della produttività (massimo 50%) passa al secondario;
+  10% per livello della produttività (massimo 50%) passa al secondario. Nella
+  pagina Scuola il riquadro si chiama **Turni**;
 - **Priorità operative** sblocca l'ordinamento con cui i settori consumano Euro
   e risorse scarse a ogni ciclo (ordine iniziale: Redazione, Eventi,
-  Attrezzatura, Istruttore, Gadget);
+  Attrezzatura, Istruttore, Gadget). Nella pagina Scuola il riquadro si chiama
+  **Chi ha la precedenza**;
 - un collaboratore non leggendario può lasciare la scuola soltanto tramite
   eventi narrativi casuali;
 
@@ -2320,6 +2322,11 @@ nella barra del titolo. Ogni messaggio dell'elenco ha l'iniziale del mittente,
 l'oggetto e una riga di anteprima. Nel riquadro Spade di La mia giornata ci
 sono un numero grande (spade libere), la barra, una riga di contesto, il
 pulsante Ripara e il link per acquistare.
+
+La pagina Scuola (Fase 8) tiene scena, colori, icone ed emblemi; sono stati
+tolti i maiuscoletti e le scritte sotto i 12 px, lo «Iscritto» ripetuto su ogni
+riga degli iscritti (la colonna ora è **Ruolo**, l'ultima **Prossimo passo**) e le
+frasi da gestionale dei settori. I pulsanti dei settori dicono «Gestisci».
 
 Dove si combatte si dice **arena** (in LudoSport è un cerchio di 7 metri di
 diametro), dove ci si allena **palestra** o **scuola**; mai «pedana».
