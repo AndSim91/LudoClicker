@@ -426,6 +426,16 @@
   background: var(--onde-gold-bright);
 }
 
+:root[data-theme="dark"] .upgrade-quick-buy:not(:disabled) {
+  border-color: var(--onde-gold-bright);
+  color: var(--onde-on-gold);
+  background: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-quick-buy:hover:not(:disabled) {
+  background: #f5c97a;
+}
+
 :root[data-theme="dark"] .upgrade-tree-legend i.unaffordable {
   border-color: var(--equipment-broken);
   background: transparent;

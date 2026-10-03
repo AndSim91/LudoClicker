@@ -328,11 +328,14 @@ function UpgradeNode({
   state: stateOverride,
   selected,
   onSelect,
+  onQuickBuy,
 }: {
   definition: UpgradeDefinition;
   state?: GameState;
   selected: boolean;
   onSelect: (anchor: HTMLButtonElement) => void;
+  /** Only the cheapest node on the page gets a buy button of its own. */
+  onQuickBuy?: () => void;
 }) {
   const state = useGameStateSlices(
     ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
@@ -352,7 +355,7 @@ function UpgradeNode({
         : "disponibile";
 
   return (
-    <li className="upgrade-node-item">
+    <li className={`upgrade-node-item${onQuickBuy ? " cheapest" : ""}`}>
       <button
         type="button"
         className={`upgrade-node ${status}${unaffordable ? " unaffordable" : ""}${selected ? " selected" : ""}`}
@@ -366,31 +369,47 @@ function UpgradeNode({
         <strong><UpgradeTitle definition={definition} /></strong>
         {status === "completed" ? null : (
           <span className="upgrade-node-level">
-            {definition.maxLevel > 1 ? `${level}/${definition.maxLevel} · ` : ""}{formatStat(cost)} €
+            {onQuickBuy
+              ? `${level}/${definition.maxLevel}`
+              : <>{definition.maxLevel > 1 ? `${level}/${definition.maxLevel} · ` : ""}{formatStat(cost)} €</>}
           </span>
         )}
       </button>
+      {onQuickBuy ? (
+        <button
+          type="button"
+          className="upgrade-quick-buy"
+          onClick={onQuickBuy}
+          disabled={unaffordable}
+          aria-label={`Compra ${definition.title}`}
+          title={unaffordable ? `Mancano ${formatCurrency(cost - state.school.euros)}` : "Il più economico"}
+        >
+          Compra · {formatStat(cost)} €
+        </button>
+      ) : null}
     </li>
   );
 }
 
-function MysteryUpgradeNode({ definition }: { definition: UpgradeDefinition }) {
-  const tooltipId = `secret-upgrade-hint-${definition.id}`;
+function MysteryUpgradeNode({
+  selected,
+  onSelect,
+}: {
+  selected: boolean;
+  onSelect: (anchor: HTMLButtonElement) => void;
+}) {
   return (
-    <li className="upgrade-node-item secret-upgrade-node-item">
+    <li className="upgrade-node-item">
       <button
         type="button"
-        className="upgrade-node locked mystery"
-        aria-label="???"
-        aria-describedby={tooltipId}
+        className={`upgrade-node locked mystery${selected ? " selected" : ""}`}
+        onClick={(event) => onSelect(event.currentTarget)}
+        aria-label="Percorso segreto: leggi l'indizio"
+        aria-pressed={selected}
       >
         <span className="upgrade-node-icon" aria-hidden="true"><Icon name="lock" /></span>
         <strong>???</strong>
-        <span className="upgrade-node-level">Percorso segreto</span>
-        <span className="secret-upgrade-tooltip" id={tooltipId} role="tooltip">
-          <strong>Indizio</strong>
-          {definition.secretHint}
-        </span>
+        <span className="upgrade-node-level">Leggi l'indizio</span>
       </button>
     </li>
   );
@@ -428,6 +447,8 @@ function UpgradeDetailsDialog({
   const completed = level >= definition.maxLevel;
   const affordable = state.school.euros >= cost;
   const canBuy = !lockReason && affordable && !completed;
+  const undiscovered = definition.secretHint !== undefined &&
+    !state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId);
   const statusText = completed
     ? "Completato."
     : lockReason
@@ -527,28 +548,38 @@ function UpgradeDetailsDialog({
           <div className="upgrade-dialog-icon"><Icon name={categoryIcons[definition.category]} /></div>
           <div>
             <span>{UPGRADE_CATEGORIES.find((category) => category.id === definition.category)?.title}</span>
-            <h2 id="upgrade-dialog-title"><UpgradeTitle definition={definition} /></h2>
+            <h2 id="upgrade-dialog-title">
+              {undiscovered ? "???" : <UpgradeTitle definition={definition} />}
+            </h2>
           </div>
           <button ref={closeButtonRef} type="button" className="upgrade-dialog-close" onClick={onClose} aria-label="Chiudi dettagli">×</button>
         </header>
 
-        <p id="upgrade-dialog-description">{definition.description}</p>
-
-        <dl className="upgrade-dialog-stats">
-          <div><dt>Livello</dt><dd>{level} di {definition.maxLevel}</dd></div>
-          <div><dt>Effetto</dt><dd>{definition.effectLabel}</dd></div>
-          <div><dt>Prerequisiti</dt><dd>{getPrerequisiteText(definition)}</dd></div>
-        </dl>
-
-        {statusText ? (
-          <p className={`upgrade-dialog-status${completed ? " positive" : ""}`}>
-            <span aria-hidden="true">{completed ? "✓" : "!"}</span> {statusText}
+        {undiscovered ? (
+          <p id="upgrade-dialog-description">
+            <strong>Indizio:</strong> {definition.secretHint}
           </p>
-        ) : null}
-        {completed ? null : (
-          <button type="button" className="upgrade-dialog-buy" onClick={onBuy} disabled={!canBuy}>
-            Compra · {formatStat(cost)} €
-          </button>
+        ) : (
+          <>
+            <p id="upgrade-dialog-description">{definition.description}</p>
+
+            <dl className="upgrade-dialog-stats">
+              <div><dt>Livello</dt><dd>{level} di {definition.maxLevel}</dd></div>
+              <div><dt>Effetto</dt><dd>{definition.effectLabel}</dd></div>
+              <div><dt>Prerequisiti</dt><dd>{getPrerequisiteText(definition)}</dd></div>
+            </dl>
+
+            {statusText ? (
+              <p className={`upgrade-dialog-status${completed ? " positive" : ""}`}>
+                <span aria-hidden="true">{completed ? "✓" : "!"}</span> {statusText}
+              </p>
+            ) : null}
+            {completed ? null : (
+              <button type="button" className="upgrade-dialog-buy" onClick={onBuy} disabled={!canBuy}>
+                Compra · {formatStat(cost)} €
+              </button>
+            )}
+          </>
         )}
       </div>
     </section>
@@ -603,42 +634,15 @@ export function UpgradesView({
     }
   }
   const upgradeBenefits = getUpgradeBenefitsSummary(state);
-  const recommendedAffordable = recommendedUpgrade
-    ? state.school.euros >= recommendedUpgrade.cost
-    : false;
+  const buyCheapest = recommendedUpgrade
+    ? () => onBuyUpgrade(recommendedUpgrade.definition.id)
+    : undefined;
 
   return (
     <main className="overview-view shop-view">
       <header className="upgrade-page-header">
         <Icon name="spark" />
         <div><h1>Upgrade</h1><p>Spendere oggi per lavorare meno domani.</p></div>
-        <section className="upgrade-next" aria-labelledby="upgrade-recommendation-title">
-          <div>
-            <h2 id="upgrade-recommendation-title">Il più economico</h2>
-            {recommendedUpgrade ? (
-              <>
-                <strong><UpgradeTitle definition={recommendedUpgrade.definition} /></strong>
-                <small>
-                  {recommendedAffordable
-                    ? `Livello ${state.upgrades[recommendedUpgrade.definition.id] + 1} di ${recommendedUpgrade.definition.maxLevel}`
-                    : `Mancano ${formatCurrency(recommendedUpgrade.cost - state.school.euros)}`}
-                </small>
-              </>
-            ) : (
-              <strong>Niente da comprare, per ora.</strong>
-            )}
-          </div>
-          {recommendedUpgrade ? (
-            <button
-              type="button"
-              onClick={() => onBuyUpgrade(recommendedUpgrade.definition.id)}
-              disabled={!recommendedAffordable}
-              aria-label={`Compra ${recommendedUpgrade.definition.title}`}
-            >
-              Compra · {formatStat(recommendedUpgrade.cost)} €
-            </button>
-          ) : null}
-        </section>
       </header>
 
       <section className="upgrade-tree-section" aria-labelledby="upgrade-tree-title">
@@ -706,7 +710,11 @@ export function UpgradesView({
                           !state.secretUpgradeDiscoveries.includes(
                             definition.id as SecretUpgradeId,
                           ) ? (
-                            <MysteryUpgradeNode key={definition.id} definition={definition} />
+                            <MysteryUpgradeNode
+                              key={definition.id}
+                              selected={selection?.upgradeId === definition.id}
+                              onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
+                            />
                           ) : (
                             <UpgradeNode
                               key={definition.id}
@@ -714,6 +722,7 @@ export function UpgradesView({
                               state={stateOverride}
                               selected={selection?.upgradeId === definition.id}
                               onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
+                              onQuickBuy={recommendedUpgrade?.definition.id === definition.id ? buyCheapest : undefined}
                             />
                           )
                         )}
@@ -729,6 +738,7 @@ export function UpgradesView({
                                 state={stateOverride}
                                 selected={selection?.upgradeId === definition.id}
                                 onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
+                                onQuickBuy={recommendedUpgrade?.definition.id === definition.id ? buyCheapest : undefined}
                               />
                             ))}
                           </ol>

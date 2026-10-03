@@ -69,7 +69,7 @@ describe("UpgradesView", () => {
     // 56 branch nodes + the two Scrittura extensions (Ritmo di battitura, Frasi fatte).
     expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(58);
     expect(screen.getByRole("button", { name: /Apri dettagli Ritmo di battitura/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /^Percorso segreto/ })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
 
@@ -89,12 +89,16 @@ describe("UpgradesView", () => {
       <UpgradesView state={initial} onBuyUpgrade={() => undefined} />,
     );
 
-    expect(screen.getByRole("tooltip", {
-      name: /Vincere il torneo più superbo dell'anno è solo l'inizio/,
-    })).toBeInTheDocument();
-    expect(screen.getByRole("tooltip", {
-      name: /Esistono forze più grandi di quanto avresti mai potuto immaginare/,
-    })).toBeInTheDocument();
+    const secrets = screen.getAllByRole("button", { name: /^Percorso segreto/ });
+    fireEvent.click(secrets[0]);
+    expect(screen.getByRole("dialog", { name: "???" })).toHaveTextContent(
+      "Indizio: Vincere il torneo più superbo dell'anno è solo l'inizio",
+    );
+    fireEvent.click(secrets[1]);
+    expect(screen.getByRole("dialog", { name: "???" })).toHaveTextContent(
+      "Esistono forze più grandi di quanto avresti mai potuto immaginare",
+    );
+    fireEvent.keyDown(window, { key: "Escape" });
 
     rerender(
       <UpgradesView
@@ -104,7 +108,7 @@ describe("UpgradesView", () => {
     );
 
     expect(screen.getByRole("button", { name: /Apri dettagli Corso X/ })).toBeVisible();
-    expect(screen.getAllByRole("button", { name: "???" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /^Percorso segreto/ })).toHaveLength(1);
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
   });
 
@@ -226,11 +230,9 @@ describe("UpgradesView", () => {
       onBuyUpgrade={onBuyUpgrade}
     />);
 
-    const recommendation = screen.getByRole("region", { name: "Il più economico" });
-    expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
-    fireEvent.click(within(recommendation).getByRole("button", {
-      name: "Compra Tastiera comoda",
-    }));
+    // Only the cheapest node carries a buy button, right under the node itself.
+    expect(screen.getAllByRole("button", { name: /^Compra / })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Compra Tastiera comoda" }));
     expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
   });
 
@@ -243,12 +245,9 @@ describe("UpgradesView", () => {
       />,
     );
 
-    const recommendation = screen.getByRole("region", { name: "Il più economico" });
-    expect(within(recommendation).getByText("Tastiera comoda")).toBeVisible();
-    expect(within(recommendation).getByRole("button", {
-      name: "Compra Tastiera comoda",
-    })).toBeDisabled();
-    expect(within(recommendation).getByText(/Mancano 30,00/)).toBeVisible();
+    const quickBuy = screen.getByRole("button", { name: "Compra Tastiera comoda" });
+    expect(quickBuy).toBeDisabled();
+    expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 30,00/));
   });
 
   it("summarizes cumulative benefits without claiming free swords", () => {

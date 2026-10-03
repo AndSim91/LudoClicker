@@ -1843,8 +1843,9 @@ fatte), mostrato sotto Tastiera comoda, da cui dipende. Il ramo Gadget compare s
 dopo lo sblocco del settore. Social non ha più un ramo separato: i suoi
 effetti sono distribuiti tra Scrittura e Creatività.
 
-In alto a destra la pagina propone **il più economico** tra i nodi
-disponibili, acquistabile con un clic («Compra · prezzo»). Sotto, una riga
+Il nodo disponibile **più economico** ha un pulsante «Compra · prezzo» proprio
+sotto di sé, per comprarlo con un clic senza aprire i dettagli (disattivato,
+con quanto manca nel suggerimento, se i Fondi non bastano). Sopra l'albero, una riga
 riassume quanti nodi sono completati e spiega la legenda (da comprare, fondi
 insufficienti, bloccati, completati); il riepilogo **Bonus totali** degli
 effetti già ottenuti è una tendina chiusa. Ogni nodo non completato mostra
@@ -2101,7 +2102,8 @@ più almeno una scuola fondata.
 ### 10.9 Percorsi Segreti
 
 La riga è sempre visibile. Prima della scoperta, ciascun nodo mostra `???`, un
-lucchetto e soltanto un indizio nel tooltip. Ogni percorso si scopre in modo
+lucchetto e «Leggi l'indizio»: un clic apre il riquadro dei dettagli con il
+solo indizio. Ogni percorso si scopre in modo
 indipendente: rivelarne uno non mostra il nome o la descrizione degli altri.
 Un percorso non scoperto non si può acquistare e non viene conteggiato fra i
 nodi disponibili. Una volta scoperto resta scoperto anche nelle scuole fondate

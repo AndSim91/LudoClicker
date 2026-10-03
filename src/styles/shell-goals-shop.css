@@ -82,64 +82,6 @@
   min-width: 260px;
 }
 
-.upgrade-next {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: auto;
-  padding: 8px 8px 8px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-
-.upgrade-next > div {
-  display: flex;
-  min-width: 150px;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.upgrade-next h2,
-.upgrade-next small {
-  margin: 0;
-  color: var(--ink-muted);
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.upgrade-next strong {
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.upgrade-next button {
-  min-height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-sm);
-  color: white;
-  background: var(--blue-600);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.upgrade-next button:hover:not(:disabled) {
-  background: #115ea3;
-}
-
-.upgrade-next button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-  cursor: not-allowed;
-}
-
 .upgrade-tree-section {
   min-width: 0;
 }
@@ -534,37 +476,34 @@
   background: var(--surface-muted);
 }
 
-.secret-upgrade-tooltip {
-  position: absolute;
-  z-index: 8;
-  top: calc(100% + 7px);
-  left: 50%;
-  display: none;
-  width: 210px;
-  padding: 8px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  color: var(--ink);
-  background: var(--surface);
-  box-shadow: var(--shadow-flyout);
+/* The cheapest node carries its own buy button: what you buy is where you click. */
+.upgrade-quick-buy {
+  display: block;
+  width: 104px;
+  min-height: 28px;
+  margin: 3px 0 2px 2px;
+  padding: 0 6px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-sm);
+  color: white;
+  background: var(--blue-600);
+  font: inherit;
   font-size: 12px;
-  line-height: 1.35;
-  text-align: left;
-  transform: translateX(-50%);
-  white-space: normal;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.secret-upgrade-tooltip strong {
-  margin-bottom: 3px;
-  display: block;
+.upgrade-quick-buy:hover:not(:disabled) {
+  background: #115ea3;
+}
+
+.upgrade-quick-buy:disabled {
+  border-color: var(--line-strong);
   color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.upgrade-node.mystery:hover .secret-upgrade-tooltip,
-.upgrade-node.mystery:focus-visible .secret-upgrade-tooltip,
-.upgrade-node.mystery:focus .secret-upgrade-tooltip {
-  display: block;
+  background: var(--surface-muted);
+  cursor: not-allowed;
 }
 
 .upgrade-branch-extension {
