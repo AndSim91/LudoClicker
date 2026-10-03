@@ -51,6 +51,7 @@ import {
   getTechnicianCoverageForms,
 } from "./instructorGroupPresentation";
 import { TrainingFormPreview } from "./PersonPresentation";
+import { getDefaultTrainingOption } from "./peoplePresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
 
 type InstructorTeachingEntry = {
@@ -353,15 +354,6 @@ export function TechnicianCourseControl({
       </div>
     ) : null;
   }
-  const selected = definitions.find((definition) => definition.id === selectedFormId) ??
-    (definitions.length === 1 ? definitions[0] : undefined);
-  const cost = selected
-    ? applyQualifyingCourseDiscount(
-        state.upgrades,
-        getTechnicianCourseCost(selected.cost),
-      )
-    : 0;
-  const lacksFunds = selected ? state.school.euros < cost : false;
   const options = definitions.map((definition) => ({
     definition,
     costLabel: formatCurrency(applyQualifyingCourseDiscount(
@@ -371,6 +363,15 @@ export function TechnicianCourseControl({
     contextLabel: "Corso Tecnico SIS",
     coverage: technicianCoverage.has(definition.id) ? "covered" as const : "uncovered" as const,
   }));
+  const selected = definitions.find((definition) => definition.id === selectedFormId) ??
+    getDefaultTrainingOption(options)?.definition;
+  const cost = selected
+    ? applyQualifyingCourseDiscount(
+        state.upgrades,
+        getTechnicianCourseCost(selected.cost),
+      )
+    : 0;
+  const lacksFunds = selected ? state.school.euros < cost : false;
 
   return (
     <div
@@ -787,31 +788,6 @@ export function TrainingControl({
 
   const needsSelection = qualificationDefinitions.length > 0 ||
     (student.forms.includes("course-y") && available.length > 1);
-  const selected = needsSelection
-    ? available.find((definition) => definition.id === selectedFormId)
-    : available[0];
-  const selectedIsQualification = Boolean(
-    selected && qualificationDefinitions.some((definition) => definition.id === selected.id),
-  );
-  const selectedCost = selected
-    ? getDisplayedTrainingCost(
-        state,
-        personId,
-        collaborator,
-        selected,
-        selectedIsQualification,
-        trainingMode,
-      )
-    : 0;
-  const actionLabel = !selected
-    ? "Seleziona una Forma"
-    : state.school.euros < selectedCost
-      ? `Servono ${formatCurrency(selectedCost)}`
-      : selectedIsQualification
-        ? "Avvia Corso Istruttori"
-        : selectedCost === 0
-          ? "Avvia gratuitamente"
-          : `Paga e avvia · ${formatCurrency(selectedCost)}`;
   const trainingOptions = available.map((definition) => {
     const qualification = qualificationDefinitions.some(
       (candidate) => candidate.id === definition.id,
@@ -827,6 +803,7 @@ export function TrainingControl({
     const hasInstructorDiscount = !qualification && cost < definition.cost;
     return {
       definition,
+      qualification,
       costLabel: formatCurrency(cost),
       coverage: qualification
         ? instructorCoverage.has(definition.id) ? "covered" as const : "uncovered" as const
@@ -840,6 +817,33 @@ export function TrainingControl({
             : undefined,
     };
   });
+  const selectedOption = needsSelection
+    ? trainingOptions.find((option) => option.definition.id === selectedFormId) ??
+      getDefaultTrainingOption(trainingOptions)
+    : trainingOptions[0];
+  const selected = selectedOption?.definition;
+  const selectedIsQualification = Boolean(selectedOption?.qualification);
+  const selectedCost = selected
+    ? getDisplayedTrainingCost(
+        state,
+        personId,
+        collaborator,
+        selected,
+        selectedIsQualification,
+        trainingMode,
+      )
+    : 0;
+  const actionLabel = !selected
+    ? "Seleziona una Forma"
+    : state.school.euros < selectedCost
+      ? `Servono ${formatCurrency(selectedCost)}`
+      : selectedIsQualification
+        ? `Abilita · ${formatCurrency(selectedCost)}`
+        : selectedOption?.contextLabel === "Qualifica inclusa"
+          ? `Impara e abilita · ${formatCurrency(selectedCost)}`
+          : selectedCost === 0
+            ? "Avvia gratuitamente"
+            : `Paga e avvia · ${formatCurrency(selectedCost)}`;
 
   return (
     <div className={`training-control${variantClass}${needsSelection ? " has-options" : ""}`}>

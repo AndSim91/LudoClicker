@@ -502,37 +502,6 @@
   font-size: 12px;
 }
 
-.training-compact .training-option-list {
-  max-height: 172px;
-  grid-template-columns: 1fr;
-  gap: 5px;
-}
-
-.training-compact.training-control .training-option-card {
-  min-height: 50px;
-  grid-template-columns: 28px minmax(0, 1fr) 12px;
-  gap: 6px;
-  padding: 6px;
-}
-
-.training-compact .training-option-card > img {
-  width: 28px;
-  height: 28px;
-}
-
-.training-compact .training-option-copy > strong {
-  font-size: 12px;
-}
-
-.training-compact .training-option-copy > small,
-.training-compact .training-option-meta > small {
-  font-size: 12px;
-}
-
-.training-compact .training-option-meta > strong {
-  font-size: 12px;
-}
-
 .training-compact.training-control > .training-start-button {
   width: 100%;
   min-height: 30px;

@@ -98,9 +98,9 @@ describe("TrainingControl Instructor students", () => {
       />,
     );
 
-    expect(screen.getByRole("radio", { name: /Forma 3 Spada Lunga/ })).toBeVisible();
-    expect(screen.getByRole("radio", { name: /Forma 3 Staffa/ })).toBeVisible();
-    expect(screen.getByRole("radio", { name: /Forma 3 Doppie Spade Corte/ })).toBeVisible();
+    expect(screen.getByRole("option", { name: /Forma 3 Spada Lunga/, hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Forma 3 Staffa/, hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Forma 3 Doppie Spade Corte/, hidden: true })).toBeInTheDocument();
   });
 
   it("highlights Instructor courses for Forms without school coverage", () => {
@@ -130,12 +130,13 @@ describe("TrainingControl Instructor students", () => {
       />,
     );
 
-    expect(within(view.container).getByRole("radio", { name: /Forma 1/ })).not.toHaveClass("is-uncovered");
-    const uncoveredInstructorOption = within(view.container).getByRole("radio", { name: /Corso X/ });
+    expect(within(view.container).getByRole("button", { name: /Formazione per .*: Corso X/ })).toBeVisible();
+    expect(within(view.container).getByRole("option", { name: /Forma 1/, hidden: true })).not.toHaveClass("is-uncovered");
+    const uncoveredInstructorOption = within(view.container).getByRole("option", { name: /Corso X/, hidden: true });
     expect(uncoveredInstructorOption).toHaveClass("is-uncovered");
     fireEvent.click(uncoveredInstructorOption);
     expect(uncoveredInstructorOption).toHaveClass("is-selected", "is-uncovered");
-    expect(within(view.container).getByText("Evidenziate: Forme non coperte nella scuola")).toBeVisible();
+    expect(within(view.container).getByText(/formazioni possibili, \d+ non copert[ae]/)).toBeVisible();
   });
 
   it("highlights Technician courses without technical coverage", () => {
@@ -171,11 +172,11 @@ describe("TrainingControl Instructor students", () => {
     );
 
     fireEvent.click(within(view.container).getByRole("button", { name: /Corso Tecnici/ }));
-    expect(within(view.container).getByRole("radio", { name: /Forma 1/ })).not.toHaveClass("is-uncovered");
-    const uncoveredTechnicianOption = within(view.container).getByRole("radio", { name: /Corso X/ });
+    expect(within(view.container).getByRole("option", { name: /Forma 1/, hidden: true })).not.toHaveClass("is-uncovered");
+    const uncoveredTechnicianOption = within(view.container).getByRole("option", { name: /Corso X/, hidden: true });
     expect(uncoveredTechnicianOption).toHaveClass("is-uncovered");
     fireEvent.click(uncoveredTechnicianOption);
     expect(uncoveredTechnicianOption).toHaveClass("is-selected", "is-uncovered");
-    expect(within(view.container).getByText("Evidenziate: Forme non coperte nella scuola")).toBeVisible();
+    expect(within(view.container).getByText(/formazioni possibili, \d+ non copert[ae]/)).toBeVisible();
   });
 });

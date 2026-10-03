@@ -2630,16 +2630,18 @@ describe("PeopleView", () => {
       />,
     );
 
-    const trainingPicker = screen.getByRole("radiogroup", {
-      name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
-    });
-    expect(trainingPicker).toBeVisible();
+    // jsdom nasconde il menu chiuso e non sa aprirlo: lo si interroga come contenuto nascosto.
+    const trainingPicker = screen.getByRole("listbox", { hidden: true });
+    expect(trainingPicker).toHaveAttribute(
+      "aria-label",
+      `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
+    );
     expect(screen.queryByRole("combobox", {
       name: `Formazione per ${enrolled.firstName} ${enrolled.lastName}`,
     })).not.toBeInTheDocument();
-    const staffOption = within(trainingPicker).getByRole("radio", { name: /Forma 3 Staffa/ });
+    const staffOption = within(trainingPicker).getByRole("option", { name: /Forma 3 Staffa/, hidden: true });
     fireEvent.click(staffOption);
-    expect(staffOption).toHaveAttribute("aria-checked", "true");
+    expect(staffOption).toHaveAttribute("aria-selected", "true");
   });
 
   it("shows the summer break instead of allowing Form training in July", () => {
@@ -2708,8 +2710,8 @@ describe("PeopleView", () => {
 
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
     expect(within(region).getByRole("img", { name: /Corso X/ })).toBeVisible();
-    expect(within(region).getByRole("button", { name: /Paga e avvia/ })).toBeEnabled();
-    fireEvent.click(within(region).getByRole("button", { name: /Paga e avvia/ }));
+    expect(within(region).getByRole("button", { name: /Impara e abilita/ })).toBeEnabled();
+    fireEvent.click(within(region).getByRole("button", { name: /Impara e abilita/ }));
 
     expect(onStartTraining).toHaveBeenCalledWith(instructor.id, "course-x");
   });

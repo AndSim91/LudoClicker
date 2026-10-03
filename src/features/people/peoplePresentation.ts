@@ -1,6 +1,7 @@
 import { getFormDefinition, getVisibleForms } from "../../content/forms";
 import { getMemberAnnualDepartureChance } from "../../game/formulas";
 import type { FormId, PersonRarity } from "../../game/types";
+import type { TrainingOption } from "./TrainingOptionPicker";
 
 export function formatFormPath(forms: FormId[], courseXUnlocked = true): string {
   const visibleForms = getVisibleForms(forms, courseXUnlocked);
@@ -19,4 +20,9 @@ export function getMemberDepartureRiskLabel(
   if (annualDepartureChance >= 0.15) return "Rischio di abbandono medio";
   if (annualDepartureChance > 0) return "Rischio di abbandono basso";
   return "Nessun rischio";
+}
+
+/** La prima Forma non coperta in scuola, altrimenti la prima della lista. */
+export function getDefaultTrainingOption<T extends TrainingOption>(options: readonly T[]): T | undefined {
+  return options.find((option) => option.coverage === "uncovered") ?? options[0];
 }
