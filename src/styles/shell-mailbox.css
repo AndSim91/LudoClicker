@@ -465,3 +465,37 @@
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* Riepilogo dell'anno scolastico (4.1) */
+.year-digest {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.year-digest div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.year-digest dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.year-digest dd {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.year-digest small {
+  color: var(--ink-muted);
+  font-size: 12px;
+}

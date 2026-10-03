@@ -1,3 +1,4 @@
+import { noteNarrativeEvent } from "./yearDigest";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
 import { formatCurrency } from "../shared/formatters";
 import { addLegendaryEncounters, createAcquiredContacts, mergeAcquiredContacts } from "./contacts";
@@ -118,15 +119,7 @@ export function processNarrativeEvent(
       eurosEarned: rewardState.state.statistics.eurosEarned + Math.max(0, euroDelta),
     },
   };
-  nextState = addMessage(
-    nextState,
-    now,
-    definition.title,
-    summary,
-    definition.tone,
-    "other",
-    "narrative",
-  );
+  nextState = noteNarrativeEvent(nextState, definition.title);
   return contacts.length > 0 ? startNextCampaign(nextState, now) : nextState;
 }
 

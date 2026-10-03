@@ -550,6 +550,12 @@ export function isValidGameState(value: unknown): value is GameState {
       (id) => id === "project-x" || id === "divine-touch",
     ) &&
     isValidGadgetState(state.gadgets) &&
+    (state.yearDigest === undefined || (
+      Number.isSafeInteger(state.yearDigest.schoolYear) &&
+      Number.isSafeInteger(state.yearDigest.month) &&
+      typeof state.yearDigest.start === "object" &&
+      Object.values(state.yearDigest.start ?? {}).every((value) => Number.isFinite(value))
+    )) &&
     Array.isArray(state.moments?.seen) &&
     state.moments.seen.every((key) => typeof key === "string") &&
     Array.isArray(state.moments?.queue) &&

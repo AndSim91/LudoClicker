@@ -306,21 +306,7 @@ export function resolveAcquisitionEvent(
       }),
     };
   }
-  if (contacts.length > 0) {
-    nextState = addMessage(
-      nextState,
-      now,
-      event.definitionId === "park-sparring"
-        ? "Nuovi contatti dal volantinaggio"
-        : event.definitionId === "organized-flyering"
-          ? "Nuovi contatti dallo sparring"
-          : "Contatti acquisiti alla dimostrazione",
-      `${contacts.length} nuovi indirizzi sono disponibili per la campagna email.`,
-      "positive",
-      "other",
-      "contacts",
-    );
-  }
+  // 4.1: acquired contacts are counted in the yearly digest.
   if (rewardState.statistics.eventsCompleted === 0) {
     nextState = addMessage(
       nextState,

@@ -457,12 +457,11 @@ function resolveTraining(
   };
   if (instructorPhase) return;
 
-  context.state = context.dependencies.addMessage(
+  // 4.1: Forms taught by an Instructor are counted in the yearly digest.
+  if (!training.instructorId) context.state = context.dependencies.addMessage(
     context.state,
     context.now,
-    training.instructorId
-      ? "Riepilogo formazione automatica"
-      : "Formazione completata",
+    "Formazione completata",
     `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha completato ${definition.longName}.`,
     "positive",
     "other",

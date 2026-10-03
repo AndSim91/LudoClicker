@@ -155,6 +155,16 @@ export interface ScheduledTrial {
   tutorialSceneId?: "first-event";
 }
 
+export interface YearDigestCounts {
+  members: number;
+  forms: number;
+  contacts: number;
+  collaborators: number;
+  departures: number;
+  narrative: number;
+  lastNarrative?: string;
+}
+
 export interface InboxMessage {
   id: string;
   sender: string;
@@ -165,6 +175,8 @@ export interface InboxMessage {
   unread: boolean;
   stackCount?: number;
   category?: "focused" | "other";
+  /** Riepilogo dell'anno scolastico (4.1, src/game/yearDigest.ts). */
+  digest?: YearDigestCounts;
   threadKey?:
     | "contacts"
     | "members"
@@ -1011,6 +1023,15 @@ export interface GameState {
     lastImprovedAthleteId?: string;
   };
   achievements: AchievementKey[];
+  /** Riepilogo dell'anno scolastico in corso (4.1): statistics at its start, its message. */
+  yearDigest?: {
+    schoolYear: number;
+    month: number;
+    start: Partial<Record<keyof Statistics, number>>;
+    messageId?: string;
+    narrative?: number;
+    lastNarrative?: string;
+  };
   /** Animated moments (4.2): each plays once per save; the queue waits to be shown. */
   moments: { seen: MomentKey[]; queue: MomentKey[] };
   narrative: {

@@ -850,9 +850,24 @@ fondata alcuna scuola.
 Gli esiti positivi vengono comunicati come messaggi automatici interni, non come
 risposte dei destinatari:
 
-- “Nuovo iscritto registrato” (“Primo iscritto registrato” la prima volta);
+- “Primo iscritto registrato”, solo la prima volta;
 - “Quota associativa accreditata”;
-- “Nuovo collaboratore disponibile”.
+- “Nuovo collaboratore disponibile” per il primo collaboratore, e “Nuovo
+  collaboratore Leggendario: Nome” per ogni Leggendario.
+
+**Riepilogo dell'anno scolastico** (piano 4.1, decisione del 03/10). Le notizie
+di routine non arrivano più una per una: nuovi iscritti, Forme completate
+(anche quelle insegnate in automatico), contatti acquisiti, nuovi collaboratori
+ordinari, eventi narrativi e abbandoni (solo il numero, senza nomi) si sommano
+in un unico messaggio per anno scolastico, «Riepilogo dell'anno scolastico N».
+Compare in Evidenziata con la prima novità dell'anno, si aggiorna una volta al
+mese senza tornare in cima e mostra i numeri in riquadri; a fine anno (o alla
+fondazione di una nuova scuola) si chiude e passa in Altra. I numeri sono
+l'aumento delle statistiche cumulative dall'apertura dell'anno; gli eventi
+narrativi si contano a parte e restano visibili per 10 secondi in La mia
+giornata (`src/game/yearDigest.ts`, `GameState.yearDigest`). Restano messaggi
+singoli: tornei, quote, sblocchi, prestigio, Leggendari, Forme avviate a mano,
+attestati di Istruttore e Tecnico e livelli di Maestria.
 
 > **Da implementare:** non esiste un messaggio “Quota associativa accreditata”; al cambio mese le quote compaiono solo come numero fluttuante “Quote mensili”.
 

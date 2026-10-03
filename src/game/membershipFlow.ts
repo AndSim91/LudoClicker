@@ -12,7 +12,6 @@ import { getMemberAnnualDepartureChance } from "./formulas";
 import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
-import { addMessage } from "./stateUpdates";
 import { nextRandom } from "./random";
 import { processJanuaryLightInflation } from "./lightInflation";
 import type { GameState, SpecialCollaboratorId } from "./types";
@@ -240,16 +239,6 @@ function processMemberDepartures(
   const updated = grouped.state;
   const totalDeparted = departed.length + grouped.departed;
   if (totalDeparted === 0) return updated;
-  const names = departed
-    .slice(0, 3)
-    .map((member) => `${member.firstName} ${member.lastName}`)
-    .join(", ");
-  const shown = Math.min(3, departed.length);
-  const others = totalDeparted <= shown
-    ? ""
-    : shown > 0
-      ? ` e altri ${totalDeparted - shown}`
-      : `${totalDeparted} iscritti`;
   const withNarrative: GameState = {
     ...updated,
     narrative: {
@@ -274,17 +263,8 @@ function processMemberDepartures(
       narrativeEvents: updated.statistics.narrativeEvents + departed.length,
     },
   };
-  return addMessage(
-    withNarrative,
-    now,
-    totalDeparted === 1
-      ? "Un iscritto ha lasciato la scuola"
-      : `${totalDeparted} iscritti hanno lasciato la scuola`,
-    `${names}${others} ${totalDeparted === 1 ? "ha" : "hanno"} lasciato la scuola dopo un anno senza formazione. Ogni Forma completata riduce questo rischio.`,
-    "neutral",
-    "focused",
-    "departures",
-  );
+  // 4.1: departures are a number in the yearly digest (src/game/yearDigest.ts), no names.
+  return withNarrative;
 }
 
 export function collectFees(

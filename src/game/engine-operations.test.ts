@@ -369,9 +369,9 @@ describe("game engine: operations", () => {
     };
 
     const damaged = gameReducer(due, { type: "TICK", now: 2_000 });
-    const repairMessage = damaged.messages.find(
-      (message) => message.subject === "Un piccolo disastro",
-    );
+    const repairMessage = { preview: damaged.narrative.history.find(
+      (event) => event.title === "Un piccolo disastro",
+    )?.summary };
 
     expect(repairMessage?.preview).toContain("Non so cosa sia successo");
     expect(damaged.school.euros).toBe(20);

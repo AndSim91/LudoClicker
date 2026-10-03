@@ -590,7 +590,7 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.collaborators).toHaveLength(1);
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
     expect(protectedAttempt.unlocks.forms).toBe(true);
-    expect(protectedAttempt.messages.find((message) => message.subject === "Nuovo collaboratore disponibile")?.preview)
+    expect(protectedAttempt.messages.find((message) => message.subject === "Nuovo collaboratore Leggendario: Eva Parodi")?.preview)
       .toBe("Eva Parodi è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in Redazione, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.");
   });
 
@@ -762,7 +762,8 @@ describe("game engine: funnel", () => {
         }),
       }),
     ]));
-    expect(renewed.messages.some((message) => message.subject === "2 iscritti hanno lasciato la scuola")).toBe(true);
+    // 4.1: departures are a number in the yearly digest, no message of their own.
+    expect(renewed.statistics.membersDeparted).toBe(state.statistics.membersDeparted + 2);
 
     const septemberState = gameReducer({
       ...state,

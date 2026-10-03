@@ -220,7 +220,8 @@ export function resolveStartedTrialBatch(
           forms: true,
         },
       });
-      nextState = addMessage(
+      // 4.1: after the first one, new members are counted in the yearly digest.
+      if (firstEnrollment) nextState = addMessage(
         nextState,
         now,
         firstEnrollment ? "Primo iscritto registrato" : "Nuovo iscritto registrato",

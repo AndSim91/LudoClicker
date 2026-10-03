@@ -230,9 +230,8 @@ describe("game engine: narrative", () => {
     const resolved = Array.from({ length: 100 }, (_, randomSeed) =>
       gameReducer({ ...due, randomSeed }, { type: "TICK", now: 2_000 }),
     ).find((candidate) => candidate.narrative.history[0]?.definitionId === "extra-donation");
-    const contribution = resolved?.messages.find(
-      (message) => message.subject === "Contributo straordinario",
-    );
+    // 4.1: narrative events are counted in the yearly digest; the text stays in the history.
+    const contribution = { preview: resolved?.narrative.history[0].summary };
 
     expect(resolved).toBeDefined();
     const definition = NARRATIVE_EVENTS.find((event) => event.id === "extra-donation")!;

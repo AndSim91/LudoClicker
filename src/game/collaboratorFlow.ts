@@ -56,10 +56,13 @@ export function recruitCollaborator(
     "writing",
     nextState.unlocks.social,
   );
+  // 4.1: ordinary collaborators after the first are counted in the yearly digest.
+  const legendary = contact.rarity === "legendary";
+  if (!legendary && nextState.statistics.collaboratorsRecruited > 1) return nextState;
   return addMessage(
     nextState,
     now + 1,
-    "Nuovo collaboratore disponibile",
+    legendary ? `Nuovo collaboratore Leggendario: ${collaborator.displayName}` : "Nuovo collaboratore disponibile",
     `${collaborator.displayName} è il nuovo collaboratore della scuola. Può aiutare in vari settori automatizzando il lavoro o potenziandone l'efficacia.\n\nPuoi impiegarlo in ${editorialSector}, Eventi, Attrezzatura o come Istruttore.\n\nPuò anche migliorare nel tempo la sua efficacia impiegandolo più tempo in un solo ruolo.`,
     "positive",
     "focused",
