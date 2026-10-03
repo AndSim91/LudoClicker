@@ -25,7 +25,8 @@ export function takeFeedbackSnapshot(
     month: state.school.currentMonth,
     eurosEarned: state.statistics.eurosEarned,
     flowMultiplier: state.player.flow ? getFlowMultiplier(state.player.flow.meter) : 1,
-    perfectPhrases: state.player.perfectPhrases ?? 0,
+    // Redazione's phrases pop like the player's; only the player's count for achievements.
+    perfectPhrases: (state.player.perfectPhrases ?? 0) + (state.player.teamPerfectPhrases ?? 0),
   };
 }
 

@@ -972,6 +972,8 @@ export interface GameState {
     flow?: WritingFlow;
     /** Count of Frase perfetta bonuses, used by the UI to spot new ones. */
     perfectPhrases?: number;
+    /** Frasi perfette written by Redazione: shown like the player's, never counted for achievements. */
+    teamPerfectPhrases?: number;
   };
   network: {
     /** Reputation points still to spend: the only value carried to the next school. */
@@ -1019,6 +1021,8 @@ export interface GameState {
     equipmentBuffer: number;
     equipmentPreparedWork: number;
     offlineContactBuffer: number;
+    /** Fraction of a Frase perfetta the collaborators have built up. */
+    perfectPhraseBuffer?: number;
     lastImprovedAthlete?: string;
     lastImprovedAthleteId?: string;
   };

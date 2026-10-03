@@ -51,6 +51,13 @@ import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import { getAutomaticFormCandidates } from "./formProgression";
 import { materializeGroupedMembers } from "./memberGroups";
 import { getAgonistCourseCost } from "./trainingFlow";
+import {
+  applyFlowInput,
+  getFlowCap,
+  getFlowMultiplier,
+  getPerfectPhraseChance,
+  getPerfectPhraseLength,
+} from "./writingRhythm";
 import type {
   TrainingStartPlan,
   TrainingStartPlanFactory,
@@ -312,13 +319,26 @@ export function processAutomation(
   const editorialAutomationMultiplier = 1 + genericAutomationBonus +
     getUpgradeEffectTotal(state.upgrades, "editorialAutomationMultiplier");
 
-  const generatedWriting = hasEditorialWork
+  // Redazione and Social type like the player: each "input" is writingPower characters,
+  // they share the player's Flusso and roll Frase perfetta with the same upgrades.
+  const editorialInputs = hasEditorialWork
     ? (elapsedMs / 1_000) *
       writingProductivity *
       GAME_CONFIG.collaboratorWritingPerSecond *
-      state.player.writingPower *
       editorialAutomationMultiplier
     : 0;
+  const flowCap = getFlowCap(state.upgrades);
+  const teamFlow = flowCap > 1 && editorialInputs > 0
+    ? applyFlowInput(
+        state.player.flow,
+        now,
+        flowCap,
+        state.school.specialization === "redazione" ? GAME_CONFIG.redazioneFlowDrainScale : 1,
+        editorialInputs,
+      )
+    : state.player.flow;
+  const generatedWriting = editorialInputs * state.player.writingPower *
+    (teamFlow && editorialInputs > 0 ? getFlowMultiplier(teamFlow.meter, flowCap) : 1);
   const emailWorkShare = wasWriting && producingSocialContent
     ? GAME_CONFIG.socialEmailWritingShare
     : wasWriting
@@ -333,6 +353,20 @@ export function processAutomation(
     : 0;
   const writingTotal = state.automation.writingBuffer + generatedWriting * emailWorkShare;
   const automatedEmailCharacters = wasWriting ? Math.floor(writingTotal) : 0;
+  // ponytail: expected value instead of a roll per input, so large teams cost one loop per phrase.
+  const phraseBuffer = (state.automation.perfectPhraseBuffer ?? 0) +
+    (wasWriting ? editorialInputs * emailWorkShare * getPerfectPhraseChance(state) : 0);
+  const perfectPhrases = Math.floor(phraseBuffer);
+  let perfectPhraseCharacters = 0;
+  let perfectPhrasesWritten = 0;
+  for (; activeEmail && perfectPhrasesWritten < perfectPhrases; perfectPhrasesWritten += 1) {
+    const length = getPerfectPhraseLength(
+      activeEmail,
+      activeEmail.revealedCharacters + automatedEmailCharacters + perfectPhraseCharacters,
+    );
+    if (length <= 0) break;
+    perfectPhraseCharacters += length;
+  }
   const socialContentCharacters = getSocialContentCharacters(state.upgrades);
   const socialContentTotal = state.automation.socialContentBuffer +
     generatedWriting * socialWorkShare;
@@ -384,15 +418,26 @@ export function processAutomation(
         : state.automation.socialContentBuffer,
       equipmentBuffer,
       equipmentPreparedWork,
+      ...(phraseBuffer > 0 ? { perfectPhraseBuffer: phraseBuffer - perfectPhrases } : {}),
     },
     equipment: state.equipment,
     school: state.school,
+    // One Flusso for the whole school: the player and Redazione fill the same meter.
+    player: teamFlow !== state.player.flow || perfectPhraseCharacters > 0
+      ? {
+          ...state.player,
+          ...(teamFlow ? { flow: teamFlow } : {}),
+          ...(perfectPhraseCharacters > 0
+            ? { teamPerfectPhrases: (state.player.teamPerfectPhrases ?? 0) + perfectPhrasesWritten }
+            : {}),
+        }
+      : state.player,
   };
 
-  if (automatedEmailCharacters > 0) {
+  if (automatedEmailCharacters + perfectPhraseCharacters > 0) {
     nextState = dependencies.writeCharacters(
       nextState,
-      automatedEmailCharacters,
+      automatedEmailCharacters + perfectPhraseCharacters,
       now,
       "automation",
     );

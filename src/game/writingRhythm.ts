@@ -56,11 +56,12 @@ export function applyFlowInput(
   now: number,
   cap: number = GAME_CONFIG.flowMaxMultiplier,
   drainScale = 1,
+  inputs = 1,
 ): WritingFlow {
   return {
     meter: Math.min(
       getFlowMeterLimit(cap),
-      getFlowMeterAt(flow, now) + GAME_CONFIG.flowGainPerInput,
+      getFlowMeterAt(flow, now) + GAME_CONFIG.flowGainPerInput * inputs,
     ),
     updatedAt: now,
     ...(drainScale === 1 ? {} : { drainScale }),
