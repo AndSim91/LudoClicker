@@ -7,11 +7,7 @@ import {
 import { GAME_CONFIG } from "../../game/config";
 import { memo, useState, type CSSProperties } from "react";
 import { useGameStateSlices } from "../../game/GameStateContext";
-import {
-  useGameTime,
-  useGameTimeSource,
-  useWallTimeUntil,
-} from "../../game/GameTimeContext";
+import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { useMediaQuery } from "../../shared/useMediaQuery";
@@ -222,7 +218,6 @@ function DayNotificationTimeline({
   const state = useGameStateSlices(
     [
       "contacts",
-      "lightInflation",
       "narrative",
       "scheduledTrials",
       "school",
@@ -237,31 +232,22 @@ function DayNotificationTimeline({
     now: number;
   } | null>(null);
   const referenceGameNow = timeSource?.getNow() ?? fallbackNow;
-  const referenceWallNow = timeSource?.getWallNow() ?? fallbackNow;
-  const wallClockDeadline = state.lightInflation.event?.visibleUntil;
-  const wallNow = useWallTimeUntil(
-    wallClockDeadline,
-    GAME_CONFIG.progressUpdateIntervalMs,
-    !timeSource?.isPaused,
-  );
-  const referenceNotifications = selectDayNotifications(state, referenceGameNow, referenceWallNow);
-  const hasGameClockNotification = referenceNotifications.some((notification) => notification.clock === "game");
-  const hasSmoothGameClockProgress = referenceNotifications.some(
-    (notification) => notification.clock === "game" && notification.expiresAt !== undefined,
+  const referenceNotifications = selectDayNotifications(state, referenceGameNow);
+  const hasSmoothProgress = referenceNotifications.some(
+    (notification) => notification.expiresAt !== undefined,
   );
   const gameNow = useGameTime(
-    hasGameClockNotification,
-    hasSmoothGameClockProgress
+    referenceNotifications.length > 0,
+    hasSmoothProgress
       ? GAME_CONFIG.progressUpdateIntervalMs
       : DAY_COUNTDOWN_UPDATE_INTERVAL_MS,
   );
   const now = timeSource ? gameNow : gameNow || referenceGameNow;
-  const currentWallNow = timeSource?.isPaused ? referenceWallNow : wallNow || referenceWallNow;
-  const liveNotifications = now === referenceGameNow && currentWallNow === referenceWallNow
+  const liveNotifications = now === referenceGameNow
     ? referenceNotifications
-    : selectDayNotifications(state, now, currentWallNow);
+    : selectDayNotifications(state, now);
   const pausedNotificationSnapshot = pausedNotification
-    ? selectDayNotifications(state, pausedNotification.now, currentWallNow).find(
+    ? selectDayNotifications(state, pausedNotification.now).find(
         (notification) => notification.id === pausedNotification.id,
       )
     : undefined;
@@ -293,12 +279,10 @@ function DayNotificationTimeline({
           <DayNotificationEntry
             key={notification.id}
             notification={notification}
-            now={pausedNotification?.id === notification.id
-              ? pausedNotification.now
-              : notification.clock === "wall" ? currentWallNow : now}
+            now={pausedNotification?.id === notification.id ? pausedNotification.now : now}
             isTutorialTrial={notification.tutorialTarget === true}
-            onPause={() => notification.clock === "game" && setPausedNotification({ id: notification.id, now })}
-            onResume={() => notification.clock === "game" && setPausedNotification(null)}
+            onPause={() => setPausedNotification({ id: notification.id, now })}
+            onResume={() => setPausedNotification(null)}
             onWatchFinal={onWatchFinal}
           />
         ))

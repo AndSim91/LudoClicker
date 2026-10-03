@@ -1,6 +1,15 @@
 import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
 import type { VictoryMomentLevel } from "../../game/moments";
+import {
+  getLightInflationEventDescription,
+  getOfficialSwordUnitCost,
+  LIGHT_INFLATION_CAUSES,
+  LIGHT_INFLATION_EVENT_TITLE,
+  LIGHT_INFLATION_MOMENT,
+  LIGHT_INFLATION_PRICE_INCREASE,
+} from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
+import { formatCurrency } from "../../shared/formatters";
 import type { GameState, MomentKey } from "../../game/types";
 import { getLegendaryDossier } from "../ludowiki/ludodexPresentation";
 
@@ -18,7 +27,8 @@ export type MomentContent =
       stats: string;
     }
   | { kind: "victory"; kicker: string; title: string; body: string; level: VictoryMomentLevel }
-  | { kind: "foundation"; kicker: string; title: string; body: string; from: string; to: string };
+  | { kind: "foundation"; kicker: string; title: string; body: string; from: string; to: string }
+  | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; note: string }> = {
   national: {
@@ -82,6 +92,18 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
       body: `${previous?.name ?? "La scuola"} entra nella Rete; ${state.school.name} apre a ${state.school.city}.`,
       from,
       to,
+    };
+  }
+  if (key === LIGHT_INFLATION_MOMENT) {
+    const price = getOfficialSwordUnitCost(state);
+    return {
+      kind: "inflation",
+      kicker: "Lama di Luce · Comunicazione ai rivenditori",
+      title: LIGHT_INFLATION_EVENT_TITLE,
+      body: getLightInflationEventDescription(state.lightInflation.event?.cause ?? LIGHT_INFLATION_CAUSES[0]),
+      oldPrice: formatCurrency(price / LIGHT_INFLATION_PRICE_INCREASE),
+      newPrice: formatCurrency(price),
+      increase: `+${Math.round((LIGHT_INFLATION_PRICE_INCREASE - 1) * 100)}%`,
     };
   }
   if (key.startsWith("victory:")) {

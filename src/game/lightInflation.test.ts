@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { selectDayNotifications } from "../features/day-panel/dayNotifications";
 import { GAME_CONFIG } from "./config";
 import { buyOfficialSword } from "./equipment";
 import { createInitialState, gameReducer } from "./engine";
@@ -7,6 +6,7 @@ import { rebaseGameTimeline } from "./gameTimeline";
 import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
+  LIGHT_INFLATION_MOMENT,
   getOfficialSwordUnitCost,
   processJanuaryLightInflation,
 } from "./lightInflation";
@@ -100,6 +100,8 @@ describe("Inflazione di Luce", () => {
       visibleUntil: 5_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
     });
     expect(LIGHT_INFLATION_CAUSES).toContain(succeeded.lightInflation.event?.cause);
+    expect(succeeded.moments.queue).toEqual([LIGHT_INFLATION_MOMENT]);
+    expect(succeeded.moments.seen).not.toContain(LIGHT_INFLATION_MOMENT);
   });
 
   it("non effettua un doppio tiro nello stesso gennaio", () => {
@@ -195,7 +197,7 @@ describe("Inflazione di Luce", () => {
     expect(isValidGameState(rebased)).toBe(true);
   });
 
-  it("persists and reloads the absolute deadline without reviving an expired event", () => {
+  it("persists and reloads the event", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -212,18 +214,8 @@ describe("Inflazione di Luce", () => {
 
     const beforeDeadline = loadGame(10_000);
     expect(beforeDeadline.lightInflation.event).toEqual(state.lightInflation.event);
-    expect(selectDayNotifications(beforeDeadline, beforeDeadline.lastSavedAt, 10_000)).toContainEqual(
-      expect.objectContaining({ id: "light-inflation" }),
-    );
 
     const afterDeadline = loadGame(2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS + 3_000);
     expect(afterDeadline.lightInflation.event).toEqual(state.lightInflation.event);
-    expect(selectDayNotifications(
-      afterDeadline,
-      afterDeadline.lastSavedAt,
-      2_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS + 3_000,
-    )).not.toContainEqual(
-      expect.objectContaining({ id: "light-inflation" }),
-    );
   });
 });

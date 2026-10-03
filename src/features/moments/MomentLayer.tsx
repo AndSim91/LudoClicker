@@ -11,7 +11,12 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
   legendary: "spark",
   victory: "trophy",
   foundation: "flag",
+  inflation: "coin",
 };
+
+/** Lama di Luce letterhead: three crossed blades, green, white and red. */
+const DECREE_BLADES = [["is-green", -32], ["is-red", 32], ["is-white", 0]] as const;
+const SPORT_SWORD_LABEL = "Spada per combattimento sportivo";
 
 const SEATS = Array.from({ length: 12 }, (_, index) => {
   const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
@@ -49,6 +54,35 @@ function MomentArt({ content }: { content: MomentContent }) {
           <strong>{content.name}</strong>
           <span className="moment-card-rarity">{content.kicker}</span>
           <span className="moment-card-stats">{content.stats}</span>
+        </div>
+      </div>
+    );
+  }
+  if (content.kind === "inflation") {
+    return (
+      <div className="moment-art moment-decree" aria-hidden="true">
+        <div className="moment-decree-sheet">
+          <span className="moment-decree-logo">
+            <svg viewBox="0 0 80 80">
+              {DECREE_BLADES.map(([color, angle]) => (
+                <g key={color} className={color} transform={`rotate(${angle} 40 46)`}>
+                  <rect className="moment-decree-blade" x="37" y="5" width="6" height="41" rx="3" />
+                  <rect className="moment-decree-guard" x="32" y="46" width="16" height="3.5" rx="1.5" />
+                  <rect className="moment-decree-grip" x="37.5" y="49.5" width="5" height="15" rx="1.5" />
+                  <circle className="moment-decree-guard" cx="40" cy="66" r="2.6" />
+                </g>
+              ))}
+            </svg>
+            LAMA DI LUCE
+          </span>
+          <strong className="moment-decree-title">{content.title}</strong>
+          <p className="moment-decree-body">{content.body}</p>
+          <div className="moment-decree-price">
+            <span>{SPORT_SWORD_LABEL}</span>
+            <s>{content.oldPrice}</s>
+            <b>{content.newPrice}</b>
+          </div>
+          <span className="moment-decree-stamp">{content.increase}</span>
         </div>
       </div>
     );
@@ -145,6 +179,12 @@ export function MomentLayer({
           </div>
         </div>
         <p id="moment-body" className="moment-body">{content.body}</p>
+        {content.kind === "inflation" ? (
+          <p className="moment-price">
+            <span>{SPORT_SWORD_LABEL}</span>
+            <s>{content.oldPrice}</s> → <b>{content.newPrice} ({content.increase})</b>
+          </p>
+        ) : null}
         <div className="moment-actions">
           <button ref={buttonRef} type="button" className="moment-skip" onClick={onDismiss}>
             <span className="moment-skip-office">Continua</span>

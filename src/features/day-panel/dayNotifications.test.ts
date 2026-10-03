@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { createInitialState } from "../../game/engine";
 import {
   LIGHT_INFLATION_CAUSES,
-  LIGHT_INFLATION_EVENT_TITLE,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, ScheduledTrial } from "../../game/types";
@@ -51,7 +50,7 @@ function stateWithTrialPhases(
 }
 
 describe("selectDayNotifications", () => {
-  it("uses wall time only for light inflation and preserves game time for other notifications", () => {
+  it("never lists Inflazione di Luce: it has its own full-screen scene", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -65,27 +64,8 @@ describe("selectDayNotifications", () => {
       },
     };
 
-    expect(selectDayNotifications(state, 90_000, 49_999)).not.toContainEqual(
-      expect.objectContaining({ id: "light-inflation" }),
-    );
-    expect(selectDayNotifications(state, 90_000, 50_000)).toContainEqual(
-      expect.objectContaining({
-        id: "light-inflation",
-        title: LIGHT_INFLATION_EVENT_TITLE,
-        clock: "wall",
-        expiresAt: 50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
-        expiryDurationMs: LIGHT_INFLATION_EVENT_VISIBILITY_MS,
-      }),
-    );
-    expect(selectDayNotifications(
-      state,
-      50_000,
-      50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
-    )).not.toContainEqual(
-      expect.objectContaining({ id: "light-inflation" }),
-    );
+    expect(selectDayNotifications(state, 50_000)).toEqual([]);
   });
-
   it("keeps five trial notifications separate at the aggregation boundary", () => {
     const state = stateWithTrialPhases(
       Array.from({ length: DAY_TRIAL_NOTIFICATION_LIMIT }, () => "scheduled" as const),
@@ -157,19 +137,10 @@ describe("selectDayNotifications", () => {
       "enrolled",
       "lost",
     ], 0);
-    state.lightInflation = {
-      ...state.lightInflation,
-      event: {
-        cause: LIGHT_INFLATION_CAUSES[0],
-        occurredAt: 99_000,
-        visibleUntil: 99_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
-      },
-    };
 
-    const notifications = selectDayNotifications(state, 100_000, 100_000);
+    const notifications = selectDayNotifications(state, 100_000);
 
-    expect(notifications).toHaveLength(2);
-    expect(notifications).toContainEqual(expect.objectContaining({ id: "light-inflation" }));
+    expect(notifications).toHaveLength(1);
     expect(notifications.filter((notification) => notification.kind === "trial")).toHaveLength(0);
     expect(notifications).toContainEqual(expect.objectContaining({
       id: "trial-summary",
@@ -252,7 +223,6 @@ describe("selectDayNotifications", () => {
       phase: "scheduled",
       title: "Torneo Scolastico in arrivo",
       detail: "Si combatte a fine mese: c'è ancora tempo per allenarsi.",
-      clock: "game",
       timestamp: 70_000,
       startsAt: 70_000,
     });

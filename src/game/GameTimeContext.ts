@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useSyncExternalStore } from "react";
 
 export interface GameTimeSource {
   getNow: () => number;
@@ -69,30 +69,4 @@ export function useWallTime(active: boolean, intervalMs: number): number {
     getStaticSnapshot,
   );
   return wallNow;
-}
-
-/** A real-time clock that stops notifying immediately after an absolute deadline. */
-export function useWallTimeUntil(
-  deadline: number | undefined,
-  intervalMs: number,
-  active = true,
-): number {
-  const store = getClockStore(intervalMs);
-  const subscribeUntilDeadline = useCallback((listener: () => void) => {
-    if (!active || deadline === undefined) return subscribeToStaticClock();
-
-    let unsubscribe: () => void = () => undefined;
-    unsubscribe = store.subscribe(() => {
-      listener();
-      if (store.getSnapshot() >= deadline) unsubscribe();
-    });
-    if (store.getSnapshot() >= deadline) unsubscribe();
-    return unsubscribe;
-  }, [active, deadline, store]);
-
-  return useSyncExternalStore(
-    !active || deadline === undefined ? subscribeToStaticClock : subscribeUntilDeadline,
-    !active || deadline === undefined ? getStaticSnapshot : store.getSnapshot,
-    getStaticSnapshot,
-  );
 }

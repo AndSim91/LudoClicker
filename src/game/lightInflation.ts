@@ -31,7 +31,9 @@ export function getLightInflationEventDescription(cause: string): string {
 }
 
 const CHANCE_PER_SWORD = 10;
-const PRICE_INCREASE = 1.1;
+export const LIGHT_INFLATION_PRICE_INCREASE = 1.1;
+/** Moment key (4.2 queue). Not added to `seen`: it plays at every increase. */
+export const LIGHT_INFLATION_MOMENT = "light-inflation";
 export const LIGHT_INFLATION_EVENT_VISIBILITY_MS = 60_000;
 
 export function createInitialLightInflationState(): LightInflationState {
@@ -99,12 +101,13 @@ export function processJanuaryLightInflation(state: GameState, wallNow: number):
     lightInflation: {
       ...checked,
       chancePercent: 0,
-      priceMultiplier: checked.priceMultiplier * PRICE_INCREASE,
+      priceMultiplier: checked.priceMultiplier * LIGHT_INFLATION_PRICE_INCREASE,
       event: {
         cause,
         occurredAt: wallNow,
         visibleUntil: wallNow + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
       },
     },
+    moments: { ...state.moments, queue: [...state.moments.queue, LIGHT_INFLATION_MOMENT] },
   };
 }

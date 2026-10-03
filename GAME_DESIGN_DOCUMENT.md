@@ -2889,8 +2889,8 @@ Eventi presenti nel codice:
 Evento separato, **Inflazione di Luce**: ogni gennaio c'è una probabilità di
 aumento del prezzo delle spade ufficiali pari al 10% per ogni spada acquistata
 dall'ultimo aumento (massimo 100%). Se scatta, il prezzo viene moltiplicato per
-1,1, la probabilità torna a 0 e un avviso con la causa resta visibile per 60
-secondi.
+1,1, la probabilità torna a 0 e parte la scena a schermo intero
+dell'Inflazione di Luce (§ 25.1) con la causa dell'anno.
 
 Elenchi previsti dal design:
 
@@ -3128,8 +3128,7 @@ Al caricamento (`freezeGameState`, `src/game/offline.ts`) vengono spostati:
 scadenza mensile, formazioni di iscritti e collaboratori, invii ed esiti delle
 email, prove programmate, eventi in corso, attese degli eventi in tempo reale e
 prossimo evento narrativo. Sviluppo e vendite Gadget ripartono dal momento del
-caricamento. L'avviso dell'Inflazione di Luce usa invece il tempo reale: viene
-prolungato durante una pausa del gioco aperto, ma non dopo una chiusura.
+caricamento.
 
 > **Da implementare:** la preparazione del Torneo Reptile non viene congelata alla chiusura: il suo ultimo avanzamento (`lastProgressAt`) non viene spostato, quindi al primo aggiornamento dopo il caricamento i settori avanzano anche per il tempo in cui il gioco era chiuso.
 
@@ -4067,7 +4066,14 @@ chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
   Superba) e Chronicles of Ludosport;
-- **una nuova sede per l'Ordine**: la prima fondazione.
+- **una nuova sede per l'Ordine**: la prima fondazione;
+- **Inflazione di Luce**, l'unica che torna **a ogni aumento** (al massimo una
+  volta l'anno, a gennaio): in Modalità Onde cade dall'alto un decreto su carta
+  bollata con la testata di Lama di Luce (tre spade incrociate verde, bianca e
+  rossa), titolo, causa dell'anno, prezzo della «Spada per combattimento
+  sportivo» barrato e sostituito dal nuovo, poi un timbro rosso «+10%» e uno
+  scossone. In Outlook è una «Comunicazione ai rivenditori» con la stessa riga
+  del prezzo. Non compare più in La mia giornata.
 
 La scena dura 6,5 secondi e il gioco resta in pausa; si salta con «Salta» o
 Esc. Stile adattivo: spettacolare in Modalità Onde, comunicazione d'ufficio nel
@@ -4076,7 +4082,9 @@ galleria per rivederle. Più momenti insieme si mettono in coda; il tutorial
 aspetta che la coda sia vuota.
 
 Implementazione: `src/game/moments.ts` (condizioni e coda in
-`GameState.moments`, `seen` e `queue`), `src/features/moments/`. Salvataggi
+`GameState.moments`, `seen` e `queue`), `src/features/moments/`. L'Inflazione
+di Luce va in `queue` senza passare da `seen` (`LIGHT_INFLATION_MOMENT` in
+`src/game/lightInflation.ts`). Salvataggi
 precedenti (v88): quello che il salvataggio ha già raggiunto conta come visto e
 ogni Leggendario già iscritto vale una iscrizione.
 

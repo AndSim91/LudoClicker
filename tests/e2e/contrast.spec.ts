@@ -101,7 +101,7 @@ async function openArea(page: Page, name: string) {
 test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", async ({ page }) => {
   test.setTimeout(120_000);
   const state = createProgressedGameSave();
-  const moments = ["legendary:eva-parodi", `legendary:${SECRET_LEGENDARY_IDS[0]}`, "victory:national", "council", "foundation"];
+  const moments = ["legendary:eva-parodi", `legendary:${SECRET_LEGENDARY_IDS[0]}`, "victory:national", "council", "foundation", "light-inflation"];
   state.moments = { seen: moments, queue: moments };
   state.tournaments.results = [createOwnedFinalResult(state.lastSavedAt - 60_000)];
   state.school.euros = 50_000;

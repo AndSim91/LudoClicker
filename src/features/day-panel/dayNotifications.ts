@@ -1,10 +1,6 @@
 import { NARRATIVE_EVENTS } from "../../content/narrativeEvents";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { GAME_CONFIG } from "../../game/config";
-import {
-  getLightInflationEventDescription,
-  LIGHT_INFLATION_EVENT_TITLE,
-} from "../../game/lightInflation";
 import { isGameAreaUnlocked } from "../../game/progression";
 import {
   getContactsById,
@@ -47,8 +43,6 @@ export interface DayNotification {
   phase: DayNotificationPhase;
   title: string;
   detail: string;
-  /** Game notifications may freeze on hover; wall-clock notifications cannot. */
-  clock: "game" | "wall";
   timestamp: number;
   startsAt?: number;
   expiresAt?: number;
@@ -106,11 +100,8 @@ export function getDayPipFill(pip: DayPip, now: number): number {
 }
 
 export function orderDayNotifications(notifications: readonly DayNotification[]): DayNotification[] {
-  return [...notifications].sort((left, right) => {
-    if (left.id === "light-inflation") return -1;
-    if (right.id === "light-inflation") return 1;
-    return left.timestamp - right.timestamp || left.id.localeCompare(right.id);
-  });
+  return [...notifications].sort((left, right) =>
+    left.timestamp - right.timestamp || left.id.localeCompare(right.id));
 }
 
 const narrativeDefinitionsById = new Map(
@@ -175,7 +166,6 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       title: "Lezione di prova",
       // The timing column already says where the trial stands (Fase 8).
       detail: cancelled ? "Annullata: nessuna spada libera da prestare." : "",
-      clock: "game",
       timestamp,
       startsAt: trial.startsAt,
       expiresAt,
@@ -255,7 +245,6 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     phase,
     title: trialCount === 1 ? "1 lezione di prova" : `${trialCount} lezioni di prova`,
     detail,
-    clock: "game",
     timestamp: earliestTimestamp,
     startsAt: phase === "scheduled" ? earliestScheduledStart : undefined,
     pips: capDayPips(ordinaryPips),
@@ -318,25 +307,8 @@ function getTournamentSummary(result: TournamentResult): {
 export function selectDayNotifications(
   state: GameState,
   gameNow: number,
-  wallNow = gameNow,
 ): DayNotification[] {
   const notifications = selectTrialNotifications(state, gameNow);
-  const lightInflationEvent = state.lightInflation.event;
-  const lightInflationNotification = lightInflationEvent
-    && lightInflationEvent.occurredAt <= wallNow
-    && wallNow < lightInflationEvent.visibleUntil
-    ? {
-        id: "light-inflation",
-        kind: "important-event" as const,
-        phase: "neutral" as const,
-        title: LIGHT_INFLATION_EVENT_TITLE,
-        detail: getLightInflationEventDescription(lightInflationEvent.cause),
-        clock: "wall" as const,
-        timestamp: lightInflationEvent.occurredAt,
-        expiresAt: lightInflationEvent.visibleUntil,
-        expiryDurationMs: lightInflationEvent.visibleUntil - lightInflationEvent.occurredAt,
-      }
-    : undefined;
 
   for (const contact of getDirectEnrollmentContacts(state.contacts, state.scheduledTrials)) {
     if (contact.acquiredAt > gameNow) continue;
@@ -348,7 +320,6 @@ export function selectDayNotifications(
       phase: "enrolled",
       title: "Iscritto al volo",
       detail: "Saltata la prova: ha firmato e basta.",
-      clock: "game",
       timestamp: contact.acquiredAt,
       expiresAt,
       person: {
@@ -373,7 +344,6 @@ export function selectDayNotifications(
       phase: "scheduled",
       title: `${definition.label} in arrivo`,
       detail: "Si combatte a fine mese: c'è ancora tempo per allenarsi.",
-      clock: "game",
       timestamp: upcomingTournament.occursAt,
       startsAt: upcomingTournament.occursAt,
     });
@@ -390,7 +360,6 @@ export function selectDayNotifications(
       kind: "tournament",
       phase: summary.phase,
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,
-      clock: "game",
       timestamp: result.completedAt,
       expiresAt,
       // With one of ours in the final, the winners would spoil «Guarda la finale».
@@ -408,7 +377,6 @@ export function selectDayNotifications(
       phase: definition?.tone === "positive" ? "positive" : "neutral",
       title: event.title,
       detail: event.summary,
-      clock: "game",
       timestamp: event.occurredAt,
       expiresAt,
       person: event.person
@@ -421,8 +389,5 @@ export function selectDayNotifications(
     });
   }
 
-  const visibleNotifications = lightInflationNotification
-    ? [lightInflationNotification, ...notifications]
-    : notifications;
-  return orderDayNotifications(visibleNotifications);
+  return orderDayNotifications(notifications);
 }
