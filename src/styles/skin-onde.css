@@ -588,25 +588,6 @@
 :root[data-theme="dark"] .feedback-pop.is-perfect b { color: var(--onde-gold-bright); font-size: 18px; }
 :root[data-theme="dark"] .feedback-pop.is-flow b { color: var(--onde-wave); font-size: 18px; }
 
-/* The rarity burst: a ring in the member's rarity colour behind the label. */
-:root[data-theme="dark"] .feedback-pop.is-member::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  animation: feedback-burst 0.7s ease-out forwards;
-}
-:root[data-theme="dark"] .feedback-pop.rarity-common { color: var(--rarity-common-name); }
-:root[data-theme="dark"] .feedback-pop.rarity-rare { color: var(--rarity-rare-name); }
-:root[data-theme="dark"] .feedback-pop.rarity-ultra-rare { color: var(--rarity-ultra-rare-name); }
-:root[data-theme="dark"] .feedback-pop.rarity-legendary { color: var(--rarity-legendary-name); }
-:root[data-theme="dark"] .feedback-pop.rarity-secret-legendary { color: var(--rarity-secret-legendary-name); }
-
 @keyframes feedback-rise {
   0% { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
   12% { opacity: 1; transform: translate(-50%, -70%) scale(1.15); }
@@ -624,7 +605,3 @@
   100% { opacity: 0; transform: translate(-50%, 50%) scale(0.95); }
 }
 
-@keyframes feedback-burst {
-  0% { opacity: 0.9; transform: scale(0.3); }
-  100% { opacity: 0; transform: scale(2.2); }
-}

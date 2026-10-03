@@ -17,7 +17,6 @@ interface FloatingFeedback extends FeedbackEvent {
 
 // Where each pop starts. A missing anchor (another page is open) skips the pop.
 const ANCHORS: Record<FeedbackKind, string> = {
-  member: '[aria-label^="Iscritti attivi"]',
   fees: ".title-balance",
   flow: ".composer-flow",
   perfect: ".mail-body .text-caret",
@@ -28,7 +27,6 @@ const MAX_VISIBLE = 6;
 
 function selectFeedbackSlices(state: GameState) {
   return {
-    contacts: state.contacts,
     school: state.school,
     statistics: state.statistics,
     player: state.player,
@@ -39,14 +37,13 @@ function isSameFeedbackSlices(
   left: ReturnType<typeof selectFeedbackSlices>,
   right: ReturnType<typeof selectFeedbackSlices>,
 ) {
-  return left.contacts === right.contacts &&
-    left.school.currentMonth === right.school.currentMonth &&
+  return left.school.currentMonth === right.school.currentMonth &&
     left.statistics.eurosEarned === right.statistics.eurosEarned &&
     left.player === right.player;
 }
 
 /**
- * Floating numbers for the moments that matter: a new member, the monthly fees,
+ * Floating numbers for the moments that matter: the monthly fees,
  * a higher Flusso step and a Frase perfetta. Styling decides how loud they are:
  * full in Modalità Onde, discreet in the light theme, hidden with reduced motion.
  */
@@ -58,7 +55,7 @@ export function GameFeedbackLayer({ state: stateOverride }: { state?: GameState 
 
   useEffect(() => {
     const next = takeFeedbackSnapshot(slices);
-    const events = diffFeedback(snapshotRef.current, next, slices.contacts);
+    const events = diffFeedback(snapshotRef.current, next);
     snapshotRef.current = next;
     if (events.length === 0) return;
 
@@ -92,7 +89,7 @@ export function GameFeedbackLayer({ state: stateOverride }: { state?: GameState 
       {items.map((item) => (
         <span
           key={item.id}
-          className={`feedback-pop is-${item.kind}${item.rarity ? ` rarity-${item.rarity}` : ""}${item.fromTop ? " from-top" : ""}`}
+          className={`feedback-pop is-${item.kind}${item.fromTop ? " from-top" : ""}`}
           style={{ left: item.x, top: item.y }}
         >
           <b>{item.text}</b>

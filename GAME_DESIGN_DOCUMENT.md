@@ -871,9 +871,9 @@ attestati di Istruttore e Tecnico e livelli di Maestria.
 
 > **Da implementare:** non esiste un messaggio “Quota associativa accreditata”; al cambio mese le quote compaiono solo come numero fluttuante “Quote mensili”.
 
-Nuovi iscritti, Flusso e Frase perfetta generano anche numeri fluttuanti di
-feedback (per l'iscritto: “+1 iscritto · +20 €” con nome e rarità; oltre tre
-iscrizioni simultanee un unico “+N iscritti”).
+Flusso e Frase perfetta generano anche numeri fluttuanti di feedback. I nuovi
+iscritti no: si vedono in La mia giornata (esito della lezione di prova,
+riepilogo delle prove, «Iscritto al volo»), su richiesta di Andrea (Fase 8).
 
 Le prenotazioni delle lezioni di prova non generano messaggi in Posta in arrivo:
 sono visibili in La mia giornata e nello stato dell'email inviata.
@@ -2355,8 +2355,7 @@ le azioni compiute mentre la missione è nascosta non ne aumentano il progresso.
   invisibili.
 
 Eccezione voluta: un livello di feedback mostra brevi **numeri fluttuanti**
-per ogni nuovo iscritto (“+1 iscritto · +20 €”, colorato per rarità; al
-massimo tre alla volta), per le quote mensili incassate, per ogni nuovo
+per le quote mensili incassate, per ogni nuovo
 gradino del Flusso (“Flusso ×3”) e per la Frase perfetta. Gli accenti
 acquatici sono pieni nella Modalità Onde (tema scuro predefinito) e restano
 discreti solo nel tema chiaro. L'opzione **Riduci animazioni** disattiva

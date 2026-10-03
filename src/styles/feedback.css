@@ -34,11 +34,6 @@
 
 /* In the camouflage the status bar already says "Velocità ×N": no extra pop. */
 :root:not([data-theme="dark"]) .feedback-pop.is-flow { display: none; }
-.feedback-pop.rarity-common b { color: var(--rarity-common-name); }
-.feedback-pop.rarity-rare b { color: var(--rarity-rare-name); }
-.feedback-pop.rarity-ultra-rare b { color: var(--rarity-ultra-rare-name); }
-.feedback-pop.rarity-legendary b { color: var(--rarity-legendary-name); }
-.feedback-pop.rarity-secret-legendary b { color: var(--rarity-secret-legendary-name); }
 
 @keyframes feedback-fade {
   0% { opacity: 0; transform: translate(-50%, -30%); }
