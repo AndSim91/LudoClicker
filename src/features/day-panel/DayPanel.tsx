@@ -19,7 +19,7 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   DAY_NOTIFICATION_VISIBILITY_MS,
-  getDayProgressPips,
+  getDayPipFill,
   orderDayNotifications,
   selectDayNotifications,
   type DayNotification,
@@ -183,13 +183,16 @@ function DayNotificationEntry({
               Guarda la finale
             </button>
           ) : null}
-          {notification.progress ? (
+          {notification.pips ? (
             <div className="appointment-pips" aria-hidden="true">
-              {getDayProgressPips(notification.progress).map((pip, index) => (
+              {notification.pips.map((pip, index) => (
                 <div
                   key={index}
-                  className={`appointment-pip appointment-pip-${pip}`}
-                  style={{ "--pip-index": index } as CSSProperties}
+                  className={`appointment-pip appointment-pip-${pip.state}`}
+                  style={{
+                    "--pip-index": index,
+                    "--pip-fill": getDayPipFill(pip, now),
+                  } as CSSProperties}
                 />
               ))}
             </div>

@@ -11,7 +11,8 @@ import {
   DAY_NOTIFICATION_VISIBILITY_MS,
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
-  getDayProgressPips,
+  capDayPips,
+  getDayPipFill,
   selectDayNotifications,
 } from "./dayNotifications";
 
@@ -176,25 +177,45 @@ describe("selectDayNotifications", () => {
       phase: "in-progress",
       title: "6 lezioni di prova",
       detail: "2 in programma, 2 in palestra, 1 iscritto e 1 senza iscrizione",
-      progress: { done: 2, live: 2, waiting: 2 },
+      pips: [
+        { state: "enrolled", startsAt: 90_004 },
+        { state: "lost", startsAt: 90_005 },
+        { state: "live", startsAt: 90_002 },
+        { state: "live", startsAt: 90_003 },
+        { state: "waiting", startsAt: 110_000 },
+        { state: "waiting", startsAt: 110_001 },
+      ],
       tutorialTarget: true,
     }));
     expect(state.scheduledTrials).toHaveLength(6);
   });
 
-  it("shows progress pips only while a trial is in the gym, capped and never losing the live ones", () => {
-    const scheduledOnly = stateWithTrialPhases(Array.from({ length: 6 }, () => "scheduled" as const));
-    expect(selectDayNotifications(scheduledOnly, 100_000)[0].progress).toBeUndefined();
-    expect(selectDayNotifications(stateWithTrialPhases(["in-progress"]), 100_000)[0].progress)
-      .toEqual({ done: 0, live: 1, waiting: 0 });
+  it("gives every trial a pip that fills while waiting and keeps its outcome colour", () => {
+    expect(selectDayNotifications(stateWithTrialPhases(["scheduled"]), 100_000)[0].pips)
+      .toEqual([{ state: "waiting", startsAt: 110_000 }]);
+    expect(selectDayNotifications(stateWithTrialPhases(["enrolled"]), 100_000)[0].pips)
+      .toEqual([{ state: "enrolled", startsAt: 90_000 }]);
 
-    expect(getDayProgressPips({ done: 1, live: 2, waiting: 1 }))
-      .toEqual(["done", "live", "live", "waiting"]);
-    const crowded = getDayProgressPips({ done: 0, live: 1, waiting: 99 });
+    // 30 s wait: 10 s before the start the pip is two thirds full, then full.
+    expect(getDayPipFill({ state: "waiting", startsAt: 110_000 }, 100_000)).toBeCloseTo(2 / 3);
+    expect(getDayPipFill({ state: "waiting", startsAt: 110_000 }, 50_000)).toBe(0);
+    expect(getDayPipFill({ state: "waiting", startsAt: 110_000 }, 120_000)).toBe(1);
+  });
+
+  it("caps the pips at eight, keeping each state's share and the trials about to start", () => {
+    const waiting = Array.from({ length: 99 }, (_, index) => ({ state: "waiting" as const, startsAt: 200 - index }));
+    const crowded = capDayPips([...waiting, { state: "live", startsAt: 1 }]);
     expect(crowded).toHaveLength(8);
-    expect(crowded.filter((pip) => pip === "live")).toHaveLength(1);
-    expect(getDayProgressPips({ done: 50, live: 30, waiting: 20 })).toEqual([
-      "done", "done", "done", "done", "live", "live", "waiting", "waiting",
+    expect(crowded[0]).toEqual({ state: "live", startsAt: 1 });
+    expect(crowded.slice(1).map((pip) => pip.startsAt)).toEqual([102, 103, 104, 105, 106, 107, 108]);
+
+    const mixed = capDayPips([
+      ...Array.from({ length: 50 }, (_, index) => ({ state: "enrolled" as const, startsAt: index })),
+      ...Array.from({ length: 30 }, (_, index) => ({ state: "live" as const, startsAt: index })),
+      ...Array.from({ length: 20 }, (_, index) => ({ state: "waiting" as const, startsAt: index })),
+    ]);
+    expect(mixed.map((pip) => pip.state)).toEqual([
+      "enrolled", "enrolled", "enrolled", "enrolled", "live", "live", "waiting", "waiting",
     ]);
   });
 

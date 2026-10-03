@@ -56,8 +56,8 @@ export interface DayNotification {
   tutorialTarget?: boolean;
   /** A finished tournament whose Arena final had one of our athletes: «Guarda la finale» (4.3). */
   finalResultId?: string;
-  /** Only while something is in the gym: one pip per trial, the live ones animate. */
-  progress?: DayNotificationProgress;
+  /** One pip per trial: fills while waiting, moves in the gym, green or red at the end. */
+  pips?: DayPip[];
   person?: {
     displayName: string;
     rarity: PersonRarity;
@@ -65,30 +65,44 @@ export interface DayNotification {
   };
 }
 
-export interface DayNotificationProgress {
-  done: number;
-  live: number;
-  waiting: number;
+export type DayPipState = "waiting" | "live" | "enrolled" | "lost";
+
+export interface DayPip {
+  state: DayPipState;
+  startsAt: number;
 }
 
-export type DayProgressPip = keyof DayNotificationProgress;
+const DAY_PIP_ORDER: readonly DayPipState[] = ["enrolled", "lost", "live", "waiting"];
 
-/** Pips in reading order (done, live, waiting), at most DAY_PROGRESS_PIP_LIMIT; live never rounds away. */
-export function getDayProgressPips(
-  { done, live, waiting }: DayNotificationProgress,
-  limit = DAY_PROGRESS_PIP_LIMIT,
-): DayProgressPip[] {
-  const total = done + live + waiting;
-  if (total > limit) {
-    live = Math.max(live > 0 ? 1 : 0, Math.round((live * limit) / total));
-    waiting = Math.min(limit - live, Math.round((waiting * limit) / total));
-    done = limit - live - waiting;
+/**
+ * Pips in reading order (outcomes, live, waiting by start), at most `limit`.
+ * Over the limit each state keeps its share (live never rounds away) and the
+ * earliest trials of each state stay, so the pips that move are the ones about to start.
+ */
+export function capDayPips(pips: readonly DayPip[], limit = DAY_PROGRESS_PIP_LIMIT): DayPip[] {
+  const groups = DAY_PIP_ORDER.map((state) =>
+    pips.filter((pip) => pip.state === state).sort((left, right) => left.startsAt - right.startsAt),
+  );
+  if (pips.length <= limit) return groups.flat();
+  const shares = groups.map((group, index) => {
+    const share = Math.round((group.length * limit) / pips.length);
+    return DAY_PIP_ORDER[index] === "live" && group.length > 0 ? Math.max(1, share) : share;
+  });
+  let excess = shares.reduce((sum, share) => sum + share, 0) - limit;
+  while (excess !== 0) {
+    const largest = shares.indexOf(Math.max(...shares));
+    shares[largest] -= Math.sign(excess);
+    excess -= Math.sign(excess);
   }
-  return [
-    ...Array<DayProgressPip>(done).fill("done"),
-    ...Array<DayProgressPip>(live).fill("live"),
-    ...Array<DayProgressPip>(waiting).fill("waiting"),
-  ];
+  return groups.flatMap((group, index) => group.slice(0, shares[index]));
+}
+
+/** How far a waiting trial is towards its start, 0–1. */
+export function getDayPipFill(pip: DayPip, now: number): number {
+  if (pip.state !== "waiting") return 1;
+  // ponytail: the wait is a fixed GAME_CONFIG span, so the booking time is derived; store it on the trial if waits ever vary.
+  const waitMs = GAME_CONFIG.trialWaitMaxMs;
+  return Math.min(1, Math.max(0, 1 - (pip.startsAt - now) / waitMs));
 }
 
 export function orderDayNotifications(notifications: readonly DayNotification[]): DayNotification[] {
@@ -112,6 +126,12 @@ function formatTrialCount(
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+function getDayPipState(phase: DayNotificationPhase): DayPipState {
+  if (phase === "scheduled") return "waiting";
+  if (phase === "in-progress") return "live";
+  return phase === "enrolled" ? "enrolled" : "lost";
+}
+
 function selectTrialNotifications(state: GameState, gameNow: number): DayNotification[] {
   const contactsById = getContactsById(state.contacts);
   const specialTrialNotifications: DayNotification[] = [];
@@ -128,6 +148,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
   let earliestTimestamp = Number.POSITIVE_INFINITY;
   let earliestScheduledStart: number | undefined;
   let tutorialTarget = false;
+  const ordinaryPips: DayPip[] = [];
 
   for (const trial of selectDayTrials(state, gameNow)) {
     const contact = contactsById.get(trial.contactId);
@@ -159,7 +180,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       startsAt: trial.startsAt,
       expiresAt,
       tutorialTarget: trial.tutorialSceneId === "first-event",
-      progress: phase === "in-progress" ? { done: 0, live: 1, waiting: 0 } : undefined,
+      pips: [{ state: getDayPipState(phase), startsAt: trial.startsAt }],
       person: contact
         ? {
             displayName: `${contact.firstName} ${contact.lastName}`,
@@ -175,6 +196,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     }
 
     trialCount += 1;
+    ordinaryPips.push(...notification.pips!);
     earliestTimestamp = Math.min(earliestTimestamp, timestamp);
     tutorialTarget ||= trial.tutorialSceneId === "first-event";
 
@@ -236,9 +258,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     clock: "game",
     timestamp: earliestTimestamp,
     startsAt: phase === "scheduled" ? earliestScheduledStart : undefined,
-    progress: inProgressCount > 0
-      ? { done: enrolledCount + lostCount, live: inProgressCount, waiting: scheduledCount }
-      : undefined,
+    pips: capDayPips(ordinaryPips),
     tutorialTarget,
   }];
 }
