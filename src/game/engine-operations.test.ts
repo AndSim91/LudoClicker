@@ -296,7 +296,7 @@ describe("game engine: operations", () => {
     const state = createInitialState(1_000);
     const notFamousEnough = {
       ...state,
-      school: { ...state.school, euros: 1_000, activeMembers: 4, peakActiveMembers: 4, fame: 4 },
+      school: { ...state.school, euros: 500, activeMembers: 4, peakActiveMembers: 4, fame: 4 },
     };
     const blocked = gameReducer(notFamousEnough, {
       type: "START_ACQUISITION_EVENT",
@@ -305,7 +305,7 @@ describe("game engine: operations", () => {
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 1_000, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
+      school: { ...state.school, euros: 500, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",

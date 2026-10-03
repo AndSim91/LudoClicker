@@ -17,9 +17,9 @@ describe("acquisition event progression", () => {
       event.cost,
     ])).toEqual([
       ["park-sparring", 0, 0],
-      ["kata-sea-waves", 0, 100],
-      ["organized-flyering", 5, 500],
-      ["public-demo", 5, 1_000],
+      ["kata-sea-waves", 0, 50],
+      ["organized-flyering", 5, 250],
+      ["public-demo", 5, 500],
     ]);
   });
 

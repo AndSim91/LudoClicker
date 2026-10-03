@@ -103,9 +103,9 @@ describe("collaborator mastery integration", () => {
     const event = started.acquisitionEvents[0];
 
     expect(event.resolvesAt - event.startedAt).toBe(5_000);
-    expect(event.cost).toBe(250);
+    expect(event.cost).toBe(125);
     expect(event.wearAdded).toBe(15);
-    expect(started.school.euros).toBe(750);
+    expect(started.school.euros).toBe(875);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });
     expect(completed.collaborators[0].mastery?.events).toBe(5_765);
