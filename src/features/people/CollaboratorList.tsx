@@ -220,7 +220,14 @@ export function CollaboratorList({
     now,
   }), [activeEmail, athleticPreparationInstructorIds, contactsById, now, state]);
   const sortedCollaborators = useMemo(
-    () => sortCollaborators(filteredCollaborators, sort, sortContext),
+    () => {
+      const sorted = sortCollaborators(filteredCollaborators, sort, sortContext);
+      // I non assegnati sempre in cima, con qualunque ordinamento.
+      return [
+        ...sorted.filter((collaborator) => collaborator.assignment === null),
+        ...sorted.filter((collaborator) => collaborator.assignment !== null),
+      ];
+    },
     [filteredCollaborators, sort, sortContext],
   );
   const pageCount = Math.max(
@@ -452,7 +459,7 @@ export function CollaboratorList({
               <article
                 className={`collaborator-row ${getRarityClassName(collaborator.rarity, Boolean(contact?.secretLegendaryId))}${
                   selected ? " is-selected" : ""
-                }`}
+                }${collaborator.assignment === null ? " is-unassigned" : ""}`}
                 key={collaborator.id}
               >
                 <div className="collaborator-identity" data-label="Collaboratore">

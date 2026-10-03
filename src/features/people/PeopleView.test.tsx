@@ -1821,7 +1821,7 @@ describe("PeopleView", () => {
         joinedAt: 1_000,
         forms: [] as FormId[],
         instructorForms: [] as FormId[],
-        assignment: null,
+        assignment: "events" as const,
         rarity: "ultra-rare" as const,
       },
       {
@@ -1890,6 +1890,47 @@ describe("PeopleView", () => {
     expect(rows[1]).toHaveTextContent("Alba Esperta");
     expect(rows[2]).toHaveTextContent("Bruno Tecnico");
     expect(resetSort).toBeDisabled();
+  });
+
+  it("keeps unassigned collaborators on top and highlighted with any sort", () => {
+    const initial = createInitialState(1_000);
+    const contacts = [
+      { ...initial.contacts[0], id: "contact-zeno", arenaBase: 1, styleBase: 1 },
+      { ...initial.contacts[1], id: "contact-alba", arenaBase: 90, styleBase: 70 },
+    ];
+    const base = {
+      joinedAt: 1_000,
+      forms: [] as FormId[],
+      instructorForms: [] as FormId[],
+      rarity: "common" as const,
+    };
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          contacts,
+          collaborators: [
+            { ...base, id: "collaborator-alba", contactId: "contact-alba", displayName: "Alba Assegnata", assignment: "writing" as const },
+            { ...base, id: "collaborator-zeno", contactId: "contact-zeno", displayName: "Zeno Libero", assignment: null },
+          ],
+          unlocks: { ...initial.unlocks, collaborators: true },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
+    let rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Zeno Libero");
+    expect(rows[0]).toHaveClass("is-unassigned");
+    expect(rows[1]).not.toHaveClass("is-unassigned");
+
+    fireEvent.click(within(roster).getByRole("button", {
+      name: "Ordina collaboratori per Collaboratore",
+    }));
+    rows = roster.querySelectorAll(".collaborator-row");
+    expect(rows[0]).toHaveTextContent("Zeno Libero");
   });
 
   it("shows every collaborator automation progress without the Corso Agonisti box", () => {
