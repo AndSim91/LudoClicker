@@ -23,6 +23,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
+import { MemberCard } from "./MemberCard";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
 import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentation";
@@ -35,6 +36,7 @@ import {
   getRarityClassName,
 } from "../../shared/rarityPresentation";
 import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
+import { STORAGE_KEYS } from "../../shared/storageKeys";
 import {
   getMemberNextFormLabel,
   getMemberStudent,
@@ -55,6 +57,24 @@ const CONTACT_STATUS_LABELS: Record<Contact["status"], string> = {
 };
 
 const MEMBERS_PER_PAGE = 25;
+const MEMBER_CARDS_PER_PAGE = 24;
+type MemberView = "table" | "cards";
+
+function readMemberView(): MemberView {
+  try {
+    return window.localStorage.getItem(STORAGE_KEYS.memberView) === "cards" ? "cards" : "table";
+  } catch {
+    return "table";
+  }
+}
+
+function storeMemberView(view: MemberView): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEYS.memberView, view);
+  } catch {
+    // ponytail: a blocked storage only forgets the choice.
+  }
+}
 const MEMBER_SORT_KEYS = [
   "name",
   "rarity",
@@ -195,6 +215,13 @@ export function MemberList({
     [state.contacts],
   );
   const [requestedPage, setRequestedPage] = useState(0);
+  const [view, setView] = useState<MemberView>(readMemberView);
+  const pageSize = view === "cards" ? MEMBER_CARDS_PER_PAGE : MEMBERS_PER_PAGE;
+  const changeView = (next: MemberView) => {
+    storeMemberView(next);
+    setView(next);
+    setRequestedPage(0);
+  };
   const {
     sort,
     setSort,
@@ -311,10 +338,10 @@ export function MemberList({
     () => sortMembers(filteredMembers, sort, sortContext),
     [filteredMembers, sort, sortContext],
   );
-  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / MEMBERS_PER_PAGE));
+  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
   const page = Math.min(requestedPage, pageCount - 1);
-  const firstMember = page * MEMBERS_PER_PAGE;
-  const visibleMembers = sortedMembers.slice(firstMember, firstMember + MEMBERS_PER_PAGE);
+  const firstMember = page * pageSize;
+  const visibleMembers = sortedMembers.slice(firstMember, firstMember + pageSize);
   const handleSort = (key: MemberSortKey) => {
     setRequestedPage(0);
     setSort((current) =>
@@ -373,7 +400,7 @@ export function MemberList({
   }, [cancellationTarget, onCancelEnrollment]);
 
   return (
-    <section className="people-table member-development-list" aria-label="Iscritti">
+    <section className={`people-table member-development-list${view === "cards" ? " is-cards" : ""}`} aria-label="Iscritti">
       <div className="member-sort-mobile table-sort-controls" aria-label="Ordina iscritti">
         <label>
           <span>Ordina per</span>
@@ -512,29 +539,98 @@ export function MemberList({
           </span>
         ) : null}
         <button type="button" onClick={resetFilters}>Azzera filtri</button>
+        <span className="member-view-switch" role="group" aria-label="Vista degli iscritti">
+          <button type="button" aria-pressed={view === "table"} onClick={() => changeView("table")}>
+            <Icon name="menu" />Tabella
+          </button>
+          <button type="button" aria-pressed={view === "cards"} onClick={() => changeView("cards")}>
+            <Icon name="tasks" />Schede
+          </button>
+        </span>
       </div>
+      <div className={view === "cards" ? "member-card-grid" : "member-table-rows"}>
       {visibleMembers.map((contact) => {
         const presentation = getMemberPresentation(contact);
         const collaborator = collaboratorsByContactId.get(contact.id);
         const memberStudent = presentation.student;
         const memberForms = memberStudent.forms;
         const preparation = presentation.preparation;
+        const favoriteButton = (
+          <button
+            type="button"
+            className={`member-favorite${contact.favorite ? " is-favorite" : ""}`}
+            aria-label={`${contact.favorite ? "Rimuovi" : "Aggiungi"} ${contact.firstName} ${contact.lastName} ${contact.favorite ? "dai" : "ai"} preferiti`}
+            aria-pressed={contact.favorite === true}
+            title={contact.favorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
+            onClick={() => onToggleFavorite(contact.id)}
+          >
+            <span aria-hidden="true">★</span>
+          </button>
+        );
+        const cancelButton = (
+          <button
+            type="button"
+            className="member-cancel-enrollment"
+            aria-label={contact.favorite
+              ? `Iscrizione protetta per ${contact.firstName} ${contact.lastName}: atleta preferito`
+              : `Annulla l'iscrizione di ${contact.firstName} ${contact.lastName}`}
+            title={contact.favorite
+              ? "Rimuovi l'atleta dai preferiti per annullare l'iscrizione"
+              : "Annulla iscrizione"}
+            disabled={contact.favorite === true}
+            onClick={(event) => {
+              cancellationTriggerRef.current = event.currentTarget;
+              setCancellationTarget(contact);
+            }}
+          >
+            <Icon name="close" />
+          </button>
+        );
+        const training = (
+          <>
+            <TrainingControl
+              personId={collaborator?.id ?? contact.id}
+              displayName={`${contact.firstName} ${contact.lastName}`}
+              student={memberStudent}
+              state={stateOverride}
+              collaboratorsById={collaboratorsById}
+              onStartTraining={onStartTraining}
+              variant="roster"
+              trainingMode="student-only"
+            />
+            {(contact.agonistCourseCompletions ?? 0) > 0 ? (
+              <small className="member-agonist-course-message">
+                Corso Agonisti | Potenziale totale +{
+                  (contact.agonistCourseArenaBonus ?? contact.agonistCourseCompletions ?? 0) +
+                  (contact.agonistCourseStyleBonus ?? contact.agonistCourseCompletions ?? 0)
+                }
+              </small>
+            ) : null}
+          </>
+        );
+        if (view === "cards") {
+          return (
+            <MemberCard
+              key={contact.id}
+              contact={contact}
+              forms={memberForms}
+              collaborator={collaborator}
+              path={presentation.path}
+              status={presentation.status}
+              preparation={preparation}
+              favoriteButton={favoriteButton}
+              cancelButton={cancelButton}
+              training={training}
+            />
+          );
+        }
         return (
           <div
             className={`people-row member-row ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}
             key={contact.id}
           >
             <div className="member-name" data-label="Nome">
-              <button
-                type="button"
-                className={`member-favorite${contact.favorite ? " is-favorite" : ""}`}
-                aria-label={`${contact.favorite ? "Rimuovi" : "Aggiungi"} ${contact.firstName} ${contact.lastName} ${contact.favorite ? "dai" : "ai"} preferiti`}
-                aria-pressed={contact.favorite === true}
-                title={contact.favorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
-                onClick={() => onToggleFavorite(contact.id)}
-              >
-                <span aria-hidden="true">★</span>
-              </button>
+              {favoriteButton}
               <span className="member-identity">
                 <PersonName
                   displayName={`${contact.firstName} ${contact.lastName}`}
@@ -583,45 +679,13 @@ export function MemberList({
               <small>{presentation.status}</small>
             </span>
             <div className="member-training-cell" data-label="Prossima Forma">
-              <TrainingControl
-                personId={collaborator?.id ?? contact.id}
-                displayName={`${contact.firstName} ${contact.lastName}`}
-                student={memberStudent}
-                state={stateOverride}
-                collaboratorsById={collaboratorsById}
-                onStartTraining={onStartTraining}
-                variant="roster"
-                trainingMode="student-only"
-              />
-              {(contact.agonistCourseCompletions ?? 0) > 0 ? (
-                <small className="member-agonist-course-message">
-                  Corso Agonisti | Potenziale totale +{
-                    (contact.agonistCourseArenaBonus ?? contact.agonistCourseCompletions ?? 0) +
-                    (contact.agonistCourseStyleBonus ?? contact.agonistCourseCompletions ?? 0)
-                  }
-                </small>
-              ) : null}
+              {training}
             </div>
-            <button
-              type="button"
-              className="member-cancel-enrollment"
-              aria-label={contact.favorite
-                ? `Iscrizione protetta per ${contact.firstName} ${contact.lastName}: atleta preferito`
-                : `Annulla l'iscrizione di ${contact.firstName} ${contact.lastName}`}
-              title={contact.favorite
-                ? "Rimuovi l'atleta dai preferiti per annullare l'iscrizione"
-                : "Annulla iscrizione"}
-              disabled={contact.favorite === true}
-              onClick={(event) => {
-                cancellationTriggerRef.current = event.currentTarget;
-                setCancellationTarget(contact);
-              }}
-            >
-              <Icon name="close" />
-            </button>
+            {cancelButton}
           </div>
         );
       })}
+      </div>
       {filteredMembers.length === 0 ? (
         <div className="member-filter-empty">Nessun iscritto corrisponde ai filtri.</div>
       ) : null}

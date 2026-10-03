@@ -131,6 +131,11 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   for (const area of ["Eventi", "Scuola", "Tornei", "Upgrade", "Gadget", "Impostazioni"]) {
     await openArea(page, area);
     report[area] = await audit(page);
+    if (area === "Scuola") {
+      await page.getByRole("button", { name: /Schede/ }).click();
+      report["Scuola · Schede"] = await audit(page);
+      await page.getByRole("button", { name: /Tabella/ }).click();
+    }
   }
 
   // The first achievements unlock on the first ticks: the LudoWiki is in the rail.

@@ -1266,6 +1266,29 @@ describe("PeopleView", () => {
     expect(onToggleFavorite).toHaveBeenCalledWith(favorite.id);
   });
 
+  it("switches the roster to cards and remembers the choice (4.7)", () => {
+    const initial = createInitialState(1_000);
+    const member = { ...initial.contacts[0], status: "enrolled" as const };
+    const props = {
+      state: { ...initial, contacts: [member], school: { ...initial.school, activeMembers: 1 } },
+      onAssign: () => undefined,
+      onStartTraining: () => undefined,
+    };
+    const name = `${member.firstName} ${member.lastName}`;
+    const { unmount } = render(<PeopleView {...props} />);
+    expect(screen.queryByRole("article", { name })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Schede/ }));
+    expect(screen.getByRole("article", { name })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Schede/ })).toHaveAttribute("aria-pressed", "true");
+
+    unmount();
+    render(<PeopleView {...props} />);
+    expect(screen.getByRole("article", { name })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /Tabella/ }));
+    expect(screen.queryByRole("article", { name })).not.toBeInTheDocument();
+  });
+
   it("keeps the roster DOM bounded and lets users reach every member", () => {
     const initial = createInitialState(1_000);
     const seed = initial.contacts[0];

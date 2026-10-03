@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   theme: "oggetto-nuovi-iscritti.theme",
   reduceMotion: "oggetto-nuovi-iscritti.reduce-motion",
   tableSortPrefix: "oggetto-nuovi-iscritti.table-sort.v1",
+  memberView: "oggetto-nuovi-iscritti.member-view",
   crashSession: "oggetto-nuovi-iscritti.crash-session",
   crashReport: "oggetto-nuovi-iscritti.crash-report",
 } as const;

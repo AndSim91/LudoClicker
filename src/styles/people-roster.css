@@ -812,3 +812,171 @@
 .rarity-overview article.rare { border-top-color: var(--rarity-rare-accent); }
 .rarity-overview article.ultra-rare { border-top-color: var(--rarity-ultra-rare-accent); }
 .rarity-overview article.legendary { border-top-color: var(--rarity-legendary-accent); }
+
+/* «Schede» view of the roster (4.7): same facts as a row, as cards. */
+.member-table-rows {
+  display: contents;
+}
+
+.member-view-switch {
+  display: inline-flex;
+  margin-left: auto;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.member-filter-summary .member-view-switch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-muted);
+}
+
+.member-filter-summary .member-view-switch button[aria-pressed="true"] {
+  color: #ffffff;
+  background: var(--blue-600);
+}
+
+.member-view-switch svg {
+  width: 13px;
+  height: 13px;
+}
+
+.people-view .member-development-list.is-cards .people-head {
+  display: none;
+}
+
+.member-development-list.is-cards .member-sort-mobile {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 0 12px;
+}
+
+.member-development-list.is-cards .member-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  padding: 6px 0;
+}
+
+.member-development-list.is-cards .member-filter-row > label {
+  flex: 1 1 150px;
+}
+
+.member-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.member-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: inset 0 3px 0 var(--member-card-accent, var(--line-strong));
+}
+
+.member-card.rarity-common { --member-card-accent: var(--rarity-common-accent); }
+.member-card.rarity-rare { --member-card-accent: var(--rarity-rare-accent); }
+.member-card.rarity-ultra-rare { --member-card-accent: var(--rarity-ultra-rare-accent); }
+.member-card.rarity-legendary { --member-card-accent: var(--rarity-legendary-accent); }
+.member-card.rarity-secret-legendary { --member-card-accent: var(--rarity-secret-legendary-accent); }
+
+.member-card header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-card-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border: 2px solid var(--member-card-accent, var(--line-strong));
+  border-radius: 50%;
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.member-card-identity {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.member-card-identity .member-email {
+  display: block;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-card-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+  font-size: 13px;
+}
+
+.member-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+
+.member-card-stats div {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
+.member-card-stats dt {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.member-card-stats dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.member-card-status {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.member-card-training {
+  margin-top: auto;
+}
+
+.member-card .form-logo-strip {
+  gap: 4px;
+}
+
+.member-card .form-logo-item {
+  min-width: 22px;
+}
+
+.member-card .form-logo-mark,
+.member-card .form-logo-item img {
+  width: 22px;
+  height: 22px;
+}

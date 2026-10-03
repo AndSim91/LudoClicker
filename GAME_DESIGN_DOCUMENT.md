@@ -2357,7 +2357,12 @@ Un'unica pagina, in quest'ordine:
 - Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
   assegnazioni, che dal nono Collaboratore diventa una gestione aggregata per
   settore con i tasti + e −, i settori secondari e le priorità operative;
-- Iscritti attivi;
+  sopra, l'interruttore «Assegnazione automatica» (§ 9.2);
+- Iscritti attivi, in due viste a scelta (piano 4.7, la scelta resta salvata
+  nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
+  **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
+  Forme, Arena e Stile, stato, prossima Forma, preferito e annullamento).
+  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste;
 - riepilogo delle rarità (dopo 10 email inviate, un iscritto non Comune o il
   primo Collaboratore).
 
