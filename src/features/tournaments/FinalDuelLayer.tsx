@@ -5,8 +5,10 @@ import { getAssaultSequence, getOwnedFinal } from "./finalDuel";
 import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
 import { participantName } from "./tournamentPresentation";
 
-/** Seconds each assault takes on screen; the style vote and the verdict follow. */
-const ASSAULT_SECONDS = 2;
+/** Seconds each assault takes on screen (the duel is --duel in final-duel.css). */
+const ASSAULT_SECONDS = 3;
+/** Where the bind sways in the two middle exchanges, so no assault looks the same. */
+const SWAYS = [["-9%", "7%"], ["8%", "-10%"], ["-5%", "11%"]];
 
 function FighterCard({ participant, side }: { participant: TournamentParticipant; side: "a" | "b" }) {
   const owned = Boolean(participant.ownedContactId);
@@ -88,7 +90,11 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
                   <li
                     key={index}
                     className={`is-${side}`}
-                    style={{ "--delay": `${index * ASSAULT_SECONDS}s` } as CSSProperties}
+                    style={{
+                      "--delay": `${index * ASSAULT_SECONDS}s`,
+                      "--s1": SWAYS[index % 3][0],
+                      "--s2": SWAYS[index % 3][1],
+                    } as CSSProperties}
                   >
                     <span className="final-duel-assault-label">Assalto {index + 1}</span>
                     {/* Crossed blades end on the side of whoever takes the OH. */}
@@ -96,7 +102,9 @@ export function FinalDuelLayer({ result, onClose }: { result: TournamentResult; 
                       <span className="final-duel-blades">
                         <span className="final-duel-blade is-a" />
                         <span className="final-duel-blade is-b" />
+                        <span className="final-duel-spark" />
                       </span>
+                      <span className="final-duel-oh">OH!</span>
                     </span>
                     <span className="final-duel-assault-outcome">
                       OH a {nameOf(hit)} · punto a {nameOf(side)} · {running.a}–{running.b}

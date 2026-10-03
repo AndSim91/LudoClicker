@@ -4071,7 +4071,7 @@ atleta si possono guardare: dal pulsante «Guarda la finale» nella notifica
 «Torneo completato» di La mia giornata e, siccome quel pannello è nascosto
 sotto i 1301 px e la notifica dura 10 secondi, anche dall'intestazione di
 Tornei › Risultati. Il gioco **non** si ferma. La finestra mostra i due atleti
-(il nostro evidenziato), gli assalti uno alla volta (2 secondi ciascuno), poi
+(il nostro evidenziato), gli assalti uno alla volta (3 secondi ciascuno), poi
 il voto di Stile dei giudici e il verdetto; «Mostra il risultato» salta alla
 fine, Esc o «Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
 2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
@@ -4079,9 +4079,11 @@ la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts
 
 Decisione del 04/10: ogni assalto è un duello di due spade illuminate, del
 colore della rarità dell'atleta (comune argento, raro blu, ultra raro viola,
-leggendario oro, leggendario segreto rosso). Partono incrociate al centro, si
-scontrano e finiscono dal lato di chi **subisce** il colpo («OH» nel gergo
-LudoSport): il punto va all'altro. Sotto: «OH a X · punto a Y · 1–0», con il
+leggendario oro, leggendario segreto rosso). Si accendono in guardia, si
+scontrano tre volte con una scintilla (il punto d'incontro ondeggia in modo
+diverso in ogni assalto) e con il colpo decisivo finiscono incrociate dal lato
+di chi **subisce** il colpo («OH» nel gergo LudoSport), con un lampo, una
+scossa e la scritta «OH!»: il punto va all'altro. Sotto: «OH a X · punto a Y · 1–0», con il
 punteggio progressivo.
 
 ---

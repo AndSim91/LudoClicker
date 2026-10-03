@@ -12,6 +12,8 @@
   --blade-ultra-rare: #a463f2;
   --blade-legendary: #f5b700;
   --blade-secret-legendary: #e5322d;
+  /* One assault on screen; FinalDuelLayer spaces them by ASSAULT_SECONDS. */
+  --duel: 2.6s;
   position: fixed;
   z-index: 150;
   inset: 0;
@@ -165,7 +167,7 @@
 
 .final-duel-track {
   position: relative;
-  height: 72px;
+  height: 96px;
   overflow: hidden;
   border-radius: 12px;
   background: linear-gradient(
@@ -174,43 +176,120 @@
     transparent 50%,
     color-mix(in srgb, var(--duel-b) 35%, transparent)
   );
+  animation: final-duel-shake var(--duel) linear var(--delay) both;
 }
 
-/* The crossing point. Base rule = end of the assault: blades on the OH side. */
+/* Where the decisive hit lands: the OH side lights up. */
+.final-duel-track::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--end) 50%, rgb(255 255 255 / 55%), transparent 45%);
+  content: "";
+  opacity: 0;
+  animation: final-duel-hit var(--duel) ease-out var(--delay) both;
+  pointer-events: none;
+}
+
+.final-duel-assaults li.is-a { --end: 80%; --wind: 42%; --lean: rotate(16deg); }
+.final-duel-assaults li.is-b { --end: 20%; --wind: 58%; --lean: rotate(-16deg); }
+
+/*
+ * The bind, where the blades cross. Base rule = end of the assault: blades
+ * pushed onto the side of whoever takes the OH. Mid-assault sways come from
+ * --s1/--s2, different for each assault.
+ */
 .final-duel-blades {
   position: absolute;
   top: 50%;
+  left: var(--end);
   width: 0;
   height: 0;
-  animation: final-duel-clash 1.6s ease-in-out var(--delay) both;
+  transform: var(--lean);
+  animation: final-duel-bind var(--duel) ease-in-out var(--delay) both;
 }
 
-.final-duel-assaults li.is-a .final-duel-blades { left: 80%; transform: rotate(14deg); }
-.final-duel-assaults li.is-b .final-duel-blades { left: 20%; transform: rotate(-14deg); }
-
-/* Hilt at the bottom, the fighter's side; blade lit in the rarity colour. */
+/* Rotates around the bind; hilt at the bottom, on the fighter's side. */
 .final-duel-blade {
   --blade: var(--blade-a);
+  --flip: 1;
   position: absolute;
   top: -42px;
   left: -2.5px;
   width: 5px;
   height: 84px;
-  border-radius: 3px;
-  background: linear-gradient(0deg, #3b4248 0 20%, var(--blade) 20%);
-  box-shadow: 0 0 6px var(--blade);
-  transform: rotate(50deg);
+  transform: rotate(calc(var(--flip) * 50deg));
+  animation: final-duel-fence var(--duel) ease-in-out var(--delay) both;
 }
 
 .final-duel-blade.is-b {
   --blade: var(--blade-b);
-  transform: rotate(-50deg);
+  --flip: -1;
 }
+
+.final-duel-blade::after {
+  position: absolute;
+  bottom: 0;
+  left: -0.5px;
+  width: 6px;
+  height: 20%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2b3136, #6b757c, #2b3136);
+  content: "";
+}
+
+/* The beam: white-hot core, glow in the rarity colour, ignites from the hilt. */
+.final-duel-blade::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 81%;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(90deg, var(--blade), color-mix(in srgb, var(--blade) 35%, #ffffff) 50%, var(--blade));
+  box-shadow: 0 0 5px var(--blade);
+  content: "";
+  transform-origin: 50% 100%;
+  animation:
+    final-duel-ignite 0.3s ease-out calc(var(--delay) + 0.05s) both,
+    final-duel-hum 0.13s linear calc(var(--delay) + 0.35s) infinite alternate;
+}
+
+/* Sparks at each clash, a burst on the hit. */
+.final-duel-spark {
+  position: absolute;
+  top: -22px;
+  left: -22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0 12%, color-mix(in srgb, var(--blade-a) 60%, #ffffff) 25%, color-mix(in srgb, var(--blade-b) 45%, transparent) 45%, transparent 70%);
+  opacity: 0;
+  animation: final-duel-sparks var(--duel) ease-out var(--delay) both;
+}
+
+.final-duel-oh {
+  position: absolute;
+  top: 8px;
+  left: var(--end);
+  margin-left: -24px;
+  width: 48px;
+  color: #ffffff;
+  font-family: var(--font-display, inherit);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 0 3px #000000, 0 1px 2px #000000, 0 0 12px var(--blade-a);
+  animation: final-duel-oh var(--duel) ease-out var(--delay) both;
+}
+
+.final-duel-assaults li.is-a .final-duel-oh { margin-left: 18px; }
+.final-duel-assaults li.is-b .final-duel-oh { margin-left: -66px; text-shadow: 0 0 3px #000000, 0 1px 2px #000000, 0 0 12px var(--blade-b); }
 
 .final-duel-assault-outcome {
   grid-column: 1 / -1;
   font-size: 14px;
-  animation: final-duel-fade 0.4s ease-out calc(var(--delay) + 1.6s) both;
+  animation: final-duel-fade 0.4s ease-out calc(var(--delay) + var(--duel)) both;
 }
 
 .final-duel-style {
@@ -288,18 +367,66 @@
   font-weight: 600;
 }
 
-.final-duel-layer.is-revealed * {
+.final-duel-layer.is-revealed *,
+.final-duel-layer.is-revealed *::before,
+.final-duel-layer.is-revealed *::after {
   animation: none !important;
 }
 
 @keyframes final-duel-fade { from { opacity: 0; } }
 @keyframes final-duel-rise { from { opacity: 0; transform: translateY(10px); } }
-@keyframes final-duel-clash {
-  0% { left: 50%; transform: none; }
-  20% { left: 43%; transform: rotate(-5deg); }
-  40% { left: 57%; transform: rotate(5deg); }
-  55% { left: 47%; transform: rotate(-3deg); }
-  70% { left: 51%; transform: none; }
+/*
+ * One assault, in --duel: on guard and ignition (0–10%), three exchanges that
+ * clash at 20%, 42% and 66%, a wind-up, the hit at 84%.
+ */
+@keyframes final-duel-bind {
+  0%, 20% { left: 50%; transform: none; }
+  28% { left: calc(50% + var(--s1)); transform: rotate(-4deg); }
+  42% { left: 50%; transform: none; }
+  52% { left: calc(50% + var(--s2)); transform: rotate(5deg); }
+  66% { left: 50%; transform: none; }
+  76% { left: var(--wind); transform: none; }
+  84% { left: var(--end); transform: var(--lean); }
+}
+
+@keyframes final-duel-fence {
+  0%, 10% { transform: translateX(calc(var(--flip) * -48px)) rotate(calc(var(--flip) * 10deg)); }
+  20% { transform: rotate(calc(var(--flip) * 54deg)); }
+  32% { transform: translateX(calc(var(--flip) * -40px)) rotate(calc(var(--flip) * 16deg)); }
+  42% { transform: rotate(calc(var(--flip) * 46deg)); }
+  52% { transform: rotate(calc(var(--flip) * 52deg)); }
+  58% { transform: translateX(calc(var(--flip) * -38px)) rotate(calc(var(--flip) * 18deg)); }
+  66% { transform: rotate(calc(var(--flip) * 50deg)); }
+}
+
+@keyframes final-duel-ignite { from { transform: scaleY(0); } }
+
+@keyframes final-duel-hum { to { opacity: 0.82; } }
+
+@keyframes final-duel-sparks {
+  0%, 17%, 25%, 39%, 47%, 63%, 71%, 82% { opacity: 0; transform: scale(0.3); }
+  20%, 42%, 66% { opacity: 1; transform: scale(1); }
+  85% { opacity: 1; transform: scale(2.4); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes final-duel-shake {
+  0%, 18%, 23%, 40%, 45%, 64%, 69%, 83%, 96%, 100% { transform: none; }
+  20%, 66% { transform: translateX(2px); }
+  42% { transform: translateX(-2px); }
+  86% { transform: translate(5px, -2px); }
+  89% { transform: translate(-4px, 2px); }
+  92% { transform: translate(2px, -1px); }
+}
+
+@keyframes final-duel-hit {
+  0%, 83% { opacity: 0; }
+  86% { opacity: 1; }
+}
+
+@keyframes final-duel-oh {
+  0%, 84% { opacity: 0; transform: scale(2.2); }
+  90% { opacity: 1; transform: scale(0.9); }
 }
 
 /* Modalità Onde: deeper stage, our athlete glows. */
@@ -325,8 +452,8 @@
   color: var(--onde-gold-bright);
 }
 
-:root[data-theme="dark"] .final-duel-blade {
-  box-shadow: 0 0 6px var(--blade), 0 0 16px var(--blade);
+:root[data-theme="dark"] .final-duel-blade::before {
+  box-shadow: 0 0 6px var(--blade), 0 0 18px var(--blade);
 }
 
 @keyframes final-duel-glow {

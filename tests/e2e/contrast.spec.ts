@@ -152,7 +152,7 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
     if (tab === "Risultati") {
       // «Guarda la finale» (4.3): audit the duel once it has played out.
       await page.getByRole("button", { name: "Guarda la finale" }).click();
-      await page.waitForTimeout(7_500);
+      await page.waitForTimeout(10_500);
       report["Tornei · Finale"] = await page.evaluate(auditContrast);
       await page.getByRole("button", { name: "Chiudi", exact: true }).click();
     }
