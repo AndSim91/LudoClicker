@@ -444,7 +444,7 @@ Attrezzatura, Istruttore e Gadget.
 Le spade della scuola sono gestite come inventario operativo. La scuola parte
 con 6 spade; altre si comprano dal fornitore ufficiale (visibile da 15 iscritti
 attivi di picco) a €330 l'una, prezzo che l'«Inflazione di Luce» può aumentare
-del 10% alla volta. Ogni spada è:
+dal 10% al 100% alla volta (§ 18). Ogni spada è:
 
 - disponibile;
 - riservata da corsi, lezioni di prova o eventi;
@@ -971,10 +971,10 @@ Nel codice l'acquisto si trova nel dettaglio che si apre dalla spada nella
 barra del titolo,
 compare quando il massimo storico raggiunge 15 iscritti (o la scuola possiede
 già più delle 6 spade iniziali) e permette di comprare 1, 10 o 100 spade. Il
-prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: ogni spada
-acquistata aggiunge 10 punti percentuali (massimo 100%) alla probabilità che a
-Gennaio il prezzo salga del 10% (“Lama di Luce aumenta i costi delle spade…”);
-dopo l'aumento la probabilità torna a zero.
+prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: se nell'anno è
+stata comprata almeno una spada, a Gennaio il prezzo sale (“Lama di Luce
+aumenta i costi delle spade…”) di 10%, più ricchezza e domanda, fino al 100%
+(regola completa al § 18).
 
 > **Da implementare:** l'interfaccia mostra solo “Polaris EVO Basic” e il prezzo; il nome LamaDiLuce (Abridge S.r.l.) e la descrizione del prodotto non compaiono nel pannello di acquisto.
 
@@ -2923,11 +2923,24 @@ Eventi presenti nel codice:
 | Un Pini al lavoro                           | assurdo  |               6 | −30 usura                       |
 | Mancato rinnovo                             | negativo |               — | non estratto: registrato quando un iscritto lascia la scuola alle partenze annuali |
 
-Evento separato, **Inflazione di Luce**: ogni gennaio c'è una probabilità di
-aumento del prezzo delle spade ufficiali pari al 10% per ogni spada acquistata
-dall'ultimo aumento (massimo 100%). Se scatta, il prezzo viene moltiplicato per
-1,1, la probabilità torna a 0 e parte la scena a schermo intero
-dell'Inflazione di Luce (§ 25.1) con la causa dell'anno.
+Evento separato, **Inflazione di Luce** (`src/game/lightInflation.ts`): serve
+a tenere le spade una spesa vera anche quando le entrate crescono. Ogni gennaio,
+se dal gennaio precedente è stata comprata almeno una spada, il prezzo delle
+spade ufficiali sale sempre; senza acquisti non sale. L'aumento è
+
+- **10%** di base,
+- più la **ricchezza**: il prezzo di riferimento è lo 0,5% delle entrate
+  dell'anno appena chiuso (`statistics.eurosEarned`); se la spada costa meno,
+  l'aumento recupera la differenza (riferimento ÷ prezzo − 1),
+- più la **domanda**: 30% × spade comprate nell'anno ÷ spade possedute prima
+  del primo di quegli acquisti (proporzionale, così regge a qualunque scala),
+
+con un massimo del **100%**, arrotondato al punto percentuale. Il prezzo viene
+moltiplicato per (1 + aumento), l'aumento resta nell'evento e parte la scena a
+schermo intero dell'Inflazione di Luce (§ 25.1) con la causa dell'anno. Esempio:
+spada a 363 €, 120.000 € di entrate (riferimento 600 €: +65%), 5 spade comprate
+su 10 (+15%): +90%. Nelle simulazioni intense del primo ciclo il prezzo arriva
+a 900–2.200 € al primo Nazionale (prima ~440 €). Al prestigio torna a 330 €.
 
 Elenchi previsti dal design:
 
@@ -4125,7 +4138,8 @@ chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
   volta l'anno, a gennaio): in Modalità Onde cade dall'alto un decreto su carta
   bollata con la testata di Lama di Luce (tre spade incrociate verde, bianca e
   rossa), titolo, causa dell'anno, prezzo della «Spada per combattimento
-  sportivo» barrato e sostituito dal nuovo, poi un timbro rosso «+10%» e uno
+  sportivo» barrato e sostituito dal nuovo, poi un timbro rosso con l'aumento
+vero («+10%» … «+100%») e uno
   scossone. In Outlook è una «Comunicazione ai rivenditori» con la stessa riga
   del prezzo. Non compare più in La mia giornata.
 

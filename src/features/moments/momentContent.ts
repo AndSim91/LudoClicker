@@ -6,7 +6,6 @@ import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_TITLE,
   LIGHT_INFLATION_MOMENT,
-  LIGHT_INFLATION_PRICE_INCREASE,
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency } from "../../shared/formatters";
@@ -96,14 +95,15 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
   }
   if (key === LIGHT_INFLATION_MOMENT) {
     const price = getOfficialSwordUnitCost(state);
+    const increase = state.lightInflation.event?.increase ?? 0.1;
     return {
       kind: "inflation",
       kicker: "Lama di Luce · Comunicazione ai rivenditori",
       title: LIGHT_INFLATION_EVENT_TITLE,
       body: getLightInflationEventDescription(state.lightInflation.event?.cause ?? LIGHT_INFLATION_CAUSES[0]),
-      oldPrice: formatCurrency(price / LIGHT_INFLATION_PRICE_INCREASE),
+      oldPrice: formatCurrency(price / (1 + increase)),
       newPrice: formatCurrency(price),
-      increase: `+${Math.round((LIGHT_INFLATION_PRICE_INCREASE - 1) * 100)}%`,
+      increase: `+${Math.round(increase * 100)}%`,
     };
   }
   if (key.startsWith("victory:")) {

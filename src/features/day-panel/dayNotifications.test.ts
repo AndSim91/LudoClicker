@@ -58,6 +58,7 @@ describe("selectDayNotifications", () => {
         ...initial.lightInflation,
         event: {
           cause: LIGHT_INFLATION_CAUSES[0],
+          increase: 0.1,
           occurredAt: 50_000,
           visibleUntil: 50_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
         },

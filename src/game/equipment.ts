@@ -1,7 +1,7 @@
 import { GAME_CONFIG } from "./config";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { roundCurrency } from "./economy";
-import { addLightInflationChance, getOfficialSwordUnitCost } from "./lightInflation";
+import { getOfficialSwordUnitCost, recordLightInflationPurchase } from "./lightInflation";
 import type { GameState, UpgradeLevels } from "./types";
 
 type EquipmentState = GameState["equipment"];
@@ -336,6 +336,6 @@ export function buyOfficialSword(state: GameState, rawAmount = 1): GameState {
       totalSwords,
       availableSwords,
     }),
-    lightInflation: addLightInflationChance(state.lightInflation, amount),
+    lightInflation: recordLightInflationPurchase(state.lightInflation, amount, state.equipment.totalSwords),
   };
 }

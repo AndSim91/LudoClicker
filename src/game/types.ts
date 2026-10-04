@@ -859,6 +859,8 @@ export interface HistoryArchive {
 
 export interface LightInflationEvent {
   cause: string;
+  /** Price increase as a fraction (0.1 = +10%). */
+  increase: number;
   /** Wall-clock timestamp, shifted only by explicit pauses. */
   occurredAt: number;
   /** Wall-clock deadline for the notification window, suspended while paused. */
@@ -866,8 +868,15 @@ export interface LightInflationEvent {
 }
 
 export interface LightInflationState {
-  chancePercent: number;
   priceMultiplier: number;
+  /** Inflazioni di Luce in this school. */
+  increases: number;
+  /** Swords bought since the last January check. */
+  purchasedSwords: number;
+  /** Swords owned before the first of those purchases (demand denominator). */
+  swordsBeforePurchases: number;
+  /** `statistics.eurosEarned` at the last January check (start of the income year). */
+  eurosEarnedAtCheck: number;
   /** Absolute January month already checked, so catch-up cannot roll twice. */
   lastCheckedJanuaryMonth?: number;
   event?: LightInflationEvent;

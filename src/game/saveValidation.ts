@@ -187,8 +187,10 @@ function hasValidLightInflation(state: Partial<GameState>): boolean {
   const inflation = state.lightInflation;
   return Boolean(
     inflation &&
-    Number.isFinite(inflation.chancePercent) &&
-    inflation.chancePercent >= 0 && inflation.chancePercent <= 100 &&
+    Number.isSafeInteger(inflation.increases) && inflation.increases >= 0 &&
+    Number.isSafeInteger(inflation.purchasedSwords) && inflation.purchasedSwords >= 0 &&
+    Number.isSafeInteger(inflation.swordsBeforePurchases) && inflation.swordsBeforePurchases >= 0 &&
+    Number.isFinite(inflation.eurosEarnedAtCheck) && inflation.eurosEarnedAtCheck >= 0 &&
     Number.isFinite(inflation.priceMultiplier) && inflation.priceMultiplier >= 1 &&
     (inflation.lastCheckedJanuaryMonth === undefined ||
       (Number.isSafeInteger(inflation.lastCheckedJanuaryMonth) &&
@@ -197,6 +199,8 @@ function hasValidLightInflation(state: Partial<GameState>): boolean {
       (LIGHT_INFLATION_CAUSES.includes(
         inflation.event.cause as typeof LIGHT_INFLATION_CAUSES[number],
       ) &&
+        Number.isFinite(inflation.event.increase) &&
+        inflation.event.increase > 0 && inflation.event.increase <= 1 &&
         Number.isFinite(inflation.event.occurredAt) &&
         Number.isFinite(inflation.event.visibleUntil) &&
         // These fields are absolute wall-clock timestamps; only their fixed duration is validated.

@@ -24,6 +24,7 @@ describe("light inflation visibility save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.lightInflation.event).toEqual({
       cause: LIGHT_INFLATION_CAUSES[0],
+      increase: 0.1,
       occurredAt: 10_000,
       visibleUntil: 10_000 + LIGHT_INFLATION_EVENT_VISIBILITY_MS,
     });

@@ -30,8 +30,8 @@ describe("MomentLayer", () => {
       ...initial,
       lightInflation: {
         ...initial.lightInflation,
-        priceMultiplier: 1.1,
-        event: { cause: LIGHT_INFLATION_CAUSES[5], occurredAt: 0, visibleUntil: 0 },
+        priceMultiplier: 1.35,
+        event: { cause: LIGHT_INFLATION_CAUSES[5], increase: 0.35, occurredAt: 0, visibleUntil: 0 },
       },
     };
     const { container } = render(
@@ -43,7 +43,7 @@ describe("MomentLayer", () => {
       description: "Lama di Luce aumenta i costi delle spade a causa della ricostruzione post terremoto del Friuli.",
     })).toBeVisible();
     expect(container.querySelector(".moment-price")).toHaveTextContent(
-      "Spada per combattimento sportivo330,00 € → 363,00 € (+10%)",
+      "Spada per combattimento sportivo330,00 € → 445,50 € (+35%)",
     );
   });
 });

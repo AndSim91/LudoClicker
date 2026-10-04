@@ -110,6 +110,7 @@ function stateWithLightInflationEvent(occurredAt: number, visibleUntil: number):
       ...initial.lightInflation,
       event: {
         cause: LIGHT_INFLATION_CAUSES[0],
+        increase: 0.1,
         occurredAt,
         visibleUntil,
       },

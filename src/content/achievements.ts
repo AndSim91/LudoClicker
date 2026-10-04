@@ -125,7 +125,7 @@ export const SECRET_ACHIEVEMENTS: readonly SecretAchievement[] = [
   },
   {
     id: "runaway-inflation", title: "Inflazione galoppante", description: "Cinque Inflazioni di Luce sulle spade della stessa scuola.",
-    condition: (s) => s.lightInflation.priceMultiplier >= 1.1 ** 5 - 1e-9,
+    condition: (s) => s.lightInflation.increases >= 5,
   },
   {
     id: "abandoned-armory", title: "Armeria abbandonata", description: "Mille spade rotte nello stesso momento.",
