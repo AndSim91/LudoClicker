@@ -636,3 +636,17 @@
   100% { opacity: 0; transform: translate(-50%, 50%) scale(0.95); }
 }
 
+
+/* Corso Tecnici (SIS): resta glicine ma su fondo notte, senza il cartoncino chiaro. */
+:root[data-theme="dark"] .technician-course-control,
+:root[data-theme="dark"] .technician-course-gate,
+:root[data-theme="dark"] .technician-course-reservation {
+  --sis-accent: #6a5396;
+  --sis-ink: #d4bfff;
+  --sis-line: color-mix(in srgb, #b39ddb 45%, var(--surface));
+  --sis-divider: color-mix(in srgb, #b39ddb 24%, var(--surface));
+  --sis-surface: color-mix(in srgb, #b39ddb 14%, var(--surface));
+  --sis-gate: color-mix(in srgb, #b39ddb 7%, var(--surface));
+  --sis-hover: color-mix(in srgb, #b39ddb 22%, var(--surface));
+  --sis-toggle: color-mix(in srgb, #b39ddb 14%, var(--surface));
+}

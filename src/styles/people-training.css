@@ -321,10 +321,19 @@
 .technician-course-control,
 .technician-course-gate,
 .technician-course-reservation {
+  /* Glicine del Corso Tecnici; Onde li ridefinisce in skin-onde.css. */
+  --sis-accent: #7650a8;
+  --sis-ink: #5f3b8f;
+  --sis-line: #c9b8e8;
+  --sis-divider: #decff3;
+  --sis-surface: #faf7ff;
+  --sis-gate: #f7f3fc;
+  --sis-hover: #f4edfc;
+  --sis-toggle: #fff;
   padding: 6px;
-  border: 1px solid #c9b8e8;
+  border: 1px solid var(--sis-line);
   border-radius: var(--radius-sm);
-  background: #faf7ff;
+  background: var(--sis-surface);
 }
 
 .technician-course-control {
@@ -370,7 +379,7 @@
 }
 
 .technician-course-reservation-copy strong {
-  color: #5f3b8f;
+  color: var(--sis-ink);
   font-size: 12px;
   line-height: 1.2;
 }
@@ -398,7 +407,7 @@
 .technician-course-control.is-expanded .technician-course-heading {
   margin-bottom: 2px;
   padding-bottom: 7px;
-  border-bottom: 1px solid #decff3;
+  border-bottom: 1px solid var(--sis-divider);
 }
 
 .technician-course-heading-copy {
@@ -411,7 +420,7 @@
 
 .technician-course-heading strong,
 .technician-course-gate strong {
-  color: #5f3b8f;
+  color: var(--sis-ink);
   font-size: 12px;
 }
 
@@ -429,7 +438,7 @@
   padding: 3px 6px;
   border-radius: 999px;
   color: #fff;
-  background: #7650a8;
+  background: var(--sis-accent);
   font-size: 12px;
   font-weight: 800;
 }
@@ -440,23 +449,23 @@
   height: 22px;
   flex: 0 0 22px;
   place-items: center;
-  border: 1px solid #c9b8e8;
+  border: 1px solid var(--sis-line);
   border-radius: 50%;
-  color: #5f3b8f;
-  background: #fff;
+  color: var(--sis-ink);
+  background: var(--sis-toggle);
   font-size: 15px;
   font-weight: 700;
   line-height: 1;
 }
 
 .technician-course-heading:hover .technician-course-toggle {
-  border-color: #7650a8;
-  background: #f4edfc;
+  border-color: var(--sis-accent);
+  background: var(--sis-hover);
 }
 
 .technician-course-heading:focus-visible {
   border-radius: var(--radius-sm);
-  outline: 2px solid color-mix(in srgb, #7650a8 45%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--sis-accent) 45%, transparent);
   outline-offset: 3px;
 }
 
@@ -465,12 +474,12 @@
   align-items: center;
   gap: 8px;
   border-style: dashed;
-  background: #f7f3fc;
+  background: var(--sis-gate);
 }
 
 .technician-course-control > .training-start-button {
-  border-color: #7650a8;
-  background: #7650a8;
+  border-color: var(--sis-accent);
+  background: var(--sis-accent);
 }
 
 .instructor-panel {
