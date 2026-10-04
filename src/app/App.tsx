@@ -323,7 +323,8 @@ export function App() {
   }, [dispatch]);
   const foundSchool = useCallback((details: SchoolFoundationDetails, spending: ReputationSpending) => {
     dispatch({ type: "FOUND_SCHOOL", details, spending, now: getGameNow() });
-  }, [dispatch, getGameNow]);
+    openComposer();
+  }, [dispatch, getGameNow, openComposer]);
   const forceGameUpdate = useCallback(() => {
     if (!saveNow()) return;
     const updateUrl = new URL(window.location.href);

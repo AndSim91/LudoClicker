@@ -3025,7 +3025,7 @@ inviate, gli Euro (0), l'attrezzatura (6 spade), follower e iscritti attivi,
 gli sblocchi (Potenziamenti, Collaboratori, Social, Forme, Gadget) con il
 settore Gadget, prove ed eventi in corso, tornei ordinari, Cronache e Torneo
 Reptile, eventi narrativi, Inflazione di Luce, **Fama**, livelli dei Percorsi
-Segreti e progressi del tutorial. I nuovi contatti iniziali non includono Andrea
+Segreti. I nuovi contatti iniziali non includono Andrea
 Simonazzi, che è garantito solo nella prima scuola.
 
 Gli iscritti della scuola precedente non vengono conservati come schede
@@ -3055,6 +3055,15 @@ Posta, traguardi, obiettivo breve in corso, Leggendari incontrati (Ludodex),
 progressi dei Leggendari iscritti (Forme, attestati da Istruttore e Tecnico,
 statistiche e bonus dei Corsi Agonisti), stato dei Leggendari Segreti, il flag
 della prima vittoria in un torneo ordinario, nome del profilo e seme casuale.
+Restano anche le scene del tutorial già completate o saltate: non tornano
+nelle scuole successive. Dopo la conferma il gioco torna alla compilazione
+delle email.
+
+Un Leggendario iscritto alla scuola lasciata, scelto a caso (anche un
+Leggendario Segreto), segue il giocatore: è l'unico iscritto della nuova
+scuola, con i suoi progressi conservati, e come ogni Leggendario iscritto entra
+subito tra i collaboratori. Senza Leggendari iscritti la scuola parte da zero
+iscritti.
 
 I Leggendari Segreti reclutati in una scuola precedente (con progressi
 conservati) entrano tra i leggendari ordinari: nelle scuole successive possono

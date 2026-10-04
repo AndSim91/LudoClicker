@@ -17,6 +17,7 @@ import { getWritingPower } from "./formulas";
 import { makeGameId } from "./ids";
 import { createInitialState } from "./initialState";
 import { canFoundSchool } from "./progression";
+import { nextRandom } from "./random";
 import {
   NO_REPUTATION_SPENDING,
   REPUTATION_UPGRADE_IDS,
@@ -28,6 +29,7 @@ import {
 } from "./reputation";
 import { addMessage } from "./stateUpdates";
 import type {
+  Contact,
   GameState,
   LegendaryCollaboratorProgress,
   SchoolFoundationDetails,
@@ -86,7 +88,31 @@ export function foundSchool(
   const availableReputation = state.network.reputation + rent.points;
   if (!isValidReputationSpending(state, spending, availableReputation)) return state;
   const legendaryProgress = prepareLegendaryProgressForNewSchool(state);
-  const fresh = createInitialState(now, state.profile.displayName, false, legendaryProgress);
+  // A random Leggendario of the school (secret ones too) follows the player.
+  const legendaryMembers = state.contacts.filter((contact) =>
+    contact.status === "enrolled" && contact.specialProfileId,
+  );
+  const [legendaryRoll, seedAfterLegendary] = nextRandom(state.randomSeed);
+  const follower = legendaryMembers[Math.floor(legendaryRoll * legendaryMembers.length)];
+  const followerId = follower?.specialProfileId;
+  const fresh = createInitialState(now, state.profile.displayName, false, followerId
+    ? { ...legendaryProgress, enrolledProfileIds: [followerId] }
+    : legendaryProgress);
+  const followerProgress = followerId ? legendaryProgress.retainedProgress[followerId] : undefined;
+  const carriedMembers: Contact[] = [];
+  if (follower) {
+    const carried: Contact = {
+      ...follower,
+      acquiredAt: now,
+      enrolledMonth: fresh.school.currentMonth,
+      forms: [...(followerProgress?.forms ?? follower.forms)],
+      formBranchPreferences: [
+        ...(followerProgress?.formBranchPreferences ?? follower.formBranchPreferences ?? []),
+      ],
+    };
+    delete carried.training;
+    carriedMembers.push(carried);
+  }
   // Points in the rent are consumed: they lock a fixed rent from this school only.
   const monthlyRent = Math.round(rent.rentPerPoint * spending.rent);
   const archivedSchool = {
@@ -107,9 +133,12 @@ export function foundSchool(
   const nextState: GameState = {
     ...fresh,
     createdAt: state.createdAt,
-    randomSeed: state.randomSeed,
+    randomSeed: followerId ? seedAfterLegendary : state.randomSeed,
+    contacts: [...carriedMembers, ...fresh.contacts],
     school: {
       ...fresh.school,
+      activeMembers: carriedMembers.length,
+      peakActiveMembers: carriedMembers.length,
       name: details.name.trim(),
       city: details.city.trim(),
       accentColor: details.accentColor,
@@ -133,6 +162,12 @@ export function foundSchool(
     },
     achievements: state.achievements,
     moments: state.moments,
+    // Scenes already seen (or skipped) in an earlier school never come back.
+    tutorial: {
+      ...fresh.tutorial,
+      completedSceneIds: state.tutorial.completedSceneIds,
+      skippedSceneIds: state.tutorial.skippedSceneIds,
+    },
     // A discovered secret path stays known in every later school; only its level resets.
     secretUpgradeDiscoveries: state.secretUpgradeDiscoveries,
     legendaryCollaborators: fresh.legendaryCollaborators,
@@ -153,7 +188,8 @@ export function foundSchool(
     `${details.city.trim()} ha una scuola`,
     `${state.school.name} entra nella Rete` +
       (monthlyRent > 0 ? ` e ti versa ${formatRent(monthlyRent)} al mese, puntuale come una quota.` : ".") +
-      ` Reputazione +${rent.points}, ${availableReputation - getSpentReputation(spending)} punti ancora da spendere.`,
+      ` Reputazione +${rent.points}, ${availableReputation - getSpentReputation(spending)} punti ancora da spendere.` +
+      (follower ? ` ${follower.firstName} ${follower.lastName} ha già la borsa pronta: è il primo iscritto della nuova scuola.` : ""),
     "system",
   );
   return {
