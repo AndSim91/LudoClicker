@@ -156,7 +156,6 @@ export function foundSchool(
       peakActiveMembers: carriedMembers.length,
       name: details.name.trim(),
       city: details.city.trim(),
-      accentColor: details.accentColor,
     },
     network: {
       reputation: availableReputation - getSpentReputation(spending),

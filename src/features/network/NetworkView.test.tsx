@@ -11,7 +11,7 @@ const ready = (): GameState => {
   return { ...initial, tournaments: { ...initial.tournaments, nationalTitlesCurrentSchool: 1 } };
 };
 
-it("founds a new school in three steps, with placeholders and steppers", () => {
+it("founds a new school from one page: name and city, old points white and fixed, new ones gold", () => {
   const onFoundSchool = vi.fn();
   const onFoundationOpenChange = vi.fn();
   const locked = createInitialState(1_000);
@@ -19,27 +19,35 @@ it("founds a new school in three steps, with placeholders and steppers", () => {
   expect(screen.getByRole("button", { name: "Fonda una nuova scuola…" })).toBeDisabled();
   unmount();
 
-  render(<NetworkView state={ready()} onFoundSchool={onFoundSchool} onFoundationOpenChange={onFoundationOpenChange} />);
+  const base = ready();
+  const state = { ...base, network: { ...base.network, reputationUpgrades: { genetics: 3 } } };
+  render(<NetworkView state={state} onFoundSchool={onFoundSchool} onFoundationOpenChange={onFoundationOpenChange} />);
   fireEvent.click(screen.getByRole("button", { name: "Fonda una nuova scuola…" }));
   expect(onFoundationOpenChange).toHaveBeenLastCalledWith(true);
 
-  // Step 1: the placeholders show what to write; Avanti waits for name and city.
+  expect(screen.queryByLabelText("Colore")).not.toBeInTheDocument();
   expect(screen.getByLabelText("Nome della scuola")).toHaveAttribute("placeholder", "Ordine delle Onde");
   expect(screen.getByLabelText("Città")).toHaveAttribute("placeholder", "Genova");
-  expect(screen.getByRole("button", { name: "Avanti" })).toBeDisabled();
+
+  // The 3 points spent in an earlier school show, white, and cannot be taken back.
+  const genetics = screen.getByLabelText("Genetica: 3");
+  expect(genetics).not.toHaveClass("is-added");
+  expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
+  // Only the point of the national title: one + turns it gold, then the others stop.
+  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
+  expect(screen.getByLabelText("Genetica: 4")).toHaveClass("is-added");
+  expect(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Togli un punto da Genetica" }));
+  expect(screen.getByLabelText("Genetica: 3")).not.toHaveClass("is-added");
+  expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
+
+  expect(screen.getByRole("button", { name: "Fonda la scuola" })).toBeDisabled();
   fireEvent.change(screen.getByLabelText("Nome della scuola"), { target: { value: "Onde di Levante" } });
   fireEvent.change(screen.getByLabelText("Città"), { target: { value: "La Spezia" } });
-  fireEvent.click(screen.getByRole("button", { name: "Avanti" }));
-
-  // Step 2: only the point of the national title, so one + and the others stop.
-  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
-  expect(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" })).toBeDisabled();
-  fireEvent.click(screen.getByRole("button", { name: "Avanti" }));
-
-  // Step 3: one definitive button.
   fireEvent.click(screen.getByRole("button", { name: "Fonda Onde di Levante" }));
   expect(onFoundSchool).toHaveBeenCalledWith(
-    { name: "Onde di Levante", city: "La Spezia", accentColor: "#0f6cbd" },
+    { name: "Onde di Levante", city: "La Spezia" },
     expect.objectContaining({ rent: 0, upgrades: expect.objectContaining({ genetics: 1 }) }),
   );
   expect(onFoundationOpenChange).toHaveBeenLastCalledWith(false);

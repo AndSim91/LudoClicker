@@ -426,8 +426,6 @@ test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", a
   await page.getByRole("button", { name: "Fonda una nuova scuola…" }).click();
   await page.getByLabel("Nome della scuola").fill("Onde di Levante");
   await page.getByLabel("Città").fill("La Spezia");
-  await page.getByRole("button", { name: "Avanti" }).click();
-  await page.getByRole("button", { name: "Avanti" }).click();
   await page.getByRole("button", { name: "Fonda Onde di Levante" }).click();
 
   // The new school starts back on the email composer.

@@ -7,7 +7,7 @@ import { migrate } from "./saveMigrations";
 import { foundSchool } from "./schoolProgressionFlow";
 import type { GameState } from "./types";
 
-const details = { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3", motto: "", specialization: "redazione" as const };
+const details = { name: "Ordine del Faro", city: "Trieste", motto: "", specialization: "redazione" as const };
 
 function withCareer(state: GameState, career: Partial<NonNullable<GameState["statistics"]["career"]>>): GameState {
   return { ...state, statistics: { ...state.statistics, career: { ...state.statistics.career!, ...career } } };

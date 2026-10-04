@@ -611,31 +611,17 @@ button.network-node {
   font-weight: 600;
 }
 
-.foundation-steps {
-  display: flex;
-  gap: 6px;
+.foundation-dialog > header p {
   margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 12px;
+  color: var(--ink-muted);
+  font-size: 12.5px;
 }
 
-.foundation-steps li {
-  flex: 1;
-  padding: 5px 8px;
-  border-radius: var(--radius-sm);
-  color: var(--ink-soft);
-  background: var(--surface-muted);
-}
-
-.foundation-steps .is-done {
-  color: var(--ink);
-}
-
-.foundation-steps .is-current {
-  color: white;
-  background: var(--blue-600);
-  font-weight: 600;
+.foundation-names {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-bottom: 6px;
 }
 
 .foundation-body {
@@ -664,15 +650,6 @@ button.network-node {
 
 .foundation-body input::placeholder {
   color: var(--ink-soft);
-}
-
-.foundation-color input {
-  width: 64px;
-  height: 34px;
-  padding: 2px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
 }
 
 .foundation-budget {
@@ -750,11 +727,6 @@ button.network-node {
 
 :root[data-theme="dark"] .foundation-stepper b.is-added {
   color: var(--onde-gold);
-}
-
-.foundation-summary p {
-  margin: 0;
-  line-height: 1.5;
 }
 
 .foundation-dialog > footer {

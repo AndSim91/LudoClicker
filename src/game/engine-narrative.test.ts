@@ -297,7 +297,7 @@ describe("game engine: narrative", () => {
     const founded = gameReducer(offeredAgain, {
       type: "FOUND_SCHOOL",
       now: 3_000,
-      details: { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3" },
+      details: { name: "Ordine del Faro", city: "Trieste" },
     });
 
     expect(offered.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);

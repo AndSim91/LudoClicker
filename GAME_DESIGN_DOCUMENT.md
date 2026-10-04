@@ -3043,22 +3043,21 @@ La pagina contiene, dall'alto:
 - **Resta per sempre**: Torneo della Superba e Corso X se sbloccati, Ludodex,
   Leggendari Segreti reclutati, Traguardi.
 
-La fondazione avviene in una finestra a tre passi (`FoundationDialog.tsx`),
-con il gioco in pausa finché è aperta (motivo di pausa `foundation`):
-
-1. **Nuova scuola**: nome e città obbligatori, con i segnaposto «Ordine delle
-   Onde» e «Genova», e colore di accento;
-2. **Reputazione**: pulsanti − e + per i sei rami e la rendita, con il valore
-   attuale e quello dopo la spesa e i punti ancora disponibili;
-3. **Conferma**: cosa entra nella Rete, cosa riparte da zero e cosa resta; un
-   solo pulsante definitivo «Fonda …».
+La fondazione avviene in una finestra di una sola pagina (`FoundationDialog.tsx`),
+con il gioco in pausa finché è aperta (motivo di pausa `foundation`): nome e
+città obbligatori, con i segnaposto «Ordine delle Onde» e «Genova»; sotto, i
+sei rami e la rendita con pulsanti − e +. Ogni ramo mostra il livello intero:
+i punti già spesi nelle scuole precedenti sono in bianco e non si possono
+togliere (il − si ferma lì), quelli aggiunti adesso lo fanno diventare oro. In
+fondo «Annulla» e un solo pulsante definitivo «Fonda …», attivo con nome,
+città e una spesa coperta. Il colore della scuola non si sceglie più: ogni
+scuola usa quello iniziale.
 
 Motto e specializzazione non esistono più (decisione del 04/10): le
 specializzazioni sono sostituite del tutto dai potenziamenti di Reputazione.
 
 Nel codice (`foundSchool`, `src/game/schoolProgressionFlow.ts`) nome e città
-sono testi liberi e obbligatori e il colore di accento è applicato
-all'interfaccia come `--school-accent`.
+sono testi liberi e obbligatori.
 
 > **Da implementare:** manca la lista di città.
 
@@ -4622,7 +4621,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome
   scelto dal giocatore.
 
-  La fondazione si avvia dalla pagina Rete, in una finestra a tre passi (§ 17.3).
+  La fondazione si avvia dalla pagina Rete, in una finestra di una sola pagina (§ 17.3).
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
 - Il primo prestigio deve arrivare dopo circa 60–90 minuti e offrire subito un bonus
   significativo.

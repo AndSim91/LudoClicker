@@ -34,7 +34,7 @@ const legacySchool = (monthlyRent?: number, name = "Ordine delle Onde") => ({
   ...(monthlyRent === undefined ? {} : { monthlyRent }),
 });
 
-const details = { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3" };
+const details = { name: "Ordine del Faro", city: "Trieste" };
 
 /** A school of 125 members, 10.000 Fama and a national title: ready to found. */
 function readySchool(base: GameState = createInitialState(1_000, "Tester")): GameState {

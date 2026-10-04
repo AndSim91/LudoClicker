@@ -14,7 +14,7 @@ import {
   getNewAchievementKeys,
 } from "./achievements";
 
-const details = { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3", motto: "", specialization: "redazione" as const };
+const details = { name: "Ordine del Faro", city: "Trieste", motto: "", specialization: "redazione" as const };
 
 describe("achievements", () => {
   it("has 30 tiered achievements and 10 secrets with unique ids", () => {

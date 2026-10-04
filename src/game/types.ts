@@ -368,7 +368,6 @@ export interface FoundedSchool {
 export interface SchoolFoundationDetails {
   name: string;
   city: string;
-  accentColor: string;
 }
 
 export type CollaboratorAssignment =

@@ -13,7 +13,7 @@ import {
 import type { GameState, SchoolFoundationDetails } from "../../game/types";
 import { formatCurrency, formatStat } from "../../shared/formatters";
 
-const STEPS = ["Nuova scuola", "Reputazione", "Conferma"] as const;
+const points = (value: number) => `${formatStat(value)} ${value === 1 ? "punto" : "punti"}`;
 const percent = (level: number) => `+${Math.round(level * GAME_CONFIG.reputationStep * 100)}%`;
 
 export function FoundationDialog({
@@ -27,8 +27,7 @@ export function FoundationDialog({
   onCancel: () => void;
   onConfirm: (details: SchoolFoundationDetails, spending: ReputationSpending) => void;
 }) {
-  const [step, setStep] = useState(0);
-  const [details, setDetails] = useState<SchoolFoundationDetails>({ name: "", city: "", accentColor: state.school.accentColor });
+  const [details, setDetails] = useState<SchoolFoundationDetails>({ name: "", city: "" });
   const [added, setAdded] = useState<Partial<Record<ReputationUpgradeId | "rent", number>>>({});
 
   useEffect(() => {
@@ -43,8 +42,10 @@ export function FoundationDialog({
   };
   const available = state.network.reputation + preview.points;
   const left = available - getSpentReputation(spending);
-  const valid = isValidReputationSpending(state, spending, available);
-  const named = details.name.trim() !== "" && details.city.trim() !== "";
+  const name = details.name.trim();
+  const city = details.city.trim();
+  const valid = name !== "" && city !== "" && isValidReputationSpending(state, spending, available);
+  // Points spent in earlier schools are the floor: only the ones added now can be taken back.
   const change = (key: ReputationUpgradeId | "rent", delta: number) =>
     setAdded((current) => ({ ...current, [key]: Math.max(0, (current[key] ?? 0) + delta) }));
   const canAdd = (id?: ReputationUpgradeId) =>
@@ -60,89 +61,67 @@ export function FoundationDialog({
         aria-labelledby="foundation-title"
         onSubmit={(event) => {
           event.preventDefault();
-          if (step < 2) setStep(step + 1);
-          else onConfirm({ ...details, name: details.name.trim(), city: details.city.trim() }, spending);
+          if (valid) onConfirm({ name, city }, spending);
         }}
       >
         <header>
           <h2 id="foundation-title">Fonda una nuova scuola</h2>
-          <ol className="foundation-steps">
-            {STEPS.map((label, index) => (
-              <li key={label} className={index === step ? "is-current" : index < step ? "is-done" : undefined} aria-current={index === step ? "step" : undefined}>
-                {index + 1} · {label}
-              </li>
-            ))}
-          </ol>
+          <p>{state.school.name} entra nella Rete con Fama {formatStat(state.school.fame)}. La nuova scuola riparte da zero; restano la Reputazione e i suoi potenziamenti.</p>
         </header>
 
-        {step === 0 ? (
-          <div className="foundation-body">
+        <div className="foundation-body">
+          <div className="foundation-names">
             <label>Nome della scuola
               <input name="name" required maxLength={60} autoFocus placeholder="Ordine delle Onde" value={details.name} onChange={(event) => setDetails({ ...details, name: event.target.value })} />
             </label>
             <label>Città
               <input name="city" required maxLength={40} placeholder="Genova" value={details.city} onChange={(event) => setDetails({ ...details, city: event.target.value })} />
             </label>
-            <label className="foundation-color">Colore
-              <input type="color" name="accentColor" value={details.accentColor} onChange={(event) => setDetails({ ...details, accentColor: event.target.value })} />
-            </label>
           </div>
-        ) : step === 1 ? (
-          <div className="foundation-body">
-            <p className="foundation-budget">
-              <span>{formatStat(state.network.reputation)} in tasca + {formatStat(preview.points)} da {state.school.name}</span>
-              <b className={left < 0 ? "is-over" : undefined}>{points(left)} da spendere su {formatStat(available)}</b>
-            </p>
-            {REPUTATION_UPGRADE_IDS.map((id) => {
-              const level = getReputationLevel(state, id);
-              const extra = added[id] ?? 0;
-              return (
-                <div key={id} className="foundation-row">
-                  <span>{REPUTATION_UPGRADES[id].label}<small>{REPUTATION_UPGRADES[id].description} · {percent(level)}{extra > 0 ? ` → ${percent(level + extra)}` : ""}</small></span>
-                  <Stepper label={REPUTATION_UPGRADES[id].label} value={extra} onDown={() => change(id, -1)} onUp={() => change(id, 1)} canUp={canAdd(id)} />
-                </div>
-              );
-            })}
-            <div className="foundation-row">
-              <span>Rendita della rete<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name}{rentAmount > 0 ? `, ${formatCurrency(rentAmount)} in tutto` : ""}.</small></span>
-              <Stepper label="Rendita della rete" value={spending.rent} onDown={() => change("rent", -1)} onUp={() => change("rent", 1)} canUp={canAdd()} />
-            </div>
+
+          <p className="foundation-budget">
+            <span>{formatStat(state.network.reputation)} in tasca + {formatStat(preview.points)} da {state.school.name}</span>
+            <b className={left < 0 ? "is-over" : undefined}>{points(left)} da spendere su {formatStat(available)}</b>
+          </p>
+          {REPUTATION_UPGRADE_IDS.map((id) => {
+            const level = getReputationLevel(state, id);
+            const extra = added[id] ?? 0;
+            return (
+              <div key={id} className="foundation-row">
+                <span>{REPUTATION_UPGRADES[id].label}<small>{REPUTATION_UPGRADES[id].description} · {percent(level + extra)}</small></span>
+                <Stepper label={REPUTATION_UPGRADES[id].label} value={level + extra} added={extra} onDown={() => change(id, -1)} onUp={() => change(id, 1)} canUp={canAdd(id)} />
+              </div>
+            );
+          })}
+          <div className="foundation-row">
+            <span>Rendita della rete<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name}{rentAmount > 0 ? `, ${formatCurrency(rentAmount)} in tutto` : ""}.</small></span>
+            <Stepper label="Rendita della rete" value={spending.rent} added={spending.rent} onDown={() => change("rent", -1)} onUp={() => change("rent", 1)} canUp={canAdd()} />
           </div>
-        ) : (
-          <div className="foundation-body foundation-summary">
-            <p><b>{state.school.name}</b> entra nella Rete con Fama {formatStat(state.school.fame)}{rentAmount > 0 ? ` e ti versa ${formatCurrency(rentAmount)} al mese` : ""}.</p>
-            <p><b>{details.name.trim()}</b> apre a {details.city.trim()} e riparte da zero: Fama, fondi, iscritti, collaboratori e Upgrade della scuola. Un Leggendario a caso ti segue, senza niente in tasca.</p>
-            <p>Restano la Reputazione e i suoi potenziamenti, {left > 0 ? `${points(left)} da spendere la prossima volta, ` : ""}Torneo della Superba, Corso X, Ludodex e Traguardi.</p>
-          </div>
-        )}
+        </div>
 
         <footer>
-          {step === 0
-            ? <button type="button" className="secondary" onClick={onCancel}>Annulla</button>
-            : <button type="button" className="secondary" onClick={() => setStep(step - 1)}>Indietro</button>}
-          <span>{step === 1 ? "I punti non spesi restano per la prossima volta." : step === 2 ? "Non si torna indietro." : ""}</span>
-          <button type="submit" className={step === 2 ? "danger" : undefined} disabled={(step === 0 && !named) || (step > 0 && !valid)}>
-            {step === 2 ? `Fonda ${details.name.trim()}` : "Avanti"}
-          </button>
+          <button type="button" className="secondary" onClick={onCancel}>Annulla</button>
+          <span>Non si torna indietro. I punti non spesi restano per la prossima volta.</span>
+          <button type="submit" className="danger" disabled={!valid}>{name ? `Fonda ${name}` : "Fonda la scuola"}</button>
         </footer>
       </form>
     </div>
   );
 }
 
-const points = (value: number) => `${formatStat(value)} ${value === 1 ? "punto" : "punti"}`;
-
-function Stepper({ label, value, onDown, onUp, canUp }: {
+/** Shows the whole level: white for what is already spent, gold once points are added now. */
+function Stepper({ label, value, added, onDown, onUp, canUp }: {
   label: string;
   value: number;
+  added: number;
   onDown: () => void;
   onUp: () => void;
   canUp: boolean;
 }) {
   return (
     <span className="foundation-stepper">
-      <button type="button" aria-label={`Togli un punto da ${label}`} disabled={value === 0} onClick={onDown}>−</button>
-      <b className={value > 0 ? "is-added" : undefined}>{value > 0 ? `+${value}` : 0}</b>
+      <button type="button" aria-label={`Togli un punto da ${label}`} disabled={added === 0} onClick={onDown}>−</button>
+      <b className={added > 0 ? "is-added" : undefined} aria-label={`${label}: ${value}`}>{formatStat(value)}</b>
       <button type="button" aria-label={`Aggiungi un punto a ${label}`} disabled={!canUp} onClick={onUp}>+</button>
     </span>
   );
