@@ -773,3 +773,47 @@
   --equipment-buy: var(--onde-wave);
   --equipment-buy-ink: var(--onde-on-gold);
 }
+
+/* Email HTML in Onde: carta notte al posto del foglio bianco (anteprima, codice e posta inviata). */
+:root[data-theme="dark"] .email-source-workspace { background: var(--surface); }
+:root[data-theme="dark"] .email-source-preview,
+:root[data-theme="dark"] .email-source-code-panel {
+  border-color: var(--line);
+  background: var(--onde-groove);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 25%);
+}
+:root[data-theme="dark"] .email-source-panel-label {
+  border-bottom-color: var(--line);
+  background: var(--onde-groove);
+  color: var(--ink-muted);
+}
+:root[data-theme="dark"] .email-source-preview-canvas { background: var(--onde-abyss); }
+:root[data-theme="dark"] .campaign-email-final {
+  --mail-paper: #0b2a42;
+  --mail-card: #103a57;
+  --mail-line: rgb(108 211 214 / 22%);
+  background: var(--mail-paper);
+  color: var(--ink);
+  box-shadow: 0 14px 32px rgb(0 0 0 / 35%);
+}
+:root[data-theme="dark"] .final-email-paper { background: var(--mail-paper); }
+:root[data-theme="dark"] .final-email-card {
+  border-color: var(--mail-line);
+  background: var(--mail-card);
+}
+/* Il simbolo dell'Ordine è nero su trasparente: in Onde diventa chiaro. */
+:root[data-theme="dark"] .campaign-email-final img[src$="ordine-onde.png"] { filter: invert(1); }
+:root[data-theme="dark"] .final-email-header-placeholder { border-bottom-color: var(--mail-line); }
+:root[data-theme="dark"] .final-email-title { color: #fff; }
+:root[data-theme="dark"] .final-email-category { color: var(--onde-gold-bright); }
+:root[data-theme="dark"] .final-email-hero,
+:root[data-theme="dark"] .final-email-video-image { border-color: var(--onde-abyss); }
+:root[data-theme="dark"] .final-email-copy,
+:root[data-theme="dark"] .final-email-contacts,
+:root[data-theme="dark"] .final-email-signature,
+:root[data-theme="dark"] .final-email-signature-copy { color: var(--ink); }
+:root[data-theme="dark"] .final-email-signature { border-top-color: var(--mail-line); }
+:root[data-theme="dark"] .final-email-contacts li::before { color: var(--onde-wave); }
+:root[data-theme="dark"] .final-email-video-caption,
+:root[data-theme="dark"] .final-email-disclaimer,
+:root[data-theme="dark"] .final-email-postscript { color: var(--ink-muted); }
