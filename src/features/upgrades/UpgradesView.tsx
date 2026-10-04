@@ -671,6 +671,24 @@ export function UpgradesView({
             <div className="upgrade-tree-canvas">
               <div className="upgrade-tree-root" title="Crescita della scuola">
                 <span aria-hidden="true"><Icon name="spark" /></span>
+                {/* Fixed twin of the node's quick buy: same spot every time, however the tree scrolls. */}
+                <button
+                  type="button"
+                  className="upgrade-root-buy"
+                  onClick={buyCheapest}
+                  disabled={!recommendedUpgrade || state.school.euros < recommendedUpgrade.cost}
+                  aria-label={recommendedUpgrade
+                    ? `Acquisto rapido: ${recommendedUpgrade.definition.title}`
+                    : "Acquisto rapido: niente da comprare"}
+                  title={!recommendedUpgrade
+                    ? "Niente da comprare"
+                    : state.school.euros < recommendedUpgrade.cost
+                      ? `${recommendedUpgrade.definition.title} · mancano ${formatCurrency(recommendedUpgrade.cost - state.school.euros)}`
+                      : recommendedUpgrade.definition.title}
+                >
+                  Compra
+                  <small>{recommendedUpgrade ? `${formatStat(recommendedUpgrade.cost)} €` : "—"}</small>
+                </button>
               </div>
               <div className="upgrade-tree-branches">
                 {UPGRADE_CATEGORIES.filter(

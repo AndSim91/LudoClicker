@@ -426,13 +426,15 @@
   background: var(--onde-gold-bright);
 }
 
-:root[data-theme="dark"] .upgrade-quick-buy:not(:disabled) {
+:root[data-theme="dark"] .upgrade-quick-buy:not(:disabled),
+:root[data-theme="dark"] .upgrade-root-buy:not(:disabled) {
   border-color: var(--onde-gold-bright);
   color: var(--onde-on-gold);
   background: var(--onde-gold-bright);
 }
 
-:root[data-theme="dark"] .upgrade-quick-buy:hover:not(:disabled) {
+:root[data-theme="dark"] .upgrade-quick-buy:hover:not(:disabled),
+:root[data-theme="dark"] .upgrade-root-buy:hover:not(:disabled) {
   background: #f5c97a;
 }
 
