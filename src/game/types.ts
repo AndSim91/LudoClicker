@@ -547,7 +547,32 @@ export interface TournamentMatch {
   arenaScoreB: number;
   styleScoreA: number;
   styleScoreB: number;
+  /** Coefficienti del voto di Stile, solo per gli atleti della scuola. */
+  styleDetailA?: TournamentStyleDetail;
+  styleDetailB?: TournamentStyleDetail;
+  /** Cartellino del giudice di Stile, per chiunque. */
+  styleCardA?: TournamentStyleCard;
+  styleCardB?: TournamentStyleCard;
   winnerId: string;
+}
+
+export interface TournamentStyleDetail {
+  bas: number;
+  mov: number;
+  din: number;
+  com: number;
+  sapd: number;
+  dif: number;
+  sog: number;
+  penalty: number;
+  judges: number[];
+  technique?: string;
+  highlight?: string;
+}
+
+export interface TournamentStyleCard {
+  color: "yellow" | "black";
+  reason: "declaration" | "cura" | "rispetto";
 }
 
 export interface TournamentGroupStanding {

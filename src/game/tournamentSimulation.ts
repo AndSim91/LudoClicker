@@ -18,10 +18,10 @@ import {
 import {
   getAthleteTournamentStats,
   getPreparation,
-  getStyleVote,
   hasCompletedFormOne,
 } from "./athleteStats";
 import { nextRandom } from "./random";
+import { getNpcStyleForms, getStyleJudgeCount, judgeStyle } from "./styleJudging";
 import { getCollaboratorsByContactId } from "./runtimeIndexes";
 import {
   getQualificationDisciplineSlotCount,
@@ -55,6 +55,8 @@ type ScheduledExternalTournamentLevel = Exclude<TournamentLevel, "school" | "chr
 
 interface RandomCursor {
   seed: number;
+  // ponytail: travels with the cursor because every match already receives it.
+  styleJudges?: number;
 }
 
 interface MutableStanding {
@@ -596,14 +598,28 @@ function simulateMatch(
     if (roll(cursor) < assaultChanceA) arenaScoreA += 1;
     else arenaScoreB += 1;
   }
-  const stylePerformanceA =
-    participantA.stylePreparation *
-    conditionMultiplier(participantA.condition) *
-    encounterMultiplier(cursor);
-  const stylePerformanceB =
-    participantB.stylePreparation *
-    conditionMultiplier(participantB.condition) *
-    encounterMultiplier(cursor);
+  const judge = (
+    participant: TournamentParticipant,
+    chance: number,
+    scored: number,
+    conceded: number,
+  ) =>
+    judgeStyle({
+      performance:
+        participant.stylePreparation *
+        conditionMultiplier(participant.condition) *
+        encounterMultiplier(cursor),
+      forms: participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms),
+      experience: participant.experience,
+      condition: participant.condition,
+      assaultChance: chance,
+      scored,
+      conceded,
+      judges: cursor.styleJudges ?? 1,
+      roll: () => roll(cursor),
+    });
+  const styleA = judge(participantA, assaultChanceA, arenaScoreA, arenaScoreB);
+  const styleB = judge(participantB, 1 - assaultChanceA, arenaScoreB, arenaScoreA);
   return {
     id: `match-${stage}-${matchIndex}-${cursor.seed >>> 0}`,
     stage,
@@ -612,8 +628,12 @@ function simulateMatch(
     participantBId: participantB.id,
     arenaScoreA,
     arenaScoreB,
-    styleScoreA: getStyleVote(stylePerformanceA),
-    styleScoreB: getStyleVote(stylePerformanceB),
+    styleScoreA: styleA.vote,
+    styleScoreB: styleB.vote,
+    ...(participantA.ownedContactId ? { styleDetailA: styleA.detail } : {}),
+    ...(participantB.ownedContactId ? { styleDetailB: styleB.detail } : {}),
+    ...(styleA.card ? { styleCardA: styleA.card } : {}),
+    ...(styleB.card ? { styleCardB: styleB.card } : {}),
     winnerId: arenaScoreA === 2 ? participantA.id : participantB.id,
   };
 }
@@ -964,7 +984,10 @@ export function simulateTournament(
   ownedContacts: readonly Contact[],
   options: TournamentSimulationOptions = {},
 ): SimulatedTournament {
-  const cursor: RandomCursor = { seed: state.randomSeed };
+  const cursor: RandomCursor = {
+    seed: state.randomSeed,
+    styleJudges: getStyleJudgeCount(level),
+  };
   const definition = TOURNAMENT_DEFINITIONS[level];
   // A school can eventually contain thousands of athletes. Aggregate
   // preliminaries select the field before the quadratic group simulation.
