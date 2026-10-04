@@ -547,32 +547,35 @@ export interface TournamentMatch {
   arenaScoreB: number;
   styleScoreA: number;
   styleScoreB: number;
-  /** Coefficienti del voto di Stile, solo per gli atleti della scuola. */
+  /** Schede dei giudici di Stile, solo per gli atleti della scuola. */
   styleDetailA?: TournamentStyleDetail;
   styleDetailB?: TournamentStyleDetail;
-  /** Cartellino del giudice di Stile, per chiunque. */
-  styleCardA?: TournamentStyleCard;
-  styleCardB?: TournamentStyleCard;
+  /** Cartellino di Stile (−0,5 nell'incontro), per chiunque. */
+  stylePenaltyA?: StylePenaltyReason;
+  stylePenaltyB?: StylePenaltyReason;
   winnerId: string;
 }
 
+/** BAS, MOV, DIN, COM, SAPD, GCC, DIF (0–3 a mezzi punti), SOG (0–3), PEN: come in Servizio. */
+export type StyleSheet = [
+  bas: number,
+  mov: number,
+  din: number,
+  com: number,
+  sapd: number,
+  gcc: number,
+  dif: number,
+  sog: number,
+  pen: number,
+];
+
+export type StylePenaltyReason = "declaration" | "cura" | "rispetto";
+
 export interface TournamentStyleDetail {
-  bas: number;
-  mov: number;
-  din: number;
-  com: number;
-  sapd: number;
-  dif: number;
-  sog: number;
-  penalty: number;
-  judges: number[];
+  /** Una scheda per giudice; la prima è del Riferimento. */
+  sheets: StyleSheet[];
   technique?: string;
   highlight?: string;
-}
-
-export interface TournamentStyleCard {
-  color: "yellow" | "black";
-  reason: "declaration" | "cura" | "rispetto";
 }
 
 export interface TournamentGroupStanding {

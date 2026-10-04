@@ -55,8 +55,10 @@ type ScheduledExternalTournamentLevel = Exclude<TournamentLevel, "school" | "chr
 
 interface RandomCursor {
   seed: number;
-  // ponytail: travels with the cursor because every match already receives it.
-  styleJudges?: number;
+  // ponytail: Style context travels with the cursor because every match already receives it.
+  styleLevel?: TournamentLevel;
+  /** Media della preparazione Stile del campo: i giudici valutano rispetto al torneo. */
+  styleFieldMean?: number;
 }
 
 interface MutableStanding {
@@ -605,17 +607,18 @@ function simulateMatch(
     conceded: number,
   ) =>
     judgeStyle({
-      performance:
-        participant.stylePreparation *
-        conditionMultiplier(participant.condition) *
-        encounterMultiplier(cursor),
+      relativeStyle:
+        (participant.stylePreparation *
+          conditionMultiplier(participant.condition) *
+          encounterMultiplier(cursor)) /
+        (cursor.styleFieldMean ?? participant.stylePreparation),
       forms: participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms),
       experience: participant.experience,
       condition: participant.condition,
       assaultChance: chance,
       scored,
       conceded,
-      judges: cursor.styleJudges ?? 1,
+      judges: getStyleJudgeCount(cursor.styleLevel ?? "school", stage),
       roll: () => roll(cursor),
     });
   const styleA = judge(participantA, assaultChanceA, arenaScoreA, arenaScoreB);
@@ -632,8 +635,8 @@ function simulateMatch(
     styleScoreB: styleB.vote,
     ...(participantA.ownedContactId ? { styleDetailA: styleA.detail } : {}),
     ...(participantB.ownedContactId ? { styleDetailB: styleB.detail } : {}),
-    ...(styleA.card ? { styleCardA: styleA.card } : {}),
-    ...(styleB.card ? { styleCardB: styleB.card } : {}),
+    ...(styleA.penalty ? { stylePenaltyA: styleA.penalty } : {}),
+    ...(styleB.penalty ? { stylePenaltyB: styleB.penalty } : {}),
     winnerId: arenaScoreA === 2 ? participantA.id : participantB.id,
   };
 }
@@ -986,7 +989,7 @@ export function simulateTournament(
 ): SimulatedTournament {
   const cursor: RandomCursor = {
     seed: state.randomSeed,
-    styleJudges: getStyleJudgeCount(level),
+    styleLevel: level,
   };
   const definition = TOURNAMENT_DEFINITIONS[level];
   // A school can eventually contain thousands of athletes. Aggregate
@@ -1031,6 +1034,9 @@ export function simulateTournament(
         : createNpcParticipants(state, level, npcCount, cursor);
   const participants = ensureUniqueParticipantNames(shuffle(cursor, [...owned, ...npcs]), cursor);
   const participantMap = new Map(participants.map((participant) => [participant.id, participant]));
+  cursor.styleFieldMean =
+    participants.reduce((total, participant) => total + participant.stylePreparation, 0) /
+    Math.max(1, participants.length);
   const matches: TournamentMatch[] = [];
   const mutableStandings: MutableStanding[] = [];
   const styleTotals = new Map(
