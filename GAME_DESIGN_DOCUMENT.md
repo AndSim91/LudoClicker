@@ -1235,16 +1235,32 @@ Regole:
 - se un settore richiede più persone di quelle presenti (per esempio dopo
   un'uscita dall'organico), i posti mancanti restano memorizzati e vengono
   occupati automaticamente dai nuovi collaboratori liberi;
-- **Assegnazione automatica** (piano 4.7, decisione del 03/10): un interruttore
-  sopra la sezione, disponibile in entrambe le viste. All'accensione fotografa
-  le proporzioni lasciate dal giocatore (in parti uguali se nessuno è
-  assegnato); da quel momento ogni collaboratore libero o nuovo va nel settore
-  più lontano dalla sua quota, scegliendo il più adatto tra i liberi, e chi è
-  già assegnato non si sposta mai. Le quote restano modificabili a passi del
-  5% e valgono per i prossimi arrivi. Mentre è accesa, assegnazioni
+- **Assegnazione automatica** (piano 4.7, decisioni del 03/10 e del 04/10): un
+  interruttore sopra la sezione, disponibile in entrambe le viste. Ogni
+  settore ha una **barra di impegno** di 5 tacche, indipendente dalle altre:
+  alzarne una non muove le altre barre, cambia solo il numero di persone che
+  ne deriva (la squadra divisa in proporzione alle tacche, resti più grandi).
+  All'accensione le barre partono dalle proporzioni lasciate dal giocatore
+  (tutte a 3 se nessuno è assegnato) e nessuno si sposta; liberi e nuovi
+  arrivati vanno nel settore più lontano dalla sua quota.
+  Cambiando una barra le persone **si spostano subito**, il minimo
+  indispensabile: dai settori in eccesso esce chi lì rende relativamente
+  meno, e chi si sposta va dove rende relativamente di più. «Relativamente»
+  vuol dire la resa nel settore divisa per la sua media sui settori aperti,
+  così la rarità non conta e decidono Forme e maestria; per gli Istruttori
+  contano le Forme che possono insegnare, di più quelle che nessun altro
+  copre. Uno spostamento in più è accettato quando una catena conviene
+  chiaramente (chi ha Forme passa agli Istruttori dall'Attrezzatura e un
+  altro prende il suo posto); a parità si sposta chi è libero. Chi organizza
+  un evento in corso cambia settore subito e l'evento finisce comunque; un
+  Istruttore che sta insegnando conclude le lezioni avviate senza nuovi
+  allievi, poi passa al nuovo settore (le formazioni in attesa di spade che
+  lo coinvolgono vengono annullate). Mentre è accesa, assegnazioni
   individuali e organici per settore sono bloccati; spegnendola si torna al
   controllo manuale con l'organico attuale come obiettivo
-  (`collaboratorManagement.automaticShares`, `src/game/collaboratorManagement.ts`);
+  (`collaboratorManagement.automaticShares`, 20 per tacca;
+  `automaticPendingMoves`; `src/game/collaboratorManagement.ts`,
+  `src/game/automaticAssignmentPlan.ts`; salvataggio v89);
 - **Turni dei collaboratori** permette di scegliere per ogni settore un settore
   secondario (mai Istruttore): quando il settore principale è inattivo, il
   10% per livello della produttività (massimo 50%) passa al secondario. Nella

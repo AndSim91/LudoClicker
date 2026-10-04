@@ -180,7 +180,7 @@ export function createGameActionHandlers(
     DISMISS_MOMENT: (state) => dismissMoment(state),
     SET_AUTOMATIC_ASSIGNMENT: (state, action) => setAutomaticAssignment(state, action.enabled),
     CHANGE_AUTOMATIC_SHARE: (state, action) =>
-      changeAutomaticShare(state, action.assignment, action.delta),
+      changeAutomaticShare(state, action.assignment, action.level),
     FINISH_TUTORIAL_SCENE: (state, action) => finishTutorialScene(
       state,
       action.sceneId,

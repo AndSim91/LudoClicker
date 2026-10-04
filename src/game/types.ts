@@ -399,8 +399,13 @@ export interface CollaboratorManagementState {
     Partial<Record<"gadget", number>>;
   operationalPriorities: CollaboratorMasteryRole[];
   fallbackAssignments?: Partial<Record<CollaboratorMasteryRole, CollaboratorMasteryRole>>;
-  /** «Assegnazione automatica» (4.7): present = on; relative weight of each sector. */
+  /**
+   * «Assegnazione automatica» (4.7): present = on. Effort of each sector, 20
+   * per bar notch (0–100); right after switching on, the exact proportions left.
+   */
   automaticShares?: Partial<Record<CollaboratorMasteryRole, number>>;
+  /** Istruttori moved by the automatic assignment who finish their lessons first: id → next sector. */
+  automaticPendingMoves?: Record<string, CollaboratorMasteryRole>;
 }
 
 export type FormId =
@@ -1096,7 +1101,7 @@ export type GameAction =
   | { type: "FINISH_TUTORIAL_SCENE"; sceneId: string; skipped: boolean }
   | { type: "DISMISS_MOMENT" }
   | { type: "SET_AUTOMATIC_ASSIGNMENT"; enabled: boolean }
-  | { type: "CHANGE_AUTOMATIC_SHARE"; assignment: CollaboratorMasteryRole; delta: number }
+  | { type: "CHANGE_AUTOMATIC_SHARE"; assignment: CollaboratorMasteryRole; level: number }
   | { type: "MAINTAIN_EQUIPMENT"; now: number }
   | { type: "BUY_OFFICIAL_SWORD"; now: number; amount?: number }
   | {

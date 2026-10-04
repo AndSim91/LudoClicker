@@ -1,16 +1,20 @@
-import { Icon } from "../../components/common/Icon";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
+  AUTOMATIC_MAX_LEVEL,
   getAutomaticAssignmentRoles,
-  getCollaboratorAssignmentCounts,
+  getAutomaticSectorCounts,
+  getAutomaticShareLevel,
 } from "../../game/collaboratorManagement";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { CollaboratorMasteryRole, GameState } from "../../game/types";
 
+const NOTCHES = Array.from({ length: AUTOMATIC_MAX_LEVEL }, (_, index) => index + 1);
+
 /**
- * «Assegnazione automatica» (4.7): one switch. On, free and new collaborators
- * follow the sector shares (editable here); the assigned ones never move and
- * the manual controls rest. Off, everything is back in the player's hands.
+ * «Assegnazione automatica» (4.7): one switch. On, each sector has an effort
+ * bar of five notches, independent of the others; changing one moves people
+ * right away and the newcomers follow the bars. Off, everything is back in
+ * the player's hands.
  */
 export function AutomaticAssignmentControl({
   state: stateOverride,
@@ -19,7 +23,7 @@ export function AutomaticAssignmentControl({
 }: {
   state?: GameState;
   onToggle: (enabled: boolean) => void;
-  onChangeShare: (assignment: CollaboratorMasteryRole, delta: number) => void;
+  onChangeShare: (assignment: CollaboratorMasteryRole, level: number) => void;
 }) {
   const state = useGameStateSlices(
     ["collaboratorManagement", "collaborators", "unlocks"],
@@ -27,8 +31,8 @@ export function AutomaticAssignmentControl({
   );
   const shares = state.collaboratorManagement.automaticShares;
   const roles = getAutomaticAssignmentRoles(state);
-  const counts = getCollaboratorAssignmentCounts(state);
-  const totalShare = roles.reduce((total, role) => total + (shares?.[role] ?? 0), 0);
+  const counts = getAutomaticSectorCounts(state);
+  const finishingLessons = Object.keys(state.collaboratorManagement.automaticPendingMoves ?? {}).length;
 
   return (
     <section className={`automatic-assignment${shares ? " is-on" : ""}`} aria-labelledby="automatic-assignment-title">
@@ -44,40 +48,44 @@ export function AutomaticAssignmentControl({
         </label>
         <p id="automatic-assignment-help">
           {shares
-            ? "Liberi e nuovi arrivati vanno dove manca più gente, e ci va chi è più portato. Chi ha già un posto non si muove."
-            : "Tiene le proporzioni dei settori anche con i nuovi arrivati."}
+            ? "Più tacche, più persone in quel settore. Si spostano subito, e ci va chi è più portato."
+            : "Divide i collaboratori tra i settori con delle barre di impegno, nuovi arrivati compresi."}
         </p>
       </header>
       {shares ? (
-        <ul className="automatic-assignment-shares" aria-label="Proporzioni dei settori">
+        <ul className="automatic-assignment-shares" aria-label="Impegno dei settori">
           {roles.map((role) => {
             const label = getCollaboratorAssignmentLabel(role, state.unlocks.social);
-            const share = shares[role] ?? 0;
-            const percent = totalShare > 0 ? Math.round(share / totalShare * 100) : 0;
+            const level = getAutomaticShareLevel(shares[role]);
+            const people = counts[role];
             return (
               <li key={role}>
                 <span>
                   <strong>{label}</strong>
-                  <small>{counts[role]} assegnati</small>
+                  {role === "instructor" && finishingLessons > 0 ? (
+                    <small>
+                      {finishingLessons} {finishingLessons === 1 ? "finisce" : "finiscono"} le lezioni
+                    </small>
+                  ) : null}
                 </span>
-                <span className="sector-staffing-stepper">
-                  <button
-                    type="button"
-                    onClick={() => onChangeShare(role, -1)}
-                    disabled={share <= 0}
-                    aria-label={`Riduci la quota di ${label}`}
-                  >
-                    <Icon name="minus" />
-                  </button>
-                  <span aria-label={`Quota di ${label}: ${percent}%`}><strong>{percent}%</strong></span>
-                  <button
-                    type="button"
-                    onClick={() => onChangeShare(role, 1)}
-                    disabled={share >= 100}
-                    aria-label={`Aumenta la quota di ${label}`}
-                  >
-                    <Icon name="plus" />
-                  </button>
+                <span
+                  className="automatic-assignment-effort"
+                  role="group"
+                  aria-label={`Impegno di ${label}: ${level} su ${AUTOMATIC_MAX_LEVEL}`}
+                >
+                  {NOTCHES.map((notch) => (
+                    <button
+                      key={notch}
+                      type="button"
+                      className={notch <= level ? "is-filled" : undefined}
+                      aria-pressed={notch <= level}
+                      aria-label={`${label}: impegno ${notch} su ${AUTOMATIC_MAX_LEVEL}`}
+                      onClick={() => onChangeShare(role, notch === level ? notch - 1 : notch)}
+                    />
+                  ))}
+                </span>
+                <span className="automatic-assignment-people">
+                  <strong>{people}</strong> {people === 1 ? "persona" : "persone"}
                 </span>
               </li>
             );

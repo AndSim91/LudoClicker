@@ -306,6 +306,13 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
         COLLABORATOR_MASTERY_ROLES.includes(role as CollaboratorMasteryRole) &&
         isNonNegativeSafeInteger(share)
       )
+    )) &&
+    (management.automaticPendingMoves === undefined || (
+      typeof management.automaticPendingMoves === "object" &&
+      management.automaticPendingMoves !== null &&
+      Object.values(management.automaticPendingMoves).every((role) =>
+        COLLABORATOR_MASTERY_ROLES.includes(role)
+      )
     ))
   );
 }

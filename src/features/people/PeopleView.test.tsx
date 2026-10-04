@@ -103,8 +103,11 @@ describe("PeopleView", () => {
       />,
     );
     expect(screen.getByRole("combobox", { name: "Assegnazione" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: /Aumenta la quota di Eventi/ }));
-    expect(onChangeShare).toHaveBeenCalledWith("events", 1);
+    expect(screen.getByRole("group", { name: "Impegno di Eventi: 0 su 5" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Eventi: impegno 3 su 5" }));
+    expect(onChangeShare).toHaveBeenCalledWith("events", 3);
+    fireEvent.click(screen.getByRole("button", { name: "Redazione: impegno 5 su 5" }));
+    expect(onChangeShare).toHaveBeenCalledWith("writing", 4);
   });
 
   it("marks the complete collaborator section as a tutorial target", () => {

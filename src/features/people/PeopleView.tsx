@@ -58,7 +58,7 @@ export function PeopleView({
     direction: "up" | "down",
   ) => void;
   onToggleAutomaticAssignment?: (enabled: boolean) => void;
-  onChangeAutomaticShare?: (assignment: CollaboratorMasteryRole, delta: number) => void;
+  onChangeAutomaticShare?: (assignment: CollaboratorMasteryRole, level: number) => void;
 }) {
   const state = useGameStateSlices(
     [

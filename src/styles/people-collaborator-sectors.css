@@ -2395,7 +2395,7 @@
 
 .automatic-assignment-shares {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -2403,10 +2403,10 @@
 }
 
 .automatic-assignment-shares li {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 76px;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -2419,11 +2419,50 @@
   min-width: 0;
 }
 
-.automatic-assignment-shares .sector-staffing-stepper {
-  flex: none;
-}
-
 .automatic-assignment-shares small {
   color: var(--ink-muted);
   font-size: 12px;
+}
+
+/* Effort bar: five independent notches, filled up to the level. */
+.automatic-assignment-effort {
+  display: flex;
+  gap: 4px;
+}
+
+.automatic-assignment-effort button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  cursor: pointer;
+}
+
+.automatic-assignment-effort button.is-filled {
+  background: var(--accent-ink);
+  box-shadow: none;
+}
+
+.automatic-assignment-effort button:hover {
+  box-shadow: inset 0 0 0 2px var(--accent-ink);
+}
+
+.automatic-assignment-effort button:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+.automatic-assignment-people {
+  color: var(--ink-muted);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.automatic-assignment-people strong {
+  color: var(--ink);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
 }

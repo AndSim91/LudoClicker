@@ -380,8 +380,8 @@ export function App() {
     [dispatch],
   );
   const changeAutomaticShare = useCallback(
-    (assignment: CollaboratorMasteryRole, delta: number) =>
-      dispatch({ type: "CHANGE_AUTOMATIC_SHARE", assignment, delta }),
+    (assignment: CollaboratorMasteryRole, level: number) =>
+      dispatch({ type: "CHANGE_AUTOMATIC_SHARE", assignment, level }),
     [dispatch],
   );
   const startTraining = useCallback(
