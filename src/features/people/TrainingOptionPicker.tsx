@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { getFormLogo } from "../../content/formLogos";
 import type { FormDefinition } from "../../content/forms";
 import type { FormId } from "../../game/types";
@@ -57,7 +57,8 @@ export function TrainingOptionPicker({
   const summary = `${options.length} formazioni possibili` + (
     uncoveredCount === 0 ? "" : uncoveredCount === 1 ? ", 1 non coperta" : `, ${uncoveredCount} non coperte`
   );
-  const menuId = `training-menu-${displayName.replace(/\W+/g, "-")}`;
+  // Id unico per istanza: Istruttore e Tecnici della stessa persona non devono condividerlo.
+  const menuId = `training-menu-${useId().replace(/\W+/g, "")}`;
 
   // Il menu sta nel top layer: lo si chiude se la pagina scorre, invece di inseguire il campo.
   useEffect(() => {
