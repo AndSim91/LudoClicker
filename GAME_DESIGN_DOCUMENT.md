@@ -3071,10 +3071,15 @@ maestria; gli restano solo nome, rarità e statistiche naturali di Arena e Stile
 Anche i suoi progressi conservati per le scuole successive ripartono da zero. Senza Leggendari iscritti la scuola parte da zero
 iscritti.
 
-I Leggendari Segreti reclutati in una scuola precedente (con progressi
-conservati) entrano tra i leggendari ordinari: nelle scuole successive possono
-comparire a caso nella coda dei contatti, con le loro statistiche, senza
-tornei né prove speciali (`getUnlockedSecretLegendaries`, `src/game/contacts.ts`).
+I Leggendari Segreti reclutati in una scuola precedente entrano tra i
+leggendari ordinari: nelle scuole successive possono comparire a caso nella
+coda dei contatti, senza tornei né prove speciali
+(`getUnlockedSecretLegendaries`, `src/game/contacts.ts`). Trovati così ripartono
+da zero: niente Forme, attestati, corsi agonisti, esperienza di torneo né
+maestria, solo le loro statistiche naturali di Arena e Stile
+(`getRetainedLegendaryProgress`). Solo un Leggendario Segreto vinto in un
+torneo arriva con il profilo completo (Forme canoniche ed esperienza), anche se
+in una scuola precedente aveva altri progressi.
 Il Ludodex conta come scoperti sia gli iscritti attuali sia i leggendari con
 progressi conservati, quindi non si svuota col prestigio.
 

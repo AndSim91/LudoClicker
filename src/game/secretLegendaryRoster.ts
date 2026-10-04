@@ -30,7 +30,7 @@ export function createSecretLegendaryContact(
   const existing = state.contacts.find((contact) => contact.secretLegendaryId === id);
   if (existing) return { ...existing, status };
   const profile = SECRET_LEGENDARIES[id];
-  const retained = state.legendaryCollaborators.retainedProgress[id];
+  // Won in a tournament: always the full canonical profile, whatever an earlier school left.
   return {
     id: makeGameId("secret", now, id),
     firstName: profile.firstName,
@@ -42,17 +42,13 @@ export function createSecretLegendaryContact(
     rarity: "legendary",
     specialProfileId: id,
     secretLegendaryId: id,
-    forms: [...(retained?.forms ?? getCanonicalSecretForms(
-      profile.numericForms,
-      isCourseXUnlocked(state.upgrades),
-    ))],
-    formBranchPreferences: [...(retained?.formBranchPreferences ?? ["Spada Lunga"])],
-    arenaBase: retained?.arenaBase ?? profile.arenaBase,
-    styleBase: retained?.styleBase ?? profile.styleBase,
-    tournamentExperience: retained?.tournamentExperience ?? profile.externalExperience,
-    agonistCourseCompletions: retained?.agonistCourseCompletions ?? 0,
-    agonistCourseArenaBonus: retained?.agonistCourseArenaBonus ?? 0,
-    agonistCourseStyleBonus: retained?.agonistCourseStyleBonus ?? 0,
-    lastAgonistCourseYear: retained?.lastAgonistCourseYear,
+    forms: getCanonicalSecretForms(profile.numericForms, isCourseXUnlocked(state.upgrades)),
+    formBranchPreferences: ["Spada Lunga"],
+    arenaBase: profile.arenaBase,
+    styleBase: profile.styleBase,
+    tournamentExperience: profile.externalExperience,
+    agonistCourseCompletions: 0,
+    agonistCourseArenaBonus: 0,
+    agonistCourseStyleBonus: 0,
   };
 }

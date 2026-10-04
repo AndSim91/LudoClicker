@@ -18,6 +18,7 @@ import type {
   GameState,
   LegendaryCollaboratorProgress,
   PersonRarity,
+  RetainedLegendaryProgress,
   SecretLegendaryId,
   SpecialCollaboratorId,
 } from "./types";
@@ -73,6 +74,20 @@ function getUnlockedSecretLegendaries(progress: LegendaryCollaboratorProgress): 
     .filter((id) => progress.retainedProgress[id] &&
       (SECRET_LEGENDARIES[id] as SecretLegendaryProfile).recruitment !== "never")
     .map((id) => ({ id, firstName: SECRET_LEGENDARIES[id].firstName, lastName: SECRET_LEGENDARIES[id].lastName }));
+}
+
+/**
+ * What a Leggendario brings back when met again. A Leggendario Segreto met in the
+ * ordinary queue starts from zero like any other: only its natural Arena/Stile.
+ * Forms and the rest come only when it is won in a tournament (`secretLegendaryRoster`).
+ */
+export function getRetainedLegendaryProgress(
+  progress: LegendaryCollaboratorProgress,
+  id: SpecialCollaboratorId,
+): Partial<RetainedLegendaryProgress> | undefined {
+  const retained = progress.retainedProgress[id];
+  if (!retained || !(id in SECRET_LEGENDARIES)) return retained;
+  return { arenaBase: retained.arenaBase, styleBase: retained.styleBase };
 }
 
 function secretLegendaryFields(profile: LegendaryCandidate | undefined) {
@@ -199,7 +214,7 @@ export function createInitialContacts(
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, legendaryProfile?.id);
     nextSeed = athleteStats.nextSeed;
     const retained = legendaryProfile
-      ? progress.retainedProgress[legendaryProfile.id]
+      ? getRetainedLegendaryProgress(progress, legendaryProfile.id)
       : undefined;
     return {
       id: makeGameId("contact", now, index),
@@ -298,7 +313,7 @@ export function createAcquiredContacts(
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id);
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile
-      ? progress.retainedProgress[specialProfile.id]
+      ? getRetainedLegendaryProgress(progress, specialProfile.id)
       : undefined;
     let id = returningContact?.id ?? makeGameId("contact", now, `acquired-${nextSequence}`);
     while (!returningContact && contactIds.has(id)) {

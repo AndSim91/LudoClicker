@@ -1,5 +1,6 @@
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { getCollaboratorAssignmentLabel } from "../content/collaboratorRoles";
+import { getRetainedLegendaryProgress } from "./contacts";
 import { makeGameId } from "./ids";
 import { getEnrolledLegendaryContacts } from "./runtimeIndexes";
 import { addMessage } from "./stateUpdates";
@@ -18,7 +19,7 @@ export function recruitCollaborator(
   ) return state;
 
   const retained = contact.specialProfileId
-    ? state.legendaryCollaborators.retainedProgress[contact.specialProfileId]
+    ? getRetainedLegendaryProgress(state.legendaryCollaborators, contact.specialProfileId)
     : undefined;
   const collaborator = {
     id: makeGameId("collaborator", now, state.collaborators.length),
