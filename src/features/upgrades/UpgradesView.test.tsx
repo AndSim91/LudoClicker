@@ -234,6 +234,11 @@ describe("UpgradesView", () => {
     expect(screen.getAllByRole("button", { name: /^Compra / })).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Compra Tastiera comoda" }));
     expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
+
+    // The left column carries a fixed twin that buys the same node.
+    fireEvent.click(screen.getByRole("button", { name: "Acquisto rapido: Tastiera comoda" }));
+    expect(onBuyUpgrade).toHaveBeenCalledTimes(2);
+    expect(onBuyUpgrade).toHaveBeenLastCalledWith("comfortable-keyboard");
   });
 
   it("disables the recommendation when the balance is insufficient", () => {
@@ -248,6 +253,7 @@ describe("UpgradesView", () => {
     const quickBuy = screen.getByRole("button", { name: "Compra Tastiera comoda" });
     expect(quickBuy).toBeDisabled();
     expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 30,00/));
+    expect(screen.getByRole("button", { name: "Acquisto rapido: Tastiera comoda" })).toBeDisabled();
   });
 
   it("summarizes cumulative benefits without claiming free swords", () => {
