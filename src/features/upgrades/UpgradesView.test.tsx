@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
+import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
+import { formatStat } from "../../shared/formatters";
 import { UpgradesView } from "./UpgradesView";
 
 afterEach(cleanup);
@@ -239,6 +241,25 @@ describe("UpgradesView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Acquisto rapido: Tastiera comoda" }));
     expect(onBuyUpgrade).toHaveBeenCalledTimes(2);
     expect(onBuyUpgrade).toHaveBeenLastCalledWith("comfortable-keyboard");
+  });
+
+  it("previews Compra tutto with the same count and total the engine would buy", () => {
+    const initial = createInitialState(1_000);
+    const state = { ...initial, school: { ...initial.school, euros: 1_000 } };
+    const after = buyAllAffordableUpgrades(state);
+    const count = Object.keys(after.upgrades).reduce(
+      (sum, id) => sum + after.upgrades[id as keyof typeof after.upgrades] - state.upgrades[id as keyof typeof state.upgrades],
+      0,
+    );
+    const onBuyAllUpgrades = vi.fn();
+    render(<UpgradesView state={state} onBuyUpgrade={() => undefined} onBuyAllUpgrades={onBuyAllUpgrades} />);
+
+    expect(count).toBeGreaterThan(1);
+    const button = screen.getByRole("button", {
+      name: `Compra tutto: ${count} upgrade per ${formatStat(1_000 - after.school.euros)} €`,
+    });
+    fireEvent.click(button);
+    expect(onBuyAllUpgrades).toHaveBeenCalledTimes(1);
   });
 
   it("disables the recommendation when the balance is insufficient", () => {

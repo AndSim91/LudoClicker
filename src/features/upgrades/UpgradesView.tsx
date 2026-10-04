@@ -36,7 +36,8 @@ import {
   getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
-import { formatCurrency, formatList, formatStat } from "../../shared/formatters";
+import { formatCompactCurrency, formatCurrency, formatList, formatStat } from "../../shared/formatters";
+import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
 import {
   getGadgetFollowerReach,
@@ -315,6 +316,21 @@ function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): 
   if (category === "social") return state.unlocks.social;
   if (category === "gadget") return state.unlocks.gadget;
   return true;
+}
+
+/** What «Compra tutto» would buy right now: same rule as the engine, run on a copy. */
+function getBuyAllPlan(state: GameState) {
+  const after = buyAllAffordableUpgrades(state);
+  let count = 0;
+  for (const definition of UPGRADE_DEFINITIONS) {
+    count += after.upgrades[definition.id] - state.upgrades[definition.id];
+  }
+  const total = state.school.euros - after.school.euros;
+  return {
+    count,
+    total,
+    share: state.school.euros > 0 ? Math.round((total / state.school.euros) * 100) : 0,
+  };
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -639,6 +655,9 @@ export function UpgradesView({
     }
   }
   const upgradeBenefits = getUpgradeBenefitsSummary(state);
+  const buyAllPlan = onBuyAllUpgrades
+    ? getBuyAllPlan(state)
+    : { count: 0, total: 0, share: 0 };
   const buyCheapest = recommendedUpgrade
     ? () => onBuyUpgrade(recommendedUpgrade.definition.id)
     : undefined;
@@ -674,45 +693,71 @@ export function UpgradesView({
         <div className="upgrade-tree-frame">
           <div className="upgrade-tree-scroll" tabIndex={0} aria-label="Diagramma degli Upgrade, scorribile orizzontalmente">
             <div className="upgrade-tree-canvas">
-              <div className="upgrade-tree-root" title="Crescita della scuola">
-                <span aria-hidden="true"><Icon name="spark" /></span>
-                {/* Fixed twin of the node's quick buy: same spot every time, however the tree scrolls. */}
-                <button
-                  type="button"
-                  className="upgrade-root-buy"
-                  onClick={buyCheapest}
-                  disabled={!recommendedUpgrade || state.school.euros < recommendedUpgrade.cost}
-                  aria-label={recommendedUpgrade
-                    ? `Acquisto rapido: ${recommendedUpgrade.definition.title}`
-                    : "Acquisto rapido: niente da comprare"}
-                  title={!recommendedUpgrade
-                    ? "Niente da comprare"
-                    : state.school.euros < recommendedUpgrade.cost
-                      ? `${recommendedUpgrade.definition.title} · mancano ${formatCurrency(recommendedUpgrade.cost - state.school.euros)}`
-                      : recommendedUpgrade.definition.title}
-                >
-                  Compra
-                  {(() => {
-                    const price = recommendedUpgrade ? `${formatStat(recommendedUpgrade.cost)} €` : "—";
-                    return <small className="upgrade-fit-text" style={{ "--fit-chars": price.length } as CSSProperties}>{price}</small>;
-                  })()}
-                </button>
-                {recommendedUpgrade ? (
-                  <span className="upgrade-root-buy-name" aria-hidden="true">
-                    {recommendedUpgrade.definition.title}
-                  </span>
-                ) : null}
-                {onBuyAllUpgrades ? (
+              <div className="upgrade-tree-root">
+                <div className="upgrade-root-funds">
+                  <span aria-hidden="true"><Icon name="spark" /></span>
+                  <div>
+                    <span className="upgrade-root-label">Fondi</span>
+                    <strong title={formatCurrency(state.school.euros)}>{formatCompactCurrency(state.school.euros)}</strong>
+                  </div>
+                </div>
+
+                <div className="upgrade-root-card">
+                  <span className="upgrade-root-label">Prossimo</span>
+                  {recommendedUpgrade ? (
+                    <div className="upgrade-root-next">
+                      <strong>{recommendedUpgrade.definition.title}</strong>
+                      <span>
+                        {UPGRADE_CATEGORIES.find((category) => category.id === recommendedUpgrade.definition.category)?.title}
+                        {" · liv. "}{state.upgrades[recommendedUpgrade.definition.id]} → {state.upgrades[recommendedUpgrade.definition.id] + 1}
+                      </span>
+                    </div>
+                  ) : <span className="upgrade-root-empty">Niente da comprare</span>}
+                  {/* Fixed twin of the node's quick buy: same spot every time, however the tree scrolls. */}
                   <button
                     type="button"
-                    className="upgrade-root-buy upgrade-root-buy-all"
-                    onClick={onBuyAllUpgrades}
+                    className="upgrade-root-buy"
+                    onClick={buyCheapest}
                     disabled={!recommendedUpgrade || state.school.euros < recommendedUpgrade.cost}
-                    title="Spende i fondi della scuola sugli Upgrade, dal più economico in su, finché ne resta uno da comprare. I percorsi segreti restano a te."
+                    aria-label={recommendedUpgrade
+                      ? `Acquisto rapido: ${recommendedUpgrade.definition.title}`
+                      : "Acquisto rapido: niente da comprare"}
+                    title={recommendedUpgrade && state.school.euros < recommendedUpgrade.cost
+                      ? `Mancano ${formatCurrency(recommendedUpgrade.cost - state.school.euros)}`
+                      : undefined}
                   >
-                    Compra
-                    <small>tutto</small>
+                    {(() => {
+                      const label = recommendedUpgrade ? `Compra · ${formatStat(recommendedUpgrade.cost)} €` : "Compra";
+                      return <span className="upgrade-fit-text" style={{ "--fit-chars": label.length } as CSSProperties}>{label}</span>;
+                    })()}
                   </button>
+                </div>
+
+                {onBuyAllUpgrades ? (
+                  <div className="upgrade-root-card all">
+                    <span className="upgrade-root-label">Compra tutto</span>
+                    <div className="upgrade-root-count">
+                      <strong>{buyAllPlan.count}</strong>
+                      <span>upgrade</span>
+                    </div>
+                    <strong className="upgrade-root-total">{formatStat(buyAllPlan.total)} €</strong>
+                    <div className="upgrade-root-meter" aria-hidden="true">
+                      <i style={{ width: `${buyAllPlan.share}%` }} />
+                    </div>
+                    <span className="upgrade-root-rest">
+                      {buyAllPlan.share}% dei fondi · restano {formatStat(state.school.euros - buyAllPlan.total)} €
+                    </span>
+                    <button
+                      type="button"
+                      className="upgrade-root-buy-all"
+                      onClick={onBuyAllUpgrades}
+                      disabled={buyAllPlan.count === 0}
+                      aria-label={`Compra tutto: ${buyAllPlan.count} upgrade per ${formatStat(buyAllPlan.total)} €`}
+                      title="Dal più economico in su, finché i fondi bastano. I percorsi segreti restano a te."
+                    >
+                      Compra tutto
+                    </button>
+                  </div>
                 ) : null}
               </div>
               <div className="upgrade-tree-branches">

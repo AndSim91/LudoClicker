@@ -213,8 +213,8 @@
 
 .upgrade-tree-canvas {
   display: grid;
-  grid-template-columns: 84px minmax(980px, 1fr);
-  min-width: 1064px;
+  grid-template-columns: 148px minmax(980px, 1fr);
+  min-width: 1128px;
   padding-top: 4px;
   background: var(--surface);
 }
@@ -224,15 +224,13 @@
   left: 0;
   z-index: 4;
   display: flex;
-  align-items: center;
   align-self: stretch;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 10px 6px;
+  gap: 12px;
+  padding: 12px 10px;
   border-right: 1px solid var(--line);
   background: var(--surface-muted);
-  text-align: center;
 }
 
 .upgrade-tree-root::after {
@@ -245,17 +243,39 @@
   content: "";
 }
 
-.upgrade-tree-root > span:first-child {
+.upgrade-root-funds {
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upgrade-root-funds > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.upgrade-root-funds strong {
+  color: var(--accent-ink);
+  font-family: var(--font-display, inherit);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.upgrade-root-funds > span:first-child {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   place-items: center;
   border: 1px solid var(--blue-600);
   border-radius: 50%;
   color: var(--accent-ink);
   background: var(--surface);
-  box-shadow: 0 0 0 5px var(--blue-100);
+  box-shadow: 0 0 0 4px var(--blue-100);
 }
 
 .upgrade-tree-root svg {
@@ -476,74 +496,129 @@
   background: var(--surface-muted);
 }
 
-/* Same purchase as the node's button, but always top left of the tree. */
-.upgrade-root-buy {
+/* Left column: the next purchase and «Compra tutto», always top left of the tree. */
+.upgrade-root-label {
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.upgrade-root-card {
   z-index: 1;
   display: flex;
-  width: 100%;
-  min-height: 44px;
-  align-items: center;
   flex-direction: column;
-  justify-content: center;
-  padding: 4px 2px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-sm);
-  color: white;
-  background: var(--blue-600);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.upgrade-root-card.all {
+  border-color: var(--accent-ink);
+  box-shadow: inset 0 0 14px rgb(108 211 214 / 12%);
+}
+
+.upgrade-root-next {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.upgrade-root-next strong {
+  font-size: 13px;
   line-height: 1.2;
-  cursor: pointer;
 }
 
-.upgrade-root-buy small {
-  --fit-max: 11px;
-  --fit-width: 66px;
+.upgrade-root-next span,
+.upgrade-root-empty,
+.upgrade-root-rest {
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.upgrade-root-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.upgrade-root-count strong {
+  font-family: var(--font-display, inherit);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.upgrade-root-count span {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.upgrade-root-total {
+  font-family: var(--font-display, inherit);
+  font-size: 16px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-}
-
-/* Bottom of the column: the whole budget in one click. */
-.upgrade-root-buy-all {
-  margin-top: auto;
-}
-
-/*
- * Prices shrink to stay inside their button instead of spilling out.
- * --fit-chars is the text length; ~0.5em is Barlow's average glyph, digits included.
- */
-.upgrade-fit-text {
-  font-size: min(var(--fit-max, 12px), calc(var(--fit-width) / (var(--fit-chars) * 0.5)));
   white-space: nowrap;
 }
 
-.upgrade-root-buy:hover:not(:disabled) {
+.upgrade-root-meter {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.upgrade-root-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent-ink);
+  transition: width 200ms ease;
+}
+
+.upgrade-root-buy,
+.upgrade-root-buy-all {
+  --fit-max: 13px;
+  --fit-width: 96px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--blue-600);
+  border-radius: 6px;
+  color: white;
+  background: var(--blue-600);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.upgrade-root-buy:hover:not(:disabled),
+.upgrade-root-buy-all:hover:not(:disabled) {
   background: #115ea3;
 }
 
-.upgrade-root-buy:disabled {
+.upgrade-root-buy:disabled,
+.upgrade-root-buy-all:disabled {
   border-color: var(--line-strong);
   color: var(--ink-muted);
   background: var(--surface-muted);
   cursor: not-allowed;
 }
 
-/* What the button buys, so the click never goes blind. */
-.upgrade-root-buy-name {
-  z-index: 1;
-  display: -webkit-box;
-  width: 100%;
-  margin-top: -6px;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  color: var(--ink);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.2;
-  text-align: center;
-  hyphens: auto;
-  overflow-wrap: break-word;
+/*
+ * Prices shrink to stay inside their button instead of spilling out.
+ * --fit-chars is the text length, --fit-glyph the font's average glyph width in em
+ * (0.56 for Segoe/Arial here, 0.5 for Barlow in the Onde skin).
+ */
+.upgrade-fit-text {
+  font-size: min(var(--fit-max, 12px), calc(var(--fit-width) / (var(--fit-chars) * var(--fit-glyph, 0.56))));
+  white-space: nowrap;
 }
 
 /* The cheapest node carries its own buy button: what you buy is where you click. */

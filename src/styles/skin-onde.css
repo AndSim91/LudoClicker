@@ -16,6 +16,7 @@
      400/500/600 are bundled, so every heavier weight in the CSS renders as 600. */
   --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --font-display: "Barlow Semi Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
+  --fit-glyph: 0.5;
   font-family: var(--font-body);
 
   --onde-abyss: #021e33;
@@ -535,6 +536,29 @@
 :root[data-theme="dark"] .upgrade-quick-buy:hover:not(:disabled),
 :root[data-theme="dark"] .upgrade-root-buy:hover:not(:disabled) {
   background: #f5c97a;
+}
+
+:root[data-theme="dark"] .upgrade-root-funds strong {
+  color: var(--onde-gold-bright);
+  font-size: 20px;
+}
+
+:root[data-theme="dark"] .upgrade-root-meter {
+  background: var(--onde-groove);
+}
+
+:root[data-theme="dark"] .upgrade-root-meter i {
+  background: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-root-buy-all:not(:disabled) {
+  border-color: var(--onde-wave);
+  color: var(--onde-foam);
+  background: var(--blue-600);
+}
+
+:root[data-theme="dark"] .upgrade-root-buy-all:hover:not(:disabled) {
+  background: var(--onde-hover);
 }
 
 :root[data-theme="dark"] .upgrade-tree-legend i.unaffordable {
