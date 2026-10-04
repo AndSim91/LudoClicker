@@ -17,6 +17,7 @@ import { getEventContactMultiplier } from "./eventRewards";
 import { getEmailBookingChance, getEnrollmentChance, getWritingPower } from "./formulas";
 import { foundSchool } from "./schoolProgressionFlow";
 import { getTrainingDurationMultiplier } from "./teacherTrainingFlow";
+import { getMonthlySocialIncome } from "./social";
 import { migrate } from "./saveMigrations";
 import type { GameState } from "./types";
 
@@ -112,10 +113,18 @@ it("adds the fixed rents to the monthly income without multipliers", () => {
   const initial = createInitialState(1_000, "Tester");
   const withNetwork = {
     ...initial,
-    network: { ...initial.network, monthlyRent: 1_200, reputationUpgrades: { membershipFees: 10 } },
+    network: { ...initial.network, monthlyRent: 1_200, reputationUpgrades: { socialGadgets: 10 } },
   };
   expect(getMonthlyNetworkRent(withNetwork)).toBe(1_200);
   expect(getMonthlyOperationalIncome(withNetwork) - getMonthlyOperationalIncome(initial)).toBe(1_200);
+});
+
+it("moves the Quote mensili points to Social e Gadget (v94)", () => {
+  const initial = createInitialState(1_000, "Tester");
+  const saved = { ...initial, version: 93, network: { ...initial.network, reputationUpgrades: { membershipFees: 4, events: 2 } } };
+  const migrated = migrate(saved) as GameState;
+  expect(migrated.version).toBe(GAME_CONFIG.version);
+  expect(migrated.network.reputationUpgrades).toEqual({ socialGadgets: 4, events: 2 });
 });
 
 it("turns the old reputation into points and stops the automatic rents (v86)", () => {
@@ -192,10 +201,18 @@ it("raises the base values by 20% a point, probabilities up to their maximum", (
   expect(gifted.style).toBe(Math.round(plain.style * 1.4));
 
   const withMembers = addAdminMembers(initial, 50);
-  const feesUp = { ...withMembers, network: { ...withMembers.network, reputationUpgrades: { membershipFees: 3 } } };
-  // Only the member fees grow (base and per Forma), not the Social income.
-  expect(getMonthlyOperationalIncome(feesUp) - getMonthlyOperationalIncome(withMembers))
-    .toBeCloseTo(getMonthlyMemberFees(withMembers) * 0.6);
+  const withFollowers = {
+    ...withMembers,
+    unlocks: { ...withMembers.unlocks, social: true },
+    school: { ...withMembers.school, followers: 1_000 },
+  };
+  const socialUp = { ...withFollowers, network: { ...withFollowers.network, reputationUpgrades: { socialGadgets: 3 } } };
+  // Social e Gadget: the Social income grows, the member fees do not.
+  expect(getMonthlySocialIncome(withFollowers)).toBeGreaterThan(0);
+  expect(getMonthlySocialIncome(socialUp)).toBeCloseTo(getMonthlySocialIncome(withFollowers) * 1.6);
+  expect(getMonthlyMemberFees(socialUp)).toBe(getMonthlyMemberFees(withFollowers));
+  expect(getMonthlyOperationalIncome(socialUp) - getMonthlyOperationalIncome(withFollowers))
+    .toBeCloseTo(getMonthlySocialIncome(withFollowers) * 0.6);
 });
 
 it("lets a secret legendary recruited before join the ordinary legendaries of the next schools", () => {

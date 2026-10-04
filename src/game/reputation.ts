@@ -16,7 +16,7 @@ export const REPUTATION_UPGRADE_IDS = [
   "writing",
   "events",
   "enrollment",
-  "membershipFees",
+  "socialGadgets",
   "training",
   "genetics",
 ] as const;
@@ -28,7 +28,7 @@ export const REPUTATION_UPGRADES: Record<ReputationUpgradeId, { label: string; d
   writing: { label: "Email/Social", description: "caratteri per input, nelle email e nei contenuti social" },
   events: { label: "Eventi", description: "contatti trovati a ogni evento" },
   enrollment: { label: "Iscrizioni", description: "probabilità base di iscrizione dopo la prova" },
-  membershipFees: { label: "Quote mensili", description: "quota base e aumento per ogni Forma" },
+  socialGadgets: { label: "Social e Gadget", description: "entrate dai follower e dalle vendite dei gadget" },
   training: { label: "Formazione", description: "velocità dei corsi di atleti, Istruttori, Tecnici e agonisti" },
   genetics: { label: "Genetica", description: "valori di base dei nuovi atleti e Preparazione atletica" },
 };

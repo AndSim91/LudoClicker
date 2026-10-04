@@ -555,7 +555,7 @@ applicano sopra.
 | Email/Social   | caratteri per input, delle email e dei contenuti social (`getWritingPower`)             |
 | Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
 | Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
-| Quote mensili  | quote degli iscritti, quota base e aumento per ogni Forma (non Social, non rendita)     |
+| Social e Gadget | entrate dei follower (`getMonthlySocialIncome`) e vendite dei gadget, anche incrociate (non quote, non rendita; dal 04/10 al posto di Quote mensili, salvataggio v94) |
 | Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici                       |
 | Genetica       | valori di base di Arena e Stile dei nuovi atleti (non dei Leggendari) e miglioramenti della Preparazione atletica |
 | Rendita        | si consuma: vedi sotto                                                                  |

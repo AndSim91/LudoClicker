@@ -443,7 +443,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     rules: [
       "Serve una vittoria al Torneo Nazionale, in Arena o in Stile, con la scuola corrente.",
-      "Sei rami: Email/Social (caratteri per input, email e contenuti social), Eventi (contatti a ogni evento), Iscrizioni (probabilità dopo la prova), Quote mensili (quota base e aumento per Forma), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
+      "Sei rami: Email/Social (caratteri per input, email e contenuti social), Eventi (contatti a ogni evento), Iscrizioni (probabilità dopo la prova), Social e Gadget (entrate dai follower e vendite dei gadget), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
       `La mappa della Rete conserva di ogni scuola solo nome, città e Fama; tiene la Sede madre e le ultime ${GAME_CONFIG.networkMapSchoolsLimit - 1}, le più vecchie restano contate.`,
       "La spesa è definitiva. I punti negli Upgrade restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
       "La rendita non ha tetto: è dove spendere la Reputazione quando gli Upgrade sono al massimo.",

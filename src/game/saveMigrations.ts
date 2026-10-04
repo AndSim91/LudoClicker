@@ -49,6 +49,7 @@ import { migrateWritingRhythmUpgradesState } from "./saveMigrations/writingRhyth
 import { migrateReptileSuperbaState } from "./saveMigrations/reptileSuperba";
 import { migrateReptileRebuildState } from "./saveMigrations/reptileRebuild";
 import { migrateCouncilMomentState } from "./saveMigrations/councilMoment";
+import { migrateSocialGadgetsReputationState } from "./saveMigrations/socialGadgetsReputation";
 import { migrateNetworkRentState } from "./saveMigrations/networkRent";
 import { migrateReputationShopState } from "./saveMigrations/reputationShop";
 import { migrateCareerAchievementsState } from "./saveMigrations/careerAchievements";
@@ -115,6 +116,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateNetworkMapState,
   migrateReptileRebuildState,
   migrateCouncilMomentState,
+  migrateSocialGadgetsReputationState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

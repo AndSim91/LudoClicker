@@ -1,3 +1,4 @@
+import { getReputationMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
   GADGET_PRODUCT_ORDER,
@@ -387,13 +388,14 @@ function applySales(
   productId: GadgetProductId,
   rarity: GadgetRarity,
   units: number,
+  multiplier: number,
   extra = false,
 ): SaleResult {
   if (units <= 0) return { products, revenue: 0, units: 0 };
   const product = products[productId];
   const rarityState = product.rarities[rarity];
   const revenue = roundCurrency(
-    getGadgetUnitProfit(productId, rarityState.quality, rarity) * units,
+    getGadgetUnitProfit(productId, rarityState.quality, rarity) * multiplier * units,
   );
   return {
     products: {
@@ -486,7 +488,7 @@ function processPrimarySalesPool(
         },
       },
     };
-    const applied = applySales(products, productId, rarity, sold, tier === "extra");
+    const applied = applySales(products, productId, rarity, sold, getReputationMultiplier(state, "socialGadgets"), tier === "extra");
     products = applied.products;
     revenue = roundCurrency(revenue + applied.revenue);
     units += applied.units;
@@ -627,6 +629,7 @@ function processCrossSales(
       variant.productId,
       variant.rarity,
       allocations.get(variantKey(variant)) ?? 0,
+      getReputationMultiplier(state, "socialGadgets"),
     );
     nextProducts = applied.products;
     revenue = roundCurrency(revenue + applied.revenue);

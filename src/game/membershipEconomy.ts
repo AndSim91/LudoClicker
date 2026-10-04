@@ -1,6 +1,6 @@
 import { getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
-import { getMonthlyNetworkRent, getReputationMultiplier } from "./reputation";
+import { getMonthlyNetworkRent } from "./reputation";
 import { getMonthlySocialIncome } from "./social";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
@@ -152,12 +152,11 @@ export function getMonthlyMemberFees(state: GameState): number {
   return baseFees + trainingBonuses;
 }
 
-/** Member fees with every multiplier: upgrades of the school and Reputation. */
+/** Member fees with every multiplier from the school's upgrades. */
 export function getMonthlyMembershipIncome(state: GameState): number {
   return getMonthlyMemberFees(state) *
     (1 + getUpgradeEffectTotal(state.upgrades, "membershipIncomeMultiplier") +
-      getUpgradeEffectTotal(state.upgrades, "incomeMultiplier")) *
-    getReputationMultiplier(state, "membershipFees");
+      getUpgradeEffectTotal(state.upgrades, "incomeMultiplier"));
 }
 
 export function getMonthlyOperationalIncome(state: GameState): number {
