@@ -6,10 +6,8 @@
  * Loaded after responsive.css so it wins over the generic dark overrides at equal
  * specificity. The light theme stays the Outlook camouflage (F9 swaps them).
  *
- * Surfaces follow the sword concept (night #111a24, panels #18232e): the navy
- * and teal stay in the title bar, the glow and the accents.
- * Contrast (WCAG) on --surface-muted #18232e:
- *   --ink 14.4:1 · --ink-muted 7.6:1 · --ink-soft 5.8:1 · --accent-ink 9.0:1
+ * Contrast (WCAG) on --surface #0a3a57:
+ *   --ink 10.7:1 · --ink-muted 8.6:1 · --ink-soft 6.7:1 · --accent-ink 6.8:1
  *   white on --blue-600 5.9:1 · navy on gold 7.7:1
  * tests/e2e/contrast.spec.ts keeps every visible text at AA.
  */
@@ -22,8 +20,8 @@
 
   --onde-abyss: #021e33;
   --onde-groove: #04263f;
-  --onde-hover: #1a2e40;
-  --onde-selected: #1b3550;
+  --onde-hover: #104d6b;
+  --onde-selected: #124f6c;
   --onde-teal: #177c89;
   --onde-wave: #6cd3d6;
   --onde-foam: #fbf1dc;
@@ -31,18 +29,17 @@
   --onde-gold-bright: #f0b85a;
   --onde-on-gold: #0a1f33;
 
-  /* Surfaces: night canvas, so the abyss-to-ocean bar, the wave and the gold
-     stand out instead of melting into a navy page (palette of the sword concept). */
-  --surface-rail: #0c141d;
-  --surface: #111a24;
-  --surface-muted: #18232e;
-  --blue-050: #15283a;
-  --blue-100: #1b3248;
+  /* Surfaces: abyss rail < navy canvas < ocean panels. */
+  --surface-rail: var(--onde-abyss);
+  --surface: #0a3a57;
+  --surface-muted: #0e4563;
+  --blue-050: #104b6a;
+  --blue-100: #145573;
 
-  /* Cool white text on the night canvas. */
-  --ink: #edf4fb;
-  --ink-muted: #a7b5c4;
-  --ink-soft: #8f9db0;
+  /* Foam-coloured text, warm instead of clinical white. */
+  --ink: var(--onde-foam);
+  --ink-muted: #d9dcc8;
+  --ink-soft: #a9c7c6;
 
   /* --blue-600 is a button fill (white text), --accent-ink is the text accent. */
   --blue-700: var(--onde-wave);
@@ -51,8 +48,8 @@
   --accent-ink: var(--onde-wave);
   --focus: var(--onde-gold-bright);
 
-  --line: #2b3a49;
-  --line-strong: #415467;
+  --line: #2a6280;
+  --line-strong: #3c7b96;
 
   --success: #7fdcae;
   --warning: #f3a36f;
@@ -67,7 +64,7 @@
      because gadget cards also use them as text. */
   --rarity-common-name: var(--ink);
   --rarity-common-mail-text: var(--ink);
-  --rarity-common-mail-background: #263646;
+  --rarity-common-mail-background: #1d5470;
   --rarity-common-accent: #9fb9bd;
   --rarity-rare-name: #8fbcff;
   --rarity-rare-mail-text: #8fbcff;
@@ -87,7 +84,7 @@
   --rarity-secret-legendary-accent: #ffa99c;
 
   /* Fase 8: day-panel cards and the text colours of the sword states. */
-  --day-card: #0f2233;
+  --day-card: #0a3a57;
   --equipment-broken-ink: var(--equipment-broken);
   --equipment-load-ink: var(--equipment-load);
 
@@ -135,7 +132,7 @@
 }
 
 :root[data-theme="dark"] .app-rail {
-  background: var(--surface-rail);
+  background: var(--onde-abyss);
 }
 
 /* The wave rises behind the empty lower half of the folders. The asset fades to
@@ -223,7 +220,7 @@
 
 :root[data-theme="dark"] .profile-dialog {
   border-color: rgb(224 166 74 / 45%);
-  background: rgb(15 34 51 / 94%);
+  background: rgb(10 58 87 / 94%);
   box-shadow: 0 24px 70px rgb(1 12 22 / 55%);
 }
 
@@ -251,11 +248,6 @@
 
 :root[data-theme="dark"] .appointment-neutral {
   background: #11506f;
-}
-
-/* The cool muted grey is too faint on the coloured day cards. */
-:root[data-theme="dark"] .appointment small {
-  color: #c9d4df;
 }
 
 :root[data-theme="dark"] .sent-status.prova-in-palestra,
