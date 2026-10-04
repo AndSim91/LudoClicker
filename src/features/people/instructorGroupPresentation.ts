@@ -147,6 +147,19 @@ export function getTechnicianCoverageForms(
   );
 }
 
+/** Quanti Istruttori hanno già la qualifica (o il titolo di Tecnico) per ciascuna Forma. */
+export function countQualifiedInstructors(
+  instructors: readonly Collaborator[],
+  kind: "instructor" | "technician",
+): Map<FormId, number> {
+  const counts = new Map<FormId, number>();
+  for (const instructor of instructors) {
+    const forms = kind === "instructor" ? instructor.instructorForms : instructor.technicianForms ?? [];
+    for (const formId of forms) counts.set(formId, (counts.get(formId) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export function getInternalInstructorCourseEntries(
   collaborators: readonly Collaborator[],
   courseXUnlocked = true,

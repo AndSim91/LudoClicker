@@ -11,6 +11,22 @@ export interface TrainingOption {
   coverage?: "covered" | "uncovered";
   /** Forma già imparata a cui manca il Corso Istruttori. */
   qualification?: boolean;
+  /** Istruttori della scuola che hanno già la qualifica (o il titolo di Tecnico) per questa Forma. */
+  qualified?: { count: number; role: "instructor" | "technician" };
+}
+
+const QUALIFIED_ROLE = {
+  instructor: ["Istruttore qualificato", "Istruttori qualificati", "Nessun Istruttore qualificato"],
+  technician: ["Tecnico qualificato", "Tecnici qualificati", "Nessun Tecnico qualificato"],
+} as const;
+
+function qualifiedLabel({ count, role }: NonNullable<TrainingOption["qualified"]>) {
+  const [one, many, none] = QUALIFIED_ROLE[role];
+  return count === 0 ? none : `${count} ${count === 1 ? one : many}`;
+}
+
+function qualifiedShortLabel({ count }: NonNullable<TrainingOption["qualified"]>) {
+  return count === 0 ? "nessun qualificato" : `${count} ${count === 1 ? "qualificato" : "qualificati"}`;
 }
 
 const MENU_GAP = 4;
@@ -19,7 +35,9 @@ const MENU_MAX_HEIGHT = 360;
 function describe(option: TrainingOption, showContext: boolean) {
   const { definition } = option;
   return [
-    option.coverage === "uncovered" ? "Nessuno la insegna" : undefined,
+    option.coverage === "uncovered"
+      ? "Nessuno la insegna"
+      : option.qualified ? qualifiedLabel(option.qualified) : undefined,
     showContext && !option.qualification ? option.contextLabel : undefined,
     definition.bonusLabel ?? (definition.branch ? "Specializzazione d'arma" : "Percorso lineare"),
   ].filter(Boolean).join(" · ");
@@ -103,7 +121,7 @@ export function TrainingOptionPicker({
         className={`training-option-field${selected.coverage === "uncovered" ? " is-uncovered" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Formazione per ${displayName}: ${selected.definition.longName}, ${selected.costLabel}${selected.coverage === "uncovered" ? ", nessuno la insegna" : ""}`}
+        aria-label={`Formazione per ${displayName}: ${selected.definition.longName}, ${selected.costLabel}${selected.coverage === "uncovered" ? ", nessuno la insegna" : selected.qualified ? `, ${qualifiedLabel(selected.qualified)}` : ""}`}
         popoverTarget={menuId}
         onClick={placeMenu}
       >
@@ -113,6 +131,7 @@ export function TrainingOptionPicker({
           <small>
             {selected.coverage === "uncovered" ? <i className="training-option-dot" aria-hidden="true" /> : null}
             <b>{selected.costLabel}</b>
+            {selected.qualified ? <span>· {qualifiedShortLabel(selected.qualified)}</span> : null}
           </small>
         </span>
         <span className="training-option-chevron" aria-hidden="true">▾</span>

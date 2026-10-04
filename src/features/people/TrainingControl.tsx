@@ -47,8 +47,7 @@ import type {
 } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
 import {
-  getInstructorCoverageForms,
-  getTechnicianCoverageForms,
+  countQualifiedInstructors,
 } from "./instructorGroupPresentation";
 import { TrainingFormPreview } from "./PersonPresentation";
 import { getDefaultTrainingOption } from "./peoplePresentation";
@@ -296,12 +295,12 @@ export function TechnicianCourseControl({
   const reservation = collaborator.technicianCourseReservation;
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const technicianCoverage = useMemo(
-    () => new Set(getTechnicianCoverageForms(
+  const technicianCounts = useMemo(
+    () => countQualifiedInstructors(
       state.collaborators.filter((candidate) => candidate.assignment === "instructor"),
-      courseXUnlocked,
-    )),
-    [courseXUnlocked, state.collaborators],
+      "technician",
+    ),
+    [state.collaborators],
   );
   const recoveryPending = courseXUnlocked && needsCourseXRecovery(collaborator.forms);
   const definitions = collaborator.forms.flatMap((formId) => {
@@ -361,7 +360,8 @@ export function TechnicianCourseControl({
       getTechnicianCourseCost(definition.cost),
     )),
     contextLabel: "Corso Tecnico SIS",
-    coverage: technicianCoverage.has(definition.id) ? "covered" as const : "uncovered" as const,
+    coverage: technicianCounts.has(definition.id) ? "covered" as const : "uncovered" as const,
+    qualified: { count: technicianCounts.get(definition.id) ?? 0, role: "technician" as const },
   }));
   const selected = definitions.find((definition) => definition.id === selectedFormId) ??
     getDefaultTrainingOption(options)?.definition;
@@ -630,12 +630,12 @@ export function TrainingControl({
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const instructorCoverage = useMemo(
-    () => new Set(getInstructorCoverageForms(
+  const instructorCounts = useMemo(
+    () => countQualifiedInstructors(
       state.collaborators.filter((candidate) => candidate.assignment === "instructor"),
-      courseXUnlocked,
-    )),
-    [courseXUnlocked, state.collaborators],
+      "instructor",
+    ),
+    [state.collaborators],
   );
   const recoveryPending = courseXUnlocked && needsCourseXRecovery(student.forms);
   const annualTrainingAvailable =
@@ -806,7 +806,11 @@ export function TrainingControl({
       qualification,
       costLabel: formatCurrency(cost),
       coverage: qualification
-        ? instructorCoverage.has(definition.id) ? "covered" as const : "uncovered" as const
+        ? instructorCounts.has(definition.id) ? "covered" as const : "uncovered" as const
+        : undefined,
+      // Solo per chi diventerà Istruttore: aiuta a scegliere le Forme che mancano alla scuola.
+      qualified: collaborator?.assignment === "instructor"
+        ? { count: instructorCounts.get(definition.id) ?? 0, role: "instructor" as const }
         : undefined,
       contextLabel: qualification
         ? "Corso Istruttori"
