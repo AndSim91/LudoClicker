@@ -1,3 +1,4 @@
+import { Icon } from "../../components/common/Icon";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
   AUTOMATIC_MAX_LEVEL,
@@ -33,11 +34,15 @@ export function AutomaticAssignmentControl({
   const roles = getAutomaticAssignmentRoles(state);
   const counts = getAutomaticSectorCounts(state);
   const finishingLessons = Object.keys(state.collaboratorManagement.automaticPendingMoves ?? {}).length;
+  const help = shares
+    ? "Più tacche, più persone in quel settore. Si spostano subito, e ci va chi è più portato."
+    : "Divide i collaboratori tra i settori con delle barre di impegno, nuovi arrivati compresi.";
+  const finishingText = `${finishingLessons} ${finishingLessons === 1 ? "finisce" : "finiscono"} le lezioni, poi ${finishingLessons === 1 ? "cambia" : "cambiano"} settore`;
 
   return (
     <section className={`automatic-assignment${shares ? " is-on" : ""}`} aria-labelledby="automatic-assignment-title">
       <header>
-        <label className="switch-toggle">
+        <label className="switch-toggle" title={shares ? help : undefined}>
           <input
             type="checkbox"
             checked={Boolean(shares)}
@@ -46,11 +51,7 @@ export function AutomaticAssignmentControl({
           />
           <strong id="automatic-assignment-title">Assegnazione automatica</strong>
         </label>
-        <p id="automatic-assignment-help">
-          {shares
-            ? "Più tacche, più persone in quel settore. Si spostano subito, e ci va chi è più portato."
-            : "Divide i collaboratori tra i settori con delle barre di impegno, nuovi arrivati compresi."}
-        </p>
+        <p id="automatic-assignment-help" className={shares ? "sr-only" : undefined}>{help}</p>
       </header>
       {shares ? (
         <ul className="automatic-assignment-shares" aria-label="Impegno dei settori">
@@ -60,14 +61,7 @@ export function AutomaticAssignmentControl({
             const people = counts[role];
             return (
               <li key={role}>
-                <span>
-                  <strong>{label}</strong>
-                  {role === "instructor" && finishingLessons > 0 ? (
-                    <small>
-                      {finishingLessons} {finishingLessons === 1 ? "finisce" : "finiscono"} le lezioni
-                    </small>
-                  ) : null}
-                </span>
+                <strong className="automatic-assignment-label">{label}</strong>
                 <span
                   className="automatic-assignment-effort"
                   role="group"
@@ -84,9 +78,17 @@ export function AutomaticAssignmentControl({
                     />
                   ))}
                 </span>
-                <span className="automatic-assignment-people">
-                  <strong>{people}</strong> {people === 1 ? "persona" : "persone"}
+                <span className="automatic-assignment-people" title={`${people} ${people === 1 ? "persona" : "persone"}`}>
+                  {people}
+                  <span className="sr-only"> {people === 1 ? "persona" : "persone"}</span>
                 </span>
+                {role === "instructor" && finishingLessons > 0 ? (
+                  <span className="automatic-assignment-finishing" title={finishingText}>
+                    <Icon name="clock" />
+                    {finishingLessons}
+                    <span className="sr-only">: {finishingText}</span>
+                  </span>
+                ) : null}
               </li>
             );
           })}
