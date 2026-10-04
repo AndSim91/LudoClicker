@@ -268,15 +268,6 @@
   background: #115ea3;
 }
 
-.event-row > button.event-cancel-button {
-  border-color: #a4262c;
-  background: #a4262c;
-}
-
-.event-row > button.event-cancel-button:hover:not(:disabled) {
-  background: #8f1d24;
-}
-
 .upgrade-row button:disabled,
 .event-row > button:disabled {
   border-color: var(--line-strong);
@@ -577,7 +568,7 @@
 
 .event-row {
   display: grid;
-  grid-template-columns: minmax(340px, 1fr) 210px;
+  grid-template-columns: minmax(340px, 1fr) 260px;
   align-items: center;
   gap: 20px;
   min-height: 166px;
@@ -650,11 +641,21 @@
   background: currentcolor;
 }
 
-/* Fase 8: avanzamento e attesa sono il riempimento del pulsante. */
+/* Fase 8: pulsante largo a due righe con l'anello dei secondi (concept A+B).
+   Avanzamento e attesa riempiono il pulsante; «Annulla» resta in sordina e
+   prende il rosso pieno solo sotto il puntatore. */
 .event-row > button.event-action {
   position: relative;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  min-height: 54px;
   overflow: hidden;
+  padding: 8px 14px 8px 10px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 
 .event-action-fill {
@@ -664,17 +665,113 @@
 }
 
 .event-action-fill > span {
+  position: relative;
   display: block;
   height: 100%;
-  background: rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 16%);
+}
+
+.event-action-fill > span::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: currentcolor;
+  opacity: 0.5;
 }
 
 .event-action-fill.is-cooldown > span {
   background: color-mix(in srgb, var(--line-strong) 60%, transparent);
 }
 
-.event-action-label {
-  font-variant-numeric: tabular-nums;
+.event-action-fill.is-cooldown > span::after {
+  opacity: 0.3;
+}
+
+.event-action-ring {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+}
+
+.event-action-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.event-action-ring circle {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 3.4;
+}
+
+.event-action-ring-track {
+  opacity: 0.22;
+}
+
+.event-action-ring-arc {
+  stroke-linecap: round;
+}
+
+.event-action-ring > span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.event-action-play {
+  width: 0;
+  height: 0;
+  margin-left: 3px;
+  border-block: 5px solid transparent;
+  border-left: 8px solid currentcolor;
+}
+
+.event-action-text {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.event-action-main {
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.event-action-detail {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.82;
+}
+
+/* «Annulla» in sordina: rosso tenue, rosso pieno solo sotto il puntatore. */
+.event-row > button.event-cancel-button {
+  --cancel-ink: #a4262c;
+  border-color: color-mix(in srgb, #a4262c 35%, var(--surface));
+  color: var(--cancel-ink);
+  background: color-mix(in srgb, #a4262c 10%, var(--surface));
+}
+
+.event-row > button.event-cancel-button .event-action-fill > span {
+  background: color-mix(in srgb, #a4262c 14%, transparent);
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) {
+  border-color: #a4262c;
+  color: white;
+  background: #a4262c;
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span {
+  background: rgb(255 255 255 / 16%);
 }
 
 .event-meta {

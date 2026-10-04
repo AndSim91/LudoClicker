@@ -198,7 +198,7 @@
 }
 
 :root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
-:root[data-theme="dark"] .event-row > button:hover:not(:disabled) {
+:root[data-theme="dark"] .event-row > button:hover:not(:disabled, .event-cancel-button) {
   background: #3e8cda;
 }
 

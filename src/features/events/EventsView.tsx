@@ -33,6 +33,25 @@ function memberRequirement(count: number) {
   return quantityLabel(count, "iscritto", "iscritti");
 }
 
+// Fase 8: the seconds ring at the left of the event button (concept A+B).
+function EventRing({ value, label }: { value: number; label: string }) {
+  return (
+    <span className="event-action-ring" aria-hidden="true">
+      <svg viewBox="0 0 36 36">
+        <circle className="event-action-ring-track" cx="18" cy="18" r="15.9155" />
+        <circle
+          className="event-action-ring-arc"
+          cx="18"
+          cy="18"
+          r="15.9155"
+          strokeDasharray={`${Math.min(100, Math.max(0, value))} 100`}
+        />
+      </svg>
+      {label ? <span>{label}</span> : <i className="event-action-play" />}
+    </span>
+  );
+}
+
 function getEventProgress(event: AcquisitionEvent, now: number) {
   const duration = event.resolvesAt - event.startedAt;
   if (duration <= 0) return 100;
@@ -158,21 +177,45 @@ export function EventsView({
           const disabled =
             !matching &&
             Boolean(onCooldown || lacksFunds || lacksAvailableMembers || lacksEquipment);
+          const clockLeft = `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
+          const durationLabel = quantityLabel(Math.round(displayedDurationMs / 1_000), "secondo", "secondi");
           let action =
             definition.cost === 0
               ? "Partecipa gratis"
               : `Partecipa · ${formatCurrency(definition.cost)}`;
-          if (matching)
-            action = `Annulla · ${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
-          else if (onCooldown) action = `Di nuovo tra ${cooldownRemaining}`;
-          else if (lacksMembers)
+          let main = "Partecipa";
+          let detail = `${definition.cost === 0 ? "Gratis" : formatCurrency(definition.cost)} · ${durationLabel}`;
+          let ring = { value: 100, label: "" };
+          if (matching) {
+            action = `Annulla · ${clockLeft}`;
+            main = "Annulla";
+            detail = `finisce tra ${clockLeft}`;
+            ring = { value: progress, label: String(remainingSeconds) };
+          } else if (onCooldown) {
+            action = `Di nuovo tra ${cooldownRemaining}`;
+            main = action;
+            detail = "si sta ricaricando";
+            ring = { value: cooldownProgress, label: cooldownRemaining.split(" ")[0] ?? "" };
+          } else if (lacksMembers) {
             action = `Servono ${memberRequirement(definition.requiredMembers)}`;
-          else if (lacksAvailableMembers)
+            detail = `ne hai ${state.school.activeMembers.toLocaleString("it-IT")}`;
+          } else if (lacksAvailableMembers) {
             action = `Servono ${memberRequirement(definition.requiredMembers)} liberi`;
-          else if (needsRepairForEvent)
+            detail = `liberi ora: ${availableMembers.toLocaleString("it-IT")}`;
+          } else if (needsRepairForEvent) {
             action = `Ripara ${quantityLabel(damagedSwords, "spada", "spade")}`;
-          else if (lacksEquipment) action = `Servono ${quantityLabel(definition.requiredSwords, "spada", "spade")}`;
-          else if (lacksFunds) action = `Servono ${formatCurrency(definition.cost)}`;
+            detail = "dall'elsa in alto";
+          } else if (lacksEquipment) {
+            action = `Servono ${quantityLabel(definition.requiredSwords, "spada", "spade")}`;
+            detail = `pronte: ${availableSwords.toLocaleString("it-IT")}`;
+          } else if (lacksFunds) {
+            action = `Servono ${formatCurrency(definition.cost)}`;
+            detail = `hai ${formatCurrency(state.school.euros)}`;
+          }
+          if (disabled && !onCooldown) {
+            main = action;
+            ring = { value: 0, label: "!" };
+          }
 
           return (
             <article
@@ -210,6 +253,7 @@ export function EventsView({
               <button
                 className={matching ? "event-action event-cancel-button" : "event-action"}
                 type="button"
+                aria-label={action}
                 disabled={disabled}
                 data-tutorial-region={
                   definition.id === "park-sparring" ? "park-sparring-action" : undefined
@@ -232,7 +276,11 @@ export function EventsView({
                     }
                   />
                 ) : null}
-                <span className="event-action-label">{action}</span>
+                <EventRing value={ring.value} label={ring.label} />
+                <span className="event-action-text">
+                  <span className="event-action-main">{main}</span>
+                  <span className="event-action-detail">{detail}</span>
+                </span>
               </button>
             </article>
           );
