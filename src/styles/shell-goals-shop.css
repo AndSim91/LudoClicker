@@ -229,7 +229,7 @@
   flex-direction: column;
   justify-content: flex-start;
   gap: 10px;
-  padding: 10px 8px;
+  padding: 10px 6px;
   border-right: 1px solid var(--line);
   background: var(--surface-muted);
   text-align: center;
@@ -245,7 +245,7 @@
   content: "";
 }
 
-.upgrade-tree-root > span {
+.upgrade-tree-root > span:first-child {
   z-index: 1;
   display: grid;
   width: 40px;
@@ -512,6 +512,24 @@
   color: var(--ink-muted);
   background: var(--surface-muted);
   cursor: not-allowed;
+}
+
+/* What the button buys, so the click never goes blind. */
+.upgrade-root-buy-name {
+  z-index: 1;
+  display: -webkit-box;
+  width: 100%;
+  margin-top: -6px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 /* The cheapest node carries its own buy button: what you buy is where you click. */

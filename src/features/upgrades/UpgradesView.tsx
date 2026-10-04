@@ -689,6 +689,11 @@ export function UpgradesView({
                   Compra
                   <small>{recommendedUpgrade ? `${formatStat(recommendedUpgrade.cost)} €` : "—"}</small>
                 </button>
+                {recommendedUpgrade ? (
+                  <span className="upgrade-root-buy-name" aria-hidden="true">
+                    {recommendedUpgrade.definition.title}
+                  </span>
+                ) : null}
               </div>
               <div className="upgrade-tree-branches">
                 {UPGRADE_CATEGORIES.filter(

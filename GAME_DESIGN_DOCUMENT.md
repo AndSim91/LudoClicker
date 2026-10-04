@@ -1849,7 +1849,7 @@ Il nodo disponibile **più economico** ha un pulsante «Compra · prezzo» propr
 sotto di sé, per comprarlo con un clic senza aprire i dettagli (disattivato,
 con quanto manca nel suggerimento, se i Fondi non bastano). Lo stesso acquisto
 ha anche un posto fisso: nella colonna sinistra dell'albero, sotto l'icona
-della radice, un pulsante «Compra» col prezzo resta fermo mentre l'albero
+della radice, un pulsante «Compra» col prezzo, e sotto il nome del nodo, resta fermo mentre l'albero
 scorre, così si sa sempre dove premere. Sopra l'albero, una riga
 riassume quanti nodi sono completati e spiega la legenda (da comprare, fondi
 insufficienti, bloccati, completati); il riepilogo **Bonus totali** degli
