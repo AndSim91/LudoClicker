@@ -2,14 +2,12 @@ import { describe, expect, it } from "vitest";
 import { formatApplicationVersion } from "./appVersion";
 
 describe("formatApplicationVersion", () => {
-  it("formats the date and floors the time sequence to three digits", () => {
-    const date = new Date(2026, 6, 21, 16, 0, 28, 900);
-
-    expect(formatApplicationVersion(date)).toBe("2026.07.21.667");
+  it("formats the build date and time as AAAA.MM.GG.hhmm", () => {
+    expect(formatApplicationVersion(new Date(2026, 9, 4, 14, 54, 59))).toBe("2026.10.04.1454");
   });
 
-  it("starts at 000 at midnight and reaches 999 before the next day", () => {
-    expect(formatApplicationVersion(new Date(2026, 6, 21, 0, 0, 0))).toBe("2026.07.21.000");
-    expect(formatApplicationVersion(new Date(2026, 6, 21, 23, 59, 59, 999))).toBe("2026.07.21.999");
+  it("pads midnight and single-digit fields with zeros", () => {
+    expect(formatApplicationVersion(new Date(2026, 0, 5, 0, 7))).toBe("2026.01.05.0007");
+    expect(formatApplicationVersion(new Date(2026, 11, 31, 23, 59))).toBe("2026.12.31.2359");
   });
 });
