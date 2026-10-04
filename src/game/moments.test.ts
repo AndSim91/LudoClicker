@@ -89,4 +89,20 @@ describe("moments (4.2)", () => {
     };
     expect((migrate(formed) as GameState).moments.seen).toContain("council");
   });
+
+  it("plays the birth of the Superba once, after the Reptile victory scene", () => {
+    const initial = withCareer(createInitialState(1_000), { reptileWins: 1 });
+    const superba: GameState = { ...initial, network: { ...initial.network, superbaTournament: true } };
+    const queued = queueMoments(superba);
+    expect(queued.moments.queue).toEqual(["victory:reptile", "superba"]);
+    expect(queueMoments(queued)).toBe(queued);
+  });
+
+  it("marks the Superba as seen for saves that already have it (v95)", () => {
+    const initial = createInitialState(1_000);
+    const saved = { ...initial, version: 94, network: { ...initial.network, superbaTournament: true } };
+    expect((migrate(saved) as GameState).moments).toEqual({ seen: ["superba"], queue: [] });
+    expect(queueMoments(migrate(saved) as GameState).moments.queue).toEqual([]);
+    expect((migrate({ ...initial, version: 94 }) as GameState).moments.seen).not.toContain("superba");
+  });
 });

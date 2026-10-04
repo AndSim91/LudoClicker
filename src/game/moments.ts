@@ -4,7 +4,7 @@ import type { GameState, MomentKey, SpecialCollaboratorId } from "./types";
 /*
  * Animated moments (4.2): the Consiglio delle Onde (sector view, 8 collaborators),
  * the first win of each major tournament and each Leggendario joining for the
- * first time ever. Each plays once per save: the key goes to `seen` when it is
+ * first time ever, the birth of the Torneo della Superba. Each plays once per save: the key goes to `seen` when it is
  * queued, the UI shows the queue and pauses. The foundation and the Inflazione
  * di Luce are queued directly and play every time.
  */
@@ -33,10 +33,14 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
   };
   return [
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
+    ...(state.network.superbaTournament ? [SUPERBA_MOMENT] : []),
     ...getEverEnrolledLegendaryIds(state).map((id) => `legendary:${id}`),
     ...(state.collaboratorManagement.aggregateViewUnlocked ? ["council"] : []),
   ];
 }
+
+/** The Reptile becomes, for good, the Torneo della Superba (after the victory scene, if any). */
+export const SUPERBA_MOMENT = "superba";
 
 /** The scene of a new school: queued by foundSchool at every foundation, never marked as seen. */
 export const FOUNDATION_MOMENT = "foundation";

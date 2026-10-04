@@ -3683,8 +3683,9 @@ vittorie restano.
 
 Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 2**
 (1.000 XP, tabellone da 64 team), l'Open si trasforma **per sempre** nel
-**Torneo della Superba**. Arriva il messaggio «Nasce il Torneo della Superba» e
-la trasformazione vale dall'edizione successiva. Non torna indietro se la fama
+**Torneo della Superba**. Parte la scena «Nasce il Torneo della Superba!»
+(§ 25.1), arriva il messaggio con lo stesso titolo e la trasformazione vale
+dall'edizione successiva. Non torna indietro se la fama
 scende e resta anche nelle scuole fondate dopo (`network.superbaTournament`):
 lì, una volta sbloccato l'Open con la vittoria nazionale in Arena e Stile, è già
 la Superba.
@@ -4199,6 +4200,19 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
   Superba) e Chronicles of Ludosport;
+- **nasce il Torneo della Superba** (dal 04/10): quando il Reptile diventa per
+  sempre la Superba, dopo la scena della vittoria se c'è. La targa verde
+  «Torneo Reptile» (Open, città, Fama e livello) svanisce nel fumo dell'arena,
+  la Lanterna di Genova sale dal mare in controluce contro un alone di luna (la
+  torre del logo della Superba: forte merlato, due tronconi con la cornice,
+  stemma con la corona, terrazza merlata, lanterna a vetri d'oro), si accende e
+  il suo fascio fa girare il medaglione della Superba con colonna d'oro e
+  scintille. Testi: «Il Torneo Reptile si evolve» / «Nasce il Torneo della
+  Superba!» / «Dalla prossima edizione avversari più forti e nuovi segreti da
+  sbloccare.» In Outlook l'icona è il logo della Superba. Codice:
+  `SuperbaArt.tsx`, `SUPERBA_MOMENT` in `moments.ts`; testi in `SUPERBA_COPY`
+  (`reptileUnlock.ts`), usati anche dal messaggio. Dalla v95 i salvataggi che
+  sono già Superba la segnano come vista;
 - **la costellazione dell'Ordine**, che torna **a ogni fondazione** (dal
   04/10; prima solo alla prima). Ogni sede è una stella e le stelle disegnano il
   simbolo dell'Ordine dello stendardo: la Sede madre è la punta, poi la lama, la

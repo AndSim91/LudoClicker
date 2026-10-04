@@ -652,3 +652,137 @@
   25% { transform: translate(5px, -3px); }
   50% { transform: translate(-4px, 2px); }
 }
+
+/* Superba: the Reptile plaque fades in the smoke, the Lanterna rises in
+ * backlight, its beam sweeps and the Superba medal turns. Outlook keeps the
+ * office notice, with the Superba logo in place of the icon. */
+.moment-layer.is-superba .moment-icon { overflow: hidden; padding: 0; background: transparent; }
+.moment-layer.is-superba .moment-icon img { width: 100%; height: 100%; border-radius: 6px; object-fit: cover; }
+:root[data-theme="dark"] .moment-layer.is-superba { --moment-accent: #fab600; }
+:root[data-theme="dark"] .moment-layer.is-superba .moment-kicker { color: #ffb36b; }
+:root[data-theme="dark"] .moment-layer.is-superba .moment-title { text-shadow: 0 0 24px rgb(250 182 0 / 35%); }
+:root[data-theme="dark"] .moment-superba-art {
+  position: relative;
+  width: min(960px, 94vw, 101vh); /* keeps the 2.2 ratio inside the 46vh art row */
+  height: auto;
+  aspect-ratio: 2.2;
+  overflow: hidden;
+  container-type: inline-size;
+  /* soft edges: beam, smoke and sea fade into the night instead of ending on a box */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(transparent, #000 18%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(transparent, #000 18%);
+  mask-composite: intersect;
+}
+
+.superba-smoke {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/reptile-smoke-backdrop.png") center / cover;
+  opacity: 0;
+  animation: superba-smoke 2s ease-in both;
+}
+.superba-smoke::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 40%, #07120d); }
+.superba-scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+.superba-beam {
+  fill: url(#superba-beam-gradient);
+  opacity: 0.35;
+  transform-box: view-box;
+  transform-origin: 82.2px 86.2px; /* SUPERBA_LAMP in SuperbaArt.tsx */
+  transform: rotate(4deg);
+  animation: superba-sweep 1.3s ease-in-out 1.9s both;
+}
+.superba-moon { fill: rgb(108 211 214 / 16%); filter: blur(10px); animation: moment-fade 1s ease-out 0.9s both; }
+.superba-tower { animation: superba-rise 1.1s cubic-bezier(0.2, 0.8, 0.3, 1) 0.9s both; }
+.superba-stone { fill: #03101b; stroke: rgb(108 211 214 / 35%); stroke-width: 0.5; stroke-linejoin: round; }
+.superba-edge { fill: none; stroke: #03101b; stroke-width: 0.9; }
+.superba-window { fill: #03101b; }
+.superba-glass { fill: #6b5214; stroke: #03101b; }
+.superba-lamp { fill: #fab600; filter: drop-shadow(0 0 6px #fab600); animation: superba-lamp 0.6s ease-out 1.8s both; }
+.superba-gold { fill: #8a6516; }
+.superba-shield { fill: #b9b2a3; }
+.superba-cross { fill: #7a1416; }
+.superba-sea-back { fill: #0a465b; }
+.superba-sea-front { fill: #082736; }
+.superba-foam { fill: none; stroke: var(--onde-foam); stroke-width: 1.4; opacity: 0.7; }
+.superba-pillar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 47%;
+  width: 26%;
+  background: linear-gradient(to top, rgb(250 182 0 / 55%), transparent);
+  filter: blur(22px);
+  opacity: 0.55;
+  transform-origin: 50% 100%;
+  animation: moment-pillar 1.2s ease-out 2.1s both;
+}
+.superba-spark {
+  position: absolute;
+  bottom: 12%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fab600;
+  opacity: 0;
+  animation: moment-spark 2.4s ease-out 2.6s 2 both;
+}
+.superba-spark.is-0 { left: 48%; }
+.superba-spark.is-1 { left: 55%; animation-delay: 2.9s; }
+.superba-spark.is-2 { left: 63%; animation-delay: 2.7s; }
+.superba-spark.is-3 { left: 69%; animation-delay: 3.2s; }
+.superba-spark.is-4 { left: 74%; animation-delay: 3s; }
+.superba-medal {
+  position: absolute;
+  top: 52%;
+  left: 60%;
+  height: 56%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 0 40px rgb(250 182 0 / 50%), 0 0 0 3px var(--onde-foam);
+  translate: -50% -50%;
+  animation: superba-medal 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1) 2.3s both;
+}
+.superba-plaque {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 2.2cqw 3.6cqw;
+  border: 2px solid #1fd071;
+  border-radius: 10px;
+  color: #b7ff68;
+  background: rgb(7 18 13 / 88%);
+  box-shadow: 0 0 30px rgb(31 208 113 / 45%);
+  white-space: nowrap;
+  opacity: 0;
+  translate: -50% -50%;
+  animation: superba-plaque 1.7s ease-in both;
+}
+.superba-plaque small { color: #cfe9d6; font-size: max(11px, 1.6cqw); letter-spacing: 2px; text-transform: uppercase; }
+.superba-plaque strong { font-family: var(--font-display); font-size: max(20px, 4.6cqw); line-height: 1; letter-spacing: 1px; }
+.superba-plaque em { color: #cfe9d6; font-size: max(11px, 1.7cqw); font-style: normal; font-variant-numeric: tabular-nums; }
+
+@keyframes superba-smoke { 0%, 45% { opacity: 0.9; } 100% { opacity: 0; } }
+@keyframes superba-plaque {
+  0% { opacity: 0; }
+  12%, 55% { opacity: 1; filter: none; translate: -50% -50%; }
+  100% { opacity: 0; filter: blur(8px); translate: -50% -80%; }
+}
+@keyframes superba-rise { from { transform: translateY(170px); } }
+@keyframes superba-lamp { from { fill: #3c4b55; filter: none; } }
+@keyframes superba-sweep {
+  0% { opacity: 0; transform: rotate(-38deg); }
+  20% { opacity: 0.85; }
+  70% { opacity: 0.85; transform: rotate(14deg); }
+}
+@keyframes superba-medal {
+  from { opacity: 0; transform: perspective(900px) rotateY(90deg) scale(0.75); }
+  70% { opacity: 1; transform: perspective(900px) rotateY(-10deg) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-superba-art, .moment-superba-art * { animation: none !important; }
+}

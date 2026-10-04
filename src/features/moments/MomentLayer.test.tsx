@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
+import { SUPERBA_MOMENT } from "../../game/moments";
 import { MOMENT_DURATION_MS, MomentLayer } from "./MomentLayer";
 import { getFoundationTitle } from "./momentContent";
 
@@ -80,5 +81,19 @@ describe("MomentLayer", () => {
     expect(getFoundationTitle(120)).toBe("La centoventesima sede dell'Ordine");
     expect(getFoundationTitle(306)).toBe("La trecentoseiesima sede dell'Ordine");
     expect(getFoundationTitle(1200)).toBe("La sede n° 1.200 dell'Ordine");
+  });
+
+  it("announces the Torneo della Superba with the Lanterna and the medal", () => {
+    const initial = createInitialState(1_000, "Verifica UI");
+    const state = {
+      ...initial,
+      tournaments: { ...initial.tournaments, reptile: { ...initial.tournaments.reptile, fameXp: 1_040 } },
+    };
+    const { container } = render(<MomentLayer state={state} momentKey={SUPERBA_MOMENT} onDismiss={vi.fn()} />);
+    expect(screen.getByRole("dialog", { name: "Nasce il Torneo della Superba!" })).toBeVisible();
+    expect(screen.getByText("Il Torneo Reptile si evolve")).toBeVisible();
+    expect(container.querySelector(".superba-tower .superba-lamp")).not.toBeNull();
+    expect(container.querySelector(".superba-medal")?.getAttribute("src")).toBe("/assets/superba-logo.webp");
+    expect(container.querySelector(".superba-plaque")?.textContent).toContain("Fama 1.040 · livello 2");
   });
 });

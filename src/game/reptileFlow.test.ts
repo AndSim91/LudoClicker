@@ -255,7 +255,7 @@ describe("Torneo Reptile", () => {
       economy: { ...result.economy, fameAfter: 1_000 },
     }, STARTED_AT);
     expect(completed.network.superbaTournament).toBe(true);
-    expect(completed.messages.some((message) => message.subject === "Nasce il Torneo della Superba")).toBe(true);
+    expect(completed.messages.some((message) => message.subject === "Nasce il Torneo della Superba!")).toBe(true);
   });
 
   it("vincere la Superba scopre Corso X e lo segna nell'albo", () => {

@@ -9,7 +9,9 @@ import {
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency, formatStat } from "../../shared/formatters";
-import { FOUNDATION_MOMENT } from "../../game/moments";
+import { FOUNDATION_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
+import { getReptileFameLevel } from "../../game/reptilePreparation";
+import { SUPERBA_COPY } from "../../game/reptileUnlock";
 import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
 import { getLegendaryDossier } from "../ludowiki/ludodexPresentation";
@@ -42,6 +44,7 @@ export type MomentContent =
       newcomerCity: string;
       tally: string;
     }
+  | { kind: "superba"; kicker: string; title: string; body: string; city: string; fameLabel: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
@@ -158,6 +161,15 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
       newcomerName: state.school.name,
       newcomerCity: state.school.city,
       tally: number > CONSTELLATION_SIZE ? `Simbolo completo · ${number} sedi` : `${lit - 1} → ${lit} di ${CONSTELLATION_SIZE}`,
+    };
+  }
+  if (key === SUPERBA_MOMENT) {
+    const fame = state.tournaments.reptile.fameXp;
+    return {
+      kind: "superba",
+      ...SUPERBA_COPY,
+      city: state.school.city,
+      fameLabel: `Fama ${formatStat(fame)} · livello ${getReptileFameLevel(fame)}`,
     };
   }
   if (key === LIGHT_INFLATION_MOMENT) {

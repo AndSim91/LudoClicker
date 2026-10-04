@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import type { GameState, MomentKey } from "../../game/types";
 import { FoundationArt } from "./FoundationArt";
+import { SuperbaArt } from "./SuperbaArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
 /** How long a moment plays before it closes on its own (the game stays paused meanwhile). */
@@ -13,6 +14,7 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
   victory: "trophy",
   foundation: "flag",
   inflation: "coin",
+  superba: "trophy",
 };
 
 /** Lama di Luce letterhead: three crossed blades, green, white and red. */
@@ -145,6 +147,7 @@ function MomentArt({ content }: { content: MomentContent }) {
       </div>
     );
   }
+  if (content.kind === "superba") return <SuperbaArt city={content.city} fameLabel={content.fameLabel} />;
   if (content.kind === "victory") {
     return (
       <svg className="moment-art" viewBox="0 0 400 340" aria-hidden="true">
@@ -228,7 +231,11 @@ export function MomentLayer({
       <div className="moment-card">
         <span className="moment-progress" aria-hidden="true"><span /></span>
         <div className="moment-heading">
-          <span className="moment-icon" aria-hidden="true"><Icon name={OUTLOOK_ICONS[content.kind]} /></span>
+          <span className="moment-icon" aria-hidden="true">
+            {content.kind === "superba"
+              ? <img src="/assets/superba-logo.webp" alt="" />
+              : <Icon name={OUTLOOK_ICONS[content.kind]} />}
+          </span>
           <div>
             <small className="moment-kicker">{content.kicker}</small>
             <h2 id="moment-title" className="moment-title">{content.title}</h2>

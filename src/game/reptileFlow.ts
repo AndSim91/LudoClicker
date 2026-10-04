@@ -9,7 +9,7 @@ import {
   processReptilePreparation,
 } from "./reptilePreparation";
 import { simulateReptileTournament } from "./reptileSimulation";
-import { discoverCourseXFromSuperbaVictory, getReptileTournamentName } from "./reptileUnlock";
+import { discoverCourseXFromSuperbaVictory, getReptileTournamentName, SUPERBA_COPY } from "./reptileUnlock";
 import { GAME_CONFIG } from "./config";
 import { resolveSecretLegendaryDefeat } from "./tournamentFlow";
 import { addMessage } from "./stateUpdates";
@@ -186,8 +186,8 @@ export function applyReptileResult(
     nextState = addMessage(
       { ...nextState, network: { ...nextState.network, superbaTournament: true } },
       now,
-      "Nasce il Torneo della Superba",
-      "Del Reptile ormai si parla fuori Genova. Dalla prossima edizione è il Torneo della Superba: avversari più forti, e un segreto per chi vince.",
+      SUPERBA_COPY.title,
+      SUPERBA_COPY.body,
       "positive",
       "focused",
       "tournaments",

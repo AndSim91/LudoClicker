@@ -14,6 +14,13 @@ export function isSuperbaTournament(state: Pick<GameState, "network">): boolean 
   return state.network.superbaTournament === true;
 }
 
+/** Texts of the scene and of the message when the Reptile becomes the Superba. */
+export const SUPERBA_COPY = {
+  kicker: "Il Torneo Reptile si evolve",
+  title: "Nasce il Torneo della Superba!",
+  body: "Dalla prossima edizione avversari più forti e nuovi segreti da sbloccare.",
+};
+
 export function getReptileTournamentName(state: Pick<GameState, "network">): string {
   return isSuperbaTournament(state) ? "Torneo della Superba" : "Torneo Reptile";
 }
