@@ -1214,7 +1214,7 @@ Regole:
 - non esiste un limite massimo di collaboratori;
 - ogni collaboratore svolge un solo incarico alla volta;
 - fino a otto collaboratori la riassegnazione individuale è libera e immediata;
-- al raggiungimento del nono collaboratore si sblocca definitivamente la vista
+- al raggiungimento del ottavo collaboratore si sblocca definitivamente la vista
   aggregata per settori, accompagnata da un tutorial che mette il gioco in
   pausa; la vista individuale non torna disponibile anche se l'organico scende;
 - la vista aggregata mostra il rapporto **Non assegnati/Totali** (accanto al
@@ -2186,7 +2186,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | 10° contatto della scuola iniziale         | Andrea Simonazzi e, dal contatto successivo, le rarità avanzate         |
 | 15 iscritti attivi (massimo raggiunto)     | fornitore ufficiale di spade                                             |
 | Primo Collaboratore delle Onde             | sezione Collaboratori e assegnazioni                                     |
-| 9 Collaboratori                            | gestione aggregata per settore                                           |
+| 8 Collaboratori                            | gestione aggregata per settore                                           |
 | 35 iscritti attivi                         | Redazione si evolve in Social                                            |
 | Prima vittoria nell'Accademico Arena       | settore e pagina Gadget                                                  |
 | Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Campioni d'Italia” |
@@ -2480,7 +2480,7 @@ Un'unica pagina, in quest'ordine:
 
 - la palestra illustrata, che cresce con la scuola;
 - Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
-  assegnazioni, che dal nono Collaboratore diventa una gestione aggregata per
+  assegnazioni, che dall'ottavo Collaboratore diventa una gestione aggregata per
   settore con i tasti + e −, i settori secondari e le priorità operative;
   sopra, l'interruttore «Assegnazione automatica» (§ 9.2);
 - Iscritti attivi, in due viste a scelta (piano 4.7, la scelta resta salvata
@@ -2665,7 +2665,7 @@ l'avanzamento.
    suggerisce di impiegare i Collaboratori nell'insegnamento, anche per lo
    sconto sui corsi.
 
-10. **Una squadra che cresce** Al nono Collaboratore la gestione passa alla
+10. **Una squadra che cresce** All'ottavo Collaboratore la gestione passa alla
     vista aggregata per settore: la scena spiega il cambio, chiede di aprire
     **Scuola** e mostra come usare + e − nei riquadri dei settori, precisando
     che chi è impegnato in un Evento o in una formazione cambia incarico solo

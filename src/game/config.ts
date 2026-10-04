@@ -15,7 +15,7 @@ export const GAME_CONFIG = {
   tournamentMinimumMembers: 6,
   officialSwordSupplierUnlockMembers: 15,
   guaranteedAndreaContactPosition: 10,
-  collaboratorAggregateUnlockCount: 9,
+  collaboratorAggregateUnlockCount: 8,
   conversionGuaranteeFailures: 4,
   emailOutcomeMinMs: 10_000,
   emailOutcomeMaxMs: 10_000,

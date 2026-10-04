@@ -35,11 +35,11 @@ function collaborator(
 }
 
 describe("collaborator aggregate management", () => {
-  it("unlocks permanently when the ninth collaborator joins", () => {
+  it("unlocks permanently when the eighth collaborator joins", () => {
     const initial = createInitialState(1_000);
     const unlocked = reconcileCollaboratorManagement({
       ...initial,
-      collaborators: Array.from({ length: 9 }, (_, index) => collaborator(index)),
+      collaborators: Array.from({ length: 8 }, (_, index) => collaborator(index)),
     });
 
     expect(unlocked.collaboratorManagement.aggregateViewUnlocked).toBe(true);
