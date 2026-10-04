@@ -313,16 +313,24 @@ describe("game engine: narrative", () => {
     expect(founded.contacts.filter((contact) => contact.status === "enrolled")
       .map((contact) => contact.specialProfileId)).toEqual(["eva-parodi"]);
     expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual(["eva-parodi"]);
-    expect(founded.legendaryCollaborators.retainedProgress["eva-parodi"]).toMatchObject({
-      forms: ["form-1"],
-      instructorForms: ["form-1"],
-      joinedAt: 500,
+    // She follows without anything she earned: no Forms, attestati or course bonuses.
+    expect(founded.legendaryCollaborators.retainedProgress["eva-parodi"]).toEqual({
+      forms: [],
+      instructorForms: [],
+      technicianForms: [],
+      formBranchPreferences: [],
+      joinedAt: 3_000,
       arenaBase: 91,
       styleBase: 87,
-      agonistCourseCompletions: 2,
-      agonistCourseArenaBonus: 4,
-      agonistCourseStyleBonus: 6,
     });
+    expect(founded.contacts.find((contact) => contact.specialProfileId === "eva-parodi")).toMatchObject({
+      forms: [],
+      agonistCourseCompletions: 0,
+      agonistCourseArenaBonus: 0,
+      agonistCourseStyleBonus: 0,
+      tournamentExperience: 0,
+    });
+    expect(founded.collaborators[0]).toMatchObject({ forms: [], instructorForms: [] });
     expect(founded.legendaryCollaborators.encounteredProfileIds).toEqual(
       expect.arrayContaining(initial.legendaryCollaborators.encounteredProfileIds),
     );
@@ -343,7 +351,7 @@ describe("game engine: narrative", () => {
     // Founding alone gives no bonus: only the Reputation spent does.
     expect(founded.player.writingPower).toBeCloseTo(1);
     // Only the fee of the Leggendario who followed.
-    expect(selectIncomePerMonth(founded)).toBe(55);
+    expect(selectIncomePerMonth(founded)).toBe(40);
     expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
 
     const postPrestigeEvent = {

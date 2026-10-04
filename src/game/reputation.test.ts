@@ -203,6 +203,7 @@ it("brings one random Leggendario of the old school as the only member of the ne
   const members = next.contacts.filter((contact) => contact.status === "enrolled");
   expect(members).toHaveLength(1);
   const followerId = members[0].specialProfileId;
+  expect(members[0].forms).toEqual([]);
   expect(withLegendary.contacts.some((contact) =>
     contact.status === "enrolled" && contact.specialProfileId === followerId,
   )).toBe(true);

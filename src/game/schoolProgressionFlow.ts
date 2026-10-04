@@ -95,24 +95,49 @@ export function foundSchool(
   const [legendaryRoll, seedAfterLegendary] = nextRandom(state.randomSeed);
   const follower = legendaryMembers[Math.floor(legendaryRoll * legendaryMembers.length)];
   const followerId = follower?.specialProfileId;
-  const fresh = createInitialState(now, state.profile.displayName, false, followerId
-    ? { ...legendaryProgress, enrolledProfileIds: [followerId] }
+  // The follower keeps nothing it earned: no Forms, attestati, courses or experience.
+  // Only who they are (name, rarity, natural Arena/Stile) comes along.
+  const carried: Contact | undefined = follower && {
+    id: follower.id,
+    firstName: follower.firstName,
+    lastName: follower.lastName,
+    email: follower.email,
+    source: follower.source,
+    acquiredAt: now,
+    status: "enrolled",
+    rarity: follower.rarity,
+    specialProfileId: follower.specialProfileId,
+    ...(follower.secretLegendaryId ? { secretLegendaryId: follower.secretLegendaryId } : {}),
+    forms: [],
+    arenaBase: follower.arenaBase,
+    styleBase: follower.styleBase,
+    tournamentExperience: 0,
+    formBranchPreferences: [],
+    agonistCourseCompletions: 0,
+    agonistCourseArenaBonus: 0,
+    agonistCourseStyleBonus: 0,
+  };
+  const fresh = createInitialState(now, state.profile.displayName, false, carried && followerId
+    ? {
+        ...legendaryProgress,
+        enrolledProfileIds: [followerId],
+        retainedProgress: {
+          ...legendaryProgress.retainedProgress,
+          [followerId]: {
+            forms: [],
+            instructorForms: [],
+            technicianForms: [],
+            formBranchPreferences: [],
+            joinedAt: now,
+            arenaBase: carried.arenaBase,
+            styleBase: carried.styleBase,
+          },
+        },
+      }
     : legendaryProgress);
-  const followerProgress = followerId ? legendaryProgress.retainedProgress[followerId] : undefined;
-  const carriedMembers: Contact[] = [];
-  if (follower) {
-    const carried: Contact = {
-      ...follower,
-      acquiredAt: now,
-      enrolledMonth: fresh.school.currentMonth,
-      forms: [...(followerProgress?.forms ?? follower.forms)],
-      formBranchPreferences: [
-        ...(followerProgress?.formBranchPreferences ?? follower.formBranchPreferences ?? []),
-      ],
-    };
-    delete carried.training;
-    carriedMembers.push(carried);
-  }
+  const carriedMembers: Contact[] = carried
+    ? [{ ...carried, enrolledMonth: fresh.school.currentMonth }]
+    : [];
   // Points in the rent are consumed: they lock a fixed rent from this school only.
   const monthlyRent = Math.round(rent.rentPerPoint * spending.rent);
   const archivedSchool = {

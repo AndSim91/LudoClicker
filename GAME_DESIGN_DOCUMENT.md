@@ -3061,8 +3061,11 @@ delle email.
 
 Un Leggendario iscritto alla scuola lasciata, scelto a caso (anche un
 Leggendario Segreto), segue il giocatore: è l'unico iscritto della nuova
-scuola, con i suoi progressi conservati, e come ogni Leggendario iscritto entra
-subito tra i collaboratori. Senza Leggendari iscritti la scuola parte da zero
+scuola e come ogni Leggendario iscritto entra subito tra i collaboratori. Non
+conserva nulla di ciò che aveva guadagnato: riparte da zero Forme, senza
+attestati da Istruttore o Tecnico, corsi agonisti, esperienza di torneo né
+maestria; gli restano solo nome, rarità e statistiche naturali di Arena e Stile.
+Anche i suoi progressi conservati per le scuole successive ripartono da zero. Senza Leggendari iscritti la scuola parte da zero
 iscritti.
 
 I Leggendari Segreti reclutati in una scuola precedente (con progressi
