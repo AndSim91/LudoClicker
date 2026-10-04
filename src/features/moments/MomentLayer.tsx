@@ -73,8 +73,14 @@ function MomentArt({ content }: { content: MomentContent }) {
         </g>
         <g className="moment-table-group">
           <circle className="moment-table" cx={COUNCIL_CENTER.x} cy={COUNCIL_CENTER.y} r="80" />
-          <path className="moment-wave" d="M154 172 q23 -36 46 0 t46 0" pathLength="1" />
-          <path className="moment-wave is-soft" d="M166 192 q17 -26 34 0 t34 0" pathLength="1" />
+          <image
+            className="moment-council-emblem"
+            href="/assets/ordine-emblem.webp"
+            x={COUNCIL_CENTER.x - 42}
+            y={COUNCIL_CENTER.y - 58}
+            width="84"
+            height="110"
+          />
         </g>
         <circle className="moment-halo" cx={COUNCIL_CENTER.x} cy={COUNCIL_CENTER.y} r="80" />
         {seats.map((seat, index) => (

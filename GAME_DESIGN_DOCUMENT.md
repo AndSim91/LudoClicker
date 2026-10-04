@@ -4167,8 +4167,8 @@ chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
 
 - **Nasce il Consiglio delle Onde**: all'ottavo collaboratore, quando si
   sblocca la gestione per settori. Otto collaboratori sparsi prendono posto
-  intorno a un tavolo rotondo (con le loro iniziali), il tavolo si accende e
-  il Consiglio raggiunge i cinque settori di tutta la squadra. Dalla v93 chi
+  intorno a un tavolo rotondo (con le loro iniziali), al centro si accende il
+  logo dell'Ordine e il Consiglio raggiunge i cinque settori di tutta la squadra. Dalla v93 chi
   l'aveva visto al primo collaboratore senza avere ancora il Consiglio lo
   rivede quando il Consiglio nasce;
 - **un Leggendario entra nell'Ordine**: ogni Leggendario alla sua prima

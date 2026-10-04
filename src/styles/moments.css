@@ -214,15 +214,13 @@
 :root[data-theme="dark"] .moment-council { overflow: visible; }
 .moment-table { fill: #04263f; stroke: #2a6280; stroke-width: 2; }
 .moment-table-group .moment-table { animation: moment-table-on 0.8s ease-out 2.3s both; }
-.moment-wave {
-  fill: none;
-  stroke: var(--onde-wave);
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  animation: moment-wave-draw 0.9s ease-out 2.4s both;
+.moment-council-emblem {
+  opacity: 0.25;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 0 rgb(240 184 90 / 0%));
+  animation: moment-emblem-on 1s ease-out 2.3s both;
 }
-.moment-wave.is-soft { stroke: var(--onde-foam); stroke-width: 3; opacity: 0.7; animation-delay: 2.6s; }
 .moment-halo {
   fill: none;
   stroke: var(--onde-gold-bright);
@@ -254,7 +252,11 @@
 }
 @keyframes moment-rise { from { opacity: 0; transform: translateY(60px); } }
 @keyframes moment-table-on { from { stroke: #2a6280; } to { stroke: var(--onde-wave); } }
-@keyframes moment-wave-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes moment-emblem-on {
+  0% { opacity: 0.25; transform: scale(0.9); filter: drop-shadow(0 0 0 rgb(240 184 90 / 0%)); }
+  60% { opacity: 1; transform: scale(1.06); filter: drop-shadow(0 0 14px rgb(240 184 90 / 70%)); }
+  100% { opacity: 1; transform: none; filter: drop-shadow(0 0 6px rgb(240 184 90 / 45%)); }
+}
 @keyframes moment-sector-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes moment-halo {
   0% { opacity: 0; transform: scale(0.6); }
@@ -266,6 +268,7 @@
   .moment-council *, .moment-council .moment-sector { animation: none !important; }
   .moment-council .moment-sector { opacity: 1; }
   .moment-council .moment-halo { opacity: 0; }
+  .moment-council .moment-council-emblem { opacity: 1; }
 }
 
 /* Legendary: a pillar of light, the card flips in. Red for a Leggendario Segreto. */
