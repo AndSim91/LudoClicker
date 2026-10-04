@@ -61,6 +61,7 @@ import type {
 import { APP_VERSION } from "../shared/appVersion";
 import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { AchievementToast } from "../features/feedback/AchievementToast";
+import type { LudoWikiSection } from "../features/ludowiki/LudoWikiView";
 import { MomentLayer } from "../features/moments/MomentLayer";
 import { FinalDuelLayer } from "../features/tournaments/FinalDuelLayer";
 import { useAppPreferences } from "./useAppPreferences";
@@ -225,9 +226,17 @@ export function App() {
     setView("tournaments");
   }, [watchedFinal]);
   // From the rail Tornei opens as usual: the focus served its one visit.
+  // The achievement toast opens LudoWiki › Traguardi; the key remounts the view if it is already open.
+  const [wikiEntry, setWikiEntry] = useState<{ section: LudoWikiSection; key: number }>({ section: "ludodex", key: 0 });
   const changeView = useCallback((next: AppView) => {
     setTournamentFocus((focus) => focus && { key: focus.key });
+    setWikiEntry((entry) => ({ ...entry, section: "ludodex" }));
     setView(next);
+  }, []);
+  const openAchievements = useCallback(() => {
+    setTournamentFocus((focus) => focus && { key: focus.key });
+    setWikiEntry((entry) => ({ section: "achievements", key: entry.key + 1 }));
+    setView("ludowiki");
   }, []);
   const tournamentResults = state.tournaments.results;
   const watchFinal = useCallback(
@@ -584,7 +593,7 @@ export function App() {
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
         <GameFeedbackLayer />
-        <AchievementToast />
+        <AchievementToast onOpen={openAchievements} />
         <StableTitleBar
           currentMonth={state.school.currentMonth}
           nextMonthAt={state.school.nextFeeAt}
@@ -695,7 +704,7 @@ export function App() {
               onAccept={acceptGadgetProduct}
             />
           ) : activeView === "ludowiki" ? (
-            <StableLudoWikiView />
+            <StableLudoWikiView key={wikiEntry.key} initialSection={wikiEntry.section} />
           ) : activeView === "network" ? (
             <StableNetworkView onFoundSchool={foundSchool} onFoundationOpenChange={setFoundationPaused} />
           ) : activeView === "admin" ? (

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ACHIEVEMENT_TOTAL, describeAchievementKey } from "../../content/achievements";
+import { ACHIEVEMENT_TOTAL, describeAchievementGoal, describeAchievementKey } from "../../content/achievements";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { AchievementKey, GameState } from "../../game/types";
 
@@ -26,7 +26,7 @@ function describeBatch(added: readonly AchievementKey[], total: number, id: numb
       id,
       label: level ? `Traguardo sbloccato · ${level}` : "Traguardo segreto svelato",
       title,
-      detail: `${total} / ${ACHIEVEMENT_TOTAL} traguardi · LudoWiki › Traguardi`,
+      detail: describeAchievementGoal(last),
       tier,
     };
   }
@@ -44,7 +44,7 @@ function describeBatch(added: readonly AchievementKey[], total: number, id: numb
  * Windows-style notification in the Outlook theme. The style comes from the
  * theme in CSS; a batch of unlocks (an old save after the update) is one toast.
  */
-export function AchievementToast({ state: stateOverride }: { state?: GameState }) {
+export function AchievementToast({ state: stateOverride, onOpen }: { state?: GameState; onOpen?: () => void }) {
   const achievements = useGameSelector(selectAchievements, stateOverride);
   const knownRef = useRef(new Set(achievements));
   const nextIdRef = useRef(0);
@@ -67,15 +67,25 @@ export function AchievementToast({ state: stateOverride }: { state?: GameState }
   if (!toast) return null;
   return (
     <div key={toast.id} className={`achievement-toast is-${toast.tier}`} role="status">
-      <svg className="achievement-toast-medal" width="48" height="48" viewBox="0 0 40 40" aria-hidden="true">
-        <path d="M14 6 L20 13 L26 6" />
-        <circle cx="20" cy="23" r="10" />
-      </svg>
-      <span className="achievement-toast-copy">
-        <small>{toast.label}</small>
-        <strong>{toast.title}</strong>
-        <span>{toast.detail}</span>
-      </span>
+      <button
+        type="button"
+        className="achievement-toast-open"
+        title="Apri LudoWiki › Traguardi"
+        onClick={() => {
+          setToast(null);
+          onOpen?.();
+        }}
+      >
+        <svg className="achievement-toast-medal" width="48" height="48" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M14 6 L20 13 L26 6" />
+          <circle cx="20" cy="23" r="10" />
+        </svg>
+        <span className="achievement-toast-copy">
+          <small>{toast.label}</small>
+          <strong>{toast.title}</strong>
+          <span>{toast.detail}</span>
+        </span>
+      </button>
       <button type="button" aria-label="Chiudi la notifica" onClick={() => setToast(null)}>×</button>
     </div>
   );

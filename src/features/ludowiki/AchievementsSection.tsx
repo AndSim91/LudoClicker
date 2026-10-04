@@ -5,17 +5,12 @@ import {
   ACHIEVEMENT_TOTAL,
   SECRET_ACHIEVEMENTS,
   TIERED_ACHIEVEMENTS,
+  formatAchievementAmount,
   getAchievementTierLabel,
   getTierKey,
   type AchievementCategory,
   type AchievementTier,
-  type TieredAchievement,
 } from "../../content/achievements";
-import {
-  formatCompactCurrency,
-  formatCompactNumber,
-  formatExactNumber,
-} from "../../components/outlook-shell/resourceFormatting";
 import type { GameState } from "../../game/types";
 
 type MedalTier = AchievementTier | "locked";
@@ -33,11 +28,6 @@ interface AchievementCard {
   steps: { label: string; goal: string; state: string; reached: boolean; tier: MedalTier }[];
 }
 
-function formatAmount(value: number, definition: TieredAchievement): string {
-  if (definition.unit === "euro") return formatCompactCurrency(value);
-  return value >= 1_000_000 ? formatCompactNumber(value) : formatExactNumber(value);
-}
-
 function buildCards(state: GameState): AchievementCard[] {
   const unlocked = new Set(state.achievements);
   const tiered = TIERED_ACHIEVEMENTS.map((definition): AchievementCard => {
@@ -50,22 +40,22 @@ function buildCards(state: GameState): AchievementCard[] {
       id: definition.id,
       category: definition.category,
       title: definition.title,
-      goal: `${definition.measure}: ${definition.thresholds.map((threshold) => formatAmount(threshold, definition)).join(" · ")}`,
+      goal: `${definition.measure}: ${definition.thresholds.map((threshold) => formatAchievementAmount(threshold, definition)).join(" · ")}`,
       tier,
       progress: next === undefined ? 1 : Math.min(1, value / next),
       progressLabel: next === undefined
         ? "Completato"
-        : `${formatAmount(Math.min(value, next), definition)} / ${formatAmount(next, definition)}`,
+        : `${formatAchievementAmount(Math.min(value, next), definition)} / ${formatAchievementAmount(next, definition)}`,
       flavor: definition.measure,
       steps: ACHIEVEMENT_TIERS.map((stepTier, index) => {
         const reached = unlocked.has(getTierKey(definition.id, stepTier));
         return {
           label: getAchievementTierLabel(stepTier),
-          goal: formatAmount(definition.thresholds[index], definition),
+          goal: formatAchievementAmount(definition.thresholds[index], definition),
           state: reached
             ? "Ottenuto"
             : index === nextIndex
-              ? `${formatAmount(Math.min(value, definition.thresholds[index]), definition)} / ${formatAmount(definition.thresholds[index], definition)}`
+              ? `${formatAchievementAmount(Math.min(value, definition.thresholds[index]), definition)} / ${formatAchievementAmount(definition.thresholds[index], definition)}`
               : "Bloccato",
           reached,
           tier: stepTier,

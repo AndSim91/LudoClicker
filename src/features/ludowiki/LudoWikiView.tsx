@@ -21,7 +21,7 @@ import {
   type LudodexStatus,
 } from "./ludodexPresentation";
 
-type LudoWikiSection = "ludodex" | "achievements" | "manual";
+export type LudoWikiSection = "ludodex" | "achievements" | "manual";
 type LudodexFilter = "all" | "discovered";
 
 const wikiIconNames: Record<LudoWikiVisualIcon, IconName> = {
@@ -433,9 +433,9 @@ function ManualSection() {
   );
 }
 
-export function LudoWikiView({ state: stateOverride }: { state?: GameState }) {
+export function LudoWikiView({ state: stateOverride, initialSection = "ludodex" }: { state?: GameState; initialSection?: LudoWikiSection }) {
   const state = useGameState(stateOverride);
-  const [section, setSection] = useState<LudoWikiSection>("ludodex");
+  const [section, setSection] = useState<LudoWikiSection>(initialSection);
   return (
     <main className="overview-view ludowiki-view">
       <header>

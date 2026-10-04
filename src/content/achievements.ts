@@ -3,6 +3,7 @@ import { getArchivedCompletedEventCount } from "../game/historyArchive";
 import { getMonthlyNetworkRent, getReputationLevel, REPUTATION_UPGRADE_IDS } from "../game/reputation";
 import type { AchievementKey, FormId, GameState } from "../game/types";
 import { GAME_CONFIG } from "../game/config";
+import { formatCompactCurrency, formatCompactNumber, formatExactNumber } from "../components/outlook-shell/resourceFormatting";
 import { getCollaboratorMasteryLevel, COLLABORATOR_MASTERY_LEVELS } from "./mastery";
 import { SECRET_LEGENDARIES, SECRET_LEGENDARY_IDS, type SecretLegendaryProfile } from "./secretLegendaries";
 
@@ -203,6 +204,22 @@ export function describeAchievementKey(key: AchievementKey): string {
   const tiered = TIERED_ACHIEVEMENTS.find((definition) => definition.id === id);
   if (tiered && tier) return `${tiered.title} · ${TIER_LABELS[tier as AchievementTier]}`;
   return SECRET_ACHIEVEMENTS.find((secret) => secret.id === id)?.title ?? key;
+}
+
+export function formatAchievementAmount(value: number, definition: TieredAchievement): string {
+  if (definition.unit === "euro") return formatCompactCurrency(value);
+  return value >= 1_000_000 ? formatCompactNumber(value) : formatExactNumber(value);
+}
+
+/** What an unlocked key asked for: "100.000 Persone incontrate agli eventi", or the secret's description. */
+export function describeAchievementGoal(key: AchievementKey): string {
+  const [id, tier] = key.split(":");
+  const tiered = TIERED_ACHIEVEMENTS.find((definition) => definition.id === id);
+  if (tiered && tier) {
+    const amount = formatAchievementAmount(tiered.thresholds[ACHIEVEMENT_TIERS.indexOf(tier as AchievementTier)], tiered);
+    return tiered.unit === "euro" ? `${tiered.measure}: ${amount}` : `${amount} ${tiered.measure}`;
+  }
+  return SECRET_ACHIEVEMENTS.find((secret) => secret.id === id)?.description ?? "";
 }
 
 export const ALL_ACHIEVEMENT_KEYS: readonly AchievementKey[] = [
