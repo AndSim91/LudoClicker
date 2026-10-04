@@ -384,7 +384,9 @@ function UpgradeNode({
           aria-label={`Compra ${definition.title}`}
           title={unaffordable ? `Mancano ${formatCurrency(cost - state.school.euros)}` : "Il più economico"}
         >
-          Compra · {formatStat(cost)} €
+          <span className="upgrade-fit-text" style={{ "--fit-chars": `Compra · ${formatStat(cost)} €`.length } as CSSProperties}>
+            Compra · {formatStat(cost)} €
+          </span>
         </button>
       ) : null}
     </li>
@@ -589,9 +591,12 @@ function UpgradeDetailsDialog({
 export function UpgradesView({
   state: stateOverride,
   onBuyUpgrade,
+  onBuyAllUpgrades,
 }: {
   state?: GameState;
   onBuyUpgrade: (upgradeId: UpgradeId) => void;
+  /** Spends the funds on the cheapest upgrades, one after another, until nothing fits. */
+  onBuyAllUpgrades?: () => void;
 }) {
   const state = useGameStateSlices(
     ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
@@ -687,12 +692,27 @@ export function UpgradesView({
                       : recommendedUpgrade.definition.title}
                 >
                   Compra
-                  <small>{recommendedUpgrade ? `${formatStat(recommendedUpgrade.cost)} €` : "—"}</small>
+                  {(() => {
+                    const price = recommendedUpgrade ? `${formatStat(recommendedUpgrade.cost)} €` : "—";
+                    return <small className="upgrade-fit-text" style={{ "--fit-chars": price.length } as CSSProperties}>{price}</small>;
+                  })()}
                 </button>
                 {recommendedUpgrade ? (
                   <span className="upgrade-root-buy-name" aria-hidden="true">
                     {recommendedUpgrade.definition.title}
                   </span>
+                ) : null}
+                {onBuyAllUpgrades ? (
+                  <button
+                    type="button"
+                    className="upgrade-root-buy upgrade-root-buy-all"
+                    onClick={onBuyAllUpgrades}
+                    disabled={!recommendedUpgrade || state.school.euros < recommendedUpgrade.cost}
+                    title="Spende i fondi della scuola sugli Upgrade, dal più economico in su, finché ne resta uno da comprare. I percorsi segreti restano a te."
+                  >
+                    Compra
+                    <small>tutto</small>
+                  </button>
                 ) : null}
               </div>
               <div className="upgrade-tree-branches">

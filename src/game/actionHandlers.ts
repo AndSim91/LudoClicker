@@ -36,7 +36,7 @@ import type {
   GameState,
 } from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
-import { buyUpgrade } from "./upgradeFlow";
+import { buyAllAffordableUpgrades, buyUpgrade } from "./upgradeFlow";
 import { finishTutorialScene, triggerTutorialScene } from "./tutorialProgress";
 import {
   acceptGadgetProduct,
@@ -152,6 +152,7 @@ export function createGameActionHandlers(
     UPDATE_PROFILE_NAME: (state, action) => updateProfileName(state, action.displayName),
     FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now, action.spending),
     BUY_UPGRADE: (state, action) => buyUpgrade(state, action.upgradeId),
+    BUY_ALL_UPGRADES: (state) => buyAllAffordableUpgrades(state),
     START_GADGET_PROJECT: (state, action) => startGadgetProject(
       state,
       action.productId,

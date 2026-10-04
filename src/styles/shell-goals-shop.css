@@ -498,9 +498,23 @@
 }
 
 .upgrade-root-buy small {
-  font-size: 11px;
+  --fit-max: 11px;
+  --fit-width: 66px;
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+}
+
+/* Bottom of the column: the whole budget in one click. */
+.upgrade-root-buy-all {
+  margin-top: auto;
+}
+
+/*
+ * Prices shrink to stay inside their button instead of spilling out.
+ * --fit-chars is the text length; ~0.5em is Barlow's average glyph, digits included.
+ */
+.upgrade-fit-text {
+  font-size: min(var(--fit-max, 12px), calc(var(--fit-width) / (var(--fit-chars) * 0.5)));
+  white-space: nowrap;
 }
 
 .upgrade-root-buy:hover:not(:disabled) {
@@ -534,6 +548,8 @@
 
 /* The cheapest node carries its own buy button: what you buy is where you click. */
 .upgrade-quick-buy {
+  --fit-max: 12px;
+  --fit-width: 90px;
   display: block;
   width: 104px;
   min-height: 28px;

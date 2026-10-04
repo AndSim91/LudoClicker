@@ -46,6 +46,26 @@ describe("game engine: progression", () => {
     expect(second.school.euros).toBe(50);
   });
 
+  it("Compra tutto spends the funds cheapest first until nothing fits", () => {
+    const initial = createInitialState(1_000);
+    const funded = {
+      ...initial,
+      school: { ...initial.school, euros: 5_000, fame: 1_000 },
+      unlocks: { ...initial.unlocks, upgrades: true },
+    };
+
+    const bought = gameReducer(funded, { type: "BUY_ALL_UPGRADES", now: 2_000 });
+    const levels = (state: GameState) =>
+      UPGRADE_DEFINITIONS.reduce((sum, definition) => sum + state.upgrades[definition.id], 0);
+
+    expect(levels(bought)).toBeGreaterThan(levels(funded) + 1);
+    expect(bought.school.euros).toBeGreaterThanOrEqual(0);
+    // Nothing left that a single purchase could still buy.
+    for (const definition of UPGRADE_DEFINITIONS.filter((item) => item.category !== "secrets")) {
+      expect(gameReducer(bought, { type: "BUY_UPGRADE", upgradeId: definition.id, now: 3_000 })).toBe(bought);
+    }
+  });
+
   it("unlocks Banco da lavoro without creating free swords", () => {
     const initial = createInitialState(1_000);
     const funded = {

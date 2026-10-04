@@ -1088,6 +1088,7 @@ export type GameAction =
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number; spending?: ReputationSpending }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
+  | { type: "BUY_ALL_UPGRADES"; now: number }
   | { type: "START_GADGET_PROJECT"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_REVISION"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_MINIGAME"; productId: GadgetProductId }

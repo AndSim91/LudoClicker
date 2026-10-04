@@ -1,4 +1,5 @@
 import {
+  UPGRADE_DEFINITIONS,
   getUpgradeCost,
   getUpgradeDefinition,
   hasCompletedUpgradePrerequisites,
@@ -49,4 +50,28 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
     ...nextState,
     player: { ...nextState.player, writingPower: getWritingPower(nextState) },
   };
+}
+
+/**
+ * "Compra tutto": buys the cheapest purchasable upgrade again and again until the
+ * funds run out, so the funds go to as many levels as possible. A bought level can
+ * open the next node, which then joins the race. Secret paths stay a deliberate choice.
+ */
+export function buyAllAffordableUpgrades(state: GameState): GameState {
+  let current = state;
+  for (;;) {
+    // ponytail: re-sorts ~60 nodes per purchase; fine at a few hundred levels.
+    const next = UPGRADE_DEFINITIONS
+      .filter((definition) => definition.category !== "secrets")
+      .map((definition) => ({
+        id: definition.id,
+        cost: getUpgradeCost(definition, current.upgrades[definition.id], current.network.schoolCount),
+      }))
+      .filter(({ cost }) => cost <= current.school.euros)
+      .sort((a, b) => a.cost - b.cost)
+      .map(({ id }) => buyUpgrade(current, id))
+      .find((candidate) => candidate !== current);
+    if (!next) return current;
+    current = next;
+  }
 }

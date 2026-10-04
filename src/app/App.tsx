@@ -353,6 +353,10 @@ export function App() {
     (upgradeId: UpgradeId) => dispatch({ type: "BUY_UPGRADE", upgradeId, now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const buyAllUpgrades = useCallback(
+    () => dispatch({ type: "BUY_ALL_UPGRADES", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
   const startAcquisitionEvent = useCallback(
     (definitionId: AcquisitionEvent["definitionId"]) =>
       dispatch({ type: "START_ACQUISITION_EVENT", definitionId, now: getGameNow() }),
@@ -643,7 +647,7 @@ export function App() {
               )}
             </>
           ) : activeView === "upgrades" ? (
-            <StableUpgradesView onBuyUpgrade={buyUpgrade} />
+            <StableUpgradesView onBuyUpgrade={buyUpgrade} onBuyAllUpgrades={buyAllUpgrades} />
           ) : activeView === "events" ? (
             <StableEventsView
               onStart={startAcquisitionEvent}
