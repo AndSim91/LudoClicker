@@ -9,6 +9,13 @@ import {
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { CollaboratorMasteryRole, GameState } from "../../game/types";
 
+/** Shown instead of the full name when the panel is phone-narrow. */
+const SHORT_LABELS: Partial<Record<string, string>> = {
+  Redazione: "Redaz.",
+  Attrezzatura: "Attrezz.",
+  Istruttore: "Istrutt.",
+};
+
 const NOTCHES = Array.from({ length: AUTOMATIC_MAX_LEVEL }, (_, index) => index + 1);
 
 /**
@@ -61,7 +68,10 @@ export function AutomaticAssignmentControl({
             const people = counts[role];
             return (
               <li key={role}>
-                <strong className="automatic-assignment-label">{label}</strong>
+                <strong className="automatic-assignment-label" title={label}>
+                  <span className="is-full">{label}</span>
+                  <span className="is-short" aria-hidden="true">{SHORT_LABELS[label] ?? label}</span>
+                </strong>
                 <span
                   className="automatic-assignment-effort"
                   role="group"
