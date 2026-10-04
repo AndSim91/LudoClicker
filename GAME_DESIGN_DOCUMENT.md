@@ -4165,7 +4165,12 @@ suo inizio non c'è una spada disponibile.
 Decisione del 03/10 (piano 4.2). Scene a schermo che celebrano i momenti
 chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
 
-- **Nasce il Consiglio delle Onde**: il primo collaboratore;
+- **Nasce il Consiglio delle Onde**: all'ottavo collaboratore, quando si
+  sblocca la gestione per settori. Otto collaboratori sparsi prendono posto
+  intorno a un tavolo rotondo (con le loro iniziali), il tavolo si accende e
+  il Consiglio raggiunge i cinque settori di tutta la squadra. Dalla v93 chi
+  l'aveva visto al primo collaboratore senza avere ancora il Consiglio lo
+  rivede quando il Consiglio nasce;
 - **un Leggendario entra nell'Ordine**: ogni Leggendario alla sua prima
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o

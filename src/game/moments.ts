@@ -2,7 +2,7 @@ import { getCareer } from "./career";
 import type { GameState, MomentKey, SpecialCollaboratorId } from "./types";
 
 /*
- * Animated moments (4.2): the first collaborator (the Consiglio delle Onde),
+ * Animated moments (4.2): the Consiglio delle Onde (sector view, 8 collaborators),
  * the first school founded, the first win of each major tournament and each
  * Leggendario joining for the first time ever. Each plays once per save: the
  * key goes to `seen` when it is queued, the UI shows the queue and pauses.
@@ -33,7 +33,7 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
   return [
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
     ...getEverEnrolledLegendaryIds(state).map((id) => `legendary:${id}`),
-    ...(state.collaborators.length > 0 ? ["council"] : []),
+    ...(state.collaboratorManagement.aggregateViewUnlocked ? ["council"] : []),
     ...(state.network.schoolCount > 0 ? ["foundation"] : []),
   ];
 }

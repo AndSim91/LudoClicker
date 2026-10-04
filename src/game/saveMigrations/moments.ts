@@ -27,6 +27,7 @@ export function migrateMomentsState(state: MigratableState): MigratableState {
       retainedProgress: legendaryCollaborators?.retainedProgress ?? {},
     },
     collaborators: migrated.collaborators ?? [],
+    collaboratorManagement: { aggregateViewUnlocked: migrated.collaboratorManagement?.aggregateViewUnlocked === true },
     network: { schools: migrated.network?.schools ?? [] },
   } as unknown as GameState);
   return { ...migrated, moments: { seen, queue: [] } };

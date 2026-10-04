@@ -56,4 +56,26 @@ describe("moments (4.2)", () => {
     expect(migrated.moments).toEqual({ seen: ["victory:champions", "legendary:eva-parodi"], queue: [] });
     expect(migrated.legendaryCollaborators.enrollmentCounts).toEqual({ "eva-parodi": 1 });
   });
+
+  it("plays the Consiglio when the sector view unlocks, not at the first collaborator", () => {
+    const initial = createInitialState(1_000);
+    expect(queueMoments({ ...initial, collaborators: [{} as GameState["collaborators"][number]] }).moments.queue)
+      .toEqual([]);
+    const council: GameState = {
+      ...initial,
+      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+    };
+    expect(queueMoments(council).moments.queue).toEqual(["council"]);
+  });
+
+  it("lets an old save see the Consiglio again if it saw it before the sector view (v93)", () => {
+    const initial = createInitialState(1_000);
+    const early = { ...initial, version: 92, moments: { seen: ["council", "victory:national"], queue: ["council"] } };
+    expect((migrate(early) as GameState).moments).toEqual({ seen: ["victory:national"], queue: [] });
+    const formed = {
+      ...early,
+      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+    };
+    expect((migrate(formed) as GameState).moments.seen).toContain("council");
+  });
 });

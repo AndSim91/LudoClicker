@@ -9,11 +9,12 @@ import {
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency } from "../../shared/formatters";
+import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
 import { getLegendaryDossier } from "../ludowiki/ludodexPresentation";
 
 export type MomentContent =
-  | { kind: "council"; kicker: string; title: string; body: string }
+  | { kind: "council"; kicker: string; title: string; body: string; seats: string[] }
   | {
       kind: "legendary";
       kicker: string;
@@ -28,6 +29,13 @@ export type MomentContent =
   | { kind: "victory"; kicker: string; title: string; body: string; level: VictoryMomentLevel }
   | { kind: "foundation"; kicker: string; title: string; body: string; from: string; to: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
+
+/** The Consiglio is born with as many seats as collaborators unlock it. */
+export const COUNCIL_SEATS = GAME_CONFIG.collaboratorAggregateUnlockCount;
+
+function getInitials(name: string): string {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
+}
 
 const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; note: string }> = {
   national: {
@@ -72,12 +80,12 @@ function getVictoryWinners(state: GameState, level: VictoryMomentLevel): string[
 /** What a queued moment shows, read from the current state. */
 export function describeMoment(state: GameState, key: MomentKey): MomentContent {
   if (key === "council") {
-    const first = state.collaborators[0]?.displayName;
     return {
       kind: "council",
-      kicker: "Primo collaboratore",
+      kicker: "Otto collaboratori",
       title: "Nasce il Consiglio delle Onde",
-      body: `${first ? `${first} prende il primo posto al tavolo. ` : ""}Da oggi l'Ordine non lavora più da solo.`,
+      body: "Un tavolo rotondo, otto sedie, nessuno a capotavola. I collaboratori non sono più sparsi: da oggi il Consiglio guida tutta la squadra, settore per settore.",
+      seats: state.collaborators.slice(0, COUNCIL_SEATS).map((collaborator) => getInitials(collaborator.displayName)),
     };
   }
   if (key === "foundation") {

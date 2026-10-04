@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import type { GameState, MomentKey } from "../../game/types";
-import { describeMoment, type MomentContent } from "./momentContent";
+import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
 /** How long a moment plays before it closes on its own (the game stays paused meanwhile). */
 export const MOMENT_DURATION_MS = 6_500;
@@ -18,28 +18,79 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
 const DECREE_BLADES = [["is-green", -32], ["is-red", 32], ["is-white", 0]] as const;
 const SPORT_SWORD_LABEL = "Spada per combattimento sportivo";
 
-const SEATS = Array.from({ length: 12 }, (_, index) => {
-  const angle = (index / 12) * Math.PI * 2 - Math.PI / 2;
-  return { x: 200 + Math.cos(angle) * 150, y: 170 + Math.sin(angle) * 150 };
+/* Consiglio: eight scattered collaborators take their seats around one table,
+ * then the table reaches the five sectors of the whole team. */
+const COUNCIL_CENTER = { x: 200, y: 165 };
+const COUNCIL_SEAT_RADIUS = 112;
+const SCATTER = [[-40, -150], [150, -90], [130, 30], [170, 130], [-20, 150], [-190, 120], [-170, 20], [-120, -110]];
+const SECTOR_RADIUS = 152;
+const SECTOR_ARC = (Math.PI * 2) / 5;
+const SECTOR_GAP = 0.16;
+
+function polar(radius: number, angle: number) {
+  return { x: COUNCIL_CENTER.x + Math.cos(angle) * radius, y: COUNCIL_CENTER.y + Math.sin(angle) * radius };
+}
+
+function getCouncilSeats(count: number) {
+  return Array.from({ length: count }, (_, index) => {
+    const seat = polar(COUNCIL_SEAT_RADIUS, (index / count) * Math.PI * 2 - Math.PI / 2);
+    const [dx, dy] = SCATTER[index % SCATTER.length];
+    return { ...seat, fromX: dx, fromY: dy };
+  });
+}
+
+const SECTORS = Array.from({ length: 5 }, (_, index) => {
+  const start = index * SECTOR_ARC - Math.PI / 2 + SECTOR_GAP / 2;
+  const end = start + SECTOR_ARC - SECTOR_GAP;
+  const from = polar(SECTOR_RADIUS, start);
+  const to = polar(SECTOR_RADIUS, end);
+  const middle = polar(SECTOR_RADIUS - 10, (start + end) / 2);
+  const dots = [0.2, 0.4, 0.6, 0.8].map((step) => polar(SECTOR_RADIUS, start + (end - start) * step));
+  return {
+    arc: `M${from.x} ${from.y} A${SECTOR_RADIUS} ${SECTOR_RADIUS} 0 0 1 ${to.x} ${to.y}`,
+    ray: `M${COUNCIL_CENTER.x} ${COUNCIL_CENTER.y} L${middle.x} ${middle.y}`,
+    dots,
+  };
 });
 
 /* Modalità Onde art; the Outlook skin hides it and keeps the sober card. */
 function MomentArt({ content }: { content: MomentContent }) {
   if (content.kind === "council") {
+    const seats = getCouncilSeats(COUNCIL_SEATS);
     return (
-      <svg className="moment-art" viewBox="0 0 400 340" aria-hidden="true">
-        <circle className="moment-glow" cx="200" cy="170" r="165" />
-        <g className="moment-rise">
-          <circle className="moment-ring" cx="200" cy="170" r="150" />
-          <circle className="moment-table" cx="200" cy="170" r="95" />
-          <path className="moment-wave" d="M150 178 q25 -40 50 0 t50 0" />
-          <path className="moment-wave is-soft" d="M162 200 q19 -28 38 0 t38 0" />
-          {SEATS.map((seat, index) => index === 0 ? null : (
-            <circle key={index} className="moment-seat" cx={seat.x} cy={seat.y} r="9" />
+      <svg className="moment-art moment-council" viewBox="0 0 400 340" aria-hidden="true">
+        <circle className="moment-glow" cx={COUNCIL_CENTER.x} cy={COUNCIL_CENTER.y} r="165" />
+        <g className="moment-sectors">
+          {SECTORS.map((sector, index) => (
+            <g key={index} className="moment-sector" style={{ animationDelay: `${3 + index * 0.18}s` }}>
+              <path className="moment-sector-ray" d={sector.ray} />
+              <path className="moment-sector-arc" d={sector.arc} />
+              {sector.dots.map((dot, dotIndex) => (
+                <circle key={dotIndex} className="moment-sector-dot" cx={dot.x} cy={dot.y} r="3.5" />
+              ))}
+            </g>
           ))}
-          <circle className="moment-halo" cx={SEATS[0].x} cy={SEATS[0].y} r="24" />
-          <circle className="moment-seat is-on" cx={SEATS[0].x} cy={SEATS[0].y} r="11" />
         </g>
+        <g className="moment-table-group">
+          <circle className="moment-table" cx={COUNCIL_CENTER.x} cy={COUNCIL_CENTER.y} r="80" />
+          <path className="moment-wave" d="M154 172 q23 -36 46 0 t46 0" pathLength="1" />
+          <path className="moment-wave is-soft" d="M166 192 q17 -26 34 0 t34 0" pathLength="1" />
+        </g>
+        <circle className="moment-halo" cx={COUNCIL_CENTER.x} cy={COUNCIL_CENTER.y} r="80" />
+        {seats.map((seat, index) => (
+          <g
+            key={index}
+            className="moment-seat"
+            style={{
+              "--seat-from-x": `${seat.fromX}px`,
+              "--seat-from-y": `${seat.fromY}px`,
+              animationDelay: `${0.2 + index * 0.12}s`,
+            } as CSSProperties}
+          >
+            <circle cx={seat.x} cy={seat.y} r="16" />
+            <text x={seat.x} y={seat.y}>{content.seats[index] ?? ""}</text>
+          </g>
+        ))}
       </svg>
     );
   }
