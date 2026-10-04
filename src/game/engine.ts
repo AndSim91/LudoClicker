@@ -1,3 +1,5 @@
+import { processReptile } from "./reptileFlow";
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   createGameActionHandlers,
   dispatchGameAction,
@@ -29,11 +31,6 @@ import { GAME_CONFIG } from "./config";
 import { countEnrolledContacts, groupExcessMembers } from "./memberGroups";
 import { markAllMessagesRead } from "./inboxFlow";
 import { processGadgets } from "./gadgetFlow";
-import {
-  getReptileAssignedCollaboratorIds,
-  isReptilePreparationWorkActive,
-  processReptilePreparation,
-} from "./reptilePreparation";
 import {
   AUTOMATION_HEARTBEAT_MS,
   getNextGameTickAt,
@@ -176,18 +173,14 @@ function tickStep(
   // il tempo di gioco attivo trascorso con l'assegnazione corrente.
   const masteryElapsedMs = Math.max(0, now - state.automation.lastProcessedAt);
   const automationElapsedMs = Math.min(1_000, masteryElapsedMs);
-  const reptilePreparationActive = isReptilePreparationWorkActive(state);
-  const reptileCollaboratorIds = getReptileAssignedCollaboratorIds(state);
   let nextState = addAssignedCollaboratorMasteryExperience(
     state,
     masteryElapsedMs,
     now,
   );
-  nextState = processReptilePreparation(nextState, now);
-  if (!reptilePreparationActive) {
-    nextState = advanceAutomation(nextState, now, gainMultiplier);
-    nextState = processGadgets(nextState, masteryElapsedMs, now);
-  }
+  nextState = processReptile(nextState, now);
+  nextState = advanceAutomation(nextState, now, gainMultiplier);
+  nextState = processGadgets(nextState, masteryElapsedMs, now);
 
   const dueEmails = getSendingEmails(nextState.emails).filter(
     (email) => (email.sendCompletesAt ?? Infinity) <= now,
@@ -220,7 +213,6 @@ function tickStep(
     ...getPeopleInTraining(nextState.contacts),
     ...getPeopleInTraining(nextState.collaborators),
   ].flatMap((person) =>
-    !reptileCollaboratorIds.has(person.id) &&
       person.training!.status !== "waitingForEquipment" &&
       person.training!.completesAt <= now
       ? [person.id]
@@ -253,12 +245,9 @@ function tickStep(
   if (trialResolutionWork < trialsToResolve.length) return result(nextState, false);
 
   nextState = collectFees(nextState, now, gainMultiplier, wallNow);
-  if (!isReptilePreparationWorkActive(nextState)) {
-    nextState = reconcileCollaboratorManagement(nextState);
-  }
+  nextState = reconcileCollaboratorManagement(nextState);
   const automaticOperationOrder = nextState.collaboratorManagement.operationalPriorities;
   for (const role of automaticOperationOrder) {
-    if (reptilePreparationActive && role !== "instructor") continue;
     if (role === "equipment") {
       nextState = processAutomaticEquipmentRepair(nextState);
       continue;
@@ -284,7 +273,7 @@ function tickStep(
     nextState = refreshTrainingDurations(nextState, now);
     nextState = processInstructorAthleticPreparation(
       nextState,
-      automationElapsedMs,
+      automationElapsedMs * getReptileOrdinaryShare(nextState, "instructor"),
     );
   }
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
@@ -317,9 +306,7 @@ function completeTickStep(
   );
   if (!resolved.complete) return resolved;
   const recruited = recruitEnrolledLegendaryCollaborators(resolved.state, now);
-  const reconciled = isReptilePreparationWorkActive(recruited)
-    ? recruited
-    : reconcileCollaboratorManagement(recruited);
+  const reconciled = reconcileCollaboratorManagement(recruited);
   const progressed = completeShortGoal(
     queueMoments(syncYearDigest(grantAchievements(reconciled, now), now)),
     now,

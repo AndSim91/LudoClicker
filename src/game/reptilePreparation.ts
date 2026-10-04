@@ -1,41 +1,37 @@
 import { getCollaboratorProductivity } from "../content/forms";
+import { getCalendarMonth } from "./calendar";
+import { isPrimarySectorIdle } from "./collaboratorFallback";
 import { GAME_CONFIG } from "./config";
-import { getSchoolYear } from "./calendar";
+import {
+  REPTILE_ROLE_BY_SECTOR,
+  REPTILE_SECTORS,
+  getReptileSectorForRole,
+  isReptileBarOpen,
+} from "./reptileSectors";
 import type {
-  CollaboratorAssignment,
   GameState,
   ReptileActiveEdition,
+  ReptileBar,
   ReptileSector,
-  ReptileSectorAssignments,
-  ReptileSectorProgress,
 } from "./types";
 
-export const REPTILE_SECTORS: readonly ReptileSector[] = [
-  "social",
-  "equipment",
-  "gadget",
-  "events",
-];
+export { REPTILE_SECTORS, REPTILE_SECTOR_LABELS } from "./reptileSectors";
 
-export const REPTILE_SECTOR_LABELS: Record<ReptileSector, string> = {
-  social: "Social",
-  equipment: "Attrezzature",
-  gadget: "Gadget",
-  events: "Eventi",
-};
+/*
+ * Reptile preparation (rifatto, 04/10): five bars, one per sector, filled with
+ * collaborator power × game months. Each sector gives half its power to its
+ * bar (all of it when idle); people without a sector help the bar furthest
+ * behind at half value. A sector with nobody assigned does not move. The
+ * faster a bar fills, the better that sector's quality.
+ */
 
-const REPTILE_ROLE_BY_SECTOR: Record<ReptileSector, Exclude<CollaboratorAssignment, null>> = {
-  social: "writing",
-  equipment: "equipment",
-  gadget: "gadget",
-  events: "events",
-};
-
-const BASE_LOAD_BY_SECTOR: Record<ReptileSector, number> = {
-  social: 4,
-  equipment: 6,
-  gadget: 2,
-  events: 4,
+/** Work per bar with 16 teams, in collaborator power × game months. */
+export const REPTILE_BASE_LOADS: Record<ReptileSector, number> = {
+  social: 24,
+  events: 16,
+  equipment: 10,
+  instructors: 16,
+  gadget: 8,
 };
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -62,281 +58,68 @@ export function getReptileQualityLabel(quality: number): string {
   return "Eccellente";
 }
 
-export function calculateReptileMinigameModifier(
-  hits: number,
-  misses: number,
-  outsideClicks: number,
-): number {
-  const safeHits = clamp(Math.floor(hits), 0, 50);
-  const penalty = Math.min(
-    50,
-    Math.max(0, misses) * 0.5 + Math.max(0, outsideClicks),
-  );
-  return clamp(safeHits - penalty, -50, 50);
+/** Sectors with a bar: Gadget only once the Gadget area is open. */
+export function getReptilePreparationSectors(state: Pick<GameState, "unlocks">): ReptileSector[] {
+  return REPTILE_SECTORS.filter((sector) => sector !== "gadget" || state.unlocks.gadget);
 }
 
-export function getReptileAssignedCollaboratorIds(state: GameState): Set<string> {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || (edition.status !== "minigame" && edition.status !== "preparing")) {
-    return new Set();
-  }
-  return new Set(REPTILE_SECTORS.flatMap((sector) => edition.assignments[sector]));
+/** 100 when the bar filled within three game months, 50 in six, 25 in twelve. */
+export function getReptileBarQuality(bar: ReptileBar): number {
+  if (bar.completedAfterMs === undefined) return 0;
+  const excellentMs = GAME_CONFIG.reptileExcellentMonths * GAME_CONFIG.gameMonthMs;
+  return Math.round(100 * Math.min(1, excellentMs / Math.max(1, bar.completedAfterMs)));
 }
 
-export function isReptilePreparationWorkActive(state: GameState): boolean {
-  const status = state.tournaments.reptile.activeEdition?.status;
-  return status === "minigame" || status === "preparing";
+export function getReptileBaseResa(edition: ReptileActiveEdition): number {
+  const bars = Object.values(edition.bars);
+  if (bars.length === 0) return 0;
+  return bars.reduce((total, bar) => total + getReptileBarQuality(bar), 0) / bars.length;
 }
 
-function hasValidAssignments(
-  state: GameState,
-  assignments: ReptileSectorAssignments,
-): boolean {
-  const eligibleIds = state.collaborators
-    .filter((collaborator) => collaborator.assignment !== "instructor")
-    .map((collaborator) => collaborator.id);
-  const assignedIds = REPTILE_SECTORS.flatMap((sector) => assignments[sector] ?? []);
-  return REPTILE_SECTORS.every((sector) => (assignments[sector]?.length ?? 0) > 0) &&
-    assignedIds.length === eligibleIds.length &&
-    new Set(assignedIds).size === assignedIds.length &&
-    eligibleIds.every((id) => assignedIds.includes(id));
+export function isReptilePreparationComplete(edition: ReptileActiveEdition): boolean {
+  return Object.values(edition.bars).every((bar) => bar.completedAfterMs !== undefined);
 }
 
-function calculatePowerSnapshot(
-  state: GameState,
-  assignments: ReptileSectorAssignments,
-): Record<ReptileSector, number> {
-  const collaboratorsById = new Map(state.collaborators.map((entry) => [entry.id, entry]));
-  return Object.fromEntries(REPTILE_SECTORS.map((sector) => {
-    const role = REPTILE_ROLE_BY_SECTOR[sector];
-    let power = assignments[sector].reduce((total, id) => {
-      const collaborator = collaboratorsById.get(id);
-      return total + (collaborator ? getCollaboratorProductivity(collaborator, role) : 0);
-    }, 0);
-    if (sector === "social") {
-      power *= 1 + Math.min(1, Math.max(0, state.school.followers) * 0.00005);
-    }
-    return [sector, power];
-  })) as Record<ReptileSector, number>;
-}
-
-export function canStartReptilePreparation(state: GameState): boolean {
+export function canOrganizeReptile(state: GameState): boolean {
   const reptile = state.tournaments.reptile;
-  return reptile.unlocked &&
-    !reptile.activeEdition &&
-    getSchoolYear(state.school.currentMonth) >= reptile.nextPreparationSchoolYear &&
-    state.collaborators.filter((collaborator) => collaborator.assignment !== "instructor").length >= 4;
+  return reptile.unlocked && !reptile.activeEdition &&
+    state.school.euros >= GAME_CONFIG.reptileVenueCost;
 }
 
-export function startReptilePreparation(
-  state: GameState,
-  assignments: ReptileSectorAssignments,
-  now: number,
-): GameState {
-  if (!canStartReptilePreparation(state) || !hasValidAssignments(state, assignments)) return state;
-  const sectorByCollaboratorId = new Map<string, ReptileSector>();
-  for (const sector of REPTILE_SECTORS) {
-    for (const collaboratorId of assignments[sector]) sectorByCollaboratorId.set(collaboratorId, sector);
-  }
-  const previousAssignments = Object.fromEntries(
-    state.collaborators
-      .filter((collaborator) => sectorByCollaboratorId.has(collaborator.id))
-      .map((collaborator) => [collaborator.id, collaborator.assignment]),
-  );
-  const schoolYear = getSchoolYear(state.school.currentMonth);
+export function organizeReptile(state: GameState, now: number): GameState {
+  if (!canOrganizeReptile(state)) return state;
+  const teamCount = getReptileTeamCount(state.tournaments.reptile.fameXp);
+  const loadMultiplier = getReptileTeamLoadMultiplier(teamCount);
+  const bars = Object.fromEntries(getReptilePreparationSectors(state).map((sector) => [
+    sector,
+    { progress: 0, required: REPTILE_BASE_LOADS[sector] * loadMultiplier },
+  ])) as ReptileActiveEdition["bars"];
   const activeEdition: ReptileActiveEdition = {
-    id: `reptile-${schoolYear}-${now}`,
-    schoolYear,
-    teamCount: getReptileTeamCount(state.tournaments.reptile.fameXp),
-    status: "minigame",
-    startedAt: now,
+    id: `reptile-${state.school.currentMonth}-${now}`,
+    organizedAt: now,
+    organizedMonth: state.school.currentMonth,
+    teamCount,
+    elapsedMs: 0,
     lastProgressAt: now,
-    assignments: Object.fromEntries(
-      REPTILE_SECTORS.map((sector) => [sector, [...assignments[sector]]]),
-    ) as ReptileSectorAssignments,
-    powerSnapshot: calculatePowerSnapshot(state, assignments),
-    previousAssignments,
-    minigame: {
-      status: "ready",
-      hits: 0,
-      misses: 0,
-      outsideClicks: 0,
-      modifierPercent: 0,
-    },
-    presentationStep: 0,
+    bars,
+    minigame: { status: "ready", score: 0, available: 0, bonusPercent: 0 },
   };
   return {
     ...state,
-    collaborators: state.collaborators.map((collaborator) => {
-      const sector = sectorByCollaboratorId.get(collaborator.id);
-      return sector ? { ...collaborator, assignment: REPTILE_ROLE_BY_SECTOR[sector] } : collaborator;
-    }),
+    school: { ...state.school, euros: state.school.euros - GAME_CONFIG.reptileVenueCost },
     tournaments: {
       ...state.tournaments,
-      reptile: {
-        ...state.tournaments.reptile,
-        activeEdition,
-        latestRecap: undefined,
-      },
+      reptile: { ...state.tournaments.reptile, activeEdition },
     },
   };
 }
 
-export function startReptileMinigame(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "minigame" || edition.minigame.status !== "ready") return state;
-  return updateActiveEdition(state, {
-    ...edition,
-    minigame: { ...edition.minigame, status: "running", startedAt: now },
-  });
-}
-
-function calculateSectorProgress(
-  state: GameState,
-  edition: ReptileActiveEdition,
-  modifierPercent: number,
-): Record<ReptileSector, ReptileSectorProgress> {
-  const loadMultiplier = getReptileTeamLoadMultiplier(edition.teamCount);
-  const powers = edition.powerSnapshot;
-  const loads = Object.fromEntries(
-    REPTILE_SECTORS.map((sector) => [sector, BASE_LOAD_BY_SECTOR[sector] * loadMultiplier]),
-  ) as Record<ReptileSector, number>;
-  const ratios = Object.fromEntries(
-    REPTILE_SECTORS.map((sector) => [sector, powers[sector] / loads[sector]]),
-  ) as Record<ReptileSector, number>;
-  const rawQualities = Object.fromEntries(
-    REPTILE_SECTORS.map((sector) => [sector, clamp(ratios[sector] * 50, 0, 100)]),
-  ) as Record<ReptileSector, number>;
-  const coordination = 0.5 + Math.min(...Object.values(rawQualities)) / 200;
-  const coordinatedEventsQuality = rawQualities.events * coordination;
-  const eventBoost = 1 + coordinatedEventsQuality / 200;
-  const minigameMultiplier = 1 + modifierPercent / 100;
-
-  return Object.fromEntries(REPTILE_SECTORS.map((sector) => {
-    const sectorEventBoost = sector === "events" ? 1 : eventBoost;
-    const quality = clamp(
-      rawQualities[sector] * coordination * sectorEventBoost * minigameMultiplier,
-      0,
-      100,
-    );
-    const durationMs = GAME_CONFIG.gameMonthMs * GAME_CONFIG.reptileBasePreparationMonths /
-      Math.max(0.001, ratios[sector] * coordination * sectorEventBoost * minigameMultiplier);
-    return [sector, {
-      assignedCollaboratorIds: [...edition.assignments[sector]],
-      load: loads[sector],
-      effectivePower: powers[sector],
-      rawQuality: rawQualities[sector],
-      quality,
-      durationMs,
-      progress: 0,
-    }];
-  })) as Record<ReptileSector, ReptileSectorProgress>;
-}
-
-function beginTimedPreparation(
-  state: GameState,
-  minigame: ReptileActiveEdition["minigame"],
-  now: number,
-): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "minigame") return state;
-  const preparedEdition: ReptileActiveEdition = {
-    ...edition,
-    status: "preparing",
-    lastProgressAt: now,
-    minigame,
-    sectors: calculateSectorProgress(state, edition, minigame.modifierPercent),
-  };
-  return updateActiveEdition(state, preparedEdition);
-}
-
-export function completeReptileMinigame(
-  state: GameState,
-  hits: number,
-  misses: number,
-  outsideClicks: number,
-  now: number,
-): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "minigame" || edition.minigame.status !== "running") return state;
-  const safeHits = clamp(Math.floor(hits), 0, 50);
-  const safeMisses = clamp(Math.floor(misses), 0, 50 - safeHits);
-  return beginTimedPreparation(state, {
-    status: "completed",
-    startedAt: edition.minigame.startedAt,
-    hits: safeHits,
-    misses: safeMisses,
-    outsideClicks: Math.max(0, Math.floor(outsideClicks)),
-    modifierPercent: calculateReptileMinigameModifier(safeHits, safeMisses, outsideClicks),
-  }, now);
-}
-
-export function skipReptileMinigame(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "minigame" || edition.minigame.status !== "ready") return state;
-  return beginTimedPreparation(state, {
-    status: "skipped",
-    hits: 0,
-    misses: 0,
-    outsideClicks: 0,
-    modifierPercent: 0,
-  }, now);
-}
-
-function restoreCollaborators(
-  state: GameState,
-  edition: ReptileActiveEdition,
-  now: number,
-): GameState["collaborators"] {
-  const pausedDuration = Math.max(0, now - edition.startedAt);
-  return state.collaborators.map((collaborator) => {
-    const previous = edition.previousAssignments[collaborator.id];
-    if (previous === undefined && !(collaborator.id in edition.previousAssignments)) return collaborator;
-    return {
-      ...collaborator,
-      assignment: previous,
-      training: collaborator.training
-        ? {
-            ...collaborator.training,
-            startedAt: collaborator.training.startedAt + pausedDuration,
-            completesAt: collaborator.training.completesAt + pausedDuration,
-          }
-        : undefined,
-    };
-  });
-}
-
-export function processReptilePreparation(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "preparing" || !edition.sectors) return state;
-  const elapsed = Math.max(0, now - edition.lastProgressAt);
-  if (elapsed <= 0) return state;
-  const sectors = Object.fromEntries(REPTILE_SECTORS.map((sector) => {
-    const current = edition.sectors![sector];
-    return [sector, {
-      ...current,
-      progress: clamp(current.progress + elapsed / current.durationMs, 0, 1),
-    }];
-  })) as Record<ReptileSector, ReptileSectorProgress>;
-  const complete = REPTILE_SECTORS.every((sector) => sectors[sector].progress >= 1);
-  const nextEdition: ReptileActiveEdition = {
-    ...edition,
-    status: complete ? "ready" : "preparing",
-    lastProgressAt: now,
-    sectors,
-  };
-  const updated = updateActiveEdition(state, nextEdition);
-  return complete ? { ...updated, collaborators: restoreCollaborators(updated, edition, now) } : updated;
-}
-
-export function cancelReptilePreparation(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status === "booked" || edition.status === "presenting") return state;
+export function cancelReptile(state: GameState): GameState {
+  if (!state.tournaments.reptile.activeEdition) return state;
+  const refund = Math.round(GAME_CONFIG.reptileVenueCost * GAME_CONFIG.reptileCancelRefundShare);
   return {
     ...state,
-    collaborators: edition.status === "ready"
-      ? state.collaborators
-      : restoreCollaborators(state, edition, now),
+    school: { ...state.school, euros: state.school.euros + refund },
     tournaments: {
       ...state.tournaments,
       reptile: { ...state.tournaments.reptile, activeEdition: undefined },
@@ -344,40 +127,215 @@ export function cancelReptilePreparation(state: GameState, now: number): GameSta
   };
 }
 
-export function getNextReptileJuly(currentMonth: number): number {
-  const calendarMonth = ((Math.max(1, Math.floor(currentMonth)) - 1) % 12) + 1;
-  return calendarMonth === 7 ? currentMonth : currentMonth + ((7 - calendarMonth + 12) % 12);
+export interface ReptileBarRate {
+  /** Power per game month going into the bar. */
+  rate: number;
+  /** Collaborators assigned to the sector. */
+  assigned: number;
+  /** Of them, idle and giving everything. */
+  idle: number;
+  /** Collaborators without a sector helping this bar. */
+  helpers: number;
 }
 
-export function bookReptileVenue(state: GameState, now: number): GameState {
+/** Live power going into each open bar. */
+export function getReptileBarRates(state: GameState): Partial<Record<ReptileSector, ReptileBarRate>> {
   const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "ready" || state.school.euros < GAME_CONFIG.reptileVenueCost) {
-    return state;
+  if (!edition) return {};
+  const rates: Partial<Record<ReptileSector, ReptileBarRate>> = {};
+  for (const sector of Object.keys(edition.bars) as ReptileSector[]) {
+    if (isReptileBarOpen(state, sector)) rates[sector] = { rate: 0, assigned: 0, idle: 0, helpers: 0 };
   }
-  return {
-    ...state,
-    school: { ...state.school, euros: state.school.euros - GAME_CONFIG.reptileVenueCost },
-    tournaments: {
-      ...state.tournaments,
-      reptile: {
-        ...state.tournaments.reptile,
-        activeEdition: {
-          ...edition,
-          status: "booked",
-          bookedAt: now,
-          scheduledMonth: getNextReptileJuly(state.school.currentMonth),
-        },
-      },
-    },
-  };
+  let unassignedPower = 0;
+  let unassignedCount = 0;
+  for (const collaborator of state.collaborators) {
+    if (!collaborator.assignment) {
+      unassignedPower += getCollaboratorProductivity(collaborator, null) * GAME_CONFIG.reptileUnassignedShare;
+      unassignedCount += 1;
+      continue;
+    }
+    const sector = getReptileSectorForRole(collaborator.assignment);
+    const entry = sector ? rates[sector] : undefined;
+    if (!sector || !entry) continue;
+    const idle = isPrimarySectorIdle(state, collaborator);
+    entry.assigned += 1;
+    if (idle) entry.idle += 1;
+    entry.rate += getCollaboratorProductivity(collaborator, REPTILE_ROLE_BY_SECTOR[sector]) *
+      (idle ? 1 : GAME_CONFIG.reptilePreparationShare);
+  }
+  if (unassignedPower > 0) {
+    const behind = (Object.keys(rates) as ReptileSector[])
+      .filter((sector) => rates[sector]!.assigned > 0)
+      .sort((left, right) => {
+        const a = edition.bars[left]!;
+        const b = edition.bars[right]!;
+        return a.progress / a.required - b.progress / b.required;
+      })[0];
+    if (behind) {
+      rates[behind]!.rate += unassignedPower;
+      rates[behind]!.helpers = unassignedCount;
+    }
+  }
+  return rates;
 }
 
-function updateActiveEdition(state: GameState, activeEdition: ReptileActiveEdition): GameState {
+/** Game months still needed by a bar at the current pace (Infinity if stuck). */
+export function getReptileBarMonthsLeft(bar: ReptileBar, rate: number | undefined): number {
+  if (bar.completedAfterMs !== undefined) return 0;
+  if (!rate || rate <= 0) return Infinity;
+  return Math.max(0, bar.required - bar.progress) / rate;
+}
+
+export function processReptilePreparation(state: GameState, now: number): GameState {
+  const edition = state.tournaments.reptile.activeEdition;
+  if (!edition) return state;
+  const elapsed = Math.max(0, now - edition.lastProgressAt);
+  if (elapsed <= 0) return state;
+  // A running «giornata degli imprevisti» pauses the game: no progress meanwhile.
+  const rates = getReptileBarRates(state);
+  const months = elapsed / GAME_CONFIG.gameMonthMs;
+  const bars = { ...edition.bars };
+  for (const sector of Object.keys(rates) as ReptileSector[]) {
+    const bar = bars[sector]!;
+    const rate = rates[sector]!.rate;
+    if (rate <= 0) continue;
+    const progress = bar.progress + rate * months;
+    if (progress < bar.required) {
+      bars[sector] = { ...bar, progress };
+      continue;
+    }
+    const neededMs = ((bar.required - bar.progress) / rate) * GAME_CONFIG.gameMonthMs;
+    bars[sector] = {
+      ...bar,
+      progress: bar.required,
+      completedAfterMs: Math.max(1, Math.round(edition.elapsedMs + neededMs)),
+    };
+  }
+  return updateEdition(state, {
+    ...edition,
+    bars,
+    elapsedMs: edition.elapsedMs + elapsed,
+    lastProgressAt: now,
+  });
+}
+
+export function calculateReptileMinigameBonus(score: number, available: number): number {
+  if (!(available > 0) || !(score > 0)) return 0;
+  const share = Math.min(1, score / (GAME_CONFIG.reptileMinigameFullScoreShare * available));
+  return Math.round(GAME_CONFIG.reptileMinigameMaxBonusPercent * share);
+}
+
+export function startReptileMinigame(state: GameState, now: number): GameState {
+  const edition = state.tournaments.reptile.activeEdition;
+  if (!edition || edition.minigame.status !== "ready") return state;
+  return updateEdition(state, {
+    ...edition,
+    minigame: { ...edition.minigame, status: "running", startedAt: now },
+  });
+}
+
+/** The only attempt ends: the score and the perfect day's score come from the board. */
+export function completeReptileMinigame(
+  state: GameState,
+  score: number,
+  available: number,
+): GameState {
+  const edition = state.tournaments.reptile.activeEdition;
+  if (!edition || edition.minigame.status !== "running") return state;
+  const safeAvailable = Number.isFinite(available) ? clamp(available, 0, 5_000) : 0;
+  // Nobody beats the perfect day.
+  const safeScore = Number.isFinite(score) ? clamp(score, 0, safeAvailable) : 0;
+  return updateEdition(state, {
+    ...edition,
+    minigame: {
+      ...edition.minigame,
+      status: "completed",
+      score: safeScore,
+      available: safeAvailable,
+      bonusPercent: calculateReptileMinigameBonus(safeScore, safeAvailable),
+    },
+  });
+}
+
+export function isJuly(currentMonth: number): boolean {
+  return getCalendarMonth(currentMonth) === 7;
+}
+
+function updateEdition(state: GameState, activeEdition: ReptileActiveEdition): GameState {
   return {
     ...state,
     tournaments: {
       ...state.tournaments,
       reptile: { ...state.tournaments.reptile, activeEdition },
     },
+  };
+}
+
+export interface ReptileBarOutlook {
+  sector: ReptileSector;
+  bar: ReptileBar;
+  share: number;
+  rate: ReptileBarRate;
+  monthsLeft: number;
+  /** Quality now if complete, otherwise at the current pace (0 if stuck). */
+  quality: number;
+  stuck: boolean;
+}
+
+export interface ReptileOutlook {
+  bars: ReptileBarOutlook[];
+  complete: boolean;
+  /** Absolute month when the last bar fills (undefined if a bar is stuck). */
+  readyMonth?: number;
+  /** Absolute month of the tournament at the current pace. */
+  tournamentMonth?: number;
+  projectedResa: number;
+}
+
+/** First July at or after a month, skipping one that already had its Reptile. */
+export function getNextReptileJuly(month: number, lastTournamentMonth?: number): number {
+  let july = month + ((7 - getCalendarMonth(month) + 12) % 12);
+  if (july === lastTournamentMonth) july += 12;
+  return july;
+}
+
+export function getReptileOutlook(state: GameState): ReptileOutlook | undefined {
+  const edition = state.tournaments.reptile.activeEdition;
+  if (!edition) return undefined;
+  const rates = getReptileBarRates(state);
+  const elapsedMonths = edition.elapsedMs / GAME_CONFIG.gameMonthMs;
+  const bars = (Object.entries(edition.bars) as [ReptileSector, ReptileBar][]).map(([sector, bar]) => {
+    const rate = rates[sector] ?? { rate: 0, assigned: 0, idle: 0, helpers: 0 };
+    const monthsLeft = getReptileBarMonthsLeft(bar, rate.rate);
+    const quality = bar.completedAfterMs !== undefined
+      ? getReptileBarQuality(bar)
+      : Number.isFinite(monthsLeft)
+        ? Math.round(100 * Math.min(1, GAME_CONFIG.reptileExcellentMonths / Math.max(0.001, elapsedMonths + monthsLeft)))
+        : 0;
+    return {
+      sector,
+      bar,
+      share: Math.min(1, bar.progress / bar.required),
+      rate,
+      monthsLeft,
+      quality,
+      stuck: !Number.isFinite(monthsLeft),
+    };
+  });
+  const complete = bars.every((entry) => entry.bar.completedAfterMs !== undefined);
+  const slowest = Math.max(0, ...bars.map((entry) => entry.monthsLeft));
+  const readyMonth = Number.isFinite(slowest)
+    ? state.school.currentMonth + Math.ceil(slowest)
+    : undefined;
+  return {
+    bars,
+    complete,
+    readyMonth,
+    tournamentMonth: readyMonth === undefined
+      ? undefined
+      : getNextReptileJuly(readyMonth, state.tournaments.reptile.lastTournamentMonth),
+    projectedResa: bars.length === 0
+      ? 0
+      : Math.round(bars.reduce((total, entry) => total + entry.quality, 0) / bars.length),
   };
 }

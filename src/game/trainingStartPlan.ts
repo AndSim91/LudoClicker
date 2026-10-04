@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   AGONIST_COURSE_ID,
   canTrainForm,
@@ -293,7 +294,8 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     const baseDuration = agonistCourseUnlocked
       ? GAME_CONFIG.agonistCourseDurationMs
       : getTechnicalArenaDurationMs(arenaLevel);
-    const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
+    const trainingSpeed = getCollaboratorProductivity(instructor, "instructor") *
+      getReptileOrdinaryShare(this.state, "instructor");
     const training = scheduleTraining(
       this.state,
       personId,
@@ -393,7 +395,8 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         collaborator.id,
         this.now,
         getInstructorQualificationDuration(definition.durationMs) /
-          getCollaboratorProductivity(collaborator, "instructor"),
+          (getCollaboratorProductivity(collaborator, "instructor") *
+            getReptileOrdinaryShare(this.state, "instructor")),
         {
           formId,
           status: "running",
@@ -481,7 +484,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       : 1;
     const trainingSpeed = trainingInstructor
       ? getCollaboratorProductivity(trainingInstructor, "instructor") *
-        instructorTeachingSpeed
+        instructorTeachingSpeed * getReptileOrdinaryShare(this.state, "instructor")
       : 1;
     const training = scheduleTraining(
       this.state,

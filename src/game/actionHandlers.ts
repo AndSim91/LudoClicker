@@ -46,19 +46,12 @@ import {
   startGadgetRevision,
 } from "./gadgetFlow";
 import {
-  bookReptileVenue,
-  cancelReptilePreparation,
+  cancelReptile,
   completeReptileMinigame,
-  skipReptileMinigame,
+  organizeReptile,
   startReptileMinigame,
-  startReptilePreparation,
-  isReptilePreparationWorkActive,
 } from "./reptilePreparation";
-import {
-  advanceReptilePresentation,
-  skipReptilePresentation,
-  startReptileTournamentIfDue,
-} from "./reptileFlow";
+import { dismissReptileRecap, holdReptileTournamentIfDue } from "./reptileFlow";
 
 type ActionType = GameAction["type"];
 type ActionByType<Type extends ActionType> = Extract<GameAction, { type: Type }>;
@@ -188,21 +181,19 @@ export function createGameActionHandlers(
     ),
     MAINTAIN_EQUIPMENT: (state) => maintainEquipment(state),
     BUY_OFFICIAL_SWORD: (state, action) => buyOfficialSword(state, action.amount),
-    ASSIGN_COLLABORATOR: (state, action) => isReptilePreparationWorkActive(state)
-      ? state
-      : assignCollaborator(
+    ASSIGN_COLLABORATOR: (state, action) => assignCollaborator(
       state,
       action.collaboratorId,
       action.assignment,
       action.now,
     ),
     INCREMENT_COLLABORATOR_ASSIGNMENT: (state, action) =>
-      isReptilePreparationWorkActive(state) ? state : incrementCollaboratorAssignment(
+      incrementCollaboratorAssignment(
         state,
         action.assignment,
       ),
     DECREMENT_COLLABORATOR_ASSIGNMENT: (state, action) =>
-      isReptilePreparationWorkActive(state) ? state : decrementCollaboratorAssignment(
+      decrementCollaboratorAssignment(
       state,
       action.assignment,
     ),
@@ -276,29 +267,18 @@ export function createGameActionHandlers(
       action.choice,
       action.now,
     ),
-    START_REPTILE_PREPARATION: (state, action) => startReptilePreparation(
-      state,
-      action.assignments,
+    ORGANIZE_REPTILE: (state, action) => holdReptileTournamentIfDue(
+      organizeReptile(state, action.now),
       action.now,
     ),
+    CANCEL_REPTILE: (state) => cancelReptile(state),
     START_REPTILE_MINIGAME: (state, action) => startReptileMinigame(state, action.now),
     COMPLETE_REPTILE_MINIGAME: (state, action) => completeReptileMinigame(
       state,
-      action.hits,
-      action.misses,
-      action.outsideClicks,
-      action.now,
+      action.score,
+      action.available,
     ),
-    SKIP_REPTILE_MINIGAME: (state, action) => skipReptileMinigame(state, action.now),
-    CANCEL_REPTILE_PREPARATION: (state, action) => cancelReptilePreparation(state, action.now),
-    BOOK_REPTILE_VENUE: (state, action) => startReptileTournamentIfDue(
-      bookReptileVenue(state, action.now),
-      action.now,
-    ),
-    ADVANCE_REPTILE_PRESENTATION: (state, action) =>
-      advanceReptilePresentation(state, action.now),
-    SKIP_REPTILE_PRESENTATION: (state, action) =>
-      skipReptilePresentation(state, action.now),
+    DISMISS_REPTILE_RECAP: (state) => dismissReptileRecap(state),
   };
 }
 

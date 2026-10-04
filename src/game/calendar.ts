@@ -55,3 +55,8 @@ export function isSchoolYearDepartureMonth(currentMonth: number): boolean {
   const monthIndex = (Math.max(1, Math.floor(currentMonth)) - 1) % GAME_MONTH_NAMES.length;
   return monthIndex === 5;
 }
+
+/** 1 = Gennaio … 12 = Dicembre. */
+export function getCalendarMonth(currentMonth: number): number {
+  return ((Math.max(1, Math.floor(currentMonth)) - 1) % GAME_MONTH_NAMES.length) + 1;
+}

@@ -115,12 +115,8 @@ export function rebaseGameTimeline(
         activeEdition: state.tournaments.reptile.activeEdition
           ? {
               ...state.tournaments.reptile.activeEdition,
-              startedAt: state.tournaments.reptile.activeEdition.startedAt + offsetMs,
+              organizedAt: state.tournaments.reptile.activeEdition.organizedAt + offsetMs,
               lastProgressAt: state.tournaments.reptile.activeEdition.lastProgressAt + offsetMs,
-              bookedAt: shiftOptional(
-                state.tournaments.reptile.activeEdition.bookedAt,
-                offsetMs,
-              ),
               minigame: {
                 ...state.tournaments.reptile.activeEdition.minigame,
                 startedAt: shiftOptional(
@@ -128,13 +124,6 @@ export function rebaseGameTimeline(
                   offsetMs,
                 ),
               },
-              result: state.tournaments.reptile.activeEdition.result
-                ? {
-                    ...state.tournaments.reptile.activeEdition.result,
-                    completedAt:
-                      state.tournaments.reptile.activeEdition.result.completedAt + offsetMs,
-                  }
-                : undefined,
             }
           : undefined,
         latestRecap: state.tournaments.reptile.latestRecap

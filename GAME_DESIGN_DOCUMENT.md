@@ -315,7 +315,7 @@ usati per:
 - corsi di Forma, qualifiche da Istruttore e Tecnico, Arena tecnica e Corso
   Agonisti;
 - progetti e produzione di Gadget;
-- sede e noleggio spade per il torneo Reptile.
+- palazzetto del torneo Reptile.
 
 > **Da implementare:** le campagne social a pagamento e gli strumenti amministrativi acquistabili non esistono: il Social avanza solo tramite collaboratori e potenziamenti.
 
@@ -3215,7 +3215,8 @@ email, prove programmate, eventi in corso, attese degli eventi in tempo reale e
 prossimo evento narrativo. Sviluppo e vendite Gadget ripartono dal momento del
 caricamento.
 
-> **Da implementare:** la preparazione del Torneo Reptile non viene congelata alla chiusura: il suo ultimo avanzamento (`lastProgressAt`) non viene spostato, quindi al primo aggiornamento dopo il caricamento i settori avanzano anche per il tempo in cui il gioco era chiuso.
+Si spostano anche le barre del Torneo Reptile (`organizedAt`, `lastProgressAt`),
+che quindi non avanzano a gioco chiuso.
 
 ### 18.2 Limiti
 
@@ -3495,148 +3496,165 @@ scuole fondate. Gli effetti crescono per livello: +20% di velocità o capacità,
 
 ### 20.1 Identità, sblocco e calendario
 
-Il **Torneo Reptile** è il primo torneo Open organizzato dalla scuola di
-Genova. Non appartiene alla progressione Rated tra Nazionale e Champion's. Si
-sblocca quando, nella stessa edizione del Torneo Nazionale, atleti della scuola
-vincono sia Arena sia Stile.
+Il **Torneo Reptile** è il primo torneo Open organizzato dalla scuola. Non
+appartiene alla progressione Rated tra Nazionale e Champion's. Si sblocca
+quando, nella stessa edizione del Torneo Nazionale, atleti della scuola vincono
+sia Arena sia Stile.
 
-La preparazione può iniziare in qualunque mese, ma una nuova edizione può
-essere disputata una sola volta per anno scolastico. Quando tutti i settori
-hanno terminato, il giocatore deve prenotare il palazzetto pagando subito
-10.000 €. La prenotazione non è rimborsabile e non può essere annullata. Se il
-mese corrente è luglio il torneo parte subito; altrimenti viene fissato al
-luglio successivo. Partecipanti e spade sono fotografati soltanto all'avvio
-effettivo, dopo le partenze annuali di giugno. Conclusa l'edizione, la prossima
-preparazione è disponibile dal settembre seguente.
+Rifatto il 04/10 per essere meno macchinoso: una sola pagina (Tornei › Open ›
+Reptile) con tre momenti, **organizza**, **si prepara da solo**, **il giorno
+del torneo**, senza schede a passi, menu per collaboratore né prenotazioni a
+parte.
 
-Per avviare la preparazione servono almeno 4 Collaboratori non Istruttori.
-Finché il palazzetto non è prenotato, la preparazione può essere annullata: i
-Collaboratori tornano agli incarichi precedenti e non c'è alcun costo.
+- **Organizzare** si può in qualunque mese, anche a luglio, con un clic:
+  si pagano subito i **10.000 €** del palazzetto. Nessun collaboratore cambia
+  incarico.
+- **Annullare** si può in qualunque momento prima del torneo, con un rimborso
+  del **50%** (5.000 €).
+- Il torneo si gioca **a luglio**, appena tutte le barre di preparazione sono
+  piene: all'inizio di luglio se lo erano già, oppure nel momento in cui si
+  riempiono durante luglio. Se a fine luglio non sono piene, slitta al **luglio
+  successivo**. Si gioca **un Reptile per luglio** (`lastTournamentMonth`):
+  organizzato di nuovo subito dopo, vale per il luglio dopo.
 
-### 20.2 Preparazione coordinata
+Codice: `reptileSectors.ts` (settori e quota del lavoro), `reptilePreparation.ts`
+(barre, resa prevista, minigioco), `reptileFlow.ts` (torneo e premi),
+`reptileSimulation.ts` (resa, squadre e partite). Interfaccia in
+`features/tournaments/ReptileView.tsx`, `ReptileIncidentsLayer.tsx`,
+`ReptileDayLayer.tsx`, stile in `styles/reptile.css`.
 
-Tutti i Collaboratori non assegnati come Istruttori devono essere distribuiti
-fra Social, Attrezzature, Gadget ed Eventi, con almeno una persona per settore.
-Gli incarichi ordinari si fermano fino al termine della preparazione; al 100%
-di tutti e quattro i settori vengono ripristinati. Potenza, Maestria, rarità e
-bonus di Forma sono fotografati all'avvio; i miglioramenti ottenuti durante il
-lavoro valgono dall'edizione successiva. Durante la preparazione gli
-incarichi dei Collaboratori non possono essere modificati.
+### 20.2 Preparazione: cinque barre
 
-La potenza di un settore è la somma della produttività dei Collaboratori
-assegnati, calcolata sull'incarico corrispondente (Social usa la Redazione).
-La potenza Social è inoltre moltiplicata per `1 + min(1, follower × 0,00005)`,
-cioè fino al doppio con 20.000 follower.
+Ogni settore della scuola ha una **barra** da riempire, con un compito e un
+carico suo:
 
-I carichi base con 16 team sono rispettivamente 4, 6, 2 e 4. Il moltiplicatore
-del carico vale ×1 / ×1,5 / ×2 / ×2,5 / ×3 / ×3,5 per 16 / 32 / 64 / 128 /
-256 / 512 team. Indicando con `R = potenza / carico`:
+| Settore | Compito nel torneo | Carico con 16 squadre |
+|---|---|---|
+| Social (Redazione) | fa conoscere il torneo e porta follower | 24 |
+| Eventi | logistica: accrediti, orari, tribune | 16 |
+| Attrezzature | spade, tavoli, sedie, nastro delle arene | 10 |
+| Istruttori | coordinano tutto e preparano gli arbitri | 16 |
+| Gadget | gadget dell'evento e trofei (solo se l'area Gadget è aperta) | 8 |
+
+Il carico è in potenza dei collaboratori × mesi di gioco e cresce con le
+squadre: ×1 / ×1,5 / ×2 / ×2,5 / ×3 / ×3,5 per 16 / 32 / 64 / 128 / 256 / 512.
+
+- Finché la sua barra non è piena, ogni settore dà al torneo **il 50%** della
+  sua forza e lavora a metà sul lavoro normale (Redazione con Flusso e Frase
+  perfetta, eventi, produzione Gadget, riparazioni, e per gli Istruttori
+  formazioni avviate in quel periodo e Preparazione atletica). Chi è **fermo**
+  (lo stesso criterio di «Turni e precedenza»: settore senza lavoro, Istruttori
+  giudicati persona per persona) dà **tutto** alla barra e non aiuta altri
+  settori.
+- I collaboratori **senza incarico** aiutano la barra più indietro, ma valgono
+  il **50%** della loro forza. Non aiutano mai una barra senza nessuno
+  assegnato: **un settore vuoto non avanza** e il torneo non può partire. La
+  pagina lo segnala in rosso.
+- Una barra piena libera subito il suo settore, che torna al 100%.
+- A gioco chiuso o in pausa le barre restano ferme (`freezeGameState`).
+
+La pagina mostra per ogni barra percentuale, chi ci lavora, quando sarà piena
+al ritmo attuale, e in alto quando saranno piene tutte, la resa prevista e il
+mese del torneo.
+
+### 20.3 Resa del torneo
+
+La **qualità di una barra** dipende dalla velocità: 100 se piena in 3 mesi di
+gioco, poi `100 × 3 / mesi impiegati` (6 mesi = 50, 12 mesi = 25). La **resa
+della preparazione** è la media delle barre. Il giorno del torneo:
 
 ```text
-qualitàGrezza = clamp(50 × R, 0, 100)
-coordinamento = 0,5 + qualitàGrezzaPeggiore / 200
-bonusEventi = 1 + qualitàEventiCoordinata / 200
-durataBase = 6 mesi di gioco / R
-qualità = clamp(qualitàGrezza × coordinamento × bonusEventi × (1 + modificatore), 0, 100)
-durata = durataBase / (coordinamento × bonusEventi × (1 + modificatore))
+resa = min(100, preparazione × (1 + bonus imprevisti))
+       × (1 − 50% × spade mancanti / spade richieste)
 ```
 
-Il coordinamento modifica qualità e velocità di tutti. Il bonus Eventi si
-applica a Social, Attrezzature e Gadget, ma non a Eventi stesso. La qualità
-finale resta fra 0 e 100 ed è descritta come Disastroso, Insufficiente,
-Adeguato, Buono o Eccellente a intervalli di 20 punti. Il tempo impiegato non
-riduce la qualità: un settore debole procede più lentamente e costituisce il
-collo di bottiglia condiviso.
+Servono **2 spade libere per squadra**, ospiti comprese; contano le spade
+**disponibili** quel giorno, non quelle possedute. Ogni spada che manca abbassa
+la resa, fino a metà senza spade: il torneo si gioca comunque e, perdendo Fama,
+torna a dimensioni sostenibili. Le spade della scuola usate prendono 20 punti di
+usura ciascuna. Niente più noleggio. Dalla resa escono tutti i risultati:
 
-### 20.3 Mini-gioco di coordinamento
+- **Fama del Reptile**: `10 × resa − 500` (da −500 a +500);
+- **banchetto**: `squadre × 1.000 € × resa / 100`;
+- **follower**: `squadre × resa / 100`;
+- **coppie di casa**: `2 + (squadre / 2 − 2) × resa / 100`, entro le coppie
+  formabili con iscritti che hanno la Forma 1; la resa sposta anche la scelta
+  dalla sorte verso gli atleti migliori.
 
-Prima dell'avanzamento temporale il giocatore può saltare il mini-gioco con
-modificatore 0 oppure affrontare un unico tentativo di 30 secondi. Appaiono 50
-cerchi, al massimo tre contemporaneamente e senza sovrapposizioni:
+### 20.4 La giornata degli imprevisti (minigioco)
 
-- cerchio colpito: +1%;
-- cerchio scaduto: −0,5%;
-- click o tap nell'area di gioco ma fuori dai cerchi: −1%;
-- penalità complessive limitate a −50%; risultato finale fra −50% e +50%.
+Il preside scende in palazzetto dalle 9 alle 19 e aiuta i collaboratori a
+risolvere i guai: è slegato dalle barre e può solo **alzare la resa**, fino a
+**+25%**. Si gioca **una sola volta per torneo**, quando si vuole tra
+l'organizzazione e il torneo; a giugno arriva un promemoria se non è ancora
+stato giocato. Accanto a «Gioca» c'è **«Tutorial»**: una giornata guidata, un
+tipo di imprevisto alla volta e poi 8 secondi liberi, ripetibile e senza
+punteggio.
 
-Il modificatore moltiplica sia velocità sia qualità di ogni settore. Perdita
-del focus o cambio scheda mette in pausa la prova; la ripresa usa tre secondi
-di conto alla rovescia. Abbandono o reload trasformano tutti i cerchi rimasti
-in errori. Click sull'interfaccia esterna all'area non producono penalità.
-
-### 20.4 Fama e partecipazione
-
-La fama del Reptile usa XP separati dalla fama della scuola, parte da 0 ed è
-limitata a 3.000. I livelli 0–5 richiedono intervalli di 500 XP e generano
-rispettivamente 16, 32, 64, 128, 256 e 512 team. Social seleziona linearmente
-da un minimo di due team di Genova fino a metà del tabellone, sempre entro le
-coppie realmente formabili con iscritti attivi che possiedono Forma 1. Eventi
-sposta la selezione da casuale verso i migliori atleti, valutati al 50% Arena e
-50% Stile: ogni atleta ha peso `1 + qualitàEventi/100 × forza × 9`, dove la
-forza va da 0 (ultimo) a 1 (migliore); con Eventi al 100% vengono presi
-direttamente i migliori. Le coppie di Genova sono costruite in modo equilibrato
-ma non perfettamente deterministico: la metà più forte viene abbinata alla metà
-più debole in ordine inverso, con scambi casuali fra posizioni vicine. Ogni
-team esterno contiene due atleti della stessa scuola.
-
-Al termine, Social, Gadget ed Eventi assegnano `2 × qualità − 100` punti;
-Attrezzature assegna `4 × qualità − 200`. La somma, arrotondata una sola volta,
-può variare da −500 a +500 e viene applicata soltanto alla conclusione.
-Attrezzature usa prima `qualità × min(1, spadeLibere / spadeRichieste)`.
+- 30 secondi a schermo intero, gioco in pausa; pausa automatica se si cambia
+  scheda o finestra. Ricaricare la pagina chiude il tentativo con i punti fatti
+  fin lì.
+- Pianta del palazzetto con una zona per settore e tre arene al centro. Le
+  segnalazioni portano il nome di un vero collaboratore del settore.
+- Imprevisto: un clic prima che l'anello si svuoti (vita 2,6 → 1,5 s, ritmo che
+  sale tra accrediti, gironi e fase finale, fino a 7 insieme). **Guaio grosso**:
+  tre clic, vale 3. **Urgente**: dura poco, vale 2. **Tutto a posto**
+  (tratteggiato): toccarlo toglie 2 punti e azzera la serie. Lasciarne scadere
+  uno è una **lamentela** e azzera la serie.
+- **Serie**: ogni 5 risolti di fila i punti salgono di ×0,5, fino a ×3.
+- Bonus = `25% × min(1, punti / (90% dei punti della giornata perfetta))`, dove
+  la giornata perfetta è ogni imprevisto risolto in un'unica serie.
 
 ### 20.5 Simulazione sportiva
 
-Arena e Stile del team sono la media dei due atleti; la potenza di assalto è
-la media 50/50 dei due valori. Ogni team riceve una sola condizione triangolare
-fissa per l'intero torneo. Ogni assalto applica invece una variazione fresca di
-incontro fra −5% e +5%, decisività 18 e probabilità limitata fra 5% e 95%.
-Ogni sfida è alla meglio dei cinque, quindi termina a 3 punti.
+Tutti i combattimenti sono automatici. Arena e Stile del team sono la media dei
+due atleti; la potenza di assalto è la media 50/50 dei due valori. Ogni team
+riceve una sola condizione triangolare fissa per l'intero torneo. Ogni assalto
+applica una variazione fresca fra −5% e +5%, decisività 18 e probabilità
+limitata fra 5% e 95%. Ogni sfida è alla meglio dei cinque, quindi termina a 3
+punti.
 
 Gli esterni usano profilo, rarità, Forme, esperienza, scuole e tier della
 Champion's Arena adattati alle coppie, incluse almeno due squadre Elite quando
 il campo lo consente. Ogni team esterno è specializzato: a caso, una delle due
-discipline riceve ×1,15 e l'altra ×0,85. Le apparizioni dei Leggendari Segreti seguono le regole
-dei tornei ordinari e ricevono un compagno generato della stessa scuola. La
-difficoltà parte dallo standard Champion's e viene moltiplicata
-cumulativamente per ×1,1 dopo ogni vittoria di un team di Genova; il nuovo
-valore vale da tutte le edizioni successive.
+discipline riceve ×1,15 e l'altra ×0,85. Le apparizioni dei Leggendari Segreti
+seguono le regole dei tornei ordinari e ricevono un compagno generato della
+stessa scuola. La difficoltà parte dallo standard Champion's e viene
+moltiplicata cumulativamente per ×1,1 dopo ogni vittoria di un team di casa.
 
 La fase svizzera usa `max(5, log2(team))` turni: 5 fino a 32 team, poi 6 / 7 /
-8 / 9. Il primo turno è casuale evitando la stessa scuola quando possibile;
-i successivi preferiscono stesso record, scuole diverse, differenza punti
-simile e nessun rematch. La classifica usa vittorie, forza avversari, differenza punti, scontro
-diretto e sorteggio deterministico. Le prime 16 entrano nel tabellone 1ª–16ª,
-2ª–15ª e così via, con finale per il terzo posto. Il tabellone è ordinato
-(1–16, 8–9, 4–13, 5–12, 2–15, 7–10, 3–14, 6–11), quindi prima e seconda possono
-incontrarsi solo in finale.
+8 / 9. Il primo turno è casuale evitando la stessa scuola quando possibile; i
+successivi preferiscono stesso record, scuole diverse, differenza punti simile
+e nessun rematch. La classifica usa vittorie, forza avversari, differenza
+punti, scontro diretto e sorteggio deterministico. Le prime 16 entrano nel
+tabellone (1–16, 8–9, 4–13, 5–12, 2–15, 7–10, 3–14, 6–11), con finale per il
+terzo posto.
 
-### 20.6 Economia, premi e persistenza
+### 20.6 Il giorno del torneo, premi e persistenza
 
-Servono due spade per ogni team, inclusi gli esterni. Le spade libere della
-scuola vengono usate per prime; le mancanti sono noleggiate a 100 € ciascuna.
-Ogni spada della scuola impiegata aggiunge 20 punti all'usura
-dell'attrezzatura; ogni 100 punti di usura si rompe una spada, al massimo
-quante ne sono state impiegate. Gadget può generare al
-massimo 1.000 € lordi per team, moltiplicati per la sua qualità. Social genera
-`floor(team × qualità / 100)` follower. Il riepilogo separa entrate Gadget,
-palazzetto, noleggio e risultato netto; i costi finali possono portare il saldo
-della scuola sotto zero. L'edizione completata conta come un Evento.
+Risultati e premi si applicano **subito**, all'inizio di luglio o quando
+l'ultima barra si riempie a luglio, anche a gioco chiuso. La scena «il giorno
+del torneo» parte alla prima apertura e si rivede dalla pagina: apertura con un
+timbro per settore e la resa, gironi svizzeri turno per turno, tabellone dai
+quarti al vincitore, podio con resa, Fama, banchetto e follower. «Salta» porta
+al podio; il gioco è in pausa mentre la scena è aperta, e le scene «Momenti»
+aspettano che finisca.
 
-Ogni atleta di Genova nei migliori 16 riceve +1 Arena e +1 Stile permanenti.
-Il bonus non si somma: quarto, terzo, secondo e vincitore ricevono
-rispettivamente +2, +3, +4 e +5 totali. I bonus dei Leggendari restano nel
-normale progresso conservato dal prestigio. Ogni atleta di Genova che partecipa
-guadagna anche 1 punto di esperienza da torneo. I Leggendari Segreti battuti da
-un team di Genova vengono risolti come nei tornei ordinari.
+Ogni atleta di casa nei migliori 16 riceve +1 Arena e +1 Stile permanenti; il
+bonus non si somma: quarto, terzo, secondo e vincitore ricevono +2, +3, +4 e +5
+totali. Ogni atleta di casa che partecipa guadagna 1 punto di esperienza da
+torneo. I Leggendari Segreti battuti da un team di casa vengono risolti come nei
+tornei ordinari. L'edizione conta come un Evento.
 
-La simulazione completa viene generata una volta sola all'avvio di luglio e
-salvata prima della presentazione. Le schermate mostrano nell'ordine Social,
-Attrezzature, Gadget, Eventi, turni svizzeri, classifica, eliminatorie e recap;
-possono essere saltate. Costi e premi sono protetti da un flag idempotente. Il
-recap dettagliato più recente resta visibile fino a una nuova preparazione;
-l'albo conserva per ogni edizione anno, scuola e nomi dei due vincitori. Il
-prestigio azzera sblocco, fama, vittorie, preparazione, prenotazione, recap e
-albo Reptile; una prenotazione pendente viene persa senza rimborso.
+L'ultimo risultato resta visibile nella pagina finché non si organizza la
+prossima edizione; l'albo d'oro conserva anno, scuola e nomi dei due vincitori
+di ogni edizione. Il prestigio azzera sblocco, fama, vittorie, edizione in corso
+(senza rimborso), recap e albo.
+
+Salvataggio **v92** (`saveMigrations/reptileRebuild.ts`): l'edizione preparata
+con il sistema precedente viene annullata senza rimborso, i collaboratori
+tornano agli incarichi di prima e il vecchio recap sparisce; albo, fama e
+vittorie restano.
 
 ### 20.7 Torneo della Superba
 
@@ -3648,8 +3666,8 @@ scende e resta anche nelle scuole fondate dopo (`network.superbaTournament`):
 lì, una volta sbloccato l'Open con la vittoria nazionale in Arena e Stile, è già
 la Superba.
 
-La Superba segue tutte le regole del Reptile (preparazione, mini-gioco, fase
-svizzera, tabellone, premi e fama) con tre differenze:
+La Superba segue tutte le regole del Reptile (barre, giornata degli imprevisti,
+fase svizzera, tabellone, premi e fama) con tre differenze:
 
 - nome «Torneo della Superba» nella scheda Tornei, nei messaggi e nel recap;
   nell'albo d'oro ogni edizione indica se era Reptile o Superba;
@@ -3658,7 +3676,8 @@ svizzera, tabellone, premi e fama) con tre differenze:
   del mare di Genova, sabbia della Lanterna, oro), con il logo nell'intestazione,
   lo sfondo a vetrata (`public/assets/superba-glass.svg`, logo
   `superba-logo.webp`), bordi neri a piombo e titoli con carattere classico
-  (`.reptile-view.is-superba` in `tournaments.css`);
+  (`.reptile-view.is-superba` in `tournaments.css`, che vale anche per la
+  giornata degli imprevisti e il giorno del torneo);
 - avversari più forti: la difficoltà del Reptile (standard Champion's × 1,1 per
   ogni vittoria precedente di Genova) viene moltiplicata per **1,25**;
 - se vince un team di Genova, si scopre il Percorso Segreto **Corso X** (10.9),

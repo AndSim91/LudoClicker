@@ -660,27 +660,24 @@ export interface ChroniclesProgress {
   activeChallenge?: ChroniclesChallenge;
 }
 
-export type ReptileSector = "social" | "equipment" | "gadget" | "events";
+export type ReptileSector = "social" | "events" | "equipment" | "instructors" | "gadget";
 
-export type ReptileSectorAssignments = Record<ReptileSector, string[]>;
-
+/** «La giornata degli imprevisti»: one attempt per tournament, a bonus on the resa. */
 export interface ReptileMinigameProgress {
-  status: "ready" | "running" | "completed" | "skipped";
+  status: "ready" | "running" | "completed";
   startedAt?: number;
-  hits: number;
-  misses: number;
-  outsideClicks: number;
-  modifierPercent: number;
+  score: number;
+  /** Points of the perfect day: every trouble solved in one long series. */
+  available: number;
+  bonusPercent: number;
 }
 
-export interface ReptileSectorProgress {
-  assignedCollaboratorIds: string[];
-  load: number;
-  effectivePower: number;
-  rawQuality: number;
-  quality: number;
-  durationMs: number;
+/** One preparation bar: work done and needed, in collaborator power × game months. */
+export interface ReptileBar {
   progress: number;
+  required: number;
+  /** Game time from the organization to the moment the bar filled up. */
+  completedAfterMs?: number;
 }
 
 export interface ReptileAthlete {
@@ -735,11 +732,10 @@ export interface ReptileStanding {
 export interface ReptileEconomyResult {
   venueCost: number;
   gadgetGross: number;
-  rentedSwords: number;
-  rentalCost: number;
+  requiredSwords: number;
   usedSchoolSwords: number;
+  missingSwords: number;
   swordWear: number;
-  netResult: number;
   followersGained: number;
   fameDelta: number;
   fameBefore: number;
@@ -759,29 +755,28 @@ export interface ReptileTournamentResult {
   standings: ReptileStanding[];
   top16TeamIds: string[];
   podiumTeamIds: [string, string, string, string];
-  sectorQualities: Record<ReptileSector, number>;
-  minigameModifierPercent: number;
+  /** 0–100 per bar, from how fast it filled. */
+  sectorQualities: Partial<Record<ReptileSector, number>>;
+  /** Average of the bars, before the minigame and the swords. */
+  baseResa: number;
+  minigameBonusPercent: number;
+  /** Final resa (0–100) that sets fame, stall, followers and home couples. */
+  resa: number;
   economy: ReptileEconomyResult;
   difficultyMultiplier: number;
-  rewardsApplied: boolean;
 }
 
 export interface ReptileActiveEdition {
   id: string;
-  schoolYear: number;
+  organizedAt: number;
+  organizedMonth: number;
   teamCount: number;
-  status: "minigame" | "preparing" | "ready" | "booked" | "presenting";
-  startedAt: number;
+  /** Game time spent preparing (pause excluded). */
+  elapsedMs: number;
   lastProgressAt: number;
-  assignments: ReptileSectorAssignments;
-  powerSnapshot: Record<ReptileSector, number>;
-  previousAssignments: Record<string, CollaboratorAssignment>;
+  bars: Partial<Record<ReptileSector, ReptileBar>>;
   minigame: ReptileMinigameProgress;
-  sectors?: Record<ReptileSector, ReptileSectorProgress>;
-  bookedAt?: number;
-  scheduledMonth?: number;
-  result?: ReptileTournamentResult;
-  presentationStep: number;
+  juneReminderSent?: boolean;
 }
 
 export interface ReptileHallEntry {
@@ -797,9 +792,12 @@ export interface ReptileProgress {
   unlocked: boolean;
   fameXp: number;
   victories: number;
-  nextPreparationSchoolYear: number;
+  /** Month of the last tournament held: one per July. */
+  lastTournamentMonth?: number;
   activeEdition?: ReptileActiveEdition;
   latestRecap?: ReptileTournamentResult;
+  /** The tournament day scene is waiting to be watched. */
+  unseenRecap?: boolean;
   hall: ReptileHallEntry[];
 }
 
@@ -1154,21 +1152,8 @@ export type GameAction =
       choice: RockPaperScissorsChoice;
       now: number;
     }
-  | {
-      type: "START_REPTILE_PREPARATION";
-      assignments: ReptileSectorAssignments;
-      now: number;
-    }
+  | { type: "ORGANIZE_REPTILE"; now: number }
+  | { type: "CANCEL_REPTILE"; now: number }
   | { type: "START_REPTILE_MINIGAME"; now: number }
-  | {
-      type: "COMPLETE_REPTILE_MINIGAME";
-      hits: number;
-      misses: number;
-      outsideClicks: number;
-      now: number;
-    }
-  | { type: "SKIP_REPTILE_MINIGAME"; now: number }
-  | { type: "CANCEL_REPTILE_PREPARATION"; now: number }
-  | { type: "BOOK_REPTILE_VENUE"; now: number }
-  | { type: "ADVANCE_REPTILE_PRESENTATION"; now: number }
-  | { type: "SKIP_REPTILE_PRESENTATION"; now: number };
+  | { type: "COMPLETE_REPTILE_MINIGAME"; score: number; available: number; now: number }
+  | { type: "DISMISS_REPTILE_RECAP" };

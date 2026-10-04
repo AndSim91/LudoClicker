@@ -3,12 +3,15 @@ import { getAthleteTournamentStats, hasCompletedFormOne } from "./athleteStats";
 import { ARENA_DECISIVENESS, createChampionsOpenAthletePairs } from "./tournamentSimulation";
 import { getAvailableSwords } from "./equipment";
 import { GAME_CONFIG } from "./config";
+import { getSchoolYear } from "./calendar";
+import { getReptileBarQuality, getReptileBaseResa } from "./reptilePreparation";
 import { nextRandom } from "./random";
 import type {
   Contact,
   GameState,
   ReptileAthlete,
   ReptileKnockoutStage,
+  ReptileBar,
   ReptileMatch,
   ReptileSector,
   ReptileStanding,
@@ -391,26 +394,62 @@ function playKnockoutRound(
   return { winners, losers };
 }
 
+export interface ReptileResaBreakdown {
+  sectorQualities: Partial<Record<ReptileSector, number>>;
+  baseResa: number;
+  minigameBonusPercent: number;
+  requiredSwords: number;
+  freeSwords: number;
+  missingSwords: number;
+  resa: number;
+}
+
+/**
+ * Resa of the tournament day: the bars' average, raised by the «giornata
+ * degli imprevisti» (cap 100), then cut for every sword missing among the free
+ * ones (up to −50% with none at all).
+ */
+export function getReptileResa(state: GameState): ReptileResaBreakdown | undefined {
+  const edition = state.tournaments.reptile.activeEdition;
+  if (!edition) return undefined;
+  const sectorQualities = Object.fromEntries(
+    (Object.entries(edition.bars) as [ReptileSector, ReptileBar][])
+      .map(([sector, bar]) => [sector, getReptileBarQuality(bar)]),
+  ) as Partial<Record<ReptileSector, number>>;
+  const baseResa = getReptileBaseResa(edition);
+  const minigameBonusPercent = edition.minigame.status === "completed" ? edition.minigame.bonusPercent : 0;
+  const requiredSwords = edition.teamCount * 2;
+  const freeSwords = getAvailableSwords(state.equipment);
+  const missingSwords = Math.max(0, requiredSwords - freeSwords);
+  const boosted = Math.min(100, baseResa * (1 + minigameBonusPercent / 100));
+  const resa = boosted * (1 - GAME_CONFIG.reptileMaxSwordMalus * missingSwords / requiredSwords);
+  return {
+    sectorQualities,
+    baseResa,
+    minigameBonusPercent,
+    requiredSwords,
+    freeSwords,
+    missingSwords,
+    resa: clamp(resa, 0, 100),
+  };
+}
+
 export function simulateReptileTournament(
   state: GameState,
   now: number,
 ): { result: ReptileTournamentResult; nextSeed: number } | undefined {
   const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "booked" || !edition.sectors) return undefined;
+  const resaBreakdown = getReptileResa(state);
+  if (!edition || !resaBreakdown) return undefined;
   const cursor: RandomCursor = { seed: state.randomSeed };
-  const qualities = Object.fromEntries(
-    (["social", "equipment", "gadget", "events"] as const)
-      .map((sector) => [sector, edition.sectors![sector].quality]),
-  ) as Record<ReptileSector, number>;
+  const resa = resaBreakdown.resa;
   const eligibleCount = state.contacts.filter(
     (contact) => contact.status === "enrolled" && hasCompletedFormOne(contact.forms),
   ).length;
   const maximumHomeTeams = Math.min(Math.floor(eligibleCount / 2), edition.teamCount / 2);
-  const requestedHomeTeams = Math.floor(
-    2 + (edition.teamCount / 2 - 2) * qualities.social / 100,
-  );
+  const requestedHomeTeams = Math.floor(2 + (edition.teamCount / 2 - 2) * resa / 100);
   const homeTeamCount = Math.max(0, Math.min(maximumHomeTeams, requestedHomeTeams));
-  const homeTeams = createHomeTeams(state, homeTeamCount, qualities.events, cursor);
+  const homeTeams = createHomeTeams(state, homeTeamCount, resa, cursor);
   const externalTeams = createExternalTeams(state, edition.teamCount - homeTeams.length, cursor);
   const teams = shuffle(cursor, [...homeTeams, ...externalTeams]);
   const teamsById = new Map(teams.map((team) => [team.id, team]));
@@ -454,33 +493,13 @@ export function simulateReptileTournament(
   const semifinals = playKnockoutRound(quarters.winners, "semifinal", swissRounds + 3, teamsById, cursor, matches);
   const final = playKnockoutRound(semifinals.winners, "final", swissRounds + 4, teamsById, cursor, matches);
   const bronze = playKnockoutRound(semifinals.losers, "bronze", swissRounds + 4, teamsById, cursor, matches);
-  const winnerId = final.winners[0];
-  const runnerUpId = final.losers[0];
-  const thirdId = bronze.winners[0];
-  const fourthId = bronze.losers[0];
 
-  const requiredSwords = edition.teamCount * 2;
-  const usedSchoolSwords = Math.min(requiredSwords, getAvailableSwords(state.equipment));
-  const rentedSwords = requiredSwords - usedSchoolSwords;
-  qualities.equipment = clamp(
-    qualities.equipment * Math.min(1, usedSchoolSwords / requiredSwords),
-    0,
-    100,
-  );
-  const weightedQuality = (
-    qualities.social + qualities.gadget + qualities.events + qualities.equipment * 2
-  ) / 5;
+  const usedSchoolSwords = Math.min(resaBreakdown.requiredSwords, resaBreakdown.freeSwords);
   const fameBefore = state.tournaments.reptile.fameXp;
-  const fameDelta = Math.round(weightedQuality * 10 - 500);
-  const fameAfter = clamp(fameBefore + fameDelta, 0, 3_000);
-  const gadgetGross = Math.round(
-    edition.teamCount * GAME_CONFIG.reptileMaximumGadgetGrossPerTeam * qualities.gadget / 100,
-  );
-  const rentalCost = rentedSwords * GAME_CONFIG.reptileSwordRentalCost;
-  const followersGained = Math.floor(edition.teamCount * qualities.social / 100);
+  const fameDelta = Math.round(resa * 10 - 500);
   const result: ReptileTournamentResult = {
     id: edition.id,
-    schoolYear: edition.schoolYear,
+    schoolYear: getSchoolYear(state.school.currentMonth),
     completedAt: now,
     teamCount: edition.teamCount,
     swissRounds,
@@ -488,25 +507,27 @@ export function simulateReptileTournament(
     matches,
     standings: finalStandings,
     top16TeamIds,
-    podiumTeamIds: [winnerId, runnerUpId, thirdId, fourthId],
-    sectorQualities: qualities,
-    minigameModifierPercent: edition.minigame.modifierPercent,
+    podiumTeamIds: [final.winners[0], final.losers[0], bronze.winners[0], bronze.losers[0]],
+    sectorQualities: resaBreakdown.sectorQualities,
+    baseResa: Math.round(resaBreakdown.baseResa),
+    minigameBonusPercent: resaBreakdown.minigameBonusPercent,
+    resa: Math.round(resa),
     economy: {
       venueCost: GAME_CONFIG.reptileVenueCost,
-      gadgetGross,
-      rentedSwords,
-      rentalCost,
+      gadgetGross: Math.round(
+        edition.teamCount * GAME_CONFIG.reptileMaximumGadgetGrossPerTeam * resa / 100,
+      ),
+      requiredSwords: resaBreakdown.requiredSwords,
       usedSchoolSwords,
+      missingSwords: resaBreakdown.missingSwords,
       swordWear: usedSchoolSwords * GAME_CONFIG.reptileSwordWear,
-      netResult: gadgetGross - GAME_CONFIG.reptileVenueCost - rentalCost,
-      followersGained,
+      followersGained: Math.floor(edition.teamCount * resa / 100),
       fameDelta,
       fameBefore,
-      fameAfter,
+      fameAfter: clamp(fameBefore + fameDelta, 0, 3_000),
     },
     difficultyMultiplier: getReptileDifficultyMultiplier(state),
     superba: isSuperbaTournament(state),
-    rewardsApplied: false,
   };
   return { result, nextSeed: cursor.seed };
 }

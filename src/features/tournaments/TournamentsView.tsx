@@ -8,7 +8,6 @@ import type {
   TournamentDiscipline,
   TournamentHallEntry,
   TournamentResult,
-  ReptileSectorAssignments,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
 import { useGameSelector, useGameStateSlices } from "../../game/GameStateContext";
@@ -200,14 +199,11 @@ export function TournamentsView({
   onOpenAthletes = () => undefined,
   onStartChronicles = () => undefined,
   onPlayChroniclesHand = () => undefined,
-  onStartReptilePreparation = () => undefined,
-  onStartReptileMinigame = () => undefined,
-  onCompleteReptileMinigame = () => undefined,
-  onSkipReptileMinigame = () => undefined,
-  onCancelReptilePreparation = () => undefined,
-  onBookReptileVenue = () => undefined,
-  onAdvanceReptilePresentation = () => undefined,
-  onSkipReptilePresentation = () => undefined,
+  onOrganizeReptile = () => undefined,
+  onCancelReptile = () => undefined,
+  onPlayReptileMinigame = () => undefined,
+  onOpenReptileTutorial = () => undefined,
+  onReplayReptileDay = () => undefined,
   focusResultId,
 }: {
   state?: GameState;
@@ -217,14 +213,11 @@ export function TournamentsView({
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
   onPlayChroniclesHand?: (choice: RockPaperScissorsChoice) => void;
-  onStartReptilePreparation?: (assignments: ReptileSectorAssignments) => void;
-  onStartReptileMinigame?: () => void;
-  onCompleteReptileMinigame?: (hits: number, misses: number, outsideClicks: number) => void;
-  onSkipReptileMinigame?: () => void;
-  onCancelReptilePreparation?: () => void;
-  onBookReptileVenue?: () => void;
-  onAdvanceReptilePresentation?: () => void;
-  onSkipReptilePresentation?: () => void;
+  onOrganizeReptile?: () => void;
+  onCancelReptile?: () => void;
+  onPlayReptileMinigame?: () => void;
+  onOpenReptileTutorial?: () => void;
+  onReplayReptileDay?: () => void;
 }) {
   const state = useGameStateSlices(
     ["tournaments", "network"],
@@ -242,10 +235,8 @@ export function TournamentsView({
     CHRONICLES_TOURNAMENT_LOADING_MS,
     gameSpeed,
   );
-  const blockingReptileFlow = state.tournaments.reptile.activeEdition?.status === "presenting" ||
-    state.tournaments.reptile.activeEdition?.minigame.status === "running";
-  const visibleTab = blockingReptileFlow ? "open" : tab;
-  const visibleOpenTournamentTab = blockingReptileFlow ? "reptile" : openTournamentTab;
+  const visibleTab = tab;
+  const visibleOpenTournamentTab = openTournamentTab;
   const latestResult = state.tournaments.results.at(-1);
   const selectedResult =
     state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
@@ -352,14 +343,11 @@ export function TournamentsView({
           {visibleOpenTournamentTab === "reptile" ? (
             <ReptileView
               state={stateOverride}
-              onStartPreparation={onStartReptilePreparation}
-              onStartMinigame={onStartReptileMinigame}
-              onCompleteMinigame={onCompleteReptileMinigame}
-              onSkipMinigame={onSkipReptileMinigame}
-              onCancelPreparation={onCancelReptilePreparation}
-              onBookVenue={onBookReptileVenue}
-              onAdvancePresentation={onAdvanceReptilePresentation}
-              onSkipPresentation={onSkipReptilePresentation}
+              onOrganize={onOrganizeReptile}
+              onCancel={onCancelReptile}
+              onPlayMinigame={onPlayReptileMinigame}
+              onOpenTutorial={onOpenReptileTutorial}
+              onReplayDay={onReplayReptileDay}
             />
           ) : showChroniclesResult && latestChroniclesResult ? (
             <StoredTournamentResults

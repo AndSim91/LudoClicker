@@ -339,9 +339,10 @@ function hasValidCollaboratorManagement(state: Partial<GameState>): boolean {
 
 const REPTILE_SECTORS: readonly ReptileSector[] = [
   "social",
-  "equipment",
-  "gadget",
   "events",
+  "equipment",
+  "instructors",
+  "gadget",
 ];
 
 function hasValidReptileProgress(state: Partial<GameState>): boolean {
@@ -351,34 +352,32 @@ function hasValidReptileProgress(state: Partial<GameState>): boolean {
     typeof reptile.unlocked !== "boolean" ||
     !isNonNegativeSafeInteger(reptile.fameXp) || reptile.fameXp > 3_000 ||
     !isNonNegativeSafeInteger(reptile.victories) ||
-    !Number.isSafeInteger(reptile.nextPreparationSchoolYear) ||
-    reptile.nextPreparationSchoolYear < 1 ||
+    (reptile.lastTournamentMonth !== undefined && !isNonNegativeSafeInteger(reptile.lastTournamentMonth)) ||
+    (reptile.unseenRecap !== undefined && typeof reptile.unseenRecap !== "boolean") ||
     !Array.isArray(reptile.hall)
   ) return false;
   const edition = reptile.activeEdition;
   if (!edition) return true;
-  const validStatus = ["minigame", "preparing", "ready", "booked", "presenting"]
-    .includes(edition.status);
-  const assigned = REPTILE_SECTORS.flatMap((sector) => edition.assignments?.[sector] ?? []);
-  const validMinigame = ["ready", "running", "completed", "skipped"]
-    .includes(edition.minigame?.status) &&
-    Number.isFinite(edition.minigame?.modifierPercent) &&
-    edition.minigame.modifierPercent >= -50 && edition.minigame.modifierPercent <= 50;
-  const validSectors = edition.sectors === undefined || REPTILE_SECTORS.every((sector) => {
-    const progress = edition.sectors?.[sector];
-    return Boolean(
-      progress &&
-      Number.isFinite(progress.quality) && progress.quality >= 0 && progress.quality <= 100 &&
-      Number.isFinite(progress.progress) && progress.progress >= 0 && progress.progress <= 1 &&
-      Number.isFinite(progress.durationMs) && progress.durationMs > 0,
-    );
-  });
-  return validStatus && validMinigame && validSectors &&
-    assigned.length === new Set(assigned).size &&
-    REPTILE_SECTORS.every((sector) =>
-      Number.isFinite(edition.powerSnapshot?.[sector]) && edition.powerSnapshot[sector] >= 0
-    ) &&
-    Number.isFinite(edition.startedAt) && Number.isFinite(edition.lastProgressAt) &&
+  const bars = edition.bars && typeof edition.bars === "object" ? Object.entries(edition.bars) : [];
+  const validBars = bars.length > 0 && bars.every(([sector, bar]) =>
+    REPTILE_SECTORS.includes(sector as ReptileSector) &&
+    Boolean(bar) &&
+    Number.isFinite(bar!.progress) && bar!.progress >= 0 &&
+    Number.isFinite(bar!.required) && bar!.required > 0 &&
+    (bar!.completedAfterMs === undefined ||
+      (Number.isFinite(bar!.completedAfterMs) && bar!.completedAfterMs > 0))
+  );
+  const minigame = edition.minigame;
+  const validMinigame = Boolean(minigame) &&
+    ["ready", "running", "completed"].includes(minigame.status) &&
+    Number.isFinite(minigame.score) && minigame.score >= 0 &&
+    Number.isFinite(minigame.available) && minigame.available >= 0 &&
+    Number.isFinite(minigame.bonusPercent) &&
+    minigame.bonusPercent >= 0 && minigame.bonusPercent <= GAME_CONFIG.reptileMinigameMaxBonusPercent;
+  return validBars && validMinigame &&
+    Number.isFinite(edition.organizedAt) && Number.isFinite(edition.lastProgressAt) &&
+    Number.isFinite(edition.elapsedMs) && edition.elapsedMs >= 0 &&
+    isNonNegativeSafeInteger(edition.organizedMonth) &&
     Number.isSafeInteger(edition.teamCount) && edition.teamCount >= 16 && edition.teamCount <= 512;
 }
 

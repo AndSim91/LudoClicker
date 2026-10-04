@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import { getReputationMultiplier } from "./reputation";
 import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorBaseProductivity } from "../content/forms";
@@ -31,7 +32,7 @@ export function getEventCollaboratorMultiplier(state: GameState): number {
     .reduce(
       (total, collaborator) => total + getCollaboratorBaseProductivity(collaborator),
       0,
-    ) + getCollaboratorFallbackProductivity(state, "events");
+    ) * getReptileOrdinaryShare(state, "events") + getCollaboratorFallbackProductivity(state, "events");
   return Math.max(1, effectiveCollaborators) ** EVENT_COLLABORATOR_EXPONENT;
 }
 

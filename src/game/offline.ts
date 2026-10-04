@@ -92,6 +92,20 @@ export function freezeGameState(
     // The event deadline is real time, so closing the game never preserves its remaining duration.
     lightInflation: state.lightInflation,
     narrative: { ...state.narrative, nextEventAt: state.narrative.nextEventAt + elapsedMs },
+    // The Reptile bars stop with the game too (6.26).
+    tournaments: state.tournaments.reptile.activeEdition
+      ? {
+          ...state.tournaments,
+          reptile: {
+            ...state.tournaments.reptile,
+            activeEdition: {
+              ...state.tournaments.reptile.activeEdition,
+              organizedAt: state.tournaments.reptile.activeEdition.organizedAt + elapsedMs,
+              lastProgressAt: state.tournaments.reptile.activeEdition.lastProgressAt + elapsedMs,
+            },
+          },
+        }
+      : state.tournaments,
     automation: { ...state.automation, lastProcessedAt: now },
   };
 }

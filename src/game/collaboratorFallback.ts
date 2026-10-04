@@ -6,6 +6,7 @@ import {
 import { isSummerBreak } from "./calendar";
 import { getEquipmentAutomaticRepairTarget } from "./equipment";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
+import { getReptileSectorForRole, isReptileBarOpen } from "./reptileSectors";
 import { selectActiveEmail } from "./selectors";
 import type {
   Collaborator,
@@ -44,7 +45,7 @@ function isSectorWorking(state: GameState, role: CollaboratorMasteryRole): boole
   }
 }
 
-function isPrimarySectorIdle(
+export function isPrimarySectorIdle(
   state: GameState,
   collaborator: Collaborator,
 ): boolean {
@@ -95,6 +96,9 @@ export function getShiftSummary(state: GameState): ShiftSummary {
       busyRoles.add(role);
       continue;
     }
+    // Idle people of a sector still filling its Reptile bar give everything to the bar.
+    const reptileSector = getReptileSectorForRole(role);
+    if (reptileSector && isReptileBarOpen(state, reptileSector)) continue;
     if (receiver && role !== receiver) helpers.push(collaborator);
   }
   const idleRoles = new Set([...staffedRoles].filter((role) => !busyRoles.has(role)));

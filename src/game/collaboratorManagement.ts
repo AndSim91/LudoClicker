@@ -13,7 +13,6 @@ import {
   planAutomaticAssignment,
 } from "./automaticAssignmentPlan";
 import { GAME_CONFIG } from "./config";
-import { isReptilePreparationWorkActive } from "./reptilePreparation";
 import { getInstructorTeachingCounts, getRunningAcquisitionEvents } from "./runtimeIndexes";
 import type {
   Collaborator,
@@ -560,7 +559,7 @@ function settleAutomaticPendingMoves(state: GameState): GameState {
  */
 function assignFreeCollaboratorsAutomatically(state: GameState): GameState {
   const shares = state.collaboratorManagement.automaticShares;
-  if (!shares || isReptilePreparationWorkActive(state)) return state;
+  if (!shares) return state;
   if (!state.collaborators.some((collaborator) => collaborator.assignment === null)) return state;
   const roles = getAutomaticAssignmentRoles(state).filter((role) => (shares[role] ?? 0) > 0);
   const totalShare = roles.reduce((total, role) => total + (shares[role] ?? 0), 0);

@@ -312,7 +312,6 @@ export function collectFees(
       });
     }
     nextState = processReptileCalendarTransition(nextState, now + period);
-    if (nextState.tournaments.reptile.activeEdition?.status === "presenting") break;
   }
   return nextState;
 }

@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 91,
+  version: 92,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -124,8 +124,20 @@ export const GAME_CONFIG = {
   chroniclesTeamSize: 6,
   chroniclesLegendaryFameReward: 500,
   reptileVenueCost: 10_000,
-  reptileBasePreparationMonths: 6,
-  reptileSwordRentalCost: 100,
+  // Cancelling gives back this share of the venue.
+  reptileCancelRefundShare: 0.5,
+  // Share of their power the sectors give to the bars; idle people give everything.
+  reptilePreparationShare: 0.5,
+  // Collaborators without a sector help the bar furthest behind at half value.
+  reptileUnassignedShare: 0.5,
+  // A bar filled in this many game months scores 100; slower bars score less.
+  reptileExcellentMonths: 3,
+  // «La giornata degli imprevisti»: maximum bonus on the resa, reached at this
+  // share of the perfect day's points (every trouble solved, one long series).
+  reptileMinigameMaxBonusPercent: 25,
+  reptileMinigameFullScoreShare: 0.9,
+  // With no free sword at all the resa loses this share; linear per missing sword.
+  reptileMaxSwordMalus: 0.5,
   reptileSwordWear: 20,
   reptileMaximumGadgetGrossPerTeam: 1_000,
   // Reptile fame level at which the Open becomes, for good, the Torneo della Superba.

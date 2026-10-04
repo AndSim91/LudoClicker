@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   FORM_DEFINITIONS,
   canTrainForm,
@@ -306,6 +307,9 @@ export function processAutomation(
       equipmentProductivity += getCollaboratorProductivity(collaborator);
     }
   }
+  // A sector still filling its Reptile bar keeps half its power for the bar.
+  writingProductivity *= getReptileOrdinaryShare(state, "writing");
+  equipmentProductivity *= getReptileOrdinaryShare(state, "equipment");
   writingProductivity += getCollaboratorFallbackProductivity(state, "writing");
   equipmentProductivity += getCollaboratorFallbackProductivity(state, "equipment");
   const activeEmail = selectActiveEmail(state);

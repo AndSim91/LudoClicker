@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   AGONIST_COURSE_ID,
   canTrainForm,
@@ -187,7 +188,8 @@ export function startAgonistCourse(
   const baseDuration = agonistCourseUnlocked
     ? GAME_CONFIG.agonistCourseDurationMs
     : getTechnicalArenaDurationMs(arenaLevel);
-  const trainingSpeed = getCollaboratorProductivity(instructor, "instructor");
+  const trainingSpeed = getCollaboratorProductivity(instructor, "instructor") *
+    getReptileOrdinaryShare(state, "instructor");
   const training = scheduleTraining(
     state,
     personId,
@@ -288,7 +290,8 @@ export function startFormTraining(
       collaborator.id,
       now,
       getInstructorQualificationDuration(definition.durationMs) /
-        getCollaboratorProductivity(collaborator, "instructor"),
+        (getCollaboratorProductivity(collaborator, "instructor") *
+          getReptileOrdinaryShare(state, "instructor")),
       {
         formId,
         status: "running",
@@ -394,7 +397,8 @@ export function startFormTraining(
     ? 1 + getUpgradeEffectTotal(state.upgrades, "instructorTeachingSpeed")
     : 1;
   const trainingSpeed = trainingInstructor
-    ? getCollaboratorProductivity(trainingInstructor, "instructor") * instructorTeachingSpeed
+    ? getCollaboratorProductivity(trainingInstructor, "instructor") * instructorTeachingSpeed *
+      getReptileOrdinaryShare(state, "instructor")
     : 1;
   const training = scheduleTraining(
     state,

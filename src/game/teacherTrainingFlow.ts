@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   FORM_DEFINITIONS,
   getFormDefinition,
@@ -359,7 +360,8 @@ export function processTechnicianCourseReservations(
       collaborator.id,
       now,
       getTechnicianCourseDuration(definition.durationMs) /
-        getCollaboratorProductivity(collaborator, "instructor"),
+        (getCollaboratorProductivity(collaborator, "instructor") *
+          getReptileOrdinaryShare(nextState, "instructor")),
       {
         formId: reservation.formId,
         status: "running",
@@ -523,7 +525,8 @@ function processInstructorQualifications(
       candidate.collaboratorId,
       now,
       getInstructorQualificationDuration(definition.durationMs) /
-        getCollaboratorProductivity(trainee, "instructor"),
+        (getCollaboratorProductivity(trainee, "instructor") *
+          getReptileOrdinaryShare(nextState, "instructor")),
       {
         formId: candidate.formId,
         status: "running",

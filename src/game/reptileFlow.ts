@@ -1,10 +1,15 @@
 import { addCareer } from "./career";
 import { getContactBaseStats } from "./athleteStats";
-import { getSchoolYear } from "./calendar";
+import { getCalendarMonth } from "./calendar";
 import { applyEquipmentWear } from "./equipment";
-import { getReptileFameLevel } from "./reptilePreparation";
+import {
+  getReptileFameLevel,
+  isJuly,
+  isReptilePreparationComplete,
+  processReptilePreparation,
+} from "./reptilePreparation";
 import { simulateReptileTournament } from "./reptileSimulation";
-import { discoverCourseXFromSuperbaVictory } from "./reptileUnlock";
+import { discoverCourseXFromSuperbaVictory, getReptileTournamentName } from "./reptileUnlock";
 import { GAME_CONFIG } from "./config";
 import { resolveSecretLegendaryDefeat } from "./tournamentFlow";
 import { addMessage } from "./stateUpdates";
@@ -14,40 +19,47 @@ import type {
   ReptileTournamentResult,
 } from "./types";
 
-export function getReptilePresentationStepCount(result: ReptileTournamentResult): number {
-  // Quattro intermezzi, turni svizzeri, classifica, quattro schermate KO e recap.
-  return 4 + result.swissRounds + 1 + 4 + 1;
-}
-
-export function startReptileTournamentIfDue(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
+/** All bars full, it is July and no Reptile was held this July: the tournament runs. */
+export function holdReptileTournamentIfDue(state: GameState, now: number): GameState {
+  const reptile = state.tournaments.reptile;
+  const edition = reptile.activeEdition;
   if (
     !edition ||
-    edition.status !== "booked" ||
-    edition.scheduledMonth !== state.school.currentMonth
+    !isReptilePreparationComplete(edition) ||
+    !isJuly(state.school.currentMonth) ||
+    reptile.lastTournamentMonth === state.school.currentMonth
   ) return state;
   const simulation = simulateReptileTournament(state, now);
   if (!simulation) return state;
-  return {
-    ...state,
-    randomSeed: simulation.nextSeed,
-    tournaments: {
-      ...state.tournaments,
-      reptile: {
-        ...state.tournaments.reptile,
-        activeEdition: {
-          ...edition,
-          status: "presenting",
-          result: simulation.result,
-          presentationStep: 0,
-        },
-      },
-    },
-  };
+  return applyReptileResult({ ...state, randomSeed: simulation.nextSeed }, simulation.result, now);
+}
+
+/** One tick of Reptile: bars fill, then the tournament if it is due. */
+export function processReptile(state: GameState, now: number): GameState {
+  return holdReptileTournamentIfDue(processReptilePreparation(state, now), now);
 }
 
 export function processReptileCalendarTransition(state: GameState, now: number): GameState {
-  return startReptileTournamentIfDue(state, now);
+  const edition = state.tournaments.reptile.activeEdition;
+  let nextState = state;
+  if (
+    edition &&
+    edition.minigame.status === "ready" &&
+    !edition.juneReminderSent &&
+    getCalendarMonth(state.school.currentMonth) === 6
+  ) {
+    nextState = addMessage({
+      ...state,
+      tournaments: {
+        ...state.tournaments,
+        reptile: {
+          ...state.tournaments.reptile,
+          activeEdition: { ...edition, juneReminderSent: true },
+        },
+      },
+    }, now, "La giornata degli imprevisti aspetta", `A luglio c'è il ${getReptileTournamentName(state)} e il palazzetto non si gestisce da solo: hai ancora un tentativo per alzare la resa.`, "neutral", "focused", "tournaments");
+  }
+  return holdReptileTournamentIfDue(nextState, now);
 }
 
 function getHomeAthleteBonusByContactId(
@@ -85,12 +97,11 @@ function getDefeatedSecretLegendaryIds(result: ReptileTournamentResult): string[
   return [...defeated];
 }
 
-function applyReptileResult(
+export function applyReptileResult(
   state: GameState,
   result: ReptileTournamentResult,
   now: number,
 ): GameState {
-  if (result.rewardsApplied) return state;
   const bonuses = getHomeAthleteBonusByContactId(result);
   const participatingHomeIds = new Set(
     result.teams.filter((team) => team.home).flatMap((team) =>
@@ -99,10 +110,6 @@ function applyReptileResult(
   );
   const winner = result.teams.find((team) => team.id === result.podiumTeamIds[0])!;
   const schoolWon = winner.home;
-  const appliedResult: ReptileTournamentResult = {
-    ...result,
-    rewardsApplied: true,
-  };
   let nextState: GameState = {
     ...state,
     contacts: state.contacts.map((contact) => {
@@ -119,7 +126,7 @@ function applyReptileResult(
     }),
     school: {
       ...state.school,
-      euros: state.school.euros + result.economy.gadgetGross - result.economy.rentalCost,
+      euros: state.school.euros + result.economy.gadgetGross,
       followers: state.school.followers + result.economy.followersGained,
     },
     equipment: applyEquipmentWear(
@@ -140,9 +147,10 @@ function applyReptileResult(
         ...state.tournaments.reptile,
         fameXp: result.economy.fameAfter,
         victories: state.tournaments.reptile.victories + (schoolWon ? 1 : 0),
-        nextPreparationSchoolYear: getSchoolYear(state.school.currentMonth) + 1,
+        lastTournamentMonth: state.school.currentMonth,
         activeEdition: undefined,
-        latestRecap: appliedResult,
+        latestRecap: result,
+        unseenRecap: true,
         hall: [...state.tournaments.reptile.hall, {
           schoolYear: result.schoolYear,
           teamId: winner.id,
@@ -164,7 +172,7 @@ function applyReptileResult(
     nextState,
     now,
     `${tournamentName} completato`,
-    `${result.teamCount} squadre si sono sfidate nelle nostre arene. +${result.economy.followersGained} follower, Fama ${result.economy.fameDelta >= 0 ? "+" : ""}${result.economy.fameDelta}.`,
+    `${result.teamCount} squadre si sono sfidate nelle nostre arene. Resa ${result.resa}, +${result.economy.followersGained} follower, Fama ${result.economy.fameDelta >= 0 ? "+" : ""}${result.economy.fameDelta}.${result.economy.missingSwords > 0 ? ` Mancavano ${result.economy.missingSwords} spade: si è visto.` : ""}`,
     schoolWon ? "positive" : "neutral",
     "focused",
     "tournaments",
@@ -188,29 +196,15 @@ function applyReptileResult(
   return nextState;
 }
 
-export function advanceReptilePresentation(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  const result = edition?.result;
-  if (!edition || edition.status !== "presenting" || !result) return state;
-  if (edition.presentationStep + 1 < getReptilePresentationStepCount(result)) {
-    return {
-      ...state,
-      tournaments: {
-        ...state.tournaments,
-        reptile: {
-          ...state.tournaments.reptile,
-          activeEdition: { ...edition, presentationStep: edition.presentationStep + 1 },
-        },
-      },
-    };
-  }
-  return applyReptileResult(state, result, now);
-}
-
-export function skipReptilePresentation(state: GameState, now: number): GameState {
-  const edition = state.tournaments.reptile.activeEdition;
-  if (!edition || edition.status !== "presenting" || !edition.result) return state;
-  return applyReptileResult(state, edition.result, now);
+export function dismissReptileRecap(state: GameState): GameState {
+  if (!state.tournaments.reptile.unseenRecap) return state;
+  return {
+    ...state,
+    tournaments: {
+      ...state.tournaments,
+      reptile: { ...state.tournaments.reptile, unseenRecap: false },
+    },
+  };
 }
 
 export function getReptileWinner(result: ReptileTournamentResult): ReptileTeam {

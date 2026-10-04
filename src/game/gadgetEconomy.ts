@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import {
   GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY,
   GADGET_DEFINITIONS,
@@ -57,7 +58,7 @@ export function getGadgetProductivity(state: GameState): number {
       ? total + getCollaboratorProductivity(collaborator, "gadget")
       : total,
     0,
-  ) + getCollaboratorFallbackProductivity(state, "gadget");
+  ) * getReptileOrdinaryShare(state, "gadget") + getCollaboratorFallbackProductivity(state, "gadget");
 }
 
 export function getGadgetDevelopmentSpeed(upgrades: UpgradeLevels): number {

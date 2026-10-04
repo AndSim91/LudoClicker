@@ -53,7 +53,7 @@ import type {
   FormTrainingStartMode,
   GadgetProductId,
   RockPaperScissorsChoice,
-  ReptileSectorAssignments,
+  ReptileSector,
   SchoolFoundationDetails,
   TournamentResult,
   UpgradeId,
@@ -64,6 +64,10 @@ import { AchievementToast } from "../features/feedback/AchievementToast";
 import type { LudoWikiSection } from "../features/ludowiki/LudoWikiView";
 import { MomentLayer } from "../features/moments/MomentLayer";
 import { FinalDuelLayer } from "../features/tournaments/FinalDuelLayer";
+import { ReptileDayLayer } from "../features/tournaments/ReptileDayLayer";
+import { ReptileIncidentsLayer } from "../features/tournaments/ReptileIncidentsLayer";
+import { clearIncidentsAttempt, readIncidentsAttempt } from "../features/tournaments/reptileUi";
+import { getReptileSectorForRole } from "../game/reptileSectors";
 import { useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
@@ -160,15 +164,21 @@ export function App() {
   const hasActiveGadgetMinigame = state.unlocks.gadget &&
     (state.gadgets.minigame?.status === "running" ||
       state.gadgets.minigame?.status === "result");
-  const reptileStatus = state.tournaments.reptile.activeEdition?.status;
-  const hasBlockingReptileFlow =
-    (reptileStatus === "minigame" &&
-      state.tournaments.reptile.activeEdition?.minigame.status === "running") ||
-    reptileStatus === "presenting";
+  const reptile = state.tournaments.reptile;
+  const reptileEdition = reptile.activeEdition;
+  const reptileMinigameRunning = reptileEdition?.minigame.status === "running";
+  // An attempt is live only if it started in this page: after a reload it closes with its points.
+  const [reptileAttemptLive, setReptileAttemptLive] = useState(false);
+  const [reptileTutorialOpen, setReptileTutorialOpen] = useState(false);
+  const [reptileDayReplay, setReptileDayReplay] = useState(false);
+  const reptileDayResult = reptile.latestRecap && (reptile.unseenRecap || reptileDayReplay)
+    ? reptile.latestRecap
+    : undefined;
+  const hasBlockingReptileFlow = (reptileMinigameRunning && reptileAttemptLive) ||
+    (reptileTutorialOpen && Boolean(reptileEdition)) ||
+    reptileDayResult !== undefined;
   const activeView: AppView = hasActiveGadgetMinigame
     ? "gadget"
-    : hasBlockingReptileFlow
-      ? "tournaments"
     : view === "ludowiki"
       ? import.meta.env.DEV || state.achievements.length > 0 ? view : "mail"
     : view === "admin"
@@ -208,7 +218,7 @@ export function App() {
     setReptilePaused(hasBlockingReptileFlow);
   }, [hasBlockingReptileFlow, setReptilePaused]);
 
-  const activeMoment = state.moments.queue[0];
+  const activeMoment = reptileDayResult ? undefined : state.moments.queue[0];
   useLayoutEffect(() => {
     setMomentPaused(activeMoment !== undefined);
   }, [activeMoment, setMomentPaused]);
@@ -466,48 +476,46 @@ export function App() {
     () => dispatch({ type: "ADMIN_RESET_GADGET_SALES" }),
     [dispatch],
   );
-  const startReptilePreparation = useCallback(
-    (assignments: ReptileSectorAssignments) => dispatch({
-      type: "START_REPTILE_PREPARATION",
-      assignments,
-      now: getGameNow(),
-    }),
+  const organizeReptile = useCallback(
+    () => dispatch({ type: "ORGANIZE_REPTILE", now: getGameNow() }),
     [dispatch, getGameNow],
   );
-  const startReptileMinigame = useCallback(
-    () => dispatch({ type: "START_REPTILE_MINIGAME", now: getGameNow() }),
+  const cancelReptile = useCallback(
+    () => dispatch({ type: "CANCEL_REPTILE", now: getGameNow() }),
     [dispatch, getGameNow],
   );
-  const completeReptileMinigame = useCallback(
-    (hits: number, misses: number, outsideClicks: number) => dispatch({
-      type: "COMPLETE_REPTILE_MINIGAME",
-      hits,
-      misses,
-      outsideClicks,
-      now: getGameNow(),
-    }),
-    [dispatch, getGameNow],
-  );
-  const skipReptileMinigame = useCallback(
-    () => dispatch({ type: "SKIP_REPTILE_MINIGAME", now: getGameNow() }),
-    [dispatch, getGameNow],
-  );
-  const cancelReptilePreparation = useCallback(
-    () => dispatch({ type: "CANCEL_REPTILE_PREPARATION", now: getGameNow() }),
-    [dispatch, getGameNow],
-  );
-  const bookReptileVenue = useCallback(
-    () => dispatch({ type: "BOOK_REPTILE_VENUE", now: getGameNow() }),
-    [dispatch, getGameNow],
-  );
-  const advanceReptilePresentation = useCallback(
-    () => dispatch({ type: "ADVANCE_REPTILE_PRESENTATION", now: getGameNow() }),
-    [dispatch, getGameNow],
-  );
-  const skipReptilePresentation = useCallback(
-    () => dispatch({ type: "SKIP_REPTILE_PRESENTATION", now: getGameNow() }),
-    [dispatch, getGameNow],
-  );
+  const playReptileMinigame = useCallback(() => {
+    setReptileTutorialOpen(false);
+    setReptileAttemptLive(true);
+    dispatch({ type: "START_REPTILE_MINIGAME", now: getGameNow() });
+  }, [dispatch, getGameNow]);
+  const completeReptileMinigame = useCallback((score: number, available: number) => {
+    if (reptileEdition) clearIncidentsAttempt(reptileEdition.id);
+    setReptileAttemptLive(false);
+    dispatch({ type: "COMPLETE_REPTILE_MINIGAME", score, available, now: getGameNow() });
+  }, [dispatch, getGameNow, reptileEdition]);
+  const openReptileTutorial = useCallback(() => setReptileTutorialOpen(true), []);
+  const closeReptileTutorial = useCallback(() => setReptileTutorialOpen(false), []);
+  const replayReptileDay = useCallback(() => setReptileDayReplay(true), []);
+  const closeReptileDay = useCallback(() => {
+    setReptileDayReplay(false);
+    if (reptile.unseenRecap) dispatch({ type: "DISMISS_REPTILE_RECAP" });
+  }, [dispatch, reptile.unseenRecap]);
+  useEffect(() => {
+    if (!reptileMinigameRunning || reptileAttemptLive || !reptileEdition) return;
+    const attempt = readIncidentsAttempt(reptileEdition.id);
+    clearIncidentsAttempt(reptileEdition.id);
+    dispatch({ type: "COMPLETE_REPTILE_MINIGAME", ...attempt, now: getGameNow() });
+  }, [dispatch, getGameNow, reptileAttemptLive, reptileEdition, reptileMinigameRunning]);
+  const reptileNames = useMemo(() => {
+    const names: Partial<Record<ReptileSector, string[]>> = {};
+    for (const collaborator of state.collaborators) {
+      const sector = getReptileSectorForRole(collaborator.assignment);
+      if (!sector) continue;
+      (names[sector] ??= []).push(collaborator.displayName.split(" ")[0]);
+    }
+    return names;
+  }, [state.collaborators]);
   const moveOperationalPriority = useCallback(
     (assignment: CollaboratorMasteryRole, toIndex: number) =>
       dispatch({ type: "MOVE_OPERATIONAL_PRIORITY", assignment, toIndex }),
@@ -671,14 +679,11 @@ export function App() {
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}
               onPlayChroniclesHand={playChroniclesHand}
-              onStartReptilePreparation={startReptilePreparation}
-              onStartReptileMinigame={startReptileMinigame}
-              onCompleteReptileMinigame={completeReptileMinigame}
-              onSkipReptileMinigame={skipReptileMinigame}
-              onCancelReptilePreparation={cancelReptilePreparation}
-              onBookReptileVenue={bookReptileVenue}
-              onAdvanceReptilePresentation={advanceReptilePresentation}
-              onSkipReptilePresentation={skipReptilePresentation}
+              onOrganizeReptile={organizeReptile}
+              onCancelReptile={cancelReptile}
+              onPlayReptileMinigame={playReptileMinigame}
+              onOpenReptileTutorial={openReptileTutorial}
+              onReplayReptileDay={replayReptileDay}
             />
           ) : activeView === "gadget" ? (
             <StableGadgetsView
@@ -751,6 +756,27 @@ export function App() {
         </footer>
       </div>
       {watchedFinal ? <FinalDuelLayer result={watchedFinal} onClose={closeFinal} onShowResults={showFinalResults} /> : null}
+      {reptileEdition && ((reptileMinigameRunning && reptileAttemptLive) || reptileTutorialOpen) ? (
+        <ReptileIncidentsLayer
+          key={reptileMinigameRunning ? "play" : "tutorial"}
+          mode={reptileMinigameRunning ? "play" : "tutorial"}
+          superba={state.network.superbaTournament === true}
+          editionId={reptileEdition.id}
+          sectors={Object.keys(reptileEdition.bars) as ReptileSector[]}
+          names={reptileNames}
+          onFinish={completeReptileMinigame}
+          onClose={closeReptileTutorial}
+          onPlay={playReptileMinigame}
+        />
+      ) : null}
+      {reptileDayResult ? (
+        <ReptileDayLayer
+          result={reptileDayResult}
+          superba={reptileDayResult.superba === true}
+          city={state.school.city}
+          onClose={closeReptileDay}
+        />
+      ) : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />
       ) : tutorial.activeScene && tutorial.activeStep ? (

@@ -1,3 +1,4 @@
+import { getReptileOrdinaryShare } from "./reptileSectors";
 import { addCareer } from "./career";
 import {
   FORM_BRANCHES,
@@ -410,7 +411,8 @@ function resolveTraining(
         collaborator.id,
         context.now,
         getInstructorQualificationDuration(definition.durationMs) /
-          getCollaboratorProductivity(collaborator, "instructor"),
+          (getCollaboratorProductivity(collaborator, "instructor") *
+            getReptileOrdinaryShare(context.state, "instructor")),
         {
           formId: training.formId,
           status: "running",

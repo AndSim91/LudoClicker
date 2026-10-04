@@ -30,7 +30,6 @@ export function migrateTournamentState(state: MigratableState): MigratableState 
         unlocked: false,
         fameXp: 0,
         victories: 0,
-        nextPreparationSchoolYear: 1,
         hall: [],
       },
     },
