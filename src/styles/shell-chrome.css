@@ -1,15 +1,10 @@
 .application-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 45px 54px minmax(0, 1fr) 26px;
+  grid-template-rows: 45px minmax(0, 1fr) 26px;
   width: 100vw;
   height: 100dvh;
   background: var(--surface);
-}
-
-/* The Outlook command bar exists only in Mail. */
-.application-shell.without-commands {
-  grid-template-rows: 45px minmax(0, 1fr) 26px;
 }
 
 .title-bar {
@@ -445,7 +440,7 @@
   align-items: center;
   gap: 7px;
   min-width: 0;
-  padding: 7px 16px 7px 82px;
+  padding: 7px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--surface);
 }
@@ -526,6 +521,19 @@
     clamp(250px, 16vw, 310px);
   min-height: 0;
   overflow: hidden;
+}
+
+/* Mail only: the Outlook command bar sits inside the page, beside the rail. */
+.workspace:has(> .command-bar) {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.workspace:has(> .command-bar) > .app-rail {
+  grid-row: 1 / -1;
+}
+
+.workspace > .command-bar {
+  grid-column: 2 / -1;
 }
 
 .overview-workspace {

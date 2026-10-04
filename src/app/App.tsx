@@ -585,11 +585,7 @@ export function App() {
       speed={gameSpeed}
     >
       <div
-        className={[
-          "application-shell",
-          reduceMotion && "reduce-motion",
-          activeView !== "mail" && "without-commands",
-        ].filter(Boolean).join(" ")}
+        className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
         <GameFeedbackLayer />
@@ -608,21 +604,19 @@ export function App() {
           onMaintainEquipment={maintainEquipment}
           onBuyOfficialSwords={buyOfficialSwords}
         />
-        {activeView === "mail" && (
-          <CommandBar
-            onCompose={openComposer}
-            onMarkAllRead={markAllMessagesRead}
-            canMarkAllRead={
-              mailFolder === "inbox" &&
-              visibleInboxMessages.some((message) => message.unread)
-            }
-          />
-        )}
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
           <StableAppRail view={activeView} onChange={changeView} />
           <Suspense fallback={null}>
           {activeView === "mail" ? (
             <>
+              <CommandBar
+                onCompose={openComposer}
+                onMarkAllRead={markAllMessagesRead}
+                canMarkAllRead={
+                  mailFolder === "inbox" &&
+                  visibleInboxMessages.some((message) => message.unread)
+                }
+              />
               <StableFolderPane
                 folder={mailFolder}
                 onSelectFolder={selectFolder}
