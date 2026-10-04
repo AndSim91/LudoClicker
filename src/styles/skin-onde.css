@@ -20,14 +20,20 @@
 
   --onde-abyss: #021e33;
   --onde-groove: #04263f;
-  --onde-hover: #104d6b;
-  --onde-selected: #124f6c;
+  --onde-hover: rgb(230 244 241 / 8%);
+  --onde-selected: rgb(108 211 214 / 14%);
   --onde-teal: #177c89;
   --onde-wave: #6cd3d6;
   --onde-foam: #fbf1dc;
   --onde-gold: #e0a64a;
   --onde-gold-bright: #f0b85a;
   --onde-on-gold: #0a1f33;
+  --onde-gold-soft: #f3d79f;
+  --onde-thread: rgb(224 166 74 / 30%);
+  /* The title bar gradient, fixed to the viewport, darkening towards the bottom. */
+  --onde-page:
+    linear-gradient(180deg, rgb(1 14 25 / 0%) 45px, rgb(1 14 25 / 50%)) fixed,
+    linear-gradient(90deg, #021e33, #03324d 55%, #034965) fixed;
 
   /* Surfaces: abyss rail < navy canvas < ocean panels. */
   --surface-rail: var(--onde-abyss);
@@ -48,8 +54,8 @@
   --accent-ink: var(--onde-wave);
   --focus: var(--onde-gold-bright);
 
-  --line: #2a6280;
-  --line-strong: #3c7b96;
+  --line: rgb(230 244 241 / 13%);
+  --line-strong: rgb(230 244 241 / 26%);
 
   --success: #7fdcae;
   --warning: #f3a36f;
@@ -95,11 +101,104 @@
 
 /* ---- Chrome ---------------------------------------------------------- */
 
+/* The title bar continues through the whole window: the same abyss-to-ocean
+   gradient, fixed to the viewport so every pane (and every sticky header) sits
+   exactly under its own slice of the bar, darkening towards the bottom. */
 :root[data-theme="dark"] body,
-:root[data-theme="dark"] .application-shell {
-  background:
-    radial-gradient(1100px 520px at 60% -12%, rgb(3 73 101 / 70%), transparent 65%),
-    var(--surface);
+:root[data-theme="dark"] .application-shell,
+:root[data-theme="dark"] .command-bar,
+:root[data-theme="dark"] .message-list,
+:root[data-theme="dark"] .list-tabs,
+:root[data-theme="dark"] .composer,
+:root[data-theme="dark"] .empty-composer,
+:root[data-theme="dark"] .message-detail,
+:root[data-theme="dark"] .day-panel,
+:root[data-theme="dark"] .overview-view,
+:root[data-theme="dark"] .people-hero,
+:root[data-theme="dark"] .people-table,
+:root[data-theme="dark"] .member-filter-row,
+:root[data-theme="dark"] .collaborator-table,
+:root[data-theme="dark"] .collaborator-table-filters,
+:root[data-theme="dark"] .collaborator-sort-mobile,
+:root[data-theme="dark"] .upgrade-tree-scroll,
+:root[data-theme="dark"] .upgrade-tree-canvas,
+:root[data-theme="dark"] .season-schedule,
+:root[data-theme="dark"] .qualified-team {
+  background: var(--onde-page);
+}
+
+/* Main dividers are thin gold threads, like the one beside Fondi in the bar. */
+:root[data-theme="dark"] .app-rail,
+:root[data-theme="dark"] .folder-pane,
+:root[data-theme="dark"] .message-list {
+  border-right-color: var(--onde-thread);
+}
+
+:root[data-theme="dark"] .day-panel {
+  border-left-color: var(--onde-thread);
+}
+
+:root[data-theme="dark"] .command-divider {
+  background: rgb(224 166 74 / 55%);
+}
+
+/* The window closes between two gold threads: under the bar and over the status bar. */
+:root[data-theme="dark"] .status-bar {
+  border-top-color: rgb(224 166 74 / 40%);
+  background: linear-gradient(rgb(1 14 25 / 45%), rgb(1 14 25 / 45%)), var(--onde-page);
+}
+
+/* Pane titles are small gold capitals over a gold thread, like the concept labels. */
+:root[data-theme="dark"] .pane-heading,
+:root[data-theme="dark"] .day-heading {
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgb(224 166 74 / 30%);
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .pane-heading strong,
+:root[data-theme="dark"] .day-heading strong {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="dark"] .date-label {
+  color: var(--onde-gold-soft);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Active tabs: gold underline, the action colour; teal stays for activity. */
+:root[data-theme="dark"] .list-tabs button.active,
+:root[data-theme="dark"] .composer-tabs > button.active,
+:root[data-theme="dark"] .people-tabs button.active {
+  border-bottom-color: var(--onde-gold-bright);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .folder b {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .folder.resource-row b {
+  color: var(--onde-gold-soft);
+}
+
+:root[data-theme="dark"] .message-row.selected .message-avatar {
+  box-shadow: 0 0 0 1.5px var(--onde-gold-bright), 0 0 10px rgb(240 184 90 / 30%);
+}
+
+:root[data-theme="dark"] .appointment {
+  box-shadow: inset 0 0 0 1px rgb(240 184 90 / 22%), 0 6px 18px rgb(1 14 25 / 30%);
+}
+
+:root[data-theme="dark"] .appointment:not(.appointment-tournament) .appointment-title > span {
+  color: var(--onde-gold-soft);
 }
 
 /* Title bar: abyss to ocean, sealed by a gold saber line. */
@@ -132,7 +231,7 @@
 }
 
 :root[data-theme="dark"] .app-rail {
-  background: var(--onde-abyss);
+  background: linear-gradient(rgb(1 20 34 / 45%), rgb(1 20 34 / 45%)), var(--onde-page);
 }
 
 /* The wave rises behind the empty lower half of the folders. The asset fades to
@@ -140,7 +239,7 @@
 :root[data-theme="dark"] .folder-pane {
   background:
     url("/assets/onde-wave-strip.webp") center bottom 40px / 100% auto no-repeat,
-    var(--surface-muted);
+    var(--onde-page);
 }
 
 :root[data-theme="dark"] .rail-item:hover,
