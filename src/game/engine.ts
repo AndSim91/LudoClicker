@@ -16,7 +16,9 @@ import { reconcileCollaboratorManagement } from "./collaboratorManagement";
 import {
   finalizeEmail,
   resolveEmailOutcome,
+  startNextCampaign,
 } from "./emailFlow";
+import { selectActiveEmail, selectAvailableContacts } from "./selectors";
 import { resolveAcquisitionEvent } from "./eventFlow";
 import { processAutomaticEvents } from "./eventAutomationFlow";
 import { createInitialState as buildInitialState } from "./initialState";
@@ -284,6 +286,11 @@ function tickStep(
     );
   }
   nextState = processNarrativeEvent(nextState, now, gainMultiplier);
+  // Qualunque strada renda disponibile un contatto (prova recuperata, collaboratori,
+  // salvataggi vecchi) deve aprire la bozza: mai Posta vuota con contatti in attesa.
+  if (!selectActiveEmail(nextState) && selectAvailableContacts(nextState) > 0) {
+    nextState = startNextCampaign(nextState, now);
+  }
   return result(notifyPrestigeOffer(announceMembershipFeeTier(nextState, now), now), true);
 }
 
