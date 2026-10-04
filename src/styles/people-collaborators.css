@@ -99,6 +99,15 @@
   box-shadow: inset 3px 0 var(--collaborator-accent, var(--blue-600));
 }
 
+.collaborator-row.is-unassigned:not(.is-selected) {
+  background: color-mix(in srgb, var(--warning) 9%, var(--surface));
+  box-shadow: inset 4px 0 var(--warning);
+}
+
+.collaborator-row.is-unassigned .collaborator-current-role > strong {
+  color: var(--warning);
+}
+
 .collaborator-row.rarity-common {
   --collaborator-accent: var(--rarity-common-accent);
 }

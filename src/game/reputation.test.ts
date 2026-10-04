@@ -177,3 +177,40 @@ it("lets a secret legendary recruited before join the ordinary legendaries of th
   expect(getDiscoveredLegendaryIds({ legendaryCollaborators: { ...state.legendaryCollaborators, enrolledProfileIds: [] } }))
     .toContain("marco-palena");
 });
+
+it("keeps the tutorial scenes already finished in the next school", () => {
+  const ready = readySchool();
+  const seen = {
+    ...ready,
+    tutorial: { completedSceneIds: ["first-invitation"], skippedSceneIds: ["first-event"], triggeredSceneIds: ["x"] },
+  };
+  expect(foundSchool(seen, details, 2_000).tutorial).toEqual({
+    completedSceneIds: ["first-invitation"],
+    skippedSceneIds: ["first-event"],
+    triggeredSceneIds: [],
+  });
+});
+
+it("brings one random Leggendario of the old school as the only member of the new one", () => {
+  const ready = readySchool();
+  const legendary = ready.contacts.find((contact) => contact.specialProfileId) ??
+    { ...ready.contacts[0], rarity: "legendary" as const, specialProfileId: SPECIAL_COLLABORATORS[0].id };
+  const withLegendary: GameState = {
+    ...ready,
+    contacts: [
+      ...ready.contacts.filter((contact) => contact.id !== legendary.id),
+      { ...legendary, status: "enrolled", training: undefined },
+    ],
+  };
+  const next = foundSchool(withLegendary, details, 2_000);
+  const members = next.contacts.filter((contact) => contact.status === "enrolled");
+  expect(members).toHaveLength(1);
+  const followerId = members[0].specialProfileId;
+  expect(members[0].forms).toEqual([]);
+  expect(withLegendary.contacts.some((contact) =>
+    contact.status === "enrolled" && contact.specialProfileId === followerId,
+  )).toBe(true);
+  expect(next.school.activeMembers).toBe(1);
+  expect(next.legendaryCollaborators.enrolledProfileIds).toEqual([followerId]);
+  expect(next.contacts.filter((contact) => contact.specialProfileId === followerId)).toHaveLength(1);
+});

@@ -304,22 +304,33 @@ describe("game engine: narrative", () => {
     expect(offeredAgain.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
-    expect(founded.school.activeMembers).toBe(0);
+    // Eva Parodi, the only Leggendario, follows the player as the first member.
+    expect(founded.school.activeMembers).toBe(1);
     // The Fama belongs to the school: the new one starts from zero.
     expect(founded.school.fame).toBe(0);
-    expect(founded.collaborators).toEqual([]);
-    expect(founded.contacts).toHaveLength(5);
-    expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual([]);
-    expect(founded.legendaryCollaborators.retainedProgress["eva-parodi"]).toMatchObject({
-      forms: ["form-1"],
-      instructorForms: ["form-1"],
-      joinedAt: 500,
+    expect(founded.collaborators.map((collaborator) => collaborator.specialProfileId)).toEqual(["eva-parodi"]);
+    expect(founded.contacts).toHaveLength(6);
+    expect(founded.contacts.filter((contact) => contact.status === "enrolled")
+      .map((contact) => contact.specialProfileId)).toEqual(["eva-parodi"]);
+    expect(founded.legendaryCollaborators.enrolledProfileIds).toEqual(["eva-parodi"]);
+    // She follows without anything she earned: no Forms, attestati or course bonuses.
+    expect(founded.legendaryCollaborators.retainedProgress["eva-parodi"]).toEqual({
+      forms: [],
+      instructorForms: [],
+      technicianForms: [],
+      formBranchPreferences: [],
+      joinedAt: 3_000,
       arenaBase: 91,
       styleBase: 87,
-      agonistCourseCompletions: 2,
-      agonistCourseArenaBonus: 4,
-      agonistCourseStyleBonus: 6,
     });
+    expect(founded.contacts.find((contact) => contact.specialProfileId === "eva-parodi")).toMatchObject({
+      forms: [],
+      agonistCourseCompletions: 0,
+      agonistCourseArenaBonus: 0,
+      agonistCourseStyleBonus: 0,
+      tournamentExperience: 0,
+    });
+    expect(founded.collaborators[0]).toMatchObject({ forms: [], instructorForms: [] });
     expect(founded.legendaryCollaborators.encounteredProfileIds).toEqual(
       expect.arrayContaining(initial.legendaryCollaborators.encounteredProfileIds),
     );
@@ -339,7 +350,8 @@ describe("game engine: narrative", () => {
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
     // Founding alone gives no bonus: only the Reputation spent does.
     expect(founded.player.writingPower).toBeCloseTo(1);
-    expect(selectIncomePerMonth(founded)).toBe(0);
+    // Only the fee of the Leggendario who followed.
+    expect(selectIncomePerMonth(founded)).toBe(40);
     expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
 
     const postPrestigeEvent = {
@@ -363,7 +375,7 @@ describe("game engine: narrative", () => {
       acquisitionEvents: [postPrestigeEvent],
       automation: { ...founded.automation, lastProcessedAt: 4_000 },
     }, { type: "TICK", now: 4_000 });
-    expect(postPrestigeContacts.contacts).toHaveLength(9);
+    expect(postPrestigeContacts.contacts).toHaveLength(10);
 
     const upgraded = gameReducer(
       { ...founded, school: { ...founded.school, euros: 100 } },

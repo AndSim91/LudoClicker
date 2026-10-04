@@ -34,7 +34,7 @@ describe("moments (4.2)", () => {
       ...base,
       school: { ...base.school, fame: 10_000 },
       tournaments: { ...base.tournaments, nationalTitlesCurrentSchool: 1 },
-      moments: { seen: [...getReachedMomentKeys(base), "victory:national"], queue: [] },
+      moments: { seen: [...getReachedMomentKeys(base), "victory:national", "council"], queue: [] },
     };
     const founded = gameReducer(ready, { type: "FOUND_SCHOOL", details, now: 2_000, spending: { upgrades: {}, rent: 0 } });
     expect(founded.moments.queue).toEqual(["foundation"]);

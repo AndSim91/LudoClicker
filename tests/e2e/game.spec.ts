@@ -428,6 +428,10 @@ test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", a
   await page.getByRole("button", { name: "Fonda la nuova scuola" }).click();
   await page.getByRole("button", { name: "Conferma: fonda la scuola" }).click();
 
+  // The new school starts back on the email composer.
+  await expect(page.getByRole("heading", { name: "Impostazioni" })).toHaveCount(0);
+  await page.getByRole("button", { name: /Salta/ }).click();
+  await page.getByRole("button", { name: "Impostazioni", exact: true }).click();
   await expect(page.getByText(/Onde di Levante · v/)).toBeVisible();
   await expect(page.getByText(`${state.school.name} · Sede madre`)).toBeVisible();
   await expect(page.getByRole("button", { name: "Fonda la nuova scuola" })).toBeDisabled();
