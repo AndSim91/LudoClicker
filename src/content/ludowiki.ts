@@ -437,7 +437,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Titoli nazionali", value: `${GAME_CONFIG.prestigeNationalTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
-      { label: "Reputazione", value: "1 + √(Fama/200)", detail: "1 per il Nazionale, +1 per Champion's Arena, Reptile o Superba e Chronicles vinti" },
+      { label: "Reputazione", value: "2 + √(Fama/128)", detail: "2 per il Nazionale, +2 per Champion's Arena, Reptile o Superba e Chronicles vinti" },
       { label: "Potenziamenti", value: `+${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: `fino a ${GAME_CONFIG.reputationUpgradeMaxLevel} punti ciascuno, mai azzerati` },
       { label: "Rendita", value: `${Math.round(GAME_CONFIG.networkRentPointShare * 100)}% a punto`, detail: "del valore di rendita della scuola lasciata (iscritti × 40 € × 10%)" },
     ],

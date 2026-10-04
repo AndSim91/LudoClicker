@@ -337,8 +337,8 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    // 150 Fama earns no point; the national title and the Champion's Arena one each. Nothing spent.
-    expect(founded.network.reputation).toBe(2);
+    // 150 Fama earns 1 point (√(150/128)); the national title and the Champion's Arena 2 each. Nothing spent.
+    expect(founded.network.reputation).toBe(5);
     // The map keeps only name, city and Fama of the school left behind.
     expect(founded.network.schools).toEqual([{ name: eligible.school.name, city: eligible.school.city, fame: eligible.school.fame }]);
     expect(founded.network).toMatchObject({ schoolCount: 1, monthlyRent: 0 });

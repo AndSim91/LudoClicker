@@ -57,7 +57,7 @@ describe("achievements", () => {
     };
     const founded = foundSchool(ready, details, 2_000, { upgrades: {}, rent: 6 });
     expect(getCareer(founded)).toMatchObject({
-      reputationEarned: 6,
+      reputationEarned: 8,
       perfectPhrases: 7,
       maxRentPoints: 6,
       earliestFoundationYear: 1,

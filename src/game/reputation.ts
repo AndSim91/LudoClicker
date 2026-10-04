@@ -3,8 +3,8 @@ import type { FoundedSchool, GameState } from "./types";
 
 /*
  * Reputazione di rete (6.19): the only value that travels from a school to the
- * next one. The prestige earns 1 point for the national title that unlocked it,
- * √(Fama / 200) points, +1 each for the Champion's Arena, the Reptile
+ * next one. The prestige earns 2 points for the national title that unlocked it,
+ * √(Fama / 128) points, +2 each for the Champion's Arena, the Reptile
  * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
  * - six permanent upgrades, +20% of their base value per point, up to 50 points;
  * - the network rent, which is consumed: each point locks 10% of the rent value
@@ -75,7 +75,7 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
   const championsWin = state.tournaments.championsVictoryCurrentSchool;
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
-  const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / 200));
+  const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / GAME_CONFIG.reputationFameDivisor));
   const rentValue = Math.max(0, state.school.activeMembers) *
     GAME_CONFIG.monthlyMemberFee * GAME_CONFIG.networkRentValueShare;
   return {
@@ -84,7 +84,7 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
     reptileWin,
     chroniclesWin,
     points: GAME_CONFIG.reputationNationalTitlePoints + famePoints +
-      [championsWin, reptileWin, chroniclesWin].filter(Boolean).length,
+      [championsWin, reptileWin, chroniclesWin].filter(Boolean).length * GAME_CONFIG.reputationTournamentPoints,
     rentPerPoint: rentValue * GAME_CONFIG.networkRentPointShare,
   };
 }

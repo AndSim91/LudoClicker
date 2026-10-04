@@ -105,7 +105,11 @@ export const GAME_CONFIG = {
   // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
   reputationStep: 0.2,
   // The national title that unlocks the prestige is worth one point by itself.
-  reputationNationalTitlePoints: 1,
+  reputationNationalTitlePoints: 2,
+  // Champion's Arena, Reptile/Superba and Chronicles won by the school left behind.
+  reputationTournamentPoints: 2,
+  // Fama points = ⌊√(Fama / divisor)⌋: 128 = 200 / 1,25², so 1,25 × √(Fama / 200) with exact thresholds.
+  reputationFameDivisor: 128,
   reputationUpgradeMaxLevel: 50,
   // Rent value of a school left behind: members × base fee × this share.
   networkRentValueShare: 0.1,

@@ -33,10 +33,11 @@ it("founds a new school from one page: name and city, old points white and fixed
   const genetics = screen.getByLabelText("Genetica: 3");
   expect(genetics).not.toHaveClass("is-added");
   expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
-  // Only the point of the national title: one + turns it gold, then the others stop.
+  // Only the 2 points of the national title: each + turns gold, then the others stop.
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
   expect(screen.getByLabelText("Genetica: 4")).toHaveClass("is-added");
-  expect(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" }));
+  expect(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Togli un punto da Genetica" }));
   expect(screen.getByLabelText("Genetica: 3")).not.toHaveClass("is-added");
   expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
@@ -48,7 +49,7 @@ it("founds a new school from one page: name and city, old points white and fixed
   fireEvent.click(screen.getByRole("button", { name: "Fonda Onde di Levante" }));
   expect(onFoundSchool).toHaveBeenCalledWith(
     { name: "Onde di Levante", city: "La Spezia" },
-    expect.objectContaining({ rent: 0, upgrades: expect.objectContaining({ genetics: 1 }) }),
+    expect.objectContaining({ rent: 0, upgrades: expect.objectContaining({ genetics: 1, writing: 1 }) }),
   );
   expect(onFoundationOpenChange).toHaveBeenLastCalledWith(false);
 });

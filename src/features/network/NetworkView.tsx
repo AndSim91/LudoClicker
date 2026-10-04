@@ -47,7 +47,7 @@ export function NetworkView({
   const ready = canFoundSchool(state);
   const preview = getPrestigeReputationPreview(state);
   const network = state.network;
-  const nextFamePoint = (preview.famePoints + 1) ** 2 * 200;
+  const nextFamePoint = (preview.famePoints + 1) ** 2 * GAME_CONFIG.reputationFameDivisor;
   const reptileName = getReptileTournamentName(state);
   const tournaments: [string, boolean][] = [
     ["Champion's Arena", preview.championsWin],
@@ -104,7 +104,7 @@ export function NetworkView({
             {tournaments.map(([name, won]) => (
               <li key={name} className={won ? "is-done" : "is-open"}>
                 <span>{name}</span>
-                <b>{won ? "+1" : "+1 possibile"}</b>
+                <b>{won ? `+${GAME_CONFIG.reputationTournamentPoints}` : `+${GAME_CONFIG.reputationTournamentPoints} possibili`}</b>
               </li>
             ))}
           </ul>

@@ -531,15 +531,18 @@ i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 `src/game/reputation.ts`):
 
 ```
-punti = 1 per il titolo nazionale che sblocca il prestigio
-      + arrotonda per difetto(√(Fama / 200))
-      + 1 se la scuola lasciata ha vinto la Champion's Arena
-      + 1 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
-      + 1 se ha vinto le Chronicles of Ludosport
+punti = 2 per il titolo nazionale che sblocca il prestigio
+      + arrotonda per difetto(√(Fama / 128))
+      + 2 se la scuola lasciata ha vinto la Champion's Arena
+      + 2 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
+      + 2 se ha vinto le Chronicles of Ludosport
 ```
 
-Per esempio, senza altri tornei, Fama 199 dà 1 punto, Fama 10.000 ne dà 8 e
-Fama 30.000 ne dà 13 (`reputationNationalTitlePoints = 1`).
+La parte della Fama vale 1,25 × √(Fama / 200) (128 = 200 / 1,25²): l'n-esimo
+punto arriva a 128 × n² (128, 512, 1.152 …). Per esempio, senza altri tornei,
+Fama 127 dà 2 punti, Fama 10.000 ne dà 10 e Fama 30.000 ne dà 17
+(`reputationNationalTitlePoints = 2`, `reputationTournamentPoints = 2`,
+`reputationFameDivisor = 128`).
 
 **Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
 scuola» della pagina Rete (§ 17.3); la spesa è definitiva e i punti non spesi
