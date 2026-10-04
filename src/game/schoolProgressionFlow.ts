@@ -15,6 +15,7 @@ import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
 import { createInitialState } from "./initialState";
+import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
 import {
@@ -175,7 +176,8 @@ export function foundSchool(
       ordinaryVictoryAchieved: state.tournaments.ordinaryVictoryAchieved,
     },
     achievements: state.achievements,
-    moments: state.moments,
+    // The constellation of the Rete plays at every new school.
+    moments: { ...state.moments, queue: [...state.moments.queue, FOUNDATION_MOMENT] },
     // Scenes already seen (or skipped) in an earlier school never come back.
     tutorial: {
       ...fresh.tutorial,

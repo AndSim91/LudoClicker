@@ -1,6 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { Icon, type IconName } from "../../components/common/Icon";
 import type { GameState, MomentKey } from "../../game/types";
+import { FoundationArt } from "./FoundationArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
 /** How long a moment plays before it closes on its own (the game stays paused meanwhile). */
@@ -171,16 +172,14 @@ function MomentArt({ content }: { content: MomentContent }) {
     );
   }
   return (
-    <div className="moment-art moment-foundation-art" aria-hidden="true">
-      <svg viewBox="0 0 400 220">
-        <path className="moment-grid" d="M0 55 H400 M0 110 H400 M0 165 H400 M80 0 V220 M160 0 V220 M240 0 V220 M320 0 V220" />
-        <path className="moment-route" d="M70 150 C 140 40, 260 40, 330 100" pathLength="1" />
-        <circle className="moment-city is-old" cx="70" cy="150" r="10" />
-        <circle className="moment-city is-new" cx="330" cy="100" r="12" />
-      </svg>
-      <span className="moment-city-label is-old">{content.from}</span>
-      <span className="moment-city-label is-new">{content.to}</span>
-    </div>
+    <FoundationArt
+      number={content.number}
+      stars={content.stars}
+      dropped={content.dropped}
+      previousCity={content.previousCity}
+      newcomerName={content.newcomerName}
+      newcomerCity={content.newcomerCity}
+    />
   );
 }
 
@@ -240,6 +239,12 @@ export function MomentLayer({
           <p className="moment-price">
             <span>{SPORT_SWORD_LABEL}</span>
             <s>{content.oldPrice}</s> → <b>{content.newPrice} ({content.increase})</b>
+          </p>
+        ) : null}
+        {content.kind === "foundation" ? (
+          <p className="moment-price">
+            <span>Stelle del simbolo</span>
+            <b>{content.tally}</b>
           </p>
         ) : null}
         <div className="moment-actions">

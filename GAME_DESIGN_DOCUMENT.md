@@ -4163,7 +4163,8 @@ suo inizio non c'è una spada disponibile.
 ### 25.1 Momenti animati
 
 Decisione del 03/10 (piano 4.2). Scene a schermo che celebrano i momenti
-chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
+chiave, **una sola volta per salvataggio** (anche dopo il prestigio), tranne la
+costellazione dell'Ordine e l'Inflazione di Luce:
 
 - **Nasce il Consiglio delle Onde**: all'ottavo collaboratore, quando si
   sblocca la gestione per settori. Otto collaboratori sparsi prendono posto
@@ -4175,8 +4176,22 @@ chiave, **una sola volta per salvataggio** (anche dopo il prestigio):
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
   Superba) e Chronicles of Ludosport;
-- **una nuova sede per l'Ordine**: la prima fondazione;
-- **Inflazione di Luce**, l'unica che torna **a ogni aumento** (al massimo una
+- **la costellazione dell'Ordine**, che torna **a ogni fondazione** (dal
+  04/10; prima solo alla prima). Ogni sede è una stella e le stelle disegnano il
+  simbolo dell'Ordine dello stendardo: la Sede madre è la punta, poi la lama, la
+  fiamma interna e le onde alla base, a coppie sinistra/destra. Bastano **25
+  stelle**: la Sede madre e le ultime 24 scuole della mappa della Rete (la mappa
+  resta a 50). Le stelle da accendere si vedono già in filigrana; quelle accese
+  sono più grandi e luminose quanta più Fama aveva la scuola (spente se il
+  salvataggio non l'ha registrata). La nuova sede si accende in oro con il suo
+  nome; la venticinquesima chiude il simbolo («Simbolo completo») e lo fa
+  brillare, dalla ventiseiesima la nuova stella si accende sopra la punta e le
+  sedi più vecchie sono contate a parte («+N sedi»). Titolo con l'ordinale
+  («L'undicesima sede dell'Ordine»), testo con la Fama della scuola lasciata e
+  il Leggendario che segue. In Outlook l'avviso ha la riga «Stelle del simbolo
+  10 → 11 di 25». Codice: `FoundationArt.tsx` e `constellation.ts` in
+  `src/features/moments/`, accodata da `foundSchool` senza passare da `seen`;
+- **Inflazione di Luce**, che torna **a ogni aumento** (al massimo una
   volta l'anno, a gennaio): in Modalità Onde cade dall'alto un decreto su carta
   bollata con la testata di Lama di Luce (tre spade incrociate verde, bianca e
   rossa), titolo, causa dell'anno, prezzo della «Spada per combattimento

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
 import { MOMENT_DURATION_MS, MomentLayer } from "./MomentLayer";
+import { getFoundationTitle } from "./momentContent";
 
 afterEach(() => {
   cleanup();
@@ -45,5 +46,39 @@ describe("MomentLayer", () => {
     expect(container.querySelector(".moment-price")).toHaveTextContent(
       "Spada per combattimento sportivo330,00 € → 445,50 € (+35%)",
     );
+  });
+
+  it("draws a new star of the Ordine at every foundation", () => {
+    const initial = createInitialState(1_000, "Verifica UI");
+    const schools = Array.from({ length: 10 }, (_, index) => ({
+      name: index === 0 ? "Ordine delle Onde" : `Scuola ${index + 1}`,
+      city: index === 9 ? "Bergamo" : `Città ${index + 1}`,
+      ...(index < 2 ? {} : { fame: 1_000 + index * 300 }),
+    }));
+    const state = {
+      ...initial,
+      school: { ...initial.school, name: "Scuola del Vento", city: "Torino" },
+      network: { ...initial.network, schools, schoolCount: 10 },
+    };
+    const { container } = render(<MomentLayer state={state} momentKey="foundation" onDismiss={vi.fn()} />);
+
+    expect(screen.getByRole("dialog", { name: "L'undicesima sede dell'Ordine" })).toBeVisible();
+    expect(screen.getByText("Scuola 10 entra nella Rete con 3.700 di Fama; Scuola del Vento apre a Torino.")).toBeVisible();
+    expect(screen.getByText("10 → 11 di 25")).toBeVisible();
+    // Ten schools left are ten stars, two of them without Fama; the other fourteen wait as faint dots.
+    expect(container.querySelectorAll(".moment-star")).toHaveLength(10);
+    expect(container.querySelectorAll(".moment-star.is-unknown")).toHaveLength(1);
+    expect(container.querySelectorAll(".moment-constellation-ghost circle")).toHaveLength(14);
+  });
+
+  it("names the school in Italian ordinals", () => {
+    expect(getFoundationTitle(2)).toBe("La seconda sede dell'Ordine");
+    expect(getFoundationTitle(11)).toBe("L'undicesima sede dell'Ordine");
+    expect(getFoundationTitle(23)).toBe("La ventitreesima sede dell'Ordine");
+    expect(getFoundationTitle(28)).toBe("La ventottesima sede dell'Ordine");
+    expect(getFoundationTitle(81)).toBe("L'ottantunesima sede dell'Ordine");
+    expect(getFoundationTitle(120)).toBe("La centoventesima sede dell'Ordine");
+    expect(getFoundationTitle(306)).toBe("La trecentoseiesima sede dell'Ordine");
+    expect(getFoundationTitle(1200)).toBe("La sede n° 1.200 dell'Ordine");
   });
 });

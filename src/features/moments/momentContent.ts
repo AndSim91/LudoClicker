@@ -8,10 +8,12 @@ import {
   LIGHT_INFLATION_MOMENT,
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
-import { formatCurrency } from "../../shared/formatters";
+import { formatCurrency, formatStat } from "../../shared/formatters";
+import { FOUNDATION_MOMENT } from "../../game/moments";
 import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
 import { getLegendaryDossier } from "../ludowiki/ludodexPresentation";
+import { CONSTELLATION_SIZE, type FoundationStar } from "./constellation";
 
 export type MomentContent =
   | { kind: "council"; kicker: string; title: string; body: string; seats: string[] }
@@ -27,7 +29,19 @@ export type MomentContent =
       stats: string;
     }
   | { kind: "victory"; kicker: string; title: string; body: string; level: VictoryMomentLevel }
-  | { kind: "foundation"; kicker: string; title: string; body: string; from: string; to: string }
+  | {
+      kind: "foundation";
+      kicker: string;
+      title: string;
+      body: string;
+      number: number;
+      stars: FoundationStar[];
+      dropped: number;
+      previousCity: string;
+      newcomerName: string;
+      newcomerCity: string;
+      tally: string;
+    }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
@@ -77,6 +91,36 @@ function getVictoryWinners(state: GameState, level: VictoryMomentLevel): string[
     .map((participant) => `${participant!.firstName} ${participant!.lastName}`);
 }
 
+const UNITS = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
+const TEENS = ["dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"];
+const TENS = ["", "", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"];
+const FIRST_ORDINALS = ["", "prima", "seconda", "terza", "quarta", "quinta", "sesta", "settima", "ottava", "nona", "decima"];
+
+function cardinal(value: number): string {
+  if (value >= 100) {
+    const hundreds = Math.floor(value / 100);
+    return (hundreds === 1 ? "" : UNITS[hundreds]) + "cento" + (value % 100 ? cardinal(value % 100) : "");
+  }
+  if (value < 10) return UNITS[value];
+  if (value < 20) return TEENS[value - 10];
+  const tens = TENS[Math.floor(value / 10)];
+  const unit = value % 10;
+  if (!unit) return tens;
+  return (unit === 1 || unit === 8 ? tens.slice(0, -1) : tens) + UNITS[unit];
+}
+
+/** «La seconda sede dell'Ordine», «L'undicesima …»; from the thousandth on, «La sede n° 1.000 …». */
+export function getFoundationTitle(value: number): string {
+  if (value >= 1000) return `La sede n° ${formatStat(value)} dell'Ordine`;
+  let word: string;
+  if (value <= 10) word = FIRST_ORDINALS[value];
+  else {
+    const number = cardinal(value);
+    word = number.endsWith("tre") || number.endsWith("sei") ? `${number}esima` : `${number.slice(0, -1)}esima`;
+  }
+  return `${/^[aeiou]/.test(word) ? "L'" : "La "}${word} sede dell'Ordine`;
+}
+
 /** What a queued moment shows, read from the current state. */
 export function describeMoment(state: GameState, key: MomentKey): MomentContent {
   if (key === "council") {
@@ -88,17 +132,32 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
       seats: state.collaborators.slice(0, COUNCIL_SEATS).map((collaborator) => getInitials(collaborator.displayName)),
     };
   }
-  if (key === "foundation") {
-    const previous = state.network.schools.at(-1);
-    const from = previous ? `${previous.name} · ${previous.city}` : "Sede madre";
-    const to = `${state.school.name} · ${state.school.city}`;
+  if (key === FOUNDATION_MOMENT) {
+    const number = state.network.schoolCount + 1;
+    const map = state.network.schools;
+    const previous = map.at(-1);
+    // The constellation: the Sede madre and the latest schools left, one star each.
+    const starred = map.length <= CONSTELLATION_SIZE ? map : [map[0], ...map.slice(-(CONSTELLATION_SIZE - 1))];
+    const brightest = Math.max(1, ...starred.map((school) => school.fame ?? 0));
+    // ponytail: the follower is the first contact of the new school (foundSchool puts it there);
+    // the scene plays right after the foundation, before any other Leggendario can join.
+    const first = state.contacts[0];
+    const follower = first?.specialProfileId && first.status === "enrolled" ? `${first.firstName} ${first.lastName}` : null;
+    const fame = previous?.fame === undefined ? "" : ` con ${formatStat(previous.fame)} di Fama`;
+    const lit = Math.min(number, CONSTELLATION_SIZE);
     return {
       kind: "foundation",
-      kicker: "Rete dell'Ordine",
-      title: "Una nuova sede per l'Ordine",
-      body: `${previous?.name ?? "La scuola"} entra nella Rete; ${state.school.name} apre a ${state.school.city}.`,
-      from,
-      to,
+      kicker: `Rete dell'Ordine · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
+      title: getFoundationTitle(number),
+      body: `${previous?.name ?? "La scuola"} entra nella Rete${fame}; ${state.school.name} apre a ${state.school.city}.` +
+        (follower ? ` Ti segue ${follower}.` : ""),
+      number,
+      stars: starred.map((school) => ({ light: school.fame === undefined ? null : Math.sqrt(school.fame / brightest) })),
+      dropped: state.network.schoolCount - starred.length,
+      previousCity: previous?.city ?? "",
+      newcomerName: state.school.name,
+      newcomerCity: state.school.city,
+      tally: number > CONSTELLATION_SIZE ? `Simbolo completo · ${number} sedi` : `${lit - 1} → ${lit} di ${CONSTELLATION_SIZE}`,
     };
   }
   if (key === LIGHT_INFLATION_MOMENT) {

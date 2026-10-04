@@ -395,40 +395,98 @@
   100% { opacity: 0; transform: scale(2.4); }
 }
 
-/* Foundation: the route from the old school to the new one. */
-.moment-foundation-art { position: relative; }
-.moment-foundation-art svg { width: 100%; height: 100%; }
-.moment-grid { stroke: #0e4563; stroke-width: 1; }
-.moment-route {
-  fill: none;
-  stroke: var(--onde-gold-bright);
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  animation: moment-route 2s ease-in-out 0.4s both;
+/*
+ * Foundation: a constellation that draws the symbol of the Ordine, one star per
+ * school (FoundationArt.tsx). The stars still to light are faint dots; the new
+ * one lights up in gold, the whole symbol glows when it is complete.
+ */
+.moment-dust { display: none; }
+:root[data-theme="dark"] .moment-dust {
+  position: absolute;
+  z-index: -1; /* above the layer's background, under the scene (the layer is a stacking context) */
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
-.moment-city { stroke: var(--onde-foam); stroke-width: 3; }
-.moment-city.is-old { fill: var(--onde-wave); opacity: 0.7; }
-.moment-city.is-new {
-  fill: #9a7bd0;
+.moment-dust circle { fill: var(--onde-foam); animation: moment-twinkle 3s ease-in-out infinite; }
+:root[data-theme="dark"] .moment-constellation {
+  width: min(560px, 92vw);
+  max-height: 52vh;
+  overflow: visible;
+}
+.moment-constellation text { font-family: var(--font-body); font-size: 9px; fill: var(--ink-muted); }
+.moment-constellation-ghost { animation: moment-fade 0.6s ease-out 0.1s both; }
+.moment-constellation-ghost line { stroke: var(--onde-wave); stroke-opacity: 0.13; stroke-width: 0.6; stroke-dasharray: 1.5 2.5; }
+.moment-constellation-ghost circle { fill: var(--onde-foam); opacity: 0.28; }
+.moment-constellation-line {
+  stroke: var(--onde-wave);
+  stroke-opacity: 0.55;
+  stroke-width: 0.9;
+  stroke-dasharray: 1;
+  animation: moment-route 0.4s ease-in-out both;
+}
+.moment-constellation-line.is-new {
+  stroke: var(--onde-gold-bright);
+  stroke-opacity: 1;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  animation-duration: 0.6s;
+}
+.moment-constellation-glow {
+  stroke: var(--onde-gold-bright);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.55;
+  animation: moment-constellation-glow 1.8s ease-out both;
+}
+.moment-star-aura { fill: var(--onde-wave); animation: moment-fade 0.6s ease-out both; }
+.moment-star {
+  fill: var(--onde-foam);
   transform-box: fill-box;
   transform-origin: center;
-  animation: moment-pop 0.6s ease-out 2.3s both;
+  animation: moment-pop 0.5s ease-out both;
 }
-.moment-city-label {
-  position: absolute;
-  max-width: 42%;
-  color: var(--onde-foam);
+.moment-star.is-madre { fill: var(--onde-gold-bright); }
+.moment-star.is-unknown { fill: #5d7a8a; }
+.moment-constellation .moment-star-label.is-madre {
+  fill: var(--onde-gold-bright);
   font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1.2;
-  animation: moment-text 0.6s ease-out 2.6s both;
+  font-size: 11px;
+  font-weight: 700;
+  animation: moment-fade 0.6s ease-out 0.3s both;
 }
-.moment-city-label.is-old { bottom: 4%; left: 2%; color: var(--ink-muted); animation-delay: 0.3s; }
-.moment-city-label.is-new { top: 4%; right: 2%; text-align: right; }
-
+.moment-star-note { animation: moment-fade 0.6s ease-out both; }
+.moment-star-note line { stroke: var(--onde-foam); stroke-opacity: 0.25; stroke-width: 0.4; stroke-dasharray: 1 1.5; }
+.moment-star-note.is-new { animation-delay: 2.6s; }
+.moment-constellation .moment-star-note.is-new text { fill: var(--onde-foam); }
+.moment-constellation .moment-star-note.is-new .moment-star-name {
+  fill: var(--onde-gold-bright);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+}
+.moment-star-new {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moment-pop 0.5s ease-out 2.4s both;
+}
+.moment-star-new path { fill: var(--onde-gold-bright); }
+.moment-star-new circle { fill: #fff6e4; }
+.moment-star-halo {
+  fill: none;
+  stroke: var(--onde-gold-bright);
+  stroke-width: 1.4;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moment-halo 1.6s ease-out 2.45s both;
+}
 @keyframes moment-route { from { stroke-dashoffset: 1; } }
 @keyframes moment-pop { from { transform: scale(0); } 70% { transform: scale(1.4); } }
+@keyframes moment-twinkle { 50% { opacity: 0.12; } }
+@keyframes moment-constellation-glow { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0.55; } }
 
 /*
  * Inflazione di Luce: Lama di Luce's decree falls, the old price is struck out,

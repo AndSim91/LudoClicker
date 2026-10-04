@@ -28,7 +28,7 @@ describe("moments (4.2)", () => {
     expect(queueMoments(withCareer(empty, { nationalTitles: 2 })).moments.queue).toEqual([]);
   });
 
-  it("plays the foundation once and keeps what was seen in the new school", () => {
+  it("plays the foundation at every new school and keeps what was seen", () => {
     const base = addAdminMembers(createInitialState(1_000), 125);
     const ready: GameState = {
       ...base,
@@ -36,10 +36,21 @@ describe("moments (4.2)", () => {
       tournaments: { ...base.tournaments, nationalTitlesCurrentSchool: 1 },
       moments: { seen: [...getReachedMomentKeys(base), "victory:national", "council"], queue: [] },
     };
-    const founded = gameReducer(ready, { type: "FOUND_SCHOOL", details, now: 2_000, spending: { upgrades: {}, rent: 0 } });
+    const found = (state: GameState, now: number) =>
+      gameReducer(state, { type: "FOUND_SCHOOL", details, now, spending: { upgrades: {}, rent: 0 } });
+    const founded = found(ready, 2_000);
     expect(founded.moments.queue).toEqual(["foundation"]);
     expect(founded.moments.seen).toContain("victory:national");
-    expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 0 }).moments).toEqual(ready.moments);
+    expect(founded.moments.seen).not.toContain("foundation");
+    expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 0 }).moments.queue).toEqual(["foundation"]);
+
+    const again = found({
+      ...gameReducer(founded, { type: "DISMISS_MOMENT" }),
+      school: { ...founded.school, fame: 10_000 },
+      tournaments: { ...founded.tournaments, nationalTitlesCurrentSchool: 1 },
+    }, 3_000);
+    expect(again.network.schoolCount).toBe(2);
+    expect(again.moments.queue).toEqual(["foundation"]);
   });
 
   it("marks what an old save already reached as seen (v88)", () => {
