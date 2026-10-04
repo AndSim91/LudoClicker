@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import type { TournamentParticipant, TournamentResult } from "../../game/types";
 import { getAssaultSequence, getOwnedFinal } from "./finalDuel";
+import { FinalDuelJudges } from "./FinalDuelJudges";
 import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
 import { participantName } from "./tournamentPresentation";
 
@@ -121,17 +122,12 @@ export function FinalDuelLayer({
                 );
               })}
             </ol>
-            <div className="final-duel-style" style={{ "--delay": endDelay } as CSSProperties}>
-              <span>Voto di Stile dei giudici</span>
-              {([["a", match.styleScoreA], ["b", match.styleScoreB]] as const).map(([side, vote]) => (
-                <span key={side} className={`final-duel-vote is-${side}`}>
-                  <span className="final-duel-vote-bar" aria-hidden="true">
-                    <span style={{ width: `${Math.min(100, vote * 10)}%` }} />
-                  </span>
-                  <b>{vote.toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</b>
-                </span>
-              ))}
-            </div>
+            <FinalDuelJudges
+              match={match}
+              a={a}
+              b={b}
+              startSeconds={sequence.length * ASSAULT_SECONDS}
+            />
             <p className={`final-duel-verdict${ownWinner ? " is-ours" : ""}`} style={{ "--delay": endDelay } as CSSProperties}>
               {participantName(winner)} vince la finale {Math.max(match.arenaScoreA, match.arenaScoreB)} a{" "}
               {Math.min(match.arenaScoreA, match.arenaScoreB)}

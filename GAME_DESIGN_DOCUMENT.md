@@ -2342,7 +2342,7 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 > **Da implementare:** la barra inferiore mostra solo testi statici (stato dei messaggi, profilo, connessione, scuola e versione) e non la velocità di scrittura; non esiste un pannello “Statistiche campagna” con la conversione.
 
 Come si scrivono i numeri (Fase 8): Arena e Stile sono interi (1.822, non
-1822.400); il voto di Stile di un assalto, da 0 a 10, ha due decimali (7,35);
+1822.400); il voto di Stile di un incontro, sulla scala di Servizio da 5,5 a 10, ha due decimali (7,35), quello di un singolo giudice uno (7,4);
 gli importi perdono i centesimi da 10.000 € in su; i conti alla rovescia sono
 un orologio (1:36, 2:05:09, oltre il giorno «3 g 4 h»). Tutte le cifre sono
 tabellari, così restano allineate in colonna.
@@ -4249,6 +4249,16 @@ torneo in Tornei › Risultati (da lì la finestra si chiude e basta), Esc o
 «Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
 2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
 la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts`).
+
+Decisione del 04/10 (Giudizio di Stile): dopo gli assalti, se c'è un
+cartellino di Stile (a scacchi gialli e neri) compare prima, una volta, con il
+motivo; poi i giudici del nostro atleta alzano il cartello uno alla volta, con
+voto e codice Servizio, e arriva la media; per l'avversario esterno solo la
+media (`FinalDuelJudges.tsx`). In Tornei › Risultati, «Dettaglio incontro»
+mostra la scheda come sul telefono del giudice (`StyleJudgeSheet.tsx`): voto e
+Arena in alto, le nove voci del Riferimento per i nostri atleti, il solo voto
+per gli esterni, poi voti e codici di tutti i giudici. Regole del voto in
+`docs/tournament-system-design.md` § 5.
 
 Decisione del 04/10: ogni assalto è un duello di due spade illuminate, del
 colore della rarità dell'atleta (comune argento, raro blu, ultra raro viola,

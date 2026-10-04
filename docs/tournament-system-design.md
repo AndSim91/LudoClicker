@@ -167,35 +167,60 @@ Principi vincolanti:
 
 ## 5. Valutazione Stile
 
-Entrambi gli atleti ricevono una valutazione Stile in ogni incontro, indipendentemente dal vincitore Arena.
+Decisione del 04/10 (concept «Giudizio di Stile»): il voto nasce come lo dà un
+Giudice di Stile con l'app **Servizio** di INCOM, sulle voci delle *Guidelines
+for Style Judges* 2.6.5. Codice in `src/game/styleJudging.ts`.
+
+Ogni giudice compila una scheda: sette voci tecniche (BAS, MOV, DIN, COM, SAPD,
+GCC, DIF) da 0 a 3 a **mezzi punti**, SOG da 0 a 3 a punti interi e PEN.
 
 ```text
-prestazioneStile = preparazioneStile
-  × modificatoreCondizione
-  × modificatoreIncontroStile
+voto = 5,5 + 0,2 × punti tecnici + 0,1 × SOG − 0,5 × PEN
 ```
 
-La prestazione viene convertita in un voto assoluto da 0 a 10:
+La scala è stretta come nella realtà: si viaggia tra 5,5 e 8,5, 8,5 è un
+incontro eccezionale, 3 su una voce è la perfezione e il 10 è quasi
+impossibile. I punti sono **relativi al campo del torneo**: il livello atteso
+di un atleta è
 
 ```text
-voto = 10 / (1 + e^(-(prestazioneStile - 125) / 50))
+livello = 1,25 + 2 × ln(preparazioneStile × condizione × incontro / media del campo)
+sopra 2,25 il livello sale al 70%
 ```
 
-Il voto viene mostrato con esattamente tre decimali. Il calcolo della media usa il valore interno non arrotondato.
+- **BAS, GCC**: livello + occhio del giudice (±0,25, cioè mezzo punto: così
+  l'arrotondamento al mezzo punto resta giusto in media).
+- **MOV**: livello + 1,5 × (quota di assalti vinti − probabilità attesa di
+  vincerne uno): l'iniziativa sull'Orizzonte degli Eventi.
+- **DIN**: livello + giornata (±0,3, metà con 20 tornei di esperienza).
+- **COM**: tecniche complesse dell'elenco SLM per le Forme dell'atleta
+  (`COMPLEX_TECHNIQUES`; gli esterni hanno Forma 1, 2 e un'arma stabile per
+  3–5). Molto rare: fino al 12% × abilità, e solo se l'incontro è vero
+  (probabilità d'assalto ≤ 85%) e l'atleta va a segno. F1–F2 0,5–1, F3–F5 1–1,5.
+- **SAPD**: Disarmo (1,5), Sync con F3 lunga, Armonica con F1 o F3 lunga, Presa
+  con F2 (1). Rare.
+- **DIF**: 1 a chi, nettamente sovrastato in Arena (< 15%) e sconfitto, va
+  comunque a segno.
+- **SOG**: gusto di ciascun giudice, più facile negli incontri finiti 2–1.
+- **PEN**: il **cartellino di Stile**, separato da quelli dell'Arena e a scacchi
+  gialli e neri; 1–6% a incontro (più spesso a chi è inesperto, in cattiva forma
+  o perde 0–2), motivo Dichiarazione, Cura o Rispetto; −0,5 solo in quell'incontro.
 
-Valori indicativi:
+**Giudici:** uno nei gironi e nel tabellone; dalle semifinali (semifinali,
+finale per il bronzo, finale) due, quattro al Nazionale, in Champion's Arena e
+nelle Chronicles. Il voto dell'incontro è la media dei giudici; la classifica
+Stile usa la media di tutti gli incontri.
 
-| Prestazione | Voto |
-|---:|---:|
-| 50 | 1,824 |
-| 100 | 3,775 |
-| 125 | 5,000 |
-| 150 | 6,225 |
-| 200 | 8,176 |
-| 250 | 9,241 |
-| 300 | 9,707 |
+Si salvano le schede (`styleDetailA/B`, prima il Riferimento) solo per gli
+atleti della scuola, il cartellino (`stylePenaltyA/B`) per tutti. Il codice
+Servizio v2 di ogni scheda si calcola alla lettura (`src/game/styleCode.ts`,
+porting dell'algoritmo pubblico `anfive/style-codes`).
 
-La classifica finale Stile usa la media di tutte le valutazioni ottenute. Il numero di incontri non assegna un bonus diretto.
+Misure (200 tornei per riga): mediana 6,5–6,6, 95% sotto 7,4, massimo visto
+8,5; chi vince lo Stile ha in media 7,4–7,6. Con un atleta della scuola a 8 tornei di
+esperienza, le vittorie nello Stile restano vicine a quelle del vecchio voto
+(Nazionale 1,35× lo standard 37% → 35%; Champion's 66% → 60%) e un atleta da
+200 di Stile batte sempre uno da 150.
 
 ## 6. Calendario e progresso offline
 

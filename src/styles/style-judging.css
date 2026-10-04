@@ -1,0 +1,333 @@
+/*
+ * Giudizio di Stile come nell'app Servizio (schermate B e D del concept).
+ * Outlook: tabella sobria. Modalità Onde: testata blu abisso con filo d'oro.
+ */
+
+/* Cartellino di Stile: a scacchi gialli e neri, mai come quelli dell'Arena. */
+.style-card-mark {
+  display: inline-block;
+  width: 9px;
+  height: 12px;
+  flex: none;
+  margin-left: 5px;
+  border-radius: 1px;
+  background: repeating-conic-gradient(#f3cf3e 0 25%, #111417 0 50%) 0 0 / 4.5px 4.5px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+  vertical-align: -1px;
+}
+
+.style-card-mark.is-large {
+  width: 22px;
+  height: 30px;
+  margin-left: 0;
+  border-radius: 2px;
+  background-size: 7.3px 7.5px;
+}
+
+/* B · Dettaglio incontro */
+.style-sheet {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 6px;
+  width: min(100%, 460px);
+  justify-self: center;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.style-sheet-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.style-sheet-head > div {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+}
+
+.style-sheet-head > div:last-child {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.style-sheet-head b {
+  font-family: var(--font-display, inherit);
+  font-size: 24px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.style-sheet-head small {
+  overflow: hidden;
+  width: 100%;
+  color: var(--ink-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.style-sheet-head .is-owned small {
+  color: var(--accent-ink);
+}
+
+.style-sheet-arena {
+  display: grid;
+  justify-items: center;
+  color: var(--accent-ink);
+  font-family: var(--font-display, inherit);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.style-sheet-arena small {
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.style-sheet-rows {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 3px;
+}
+
+.style-sheet-rows td,
+.style-sheet-rows th {
+  height: 24px;
+  padding: 0 8px;
+  background: var(--surface-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.style-sheet-rows td {
+  width: 52px;
+}
+
+.style-sheet-rows td:first-child { border-radius: 4px 0 0 4px; }
+.style-sheet-rows td:last-child { border-radius: 0 4px 4px 0; }
+
+.style-sheet-rows th {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.style-sheet-rows th em {
+  color: var(--accent-ink);
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.style-sheet-rows tr.is-lit td:first-child,
+.style-sheet-rows tr.is-lit td:last-child {
+  font-weight: 700;
+}
+
+.style-sheet-rows td span {
+  color: var(--ink-muted);
+}
+
+.style-sheet-judges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.style-sheet-judges li {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.style-sheet-judges li.is-reference {
+  border-color: var(--accent-ink);
+}
+
+.style-sheet-judges small {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.style-sheet-judges b {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.style-sheet-judges code {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.style-sheet-penalty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.style-sheet-penalty .style-card-mark {
+  margin-left: 0;
+}
+
+/* D · «Guarda la finale»: i giudici alzano il cartello. */
+.final-duel-judges {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  animation: final-duel-rise 0.4s ease-out var(--delay) both;
+}
+
+.final-duel-judges > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.final-duel-judge-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) repeat(var(--judges), minmax(0, 1fr)) minmax(0, 1.1fr);
+  align-items: end;
+  gap: 8px;
+}
+
+.final-duel-judge-row > small {
+  overflow: hidden;
+  align-self: center;
+  color: var(--ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.final-duel-judge-row.is-owned > small {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.final-duel-paddle {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  animation: final-duel-paddle 0.6s ease-out var(--delay) both;
+}
+
+.final-duel-paddle b {
+  width: 100%;
+  padding: 7px 0 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  font-family: var(--font-display, inherit);
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.final-duel-paddle code {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.final-duel-paddle small {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.final-duel-judge-row.is-owned .final-duel-paddle.is-average b {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+
+.final-duel-style-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-weight: 700;
+  animation: final-duel-rise 0.4s ease-out var(--delay) both;
+}
+
+@keyframes final-duel-paddle {
+  0% { opacity: 0; transform: translateY(14px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .final-duel-paddle,
+  .final-duel-style-card,
+  .final-duel-judges { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .final-duel-judge-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .final-duel-judge-row > small {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Modalità Onde: la testata di Servizio in blu abisso e oro, i cartelli in crema. */
+:root[data-theme="dark"] .style-sheet-head {
+  border-color: var(--onde-gold);
+  background: linear-gradient(180deg, var(--onde-groove), var(--onde-abyss));
+}
+
+:root[data-theme="dark"] .style-sheet-rows tr.is-lit td:first-child,
+:root[data-theme="dark"] .style-sheet-rows tr.is-lit td:last-child {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .style-sheet-rows tr.is-sog td,
+:root[data-theme="dark"] .style-sheet-rows tr.is-sog th {
+  background: rgb(108 211 214 / 9%);
+}
+
+:root[data-theme="dark"] .style-sheet-rows tr.is-pen td,
+:root[data-theme="dark"] .style-sheet-rows tr.is-pen th {
+  background: rgb(240 138 126 / 12%);
+}
+
+:root[data-theme="dark"] .style-sheet-judges li.is-reference {
+  border-color: var(--onde-gold);
+}
+
+:root[data-theme="dark"] .style-sheet-judges code,
+:root[data-theme="dark"] .final-duel-paddle code {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .final-duel-paddle b {
+  border: 0;
+  background: var(--onde-foam);
+  box-shadow: 0 4px 0 var(--onde-gold);
+  color: var(--onde-on-gold);
+}
+
+:root[data-theme="dark"] .final-duel-judge-row.is-owned .final-duel-paddle.is-average b {
+  background: var(--onde-gold);
+  box-shadow: 0 4px 0 #a0712a;
+  color: var(--onde-on-gold);
+}

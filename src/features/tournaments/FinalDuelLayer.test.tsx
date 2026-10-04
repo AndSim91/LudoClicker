@@ -74,6 +74,32 @@ describe("Guarda la finale (4.3)", () => {
     expect(selectDayNotifications(state, 70_000).find((n) => n.finalResultId)?.detail).toBe("");
   });
 
+  it("shows the judges' signs with Servizio codes and the style card", () => {
+    const base = result(true);
+    const withJudges: TournamentResult = {
+      ...base,
+      matches: [{
+        ...base.matches[0],
+        styleScoreA: 7.45,
+        styleScoreB: 6.38,
+        styleDetailA: {
+          sheets: [
+            [2, 2.5, 2.5, 0, 0, 2.5, 0, 1, 0],
+            [2, 2.5, 2.5, 0, 0, 2, 0, 1, 0],
+          ],
+        },
+        stylePenaltyB: "declaration",
+      }],
+    };
+    render(<FinalDuelLayer result={withJudges} onClose={vi.fn()} />);
+
+    expect(screen.getByText("qg19z1")).toBeVisible();
+    expect(screen.getByText("tg18z1")).toBeVisible();
+    expect(screen.getByText("Riferimento")).toBeVisible();
+    expect(screen.getByText("7,45")).toBeVisible();
+    expect(screen.getByText(/Cartellino di Stile a Giulia Prova · Dichiarazione · −0,5/)).toBeVisible();
+  });
+
   it("plays the final, closes with Esc or Chiudi and leads to the results", () => {
     const onClose = vi.fn();
     const onShowResults = vi.fn();

@@ -24,6 +24,8 @@ import {
   TournamentSchoolBadge,
 } from "./TournamentAthleteIdentity";
 import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
+import { StyleJudgeSheet } from "./StyleJudgeSheet";
+import { StyleCardMark } from "./StyleCardMark";
 
 const KNOCKOUT_STAGE_ORDER: TournamentMatch["stage"][] = [
   "round64",
@@ -62,11 +64,13 @@ function MatchCompetitor({
   participant,
   score,
   styleScore,
+  stylePenalty,
   winner,
 }: {
   participant: TournamentParticipant | undefined;
   score: number;
   styleScore: number;
+  stylePenalty?: TournamentMatch["stylePenaltyA"];
   winner: boolean;
 }) {
   return (
@@ -77,7 +81,10 @@ function MatchCompetitor({
     >
       <TournamentParticipantIdentity participant={participant} />
       <b>{score}</b>
-      <small>{formatVote(styleScore)}</small>
+      <small>
+        {formatVote(styleScore)}
+        {stylePenalty ? <StyleCardMark reason={stylePenalty} /> : null}
+      </small>
     </span>
   );
 }
@@ -121,12 +128,14 @@ function BracketMatch({
         participant={a}
         score={match.arenaScoreA}
         styleScore={match.styleScoreA}
+        stylePenalty={match.stylePenaltyA}
         winner={match.winnerId === a?.id}
       />
       <MatchCompetitor
         participant={b}
         score={match.arenaScoreB}
         styleScore={match.styleScoreB}
+        stylePenalty={match.stylePenaltyB}
         winner={match.winnerId === b?.id}
       />
     </button>
@@ -595,7 +604,10 @@ export function TournamentResults({
                     <TournamentParticipantIdentity
                       participant={selectedParticipantA}
                     />
-                    <small>Stile {formatVote(selectedMatch.styleScoreA)}</small>
+                    <small>
+                      Stile {formatVote(selectedMatch.styleScoreA)}
+                      {selectedMatch.stylePenaltyA ? <StyleCardMark reason={selectedMatch.stylePenaltyA} /> : null}
+                    </small>
                   </span>
                   <b>
                     {selectedMatch.arenaScoreA}
@@ -606,7 +618,10 @@ export function TournamentResults({
                     <TournamentParticipantIdentity
                       participant={selectedParticipantB}
                     />
-                    <small>Stile {formatVote(selectedMatch.styleScoreB)}</small>
+                    <small>
+                      Stile {formatVote(selectedMatch.styleScoreB)}
+                      {selectedMatch.stylePenaltyB ? <StyleCardMark reason={selectedMatch.stylePenaltyB} /> : null}
+                    </small>
                   </span>
                   <button
                     type="button"
@@ -636,6 +651,11 @@ export function TournamentResults({
                           owned={Boolean(selectedParticipantB.ownedContactId)}
                         />
                       ) : <span>Scuola non disponibile</span>}
+                      <StyleJudgeSheet
+                        match={selectedMatch}
+                        a={selectedParticipantA}
+                        b={selectedParticipantB}
+                      />
                     </div>
                   ) : null}
                 </div>
