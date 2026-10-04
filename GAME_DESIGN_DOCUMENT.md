@@ -1256,7 +1256,12 @@ Regole:
   un evento in corso cambia settore subito e l'evento finisce comunque; un
   Istruttore che sta insegnando conclude le lezioni avviate senza nuovi
   allievi, poi passa al nuovo settore (le formazioni in attesa di spade che
-  lo coinvolgono vengono annullate). Mentre è accesa, assegnazioni
+  lo coinvolgono vengono annullate). Un Istruttore che non sa insegnare
+  nessuna Forma avvia da solo la Forma 1 da istruttore, lo stesso corso del
+  pulsante nel Centro didattico («Abilita» se la conosce già, «Impara e
+  abilita» altrimenti, o prima da allievo se un collega la insegna); senza
+  fondi riprova a ogni ciclo e parte appena ci sono
+  (`src/game/automaticInstructorTraining.ts`). Mentre è accesa, assegnazioni
   individuali e organici per settore sono bloccati; spegnendola si torna al
   controllo manuale con l'organico attuale come obiettivo
   (`collaboratorManagement.automaticShares`, 20 per tacca;

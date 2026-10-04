@@ -5,6 +5,7 @@ import {
   getCollaboratorAssignmentCounts,
   getInstructorPendingReleaseIds,
 } from "./collaboratorManagement";
+import { startFormOneForUnqualifiedInstructors } from "./automaticInstructorTraining";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
 import { migrateAutomaticShareLevelsState } from "./saveMigrations/automaticShareLevels";
@@ -172,5 +173,48 @@ describe("Assegnazione automatica (4.7)", () => {
     expect(migrated.collaboratorManagement?.automaticShares).toEqual({
       writing: 100, events: 67, equipment: 67, instructor: 67, gadget: 33,
     });
+  });
+});
+
+describe("Istruttori senza Forme nell'assegnazione automatica", () => {
+  function automaticWithInstructor(extra: Partial<Collaborator> = {}, euros = 1_000): GameState {
+    const base = withCollaborators([collaborator(1, "writing"), collaborator(2, "instructor", extra)]);
+    return switchOn({
+      ...base,
+      unlocks: { ...base.unlocks, forms: true },
+      school: { ...base.school, euros },
+    });
+  }
+
+  it("starts Forma 1 as an instructor (learn and qualify) when there are funds", () => {
+    const started = startFormOneForUnqualifiedInstructors(automaticWithInstructor(), 5_000);
+    const training = started.collaborators[1].training;
+    expect(training).toMatchObject({ formId: "form-1", includesInstructorCertification: true });
+    expect(started.school.euros).toBeLessThan(1_000);
+  });
+
+  it("only qualifies them when they already know Forma 1", () => {
+    const started = startFormOneForUnqualifiedInstructors(automaticWithInstructor({ forms: ["form-1"] }), 5_000);
+    expect(started.collaborators[1].training).toMatchObject({ formId: "form-1", trainingTrack: "instructor" });
+  });
+
+  it("waits without funds and starts as soon as the money is there", () => {
+    const broke = automaticWithInstructor({}, 0);
+    expect(startFormOneForUnqualifiedInstructors(broke, 5_000).collaborators[1].training).toBeUndefined();
+    const paid = { ...broke, school: { ...broke.school, euros: 1_000 } };
+    expect(startFormOneForUnqualifiedInstructors(paid, 5_000).collaborators[1].training?.formId).toBe("form-1");
+  });
+
+  it("does nothing for Istruttori who already teach a Form or when the automatic assignment is off", () => {
+    const teaching = automaticWithInstructor({ forms: ["form-1"], instructorForms: ["form-1"] });
+    expect(startFormOneForUnqualifiedInstructors(teaching, 5_000)).toBe(teaching);
+    const manual = gameReducer(automaticWithInstructor(), { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: false });
+    expect(startFormOneForUnqualifiedInstructors(manual, 5_000)).toBe(manual);
+  });
+
+  it("runs in the game loop", () => {
+    const state = automaticWithInstructor();
+    const ticked = gameReducer(state, { type: "TICK", now: state.lastSavedAt + 2_000 });
+    expect(ticked.collaborators.find((entry) => entry.id === "collaborator-2")?.training?.formId).toBe("form-1");
   });
 });
