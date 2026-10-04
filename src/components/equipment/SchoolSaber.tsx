@@ -94,7 +94,7 @@ export function SchoolSaber({
         aria-disabled={!canRepair}
         onClick={canRepair ? onRepair : undefined}
       >
-        {/* Proportions approved by Andrea (04/10): cap pommel, spool emitter; drawn at 87.5 px in the 45 px bar. */}
+        {/* Proportions approved by Andrea (04/10): cap pommel, spool emitter; drawn at 78.75 × 27 px in the 45 px bar. */}
         <svg viewBox="0 0 87.7 24" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id={metal} x1="0" y1="0" x2="0" y2="1">
