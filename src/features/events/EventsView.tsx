@@ -156,7 +156,8 @@ export function EventsView({
           const cooldownRemaining =
             cooldown && onCooldown ? formatEventCooldownRemaining(cooldown, state, now) : "";
           const cooldownProgress =
-            cooldown && onCooldown ? getEventCooldownProgress(cooldown, state, now) : 0;
+            // The wait drains from full to empty (bar and ring alike).
+            cooldown && onCooldown ? 100 - getEventCooldownProgress(cooldown, state, now) : 0;
           const lacksFunds = state.school.euros < definition.cost;
           const lacksMembers = state.school.activeMembers < definition.requiredMembers;
           const lacksAvailableMembers = availableMembers < definition.requiredMembers;

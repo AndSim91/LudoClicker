@@ -234,11 +234,11 @@ describe("EventsView", () => {
     );
 
     expect(screen.getByRole("button", { name: "Di nuovo tra 5 secondi" })).toBeDisabled();
-    // The wait fills the button from empty to full.
+    // The wait drains the button from full to empty.
     const cooldownFill = screen
       .getByRole("button", { name: "Di nuovo tra 5 secondi" })
       .querySelector(".event-action-fill.is-cooldown > span");
-    expect(cooldownFill).toHaveStyle({ width: "0%" });
+    expect(cooldownFill).toHaveStyle({ width: "100%" });
   });
 
   it("shows calendar cooldowns in game months", () => {
