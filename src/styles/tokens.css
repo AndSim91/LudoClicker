@@ -137,3 +137,9 @@ select,
 textarea {
   font-family: inherit;
 }
+
+/* Clicking a button quickly must not select its label (clicker game: fast clicks everywhere). */
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
