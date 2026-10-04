@@ -1,10 +1,15 @@
 .application-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 32px 54px minmax(0, 1fr) 26px;
+  grid-template-rows: 38px 54px minmax(0, 1fr) 26px;
   width: 100vw;
   height: 100dvh;
   background: var(--surface);
+}
+
+/* The Outlook command bar exists only in Mail. */
+.application-shell.without-commands {
+  grid-template-rows: 38px minmax(0, 1fr) 26px;
 }
 
 .title-bar {
@@ -20,7 +25,7 @@
 .title-pause {
   display: grid;
   width: 38px;
-  height: 32px;
+  height: 38px;
   place-items: center;
   color: white;
   background: transparent;
@@ -90,7 +95,7 @@
 
 .title-menu {
   display: grid;
-  height: 32px;
+  height: 38px;
   place-items: center;
   color: white;
   background: transparent;

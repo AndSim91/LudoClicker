@@ -569,7 +569,11 @@ export function App() {
       speed={gameSpeed}
     >
       <div
-        className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
+        className={[
+          "application-shell",
+          reduceMotion && "reduce-motion",
+          activeView !== "mail" && "without-commands",
+        ].filter(Boolean).join(" ")}
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
         <GameFeedbackLayer />
@@ -586,15 +590,16 @@ export function App() {
           equipment={state.equipment}
           onTogglePause={togglePause}
         />
-        <CommandBar
-          onCompose={openComposer}
-          onMarkAllRead={markAllMessagesRead}
-          canMarkAllRead={
-            view === "mail" &&
-            mailFolder === "inbox" &&
-            visibleInboxMessages.some((message) => message.unread)
-          }
-        />
+        {activeView === "mail" && (
+          <CommandBar
+            onCompose={openComposer}
+            onMarkAllRead={markAllMessagesRead}
+            canMarkAllRead={
+              mailFolder === "inbox" &&
+              visibleInboxMessages.some((message) => message.unread)
+            }
+          />
+        )}
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
           <StableAppRail view={activeView} onChange={changeView} />
           <Suspense fallback={null}>
