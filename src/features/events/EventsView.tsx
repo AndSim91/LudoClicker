@@ -137,7 +137,7 @@ export function EventsView({
           const cooldownRemaining =
             cooldown && onCooldown ? formatEventCooldownRemaining(cooldown, state, now) : "";
           const cooldownProgress =
-            cooldown && onCooldown ? 100 - getEventCooldownProgress(cooldown, state, now) : 0;
+            cooldown && onCooldown ? getEventCooldownProgress(cooldown, state, now) : 0;
           const lacksFunds = state.school.euros < definition.cost;
           const lacksMembers = state.school.activeMembers < definition.requiredMembers;
           const lacksAvailableMembers = availableMembers < definition.requiredMembers;
@@ -162,7 +162,8 @@ export function EventsView({
             definition.cost === 0
               ? "Partecipa gratis"
               : `Partecipa · ${formatCurrency(definition.cost)}`;
-          if (matching) action = "Annulla";
+          if (matching)
+            action = `Annulla · ${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
           else if (onCooldown) action = `Di nuovo tra ${cooldownRemaining}`;
           else if (lacksMembers)
             action = `Servono ${memberRequirement(definition.requiredMembers)}`;
@@ -205,43 +206,9 @@ export function EventsView({
                   </span>
                   Resa: {definition.potential.toLocaleLowerCase("it-IT")}
                 </small>
-                {matching ? (
-                  <div className="event-progress-block">
-                    <div className="event-progress-label">
-                      <span>In corso</span>
-                      <strong>
-                        finisce tra {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, "0")}
-                      </strong>
-                    </div>
-                    <ProgressBar
-                      className="event-progress"
-                      label={`Avanzamento ${definition.title}`}
-                      value={progress}
-                      durationMs={matching.resolvesAt - matching.startedAt}
-                    />
-                  </div>
-                ) : cooldown && onCooldown ? (
-                  <div className="event-progress-block event-cooldown-block">
-                    <div className="event-progress-label">
-                      <span>Di nuovo tra</span>
-                      <strong>{cooldownRemaining}</strong>
-                    </div>
-                    <ProgressBar
-                      className="event-progress event-cooldown-progress"
-                      label={`Cooldown ${definition.title}`}
-                      value={cooldownProgress}
-                      valueText={`Di nuovo tra ${cooldownRemaining}`}
-                      durationMs={
-                        cooldown.kind === "realtime"
-                          ? cooldown.availableAt - cooldown.startedAt
-                          : GAME_CONFIG.gameMonthMs
-                      }
-                    />
-                  </div>
-                ) : null}
               </div>
               <button
-                className={matching ? "event-cancel-button" : undefined}
+                className={matching ? "event-action event-cancel-button" : "event-action"}
                 type="button"
                 disabled={disabled}
                 data-tutorial-region={
@@ -250,7 +217,22 @@ export function EventsView({
                 data-tutorial-target={definition.id === "park-sparring" ? "true" : undefined}
                 onClick={() => (matching ? onCancel(matching.id) : onStart(definition.id))}
               >
-                {action}
+                {/* Fase 8: avanzamento e attesa riempiono il pulsante, la scheda non cambia altezza. */}
+                {matching || onCooldown ? (
+                  <ProgressBar
+                    className={matching ? "event-action-fill" : "event-action-fill is-cooldown"}
+                    ariaHidden
+                    value={matching ? progress : cooldownProgress}
+                    durationMs={
+                      matching
+                        ? matching.resolvesAt - matching.startedAt
+                        : cooldown?.kind === "realtime"
+                          ? cooldown.availableAt - cooldown.startedAt
+                          : GAME_CONFIG.gameMonthMs
+                    }
+                  />
+                ) : null}
+                <span className="event-action-label">{action}</span>
               </button>
             </article>
           );

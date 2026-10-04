@@ -204,7 +204,7 @@ describe("EventsView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Annulla" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Annulla · \d+:\d{2}$/ }));
 
     expect(onCancel).toHaveBeenCalledWith(event.id);
   });
@@ -234,12 +234,11 @@ describe("EventsView", () => {
     );
 
     expect(screen.getByRole("button", { name: "Di nuovo tra 5 secondi" })).toBeDisabled();
-    const cooldownBar = screen.getByRole("progressbar", {
-      name: "Cooldown Volantinaggio",
-    });
-    expect(cooldownBar).toHaveAttribute("aria-valuetext", "Di nuovo tra 5 secondi");
-    expect(cooldownBar).toHaveAttribute("aria-valuenow", "100");
-    expect(cooldownBar.firstElementChild).toHaveStyle({ width: "100%" });
+    // The wait fills the button from empty to full.
+    const cooldownFill = screen
+      .getByRole("button", { name: "Di nuovo tra 5 secondi" })
+      .querySelector(".event-action-fill.is-cooldown > span");
+    expect(cooldownFill).toHaveStyle({ width: "0%" });
   });
 
   it("shows calendar cooldowns in game months", () => {
@@ -270,7 +269,9 @@ describe("EventsView", () => {
     );
 
     expect(screen.getByRole("button", { name: "Di nuovo tra 3 mesi" })).toBeDisabled();
-    expect(screen.getByRole("progressbar", { name: "Cooldown Mele Comics" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Di nuovo tra 3 mesi" }).querySelector(".event-action-fill"),
+    ).not.toBeNull();
   });
 
   it("marks damaged swords as unavailable until maintenance", () => {

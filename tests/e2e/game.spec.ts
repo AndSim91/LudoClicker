@@ -251,12 +251,11 @@ test("avvia un evento e aggiorna il progresso usando il tempo reale del gioco", 
     has: page.getByRole("heading", { name: "Volantinaggio" }),
   });
   await expect(sparring.getByRole("button", { name: "Annulla" })).toBeVisible();
-  const progress = sparring.getByRole("progressbar", { name: "Avanzamento Volantinaggio" });
-  await expect(progress).toBeVisible();
-  const initialProgress = Number(await progress.getAttribute("aria-valuenow"));
-  await expect
-    .poll(async () => Number(await progress.getAttribute("aria-valuenow")), { timeout: 3_000 })
-    .toBeGreaterThan(initialProgress);
+  // The progress fills the Annulla button itself.
+  const fill = sparring.locator(".event-action-fill > span");
+  const width = async () => fill.evaluate((element) => Number.parseFloat((element as HTMLElement).style.width));
+  const initialProgress = await width();
+  await expect.poll(width, { timeout: 3_000 }).toBeGreaterThan(initialProgress);
 });
 
 test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ page }) => {
