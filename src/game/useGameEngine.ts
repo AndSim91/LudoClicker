@@ -23,7 +23,7 @@ import { postponeLightInflationEvent } from "./lightInflation";
 import { crashReporter } from "./crashReporting";
 import type { GameAction } from "./types";
 
-type PauseReason = "manual" | "tutorial" | "gadget" | "reptile" | "moment" | "foundation";
+type PauseReason = "manual" | "tutorial" | "gadget" | "reptile" | "moment" | "foundation" | "practice";
 
 interface PauseDrainRequest {
   gameNow: number;
@@ -370,6 +370,13 @@ export function useGameEngine() {
     [setPauseReason],
   );
 
+  const setPracticePaused = useCallback(
+    (paused: boolean) => {
+      setPauseReason("practice", paused);
+    },
+    [setPauseReason],
+  );
+
   return {
     state,
     dispatch: dispatchAction,
@@ -385,6 +392,7 @@ export function useGameEngine() {
     setReptilePaused,
     setMomentPaused,
     setFoundationPaused,
+    setPracticePaused,
     saveStatus,
     saveNow,
   };

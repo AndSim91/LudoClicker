@@ -247,12 +247,17 @@ describe("Torneo Reptile", () => {
     expect(processReptileCalendarTransition(reminded, STARTED_AT)).toBe(reminded);
   });
 
-  it("diventa per sempre il Torneo della Superba al livello 2 di fama", () => {
+  it("diventa per sempre il Torneo della Superba al livello 1 di fama", () => {
     const july = fillAndReachJuly(createOrganizedState());
     const { result } = simulateReptileTournament(july, STARTED_AT)!;
+    const below = applyReptileResult(july, {
+      ...result,
+      economy: { ...result.economy, fameAfter: 499 },
+    }, STARTED_AT);
+    expect(below.network.superbaTournament).not.toBe(true);
     const completed = applyReptileResult(july, {
       ...result,
-      economy: { ...result.economy, fameAfter: 1_000 },
+      economy: { ...result.economy, fameAfter: 500 },
     }, STARTED_AT);
     expect(completed.network.superbaTournament).toBe(true);
     expect(completed.messages.some((message) => message.subject === "Nasce il Torneo della Superba!")).toBe(true);

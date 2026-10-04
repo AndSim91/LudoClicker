@@ -1,4 +1,4 @@
-import { memo, useCallback, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useState, type CSSProperties } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
@@ -321,6 +321,7 @@ export function GadgetsView({
   onCompleteMinigame,
   onDismissMinigameResult,
   onAccept,
+  onPracticeRunningChange,
 }: {
   state?: GameState;
   onStartProject: (productId: GadgetProductId) => void;
@@ -329,6 +330,8 @@ export function GadgetsView({
   onCompleteMinigame: (productId: GadgetProductId, score: number) => void;
   onDismissMinigameResult: (productId: GadgetProductId) => void;
   onAccept: (productId: GadgetProductId) => void;
+  /** Free practice pauses the game while it runs, like the real minigame. */
+  onPracticeRunningChange?: (running: boolean) => void;
 }) {
   const state = useGameStateSlices(
     ["collaborators", "gadgets", "network", "school", "unlocks", "upgrades"],
@@ -343,6 +346,12 @@ export function GadgetsView({
   const startPractice = useCallback((productId: GadgetProductId, rarity: GadgetRarity) => {
     setPractice({ productId, rarity, seed: Math.floor(Math.random() * 2_147_483_647) });
   }, []);
+  const practiceRunning = practice !== undefined && practice.score === undefined;
+  useEffect(() => {
+    if (!practiceRunning) return;
+    onPracticeRunningChange?.(true);
+    return () => onPracticeRunningChange?.(false);
+  }, [onPracticeRunningChange, practiceRunning]);
   const productivity = getGadgetProductivity(state);
   const activeWork = state.gadgets.activeWork;
   const workProgress = getGadgetWorkProgress(state);

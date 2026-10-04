@@ -126,6 +126,7 @@ export function App() {
     setReptilePaused,
     setMomentPaused,
     setFoundationPaused,
+    setPracticePaused,
     saveStatus,
     saveNow,
   } = useGameEngine();
@@ -693,6 +694,7 @@ export function App() {
               onCompleteMinigame={completeGadgetMinigame}
               onDismissMinigameResult={dismissGadgetMinigameResult}
               onAccept={acceptGadgetProduct}
+              onPracticeRunningChange={setPracticePaused}
             />
           ) : activeView === "ludowiki" ? (
             <StableLudoWikiView key={wikiEntry.key} initialSection={wikiEntry.section} />

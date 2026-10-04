@@ -190,12 +190,15 @@ describe("GadgetsView", () => {
       },
     };
     const actions = handlers();
-    render(<GadgetsView state={mastered} {...actions} />);
+    const onPracticeRunningChange = vi.fn();
+    render(<GadgetsView state={mastered} {...actions} onPracticeRunningChange={onPracticeRunningChange} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Maestria Comune: gioca il collaudo per divertimento" }));
     expect(screen.getByText("Prova libera · Comune")).toBeVisible();
+    expect(onPracticeRunningChange).toHaveBeenLastCalledWith(true);
     fireEvent.click(screen.getByRole("button", { name: "Abbandona il tentativo" }));
     expect(screen.getByText(/solo per il gusto di farla/)).toBeVisible();
+    expect(onPracticeRunningChange).toHaveBeenLastCalledWith(false);
     fireEvent.click(screen.getByRole("button", { name: "Chiudi" }));
 
     expect(screen.queryByText("Prova libera")).toBeNull();

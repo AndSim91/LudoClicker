@@ -29,14 +29,14 @@ describe("Torneo della Superba e Corso X", () => {
     expect(getReptileDifficultyMultiplier(superba) / getReptileDifficultyMultiplier(initial)).toBeCloseTo(1.25);
   });
 
-  it("turns Reptiles already at fame level 2 into the Superba when loading older saves", () => {
+  it("turns Reptiles already at fame level 1 into the Superba when loading older saves", () => {
     const initial = createInitialState(1_000, "Tester");
     const withFame = (fameXp: number) => ({
       ...initial,
       version: 83,
       tournaments: { ...initial.tournaments, reptile: { ...initial.tournaments.reptile, fameXp } },
     });
-    expect((migrate(withFame(1_000)) as GameState).network.superbaTournament).toBe(true);
-    expect((migrate(withFame(999)) as GameState).network.superbaTournament).toBeUndefined();
+    expect((migrate(withFame(500)) as GameState).network.superbaTournament).toBe(true);
+    expect((migrate(withFame(499)) as GameState).network.superbaTournament).toBeUndefined();
   });
 });

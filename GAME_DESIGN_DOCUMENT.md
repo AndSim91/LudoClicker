@@ -3681,8 +3681,8 @@ vittorie restano.
 
 ### 20.7 Torneo della Superba
 
-Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 2**
-(1.000 XP, tabellone da 64 team), l'Open si trasforma **per sempre** nel
+Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 1**
+(500 XP, tabellone da 32 team), l'Open si trasforma **per sempre** nel
 **Torneo della Superba**. Parte la scena «Nasce il Torneo della Superba!»
 (§ 25.1), arriva il messaggio con lo stesso titolo e la trasformazione vale
 dall'edizione successiva. Non torna indietro se la fama
@@ -3708,9 +3708,12 @@ fase svizzera, tabellone, premi e fama) con tre differenze:
   acquistabile a 1 €.
 
 I salvataggi che all'aggiornamento alla versione 84 avevano già la fama del
-Reptile al livello 2 diventano subito Superba
-(`saveMigrations/reptileSuperba.ts`). Costanti in `GAME_CONFIG`:
-`superbaReptileFameLevel` = 2, `superbaDifficultyMultiplier` = 1,25.
+Reptile al livello richiesto diventano subito Superba
+(`saveMigrations/reptileSuperba.ts`). Dalla versione 96 la soglia è il
+livello 1 (prima era il 2): i salvataggi già al livello 1 diventano Superba
+all'aggiornamento e vedono la scena al caricamento
+(`saveMigrations/superbaLevelOne.ts`). Costanti in `GAME_CONFIG`:
+`superbaReptileFameLevel` = 1, `superbaDifficultyMultiplier` = 1,25.
 
 ---
 
