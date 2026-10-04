@@ -55,7 +55,7 @@ e Doppia spada corta.
 
 Raggiunti i requisiti di Fama, collaboratori, eventi completati e una vittoria
 (Arena o Stile) di un proprio atleta alla Champion's Arena, al giocatore viene
-proposto di trasferirsi e fondare una nuova scuola, scegliendone nome, città, motto, colore e specializzazione.
+proposto di trasferirsi e fondare una nuova scuola, scegliendone nome, città e colore.
 Questa è la meccanica di prestigio: una parte dei progressi locali riparte,
 mentre la Fama, i progressi dei Leggendari iscritti e la rete delle scuole
 fondate forniscono bonus permanenti. Il gioco non ha un finale e può continuare
@@ -225,8 +225,8 @@ flowchart LR
    Fama pari a 150 × ciclo, 8 collaboratori (+2 per ogni scuola già fondata),
    25 × ciclo eventi completati, una vittoria di un proprio atleta alla
    Champion's Arena nella scuola corrente e nessun Leggendario Segreto in prova.
-5. Scegliere città, nome, motto, colore e specializzazione della scuola
-   (Generale, Redazione, Eventi o Accoglienza).
+5. Scegliere città, nome e colore della scuola e spendere la Reputazione
+   nei sei potenziamenti permanenti o nella rendita.
 6. Trasferire l'esperienza permanente alla nuova sede.
 7. Ripetere con costi, numeri e moltiplicatori crescenti.
 
@@ -360,8 +360,8 @@ prova dalla probabilità base fino a 85% per i Comuni, 90% per i Rari, 95% per
 gli Ultra Rari e 100% per i Leggendari. I potenziamenti di Accoglienza fanno
 avanzare ogni rarità dalla propria probabilità base d'iscrizione al proprio
 massimo specifico; allo stesso avanzamento contribuiscono i collaboratori
-Istruttori (10% della loro produttività ciascuno) e la specializzazione
-Accoglienza (+10%, che vale anche per la prenotazione).
+Istruttori (10% della loro produttività ciascuno); la Reputazione
+(ramo Iscrizioni) alza la probabilità base (§ 5.7).
 
 Esistono inoltre protezioni contro le serie sfortunate: la prima email della
 partita prenota sempre la prova; dopo 4 email consecutive senza prenotazione la
@@ -541,27 +541,29 @@ punti = 1 per il titolo nazionale che sblocca il prestigio
 Per esempio, senza altri tornei, Fama 199 dà 1 punto, Fama 10.000 ne dà 8 e
 Fama 30.000 ne dà 13 (`reputationNationalTitlePoints = 1`).
 
-**Spesa.** I punti si spendono alla fondazione, nel modulo di Impostazioni →
-Rete dell'Ordine; la spesa è definitiva e i punti non spesi restano per la
-fondazione successiva. Ogni punto vale **+10% del valore base**
-(`reputationStep = 0,1`); i potenziamenti della scuola si applicano sopra.
+**Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
+scuola» della pagina Rete (§ 17.3); la spesa è definitiva e i punti non spesi
+restano per la fondazione successiva. Ogni punto vale **+20% del valore base**
+(`reputationStep = 0,2`, decisione del 04/10); i potenziamenti della scuola si
+applicano sopra.
 
-| Potenziamento             | Valore base aumentato                                                         |
-| ------------------------- | ----------------------------------------------------------------------------- |
-| Compilazione email        | caratteri per input (`getWritingPower`)                                        |
-| Lezioni di prova          | probabilità base di prenotare una prova, fino al massimo della rarità          |
-| Iscrizioni                | probabilità base di iscrizione dopo la prova, fino al massimo della rarità     |
-| Quote mensili             | quote degli iscritti (non Social, non rendita)                                 |
-| Formazione allievi        | velocità dei corsi di atleti e agonisti (non Istruttori e Tecnici)             |
-| Capacità di miglioramento | miglioramenti della Preparazione atletica                                      |
-| Rendita della rete        | si consuma: vedi sotto                                                         |
+| Potenziamento  | Valore base aumentato                                                                  |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Email/Social   | caratteri per input, delle email e dei contenuti social (`getWritingPower`)             |
+| Eventi         | contatti trovati a ogni evento (`getEventContactMultiplier`)                            |
+| Iscrizioni     | probabilità base di iscrizione dopo la prova, fino al massimo della rarità              |
+| Quote mensili  | quote degli iscritti, quota base e aumento per ogni Forma (non Social, non rendita)     |
+| Formazione     | velocità di tutti i corsi: atleti, agonisti, Istruttori e Tecnici                       |
+| Genetica       | valori di base di Arena e Stile dei nuovi atleti (non dei Leggendari) e miglioramenti della Preparazione atletica |
+| Rendita        | si consuma: vedi sotto                                                                  |
 
-I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+500%,
+I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+1000%,
 `reputationUpgradeMaxLevel`) e non si azzerano mai
-(`network.reputationUpgrades`). La **rendita della rete** si consuma: ogni
-punto blocca il 10% del valore di rendita della scuola che si sta lasciando,
-`iscritti × 40 € × 10%` (`networkRentValueShare`), come rendita mensile fissa
-di quella scuola. I punti non restano come livelli: alla fondazione successiva
+(`network.reputationUpgrades`). Genetica vale per gli atleti che arrivano dopo
+la spesa: i cinque contatti iniziali di una scuola nascono senza. La **rendita
+della rete** si consuma: ogni punto blocca il 10% (`networkRentPointShare`) del
+valore di rendita della scuola che si sta lasciando, `iscritti × 40 € × 10%`
+(`networkRentValueShare`), come rendita mensile fissa di quella scuola. I punti non restano come livelli: alla fondazione successiva
 la rendita riparte da 0% e si calcola sulla nuova scuola, sommandosi alle
 precedenti. La rendita non ha tetto: è dove spendere la Reputazione quando i
 potenziamenti sono al massimo. Esempio: 125 iscritti valgono 500 €; 5 punti
@@ -573,7 +575,9 @@ la probabilità di abbandono degli allievi con Forma 7.
 
 Salvataggi precedenti (v86): la Reputazione accumulata diventa punti da
 spendere e le rendite automatiche delle scuole già fondate vanno a zero; la
-Fama si azzera al prossimo prestigio.
+Fama si azzera al prossimo prestigio. Salvataggi v90 → v91: i punti in Lezioni
+di prova (ramo tolto) tornano da spendere, Capacità di miglioramento diventa
+Genetica.
 
 ---
 
@@ -611,8 +615,7 @@ Formula attuale:
 
 ```text
 potenzaScrittura = (1 + bonusTastieraComoda + bonusFrasiRapide)
-  × (1 + 0,25 × scuoleFondate)
-  × 1,1 se la specializzazione è Redazione
+  × (1 + 0,20 × punti Reputazione Email/Social)
 
 caratteriPerInput = potenzaScrittura
   × moltiplicatoreFlusso
@@ -636,8 +639,8 @@ Valori effettivi della prima curva:
 | Tastiera comoda e Frasi rapide al massimo |                   4 |
 | Come sopra, con Flusso al tetto ×5        |                  20 |
 
-Le scuole fondate (+5% ciascuna) e la specializzazione Redazione (+10%)
-moltiplicano ulteriormente la potenza.
+La Reputazione (ramo Email/Social, +20% a punto) moltiplica ulteriormente la
+potenza, per il giocatore e per Redazione e Social.
 
 #### Flusso e Frase perfetta
 
@@ -799,8 +802,7 @@ logica.
 
 ```text
 progressoCreatività = clamp(
-  puntiCreatività / 35
-  + 0,10 se la specializzazione è Accoglienza,
+  puntiCreatività / 35,
   0, 1
 )
 probabilitàPrenotazione = prenotazioneBase
@@ -808,8 +810,7 @@ probabilitàPrenotazione = prenotazioneBase
 
 miglioramentoIscrizione = clamp(
   bonusAccoglienza
-  + produttivitàIstruttori × 0,10 × (1 + efficaciaIstruttori)
-  + 0,10 se la specializzazione è Accoglienza,
+  + produttivitàIstruttori × 0,10 × (1 + efficaciaIstruttori),
   0, 1
 )
 probabilitàIscrizioneDopoProva = clamp(
@@ -1040,6 +1041,7 @@ mediaContatti = mediaDistribuzioneEvento
   × disponibilitàBacino
   × efficaciaCollaboratori
   × (1 + bonusAffluenza + bonusCarisma)
+  × (1 + 0,20 × punti Reputazione Eventi)
 
 efficaciaCollaboratori = max(1, sommaProduttivitàCollaboratoriEventi)^0,30103
 disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
@@ -1047,8 +1049,7 @@ disponibilitàBacino = 1000 / (1000 + max(0, iscrittiAttivi - 10))
 
 Le prove dimostrative non sono mai meno dei contatti estratti e le persone
 incontrate mai meno delle prove. `bonusAffluenza` somma i potenziamenti
-Carisma di pubblico, +10% con la specializzazione Eventi, +5% per scuola
-fondata e, con i Social attivi, +5% ogni 1.000 Follower; `bonusCarisma` somma
+Carisma di pubblico e, con i Social attivi, +5% ogni 1.000 Follower; `bonusCarisma` somma
 i potenziamenti Carisma sui contatti. La variabilità casuale è estratta tra i
 limiti propri di ogni evento (per esempio 0,35–2,5 per lo Sparring al parco).
 
@@ -1917,8 +1918,7 @@ di Social; Revisione istantanea richiede Campi intelligenti 3; Fusione
 documenti richiede Sintesi dei contenuti 3, Revisione istantanea 3 e Social.
 
 I caratteri per input partono da 1 e sommano i bonus dei nodi; il totale è poi
-moltiplicato per 1 + 0,25 × scuole fondate e per 1,1 con la specializzazione
-Redazione. La velocità Redazione/Social si somma ai bonus
+moltiplicato per la Reputazione Email/Social (+20% a punto). La velocità Redazione/Social si somma ai bonus
 generici di automazione dell'Organizzazione.
 
 **Ramo laterale.** Le due meccaniche di ritmo della scrittura manuale
@@ -1940,8 +1940,7 @@ intelligenti + 1,5% Revisione istantanea).
 Ogni livello concede un punto Creatività (35 in tutto) e fa avanzare
 linearmente la probabilità che una email ottenga una prova, dalla base della
 rarità fino al massimo: 85% per i Comuni, 90% per i Rari, 95% per gli Ultra
-Rari e 100% per i Leggendari. La specializzazione Accoglienza aggiunge il 10%
-del percorso.
+Rari e 100% per i Leggendari.
 
 Ogni nodo apre il catalogo email del livello successivo (1–7). Il primo
 livello acquistato di un nodo fa scrivere il 20% delle nuove email con il
@@ -1998,8 +1997,7 @@ non punti percentuali aggiunti direttamente al risultato finale.
 
 A ramo completo il percorso raggiunge il 100%. Al percorso si sommano anche il
 contributo degli Istruttori (10% della loro produttività, potenziato da
-Collaboratore dedicato) e il 10% della specializzazione Accoglienza, con tetto
-complessivo al 100%. La durata base della prova è 15 secondi, quindi Sala
+Collaboratore dedicato), con tetto complessivo al 100%. La durata base della prova è 15 secondi, quindi Sala
 preparata al livello 5 la porta esattamente al minimo di 10 secondi.
 Prerequisiti: Procedura di benvenuto nessuno; ogni nodo successivo richiede
 tutti i precedenti al livello 5.
@@ -3016,45 +3014,51 @@ Il prestigio è una scelta volontaria. A differenza del gioco di riferimento, il
 primo prestigio deve concedere immediatamente un bonus permanente chiaramente
 percepibile; non deve richiedere più reset prima di diventare utile.
 
-### 17.3 Creazione della scuola
+### 17.3 La pagina Rete e la fondazione
 
-Il giocatore sceglie:
+La Rete dell'Ordine è una pagina a sé, voce **Rete** della barra delle
+applicazioni tra Upgrade e LudoWiki (`src/features/network/`). Compare con il
+primo titolo nazionale della scuola corrente e da lì resta per sempre, perché
+dopo la prima fondazione la tiene aperta il numero di scuole
+(`isGameAreaUnlocked`). L'email «Campioni d'Italia» rimanda alla voce Rete.
 
-- nome dell'Ordine;
-- città da una lista o campo libero controllato;
-- colore di accento discreto;
-- motto facoltativo;
-- specializzazione iniziale.
+La pagina contiene, dall'alto:
+
+- **intestazione** con il numero di sedi e la Reputazione da spendere;
+- **mappa della Rete** (`NetworkMap.tsx`): ogni scuola è un nodo numerato,
+  la Sede madre è sempre il n° 1, la scuola in corso è l'ultimo nodo e dopo c'è
+  un nodo tratteggiato «la prossima?». In Onde i nodi sono sfere su un filo
+  d'onda, più grandi e luminose in proporzione a √(Fama / Fama massima della
+  mappa); in Outlook diventano le schede di un organigramma. Fino a 6 scuole
+  lasciate la mappa sta nella fascia; dalla 7ª scorre in orizzontale e si apre
+  sulla scuola in corso. La riga sotto la mappa mostra numero, nome, città e
+  Fama del nodo scelto, con i pulsanti «« Sede madre» e «Oggi »»;
+- **Se fondi ora**: i punti voce per voce (titolo nazionale, Fama con la
+  soglia del punto successivo, Champion's Arena, Reptile/Superba, Chronicles;
+  le vittorie mancanti restano visibili come «+1 possibile») e il pulsante
+  «Fonda una nuova scuola…», disabilitato senza titolo nazionale o con una
+  prova di Leggendario Segreto in corso;
+- **Potenziamenti**: i sei rami con il livello su 50 (quadranti) e la
+  rendita della rete;
+- **Resta per sempre**: Torneo della Superba e Corso X se sbloccati, Ludodex,
+  Leggendari Segreti reclutati, Traguardi.
+
+La fondazione avviene in una finestra a tre passi (`FoundationDialog.tsx`),
+con il gioco in pausa finché è aperta (motivo di pausa `foundation`):
+
+1. **Nuova scuola**: nome e città obbligatori, con i segnaposto «Ordine delle
+   Onde» e «Genova», e colore di accento;
+2. **Reputazione**: pulsanti − e + per i sei rami e la rendita, con il valore
+   attuale e quello dopo la spesa e i punti ancora disponibili;
+3. **Conferma**: cosa entra nella Rete, cosa riparte da zero e cosa resta; un
+   solo pulsante definitivo «Fonda …».
+
+Motto e specializzazione non esistono più (decisione del 04/10): le
+specializzazioni sono sostituite del tutto dai potenziamenti di Reputazione.
 
 Nel codice (`foundSchool`, `src/game/schoolProgressionFlow.ts`) nome e città
-sono testi liberi e obbligatori, il colore di accento è un valore libero,
-applicato all'interfaccia come `--school-accent`, e il motto è facoltativo. Le
-specializzazioni sono quattro:
-
-| Specializzazione | Effetto                                                                          |
-| ---------------- | -------------------------------------------------------------------------------- |
-| Generale         | nessuno (valore della scuola iniziale)                                           |
-| Redazione        | ogni nuova email parte già al 20% (in più di Campi intelligenti) e il Flusso cala a metà velocità |
-| Eventi           | lo stesso evento può svolgersi due volte in contemporanea (pulsante «Avvia un secondo turno») |
-| Accoglienza      | ogni prova fallita di un contatto ordinario si ripete una volta; abbandoni di fine anno −25% |
-
-Ogni specializzazione cambia il modo di giocare invece di dare un bonus
-percentuale (piano 3.6). Costanti in `GAME_CONFIG`: `redazioneEmailHeadStart`
-0,2, `redazioneFlowDrainScale` 0,5, `eventiParallelRuns` 2,
-`accoglienzaDepartureScale` 0,75.
-
-Il modulo si trova in Impostazioni → **Rete dell'Ordine**
-(`src/features/settings/NetworkPanel.tsx`): nome, città, specializzazione
-(Redazione, Eventi o Accoglienza), colore e motto facoltativo. Il pulsante
-«Fonda la nuova scuola» resta disabilitato finché il requisito non è raggiunto e
-chiede una seconda conferma prima di fondare. Il pannello mostra anche i punti
-Reputazione da spendere, il requisito (Titolo nazionale 0/1), i punti
-guadagnati «Se fondi ora» (dalla Fama e dai tornei), la rendita della rete e
-l'elenco delle scuole, con la prima indicata come «Sede madre». Sotto i campi
-della scuola c'è la spesa dei punti: un campo per ciascuno dei sei
-potenziamenti permanenti, con il valore attuale e quello dopo la spesa, e uno
-per la rendita con l'importo mensile che bloccherà. Il pulsante resta
-disabilitato se i punti assegnati superano quelli disponibili.
+sono testi liberi e obbligatori e il colore di accento è applicato
+all'interfaccia come `--school-accent`.
 
 > **Da implementare:** manca la lista di città.
 
@@ -3079,11 +3083,17 @@ Segreti. I nuovi contatti iniziali non includono Andrea
 Simonazzi, che è garantito solo nella prima scuola.
 
 Gli iscritti della scuola precedente non vengono conservati come schede
-individuali. La scuola fondata registra soltanto nome, città, motto,
-specializzazione, numero di membri al trasferimento, email inviate, eventi
-completati, rendita mensile e vittorie di Champion's Arena, Reptile/Superba e
-Chronicles; Fama e statistiche cumulative restano disponibili senza creare
-uno storico nominativo.
+individuali. Della scuola lasciata la mappa conserva soltanto **nome, città e
+Fama** al momento della fondazione (`network.schools`); a parte restano il
+numero esatto di scuole lasciate (`network.schoolCount`, usato da costi,
+traguardi e tutorial) e la rendita totale (`network.monthlyRent`). La mappa
+tiene al massimo 50 scuole (`networkMapSchoolsLimit`): la Sede madre e le
+ultime 49; le più vecchie diventano un nodo «altre N scuole» e restano solo
+nel conteggio (`addSchoolToMap`, `src/game/reputation.ts`). Salvataggi v90 →
+v91 (`saveMigrations/networkMap.ts`): le scuole già lasciate perdono gli altri
+campi e la Fama, che non era salvata («Fama non registrata»); rendita e
+conteggio diventano i due numeri della rete; spariscono motto e
+specializzazione.
 
 ### 17.5 Cosa rimane
 
@@ -3097,7 +3107,7 @@ uno storico nominativo.
 - scoperte del Ludodex e progressi permanenti dei Leggendari;
 - un collaboratore mentore selezionato, se sbloccato.
 
-Nel codice restano: scuole fondate con la loro rendita, Reputazione di
+Nel codice restano: la mappa e il conteggio delle scuole con la rendita totale, Reputazione di
 rete con i suoi potenziamenti (§ 5.7), Percorsi Segreti scoperti (Corso X
 compreso), trasformazione del Reptile in Torneo della Superba, statistiche
 cumulative, messaggi della
@@ -3776,12 +3786,12 @@ interface GameState {
   randomSeed: number;
   profile: { displayName: string };
   school: {
-    name; city; accentColor; motto; specialization;
+    name; city; accentColor;
     activeMembers; peakActiveMembers; fame; euros; followers;
     currentMonth; nextFeeAt;
   };
   player: { writingPower: number; flow?: WritingFlow; perfectPhrases?: number };
-  network: { reputation; schools: FoundedSchool[]; prestigeOfferSent; secretLegendaries };
+  network: { reputation; reputationUpgrades; schools: { name; city; fame? }[] /* max 50 */; schoolCount; monthlyRent; prestigeOfferSent; secretLegendaries };
   contacts: Contact[];
   emails: CampaignEmail[];
   pendingEmailOutcomes: PendingEmailOutcome[];
@@ -4612,7 +4622,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome
   scelto dal giocatore.
 
-  La fondazione si avvia da Impostazioni → Rete dell'Ordine (§ 17.3).
+  La fondazione si avvia dalla pagina Rete, in una finestra a tre passi (§ 17.3).
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
 - Il primo prestigio deve arrivare dopo circa 60–90 minuti e offrire subito un bonus
   significativo.

@@ -34,7 +34,7 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
     ...getEverEnrolledLegendaryIds(state).map((id) => `legendary:${id}`),
     ...(state.collaborators.length > 0 ? ["council"] : []),
-    ...(state.network.schools.length > 0 ? ["foundation"] : []),
+    ...(state.network.schoolCount > 0 ? ["foundation"] : []),
   ];
 }
 

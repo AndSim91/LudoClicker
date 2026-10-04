@@ -171,6 +171,22 @@ function hasValidEventCooldowns(state: Partial<GameState>): boolean {
   });
 }
 
+function hasValidNetworkMap(state: Partial<GameState>): boolean {
+  const network = state.network;
+  return Boolean(
+    network &&
+    Array.isArray(network.schools) &&
+    network.schools.length <= GAME_CONFIG.networkMapSchoolsLimit &&
+    network.schools.every((school) =>
+      typeof school?.name === "string" &&
+      typeof school.city === "string" &&
+      (school.fame === undefined || (Number.isFinite(school.fame) && school.fame >= 0))
+    ) &&
+    Number.isSafeInteger(network.schoolCount) && network.schoolCount >= network.schools.length &&
+    Number.isFinite(network.monthlyRent) && network.monthlyRent >= 0,
+  );
+}
+
 function hasValidReputationUpgrades(state: Partial<GameState>): boolean {
   const upgrades = state.network?.reputationUpgrades;
   if (upgrades === undefined) return true;
@@ -602,7 +618,7 @@ export function isValidGameState(value: unknown): value is GameState {
     typeof state.school?.accentColor === "string" &&
     Number.isSafeInteger(state.network?.reputation) && (state.network?.reputation ?? -1) >= 0 &&
     hasValidReputationUpgrades(state) &&
-    Array.isArray(state.network?.schools) &&
+    hasValidNetworkMap(state) &&
     typeof state.network?.prestigeOfferSent === "boolean"
     && Array.isArray(state.tournaments?.results)
     && hasValidTournamentHall(state)

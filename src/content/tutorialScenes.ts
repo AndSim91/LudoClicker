@@ -258,7 +258,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     id: "first-legendary",
     pauseWhileActive: true,
     canStart: ({ state }) =>
-      state.network.schools.length === 0 &&
+      state.network.schoolCount === 0 &&
       state.contacts.some(
         (contact) =>
           contact.specialProfileId === "andrea-simonazzi" &&

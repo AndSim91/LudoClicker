@@ -104,6 +104,8 @@ export function rollAthleteBaseStats(
   seed: number,
   rarity: PersonRarity,
   specialProfileId?: SpecialCollaboratorId,
+  /** Genetica (Reputation): scales the rolled base values, legendaries keep theirs. */
+  geneticsMultiplier = 1,
 ): { arena: number; style: number; nextSeed: number } {
   if (rarity === "legendary") {
     const [arena, style] = FIXED_LEGENDARY_STATS[specialProfileId ?? "andrea-simonazzi"] ??
@@ -114,8 +116,8 @@ export function rollAthleteBaseStats(
   const [arenaRoll, afterArena] = nextRandom(seed);
   const [styleRoll, nextSeed] = nextRandom(afterArena);
   return {
-    arena: minimum + Math.floor(arenaRoll * (101 - minimum)),
-    style: minimum + Math.floor(styleRoll * (101 - minimum)),
+    arena: Math.round((minimum + Math.floor(arenaRoll * (101 - minimum))) * geneticsMultiplier),
+    style: Math.round((minimum + Math.floor(styleRoll * (101 - minimum))) * geneticsMultiplier),
     nextSeed,
   };
 }

@@ -24,6 +24,7 @@ const items: AppRailItem[] = [
   { id: "tournaments", label: "Tornei", icon: "trophy" },
   { id: "gadget", label: "Gadget", icon: "gift", tutorialRegion: "gadget-navigation" },
   { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },
+  { id: "network", label: "Rete", icon: "network" },
   { id: "ludowiki", label: "LudoWiki", icon: "ludowiki" },
   { id: "settings", label: "Impostazioni", icon: "settings" },
   { id: "admin", label: "Admin", icon: "admin", devOnly: true },
@@ -39,7 +40,7 @@ export function AppRail({
   onChange: (view: AppView) => void;
 }) {
   const state = useGameStateSlices(
-    ["network", "school", "shortGoal", "statistics", "unlocks", "achievements"],
+    ["network", "school", "shortGoal", "statistics", "unlocks", "achievements", "tournaments"],
     stateOverride,
   );
   const visibleItems = items.filter((item) => {

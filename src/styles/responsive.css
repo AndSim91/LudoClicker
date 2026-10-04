@@ -104,8 +104,7 @@
 :root[data-theme="dark"] .instructor-panel,
 :root[data-theme="dark"] .event-notice,
 :root[data-theme="dark"] .income-summary,
-:root[data-theme="dark"] .calendar-summary,
-:root[data-theme="dark"] .network-heading {
+:root[data-theme="dark"] .calendar-summary {
   background: var(--blue-050);
 }
 
@@ -119,9 +118,7 @@
 :root[data-theme="dark"] .list-tabs,
 :root[data-theme="dark"] .format-bar select,
 :root[data-theme="dark"] .profile-settings-form input,
-:root[data-theme="dark"] .profile-dialog input,
-:root[data-theme="dark"] .foundation-fields input,
-:root[data-theme="dark"] .foundation-fields select {
+:root[data-theme="dark"] .profile-dialog input {
   background: var(--surface);
 }
 
@@ -149,7 +146,6 @@
 :root[data-theme="dark"] .rarity-overview article,
 :root[data-theme="dark"] .mastery-entry,
 :root[data-theme="dark"] .settings-sheet button:disabled,
-:root[data-theme="dark"] .foundation-form button:disabled,
 :root[data-theme="dark"] .upgrade-row button:disabled,
 :root[data-theme="dark"] .event-row > button:disabled,
 :root[data-theme="dark"] .training-control > .training-start-button:disabled,

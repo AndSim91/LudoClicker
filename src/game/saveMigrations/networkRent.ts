@@ -17,7 +17,7 @@ export function migrateNetworkRentState(state: MigratableState): MigratableState
             ? {
                 ...school,
                 monthlyRent: Math.round(
-                  school.membersAtTransfer * GAME_CONFIG.monthlyMemberFee * V85_NETWORK_RENT_SHARE,
+                  (school.membersAtTransfer ?? 0) * GAME_CONFIG.monthlyMemberFee * V85_NETWORK_RENT_SHARE,
                 ),
               }
             : school),

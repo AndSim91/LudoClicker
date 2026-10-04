@@ -357,32 +357,18 @@ export interface TutorialProgress {
   triggeredSceneIds?: string[];
 }
 
-export type SchoolSpecialization = "generale" | "redazione" | "eventi" | "accoglienza";
-
+/** A school left behind, as the map of the network shows it: nothing heavier. */
 export interface FoundedSchool {
-  id: string;
   name: string;
   city: string;
-  motto: string;
-  specialization: SchoolSpecialization;
-  membersAtTransfer: number;
-  emailsSent: number;
-  eventsCompleted: number;
-  transferredAt: number;
-  /** Fixed monthly rent locked with Reputation points at the foundation. */
-  monthlyRent?: number;
-  championsWin?: boolean;
-  /** Won the Reptile, or the Superba it became: same tournament, one bonus. */
-  reptileWin?: "reptile" | "superba";
-  chroniclesWin?: boolean;
+  /** Fama when it was left; missing for schools left before v91. */
+  fame?: number;
 }
 
 export interface SchoolFoundationDetails {
   name: string;
   city: string;
   accentColor: string;
-  motto: string;
-  specialization: SchoolSpecialization;
 }
 
 export type CollaboratorAssignment =
@@ -968,8 +954,6 @@ export interface GameState {
     name: string;
     city: string;
     accentColor: string;
-    motto: string;
-    specialization: SchoolSpecialization;
     activeMembers: number;
     peakActiveMembers: number;
     /** Fee tiers already announced by email in the current school. */
@@ -994,7 +978,12 @@ export interface GameState {
     reputation: number;
     /** Permanent Reputation upgrades, 0–50 points each (src/game/reputation.ts). */
     reputationUpgrades?: ReputationUpgradeLevels;
+    /** Map of the network: the Sede madre and the latest schools left, up to networkMapSchoolsLimit. */
     schools: FoundedSchool[];
+    /** Every school left behind, also those no longer on the map. */
+    schoolCount: number;
+    /** Fixed monthly rent locked with Reputation points, summed over every school left. */
+    monthlyRent: number;
     prestigeOfferSent: boolean;
     secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
     /** The Reptile has become the Torneo della Superba: permanent, kept by every new school. */

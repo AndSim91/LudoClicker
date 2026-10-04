@@ -144,7 +144,7 @@ function buyOneAffordableUpgrade(
     const definition = getUpgradeDefinition(upgradeId);
     if (!definition) continue;
     const level = state.upgrades[upgradeId];
-    const cost = getUpgradeCost(definition, level, state.network.schools.length);
+    const cost = getUpgradeCost(definition, level, state.network.schoolCount);
     if (
       level < definition.maxLevel &&
       state.school.fame >= definition.requiredFame &&

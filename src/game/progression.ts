@@ -10,12 +10,18 @@ export type GameArea =
   | "upgrades"
   | "tournaments"
   | "gadget"
+  | "network"
   | "settings";
 
 export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (view === "mail" || view === "ludowiki" || view === "settings") return true;
   if (view === "gadget") return state.unlocks.gadget;
-  if (state.network.schools.length > 0) return true;
+  // Opens with the first national title and stays: after a foundation the count keeps it.
+  if (view === "network") {
+    return state.network.schoolCount > 0 ||
+      (state.tournaments.nationalTitlesCurrentSchool ?? 0) >= GAME_CONFIG.prestigeNationalTitles;
+  }
+  if (state.network.schoolCount > 0) return true;
 
   if (view === "events") {
     return state.shortGoal.completedCount > 0 || (

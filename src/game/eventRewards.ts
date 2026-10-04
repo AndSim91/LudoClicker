@@ -1,3 +1,4 @@
+import { getReputationMultiplier } from "./reputation";
 import type { AcquisitionEventDefinition } from "../content/events";
 import { getCollaboratorBaseProductivity } from "../content/forms";
 import { getUpgradeEffectTotal } from "../content/upgrades";
@@ -57,7 +58,8 @@ export function getEventContactBonus(state: GameState): number {
 export function getEventContactMultiplier(state: GameState): number {
   return EVENT_CONTACT_BASE_SCALE *
     getEventMarketAvailability(state) *
-    (1 + getEventContactBonus(state));
+    (1 + getEventContactBonus(state)) *
+    getReputationMultiplier(state, "events");
 }
 
 export function getBaseExpectedEventContacts(

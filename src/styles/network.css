@@ -1,0 +1,805 @@
+/* Rete dell'Ordine: a page of its own with the map of the schools (Fase 8). */
+.overview-view.network-view {
+  --network-rep: #8a5a00;
+  --network-on-rep: #ffffff;
+  --network-node: var(--blue-600);
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 20px 24px 40px;
+}
+
+:root[data-theme="dark"] .overview-view.network-view {
+  --network-rep: var(--onde-gold);
+  --network-on-rep: var(--onde-on-gold);
+  --network-node: var(--onde-gold);
+}
+
+.network-view > header {
+  margin: 0;
+  padding-bottom: 14px;
+}
+
+.network-view > header > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.network-reputation {
+  display: grid;
+  justify-items: end;
+}
+
+.network-reputation b {
+  color: var(--network-rep);
+  font: 600 28px/1 var(--font-display, "Segoe UI", system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.network-reputation small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- Map ---------- */
+.network-map {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .network-map {
+  background: radial-gradient(120% 160% at 85% 0%, var(--onde-teal) 0%, #0e4563 42%, var(--onde-abyss) 100%);
+}
+
+.network-map-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.network-map-track {
+  position: relative;
+  min-width: 100%;
+  height: 110px;
+}
+
+/* Outlook: an org chart row, the line drawn by CSS. */
+.network-map-track::before {
+  position: absolute;
+  top: 64px;
+  right: 0;
+  left: 0;
+  border-top: 1.5px solid var(--line-strong);
+  content: "";
+}
+
+.network-map-track svg {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+:root[data-theme="dark"] .network-map-track {
+  height: 190px;
+}
+
+:root[data-theme="dark"] .network-map-track::before {
+  display: none;
+}
+
+:root[data-theme="dark"] .network-map-track svg {
+  display: block;
+}
+
+.network-map-track path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.network-map-sea {
+  stroke: var(--onde-wave);
+  stroke-width: 1.2;
+  opacity: 0.35;
+}
+
+.network-map-wire {
+  stroke: var(--onde-wave);
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.network-map-wire.is-next {
+  stroke-dasharray: 2 7;
+  stroke-width: 2.2;
+  opacity: 0.8;
+}
+
+.network-node {
+  --size: 26px;
+  --glow: 0;
+  position: absolute;
+  top: calc(64px - 22px);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 160px;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  background: none;
+  font: inherit;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+button.network-node {
+  cursor: pointer;
+}
+
+.network-node > strong,
+.network-node > small {
+  display: none;
+}
+
+.network-node-orb {
+  display: grid;
+  justify-items: start;
+  width: 136px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  text-align: left;
+}
+
+.network-node-orb > b {
+  display: none;
+}
+
+.network-node-card {
+  display: grid;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.network-node-card b,
+.network-node-card small,
+.network-node > strong,
+.network-node > small {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.network-node-card b {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.network-node-card small {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.network-node.is-current .network-node-orb {
+  border-color: var(--blue-600);
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
+
+.network-node.is-selected .network-node-orb {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 1px var(--blue-600);
+}
+
+.network-node.is-older .network-node-orb,
+.network-node.is-next .network-node-orb {
+  justify-items: center;
+  align-content: center;
+  border-style: dashed;
+  box-shadow: none;
+  color: var(--ink-muted);
+  background: transparent;
+}
+
+.network-node.is-older > strong,
+.network-node.is-next > small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.network-node:focus-visible {
+  border-radius: var(--radius-md);
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+/* Onde: glowing orbs on the wave, bigger when the school had more Fama. */
+:root[data-theme="dark"] .network-node {
+  top: calc(var(--node-y) - var(--size) / 2);
+  width: 140px;
+}
+
+:root[data-theme="dark"] .network-node > strong,
+:root[data-theme="dark"] .network-node > small {
+  display: block;
+}
+
+:root[data-theme="dark"] .network-node > strong {
+  color: var(--onde-foam);
+  font: 600 13.5px/1.15 var(--font-display);
+}
+
+:root[data-theme="dark"] .network-node > small {
+  color: #cfe3e3;
+  font-size: 11.5px;
+}
+
+:root[data-theme="dark"] .network-node-orb {
+  place-items: center;
+  width: var(--size);
+  min-height: 0;
+  height: var(--size);
+  margin-bottom: 4px;
+  padding: 0;
+  border: 3px solid var(--network-node);
+  border-radius: 50%;
+  color: var(--network-node);
+  background: var(--onde-abyss);
+  box-shadow: 0 0 calc(var(--glow) * 22px) color-mix(in srgb, var(--onde-gold) 70%, transparent);
+  font: 600 12px var(--font-display);
+  transition: transform 0.15s;
+}
+
+:root[data-theme="dark"] .network-node-orb > b {
+  display: inline;
+}
+
+:root[data-theme="dark"] .network-node-card {
+  display: none;
+}
+
+:root[data-theme="dark"] .network-node:hover .network-node-orb,
+:root[data-theme="dark"] .network-node.is-selected .network-node-orb {
+  transform: scale(1.12);
+}
+
+:root[data-theme="dark"] .network-node.is-selected .network-node-orb {
+  color: var(--network-on-rep);
+  background: var(--network-rep);
+}
+
+:root[data-theme="dark"] .network-node.is-current .network-node-orb {
+  border-color: var(--onde-wave);
+  color: var(--onde-abyss);
+  background: var(--onde-wave);
+  animation: network-pulse 2.4s ease-in-out infinite;
+}
+
+:root[data-theme="dark"] .network-node.is-older .network-node-orb {
+  border: 2px dotted var(--network-node);
+  background: transparent;
+}
+
+:root[data-theme="dark"] .network-node.is-next .network-node-orb {
+  border: 1.5px dashed var(--onde-wave);
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .network-node.is-older > strong,
+:root[data-theme="dark"] .network-node.is-next > small {
+  color: #cfe3e3;
+}
+
+@keyframes network-pulse {
+  50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--onde-wave) 25%, transparent); }
+}
+
+.network-map-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12.5px;
+}
+
+:root[data-theme="dark"] .network-map-bar {
+  background: color-mix(in srgb, var(--onde-abyss) 55%, transparent);
+}
+
+.network-map-bar span {
+  flex: 1;
+  min-width: 0;
+}
+
+.network-map-bar button {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--accent-ink);
+  background: transparent;
+  font: 600 12px var(--font-body, "Segoe UI", system-ui, sans-serif);
+  white-space: nowrap;
+}
+
+/* ---------- Columns ---------- */
+.network-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.9fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.network-panel {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .network-panel {
+  background: var(--surface-muted);
+}
+
+.network-panel h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.network-panel h2 small,
+.network-note {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.network-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.network-big b {
+  color: var(--network-rep);
+  font: 600 40px/1 var(--font-display, "Segoe UI", system-ui, sans-serif);
+}
+
+.network-points,
+.network-keeps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.network-points li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.network-points li:last-child {
+  border-bottom: 0;
+}
+
+.network-points li::before {
+  content: "";
+  align-self: center;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+}
+
+.network-points li.is-done::before {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.network-points li.is-open {
+  color: var(--ink-soft);
+}
+
+.network-points small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+
+.network-points b {
+  font-weight: 600;
+}
+
+.network-points li.is-open b {
+  font-weight: 400;
+}
+
+.network-found {
+  min-height: 38px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--network-on-rep);
+  background: var(--network-rep);
+  font-weight: 600;
+}
+
+.network-found:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.network-dials {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.network-dial {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  text-align: center;
+}
+
+:root[data-theme="dark"] .network-dial {
+  background: var(--blue-050);
+}
+
+.network-dial svg {
+  width: 54px;
+  height: 54px;
+}
+
+.network-dial circle {
+  fill: none;
+  stroke-width: 5;
+}
+
+.network-dial .track {
+  stroke: var(--line);
+}
+
+.network-dial .value {
+  stroke: var(--network-rep);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.network-dial text {
+  fill: var(--ink);
+  font: 600 13px var(--font-display, "Segoe UI", system-ui, sans-serif);
+}
+
+.network-dial span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.network-dial small {
+  color: var(--network-rep);
+  font-size: 11.5px;
+}
+
+:root[data-theme="dark"] .network-dial small {
+  color: var(--onde-gold-bright);
+}
+
+.network-rent {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="dark"] .network-rent {
+  background: var(--blue-050);
+}
+
+.network-rent small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+
+.network-rent b {
+  font: 600 17px var(--font-display, "Segoe UI", system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.network-keeps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.network-keeps li {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.network-keeps b {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .network-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .network-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Foundation dialog ---------- */
+.foundation-backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 45%);
+}
+
+.foundation-dialog {
+  display: grid;
+  overflow: hidden;
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 35%);
+}
+
+.foundation-dialog > header {
+  display: grid;
+  gap: 10px;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.foundation-dialog h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.foundation-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.foundation-steps li {
+  flex: 1;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+  background: var(--surface-muted);
+}
+
+.foundation-steps .is-done {
+  color: var(--ink);
+}
+
+.foundation-steps .is-current {
+  color: white;
+  background: var(--blue-600);
+  font-weight: 600;
+}
+
+.foundation-body {
+  display: grid;
+  overflow-y: auto;
+  align-content: start;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.foundation-body label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-muted);
+}
+
+.foundation-body input:not([type="color"]) {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+}
+
+.foundation-body input::placeholder {
+  color: var(--ink-soft);
+}
+
+.foundation-color input {
+  width: 64px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.foundation-budget {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.foundation-budget b {
+  color: var(--network-rep, #8a5a00);
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-theme="dark"] .foundation-budget b {
+  color: var(--onde-gold);
+}
+
+.foundation-budget b.is-over {
+  color: var(--warning);
+}
+
+.foundation-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.foundation-row:last-child {
+  border-bottom: 0;
+}
+
+.foundation-row small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+
+.foundation-stepper {
+  display: inline-flex;
+  overflow: hidden;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.foundation-stepper button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  color: var(--accent-ink);
+  background: var(--surface-muted);
+  font-weight: 600;
+}
+
+.foundation-stepper button:disabled {
+  color: var(--ink-soft);
+  opacity: 0.5;
+}
+
+.foundation-stepper b {
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.foundation-stepper b.is-added {
+  color: #8a5a00;
+}
+
+:root[data-theme="dark"] .foundation-stepper b.is-added {
+  color: var(--onde-gold);
+}
+
+.foundation-summary p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.foundation-dialog > footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.foundation-dialog > footer span {
+  flex: 1;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.foundation-dialog > footer button {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--blue-600);
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--blue-600);
+  font-weight: 600;
+}
+
+.foundation-dialog > footer button.secondary {
+  color: var(--accent-ink);
+  background: transparent;
+}
+
+.foundation-dialog > footer button.danger {
+  border-color: #a4262c;
+  background: #a4262c;
+}
+
+.foundation-dialog > footer button:disabled {
+  border-color: var(--line-strong);
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] .network-node.is-current .network-node-orb {
+    animation: none;
+  }
+}

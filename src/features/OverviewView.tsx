@@ -4,10 +4,8 @@ import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
 import { useGameStateSlices } from "../game/GameStateContext";
 import type { GameSaveStatus } from "../game/saveStatus";
-import type { ReputationSpending } from "../game/reputation";
-import type { GameState, SchoolFoundationDetails } from "../game/types";
+import type { GameState } from "../game/types";
 import { CrashReportPanel } from "./settings/CrashReportPanel";
-import { NetworkPanel } from "./settings/NetworkPanel";
 import { SaveStatusPanel } from "./settings/SaveStatusPanel";
 
 type OverviewViewName = Extract<AppView, "settings">;
@@ -30,7 +28,6 @@ interface OverviewViewProps {
   onDarkModeChange: (enabled: boolean) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
-  onFoundSchool: (details: SchoolFoundationDetails, spending: ReputationSpending) => void;
 }
 
 export function OverviewView({
@@ -47,7 +44,6 @@ export function OverviewView({
   onDarkModeChange,
   reduceMotion,
   onReduceMotionChange,
-  onFoundSchool,
 }: OverviewViewProps) {
   const state = useGameStateSlices(["profile", "version"], stateOverride);
   const [title, subtitle] = titles[view];
@@ -145,7 +141,6 @@ export function OverviewView({
           </div>
         </div>
 
-        <NetworkPanel state={stateOverride} onFoundSchool={onFoundSchool} />
       </div>
     </main>
   );

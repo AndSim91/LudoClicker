@@ -109,11 +109,8 @@ export function getTrainingDurationMultiplier(
 ): number {
   const track = getTrainingTrack(training);
   let speed = 1 + getPagoSportAllCourseSpeedBonus(state.upgrades);
-  // Reputation speeds up the courses of the students (athletes, agonists,
-  // Forms taken together with the instructor certificate), not the staff ones.
-  if (track === "athlete" || track === "agonist" || track === "combined-instructor") {
-    speed *= getReputationMultiplier(state, "training");
-  }
+  // Reputation (Formazione) speeds up every course: athletes, agonists, Instructors, Technicians.
+  speed *= getReputationMultiplier(state, "training");
   if (
     isSummerBreak(state.school.currentMonth) &&
     (track === "combined-instructor" || track === "instructor" || track === "technician")

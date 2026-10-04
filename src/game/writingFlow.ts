@@ -81,7 +81,6 @@ export function write(state: GameState, now: number): GameState {
     state.player.flow,
     now,
     flowCap,
-    state.school.specialization === "redazione" ? GAME_CONFIG.redazioneFlowDrainScale : 1,
   ) : undefined;
   let amount = state.player.writingPower * (flow ? getFlowMultiplier(flow.meter, flowCap) : 1);
   let perfectPhrase = false;

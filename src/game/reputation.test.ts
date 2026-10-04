@@ -7,19 +7,23 @@ import { createAcquiredContacts } from "./contacts";
 import { createInitialState } from "./engine";
 import { getMonthlyMemberFees, getMonthlyOperationalIncome } from "./membershipEconomy";
 import {
+  addSchoolToMap,
   getMonthlyNetworkRent,
   getPrestigeReputationPreview,
   getReputationMultiplier,
 } from "./reputation";
+import { rollAthleteBaseStats } from "./athleteStats";
+import { getEventContactMultiplier } from "./eventRewards";
 import { getEmailBookingChance, getEnrollmentChance, getWritingPower } from "./formulas";
 import { foundSchool } from "./schoolProgressionFlow";
 import { getTrainingDurationMultiplier } from "./teacherTrainingFlow";
 import { migrate } from "./saveMigrations";
-import type { FoundedSchool, GameState } from "./types";
+import type { GameState } from "./types";
 
-const school = (monthlyRent?: number): FoundedSchool => ({
+/** A school left behind as saved up to v90. */
+const legacySchool = (monthlyRent?: number, name = "Ordine delle Onde") => ({
   id: `school-${monthlyRent}`,
-  name: "Ordine delle Onde",
+  name,
   city: "Genova",
   motto: "",
   specialization: "generale",
@@ -30,7 +34,7 @@ const school = (monthlyRent?: number): FoundedSchool => ({
   ...(monthlyRent === undefined ? {} : { monthlyRent }),
 });
 
-const details = { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3", motto: "", specialization: "redazione" as const };
+const details = { name: "Ordine del Faro", city: "Trieste", accentColor: "#7652b3" };
 
 /** A school of 125 members, 10.000 Fama and a national title: ready to found. */
 function readySchool(base: GameState = createInitialState(1_000, "Tester")): GameState {
@@ -68,15 +72,19 @@ it("spends points for good: permanent upgrades stay, rent points only lock this 
   const first = foundSchool(readySchool(), details, 2_000, { upgrades: { writing: 2 }, rent: 4 });
   expect(first.network.reputation).toBe(0);
   expect(first.network.reputationUpgrades?.writing).toBe(2);
-  expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.2);
-  expect(first.player.writingPower).toBeCloseTo(1.2);
+  expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.4);
+  expect(first.player.writingPower).toBeCloseTo(1.4);
   // 125 members × 40 € × 10% = 500 € of rent value; 4 points = 40% = 200 €.
-  expect(first.network.schools[0].monthlyRent).toBe(200);
+  expect(first.network.monthlyRent).toBe(200);
+  // The map keeps name, city and the Fama the school had.
+  expect(first.network.schools).toEqual([{ name: "Ordine delle Onde", city: "Genova", fame: 5_000 }]);
+  expect(first.network.schoolCount).toBe(1);
   expect(first.school.fame).toBe(0);
 
   // The next school starts again from 0% rent: 5 more points add 50% of its own value.
   const second = foundSchool(readySchool(first), details, 3_000, { upgrades: {}, rent: 5 });
-  expect(second.network.schools.map((entry) => entry.monthlyRent)).toEqual([200, 250]);
+  expect(second.network.monthlyRent).toBe(450);
+  expect(second.network.schools.map((entry) => entry.name)).toEqual(["Ordine delle Onde", "Ordine del Faro"]);
   expect(second.network.reputationUpgrades?.writing).toBe(2);
 
   // No rent points: no new rent, the old ones stay.
@@ -95,14 +103,14 @@ it("refuses the foundation when the spending is not covered or exceeds a cap", (
   };
   expect(foundSchool(nearlyMaxed, details, 2_000, { upgrades: { enrollment: 3 }, rent: 0 })).toBe(nearlyMaxed);
   // The rent has no cap: it is where the reputation goes once the upgrades are full.
-  expect(foundSchool(nearlyMaxed, details, 2_000, { upgrades: {}, rent: 15 }).network.schools[0].monthlyRent).toBe(750);
+  expect(foundSchool(nearlyMaxed, details, 2_000, { upgrades: {}, rent: 15 }).network.monthlyRent).toBe(750);
 });
 
 it("adds the fixed rents to the monthly income without multipliers", () => {
   const initial = createInitialState(1_000, "Tester");
   const withNetwork = {
     ...initial,
-    network: { ...initial.network, schools: [school(900), school(300)], reputationUpgrades: { membershipFees: 10 } },
+    network: { ...initial.network, monthlyRent: 1_200, reputationUpgrades: { membershipFees: 10 } },
   };
   expect(getMonthlyNetworkRent(withNetwork)).toBe(1_200);
   expect(getMonthlyOperationalIncome(withNetwork) - getMonthlyOperationalIncome(initial)).toBe(1_200);
@@ -110,45 +118,82 @@ it("adds the fixed rents to the monthly income without multipliers", () => {
 
 it("turns the old reputation into points and stops the automatic rents (v86)", () => {
   const initial = createInitialState(1_000, "Tester");
-  const saved = { ...initial, version: 85, network: { ...initial.network, reputation: 4, reputationUpgrades: undefined, schools: [school(1_000)] } };
+  const saved = { ...initial, version: 85, network: { ...initial.network, reputation: 4, reputationUpgrades: undefined, schools: [legacySchool(1_000)] } };
   const migrated = migrate(saved) as GameState;
   expect(migrated.version).toBe(GAME_CONFIG.version);
   expect(migrated.network.reputation).toBe(4);
   expect(migrated.network.reputationUpgrades).toEqual({});
-  expect(migrated.network.schools[0].monthlyRent).toBe(0);
+  expect(migrated.network.monthlyRent).toBe(0);
   expect(migrated.school.fame).toBe(initial.school.fame);
 });
 
-it("raises the base values by 10% a point, probabilities up to their maximum", () => {
+it("lightens the network for the map (v91): name and city, count, total rent, at most 50 schools", () => {
+  const initial = createInitialState(1_000, "Tester");
+  const schools = Array.from({ length: 60 }, (_, index) => legacySchool(10, `Scuola ${index + 1}`));
+  const saved = {
+    ...initial,
+    version: 90,
+    school: { ...initial.school, motto: "Ogni onda", specialization: "redazione" },
+    network: { ...initial.network, reputation: 1, reputationUpgrades: { trialBooking: 3, athleticPreparation: 2, writing: 4 }, schools },
+  };
+  const migrated = migrate(saved) as GameState;
+  expect(migrated.version).toBe(GAME_CONFIG.version);
+  expect(migrated.school).not.toHaveProperty("motto");
+  expect(migrated.school).not.toHaveProperty("specialization");
+  // Lezioni di prova is gone: its points come back; Capacità di miglioramento becomes Genetica.
+  expect(migrated.network.reputation).toBe(4);
+  expect(migrated.network.reputationUpgrades).toEqual({ writing: 4, genetics: 2 });
+  expect(migrated.network).toMatchObject({ schoolCount: 60, monthlyRent: 600 });
+  expect(migrated.network.schools).toHaveLength(GAME_CONFIG.networkMapSchoolsLimit);
+  expect(migrated.network.schools[0]).toEqual({ name: "Scuola 1", city: "Genova" });
+  expect(migrated.network.schools.at(-1)).toEqual({ name: "Scuola 60", city: "Genova" });
+});
+
+it("keeps the Sede madre and the latest schools on the map", () => {
+  let schools: GameState["network"]["schools"] = [];
+  for (let index = 1; index <= 60; index += 1) schools = addSchoolToMap(schools, { name: `${index}`, city: "X", fame: index });
+  expect(schools).toHaveLength(50);
+  expect(schools.map((school) => school.name).slice(0, 3)).toEqual(["1", "12", "13"]);
+  expect(schools.at(-1)?.name).toBe("60");
+});
+
+it("raises the base values by 20% a point, probabilities up to their maximum", () => {
   const initial = createInitialState(1_000, "Tester");
   const boosted = (levels: GameState["network"]["reputationUpgrades"]): GameState => ({
     ...initial,
     network: { ...initial.network, reputationUpgrades: levels },
   });
-  const levelled = boosted({ writing: 5, trialBooking: 5, enrollment: 2, training: 10 });
+  const levelled = boosted({ writing: 5, events: 5, enrollment: 2, training: 10, genetics: 2 });
 
-  expect(getWritingPower(levelled)).toBeCloseTo(getWritingPower(initial) * 1.5);
-  // Common: 40% booking base × 1.5 = 60%; 62.5% enrollment base × 1.2 = 75%.
-  expect(getEmailBookingChance(levelled, "common")).toBeCloseTo(0.6);
-  expect(getEnrollmentChance(levelled, "common")).toBeCloseTo(0.75);
-  expect(getEmailBookingChance(boosted({ trialBooking: 50 }), "common")).toBeCloseTo(0.85);
+  // Email/Social: characters per input, for the player and for Redazione and Social.
+  expect(getWritingPower(levelled)).toBeCloseTo(getWritingPower(initial) * 2);
+  // Eventi: more contacts at every event.
+  expect(getEventContactMultiplier(levelled)).toBeCloseTo(getEventContactMultiplier(initial) * 2);
+  // Iscrizioni: 62.5% enrollment base × 1.4 = 87.5%; the booking chance has no branch any more.
+  expect(getEnrollmentChance(levelled, "common")).toBeCloseTo(0.875);
+  expect(getEmailBookingChance(levelled, "common")).toBeCloseTo(getEmailBookingChance(initial, "common"));
   expect(getEnrollmentChance(boosted({ enrollment: 50 }), "common")).toBeCloseTo(1);
 
+  // Formazione: every course, staff included, three times as fast at 10 points.
   const course = { formId: "form-1" as const, startedAt: 0, completesAt: 0 };
-  expect(getTrainingDurationMultiplier(levelled, "x", course)).toBeCloseTo(
-    getTrainingDurationMultiplier(initial, "x", course) / 2,
-  );
-  // Courses of the staff are not students' courses.
   const instructorCourse = { ...course, trainingTrack: "instructor" as const };
-  expect(getTrainingDurationMultiplier(levelled, "x", instructorCourse)).toBeCloseTo(
-    getTrainingDurationMultiplier(initial, "x", instructorCourse),
-  );
+  for (const training of [course, instructorCourse]) {
+    expect(getTrainingDurationMultiplier(levelled, "x", training)).toBeCloseTo(
+      getTrainingDurationMultiplier(initial, "x", training) / 3,
+    );
+  }
+
+  // Genetica: new athletes are born with higher base values.
+  const plain = rollAthleteBaseStats(7, "common");
+  const gifted = rollAthleteBaseStats(7, "common", undefined, getReputationMultiplier(levelled, "genetics"));
+  expect(gifted.arena).toBe(Math.round(plain.arena * 1.4));
+  expect(gifted.style).toBe(Math.round(plain.style * 1.4));
 
   const withMembers = addAdminMembers(initial, 50);
   const feesUp = { ...withMembers, network: { ...withMembers.network, reputationUpgrades: { membershipFees: 3 } } };
-  // Only the member fees grow, not the Social income.
+  // Only the member fees grow (base and per Forma), not the Social income.
   expect(getMonthlyOperationalIncome(feesUp) - getMonthlyOperationalIncome(withMembers))
-    .toBeCloseTo(getMonthlyMemberFees(withMembers) * 0.3);
+    .toBeCloseTo(getMonthlyMemberFees(withMembers) * 0.6);
 });
 
 it("lets a secret legendary recruited before join the ordinary legendaries of the next schools", () => {

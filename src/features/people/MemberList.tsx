@@ -243,7 +243,7 @@ export function MemberList({
   const currentMonth = state.school.currentMonth;
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const foundedSchools = state.network.schools.length;
+  const foundedSchools = state.network.schoolCount;
   const immunityContext = useMemo(() => ({
     currentMonth,
     tournamentQualification: state.tournaments.qualification,

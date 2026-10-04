@@ -612,11 +612,13 @@ describe("local save", () => {
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.school.city).toBe("Genova");
-    expect(migrated.school.specialization).toBe("generale");
+    expect(migrated.school).not.toHaveProperty("specialization");
     expect(migrated.network).toEqual({
       reputation: 0,
       reputationUpgrades: {},
       schools: [],
+      schoolCount: 0,
+      monthlyRent: 0,
       prestigeOfferSent: false,
       secretLegendaries: Object.fromEntries(SECRET_LEGENDARY_IDS.map((id) => [
         id,

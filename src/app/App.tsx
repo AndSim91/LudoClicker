@@ -20,6 +20,7 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
+import { NetworkView } from "../features/network/NetworkView";
 import { EventsView } from "../features/events/EventsView";
 import { PeopleView } from "../features/people/PeopleView";
 import { UpgradesView } from "../features/upgrades/UpgradesView";
@@ -83,6 +84,7 @@ const StableTournamentsView = memo(TournamentsView);
 const StableGadgetsView = memo(GadgetsView);
 const StableLudoWikiView = memo(LudoWikiView);
 const StableOverviewView = memo(OverviewView);
+const StableNetworkView = memo(NetworkView);
 const StableDayPanel = memo(DayPanel);
 
 function targetConsumesKeyboard(target: EventTarget | null): boolean {
@@ -118,6 +120,7 @@ export function App() {
     setGadgetPaused,
     setReptilePaused,
     setMomentPaused,
+    setFoundationPaused,
     saveStatus,
     saveNow,
   } = useGameEngine();
@@ -689,6 +692,8 @@ export function App() {
             />
           ) : activeView === "ludowiki" ? (
             <StableLudoWikiView />
+          ) : activeView === "network" ? (
+            <StableNetworkView onFoundSchool={foundSchool} onFoundationOpenChange={setFoundationPaused} />
           ) : activeView === "admin" ? (
             <AdminEmailView
               totalContacts={state.contacts.length}
@@ -730,7 +735,6 @@ export function App() {
               onDarkModeChange={setDarkMode}
               reduceMotion={reduceMotion}
               onReduceMotionChange={setReduceMotion}
-              onFoundSchool={foundSchool}
             />
           )}
           </Suspense>
@@ -742,7 +746,7 @@ export function App() {
           <span>Tutti i messaggi sono aggiornati.</span>
           <span>Profilo: {state.profile.displayName}</span>
           <span>Connesso localmente</span>
-          <b title={state.school.motto || undefined}>
+          <b>
             {state.school.name} · v{APP_VERSION}
           </b>
         </footer>

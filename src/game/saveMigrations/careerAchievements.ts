@@ -27,7 +27,7 @@ export function migrateCareerAchievementsState(state: MigratableState): Migratab
     chroniclesWins: schools.filter((school) => school.chroniclesWin).length +
       (tournaments?.chroniclesVictoryCurrentSchool ? 1 : 0),
     reputationEarned: (state.network?.reputation ?? 0) +
-      Object.values(state.network?.reputationUpgrades ?? {}).reduce((total, level) => total + (level ?? 0), 0),
+      Object.values(state.network?.reputationUpgrades ?? {}).reduce<number>((total, level) => total + (level ?? 0), 0),
   };
   return {
     ...state,

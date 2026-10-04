@@ -232,7 +232,7 @@ function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
   if (missingUnlock) return "Funzione richiesta non ancora sbloccata";
   if (
     definition.requiredNetworkSchools !== undefined &&
-    state.network.schools.length < definition.requiredNetworkSchools
+    state.network.schoolCount < definition.requiredNetworkSchools
   ) {
     return definition.requiredNetworkSchools === 1
       ? "Fonda prima un'altra scuola"
@@ -344,7 +344,7 @@ function UpgradeNode({
   const level = state.upgrades[definition.id];
   const status = getUpgradeStatus(state, definition);
   const lockReason = getUpgradeLockReason(state, definition);
-  const cost = getUpgradeCost(definition, level, state.network.schools.length);
+  const cost = getUpgradeCost(definition, level, state.network.schoolCount);
   const unaffordable = status === "available" && state.school.euros < cost;
   const stateLabel = status === "locked"
     ? `bloccato, ${lockReason?.toLocaleLowerCase("it")}`
@@ -442,7 +442,7 @@ function UpgradeDetailsDialog({
     placement: "top" | "bottom";
   } | null>(null);
   const level = state.upgrades[definition.id];
-  const cost = getUpgradeCost(definition, level, state.network.schools.length);
+  const cost = getUpgradeCost(definition, level, state.network.schoolCount);
   const lockReason = getUpgradeLockReason(state, definition);
   const completed = level >= definition.maxLevel;
   const affordable = state.school.euros >= cost;
@@ -627,7 +627,7 @@ export function UpgradesView({
     const cost = getUpgradeCost(
       definition,
       state.upgrades[definition.id],
-      state.network.schools.length,
+      state.network.schoolCount,
     );
     if (!recommendedUpgrade || cost < recommendedUpgrade.cost) {
       recommendedUpgrade = { definition, cost };

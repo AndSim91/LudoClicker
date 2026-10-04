@@ -420,19 +420,22 @@ test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", a
   await installGameSave(page, state);
   await page.goto("/");
   await page.getByRole("button", { name: "Pausa" }).click();
-  await page.getByRole("button", { name: "Impostazioni", exact: true }).click();
+  await page.getByRole("button", { name: "Rete", exact: true }).click();
 
-  await expect(page.getByText("Titolo nazionale (Arena o Stile)")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rete dell'Ordine" })).toBeVisible();
+  await page.getByRole("button", { name: "Fonda una nuova scuola…" }).click();
   await page.getByLabel("Nome della scuola").fill("Onde di Levante");
   await page.getByLabel("Città").fill("La Spezia");
-  await page.getByRole("button", { name: "Fonda la nuova scuola" }).click();
-  await page.getByRole("button", { name: "Conferma: fonda la scuola" }).click();
+  await page.getByRole("button", { name: "Avanti" }).click();
+  await page.getByRole("button", { name: "Avanti" }).click();
+  await page.getByRole("button", { name: "Fonda Onde di Levante" }).click();
 
   // The new school starts back on the email composer.
-  await expect(page.getByRole("heading", { name: "Impostazioni" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Rete dell'Ordine" })).toHaveCount(0);
   await page.getByRole("button", { name: /Salta/ }).click();
-  await page.getByRole("button", { name: "Impostazioni", exact: true }).click();
+  await page.getByRole("button", { name: "Rete", exact: true }).click();
   await expect(page.getByText(/Onde di Levante · v/)).toBeVisible();
-  await expect(page.getByText(`${state.school.name} · Sede madre`)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Fonda la nuova scuola" })).toBeDisabled();
+  await page.getByRole("button", { name: "« Sede madre" }).click();
+  await expect(page.getByText(new RegExp(`N° 1 · ${state.school.name} · ${state.school.city}`))).toBeVisible();
+  await expect(page.getByRole("button", { name: "Fonda una nuova scuola…" })).toBeDisabled();
 });

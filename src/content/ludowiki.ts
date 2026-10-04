@@ -428,7 +428,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Crescita",
     title: "Rete e nuove scuole",
     summary: "Prestigio, requisiti di fondazione e progressi permanenti.",
-    introduction: "Fondare una nuova scuola riavvia il ciclo locale, Fama compresa, e ti dà punti Reputazione: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in Upgrade permanenti o in una rendita fissa dalla scuola che lasci.",
+    introduction: "Fondare una nuova scuola riavvia il ciclo locale, Fama compresa, e ti dà punti Reputazione: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in sei potenziamenti permanenti o in una rendita fissa dalla scuola che lasci. La voce Rete compare con il primo titolo nazionale e da lì resta.",
     steps: [
       { icon: "trend", label: "Requisiti", detail: "Completa il ciclo" },
       { icon: "trophy", label: "Nazionale", detail: "Vinci Arena o Stile" },
@@ -437,12 +437,14 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Titoli nazionali", value: `${GAME_CONFIG.prestigeNationalTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
-      { label: "Reputazione", value: "1 + ½ √(Fama/100)", detail: "1 per il Nazionale, +1 per Champion's Arena, Reptile o Superba e Chronicles vinti" },
+      { label: "Reputazione", value: "1 + √(Fama/200)", detail: "1 per il Nazionale, +1 per Champion's Arena, Reptile o Superba e Chronicles vinti" },
       { label: "Potenziamenti", value: `+${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: `fino a ${GAME_CONFIG.reputationUpgradeMaxLevel} punti ciascuno, mai azzerati` },
-      { label: "Rendita", value: `${Math.round(GAME_CONFIG.reputationStep * 100)}% a punto`, detail: "del valore di rendita della scuola lasciata (iscritti × 40 € × 10%)" },
+      { label: "Rendita", value: `${Math.round(GAME_CONFIG.networkRentPointShare * 100)}% a punto`, detail: "del valore di rendita della scuola lasciata (iscritti × 40 € × 10%)" },
     ],
     rules: [
       "Serve una vittoria al Torneo Nazionale, in Arena o in Stile, con la scuola corrente.",
+      "Sei rami: Email/Social (caratteri per input, email e contenuti social), Eventi (contatti a ogni evento), Iscrizioni (probabilità dopo la prova), Quote mensili (quota base e aumento per Forma), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
+      `La mappa della Rete conserva di ogni scuola solo nome, città e Fama; tiene la Sede madre e le ultime ${GAME_CONFIG.networkMapSchoolsLimit - 1}, le più vecchie restano contate.`,
       "La spesa è definitiva. I punti negli Upgrade restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
       "La rendita non ha tetto: è dove spendere la Reputazione quando gli Upgrade sono al massimo.",
       "Il Nazionale serve solo a sbloccare la fondazione; vincere più volte lo stesso torneo non aggiunge altro.",

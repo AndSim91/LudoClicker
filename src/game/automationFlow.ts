@@ -333,7 +333,7 @@ export function processAutomation(
         state.player.flow,
         now,
         flowCap,
-        state.school.specialization === "redazione" ? GAME_CONFIG.redazioneFlowDrainScale : 1,
+        1,
         editorialInputs,
       )
     : state.player.flow;
@@ -596,7 +596,7 @@ export function processInstructorAthleticPreparation(
     1 + getUpgradeEffectTotal(state.upgrades, "automationMultiplier");
   const preparationMultiplier =
     (1 + getUpgradeEffectTotal(state.upgrades, "athleticPreparationPower")) *
-    getReputationMultiplier(state, "athleticPreparation");
+    getReputationMultiplier(state, "genetics");
   const total = state.automation.lessonBuffer +
     (safeElapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
       productivity *
@@ -809,8 +809,7 @@ export function processAutomaticTeaching(
       ? getMemberAnnualDepartureChance(
         student.forms,
         contact.rarity,
-        state.network.schools.length,
-        state.school.specialization,
+        state.network.schoolCount,
       )
       : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];

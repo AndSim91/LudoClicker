@@ -1,3 +1,4 @@
+import { getReputationMultiplier } from "./reputation";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { createLegendaryEmailAddress } from "../content/emailAddresses";
 import { PERSON_RARITIES } from "../content/rarities";
@@ -211,6 +212,7 @@ export function createInitialContacts(
       : generated.email;
     nextSeed = advanceRandomSeed(nextSeed, 3);
     const rarity = legendaryProfile ? "legendary" as const : ordinary!.rarity;
+    // ponytail: the five initial contacts of a school roll without Genetica.
     const athleteStats = rollAthleteBaseStats(nextSeed, rarity, legendaryProfile?.id);
     nextSeed = athleteStats.nextSeed;
     const retained = legendaryProfile
@@ -258,7 +260,7 @@ export function createAcquiredContacts(
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;
-    const isInitialSchool = state.network.schools.length === 0;
+    const isInitialSchool = state.network.schoolCount === 0;
     const advancedRaritiesUnlocked =
       !isInitialSchool || queuePosition > GAME_CONFIG.guaranteedAndreaContactPosition;
     const isGuaranteedAndreaPosition = queuePosition ===
@@ -310,7 +312,7 @@ export function createAcquiredContacts(
       ? "legendary" as const
       : ordinary!.rarity;
     const rarity = rolledRarity;
-    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id);
+    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id, getReputationMultiplier(state, "genetics"));
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile
       ? getRetainedLegendaryProgress(progress, specialProfile.id)
@@ -384,7 +386,7 @@ export function materializePooledContact(
   const entryIndex = pool.findIndex((entry) => (target -= entry.count) < 0);
   const entry = pool[entryIndex];
   const { firstName, lastName, email } = createRandomProspect(afterRoll);
-  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity);
+  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getReputationMultiplier(state, "genetics"));
   let suffix = state.contacts.length;
   const ids = new Set(state.contacts.map((contact) => contact.id));
   while (ids.has(makeGameId("contact", now, `pool-${suffix}`))) suffix += 1;

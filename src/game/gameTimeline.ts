@@ -73,13 +73,6 @@ export function rebaseGameTimeline(
       ...state.school,
       nextFeeAt: state.school.nextFeeAt + offsetMs,
     },
-    network: {
-      ...state.network,
-      schools: state.network.schools.map((school) => ({
-        ...school,
-        transferredAt: school.transferredAt + offsetMs,
-      })),
-    },
     contacts: state.contacts.map((contact) => shiftTraining({
       ...contact,
       acquiredAt: contact.acquiredAt + offsetMs,

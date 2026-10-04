@@ -587,8 +587,7 @@
   margin-left: auto;
 }
 
-.settings-view .settings-sheet,
-.network-sheet {
+.settings-view .settings-sheet {
   max-width: 900px;
 }
 
@@ -603,8 +602,7 @@
   margin-top: 20px;
 }
 
-.settings-sheet button,
-.foundation-form button {
+.settings-sheet button {
   min-height: 38px;
   padding: 0 14px;
   border: 1px solid var(--blue-600);
@@ -624,15 +622,13 @@
   background: #a4262c;
 }
 
-.settings-sheet button:disabled,
-.foundation-form button:disabled {
+.settings-sheet button:disabled {
   border-color: var(--line-strong);
   color: var(--ink-muted);
   background: var(--surface-muted);
 }
 
-.import-field,
-.foundation-fields label {
+.import-field {
   display: flex;
   flex-direction: column;
   gap: 6px;

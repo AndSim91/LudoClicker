@@ -96,7 +96,7 @@ export const TIERED_ACHIEVEMENTS: readonly TieredAchievement[] = [
       return SECRET_LEGENDARY_IDS.filter((id) => everEnrolled.has(id) || s.network.secretLegendaries[id]?.status === "enrolled").length;
     },
   },
-  { id: "schools", category: "Rete", title: "La Rete dell'Ordine", measure: "Scuole fondate", thresholds: [1, 5, 10], value: (s) => s.network.schools.length },
+  { id: "schools", category: "Rete", title: "La Rete dell'Ordine", measure: "Scuole fondate", thresholds: [1, 5, 10], value: (s) => s.network.schoolCount },
   { id: "reputation", category: "Rete", title: "Nome che pesa", measure: "Punti Reputazione guadagnati", thresholds: [10, 100, 1_000], value: (s) => getCareer(s).reputationEarned },
   { id: "rent", category: "Rete", title: "Vivere di rendita", measure: "Rendita della rete al mese", thresholds: [1_000, 100_000, 10_000_000], unit: "euro", value: getMonthlyNetworkRent },
   {

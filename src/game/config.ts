@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 90,
+  version: 91,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -102,18 +102,17 @@ export const GAME_CONFIG = {
   narrativeNegativeStreakLimit: 2,
   // Prestige: one national title (Arena or Style) opens the foundation of a new school.
   prestigeNationalTitles: 1,
-  // Reputazione di rete (src/game/reputation.ts): +10% of the base value per point.
-  reputationStep: 0.1,
+  // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
+  reputationStep: 0.2,
   // The national title that unlocks the prestige is worth one point by itself.
   reputationNationalTitlePoints: 1,
   reputationUpgradeMaxLevel: 50,
   // Rent value of a school left behind: members × base fee × this share.
   networkRentValueShare: 0.1,
-  // Specializations chosen at the foundation of a new school.
-  redazioneEmailHeadStart: 0.2,
-  redazioneFlowDrainScale: 0.5,
-  eventiParallelRuns: 2,
-  accoglienzaDepartureScale: 0.75,
+  // Each Reputation point spent on the rent locks this share of that value.
+  networkRentPointShare: 0.1,
+  // Schools left behind kept on the map of the network: the Sede madre and the latest ones.
+  networkMapSchoolsLimit: 50,
   saveIntervalMs: 60_000,
   recentEmailsLimit: 500,
   /** Available contacts kept as objects; the ordinary ones beyond it become counters. */

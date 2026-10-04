@@ -26,7 +26,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
     currentLevel >= definition.maxLevel ||
     definition.requiredUnlocks?.some((unlock) => !state.unlocks[unlock]) ||
     (definition.requiredNetworkSchools !== undefined &&
-      state.network.schools.length < definition.requiredNetworkSchools) ||
+      state.network.schoolCount < definition.requiredNetworkSchools) ||
     (definition.secretHint !== undefined &&
       !state.secretUpgradeDiscoveries.includes(upgradeId as SecretUpgradeId)) ||
     (definition.requiredGadgetProduct !== undefined &&
@@ -36,7 +36,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   ) {
     return state;
   }
-  const cost = getUpgradeCost(definition, currentLevel, state.network.schools.length);
+  const cost = getUpgradeCost(definition, currentLevel, state.network.schoolCount);
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };

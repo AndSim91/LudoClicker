@@ -109,6 +109,8 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   const rarities = ["common", "rare", "ultra-rare", "legendary"] as const;
   state.contacts = state.contacts.map((contact, index) => ({ ...contact, rarity: rarities[index % 4] }));
   state.unlocks.gadget = true;
+  // A network with a school whose Fama was not recorded: the Rete page is in the rail.
+  state.network = { ...state.network, schools: [{ name: "Ordine delle Onde", city: "Genova", fame: 2_400 }, { name: "Lame del Faro", city: "Trieste" }], schoolCount: 2, monthlyRent: 900 };
   state.gadgets.products.wristband = {
     ...state.gadgets.products.wristband,
     unlocked: true,
@@ -128,7 +130,7 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   for (let input = 0; input < 40; input += 1) await page.keyboard.press("a");
 
   report.Posta = await audit(page);
-  for (const area of ["Eventi", "Scuola", "Tornei", "Upgrade", "Gadget", "Impostazioni"]) {
+  for (const area of ["Eventi", "Scuola", "Tornei", "Upgrade", "Gadget", "Rete", "Impostazioni"]) {
     await openArea(page, area);
     report[area] = await audit(page);
     if (area === "Scuola") {

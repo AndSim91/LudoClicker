@@ -14,7 +14,6 @@ import { refreshWritingCampaignCopies } from "./campaignContent";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
-import { makeGameId } from "./ids";
 import { createInitialState } from "./initialState";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
@@ -22,6 +21,7 @@ import {
   NO_REPUTATION_SPENDING,
   REPUTATION_UPGRADE_IDS,
   getPrestigeReputationPreview,
+  addSchoolToMap,
   getReputationLevel,
   getSpentReputation,
   isValidReputationSpending,
@@ -141,19 +141,9 @@ export function foundSchool(
   // Points in the rent are consumed: they lock a fixed rent from this school only.
   const monthlyRent = Math.round(rent.rentPerPoint * spending.rent);
   const archivedSchool = {
-    id: makeGameId("school", now, state.network.schools.length),
     name: state.school.name,
     city: state.school.city,
-    motto: state.school.motto,
-    specialization: state.school.specialization,
-    membersAtTransfer: state.school.activeMembers,
-    emailsSent: state.statistics.emailsSent,
-    eventsCompleted: state.statistics.eventsCompleted,
-    transferredAt: now,
-    monthlyRent,
-    championsWin: rent.championsWin,
-    ...(rent.reptileWin ? { reptileWin: rent.reptileWin } : {}),
-    ...(rent.chroniclesWin ? { chroniclesWin: true } : {}),
+    fame: state.school.fame,
   };
   const nextState: GameState = {
     ...fresh,
@@ -167,8 +157,6 @@ export function foundSchool(
       name: details.name.trim(),
       city: details.city.trim(),
       accentColor: details.accentColor,
-      motto: details.motto.trim(),
-      specialization: details.specialization,
     },
     network: {
       reputation: availableReputation - getSpentReputation(spending),
@@ -176,7 +164,9 @@ export function foundSchool(
         id,
         getReputationLevel(state, id) + (spending.upgrades[id] ?? 0),
       ])),
-      schools: [...state.network.schools, archivedSchool],
+      schools: addSchoolToMap(state.network.schools, archivedSchool),
+      schoolCount: state.network.schoolCount + 1,
+      monthlyRent: state.network.monthlyRent + monthlyRent,
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
       ...(state.network.superbaTournament ? { superbaTournament: true } : {}),

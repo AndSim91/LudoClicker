@@ -1,3 +1,4 @@
+import { migrateNetworkMapState } from "./saveMigrations/networkMap";
 import { GAME_CONFIG, INITIAL_SAVE_COMPATIBILITY_VERSION } from "./config";
 import { compactGameHistory } from "./historyArchive";
 import { migrateContentState } from "./saveMigrations/content";
@@ -109,6 +110,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateMomentsState,
   migrateAutomaticShareLevelsState,
   migrateLightInflationDemandState,
+  migrateNetworkMapState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {
@@ -141,6 +143,6 @@ export function migrate(value: unknown): unknown {
       }
     : normalized;
   return canCompactHistory(compatible)
-    ? compactGameHistory(compatible as GameState)
+    ? compactGameHistory(compatible as unknown as GameState)
     : compatible;
 }

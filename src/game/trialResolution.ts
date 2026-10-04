@@ -105,12 +105,10 @@ export function resolveStartedTrialBatch(
       !trialContact.secretLegendaryId &&
       !trial.secretLegendaryId &&
       !trialContact.trialRetryUsed &&
-      // Accoglienza schools always give a failed trial a second chance.
-      (stateBeforeTrial.school.specialization === "accoglienza" ||
-        retryRoll < getUpgradeEffectTotal(
-          stateBeforeTrial.upgrades,
-          "failedTrialRetryChance",
-        )),
+      retryRoll < getUpgradeEffectTotal(
+        stateBeforeTrial.upgrades,
+        "failedTrialRetryChance",
+      ),
     );
     const attempted = specialProfileId
       ? {

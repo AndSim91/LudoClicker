@@ -46,7 +46,7 @@ export function isTrialEnrollmentGuaranteed(
       return false;
     }
     return (
-      (specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schools.length === 0) ||
+      (specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schoolCount === 0) ||
       getLegendaryEnrollmentChanceAtPity(state, specialProfileId, context.legendaryPity) >= 1
     );
   }

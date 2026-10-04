@@ -133,7 +133,7 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
     ready,
     now,
     "Campioni d'Italia",
-    `${state.school.name} vince il Nazionale. La Rete ora ti lascia aprire una nuova scuola: quando vuoi, è in Impostazioni, e più aspetti più Reputazione porti con te.`,
+    `${state.school.name} vince il Nazionale. La Rete ora ti lascia aprire una nuova scuola: quando vuoi, la trovi nella nuova voce Rete, e più aspetti più Reputazione porti con te.`,
     "system",
   );
 }

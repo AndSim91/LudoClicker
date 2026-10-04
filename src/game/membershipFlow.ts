@@ -220,8 +220,7 @@ function processMemberDepartures(
     const departureChance = getMemberAnnualDepartureChance(
       forms,
       member.rarity,
-      state.network.schools.length,
-      state.school.specialization,
+      state.network.schoolCount,
     );
     if (roll < departureChance) departedIds.add(member.id);
   }
@@ -233,8 +232,7 @@ function processMemberDepartures(
     getMemberAnnualDepartureChance(
       group.forms,
       group.rarity,
-      state.network.schools.length,
-      state.school.specialization,
+      state.network.schoolCount,
     ));
   const updated = grouped.state;
   const totalDeparted = departed.length + grouped.departed;

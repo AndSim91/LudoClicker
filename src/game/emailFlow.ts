@@ -56,9 +56,7 @@ export function startNextCampaign(currentState: GameState, now: number): GameSta
     state.upgrades,
     "emailInitialProgress",
   );
-  // Redazione schools start every email further on, on top of the upgrades.
-  const startShare = Math.min(0.25, initialProgress) +
-    (state.school.specialization === "redazione" ? GAME_CONFIG.redazioneEmailHeadStart : 0);
+  const startShare = Math.min(0.25, initialProgress);
   const email = startShare > 0
     ? {
         ...createdEmail,

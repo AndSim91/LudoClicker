@@ -1,3 +1,4 @@
+import { getReputationMultiplier } from "./reputation";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import { advanceRandomSeed, rollAthleteBaseStats } from "./athleteStats";
@@ -190,7 +191,7 @@ export function materializeGroupedMembers(
       const group = groups[index];
       const profile = getGroupMemberProfile(group, state.school.currentMonth);
       const { firstName, lastName, email } = createRandomProspect(seed);
-      const stats = rollAthleteBaseStats(advanceRandomSeed(seed, 3), group.rarity);
+      const stats = rollAthleteBaseStats(advanceRandomSeed(seed, 3), group.rarity, undefined, getReputationMultiplier(state, "genetics"));
       seed = stats.nextSeed;
       let suffix = state.contacts.length + created.length;
       while (ids.has(makeGameId("member", now, suffix))) suffix += 1;

@@ -12,7 +12,7 @@ import {
   getEventCollaboratorMultiplier,
 } from "./eventRewards";
 import { getReputationMultiplier } from "./reputation";
-import type { FormId, GameState, PersonRarity, SchoolSpecialization } from "./types";
+import type { FormId, GameState, PersonRarity } from "./types";
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -37,7 +37,7 @@ export function getEmailBookingChance(
   // still close the gap to the maximum.
   const baseChance = Math.min(
     maximumChance[rarity],
-    PERSON_RARITIES[rarity].baseTrialBookingChance * getReputationMultiplier(state, "trialBooking"),
+    PERSON_RARITIES[rarity].baseTrialBookingChance,
   );
   return baseChance + (maximumChance[rarity] - baseChance) * progress;
 }
@@ -117,11 +117,8 @@ export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
   foundedSchools = 0,
-  specialization?: SchoolSpecialization,
 ): number {
   if (rarity === "legendary") return 0;
-  // Accoglienza schools keep more members at the end of the year.
-  const scale = specialization === "accoglienza" ? GAME_CONFIG.accoglienzaDepartureScale : 1;
 
   const highestForm = forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);
@@ -133,7 +130,7 @@ export function getMemberAnnualDepartureChance(
         Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool,
       0,
       1,
-    ) * scale * 1_000) / 1_000;
+    ) * 1_000) / 1_000;
   }
-  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)] * scale;
+  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)];
 }
