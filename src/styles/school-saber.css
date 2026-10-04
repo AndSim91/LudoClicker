@@ -1,8 +1,8 @@
 /* The school's sword (title bar and detail): the hilt repairs, the blade is the state. */
 .school-saber {
   --saber-ring: var(--equipment-healthy);
-  --saber-blade: 155px;
-  --saber-blade-height: 8px;
+  --saber-blade: 194px;
+  --saber-blade-height: 10px;
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -22,14 +22,14 @@
 .school-saber-hilt {
   position: relative;
   flex: none;
-  width: 70px;
-  height: 24px;
+  width: 87.5px;
+  height: 30px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
   font-family: var(--font-display, inherit);
-  font-size: 12px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   line-height: 1;
@@ -40,7 +40,6 @@
 .school-saber.is-large .school-saber-hilt {
   width: 87.5px;
   height: 30px;
-  font-size: 15px;
 }
 
 .school-saber-hilt svg {
@@ -91,7 +90,7 @@
 
 .school-saber-blade-button {
   display: flex;
-  height: 24px;
+  height: 30px;
   align-items: center;
   padding: 0 2px 0 0;
   border: 0;
@@ -146,5 +145,12 @@
   .school-saber-price,
   .school-saber-ring {
     transition: none;
+  }
+}
+
+/* Narrow windows: a shorter blade leaves room to Fondi and the counters. */
+@media (max-width: 1280px) {
+  .title-equipment .school-saber {
+    --saber-blade: 110px;
   }
 }
