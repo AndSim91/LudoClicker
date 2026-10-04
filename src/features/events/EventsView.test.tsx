@@ -296,7 +296,7 @@ describe("EventsView", () => {
       name: "Risorse disponibili per gli eventi",
     });
     expect(within(equipmentPanel).getByText("5 spade pronte su 6")).toBeVisible();
-    expect(screen.getByText("1 spada rotta. Riparala da La mia giornata.")).toBeVisible();
+    expect(screen.getByText("1 spada rotta. Riparala dall'elsa in alto.")).toBeVisible();
     expect(within(equipmentPanel).queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -316,7 +316,7 @@ describe("EventsView", () => {
       name: "Risorse disponibili per gli eventi",
     });
     expect(within(equipmentPanel).getByText("0 spade pronte su 6")).toBeVisible();
-    expect(screen.getByText("6 spade rotte. Riparale da La mia giornata.")).toBeVisible();
+    expect(screen.getByText("6 spade rotte. Riparale dall'elsa in alto.")).toBeVisible();
   });
 
   it("does not show calendar date boxes in the event list", () => {

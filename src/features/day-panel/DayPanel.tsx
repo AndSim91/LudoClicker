@@ -22,7 +22,6 @@ import {
   type DayNotificationKind,
   type DayNotificationPhase,
 } from "./dayNotifications";
-import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
 
 export const DAY_PANEL_MEDIA_QUERY = "(min-width: 1301px)";
 const DAY_COUNTDOWN_UPDATE_INTERVAL_MS = 1_000;
@@ -293,13 +292,9 @@ function DayNotificationTimeline({
 
 export function DayPanel({
   state: stateOverride,
-  onMaintainEquipment = () => undefined,
-  onBuyOfficialSwords = () => undefined,
   onWatchFinal,
 }: {
   state?: GameState;
-  onMaintainEquipment?: () => void;
-  onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
   onWatchFinal?: (resultId: string) => void;
 }) {
   const isVisible = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
@@ -312,11 +307,6 @@ export function DayPanel({
         <Icon name="calendar" />
       </div>
       <ShortGoalCard state={stateOverride} />
-      <EquipmentQuickPanel
-        state={stateOverride}
-        onMaintainEquipment={onMaintainEquipment}
-        onBuyOfficialSwords={onBuyOfficialSwords}
-      />
       <DayNotificationTimeline state={stateOverride} onWatchFinal={onWatchFinal} />
     </aside>
   );

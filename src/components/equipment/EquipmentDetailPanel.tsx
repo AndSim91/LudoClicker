@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { ProgressBar } from "../../components/common/ProgressBar";
-import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
+import { ProgressBar } from "../common/ProgressBar";
+import { SchoolSaber } from "./SchoolSaber";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
@@ -9,22 +9,16 @@ import {
   getEffectiveDamagedSwords,
   getEquipmentAutomaticRepairTarget,
   getEquipmentAutomaticRepairUnitCost,
-  getEquipmentMaintenanceCost,
-  getEquipmentMinimumMaintenanceCost,
   getOfficialSwordPurchaseCost,
   getReservedSwords,
 } from "../../game/equipment";
 import type { GameState } from "../../game/types";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
-import { formatCompactCurrency, formatCurrency } from "../../shared/formatters";
+import { formatCurrency } from "../../shared/formatters";
 
 type PurchaseAmount = 1 | 10 | 100;
 
 const PURCHASE_AMOUNTS: readonly PurchaseAmount[] = [1, 10, 100];
-
-function formatMaintenanceValue(value: number): string {
-  return value >= 1_000 ? formatCompactCurrency(value) : formatCurrency(value);
-}
 
 function getAffordablePurchaseAmounts(state: GameState): PurchaseAmount[] {
   return PURCHASE_AMOUNTS.filter(
@@ -32,7 +26,8 @@ function getAffordablePurchaseAmounts(state: GameState): PurchaseAmount[] {
   );
 }
 
-export function EquipmentQuickPanel({
+/** Detail of the school swords, opened from the sword in the title bar. */
+export function EquipmentDetailPanel({
   state: stateOverride,
   onMaintainEquipment,
   onBuyOfficialSwords,
@@ -50,11 +45,6 @@ export function EquipmentQuickPanel({
   const availableSwords = getAvailableSwords(equipment);
   const damagedSwords = getEffectiveDamagedSwords(equipment);
   const reservedSwords = getReservedSwords(equipment);
-  const maintenanceCost = getEquipmentMaintenanceCost(equipment);
-  const minimumMaintenanceCost = getEquipmentMinimumMaintenanceCost(equipment);
-  const needsMaintenance = equipment.wear > 0 || damagedSwords > 0;
-  const hasRepairableEquipment = damagedSwords > 0 || (equipment.wear > 0 && availableSwords > 0);
-  const canMaintain = hasRepairableEquipment && state.school.euros >= minimumMaintenanceCost;
   const affordableAmounts = getAffordablePurchaseAmounts(state);
   const purchaseAmount = affordableAmounts[purchaseIndex % affordableAmounts.length];
   const purchaseCost = getOfficialSwordPurchaseCost(state, purchaseAmount);
@@ -85,29 +75,14 @@ export function EquipmentQuickPanel({
         ? `${Math.round(equipment.wear)} pt di usura`
         : "In ordine";
 
-  let maintenanceLabel = `Ripara tutto \u00b7 ${formatCurrency(maintenanceCost)}`;
-  let maintenanceText = `Ripara \u00b7 ${formatMaintenanceValue(maintenanceCost)}`;
-  if (!hasRepairableEquipment) {
-    maintenanceLabel = needsMaintenance
-      ? "Riparazione non disponibile"
-      : "Nessuna riparazione necessaria";
-    maintenanceText = needsMaintenance ? "Riparazione bloccata" : "Niente da riparare";
-  } else if (state.school.euros < minimumMaintenanceCost) {
-    maintenanceLabel = `Servono almeno ${formatCurrency(minimumMaintenanceCost)}`;
-    maintenanceText = "Fondi insufficienti";
-  } else if (state.school.euros < maintenanceCost) {
-    maintenanceLabel = `Riparazione parziale \u00b7 ${formatCurrency(state.school.euros)}`;
-    maintenanceText = `Ripara \u00b7 ${formatMaintenanceValue(state.school.euros)}`;
-  }
-
   let automaticLabel = "Controllo automatico attivo";
   if (automaticRepairBlocked) automaticLabel = "Riparazione automatica in attesa di fondi";
   else if (automaticTarget === "sword") automaticLabel = "Riparazione automatica di una spada";
   else if (automaticTarget === "wear") automaticLabel = "Riduzione automatica dell'usura";
 
-  // Fase 8: one big number, one line of context, one filled button.
+  // Fase 8: one big number, the sword (its hilt repairs), the legend, one line of context.
   const note = [
-    reservedSwords > 0 ? `${count(reservedSwords)} in uso.` : "",
+    availableSwords === 0 && equipment.totalSwords > 0 ? "Nessuna spada libera: le prove nuove aspettano." : "",
     equipmentCollaborators > 0
       ? automaticRepairBlocked
         ? "Gli addetti aspettano i fondi per riparare."
@@ -118,7 +93,7 @@ export function EquipmentQuickPanel({
   return (
     <section className={`equipment-quick-card is-${condition}`} aria-label="Gestione attrezzatura">
       <div className="equipment-quick-heading">
-        <h3>Spade</h3>
+        <h3>Spade della scuola</h3>
         <b>{conditionLabel}</b>
       </div>
       <p className="equipment-quick-total">
@@ -126,12 +101,18 @@ export function EquipmentQuickPanel({
         <span>libere su {count(equipment.totalSwords)}</span>
       </p>
 
-      <EquipmentConditionBar
+      <SchoolSaber
         equipment={equipment}
-        compact
-        variant="saber"
-        ariaLabel="Condizione delle spade della scuola"
+        euros={state.school.euros}
+        onRepair={onMaintainEquipment}
+        size="large"
       />
+      <ul className="equipment-legend">
+        <li className="is-healthy">Libere <strong>{count(availableSwords)}</strong></li>
+        <li className="is-in-use">In uso <strong>{count(reservedSwords)}</strong></li>
+        <li className="is-broken">Rotte <strong>{count(damagedSwords)}</strong></li>
+        <li className="is-wear">Usura <strong>{Math.round(equipment.wear)} pt</strong></li>
+      </ul>
 
       {note ? <p className="equipment-quick-note">{note}</p> : null}
       {equipmentCollaborators > 0 ? (
@@ -147,18 +128,8 @@ export function EquipmentQuickPanel({
         </div>
       ) : null}
 
-      <div className="equipment-quick-actions">
-        <button
-          className="equipment-maintenance-button"
-          type="button"
-          aria-label={maintenanceLabel}
-          title={maintenanceLabel}
-          disabled={!canMaintain}
-          onClick={onMaintainEquipment}
-        >
-          {maintenanceText}
-        </button>
-        {showSupplier ? (
+      {showSupplier ? (
+        <div className="equipment-quick-actions">
           <span className="equipment-purchase">
             <button
               className="equipment-purchase-button"
@@ -181,8 +152,8 @@ export function EquipmentQuickPanel({
               {purchaseAmount}
             </button>
           </span>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }

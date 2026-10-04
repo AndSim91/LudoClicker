@@ -589,6 +589,8 @@ export function App() {
           isPaused={isPaused}
           equipment={state.equipment}
           onTogglePause={togglePause}
+          onMaintainEquipment={maintainEquipment}
+          onBuyOfficialSwords={buyOfficialSwords}
         />
         {activeView === "mail" && (
           <CommandBar
@@ -733,8 +735,6 @@ export function App() {
           )}
           </Suspense>
           <StableDayPanel
-            onMaintainEquipment={maintainEquipment}
-            onBuyOfficialSwords={buyOfficialSwords}
             onWatchFinal={watchFinal}
           />
         </div>

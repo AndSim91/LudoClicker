@@ -41,13 +41,11 @@ function EquipmentConditionBarView({
   equipment,
   title,
   compact = false,
-  variant = "default",
   ariaLabel = "Usura complessiva attrezzatura",
 }: {
   equipment: EquipmentState;
   title?: string;
   compact?: boolean;
-  variant?: "default" | "battery" | "saber" | "cylinder";
   ariaLabel?: string;
 }) {
   const totalSwords = Math.max(0, Math.floor(equipment.totalSwords));
@@ -80,7 +78,7 @@ function EquipmentConditionBarView({
 
   return (
     <div
-      className={`equipment-condition${compact ? " is-compact" : ""}${variant === "battery" ? " is-battery" : ""}${variant === "saber" ? " is-saber" : ""}${variant === "cylinder" ? " is-cylinder" : ""}`}
+      className={`equipment-condition${compact ? " is-compact" : ""}`}
     >
       {title ? <strong className="equipment-condition-title">{title}</strong> : null}
       <div
@@ -128,7 +126,6 @@ function EquipmentConditionBarView({
             />
           </>
         )}
-        {variant === "saber" ? <span className="equipment-saber-outline" aria-hidden="true" /> : null}
       </div>
       {compact ? null : (
         <div className="equipment-condition-legend" aria-hidden="true">

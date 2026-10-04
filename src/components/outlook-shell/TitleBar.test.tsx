@@ -51,10 +51,10 @@ describe("TitleBar", () => {
     );
     const pause = screen.getByRole("button", { name: "Pausa" });
     expect(fame).toHaveTextContent("Fama7");
-    expect(equipmentIndicator).toHaveTextContent("Spade6 su 6");
-    expect(equipmentIndicator.querySelector(".equipment-condition.is-cylinder")).toBeInTheDocument();
-    expect(equipmentIndicator.querySelector(".equipment-saber-outline")).not.toBeInTheDocument();
-    expect(equipmentIndicator.nextElementSibling).toBe(fame);
+    expect(equipmentIndicator).toHaveTextContent("Spade6su 6");
+    const swords = equipmentIndicator.closest(".title-equipment");
+    expect(swords?.querySelector(".school-saber.repair-none")).toBeInTheDocument();
+    expect(swords?.nextElementSibling).toBe(fame);
     // Fondi and «al mese» read together (Fase 8).
     expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
     expect(fame.nextElementSibling).toBe(pause);

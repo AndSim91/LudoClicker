@@ -375,7 +375,7 @@
   width: 16px;
 }
 
-/* Fase 8: one number, one line, one filled button. */
+/* Fase 8: detail of the school swords, opened from the sword in the title bar. */
 .equipment-quick-card {
   margin: 4px 0 12px;
   padding: 14px;
@@ -441,8 +441,52 @@
   line-height: 1.4;
 }
 
-.equipment-quick-card .equipment-condition-bar {
-  height: 10px;
+.equipment-quick-card .school-saber {
+  margin-left: 2px;
+}
+
+.equipment-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.equipment-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.equipment-legend li::before {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--equipment-healthy);
+  content: "";
+}
+
+.equipment-legend .is-in-use::before {
+  background: var(--equipment-reserved);
+}
+
+.equipment-legend .is-broken::before {
+  background: var(--equipment-broken);
+}
+
+.equipment-legend .is-wear::before {
+  background: var(--equipment-load);
+}
+
+.equipment-legend strong {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .equipment-auto-progress-slot {
@@ -473,33 +517,9 @@
   margin-top: 12px;
 }
 
-.equipment-maintenance-button {
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 17px;
-  color: white;
-  background: var(--blue-600);
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.equipment-maintenance-button:not(:disabled):hover {
-  filter: brightness(1.08);
-}
-
-.equipment-maintenance-button:focus-visible,
 .equipment-purchase button:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-}
-
-/* Nothing to do: the button steps back to plain text. */
-.equipment-maintenance-button:disabled {
-  padding: 0;
-  color: var(--ink-muted);
-  background: transparent;
-  font-weight: 400;
 }
 
 .equipment-purchase {

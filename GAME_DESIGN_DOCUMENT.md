@@ -967,7 +967,8 @@ di produzione. L'acquisto è immediato per non introdurre microgestione
 logistica; la presentazione conserva un tono goliardico senza alterare i
 riferimenti reali del produttore.
 
-Nel codice l'acquisto si trova nel pannello Attrezzatura di **La mia giornata**,
+Nel codice l'acquisto si trova nel dettaglio che si apre dalla spada nella
+barra del titolo,
 compare quando il massimo storico raggiunge 15 iscritti (o la scuola possiede
 già più delle 6 spade iniziali) e permette di comprare 1, 10 o 100 spade. Il
 prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: ogni spada
@@ -2319,9 +2320,7 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Fama: contatore nella barra del titolo;
 - Caratteri al secondo: stato “Sincronizzazione” nella barra inferiore;
 - Conversione: pannello “Statistiche campagna”;
-- Spade disponibili: indicatore **Spade** (disponibili/totali, con barra di
-  condizione) nella barra del titolo e riquadro attrezzatura in La mia
-  giornata;
+- Spade disponibili: la **spada** nella barra del titolo (vedi sotto);
 - Prestigio: messaggio “Campioni d'Italia” ricevuto quando i requisiti sono
   soddisfatti.
 
@@ -2351,9 +2350,23 @@ le prime volte e gli sblocchi hanno una battuta; quelli che tornano spesso
 velata. Le cartelle mostrano Posta in arrivo con i non letti, Posta inviata
 senza conteggio e due scorciatoie, Contatti e Iscritti; i Fondi stanno solo
 nella barra del titolo. Ogni messaggio dell'elenco ha l'iniziale del mittente,
-l'oggetto e una riga di anteprima. Nel riquadro Spade di La mia giornata ci
-sono un numero grande (spade libere), la barra, una riga di contesto, il
-pulsante Ripara e il link per acquistare.
+l'oggetto e una riga di anteprima.
+
+**Le spade nella barra del titolo** (Fase 8, decisione di Andrea del 04/10):
+il riquadro Spade non sta più in La mia giornata. Nella barra del titolo,
+dopo «Spade 14 su 31», c'è una spada laser disegnata. L'**elsa** (70 px:
+pomolo a tappo, impugnatura, anello di stato, emettitore a rocchetto) è il
+pulsante di riparazione manuale: sull'impugnatura c'è il costo e l'anello
+prende il colore di quello che i fondi permettono, verde niente da riparare
+(impugnatura vuota), oro riparazione completa, arancio riparazione parziale
+con tutti i fondi, rosso fondi insufficienti (mostra il minimo), grigio se
+l'usura è solo sulle spade in uso. Dopo il clic l'anello sfuma al verde, senza
+scritte. La **lama** mostra tutte le spade dall'elsa verso la punta: libere,
+usurate (con un minimo visibile del 4%), in uso, rotte. La scritta e la lama
+aprono il dettaglio (si chiude con Esc o cliccando fuori): numero grande delle
+spade libere, la spada più grande, la legenda con i numeri, gli addetti
+all'attrezzatura e l'acquisto in evidenza. Sotto i 1.001 pixel la spada
+sparisce dalla barra.
 
 La pagina Scuola (Fase 8) tiene scena, colori, icone ed emblemi; sono stati
 tolti i maiuscoletti e le scritte sotto i 12 px, lo «Iscritto» ripetuto su ogni
@@ -2481,7 +2494,7 @@ Gestisce:
 
 I costi appaiono come “Persone richieste” o “Collaboratori coinvolti”.
 
-> **Da implementare:** non esiste una pagina Attività. Oggi la manutenzione delle spade e l'acquisto di spade ufficiali stanno nel riquadro attrezzatura di La mia giornata, gli eventi nella pagina Eventi, i contenuti Social sono prodotti dai Collaboratori assegnati, i potenziamenti nella pagina Upgrade.
+> **Da implementare:** non esiste una pagina Attività. Oggi la manutenzione delle spade e l'acquisto di spade ufficiali stanno nella spada della barra del titolo, gli eventi nella pagina Eventi, i contenuti Social sono prodotti dai Collaboratori assegnati, i potenziamenti nella pagina Upgrade.
 
 ### 12.5 Statistiche
 
@@ -3857,7 +3870,7 @@ src/
     OverviewView.tsx        # Impostazioni
     admin/                  # solo sviluppo
     calendar/
-    day-panel/              # La mia giornata, obiettivo breve, spade
+    day-panel/              # La mia giornata, obiettivo breve
     events/
     feedback/
     gadgets/

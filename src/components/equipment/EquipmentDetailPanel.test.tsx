@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import type { Collaborator } from "../../game/types";
 import { formatCurrency } from "../../shared/formatters";
-import { EquipmentQuickPanel } from "./EquipmentQuickPanel";
+import { EquipmentDetailPanel } from "./EquipmentDetailPanel";
 
 function renderedCurrency(value: number): string {
   return formatCurrency(value).replace(/\s/g, " ");
@@ -12,13 +12,13 @@ function renderedCurrency(value: number): string {
 
 afterEach(cleanup);
 
-describe("EquipmentQuickPanel", () => {
-  it("shows condition and moves manual maintenance into La mia giornata", () => {
+describe("EquipmentDetailPanel", () => {
+  it("shows the swords, repairs from the hilt and lists every state", () => {
     const initial = createInitialState(1_000);
     const onMaintainEquipment = vi.fn();
 
     const { container } = render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: { ...initial.school, euros: 100 },
@@ -31,70 +31,27 @@ describe("EquipmentQuickPanel", () => {
 
     expect(container.querySelector(".equipment-quick-total")).toHaveTextContent("5libere su 6");
     expect(screen.getByText("45 pt di usura")).toBeVisible();
-    expect(
-      screen.getByRole("progressbar", { name: "Condizione delle spade della scuola" }),
-    ).toHaveClass("equipment-condition-bar", "is-aggregate");
-    expect(container.querySelector(".equipment-condition.is-saber")).toBeInTheDocument();
-    expect(container.querySelector(".equipment-saber-outline")).toBeInTheDocument();
+    expect(container.querySelector(".school-saber.is-large")).toBeInTheDocument();
+    expect(container.querySelector(".equipment-legend")).toHaveTextContent(
+      "Libere 5In uso 1Rotte 0Usura 45 pt",
+    );
 
-    const repairButton = screen.getByRole("button", { name: /Ripara tutto/ });
-    expect(repairButton.parentElement).toHaveClass("equipment-quick-actions");
-    fireEvent.click(repairButton);
+    fireEvent.click(screen.getByRole("button", { name: /Ripara tutto/ }));
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
 
-  it("keeps the repair action mounted and disabled when maintenance is not needed", () => {
+  it("says when no sword is free", () => {
     const initial = createInitialState(1_000);
-    const fundedState = {
-      ...initial,
-      school: { ...initial.school, euros: 100 },
-    };
-    const onMaintainEquipment = vi.fn();
-    const { container, rerender } = render(
-      <EquipmentQuickPanel
-        state={fundedState}
-        onMaintainEquipment={onMaintainEquipment}
+    render(
+      <EquipmentDetailPanel
+        state={{ ...initial, equipment: { ...initial.equipment, availableSwords: 0 } }}
+        onMaintainEquipment={() => undefined}
         onBuyOfficialSwords={() => undefined}
       />,
     );
 
-    const idleRepairButton = screen.getByRole("button", {
-      name: "Nessuna riparazione necessaria",
-    });
-    expect(idleRepairButton).toBeDisabled();
-    expect(idleRepairButton).toHaveTextContent("Niente da riparare");
-    expect(container.querySelector(".equipment-quick-heading")).toHaveTextContent("In ordine");
-
-    fireEvent.click(idleRepairButton);
-    expect(onMaintainEquipment).not.toHaveBeenCalled();
-
-    rerender(
-      <EquipmentQuickPanel
-        state={{
-          ...fundedState,
-          equipment: { ...initial.equipment, wear: 10 },
-        }}
-        onMaintainEquipment={onMaintainEquipment}
-        onBuyOfficialSwords={() => undefined}
-      />,
-    );
-
-    const activeRepairButton = screen.getByRole("button", { name: /Ripara tutto/ });
-    expect(activeRepairButton).toBe(idleRepairButton);
-    expect(activeRepairButton).toBeEnabled();
-
-    rerender(
-      <EquipmentQuickPanel
-        state={fundedState}
-        onMaintainEquipment={onMaintainEquipment}
-        onBuyOfficialSwords={() => undefined}
-      />,
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Nessuna riparazione necessaria" }),
-    ).toBe(idleRepairButton);
-    expect(idleRepairButton).toBeDisabled();
+    expect(screen.getByText(/Nessuna spada libera/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Spade in ordine" })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("reserves the automatic repair progress space while there is no repair work", () => {
@@ -117,7 +74,7 @@ describe("EquipmentQuickPanel", () => {
       collaborators: [equipmentCollaborator],
     };
     const { container, rerender } = render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={idleState}
         onMaintainEquipment={() => undefined}
         onBuyOfficialSwords={() => undefined}
@@ -131,7 +88,7 @@ describe("EquipmentQuickPanel", () => {
     ).not.toBeInTheDocument();
 
     rerender(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...idleState,
           equipment: { ...idleState.equipment, wear: 10 },
@@ -152,7 +109,7 @@ describe("EquipmentQuickPanel", () => {
     const onBuyOfficialSwords = vi.fn();
 
     render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: {
@@ -183,7 +140,7 @@ describe("EquipmentQuickPanel", () => {
     const initial = createInitialState(1_000);
 
     render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: {
@@ -212,7 +169,7 @@ describe("EquipmentQuickPanel", () => {
     const onBuyOfficialSwords = vi.fn();
 
     render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: { ...initial.school, euros: 40_000, peakActiveMembers: 15 },
@@ -248,7 +205,7 @@ describe("EquipmentQuickPanel", () => {
     const initial = createInitialState(1_000);
 
     render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: {
@@ -279,7 +236,7 @@ describe("EquipmentQuickPanel", () => {
     const onBuyOfficialSwords = vi.fn();
 
     render(
-      <EquipmentQuickPanel
+      <EquipmentDetailPanel
         state={{
           ...initial,
           school: { ...initial.school, euros, peakActiveMembers: 15 },

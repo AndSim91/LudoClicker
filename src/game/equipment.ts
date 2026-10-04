@@ -58,6 +58,28 @@ export function getEquipmentMinimumMaintenanceCost(equipment: EquipmentState): n
     : 0;
 }
 
+/**
+ * What the manual repair can do right now: nothing to fix, blocked (only swords
+ * in use are worn), the full repair, a partial one with every euro, or the
+ * minimum the school is missing.
+ */
+export type EquipmentRepairStatus =
+  | { kind: "none" | "blocked" }
+  | { kind: "full" | "partial" | "short"; amount: number };
+
+export function getEquipmentRepairStatus(
+  equipment: EquipmentState,
+  euros: number,
+): EquipmentRepairStatus {
+  const damagedSwords = getEffectiveDamagedSwords(equipment);
+  if (damagedSwords === 0 && equipment.wear <= 0) return { kind: "none" };
+  if (damagedSwords === 0 && getAvailableSwords(equipment) <= 0) return { kind: "blocked" };
+  const minimum = getEquipmentMinimumMaintenanceCost(equipment);
+  if (euros < minimum) return { kind: "short", amount: minimum };
+  const cost = getEquipmentMaintenanceCost(equipment);
+  return euros < cost ? { kind: "partial", amount: euros } : { kind: "full", amount: cost };
+}
+
 export function synchronizeEquipmentAvailability(equipment: EquipmentState): EquipmentState {
   const totalSwords = Math.max(0, Math.floor(equipment.totalSwords));
   const damagedSwords = clampCount(equipment.damagedSwords ?? 0, totalSwords);

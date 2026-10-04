@@ -172,9 +172,9 @@ describe("DayPanel", () => {
       "data-tutorial-target",
       "true",
     );
-    const mission = screen.getByLabelText("Obiettivo breve");
-    const equipment = screen.getByLabelText("Gestione attrezzatura");
-    expect(mission.nextElementSibling).toBe(equipment);
+    expect(screen.getByLabelText("Obiettivo breve")).toBeVisible();
+    // The swords live in the title bar now (Fase 8).
+    expect(screen.queryByLabelText("Gestione attrezzatura")).not.toBeInTheDocument();
   });
 
   it("hides wave missions when the engine marks them as inactive", () => {

@@ -650,3 +650,9 @@
   --sis-hover: color-mix(in srgb, #b39ddb 22%, var(--surface));
   --sis-toggle: color-mix(in srgb, #b39ddb 14%, var(--surface));
 }
+
+/* Swords detail: the purchase takes the wave colour. */
+:root[data-theme="dark"] .title-equipment-popover {
+  --equipment-buy: var(--onde-wave);
+  --equipment-buy-ink: var(--onde-on-gold);
+}

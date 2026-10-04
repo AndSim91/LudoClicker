@@ -230,53 +230,98 @@
   white-space: nowrap;
 }
 
+/* Swords: label and blade open the detail, the hilt repairs (see school-saber.css). */
 .title-equipment {
-  display: grid;
-  align-self: stretch;
-  grid-template-columns: auto 40px;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  color: white;
-  font-variant-numeric: tabular-nums;
-}
-
-.title-equipment-copy {
+  position: relative;
   display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: 6px;
-  line-height: 1;
+  align-self: stretch;
+  align-items: center;
+  padding-right: 10px;
+  color: white;
 }
 
-.title-equipment-copy small {
+.title-equipment-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 8px 0 10px;
+  color: inherit;
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.title-equipment-toggle:hover,
+.title-equipment-toggle[aria-expanded="true"] {
+  background: rgb(255 255 255 / 10%);
+}
+
+.title-equipment-toggle small {
   color: rgb(255 255 255 / 80%);
   font-size: 12px;
 }
 
-.title-equipment-copy strong {
+.title-equipment-toggle strong {
   font-family: var(--font-display, inherit);
   font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
 }
 
-.title-equipment .equipment-condition {
+.title-equipment-toggle span {
   color: rgb(255 255 255 / 72%);
+  font-size: 13px;
 }
 
-.title-equipment .equipment-condition-bar {
-  height: 9px;
-  border-color: rgb(255 255 255 / 72%);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%) inset;
+.title-equipment-popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 340px;
+  color: var(--ink);
+  user-select: text;
 }
 
-.title-equipment.is-critical .equipment-condition {
-  color: #ffb4ab;
+.title-equipment-popover .equipment-quick-card {
+  margin: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-flyout);
 }
 
-.title-equipment.is-warning .equipment-condition {
-  color: #ffe08a;
+/* In the popover the purchase is the call to action, not a link. */
+.title-equipment-popover .equipment-purchase {
+  align-items: stretch;
+  gap: 1px;
+}
+
+.title-equipment-popover .equipment-purchase-button,
+.title-equipment-popover .equipment-purchase-quantity {
+  min-height: 34px;
+  padding: 0 16px;
+  color: var(--equipment-buy-ink, white);
+  background: var(--equipment-buy, var(--blue-600));
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.title-equipment-popover .equipment-purchase-button {
+  border-radius: 17px 0 0 17px;
+}
+
+.title-equipment-popover .equipment-purchase-quantity {
+  padding: 0 12px;
+  border-radius: 0 17px 17px 0;
+  filter: brightness(0.88);
+}
+
+.title-equipment-popover .equipment-purchase-button:disabled,
+.title-equipment-popover .equipment-purchase-quantity:disabled {
+  color: var(--equipment-buy-ink, white);
+  opacity: 0.5;
 }
 
 .title-fame {

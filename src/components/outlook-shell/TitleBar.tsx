@@ -1,12 +1,11 @@
 import { Icon } from "../common/Icon";
-import { EquipmentConditionBar } from "../equipment/EquipmentConditionBar";
 import { ProgressBar } from "../common/ProgressBar";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
-import { getAvailableSwords, getEffectiveDamagedSwords } from "../../game/equipment";
 import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
+import { TitleEquipment } from "./TitleEquipment";
 import {
   formatCompactCurrency,
   formatCompactNumber,
@@ -27,6 +26,8 @@ export function TitleBar({
   equipment,
   isPaused,
   onTogglePause,
+  onMaintainEquipment = () => undefined,
+  onBuyOfficialSwords = () => undefined,
 }: {
   currentMonth: number;
   nextMonthAt: number;
@@ -40,6 +41,8 @@ export function TitleBar({
   equipment: GameState["equipment"];
   isPaused: boolean;
   onTogglePause: () => void;
+  onMaintainEquipment?: () => void;
+  onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
@@ -49,10 +52,6 @@ export function TitleBar({
     100,
     Math.max(0, (1 - (nextMonthAt - now) / GAME_CONFIG.gameMonthMs) * 100),
   );
-  const availableSwords = getAvailableSwords(equipment);
-  const damagedSwords = getEffectiveDamagedSwords(equipment);
-  const equipmentStatus =
-    damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
 
   return (
     <header className="title-bar">
@@ -97,23 +96,12 @@ export function TitleBar({
         </span>
         <MonthlyIncomeSummary state={monthlyIncomeState} />
       </div>
-      <span
-        className={`title-equipment is-${equipmentStatus}`}
-        aria-label={`Spade disponibili: ${availableSwords} su ${equipment.totalSwords}; ${damagedSwords} rotte; ${Math.round(equipment.wear)} punti di usura`}
-      >
-        <span className="title-equipment-copy">
-          <small>Spade</small>
-          <strong>
-            {formatExactNumber(availableSwords)} su {formatExactNumber(equipment.totalSwords)}
-          </strong>
-        </span>
-        <EquipmentConditionBar
-          equipment={equipment}
-          compact
-          variant="cylinder"
-          ariaLabel="Condizione delle spade nella barra superiore"
-        />
-      </span>
+      <TitleEquipment
+        equipment={equipment}
+        euros={euros}
+        onMaintainEquipment={onMaintainEquipment}
+        onBuyOfficialSwords={onBuyOfficialSwords}
+      />
       <span
         className="title-resource title-fame"
         aria-label={`Fama della scuola: ${formatExactNumber(fame)}`}

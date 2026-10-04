@@ -48,6 +48,15 @@ export function formatCurrency(value: number): string {
   return (Math.abs(value) >= 10_000 ? wholeCurrencyFormatter : currencyFormatter).format(value);
 }
 
+const shortCurrencyFormatter = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 1 });
+
+/** Very short amounts for tight spots like the sword hilt: 428 €, 1,2k €, 125k €, 3,4M €. */
+export function formatShortCurrency(value: number): string {
+  if (value >= 1_000_000) return `${shortCurrencyFormatter.format(value / 1_000_000)}M €`;
+  if (value >= 1_000) return `${shortCurrencyFormatter.format(value / 1_000)}k €`;
+  return `${Math.round(value)} €`;
+}
+
 const listFormatter = new Intl.ListFormat("it-IT", { type: "conjunction" });
 
 /** «a, b e c». */
