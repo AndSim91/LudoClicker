@@ -11,6 +11,7 @@ import type {
 } from "../../game/types";
 import { isCollaboratorAreaVisible } from "../../game/unlocks";
 import { AutomaticAssignmentControl } from "./AutomaticAssignmentControl";
+import { ShiftControl } from "./ShiftControl";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
 import { GymScene } from "./GymScene";
@@ -31,7 +32,6 @@ export function PeopleView({
   onBookTechnicianCourse,
   onIncrementCollaboratorAssignment,
   onDecrementCollaboratorAssignment,
-  onSetCollaboratorFallback,
   onMoveOperationalPriority,
   onToggleAutomaticAssignment,
   onChangeAutomaticShare,
@@ -49,13 +49,9 @@ export function PeopleView({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onIncrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
   onDecrementCollaboratorAssignment?: (assignment: CollaboratorMasteryRole) => void;
-  onSetCollaboratorFallback?: (
-    assignment: CollaboratorMasteryRole,
-    fallback: CollaboratorMasteryRole | null,
-  ) => void;
   onMoveOperationalPriority?: (
     assignment: CollaboratorMasteryRole,
-    direction: "up" | "down",
+    toIndex: number,
   ) => void;
   onToggleAutomaticAssignment?: (enabled: boolean) => void;
   onChangeAutomaticShare?: (assignment: CollaboratorMasteryRole, level: number) => void;
@@ -138,14 +134,15 @@ export function PeopleView({
               onChangeShare={onChangeAutomaticShare}
             />
           ) : null}
+          {onMoveOperationalPriority ? (
+            <ShiftControl state={stateOverride} onMove={onMoveOperationalPriority} />
+          ) : null}
           {showAggregateCollaborators ? (
             <CollaboratorSectorView
               state={stateOverride}
               collaboratorsById={collaboratorsById}
               onIncrement={onIncrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
               onDecrement={onDecrementCollaboratorAssignment ?? ignoreCollaboratorAssignmentChange}
-              onSetFallback={onSetCollaboratorFallback}
-              onMovePriority={onMoveOperationalPriority}
               onStartTraining={onStartTraining}
               onBookTechnicianCourse={onBookTechnicianCourse}
               onToggleAutomaticTeaching={onToggleAutomaticTeaching ?? ignoreAutomaticTeachingToggle}

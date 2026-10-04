@@ -1268,14 +1268,23 @@ Regole:
   (`collaboratorManagement.automaticShares`, 20 per tacca;
   `automaticPendingMoves`; `src/game/collaboratorManagement.ts`,
   `src/game/automaticAssignmentPlan.ts`; salvataggio v89);
-- **Turni dei collaboratori** permette di scegliere per ogni settore un settore
-  secondario (mai Istruttore): quando il settore principale è inattivo, il
-  10% per livello della produttività (massimo 50%) passa al secondario. Nella
-  pagina Scuola il riquadro si chiama **Turni**;
-- **Priorità operative** sblocca l'ordinamento con cui i settori consumano Euro
-  e risorse scarse a ogni ciclo (ordine iniziale: Redazione, Eventi,
-  Attrezzatura, Istruttore, Gadget). Nella pagina Scuola il riquadro si chiama
-  **Chi ha la precedenza**;
+- **Turni e precedenza**: una sola fila di settori (ordine iniziale: Redazione,
+  Eventi, Attrezzatura, Istruttore, Gadget; Gadget solo da sbloccato) decide
+  due cose. Con **Turni dei collaboratori**, chi è fermo dà il 10% per livello
+  della sua produttività (massimo 50%) al **primo settore della fila che sta
+  lavorando**; gli Istruttori possono aiutare ma non ricevono aiuto. Un
+  settore lavora se: Redazione ha il Social o un'email in scrittura, Eventi un
+  evento in corso, Attrezzatura usura da riparare, Gadget un lavoro o un
+  prodotto in vendita; un Istruttore è fermo se non insegna, non si forma e
+  non c'è Preparazione atletica. La stessa fila decide chi consuma per primo
+  Euro e spade a ogni ciclo (contano Attrezzatura, Eventi e Istruttori, gli
+  unici che spendono da soli). **Priorità operative** rende la fila
+  modificabile: clic su un settore per farlo passare avanti, o trascinarlo.
+  Nella pagina Scuola è una striscia sotto «Assegnazione automatica» che
+  compare con il primo dei due potenziamenti e mostra «+N» sul settore che
+  riceve aiuto e «fermo» sui settori fermi (`src/game/collaboratorFallback.ts`,
+  `src/features/people/ShiftControl.tsx`). Le scelte del vecchio settore
+  secondario (`fallbackAssignments`, `secondaryAssignment`) sono ignorate;
 - un collaboratore non leggendario può lasciare la scuola soltanto tramite
   eventi narrativi casuali;
 
@@ -2101,10 +2110,10 @@ le entrate ricorrenti.
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
 | Manuale operativo | +10% esperienza Maestria per livello; massimo +50% | 500 / 1.000 / 2.000 / 4.000 / 8.000 € |
-| Turni dei collaboratori | trasferisce a un settore secondario il 10% della produttività inattiva per livello; massimo 50% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Turni dei collaboratori | chi è fermo dà il 10% della produttività per livello al primo settore al lavoro della fila; massimo 50% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Procedure standard | +5% velocità automazioni generiche per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Modulo di iscrizione | +5% entrate dalle quote per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
-| Priorità operative | sblocca l'ordinamento con cui le AA consumano Euro, spade e risorse scarse | 25.000 € |
+| Priorità operative | rende modificabile la fila «Turni e precedenza» (chi consuma per primo Euro e spade e chi riceve aiuto) | 25.000 € |
 | A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50%; richiede almeno una scuola fondata | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
@@ -3273,9 +3282,9 @@ P = somma della produttività dei Collaboratori assegnati a Gadget
 Le rarità, la Maestria dell'incarico e i bonus globali di Forma 6 e Forma 7
 concorrono a `P`. I bonus specifici dei rami d'arma non modificano Gadget. Un
 Collaboratore assegnato guadagna 1 XP di Maestria Gadget al secondo, come negli
-altri incarichi. A `P` si aggiunge la quota dei Collaboratori che hanno Gadget
-come settore secondario quando il loro settore principale è inattivo
-(potenziamento Turni dei collaboratori, 10% per livello, massimo 50%).
+altri incarichi. A `P` si aggiunge, quando Gadget è il primo settore al lavoro della fila
+«Turni e precedenza», la quota dei Collaboratori fermi (potenziamento Turni
+dei collaboratori, 10% per livello, massimo 50%).
 
 Il tempo effettivo di progettazione è `lavoroBase / P`; una revisione Comune
 richiede un terzo del lavoro iniziale. Costo e lavoro di revisione crescono in

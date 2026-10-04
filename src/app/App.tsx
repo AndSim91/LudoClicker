@@ -508,16 +508,9 @@ export function App() {
     () => dispatch({ type: "SKIP_REPTILE_PRESENTATION", now: getGameNow() }),
     [dispatch, getGameNow],
   );
-  const setCollaboratorFallback = useCallback(
-    (
-      assignment: CollaboratorMasteryRole,
-      fallback: CollaboratorMasteryRole | null,
-    ) => dispatch({ type: "SET_COLLABORATOR_FALLBACK", assignment, fallback }),
-    [dispatch],
-  );
   const moveOperationalPriority = useCallback(
-    (assignment: CollaboratorMasteryRole, direction: "up" | "down") =>
-      dispatch({ type: "MOVE_OPERATIONAL_PRIORITY", assignment, direction }),
+    (assignment: CollaboratorMasteryRole, toIndex: number) =>
+      dispatch({ type: "MOVE_OPERATIONAL_PRIORITY", assignment, toIndex }),
     [dispatch],
   );
   const startGadgetProject = useCallback(
@@ -663,7 +656,6 @@ export function App() {
               onDecrementCollaboratorAssignment={decrementCollaboratorAssignment}
               onToggleAutomaticAssignment={toggleAutomaticAssignment}
               onChangeAutomaticShare={changeAutomaticShare}
-              onSetCollaboratorFallback={setCollaboratorFallback}
               onMoveOperationalPriority={moveOperationalPriority}
               onStartTraining={startTraining}
               onBookTechnicianCourse={bookTechnicianCourse}

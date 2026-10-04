@@ -20,7 +20,6 @@ import {
   incrementCollaboratorAssignment,
   moveOperationalPriority,
   setAutomaticAssignment,
-  setCollaboratorFallback,
 } from "./collaboratorManagement";
 import { postponeLightInflationEvent } from "./lightInflation";
 import { updateProfileName } from "./profileFlow";
@@ -207,15 +206,10 @@ export function createGameActionHandlers(
       state,
       action.assignment,
     ),
-    SET_COLLABORATOR_FALLBACK: (state, action) => setCollaboratorFallback(
-      state,
-      action.assignment,
-      action.fallback,
-    ),
     MOVE_OPERATIONAL_PRIORITY: (state, action) => moveOperationalPriority(
       state,
       action.assignment,
-      action.direction,
+      action.toIndex,
     ),
     TOGGLE_MEMBER_FAVORITE: (state, action) => toggleMemberFavorite(
       state,

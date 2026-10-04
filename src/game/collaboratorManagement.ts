@@ -4,7 +4,6 @@ import {
   getVisibleForms,
 } from "../content/forms";
 import {
-  getUpgradeEffectTotal,
   isCourseXUnlocked,
   isOperationalPrioritiesUnlocked,
 } from "../content/upgrades";
@@ -38,7 +37,6 @@ export function createInitialCollaboratorManagement(): CollaboratorManagementSta
     aggregateViewUnlocked: false,
     targets: createEmptyCollaboratorTargets(),
     operationalPriorities: ["writing", "events", "equipment", "instructor", "gadget"],
-    fallbackAssignments: {},
   };
 }
 
@@ -444,40 +442,18 @@ export function decrementCollaboratorAssignment(
   });
 }
 
-export function setCollaboratorFallback(
-  state: GameState,
-  assignment: CollaboratorMasteryRole,
-  fallback: CollaboratorMasteryRole | null,
-): GameState {
-  if (
-    getUpgradeEffectTotal(state.upgrades, "collaboratorFallbackTier") <= 0 ||
-    fallback === assignment ||
-    fallback === "instructor" ||
-    (fallback === "gadget" && !state.unlocks.gadget)
-  ) return state;
-  const fallbackAssignments = { ...(state.collaboratorManagement.fallbackAssignments ?? {}) };
-  if (fallback === null) delete fallbackAssignments[assignment];
-  else fallbackAssignments[assignment] = fallback;
-  return {
-    ...state,
-    collaboratorManagement: {
-      ...state.collaboratorManagement,
-      fallbackAssignments,
-    },
-  };
-}
-
+/** Moves a sector of «Turni e precedenza» to a place of the row (index in the full list). */
 export function moveOperationalPriority(
   state: GameState,
   assignment: CollaboratorMasteryRole,
-  direction: "up" | "down",
+  toIndex: number,
 ): GameState {
   if (!isOperationalPrioritiesUnlocked(state.upgrades)) return state;
   const priorities = [...state.collaboratorManagement.operationalPriorities];
   const index = priorities.indexOf(assignment);
-  const nextIndex = direction === "up" ? index - 1 : index + 1;
-  if (index < 0 || nextIndex < 0 || nextIndex >= priorities.length) return state;
-  [priorities[index], priorities[nextIndex]] = [priorities[nextIndex], priorities[index]];
+  if (index < 0 || index === toIndex || toIndex < 0 || toIndex >= priorities.length) return state;
+  priorities.splice(index, 1);
+  priorities.splice(toIndex, 0, assignment);
   return {
     ...state,
     collaboratorManagement: {

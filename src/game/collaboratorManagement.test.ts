@@ -6,9 +6,12 @@ import {
   incrementCollaboratorAssignment,
   moveOperationalPriority,
   reconcileCollaboratorManagement,
-  setCollaboratorFallback,
 } from "./collaboratorManagement";
-import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
+import {
+  getCollaboratorFallbackProductivity,
+  getShiftReceiver,
+  getShiftSummary,
+} from "./collaboratorFallback";
 import { createInitialState } from "./initialState";
 import { gameReducer } from "./engine";
 import type { Collaborator, CollaboratorAssignment, GameState } from "./types";
@@ -424,46 +427,24 @@ describe("collaborator aggregate management", () => {
       .toBe("instructor");
   });
 
-  it("unlocks secondary shifts and operational priorities only at their upgrades", () => {
+  it("lets the row of Turni e precedenza be reordered only with Priorità operative", () => {
     const initial = createInitialState(1_000);
+    expect(moveOperationalPriority(initial, "equipment", 1)).toBe(initial);
 
-    expect(setCollaboratorFallback(initial, "events", "writing")).toBe(initial);
-    expect(moveOperationalPriority(initial, "equipment", "up")).toBe(initial);
-
-    const shiftsUnlocked = {
+    const unlocked = {
       ...initial,
-      upgrades: { ...initial.upgrades, "collaborator-shifts": 1 },
-    };
-    const configured = setCollaboratorFallback(shiftsUnlocked, "events", "writing");
-    expect(configured.collaboratorManagement.fallbackAssignments).toEqual({
-      events: "writing",
-    });
-    expect(setCollaboratorFallback(configured, "events", "instructor")).toBe(configured);
-
-    const prioritiesUnlocked = {
-      ...configured,
-      upgrades: { ...configured.upgrades, "operational-priorities": 1 },
+      upgrades: { ...initial.upgrades, "operational-priorities": 1 },
     };
     expect(
-      moveOperationalPriority(prioritiesUnlocked, "equipment", "up")
-        .collaboratorManagement.operationalPriorities,
+      moveOperationalPriority(unlocked, "equipment", 1).collaboratorManagement.operationalPriorities,
     ).toEqual(["writing", "equipment", "events", "instructor", "gadget"]);
+    expect(
+      moveOperationalPriority(unlocked, "gadget", 0).collaboratorManagement.operationalPriorities,
+    ).toEqual(["gadget", "writing", "events", "equipment", "instructor"]);
   });
 
-  it("uses Eventi as a secondary source only while no event is active", () => {
+  it("sends whoever is idle to the first working sector of the row, never to Istruttori", () => {
     const initial = createInitialState(1_000);
-    const eventCollaborators = [collaborator(1, "events"), collaborator(2, "events")];
-    const configured: GameState = {
-      ...initial,
-      collaborators: eventCollaborators,
-      upgrades: { ...initial.upgrades, "collaborator-shifts": 5 },
-      collaboratorManagement: {
-        ...initial.collaboratorManagement,
-        fallbackAssignments: { events: "writing" },
-      },
-    };
-    expect(getCollaboratorFallbackProductivity(configured, "writing")).toBeGreaterThan(0);
-
     const runningEvent = {
       id: "active-event",
       definitionId: "park-sparring" as const,
@@ -478,13 +459,38 @@ describe("collaborator aggregate management", () => {
       membersUsed: 0,
       equipmentUsed: 0,
       wearAdded: 0,
-      collaboratorId: eventCollaborators[0].id,
+      collaboratorId: "collaborator-1",
       status: "running" as const,
     };
-    expect(getCollaboratorFallbackProductivity({
-      ...configured,
-      acquisitionEvents: [runningEvent],
-    }, "writing")).toBe(0);
+    const state: GameState = {
+      ...initial,
+      unlocks: { ...initial.unlocks, social: true },
+      collaborators: [
+        collaborator(1, "events"),
+        collaborator(2, "events"),
+        collaborator(3, "writing"),
+      ],
+      upgrades: { ...initial.upgrades, "collaborator-shifts": 5 },
+    };
+    // Eventi without an event is idle: its people help Social, first of the row at work.
+    expect(getShiftSummary(state).idleRoles).toEqual(new Set(["events"]));
+    expect(getCollaboratorFallbackProductivity(state, "writing")).toBeGreaterThan(0);
+    expect(getCollaboratorFallbackProductivity(state, "events")).toBe(0);
+
+    const eventsFirst: GameState = {
+      ...state,
+      collaboratorManagement: {
+        ...state.collaboratorManagement,
+        operationalPriorities: ["instructor", "events", "writing", "equipment", "gadget"],
+      },
+    };
+    // Eventi still idle: the help skips it (and Istruttori) and goes to Social.
+    expect(getShiftReceiver(eventsFirst)).toBe("writing");
+    // With an event running, nobody is idle any more.
+    const busy = { ...eventsFirst, acquisitionEvents: [runningEvent] };
+    expect(getShiftReceiver(busy)).toBe("events");
+    expect(getShiftSummary(busy).helpers).toEqual([]);
+    expect(getCollaboratorFallbackProductivity(busy, "events")).toBe(0);
   });
 
   it("lets the chosen operational priority spend scarce euros first", () => {

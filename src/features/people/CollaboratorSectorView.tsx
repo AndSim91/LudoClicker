@@ -4,11 +4,9 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
-  getUpgradeEffectTotal,
   isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
-  isOperationalPrioritiesUnlocked,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -540,8 +538,6 @@ export function CollaboratorSectorView({
   collaboratorsById,
   onIncrement,
   onDecrement,
-  onSetFallback,
-  onMovePriority,
   onStartTraining,
   onBookTechnicianCourse,
   onToggleAutomaticTeaching,
@@ -550,14 +546,6 @@ export function CollaboratorSectorView({
   collaboratorsById: Map<string, Collaborator>;
   onIncrement: (assignment: CollaboratorMasteryRole) => void;
   onDecrement: (assignment: CollaboratorMasteryRole) => void;
-  onSetFallback?: (
-    assignment: CollaboratorMasteryRole,
-    fallback: CollaboratorMasteryRole | null,
-  ) => void;
-  onMovePriority?: (
-    assignment: CollaboratorMasteryRole,
-    direction: "up" | "down",
-  ) => void;
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onToggleAutomaticTeaching?: (enabled: boolean) => void;
@@ -611,14 +599,6 @@ export function CollaboratorSectorView({
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const targets = state.collaboratorManagement.targets;
   const automaticAssignment = Boolean(state.collaboratorManagement.automaticShares);
-  const availableRoles: CollaboratorMasteryRole[] = state.unlocks.gadget
-    ? ["writing", "events", "equipment", "instructor", "gadget"]
-    : ["writing", "events", "equipment", "instructor"];
-  const fallbackUnlocked = getUpgradeEffectTotal(
-    state.upgrades,
-    "collaboratorFallbackTier",
-  ) > 0;
-  const prioritiesUnlocked = isOperationalPrioritiesUnlocked(state.upgrades);
   const panelProps = useMemo(() => ({
     collaboratorsById,
     onStartTraining,
@@ -670,71 +650,6 @@ export function CollaboratorSectorView({
           </div>
         ) : null}
       </div>
-
-      {fallbackUnlocked && onSetFallback ? (
-        <section className="collaborator-operations-control" aria-labelledby="fallback-sectors-title">
-          <header>
-            <h3 id="fallback-sectors-title">Turni</h3>
-            <p>Quando un settore è fermo, i suoi collaboratori danno una mano a un altro. Gli Istruttori no: insegnare è un lavoro a tempo pieno.</p>
-          </header>
-          <div className="collaborator-fallback-grid">
-            {availableRoles.map((role) => (
-              <label key={role}>
-                <span>{getCollaboratorAssignmentLabel(role, state.unlocks.social)}</span>
-                <select
-                  aria-label={`Settore secondario per ${getCollaboratorAssignmentLabel(role, state.unlocks.social)}`}
-                  value={state.collaboratorManagement.fallbackAssignments?.[role] ?? ""}
-                  onChange={(event) => onSetFallback(
-                    role,
-                    (event.target.value || null) as CollaboratorMasteryRole | null,
-                  )}
-                >
-                  <option value="">Nessuno</option>
-                  {availableRoles.filter((candidate) =>
-                    candidate !== role && candidate !== "instructor"
-                  ).map((candidate) => (
-                    <option value={candidate} key={candidate}>
-                      {getCollaboratorAssignmentLabel(candidate, state.unlocks.social)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {prioritiesUnlocked && onMovePriority ? (
-        <section className="collaborator-operations-control" aria-labelledby="operational-priorities-title">
-          <header>
-            <h3 id="operational-priorities-title">Chi ha la precedenza</h3>
-            <p>Quando fondi e spade non bastano per tutti, si serve prima chi sta in alto.</p>
-          </header>
-          <ol className="operational-priority-list">
-            {state.collaboratorManagement.operationalPriorities
-              .filter((role) => role !== "gadget" || state.unlocks.gadget)
-              .map((role, index, roles) => (
-                <li key={role}>
-                  <span><small>{index + 1}</small>{getCollaboratorAssignmentLabel(role, state.unlocks.social)}</span>
-                  <span>
-                    <button
-                      type="button"
-                      aria-label={`Sposta prima ${getCollaboratorAssignmentLabel(role, state.unlocks.social)}`}
-                      disabled={index === 0}
-                      onClick={() => onMovePriority(role, "up")}
-                    >↑</button>
-                    <button
-                      type="button"
-                      aria-label={`Sposta dopo ${getCollaboratorAssignmentLabel(role, state.unlocks.social)}`}
-                      disabled={index === roles.length - 1}
-                      onClick={() => onMovePriority(role, "down")}
-                    >↓</button>
-                  </span>
-                </li>
-              ))}
-          </ol>
-        </section>
-      ) : null}
 
       {openRole ? (
         <CollaboratorSectorPanel

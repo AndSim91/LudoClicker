@@ -383,6 +383,7 @@ export interface CollaboratorManagementState {
   targets: Record<Exclude<CollaboratorMasteryRole, "gadget">, number> &
     Partial<Record<"gadget", number>>;
   operationalPriorities: CollaboratorMasteryRole[];
+  /** ponytail: ignored since «Turni e precedenza» (proposta B); kept only so old saves validate. */
   fallbackAssignments?: Partial<Record<CollaboratorMasteryRole, CollaboratorMasteryRole>>;
   /**
    * «Assegnazione automatica» (4.7): present = on. Effort of each sector, 20
@@ -429,6 +430,7 @@ export interface Collaborator {
   technicianCourseReservation?: TechnicianCourseReservation;
   formBranchPreferences?: FormBranch[];
   assignment: CollaboratorAssignment;
+  /** ponytail: ignored since «Turni e precedenza» (proposta B); kept only so old saves validate. */
   secondaryAssignment?: CollaboratorAssignment;
   mastery?: CollaboratorMastery;
   rarity: PersonRarity;
@@ -1117,14 +1119,9 @@ export type GameAction =
       assignment: CollaboratorMasteryRole;
     }
   | {
-      type: "SET_COLLABORATOR_FALLBACK";
-      assignment: CollaboratorMasteryRole;
-      fallback: CollaboratorMasteryRole | null;
-    }
-  | {
       type: "MOVE_OPERATIONAL_PRIORITY";
       assignment: CollaboratorMasteryRole;
-      direction: "up" | "down";
+      toIndex: number;
     }
   | { type: "TOGGLE_MEMBER_FAVORITE"; contactId: string }
   | { type: "CANCEL_MEMBER_ENROLLMENT"; contactId: string }
