@@ -99,7 +99,7 @@ describe("App profile and navigation", () => {
     await waitFor(() => {
       expect(screen.queryByText("Avvia il volantinaggio gratuito")).not.toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Annulla" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Annulla · \d+:\d{2}$/ })).toBeVisible();
   });
 
   it("starts with only the applications useful during the first campaign", () => {
