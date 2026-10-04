@@ -120,7 +120,17 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
       ? !Number.isSafeInteger(state.minigame.score) ||
         (state.minigame.score ?? -1) < 0 ||
         (state.minigame.score ?? 101) > 100
-      : state.minigame.score !== undefined)
+      : state.minigame.score !== undefined) ||
+    (state.minigame.mastered !== undefined &&
+      (state.minigame.mastered !== true || state.minigame.status !== "result"))
   )) return false;
   return true;
+}
+
+export function isValidGadgetMastery(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.entries(value).every(([productId, rarities]) =>
+    isProductId(productId) && Array.isArray(rarities) && rarities.every(isGadgetRarity),
+  );
 }

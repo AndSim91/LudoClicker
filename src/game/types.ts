@@ -929,6 +929,8 @@ export interface GadgetMinigameState {
   previousQuality: number;
   status: "ready" | "running" | "result";
   score?: number;
+  /** Collaudo skipped by the Maestria: the score is 100 without playing. */
+  mastered?: boolean;
 }
 
 export interface GadgetState {
@@ -987,6 +989,8 @@ export interface GameState {
     secretLegendaries: Record<SecretLegendaryId, SecretLegendaryProgress>;
     /** The Reptile has become the Torneo della Superba: permanent, kept by every new school. */
     superbaTournament?: boolean;
+    /** Maestria dei gadget: product×rarity reached at 100%, collaudo skipped for good (gadgetRarity.ts). */
+    gadgetMastery?: Partial<Record<GadgetProductId, GadgetRarity[]>>;
   };
   contacts: Contact[];
   availableContactPool?: AvailableContactPoolEntry[];

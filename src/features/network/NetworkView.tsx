@@ -56,11 +56,14 @@ export function NetworkView({
   ];
   const secretsEnrolled = Object.values(network.secretLegendaries)
     .filter((progress) => progress.status === "enrolled").length;
+  const gadgetMasteries = Object.values(network.gadgetMastery ?? {})
+    .reduce((total, rarities) => total + (rarities?.length ?? 0), 0);
   const keeps: [string, string][] = [
     ...(network.superbaTournament ? [["Torneo della Superba", ""] as [string, string]] : []),
     ...(state.secretUpgradeDiscoveries.includes("project-x") ? [["Corso X", "1 €"] as [string, string]] : []),
     ["Ludodex", `${getDiscoveredLegendaryIds(state).size}/${LUDODEX_LEGENDARIES.length}`],
     ...(secretsEnrolled > 0 ? [["Leggendari Segreti", `${secretsEnrolled}`] as [string, string]] : []),
+    ...(gadgetMasteries > 0 ? [["Maestria dei gadget", `${gadgetMasteries}`] as [string, string]] : []),
     ["Traguardi", `${state.achievements.length}/${ACHIEVEMENT_TOTAL}`],
   ];
 

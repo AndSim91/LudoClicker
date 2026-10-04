@@ -13,7 +13,7 @@ import {
   LIGHT_INFLATION_CAUSES,
   LIGHT_INFLATION_EVENT_VISIBILITY_MS,
 } from "./lightInflation";
-import { isValidGadgetState } from "./gadgetState";
+import { isValidGadgetMastery, isValidGadgetState } from "./gadgetState";
 import { REPUTATION_UPGRADE_IDS } from "./reputation";
 
 const CONTACT_SOURCES: GameState["contacts"][number]["source"][] = [
@@ -629,5 +629,6 @@ export function isValidGameState(value: unknown): value is GameState {
     && hasValidChroniclesProgress(state)
     && hasValidReptileProgress(state)
     && typeof state.network?.secretLegendaries === "object"
+    && isValidGadgetMastery(state.network?.gadgetMastery)
   );
 }

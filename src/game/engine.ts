@@ -38,6 +38,7 @@ import {
 } from "./gameScheduler";
 import { queueMoments } from "./moments";
 import { syncYearDigest } from "./yearDigest";
+import { syncGadgetMastery } from "./gadgetRarity";
 import { announceMembershipFeeTier, notifyPrestigeOffer, processNarrativeEvent } from "./narrativeFlow";
 import {
   completeShortGoal,
@@ -308,7 +309,7 @@ function completeTickStep(
   const recruited = recruitEnrolledLegendaryCollaborators(resolved.state, now);
   const reconciled = reconcileCollaboratorManagement(recruited);
   const progressed = completeShortGoal(
-    queueMoments(syncYearDigest(grantAchievements(reconciled, now), now)),
+    queueMoments(syncYearDigest(grantAchievements(syncGadgetMastery(reconciled), now), now)),
     now,
     gainMultiplier,
   );
@@ -443,7 +444,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // A refused action leaves the state as it was: no achievement either.
       reconciledState === preparedState
         ? reconciledState
-        : queueMoments(syncYearDigest(grantAchievements(reconciledState, now), now)),
+        : queueMoments(syncYearDigest(grantAchievements(syncGadgetMastery(reconciledState), now), now)),
       now,
       gainMultiplier,
     ),

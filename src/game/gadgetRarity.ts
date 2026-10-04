@@ -102,3 +102,35 @@ export function canRollNextGadgetRarity(
   return nextRarity !== "secret-legendary" ||
     areSecretLegendaryGadgetRequirementsMet(state, productId);
 }
+
+/** Maestria: a product×rarity that once reached 100% skips its collaudo forever, in every school. */
+export function isGadgetRarityMastered(
+  state: GameState,
+  productId: GadgetProductId,
+  rarity: GadgetRarity,
+): boolean {
+  return state.network.gadgetMastery?.[productId]?.includes(rarity) === true;
+}
+
+/** Records every product×rarity at 100% (also the 100% given when the next rarity unlocks). */
+export function syncGadgetMastery(state: GameState): GameState {
+  let mastery = state.network.gadgetMastery;
+  for (const [productId, product] of Object.entries(state.gadgets.products) as [
+    GadgetProductId,
+    GadgetProductState,
+  ][]) {
+    for (const rarity of GADGET_RARITY_ORDER) {
+      const rarityState = product.rarities[rarity];
+      if (!rarityState.unlocked || rarityState.quality < 100) continue;
+      if (mastery?.[productId]?.includes(rarity)) continue;
+      const known = mastery?.[productId] ?? [];
+      mastery = {
+        ...mastery,
+        [productId]: GADGET_RARITY_ORDER.filter((id) => id === rarity || known.includes(id)),
+      };
+    }
+  }
+  return mastery === state.network.gadgetMastery
+    ? state
+    : { ...state, network: { ...state.network, gadgetMastery: mastery } };
+}

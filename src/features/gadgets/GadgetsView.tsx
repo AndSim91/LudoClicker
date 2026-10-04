@@ -1,4 +1,4 @@
-import { memo, type CSSProperties } from "react";
+import { memo, useCallback, useState, type CSSProperties } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
@@ -28,6 +28,7 @@ import type {
   GadgetMinigameState,
   GadgetProductId,
   GadgetProductState,
+  GadgetRarity,
   GameState,
   GadgetWorkState,
 } from "../../game/types";
@@ -42,7 +43,15 @@ const numberFormatter = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 2,
 });
 
-function GadgetRarityRows({ product }: { product: GadgetProductState }) {
+function GadgetRarityRows({
+  product,
+  mastery,
+  onPractice,
+}: {
+  product: GadgetProductState;
+  mastery?: readonly GadgetRarity[];
+  onPractice: (rarity: GadgetRarity) => void;
+}) {
   const rarities = getUnlockedGadgetRarities(product);
   const highestRarity = getHighestUnlockedGadgetRarity(product);
   return (
@@ -65,10 +74,23 @@ function GadgetRarityRows({ product }: { product: GadgetProductState }) {
               aria-label={`${GADGET_RARITIES[rarity].label}: qualità ${rarityState.quality} su 100`}
             >
               <span><small>Qualità</small><strong>{rarityState.quality}%</strong></span>
-              <ProgressBar
-                label={`Qualità ${GADGET_RARITIES[rarity].label}`}
-                value={rarityState.quality}
-              />
+              {mastery?.includes(rarity) ? (
+                <button
+                  type="button"
+                  className="gadget-mastery-stamp"
+                  title="Maestria: il collaudo non serve più, anche nelle prossime scuole. Clic per giocarlo per divertimento."
+                  aria-label={`Maestria ${GADGET_RARITIES[rarity].label}: gioca il collaudo per divertimento`}
+                  onClick={() => onPractice(rarity)}
+                >
+                  <Icon name="play" />
+                  Maestria
+                </button>
+              ) : (
+                <ProgressBar
+                  label={`Qualità ${GADGET_RARITIES[rarity].label}`}
+                  value={rarityState.quality}
+                />
+              )}
             </div>
             <span className="gadget-rarity-stat">
               <small>Venduti</small>
@@ -100,7 +122,11 @@ const GadgetProductCard = memo(function GadgetProductCard({
   onStartRevision,
   onStartMinigame,
   onAccept,
+  mastery,
+  onPractice,
 }: {
+  mastery?: readonly GadgetRarity[];
+  onPractice: (productId: GadgetProductId, rarity: GadgetRarity) => void;
   product: GadgetProductState;
   productId: GadgetProductId;
   work?: GadgetWorkState;
@@ -215,7 +241,13 @@ const GadgetProductCard = memo(function GadgetProductCard({
         <p>{definition.description}</p>
       </div>
 
-      {product.prototypeCompleted ? <GadgetRarityRows product={product} /> : null}
+      {product.prototypeCompleted ? (
+        <GadgetRarityRows
+          product={product}
+          mastery={mastery}
+          onPractice={(rarity) => onPractice(productId, rarity)}
+        />
+      ) : null}
 
       <div className="gadget-product-status">
         {work ? (
@@ -299,9 +331,18 @@ export function GadgetsView({
   onAccept: (productId: GadgetProductId) => void;
 }) {
   const state = useGameStateSlices(
-    ["collaborators", "gadgets", "school", "unlocks", "upgrades"],
+    ["collaborators", "gadgets", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
+  const [practice, setPractice] = useState<{
+    productId: GadgetProductId;
+    rarity: GadgetRarity;
+    seed: number;
+    score?: number;
+  }>();
+  const startPractice = useCallback((productId: GadgetProductId, rarity: GadgetRarity) => {
+    setPractice({ productId, rarity, seed: Math.floor(Math.random() * 2_147_483_647) });
+  }, []);
   const productivity = getGadgetProductivity(state);
   const activeWork = state.gadgets.activeWork;
   const workProgress = getGadgetWorkProgress(state);
@@ -424,6 +465,8 @@ export function GadgetsView({
               onStartRevision={onStartRevision}
               onStartMinigame={onStartMinigame}
               onAccept={onAccept}
+              mastery={state.network.gadgetMastery?.[productId]}
+              onPractice={startPractice}
             />
           );
         })}
@@ -442,6 +485,29 @@ export function GadgetsView({
           onAccept={() => onAccept(minigame.productId)}
           onRevision={() => onStartRevision(minigame.productId)}
           onContinue={() => onDismissMinigameResult(minigame.productId)}
+        />
+      ) : practice ? (
+        <GadgetRhythmGame
+          key={`practice-${practice.productId}-${practice.seed}`}
+          practice
+          minigame={{
+            productId: practice.productId,
+            kind: "revision",
+            rarity: practice.rarity,
+            seed: practice.seed,
+            previousQuality: 100,
+            status: practice.score === undefined ? "running" : "result",
+            score: practice.score,
+          }}
+          quality={100}
+          accepted
+          revisionCost={0}
+          canRevise={false}
+          canAffordRevision={false}
+          onComplete={(score) => setPractice((current) => current && { ...current, score })}
+          onAccept={() => setPractice(undefined)}
+          onRevision={() => setPractice(undefined)}
+          onContinue={() => setPractice(undefined)}
         />
       ) : null}
     </main>

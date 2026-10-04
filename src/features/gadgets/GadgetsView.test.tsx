@@ -172,6 +172,37 @@ describe("GadgetsView", () => {
     expect(screen.getByText("75%")).toBeVisible();
   });
 
+  it("stamps a mastered rarity and replays its collaudo for fun without touching the save", () => {
+    const initial = unlockedState();
+    const mastered: GameState = {
+      ...initial,
+      network: { ...initial.network, gadgetMastery: { wristband: ["common"] } },
+      gadgets: {
+        ...initial.gadgets,
+        products: {
+          ...initial.gadgets.products,
+          wristband: withCommonRarity(
+            initial.gadgets.products.wristband,
+            { quality: 100 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+        },
+      },
+    };
+    const actions = handlers();
+    render(<GadgetsView state={mastered} {...actions} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Maestria Comune: gioca il collaudo per divertimento" }));
+    expect(screen.getByText("Prova libera · Comune")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Abbandona il tentativo" }));
+    expect(screen.getByText(/solo per il gusto di farla/)).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Chiudi" }));
+
+    expect(screen.queryByText("Prova libera")).toBeNull();
+    expect(actions.onCompleteMinigame).not.toHaveBeenCalled();
+    expect(actions.onStartMinigame).not.toHaveBeenCalled();
+  });
+
   it("keeps the best quality after a worse revision result", () => {
     const initial = unlockedState();
     const result: GameState = {

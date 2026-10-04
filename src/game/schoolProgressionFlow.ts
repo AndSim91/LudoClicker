@@ -170,6 +170,7 @@ export function foundSchool(
       prestigeOfferSent: false,
       secretLegendaries: state.network.secretLegendaries,
       ...(state.network.superbaTournament ? { superbaTournament: true } : {}),
+      ...(state.network.gadgetMastery ? { gadgetMastery: state.network.gadgetMastery } : {}),
     },
     tournaments: {
       ...fresh.tournaments,

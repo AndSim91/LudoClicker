@@ -24,6 +24,7 @@ import {
 } from "./gadgetEconomy";
 import {
   canRollNextGadgetRarity,
+  isGadgetRarityMastered,
   getGadgetAudienceUnitsSold,
   getGadgetFamilyUnitsSold,
   getGadgetRarityUpgradeChance,
@@ -341,7 +342,13 @@ function processGadgetWork(state: GameState, elapsedMs: number): GameState {
   const rarityState = product.rarities[work.rarity];
   const minigameSeed = state.randomSeed;
   const [, randomSeed] = nextRandom(state.randomSeed);
-  return {
+  // The collaudo is played at the opportunity's rarity when there is one (as in the UI).
+  const mastered = isGadgetRarityMastered(
+    state,
+    work.productId,
+    work.opportunityRarity ?? work.rarity,
+  );
+  const next: GameState = {
     ...state,
     randomSeed,
     gadgets: {
@@ -354,8 +361,17 @@ function processGadgetWork(state: GameState, elapsedMs: number): GameState {
         opportunityRarity: work.opportunityRarity,
         seed: minigameSeed,
         previousQuality: rarityState.quality,
-        status: "ready",
+        status: mastered ? "running" : "ready",
       },
+    },
+  };
+  if (!mastered) return next;
+  const completed = completeGadgetMinigame(next, work.productId, 100);
+  return {
+    ...completed,
+    gadgets: {
+      ...completed.gadgets,
+      minigame: completed.gadgets.minigame && { ...completed.gadgets.minigame, mastered: true },
     },
   };
 }

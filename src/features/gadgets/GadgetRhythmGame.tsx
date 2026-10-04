@@ -139,6 +139,7 @@ export function GadgetRhythmGame({
   onAccept,
   onRevision,
   onContinue,
+  practice = false,
 }: {
   minigame: GadgetMinigameState;
   quality: number;
@@ -150,6 +151,8 @@ export function GadgetRhythmGame({
   onAccept: () => void;
   onRevision: () => void;
   onContinue: () => void;
+  /** Free play on a mastered rarity: nothing is saved. */
+  practice?: boolean;
 }) {
   const playRarity = minigame.opportunityRarity ?? minigame.rarity;
   const travelMs = GADGET_MINIGAME_DIFFICULTIES[playRarity].travelMs;
@@ -340,6 +343,31 @@ export function GadgetRhythmGame({
     const unlockedRarity = minigame.unlockedRarity;
     const improved = !unlockedRarity && quality > minigame.previousQuality;
     const resultRarity = unlockedRarity ?? minigame.rarity;
+    if (practice) {
+      return (
+        <div
+          className={`gadget-minigame-overlay ${getGadgetRarityClassName(resultRarity)}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="gadget-result-title"
+        >
+          <section className="gadget-minigame-result">
+            <span className="gadget-result-kicker">Prova libera</span>
+            <h2 id="gadget-result-title">{product.name}</h2>
+            <div className="gadget-result-score" aria-label={`Risultato ${score} su 100`}>
+              <strong>{score}%</strong>
+              <span>risultato della prova</span>
+            </div>
+            <p>Con la Maestria la qualità resta al 100%: questa partita era solo per il gusto di farla.</p>
+            <div className="gadget-result-actions">
+              <button type="button" className="primary" onClick={onContinue}>
+                Chiudi
+              </button>
+            </div>
+          </section>
+        </div>
+      );
+    }
     return (
       <div
         className={`gadget-minigame-overlay ${getGadgetRarityClassName(resultRarity)}`}
@@ -349,19 +377,21 @@ export function GadgetRhythmGame({
       >
         <section className="gadget-minigame-result">
           <span className="gadget-result-kicker">
-            {unlockedRarity ? "Rarità sbloccata" : "Collaudo completato"}
+            {unlockedRarity ? "Rarità sbloccata" : minigame.mastered ? "Maestria" : "Collaudo completato"}
           </span>
           <h2 id="gadget-result-title">{product.name}</h2>
           <div className="gadget-result-score" aria-label={`Risultato ${score} su 100`}>
             <strong>{score}%</strong>
-            <span>risultato del tentativo</span>
+            <span>{minigame.mastered ? "collaudo superato d'ufficio" : "risultato del tentativo"}</span>
           </div>
           <p>
             {unlockedRarity
               ? `${GADGET_RARITIES[minigame.rarity].label} sale al 100%. ${GADGET_RARITIES[unlockedRarity].label} entra automaticamente in catalogo con qualità ${score}%.`
               : improved
                 ? `Nuovo record: la qualità sale al ${quality}%.`
-                : `La qualità massima resta al ${quality}%.`}
+                : minigame.mastered
+                  ? `Maestria: niente collaudo, la qualità resta al ${quality}%.`
+                  : `La qualità massima resta al ${quality}%.`}
           </p>
           {quality === 0 ? (
             <p className="gadget-result-warning">
@@ -413,7 +443,9 @@ export function GadgetRhythmGame({
         <header>
           <div>
             <span className="gadget-minigame-rarity">
-              {minigame.opportunityRarity
+              {practice
+                ? `Prova libera · ${GADGET_RARITIES[minigame.rarity].label}`
+                : minigame.opportunityRarity
                 ? `Occasione: ${GADGET_RARITIES[minigame.opportunityRarity].label}`
                 : `Rarità: ${GADGET_RARITIES[minigame.rarity].label}`}
             </span>
