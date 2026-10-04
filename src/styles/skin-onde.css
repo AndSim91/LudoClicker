@@ -283,7 +283,10 @@
 }
 
 :root[data-theme="dark"] .event-row > button.event-cancel-button:not(:hover, :focus-visible) {
-  --cancel-ink: #f0b3b6;
+  --cancel-ink: #fbe3e4;
+  --event-run-from: rgb(23 124 137 / 75%);
+  --event-run-to: rgb(108 211 214 / 62%);
+  --event-run-edge: var(--onde-wave);
   border-color: rgb(164 38 44 / 55%);
   background: color-mix(in srgb, #a4262c 22%, var(--surface-muted));
 }

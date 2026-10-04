@@ -760,8 +760,37 @@
   background: color-mix(in srgb, #a4262c 10%, var(--surface));
 }
 
+/* In corso il riempimento è la parte viva del pulsante: colore pieno, riflesso
+   che scorre e bordo luminoso, così si vede che avanza. */
+.event-row > button.event-cancel-button {
+  --event-run-from: #bcdcf6;
+  --event-run-to: #8ec2ee;
+  --event-run-edge: #0f6cbd;
+}
+
 .event-row > button.event-cancel-button .event-action-fill > span {
-  background: color-mix(in srgb, #a4262c 14%, transparent);
+  background:
+    linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 35%) 50%, transparent 65%) 0 0 / 220% 100%,
+    linear-gradient(90deg, var(--event-run-from), var(--event-run-to));
+  animation: event-fill-sheen 1.6s linear infinite;
+}
+
+.event-row > button.event-cancel-button .event-action-fill > span::after {
+  width: 3px;
+  background: var(--event-run-edge);
+  box-shadow: 0 0 10px var(--event-run-edge);
+  opacity: 1;
+}
+
+@keyframes event-fill-sheen {
+  from { background-position: 120% 0, 0 0; }
+  to { background-position: -120% 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-row > button.event-cancel-button .event-action-fill > span {
+    animation: none;
+  }
 }
 
 .event-row > button.event-cancel-button:is(:hover, :focus-visible) {
@@ -771,7 +800,14 @@
 }
 
 .event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span {
-  background: rgb(255 255 255 / 16%);
+  background:
+    linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 22%) 50%, transparent 65%) 0 0 / 220% 100%,
+    rgb(255 255 255 / 18%);
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span::after {
+  background: white;
+  box-shadow: 0 0 8px rgb(255 255 255 / 70%);
 }
 
 .event-meta {
