@@ -147,7 +147,6 @@ export function FinalArenaBackdrop({ level }: { level: TournamentLevel }) {
             <path d="M538 34 V84 M490 59 H586" fill="none" stroke="#0a3a57" strokeWidth={3} />
             <rect x={40} y={70} width={40} height={84} rx={2} fill="#04263f" />
             <Banner x={320} y={0} scale={1.15} logo="onde" />
-            <text className="fd-title is-motto" x={320} y={128} textAnchor="middle">Servizio · Cura · Rispetto</text>
             <g className="fd-crowd">
               {[110, 128, 146, 494, 512, 530, 548].map((x, index) => (
                 <g key={x}>

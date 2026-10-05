@@ -4331,7 +4331,8 @@ l'Arena, a destra il telefono di Servizio.
   codici di ogni giudice. Per questo la finale con un nostro atleta salva anche
   la scheda dell'avversario e l'ordine degli assalti.
 - **Sala per livello**, con il nome del torneo in alto: Scolastico, palestra
-  con lo stendardo delle Onde e il motto; Accademico, gli stendardi degli
+  con lo stendardo delle Onde (il motto «Servizio · Cura · Rispetto» tolto il
+  05/10); Accademico, gli stendardi degli
   Ordini (fondo nero, logo bianco); Nazionale, tricolore; Champion's, bandiere
   delle nazioni, flash e luci che si muovono; Chronicles, la sala dei
   Leggendari (anello di rune, colonne, statue, bracieri).

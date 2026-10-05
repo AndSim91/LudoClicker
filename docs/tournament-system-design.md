@@ -239,7 +239,7 @@ del torneo (`FinalDuelLayer.tsx`), in non più di 30 secondi.
   a volte mezzo punto oltre e poi giù; COM e SAPD si contano al tocco; alla
   fine i valori veri e i codici dei giudici.
 - **Sala per livello** (`FinalArenaBackdrop.tsx`), con il nome del torneo in
-  alto: Scolastico, palestra con lo stendardo delle Onde; Accademico, stendardi
+  alto: Scolastico, palestra con lo stendardo delle Onde (senza motto); Accademico, stendardi
   degli Ordini (fondo nero, logo bianco, `public/assets/orders/`; mancano
   Shardana, Loggia e Ronin); Nazionale, tricolore; Champion's, bandiere delle
   nazioni del circuito; Chronicles, la sala dei Leggendari.

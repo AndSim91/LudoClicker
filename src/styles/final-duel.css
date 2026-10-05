@@ -428,8 +428,6 @@
   letter-spacing: 1.5px;
 }
 
-.fd-title.is-motto { font-size: 12px; }
-
 .fd-title.is-chronicles {
   fill: #f3d79f;
   filter: drop-shadow(0 0 6px #d5a84b);
