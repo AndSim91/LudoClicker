@@ -2418,7 +2418,8 @@ il numero della serie e non ha tetto:
 | Una sedia in più | nuovi iscritti | 1 (+1, max 5) | 25 € |
 
 Tutti i tetti si raggiungono alla quinta serie. La scheda mostra il numero della
-serie, non della missione. Quando il
+serie, non della missione. A ogni nuova scuola le missioni ripartono dalla serie 1
+(«Tre inviti in partenza»), senza il messaggio che apre gli Eventi. Quando il
 saldo raggiunge o supera **10.000 €**, una missione ancora a zero progresso si
 nasconde. Se possiede già almeno un punto di progresso, rimane invece attiva
 fino al completamento; la missione successiva applica nuovamente la regola del

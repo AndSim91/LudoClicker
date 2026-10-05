@@ -15,7 +15,7 @@ import {
 import { rollAthleteBaseStats } from "./athleteStats";
 import { getEventContactMultiplier } from "./eventRewards";
 import { getEmailBookingChance, getEnrollmentChance, getWritingPower } from "./formulas";
-import { foundSchool } from "./schoolProgressionFlow";
+import { completeShortGoal, foundSchool } from "./schoolProgressionFlow";
 import { getTrainingDurationMultiplier } from "./teacherTrainingFlow";
 import { getMonthlySocialIncome } from "./social";
 import { migrate } from "./saveMigrations";
@@ -277,4 +277,28 @@ it("brings one random Leggendario of the old school as the only member of the ne
   expect(next.school.activeMembers).toBe(1);
   expect(next.legendaryCollaborators.enrolledProfileIds).toEqual([followerId]);
   expect(next.contacts.filter((contact) => contact.specialProfileId === followerId)).toHaveLength(1);
+});
+
+it("restarts the Missioni delle Onde from series 1 at every new school", () => {
+  const ready = readySchool();
+  const advanced = {
+    ...ready,
+    statistics: { ...ready.statistics, emailsSent: 40 },
+    shortGoal: { ...ready.shortGoal, definitionId: "book-trials" as const, completedCount: 21, target: 6 },
+  };
+  const founded = foundSchool(advanced, details, 2_000);
+  expect(founded.shortGoal).toMatchObject({
+    definitionId: "send-emails",
+    completedCount: 0,
+    target: 3,
+    baseline: founded.statistics.emailsSent,
+  });
+  // Events are already open in a new school: no "Si esce dalla palestra" message.
+  const completed = completeShortGoal({
+    ...founded,
+    school: { ...founded.school, euros: 0 },
+    statistics: { ...founded.statistics, emailsSent: founded.statistics.emailsSent + 3 },
+  }, 3_000, 1);
+  expect(completed.shortGoal.completedCount).toBe(1);
+  expect(completed.messages.some((message) => message.subject === "Si esce dalla palestra")).toBe(false);
 });

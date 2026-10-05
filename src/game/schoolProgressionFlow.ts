@@ -4,6 +4,7 @@ import { describeAchievementKey, getNewAchievementKeys } from "../content/achiev
 import {
   SHORT_GOALS,
   createNextShortGoal,
+  createShortGoalFromStatistics,
   getShortGoalProgress,
   getShortGoalReward,
   getShortGoalValue,
@@ -146,6 +147,14 @@ export function foundSchool(
     city: state.school.city,
     fame: state.school.fame,
   };
+  const careerStatistics = recordCareer(addCareer(state, {
+    reputationEarned: rent.points,
+    perfectPhrases: state.player.perfectPhrases ?? 0,
+    gadgetsSold: getSchoolGadgetsSold(state),
+  }), {
+    maxRentPoints: spending.rent,
+    earliestFoundationYear: getSchoolYear(state.school.currentMonth),
+  }).statistics;
   const nextState: GameState = {
     ...fresh,
     createdAt: state.createdAt,
@@ -188,16 +197,10 @@ export function foundSchool(
     // A discovered secret path stays known in every later school; only its level resets.
     secretUpgradeDiscoveries: state.secretUpgradeDiscoveries,
     legendaryCollaborators: fresh.legendaryCollaborators,
-    statistics: recordCareer(addCareer(state, {
-      reputationEarned: rent.points,
-      perfectPhrases: state.player.perfectPhrases ?? 0,
-      gadgetsSold: getSchoolGadgetsSold(state),
-    }), {
-      maxRentPoints: spending.rent,
-      earliestFoundationYear: getSchoolYear(state.school.currentMonth),
-    }).statistics,
+    statistics: careerStatistics,
     messages: state.messages,
-    shortGoal: state.shortGoal,
+    // Missions start again from series 1; the baseline is the career statistics carried over.
+    shortGoal: createShortGoalFromStatistics(careerStatistics, 0, now),
   };
   const announced = addMessage(
     refreshWritingCampaignCopies(nextState),
@@ -318,7 +321,8 @@ export function completeShortGoal(
     },
   };
   const nextGoal = createNextShortGoal(rewarded, completedCount, now);
-  const progressed = definition.id === "send-emails" && available.shortGoal.completedCount === 0
+  const progressed = definition.id === "send-emails" && available.shortGoal.completedCount === 0 &&
+      available.network.schoolCount === 0
     ? addMessage(
         { ...rewarded, shortGoal: nextGoal },
         now,
