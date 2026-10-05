@@ -279,6 +279,17 @@ describe("game engine: narrative", () => {
         ...initial.legendaryCollaborators,
         encounteredProfileIds: ["eva-parodi" as const],
         enrolledProfileIds: ["eva-parodi" as const],
+        // Met in an earlier school, with everything earned there.
+        retainedProgress: {
+          "marco-palena": {
+            forms: ["form-1" as const, "form-2" as const],
+            instructorForms: ["form-1" as const],
+            joinedAt: 10,
+            arenaBase: 80,
+            styleBase: 70,
+            agonistCourseCompletions: 3,
+          },
+        },
       },
       statistics: { ...initial.statistics, eventsCompleted: 25, emailsSent: 30 },
       upgrades: { ...initial.upgrades, "comfortable-keyboard": 2, "project-x": 1 },
@@ -322,6 +333,16 @@ describe("game engine: narrative", () => {
       joinedAt: 3_000,
       arenaBase: 91,
       styleBase: 87,
+    });
+    // Every other Leggendario starts from zero too when met again.
+    expect(founded.legendaryCollaborators.retainedProgress["marco-palena"]).toEqual({
+      forms: [],
+      instructorForms: [],
+      technicianForms: [],
+      formBranchPreferences: [],
+      joinedAt: 10,
+      arenaBase: 80,
+      styleBase: 70,
     });
     expect(founded.contacts.find((contact) => contact.specialProfileId === "eva-parodi")).toMatchObject({
       forms: [],

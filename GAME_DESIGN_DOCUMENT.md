@@ -57,8 +57,8 @@ Raggiunti i requisiti di Fama, collaboratori, eventi completati e una vittoria
 (Arena o Stile) di un proprio atleta alla Champion's Arena, al giocatore viene
 proposto di trasferirsi e fondare una nuova scuola, scegliendone nome, città e colore.
 Questa è la meccanica di prestigio: una parte dei progressi locali riparte,
-mentre la Fama, i progressi dei Leggendari iscritti e la rete delle scuole
-fondate forniscono bonus permanenti. Il gioco non ha un finale e può continuare
+mentre la Reputazione, la rete delle scuole fondate e le scoperte
+forniscono bonus permanenti. Il gioco non ha un finale e può continuare
 indefinitamente.
 
 > **Da implementare:** la fondazione esiste solo come azione del motore (`FOUND_SCHOOL`): il messaggio di offerta rimanda alle Impostazioni, ma nessuna schermata permette di inserire i dati e confermare il trasferimento.
@@ -342,7 +342,7 @@ successive tutte le rarità sono disponibili fin dal primo contatto e Andrea
 torna nel normale pool Leggendario. Ogni Leggendario ordinario è un profilo
 unico: se l'estrazione Leggendaria non trova profili liberi, il contatto
 diventa Ultra Raro. Alla fondazione di una nuova scuola i Leggendari iscritti
-tornano disponibili conservando Forme e qualifiche.
+tornano disponibili e ripartono da zero: solo Arena e Stile naturali.
 
 Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità
 determina la probabilità di prenotare una prova dopo la mail e quella di
@@ -1325,9 +1325,9 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - se nessun profilo del pool è disponibile, qualsiasi nuova assegnazione
   Leggendaria genera invece un Ultra Raro dello stesso tipo di premio;
 - con il prestigio tutti i profili Leggendari tornano disponibili nel pool della
-  nuova scuola; chi era iscritto conserva per un futuro incontro Forme,
-  attestati, qualifiche da Tecnico, preferenze, anzianità, Arena, Stile e Corsi
-  Agonisti, ma non la Maestria né l'esperienza nei tornei;
+  nuova scuola; ritrovati, tutti ripartono da zero (niente Forme, attestati,
+  qualifiche, preferenze, Corsi Agonisti, Maestria né esperienza nei tornei):
+  restano solo Arena e Stile naturali;
 - dopo l'abbandono (oggi soltanto per annullamento manuale) tornano disponibili
   per incontri futuri;
 - una nuova iscrizione successiva all'abbandono ripristina integralmente
@@ -3115,7 +3115,7 @@ specializzazione.
 - bonus permanenti;
 - modelli email sbloccati;
 - traguardi;
-- scoperte del Ludodex e progressi permanenti dei Leggendari;
+- scoperte del Ludodex (i Leggendari ripartono da zero);
 - un collaboratore mentore selezionato, se sbloccato.
 
 Nel codice restano: la mappa e il conteggio delle scuole con la rendita totale, Reputazione di
@@ -3123,8 +3123,8 @@ rete con i suoi potenziamenti (§ 5.7), Percorsi Segreti scoperti (Corso X
 compreso), trasformazione del Reptile in Torneo della Superba, statistiche
 cumulative, messaggi della
 Posta, traguardi, obiettivo breve in corso, Leggendari incontrati (Ludodex),
-progressi dei Leggendari iscritti (Forme, attestati da Istruttore e Tecnico,
-statistiche e bonus dei Corsi Agonisti), stato dei Leggendari Segreti, il flag
+Arena e Stile naturali dei Leggendari conosciuti (Forme, attestati, Corsi
+Agonisti ed esperienza ripartono da zero per tutti), stato dei Leggendari Segreti, il flag
 della prima vittoria in un torneo ordinario, nome del profilo e seme casuale.
 Restano anche le scene del tutorial già completate o saltate: non tornano
 nelle scuole successive. Dopo la conferma il gioco torna alla compilazione
@@ -3138,6 +3138,15 @@ attestati da Istruttore o Tecnico, corsi agonisti, esperienza di torneo né
 maestria; gli restano solo nome, rarità e statistiche naturali di Arena e Stile.
 Anche i suoi progressi conservati per le scuole successive ripartono da zero. Senza Leggendari iscritti la scuola parte da zero
 iscritti.
+
+Lo stesso vale per tutti gli altri Leggendari, ordinari e Segreti: alla
+fondazione ogni progresso conservato (della scuola lasciata e di quelle
+prima) torna a sole Arena e Stile naturali (`forgetLegendaryProgress` in
+`schoolProgressionFlow.ts`). La chiave resta, quindi Ludodex, traguardi e
+Leggendari Segreti sbloccati non cambiano. Un Leggendario che lascia la
+scuola e ci ritorna nella stessa scuola conserva invece i suoi progressi.
+Salvataggio v97: nei salvataggi che hanno già fondato una scuola si azzerano
+i Leggendari che non sono passati dalla scuola corrente.
 
 I Leggendari Segreti reclutati in una scuola precedente entrano tra i
 leggendari ordinari: nelle scuole successive possono comparire a caso nella
@@ -4777,8 +4786,8 @@ completa:
 13. nomi e comportamento definitivo delle spade reali;
 14. elementi esatti mantenuti o azzerati dal prestigio (oggi la logica conserva
     Fama, traguardi, statistiche, messaggi, obiettivo breve, stato dei
-    Leggendari Segreti, vittoria ordinaria ai tornei e i progressi dei
-    Leggendari iscritti; tutto il resto, Euro e potenziamenti compresi,
+    Leggendari Segreti, vittoria ordinaria ai tornei e Arena/Stile naturali dei
+    Leggendari; tutto il resto, Euro e potenziamenti compresi,
     riparte da zero);
 15. durata massima definitiva del progresso offline (oggi non c'è progresso
     offline: la partita si congela alla chiusura).

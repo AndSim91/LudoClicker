@@ -323,7 +323,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     rules: [
       "Ogni Collaboratore può avere un incarico operativo principale.",
       "I posti aggregati distribuiscono automaticamente le persone rispettando le priorità.",
-      "I Leggendari conservano progressi e Maestria anche tra scuole diverse.",
+      "In una nuova scuola i Leggendari ripartono da zero: restano solo Arena e Stile naturali.",
     ],
     related: ["forme-corsi", "social", "eventi-attrezzatura"],
   },

@@ -33,39 +33,43 @@ import type {
   Contact,
   GameState,
   LegendaryCollaboratorProgress,
+  RetainedLegendaryProgress,
   SchoolFoundationDetails,
 } from "./types";
+
+/**
+ * A new school starts every Leggendario from zero: met again, they bring only
+ * who they are (natural Arena/Stile). The key stays so Ludodex, traguardi and
+ * unlocked Leggendari Segreti do not change.
+ */
+export function forgetLegendaryProgress(
+  retained: Pick<RetainedLegendaryProgress, "joinedAt" | "arenaBase" | "styleBase">,
+): RetainedLegendaryProgress {
+  return {
+    forms: [],
+    instructorForms: [],
+    technicianForms: [],
+    formBranchPreferences: [],
+    joinedAt: retained.joinedAt,
+    arenaBase: retained.arenaBase,
+    styleBase: retained.styleBase,
+  };
+}
 
 function prepareLegendaryProgressForNewSchool(
   state: GameState,
 ): LegendaryCollaboratorProgress {
-  const retainedProgress = { ...state.legendaryCollaborators.retainedProgress };
-  const collaboratorsByContactId = new Map(
-    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
-  );
+  const retainedProgress = Object.fromEntries(
+    Object.entries(state.legendaryCollaborators.retainedProgress).map(([id, retained]) =>
+      [id, retained && forgetLegendaryProgress(retained)]),
+  ) as LegendaryCollaboratorProgress["retainedProgress"];
   for (const contact of state.contacts) {
     if (contact.status !== "enrolled" || !contact.specialProfileId) continue;
-    const collaborator = collaboratorsByContactId.get(contact.id);
-    retainedProgress[contact.specialProfileId] = {
-      forms: [...(collaborator?.forms ?? contact.forms)],
-      instructorForms: [...(collaborator?.instructorForms ?? [])],
-      technicianForms: [...(collaborator?.technicianForms ?? [])],
-      formBranchPreferences: [
-        ...(collaborator?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
-      ],
-      joinedAt: collaborator?.joinedAt ?? contact.acquiredAt,
+    retainedProgress[contact.specialProfileId] = forgetLegendaryProgress({
+      joinedAt: contact.acquiredAt,
       arenaBase: contact.arenaBase,
       styleBase: contact.styleBase,
-      agonistCourseCompletions: contact.agonistCourseCompletions,
-      agonistCourseArenaBonus: contact.agonistCourseArenaBonus,
-      agonistCourseStyleBonus: contact.agonistCourseStyleBonus,
-      lastAgonistCourseYear:
-        collaborator?.lastAgonistCourseYear ?? contact.lastAgonistCourseYear,
-      lastFormTrainingYear:
-        collaborator?.lastFormTrainingYear ?? contact.lastFormTrainingYear,
-      formTrainingYearCount:
-        collaborator?.formTrainingYearCount ?? contact.formTrainingYearCount,
-    };
+    });
   }
   return {
     ...state.legendaryCollaborators,
@@ -124,15 +128,11 @@ export function foundSchool(
         enrolledProfileIds: [followerId],
         retainedProgress: {
           ...legendaryProgress.retainedProgress,
-          [followerId]: {
-            forms: [],
-            instructorForms: [],
-            technicianForms: [],
-            formBranchPreferences: [],
+          [followerId]: forgetLegendaryProgress({
             joinedAt: now,
             arenaBase: carried.arenaBase,
             styleBase: carried.styleBase,
-          },
+          }),
         },
       }
     : legendaryProgress);
