@@ -46,7 +46,8 @@ export function isTrialEnrollmentGuaranteed(
       return false;
     }
     return (
-      (specialProfileId === ANDREA_SIMONAZZI_ID && state.network.schoolCount === 0) ||
+      // Andrea Simonazzi always enrolls, in every school.
+      specialProfileId === ANDREA_SIMONAZZI_ID ||
       getLegendaryEnrollmentChanceAtPity(state, specialProfileId, context.legendaryPity) >= 1
     );
   }

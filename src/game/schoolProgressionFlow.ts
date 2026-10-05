@@ -14,7 +14,6 @@ import { refreshWritingCampaignCopies } from "./campaignContent";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
-import { ANDREA_SIMONAZZI_ID } from "./contacts";
 import { createInitialState } from "./initialState";
 import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
@@ -94,11 +93,9 @@ export function foundSchool(
   const availableReputation = state.network.reputation + rent.points;
   if (!isValidReputationSpending(state, spending, availableReputation)) return state;
   const legendaryProgress = prepareLegendaryProgressForNewSchool(state);
-  // A random Leggendario of the school (secret ones too) follows the player;
-  // never Andrea Simonazzi, who waits for the next Nazionale.
+  // A random Leggendario of the school (secret ones too) follows the player.
   const legendaryMembers = state.contacts.filter((contact) =>
-    contact.status === "enrolled" && contact.specialProfileId &&
-    contact.specialProfileId !== ANDREA_SIMONAZZI_ID,
+    contact.status === "enrolled" && contact.specialProfileId,
   );
   const [legendaryRoll, seedAfterLegendary] = nextRandom(state.randomSeed);
   const follower = legendaryMembers[Math.floor(legendaryRoll * legendaryMembers.length)];
