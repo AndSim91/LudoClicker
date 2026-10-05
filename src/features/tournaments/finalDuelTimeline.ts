@@ -1,4 +1,5 @@
 import type { StyleSheet } from "../../game/types";
+import type { FighterBody } from "../people/fighterBodies";
 import { type DuelMoment, type DuelScript, type DuelSide } from "./finalDuel";
 
 /**
@@ -31,6 +32,21 @@ export interface FighterPose {
   pose: "guard" | "attack";
   tip?: { x: number; y: number };
   declare?: boolean;
+  unarmed?: boolean;
+  body?: FighterBody;
+}
+
+/** A sword knocked out of the hand (Disarmo): it flies from the hand (x, y) and lands dx further on. */
+export interface DroppedSaber {
+  side: DuelSide;
+  x: number;
+  y: number;
+  /** Blade from the hilt, as it was held. */
+  blade: [number, number];
+  dx: number;
+  floor: number;
+  /** Degrees; ends with the blade flat on the floor. */
+  spin: number;
 }
 
 export type DuelEffect =
@@ -51,7 +67,9 @@ export type DuelEvent = { t: number } & (
   | { type: "card"; side: DuelSide }
   | { type: "mark"; side: DuelSide; judge: number; row: number; value: number }
   | { type: "release"; key: string }
-  | { type: "end"; sheets: DuelSheets; score: Record<DuelSide, number>; history: DuelSide[] }
+  | { type: "drop"; saber: DroppedSaber }
+  | { type: "pickup" }
+  | { type: "end"; sheets: DuelSheets; score: Record<DuelSide, number>; history: DuelSide[]; poses: Record<DuelSide, FighterPose> }
 );
 
 export interface DuelView {
@@ -70,6 +88,7 @@ export interface DuelView {
   effects: DuelEffect[];
   /** Bumps each time the judges raise a Style card. */
   carding: number;
+  dropped?: DroppedSaber;
   nextId: number;
 }
 
@@ -104,7 +123,19 @@ export function endView(script: DuelScript, sheets: DuelSheets): DuelView {
     a: script.penalties.some((penalty) => penalty.side === "a"),
     b: script.penalties.some((penalty) => penalty.side === "b"),
   });
-  return { ...view, score: end, history: script.assaults.map((assault) => assault.winner), sheets, done: true };
+  return {
+    ...view,
+    score: end,
+    history: script.assaults.map((assault) => assault.winner),
+    sheets,
+    poses: endPoses(script),
+    done: true,
+  };
+}
+
+function endPoses({ ending }: DuelScript): Record<DuelSide, FighterPose> {
+  const loser = ending.winner === "a" ? "b" : "a";
+  return { [ending.winner]: { pose: "guard", body: ending.win }, [loser]: { pose: "guard", body: ending.lose } } as Record<DuelSide, FighterPose>;
 }
 
 export function applyEvent(view: DuelView, event: DuelEvent): DuelView {
@@ -141,6 +172,10 @@ export function applyEvent(view: DuelView, event: DuelEvent): DuelView {
     }
     case "release":
       return { ...view, pressed: view.pressed.filter((key) => key !== event.key) };
+    case "drop":
+      return { ...view, dropped: event.saber };
+    case "pickup":
+      return { ...view, dropped: undefined };
     case "end":
       return {
         ...view,
@@ -152,7 +187,8 @@ export function applyEvent(view: DuelView, event: DuelEvent): DuelView {
         pressed: [],
         steps: [0, 0],
         moveMs: 600,
-        poses: { a: { pose: "guard" }, b: { pose: "guard" } },
+        poses: event.poses,
+        dropped: undefined,
       };
   }
 }
@@ -176,7 +212,8 @@ export function buildTimeline(
   add(800, { type: "engage" });
   let t = INTRO_MS;
   script.assaults.forEach((assault) => {
-    const decisiveMs = assault.moment ? 560 : 340;
+    const disarming = assault.moment?.name === "Disarmo";
+    const decisiveMs = disarming ? DISARM_MS : assault.moment ? 560 : 340;
     let at = t;
     // Exchanges: someone attacks, the blades meet (mostly), both reset their feet.
     while (true) {
@@ -194,12 +231,13 @@ export function buildTimeline(
       at += attackMs + recoverMs;
     }
     score[assault.winner] += 1;
-    decisive(add, at, decisiveMs, assault);
+    if (disarming) disarm(add, at, assault);
+    else decisive(add, at, decisiveMs, assault);
     if (assault.moment) momentAt[`${assault.winner}${assault.moment.kind}`] = at + decisiveMs;
     ends.push(at + decisiveMs);
     t += perAssault + GAP_MS;
   });
-  const durationMs = t + OUTRO_MS - GAP_MS;
+  let durationMs = t + OUTRO_MS - GAP_MS;
 
   for (const penalty of script.penalties) add(ends[penalty.assault] - 600, { type: "card", side: penalty.side });
   for (const side of ["a", "b"] as const) {
@@ -229,11 +267,16 @@ export function buildTimeline(
       values.forEach((value, k) => mark(times[k], value));
     }));
   }
-  add(durationMs - 900, {
+  // The end stances come once the last «OH!» has been called and everyone is back on guard.
+  const lastBeat = Math.max(...events.filter((event) => event.type === "pose" || event.type === "pickup").map((event) => event.t));
+  const endAt = Math.max(ends.at(-1)! + 1_300, lastBeat + 150);
+  durationMs = Math.max(durationMs, endAt + 900);
+  add(endAt, {
     type: "end",
     sheets,
     score,
     history: script.assaults.map((assault) => assault.winner),
+    poses: endPoses(script),
   });
   return { events: events.sort((x, y) => x.t - y.t), durationMs };
 }
@@ -241,7 +284,7 @@ export function buildTimeline(
 type Add = (t: number, event: DistributiveOmit<DuelEvent, "t">) => void;
 
 /** The cut that scores: the blade sweeps onto the other's body, a flash, then «OH!». */
-function decisive(add: Add, at: number, ms: number, assault: DuelScript["assaults"][number]) {
+function decisive(add: Add, at: number, ms: number, assault: DuelScript["assaults"][number], dropDx?: number) {
   const attacker = assault.winner;
   const defender = attacker === "a" ? "b" : "a";
   const dir = attacker === "a" ? 1 : -1;
@@ -269,11 +312,66 @@ function decisive(add: Add, at: number, ms: number, assault: DuelScript["assault
   }
   add(at + ms, { type: "effect", effect: { kind: "touch", x: contact.x, y: contact.y } });
   add(at + ms, { type: "hit", side: defender });
-  add(at + ms + 240, { type: "pose", side: defender, pose: { pose: "guard", declare: true } });
+  add(at + ms + 240, { type: "pose", side: defender, pose: { pose: "guard", declare: true, unarmed: dropDx !== undefined } });
   add(at + ms + 240, { type: "effect", effect: { kind: "oh", x: defX, y: 74 } });
   add(at + ms + 240, { type: "point", side: attacker });
-  add(at + ms + 1_100, { type: "pose", side: defender, pose: { pose: "attack" } });
-  add(at + ms + 1_100, { type: "pose", side: attacker, pose: { pose: "attack" } });
-  add(at + ms + 1_100, { type: "move", ms: 500, steps: [0, 0] });
+  if (dropDx === undefined) {
+    add(at + ms + 1_100, { type: "pose", side: defender, pose: { pose: "attack" } });
+    add(at + ms + 1_100, { type: "pose", side: attacker, pose: { pose: "attack" } });
+    add(at + ms + 1_100, { type: "move", ms: 500, steps: [0, 0] });
+    return;
+  }
+  // Disarmed: off to pick the sword up, then back on guard.
+  const fetch = dropDx * 0.8;
+  add(at + ms + 700, { type: "pose", side: attacker, pose: { pose: "guard" } });
+  add(at + ms + 700, { type: "move", ms: 350, steps: attacker === "a" ? [0, fetch] : [fetch, 0] });
+  add(at + ms + 1_050, { type: "pickup" });
+  add(at + ms + 1_050, { type: "pose", side: defender, pose: { pose: "guard" } });
+  add(at + ms + 1_050, { type: "move", ms: 400, steps: [0, 0] });
+  add(at + ms + 1_450, { type: "pose", side: defender, pose: { pose: "attack" } });
+  add(at + ms + 1_450, { type: "pose", side: attacker, pose: { pose: "attack" } });
+}
+
+const BIND_MS = 480;
+const FLY_MS = 820;
+const DISARM_CUT_MS = 340;
+/** The bind, the flight, then the cut lands just as the sword hits the floor. */
+const DISARM_MS = BIND_MS + FLY_MS - 160 + DISARM_CUT_MS;
+// The blade winds round the other's and flicks up.
+const BIND_ANGLES = [-40, -12, 18, 42, 28, 2, -26, -55, -78];
+
+/**
+ * Disarmo (SAPD): the blade winds round the other's, the sword flies and falls
+ * behind its owner, who takes the cut empty-handed and calls «OH!».
+ */
+function disarm(add: Add, at: number, assault: DuelScript["assaults"][number]) {
+  const attacker = assault.winner;
+  const defender = attacker === "a" ? "b" : "a";
+  const dir = attacker === "a" ? 1 : -1;
+  const base = attacker === "a" ? DUEL_LEFT : DUEL_RIGHT;
+  add(at, { type: "effect", effect: { kind: "tech", x: base, y: 60, moment: assault.moment! } });
+  add(at, { type: "move", ms: 260, steps: attacker === "a" ? [9, 0] : [0, -9] });
+  const hand = { x: base + 14 * dir, y: HAND_Y };
+  BIND_ANGLES.forEach((degrees, index) => {
+    const angle = (degrees * Math.PI) / 180;
+    const t = at + (BIND_MS * index) / (BIND_ANGLES.length - 1);
+    add(t, { type: "pose", side: attacker, pose: { pose: "attack", tip: { x: hand.x + Math.cos(angle) * BLADE * dir, y: hand.y + Math.sin(angle) * BLADE } } });
+    if (index === 2) add(t, { type: "effect", effect: { kind: "clash", x: (DUEL_LEFT + DUEL_RIGHT) / 2 + 4 * dir, y: 106 } });
+  });
+
+  const drop = at + BIND_MS;
+  const owner = -dir;
+  const blade: [number, number] = [30 * owner, -26];
+  const start = (Math.atan2(blade[1], blade[0]) * 180) / Math.PI;
+  let spin = -owner * 540;
+  spin += ((-(start + spin) % 180) + 180) % 180; // lands flat
+  const dx = dir * 52;
+  add(drop, { type: "pose", side: defender, pose: { pose: "guard", unarmed: true } });
+  add(drop, { type: "hit", side: defender });
+  add(drop, {
+    type: "drop",
+    saber: { side: defender, x: (defender === "a" ? DUEL_LEFT : DUEL_RIGHT) + 14 * owner, y: HAND_Y, blade, dx, floor: 150 - HAND_Y - 1, spin },
+  });
+  decisive(add, drop + FLY_MS - 160, DISARM_CUT_MS, { ...assault, moment: undefined }, dx);
 }
 

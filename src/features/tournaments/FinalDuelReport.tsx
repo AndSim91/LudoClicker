@@ -27,7 +27,9 @@ export function FinalDuelReport({
                 {moment ? (
                   <><b>{moment.name}</b> ({[moment.kind, moment.form].filter(Boolean).join(" · ")})</>
                 ) : assault.strike.name}{" "}
-                di <b>{participantName(participants[assault.winner])}</b> · «OH!» su {participantName(participants[touched])}
+                di <b>{participantName(participants[assault.winner])}</b>
+                {moment?.name === "Disarmo" ? `: ${participantName(participants[touched])} perde la spada` : null}
+                {" "}· «OH!» su {participantName(participants[touched])}
               </span>
               <span>{score.a}–{score.b}</span>
             </li>

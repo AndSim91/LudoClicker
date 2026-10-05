@@ -76,5 +76,25 @@ describe("Guarda la finale: copione e regia", () => {
     expect(last.score).toEqual(ended.score);
     expect(last.history).toEqual(ended.history);
     expect(last.done).toBe(true);
+    // The winner celebrates, the loser takes it badly.
+    expect(last.poses.a.body).toMatch(/^win-/);
+    expect(last.poses.b.body).toMatch(/^lose-/);
+    expect(endView(script, sheets).poses).toEqual(last.poses);
+  });
+
+  it("shows a Disarmo: the sword falls, the athlete takes the cut empty-handed, then picks it up", () => {
+    const disarming = getDuelScript({ ...final, match: { ...match, styleDetailA: { sheets: sheetsA, highlight: "Disarmo" } } });
+    const assault = disarming.assaults.findIndex((candidate) => candidate.moment?.name === "Disarmo");
+    expect(disarming.assaults[assault]).toMatchObject({ winner: "a", moment: { kind: "SAPD", name: "Disarmo", form: undefined } });
+    const { events, durationMs } = buildTimeline(disarming, { a: sheetsA, b: sheetsB }, seededRoll("disarm"));
+    expect(durationMs).toBeLessThanOrEqual(30_000);
+    const drop = events.find((event) => event.type === "drop")!;
+    const pickup = events.find((event) => event.type === "pickup")!;
+    const oh = events.filter((event) => event.type === "pose" && event.side === "b" && event.pose.declare);
+    const ohAfterDrop = oh.find((event) => event.t > drop.t && event.t < pickup.t);
+    expect(ohAfterDrop?.type === "pose" && ohAfterDrop.pose.unarmed).toBe(true);
+    const fallen = events.filter((event) => event.t <= drop.t + 900).reduce(applyEvent, startView({ a: sheetsA, b: sheetsB }));
+    expect(fallen.dropped?.side).toBe("b");
+    expect(events.reduce(applyEvent, startView({ a: sheetsA, b: sheetsB })).dropped).toBeUndefined();
   });
 });

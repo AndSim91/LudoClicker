@@ -1,4 +1,5 @@
 import { getFormDefinition } from "../../content/forms";
+import { LOSE_BODIES, WIN_BODIES, type FighterBody } from "../people/fighterBodies";
 import { COMPLEX_TECHNIQUES, getNpcStyleForms } from "../../game/styleJudging";
 import type {
   FormId,
@@ -94,6 +95,8 @@ export interface DuelPenalty {
 export interface DuelScript {
   assaults: DuelAssault[];
   penalties: DuelPenalty[];
+  /** At the end the winner celebrates and the loser takes it badly: one of three stances each. */
+  ending: { winner: DuelSide; win: FighterBody; lose: FighterBody };
 }
 
 const SAPD_FORMS: Record<string, readonly FormId[]> = {
@@ -139,5 +142,10 @@ export function getDuelScript({ match, a, b }: OwnedFinal): DuelScript {
   for (const [side, reason] of [["a", match.stylePenaltyA], ["b", match.stylePenaltyB]] as const) {
     if (reason) penalties.push({ side, reason, assault: Math.floor(roll() * assaults.length) });
   }
-  return { assaults, penalties };
+  const ending = {
+    winner: match.winnerId === match.participantAId ? "a" : "b",
+    win: pick(roll, WIN_BODIES),
+    lose: pick(roll, LOSE_BODIES),
+  } as const;
+  return { assaults, penalties, ending };
 }

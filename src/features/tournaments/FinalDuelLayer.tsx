@@ -53,7 +53,7 @@ export function FinalDuelLayer({
   const closeRef = useRef<HTMLButtonElement>(null);
   const final = useMemo(() => getOwnedFinal(result), [result]);
   const match = final?.match;
-  const script = useMemo<DuelScript>(() => (final ? getDuelScript(final) : { assaults: [], penalties: [] }), [final]);
+  const script = useMemo<DuelScript>(() => (final ? getDuelScript(final) : { assaults: [], penalties: [], ending: { winner: "a", win: "win-sky", lose: "lose-head" } }), [final]);
   const sheets = useMemo<DuelSheets>(
     () => ({ a: match?.styleDetailA?.sheets, b: match?.styleDetailB?.sheets }),
     [match],

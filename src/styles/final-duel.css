@@ -539,6 +539,34 @@
 
 .fd-hit .gym-fighter { animation: fd-flinch 0.55s ease-out; }
 
+/* End of the final: the winner jumps a few times, the loser sags, blade off. */
+.gym-pair .gym-fighter.is-cheer { animation: fd-cheer 0.5s ease-in-out 4; }
+.gym-pair .gym-fighter.is-sad { animation: fd-sag 3.6s ease-in-out infinite; }
+.gym-fist { fill: #021e33; }
+
+.gym-fighter .gym-saber.is-off {
+  color: #8a98a0 !important;
+  opacity: 0.75;
+  filter: none;
+  stroke-width: 3.4;
+  animation: none;
+}
+
+/* Disarmo: the sword flies from the hand and lands flat on the floor. */
+.fd-dropped {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: fd-saber-fly 820ms ease-in forwards;
+}
+
+.fd-dropped .gym-saber { animation: fd-flicker 2s ease-out forwards; }
+
+.fd-hilt {
+  stroke: #c9d3d8;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+}
+
 .fd-touch {
   transform-box: fill-box;
   transform-origin: center;
@@ -608,6 +636,16 @@
   100% { opacity: 0; }
 }
 @keyframes fd-bump { 40% { transform: scale(1.35); } }
+@keyframes fd-cheer { 50% { transform: translateY(-8px); } }
+@keyframes fd-sag { 50% { transform: translateY(1px); } }
+@keyframes fd-saber-fly {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  40% { transform: translate(calc(var(--dx) * 0.35), -52px) rotate(calc(var(--spin) * 0.45)); }
+  82% { transform: translate(var(--dx), var(--floor)) rotate(var(--spin)); animation-timing-function: ease-out; }
+  90% { transform: translate(var(--dx), calc(var(--floor) - 5px)) rotate(var(--spin)); }
+  100% { transform: translate(var(--dx), var(--floor)) rotate(var(--spin)); }
+}
+@keyframes fd-flicker { 0%, 46%, 54% { opacity: 1; } 50%, 58% { opacity: 0.4; } 100% { opacity: 0.85; } }
 
 /* Modalità Onde: deep blue, gold, and Servizio's phone in the hand. */
 :root[data-theme="dark"] .final-duel-layer {
@@ -651,6 +689,8 @@
 :root[data-theme="dark"] .fd-phone-codes { color: var(--onde-gold-bright); }
 
 @media (prefers-reduced-motion: reduce) {
+  .gym-pair .gym-fighter.is-cheer,
+  .gym-pair .gym-fighter.is-sad,
   .fd-beam,
   .fd-flash,
   .fd-stars circle,
@@ -658,6 +698,8 @@
   .fd-brazier { animation: none; }
 }
 
+:root.reduce-motion .gym-pair .gym-fighter.is-cheer,
+:root.reduce-motion .gym-pair .gym-fighter.is-sad,
 :root.reduce-motion .fd-beam,
 :root.reduce-motion .fd-flash,
 :root.reduce-motion .fd-stars circle,

@@ -4367,6 +4367,11 @@ l'Arena, a destra il telefono di Servizio.
   COM · Forma 3 Spada Lunga») ed è il colpo decisivo di un assalto vinto da chi
   la esegue. I giudici (2 o 4) stanno a bordo Arena e alzano il cartellino di
   Stile, a scacchi gialli e neri, quando arriva.
+- **Disarmo** (decisione del 05/10; SAPD = Sync, Armoniche, Prese, Disarmi):
+  quando c'è, si vede la spada che vola e cade a terra; l'atleta disarmato
+  prende il taglio a mani vuote e chiama «OH!», poi raccoglie la spada.
+- **Fine** (decisione del 05/10): chi vince esulta e chi perde è triste, con
+  la spada spenta; una posa a caso tra tre per parte.
 - **Servizio** si compila mentre si combatte, per **entrambi** gli atleti
   (anche l'esterno), come media di tutti i giudici: mezzo punto alla volta in
   voci a caso, a volte mezzo punto oltre e poi giù; alla fine i valori veri e i

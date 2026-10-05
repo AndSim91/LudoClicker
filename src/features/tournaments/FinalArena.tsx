@@ -3,7 +3,7 @@ import type { TournamentLevel } from "../../game/types";
 import { Fighter } from "../people/GymPair";
 import type { DuelSide } from "./finalDuel";
 import { FinalArenaBackdrop } from "./FinalArenaBackdrop";
-import { DUEL_LEFT, DUEL_RIGHT, type DuelEffect, type DuelView } from "./finalDuelTimeline";
+import { DUEL_LEFT, DUEL_RIGHT, type DroppedSaber, type DuelEffect, type DuelView } from "./finalDuelTimeline";
 
 const JUDGE_SPOTS: Record<number, [number, number][]> = {
   1: [[96, 216]],
@@ -56,6 +56,22 @@ function Effect({ effect }: { effect: DuelEffect }) {
   }
 }
 
+/** Disarmo: the sword spins through the air and lands flat behind its owner (CSS, final-duel.css). */
+function Dropped({ saber, color }: { saber: DroppedSaber; color: string }) {
+  const [bx, by] = saber.blade;
+  return (
+    <g transform={`translate(${saber.x} ${saber.y})`}>
+      <g
+        className="fd-dropped"
+        style={{ "--dx": `${saber.dx}px`, "--floor": `${saber.floor}px`, "--spin": `${saber.spin}deg` } as CSSProperties}
+      >
+        <line className="gym-saber" x1={0} y1={0} x2={bx} y2={by} style={{ color }} />
+        <line className="fd-hilt" x1={0} y1={0} x2={-bx * 0.18} y2={-by * 0.18} />
+      </g>
+    </g>
+  );
+}
+
 /** The Arena of «Guarda la finale», drawn from the current DuelView. */
 export function FinalArena({
   level,
@@ -82,6 +98,8 @@ export function FinalArena({
             pose={pose.pose}
             tip={pose.tip}
             declare={pose.declare}
+            unarmed={pose.unarmed}
+            body={pose.body}
             delay={side === "a" ? 0 : 1.7}
           />
         </g>
@@ -108,6 +126,7 @@ export function FinalArena({
       >
         {fighter("a")}
         {fighter("b")}
+        {view.dropped ? <Dropped saber={view.dropped} color={sabers[view.dropped.side]} /> : null}
         {view.effects.map((effect) => <Effect key={effect.id} effect={effect} />)}
       </g>
     </svg>

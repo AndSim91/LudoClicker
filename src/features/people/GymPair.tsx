@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { motionReduced } from "../../shared/motion";
+import { bodyShape, type FighterBody } from "./fighterBodies";
 import { exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
 
 // A stick athlete: "guard" holds the blade upright, "attack" reaches towards
@@ -12,6 +13,8 @@ export function Fighter({
   delay = 0,
   tip: blade,
   declare = false,
+  unarmed = false,
+  body,
 }: {
   x: number;
   facing: 1 | -1;
@@ -23,16 +26,41 @@ export function Fighter({
   tip?: { x: number; y: number };
   /** Free hand raised: the touched athlete calls «OH!». */
   declare?: boolean;
+  /** Disarmed: no blade, the open hand held out. */
+  unarmed?: boolean;
+  /** End of the final: a celebration or a defeat stance; overrides everything else. */
+  body?: FighterBody;
 }) {
+  const offset = `${-delay}s`;
+  if (body) {
+    const shape = bodyShape(body, x, facing);
+    return (
+      <g className={`gym-fighter ${body.startsWith("win") ? "is-cheer" : "is-sad"}`} style={{ animationDelay: offset }}>
+        <circle cx={shape.head[0]} cy={shape.head[1]} r={7} />
+        <path d={shape.d} />
+        {shape.fist ? <circle className="gym-fist" cx={shape.fist[0]} cy={shape.fist[1]} r={2.6} /> : null}
+        <line
+          className={shape.off ? "gym-saber is-off" : "gym-saber"}
+          x1={shape.blade[0]}
+          y1={shape.blade[1]}
+          x2={shape.blade[2]}
+          y2={shape.blade[3]}
+          style={{ color: saber }}
+        />
+      </g>
+    );
+  }
   const hand = x + 14 * facing;
   const tip = blade ?? (pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 });
-  const offset = `${-delay}s`;
   const raised = declare ? ` M${x} 110 L${x - 8 * facing} 96 L${x - 10 * facing} 84` : "";
+  const arm = unarmed ? `M${x} 110 L${x + 9 * facing} 104 L${x + 12 * facing} 97` : `M${x} 110 L${hand} 116`;
   return (
     <g className="gym-fighter" style={{ animationDelay: offset }}>
       <circle cx={x} cy={96} r={7} />
-      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116${raised}`} />
-      <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber, animationDelay: offset }} />
+      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 ${arm}${raised}`} />
+      {unarmed ? null : (
+        <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber, animationDelay: offset }} />
+      )}
     </g>
   );
 }

@@ -238,6 +238,13 @@ del torneo (`FinalDuelLayer.tsx`), in non più di 30 secondi.
   media di tutti i giudici e per entrambi gli atleti: mezzo punto alla volta,
   a volte mezzo punto oltre e poi giù; COM e SAPD si contano al tocco; alla
   fine i valori veri e i codici dei giudici.
+- **Disarmo** (SAPD rarissimo): la lama avvolge quella dell'avversario, la
+  spada vola girando e cade a terra dietro di lui; a mani vuote prende il
+  taglio e chiama «OH!», poi va a raccoglierla e si torna in guardia.
+- **Fine**: chi vince esulta (spada al cielo, braccia a V o pugno al cielo) e
+  chi perde è giù di morale con la spada spenta (testa bassa, in ginocchio o
+  mano sulla testa); una delle tre a caso, fissata dall'id dell'incontro
+  (`fighterBodies.ts`).
 - **Sala per livello** (`FinalArenaBackdrop.tsx`), con il nome del torneo in
   alto: Scolastico, palestra con lo stendardo delle Onde (senza motto); Accademico, stendardi
   degli Ordini (fondo nero, logo bianco, `public/assets/orders/`; mancano
