@@ -155,3 +155,225 @@
     --saber-blade: 110px;
   }
 }
+
+/* Outlook-only parts of the hilt and of the locked purchase: hidden in Onde. */
+.school-saber-wrench,
+.school-saber-dot,
+.school-saber-action,
+.equipment-lock {
+  display: none;
+}
+
+/*
+ * Modalità Outlook, Concept B «Contatore d'archivio» (Andrea, 06/10): no sword is
+ * drawn. A thin capacity meter (like OneDrive storage) and, after it, the hilt as
+ * a wrench button with the price and a status dot. No glow, no transitions.
+ */
+:root[data-theme="light"] .school-saber {
+  --saber-blade: 120px;
+  --saber-blade-height: 4px;
+  --saber-dot: #f2c661;
+  gap: 4px;
+}
+
+:root[data-theme="light"] .school-saber.repair-partial { --saber-dot: #ffb27a; }
+:root[data-theme="light"] .school-saber.repair-short { --saber-dot: #f4a3a8; }
+:root[data-theme="light"] .school-saber.repair-blocked { --saber-dot: rgb(255 255 255 / 55%); }
+:root[data-theme="light"] .school-saber.repair-none .school-saber-hilt { display: none; }
+
+:root[data-theme="light"] .school-saber-hilt {
+  order: 1;
+  display: inline-flex;
+  width: auto;
+  height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-weight: 400;
+  transition: none;
+}
+
+:root[data-theme="light"] .school-saber-hilt > svg:first-child { display: none; }
+
+:root[data-theme="light"] .school-saber-hilt:not([aria-disabled="true"]):hover {
+  background: rgb(255 255 255 / 12%);
+  filter: none;
+}
+
+:root[data-theme="light"] .school-saber-hilt:not([aria-disabled="true"]):active { transform: none; }
+
+:root[data-theme="light"] .school-saber-wrench {
+  position: static;
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.1;
+}
+
+:root[data-theme="light"] .school-saber-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--saber-dot);
+}
+
+:root[data-theme="light"] .school-saber-price {
+  position: static;
+  display: inline;
+  width: auto;
+  color: inherit;
+  text-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="light"] .school-saber-blade-button {
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .school-saber-blade-button:hover,
+:root[data-theme="light"] .school-saber-blade-button[aria-expanded="true"] {
+  background: rgb(255 255 255 / 10%);
+}
+
+:root[data-theme="light"] .school-saber-blade,
+:root[data-theme="light"] .school-saber-blade-button:hover .school-saber-blade,
+:root[data-theme="light"] .school-saber-blade-button[aria-expanded="true"] .school-saber-blade {
+  border-radius: 2px;
+  background: rgb(255 255 255 / 22%);
+  box-shadow: none;
+  filter: none;
+}
+
+:root[data-theme="light"] .school-saber-blade > .is-healthy { background: #fff; }
+:root[data-theme="light"] .school-saber-blade > .is-wear { background: #f2c661; }
+:root[data-theme="light"] .school-saber-blade > .is-in-use { background: rgb(255 255 255 / 45%); }
+:root[data-theme="light"] .school-saber-blade > .is-broken { background: #f4a3a8; }
+
+@media (max-width: 1280px) {
+  :root[data-theme="light"] .title-equipment .school-saber { --saber-blade: 90px; }
+}
+
+/*
+ * Outlook popover: the card wraps as one flow so the meter spans the width and
+ * the repair button sits beside the purchase, wrapping below it when narrow.
+ */
+:root[data-theme="light"] .equipment-quick-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  border-radius: 6px;
+}
+
+:root[data-theme="light"] .equipment-quick-card > *,
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade {
+  flex: 0 0 100%;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber,
+:root[data-theme="light"] .equipment-quick-card .equipment-quick-actions {
+  display: contents;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade {
+  height: 8px;
+  margin-left: 0;
+  border-radius: 4px;
+  background: var(--line);
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade > .is-healthy { background: var(--equipment-healthy); }
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade > .is-wear { background: var(--equipment-load); }
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade > .is-in-use { background: var(--equipment-reserved); }
+:root[data-theme="light"] .equipment-quick-card .school-saber-blade > .is-broken { background: var(--equipment-broken); }
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-hilt,
+:root[data-theme="light"] .equipment-quick-card .equipment-quick-actions > * {
+  order: 1;
+  flex: none;
+  margin-top: 12px;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-hilt {
+  height: 32px;
+  padding: 0 12px;
+  color: white;
+  background: var(--blue-600);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-hilt:not([aria-disabled="true"]):hover {
+  background: var(--blue-700);
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-hilt[aria-disabled="true"] {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-wrench,
+:root[data-theme="light"] .equipment-quick-card .school-saber-dot,
+:root[data-theme="light"] .equipment-quick-card .school-saber-price {
+  display: none;
+}
+
+:root[data-theme="light"] .equipment-quick-card .school-saber-action { display: inline; }
+
+/* Outlook buttons have 4 px corners; with the repair as primary, the purchase is secondary. */
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-button,
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-quantity {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: var(--surface);
+  filter: none;
+}
+
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-button { border-radius: 4px 0 0 4px; }
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-quantity { border-left: 0; border-radius: 0 4px 4px 0; }
+
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-button:not(:disabled):hover,
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-quantity:not(:disabled):hover {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-button:disabled,
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-quantity:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  opacity: 1;
+}
+
+:root[data-theme="light"] .title-equipment-popover .equipment-purchase-button.equipment-purchase-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .equipment-purchase-hint { display: none; }
+
+:root[data-theme="light"] .equipment-lock {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+}

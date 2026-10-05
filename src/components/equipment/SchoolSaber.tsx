@@ -15,18 +15,19 @@ type EquipmentState = GameState["equipment"];
 /** Wear is tiny next to the whole capacity: give it a sliver so it stays visible. */
 const MINIMUM_VISIBLE_WEAR = 0.04;
 
-function getHiltText(status: EquipmentRepairStatus): { label: string; price: string } {
+/** `action` is the Outlook popover's button text (Concept B, 06/10): the hilt becomes a plain button. */
+function getHiltText(status: EquipmentRepairStatus): { label: string; price: string; action: string } {
   switch (status.kind) {
     case "none":
-      return { label: "Spade in ordine", price: "" };
+      return { label: "Spade in ordine", price: "", action: "" };
     case "blocked":
-      return { label: "Riparazione non disponibile: l'usura è sulle spade in uso", price: "" };
+      return { label: "Riparazione non disponibile: l'usura è sulle spade in uso", price: "", action: "Usura sulle spade in uso" };
     case "short":
-      return { label: `Servono almeno ${formatCurrency(status.amount)} per riparare`, price: formatShortCurrency(status.amount) };
+      return { label: `Servono almeno ${formatCurrency(status.amount)} per riparare`, price: formatShortCurrency(status.amount), action: `Servono ${formatShortCurrency(status.amount)}` };
     case "partial":
-      return { label: `Riparazione parziale · ${formatCurrency(status.amount)}`, price: formatShortCurrency(status.amount) };
+      return { label: `Riparazione parziale · ${formatCurrency(status.amount)}`, price: formatShortCurrency(status.amount), action: `Riparazione parziale · ${formatShortCurrency(status.amount)}` };
     default:
-      return { label: `Ripara tutto · ${formatCurrency(status.amount)}`, price: formatShortCurrency(status.amount) };
+      return { label: `Ripara tutto · ${formatCurrency(status.amount)}`, price: formatShortCurrency(status.amount), action: `Ripara tutto · ${formatShortCurrency(status.amount)}` };
   }
 }
 
@@ -53,6 +54,8 @@ const RIDGES = Array.from({ length: 15 }, (_, index) => 11 + index * 3.4);
  * The school's sword: the hilt is the manual repair button (price on the grip,
  * a ring coloured by what the funds allow), the blade is the state of every
  * sword, from the hilt out: free, worn, in use, broken.
+ * Outlook (light theme) draws no sword: a thin capacity meter and the hilt as a
+ * wrench button after it (Concept B, Andrea 06/10). Only CSS tells the two apart.
  */
 export function SchoolSaber({
   equipment,
@@ -69,7 +72,7 @@ export function SchoolSaber({
 }) {
   const id = useId();
   const status = getEquipmentRepairStatus(equipment, euros);
-  const { label, price } = getHiltText(status);
+  const { label, price, action } = getHiltText(status);
   const canRepair = status.kind === "full" || status.kind === "partial";
   const blade = getBladeShares(equipment);
   const metal = `${id}-metal`;
@@ -126,7 +129,12 @@ export function SchoolSaber({
           {/* The ring sits on top of the emitter: no gap, no visible overlap. */}
           <rect className="school-saber-ring" x="64.5" y="3" width="5" height="18" rx="1.6" />
         </svg>
+        <svg className="school-saber-wrench" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M10.6 1.8a3.6 3.6 0 0 0-3.4 4.7L2.3 11.4a1.3 1.3 0 0 0 1.8 1.8L9 8.3a3.6 3.6 0 0 0 4.7-3.4l-1.9 1.9-1.9-.3-.3-1.9z" />
+        </svg>
+        <span className="school-saber-dot" aria-hidden="true" />
         <span className="school-saber-price">{price}</span>
+        <span className="school-saber-action">{action}</span>
       </button>
       {bladeButton ? (
         <button className="school-saber-blade-button" type="button" {...bladeButton}>

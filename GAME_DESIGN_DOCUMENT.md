@@ -2592,6 +2592,17 @@ spade libere, la spada più grande, la legenda con i numeri, gli addetti
 all'attrezzatura e l'acquisto in evidenza. Sotto i 1.001 pixel la spada
 sparisce dalla barra.
 
+La spada disegnata è della Modalità Onde. In **Modalità Outlook** (concept B
+«Contatore d'archivio», decisione di Andrea del 06/10) non c'è nessuna spada:
+dopo «Spade 14 su 31» c'è una barra di capacità sottile (4 px, gli stessi
+quattro tratti della lama) e, dopo, un pulsante con la chiave inglese, un
+pallino nel colore dello stato e il costo; il pulsante sparisce quando non c'è
+niente da riparare. Nel dettaglio la barra prende tutta la larghezza e la
+riparazione è un pulsante blu («Ripara tutto · 770 €», «Servono 250 €»)
+accanto all'acquisto, che diventa secondario; da bloccato l'acquisto è un
+pulsante grigio con il lucchetto. Angoli da 4 px, niente bagliori né
+transizioni.
+
 La pagina Scuola (Fase 8) tiene scena, colori, icone ed emblemi; sono stati
 tolti i maiuscoletti e le scritte sotto i 12 px, lo «Iscritto» ripetuto su ogni
 riga degli iscritti (la colonna ora è **Ruolo**, l'ultima **Prossimo passo**) e le

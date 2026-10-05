@@ -16,18 +16,20 @@ const equipment = (overrides: Partial<{ totalSwords: number; availableSwords: nu
 
 describe("SchoolSaber", () => {
   it.each([
-    { name: "nothing to repair", eq: { damagedSwords: 0, wear: 0, availableSwords: 15 }, euros: 1_000, kind: "none", price: "", label: "Spade in ordine" },
-    { name: "full repair", eq: {}, euros: 12_480, kind: "full", price: "428 €", label: /^Ripara tutto/ },
-    { name: "partial repair", eq: {}, euros: 300, kind: "partial", price: "300 €", label: /^Riparazione parziale/ },
-    { name: "missing funds", eq: {}, euros: 180, kind: "short", price: "250 €", label: /^Servono almeno/ },
-    { name: "wear only on swords in use", eq: { damagedSwords: 0, availableSwords: 0 }, euros: 1_000, kind: "blocked", price: "", label: /^Riparazione non disponibile/ },
-  ])("colours the ring and prices the hilt: $name", ({ eq, euros, kind, price, label }) => {
+    { name: "nothing to repair", eq: { damagedSwords: 0, wear: 0, availableSwords: 15 }, euros: 1_000, kind: "none", price: "", action: "", label: "Spade in ordine" },
+    { name: "full repair", eq: {}, euros: 12_480, kind: "full", price: "428 €", action: /^Ripara tutto · 428/, label: /^Ripara tutto/ },
+    { name: "partial repair", eq: {}, euros: 300, kind: "partial", price: "300 €", action: /^Riparazione parziale · 300/, label: /^Riparazione parziale/ },
+    { name: "missing funds", eq: {}, euros: 180, kind: "short", price: "250 €", action: /^Servono 250/, label: /^Servono almeno/ },
+    { name: "wear only on swords in use", eq: { damagedSwords: 0, availableSwords: 0 }, euros: 1_000, kind: "blocked", price: "", action: "Usura sulle spade in uso", label: /^Riparazione non disponibile/ },
+  ])("colours the ring and prices the hilt: $name", ({ eq, euros, kind, price, action, label }) => {
     const onRepair = vi.fn();
     const { container } = render(<SchoolSaber equipment={equipment(eq)} euros={euros} onRepair={onRepair} />);
 
     expect(container.querySelector(".school-saber")).toHaveClass(`repair-${kind}`);
     const hilt = screen.getByRole("button", { name: label });
-    expect(hilt).toHaveTextContent(price);
+    expect(hilt.querySelector(".school-saber-price")?.textContent).toBe(price);
+    // Outlook popover text (Concept B): the hilt becomes a plain button.
+    expect(hilt.querySelector(".school-saber-action")?.textContent).toMatch(action);
     fireEvent.click(hilt);
     expect(onRepair).toHaveBeenCalledTimes(kind === "full" || kind === "partial" ? 1 : 0);
   });

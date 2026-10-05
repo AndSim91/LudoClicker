@@ -136,7 +136,11 @@ export function EquipmentDetailPanel({
             disabled
             title="Compra il potenziamento Fornitore ufficiale, nel ramo Attrezzatura"
           >
-            Acquisto spade {"\u00b7"} da sbloccare negli Upgrade
+            <svg className="equipment-lock" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3.5" y="7" width="9" height="6.5" rx="1" />
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+            </svg>
+            Acquisto spade<span className="equipment-purchase-hint"> {"\u00b7"} da sbloccare negli Upgrade</span>
           </button>
         </div>
       ) : (
