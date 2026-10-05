@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
 import { LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
-import { FOUNDATION_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
 import type { GameState, MomentKey } from "../../game/types";
 import {
   describeFoundation,
@@ -16,7 +16,7 @@ import {
  * Leggendari and Rete can show the data of one unlocked Leggendario or sede.
  */
 
-type Thumb = "council" | "legendary" | "trophy" | "superba" | "foundation" | "inflation";
+type Thumb = "council" | "legendary" | "trophy" | "superba" | "chronicles" | "foundation" | "inflation";
 
 const SCENES: readonly { key: MomentKey; thumb: Thumb }[] = [
   { key: "council", thumb: "council" },
@@ -25,6 +25,7 @@ const SCENES: readonly { key: MomentKey; thumb: Thumb }[] = [
   { key: "victory:champions", thumb: "trophy" },
   { key: "victory:reptile", thumb: "trophy" },
   { key: SUPERBA_MOMENT, thumb: "superba" },
+  { key: CHRONICLES_KEY_MOMENT, thumb: "chronicles" },
   { key: "victory:chronicles", thumb: "trophy" },
   { key: FOUNDATION_MOMENT, thumb: "foundation" },
   { key: LIGHT_INFLATION_MOMENT, thumb: "inflation" },
@@ -96,6 +97,16 @@ const THUMBS: Record<Thumb, ReactNode> = {
       <path className="scene-tower" d="M90 112V60h20v52zM86 60h28v-6H86zM93 54V40h14v14zM96 40l4-8 4 8z" />
       <rect className="scene-gold" x="95" y="42" width="10" height="10" />
       <path className="scene-fill" d="M0 112q50-10 100 0t100 0v8H0z" />
+    </>
+  ),
+  chronicles: (
+    <>
+      <circle className="scene-halo" cx="100" cy="74" r="36" />
+      <path className="scene-fill" d="M74 112V66a26 26 0 0 1 52 0v46z" />
+      <path className="scene-gold-line" d="M74 112V66a26 26 0 0 1 52 0v46" />
+      <circle className="scene-gold-line" cx="100" cy="54" r="7" />
+      <path className="scene-gold" d="M98 61h4v26h-4zM102 78h6v3h-6zM102 83h4v3h-4z" />
+      {[[42, 30], [160, 26], [150, 92], [46, 94]].map(([x, y]) => <circle key={x} className="scene-wave" cx={x} cy={y} r="2" />)}
     </>
   ),
   foundation: (

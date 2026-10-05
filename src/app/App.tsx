@@ -693,6 +693,7 @@ export function App() {
             <StableTournamentsView
               key={tournamentFocus?.key}
               focusResultId={tournamentFocus?.resultId}
+              tutorialTab={tutorial.activeStep?.tournamentTab}
               gameSpeed={gameSpeed}
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}

@@ -205,10 +205,13 @@ export function TournamentsView({
   onOpenReptileTutorial = () => undefined,
   onReplayReptileDay = () => undefined,
   focusResultId,
+  tutorialTab,
 }: {
   state?: GameState;
   /** Opens straight on this result in Risultati (from «Mostra i risultati» of the final). */
   focusResultId?: string;
+  /** A tutorial step shows this tab (the latest result, or Open › Reptile). */
+  tutorialTab?: "results" | "reptile";
   gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
@@ -247,6 +250,18 @@ export function TournamentsView({
     setSelectedResultId(result.id);
     setTab("results");
   };
+  // A tutorial step moves to its tab once, when the step asks for it (adjusted while rendering).
+  const [shownTutorialTab, setShownTutorialTab] = useState<typeof tutorialTab>();
+  if (tutorialTab !== shownTutorialTab) {
+    setShownTutorialTab(tutorialTab);
+    if (tutorialTab === "results") {
+      setSelectedResultId(undefined);
+      setTab("results");
+    } else if (tutorialTab === "reptile") {
+      setTab("open");
+      setOpenTournamentTab("reptile");
+    }
+  }
   useEffect(() => {
     onStartChroniclesRef.current = onStartChronicles;
   }, [onStartChronicles]);

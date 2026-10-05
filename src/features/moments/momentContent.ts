@@ -9,7 +9,7 @@ import {
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency, formatStat } from "../../shared/formatters";
-import { FOUNDATION_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { getReptileFameLevel } from "../../game/reptilePreparation";
 import { SUPERBA_COPY } from "../../game/reptileUnlock";
 import { GAME_CONFIG } from "../../game/config";
@@ -45,6 +45,7 @@ export type MomentContent =
       tally: string;
     }
   | { kind: "superba"; kicker: string; title: string; body: string; city: string; fameLabel: string }
+  | { kind: "chronicles"; kicker: string; title: string; body: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
@@ -53,6 +54,14 @@ export const COUNCIL_SEATS = GAME_CONFIG.collaboratorAggregateUnlockCount;
 function getInitials(name: string): string {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
 }
+
+/** «La porta delle Chronicles si apre» (concept A, 05/10/2026). */
+const CHRONICLES_KEY_CONTENT: MomentContent = {
+  kind: "chronicles",
+  kicker: "Arena e Stile nella stessa Champion's Arena",
+  title: "La porta delle Chronicles si apre",
+  body: "Una Chiave, sei atleti, avversari che non perdono mai. Vinci in Arena o in Stile e un Leggendario Segreto ti sfiderà.",
+};
 
 const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; note: string }> = {
   national: {
@@ -189,6 +198,7 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
       stats: "",
     };
   }
+  if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
   if (key === SUPERBA_MOMENT) {
     return { kind: "superba", ...SUPERBA_COPY, city: state.school.city, fameLabel: `Fama · livello ${GAME_CONFIG.superbaReptileFameLevel}` };
   }
@@ -230,6 +240,7 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     const follower = first?.specialProfileId && first.status === "enrolled" ? `${first.firstName} ${first.lastName}` : null;
     return describeFoundation(state, state.network.schoolCount + 1, { follower });
   }
+  if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
   if (key === SUPERBA_MOMENT) {
     const fame = state.tournaments.reptile.fameXp;
     return {

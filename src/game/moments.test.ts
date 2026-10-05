@@ -28,6 +28,27 @@ describe("moments (4.2)", () => {
     expect(queueMoments(withCareer(empty, { nationalTitles: 2 })).moments.queue).toEqual([]);
   });
 
+  it("opens the Chronicles door at the first key of the playthrough only (05/10)", () => {
+    const initial = withCareer(createInitialState(1_000), { championsWins: 1 });
+    const keyed: GameState = {
+      ...initial,
+      tournaments: { ...initial.tournaments, chronicles: { unlocked: true, keys: 1 } },
+    };
+    const queued = queueMoments(keyed);
+    expect(queued.moments.queue).toEqual(["victory:champions", "chronicles-key"]);
+    // A new school starts locked; the key earned there finds the scene already seen.
+    const nextSchool = queueMoments({
+      ...queued,
+      moments: { ...queued.moments, queue: [] },
+      tournaments: { ...queued.tournaments, chronicles: { unlocked: false, keys: 0 } },
+    });
+    const keyedAgain = queueMoments({
+      ...nextSchool,
+      tournaments: { ...nextSchool.tournaments, chronicles: { unlocked: true, keys: 1 } },
+    });
+    expect(keyedAgain.moments.queue).toEqual([]);
+  });
+
   it("plays the foundation at every new school and keeps what was seen", () => {
     const base = addAdminMembers(createInitialState(1_000), 125);
     const ready: GameState = {

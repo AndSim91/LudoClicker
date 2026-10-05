@@ -58,7 +58,7 @@ function ReptileHero({ state }: { state: GameState }) {
   const nextJuly = getNextReptileJuly(state.school.currentMonth, reptile.lastTournamentMonth);
   const tournamentMonth = reptile.activeEdition ? outlook?.tournamentMonth : nextJuly;
   return (
-    <section className="reptile-hero" aria-labelledby="reptile-title">
+    <section className="reptile-hero" aria-labelledby="reptile-title" data-tutorial-region="reptile-hero">
       <div className="reptile-hero-copy">
         {superba ? (
           <img className="superba-hero-logo" src="/assets/superba-logo.webp" alt="Logo del Torneo della Superba" />
@@ -84,7 +84,7 @@ function ReptileHero({ state }: { state: GameState }) {
           <strong>{teamCount}</strong>
           <small>{reptile.victories} vittorie della scuola · difficoltà {Math.round(difficulty)}</small>
         </div>
-        <div>
+        <div data-tutorial-region="reptile-month">
           <Icon name="calendar" />
           <span>Torneo</span>
           <strong>{tournamentMonth === undefined ? "Sospeso" : "Luglio"}</strong>
@@ -114,7 +114,7 @@ function OrganizePanel({ state, onOrganize }: { state: GameState; onOrganize: ()
   const canOrganize = canOrganizeReptile(state);
   const heldThisJuly = state.tournaments.reptile.lastTournamentMonth === state.school.currentMonth;
   return (
-    <section className="reptile-panel" aria-labelledby="reptile-organize-title">
+    <section className="reptile-panel" aria-labelledby="reptile-organize-title" data-tutorial-region="reptile-preparation">
       <header className="reptile-panel-heading">
         <div>
           <span className="reptile-section-kicker">Nuova edizione</span>
@@ -209,7 +209,7 @@ function PreparationPanel({
   const refund = GAME_CONFIG.reptileVenueCost * GAME_CONFIG.reptileCancelRefundShare;
   const julyNow = outlook.complete && outlook.tournamentMonth === state.school.currentMonth;
   return (
-    <section className="reptile-panel" aria-labelledby="reptile-preparation-title">
+    <section className="reptile-panel" aria-labelledby="reptile-preparation-title" data-tutorial-region="reptile-preparation">
       <header className="reptile-panel-heading">
         <div>
           <span className="reptile-section-kicker">
@@ -289,7 +289,7 @@ function MinigameCard({
   const minigame = edition.minigame;
   if (minigame.status === "completed") {
     return (
-      <section className="reptile-minicard" aria-label="La giornata degli imprevisti">
+      <section className="reptile-minicard" aria-label="La giornata degli imprevisti" data-tutorial-region="reptile-minigame">
         <span className="reptile-section-kicker">La giornata degli imprevisti</span>
         <strong className="reptile-minicard-bonus">+{minigame.bonusPercent}%</strong>
         <p>Sulla resa del torneo. Tentativo usato.</p>
@@ -297,7 +297,7 @@ function MinigameCard({
     );
   }
   return (
-    <section className="reptile-minicard" aria-labelledby="reptile-minigame-title">
+    <section className="reptile-minicard" aria-labelledby="reptile-minigame-title" data-tutorial-region="reptile-minigame">
       <span className="reptile-section-kicker">Il preside in palazzetto</span>
       <h3 id="reptile-minigame-title">La giornata degli imprevisti</h3>
       <p>Aiuta i collaboratori a sbrogliare i guai della giornata. Non tocca le barre: alza la resa del torneo.</p>

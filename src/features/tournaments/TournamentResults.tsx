@@ -455,7 +455,7 @@ export function TournamentResults({
         ) : null}
         <strong>Completato</strong>
         {ownedFinal ? (
-          <button type="button" className="results-watch-final" onClick={() => setWatchingFinal(true)}>
+          <button type="button" className="results-watch-final" data-tutorial-region="tournament-final" onClick={() => setWatchingFinal(true)}>
             Guarda la finale
           </button>
         ) : null}
@@ -539,7 +539,7 @@ export function TournamentResults({
           className="result-view-panel"
         >
           <div className="results-workspace">
-            <section className="group-stage" aria-labelledby="group-stage-title">
+            <section className="group-stage" aria-labelledby="group-stage-title" data-tutorial-region="tournament-groups">
               <h2 id="group-stage-title">Gironi</h2>
               <div className="group-selector" role="tablist" aria-label="Seleziona girone">
                 {groupIndices.map((groupIndex) => (
@@ -731,6 +731,7 @@ export function TournamentResults({
 
           <section
             className="podium-qualification-rail"
+            data-tutorial-region="tournament-podium"
             aria-labelledby="podium-qualification-title"
           >
             <h2 id="podium-qualification-title">Podio e qualificazioni</h2>

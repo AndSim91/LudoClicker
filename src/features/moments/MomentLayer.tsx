@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { motionReduced } from "../../shared/motion";
 import { Icon, type IconName } from "../../components/common/Icon";
+import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
+import { ChroniclesArt } from "./ChroniclesArt";
 import { FoundationArt } from "./FoundationArt";
 import { SuperbaArt } from "./SuperbaArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
@@ -16,6 +18,7 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
   foundation: "flag",
   inflation: "coin",
   superba: "trophy",
+  chronicles: "key",
 };
 
 /** Lama di Luce letterhead: three crossed blades, green, white and red. */
@@ -148,6 +151,7 @@ function MomentArt({ content }: { content: MomentContent }) {
       </div>
     );
   }
+  if (content.kind === "chronicles") return <ChroniclesArt />;
   if (content.kind === "superba") return <SuperbaArt city={content.city} fameLabel={content.fameLabel} />;
   if (content.kind === "victory") {
     return (
@@ -255,6 +259,13 @@ export function MomentLayer({
             <span>{SPORT_SWORD_LABEL}</span>
             <s>{content.oldPrice}</s> → <b>{content.newPrice} ({content.increase})</b>
           </p>
+        ) : null}
+        {content.kind === "chronicles" ? (
+          <>
+            <p className="moment-price"><span>Chiavi disponibili</span><b>0 → 1</b></p>
+            <p className="moment-price"><span>Squadra</span><b>{GAME_CONFIG.chroniclesTeamSize} atleti</b></p>
+            <p className="moment-price"><span>Dove</span><b>Tornei › Open</b></p>
+          </>
         ) : null}
         {content.kind === "foundation" ? (
           <p className="moment-price">

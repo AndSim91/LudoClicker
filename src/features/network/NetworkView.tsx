@@ -89,7 +89,7 @@ export function NetworkView({
       />
 
       <div className="network-columns">
-        <section className="network-panel network-ready" aria-labelledby="network-ready-title">
+        <section className="network-panel network-ready" aria-labelledby="network-ready-title" data-tutorial-region="network-ready">
           <h2 id="network-ready-title">Se fondi ora</h2>
           <p className="network-big">
             <b>+{formatStat(preview.points)}</b>
@@ -123,13 +123,13 @@ export function NetworkView({
               </li>
             ) : null}
           </ul>
-          <button type="button" className="network-found" disabled={!ready} onClick={() => setFounding(true)}>
+          <button type="button" className="network-found" data-tutorial-region="network-found" disabled={!ready} onClick={() => setFounding(true)}>
             Fonda una nuova scuola…
           </button>
           {titled && !ready ? <small className="network-note">Completa prima la prova del Leggendario in corso.</small> : null}
         </section>
 
-        <section className="network-panel" aria-labelledby="network-upgrades-title">
+        <section className="network-panel" aria-labelledby="network-upgrades-title" data-tutorial-region="network-upgrades">
           <h2 id="network-upgrades-title">Potenziamenti <small>+{Math.round(GAME_CONFIG.reputationStep * 100)}% a punto · massimo {GAME_CONFIG.reputationUpgradeMaxLevel}</small></h2>
           <div className="network-dials">
             {REPUTATION_UPGRADE_IDS.map((id) => {
@@ -153,7 +153,7 @@ export function NetworkView({
           </p>
         </section>
 
-        <section className="network-panel" aria-labelledby="network-keeps-title">
+        <section className="network-panel" aria-labelledby="network-keeps-title" data-tutorial-region="network-keeps">
           <h2 id="network-keeps-title">Resta per sempre</h2>
           <ul className="network-keeps">
             {keeps.map(([name, value]) => <li key={name}>{name}{value ? <b> {value}</b> : null}</li>)}

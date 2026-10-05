@@ -2892,6 +2892,36 @@ l'avanzamento.
     gioco ma non è spiegato dalla scena. Il tutorial non obbliga a spendere
     fondi o assegnare subito un Collaboratore.
 
+Tutorial della seconda metà della partita (decisione di Andrea del 05/10, dalla
+v102; i salvataggi che li hanno già superati li segnano come fatti):
+
+14. **Il primo torneo è finito** (`first-tournament`): al primo risultato di
+    torneo salvato. Fa aprire Tornei, che si apre su Risultati; poi «Guarda la
+    finale», Arena e Stile (voto da 5,5 a 8,5 circa, «Dettaglio incontro»),
+    podi e qualificazioni (Accademico ad aprile, Nazionale a giugno, posti dagli
+    iscritti attivi) e la meta: il Nazionale apre la Rete, Arena e Stile insieme
+    «qualcosa in più».
+15. **Perché le spade costano di più** (`light-inflation-explained`): appena si
+    chiude la prima scena dell'Inflazione di Luce, con le spade della barra del
+    titolo in evidenza. Le tre cause vere (10% fisso, ricchezza oltre lo 0,5%
+    delle entrate dell'anno, domanda: +30% comprando tante spade quante se ne
+    avevano; massimo +100%) e come difendersi (riparare non tocca il listino; un
+    anno senza acquisti non porta aumenti).
+16. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
+    nazionale, solo nella prima scuola. Fa aprire la Rete; mappa, fondare è
+    ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
+    rendita, cosa resta per sempre, «Nessuna fretta» sul pulsante di fondazione.
+17. **La scuola organizza un torneo** (`reptile-introduction`): allo sblocco del
+    Reptile; se lo stesso Nazionale apre anche la Rete parte subito dopo quella.
+    Fa aprire Tornei, che si apre su Open › Reptile; palazzetto e rimborso, le
+    barre dei settori, luglio o il prossimo (resa e spade libere), «La giornata
+    degli imprevisti» fino a +25%.
+
+I passi possono mettere la scheda a destra o nella metà bassa
+(`cardPlacement`: `left`, `right`, `below`) per non coprire la zona evidenziata;
+nelle pagine Tornei, Reptile e Rete resta accesa solo la zona del passo e il
+resto della pagina si scurisce.
+
 L'evidenziazione deve restare coerente con l'interfaccia ispirata a Windows:
 niente frecce luminose o decorazioni estranee, ma contorni di focus, oscuramento
 e sfocatura controllata delle aree non necessarie.
@@ -4444,6 +4474,17 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
   Superba) e Chronicles of Ludosport;
+- **la porta delle Chronicles si apre** (dal 05/10, concept A): alla prima
+  Chiave della partita (Arena e Stile nella stessa Champion's Arena), dopo la
+  scena della Champion's Arena. La Chiave scende e gira nella serratura di una
+  porta ad arco con la scritta «CHRONICLES OF LUDOSPORT», le porte si aprono
+  sulla luce e su sei sagome senza nome, una per atleta della squadra. Testi:
+  «Arena e Stile nella stessa Champion's Arena» / «La porta delle Chronicles si
+  apre» / «Una Chiave, sei atleti, avversari che non perdono mai. Vinci in
+  Arena o in Stile e un Leggendario Segreto ti sfiderà.» In Outlook l'avviso ha
+  le righe Chiavi disponibili 0 → 1, Squadra 6 atleti, Dove Tornei › Open.
+  Codice: `ChroniclesArt.tsx`, `CHRONICLES_KEY_MOMENT` in `moments.ts`; dalla
+  v102 chi ha già avuto una Chiave la segna come vista;
 - **nasce il Torneo della Superba** (dal 04/10): quando il Reptile diventa per
   sempre la Superba, dopo la scena della vittoria se c'è. La targa verde
   «Torneo Reptile» (Open, città, Fama e livello) svanisce nel fumo dell'arena,
@@ -4498,7 +4539,7 @@ precedenti (v88): quello che il salvataggio ha già raggiunto conta come visto e
 ogni Leggendario già iscritto vale una iscrizione.
 
 **Galleria delle scene (LudoWiki › Scene).** Una bacheca di schede, una per
-scena: Consiglio, Leggendario, le quattro prime vittorie, Superba, nuova sede,
+scena: Consiglio, Leggendario, le quattro prime vittorie, Superba, Chiave delle Chronicles, nuova sede,
 Inflazione di Luce. Le scene mai viste sono schede «???» senza nome; le altre
 hanno «▶ Rivedi», che rilancia la stessa scena a schermo intero con il gioco in
 pausa (in Outlook l'avviso fermo, senza disegni nelle schede). Le scene sono

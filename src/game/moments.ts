@@ -4,7 +4,7 @@ import type { GameState, MomentKey, SpecialCollaboratorId } from "./types";
 /*
  * Animated moments (4.2): the Consiglio delle Onde (sector view, 8 collaborators),
  * the first win of each major tournament and each Leggendario joining for the
- * first time ever, the birth of the Torneo della Superba. Each plays once per save: the key goes to `seen` when it is
+ * first time ever, the birth of the Torneo della Superba, the first Chronicles key. Each plays once per save: the key goes to `seen` when it is
  * queued, the UI shows the queue and pauses. The foundation and the Inflazione
  * di Luce are queued directly and play every time.
  */
@@ -34,6 +34,9 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
   return [
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
     ...(state.network.superbaTournament ? [SUPERBA_MOMENT] : []),
+    // The first key of the playthrough: `seen` outlives the foundations, `unlocked` does not.
+    // Optional: the v88 migration runs this on saves older than the Chronicles.
+    ...(state.tournaments?.chronicles?.unlocked ? [CHRONICLES_KEY_MOMENT] : []),
     ...getEverEnrolledLegendaryIds(state).map((id) => `legendary:${id}`),
     ...(state.collaboratorManagement.aggregateViewUnlocked ? ["council"] : []),
   ];
@@ -41,6 +44,9 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
 
 /** The Reptile becomes, for good, the Torneo della Superba (after the victory scene, if any). */
 export const SUPERBA_MOMENT = "superba";
+
+/** The first key of the Chronicles opens their door (after the Champion's Arena scene). */
+export const CHRONICLES_KEY_MOMENT = "chronicles-key";
 
 /** The scene of a new school: queued by foundSchool at every foundation, never marked as seen. */
 export const FOUNDATION_MOMENT = "foundation";

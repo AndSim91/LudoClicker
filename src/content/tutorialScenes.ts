@@ -1,5 +1,7 @@
 import { GAME_CONFIG } from "../game/config";
+import { LIGHT_INFLATION_MOMENT } from "../game/lightInflation";
 import { isGameAreaUnlocked } from "../game/progression";
+import { formatCurrency } from "../shared/formatters";
 import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
 import type { GameState } from "../game/types";
 
@@ -27,6 +29,21 @@ export const TUTORIAL_REGION_IDS = [
   "collaborator-section",
   "collaborator-social-assignment",
   "collaborator-sectors",
+  "tournaments-navigation",
+  "network-navigation",
+  "title-equipment",
+  "tournament-final",
+  "tournament-groups",
+  "tournament-podium",
+  "reptile-hero",
+  "reptile-month",
+  "reptile-preparation",
+  "reptile-minigame",
+  "network-map",
+  "network-ready",
+  "network-upgrades",
+  "network-keeps",
+  "network-found",
   "status",
 ] as const;
 
@@ -45,11 +62,20 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
 export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
 
+/** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
+export const LATE_TUTORIAL_SCENE_IDS = [
+  "first-tournament",
+  "light-inflation-explained",
+  "network-introduction",
+  "reptile-introduction",
+] as const;
+
 export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
+  ...LATE_TUTORIAL_SCENE_IDS,
 ] as const;
 
 export type TutorialSceneId = typeof TUTORIAL_SCENE_IDS[number];
@@ -74,7 +100,10 @@ interface TutorialStepBase {
   hiddenRegions?: RegionSelection;
   scrollToRegion?: TutorialRegionId;
   navigateTo?: string;
-  cardPlacement?: "left";
+  /** Where the dialog card sits, so it does not cover the focused region (default: centre). */
+  cardPlacement?: "left" | "right" | "below";
+  /** Tornei opens on this tab while the step is shown. */
+  tournamentTab?: "results" | "reptile";
 }
 
 export interface TutorialDialogStep extends TutorialStepBase {
@@ -557,6 +586,264 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         ],
         focusRegions: ["main", "gadget-catalog"],
         scrollToRegion: "gadget-catalog",
+      },
+    ],
+  },
+  {
+    id: "first-tournament",
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.tournaments.results.length > 0,
+    steps: [
+      {
+        id: "open-tournaments",
+        kind: "objective",
+        title: "Apri Tornei",
+        body: ["Il primo torneo della scuola è finito. I risultati ti aspettano nella pagina Tornei."],
+        focusRegions: ({ activeView }) =>
+          activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView }) => activeView === "tournaments",
+      },
+      {
+        id: "watch-the-final",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Una finale da vedere",
+        body: [
+          "Il primo torneo della scuola è in archivio: gironi, tabellone e due titoli in palio.",
+          "Se in finale c'è uno dei tuoi puoi guardarla con «Guarda la finale»: al meglio dei cinque assalti, con i giudici che compilano il Servizio dal vivo. Popcorn non inclusi.",
+        ],
+        focusRegions: ["main", "tournament-final"],
+        tournamentTab: "results",
+      },
+      {
+        id: "arena-and-style",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Arena e Stile",
+        body: [
+          "Ogni incontro dà due risultati. In Arena vince chi mette a segno più colpi.",
+          "Lo Stile è il voto dei giudici: si parte da 5,5, un incontro eccezionale arriva a 8,5, il 10 è una leggenda metropolitana. «Dettaglio incontro» mostra la scheda di ogni giudice.",
+        ],
+        focusRegions: ["main", "tournament-groups"],
+        cardPlacement: "right",
+        tournamentTab: "results",
+      },
+      {
+        id: "who-goes-on",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Chi va avanti",
+        body: [
+          "Arena e Stile hanno due podi separati: due classifiche, due modi di farsi notare.",
+          "I migliori si qualificano al Torneo Accademico di aprile, e da lì al Nazionale di giugno. I posti dipendono dagli iscritti attivi: più cresce la scuola, più atleti porti.",
+        ],
+        focusRegions: ["main", "tournament-podium"],
+        scrollToRegion: "tournament-podium",
+        tournamentTab: "results",
+      },
+      {
+        id: "this-year-goal",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La meta di quest'anno",
+        body: [
+          "Un titolo al Nazionale, in Arena o in Stile, apre la Rete dell'Ordine: lì si fondano nuove scuole.",
+          "Vincerli tutti e due nello stesso Nazionale fa succedere qualcosa in più. Lo scoprirai.",
+        ],
+        focusRegions: [],
+        tournamentTab: "results",
+      },
+    ],
+  },
+  {
+    id: "light-inflation-explained",
+    pauseWhileActive: true,
+    canStart: ({ state }) =>
+      state.lightInflation.increases > 0 && !state.moments.queue.includes(LIGHT_INFLATION_MOMENT),
+    steps: [
+      {
+        id: "prices-went-up",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Lama di Luce ha alzato i prezzi",
+        body: [
+          "Ogni gennaio, se nell'anno hai comprato almeno una spada, il listino di Lama di Luce sale. La causa ufficiale cambia ogni volta.",
+          "Le cause vere invece sono sempre le stesse tre.",
+        ],
+        focusRegions: ["title", "title-equipment"],
+      },
+      {
+        id: "three-real-causes",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Le tre cause vere",
+        body: [
+          "Un 10% fisso, perché sì.",
+          "La ricchezza: se lo 0,5% di quanto hai incassato nell'anno supera il prezzo di una spada, l'aumento cresce in proporzione.",
+          "La domanda: più spade compri rispetto a quelle che avevi, più sale. Comprarne 10 avendone 10 vale un altro +30%. In ogni caso, mai oltre il +100% in un anno.",
+        ],
+        focusRegions: ["title", "title-equipment"],
+      },
+      {
+        id: "how-to-defend",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Come difendersi",
+        body: [
+          "Riparare dall'elsa qui in alto non tocca il listino: conviene curare le spade che hai.",
+          "Comprane quando servono davvero. Un anno senza acquisti non porta aumenti a gennaio.",
+        ],
+        focusRegions: ["title", "title-equipment"],
+      },
+    ],
+  },
+  {
+    id: "network-introduction",
+    pauseWhileActive: true,
+    canStart: ({ state }) =>
+      state.network.schoolCount === 0 && (state.tournaments.nationalTitlesCurrentSchool ?? 0) > 0,
+    steps: [
+      {
+        id: "open-network",
+        kind: "objective",
+        title: "Apri la Rete dell'Ordine",
+        body: ["Un titolo nazionale e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: Rete."],
+        focusRegions: ({ activeView }) =>
+          activeView === "network" ? ["main"] : ["navigation", "network-navigation"],
+        isComplete: ({ activeView }) => activeView === "network",
+      },
+      {
+        id: "network-map",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La mappa della Rete",
+        body: [
+          "Questa è la tua scuola, per ora l'unica. Quando ne fondi una nuova, quella che lasci resta sulla mappa con il suo nome, la città e la Fama.",
+          "Non dovrai più gestirla: diventa una sede dell'Ordine.",
+        ],
+        focusRegions: ["main", "network-map"],
+        cardPlacement: "below",
+      },
+      {
+        id: "founding-restarts",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Fondare è ricominciare",
+        body: [
+          "La nuova scuola parte da zero: fondi, iscritti, collaboratori, Upgrade e Fama.",
+          `Porti con te la Reputazione: ${GAME_CONFIG.reputationNationalTitlePoints} punti per il titolo nazionale e per ognuno degli altri grandi tornei vinti, più quelli che vengono dalla Fama. Più resti, più ne porti.`,
+        ],
+        focusRegions: ["main", "network-ready"],
+        cardPlacement: "right",
+      },
+      {
+        id: "spend-reputation",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Dove spendere la Reputazione",
+        body: [
+          `La spendi una volta sola, alla fondazione, in sei potenziamenti permanenti: ogni punto vale +${Math.round(GAME_CONFIG.reputationStep * 100)}%.`,
+          "Oppure in una rendita: la scuola che lasci continua a mandarti soldi ogni mese.",
+        ],
+        focusRegions: ["main", "network-upgrades"],
+        cardPlacement: "right",
+      },
+      {
+        id: "what-stays",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Cosa resta",
+        body: [
+          "Ludodex, traguardi, Leggendari Segreti scoperti e segreti già trovati restano per sempre.",
+          "E un Leggendario a caso ti segue nella nuova scuola, ripartendo da zero come tutti.",
+        ],
+        focusRegions: ["main", "network-keeps"],
+        cardPlacement: "left",
+      },
+      {
+        id: "no-hurry",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Nessuna fretta",
+        body: [
+          "Puoi fondare oggi o tra dieci anni di gioco. Fondare presto fa provare prima i potenziamenti; restare porta più punti.",
+          "Quando sei pronto, il pulsante è qui.",
+        ],
+        focusRegions: ["main", "network-found"],
+        cardPlacement: "right",
+      },
+    ],
+  },
+  {
+    id: "reptile-introduction",
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.tournaments.reptile.unlocked,
+    steps: [
+      {
+        id: "open-tournaments",
+        kind: "objective",
+        title: "Apri Tornei",
+        body: ["Il Nazionale ha lasciato il segno: ora la scuola può organizzare un torneo tutto suo. Apri Tornei."],
+        focusRegions: ({ activeView }) =>
+          activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView }) => activeView === "tournaments",
+      },
+      {
+        id: "reptile-tournament",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il Torneo Reptile",
+        body: ({ state }) => [
+          `Un torneo a coppie, a ${state.school.city}, ogni luglio. Lo organizzi tu: affitti il palazzetto, prepari tutto e la scuola ci guadagna Fama, follower e l'incasso del banchetto.`,
+          `Il palazzetto costa ${formatCurrency(GAME_CONFIG.reptileVenueCost)}. Puoi annullare quando vuoi e riavere metà: l'altra metà resta al gestore, come da tradizione.`,
+        ],
+        focusRegions: ["main", "reptile-hero"],
+        cardPlacement: "below",
+        tournamentTab: "reptile",
+      },
+      {
+        id: "five-bars",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Cinque barre, cinque settori",
+        body: [
+          "Ogni settore riempie la sua barra: Social, Eventi, Attrezzature, Istruttori e Gadget.",
+          "Chi lavora dà metà del suo impegno alla barra e metà al lavoro di sempre. Chi è fermo dà tutto. Chi è senza incarico aiuta la barra più indietro, ma a metà.",
+          "Se in un settore non c'è nessuno, la sua barra resta ferma. A barra piena quel settore torna al ritmo normale.",
+        ],
+        focusRegions: ["main", "reptile-preparation"],
+        scrollToRegion: "reptile-preparation",
+        cardPlacement: "right",
+        tournamentTab: "reptile",
+      },
+      {
+        id: "july-or-next",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Luglio, oppure il prossimo",
+        body: [
+          "Il torneo si gioca a luglio solo con tutte le barre piene. Altrimenti slitta al luglio dopo.",
+          "Prima finisci, migliore è la resa: in tre mesi è al massimo. Il giorno del torneo servono due spade libere per squadra, e ogni spada che manca pesa sulla resa.",
+        ],
+        focusRegions: ["main", "reptile-month"],
+        scrollToRegion: "reptile-hero",
+        cardPlacement: "left",
+        tournamentTab: "reptile",
+      },
+      {
+        id: "principal-at-the-venue",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il preside in palazzetto",
+        body: [
+          "Fino a fine giugno puoi giocare «La giornata degli imprevisti»: 30 secondi, un solo tentativo, fino a +25% sulla resa.",
+          "Non salva un torneo preparato male, ma ne migliora uno buono. Se vuoi provarla prima, c'è il Tutorial.",
+        ],
+        // The minigame card exists once the tournament is organized.
+        focusRegions: ({ state }) =>
+          state.tournaments.reptile.activeEdition ? ["main", "reptile-minigame"] : ["main"],
+        cardPlacement: "left",
+        tournamentTab: "reptile",
       },
     ],
   },

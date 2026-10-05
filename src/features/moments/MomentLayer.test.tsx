@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT, getLightInflationEventDescription } from "../../game/lightInflation";
-import { SUPERBA_MOMENT } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { MOMENT_DURATION_MS, MomentLayer } from "./MomentLayer";
 import { getFoundationTitle } from "./momentContent";
 
@@ -35,6 +35,17 @@ describe("MomentLayer", () => {
     expect(onDismiss).toHaveBeenCalledTimes(3);
     fireEvent.click(dialog);
     expect(onDismiss).toHaveBeenCalledTimes(4);
+  });
+
+  it("opens the Chronicles door: six nameless figures, and the key in the Outlook notice", () => {
+    const { container } = render(
+      <MomentLayer state={createInitialState(1_000, "Verifica UI")} momentKey={CHRONICLES_KEY_MOMENT} onDismiss={vi.fn()} />,
+    );
+    expect(screen.getByRole("dialog", { name: "La porta delle Chronicles si apre" })).toBeVisible();
+    expect(screen.getByText(/un Leggendario Segreto ti sfiderà/)).toBeVisible();
+    expect(container.querySelectorAll(".chronicles-figure")).toHaveLength(6);
+    expect(screen.getByText("Chiavi disponibili")).toBeInTheDocument();
+    expect(screen.getByText("6 atleti")).toBeInTheDocument();
   });
 
   it("announces Inflazione di Luce with the yearly cause and the price going up", () => {
