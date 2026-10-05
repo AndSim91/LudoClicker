@@ -218,7 +218,7 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
       kind: "council",
       kicker: "Otto collaboratori",
       title: "Nasce il Consiglio delle Onde",
-      body: "Un tavolo rotondo, otto sedie, nessuno a capotavola. I collaboratori non sono più sparsi: da oggi il Consiglio guida tutta la squadra, settore per settore.",
+      body: "I Collaboratori hanno scelto i loro rappresentanti: da oggi il Consiglio guida tutte le squadre, settore per settore.",
       seats: state.collaborators.slice(0, COUNCIL_SEATS).map((collaborator) => getInitials(collaborator.displayName)),
     };
   }
