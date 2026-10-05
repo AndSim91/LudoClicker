@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { getUpgradeDefinition } from "../../content/upgrades";
 import { createInitialState } from "../../game/engine";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { formatStat } from "../../shared/formatters";
@@ -129,7 +130,7 @@ describe("UpgradesView", () => {
 
     expect(screen.getByRole("dialog", { name: "Sintesi dei contenuti" })).toBeVisible();
     expect(screen.getByText(
-      "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri",
+      getUpgradeDefinition("social-content-synthesis")!.effectLabel,
     )).toBeVisible();
     expect(screen.getByText("9 punti in Scrittura (ne hai 0)")).toBeVisible();
     expect(screen.getByText("Social sbloccato")).toBeVisible();
@@ -149,7 +150,7 @@ describe("UpgradesView", () => {
     }));
 
     expect(screen.getByText(
-      "L1 Arena Tecnica · L2 durata 120→100 s · L3 durata 100→80 s · L4 durata 80→60 s · L5 durata 60→40 s",
+      getUpgradeDefinition("technical-arena")!.effectLabel,
     )).toBeVisible();
   });
 
@@ -163,7 +164,7 @@ describe("UpgradesView", () => {
     }));
 
     expect(screen.getByText(
-      "L1–L2 +1 ramo per Istruttore · L3 +10 punti percentuali di successo dei corsi · L4 +20 · L5 tutti i rami dopo Corso Y",
+      getUpgradeDefinition("instructor-versatility")!.effectLabel,
     )).toBeVisible();
   });
 
@@ -177,7 +178,7 @@ describe("UpgradesView", () => {
     }));
 
     expect(screen.getByText(
-      "L1 Corso Agonisti (€1.000, 60 s) · L2–L4 massimo fino a +4/+4 · L5 Preparazione agonistica · L6–L9 +10% efficacia · L10 +10% efficacia e massimo +5/+5",
+      getUpgradeDefinition("agonist-course-intensity")!.effectLabel,
     )).toBeVisible();
   });
 

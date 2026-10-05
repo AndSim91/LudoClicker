@@ -1932,6 +1932,15 @@ requisito con spunta o lucchetto, e i punti che hai) e il pulsante d'acquisto;
 in fondo, il nodo successivo del ramo. Si chiude con ×, con Esc, cliccando
 fuori o cliccando di nuovo il nodo.
 
+**Testi dei nodi.** La descrizione è un'immagine concreta da palestra o da
+stand con una chiusa ironica (voce del gioco, 60% ironia). La riga **Effetto**
+resta asciutta e segue sempre lo stesso schema, così si capisce cosa dà ogni
+livello: «Ogni livello: …» seguito dal totale all'ultimo livello («Livello 5:
++50%»); per gli effetti a tappe, una voce per livello («Livello 1: … ·
+Livello 2: …»); per le tabelle, i valori in fila fino all'ultimo livello. Le
+parole sono quelle del giocatore («caratteri a ogni tasto», «contatti a ogni
+evento», «probabilità che chi fa la prova si iscriva»), non quelle del codice.
+
 I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
 scuola già fondata aggiunge il 15% ai prezzi di Scrittura, Creatività,
 Carisma, Accoglienza, Attrezzatura e Organizzazione: con n scuole fondate il
