@@ -37,13 +37,37 @@ export function getLegendaryAppearanceChance(): number {
   return PERSON_RARITIES.legendary.queueAppearanceChance;
 }
 
-function chooseOrdinaryRarity(seed: number): { rarity: Exclude<PersonRarity, "legendary">; nextSeed: number } {
+/**
+ * Ultra Rari get scarcer as the team grows: 5,5% up to the Consiglio (8
+ * collaborators), then down in a straight line to 1,1% at 100 collaborators
+ * (Leggendari included), then flat. Starting at 8 keeps the first National
+ * title within its target time.
+ */
+export function getUltraRareAppearanceChance(collaboratorCount: number): number {
+  const base = PERSON_RARITIES["ultra-rare"].queueAppearanceChance;
+  const floor = GAME_CONFIG.ultraRareMinimumAppearanceChance;
+  const start = GAME_CONFIG.ultraRareDeclineStartCollaborators;
+  const progress = Math.min(
+    1,
+    Math.max(0, collaboratorCount - start) / (GAME_CONFIG.ultraRareFloorCollaborators - start),
+  );
+  return base - (base - floor) * progress;
+}
+
+function chooseOrdinaryRarity(
+  seed: number,
+  collaboratorCount: number,
+): { rarity: Exclude<PersonRarity, "legendary">; nextSeed: number } {
   const [rarityRoll, nextSeed] = nextRandom(seed);
   const nonLegendaryChance = 1 - PERSON_RARITIES.legendary.queueAppearanceChance;
-  const ultraRareThreshold =
-    PERSON_RARITIES["ultra-rare"].queueAppearanceChance / nonLegendaryChance;
+  const ultraRareChance = getUltraRareAppearanceChance(collaboratorCount);
+  // What Ultra Rari lose goes to Comuni and Rari in proportion.
+  const { rare, common } = PERSON_RARITIES;
+  const rareShare = rare.queueAppearanceChance /
+    (rare.queueAppearanceChance + common.queueAppearanceChance);
+  const ultraRareThreshold = ultraRareChance / nonLegendaryChance;
   const rareThreshold = ultraRareThreshold +
-    PERSON_RARITIES.rare.queueAppearanceChance / nonLegendaryChance;
+    (nonLegendaryChance - ultraRareChance) * rareShare / nonLegendaryChance;
   return {
     rarity: rarityRoll < ultraRareThreshold
       ? "ultra-rare"
@@ -205,7 +229,7 @@ export function createInitialContacts(
       : legendaryRolled
         ? { rarity: "ultra-rare" as const, nextSeed }
       : advancedRaritiesUnlocked
-        ? chooseOrdinaryRarity(nextSeed)
+        ? chooseOrdinaryRarity(nextSeed, 0)
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, legendaryProfile);
@@ -310,7 +334,7 @@ export function createAcquiredContacts(
       : selected.legendaryRolled
         ? { rarity: "ultra-rare" as const, nextSeed }
       : advancedRaritiesUnlocked
-        ? chooseOrdinaryRarity(nextSeed)
+        ? chooseOrdinaryRarity(nextSeed, state.collaborators.length)
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);

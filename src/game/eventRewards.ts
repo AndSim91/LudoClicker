@@ -46,8 +46,7 @@ export function getEventMarketAvailability(state: GameState): number {
     0,
     state.school.activeMembers - GAME_CONFIG.eventContactProtectedActiveMembers,
   );
-  const easyMarketMembers = Math.max(1, GAME_CONFIG.eventContactEasyMarketMembers);
-  return easyMarketMembers / (easyMarketMembers + depletedMembers);
+  return 0.5 ** (depletedMembers / GAME_CONFIG.eventContactHalvingMembers);
 }
 
 export function getEventContactBonus(state: GameState): number {

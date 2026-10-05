@@ -67,7 +67,11 @@ export const GAME_CONFIG = {
   eventWearMultiplier: 1,
   eventZeroContactProtectionCollaboratorThreshold: 4,
   eventContactProtectedActiveMembers: 10,
-  eventContactEasyMarketMembers: 1_000,
+  // Event contacts halve for every 1.000 active members beyond the first ten.
+  eventContactHalvingMembers: 1_000,
+  ultraRareMinimumAppearanceChance: 0.011,
+  ultraRareDeclineStartCollaborators: 8,
+  ultraRareFloorCollaborators: 100,
   equipmentMaximumUpgradeWearReduction: 0.5,
   equipmentMaximumEventMasteryWearReduction: 0.25,
   officialSwordCost: 330,

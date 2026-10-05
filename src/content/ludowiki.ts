@@ -250,6 +250,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: rarityNumbers,
     rules: [
       "Le percentuali di coda indicano la distribuzione base dei nuovi contatti.",
+      `Gli Ultra Rari si fanno più rari con la squadra: dal ${percentage(PERSON_RARITIES["ultra-rare"].queueAppearanceChance)} fino a ${GAME_CONFIG.ultraRareDeclineStartCollaborators} collaboratori, poi in calo fino all'${percentage(GAME_CONFIG.ultraRareMinimumAppearanceChance)} con ${GAME_CONFIG.ultraRareFloorCollaborators} collaboratori o più; la differenza va a Comuni e Rari.`,
       "I Leggendari diventano Collaboratori appena si iscrivono.",
       "Un Leggendario già iscritto resta nel Ludodex anche se lascia la scuola o ne fondi una nuova.",
     ],

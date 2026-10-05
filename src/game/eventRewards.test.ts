@@ -164,8 +164,11 @@ describe("event contact rewards", () => {
         fame: 10,
       },
     })).toBe(1);
-    expect(getEventMarketAvailability(withMembers(100))).toBeCloseTo(0.9174, 4);
-    expect(getEventMarketAvailability(withMembers(5_000))).toBeCloseTo(0.1669, 4);
+    // Halves for every 1.000 members beyond the first ten.
+    expect(getEventMarketAvailability(withMembers(100))).toBeCloseTo(0.9395, 4);
+    expect(getEventMarketAvailability(withMembers(1_010))).toBe(0.5);
+    expect(getEventMarketAvailability(withMembers(2_010))).toBe(0.25);
+    expect(getEventMarketAvailability(withMembers(5_000))).toBeCloseTo(0.0315, 4);
     expect(getEventMarketAvailability(withMembers(10))).toBe(1);
   });
 
@@ -181,9 +184,10 @@ describe("event contact rewards", () => {
       school: { ...depleted.school, followers },
     });
 
-    expect(getMasterEventContactsPerMinute(withFollowers(0))).toBeCloseTo(17.31, 1);
-    expect(getMasterEventContactsPerMinute(withFollowers(100_000))).toBeCloseTo(46.16, 1);
-    expect(getMasterEventContactsPerMinute(withFollowers(300_000))).toBeCloseTo(103.85, 1);
+    const noFollowers = getMasterEventContactsPerMinute(withFollowers(0));
+    expect(noFollowers).toBeCloseTo(3.26, 1);
+    expect(getMasterEventContactsPerMinute(withFollowers(100_000)) / noFollowers).toBeCloseTo(2.667, 2);
+    expect(getMasterEventContactsPerMinute(withFollowers(300_000)) / noFollowers).toBeCloseTo(6, 2);
   });
 
   it("applies market depletion to actual random rewards, not only expected values", () => {

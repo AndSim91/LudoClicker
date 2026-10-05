@@ -5,6 +5,7 @@ import { PERSON_RARITIES } from "../content/rarities";
 import { getSchoolYear } from "./calendar";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { GAME_CONFIG } from "./config";
+import { getUltraRareAppearanceChance } from "./contacts";
 import {
   createInitialState,
   gameReducer,
@@ -40,6 +41,12 @@ describe("game engine: funnel", () => {
     expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.125);
     expect(PERSON_RARITIES["ultra-rare"].queueAppearanceChance).toBe(0.055);
     expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.02);
+    // Ultra Rari get scarcer with the team: 5,5% until 8 collaborators, 1,1% from 100.
+    expect(getUltraRareAppearanceChance(0)).toBe(0.055);
+    expect(getUltraRareAppearanceChance(8)).toBe(0.055);
+    expect(getUltraRareAppearanceChance(54)).toBeCloseTo(0.033);
+    expect(getUltraRareAppearanceChance(100)).toBeCloseTo(0.011);
+    expect(getUltraRareAppearanceChance(446)).toBeCloseTo(0.011);
     expect(Object.values(PERSON_RARITIES).reduce(
       (total, rarity) => total + rarity.queueAppearanceChance,
       0,

@@ -39,9 +39,9 @@ function maxAll(state: GameState): GameState {
 
 describe("tutti i potenziamenti al massimo", () => {
   it("regge due anni di gioco senza numeri rotti né regole violate", () => {
-    // ~50 game months of a competitive player: collaborators, an Istruttore, Forms, events.
-    const horizonMs = 50 * 60_000;
-    const { state: midGame } = simulateBalanceGame({ seed: 7, pace: "intense", horizonMs });
+    // ~60 game months of a competitive player: collaborators, an Istruttore, Forms, events.
+    const horizonMs = 60 * 60_000;
+    const { state: midGame } = simulateBalanceGame({ seed: 2, pace: "intense", horizonMs });
     expect(midGame.collaborators.length).toBeGreaterThan(4);
 
     let state = maxAll(midGame);

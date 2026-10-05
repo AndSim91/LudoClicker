@@ -352,6 +352,14 @@ iscriversi dopo la prova:
 | Ultra Raro  |     5,5% |                75% |          23,33% |                          17,5% |               50% | Dopo il Corso Y          |
 | Leggendario |       2% |               100% |             15% |                            15% |               35% | Subito dopo l'iscrizione |
 
+La comparsa degli **Ultra Rari** scende con la squadra: 5,5% fino a 8
+collaboratori (il Consiglio), poi in linea retta fino all'1,1% con 100
+collaboratori (Leggendari compresi), e resta lì (`getUltraRareAppearanceChance`
+in `contacts.ts`; decisione di Andrea del 05/10). La partenza a 8 invece che a 0
+tiene il primo Nazionale nei tempi: con il calo da 0 la simulazione intensa lo
+spostava al luglio successivo (94 minuti invece di 82,5). Quello che perdono va a Comuni e Rari in proporzione; i
+Leggendari restano al 2%. I contatti iniziali di una nuova scuola usano il 5,5%.
+
 I potenziamenti di Creatività fanno avanzare linearmente la prenotazione della
 prova dalla probabilità base fino a 85% per i Comuni, 90% per i Rari, 95% per
 gli Ultra Rari e 100% per i Leggendari. I potenziamenti di Accoglienza fanno
@@ -1104,12 +1112,13 @@ garantisce sempre un contatto. L'interfaccia mostra solo
 indicazioni generiche di esito e resa, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
-applicano penalità; oltre quella soglia, ogni iscritto riduce progressivamente
-la capacità di trovare persone nuove. Se qualcuno lascia la scuola, la
-disponibilità risale perché quella persona, o una persona equivalente nella
-rappresentazione delle rarità non nominali, può tornare nel bacino futuro. La
-curva non raggiunge mai zero: con 5.000 iscritti conserva circa il 16,69% della
-produzione. Il bonus Follower resta nel moltiplicatore e può compensare la
+applicano penalità; oltre quella soglia i contatti degli eventi **si dimezzano
+ogni 1.000 iscritti** (× 0,5^((iscritti − 10) / 1.000), `eventContactHalvingMembers`;
+decisione di Andrea del 05/10, prima era 1.000 / (1.000 + iscritti − 10)). Se
+qualcuno lascia la scuola, la disponibilità risale perché quella persona, o una
+persona equivalente nella rappresentazione delle rarità non nominali, può
+tornare nel bacino futuro. La curva non raggiunge mai zero: 50% a 1.010 iscritti,
+25% a 2.010, 12,5% a 3.010, circa 3% a 5.000. Il bonus Follower resta nel moltiplicatore e può compensare la
 saturazione nel tempo. Questa regola è intenzionalmente interna e non viene
 mostrata nell'interfaccia.
 
