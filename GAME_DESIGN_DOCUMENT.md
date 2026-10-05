@@ -443,8 +443,8 @@ Attrezzatura, Istruttore e Gadget.
 ### 5.6 Attrezzatura
 
 Le spade della scuola sono gestite come inventario operativo. La scuola parte
-con 6 spade; altre si comprano dal fornitore ufficiale (visibile da 15 iscritti
-attivi di picco) a €330 l'una, prezzo che l'«Inflazione di Luce» può aumentare
+con 6 spade; altre si comprano dal fornitore ufficiale (dopo il potenziamento
+Fornitore ufficiale, § 10.5) a €330 l'una, prezzo che l'«Inflazione di Luce» può aumentare
 dal 10% al 100% alla volta (§ 18). Ogni spada è:
 
 - disponibile;
@@ -974,8 +974,11 @@ riferimenti reali del produttore.
 
 Nel codice l'acquisto si trova nel dettaglio che si apre dalla spada nella
 barra del titolo,
-compare quando il massimo storico raggiunge 15 iscritti (o la scuola possiede
-già più delle 6 spade iniziali) e permette di comprare 1, 10 o 100 spade. Il
+compare dopo il potenziamento **Fornitore ufficiale** (primo nodo di
+Attrezzatura, 500 €) e permette di comprare 1, 10 o 100 spade. Prima, al suo
+posto, c'è un pulsante spento «Acquisto spade · da sbloccare negli Upgrade».
+I salvataggi che avevano già aperto l'acquisto con la vecchia regola (15
+iscritti di picco o più di 6 spade) ricevono il nodo con la migrazione v99. Il
 prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: se nell'anno è
 stata comprata almeno una spada, a Gennaio il prezzo sale (“Lama di Luce
 aumenta i costi delle spade…”) di 10%, più ricchezza e domanda, fino al 100%
@@ -2023,12 +2026,13 @@ seconda prova.
 
 ### 10.5 Attrezzatura
 
-Riduce l'usura prodotta dalle attività programmate e accelera la manutenzione
-dei Collaboratori. Nessun potenziamento crea spade gratuite: le spade continuano
+Apre l'acquisto delle spade, riduce l'usura prodotta dalle attività programmate
+e accelera la manutenzione dei Collaboratori. Nessun potenziamento crea spade gratuite: le spade continuano
 a essere acquistate dal giocatore.
 
 | Potenziamento | Effetto per livello | Costi per livello |
 | --- | --- | --- |
+| Fornitore ufficiale | sblocca l'acquisto delle spade (un solo livello) | 500 € |
 | Controllo prima dell'uso | −2% usura programmata | 100 / 200 / 400 / 800 / 1.600 € |
 | Kit di manutenzione | +10% velocità manutenzione automatica | 250 / 500 / 1.000 / 2.000 / 4.000 € |
 | Banco da lavoro | riserva lavoro pari al 2% dell'usura massima di tutte le spade; massimo 10% | 500 / 750 / 1.000 / 1.500 / 2.500 € |
@@ -2047,8 +2051,9 @@ prodotto durante il guasto.
 A ramo completo l'usura programmata scende del 50%, che è anche il tetto
 massimo della riduzione da potenziamenti; la velocità di manutenzione
 automatica sale del 100%, sommata ai bonus generici di automazione
-dell'Organizzazione. Prerequisiti: Controllo prima dell'uso nessuno; ogni nodo
-successivo richiede tutti i precedenti al livello 5.
+dell'Organizzazione. Prerequisiti: Fornitore ufficiale nessuno; ogni nodo
+successivo richiede tutti i precedenti al livello massimo (Controllo prima
+dell'uso richiede quindi il Fornitore ufficiale).
 
 ### 10.6 Gadget
 
@@ -2190,7 +2195,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | 6 punti Fama                               | pagina Tornei                                                            |
 | 10 email inviate                           | riepilogo delle rarità nella pagina Scuola (compare prima se c'è già un iscritto non Comune o un Collaboratore) |
 | 10° contatto della scuola iniziale         | Andrea Simonazzi e, dal contatto successivo, le rarità avanzate         |
-| 15 iscritti attivi (massimo raggiunto)     | fornitore ufficiale di spade                                             |
+| potenziamento Fornitore ufficiale (500 €)  | fornitore ufficiale di spade                                             |
 | Primo Collaboratore delle Onde             | sezione Collaboratori e assegnazioni                                     |
 | 8 Collaboratori                            | gestione aggregata per settore                                           |
 | 35 iscritti attivi                         | Redazione si evolve in Social                                            |

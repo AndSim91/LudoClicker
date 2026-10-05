@@ -1,3 +1,4 @@
+import { isOfficialSwordSupplierUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import type { GameState } from "./types";
 
@@ -34,7 +35,7 @@ export function isCollaboratorAreaVisible(state: GameState): boolean {
   return state.unlocks.collaborators || state.collaborators.length > 0;
 }
 
+/** Buying swords opens with the Fornitore ufficiale node (Attrezzatura). */
 export function isOfficialSwordSupplierVisible(state: GameState): boolean {
-  return state.school.peakActiveMembers >= GAME_CONFIG.officialSwordSupplierUnlockMembers ||
-    state.equipment.totalSwords > GAME_CONFIG.initialSwords;
+  return isOfficialSwordSupplierUnlocked(state.upgrades);
 }

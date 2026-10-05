@@ -195,6 +195,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     rules: [
       "Se l'attrezzatura richiesta non è disponibile, l'attività non può partire.",
       "La manutenzione preventiva converte lavoro e denaro in usura rimossa.",
+      "Nuove spade si comprano dal fornitore ufficiale, dopo il potenziamento Fornitore ufficiale (Attrezzatura).",
       "Upgrade e Collaboratori possono ridurre il consumo o automatizzare le riparazioni.",
     ],
     related: ["collaboratori-settori", "upgrade", "gadget"],

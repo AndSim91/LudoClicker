@@ -40,6 +40,7 @@ export type UpgradeEffect =
   | "membershipIncomeMultiplier"
   | "incomeMultiplier"
   | "operationalPrioritiesUnlock"
+  | "officialSwordSupplierUnlock"
   | "annualFormCapacity"
   | "instructorBranchCapacity"
   | "trainingExamSuccessChance"
@@ -98,7 +99,7 @@ export const UPGRADE_CATEGORIES: Array<{
   { id: "writing", title: "Creatività", description: "Migliora i cataloghi email e la probabilità di ottenere una prova." },
   { id: "charisma", title: "Carisma", description: "Migliora pubblico, dimostrazioni e contatti durante gli eventi." },
   { id: "welcome", title: "Accoglienza", description: "Migliora lezioni di prova e conversione in nuovi iscritti." },
-  { id: "equipment", title: "Attrezzatura", description: "Riduce l'usura programmata e automatizza la manutenzione." },
+  { id: "equipment", title: "Attrezzatura", description: "Apre l'acquisto delle spade, riduce l'usura programmata e automatizza la manutenzione." },
   { id: "gadget", title: "Gadget", description: "Amplia il pubblico e rende più rapidi sviluppo, revisioni e vendite." },
   { id: "instructors", title: "Insegnamento", description: "Sviluppa Istruttori, Tecnici e preparazione agonistica." },
   { id: "organization", title: "Organizzazione", description: "Coordina collaboratori, automazioni ed entrate ricorrenti." },
@@ -149,6 +150,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "memorable-experience", category: "welcome", title: "Esperienza memorabile", description: "Insegnare la Settima alla prima lezione di prova lascia un ricordo indelebile nella mente di chi prova e di chi guarda dalle altre classi.", effectLabel: "+6% possibilità di iscrizioni · 5% possibilità di contatto extra per livello · massimo 25%", effect: "enrollmentProgress", effectPerLevel: 0.06, additionalEffectsPerLevel: { failedTrialRetryChance: 0.05 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame },
 
   // Attrezzatura
+  { id: "official-supplier", category: "equipment", title: "Fornitore ufficiale", description: "Un conto aperto con Lama di Luce: le spade nuove arrivano quando servono.", effectLabel: "Sblocca l'acquisto delle spade", effect: "officialSwordSupplierUnlock", effectPerLevel: 1, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500], maxLevel: 1, requiredFame: noFame },
   { id: "pre-event-check", category: "equipment", title: "Controllo prima dell'uso", description: "I problemi vengono trovati prima di iniziare un'attività programmata.", effectLabel: "−2% usura programmata per livello", effect: "equipmentWearReduction", effectPerLevel: 0.02, baseCost: 100, costGrowth: LEVEL_GROWTH, levelCosts: [100, 200, 400, 800, 1_600], maxLevel: 5, requiredFame: noFame },
   { id: "maintenance-kit", category: "equipment", title: "Kit di manutenzione", description: "Gli strumenti giusti accelerano le riparazioni automatiche.", effectLabel: "+10% velocità manutenzione automatica per livello", effect: "equipmentAutomationMultiplier", effectPerLevel: 0.1, baseCost: 250, costGrowth: LEVEL_GROWTH, levelCosts: [250, 500, 1_000, 2_000, 4_000], maxLevel: 5, requiredFame: noFame },
   { id: "organized-rack", category: "equipment", title: "Banco da lavoro", description: "Quando tutto è in ordine, i collaboratori preparano in anticipo lavoro di manutenzione da usare al prossimo guasto.", effectLabel: "Riserva massima pari al 2% dell'usura massima di tutte le spade per livello · massimo 10%", effect: "equipmentPreparedWorkCapacity", effectPerLevel: 0.02, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 750, 1_000, 1_500, 2_500], maxLevel: 5, requiredFame: noFame },
@@ -446,6 +448,10 @@ export function getEquipmentSwordRepairWork(levels: UpgradeLevels): number {
     75,
     150 - getUpgradeEffectTotal(levels, "equipmentSwordRepairWorkReduction"),
   );
+}
+
+export function isOfficialSwordSupplierUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "officialSwordSupplierUnlock") >= 1;
 }
 
 export function isOperationalPrioritiesUnlocked(levels: UpgradeLevels): boolean {

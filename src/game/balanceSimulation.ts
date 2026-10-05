@@ -71,6 +71,7 @@ const UPGRADE_PRIORITY: UpgradeId[] = [
   "personalized-invite",
   "stock-phrases",
   "shared-calendar",
+  "official-supplier",
   "pre-event-check",
   "maintenance-kit",
   "social-content-synthesis",
@@ -243,9 +244,12 @@ function buySwordsForWaitingTrainings(state: GameState, now: number): GameState 
   const waiting = [...state.contacts, ...state.collaborators].some(
     (person) => person.training?.status === "waitingForEquipment",
   );
+  if (!waiting) return state;
+  // The first wait for swords is when a competitive player buys the supplier.
+  if (!isOfficialSwordSupplierVisible(state)) {
+    return dispatch(state, { type: "BUY_UPGRADE", upgradeId: "official-supplier", now });
+  }
   if (
-    !waiting ||
-    !isOfficialSwordSupplierVisible(state) ||
     state.equipment.totalSwords >= MAX_OFFICIAL_SWORDS ||
     state.school.euros < GAME_CONFIG.officialSwordCost
   ) return state;

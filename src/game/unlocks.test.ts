@@ -48,15 +48,16 @@ describe("game unlock rules", () => {
     })).toBe(true);
   });
 
-  it("derives supplier visibility from the centralized fame requirement", () => {
+  it("opens the sword supplier only with the Fornitore ufficiale upgrade", () => {
     const initial = createInitialState(1_000);
     expect(isOfficialSwordSupplierVisible(initial)).toBe(false);
     expect(isOfficialSwordSupplierVisible({
       ...initial,
-      school: {
-        ...initial.school,
-        peakActiveMembers: GAME_CONFIG.officialSwordSupplierUnlockMembers,
-      },
+      school: { ...initial.school, peakActiveMembers: 500 },
+    })).toBe(false);
+    expect(isOfficialSwordSupplierVisible({
+      ...initial,
+      upgrades: { ...initial.upgrades, "official-supplier": 1 },
     })).toBe(true);
   });
 });

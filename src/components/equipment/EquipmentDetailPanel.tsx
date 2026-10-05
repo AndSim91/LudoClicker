@@ -128,7 +128,18 @@ export function EquipmentDetailPanel({
         </div>
       ) : null}
 
-      {showSupplier ? (
+      {!showSupplier ? (
+        <div className="equipment-quick-actions">
+          <button
+            className="equipment-purchase-button equipment-purchase-locked"
+            type="button"
+            disabled
+            title="Compra il potenziamento Fornitore ufficiale, nel ramo Attrezzatura"
+          >
+            Acquisto spade {"\u00b7"} da sbloccare negli Upgrade
+          </button>
+        </div>
+      ) : (
         <div className="equipment-quick-actions">
           <span className="equipment-purchase">
             <button
@@ -153,7 +164,7 @@ export function EquipmentDetailPanel({
             </button>
           </span>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }

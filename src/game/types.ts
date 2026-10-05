@@ -271,6 +271,7 @@ export type UpgradeId =
   | "social-editorial-plan"
   | "social-content-distribution"
   | "social-sponsorships"
+  | "official-supplier"
   | "pre-event-check"
   | "maintenance-kit"
   | "organized-rack"

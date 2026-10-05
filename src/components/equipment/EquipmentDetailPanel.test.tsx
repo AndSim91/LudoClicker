@@ -40,6 +40,30 @@ describe("EquipmentDetailPanel", () => {
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
 
+  it("points to the Upgrades until Fornitore ufficiale is bought", () => {
+    const initial = createInitialState(1_000);
+    const { rerender } = render(
+      <EquipmentDetailPanel
+        state={{ ...initial, school: { ...initial.school, euros: 10_000, peakActiveMembers: 500 } }}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /da sbloccare negli Upgrade/ })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /Acquista 1 spada/ })).not.toBeInTheDocument();
+
+    rerender(
+      <EquipmentDetailPanel
+        state={{ ...initial, upgrades: { ...initial.upgrades, "official-supplier": 1 } }}
+        onMaintainEquipment={() => undefined}
+        onBuyOfficialSwords={() => undefined}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /da sbloccare negli Upgrade/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Acquista 1 spada/ })).toBeInTheDocument();
+  });
+
   it("says when no sword is free", () => {
     const initial = createInitialState(1_000);
     render(
@@ -112,10 +136,10 @@ describe("EquipmentDetailPanel", () => {
       <EquipmentDetailPanel
         state={{
           ...initial,
+          upgrades: { ...initial.upgrades, "official-supplier": 1 },
           school: {
             ...initial.school,
             euros: 3_300,
-            peakActiveMembers: 15,
           },
         }}
         onMaintainEquipment={() => undefined}
@@ -143,10 +167,10 @@ describe("EquipmentDetailPanel", () => {
       <EquipmentDetailPanel
         state={{
           ...initial,
+          upgrades: { ...initial.upgrades, "official-supplier": 1 },
           school: {
             ...initial.school,
             euros: 33_000,
-            peakActiveMembers: 15,
           },
         }}
         onMaintainEquipment={() => undefined}
@@ -172,7 +196,8 @@ describe("EquipmentDetailPanel", () => {
       <EquipmentDetailPanel
         state={{
           ...initial,
-          school: { ...initial.school, euros: 40_000, peakActiveMembers: 15 },
+          upgrades: { ...initial.upgrades, "official-supplier": 1 },
+          school: { ...initial.school, euros: 40_000 },
           lightInflation: { ...initial.lightInflation, priceMultiplier: 1.1 * 1.1 },
         }}
         onMaintainEquipment={() => undefined}
@@ -208,10 +233,10 @@ describe("EquipmentDetailPanel", () => {
       <EquipmentDetailPanel
         state={{
           ...initial,
+          upgrades: { ...initial.upgrades, "official-supplier": 1 },
           school: {
             ...initial.school,
             euros: 329,
-            peakActiveMembers: 15,
           },
         }}
         onMaintainEquipment={() => undefined}
@@ -239,7 +264,8 @@ describe("EquipmentDetailPanel", () => {
       <EquipmentDetailPanel
         state={{
           ...initial,
-          school: { ...initial.school, euros, peakActiveMembers: 15 },
+          upgrades: { ...initial.upgrades, "official-supplier": 1 },
+          school: { ...initial.school, euros },
           lightInflation: { ...initial.lightInflation, priceMultiplier: 1.1 },
         }}
         onMaintainEquipment={() => undefined}

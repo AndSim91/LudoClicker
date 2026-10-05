@@ -62,7 +62,8 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      expect(definitionsFor(category.id), category.id).toHaveLength(7);
+      // Attrezzatura opens with Fornitore ufficiale, one node more than the others.
+      expect(definitionsFor(category.id), category.id).toHaveLength(category.id === "equipment" ? 8 : 7);
     }
     expect(definitionsFor("secrets").map((definition) => definition.id)).toEqual([
       "project-x",
@@ -111,6 +112,7 @@ describe("upgrade catalog", () => {
 
   it("uses the approved costs for Attrezzatura and Organizzazione", () => {
     expect(costsFor("equipment")).toEqual({
+      "official-supplier": [500],
       "pre-event-check": [100, 200, 400, 800, 1_600],
       "maintenance-kit": [250, 500, 1_000, 2_000, 4_000],
       "organized-rack": [500, 750, 1_000, 1_500, 2_500],

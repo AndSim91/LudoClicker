@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 98,
+  version: 99,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -13,7 +13,6 @@ export const GAME_CONFIG = {
   socialUnlockMembers: 35,
   tournamentUnlockMembers: 6,
   tournamentMinimumMembers: 6,
-  officialSwordSupplierUnlockMembers: 15,
   guaranteedAndreaContactPosition: 10,
   collaboratorAggregateUnlockCount: 8,
   conversionGuaranteeFailures: 4,

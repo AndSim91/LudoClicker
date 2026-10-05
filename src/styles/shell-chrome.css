@@ -319,6 +319,18 @@
   opacity: 0.5;
 }
 
+/* Until Fornitore ufficiale is bought: a placeholder pointing to the Upgrades. */
+.title-equipment-popover .equipment-purchase-button.equipment-purchase-locked {
+  border: 1px dashed var(--line-strong);
+  border-radius: 17px;
+  color: var(--ink-muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 1;
+}
+
 .title-fame {
   min-width: 0;
 }
