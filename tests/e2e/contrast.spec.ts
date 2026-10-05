@@ -64,7 +64,8 @@ function auditContrast(): ContrastFailure[] {
       }
     }
     const foreground = parse(style.color);
-    if (overImage || !background || !foreground) continue;
+    // Text hidden by an ancestor (e.g. a label swapped out on hover) has nothing to read.
+    if (overImage || !background || !foreground || opacity === 0) continue;
 
     const text_ = over({ ...foreground, a: foreground.a * opacity }, background);
     const [light, dark] = [luminance(text_), luminance(background)].sort((a, b) => b - a);
