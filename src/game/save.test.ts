@@ -114,7 +114,7 @@ describe("local save", () => {
     expect(scheduler.isDirty()).toBe(false);
   });
 
-  it("discards an obsolete prepared revision and commits only the latest state", async () => {
+  it("writes a snapshot even if the game moved on while it was prepared", async () => {
     const initial = createInitialState(1_000);
     const latest = { ...initial, school: { ...initial.school, euros: 99 } };
     const persist = vi.fn(() => true);
@@ -132,28 +132,62 @@ describe("local save", () => {
         return pending.promise;
       },
     );
+    const resolveLast = () => {
+      const last = preparations.at(-1)!;
+      last.deferred.resolve({
+        commit: () => {
+          committedEuros.push(last.euros);
+          return true;
+        },
+      });
+    };
 
     const saving = scheduler.flushInBackground(2_000);
     scheduler.markDirty(latest);
-    preparations[0].deferred.resolve({
-      commit: () => {
-        committedEuros.push(preparations[0].euros);
-        return true;
-      },
-    });
-    await Promise.resolve();
+    resolveLast();
 
-    expect(preparations).toHaveLength(2);
-    preparations[1].deferred.resolve({
-      commit: () => {
-        committedEuros.push(preparations[1].euros);
-        return true;
-      },
-    });
-
+    // One preparation, written although a newer revision exists; it stays dirty
+    // for the next round instead of preparing again straight away.
     await expect(saving).resolves.toBe(true);
-    expect(committedEuros).toEqual([99]);
+    expect(preparations).toHaveLength(1);
+    expect(committedEuros).toEqual([initial.school.euros]);
+    expect(scheduler.isDirty()).toBe(true);
+
+    const next = scheduler.flushInBackground(3_000);
+    resolveLast();
+    await expect(next).resolves.toBe(true);
+    expect(committedEuros).toEqual([initial.school.euros, 99]);
     expect(scheduler.isDirty()).toBe(false);
+  });
+
+  it("saves every interval while ticks keep changing the state faster than a preparation", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    let state = createInitialState(1_000);
+    const commits: number[] = [];
+    let preparations = 0;
+    const scheduler = createSaveScheduler(state, vi.fn(() => true), (snapshot) => {
+      preparations += 1;
+      // Worker compression: 600 ms, longer than a 250 ms tick.
+      return new Promise((resolve) => setTimeout(() => resolve({
+        commit: () => {
+          commits.push(snapshot.school.euros);
+          return true;
+        },
+      }), 600));
+    });
+    const stop = scheduler.start(GAME_CONFIG.saveIntervalMs);
+    const tick = setInterval(() => {
+      state = { ...state, school: { ...state.school, euros: state.school.euros + 1 } };
+      scheduler.markDirty(state);
+    }, 250);
+
+    await vi.advanceTimersByTimeAsync(GAME_CONFIG.saveIntervalMs * 2 + 1_000);
+    clearInterval(tick);
+    stop();
+
+    expect(commits).toHaveLength(2);
+    expect(preparations).toBe(2);
   });
 
   it("never lets an older background result overwrite a manual save", async () => {

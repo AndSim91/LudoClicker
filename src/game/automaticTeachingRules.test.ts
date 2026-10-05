@@ -369,6 +369,70 @@ describe("automatic teaching rules", () => {
     expect(secondTick.contacts.filter((contact) => contact.training)).toHaveLength(6);
   });
 
+  it("skips the whole pass while every Istruttore is full", () => {
+    const initial = teachingState();
+    const full = instructor("full", "legendary", ["form-1"]);
+    const busy = {
+      ...initial.contacts[1],
+      id: "busy",
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 10_000,
+        status: "running" as const,
+        instructorId: full.id,
+      },
+    };
+    const waiting = { ...initial.contacts[0], id: "waiting", status: "enrolled" as const, forms: [] };
+    const state: GameState = {
+      ...initial,
+      contacts: [waiting, busy],
+      collaborators: [full],
+    };
+    const createPlan = vi.fn(createTrainingStartPlan);
+    const keep = (current: GameState) => current;
+
+    expect(processAutomaticTeaching(state, 2_000, keep, keep, createPlan)).toBe(state);
+    expect(createPlan).not.toHaveBeenCalled();
+
+    const freed: GameState = { ...state, contacts: [waiting, { ...busy, training: undefined }] };
+    const started = processAutomaticTeaching(freed, 2_000, keep, keep, createPlan);
+    expect(started.contacts.find((contact) => contact.id === "waiting")?.training?.instructorId)
+      .toBe(full.id);
+  });
+
+  it("still lets a full Istruttore recover Corso X on his own", () => {
+    const initial = teachingState();
+    const recovering = {
+      ...instructor("recovering", "legendary", ["form-1"]),
+      forms: ["form-1", "form-2"] as FormId[],
+    };
+    const busy = {
+      ...initial.contacts[1],
+      id: "busy",
+      status: "enrolled" as const,
+      training: {
+        formId: "form-1" as const,
+        startedAt: 1_000,
+        completesAt: 10_000,
+        status: "running" as const,
+        instructorId: recovering.id,
+      },
+    };
+    const state: GameState = {
+      ...initial,
+      contacts: [busy],
+      collaborators: [recovering],
+      upgrades: { ...initial.upgrades, "project-x": 1 },
+    };
+    const createPlan = vi.fn(createTrainingStartPlan);
+    const keep = (current: GameState) => current;
+
+    processAutomaticTeaching(state, 2_000, keep, keep, createPlan);
+    expect(createPlan).toHaveBeenCalledTimes(1);
+  });
+
   it("reuses a known idle result across mastery-only updates and invalidates on equipment", () => {
     const initial = teachingState();
     const state: GameState = {

@@ -94,7 +94,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByText("Avvia il volantinaggio gratuito")).toBeVisible();
     expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "Partecipa gratis" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Partecipa gratis" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Avvia il volantinaggio gratuito")).not.toBeInTheDocument();
@@ -182,7 +182,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByRole("button", { name: "Tornei" })).toBeVisible();
   });
 
-  it("uses the resource rows as shortcuts to the composer and members", () => {
+  it("uses the resource rows as shortcuts to the composer and members", async () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({
       ...initial,
@@ -201,7 +201,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByRole("button", { name: /Corpo del messaggio/ })).toBeVisible();
 
     fireEvent.click(folders.getByRole("button", { name: /Iscritti/ }));
-    expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Scuola" })).toBeVisible();
   });
 
   it("opens the development-only email catalog editor", async () => {

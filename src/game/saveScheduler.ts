@@ -80,12 +80,9 @@ export function createSaveScheduler(
         }
 
         if (backgroundStopped) return wroteSnapshot;
-        if (
-          generationBeingPrepared !== persistenceGeneration ||
-          revisionBeingPrepared !== revision
-        ) {
-          // Lo snapshot è già obsoleto: non tocca localStorage e riparte
-          // direttamente dall'ultima revisione disponibile.
+        if (generationBeingPrepared !== persistenceGeneration) {
+          // Un salvataggio sincrono è arrivato nel frattempo: questa fotografia
+          // è più vecchia di quella scritta e non deve sovrascriverla.
           requestedAt = Date.now();
           continue;
         }
@@ -100,6 +97,11 @@ export function createSaveScheduler(
         savedRevision = revisionBeingPrepared;
         wroteSnapshot = true;
         requestedAt = Date.now();
+        // La partita è andata avanti durante la preparazione (un tick ogni 250 ms,
+        // una preparazione dura anche secondi): la fotografia scritta è coerente,
+        // il resto lo prende il prossimo giro. Ripartire subito terrebbe il worker
+        // sempre occupato senza mai scrivere niente di più fresco.
+        if (!forceBackgroundSave && revision !== savedRevision) break;
       }
 
       return wroteSnapshot;

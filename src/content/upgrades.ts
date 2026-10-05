@@ -304,17 +304,26 @@ export function getUpgradeDefinition(id: UpgradeId) {
 }
 
 /** Points of a branch: every level bought in its visible nodes counts 1. */
+// Per levels object: the game never modifies one in place (new object on purchase).
+const categoryPointsCache = new WeakMap<UpgradeLevels, Map<UpgradeCategory, number>>();
+
 export function getUpgradeCategoryPoints(
   levels: UpgradeLevels,
   category: UpgradeCategory,
 ): number {
-  return UPGRADE_DEFINITIONS.reduce(
-    (total, definition) =>
-      definition.category === category && !definition.hidden
-        ? total + (levels[definition.id] ?? 0)
-        : total,
-    0,
-  );
+  let points = categoryPointsCache.get(levels);
+  if (!points) {
+    points = new Map();
+    for (const definition of UPGRADE_DEFINITIONS) {
+      if (definition.hidden) continue;
+      points.set(
+        definition.category,
+        (points.get(definition.category) ?? 0) + (levels[definition.id] ?? 0),
+      );
+    }
+    categoryPointsCache.set(levels, points);
+  }
+  return points.get(category) ?? 0;
 }
 
 export type MissingUpgradeRequirement =

@@ -21,10 +21,6 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
-import { NetworkView } from "../features/network/NetworkView";
-import { EventsView } from "../features/events/EventsView";
-import { PeopleView } from "../features/people/PeopleView";
-import { UpgradesView } from "../features/upgrades/UpgradesView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
@@ -63,11 +59,7 @@ import { APP_VERSION } from "../shared/appVersion";
 import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { AchievementToast } from "../features/feedback/AchievementToast";
 import type { LudoWikiSection } from "../features/ludowiki/LudoWikiView";
-import { MomentLayer } from "../features/moments/MomentLayer";
 import type { MomentContent } from "../features/moments/momentContent";
-import { FinalDuelLayer } from "../features/tournaments/FinalDuelLayer";
-import { ReptileDayLayer } from "../features/tournaments/ReptileDayLayer";
-import { ReptileIncidentsLayer } from "../features/tournaments/ReptileIncidentsLayer";
 import { clearIncidentsAttempt, readIncidentsAttempt } from "../features/tournaments/reptileUi";
 import { getReptileSectorForRole } from "../game/reptileSectors";
 import { getTickStepMs, useAppPreferences } from "./useAppPreferences";
@@ -79,11 +71,58 @@ const StableFolderPane = memo(FolderPane);
 const StableMessageList = memo(MessageList);
 const StableSentMailDetail = memo(SentMailDetail);
 const StableComposer = memo(Composer);
-// ponytail: lazy-load only the late-game views; core mail/upgrade views stay in the main chunk.
-const AdminEmailView = lazy(reloadOnStaleChunk(() => import("../features/admin/AdminEmailView").then((module) => ({ default: module.AdminEmailView }))));
-const TournamentsView = lazy(reloadOnStaleChunk(() => import("../features/tournaments/TournamentsView").then((module) => ({ default: module.TournamentsView }))));
-const GadgetsView = lazy(reloadOnStaleChunk(() => import("../features/gadgets/GadgetsView").then((module) => ({ default: module.GadgetsView }))));
-const LudoWikiView = lazy(reloadOnStaleChunk(() => import("../features/ludowiki/LudoWikiView").then((module) => ({ default: module.LudoWikiView }))));
+// Only the mail (the first page) is in the main chunk: every other page and the
+// full-screen layers load on demand, and preloadLazyViews fetches them while idle,
+// so the first click does not wait. Faster start on slow processors.
+const lazyViewLoaders = {
+  admin: () => import("../features/admin/AdminEmailView").then((module) => ({ default: module.AdminEmailView })),
+  tournaments: () => import("../features/tournaments/TournamentsView").then((module) => ({ default: module.TournamentsView })),
+  gadgets: () => import("../features/gadgets/GadgetsView").then((module) => ({ default: module.GadgetsView })),
+  ludowiki: () => import("../features/ludowiki/LudoWikiView").then((module) => ({ default: module.LudoWikiView })),
+  people: () => import("../features/people/PeopleView").then((module) => ({ default: module.PeopleView })),
+  upgrades: () => import("../features/upgrades/UpgradesView").then((module) => ({ default: module.UpgradesView })),
+  events: () => import("../features/events/EventsView").then((module) => ({ default: module.EventsView })),
+  network: () => import("../features/network/NetworkView").then((module) => ({ default: module.NetworkView })),
+  moment: () => import("../features/moments/MomentLayer").then((module) => ({ default: module.MomentLayer })),
+  finalDuel: () => import("../features/tournaments/FinalDuelLayer").then((module) => ({ default: module.FinalDuelLayer })),
+  reptileDay: () => import("../features/tournaments/ReptileDayLayer").then((module) => ({ default: module.ReptileDayLayer })),
+  reptileIncidents: () => import("../features/tournaments/ReptileIncidentsLayer").then((module) => ({ default: module.ReptileIncidentsLayer })),
+};
+const AdminEmailView = lazy(reloadOnStaleChunk(lazyViewLoaders.admin));
+const TournamentsView = lazy(reloadOnStaleChunk(lazyViewLoaders.tournaments));
+const GadgetsView = lazy(reloadOnStaleChunk(lazyViewLoaders.gadgets));
+const LudoWikiView = lazy(reloadOnStaleChunk(lazyViewLoaders.ludowiki));
+const PeopleView = lazy(reloadOnStaleChunk(lazyViewLoaders.people));
+const UpgradesView = lazy(reloadOnStaleChunk(lazyViewLoaders.upgrades));
+const EventsView = lazy(reloadOnStaleChunk(lazyViewLoaders.events));
+const NetworkView = lazy(reloadOnStaleChunk(lazyViewLoaders.network));
+const MomentLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.moment));
+const FinalDuelLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.finalDuel));
+const ReptileDayLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.reptileDay));
+const ReptileIncidentsLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.reptileIncidents));
+
+/** Fetches the on-demand chunks one by one once the page is idle. */
+function preloadLazyViews(): () => void {
+  let cancelled = false;
+  const loaders = Object.values(lazyViewLoaders);
+  const idle = (callback: () => void) => {
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(callback, { timeout: 5_000 });
+    } else {
+      window.setTimeout(callback, 1_000);
+    }
+  };
+  const next = () => {
+    const loader = loaders.shift();
+    if (cancelled || !loader) return;
+    // A failed preload is retried, with the stale-chunk reload, on the real click.
+    loader().catch(() => undefined).finally(() => idle(next));
+  };
+  idle(next);
+  return () => {
+    cancelled = true;
+  };
+}
 const BOSS_KEY = "F9";
 const StableUpgradesView = memo(UpgradesView);
 const StableEventsView = memo(EventsView);
@@ -134,6 +173,7 @@ export function App() {
     saveStatus,
     saveNow,
   } = useGameEngine({ minStepMs: getTickStepMs(darkMode, reduceMotion) });
+  useEffect(() => preloadLazyViews(), []);
   const gameStateStore = useGameStateStore(state);
   const [view, setView] = useState<AppView>("mail");
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
@@ -777,6 +817,7 @@ export function App() {
           </b>
         </footer>
       </div>
+      <Suspense fallback={null}>
       {watchedFinal ? <FinalDuelLayer result={watchedFinal} onClose={closeFinal} onShowResults={showFinalResults} /> : null}
       {reptileEdition && ((reptileMinigameRunning && reptileAttemptLive) || reptileTutorialOpen) ? (
         <ReptileIncidentsLayer
@@ -813,6 +854,7 @@ export function App() {
           onSkip={tutorial.skipScene}
         />
       ) : null}
+      </Suspense>
     </GameTimeProvider>
     </GameStateStoreProvider>
   );

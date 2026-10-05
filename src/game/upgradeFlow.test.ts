@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
-import type { Collaborator } from "./types";
-import { buyUpgrade, discoverSecretUpgrade } from "./upgradeFlow";
+import type { Collaborator, GameState } from "./types";
+import {
+  buyAllAffordableUpgrades,
+  buyUpgrade,
+  discoverSecretUpgrade,
+  getBuyAllPreview,
+  planBuyAllUpgrades,
+} from "./upgradeFlow";
+import { UPGRADE_DEFINITIONS, getUpgradeCost } from "../content/upgrades";
 
 describe("buyUpgrade prerequisites", () => {
   it("buys Corso X for one euro only after its independent discovery", () => {
@@ -201,5 +208,55 @@ describe("buyUpgrade prerequisites", () => {
     };
     expect(buyUpgrade(mugUnlocked, "gadget-cross-selling").upgrades["gadget-cross-selling"])
       .toBe(1);
+  });
+});
+
+describe("Compra tutto", () => {
+  // The rule before the plan existed: every affordable node by price, first purchasable wins.
+  function legacyBuyAll(state: GameState): GameState {
+    let current = state;
+    for (;;) {
+      const next = UPGRADE_DEFINITIONS
+        .filter((definition) => definition.category !== "secrets")
+        .map((definition) => ({
+          id: definition.id,
+          cost: getUpgradeCost(definition, current.upgrades[definition.id], current.upgrades),
+        }))
+        .filter(({ cost }) => cost <= current.school.euros)
+        .sort((a, b) => a.cost - b.cost)
+        .map(({ id }) => buyUpgrade(current, id))
+        .find((candidate) => candidate !== current);
+      if (!next) return current;
+      current = next;
+    }
+  }
+
+  function funded(euros: number): GameState {
+    const initial = createInitialState(1_000);
+    return {
+      ...initial,
+      school: { ...initial.school, euros, fame: 5_000 },
+      unlocks: { ...initial.unlocks, social: true, gadget: true, forms: true, collaborators: true },
+    };
+  }
+
+  it.each([0, 50, 2_000, 75_000, 3_000_000, 1e9])("buys exactly what the old rule bought with %d €", (euros) => {
+    const state = funded(euros);
+    const expected = legacyBuyAll(state);
+    const actual = buyAllAffordableUpgrades(state);
+    expect(actual.upgrades).toEqual(expected.upgrades);
+    expect(actual.school.euros).toBe(expected.school.euros);
+    expect(actual.player.writingPower).toBe(expected.player.writingPower);
+  });
+
+  it("keeps the preview right while the funds move inside and outside its range", () => {
+    let state = funded(75_000);
+    const plan = planBuyAllUpgrades(state);
+    expect(plan.purchases.length).toBeGreaterThan(0);
+    for (const euros of [plan.minEuros, 75_000, plan.maxEuros - 1, plan.maxEuros, plan.minEuros - 1, 1e7]) {
+      state = { ...state, school: { ...state.school, euros } };
+      const fresh = planBuyAllUpgrades(state);
+      expect(getBuyAllPreview(state)).toEqual({ count: fresh.purchases.length, total: fresh.total });
+    }
   });
 });

@@ -344,7 +344,8 @@ test("acquista un Upgrade, salva e mantiene il livello dopo il reload", async ({
   await saveNow(page);
   const stored = await readStoredGameSave(page);
   expect(stored.upgrades["comfortable-keyboard"]).toBe(1);
-  expect(stored.school.euros).toBe(4_950);
+  // 5.000 € meno la Tastiera comoda: 50 € di catalogo a un quarto (d0c760a), arrotondati.
+  expect(stored.school.euros).toBe(4_987);
 
   await page.reload();
   await expect(page.getByText(`Profilo: ${E2E_PLAYER_NAME}`)).toBeVisible();

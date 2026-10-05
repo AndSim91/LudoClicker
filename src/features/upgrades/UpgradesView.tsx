@@ -41,7 +41,7 @@ import {
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
 import { formatCurrency, formatPercent, formatShortCurrency, formatStat } from "../../shared/formatters";
 import { getEmailBookingChance } from "../../game/formulas";
-import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
+import { getBuyAllPreview } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
 import {
   getGadgetFollowerReach,
@@ -362,17 +362,6 @@ function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): 
   // Rete dell'Ordine: from the first foundation on.
   if (category === "network") return state.network.schoolCount > 0;
   return true;
-}
-
-/** What «Compra tutto» would buy right now: same rule as the engine, run on a copy. */
-function getBuyAllPlan(state: GameState) {
-  const after = buyAllAffordableUpgrades(state);
-  let count = 0;
-  for (const definition of UPGRADE_DEFINITIONS) {
-    count += after.upgrades[definition.id] - state.upgrades[definition.id];
-  }
-  const total = state.school.euros - after.school.euros;
-  return { count, total };
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -790,7 +779,7 @@ export function UpgradesView({
     }
   }
   const upgradeBenefits = getUpgradeBenefitsSummary(state);
-  const buyAllPlan = onBuyAllUpgrades ? getBuyAllPlan(state) : { count: 0, total: 0 };
+  const buyAllPlan = onBuyAllUpgrades ? getBuyAllPreview(state) : { count: 0, total: 0 };
   const buyCheapest = recommendedUpgrade
     ? () => onBuyUpgrade(recommendedUpgrade.definition.id)
     : undefined;

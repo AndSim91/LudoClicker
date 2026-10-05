@@ -665,6 +665,36 @@ function materializeMembersForCourses(state: GameState, now: number): GameState 
   );
 }
 
+/**
+ * Every automatic start below needs an Istruttore with a free place, except the
+ * Corso X recovery of an Istruttore, who can study it on his own. Without either
+ * the full pass ends with the same state: skip it (half of the engine time in big
+ * schools, most ticks have no free place).
+ */
+function canStartAnyAutomaticCourse(
+  state: GameState,
+  pendingReleaseIds: ReadonlySet<string>,
+): boolean {
+  const capacity = selectInstructorCapacity(state);
+  const loads = getInstructorTeachingCounts(state.contacts, state.collaborators);
+  for (const collaborator of state.collaborators) {
+    if (
+      collaborator.assignment === "instructor" &&
+      (loads.get(collaborator.id) ?? 0) < capacity
+    ) return true;
+  }
+  if (!isCourseXUnlocked(state.upgrades)) return false;
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const annualLimit = getAnnualFormTrainingLimit(state.upgrades);
+  return state.collaborators.some((collaborator) =>
+    collaborator.assignment === "instructor" &&
+    !collaborator.training &&
+    !pendingReleaseIds.has(collaborator.id) &&
+    getFormTrainingCount(collaborator, trainingYear) < annualLimit &&
+    needsCourseXRecovery(collaborator.forms)
+  );
+}
+
 export function processAutomaticTeaching(
   initialState: GameState,
   now: number,
@@ -685,7 +715,7 @@ export function processAutomaticTeaching(
     !pendingReleaseIds.has(collaborator.id) &&
     !priorityQualificationTechnicianIds.has(collaborator.id)
   );
-  if (!hasAutomaticInstructor) {
+  if (!hasAutomaticInstructor || !canStartAnyAutomaticCourse(state, pendingReleaseIds)) {
     rememberAutomaticTeachingNoOp(state);
     return state;
   }

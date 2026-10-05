@@ -4297,6 +4297,21 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   (decisione di Andrea, 05/10);
 - un recupero lungo si ferma dopo ~12 ms reali e prosegue al tick successivo
   (`timeBudgetMs` del `TICK`), così la pagina continua a disegnarsi;
+- l'insegnamento automatico salta il suo giro quando nessun Istruttore ha un
+  posto libero e nessun Istruttore deve recuperare il Corso X da solo
+  (`canStartAnyAutomaticCourse`): stesso risultato tick per tick, metà del
+  motore in meno da fare nella maggior parte dei tick;
+- salvataggio automatico ogni minuto in un Web Worker: la fotografia preparata
+  viene scritta anche se nel frattempo la partita è andata avanti (resta
+  «da salvare» per il giro dopo); la scarta solo un salvataggio sincrono
+  arrivato nel frattempo («Salva ora», chiusura della pagina);
+- solo la Posta (prima pagina) è nel pacchetto iniziale: le altre pagine e i
+  livelli a schermo intero (scene, finale, Open Reptile) si caricano a
+  richiesta e vengono prelevati in sottofondo quando la pagina è ferma;
+- l'anteprima di «Compra tutto» si ricalcola solo quando cambiano i livelli o
+  i fondi escono dall'intervallo in cui la spesa resta la stessa
+  (`getBuyAllPreview`); i punti spesi per ramo sono memorizzati per oggetto
+  livelli (mai modificato sul posto);
 - orologio di gioco con pausa (pulsante nella barra del titolo; il tutorial e
   i minigiochi mettono in pausa da soli) e velocità regolabile dal pannello
   Admin in sviluppo;
