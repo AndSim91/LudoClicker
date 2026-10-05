@@ -98,13 +98,17 @@ const LEVEL_AT_AVERAGE = 1.25;
 const LEVEL_PER_LOG = 2;
 const TOP_KNEE = 2.25;
 const TOP_SLOPE = 0.7;
+/** Il livello non supera mai 2,6: anche chi stravince il campo prende un 3 solo con una bella giornata. */
+const TOP_SPAN = 0.35;
 
 export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
   const { roll, scored, conceded, assaultChance } = input;
   const experienceShare = Math.min(20, Math.max(0, input.experience)) / 20;
   const raw = LEVEL_AT_AVERAGE + LEVEL_PER_LOG * Math.log(Math.max(0.05, input.relativeStyle));
-  // Sopra 2,25 si sale più piano: il 3 resta la perfezione.
-  const level = raw <= TOP_KNEE ? raw : TOP_KNEE + (raw - TOP_KNEE) * TOP_SLOPE;
+  // Sopra 2,25 si sale più piano (pendenza 0,7) verso 2,6: il 3 resta la perfezione.
+  const level = raw <= TOP_KNEE
+    ? raw
+    : TOP_KNEE + TOP_SPAN * (1 - Math.exp((-(raw - TOP_KNEE) * TOP_SLOPE) / TOP_SPAN));
 
   // Fatti dell'incontro, uguali per tutti i giudici.
   // MOV: iniziativa sull'Orizzonte degli Eventi oltre quanto atteso.

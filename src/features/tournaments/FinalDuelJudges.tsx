@@ -57,7 +57,7 @@ export function FinalDuelJudges({
               <span key={index} className="final-duel-paddle" style={delay(rowStart + index * SIGN_SECONDS)}>
                 <b>{judge.vote}</b>
                 <code>{judge.code}</code>
-                <small>{index === 0 ? "Riferimento" : `Giudice ${index + 1}`}</small>
+                <small>{`Giudice ${index + 1}`}</small>
               </span>
             ))}
             {Array.from({ length: judgeCount - judges.length }, (_, index) => (

@@ -48,7 +48,7 @@ it("shows our athlete's sheet, judges and codes, and only the vote for the oppon
   expect(screen.getByText("7,75")).toBeVisible();
   expect(screen.getByText(/Quarta Armonica/)).toBeVisible();
   expect(screen.getByText("cn22w1")).toBeVisible();
-  expect(screen.getByText("Riferimento")).toBeVisible();
+  expect(screen.getByText("Giudice 1")).toBeVisible();
   expect(screen.getByText(/Simone Prova · Cura · −0,5/)).toBeVisible();
   expect(screen.getAllByRole("img", { name: "Cartellino di Stile: Cura, −0,5" })).toHaveLength(2);
 });

@@ -572,7 +572,7 @@ export type StyleSheet = [
 export type StylePenaltyReason = "declaration" | "cura" | "rispetto";
 
 export interface TournamentStyleDetail {
-  /** Una scheda per giudice; la prima è del Riferimento. */
+  /** Una scheda per giudice, nell'ordine Giudice 1, 2… */
   sheets: StyleSheet[];
   technique?: string;
   highlight?: string;

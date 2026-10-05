@@ -4293,7 +4293,7 @@ motivo; poi i giudici del nostro atleta alzano il cartello uno alla volta, con
 voto e codice Servizio, e arriva la media; per l'avversario esterno solo la
 media (`FinalDuelJudges.tsx`). In Tornei › Risultati, «Dettaglio incontro»
 mostra la scheda come sul telefono del giudice (`StyleJudgeSheet.tsx`): voto e
-Arena in alto, le nove voci del Riferimento per i nostri atleti, il solo voto
+Arena in alto, le nove voci del Giudice 1 per i nostri atleti, il solo voto
 per gli esterni, poi voti e codici di tutti i giudici. Regole del voto in
 `docs/tournament-system-design.md` § 5.
 

@@ -185,7 +185,7 @@ di un atleta è
 
 ```text
 livello = 1,25 + 2 × ln(preparazioneStile × condizione × incontro / media del campo)
-sopra 2,25 il livello sale al 70%
+sopra 2,25 il livello sale più piano (pendenza 0,7) verso un massimo di 2,6
 ```
 
 - **BAS, GCC**: livello + occhio del giudice (±0,25, cioè mezzo punto: così
@@ -211,7 +211,7 @@ finale per il bronzo, finale) due, quattro al Nazionale, in Champion's Arena e
 nelle Chronicles. Il voto dell'incontro è la media dei giudici; la classifica
 Stile usa la media di tutti gli incontri.
 
-Si salvano le schede (`styleDetailA/B`, prima il Riferimento) solo per gli
+Si salvano le schede (`styleDetailA/B`, Giudice 1, 2…) solo per gli
 atleti della scuola, il cartellino (`stylePenaltyA/B`) per tutti. Il codice
 Servizio v2 di ogni scheda si calcola alla lettura (`src/game/styleCode.ts`,
 porting dell'algoritmo pubblico `anfive/style-codes`).

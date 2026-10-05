@@ -95,7 +95,7 @@ describe("Guarda la finale (4.3)", () => {
 
     expect(screen.getByText("qg19z1")).toBeVisible();
     expect(screen.getByText("tg18z1")).toBeVisible();
-    expect(screen.getByText("Riferimento")).toBeVisible();
+    expect(screen.getByText("Giudice 1")).toBeVisible();
     expect(screen.getByText("7,45")).toBeVisible();
     expect(screen.getByText(/Cartellino di Stile a Giulia Prova · Dichiarazione · −0,5/)).toBeVisible();
   });

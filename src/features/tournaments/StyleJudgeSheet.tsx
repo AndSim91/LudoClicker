@@ -12,7 +12,7 @@ import {
 
 /**
  * Il giudizio di Stile dell'incontro come sul telefono del giudice (app
- * Servizio): le voci del Riferimento per gli atleti della scuola, il solo voto
+ * Servizio): le voci del Giudice 1 per gli atleti della scuola, il solo voto
  * per gli esterni, e i voti con il codice di ogni giudice.
  */
 export function StyleJudgeSheet({
@@ -85,7 +85,7 @@ export function StyleJudgeSheet({
           <ol key={name} className="style-sheet-judges" aria-label={`Giudici di ${name}`}>
             {describeJudges(sheet).map((judge, index) => (
               <li key={index} className={index === 0 ? "is-reference" : undefined}>
-                <small>{index === 0 ? (sheet.length > 1 ? "Riferimento" : "Giudice") : `Giudice ${index + 1}`}</small>
+                <small>{`Giudice ${index + 1}`}</small>
                 <b>{judge.vote}</b>
                 <code>{judge.code}</code>
               </li>
