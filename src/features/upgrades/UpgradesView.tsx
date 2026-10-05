@@ -7,6 +7,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { useUpgradeSpark } from "./useUpgradeSpark";
 import { Icon, type IconName } from "../../components/common/Icon";
 import {
   UPGRADE_CATEGORIES,
@@ -362,6 +363,7 @@ function UpgradeNode({
   const lockReason = getUpgradeLockReason(state, definition);
   const cost = getUpgradeCost(definition, level, state.network.schoolCount);
   const unaffordable = status === "available" && state.school.euros < cost;
+  const spark = useUpgradeSpark(level, status);
   const stateLabel = status === "locked"
     ? `bloccato, ${lockReason?.toLocaleLowerCase("it")}`
     : status === "completed"
@@ -371,7 +373,7 @@ function UpgradeNode({
         : "disponibile";
 
   return (
-    <li className={`upgrade-node-item${onQuickBuy ? " cheapest" : ""}`}>
+    <li className={`upgrade-node-item${onQuickBuy ? " cheapest" : ""}${spark.className}`} style={spark.style}>
       <button
         type="button"
         className={`upgrade-node ${status}${unaffordable ? " unaffordable" : ""}${selected ? " selected" : ""}`}
@@ -379,7 +381,8 @@ function UpgradeNode({
         aria-label={`Apri dettagli ${definition.title}: livello ${level} di ${definition.maxLevel}, ${stateLabel}`}
         aria-pressed={selected}
       >
-        <span className="upgrade-node-icon" aria-hidden="true">
+        {/* Keyed on the spark, so a second quick purchase replays the pop and the ring. */}
+        <span key={spark.id} className="upgrade-node-icon" aria-hidden="true">
           {status === "completed" ? <span className="upgrade-node-check">✓</span> : <Icon name={categoryIcons[definition.category]} />}
         </span>
         <strong><UpgradeTitle definition={definition} /></strong>
@@ -391,6 +394,7 @@ function UpgradeNode({
           </span>
         )}
       </button>
+      {spark.className.includes("just-completed") ? <span key={spark.id} className="branch-comet" aria-hidden="true" /> : null}
       {onQuickBuy ? (
         <button
           type="button"

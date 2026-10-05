@@ -6,6 +6,7 @@ import { useGameTime } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
 import { MonthlyIncomeSummary } from "./MonthlyIncomeSummary";
 import { TitleEquipment } from "./TitleEquipment";
+import { useRollingNumber } from "../../shared/useRollingNumber";
 import {
   formatCompactCurrency,
   formatCompactNumber,
@@ -44,6 +45,7 @@ export function TitleBar({
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
+  const balance = useRollingNumber(euros);
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
   const monthName = getGameMonthName(currentMonth);
@@ -92,7 +94,10 @@ export function TitleBar({
           aria-label={`Fondi: ${formatExactCurrency(euros)}`}
         >
           <small>Fondi</small>
-          <strong title={formatExactCurrency(euros)}>{formatCompactCurrency(euros)}</strong>
+          {/* Keyed on the rises so «Scatto» replays; the exact figure stays in title and aria-label. */}
+          <strong key={balance.pops} className={balance.pops ? "is-rising" : undefined} title={formatExactCurrency(euros)}>
+            {formatCompactCurrency(Math.round(balance.shown))}
+          </strong>
         </span>
         <MonthlyIncomeSummary state={monthlyIncomeState} />
       </div>
