@@ -4345,7 +4345,7 @@ traguardo sbloccato (prima era visibile solo in sviluppo).
 | Scuola | Sempre in piazza | Eventi completati | 1 | 500 | 10.000 |
 | Scuola | Bilancio in attivo | Euro guadagnati | 10.000 € | 10 milioni € | 10 miliardi € |
 | Scuola | Virale | Follower guadagnati | 1.000 | 100.000 | 10 milioni |
-| Scuola | Spade sempre affilate | Manutenzioni | 1 | 5.000 | 100.000 |
+| Scuola | Spade sempre funzionanti | Manutenzioni | 1 | 5.000 | 100.000 |
 | Formazione | Dalla Forma 1 alla 7 | Forme completate | 1 | 1.000 | 25.000 |
 | Formazione | Il cerchio si chiude | Iscritti con Forma 7 in una scuola | 1 | 50 | 500 |
 | Formazione | Spirito agonistico | Corsi Agonisti completati | 10 | 500 | 10.000 |

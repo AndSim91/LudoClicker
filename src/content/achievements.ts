@@ -75,7 +75,7 @@ export const TIERED_ACHIEVEMENTS: readonly TieredAchievement[] = [
   { id: "events", category: "Scuola", title: "Sempre in piazza", measure: "Eventi completati", thresholds: [1, 500, 10_000], value: (s) => s.statistics.eventsCompleted },
   { id: "euros", category: "Scuola", title: "Bilancio in attivo", measure: "Euro guadagnati", thresholds: [10_000, 10_000_000, 10_000_000_000], unit: "euro", value: (s) => s.statistics.eurosEarned },
   { id: "followers", category: "Scuola", title: "Virale", measure: "Follower guadagnati", thresholds: [1_000, 100_000, 10_000_000], value: (s) => s.statistics.socialFollowersGained },
-  { id: "maintenance", category: "Scuola", title: "Spade sempre affilate", measure: "Manutenzioni", thresholds: [1, 5_000, 100_000], value: (s) => s.statistics.maintenanceCompleted },
+  { id: "maintenance", category: "Scuola", title: "Spade sempre funzionanti", measure: "Manutenzioni", thresholds: [1, 5_000, 100_000], value: (s) => s.statistics.maintenanceCompleted },
   { id: "forms", category: "Formazione", title: "Dalla Forma 1 alla 7", measure: "Forme completate", thresholds: [1, 1_000, 25_000], value: (s) => s.statistics.formsCompleted },
   { id: "form-seven", category: "Formazione", title: "Il cerchio si chiude", measure: "Iscritti con Forma 7 in una scuola", thresholds: [1, 50, 500], value: countFormSevenMembers },
   { id: "agonist-courses", category: "Formazione", title: "Spirito agonistico", measure: "Corsi Agonisti completati", thresholds: [10, 500, 10_000], value: (s) => getCareer(s).agonistCourses },
