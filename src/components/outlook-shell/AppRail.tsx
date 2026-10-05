@@ -2,6 +2,7 @@ import { Icon, type IconName } from "../common/Icon";
 import { isGameAreaUnlocked, type GameArea } from "../../game/progression";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
+import { isAdminMode } from "../../app/adminMode";
 
 export type AppView = GameArea | "admin";
 
@@ -47,8 +48,8 @@ export function AppRail({
   );
   const visibleItems = items.filter((item) => {
     // The LudoWiki opens to everyone with the first achievement (4.4).
-    if (item.id === "ludowiki") return import.meta.env.DEV || state.achievements.length > 0;
-    if (item.devOnly) return import.meta.env.DEV;
+    if (item.id === "ludowiki") return isAdminMode || state.achievements.length > 0;
+    if (item.devOnly) return isAdminMode;
     return isGameAreaUnlocked(item.id as GameArea, state);
   });
   return (

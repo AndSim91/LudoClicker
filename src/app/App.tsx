@@ -71,6 +71,7 @@ import { ReptileIncidentsLayer } from "../features/tournaments/ReptileIncidentsL
 import { clearIncidentsAttempt, readIncidentsAttempt } from "../features/tournaments/reptileUi";
 import { getReptileSectorForRole } from "../game/reptileSectors";
 import { getTickStepMs, useAppPreferences } from "./useAppPreferences";
+import { isAdminMode } from "./adminMode";
 
 const StableTitleBar = memo(TitleBar);
 const StableAppRail = memo(AppRail);
@@ -183,9 +184,9 @@ export function App() {
   const activeView: AppView = hasActiveGadgetMinigame
     ? "gadget"
     : view === "ludowiki"
-      ? import.meta.env.DEV || state.achievements.length > 0 ? view : "mail"
+      ? isAdminMode || state.achievements.length > 0 ? view : "mail"
     : view === "admin"
-      ? import.meta.env.DEV
+      ? isAdminMode
         ? view
         : "mail"
       : isGameAreaUnlocked(view, state)
