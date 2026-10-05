@@ -7,7 +7,6 @@ import {
   isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
-  isQuickTeacherTrainingUnlocked,
   isSISTechnicianCourseUnlocked,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
@@ -36,6 +35,7 @@ import {
   getSocialContentAutomationPresentation,
 } from "./collaboratorAutomationPresentation";
 import {
+  countQualifiedInstructors,
   getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
   getInstructorCoverageForms,
@@ -46,6 +46,7 @@ import {
 import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormLogoStrip } from "./PersonPresentation";
+import { QuickTeacherTraining, useQuickTrainingPreviews } from "./QuickTeacherTraining";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { GadgetRevenueRanking } from "./GadgetRevenueRanking";
 
@@ -379,6 +380,12 @@ function InstructorSectorCard({
       availableInstructorCourses: nextAvailableCourses,
     };
   }, [courseXUnlocked, state.collaborators, state.contacts]);
+  const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
+  const coverageCounts = useMemo(() => ({
+    instructor: countQualifiedInstructors(instructors, "instructor"),
+    technician: sisUnlocked ? countQualifiedInstructors(instructors, "technician") : undefined,
+  }), [instructors, sisUnlocked]);
+  const quickPreviews = useQuickTrainingPreviews(state, now);
   const prepUnlocked = isAthleticPreparationUnlocked(state.upgrades);
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const showAthleticPreparation = prepUnlocked && instructors.length > 0;
@@ -509,30 +516,18 @@ function InstructorSectorCard({
               instructorForms={coverage}
               technicianForms={technicianCoverage}
               showLabels={false}
+              counts={coverageCounts}
+              highlight={onQuickTeacherTraining
+                ? { instructor: quickPreviews.instructor?.formId, technician: quickPreviews.technician?.formId }
+                : undefined}
             />
           </div>
-          {onQuickTeacherTraining && isQuickTeacherTrainingUnlocked(state.upgrades) ? (
-            <div className="instructor-quick-training" role="group" aria-label="Ufficio formazione">
-              <button
-                type="button"
-                title="Avvia un Corso Istruttori sulla Forma con meno Istruttori. Lo fa chi ha più Maestria, a parità più Stile."
-                onClick={() => onQuickTeacherTraining("instructor")}
-              >
-                <Icon name="people" />
-                Forma un Istruttore
-              </button>
-              {isSISTechnicianCourseUnlocked(state.upgrades) ? (
-                <button
-                  type="button"
-                  className="is-technician"
-                  title="Prenota un Corso Tecnici SIS sulla Forma con meno Tecnici. Lo fa chi ha più Maestria, a parità più Stile."
-                  onClick={() => onQuickTeacherTraining("technician")}
-                >
-                  <span className="technician-course-badge" aria-hidden="true">SIS</span>
-                  Forma un Tecnico
-                </button>
-              ) : null}
-            </div>
+          {onQuickTeacherTraining ? (
+            <QuickTeacherTraining
+              previews={quickPreviews}
+              currentMonth={state.school.currentMonth}
+              onStart={onQuickTeacherTraining}
+            />
           ) : null}
           <div className="instructor-coverage-actions">
             <SectorMasteryIndicator collaborators={instructors} role="instructor" />

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
-import { startQuickTeacherTraining } from "./quickTeacherTraining";
+import { previewQuickTeacherTraining, startQuickTeacherTraining } from "./quickTeacherTraining";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
 function instructor(index: number, forms: FormId[], instructorForms: FormId[], masteryXp = 0): Collaborator {
@@ -76,6 +76,16 @@ describe("Ufficio formazione", () => {
   it("lets someone with only Forma 1 learn Forma 2 when Corso X is locked", () => {
     const state = school([instructor(1, ["form-1"], ["form-1"])], [100]);
     expect(startQuickTeacherTraining(state, "instructor", 5_000).collaborators[0].training?.formId).toBe("form-2");
+  });
+
+  it("previews Form and full cost, even without swords or funds", () => {
+    const base = school([instructor(1, ["form-1"], ["form-1"])], [100]);
+    const broke = { ...base, school: { ...base.school, euros: 0 }, equipment: { ...base.equipment, availableSwords: 0 } };
+    const preview = previewQuickTeacherTraining(broke, "instructor", 5_000);
+    expect(preview?.formId).toBe("form-2");
+    expect(preview?.cost).toBeGreaterThan(0);
+    expect(preview?.affordable).toBe(false);
+    expect(previewQuickTeacherTraining(base, "instructor", 5_000)?.affordable).toBe(true);
   });
 
   it("books a SIS course on a Form without Tecnici, only with the SIS", () => {

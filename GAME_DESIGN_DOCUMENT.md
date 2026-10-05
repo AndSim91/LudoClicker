@@ -2266,6 +2266,17 @@ Istruttore più alta e, a parità, lo Stile più alto. Valgono tutte le regole d
 pulsante del Centro didattico (costi, spade, corsi annuali, rami, Corso X da
 recuperare, pausa estiva): se nessuno può, non succede nulla.
 
+Concept scelto da Andrea: **B2**. Ogni pulsante dice già cosa farà: «Forma un
+Istruttore · Forma 4 Staffa» con sotto «Corso Istruttori · 15.000 €» (per il
+Tecnico «Corso Tecnici SIS da settembre · …»), senza il nome di chi lo farà.
+L'anteprima (`previewQuickTeacherTraining`) prova lo stesso clic con fondi e
+spade in abbondanza, così mostra Forma e costo anche quando mancano; se i fondi
+non bastano il pulsante è spento con «Servono …», se nessuno può aprire una
+Forma con «Nessuno può aprire una Forma nuova». Sempre nella Copertura
+didattica, anche senza il potenziamento, sotto ogni Forma ci sono gli Istruttori
+titolati (verde) e, con la SIS, i Tecnici (viola; lo 0 in arancio). Con
+l'Ufficio le Forme che i pulsanti sceglierebbero hanno un anello che pulsa.
+
 ### 10.9 Percorsi Segreti
 
 La riga è sempre visibile. Prima della scoperta, ciascun nodo mostra `???`, un

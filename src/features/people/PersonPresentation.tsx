@@ -15,12 +15,18 @@ export function FormLogoStrip({
   technicianForms = [],
   showLabels = true,
   className = "",
+  counts,
+  highlight,
 }: {
   forms: FormId[];
   instructorForms?: readonly FormId[];
   technicianForms?: readonly FormId[];
   showLabels?: boolean;
   className?: string;
+  /** Copertura didattica: quanti Istruttori (e Tecnici, se c'è la SIS) per Forma. */
+  counts?: { instructor: ReadonlyMap<FormId, number>; technician?: ReadonlyMap<FormId, number> };
+  /** Ufficio formazione: le Forme che i due pulsanti sceglierebbero adesso. */
+  highlight?: { instructor?: FormId; technician?: FormId };
 }) {
   const state = useOptionalGameState();
   const visibleForms = getVisibleForms(
@@ -51,7 +57,7 @@ export function FormLogoStrip({
         <span className="form-logo-empty">Nessuna forma completata</span>
       ) : entries.map(({ formId, longName, shortName, logo, instructorCertified, technicianCertified }) => (
         <span
-          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""} ${technicianCertified ? "technician-certified" : ""}`}
+          className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""} ${technicianCertified ? "technician-certified" : ""}${highlight?.instructor === formId ? " is-next-instructor" : ""}${highlight?.technician === formId ? " is-next-technician" : ""}`}
           key={formId}
           title={`${longName}${technicianCertified
             ? " · Qualifica da Tecnico"
@@ -72,6 +78,22 @@ export function FormLogoStrip({
             ) : null}
           </span>
           {showLabels ? <span>{shortName}</span> : null}
+          {counts ? (
+            <span
+              className="form-logo-count"
+              title={`${counts.instructor.get(formId) ?? 0} Istruttori${counts.technician ? ` · ${counts.technician.get(formId) ?? 0} Tecnici` : ""}`}
+            >
+              <span className="is-instructor">{counts.instructor.get(formId) ?? 0}</span>
+              {counts.technician ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className={`is-technician${counts.technician.get(formId) ? "" : " is-zero"}`}>
+                    {counts.technician.get(formId) ?? 0}
+                  </span>
+                </>
+              ) : null}
+            </span>
+          ) : null}
         </span>
       ))}
     </div>

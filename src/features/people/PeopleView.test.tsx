@@ -59,7 +59,7 @@ describe("PeopleView", () => {
     expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
   });
 
-  it("shows the Ufficio formazione shortcuts only with the upgrade (Tecnico only with the SIS)", () => {
+  it("shows the Ufficio formazione shortcuts with Form and cost, and Istruttori/Tecnici per Form", () => {
     const initial = createInitialState(1_000, "", false);
     const instructor: Collaborator = {
       id: "office-instructor",
@@ -68,34 +68,43 @@ describe("PeopleView", () => {
       joinedAt: 1_000,
       forms: ["form-1"],
       instructorForms: ["form-1"],
+      formBranchPreferences: [],
       assignment: "instructor",
       rarity: "ultra-rare",
     };
-    const state = (upgrades: Partial<GameState["upgrades"]>): GameState => ({
+    const state = (upgrades: Partial<GameState["upgrades"]>, euros = 100_000): GameState => ({
       ...initial,
       collaborators: [instructor],
-      unlocks: { ...initial.unlocks, collaborators: true },
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
+      school: { ...initial.school, euros },
       upgrades: { ...initial.upgrades, ...upgrades },
-      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+      collaboratorManagement: {
+        ...initial.collaboratorManagement,
+        aggregateViewUnlocked: true,
+        targets: { ...initial.collaboratorManagement.targets, instructor: 1 },
+      },
     });
     const onQuick = vi.fn();
     const view = render(
       <PeopleView state={state({})} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
     );
-    expect(screen.queryByRole("button", { name: "Forma un Istruttore" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Forma un Istruttore/ })).not.toBeInTheDocument();
+    expect(screen.getByTitle("1 Istruttori")).toHaveTextContent("1");
 
     view.rerender(
       <PeopleView state={state({ "training-office": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Forma un Istruttore" }));
+    const button = screen.getByRole("button", { name: /^Forma un Istruttore · Forma 2.*Corso Istruttori/ });
+    fireEvent.click(button);
     expect(onQuick).toHaveBeenCalledWith("instructor");
-    expect(screen.queryByRole("button", { name: /Forma un Tecnico/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Forma un Tecnico/ })).not.toBeInTheDocument();
 
     view.rerender(
-      <PeopleView state={state({ "training-office": 1, "sis-accreditation": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
+      <PeopleView state={state({ "training-office": 1, "sis-accreditation": 1 }, 0)} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /Forma un Tecnico/ }));
-    expect(onQuick).toHaveBeenCalledWith("technician");
+    expect(screen.getByRole("button", { name: /^Forma un Istruttore · Forma 2.*Servono/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Forma un Tecnico · Forma 1/ })).toBeDisabled();
+    expect(screen.getByTitle("1 Istruttori · 0 Tecnici")).toBeVisible();
   });
 
   it("shows a crowded Centro didattico 8 instructors at a time", () => {

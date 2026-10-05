@@ -56,13 +56,52 @@ export function startQuickTeacherTraining(
   kind: QuickTrainingKind,
   now: number,
 ): GameState {
-  if (!state.unlocks.forms || !isQuickTeacherTrainingUnlocked(state.upgrades)) return state;
-  if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return state;
+  return pickQuickTeacherTraining(state, kind, now).state;
+}
+
+export interface QuickTrainingPreview {
+  formId: FormId;
+  cost: number;
+  affordable: boolean;
+}
+
+// Fondi finti per l'anteprima: così si vede la Forma scelta (e il suo costo) anche quando mancano i soldi.
+const PREVIEW_FUNDS = 1e15;
+
+/** Cosa farebbe il prossimo clic: Forma e costo. Undefined se nessuno può aprire una Forma. */
+export function previewQuickTeacherTraining(
+  state: GameState,
+  kind: QuickTrainingKind,
+  now: number,
+): QuickTrainingPreview | undefined {
+  // Anche spade in abbondanza: senza, il corso resterebbe «in attesa di spade» e non mostrerebbe il costo.
+  const rich: GameState = {
+    ...state,
+    school: { ...state.school, euros: PREVIEW_FUNDS },
+    equipment: { ...state.equipment, totalSwords: state.equipment.totalSwords + 1_000, availableSwords: state.equipment.availableSwords + 1_000 },
+  };
+  const picked = pickQuickTeacherTraining(rich, kind, now);
+  if (!picked.formId) return undefined;
+  const cost = Math.round((PREVIEW_FUNDS - picked.state.school.euros) * 100) / 100;
+  return { formId: picked.formId, cost, affordable: state.school.euros >= cost };
+}
+
+function pickQuickTeacherTraining(
+  state: GameState,
+  kind: QuickTrainingKind,
+  now: number,
+): { state: GameState; formId?: FormId } {
+  const none = { state };
+  if (!state.unlocks.forms || !isQuickTeacherTrainingUnlocked(state.upgrades)) return none;
+  if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return none;
   const leaving = getInstructorPendingReleaseIds(state);
   const instructors = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "instructor" && !leaving.has(collaborator.id),
   );
-  const contacts = new Map(state.contacts.map((contact) => [contact.id, contact]));
+  const contactIds = new Set(instructors.map((collaborator) => collaborator.contactId));
+  const contacts = new Map(
+    state.contacts.filter((contact) => contactIds.has(contact.id)).map((contact) => [contact.id, contact]),
+  );
   const style = (collaborator: Collaborator) => {
     const contact = contacts.get(collaborator.contactId);
     return contact ? getAthleteTournamentStats(contact, collaborator.forms).style : 0;
@@ -81,15 +120,15 @@ export function startQuickTeacherTraining(
     .map((formId) => ({ formId, count: instructors.filter((c) => covers(c, formId, kind)).length }))
     .sort((a, b) => a.count - b.count); // stabile: a parità resta l'ordine di Andrea
 
-  // ponytail: prova forma × persona finché un corso parte; al clic, non a ogni tick, quindi va bene anche con centinaia di Istruttori.
+  // ponytail: prova forma × persona finché un corso parte. L'anteprima lo rifà a ogni render con fondi finti, quindi si ferma quasi sempre al primo candidato; se diventa lento con migliaia di Istruttori, memorizzare per stato.
   for (const { formId } of forms) {
     for (const collaborator of ranked) {
       if (covers(collaborator, formId, kind) || !canReach(collaborator, formId, kind, courseXUnlocked)) continue;
       const next = kind === "instructor"
         ? startFormTraining(state, collaborator.id, formId, now)
         : bookTechnicianCourse(state, collaborator.id, formId, now);
-      if (next !== state) return next;
+      if (next !== state) return { state: next, formId };
     }
   }
-  return state;
+  return none;
 }
