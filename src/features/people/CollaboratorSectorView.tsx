@@ -35,7 +35,6 @@ import {
   getSocialContentAutomationPresentation,
 } from "./collaboratorAutomationPresentation";
 import {
-  countQualifiedInstructors,
   getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
   getInstructorCoverageForms,
@@ -47,6 +46,7 @@ import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormLogoStrip } from "./PersonPresentation";
 import { QuickTeacherTraining, useQuickTrainingPreviews } from "./QuickTeacherTraining";
+import { countTeacherCoverage } from "../../game/quickTeacherTraining";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { GadgetRevenueRanking } from "./GadgetRevenueRanking";
 
@@ -382,8 +382,8 @@ function InstructorSectorCard({
   }, [courseXUnlocked, state.collaborators, state.contacts]);
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
   const coverageCounts = useMemo(() => ({
-    instructor: countQualifiedInstructors(instructors, "instructor"),
-    technician: sisUnlocked ? countQualifiedInstructors(instructors, "technician") : undefined,
+    instructor: countTeacherCoverage(instructors, "instructor"),
+    technician: sisUnlocked ? countTeacherCoverage(instructors, "technician") : undefined,
   }), [instructors, sisUnlocked]);
   const quickPreviews = useQuickTrainingPreviews(state, now);
   const prepUnlocked = isAthleticPreparationUnlocked(state.upgrades);

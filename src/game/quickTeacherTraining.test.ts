@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../content/mastery";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
-import { previewQuickTeacherTraining, startQuickTeacherTraining } from "./quickTeacherTraining";
+import { countTeacherCoverage, previewQuickTeacherTraining, startQuickTeacherTraining } from "./quickTeacherTraining";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
 
 function instructor(index: number, forms: FormId[], instructorForms: FormId[], masteryXp = 0): Collaborator {
@@ -86,6 +86,16 @@ describe("Ufficio formazione", () => {
     expect(preview?.cost).toBeGreaterThan(0);
     expect(preview?.affordable).toBe(false);
     expect(previewQuickTeacherTraining(base, "instructor", 5_000)?.affordable).toBe(true);
+  });
+
+  it("counts courses running and SIS courses booked in the coverage", () => {
+    const running = { ...instructor(1, ["form-1"], ["form-1"]), training: { formId: "form-2" as const, startedAt: 0, completesAt: 9 } };
+    const booked = { ...instructor(2, known, ["form-1", "form-2"]), technicianCourseReservation: { formId: "form-2" as const, bookedAt: 0, eligibleMonth: 7 } };
+    const certified = { ...instructor(3, known, ["form-1"]), technicianForms: ["form-1" as const] };
+    const instructors = countTeacherCoverage([running, booked, certified], "instructor");
+    const technicians = countTeacherCoverage([running, booked, certified], "technician");
+    expect([instructors.get("form-1"), instructors.get("form-2")]).toEqual([3, 2]);
+    expect([technicians.get("form-1"), technicians.get("form-2")]).toEqual([1, 1]);
   });
 
   it("books a SIS course on a Form without Tecnici, only with the SIS", () => {

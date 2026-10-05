@@ -29,6 +29,23 @@ function covers(collaborator: Collaborator, formId: FormId, kind: QuickTrainingK
       (collaborator.training.trainingPhase === "technician" || collaborator.training.trainingTrack === "technician"));
 }
 
+/**
+ * Copertura didattica: per ogni Forma quanti Istruttori (o Tecnici) ci sono,
+ * contando anche chi ha il corso in corso o il Corso Tecnici SIS prenotato.
+ * È lo stesso conto con cui l'Ufficio formazione sceglie la Forma.
+ */
+export function countTeacherCoverage(
+  collaborators: readonly Collaborator[],
+  kind: QuickTrainingKind,
+): Map<FormId, number> {
+  const counts = new Map<FormId, number>();
+  for (const formId of QUICK_TRAINING_FORM_ORDER) {
+    const count = collaborators.filter((collaborator) => covers(collaborator, formId, kind)).length;
+    if (count > 0) counts.set(formId, count);
+  }
+  return counts;
+}
+
 /** Può aprire quella Forma: la sa già, oppure è la prossima del suo percorso. */
 function canReach(collaborator: Collaborator, formId: FormId, kind: QuickTrainingKind, courseXUnlocked: boolean): boolean {
   if (kind === "technician") {
@@ -115,9 +132,10 @@ function pickQuickTeacherTraining(
     .sort((a, b) => b.level - a.level || b.style - a.style)
     .map((entry) => entry.collaborator);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const coverage = countTeacherCoverage(instructors, kind);
   const forms = QUICK_TRAINING_FORM_ORDER
     .filter((formId) => courseXUnlocked || formId !== "course-x")
-    .map((formId) => ({ formId, count: instructors.filter((c) => covers(c, formId, kind)).length }))
+    .map((formId) => ({ formId, count: coverage.get(formId) ?? 0 }))
     .sort((a, b) => a.count - b.count); // stabile: a parità resta l'ordine di Andrea
 
   // ponytail: prova forma × persona finché un corso parte. L'anteprima lo rifà a ogni render con fondi finti, quindi si ferma quasi sempre al primo candidato; se diventa lento con migliaia di Istruttori, memorizzare per stato.

@@ -2274,7 +2274,9 @@ spade in abbondanza, così mostra Forma e costo anche quando mancano; se i fondi
 non bastano il pulsante è spento con «Servono …», se nessuno può aprire una
 Forma con «Nessuno può aprire una Forma nuova». Sempre nella Copertura
 didattica, anche senza il potenziamento, sotto ogni Forma ci sono gli Istruttori
-titolati (verde) e, con la SIS, i Tecnici (viola; lo 0 in arancio). Con
+(verde) e, con la SIS, i Tecnici (viola; lo 0 in arancio), contando anche chi ha
+il corso di quella Forma in corso o il Corso Tecnici SIS prenotato
+(`countTeacherCoverage`, lo stesso conto con cui l'Ufficio sceglie la Forma). Con
 l'Ufficio le Forme che i pulsanti sceglierebbero hanno un anello che pulsa.
 
 ### 10.9 Percorsi Segreti
