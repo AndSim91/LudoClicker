@@ -909,6 +909,12 @@ solo quando le prove ordinarie visibili sono più di 5. Le prove concluse o
 annullate restano visibili per 10 secondi. Le prove dei Leggendari e dei Leggendari
 Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 
+Anche le altre notifiche con lo stesso titolo (iscritti al volo, eventi
+importanti ricorrenti) si raggruppano quando sono **più di 4** insieme: una
+scheda sola («8 iscritti al volo», oppure «Titolo · N volte») con gli ultimi tre
+nomi e «altri N», visibile finché resta visibile l'ultima. I Leggendari restano
+fuori e i tornei non si raggruppano. Sotto la soglia tornano le schede singole.
+
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
 notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
 del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.

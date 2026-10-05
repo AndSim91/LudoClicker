@@ -16,7 +16,9 @@ import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   DAY_NOTIFICATION_VISIBILITY_MS,
+  getDayNotificationGroupKey,
   getDayPipFill,
+  isSpecialDayPerson,
   orderDayNotifications,
   selectDayNotifications,
   type DayNotification,
@@ -260,6 +262,10 @@ function DayNotificationTimeline({
                 notification.person?.rarity === "legendary" ||
                 notification.person?.secretLegendary === true
               )
+            : pausedNotificationSnapshot.groupKey
+            ? notification.id !== pausedNotificationSnapshot.id &&
+              (isSpecialDayPerson(notification) ||
+                getDayNotificationGroupKey(notification) !== pausedNotificationSnapshot.groupKey)
             : notification.id !== pausedNotificationSnapshot.id,
         ),
         pausedNotificationSnapshot,

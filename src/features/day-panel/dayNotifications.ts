@@ -19,6 +19,9 @@ import { formatList } from "../../shared/formatters";
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
 export const DAY_TRIAL_GROUPING_UNLOCK_MEMBERS = 5;
+/** More notifications than this with the same title become one card. */
+export const DAY_NOTIFICATION_GROUP_LIMIT = 4;
+const DAY_GROUP_NAME_LIMIT = 3;
 /** Beyond this the pips scale down: the detail line still carries the real counts. */
 export const DAY_PROGRESS_PIP_LIMIT = 8;
 
@@ -50,6 +53,8 @@ export interface DayNotification {
   tutorialTarget?: boolean;
   /** A finished tournament whose Arena final had one of our athletes: «Guarda la finale» (4.3). */
   finalResultId?: string;
+  /** A card standing for several notifications with the same `kind:title`. */
+  groupKey?: string;
   /** One pip per trial: fills while waiting, moves in the gym, green or red at the end. */
   pips?: DayPip[];
   person?: {
@@ -389,5 +394,54 @@ export function selectDayNotifications(
     });
   }
 
-  return orderDayNotifications(notifications);
+  return orderDayNotifications(groupCrowdedNotifications(notifications));
+}
+
+export function getDayNotificationGroupKey(notification: DayNotification): string {
+  return `${notification.kind}:${notification.title}`;
+}
+
+export function isSpecialDayPerson(notification: DayNotification): boolean {
+  return notification.person?.rarity === "legendary" || notification.person?.secretLegendary === true;
+}
+
+/**
+ * Same-title notifications (direct enrollments, recurring events) beyond the limit
+ * collapse into one card; Legendaries keep their own. Trials have their own summary.
+ */
+function groupCrowdedNotifications(notifications: DayNotification[]): DayNotification[] {
+  const groups = new Map<string, DayNotification[]>();
+  for (const notification of notifications) {
+    if (notification.kind === "trial" || notification.kind === "trial-summary") continue;
+    if (notification.kind === "tournament" || isSpecialDayPerson(notification)) continue;
+    const key = getDayNotificationGroupKey(notification);
+    groups.set(key, [...(groups.get(key) ?? []), notification]);
+  }
+  const grouped = new Set<DayNotification>();
+  const summaries: DayNotification[] = [];
+  for (const [key, members] of groups) {
+    if (members.length <= DAY_NOTIFICATION_GROUP_LIMIT) continue;
+    members.forEach((member) => grouped.add(member));
+    const sorted = [...members].sort((left, right) => left.timestamp - right.timestamp);
+    const [first] = sorted;
+    const names = sorted.flatMap((member) => member.person ? [member.person.displayName] : []);
+    const shown = names.slice(-DAY_GROUP_NAME_LIMIT).reverse();
+    const others = names.length - shown.length;
+    const sameDetail = sorted.every((member) => member.detail === first.detail);
+    summaries.push({
+      id: `group-${key}`,
+      kind: first.kind,
+      phase: sorted.every((member) => member.phase === first.phase) ? first.phase : "neutral",
+      title: first.kind === "direct-enrollment"
+        ? `${members.length} iscritti al volo`
+        : `${first.title} · ${members.length} volte`,
+      detail: names.length > 0
+        ? formatList(others > 0 ? [...shown, `altri ${others}`] : shown) + "."
+        : sameDetail ? first.detail : "",
+      timestamp: first.timestamp,
+      expiresAt: Math.max(...sorted.map((member) => member.expiresAt ?? first.timestamp)),
+      groupKey: key,
+    });
+  }
+  return [...notifications.filter((notification) => !grouped.has(notification)), ...summaries];
 }
