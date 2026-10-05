@@ -40,8 +40,20 @@ export function hasCompletedFormOne(forms: readonly FormId[]): boolean {
   return forms.includes("form-1");
 }
 
-export function hasUnlockedOfficialStats(forms: readonly FormId[]): boolean {
-  return forms.includes("course-y");
+/**
+ * Arena and Style are shown by Occhio del Maestro (statsTier = its level):
+ * never without it, after Corso Y at level 1, from enrolment at level 2.
+ */
+export function hasUnlockedOfficialStats(forms: readonly FormId[], statsTier: number): boolean {
+  if (statsTier >= 2) return true;
+  return statsTier >= 1 && forms.includes("course-y");
+}
+
+/** Tooltip on the «???» shown while Arena and Style stay hidden. */
+export function getHiddenStatsHint(statsTier: number): string {
+  return statsTier >= 1
+    ? "Si vedono dopo il Corso Y"
+    : "Si vedono con Occhio del Maestro (Upgrade, Insegnamento)";
 }
 
 export function getPreparation(

@@ -1,3 +1,4 @@
+import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import {
@@ -42,6 +43,7 @@ function haveSameTournamentOverviewState(left: GameState, right: GameState): boo
     left.school.currentMonth === right.school.currentMonth &&
     left.school.name === right.school.name &&
     left.school.city === right.school.city &&
+    left.upgrades["talent-eye"] === right.upgrades["talent-eye"] &&
     left.collaborators.length === right.collaborators.length &&
     left.collaborators.every((collaborator, index) => {
       const current = right.collaborators[index];
@@ -80,14 +82,15 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     () => new Map(state.collaborators.map((entry) => [entry.contactId, entry])),
     [state.collaborators],
   );
+  const statsTier = getOfficialStatsVisibilityTier(state.upgrades);
   const teamEntryByContactId = useMemo(() => new Map(
     state.contacts.map((contact) => {
       const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
       const preparation = getContactPreparation(contact, forms);
-      const visible = hasUnlockedOfficialStats(forms);
+      const visible = hasUnlockedOfficialStats(forms, statsTier);
       return [contact.id, { contact, preparation, visible }] as const;
     }),
-  ), [collaboratorsByContactId, state.contacts]);
+  ), [collaboratorsByContactId, state.contacts, statsTier]);
   const delegation = delegationContactIds.flatMap((contactId) => {
     const entry = teamEntryByContactId.get(contactId);
     return entry?.contact.status === "enrolled" ? [entry] : [];

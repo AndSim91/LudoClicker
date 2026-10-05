@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
-import type { Collaborator, FormBranch, FormId } from "../../game/types";
+import type { Collaborator, FormBranch, FormId, GameState } from "../../game/types";
 import { PeopleView } from "./PeopleView";
 
 afterEach(() => {
@@ -11,6 +11,12 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
+
+
+/** Occhio del Maestro at level 1: Arena and Stile visible after Corso Y, as before v100. */
+function withMasterEye(state: GameState): GameState {
+  return { ...state, upgrades: { ...state.upgrades, "talent-eye": 1 } };
+}
 
 describe("PeopleView", () => {
   it("exposes the global automatic teaching toggle in the Instructor center", () => {
@@ -1336,7 +1342,7 @@ describe("PeopleView", () => {
   });
 
   it("shows the requested columns and sorts visible scores in both directions", () => {
-    const initial = createInitialState(1_000);
+    const initial = withMasterEye(createInitialState(1_000));
     const hidden = {
       ...initial.contacts[0],
       id: "hidden-score",
@@ -1480,7 +1486,7 @@ describe("PeopleView", () => {
   });
 
   it("filters enrolled athletes using the values of their columns", () => {
-    const initial = createInitialState(1_000);
+    const initial = withMasterEye(createInitialState(1_000));
     const members = [
       {
         ...initial.contacts[0],
@@ -1741,7 +1747,7 @@ describe("PeopleView", () => {
   });
 
   it("filters collaborators by the values shown in their table columns", () => {
-    const initial = createInitialState(1_000);
+    const initial = withMasterEye(createInitialState(1_000));
     const collaborators = [
       {
         id: "writer",
@@ -1810,7 +1816,7 @@ describe("PeopleView", () => {
   });
 
   it("sorts collaborator rows using column data in both directions", () => {
-    const initial = createInitialState(1_000);
+    const initial = withMasterEye(createInitialState(1_000));
     const contacts = [
       { ...initial.contacts[0], id: "contact-carla", arenaBase: 1, styleBase: 1 },
       { ...initial.contacts[1], id: "contact-alba", arenaBase: 90, styleBase: 70 },
@@ -2315,7 +2321,7 @@ describe("PeopleView", () => {
   });
 
   it("shows only the official Arena and Style values with their score colors", () => {
-    const initial = createInitialState(1_000);
+    const initial = withMasterEye(createInitialState(1_000));
     const enrolled = {
       ...initial.contacts[0],
       status: "enrolled" as const,

@@ -389,6 +389,25 @@
 /* Fase 8: pulsante largo a due righe con l'anello dei secondi (concept A+B).
    Avanzamento e attesa riempiono il pulsante; «Annulla» resta in sordina e
    prende il rosso pieno solo sotto il puntatore. */
+/* Eventi nel Multiverso: a second, quieter action under the running event. */
+.event-row:has(> .event-copy-action) > .event-copy {
+  grid-row: span 2;
+}
+
+.event-row > button.event-copy-action {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 18px;
+  color: var(--accent-ink);
+  background: transparent;
+  font-weight: 600;
+}
+
+.event-row > button.event-copy-action:disabled {
+  color: var(--ink-muted);
+}
+
 .event-row > button.event-action {
   position: relative;
   isolation: isolate;

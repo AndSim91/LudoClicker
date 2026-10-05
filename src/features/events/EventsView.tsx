@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS, type AcquisitionEventDefinition } from "../../content/events";
+import { getEventExtraCopies } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
+import { getEventCopyCost } from "../../game/eventFlow";
+import { getRunningEventCounts } from "../../game/runtimeIndexes";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import {
   formatEventCooldownRemaining,
@@ -95,10 +98,15 @@ export function EventsView({
     );
   const clockNow = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
   const now = timeSource ? clockNow : clockNow || referenceNow;
-  const runningByDefinition = useMemo(
-    () => new Map(runningEvents.map((event) => [event.definitionId, event])),
-    [runningEvents],
-  );
+  const runningByDefinition = useMemo(() => {
+    const first = new Map<AcquisitionEvent["definitionId"], AcquisitionEvent>();
+    for (const event of runningEvents) {
+      if (!first.has(event.definitionId)) first.set(event.definitionId, event);
+    }
+    return first;
+  }, [runningEvents]);
+  const runningCounts = getRunningEventCounts(state.acquisitionEvents);
+  const extraCopies = getEventExtraCopies(state.upgrades);
   const availableMembers = selectAvailableEventMembers(state);
   const availableSwords = getAvailableSwords(state.equipment);
   const damagedSwords = getEffectiveDamagedSwords(state.equipment);
@@ -187,9 +195,10 @@ export function EventsView({
           let main = "Partecipa";
           let detail = `${definition.cost === 0 ? "Gratis" : formatCurrency(definition.cost)} · ${durationLabel}`;
           let ring = { value: 100, label: "" };
+          const copiesRunning = runningCounts.get(definition.id) ?? 0;
           if (matching) {
             action = `Annulla · ${clockLeft}`;
-            main = "In corso";
+            main = copiesRunning > 1 ? `In corso ×${copiesRunning}` : "In corso";
             detail = `finisce tra ${clockLeft}`;
             ring = { value: progress, label: String(remainingSeconds) };
           } else if (onCooldown) {
@@ -213,6 +222,17 @@ export function EventsView({
             action = `Servono ${formatCurrency(definition.cost)}`;
             detail = `hai ${formatCurrency(state.school.euros)}`;
           }
+          // Eventi nel Multiverso: one more copy while it runs, each at double the previous cost.
+          const copyCost = getEventCopyCost(definition.cost, copiesRunning);
+          const canOfferCopy = Boolean(matching) && copiesRunning <= extraCopies;
+          const copyBlocker = state.school.euros < copyCost
+            ? `Servono ${formatCurrency(copyCost)}`
+            : availableMembers < definition.requiredMembers
+              ? `Servono ${memberRequirement(definition.requiredMembers)} liberi`
+              : availableSwords < definition.requiredSwords
+                ? `Servono ${quantityLabel(definition.requiredSwords, "spada", "spade")}`
+                : "";
+          const copyLabel = `Altra copia · ${copyCost === 0 ? "gratis" : formatCurrency(copyCost)}`;
           if (disabled && !onCooldown) {
             main = action;
             ring = { value: 0, label: "!" };
@@ -290,6 +310,18 @@ export function EventsView({
                   </span>
                 ) : null}
               </button>
+              {canOfferCopy ? (
+                <button
+                  className="event-copy-action"
+                  type="button"
+                  disabled={Boolean(copyBlocker)}
+                  title={copyBlocker || "Lo stesso evento, in un universo parallelo"}
+                  aria-label={`${copyLabel}: ${definition.title}`}
+                  onClick={() => onStart(definition.id)}
+                >
+                  {copyBlocker || copyLabel}
+                </button>
+              ) : null}
             </article>
           );
         })}

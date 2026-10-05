@@ -3,9 +3,10 @@ import { getExpectedEventContacts } from "./eventRewards";
 import {
   canStartAcquisitionEvent,
   createEventStartCheckContext,
+  getEventCopyCost,
   startAcquisitionEvent,
 } from "./eventFlow";
-import { getBusyEventCollaboratorIds } from "./runtimeIndexes";
+import { getBusyEventCollaboratorIds, getRunningEventCounts } from "./runtimeIndexes";
 import type { GameState } from "./types";
 
 function expectedContacts(state: GameState, definition: (typeof ACQUISITION_EVENTS)[number]) {
@@ -44,6 +45,12 @@ export function hasActionableAutomaticEvents(state: GameState, now: number): boo
   );
 }
 
+/**
+ * Each idle addetto Eventi starts the cheapest event that is not running yet.
+ * Only when none can start does it open a copy (Eventi nel Multiverso), again
+ * the cheapest one first, until the funds run out. A free Volantinaggio copy
+ * stays free, on purpose.
+ */
 export function processAutomaticEvents(state: GameState, now: number): GameState {
   let nextState = state;
   const idleCollaborators = getIdleEventCollaborators(state);
@@ -52,7 +59,15 @@ export function processAutomaticEvents(state: GameState, now: number): GameState
   if (!hasActionableAutomaticEvents(state, now)) return state;
 
   for (const collaborator of idleCollaborators) {
-    for (const definition of candidates) {
+    const running = getRunningEventCounts(nextState.acquisitionEvents);
+    const fresh = candidates.filter((definition) => !running.has(definition.id));
+    const copies = candidates
+      .filter((definition) => running.has(definition.id))
+      .sort((left, right) =>
+        getEventCopyCost(left.cost, running.get(left.id) ?? 0) -
+          getEventCopyCost(right.cost, running.get(right.id) ?? 0)
+      );
+    for (const definition of [...fresh, ...copies]) {
       const attempted = startAcquisitionEvent(
         nextState,
         definition.id,

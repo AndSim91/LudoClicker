@@ -13,7 +13,7 @@ describe("UpgradesView", () => {
 
     expect(screen.queryByRole("heading", { name: "Social" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", {
-      name: /Apri dettagli Sintesi dei contenuti:.*social non ancora sbloccato/i,
+      name: /Apri dettagli Sintesi dei contenuti:.*bloccato, 9 punti in scrittura/i,
     })).toBeVisible();
   });
 
@@ -70,8 +70,8 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.queryByRole("button", { name: /Apri dettagli Preparazione agonistica/ }))
       .not.toBeInTheDocument();
-    // 57 branch nodes + the two Scrittura extensions (Ritmo di battitura, Frasi fatte).
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(59);
+    // One line per branch: 9 + 7 + 8 + 7 + 8 + 7 + 9 + 7 nodes, no side branches.
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(62);
     expect(screen.getByRole("button", { name: /Apri dettagli Ritmo di battitura/ })).toBeVisible();
     expect(screen.getAllByRole("button", { name: /^Percorso segreto/ })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
@@ -81,10 +81,12 @@ describe("UpgradesView", () => {
     const teachingButtons = within(teachingBranch).getAllByRole("button", {
       name: /^Apri dettagli/,
     });
-    expect(teachingButtons).toHaveLength(7);
-    expect(teachingButtons[5]).toHaveAccessibleName(/Apri dettagli Nessun Rancore/);
-    expect(teachingButtons[6]).toHaveAccessibleName(/Apri dettagli PagoSport/);
-    expect(within(teachingButtons[5]).getByText("Rancor", { selector: "em" })).toBeVisible();
+    expect(teachingButtons).toHaveLength(9);
+    expect(teachingButtons[0]).toHaveAccessibleName(/Apri dettagli Occhio del Maestro/);
+    expect(teachingButtons[3]).toHaveAccessibleName(/Apri dettagli Istruttori in e-Learning/);
+    expect(teachingButtons[7]).toHaveAccessibleName(/Apri dettagli Nessun Rancore/);
+    expect(teachingButtons[8]).toHaveAccessibleName(/Apri dettagli PagoSport/);
+    expect(within(teachingButtons[7]).getByText("Rancor", { selector: "em" })).toBeVisible();
   });
 
   it("shows both secret hints and reveals only the discovered path", () => {
@@ -129,8 +131,9 @@ describe("UpgradesView", () => {
     expect(screen.getByText(
       "100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri",
     )).toBeVisible();
-    expect(screen.getByText("Porta prima Campi intelligenti al livello 2")).toBeVisible();
-    expect(screen.getByRole("button", { name: /^Compra ·/ })).toBeDisabled();
+    expect(screen.getByText("9 punti in Scrittura (ne hai 0)")).toBeVisible();
+    expect(screen.getByText("Social sbloccato")).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Bloccato ·/ })).toBeDisabled();
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -178,7 +181,7 @@ describe("UpgradesView", () => {
     )).toBeVisible();
   });
 
-  it("requires every previous upgrade in a linear branch to be completed", () => {
+  it("opens a node when its branch has enough points and says how many are missing", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -191,15 +194,17 @@ describe("UpgradesView", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
     );
-    expect(screen.getByText("Completa prima Presentazione preparata")).toBeVisible();
-    expect(screen.getByRole("button", { name: /^Compra ·/ })).toBeDisabled();
+    expect(screen.getByText("3 punti in Carisma (ne hai 0)")).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Bloccato ·/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Apri dettagli Dimostrazione coordinata/ }))
+      .toHaveTextContent("8 punti in Carisma");
 
     fireEvent.click(screen.getByRole("button", { name: "Chiudi dettagli" }));
     rerender(
       <UpgradesView
         state={{
           ...state,
-          upgrades: { ...state.upgrades, "prepared-presentation": 5 },
+          upgrades: { ...state.upgrades, "prepared-presentation": 3 },
         }}
         onBuyUpgrade={() => undefined}
       />,
@@ -239,10 +244,6 @@ describe("UpgradesView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Compra Tastiera comoda" }));
     expect(onBuyUpgrade).toHaveBeenCalledWith("comfortable-keyboard");
 
-    // The left column carries a fixed twin that buys the same node.
-    fireEvent.click(screen.getByRole("button", { name: "Acquisto rapido: Tastiera comoda" }));
-    expect(onBuyUpgrade).toHaveBeenCalledTimes(2);
-    expect(onBuyUpgrade).toHaveBeenLastCalledWith("comfortable-keyboard");
   });
 
   it("previews Compra tutto with the same count and total the engine would buy", () => {
@@ -276,7 +277,6 @@ describe("UpgradesView", () => {
     const quickBuy = screen.getByRole("button", { name: "Compra Tastiera comoda" });
     expect(quickBuy).toBeDisabled();
     expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 30,00/));
-    expect(screen.getByRole("button", { name: "Acquisto rapido: Tastiera comoda" })).toBeDisabled();
   });
 
   it("summarizes cumulative benefits without claiming free swords", () => {

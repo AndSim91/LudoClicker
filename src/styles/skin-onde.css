@@ -16,7 +16,6 @@
      400/500/600 are bundled, so every heavier weight in the CSS renders as 600. */
   --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --font-display: "Barlow Semi Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
-  --fit-glyph: 0.5;
   font-family: var(--font-body);
 
   --onde-abyss: #021e33;
@@ -124,8 +123,6 @@
 :root[data-theme="dark"] .collaborator-table,
 :root[data-theme="dark"] .collaborator-table-filters,
 :root[data-theme="dark"] .collaborator-sort-mobile,
-:root[data-theme="dark"] .upgrade-tree-scroll,
-:root[data-theme="dark"] .upgrade-tree-canvas,
 :root[data-theme="dark"] .season-schedule,
 :root[data-theme="dark"] .qualified-team {
   background: var(--onde-page);
@@ -504,9 +501,19 @@
   background: var(--surface-muted);
 }
 
-:root[data-theme="dark"] .upgrade-node-item:has(> .upgrade-node.completed):not(:last-child)::after {
-  background: var(--onde-wave);
-  box-shadow: 0 0 8px rgb(108 211 214 / 60%);
+:root[data-theme="dark"] .upgrade-lane {
+  border-color: var(--line);
+  background: rgb(10 58 87 / 55%);
+}
+
+/* The wave lights up in teal as the branch is completed. */
+:root[data-theme="dark"] .upgrade-lane-wave-lit {
+  stroke: var(--onde-wave);
+  filter: drop-shadow(0 0 4px rgb(108 211 214 / 80%));
+}
+
+:root[data-theme="dark"] .upgrade-lane-points strong {
+  color: var(--onde-wave);
 }
 
 :root[data-theme="dark"] .upgrade-tree-legend i.available {
@@ -514,39 +521,48 @@
   background: var(--onde-gold-bright);
 }
 
+/* Gold is the colour of buying: quick buy, the window's button, «Compra tutto». */
 :root[data-theme="dark"] .upgrade-quick-buy:not(:disabled),
-:root[data-theme="dark"] .upgrade-root-buy:not(:disabled) {
+:root[data-theme="dark"] .upgrade-dialog-buy:not(:disabled) {
   border-color: var(--onde-gold-bright);
   color: var(--onde-on-gold);
   background: var(--onde-gold-bright);
 }
 
 :root[data-theme="dark"] .upgrade-quick-buy:hover:not(:disabled),
-:root[data-theme="dark"] .upgrade-root-buy:hover:not(:disabled) {
+:root[data-theme="dark"] .upgrade-dialog-buy:hover:not(:disabled) {
   background: #f5c97a;
 }
 
-:root[data-theme="dark"] .upgrade-root-funds strong {
+:root[data-theme="dark"] .upgrade-funds {
+  border-color: var(--onde-thread);
+  background: rgb(10 58 87 / 55%);
+}
+
+:root[data-theme="dark"] .upgrade-funds svg,
+:root[data-theme="dark"] .upgrade-funds strong {
   color: var(--onde-gold-bright);
-  font-size: 20px;
 }
 
-:root[data-theme="dark"] .upgrade-root-meter {
-  background: var(--onde-groove);
-}
-
-:root[data-theme="dark"] .upgrade-root-meter i {
-  background: var(--onde-gold-bright);
-}
-
-:root[data-theme="dark"] .upgrade-root-buy-all:not(:disabled) {
-  border-color: var(--onde-wave);
+:root[data-theme="dark"] .upgrade-buy-all:not(:disabled) {
+  border-color: var(--onde-gold-bright);
   color: var(--onde-foam);
-  background: var(--blue-600);
 }
 
-:root[data-theme="dark"] .upgrade-root-buy-all:hover:not(:disabled) {
+:root[data-theme="dark"] .upgrade-buy-all:hover:not(:disabled) {
   background: var(--onde-hover);
+}
+
+:root[data-theme="dark"] .upgrade-dialog-pips i.is-on {
+  background: var(--onde-wave);
+}
+
+:root[data-theme="dark"] .upgrade-dialog-requirements li {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-dialog-requirements li.is-met {
+  color: var(--onde-wave);
 }
 
 :root[data-theme="dark"] .upgrade-tree-legend i.unaffordable {
@@ -554,7 +570,7 @@
   background: transparent;
 }
 
-:root[data-theme="dark"] .upgrade-branch.complete .upgrade-branch-icon {
+:root[data-theme="dark"] .upgrade-lane.complete .upgrade-branch-icon {
   border-color: var(--onde-wave);
   background: var(--blue-600);
   box-shadow: 0 0 12px rgb(108 211 214 / 45%);

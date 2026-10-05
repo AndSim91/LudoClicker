@@ -20,7 +20,7 @@ describe("buyUpgrade prerequisites", () => {
     expect(upgraded.school.euros).toBe(9);
   });
 
-  it("blocks a later branch upgrade until every previous upgrade is complete", () => {
+  it("blocks a node until its branch has enough points", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -53,64 +53,61 @@ describe("buyUpgrade prerequisites", () => {
     expect(versatility.upgrades["technical-arena"]).toBe(1);
   });
 
-  it("requires all five Master of none levels before Tu conosci la SIS?", () => {
+  it("opens Tu conosci la SIS? at 9 points of Insegnamento, spent in any node", () => {
     const initial = createInitialState(1_000);
-    const levelFour = {
+    const eightPoints = {
       ...initial,
       school: { ...initial.school, euros: 50_000 },
+      upgrades: { ...initial.upgrades, "technical-arena": 4, "instructor-versatility": 4 },
+    };
+
+    expect(buyUpgrade(eightPoints, "sis-accreditation")).toBe(eightPoints);
+
+    const ninePoints = buyUpgrade(eightPoints, "talent-eye");
+    expect(ninePoints.upgrades["talent-eye"]).toBe(1);
+    expect(buyUpgrade(ninePoints, "sis-accreditation").upgrades["sis-accreditation"]).toBe(1);
+  });
+
+  it("opens Nessun Rancore at 28 points with Percorso Tecnico at level 3", () => {
+    const initial = createInitialState(1_000);
+    const points = {
+      ...initial,
+      school: { ...initial.school, euros: 200_000 },
       upgrades: {
         ...initial.upgrades,
-        "technical-arena": 1,
-        "instructor-versatility": 4,
-      },
-    };
-
-    expect(buyUpgrade(levelFour, "sis-accreditation")).toBe(levelFour);
-
-    const levelFive = buyUpgrade(levelFour, "instructor-versatility");
-    const sis = buyUpgrade(levelFive, "sis-accreditation");
-
-    expect(levelFive.upgrades["instructor-versatility"]).toBe(5);
-    expect(levelFive.school.euros).toBe(18_000);
-    expect(sis.upgrades["sis-accreditation"]).toBe(1);
-  });
-
-  it("opens Nessun Rancore after Didattica di gruppo and Percorso Tecnico", () => {
-    const initial = createInitialState(1_000);
-    const locked = {
-      ...initial,
-      school: { ...initial.school, euros: 200_000 },
-    };
-
-    expect(buyUpgrade(locked, "agonist-course-intensity")).toBe(locked);
-
-    const eligible = {
-      ...locked,
-      upgrades: {
-        ...locked.upgrades,
+        "talent-eye": 2,
+        "technical-arena": 2,
+        "instructor-versatility": 5,
+        "e-learning": 3,
+        "sis-accreditation": 4,
+        "cost-of-service": 5,
         "promiscuous-instructor": 6,
-        "technical-arena": 3,
       },
     };
-    expect(buyUpgrade(eligible, "agonist-course-intensity").upgrades["agonist-course-intensity"])
-      .toBe(1);
+
+    // 27 points and Percorso Tecnico 2: still locked.
+    expect(buyUpgrade(points, "agonist-course-intensity")).toBe(points);
+    const ready = { ...points, upgrades: { ...points.upgrades, "technical-arena": 3 } };
+    expect(buyUpgrade(ready, "agonist-course-intensity").upgrades["agonist-course-intensity"]).toBe(1);
   });
 
-  it("opens PagoSport only after completing Nessun Rancore", () => {
+  it("opens PagoSport at 38 points of Insegnamento", () => {
     const initial = createInitialState(1_000);
-    const levelNine = {
-      ...initial,
-      school: { ...initial.school, euros: 200_000 },
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 9 },
+    const levels = {
+      ...initial.upgrades,
+      "talent-eye": 2,
+      "technical-arena": 5,
+      "instructor-versatility": 5,
+      "e-learning": 3,
+      "sis-accreditation": 4,
+      "cost-of-service": 5,
+      "promiscuous-instructor": 6,
+      "agonist-course-intensity": 7,
     };
-
-    expect(buyUpgrade(levelNine, "pagosport")).toBe(levelNine);
-
-    const levelTen = {
-      ...levelNine,
-      upgrades: { ...levelNine.upgrades, "agonist-course-intensity": 10 },
-    };
-    expect(buyUpgrade(levelTen, "pagosport").upgrades.pagosport).toBe(1);
+    const thirtySeven = { ...initial, school: { ...initial.school, euros: 200_000 }, upgrades: levels };
+    expect(buyUpgrade(thirtySeven, "pagosport")).toBe(thirtySeven);
+    const thirtyEight = { ...thirtySeven, upgrades: { ...levels, "agonist-course-intensity": 8 } };
+    expect(buyUpgrade(thirtyEight, "pagosport").upgrades.pagosport).toBe(1);
   });
 
   it("does not grant Instructor certificates when PagoSport reaches level two", () => {
@@ -133,6 +130,13 @@ describe("buyUpgrade prerequisites", () => {
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,
+        "talent-eye": 2,
+        "technical-arena": 5,
+        "instructor-versatility": 5,
+        "e-learning": 3,
+        "sis-accreditation": 4,
+        "cost-of-service": 5,
+        "promiscuous-instructor": 6,
         "agonist-course-intensity": 10,
         pagosport: 1,
       },
@@ -173,14 +177,14 @@ describe("buyUpgrade prerequisites", () => {
     const publicBranchReady = {
       ...gadgetUnlocked,
       unlocks: { ...gadgetUnlocked.unlocks, social: true },
-      upgrades: { ...gadgetUnlocked.upgrades, "gadget-showcase": 2 },
+      upgrades: { ...gadgetUnlocked.upgrades, "gadget-showcase": 3 },
     };
     expect(buyUpgrade(publicBranchReady, "gadget-online-store").upgrades["gadget-online-store"])
       .toBe(1);
 
     const commercialBranchReady = {
       ...gadgetUnlocked,
-      upgrades: { ...gadgetUnlocked.upgrades, "gadget-sales-training": 3 },
+      upgrades: { ...gadgetUnlocked.upgrades, "gadget-showcase": 5, "gadget-design-tools": 4, "gadget-sales-training": 3 },
     };
     expect(buyUpgrade(commercialBranchReady, "gadget-cross-selling"))
       .toBe(commercialBranchReady);

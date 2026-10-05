@@ -17,12 +17,12 @@ import {
   getEquipmentPreparedWorkMaximum,
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
-  getFirstIncompleteUpgradePrerequisite,
-  getUpgradeDefinition,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
+  getUpgradeCategoryPoints,
   getUpgradeCost,
   getUpgradeEffectTotal,
+  getUpgradeRequirements,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
   type UpgradeCategory,
@@ -37,7 +37,7 @@ import {
   getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
-import { formatCompactCurrency, formatCurrency, formatList, formatPercent, formatStat } from "../../shared/formatters";
+import { formatCompactCurrency, formatCurrency, formatPercent, formatStat } from "../../shared/formatters";
 import { getEmailBookingChance } from "../../game/formulas";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
@@ -222,72 +222,86 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
 
 type UpgradeStatus = "locked" | "available" | "completed";
 
-function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition) {
+/** The node line is a soft wave: odd nodes sit lower by this much (px). */
+const WAVE_AMPLITUDE = 24;
+/** Every lane uses the same nine columns, so nodes line up across branches. */
+const LANE_COLUMNS = 9;
+
+function getCategoryTitle(category: UpgradeCategory): string {
+  return UPGRADE_CATEGORIES.find((entry) => entry.id === category)?.title ?? "";
+}
+
+interface UpgradeRequirementRow {
+  /** Short line under a locked node («🔒 9 punti in Scrittura»). */
+  short: string;
+  /** Line in the details window («Si apre con»). */
+  full: string;
+  met: boolean;
+}
+
+/**
+ * Everything that opens a node, in display order: points of its branch, then
+ * the narrative links (another branch, a node at a given level, a game feature).
+ */
+function getUpgradeRequirementRows(state: GameState, definition: UpgradeDefinition): UpgradeRequirementRow[] {
+  const rows: UpgradeRequirementRow[] = [];
+  for (const requirement of getUpgradeRequirements(state.upgrades, definition)) {
+    if (requirement.kind === "points") {
+      const branch = getCategoryTitle(requirement.category);
+      rows.push({
+        short: `${requirement.required} punti in ${branch}`,
+        full: `${requirement.required} punti in ${branch} (ne hai ${requirement.current})`,
+        met: requirement.met,
+      });
+    } else {
+      const { definition: required, level } = requirement;
+      const label = level >= required.maxLevel && required.maxLevel > 1
+        ? `${required.title} completo`
+        : required.maxLevel === 1
+          ? required.title
+          : `${required.title} liv. ${level}`;
+      rows.push({ short: label, full: label, met: requirement.met });
+    }
+  }
+  for (const unlock of definition.requiredUnlocks ?? []) {
+    const met = Boolean(state.unlocks[unlock]);
+    if (unlock === "social") rows.push({ short: "Serve il Social", full: "Social sbloccato", met });
+    else if (unlock === "gadget") rows.push({ short: "Serve il settore Gadget", full: "Settore Gadget sbloccato", met });
+    else if (unlock === "forms") rows.push({ short: "Servono le Forme", full: "Centro didattico aperto (Forme)", met });
+    else rows.push({ short: "Funzione da sbloccare", full: "Funzione del gioco sbloccata", met });
+  }
+  if (definition.requiredNetworkSchools !== undefined) {
+    const one = definition.requiredNetworkSchools === 1;
+    rows.push({
+      short: one ? "Fonda un'altra scuola" : `${definition.requiredNetworkSchools} scuole fondate`,
+      full: one ? "Un'altra scuola fondata" : `${definition.requiredNetworkSchools} scuole fondate`,
+      met: state.network.schoolCount >= definition.requiredNetworkSchools,
+    });
+  }
+  if (definition.requiredGadgetProduct !== undefined) {
+    const name = GADGET_DEFINITIONS[definition.requiredGadgetProduct].name;
+    rows.push({
+      short: `Serve il progetto ${name}`,
+      full: `Progetto ${name} sbloccato`,
+      met: state.gadgets.products[definition.requiredGadgetProduct].unlocked,
+    });
+  }
+  if (definition.requiredFame > 0) {
+    rows.push({
+      short: `Fama ${definition.requiredFame}`,
+      full: `Fama della scuola ${definition.requiredFame}`,
+      met: state.school.fame >= definition.requiredFame,
+    });
+  }
+  return rows;
+}
+
+function getUpgradeLockReason(state: GameState, definition: UpgradeDefinition): string | null {
   if (
     definition.secretHint !== undefined &&
     !state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId)
   ) return "Percorso segreto non ancora scoperto";
-  const missingUnlock = definition.requiredUnlocks?.find(
-    (unlock) => !state.unlocks[unlock],
-  );
-  if (missingUnlock === "social") return "Social non ancora sbloccato";
-  if (missingUnlock === "gadget") return "Settore Gadget non ancora sbloccato";
-  if (missingUnlock) return "Funzione richiesta non ancora sbloccata";
-  if (
-    definition.requiredNetworkSchools !== undefined &&
-    state.network.schoolCount < definition.requiredNetworkSchools
-  ) {
-    return definition.requiredNetworkSchools === 1
-      ? "Fonda prima un'altra scuola"
-      : `Servono ${definition.requiredNetworkSchools} scuole fondate`;
-  }
-  if (
-    definition.requiredGadgetProduct !== undefined &&
-    !state.gadgets.products[definition.requiredGadgetProduct].unlocked
-  ) {
-    return `Sblocca prima il progetto ${GADGET_DEFINITIONS[definition.requiredGadgetProduct].name}`;
-  }
-  if (state.school.fame < definition.requiredFame) {
-    return `Serve Fama della scuola ${definition.requiredFame}`;
-  }
-  const prerequisite = getFirstIncompleteUpgradePrerequisite(
-    state.upgrades,
-    definition,
-  );
-  if (!prerequisite) return null;
-  const requiredLevel = definition.requiredUpgradeLevels?.[prerequisite.id] ?? prerequisite.maxLevel;
-  return requiredLevel < prerequisite.maxLevel
-    ? `Porta prima ${prerequisite.title} al livello ${requiredLevel}`
-    : `Completa prima ${prerequisite.title}`;
-}
-
-function getPrerequisiteText(definition: UpgradeDefinition) {
-  const parts: string[] = [];
-  if (definition.requiredNetworkSchools) {
-    parts.push(definition.requiredNetworkSchools === 1
-      ? "un'altra scuola fondata"
-      : `${definition.requiredNetworkSchools} scuole fondate`);
-  }
-  if (definition.requiredFame > 0) parts.push(`Fama ${definition.requiredFame}`);
-  if (definition.requiredUnlocks?.includes("social")) parts.push("Social sbloccato");
-  if (definition.requiredUnlocks?.includes("gadget")) parts.push("settore Gadget sbloccato");
-  if (definition.requiredUpgradeLevels) {
-    for (const [id, requiredLevel = 0] of Object.entries(definition.requiredUpgradeLevels)) {
-      const required = getUpgradeDefinition(id as UpgradeId);
-      if (!required) continue;
-      parts.push(requiredLevel >= required.maxLevel
-        ? `${required.title} completo`
-        : `${required.title} al livello ${requiredLevel}`);
-    }
-  } else {
-    // Without explicit requirements, a node waits for the one before it in its branch.
-    const branch = UPGRADE_DEFINITIONS.filter(
-      (upgrade) => upgrade.category === definition.category && !upgrade.hidden && !upgrade.extension,
-    );
-    const previous = branch[branch.findIndex((upgrade) => upgrade.id === definition.id) - 1];
-    if (previous) parts.push(`${previous.title} completo`);
-  }
-  return parts.length > 0 ? formatList(parts) : "Nessuno";
+  return getUpgradeRequirementRows(state, definition).find((row) => !row.met)?.short ?? null;
 }
 
 function UpgradeTitle({ definition }: { definition: UpgradeDefinition }) {
@@ -328,11 +342,7 @@ function getBuyAllPlan(state: GameState) {
     count += after.upgrades[definition.id] - state.upgrades[definition.id];
   }
   const total = state.school.euros - after.school.euros;
-  return {
-    count,
-    total,
-    share: state.school.euros > 0 ? Math.round((total / state.school.euros) * 100) : 0,
-  };
+  return { count, total };
 }
 
 function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): UpgradeStatus {
@@ -341,14 +351,46 @@ function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): Upgr
   return getUpgradeLockReason(state, definition) ? "locked" : "available";
 }
 
+/** The wave through the node centres (x = 100 per node, y = 15 or 15 + amplitude). */
+function getWavePath(lastIndex: number): string {
+  if (lastIndex <= 0) return "";
+  const y = (index: number) => (index % 2 === 0 ? 15 : 15 + WAVE_AMPLITUDE);
+  let path = `M0,${y(0)}`;
+  for (let index = 1; index <= lastIndex; index += 1) {
+    const from = (index - 1) * 100;
+    const to = index * 100;
+    path += ` C${from + 50},${y(index - 1)} ${to - 50},${y(index)} ${to},${y(index)}`;
+  }
+  return path;
+}
+
+function UpgradeLaneWave({ count, litTo }: { count: number; litTo: number }) {
+  if (count < 2) return null;
+  const width = (count - 1) * 100;
+  return (
+    <svg
+      className="upgrade-lane-wave"
+      aria-hidden="true"
+      viewBox={`0 0 ${width} 54`}
+      preserveAspectRatio="none"
+      style={{ width: `calc(${count - 1} * 100% / ${LANE_COLUMNS})` }}
+    >
+      <path className="upgrade-lane-wave-base" d={getWavePath(count - 1)} />
+      {litTo > 0 ? <path className="upgrade-lane-wave-lit" d={getWavePath(litTo)} /> : null}
+    </svg>
+  );
+}
+
 function UpgradeNode({
   definition,
+  index,
   state: stateOverride,
   selected,
   onSelect,
   onQuickBuy,
 }: {
   definition: UpgradeDefinition;
+  index: number;
   state?: GameState;
   selected: boolean;
   onSelect: (anchor: HTMLButtonElement) => void;
@@ -356,7 +398,7 @@ function UpgradeNode({
   onQuickBuy?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
+    ["equipment", "gadgets", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const level = state.upgrades[definition.id];
@@ -372,9 +414,18 @@ function UpgradeNode({
       : unaffordable
         ? "disponibile, saldo insufficiente"
         : "disponibile";
+  const low = index % 2 === 1;
 
   return (
-    <li className={`upgrade-node-item${onQuickBuy ? " cheapest" : ""}${spark.className}`} style={spark.style}>
+    <li
+      className={`upgrade-node-item${onQuickBuy ? " cheapest" : ""}${spark.className}`}
+      style={{
+        ...spark.style,
+        paddingTop: low ? WAVE_AMPLITUDE : 0,
+        "--node-drop": `${low ? WAVE_AMPLITUDE : 0}px`,
+        "--comet-rise": `${low ? -WAVE_AMPLITUDE : WAVE_AMPLITUDE}px`,
+      } as CSSProperties}
+    >
       <button
         type="button"
         className={`upgrade-node ${status}${unaffordable ? " unaffordable" : ""}${selected ? " selected" : ""}`}
@@ -387,7 +438,12 @@ function UpgradeNode({
           {status === "completed" ? <span className="upgrade-node-check">✓</span> : <Icon name={categoryIcons[definition.category]} />}
         </span>
         <strong><UpgradeTitle definition={definition} /></strong>
-        {status === "completed" ? null : (
+        {status === "completed" ? null : status === "locked" ? (
+          <span className="upgrade-node-lock">
+            <Icon name="lock" />
+            {lockReason}
+          </span>
+        ) : (
           <span className="upgrade-node-level">
             {onQuickBuy
               ? `${level}/${definition.maxLevel}`
@@ -405,9 +461,7 @@ function UpgradeNode({
           aria-label={`Compra ${definition.title}`}
           title={unaffordable ? `Mancano ${formatCurrency(cost - state.school.euros)}` : "Il più economico"}
         >
-          <span className="upgrade-fit-text" style={{ "--fit-chars": `Compra · ${formatStat(cost)} €`.length } as CSSProperties}>
-            Compra · {formatStat(cost)} €
-          </span>
+          Compra · {formatStat(cost)} €
         </button>
       ) : null}
     </li>
@@ -415,14 +469,16 @@ function UpgradeNode({
 }
 
 function MysteryUpgradeNode({
+  index,
   selected,
   onSelect,
 }: {
+  index: number;
   selected: boolean;
   onSelect: (anchor: HTMLButtonElement) => void;
 }) {
   return (
-    <li className="upgrade-node-item">
+    <li className="upgrade-node-item" style={{ paddingTop: index % 2 === 1 ? WAVE_AMPLITUDE : 0 }}>
       <button
         type="button"
         className={`upgrade-node locked mystery${selected ? " selected" : ""}`}
@@ -452,7 +508,7 @@ function UpgradeDetailsDialog({
   onBuy: () => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
+    ["equipment", "gadgets", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const dialogRef = useRef<HTMLElement>(null);
@@ -467,19 +523,17 @@ function UpgradeDetailsDialog({
   const level = state.upgrades[definition.id];
   const cost = getUpgradeCost(definition, level, state.network.schoolCount);
   const lockReason = getUpgradeLockReason(state, definition);
+  const requirements = getUpgradeRequirementRows(state, definition);
   const completed = level >= definition.maxLevel;
   const affordable = state.school.euros >= cost;
   const canBuy = !lockReason && affordable && !completed;
   const undiscovered = definition.secretHint !== undefined &&
     !state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId);
-  const statusText = completed
-    ? "Completato."
-    : lockReason
-      ? lockReason
-      : !affordable
-        ? `Mancano ${formatCurrency(cost - state.school.euros)}`
-        : null;
+  const branchIndex = UPGRADE_DEFINITIONS
+    .filter((entry) => entry.category === definition.category && !entry.hidden)
+    .findIndex((entry) => entry.id === definition.id);
 
+  // Next to the clicked node: below it, or above when the screen has more room there.
   useLayoutEffect(() => {
     const updatePosition = () => {
       const panel = dialogRef.current;
@@ -557,6 +611,7 @@ function UpgradeDetailsDialog({
       aria-labelledby="upgrade-dialog-title"
       aria-describedby="upgrade-dialog-description"
       data-placement={position?.placement ?? "bottom"}
+      data-state={completed ? "completed" : lockReason ? "locked" : canBuy ? "buy" : "unaffordable"}
       style={{
         left: position?.left ?? -9999,
         top: position?.top ?? -9999,
@@ -570,7 +625,10 @@ function UpgradeDetailsDialog({
         <header>
           <div className="upgrade-dialog-icon"><Icon name={categoryIcons[definition.category]} /></div>
           <div>
-            <span>{UPGRADE_CATEGORIES.find((category) => category.id === definition.category)?.title}</span>
+            <span>
+              {getCategoryTitle(definition.category)}
+              {branchIndex >= 0 && definition.category !== "secrets" ? ` · nodo ${branchIndex + 1}` : ""}
+            </span>
             <h2 id="upgrade-dialog-title">
               {undiscovered ? "???" : <UpgradeTitle definition={definition} />}
             </h2>
@@ -587,26 +645,65 @@ function UpgradeDetailsDialog({
             <p id="upgrade-dialog-description">{definition.description}</p>
 
             <dl className="upgrade-dialog-stats">
-              <div><dt>Livello</dt><dd>{level} di {definition.maxLevel}</dd></div>
+              <div>
+                <dt>Livello</dt>
+                <dd className="upgrade-dialog-level">
+                  {definition.maxLevel > 1 ? (
+                    <span className="upgrade-dialog-pips" aria-hidden="true">
+                      {Array.from({ length: definition.maxLevel }, (_, pip) => (
+                        <i key={pip} className={pip < level ? "is-on" : undefined} />
+                      ))}
+                    </span>
+                  ) : null}
+                  {level} di {definition.maxLevel}
+                </dd>
+              </div>
               <div><dt>Effetto</dt><dd>{definition.effectLabel}</dd></div>
-              <div><dt>Prerequisiti</dt><dd>{getPrerequisiteText(definition)}</dd></div>
+              <div>
+                <dt>Si apre con</dt>
+                <dd>
+                  {requirements.length === 0 ? "Aperto da subito" : (
+                    <ul className="upgrade-dialog-requirements">
+                      {requirements.map((requirement) => (
+                        <li key={requirement.full} className={requirement.met ? "is-met" : undefined}>
+                          <Icon name={requirement.met ? "check" : "lock"} />
+                          {requirement.full}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </dd>
+              </div>
             </dl>
 
-            {statusText ? (
-              <p className={`upgrade-dialog-status${completed ? " positive" : ""}`}>
-                <span aria-hidden="true">{completed ? "✓" : "!"}</span> {statusText}
-              </p>
-            ) : null}
-            {completed ? null : (
+            {completed ? (
+              <p className="upgrade-dialog-status positive"><span aria-hidden="true">✓</span> Completato.</p>
+            ) : (
               <button type="button" className="upgrade-dialog-buy" onClick={onBuy} disabled={!canBuy}>
-                Compra · {formatStat(cost)} €
+                {lockReason
+                  ? `Bloccato · ${formatStat(cost)} €`
+                  : affordable
+                    ? `Compra · ${formatStat(cost)} €`
+                    : `${formatStat(cost)} € · mancano ${formatCurrency(cost - state.school.euros)}`}
               </button>
             )}
+            {!completed && branchIndex >= 0 ? (
+              <p className="upgrade-dialog-next">{getNextNodeText(definition)}</p>
+            ) : null}
           </>
         )}
       </div>
     </section>
   );
+}
+
+function getNextNodeText(definition: UpgradeDefinition): string {
+  if (definition.category === "secrets") return "";
+  const branch = UPGRADE_DEFINITIONS.filter(
+    (entry) => entry.category === definition.category && !entry.hidden,
+  );
+  const next = branch[branch.findIndex((entry) => entry.id === definition.id) + 1];
+  return next ? `Poi nel ramo: ${next.title}` : "Ultimo nodo del ramo";
 }
 
 export function UpgradesView({
@@ -620,7 +717,7 @@ export function UpgradesView({
   onBuyAllUpgrades?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["equipment", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
+    ["equipment", "gadgets", "network", "player", "school", "secretUpgradeDiscoveries", "unlocks", "upgrades"],
     stateOverride,
   );
   const [selection, setSelection] = useState<{
@@ -635,6 +732,8 @@ export function UpgradesView({
     setSelection(null);
     window.requestAnimationFrame(() => anchor?.focus());
   }, [selection]);
+  const toggleDetails = (upgradeId: UpgradeId, anchor: HTMLButtonElement) =>
+    setSelection((current) => current?.upgradeId === upgradeId ? null : { upgradeId, anchor });
   let availableCount = 0;
   let completedCount = 0;
   let visibleCount = 0;
@@ -660,9 +759,7 @@ export function UpgradesView({
     }
   }
   const upgradeBenefits = getUpgradeBenefitsSummary(state);
-  const buyAllPlan = onBuyAllUpgrades
-    ? getBuyAllPlan(state)
-    : { count: 0, total: 0, share: 0 };
+  const buyAllPlan = onBuyAllUpgrades ? getBuyAllPlan(state) : { count: 0, total: 0 };
   const buyCheapest = recommendedUpgrade
     ? () => onBuyUpgrade(recommendedUpgrade.definition.id)
     : undefined;
@@ -672,12 +769,33 @@ export function UpgradesView({
       <header className="upgrade-page-header">
         <Icon name="spark" />
         <div><h1>Upgrade</h1><p>Spendere oggi per lavorare meno domani.</p></div>
+        <div className="upgrade-header-actions">
+          <span className="upgrade-funds" title={formatCurrency(state.school.euros)}>
+            <Icon name="coin" />
+            <strong>{formatCompactCurrency(state.school.euros)}</strong>
+            <span>Fondi</span>
+          </span>
+          {onBuyAllUpgrades ? (
+            <button
+              type="button"
+              className="upgrade-buy-all"
+              onClick={onBuyAllUpgrades}
+              disabled={buyAllPlan.count === 0}
+              aria-label={`Compra tutto: ${buyAllPlan.count} upgrade per ${formatStat(buyAllPlan.total)} €`}
+              title={`Dal più economico in su, finché i fondi bastano. Restano ${formatCurrency(state.school.euros - buyAllPlan.total)}. I percorsi segreti restano a te.`}
+            >
+              Compra tutto · {buyAllPlan.count} per {formatStat(buyAllPlan.total)} €
+            </button>
+          ) : null}
+        </div>
       </header>
 
       <section className="upgrade-tree-section" aria-labelledby="upgrade-tree-title">
         <div className="upgrade-tree-heading">
           <h2 id="upgrade-tree-title" className="sr-only">Piano degli Upgrade</h2>
-          <p>{completedCount} di {visibleCount} completati. Clicca un nodo per i dettagli.</p>
+          <p>
+            {completedCount} di {visibleCount} completati. Ogni livello comprato vale 1 punto nel suo ramo.
+          </p>
           <div className="upgrade-tree-legend" aria-label="Legenda stati">
             <span><i className="available" />Da comprare ({availableCount})</span>
             <span><i className="unaffordable" />Fondi insufficienti</span>
@@ -695,154 +813,77 @@ export function UpgradesView({
           </ul>
         </details>
 
-        <div className="upgrade-tree-frame">
-          <div className="upgrade-tree-scroll" tabIndex={0} aria-label="Diagramma degli Upgrade, scorribile orizzontalmente">
-            <div className="upgrade-tree-canvas">
-              <div className="upgrade-tree-root">
-                <div className="upgrade-root-funds">
-                  <span aria-hidden="true"><Icon name="spark" /></span>
-                  <div>
-                    <span className="upgrade-root-label">Fondi</span>
-                    <strong title={formatCurrency(state.school.euros)}>{formatCompactCurrency(state.school.euros)}</strong>
+        <div className="upgrade-lanes">
+          {UPGRADE_CATEGORIES.filter(
+            (category) => isUpgradeCategoryVisible(state, category.id),
+          ).map((category) => {
+            const definitions = UPGRADE_DEFINITIONS.filter(
+              (definition) => definition.category === category.id && !definition.hidden,
+            );
+            const isSecrets = category.id === "secrets";
+            const branchComplete = !isSecrets && definitions.every(
+              (definition) => state.upgrades[definition.id] >= definition.maxLevel,
+            );
+            // The wave lights up to the node after the last completed one.
+            const lastCompleted = definitions.reduce(
+              (last, definition, index) => state.upgrades[definition.id] >= definition.maxLevel ? index : last,
+              -1,
+            );
+            const litTo = lastCompleted < 0 ? 0 : Math.min(lastCompleted + 1, definitions.length - 1);
+            return (
+              <section
+                className={`upgrade-lane${branchComplete ? " complete" : ""}${isSecrets ? " secrets" : ""}`}
+                key={category.id}
+                aria-labelledby={`upgrade-branch-${category.id}`}
+              >
+                <div className="upgrade-lane-heading">
+                  <div className="upgrade-lane-title">
+                    <span className="upgrade-branch-icon"><Icon name={categoryIcons[category.id]} /></span>
+                    <h3 id={`upgrade-branch-${category.id}`}>
+                      {category.title}
+                      {branchComplete ? <span className="sr-only"> (completo)</span> : null}
+                    </h3>
                   </div>
-                </div>
-
-                <div className="upgrade-root-card">
-                  <span className="upgrade-root-label">Prossimo</span>
-                  {recommendedUpgrade ? (
-                    <div className="upgrade-root-next">
-                      <strong>{recommendedUpgrade.definition.title}</strong>
-                      <span>
-                        {UPGRADE_CATEGORIES.find((category) => category.id === recommendedUpgrade.definition.category)?.title}
-                        {" · liv. "}{state.upgrades[recommendedUpgrade.definition.id]} → {state.upgrades[recommendedUpgrade.definition.id] + 1}
-                      </span>
-                    </div>
-                  ) : <span className="upgrade-root-empty">Niente da comprare</span>}
-                  {/* Fixed twin of the node's quick buy: same spot every time, however the tree scrolls. */}
-                  <button
-                    type="button"
-                    className="upgrade-root-buy"
-                    onClick={buyCheapest}
-                    disabled={!recommendedUpgrade || state.school.euros < recommendedUpgrade.cost}
-                    aria-label={recommendedUpgrade
-                      ? `Acquisto rapido: ${recommendedUpgrade.definition.title}`
-                      : "Acquisto rapido: niente da comprare"}
-                    title={recommendedUpgrade && state.school.euros < recommendedUpgrade.cost
-                      ? `Mancano ${formatCurrency(recommendedUpgrade.cost - state.school.euros)}`
-                      : undefined}
-                  >
-                    {(() => {
-                      const label = recommendedUpgrade ? `Compra · ${formatStat(recommendedUpgrade.cost)} €` : "Compra";
-                      return <span className="upgrade-fit-text" style={{ "--fit-chars": label.length } as CSSProperties}>{label}</span>;
-                    })()}
-                  </button>
-                </div>
-
-                {onBuyAllUpgrades ? (
-                  <div className="upgrade-root-card all">
-                    <span className="upgrade-root-label">Compra tutto</span>
-                    <div className="upgrade-root-count">
-                      <strong>{buyAllPlan.count}</strong>
-                      <span>upgrade</span>
-                    </div>
-                    <strong className="upgrade-root-total">{formatStat(buyAllPlan.total)} €</strong>
-                    <div className="upgrade-root-meter" aria-hidden="true">
-                      <i style={{ width: `${buyAllPlan.share}%` }} />
-                    </div>
-                    <span className="upgrade-root-rest">
-                      {buyAllPlan.share}% dei fondi · restano {formatStat(state.school.euros - buyAllPlan.total)} €
+                  <p>{getCategorySummary(state, category.id)}</p>
+                  {isSecrets ? null : (
+                    <span className="upgrade-lane-points">
+                      <strong>{getUpgradeCategoryPoints(state.upgrades, category.id)}</strong> punti nel ramo
                     </span>
-                    <button
-                      type="button"
-                      className="upgrade-root-buy-all"
-                      onClick={onBuyAllUpgrades}
-                      disabled={buyAllPlan.count === 0}
-                      aria-label={`Compra tutto: ${buyAllPlan.count} upgrade per ${formatStat(buyAllPlan.total)} €`}
-                      title="Dal più economico in su, finché i fondi bastano. I percorsi segreti restano a te."
-                    >
-                      Compra tutto
-                    </button>
+                  )}
+                </div>
+                <div className="upgrade-lane-track">
+                  <div className="upgrade-lane-canvas">
+                    <UpgradeLaneWave count={definitions.length} litTo={litTo} />
+                    <ol className="upgrade-lane-nodes">
+                      {definitions.map((definition, index) =>
+                        isSecrets &&
+                        !state.secretUpgradeDiscoveries.includes(
+                          definition.id as SecretUpgradeId,
+                        ) ? (
+                          <MysteryUpgradeNode
+                            key={definition.id}
+                            index={index}
+                            selected={selection?.upgradeId === definition.id}
+                            onSelect={(anchor) => toggleDetails(definition.id, anchor)}
+                          />
+                        ) : (
+                          <UpgradeNode
+                            key={definition.id}
+                            definition={definition}
+                            index={index}
+                            state={stateOverride}
+                            selected={selection?.upgradeId === definition.id}
+                            onSelect={(anchor) => toggleDetails(definition.id, anchor)}
+                            onQuickBuy={recommendedUpgrade?.definition.id === definition.id ? buyCheapest : undefined}
+                          />
+                        )
+                      )}
+                    </ol>
                   </div>
-                ) : null}
-              </div>
-              <div className="upgrade-tree-branches">
-                {UPGRADE_CATEGORIES.filter(
-                  (category) => isUpgradeCategoryVisible(state, category.id),
-                ).map((category) => {
-                  const definitions = UPGRADE_DEFINITIONS.filter(
-                    (definition) =>
-                      definition.category === category.id &&
-                      !definition.hidden &&
-                      !definition.extension,
-                  );
-                  const extensions = UPGRADE_DEFINITIONS.filter(
-                    (definition) =>
-                      definition.category === category.id &&
-                      !definition.hidden &&
-                      definition.extension,
-                  );
-                  const branchComplete = category.id !== "secrets" &&
-                    [...definitions, ...extensions].every(
-                      (definition) => state.upgrades[definition.id] >= definition.maxLevel,
-                    );
-                  return (
-                    <section className={`upgrade-branch${branchComplete ? " complete" : ""}`} key={category.id} aria-labelledby={`upgrade-branch-${category.id}`}>
-                      <div className="upgrade-branch-heading">
-                        <span className="upgrade-branch-icon"><Icon name={categoryIcons[category.id]} /></span>
-                        <div>
-                          <h3 id={`upgrade-branch-${category.id}`}>
-                            {category.title}
-                            {branchComplete ? <span className="sr-only"> (completo)</span> : null}
-                          </h3>
-                          <p>{getCategorySummary(state, category.id)}</p>
-                        </div>
-                      </div>
-                      <ol className="upgrade-branch-nodes">
-                        {definitions.map((definition) =>
-                          category.id === "secrets" &&
-                          !state.secretUpgradeDiscoveries.includes(
-                            definition.id as SecretUpgradeId,
-                          ) ? (
-                            <MysteryUpgradeNode
-                              key={definition.id}
-                              selected={selection?.upgradeId === definition.id}
-                              onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
-                            />
-                          ) : (
-                            <UpgradeNode
-                              key={definition.id}
-                              definition={definition}
-                              state={stateOverride}
-                              selected={selection?.upgradeId === definition.id}
-                              onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
-                              onQuickBuy={recommendedUpgrade?.definition.id === definition.id ? buyCheapest : undefined}
-                            />
-                          )
-                        )}
-                      </ol>
-                      {extensions.length > 0 ? (
-                        <div className="upgrade-branch-extension">
-                          <small>Ramo laterale</small>
-                          <ol className="upgrade-branch-nodes">
-                            {extensions.map((definition) => (
-                              <UpgradeNode
-                                key={definition.id}
-                                definition={definition}
-                                state={stateOverride}
-                                selected={selection?.upgradeId === definition.id}
-                                onSelect={(anchor) => setSelection({ upgradeId: definition.id, anchor })}
-                                onQuickBuy={recommendedUpgrade?.definition.id === definition.id ? buyCheapest : undefined}
-                              />
-                            ))}
-                          </ol>
-                        </div>
-                      ) : null}
-                    </section>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+                </div>
+              </section>
+            );
+          })}
         </div>
       </section>
 

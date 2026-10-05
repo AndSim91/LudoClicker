@@ -14,7 +14,7 @@ import {
   recruitCollaborator,
   recruitEnrolledLegendaryCollaborators,
 } from "./collaboratorFlow";
-import { startFormOneForUnqualifiedInstructors } from "./automaticInstructorTraining";
+import { startELearningInstructorCourses } from "./automaticInstructorTraining";
 import { reconcileCollaboratorManagement } from "./collaboratorManagement";
 import {
   finalizeEmail,
@@ -262,7 +262,7 @@ function tickStep(
     if (role !== "instructor") continue;
     nextState = processWaitingTrainings(nextState, now);
     nextState = processPriorityInstructorQualifications(nextState, now);
-    nextState = startFormOneForUnqualifiedInstructors(nextState, now);
+    nextState = startELearningInstructorCourses(nextState, now);
     nextState = processTechnicianCourseReservations(nextState, now);
     nextState = processAutomaticTeaching(
       nextState,

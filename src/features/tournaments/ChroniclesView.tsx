@@ -1,3 +1,4 @@
+import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
 import { useMemo, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { TableSortResetButton } from "../../components/common/TableSortResetButton";
@@ -180,7 +181,7 @@ export function ChroniclesView({
             contact.id,
             {
               values: getContactPreparation(contact, forms),
-              visible: hasUnlockedOfficialStats(forms),
+              visible: hasUnlockedOfficialStats(forms, getOfficialStatsVisibilityTier(state.upgrades)),
             },
           ] as const;
         }),

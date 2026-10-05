@@ -54,6 +54,7 @@ import { migrateSuperbaMomentState } from "./saveMigrations/superbaMoment";
 import { migrateSuperbaLevelOneState } from "./saveMigrations/superbaLevelOne";
 import { migrateLegendaryResetState } from "./saveMigrations/legendaryReset";
 import { migrateOfficialSupplierState } from "./saveMigrations/officialSupplier";
+import { migratePointUnlocksState } from "./saveMigrations/pointUnlocks";
 import { migrateNetworkRentState } from "./saveMigrations/networkRent";
 import { migrateReputationShopState } from "./saveMigrations/reputationShop";
 import { migrateCareerAchievementsState } from "./saveMigrations/careerAchievements";
@@ -125,6 +126,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateSuperbaLevelOneState,
   migrateLegendaryResetState,
   migrateOfficialSupplierState,
+  migratePointUnlocksState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

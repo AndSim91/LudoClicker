@@ -40,6 +40,8 @@ export interface MemberSortContext {
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
   courseXUnlocked: boolean;
+  /** Occhio del Maestro level: when Arena and Style are visible. */
+  statsTier: number;
   collaboratorsByContactId: ReadonlyMap<string, Collaborator>;
 }
 
@@ -57,7 +59,7 @@ export function getMemberVisibleScore(
   context: MemberSortContext,
 ): number | null {
   const forms = getMemberStudent(contact, context).forms;
-  if (!hasUnlockedOfficialStats(forms)) return null;
+  if (!hasUnlockedOfficialStats(forms, context.statsTier)) return null;
   return getContactPreparation(contact, forms)[key];
 }
 

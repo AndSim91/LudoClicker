@@ -22,8 +22,9 @@ import { discoverSecretUpgrade } from "./upgradeFlow";
 import {
   getBusyEventCollaboratorIds,
   getCollaboratorsById,
-  getRunningEventDefinitionIds,
+  getRunningEventCounts,
 } from "./runtimeIndexes";
+import { getEventExtraCopies } from "../content/upgrades";
 import { isGameAreaUnlocked } from "./progression";
 import {
   FIRST_EVENT_TUTORIAL_SCENE_ID,
@@ -32,7 +33,7 @@ import {
 import type { AcquisitionEvent, Collaborator, GameState } from "./types";
 
 export interface EventStartCheckContext {
-  runningDefinitionIds: ReadonlySet<AcquisitionEvent["definitionId"]>;
+  runningCounts: ReadonlyMap<AcquisitionEvent["definitionId"], number>;
   busyCollaboratorIds: ReadonlySet<string>;
   collaboratorsById: ReadonlyMap<string, Collaborator>;
   availableMembers: number;
@@ -41,7 +42,7 @@ export interface EventStartCheckContext {
 
 export function createEventStartCheckContext(state: GameState): EventStartCheckContext {
   return {
-    runningDefinitionIds: getRunningEventDefinitionIds(state.acquisitionEvents),
+    runningCounts: getRunningEventCounts(state.acquisitionEvents),
     busyCollaboratorIds: getBusyEventCollaboratorIds(state.acquisitionEvents),
     collaboratorsById: getCollaboratorsById(state.collaborators),
     availableMembers: selectAvailableEventMembers(state),
@@ -58,7 +59,9 @@ function getEventStartDetails(
 ) {
   const definition = getAcquisitionEventDefinition(definitionId);
   if (!definition) return undefined;
-  if (checkContext.runningDefinitionIds.has(definitionId)) return undefined;
+  // Eventi nel Multiverso: up to 1 + extra copies of the same event at once.
+  const runningCopies = checkContext.runningCounts.get(definitionId) ?? 0;
+  if (runningCopies > getEventExtraCopies(state.upgrades)) return undefined;
   const collaborator = collaboratorId
     ? checkContext.collaboratorsById.get(collaboratorId)
     : undefined;
@@ -81,11 +84,17 @@ function getEventStartDetails(
   const masteryDefinition = collaborator
     ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0)
     : undefined;
-  const eventCost = Math.round(
-    definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1),
+  const eventCost = getEventCopyCost(
+    Math.round(definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1)),
+    runningCopies,
   );
   if (state.school.euros < eventCost) return undefined;
   return { definition, masteryDefinition, eventCost };
+}
+
+/** Each copy started while the event runs costs double the previous one: 50 → 100 → 200 €. */
+export function getEventCopyCost(baseCost: number, runningCopies: number): number {
+  return baseCost * 2 ** runningCopies;
 }
 
 export function canStartAcquisitionEvent(
@@ -259,7 +268,12 @@ export function resolveAcquisitionEvent(
           (rewardState.historyArchive.completedEventsByDefinition[event.definitionId] ?? 0) + 1,
       },
     },
-    activities: definition
+    // The wait starts when the last copy of the event ends (Eventi nel Multiverso).
+    activities: definition && !rewardState.acquisitionEvents.some((candidate) =>
+      candidate.id !== event.id &&
+      candidate.status === "running" &&
+      candidate.definitionId === event.definitionId
+    )
       ? {
           ...rewardState.activities,
           eventCooldowns: {

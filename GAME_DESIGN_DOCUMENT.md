@@ -651,14 +651,14 @@ potenza, per il giocatore e per Redazione e Social.
 Entrambe le meccaniche sono bloccate all'inizio e riguardano solo l'input
 manuale.
 
-- **Flusso** (nodo di estensione **Ritmo di battitura**, 4 livelli: €100,
+- **Flusso** (nodo **Ritmo di battitura** del ramo Scrittura, 4 livelli: €100,
   €250, €600, €1.500; richiede Tastiera comoda 2). Ogni input aggiunge 2 punti
   a un indicatore da 0 a 100; ogni 25 punti il moltiplicatore sale di un
   gradino e l'indicatore si ferma al valore che corrisponde al tetto attuale.
   Il primo livello fissa il tetto a ×2 e ogni livello successivo lo alza di 1,
   fino a ×5. Nei primi 1,5 secondi senza input l'indicatore scende
   di 5 punti al secondo, poi di 40 punti al secondo.
-- **Frase perfetta** (nodo di estensione **Frasi fatte**, 5 livelli: €400,
+- **Frase perfetta** (nodo **Frasi fatte** del ramo Scrittura, 5 livelli: €400,
   €800, €1.600, €3.200, €6.400; richiede Ritmo di battitura 2). Con almeno un
   livello, ogni input ha una probabilità di completare subito la frase in
   corso (fino al prossimo `.`, `!`, `?`, a capo o, nel sorgente HTML, `>`), per
@@ -941,6 +941,11 @@ Ogni evento richiede:
 - un costo in Euro;
 - una Fama della scuola almeno pari alla soglia di sblocco;
 - eventuali requisiti di Carisma, Social o Attrezzatura.
+
+Ogni evento gira una copia alla volta; con **Eventi nel Multiverso** (§ 10.3)
+sotto un evento in corso compare «Altra copia · prezzo»: la copia costa il
+doppio della precedente, chiede gli stessi iscritti e le stesse spade, e la
+pausa di ricarica parte quando finisce l'ultima copia.
 
 > **Da implementare:** non esistono requisiti di Carisma, Social o Attrezzatura per avviare un evento, oltre a iscritti, spade disponibili, Euro, Fama e cooldown.
 
@@ -1437,6 +1442,12 @@ più alta. Il Volantinaggio partecipa alla graduatoria ed è quindi normalmente 
 prima scelta. Eventi già in corso, in cooldown o non sostenibili per sblocchi,
 Euro, iscritti o spade vengono saltati.
 
+Con **Eventi nel Multiverso** (Carisma, § 10.3) lo stesso evento può girare in
+più copie contemporanee. L'automazione prova prima gli eventi che non sono già
+in corso, sempre dal più economico; solo se nessuno può partire apre una copia
+di un evento in corso, dalla copia più economica (ogni copia costa il doppio
+della precedente, il Volantinaggio resta gratis), finché i fondi bastano.
+
 La raccolta automatica deve essere più lenta degli eventi gestiti attivamente,
 ma sufficiente a impedire un blocco totale nelle fasi avanzate.
 
@@ -1499,8 +1510,10 @@ Regole:
   Forma, Arena Tecnica, Corso Agonisti, Corso Istruttori o Corso Tecnico;
 - il recupero rispetta costo, spade, slot annuali e condizioni didattiche
   ordinarie; se una formazione è già attiva, attende la sua conclusione;
-- le statistiche ufficiali Arena e Stile diventano visibili soltanto dopo il
-  completamento di **Corso Y**;
+- le statistiche ufficiali Arena e Stile si vedono con **Occhio del Maestro**
+  (Insegnamento, § 10.7): mai senza il nodo, dopo il completamento di
+  **Corso Y** al livello 1, dall'iscrizione al livello 2; dove sono nascoste
+  compare «???» con un suggerimento su come vederle;
 - ogni iscritto o collaboratore può iniziare al massimo una Forma per anno
   formativo; il livello 6 di **Didattica di gruppo** porta questo limite a due
   e il livello 1 di **PagoSport** lo porta a tre;
@@ -1879,78 +1892,75 @@ per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
 La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
 Insegnamento e Organizzazione**, seguiti dalla riga dei **Percorsi Segreti**.
-Ogni ramo contiene esattamente sette potenziamenti principali; Scrittura ha in
-più un **ramo laterale** con due nodi (Ritmo di battitura e Frasi
-fatte), mostrato sotto Tastiera comoda, da cui dipende. Il ramo Gadget compare soltanto
-dopo lo sblocco del settore. Social non ha più un ramo separato: i suoi
-effetti sono distribuiti tra Scrittura e Creatività.
+Ogni ramo è **una sola linea di nodi**, senza rami laterali: Scrittura e
+Insegnamento ne hanno 9, Carisma e Attrezzatura 8, gli altri 7. Il ramo Gadget
+compare soltanto dopo lo sblocco del settore. Social non ha più un ramo
+separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 
-Il nodo disponibile **più economico** ha un pulsante «Compra · prezzo» proprio
-sotto di sé, per comprarlo con un clic senza aprire i dettagli (disattivato,
-con quanto manca nel suggerimento, se i Fondi non bastano). Lo stesso acquisto
-ha anche un posto fisso: nella colonna sinistra dell'albero, sotto l'icona
-della radice, un pulsante «Compra» col prezzo, e sotto il nome del nodo, resta fermo mentre l'albero
-scorre, così si sa sempre dove premere. Sopra l'albero, una riga
-riassume quanti nodi sono completati e spiega la legenda (da comprare, fondi
-insufficienti, bloccati, completati); il riepilogo **Bonus totali** degli
-effetti già ottenuti è una tendina chiusa. Ogni nodo non completato mostra
-livello e prezzo del livello successivo («2/5 · 600 €»); un nodo completato
-mostra solo la spunta, e un ramo tutto completato accende la propria icona.
-Selezionando un nodo si apre un riquadro con descrizione, livello, effetto e
-prerequisiti esatti; il pulsante d'acquisto riporta il prezzo.
+**La pagina.** In alto, accanto al titolo, ci sono i **Fondi** e il pulsante
+**«Compra tutto · N per X €»** (dal più economico in su finché i fondi bastano;
+i Percorsi Segreti restano esclusi). Sotto, una riga riassume quanti nodi sono
+completati e la legenda (da comprare, fondi insufficienti, bloccati,
+completati); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
+una **corsia**: a sinistra icona, nome, riepilogo dell'effetto e **punti nel
+ramo**; a destra i nodi, in nove colonne uguali per tutti i rami, disposti su
+un'**onda** (un nodo in alto e uno in basso). L'onda si accende fino al nodo
+dopo l'ultimo completato. Ogni nodo non completato mostra livello e prezzo
+(«2/5 · 600 €»); un nodo bloccato mostra invece il lucchetto e **come si
+apre** («🔒 13 punti in Carisma», «🔒 Serve il Social»); un nodo completato
+mostra la spunta, e un ramo tutto completato accende la propria icona. Il nodo
+disponibile **più economico** ha sotto di sé un pulsante «Compra · prezzo».
+
+Cliccando un nodo si apre una **finestra agganciata al nodo**, sotto oppure
+sopra in base allo spazio libero sullo schermo, con: ramo e posizione («nodo
+4»), titolo, descrizione, livello con tacche, effetto, **«Si apre con»** (ogni
+requisito con spunta o lucchetto, e i punti che hai) e il pulsante d'acquisto;
+in fondo, il nodo successivo del ramo. Si chiude con ×, con Esc, cliccando
+fuori o cliccando di nuovo il nodo.
 
 I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
-scuola già fondata aggiunge il 15% ai prezzi di Scrittura (estensione
-compresa), Creatività, Carisma, Accoglienza, Attrezzatura e Organizzazione:
-con n scuole fondate il prezzo è moltiplicato per 1 + 0,15 × n e arrotondato
-all'euro. Gadget, Insegnamento e Percorsi Segreti non ricevono questa
-maggiorazione.
+scuola già fondata aggiunge il 15% ai prezzi di Scrittura, Creatività,
+Carisma, Accoglienza, Attrezzatura e Organizzazione: con n scuole fondate il
+prezzo è moltiplicato per 1 + 0,15 × n e arrotondato all'euro. Gadget,
+Insegnamento e Percorsi Segreti non ricevono questa maggiorazione.
 
-I prerequisiti seguono due regole. Un nodo che dichiara requisiti espliciti
-richiede soltanto quei livelli (riportati sotto ciascuna tabella). Un nodo che
-non ne dichiara richiede invece che **tutti i nodi precedenti dello stesso
-ramo siano al livello massimo**: Creatività, Carisma, Accoglienza,
-Attrezzatura e Organizzazione si sbloccano quindi in sequenza stretta. Il nodo
-bloccato indica il primo requisito mancante («Completa prima …», oppure
-«Porta prima … al livello N» quando basta un livello).
+**Sblocco a punti.** Ogni livello comprato in un ramo vale **1 punto di quel
+ramo**. Un nodo si apre quando nel ramo hai speso almeno la sua **soglia** di
+punti, in qualunque nodo (`requiredBranchPoints`). Un legame diretto resta
+solo quando lo chiede la storia: punti di un altro ramo
+(`requiredCategoryPoints`), un nodo a un certo livello
+(`requiredUpgradeLevels`) o una funzione del gioco (Social, settore Gadget,
+Forme, una scuola fondata, un prodotto Gadget). Le soglie tengono il costo
+minimo per aprire i nodi importanti intorno al 40–60% di quello della regola
+precedente («tutti i nodi prima completi»); l'analisi completa è nel documento
+di progetto «sblocco-a-punti». I livelli già comprati restano anche se sotto
+soglia (salvataggio v100).
 
 ### 10.1 Scrittura
 
 Accelera la produzione manuale e automatica delle email e dei contenuti Social.
 
-| Potenziamento | Effetto completo | Costi per livello |
-| --- | --- | --- |
-| Tastiera comoda | +0,2 caratteri per input per livello; massimo +1. Con Frasi fatte: +0,15% Frase perfetta per livello | 50 / 100 / 200 / 400 / 800 € |
-| Frasi rapide | +0,4 caratteri per input per livello; massimo +2. Con Frasi fatte: +0,15% Frase perfetta per livello | 150 / 300 / 600 / 1.200 / 2.400 € |
-| Firma automatica | +10% velocità Redazione/Social per livello; massimo +50% | 300 / 600 / 1.200 / 2.400 / 4.800 € |
-| Campi intelligenti | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create. Con Frasi fatte: +0,15% Frase perfetta per livello | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
-| Sintesi dei contenuti | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
-| Revisione istantanea | +15% velocità Redazione/Social per livello; massimo +75%. Con Frasi fatte: +0,3% Frase perfetta per livello | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
-| Fusione documenti | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Potenziamento | Soglia | Effetto completo | Costi per livello |
+| --- | --- | --- | --- |
+| Tastiera comoda | 0 | +0,2 caratteri per input per livello; massimo +1. Con Frasi fatte: +0,15% Frase perfetta per livello | 50 / 100 / 200 / 400 / 800 € |
+| Ritmo di battitura | 2 | sblocca il **Flusso**: tetto del moltiplicatore ×2 al livello 1, poi +1 per livello fino a ×5 al livello 4 | 100 / 250 / 600 / 1.500 € |
+| Frasi rapide | 2 | +0,4 caratteri per input per livello; massimo +2. Con Frasi fatte: +0,15% Frase perfetta per livello | 150 / 300 / 600 / 1.200 / 2.400 € |
+| Frasi fatte | 3 | sblocca la **Frase perfetta**: +0,25% per livello; insieme ai bonus degli altri nodi di Scrittura arriva al massimo del 5% | 400 / 800 / 1.600 / 3.200 / 6.400 € |
+| Firma automatica | 4 | +10% velocità Redazione/Social per livello; massimo +50% | 300 / 600 / 1.200 / 2.400 / 4.800 € |
+| Campi intelligenti | 6 | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create. Con Frasi fatte: +0,15% Frase perfetta per livello | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Sintesi dei contenuti | 9 + Social | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Revisione istantanea | 11 | +15% velocità Redazione/Social per livello; massimo +75%. Con Frasi fatte: +0,3% Frase perfetta per livello | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
+| Fusione documenti | 25 + Social | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
-Prerequisiti: Tastiera comoda nessuno; Frasi rapide richiede Tastiera comoda 2;
-Firma automatica richiede Frasi rapide 2; Campi intelligenti richiede Firma
-automatica 2; Sintesi dei contenuti richiede Campi intelligenti 2 e lo sblocco
-di Social; Revisione istantanea richiede Campi intelligenti 3; Fusione
-documenti richiede Sintesi dei contenuti 3, Revisione istantanea 3 e Social.
+La soglia è in punti di Scrittura; «+ Social» vuol dire che serve anche lo
+sblocco di Social. Finché Frasi fatte è a livello 0, i bonus Frase perfetta
+degli altri nodi non hanno effetto. A rami completi la somma è esattamente 5%
+(1,25% Frasi fatte + 0,75% ciascuno per Tastiera comoda, Frasi rapide e Campi
+intelligenti + 1,5% Revisione istantanea).
 
 I caratteri per input partono da 1 e sommano i bonus dei nodi; il totale è poi
 moltiplicato per la Reputazione Email/Social (+20% a punto). La velocità Redazione/Social si somma ai bonus
 generici di automazione dell'Organizzazione.
-
-**Ramo laterale.** Le due meccaniche di ritmo della scrittura manuale
-partono bloccate e si acquistano qui:
-
-| Potenziamento | Effetto completo | Costi per livello |
-| --- | --- | --- |
-| Ritmo di battitura | sblocca il **Flusso**: tetto del moltiplicatore ×2 al livello 1, poi +1 per livello fino a ×5 al livello 4 | 100 / 250 / 600 / 1.500 € |
-| Frasi fatte | sblocca la **Frase perfetta**: +0,25% per livello; insieme ai bonus degli altri nodi di Scrittura arriva al massimo del 5% | 400 / 800 / 1.600 / 3.200 / 6.400 € |
-
-Ritmo di battitura richiede Tastiera comoda 2; Frasi fatte richiede Ritmo di
-battitura 2. Finché Frasi fatte è a livello 0, i bonus Frase perfetta degli
-altri nodi non hanno effetto. A rami completi la somma è esattamente 5%
-(1,25% Frasi fatte + 0,75% ciascuno per Tastiera comoda, Frasi rapide e Campi
-intelligenti + 1,5% Revisione istantanea).
 
 ### 10.2 Creatività
 
@@ -1975,8 +1985,9 @@ del suo catalogo di una frase ciascuno.
 | Pubblicità vincente | catalogo 6: oggetti promozionali e sezione video; probabilità Follower Social 50% → 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Corso di Marketing | catalogo 7: email finale HTML; valore mensile del Follower 0,10 → 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-Prerequisiti: Controllo ortografico nessuno; ogni nodo successivo richiede
-tutti i precedenti al livello 5.
+Soglie in punti di Creatività: 0 · 5 · 10 · 15 · 20 · 25 · 30. Il ramo resta
+una catena per ragioni narrative (ogni nodo è il catalogo email successivo):
+le soglie coincidono con «tutti i nodi precedenti completi».
 
 ### 10.3 Carisma
 
@@ -1992,9 +2003,23 @@ Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
 | Risposte alle domande difficili | +6% contatti dagli eventi | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | No, non è esattamente quella cosa | +8% contatti dagli eventi | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 
-A rami completi: +110% contatti dagli eventi e +90% pubblico. Prerequisiti:
-Presentazione preparata nessuno; ogni nodo successivo richiede tutti i
-precedenti al livello 5.
+A rami completi: +110% contatti dagli eventi e +90% pubblico. Soglie in punti
+di Carisma: Presentazione preparata 0, Biglietti con QR code 3, Dimostrazione
+coordinata 8, Stand riconoscibile 13, **Eventi nel Multiverso** 15, Set da
+dimostrazione 18, Risposte alle domande difficili 23, No, non è esattamente
+quella cosa 30.
+
+**Eventi nel Multiverso** (2 livelli: 4.000 / 20.000 €; «Lo stesso evento, in
+due universi paralleli. Il pubblico non nota la differenza.») permette di
+lanciare **di nuovo lo stesso evento mentre è in corso**: livello 1 fino a 2
+copie in contemporanea, livello 2 fino a 3. Ogni copia costa il **doppio della
+precedente** (50 → 100 → 200 €; il Volantinaggio resta gratuito) e chiede
+iscritti e spade come l'originale. La pausa di ricarica dell'evento parte
+quando finisce **l'ultima copia**. Nella pagina Eventi, sotto un evento in
+corso compare il pulsante «Altra copia · prezzo» (§ 8). Gli addetti Eventi
+avviano prima gli eventi nuovi, dal più economico; solo quando nessun evento
+nuovo può partire aprono una copia, dalla più economica, finché i fondi
+bastano.
 
 ### 10.4 Accoglienza
 
@@ -2016,8 +2041,9 @@ A ramo completo il percorso raggiunge il 100%. Al percorso si sommano anche il
 contributo degli Istruttori (10% della loro produttività, potenziato da
 Collaboratore dedicato), con tetto complessivo al 100%. La durata base della prova è 15 secondi, quindi Sala
 preparata al livello 5 la porta esattamente al minimo di 10 secondi.
-Prerequisiti: Procedura di benvenuto nessuno; ogni nodo successivo richiede
-tutti i precedenti al livello 5.
+Soglie in punti di Accoglienza: 0 · 3 · 8 · 13 · 18 · 23 · 28; Esperienza
+memorabile chiede in più **10 punti in Insegnamento** (si insegna la Settima
+alla prima lezione di prova: serve una scuola che sa insegnare).
 
 Il recupero di Esperienza memorabile vale una sola volta per contatto, esclude i
 Leggendari Segreti (e i Leggendari già iscritti) e rimette il contatto tra i
@@ -2051,9 +2077,11 @@ prodotto durante il guasto.
 A ramo completo l'usura programmata scende del 50%, che è anche il tetto
 massimo della riduzione da potenziamenti; la velocità di manutenzione
 automatica sale del 100%, sommata ai bonus generici di automazione
-dell'Organizzazione. Prerequisiti: Fornitore ufficiale nessuno; ogni nodo
-successivo richiede tutti i precedenti al livello massimo (Controllo prima
-dell'uso richiede quindi il Fornitore ufficiale).
+dell'Organizzazione. Soglie in punti di Attrezzatura: Fornitore ufficiale e
+Controllo prima dell'uso 0, Kit di manutenzione 4, Banco da lavoro 9, Ricambi
+essenziali 13, Lista di controllo 18, Registro dell'attrezzatura 23, Le abbiamo
+messe a posto tutte 28 e **ogni altro nodo del ramo almeno al livello 1** (la
+dichiarazione deve essere supportata dai fatti).
 
 ### 10.6 Gadget
 
@@ -2070,13 +2098,11 @@ diventa visibile soltanto con lo sblocco del settore.
 | Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
 | Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
-Tutti i nodi richiedono lo sblocco del settore Gadget. Prerequisiti ulteriori:
-Negozio online richiede Vetrina della scuola 2 e lo sblocco di Social;
-Laboratorio revisioni richiede Strumenti di progettazione 2; Formazione
-commerciale richiede Gestione degli ordini 2; Vendita abbinata richiede
-Formazione commerciale 3 e il progetto Tazza già sbloccato. Vetrina della
-scuola, Strumenti di progettazione e Gestione degli ordini non hanno
-prerequisiti. La capacità commerciale riceve anche i bonus generici di
+Tutti i nodi richiedono lo sblocco del settore Gadget. Soglie in punti di
+Gadget, nell'ordine della linea: Vetrina della scuola 0, Strumenti di
+progettazione 0, Gestione degli ordini 2, Laboratorio revisioni 3, Negozio
+online 3 e lo sblocco di Social, Formazione commerciale 8, Vendita abbinata 12
+e il progetto Tazza già sbloccato. La capacità commerciale riceve anche i bonus generici di
 automazione dell'Organizzazione.
 
 ### 10.7 Insegnamento
@@ -2087,19 +2113,21 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
+| Occhio del Maestro | L1 Arena e Stile visibili dopo il Corso Y; L2 visibili dall'iscrizione. Senza il nodo non si vedono mai | 1.000 / 10.000 € |
 | Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
 | Master of none | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 € |
+| Istruttori in e-Learning | gli Istruttori fanno da soli il corso da istruttore delle Forme, uno alla volta: L1 Forma 1; L2 anche Forma 2 (e Corso X, se sbloccato); L3 anche Corso Y. Mai oltre | 1.500 / 6.000 / 20.000 € |
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 | Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
 | PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
 
-Prerequisiti: Percorso Tecnico nessuno; Master of none richiede Percorso
-Tecnico 1; Tu conosci la SIS? richiede Master of none 5; Il costo del Servizio
-richiede Tu conosci la SIS? 1; Didattica di gruppo richiede Il costo del
-Servizio 2; Nessun *Rancor*e richiede Didattica di gruppo 6 e Percorso
-Tecnico 3; PagoSport richiede Nessun *Rancor*e 10. I rami d'arma per
+Soglie in punti di Insegnamento: Occhio del Maestro e Percorso Tecnico 0,
+Master of none 1, Istruttori in e-Learning 3 (e le Forme sbloccate), Tu
+conosci la SIS? 9, Il costo del Servizio 10, Didattica di gruppo 12, Nessun
+*Rancor*e 28 e **Percorso Tecnico al livello 3** (trasforma l'Arena Tecnica),
+PagoSport 38. I rami d'arma per
 Istruttore partono da 1 e arrivano al massimo a 3; gli allievi contemporanei
 partono da 1; i corsi annuali arrivano al massimo a 3 (base, Didattica di
 gruppo 6 e PagoSport 1).
@@ -2111,6 +2139,15 @@ un anno. I livelli 2–4 ne portano progressivamente il massimo a +4/+4; il
 livello 5 sblocca Preparazione agonistica; i livelli 6–10 portano l'efficacia
 aggiuntiva della preparazione al 50%, mentre il livello 10 porta anche il
 massimo del corso a +5/+5.
+
+**Istruttori in e-Learning** (testo: «Il corso è registrato. Le domande si
+fanno nei commenti.») funziona sempre, anche senza l'assegnazione automatica:
+ogni Collaboratore assegnato come Istruttore avvia da solo il primo corso della
+lista che non sa ancora insegnare, con le stesse regole del pulsante del Centro
+didattico («Abilita» o «Impara e abilita»: costo, spade e posti annuali). Senza
+fondi riprova al tick successivo. Il Corso X entra con il livello 2 perché,
+quando è sbloccato, il percorso lo chiede prima di qualsiasi altra Forma
+(`automaticInstructorTraining.ts`).
 
 ### 10.8 Organizzazione
 
@@ -2138,10 +2175,11 @@ non c'è Preparazione agonistica attiva.
 
 Le automazioni generiche (Procedure standard e Coordinamento multi-sede, fino
 a +75% insieme) accelerano Redazione/Social, manutenzione dell'attrezzatura,
-sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica. Prerequisiti: Manuale operativo
-nessuno; ogni nodo successivo richiede tutti i precedenti al livello massimo
-(Priorità operative ha un solo livello); Coordinamento multi-sede richiede in
-più almeno una scuola fondata.
+sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
+Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
+3, Procedure standard 8, Modulo di iscrizione 13, Priorità operative 18 e
+**Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
+A.N.D.E.R. 18, Coordinamento multi-sede 23 e almeno una scuola fondata.
 
 ### 10.9 Percorsi Segreti
 
@@ -2175,8 +2213,9 @@ automaticamente scoperto. I due prezzi non ricevono maggiorazioni di rete.
 
 Tutti i potenziamenti vengono acquistati esclusivamente in Euro e non sono
 rimborsabili. I costi sono elenchi espliciti per livello: non dipendono più da
-una formula generale implicita. Oltre agli Euro, un nodo può richiedere livelli
-precedenti, lo sblocco di Social o Gadget, un prodotto Gadget, almeno una
+una formula generale implicita. Oltre agli Euro, un nodo può richiedere punti
+nel proprio ramo (o in un altro, per ragioni narrative), un nodo a un certo
+livello, lo sblocco di Social, Gadget o Forme, un prodotto Gadget, almeno una
 scuola nella rete oppure, per i Percorsi Segreti, la scoperta del percorso. Il
 formato prevede anche un requisito di Fama, ma oggi nessun nodo lo usa (vale
 0 per tutti). Ogni acquisto aggiorna subito i caratteri per input.

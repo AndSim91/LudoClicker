@@ -18,7 +18,7 @@ import {
   getNextScheduledTrialDeadline,
   getNextSendingEmailDeadline,
   getNextTrainingDeadline,
-  getRunningEventDefinitionIds,
+  getRunningEventCounts,
   getScheduledTrials,
   getScheduledTrialsByStart,
   getWaitingTrainingsByPriority,
@@ -217,7 +217,7 @@ describe("runtime indexes", () => {
     expect(getNextScheduledTrialDeadline(trials)).toBe(2_000);
     expect(getNextRunningEventDeadline(events)).toBe(6_000);
     expect(getNextTrainingDeadline(contacts)).toBe(7_000);
-    expect(getRunningEventDefinitionIds(events)).toBe(getRunningEventDefinitionIds(events));
+    expect(getRunningEventCounts(events)).toBe(getRunningEventCounts(events));
     expect(getBusyEventCollaboratorIds(events)).toBe(getBusyEventCollaboratorIds(events));
 
     const waiting = getWaitingTrainingsByPriority(contacts, initial.collaborators);

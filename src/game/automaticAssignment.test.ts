@@ -5,7 +5,7 @@ import {
   getCollaboratorAssignmentCounts,
   getInstructorPendingReleaseIds,
 } from "./collaboratorManagement";
-import { startFormOneForUnqualifiedInstructors } from "./automaticInstructorTraining";
+import { getELearningForms, startELearningInstructorCourses } from "./automaticInstructorTraining";
 import { gameReducer } from "./engine";
 import { createInitialState } from "./initialState";
 import { migrateAutomaticShareLevelsState } from "./saveMigrations/automaticShareLevels";
@@ -176,44 +176,59 @@ describe("Assegnazione automatica (4.7)", () => {
   });
 });
 
-describe("Istruttori senza Forme nell'assegnazione automatica", () => {
-  function automaticWithInstructor(extra: Partial<Collaborator> = {}, euros = 1_000): GameState {
+describe("Istruttori in e-Learning", () => {
+  function withInstructor(extra: Partial<Collaborator> = {}, euros = 1_000, eLearning = 1): GameState {
     const base = withCollaborators([collaborator(1, "writing"), collaborator(2, "instructor", extra)]);
-    return switchOn({
+    return {
       ...base,
       unlocks: { ...base.unlocks, forms: true },
       school: { ...base.school, euros },
-    });
+      upgrades: { ...base.upgrades, "e-learning": eLearning },
+    };
   }
 
+  it("lists the Forms of each level in path order, with Corso X once it exists", () => {
+    expect(getELearningForms(0, false)).toEqual([]);
+    expect(getELearningForms(1, true)).toEqual(["form-1"]);
+    expect(getELearningForms(2, false)).toEqual(["form-1", "form-2"]);
+    expect(getELearningForms(2, true)).toEqual(["form-1", "course-x", "form-2"]);
+    expect(getELearningForms(3, true)).toEqual(["form-1", "course-x", "form-2", "course-y"]);
+  });
+
   it("starts Forma 1 as an instructor (learn and qualify) when there are funds", () => {
-    const started = startFormOneForUnqualifiedInstructors(automaticWithInstructor(), 5_000);
+    const started = startELearningInstructorCourses(withInstructor(), 5_000);
     const training = started.collaborators[1].training;
     expect(training).toMatchObject({ formId: "form-1", includesInstructorCertification: true });
     expect(started.school.euros).toBeLessThan(1_000);
   });
 
   it("only qualifies them when they already know Forma 1", () => {
-    const started = startFormOneForUnqualifiedInstructors(automaticWithInstructor({ forms: ["form-1"] }), 5_000);
+    const started = startELearningInstructorCourses(withInstructor({ forms: ["form-1"] }), 5_000);
     expect(started.collaborators[1].training).toMatchObject({ formId: "form-1", trainingTrack: "instructor" });
   });
 
   it("waits without funds and starts as soon as the money is there", () => {
-    const broke = automaticWithInstructor({}, 0);
-    expect(startFormOneForUnqualifiedInstructors(broke, 5_000).collaborators[1].training).toBeUndefined();
+    const broke = withInstructor({}, 0);
+    expect(startELearningInstructorCourses(broke, 5_000).collaborators[1].training).toBeUndefined();
     const paid = { ...broke, school: { ...broke.school, euros: 1_000 } };
-    expect(startFormOneForUnqualifiedInstructors(paid, 5_000).collaborators[1].training?.formId).toBe("form-1");
+    expect(startELearningInstructorCourses(paid, 5_000).collaborators[1].training?.formId).toBe("form-1");
   });
 
-  it("does nothing for Istruttori who already teach a Form or when the automatic assignment is off", () => {
-    const teaching = automaticWithInstructor({ forms: ["form-1"], instructorForms: ["form-1"] });
-    expect(startFormOneForUnqualifiedInstructors(teaching, 5_000)).toBe(teaching);
-    const manual = gameReducer(automaticWithInstructor(), { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: false });
-    expect(startFormOneForUnqualifiedInstructors(manual, 5_000)).toBe(manual);
+  it("stops at the last Form of its level and does nothing without the upgrade", () => {
+    const teaching = withInstructor({ forms: ["form-1"], instructorForms: ["form-1"] });
+    expect(startELearningInstructorCourses(teaching, 5_000)).toBe(teaching);
+    const none = withInstructor({}, 1_000, 0);
+    expect(startELearningInstructorCourses(none, 5_000)).toBe(none);
+  });
+
+  it("goes on to Forma 2 at level 2, without the automatic assignment", () => {
+    const state = withInstructor({ forms: ["form-1"], instructorForms: ["form-1"] }, 5_000, 2);
+    expect(state.collaboratorManagement.automaticShares).toBeFalsy();
+    expect(startELearningInstructorCourses(state, 5_000).collaborators[1].training?.formId).toBe("form-2");
   });
 
   it("runs in the game loop", () => {
-    const state = automaticWithInstructor();
+    const state = withInstructor();
     const ticked = gameReducer(state, { type: "TICK", now: state.lastSavedAt + 2_000 });
     expect(ticked.collaborators.find((entry) => entry.id === "collaborator-2")?.training?.formId).toBe("form-1");
   });

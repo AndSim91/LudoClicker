@@ -10,7 +10,8 @@ import {
   getCreativityProgress,
   getEquipmentPreparedWorkMaximum,
   getEquipmentSwordRepairWork,
-  getFirstIncompleteUpgradePrerequisite,
+  getMissingUpgradeRequirement,
+  getUpgradeCategoryPoints,
   getInstructorBranchCapacityBonus,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
@@ -32,8 +33,7 @@ function definitionsFor(category: (typeof UPGRADE_CATEGORIES)[number]["id"]) {
   return UPGRADE_DEFINITIONS.filter(
     (definition) =>
       definition.category === category &&
-      !definition.hidden &&
-      !definition.extension,
+      !definition.hidden,
   );
 }
 
@@ -62,8 +62,9 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      // Attrezzatura opens with Fornitore ufficiale, one node more than the others.
-      expect(definitionsFor(category.id), category.id).toHaveLength(category.id === "equipment" ? 8 : 7);
+      // One line per branch: Scrittura and Insegnamento 9, Carisma and Attrezzatura 8.
+      const expected = { speed: 9, charisma: 8, equipment: 8, instructors: 9 } as Record<string, number>;
+      expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
     expect(definitionsFor("secrets").map((definition) => definition.id)).toEqual([
       "project-x",
@@ -74,7 +75,9 @@ describe("upgrade catalog", () => {
   it("uses the approved costs for Scrittura, Creatività, Carisma and Accoglienza", () => {
     expect(costsFor("speed")).toEqual({
       "comfortable-keyboard": [50, 100, 200, 400, 800],
+      "writing-rhythm": [100, 250, 600, 1_500],
       "quick-phrases": [150, 300, 600, 1_200, 2_400],
+      "stock-phrases": [400, 800, 1_600, 3_200, 6_400],
       "automatic-signature": [300, 600, 1_200, 2_400, 4_800],
       "smart-fields": [600, 1_200, 2_400, 4_800, 9_600],
       "social-content-synthesis": [2_500, 5_000, 10_000, 20_000, 40_000],
@@ -95,6 +98,7 @@ describe("upgrade catalog", () => {
       "qr-cards": [100, 200, 400, 800, 1_600],
       "coordinated-demo": [150, 300, 600, 1_200, 2_400],
       "recognizable-stand": [300, 600, 1_200, 2_400, 4_800],
+      "event-multiverse": [4_000, 20_000],
       "demo-set": [600, 1_200, 2_400, 4_800, 9_600],
       "difficult-questions": [5_000, 10_000, 20_000, 40_000, 80_000],
       "not-that-thing": [10_000, 25_000, 50_000, 100_000, 200_000],
@@ -146,8 +150,10 @@ describe("upgrade catalog", () => {
       "gadget-cross-selling": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
     expect(costsFor("instructors")).toEqual({
+      "talent-eye": [1_000, 10_000],
       "technical-arena": [1_000, 2_000, 5_000, 7_500, 10_000],
       "instructor-versatility": [2_000, 4_000, 8_000, 16_000, 32_000],
+      "e-learning": [1_500, 6_000, 20_000],
       "sis-accreditation": [5_000, 10_000, 20_000, 40_000],
       "cost-of-service": [2_500, 5_000, 10_000, 25_000, 50_000],
       "promiscuous-instructor": [10_000, 25_000, 50_000, 100_000, 200_000, 400_000],
@@ -258,13 +264,15 @@ describe("Teaching branch", () => {
     expect(getTrainingExamSuccessChanceBonus(fifthLevel)).toBeCloseTo(0.2);
     expect(areAllFormBranchesUnlocked(fourthLevel)).toBe(false);
     expect(areAllFormBranchesUnlocked(fifthLevel)).toBe(true);
-    expect(sis.requiredUpgradeLevels).toEqual({ "instructor-versatility": 5 });
+    expect(sis.requiredBranchPoints).toBe(9);
   });
 
   it("merges Preparazione agonistica into Nessun Rancore before PagoSport", () => {
     expect(definitionsFor("instructors").map((definition) => definition.id)).toEqual([
+      "talent-eye",
       "technical-arena",
       "instructor-versatility",
+      "e-learning",
       "sis-accreditation",
       "cost-of-service",
       "promiscuous-instructor",
@@ -277,10 +285,8 @@ describe("Teaching branch", () => {
     expect(intensity.title).toBe("Nessun Rancore");
     expect(intensity.emphasizedTitlePart).toBe("Rancor");
     expect(intensity.maxLevel).toBe(10);
-    expect(intensity.requiredUpgradeLevels).toEqual({
-      "promiscuous-instructor": 6,
-      "technical-arena": 3,
-    });
+    expect(intensity.requiredBranchPoints).toBe(28);
+    expect(intensity.requiredUpgradeLevels).toEqual({ "technical-arena": 3 });
     expect(Array.from({ length: intensity.maxLevel }, (_, level) =>
       getUpgradeCost(intensity, level)
     )).toEqual([
@@ -342,21 +348,31 @@ describe("Teaching branch", () => {
 });
 
 describe("prerequisites and secret paths", () => {
-  it("keeps the approved partial Scrittura gates", () => {
-    const quick = UPGRADE_DEFINITIONS.find((definition) => definition.id === "quick-phrases")!;
-    const merge = UPGRADE_DEFINITIONS.find((definition) => definition.id === "mail-merge")!;
-    expect(getFirstIncompleteUpgradePrerequisite(
-      levelsWith({ "comfortable-keyboard": 1 }),
-      quick,
-    )?.id).toBe("comfortable-keyboard");
-    expect(getFirstIncompleteUpgradePrerequisite(
-      levelsWith({
-        "comfortable-keyboard": 2,
-        "social-content-synthesis": 3,
-        "instant-review": 2,
-      }),
-      merge,
-    )?.id).toBe("instant-review");
+  it("opens nodes by points spent anywhere in their branch", () => {
+    const find = (id: UpgradeId) => UPGRADE_DEFINITIONS.find((definition) => definition.id === id)!;
+    const review = find("instant-review");
+    // 11 points of Scrittura in any nodes open Revisione istantanea.
+    const scattered = levelsWith({ "comfortable-keyboard": 5, "writing-rhythm": 2, "quick-phrases": 3, "automatic-signature": 1 });
+    expect(getUpgradeCategoryPoints(scattered, "speed")).toBe(11);
+    expect(getMissingUpgradeRequirement(scattered, review)).toBeUndefined();
+    expect(getMissingUpgradeRequirement(levelsWith({ "comfortable-keyboard": 5 }), review)).toMatchObject({
+      kind: "points", category: "speed", required: 11, current: 5,
+    });
+    // Hidden legacy nodes never count.
+    expect(getUpgradeCategoryPoints(levelsWith({ "athletic-preparation": 5 }), "instructors")).toBe(0);
+  });
+
+  it("keeps only the narrative links", () => {
+    const find = (id: UpgradeId) => UPGRADE_DEFINITIONS.find((definition) => definition.id === id)!;
+    const memorable = find("memorable-experience");
+    const welcome = levelsWith({ "welcome-procedure": 5, "clear-material": 5, "tested-intro": 5, "prepared-room": 5, "dedicated-helper": 5, "order-welcome": 3 });
+    expect(getMissingUpgradeRequirement(welcome, memorable)).toMatchObject({ kind: "points", category: "instructors", required: 10 });
+    expect(getMissingUpgradeRequirement({ ...welcome, "technical-arena": 5, "instructor-versatility": 5 }, memorable)).toBeUndefined();
+    expect(find("operational-priorities").requiredUpgradeLevels).toEqual({ "collaborator-shifts": 1 });
+    expect(Object.keys(find("all-fixed").requiredUpgradeLevels ?? {})).toHaveLength(7);
+    expect(find("e-learning").requiredUnlocks).toEqual(["forms"]);
+    const linked = UPGRADE_DEFINITIONS.filter((definition) => definition.requiredUpgradeLevels).map((definition) => definition.id);
+    expect(linked.sort()).toEqual(["agonist-course-intensity", "all-fixed", "operational-priorities"]);
   });
 
   it("stores Corso X and ToccoDiGilo only in the secret row with their hints", () => {

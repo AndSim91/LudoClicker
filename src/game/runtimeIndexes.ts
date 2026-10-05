@@ -28,10 +28,6 @@ const directEnrollmentContactsCache = new WeakMap<
   WeakMap<ScheduledTrial[], Contact[]>
 >();
 const runningEventsCache = new WeakMap<AcquisitionEvent[], AcquisitionEvent[]>();
-const runningEventDefinitionIdsCache = new WeakMap<
-  AcquisitionEvent[],
-  ReadonlySet<AcquisitionEvent["definitionId"]>
->();
 const busyEventCollaboratorIdsCache = new WeakMap<AcquisitionEvent[], ReadonlySet<string>>();
 const activeTrainingsCache = new WeakMap<TrainingPerson[], TrainingPerson[]>();
 const waitingTrainingsCache = new WeakMap<
@@ -244,14 +240,20 @@ export function getRunningAcquisitionEvents(
   return cachedFilter(runningEventsCache, events, (event) => event.status === "running");
 }
 
-export function getRunningEventDefinitionIds(
+const runningEventCountsCache = new WeakMap<AcquisitionEvent[], ReadonlyMap<AcquisitionEvent["definitionId"], number>>();
+
+/** How many copies of each event are running (Eventi nel Multiverso allows more than one). */
+export function getRunningEventCounts(
   events: AcquisitionEvent[],
-): ReadonlySet<AcquisitionEvent["definitionId"]> {
-  const cached = runningEventDefinitionIdsCache.get(events);
+): ReadonlyMap<AcquisitionEvent["definitionId"], number> {
+  const cached = runningEventCountsCache.get(events);
   if (cached) return cached;
-  const ids = new Set(getRunningAcquisitionEvents(events).map((event) => event.definitionId));
-  runningEventDefinitionIdsCache.set(events, ids);
-  return ids;
+  const counts = new Map<AcquisitionEvent["definitionId"], number>();
+  for (const event of getRunningAcquisitionEvents(events)) {
+    counts.set(event.definitionId, (counts.get(event.definitionId) ?? 0) + 1);
+  }
+  runningEventCountsCache.set(events, counts);
+  return counts;
 }
 
 export function getBusyEventCollaboratorIds(

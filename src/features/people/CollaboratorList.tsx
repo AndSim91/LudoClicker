@@ -14,8 +14,8 @@ import {
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { isSISTechnicianCourseUnlocked } from "../../content/upgrades";
-import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
+import { isSISTechnicianCourseUnlocked, getOfficialStatsVisibilityTier } from "../../content/upgrades";
+import { getContactPreparation, hasUnlockedOfficialStats, getHiddenStatsHint } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { getEffectiveDamagedSwords } from "../../game/equipment";
@@ -121,6 +121,7 @@ export function CollaboratorList({
     stateOverride,
   );
   const automaticAssignment = Boolean(state.collaboratorManagement.automaticShares);
+  const statsTier = getOfficialStatsVisibilityTier(state.upgrades);
   const [requestedPage, setRequestedPage] = useState(0);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -175,7 +176,7 @@ export function CollaboratorList({
       ) return false;
       if (
         statsFilter !== "all" &&
-        hasUnlockedOfficialStats(collaborator.forms) !== (statsFilter === "visible")
+        hasUnlockedOfficialStats(collaborator.forms, statsTier) !== (statsFilter === "visible")
       ) return false;
       if (levelFilter !== "all") {
         const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
@@ -446,7 +447,7 @@ export function CollaboratorList({
             const masteryProgress = collaborator.assignment
               ? getCollaboratorMasteryProgress(mastery[collaborator.assignment])
               : undefined;
-            const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms);
+            const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms, statsTier);
             const officialStats = contact && hasVisibleStats
               ? getContactPreparation(contact, collaborator.forms)
               : undefined;
@@ -566,7 +567,7 @@ export function CollaboratorList({
                     {officialStats ? (
                       <OfficialStatValue value={officialStats.arena} />
                     ) : (
-                      <strong className="member-stat-locked" title="Completa Corso Y">???</strong>
+                      <strong className="member-stat-locked" title={getHiddenStatsHint(statsTier)}>???</strong>
                     )}
                   </span>
                   <span>
@@ -574,7 +575,7 @@ export function CollaboratorList({
                     {officialStats ? (
                       <OfficialStatValue value={officialStats.style} />
                     ) : (
-                      <strong className="member-stat-locked" title="Completa Corso Y">???</strong>
+                      <strong className="member-stat-locked" title={getHiddenStatsHint(statsTier)}>???</strong>
                     )}
                   </span>
                 </div>

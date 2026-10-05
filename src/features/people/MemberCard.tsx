@@ -15,6 +15,7 @@ export function MemberCard({
   path,
   status,
   preparation,
+  hiddenStatsHint,
   favoriteButton,
   cancelButton,
   training,
@@ -25,6 +26,7 @@ export function MemberCard({
   path: string;
   status: string;
   preparation?: { arena: number; style: number };
+  hiddenStatsHint: string;
   favoriteButton: ReactNode;
   cancelButton: ReactNode;
   training: ReactNode;
@@ -60,11 +62,11 @@ export function MemberCard({
       <dl className="member-card-stats">
         <div>
           <dt>Arena</dt>
-          <dd>{preparation ? <OfficialStatValue value={preparation.arena} /> : <span title="Completa Corso Y">???</span>}</dd>
+          <dd>{preparation ? <OfficialStatValue value={preparation.arena} /> : <span title={hiddenStatsHint}>???</span>}</dd>
         </div>
         <div>
           <dt>Stile</dt>
-          <dd>{preparation ? <OfficialStatValue value={preparation.style} /> : <span title="Completa Corso Y">???</span>}</dd>
+          <dd>{preparation ? <OfficialStatValue value={preparation.style} /> : <span title={hiddenStatsHint}>???</span>}</dd>
         </div>
       </dl>
       <p className="member-card-status">{status}</p>

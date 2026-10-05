@@ -12,6 +12,7 @@ import {
   getInstructorBranchCapacityBonus,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
+  getOfficialStatsVisibilityTier,
 } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { getGroupedMemberCount } from "../../game/memberGroups";
@@ -30,6 +31,7 @@ import { formatFormPath, getMemberDepartureRiskLabel } from "./peoplePresentatio
 import {
   getContactPreparation,
   hasUnlockedOfficialStats,
+  getHiddenStatsHint,
 } from "../../game/athleteStats";
 import {
   getPresentedRarityLabel,
@@ -136,7 +138,7 @@ function createMemberPresentationReader(
     const cached = cache.get(contact);
     if (cached) return cached;
     const student = getMemberStudent(contact, context);
-    const hasVisibleStats = hasUnlockedOfficialStats(student.forms);
+    const hasVisibleStats = hasUnlockedOfficialStats(student.forms, context.statsTier);
     const presentation: MemberPresentation = {
       contact,
       student,
@@ -261,6 +263,7 @@ export function MemberList({
       immunityContext,
       foundedSchools,
       courseXUnlocked,
+      statsTier: getOfficialStatsVisibilityTier(state.upgrades),
       collaboratorsByContactId,
     }),
     [
@@ -622,6 +625,7 @@ export function MemberList({
               path={presentation.path}
               status={presentation.status}
               preparation={preparation}
+              hiddenStatsHint={getHiddenStatsHint(sortContext.statsTier)}
               favoriteButton={favoriteButton}
               cancelButton={cancelButton}
               training={training}
@@ -668,14 +672,14 @@ export function MemberList({
               {preparation ? (
                 <OfficialStatValue value={preparation.arena} />
               ) : (
-                <span className="member-stat-locked" title="Completa Corso Y">???</span>
+                <span className="member-stat-locked" title={getHiddenStatsHint(sortContext.statsTier)}>???</span>
               )}
             </span>
             <span className="member-stat" data-label="Stile">
               {preparation ? (
                 <OfficialStatValue value={preparation.style} />
               ) : (
-                <span className="member-stat-locked" title="Completa Corso Y">???</span>
+                <span className="member-stat-locked" title={getHiddenStatsHint(sortContext.statsTier)}>???</span>
               )}
             </span>
             <span className="member-status" data-label="Stato">

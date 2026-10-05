@@ -14,6 +14,7 @@ import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athl
 import {
   isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
+  getOfficialStatsVisibilityTier,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -206,7 +207,7 @@ function SectorCollaboratorRow({
   const masteryProgress = getCollaboratorMasteryProgress(
     mastery[collaborator.assignment ?? "instructor"],
   );
-  const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms)
+  const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms, getOfficialStatsVisibilityTier(state.upgrades))
     ? getContactPreparation(contact, collaborator.forms)
     : undefined;
   const isInstructor = collaborator.assignment === "instructor";
