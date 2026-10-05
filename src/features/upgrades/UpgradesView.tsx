@@ -37,7 +37,7 @@ import {
   getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
-import { formatCurrency, formatPercent, formatStat } from "../../shared/formatters";
+import { formatCurrency, formatPercent, formatShortCurrency, formatStat } from "../../shared/formatters";
 import { getEmailBookingChance } from "../../game/formulas";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
@@ -62,6 +62,11 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
 const numberFormatter = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 2,
 });
+
+/** Node and quick-buy prices stay exact up to 99.999 €, then shorten («12,8M €») to fit the node. */
+function formatNodePrice(cost: number): string {
+  return cost < 100_000 ? `${formatStat(cost)} €` : formatShortCurrency(cost);
+}
 
 function formatNumber(value: number) {
   return numberFormatter.format(value);
@@ -454,7 +459,7 @@ function UpgradeNode({
           <span className="upgrade-node-level">
             {onQuickBuy
               ? `${level}/${definition.maxLevel}`
-              : <>{definition.maxLevel > 1 ? `${level}/${definition.maxLevel} · ` : ""}{formatStat(cost)} €</>}
+              : <>{definition.maxLevel > 1 ? `${level}/${definition.maxLevel} · ` : ""}{formatNodePrice(cost)}</>}
           </span>
         )}
       </button>
@@ -468,7 +473,8 @@ function UpgradeNode({
           aria-label={`Compra ${definition.title}`}
           title={unaffordable ? `Mancano ${formatCurrency(cost - state.school.euros)}` : "Il più economico"}
         >
-          Compra · {formatStat(cost)} €
+          <span>Compra</span>
+          <span className="upgrade-quick-buy-price">{formatNodePrice(cost)}</span>
         </button>
       ) : null}
     </li>
