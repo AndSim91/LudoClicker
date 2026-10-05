@@ -1762,8 +1762,6 @@ Regole:
   Corso X costa €1; ToccoDiGilo costa €1.000.000 e aumenta del 9.999% la
   velocità delle Forme insegnate dagli Istruttori;
 
-> **Da implementare:** la scoperta di ToccoDiGilo, legata alla Sfida di Cthulhu che è ancora da sviluppare.
-
 - i completamenti automatici confluiscono in una notifica riepilogativa
   impilata.
 
@@ -2157,9 +2155,10 @@ dopo (il livello acquistato invece si azzera con la fondazione).
   «Percorso Segreto scoperto» e il nodo diventa acquistabile a 1 €. La scoperta
   resta valida in tutte le scuole fondate dopo: lì Corso X è acquistabile a 1 €
   fin da subito (`reptileUnlock.ts`, `reptileFlow.ts`).
-- **ToccoDiGilo** si scoprirà completando la **Sfida di Cthulhu**.
-
-> **Da implementare:** la scoperta di ToccoDiGilo, legata alla Sfida di Cthulhu che è ancora da sviluppare.
+- **ToccoDiGilo** si scopre portando a termine l'evento **Sfida a Cthulhu**
+  (1.000.000 €, sblocco a 500 iscritti). Arriva il messaggio «Percorso Segreto:
+  ToccoDiGilo» e il nodo diventa acquistabile; la scoperta resta valida nelle
+  scuole fondate dopo (`eventFlow.ts`).
 
 | Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
 | --- | --- | ---: | --- |

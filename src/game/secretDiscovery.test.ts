@@ -3,6 +3,7 @@ import { createInitialState } from "./engine";
 import { discoverCourseXFromSuperbaVictory, getReptileTournamentName } from "./reptileUnlock";
 import { getReptileDifficultyMultiplier } from "./reptileSimulation";
 import { buyUpgrade } from "./upgradeFlow";
+import { resolveAcquisitionEvent } from "./eventFlow";
 import { migrate } from "./saveMigrations";
 import type { GameState } from "./types";
 
@@ -19,6 +20,18 @@ describe("Torneo della Superba e Corso X", () => {
     expect(bought.upgrades["project-x"]).toBe(1);
     expect(bought.school.euros).toBe(9);
     expect(discoverCourseXFromSuperbaVictory(discovered, 3_000)).toBe(discovered);
+  });
+
+  it("reveals ToccoDiGilo once the Sfida a Cthulhu is over", () => {
+    const state = createInitialState(1_000, "Tester");
+    const event = {
+      id: "ev-cthulhu", definitionId: "cthulhu-challenge" as const, title: "Sfida a Cthulhu", location: "R'lyeh",
+      startedAt: 1_000, resolvesAt: 2_000, cost: 1_000_000, peopleMet: 0, demonstrationsGiven: 0,
+      contactReward: 0, membersUsed: 0, equipmentUsed: 0, wearAdded: 0, status: "running" as const,
+    };
+    const resolved = resolveAcquisitionEvent({ ...state, acquisitionEvents: [event] }, event, 2_000, 1);
+    expect(resolved.secretUpgradeDiscoveries).toContain("divine-touch");
+    expect(resolved.messages.some((message) => message.subject === "Percorso Segreto: ToccoDiGilo")).toBe(true);
   });
 
   it("renames the Open and toughens the field once it is the Superba", () => {

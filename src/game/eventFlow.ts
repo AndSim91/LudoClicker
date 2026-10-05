@@ -18,6 +18,7 @@ import { addMessage } from "./stateUpdates";
 import { selectAvailableEventMembers } from "./selectors";
 import { startNextCampaign } from "./emailFlow";
 import { getArchivedCompletedEventCount } from "./historyArchive";
+import { discoverSecretUpgrade } from "./upgradeFlow";
 import {
   getBusyEventCollaboratorIds,
   getCollaboratorsById,
@@ -307,6 +308,18 @@ export function resolveAcquisitionEvent(
       "Primo evento archiviato",
       "Le spade tornano a fine evento, non sempre intere. Le tieni d'occhio in La mia giornata.",
       "system",
+    );
+  }
+  // The secret hint («forze più grandi…») points here: surviving R'lyeh reveals ToccoDiGilo.
+  if (event.definitionId === "cthulhu-challenge" && !nextState.secretUpgradeDiscoveries.includes("divine-touch")) {
+    nextState = addMessage(
+      discoverSecretUpgrade(nextState, "divine-touch"),
+      now + 2,
+      "Percorso Segreto: ToccoDiGilo",
+      "Da R'lyeh si torna con qualcosa in più: negli Upgrade compare ToccoDiGilo.",
+      "positive",
+      "focused",
+      "progress",
     );
   }
   return contacts.length > 0 ? startNextCampaign(nextState, now) : nextState;
