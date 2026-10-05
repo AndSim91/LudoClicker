@@ -63,6 +63,7 @@ import { GameFeedbackLayer } from "../features/feedback/GameFeedbackLayer";
 import { AchievementToast } from "../features/feedback/AchievementToast";
 import type { LudoWikiSection } from "../features/ludowiki/LudoWikiView";
 import { MomentLayer } from "../features/moments/MomentLayer";
+import type { MomentContent } from "../features/moments/momentContent";
 import { FinalDuelLayer } from "../features/tournaments/FinalDuelLayer";
 import { ReptileDayLayer } from "../features/tournaments/ReptileDayLayer";
 import { ReptileIncidentsLayer } from "../features/tournaments/ReptileIncidentsLayer";
@@ -220,9 +221,14 @@ export function App() {
   }, [hasBlockingReptileFlow, setReptilePaused]);
 
   const activeMoment = reptileDayResult ? undefined : state.moments.queue[0];
+  // A scene replayed from LudoWiki › Scene or the Ludodex; queued moments go first.
+  const [replayedMoment, setReplayedMoment] = useState<{ content: MomentContent; key: number }>();
+  const replayMoment = useCallback((content: MomentContent) => setReplayedMoment({ content, key: Date.now() }), []);
+  const closeReplayedMoment = useCallback(() => setReplayedMoment(undefined), []);
+  const showsMoment = activeMoment !== undefined || replayedMoment !== undefined;
   useLayoutEffect(() => {
-    setMomentPaused(activeMoment !== undefined);
-  }, [activeMoment, setMomentPaused]);
+    setMomentPaused(showsMoment);
+  }, [showsMoment, setMomentPaused]);
   const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
   // A snapshot: the result may leave the detailed history while the final plays.
   const [watchedFinal, setWatchedFinal] = useState<TournamentResult>();
@@ -263,7 +269,7 @@ export function App() {
         selectedMessageId !== null ||
         !state.profile.displayName.trim() ||
         tutorial.isBlockingInput ||
-        activeMoment !== undefined ||
+        showsMoment ||
         watchedFinal !== undefined ||
         event.repeat ||
         event.key === BOSS_KEY ||
@@ -276,7 +282,7 @@ export function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
-    activeMoment,
+    showsMoment,
     watchedFinal,
     activeView,
     dispatch,
@@ -697,7 +703,7 @@ export function App() {
               onPracticeRunningChange={setPracticePaused}
             />
           ) : activeView === "ludowiki" ? (
-            <StableLudoWikiView key={wikiEntry.key} initialSection={wikiEntry.section} />
+            <StableLudoWikiView key={wikiEntry.key} initialSection={wikiEntry.section} onReplayMoment={replayMoment} />
           ) : activeView === "network" ? (
             <StableNetworkView onFoundSchool={foundSchool} onFoundationOpenChange={setFoundationPaused} />
           ) : activeView === "admin" ? (
@@ -781,6 +787,8 @@ export function App() {
       ) : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />
+      ) : replayedMoment ? (
+        <MomentLayer key={replayedMoment.key} state={state} content={replayedMoment.content} onDismiss={closeReplayedMoment} />
       ) : tutorial.activeScene && tutorial.activeStep ? (
         <TutorialLayer
           scene={tutorial.activeScene}

@@ -124,6 +124,93 @@ export function getFoundationTitle(value: number): string {
   return `${/^[aeiou]/.test(word) ? "L'" : "La "}${word} sede dell'Ordine`;
 }
 
+/** School numbers of the map entries: the Sede madre, then the latest ones (the map keeps 50). */
+function getNumberedMap(state: GameState) {
+  const map = state.network.schools;
+  const offset = state.network.schoolCount - map.length;
+  return map.map((school, index) => ({ school, number: index === 0 ? 1 : index + 1 + offset }));
+}
+
+/** Nuova sede n° `number` (2 … schoolCount + 1); `generic` hides names and cities (LudoWiki › Scene). */
+export function describeFoundation(
+  state: GameState,
+  number: number,
+  { follower = null, generic = false }: { follower?: string | null; generic?: boolean } = {},
+): MomentContent {
+  const numbered = getNumberedMap(state);
+  const map = numbered.filter((entry) => entry.number < number).map((entry) => entry.school);
+  const newcomer = number > state.network.schoolCount
+    ? state.school
+    : numbered.find((entry) => entry.number === number)?.school ?? state.school;
+  const previous = map.at(-1);
+  // The constellation: the Sede madre and the latest schools left, one star each.
+  const starred = map.length <= CONSTELLATION_SIZE ? map : [map[0], ...map.slice(-(CONSTELLATION_SIZE - 1))];
+  const brightest = Math.max(1, ...starred.map((school) => school.fame ?? 0));
+  const fame = previous?.fame === undefined ? "" : ` con ${formatStat(previous.fame)} di Fama`;
+  const lit = Math.min(number, CONSTELLATION_SIZE);
+  return {
+    kind: "foundation",
+    kicker: `Rete dell'Ordine · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
+    title: getFoundationTitle(number),
+    body: generic
+      ? "Una nuova scuola entra nella Rete dell'Ordine e accende una stella del simbolo."
+      : `${previous?.name ?? "La scuola"} entra nella Rete${fame}; ${newcomer.name} apre a ${newcomer.city}.` +
+        (follower ? ` Ti segue ${follower}.` : ""),
+    number,
+    stars: starred.map((school) => ({ light: school.fame === undefined ? null : Math.sqrt(school.fame / brightest) })),
+    dropped: number - 1 - starred.length,
+    previousCity: generic ? "" : previous?.city ?? "",
+    newcomerName: generic ? "Nuova sede" : newcomer.name,
+    newcomerCity: generic ? "" : newcomer.city,
+    tally: number > CONSTELLATION_SIZE ? `Simbolo completo · ${number} sedi` : `${lit - 1} → ${lit} di ${CONSTELLATION_SIZE}`,
+  };
+}
+
+/** Sedi whose scene can be shown by name: the previous school must still be on the map. */
+export function getFoundationSceneNumbers(state: GameState): number[] {
+  const known = new Set(getNumberedMap(state).map((entry) => entry.number));
+  return Array.from({ length: state.network.schoolCount }, (_, index) => state.network.schoolCount + 1 - index)
+    .filter((number) => known.has(number - 1));
+}
+
+/** The scenes of LudoWiki › Scene: the same moments with generic data. */
+export function describeGenericMoment(state: GameState, key: MomentKey): MomentContent {
+  if (key === FOUNDATION_MOMENT) return describeFoundation(state, state.network.schoolCount + 1, { generic: true });
+  if (key === "legendary") {
+    return {
+      kind: "legendary",
+      secret: false,
+      kicker: "Leggendario",
+      title: "Un Leggendario entra nell'Ordine",
+      body: "Un nuovo nome entra nella scuola e il suo dossier si apre nel Ludodex.",
+      name: "Leggendario",
+      initials: "?",
+      number: "#???",
+      stats: "",
+    };
+  }
+  if (key === SUPERBA_MOMENT) {
+    return { kind: "superba", ...SUPERBA_COPY, city: state.school.city, fameLabel: `Fama · livello ${GAME_CONFIG.superbaReptileFameLevel}` };
+  }
+  if (key === LIGHT_INFLATION_MOMENT) {
+    return {
+      kind: "inflation",
+      kicker: "Lama di Luce · Comunicazione ai rivenditori",
+      title: LIGHT_INFLATION_EVENT_TITLE,
+      body: getLightInflationEventDescription(LIGHT_INFLATION_CAUSES[0]),
+      oldPrice: formatCurrency(GAME_CONFIG.officialSwordCost),
+      newPrice: formatCurrency(GAME_CONFIG.officialSwordCost * 1.1),
+      increase: "+10%",
+    };
+  }
+  if (key.startsWith("victory:")) {
+    const level = key.slice("victory:".length) as VictoryMomentLevel;
+    const copy = VICTORY_COPY[level] ?? VICTORY_COPY.national;
+    return { kind: "victory", level, kicker: copy.kicker, title: copy.title, body: copy.note };
+  }
+  return describeMoment(state, key);
+}
+
 /** What a queued moment shows, read from the current state. */
 export function describeMoment(state: GameState, key: MomentKey): MomentContent {
   if (key === "council") {
@@ -136,32 +223,11 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     };
   }
   if (key === FOUNDATION_MOMENT) {
-    const number = state.network.schoolCount + 1;
-    const map = state.network.schools;
-    const previous = map.at(-1);
-    // The constellation: the Sede madre and the latest schools left, one star each.
-    const starred = map.length <= CONSTELLATION_SIZE ? map : [map[0], ...map.slice(-(CONSTELLATION_SIZE - 1))];
-    const brightest = Math.max(1, ...starred.map((school) => school.fame ?? 0));
     // ponytail: the follower is the first contact of the new school (foundSchool puts it there);
     // the scene plays right after the foundation, before any other Leggendario can join.
     const first = state.contacts[0];
     const follower = first?.specialProfileId && first.status === "enrolled" ? `${first.firstName} ${first.lastName}` : null;
-    const fame = previous?.fame === undefined ? "" : ` con ${formatStat(previous.fame)} di Fama`;
-    const lit = Math.min(number, CONSTELLATION_SIZE);
-    return {
-      kind: "foundation",
-      kicker: `Rete dell'Ordine · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
-      title: getFoundationTitle(number),
-      body: `${previous?.name ?? "La scuola"} entra nella Rete${fame}; ${state.school.name} apre a ${state.school.city}.` +
-        (follower ? ` Ti segue ${follower}.` : ""),
-      number,
-      stars: starred.map((school) => ({ light: school.fame === undefined ? null : Math.sqrt(school.fame / brightest) })),
-      dropped: state.network.schoolCount - starred.length,
-      previousCity: previous?.city ?? "",
-      newcomerName: state.school.name,
-      newcomerCity: state.school.city,
-      tally: number > CONSTELLATION_SIZE ? `Simbolo completo · ${number} sedi` : `${lit - 1} → ${lit} di ${CONSTELLATION_SIZE}`,
-    };
+    return describeFoundation(state, state.network.schoolCount + 1, { follower });
   }
   if (key === SUPERBA_MOMENT) {
     const fame = state.tournaments.reptile.fameXp;

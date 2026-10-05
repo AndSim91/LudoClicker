@@ -111,7 +111,7 @@ export function FoundationArt({
           );
         })}
         <text className="moment-star-label is-madre" x={point(0)[1] + 9} y={point(0)[2] + 3}>Sede madre</text>
-        {previous ? (
+        {previous && previousCity ? (
           <g className="moment-star-note" style={delayStyle(lightAt(lit - 1))}>
             <line x1={previous[1]} y1={previous[2]} x2={edgeX(previousLeft)} y2={previous[2]} />
             <text x={edgeX(previousLeft) + (previousLeft ? -3 : 3)} y={previous[2] + 3} textAnchor={previousLeft ? "end" : "start"}>
@@ -132,7 +132,7 @@ export function FoundationArt({
             return (
               <>
                 <text className="moment-star-name" x={x} y={ny - 2} textAnchor={anchor}>{newcomerName}</text>
-                <text x={x} y={ny + 10} textAnchor={anchor}>{`N° ${number} · ${newcomerCity}`}</text>
+                <text x={x} y={ny + 10} textAnchor={anchor}>{newcomerCity ? `N° ${number} · ${newcomerCity}` : `N° ${number}`}</text>
               </>
             );
           })()}

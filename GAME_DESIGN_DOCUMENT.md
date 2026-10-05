@@ -4285,6 +4285,22 @@ di Luce va in `queue` senza passare da `seen` (`LIGHT_INFLATION_MOMENT` in
 precedenti (v88): quello che il salvataggio ha già raggiunto conta come visto e
 ogni Leggendario già iscritto vale una iscrizione.
 
+**Galleria delle scene (LudoWiki › Scene).** Una bacheca di schede, una per
+scena: Consiglio, Leggendario, le quattro prime vittorie, Superba, nuova sede,
+Inflazione di Luce. Le scene mai viste sono schede «???» senza nome; le altre
+hanno «▶ Rivedi», che rilancia la stessa scena a schermo intero con il gioco in
+pausa (in Outlook l'avviso fermo, senza disegni nelle schede). Le scene sono
+generiche: vittorie senza i nomi dei vincitori, Superba al livello 1,
+Inflazione di Luce a +10% sul prezzo base, nuova sede senza nomi né città ma
+con le stelle già accese nella costellazione. Leggendario e nuova sede hanno un
+menu per mostrare i dati di un Leggendario scoperto o di una sede della mappa
+(serve che la sede precedente sia ancora sulla mappa). Nel Ludodex il dossier
+di un Leggendario scoperto ha «▶ Rivedi la scena» con la sua scena. Sblocco:
+`moments.seen`; Leggendario con almeno un Leggendario iscritto, nuova sede con
+`network.schoolCount > 0`, Inflazione con `lightInflation.increases > 0`.
+Nessun dato nuovo nel salvataggio. File: `ScenesSection.tsx`,
+`describeGenericMoment` e `describeFoundation` in `momentContent.ts`.
+
 ### 25.2 Guarda la finale
 
 Decisione del 03/10 (piano 4.3). Solo le finali di Arena con almeno un nostro

@@ -194,13 +194,16 @@ function MomentArt({ content }: { content: MomentContent }) {
 export function MomentLayer({
   state,
   momentKey,
+  content: replayed,
   onDismiss,
 }: {
   state: GameState;
-  momentKey: MomentKey;
+  /** A queued moment, read from the state; or `content`, a scene replayed from the LudoWiki. */
+  momentKey?: MomentKey;
+  content?: MomentContent;
   onDismiss: () => void;
 }) {
-  const content = describeMoment(state, momentKey);
+  const content = replayed ?? describeMoment(state, momentKey ?? "council");
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {

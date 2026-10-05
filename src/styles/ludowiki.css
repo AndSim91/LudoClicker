@@ -1283,3 +1283,154 @@
   .achievements-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .achievement-detail { border-left: 0; border-top: 1px solid var(--line); }
 }
+
+/* LudoWiki › Scene: the moments already seen, replayable (concept A, bacheca). */
+.scenes-section {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 4px 40px;
+}
+
+.scenes-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.scenes-summary strong { font-size: 16px; }
+.scenes-summary small { color: var(--ink-muted); }
+
+.scenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.scene-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.scene-card.is-locked {
+  border-style: dashed;
+  background: transparent;
+}
+
+.scene-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  background: radial-gradient(circle at 50% 60%, rgb(108 211 214 / 18%), transparent 65%), var(--surface-rail);
+}
+
+.scene-art svg { width: 72%; height: 80%; }
+
+.is-locked .scene-art {
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.scene-play {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--onde-gold-bright, var(--blue-700));
+  color: var(--onde-on-gold, #fff);
+  font-size: 13px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.scene-card:hover .scene-play,
+.scene-card:focus-within .scene-play {
+  opacity: 1;
+  transform: none;
+}
+
+.scene-copy {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 10px 12px 12px;
+}
+
+.scene-copy small {
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.scene-copy strong { font-size: 16px; }
+.is-locked .scene-copy small,
+.is-locked .scene-copy strong { color: var(--ink-muted); }
+
+.scene-copy select {
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 4px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.scene-replay {
+  justify-self: start;
+  margin-top: 6px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--blue-700);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ludodex-scene-replay { margin-top: 8px; }
+
+:root[data-theme="dark"] .scene-replay {
+  background: var(--onde-gold-bright);
+  color: var(--onde-on-gold);
+}
+
+/* Outlook: no drawings, only the list of cards. */
+:root:not([data-theme="dark"]) .scene-art { display: none; }
+
+/* Thumbnails, Modalità Onde colours. */
+.scene-art svg text { font: 700 22px "Barlow Semi Condensed", sans-serif; }
+.scene-fill { fill: #0e4563; }
+.scene-wave { fill: var(--onde-wave, #6cd3d6); }
+.scene-foam { fill: var(--onde-foam, #fbf1dc); }
+.scene-gold { fill: var(--onde-gold-bright, #f0b85a); }
+.scene-gold-line { fill: none; stroke: var(--onde-gold-bright, #f0b85a); stroke-width: 2; }
+.scene-wave-line { stroke: var(--onde-wave, #6cd3d6); stroke-width: 2; }
+path.scene-wave-line { fill: none; stroke-opacity: 0.45; }
+.scene-halo { fill: rgb(240 184 90 / 18%); }
+.scene-tower { fill: #021e33; stroke: var(--onde-wave, #6cd3d6); stroke-width: 1.5; }
+.scene-paper { fill: var(--onde-foam, #fbf1dc); }
+.scene-ink { fill: #9aa7ad; }
+.scene-stamp rect { fill: none; stroke: #c4423b; stroke-width: 3; }
+.scene-stamp text { fill: #c4423b; font-size: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-play { transition: none; }
+}

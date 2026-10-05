@@ -12,6 +12,8 @@ import {
 } from "../../content/ludowiki";
 import { useGameState } from "../../game/GameStateContext";
 import { AchievementsSection } from "./AchievementsSection";
+import { ScenesSection } from "./ScenesSection";
+import { describeMoment, type MomentContent } from "../moments/momentContent";
 import type { GameState, SpecialCollaboratorId } from "../../game/types";
 import {
   getDiscoveredLegendaryIds,
@@ -21,7 +23,7 @@ import {
   type LudodexStatus,
 } from "./ludodexPresentation";
 
-export type LudoWikiSection = "ludodex" | "achievements" | "manual";
+export type LudoWikiSection = "ludodex" | "achievements" | "scenes" | "manual";
 type LudodexFilter = "all" | "discovered";
 
 const wikiIconNames: Record<LudoWikiVisualIcon, IconName> = {
@@ -122,11 +124,13 @@ function LegendaryDossierPanel({
   legendary,
   index,
   status,
+  onReplay,
 }: {
   state: Pick<GameState, "contacts" | "legendaryCollaborators">;
   legendary: LudodexLegendary;
   index: number;
   status: LudodexStatus;
+  onReplay?: (id: SpecialCollaboratorId) => void;
 }) {
   if (status === "encountered") {
     return (
@@ -193,6 +197,11 @@ function LegendaryDossierPanel({
           <span className="ludodex-enrollment-count">
             {enrollments === 1 ? "Iscritto 1 volta" : `Iscritto ${enrollments} volte`}
           </span>
+          {onReplay ? (
+            <button type="button" className="scene-replay ludodex-scene-replay" onClick={() => onReplay(legendary.id as SpecialCollaboratorId)}>
+              ▶ Rivedi la scena
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -224,7 +233,7 @@ function LegendaryDossierPanel({
   );
 }
 
-function LudodexSection({ state }: { state: Pick<GameState, "contacts" | "legendaryCollaborators"> }) {
+function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts" | "legendaryCollaborators">; onReplay?: (id: SpecialCollaboratorId) => void }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<LudodexFilter>("all");
   const [selectedId, setSelectedId] = useState<SpecialCollaboratorId | null>(null);
@@ -301,6 +310,7 @@ function LudodexSection({ state }: { state: Pick<GameState, "contacts" | "legend
       </aside>
       {selectedLegendary ? (
         <LegendaryDossierPanel
+          onReplay={onReplay}
           state={state}
           legendary={selectedLegendary}
           index={selectedIndex}
@@ -433,8 +443,19 @@ function ManualSection() {
   );
 }
 
-export function LudoWikiView({ state: stateOverride, initialSection = "ludodex" }: { state?: GameState; initialSection?: LudoWikiSection }) {
+export function LudoWikiView({
+  state: stateOverride,
+  initialSection = "ludodex",
+  onReplayMoment,
+}: {
+  state?: GameState;
+  initialSection?: LudoWikiSection;
+  onReplayMoment?: (content: MomentContent) => void;
+}) {
   const state = useGameState(stateOverride);
+  const replayLegendary = onReplayMoment
+    ? (id: SpecialCollaboratorId) => onReplayMoment(describeMoment(state, `legendary:${id}`))
+    : undefined;
   const [section, setSection] = useState<LudoWikiSection>(initialSection);
   return (
     <main className="overview-view ludowiki-view">
@@ -445,14 +466,17 @@ export function LudoWikiView({ state: stateOverride, initialSection = "ludodex" 
       <div className="ludowiki-tabs" role="tablist" aria-label="Sezioni LudoWiki">
         <button type="button" role="tab" aria-selected={section === "ludodex"} className={section === "ludodex" ? "is-active" : ""} onClick={() => setSection("ludodex")}>Ludodex</button>
         <button type="button" role="tab" aria-selected={section === "achievements"} className={section === "achievements" ? "is-active" : ""} onClick={() => setSection("achievements")}>Traguardi</button>
+        <button type="button" role="tab" aria-selected={section === "scenes"} className={section === "scenes" ? "is-active" : ""} onClick={() => setSection("scenes")}>Scene</button>
         <button type="button" role="tab" aria-selected={section === "manual"} className={section === "manual" ? "is-active" : ""} onClick={() => setSection("manual")}>Manuale di gioco</button>
       </div>
       <div className="ludowiki-content" role="tabpanel">
         {section === "ludodex"
-          ? <LudodexSection state={state} />
+          ? <LudodexSection state={state} onReplay={replayLegendary} />
           : section === "achievements"
             ? <AchievementsSection state={state} />
-            : <ManualSection />}
+            : section === "scenes"
+              ? <ScenesSection state={state} onReplay={onReplayMoment} />
+              : <ManualSection />}
       </div>
     </main>
   );
