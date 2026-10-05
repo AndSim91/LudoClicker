@@ -12,7 +12,6 @@ export function migrateLateTutorialsState(state: MigratableState): MigratableSta
   const founded = (network?.schoolCount ?? 0) > 0;
   const done = [
     ...(founded || (tournaments?.results?.length ?? 0) > 0 ? ["first-tournament"] : []),
-    ...((state.lightInflation?.increases ?? 0) > 0 ? ["light-inflation-explained"] : []),
     ...(founded || (tournaments?.nationalTitlesCurrentSchool ?? 0) > 0 ? ["network-introduction"] : []),
     ...(founded || tournaments?.reptile?.unlocked ? ["reptile-introduction"] : []),
   ];

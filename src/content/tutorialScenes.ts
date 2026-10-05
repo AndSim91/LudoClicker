@@ -1,5 +1,4 @@
 import { GAME_CONFIG } from "../game/config";
-import { LIGHT_INFLATION_MOMENT } from "../game/lightInflation";
 import { isGameAreaUnlocked } from "../game/progression";
 import { formatCurrency } from "../shared/formatters";
 import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
@@ -31,7 +30,6 @@ export const TUTORIAL_REGION_IDS = [
   "collaborator-sectors",
   "tournaments-navigation",
   "network-navigation",
-  "title-equipment",
   "tournament-final",
   "tournament-groups",
   "tournament-podium",
@@ -65,7 +63,6 @@ export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" a
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
   "first-tournament",
-  "light-inflation-explained",
   "network-introduction",
   "reptile-introduction",
 ] as const;
@@ -652,48 +649,6 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         ],
         focusRegions: [],
         tournamentTab: "results",
-      },
-    ],
-  },
-  {
-    id: "light-inflation-explained",
-    pauseWhileActive: true,
-    canStart: ({ state }) =>
-      state.lightInflation.increases > 0 && !state.moments.queue.includes(LIGHT_INFLATION_MOMENT),
-    steps: [
-      {
-        id: "prices-went-up",
-        kind: "dialog",
-        speaker: "A.N.D.E.R.",
-        title: "Lama di Luce ha alzato i prezzi",
-        body: [
-          "Ogni gennaio, se nell'anno hai comprato almeno una spada, il listino di Lama di Luce sale. La causa ufficiale cambia ogni volta.",
-          "Le cause vere invece sono sempre le stesse tre.",
-        ],
-        focusRegions: ["title", "title-equipment"],
-      },
-      {
-        id: "three-real-causes",
-        kind: "dialog",
-        speaker: "A.N.D.E.R.",
-        title: "Le tre cause vere",
-        body: [
-          "Un 10% fisso, perché sì.",
-          "La ricchezza: se lo 0,5% di quanto hai incassato nell'anno supera il prezzo di una spada, l'aumento cresce in proporzione.",
-          "La domanda: più spade compri rispetto a quelle che avevi, più sale. Comprarne 10 avendone 10 vale un altro +30%. In ogni caso, mai oltre il +100% in un anno.",
-        ],
-        focusRegions: ["title", "title-equipment"],
-      },
-      {
-        id: "how-to-defend",
-        kind: "dialog",
-        speaker: "A.N.D.E.R.",
-        title: "Come difendersi",
-        body: [
-          "Riparare dall'elsa qui in alto non tocca il listino: conviene curare le spade che hai.",
-          "Comprane quando servono davvero. Un anno senza acquisti non porta aumenti a gennaio.",
-        ],
-        focusRegions: ["title", "title-equipment"],
       },
     ],
   },

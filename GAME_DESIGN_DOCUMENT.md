@@ -2910,17 +2910,11 @@ v102; i salvataggi che li hanno già superati li segnano come fatti):
     podi e qualificazioni (Accademico ad aprile, Nazionale a giugno, posti dagli
     iscritti attivi) e la meta: il Nazionale apre la Rete, Arena e Stile insieme
     «qualcosa in più».
-15. **Perché le spade costano di più** (`light-inflation-explained`): appena si
-    chiude la prima scena dell'Inflazione di Luce, con le spade della barra del
-    titolo in evidenza. Le tre cause vere (10% fisso, ricchezza oltre lo 0,5%
-    delle entrate dell'anno, domanda: +30% comprando tante spade quante se ne
-    avevano; massimo +100%) e come difendersi (riparare non tocca il listino; un
-    anno senza acquisti non porta aumenti).
-16. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
+15. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
     nazionale, solo nella prima scuola. Fa aprire la Rete; mappa, fondare è
     ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
     rendita, cosa resta per sempre, «Nessuna fretta» sul pulsante di fondazione.
-17. **La scuola organizza un torneo** (`reptile-introduction`): allo sblocco del
+16. **La scuola organizza un torneo** (`reptile-introduction`): allo sblocco del
     Reptile; se lo stesso Nazionale apre anche la Rete parte subito dopo quella.
     Fa aprire Tornei, che si apre su Open › Reptile; palazzetto e rimborso, le
     barre dei settori, luglio o il prossimo (resa e spade libere), «La giornata

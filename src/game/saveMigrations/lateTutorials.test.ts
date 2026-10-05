@@ -18,7 +18,6 @@ describe("late tutorials migration (v102)", () => {
   it("marks done what an older save already went past, and the first key as seen", () => {
     const migrated = migrateLateTutorialsState(v101((state) => ({
       ...state,
-      lightInflation: { ...state.lightInflation!, increases: 2 },
       tournaments: {
         ...state.tournaments!,
         results: [{} as never],
@@ -29,7 +28,6 @@ describe("late tutorials migration (v102)", () => {
     })));
     expect(migrated.tutorial?.completedSceneIds).toEqual([
       "first-tournament",
-      "light-inflation-explained",
       "network-introduction",
       "reptile-introduction",
     ]);

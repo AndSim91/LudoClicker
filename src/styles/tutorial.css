@@ -407,30 +407,6 @@
   padding-bottom: clamp(28px, 7vh, 72px);
 }
 
-/* Spade nella barra del titolo (Inflazione di Luce): like the contacts counter. */
-.title-bar[data-tutorial-treatment="focus"]:has(
-  [data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"]
-) {
-  z-index: auto;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.title-bar:has(
-  [data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"]
-) > :not([data-tutorial-region="title-equipment"]) {
-  opacity: .3;
-}
-
-[data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"] {
-  z-index: 5001;
-  border-radius: 6px;
-  box-shadow:
-    0 0 0 2px white,
-    0 0 0 7px rgb(255 255 255 / 32%),
-    0 5px 18px rgb(3 32 58 / 38%);
-}
-
 /* Regions of Tornei, Reptile and Rete: the page stays, only the region is lit.
  * The wide shadow darkens the rest of the page and is clipped by its scroller. */
 .workspace > main[data-tutorial-treatment="focus"]:has(:is(

@@ -45,7 +45,7 @@ export function TitleEquipment({
   }, [isOpen]);
 
   return (
-    <div className={`title-equipment is-${status}`} ref={rootRef} data-tutorial-region="title-equipment">
+    <div className={`title-equipment is-${status}`} ref={rootRef}>
       <button
         className="title-equipment-toggle"
         type="button"

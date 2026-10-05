@@ -29,7 +29,6 @@ const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   "collaborator-sectors": '[data-tutorial-region="collaborator-sectors"]',
   "tournaments-navigation": '[data-tutorial-region="tournaments-navigation"]',
   "network-navigation": '[data-tutorial-region="network-navigation"]',
-  "title-equipment": '[data-tutorial-region="title-equipment"]',
   "tournament-final": '[data-tutorial-region="tournament-final"]',
   "tournament-groups": '[data-tutorial-region="tournament-groups"]',
   "tournament-podium": '[data-tutorial-region="tournament-podium"]',
