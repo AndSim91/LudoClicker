@@ -125,6 +125,9 @@ export const GAME_CONFIG = {
   materialAvailableContactsLimit: 100,
   /** Enrolled members kept as objects; the ordinary ones beyond it are grouped. */
   materialEnrolledMembersLimit: 2_000,
+  // Grouping starts only this far past the limit, then brings it back to the limit:
+  // members taken out for a course do not trigger a regrouping at every step.
+  materialEnrolledMembersSlack: 250,
   recentCompletedTrialsLimit: 500,
   recentMissedTournamentsLimit: 48,
   chroniclesTeamSize: 6,

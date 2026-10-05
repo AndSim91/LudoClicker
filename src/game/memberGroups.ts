@@ -27,6 +27,7 @@ export function getGroupMemberProfile(group: MemberGroup, currentMonth: number) 
     enrolledMonth: group.recentEnrolledMonth ?? getOldEnrollmentMonth(currentMonth),
     lastFormTrainingYear: group.lastFormTrainingYear,
     formTrainingYearCount: group.formTrainingYearCount,
+    lastAgonistCourseYear: group.lastAgonistCourseYear,
   };
 }
 
@@ -53,6 +54,7 @@ function toGroupFields(
     lastFormTrainingYear?: number;
     formTrainingYearCount?: number;
     formBranchPreferences?: Contact["formBranchPreferences"];
+    lastAgonistCourseYear?: number;
   },
   currentMonth: number,
 ): Omit<MemberGroup, "count"> {
@@ -76,6 +78,10 @@ function toGroupFields(
     ...(member.formBranchPreferences?.length
       ? { formBranchPreferences: [...member.formBranchPreferences] }
       : {}),
+    // One Corso Agonisti a year: the year stays only while it still blocks a second one.
+    ...(member.lastAgonistCourseYear === getFormTrainingYear(currentMonth)
+      ? { lastAgonistCourseYear: member.lastAgonistCourseYear }
+      : {}),
   };
 }
 
@@ -88,6 +94,7 @@ function groupKey(group: Omit<MemberGroup, "count">): string {
     group.lastFormTrainingYear ?? "",
     group.formTrainingYearCount ?? "",
     group.formBranchPreferences?.join(",") ?? "",
+    group.lastAgonistCourseYear ?? "",
   ].join("|");
 }
 
@@ -116,9 +123,16 @@ function isGroupable(contact: Contact, keep: ReadonlySet<string>): contact is Co
     !contact.favorite &&
     !contact.training &&
     !contact.tournamentExperience &&
-    !contact.agonistCourseCompletions &&
-    contact.lastAgonistCourseYear === undefined &&
     !keep.has(contact.id);
+}
+
+/**
+ * Natural values plus Corso Agonisti bonuses: the strongest athletes stay people.
+ * A grouped member keeps neither the bonuses nor the course count (Andrea, 05/10).
+ */
+function getGroupingStrength(contact: Contact): number {
+  return (contact.arenaBase ?? 0) + (contact.styleBase ?? 0) +
+    (contact.agonistCourseArenaBonus ?? 0) + (contact.agonistCourseStyleBonus ?? 0);
 }
 
 /** Contacts that other records point to, or that hold a role, stay objects. */
@@ -154,10 +168,7 @@ export function groupExcessMembers(state: GameState): GameState {
   const keep = getContactsToKeep(state);
   const candidates = state.contacts
     .filter((contact) => isGroupable(contact, keep))
-    .sort((left, right) =>
-      ((left.arenaBase ?? 0) + (left.styleBase ?? 0)) -
-      ((right.arenaBase ?? 0) + (right.styleBase ?? 0)),
-    )
+    .sort((left, right) => getGroupingStrength(left) - getGroupingStrength(right))
     .slice(0, excess);
   if (candidates.length === 0) return state;
 
@@ -222,6 +233,9 @@ export function materializeGroupedMembers(
         enrolledMonth: profile.enrolledMonth,
         lastFormTrainingYear: group.lastFormTrainingYear,
         formTrainingYearCount: group.formTrainingYearCount,
+        ...(group.lastAgonistCourseYear !== undefined
+          ? { lastAgonistCourseYear: group.lastAgonistCourseYear }
+          : {}),
       });
       groups[index] = { ...group, count: group.count - 1 };
     }

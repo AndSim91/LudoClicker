@@ -29,7 +29,11 @@ import {
   getFormProgressionRank,
 } from "./formProgression";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
-import { getInstructorTeachingCounts, getPeopleInTraining } from "./runtimeIndexes";
+import {
+  getCollaboratorsById,
+  getInstructorTeachingCounts,
+  getPeopleInTraining,
+} from "./runtimeIndexes";
 import { selectInstructorTeachingCount } from "./selectors";
 import type {
   FormId,
@@ -85,14 +89,11 @@ export function getInstructorTrainingWorkloadMultiplier(
 ): number | undefined {
   const track = getTrainingTrack(training);
   const phase = getTrainingPhase(training);
-  const participantIsInstructor = state.collaborators.some(
-    (collaborator) =>
-      collaborator.id === personId && collaborator.assignment === "instructor",
-  );
   const teacherTraining = phase === "instructor" ||
     phase === "technician" ||
     track === "combined-instructor" ||
-    (track === "athlete" && participantIsInstructor);
+    (track === "athlete" &&
+      getCollaboratorsById(state.collaborators).get(personId)?.assignment === "instructor");
   if (!teacherTraining) return undefined;
   return hasActiveStudentLesson(state, personId, teachingCounts) ||
     Boolean(

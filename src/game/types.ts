@@ -105,6 +105,8 @@ export interface MemberGroup {
   formTrainingYearCount?: number;
   /** Preferred weapons, in order (Corso Y onwards): most members have them. */
   formBranchPreferences?: FormBranch[];
+  /** Set only during the training year of their last Corso Agonisti. */
+  lastAgonistCourseYear?: number;
   count: number;
 }
 
@@ -1133,6 +1135,8 @@ export type GameAction =
     allowAutomaticEventStarts?: boolean;
     /** Shortest step: lighter display modes group deadlines over a longer span. */
     minStepMs?: number;
+    /** Real milliseconds after which a catch-up yields to the browser (next tick goes on). */
+    timeBudgetMs?: number;
   }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }

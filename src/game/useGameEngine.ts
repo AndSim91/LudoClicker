@@ -23,6 +23,9 @@ import { postponeLightInflationEvent } from "./lightInflation";
 import { crashReporter } from "./crashReporting";
 import type { GameAction } from "./types";
 
+// About one frame: a long catch-up is split over several ticks so the page keeps drawing.
+const TICK_TIME_BUDGET_MS = 12;
+
 type PauseReason = "manual" | "tutorial" | "gadget" | "reptile" | "moment" | "foundation" | "practice";
 
 interface PauseDrainRequest {
@@ -173,6 +176,7 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
           stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
           workBudget: MAX_SIMULTANEOUS_WORK_PER_SLICE,
           minStepMs: minStepMsRef.current,
+          timeBudgetMs: TICK_TIME_BUDGET_MS,
         });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo

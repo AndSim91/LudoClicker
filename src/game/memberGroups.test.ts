@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialCollaboratorMastery } from "../content/mastery";
+import { getFormTrainingYear } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { getCurrentSchoolContactCount } from "./historyArchive";
@@ -83,6 +84,38 @@ describe("member groups", () => {
     const back = materializeGroupedMembers(grouped, 1, NOW, () => 0,
       (candidate) => candidate === group);
     expect(back.contacts.at(-1)?.formBranchPreferences).toEqual(["Staffa", "Spada Lunga"]);
+  });
+
+  it("groups Corso Agonisti members too, keeping the strongest with their bonuses", () => {
+    const base = withMembers(LIMIT);
+    const people = base.contacts.filter((contact) => contact.status === "enrolled");
+    const trainingYear = getFormTrainingYear(base.school.currentMonth);
+    const weakAgonist: Contact = { ...people[0], id: "weak-agonist", rarity: "common",
+      arenaBase: 0, styleBase: 0, agonistCourseCompletions: 2, agonistCourseArenaBonus: 1,
+      agonistCourseStyleBonus: 1, lastAgonistCourseYear: trainingYear };
+    // Weak by nature, strong thanks to the courses: stays a person.
+    const coursedChampion: Contact = { ...people[0], id: "coursed-champion", rarity: "common",
+      arenaBase: 0, styleBase: 0, agonistCourseCompletions: 6, agonistCourseArenaBonus: 500,
+      agonistCourseStyleBonus: 500 };
+    const state: GameState = {
+      ...base,
+      contacts: [...base.contacts, weakAgonist, coursedChampion],
+      school: { ...base.school, activeMembers: base.school.activeMembers + 2 },
+    };
+
+    const grouped = groupExcessMembers(state);
+    const ids = new Set(grouped.contacts.map((contact) => contact.id));
+    expect(ids.has("weak-agonist")).toBe(false);
+    expect(ids.has("coursed-champion")).toBe(true);
+    const group = grouped.memberGroups?.find((candidate) => candidate.lastAgonistCourseYear);
+    expect(group?.lastAgonistCourseYear).toBe(trainingYear);
+
+    const back = materializeGroupedMembers(grouped, 1, NOW, () => 0,
+      (candidate) => candidate === group);
+    const member = back.contacts.at(-1);
+    expect(member?.lastAgonistCourseYear).toBe(trainingYear);
+    expect(member?.agonistCourseCompletions).toBe(0);
+    expect(member?.agonistCourseArenaBonus).toBe(0);
   });
 
   it("sends grouped members away at the yearly rate and archives them", () => {

@@ -426,16 +426,29 @@ function getDefinitionEffectTotal(
   return effectiveLevel * repeatedEffectPerLevel + scheduledEffect;
 }
 
+// The game never edits a levels object in place (a purchase makes a new one), so
+// each effect is summed once per levels object: the engine asks thousands of times
+// a second, and every answer used to walk the whole catalog.
+const upgradeEffectTotalsCache = new WeakMap<UpgradeLevels, Map<UpgradeEffect, number>>();
+
 export function getUpgradeEffectTotal(
   levels: UpgradeLevels,
   effect: UpgradeEffect,
 ): number {
-  return UPGRADE_DEFINITIONS.reduce(
-    (total, definition) =>
-      total +
-      getDefinitionEffectTotal(definition, levels[definition.id] ?? 0, effect),
+  let totals = upgradeEffectTotalsCache.get(levels);
+  if (!totals) {
+    totals = new Map();
+    upgradeEffectTotalsCache.set(levels, totals);
+  }
+  const cached = totals.get(effect);
+  if (cached !== undefined) return cached;
+  const total = UPGRADE_DEFINITIONS.reduce(
+    (sum, definition) =>
+      sum + getDefinitionEffectTotal(definition, levels[definition.id] ?? 0, effect),
     0,
   );
+  totals.set(effect, total);
+  return total;
 }
 
 export function getUpgradeEffectMaximum(effect: UpgradeEffect): number {

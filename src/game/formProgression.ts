@@ -13,10 +13,37 @@ export function getFormProgressionRank(formId: FormId): number {
   return 8;
 }
 
+// Forms and preferences arrays are shared by every copy of a person, so the
+// answer is kept per forms array: the teaching passes ask it for thousands of
+// members at every step. Callers only read the result.
+const candidatesCache = new WeakMap<readonly FormId[], {
+  preferences: readonly FormBranch[] | undefined;
+  flags: number;
+  candidates: FormId[];
+}>();
+
 export function getAutomaticFormCandidates(student: {
   forms: FormId[];
   formBranchPreferences?: FormBranch[];
 }, courseXUnlocked = true, unrestrictedFormBranches = false): FormId[] {
+  const flags = (courseXUnlocked ? 1 : 0) + (unrestrictedFormBranches ? 2 : 0);
+  const cached = candidatesCache.get(student.forms);
+  if (cached?.flags === flags && cached.preferences === student.formBranchPreferences) {
+    return cached.candidates;
+  }
+  const candidates = computeAutomaticFormCandidates(student, courseXUnlocked, unrestrictedFormBranches);
+  candidatesCache.set(student.forms, {
+    preferences: student.formBranchPreferences,
+    flags,
+    candidates,
+  });
+  return candidates;
+}
+
+function computeAutomaticFormCandidates(student: {
+  forms: FormId[];
+  formBranchPreferences?: FormBranch[];
+}, courseXUnlocked: boolean, unrestrictedFormBranches: boolean): FormId[] {
   const core: FormId[] = courseXUnlocked
     ? ["form-1", "course-x", "form-2", "course-y"]
     : ["form-1", "form-2", "course-y"];

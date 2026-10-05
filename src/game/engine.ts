@@ -332,7 +332,11 @@ function tick(
   workBudget = Infinity,
   allowAutomaticEventStarts = true,
   minStepMs?: number,
+  timeBudgetMs?: number,
 ): GameState {
+  // Steps are cut by deadlines, not by this budget: stopping early and going on at
+  // the next tick gives the same game, the browser just gets to draw in between.
+  const yieldAt = timeBudgetMs === undefined ? Infinity : performance.now() + timeBudgetMs;
   let nextState = state;
   let stalledAt: number | undefined;
   const hasStepBudget = stepBudget !== undefined;
@@ -379,6 +383,7 @@ function tick(
     if (!completedStep.complete) break;
     if (boundary >= now) break;
     if (remainingWorkBudget <= 0) break;
+    if (performance.now() >= yieldAt) break;
     // Passo fermo sullo stesso istante senza lavoro discreto: al prossimo si
     // forza il battito. L'identità dello stato non basta, perché una funzione
     // che lo ricrea senza cambiarlo fermerebbe il tempo per sempre (6.29).
@@ -417,7 +422,8 @@ function compactChangedHistory(
       ? poolExcessAvailableContacts(archived)
       : archived;
   const compacted =
-    countEnrolledContacts(pooled.contacts) > GAME_CONFIG.materialEnrolledMembersLimit
+    countEnrolledContacts(pooled.contacts) >
+      GAME_CONFIG.materialEnrolledMembersLimit + GAME_CONFIG.materialEnrolledMembersSlack
       ? groupExcessMembers(pooled)
       : pooled;
   return action.type === "REPLACE_STATE"

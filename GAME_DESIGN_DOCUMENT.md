@@ -4232,10 +4232,15 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   animazioni» il passo minimo sale a 500 ms in Onde e 1 s in Outlook
   (`getTickStepMs` in `useAppPreferences.ts`, campo `minStepMs` dell'azione
   `TICK`);
-- oltre 2.000 iscritti, gli ordinari più deboli senza Corso Agonisti, tornei,
-  formazione in corso o ruoli diventano contatori (`memberGroups`: rarità,
-  provenienza, Forme, preferenze d'arma e contatori annuali finché contano) e
-  tornano persone quando servono per un corso;
+- oltre 2.000 iscritti (con un margine di 250 prima di rifare i gruppi), gli
+  ordinari più deboli senza tornei, formazione in corso o ruoli diventano
+  contatori (`memberGroups`: rarità, provenienza, Forme, preferenze d'arma,
+  contatori annuali e anno del Corso Agonisti finché contano) e tornano persone
+  quando servono per un corso; «più deboli» conta anche i bonus del Corso
+  Agonisti, che chi finisce in un gruppo perde insieme al numero di corsi fatti
+  (decisione di Andrea, 05/10);
+- un recupero lungo si ferma dopo ~12 ms reali e prosegue al tick successivo
+  (`timeBudgetMs` del `TICK`), così la pagina continua a disegnarsi;
 - orologio di gioco con pausa (pulsante nella barra del titolo; il tutorial e
   i minigiochi mettono in pausa da soli) e velocità regolabile dal pannello
   Admin in sviluppo;

@@ -77,6 +77,7 @@ export interface GameActionHandlerDependencies {
     workBudget?: number,
     allowAutomaticEventStarts?: boolean,
     minStepMs?: number,
+    timeBudgetMs?: number,
   ) => GameState;
   startFormTraining: (
     state: GameState,
@@ -121,6 +122,7 @@ export function createGameActionHandlers(
       action.workBudget,
       action.allowAutomaticEventStarts ?? true,
       action.minStepMs,
+      action.timeBudgetMs,
     ),
     RESUME_FROM_PAUSE: (state, action) => postponeLightInflationEvent(
       state,

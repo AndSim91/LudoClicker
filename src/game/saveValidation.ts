@@ -422,6 +422,8 @@ export function isValidGameState(value: unknown): value is GameState {
           (group.formTrainingYearCount === undefined ||
             isNonNegativeSafeInteger(group.formTrainingYearCount)) &&
           (group.formBranchPreferences === undefined || Array.isArray(group.formBranchPreferences)) &&
+          (group.lastAgonistCourseYear === undefined ||
+            Number.isSafeInteger(group.lastAgonistCourseYear)) &&
           Number.isSafeInteger(group.count) && group.count > 0
         ))) &&
     Array.isArray(state.emails) &&

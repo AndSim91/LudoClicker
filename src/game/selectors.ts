@@ -139,18 +139,40 @@ export function canInstructorTeachForm(
   );
 }
 
+// Collaborators are immutable: the ranking keys are computed once per object,
+// not at every comparison (a teaching pass compares hundreds of instructors).
+const instructorRankCache = new WeakMap<
+  Collaborator,
+  { formsWithCourseX: number; formsWithoutCourseX: number; productivity: number }
+>();
+
+function getInstructorRank(collaborator: Collaborator) {
+  let rank = instructorRankCache.get(collaborator);
+  if (!rank) {
+    rank = {
+      formsWithCourseX: getVisibleForms(collaborator.instructorForms, true).length,
+      formsWithoutCourseX: getVisibleForms(collaborator.instructorForms, false).length,
+      productivity: getCollaboratorProductivity(collaborator, "instructor"),
+    };
+    instructorRankCache.set(collaborator, rank);
+  }
+  return rank;
+}
+
 export function compareInstructorTeachingPriority(
   left: Collaborator,
   right: Collaborator,
   teachingCounts: ReadonlyMap<string, number>,
   courseXUnlocked = true,
 ): number {
-  return getVisibleForms(left.instructorForms, courseXUnlocked).length -
-      getVisibleForms(right.instructorForms, courseXUnlocked).length ||
+  const leftRank = getInstructorRank(left);
+  const rightRank = getInstructorRank(right);
+  return (courseXUnlocked
+      ? leftRank.formsWithCourseX - rightRank.formsWithCourseX
+      : leftRank.formsWithoutCourseX - rightRank.formsWithoutCourseX) ||
     (teachingCounts.get(left.id) ?? 0) -
       (teachingCounts.get(right.id) ?? 0) ||
-    getCollaboratorProductivity(right, "instructor") -
-      getCollaboratorProductivity(left, "instructor") ||
+    rightRank.productivity - leftRank.productivity ||
     left.joinedAt - right.joinedAt ||
     left.id.localeCompare(right.id);
 }
