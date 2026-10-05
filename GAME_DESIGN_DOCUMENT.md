@@ -3506,8 +3506,8 @@ rarità e resta per tutta la partita, anche nelle scuole fondate dopo (passa
 solo la Maestria: progetti, prototipi e rarità ripartono da zero).
 
 Con la Maestria la prova si salta: sviluppo e revisione si pagano e si
-aspettano come sempre, poi il risultato è 100 senza giocare (`mastered` nella
-prova, esito «Maestria»). La prova da saltare è quella della rarità su cui si
+aspettano come sempre, poi il risultato è 100 senza giocare e senza finestra
+di esito: un prototipo nuovo resta sulla scheda con «Metti in vendita». La prova da saltare è quella della rarità su cui si
 gioca: l'occasione se c'è, altrimenti la rarità attuale. Se la rarità attuale
 ha la Maestria e quella dell'occasione no, si gioca la prova della nuova
 rarità. Nella riga della rarità la barra della qualità diventa il timbro

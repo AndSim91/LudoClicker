@@ -367,14 +367,9 @@ function processGadgetWork(state: GameState, elapsedMs: number): GameState {
     },
   };
   if (!mastered) return next;
+  // Maestria: 100 without playing and no result window; the card offers «Metti in vendita».
   const completed = completeGadgetMinigame(next, work.productId, 100);
-  return {
-    ...completed,
-    gadgets: {
-      ...completed.gadgets,
-      minigame: completed.gadgets.minigame && { ...completed.gadgets.minigame, mastered: true },
-    },
-  };
+  return { ...completed, gadgets: { ...completed.gadgets, minigame: undefined } };
 }
 
 interface SaleResult {

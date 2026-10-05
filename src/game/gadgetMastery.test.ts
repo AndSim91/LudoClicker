@@ -102,7 +102,7 @@ describe("Maestria dei gadget", () => {
     const started = startGadgetProject(gadgetSchool({ wristband: ["common"] }), "wristband");
     expect(started.gadgets.activeWork).toBeDefined();
     const done = finishWork(started);
-    expect(done.gadgets.minigame).toMatchObject({ status: "result", score: 100, mastered: true });
+    expect(done.gadgets.minigame).toBeUndefined();
     expect(done.gadgets.products.wristband).toMatchObject({ prototypeCompleted: true });
     expect(done.gadgets.products.wristband.rarities.common).toMatchObject({ unlocked: true, quality: 100 });
   });
@@ -122,7 +122,8 @@ describe("Maestria dei gadget", () => {
     expect(finishWork(revising).gadgets.minigame?.status).toBe("ready");
 
     const bothMastered = finishWork(startGadgetRevision(sellingWristband(100, ["common", "rare"]), "wristband"));
-    expect(bothMastered.gadgets.minigame).toMatchObject({ status: "result", unlockedRarity: "rare", mastered: true });
+    expect(bothMastered.gadgets.minigame).toBeUndefined();
+    expect(bothMastered.gadgets.products.wristband.rarities.rare.unlocked).toBe(true);
     expect(bothMastered.gadgets.products.wristband.rarities.rare.quality).toBe(100);
   });
 

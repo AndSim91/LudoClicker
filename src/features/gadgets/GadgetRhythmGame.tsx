@@ -377,21 +377,19 @@ export function GadgetRhythmGame({
       >
         <section className="gadget-minigame-result">
           <span className="gadget-result-kicker">
-            {unlockedRarity ? "Rarità sbloccata" : minigame.mastered ? "Maestria" : "Collaudo completato"}
+            {unlockedRarity ? "Rarità sbloccata" : "Collaudo completato"}
           </span>
           <h2 id="gadget-result-title">{product.name}</h2>
           <div className="gadget-result-score" aria-label={`Risultato ${score} su 100`}>
             <strong>{score}%</strong>
-            <span>{minigame.mastered ? "collaudo superato d'ufficio" : "risultato del tentativo"}</span>
+            <span>risultato del tentativo</span>
           </div>
           <p>
             {unlockedRarity
               ? `${GADGET_RARITIES[minigame.rarity].label} sale al 100%. ${GADGET_RARITIES[unlockedRarity].label} entra automaticamente in catalogo con qualità ${score}%.`
               : improved
                 ? `Nuovo record: la qualità sale al ${quality}%.`
-                : minigame.mastered
-                  ? `Maestria: niente collaudo, la qualità resta al ${quality}%.`
-                  : `La qualità massima resta al ${quality}%.`}
+                : `La qualità massima resta al ${quality}%.`}
           </p>
           {quality === 0 ? (
             <p className="gadget-result-warning">

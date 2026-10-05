@@ -120,9 +120,7 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
       ? !Number.isSafeInteger(state.minigame.score) ||
         (state.minigame.score ?? -1) < 0 ||
         (state.minigame.score ?? 101) > 100
-      : state.minigame.score !== undefined) ||
-    (state.minigame.mastered !== undefined &&
-      (state.minigame.mastered !== true || state.minigame.status !== "result"))
+      : state.minigame.score !== undefined)
   )) return false;
   return true;
 }

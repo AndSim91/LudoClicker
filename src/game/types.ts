@@ -957,8 +957,6 @@ export interface GadgetMinigameState {
   previousQuality: number;
   status: "ready" | "running" | "result";
   score?: number;
-  /** Collaudo skipped by the Maestria: the score is 100 without playing. */
-  mastered?: boolean;
 }
 
 export interface GadgetState {
