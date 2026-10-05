@@ -552,6 +552,10 @@ export function App() {
     }),
     [dispatch],
   );
+  const skipGadgetMinigame = useCallback(
+    (productId: GadgetProductId) => dispatch({ type: "SKIP_GADGET_MINIGAME", productId }),
+    [dispatch],
+  );
   const completeGadgetMinigame = useCallback(
     (productId: GadgetProductId, score: number) => dispatch({
       type: "COMPLETE_GADGET_MINIGAME",
@@ -698,6 +702,7 @@ export function App() {
               onStartProject={startGadgetProject}
               onStartRevision={startGadgetRevision}
               onStartMinigame={startGadgetMinigame}
+              onSkipMinigame={skipGadgetMinigame}
               onCompleteMinigame={completeGadgetMinigame}
               onDismissMinigameResult={dismissGadgetMinigameResult}
               onAccept={acceptGadgetProduct}

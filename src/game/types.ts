@@ -1147,6 +1147,7 @@ export type GameAction =
   | { type: "START_GADGET_PROJECT"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_REVISION"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_MINIGAME"; productId: GadgetProductId }
+  | { type: "SKIP_GADGET_MINIGAME"; productId: GadgetProductId }
   | { type: "COMPLETE_GADGET_MINIGAME"; productId: GadgetProductId; score: number }
   | { type: "DISMISS_GADGET_MINIGAME_RESULT"; productId: GadgetProductId }
   | { type: "ACCEPT_GADGET_PRODUCT"; productId: GadgetProductId }

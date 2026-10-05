@@ -125,6 +125,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   onStartProject,
   onStartRevision,
   onStartMinigame,
+  onSkipMinigame,
   onAccept,
   mastery,
   onPractice,
@@ -147,6 +148,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   onStartProject: (productId: GadgetProductId) => void;
   onStartRevision: (productId: GadgetProductId) => void;
   onStartMinigame: (productId: GadgetProductId) => void;
+  onSkipMinigame: (productId: GadgetProductId) => void;
   onAccept: (productId: GadgetProductId) => void;
 }) {
   const definition = GADGET_DEFINITIONS[productId];
@@ -288,9 +290,18 @@ const GadgetProductCard = memo(function GadgetProductCard({
             Avvia progetto · {formatCurrency(definition.projectCost)}
           </button>
         ) : minigame?.status === "ready" ? (
-          <button type="button" className="primary" onClick={() => onStartMinigame(productId)}>
-            Avvia collaudo
-          </button>
+          <>
+            <button type="button" className="primary" onClick={() => onStartMinigame(productId)}>
+              Avvia collaudo
+            </button>
+            <button
+              type="button"
+              title="Niente minigioco: il collaudo chiude al 50% di qualità"
+              onClick={() => onSkipMinigame(productId)}
+            >
+              Salta · 50%
+            </button>
+          </>
         ) : work || minigame || queued ? null : !product.prototypeCompleted ? null : !product.accepted ? (
           <>
             <button type="button" className="primary" onClick={() => onAccept(productId)}>
@@ -327,6 +338,7 @@ export function GadgetsView({
   onStartProject,
   onStartRevision,
   onStartMinigame,
+  onSkipMinigame,
   onCompleteMinigame,
   onDismissMinigameResult,
   onAccept,
@@ -336,6 +348,7 @@ export function GadgetsView({
   onStartProject: (productId: GadgetProductId) => void;
   onStartRevision: (productId: GadgetProductId) => void;
   onStartMinigame: (productId: GadgetProductId) => void;
+  onSkipMinigame: (productId: GadgetProductId) => void;
   onCompleteMinigame: (productId: GadgetProductId, score: number) => void;
   onDismissMinigameResult: (productId: GadgetProductId) => void;
   onAccept: (productId: GadgetProductId) => void;
@@ -491,6 +504,7 @@ export function GadgetsView({
               onStartProject={onStartProject}
               onStartRevision={onStartRevision}
               onStartMinigame={onStartMinigame}
+              onSkipMinigame={onSkipMinigame}
               onAccept={onAccept}
               mastery={state.network.gadgetMastery?.[productId]}
               onPractice={startPractice}

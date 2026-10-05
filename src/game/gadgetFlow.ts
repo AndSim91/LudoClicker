@@ -274,6 +274,7 @@ function applyGadgetCollaudo(
   state: GameState,
   minigame: GadgetMinigameState,
   score: number,
+  skipped = false,
 ): { products: GadgetState["products"]; unlockedRarity?: GadgetRarity } {
   const productId = minigame.productId;
   const product = state.gadgets.products[productId];
@@ -283,7 +284,7 @@ function applyGadgetCollaudo(
     minigame.opportunityRarity !== undefined &&
     minigame.opportunityRarity === getNextGadgetRarity(rarity) &&
     !product.rarities[minigame.opportunityRarity].unlocked &&
-    score > GADGET_RARITY_UNLOCK_SCORE_THRESHOLD
+    (skipped || score > GADGET_RARITY_UNLOCK_SCORE_THRESHOLD)
     ? minigame.opportunityRarity
     : undefined;
   const rarities = unlockedRarity
@@ -314,6 +315,27 @@ function applyGadgetCollaudo(
       },
     },
     unlockedRarity,
+  };
+}
+
+/** Quality fixed by «Salta»: for players who would rather not play the collaudo. */
+export const SKIPPED_GADGET_COLLAUDO_SCORE = 50;
+
+/** «Salta»: the collaudo closes at 50% with no result window; an opportunity still opens its rarity. */
+export function skipGadgetMinigame(
+  state: GameState,
+  productId: GadgetProductId,
+): GameState {
+  const minigame = state.gadgets.minigame;
+  if (
+    !minigame ||
+    minigame.productId !== productId ||
+    minigame.status !== "ready"
+  ) return state;
+  const { products } = applyGadgetCollaudo(state, minigame, SKIPPED_GADGET_COLLAUDO_SCORE, true);
+  return {
+    ...state,
+    gadgets: promoteNextMinigame({ ...state.gadgets, products, minigame: undefined }),
   };
 }
 

@@ -3651,6 +3651,16 @@ superamento di requisiti specifici per prodotto. Tali requisiti sono ancora
 `TBD`; fino alla loro definizione il livello resta presente nei salvataggi e
 nel modello di gioco, ma non è ottenibile.
 
+#### Salta il collaudo
+
+Chi non vuole giocare la prova può premere **«Salta · 50%»** accanto ad «Avvia
+collaudo» (`skipGadgetMinigame` in `gadgetFlow.ts`, azione
+`SKIP_GADGET_MINIGAME`). Il collaudo si chiude subito con qualità 50, senza
+finestra di esito, e la qualità massima già ottenuta non scende. Se la revisione
+aveva l'occasione di una rarità nuova, saltando la rarità si sblocca comunque,
+con qualità 50 (la precedente sale al 100% come sempre): chi salta non perde
+contenuti, solo qualità. Saltare non dà la Maestria della rarità giocata.
+
 #### Maestria
 
 Quando una rarità di un prodotto arriva al 100% (con una prova, oppure

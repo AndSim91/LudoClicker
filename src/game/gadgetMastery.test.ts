@@ -6,6 +6,7 @@ import { getGadgetWorkSpeed } from "./gadgetEconomy";
 import {
   completeGadgetMinigame,
   processGadgets,
+  skipGadgetMinigame,
   startGadgetMinigame,
   startGadgetProject,
   startGadgetRevision,
@@ -132,5 +133,26 @@ describe("Maestria dei gadget", () => {
     expect(isValidGadgetMastery({ wristband: ["common", "rare"] })).toBe(true);
     expect(isValidGadgetMastery({ wristband: ["mythic"] })).toBe(false);
     expect(isValidGadgetMastery({ spoon: ["common"] })).toBe(false);
+  });
+});
+
+describe("Salta il collaudo", () => {
+  it("closes a new prototype at 50% with no result window", () => {
+    const skipped = skipGadgetMinigame(finishWork(startGadgetProject(gadgetSchool(), "wristband")), "wristband");
+    expect(skipped.gadgets.minigame).toBeUndefined();
+    expect(skipped.gadgets.products.wristband).toMatchObject({ prototypeCompleted: true });
+    expect(skipped.gadgets.products.wristband.rarities.common).toMatchObject({ unlocked: true, quality: 50 });
+  });
+
+  it("still opens the rarity of the opportunity, at 50%", () => {
+    const skipped = skipGadgetMinigame(finishWork(startGadgetRevision(sellingWristband(60), "wristband")), "wristband");
+    expect(skipped.gadgets.products.wristband.rarities.rare).toMatchObject({ unlocked: true, quality: 50 });
+  });
+
+  it("never lowers a better quality", () => {
+    const revising = startGadgetRevision(sellingWristband(80), "wristband");
+    const noOpportunity = { ...revising, gadgets: { ...revising.gadgets, activeWorks: revising.gadgets.activeWorks.map((work) => ({ ...work, opportunityRarity: undefined })) } };
+    const skipped = skipGadgetMinigame(finishWork(noOpportunity), "wristband");
+    expect(skipped.gadgets.products.wristband.rarities.common.quality).toBe(80);
   });
 });

@@ -25,6 +25,7 @@ const handlers = () => ({
   onStartProject: vi.fn(),
   onStartRevision: vi.fn(),
   onStartMinigame: vi.fn(),
+  onSkipMinigame: vi.fn(),
   onCompleteMinigame: vi.fn(),
   onDismissMinigameResult: vi.fn(),
   onAccept: vi.fn(),
@@ -436,5 +437,33 @@ describe("GadgetsView", () => {
     fireEvent(document, new Event("visibilitychange"));
 
     expect(screen.getByRole("alertdialog", { name: "Scheda non attiva" })).toBeVisible();
+  });
+  it("offers «Salta» next to a ready collaudo", () => {
+    const state = unlockedState();
+    const actions = handlers();
+    render(<GadgetsView
+      {...actions}
+      state={{
+        ...state,
+        gadgets: {
+          ...state.gadgets,
+          products: {
+            ...state.gadgets.products,
+            wristband: { ...state.gadgets.products.wristband, projectPurchased: true },
+          },
+          minigame: {
+            productId: "wristband",
+            kind: "development",
+            rarity: "common",
+            seed: 1,
+            previousQuality: 0,
+            status: "ready",
+          },
+        },
+      }}
+    />);
+    fireEvent.click(screen.getByRole("button", { name: "Salta · 50%" }));
+    expect(actions.onSkipMinigame).toHaveBeenCalledWith("wristband");
+    expect(actions.onStartMinigame).not.toHaveBeenCalled();
   });
 });

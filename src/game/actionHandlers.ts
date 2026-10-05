@@ -42,6 +42,7 @@ import {
   completeGadgetMinigame,
   dismissGadgetMinigameResult,
   startGadgetMinigame,
+  skipGadgetMinigame,
   startGadgetProject,
   startGadgetRevision,
 } from "./gadgetFlow";
@@ -157,6 +158,7 @@ export function createGameActionHandlers(
       state,
       action.productId,
     ),
+    SKIP_GADGET_MINIGAME: (state, action) => skipGadgetMinigame(state, action.productId),
     COMPLETE_GADGET_MINIGAME: (state, action) => completeGadgetMinigame(
       state,
       action.productId,
