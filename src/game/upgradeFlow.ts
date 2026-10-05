@@ -37,7 +37,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): GameState {
   ) {
     return state;
   }
-  const cost = getUpgradeCost(definition, currentLevel, state.network.schoolCount);
+  const cost = getUpgradeCost(definition, currentLevel, state.upgrades);
   if (state.school.euros < cost) return state;
 
   const upgrades = { ...state.upgrades, [upgradeId]: currentLevel + 1 };
@@ -65,7 +65,7 @@ export function buyAllAffordableUpgrades(state: GameState): GameState {
       .filter((definition) => definition.category !== "secrets")
       .map((definition) => ({
         id: definition.id,
-        cost: getUpgradeCost(definition, current.upgrades[definition.id], current.network.schoolCount),
+        cost: getUpgradeCost(definition, current.upgrades[definition.id], current.upgrades),
       }))
       .filter(({ cost }) => cost <= current.school.euros)
       .sort((a, b) => a.cost - b.cost)

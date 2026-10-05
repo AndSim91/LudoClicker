@@ -36,6 +36,10 @@ export interface BalanceSimulationOptions {
   horizonMs: number;
   tickMs?: number;
   strategy?: BalanceStrategy;
+  /** After the priority list, press "Compra tutto" every 10 seconds. */
+  spendSurplus?: boolean;
+  /** Keep playing the same school after the first National title. */
+  continueAfterPrestige?: boolean;
   onTick?: (state: GameState, elapsedMs: number) => void;
 }
 
@@ -152,7 +156,7 @@ function buyOneAffordableUpgrade(
     const definition = getUpgradeDefinition(upgradeId);
     if (!definition) continue;
     const level = state.upgrades[upgradeId];
-    const cost = getUpgradeCost(definition, level, state.network.schoolCount);
+    const cost = getUpgradeCost(definition, level, state.upgrades);
     if (
       level < definition.maxLevel &&
       state.school.fame >= definition.requiredFame &&
@@ -317,6 +321,8 @@ export function simulateBalanceGame({
   horizonMs,
   tickMs = SIMULATION_TICK_MS,
   strategy = "competitive",
+  spendSurplus = false,
+  continueAfterPrestige = false,
   onTick,
 }: BalanceSimulationOptions): BalanceSimulationResult {
   const startedAt = SIMULATION_START_MS + seed * 100_000;
@@ -333,6 +339,10 @@ export function simulateBalanceGame({
     const now = startedAt + elapsedMs;
     state = dispatch(state, { type: "TICK", now });
     state = takeStrategicActions(state, now, strategy);
+    // A player who presses "Compra tutto" every now and then.
+    if (spendSurplus && elapsedMs % 10_000 === 0) {
+      state = dispatch(state, { type: "BUY_ALL_UPGRADES", now });
+    }
 
     const activeEmail = selectActiveEmail(state);
     if (activeEmail?.status === "writing") {
@@ -347,7 +357,7 @@ export function simulateBalanceGame({
     onTick?.(state, elapsedMs);
     if (prestigeReadyAtMs === undefined && canFoundSchool(state)) {
       prestigeReadyAtMs = elapsedMs;
-      break;
+      if (!continueAfterPrestige) break;
     }
   }
 
