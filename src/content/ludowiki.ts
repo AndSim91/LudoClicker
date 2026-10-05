@@ -5,6 +5,7 @@ import {
   SECRET_LEGENDARY_IDS,
   type SecretLegendaryId,
 } from "./secretLegendaries";
+import { UPGRADE_PRICING } from "./upgrades";
 import { SPECIAL_COLLABORATORS } from "./specialCollaborators";
 import { getTournamentSchool } from "./tournamentSchools";
 import { TOURNAMENT_DEFINITIONS } from "./tournaments";
@@ -216,18 +217,18 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Durata prova", value: seconds(GAME_CONFIG.trialDurationMs), detail: "durata base visibile" },
       { label: "Bonus immediato", value: `€ ${GAME_CONFIG.enrollmentBonus}`, detail: "accreditato all'iscrizione" },
-      { label: "Quota mensile", value: `€ ${GAME_CONFIG.monthlyMemberFee} + € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "base iniziale più ogni Forma o corso" },
+      { label: "Quota mensile", value: `€ ${GAME_CONFIG.monthlyMemberFee}`, detail: "base iniziale, sale con il record di iscritti" },
     ],
     rules: [
       "Il risultato non è sempre garantito, anche dopo una prova prenotata.",
       "Un'iscrizione Leggendaria rende subito disponibile anche il Collaboratore.",
       "Il bonus di iscrizione è separato dalla quota ricorrente mensile.",
-      `Per ogni Forma o corso, un attestato da Istruttore aggiunge € ${GAME_CONFIG.monthlyMemberInstructorBonus}; una qualifica da Tecnico porta il bonus a € ${GAME_CONFIG.monthlyMemberTechnicianBonus} e sostituisce quello da Istruttore.`,
+      "La quota è la stessa per tutti: Forme, attestati e qualifiche non la cambiano.",
     ],
     example: {
-      title: "Esempio: iscritto con 2 Forme",
+      title: "Esempio: scuola appena aperta",
       lines: [
-        `€ ${GAME_CONFIG.monthlyMemberFee} + (2 × € ${GAME_CONFIG.monthlyMemberFormBonus}) = € ${GAME_CONFIG.monthlyMemberFee + 2 * GAME_CONFIG.monthlyMemberFormBonus} al mese`,
+        `3 iscritti × € ${GAME_CONFIG.monthlyMemberFee} = € ${3 * GAME_CONFIG.monthlyMemberFee} al mese`,
         `All'iscrizione ricevi inoltre € ${GAME_CONFIG.enrollmentBonus} una tantum.`,
       ],
     },
@@ -259,7 +260,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Gestione della scuola",
     title: "Economia della scuola",
     summary: "Entrate una tantum, rette, spese e ritmo dei mesi.",
-    introduction: "Gli Euro finanziano Forme, attrezzatura, Upgrade e attività. Le iscrizioni danno un bonus immediato; le rette arrivano invece al cambio mese e crescono con la formazione degli iscritti.",
+    introduction: "Gli Euro finanziano Forme, attrezzatura, Upgrade e attività. Le iscrizioni danno un bonus immediato; le rette arrivano invece al cambio mese e crescono con il numero di iscritti.",
     steps: [
       { icon: "people", label: "Iscritti", detail: "Generano rette" },
       { icon: "coin", label: "Entrate", detail: "Finanziano la scuola" },
@@ -269,14 +270,11 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Mese di gioco", value: seconds(GAME_CONFIG.gameMonthMs), detail: "tempo attivo di base" },
       { label: "Quota base", value: `€ ${GAME_CONFIG.monthlyMemberFee} → € ${GAME_CONFIG.membershipFeeTiers.at(-1)!.fee}`, detail: "sale con il record di iscritti" },
-      { label: "Bonus formazione", value: `+ € ${GAME_CONFIG.monthlyMemberFormBonus}`, detail: "per ogni Forma o corso" },
-      { label: "Bonus Istruttore", value: `+ € ${GAME_CONFIG.monthlyMemberInstructorBonus}`, detail: "per ogni attestato" },
-      { label: "Bonus Tecnico", value: `+ € ${GAME_CONFIG.monthlyMemberTechnicianBonus}`, detail: "al posto del bonus Istruttore" },
     ],
     rules: [
       "Le rette considerano soltanto gli iscritti attivi.",
       `La quota base sale quando la scuola raggiunge per la prima volta ${GAME_CONFIG.membershipFeeTiers.map((tier) => `${tier.members} iscritti (€ ${tier.fee})`).join(", ")}; non scende più, anche se qualcuno lascia, e riparte da € ${GAME_CONFIG.monthlyMemberFee} in una nuova scuola.`,
-      "La formazione aumenta le entrate ma richiede tempo, denaro e attrezzatura.",
+      "La formazione non alza le quote: serve ai tornei, agli Istruttori e alla Fama.",
       "Follower e scuole fondate aggiungono altre entrate ricorrenti quando i sistemi sono sbloccati.",
     ],
     related: ["forme-corsi", "social", "rete-scuole"],
@@ -296,10 +294,13 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     numbers: [
       { label: "Rami pubblici", value: "8", detail: "Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget, Insegnamento e Organizzazione" },
       { label: "Punti", value: "1 a livello", detail: "contano nel ramo del nodo comprato" },
+      { label: "Prezzo", value: `+${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% a punto`, detail: "per ogni livello già comprato nello stesso ramo" },
       { label: "Sblocco iniziale", value: "1 iscritto", detail: "insieme alla pagina della scuola" },
     ],
     rules: [
       "Un nodo bloccato dice come si apre: i punti che servono nel ramo o il legame che manca.",
+      `Ogni livello comprato rende più cari del ${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% tutti i nodi dello stesso ramo; gli altri rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e i prezzi tornano quelli di partenza: le cime dei rami si raggiungono scuola dopo scuola, con la Reputazione.`,
+      "I nodi della Rete dell'Ordine e i percorsi segreti hanno prezzi fissi.",
       "Pochi nodi hanno un legame narrativo: il Social, un nodo che ne trasforma un altro, punti di un altro ramo.",
       "Creatività resta una catena: ogni nodo è il catalogo email successivo.",
       "Occhio del Maestro decide quando si vedono Arena e Stile; Istruttori in e-Learning fa formare da soli gli Istruttori; Eventi nel Multiverso fa girare più copie dello stesso evento, che costano il doppio e trovano meno contatti.",

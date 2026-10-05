@@ -143,7 +143,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "smart-fields", category: "speed", title: "Campi intelligenti", description: "Nome, luogo e orario si compilano da soli. Ogni email nuova parte già avviata, come chi arriva in palestra già cambiato.", effectLabel: "Ogni livello: ogni nuova email parte già scritta al 5% · Livello 5: al 25% · Con Frasi fatte, anche +0,15% di Frase perfetta a livello", effect: "emailInitialProgress", effectPerLevel: 0.05, additionalEffectsPerLevel: { perfectPhraseChance: 0.0015 }, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 6 },
   { id: "social-content-synthesis", category: "speed", title: "Sintesi dei contenuti", description: "Un post non deve per forza essere un romanzo. Meno parole, stessi like.", effectLabel: "Ogni livello: 10.000 caratteri in meno per pubblicare un contenuto Social · da 100.000 a 50.000 al livello 5", effect: "socialContentTier", effectPerLevel: 1, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredBranchPoints: 9 },
   { id: "instant-review", category: "speed", title: "Revisione istantanea", description: "Qualcuno rilegge mentre scrivi. I refusi non arrivano neanche al secondo paragrafo.", effectLabel: "Ogni livello: Redazione e Social lavorano il 15% più in fretta · Livello 5: +75% · Con Frasi fatte, anche +0,3% di Frase perfetta a livello", effect: "editorialAutomationMultiplier", effectPerLevel: 0.15, additionalEffectsPerLevel: { perfectPhraseChance: 0.003 }, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 11 },
-  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Un pezzo di ogni email finisce anche sui Social. Scrivi una volta, pubblichi due: il sogno di ogni Redazione.", effectLabel: "Ogni livello: il 5% del lavoro sulle email fa avanzare anche i contenuti Social, senza rallentare l'email · Livello 5: il 25%", effect: "socialCopyShare", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredBranchPoints: 25 },
+  { id: "mail-merge", category: "speed", title: "Fusione documenti", description: "Un pezzo di ogni email finisce anche sui Social. Scrivi una volta, pubblichi due: il sogno di ogni Redazione.", effectLabel: "Ogni livello: il 5% del lavoro sulle email fa avanzare anche i contenuti Social, senza rallentare l'email · Livello 5: il 25%", effect: "socialCopyShare", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 37_500, 56_000, 84_000, 127_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredBranchPoints: 25 },
 
   // Creatività
   { id: "spell-check", category: "writing", title: "Controllo ortografico", description: "Addio refusi e «qual'è». L'email resta la stessa, ma ora si può mandare senza arrossire.", effectLabel: "Livello 1: email nuove nel catalogo · Ogni livello: +1 punto Creatività, cioè più contatti che prenotano la prova dopo l'email", effect: "creativityPoint", effectPerLevel: 1, baseCost: 50, costGrowth: LEVEL_GROWTH, levelCosts: [50, 100, 200, 400, 800], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 0 },
@@ -152,7 +152,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "call-to-action", category: "writing", title: "Call to action", description: "Un pulsante grande con scritto «Prova gratis». Cliccarlo è più facile che ignorarlo.", effectLabel: "Livello 1: email nuove nel catalogo · Ogni livello: +1 punto Creatività (più prove prenotate)", effect: "creativityPoint", effectPerLevel: 1, baseCost: 300, costGrowth: LEVEL_GROWTH, levelCosts: [300, 600, 1_200, 2_400, 4_800], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 15 },
   { id: "email-layout", category: "writing", title: "Impaginazione", description: "Logo in alto, foto al centro, orari in fondo. Finalmente l'occhio sa dove guardare.", effectLabel: "Livello 1: email nuove nel catalogo · Ogni livello: +1 punto Creatività (più prove prenotate)", effect: "creativityPoint", effectPerLevel: 1, baseCost: 600, costGrowth: LEVEL_GROWTH, levelCosts: [600, 1_200, 2_400, 4_800, 9_600], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 20 },
   { id: "winning-advertising", category: "writing", title: "Pubblicità vincente", description: "L'email diventa un volantino completo, e funziona anche sui Social. I follower arrivano, a volte persino in coppia.", effectLabel: "Ogni livello: +1 punto Creatività · Probabilità che un contenuto Social porti un follower: 50% senza il nodo, poi 60% · 70% · 80% · 90% · 95% · Livello 5: il 5% dei follower arriva in coppia", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerChanceTier: 1 }, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 25 },
-  { id: "marketing-course", category: "writing", title: "Corso di Marketing", description: "Qualcuno ha seguito un corso, e si vede: l'email spiega lo sport per bene. E ogni follower ora vale qualche centesimo in più.", effectLabel: "Ogni livello: +1 punto Creatività · Ogni follower rende al mese 0,10 € senza il nodo, poi 0,15 € · 0,20 € · 0,30 € · 0,40 € · 0,50 €", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerValueTier: 1 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 30 },
+  { id: "marketing-course", category: "writing", title: "Corso di Marketing", description: "Qualcuno ha seguito un corso, e si vede: l'email spiega lo sport per bene. E ogni follower ora vale qualche centesimo in più.", effectLabel: "Ogni livello: +1 punto Creatività · Ogni follower rende al mese 0,10 € senza il nodo, poi 0,15 € · 0,20 € · 0,30 € · 0,40 € · 0,50 €", effect: "creativityPoint", effectPerLevel: 1, additionalEffectsPerLevel: { socialFollowerValueTier: 1 }, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 15_000, 22_500, 34_000, 51_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 30 },
   { id: "influencer-project", category: "writing", title: "Progetto Influencer", description: "Ring light, sorriso e un balletto che nessuno aveva chiesto. I follower, però, arrivano.", effectLabel: "Ogni livello: +1 follower sicuro per ogni contenuto Social · Livello 5: +5", effect: "socialExtraFollowers", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["social"], requiredBranchPoints: 35 },
 
   // Carisma
@@ -192,7 +192,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "gadget-design-tools", category: "gadget", title: "Strumenti di progettazione", description: "Un programma di disegno e qualche ora di stampante 3D. Il primo prototipo arriva prima, e somiglia di più al disegno.", effectLabel: "Ogni livello: il primo prototipo si sviluppa il 20% più in fretta · Livello 5: +100%, cioè in metà tempo", effect: "gadgetDevelopmentSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 0 },
   { id: "gadget-order-management", category: "gadget", title: "Gestione degli ordini", description: "Un foglio di calcolo al posto dei post-it. Ogni mese si seguono più ordini, e se ne perdono meno.", effectLabel: "Ogni livello: +20% di proposte di vendita gestite ogni mese · Livello 5: il doppio", effect: "gadgetSalesCapacity", effectPerLevel: 0.2, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 2 },
   { id: "gadget-revision-lab", category: "gadget", title: "Laboratorio revisioni", description: "Un angolo dove smontare, correggere e riprovare. Il secondo tentativo arriva prima, e il terzo, se serve, ancora prima.", effectLabel: "Ogni livello: le revisioni si preparano il 20% più in fretta · Livello 5: +100%, cioè in metà tempo", effect: "gadgetRevisionSpeed", effectPerLevel: 0.2, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 3 },
-  { id: "gadget-online-store", category: "gadget", title: "Negozio online", description: "Il catalogo arriva anche ai follower, che comprano dal divano. Non serve neanche venire in palestra, purtroppo.", effectLabel: "Quota dei follower che vede il catalogo: 1% · 3% · 5% · 10% · 20% · 35% · 50% · 75% · 100% al livello 9", effect: "gadgetFollowerReachTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000, 1_600_000], maxLevel: 9, requiredFame: noFame, requiredUnlocks: ["gadget", "social"], requiredBranchPoints: 3 },
+  { id: "gadget-online-store", category: "gadget", title: "Negozio online", description: "Il catalogo arriva anche ai follower, che comprano dal divano. Non serve neanche venire in palestra, purtroppo.", effectLabel: "Quota dei follower che vede il catalogo: 1% · 3% · 5% · 10% · 20% · 35% · 50% · 75% · 100% al livello 9", effect: "gadgetFollowerReachTier", effectPerLevel: 1, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 7_500, 11_000, 17_000, 25_000, 38_000, 57_000, 85_000, 128_000], maxLevel: 9, requiredFame: noFame, requiredUnlocks: ["gadget", "social"], requiredBranchPoints: 3 },
   { id: "rhythm-gamer", category: "gadget", title: "Rhythm Gamer", description: "Anni di giochi musicali, finalmente messi a bilancio. Il collaudo va a tempo.", effectLabel: "Ogni livello: +20% di probabilità di aprire la rarità successiva dopo il collaudo · Livello 5: il doppio", effect: "gadgetRarityChanceMultiplier", effectPerLevel: 0.2, baseCost: 7_500, costGrowth: LEVEL_GROWTH, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 5 },
   { id: "gadget-sales-training", category: "gadget", title: "Formazione commerciale", description: "I collaboratori imparano a proporre senza insistere. Chi era indeciso, alla fine, compra.", effectLabel: "Ogni livello: su 100 proposte, 2 vendite in più · Livello 5: 10 in più", effect: "gadgetSalesConversion", effectPerLevel: 0.02, baseCost: 15_000, costGrowth: LEVEL_GROWTH, levelCosts: [15_000, 30_000, 60_000, 120_000, 240_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 8 },
   { id: "gadget-cross-selling", category: "gadget", title: "Vendita abbinata", description: "«Con la maglietta, la toppa è a metà prezzo.» Ogni tanto un ordine se ne porta dietro un altro.", effectLabel: "Ogni livello: +5% di probabilità che una vendita ne porti un'altra, di un altro gadget · Livello 5: 25%", effect: "gadgetCrossSell", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredGadgetProduct: "mug", requiredBranchPoints: 12 },
@@ -250,24 +250,13 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
     ],
     baseCost: 25_000,
     costGrowth: LEVEL_GROWTH,
-    levelCosts: [
-      25_000,
-      50_000,
-      100_000,
-      200_000,
-      400_000,
-      800_000,
-      1_600_000,
-      3_200_000,
-      6_400_000,
-      12_800_000,
-    ],
+    levelCosts: [25_000, 37_500, 56_000, 84_000, 127_000, 190_000, 285_000, 427_000, 641_000, 961_000],
     maxLevel: 10,
     requiredFame: noFame,
     requiredBranchPoints: 28,
     requiredUpgradeLevels: { "technical-arena": 3 },
   },
-  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Un piano formativo più ampio, un corso in più all'anno e tutto più veloce. Il nome lo dice: non è gratis.", effectLabel: "Livello 1: un corso in più all'anno per ogni persona · Livello 2: Corsi Tecnici il 50% più veloci · Livello 3: tutti i corsi il 50% più veloci", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000], maxLevel: 3, requiredFame: noFame, requiredBranchPoints: 38 },
+  { id: "pagosport", category: "instructors", title: "PagoSport", description: "Un piano formativo più ampio, un corso in più all'anno e tutto più veloce. Il nome lo dice: non è gratis.", effectLabel: "Livello 1: un corso in più all'anno per ogni persona · Livello 2: Corsi Tecnici il 50% più veloci · Livello 3: tutti i corsi il 50% più veloci", effect: "annualFormCapacity", effectPerLevel: 1, effectLevelCap: 1, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 150_000, 225_000], maxLevel: 3, requiredFame: noFame, requiredBranchPoints: 38 },
 
   // Organizzazione
   { id: "shared-calendar", category: "organization", title: "Manuale operativo", description: "Tutto quello che si impara, scritto in un manuale. I collaboratori crescono più in fretta, e nessuno deve rispiegare tutto da capo.", effectLabel: "Ogni livello: i collaboratori guadagnano Maestria il 10% più in fretta · Livello 5: +50%", effect: "masteryExperienceMultiplier", effectPerLevel: 0.1, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 1_000, 2_000, 4_000, 8_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 0 },
@@ -377,11 +366,13 @@ export function hasCompletedUpgradePrerequisites(
 }
 
 /**
- * Prices climb with the levels already bought in the same branch, and go back
- * to the catalogue price at every new school (upgrades start from zero there).
- * The Rete dell'Ordine branch keeps its own prices: it is gated by schools.
+ * Prices climb by 20% for every level already bought in the same branch, and
+ * go back down at every new school (upgrades start from zero there): the
+ * reason to found one. Catalogue prices count at a quarter. The Rete
+ * dell'Ordine (already gated by schools) and the secret paths (Corso X at 1 €)
+ * keep their own prices.
  */
-export const UPGRADE_PRICING = { branchGrowth: 0.1, baseScale: 1 };
+export const UPGRADE_PRICING = { branchGrowth: 0.2, baseScale: 0.25 };
 
 export function getUpgradeCost(
   definition: UpgradeDefinition,
@@ -390,9 +381,10 @@ export function getUpgradeCost(
 ) {
   const localCost = definition.levelCosts?.[currentLevel] ??
     definition.baseCost * definition.costGrowth ** currentLevel;
-  const branchPoints = !levels || definition.category === "network"
-    ? 0
-    : getUpgradeCategoryPoints(levels, definition.category);
+  if (definition.category === "network" || definition.category === "secrets") {
+    return Math.round(localCost);
+  }
+  const branchPoints = levels ? getUpgradeCategoryPoints(levels, definition.category) : 0;
   return Math.round(
     localCost * UPGRADE_PRICING.baseScale * (1 + UPGRADE_PRICING.branchGrowth) ** branchPoints,
   );

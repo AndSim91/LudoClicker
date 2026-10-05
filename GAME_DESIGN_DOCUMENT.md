@@ -252,16 +252,11 @@ sorgente di entrate ricorrenti. Non sono spendibili.
 
 Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**.
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
-gioco**, aumentata di **€5 per ogni Forma o corso permanente registrato sul
-singolo allievo**. Corso Y concorre sempre al conteggio; Corso X vi concorre
-soltanto dopo l'acquisto del relativo Percorso Segreto («Corso X», costo €1). Il Corso Agonisti è escluso perché
-potenzia Arena e Stile ma non assegna un badge permanente. Ogni badge permanente
-può essere registrato una sola volta sullo stesso allievo: un duplicato
-rappresenta uno stato non valido e non viene corretto nel calcolo economico. Un
-attestato da Istruttore aggiunge **€10** per la relativa Forma o corso; una
-qualifica da Tecnico porta quel bonus a **€20**, sostituendo il bonus da
-Istruttore della stessa formazione (i bonus da Istruttore e Tecnico valgono
-solo per i Collaboratori).
+gioco**, che sale con il record di iscritti della scuola (§ 5). **Forme, corsi,
+attestati da Istruttore e qualifiche da Tecnico non cambiano la quota** (tolti
+il 05/10, decisione di Andrea: le entrate crescono solo con gli iscritti, così
+la curva dei prezzi degli Upgrade, § 10, le raggiunge). Le Forme contano per
+tornei, Istruttori e Fama.
 
 Il Percorso Segreto «Corso X» si scopre vincendo il Torneo della Superba (vedi 10.9 e 20.7).
 
@@ -795,7 +790,7 @@ Per il primo prototipo:
 | Durata della lezione di prova    | 15 secondi (−1 secondo per livello di Sala preparata, minimo 10); Leggendario Segreto 30 secondi |
 | Esito della lezione              |                                                             immediato al termine |
 | Bonus di iscrizione              |                                                                  immediato (€20) |
-| Accredito della quota mensile    | al cambio mese (€40–160 base secondo il record di iscritti + €5 per Forma o corso permanente + €10 per attestato da Istruttore oppure €20 per qualifica da Tecnico) |
+| Accredito della quota mensile    | al cambio mese (€40–160 secondo il record di iscritti) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
 La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono
@@ -1949,11 +1944,15 @@ Livello 2: …»); per le tabelle, i valori in fila fino all'ultimo livello. Le
 parole sono quelle del giocatore («caratteri a ogni tasto», «contatti a ogni
 evento», «probabilità che chi fa la prova si iscriva»), non quelle del codice.
 
-I prezzi riportati nelle tabelle sono quelli locali della prima scuola. Ogni
-scuola già fondata aggiunge il 15% ai prezzi di Scrittura, Creatività,
-Carisma, Accoglienza, Attrezzatura e Organizzazione: con n scuole fondate il
-prezzo è moltiplicato per 1 + 0,15 × n e arrotondato all'euro. Gadget,
-Insegnamento e Percorsi Segreti non ricevono questa maggiorazione.
+**Prezzi.** I prezzi nelle tabelle sono quelli di catalogo. In negozio valgono
+**un quarto** e salgono del **20% per ogni livello già comprato nello stesso
+ramo**: prezzo = catalogo × 0,25 × 1,2^(punti del ramo), arrotondato all'euro
+(`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
+rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
+loro i prezzi: è il motivo per fondare, e le cime dei rami si raggiungono
+scuola dopo scuola con la Reputazione. Rete dell'Ordine e Percorsi Segreti
+tengono i prezzi di catalogo. Non c'è più la maggiorazione del 15% per scuola
+fondata (decisioni di Andrea del 05/10; misure in § 10.10).
 
 **Sblocco a punti.** Ogni livello comprato in un ramo vale **1 punto di quel
 ramo**. Un nodo si apre quando nel ramo hai speso almeno la sua **soglia** di
@@ -1981,7 +1980,7 @@ Accelera la produzione manuale e automatica delle email e dei contenuti Social.
 | Campi intelligenti | 6 | ogni nuova email nasce già completata del 5% per livello; massimo 25%. Non modifica email già create. Con Frasi fatte: +0,15% Frase perfetta per livello | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
 | Sintesi dei contenuti | 9 + Social | lavoro per contenuto Social: 100.000 → 90.000 → 80.000 → 70.000 → 60.000 → 50.000 caratteri | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Revisione istantanea | 11 | +15% velocità Redazione/Social per livello; massimo +75%. Con Frasi fatte: +0,3% Frase perfetta per livello | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
-| Fusione documenti | 25 + Social | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Fusione documenti | 25 + Social | copia nei Social il 5% per livello del lavoro svolto sull'email, senza rallentarla; massimo 25% | 25.000 / 37.500 / 56.000 / 84.000 / 127.000 € |
 
 La soglia è in punti di Scrittura; «+ Social» vuol dire che serve anche lo
 sblocco di Social. Finché Frasi fatte è a livello 0, i bonus Frase perfetta
@@ -2014,7 +2013,7 @@ del suo catalogo di una frase ciascuno.
 | Call to action | catalogo 4: testo più lungo con i dettagli della prova | 300 / 600 / 1.200 / 2.400 / 4.800 € |
 | Impaginazione | catalogo 5: tono promozionale più fluido | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
 | Pubblicità vincente | catalogo 6: oggetti promozionali e sezione video; probabilità Follower Social 50% → 60% → 70% → 80% → 90% → 95%; al livello 5, 5% di ottenere due Follower | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
-| Corso di Marketing | catalogo 7: email finale HTML; valore mensile del Follower 0,10 → 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Corso di Marketing | catalogo 7: email finale HTML; valore mensile del Follower 0,10 → 0,15 → 0,20 → 0,30 → 0,40 → 0,50 € | 10.000 / 15.000 / 22.500 / 34.000 / 51.000 € |
 
 Soglie in punti di Creatività: 0 · 5 · 10 · 15 · 20 · 25 · 30. Il ramo resta
 una catena per ragioni narrative (ogni nodo è il catalogo email successivo):
@@ -2154,7 +2153,7 @@ diventa visibile soltanto con lo sblocco del settore.
 | Potenziamento | Effetto completo | Costi per livello |
 | --- | --- | --- |
 | Vetrina della scuola | pubblico iscritti 10% → 20% → 35% → 50% → 75% → 100% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
-| Negozio online | pubblico follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
+| Negozio online | pubblico follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 7.500 / 11.000 / 17.000 / 25.000 / 38.000 / 57.000 / 85.000 / 128.000 € |
 | Strumenti di progettazione | +20% velocità sviluppo per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Laboratorio revisioni | +20% velocità revisione per livello; massimo +100% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Gestione degli ordini | +20% capacità commerciale per livello; massimo +100% | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
@@ -2186,8 +2185,8 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
-| Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 / 3.200.000 / 6.400.000 / 12.800.000 € |
-| PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 200.000 / 400.000 € |
+| Nessun *Rancor*e | L1 Corso Agonisti (1.000 €, 60 s); L2–L4 massimo fino a +4/+4; L5 Preparazione agonistica; L6–L9 +10% efficacia; L10 +10% efficacia e massimo +5/+5 | 25.000 / 37.500 / 56.000 / 84.000 / 127.000 / 190.000 / 285.000 / 427.000 / 641.000 / 961.000 € |
+| PagoSport | L1 +1 corso annuale; L2 +50% velocità Corsi Tecnici; L3 +50% velocità di tutti i corsi | 100.000 / 150.000 / 225.000 € |
 
 Soglie in punti di Insegnamento: Occhio del Maestro e Percorso Tecnico 0,
 Master of none 1, Istruttori in e-Learning 3 (e le Forme sbloccate), Tu
@@ -2317,6 +2316,15 @@ livello, lo sblocco di Social, Gadget o Forme, un prodotto Gadget, almeno una
 scuola nella rete oppure, per i Percorsi Segreti, la scoperta del percorso. Il
 formato prevede anche un requisito di Fama, ma oggi nessun nodo lo usa (vale
 0 per tutti). Ogni acquisto aggiorna subito i caratteri per input.
+
+**Taratura della curva (05/10).** Simulazione intensa, semi 1 e 2, prima scuola,
+con «Compra tutto» ogni 10 secondi (`spendSurplus` e `continueAfterPrestige` di
+`simulateBalanceGame`). Senza curva la scuola comprava il 98% dei livelli in
+3 ore. Con 20% e prezzi a un quarto: primo Nazionale 82,5–94,5 minuti, 53% dei
+livelli a 2 ore, 72% a 4, 78% a 6. Per non rendere irraggiungibili le cime,
+Fusione documenti, Corso di Marketing, Negozio online, Nessun Rancore e
+PagoSport crescono ×1,5 a livello invece di ×2. Albero completo (Rete esclusa):
+circa 4,5 Mld in negozio.
 
 ### 10.11 Sblocco progressivo
 
@@ -2840,9 +2848,8 @@ l'avanzamento.
 
 6. **Primo bonus e quota associativa** Al primo iscritto, il dialogo
    “Habemus inscriptum!” introduce il bonus immediato di €20, la quota mensile
-   base di €40, il bonus di €5 per ogni Forma o corso, i bonus di €10 per un
-   attestato da Istruttore o €20 per una qualifica da Tecnico sulla stessa
-   formazione e il finanziamento dei potenziamenti. Segue l'obiettivo di aprire
+   base di €40, che cresce con gli iscritti, e il finanziamento dei
+   potenziamenti. Segue l'obiettivo di aprire
    **Upgrade** dall'app rail e un dialogo che presenta l'albero dei
    potenziamenti.
 
@@ -3420,9 +3427,8 @@ Ogni scuola fondata aumenta:
 
 Nel codice, per ogni scuola fondata:
 
-- **costi:** il costo dei potenziamenti cresce del 15% (`× (1 + 0,15 ×
-  scuole)`), tranne quelli con crescita di rete azzerata (ramo Gadget, ramo
-  Istruttori, Percorsi Segreti e pochi altri);
+- **costi:** gli Upgrade ripartono da zero e i prezzi tornano a quelli di
+  partenza (la curva per ramo, § 10, riparte);
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
 - **complessità organizzativa:** la Rete dell'Ordine (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;
@@ -3760,7 +3766,7 @@ rarità al 100% ottengono la Maestria al primo passo di gioco.
 | Potenziamento              | Effetto massimo                                      | Costi per livello                                      | Requisito |
 | -------------------------- | ---------------------------------------------------- | ------------------------------------------------------ | --------- |
 | Vetrina della scuola       | iscritti 10% → 20% → 35% → 50% → 75% → 100%         | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 €             | Gadget |
-| Negozio online             | follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € | Vetrina 2 e Social |
+| Negozio online             | follower 0% → 1% → 3% → 5% → 10% → 20% → 35% → 50% → 75% → 100% | 5.000 / 7.500 / 11.000 / 17.000 / 25.000 / 38.000 / 57.000 / 85.000 / 128.000 € | Vetrina 2 e Social |
 | Strumenti di progettazione | +100% velocità sviluppo                              | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Gadget |
 | Laboratorio revisioni      | +100% velocità revisione                             | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 €            | Strumenti 2 |
 | Gestione degli ordini      | +100% capacità commerciale                           | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €          | Gadget |
@@ -4024,11 +4030,7 @@ disponibile come opzione.
   Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;
 - quota ricorrente: €40 base per iscritto attivo (fino a €160 con il record di
-  iscritti, § 5), più €5 per ogni Forma o corso
-  permanente registrato sul singolo allievo, più €10 per ogni attestato da
-  Istruttore oppure €20 per ogni qualifica da Tecnico sulla stessa formazione, a
-  ogni mese di gioco; il Corso Agonisti è escluso e il Corso X conta solo dopo
-  che è stato sbloccato;
+  iscritti, § 5), a ogni mese di gioco; Forme e qualifiche non la cambiano;
 - durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno
   scolastico Settembre–Agosto sempre visibile nella barra del titolo;
 - la prima email inviata ottiene sempre una prova e il primo iscritto è

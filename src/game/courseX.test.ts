@@ -105,7 +105,8 @@ describe("Progetto X", () => {
       upgrades: { ...state.upgrades, "project-x": 1 },
     });
 
-    expect(visibleFees - hiddenFees).toBe(5);
+    // Forms do not change the fee any more: unlocking Corso X changes nothing.
+    expect(visibleFees).toBe(hiddenFees);
     expect(state.contacts[0].forms).toContain("course-x");
   });
 });

@@ -286,14 +286,14 @@ describe("UpgradesView", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
-        state={{ ...initial, school: { ...initial.school, euros: 20 } }}
+        state={{ ...initial, school: { ...initial.school, euros: 5 } }}
         onBuyUpgrade={() => undefined}
       />,
     );
 
     const quickBuy = screen.getByRole("button", { name: "Compra Tastiera comoda" });
     expect(quickBuy).toBeDisabled();
-    expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 30,00/));
+    expect(quickBuy).toHaveAttribute("title", expect.stringMatching(/^Mancano 8,00/));
   });
 
   it("summarizes cumulative benefits without claiming free swords", () => {

@@ -72,7 +72,7 @@ describe("buyUpgrade prerequisites", () => {
     const initial = createInitialState(1_000);
     const points = {
       ...initial,
-      school: { ...initial.school, euros: 200_000 },
+      school: { ...initial.school, euros: 1_000_000_000 },
       upgrades: {
         ...initial.upgrades,
         "talent-eye": 2,
@@ -104,7 +104,7 @@ describe("buyUpgrade prerequisites", () => {
       "promiscuous-instructor": 6,
       "agonist-course-intensity": 7,
     };
-    const thirtySeven = { ...initial, school: { ...initial.school, euros: 200_000 }, upgrades: levels };
+    const thirtySeven = { ...initial, school: { ...initial.school, euros: 1_000_000_000 }, upgrades: levels };
     expect(buyUpgrade(thirtySeven, "pagosport")).toBe(thirtySeven);
     const thirtyEight = { ...thirtySeven, upgrades: { ...levels, "agonist-course-intensity": 8 } };
     expect(buyUpgrade(thirtyEight, "pagosport").upgrades.pagosport).toBe(1);
@@ -126,7 +126,7 @@ describe("buyUpgrade prerequisites", () => {
     };
     const state = {
       ...initial,
-      school: { ...initial.school, euros: 200_000, fame: 15 },
+      school: { ...initial.school, euros: 1_000_000_000, fame: 15 },
       collaborators: [collaborator],
       upgrades: {
         ...initial.upgrades,

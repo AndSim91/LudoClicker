@@ -5,6 +5,7 @@ import {
   UPGRADE_DEFINITIONS,
   areAllFormBranchesUnlocked,
   createInitialUpgradeLevels,
+  getUpgradeDefinition,
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
   getCreativityProgress,
@@ -42,9 +43,14 @@ function costsFor(category: (typeof UPGRADE_CATEGORIES)[number]["id"]) {
     definition.id,
     Array.from(
       { length: definition.maxLevel },
-      (_, level) => getUpgradeCost(definition, level),
+      (_, level) => catalogueCost(definition, level),
     ),
   ]));
+}
+
+/** The price written in the catalogue; the shop applies the quarter and the branch curve. */
+function catalogueCost(definition: (typeof UPGRADE_DEFINITIONS)[number], level: number) {
+  return definition.levelCosts?.[level] ?? definition.baseCost * definition.costGrowth ** level;
 }
 
 describe("upgrade catalog", () => {
@@ -85,7 +91,7 @@ describe("upgrade catalog", () => {
       "smart-fields": [600, 1_200, 2_400, 4_800, 9_600],
       "social-content-synthesis": [2_500, 5_000, 10_000, 20_000, 40_000],
       "instant-review": [2_500, 5_000, 10_000, 20_000, 40_000],
-      "mail-merge": [25_000, 50_000, 100_000, 200_000, 400_000],
+      "mail-merge": [25_000, 37_500, 56_000, 84_000, 127_000],
     });
     expect(costsFor("writing")).toEqual({
       "spell-check": [50, 100, 200, 400, 800],
@@ -94,7 +100,7 @@ describe("upgrade catalog", () => {
       "call-to-action": [300, 600, 1_200, 2_400, 4_800],
       "email-layout": [600, 1_200, 2_400, 4_800, 9_600],
       "winning-advertising": [5_000, 10_000, 20_000, 40_000, 80_000],
-      "marketing-course": [10_000, 25_000, 50_000, 100_000, 200_000],
+      "marketing-course": [10_000, 15_000, 22_500, 34_000, 51_000],
       "influencer-project": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
     expect(costsFor("charisma")).toEqual({
@@ -144,13 +150,10 @@ describe("upgrade catalog", () => {
     });
   });
 
-  it("keeps Gadget prices unchanged and removes network surcharges from Gadget and Teaching", () => {
+  it("keeps the catalogue prices of Gadget and Teaching, at a quarter in the shop", () => {
     expect(costsFor("gadget")).toEqual({
       "gadget-showcase": [2_500, 5_000, 10_000, 25_000, 50_000],
-      "gadget-online-store": [
-        5_000, 10_000, 25_000, 50_000, 100_000, 200_000, 400_000, 800_000,
-        1_600_000,
-      ],
+      "gadget-online-store": [5_000, 7_500, 11_000, 17_000, 25_000, 38_000, 57_000, 85_000, 128_000],
       "gadget-design-tools": [5_000, 10_000, 20_000, 40_000, 80_000],
       "gadget-revision-lab": [5_000, 10_000, 20_000, 40_000, 80_000],
       "gadget-order-management": [10_000, 20_000, 40_000, 80_000, 160_000],
@@ -168,25 +171,31 @@ describe("upgrade catalog", () => {
       "cost-of-service": [2_500, 5_000, 10_000, 25_000, 50_000],
       "promiscuous-instructor": [10_000, 25_000, 50_000, 100_000, 200_000, 400_000],
       "agonist-course-intensity": [
-        25_000,
-        50_000,
-        100_000,
-        200_000,
-        400_000,
-        800_000,
-        1_600_000,
-        3_200_000,
-        6_400_000,
-        12_800_000,
+        25_000, 37_500, 56_000, 84_000, 127_000, 190_000, 285_000, 427_000, 641_000, 961_000,
       ],
-      pagosport: [100_000, 200_000, 400_000],
+      pagosport: [100_000, 150_000, 225_000],
     });
     const gadget = definitionsFor("gadget")[0];
     const teaching = definitionsFor("instructors")[0];
     const writing = definitionsFor("speed")[0];
-    expect(getUpgradeCost(gadget, 0, 2)).toBe(getUpgradeCost(gadget, 0));
-    expect(getUpgradeCost(teaching, 0, 2)).toBe(getUpgradeCost(teaching, 0));
-    expect(getUpgradeCost(writing, 0, 2)).toBe(65);
+    expect(getUpgradeCost(gadget, 0)).toBe(625);
+    expect(getUpgradeCost(teaching, 0)).toBe(250);
+    expect(getUpgradeCost(writing, 0)).toBe(13);
+  });
+
+  it("raises prices by 20% for every level already bought in the same branch", () => {
+    const keyboard = getUpgradeDefinition("comfortable-keyboard")!;
+    const levels = { ...createInitialUpgradeLevels(), "writing-rhythm": 2, "spell-check": 3 };
+    // Two points in Scrittura: 50 € × ¼ × 1,2² = 18 €. Creatività does not count.
+    expect(getUpgradeCost(keyboard, 0, levels)).toBe(18);
+    // A new school starts from no levels: back to the catalogue price.
+    expect(getUpgradeCost(keyboard, 0, createInitialUpgradeLevels())).toBe(13);
+  });
+
+  it("keeps the Rete dell'Ordine at its own prices", () => {
+    const council = getUpgradeDefinition("grand-council")!;
+    const levels = { ...createInitialUpgradeLevels(), "multi-site-coordination": 5 };
+    expect(getUpgradeCost(council, 0, levels)).toBe(10_000_000);
   });
 });
 
@@ -298,18 +307,9 @@ describe("Teaching branch", () => {
     expect(intensity.requiredBranchPoints).toBe(28);
     expect(intensity.requiredUpgradeLevels).toEqual({ "technical-arena": 3 });
     expect(Array.from({ length: intensity.maxLevel }, (_, level) =>
-      getUpgradeCost(intensity, level)
+      catalogueCost(intensity, level)
     )).toEqual([
-      25_000,
-      50_000,
-      100_000,
-      200_000,
-      400_000,
-      800_000,
-      1_600_000,
-      3_200_000,
-      6_400_000,
-      12_800_000,
+      25_000, 37_500, 56_000, 84_000, 127_000, 190_000, 285_000, 427_000, 641_000, 961_000,
     ]);
   });
 

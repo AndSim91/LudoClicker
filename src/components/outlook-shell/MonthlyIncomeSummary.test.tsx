@@ -15,7 +15,7 @@ describe("MonthlyIncomeSummary", () => {
       status: index < 2 ? ("enrolled" as const) : contact.status,
       forms: index === 0 ? (["form-1"] as FormId[]) : contact.forms,
     }));
-    const memberFees = 85;
+    const memberFees = 80;
     const socialIncome = 10;
 
     render(
@@ -45,7 +45,7 @@ describe("MonthlyIncomeSummary", () => {
     const tooltip = screen.getByRole("tooltip");
     expect(income).toHaveAttribute("aria-describedby", tooltip.id);
     expect(tooltip).toHaveTextContent("Quote iscritti");
-    expect(tooltip).toHaveTextContent(/85,00\s*€/);
+    expect(tooltip).toHaveTextContent(/80,00\s*€/);
     expect(tooltip).toHaveTextContent("Bonus Social");
     expect(tooltip).toHaveTextContent(/10,00\s*€/);
     expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");

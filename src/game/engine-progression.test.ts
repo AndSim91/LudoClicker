@@ -41,9 +41,9 @@ describe("game engine: progression", () => {
     });
 
     expect(first.upgrades["prepared-presentation"]).toBe(1);
-    expect(first.school.euros).toBe(150);
+    expect(first.school.euros).toBe(187);
     expect(second.upgrades["prepared-presentation"]).toBe(2);
-    expect(second.school.euros).toBe(50);
+    expect(second.school.euros).toBe(157);
   });
 
   it("Compra tutto spends the funds cheapest first until nothing fits", () => {
@@ -92,7 +92,7 @@ describe("game engine: progression", () => {
     const initial = createInitialState(1_000);
     const funded = {
       ...initial,
-      school: { ...initial.school, euros: 50 },
+      school: { ...initial.school, euros: 13 },
     };
 
     const purchased = gameReducer(funded, {

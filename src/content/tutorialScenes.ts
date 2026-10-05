@@ -320,8 +320,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Habemus inscriptum!",
         body: [
           `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nelle nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
-          `Ogni Forma o corso conosciuti dal singolo iscritto aggiunge ${GAME_CONFIG.monthlyMemberFormBonus}€ alla quota mensile. È così che la scuola finanzia i suoi miglioramenti.`,
-          `Per ogni Forma o corso, l'attestato da Istruttore aggiunge ${GAME_CONFIG.monthlyMemberInstructorBonus}€ alla quota; la qualifica da Tecnico porta questo bonus a ${GAME_CONFIG.monthlyMemberTechnicianBonus}€.`,
+          "Più iscritti, più quote: è così che la scuola finanzia i suoi miglioramenti. E quando la scuola cresce, anche la quota sale.",
           `Pensavi che solo la tua Black Card fosse costosa?`,
         ],
         focusRegions: ["title"],
