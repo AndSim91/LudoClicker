@@ -388,8 +388,9 @@ export function materializePooledContact(
   const { firstName, lastName, email } = createRandomProspect(afterRoll);
   const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getReputationMultiplier(state, "genetics"));
   let suffix = state.contacts.length;
-  const ids = new Set(state.contacts.map((contact) => contact.id));
-  while (ids.has(makeGameId("contact", now, `pool-${suffix}`))) suffix += 1;
+  // A scan without building a Set: this runs once per email written.
+  const isTaken = (id: string) => state.contacts.some((contact) => contact.id === id);
+  while (isTaken(makeGameId("contact", now, `pool-${suffix}`))) suffix += 1;
   const contact: Contact = {
     id: makeGameId("contact", now, `pool-${suffix}`),
     firstName,

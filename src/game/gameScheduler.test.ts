@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "./config";
 import { describe, expect, it } from "vitest";
 import {
   MAX_CATCH_UP_STEPS_PER_TICK,
@@ -301,7 +302,8 @@ describe("game scheduler", () => {
       unlocks: { ...state.unlocks, forms: true },
     };
 
-    expect(getNextGameTickDelay(unchecked, NOW)).toBe(0);
+    // Just processed: the next step waits the minimum step, then runs the teaching pass.
+    expect(getNextGameTickDelay(unchecked, NOW)).toBe(GAME_CONFIG.minTickStepMs);
     const checked = gameReducer(unchecked, { type: "TICK", now: NOW });
     expect(needsAutomationHeartbeat(checked)).toBe(false);
     expect(getNextGameTickDelay(checked, NOW)).toBe(60_000);
@@ -465,9 +467,20 @@ describe("game scheduler", () => {
     const state = stateAtNow();
     const overdue = {
       ...state,
+      automation: { ...state.automation, lastProcessedAt: NOW - 1_000 },
       school: { ...state.school, nextFeeAt: NOW - 1 },
     };
 
     expect(getNextGameTickDelay(overdue, NOW)).toBe(0);
+  });
+
+  it("groups close deadlines into one step after the last one", () => {
+    const state = stateAtNow();
+    const soon = {
+      ...state,
+      school: { ...state.school, nextFeeAt: NOW + 10 },
+    };
+
+    expect(getNextGameTickDelay(soon, NOW)).toBe(GAME_CONFIG.minTickStepMs);
   });
 });

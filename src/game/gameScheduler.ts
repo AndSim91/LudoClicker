@@ -139,7 +139,10 @@ export function getNextGameTickAt(
   const heartbeatAt = needsAutomationHeartbeat(state)
     ? state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS
     : Infinity;
-  return Math.min(nextDeadline, heartbeatAt);
+  return Math.max(
+    state.automation.lastProcessedAt + GAME_CONFIG.minTickStepMs,
+    Math.min(nextDeadline, heartbeatAt),
+  );
 }
 
 export function hasQueuedGameWorkAt(state: GameState, now: number): boolean {

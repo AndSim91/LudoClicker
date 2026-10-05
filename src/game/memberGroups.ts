@@ -23,7 +23,7 @@ export function getGroupMemberProfile(group: MemberGroup, currentMonth: number) 
     id: "",
     rarity: group.rarity,
     forms: group.forms,
-    formBranchPreferences: [],
+    formBranchPreferences: group.formBranchPreferences ?? [],
     enrolledMonth: group.recentEnrolledMonth ?? getOldEnrollmentMonth(currentMonth),
     lastFormTrainingYear: group.lastFormTrainingYear,
     formTrainingYearCount: group.formTrainingYearCount,
@@ -52,6 +52,7 @@ function toGroupFields(
     enrolledMonth?: number;
     lastFormTrainingYear?: number;
     formTrainingYearCount?: number;
+    formBranchPreferences?: Contact["formBranchPreferences"];
   },
   currentMonth: number,
 ): Omit<MemberGroup, "count"> {
@@ -72,6 +73,9 @@ function toGroupFields(
           formTrainingYearCount: member.formTrainingYearCount,
         }
       : {}),
+    ...(member.formBranchPreferences?.length
+      ? { formBranchPreferences: [...member.formBranchPreferences] }
+      : {}),
   };
 }
 
@@ -83,6 +87,7 @@ function groupKey(group: Omit<MemberGroup, "count">): string {
     group.recentEnrolledMonth ?? "",
     group.lastFormTrainingYear ?? "",
     group.formTrainingYearCount ?? "",
+    group.formBranchPreferences?.join(",") ?? "",
   ].join("|");
 }
 
@@ -113,7 +118,6 @@ function isGroupable(contact: Contact, keep: ReadonlySet<string>): contact is Co
     !contact.tournamentExperience &&
     !contact.agonistCourseCompletions &&
     contact.lastAgonistCourseYear === undefined &&
-    !contact.formBranchPreferences?.length &&
     !keep.has(contact.id);
 }
 
@@ -213,7 +217,7 @@ export function materializeGroupedMembers(
         agonistCourseCompletions: 0,
         agonistCourseArenaBonus: 0,
         agonistCourseStyleBonus: 0,
-        formBranchPreferences: [],
+        formBranchPreferences: [...(group.formBranchPreferences ?? [])],
         enrolledMonth: profile.enrolledMonth,
         lastFormTrainingYear: group.lastFormTrainingYear,
         formTrainingYearCount: group.formTrainingYearCount,

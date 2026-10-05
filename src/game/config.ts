@@ -24,6 +24,8 @@ export const GAME_CONFIG = {
   dayNotificationVisibilityMs: 10_000,
   progressUpdateIntervalMs: 250,
   gameTickMs: 1_000,
+  // ponytail: scadenze vicine si risolvono nello stesso passo (al più 250 ms dopo); passi più fitti costavano CPU senza cambiare il gioco.
+  minTickStepMs: 250,
   minimumTrainingDurationMs: 1_000,
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,

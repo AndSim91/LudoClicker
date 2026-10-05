@@ -131,15 +131,19 @@ function getDisplayedMemberStatus(
   );
 }
 
+type MemberPresentationCache = WeakMap<Contact, MemberPresentation>;
+
 function createMemberPresentationReader(
   context: MemberSortContext,
   socialUnlocked: boolean,
+  cache: MemberPresentationCache,
 ): (contact: Contact) => MemberPresentation {
-  const cache = new WeakMap<Contact, MemberPresentation>();
   return (contact) => {
-    const cached = cache.get(contact);
-    if (cached) return cached;
     const student = getMemberStudent(contact, context);
+    const cached = cache.get(contact);
+    // The student is the collaborator when there is one: a new collaborator
+    // object (mastery, training, assignment) rebuilds only that row.
+    if (cached?.student === student) return cached;
     const hasVisibleStats = hasUnlockedOfficialStats(student.forms, context.statsTier);
     const presentation: MemberPresentation = {
       contact,
@@ -279,9 +283,16 @@ export function MemberList({
       immunityContext,
     ],
   );
+  // ponytail: the cache survives the collaborators map, which changes at every tick
+  // (mastery); without it the whole member list was rebuilt four times a second.
+  const presentationCache = useMemo<MemberPresentationCache>(
+    () => new WeakMap(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are the cache key
+    [currentMonth, annualTrainingLimit, state.upgrades, foundedSchools, courseXUnlocked, immunityContext, state.unlocks.social],
+  );
   const getMemberPresentation = useMemo(
-    () => createMemberPresentationReader(sortContext, state.unlocks.social),
-    [sortContext, state.unlocks.social],
+    () => createMemberPresentationReader(sortContext, state.unlocks.social, presentationCache),
+    [sortContext, state.unlocks.social, presentationCache],
   );
   const memberPresentations = useMemo(
     () => members.map(getMemberPresentation),

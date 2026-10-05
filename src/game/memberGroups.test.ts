@@ -8,6 +8,7 @@ import {
   departGroupedMembers,
   getGroupedMemberCount,
   groupExcessMembers,
+  materializeGroupedMembers,
   sampleBinomial,
 } from "./memberGroups";
 import { getMonthlyMemberFees } from "./membershipEconomy";
@@ -61,6 +62,27 @@ describe("member groups", () => {
     expect(ids.has("weakest")).toBe(false);
     expect(memberCount(grouped)).toBe(grouped.school.activeMembers);
     expect(getMonthlyMemberFees(grouped)).toBe(feesBefore);
+  });
+
+  it("groups members with weapon preferences and gives them back", () => {
+    const base = withMembers(LIMIT);
+    const people = base.contacts.filter((contact) => contact.status === "enrolled");
+    const weakest: Contact = { ...people[0], id: "weakest-staff", rarity: "common",
+      arenaBase: 0, styleBase: 0, formBranchPreferences: ["Staffa", "Spada Lunga"] };
+    const state: GameState = {
+      ...base,
+      contacts: [...base.contacts, weakest],
+      school: { ...base.school, activeMembers: base.school.activeMembers + 1 },
+    };
+
+    const grouped = groupExcessMembers(state);
+    expect(grouped.contacts.some((contact) => contact.id === "weakest-staff")).toBe(false);
+    const group = grouped.memberGroups?.find((candidate) => candidate.formBranchPreferences);
+    expect(group?.formBranchPreferences).toEqual(["Staffa", "Spada Lunga"]);
+
+    const back = materializeGroupedMembers(grouped, 1, NOW, () => 0,
+      (candidate) => candidate === group);
+    expect(back.contacts.at(-1)?.formBranchPreferences).toEqual(["Staffa", "Spada Lunga"]);
   });
 
   it("sends grouped members away at the yearly rate and archives them", () => {

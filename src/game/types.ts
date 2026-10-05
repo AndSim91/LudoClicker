@@ -103,6 +103,8 @@ export interface MemberGroup {
   /** Set only while it still counts for this year's courses or protections. */
   lastFormTrainingYear?: number;
   formTrainingYearCount?: number;
+  /** Preferred weapons, in order (Corso Y onwards): most members have them. */
+  formBranchPreferences?: FormBranch[];
   count: number;
 }
 

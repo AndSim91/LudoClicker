@@ -4133,6 +4133,13 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   scadenza utile (esito email, prova, evento, quota mensile, formazione,
   evento narrativo…), con un battito di 1 secondo solo quando c'è automazione
   continua da far avanzare; i recuperi lunghi vengono elaborati a blocchi;
+  due passi distano almeno 250 ms di gioco (`minTickStepMs`): le scadenze più
+  vicine si risolvono insieme nel passo successivo, così una scuola con
+  migliaia di formazioni non fa decine di passi al secondo;
+- oltre 2.000 iscritti, gli ordinari più deboli senza Corso Agonisti, tornei,
+  formazione in corso o ruoli diventano contatori (`memberGroups`: rarità,
+  provenienza, Forme, preferenze d'arma e contatori annuali finché contano) e
+  tornano persone quando servono per un corso;
 - orologio di gioco con pausa (pulsante nella barra del titolo; il tutorial e
   i minigiochi mettono in pausa da soli) e velocità regolabile dal pannello
   Admin in sviluppo;
