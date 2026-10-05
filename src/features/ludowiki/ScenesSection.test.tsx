@@ -34,7 +34,7 @@ describe("ScenesSection", () => {
     const buttons = screen.getAllByRole("button", { name: /Rivedi/ });
     fireEvent.click(buttons[2]);
     expect(onReplay).toHaveBeenLastCalledWith(expect.objectContaining({ kind: "inflation", increase: "+10%" }));
-    // The cause is drawn again at every replay, as in January.
+    // The cause is drawn again at every replay, as in September.
     const bodies = new Set(Array.from({ length: 20 }, () => {
       fireEvent.click(buttons[2]);
       return onReplay.mock.lastCall?.[0].body;

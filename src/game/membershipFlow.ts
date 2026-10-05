@@ -14,7 +14,7 @@ import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { nextRandom } from "./random";
-import { processJanuaryLightInflation } from "./lightInflation";
+import { processSeptemberLightInflation } from "./lightInflation";
 import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 import { processReptileCalendarTransition } from "./reptileFlow";
@@ -305,8 +305,8 @@ export function collectFees(
         eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),
       },
     };
-    // A January crossed during catch-up still opens its notification now, not at its past game boundary.
-    nextState = processJanuaryLightInflation(nextState, wallNow);
+    // A September crossed during catch-up still opens its notification now, not at its past game boundary.
+    nextState = processSeptemberLightInflation(nextState, wallNow);
     if (isSchoolYearDepartureMonth(currentMonth)) {
       const departedBefore = nextState.statistics.membersDeparted;
       nextState = processMemberDepartures(nextState, now + period);

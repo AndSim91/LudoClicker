@@ -9,7 +9,7 @@ import {
   LIGHT_INFLATION_MOMENT,
   getLightInflationIncrease,
   getOfficialSwordUnitCost,
-  processJanuaryLightInflation,
+  processSeptemberLightInflation,
 } from "./lightInflation";
 import { migrate } from "./saveMigrations";
 import { isValidGameState } from "./saveValidation";
@@ -61,20 +61,20 @@ describe("Inflazione di Luce", () => {
     expect(buyOfficialSword(unaffordable, 10)).toBe(unaffordable);
   });
 
-  it("in gennaio senza spade comprate non rincara, ma riparte l'anno delle entrate", () => {
+  it("a settembre senza spade comprate non rincara, ma riparte l'anno delle entrate", () => {
     const initial = createInitialState(1_000);
-    const january = {
+    const september = {
       ...initial,
       randomSeed: 123,
-      school: { ...initial.school, currentMonth: 13 },
+      school: { ...initial.school, currentMonth: 21 },
       statistics: { ...initial.statistics, eurosEarned: 5_000 },
     };
 
-    const checked = processJanuaryLightInflation(january, 5_000);
+    const checked = processSeptemberLightInflation(september, 5_000);
 
     expect(checked.randomSeed).toBe(123);
     expect(checked.lightInflation).toMatchObject({
-      lastCheckedJanuaryMonth: 13,
+      lastCheckedJanuaryMonth: 21,
       priceMultiplier: 1,
       eurosEarnedAtCheck: 5_000,
     });
@@ -83,10 +83,10 @@ describe("Inflazione di Luce", () => {
 
   it("con almeno una spada comprata rincara sempre, in modo composto, e conserva l'aumento nell'evento", () => {
     const initial = createInitialState(1_000);
-    const january = {
+    const september = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, currentMonth: 25 },
+      school: { ...initial.school, currentMonth: 33 },
       statistics: { ...initial.statistics, eurosEarned: 130_000 },
       lightInflation: {
         ...initial.lightInflation,
@@ -98,7 +98,7 @@ describe("Inflazione di Luce", () => {
       },
     };
 
-    const succeeded = processJanuaryLightInflation(january, 5_000);
+    const succeeded = processSeptemberLightInflation(september, 5_000);
 
     // Prezzo 363 €, entrate dell'anno 120.000 € → riferimento 600 €: +65%; domanda +15%.
     expect(succeeded.lightInflation.event?.increase).toBe(0.9);
@@ -117,37 +117,37 @@ describe("Inflazione di Luce", () => {
     expect(succeeded.moments.seen).not.toContain(LIGHT_INFLATION_MOMENT);
   });
 
-  it("non effettua un doppio tiro nello stesso gennaio", () => {
+  it("non effettua un doppio tiro nello stesso settembre", () => {
     const initial = createInitialState(1_000);
-    const january = {
+    const september = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, currentMonth: 13 },
+      school: { ...initial.school, currentMonth: 21 },
       lightInflation: { ...initial.lightInflation, purchasedSwords: 1, swordsBeforePurchases: 6 },
     };
 
-    const first = processJanuaryLightInflation(january, 5_000);
+    const first = processSeptemberLightInflation(september, 5_000);
 
-    expect(processJanuaryLightInflation(first, 6_000)).toBe(first);
+    expect(processSeptemberLightInflation(first, 6_000)).toBe(first);
   });
 
-  it("avvia la finestra reale del gennaio recuperato al wall clock del TICK", () => {
+  it("avvia la finestra reale del settembre recuperato al wall clock del TICK", () => {
     const initial = createInitialState(1_000);
-    const december = {
+    const august = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, currentMonth: 12, nextFeeAt: 2_000 },
+      school: { ...initial.school, currentMonth: 20, nextFeeAt: 2_000 },
       lightInflation: { ...initial.lightInflation, purchasedSwords: 1, swordsBeforePurchases: 6 },
     };
 
-    const caughtUp = gameReducer(december, {
+    const caughtUp = gameReducer(august, {
       type: "TICK",
       now: 122_000,
       wallNow: 5_000,
       gainMultiplier: 100,
     });
 
-    expect(caughtUp.lightInflation.lastCheckedJanuaryMonth).toBe(13);
+    expect(caughtUp.lightInflation.lastCheckedJanuaryMonth).toBe(21);
     expect(caughtUp.lightInflation.priceMultiplier).toBeGreaterThan(1.1 - 1e-9);
     expect(caughtUp.lightInflation.event).toMatchObject({
       occurredAt: 5_000,
@@ -157,15 +157,15 @@ describe("Inflazione di Luce", () => {
 
   it("sceglie causa e avanzamento RNG in modo deterministico", () => {
     const initial = createInitialState(1_000);
-    const january = {
+    const september = {
       ...initial,
       randomSeed: 42,
-      school: { ...initial.school, currentMonth: 13 },
+      school: { ...initial.school, currentMonth: 21 },
       lightInflation: { ...initial.lightInflation, purchasedSwords: 1, swordsBeforePurchases: 6 },
     };
 
-    const first = processJanuaryLightInflation(january, 5_000);
-    const second = processJanuaryLightInflation(january, 5_000);
+    const first = processSeptemberLightInflation(september, 5_000);
+    const second = processSeptemberLightInflation(september, 5_000);
 
     expect(second.lightInflation.event?.cause).toBe(first.lightInflation.event?.cause);
     expect(second.randomSeed).toBe(first.randomSeed);

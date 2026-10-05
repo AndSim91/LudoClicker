@@ -998,7 +998,7 @@ posto, c'è un pulsante spento «Acquisto spade · da sbloccare negli Upgrade».
 I salvataggi che avevano già aperto l'acquisto con la vecchia regola (15
 iscritti di picco o più di 6 spade) ricevono il nodo con la migrazione v99. Il
 prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: se nell'anno è
-stata comprata almeno una spada, a Gennaio il prezzo sale (“Lama di Luce
+stata comprata almeno una spada, a Settembre il prezzo sale (“Lama di Luce
 aumenta i costi delle spade…”) di 10%, più ricchezza e domanda, fino al 100%
 (regola completa al § 18).
 
@@ -3180,13 +3180,14 @@ Eventi presenti nel codice:
 | Mancato rinnovo                             | negativo |               — | non estratto: registrato quando un iscritto lascia la scuola alle partenze annuali |
 
 Evento separato, **Inflazione di Luce** (`src/game/lightInflation.ts`): serve
-a tenere le spade una spesa vera anche quando le entrate crescono. Ogni gennaio,
-se dal gennaio precedente è stata comprata almeno una spada, il prezzo delle
+a tenere le spade una spesa vera anche quando le entrate crescono. Ogni settembre,
+all'apertura dell'anno scolastico (decisione del 06/10/2026, prima era a
+gennaio), se dal settembre precedente è stata comprata almeno una spada, il prezzo delle
 spade ufficiali sale sempre; senza acquisti non sale. L'aumento è
 
 - **10%** di base,
 - più la **ricchezza**: il prezzo di riferimento è lo 0,5% delle entrate
-  dell'anno appena chiuso (`statistics.eurosEarned`); se la spada costa meno,
+  dell'anno scolastico appena chiuso (`statistics.eurosEarned`); se la spada costa meno,
   l'aumento recupera la differenza (riferimento ÷ prezzo − 1),
 - più la **domanda**: 30% × spade comprate nell'anno ÷ spade possedute prima
   del primo di quegli acquisti (proporzionale, così regge a qualunque scala),
@@ -4528,7 +4529,7 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   10 → 11 di 25». Codice: `FoundationArt.tsx` e `constellation.ts` in
   `src/features/moments/`, accodata da `foundSchool` senza passare da `seen`;
 - **Inflazione di Luce**, che torna **a ogni aumento** (al massimo una
-  volta l'anno, a gennaio): in Modalità Onde cade dall'alto un decreto su carta
+  volta l'anno, a settembre): in Modalità Onde cade dall'alto un decreto su carta
   bollata con la testata di Lama di Luce (tre spade incrociate verde, bianca e
   rossa), titolo, causa dell'anno, prezzo della «Spada per combattimento
   sportivo» barrato e sostituito dal nuovo, poi un timbro rosso con l'aumento

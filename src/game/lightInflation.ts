@@ -1,5 +1,6 @@
 import { nextRandom } from "./random";
 import { GAME_CONFIG } from "./config";
+import { getCalendarMonth } from "./calendar";
 import type { GameState, LightInflationState } from "./types";
 
 export const LIGHT_INFLATION_CAUSES = [
@@ -95,15 +96,16 @@ export function postponeLightInflationEvent(
   };
 }
 
-export function processJanuaryLightInflation(state: GameState, wallNow: number): GameState {
-  const januaryMonth = state.school.currentMonth;
+/** Checked every September (decision of 06/10/2026, it used to be January). */
+export function processSeptemberLightInflation(state: GameState, wallNow: number): GameState {
+  const month = state.school.currentMonth;
   const inflation = state.lightInflation;
-  if (januaryMonth % 12 !== 1 || inflation.lastCheckedJanuaryMonth === januaryMonth) return state;
+  if (getCalendarMonth(month) !== 9 || inflation.lastCheckedJanuaryMonth === month) return state;
 
   const eurosEarned = state.statistics.eurosEarned;
   const checked: LightInflationState = {
     ...inflation,
-    lastCheckedJanuaryMonth: januaryMonth,
+    lastCheckedJanuaryMonth: month,
     purchasedSwords: 0,
     swordsBeforePurchases: 0,
     eurosEarnedAtCheck: eurosEarned,

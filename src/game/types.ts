@@ -910,13 +910,16 @@ export interface LightInflationState {
   priceMultiplier: number;
   /** Inflazioni di Luce in this school. */
   increases: number;
-  /** Swords bought since the last January check. */
+  /** Swords bought since the last September check. */
   purchasedSwords: number;
   /** Swords owned before the first of those purchases (demand denominator). */
   swordsBeforePurchases: number;
-  /** `statistics.eurosEarned` at the last January check (start of the income year). */
+  /** `statistics.eurosEarned` at the last September check (start of the income year). */
   eurosEarnedAtCheck: number;
-  /** Absolute January month already checked, so catch-up cannot roll twice. */
+  /**
+   * Absolute September month already checked, so catch-up cannot roll twice.
+   * ponytail: the name predates the move to September; renaming needs a save migration.
+   */
   lastCheckedJanuaryMonth?: number;
   event?: LightInflationEvent;
 }
