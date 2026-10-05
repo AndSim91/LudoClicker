@@ -197,7 +197,8 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
       kind: "inflation",
       kicker: "Lama di Luce · Comunicazione ai rivenditori",
       title: LIGHT_INFLATION_EVENT_TITLE,
-      body: getLightInflationEventDescription(LIGHT_INFLATION_CAUSES[0]),
+      // A random cause every time, like the real January scene.
+      body: getLightInflationEventDescription(LIGHT_INFLATION_CAUSES[Math.floor(Math.random() * LIGHT_INFLATION_CAUSES.length)]),
       oldPrice: formatCurrency(GAME_CONFIG.officialSwordCost),
       newPrice: formatCurrency(GAME_CONFIG.officialSwordCost * 1.1),
       increase: "+10%",

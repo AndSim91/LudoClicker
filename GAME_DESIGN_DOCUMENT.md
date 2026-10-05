@@ -4311,10 +4311,13 @@ vero («+10%» … «+100%») e uno
   scossone. In Outlook è una «Comunicazione ai rivenditori» con la stessa riga
   del prezzo. Non compare più in La mia giornata.
 
-La scena dura 6,5 secondi e il gioco resta in pausa; si salta con «Salta» o
-Esc. Stile adattivo: spettacolare in Modalità Onde, comunicazione d'ufficio nel
-tema Outlook; con «Riduci animazioni» resta l'ultimo fotogramma. Non c'è una
-galleria per rivederle. Più momenti insieme si mettono in coda; il tutorial
+L'animazione dura 6,5 secondi e il gioco resta in pausa; la scena non si
+chiude da sola. Mentre si anima si chiude solo con «Salta» o Esc (un clic sulla
+scena non fa nulla); finita, resta ferma sull'ultimo fotogramma, il pulsante
+diventa «Chiudi» e un clic ovunque la chiude. Stile adattivo: spettacolare in
+Modalità Onde, comunicazione d'ufficio nel tema Outlook; con «Riduci
+animazioni» la scena è ferma e subito chiudibile. Si rivedono in LudoWiki ›
+Scene (vedi sotto). Più momenti insieme si mettono in coda; il tutorial
 aspetta che la coda sia vuota.
 
 Implementazione: `src/game/moments.ts` (condizioni e coda in
@@ -4330,7 +4333,7 @@ Inflazione di Luce. Le scene mai viste sono schede «???» senza nome; le altre
 hanno «▶ Rivedi», che rilancia la stessa scena a schermo intero con il gioco in
 pausa (in Outlook l'avviso fermo, senza disegni nelle schede). Le scene sono
 generiche: vittorie senza i nomi dei vincitori, Superba al livello 1,
-Inflazione di Luce a +10% sul prezzo base, nuova sede senza nomi né città ma
+Inflazione di Luce a +10% sul prezzo base con una causa a caso a ogni visione, nuova sede senza nomi né città ma
 con le stelle già accese nella costellazione. Leggendario e nuova sede hanno un
 menu per mostrare i dati di un Leggendario scoperto o di una sede della mappa
 (serve che la sede precedente sia ancora sulla mappa). Nel Ludodex il dossier

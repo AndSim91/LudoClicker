@@ -1,11 +1,12 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { motionReduced } from "../../shared/motion";
 import { Icon, type IconName } from "../../components/common/Icon";
 import type { GameState, MomentKey } from "../../game/types";
 import { FoundationArt } from "./FoundationArt";
 import { SuperbaArt } from "./SuperbaArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
-/** How long a moment plays before it closes on its own (the game stays paused meanwhile). */
+/** How long a moment's animation lasts; then it stays still until the player closes it. */
 export const MOMENT_DURATION_MS = 6_500;
 
 const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
@@ -189,7 +190,8 @@ function MomentArt({ content }: { content: MomentContent }) {
 /**
  * Animated moments (4.2). Spectacular in Modalità Onde, an office notice in the
  * Outlook skin (the CSS decides); «Riduci animazioni» leaves them static.
- * Skippable with the button or Esc; closes on its own after MOMENT_DURATION_MS.
+ * While it plays only «Salta» (or Esc) closes it; once still, after
+ * MOMENT_DURATION_MS, the button reads «Chiudi» and any click closes it.
  */
 export function MomentLayer({
   state,
@@ -205,10 +207,12 @@ export function MomentLayer({
 }) {
   const content = replayed ?? describeMoment(state, momentKey ?? "council");
   const buttonRef = useRef<HTMLButtonElement>(null);
+  // Static scenes («Riduci animazioni») are finished from the start.
+  const [finished, setFinished] = useState(motionReduced);
 
   useEffect(() => {
     buttonRef.current?.focus();
-    const timer = window.setTimeout(() => onDismiss(), MOMENT_DURATION_MS);
+    const timer = window.setTimeout(() => setFinished(true), MOMENT_DURATION_MS);
     const handleKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
@@ -224,7 +228,8 @@ export function MomentLayer({
   const secret = content.kind === "legendary" && content.secret;
   return (
     <div
-      className={`moment-layer is-${content.kind}${secret ? " is-secret" : ""}`}
+      className={`moment-layer is-${content.kind}${secret ? " is-secret" : ""}${finished ? " is-finished" : ""}`}
+      onClick={finished ? onDismiss : undefined}
       role="dialog"
       aria-modal="true"
       aria-labelledby="moment-title"
@@ -258,9 +263,8 @@ export function MomentLayer({
           </p>
         ) : null}
         <div className="moment-actions">
-          <button ref={buttonRef} type="button" className="moment-skip" onClick={onDismiss}>
-            <span className="moment-skip-office">Continua</span>
-            <span className="moment-skip-onde">Salta ▸</span>
+          <button ref={buttonRef} type="button" className="moment-skip" onClick={(event) => { event.stopPropagation(); onDismiss(); }}>
+            {finished ? "Chiudi" : <>Salta<span className="moment-skip-onde" aria-hidden="true"> ▸</span></>}
           </button>
         </div>
       </div>

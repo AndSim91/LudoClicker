@@ -429,7 +429,7 @@ test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", a
 
   // The new school starts back on the email composer.
   await expect(page.getByRole("heading", { name: "Rete dell'Ordine" })).toHaveCount(0);
-  await page.getByRole("button", { name: /Salta/ }).click();
+  await page.locator(".moment-layer").getByRole("button", { name: /Salta|Chiudi/ }).click();
   await page.getByRole("button", { name: "Rete", exact: true }).click();
   await expect(page.getByText(/Onde di Levante · v/)).toBeVisible();
   await page.getByRole("button", { name: "« Sede madre" }).click();

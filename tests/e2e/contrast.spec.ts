@@ -126,7 +126,13 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.waitForTimeout(4_300);
     report[`Momento · ${moment}`] = await page.evaluate(auditContrast);
-    await page.getByRole("button", { name: /Salta/ }).click();
+    await page.locator(".moment-layer").getByRole("button", { name: /Salta|Chiudi/ }).click();
+  }
+  // Scenes queued on load (Leggendari already in the save) wait to be closed.
+  const scene = page.locator(".moment-layer");
+  while (await scene.count()) {
+    await scene.getByRole("button", { name: /Salta|Chiudi/ }).click();
+    await page.waitForTimeout(300);
   }
   for (let input = 0; input < 40; input += 1) await page.keyboard.press("a");
 

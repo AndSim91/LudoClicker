@@ -12,18 +12,29 @@ afterEach(() => {
 });
 
 describe("MomentLayer", () => {
-  it("shows the moment, closes on Esc, the button or after its duration", () => {
+  it("plays until «Salta», then stays still until «Chiudi» or a click anywhere", () => {
     vi.useFakeTimers();
     const state = createInitialState(1_000, "Verifica UI");
     const onDismiss = vi.fn();
     render(<MomentLayer state={state} momentKey="legendary:eva-parodi" onDismiss={onDismiss} />);
 
-    expect(screen.getByRole("dialog", { name: "Un Leggendario entra nell'Ordine" })).toBeVisible();
+    const dialog = screen.getByRole("dialog", { name: "Un Leggendario entra nell'Ordine" });
+    expect(dialog).toBeVisible();
     expect(screen.getByText(/Eva Parodi entra nella scuola/)).toBeVisible();
+    // While it plays a click on the scene does nothing; «Salta» and Esc close it.
+    fireEvent.click(dialog);
+    expect(onDismiss).not.toHaveBeenCalled();
     fireEvent.keyDown(window, { key: "Escape" });
-    fireEvent.click(screen.getByRole("button", { name: /Continua/ }));
-    act(() => { vi.advanceTimersByTime(MOMENT_DURATION_MS); });
+    fireEvent.click(screen.getByRole("button", { name: "Salta" }));
+    expect(onDismiss).toHaveBeenCalledTimes(2);
+
+    // At the end it does not close on its own.
+    act(() => { vi.advanceTimersByTime(MOMENT_DURATION_MS * 3); });
+    expect(onDismiss).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole("button", { name: "Chiudi" }));
     expect(onDismiss).toHaveBeenCalledTimes(3);
+    fireEvent.click(dialog);
+    expect(onDismiss).toHaveBeenCalledTimes(4);
   });
 
   it("announces Inflazione di Luce with the yearly cause and the price going up", () => {

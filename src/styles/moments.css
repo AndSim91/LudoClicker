@@ -4,6 +4,8 @@
  * so the base rules are the final frame and «Riduci animazioni» shows it still.
  * The scene lasts 6.5 s (MOMENT_DURATION_MS in MomentLayer.tsx).
  */
+.moment-layer.is-finished { cursor: pointer; }
+
 .moment-layer {
   position: fixed;
   z-index: var(--z-moment);
@@ -148,8 +150,7 @@
 }
 
 :root[data-theme="dark"] .moment-progress,
-:root[data-theme="dark"] .moment-icon,
-:root[data-theme="dark"] .moment-skip-office {
+:root[data-theme="dark"] .moment-icon {
   display: none;
 }
 

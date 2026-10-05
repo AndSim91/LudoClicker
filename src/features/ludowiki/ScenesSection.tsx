@@ -149,7 +149,7 @@ function SceneCard({ state, sceneKey, thumb, onReplay }: {
             </select>
           </>
         ) : null}
-        <button type="button" className="scene-replay" onClick={() => onReplay?.(content)} disabled={!onReplay}>
+        <button type="button" className="scene-replay" onClick={() => onReplay?.(describeScene(state, sceneKey, choice))} disabled={!onReplay}>
           ▶ Rivedi
         </button>
       </div>
