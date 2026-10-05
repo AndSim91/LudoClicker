@@ -7,6 +7,8 @@ const compactNumber = new Intl.NumberFormat("it-IT", {
   useGrouping: true,
 });
 
+const compactMantissa = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 1, useGrouping: true });
+
 const compactCurrency = new Intl.NumberFormat("it-IT", {
   style: "currency",
   currency: "EUR",
@@ -23,7 +25,20 @@ const exactCurrency = new Intl.NumberFormat("it-IT", {
   useGrouping: true,
 });
 
+// Italian CLDR has no short form for thousands («1200», «15.400»), so the sidebar
+// would grow back to the exact value; K is spelled out by hand, Mln/Mld follow ICU.
+// 999.950 already reads «1 Mln», like 999,95 rounds to 1.
+const COMPACT_UNITS = [
+  [1e9, " Mld"],
+  [1e6, " Mln"],
+  [1e3, "K"],
+] as const;
+
 export function formatCompactNumber(value: number): string {
+  const magnitude = Math.abs(value);
+  for (const [size, suffix] of COMPACT_UNITS) {
+    if (magnitude >= size * 0.99995) return `${compactMantissa.format(value / size)}${suffix}`;
+  }
   return compactNumber.format(value);
 }
 

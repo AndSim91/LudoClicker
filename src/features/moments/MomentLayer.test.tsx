@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
-import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
+import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT, getLightInflationEventDescription } from "../../game/lightInflation";
 import { SUPERBA_MOMENT } from "../../game/moments";
 import { MOMENT_DURATION_MS, MomentLayer } from "./MomentLayer";
 import { getFoundationTitle } from "./momentContent";
@@ -53,7 +53,8 @@ describe("MomentLayer", () => {
 
     expect(screen.getByRole("dialog", {
       name: "Inflazione di Luce",
-      description: "Lama di Luce aumenta i costi delle spade a causa della ricostruzione post terremoto del Friuli.",
+      // The causes are an inside joke that Andrea rewrites; the test follows the list.
+      description: getLightInflationEventDescription(LIGHT_INFLATION_CAUSES[5]),
     })).toBeVisible();
     expect(container.querySelector(".moment-price")).toHaveTextContent(
       "Spada per combattimento sportivo330,00 € → 445,50 € (+35%)",
