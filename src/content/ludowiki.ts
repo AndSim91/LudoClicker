@@ -172,6 +172,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       "La scrittura automatica e quella manuale completano la stessa campagna.",
       "Una risposta positiva prenota una prova; una negativa chiude il contatto.",
       "La rarità modifica la probabilità di ottenere la prova.",
+      "La Creatività (ramo degli Upgrade) alza la probabilità di ottenere la prova fino al massimo della rarità e arricchisce l'aspetto dell'email.",
     ],
     related: ["prove-iscrizioni", "rarita-leggendari", "collaboratori-settori"],
   },

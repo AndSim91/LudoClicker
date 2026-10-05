@@ -62,6 +62,8 @@ describe("UpgradesView", () => {
     ]) {
       expect(screen.getByRole("heading", { name: heading })).toBeVisible();
     }
+    expect(within(screen.getByRole("region", { name: "Creatività" }))
+      .getByText(/0\/35 punti Creatività · prova dopo l'email \d+%/)).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Master of none/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Il costo del Servizio/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ })).toBeVisible();

@@ -37,7 +37,8 @@ import {
   getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
-import { formatCompactCurrency, formatCurrency, formatList, formatStat } from "../../shared/formatters";
+import { formatCompactCurrency, formatCurrency, formatList, formatPercent, formatStat } from "../../shared/formatters";
+import { getEmailBookingChance } from "../../game/formulas";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
 import {
@@ -195,7 +196,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "charisma":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "eventContactsMultiplier") * 100)}% contatti`;
     case "writing":
-      return `${Math.round(getCreativityProgress(state.upgrades) * 35)}/35 punti Creatività`;
+      return `${Math.round(getCreativityProgress(state.upgrades) * 35)}/35 punti Creatività · prova dopo l'email ${formatPercent(getEmailBookingChance(state))}`;
     case "welcome":
       return `${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") * 100)}% della possibilità di Iscrizione`;
     case "equipment":

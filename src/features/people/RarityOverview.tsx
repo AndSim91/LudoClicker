@@ -20,7 +20,7 @@ export function RarityOverview({ state: stateOverride }: { state?: GameState }) 
           <article className={rarity === "common" ? undefined : rarity} key={rarity}>
             <strong>{definition.label}</strong>
             <span>Comparsa: {formatPercent(definition.queueAppearanceChance)}</span>
-            <span>Prova dopo l'email: {formatPercent(getEmailBookingChance(state, rarity))}</span>
+            <span title="Dipende dalla rarità e dai punti Creatività (Upgrade)">Prova dopo l'email: {formatPercent(getEmailBookingChance(state, rarity))}</span>
             <span>
               Iscrizione: {formatPercent(definition.baseEnrollmentChance)} base · {formatPercent(getEnrollmentChance(state, rarity))} attuale · max {formatPercent(definition.maxEnrollmentChance)}
             </span>
