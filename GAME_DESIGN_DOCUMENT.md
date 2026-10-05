@@ -339,10 +339,12 @@ contatto è sempre Andrea Simonazzi, il primo Leggendario della partita, la cui
 prova nella scuola iniziale si conclude sempre con l'iscrizione; dall'undicesimo contatto si
 sbloccano le estrazioni Rare, Ultra Rare e Leggendarie. Nelle scuole
 successive tutte le rarità sono disponibili fin dal primo contatto e Andrea
-torna nel normale pool Leggendario. Ogni Leggendario ordinario è un profilo
+torna nel normale pool Leggendario, ma solo dopo che la scuola ha vinto il
+Nazionale. Ogni Leggendario ordinario è un profilo
 unico: se l'estrazione Leggendaria non trova profili liberi, il contatto
 diventa Ultra Raro. Alla fondazione di una nuova scuola i Leggendari iscritti
-tornano disponibili e ripartono da zero: solo Arena e Stile naturali.
+tornano disponibili e ripartono da zero: solo Arena e Stile naturali. Fa
+eccezione Andrea Simonazzi, che conserva sempre tutto.
 
 Ogni contatto riceve una rarità al momento dell'acquisizione. La rarità
 determina la probabilità di prenotare una prova dopo la mail e quella di
@@ -1301,7 +1303,11 @@ Regole interne dei Leggendari, mai esplicitate nell'interfaccia:
 - Andrea Simonazzi è garantito come 10° contatto nella scuola iniziale (i primi
   nove sono sempre Comuni) e la sua iscrizione dopo la prova è garantita; nelle
   scuole successive la sua comparsa torna casuale come per ogni altro
-  Leggendario, senza garanzie di prenotazione o iscrizione;
+  Leggendario, senza garanzie di prenotazione o iscrizione, e solo dopo un
+  titolo nazionale della scuola corrente (`getReservedLegendaryProfileIds`);
+  non è mai il Leggendario che segue il giocatore né uno dei primi contatti
+  della nuova scuola; tra una scuola e l'altra conserva tutto (Forme,
+  attestati, Maestria, esperienza, Corsi Agonisti);
 - la probabilità annuale di abbandono di tutti i Leggendari è sempre 0%,
   indipendentemente dalla formazione e dal numero di scuole fondate;
 - l'unico modo previsto per perdere un Leggendario sarà un evento narrativo
@@ -3139,14 +3145,20 @@ maestria; gli restano solo nome, rarità e statistiche naturali di Arena e Stile
 Anche i suoi progressi conservati per le scuole successive ripartono da zero. Senza Leggendari iscritti la scuola parte da zero
 iscritti.
 
-Lo stesso vale per tutti gli altri Leggendari, ordinari e Segreti: alla
+Andrea Simonazzi non segue mai il giocatore: se è l'unico Leggendario
+iscritto, la nuova scuola parte senza iscritti. È anche l'unico che conserva
+tutto tra una scuola e l'altra (`captureLegendaryProgress`), e si ritrova
+solo dopo aver vinto il Nazionale nella nuova scuola.
+
+Lo stesso azzeramento vale per tutti gli altri Leggendari, ordinari e Segreti: alla
 fondazione ogni progresso conservato (della scuola lasciata e di quelle
 prima) torna a sole Arena e Stile naturali (`forgetLegendaryProgress` in
 `schoolProgressionFlow.ts`). La chiave resta, quindi Ludodex, traguardi e
 Leggendari Segreti sbloccati non cambiano. Un Leggendario che lascia la
 scuola e ci ritorna nella stessa scuola conserva invece i suoi progressi.
 Salvataggio v97: nei salvataggi che hanno già fondato una scuola si azzerano
-i Leggendari che non sono passati dalla scuola corrente.
+i Leggendari che non sono passati dalla scuola corrente, tranne Andrea
+Simonazzi.
 
 I Leggendari Segreti reclutati in una scuola precedente entrano tra i
 leggendari ordinari: nelle scuole successive possono comparire a caso nella

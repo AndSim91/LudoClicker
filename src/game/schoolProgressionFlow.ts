@@ -14,7 +14,9 @@ import { refreshWritingCampaignCopies } from "./campaignContent";
 import { GAME_CONFIG } from "./config";
 import { scaleCurrencyGain } from "./economy";
 import { getWritingPower } from "./formulas";
+import { ANDREA_SIMONAZZI_ID } from "./contacts";
 import { createInitialState } from "./initialState";
+import { captureLegendaryProgress } from "./membershipFlow";
 import { FOUNDATION_MOMENT } from "./moments";
 import { canFoundSchool } from "./progression";
 import { nextRandom } from "./random";
@@ -38,9 +40,9 @@ import type {
 } from "./types";
 
 /**
- * A new school starts every Leggendario from zero: met again, they bring only
- * who they are (natural Arena/Stile). The key stays so Ludodex, traguardi and
- * unlocked Leggendari Segreti do not change.
+ * A new school starts every Leggendario but Andrea Simonazzi from zero: met
+ * again, they bring only who they are (natural Arena/Stile). The key stays so
+ * Ludodex, traguardi and unlocked Leggendari Segreti do not change.
  */
 export function forgetLegendaryProgress(
   retained: Pick<RetainedLegendaryProgress, "joinedAt" | "arenaBase" | "styleBase">,
@@ -61,15 +63,20 @@ function prepareLegendaryProgressForNewSchool(
 ): LegendaryCollaboratorProgress {
   const retainedProgress = Object.fromEntries(
     Object.entries(state.legendaryCollaborators.retainedProgress).map(([id, retained]) =>
-      [id, retained && forgetLegendaryProgress(retained)]),
+      [id, retained && id !== ANDREA_SIMONAZZI_ID ? forgetLegendaryProgress(retained) : retained]),
   ) as LegendaryCollaboratorProgress["retainedProgress"];
+  const collaboratorsByContactId = new Map(
+    state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
+  );
   for (const contact of state.contacts) {
     if (contact.status !== "enrolled" || !contact.specialProfileId) continue;
-    retainedProgress[contact.specialProfileId] = forgetLegendaryProgress({
-      joinedAt: contact.acquiredAt,
-      arenaBase: contact.arenaBase,
-      styleBase: contact.styleBase,
-    });
+    retainedProgress[contact.specialProfileId] = contact.specialProfileId === ANDREA_SIMONAZZI_ID
+      ? captureLegendaryProgress(contact, collaboratorsByContactId.get(contact.id))
+      : forgetLegendaryProgress({
+          joinedAt: contact.acquiredAt,
+          arenaBase: contact.arenaBase,
+          styleBase: contact.styleBase,
+        });
   }
   return {
     ...state.legendaryCollaborators,
@@ -93,9 +100,11 @@ export function foundSchool(
   const availableReputation = state.network.reputation + rent.points;
   if (!isValidReputationSpending(state, spending, availableReputation)) return state;
   const legendaryProgress = prepareLegendaryProgressForNewSchool(state);
-  // A random Leggendario of the school (secret ones too) follows the player.
+  // A random Leggendario of the school (secret ones too) follows the player;
+  // never Andrea Simonazzi, who waits for the next Nazionale.
   const legendaryMembers = state.contacts.filter((contact) =>
-    contact.status === "enrolled" && contact.specialProfileId,
+    contact.status === "enrolled" && contact.specialProfileId &&
+    contact.specialProfileId !== ANDREA_SIMONAZZI_ID,
   );
   const [legendaryRoll, seedAfterLegendary] = nextRandom(state.randomSeed);
   const follower = legendaryMembers[Math.floor(legendaryRoll * legendaryMembers.length)];

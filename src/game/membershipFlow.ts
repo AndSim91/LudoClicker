@@ -14,10 +14,44 @@ import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { nextRandom } from "./random";
 import { processJanuaryLightInflation } from "./lightInflation";
-import type { GameState, SpecialCollaboratorId } from "./types";
+import type {
+  Collaborator,
+  Contact,
+  GameState,
+  RetainedLegendaryProgress,
+  SpecialCollaboratorId,
+} from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 import { processReptileCalendarTransition } from "./reptileFlow";
 import { resetGadgetMonthlyRevenueForMonth } from "./gadgetRevenue";
+
+/** Everything a Leggendario has earned, kept for when they are met again. */
+export function captureLegendaryProgress(
+  member: Contact,
+  collaborator: Collaborator | undefined,
+): RetainedLegendaryProgress {
+  return {
+    forms: [...(collaborator?.forms ?? member.forms)],
+    instructorForms: [...(collaborator?.instructorForms ?? [])],
+    technicianForms: [...(collaborator?.technicianForms ?? [])],
+    formBranchPreferences: [
+      ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
+    ],
+    joinedAt: collaborator?.joinedAt ?? member.acquiredAt,
+    mastery: collaborator?.mastery ? { ...collaborator.mastery } : undefined,
+    arenaBase: member.arenaBase,
+    styleBase: member.styleBase,
+    tournamentExperience: member.tournamentExperience,
+    agonistCourseCompletions: member.agonistCourseCompletions,
+    agonistCourseArenaBonus: member.agonistCourseArenaBonus,
+    agonistCourseStyleBonus: member.agonistCourseStyleBonus,
+    lastAgonistCourseYear: member.lastAgonistCourseYear,
+    lastFormTrainingYear:
+      collaborator?.lastFormTrainingYear ?? member.lastFormTrainingYear,
+    formTrainingYearCount:
+      collaborator?.formTrainingYearCount ?? member.formTrainingYearCount,
+  };
+}
 
 export function departMembers(
   state: GameState,
@@ -56,27 +90,7 @@ export function departMembers(
     if (!member.specialProfileId) continue;
     const collaborator = collaboratorsByContactId.get(member.id);
     departedProfileIds.add(member.specialProfileId);
-    retainedProgress[member.specialProfileId] = {
-      forms: [...(collaborator?.forms ?? member.forms)],
-      instructorForms: [...(collaborator?.instructorForms ?? [])],
-      technicianForms: [...(collaborator?.technicianForms ?? [])],
-      formBranchPreferences: [
-        ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
-      ],
-      joinedAt: collaborator?.joinedAt ?? member.acquiredAt,
-      mastery: collaborator?.mastery ? { ...collaborator.mastery } : undefined,
-      arenaBase: member.arenaBase,
-      styleBase: member.styleBase,
-      tournamentExperience: member.tournamentExperience,
-      agonistCourseCompletions: member.agonistCourseCompletions,
-      agonistCourseArenaBonus: member.agonistCourseArenaBonus,
-      agonistCourseStyleBonus: member.agonistCourseStyleBonus,
-      lastAgonistCourseYear: member.lastAgonistCourseYear,
-      lastFormTrainingYear:
-        collaborator?.lastFormTrainingYear ?? member.lastFormTrainingYear,
-      formTrainingYearCount:
-        collaborator?.formTrainingYearCount ?? member.formTrainingYearCount,
-    };
+    retainedProgress[member.specialProfileId] = captureLegendaryProgress(member, collaborator);
   }
 
   return {

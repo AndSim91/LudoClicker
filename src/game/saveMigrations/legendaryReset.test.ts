@@ -30,3 +30,12 @@ describe("v97 Leggendari da zero nella nuova scuola", () => {
     expect(migrated.legendaryCollaborators?.retainedProgress["marco-palena"]).toBe(earned);
   });
 });
+
+describe("v97 Andrea Simonazzi", () => {
+  it("tiene tutto anche se viene da una scuola passata", () => {
+    const state = save(1);
+    state.legendaryCollaborators!.retainedProgress["andrea-simonazzi"] = earned as never;
+    const retained = migrateLegendaryResetState(state).legendaryCollaborators?.retainedProgress;
+    expect(retained?.["andrea-simonazzi"]).toBe(earned);
+  });
+});

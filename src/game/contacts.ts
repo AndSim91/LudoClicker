@@ -175,6 +175,8 @@ export function createInitialContacts(
   let progress = existingProgress;
   const reservedProfileIds = new Set<SpecialCollaboratorId>([
     ...progress.enrolledProfileIds,
+    // A new school has no Nazionale yet: Andrea Simonazzi cannot be among its first contacts.
+    ...(includeAndrea ? [] : [ANDREA_SIMONAZZI_ID]),
   ]);
   const contacts = Array.from({ length: GAME_CONFIG.initialContacts }, (_, index) => {
     const queuePosition = index + 1;

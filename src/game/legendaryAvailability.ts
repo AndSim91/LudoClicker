@@ -44,12 +44,16 @@ export function getReservedLegendaryProfileIds(
   state: Pick<
     GameState,
     "contacts" | "collaborators" | "legendaryCollaborators" | "scheduledTrials"
-  >,
+  > & Partial<Pick<GameState, "network" | "tournaments">>,
   now: number,
 ): Set<SpecialCollaboratorId> {
   const reserved = new Set<SpecialCollaboratorId>([
     ...state.legendaryCollaborators.enrolledProfileIds,
   ]);
+  // After the first school Andrea Simonazzi is met only once the school has won the Nazionale.
+  if ((state.network?.schoolCount ?? 0) > 0 && !(state.tournaments?.nationalTitlesCurrentSchool ?? 0)) {
+    reserved.add("andrea-simonazzi");
+  }
   const visibleFailedTrialContactIds = new Set(
     state.scheduledTrials
       .filter((trial) =>
@@ -77,7 +81,7 @@ export function getAvailableStandardLegendaryProfiles(
   state: Pick<
     GameState,
     "contacts" | "collaborators" | "legendaryCollaborators" | "scheduledTrials"
-  >,
+  > & Partial<Pick<GameState, "network" | "tournaments">>,
   now: number,
 ) {
   const reserved = getReservedLegendaryProfileIds(state, now);

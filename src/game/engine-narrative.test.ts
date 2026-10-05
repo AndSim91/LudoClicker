@@ -273,12 +273,25 @@ describe("game engine: narrative", () => {
             agonistCourseStyleBonus: 6,
             enrolledMonth: 1,
           }
-        : contact),
+        : index === 1
+          ? {
+              ...contact,
+              firstName: "Andrea",
+              lastName: "Simonazzi",
+              status: "enrolled" as const,
+              rarity: "legendary" as const,
+              specialProfileId: "andrea-simonazzi" as const,
+              forms: ["form-1" as const, "form-2" as const],
+              tournamentExperience: 5,
+              agonistCourseCompletions: 1,
+              enrolledMonth: 1,
+            }
+          : contact),
       collaborators,
       legendaryCollaborators: {
         ...initial.legendaryCollaborators,
         encounteredProfileIds: ["eva-parodi" as const],
-        enrolledProfileIds: ["eva-parodi" as const],
+        enrolledProfileIds: ["eva-parodi" as const, "andrea-simonazzi" as const],
         // Met in an earlier school, with everything earned there.
         retainedProgress: {
           "marco-palena": {
@@ -334,6 +347,13 @@ describe("game engine: narrative", () => {
       arenaBase: 91,
       styleBase: 87,
     });
+    // Andrea Simonazzi never follows, but keeps everything for when he is met again.
+    expect(founded.legendaryCollaborators.retainedProgress["andrea-simonazzi"]).toMatchObject({
+      forms: ["form-1", "form-2"],
+      tournamentExperience: 5,
+      agonistCourseCompletions: 1,
+    });
+    expect(founded.contacts.some((contact) => contact.specialProfileId === "andrea-simonazzi")).toBe(false);
     // Every other Leggendario starts from zero too when met again.
     expect(founded.legendaryCollaborators.retainedProgress["marco-palena"]).toEqual({
       forms: [],
