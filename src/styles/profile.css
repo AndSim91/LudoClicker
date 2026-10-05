@@ -497,20 +497,40 @@
   opacity: 0.82;
 }
 
-/* «Annulla» in sordina: rosso tenue, rosso pieno solo sotto il puntatore. */
+/* In corso: a riposo «In corso» con il tempo; «Annulla» e il rosso pieno
+   compaiono solo sotto il puntatore o con il focus (concept A). */
 .event-row > button.event-cancel-button {
-  --cancel-ink: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 35%, var(--surface));
-  color: var(--cancel-ink);
-  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
-}
-
-/* In corso il riempimento è la parte viva del pulsante: colore pieno, riflesso
-   che scorre e bordo luminoso, così si vede che avanza. */
-.event-row > button.event-cancel-button {
+  --event-run-bg: #f2f7fc;
+  --event-run-border: #8ec2ee;
+  --event-run-ink: #0b3a66;
   --event-run-from: #bcdcf6;
   --event-run-to: #8ec2ee;
   --event-run-edge: #0f6cbd;
+  border-color: var(--event-run-border);
+  color: var(--event-run-ink);
+  background: var(--event-run-bg);
+  transition: background-color 0.18s, border-color 0.18s, color 0.18s;
+}
+
+/* The two labels share the same grid cell; hover swaps which one shows. */
+.event-row > button.event-cancel-button > .event-action-text {
+  grid-area: 1 / 2;
+  transition: opacity 0.16s, transform 0.16s;
+}
+
+.event-row > button.event-cancel-button > .event-action-cancel {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) > .event-action-text:not(.event-action-cancel) {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) > .event-action-cancel {
+  opacity: 1;
+  transform: none;
 }
 
 .event-row > button.event-cancel-button .event-action-fill > span {
@@ -535,6 +555,10 @@
 @media (prefers-reduced-motion: reduce) {
   .event-row > button.event-cancel-button .event-action-fill > span {
     animation: none;
+  }
+
+  .event-row > button.event-cancel-button > .event-action-text {
+    transition: none;
   }
 }
 

@@ -189,7 +189,7 @@ export function EventsView({
           let ring = { value: 100, label: "" };
           if (matching) {
             action = `Annulla · ${clockLeft}`;
-            main = "Annulla";
+            main = "In corso";
             detail = `finisce tra ${clockLeft}`;
             ring = { value: progress, label: String(remainingSeconds) };
           } else if (onCooldown) {
@@ -282,6 +282,13 @@ export function EventsView({
                   <span className="event-action-main">{main}</span>
                   <span className="event-action-detail">{detail}</span>
                 </span>
+                {/* Fase 8: «Annulla» si vede solo sotto il puntatore o con il focus. */}
+                {matching ? (
+                  <span className="event-action-text event-action-cancel" aria-hidden="true">
+                    <span className="event-action-main">Annulla</span>
+                    <span className="event-action-detail">l'evento si ferma qui</span>
+                  </span>
+                ) : null}
               </button>
             </article>
           );

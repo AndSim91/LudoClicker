@@ -278,13 +278,13 @@
   background: #0e5f6c;
 }
 
-:root[data-theme="dark"] .event-row > button.event-cancel-button:not(:hover, :focus-visible) {
-  --cancel-ink: #fbe3e4;
+:root[data-theme="dark"] .event-row > button.event-cancel-button {
+  --event-run-bg: #0f3a52;
+  --event-run-border: rgb(108 211 214 / 45%);
+  --event-run-ink: #f3fbfb;
   --event-run-from: rgb(23 124 137 / 75%);
   --event-run-to: rgb(108 211 214 / 62%);
   --event-run-edge: var(--onde-wave);
-  border-color: rgb(164 38 44 / 55%);
-  background: color-mix(in srgb, var(--danger) 22%, var(--surface-muted));
 }
 
 :root[data-theme="dark"] h1,

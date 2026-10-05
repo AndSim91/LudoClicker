@@ -204,7 +204,11 @@ describe("EventsView", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Annulla · \d+:\d{2}$/ }));
+    const cancel = screen.getByRole("button", { name: /^Annulla · \d+:\d{2}$/ });
+    // At rest the button says «In corso»; «Annulla» is the hover label.
+    expect(cancel.querySelector(".event-action-text:not(.event-action-cancel)")).toHaveTextContent(/^In corsofinisce tra/);
+    expect(cancel.querySelector(".event-action-cancel")).toHaveTextContent("Annulla");
+    fireEvent.click(cancel);
 
     expect(onCancel).toHaveBeenCalledWith(event.id);
   });
