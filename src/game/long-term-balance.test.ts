@@ -58,6 +58,17 @@ describe("long-term automated balance simulation", () => {
     }
   });
 
+  it("plays the first prestige with the point-unlock upgrades in use", () => {
+    // Occhio del Maestro, e-Learning and Multiverso change the pacing: the
+    // target above only means something if the simulation really buys them.
+    for (const result of intense) {
+      expect(result.state.upgrades["talent-eye"], "Occhio del Maestro").toBeGreaterThan(0);
+      expect(result.state.upgrades["e-learning"], "Istruttori in e-Learning").toBeGreaterThan(0);
+      expect(result.state.upgrades["event-multiverse"], "Eventi nel Multiverso").toBeGreaterThan(0);
+      expect(result.state.upgrades["official-supplier"], "Fornitore ufficiale").toBe(1);
+    }
+  });
+
   it("opens the prestige with one national title in Arena or Style, and offers it once", () => {
     const startedAt = 1_700_000_000_000;
     const state = createInitialState(startedAt, "Prestige gate test");

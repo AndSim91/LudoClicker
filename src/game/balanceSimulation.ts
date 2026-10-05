@@ -1,6 +1,7 @@
 import { getAvailableForms, getInstructorFormCost } from "../content/forms";
 import {
   getAnnualFormTrainingLimit,
+  getEventExtraCopies,
   getUpgradeCost,
   getUpgradeDefinition,
   hasCompletedUpgradePrerequisites,
@@ -81,16 +82,22 @@ const UPGRADE_PRIORITY: UpgradeId[] = [
 // are in place. The chain technical-arena → instructor-versatility →
 // sis-accreditation → cost-of-service → promiscuous-instructor →
 // agonist-course-intensity → pagosport follows the in-game prerequisites.
+// The three nodes of the point unlocks (Occhio del Maestro, Istruttori in
+// e-Learning, Eventi nel Multiverso) are bought too, so the balance tests
+// measure the game with them: they are the ones that can break the pacing.
 const COMPETITIVE_UPGRADE_PRIORITY: UpgradeId[] = [
   ...UPGRADE_PRIORITY.slice(0, 8),
+  "talent-eye",
   "technical-arena",
   "instructor-versatility",
+  "e-learning",
   "sis-accreditation",
   "cost-of-service",
   "promiscuous-instructor",
   "agonist-course-intensity",
   "pagosport",
   ...UPGRADE_PRIORITY.slice(8),
+  "event-multiverse",
 ];
 // The first four collaborators keep the funnel roles; from the fifth on, every
 // fourth one becomes an Istruttore. Until then Forms are booked by hand.
@@ -256,20 +263,24 @@ function buySwordsForWaitingTrainings(state: GameState, now: number): GameState 
   return dispatch(state, { type: "BUY_OFFICIAL_SWORD", now });
 }
 
+// With Eventi nel Multiverso the player also opens every copy it can afford.
 function startBestAvailableActivity(state: GameState, now: number): GameState {
   const hasRunningParkSparring = state.acquisitionEvents.some(
     (event) => event.definitionId === "park-sparring" && event.status === "running",
   );
-  let nextState = state;
   if (
     !hasRunningParkSparring &&
-    !isEventCooldownActive(state.activities.eventCooldowns["park-sparring"], state, now)
-  ) {
-    nextState = dispatch(nextState, {
+    isEventCooldownActive(state.activities.eventCooldowns["park-sparring"], state, now)
+  ) return state;
+  let nextState = state;
+  for (let copy = 0; copy <= getEventExtraCopies(state.upgrades); copy += 1) {
+    const started = dispatch(nextState, {
       type: "START_ACQUISITION_EVENT",
       definitionId: "park-sparring",
       now,
     });
+    if (started === nextState) break;
+    nextState = started;
   }
   return nextState;
 }

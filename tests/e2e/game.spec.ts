@@ -278,6 +278,8 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
   }));
   state.unlocks.collaborators = true;
   state.collaboratorManagement.aggregateViewUnlocked = true;
+  // The Consiglio scene is already seen: it now waits for «Chiudi» and would cover the page.
+  state.moments = { seen: [...state.moments.seen, "council"], queue: [] };
   state.collaboratorManagement.targets = {
     writing: 0,
     events: 0,
