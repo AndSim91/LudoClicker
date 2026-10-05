@@ -447,7 +447,6 @@
 
 .primary-command,
 .command,
-.upgrade-command,
 .icon-command {
   display: inline-flex;
   align-items: center;
@@ -471,13 +470,8 @@
   background: #115ea3;
 }
 
-.primary-command .icon-name-chevron {
-  width: 14px;
-}
-
 .command:hover:not(:disabled),
-.icon-command:hover,
-.upgrade-command:hover:not(:disabled) {
+.icon-command:hover {
   background: #f3f2f1;
 }
 
@@ -490,19 +484,6 @@
 
 .command-spacer {
   flex: 1;
-}
-
-.upgrade-command {
-  border: 1px solid #b7d7f0;
-  color: #0f5fab;
-  background: #f5faff;
-  font-weight: 600;
-}
-
-.upgrade-command:disabled {
-  border-color: var(--line);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
 }
 
 .icon-command {
@@ -665,10 +646,6 @@
 
 .folder.active {
   color: var(--accent-ink);
-}
-
-.folder-glyph {
-  font-size: 20px;
 }
 
 .folder-rule {

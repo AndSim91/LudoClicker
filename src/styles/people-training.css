@@ -319,7 +319,6 @@
 }
 
 .technician-course-control,
-.technician-course-gate,
 .technician-course-reservation {
   /* Glicine del Corso Tecnici; Onde li ridefinisce in skin-onde.css. */
   --sis-accent: #7650a8;
@@ -418,14 +417,12 @@
   gap: 1px;
 }
 
-.technician-course-heading strong,
-.technician-course-gate strong {
+.technician-course-heading strong {
   color: var(--sis-ink);
   font-size: 12px;
 }
 
-.technician-course-heading small,
-.technician-course-gate small {
+.technician-course-heading small {
   color: var(--ink-muted);
   font-size: 12px;
 }
@@ -467,14 +464,6 @@
   border-radius: var(--radius-sm);
   outline: 2px solid color-mix(in srgb, var(--sis-accent) 45%, transparent);
   outline-offset: 3px;
-}
-
-.technician-course-gate {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-style: dashed;
-  background: var(--sis-gate);
 }
 
 .technician-course-control > .training-start-button {
@@ -545,59 +534,6 @@
   color: var(--ink-muted);
   font-size: 12px;
   line-height: 1.35;
-}
-
-.instructor-certification-action {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
-  align-items: end;
-  gap: 8px;
-  padding-top: 7px;
-  border-top: 1px solid #c7dcef;
-}
-
-.instructor-certification-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.instructor-certification-copy small {
-  color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.instructor-certification-copy strong {
-  color: var(--blue-700);
-  font-size: 12px;
-}
-
-.instructor-certification-action button {
-  min-height: 32px;
-  padding: 5px 9px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-sm);
-  color: #fff;
-  background: var(--blue-600);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.instructor-certification-action button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
-.instructor-toggle {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 6px !important;
-  color: var(--blue-700);
-  font-size: 12px;
-  font-weight: 600;
 }
 
 .instructor-teaching {

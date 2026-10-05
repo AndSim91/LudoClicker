@@ -15,7 +15,7 @@
   /* One assault on screen; FinalDuelLayer spaces them by ASSAULT_SECONDS. */
   --duel: 2.6s;
   position: fixed;
-  z-index: 150;
+  z-index: var(--z-final-duel);
   inset: 0;
   display: grid;
   place-items: center;
@@ -307,28 +307,6 @@
   font-size: 13px;
   font-weight: 700;
 }
-
-.final-duel-vote {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.final-duel-vote-bar {
-  height: 10px;
-  flex: 1;
-  overflow: hidden;
-  border-radius: 5px;
-  background: var(--line);
-}
-
-.final-duel-vote-bar span {
-  display: block;
-  height: 100%;
-  background: var(--duel-a);
-}
-
-.final-duel-vote.is-b .final-duel-vote-bar span { background: var(--duel-b); }
 
 .final-duel-verdict {
   margin: 4px 0 0;

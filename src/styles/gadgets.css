@@ -42,8 +42,7 @@
 }
 
 .gadget-overview small,
-.gadget-product-heading > span,
-.gadget-sales-stats small {
+.gadget-product-heading > span {
   color: var(--ink-muted);
   font-size: 11px;
   font-weight: 600;
@@ -106,26 +105,6 @@
   box-shadow: none;
 }
 
-.gadget-product-symbol {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  color: var(--blue-700);
-  background: var(--blue-050);
-  border: 1px solid color-mix(in srgb, var(--blue-600) 20%, var(--line));
-  border-radius: 50%;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
-.is-locked .gadget-product-symbol {
-  color: var(--ink-muted);
-  background: var(--surface);
-  border-color: var(--line);
-}
-
 .gadget-product-heading h2 {
   margin: 3px 0 6px;
   color: var(--ink);
@@ -139,7 +118,6 @@
 }
 
 .gadget-quality,
-.gadget-sales-stats,
 .gadget-product-status,
 .gadget-product-actions {
   grid-column: 1 / -1;
@@ -167,32 +145,6 @@
   color: var(--ink-muted);
 }
 
-.gadget-sales-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 15px;
-  background: var(--surface-muted);
-  border: 1px solid var(--line);
-}
-
-.gadget-sales-stats > span {
-  display: flex;
-  min-height: 58px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px 14px;
-}
-
-.gadget-sales-stats > span + span {
-  border-left: 1px solid var(--line);
-}
-
-.gadget-sales-stats strong {
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
 .gadget-product-status {
   display: flex;
   min-height: 38px;
@@ -204,32 +156,6 @@
 
 .gadget-product-status small {
   color: var(--warning);
-}
-
-.gadget-status-pill {
-  width: fit-content;
-  padding: 4px 9px;
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.gadget-status-pill.is-ready,
-.gadget-status-pill.is-selling {
-  color: var(--success);
-  background: color-mix(in srgb, var(--success) 10%, var(--surface));
-}
-
-.gadget-status-pill.is-working {
-  color: var(--blue-700);
-  background: var(--blue-050);
-}
-
-.gadget-status-pill.is-warning {
-  color: var(--warning);
-  background: color-mix(in srgb, var(--warning) 10%, var(--surface));
 }
 
 .gadget-product-actions,
@@ -287,7 +213,7 @@
 .gadget-minigame-overlay {
   --gadget-rarity-color: var(--rarity-common-accent);
   position: fixed;
-  z-index: 1200;
+  z-index: var(--z-minigame);
   inset: 0;
   display: grid;
   place-items: center;
@@ -887,11 +813,6 @@
   .gadget-product-card {
     grid-template-columns: 50px minmax(0, 1fr);
     padding: 16px;
-  }
-
-  .gadget-product-symbol {
-    width: 48px;
-    height: 48px;
   }
 
   .gadget-product-actions,

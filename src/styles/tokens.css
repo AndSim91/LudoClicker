@@ -26,8 +26,23 @@
   --equipment-reserved: #8a8886;
   --equipment-healthy: #107c10;
   --shadow-flyout: 0 4px 16px rgb(0 0 0 / 14%);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 18%);
   --radius-sm: 3px;
   --radius-md: 5px;
+  --radius-lg: 8px;
+  --blue-800: #0c3b5e;
+  --blue-200: #b4d6fa;
+  --surface-soft: var(--surface-muted);
+  /* Rosso delle azioni distruttive (annulla, cancella, conferme pericolose). */
+  --danger: #a4262c;
+
+  /* Livelli sovrapposti, dal basso verso l'alto (il tutorial resta sopra tutto: 5000-6000 in tutorial.css). */
+  --z-drawer: 60;
+  --z-final-duel: 150;
+  --z-reptile: 180;
+  --z-moment: 200;
+  --z-dialog: 1000;
+  --z-minigame: 1200;
 
   /* Schema colori unico: rarità degli atleti. */
   --rarity-common-name: #242424;

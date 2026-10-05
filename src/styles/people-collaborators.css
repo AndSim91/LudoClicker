@@ -456,32 +456,6 @@
   margin-top: 4px;
 }
 
-.instructor-compact-certification {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.instructor-compact-certification button {
-  min-height: 26px;
-  padding: 3px 7px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-sm);
-  color: #fff;
-  background: var(--blue-600);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.instructor-compact-certification button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
 .training-control.training-compact {
   grid-template-columns: 1fr;
   align-items: stretch;
@@ -551,7 +525,7 @@
 
 .collaborator-detail-drawer {
   position: fixed;
-  z-index: 60;
+  z-index: var(--z-drawer);
   top: 32px;
   right: 0;
   bottom: 26px;

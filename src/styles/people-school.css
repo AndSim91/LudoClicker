@@ -213,33 +213,20 @@
   min-height: 38px;
 }
 
-.people-view .instructor-main-activity,
 .people-view .instructor-coverage {
   padding: 16px 18px;
 }
 
-.people-view .instructor-main-activity-stage {
-  height: 130px;
-}
-
-.people-view .instructor-main-activity small,
-.people-view .instructor-coverage small,
-.people-view .instructor-main-activity-stage > p {
+.people-view .instructor-coverage small {
   font-size: 12px;
 }
 
-.people-view .instructor-main-activity-stage > p strong,
 .people-view .instructor-coverage-forms > span > strong {
   font-size: 12px;
 }
 
 .people-view .aggregated-teaching-segment {
   background: color-mix(in srgb, var(--school-page-energy) 15%, var(--surface));
-}
-
-.people-view .instructor-main-activity-stage .aggregated-teaching-segment > span,
-.people-view .instructor-main-activity-stage .aggregated-teaching-bar.is-compact > span {
-  background: var(--school-page-energy);
 }
 
 .people-view .collaborator-sector-grid {

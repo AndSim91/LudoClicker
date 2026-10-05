@@ -274,8 +274,3 @@
     border-left: 0;
   }
 }
-
-.data-table {
-  max-width: 1100px;
-  border-top: 1px solid var(--line);
-}

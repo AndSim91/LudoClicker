@@ -67,31 +67,6 @@
   background: var(--surface-muted);
 }
 
-.preference-check {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-
-.preference-check input {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--blue-600);
-}
-
-.preference-check span {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.preference-check small {
-  color: var(--ink-muted);
-}
-
 .reduce-motion *,
 .reduce-motion *::before,
 .reduce-motion *::after {
@@ -101,157 +76,6 @@
   transition-duration: 0.01ms !important;
 }
 
-.income-summary {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(260px, 1.2fr) auto;
-  align-items: center;
-  max-width: 1100px;
-  min-height: 112px;
-  padding: 22px 26px;
-  border: 1px solid #c7dcef;
-  border-left: 4px solid var(--blue-600);
-  background: var(--blue-050);
-}
-
-.income-summary > div:first-child,
-.income-balance {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.income-summary span,
-.income-summary p {
-  color: var(--ink-muted);
-}
-
-.income-summary strong {
-  font-size: 26px;
-  font-weight: 600;
-}
-
-.income-summary strong small {
-  color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 400;
-}
-
-.income-summary p {
-  margin: 0;
-  line-height: 1.5;
-}
-
-.income-balance {
-  min-width: 150px;
-  padding-left: 26px;
-  border-left: 1px solid #c7dcef;
-  text-align: right;
-}
-
-.income-balance b {
-  font-size: 18px;
-}
-
-.shop-section {
-  max-width: 1100px;
-  margin-top: 34px;
-}
-
-.section-title {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 0 4px 14px;
-}
-
-.section-title h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.section-title p {
-  margin: 5px 0 0;
-  color: var(--ink-muted);
-}
-
-.section-title > span {
-  color: var(--blue-700);
-  font-weight: 600;
-}
-
-.upgrade-row {
-  display: grid;
-  grid-template-columns: 46px minmax(240px, 1fr) 190px 105px 170px;
-  align-items: center;
-  gap: 16px;
-  min-height: 92px;
-  padding: 15px 18px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.upgrade-icon {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--blue-700);
-  background: var(--blue-100);
-}
-
-.upgrade-icon svg {
-  width: 21px;
-}
-
-.upgrade-description {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.upgrade-description span {
-  color: var(--ink-muted);
-  line-height: 1.4;
-}
-
-.upgrade-effect {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.upgrade-effect strong {
-  color: var(--success);
-  font-size: 12px;
-}
-
-.upgrade-effect span {
-  color: var(--ink-muted);
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-.upgrade-price {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: right;
-}
-
-.upgrade-price span {
-  color: var(--ink-muted);
-  font-size: 11px;
-}
-
-.upgrade-price strong {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.upgrade-row button,
 .event-row > button {
   min-height: 36px;
   padding: 0 14px;
@@ -263,12 +87,10 @@
   font-weight: 600;
 }
 
-.upgrade-row button:hover:not(:disabled),
 .event-row > button:hover:not(:disabled) {
   background: #115ea3;
 }
 
-.upgrade-row button:disabled,
 .event-row > button:disabled {
   border-color: var(--line-strong);
   color: var(--ink-muted);
@@ -320,35 +142,6 @@
 .event-capacity-note small {
   color: var(--ink-muted);
   font-size: 11px;
-}
-
-.event-equipment-summary {
-  align-items: flex-start !important;
-}
-
-.event-equipment-summary > svg {
-  margin-top: 2px;
-}
-
-.event-equipment-content {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.event-equipment-actions,
-.event-equipment-supplier {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.event-equipment-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .equipment-condition {
@@ -495,54 +288,6 @@
 
 .equipment-condition-legend strong {
   color: var(--ink);
-}
-
-.event-equipment-actions {
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.event-equipment-maintenance,
-.event-equipment-supplier > button {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--blue-600);
-  border-radius: var(--radius-md);
-  color: white;
-  background: var(--blue-600);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.event-equipment-maintenance:disabled,
-.event-equipment-supplier > button:disabled {
-  border-color: var(--line-strong);
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-}
-
-.event-equipment-supplier {
-  min-width: 0;
-  flex: 1 1 330px;
-  justify-content: flex-end;
-  margin-left: auto;
-}
-
-.event-equipment-supplier > div {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.event-equipment-supplier small {
-  color: var(--ink-muted);
-}
-
-.event-equipment-supplier a {
-  color: var(--blue-700);
-  font-weight: 600;
 }
 
 .event-notice svg {
@@ -754,10 +499,10 @@
 
 /* «Annulla» in sordina: rosso tenue, rosso pieno solo sotto il puntatore. */
 .event-row > button.event-cancel-button {
-  --cancel-ink: #a4262c;
-  border-color: color-mix(in srgb, #a4262c 35%, var(--surface));
+  --cancel-ink: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--surface));
   color: var(--cancel-ink);
-  background: color-mix(in srgb, #a4262c 10%, var(--surface));
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
 }
 
 /* In corso il riempimento è la parte viva del pulsante: colore pieno, riflesso
@@ -794,9 +539,9 @@
 }
 
 .event-row > button.event-cancel-button:is(:hover, :focus-visible) {
-  border-color: #a4262c;
+  border-color: var(--danger);
   color: white;
-  background: #a4262c;
+  background: var(--danger);
 }
 
 .event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span {

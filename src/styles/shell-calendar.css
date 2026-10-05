@@ -361,20 +361,6 @@
   background: var(--tournament-track);
 }
 
-.add-event {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  padding: 8px;
-  color: var(--accent-ink);
-  background: transparent;
-}
-
-.add-event svg {
-  width: 16px;
-}
-
 /* Fase 8: detail of the school swords, opened from the sword in the title bar. */
 .equipment-quick-card {
   margin: 4px 0 12px;

@@ -21,7 +21,6 @@
   font-weight: 600;
 }
 
-.person-avatar.special-avatar,
 .person-avatar.rarity-legendary {
   color: var(--rarity-legendary-avatar-text);
   background: var(--rarity-legendary-avatar-background);
@@ -59,7 +58,6 @@
   gap: 8px;
 }
 
-.special-name,
 .rarity-name.rarity-legendary {
   color: var(--rarity-legendary-name);
 }

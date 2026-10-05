@@ -3,7 +3,7 @@
 .feedback-layer {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--z-drawer);
   pointer-events: none;
   overflow: hidden;
 }
@@ -50,7 +50,7 @@
 /* Notifica di traguardo (4.4): sobria in tema Outlook, da console in Modalità Onde. */
 .achievement-toast {
   position: fixed;
-  z-index: 60;
+  z-index: var(--z-drawer);
   right: 24px;
   bottom: 40px;
   display: flex;

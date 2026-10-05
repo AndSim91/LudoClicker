@@ -295,11 +295,6 @@
   white-space: pre-wrap;
 }
 
-.untyped-copy {
-  opacity: 0;
-  user-select: none;
-}
-
 .text-caret {
   display: inline-block;
   width: 1px;
@@ -431,22 +426,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.progress-dots {
-  display: flex;
-  gap: 3px;
-}
-
-.progress-dots i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #c8c6c4;
-}
-
-.progress-dots i.on {
-  background: var(--blue-500);
 }
 
 /* Flusso di scrittura (WritingFlowMeter): Outlook-like text in the light theme. */

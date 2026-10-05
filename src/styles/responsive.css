@@ -1,22 +1,5 @@
 @media (max-width: 1050px) {
-  .profile-settings-form {
-    align-items: stretch;
-    flex-direction: column;
-  }
 
-  .profile-settings-form button {
-    align-self: flex-start;
-  }
-
-  .income-summary {
-    grid-template-columns: 1fr auto;
-  }
-
-  .income-summary > p {
-    display: none;
-  }
-
-  .upgrade-row,
   .trial-card {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -25,9 +8,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .upgrade-effect,
-  .upgrade-price,
-  .upgrade-row button,
   .trial-card > button {
     grid-column: 2;
   }
@@ -49,14 +29,6 @@
   .event-capacity-note > div + div {
     border-top: 1px solid var(--line);
     border-left: 0;
-  }
-
-  .event-equipment-supplier {
-    margin-left: 0;
-  }
-
-  .upgrade-price {
-    text-align: left;
   }
 }
 
@@ -91,19 +63,15 @@
 /* Dark theme: calm blue-black surfaces keep the simulated mail readable while
    preserving the light paper treatment inside campaign emails. */
 :root[data-theme="dark"] .short-goal-card,
-:root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
 :root[data-theme="dark"] .event-notice,
-:root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary {
   border-color: #2f5b80;
 }
 
 :root[data-theme="dark"] .short-goal-card,
-:root[data-theme="dark"] .shop-guide,
 :root[data-theme="dark"] .instructor-panel,
 :root[data-theme="dark"] .event-notice,
-:root[data-theme="dark"] .income-summary,
 :root[data-theme="dark"] .calendar-summary {
   background: var(--blue-050);
 }
@@ -117,7 +85,6 @@
 :root[data-theme="dark"] .message-row,
 :root[data-theme="dark"] .list-tabs,
 :root[data-theme="dark"] .format-bar select,
-:root[data-theme="dark"] .profile-settings-form input,
 :root[data-theme="dark"] .profile-dialog input {
   background: var(--surface);
 }
@@ -136,20 +103,15 @@
 
 :root[data-theme="dark"] .folder-pane,
 :root[data-theme="dark"] .event-capacity-note,
-:root[data-theme="dark"] .report-head,
 :root[data-theme="dark"] .table-head,
 :root[data-theme="dark"] .people-head,
 :root[data-theme="dark"] .section-heading,
-:root[data-theme="dark"] .calendar-title,
 :root[data-theme="dark"] .trial-time,
 :root[data-theme="dark"] .rarity-overview,
 :root[data-theme="dark"] .rarity-overview article,
 :root[data-theme="dark"] .mastery-entry,
-:root[data-theme="dark"] .settings-sheet button:disabled,
-:root[data-theme="dark"] .upgrade-row button:disabled,
 :root[data-theme="dark"] .event-row > button:disabled,
 :root[data-theme="dark"] .training-control > .training-start-button:disabled,
-:root[data-theme="dark"] .social-panel > button:disabled,
 :root[data-theme="dark"] .profile-dialog button:disabled {
   background: var(--surface-muted);
 }
@@ -167,7 +129,6 @@
 :root[data-theme="dark"] .rail-item:hover,
 :root[data-theme="dark"] .command:hover:not(:disabled),
 :root[data-theme="dark"] .icon-command:hover,
-:root[data-theme="dark"] .upgrade-command:hover:not(:disabled),
 :root[data-theme="dark"] .message-row:hover {
   background: #22313f;
 }
@@ -177,7 +138,6 @@
 :root[data-theme="dark"] .folder:hover,
 :root[data-theme="dark"] .folder.active,
 :root[data-theme="dark"] .mastery-entry.active,
-:root[data-theme="dark"] .upgrade-row.recommended,
 :root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {
   background: #18334c;
 }
@@ -185,19 +145,10 @@
 :root[data-theme="dark"] .folder.active,
 :root[data-theme="dark"] .list-tabs button.active,
 :root[data-theme="dark"] .composer-tabs > button.active,
-:root[data-theme="dark"] .people-tabs button.active,
-:root[data-theme="dark"] .upgrade-command,
-:root[data-theme="dark"] .instructor-toggle,
-:root[data-theme="dark"] .event-equipment-supplier a {
+:root[data-theme="dark"] .people-tabs button.active {
   color: var(--blue-700);
 }
 
-:root[data-theme="dark"] .upgrade-command {
-  border-color: #2f5b80;
-  background: #12283d;
-}
-
-:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
 :root[data-theme="dark"] .event-row > button:hover:not(:disabled, .event-cancel-button) {
   background: #3e8cda;
 }
@@ -205,9 +156,7 @@
 :root[data-theme="dark"] .short-goal-progress,
 :root[data-theme="dark"] .trial-progress,
 :root[data-theme="dark"] .mastery-track,
-:root[data-theme="dark"] .training-progress > div,
-:root[data-theme="dark"] .social-progress,
-:root[data-theme="dark"] .progress-dots i {
+:root[data-theme="dark"] .training-progress > div {
   background: #29445c;
 }
 
@@ -272,11 +221,6 @@
 
 :root[data-theme="dark"] .form-logo-item img {
   background: var(--surface-muted);
-}
-
-:root[data-theme="dark"] .settings-sheet button.secondary {
-  color: var(--blue-700);
-  background: var(--surface);
 }
 
 :root[data-theme="dark"] .profile-gate {

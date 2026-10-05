@@ -100,8 +100,7 @@
 }
 
 .gadget-overview small,
-.gadget-product-heading > span,
-.gadget-sales-stats small {
+.gadget-product-heading > span {
   color: var(--ink-muted);
   font-size: 10px;
   font-weight: 650;
@@ -586,42 +585,6 @@
   background: var(--gadget-rarity-color);
 }
 
-.gadget-sales-stats {
-  display: grid;
-  grid-column: 3;
-  grid-row: 3;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 13px;
-  border: 1px solid var(--line);
-  border-right: 0;
-  border-left: 0;
-  background: transparent;
-}
-
-.gadget-sales-stats > span {
-  display: flex;
-  min-height: 54px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 10px;
-}
-
-.gadget-sales-stats > span:first-child {
-  padding-left: 0;
-}
-
-.gadget-sales-stats > span + span {
-  border-left: 1px solid var(--line);
-}
-
-.gadget-sales-stats strong {
-  color: var(--ink);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 650;
-}
-
 .gadget-product-status {
   display: flex;
   grid-column: 2;
@@ -891,7 +854,6 @@
   }
 
   .gadget-quality,
-  .gadget-sales-stats,
   .gadget-rarity-list {
     grid-column: 2 / 4;
   }

@@ -587,7 +587,7 @@ export function App() {
       speed={gameSpeed}
     >
       <div
-        className={reduceMotion ? "application-shell reduce-motion" : "application-shell"}
+        className="application-shell"
         style={{ "--school-accent": state.school.accentColor } as CSSProperties}
       >
         <GameFeedbackLayer />

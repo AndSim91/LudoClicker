@@ -42,6 +42,8 @@
   --surface-muted: #0e4563;
   --blue-050: #104b6a;
   --blue-100: #145573;
+  --blue-200: #1d6688;
+  --blue-800: var(--ink);
 
   /* Foam-coloured text, warm instead of clinical white. */
   --ink: var(--onde-foam);
@@ -98,6 +100,7 @@
   --shadow-flyout: 0 12px 36px rgb(1 12 22 / 60%), 0 0 0 1px rgb(92 200 204 / 16%);
   --radius-sm: 4px;
   --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 /* ---- Chrome ---------------------------------------------------------- */
@@ -246,7 +249,6 @@
 :root[data-theme="dark"] .rail-item:hover,
 :root[data-theme="dark"] .command:hover:not(:disabled),
 :root[data-theme="dark"] .icon-command:hover,
-:root[data-theme="dark"] .upgrade-command:hover:not(:disabled),
 :root[data-theme="dark"] .message-row:hover {
   background: var(--onde-hover);
 }
@@ -256,7 +258,6 @@
 :root[data-theme="dark"] .folder:hover,
 :root[data-theme="dark"] .folder.active,
 :root[data-theme="dark"] .mastery-entry.active,
-:root[data-theme="dark"] .upgrade-row.recommended,
 :root[data-theme="dark"] .trial-card > button:hover:not(:disabled) {
   background: var(--onde-selected);
 }
@@ -272,12 +273,6 @@
   box-shadow: inset 3px 0 0 var(--onde-gold-bright);
 }
 
-:root[data-theme="dark"] .upgrade-command {
-  border-color: var(--line-strong);
-  background: var(--blue-050);
-}
-
-:root[data-theme="dark"] .upgrade-row button:hover:not(:disabled),
 :root[data-theme="dark"] .event-row > button:hover:not(:disabled, .event-cancel-button) {
   background: #0e5f6c;
 }
@@ -288,7 +283,7 @@
   --event-run-to: rgb(108 211 214 / 62%);
   --event-run-edge: var(--onde-wave);
   border-color: rgb(164 38 44 / 55%);
-  background: color-mix(in srgb, #a4262c 22%, var(--surface-muted));
+  background: color-mix(in srgb, var(--danger) 22%, var(--surface-muted));
 }
 
 :root[data-theme="dark"] h1,
@@ -333,9 +328,7 @@
 
 :root[data-theme="dark"] .trial-progress,
 :root[data-theme="dark"] .mastery-track,
-:root[data-theme="dark"] .training-progress > div,
-:root[data-theme="dark"] .social-progress,
-:root[data-theme="dark"] .progress-dots i {
+:root[data-theme="dark"] .training-progress > div {
   background: var(--onde-groove);
 }
 
@@ -756,7 +749,6 @@
 
 /* Corso Tecnici (SIS): resta glicine ma su fondo notte, senza il cartoncino chiaro. */
 :root[data-theme="dark"] .technician-course-control,
-:root[data-theme="dark"] .technician-course-gate,
 :root[data-theme="dark"] .technician-course-reservation {
   --sis-accent: #6a5396;
   --sis-ink: #d4bfff;

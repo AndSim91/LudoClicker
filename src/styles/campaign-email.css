@@ -32,15 +32,6 @@
   line-height: 1.75;
 }
 
-.typed-copy-kicker {
-  margin-bottom: 26px;
-  color: #929da7;
-  font-family: "Segoe UI", sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-}
-
 .email-structure-preview,
 .email-structure-preview * {
   box-sizing: border-box;

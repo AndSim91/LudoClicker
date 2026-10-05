@@ -136,8 +136,8 @@
 }
 
 .upgrade-tree-legend i.unaffordable {
-  border-color: #a4262c;
-  background: #a4262c;
+  border-color: var(--danger);
+  background: var(--danger);
 }
 
 .upgrade-tree-legend i.completed {
@@ -440,8 +440,8 @@
 }
 
 .upgrade-node.available.unaffordable .upgrade-node-icon {
-  border-color: #a4262c;
-  background: #a4262c;
+  border-color: var(--danger);
+  background: var(--danger);
 }
 
 .upgrade-node.completed .upgrade-node-icon {
@@ -890,16 +890,6 @@
     flex-wrap: wrap;
   }
 
-  .upgrade-page-summary {
-    width: 100%;
-    margin-left: 44px;
-  }
-
-  .upgrade-page-summary > div {
-    min-width: 0;
-    flex: 1;
-  }
-
   .upgrade-tree-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -915,9 +905,7 @@
 :root[data-theme="dark"] .upgrade-tree-canvas,
 :root[data-theme="dark"] .upgrade-tree-root,
 :root[data-theme="dark"] .upgrade-branch-heading,
-:root[data-theme="dark"] .upgrade-page-summary,
 :root[data-theme="dark"] .upgrade-benefits-summary,
-:root[data-theme="dark"] .upgrade-recommendation,
 :root[data-theme="dark"] .upgrade-dialog {
   background: var(--surface);
 }

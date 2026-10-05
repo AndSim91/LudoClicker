@@ -578,7 +578,7 @@ button.network-node {
 /* ---------- Foundation dialog ---------- */
 .foundation-backdrop {
   position: fixed;
-  z-index: 60;
+  z-index: var(--z-drawer);
   inset: 0;
   display: grid;
   place-items: center;
@@ -760,8 +760,8 @@ button.network-node {
 }
 
 .foundation-dialog > footer button.danger {
-  border-color: #a4262c;
-  background: #a4262c;
+  border-color: var(--danger);
+  background: var(--danger);
 }
 
 .foundation-dialog > footer button:disabled {

@@ -22,7 +22,7 @@
   --reptile-acid-rgb: 183 255 104;
   --reptile-line-rgb: 151 210 164;
   --reptile-surface-rgb: 14 32 22;
-  --reptile-backdrop: url("/assets/reptile-smoke-backdrop.png");
+  --reptile-backdrop: url("/assets/reptile-smoke-backdrop.webp");
   display: grid;
   gap: 14px;
   min-width: 0;
@@ -561,7 +561,6 @@
 }
 
 .tournament-overview,
-.tournament-athletes-view,
 .tournament-results-view {
   min-width: 0;
 }
@@ -718,8 +717,6 @@
 
 .season-schedule,
 .qualified-team,
-.athlete-roster,
-.athlete-summary,
 .group-stage,
 .knockout-stage,
 .podium-qualification-rail,
@@ -732,7 +729,6 @@
 
 .season-schedule > h2,
 .qualified-team > header,
-.athlete-roster > header,
 .group-stage > h2,
 .knockout-stage > h2,
 .podium-qualification-rail > h2,
@@ -910,7 +906,6 @@
 }
 
 .qualified-team > header,
-.athlete-roster > header,
 .tournament-hall > header {
   display: flex;
   align-items: center;
@@ -936,14 +931,12 @@
 }
 
 .qualified-team h2,
-.athlete-roster h2,
 .tournament-hall h2 {
   margin: 0;
   font-size: 16px;
 }
 
 .qualified-team header span,
-.athlete-roster header span,
 .tournament-hall header span {
   color: var(--ink-muted);
   font-size: 11px;
@@ -1052,132 +1045,10 @@
   font-size: 12px;
 }
 
-.tournament-context-strip {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(250px, 1fr) auto auto;
-  align-items: center;
-  gap: 32px;
-  min-height: 52px;
-  padding: 0 2px 9px;
-}
-
-.tournament-context-strip > span {
-  color: var(--ink-muted);
-}
-
-.tournament-context-strip > span b {
-  color: var(--ink);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-
-.tournament-context-strip > i {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--line);
-}
-
-.tournament-context-strip > i b {
-  display: block;
-  height: 100%;
-  background: var(--blue-600);
-}
-
-.athlete-roster {
-  margin-top: 14px;
-}
-
-.athlete-filters {
-  display: grid;
-  grid-template-columns: minmax(190px, 1.2fr) repeat(4, minmax(155px, 1fr)) auto;
-  gap: 10px;
-  padding: 12px 16px 16px;
-  border-bottom: 1px solid var(--line);
-}
-
-.athlete-filters label {
-  min-width: 0;
-}
-
-.athlete-filters input,
-.athlete-filters select {
-  width: 100%;
-  min-height: 38px;
-  padding: 0 11px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  color: var(--ink);
-  background: var(--surface);
-  font:
-    12px/1 "Segoe UI Variable",
-    "Segoe UI",
-    system-ui,
-    sans-serif;
-}
-
-.athlete-filters input:focus,
-.athlete-filters select:focus {
-  border-color: var(--focus);
-  outline: 1px solid var(--focus);
-}
-
-.athlete-search {
-  position: relative;
-}
-
-.athlete-search svg {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 18px;
-  height: 18px;
-  color: var(--ink-muted);
-}
-
-.athlete-search input {
-  padding-left: 36px;
-}
-
-.athlete-filters > button {
-  min-height: 38px;
-  padding: 0 10px;
-  color: var(--blue-700);
-  background: transparent;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.athlete-table-wrap,
 .group-table-wrap {
   overflow-x: auto;
 }
 
-.virtualized-athlete-table {
-  max-height: min(65vh, 610px);
-  overflow: auto;
-  scrollbar-gutter: stable;
-}
-
-.virtualized-athlete-table .athlete-table thead {
-  position: sticky;
-  z-index: 2;
-  top: 0;
-  background: var(--surface);
-}
-
-.athlete-table .virtual-table-spacer > td {
-  height: 0;
-  padding: 0;
-  border: 0;
-}
-
-.athlete-table,
 .group-table {
   width: 100%;
   border-collapse: collapse;
@@ -1185,8 +1056,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.athlete-table th,
-.athlete-table td,
 .group-table th,
 .group-table td {
   height: 48px;
@@ -1196,7 +1065,6 @@
   white-space: nowrap;
 }
 
-.athlete-table thead th,
 .group-table thead th {
   height: 34px;
   color: var(--ink-muted);
@@ -1206,44 +1074,19 @@
   text-transform: uppercase;
 }
 
-.athlete-table tbody th,
 .group-table tbody th {
   color: var(--ink);
   font-size: 12px;
   font-weight: 600;
 }
 
-.athlete-table tbody tr.is-qualified,
 .group-table tbody tr.is-advanced {
   background: var(--blue-050);
   box-shadow: inset 3px 0 var(--blue-600);
 }
 
-.athlete-table tbody tr:hover,
 .group-table tbody tr:hover {
   background: var(--surface-muted);
-}
-
-.athlete-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--ink-muted);
-}
-
-.athlete-status i {
-  display: grid;
-  width: 15px;
-  height: 15px;
-  place-items: center;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-size: 9px;
-  font-style: normal;
-}
-
-.athlete-status.qualified {
-  color: var(--success);
 }
 
 .tournament-athlete-identity {
@@ -1287,27 +1130,6 @@
   border-color: color-mix(in srgb, var(--blue-600) 45%, transparent);
   color: var(--blue-700);
   background: var(--blue-050);
-}
-
-.athlete-summary {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto auto;
-  align-items: center;
-  gap: 48px;
-  min-height: 62px;
-  margin-top: 14px;
-  padding: 0 18px;
-}
-
-.athlete-summary span {
-  color: var(--ink-muted);
-}
-
-.athlete-summary span b {
-  margin-left: 14px;
-  color: var(--success);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
 }
 
 .results-context {
@@ -2387,10 +2209,6 @@
     min-height: 0;
   }
 
-  .athlete-filters {
-    grid-template-columns: repeat(3, minmax(160px, 1fr));
-  }
-
   .knockout-stage {
     min-height: 420px;
   }
@@ -2418,14 +2236,6 @@
   .season-schedule-head,
   .season-schedule-row {
     min-width: 760px;
-  }
-
-  .tournament-context-strip {
-    grid-template-columns: 1fr auto;
-  }
-
-  .tournament-context-strip > span:last-of-type {
-    display: none;
   }
 
   .results-context {
@@ -2484,16 +2294,6 @@
   .tournament-reward-list article > span:not(:first-child) {
     text-align: left;
   }
-
-  .athlete-summary {
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 14px 18px;
-  }
-
-  .athlete-summary > strong {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 620px) {
@@ -2529,10 +2329,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .athlete-filters {
-    grid-template-columns: 1fr;
-  }
-
   .qualified-team {
     overflow-x: auto;
   }
@@ -2541,14 +2337,6 @@
   .qualified-team-list > div,
   .qualified-team footer {
     min-width: 430px;
-  }
-
-  .athlete-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .athlete-summary > strong {
-    grid-column: auto;
   }
 
   .selected-match-detail {

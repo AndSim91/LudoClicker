@@ -6,7 +6,7 @@
  */
 .moment-layer {
   position: fixed;
-  z-index: 200;
+  z-index: var(--z-moment);
   inset: 0;
   display: grid;
   place-items: center;
@@ -678,7 +678,7 @@
 .superba-smoke {
   position: absolute;
   inset: 0;
-  background: url("/assets/reptile-smoke-backdrop.png") center / cover;
+  background: url("/assets/reptile-smoke-backdrop.webp") center / cover;
   opacity: 0;
   animation: superba-smoke 2s ease-in both;
 }

@@ -344,22 +344,22 @@
 
 .settings-data-row.is-danger strong,
 .settings-layout button.danger-link {
-  color: #a4262c;
+  color: var(--danger);
 }
 
 .settings-layout button.danger-link {
-  border-color: #a4262c;
+  border-color: var(--danger);
   background: transparent;
 }
 
 .settings-layout button.danger-link:hover:not(:disabled) {
-  border-color: color-mix(in srgb, #a4262c 28%, transparent);
-  background: color-mix(in srgb, #a4262c 6%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 28%, transparent);
+  background: color-mix(in srgb, var(--danger) 6%, transparent);
 }
 
 .settings-layout button.danger {
-  border-color: #a4262c;
-  background: #a4262c;
+  border-color: var(--danger);
+  background: var(--danger);
 }
 
 .settings-update-section {

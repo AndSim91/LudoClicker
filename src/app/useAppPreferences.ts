@@ -19,6 +19,8 @@ export function useAppPreferences() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.reduceMotion, String(reduceMotion));
+    // On <html> so it also reaches the layers rendered outside the shell (moments, duel, Reptile, tutorial).
+    document.documentElement.classList.toggle("reduce-motion", reduceMotion);
   }, [reduceMotion]);
 
   useEffect(() => {
