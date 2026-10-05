@@ -1,5 +1,4 @@
 import { SHORT_GOALS } from "../../content/shortGoals";
-import { GAME_CONFIG } from "../config";
 import type { ShortGoalId } from "../types";
 import type { MigratableState } from "./types";
 
@@ -17,7 +16,8 @@ export function migrateShortGoalAvailabilityState(
     : baseline;
   const hasProgress = Math.max(0, currentValue - baseline) >= 1;
   const isBelowActivationBalance =
-    (state.school?.euros ?? 0) < GAME_CONFIG.shortGoalActivationBalance;
+    // The threshold of that time: the 10.000 € of today applies from the first tick.
+    (state.school?.euros ?? 0) < 5_000;
 
   return {
     ...state,

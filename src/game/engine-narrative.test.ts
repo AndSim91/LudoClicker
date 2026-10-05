@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NARRATIVE_EVENTS } from "../content/narrativeEvents";
+import { createShortGoalFromStatistics, getShortGoalReward } from "../content/shortGoals";
 import { GAME_CONFIG } from "./config";
 import {
   canFoundSchool,
@@ -48,17 +49,30 @@ describe("game engine: narrative", () => {
     expect(repeated.school.euros).toBe(completed.school.euros);
   });
 
-  it("hides a zero-progress short goal at exactly 5,000 euros", () => {
+  it("caps mission targets and multiplies the reward by the series", () => {
+    const statistics = createInitialState(1_000).statistics;
+    // Series 2 (one full round done): 5 emails for 30 €.
+    const second = createShortGoalFromStatistics(statistics, 4, 0);
+    expect(second.target).toBe(5);
+    expect(getShortGoalReward(second)).toBe(30);
+    // Series 9: targets stuck at the cap, reward still growing.
+    const ninth = createShortGoalFromStatistics(statistics, 32, 0);
+    expect(ninth.target).toBe(11);
+    expect(getShortGoalReward(ninth)).toBe(135);
+    expect(createShortGoalFromStatistics(statistics, 35, 0).target).toBe(5);
+  });
+
+  it("hides a zero-progress short goal at exactly 10,000 euros", () => {
     const initial = createInitialState(1_000);
     const inactive = gameReducer(
       {
         ...initial,
-        school: { ...initial.school, euros: 5_000 },
+        school: { ...initial.school, euros: 10_000 },
       },
       { type: "TICK", now: 2_000 },
     );
 
-    expect(inactive.school.euros).toBe(5_000);
+    expect(inactive.school.euros).toBe(10_000);
     expect(inactive.shortGoal).toMatchObject({
       definitionId: "send-emails",
       baseline: 0,
@@ -67,17 +81,17 @@ describe("game engine: narrative", () => {
     });
   });
 
-  it("reactivates a hidden short goal after 60 continuous seconds below 5,000 euros", () => {
+  it("reactivates a hidden short goal after 60 continuous seconds below 10,000 euros", () => {
     const initial = createInitialState(1_000);
     const inactive = gameReducer(
-      { ...initial, school: { ...initial.school, euros: 5_000 } },
+      { ...initial, school: { ...initial.school, euros: 10_000 } },
       { type: "TICK", now: 2_000 },
     );
     const waiting = gameReducer(
       {
         ...inactive,
         achievements: ["first-email" as const],
-        school: { ...inactive.school, euros: 4_999 },
+        school: { ...inactive.school, euros: 9_999 },
         statistics: { ...inactive.statistics, emailsSent: 2 },
       },
       { type: "TICK", now: 3_000 },
@@ -98,22 +112,22 @@ describe("game engine: narrative", () => {
     expect(active.shortGoal.reactivationStartedAt).toBeUndefined();
   });
 
-  it("restarts the reactivation timer if the balance returns to 5,000 euros", () => {
+  it("restarts the reactivation timer if the balance returns to 10,000 euros", () => {
     const initial = createInitialState(1_000);
     const inactive = gameReducer(
-      { ...initial, school: { ...initial.school, euros: 5_000 } },
+      { ...initial, school: { ...initial.school, euros: 10_000 } },
       { type: "TICK", now: 2_000 },
     );
     const firstWait = gameReducer(
-      { ...inactive, school: { ...inactive.school, euros: 4_999 } },
+      { ...inactive, school: { ...inactive.school, euros: 9_999 } },
       { type: "TICK", now: 3_000 },
     );
     const reset = gameReducer(
-      { ...firstWait, school: { ...firstWait.school, euros: 5_000 } },
+      { ...firstWait, school: { ...firstWait.school, euros: 10_000 } },
       { type: "TICK", now: 32_000 },
     );
     const secondWait = gameReducer(
-      { ...reset, school: { ...reset.school, euros: 4_999 } },
+      { ...reset, school: { ...reset.school, euros: 9_999 } },
       { type: "TICK", now: 33_000 },
     );
     const almostReady = gameReducer(secondWait, { type: "TICK", now: 92_999 });
@@ -125,13 +139,13 @@ describe("game engine: narrative", () => {
     expect(active.shortGoal.isActive).toBe(true);
   });
 
-  it("keeps a progressed short goal active above 5,000 euros until completion", () => {
+  it("keeps a progressed short goal active above 10,000 euros until completion", () => {
     const initial = createInitialState(1_000);
     const protectedGoal = gameReducer(
       {
         ...initial,
         achievements: ["first-email" as const],
-        school: { ...initial.school, euros: 5_000 },
+        school: { ...initial.school, euros: 10_000 },
         statistics: { ...initial.statistics, emailsSent: 1 },
       },
       { type: "TICK", now: 2_000 },
@@ -149,7 +163,7 @@ describe("game engine: narrative", () => {
       definitionId: "send-emails",
       isActive: true,
     });
-    expect(completed.school.euros).toBe(5_015);
+    expect(completed.school.euros).toBe(10_015);
     expect(completed.shortGoal).toMatchObject({
       definitionId: "book-trials",
       completedCount: 1,

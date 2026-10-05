@@ -1333,7 +1333,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, currentMonth: 21, euros: 5_000 },
+      school: { ...initial.school, currentMonth: 21, euros: 10_000 },
       shortGoal: { ...initial.shortGoal, isActive: false },
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },
@@ -1356,7 +1356,7 @@ describe("game engine: progression", () => {
 
     expect(blocked).toBe(ready);
     expect(unlocked.collaborators[0].training?.formId).toBe("form-3-staff");
-    expect(unlocked.school.euros).toBe(1_500);
+    expect(unlocked.school.euros).toBe(6_500);
   });
 
   it("unlocks every weapon branch for all students at Master of none level five", () => {
@@ -1382,7 +1382,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 1, currentMonth: 21, euros: 5_000 },
+      school: { ...initial.school, activeMembers: 1, currentMonth: 21, euros: 10_000 },
       shortGoal: { ...initial.shortGoal, isActive: false },
       contacts: [member],
       collaborators: [instructor],
@@ -1406,7 +1406,7 @@ describe("game engine: progression", () => {
 
     expect(blocked).toBe(ready);
     expect(unlocked.contacts[0].training?.formId).toBe("form-3-staff");
-    expect(unlocked.school.euros).toBe(4_250);
+    expect(unlocked.school.euros).toBe(9_250);
   });
 
   it("creates an Ultra Rare collaborator at Course Y and applies rarity bonuses", () => {

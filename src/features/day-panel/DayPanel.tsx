@@ -2,6 +2,7 @@ import {
   SHORT_GOALS,
   getShortGoalProgress,
   getShortGoalReward,
+  getShortGoalSeries,
   isShortGoalActive,
 } from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
@@ -72,7 +73,7 @@ const ShortGoalCard = memo(function ShortGoalCard({
     <section className="short-goal-card" aria-label="Obiettivo breve">
       <div className="short-goal-heading">
         <span>Missioni delle Onde</span>
-        <b>Serie {state.shortGoal.completedCount + 1}</b>
+        <b>Serie {getShortGoalSeries(state.shortGoal.completedCount)}</b>
       </div>
       <strong>{definition.title}</strong>
       <p>{definition.description}</p>

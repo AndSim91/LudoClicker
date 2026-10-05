@@ -13,6 +13,8 @@ export interface ShortGoalDefinition {
   metric: ShortGoalMetric;
   baseTarget: number;
   targetGrowth: number;
+  /** The target stops growing here; the reward keeps growing with the series. */
+  maxTarget: number;
   baseReward: number;
   completionNarrative: string;
 }
@@ -32,6 +34,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     metric: "emailsSent",
     baseTarget: 3,
     targetGrowth: 2,
+    maxTarget: 11,
     baseReward: 15,
     completionNarrative: "La segreteria ha dichiarato ufficialmente smaltita la pila urgente.",
   },
@@ -42,6 +45,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     metric: "trialsBooked",
     baseTarget: 2,
     targetGrowth: 1,
+    maxTarget: 6,
     baseReward: 20,
     completionNarrative: "Il calendario ha finalmente abbastanza appuntamenti da sembrare intenzionale.",
   },
@@ -52,6 +56,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     metric: "eventsCompleted",
     baseTarget: 1,
     targetGrowth: 1,
+    maxTarget: 5,
     baseReward: 20,
     completionNarrative: "Il verbale della polizia locale conferma che siamo stati visti fuori dalla palestra.",
   },
@@ -62,6 +67,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     metric: "membersEnrolled",
     baseTarget: 1,
     targetGrowth: 1,
+    maxTarget: 5,
     baseReward: 25,
     completionNarrative: "È stata aggiunta una sedia alla riunione e nessuno ha protestato.",
   },
@@ -98,9 +104,13 @@ export function isShortGoalActive(state: GameState): boolean {
   return state.shortGoal.isActive;
 }
 
+/** Series = one full round of the four missions, starting from 1. */
+export function getShortGoalSeries(completedCount: number): number {
+  return Math.floor(completedCount / SHORT_GOAL_ORDER.length) + 1;
+}
+
 export function getShortGoalReward(progress: ShortGoalProgress): number {
-  const cycle = Math.floor(progress.completedCount / SHORT_GOAL_ORDER.length);
-  return SHORT_GOALS[progress.definitionId].baseReward + cycle * 5;
+  return SHORT_GOALS[progress.definitionId].baseReward * getShortGoalSeries(progress.completedCount);
 }
 
 export function createNextShortGoal(
@@ -121,11 +131,11 @@ export function createShortGoalFromStatistics(
 ): ShortGoalProgress {
   const definitionId = SHORT_GOAL_ORDER[completedCount % SHORT_GOAL_ORDER.length];
   const definition = SHORT_GOALS[definitionId];
-  const cycle = Math.floor(completedCount / SHORT_GOAL_ORDER.length);
+  const cycle = getShortGoalSeries(completedCount) - 1;
   return {
     definitionId,
     baseline: statistics[definition.metric],
-    target: definition.baseTarget + cycle * definition.targetGrowth,
+    target: Math.min(definition.maxTarget, definition.baseTarget + cycle * definition.targetGrowth),
     startedAt: now,
     completedCount,
     isActive: true,

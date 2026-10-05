@@ -2405,12 +2405,25 @@ lezione di prova e **collaudo** per il controllo dei Gadget, **Preside** per chi
 gioca. Le etichette sono in italiano (Perfetto, Bene, Quasi, Mancato; Riepilogo;
 In testa; In arrivo).
 
-La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quando il
-saldo raggiunge o supera **5.000 €**, una missione ancora a zero progresso si
+La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quattro
+missioni girano sempre nello stesso ordine; una **serie** è un giro completo.
+L'obiettivo cresce a ogni serie fino a un tetto, il premio è il premio base per
+il numero della serie e non ha tetto:
+
+| Missione | Conta | Obiettivo (crescita per serie, tetto) | Premio base |
+| --- | --- | --- | ---: |
+| Tre inviti in partenza | email inviate | 3 (+2, max 11) | 15 € |
+| Agenda in movimento | prove prenotate | 2 (+1, max 6) | 20 € |
+| Uscire a toccare l'erba | eventi completati | 1 (+1, max 5) | 20 € |
+| Una sedia in più | nuovi iscritti | 1 (+1, max 5) | 25 € |
+
+Tutti i tetti si raggiungono alla quinta serie. La scheda mostra il numero della
+serie, non della missione. Quando il
+saldo raggiunge o supera **10.000 €**, una missione ancora a zero progresso si
 nasconde. Se possiede già almeno un punto di progresso, rimane invece attiva
 fino al completamento; la missione successiva applica nuovamente la regola del
 saldo. Una missione nascosta torna attiva soltanto dopo **60 secondi continui di
-tempo di gioco** con un saldo inferiore a 5.000 €. Tornare a 5.000 € o più
+tempo di gioco** con un saldo inferiore a 10.000 €. Tornare a 10.000 € o più
 azzera il conteggio. Il timer resta interno e non viene mostrato al giocatore;
 le azioni compiute mentre la missione è nascosta non ne aumentano il progresso.
 

@@ -51,7 +51,7 @@ export const GAME_CONFIG = {
   monthlyMemberInstructorBonus: 10,
   monthlyMemberTechnicianBonus: 20,
   enrollmentBonus: 20,
-  shortGoalActivationBalance: 5_000,
+  shortGoalActivationBalance: 10_000,
   shortGoalReactivationDelayMs: 60_000,
   gameMonthMs: 60_000,
   secretLegendaryTrialDurationMs: 30_000,
