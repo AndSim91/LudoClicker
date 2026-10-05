@@ -103,8 +103,8 @@ describe("game engine: funnel", () => {
     );
 
     expect(state.automation.autoSendEmails).toBe(true);
-    expect(selectActiveEmail(completed)?.status).toBe("sending");
-    expect(selectActiveEmail(completed)?.sendCompletesAt).toBe(2_000 + GAME_CONFIG.sendDelayMs);
+    expect(completed.emails[0].status).toBe("sending");
+    expect(completed.emails[0].sendCompletesAt).toBe(2_000 + GAME_CONFIG.sendDelayMs);
   });
 
   it("waits for one explicit final input when automatic sending is disabled", () => {
@@ -127,12 +127,14 @@ describe("game engine: funnel", () => {
       enabled: true,
       now: 2_001,
     });
-    expect(selectActiveEmail(enabledWhileWaiting)?.status).toBe("sending");
+    expect(enabledWhileWaiting.emails[0].status).toBe("sending");
 
     const sending = gameReducer(completed, { type: "WRITE", now: 2_002 });
-    expect(selectActiveEmail(sending)?.status).toBe("sending");
-    expect(selectActiveEmail(sending)?.sendCompletesAt).toBe(2_002 + GAME_CONFIG.sendDelayMs);
-    expect(gameReducer(sending, { type: "WRITE", now: 2_003 })).toBe(sending);
+    expect(sending.emails[0].status).toBe("sending");
+    expect(sending.emails[0].sendCompletesAt).toBe(2_002 + GAME_CONFIG.sendDelayMs);
+    // Posta in uscita: mentre parte, la bozza successiva è già aperta.
+    expect(selectActiveEmail(sending)?.status).toBe("writing");
+    expect(selectActiveEmail(sending)?.id).not.toBe(sending.emails[0].id);
   });
 
   it("lets Redazione send completed mail only when automatic sending is enabled", () => {
@@ -166,7 +168,7 @@ describe("game engine: funnel", () => {
     };
 
     const sending = gameReducer(almostComplete, { type: "TICK", now: 2_000 });
-    expect(selectActiveEmail(sending)?.status).toBe("sending");
+    expect(sending.emails[0].status).toBe("sending");
     expect(sending.statistics.automatedCharacters).toBeGreaterThan(0);
 
     const waiting = gameReducer({

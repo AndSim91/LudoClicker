@@ -27,6 +27,7 @@ export const GAME_CONFIG = {
   minimumTrainingDurationMs: 1_000,
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,
+  maxAutomatedEmailsPerStep: 50,
   // Flusso (manual writing rhythm): see writingRhythm.ts.
   flowMeterMax: 100,
   flowGainPerInput: 2,

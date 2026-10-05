@@ -7,6 +7,38 @@ import { Composer } from "./Composer";
 afterEach(() => cleanup());
 
 describe("Composer", () => {
+  it("shows the Redazione pace instead of the draft when emails fly out", () => {
+    const initial = createInitialState(1_000);
+    const sent = Array.from({ length: 20 }, (_, index) => ({
+      ...initial.emails[0],
+      id: `sent-${index}`,
+      status: "sent" as const,
+      sentAt: 55_000 + index * 250,
+    }));
+    const state = {
+      ...initial,
+      emails: [...sent, ...initial.emails],
+      automation: { ...initial.automation, lastProcessedAt: 60_000 },
+      collaborators: [{
+        id: "writer",
+        contactId: "writer-contact",
+        displayName: "Giulia Ferrando",
+        joinedAt: 1_000,
+        forms: [],
+        instructorForms: [],
+        assignment: "writing" as const,
+        rarity: "rare" as const,
+      }],
+    };
+
+    render(
+      <Composer state={state} onWrite={() => undefined} onAutomaticSendingChange={() => undefined} />,
+    );
+
+    expect(screen.getByText("La Redazione sta scrivendo")).toBeInTheDocument();
+    expect(screen.getByText("240 email/min")).toBeInTheDocument();
+  });
+
   it("shows the recipient rarity from the first active email", () => {
     const initial = createInitialState(1_000);
     const activeContact = initial.contacts[0];

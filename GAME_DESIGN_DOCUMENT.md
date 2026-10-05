@@ -192,7 +192,8 @@ flowchart LR
 4. Quando il corpo è completo, la mail viene inviata automaticamente se il
    toggle «Invio automatico» (attivo per impostazione predefinita) è acceso;
    altrimenti resta pronta fino al successivo input o al pulsante Invia.
-   L'invio mostra «Invio in corso…» per 0,35 secondi.
+   L'invio mostra «Invio in corso…» per 0,35 secondi, ma non blocca: la mail
+   va in Posta in uscita e la bozza successiva si apre nello stesso istante.
 5. Il contatto viene consumato e viene programmato l'esito ritardato dell'invito
    alla prova in palestra (10 secondi). Se la prova viene prenotata, la lezione
    inizia dopo 30 secondi e dura 15 secondi di base.
@@ -695,11 +696,13 @@ nella partita. Al completamento:
 2. con l'invio automatico attivo la mail parte subito; con l'opzione disattivata
    resta completamente visibile finché il giocatore non preme un tasto, fa
    clic o preme **Invia** (i collaboratori non la spediscono);
-3. compare per 350 ms lo stato Outlook “Invio in corso…”;
-4. la mail passa in Posta inviata;
+3. la mail va in Posta in uscita e si apre subito la mail successiva, se esiste
+   un contatto disponibile: si continua a scrivere senza aspettare;
+4. per 350 ms compare la notifica Outlook “Invio in corso…”, poi la mail passa
+   in Posta inviata;
 5. viene determinato e salvato l'esito ritardato
    `prenota la prova / contatto perso`;
-6. si apre subito la mail successiva, se esiste un contatto disponibile;
+6. più mail possono essere in uscita nello stesso momento;
 7. non viene riprodotto alcun suono.
 
 Al primo invio arriva anche il messaggio di sistema “Configurazione campagna
@@ -1405,7 +1408,13 @@ vengono da **Firma automatica** e **Revisione istantanea**, quelli generici da
 
 I caratteri automatici avanzano la stessa mail visibile al giocatore. L'input
 manuale si somma senza conflitti. Con **Invio automatico** attivo, la Redazione
-invia la mail appena raggiunge la lunghezza richiesta. Se è disattivato, anche i
+invia la mail appena raggiunge la lunghezza richiesta e **il lavoro avanza**: i
+caratteri oltre la fine passano alla bozza successiva, così nello stesso passo
+si possono finire più mail (al massimo `GAME_CONFIG.maxAutomatedEmailsPerStep`
+= 50, oltre l'eccedenza si perde). La produzione cresce quindi con la squadra e
+il limite vero diventano i contatti disponibili. Quando la Redazione supera le
+30 mail al minuto (ultimo minuto di gioco, `selectRecentEmailsPerMinute`) la
+bozza smette di animarsi e mostra «La Redazione sta scrivendo · N email/min». Se è disattivato, anche i
 collaboratori si fermano sulla mail completa finché il giocatore non conferma
 l'invio. Dopo lo sblocco Social, i collaboratori producono sempre contenuti
 online; durante la scrittura di una mail le danno priorità, assegnandole

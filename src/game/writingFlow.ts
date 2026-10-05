@@ -1,5 +1,6 @@
 import { getEmailBuildLength } from "../content/emailBuild";
 import { GAME_CONFIG } from "./config";
+import { startNextCampaign } from "./emailFlow";
 import { selectActiveEmail } from "./selectors";
 import type { GameState } from "./types";
 import {
@@ -15,7 +16,8 @@ export function sendEmail(state: GameState, now: number): GameState {
   const email = selectActiveEmail(state);
   if (!email || email.status !== "readyToSend") return state;
 
-  return {
+  // Posta in uscita: l'invio non blocca, la bozza successiva si apre subito.
+  return startNextCampaign({
     ...state,
     emails: state.emails.map((candidate) =>
       candidate.id === email.id
@@ -26,7 +28,7 @@ export function sendEmail(state: GameState, now: number): GameState {
           }
         : candidate,
     ),
-  };
+  }, now);
 }
 
 export function writeCharacters(

@@ -234,9 +234,7 @@ export function MessageList({
                 <strong className={`rarity-name ${getRarityClassName(activeContact.rarity, Boolean(activeContact.secretLegendaryId))}`}>
                   Bozza per {activeContact.firstName} {activeContact.lastName}
                 </strong>
-                <small>{activeEmail.status === "sending"
-                  ? "Invio in corso…"
-                  : activeEmail.status === "readyToSend"
+                <small>{activeEmail.status === "readyToSend"
                     ? "Pronta per l’invio: premi un tasto o fai clic"
                     : "Digitazione in corso…"}</small>
               </span>

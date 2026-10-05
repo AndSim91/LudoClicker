@@ -28,6 +28,7 @@ import {
   resolveSocialContentCycles,
 } from "./collaboratorAutomationOutcomes";
 import { GAME_CONFIG } from "./config";
+import { getEmailBuildLength } from "../content/emailBuild";
 import { roundCurrency } from "./economy";
 import {
   getEquipmentAutomaticRepairTarget,
@@ -439,13 +440,22 @@ export function processAutomation(
       : state.player,
   };
 
-  if (automatedEmailCharacters + perfectPhraseCharacters > 0) {
-    nextState = dependencies.writeCharacters(
-      nextState,
-      automatedEmailCharacters + perfectPhraseCharacters,
-      now,
-      "automation",
+  // Il lavoro avanza: i caratteri oltre la fine passano alla bozza successiva.
+  // ponytail: tetto di email per passo; oltre, l'eccedenza si perde (alzarlo se la Redazione lo tocca).
+  let emailCharactersLeft = automatedEmailCharacters + perfectPhraseCharacters;
+  for (
+    let finished = 0;
+    emailCharactersLeft > 0 && finished < GAME_CONFIG.maxAutomatedEmailsPerStep;
+    finished += 1
+  ) {
+    const draft = selectActiveEmail(nextState);
+    if (draft?.status !== "writing") break;
+    const chunk = Math.min(
+      emailCharactersLeft,
+      getEmailBuildLength(draft) - draft.revealedCharacters,
     );
+    nextState = dependencies.writeCharacters(nextState, chunk, now, "automation");
+    emailCharactersLeft -= chunk;
   }
 
   if (automatedSocialCharacters > 0) {

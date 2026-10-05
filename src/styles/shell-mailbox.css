@@ -328,6 +328,26 @@
   color: var(--accent-ink);
 }
 
+.composer-rush {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 48px 16px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.composer-rush svg {
+  width: 28px;
+  color: var(--accent-ink);
+}
+
+.composer-rush strong {
+  color: var(--ink);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
 .composer-status {
   position: relative;
   display: flex;

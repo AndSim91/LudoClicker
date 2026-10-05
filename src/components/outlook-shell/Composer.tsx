@@ -1,13 +1,21 @@
 import { MAIL_SENDER_ADDRESS } from "../../content/emailAddresses";
 import { getEmailBuildLength } from "../../content/emailBuild";
 import { useGameSelector } from "../../game/GameStateContext";
-import { selectActiveContact, selectActiveEmail } from "../../game/selectors";
+import { getSendingEmails } from "../../game/runtimeIndexes";
+import {
+  selectActiveContact,
+  selectActiveEmail,
+  selectRecentEmailsPerMinute,
+} from "../../game/selectors";
 import type { GameState } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
 import { Icon } from "../common/Icon";
 import { WritingFlowMeter } from "./WritingFlowMeter";
 import { CampaignEmailContent } from "./CampaignEmailContent";
 import { LevelZeroProofreadText } from "./LevelZeroProofreadText";
+
+/** Sopra questo ritmo la bozza smette di animarsi e mostra il conteggio. */
+export const EMAIL_RUSH_PER_MINUTE = 30;
 
 export function Composer({
   state: stateOverride,
@@ -24,13 +32,19 @@ export function Composer({
       contact: selectActiveContact(state),
       writingPower: state.player.writingPower,
       automaticSending: state.automation.autoSendEmails,
+      sending: getSendingEmails(state.emails).length > 0,
+      rushRate: state.collaborators.some((collaborator) => collaborator.assignment === "writing")
+        ? selectRecentEmailsPerMinute(state)
+        : 0,
     }),
     stateOverride,
     (left, right) =>
       left.email === right.email &&
       left.contact === right.contact &&
       left.writingPower === right.writingPower &&
-      left.automaticSending === right.automaticSending,
+      left.automaticSending === right.automaticSending &&
+      left.sending === right.sending &&
+      left.rushRate === right.rushRate,
   );
   const { email, contact } = selection;
   if (!email || !contact) {
@@ -43,6 +57,7 @@ export function Composer({
     );
   }
   const buildLength = getEmailBuildLength(email);
+  const rush = selection.rushRate >= EMAIL_RUSH_PER_MINUTE;
   const displayedRevealedCharacters = Math.floor(email.revealedCharacters);
   const displayedWritingPower = Math.round(selection.writingPower);
   const readyToSend = email.status === "readyToSend";
@@ -76,13 +91,21 @@ export function Composer({
         aria-label={bodyLabel}
         onClick={onWrite}
       >
-        <CampaignEmailContent
-          email={email}
-          revealedCharacters={email.revealedCharacters}
-          showCaret={email.status === "writing"}
-          showHtmlEditor
-        />
-        {email.status === "sending" ? <div className="sending-toast"><Icon name="send" /> Invio in corso…</div> : null}
+        {rush ? (
+          <div className="composer-rush">
+            <Icon name="send" />
+            <span>La Redazione sta scrivendo</span>
+            <strong>{selection.rushRate.toLocaleString("it-IT")} email/min</strong>
+          </div>
+        ) : (
+          <CampaignEmailContent
+            email={email}
+            revealedCharacters={email.revealedCharacters}
+            showCaret={email.status === "writing"}
+            showHtmlEditor
+          />
+        )}
+        {selection.sending && !rush ? <div className="sending-toast"><Icon name="send" /> Invio in corso…</div> : null}
       </div>
       <div className="composer-status">
         {/* Decorative: the exact count stays in the text on the right. */}
@@ -95,9 +118,7 @@ export function Composer({
             onChange={(event) => onAutomaticSendingChange(event.currentTarget.checked)}
           />
         </label>
-        <em>{email.status === "sending"
-          ? "Invio in corso…"
-          : readyToSend
+        <em>{readyToSend
             ? "Email completa · premi un tasto o fai clic per inviare"
             : "Digitazione in corso…"}</em>
         <WritingFlowMeter state={stateOverride} />

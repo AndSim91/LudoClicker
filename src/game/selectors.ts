@@ -33,7 +33,24 @@ import {
 } from "./runtimeIndexes";
 
 export function selectActiveEmail(state: GameState): CampaignEmail | undefined {
-  return getActiveCampaignEmails(state.emails)[0];
+  // Le email in invio stanno in Posta in uscita: la bozza è la prima ancora da spedire.
+  return getActiveCampaignEmails(state.emails).find((email) => email.status !== "sending");
+}
+
+/** Email partite nell'ultimo minuto di gioco, in ritmo al minuto (0 sotto le due). */
+export function selectRecentEmailsPerMinute(state: GameState): number {
+  const now = state.automation.lastProcessedAt;
+  let count = 0;
+  let oldest = now;
+  // ponytail: guarda solo le ultime 60 partite; a ritmi altissimi la stima arrotonda.
+  for (let index = state.emails.length - 1; index >= 0 && count < 60; index -= 1) {
+    const sentAt = state.emails[index].sentAt;
+    if (sentAt === undefined) continue;
+    if (sentAt < now - 60_000) break;
+    count += 1;
+    oldest = sentAt;
+  }
+  return count < 2 ? 0 : Math.round((count * 60_000) / Math.max(1_000, now - oldest));
 }
 
 export function selectActiveContact(state: GameState): Contact | undefined {
