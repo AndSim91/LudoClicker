@@ -59,7 +59,7 @@ describe("PeopleView", () => {
     expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
   });
 
-  it("shows a crowded Centro didattico 25 instructors at a time", () => {
+  it("shows a crowded Centro didattico 8 instructors at a time", () => {
     const initial = createInitialState(1_000, "", false);
     const instructors: Collaborator[] = Array.from({ length: 30 }, (_, index) => ({
       id: `page-instructor-${index}`,
@@ -91,16 +91,17 @@ describe("PeopleView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
     const dialog = screen.getByRole("dialog", { name: "Istruttori" });
     const rows = () => within(dialog).getAllByRole("button", { name: /Apri dettagli di/ });
-    expect(rows()).toHaveLength(25);
-    expect(within(dialog).getByText("Pagina 1 di 2")).toBeInTheDocument();
+    expect(rows()).toHaveLength(8);
+    expect(within(dialog).getByText("Pagina 1 di 4")).toBeInTheDocument();
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Successiva" }));
-    expect(rows()).toHaveLength(5);
+    expect(within(dialog).getByText("Pagina 2 di 4")).toBeInTheDocument();
     fireEvent.change(within(dialog).getByRole("searchbox", { name: "Filtra istruttori per nome o email" }), {
       target: { value: "Istruttore 0" },
     });
-    expect(within(dialog).queryByText(/Pagina \d di/)).not.toBeInTheDocument();
-    expect(rows()).toHaveLength(10);
+    // A new search starts again from the first page.
+    expect(within(dialog).getByText("Pagina 1 di 2")).toBeInTheDocument();
+    expect(rows()).toHaveLength(8);
   });
 
   it("offers the automatic assignment switch and locks the manual choice while on (4.7)", () => {

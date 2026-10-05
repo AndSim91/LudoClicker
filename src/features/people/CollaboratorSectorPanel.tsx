@@ -334,9 +334,9 @@ function SectorCollaboratorRow({
   );
 }
 
-// Same page size as the member table: a sector can hold hundreds of collaborators,
+// Eight per page (Andrea): a sector can hold hundreds of collaborators,
 // and every row carries live training controls.
-const SECTOR_ROWS_PER_PAGE = 25;
+const SECTOR_ROWS_PER_PAGE = 8;
 
 export function CollaboratorSectorPanel({
   state: stateOverride,
