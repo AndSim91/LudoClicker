@@ -347,12 +347,13 @@ describe("game engine: narrative", () => {
       arenaBase: 91,
       styleBase: 87,
     });
-    // Andrea Simonazzi never follows, but keeps everything for when he is met again.
+    // Andrea Simonazzi never follows, and starts from zero like everyone else.
     expect(founded.legendaryCollaborators.retainedProgress["andrea-simonazzi"]).toMatchObject({
-      forms: ["form-1", "form-2"],
-      tournamentExperience: 5,
-      agonistCourseCompletions: 1,
+      forms: [],
+      instructorForms: [],
     });
+    expect(founded.legendaryCollaborators.retainedProgress["andrea-simonazzi"])
+      .not.toHaveProperty("tournamentExperience");
     expect(founded.contacts.some((contact) => contact.specialProfileId === "andrea-simonazzi")).toBe(false);
     // Every other Leggendario starts from zero too when met again.
     expect(founded.legendaryCollaborators.retainedProgress["marco-palena"]).toEqual({

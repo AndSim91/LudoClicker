@@ -26,16 +26,19 @@ describe("v97 Leggendari da zero nella nuova scuola", () => {
 
   it("non tocca chi non ha mai fondato", () => {
     const migrated = migrateLegendaryResetState(save(0));
-    expect(migrated.version).toBe(97);
+    expect(migrated.version).toBe(98);
     expect(migrated.legendaryCollaborators?.retainedProgress["marco-palena"]).toBe(earned);
   });
 });
 
-describe("v97 Andrea Simonazzi", () => {
-  it("tiene tutto anche se viene da una scuola passata", () => {
-    const state = save(1);
+describe("v98 Andrea Simonazzi", () => {
+  it("si azzera anche nei salvataggi già a v97", () => {
+    const state = { ...save(1), version: 97 } as MigratableState;
     state.legendaryCollaborators!.retainedProgress["andrea-simonazzi"] = earned as never;
-    const retained = migrateLegendaryResetState(state).legendaryCollaborators?.retainedProgress;
-    expect(retained?.["andrea-simonazzi"]).toBe(earned);
+    const migrated = migrateLegendaryResetState(state);
+    expect(migrated.version).toBe(98);
+    expect(migrated.legendaryCollaborators?.retainedProgress["andrea-simonazzi"]).toMatchObject({
+      forms: [], instructorForms: [], arenaBase: 90, styleBase: 80,
+    });
   });
 });
