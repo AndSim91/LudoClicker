@@ -1897,9 +1897,10 @@ Insegnamento ne hanno 9, Carisma e Attrezzatura 8, gli altri 7. Il ramo Gadget
 compare soltanto dopo lo sblocco del settore. Social non ha più un ramo
 separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 
-**La pagina.** In alto, accanto al titolo, ci sono i **Fondi** e il pulsante
-**«Compra tutto · N per X €»** (dal più economico in su finché i fondi bastano;
-i Percorsi Segreti restano esclusi). Sotto, una riga riassume quanti nodi sono
+**La pagina.** In alto, accanto al titolo, c'è il pulsante **«Compra tutto ·
+N livelli»**, con sotto il totale e i fondi che restano dopo l'acquisto (dal più
+economico in su finché i fondi bastano; i Percorsi Segreti restano esclusi). I
+Fondi non si ripetono: sono già nella barra delle informazioni. Sotto, una riga riassume quanti nodi sono
 completati e la legenda (da comprare, fondi insufficienti, bloccati,
 completati); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
 una **corsia**: a sinistra icona, nome, riepilogo dell'effetto e **punti nel

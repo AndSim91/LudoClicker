@@ -37,7 +37,7 @@ import {
   getSocialFollowerValue,
 } from "../../game/social";
 import type { GameState, SecretUpgradeId, UpgradeId } from "../../game/types";
-import { formatCompactCurrency, formatCurrency, formatPercent, formatStat } from "../../shared/formatters";
+import { formatCurrency, formatPercent, formatStat } from "../../shared/formatters";
 import { getEmailBookingChance } from "../../game/formulas";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { GADGET_DEFINITIONS } from "../../content/gadgets";
@@ -770,11 +770,6 @@ export function UpgradesView({
         <Icon name="spark" />
         <div><h1>Upgrade</h1><p>Spendere oggi per lavorare meno domani.</p></div>
         <div className="upgrade-header-actions">
-          <span className="upgrade-funds" title={formatCurrency(state.school.euros)}>
-            <Icon name="coin" />
-            <strong>{formatCompactCurrency(state.school.euros)}</strong>
-            <span>Fondi</span>
-          </span>
           {onBuyAllUpgrades ? (
             <button
               type="button"
@@ -784,7 +779,19 @@ export function UpgradesView({
               aria-label={`Compra tutto: ${buyAllPlan.count} upgrade per ${formatStat(buyAllPlan.total)} €`}
               title={`Dal più economico in su, finché i fondi bastano. Restano ${formatCurrency(state.school.euros - buyAllPlan.total)}. I percorsi segreti restano a te.`}
             >
-              Compra tutto · {buyAllPlan.count} per {formatStat(buyAllPlan.total)} €
+              <Icon name="spark" />
+              <span className="upgrade-buy-all-text">
+                <strong>
+                  Compra tutto{buyAllPlan.count > 0
+                    ? ` · ${buyAllPlan.count} ${buyAllPlan.count === 1 ? "livello" : "livelli"}`
+                    : ""}
+                </strong>
+                <small>
+                  {buyAllPlan.count > 0
+                    ? `${formatStat(buyAllPlan.total)} € · restano ${formatStat(state.school.euros - buyAllPlan.total)} €`
+                    : "Niente alla portata dei fondi"}
+                </small>
+              </span>
             </button>
           ) : null}
         </div>

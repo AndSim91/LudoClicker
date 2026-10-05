@@ -534,19 +534,17 @@
   background: #f5c97a;
 }
 
-:root[data-theme="dark"] .upgrade-funds {
-  border-color: var(--onde-thread);
-  background: rgb(10 58 87 / 55%);
-}
-
-:root[data-theme="dark"] .upgrade-funds svg,
-:root[data-theme="dark"] .upgrade-funds strong {
-  color: var(--onde-gold-bright);
-}
-
 :root[data-theme="dark"] .upgrade-buy-all:not(:disabled) {
   border-color: var(--onde-gold-bright);
   color: var(--onde-foam);
+}
+
+:root[data-theme="dark"] .upgrade-buy-all:not(:disabled) svg {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .upgrade-buy-all:not(:disabled) small {
+  color: var(--onde-gold-bright);
 }
 
 :root[data-theme="dark"] .upgrade-buy-all:hover:not(:disabled) {

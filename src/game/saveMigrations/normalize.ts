@@ -1,4 +1,5 @@
 import { createProspectEmail } from "../../content/prospectDirectory";
+import { createInitialUpgradeLevels } from "../../content/upgrades";
 import {
   createSecretLegendaryProgress,
   isCataloguedLegendaryId,
@@ -194,6 +195,11 @@ export function normalizeLegacySave(state: MigratableState): MigratableState {
         autoTeachingEnabled: migrated.automation.autoTeachingEnabled ?? true,
       },
     };
+  }
+
+  // A new upgrade starts at level 0 in every save, also one already at the current version.
+  if (migrated.upgrades) {
+    migrated = { ...migrated, upgrades: { ...createInitialUpgradeLevels(), ...migrated.upgrades } };
   }
 
   return normalizeLegendaryAssignments(migrated);

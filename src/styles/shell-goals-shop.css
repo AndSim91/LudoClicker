@@ -184,54 +184,47 @@
   color: var(--ink-muted);
 }
 
-/* Header: funds and «Compra tutto» beside the title. */
+/* Header: «Compra tutto» beside the title; the funds are already in the top bar. */
 .upgrade-header-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
   margin-left: auto;
 }
 
-.upgrade-funds {
+.upgrade-buy-all {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 18px;
-  background: var(--surface);
-}
-
-.upgrade-funds svg {
-  width: 18px;
-  height: 18px;
-  color: var(--accent-ink);
-}
-
-.upgrade-funds strong {
-  font-family: var(--font-display, inherit);
-  font-size: 18px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.upgrade-funds span {
-  color: var(--ink-muted);
-  font-size: 12px;
-}
-
-.upgrade-buy-all {
-  min-height: 36px;
-  padding: 0 16px;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 18px 6px 14px;
   border: 1px solid var(--blue-600);
-  border-radius: 18px;
+  border-radius: 22px;
   color: var(--accent-ink);
   background: transparent;
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  text-align: left;
   cursor: pointer;
+}
+
+.upgrade-buy-all svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.upgrade-buy-all-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.upgrade-buy-all-text strong {
+  font-weight: 600;
+}
+
+.upgrade-buy-all-text small {
+  color: var(--ink-muted);
+  font-size: 12px;
 }
 
 .upgrade-buy-all:hover:not(:disabled) {
