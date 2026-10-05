@@ -334,6 +334,10 @@ function SectorCollaboratorRow({
   );
 }
 
+// Same page size as the member table: a sector can hold hundreds of collaborators,
+// and every row carries live training controls.
+const SECTOR_ROWS_PER_PAGE = 25;
+
 export function CollaboratorSectorPanel({
   state: stateOverride,
   role,
@@ -461,6 +465,17 @@ export function CollaboratorSectorPanel({
   const sortedAssigned = useMemo(
     () => sortSectorCollaborators(filteredAssigned, sort, sortContext),
     [filteredAssigned, sort, sortContext],
+  );
+  // A new search, filter or sort starts again from the first page.
+  const pageKey = [deferredSearch, rarityFilter, activityFilter, trainingFilter, masteryFilter,
+    sort?.key, sort?.direction].join("|");
+  const [pageState, setPageState] = useState({ key: pageKey, page: 0 });
+  const pageCount = Math.max(1, Math.ceil(sortedAssigned.length / SECTOR_ROWS_PER_PAGE));
+  const page = Math.min(pageState.key === pageKey ? pageState.page : 0, pageCount - 1);
+  const goToPage = (next: number) => setPageState({ key: pageKey, page: next });
+  const visibleAssigned = sortedAssigned.slice(
+    page * SECTOR_ROWS_PER_PAGE,
+    (page + 1) * SECTOR_ROWS_PER_PAGE,
   );
   const selectedCollaborator = selectedCollaboratorId
     ? state.collaborators.find((collaborator) => collaborator.id === selectedCollaboratorId)
@@ -722,7 +737,7 @@ export function CollaboratorSectorPanel({
                 ) : null}
                 <span aria-hidden="true" />
               </div>
-              {sortedAssigned.map((collaborator) => (
+              {visibleAssigned.map((collaborator) => (
                 <SectorCollaboratorRow
                   key={collaborator.id}
                   state={stateOverride}
@@ -736,6 +751,23 @@ export function CollaboratorSectorPanel({
                   onOpen={() => setSelectedCollaboratorId(collaborator.id)}
                 />
               ))}
+              {pageCount > 1 ? (
+                <nav className="list-pagination" aria-label={`Pagine ${roleLabel.toLocaleLowerCase("it-IT")}`}>
+                  <button type="button" disabled={page === 0} onClick={() => goToPage(page - 1)}>
+                    Precedente
+                  </button>
+                  <span>
+                    Pagina {page + 1} di {pageCount}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={page === pageCount - 1}
+                    onClick={() => goToPage(page + 1)}
+                  >
+                    Successiva
+                  </button>
+                </nav>
+              ) : null}
               {sortedAssigned.length === 0 ? (
                 <div className="sector-roster-filter-empty">
                   <strong>Nessun istruttore corrisponde ai filtri</strong>

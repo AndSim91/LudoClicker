@@ -59,20 +59,37 @@ type InstructorTeachingEntry = {
   training: NonNullable<FormStudent["training"]>;
 };
 
+// Built once per contacts/collaborators pair: every instructor row reads it.
+const teachingStudentsCache = new WeakMap<
+  GameState["contacts"],
+  { collaborators: GameState["collaborators"]; byInstructor: Map<string, InstructorTeachingEntry[]> }
+>();
+
 function getInstructorTeachingStudents(
   contacts: GameState["contacts"],
   collaborators: GameState["collaborators"],
   instructorId: string,
 ): InstructorTeachingEntry[] {
-  return [
-    ...contacts.flatMap((contact) => contact.training?.instructorId === instructorId
-      ? [{ id: contact.id, displayName: `${contact.firstName} ${contact.lastName}`, training: contact.training }]
-      : []),
-    ...collaborators.flatMap((collaborator) =>
-      collaborator.training?.instructorId === instructorId
-        ? [{ id: collaborator.id, displayName: collaborator.displayName, training: collaborator.training }]
-        : []),
-  ];
+  let cached = teachingStudentsCache.get(contacts);
+  if (cached?.collaborators !== collaborators) {
+    const byInstructor = new Map<string, InstructorTeachingEntry[]>();
+    const add = (id: string, displayName: string, training: FormStudent["training"]) => {
+      if (!training?.instructorId) return;
+      const entries = byInstructor.get(training.instructorId);
+      const entry = { id, displayName, training };
+      if (entries) entries.push(entry);
+      else byInstructor.set(training.instructorId, [entry]);
+    };
+    for (const contact of contacts) {
+      add(contact.id, `${contact.firstName} ${contact.lastName}`, contact.training);
+    }
+    for (const collaborator of collaborators) {
+      add(collaborator.id, collaborator.displayName, collaborator.training);
+    }
+    cached = { collaborators, byInstructor };
+    teachingStudentsCache.set(contacts, cached);
+  }
+  return cached.byInstructor.get(instructorId) ?? [];
 }
 
 function useInstructorTeachingEntries(state: GameState, instructorId: string) {

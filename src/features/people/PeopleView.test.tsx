@@ -59,6 +59,50 @@ describe("PeopleView", () => {
     expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
   });
 
+  it("shows a crowded Centro didattico 25 instructors at a time", () => {
+    const initial = createInitialState(1_000, "", false);
+    const instructors: Collaborator[] = Array.from({ length: 30 }, (_, index) => ({
+      id: `page-instructor-${index}`,
+      contactId: initial.contacts[0].id,
+      displayName: `Istruttore ${String(index).padStart(2, "0")}`,
+      joinedAt: 1_000 + index,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      assignment: "instructor",
+      rarity: "ultra-rare",
+    }));
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: instructors,
+          unlocks: { ...initial.unlocks, collaborators: true },
+          collaboratorManagement: {
+            ...initial.collaboratorManagement,
+            aggregateViewUnlocked: true,
+            targets: { ...initial.collaboratorManagement.targets, instructor: 30 },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
+    const dialog = screen.getByRole("dialog", { name: "Istruttori" });
+    const rows = () => within(dialog).getAllByRole("button", { name: /Apri dettagli di/ });
+    expect(rows()).toHaveLength(25);
+    expect(within(dialog).getByText("Pagina 1 di 2")).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Successiva" }));
+    expect(rows()).toHaveLength(5);
+    fireEvent.change(within(dialog).getByRole("searchbox", { name: "Filtra istruttori per nome o email" }), {
+      target: { value: "Istruttore 0" },
+    });
+    expect(within(dialog).queryByText(/Pagina \d di/)).not.toBeInTheDocument();
+    expect(rows()).toHaveLength(10);
+  });
+
   it("offers the automatic assignment switch and locks the manual choice while on (4.7)", () => {
     const initial = createInitialState(1_000, "", false);
     const member: Collaborator = {

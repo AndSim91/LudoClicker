@@ -155,30 +155,53 @@ export function compareInstructorTeachingPriority(
     left.id.localeCompare(right.id);
 }
 
+// One pass per game state: the Centro didattico asks this for every row and every Forma.
+const instructorAvailabilityCache = new WeakMap<GameState, {
+  busyInstructorIds: ReadonlySet<string>;
+  pendingReleaseIds: ReadonlySet<string>;
+  teachingCounts: ReadonlyMap<string, number>;
+  courseXUnlocked: boolean;
+}>();
+
+function getInstructorAvailability(state: GameState) {
+  let cached = instructorAvailabilityCache.get(state);
+  if (!cached) {
+    cached = {
+      busyInstructorIds: selectBusyInstructorIds(state),
+      pendingReleaseIds: getInstructorPendingReleaseIds(state),
+      teachingCounts: getInstructorTeachingCounts(state.contacts, state.collaborators),
+      courseXUnlocked: isCourseXUnlocked(state.upgrades),
+    };
+    instructorAvailabilityCache.set(state, cached);
+  }
+  return cached;
+}
+
 export function selectAvailableInstructor(
   state: GameState,
   formId: FormId,
   studentId?: string,
 ) {
-  const busyInstructorIds = selectBusyInstructorIds(state);
-  const teachingCounts = getInstructorTeachingCounts(
-    state.contacts,
-    state.collaborators,
-  );
-  return state.collaborators
-    .filter((collaborator) =>
-      collaborator.id !== studentId &&
-      canInstructorTeachForm(state, collaborator.id, formId) &&
-      !busyInstructorIds.has(collaborator.id)
-    )
-    .sort((left, right) =>
-      compareInstructorTeachingPriority(
-        left,
-        right,
-        teachingCounts,
-        isCourseXUnlocked(state.upgrades),
-      )
-    )[0];
+  const { busyInstructorIds, pendingReleaseIds, teachingCounts, courseXUnlocked } =
+    getInstructorAvailability(state);
+  if (formId === "course-x" && !courseXUnlocked) return undefined;
+  const needsQualification = isInstructorForm(formId);
+  let best: Collaborator | undefined;
+  for (const collaborator of state.collaborators) {
+    if (
+      collaborator.id === studentId ||
+      collaborator.assignment !== "instructor" ||
+      pendingReleaseIds.has(collaborator.id) ||
+      busyInstructorIds.has(collaborator.id) ||
+      !collaborator.forms.includes(formId) ||
+      (needsQualification && !collaborator.instructorForms.includes(formId))
+    ) continue;
+    if (
+      !best ||
+      compareInstructorTeachingPriority(collaborator, best, teachingCounts, courseXUnlocked) < 0
+    ) best = collaborator;
+  }
+  return best;
 }
 
 export function selectUpcomingTrials(state: GameState): ScheduledTrial[] {
