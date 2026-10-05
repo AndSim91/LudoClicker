@@ -130,9 +130,9 @@ describe("App profile and navigation", () => {
 
     const navigation = screen.getByRole("navigation", { name: "Applicazioni" });
     expect(Array.from(navigation.querySelectorAll("button"), (button) => button.textContent)).toEqual([
+      "Scuola",
       "Posta",
       "Eventi",
-      "Scuola",
       "Tornei",
       "Upgrade",
       "LudoWiki",

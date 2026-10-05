@@ -2290,7 +2290,7 @@ informazioni del progetto.
 └──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-L'app rail contiene, nell'ordine, Posta, Eventi, Scuola, Tornei, Gadget,
+L'app rail contiene, nell'ordine, Scuola, Posta, Eventi, Tornei, Gadget,
 Upgrade e Impostazioni; ciascuna voce compare solo quando la sua area è
 sbloccata (sezione 10.11). Nelle build di sviluppo si aggiungono LudoWiki e
 Admin. La colonna **La mia giornata** resta visibile in tutte le pagine, ma
@@ -2461,7 +2461,7 @@ attrezzatura e notifiche del giorno non sono visibili.
 
 ## 12. Navigazione e schermate
 
-Le pagine realmente raggiungibili dall'app rail sono Posta, Eventi, Scuola,
+Le pagine realmente raggiungibili dall'app rail sono Scuola, Posta, Eventi,
 Tornei, Gadget, Upgrade e Impostazioni (più LudoWiki e Admin nelle build di
 sviluppo). Impostazioni raccoglie stato del salvataggio, nome del profilo,
 tema (Modalità Onde) e Riduci animazioni, versione, esportazione, importazione
@@ -4475,7 +4475,7 @@ manuale.
 
 - layout fedele a Windows 11;
 - Posta, Calendario, Scuola e Attività (nel codice la barra delle app mostra
-  Posta, Eventi, Scuola, Tornei, Gadget, Upgrade e Impostazioni, che compaiono
+  Scuola, Posta, Eventi, Tornei, Gadget, Upgrade e Impostazioni, che compaiono
   man mano che vengono sbloccate; LudoWiki e Admin solo in sviluppo);
 - notifiche e finestre coerenti;
 - contenuti ludici interamente diegetici;
