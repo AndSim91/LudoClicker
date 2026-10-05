@@ -434,7 +434,7 @@ function UpgradeNode({
   const level = state.upgrades[definition.id];
   const status = getUpgradeStatus(state, definition);
   const lockReason = getUpgradeLockReason(state, definition);
-  const cost = getUpgradeCost(definition, level, state.network.schoolCount);
+  const cost = getUpgradeCost(definition, level, state.upgrades);
   const unaffordable = status === "available" && state.school.euros < cost;
   const spark = useUpgradeSpark(level, status);
   const stateLabel = status === "locked"
@@ -552,7 +552,7 @@ function UpgradeDetailsDialog({
     placement: "top" | "bottom";
   } | null>(null);
   const level = state.upgrades[definition.id];
-  const cost = getUpgradeCost(definition, level, state.network.schoolCount);
+  const cost = getUpgradeCost(definition, level, state.upgrades);
   const lockReason = getUpgradeLockReason(state, definition);
   const requirements = getUpgradeRequirementRows(state, definition);
   const completed = level >= definition.maxLevel;
@@ -783,7 +783,7 @@ export function UpgradesView({
     const cost = getUpgradeCost(
       definition,
       state.upgrades[definition.id],
-      state.network.schoolCount,
+      state.upgrades,
     );
     if (!recommendedUpgrade || cost < recommendedUpgrade.cost) {
       recommendedUpgrade = { definition, cost };
