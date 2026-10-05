@@ -1,4 +1,5 @@
-import { getReputationMultiplier } from "./reputation";
+import { getAthleteGeneticsMultiplier } from "./reputation";
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { createLegendaryEmailAddress } from "../content/emailAddresses";
 import { PERSON_RARITIES } from "../content/rarities";
@@ -102,9 +103,11 @@ function chooseLegendaryProfile(
   reservedProfileIds: ReadonlySet<SpecialCollaboratorId>,
   progress: LegendaryCollaboratorProgress,
   guaranteed = false,
+  /** Leggende in visita (Rete dell'Ordine). */
+  chanceMultiplier = 1,
 ) {
   const [appearanceRoll, seedAfterAppearance] = nextRandom(seed);
-  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance()) {
+  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance() * chanceMultiplier) {
     return { profile: undefined, legendaryRolled: false, nextSeed: seedAfterAppearance };
   }
   const candidates: LegendaryCandidate[] = [
@@ -258,6 +261,8 @@ export function createAcquiredContacts(
   const contactIds = new Set(state.contacts.map((contact) => contact.id));
   let nextSequence = state.statistics.contactsAcquired;
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
+  const legendaryChanceMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus");
+  const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;
     const isInitialSchool = state.network.schoolCount === 0;
@@ -278,7 +283,13 @@ export function createAcquiredContacts(
       : isGuaranteedAndreaPosition
         ? { profile: undefined, legendaryRolled: true, nextSeed }
       : advancedRaritiesUnlocked
-        ? chooseLegendaryProfile(nextSeed, reservedProfileIds, progress)
+        ? chooseLegendaryProfile(
+          nextSeed,
+          reservedProfileIds,
+          progress,
+          false,
+          legendaryChanceMultiplier,
+        )
         : { profile: undefined, legendaryRolled: false, nextSeed };
     const specialProfile = selected.profile;
     const returningContact = specialProfile
@@ -312,7 +323,7 @@ export function createAcquiredContacts(
       ? "legendary" as const
       : ordinary!.rarity;
     const rarity = rolledRarity;
-    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id, getReputationMultiplier(state, "genetics"));
+    const athleteStats = rollAthleteBaseStats(nextSeed, rarity, specialProfile?.id, geneticsMultiplier);
     nextSeed = athleteStats.nextSeed;
     const retained = specialProfile
       ? getRetainedLegendaryProgress(progress, specialProfile.id)
@@ -386,7 +397,7 @@ export function materializePooledContact(
   const entryIndex = pool.findIndex((entry) => (target -= entry.count) < 0);
   const entry = pool[entryIndex];
   const { firstName, lastName, email } = createRandomProspect(afterRoll);
-  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getReputationMultiplier(state, "genetics"));
+  const stats = rollAthleteBaseStats(advanceRandomSeed(afterRoll, 3), entry.rarity, undefined, getAthleteGeneticsMultiplier(state));
   let suffix = state.contacts.length;
   // A scan without building a Set: this runs once per email written.
   const isTaken = (id: string) => state.contacts.some((contact) => contact.id === id);

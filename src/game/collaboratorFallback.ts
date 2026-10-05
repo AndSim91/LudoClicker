@@ -38,7 +38,7 @@ function isSectorWorking(state: GameState, role: CollaboratorMasteryRole): boole
     case "equipment":
       return getEquipmentAutomaticRepairTarget(state.equipment) !== undefined;
     case "gadget":
-      return Boolean(state.gadgets.activeWork) ||
+      return state.gadgets.activeWorks.length > 0 ||
         Object.values(state.gadgets.products).some((product) => product.accepted);
     default:
       return false;

@@ -291,15 +291,17 @@ export function getCollaboratorAutomationPresentation({
   }
 
   if (assignment === "gadget") {
-    const work = state.gadgets.activeWork;
+    const [work, ...otherWorks] = state.gadgets.activeWorks;
     if (work) {
       const definition = GADGET_DEFINITIONS[work.productId];
-      const progress = getGadgetWorkProgress(state) ?? 0;
+      const progress = getGadgetWorkProgress(work);
       return {
         title: work.kind === "development"
           ? `Progetto ${definition.name}`
           : `Revisione ${definition.name}`,
-        detail: progress > 0 ? "Lavorazione in corso..." : "In attesa di avanzamento",
+        detail: otherWorks.length > 0
+          ? `e altri ${otherWorks.length} sui banchi`
+          : progress > 0 ? "Lavorazione in corso..." : "In attesa di avanzamento",
         progress,
         progressLabel: work.kind === "development"
           ? `Sviluppo di ${definition.name}`

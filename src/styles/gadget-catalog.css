@@ -123,6 +123,33 @@
   white-space: nowrap;
 }
 
+/* Multitasking: one row per bench. */
+.gadget-lab-benches {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.gadget-lab-bench {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.gadget-lab-bench > strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gadget-lab-bench.is-free {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
 .gadget-overview-work .progress-bar {
   width: 100%;
   height: 6px;

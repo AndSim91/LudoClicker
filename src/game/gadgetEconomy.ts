@@ -18,6 +18,7 @@ import type {
   GadgetProductId,
   GadgetRarity,
   GadgetWorkKind,
+  GadgetWorkState,
   GameState,
   UpgradeLevels,
 } from "./types";
@@ -83,11 +84,7 @@ export function getGadgetWorkSpeed(
   return getGadgetProductivity(state) * (upgradeSpeed + genericAutomationBonus);
 }
 
-export function getGadgetWorkProgress(
-  state: GameState,
-): number | undefined {
-  const work = state.gadgets.activeWork;
-  if (!work) return undefined;
+export function getGadgetWorkProgress(work: GadgetWorkState): number {
   const required = getGadgetWorkRequirement(work.productId, work.kind, work.rarity);
   return required <= 0
     ? 100
@@ -195,5 +192,5 @@ export function getSellableGadgetVariants(
 
 export function hasGadgetRuntimeWork(state: GameState): boolean {
   if (!state.unlocks.gadget || getGadgetProductivity(state) <= 0) return false;
-  return Boolean(state.gadgets.activeWork) || getSellableGadgetVariants(state).length > 0;
+  return state.gadgets.activeWorks.length > 0 || getSellableGadgetVariants(state).length > 0;
 }

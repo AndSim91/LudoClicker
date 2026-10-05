@@ -156,7 +156,7 @@ export function CollaboratorList({
   );
   const hasActiveGadgetWork = state.collaborators.some(
     (collaborator) => collaborator.assignment === "gadget",
-  ) && Boolean(state.gadgets.activeWork);
+  ) && state.gadgets.activeWorks.length > 0;
   const now = useGameTime(
     hasTimedAutomation || hasActiveEquipmentAutomation || hasActiveGadgetWork,
     GAME_CONFIG.progressUpdateIntervalMs,

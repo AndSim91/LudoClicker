@@ -1,3 +1,4 @@
+import { getNetworkEventContactMultiplier } from "../content/upgrades";
 import { getReptileOrdinaryShare } from "./reptileSectors";
 import { getReputationMultiplier } from "./reputation";
 import type { AcquisitionEventDefinition } from "../content/events";
@@ -60,6 +61,7 @@ export function getEventContactMultiplier(state: GameState): number {
   return EVENT_CONTACT_BASE_SCALE *
     getEventMarketAvailability(state) *
     (1 + getEventContactBonus(state)) *
+    getNetworkEventContactMultiplier(state.upgrades, state.network.schoolCount) *
     getReputationMultiplier(state, "events");
 }
 

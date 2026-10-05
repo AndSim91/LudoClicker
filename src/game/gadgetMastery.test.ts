@@ -48,7 +48,7 @@ function gadgetSchool(mastery?: Partial<Record<"wristband", GadgetRarity[]>>): G
 }
 
 function finishWork(state: GameState): GameState {
-  const work = state.gadgets.activeWork!;
+  const work = state.gadgets.activeWorks[0];
   const remaining = getGadgetWorkRequirement(work.productId, work.kind, work.rarity) - work.completedWorkMs;
   return processGadgets(state, remaining / getGadgetWorkSpeed(state, work.kind), 2_000);
 }
@@ -100,7 +100,7 @@ describe("Maestria dei gadget", () => {
 
   it("skips the collaudo of a mastered rarity: development is paid and waited, quality is 100", () => {
     const started = startGadgetProject(gadgetSchool({ wristband: ["common"] }), "wristband");
-    expect(started.gadgets.activeWork).toBeDefined();
+    expect(started.gadgets.activeWorks[0]).toBeDefined();
     const done = finishWork(started);
     expect(done.gadgets.minigame).toBeUndefined();
     expect(done.gadgets.products.wristband).toMatchObject({ prototypeCompleted: true });
@@ -109,7 +109,7 @@ describe("Maestria dei gadget", () => {
 
   it("counts the 100% given to the previous rarity when the next one unlocks", () => {
     const revising = startGadgetRevision(sellingWristband(60), "wristband");
-    expect(revising.gadgets.activeWork?.opportunityRarity).toBe("rare");
+    expect(revising.gadgets.activeWorks[0]?.opportunityRarity).toBe("rare");
     const played = startGadgetMinigame(finishWork(revising), "wristband");
     const unlocked = syncGadgetMastery(completeGadgetMinigame(played, "wristband", 70));
     expect(unlocked.network.gadgetMastery).toEqual({ wristband: ["common"] });
@@ -118,7 +118,7 @@ describe("Maestria dei gadget", () => {
 
   it("plays the new rarity's collaudo when only the current one is mastered", () => {
     const revising = startGadgetRevision(sellingWristband(100, ["common"]), "wristband");
-    expect(revising.gadgets.activeWork?.opportunityRarity).toBe("rare");
+    expect(revising.gadgets.activeWorks[0]?.opportunityRarity).toBe("rare");
     expect(finishWork(revising).gadgets.minigame?.status).toBe("ready");
 
     const bothMastered = finishWork(startGadgetRevision(sellingWristband(100, ["common", "rare"]), "wristband"));

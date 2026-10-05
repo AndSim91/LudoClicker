@@ -203,12 +203,12 @@ describe("game scheduler", () => {
       collaborators: [collaborator("gadget")],
       gadgets: {
         ...state.gadgets,
-        activeWork: {
+        activeWorks: [{
           productId: "wristband",
           kind: "development",
           rarity: "common",
           completedWorkMs: 0,
-        },
+        }],
         products: {
           ...state.gadgets.products,
           wristband: {
@@ -223,7 +223,7 @@ describe("game scheduler", () => {
     expect(needsAutomationHeartbeat(working)).toBe(true);
     expect(getNextGameTickDelay(working, NOW)).toBe(AUTOMATION_HEARTBEAT_MS);
 
-    const idle = { ...working, gadgets: { ...working.gadgets, activeWork: undefined } };
+    const idle = { ...working, gadgets: { ...working.gadgets, activeWorks: [] } };
     expect(needsAutomationHeartbeat(idle)).toBe(false);
 
     const extraSales: GameState = {

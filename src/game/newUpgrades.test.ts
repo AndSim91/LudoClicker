@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getAcquisitionEventDefinition } from "../content/events";
-import { getEventCopyContactMultiplier } from "../content/upgrades";
+import {
+  getEventCopyContactMultiplier,
+  getNetworkEventContactMultiplier,
+  getNetworkSponsorIncome,
+} from "../content/upgrades";
+import { getAthleteGeneticsMultiplier, getPrestigeReputationPreview } from "./reputation";
 import { resolveSocialContentCycles } from "./collaboratorAutomationOutcomes";
 import { createInitialState } from "./engine";
 import { createEventCooldown } from "./eventCooldowns";
@@ -82,5 +87,52 @@ describe("upgrade del 05/10", () => {
     expect(brought).toBeLessThan(30);
     const without = resolveTrialBatch({ ...state, upgrades: { ...state.upgrades, "bring-a-friend": 0 } }, state.scheduledTrials, NOW, 1);
     expect(without.contacts).toHaveLength(contacts.length);
+  });
+
+  describe("Rete dell'Ordine", () => {
+    it("Lettere di raccomandazione e Gran Consiglio cambiano la Reputazione della fondazione", () => {
+      const base = getPrestigeReputationPreview(createInitialState(NOW, "Test", false)).points;
+      const letters = withUpgrade("recommendation-letters", 3);
+      expect(getPrestigeReputationPreview(letters).points).toBe(base + 3);
+      expect(getPrestigeReputationPreview(withUpgrade("grand-council", 1, letters)).points).toBe((base + 3) * 2);
+    });
+
+    it("Circuito della Rete e Sponsor nazionale crescono con le scuole fondate", () => {
+      const levels = withUpgrade("national-sponsor", 2, withUpgrade("network-circuit", 5)).upgrades;
+      expect(getNetworkEventContactMultiplier(levels, 10)).toBeCloseTo(1.5);
+      expect(getNetworkSponsorIncome(levels, 10)).toBe(20_000);
+    });
+
+    it("Arena della Rete alza i valori di partenza", () => {
+      expect(getAthleteGeneticsMultiplier(withUpgrade("network-arena", 3))).toBeCloseTo(1.15);
+    });
+
+    it("Albo dei Maestri: alcuni nuovi iscritti arrivano con la Forma 1", () => {
+      const initial = withUpgrade("masters-roll", 5);
+      const contacts: Contact[] = Array.from({ length: 40 }, (_, index) => ({
+        ...initial.contacts[0],
+        id: `roll-${index}`,
+        email: `roll-${index}@example.invalid`,
+        status: "trialScheduled",
+        forms: [],
+      }));
+      const state: GameState = {
+        ...initial,
+        contacts,
+        scheduledTrials: contacts.map((contact, index) => ({
+          id: `roll-trial-${index}`,
+          contactId: contact.id,
+          startsAt: NOW - 20_000,
+          resolvesAt: NOW - 1,
+          resultSeed: index + 1,
+          status: "scheduled",
+          equipmentUsed: 0,
+        })),
+      };
+      const withFormOne = resolveTrialBatch(state, state.scheduledTrials, NOW, 1).contacts
+        .filter((contact) => contact.forms.includes("form-1")).length;
+      expect(withFormOne).toBeGreaterThan(5);
+      expect(withFormOne).toBeLessThan(35);
+    });
   });
 });

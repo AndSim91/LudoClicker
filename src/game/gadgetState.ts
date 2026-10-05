@@ -6,7 +6,9 @@ import type {
   GadgetProductId,
   GadgetProductState,
   GadgetRarity,
+  GadgetMinigameState,
   GadgetState,
+  GadgetWorkState,
 } from "./types";
 
 export function createInitialGadgetProductState(
@@ -29,10 +31,37 @@ export function createInitialGadgetState(currentMonth = 9): GadgetState {
         createInitialGadgetProductState(),
       ]),
     ) as Record<GadgetProductId, GadgetProductState>,
+    activeWorks: [],
     crossSellRemainder: 0,
     crossSellCursor: 0,
     monthlyRevenue: createInitialGadgetMonthlyRevenueState(currentMonth),
   };
+}
+
+function isValidGadgetWork(work: GadgetWorkState): boolean {
+  return isProductId(work.productId) &&
+    (work.kind === "development" || work.kind === "revision") &&
+    isGadgetRarity(work.rarity) &&
+    (work.opportunityRarity === undefined || isGadgetRarity(work.opportunityRarity)) &&
+    isFiniteNonNegative(work.completedWorkMs);
+}
+
+function isValidGadgetMinigame(minigame: GadgetMinigameState): boolean {
+  return isProductId(minigame.productId) &&
+    (minigame.kind === "development" || minigame.kind === "revision") &&
+    isGadgetRarity(minigame.rarity) &&
+    (minigame.opportunityRarity === undefined || isGadgetRarity(minigame.opportunityRarity)) &&
+    (minigame.unlockedRarity === undefined ||
+      (isGadgetRarity(minigame.unlockedRarity) && minigame.status === "result")) &&
+    Number.isSafeInteger(minigame.seed) &&
+    Number.isSafeInteger(minigame.previousQuality) &&
+    minigame.previousQuality >= 0 && minigame.previousQuality <= 100 &&
+    ["ready", "running", "result"].includes(minigame.status) &&
+    (minigame.status === "result"
+      ? Number.isSafeInteger(minigame.score) &&
+        (minigame.score ?? -1) >= 0 &&
+        (minigame.score ?? 101) <= 100
+      : minigame.score === undefined);
 }
 
 function isFiniteNonNegative(value: unknown): value is number {
@@ -95,32 +124,11 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
     const total = state.monthlyRevenue.totals[productId];
     if (!isFiniteNonNegative(total)) return false;
   }
-  if (state.activeWork && (
-    !isProductId(state.activeWork.productId) ||
-    (state.activeWork.kind !== "development" && state.activeWork.kind !== "revision") ||
-    !isGadgetRarity(state.activeWork.rarity) ||
-    (state.activeWork.opportunityRarity !== undefined &&
-      !isGadgetRarity(state.activeWork.opportunityRarity)) ||
-    !isFiniteNonNegative(state.activeWork.completedWorkMs)
-  )) return false;
-  if (state.minigame && (
-    !isProductId(state.minigame.productId) ||
-    (state.minigame.kind !== "development" && state.minigame.kind !== "revision") ||
-    !isGadgetRarity(state.minigame.rarity) ||
-    (state.minigame.opportunityRarity !== undefined &&
-      !isGadgetRarity(state.minigame.opportunityRarity)) ||
-    (state.minigame.unlockedRarity !== undefined &&
-      (!isGadgetRarity(state.minigame.unlockedRarity) ||
-        state.minigame.status !== "result")) ||
-    !Number.isSafeInteger(state.minigame.seed) ||
-    !Number.isSafeInteger(state.minigame.previousQuality) ||
-    state.minigame.previousQuality < 0 || state.minigame.previousQuality > 100 ||
-    !["ready", "running", "result"].includes(state.minigame.status) ||
-    (state.minigame.status === "result"
-      ? !Number.isSafeInteger(state.minigame.score) ||
-        (state.minigame.score ?? -1) < 0 ||
-        (state.minigame.score ?? 101) > 100
-      : state.minigame.score !== undefined)
+  if (!Array.isArray(state.activeWorks) || !state.activeWorks.every(isValidGadgetWork)) return false;
+  if (state.minigame && !isValidGadgetMinigame(state.minigame)) return false;
+  if (state.minigameQueue !== undefined && (
+    !Array.isArray(state.minigameQueue) ||
+    !state.minigameQueue.every((queued) => isValidGadgetMinigame(queued) && queued.status === "ready")
   )) return false;
   return true;
 }

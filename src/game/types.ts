@@ -283,6 +283,15 @@ export type UpgradeId =
   | "bring-a-friend"
   | "rhythm-gamer"
   | "deposit-account"
+  | "instructor-exchange"
+  | "recommendation-letters"
+  | "network-circuit"
+  | "masters-roll"
+  | "national-sponsor"
+  | "network-arena"
+  | "legends-visit"
+  | "grand-council"
+  | "multitasking"
   | "pre-event-check"
   | "maintenance-kit"
   | "organized-rack"
@@ -975,8 +984,11 @@ export interface GadgetMinigameState {
 
 export interface GadgetState {
   products: Record<GadgetProductId, GadgetProductState>;
-  activeWork?: GadgetWorkState;
+  /** One per bench: 1, then 2 or 3 with Multitasking. */
+  activeWorks: GadgetWorkState[];
   minigame?: GadgetMinigameState;
+  /** Collaudi ready while another one is open: played in order. */
+  minigameQueue?: GadgetMinigameState[];
   crossSellRemainder: number;
   crossSellCursor: number;
   monthlyRevenue: GadgetMonthlyRevenueState;

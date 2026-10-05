@@ -17,6 +17,8 @@ import {
   getEquipmentPreparedWorkMaximum,
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
+  getNetworkEventContactMultiplier,
+  getNetworkSponsorIncome,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getUpgradeCategoryPoints,
@@ -57,6 +59,7 @@ const categoryIcons: Record<UpgradeCategory, IconName> = {
   instructors: "people",
   gadget: "gift",
   secrets: "lock",
+  network: "network",
 };
 
 const numberFormatter = new Intl.NumberFormat("it-IT", {
@@ -108,6 +111,16 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Rischio di non rinnovare", "departureRiskReduction", "−");
   addPercentage("Iscritti che portano un amico", "referralChance", "");
   addPercentage("Interessi mensili sui Fondi", "depositInterestRate", "");
+  addPercentage("Velocità dei corsi (Rete)", "courseSpeedBonus");
+  const networkEventBonus = getNetworkEventContactMultiplier(state.upgrades, state.network.schoolCount) - 1;
+  if (networkEventBonus > 0) {
+    benefits.push({ label: "Contatti eventi (Rete)", value: `+${formatUpgradePercentage(networkEventBonus)}` });
+  }
+  const networkSponsor = getNetworkSponsorIncome(state.upgrades, state.network.schoolCount);
+  if (networkSponsor > 0) benefits.push({ label: "Sponsor nazionale", value: `${formatCurrency(networkSponsor)} al mese` });
+  addPercentage("Nuovi iscritti con la Forma 1", "enrollmentFormOneChance", "");
+  addPercentage("Arena e Stile di partenza", "athleteBaseStatsBonus");
+  addPercentage("Leggendari tra i contatti", "legendaryAppearanceBonus");
   addPercentage("Manutenzione automatica", "equipmentAutomationMultiplier");
   const preparedWorkMaximum = getEquipmentPreparedWorkMaximum(state);
   if (preparedWorkMaximum > 0) {
@@ -227,6 +240,8 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
       return `${formatUpgradePercentage(getGadgetMemberReach(state.upgrades))} iscritti · ${formatUpgradePercentage(getGadgetFollowerReach(state.upgrades))} follower`;
     case "secrets":
       return "Segui gli indizi per rivelare i percorsi";
+    case "network":
+      return `${formatNumber(state.network.schoolCount)} ${state.network.schoolCount === 1 ? "scuola fondata" : "scuole fondate"}`;
     case "social":
       return "";
   }
@@ -337,12 +352,15 @@ function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): bool
     (definition.category !== "secrets" ||
       state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId)) &&
     (definition.category !== "social" || state.unlocks.social) &&
-    (definition.category !== "gadget" || state.unlocks.gadget);
+    (definition.category !== "gadget" || state.unlocks.gadget) &&
+    (definition.category !== "network" || state.network.schoolCount > 0);
 }
 
 function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
   if (category === "social") return state.unlocks.social;
   if (category === "gadget") return state.unlocks.gadget;
+  // Rete dell'Ordine: from the first foundation on.
+  if (category === "network") return state.network.schoolCount > 0;
   return true;
 }
 
@@ -865,7 +883,7 @@ export function UpgradesView({
                     </h3>
                   </div>
                   <p>{getCategorySummary(state, category.id)}</p>
-                  {isSecrets ? null : (
+                  {isSecrets || category.id === "network" ? null : (
                     <span className="upgrade-lane-points">
                       <strong>{getUpgradeCategoryPoints(state.upgrades, category.id)}</strong> punti nel ramo
                     </span>

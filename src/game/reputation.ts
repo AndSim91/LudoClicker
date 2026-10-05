@@ -1,3 +1,4 @@
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import type { FoundedSchool, GameState } from "./types";
 
@@ -54,6 +55,12 @@ export function getReputationMultiplier(
   return 1 + getReputationLevel(state, id) * GAME_CONFIG.reputationStep;
 }
 
+/** Base Arena and Stile of new athletes: Genetica (Reputation) and Arena della Rete. */
+export function getAthleteGeneticsMultiplier(state: Pick<GameState, "network" | "upgrades">): number {
+  return getReputationMultiplier(state, "genetics") *
+    (1 + getUpgradeEffectTotal(state.upgrades, "athleteBaseStatsBonus"));
+}
+
 function getReptileWin(state: GameState): "reptile" | "superba" | undefined {
   const wins = state.tournaments.reptile.hall.filter((entry) => entry.schoolName === state.school.name);
   if (wins.length === 0) return undefined;
@@ -65,6 +72,10 @@ export interface PrestigeReputationPreview {
   championsWin: boolean;
   reptileWin?: "reptile" | "superba" | undefined;
   chroniclesWin: boolean;
+  /** Lettere di raccomandazione. */
+  letterPoints: number;
+  /** Gran Consiglio: the whole sum counts twice. */
+  councilDoubled: boolean;
   /** Points earned by founding now. */
   points: number;
   /** Rent locked by each point spent on the network rent at this foundation. */
@@ -76,6 +87,12 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
   const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / GAME_CONFIG.reputationFameDivisor));
+  // Rete dell'Ordine: Lettere di raccomandazione and Gran Consiglio.
+  const letterPoints = getUpgradeEffectTotal(state.upgrades, "foundationReputationBonus");
+  const councilDoubled = getUpgradeEffectTotal(state.upgrades, "foundationReputationDouble") > 0;
+  const basePoints = GAME_CONFIG.reputationNationalTitlePoints + famePoints +
+    [championsWin, reptileWin, chroniclesWin].filter(Boolean).length * GAME_CONFIG.reputationTournamentPoints +
+    letterPoints;
   const rentValue = Math.max(0, state.school.activeMembers) *
     GAME_CONFIG.monthlyMemberFee * GAME_CONFIG.networkRentValueShare;
   return {
@@ -83,8 +100,9 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
     championsWin,
     reptileWin,
     chroniclesWin,
-    points: GAME_CONFIG.reputationNationalTitlePoints + famePoints +
-      [championsWin, reptileWin, chroniclesWin].filter(Boolean).length * GAME_CONFIG.reputationTournamentPoints,
+    letterPoints,
+    councilDoubled,
+    points: basePoints * (councilDoubled ? 2 : 1),
     rentPerPoint: rentValue * GAME_CONFIG.networkRentPointShare,
   };
 }

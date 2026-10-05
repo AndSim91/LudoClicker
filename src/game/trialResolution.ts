@@ -77,6 +77,8 @@ export function resolveStartedTrialBatch(
   // Porta un amico: new members who bring a contact, added once after the batch.
   const referralChance = getUpgradeEffectTotal(state.upgrades, "referralChance");
   let referrals = 0;
+  // Albo dei Maestri: some new members arrive with Forma 1 already done.
+  const formOneChance = getUpgradeEffectTotal(state.upgrades, "enrollmentFormOneChance");
 
   for (const requestedTrial of requestedTrials) {
     if (requestedTrial.status !== "scheduled") continue;
@@ -86,7 +88,8 @@ export function resolveStartedTrialBatch(
     const stateBeforeTrial = nextState;
     const [enrollmentRoll, retrySeed] = nextRandom(trial.resultSeed);
     const [retryRoll, referralSeed] = nextRandom(retrySeed);
-    const [referralRoll] = nextRandom(referralSeed);
+    const [referralRoll, formOneSeed] = nextRandom(referralSeed);
+    const [formOneRoll] = nextRandom(formOneSeed);
     const trialContact = contactsById.get(trial.contactId);
     const specialProfileId = trialContact?.specialProfileId;
     const alreadyEnrolledLegendary = specialProfileId
@@ -143,6 +146,9 @@ export function resolveStartedTrialBatch(
               ? "available"
               : "lost",
           enrolledMonth: enrolled ? stateBeforeTrial.school.currentMonth : undefined,
+          ...(enrolled && trialContact.forms.length === 0 && formOneRoll < formOneChance
+            ? { forms: ["form-1" as const] }
+            : {}),
           trialRetryUsed: recoveredForSecondAttempt || trialContact.trialRetryUsed,
         }
       : undefined;

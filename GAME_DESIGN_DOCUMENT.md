@@ -1904,10 +1904,12 @@ per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
 
 La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
-Insegnamento e Organizzazione**, seguiti dalla riga dei **Percorsi Segreti**.
-Ogni ramo è **una sola linea di nodi**, senza rami laterali, al massimo nove:
-Scrittura, Carisma, Accoglienza e Insegnamento ne hanno 9, gli altri 8. Il ramo Gadget
-compare soltanto dopo lo sblocco del settore. Social non ha più un ramo
+Insegnamento e Organizzazione**, poi la **Rete dell'Ordine** (§ 10.13, dalla
+prima fondazione) e la riga dei **Percorsi Segreti**. Ogni ramo è **una sola
+linea di nodi**, senza rami laterali, al massimo nove: Scrittura, Carisma,
+Accoglienza, Gadget, Insegnamento e Rete ne hanno 9, Creatività e Attrezzatura
+8, Organizzazione 7. Il ramo Gadget compare soltanto dopo lo sblocco del
+settore. Social non ha più un ramo
 separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 
 **La pagina.** In alto, accanto al titolo, c'è il pulsante **«Compra tutto ·
@@ -2153,12 +2155,13 @@ diventa visibile soltanto con lo sblocco del settore.
 | Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
 | Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 | Rhythm Gamer | probabilità di aprire la rarità successiva ×(1 + 20% per livello); massimo ×2 | 7.500 / 15.000 / 30.000 / 60.000 / 120.000 € |
+| Multitasking | +1 lavoro in contemporanea per livello: 2, poi 3 banchi, ognuno a piena velocità | 150.000 / 750.000 € |
 
 Tutti i nodi richiedono lo sblocco del settore Gadget. Soglie in punti di
 Gadget, nell'ordine della linea: Vetrina della scuola 0, Strumenti di
 progettazione 0, Gestione degli ordini 2, Laboratorio revisioni 3, Negozio
 online 3 e lo sblocco di Social, **Rhythm Gamer** 5, Formazione commerciale 8,
-Vendita abbinata 12
+Vendita abbinata 12, **Multitasking** 20
 e il progetto Tazza già sbloccato. La capacità commerciale riceve anche i bonus generici di
 automazione dell'Organizzazione.
 
@@ -2220,7 +2223,6 @@ le entrate ricorrenti.
 | Priorità operative | rende modificabile la fila «Turni e precedenza» (chi consuma per primo Euro e spade e chi riceve aiuto) | 25.000 € |
 | A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 | Conto deposito | +0,5% al mese sui primi 250.000 € di Fondi per livello; massimo 6.250 € al mese | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
-| Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50%; richiede almeno una scuola fondata | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 Un settore principale è inattivo soltanto quando non ha lavoro reale da
 svolgere. Eventi è considerato attivo finché esiste un evento in corso, così i
@@ -2231,14 +2233,15 @@ Redazione è inattiva solo se non c'è un'email in scrittura e Social non è
 ancora sbloccato; Istruttore è inattivo se non insegna, non è in formazione e
 non c'è Preparazione agonistica attiva.
 
-Le automazioni generiche (Procedure standard e Coordinamento multi-sede, fino
+Le automazioni generiche (Procedure standard e Coordinamento multi-sede della
+Rete, fino
 a +75% insieme) accelerano Redazione/Social, manutenzione dell'attrezzatura,
 sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
 Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
 3, Procedure standard 8, Modulo di iscrizione 13, Priorità operative 18 e
 **Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
-A.N.D.E.R. 18, Conto deposito 23, Coordinamento multi-sede 23 e almeno una
-scuola fondata. Gli interessi del **Conto deposito** («La banca paga poco, ma
+A.N.D.E.R. 18, Conto deposito 23. Coordinamento multi-sede è passato alla Rete
+dell'Ordine (§ 10.13). Gli interessi del **Conto deposito** («La banca paga poco, ma
 paga. Il tesoriere dorme meglio.») si calcolano a fine mese sui Fondi di quel
 momento, entrano nelle entrate mensili e compaiono nel loro dettaglio come
 «Conto deposito».
@@ -2343,6 +2346,36 @@ affidata alle scene di tutorial (sezione 13).
 > **Da implementare:** comunicazioni da scrivere manualmente con la meccanica di tastiera che sbloccano una funzione al completamento; gli sblocchi avvengono direttamente al raggiungimento del traguardo.
 
 ---
+
+### 10.13 Rete dell'Ordine
+
+Un ramo che si apre con le **scuole fondate**, non con i punti: la corsia
+compare dalla prima fondazione e ogni nodo bloccato dice quante scuole servono
+(«🔒 5 scuole fondate»). I prezzi non salgono con le scuole fondate; la corsia
+non mostra «punti nel ramo». Decisione del 05/10: dare al giocatore una strada
+visibile fino alla 20ª scuola.
+
+| Scuole | Potenziamento | Effetto | Costi per livello |
+| ---: | --- | --- | --- |
+| 1 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| 2 | Scambio di Istruttori | +10% velocità di tutti i corsi per livello; massimo +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
+| 3 | Lettere di raccomandazione | +1 punto Reputazione alla prossima fondazione per livello | 50.000 / 150.000 / 450.000 € |
+| 5 | Circuito della Rete | +1% contatti dagli eventi per ogni scuola della Rete, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
+| 7 | Albo dei Maestri | +10% per livello che un nuovo iscritto arrivi con la Forma 1 | 150.000 / 300.000 / 600.000 / 1.200.000 / 2.400.000 € |
+| 10 | Sponsor nazionale | +1.000 € al mese per ogni scuola della Rete, per livello | 500.000 / 1.500.000 / 4.500.000 € |
+| 13 | Arena della Rete | +5% ai valori di partenza di Arena e Stile dei nuovi atleti per livello | 1.000.000 / 3.000.000 / 9.000.000 € |
+| 16 | Leggende in visita | +20% probabilità di Leggendari tra i nuovi contatti per livello | 2.000.000 / 6.000.000 / 18.000.000 € |
+| 20 | Gran Consiglio | raddoppia la Reputazione della prossima fondazione | 10.000.000 € |
+
+Come gli altri Upgrade, i livelli si azzerano alla fondazione: Lettere di
+raccomandazione e Gran Consiglio valgono per la fondazione della scuola in cui
+si comprano, e la finestra «Se fondi ora» della pagina Rete li mostra nel
+conto (+N, ×2). Il raddoppio si applica dopo le Lettere. Scambio di Istruttori
+si somma a PagoSport prima del moltiplicatore della Reputazione Formazione.
+Arena della Rete moltiplica i valori come la Genetica (un +1 fisso su valori
+da 0 a 100 sarebbe stato invisibile); non tocca i Leggendari, che hanno valori
+fissi. Leggende in visita non cambia i contatti forzati dai tornei. Sponsor
+nazionale compare nel dettaglio delle entrate mensili.
 
 ## 11. Interfaccia Outlook per Windows 11
 
@@ -3317,13 +3350,14 @@ Nel codice, per ogni scuola fondata:
   scuole)`), tranne quelli con crescita di rete azzerata (ramo Gadget, ramo
   Istruttori, Percorsi Segreti e pochi altri);
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
-- **complessità organizzativa:** il potenziamento Coordinamento multi-sede
-  richiede almeno una scuola fondata;
+- **complessità organizzativa:** la Rete dell'Ordine (§ 10.13) apre un nodo
+  alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;
 - **moltiplicatori permanenti:** solo quelli comprati con la Reputazione (§ 5.7);
 - gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
   a fine anno.
 
-> **Da implementare:** nessun aumento del numero di attività simultanee.
+Le attività simultanee crescono con i potenziamenti, non con le scuole:
+Multitasking (Gadget) e Eventi nel Multiverso (Carisma).
 
 Ogni scuola lasciata entra nella **Rete dell'Ordine**. Versa una rendita
 mensile fissa solo se alla fondazione si spendono punti Reputazione nella
@@ -3408,8 +3442,16 @@ fanno parte del catalogo base.
 
 ### 19.2 Progettazione, revisione e Collaboratori
 
-Il laboratorio possiede un solo slot. Il costo viene scalato quando parte un
-progetto o una revisione, senza annullamento e senza rimborso. La produttività
+Il laboratorio ha un **banco**; **Multitasking** (§ 10.6) ne aggiunge uno per
+livello, fino a tre. Ogni banco porta avanti un progetto o una revisione di un
+prodotto diverso, **alla velocità piena** del laboratorio: la produttività non
+si divide. Il riquadro «Laboratorio» elenca i banchi («Laboratorio · 2 di 3
+banchi», una riga con barra per lavoro, «— banco libero —»). Quando un lavoro
+finisce si apre il suo collaudo; se un collaudo è già aperto, il nuovo aspetta
+**in coda** («Collaudo in coda» sulla scheda) e si apre quando il precedente
+si chiude (salvataggio v101: il lavoro in corso diventa il primo banco). Il
+costo viene scalato quando parte un progetto o una revisione, senza
+annullamento e senza rimborso. La produttività
 del settore è:
 
 ```text

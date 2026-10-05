@@ -49,8 +49,8 @@ describe("Gadget rarity save migration", () => {
     expect(migrated.gadgets.products.wristband.rarities.rare.unlocked).toBe(false);
     expect(migrated.gadgets.products.wristband.rarities["secret-legendary"].unlocked)
       .toBe(false);
-    expect(migrated.gadgets.activeWork).toMatchObject({ rarity: "common" });
-    expect(migrated.gadgets.activeWork?.opportunityRarity).toBeUndefined();
+    expect(migrated.gadgets.activeWorks[0]).toMatchObject({ rarity: "common" });
+    expect(migrated.gadgets.activeWorks[0]?.opportunityRarity).toBeUndefined();
     expect(isValidGameState(migrated)).toBe(true);
   });
 });

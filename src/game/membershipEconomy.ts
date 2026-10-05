@@ -1,4 +1,4 @@
-import { getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
+import { getNetworkSponsorIncome, getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
 import { getMonthlyNetworkRent } from "./reputation";
@@ -172,5 +172,6 @@ export function getMonthlyDepositInterest(state: GameState): number {
 export function getMonthlyOperationalIncome(state: GameState): number {
   // Rents of the schools in the network are fixed: no multiplier touches them.
   return getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
-    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state);
+    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state) +
+    getNetworkSponsorIncome(state.upgrades, state.network.schoolCount);
 }

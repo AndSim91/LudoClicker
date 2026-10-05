@@ -1,3 +1,4 @@
+import { getNetworkSponsorIncome } from "../../content/upgrades";
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
 import { getMonthlyDepositInterest, getMonthlyMembershipIncome } from "../../game/membershipEconomy";
@@ -15,6 +16,7 @@ interface MonthlyIncomePresentation {
   gadgetUnlocked: boolean;
   networkRent: number;
   depositInterest: number;
+  networkSponsor: number;
 }
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
@@ -25,6 +27,7 @@ function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresent
     gadgetUnlocked: state.unlocks.gadget,
     networkRent: getMonthlyNetworkRent(state),
     depositInterest: getMonthlyDepositInterest(state),
+    networkSponsor: getNetworkSponsorIncome(state.upgrades, state.network.schoolCount),
   };
 }
 
@@ -37,7 +40,8 @@ function isSameMonthlyIncomePresentation(
     left.gadgetIncome === right.gadgetIncome &&
     left.gadgetUnlocked === right.gadgetUnlocked &&
     left.networkRent === right.networkRent &&
-    left.depositInterest === right.depositInterest;
+    left.depositInterest === right.depositInterest &&
+    left.networkSponsor === right.networkSponsor;
 }
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
@@ -49,12 +53,13 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
     gadgetUnlocked,
     networkRent,
     depositInterest,
+    networkSponsor,
   } = useGameSelector(
     selectMonthlyIncomePresentation,
     stateOverride,
     isSameMonthlyIncomePresentation,
   );
-  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent + depositInterest;
+  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent + depositInterest + networkSponsor;
 
   return (
     <div className="title-monthly-income">
@@ -88,6 +93,12 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <div>
               <dt>Rete dell'Ordine</dt>
               <dd>{formatCurrency(networkRent)}</dd>
+            </div>
+          ) : null}
+          {networkSponsor > 0 ? (
+            <div>
+              <dt>Sponsor nazionale</dt>
+              <dd>{formatCurrency(networkSponsor)}</dd>
             </div>
           ) : null}
           {depositInterest > 0 ? (

@@ -10,6 +10,7 @@ export type UpgradeCategory =
   | "instructors"
   | "organization"
   | "secrets"
+  | "network"
   | "social";
 
 export type UpgradeEffect =
@@ -64,11 +65,20 @@ export type UpgradeEffect =
   | "gadgetSalesConversion"
   | "gadgetCrossSell"
   | "gadgetRarityChanceMultiplier"
+  | "gadgetWorkCapacity"
   | "socialExtraFollowers"
   | "eventCooldownReduction"
   | "departureRiskReduction"
   | "referralChance"
   | "depositInterestRate"
+  | "courseSpeedBonus"
+  | "foundationReputationBonus"
+  | "networkEventContactBonus"
+  | "enrollmentFormOneChance"
+  | "networkSponsorIncome"
+  | "athleteBaseStatsBonus"
+  | "legendaryAppearanceBonus"
+  | "foundationReputationDouble"
   | "legacy";
 
 export interface UpgradeDefinition {
@@ -116,6 +126,7 @@ export const UPGRADE_CATEGORIES: Array<{
   { id: "gadget", title: "Gadget", description: "Amplia il pubblico e rende più rapidi sviluppo, revisioni e vendite." },
   { id: "instructors", title: "Insegnamento", description: "Sviluppa Istruttori, Tecnici e preparazione agonistica." },
   { id: "organization", title: "Organizzazione", description: "Coordina collaboratori, automazioni ed entrate ricorrenti." },
+  { id: "network", title: "Rete dell'Ordine", description: "Si apre con le scuole fondate: più è grande la Rete, più vale." },
   { id: "secrets", title: "Percorsi Segreti", description: "Alcuni percorsi si rivelano soltanto compiendo imprese particolari." },
 ];
 
@@ -185,6 +196,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "rhythm-gamer", category: "gadget", title: "Rhythm Gamer", description: "Anni di giochi musicali, finalmente messi a bilancio. Il collaudo va a tempo.", effectLabel: "Ogni livello: +20% di probabilità di aprire la rarità successiva dopo il collaudo · Livello 5: il doppio", effect: "gadgetRarityChanceMultiplier", effectPerLevel: 0.2, baseCost: 7_500, costGrowth: LEVEL_GROWTH, levelCosts: [7_500, 15_000, 30_000, 60_000, 120_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 5 },
   { id: "gadget-sales-training", category: "gadget", title: "Formazione commerciale", description: "I collaboratori imparano a proporre senza insistere. Chi era indeciso, alla fine, compra.", effectLabel: "Ogni livello: su 100 proposte, 2 vendite in più · Livello 5: 10 in più", effect: "gadgetSalesConversion", effectPerLevel: 0.02, baseCost: 15_000, costGrowth: LEVEL_GROWTH, levelCosts: [15_000, 30_000, 60_000, 120_000, 240_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 8 },
   { id: "gadget-cross-selling", category: "gadget", title: "Vendita abbinata", description: "«Con la maglietta, la toppa è a metà prezzo.» Ogni tanto un ordine se ne porta dietro un altro.", effectLabel: "Ogni livello: +5% di probabilità che una vendita ne porti un'altra, di un altro gadget · Livello 5: 25%", effect: "gadgetCrossSell", effectPerLevel: 0.05, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredGadgetProduct: "mug", requiredBranchPoints: 12 },
+  { id: "multitasking", category: "gadget", title: "Multitasking", description: "Due progetti sullo stesso tavolo, poi tre. Le colle si somigliano tutte.", effectLabel: "Livello 1: due lavori insieme · Livello 2: tre · ognuno alla velocità piena del laboratorio", effect: "gadgetWorkCapacity", effectPerLevel: 1, baseCost: 150_000, costGrowth: LEVEL_GROWTH, levelCosts: [150_000, 750_000], networkCostGrowth: 0, maxLevel: 2, requiredFame: noFame, requiredUnlocks: ["gadget"], requiredBranchPoints: 20 },
 
   // Insegnamento
   { id: "talent-eye", category: "instructors", title: "Occhio del Maestro", description: "Certi talenti si riconoscono da come impugnano la spada. Altri da come la fanno cadere.", effectLabel: "Senza il nodo Arena e Stile degli atleti restano «?» · Livello 1: si vedono dopo il Corso Y · Livello 2: si vedono dall'iscrizione", effect: "officialStatsVisibilityTier", effectPerLevel: 1, baseCost: 1_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000, 10_000], networkCostGrowth: 0, maxLevel: 2, requiredFame: noFame, requiredBranchPoints: 0 },
@@ -267,8 +279,17 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "operational-priorities", category: "organization", title: "Priorità operative", description: "Decidi tu l'ordine della fila: chi sta davanti spende per primo e riceve l'aiuto dei Turni. Le discussioni su chi viene prima, invece, restano.", effectLabel: "Puoi riordinare la fila dei settori in Scuola", effect: "operationalPrioritiesUnlock", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000], maxLevel: 1, requiredFame: noFame, requiredBranchPoints: 18, requiredUpgradeLevels: { "collaborator-shifts": 1 } },
   { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Arriva A.N.D.E.R., che si occupa di notifiche, quote e pratiche. Non dorme, non sbaglia, e ci tiene a farlo sapere.", effectLabel: "Ogni livello: +10% sulle entrate mensili di quote e Social · Livello 5: +50%", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 18 },
   { id: "deposit-account", category: "organization", title: "Conto deposito", description: "La banca paga poco, ma paga. Il tesoriere dorme meglio.", effectLabel: "Ogni livello: ogni mese +0,5% di interessi sui Fondi, contando al massimo 250.000 € · Livello 5: +2,5%, fino a 6.250 € al mese", effect: "depositInterestRate", effectPerLevel: 0.005, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 23 },
-  { id: "multi-site-coordination", category: "organization", title: "Coordinamento multi-sede", description: "Le scuole della rete condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, requiredBranchPoints: 23 },
 
+  // Rete dell'Ordine: si apre con le scuole fondate.
+  { id: "multi-site-coordination", category: "network", title: "Coordinamento multi-sede", description: "Le scuole della rete condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, networkCostGrowth: 0, requiredNetworkSchools: 1, requiredBranchPoints: 0 },
+  { id: "instructor-exchange", category: "network", title: "Scambio di Istruttori", description: "Un mese qui, un mese là. Tornano con idee nuove e una valigia di spade da riparare.", effectLabel: "Ogni livello: tutti i corsi il 10% più veloci · Livello 5: +50%", effect: "courseSpeedBonus", effectPerLevel: 0.1, baseCost: 20_000, costGrowth: LEVEL_GROWTH, levelCosts: [20_000, 40_000, 80_000, 160_000, 320_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 2, requiredBranchPoints: 0 },
+  { id: "recommendation-letters", category: "network", title: "Lettere di raccomandazione", description: "Tre righe firmate dalla Sede madre aprono porte che nemmeno sapevi chiuse.", effectLabel: "Ogni livello: +1 punto Reputazione alla prossima fondazione · Livello 3: +3", effect: "foundationReputationBonus", effectPerLevel: 1, baseCost: 50_000, costGrowth: LEVEL_GROWTH, levelCosts: [50_000, 150_000, 450_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 3, requiredBranchPoints: 0 },
+  { id: "network-circuit", category: "network", title: "Circuito della Rete", description: "Le scuole si passano piazze, date e contatti. Il gazebo, invece, se lo tengono stretto.", effectLabel: "Ogni livello: +1% di contatti dagli eventi per ogni scuola della Rete", effect: "networkEventContactBonus", effectPerLevel: 0.01, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000, 800_000, 1_600_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 5, requiredBranchPoints: 0 },
+  { id: "masters-roll", category: "network", title: "Albo dei Maestri", description: "Gli Istruttori della Rete seguono i nuovi arrivati anche prima che arrivino. Non chiedere come.", effectLabel: "Ogni livello: +10% che un nuovo iscritto arrivi con la Forma 1 · Livello 5: 50%", effect: "enrollmentFormOneChance", effectPerLevel: 0.1, baseCost: 150_000, costGrowth: LEVEL_GROWTH, levelCosts: [150_000, 300_000, 600_000, 1_200_000, 2_400_000], networkCostGrowth: 0, maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 7, requiredBranchPoints: 0 },
+  { id: "national-sponsor", category: "network", title: "Sponsor nazionale", description: "Un marchio, dieci scuole, un solo contratto. Il logo va sulla manica sinistra.", effectLabel: "Ogni livello: +1.000 € al mese per ogni scuola della Rete", effect: "networkSponsorIncome", effectPerLevel: 1_000, baseCost: 500_000, costGrowth: LEVEL_GROWTH, levelCosts: [500_000, 1_500_000, 4_500_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 10, requiredBranchPoints: 0 },
+  { id: "network-arena", category: "network", title: "Arena della Rete", description: "Chi arriva ha già visto combattere tredici scuole. Si nota dal primo saluto.", effectLabel: "Ogni livello: Arena e Stile di partenza dei nuovi atleti +5% · Livello 3: +15%", effect: "athleteBaseStatsBonus", effectPerLevel: 0.05, baseCost: 1_000_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000_000, 3_000_000, 9_000_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 13, requiredBranchPoints: 0 },
+  { id: "legends-visit", category: "network", title: "Leggende in visita", description: "Sedici scuole fanno rumore. Qualche Leggendario passa a vedere di persona.", effectLabel: "Ogni livello: +20% di probabilità di trovare Leggendari tra i nuovi contatti · Livello 3: +60%", effect: "legendaryAppearanceBonus", effectPerLevel: 0.2, baseCost: 2_000_000, costGrowth: LEVEL_GROWTH, levelCosts: [2_000_000, 6_000_000, 18_000_000], networkCostGrowth: 0, maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 16, requiredBranchPoints: 0 },
+  { id: "grand-council", category: "network", title: "Gran Consiglio", description: "Venti scuole, un tavolo, nessuno d'accordo. Però votano tutti per te.", effectLabel: "La Reputazione della prossima fondazione vale il doppio", effect: "foundationReputationDouble", effectPerLevel: 1, baseCost: 10_000_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000_000], networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, requiredNetworkSchools: 20, requiredBranchPoints: 0 },
   // Percorsi Segreti: si scoprono con le imprese, non con i punti.
   { id: "project-x", category: "secrets", title: "Corso X", description: "Un anno dedicato a una Forma 1 più avanzata e ai primi rudimenti di Forma 2 in arena. Chi ci arriva, di solito, non torna indietro.", effectLabel: "Apre il Corso X, con le sue qualifiche da Istruttore e Tecnico", effect: "courseXUnlock", effectPerLevel: 1, baseCost: 1, costGrowth: LEVEL_GROWTH, levelCosts: [1], networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, secretHint: "Vincere il torneo più superbo dell'anno è solo l'inizio" },
   { id: "divine-touch", category: "secrets", title: "ToccoDiGilo", description: "Gli Istruttori insegnano le Forme a una velocità che non ha spiegazioni. Meglio non chiederne.", effectLabel: "Gli Istruttori insegnano le Forme quasi all'istante (+9999%)", effect: "instructorTeachingSpeed", effectPerLevel: 99.99, baseCost: 1_000_000, costGrowth: LEVEL_GROWTH, levelCosts: [1_000_000], networkCostGrowth: 0, maxLevel: 1, requiredFame: noFame, secretHint: "Esistono forze più grandi di quanto avresti mai potuto immaginare" },
@@ -533,6 +554,25 @@ export function getDepartureRiskReduction(levels: UpgradeLevels): number {
 /** Calendario fitto: what is left of the wait before an event can run again. */
 export function getEventCooldownMultiplier(levels: UpgradeLevels): number {
   return 1 - Math.min(0.5, getUpgradeEffectTotal(levels, "eventCooldownReduction"));
+}
+
+/** Scambio di Istruttori: read straight from its level, it runs for every course start. */
+export function getNetworkCourseSpeedBonus(levels: UpgradeLevels): number {
+  return Math.min(5, levels["instructor-exchange"] ?? 0) * 0.1;
+}
+
+/** Rete dell'Ordine: effects that grow with the schools in the network. */
+export function getNetworkEventContactMultiplier(levels: UpgradeLevels, schoolCount: number): number {
+  return 1 + getUpgradeEffectTotal(levels, "networkEventContactBonus") * Math.max(0, schoolCount);
+}
+
+export function getNetworkSponsorIncome(levels: UpgradeLevels, schoolCount: number): number {
+  return getUpgradeEffectTotal(levels, "networkSponsorIncome") * Math.max(0, schoolCount);
+}
+
+/** Multitasking: benches in the Gadget laboratory, 1 + level (at most 3). */
+export function getGadgetWorkCapacity(levels: UpgradeLevels): number {
+  return 1 + Math.min(2, getUpgradeEffectTotal(levels, "gadgetWorkCapacity"));
 }
 
 /** Rhythm Gamer: ×(1 + 0,2 per livello) on the chance to open the next rarity. */

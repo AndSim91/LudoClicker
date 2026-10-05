@@ -16,6 +16,7 @@ import {
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getSISTechnicianCourseSpeedBonus,
+  getNetworkCourseSpeedBonus,
   isSISTechnicianCourseUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
@@ -109,7 +110,8 @@ export function getTrainingDurationMultiplier(
   teachingCounts?: ReadonlyMap<string, number>,
 ): number {
   const track = getTrainingTrack(training);
-  let speed = 1 + getPagoSportAllCourseSpeedBonus(state.upgrades);
+  let speed = 1 + getPagoSportAllCourseSpeedBonus(state.upgrades) +
+    getNetworkCourseSpeedBonus(state.upgrades);
   // Reputation (Formazione) speeds up every course: athletes, agonists, Instructors, Technicians.
   speed *= getReputationMultiplier(state, "training");
   if (

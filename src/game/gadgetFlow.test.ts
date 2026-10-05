@@ -105,7 +105,7 @@ function commonRarity(
 }
 
 function completeCurrentWork(state: GameState): GameState {
-  const work = state.gadgets.activeWork!;
+  const work = state.gadgets.activeWorks[0];
   const remaining = getGadgetWorkRequirement(work.productId, work.kind, work.rarity) -
     work.completedWorkMs;
   return processGadgets(state, remaining / getGadgetWorkSpeed(state, work.kind), 2_000);
@@ -179,7 +179,7 @@ describe("Gadget flow", () => {
     expect(paid.gadgets.products.wristband.projectPurchased).toBe(true);
 
     const prototypeReady = completeCurrentWork(paid);
-    expect(prototypeReady.gadgets.activeWork).toBeUndefined();
+    expect(prototypeReady.gadgets.activeWorks).toEqual([]);
     expect(prototypeReady.gadgets.minigame).toMatchObject({
       productId: "wristband",
       status: "ready",
@@ -211,7 +211,7 @@ describe("Gadget flow", () => {
     const paid = startGadgetProject(withoutStaff, "wristband");
     const paused = processGadgets(paid, 60_000, 61_000);
 
-    expect(paused.gadgets.activeWork?.completedWorkMs).toBe(0);
+    expect(paused.gadgets.activeWorks[0]?.completedWorkMs).toBe(0);
 
     const staffed = { ...paused, collaborators: [gadgetCollaborator()] };
     expect(completeCurrentWork(staffed).gadgets.minigame?.status).toBe("ready");
@@ -676,7 +676,7 @@ describe("Gadget flow", () => {
     };
 
     const revision = startGadgetRevision(ready, "wristband");
-    expect(revision.gadgets.activeWork).toMatchObject({
+    expect(revision.gadgets.activeWorks[0]).toMatchObject({
       rarity: "common",
       opportunityRarity: "rare",
     });
@@ -810,5 +810,46 @@ describe("Gadget flow", () => {
         sold.gadgets.products.wristband.rarities.rare.unitsSold,
     ).toBeGreaterThanOrEqual(GADGET_PROJECT_UNLOCK_SALES);
     expect(sold.gadgets.products.mug.unlocked).toBe(true);
+  });
+});
+
+describe("Multitasking", () => {
+  function twoProducts(level: number): GameState {
+    const state = unlockedState();
+    return {
+      ...state,
+      upgrades: { ...state.upgrades, multitasking: level },
+      gadgets: {
+        ...state.gadgets,
+        products: {
+          ...state.gadgets.products,
+          keychain: { ...state.gadgets.products.keychain, unlocked: true },
+          mug: { ...state.gadgets.products.mug, unlocked: true },
+        },
+      },
+    };
+  }
+
+  it("runs one work per bench, each at full speed, and queues the collaudi", () => {
+    const single = startGadgetProject(startGadgetProject(twoProducts(0), "wristband"), "keychain");
+    expect(single.gadgets.activeWorks).toHaveLength(1);
+
+    let state = twoProducts(2);
+    for (const productId of ["wristband", "keychain", "mug"] as const) {
+      state = startGadgetProject(state, productId);
+    }
+    expect(state.gadgets.activeWorks.map((work) => work.productId)).toEqual(["wristband", "keychain", "mug"]);
+
+    const longest = Math.max(...state.gadgets.activeWorks.map((work) =>
+      getGadgetWorkRequirement(work.productId, work.kind, work.rarity)));
+    const done = processGadgets(state, longest / getGadgetWorkSpeed(state, "development"), 2_000);
+    expect(done.gadgets.activeWorks).toEqual([]);
+    expect(done.gadgets.minigame?.productId).toBe("wristband");
+    expect(done.gadgets.minigameQueue?.map((queued) => queued.productId)).toEqual(["keychain", "mug"]);
+
+    const played = completeGadgetMinigame(startGadgetMinigame(done, "wristband"), "wristband", 80);
+    const accepted = acceptGadgetProduct(played, "wristband");
+    expect(accepted.gadgets.minigame?.productId).toBe("keychain");
+    expect(accepted.gadgets.minigameQueue?.map((queued) => queued.productId)).toEqual(["mug"]);
   });
 });

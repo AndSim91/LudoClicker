@@ -1,4 +1,5 @@
-import { getGadgetRarityChanceMultiplier } from "../../content/upgrades";
+import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity } from "../../content/upgrades";
+import { getGadgetWorkFor, hasFreeGadgetBench, isGadgetMinigameQueued } from "../../game/gadgetFlow";
 import { memo, useCallback, useEffect, useState, type CSSProperties } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
@@ -113,6 +114,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   productId,
   work,
   minigame,
+  queued,
   slotBusy,
   canRollNextRarity,
   rarityChanceMultiplier,
@@ -133,6 +135,8 @@ const GadgetProductCard = memo(function GadgetProductCard({
   productId: GadgetProductId;
   work?: GadgetWorkState;
   minigame?: GadgetMinigameState;
+  /** Its collaudo waits behind the open one (Multitasking). */
+  queued: boolean;
   slotBusy: boolean;
   canRollNextRarity: boolean;
   rarityChanceMultiplier: number;
@@ -262,6 +266,8 @@ const GadgetProductCard = memo(function GadgetProductCard({
           </>
         ) : minigame?.status === "ready" ? (
           <span className="gadget-status-label is-ready">Collaudo pronto</span>
+        ) : queued ? (
+          <span className="gadget-status-label is-ready">Collaudo in coda</span>
         ) : product.accepted && highestRarityState.quality === 0 ? (
           <span className="gadget-status-label is-warning">Non vendibile</span>
         ) : product.accepted ? (
@@ -285,7 +291,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
           <button type="button" className="primary" onClick={() => onStartMinigame(productId)}>
             Avvia collaudo
           </button>
-        ) : work || minigame ? null : !product.prototypeCompleted ? null : !product.accepted ? (
+        ) : work || minigame || queued ? null : !product.prototypeCompleted ? null : !product.accepted ? (
           <>
             <button type="button" className="primary" onClick={() => onAccept(productId)}>
               Metti in vendita
@@ -356,8 +362,8 @@ export function GadgetsView({
     return () => onPracticeRunningChange?.(false);
   }, [onPracticeRunningChange, practiceRunning]);
   const productivity = getGadgetProductivity(state);
-  const activeWork = state.gadgets.activeWork;
-  const workProgress = getGadgetWorkProgress(state);
+  const activeWorks = state.gadgets.activeWorks;
+  const benches = getGadgetWorkCapacity(state.upgrades);
   const minigame = state.gadgets.minigame;
   const minigameProduct = minigame
     ? state.gadgets.products[minigame.productId]
@@ -412,18 +418,27 @@ export function GadgetsView({
         <div className="gadget-overview-item gadget-overview-work">
           <span className="gadget-overview-icon" aria-hidden="true"><Icon name="flask" /></span>
           <span>
-            <small>Laboratorio</small>
-            {activeWork && workProgress !== undefined ? (
-              <>
-                <strong>
-                  {activeWork.kind === "development" ? "Progetto" : "Revisione"} {GADGET_DEFINITIONS[activeWork.productId].name}
-                </strong>
-                <ProgressBar
-                  label={`Avanzamento ${GADGET_DEFINITIONS[activeWork.productId].name}`}
-                  value={workProgress}
-                  paused={productivity <= 0}
-                />
-              </>
+            <small>
+              Laboratorio{benches > 1 ? ` · ${activeWorks.length} di ${benches} banchi` : ""}
+            </small>
+            {activeWorks.length > 0 ? (
+              <span className="gadget-lab-benches">
+                {activeWorks.map((work) => (
+                  <span key={work.productId} className="gadget-lab-bench">
+                    <strong>
+                      {work.kind === "development" ? "Progetto" : "Revisione"} {GADGET_DEFINITIONS[work.productId].name}
+                    </strong>
+                    <ProgressBar
+                      label={`Avanzamento ${GADGET_DEFINITIONS[work.productId].name}`}
+                      value={getGadgetWorkProgress(work)}
+                      paused={productivity <= 0}
+                    />
+                  </span>
+                ))}
+                {benches > activeWorks.length
+                  ? <span className="gadget-lab-bench is-free">— banco libero —</span>
+                  : null}
+              </span>
             ) : minigame?.status === "ready" ? (
               <strong>Collaudo pronto</strong>
             ) : (
@@ -460,13 +475,12 @@ export function GadgetsView({
               key={productId}
               product={product}
               productId={productId}
-              work={state.gadgets.activeWork?.productId === productId
-                ? state.gadgets.activeWork
-                : undefined}
+              work={getGadgetWorkFor(state.gadgets, productId)}
               minigame={state.gadgets.minigame?.productId === productId
                 ? state.gadgets.minigame
                 : undefined}
-              slotBusy={Boolean(state.gadgets.activeWork || state.gadgets.minigame)}
+              queued={isGadgetMinigameQueued(state.gadgets, productId)}
+              slotBusy={!hasFreeGadgetBench(state)}
               rarityChanceMultiplier={getGadgetRarityChanceMultiplier(state.upgrades)}
               canRollNextRarity={product.prototypeCompleted &&
                 canRollNextGadgetRarity(state, productId, highestRarity)}

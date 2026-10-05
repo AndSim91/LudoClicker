@@ -110,6 +110,18 @@ export function NetworkView({
                 <b>{won ? `+${GAME_CONFIG.reputationTournamentPoints}` : `+${GAME_CONFIG.reputationTournamentPoints} possibili`}</b>
               </li>
             ))}
+            {preview.letterPoints > 0 ? (
+              <li className="is-done">
+                <span>Lettere di raccomandazione</span>
+                <b>+{preview.letterPoints}</b>
+              </li>
+            ) : null}
+            {preview.councilDoubled ? (
+              <li className="is-done">
+                <span>Gran Consiglio<small>il totale vale doppio</small></span>
+                <b>×2</b>
+              </li>
+            ) : null}
           </ul>
           <button type="button" className="network-found" disabled={!ready} onClick={() => setFounding(true)}>
             Fonda una nuova scuola…

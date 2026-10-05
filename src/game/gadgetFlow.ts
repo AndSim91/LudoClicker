@@ -1,4 +1,4 @@
-import { getGadgetRarityChanceMultiplier } from "../content/upgrades";
+import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity } from "../content/upgrades";
 import { getReputationMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
@@ -38,11 +38,37 @@ import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
 import { addMessage } from "./stateUpdates";
 import type {
+  GadgetMinigameState,
   GadgetProductId,
   GadgetRarity,
+  GadgetState,
+  GadgetWorkState,
   GameState,
   TournamentResult,
 } from "./types";
+
+/** Multitasking: a bench is free while fewer works run than the lab holds. */
+export function hasFreeGadgetBench(state: GameState): boolean {
+  return state.gadgets.activeWorks.length < getGadgetWorkCapacity(state.upgrades);
+}
+
+export function getGadgetWorkFor(
+  gadgets: GadgetState,
+  productId: GadgetProductId,
+): GadgetWorkState | undefined {
+  return gadgets.activeWorks.find((work) => work.productId === productId);
+}
+
+export function isGadgetMinigameQueued(gadgets: GadgetState, productId: GadgetProductId): boolean {
+  return (gadgets.minigameQueue ?? []).some((queued) => queued.productId === productId);
+}
+
+/** When the open collaudo closes, the next one in the queue becomes the open one. */
+function promoteNextMinigame(gadgets: GadgetState): GadgetState {
+  if (gadgets.minigame || !gadgets.minigameQueue?.length) return gadgets;
+  const [next, ...rest] = gadgets.minigameQueue;
+  return { ...gadgets, minigame: next, minigameQueue: rest };
+}
 
 function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(Number.isFinite(score) ? score : 0)));
@@ -105,8 +131,7 @@ export function startGadgetProject(
     !state.unlocks.gadget ||
     !product?.unlocked ||
     product.projectPurchased ||
-    state.gadgets.activeWork ||
-    state.gadgets.minigame ||
+    !hasFreeGadgetBench(state) ||
     state.school.euros < definition.projectCost
   ) return state;
 
@@ -122,12 +147,12 @@ export function startGadgetProject(
         ...state.gadgets.products,
         [productId]: { ...product, projectPurchased: true },
       },
-      activeWork: {
+      activeWorks: [...state.gadgets.activeWorks, {
         productId,
         kind: "development",
         rarity: "common",
         completedWorkMs: 0,
-      },
+      }],
     },
   };
 }
@@ -155,8 +180,10 @@ export function startGadgetRevision(
     !product.projectPurchased ||
     !product.prototypeCompleted ||
     !canImprove ||
-    state.gadgets.activeWork ||
-    (state.gadgets.minigame !== undefined && !resultForProduct) ||
+    !hasFreeGadgetBench(state) ||
+    getGadgetWorkFor(state.gadgets, productId) ||
+    isGadgetMinigameQueued(state.gadgets, productId) ||
+    (state.gadgets.minigame?.productId === productId && !resultForProduct) ||
     state.school.euros < cost
   ) return state;
 
@@ -181,17 +208,17 @@ export function startGadgetRevision(
       ...state.school,
       euros: roundCurrency(state.school.euros - cost),
     },
-    gadgets: {
+    gadgets: promoteNextMinigame({
       ...state.gadgets,
-      minigame: undefined,
-      activeWork: {
+      minigame: resultForProduct ? undefined : state.gadgets.minigame,
+      activeWorks: [...state.gadgets.activeWorks, {
         productId,
         kind: "revision",
         rarity,
         opportunityRarity,
         completedWorkMs: 0,
-      },
-    },
+      }],
+    }),
   };
 }
 
@@ -226,6 +253,29 @@ export function completeGadgetMinigame(
     minigame.status !== "running"
   ) return state;
   const score = clampScore(rawScore);
+  const { products, unlockedRarity } = applyGadgetCollaudo(state, minigame, score);
+  return {
+    ...state,
+    gadgets: {
+      ...state.gadgets,
+      products,
+      minigame: {
+        ...minigame,
+        status: "result",
+        score,
+        unlockedRarity,
+      },
+    },
+  };
+}
+
+/** The outcome of a collaudo on the product: quality kept at its best, next rarity if earned. */
+function applyGadgetCollaudo(
+  state: GameState,
+  minigame: GadgetMinigameState,
+  score: number,
+): { products: GadgetState["products"]; unlockedRarity?: GadgetRarity } {
+  const productId = minigame.productId;
   const product = state.gadgets.products[productId];
   const rarity = minigame.rarity;
   const currentRarity = product.rarities[rarity];
@@ -255,24 +305,15 @@ export function completeGadgetMinigame(
         },
       };
   return {
-    ...state,
-    gadgets: {
-      ...state.gadgets,
-      products: {
-        ...state.gadgets.products,
-        [productId]: {
-          ...product,
-          prototypeCompleted: true,
-          rarities,
-        },
-      },
-      minigame: {
-        ...minigame,
-        status: "result",
-        score,
-        unlockedRarity,
+    products: {
+      ...state.gadgets.products,
+      [productId]: {
+        ...product,
+        prototypeCompleted: true,
+        rarities,
       },
     },
+    unlockedRarity,
   };
 }
 
@@ -288,7 +329,7 @@ export function dismissGadgetMinigameResult(
   ) return state;
   return {
     ...state,
-    gadgets: { ...state.gadgets, minigame: undefined },
+    gadgets: promoteNextMinigame({ ...state.gadgets, minigame: undefined }),
   };
 }
 
@@ -304,77 +345,70 @@ export function acceptGadgetProduct(
     !product?.projectPurchased ||
     !product.prototypeCompleted ||
     product.accepted ||
-    state.gadgets.activeWork?.productId === productId ||
-    (minigame !== undefined &&
-      (minigame.productId !== productId || minigame.status !== "result"))
+    getGadgetWorkFor(state.gadgets, productId) ||
+    isGadgetMinigameQueued(state.gadgets, productId) ||
+    (minigame?.productId === productId && minigame.status !== "result")
   ) return state;
   return {
     ...state,
-    gadgets: {
+    gadgets: promoteNextMinigame({
       ...state.gadgets,
       minigame: minigame?.productId === productId ? undefined : minigame,
       products: {
         ...state.gadgets.products,
         [productId]: { ...product, accepted: true },
       },
-    },
+    }),
   };
 }
 
+/** Every bench works at the full speed of the laboratory (Multitasking). */
 function processGadgetWork(state: GameState, elapsedMs: number): GameState {
-  const work = state.gadgets.activeWork;
-  if (!work || elapsedMs <= 0) return state;
-  const speed = getGadgetWorkSpeed(state, work.kind);
-  if (speed <= 0) return state;
-  const requiredWork = getGadgetWorkRequirement(
-    work.productId,
-    work.kind,
-    work.rarity,
-  );
-  const completedWorkMs = Math.min(
-    requiredWork,
-    work.completedWorkMs + elapsedMs * speed,
-  );
-  if (completedWorkMs < requiredWork) {
-    return {
-      ...state,
-      gadgets: {
-        ...state.gadgets,
-        activeWork: { ...work, completedWorkMs },
-      },
-    };
+  if (state.gadgets.activeWorks.length === 0 || elapsedMs <= 0) return state;
+  let next = state;
+  const remaining: GadgetWorkState[] = [];
+  for (const work of state.gadgets.activeWorks) {
+    const speed = getGadgetWorkSpeed(state, work.kind);
+    const requiredWork = getGadgetWorkRequirement(work.productId, work.kind, work.rarity);
+    const completedWorkMs = speed > 0
+      ? Math.min(requiredWork, work.completedWorkMs + elapsedMs * speed)
+      : work.completedWorkMs;
+    if (completedWorkMs < requiredWork) {
+      remaining.push(completedWorkMs === work.completedWorkMs ? work : { ...work, completedWorkMs });
+    } else {
+      next = finishGadgetWork(next, work);
+    }
   }
+  return { ...next, gadgets: { ...next.gadgets, activeWorks: remaining } };
+}
+
+/** A finished work opens its collaudo, or queues it behind the open one. */
+function finishGadgetWork(state: GameState, work: GadgetWorkState): GameState {
   const product = state.gadgets.products[work.productId];
   const rarityState = product.rarities[work.rarity];
-  const minigameSeed = state.randomSeed;
   const [, randomSeed] = nextRandom(state.randomSeed);
+  const minigame: GadgetMinigameState = {
+    productId: work.productId,
+    kind: work.kind,
+    rarity: work.rarity,
+    opportunityRarity: work.opportunityRarity,
+    seed: state.randomSeed,
+    previousQuality: rarityState.quality,
+    status: "ready",
+  };
   // The collaudo is played at the opportunity's rarity when there is one (as in the UI).
-  const mastered = isGadgetRarityMastered(
-    state,
-    work.productId,
-    work.opportunityRarity ?? work.rarity,
-  );
-  const next: GameState = {
+  if (isGadgetRarityMastered(state, work.productId, work.opportunityRarity ?? work.rarity)) {
+    // Maestria: 100 without playing and no result window; the card offers «Metti in vendita».
+    const { products } = applyGadgetCollaudo(state, minigame, 100);
+    return { ...state, randomSeed, gadgets: { ...state.gadgets, products } };
+  }
+  return {
     ...state,
     randomSeed,
-    gadgets: {
-      ...state.gadgets,
-      activeWork: undefined,
-      minigame: {
-        productId: work.productId,
-        kind: work.kind,
-        rarity: work.rarity,
-        opportunityRarity: work.opportunityRarity,
-        seed: minigameSeed,
-        previousQuality: rarityState.quality,
-        status: mastered ? "running" : "ready",
-      },
-    },
+    gadgets: state.gadgets.minigame
+      ? { ...state.gadgets, minigameQueue: [...(state.gadgets.minigameQueue ?? []), minigame] }
+      : { ...state.gadgets, minigame },
   };
-  if (!mastered) return next;
-  // Maestria: 100 without playing and no result window; the card offers «Metti in vendita».
-  const completed = completeGadgetMinigame(next, work.productId, 100);
-  return { ...completed, gadgets: { ...completed.gadgets, minigame: undefined } };
 }
 
 interface SaleResult {

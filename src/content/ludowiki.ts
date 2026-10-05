@@ -304,6 +304,8 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       "Creatività resta una catena: ogni nodo è il catalogo email successivo.",
       "Occhio del Maestro decide quando si vedono Arena e Stile; Istruttori in e-Learning fa formare da soli gli Istruttori; Eventi nel Multiverso fa girare più copie dello stesso evento, che costano il doppio e trovano meno contatti.",
       "Calendario fitto accorcia le attese tra gli eventi, Chat di Gruppo trattiene gli iscritti, Porta un amico porta contatti, Progetto Influencer porta Follower sicuri, Rhythm Gamer apre prima le rarità dei Gadget, Conto deposito paga interessi sui Fondi.",
+      "Dalla prima fondazione compare la Rete dell'Ordine: i suoi nodi si aprono con le scuole fondate (1, 2, 3, 5, 7, 10, 13, 16, 20) e alcuni crescono con la Rete.",
+      "Multitasking dà al laboratorio Gadget un secondo e un terzo banco: i collaudi in più aspettano in coda.",
       "I percorsi segreti compaiono soltanto dopo la loro scoperta nel gioco.",
     ],
     related: ["economia-scuola", "collaboratori-settori", "gadget"],

@@ -804,6 +804,7 @@ export function processAutomaticTeaching(
     automaticFormOrder.map((formId, index) => [formId, index]),
   );
   const originalOrder = new Map(students.map((student, index) => [student.id, index]));
+  const departureRiskReduction = getDepartureRiskReduction(state.upgrades);
   const studentPriorities = new Map(students.map((student) => {
     const contact = "acquiredAt" in student
       ? student
@@ -825,7 +826,7 @@ export function processAutomaticTeaching(
         student.forms,
         contact.rarity,
         state.network.schoolCount,
-        getDepartureRiskReduction(state.upgrades),
+        departureRiskReduction,
       )
       : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];
