@@ -9,10 +9,7 @@ import {
   isSecretLegendaryId,
 } from "./legendaryAvailability";
 import type { CollaboratorMasteryRole, GameState, ReptileSector } from "./types";
-import {
-  LIGHT_INFLATION_CAUSES,
-  LIGHT_INFLATION_EVENT_VISIBILITY_MS,
-} from "./lightInflation";
+import { LIGHT_INFLATION_EVENT_VISIBILITY_MS } from "./lightInflation";
 import { isValidGadgetMastery, isValidGadgetState } from "./gadgetState";
 import { REPUTATION_UPGRADE_IDS } from "./reputation";
 
@@ -212,9 +209,8 @@ function hasValidLightInflation(state: Partial<GameState>): boolean {
       (Number.isSafeInteger(inflation.lastCheckedJanuaryMonth) &&
         inflation.lastCheckedJanuaryMonth >= 1)) &&
     (inflation.event === undefined ||
-      (LIGHT_INFLATION_CAUSES.includes(
-        inflation.event.cause as typeof LIGHT_INFLATION_CAUSES[number],
-      ) &&
+      // Any text: the causes get rewritten, and an old one must not throw the save away.
+      (typeof inflation.event.cause === "string" &&
         Number.isFinite(inflation.event.increase) &&
         inflation.event.increase > 0 && inflation.event.increase <= 1 &&
         Number.isFinite(inflation.event.occurredAt) &&

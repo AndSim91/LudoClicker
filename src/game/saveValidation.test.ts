@@ -39,6 +39,22 @@ describe("save validation at extreme scale", () => {
     })).toBe(false);
   });
 
+  it("keeps a save whose Inflazione di Luce cause was rewritten since", () => {
+    const initial = createInitialState(1_000, "", false);
+    expect(isValidGameState({
+      ...initial,
+      lightInflation: {
+        ...initial.lightInflation,
+        event: {
+          cause: "del finanziamento del \"Bonus Gestori\"",
+          increase: 1,
+          occurredAt: 1_000,
+          visibleUntil: 61_000,
+        },
+      },
+    })).toBe(true);
+  });
+
   it("accepts a finite negative balance caused by Reptile completion costs", () => {
     const initial = createInitialState(1_000, "", false);
     expect(isValidGameState({
