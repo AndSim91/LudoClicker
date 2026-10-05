@@ -9,6 +9,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { reloadOnStaleChunk } from "./reloadOnStaleChunk";
 import { Icon } from "../components/common/Icon";
 import { ProfileNameDialog } from "../components/ProfileNameDialog";
 import { AppRail, type AppView } from "../components/outlook-shell/AppRail";
@@ -78,10 +79,10 @@ const StableMessageList = memo(MessageList);
 const StableSentMailDetail = memo(SentMailDetail);
 const StableComposer = memo(Composer);
 // ponytail: lazy-load only the late-game views; core mail/upgrade views stay in the main chunk.
-const AdminEmailView = lazy(() => import("../features/admin/AdminEmailView").then((module) => ({ default: module.AdminEmailView })));
-const TournamentsView = lazy(() => import("../features/tournaments/TournamentsView").then((module) => ({ default: module.TournamentsView })));
-const GadgetsView = lazy(() => import("../features/gadgets/GadgetsView").then((module) => ({ default: module.GadgetsView })));
-const LudoWikiView = lazy(() => import("../features/ludowiki/LudoWikiView").then((module) => ({ default: module.LudoWikiView })));
+const AdminEmailView = lazy(reloadOnStaleChunk(() => import("../features/admin/AdminEmailView").then((module) => ({ default: module.AdminEmailView }))));
+const TournamentsView = lazy(reloadOnStaleChunk(() => import("../features/tournaments/TournamentsView").then((module) => ({ default: module.TournamentsView }))));
+const GadgetsView = lazy(reloadOnStaleChunk(() => import("../features/gadgets/GadgetsView").then((module) => ({ default: module.GadgetsView }))));
+const LudoWikiView = lazy(reloadOnStaleChunk(() => import("../features/ludowiki/LudoWikiView").then((module) => ({ default: module.LudoWikiView }))));
 const BOSS_KEY = "F9";
 const StableUpgradesView = memo(UpgradesView);
 const StableEventsView = memo(EventsView);
