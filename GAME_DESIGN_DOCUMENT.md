@@ -944,8 +944,9 @@ Ogni evento richiede:
 
 Ogni evento gira una copia alla volta; con **Eventi nel Multiverso** (§ 10.3)
 sotto un evento in corso compare «Altra copia · prezzo»: la copia costa il
-doppio della precedente, chiede gli stessi iscritti e le stesse spade, e la
-pausa di ricarica parte quando finisce l'ultima copia.
+doppio della precedente e trova il 25% di contatti in meno per ogni copia già in
+corso (−25% la seconda, −50% la terza), chiede gli stessi iscritti e le stesse
+spade, e la pausa di ricarica parte quando finisce l'ultima copia.
 
 > **Da implementare:** non esistono requisiti di Carisma, Social o Attrezzatura per avviare un evento, oltre a iscritti, spade disponibili, Euro, Fama e cooldown.
 
@@ -1446,7 +1447,8 @@ Con **Eventi nel Multiverso** (Carisma, § 10.3) lo stesso evento può girare in
 più copie contemporanee. L'automazione prova prima gli eventi che non sono già
 in corso, sempre dal più economico; solo se nessuno può partire apre una copia
 di un evento in corso, dalla copia più economica (ogni copia costa il doppio
-della precedente, il Volantinaggio resta gratis), finché i fondi bastano.
+della precedente e trova meno contatti, il Volantinaggio resta gratis), finché
+i fondi bastano.
 
 La raccolta automatica deve essere più lenta degli eventi gestiti attivamente,
 ma sufficiente a impedire un blocco totale nelle fasi avanzate.
@@ -1864,6 +1866,8 @@ X e Y non riducono da soli il rischio. Comuni, Rari e Ultra Rari seguono la
 curva ordinaria fino alla Forma 6; a Forma 7 si applicano valori specifici per
 rarità. I Leggendari hanno sempre probabilità 0%. Normalmente un Ultra Raro è
 già collaboratore dal Corso Y ed è quindi escluso da questo controllo.
+**Chat di Gruppo** (Accoglienza, § 10.4) toglie il 10% del rischio per livello,
+fino a metà.
 
 | Forma più alta        | Comuni | Rari | Ultra Rari | Leggendari |
 | --------------------- | -----: | ---: | ---------: | ---------: |
@@ -1892,8 +1896,8 @@ per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
 La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
 Insegnamento e Organizzazione**, seguiti dalla riga dei **Percorsi Segreti**.
-Ogni ramo è **una sola linea di nodi**, senza rami laterali: Scrittura e
-Insegnamento ne hanno 9, Carisma e Attrezzatura 8, gli altri 7. Il ramo Gadget
+Ogni ramo è **una sola linea di nodi**, senza rami laterali, al massimo nove:
+Scrittura, Carisma, Accoglienza e Insegnamento ne hanno 9, gli altri 8. Il ramo Gadget
 compare soltanto dopo lo sblocco del settore. Social non ha più un ramo
 separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 
@@ -1990,6 +1994,16 @@ Soglie in punti di Creatività: 0 · 5 · 10 · 15 · 20 · 25 · 30. Il ramo re
 una catena per ragioni narrative (ogni nodo è il catalogo email successivo):
 le soglie coincidono con «tutti i nodi precedenti completi».
 
+**Progetto Influencer** (ultimo nodo, 35 punti di Creatività e Social; 25.000 /
+50.000 / 100.000 / 200.000 / 400.000 €; «Ring light, sorriso e un balletto che
+nessuno aveva chiesto. I follower, però, arrivano.»): ogni contenuto Social
+porta **+1 Follower sicuro per livello**, oltre al tiro normale (al livello 5,
++5 a contenuto). Non dà punti Creatività e non cambia i cataloghi. La prima
+idea (+20% di probabilità di un Follower in più per livello) raddoppiava un
+numero troppo piccolo: nella prima scuola i contenuti Social portano 3–14
+Follower in tutto. Ogni Follower vale anche 1 Fama: il nodo sta in fondo
+alla catena perché non acceleri troppo il prestigio.
+
 ### 10.3 Carisma
 
 Migliora il pubblico raggiunto dagli eventi e la quota che lascia un contatto.
@@ -2014,13 +2028,24 @@ quella cosa 30.
 due universi paralleli. Il pubblico non nota la differenza.») permette di
 lanciare **di nuovo lo stesso evento mentre è in corso**: livello 1 fino a 2
 copie in contemporanea, livello 2 fino a 3. Ogni copia costa il **doppio della
-precedente** (50 → 100 → 200 €; il Volantinaggio resta gratuito) e chiede
-iscritti e spade come l'originale. La pausa di ricarica dell'evento parte
+precedente** (50 → 100 → 200 €; il Volantinaggio resta gratuito), trova
+**meno contatti** (−25% la seconda copia, −50% la terza: la frazione che resta
+diventa un contatto in più per sorte) e chiede iscritti e spade come
+l'originale; il pulsante lo dice («Altra copia · 100 € · −25% contatti»). Il
+taglio dei contatti (decisione del 05/10) frena gli Eventi, che con le copie
+erano diventati troppo forti. La pausa di ricarica dell'evento parte
 quando finisce **l'ultima copia**. Nella pagina Eventi, sotto un evento in
 corso compare il pulsante «Altra copia · prezzo» (§ 8). Gli addetti Eventi
 avviano prima gli eventi nuovi, dal più economico; solo quando nessun evento
 nuovo può partire aprono una copia, dalla più economica, finché i fondi
 bastano.
+
+**Calendario fitto** (ultimo nodo, 33 punti di Carisma; 25.000 / 50.000 /
+100.000 / 200.000 / 400.000 €; «Tra un evento e l'altro c'è giusto il tempo di
+ricaricare le spade. E il telefono.»): l'attesa prima di poter ripetere un
+evento scende del **10% per livello**, fino al −50%. Le attese in secondi si
+accorciano esatte; quelle in mesi restano mesi interi (arrotondati, almeno uno):
+1 mese resta 1, 3 mesi diventano 2, 120 mesi diventano 60.
 
 ### 10.4 Accoglienza
 
@@ -2034,15 +2059,18 @@ non punti percentuali aggiunti direttamente al risultato finale.
 | Materiale informativo chiaro | +1,5% del percorso | 150 / 300 / 600 / 1.200 / 2.400 € |
 | Lezione introduttiva collaudata | +2% del percorso | 300 / 600 / 1.200 / 2.400 / 4.800 € |
 | Sala preparata | +2,5% del percorso e −1 secondo alla prova; durata minima 10 secondi | 600 / 1.200 / 2.400 / 4.800 / 9.600 € |
+| Chat di Gruppo | −10% del rischio di non rinnovare a fine anno (§ 9.8); massimo −50% | 3.000 / 6.000 / 12.000 / 24.000 / 48.000 € |
 | Collaboratore dedicato | +3% del percorso e +10% efficacia del contributo Istruttori | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Accoglienza dell'Ordine | +4% del percorso | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Esperienza memorabile | +6% del percorso e 5% di recuperare una prova fallita; massimo 25% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Porta un amico | +3% che un nuovo iscritto porti un contatto; massimo 15% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 A ramo completo il percorso raggiunge il 100%. Al percorso si sommano anche il
 contributo degli Istruttori (10% della loro produttività, potenziato da
 Collaboratore dedicato), con tetto complessivo al 100%. La durata base della prova è 15 secondi, quindi Sala
 preparata al livello 5 la porta esattamente al minimo di 10 secondi.
-Soglie in punti di Accoglienza: 0 · 3 · 8 · 13 · 18 · 23 · 28; Esperienza
+Soglie in punti di Accoglienza: 0 · 3 · 8 · 13 · Chat di Gruppo 16 · 18 · 23 ·
+28 · Porta un amico 33; Esperienza
 memorabile chiede in più **10 punti in Insegnamento** (si insegna la Settima
 alla prima lezione di prova: serve una scuola che sa insegnare).
 
@@ -2050,6 +2078,14 @@ Il recupero di Esperienza memorabile vale una sola volta per contatto, esclude i
 Leggendari Segreti (e i Leggendari già iscritti) e rimette il contatto tra i
 disponibili: serve quindi scrivere e inviare una nuova email prima della
 seconda prova.
+
+**Chat di Gruppo** («Promemoria, foto dell'allenamento e trecento buongiorno al
+giorno. Chi è nel gruppo, a fine anno rinnova.») moltiplica il rischio annuale
+di § 9.8 per 1 − 10% a livello (anche nella scheda dell'iscritto). **Porta un
+amico** («La prova è gratis anche per l'amico. L'amico, di solito, non lo
+sapeva.») tira una volta per ogni prova che finisce in iscrizione: in caso di
+successo arriva un nuovo contatto con origine «Collaboratore», come quelli
+degli eventi narrativi.
 
 ### 10.5 Attrezzatura
 
@@ -2098,11 +2134,13 @@ diventa visibile soltanto con lo sblocco del settore.
 | Gestione degli ordini | +20% capacità commerciale per livello; massimo +100% | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
 | Formazione commerciale | +2 punti percentuali di conversione per livello; massimo +10 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 € |
 | Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| Rhythm Gamer | probabilità di aprire la rarità successiva ×(1 + 20% per livello); massimo ×2 | 7.500 / 15.000 / 30.000 / 60.000 / 120.000 € |
 
 Tutti i nodi richiedono lo sblocco del settore Gadget. Soglie in punti di
 Gadget, nell'ordine della linea: Vetrina della scuola 0, Strumenti di
 progettazione 0, Gestione degli ordini 2, Laboratorio revisioni 3, Negozio
-online 3 e lo sblocco di Social, Formazione commerciale 8, Vendita abbinata 12
+online 3 e lo sblocco di Social, **Rhythm Gamer** 5, Formazione commerciale 8,
+Vendita abbinata 12
 e il progetto Tazza già sbloccato. La capacità commerciale riceve anche i bonus generici di
 automazione dell'Organizzazione.
 
@@ -2163,6 +2201,7 @@ le entrate ricorrenti.
 | Modulo di iscrizione | +5% entrate dalle quote per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Priorità operative | rende modificabile la fila «Turni e precedenza» (chi consuma per primo Euro e spade e chi riceve aiuto) | 25.000 € |
 | A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
+| Conto deposito | +0,5% al mese sui primi 250.000 € di Fondi per livello; massimo 6.250 € al mese | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50%; richiede almeno una scuola fondata | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 
 Un settore principale è inattivo soltanto quando non ha lavoro reale da
@@ -2180,7 +2219,11 @@ sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
 Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
 3, Procedure standard 8, Modulo di iscrizione 13, Priorità operative 18 e
 **Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
-A.N.D.E.R. 18, Coordinamento multi-sede 23 e almeno una scuola fondata.
+A.N.D.E.R. 18, Conto deposito 23, Coordinamento multi-sede 23 e almeno una
+scuola fondata. Gli interessi del **Conto deposito** («La banca paga poco, ma
+paga. Il tesoriere dorme meglio.») si calcolano a fine mese sui Fondi di quel
+momento, entrano nelle entrate mensili e compaiono nel loro dettaglio come
+«Conto deposito».
 
 ### 10.9 Percorsi Segreti
 
@@ -3523,8 +3566,8 @@ casuale nascosta usando soltanto vendite e qualità già accumulate dalla rarit�
 attuale:
 
 ```text
-probabilitàPassaggio = min(100%, floor(venduti / 10) × 1%
-  + floor(qualità / 10) × 2,5%)
+probabilitàPassaggio = min(100%, (floor(venduti / 10) × 1%
+  + floor(qualità / 10) × 2,5%) × (1 + 20% × livello Rhythm Gamer))
 ```
 
 La barra verticale a sinistra della scheda prodotto rappresenta questo valore:

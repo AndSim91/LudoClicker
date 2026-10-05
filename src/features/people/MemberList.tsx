@@ -12,6 +12,7 @@ import {
   getInstructorBranchCapacityBonus,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
+  getDepartureRiskReduction,
   getOfficialStatsVisibilityTier,
 } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -126,6 +127,7 @@ function getDisplayedMemberStatus(
     student.forms,
     contact.rarity,
     context.foundedSchools,
+    context.departureRiskReduction,
   );
 }
 
@@ -262,6 +264,7 @@ export function MemberList({
       unrestrictedFormBranches: areAllFormBranchesUnlocked(state.upgrades),
       immunityContext,
       foundedSchools,
+      departureRiskReduction: getDepartureRiskReduction(state.upgrades),
       courseXUnlocked,
       statsTier: getOfficialStatsVisibilityTier(state.upgrades),
       collaboratorsByContactId,

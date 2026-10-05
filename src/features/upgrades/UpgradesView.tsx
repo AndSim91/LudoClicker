@@ -68,7 +68,7 @@ function formatNumber(value: number) {
 }
 
 function formatUpgradePercentage(value: number) {
-  return `${Math.round(value * 100)}%`;
+  return `${(value * 100).toLocaleString("it-IT", { maximumFractionDigits: 1 })}%`;
 }
 
 function getUpgradeBenefitsSummary(state: GameState) {
@@ -99,6 +99,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Quote mensili", "membershipIncomeMultiplier");
   addPercentage("Costi corsi Istruttori/Tecnici", "courseCostReduction", "−");
   addPercentage("Usura", "equipmentWearReduction", "−");
+  addPercentage("Attesa tra gli eventi", "eventCooldownReduction", "−");
+  addPercentage("Rischio di non rinnovare", "departureRiskReduction", "−");
+  addPercentage("Iscritti che portano un amico", "referralChance", "");
+  addPercentage("Interessi mensili sui Fondi", "depositInterestRate", "");
   addPercentage("Manutenzione automatica", "equipmentAutomationMultiplier");
   const preparedWorkMaximum = getEquipmentPreparedWorkMaximum(state);
   if (preparedWorkMaximum > 0) {
@@ -153,6 +157,9 @@ function getUpgradeBenefitsSummary(state: GameState) {
       {
         label: "Follower per contenuto",
         value: [
+          getUpgradeEffectTotal(state.upgrades, "socialExtraFollowers") > 0
+            ? `+${getUpgradeEffectTotal(state.upgrades, "socialExtraFollowers")} sicuri`
+            : "",
           formatUpgradePercentage(getSocialFollowerChance(state.upgrades)),
           getSocialDoubleFollowerChance(state.upgrades) > 0
             ? `${formatUpgradePercentage(getSocialDoubleFollowerChance(state.upgrades))} doppio`
@@ -249,8 +256,8 @@ function getUpgradeRequirementRows(state: GameState, definition: UpgradeDefiniti
     if (requirement.kind === "points") {
       const branch = getCategoryTitle(requirement.category);
       rows.push({
-        short: `${requirement.required} punti in ${branch}`,
-        full: `${requirement.required} punti in ${branch} (ne hai ${requirement.current})`,
+        short: `${requirement.required} ${requirement.required === 1 ? "punto" : "punti"} in ${branch}`,
+        full: `${requirement.required} ${requirement.required === 1 ? "punto" : "punti"} in ${branch} (ne hai ${requirement.current})`,
         met: requirement.met,
       });
     } else {

@@ -1,3 +1,4 @@
+import { getUpgradeEffectTotal } from "../content/upgrades";
 import { getContactBaseStats } from "./athleteStats";
 import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
@@ -128,6 +129,8 @@ export function resolveSocialContentCycles(
   let followersGained = 0;
   const followerChance = getSocialFollowerChance(state.upgrades);
   const doubleFollowerChance = getSocialDoubleFollowerChance(state.upgrades);
+  // Progetto Influencer: every content brings these Follower on top of the roll.
+  const extraFollowers = getUpgradeEffectTotal(state.upgrades, "socialExtraFollowers");
   for (let index = 0; index < cycles; index += 1) {
     const [followerRoll, seedAfterFollower] = nextRandom(nextSeed);
     nextSeed = seedAfterFollower;
@@ -136,7 +139,8 @@ export function resolveSocialContentCycles(
       : followerRoll < followerChance
         ? 1
         : 0;
-    followers += gained;
+    followers += gained + extraFollowers;
+    followersGained += extraFollowers;
     followersGained += gained;
   }
 

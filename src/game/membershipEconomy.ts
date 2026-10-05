@@ -1,5 +1,6 @@
 import { getUpgradeEffectTotal, isCourseXUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { roundCurrency } from "./economy";
 import { getMonthlyNetworkRent } from "./reputation";
 import { getMonthlySocialIncome } from "./social";
 import type { Collaborator, Contact, FormId, GameState } from "./types";
@@ -159,8 +160,17 @@ export function getMonthlyMembershipIncome(state: GameState): number {
       getUpgradeEffectTotal(state.upgrades, "incomeMultiplier"));
 }
 
+const DEPOSIT_INTEREST_FUNDS_CAP = 250_000;
+
+/** Conto deposito: monthly interest on the first 250.000 € of funds. */
+export function getMonthlyDepositInterest(state: GameState): number {
+  const rate = getUpgradeEffectTotal(state.upgrades, "depositInterestRate");
+  if (rate <= 0) return 0;
+  return roundCurrency(Math.min(Math.max(0, state.school.euros), DEPOSIT_INTEREST_FUNDS_CAP) * rate);
+}
+
 export function getMonthlyOperationalIncome(state: GameState): number {
   // Rents of the schools in the network are fixed: no multiplier touches them.
   return getMonthlyMembershipIncome(state) + getMonthlyNetworkRent(state) +
-    getMonthlySocialIncome(state);
+    getMonthlySocialIncome(state) + getMonthlyDepositInterest(state);
 }

@@ -1,4 +1,5 @@
 import type { AcquisitionEventDefinition } from "../content/events";
+import { getEventCooldownMultiplier } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import type { AcquisitionEventCooldown, GameState } from "./types";
 
@@ -20,17 +21,20 @@ export function createEventCooldown(
   definition: AcquisitionEventDefinition,
   now: number,
 ): AcquisitionEventCooldown {
+  const multiplier = getEventCooldownMultiplier(state.upgrades);
   if (definition.cooldown.kind === "realtime") {
     return {
       kind: "realtime",
       startedAt: now,
-      availableAt: now + definition.cooldown.durationMs,
+      availableAt: now + Math.round(definition.cooldown.durationMs * multiplier),
     };
   }
+  // Calendar waits stay whole months: at least one.
   return {
     kind: "calendar",
     startedMonthPosition: getGameMonthPosition(state, now),
-    availableAtMonth: state.school.currentMonth + definition.cooldown.months,
+    availableAtMonth: state.school.currentMonth +
+      Math.max(1, Math.round(definition.cooldown.months * multiplier)),
   };
 }
 

@@ -17,7 +17,7 @@ describe("UpgradesView", () => {
     })).toBeVisible();
   });
 
-  it("reveals the seven Gadget upgrades only after the sector unlocks", () => {
+  it("reveals the eight Gadget upgrades only after the sector unlocks", () => {
     const initial = createInitialState(1_000);
     const { rerender } = render(
       <UpgradesView state={initial} onBuyUpgrade={() => undefined} />,
@@ -34,7 +34,7 @@ describe("UpgradesView", () => {
 
     const gadgetBranch = screen.getByRole("region", { name: "Gadget" });
     expect(within(gadgetBranch).getAllByRole("button", { name: /^Apri dettagli/ }))
-      .toHaveLength(7);
+      .toHaveLength(8);
   });
 
   it("renders eight public branches, the secret row and the merged Teaching row", () => {
@@ -70,8 +70,8 @@ describe("UpgradesView", () => {
     expect(screen.getByRole("button", { name: /Apri dettagli PagoSport/ })).toBeVisible();
     expect(screen.queryByRole("button", { name: /Apri dettagli Preparazione agonistica/ }))
       .not.toBeInTheDocument();
-    // One line per branch: 9 + 7 + 8 + 7 + 8 + 7 + 9 + 7 nodes, no side branches.
-    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(62);
+    // One line per branch: 9 + 8 + 9 + 9 + 8 + 8 + 9 + 8 nodes, no side branches.
+    expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(68);
     expect(screen.getByRole("button", { name: /Apri dettagli Ritmo di battitura/ })).toBeVisible();
     expect(screen.getAllByRole("button", { name: /^Percorso segreto/ })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();

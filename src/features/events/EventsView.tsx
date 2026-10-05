@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { ACQUISITION_EVENTS, type AcquisitionEventDefinition } from "../../content/events";
-import { getEventExtraCopies } from "../../content/upgrades";
+import { getEventCopyContactMultiplier, getEventExtraCopies } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { getEventCopyCost } from "../../game/eventFlow";
 import { getRunningEventCounts } from "../../game/runtimeIndexes";
@@ -232,7 +232,8 @@ export function EventsView({
               : availableSwords < definition.requiredSwords
                 ? `Servono ${quantityLabel(definition.requiredSwords, "spada", "spade")}`
                 : "";
-          const copyLabel = `Altra copia · ${copyCost === 0 ? "gratis" : formatCurrency(copyCost)}`;
+          const copyContactCut = Math.round((1 - getEventCopyContactMultiplier(copiesRunning)) * 100);
+          const copyLabel = `Altra copia · ${copyCost === 0 ? "gratis" : formatCurrency(copyCost)} · −${copyContactCut}% contatti`;
           if (disabled && !onCooldown) {
             main = action;
             ring = { value: 0, label: "!" };

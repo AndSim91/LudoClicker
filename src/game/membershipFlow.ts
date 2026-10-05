@@ -9,6 +9,7 @@ import { isSchoolYearDepartureMonth } from "./calendar";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency, scaleCurrencyGain } from "./economy";
 import { getMemberAnnualDepartureChance } from "./formulas";
+import { getDepartureRiskReduction } from "../content/upgrades";
 import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
@@ -221,6 +222,7 @@ function processMemberDepartures(
       forms,
       member.rarity,
       state.network.schoolCount,
+      getDepartureRiskReduction(state.upgrades),
     );
     if (roll < departureChance) departedIds.add(member.id);
   }
@@ -233,6 +235,7 @@ function processMemberDepartures(
       group.forms,
       group.rarity,
       state.network.schoolCount,
+      getDepartureRiskReduction(state.upgrades),
     ));
   const updated = grouped.state;
   const totalDeparted = departed.length + grouped.departed;

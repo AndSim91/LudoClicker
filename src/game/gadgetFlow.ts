@@ -1,3 +1,4 @@
+import { getGadgetRarityChanceMultiplier } from "../content/upgrades";
 import { getReputationMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
@@ -164,7 +165,11 @@ export function startGadgetRevision(
   if (canRollNext && nextRarity) {
     const [roll, nextSeed] = nextRandom(randomSeed);
     randomSeed = nextSeed;
-    if (roll < getGadgetRarityUpgradeChance(product, rarity)) {
+    if (roll < getGadgetRarityUpgradeChance(
+      product,
+      rarity,
+      getGadgetRarityChanceMultiplier(state.upgrades),
+    )) {
       opportunityRarity = nextRarity;
     }
   }

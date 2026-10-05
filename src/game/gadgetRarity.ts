@@ -70,6 +70,8 @@ export function getGadgetFamilyProfit(product: GadgetProductState): number {
 export function getGadgetRarityUpgradeChance(
   product: GadgetProductState,
   rarity: GadgetRarity,
+  /** Rhythm Gamer. */
+  multiplier = 1,
 ): number {
   const current = product.rarities[rarity];
   if (!current.unlocked) return 0;
@@ -77,7 +79,7 @@ export function getGadgetRarityUpgradeChance(
     GADGET_RARITY_SALES_CHANCE_PER_TEN;
   const qualityChance = Math.floor(current.quality / 10) *
     GADGET_RARITY_QUALITY_CHANCE_PER_TEN;
-  return Math.min(1, Math.max(0, salesChance + qualityChance));
+  return Math.min(1, Math.max(0, (salesChance + qualityChance) * multiplier));
 }
 
 export function areSecretLegendaryGadgetRequirementsMet(

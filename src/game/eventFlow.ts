@@ -24,7 +24,7 @@ import {
   getCollaboratorsById,
   getRunningEventCounts,
 } from "./runtimeIndexes";
-import { getEventExtraCopies } from "../content/upgrades";
+import { getEventCopyContactMultiplier, getEventExtraCopies } from "../content/upgrades";
 import { isGameAreaUnlocked } from "./progression";
 import {
   FIRST_EVENT_TUTORIAL_SCENE_ID,
@@ -89,7 +89,7 @@ function getEventStartDetails(
     runningCopies,
   );
   if (state.school.euros < eventCost) return undefined;
-  return { definition, masteryDefinition, eventCost };
+  return { definition, masteryDefinition, eventCost, runningCopies };
 }
 
 /** Each copy started while the event runs costs double the previous one: 50 → 100 → 200 €. */
@@ -117,7 +117,7 @@ export function startAcquisitionEvent(
 ): GameState {
   const details = getEventStartDetails(state, definitionId, now, collaboratorId);
   if (!details) return state;
-  const { definition, masteryDefinition, eventCost } = details;
+  const { definition, masteryDefinition, eventCost, runningCopies } = details;
   const masteryBonus = masteryDefinition?.multiplier ?? 0;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
@@ -129,7 +129,14 @@ export function startAcquisitionEvent(
     isGameAreaUnlocked("events", state) &&
     isTutorialScenePending(state, FIRST_EVENT_TUTORIAL_SCENE_ID);
 
-  const contactReward = isTutorialSparring ? 1 : reward.amount;
+  // A copy finds fewer contacts; the fraction left becomes one more contact by chance.
+  const [copyRoll, seedAfterCopy] = runningCopies > 0
+    ? nextRandom(reward.nextSeed)
+    : [0, reward.nextSeed];
+  const copyContacts = reward.amount * getEventCopyContactMultiplier(runningCopies);
+  const contactReward = isTutorialSparring
+    ? 1
+    : Math.floor(copyContacts) + (copyRoll < copyContacts % 1 ? 1 : 0);
   const demonstrationsGiven = Math.max(outcome.demonstrationsGiven, contactReward);
   const peopleMet = Math.max(outcome.peopleMet, demonstrationsGiven);
   const event: AcquisitionEvent = {
@@ -172,7 +179,7 @@ export function startAcquisitionEvent(
   };
   return {
     ...state,
-    randomSeed: reward.nextSeed,
+    randomSeed: seedAfterCopy,
     school: { ...state.school, euros: state.school.euros - eventCost },
     equipment: reserveSwords(state.equipment, definition.requiredSwords) ?? state.equipment,
     acquisitionEvents: [...state.acquisitionEvents, event],

@@ -1,3 +1,4 @@
+import { getGadgetRarityChanceMultiplier } from "../../content/upgrades";
 import { memo, useCallback, useEffect, useState, type CSSProperties } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
@@ -114,6 +115,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   minigame,
   slotBusy,
   canRollNextRarity,
+  rarityChanceMultiplier,
   hasProductivity,
   revisionCost,
   canAffordProject,
@@ -133,6 +135,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   minigame?: GadgetMinigameState;
   slotBusy: boolean;
   canRollNextRarity: boolean;
+  rarityChanceMultiplier: number;
   hasProductivity: boolean;
   revisionCost: number;
   canAffordProject: boolean;
@@ -154,7 +157,7 @@ const GadgetProductCard = memo(function GadgetProductCard({
   const hasMaximumRarity = product.prototypeCompleted && !nextRarity;
   const rarityProgressPercent = nextRarity
     ? Math.round(
-        getGadgetRarityUpgradeChance(product, highestRarity) * 10_000,
+        getGadgetRarityUpgradeChance(product, highestRarity, rarityChanceMultiplier) * 10_000,
       ) / 100
     : 0;
   const rarityProgressStyle = nextRarity
@@ -464,6 +467,7 @@ export function GadgetsView({
                 ? state.gadgets.minigame
                 : undefined}
               slotBusy={Boolean(state.gadgets.activeWork || state.gadgets.minigame)}
+              rarityChanceMultiplier={getGadgetRarityChanceMultiplier(state.upgrades)}
               canRollNextRarity={product.prototypeCompleted &&
                 canRollNextGadgetRarity(state, productId, highestRarity)}
               hasProductivity={productivity > 0}

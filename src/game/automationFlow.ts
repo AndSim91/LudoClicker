@@ -40,6 +40,7 @@ import {
   getAutomaticTeachingRarityPriority,
 } from "./automaticTeachingPriority";
 import { getMemberAnnualDepartureChance } from "./formulas";
+import { getDepartureRiskReduction } from "../content/upgrades";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import {
   compareInstructorTeachingPriority,
@@ -814,6 +815,7 @@ export function processAutomaticTeaching(
         student.forms,
         contact.rarity,
         state.network.schoolCount,
+        getDepartureRiskReduction(state.upgrades),
       )
       : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];

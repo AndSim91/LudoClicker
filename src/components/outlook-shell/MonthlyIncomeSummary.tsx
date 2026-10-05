@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { getEstimatedMonthlyGadgetIncome } from "../../game/gadgetIncomeEstimate";
-import { getMonthlyMembershipIncome } from "../../game/membershipEconomy";
+import { getMonthlyDepositInterest, getMonthlyMembershipIncome } from "../../game/membershipEconomy";
 import { getMonthlyNetworkRent } from "../../game/reputation";
 import { getMonthlySocialIncome } from "../../game/social";
 import { useGameSelector } from "../../game/GameStateContext";
@@ -14,6 +14,7 @@ interface MonthlyIncomePresentation {
   gadgetIncome: number;
   gadgetUnlocked: boolean;
   networkRent: number;
+  depositInterest: number;
 }
 
 function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresentation {
@@ -23,6 +24,7 @@ function selectMonthlyIncomePresentation(state: GameState): MonthlyIncomePresent
     gadgetIncome: getEstimatedMonthlyGadgetIncome(state),
     gadgetUnlocked: state.unlocks.gadget,
     networkRent: getMonthlyNetworkRent(state),
+    depositInterest: getMonthlyDepositInterest(state),
   };
 }
 
@@ -34,7 +36,8 @@ function isSameMonthlyIncomePresentation(
     left.socialIncome === right.socialIncome &&
     left.gadgetIncome === right.gadgetIncome &&
     left.gadgetUnlocked === right.gadgetUnlocked &&
-    left.networkRent === right.networkRent;
+    left.networkRent === right.networkRent &&
+    left.depositInterest === right.depositInterest;
 }
 
 export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameState }) {
@@ -45,12 +48,13 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
     gadgetIncome,
     gadgetUnlocked,
     networkRent,
+    depositInterest,
   } = useGameSelector(
     selectMonthlyIncomePresentation,
     stateOverride,
     isSameMonthlyIncomePresentation,
   );
-  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent;
+  const monthlyIncome = memberFees + socialIncome + gadgetIncome + networkRent + depositInterest;
 
   return (
     <div className="title-monthly-income">
@@ -84,6 +88,12 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
             <div>
               <dt>Rete dell'Ordine</dt>
               <dd>{formatCurrency(networkRent)}</dd>
+            </div>
+          ) : null}
+          {depositInterest > 0 ? (
+            <div>
+              <dt>Conto deposito</dt>
+              <dd>{formatCurrency(depositInterest)}</dd>
             </div>
           ) : null}
         </dl>

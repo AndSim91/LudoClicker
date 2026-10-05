@@ -117,8 +117,15 @@ export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
   foundedSchools = 0,
+  /** Chat di Gruppo: share of the risk taken away (0–0,5). */
+  riskReduction = 0,
 ): number {
   if (rarity === "legendary") return 0;
+  if (riskReduction > 0) {
+    return Math.round(
+      getMemberAnnualDepartureChance(forms, rarity, foundedSchools) * (1 - riskReduction) * 1_000,
+    ) / 1_000;
+  }
 
   const highestForm = forms.reduce((highest, formId) => {
     const match = /^form-(\d)/.exec(formId);

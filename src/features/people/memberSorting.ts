@@ -39,6 +39,8 @@ export interface MemberSortContext {
   unrestrictedFormBranches: boolean;
   immunityContext: AthleteImmunityContext;
   foundedSchools: number;
+  /** Chat di Gruppo. */
+  departureRiskReduction?: number;
   courseXUnlocked: boolean;
   /** Occhio del Maestro level: when Arena and Style are visible. */
   statsTier: number;
@@ -122,6 +124,7 @@ function getDisplayedRisk(contact: Contact, context: MemberSortContext): number 
     student.forms,
     contact.rarity,
     context.foundedSchools,
+    context.departureRiskReduction,
   );
 }
 

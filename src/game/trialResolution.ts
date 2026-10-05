@@ -1,5 +1,10 @@
 import { formatCurrency } from "../shared/formatters";
-import { addLegendaryEnrollment } from "./contacts";
+import {
+  addLegendaryEncounters,
+  addLegendaryEnrollment,
+  createAcquiredContacts,
+  mergeAcquiredContacts,
+} from "./contacts";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
@@ -69,6 +74,9 @@ export function resolveStartedTrialBatch(
   const enrollmentBonus = scaleCurrencyGain(GAME_CONFIG.enrollmentBonus, gainMultiplier);
   let nextState = state;
   let resolvedCount = 0;
+  // Porta un amico: new members who bring a contact, added once after the batch.
+  const referralChance = getUpgradeEffectTotal(state.upgrades, "referralChance");
+  let referrals = 0;
 
   for (const requestedTrial of requestedTrials) {
     if (requestedTrial.status !== "scheduled") continue;
@@ -77,7 +85,8 @@ export function resolveStartedTrialBatch(
 
     const stateBeforeTrial = nextState;
     const [enrollmentRoll, retrySeed] = nextRandom(trial.resultSeed);
-    const [retryRoll] = nextRandom(retrySeed);
+    const [retryRoll, referralSeed] = nextRandom(retrySeed);
+    const [referralRoll] = nextRandom(referralSeed);
     const trialContact = contactsById.get(trial.contactId);
     const specialProfileId = trialContact?.specialProfileId;
     const alreadyEnrolledLegendary = specialProfileId
@@ -196,6 +205,7 @@ export function resolveStartedTrialBatch(
     }
 
     if (enrolled) {
+      if (referralRoll < referralChance) referrals += 1;
       const firstEnrollment = stateBeforeTrial.school.fame === 0;
       const nextActiveMembers = nextState.school.activeMembers + 1;
       const socialUnlockedNow = !stateBeforeTrial.unlocks.social &&
@@ -255,9 +265,27 @@ export function resolveStartedTrialBatch(
   }
 
   if (resolvedCount === 0) return state;
-  return {
+  const resolved: GameState = {
     ...nextState,
     scheduledTrials: state.scheduledTrials.map((trial) => trialUpdates.get(trial.id) ?? trial),
     contacts: state.contacts.map((contact) => contactUpdates.get(contact.id) ?? contact),
+  };
+  return referrals > 0 ? addReferralContacts(resolved, referrals, now) : resolved;
+}
+
+function addReferralContacts(state: GameState, count: number, now: number): GameState {
+  const acquired = createAcquiredContacts(state, count, "collaborator", now);
+  return {
+    ...state,
+    randomSeed: acquired.nextSeed,
+    contacts: mergeAcquiredContacts(state.contacts, acquired.contacts),
+    legendaryCollaborators: addLegendaryEncounters(
+      state.legendaryCollaborators,
+      acquired.contacts,
+    ),
+    statistics: {
+      ...state.statistics,
+      contactsAcquired: state.statistics.contactsAcquired + acquired.contacts.length,
+    },
   };
 }

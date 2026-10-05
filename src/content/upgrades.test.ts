@@ -62,8 +62,10 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      // One line per branch: Scrittura and Insegnamento 9, Carisma and Attrezzatura 8.
-      const expected = { speed: 9, charisma: 8, equipment: 8, instructors: 9 } as Record<string, number>;
+      // One line per branch, nine columns at most.
+      const expected = {
+        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 8, instructors: 9, organization: 8,
+      } as Record<string, number>;
       expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
     expect(definitionsFor("secrets").map((definition) => definition.id)).toEqual([
@@ -92,6 +94,7 @@ describe("upgrade catalog", () => {
       "email-layout": [600, 1_200, 2_400, 4_800, 9_600],
       "winning-advertising": [5_000, 10_000, 20_000, 40_000, 80_000],
       "marketing-course": [10_000, 25_000, 50_000, 100_000, 200_000],
+      "influencer-project": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
     expect(costsFor("charisma")).toEqual({
       "prepared-presentation": [50, 100, 200, 400, 800],
@@ -102,15 +105,18 @@ describe("upgrade catalog", () => {
       "demo-set": [600, 1_200, 2_400, 4_800, 9_600],
       "difficult-questions": [5_000, 10_000, 20_000, 40_000, 80_000],
       "not-that-thing": [10_000, 25_000, 50_000, 100_000, 200_000],
+      "busy-calendar": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
     expect(costsFor("welcome")).toEqual({
       "welcome-procedure": [50, 100, 200, 400, 800],
       "clear-material": [150, 300, 600, 1_200, 2_400],
       "tested-intro": [300, 600, 1_200, 2_400, 4_800],
       "prepared-room": [600, 1_200, 2_400, 4_800, 9_600],
+      "group-chat": [3_000, 6_000, 12_000, 24_000, 48_000],
       "dedicated-helper": [2_500, 5_000, 10_000, 20_000, 40_000],
       "order-welcome": [5_000, 10_000, 20_000, 40_000, 80_000],
       "memorable-experience": [10_000, 25_000, 50_000, 100_000, 200_000],
+      "bring-a-friend": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
   });
 
@@ -132,6 +138,7 @@ describe("upgrade catalog", () => {
       "registration-form": [5_000, 10_000, 20_000, 40_000, 80_000],
       "operational-priorities": [25_000],
       "order-secretariat": [10_000, 25_000, 50_000, 100_000, 200_000],
+      "deposit-account": [10_000, 20_000, 40_000, 80_000, 160_000],
       "multi-site-coordination": [25_000, 50_000, 100_000, 200_000, 400_000],
     });
   });
@@ -148,6 +155,7 @@ describe("upgrade catalog", () => {
       "gadget-order-management": [10_000, 20_000, 40_000, 80_000, 160_000],
       "gadget-sales-training": [15_000, 30_000, 60_000, 120_000, 240_000],
       "gadget-cross-selling": [25_000, 50_000, 100_000, 200_000, 400_000],
+      "rhythm-gamer": [7_500, 15_000, 30_000, 60_000, 120_000],
     });
     expect(costsFor("instructors")).toEqual({
       "talent-eye": [1_000, 10_000],
