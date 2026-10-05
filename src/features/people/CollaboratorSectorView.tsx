@@ -7,6 +7,8 @@ import {
   isAgonistCourseUnlocked,
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
+  isQuickTeacherTrainingUnlocked,
+  isSISTechnicianCourseUnlocked,
 } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -315,6 +317,7 @@ function InstructorSectorCard({
   onDecrement,
   onOpen,
   onToggleAutomaticTeaching,
+  onQuickTeacherTraining,
 }: {
   state?: GameState;
   actual: number;
@@ -326,6 +329,7 @@ function InstructorSectorCard({
   onDecrement: () => void;
   onOpen: () => void;
   onToggleAutomaticTeaching: (enabled: boolean) => void;
+  onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
 }) {
   const state = useGameStateSlices(
     ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
@@ -507,6 +511,29 @@ function InstructorSectorCard({
               showLabels={false}
             />
           </div>
+          {onQuickTeacherTraining && isQuickTeacherTrainingUnlocked(state.upgrades) ? (
+            <div className="instructor-quick-training" role="group" aria-label="Ufficio formazione">
+              <button
+                type="button"
+                title="Avvia un Corso Istruttori sulla Forma con meno Istruttori. Lo fa chi ha più Maestria, a parità più Stile."
+                onClick={() => onQuickTeacherTraining("instructor")}
+              >
+                <Icon name="people" />
+                Forma un Istruttore
+              </button>
+              {isSISTechnicianCourseUnlocked(state.upgrades) ? (
+                <button
+                  type="button"
+                  className="is-technician"
+                  title="Prenota un Corso Tecnici SIS sulla Forma con meno Tecnici. Lo fa chi ha più Maestria, a parità più Stile."
+                  onClick={() => onQuickTeacherTraining("technician")}
+                >
+                  <span className="technician-course-badge" aria-hidden="true">SIS</span>
+                  Forma un Tecnico
+                </button>
+              ) : null}
+            </div>
+          ) : null}
           <div className="instructor-coverage-actions">
             <SectorMasteryIndicator collaborators={instructors} role="instructor" />
             <button
@@ -541,6 +568,7 @@ export function CollaboratorSectorView({
   onStartTraining,
   onBookTechnicianCourse,
   onToggleAutomaticTeaching,
+  onQuickTeacherTraining,
 }: {
   state?: GameState;
   collaboratorsById: Map<string, Collaborator>;
@@ -549,6 +577,7 @@ export function CollaboratorSectorView({
   onStartTraining: (personId: string, formId: FormId) => void;
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   onToggleAutomaticTeaching?: (enabled: boolean) => void;
+  onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
 }) {
   const state = useGameStateSlices(
     ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
@@ -622,6 +651,7 @@ export function CollaboratorSectorView({
         onDecrement={() => onDecrement("instructor")}
         onOpen={() => setOpenRole("instructor")}
         onToggleAutomaticTeaching={onToggleAutomaticTeaching ?? ignoreAutomaticTeachingToggle}
+        onQuickTeacherTraining={onQuickTeacherTraining}
       />
 
       <div className="collaborator-sector-grid">

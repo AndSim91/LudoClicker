@@ -41,6 +41,7 @@ export type UpgradeEffect =
   | "membershipIncomeMultiplier"
   | "incomeMultiplier"
   | "operationalPrioritiesUnlock"
+  | "quickTeacherTrainingUnlock"
   | "officialStatsVisibilityTier"
   | "instructorSelfTrainingTier"
   | "eventCopyCapacity"
@@ -275,6 +276,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "shared-calendar", category: "organization", title: "Manuale operativo", description: "Tutto quello che si impara, scritto in un manuale. I collaboratori crescono più in fretta, e nessuno deve rispiegare tutto da capo.", effectLabel: "Ogni livello: i collaboratori guadagnano Maestria il 10% più in fretta · Livello 5: +50%", effect: "masteryExperienceMultiplier", effectPerLevel: 0.1, baseCost: 500, costGrowth: LEVEL_GROWTH, levelCosts: [500, 1_000, 2_000, 4_000, 8_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 0 },
   { id: "collaborator-shifts", category: "organization", title: "Turni dei collaboratori", description: "Chi resta fermo dà una mano al primo settore della fila che sta lavorando. Le mani in mano, da oggi, sono fuori moda.", effectLabel: "Ogni livello: chi è fermo passa il 10% del suo lavoro al primo settore attivo della fila · Livello 5: il 50%", effect: "collaboratorFallbackTier", effectPerLevel: 0.1, baseCost: 2_500, costGrowth: LEVEL_GROWTH, levelCosts: [2_500, 5_000, 10_000, 20_000, 40_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 3 },
   { id: "standard-procedures", category: "organization", title: "Procedure standard", description: "Ogni lavoro ripetitivo ha la sua procedura. Le automazioni girano più in fretta, e nessuno inventa più scorciatoie creative.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 5% più in fretta · Livello 5: +25%", effect: "automationMultiplier", effectPerLevel: 0.05, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 8 },
+  { id: "training-office", category: "organization", title: "Ufficio formazione", description: "Un ufficio, un foglio di calcolo e una sola domanda: quale Forma ci manca? Chi ha più Maestria parte per primo, gli altri fanno il tifo.", effectLabel: "Nel Centro didattico: «Forma un Istruttore» e «Forma un Tecnico» avviano il corso sulla Forma con meno insegnanti, affidato a chi ha più Maestria (a parità, più Stile)", effect: "quickTeacherTrainingUnlock", effectPerLevel: 1, baseCost: 15_000, costGrowth: LEVEL_GROWTH, levelCosts: [15_000], maxLevel: 1, requiredFame: noFame, requiredBranchPoints: 8 },
   { id: "registration-form", category: "organization", title: "Modulo di iscrizione", description: "Un modulo solo, chiaro, da firmare una volta. Le quote arrivano tutte, e la segreteria smette di rincorrere le persone.", effectLabel: "Ogni livello: +5% di entrate dalle quote mensili · Livello 5: +25%", effect: "membershipIncomeMultiplier", effectPerLevel: 0.05, baseCost: 5_000, costGrowth: LEVEL_GROWTH, levelCosts: [5_000, 10_000, 20_000, 40_000, 80_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 13 },
   { id: "operational-priorities", category: "organization", title: "Priorità operative", description: "Decidi tu l'ordine della fila: chi sta davanti spende per primo e riceve l'aiuto dei Turni. Le discussioni su chi viene prima, invece, restano.", effectLabel: "Puoi riordinare la fila dei settori in Scuola", effect: "operationalPrioritiesUnlock", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000], maxLevel: 1, requiredFame: noFame, requiredBranchPoints: 18, requiredUpgradeLevels: { "collaborator-shifts": 1 } },
   { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Arriva A.N.D.E.R., che si occupa di notifiche, quote e pratiche. Non dorme, non sbaglia, e ci tiene a farlo sapere.", effectLabel: "Ogni livello: +10% sulle entrate mensili di quote e Social · Livello 5: +50%", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 18 },
@@ -582,6 +584,10 @@ export function getGadgetRarityChanceMultiplier(levels: UpgradeLevels): number {
 
 export function isOperationalPrioritiesUnlocked(levels: UpgradeLevels): boolean {
   return getUpgradeEffectTotal(levels, "operationalPrioritiesUnlock") >= 1;
+}
+
+export function isQuickTeacherTrainingUnlocked(levels: UpgradeLevels): boolean {
+  return getUpgradeEffectTotal(levels, "quickTeacherTrainingUnlock") >= 1;
 }
 
 export function isSISTechnicianCourseUnlocked(levels: UpgradeLevels): boolean {

@@ -2225,6 +2225,7 @@ le entrate ricorrenti.
 | Manuale operativo | +10% esperienza Maestria per livello; massimo +50% | 500 / 1.000 / 2.000 / 4.000 / 8.000 € |
 | Turni dei collaboratori | chi è fermo dà il 10% della produttività per livello al primo settore al lavoro della fila; massimo 50% | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
 | Procedure standard | +5% velocità automazioni generiche per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
+| Ufficio formazione | nel Centro didattico i pulsanti «Forma un Istruttore» e «Forma un Tecnico» (questo solo con la SIS) | 15.000 € |
 | Modulo di iscrizione | +5% entrate dalle quote per livello; massimo +25% | 5.000 / 10.000 / 20.000 / 40.000 / 80.000 € |
 | Priorità operative | rende modificabile la fila «Turni e precedenza» (chi consuma per primo Euro e spade e chi riceve aiuto) | 25.000 € |
 | A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
@@ -2244,13 +2245,26 @@ Rete, fino
 a +75% insieme) accelerano Redazione/Social, manutenzione dell'attrezzatura,
 sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
 Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
-3, Procedure standard 8, Modulo di iscrizione 13, Priorità operative 18 e
+3, Procedure standard 8, Ufficio formazione 8, Modulo di iscrizione 13, Priorità operative 18 e
 **Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
 A.N.D.E.R. 18, Conto deposito 23. Coordinamento multi-sede è passato alla Rete
 dell'Ordine (§ 10.13). Gli interessi del **Conto deposito** («La banca paga poco, ma
 paga. Il tesoriere dorme meglio.») si calcolano a fine mese sui Fondi di quel
 momento, entrano nelle entrate mensili e compaiono nel loro dettaglio come
 «Conto deposito».
+
+**Ufficio formazione** (`quickTeacherTraining.ts`). Un clic su «Forma un
+Istruttore» avvia un Corso Istruttori sulla Forma che ha meno Istruttori;
+«Forma un Tecnico» prenota un Corso Tecnici SIS sulla Forma che ha meno
+Tecnici. Nel conto entrano anche chi è già in corso o ha prenotato, così due
+clic di fila non finiscono sulla stessa Forma. A parità: Forma 1, Forma 2,
+Corso X, Corso Y, Forma 3 Lunga, Staffa, Doppia, Forma 4 Lunga, Staffa, Doppia,
+Forma 5 Lunga, Staffa, Doppia, Forma 6, Forma 7. Il corso va all'Istruttore
+assegnato che può aprire quella Forma (la sa già, o è la prossima del suo
+percorso; per il Tecnico deve esserne Istruttore), con la Maestria da
+Istruttore più alta e, a parità, lo Stile più alto. Valgono tutte le regole del
+pulsante del Centro didattico (costi, spade, corsi annuali, rami, Corso X da
+recuperare, pausa estiva): se nessuno può, non succede nulla.
 
 ### 10.9 Percorsi Segreti
 

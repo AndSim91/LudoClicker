@@ -28,6 +28,7 @@ import {
   assignCollaborator,
 } from "./trainingFlow";
 import { bookTechnicianCourse } from "./teacherTrainingFlow";
+import { startQuickTeacherTraining } from "./quickTeacherTraining";
 import type {
   FormId,
   FormTrainingStartMode,
@@ -247,6 +248,11 @@ export function createGameActionHandlers(
     START_ACQUISITION_EVENT: (state, action) => startAcquisitionEvent(
       state,
       action.definitionId,
+      action.now,
+    ),
+    START_QUICK_TEACHER_TRAINING: (state, action) => startQuickTeacherTraining(
+      state,
+      action.kind,
       action.now,
     ),
     BOOK_TECHNICIAN_COURSE: (state, action) => bookTechnicianCourse(

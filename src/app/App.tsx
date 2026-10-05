@@ -434,6 +434,11 @@ export function App() {
       dispatch({ type: "BOOK_TECHNICIAN_COURSE", collaboratorId, formId, now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const startQuickTeacherTraining = useCallback(
+    (kind: "instructor" | "technician") =>
+      dispatch({ type: "START_QUICK_TEACHER_TRAINING", kind, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
   const toggleMemberFavorite = useCallback(
     (contactId: string) => dispatch({ type: "TOGGLE_MEMBER_FAVORITE", contactId }),
     [dispatch],
@@ -679,6 +684,7 @@ export function App() {
               onMoveOperationalPriority={moveOperationalPriority}
               onStartTraining={startTraining}
               onBookTechnicianCourse={bookTechnicianCourse}
+              onQuickTeacherTraining={startQuickTeacherTraining}
               onToggleAutomaticTeaching={setAutomaticTeaching}
               onToggleFavorite={toggleMemberFavorite}
               onCancelEnrollment={cancelMemberEnrollment}

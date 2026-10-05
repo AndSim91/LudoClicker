@@ -305,6 +305,7 @@ export type UpgradeId =
   | "checklist"
   | "registration-form"
   | "operational-priorities"
+  | "training-office"
   | "order-secretariat"
   | "multi-site-coordination"
   | "instructor-versatility"
@@ -1186,6 +1187,11 @@ export type GameAction =
       formId: FormId;
       now: number;
       mode?: FormTrainingStartMode;
+    }
+  | {
+      type: "START_QUICK_TEACHER_TRAINING";
+      kind: "instructor" | "technician";
+      now: number;
     }
   | {
       type: "BOOK_TECHNICIAN_COURSE";

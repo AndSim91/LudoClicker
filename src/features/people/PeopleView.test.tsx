@@ -59,6 +59,45 @@ describe("PeopleView", () => {
     expect(onToggleAutomaticTeaching).toHaveBeenCalledWith(false);
   });
 
+  it("shows the Ufficio formazione shortcuts only with the upgrade (Tecnico only with the SIS)", () => {
+    const initial = createInitialState(1_000, "", false);
+    const instructor: Collaborator = {
+      id: "office-instructor",
+      contactId: initial.contacts[0].id,
+      displayName: "Istruttore Ufficio",
+      joinedAt: 1_000,
+      forms: ["form-1"],
+      instructorForms: ["form-1"],
+      assignment: "instructor",
+      rarity: "ultra-rare",
+    };
+    const state = (upgrades: Partial<GameState["upgrades"]>): GameState => ({
+      ...initial,
+      collaborators: [instructor],
+      unlocks: { ...initial.unlocks, collaborators: true },
+      upgrades: { ...initial.upgrades, ...upgrades },
+      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+    });
+    const onQuick = vi.fn();
+    const view = render(
+      <PeopleView state={state({})} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
+    );
+    expect(screen.queryByRole("button", { name: "Forma un Istruttore" })).not.toBeInTheDocument();
+
+    view.rerender(
+      <PeopleView state={state({ "training-office": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Forma un Istruttore" }));
+    expect(onQuick).toHaveBeenCalledWith("instructor");
+    expect(screen.queryByRole("button", { name: /Forma un Tecnico/ })).not.toBeInTheDocument();
+
+    view.rerender(
+      <PeopleView state={state({ "training-office": 1, "sis-accreditation": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Forma un Tecnico/ }));
+    expect(onQuick).toHaveBeenCalledWith("technician");
+  });
+
   it("shows a crowded Centro didattico 8 instructors at a time", () => {
     const initial = createInitialState(1_000, "", false);
     const instructors: Collaborator[] = Array.from({ length: 30 }, (_, index) => ({

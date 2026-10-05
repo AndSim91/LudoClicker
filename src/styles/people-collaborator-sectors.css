@@ -713,6 +713,56 @@ button.shift-control-sector:focus-visible {
   border-top: 1px solid var(--line);
 }
 
+/* Ufficio formazione: due scorciatoie sulla Forma più scoperta. */
+.instructor-quick-training {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.instructor-quick-training button {
+  --quick-accent: #2f8a57;
+  display: inline-flex;
+  min-height: 32px;
+  flex: 1 1 150px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, var(--quick-accent) 55%, transparent);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--quick-accent) 60%, var(--ink));
+  background: color-mix(in srgb, var(--quick-accent) 10%, var(--surface));
+  font-size: 12px;
+  font-weight: 700;  white-space: nowrap;
+}
+
+.instructor-quick-training button.is-technician {
+  --quick-accent: #8b5cf6;
+  --sis-accent: #6a5396;
+}
+
+.instructor-quick-training button:hover {
+  background: color-mix(in srgb, var(--quick-accent) 20%, var(--surface));
+}
+
+.instructor-quick-training button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--quick-accent) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.instructor-quick-training svg {
+  width: 14px;
+  height: 14px;
+}
+
+.instructor-quick-training .technician-course-badge {
+  min-width: 28px;
+  min-height: 18px;
+  padding: 1px 5px;
+  font-size: 10px;
+}
+
 .instructor-courses-link {
   display: inline-flex;
   min-height: 28px;
