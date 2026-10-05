@@ -331,6 +331,7 @@ function tick(
   wallNow = now,
   workBudget = Infinity,
   allowAutomaticEventStarts = true,
+  minStepMs?: number,
 ): GameState {
   let nextState = state;
   let stalledAt: number | undefined;
@@ -348,6 +349,7 @@ function tick(
       nextState,
       cursor,
       allowAutomaticEventStarts,
+      minStepMs,
     );
     const scheduledBoundary = Math.max(cursor, scheduledAt);
     if (

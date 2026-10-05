@@ -1131,6 +1131,8 @@ export type GameAction =
     workBudget?: number;
     /** Disabled while settling a pause so queued work cannot start another event. */
     allowAutomaticEventStarts?: boolean;
+    /** Shortest step: lighter display modes group deadlines over a longer span. */
+    minStepMs?: number;
   }
   | { type: "RESUME_FROM_PAUSE"; now: number; elapsedMs: number }
   | { type: "REPLACE_STATE"; state: GameState }

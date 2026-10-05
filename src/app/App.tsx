@@ -70,7 +70,7 @@ import { ReptileDayLayer } from "../features/tournaments/ReptileDayLayer";
 import { ReptileIncidentsLayer } from "../features/tournaments/ReptileIncidentsLayer";
 import { clearIncidentsAttempt, readIncidentsAttempt } from "../features/tournaments/reptileUi";
 import { getReptileSectorForRole } from "../game/reptileSectors";
-import { useAppPreferences } from "./useAppPreferences";
+import { getTickStepMs, useAppPreferences } from "./useAppPreferences";
 
 const StableTitleBar = memo(TitleBar);
 const StableAppRail = memo(AppRail);
@@ -113,6 +113,7 @@ function isWindowsKey(event: KeyboardEvent): boolean {
 }
 
 export function App() {
+  const { reduceMotion, setReduceMotion, darkMode, setDarkMode } = useAppPreferences();
   const {
     state,
     dispatch,
@@ -131,13 +132,12 @@ export function App() {
     setPracticePaused,
     saveStatus,
     saveNow,
-  } = useGameEngine();
+  } = useGameEngine({ minStepMs: getTickStepMs(darkMode, reduceMotion) });
   const gameStateStore = useGameStateStore(state);
   const [view, setView] = useState<AppView>("mail");
   const [mailFolder, setMailFolder] = useState<MailFolder>("inbox");
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedSentEmailId, setSelectedSentEmailId] = useState<string | null>(null);
-  const { reduceMotion, setReduceMotion, darkMode, setDarkMode } = useAppPreferences();
 
   useEffect(() => {
     // Boss key: F9 swaps between Modalità Onde (dark) and the Outlook camouflage (light).

@@ -18,7 +18,7 @@ import "./styles/table-sorting.css";
 
 initializeCrashReporting();
 
-if (localStorage.getItem(STORAGE_KEYS.theme) === "dark") {
+if (localStorage.getItem(STORAGE_KEYS.theme) !== "light") {
   document.documentElement.dataset.theme = "dark";
 }
 

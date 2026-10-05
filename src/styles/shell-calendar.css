@@ -96,11 +96,23 @@
 }
 
 .appointment-pip-waiting {
+  position: relative;
+  overflow: hidden;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 50%, transparent);
+  background: none;
+}
+
+/* The fill grows with transform, not background-size: the compositor moves it
+   without repainting the day panel at every frame. */
+.appointment-pip-waiting::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   /* Softer than a live pip, so the trial in the gym stays the brightest. */
-  --pip-fill-color: color-mix(in srgb, currentColor 55%, transparent);
-  background: linear-gradient(var(--pip-fill-color), var(--pip-fill-color)) left / calc(var(--pip-fill, 0) * 100%) 100% no-repeat;
-  transition: background-size 1s linear;
+  background: color-mix(in srgb, currentColor 55%, transparent);
+  transform: scaleX(var(--pip-fill, 0));
+  transform-origin: left;
+  transition: transform 1s linear;
 }
 
 .appointment-pip-enrolled {
@@ -161,7 +173,7 @@
     display: none;
   }
 
-  .appointment-pip-waiting {
+  .appointment-pip-waiting::before {
     transition: none;
   }
 }

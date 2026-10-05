@@ -474,6 +474,16 @@ describe("game scheduler", () => {
     expect(getNextGameTickDelay(overdue, NOW)).toBe(0);
   });
 
+  it("waits longer between steps in the lighter display modes", () => {
+    const state = stateAtNow();
+    const soon = {
+      ...state,
+      school: { ...state.school, nextFeeAt: NOW + 10 },
+    };
+
+    expect(getNextGameTickDelay(soon, NOW, 1, 1_000)).toBe(1_000);
+  });
+
   it("groups close deadlines into one step after the last one", () => {
     const state = stateAtNow();
     const soon = {

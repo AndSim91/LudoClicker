@@ -2426,6 +2426,14 @@ passa istantaneamente dalla Modalità Onde alla vista chiara da ufficio e
 viceversa, e la scelta resta salvata nel browser. Lo stesso interruttore è
 presente in Impostazioni › Aspetto, insieme a **Riduci animazioni**.
 
+Peso delle quattro combinazioni (decisione di Andrea, dalla più pesante alla
+più leggera): **Onde > Outlook > Onde senza animazioni > Outlook senza
+animazioni**. Onde è la più bella e la predefinita; Outlook non ha animazioni
+decorative in ciclo e le barre avanzano a scatti a ogni aggiornamento, come in
+Windows; senza animazioni il gioco avanza a passi più lunghi (0,5 s in Onde,
+1 s in Outlook), così Outlook senza animazioni deve girare anche su un
+processore lento a un solo core.
+
 > **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Fondi in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
 
 Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come
@@ -4218,7 +4226,10 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   continua da far avanzare; i recuperi lunghi vengono elaborati a blocchi;
   due passi distano almeno 250 ms di gioco (`minTickStepMs`): le scadenze più
   vicine si risolvono insieme nel passo successivo, così una scuola con
-  migliaia di formazioni non fa decine di passi al secondo;
+  migliaia di formazioni non fa decine di passi al secondo; con «Riduci
+  animazioni» il passo minimo sale a 500 ms in Onde e 1 s in Outlook
+  (`getTickStepMs` in `useAppPreferences.ts`, campo `minStepMs` dell'azione
+  `TICK`);
 - oltre 2.000 iscritti, gli ordinari più deboli senza Corso Agonisti, tornei,
   formazione in corso o ruoli diventano contatori (`memberGroups`: rarità,
   provenienza, Forme, preferenze d'arma e contatori annuali finché contano) e

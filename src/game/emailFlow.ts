@@ -10,6 +10,7 @@ import { GAME_CONFIG } from "./config";
 import { createCampaign } from "./campaignContent";
 import { materializePooledContact } from "./contacts";
 import { makeGameId } from "./ids";
+import { replaceById } from "./replaceById";
 import { nextRandom, randomBetween } from "./random";
 import { addMessage } from "./stateUpdates";
 import { selectActiveEmail } from "./selectors";
@@ -66,9 +67,10 @@ export function startNextCampaign(currentState: GameState, now: number): GameSta
   return {
     ...state,
     randomSeed,
-    contacts: state.contacts.map((contact) =>
-      contact.id === nextContact.id ? { ...contact, status: "writing" } : contact,
-    ),
+    contacts: replaceById(state.contacts, nextContact.id, (contact) => ({
+      ...contact,
+      status: "writing",
+    })),
     emails: [...state.emails, email],
   };
 }
@@ -88,14 +90,14 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     isTutorialSceneFinished(state, "first-invitation") &&
     isTutorialScenePending(state, FIRST_EVENT_TUTORIAL_SCENE_ID);
   const reservesBookingForEventTutorial = guaranteedTutorialBooking && waitsForEventTutorial;
-  const recentEmailResults = state.emails
-    .slice()
-    .reverse()
-    .filter((candidate) => candidate.status === "lost" || candidate.status === "trialBooked");
-  const emailLossStreak = recentEmailResults.findIndex((candidate) => candidate.status !== "lost");
-  const protectedBooking =
-    (emailLossStreak === -1 ? recentEmailResults.length : emailLossStreak) >=
-      GAME_CONFIG.conversionGuaranteeFailures;
+  // Lost emails in a row, newest first, up to the last booked trial.
+  let emailLossStreak = 0;
+  for (let index = state.emails.length - 1; index >= 0; index -= 1) {
+    const { status } = state.emails[index];
+    if (status === "trialBooked") break;
+    if (status === "lost") emailLossStreak += 1;
+  }
+  const protectedBooking = emailLossStreak >= GAME_CONFIG.conversionGuaranteeFailures;
   const contactRarity = state.contacts.find(
     (contact) => contact.id === email.contactId,
   )?.rarity ?? "common";
@@ -119,14 +121,16 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
   let nextState: GameState = {
     ...state,
     randomSeed: nextSeed,
-    emails: state.emails.map((candidate) =>
-      candidate.id === email.id
-        ? { ...candidate, status: "sent", sentAt: now, sendCompletesAt: undefined }
-        : candidate,
-    ),
-    contacts: state.contacts.map((contact) =>
-      contact.id === email.contactId ? { ...contact, status: "invited" } : contact,
-    ),
+    emails: replaceById(state.emails, email.id, (candidate) => ({
+      ...candidate,
+      status: "sent",
+      sentAt: now,
+      sendCompletesAt: undefined,
+    })),
+    contacts: replaceById(state.contacts, email.contactId, (contact) => ({
+      ...contact,
+      status: "invited",
+    })),
     pendingEmailOutcomes: [...state.pendingEmailOutcomes, outcome],
     statistics: { ...state.statistics, emailsSent: state.statistics.emailsSent + 1 },
   };
@@ -160,12 +164,14 @@ export function resolveEmailOutcome(
   if (outcome.result === "lost") {
     return {
       ...nextState,
-      contacts: nextState.contacts.map((contact) =>
-        contact.id === outcome.contactId ? { ...contact, status: "lost" } : contact,
-      ),
-      emails: nextState.emails.map((email) =>
-        email.id === outcome.emailId ? { ...email, status: "lost" } : email,
-      ),
+      contacts: replaceById(nextState.contacts, outcome.contactId, (contact) => ({
+        ...contact,
+        status: "lost",
+      })),
+      emails: replaceById(nextState.emails, outcome.emailId, (email) => ({
+        ...email,
+        status: "lost",
+      })),
       statistics: {
         ...nextState.statistics,
         contactsLost: nextState.statistics.contactsLost + 1,
@@ -199,12 +205,14 @@ export function resolveEmailOutcome(
   nextState = {
     ...nextState,
     randomSeed: nextSeed,
-    contacts: nextState.contacts.map((contact) =>
-      contact.id === outcome.contactId ? { ...contact, status: "trialScheduled" } : contact,
-    ),
-    emails: nextState.emails.map((email) =>
-      email.id === outcome.emailId ? { ...email, status: "trialBooked" } : email,
-    ),
+    contacts: replaceById(nextState.contacts, outcome.contactId, (contact) => ({
+      ...contact,
+      status: "trialScheduled",
+    })),
+    emails: replaceById(nextState.emails, outcome.emailId, (email) => ({
+      ...email,
+      status: "trialBooked",
+    })),
     scheduledTrials: [...nextState.scheduledTrials, trial],
     statistics: {
       ...nextState.statistics,

@@ -30,7 +30,12 @@ interface PauseDrainRequest {
   wallNow: number;
 }
 
-export function useGameEngine() {
+export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minStepMs?: number } = {}) {
+  // A ref: changing the display mode must not restart the tick scheduler.
+  const minStepMsRef = useRef<number>(minStepMs);
+  useEffect(() => {
+    minStepMsRef.current = minStepMs;
+  }, [minStepMs]);
   const [initialWallNow] = useState(() => Date.now());
   const [state, dispatch] = useReducer(gameReducer, undefined, () => loadGame(initialWallNow));
   const stateRef = useRef(state);
@@ -148,7 +153,7 @@ export function useGameEngine() {
       const now = getGameNow();
       const delay = Math.max(
         gameDelayToWallDelay(minimumGameDelay, gameSpeed),
-        getNextGameTickDelay(stateRef.current, now, gameSpeed),
+        getNextGameTickDelay(stateRef.current, now, gameSpeed, minStepMsRef.current),
       );
       const nextWallAt = Date.now() + delay;
       // Unrelated state updates must not restart or postpone the current deadline.
@@ -167,6 +172,7 @@ export function useGameEngine() {
           wallNow,
           stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
           workBudget: MAX_SIMULTANEOUS_WORK_PER_SLICE,
+          minStepMs: minStepMsRef.current,
         });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
         // lo scheduler anche quando un tick intenzionalmente restituisce lo

@@ -111,6 +111,7 @@ export function getNextGameTickAt(
   state: GameState,
   now: number,
   allowAutomaticEventStarts = true,
+  minStepMs: number = GAME_CONFIG.minTickStepMs,
 ): number {
   let nextDeadline = getNextGameDeadline(state);
   if (state.tournaments.reptile.activeEdition) {
@@ -140,7 +141,7 @@ export function getNextGameTickAt(
     ? state.automation.lastProcessedAt + AUTOMATION_HEARTBEAT_MS
     : Infinity;
   return Math.max(
-    state.automation.lastProcessedAt + GAME_CONFIG.minTickStepMs,
+    state.automation.lastProcessedAt + minStepMs,
     Math.min(nextDeadline, heartbeatAt),
   );
 }
@@ -153,8 +154,9 @@ export function getNextGameTickDelay(
   state: GameState,
   now: number,
   gameSpeed = 1,
+  minStepMs: number = GAME_CONFIG.minTickStepMs,
 ): number {
-  const requestedDelay = Math.max(0, getNextGameTickAt(state, now) - now);
+  const requestedDelay = Math.max(0, getNextGameTickAt(state, now, true, minStepMs) - now);
   return Math.min(
     MAX_TIMEOUT_MS,
     gameDelayToWallDelay(requestedDelay, gameSpeed),

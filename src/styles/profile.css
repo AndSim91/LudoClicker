@@ -76,6 +76,29 @@
   transition-duration: 0.01ms !important;
 }
 
+/* Outlook camouflage: no decorative loops (Andrea: niente animazioni in Outlook),
+   so it weighs less than Modalità Onde. What they show stays, still. */
+:root[data-theme="light"] .appointment-pip-live {
+  opacity: 1;
+}
+
+:root[data-theme="light"] .appointment-pip-live::after {
+  display: none;
+}
+
+/* Bars move in steps at each update, like Windows ones: a bar always in
+   transition kept the browser drawing 60 frames a second. */
+:root[data-theme="light"] .progress-bar-linear:not(.is-indeterminate) > span,
+:root[data-theme="light"] .appointment-pip-waiting::before {
+  transition: none;
+}
+
+:root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill > span,
+:root[data-theme="light"] .progress-bar-linear.is-indeterminate > span,
+:root[data-theme="light"] .instructor-preparation-loop.is-indeterminate > span {
+  animation: none;
+}
+
 .event-row > button {
   min-height: 36px;
   padding: 0 14px;
