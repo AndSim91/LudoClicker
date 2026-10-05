@@ -8,32 +8,9 @@ import {
 } from "../../content/gymStages";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
+import { Fighter, GymPair } from "./GymPair";
 
 const BLUE_SABER = GYM_SABER_COLORS.common;
-
-// A stick athlete: "guard" holds the blade upright, "attack" reaches towards
-// a partner standing 62 units away, so two attacks cross in the middle.
-function Fighter({
-  x,
-  facing,
-  saber,
-  pose = "attack",
-}: {
-  x: number;
-  facing: 1 | -1;
-  saber: string;
-  pose?: "guard" | "attack";
-}) {
-  const hand = x + 14 * facing;
-  const tip = pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 };
-  return (
-    <g className="gym-fighter">
-      <circle cx={x} cy={96} r={7} />
-      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116`} />
-      <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber }} />
-    </g>
-  );
-}
 
 // The five blades on the rack: yellow, green, red and two blue, as asked by the school.
 const RACK_SABERS = [
@@ -44,8 +21,9 @@ const RACK_SABERS = [
   BLUE_SABER,
 ];
 
-// Sparring spots, central pair first: the rarest blades take the centre.
-const FIGHTER_SPOTS: [number, 1 | -1][] = [[290, 1], [352, -1], [170, 1], [232, -1], [408, 1], [470, -1]];
+// Sparring pairs (left athlete's x), central pair first: the rarest blades take the centre.
+const PAIR_SPOTS = [290, 170, 408];
+const PAIR_GAP = 62;
 
 // Subscribes to members and contacts only, so money ticks do not repaint the scene.
 export function GymScene({ state: stateOverride }: { state?: GameState }) {
@@ -139,11 +117,15 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
         ) : null}
 
         {fighterCount === 1 ? <Fighter x={320} facing={1} saber={sabers[0]} pose="guard" /> : null}
-        {fighterCount > 1
-          ? FIGHTER_SPOTS.slice(0, fighterCount).map(([x, facing], index) => (
-              <Fighter key={x} x={x} facing={facing} saber={sabers[index]} />
-            ))
-          : null}
+        {PAIR_SPOTS.slice(0, Math.floor(fighterCount / 2)).map((x, index) => (
+          <GymPair
+            key={x}
+            leftX={x}
+            rightX={x + PAIR_GAP}
+            sabers={[sabers[index * 2], sabers[index * 2 + 1]]}
+            index={index}
+          />
+        ))}
       </svg>
       <figcaption>
         <strong>{current.name}</strong>
