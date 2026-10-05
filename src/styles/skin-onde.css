@@ -929,3 +929,9 @@
 @keyframes upgrade-node-flash-onde {
   25% { box-shadow: 0 0 0 4px var(--surface), 0 0 22px 6px rgb(108 211 214 / 75%); }
 }
+
+/* Centro didattico, «Un giro per Forma»: the lesson lap in the Onde colours. */
+:root[data-theme="dark"] .aggregated-teaching-groups:not(.is-internal-instructor, .is-technician) .aggregated-teaching-bar.is-lap > span {
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+  box-shadow: inset -2px 0 0 var(--onde-gold);
+}

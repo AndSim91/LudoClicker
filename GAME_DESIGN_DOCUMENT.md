@@ -2432,9 +2432,18 @@ Peso delle quattro combinazioni (decisione di Andrea, dalla più pesante alla
 più leggera): **Onde > Outlook > Onde senza animazioni > Outlook senza
 animazioni**. Onde è la più bella e la predefinita; Outlook non ha animazioni
 decorative in ciclo e le barre avanzano a scatti a ogni aggiornamento, come in
-Windows; senza animazioni il gioco avanza a passi più lunghi (0,5 s in Onde,
-1 s in Outlook), così Outlook senza animazioni deve girare anche su un
+Windows. Il gioco avanza a passi di 0,5 s con le animazioni e di 1 s senza (in
+tutti e due i temi); Outlook senza animazioni deve girare anche su un
 processore lento a un solo core.
+
+Nel Centro didattico, da **8 corsi della stessa Forma** le tacche (una per
+corso) lasciano il posto a **una barra sola per Forma** («Un giro per Forma»,
+concept A scelto da Andrea): si riempie in loop con la durata più comune dei
+corsi in atto (mai sotto i 4 s), il numero accanto è chi segue il corso adesso
+(«38 allievi») e a ogni giro compare «+N diplomati» sulla fine della barra. Il
+loop lo disegna il browser, quindi resta fluido con qualunque ritmo del gioco.
+In Outlook e con «Riduci animazioni» la barra resta piena e ferma e sotto
+compare «N diplomati nell'ultimo giro».
 
 > **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Fondi in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
 
@@ -4258,10 +4267,10 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   continua da far avanzare; i recuperi lunghi vengono elaborati a blocchi;
   due passi distano almeno 250 ms di gioco (`minTickStepMs`): le scadenze più
   vicine si risolvono insieme nel passo successivo, così una scuola con
-  migliaia di formazioni non fa decine di passi al secondo; con «Riduci
-  animazioni» il passo minimo sale a 500 ms in Onde e 1 s in Outlook
-  (`getTickStepMs` in `useAppPreferences.ts`, campo `minStepMs` dell'azione
-  `TICK`);
+  migliaia di formazioni non fa decine di passi al secondo; nel gioco il passo
+  minimo è 500 ms con le animazioni e 1 s senza (`getTickStepMs` in
+  `useAppPreferences.ts`, campo `minStepMs` dell'azione `TICK`; simulazioni e
+  recupero offline restano a 250 ms);
 - oltre 2.000 iscritti (con un margine di 250 prima di rifare i gruppi), gli
   ordinari più deboli senza tornei, formazione in corso o ruoli diventano
   contatori (`memberGroups`: rarità, provenienza, Forme, preferenze d'arma,

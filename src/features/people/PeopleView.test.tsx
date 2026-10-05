@@ -392,8 +392,8 @@ describe("PeopleView", () => {
     );
 
     expect(screen.getByRole("progressbar", {
-      name: "Forma 1: 100 corsi",
-    })).toHaveClass("is-compact");
+      name: "Forma 1: 100 allievi",
+    })).toHaveClass("is-lap");
     expect(intervalSpy.mock.calls.some(
       ([, intervalMs]) => intervalMs === GAME_CONFIG.progressUpdateIntervalMs,
     )).toBe(true);

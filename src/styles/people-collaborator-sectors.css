@@ -348,7 +348,7 @@
 
 .aggregated-teaching-group {
   display: grid;
-  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 48px;
+  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 64px;
   align-items: center;
   gap: 8px;
 }
@@ -542,6 +542,76 @@ button.shift-control-sector:focus-visible {
   text-align: right;
 }
 
+/* Concept A «Un giro per Forma»: from 8 courses of one Forma, one bar that loops
+   with the course length. Drawn by the compositor (transform), so it stays smooth
+   whatever the game rhythm; still in Outlook and with «Riduci animazioni». */
+.aggregated-teaching-bar.is-lap > span {
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: aggregated-teaching-lap var(--lap-duration, 20s) linear infinite;
+}
+
+.aggregated-teaching-bar.is-lap.is-paused > span {
+  animation-play-state: paused;
+}
+
+:root[data-theme="light"] .aggregated-teaching-bar.is-lap > span,
+.reduce-motion .aggregated-teaching-bar.is-lap > span {
+  animation: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aggregated-teaching-bar.is-lap > span {
+    animation: none;
+    transform: none;
+  }
+}
+
+@keyframes aggregated-teaching-lap {
+  to { transform: scaleX(1); }
+}
+
+.aggregated-teaching-group:has(.is-lap) {
+  position: relative;
+}
+
+.aggregated-teaching-group > small.aggregated-teaching-lap-count {
+  white-space: nowrap;
+}
+
+/* At the end of the bar, where the lap just closed (the lane clips anything above). */
+.aggregated-teaching-graduates {
+  position: absolute;
+  top: 50%;
+  right: calc(64px + 8px);
+  translate: 0 -50%;
+  padding: 0 6px;
+  border-radius: 9px;
+  color: var(--onde-on-gold, #0a1f33);
+  background: var(--onde-gold, #e0a64a);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 17px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: aggregated-teaching-graduates 1.6s ease-out forwards;
+}
+
+@keyframes aggregated-teaching-graduates {
+  0% { opacity: 0; transform: translateY(4px); }
+  15%, 75% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+.aggregated-teaching-group > small.aggregated-teaching-lap-note {
+  grid-column: 2 / -1;
+  margin-top: -4px;
+  font-size: 11px;
+  text-align: left;
+}
+
 .aggregated-teaching-segment {
   position: relative;
   min-width: 3px;
@@ -587,7 +657,7 @@ button.shift-control-sector:focus-visible {
 .athletic-preparation-course {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 48px;
+  grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr) 64px;
   align-items: center;
   gap: 8px;
   margin-top: 7px;
@@ -2105,12 +2175,12 @@ button.shift-control-sector:focus-visible {
   }
 
   .aggregated-teaching-group {
-    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 48px;
+    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 64px;
     gap: 6px;
   }
 
   .athletic-preparation-course {
-    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 48px;
+    grid-template-columns: minmax(102px, .9fr) minmax(64px, 1fr) 64px;
     gap: 6px;
   }
 

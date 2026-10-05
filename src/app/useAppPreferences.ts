@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { GAME_CONFIG } from "../game/config";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 
 // ponytail: one-off migration from the short-lived separate "skin" preference.
@@ -13,13 +12,13 @@ function readInitialDarkMode(): boolean {
 }
 
 /**
- * Andrea's weight order: Onde > Outlook > Onde senza animazioni > Outlook senza
- * animazioni. The lighter modes advance the game in longer steps (deadlines
- * grouped over 0,5 or 1 s), so a slow processor does a fraction of the work.
+ * Game rhythm per display mode (Andrea, 05/10): 0,5 s with the animations, 1 s
+ * without. The Centro didattico loops its bars on its own («Un giro per
+ * Forma»), so the slower rhythm does not show. Weight order stays Onde > Outlook
+ * > Onde senza animazioni > Outlook senza animazioni through the graphics.
  */
-export function getTickStepMs(darkMode: boolean, reduceMotion: boolean): number {
-  if (!reduceMotion) return GAME_CONFIG.minTickStepMs;
-  return darkMode ? 500 : 1_000;
+export function getTickStepMs(_darkMode: boolean, reduceMotion: boolean): number {
+  return reduceMotion ? 1_000 : 500;
 }
 
 export function useAppPreferences() {

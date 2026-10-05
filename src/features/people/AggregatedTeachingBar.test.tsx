@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { AGONIST_COURSE_LOGO } from "../../content/formLogos";
-import { AggregatedTeachingBar } from "./AggregatedTeachingBar";
+import { AggregatedTeachingBar, LAP_BAR_MIN_COURSES } from "./AggregatedTeachingBar";
 import { groupInstructorTeachingEntries } from "./aggregatedTeachingPresentation";
 import type { InstructorTeachingEntry } from "./instructorGroupPresentation";
 
@@ -83,29 +83,61 @@ describe("AggregatedTeachingBar", () => {
     })).toBeVisible();
   });
 
-  it("compacts a large course group into one bounded progress bar", () => {
+  it("keeps one segment per course below eight courses of a Forma", () => {
+    const entries = Array.from(
+      { length: LAP_BAR_MIN_COURSES - 1 },
+      (_, index) => entry(`student-${index}`, "form-1"),
+    );
+    const view = render(
+      <AggregatedTeachingBar entries={entries} now={1_500} agonistCourseUnlocked />,
+    );
+
+    expect(screen.getByRole("progressbar", { name: "Forma 1: 7 corsi" })).not.toHaveClass("is-lap");
+    expect(view.container.querySelectorAll(".aggregated-teaching-segment")).toHaveLength(7);
+  });
+
+  it("loops one bar with the course length from eight courses of a Forma", () => {
     const entries = Array.from(
       { length: 25 },
       (_, index) => entry(`student-${index}`, "form-1"),
     );
     const view = render(
-      <AggregatedTeachingBar
-        entries={entries}
-        now={1_500}
-        agonistCourseUnlocked
-      />,
+      <AggregatedTeachingBar entries={entries} now={1_500} agonistCourseUnlocked />,
     );
 
-    const progress = screen.getByRole("progressbar", {
-      name: "Forma 1: 25 corsi",
-    });
-    expect(progress).toHaveClass("is-compact");
-    expect(progress).toHaveAttribute("aria-valuenow", "50");
-    expect(progress).toHaveAttribute(
-      "aria-valuetext",
-      "25 corsi · avanzamento medio 50%",
-    );
+    const lap = screen.getByRole("progressbar", { name: "Forma 1: 25 allievi" });
+    expect(lap).toHaveClass("is-lap");
+    expect(lap.querySelector("span")).toHaveStyle({ "--lap-duration": "4000ms" });
+    expect(screen.getByText("25 allievi")).toBeVisible();
     expect(view.container.querySelectorAll(".aggregated-teaching-segment")).toHaveLength(0);
+  });
+
+  it("counts the graduates of each lap (Outlook: still bar, a timer closes the lap)", () => {
+    vi.useFakeTimers();
+    document.documentElement.dataset.theme = "light";
+    try {
+      const entries = Array.from(
+        { length: 10 },
+        (_, index) => entry(`student-${index}`, "form-1"),
+      );
+      const view = render(
+        <AggregatedTeachingBar entries={entries} now={1_500} agonistCourseUnlocked />,
+      );
+      // Two courses end on time, then the lap (never under four seconds) closes.
+      view.rerender(
+        <AggregatedTeachingBar entries={entries.slice(2)} now={2_000} agonistCourseUnlocked />,
+      );
+      act(() => {
+        vi.advanceTimersByTime(4_000);
+      });
+
+      expect(screen.getByText("2 diplomati nell'ultimo giro")).toBeInTheDocument();
+      expect(screen.getByRole("progressbar", { name: "Forma 1: 8 allievi" }))
+        .toHaveAttribute("aria-valuetext", "8 allievi · 2 diplomati nell'ultimo giro");
+    } finally {
+      delete document.documentElement.dataset.theme;
+      vi.useRealTimers();
+    }
   });
 });
 
