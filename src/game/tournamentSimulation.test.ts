@@ -230,9 +230,18 @@ describe("tournament simulation", () => {
     ]);
     expect(
       simulation.result.matches.every(
-        (match) => (match.arenaScoreA === 2) !== (match.arenaScoreB === 2),
+        (match) => {
+          const wins = match.stage === "final" ? 3 : 2;
+          return (match.arenaScoreA === wins) !== (match.arenaScoreB === wins);
+        },
       ),
     ).toBe(true);
+    for (const match of simulation.result.matches.filter((candidate) => candidate.assaults)) {
+      expect(match.stage).toBe("final");
+      expect(match.assaults!.split("a").length - 1).toBe(match.arenaScoreA);
+      expect(match.assaults!.split("b").length - 1).toBe(match.arenaScoreB);
+      expect(match.styleDetailA && match.styleDetailB).toBeTruthy();
+    }
     expect(
       simulation.result.matches.every(
         (match) =>

@@ -1,33 +1,44 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
-import type { TournamentParticipant, TournamentResult } from "../../game/types";
-import { getAssaultSequence, getOwnedFinal } from "./finalDuel";
-import { FinalDuelJudges } from "./FinalDuelJudges";
-import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
+import { getStyleJudgeCount } from "../../game/styleJudging";
+import type { TournamentResult } from "../../game/types";
+import { motionReduced } from "../../shared/motion";
+import { FinalArena } from "./FinalArena";
+import { getDuelScript, getOwnedFinal, type DuelScript, type DuelSide } from "./finalDuel";
+import { FinalDuelBoard } from "./FinalDuelBoard";
+import { FinalDuelReport } from "./FinalDuelReport";
+import { applyEvent, buildTimeline, endView, startView, type DuelSheets } from "./finalDuelTimeline";
+import { FinalServizioPhone } from "./FinalServizioPhone";
 import { participantName } from "./tournamentPresentation";
 
-/** Seconds each assault takes on screen (the duel is --duel in final-duel.css). */
-const ASSAULT_SECONDS = 3;
-/** Where the bind sways in the two middle exchanges, so no assault looks the same. */
-const SWAYS = [["-9%", "7%"], ["8%", "-10%"], ["-5%", "11%"]];
+const subscribeTheme = (onChange: () => void) => {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+};
+/** Outlook is the light camouflage: there the final is a plain report (F9 can flip it mid-final). */
+const useOutlook = () => useSyncExternalStore(subscribeTheme, () => document.documentElement.dataset.theme === "light");
 
-function FighterCard({ participant, side }: { participant: TournamentParticipant; side: "a" | "b" }) {
-  const owned = Boolean(participant.ownedContactId);
-  return (
-    <div className={`final-duel-fighter is-${side}${owned ? " is-owned" : ""}`}>
-      <small>{owned ? "La tua scuola" : "Avversario"}</small>
-      <TournamentParticipantIdentity participant={participant} />
-      <span>
-        Forma {participant.numericForms} · Arena {Math.round(participant.arenaPreparation)} · Stile{" "}
-        {Math.round(participant.stylePreparation)}
-      </span>
-    </div>
-  );
+/**
+ * The fight plays on its own clock (max 30 s). It keeps running under the
+ * Outlook report, so flipping back to Onde finds it where it got to.
+ */
+function usePlayback(script: DuelScript, sheets: DuelSheets) {
+  const [view, dispatch] = useReducer(applyEvent, sheets, (initial) => startView(initial));
+  const [animate] = useState(() => !motionReduced());
+  useEffect(() => {
+    if (!animate) return undefined;
+    const { events } = buildTimeline(script, sheets, Math.random);
+    const timers = events.map((event) => window.setTimeout(() => dispatch(event), event.t));
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [animate, script, sheets]);
+  return animate ? view : undefined;
 }
 
 /**
- * «Guarda la finale» (4.3): the Arena final with one of the player's athletes,
- * assault by assault, then the style vote. The game keeps running underneath.
+ * «Guarda la finale» (4.3): the Arena final with one of the player's athletes.
+ * Modalità Onde fights it out while Servizio fills in, for both athletes, as
+ * the average of the judges; Outlook shows the same final as a static report.
  */
 export function FinalDuelLayer({
   result,
@@ -40,7 +51,16 @@ export function FinalDuelLayer({
   onShowResults?: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
-  const final = getOwnedFinal(result);
+  const final = useMemo(() => getOwnedFinal(result), [result]);
+  const match = final?.match;
+  const script = useMemo<DuelScript>(() => (final ? getDuelScript(final) : { assaults: [], penalties: [] }), [final]);
+  const sheets = useMemo<DuelSheets>(
+    () => ({ a: match?.styleDetailA?.sheets, b: match?.styleDetailB?.sheets }),
+    [match],
+  );
+  const ended = useMemo(() => endView(script, sheets), [script, sheets]);
+  const live = usePlayback(script, sheets);
+  const outlook = useOutlook();
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -53,27 +73,22 @@ export function FinalDuelLayer({
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  if (!final) return null;
-  const { match, a, b } = final;
-  const sequence = getAssaultSequence(match);
-  const endDelay = `${sequence.length * ASSAULT_SECONDS}s`;
+  if (!final || !match) return null;
+  const { a, b } = final;
+  const participants = { a, b };
+  const view = outlook || !live ? ended : live;
   const winner = match.winnerId === a.id ? a : b;
-  const ownWinner = Boolean(winner.ownedContactId);
-  const nameOf = (side: "a" | "b") => participantName(side === "a" ? a : b);
-  const blades = {
-    "--blade-a": `var(--blade-${a.rarity})`,
-    "--blade-b": `var(--blade-${b.rarity})`,
-  } as CSSProperties;
-  const running = { a: 0, b: 0 };
+  const judges = Math.max(
+    sheets.a?.length ?? 0,
+    sheets.b?.length ?? 0,
+    getStyleJudgeCount(result.level, "final"),
+  );
+  const bestOf = Math.max(match.arenaScoreA, match.arenaScoreB) * 2 - 1;
+  const sabers: Record<DuelSide, string> = { a: `var(--blade-${a.rarity})`, b: `var(--blade-${b.rarity})` };
 
   return (
-    <div
-      className="final-duel-layer"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="final-duel-title"
-    >
-      <div className="final-duel">
+    <div className="final-duel-layer" role="dialog" aria-modal="true" aria-labelledby="final-duel-title">
+      <div className={`final-duel${outlook ? " is-report" : ""}`}>
         <header>
           <div>
             <small>{TOURNAMENT_DEFINITIONS[result.level].label} · Stagione {result.season} · Arena</small>
@@ -83,58 +98,29 @@ export function FinalDuelLayer({
             ×
           </button>
         </header>
-        <div className="final-duel-ring">
-          <FighterCard participant={a} side="a" />
-          <div className="final-duel-center">
-            <div className="final-duel-score" style={{ "--delay": endDelay } as CSSProperties}>
-              <strong>{match.arenaScoreA}</strong>
-              <span>Assalti · al meglio dei 3</span>
-              <strong>{match.arenaScoreB}</strong>
-            </div>
-            <ol className="final-duel-assaults" style={blades}>
-              {sequence.map((side, index) => {
-                running[side] += 1;
-                const hit = side === "a" ? "b" : "a";
-                return (
-                  <li
-                    key={index}
-                    className={`is-${side}`}
-                    style={{
-                      "--delay": `${index * ASSAULT_SECONDS}s`,
-                      "--s1": SWAYS[index % 3][0],
-                      "--s2": SWAYS[index % 3][1],
-                    } as CSSProperties}
-                  >
-                    <span className="final-duel-assault-label">Assalto {index + 1}</span>
-                    {/* Crossed blades end on the side of whoever takes the OH. */}
-                    <span className="final-duel-track" aria-hidden="true">
-                      <span className="final-duel-blades">
-                        <span className="final-duel-blade is-a" />
-                        <span className="final-duel-blade is-b" />
-                        <span className="final-duel-spark" />
-                      </span>
-                      <span className="final-duel-oh">OH!</span>
-                    </span>
-                    <span className="final-duel-assault-outcome">
-                      OH a {nameOf(hit)} · punto a {nameOf(side)} · {running.a}–{running.b}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-            <FinalDuelJudges
-              match={match}
-              a={a}
-              b={b}
-              startSeconds={sequence.length * ASSAULT_SECONDS}
-            />
-            <p className={`final-duel-verdict${ownWinner ? " is-ours" : ""}`} style={{ "--delay": endDelay } as CSSProperties}>
-              {participantName(winner)} vince la finale {Math.max(match.arenaScoreA, match.arenaScoreB)} a{" "}
-              {Math.min(match.arenaScoreA, match.arenaScoreB)}
-            </p>
+        <div className="fd-body">
+          <div className="fd-main">
+            <FinalDuelBoard participants={participants} score={view.score} history={view.history} bestOf={bestOf} />
+            {outlook ? (
+              <FinalDuelReport script={script} participants={participants} />
+            ) : (
+              <div className={`fd-arena-frame${view.fighting ? " is-fighting" : ""}`}>
+                <FinalArena level={result.level} view={view} judges={judges} sabers={sabers} />
+              </div>
+            )}
           </div>
-          <FighterCard participant={b} side="b" />
+          <FinalServizioPhone
+            view={view}
+            participants={participants}
+            votes={{ a: match.styleScoreA, b: match.styleScoreB }}
+            judges={judges}
+          />
         </div>
+        <p className={`final-duel-verdict${winner.ownedContactId ? " is-ours" : ""}`} aria-live="polite">
+          {view.done
+            ? `${participantName(winner)} vince la finale ${Math.max(match.arenaScoreA, match.arenaScoreB)} a ${Math.min(match.arenaScoreA, match.arenaScoreB)}`
+            : null}
+        </p>
         <footer>
           <button type="button" onClick={onShowResults}>Mostra i risultati</button>
           <button type="button" className="is-primary" onClick={onClose}>Chiudi</button>

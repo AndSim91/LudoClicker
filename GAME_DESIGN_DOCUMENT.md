@@ -4291,32 +4291,41 @@ Decisione del 03/10 (piano 4.3). Solo le finali di Arena con almeno un nostro
 atleta si possono guardare: dal pulsante «Guarda la finale» nella notifica
 «Torneo completato» di La mia giornata e, siccome quel pannello è nascosto
 sotto i 1301 px e la notifica dura 10 secondi, anche dall'intestazione di
-Tornei › Risultati. Il gioco **non** si ferma. La finestra mostra i due atleti
-(il nostro evidenziato), gli assalti uno alla volta (3 secondi ciascuno), poi
-il voto di Stile dei giudici e il verdetto; «Mostra i risultati» apre quel
+Tornei › Risultati. Il gioco **non** si ferma. «Mostra i risultati» apre quel
 torneo in Tornei › Risultati (da lì la finestra si chiude e basta), Esc o
-«Chiudi» la chiudono. La partita salva solo il punteggio (2–0 o
-2–1): l'ordine degli assalti di un 2–1 si ricava dall'id dell'incontro, quindi
-la stessa finale si rivede sempre uguale (`src/features/tournaments/finalDuel.ts`).
+«Chiudi» la chiudono. La stessa finale si rivede sempre uguale: colpi, assalto
+delle tecniche e cartellini derivano dall'id dell'incontro
+(`src/features/tournaments/finalDuel.ts`).
 
-Decisione del 04/10 (Giudizio di Stile): dopo gli assalti, se c'è un
-cartellino di Stile (a scacchi gialli e neri) compare prima, una volta, con il
-motivo; poi i giudici del nostro atleta alzano il cartello uno alla volta, con
-voto e codice Servizio, e arriva la media; per l'avversario esterno solo la
-media (`FinalDuelJudges.tsx`). In Tornei › Risultati, «Dettaglio incontro»
-mostra la scheda come sul telefono del giudice (`StyleJudgeSheet.tsx`): voto e
-Arena in alto, le nove voci del Giudice 1 per i nostri atleti, il solo voto
-per gli esterni, poi voti e codici di tutti i giudici. Regole del voto in
-`docs/tournament-system-design.md` § 5.
+Decisione del 05/10 (rifatta con Andrea, concept v7): la finale per il 1° e 2°
+posto è **al meglio dei 5** (bronzo e resto al meglio dei 3) e dura al massimo
+30 secondi. A sinistra il tabellone (punteggio e pallini degli assalti) e
+l'Arena, a destra il telefono di Servizio.
 
-Decisione del 04/10: ogni assalto è un duello di due spade illuminate, del
-colore della rarità dell'atleta (comune argento, raro blu, ultra raro viola,
-leggendario oro, leggendario segreto rosso). Si accendono in guardia, si
-scontrano tre volte con una scintilla (il punto d'incontro ondeggia in modo
-diverso in ogni assalto) e con il colpo decisivo finiscono incrociate dal lato
-di chi **subisce** il colpo («OH» nel gergo LudoSport), con un lampo, una
-scossa e la scritta «OH!»: il punto va all'altro. Sotto: «OH a X · punto a Y · 1–0», con il
-punteggio progressivo.
+- **Combattimento** con gli atleti della palestra viva (`Fighter` di
+  `GymPair.tsx`), spade del colore della rarità. Ogni punto è un **taglio**,
+  mai un affondo: chi è toccato barcolla, alza la mano libera e chiama «OH!».
+  Una COM o un SAPD compare sopra l'atleta con la Forma («Cruna dell'Ago ·
+  COM · Forma 3 Spada Lunga») ed è il colpo decisivo di un assalto vinto da chi
+  la esegue. I giudici (2 o 4) stanno a bordo Arena e alzano il cartellino di
+  Stile, a scacchi gialli e neri, quando arriva.
+- **Servizio** si compila mentre si combatte, per **entrambi** gli atleti
+  (anche l'esterno), come media di tutti i giudici: mezzo punto alla volta in
+  voci a caso, a volte mezzo punto oltre e poi giù; alla fine i valori veri e i
+  codici di ogni giudice. Per questo la finale con un nostro atleta salva anche
+  la scheda dell'avversario e l'ordine degli assalti.
+- **Sala per livello**, con il nome del torneo in alto: Scolastico, palestra
+  con lo stendardo delle Onde e il motto; Accademico, gli stendardi degli
+  Ordini (fondo nero, logo bianco); Nazionale, tricolore; Champion's, bandiere
+  delle nazioni, flash e luci che si muovono; Chronicles, la sala dei
+  Leggendari (anello di rune, colonne, statue, bracieri).
+- **Outlook** non anima nulla: resoconto assalto per assalto («Montante al
+  busto di X · «OH!» su Y»: l'OH si assegna a chi lo subisce), cartellini di
+  Stile e Servizio già compilato. Anche «Riduci animazioni» apre sulla fine.
+
+In Tornei › Risultati, «Dettaglio incontro» mostra la scheda come sul telefono
+del giudice (`StyleJudgeSheet.tsx`). Dettagli tecnici in
+`docs/tournament-system-design.md` § 5.1.
 
 ---
 

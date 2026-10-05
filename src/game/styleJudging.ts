@@ -157,7 +157,8 @@ export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
     penalty = reason < 0.5 ? "declaration" : reason < 0.8 ? "cura" : "rispetto";
   }
 
-  const close = scored + conceded === 3 ? 0.5 : 0;
+  // Incontro deciso all'ultimo assalto (2–1, o 3–2 in finale).
+  const close = Math.abs(scored - conceded) === 1 ? 0.5 : 0;
   const sheets = Array.from({ length: input.judges }, (): StyleSheet => {
     // Occhio del giudice largo esattamente mezzo punto: l'arrotondamento al
     // mezzo punto resta giusto in media e non crea pareggi a gradini.

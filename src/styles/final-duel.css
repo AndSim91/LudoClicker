@@ -1,7 +1,7 @@
 /*
- * «Guarda la finale» (4.3). Theme tokens keep it sober in Outlook and lit in
- * Modalità Onde. Keyframes animate *from* the hidden state: the base rules are
- * the end of the final, which «Riduci animazioni» shows.
+ * «Guarda la finale» (4.3). Modalità Onde: the fight in the Arena with
+ * Servizio filling in (finalDuelTimeline.ts). Outlook: the same final as a
+ * sober report, no animation. Base rules are the Outlook look.
  */
 .final-duel-layer {
   --duel-a: var(--accent-ink);
@@ -12,8 +12,6 @@
   --blade-ultra-rare: #a463f2;
   --blade-legendary: #f5b700;
   --blade-secret-legendary: #e5322d;
-  /* One assault on screen; FinalDuelLayer spaces them by ASSAULT_SECONDS. */
-  --duel: 2.6s;
   position: fixed;
   z-index: var(--z-final-duel);
   inset: 0;
@@ -26,7 +24,7 @@
 
 .final-duel {
   display: flex;
-  width: min(1040px, 100%);
+  width: min(1120px, 100%);
   max-height: 100%;
   box-sizing: border-box;
   flex-direction: column;
@@ -72,242 +70,6 @@
   cursor: pointer;
 }
 
-.final-duel-ring {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 240px;
-  gap: 22px;
-  align-items: start;
-}
-
-.final-duel-fighter {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-muted);
-}
-
-.final-duel-fighter small {
-  color: var(--ink-muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.final-duel-fighter.is-owned {
-  border: 2px solid var(--accent-ink);
-}
-
-.final-duel-fighter.is-owned small {
-  color: var(--accent-ink);
-}
-
-.final-duel-fighter > span {
-  color: var(--ink-muted);
-  font-size: 13px;
-}
-
-.final-duel-center {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.final-duel-score {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  animation: final-duel-rise 0.5s ease-out var(--delay) both;
-}
-
-.final-duel-score strong {
-  font-family: var(--font-display, inherit);
-  font-size: 52px;
-  line-height: 1;
-}
-
-.final-duel-score strong:first-child { color: var(--duel-a); }
-.final-duel-score strong:last-child { color: var(--duel-b); }
-
-.final-duel-score span {
-  color: var(--ink-muted);
-  font-size: 14px;
-}
-
-.final-duel-assaults {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.final-duel-assaults li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 8px 12px;
-  align-items: center;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-muted);
-  animation: final-duel-rise 0.3s ease-out var(--delay) both;
-}
-
-.final-duel-assault-label {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.final-duel-track {
-  position: relative;
-  height: 96px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--duel-a) 35%, transparent),
-    transparent 50%,
-    color-mix(in srgb, var(--duel-b) 35%, transparent)
-  );
-  animation: final-duel-shake var(--duel) linear var(--delay) both;
-}
-
-/* Where the decisive hit lands: the OH side lights up. */
-.final-duel-track::after {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at var(--end) 50%, rgb(255 255 255 / 55%), transparent 45%);
-  content: "";
-  opacity: 0;
-  animation: final-duel-hit var(--duel) ease-out var(--delay) both;
-  pointer-events: none;
-}
-
-.final-duel-assaults li.is-a { --end: 80%; --wind: 42%; --lean: rotate(16deg); }
-.final-duel-assaults li.is-b { --end: 20%; --wind: 58%; --lean: rotate(-16deg); }
-
-/*
- * The bind, where the blades cross. Base rule = end of the assault: blades
- * pushed onto the side of whoever takes the OH. Mid-assault sways come from
- * --s1/--s2, different for each assault.
- */
-.final-duel-blades {
-  position: absolute;
-  top: 50%;
-  left: var(--end);
-  width: 0;
-  height: 0;
-  transform: var(--lean);
-  animation: final-duel-bind var(--duel) ease-in-out var(--delay) both;
-}
-
-/* Rotates around the bind; hilt at the bottom, on the fighter's side. */
-.final-duel-blade {
-  --blade: var(--blade-a);
-  --flip: 1;
-  position: absolute;
-  top: -42px;
-  left: -2.5px;
-  width: 5px;
-  height: 84px;
-  transform: rotate(calc(var(--flip) * 50deg));
-  animation: final-duel-fence var(--duel) ease-in-out var(--delay) both;
-}
-
-.final-duel-blade.is-b {
-  --blade: var(--blade-b);
-  --flip: -1;
-}
-
-.final-duel-blade::after {
-  position: absolute;
-  bottom: 0;
-  left: -0.5px;
-  width: 6px;
-  height: 20%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #2b3136, #6b757c, #2b3136);
-  content: "";
-}
-
-/* The beam: white-hot core, glow in the rarity colour, ignites from the hilt. */
-.final-duel-blade::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 81%;
-  border-radius: 3px 3px 1px 1px;
-  background: linear-gradient(90deg, var(--blade), color-mix(in srgb, var(--blade) 35%, #ffffff) 50%, var(--blade));
-  box-shadow: 0 0 5px var(--blade);
-  content: "";
-  transform-origin: 50% 100%;
-  animation:
-    final-duel-ignite 0.3s ease-out calc(var(--delay) + 0.05s) both,
-    final-duel-hum 0.13s linear calc(var(--delay) + 0.35s) infinite alternate;
-}
-
-/* Sparks at each clash, a burst on the hit. */
-.final-duel-spark {
-  position: absolute;
-  top: -22px;
-  left: -22px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0 12%, color-mix(in srgb, var(--blade-a) 60%, #ffffff) 25%, color-mix(in srgb, var(--blade-b) 45%, transparent) 45%, transparent 70%);
-  opacity: 0;
-  animation: final-duel-sparks var(--duel) ease-out var(--delay) both;
-}
-
-.final-duel-oh {
-  position: absolute;
-  top: 8px;
-  left: var(--end);
-  margin-left: -24px;
-  width: 48px;
-  color: #ffffff;
-  font-family: var(--font-display, inherit);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1;
-  text-align: center;
-  text-shadow: 0 0 3px #000000, 0 1px 2px #000000, 0 0 12px var(--blade-a);
-  animation: final-duel-oh var(--duel) ease-out var(--delay) both;
-}
-
-.final-duel-assaults li.is-a .final-duel-oh { margin-left: 18px; }
-.final-duel-assaults li.is-b .final-duel-oh { margin-left: -66px; text-shadow: 0 0 3px #000000, 0 1px 2px #000000, 0 0 12px var(--blade-b); }
-
-.final-duel-assault-outcome {
-  grid-column: 1 / -1;
-  font-size: 14px;
-  animation: final-duel-fade 0.4s ease-out calc(var(--delay) + var(--duel)) both;
-}
-
-.final-duel-style {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 16px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  animation: final-duel-rise 0.4s ease-out var(--delay) both;
-}
-
-.final-duel-style > span:first-child {
-  grid-column: 1 / -1;
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .final-duel-verdict {
   margin: 4px 0 0;
   font-family: var(--font-display, inherit);
@@ -315,7 +77,7 @@
   font-weight: 700;
   text-align: center;
   text-wrap: balance;
-  animation: final-duel-rise 0.5s ease-out calc(var(--delay) + 0.3s) both;
+  min-height: 28px;
 }
 
 .final-duel-verdict.is-ours { color: var(--accent-ink); }
@@ -347,61 +109,509 @@
 
 @keyframes final-duel-fade { from { opacity: 0; } }
 @keyframes final-duel-rise { from { opacity: 0; transform: translateY(10px); } }
-/*
- * One assault, in --duel: on guard and ignition (0–10%), three exchanges that
- * clash at 20%, 42% and 66%, a wind-up, the hit at 84%.
- */
-@keyframes final-duel-bind {
-  0%, 20% { left: 50%; transform: none; }
-  28% { left: calc(50% + var(--s1)); transform: rotate(-4deg); }
-  42% { left: 50%; transform: none; }
-  52% { left: calc(50% + var(--s2)); transform: rotate(5deg); }
-  66% { left: 50%; transform: none; }
-  76% { left: var(--wind); transform: none; }
-  84% { left: var(--end); transform: var(--lean); }
+
+/* Body: scoreboard and Arena (or the report) on the left, Servizio on the right. */
+.fd-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
 }
 
-@keyframes final-duel-fence {
-  0%, 10% { transform: translateX(calc(var(--flip) * -48px)) rotate(calc(var(--flip) * 10deg)); }
-  20% { transform: rotate(calc(var(--flip) * 54deg)); }
-  32% { transform: translateX(calc(var(--flip) * -40px)) rotate(calc(var(--flip) * 16deg)); }
-  42% { transform: rotate(calc(var(--flip) * 46deg)); }
-  52% { transform: rotate(calc(var(--flip) * 52deg)); }
-  58% { transform: translateX(calc(var(--flip) * -38px)) rotate(calc(var(--flip) * 18deg)); }
-  66% { transform: rotate(calc(var(--flip) * 50deg)); }
+.fd-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
 }
 
-@keyframes final-duel-ignite { from { transform: scaleY(0); } }
-
-@keyframes final-duel-hum { to { opacity: 0.82; } }
-
-@keyframes final-duel-sparks {
-  0%, 17%, 25%, 39%, 47%, 63%, 71%, 82% { opacity: 0; transform: scale(0.3); }
-  20%, 42%, 66% { opacity: 1; transform: scale(1); }
-  85% { opacity: 1; transform: scale(2.4); }
-  100% { opacity: 0; transform: scale(1.6); }
+.fd-board {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
 }
 
-@keyframes final-duel-shake {
-  0%, 18%, 23%, 40%, 45%, 64%, 69%, 83%, 96%, 100% { transform: none; }
-  20%, 66% { transform: translateX(2px); }
-  42% { transform: translateX(-2px); }
-  86% { transform: translate(5px, -2px); }
-  89% { transform: translate(-4px, 2px); }
-  92% { transform: translate(2px, -1px); }
+.fd-board-who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
-@keyframes final-duel-hit {
-  0%, 83% { opacity: 0; }
-  86% { opacity: 1; }
+.fd-board-who.is-b {
+  justify-items: end;
+  text-align: right;
 }
 
-@keyframes final-duel-oh {
-  0%, 84% { opacity: 0; transform: scale(2.2); }
-  90% { opacity: 1; transform: scale(0.9); }
+.fd-board-who > small {
+  color: var(--ink-muted);
+  font-size: 12px;
 }
 
-/* Modalità Onde: deeper stage, our athlete glows. */
+.fd-board-who.is-owned > small { color: var(--accent-ink); }
+
+.fd-board-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fd-board-score > b {
+  min-width: 28px;
+  font-family: var(--font-display, inherit);
+  font-size: 40px;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.fd-board-score > b.is-a { color: var(--duel-a); }
+.fd-board-score > b.is-b { color: var(--duel-b); }
+
+.fd-board-score > span {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fd-board-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.fd-board-pips i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.fd-board-pips i.is-a { background: var(--duel-a); }
+.fd-board-pips i.is-b { background: var(--duel-b); }
+
+/* Outlook: the final assault by assault. */
+.fd-report {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.fd-report h3 {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fd-report ol {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  list-style: none;
+}
+
+.fd-report li {
+  display: grid;
+  grid-template-columns: 78px 1fr 40px;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.fd-report li:last-child { border-bottom: 0; }
+.fd-report li > span:first-child { color: var(--ink-muted); }
+
+.fd-report li > span:last-child {
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Servizio, as the average of the judges. */
+.fd-phone {
+  --phone-row: var(--surface-muted);
+  --phone-plus: var(--surface);
+  --phone-lit: var(--accent-ink);
+  --phone-press: var(--accent-ink);
+  --phone-press-ink: #ffffff;
+  --phone-sog: var(--surface-muted);
+  --phone-pen: rgb(196 49 75 / 8%);
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.fd-phone-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 4px 2px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fd-phone-bar b { color: var(--accent-ink); }
+
+.fd-phone-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+
+.fd-phone-side {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.fd-phone-side.is-b { text-align: right; }
+
+.fd-phone-side b {
+  font-family: var(--font-display, inherit);
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.fd-phone-side small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fd-phone-side.is-owned small { color: var(--accent-ink); }
+
+.fd-phone-arena {
+  display: grid;
+  justify-items: center;
+  color: var(--accent-ink);
+  font-family: var(--font-display, inherit);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.fd-phone-arena small {
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fd-phone-rows {
+  display: grid;
+  gap: 3px;
+}
+
+.fd-phone-row {
+  display: grid;
+  grid-template-columns: 26px 42px 1fr 42px 26px;
+  align-items: center;
+  height: 28px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--phone-row);
+  font-size: 13px;
+}
+
+.fd-phone-row > span {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.fd-phone-row.is-sog { background: var(--phone-sog); }
+.fd-phone-row.is-pen { background: var(--phone-pen); }
+
+.fd-phone-plus {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  color: var(--ink-muted);
+  background: var(--phone-plus);
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+
+.fd-phone-plus.is-pressed {
+  color: var(--phone-press-ink);
+  background: var(--phone-press);
+}
+
+.fd-phone-name {
+  overflow: hidden;
+  padding: 0 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.fd-phone-value.is-lit {
+  color: var(--phone-lit);
+  font-weight: 700;
+}
+
+.fd-phone-value.is-dim { color: var(--ink-muted); }
+
+.fd-phone-codes {
+  min-height: 14px;
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.fd-phone-codes.is-on { opacity: 1; }
+
+.fd-style-card {
+  display: inline-block;
+  width: 9px;
+  height: 12px;
+  margin-left: 4px;
+  border-radius: 1px;
+  background: repeating-conic-gradient(#f3cf3e 0 25%, #111417 0 50%) 0 0 / 4.5px 4.5px;
+  box-shadow: 0 0 0 1px var(--line);
+  vertical-align: -1px;
+}
+
+/* Outlook: the report has no buttons to press. */
+.final-duel.is-report .fd-phone-plus { visibility: hidden; }
+.final-duel.is-report .fd-phone-row { grid-template-columns: 10px 52px 1fr 52px 10px; }
+
+/* The Arena (Modalità Onde only). */
+.fd-arena-frame {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.fd-arena {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-display, sans-serif);
+}
+
+.fd-title {
+  fill: #ffe2a8;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.fd-title.is-motto { font-size: 12px; }
+
+.fd-title.is-chronicles {
+  fill: #f3d79f;
+  filter: drop-shadow(0 0 6px #d5a84b);
+  letter-spacing: 2.5px;
+}
+
+.fd-banner-name {
+  fill: #b9c8cf;
+  font-size: 11px;
+}
+
+.fd-crowd circle,
+.fd-crowd rect { fill: #04263f; }
+.fd-crowd .is-back circle,
+.fd-crowd .is-back rect { fill: #032036; }
+.fd-crowd.is-hooded path { fill: #040b1a; }
+
+.fd-beam {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: fd-beam 6s ease-in-out infinite alternate;
+}
+
+.fd-beam.is-sway { animation: fd-sway 5s ease-in-out infinite alternate; }
+
+.fd-flash {
+  fill: #ffffff;
+  opacity: 0;
+  animation: fd-camera 2.8s linear infinite;
+}
+
+.fd-stars circle {
+  fill: #fbf1dc;
+  animation: fd-twinkle 4s ease-in-out infinite;
+}
+
+.fd-rune-ring {
+  transform-origin: 320px 120px;
+  animation: fd-spin 60s linear infinite;
+}
+
+.fd-rune-ring circle {
+  fill: none;
+  stroke: #d5a84b;
+}
+
+.fd-rune-ring .is-rune { fill: #d5a84b; }
+
+.fd-column rect {
+  fill: #0d274b;
+  stroke: #d5a84b;
+  stroke-width: 1;
+}
+
+.fd-column rect.is-capital {
+  fill: #d5a84b;
+  stroke: none;
+}
+
+.fd-column line {
+  stroke: #071a35;
+  stroke-width: 1.5;
+}
+
+.fd-statue > rect {
+  fill: #0d274b;
+  stroke: #d5a84b;
+  stroke-width: 1;
+}
+
+.fd-statue circle { fill: #16345e; }
+
+.fd-statue path {
+  fill: none;
+  stroke: #16345e;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.fd-brazier {
+  fill: #f0b85a;
+  filter: drop-shadow(0 0 8px #f0b85a);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fd-fire 0.9s ease-in-out infinite alternate;
+}
+
+.fd-ring.is-epic { filter: drop-shadow(0 0 10px rgb(213 168 75 / 55%)); }
+
+.fd-judge circle,
+.fd-judge path {
+  fill: none;
+  stroke: #9fb4c0;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.fd-judge circle { fill: #9fb4c0; }
+
+.fd-judge-phone {
+  fill: #6cd3d6;
+  filter: drop-shadow(0 0 3px #6cd3d6);
+}
+
+.fd-judge-card {
+  opacity: 0;
+  animation: fd-card 1.6s ease-out;
+}
+
+.fd-hit .gym-fighter { animation: fd-flinch 0.55s ease-out; }
+
+.fd-touch {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fd-touch 520ms ease-out forwards;
+}
+
+.fd-touch circle {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px #ff9b8a);
+}
+
+.fd-oh {
+  fill: #ffffff;
+  paint-order: stroke;
+  stroke: #021e33;
+  stroke-width: 4px;
+  font-size: 19px;
+  font-weight: 700;
+  animation: fd-oh 1.2s ease-out forwards;
+}
+
+.fd-tech {
+  fill: #6cd3d6;
+  paint-order: stroke;
+  stroke: #021e33;
+  stroke-width: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  animation: fd-tech 2.2s ease-out forwards;
+}
+
+.fd-tech-sub {
+  fill: #fbf1dc;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+@keyframes final-duel-fade { from { opacity: 0; } }
+@keyframes fd-spin { to { transform: rotate(360deg); } }
+@keyframes fd-twinkle { 50% { opacity: 0.3; } }
+@keyframes fd-fire {
+  from { opacity: 0.85; transform: scaleY(0.85) skewX(-4deg); }
+  to { opacity: 1; transform: scaleY(1.1) skewX(4deg); }
+}
+@keyframes fd-beam { from { opacity: 0.7; } to { opacity: 1; } }
+@keyframes fd-sway { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes fd-camera { 0%, 92%, 100% { opacity: 0; } 94% { opacity: 0.9; } }
+@keyframes fd-flinch { 30% { transform: rotate(-8deg) translateX(-3px); } }
+@keyframes fd-touch { 0% { opacity: 1; transform: scale(0.3); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes fd-oh {
+  0% { opacity: 0; transform: translateY(6px) scale(0.7); }
+  18% { opacity: 1; transform: none; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+@keyframes fd-tech {
+  0% { opacity: 0; transform: translateY(6px); }
+  15%, 75% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes fd-card {
+  0% { opacity: 0; transform: translateY(6px); }
+  15%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes fd-bump { 40% { transform: scale(1.35); } }
+
+/* Modalità Onde: deep blue, gold, and Servizio's phone in the hand. */
 :root[data-theme="dark"] .final-duel-layer {
   --duel-b: #f3a36f;
   background: rgb(2 30 51 / 82%);
@@ -412,28 +622,52 @@
   background: radial-gradient(ellipse at 50% 0%, #0e4563 0%, var(--surface) 60%);
 }
 
-:root[data-theme="dark"] .final-duel-fighter {
-  background: var(--onde-groove);
+:root[data-theme="dark"] .final-duel-verdict.is-ours { color: var(--onde-gold-bright); }
+
+:root[data-theme="dark"] .fd-board { background: var(--onde-groove); }
+:root[data-theme="dark"] .fd-board-score > b.is-bump { animation: fd-bump 0.3s ease-out; }
+
+:root[data-theme="dark"] .fd-phone {
+  --phone-row: rgb(23 124 137 / 40%);
+  --phone-plus: rgb(2 30 51 / 55%);
+  --phone-lit: var(--onde-gold-bright);
+  --phone-press: var(--onde-gold);
+  --phone-press-ink: var(--onde-on-gold);
+  --phone-sog: rgb(109 115 120 / 45%);
+  --phone-pen: rgb(142 0 0 / 45%);
+  border-radius: 22px;
+  background: #050d14;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 30%);
 }
 
-:root[data-theme="dark"] .final-duel-fighter.is-owned {
-  animation: final-duel-glow 2.4s ease-in-out infinite;
+:root[data-theme="dark"] .fd-phone-head {
+  border-color: var(--onde-gold);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--onde-groove), var(--onde-abyss));
 }
 
-:root[data-theme="dark"] .final-duel-verdict.is-ours {
-  color: var(--onde-gold-bright);
+:root[data-theme="dark"] .fd-phone-row { border-radius: 6px; }
+
+:root[data-theme="dark"] .fd-phone-bar b,
+:root[data-theme="dark"] .fd-phone-arena,
+:root[data-theme="dark"] .fd-phone-codes { color: var(--onde-gold-bright); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fd-beam,
+  .fd-flash,
+  .fd-stars circle,
+  .fd-rune-ring,
+  .fd-brazier { animation: none; }
 }
 
-:root[data-theme="dark"] .final-duel-blade::before {
-  box-shadow: 0 0 6px var(--blade), 0 0 18px var(--blade);
-}
+:root.reduce-motion .fd-beam,
+:root.reduce-motion .fd-flash,
+:root.reduce-motion .fd-stars circle,
+:root.reduce-motion .fd-rune-ring,
+:root.reduce-motion .fd-brazier { animation: none; }
 
-@keyframes final-duel-glow {
-  50% { box-shadow: 0 0 26px rgb(108 211 214 / 50%); }
-}
-
-@media (max-width: 860px) {
-  .final-duel-ring { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .fd-body { grid-template-columns: 1fr; }
 }
 
 /* Entry points: the «Torneo completato» notification and Tornei › Risultati. */

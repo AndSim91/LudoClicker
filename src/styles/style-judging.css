@@ -190,105 +190,6 @@
   margin-left: 0;
 }
 
-/* D · «Guarda la finale»: i giudici alzano il cartello. */
-.final-duel-judges {
-  display: grid;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  animation: final-duel-rise 0.4s ease-out var(--delay) both;
-}
-
-.final-duel-judges > span {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.final-duel-judge-row {
-  display: grid;
-  grid-template-columns: minmax(90px, 0.8fr) repeat(var(--judges), minmax(0, 1fr)) minmax(0, 1.1fr);
-  align-items: end;
-  gap: 8px;
-}
-
-.final-duel-judge-row > small {
-  overflow: hidden;
-  align-self: center;
-  color: var(--ink-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.final-duel-judge-row.is-owned > small {
-  color: var(--accent-ink);
-  font-weight: 700;
-}
-
-.final-duel-paddle {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  animation: final-duel-paddle 0.6s ease-out var(--delay) both;
-}
-
-.final-duel-paddle b {
-  width: 100%;
-  padding: 7px 0 5px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--surface);
-  font-family: var(--font-display, inherit);
-  font-size: 22px;
-  line-height: 1;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.final-duel-paddle code {
-  color: var(--ink-muted);
-  font-size: 10px;
-}
-
-.final-duel-paddle small {
-  color: var(--ink-muted);
-  font-size: 10px;
-}
-
-.final-duel-judge-row.is-owned .final-duel-paddle.is-average b {
-  border-color: var(--accent-ink);
-  color: var(--accent-ink);
-}
-
-.final-duel-style-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-weight: 700;
-  animation: final-duel-rise 0.4s ease-out var(--delay) both;
-}
-
-@keyframes final-duel-paddle {
-  0% { opacity: 0; transform: translateY(14px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .final-duel-paddle,
-  .final-duel-style-card,
-  .final-duel-judges { animation: none; }
-}
-
-@media (max-width: 640px) {
-  .final-duel-judge-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .final-duel-judge-row > small {
-    grid-column: 1 / -1;
-  }
-}
-
 /* Modalità Onde: la testata di Servizio in blu abisso e oro, i cartelli in crema. */
 :root[data-theme="dark"] .style-sheet-head {
   border-color: var(--onde-gold);
@@ -314,20 +215,6 @@
   border-color: var(--onde-gold);
 }
 
-:root[data-theme="dark"] .style-sheet-judges code,
-:root[data-theme="dark"] .final-duel-paddle code {
+:root[data-theme="dark"] .style-sheet-judges code {
   color: var(--onde-gold-bright);
-}
-
-:root[data-theme="dark"] .final-duel-paddle b {
-  border: 0;
-  background: var(--onde-foam);
-  box-shadow: 0 4px 0 var(--onde-gold);
-  color: var(--onde-on-gold);
-}
-
-:root[data-theme="dark"] .final-duel-judge-row.is-owned .final-duel-paddle.is-average b {
-  background: var(--onde-gold);
-  box-shadow: 0 4px 0 #a0712a;
-  color: var(--onde-on-gold);
 }

@@ -594,11 +594,16 @@ function simulateMatch(
     MINIMUM_ASSAULT_CHANCE,
     MAXIMUM_ASSAULT_CHANCE,
   );
+  // La finale per il 1° e 2° posto è al meglio dei 5, il resto al meglio dei 3.
+  const wins = stage === "final" ? 3 : 2;
   let arenaScoreA = 0;
   let arenaScoreB = 0;
-  while (arenaScoreA < 2 && arenaScoreB < 2) {
-    if (roll(cursor) < assaultChanceA) arenaScoreA += 1;
+  let assaults = "";
+  while (arenaScoreA < wins && arenaScoreB < wins) {
+    const side = roll(cursor) < assaultChanceA ? "a" : "b";
+    if (side === "a") arenaScoreA += 1;
     else arenaScoreB += 1;
+    assaults += side;
   }
   const judge = (
     participant: TournamentParticipant,
@@ -623,6 +628,7 @@ function simulateMatch(
     });
   const styleA = judge(participantA, assaultChanceA, arenaScoreA, arenaScoreB);
   const styleB = judge(participantB, 1 - assaultChanceA, arenaScoreB, arenaScoreA);
+  const ownedMatch = Boolean(participantA.ownedContactId || participantB.ownedContactId);
   return {
     id: `match-${stage}-${matchIndex}-${cursor.seed >>> 0}`,
     stage,
@@ -633,11 +639,13 @@ function simulateMatch(
     arenaScoreB,
     styleScoreA: styleA.vote,
     styleScoreB: styleB.vote,
-    ...(participantA.ownedContactId ? { styleDetailA: styleA.detail } : {}),
-    ...(participantB.ownedContactId ? { styleDetailB: styleB.detail } : {}),
+    // «Guarda la finale» compila Servizio per entrambi: lì si tiene anche la scheda dell'esterno.
+    ...(stage === "final" && ownedMatch ? { assaults } : {}),
+    ...(participantA.ownedContactId || (stage === "final" && ownedMatch) ? { styleDetailA: styleA.detail } : {}),
+    ...(participantB.ownedContactId || (stage === "final" && ownedMatch) ? { styleDetailB: styleB.detail } : {}),
     ...(styleA.penalty ? { stylePenaltyA: styleA.penalty } : {}),
     ...(styleB.penalty ? { stylePenaltyB: styleB.penalty } : {}),
-    winnerId: arenaScoreA === 2 ? participantA.id : participantB.id,
+    winnerId: arenaScoreA === wins ? participantA.id : participantB.id,
   };
 }
 

@@ -10,6 +10,8 @@ export function Fighter({
   saber,
   pose = "attack",
   delay = 0,
+  tip: blade,
+  declare = false,
 }: {
   x: number;
   facing: 1 | -1;
@@ -17,14 +19,19 @@ export function Fighter({
   pose?: "guard" | "attack";
   /** Negative offset (s) of the idle loops, so no two athletes breathe in step. */
   delay?: number;
+  /** Blade tip mid-cut (the Arena final); overrides the pose. */
+  tip?: { x: number; y: number };
+  /** Free hand raised: the touched athlete calls «OH!». */
+  declare?: boolean;
 }) {
   const hand = x + 14 * facing;
-  const tip = pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 };
+  const tip = blade ?? (pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 });
   const offset = `${-delay}s`;
+  const raised = declare ? ` M${x} 110 L${x - 8 * facing} 96 L${x - 10 * facing} 84` : "";
   return (
     <g className="gym-fighter" style={{ animationDelay: offset }}>
       <circle cx={x} cy={96} r={7} />
-      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116`} />
+      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116${raised}`} />
       <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber, animationDelay: offset }} />
     </g>
   );

@@ -145,7 +145,7 @@ valoreEffettivo = preparazione × modificatoreCondizione × modificatoreIncontro
 
 ## 4. Incontri Arena
 
-Ogni incontro è al meglio dei tre assalti. Vince chi raggiunge per primo due assalti, con risultato 2–0 oppure 2–1.
+Ogni incontro è al meglio dei tre assalti: vince chi raggiunge per primo due assalti, con risultato 2–0 oppure 2–1. Fa eccezione la finale per il 1° e 2° posto, al meglio dei cinque (3–0, 3–1 o 3–2); la finale per il bronzo resta al meglio dei tre.
 
 La probabilità del singolo assalto deriva dal rapporto tra preparazione e fortuna. Il coefficiente di decisione viene applicato soltanto alla preparazione: applicarlo anche ai modificatori casuali renderebbe la fortuna molto più importante del 30% concordato.
 
@@ -201,7 +201,7 @@ sopra 2,25 il livello sale più piano (pendenza 0,7) verso un massimo di 2,6
   con F2 (1). Rare.
 - **DIF**: 1 a chi, nettamente sovrastato in Arena (< 15%) e sconfitto, va
   comunque a segno.
-- **SOG**: gusto di ciascun giudice, più facile negli incontri finiti 2–1.
+- **SOG**: gusto di ciascun giudice, più facile negli incontri decisi all'ultimo assalto (2–1, 3–2).
 - **PEN**: il **cartellino di Stile**, separato da quelli dell'Arena e a scacchi
   gialli e neri; 1–6% a incontro (più spesso a chi è inesperto, in cattiva forma
   o perde 0–2), motivo Dichiarazione, Cura o Rispetto; −0,5 solo in quell'incontro.
@@ -211,8 +211,10 @@ finale per il bronzo, finale) due, quattro al Nazionale, in Champion's Arena e
 nelle Chronicles. Il voto dell'incontro è la media dei giudici; la classifica
 Stile usa la media di tutti gli incontri.
 
-Si salvano le schede (`styleDetailA/B`, Giudice 1, 2…) solo per gli
-atleti della scuola, il cartellino (`stylePenaltyA/B`) per tutti. Il codice
+Si salvano le schede (`styleDetailA/B`, Giudice 1, 2…) per gli atleti della
+scuola e, nella finale con un nostro atleta, anche per l'avversario esterno;
+il cartellino (`stylePenaltyA/B`) per tutti. Quella finale salva anche l'ordine
+degli assalti (`assaults`, es. «abaa»). Il codice
 Servizio v2 di ogni scheda si calcola alla lettura (`src/game/styleCode.ts`,
 porting dell'algoritmo pubblico `anfive/style-codes`).
 
@@ -221,6 +223,34 @@ Misure (200 tornei per riga): mediana 6,5–6,6, 95% sotto 7,4, massimo visto
 esperienza, le vittorie nello Stile restano vicine a quelle del vecchio voto
 (Nazionale 1,35× lo standard 37% → 35%; Champion's 66% → 60%) e un atleta da
 200 di Stile batte sempre uno da 150.
+
+### 5.1 «Guarda la finale»
+
+La finale con un nostro atleta si guarda da Tornei › Risultati o dalla notifica
+del torneo (`FinalDuelLayer.tsx`), in non più di 30 secondi.
+
+- **Modalità Onde**: combattimento in Arena con gli atleti della palestra
+  (`Fighter` di `GymPair.tsx`). Ogni punto è un taglio, mai un affondo
+  (fendente, tondo, montante, diagonale, taglio alla gamba): lampo sul corpo,
+  chi è toccato alza la mano e chiama «OH!». Una COM o un SAPD compare sopra
+  l'atleta con la Forma ed è sempre il colpo decisivo di un assalto vinto da
+  chi la esegue. Il telefono di Servizio si compila mentre si combatte, come
+  media di tutti i giudici e per entrambi gli atleti: mezzo punto alla volta,
+  a volte mezzo punto oltre e poi giù; COM e SAPD si contano al tocco; alla
+  fine i valori veri e i codici dei giudici.
+- **Sala per livello** (`FinalArenaBackdrop.tsx`), con il nome del torneo in
+  alto: Scolastico, palestra con lo stendardo delle Onde; Accademico, stendardi
+  degli Ordini (fondo nero, logo bianco, `public/assets/orders/`; mancano
+  Shardana, Loggia e Ronin); Nazionale, tricolore; Champion's, bandiere delle
+  nazioni del circuito; Chronicles, la sala dei Leggendari.
+- **Outlook**: nessuna animazione. Resoconto assalto per assalto («Montante al
+  busto di X · «OH!» su Y»), cartellini di Stile e Servizio già compilato con
+  i codici. Lo stesso vale con «Riduci animazioni».
+- Il copione (colpi, assalto di COM/SAPD e cartellini) deriva dall'id
+  dell'incontro (`finalDuel.ts`), la regia da `finalDuelTimeline.ts`. Le finali
+  salvate prima non hanno l'ordine degli assalti né la scheda dell'esterno: il
+  punto dello sconfitto cade nel primo o nel secondo assalto e il telefono
+  mostra dell'esterno solo il voto finale.
 
 ## 6. Calendario e progresso offline
 
@@ -804,7 +834,7 @@ I log completi degli incontri devono restare separati dai riepiloghi permanenti,
 - lo Scolastico parte con almeno sei idonei e include tutti;
 - i tornei superiori contengono fino a dodici atleti della scuola, NPC e
   eventuali posti vacanti fino a un campo nominale di 64;
-- Arena usa incontri al meglio dei tre;
+- Arena usa incontri al meglio dei tre, la finale per il 1° e 2° posto al meglio dei cinque;
 - Stile mostra medie a tre decimali;
 - vengono prodotti 6 o 12 qualificati distinti, divisi equamente tra Arena e
   Stile con i consueti ripescaggi;
