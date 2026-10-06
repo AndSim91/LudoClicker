@@ -224,7 +224,7 @@ function getCategorySummary(state: GameState, category: UpgradeCategory) {
     case "charisma":
       return `+${Math.round(getUpgradeEffectTotal(state.upgrades, "eventContactsMultiplier") * 100)}% contatti`;
     case "writing":
-      return `${Math.round(getCreativityProgress(state.upgrades) * 35)}/35 punti Creatività · prova dopo l'email ${formatPercent(getEmailBookingChance(state))}`;
+      return `${Math.round(getCreativityProgress(state.upgrades) * 35)} punti Creatività · prova dopo l'email ${formatPercent(getEmailBookingChance(state))}`;
     case "welcome":
       return `${Math.round(getUpgradeEffectTotal(state.upgrades, "enrollmentProgress") * 100)}% della possibilità di Iscrizione`;
     case "equipment":
@@ -377,6 +377,15 @@ function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): Upgr
   return getUpgradeLockReason(state, definition) ? "locked" : "available";
 }
 
+/**
+ * A locked node stays a semi-transparent «?»: no name, price or requirement,
+ * so the tree keeps its surprises (decision of 06/10/2026, concept Q1). Discovered
+ * secret paths keep their own lock, since finding them is the point.
+ */
+function isUpgradeHidden(state: GameState, definition: UpgradeDefinition): boolean {
+  return definition.category !== "secrets" && getUpgradeStatus(state, definition) === "locked";
+}
+
 /** The wave through the node centres (x = 100 per node, y = 15 or 15 + amplitude). */
 function getWavePath(lastIndex: number): string {
   if (lastIndex <= 0) return "";
@@ -390,7 +399,18 @@ function getWavePath(lastIndex: number): string {
   return path;
 }
 
-function UpgradeLaneWave({ count, litTo, columns }: { count: number; litTo: number; columns: number }) {
+function UpgradeLaneWave({
+  count,
+  visibleTo,
+  litTo,
+  columns,
+}: {
+  count: number;
+  /** Last node that is not hidden: past it the wave is a faint dotted trail. */
+  visibleTo: number;
+  litTo: number;
+  columns: number;
+}) {
   if (count < 2) return null;
   const width = (count - 1) * 100;
   return (
@@ -401,7 +421,8 @@ function UpgradeLaneWave({ count, litTo, columns }: { count: number; litTo: numb
       preserveAspectRatio="none"
       style={{ width: `calc(${count - 1} * 100% / ${columns})` }}
     >
-      <path className="upgrade-lane-wave-base" d={getWavePath(count - 1)} />
+      {visibleTo < count - 1 ? <path className="upgrade-lane-wave-fog" d={getWavePath(count - 1)} /> : null}
+      {visibleTo > 0 ? <path className="upgrade-lane-wave-base" d={getWavePath(visibleTo)} /> : null}
       {litTo > 0 ? <path className="upgrade-lane-wave-lit" d={getWavePath(litTo)} /> : null}
     </svg>
   );
@@ -441,6 +462,16 @@ function UpgradeNode({
         ? "disponibile, saldo insufficiente"
         : "disponibile";
   const low = index % 2 === 1;
+
+  if (isUpgradeHidden(state, definition)) {
+    return (
+      <li className="upgrade-node-item" style={{ paddingTop: low ? WAVE_AMPLITUDE : 0 }}>
+        <span className="upgrade-node hidden" role="img" aria-label="Potenziamento da scoprire">
+          <span className="upgrade-node-icon" aria-hidden="true">?</span>
+        </span>
+      </li>
+    );
+  }
 
   return (
     <li
@@ -715,7 +746,7 @@ function UpgradeDetailsDialog({
               </button>
             )}
             {!completed && branchIndex >= 0 ? (
-              <p className="upgrade-dialog-next">{getNextNodeText(definition)}</p>
+              <p className="upgrade-dialog-next">{getNextNodeText(state, definition)}</p>
             ) : null}
           </>
         )}
@@ -724,13 +755,14 @@ function UpgradeDetailsDialog({
   );
 }
 
-function getNextNodeText(definition: UpgradeDefinition): string {
+function getNextNodeText(state: GameState, definition: UpgradeDefinition): string {
   if (definition.category === "secrets") return "";
   const branch = UPGRADE_DEFINITIONS.filter(
     (entry) => entry.category === definition.category && !entry.hidden,
   );
   const next = branch[branch.findIndex((entry) => entry.id === definition.id) + 1];
-  return next ? `Poi nel ramo: ${next.title}` : "Ultimo nodo del ramo";
+  if (!next) return "Ultimo nodo del ramo";
+  return isUpgradeHidden(state, next) ? "Poi nel ramo: da scoprire" : `Poi nel ramo: ${next.title}`;
 }
 
 export function UpgradesView({
@@ -763,12 +795,10 @@ export function UpgradesView({
     setSelection((current) => current?.upgradeId === upgradeId ? null : { upgradeId, anchor });
   let availableCount = 0;
   let completedCount = 0;
-  let visibleCount = 0;
   let recommendedUpgrade: { definition: UpgradeDefinition; cost: number } | undefined;
   for (const definition of UPGRADE_DEFINITIONS) {
     if (definition.category === "secrets") continue;
     if (!isUpgradeVisible(state, definition)) continue;
-    visibleCount += 1;
     const status = getUpgradeStatus(state, definition);
     if (status === "completed") {
       completedCount += 1;
@@ -828,13 +858,13 @@ export function UpgradesView({
         <div className="upgrade-tree-heading">
           <h2 id="upgrade-tree-title" className="sr-only">Piano degli Upgrade</h2>
           <p>
-            {completedCount} di {visibleCount} completati. Ogni livello comprato vale 1 punto nel suo ramo.
+            {completedCount} {completedCount === 1 ? "completato" : "completati"}. Ogni livello comprato vale 1 punto nel suo ramo, e i punti fanno emergere quello che ancora non si vede.
           </p>
           <div className="upgrade-tree-legend" aria-label="Legenda stati">
             <span><i className="available" />Da comprare ({availableCount})</span>
             <span><i className="unaffordable" />Fondi insufficienti</span>
-            <span><i className="locked" />Bloccati</span>
             <span><i className="completed" />Completati</span>
+            <span className="hidden"><i>?</i>Da scoprire</span>
           </div>
         </div>
 
@@ -863,7 +893,11 @@ export function UpgradesView({
               (last, definition, index) => state.upgrades[definition.id] >= definition.maxLevel ? index : last,
               -1,
             );
-            const litTo = lastCompleted < 0 ? 0 : Math.min(lastCompleted + 1, definitions.length - 1);
+            const visibleTo = definitions.reduce(
+              (last, definition, index) => isUpgradeHidden(state, definition) ? last : index,
+              0,
+            );
+            const litTo = lastCompleted < 0 ? 0 : Math.min(lastCompleted + 1, visibleTo);
             return (
               <section
                 className={`upgrade-lane${branchComplete ? " complete" : ""}${isSecrets ? " secrets" : ""}`}
@@ -892,6 +926,7 @@ export function UpgradesView({
                   >
                     <UpgradeLaneWave
                       count={definitions.length}
+                      visibleTo={visibleTo}
                       litTo={litTo}
                       columns={Math.max(LANE_COLUMNS, definitions.length)}
                     />

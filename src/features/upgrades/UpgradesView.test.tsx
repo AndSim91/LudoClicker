@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getUpgradeDefinition } from "../../content/upgrades";
+import { getUpgradeDefinition, UPGRADE_DEFINITIONS } from "../../content/upgrades";
 import { createInitialState } from "../../game/engine";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { formatStat } from "../../shared/formatters";
@@ -9,14 +9,34 @@ import { stripKeywordMarkup } from "../../shared/keywordMarkup";
 
 afterEach(cleanup);
 
+/** Every public upgrade completed except `keep`, so every node of the tree is in sight. */
+function withOpenTree(keep?: string) {
+  const initial = createInitialState(1_000);
+  const upgrades = { ...initial.upgrades };
+  for (const definition of UPGRADE_DEFINITIONS) {
+    if (definition.category !== "secrets" && definition.id !== keep) upgrades[definition.id] = definition.maxLevel;
+  }
+  return {
+    ...initial,
+    upgrades,
+    school: { ...initial.school, fame: 1_000_000 },
+    unlocks: { ...initial.unlocks, gadget: true, social: true },
+  };
+}
+
+const HIDDEN = { name: "Potenziamento da scoprire" };
+
 describe("UpgradesView", () => {
-  it("keeps Social upgrades in their parent branches and visibly locked", () => {
+  it("keeps Social upgrades in their parent branches, hidden as a «?» until they open", () => {
     render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
 
     expect(screen.queryByRole("heading", { name: "Social" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", {
-      name: /Apri dettagli Sintesi dei contenuti:.*bloccato, 9 punti in scrittura/i,
-    })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }))
+      .not.toBeInTheDocument();
+    const writing = screen.getByRole("region", { name: "Scrittura" });
+    expect(within(writing).getAllByRole("img", HIDDEN).length).toBeGreaterThan(0);
+    expect(within(writing).getAllByRole("img", HIDDEN)[0]).toHaveTextContent(/^\?$/);
+    expect(within(writing).queryByText(/punti in Scrittura/)).not.toBeInTheDocument();
   });
 
   it("reveals the ten Gadget upgrades only after the sector unlocks", () => {
@@ -35,8 +55,10 @@ describe("UpgradesView", () => {
     );
 
     const gadgetBranch = screen.getByRole("region", { name: "Gadget" });
-    expect(within(gadgetBranch).getAllByRole("button", { name: /^Apri dettagli/ }))
-      .toHaveLength(10);
+    expect(
+      within(gadgetBranch).queryAllByRole("button", { name: /^Apri dettagli/ }).length +
+      within(gadgetBranch).queryAllByRole("img", HIDDEN).length,
+    ).toBe(10);
   });
 
   it("shows the Rete dell'Ordine lane from the first foundation, locked by schools founded", () => {
@@ -48,22 +70,16 @@ describe("UpgradesView", () => {
       />,
     );
     const lane = screen.getByRole("region", { name: "Rete dell'Ordine" });
-    expect(within(lane).getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(10);
-    expect(within(lane).getByText("2 scuole fondate")).toBeVisible();
-    expect(within(lane).getByText("20 scuole fondate")).toBeVisible();
+    expect(
+      within(lane).queryAllByRole("button", { name: /^Apri dettagli/ }).length +
+      within(lane).queryAllByRole("img", HIDDEN).length,
+    ).toBe(10);
+    // What a hidden node needs stays a surprise too.
+    expect(within(lane).queryByText("20 scuole fondate")).not.toBeInTheDocument();
   });
 
   it("renders eight public branches, the secret row and the merged Teaching row", () => {
-    const initial = createInitialState(1_000);
-    render(
-      <UpgradesView
-        state={{
-          ...initial,
-          unlocks: { ...initial.unlocks, gadget: true, social: true },
-        }}
-        onBuyUpgrade={() => undefined}
-      />,
-    );
+    render(<UpgradesView state={withOpenTree()} onBuyUpgrade={() => undefined} />);
 
     for (const heading of [
       "Scrittura",
@@ -76,10 +92,11 @@ describe("UpgradesView", () => {
       "Organizzazione",
       "Percorsi Segreti",
     ]) {
-      expect(screen.getByRole("heading", { name: heading })).toBeVisible();
+      // A completed branch adds «(completo)» for screen readers.
+      expect(screen.getByRole("heading", { name: new RegExp(`^${heading}`) })).toBeVisible();
     }
-    expect(within(screen.getByRole("region", { name: "Creatività" }))
-      .getByText(/0\/35 punti Creatività · prova dopo l'email \d+%/)).toBeVisible();
+    expect(within(screen.getByRole("region", { name: /^Creatività/ }))
+      .getByText(/^35 punti Creatività · prova dopo l'email \d+%/)).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Master of none/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Il costo del Servizio/ })).toBeVisible();
     expect(screen.getByRole("button", { name: /Apri dettagli Nessun Rancore/ })).toBeVisible();
@@ -95,7 +112,7 @@ describe("UpgradesView", () => {
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
 
-    const teachingBranch = screen.getByRole("region", { name: "Insegnamento" });
+    const teachingBranch = screen.getByRole("region", { name: /^Insegnamento/ });
     const teachingButtons = within(teachingBranch).getAllByRole("button", {
       name: /^Apri dettagli/,
     });
@@ -136,12 +153,21 @@ describe("UpgradesView", () => {
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
   });
 
-  it("shows requirements, effect and disabled purchase for a locked Social node", () => {
-    const initial = createInitialState(1_000);
-    render(<UpgradesView
-      state={{ ...initial, unlocks: { ...initial.unlocks, social: true } }}
-      onBuyUpgrade={() => undefined}
-    />);
+  it("does not name the hidden node that follows in the details window", () => {
+    render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
+
+    const writing = screen.getByRole("region", { name: "Scrittura" });
+    const firstHidden = within(writing).getAllByRole("img", HIDDEN)[0].closest("li")!;
+    const before = firstHidden.previousElementSibling as HTMLElement;
+    fireEvent.click(within(before).getByRole("button", { name: /^Apri dettagli/ }));
+
+    expect(screen.getByRole("dialog")).toHaveTextContent("Poi nel ramo: da scoprire");
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("shows requirements and effect of a Social node once it opens", () => {
+    render(<UpgradesView state={withOpenTree("social-content-synthesis")} onBuyUpgrade={() => undefined} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Apri dettagli Sintesi dei contenuti/ }));
 
@@ -149,12 +175,7 @@ describe("UpgradesView", () => {
     expect(screen.getByText(
       getUpgradeDefinition("social-content-synthesis")!.effectLabel,
     )).toBeVisible();
-    expect(screen.getByText("9 punti in Scrittura (ne hai 0)")).toBeVisible();
     expect(screen.getByText("Social sbloccato (15 collaboratori)")).toBeVisible();
-    expect(screen.getByRole("button", { name: /^Bloccato ·/ })).toBeDisabled();
-
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("shows the complete Percorso Tecnico progression", () => {
@@ -173,7 +194,7 @@ describe("UpgradesView", () => {
 
   it("shows the complete Master of none progression", () => {
     render(
-      <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
+      <UpgradesView state={withOpenTree("instructor-versatility")} onBuyUpgrade={() => undefined} />,
     );
 
     fireEvent.click(screen.getByRole("button", {
@@ -187,7 +208,7 @@ describe("UpgradesView", () => {
 
   it("shows the complete Nessun Rancore progression", () => {
     render(
-      <UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />,
+      <UpgradesView state={withOpenTree("agonist-course-intensity")} onBuyUpgrade={() => undefined} />,
     );
 
     fireEvent.click(screen.getByRole("button", {
@@ -199,7 +220,7 @@ describe("UpgradesView", () => {
     )).toBeVisible();
   });
 
-  it("opens a node when its branch has enough points and says how many are missing", () => {
+  it("reveals a node when its branch has enough points", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -209,15 +230,11 @@ describe("UpgradesView", () => {
       <UpgradesView state={state} onBuyUpgrade={() => undefined} />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Apri dettagli Biglietti con QR code/ }),
-    );
-    expect(screen.getByText("3 punti in Carisma (ne hai 0)")).toBeVisible();
-    expect(screen.getByRole("button", { name: /^Bloccato ·/ })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Apri dettagli Dimostrazione coordinata/ }))
-      .toHaveTextContent("8 punti in Carisma");
+    expect(screen.queryByRole("button", { name: /Apri dettagli Biglietti con QR code/ }))
+      .not.toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "Carisma" })).queryByText(/punti in Carisma/))
+      .not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Chiudi dettagli" }));
     rerender(
       <UpgradesView
         state={{

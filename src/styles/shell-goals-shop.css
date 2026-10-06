@@ -328,6 +328,14 @@
   stroke-width: 2;
 }
 
+.upgrade-lane-wave-fog {
+  stroke: var(--line-strong);
+  stroke-width: 2;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
 .upgrade-lane-wave-lit {
   stroke: var(--success);
   stroke-width: 2.5;
@@ -458,6 +466,44 @@
 .upgrade-node.locked strong,
 .upgrade-node.locked .upgrade-node-level {
   color: var(--ink-soft);
+}
+
+/* Not unlocked yet: only a faint «?», no name, price or requirement. */
+.upgrade-node.hidden {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.upgrade-node.hidden:hover {
+  background: transparent;
+}
+
+.upgrade-node.hidden .upgrade-node-icon {
+  border: 1.5px dashed var(--ink-soft);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.upgrade-tree-legend .hidden {
+  opacity: 0.6;
+}
+
+.upgrade-tree-legend .hidden i {
+  display: grid;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  place-items: center;
+  border: 1px dashed var(--ink-soft);
+  background: transparent;
+  color: var(--ink);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* A locked node says how it opens instead of its price. */

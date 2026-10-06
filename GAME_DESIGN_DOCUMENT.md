@@ -1994,15 +1994,21 @@ separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
 **La pagina.** In alto, accanto al titolo, c'è il pulsante **«Compra tutto ·
 N livelli»**, con sotto il totale e i fondi che restano dopo l'acquisto (dal più
 economico in su finché i fondi bastano; i Percorsi Segreti restano esclusi). I
-Fondi non si ripetono: sono già nella barra delle informazioni. Sotto, una riga riassume quanti nodi sono
-completati e la legenda (da comprare, fondi insufficienti, bloccati,
-completati); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
+Fondi non si ripetono: sono già nella barra delle informazioni. Sotto, una riga dice quanti nodi sono
+completati (senza il totale: quanti ne mancano resta una sorpresa) e la legenda
+(da comprare, fondi insufficienti, completati, da scoprire); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
 una **corsia**: a sinistra icona, nome, riepilogo dell'effetto e **punti nel
 ramo**; a destra i nodi, in nove colonne uguali per tutti i rami, disposti su
 un'**onda** (un nodo in alto e uno in basso). L'onda si accende fino al nodo
 dopo l'ultimo completato. Ogni nodo non completato mostra livello e prezzo
-(«2/5 · 600 €»); un nodo bloccato mostra invece il lucchetto e **come si
-apre** («🔒 13 punti in Carisma», «🔒 Serve il Social»); un nodo completato
+(«2/5 · 600 €»). Un nodo **non ancora sbloccato** non si vede: al suo posto c'è
+solo un **«?» semitrasparente** in un cerchio tratteggiato, senza nome, prezzo né
+requisiti, e non si apre; sopra i nodi nascosti l'onda è una scia puntinata.
+Quando i requisiti sono soddisfatti il «?» diventa il nodo vero, con
+l'animazione di sblocco (decisione del 06/10/2026, concept Q1). Anche la
+finestra del nodo precedente non lo nomina («Poi nel ramo: da scoprire») e il
+riepilogo di Creatività non dice più il totale dei punti. Fanno eccezione i
+Percorsi Segreti scoperti, che tengono il lucchetto; un nodo completato
 mostra la spunta, e un ramo tutto completato accende la propria icona. Il nodo
 disponibile **più economico** ha sotto di sé un pulsante «Compra · prezzo».
 
