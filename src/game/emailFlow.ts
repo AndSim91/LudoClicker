@@ -8,7 +8,7 @@ import { getTrialDurationMs, getUpgradeEffectTotal } from "../content/upgrades";
 import { getEmailBookingChance } from "./formulas";
 import { GAME_CONFIG } from "./config";
 import { createCampaign } from "./campaignContent";
-import { materializePooledContact } from "./contacts";
+import { ANDREA_SIMONAZZI_ID, materializePooledContact } from "./contacts";
 import { makeGameId } from "./ids";
 import { replaceById } from "./replaceById";
 import { nextRandom, randomBetween } from "./random";
@@ -24,6 +24,13 @@ import type {
   PendingEmailOutcome,
   ScheduledTrial,
 } from "./types";
+
+/** Andrea Simonazzi in the initial school: his first iter is a tutorial and runs in seconds. */
+function isTutorialAndrea(state: GameState, contactId: string): boolean {
+  return state.network.schoolCount === 0 &&
+    state.contacts.find((contact) => contact.id === contactId)?.specialProfileId ===
+      ANDREA_SIMONAZZI_ID;
+}
 
 export function startNextCampaign(currentState: GameState, now: number): GameState {
   if (selectActiveEmail(currentState)) return currentState;
@@ -110,7 +117,9 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     id: makeGameId("outcome", now, state.statistics.emailsSent),
     emailId: email.id,
     contactId: email.contactId,
-    resolvesAt: now + outcomeDelay,
+    resolvesAt: now + (isTutorialAndrea(state, email.contactId)
+      ? GAME_CONFIG.tutorialAndreaOutcomeMs
+      : outcomeDelay),
     result,
     tutorialSceneId: reservesBookingForEventTutorial
       ? FIRST_EVENT_TUTORIAL_SCENE_ID
@@ -185,7 +194,8 @@ export function resolveEmailOutcome(
     GAME_CONFIG.trialWaitMaxMs,
   );
   const [resultSeed, nextSeed] = nextRandom(seedAfterWait);
-  const startsAt = now + trialWait;
+  const tutorialAndrea = isTutorialAndrea(nextState, outcome.contactId);
+  const startsAt = now + (tutorialAndrea ? GAME_CONFIG.tutorialAndreaTrialWaitMs : trialWait);
   const trial: ScheduledTrial = {
     id: makeGameId(
       "trial",
@@ -194,10 +204,9 @@ export function resolveEmailOutcome(
     ),
     contactId: outcome.contactId,
     startsAt,
-    resolvesAt: startsAt + getTrialDurationMs(
-      nextState.upgrades,
-      GAME_CONFIG.trialDurationMs,
-    ),
+    resolvesAt: startsAt + (tutorialAndrea
+      ? GAME_CONFIG.tutorialAndreaTrialDurationMs
+      : getTrialDurationMs(nextState.upgrades, GAME_CONFIG.trialDurationMs)),
     resultSeed: Math.floor(resultSeed * 2_147_483_647),
     status: "scheduled",
     tutorialSceneId: outcome.tutorialSceneId,
