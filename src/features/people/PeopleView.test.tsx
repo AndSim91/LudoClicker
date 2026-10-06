@@ -1830,19 +1830,13 @@ describe("PeopleView", () => {
     );
     expect(screen.getByText("Andrea Simonazzi")).toHaveClass("rarity-legendary");
     expect(screen.queryByText("VIP")).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Forma 1 — emblema ufficiale/ })).toBeVisible();
-    expect(screen.getByRole("img", { name: /Corso X — emblema generato/ })).toBeVisible();
-    expect(screen.getByRole("img", { name: /Corso Y — emblema ufficiale/ })).toBeVisible();
     const collaboratorRegion = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    const formOneLogo = within(collaboratorRegion).getByRole("img", {
-      name: /Forma 1 — emblema ufficiale/,
-    }).closest(".form-logo-item");
-    const courseXLogo = within(collaboratorRegion).getByRole("img", {
-      name: /Corso X — emblema generato/,
-    }).closest(".form-logo-item");
-    expect(formOneLogo).toHaveClass("instructor-certified");
-    expect(formOneLogo).toHaveTextContent("♛");
-    expect(courseXLogo).not.toHaveClass("instructor-certified");
+    // Modalità Onde: the collaborator carries the whole Forms map, a notch under what they teach.
+    const formOneNode = within(collaboratorRegion).getAllByTitle(/^Forma 1/)[0];
+    const courseXNode = within(collaboratorRegion).getAllByTitle(/^Corso X/)[0];
+    expect(formOneNode).toHaveClass("is-learned", "is-instructor");
+    expect(formOneNode).not.toHaveTextContent("♛");
+    expect(courseXNode).not.toHaveClass("is-instructor");
     expect(within(collaboratorRegion).queryByText("Collaboratore VIP")).not.toBeInTheDocument();
     const officialStats = collaboratorRegion.querySelector(".collaborator-official-stats");
     expect(officialStats).toHaveTextContent("Arena");
@@ -2399,14 +2393,13 @@ describe("PeopleView", () => {
     expect(
       within(collaborators).getByText(`${enrolled.firstName} ${enrolled.lastName}`),
     ).toBeVisible();
-    expect(within(collaborators).getByText("F1", { exact: true })).toBeVisible();
+    expect(within(collaborators).getByTitle("Forma 1 · Attestato da istruttore")).toHaveClass("is-learned");
     const memberName = within(members).getByText(`${enrolled.firstName} ${enrolled.lastName}`);
     const memberRow = memberName.closest(".member-row");
     expect(memberName).toBeVisible();
-    // Modalità Onde draws the whole path: Forma 1 is lit and crowned.
+    // Modalità Onde draws the whole path: Forma 1 is lit, with the instructor notch.
     const memberFormLogo = memberRow?.querySelector(".form-path-node");
-    expect(memberFormLogo).toHaveClass("is-learned");
-    expect(memberFormLogo).toHaveTextContent("♛");
+    expect(memberFormLogo).toHaveClass("is-learned", "is-instructor");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
     expect(memberRow?.querySelector(".member-status")).toHaveTextContent(
       "Collaboratore Attrezzatura",

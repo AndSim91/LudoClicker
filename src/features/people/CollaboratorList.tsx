@@ -40,7 +40,8 @@ import {
   type CollaboratorSort,
   type CollaboratorSortKey,
 } from "./collaboratorSorting";
-import { FormLogoStrip, PersonName } from "./PersonPresentation";
+import { StaffForms } from "./FormPathMap";
+import { PersonName } from "./PersonPresentation";
 import {
   InstructorCompactActivity,
   InstructorCompactTraining,
@@ -482,7 +483,7 @@ export function CollaboratorList({
                         {contact.email}
                       </span>
                     ) : null}
-                    <FormLogoStrip
+                    <StaffForms
                       forms={collaborator.forms}
                       instructorForms={collaborator.instructorForms}
                       technicianForms={collaborator.technicianForms}

@@ -1859,7 +1859,13 @@ Regole:
 - la durata del Corso Tecnico e del Corso Istruttori interno viene divisa per la
   produttività da Istruttore del partecipante;
 - sulla singola Forma la corona dorata identifica l'attestato da Istruttore; la
-  qualifica da Tecnico la sostituisce con una corona glicine;
+  qualifica da Tecnico la sostituisce con una corona glicine. In Modalità Onde
+  (06/10, concept B2) la mappa delle Forme non ha corone: la Forma che la
+  persona sa insegnare ha una tacca sotto, oro per l'attestato da Istruttore e
+  lilla per la qualifica da Tecnico. La mappa con le tacche vale per iscritti,
+  lista dei Collaboratori (sotto nome ed email, concept A1) e righe dei settori
+  del Consiglio delle Onde (`StaffForms` in `FormPathMap.tsx`); Outlook tiene i
+  loghi;
 - nella schermata aggregata, **Forme insegnabili** usa la corona glicine quando
   è presente almeno un Tecnico compatibile e mostra i Corsi Istruttori interni
   attivi con logo della Forma, corona dorata e barra di avanzamento. Non viene

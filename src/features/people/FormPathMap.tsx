@@ -3,6 +3,8 @@ import { BRANCH_FORM_IDS, FORM_BRANCHES, getFormDefinition } from "../../content
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { useOptionalGameState } from "../../game/GameStateContext";
 import type { FormBranch, FormId } from "../../game/types";
+import { useOutlookTheme } from "../../shared/useOutlookTheme";
+import { FormLogoStrip } from "./PersonPresentation";
 
 const BRANCH_MARKS: Record<FormBranch, { letter: string; className: string }> = {
   "Spada Lunga": { letter: "L", className: "is-long" },
@@ -13,7 +15,9 @@ const BRANCH_MARKS: Record<FormBranch, { letter: string; className: string }> = 
 /**
  * Percorso delle Forme in Modalità Onde (concept G2, 06/10): the whole
  * curriculum is always drawn, the trunk, one lane per weapon, then F6 and F7.
- * Learned Forms light up, the rest stay in shadow.
+ * Learned Forms light up, the rest stay in shadow. A Form the person may
+ * teach gets a notch underneath (concept B2, 06/10): gold for the instructor
+ * certificate, lilac for the Technician qualification, no crowns.
  */
 export function FormPathMap({
   forms,
@@ -39,13 +43,11 @@ export function FormPathMap({
     return (
       <span
         key={formId}
-        className={`form-path-node${lit ? " is-learned" : ""}${formId === "course-y" ? " is-course-y" : ""}`}
+        className={`form-path-node${lit ? " is-learned" : ""}${formId === "course-y" ? " is-course-y" : ""}${
+          lit && technician ? " is-technician" : lit && instructor ? " is-instructor" : ""}`}
         title={`${name}${lit ? "" : " · da fare"}${technician ? " · Qualifica da Tecnico" : instructor ? " · Attestato da istruttore" : ""}`}
       >
         <img src={getFormLogo(formId).assetPath} alt="" />
-        {lit && (technician || instructor) ? (
-          <span className={`form-instructor-crown${technician ? " is-technician" : ""}`} aria-hidden="true">♛</span>
-        ) : null}
       </span>
     );
   };
@@ -77,5 +79,33 @@ export function FormPathMap({
       </span>
       <span className="form-path-segment">{tail.map(node)}</span>
     </div>
+  );
+}
+
+/** Staff rows: the map in Onde, the logos Outlook already had. */
+export function StaffForms({
+  forms,
+  instructorForms,
+  technicianForms,
+  stripClassName,
+  showLabels,
+}: {
+  forms: FormId[];
+  instructorForms?: readonly FormId[];
+  technicianForms?: readonly FormId[];
+  stripClassName?: string;
+  showLabels?: boolean;
+}) {
+  const outlook = useOutlookTheme();
+  return outlook ? (
+    <FormLogoStrip
+      className={stripClassName}
+      forms={forms}
+      instructorForms={instructorForms}
+      technicianForms={technicianForms}
+      showLabels={showLabels}
+    />
+  ) : (
+    <FormPathMap forms={forms} instructorForms={instructorForms} technicianForms={technicianForms} />
   );
 }

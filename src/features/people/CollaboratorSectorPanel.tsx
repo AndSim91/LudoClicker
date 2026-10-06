@@ -44,7 +44,8 @@ import {
   type SectorCollaboratorSortKey,
 } from "./collaboratorSorting";
 import { getInstructorTeachingEntries } from "./instructorGroupPresentation";
-import { FormLogoStrip, PersonName } from "./PersonPresentation";
+import { StaffForms } from "./FormPathMap";
+import { PersonName } from "./PersonPresentation";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { SectorStatisticsSummary } from "./SectorStatisticsSummary";
 import {
@@ -242,8 +243,8 @@ function SectorCollaboratorRow({
                 <span><small>Arena</small>{officialStats ? <OfficialStatValue value={officialStats.arena} /> : <strong>???</strong>}</span>
                 <span><small>Stile</small>{officialStats ? <OfficialStatValue value={officialStats.style} /> : <strong>???</strong>}</span>
               </div>
-              <FormLogoStrip
-                className="sector-form-strip"
+              <StaffForms
+                stripClassName="sector-form-strip"
                 forms={collaborator.forms}
                 instructorForms={collaborator.instructorForms}
                 technicianForms={collaborator.technicianForms}
@@ -280,8 +281,8 @@ function SectorCollaboratorRow({
             <span><small>Arena</small>{officialStats ? <OfficialStatValue value={officialStats.arena} /> : <strong>???</strong>}</span>
             <span><small>Stile</small>{officialStats ? <OfficialStatValue value={officialStats.style} /> : <strong>???</strong>}</span>
           </div>
-          <FormLogoStrip
-            className="sector-form-strip"
+          <StaffForms
+            stripClassName="sector-form-strip"
             forms={collaborator.forms}
             instructorForms={collaborator.instructorForms}
             technicianForms={collaborator.technicianForms}

@@ -276,17 +276,27 @@
   filter: none;
 }
 
-.form-path-node .form-instructor-crown {
-  position: absolute;
-  top: -6px;
-  right: -4px;
-  color: var(--onde-gold-bright);
-  font-size: 8px;
-  line-height: 1;
+/* B2: la tacca sotto la Forma che sa insegnare, oro (Istruttore) o lilla (Tecnico). */
+.form-path-node.is-instructor,
+.form-path-node.is-technician {
+  height: calc(var(--form-node) + 5px);
+  align-content: start;
 }
 
-.form-path-node .form-instructor-crown.is-technician {
-  color: #c9a7ff;
+.form-path-node.is-instructor::after,
+.form-path-node.is-technician::after {
+  position: absolute;
+  right: 3px;
+  bottom: 0;
+  left: 3px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--onde-gold-bright);
+  content: "";
+}
+
+.form-path-node.is-technician::after {
+  background: #d4aeff;
 }
 
 .member-card .form-path-map {
@@ -325,4 +335,19 @@
       minmax(220px, 1.3fr)
       42px;
   }
+}
+
+/* A1: la mappa sotto il nome anche per i Collaboratori. Ha sempre la stessa
+   altezza, quindi le righe sono tutte uguali (~150 px, prima 130–200). */
+:root[data-theme="dark"] .collaborator-row {
+  contain-intrinsic-size: auto 150px;
+}
+
+:root[data-theme="dark"] .collaborator-row .collaborator-identity {
+  padding-block: 6px;
+}
+
+.collaborator-copy .form-path-map,
+.sector-roster-identity-details .form-path-map {
+  margin-top: 3px;
 }
