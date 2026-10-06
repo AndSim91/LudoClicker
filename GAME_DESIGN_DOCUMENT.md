@@ -1865,7 +1865,13 @@ Regole:
   lilla per la qualifica da Tecnico. La mappa con le tacche vale per iscritti,
   lista dei Collaboratori (sotto nome ed email, concept A1) e righe dei settori
   del Consiglio delle Onde (`StaffForms` in `FormPathMap.tsx`); Outlook tiene i
-  loghi;
+  loghi. In Onde anche la **Copertura didattica** è la mappa (concept C5,
+  06/10): a sinistra di ogni logo una colonna con il numero di Istruttori (oro)
+  e, sotto, di Tecnici (lilla); chi sta studiando (Corso Istruttori in corso,
+  Corso Tecnici in corso o prenotato alla SIS) si aggiunge come «+1» in chiaro.
+  Una Forma con solo chi studia resta in ombra con il bordo tratteggiato e conta
+  nel «+N in arrivo» sotto il totale (`FormCoverageMap`,
+  `getFormCoverageCounts`);
 - nella schermata aggregata, **Forme insegnabili** usa la corona glicine quando
   è presente almeno un Tecnico compatibile e mostra i Corsi Istruttori interni
   attivi con logo della Forma, corona dorata e barra di avanzamento. Non viene

@@ -3,6 +3,7 @@ import {
   getMissingInstructorForms,
   getTrainingCourseTitle,
 } from "../../content/forms";
+import { getTrainingTrack } from "../../game/teacherTrainingFlow";
 import type { Collaborator, FormId, FormTraining, GameState } from "../../game/types";
 
 export interface InstructorTeachingEntry {
@@ -252,4 +253,38 @@ export function getInstructorTeachingTitle(
     agonistCourseUnlocked,
     entry.training.agonistCourseGrantsStats,
   );
+}
+
+/** Copertura didattica (concept C5): chi ha l'attestato e chi lo sta prendendo, per Forma. */
+export interface FormCoverageCount {
+  instructors: number;
+  technicians: number;
+  studyingInstructors: number;
+  studyingTechnicians: number;
+}
+
+export function getFormCoverageCounts(instructors: readonly Collaborator[]): Map<FormId, FormCoverageCount> {
+  const counts = new Map<FormId, FormCoverageCount>();
+  const bump = (formId: FormId, key: keyof FormCoverageCount) => {
+    const entry = counts.get(formId) ?? { instructors: 0, technicians: 0, studyingInstructors: 0, studyingTechnicians: 0 };
+    entry[key] += 1;
+    counts.set(formId, entry);
+  };
+  for (const instructor of instructors) {
+    const technicianForms = instructor.technicianForms ?? [];
+    instructor.instructorForms.forEach((formId) => bump(formId, "instructors"));
+    technicianForms.forEach((formId) => bump(formId, "technicians"));
+    const training = instructor.training;
+    const track = training ? getTrainingTrack(training) : undefined;
+    const trainingForm = training?.formId as FormId | undefined;
+    if (trainingForm && (track === "instructor" || track === "combined-instructor") &&
+      !instructor.instructorForms.includes(trainingForm)) {
+      bump(trainingForm, "studyingInstructors");
+    }
+    // Corso Tecnici in corso o prenotato alla SIS.
+    const technicianTarget = instructor.technicianCourseReservation?.formId ??
+      (trainingForm && (track === "technician" || training?.trainingPhase === "technician") ? trainingForm : undefined);
+    if (technicianTarget && !technicianForms.includes(technicianTarget)) bump(technicianTarget, "studyingTechnicians");
+  }
+  return counts;
 }

@@ -97,7 +97,8 @@ describe("PeopleView", () => {
       <PeopleView state={state({})} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
     );
     expect(screen.queryByRole("button", { name: /^Forma un Istruttore/ })).not.toBeInTheDocument();
-    expect(screen.getByTitle("1 Istruttori")).toHaveTextContent("1");
+    // Modalità Onde: Copertura didattica sulla mappa (C5), i numeri a sinistra del logo.
+    expect(screen.getByTitle("Forma 1 · 1 Istruttore")).toHaveTextContent("1");
 
     view.rerender(
       <PeopleView state={state({ "training-office": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
@@ -112,7 +113,7 @@ describe("PeopleView", () => {
     );
     expect(screen.getByRole("button", { name: /^Forma un Istruttore · Forma 2.*Servono/ })).toBeDisabled();
     expect(screen.getByRole("button", { name: /^Forma un Tecnico · Forma 1/ })).toBeDisabled();
-    expect(screen.getByTitle("1 Istruttori · 0 Tecnici")).toBeVisible();
+    expect(screen.getByTitle("Forma 1 · 1 Istruttore · 0 Tecnici")).toBeVisible();
   });
 
   it("shows a crowded Centro didattico 8 instructors at a time", () => {
@@ -1077,7 +1078,10 @@ describe("PeopleView", () => {
     );
     const view = render(renderView(state.collaborators));
 
-    expect(screen.getByTitle("Forma 1 · Qualifica da Tecnico")).toBeVisible();
+    // C5: chi ha l'attestato in pieno, chi sta studiando come «+1».
+    const formOneCoverage = screen.getByTitle("Forma 1 · 2 Istruttori (+1 in corso) · 1 Tecnico (+1 in corso)");
+    expect(formOneCoverage.querySelector(".form-cover-numbers .is-instructor")).toHaveTextContent("2+1");
+    expect(formOneCoverage.querySelector(".form-cover-numbers .is-technician")).toHaveTextContent("1+1");
     const instructorLane = screen.getByRole("region", { name: "Corsi Istruttori" });
     const internalCourseProgress = within(instructorLane).getByRole("progressbar", {
       name: "Forma 1: 1 corso",

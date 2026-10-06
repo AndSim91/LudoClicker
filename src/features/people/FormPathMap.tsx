@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
 import { getFormLogo } from "../../content/formLogos";
-import { BRANCH_FORM_IDS, FORM_BRANCHES, getFormDefinition } from "../../content/forms";
+import { BRANCH_FORM_IDS, FORM_BRANCHES, FORM_DEFINITIONS, getFormDefinition } from "../../content/forms";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { useOptionalGameState } from "../../game/GameStateContext";
 import type { FormBranch, FormId } from "../../game/types";
 import { useOutlookTheme } from "../../shared/useOutlookTheme";
+import type { FormCoverageCount } from "./instructorGroupPresentation";
 import { FormLogoStrip } from "./PersonPresentation";
 
 const BRANCH_MARKS: Record<FormBranch, { letter: string; className: string }> = {
@@ -12,12 +14,56 @@ const BRANCH_MARKS: Record<FormBranch, { letter: string; className: string }> = 
   "Doppia spada corta": { letter: "D", className: "is-double" },
 };
 
+const TAIL: FormId[] = ["form-6", "form-7"];
+
+const formName = (formId: FormId) => getFormDefinition(formId)?.longName ?? formId;
+
+/**
+ * The skeleton of the curriculum: the trunk (F1, Corso X if unlocked, F2,
+ * Corso Y), one lane per weapon with Forms 3–5, then F6 and F7. Each caller
+ * decides how a single Form is drawn.
+ */
+function FormPathSkeleton({
+  className = "",
+  ariaLabel,
+  node,
+  isLaneActive,
+}: {
+  className?: string;
+  ariaLabel: string;
+  node: (formId: FormId) => ReactNode;
+  isLaneActive: (ids: readonly FormId[]) => boolean;
+}) {
+  const state = useOptionalGameState();
+  const courseX = state ? isCourseXUnlocked(state.upgrades) : true;
+  const trunk: FormId[] = courseX
+    ? ["form-1", "course-x", "form-2", "course-y"]
+    : ["form-1", "form-2", "course-y"];
+  return (
+    <div className={`form-path-map${className ? ` ${className}` : ""}`} aria-label={ariaLabel}>
+      <span className="form-path-segment">{trunk.map(node)}</span>
+      <span className="form-path-lanes">
+        {FORM_BRANCHES.map((branch) => {
+          const ids = BRANCH_FORM_IDS[branch];
+          const mark = BRANCH_MARKS[branch];
+          return (
+            <span key={branch} className={`form-path-lane ${mark.className}${isLaneActive(ids) ? " is-active" : ""}`}>
+              <span className="form-path-lane-mark" title={branch} aria-hidden="true">{mark.letter}</span>
+              {ids.map(node)}
+            </span>
+          );
+        })}
+      </span>
+      <span className="form-path-segment">{TAIL.map(node)}</span>
+    </div>
+  );
+}
+
 /**
  * Percorso delle Forme in Modalità Onde (concept G2, 06/10): the whole
- * curriculum is always drawn, the trunk, one lane per weapon, then F6 and F7.
- * Learned Forms light up, the rest stay in shadow. A Form the person may
- * teach gets a notch underneath (concept B2, 06/10): gold for the instructor
- * certificate, lilac for the Technician qualification, no crowns.
+ * curriculum is always drawn. Learned Forms light up, the rest stay in shadow.
+ * A Form the person may teach gets a notch underneath (concept B2, 06/10):
+ * gold for the instructor certificate, lilac for the Technician qualification.
  */
 export function FormPathMap({
   forms,
@@ -28,15 +74,8 @@ export function FormPathMap({
   instructorForms?: readonly FormId[];
   technicianForms?: readonly FormId[];
 }) {
-  const state = useOptionalGameState();
-  const courseX = state ? isCourseXUnlocked(state.upgrades) : true;
   const learned = new Set(forms);
-  const trunk: FormId[] = courseX
-    ? ["form-1", "course-x", "form-2", "course-y"]
-    : ["form-1", "form-2", "course-y"];
   const node = (formId: FormId) => {
-    const definition = getFormDefinition(formId);
-    const name = definition?.longName ?? formId;
     const lit = learned.has(formId);
     const technician = technicianForms.includes(formId);
     const instructor = instructorForms.includes(formId);
@@ -45,40 +84,86 @@ export function FormPathMap({
         key={formId}
         className={`form-path-node${lit ? " is-learned" : ""}${formId === "course-y" ? " is-course-y" : ""}${
           lit && technician ? " is-technician" : lit && instructor ? " is-instructor" : ""}`}
-        title={`${name}${lit ? "" : " · da fare"}${technician ? " · Qualifica da Tecnico" : instructor ? " · Attestato da istruttore" : ""}`}
+        title={`${formName(formId)}${lit ? "" : " · da fare"}${technician ? " · Qualifica da Tecnico" : instructor ? " · Attestato da istruttore" : ""}`}
       >
         <img src={getFormLogo(formId).assetPath} alt="" />
       </span>
     );
   };
-  const tail: FormId[] = ["form-6", "form-7"];
-  const learnedNames = [...trunk, ...FORM_BRANCHES.flatMap((branch) => BRANCH_FORM_IDS[branch]), ...tail]
-    .filter((formId) => learned.has(formId))
-    .map((formId) => getFormDefinition(formId)?.longName ?? formId);
+  const learnedNames = FORM_BRANCHES.flatMap((branch) => BRANCH_FORM_IDS[branch])
+    .concat(TAIL)
+    .filter((formId) => learned.has(formId));
+  const trunkLearned = (["form-1", "course-x", "form-2", "course-y"] as FormId[]).filter((formId) => learned.has(formId));
+  const names = [...trunkLearned, ...learnedNames].map(formName);
 
   return (
-    <div
-      className="form-path-map"
-      aria-label={learnedNames.length > 0
-        ? `Forme conosciute: ${learnedNames.join(", ")}`
-        : "Forme conosciute: nessuna"}
-    >
-      <span className="form-path-segment">{trunk.map(node)}</span>
-      <span className="form-path-lanes">
-        {FORM_BRANCHES.map((branch) => {
-          const ids = BRANCH_FORM_IDS[branch];
-          const mark = BRANCH_MARKS[branch];
-          const active = ids.some((formId) => learned.has(formId));
-          return (
-            <span key={branch} className={`form-path-lane ${mark.className}${active ? " is-active" : ""}`}>
-              <span className="form-path-lane-mark" title={branch} aria-hidden="true">{mark.letter}</span>
-              {ids.map(node)}
-            </span>
-          );
-        })}
+    <FormPathSkeleton
+      ariaLabel={names.length > 0 ? `Forme conosciute: ${names.join(", ")}` : "Forme conosciute: nessuna"}
+      node={node}
+      isLaneActive={(ids) => ids.some((formId) => learned.has(formId))}
+    />
+  );
+}
+
+/**
+ * Copertura didattica in Modalità Onde (concept C5, 06/10): the same map, with
+ * a column of numbers left of every logo. Gold on top for the Istruttori, lilac
+ * below for the Tecnici; whoever is still studying adds a lighter «+1».
+ */
+export function FormCoverageMap({
+  counts,
+  showTechnicians,
+  highlight,
+}: {
+  counts: ReadonlyMap<FormId, FormCoverageCount>;
+  showTechnicians: boolean;
+  /** Ufficio formazione: the Forms the two buttons would pick right now. */
+  highlight?: { instructor?: FormId; technician?: FormId };
+}) {
+  const at = (formId: FormId) => counts.get(formId);
+  const covered = (formId: FormId) => (at(formId)?.instructors ?? 0) > 0;
+  const number = (value: number, studying: number, className: string) => (
+    <span className={className}>
+      {value + studying > 0 ? value : null}
+      {studying > 0 ? <span className="form-cover-studying">+{studying}</span> : null}
+    </span>
+  );
+  const node = (formId: FormId) => {
+    const count = at(formId);
+    const instructors = count?.instructors ?? 0;
+    const technicians = showTechnicians ? count?.technicians ?? 0 : 0;
+    const studyingInstructors = count?.studyingInstructors ?? 0;
+    const studyingTechnicians = showTechnicians ? count?.studyingTechnicians ?? 0 : 0;
+    const lit = instructors > 0;
+    const pending = !lit && studyingInstructors + studyingTechnicians > 0;
+    const next = highlight?.instructor === formId
+      ? " is-next-instructor"
+      : highlight?.technician === formId ? " is-next-technician" : "";
+    const people = (value: number, one: string, many: string, studying: number) =>
+      `${value} ${value === 1 ? one : many}${studying ? ` (+${studying} in corso)` : ""}`;
+    const title = `${formName(formId)} · ${people(instructors, "Istruttore", "Istruttori", studyingInstructors)}${
+      showTechnicians ? ` · ${people(technicians, "Tecnico", "Tecnici", studyingTechnicians)}` : ""}`;
+    return (
+      <span key={formId} className="form-cover-node" title={title}>
+        <span className={`form-cover-numbers${showTechnicians ? " has-technicians" : ""}`} aria-hidden="true">
+          {number(instructors, studyingInstructors, "is-instructor")}
+          {showTechnicians ? number(technicians, studyingTechnicians, "is-technician") : null}
+        </span>
+        <span className={`form-path-node${lit ? " is-learned" : ""}${pending ? " is-pending" : ""}${next}`}>
+          <img src={getFormLogo(formId).assetPath} alt="" />
+        </span>
       </span>
-      <span className="form-path-segment">{tail.map(node)}</span>
-    </div>
+    );
+  };
+  const coveredNames = FORM_DEFINITIONS.map(({ id }) => id).filter(covered).map(formName);
+
+  return (
+    <FormPathSkeleton
+      className="is-coverage"
+      ariaLabel={coveredNames.length > 0 ? `Forme insegnabili: ${coveredNames.join(", ")}` : "Forme insegnabili: nessuna"}
+      node={node}
+      isLaneActive={(ids) => ids.some((formId) => counts.has(formId))}
+    />
   );
 }
 

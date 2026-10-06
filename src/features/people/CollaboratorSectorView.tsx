@@ -37,6 +37,7 @@ import {
 import {
   getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
+  getFormCoverageCounts,
   getInstructorCoverageForms,
   getInstructorTeachingEntries,
   getTechnicianCourseEntries,
@@ -44,6 +45,7 @@ import {
 } from "./instructorGroupPresentation";
 import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
+import { FormCoverageMap } from "./FormPathMap";
 import { OndeSectorBody } from "./OndeSectorBody";
 import { FormLogoStrip } from "./PersonPresentation";
 import { QuickTeacherTraining, useQuickTrainingPreviews } from "./QuickTeacherTraining";
@@ -410,11 +412,18 @@ function InstructorSectorCard({
     };
   }, [courseXUnlocked, state.collaborators, state.contacts]);
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
+  const outlook = useOutlookTheme();
+  const formCoverage = useMemo(() => getFormCoverageCounts(instructors), [instructors]);
+  const studyingOnlyForms = [...formCoverage.values()].filter((count) =>
+    count.instructors === 0 && count.studyingInstructors > 0).length;
   const coverageCounts = useMemo(() => ({
     instructor: countTeacherCoverage(instructors, "instructor"),
     technician: sisUnlocked ? countTeacherCoverage(instructors, "technician") : undefined,
   }), [instructors, sisUnlocked]);
   const quickPreviews = useQuickTrainingPreviews(state, now);
+  const quickHighlight = onQuickTeacherTraining
+    ? { instructor: quickPreviews.instructor?.formId, technician: quickPreviews.technician?.formId }
+    : undefined;
   const prepUnlocked = isAthleticPreparationUnlocked(state.upgrades);
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const showAthleticPreparation = prepUnlocked && instructors.length > 0;
@@ -541,22 +550,32 @@ function InstructorSectorCard({
             <span>
               <small>Copertura didattica</small>
               <strong>{coverage.length} Forme insegnabili</strong>
+              {!outlook && studyingOnlyForms > 0 ? (
+                <small className="instructor-coverage-pending">+{studyingOnlyForms} in arrivo</small>
+              ) : null}
               <small className="instructor-coverage-legend">
                 <span className="is-instructor">Istruttori</span>
                 {sisUnlocked ? <> · <span className="is-technician">Tecnici</span></> : null}
               </small>
             </span>
-            <FormLogoStrip
-              className="sector-form-strip"
-              forms={coverage}
-              instructorForms={coverage}
-              technicianForms={technicianCoverage}
-              showLabels={false}
-              counts={coverageCounts}
-              highlight={onQuickTeacherTraining
-                ? { instructor: quickPreviews.instructor?.formId, technician: quickPreviews.technician?.formId }
-                : undefined}
-            />
+{outlook ? (
+              <FormLogoStrip
+                className="sector-form-strip"
+                forms={coverage}
+                instructorForms={coverage}
+                technicianForms={technicianCoverage}
+                showLabels={false}
+                counts={coverageCounts}
+                highlight={quickHighlight}
+              />
+            ) : (
+              <FormCoverageMap
+                counts={formCoverage}
+                showTechnicians={sisUnlocked || [...formCoverage.values()].some((count) =>
+                  count.technicians + count.studyingTechnicians > 0)}
+                highlight={quickHighlight}
+              />
+            )}
           </div>
           {onQuickTeacherTraining ? (
             <QuickTeacherTraining
