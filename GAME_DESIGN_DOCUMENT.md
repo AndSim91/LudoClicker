@@ -1905,7 +1905,14 @@ Regole:
   Corso Tecnici in corso o prenotato alla SIS) si aggiunge come «+1» in chiaro.
   Una Forma con solo chi studia resta in ombra con il bordo tratteggiato e conta
   nel «+N in arrivo» sotto il totale (`FormCoverageMap`,
-  `getFormCoverageCounts`);
+  `getFormCoverageCounts`). Attorno a ogni logo, i **quadranti** dei corsi che
+  si stanno tenendo su quella Forma (concept K2, Tavola 11 del 06/10): archi di
+  270° aperti in basso, dall'interno azzurro (Allievi), verde (Corso
+  Istruttori), viola (Corso Tecnici); un arco si riempie con l'avanzamento
+  medio dei corsi in atto, è tratteggiato se nessuno è partito (in attesa di
+  spade, o Corso Tecnici prenotato alla SIS) e gli archi presenti si stringono
+  verso il logo. Nel varco in basso il numero di allievi (`formActivity.ts`,
+  `CourseRings.tsx`);
 - nella schermata aggregata, **Forme insegnabili** usa la corona glicine quando
   è presente almeno un Tecnico compatibile e mostra i Corsi Istruttori interni
   attivi con logo della Forma, corona dorata e barra di avanzamento. Non viene
@@ -2536,28 +2543,39 @@ gioco (al massimo 1 s di gioco per passo), così tutto scorre fluido più in
 fretta. Outlook senza animazioni deve girare anche su un processore lento a un
 solo core.
 
-Nel Centro didattico, da **8 corsi della stessa Forma** le tacche (una per
-corso) lasciano il posto a **una barra sola per Forma** («Un giro per Forma»,
-concept A scelto da Andrea): si riempie in loop con la durata più comune dei
-corsi in atto (mai sotto i 4 s), il numero accanto è chi segue il corso adesso
-(«38 allievi») e a ogni giro compare «+N diplomati» sulla fine della barra. Il
-loop lo disegna il browser, quindi resta fluido con qualunque ritmo del gioco.
-In Outlook e con «Riduci animazioni» la barra resta piena e ferma e sotto
-compare «N diplomati nell'ultimo giro».
-
 In Modalità Outlook il Centro didattico si veste da ufficio (decisioni di
-Andrea del 06/10, `src/styles/centro-didattico-outlook.css`): la copertura
-didattica è una fila di etichette con la sigla della Forma e i due numeri
-(«F1 11 · 0», con la legenda «Istruttori · Tecnici»), la Forma scelta
-dall'Ufficio formazione ha il bordo blu; i loghi delle Forme, ovunque compaiano,
+Andrea del 06/10, `src/styles/centro-didattico-outlook.css`): la scheda
+Istruttori è una **tabella** (concept O2, `InstructorCoverageTable.tsx`), una
+riga per Forma insegnata, studiata o frequentata, più Arena Tecnica / Corso
+Agonisti quando c'è: Istruttori e Tecnici («+1» chi studia), poi le barre
+Allievi, Corso Istruttori e Corso Tecnici (tratteggiate in attesa o
+prenotate); in cima le righe con un corso, sotto le altre in grigio. A destra
+Riepilogo (Forme insegnabili, allievi in corso, staff in formazione,
+Preparazione atletica) e Ufficio formazione; i loghi delle Forme, ovunque compaiano,
 sono in scala di grigi e al posto della corona hanno un puntino blu (Istruttore)
 o un anello blu (Tecnico); le schede dei settori hanno l'icona semplice
 nell'intestazione; le barre dei corsi sono da 4 px, blu su grigio; l'Ufficio
 formazione è fatto di due righe bianche uguali e il viola della SIS resta solo
 nell'etichetta «SIS»; nel pannello Istruttori le colonne di formazione non hanno
-fondi colorati e «Prenota SIS» è un pulsante bianco. La scheda Istruttori è
-alta quanto il contenuto, quindi non taglia più «Maestria media» e «Corsi
-Istruttori disponibili» (in Onde l'altezza fissa resta).
+fondi colorati e «Prenota SIS» è un pulsante bianco.
+
+**Scheda Istruttori, regola per entrambe le modalità (06/10): altezza fissa**,
+così non cambia quando un corso parte o finisce (`src/styles/instructor-card.css`).
+In Onde il corpo è alto 264 px: la mappa ha sempre tutte le corsie, sotto la
+legenda (Allievi · Corso Istruttori · Corso Tecnici, Istruttori · Tecnici) e
+la **riga degli allenamenti**: a sinistra la Preparazione atletica, a destra
+Arena Tecnica / Corso Agonisti con un solo quadrante azzurro (lo insegna
+chiunque, quindi niente numeri Istruttori) e «N atleti · %». Prima dello
+sblocco ognuna delle due non si vede, ma il suo posto resta. Arena Tecnica ha
+l'emblema su **fondo rosso** (`arena-tecnica.png`), il Corso Agonisti su fondo
+azzurro con la stella. A destra le pastiglie (Forme insegnabili, in arrivo,
+allievi, in formazione) e l'Ufficio formazione, che tiene sempre due posti (il
+secondo, senza SIS, è «Forma un Tecnico · Con la SIS, dagli Upgrade»
+tratteggiato). In Outlook il corpo è alto 340 px e la tabella scorre dentro con
+l'intestazione ferma, con righe vuote quando sono poche. Il piede è uno solo:
+Maestria media · Corsi Istruttori disponibili · Gestisci. La scritta «Centro
+didattico» sopra «Istruttori» non c'è più. Sotto i 1100 px la scheda va in
+colonna e prende l'altezza del contenuto.
 
 > **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Fondi in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
 
@@ -2863,11 +2881,9 @@ Un'unica pagina, in quest'ordine:
   settore con i tasti + e −, i settori secondari e le priorità operative;
   sopra, l'interruttore «Assegnazione automatica» (§ 9.2). In Modalità Onde
   (06/10) l'interruttore è una pastiglia accanto al titolo, con la spiegazione
-  nel tooltip, e Turni e barre di impegno stanno sotto senza pannello; nel
-  Centro didattico la Copertura didattica (con la legenda Istruttori · Tecnici)
-  occupa tutta la larghezza sotto la testata, sotto ci sono i corsi e
-  l'Ufficio formazione, poi Maestria e Corsi Istruttori: la scheda cresce con
-  il contenuto (`src/styles/school-onde.css`). Sempre in Onde le schede dei
+  nel tooltip, e Turni e barre di impegno stanno sotto senza pannello; la
+  scheda Istruttori è la mappa con i quadranti K2 ad altezza fissa (vedi
+  sopra). Sempre in Onde le schede dei
   settori sono tutte alte uguali e hanno una scena animata (Tavola 4 del
   06/10): Social un telefono con il feed dei duelli e le pastiglie di follower,
   rendita e bonus Eventi; Eventi il gazebo blu militare con il roll-up nero

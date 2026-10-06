@@ -13,6 +13,15 @@ export const AGONIST_COURSE_LOGO: FormLogoDefinition = {
   source: "generated",
 };
 
+/** Arena Tecnica, prima di «Nessun Rancore»: lo stesso emblema su fondo rosso. */
+export const ARENA_TECNICA_LOGO: FormLogoDefinition = {
+  assetPath: "/form-assets/logos/arena-tecnica.png",
+  source: "generated",
+};
+
+export const getAgonistCourseLogo = (agonistCourseUnlocked: boolean) =>
+  agonistCourseUnlocked ? AGONIST_COURSE_LOGO : ARENA_TECNICA_LOGO;
+
 const OFFICIAL_FORMS_OVERVIEW_URL =
   "https://www.ludosport.net/images/bg/7forme2.jpg";
 const OFFICIAL_LEARNING_PATH_URL =

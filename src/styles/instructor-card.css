@@ -1,0 +1,430 @@
+/*
+ * Scheda Istruttori (06/10, Tavola 11): in Onde la mappa delle Forme con i
+ * quadranti K2, in Outlook la tabella O2. Regola per entrambe: altezza fissa,
+ * così la scheda non salta quando un corso parte o finisce.
+ */
+.instructor-sector-card.is-quadrants,
+.instructor-sector-card.is-table {
+  --ring-students: #62c6f2;
+  --ring-instructor: #5fd68a;
+  --ring-technician: #b48cff;
+  height: auto;
+}
+
+.instructor-sector-card.is-table {
+  --ring-students: var(--blue-600);
+  --ring-instructor: #107c10;
+  --ring-technician: #7650a8;
+}
+
+.instructor-sector-card .instructor-sector-body {
+  display: grid;
+  grid-template-areas: none;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  grid-template-rows: minmax(0, 1fr);
+  height: 264px;
+}
+
+.instructor-sector-card.is-table .instructor-sector-body {
+  grid-template-columns: minmax(0, 1fr) 270px;
+  height: 340px;
+}
+
+/* ---------- Onde: la mappa ---------- */
+.instructor-sector-map {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  align-items: center;
+  padding: 14px 16px 12px;
+  overflow: hidden;
+}
+
+.instructor-sector-map .form-path-map.is-coverage {
+  --form-node: 26px;
+  justify-self: center;
+  flex-wrap: nowrap;
+}
+
+.instructor-sector-map .form-path-map.is-coverage .form-path-segment { gap: 4px; }
+
+.instructor-sector-map .form-path-map.is-coverage .form-path-lanes {
+  gap: 2px 4px;
+  margin: 0 8px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  background: rgb(2 30 51 / 22%);
+}
+
+.instructor-sector-map .form-cover-node { gap: 1px; }
+.instructor-sector-map .form-cover-numbers { min-width: 15px; font-size: 11px; }
+
+/* K2: 46 px di quadranti attorno al logo, gli allievi nel varco in basso. */
+.form-cover-medal {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  place-items: center;
+}
+
+.course-rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+
+.course-ring.is-students { stroke: var(--ring-students); }
+.course-ring.is-instructorCourse { stroke: var(--ring-instructor); }
+.course-ring.is-technicianCourse { stroke: var(--ring-technician); }
+.course-ring-track { stroke-opacity: 0.18; }
+
+.form-cover-students {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  padding: 0 3px;
+  border-radius: 4px;
+  color: var(--ring-students);
+  background: var(--surface);
+  font: 600 10px/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  transform: translateX(-50%);
+}
+
+.instructor-ring-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.instructor-ring-legend > span:not(.instructor-ring-legend-counts)::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border: 2.5px solid currentColor;
+  border-radius: 50%;
+  vertical-align: -1px;
+  content: "";
+}
+
+.instructor-ring-legend .is-students::before { color: var(--ring-students); }
+.instructor-ring-legend .is-instructor-course::before { color: var(--ring-instructor); }
+.instructor-ring-legend .is-technician-course::before { color: var(--ring-technician); }
+.instructor-ring-legend b { font-weight: 600; }
+.instructor-ring-legend b.is-instructor { color: var(--onde-gold-bright, #b7791f); }
+.instructor-ring-legend b.is-technician { color: #d4aeff; }
+
+/* La riga degli allenamenti: Preparazione atletica | Arena Tecnica / Corso Agonisti.
+   Prima dello sblocco il posto resta vuoto. */
+.instructor-training-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.instructor-training-cell {
+  min-width: 0;
+  min-height: 40px;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgb(2 30 51 / 25%);
+  font-size: 12px;
+}
+
+.instructor-training-cell.is-locked { visibility: hidden; }
+
+.instructor-training-row .athletic-preparation-course {
+  grid-template-columns: 22px auto minmax(40px, 1fr) auto;
+  gap: 10px;
+  margin: 0;
+}
+
+.instructor-training-row .athletic-preparation-course-logo {
+  width: 22px;
+  height: 22px;
+}
+
+.instructor-training-row .athletic-preparation-course-logo svg { width: 12px; height: 12px; }
+
+.instructor-training-row .athletic-preparation-course > * {
+  grid-column: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.instructor-training-row .athletic-preparation-course > small {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.instructor-agonist-course {
+  display: grid;
+  grid-template-columns: 34px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.instructor-agonist-medal {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+}
+
+/* Il logo riempie il cerchio: rosso per Arena Tecnica, azzurro per il Corso Agonisti. */
+.instructor-agonist-medal img {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgb(251 241 220 / 55%);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.instructor-agonist-course.is-idle img { opacity: 0.55; }
+
+.instructor-agonist-medal .agonist-course-star {
+  top: -2px;
+  right: -2px;
+  bottom: auto;
+  width: 11px;
+  height: 11px;
+  font-size: 9px;
+}
+
+.instructor-agonist-course > strong { white-space: nowrap; }
+
+.instructor-agonist-course > small {
+  overflow: hidden;
+  color: var(--ink-soft);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instructor-agonist-course > small b { color: var(--ring-students); font-weight: 600; }
+
+/* ---------- Colonna destra: numeri e Ufficio formazione ---------- */
+.instructor-sector-side {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  overflow: hidden;
+  border-left: 1px solid var(--line);
+  background: color-mix(in srgb, var(--blue-050) 30%, var(--surface));
+}
+
+.instructor-side-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 4px;
+}
+
+.instructor-side-chips > span {
+  padding: 2px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.instructor-side-chips b { color: var(--ink); font-weight: 600; }
+
+.instructor-side-label {
+  color: var(--blue-700);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.instructor-sector-side .instructor-quick-training {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.instructor-sector-side .instructor-quick-training button,
+.instructor-sector-side .instructor-quick-slot {
+  flex: 0 0 auto;
+}
+
+.instructor-quick-slot {
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 7px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.instructor-quick-slot strong { font-weight: 600; }
+
+/* ---------- Piede: Maestria · Corsi Istruttori disponibili · Gestisci ---------- */
+.instructor-sector-foot {
+  gap: 16px;
+  padding-left: 17px;
+}
+
+.instructor-sector-foot .instructor-courses-link {
+  margin-left: auto;
+}
+
+.instructor-sector-foot .sector-manage-button {
+  width: auto;
+  min-height: 36px;
+  border-top: 0;
+  background: transparent;
+}
+
+/* ---------- Outlook: la tabella O2 ---------- */
+.instructor-table-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 14px 8px;
+}
+
+.instructor-coverage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.instructor-coverage-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 8px 5px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-muted);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.instructor-coverage-table th.is-students { width: 30%; }
+
+.instructor-coverage-table tbody th,
+.instructor-coverage-table td {
+  height: 26px;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.instructor-coverage-table tbody th { font-weight: 600; white-space: nowrap; }
+.instructor-coverage-table .is-number { width: 60px; text-align: right; white-space: nowrap; }
+.instructor-coverage-table tr.is-quiet th,
+.instructor-coverage-table tr.is-quiet td { color: var(--ink-muted); }
+.instructor-coverage-table tr.is-empty td { border-bottom-color: var(--surface-muted); }
+.instructor-table-none { color: var(--ink-soft); }
+
+.instructor-table-bar {
+  display: grid;
+  grid-template-columns: minmax(40px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.instructor-table-bar::before {
+  grid-area: 1 / 1;
+  height: 4px;
+  background: var(--line);
+  content: "";
+}
+
+.instructor-table-bar > i {
+  grid-area: 1 / 1;
+  height: 4px;
+  background: var(--tone);
+}
+
+.instructor-table-bar.is-students { --tone: var(--ring-students); }
+.instructor-table-bar.is-instructor { --tone: var(--ring-instructor); }
+.instructor-table-bar.is-technician { --tone: var(--ring-technician); }
+.instructor-table-bar.is-waiting > i {
+  background: repeating-linear-gradient(90deg, var(--tone) 0 3px, transparent 3px 6px);
+}
+
+.instructor-summary {
+  display: grid;
+  margin: 0 0 6px;
+}
+
+.instructor-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+}
+
+.instructor-summary dd { margin: 0; font-weight: 600; }
+
+:root[data-theme="light"] .instructor-sector-side { background: var(--surface-muted); }
+:root[data-theme="light"] .instructor-side-label { color: var(--ink-muted); }
+
+/* Stretta: tutto in colonna, altezza naturale. */
+@media (max-width: 1100px) {
+  .instructor-sector-card .instructor-sector-body,
+  .instructor-sector-card.is-table .instructor-sector-body {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .instructor-sector-map .form-path-map.is-coverage {
+    max-width: 100%;
+    justify-self: start;
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
+
+  .instructor-sector-foot { flex-wrap: wrap; }
+
+  .instructor-training-row .athletic-preparation-course {
+    grid-template-columns: 22px auto minmax(30px, 1fr);
+    row-gap: 2px;
+  }
+
+  .instructor-training-row .athletic-preparation-course > small { grid-column: 2 / -1; }
+  .instructor-table-scroll { max-height: 340px; }
+
+  .instructor-sector-side {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .instructor-training-row { grid-template-columns: minmax(0, 1fr); }
+  .instructor-training-cell.is-locked { display: none; }
+}

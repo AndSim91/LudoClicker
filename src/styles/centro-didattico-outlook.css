@@ -51,94 +51,9 @@
   font-weight: 400;
 }
 
-/* ---------- Corsi ---------- */
-:root[data-theme="light"] .instructor-activity-lane,
-:root[data-theme="light"] .instructor-activity-lane.is-instructor,
-:root[data-theme="light"] .instructor-activity-lane.is-technician {
-  --instructor-lane-accent: var(--accent-ink);
-  box-shadow: none;
-  background: var(--surface);
-}
-
-:root[data-theme="light"] .aggregated-teaching-bar,
-:root[data-theme="light"] .aggregated-teaching-segment,
-:root[data-theme="light"] .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar,
-:root[data-theme="light"] .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment,
-:root[data-theme="light"] .aggregated-teaching-segment.is-waiting,
-:root[data-theme="light"] .aggregated-teaching-bar.is-compact.is-waiting {
-  background: var(--line);
-}
-
-:root[data-theme="light"] .aggregated-teaching-bar {
-  height: 4px;
-}
-
-/* ---------- Copertura: etichette «F1 11 · 0» ---------- */
-:root[data-theme="light"] .instructor-coverage,
-:root[data-theme="light"] .instructor-coverage:has(.instructor-quick-training) {
-  overflow: visible;
-  background: var(--surface-muted);
-}
-
-:root[data-theme="light"] .instructor-coverage .sector-form-strip {
-  gap: 4px;
-}
-
-:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-item {
-  display: inline-flex;
-  min-width: 0;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 6px;
-  padding: 1px 7px;
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
-  background: var(--surface);
-  font-size: 11px;
-}
-
-:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-item::before {
-  color: var(--ink);
-  content: attr(data-short-name);
-  font-weight: 600;
-}
-
-:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-mark {
-  display: none;
-}
-
-:root[data-theme="light"] .instructor-coverage .form-logo-count,
-:root[data-theme="light"] .instructor-coverage .form-logo-count .is-instructor,
-:root[data-theme="light"] .instructor-coverage .form-logo-count .is-technician,
-:root[data-theme="light"] .instructor-coverage .form-logo-count .is-technician.is-zero {
-  margin: 0;
-  color: var(--ink-muted);
-  font-weight: 400;
-}
-
-/* La Forma che l'Ufficio formazione sceglierebbe adesso. */
-:root[data-theme="light"] .instructor-coverage .form-logo-item.is-next-instructor,
-:root[data-theme="light"] .instructor-coverage .form-logo-item.is-next-technician {
-  border-color: var(--blue-600);
-  box-shadow: inset 0 0 0 1px var(--blue-600);
-}
-
-/* La legenda dei numeri. */
-:root[data-theme="light"] .instructor-coverage .sector-form-strip:has(.form-logo-count)::after {
-  flex-basis: 100%;
-  color: var(--ink-muted);
-  content: "Istruttori";
-  font-size: 11px;
-}
-
-:root[data-theme="light"] .instructor-coverage .sector-form-strip:has(.form-logo-count .is-technician)::after {
-  content: "Istruttori · Tecnici";
-}
-
 /* ---------- Loghi delle Forme ovunque: grigi, il puntino al posto della corona ---------- */
 :root[data-theme="light"] .form-logo-mark img,
-:root[data-theme="light"] .training-form-preview img,
-:root[data-theme="light"] .aggregated-teaching-course-logo img {
+:root[data-theme="light"] .training-form-preview img {
   filter: grayscale(1) contrast(1.05);
 }
 

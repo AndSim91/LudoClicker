@@ -89,7 +89,13 @@ export function QuickTeacherTraining({
           course={`Corso Tecnici SIS da ${getGameMonthName(getNextSISStartMonth(currentMonth)).toLowerCase()}`}
           onStart={onStart}
         />
-      ) : null}
+      ) : (
+        // Altezza fissa (06/10): il secondo posto c'è già, in attesa della SIS.
+        <div className="instructor-quick-slot" aria-hidden="true">
+          <strong>Forma un Tecnico</strong>
+          <span>Con la SIS, dagli Upgrade</span>
+        </div>
+      )}
     </div>
   );
 }

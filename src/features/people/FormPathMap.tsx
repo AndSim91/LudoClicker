@@ -3,8 +3,10 @@ import { getFormLogo } from "../../content/formLogos";
 import { BRANCH_FORM_IDS, FORM_BRANCHES, FORM_DEFINITIONS, getFormDefinition } from "../../content/forms";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { useOptionalGameState } from "../../game/GameStateContext";
-import type { FormBranch, FormId } from "../../game/types";
+import type { FormBranch, FormId, TrainingCourseId } from "../../game/types";
 import { useOutlookTheme } from "../../shared/useOutlookTheme";
+import { CourseRings } from "./CourseRings";
+import type { CourseRing, FormActivity } from "./formActivity";
 import type { FormCoverageCount } from "./instructorGroupPresentation";
 import { FormLogoStrip } from "./PersonPresentation";
 
@@ -108,17 +110,37 @@ export function FormPathMap({
   );
 }
 
+const ringText = (label: string, ring: CourseRing | undefined, booked = "in attesa di spade") =>
+  !ring ? "" : ` · ${label} ${ring.waiting ? booked : `${Math.round(ring.progress)}%`}`;
+
+const activityTitle = (activity: FormActivity | undefined) => !activity ? "" : [
+  activity.students
+    ? ` · ${activity.students.count} ${activity.students.count === 1 ? "allievo" : "allievi"}${
+      activity.students.waiting ? " in attesa di spade" : ` al ${Math.round(activity.students.progress)}%`}`
+    : "",
+  ringText("Corso Istruttori", activity.instructorCourse),
+  ringText("Corso Tecnici", activity.technicianCourse, "prenotato"),
+].join("");
+
+/** K2: 46 px of quadrants around a 26 px logo. */
+const MEDAL_SIZE = 46;
+const MEDAL_RADII = [16, 19, 22] as const;
+
 /**
  * Copertura didattica in Modalità Onde (concept C5, 06/10): the same map, with
  * a column of numbers left of every logo. Gold on top for the Istruttori, lilac
  * below for the Tecnici; whoever is still studying adds a lighter «+1».
+ * K2 «Quadranti» (06/10): around every logo the courses running on it, and in
+ * the gap at the bottom how many athletes follow it.
  */
 export function FormCoverageMap({
   counts,
+  activity,
   showTechnicians,
   highlight,
 }: {
   counts: ReadonlyMap<FormId, FormCoverageCount>;
+  activity: ReadonlyMap<TrainingCourseId, FormActivity>;
   showTechnicians: boolean;
   /** Ufficio formazione: the Forms the two buttons would pick right now. */
   highlight?: { instructor?: FormId; technician?: FormId };
@@ -144,16 +166,21 @@ export function FormCoverageMap({
       : highlight?.technician === formId ? " is-next-technician" : "";
     const people = (value: number, one: string, many: string, studying: number) =>
       `${value} ${value === 1 ? one : many}${studying ? ` (+${studying} in corso)` : ""}`;
+    const running = activity.get(formId);
     const title = `${formName(formId)} · ${people(instructors, "Istruttore", "Istruttori", studyingInstructors)}${
-      showTechnicians ? ` · ${people(technicians, "Tecnico", "Tecnici", studyingTechnicians)}` : ""}`;
+      showTechnicians ? ` · ${people(technicians, "Tecnico", "Tecnici", studyingTechnicians)}` : ""}${activityTitle(running)}`;
     return (
       <span key={formId} className="form-cover-node" title={title}>
         <span className={`form-cover-numbers${showTechnicians ? " has-technicians" : ""}`} aria-hidden="true">
           {number(instructors, studyingInstructors, "is-instructor")}
           {showTechnicians ? number(technicians, studyingTechnicians, "is-technician") : null}
         </span>
-        <span className={`form-path-node${lit ? " is-learned" : ""}${pending ? " is-pending" : ""}${next}`}>
-          <img src={getFormLogo(formId).assetPath} alt="" />
+        <span className="form-cover-medal">
+          {running ? <CourseRings activity={running} size={MEDAL_SIZE} radii={MEDAL_RADII} /> : null}
+          <span className={`form-path-node${lit ? " is-learned" : ""}${pending ? " is-pending" : ""}${next}`}>
+            <img src={getFormLogo(formId).assetPath} alt="" />
+          </span>
+          {running?.students ? <span className="form-cover-students" aria-hidden="true">{running.students.count}</span> : null}
         </span>
       </span>
     );

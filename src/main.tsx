@@ -16,6 +16,7 @@ import "./styles/people-collaborator-sectors.css";
 import "./styles/people-school.css";
 import "./styles/centro-didattico-outlook.css";
 import "./styles/school-onde.css";
+import "./styles/instructor-card.css";
 import "./styles/sector-scenes.css";
 import "./styles/table-sorting.css";
 import "./styles/keywords.css";

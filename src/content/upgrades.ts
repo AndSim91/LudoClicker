@@ -508,6 +508,11 @@ export function getAgonistCourseMaximumStatGain(levels: UpgradeLevels): number {
   return Math.min(5, 1 + getUpgradeEffectTotal(levels, "agonistCourseStatMaximum"));
 }
 
+/** Percorso Tecnico 1: Arena Tecnica (poi Corso Agonisti con Nessun Rancore). */
+export function isTechnicalArenaUnlocked(levels: UpgradeLevels): boolean {
+  return (levels["technical-arena"] ?? 0) >= 1;
+}
+
 export function isAgonistCourseUnlocked(levels: UpgradeLevels): boolean {
   return (levels["agonist-course-intensity"] ?? 0) >= 1;
 }

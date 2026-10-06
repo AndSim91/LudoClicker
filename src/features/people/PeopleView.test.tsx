@@ -447,9 +447,9 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByRole("progressbar", {
-      name: "Forma 1: 100 allievi",
-    })).toHaveClass("is-lap");
+    // K2: the hundred courses are one azzurro quadrant, with the count in its gap.
+    expect(screen.getByTitle(/^Forma 1 · 1 Istruttore · 100 allievi al /)
+      .querySelector(".form-cover-students")).toHaveTextContent("100");
     expect(intervalSpy.mock.calls.some(
       ([, intervalMs]) => intervalMs === GAME_CONFIG.progressUpdateIntervalMs,
     )).toBe(true);
@@ -458,7 +458,7 @@ describe("PeopleView", () => {
     )).toBe(false);
   });
 
-  it("keeps every Allievi course in one scrollable lane with athletic preparation last", () => {
+  it("draws every Allievi course as a quadrant and athletic preparation in its own row", () => {
     const initial = createInitialState(1_000);
     const courseIds: FormId[] = [
       "form-1",
@@ -532,17 +532,12 @@ describe("PeopleView", () => {
     );
     const view = render(renderView(false));
 
-    const allieviLane = screen.getByRole("region", { name: "Corsi Allievi" });
-    expect(within(allieviLane).getAllByRole("progressbar")).toHaveLength(8);
-    expect(within(allieviLane).getByText("Forma 4 Spada Lunga")).toBeVisible();
-    expect(screen.queryByRole("region", { name: "Altre lezioni in corso" }))
-      .not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Corsi Istruttori" }))
-      .not.toBeInTheDocument();
+    expect(document.querySelectorAll(".form-cover-students")).toHaveLength(courseIds.length);
+    expect(screen.getByTitle(/^Forma 4 Spada Lunga · .* · 1 allievo al 50%$/)).toBeVisible();
+    expect(document.querySelector(".course-ring.is-instructorCourse")).not.toBeInTheDocument();
 
     view.rerender(renderView(true));
 
-    expect(screen.getByRole("region", { name: "Corsi Allievi" })).toBeVisible();
     expect(screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     })).toHaveClass("is-indeterminate");
@@ -923,10 +918,7 @@ describe("PeopleView", () => {
     );
     const view = render(renderView(false));
 
-    expect(screen.getByRole("region", { name: "Corsi Allievi" })).toBeVisible();
-    expect(document.querySelector(".instructor-preparation-row")).not.toBeInTheDocument();
-    expect(screen.queryByText("Attività principale")).not.toBeInTheDocument();
-    expect(screen.queryByText("Attività del gruppo")).not.toBeInTheDocument();
+    expect(screen.getByText("Preparazione atletica").closest(".instructor-training-row")).toBeVisible();
     const preparationBar = screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     });
@@ -996,7 +988,7 @@ describe("PeopleView", () => {
     expect(screen.getByText("Istruttore Preparatore")).toBeVisible();
   });
 
-  it("shows active Instructor and Technician courses in separate semantic lanes", () => {
+  it("draws active Instructor and Technician courses as their own quadrants", () => {
     const initial = createInitialState(1_000);
     const technician = {
       id: "aggregate-technician",
@@ -1082,24 +1074,14 @@ describe("PeopleView", () => {
     const view = render(renderView(state.collaborators));
 
     // C5: chi ha l'attestato in pieno, chi sta studiando come «+1».
-    const formOneCoverage = screen.getByTitle("Forma 1 · 2 Istruttori (+1 in corso) · 1 Tecnico (+1 in corso)");
+    const formOneCoverage = screen.getByTitle(
+      "Forma 1 · 2 Istruttori (+1 in corso) · 1 Tecnico (+1 in corso) · Corso Istruttori 50% · Corso Tecnici 25%",
+    );
     expect(formOneCoverage.querySelector(".form-cover-numbers .is-instructor")).toHaveTextContent("2+1");
     expect(formOneCoverage.querySelector(".form-cover-numbers .is-technician")).toHaveTextContent("1+1");
-    const instructorLane = screen.getByRole("region", { name: "Corsi Istruttori" });
-    const internalCourseProgress = within(instructorLane).getByRole("progressbar", {
-      name: "Forma 1: 1 corso",
-    });
-    expect(internalCourseProgress).toHaveAttribute("aria-valuenow", "50");
-    expect(internalCourseProgress).toHaveClass("aggregated-teaching-bar");
-    expect(internalCourseProgress.closest(".aggregated-teaching-groups"))
-      .toHaveClass("is-internal-instructor");
-    const technicianLane = screen.getByRole("region", { name: "Corsi Tecnici" });
-    const technicianCourseProgress = within(technicianLane).getByRole("progressbar", {
-      name: "Forma 1: 1 corso",
-    });
-    expect(technicianCourseProgress).toHaveAttribute("aria-valuenow", "25");
-    expect(technicianCourseProgress.closest(".aggregated-teaching-groups"))
-      .toHaveClass("is-technician");
+    expect(formOneCoverage.querySelector(".course-ring.is-instructorCourse")).toBeInTheDocument();
+    expect(formOneCoverage.querySelector(".course-ring.is-technicianCourse")).toBeInTheDocument();
+    expect(formOneCoverage.querySelector(".course-ring.is-students")).not.toBeInTheDocument();
     expect(screen.queryByText(
       /esame (fallito|non superato)|probabilità dell'esame|rischio dell'esame/i,
     )).not.toBeInTheDocument();
@@ -1115,12 +1097,7 @@ describe("PeopleView", () => {
       ...otherCollaborators,
     ]));
 
-    expect(screen.queryByRole("region", { name: "Corsi Istruttori" }))
-      .not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Corsi Tecnici" }))
-      .not.toBeInTheDocument();
-    expect(screen.queryByText("Nessun Corso Istruttori in svolgimento"))
-      .not.toBeInTheDocument();
+    expect(document.querySelector(".course-rings")).not.toBeInTheDocument();
   });
 
   it("allows booking an eligible Technician course from the Instructor card", () => {
@@ -1292,7 +1269,7 @@ describe("PeopleView", () => {
       );
 
       // July and August: one improvement every 5 minutes instead of 2 (06/10).
-      expect(screen.getByText("Estate")).toBeVisible();
+      expect(screen.getByText("Ritmo estivo · 1 Istruttore")).toBeVisible();
       const preparationBar = screen.getByRole("progressbar", {
         name: "Preparazione atletica estiva",
       });
@@ -1347,8 +1324,7 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(within(screen.getByRole("region", { name: "Corsi Allievi" }))
-      .getByText("In attesa")).toBeVisible();
+    expect(screen.getByText("In attesa di Istruttori liberi")).toBeVisible();
     const preparationBar = screen.getByRole("progressbar", {
       name: "Preparazione atletica in attesa",
     });
