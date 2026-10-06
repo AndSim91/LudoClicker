@@ -2787,7 +2787,12 @@ Un'unica pagina, in quest'ordine:
   nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
   **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
   Forme, Arena e Stile, stato, prossima Forma, preferito e annullamento).
-  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste;
+  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste.
+  In Modalità Onde (06/10) le Forme di ogni iscritto sono la mappa del percorso
+  completo (F1, Corso X se sbloccato, F2, Corso Y, una corsia per Spada Lunga,
+  Staffa e Doppie Spade Corte con le Forme 3–5, poi F6 e F7): le Forme imparate
+  sono accese, le altre in ombra (`FormPathMap.tsx`); in tabella l'email va a
+  capo dopo la «@» e «Servono…» sta sotto il nome della prossima Forma;
 - riepilogo delle rarità (dopo 10 email inviate, un iscritto non Comune o il
   primo Collaboratore).
 

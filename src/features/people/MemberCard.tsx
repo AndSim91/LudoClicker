@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import type { Collaborator, Contact, FormId } from "../../game/types";
 import { getPresentedRarityLabel, getRarityClassName } from "../../shared/rarityPresentation";
+import { FormPathMap } from "./FormPathMap";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 
 /**
@@ -19,6 +20,7 @@ export function MemberCard({
   favoriteButton,
   cancelButton,
   training,
+  pathMap = false,
 }: {
   contact: Contact;
   forms: FormId[];
@@ -30,6 +32,8 @@ export function MemberCard({
   favoriteButton: ReactNode;
   cancelButton: ReactNode;
   training: ReactNode;
+  /** Modalità Onde draws the whole curriculum instead of the learned logos. */
+  pathMap?: boolean;
 }) {
   const secret = Boolean(contact.secretLegendaryId);
   const rarityClass = getRarityClassName(contact.rarity, secret);
@@ -53,12 +57,20 @@ export function MemberCard({
         </strong>
         <span>{path}</span>
       </div>
-      <FormLogoStrip
-        forms={forms}
-        instructorForms={collaborator?.instructorForms}
-        technicianForms={collaborator?.technicianForms}
-        showLabels={false}
-      />
+      {pathMap ? (
+        <FormPathMap
+          forms={forms}
+          instructorForms={collaborator?.instructorForms}
+          technicianForms={collaborator?.technicianForms}
+        />
+      ) : (
+        <FormLogoStrip
+          forms={forms}
+          instructorForms={collaborator?.instructorForms}
+          technicianForms={collaborator?.technicianForms}
+          showLabels={false}
+        />
+      )}
       <dl className="member-card-stats">
         <div>
           <dt>Arena</dt>

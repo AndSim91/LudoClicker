@@ -25,6 +25,7 @@ import type {
   GameState,
 } from "../../game/types";
 import { EnrollmentCancellationDialog } from "./EnrollmentCancellationDialog";
+import { FormPathMap } from "./FormPathMap";
 import { MemberCard } from "./MemberCard";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { TrainingControl } from "./TrainingControl";
@@ -39,6 +40,7 @@ import {
   getRarityClassName,
 } from "../../shared/rarityPresentation";
 import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
+import { useOutlookTheme } from "../../shared/useOutlookTheme";
 import { STORAGE_KEYS } from "../../shared/storageKeys";
 import {
   getMemberNextFormLabel,
@@ -192,6 +194,12 @@ function SortableHeader({
   );
 }
 
+/** A long address wraps at the «@» first, not in the middle of a word. */
+function withBreakAfterAt(email: string) {
+  const at = email.indexOf("@");
+  return at < 0 ? email : <>{email.slice(0, at)}<wbr />{email.slice(at)}</>;
+}
+
 export function MemberList({
   state: stateOverride,
   collaboratorsByContactId,
@@ -222,6 +230,7 @@ export function MemberList({
   );
   const [requestedPage, setRequestedPage] = useState(0);
   const [view, setView] = useState<MemberView>(readMemberView);
+  const outlook = useOutlookTheme();
   const pageSize = view === "cards" ? MEMBER_CARDS_PER_PAGE : MEMBERS_PER_PAGE;
   const changeView = (next: MemberView) => {
     storeMemberView(next);
@@ -635,6 +644,7 @@ export function MemberList({
               key={contact.id}
               contact={contact}
               forms={memberForms}
+              pathMap={!outlook}
               collaborator={collaborator}
               path={presentation.path}
               status={presentation.status}
@@ -660,7 +670,7 @@ export function MemberList({
                   secretLegendary={Boolean(contact.secretLegendaryId)}
                 />
                 <span className={`member-email rarity-address ${getRarityClassName(contact.rarity, Boolean(contact.secretLegendaryId))}`}>
-                  {contact.email}
+                  {withBreakAfterAt(contact.email)}
                 </span>
               </span>
             </div>
@@ -676,11 +686,19 @@ export function MemberList({
             </span>
             <div className="member-path" data-label="Percorso">
               <strong>{presentation.path}</strong>
-              <FormLogoStrip
-                forms={memberForms}
-                instructorForms={collaborator?.instructorForms}
-                technicianForms={collaborator?.technicianForms}
-              />
+              {outlook ? (
+                <FormLogoStrip
+                  forms={memberForms}
+                  instructorForms={collaborator?.instructorForms}
+                  technicianForms={collaborator?.technicianForms}
+                />
+              ) : (
+                <FormPathMap
+                  forms={memberForms}
+                  instructorForms={collaborator?.instructorForms}
+                  technicianForms={collaborator?.technicianForms}
+                />
+              )}
             </div>
             <span className="member-stat" data-label="Arena">
               {preparation ? (

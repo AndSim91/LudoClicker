@@ -202,3 +202,127 @@
     border-left: 0;
   }
 }
+
+/* Percorso delle Forme (concept G2): tutto il percorso disegnato, tronco,
+   tre corsie d'arma, F6 e F7; le Forme imparate si accendono. Nessuna
+   animazione: è una tabella da migliaia di righe. */
+.form-path-map {
+  --form-node: 17px;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.form-path-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-path-lanes {
+  position: relative;
+  display: inline-grid;
+  gap: 3px;
+  margin: 0 5px;
+  padding: 0 4px;
+  border-inline: 1px solid var(--line-strong);
+  border-radius: 6px;
+}
+
+.form-path-lane {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-path-lane-mark {
+  width: 8px;
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  opacity: 0.45;
+}
+
+.form-path-lane.is-active .form-path-lane-mark { opacity: 1; }
+.form-path-lane.is-long .form-path-lane-mark { color: #8cc4ff; }
+.form-path-lane.is-staff .form-path-lane-mark { color: #c9a7ff; }
+.form-path-lane.is-double .form-path-lane-mark { color: #7fdcae; }
+
+.form-path-node {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: var(--form-node);
+  height: var(--form-node);
+  place-items: center;
+}
+
+.form-path-node img {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  object-fit: cover;
+  /* Da fare: in ombra (filtro fermo, si disegna una volta sola). */
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.form-path-node.is-learned img {
+  border-color: rgb(251 241 220 / 55%);
+  opacity: 1;
+  filter: none;
+}
+
+.form-path-node .form-instructor-crown {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  color: var(--onde-gold-bright);
+  font-size: 8px;
+  line-height: 1;
+}
+
+.form-path-node .form-instructor-crown.is-technician {
+  color: #c9a7ff;
+}
+
+.member-card .form-path-map {
+  --form-node: 18px;
+  margin: 2px 0 4px;
+}
+
+/* D1: tabella degli iscritti più bassa e leggibile. */
+:root[data-theme="dark"] .people-view .member-row .member-email {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+:root[data-theme="dark"] .people-view .member-training-cell .training-roster.training-control {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+
+:root[data-theme="dark"] .people-view .member-training-cell .training-roster.training-control > .training-start-button {
+  min-width: 0;
+  min-height: 26px;
+  justify-self: start;
+  padding-inline: 10px;
+}
+
+@media (min-width: 761px) {
+  :root[data-theme="dark"] .people-view .member-row,
+  :root[data-theme="dark"] .people-view .member-filter-row {
+    grid-template-columns:
+      minmax(224px, 1.25fr)
+      minmax(92px, 0.45fr)
+      minmax(232px, 1.2fr)
+      minmax(64px, 0.4fr)
+      minmax(64px, 0.4fr)
+      minmax(110px, 0.65fr)
+      minmax(220px, 1.3fr)
+      42px;
+  }
+}

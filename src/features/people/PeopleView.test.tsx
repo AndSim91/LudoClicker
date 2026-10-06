@@ -2344,8 +2344,9 @@ describe("PeopleView", () => {
     const memberName = within(members).getByText(`${enrolled.firstName} ${enrolled.lastName}`);
     const memberRow = memberName.closest(".member-row");
     expect(memberName).toBeVisible();
-    const memberFormLogo = memberRow?.querySelector(".form-logo-item");
-    expect(memberFormLogo).toHaveClass("instructor-certified");
+    // Modalità Onde draws the whole path: Forma 1 is lit and crowned.
+    const memberFormLogo = memberRow?.querySelector(".form-path-node");
+    expect(memberFormLogo).toHaveClass("is-learned");
     expect(memberFormLogo).toHaveTextContent("♛");
     expect(within(members).queryByText(/Esperienza tornei/)).not.toBeInTheDocument();
     expect(memberRow?.querySelector(".member-status")).toHaveTextContent(

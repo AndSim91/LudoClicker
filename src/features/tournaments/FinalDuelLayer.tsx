@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import { getStyleJudgeCount } from "../../game/styleJudging";
 import type { TournamentResult } from "../../game/types";
 import { motionReduced } from "../../shared/motion";
+import { useOutlookTheme } from "../../shared/useOutlookTheme";
 import { FinalArena } from "./FinalArena";
 import { getDuelScript, getOwnedFinal, type DuelScript, type DuelSide } from "./finalDuel";
 import { FinalDuelBoard } from "./FinalDuelBoard";
@@ -10,14 +11,6 @@ import { FinalDuelReport } from "./FinalDuelReport";
 import { applyEvent, buildTimeline, endView, startView, type DuelSheets } from "./finalDuelTimeline";
 import { FinalServizioPhone } from "./FinalServizioPhone";
 import { participantName } from "./tournamentPresentation";
-
-const subscribeTheme = (onChange: () => void) => {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => observer.disconnect();
-};
-/** Outlook is the light camouflage: there the final is a plain report (F9 can flip it mid-final). */
-const useOutlook = () => useSyncExternalStore(subscribeTheme, () => document.documentElement.dataset.theme === "light");
 
 /**
  * The fight plays on its own clock (max 30 s). It keeps running under the
@@ -60,7 +53,8 @@ export function FinalDuelLayer({
   );
   const ended = useMemo(() => endView(script, sheets), [script, sheets]);
   const live = usePlayback(script, sheets);
-  const outlook = useOutlook();
+  // Outlook is the light camouflage: there the final is a plain report (F9 can flip it mid-final).
+  const outlook = useOutlookTheme();
 
   useEffect(() => {
     closeRef.current?.focus();
