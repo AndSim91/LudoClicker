@@ -26,15 +26,15 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
           Potrai modificarlo in qualsiasi momento dalle Impostazioni.
         </p>
         <form onSubmit={submit}>
-          <label htmlFor="profile-display-name">Nome e cognome</label>
           <input
             id="profile-display-name"
+            aria-labelledby="profile-dialog-title"
             name="displayName"
             type="text"
             autoComplete="name"
             autoFocus
             maxLength={GAME_CONFIG.profileNameMaxLength}
-            placeholder="Es. Andrea Ungaro"
+            placeholder="Ander"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
           />

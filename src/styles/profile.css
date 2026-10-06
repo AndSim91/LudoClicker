@@ -45,12 +45,6 @@
   margin-top: 26px;
 }
 
-.profile-dialog label {
-  color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
 .profile-dialog button {
   min-height: 42px;
   margin-top: 7px;

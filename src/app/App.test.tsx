@@ -15,7 +15,7 @@ describe("App profile and navigation", () => {
     render(<App />);
 
     expect(screen.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
-    fireEvent.change(screen.getByRole("textbox", { name: "Nome e cognome" }), {
+    fireEvent.change(screen.getByRole("textbox", { name: "Come ti chiami?" }), {
       target: { value: "Andrea Ungaro" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Inizia" }));
