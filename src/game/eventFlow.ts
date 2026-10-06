@@ -85,7 +85,7 @@ function getEventStartDetails(
     ? getCollaboratorMasteryDefinition(collaborator.mastery?.events ?? 0)
     : undefined;
   const eventCost = getEventCopyCost(
-    Math.round(definition.cost * (masteryDefinition?.eventCostMultiplier ?? 1)),
+    Math.round(definition.cost * (masteryDefinition?.eventMultiplier ?? 1)),
     runningCopies,
   );
   if (state.school.euros < eventCost) return undefined;
@@ -118,7 +118,7 @@ export function startAcquisitionEvent(
   const details = getEventStartDetails(state, definitionId, now, collaboratorId);
   if (!details) return state;
   const { definition, masteryDefinition, eventCost, runningCopies } = details;
-  const masteryBonus = masteryDefinition?.multiplier ?? 0;
+  const masteryEventMultiplier = masteryDefinition?.eventMultiplier ?? 1;
 
   const [varianceRoll, nextSeed] = nextRandom(state.randomSeed);
   const attendanceVariance =
@@ -151,7 +151,7 @@ export function startAcquisitionEvent(
     startedAt: now,
     resolvesAt: now + (isTutorialSparring
       ? GAME_CONFIG.tutorialSparringDurationMs
-      : Math.round(definition.durationMs / (1 + masteryBonus))),
+      : Math.round(definition.durationMs * masteryEventMultiplier)),
     cost: eventCost,
     peopleMet,
     demonstrationsGiven,
@@ -165,10 +165,7 @@ export function startAcquisitionEvent(
           state.upgrades,
           definition.wearAdded * GAME_CONFIG.eventWearMultiplier,
         ) *
-          (1 - Math.min(
-            GAME_CONFIG.equipmentMaximumEventMasteryWearReduction,
-            masteryBonus,
-          )),
+          masteryEventMultiplier,
       ),
     ),
     collaboratorId,

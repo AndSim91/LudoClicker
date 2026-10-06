@@ -33,13 +33,14 @@ describe("collaborator mastery", () => {
       2,
       5,
     ]);
-    expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.eventCostMultiplier)).toEqual([
+    // Eventi: duration, cost and wear of the automatic events (06/10).
+    expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.eventMultiplier)).toEqual([
       1,
       0.9,
-      0.8,
-      0.7,
-      0.5,
+      0.75,
+      0.6,
       0.4,
+      0.25,
     ]);
     expect(COLLABORATOR_MASTERY_XP_PER_SECOND).toBe(1);
   });

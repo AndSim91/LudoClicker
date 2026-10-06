@@ -975,12 +975,10 @@ costo e le risorse sono ripristinati, non parte alcun conto alla rovescia e
 viene applicato soltanto il 25% dell'usura prevista.
 
 Quando l'evento viene avviato automaticamente da un collaboratore, la sua
-Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
-Iniziato 90%, Accademico 80%, Cavaliere 70%, Maestro 50% e Leggenda 40%. La
-riduzione del tempo usa invece il normale bonus di produttività della Maestria
-(+25%, +50%, +100%, +200%, +500%: un Maestro divide la durata per tre, una
-Leggenda per sei), che riduce anche l'usura
-dell'evento fino a un massimo del 25%. Gli eventi avviati dal giocatore pagano
+Maestria Eventi riduce durata, prezzo e usura con la stessa percentuale
+(decisione di Andrea del 06/10): Novizio 100%, Iniziato 90%, Accademico 75%,
+Cavaliere 60%, Maestro 40% e Leggenda 25% (`eventMultiplier` in
+`src/content/mastery.ts`). Gli eventi avviati dal giocatore pagano
 sempre il prezzo pieno.
 
 Le nuove spade possono essere acquistate dall'area Attività tramite **LamaDiLuce
@@ -1230,8 +1228,8 @@ settore attuale (rarità × Maestria, per esempio «Social ×3 · Maestro +200%�
 Il bonus moltiplica la produttività del collaboratore in Redazione/Social,
 Attrezzatura, Gadget e Istruttore (velocità delle lezioni e Preparazione
 atletica). Negli **Eventi** la Maestria non aumenta la forza del settore:
-riduce invece il costo degli eventi avviati automaticamente da quel
-collaboratore del 10%, 20%, 30%, 50% e 60% (da Iniziato a Leggenda). Anche il bonus
+riduce invece durata, costo e usura degli eventi avviati automaticamente da
+quel collaboratore: 90%, 75%, 60%, 40% e 25% (da Iniziato a Leggenda). Anche il bonus
 degli Istruttori alla conversione prova → iscrizione ignora la Maestria.
 
 Durante il gioco attivo, ogni collaboratore assegnato riceve **1 XP al secondo**

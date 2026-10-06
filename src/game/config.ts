@@ -73,7 +73,6 @@ export const GAME_CONFIG = {
   ultraRareDeclineStartCollaborators: 8,
   ultraRareFloorCollaborators: 100,
   equipmentMaximumUpgradeWearReduction: 0.5,
-  equipmentMaximumEventMasteryWearReduction: 0.25,
   officialSwordCost: 330,
   legendaryEnrollmentChancePerFailure: 0.03,
   formSevenDepartureChance: {

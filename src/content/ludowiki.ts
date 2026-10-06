@@ -334,7 +334,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     rules: [
       "Ogni Collaboratore può avere un incarico operativo principale.",
-      `La Maestria cresce con il tempo nello stesso settore: ${COLLABORATOR_MASTERY_LEVELS.slice(1).map((level) => `${level.name} +${Math.round(level.multiplier * 100)}% dopo ${level.minimumXp / 60} minuti`).join(", ")}. Negli Eventi abbassa invece il costo degli eventi automatici.`,
+      `La Maestria cresce con il tempo nello stesso settore: ${COLLABORATOR_MASTERY_LEVELS.slice(1).map((level) => `${level.name} +${Math.round(level.multiplier * 100)}% dopo ${level.minimumXp / 60} minuti`).join(", ")}. Negli Eventi riduce invece durata, costo e usura degli eventi automatici: ${COLLABORATOR_MASTERY_LEVELS.slice(1).map((level) => `${level.name} ${Math.round(level.eventMultiplier * 100)}%`).join(", ")}.`,
       "Le Forme non danno bonus ai Collaboratori: rendono più forti gli atleti in Arena e Stile.",
       "I posti aggregati distribuiscono automaticamente le persone rispettando le priorità.",
       "In una nuova scuola i Leggendari ripartono da zero: restano solo Arena e Stile naturali.",

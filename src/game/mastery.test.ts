@@ -102,13 +102,14 @@ describe("collaborator mastery integration", () => {
     );
     const event = started.acquisitionEvents[0];
 
-    expect(event.resolvesAt - event.startedAt).toBe(3_333);
-    expect(event.cost).toBe(125);
-    expect(event.wearAdded).toBe(15);
-    expect(started.school.euros).toBe(875);
+    // Maestro in the Eventi: duration, cost and wear at 40% (06/10).
+    expect(event.resolvesAt - event.startedAt).toBe(4_000);
+    expect(event.cost).toBe(100);
+    expect(event.wearAdded).toBe(8);
+    expect(started.school.euros).toBe(900);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });
-    expect(completed.collaborators[0].mastery?.events).toBeCloseTo(3_603.333);
+    expect(completed.collaborators[0].mastery?.events).toBeCloseTo(3_604);
   });
 
   it("does not grant experience for equipment maintenance", () => {
