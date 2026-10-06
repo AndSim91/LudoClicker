@@ -2165,6 +2165,57 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
+  it("keeps the Onde sector rows steady: no ghost events, an empty track when idle", () => {
+    const initial = createInitialState(1_000);
+    const collaborators = ["events", "events", "writing"].map((assignment, index) => ({
+      id: `steady-${index}`,
+      contactId: initial.contacts[index].id,
+      displayName: `Collaboratore ${index}`,
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: assignment as "events" | "writing",
+      rarity: "rare" as const,
+    }));
+    const event = (id: string, title: string, collaboratorId: string) => ({
+      id,
+      definitionId: "park-sparring" as const,
+      title,
+      location: "Centro di Genova",
+      startedAt: 1_000,
+      resolvesAt: 11_000,
+      cost: 0,
+      peopleMet: 0,
+      demonstrationsGiven: 0,
+      contactReward: 0,
+      membersUsed: 0,
+      equipmentUsed: 0,
+      wearAdded: 0,
+      collaboratorId,
+      status: "running" as const,
+    });
+    const state = {
+      ...initial,
+      emails: [],
+      collaborators,
+      unlocks: { ...initial.unlocks, collaborators: true, social: true },
+      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+      acquisitionEvents: [event("a", "Volantinaggio", "steady-0"), event("b", "Volantinaggio", "steady-1")],
+    };
+    const props = { onAssign: () => undefined, onStartTraining: () => undefined };
+    const { container, rerender } = render(<PeopleView state={state} {...props} />);
+    // Two Volantinaggi leave together: the card shows the new pair, nothing else.
+    rerender(<PeopleView state={{
+      ...state,
+      acquisitionEvents: [event("c", "Oktoberfest", "steady-0"), event("d", "Lucca", "steady-1")],
+    }} {...props} />);
+    const eventsCard = screen.getByRole("heading", { name: "Eventi" }).closest("article")!;
+    expect(eventsCard.querySelectorAll(".sector-scene-row")).toHaveLength(2);
+    expect(within(eventsCard).queryByText(/Volantinaggio/)).not.toBeInTheDocument();
+    // S1: «Nessuna email da scrivere» keeps the row as tall as a bar.
+    expect(container.querySelectorAll(".sector-scene-row.is-inactive .sector-scene-track")).toHaveLength(1);
+  });
+
   it("shows separate Social and email rows in the aggregate Social box", () => {
     inOutlook();
     const initial = createInitialState(1_000);

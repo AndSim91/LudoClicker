@@ -24,7 +24,10 @@ function SceneRow({ row }: { row: CollaboratorAutomationPresentation }) {
           value={row.progress}
           durationMs={row.durationMs}
         />
-      ) : null}
+      ) : (
+        // S1 (06/10): the empty track keeps the row as tall as a working one.
+        <span className="sector-scene-track" aria-hidden="true" />
+      )}
     </div>
   );
 }
@@ -38,7 +41,9 @@ function SceneFact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function getRunningEventRows(state: GameState, now: number): CollaboratorAutomationPresentation[] {
+type SceneRowData = CollaboratorAutomationPresentation & { key?: string };
+
+function getRunningEventRows(state: GameState, now: number): SceneRowData[] {
   return state.acquisitionEvents
     .filter((event) => event.status === "running" && event.collaboratorId)
     .sort((a, b) => a.resolvesAt - b.resolvesAt)
@@ -46,6 +51,8 @@ function getRunningEventRows(state: GameState, now: number): CollaboratorAutomat
     .map((event) => {
       const duration = event.resolvesAt - event.startedAt;
       return {
+        // Two Volantinaggi share the title: a shared key left ghost rows in the card.
+        key: event.id,
         title: `${event.title} · ${event.location}`,
         progress: duration <= 0 ? 100 : Math.min(100, Math.max(0, (now - event.startedAt) / duration * 100)),
         progressLabel: event.title,
@@ -112,7 +119,7 @@ export function OndeSectorBody({
       <>
         <SectorScene role={role} idle={idle} />
         <div className="sector-scene-data">
-          {(rows.length > 0 ? rows : [activity]).map((row) => <SceneRow key={row.title} row={row} />)}
+          {(rows.length > 0 ? rows : [activity]).map((row: SceneRowData) => <SceneRow key={row.key ?? row.title} row={row} />)}
         </div>
       </>
     );
