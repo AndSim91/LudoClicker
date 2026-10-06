@@ -9,7 +9,7 @@ import {
 } from "../../game/lightInflation";
 import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency, formatStat } from "../../shared/formatters";
-import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { getReptileFameLevel } from "../../game/reptilePreparation";
 import { SUPERBA_COPY } from "../../game/reptileUnlock";
 import { GAME_CONFIG } from "../../game/config";
@@ -46,6 +46,8 @@ export type MomentContent =
     }
   | { kind: "superba"; kicker: string; title: string; body: string; city: string; fameLabel: string }
   | { kind: "chronicles"; kicker: string; title: string; body: string }
+  | { kind: "social"; kicker: string; title: string; body: string; followers: number }
+  | { kind: "gadget"; kicker: string; title: string; body: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
@@ -61,6 +63,25 @@ const CHRONICLES_KEY_CONTENT: MomentContent = {
   kicker: "Arena e Stile nella stessa Champion's Arena",
   title: "La porta delle Chronicles si apre",
   body: "Una Chiave, sei atleti, avversari che non perdono mai. Vinci in Arena o in Stile e un Leggendario Segreto ti sfiderà.",
+};
+
+/** «Il telefono» (concept S1, 06/10/2026): the counter runs to the followers of the unlock. */
+function describeSocial(followers: number): MomentContent {
+  return {
+    kind: "social",
+    kicker: `${GAME_CONFIG.socialUnlockCollaborators} collaboratori`,
+    title: "La Redazione diventa Social",
+    body: "La scuola sbarca online. Follower, sponsor e qualche balletto.",
+    followers,
+  };
+}
+
+/** «Il progetto sul banco» (concept G2, 06/10/2026): no names, no prices. */
+const GADGET_CONTENT: MomentContent = {
+  kind: "gadget",
+  kicker: "Champion's Arena vinta",
+  title: "Apre il Laboratorio Gadget",
+  body: "Una vittoria così va messa su tutto. Il primo progetto è pronto.",
 };
 
 const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; note: string }> = {
@@ -199,6 +220,9 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
     };
   }
   if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
+  // Before the unlock of the current school the followers are still zero: Social starts them from the Fama.
+  if (key === SOCIAL_MOMENT) return describeSocial(state.unlocks.social ? state.school.followers : state.school.fame);
+  if (key === GADGET_MOMENT) return GADGET_CONTENT;
   if (key === SUPERBA_MOMENT) {
     return { kind: "superba", ...SUPERBA_COPY, city: state.school.city, fameLabel: `Fama · livello ${GAME_CONFIG.superbaReptileFameLevel}` };
   }
@@ -241,6 +265,8 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     return describeFoundation(state, state.network.schoolCount + 1, { follower });
   }
   if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
+  if (key === SOCIAL_MOMENT) return describeSocial(state.school.followers);
+  if (key === GADGET_MOMENT) return GADGET_CONTENT;
   if (key === SUPERBA_MOMENT) {
     const fame = state.tournaments.reptile.fameXp;
     return {

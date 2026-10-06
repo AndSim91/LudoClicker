@@ -126,4 +126,27 @@ describe("moments (4.2)", () => {
     expect(queueMoments(migrate(saved) as GameState).moments.queue).toEqual([]);
     expect((migrate({ ...initial, version: 94 }) as GameState).moments.seen).not.toContain("superba");
   });
+
+  it("plays the Laboratorio Gadget right after the Champion's Arena and the Social on its own (06/10)", () => {
+    const initial = withCareer(createInitialState(1_000), { championsWins: 1 });
+    const gadget = queueMoments({ ...initial, unlocks: { ...initial.unlocks, gadget: true } });
+    expect(gadget.moments.queue).toEqual(["victory:champions", "gadget"]);
+    const social = queueMoments({ ...gadget, unlocks: { ...gadget.unlocks, social: true } });
+    expect(social.moments.queue).toEqual(["victory:champions", "gadget", "social"]);
+    expect(queueMoments(social)).toBe(social);
+  });
+
+  it("marks Social and Gadget as seen for saves past them (v103)", () => {
+    const initial = createInitialState(1_000);
+    const opened = { ...initial, version: 102, unlocks: { ...initial.unlocks, social: true } };
+    expect((migrate(opened) as GameState).moments.seen).toEqual(["social"]);
+    // Gadget seen in an earlier school: the tutorial is done, the sector is locked again.
+    const laterSchool = {
+      ...initial,
+      version: 102,
+      tutorial: { ...initial.tutorial, completedSceneIds: ["gadget-laboratory"] },
+    };
+    expect((migrate(laterSchool) as GameState).moments.seen).toEqual(["gadget"]);
+    expect((migrate({ ...initial, version: 102 }) as GameState).moments.seen).toEqual([]);
+  });
 });

@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInitialState } from "../../game/engine";
 import { LIGHT_INFLATION_CAUSES, LIGHT_INFLATION_MOMENT, getLightInflationEventDescription } from "../../game/lightInflation";
-import { CHRONICLES_KEY_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { MOMENT_DURATION_MS, MomentLayer } from "./MomentLayer";
 import { getFoundationTitle } from "./momentContent";
 
@@ -118,5 +118,25 @@ describe("MomentLayer", () => {
     expect(container.querySelector(".superba-tower .superba-lamp")).not.toBeNull();
     expect(container.querySelector(".superba-medal")?.getAttribute("src")).toBe("/assets/superba-logo.webp");
     expect(container.querySelector(".superba-plaque")?.textContent).toContain("Fama 1.040 · livello 2");
+  });
+
+  it("opens the Social with the phone counting to the followers, and the Laboratorio with four gadgets (06/10)", () => {
+    vi.useFakeTimers();
+    const initial = createInitialState(1_000, "Verifica UI");
+    const state = { ...initial, unlocks: { ...initial.unlocks, social: true }, school: { ...initial.school, followers: 47 } };
+    const { container, unmount } = render(<MomentLayer state={state} momentKey={SOCIAL_MOMENT} onDismiss={vi.fn()} />);
+    expect(screen.getByRole("dialog", { name: "La Redazione diventa Social" })).toBeVisible();
+    expect(container.querySelector(".social-count")?.textContent).toBe("0");
+    act(() => { vi.advanceTimersByTime(MOMENT_DURATION_MS); });
+    expect(container.querySelector(".social-count")?.textContent).toBe("47");
+    expect(container.querySelector(".moment-social image")?.getAttribute("href")).toBe("/assets/ordine-emblem.webp");
+    unmount();
+
+    const gadget = render(<MomentLayer state={state} momentKey={GADGET_MOMENT} onDismiss={vi.fn()} />);
+    expect(screen.getByRole("dialog", { name: "Apre il Laboratorio Gadget" })).toBeVisible();
+    expect(gadget.container.querySelectorAll(".gadget-real")).toHaveLength(4);
+    expect(gadget.container.querySelectorAll(".gadget-real image")).toHaveLength(4);
+    // No names and no prices on the blueprint.
+    expect(gadget.container.querySelector(".moment-gadget text")).toBeNull();
   });
 });

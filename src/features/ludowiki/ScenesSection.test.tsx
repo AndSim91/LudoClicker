@@ -21,7 +21,7 @@ describe("ScenesSection", () => {
   it("hides every scene not seen yet behind «???»", () => {
     render(<ScenesSection state={createInitialState(1_000, "Verifica UI")} onReplay={vi.fn()} />);
     expect(screen.getByText("0 scene viste")).toBeVisible();
-    expect(screen.getAllByLabelText("Scena da scoprire")).toHaveLength(10);
+    expect(screen.getAllByLabelText("Scena da scoprire")).toHaveLength(12);
     expect(screen.queryByRole("button", { name: /Rivedi/ })).not.toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe("ScenesSection", () => {
     const onReplay = vi.fn();
     render(<ScenesSection state={withScenes()} onReplay={onReplay} />);
     expect(screen.getByText("3 scene viste")).toBeVisible();
-    expect(screen.getAllByLabelText("Scena da scoprire")).toHaveLength(7);
+    expect(screen.getAllByLabelText("Scena da scoprire")).toHaveLength(9);
 
     const buttons = screen.getAllByRole("button", { name: /Rivedi/ });
     fireEvent.click(buttons[2]);

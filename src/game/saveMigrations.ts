@@ -51,6 +51,7 @@ import { migrateReptileRebuildState } from "./saveMigrations/reptileRebuild";
 import { migrateCouncilMomentState } from "./saveMigrations/councilMoment";
 import { migrateSocialGadgetsReputationState } from "./saveMigrations/socialGadgetsReputation";
 import { migrateSuperbaMomentState } from "./saveMigrations/superbaMoment";
+import { migrateSocialGadgetMomentsState } from "./saveMigrations/socialGadgetMoments";
 import { migrateSuperbaLevelOneState } from "./saveMigrations/superbaLevelOne";
 import { migrateLegendaryResetState } from "./saveMigrations/legendaryReset";
 import { migrateOfficialSupplierState } from "./saveMigrations/officialSupplier";
@@ -131,6 +132,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migratePointUnlocksState,
   migrateGadgetBenchesState,
   migrateLateTutorialsState,
+  migrateSocialGadgetMomentsState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

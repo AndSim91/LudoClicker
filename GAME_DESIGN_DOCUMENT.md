@@ -4791,6 +4791,24 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   `SuperbaArt.tsx`, `SUPERBA_MOMENT` in `moments.ts`; testi in `SUPERBA_COPY`
   (`reptileUnlock.ts`), usati anche dal messaggio. Dalla v95 i salvataggi che
   sono già Superba la segnano come vista;
+- **la Redazione diventa Social** (dal 06/10, concept S1 «Il telefono»): al
+  15° collaboratore, prima del tutorial del Social. Un telefono sale dal mare e
+  si accende sul profilo dell'Ordine (lo stemma d'oro del gioco), il contatore
+  corre da 0 ai follower dello sblocco (pari alla Fama), salgono i cuori e
+  spunta un «+1». Testi: «15 collaboratori» / «La Redazione diventa Social» /
+  «La scuola sbarca online. Follower, sponsor e qualche balletto.» In Outlook
+  l'icona è il megafono. Codice: `SocialArt.tsx`, `SOCIAL_MOMENT`;
+- **apre il Laboratorio Gadget** (dal 06/10, concept G2 «Il progetto sul
+  banco»): alla prima vittoria nella Champion's Arena, subito dopo la scena
+  della vittoria e prima del tutorial del Laboratorio. Su un foglio da progetto
+  si disegnano uno dopo l'altro portachiavi, tazza, maglietta e cappellino,
+  poi diventano veri con lo stemma dell'Ordine; nessun nome e nessun prezzo.
+  Testi: «Champion's Arena vinta» / «Apre il Laboratorio Gadget» / «Una
+  vittoria così va messa su tutto. Il primo progetto è pronto.» In Outlook
+  l'icona è il regalo. Codice: `GadgetArt.tsx`, `GADGET_MOMENT`. Le due scene
+  si vedono una volta per partita, come i tutorial; dalla v103 chi ha già il
+  settore aperto, o ne ha già visto il tutorial in una scuola precedente, le
+  segna come viste. Entrambe sono anche nella galleria della LudoWiki;
 - **la costellazione dell'Ordine**, che torna **a ogni fondazione** (dal
   04/10; prima solo alla prima). Ogni sede è una stella e le stelle disegnano il
   simbolo dell'Ordine dello stendardo: la Sede madre è la punta, poi la lama, la

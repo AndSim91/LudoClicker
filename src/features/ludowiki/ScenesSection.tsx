@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
 import { LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
-import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
 import type { GameState, MomentKey } from "../../game/types";
 import {
   describeFoundation,
@@ -16,13 +16,15 @@ import {
  * Leggendari and Rete can show the data of one unlocked Leggendario or sede.
  */
 
-type Thumb = "council" | "legendary" | "trophy" | "superba" | "chronicles" | "foundation" | "inflation";
+type Thumb = "council" | "social" | "legendary" | "trophy" | "gadget" | "superba" | "chronicles" | "foundation" | "inflation";
 
 const SCENES: readonly { key: MomentKey; thumb: Thumb }[] = [
   { key: "council", thumb: "council" },
+  { key: SOCIAL_MOMENT, thumb: "social" },
   { key: "legendary", thumb: "legendary" },
   { key: "victory:national", thumb: "trophy" },
   { key: "victory:champions", thumb: "trophy" },
+  { key: GADGET_MOMENT, thumb: "gadget" },
   { key: "victory:reptile", thumb: "trophy" },
   { key: SUPERBA_MOMENT, thumb: "superba" },
   { key: CHRONICLES_KEY_MOMENT, thumb: "chronicles" },
@@ -73,6 +75,26 @@ const THUMBS: Record<Thumb, ReactNode> = {
         return <circle key={index} className="scene-wave" cx={100 + Math.cos(angle) * 46} cy={60 + Math.sin(angle) * 46} r="5" />;
       })}
       <path className="scene-foam" d="M100 46 l8 14 -8 14 -8 -14z" />
+    </>
+  ),
+  social: (
+    <>
+      <rect className="scene-fill scene-wave-line" x="80" y="14" width="40" height="76" rx="7" />
+      <circle className="scene-gold" cx="100" cy="38" r="8" />
+      <rect className="scene-foam" x="90" y="56" width="20" height="5" rx="2" />
+      <circle className="scene-heart" cx="128" cy="20" r="5" />
+      <path className="scene-heart" d="M60 54c-3-4-9-1-6 4l6 5 6-5c3-5-3-8-6-4z" />
+      <path className="scene-heart" d="M140 64c-3-4-9-1-6 4l6 5 6-5c3-5-3-8-6-4z" />
+      <path className="scene-fill" d="M0 100q50-10 100 0t100 0v20H0z" />
+    </>
+  ),
+  gadget: (
+    <>
+      <rect className="scene-fill scene-wave-line" x="30" y="14" width="140" height="92" rx="2" />
+      <circle className="scene-gold-line" cx="62" cy="34" r="5" />
+      <circle className="scene-gold" cx="62" cy="62" r="15" />
+      <path className="scene-foam" d="M98 40q6 5 12 0l12 6-5 9-5-2v24h-16v-24l-5 2-5-9z" />
+      <path className="scene-wave" d="M136 66q0-22 14-22q14 0 14 22z" />
     </>
   ),
   legendary: (

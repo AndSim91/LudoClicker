@@ -5,6 +5,8 @@ import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
 import { ChroniclesArt } from "./ChroniclesArt";
 import { FoundationArt } from "./FoundationArt";
+import { GadgetArt } from "./GadgetArt";
+import { SocialArt } from "./SocialArt";
 import { SuperbaArt } from "./SuperbaArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
@@ -19,6 +21,8 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
   inflation: "coin",
   superba: "trophy",
   chronicles: "key",
+  social: "megaphone",
+  gadget: "gift",
 };
 
 /** Lama di Luce letterhead: three crossed blades, green, white and red. */
@@ -152,6 +156,8 @@ function MomentArt({ content }: { content: MomentContent }) {
     );
   }
   if (content.kind === "chronicles") return <ChroniclesArt />;
+  if (content.kind === "social") return <SocialArt followers={content.followers} />;
+  if (content.kind === "gadget") return <GadgetArt />;
   if (content.kind === "superba") return <SuperbaArt city={content.city} fameLabel={content.fameLabel} />;
   if (content.kind === "victory") {
     return (

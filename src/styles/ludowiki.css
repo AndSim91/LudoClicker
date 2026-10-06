@@ -1427,6 +1427,7 @@ path.scene-wave-line { fill: none; stroke-opacity: 0.45; }
 .scene-halo { fill: rgb(240 184 90 / 18%); }
 .scene-tower { fill: #021e33; stroke: var(--onde-wave, #6cd3d6); stroke-width: 1.5; }
 .scene-paper { fill: var(--onde-foam, #fbf1dc); }
+.scene-heart { fill: #ff8a7a; }
 .scene-ink { fill: #9aa7ad; }
 .scene-stamp rect { fill: none; stroke: #c4423b; stroke-width: 3; }
 .scene-stamp text { fill: #c4423b; font-size: 15px; }
