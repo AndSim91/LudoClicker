@@ -1,0 +1,196 @@
+/*
+ * Testata delle pagine in Modalità Outlook: concept B «Barra compatta» (Andrea,
+ * 06/10). Icona a contorno da 20 px accanto al titolo, frase sulla stessa riga
+ * (va a capo se non entra), al massimo un'azione o un numero a destra, una riga
+ * sottile sotto o le schede che fanno da riga. Vale per tutte le testate
+ * `.overview-view > header` (Scuola, Eventi, Tornei, Gadget, Upgrade, Rete,
+ * LudoWiki, Impostazioni, Calendario, Admin). Onde non passa di qui.
+ */
+
+/* L'icona di Tornei esiste solo per Outlook (la testata di Onde non l'ha). */
+.tournaments-view > header > .page-header-icon {
+  display: none;
+}
+
+:root[data-theme="light"] .overview-view > header,
+:root[data-theme="light"] .people-view > .people-hero,
+:root[data-theme="light"] .overview-view > .upgrade-page-header,
+:root[data-theme="light"] .network-view > header,
+:root[data-theme="light"] .tournaments-view > header {
+  position: static;
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0 0 10px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Gadget usa !important per i suoi margini: serve lo stesso peso. */
+:root[data-theme="light"] .overview-view > .gadget-view-heading {
+  min-height: 0;
+  margin: 0 0 16px !important;
+  padding: 0 0 10px !important;
+  border-bottom-color: var(--line) !important;
+  background: none;
+}
+
+/* Con le schede sotto, sono le schede a fare da riga. */
+:root[data-theme="light"] .tournaments-view > header,
+:root[data-theme="light"] .ludowiki-view > header {
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 0;
+}
+
+/* Icona: quella della barra a sinistra, 20 px, blu, senza riquadro. */
+:root[data-theme="light"] .overview-view > header > svg,
+:root[data-theme="light"] .overview-view > header > .page-header-icon,
+:root[data-theme="light"] .people-page-mark,
+:root[data-theme="light"] .people-page-mark svg,
+:root[data-theme="light"] .gadget-view-heading > svg:not(.gadget-workshop-artwork) {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--accent-ink);
+}
+
+:root[data-theme="light"] .overview-view > header > .page-header-icon {
+  display: block;
+}
+
+:root[data-theme="light"] .people-page-mark {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Via le decorazioni: onde di Scuola e schizzo di Gadget. */
+:root[data-theme="light"] .people-hero-waves,
+:root[data-theme="light"] .gadget-view-heading > .gadget-workshop-artwork {
+  display: none;
+}
+
+/* Titolo e frase sulla stessa riga. */
+:root[data-theme="light"] .overview-view > header > div:not([class]),
+:root[data-theme="light"] .people-page-heading,
+:root[data-theme="light"] .network-view > header > div:nth-child(2),
+:root[data-theme="light"] .upgrade-page-header > div:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+
+:root[data-theme="light"] .overview-view > header h1,
+:root[data-theme="light"] .people-view .people-page-heading h1,
+:root[data-theme="light"] .tournaments-view > header h1,
+:root[data-theme="light"] .gadget-view-heading h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+:root[data-theme="light"] .overview-view > header p,
+:root[data-theme="light"] .people-view .people-page-heading p,
+:root[data-theme="light"] .tournaments-view > header p,
+:root[data-theme="light"] .ludowiki-view > header p {
+  max-width: none;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Rete: la Reputazione è un numero nero con l'etichetta sopra. */
+:root[data-theme="light"] .network-reputation {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+}
+
+:root[data-theme="light"] .network-reputation b {
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+:root[data-theme="light"] .network-reputation small {
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Upgrade: «Compra tutto» è un pulsante da 32 px, il costo scritto accanto. */
+:root[data-theme="light"] .upgrade-buy-all {
+  gap: 10px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+:root[data-theme="light"] .upgrade-buy-all > svg {
+  display: none;
+}
+
+:root[data-theme="light"] .upgrade-buy-all-text {
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="light"] .upgrade-buy-all-text strong {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .upgrade-buy-all:hover:not(:disabled) {
+  background: none;
+}
+
+:root[data-theme="light"] .upgrade-buy-all:hover:not(:disabled) .upgrade-buy-all-text strong {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .upgrade-buy-all:disabled .upgrade-buy-all-text strong {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .upgrade-buy-all:focus-visible {
+  outline: 0;
+}
+
+:root[data-theme="light"] .upgrade-buy-all:focus-visible .upgrade-buy-all-text strong {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+:root[data-theme="light"] .upgrade-buy-all-text small {
+  white-space: nowrap;
+}

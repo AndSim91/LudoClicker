@@ -293,6 +293,8 @@ export function TournamentsView({
   return (
     <main className="overview-view tournaments-view">
       <header>
+        {/* Shown only in Outlook, where every page header has its icon. */}
+        <Icon name="trophy" className="page-header-icon" aria-hidden="true" />
         <div>
           <h1>Tornei</h1>
           <p>Segui la stagione, prepara la squadra, conquista la Champion’s Arena</p>

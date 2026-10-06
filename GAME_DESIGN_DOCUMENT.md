@@ -2592,6 +2592,18 @@ senza conteggio e due scorciatoie, Contatti e Iscritti; i Fondi stanno solo
 nella barra del titolo. Ogni messaggio dell'elenco ha l'iniziale del mittente,
 l'oggetto e una riga di anteprima.
 
+**Testata delle pagine in Modalità Outlook** (concept B «Barra compatta»,
+decisione di Andrea del 06/10): tutte le pagine con testata (Scuola, Eventi,
+Tornei, Gadget, Upgrade, Rete, LudoWiki, Impostazioni, Calendario) hanno la
+stessa: icona della barra a sinistra a contorno, blu, da 20 px; titolo da 20 px;
+la frase della pagina in grigio sulla stessa riga (va a capo se non entra); una
+riga sottile sotto, oppure le schede che fanno da riga (Tornei, LudoWiki). A
+destra al massimo un'azione o un numero: «Compra tutto» è un pulsante da 32 px
+con il costo scritto accanto, la Reputazione un numero nero con l'etichetta
+sopra. Niente onde in Scuola, niente schizzo né sfumatura in Gadget, niente
+riquadro pieno con ombra. CSS in `src/styles/page-header-outlook.css`; la
+testata di Onde segue il concept A (riquadro icona), da definire nei colori.
+
 **Le spade nella barra del titolo** (Fase 8, decisione di Andrea del 04/10):
 il riquadro Spade non sta più in La mia giornata. Nella barra del titolo,
 dopo «Spade 14 su 31», c'è una spada laser disegnata. L'**elsa** (70 px:
