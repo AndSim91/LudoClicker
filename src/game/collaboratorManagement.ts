@@ -608,6 +608,8 @@ export function setAutomaticAssignment(state: GameState, enabled: boolean): Game
   delete management.automaticPendingMoves;
   if (enabled === Boolean(automaticShares)) return state;
   if (!enabled) return withTargetsFromAssignments({ ...state, collaboratorManagement: management });
+  // Arrives with the Consiglio delle Onde (8 collaborators); old saves can still switch it off.
+  if (!state.collaboratorManagement.aggregateViewUnlocked) return state;
   const roles = getAutomaticAssignmentRoles(state);
   const counts = getCollaboratorAssignmentCounts(state);
   const largest = Math.max(...roles.map((role) => counts[role]));

@@ -1305,7 +1305,10 @@ Regole:
   un'uscita dall'organico), i posti mancanti restano memorizzati e vengono
   occupati automaticamente dai nuovi collaboratori liberi;
 - **Assegnazione automatica** (piano 4.7, decisioni del 03/10 e del 04/10): un
-  interruttore sopra la sezione, disponibile in entrambe le viste. Ogni
+  interruttore sopra la sezione, disponibile in entrambe le viste. Compare
+  solo con il **Consiglio delle Onde** (8 collaboratori, decisione del 06/10);
+  nei salvataggi in cui era già acceso prima resta visibile, così si può
+  spegnere, ma non si riaccende finché non nasce il Consiglio. Ogni
   settore ha una **barra di impegno** di 5 tacche, indipendente dalle altre:
   alzarne una non muove le altre barre, cambia solo il numero di persone che
   ne deriva (la squadra divisa in proporzione alle tacche, resti più grandi).

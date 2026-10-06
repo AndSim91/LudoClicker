@@ -129,7 +129,8 @@ export function PeopleView({
               ? `${availableCollaborators}/${state.collaborators.length} liberi`
               : state.collaborators.length}</span>
           </div>
-          {onToggleAutomaticAssignment && onChangeAutomaticShare ? (
+          {onToggleAutomaticAssignment && onChangeAutomaticShare &&
+          (showAggregateCollaborators || state.collaboratorManagement.automaticShares) ? (
             <AutomaticAssignmentControl
               state={stateOverride}
               onToggle={onToggleAutomaticAssignment}

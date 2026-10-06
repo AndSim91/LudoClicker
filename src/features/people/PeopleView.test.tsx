@@ -164,7 +164,7 @@ describe("PeopleView", () => {
     expect(rows()).toHaveLength(8);
   });
 
-  it("offers the automatic assignment switch and locks the manual choice while on (4.7)", () => {
+  it("offers the automatic assignment switch only with the Consiglio delle Onde (4.7)", () => {
     const initial = createInitialState(1_000, "", false);
     const member: Collaborator = {
       id: "auto-collaborator",
@@ -182,7 +182,19 @@ describe("PeopleView", () => {
       ...initial,
       collaborators: [member],
       unlocks: { ...initial.unlocks, collaborators: true },
+      collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
     };
+    const noCouncil = render(
+      <PeopleView
+        state={{ ...state, collaboratorManagement: initial.collaboratorManagement }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+        onToggleAutomaticAssignment={onToggle}
+        onChangeAutomaticShare={onChangeShare}
+      />,
+    );
+    expect(screen.queryByRole("checkbox", { name: "Assegnazione automatica" })).toBeNull();
+    noCouncil.unmount();
     const { rerender } = render(
       <PeopleView
         state={state}
@@ -194,7 +206,6 @@ describe("PeopleView", () => {
     );
     const toggle = screen.getByRole("checkbox", { name: "Assegnazione automatica" });
     expect(toggle).not.toBeChecked();
-    expect(screen.getByRole("combobox", { name: "Assegnazione" })).toBeEnabled();
     fireEvent.click(toggle);
     expect(onToggle).toHaveBeenCalledWith(true);
 
@@ -213,7 +224,6 @@ describe("PeopleView", () => {
         onChangeAutomaticShare={onChangeShare}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "Assegnazione" })).toBeDisabled();
     expect(screen.getByRole("group", { name: "Impegno di Eventi: 0 su 5" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Eventi: impegno 3 su 5" }));
     expect(onChangeShare).toHaveBeenCalledWith("events", 3);

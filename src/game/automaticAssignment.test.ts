@@ -41,8 +41,12 @@ function withCollaborators(collaborators: Collaborator[]): GameState {
   return { ...createInitialState(1_000), collaborators };
 }
 
+function withCouncil(state: GameState): GameState {
+  return { ...state, collaboratorManagement: { ...state.collaboratorManagement, aggregateViewUnlocked: true } };
+}
+
 function switchOn(state: GameState): GameState {
-  return gameReducer(state, { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: true });
+  return gameReducer(withCouncil(state), { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: true });
 }
 
 function setLevel(state: GameState, assignment: "writing" | "events" | "equipment" | "instructor", level: number) {
@@ -54,6 +58,11 @@ function sectorOf(state: GameState, index: number) {
 }
 
 describe("Assegnazione automatica (4.7)", () => {
+  it("stays off until the Consiglio delle Onde is formed", () => {
+    const noCouncil = gameReducer(withCollaborators([collaborator(1), collaborator(2)]), { type: "SET_AUTOMATIC_ASSIGNMENT", enabled: true });
+    expect(noCouncil.collaboratorManagement.automaticShares).toBeUndefined();
+  });
+
   it("starts the bars from the team the player left and only places free collaborators", () => {
     const on = switchOn(withCollaborators([
       collaborator(1, "writing"),
