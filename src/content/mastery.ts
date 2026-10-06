@@ -27,13 +27,15 @@ export function getCollaboratorMasteryRoleLabel(
 
 // Decision of 06/10: the Forms no longer give bonuses to collaborators, the
 // Mastery of the sector does. 1 XP per second of game time in the sector:
-// Iniziato at 5 minutes, Accademico at 10, Cavaliere at 30, Maestro at one hour.
+// Iniziato at 5 minutes, Accademico at 10, Cavaliere at 30, Maestro at one hour,
+// Leggenda (+500%) at two hours.
 export const COLLABORATOR_MASTERY_LEVELS = [
   { name: "Novizio", minimumXp: 0, multiplier: 0, eventCostMultiplier: 1 },
   { name: "Iniziato", minimumXp: 300, multiplier: 0.25, eventCostMultiplier: 0.9 },
   { name: "Accademico", minimumXp: 600, multiplier: 0.5, eventCostMultiplier: 0.8 },
   { name: "Cavaliere", minimumXp: 1_800, multiplier: 1, eventCostMultiplier: 0.7 },
   { name: "Maestro", minimumXp: 3_600, multiplier: 2, eventCostMultiplier: 0.5 },
+  { name: "Leggenda", minimumXp: 7_200, multiplier: 5, eventCostMultiplier: 0.4 },
 ] as const;
 
 export const COLLABORATOR_MASTERY_XP_PER_SECOND = 1;

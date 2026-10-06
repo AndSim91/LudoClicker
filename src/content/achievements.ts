@@ -48,7 +48,7 @@ export interface SecretAchievement {
 }
 
 const hasFormSeven = (forms: readonly FormId[]) => forms.some((form) => form.startsWith("form-7"));
-const MAESTRO_LEVEL = COLLABORATOR_MASTERY_LEVELS.length - 1;
+const MAESTRO_LEVEL = COLLABORATOR_MASTERY_LEVELS.findIndex((level) => level.name === "Maestro");
 
 function countFormSevenMembers(state: GameState): number {
   return state.contacts.filter((contact) => contact.status === "enrolled" && hasFormSeven(contact.forms)).length +

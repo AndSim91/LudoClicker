@@ -976,9 +976,10 @@ viene applicato soltanto il 25% dell'usura prevista.
 
 Quando l'evento viene avviato automaticamente da un collaboratore, la sua
 Maestria Eventi riduce il prezzo base. Le percentuali pagate sono: Novizio 100%,
-Iniziato 90%, Accademico 80%, Cavaliere 70% e Maestro 50%. La riduzione del
-tempo usa invece il normale bonus di produttività della Maestria (+20%, +40%,
-+65%, +100%: un Maestro dimezza la durata), che riduce anche l'usura
+Iniziato 90%, Accademico 80%, Cavaliere 70%, Maestro 50% e Leggenda 40%. La
+riduzione del tempo usa invece il normale bonus di produttività della Maestria
+(+25%, +50%, +100%, +200%, +500%: un Maestro divide la durata per tre, una
+Leggenda per sei), che riduce anche l'usura
 dell'evento fino a un massimo del 25%. Gli eventi avviati dal giocatore pagano
 sempre il prezzo pieno.
 
@@ -1207,7 +1208,7 @@ Ogni collaboratore possiede:
 
 Ogni collaboratore accumula inoltre una **Maestria** separata per ciascun ruolo
 operativo: Redazione/Social, Eventi, Attrezzatura, Istruttore e Gadget. La
-Preparazione atletica usa la Maestria Istruttore. I cinque gradi condividono la
+Preparazione atletica usa la Maestria Istruttore. I sei gradi condividono la
 stessa curva di esperienza in tutti i ruoli:
 
 | Grado      | Tempo dal grado precedente | Tempo cumulativo | XP cumulativi | Bonus |
@@ -1217,6 +1218,7 @@ stessa curva di esperienza in tutti i ruoli:
 | Accademico |                   5 minuti |        10 minuti |           600 |   50% |
 | Cavaliere  |                  20 minuti |        30 minuti |         1.800 |  100% |
 | Maestro    |                  30 minuti |            1 ora |         3.600 |  200% |
+| Leggenda   |                      1 ora |           2 ore |         7.200 |  500% |
 
 Decisione di Andrea del 06/10: le Forme non danno più bonus ai collaboratori
 (prima +15/30/50% Eventi con la Lunga, Preparazione atletica con la Staffa,
@@ -1229,7 +1231,7 @@ Il bonus moltiplica la produttività del collaboratore in Redazione/Social,
 Attrezzatura, Gadget e Istruttore (velocità delle lezioni e Preparazione
 atletica). Negli **Eventi** la Maestria non aumenta la forza del settore:
 riduce invece il costo degli eventi avviati automaticamente da quel
-collaboratore del 10%, 20%, 30% e 50% (da Iniziato a Maestro). Anche il bonus
+collaboratore del 10%, 20%, 30%, 50% e 60% (da Iniziato a Leggenda). Anche il bonus
 degli Istruttori alla conversione prova → iscrizione ignora la Maestria.
 
 Durante il gioco attivo, ogni collaboratore assegnato riceve **1 XP al secondo**
@@ -5128,7 +5130,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Ogni collaboratore svolge un incarico alla volta (con un eventuale incarico
   di riserva quando il principale non ha lavoro) e può essere riassegnato
   liberamente. Non ha un livello generale, ma accumula maestria per settore:
-  Novizio, Iniziato, Accademico, Cavaliere, Maestro.
+  Novizio, Iniziato, Accademico, Cavaliere, Maestro, Leggenda.
 - Non esiste un limite massimo di collaboratori.
 - Gadget si sblocca con la prima vittoria della scuola all'Accademico Arena;
   il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
