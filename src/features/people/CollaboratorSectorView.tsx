@@ -35,7 +35,6 @@ import {
   getSocialContentAutomationPresentation,
 } from "./collaboratorAutomationPresentation";
 import {
-  getAvailableInstructorCourses,
   getInternalInstructorCourseEntries,
   getFormCoverageCounts,
   getInstructorCoverageForms,
@@ -46,6 +45,7 @@ import {
 import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
 import { FormCoverageMap } from "./FormPathMap";
+import { getTrainingDefinitions } from "./trainingOptions";
 import { OndeSectorBody } from "./OndeSectorBody";
 import { FormLogoStrip } from "./PersonPresentation";
 import { QuickTeacherTraining, useQuickTrainingPreviews } from "./QuickTeacherTraining";
@@ -376,7 +376,6 @@ function InstructorSectorCard({
     technicianCoverage,
     internalCourses,
     technicianCourses,
-    availableInstructorCourses,
   } = useMemo(() => {
     const nextInstructors = state.collaborators.filter(
       (collaborator) => collaborator.assignment === "instructor",
@@ -388,10 +387,6 @@ function InstructorSectorCard({
       contacts: state.contacts,
       collaborators: state.collaborators,
     }, courseXUnlocked).filter((entry) => instructorIds.has(entry.instructorId));
-    const nextAvailableCourses = getAvailableInstructorCourses(
-      nextInstructors,
-      courseXUnlocked,
-    );
     return {
       instructors: nextInstructors,
       entries: nextEntries,
@@ -408,7 +403,6 @@ function InstructorSectorCard({
         nextInstructors,
         courseXUnlocked,
       ),
-      availableInstructorCourses: nextAvailableCourses,
     };
   }, [courseXUnlocked, state.collaborators, state.contacts]);
   const sisUnlocked = isSISTechnicianCourseUnlocked(state.upgrades);
@@ -420,6 +414,12 @@ function InstructorSectorCard({
     instructor: countTeacherCoverage(instructors, "instructor"),
     technician: sisUnlocked ? countTeacherCoverage(instructors, "technician") : undefined,
   }), [instructors, sisUnlocked]);
+  // Chi può iniziare adesso una Formazione Istruttore (abilitazione o «Impara e abilita»),
+  // con lo stesso elenco della colonna Formazione Istruttore.
+  const startableInstructors = useMemo(() => state.unlocks.forms
+    ? instructors.filter((instructor) => !instructor.training &&
+        getTrainingDefinitions(state, instructor, instructor).available.length > 0).length
+    : 0, [instructors, state]);
   const quickPreviews = useQuickTrainingPreviews(state, now);
   const quickHighlight = onQuickTeacherTraining
     ? { instructor: quickPreviews.instructor?.formId, technician: quickPreviews.technician?.formId }
@@ -589,13 +589,13 @@ function InstructorSectorCard({
             <button
               type="button"
               className="instructor-courses-link"
-              aria-label={availableInstructorCourses.length > 0
-                ? `Apri ${availableInstructorCourses.length} Corsi Istruttori disponibili`
+              aria-label={startableInstructors > 0
+                ? `Apri ${startableInstructors} Corsi Istruttori disponibili`
                 : "Nessun Corso Istruttori disponibile"}
               onClick={onOpen}
-              disabled={availableInstructorCourses.length === 0}
+              disabled={startableInstructors === 0}
             >
-              Corsi Istruttori disponibili · {availableInstructorCourses.length}
+              Corsi Istruttori disponibili · {startableInstructors}
               <Icon name="arrowRight" />
             </button>
           </div>

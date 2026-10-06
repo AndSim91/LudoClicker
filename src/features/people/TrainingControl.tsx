@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import {
-  getAvailableForms,
   getFormDefinition,
   getFormTrainingCount,
   getInstructorFormCost,
@@ -17,9 +16,7 @@ import {
 } from "../../content/forms";
 import {
   applyQualifyingCourseDiscount,
-  areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
-  getInstructorBranchCapacityBonus,
   isAgonistCourseUnlocked,
   isCourseXUnlocked,
   isSISTechnicianCourseUnlocked,
@@ -52,6 +49,7 @@ import {
 import { TrainingFormPreview } from "./PersonPresentation";
 import { getDefaultTrainingOption } from "./peoplePresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
+import { getTrainingDefinitions } from "./trainingOptions";
 
 type InstructorTeachingEntry = {
   id: string;
@@ -654,7 +652,6 @@ export function TrainingControl({
     ),
     [state.collaborators],
   );
-  const recoveryPending = courseXUnlocked && needsCourseXRecovery(student.forms);
   const annualTrainingAvailable =
     getFormTrainingCount(student, trainingYear) < annualTrainingLimit;
   const collaborator = collaboratorsById.get(personId);
@@ -737,47 +734,10 @@ export function TrainingControl({
     return <div className={`training-locked${variantClass}`}><span>Pausa estiva</span><strong>Le Forme riprendono a settembre</strong></div>;
   }
 
-  const qualificationDefinitions = trainingMode === "standard" &&
-      collaborator?.assignment === "instructor"
-    ? collaborator.forms.flatMap((formId) => {
-        const definition = getFormDefinition(formId);
-        return definition && isInstructorForm(formId) &&
-            (courseXUnlocked || formId !== "course-x") &&
-            !recoveryPending &&
-            !collaborator.instructorForms.includes(formId)
-          ? [definition]
-          : [];
-      })
-    : [];
-  const unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
-  const branchCapacity = unrestrictedFormBranches
-    ? 3
-    : collaborator?.assignment === "instructor"
-      ? Math.min(3, 1 + getInstructorBranchCapacityBonus(state.upgrades))
-      : undefined;
-  const learnedBranches = new Set(collaborator?.forms.flatMap((formId) => {
-    const branch = getFormDefinition(formId)?.branch;
-    return branch ? [branch] : [];
-  }) ?? []);
-  const newForms = annualTrainingAvailable
-    ? getAvailableForms(
-        student,
-        trainingYear,
-        branchCapacity,
-        !unrestrictedFormBranches && collaborator?.assignment !== "instructor",
-        annualTrainingLimit,
-        courseXUnlocked,
-      ).filter((definition) =>
-        unrestrictedFormBranches ||
-        !definition.branch ||
-        learnedBranches.size > 0 ||
-        !collaborator?.formBranchPreferences?.length ||
-        collaborator.formBranchPreferences.includes(definition.branch)
-      )
-    : [];
-  const academicallyAvailable = summerInstructorTraining
-    ? [...qualificationDefinitions, ...newForms.filter((definition) => isInstructorForm(definition.id))]
-    : [...qualificationDefinitions, ...newForms];
+  const {
+    qualification: qualificationDefinitions,
+    available: academicallyAvailable,
+  } = getTrainingDefinitions(state, student, collaborator, trainingMode);
   const available = academicallyAvailable;
 
   if (academicallyAvailable.length === 0) {

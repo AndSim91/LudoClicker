@@ -99,6 +99,9 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("button", { name: /^Forma un Istruttore/ })).not.toBeInTheDocument();
     // Modalità Onde: Copertura didattica sulla mappa (C5), i numeri a sinistra del logo.
     expect(screen.getByTitle("Forma 1 · 1 Istruttore")).toHaveTextContent("1");
+    // Forma 1 già abilitata, ma può «Impara e abilita» la Forma 2: conta come corso disponibile.
+    expect(screen.getByRole("button", { name: "Apri 1 Corsi Istruttori disponibili" }))
+      .toHaveTextContent("Corsi Istruttori disponibili · 1");
 
     view.rerender(
       <PeopleView state={state({ "training-office": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
@@ -898,7 +901,7 @@ describe("PeopleView", () => {
         "agonist-course-intensity": 5,
         "project-x": 1,
       },
-      unlocks: { ...initial.unlocks, collaborators: true },
+      unlocks: { ...initial.unlocks, collaborators: true, forms: true },
       automation: { ...initial.automation, lessonBuffer: 0.58 },
       collaboratorManagement: {
         ...initial.collaboratorManagement,
