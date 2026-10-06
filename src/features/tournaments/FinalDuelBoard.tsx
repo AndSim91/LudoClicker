@@ -1,4 +1,5 @@
 import type { TournamentParticipant } from "../../game/types";
+import { formatStat } from "../../shared/formatters";
 import type { DuelSide } from "./finalDuel";
 import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
 
@@ -15,9 +16,16 @@ export function FinalDuelBoard({
   bestOf: number;
 }) {
   const who = (side: DuelSide) => (
-    <div className={`fd-board-who is-${side}${participants[side].ownedContactId ? " is-owned" : ""}`}>
-      <TournamentParticipantIdentity participant={participants[side]} />
-      <small>{participants[side].ownedContactId ? "La tua scuola" : "Avversario"}</small>
+    <div className={`fd-board-side is-${side}`}>
+      <div className={`fd-board-who is-${side}${participants[side].ownedContactId ? " is-owned" : ""}`}>
+        <TournamentParticipantIdentity participant={participants[side]} />
+        <small>{participants[side].ownedContactId ? "La tua scuola" : "Avversario"}</small>
+      </div>
+      {/* The final is always Arena: that row is the one in gold. */}
+      <dl className="fd-board-stats">
+        <div className="is-arena"><dt>Arena</dt><dd>{formatStat(participants[side].arenaPreparation)}</dd></div>
+        <div><dt>Stile</dt><dd>{formatStat(participants[side].stylePreparation)}</dd></div>
+      </dl>
     </div>
   );
   return (

@@ -153,6 +153,40 @@
 
 .fd-board-who.is-owned > small { color: var(--accent-ink); }
 
+/* Name on the outside, Arena and Stile on the side of the score. */
+.fd-board-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fd-board-side.is-b { flex-direction: row-reverse; }
+
+.fd-board-stats {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 1px solid var(--line-strong);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+  color: var(--ink-muted);
+}
+
+.fd-board-side.is-b .fd-board-stats {
+  padding: 0 10px 0 0;
+  border-left: 0;
+  border-right: 1px solid var(--line-strong);
+  text-align: right;
+}
+
+.fd-board-stats > div { display: flex; gap: 5px; }
+.fd-board-side.is-b .fd-board-stats > div { flex-direction: row-reverse; }
+.fd-board-stats dt { font-weight: 400; }
+.fd-board-stats dd { margin: 0; font-weight: 600; color: var(--ink); }
+:root[data-theme="dark"] .fd-board-stats .is-arena,
+:root[data-theme="dark"] .fd-board-stats .is-arena dd { color: var(--onde-gold-bright); }
+
 .fd-board-score {
   display: flex;
   align-items: center;
