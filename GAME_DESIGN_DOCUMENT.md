@@ -998,9 +998,9 @@ barra del titolo,
 compare dopo il potenziamento **Fornitore ufficiale** (primo nodo di
 Attrezzatura, 500 €) e permette di comprare 1, 10 o 100 spade. Prima, al suo
 posto, c'è un pulsante spento «Acquisto spade · da sbloccare negli Upgrade».
-In Modalità Onde, senza Fondi sufficienti, il pulsante resta leggibile (fondo
-scuro) e si riempie d'azzurro in proporzione ai Fondi, con l'indicazione
-«mancano X €» (concept «Salvadanaio», 06/10/2026). La prima volta che la scuola
+In Modalità Onde, senza Fondi sufficienti, il pulsante resta leggibile: pillola
+vuota con il bordo azzurro, testo chiaro e prezzo in oro (concept «Contorno»,
+06/10/2026; il «Salvadanaio» con «mancano X €» allargava troppo la finestra). La prima volta che la scuola
 arriva a 10 iscritti di picco parte un tutorial di A.N.D.E.R. (scena
 `sword-purchase`) che fa aprire il menu delle spade e indica Fornitore
 ufficiale negli Upgrade; i salvataggi già oltre i 10 iscritti lo segnano come

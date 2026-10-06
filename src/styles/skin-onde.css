@@ -981,34 +981,19 @@
   --equipment-buy-ink: var(--onde-on-gold);
 }
 
-/* Concept B «Salvadanaio» (06/10/2026): without funds the pill is dark, readable,
- * and fills with the wave colour as the Fondi grow; it says what is missing. */
+/* Concept A «Contorno» (06/10/2026): without funds the pill is empty, outlined
+ * in the wave colour, with readable text and the price in gold. */
 :root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled:not(.equipment-purchase-locked),
 :root[data-theme="dark"] .title-equipment-popover .equipment-purchase-quantity:disabled {
   color: var(--onde-foam);
-  background: var(--onde-groove);
-  box-shadow: inset 0 0 0 1px rgb(108 211 214 / 35%);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(108 211 214 / 45%);
   opacity: 1;
   filter: none;
 }
 
-:root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled:not(.equipment-purchase-locked) {
-  white-space: nowrap;
-  background:
-    linear-gradient(90deg, rgb(108 211 214 / 26%) var(--equipment-buy-progress, 0%), transparent 0)
-    var(--onde-groove);
-  transition: background 300ms linear;
-}
-
-:root[data-theme="dark"] .equipment-purchase-missing {
-  margin-left: 8px;
-  color: var(--onde-wave);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled { transition: none; }
+:root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled .equipment-purchase-price {
+  color: var(--onde-gold);
 }
 
 /* Email HTML in Onde: carta notte al posto del foglio bianco (anteprima, codice e posta inviata). */
