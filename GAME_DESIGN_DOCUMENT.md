@@ -2478,7 +2478,9 @@ visibile fino alla 20ª scuola.
 **Il tempo è denaro** (decisione del 06/10). Descrizione: «Abbiamo scoperto che
 il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che
 ci stiamo divertendo moltissimo.» Un nodo può chiedere scuole diverse per
-livello (`levelNetworkSchools`): qui 1 per il livello 1 e 5 per il livello 2.
+livello (`levelNetworkSchools`): qui 1, 3, 5 e 8 per i livelli da 1 a 4 (2×, 3×, 4×, 5×), così
+tutte e quattro le velocità si aprono prima della decima scuola (decisione del
+06/10).
 La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa
 (concept B: ogni clic passa alla velocità successiva, poi torna a 1×), visibile
 solo con il nodo comprato. Accelera l'orologio del gioco (`gameClock.ts`): mesi
@@ -2493,7 +2495,7 @@ colonna per nodo.
 | Scuole | Potenziamento | Effetto | Costi per livello |
 | ---: | --- | --- | --- |
 | 1 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
-| 1 · 5 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 fino a 3× (5 scuole fondate) | 25.000 / 500.000 € |
+| 1 · 3 · 5 · 8 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 3× (3), L3 4× (5), L4 5× (8) | 25.000 / 150.000 / 500.000 / 2.000.000 € |
 | 2 | Scambio di Istruttori | +10% velocità di tutti i corsi per livello; massimo +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
 | 3 | Lettere di raccomandazione | +1 punto Reputazione alla prossima fondazione per livello | 50.000 / 150.000 / 450.000 € |
 | 5 | Circuito della Rete | +1% contatti dagli eventi per ogni scuola della Rete, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |

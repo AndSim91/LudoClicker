@@ -27,7 +27,7 @@ const MAX_TIMEOUT_MS = 2_147_000_000;
 
 /**
  * Game ms covered by one tick. The display mode sets how often the game updates
- * in real time (cadenceMs); at 2× or 3× each update covers two or three times as
+ * in real time (cadenceMs); at 2×–5× each update covers that many times as
  * much game time, so the UI keeps the same rhythm and everything simply moves
  * faster. Capped at the heartbeat: automation counts at most one second per step,
  * so at high speeds the game ticks more often instead.

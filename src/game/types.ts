@@ -1093,7 +1093,7 @@ export interface GameState {
     lastProcessedAt: number;
     autoSendEmails: boolean;
     autoTeachingEnabled: boolean;
-    /** Speed the player chose with «Il tempo è denaro» (1–3); capped by its level. */
+    /** Speed the player chose with «Il tempo è denaro» (1–5); capped by its level. */
     gameSpeed?: number;
     writingBuffer: number;
     lessonBuffer: number;

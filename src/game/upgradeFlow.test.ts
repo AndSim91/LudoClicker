@@ -279,10 +279,12 @@ describe("Il tempo è denaro", () => {
     expect(buyUpgrade(levelOne, "time-is-money")).toBe(levelOne);
     expect(getPlayerGameSpeed(setGameSpeed(levelOne, 3))).toBe(2);
 
-    const fiveSchools = { ...levelOne, network: { ...levelOne.network, schoolCount: 5 } };
-    const levelTwo = setGameSpeed(buyUpgrade(fiveSchools, "time-is-money"), 3);
+    const threeSchools = { ...levelOne, network: { ...levelOne.network, schoolCount: 3 } };
+    const levelTwo = setGameSpeed(buyUpgrade(threeSchools, "time-is-money"), 3);
     expect(levelTwo.upgrades["time-is-money"]).toBe(2);
     expect(getPlayerGameSpeed(levelTwo)).toBe(3);
+    // 4× waits for the fifth school founded.
+    expect(buyUpgrade(levelTwo, "time-is-money")).toBe(levelTwo);
     // A new school starts with no levels: the saved 3× counts as 1× until the node is bought again.
     expect(getPlayerGameSpeed({ ...levelTwo, upgrades: initial.upgrades })).toBe(1);
   });
