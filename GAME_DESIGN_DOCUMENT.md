@@ -2601,8 +2601,15 @@ riga sottile sotto, oppure le schede che fanno da riga (Tornei, LudoWiki). A
 destra al massimo un'azione o un numero: «Compra tutto» è un pulsante da 32 px
 con il costo scritto accanto, la Reputazione un numero nero con l'etichetta
 sopra. Niente onde in Scuola, niente schizzo né sfumatura in Gadget, niente
-riquadro pieno con ombra. CSS in `src/styles/page-header-outlook.css`; la
-testata di Onde segue il concept A (riquadro icona), da definire nei colori.
+riquadro pieno con ombra.
+
+**Testata delle pagine in Modalità Onde** (concept A «Riquadro icona», stessa
+decisione): riquadro blu notte da 44 px con il filo e l'icona d'oro, titolo da
+26 px in Barlow Semi Condensed, frase sotto; «Compra tutto» col bordo d'oro da
+36 px e il costo in oro accanto, Reputazione in oro da 26 px con l'etichetta
+sopra; nessuna onda decorativa (via le onde di Scuola e lo schizzo di Gadget).
+Tornei ha l'icona in tutte e due le modalità. CSS di entrambe in
+`src/styles/page-header.css`, caricato dopo `skin-onde.css`.
 
 **Le spade nella barra del titolo** (Fase 8, decisione di Andrea del 04/10):
 il riquadro Spade non sta più in La mia giornata. Nella barra del titolo,

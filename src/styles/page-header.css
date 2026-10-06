@@ -1,16 +1,16 @@
 /*
- * Testata delle pagine in Modalità Outlook: concept B «Barra compatta» (Andrea,
- * 06/10). Icona a contorno da 20 px accanto al titolo, frase sulla stessa riga
- * (va a capo se non entra), al massimo un'azione o un numero a destra, una riga
- * sottile sotto o le schede che fanno da riga. Vale per tutte le testate
+ * Testata delle pagine (Andrea, 06/10): una sola testata per tutte le pagine
  * `.overview-view > header` (Scuola, Eventi, Tornei, Gadget, Upgrade, Rete,
- * LudoWiki, Impostazioni, Calendario, Admin). Onde non passa di qui.
+ * LudoWiki, Impostazioni, Calendario, Admin), diversa per modalità:
+ * - Outlook: concept B «Barra compatta», icona a contorno da 20 px accanto al
+ *   titolo, frase sulla stessa riga;
+ * - Onde: concept A «Riquadro icona» con il riquadro d'oro, titolo da 26 px e
+ *   frase sotto, senza onde decorative.
+ * In tutte e due: al massimo un'azione o un numero a destra, una riga sottile
+ * sotto o le schede che fanno da riga. Caricato dopo skin-onde.css.
  */
 
-/* L'icona di Tornei esiste solo per Outlook (la testata di Onde non l'ha). */
-.tournaments-view > header > .page-header-icon {
-  display: none;
-}
+/* ===================== Outlook · Barra compatta ===================== */
 
 :root[data-theme="light"] .overview-view > header,
 :root[data-theme="light"] .people-view > .people-hero,
@@ -59,10 +59,6 @@
   height: 20px;
   flex: none;
   color: var(--accent-ink);
-}
-
-:root[data-theme="light"] .overview-view > header > .page-header-icon {
-  display: block;
 }
 
 :root[data-theme="light"] .people-page-mark {
@@ -193,4 +189,151 @@
 
 :root[data-theme="light"] .upgrade-buy-all-text small {
   white-space: nowrap;
+}
+
+/* ===================== Onde · Riquadro icona d'oro ===================== */
+
+:root[data-theme="dark"] .overview-view > header,
+:root[data-theme="dark"] .people-view > .people-hero,
+:root[data-theme="dark"] .overview-view > .upgrade-page-header,
+:root[data-theme="dark"] .network-view > header,
+:root[data-theme="dark"] .tournaments-view > header {
+  position: static;
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0 0 16px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .overview-view > .gadget-view-heading {
+  min-height: 0;
+  margin: 0 0 18px !important;
+  padding: 0 0 16px !important;
+  border: 0;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .tournaments-view > header,
+:root[data-theme="dark"] .ludowiki-view > header {
+  margin-bottom: 4px;
+  padding-bottom: 10px;
+  border-bottom: 0;
+}
+
+/* Il riquadro: blu notte, filo e icona d'oro. Dove l'icona è un <svg> da sola,
+   il riquadro è l'svg stesso con il padding. */
+:root[data-theme="dark"] .overview-view > header > svg,
+:root[data-theme="dark"] .gadget-view-heading > svg:not(.gadget-workshop-artwork),
+:root[data-theme="dark"] .people-page-mark {
+  display: grid;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  padding: 11px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--onde-gold-bright);
+  background: var(--onde-groove);
+  box-shadow: inset 0 0 0 1px rgb(240 184 90 / 70%);
+}
+
+:root[data-theme="dark"] .people-page-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+:root[data-theme="dark"] .people-hero-waves,
+:root[data-theme="dark"] .gadget-view-heading > .gadget-workshop-artwork {
+  display: none;
+}
+
+/* Titolo da 26 px e frase sotto. */
+:root[data-theme="dark"] .overview-view > header > div:not([class]),
+:root[data-theme="dark"] .people-page-heading,
+:root[data-theme="dark"] .network-view > header > div:nth-child(2),
+:root[data-theme="dark"] .upgrade-page-header > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+:root[data-theme="dark"] .overview-view > header h1,
+:root[data-theme="dark"] .people-view .people-page-heading h1,
+:root[data-theme="dark"] .tournaments-view > header h1,
+:root[data-theme="dark"] .gadget-view-heading h1 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  line-height: 1.15;
+}
+
+:root[data-theme="dark"] .overview-view > header p,
+:root[data-theme="dark"] .people-view .people-page-heading p,
+:root[data-theme="dark"] .tournaments-view > header p,
+:root[data-theme="dark"] .ludowiki-view > header p {
+  max-width: none;
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Rete: Reputazione in oro da 26 px con l'etichetta sopra. */
+:root[data-theme="dark"] .network-reputation {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+}
+
+:root[data-theme="dark"] .network-reputation b {
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+:root[data-theme="dark"] .network-reputation small {
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Upgrade: «Compra tutto» col bordo d'oro da 36 px, il costo in oro accanto. */
+:root[data-theme="dark"] .upgrade-buy-all {
+  position: relative;
+  min-height: 36px;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 8px;
+}
+
+:root[data-theme="dark"] .upgrade-buy-all-text small {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 12px);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .upgrade-buy-all-text strong {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  :root[data-theme="dark"] .upgrade-buy-all-text small {
+    display: none;
+  }
 }

@@ -293,7 +293,7 @@ export function TournamentsView({
   return (
     <main className="overview-view tournaments-view">
       <header>
-        {/* Shown only in Outlook, where every page header has its icon. */}
+        {/* Every page header has its icon (06/10). */}
         <Icon name="trophy" className="page-header-icon" aria-hidden="true" />
         <div>
           <h1>Tornei</h1>
