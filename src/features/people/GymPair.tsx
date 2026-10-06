@@ -1,4 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { GymLayer, SaberLayers } from "./GymLayers";
+import { boxAround } from "./gymBox";
 import { motionReduced } from "../../shared/motion";
 import { bodyShape, type FighterBody } from "./fighterBodies";
 import { exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
@@ -62,6 +64,56 @@ export function Fighter({
         <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber, animationDelay: offset }} />
       )}
     </g>
+  );
+}
+
+/**
+ * The gym's athlete (GymScene), built from layers: the same figure as Fighter in
+ * guard or attack pose, but breathing, stepping and humming on the compositor.
+ * Fighter stays a single SVG group for the Arena final.
+ */
+export function GymActor({
+  x,
+  facing,
+  saber,
+  pose = "attack",
+  delay = 0,
+  step = 0,
+}: {
+  x: number;
+  facing: 1 | -1;
+  saber: string;
+  pose?: "guard" | "attack";
+  delay?: number;
+  /** Footwork of a bout, in scene units. */
+  step?: number;
+}) {
+  const offset = `${-delay}s`;
+  const hand = x + 14 * facing;
+  const tip = pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 };
+  const geometry: Array<[number, number]> = [
+    [x - 8, 150], [x + 9, 150], [x - 7, 89], [x + 7, 89], [hand, 116], [tip.x, tip.y],
+  ];
+  // The old breathing pivoted on the bottom centre of the figure's fill box.
+  const fill = boxAround(geometry, 0);
+  const pivotX = fill.x + fill.w / 2;
+  const box = boxAround(geometry, 14);
+  return (
+    <div
+      className="gym-actor"
+      style={{ "--step": step } as CSSProperties}
+    >
+      <div
+        className="gym-breath"
+        style={{ "--pivot-x": pivotX, animationDelay: offset } as CSSProperties}
+      >
+        <GymLayer box={box} className="gym-body">
+          <circle cx={x} cy={96} r={7} />
+          <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116`} />
+        </GymLayer>
+        <SaberLayers box={box} lines={[[hand, 116, tip.x, tip.y, saber]]} delay={offset} />
+      </div>
+    </div>
   );
 }
 
@@ -137,23 +189,21 @@ export function GymPair({
   }, [leftX, rightX]);
 
   return (
-    <g
+    <div
       className={sparring ? "gym-pair is-sparring" : "gym-pair"}
       style={{ "--gym-move": `${moveMs}ms` } as CSSProperties}
     >
-      <g className="gym-step" style={{ transform: `translateX(${steps[0]}px)` }}>
-        <Fighter x={leftX} facing={1} saber={sabers[0]} delay={index * 1.3} />
-      </g>
-      <g className="gym-step" style={{ transform: `translateX(${steps[1]}px)` }}>
-        <Fighter x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} />
-      </g>
+      <GymActor x={leftX} facing={1} saber={sabers[0]} delay={index * 1.3} step={steps[0]} />
+      <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} step={steps[1]} />
       {clash ? (
-        <g transform={`translate(${clash.x} ${CLASH_Y})`}>
-          <g key={clash.id} className="gym-clash">
-            <path d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2 Z" />
-          </g>
-        </g>
+        <GymLayer
+          key={clash.id}
+          box={{ x: clash.x - 16, y: CLASH_Y - 16, w: 32, h: 32 }}
+          className="gym-clash"
+        >
+          <path transform={`translate(${clash.x} ${CLASH_Y})`} d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2 Z" />
+        </GymLayer>
       ) : null}
-    </g>
+    </div>
   );
 }

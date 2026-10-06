@@ -618,10 +618,41 @@
   background: var(--surface-muted);
 }
 
-:root[data-theme="dark"] .gym-scene svg {
+:root[data-theme="dark"] .gym-scene {
+  container-type: inline-size;
+}
+
+/* --s: CSS px per scene unit, the scale of the backdrops' viewBox (-180 0 1000 180)
+   with xMidYMid meet in a 170 px band. Layers (GymLayers.tsx) are placed with it. */
+.gym-stage {
+  --s: min(0.1cqw, 0.944444px);
+  position: relative;
+  height: 170px;
+  overflow: hidden;
+}
+
+.gym-backdrop {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 170px;
+  height: 100%;
+}
+
+.gym-layer {
+  position: absolute;
+  left: calc(50% + (var(--x) - 320) * var(--s));
+  top: calc(85px + (var(--y) - 90) * var(--s));
+  width: calc(var(--w) * var(--s));
+  height: calc(var(--h) * var(--s));
+  pointer-events: none;
+}
+
+.gym-layer > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 :root[data-theme="dark"] .gym-scene figcaption {
@@ -654,8 +685,10 @@
 .gym-crowd { fill: #04263f; }
 .gym-trophies { fill: #f0b85a; }
 .gym-banner path { fill: #0a1f33; stroke: #f0b85a; stroke-width: 2; stroke-linejoin: round; }
-.gym-fighter circle { fill: #021e33; }
-.gym-fighter path { fill: none; stroke: #021e33; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.gym-fighter circle,
+.gym-body circle { fill: #021e33; }
+.gym-fighter path,
+.gym-body path { fill: none; stroke: #021e33; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
 
 .gym-saber {
   stroke: currentcolor;
@@ -676,37 +709,71 @@
   animation: gym-saber-hum 2.6s ease-in-out infinite alternate;
 }
 
-.gym-rack .gym-saber {
-  animation: gym-saber-hum 4.2s ease-in-out infinite alternate;
+/* The gym of the Scuola (GymScene) moves whole layers only: transforms and
+   opacities that the compositor animates without repainting the scene.
+   A blade is three layers: soft glow (the old 3 px drop-shadow), strong glow with
+   its white halo (7 px + 1.5 px) and the line; the hum cross-fades the glows. */
+.gym-saber-line,
+.gym-saber-glow,
+.gym-saber-glow-core {
+  stroke: currentcolor;
+  stroke-width: 4;
+  stroke-linecap: round;
 }
 
-.gym-rack .gym-saber:nth-child(odd) {
-  animation-delay: -2s;
+/* Blur radii matched by pixel comparison with the old drop-shadows. */
+.gym-saber-glow-soft .gym-saber-glow { filter: blur(3px); }
+.gym-saber-glow-strong .gym-saber-glow { filter: blur(7.5px); }
+.gym-saber-glow-core { stroke: #ffffff; stroke-width: 6; filter: blur(3.5px); }
+
+/* At rest (no animation) about the old 4 px glow. */
+.gym-saber-glow-strong { opacity: 0.25; }
+
+.gym-saber-glow-soft { animation: gym-glow-soft 4.2s ease-in-out infinite alternate; }
+.gym-saber-glow-strong { animation: gym-glow-strong 4.2s ease-in-out infinite alternate; }
+.gym-saber-core { animation: gym-saber-core 4.2s ease-in-out infinite alternate; }
+
+.gym-actor .gym-layer { animation-duration: 2.6s; }
+
+.gym-actor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--step, 0) * var(--s)));
+  transition: transform var(--gym-move, 300ms) ease-out;
 }
 
-.gym-lights polygon {
+/* Weight shift on the bottom centre of the figure, as the old fill-box pivot. */
+.gym-breath {
+  position: absolute;
+  inset: 0;
+  transform-origin: calc(50% + (var(--pivot-x) - 320) * var(--s)) calc(85px + 60 * var(--s));
+  animation: gym-breathe-layer 3.4s ease-in-out infinite;
+}
+
+.gym-light {
   animation: gym-beam 6s ease-in-out infinite alternate;
 }
 
-.gym-lights polygon + polygon {
-  animation-delay: -3s;
-}
-
+/* The Arena final (FinalArena) still draws its athletes in one SVG. */
 .gym-step {
   transition: transform var(--gym-move, 300ms) ease-out;
 }
 
+.gym-light + .gym-light {
+  animation-delay: -3s;
+}
+
 /* In a bout the stance is set by the footwork, and the blades burn brighter. */
-.gym-pair.is-sparring .gym-fighter {
+.gym-pair.is-sparring .gym-breath {
   animation: none;
 }
 
-.gym-pair.is-sparring .gym-saber {
+.gym-pair.is-sparring .gym-layer {
   animation-duration: 0.5s;
 }
 
 .gym-clash {
-  transform-box: fill-box;
   transform-origin: center;
   animation: gym-clash 380ms ease-out forwards;
 }
@@ -723,6 +790,25 @@
 @keyframes gym-saber-hum {
   from { opacity: 0.82; filter: drop-shadow(0 0 3px currentcolor); }
   to { opacity: 1; filter: drop-shadow(0 0 7px currentcolor) drop-shadow(0 0 1.5px #ffffff); }
+}
+
+@keyframes gym-breathe-layer {
+  50% { transform: translateY(calc(1.2 * var(--s))) rotate(-1.2deg); }
+}
+
+@keyframes gym-glow-soft {
+  from { opacity: 0.82; }
+  to { opacity: 0; }
+}
+
+@keyframes gym-glow-strong {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gym-saber-core {
+  from { opacity: 0.82; }
+  to { opacity: 1; }
 }
 
 @keyframes gym-beam {

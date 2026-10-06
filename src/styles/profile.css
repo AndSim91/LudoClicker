@@ -89,12 +89,13 @@
 /* Bars move in steps at each update, like Windows ones: a bar always in
    transition kept the browser drawing 60 frames a second. */
 :root[data-theme="light"] .progress-bar-linear:not(.is-indeterminate) > span,
+:root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill::after,
 :root[data-theme="light"] .appointment-pip-waiting::before {
   transition: none;
 }
 
-:root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill > span,
-:root[data-theme="light"] .progress-bar-linear.is-indeterminate > span,
+:root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill > span::before,
+:root[data-theme="light"] .progress-bar-linear.is-indeterminate > span::before,
 :root[data-theme="light"] .instructor-preparation-loop.is-indeterminate > span {
   animation: none;
 }
@@ -575,27 +576,51 @@
   transform: none;
 }
 
+/* A running event stretches its fill with scaleX (the gradient and the sheen keep
+   their proportions to the filled part, as with a growing width) and draws the
+   glowing edge on the track, so nothing is repainted while the bar moves. */
 .event-row > button.event-cancel-button .event-action-fill > span {
-  background:
-    linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 35%) 50%, transparent 65%) 0 0 / 220% 100%,
-    linear-gradient(90deg, var(--event-run-from), var(--event-run-to));
+  overflow: hidden;
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--event-run-from), var(--event-run-to));
+}
+
+/* The sheen: three periods of the old 220%-wide band, slid by transform over the
+   same ±144% of the fill as the old background-position loop. */
+.event-row > button.event-cancel-button .event-action-fill > span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -220%;
+  width: 660%;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 35%) 50%, transparent 65%) 0 0 / 33.3333% 100% repeat-x;
   animation: event-fill-sheen 1.6s linear infinite;
 }
 
 .event-row > button.event-cancel-button .event-action-fill > span::after {
-  width: 3px;
-  background: var(--event-run-edge);
-  box-shadow: 0 0 10px var(--event-run-edge);
-  opacity: 1;
+  content: none;
+}
+
+.event-row > button.event-cancel-button .event-action-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(var(--progress-shift, -100%));
+  transition: transform var(--progress-transition-duration, 1s) linear;
+  background: linear-gradient(to left, var(--event-run-edge) 0 3px, transparent 3px);
+  filter: drop-shadow(0 0 5px var(--event-run-edge));
 }
 
 @keyframes event-fill-sheen {
-  from { background-position: 120% 0, 0 0; }
-  to { background-position: -120% 0, 0 0; }
+  from { transform: translateX(-21.8182%); }
+  to { transform: translateX(21.8182%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .event-row > button.event-cancel-button .event-action-fill > span {
+  .event-row > button.event-cancel-button .event-action-fill > span::before {
     animation: none;
   }
 
@@ -611,14 +636,16 @@
 }
 
 .event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span {
-  background:
-    linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 22%) 50%, transparent 65%) 0 0 / 220% 100%,
-    rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 18%);
 }
 
-.event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span::after {
-  background: white;
-  box-shadow: 0 0 8px rgb(255 255 255 / 70%);
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill > span::before {
+  background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 22%) 50%, transparent 65%);
+}
+
+.event-row > button.event-cancel-button:is(:hover, :focus-visible) .event-action-fill::after {
+  background: linear-gradient(to left, white 0 3px, transparent 3px);
+  filter: drop-shadow(0 0 4px rgb(255 255 255 / 70%));
 }
 
 .event-meta {

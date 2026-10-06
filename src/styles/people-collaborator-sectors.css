@@ -743,6 +743,11 @@ button.shift-control-sector:focus-visible {
   animation: instructor-preparation-loop 1.35s ease-in-out infinite;
 }
 
+/* Its own sweep, not the striped shimmer of the generic bar. */
+.instructor-preparation-loop.is-indeterminate > span::before {
+  content: none;
+}
+
 .instructor-preparation-loop.is-inactive {
   background: var(--surface-muted);
 }

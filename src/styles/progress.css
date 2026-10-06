@@ -1,13 +1,20 @@
 .progress-bar-linear {
   display: block;
+  overflow: hidden;
 }
 
+/* The fill is always full width and slides in from the left: same picture as a
+   growing width, but a transform runs on the compositor, not the main thread. */
 .progress-bar-linear:not(.is-indeterminate) > span {
-  transition: width var(--progress-transition-duration, 1s) linear;
+  width: 100%;
+  transform: translateX(var(--progress-shift, -100%));
+  transition: transform var(--progress-transition-duration, 1s) linear;
 }
 
 .progress-bar-linear.is-indeterminate > span {
+  position: relative;
   width: 100%;
+  overflow: hidden;
   background:
     repeating-linear-gradient(
       135deg,
@@ -15,11 +22,21 @@
       var(--blue-500) 7px 14px
     );
   background-size: 20px 20px;
-  animation: progress-bar-shimmer 650ms linear infinite;
   transition: none;
 }
 
-.progress-bar-linear.is-indeterminate.is-paused > span {
+/* The stripes run on a copy one period wider, moved with a transform: the same
+   20 px slide as the old background-position loop, without repainting. */
+.progress-bar-linear.is-indeterminate > span::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 -20px;
+  background: inherit;
+  background-size: 20px 20px;
+  animation: progress-bar-shimmer 650ms linear infinite;
+}
+
+.progress-bar-linear.is-indeterminate.is-paused > span::before {
   animation-play-state: paused;
 }
 
@@ -44,7 +61,7 @@
 }
 
 @keyframes progress-bar-shimmer {
-  to { background-position: 20px 0; }
+  to { transform: translateX(20px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -52,7 +69,7 @@
     transition: none;
   }
 
-  .progress-bar-linear.is-indeterminate > span {
+  .progress-bar-linear.is-indeterminate > span::before {
     animation-duration: 1.8s;
   }
 }
