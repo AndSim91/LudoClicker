@@ -38,15 +38,17 @@ export function ProgressBar({
   const transitionIntervalMs = durationMs === undefined
     ? GAME_CONFIG.gameTickMs
     : GAME_CONFIG.progressUpdateIntervalMs;
+  // Linear bars move a full-width fill with a transform instead of changing its
+  // width: the compositor animates it, so a running bar needs no main-thread frames.
   const progressStyle = variant === "circular"
     ? ({ "--progress-value": `${percent}%` } as CSSProperties)
-    : undefined;
-  const barStyle = variant === "linear" && !indeterminate
-    ? ({
-        width: `${percent}%`,
-        "--progress-transition-duration": `${transitionIntervalMs}ms`,
-      } as CSSProperties)
-    : undefined;
+    : !indeterminate
+      ? ({
+          "--progress": percent / 100,
+          "--progress-shift": `${percent - 100}%`,
+          "--progress-transition-duration": `${transitionIntervalMs}ms`,
+        } as CSSProperties)
+      : undefined;
   const classes = [
     "progress-bar",
     `progress-bar-${variant}`,
@@ -69,7 +71,7 @@ export function ProgressBar({
       title={title}
       style={progressStyle}
     >
-      <span style={barStyle} />
+      <span />
     </span>
   );
 }

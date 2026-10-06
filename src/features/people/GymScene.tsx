@@ -8,7 +8,9 @@ import {
 } from "../../content/gymStages";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
-import { Fighter, GymPair } from "./GymPair";
+import { GymActor, GymPair } from "./GymPair";
+import { GymLayer, SaberLayers } from "./GymLayers";
+import type { GymBox } from "./gymBox";
 
 const BLUE_SABER = GYM_SABER_COLORS.common;
 
@@ -20,6 +22,13 @@ const RACK_SABERS = [
   BLUE_SABER,
   BLUE_SABER,
 ];
+
+const LIGHT_BEAMS = ["250,0 262,0 330,150 190,150", "378,0 390,0 450,150 318,150"];
+const LIGHT_BOXES: GymBox[] = [
+  { x: 190, y: 0, w: 140, h: 150 },
+  { x: 318, y: 0, w: 132, h: 150 },
+];
+const RACK_BOX: GymBox = { x: 752, y: 86, w: 66, h: 68 };
 
 // Sparring pairs (left athlete's x), central pair first: the rarest blades take the centre.
 const PAIR_SPOTS = [290, 170, 408];
@@ -48,75 +57,95 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
 
   return (
     <figure className="gym-scene">
-      <svg viewBox="-180 0 1000 180" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <linearGradient id="gym-wall" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#034965" />
-            <stop offset="1" stopColor="#0a3a57" />
-          </linearGradient>
-          <linearGradient id="gym-beam" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fbf1dc" stopOpacity="0.35" />
-            <stop offset="1" stopColor="#fbf1dc" stopOpacity="0" />
-          </linearGradient>
-        </defs>
+      {/* Static scenery in two SVGs (behind and in front of the light beams);
+          everything that moves is a layer of its own (GymLayers.tsx). */}
+      <div className="gym-stage">
+        <svg className="gym-backdrop" viewBox="-180 0 1000 180" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <linearGradient id="gym-wall" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#034965" />
+              <stop offset="1" stopColor="#0a3a57" />
+            </linearGradient>
+          </defs>
 
-        {/* Wall and floor run past the viewBox so wide panels have no letterbox. */}
-        <rect x="-1000" width="2640" height="180" fill="url(#gym-wall)" />
-        <rect x="620" y="30" width="120" height="58" rx="3" className="gym-window" />
-        <path d="M680 30 V88 M620 59 H740" className="gym-window-frame" />
-        <rect x="-130" y="62" width="44" height="88" rx="2" className="gym-door" />
+          {/* Wall and floor run past the viewBox so wide panels have no letterbox. */}
+          <rect x="-1000" width="2640" height="180" fill="url(#gym-wall)" />
+          <rect x="620" y="30" width="120" height="58" rx="3" className="gym-window" />
+          <path d="M680 30 V88 M620 59 H740" className="gym-window-frame" />
+          <rect x="-130" y="62" width="44" height="88" rx="2" className="gym-door" />
 
-        <rect x="-1000" y="150" width="2640" height="30" className="gym-floor" />
-        <path d="M-1000 162 H1640 M-1000 172 H1640 M-80 150 L-140 180 M80 150 L40 180 M200 150 L180 180 M320 150 V180 M440 150 L460 180 M560 150 L600 180 M720 150 L780 180" className="gym-floor-lines" />
+          <rect x="-1000" y="150" width="2640" height="30" className="gym-floor" />
+          <path d="M-1000 162 H1640 M-1000 172 H1640 M-80 150 L-140 180 M80 150 L40 180 M200 150 L180 180 M320 150 V180 M440 150 L460 180 M560 150 L600 180 M720 150 L780 180" className="gym-floor-lines" />
+        </svg>
 
-        {has(50) ? (
-          <g className="gym-lights">
-            <polygon points="250,0 262,0 330,150 190,150" fill="url(#gym-beam)" />
-            <polygon points="378,0 390,0 450,150 318,150" fill="url(#gym-beam)" />
-          </g>
-        ) : null}
+        {has(50)
+          ? LIGHT_BEAMS.map((points, index) => (
+              <GymLayer key={points} box={LIGHT_BOXES[index]} className="gym-light">
+                <defs>
+                  <linearGradient id={`gym-beam-${index}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#fbf1dc" stopOpacity="0.35" />
+                    <stop offset="1" stopColor="#fbf1dc" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <polygon points={points} fill={`url(#gym-beam-${index})`} />
+              </GymLayer>
+            ))
+          : null}
 
-        {has(500) ? (
-          <g className="gym-crowd">
-            {Array.from({ length: 22 }, (_, index) => (
-              <circle key={index} cx={68 + index * 24} cy={index % 2 ? 128 : 132} r={6} />
-            ))}
-            <rect x="56" y="134" width="528" height="8" rx="2" />
-          </g>
-        ) : null}
+        <svg className="gym-backdrop" viewBox="-180 0 1000 180" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          {has(500) ? (
+            <g className="gym-crowd">
+              {Array.from({ length: 22 }, (_, index) => (
+                <circle key={index} cx={68 + index * 24} cy={index % 2 ? 128 : 132} r={6} />
+              ))}
+              <rect x="56" y="134" width="528" height="8" rx="2" />
+            </g>
+          ) : null}
 
-        {has(50) ? <rect x="140" y="144" width="360" height="10" rx="3" className="gym-mat" /> : null}
+          {has(50) ? <rect x="140" y="144" width="360" height="10" rx="3" className="gym-mat" /> : null}
 
-        {has(20) ? (
-          <g className="gym-rack">
-            <rect x="760" y="96" width="50" height="54" rx="2" />
-            {RACK_SABERS.map((color, index) => (
-              <line key={index} className="gym-saber" x1={768 + index * 8.5} y1={140} x2={768 + index * 8.5} y2={100} style={{ color }} />
-            ))}
-          </g>
-        ) : null}
+          {has(20) ? (
+            <g className="gym-rack">
+              <rect x="760" y="96" width="50" height="54" rx="2" />
+            </g>
+          ) : null}
 
-        {has(35) ? (
-          <g className="gym-banner">
-            <path d="M290 0 H350 V70 L320 86 L290 70 Z" />
-            <image href="/assets/ordine-emblem.webp" x="301" y="8" width="38" height="50" />
-          </g>
-        ) : null}
+          {has(35) ? (
+            <g className="gym-banner">
+              <path d="M290 0 H350 V70 L320 86 L290 70 Z" />
+              <image href="/assets/ordine-emblem.webp" x="301" y="8" width="38" height="50" />
+            </g>
+          ) : null}
 
-        {has(150) ? (
-          <g className="gym-trophies">
-            <rect x="-40" y="80" width="84" height="5" rx="1" />
-            {[-28, 0, 28].map((x) => (
-              <path key={x} d={`M${x - 7} 62 H${x + 7} L${x + 4} 72 H${x - 4} Z M${x - 2} 72 H${x + 2} V78 H${x - 2} Z M${x - 6} 78 H${x + 6} V80 H${x - 6} Z`} />
-            ))}
-          </g>
-        ) : null}
+          {has(150) ? (
+            <g className="gym-trophies">
+              <rect x="-40" y="80" width="84" height="5" rx="1" />
+              {[-28, 0, 28].map((x) => (
+                <path key={x} d={`M${x - 7} 62 H${x + 7} L${x + 4} 72 H${x - 4} Z M${x - 2} 72 H${x + 2} V78 H${x - 2} Z M${x - 6} 78 H${x + 6} V80 H${x - 6} Z`} />
+              ))}
+            </g>
+          ) : null}
 
-        {has(300) ? (
-          <text className="gym-neon" x="-160" y="40">Servizio - Cura - Rispetto</text>
-        ) : null}
+          {has(300) ? (
+            <text className="gym-neon" x="-160" y="40">Servizio - Cura - Rispetto</text>
+          ) : null}
+        </svg>
 
-        {fighterCount === 1 ? <Fighter x={320} facing={1} saber={sabers[0]} pose="guard" /> : null}
+        {/* Rack blades hum in two alternating groups, as before (odd ones 2 s ahead). */}
+        {has(20)
+          ? [0, 1].map((parity) => (
+              <SaberLayers
+                key={parity}
+                box={RACK_BOX}
+                lines={RACK_SABERS.flatMap((color, index) => index % 2 === parity
+                  ? [[768 + index * 8.5, 140, 768 + index * 8.5, 100, color] as [number, number, number, number, string]]
+                  : [])}
+                delay={parity ? "-2s" : undefined}
+              />
+            ))
+          : null}
+
+        {fighterCount === 1 ? <GymActor x={320} facing={1} saber={sabers[0]} pose="guard" /> : null}
         {PAIR_SPOTS.slice(0, Math.floor(fighterCount / 2)).map((x, index) => (
           <GymPair
             key={x}
@@ -126,7 +155,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             index={index}
           />
         ))}
-      </svg>
+      </div>
       <figcaption>
         <strong>{current.name}</strong>
         <span>

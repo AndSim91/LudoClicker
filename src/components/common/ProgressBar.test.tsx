@@ -19,8 +19,9 @@ describe("ProgressBar", () => {
     expect(progress).toHaveAttribute("aria-valuenow", "35");
     expect(progress).toHaveAttribute("aria-valuetext", "35 punti completati");
     expect(progress).not.toHaveClass("is-indeterminate");
-    expect(progress.firstElementChild).toHaveStyle({
-      width: "35%",
+    expect(progress).toHaveStyle({
+      "--progress": "0.35",
+      "--progress-shift": "-65%",
       "--progress-transition-duration": `${GAME_CONFIG.progressUpdateIntervalMs}ms`,
     });
   });
@@ -29,8 +30,8 @@ describe("ProgressBar", () => {
     render(<ProgressBar label="Progresso automazione" value={25} />);
 
     const progress = screen.getByRole("progressbar", { name: "Progresso automazione" });
-    expect(progress.firstElementChild).toHaveStyle({
-      width: "25%",
+    expect(progress).toHaveStyle({
+      "--progress-shift": "-75%",
       "--progress-transition-duration": `${GAME_CONFIG.gameTickMs}ms`,
     });
   });
