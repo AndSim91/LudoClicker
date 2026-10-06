@@ -1,0 +1,258 @@
+/*
+ * Centro didattico e schede dei settori in Modalità Outlook (Andrea, 06/10):
+ * copertura come etichette con la sigla della Forma (concept F2), loghi delle
+ * Forme in grigio con un puntino al posto della corona, intestazioni delle
+ * schede con l'icona semplice, ufficio formazione e pannello Istruttori senza
+ * verde né viola (il viola resta nell'etichetta SIS), scheda alta quanto il
+ * contenuto. Onde non passa di qui.
+ */
+
+/* ---------- Schede dei settori ---------- */
+:root[data-theme="light"] .instructor-sector-card,
+:root[data-theme="light"] .collaborator-sector-card {
+  border-color: var(--line-strong);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* Alta quanto il contenuto: niente metà vuota, niente fondo tagliato. */
+:root[data-theme="light"] .instructor-sector-card {
+  height: auto;
+}
+
+:root[data-theme="light"] .instructor-sector-card > header {
+  background: none;
+}
+
+:root[data-theme="light"] .sector-card-icon,
+:root[data-theme="light"] .sector-card-icon.is-primary {
+  width: 20px;
+  height: 20px;
+  color: var(--accent-ink);
+  background: none;
+}
+
+:root[data-theme="light"] .sector-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+:root[data-theme="light"] .instructor-sector-card > header {
+  grid-template-columns: 20px minmax(0, 1fr) auto auto;
+}
+
+:root[data-theme="light"] .collaborator-sector-card > header {
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+}
+
+:root[data-theme="light"] .instructor-sector-title > span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ---------- Corsi ---------- */
+:root[data-theme="light"] .instructor-activity-lane,
+:root[data-theme="light"] .instructor-activity-lane.is-instructor,
+:root[data-theme="light"] .instructor-activity-lane.is-technician {
+  --instructor-lane-accent: var(--accent-ink);
+  box-shadow: none;
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .aggregated-teaching-bar,
+:root[data-theme="light"] .aggregated-teaching-segment,
+:root[data-theme="light"] .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-bar,
+:root[data-theme="light"] .aggregated-teaching-groups.is-internal-instructor .aggregated-teaching-segment,
+:root[data-theme="light"] .aggregated-teaching-segment.is-waiting,
+:root[data-theme="light"] .aggregated-teaching-bar.is-compact.is-waiting {
+  background: var(--line);
+}
+
+:root[data-theme="light"] .aggregated-teaching-bar {
+  height: 4px;
+}
+
+/* ---------- Copertura: etichette «F1 11 · 0» ---------- */
+:root[data-theme="light"] .instructor-coverage,
+:root[data-theme="light"] .instructor-coverage:has(.instructor-quick-training) {
+  overflow: visible;
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .instructor-coverage .sector-form-strip {
+  gap: 4px;
+}
+
+:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-item {
+  display: inline-flex;
+  min-width: 0;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-item::before {
+  color: var(--ink);
+  content: attr(data-short-name);
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .instructor-coverage .sector-form-strip .form-logo-mark {
+  display: none;
+}
+
+:root[data-theme="light"] .instructor-coverage .form-logo-count,
+:root[data-theme="light"] .instructor-coverage .form-logo-count .is-instructor,
+:root[data-theme="light"] .instructor-coverage .form-logo-count .is-technician,
+:root[data-theme="light"] .instructor-coverage .form-logo-count .is-technician.is-zero {
+  margin: 0;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+/* La Forma che l'Ufficio formazione sceglierebbe adesso. */
+:root[data-theme="light"] .instructor-coverage .form-logo-item.is-next-instructor,
+:root[data-theme="light"] .instructor-coverage .form-logo-item.is-next-technician {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 1px var(--blue-600);
+}
+
+/* La legenda dei numeri. */
+:root[data-theme="light"] .instructor-coverage .sector-form-strip:has(.form-logo-count)::after {
+  flex-basis: 100%;
+  color: var(--ink-muted);
+  content: "Istruttori";
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .instructor-coverage .sector-form-strip:has(.form-logo-count .is-technician)::after {
+  content: "Istruttori · Tecnici";
+}
+
+/* ---------- Loghi delle Forme ovunque: grigi, il puntino al posto della corona ---------- */
+:root[data-theme="light"] .form-logo-mark img,
+:root[data-theme="light"] .training-form-preview img,
+:root[data-theme="light"] .aggregated-teaching-course-logo img {
+  filter: grayscale(1) contrast(1.05);
+}
+
+:root[data-theme="light"] .form-logo-mark > .form-instructor-crown,
+:root[data-theme="light"] .sector-form-strip .form-instructor-crown {
+  top: -1px;
+  right: -1px;
+  bottom: auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  color: transparent;
+  background: var(--blue-600);
+  box-shadow: 0 0 0 1.5px var(--surface);
+  font-size: 0;
+  text-shadow: none;
+  transform: none;
+}
+
+/* Tecnico: anello invece del puntino pieno. */
+:root[data-theme="light"] .form-logo-mark > .form-instructor-crown.is-technician {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--blue-600), 0 0 0 1.5px var(--surface);
+}
+
+:root[data-theme="light"] .form-logo-item.is-next-instructor .form-logo-mark img,
+:root[data-theme="light"] .form-logo-item.is-next-technician .form-logo-mark img {
+  --next-ring: var(--blue-600);
+  animation: none;
+}
+
+/* ---------- Ufficio formazione: due righe bianche uguali ---------- */
+:root[data-theme="light"] .instructor-quick-training {
+  flex-direction: column;
+  gap: 6px;
+}
+
+:root[data-theme="light"] .instructor-quick-training button,
+:root[data-theme="light"] .instructor-quick-training button.is-technician {
+  --quick-accent: var(--blue-600);
+  width: 100%;
+  flex: none;
+  padding: 7px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .instructor-quick-training button:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .instructor-quick-training button:focus-visible {
+  outline: 2px solid var(--focus);
+}
+
+:root[data-theme="light"] .instructor-quick-training button:disabled {
+  border-style: solid;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .instructor-quick-main {
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .instructor-quick-main svg {
+  color: var(--accent-ink);
+}
+
+/* ---------- SIS: il viola resta solo nell'etichetta ---------- */
+:root[data-theme="light"] .technician-course-control,
+:root[data-theme="light"] .technician-course-reservation {
+  --sis-accent: #5f3b8f;
+  --sis-ink: var(--ink);
+  --sis-line: var(--line-strong);
+  --sis-divider: var(--line);
+  --sis-surface: var(--surface);
+  --sis-gate: var(--surface-muted);
+  --sis-hover: var(--surface-muted);
+  --sis-toggle: var(--surface);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .technician-course-badge,
+:root[data-theme="light"] .technician-course-reservation .technician-course-badge,
+:root[data-theme="light"] .instructor-quick-training .technician-course-badge {
+  min-width: 0;
+  min-height: 0;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #5f3b8f;
+  background: #efe9f7;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+
+:root[data-theme="light"] .technician-course-control > .training-start-button {
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .technician-course-control > .training-start-button:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+/* ---------- Pannello Istruttori: colonne senza fondi colorati ---------- */
+:root[data-theme="light"] .sector-roster-training,
+:root[data-theme="light"] .sector-roster-training.is-instructor-training,
+:root[data-theme="light"] .sector-roster-training.is-technician-training {
+  box-shadow: none;
+  background: none;
+}

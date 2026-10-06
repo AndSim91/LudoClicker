@@ -2488,6 +2488,20 @@ loop lo disegna il browser, quindi resta fluido con qualunque ritmo del gioco.
 In Outlook e con «Riduci animazioni» la barra resta piena e ferma e sotto
 compare «N diplomati nell'ultimo giro».
 
+In Modalità Outlook il Centro didattico si veste da ufficio (decisioni di
+Andrea del 06/10, `src/styles/centro-didattico-outlook.css`): la copertura
+didattica è una fila di etichette con la sigla della Forma e i due numeri
+(«F1 11 · 0», con la legenda «Istruttori · Tecnici»), la Forma scelta
+dall'Ufficio formazione ha il bordo blu; i loghi delle Forme, ovunque compaiano,
+sono in scala di grigi e al posto della corona hanno un puntino blu (Istruttore)
+o un anello blu (Tecnico); le schede dei settori hanno l'icona semplice
+nell'intestazione; le barre dei corsi sono da 4 px, blu su grigio; l'Ufficio
+formazione è fatto di due righe bianche uguali e il viola della SIS resta solo
+nell'etichetta «SIS»; nel pannello Istruttori le colonne di formazione non hanno
+fondi colorati e «Prenota SIS» è un pulsante bianco. La scheda Istruttori è
+alta quanto il contenuto, quindi non taglia più «Maestria media» e «Corsi
+Istruttori disponibili» (in Onde l'altezza fissa resta).
+
 > **Da implementare:** la barra del titolo mostra comunque contatori espliciti di risorse (Contatti, Iscritti, Follower, Fondi in Euro, Spade, Fama, mese corrente e pausa), quindi il requisito “nessuna barra di risorse o moneta” non è rispettato alla lettera.
 
 Il progetto imita l'esperienza visiva, ma deve evitare di presentarsi come

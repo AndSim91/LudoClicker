@@ -59,6 +59,8 @@ export function FormLogoStrip({
         <span
           className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""} ${technicianCertified ? "technician-certified" : ""}${highlight?.instructor === formId ? " is-next-instructor" : ""}${highlight?.technician === formId ? " is-next-technician" : ""}`}
           key={formId}
+          /* Outlook shows the coverage as tags with the short name (06/10). */
+          data-short-name={shortName}
           title={`${longName}${technicianCertified
             ? " · Qualifica da Tecnico"
             : instructorCertified
