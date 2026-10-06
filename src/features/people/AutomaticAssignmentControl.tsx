@@ -49,7 +49,7 @@ export function AutomaticAssignmentControl({
   return (
     <section className={`automatic-assignment${shares ? " is-on" : ""}`} aria-labelledby="automatic-assignment-title">
       <header>
-        <label className="switch-toggle" title={shares ? help : undefined}>
+        <label className="switch-toggle" title={help}>
           <input
             type="checkbox"
             checked={Boolean(shares)}

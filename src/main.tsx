@@ -15,6 +15,7 @@ import "./styles/global.css";
 import "./styles/people-collaborator-sectors.css";
 import "./styles/people-school.css";
 import "./styles/centro-didattico-outlook.css";
+import "./styles/school-onde.css";
 import "./styles/table-sorting.css";
 
 initializeCrashReporting();

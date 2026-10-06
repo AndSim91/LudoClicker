@@ -509,7 +509,14 @@ function InstructorSectorCard({
 
         <section className="instructor-coverage">
           <div className="instructor-coverage-forms">
-            <span><small>Copertura didattica</small><strong>{coverage.length} Forme insegnabili</strong></span>
+            <span>
+              <small>Copertura didattica</small>
+              <strong>{coverage.length} Forme insegnabili</strong>
+              <small className="instructor-coverage-legend">
+                <span className="is-instructor">Istruttori</span>
+                {sisUnlocked ? <> · <span className="is-technician">Tecnici</span></> : null}
+              </small>
+            </span>
             <FormLogoStrip
               className="sector-form-strip"
               forms={coverage}

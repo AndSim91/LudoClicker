@@ -1,0 +1,204 @@
+/*
+ * Scuola in Modalità Onde, secondo giro grafico (06/10, tavola «Scuola in Onde»):
+ * titoli di sezione a filo d'oro, A2 «Riga compatta» per i comandi dei
+ * collaboratori, B1 «Copertura in alto» per il Centro didattico.
+ * Solo Onde: Outlook ha il suo giro (vedi centro-outlook).
+ */
+
+/* Titoli di sezione: contatore a filo d'oro, linea che parte dall'oro. */
+:root[data-theme="dark"] .people-view .people-section-heading {
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, var(--onde-gold), var(--onde-thread) 18%, var(--line) 60%)
+    left bottom / 100% 2px no-repeat;
+}
+
+:root[data-theme="dark"] .people-view .people-section-heading > span {
+  border-color: var(--onde-thread);
+  border-radius: 999px;
+  color: var(--onde-gold-bright);
+  background: rgb(224 166 74 / 8%);
+}
+
+/* A2: «Assegnazione automatica» è una pastiglia accanto al titolo; le barre di
+   impegno (se accese) e i Turni stanno sotto, senza pannello. */
+:root[data-theme="dark"] .people-view .automatic-assignment header p:not(.sr-only) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .people-view .shift-control {
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+:root[data-theme="dark"] .people-view .shift-control-share {
+  color: var(--onde-gold-bright);
+}
+
+@media (min-width: 761px) {
+  :root[data-theme="dark"] .people-view .people-section:has(> .automatic-assignment) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    /* Le barre di impegno misurano lo spazio della sezione (le regole @container). */
+    container-type: inline-size;
+  }
+
+  :root[data-theme="dark"] .people-view .people-section:has(> .automatic-assignment) > * {
+    grid-column: 1 / -1;
+  }
+
+  :root[data-theme="dark"] .people-view .people-section:has(> .automatic-assignment) > .people-section-heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  :root[data-theme="dark"] .people-view .people-section > .automatic-assignment {
+    display: contents;
+  }
+
+  :root[data-theme="dark"] .people-view .automatic-assignment > header {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+    padding: 0 4px 10px 12px;
+    background: linear-gradient(var(--line), var(--line)) left bottom / 100% 2px no-repeat;
+  }
+
+  :root[data-theme="dark"] .people-view .automatic-assignment .switch-toggle {
+    padding: 5px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+
+  :root[data-theme="dark"] .people-view .automatic-assignment.is-on .switch-toggle {
+    border-color: var(--onde-wave);
+  }
+
+  :root[data-theme="dark"] .people-view .automatic-assignment-shares {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+  }
+}
+
+/* B1: la Copertura didattica sale a tutta larghezza sotto la testata; sotto,
+   corsi a sinistra e Ufficio formazione a destra; Maestria e Corsi Istruttori
+   in una riga sopra «Gestisci». La card cresce con il contenuto. */
+:root[data-theme="dark"] .people-view .instructor-sector-card {
+  height: auto;
+}
+
+:root[data-theme="dark"] .people-view .instructor-sector-body {
+  grid-template-areas:
+    "forms forms"
+    "activity quick"
+    "actions actions";
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  grid-template-rows: auto auto auto;
+}
+
+:root[data-theme="dark"] .people-view .instructor-sector-body:not(:has(.instructor-quick-training)) {
+  grid-template-areas:
+    "forms"
+    "activity"
+    "actions";
+  grid-template-columns: minmax(0, 1fr);
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage {
+  display: contents;
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-forms {
+  display: flex;
+  grid-area: forms;
+  align-items: flex-start;
+  gap: 8px 22px;
+  padding: 12px 17px 10px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--blue-050) 48%, var(--surface));
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-forms > span {
+  flex: 0 0 auto;
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage .sector-form-strip {
+  flex: 1 1 auto;
+  margin-top: 0;
+}
+
+/* Il numero sotto la Forma dice già chi la insegna: le corone qui sono doppie. */
+:root[data-theme="dark"] .people-view .instructor-coverage .form-instructor-crown {
+  display: none;
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-legend {
+  margin-top: 3px;
+}
+
+/* Outlook ha già la sua legenda in fondo alle etichette (centro-didattico-outlook.css). */
+:root[data-theme="light"] .instructor-coverage-legend {
+  display: none;
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-legend .is-instructor {
+  color: color-mix(in srgb, #2f8a57 65%, var(--ink));
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-legend .is-technician {
+  color: color-mix(in srgb, #8b5cf6 65%, var(--ink));
+}
+
+:root[data-theme="dark"] .people-view .instructor-quick-training {
+  grid-area: quick;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  padding: 12px 14px;
+  border-left: 1px solid var(--line);
+  background: color-mix(in srgb, var(--blue-050) 30%, var(--surface));
+}
+
+:root[data-theme="dark"] .people-view .instructor-quick-training button {
+  flex: 0 0 auto;
+}
+
+:root[data-theme="dark"] .people-view .instructor-coverage-actions {
+  grid-area: actions;
+  margin-top: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 8px 17px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="dark"] .people-view .instructor-sector-body,
+  :root[data-theme="dark"] .people-view .instructor-sector-body:not(:has(.instructor-quick-training)) {
+    grid-template-areas:
+      "forms"
+      "activity"
+      "quick"
+      "actions";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :root[data-theme="dark"] .people-view .instructor-coverage-forms {
+    flex-direction: column;
+  }
+
+  :root[data-theme="dark"] .people-view .instructor-quick-training {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}

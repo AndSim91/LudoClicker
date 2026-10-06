@@ -2778,7 +2778,13 @@ Un'unica pagina, in quest'ordine:
 - Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
   assegnazioni, che dall'ottavo Collaboratore diventa una gestione aggregata per
   settore con i tasti + e −, i settori secondari e le priorità operative;
-  sopra, l'interruttore «Assegnazione automatica» (§ 9.2);
+  sopra, l'interruttore «Assegnazione automatica» (§ 9.2). In Modalità Onde
+  (06/10) l'interruttore è una pastiglia accanto al titolo, con la spiegazione
+  nel tooltip, e Turni e barre di impegno stanno sotto senza pannello; nel
+  Centro didattico la Copertura didattica (con la legenda Istruttori · Tecnici)
+  occupa tutta la larghezza sotto la testata, sotto ci sono i corsi e
+  l'Ufficio formazione, poi Maestria e Corsi Istruttori: la scheda cresce con
+  il contenuto (`src/styles/school-onde.css`);
 - Iscritti attivi, in due viste a scelta (piano 4.7, la scelta resta salvata
   nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
   **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
