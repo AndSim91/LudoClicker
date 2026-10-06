@@ -1,9 +1,8 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { GymLayer, SaberLayers } from "./GymLayers";
 import { boxAround } from "./gymBox";
-import { motionReduced } from "../../shared/motion";
 import { bodyShape, type FighterBody } from "./fighterBodies";
-import { exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
+import { canSpar, exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
 
 // A stick athlete: "guard" holds the blade upright, "attack" reaches towards
 // a partner standing 62 units away, so two attacks cross in the middle.
@@ -121,10 +120,6 @@ export function GymActor({
 const CLASH_Y = 101;
 const wiggle = () => Math.round((Math.random() * 4 - 2) * 10) / 10;
 
-function canSpar(): boolean {
-  // The gym is drawn only in Modalità Onde: no bouts behind the Outlook camouflage.
-  return !document.hidden && document.documentElement.dataset.theme === "dark" && !motionReduced();
-}
 
 /**
  * Two athletes facing each other. Each pair lives on its own: it breathes most of the

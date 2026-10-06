@@ -2883,7 +2883,31 @@ Creare un evento usa un modulo simile a un vero appuntamento Outlook.
 
 Un'unica pagina, in quest'ordine:
 
-- la palestra illustrata, che cresce con la scuola;
+- la palestra illustrata, che cresce con la scuola (solo Modalità Onde; decisioni
+  di Andrea del 06/10, `gymStages.ts`, `GymScene.tsx`). Sei livelli, ognuno con
+  il suo nome nella didascalia e il prossimo traguardo:
+  - **Sala in affitto** (0 iscritti): porta, finestra, una lampadina che oscilla;
+  - **Prima rastrelliera** (10): tappeto e rastrelliera con le spade che ronzano;
+  - **Vessillo dell'Ordine** (50): lo stendardo e due fari al posto della lampadina;
+  - **Allenamento di gruppo** (100): tre coppie sul tappeto;
+  - **Arena e giudici** (500): tribuna, trofei, il cerchio dell'Arena al centro e
+    due giudici a bordo Arena, uno con il cellulare e uno con la maglietta blu
+    dell'Ordine;
+  - **Palazzetto** (1.000): la scena resta alta 170 px ma la telecamera si
+    allontana (capriate, gradinate ai lati, due fari che spazzano l'Arena) e
+    compare il tabellone «Player 1 – Player 2».
+
+  Gli atleti seguono gli iscritti: 1 da 1 iscritto, una coppia da 10, tre coppie
+  da 100, con le spade del colore delle rarità. La coppia centrale combatte come
+  nella finale dei tornei (`boutChoreography.ts`, la stessa coreografia):
+  qualche scambio e poi un taglio, nel 5% dei casi dopo un **Disarmo**; il
+  toccato chiama «OH!» e il punto va a chi ha tagliato. Dopo il taglio, a volte,
+  un cartellino (`gymMatch.ts`): nel 10% dei casi quello di Stile a scacchi dal
+  giudice con il cellulare, che non cambia nulla; in un altro 10% il bianco o il
+  giallo dal giudice in maglietta blu: il bianco annulla il punto, il giallo lo
+  dà all'altro atleta. I cartellini si vedono solo mentre vengono alzati. Il
+  tabellone del palazzetto conta al meglio dei 5: a 3 si torna a 0:0. Le altre
+  due coppie fanno solo scambi;
 - Collaboratori (dal primo Collaboratore delle Onde): elenco individuale con
   assegnazioni, che dall'ottavo Collaboratore diventa una gestione aggregata per
   settore con i tasti + e −, i settori secondari e le priorità operative;
@@ -4883,7 +4907,9 @@ posto è **al meglio dei 5** (bronzo e resto al meglio dei 3) e dura al massimo
 l'Arena, a destra il telefono di Servizio.
 
 - **Combattimento** con gli atleti della palestra viva (`Fighter` di
-  `GymPair.tsx`), spade del colore della rarità. Ogni punto è un **taglio**,
+  `GymPair.tsx`), spade del colore della rarità; scambi, taglio e Disarmo sono
+  gli stessi della coppia centrale della palestra (`boutChoreography.ts`,
+  disegnati da `BoutPair.tsx`). Ogni punto è un **taglio**,
   mai un affondo: chi è toccato barcolla, alza la mano libera e chiama «OH!».
   Una COM o un SAPD compare sopra l'atleta con la Forma («Cruna dell'Ago ·
   COM · Forma 3 Spada Lunga») ed è il colpo decisivo di un assalto vinto da chi

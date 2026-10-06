@@ -4,6 +4,8 @@
  * Math.random on purpose: nothing here touches the game state or its seeded RNG.
  */
 
+import { motionReduced } from "../../shared/motion";
+
 export type Random = () => number;
 
 export interface GymExchange {
@@ -60,4 +62,9 @@ export function exchangeSteps(exchange: GymExchange): [number, number] {
   return exchange.attacker === 0
     ? [exchange.reach, giveGround]
     : [-giveGround, -exchange.reach];
+}
+
+export function canSpar(): boolean {
+  // The gym is drawn only in Modalità Onde: no bouts behind the Outlook camouflage.
+  return !document.hidden && document.documentElement.dataset.theme === "dark" && !motionReduced();
 }

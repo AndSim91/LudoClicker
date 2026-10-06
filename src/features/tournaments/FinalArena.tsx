@@ -1,9 +1,11 @@
 import { useId, type CSSProperties } from "react";
+import { BoutPair } from "../arena/BoutPair";
 import type { TournamentLevel } from "../../game/types";
-import { Fighter } from "../people/GymPair";
 import type { DuelSide } from "./finalDuel";
 import { FinalArenaBackdrop } from "./FinalArenaBackdrop";
-import { DUEL_LEFT, DUEL_RIGHT, type DroppedSaber, type DuelEffect, type DuelView } from "./finalDuelTimeline";
+import { DUEL_LEFT, DUEL_RIGHT, type DuelView } from "./finalDuelTimeline";
+
+const STAGE = { left: DUEL_LEFT, right: DUEL_RIGHT };
 
 const JUDGE_SPOTS: Record<number, [number, number][]> = {
   1: [[96, 216]],
@@ -28,50 +30,6 @@ function Judge({ x, y, carding, checker }: { x: number; y: number; carding: numb
   );
 }
 
-function Effect({ effect }: { effect: DuelEffect }) {
-  switch (effect.kind) {
-    case "clash":
-      return (
-        <g transform={`translate(${effect.x} ${effect.y})`}>
-          <g className="gym-clash"><path d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2 Z" /></g>
-        </g>
-      );
-    case "touch":
-      return (
-        <g transform={`translate(${effect.x} ${effect.y})`}>
-          <g className="fd-touch"><circle r={5} /><circle r={9} /></g>
-        </g>
-      );
-    case "oh":
-      return <text className="fd-oh" x={effect.x} y={effect.y} textAnchor="middle">OH!</text>;
-    case "tech":
-      return (
-        <text className="fd-tech" x={effect.x} y={effect.y} textAnchor="middle">
-          {effect.moment.name}
-          <tspan className="fd-tech-sub" x={effect.x} dy={11}>
-            {[effect.moment.kind, effect.moment.form].filter(Boolean).join(" · ")}
-          </tspan>
-        </text>
-      );
-  }
-}
-
-/** Disarmo: the sword spins through the air and lands flat behind its owner (CSS, final-duel.css). */
-function Dropped({ saber, color }: { saber: DroppedSaber; color: string }) {
-  const [bx, by] = saber.blade;
-  return (
-    <g transform={`translate(${saber.x} ${saber.y})`}>
-      <g
-        className="fd-dropped"
-        style={{ "--dx": `${saber.dx}px`, "--floor": `${saber.floor}px`, "--spin": `${saber.spin}deg` } as CSSProperties}
-      >
-        <line className="gym-saber" x1={0} y1={0} x2={bx} y2={by} style={{ color }} />
-        <line className="fd-hilt" x1={0} y1={0} x2={-bx * 0.18} y2={-by * 0.18} />
-      </g>
-    </g>
-  );
-}
-
 /** The Arena of «Guarda la finale», drawn from the current DuelView. */
 export function FinalArena({
   level,
@@ -85,27 +43,6 @@ export function FinalArena({
   sabers: Record<DuelSide, string>;
 }) {
   const checker = `fd-checker-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  const fighter = (side: DuelSide) => {
-    const pose = view.poses[side];
-    return (
-      <g className="gym-step" style={{ transform: `translateX(${view.steps[side === "a" ? 0 : 1]}px)` }}>
-        {/* A new key replays the flinch when the blade lands. */}
-        <g key={view.hit[side]} className={view.hit[side] ? "fd-hit" : undefined}>
-          <Fighter
-            x={side === "a" ? DUEL_LEFT : DUEL_RIGHT}
-            facing={side === "a" ? 1 : -1}
-            saber={sabers[side]}
-            pose={pose.pose}
-            tip={pose.tip}
-            declare={pose.declare}
-            unarmed={pose.unarmed}
-            body={pose.body}
-            delay={side === "a" ? 0 : 1.7}
-          />
-        </g>
-      </g>
-    );
-  };
   return (
     <svg className="fd-arena" viewBox="0 0 640 300" aria-hidden="true">
       <defs>
@@ -124,10 +61,7 @@ export function FinalArena({
         transform="translate(-112 33) scale(1.35)"
         style={{ "--gym-move": `${view.moveMs}ms` } as CSSProperties}
       >
-        {fighter("a")}
-        {fighter("b")}
-        {view.dropped ? <Dropped saber={view.dropped} color={sabers[view.dropped.side]} /> : null}
-        {view.effects.map((effect) => <Effect key={effect.id} effect={effect} />)}
+        <BoutPair view={view} stage={STAGE} sabers={sabers} />
       </g>
     </svg>
   );

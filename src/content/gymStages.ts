@@ -1,19 +1,20 @@
 // "La palestra che cresce": the gym fills up as the school gains active members.
-// Each stage adds one visible element; the caption names the stage and the next
+// Six stages (06/10, Andrea): the rented room, the rack, the Order's standard,
+// group training, the official Arena with its judges and, at 1.000, the
+// palazzetto with the scoreboard. The caption names the stage and the next
 // threshold, so the picture doubles as a progress signal.
 export const GYM_STAGES = [
-  { threshold: 0, name: "Palestra vuota" },
-  { threshold: 1, name: "Primo allievo" },
-  { threshold: 5, name: "Primo sparring" },
-  { threshold: 20, name: "Rastrelliera delle spade" },
-  { threshold: 35, name: "Vessillo della scuola" },
-  { threshold: 50, name: "Luci da gara" },
+  { threshold: 0, name: "Sala in affitto" },
+  { threshold: 10, name: "Prima rastrelliera" },
+  { threshold: 50, name: "Vessillo dell'Ordine" },
   { threshold: 100, name: "Allenamento di gruppo" },
-  { threshold: 150, name: "Bacheca dei trofei" },
-  { threshold: 200, name: "Palestra affollata" },
-  { threshold: 300, name: "Insegna dei valori" },
-  { threshold: 500, name: "Tribuna piena" },
+  { threshold: 500, name: "Arena e giudici" },
+  { threshold: 1_000, name: "Palazzetto" },
 ] as const;
+
+/** Athletes on the mat: one, then a pair, then three pairs. */
+export const getGymFighterCount = (activeMembers: number) =>
+  activeMembers >= 100 ? 6 : activeMembers >= 10 ? 2 : activeMembers >= 1 ? 1 : 0;
 
 export function getGymStageIndex(activeMembers: number): number {
   let index = 0;

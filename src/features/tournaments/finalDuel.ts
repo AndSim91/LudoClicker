@@ -1,4 +1,5 @@
 import { getFormDefinition } from "../../content/forms";
+import { STRIKES, type BoutAssault, type BoutMoment, type BoutSide } from "../arena/boutChoreography";
 import { LOSE_BODIES, WIN_BODIES, type FighterBody } from "../people/fighterBodies";
 import { getAthleteWeapon } from "../../game/athleteStats";
 import {
@@ -17,7 +18,7 @@ import type {
   TournamentStyleDetail,
 } from "../../game/types";
 
-export type DuelSide = "a" | "b";
+export type DuelSide = BoutSide;
 
 export interface OwnedFinal {
   match: TournamentMatch;
@@ -70,28 +71,9 @@ export function getAssaultSequence(match: TournamentMatch): DuelSide[] {
   return (hashOf(match.id) & 1) === 0 ? [loser, winner, winner] : [winner, loser, winner];
 }
 
-/** Cuts that score: never a thrust. `from` is the blade's starting angle, `y` where it lands. */
-export const STRIKES = [
-  { name: "Fendente alla spalla", from: -105, y: 106 },
-  { name: "Tondo al fianco", from: -165, y: 121 },
-  { name: "Montante al busto", from: 85, y: 116 },
-  { name: "Diagonale al braccio", from: -60, y: 111 },
-  { name: "Taglio alla gamba", from: -40, y: 137 },
-] as const;
-
-export interface DuelMoment {
-  kind: "COM" | "SAPD";
-  name: string;
-  /** «Forma 1», «Forma 3 Spada Lunga»; none for a Disarmo. */
-  form?: string;
-}
-
-export interface DuelAssault {
-  winner: DuelSide;
-  strike: (typeof STRIKES)[number];
-  /** A COM or SAPD is the decisive cut of an assault won by whoever performs it. */
-  moment?: DuelMoment;
-}
+export { STRIKES };
+export type DuelMoment = BoutMoment;
+export type DuelAssault = BoutAssault;
 
 export interface DuelPenalty {
   side: DuelSide;

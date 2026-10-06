@@ -629,7 +629,13 @@
 /* --s: CSS px per scene unit, the scale of the backdrops' viewBox (-180 0 1000 180)
    with xMidYMid meet in a 170 px band. Layers (GymLayers.tsx) are placed with it. */
 .gym-stage {
-  --s: min(0.1cqw, 0.944444px);
+  /* The frame (GymScene sets it): the palestra is -180 0 1000 180, the
+     palazzetto -420 -40 1480 230 in the same band, so everything gets smaller. */
+  --vb-cx: 320;
+  --vb-cy: 90;
+  --vb-w: 1000;
+  --vb-h: 180;
+  --s: min(calc(100cqw / var(--vb-w)), calc(170px / var(--vb-h)));
   position: relative;
   height: 170px;
   overflow: hidden;
@@ -645,8 +651,8 @@
 
 .gym-layer {
   position: absolute;
-  left: calc(50% + (var(--x) - 320) * var(--s));
-  top: calc(85px + (var(--y) - 90) * var(--s));
+  left: calc(50% + (var(--x) - var(--vb-cx)) * var(--s));
+  top: calc(85px + (var(--y) - var(--vb-cy)) * var(--s));
   width: calc(var(--w) * var(--s));
   height: calc(var(--h) * var(--s));
   pointer-events: none;
@@ -685,6 +691,35 @@
 .gym-floor { fill: #06283f; }
 .gym-floor-lines { fill: none; stroke: #0e4563; stroke-width: 1.5; }
 .gym-mat { fill: #177c89; }
+
+.gym-arena { fill: #1b8f9b; stroke: #e6f4f1; stroke-width: 1.6; }
+
+/* Sala in affitto: one bulb swaying on its wire. */
+.gym-bulb { transform-origin: 50% 0; animation: gym-bulb 5s ease-in-out infinite alternate; }
+.gym-bulb-wire { fill: none; stroke: #021e33; stroke-width: 1.5; }
+.gym-bulb-shade { fill: #021e33; }
+.gym-bulb-glow { fill: #fff3d0; filter: drop-shadow(0 0 5px #ffe2a8); }
+
+/* Palazzetto: trusses, side stands, two lamps sweeping the Arena. */
+.gym-truss { fill: none; stroke: #2a6f8f; stroke-width: 2.5; }
+.gym-tiers rect { fill: #05304b; stroke: #0b4565; stroke-width: 1; }
+.gym-lamp { fill: #fbf1dc; filter: drop-shadow(0 0 6px #fbf1dc); }
+.gym-sweep { animation: gym-sweep 9s ease-in-out infinite alternate; }
+.gym-sweep + .gym-sweep { animation-delay: -4.5s; }
+
+.gym-scoreboard-wire { stroke: #0b4565; stroke-width: 2; }
+.gym-scoreboard-box { fill: #01101c; stroke: #f0b85a; stroke-width: 1.5; }
+.gym-scoreboard-team { fill: #a9c7c6; font: 600 8.5px var(--font-display, sans-serif); letter-spacing: 0.06em; }
+.gym-scoreboard-num { fill: #ffb347; font: 700 20px var(--font-display, sans-serif); filter: drop-shadow(0 0 3px #ff8c1a); }
+
+/* The two judges: the card exists only while it is raised. */
+.gym-judge-ink { fill: #021e33; }
+.gym-judge-limb { fill: none; stroke: #021e33; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.gym-judge-phone { fill: #021e33; stroke: #6cd3d6; stroke-width: 1; filter: drop-shadow(0 0 2px #6cd3d6); }
+.gym-judge-shirt { fill: #2f8fe0; stroke: #1d6cb8; stroke-width: 1; stroke-linejoin: round; }
+.gym-judge-mark { stroke: #e9f3ff; stroke-width: 1.4; stroke-linecap: round; }
+.gym-judge-cardface { stroke: #111417; stroke-width: 1; }
+.gym-judge-card { transform-box: view-box; animation: gym-card-up 1.8s ease-out forwards; }
 .gym-rack rect { fill: #04263f; }
 .gym-crowd { fill: #04263f; }
 .gym-trophies { fill: #f0b85a; }
@@ -751,7 +786,7 @@
 .gym-breath {
   position: absolute;
   inset: 0;
-  transform-origin: calc(50% + (var(--pivot-x) - 320) * var(--s)) calc(85px + 60 * var(--s));
+  transform-origin: calc(50% + (var(--pivot-x) - var(--vb-cx)) * var(--s)) calc(85px + (150 - var(--vb-cy)) * var(--s));
   animation: gym-breathe-layer 3.4s ease-in-out infinite;
 }
 
@@ -785,6 +820,14 @@
 .gym-clash path {
   fill: #fff6dc;
   filter: drop-shadow(0 0 4px #ffe2a8) drop-shadow(0 0 8px #f0b85a);
+}
+
+@keyframes gym-bulb { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+@keyframes gym-sweep { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+@keyframes gym-card-up {
+  0% { transform: rotate(var(--down)); opacity: 0; }
+  14%, 82% { transform: none; opacity: 1; }
+  100% { transform: rotate(var(--down)); opacity: 0; }
 }
 
 @keyframes gym-breathe {
@@ -826,14 +869,6 @@
   100% { opacity: 0; transform: scale(1.6); }
 }
 
-.gym-neon {
-  fill: #ffe2a8;
-  font-family: var(--font-display, sans-serif);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  filter: drop-shadow(0 0 3px #f0b85a) drop-shadow(0 0 8px #f0b85a);
-}
 
 /* ---- Posta: Flusso di scrittura ------------------------------------------- */
 
