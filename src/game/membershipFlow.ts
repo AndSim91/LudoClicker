@@ -19,6 +19,11 @@ import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 import { processReptileCalendarTransition } from "./reptileFlow";
 import { resetGadgetMonthlyRevenueForMonth } from "./gadgetRevenue";
+import { triggerTutorialScene } from "./tutorialProgress";
+import { MEMBER_DEPARTURES_TUTORIAL_SCENE_ID } from "../content/tutorialScenes";
+
+/** Tutorial grace (06/10/2026): a school this small never loses anyone at year end. */
+export const DEPARTURE_FREE_MEMBERS = 10;
 
 export function departMembers(
   state: GameState,
@@ -191,6 +196,7 @@ function processMemberDepartures(
   state: GameState,
   now: number,
 ): GameState {
+  if (state.school.activeMembers <= DEPARTURE_FREE_MEMBERS) return state;
   const collaboratorsByContactId = new Map(
     state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]),
   );
@@ -265,7 +271,9 @@ function processMemberDepartures(
     },
   };
   // 4.1: departures are a number in the yearly digest (src/game/yearDigest.ts), no names.
-  return withNarrative;
+  return withNarrative.collaborators.some((collaborator) => collaborator.assignment === "instructor")
+    ? withNarrative
+    : triggerTutorialScene(withNarrative, MEMBER_DEPARTURES_TUTORIAL_SCENE_ID);
 }
 
 export function collectFees(

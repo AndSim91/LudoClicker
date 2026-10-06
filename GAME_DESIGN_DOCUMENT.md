@@ -291,6 +291,9 @@ passaggio tra Giugno e Luglio. La probabilità annuale di abbandono dipende
 dalla Forma più alta raggiunta (80% senza Forme, poi 65%, 50%, 35%, 25%, 15%,
 10%; con la Forma 7 scende a 2,5% per i Comuni, 0,5% per i Rari e 0,25% per gli
 Ultra Rari, +0,5% per ogni scuola fondata); i Leggendari non abbandonano mai.
+Per il tutorial, una scuola con al massimo 10 iscritti non perde nessuno a fine
+anno. Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
+spiega che senza Istruttori e corsi durante l'anno la gente si annoia e se ne va.
 Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
 «Passaparola inatteso» produce 2 nuovi contatti, non iscritti.
 

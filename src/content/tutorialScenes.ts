@@ -59,6 +59,8 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
 export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
+/** First yearly departures with no Istruttore assigned (06/10/2026). */
+export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
 
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
@@ -71,6 +73,7 @@ export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+  MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
   ...LATE_TUTORIAL_SCENE_IDS,
 ] as const;
@@ -418,6 +421,26 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         body: [
           "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+        ],
+        focusRegions: ["main"],
+      },
+    ],
+  },
+  {
+    id: MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => Boolean(
+      state.tutorial.triggeredSceneIds?.includes(MEMBER_DEPARTURES_TUTORIAL_SCENE_ID),
+    ),
+    steps: [
+      {
+        id: "member-departures-boredom",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Rinnovi mancati",
+        body: [
+          "L'anno è finito e qualcuno non ha rinnovato l'iscrizione. Niente di personale: senza Istruttori e senza corsi durante l'anno, la gente si annoia e scopre all'improvviso che il calcetto del giovedì le mancava tantissimo.",
+          "Assegna qualche Collaboratore all'Area [[a:Istruttore]] e fai partire dei corsi: chi impara nuove Forme ha molti più motivi per restare.",
         ],
         focusRegions: ["main"],
       },

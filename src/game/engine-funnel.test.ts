@@ -726,7 +726,7 @@ describe("game engine: funnel", () => {
       ...initial,
       randomSeed: 7,
       contacts,
-      school: { ...initial.school, activeMembers: 5, currentMonth: 30, nextFeeAt: 2_000 },
+      school: { ...initial.school, activeMembers: 15, currentMonth: 30, nextFeeAt: 2_000 },
       collaborators: [{
         id: "collaborator-protected",
         contactId: collaboratorMember.id,
@@ -744,7 +744,7 @@ describe("game engine: funnel", () => {
     expect(renewed.contacts.find((contact) => contact.id === ignored.id)?.status).toBe("departed");
     expect(renewed.contacts.find((contact) => contact.id === legendary.id)?.status).toBe("enrolled");
     expect(renewed.contacts.filter((contact) => contact.status === "enrolled")).toHaveLength(3);
-    expect(renewed.school.activeMembers).toBe(3);
+    expect(renewed.school.activeMembers).toBe(13);
     expect(renewed.statistics.membersDeparted).toBe(2);
     expect(renewed.statistics.narrativeEvents).toBe(2);
     expect(renewed.narrative.history.filter(
@@ -772,6 +772,29 @@ describe("game engine: funnel", () => {
     expect(septemberState.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
   });
 
+  it("spares schools of up to 10 members and explains departures without Istruttori", () => {
+    const initial = createInitialState(1_000);
+    const state = {
+      ...initial,
+      randomSeed: 7,
+      contacts: initial.contacts.map((contact, index) => index < 2
+        ? { ...contact, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 9 }
+        : { ...contact, status: "lost" as const }),
+      school: { ...initial.school, activeMembers: 10, currentMonth: 18, nextFeeAt: 2_000 },
+    };
+
+    const small = gameReducer(state, { type: "TICK", now: 2_000 });
+    expect(small.statistics.membersDeparted).toBe(0);
+    expect(small.tutorial.triggeredSceneIds ?? []).not.toContain("member-departures");
+
+    const grown = gameReducer({
+      ...state,
+      school: { ...state.school, activeMembers: 11 },
+    }, { type: "TICK", now: 2_000 });
+    expect(grown.statistics.membersDeparted).toBeGreaterThan(0);
+    expect(grown.tutorial.triggeredSceneIds).toContain("member-departures");
+  });
+
   it("protects January-August enrollments until September, then removes immunity", () => {
     const initial = createInitialState(1_000);
     const [septemberMember, januaryMember] = initial.contacts;
@@ -788,7 +811,7 @@ describe("game engine: funnel", () => {
         : { ...contact, status: "lost" as const }),
       school: {
         ...initial.school,
-        activeMembers: 2,
+        activeMembers: 12,
         currentMonth: 18,
         nextFeeAt: 2_000,
       },
