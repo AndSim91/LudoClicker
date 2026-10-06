@@ -247,10 +247,10 @@
   font-weight: 600;
   line-height: 1;
   text-align: center;
-  opacity: 0.45;
 }
 
-.form-path-lane.is-active .form-path-lane-mark { opacity: 1; }
+/* The letter names the lane and stays readable (AA): whether the lane is
+   reached is shown by its Forme lighting up, not by dimming the letter. */
 .form-path-lane.is-long .form-path-lane-mark { color: #8cc4ff; }
 .form-path-lane.is-staff .form-path-lane-mark { color: #c9a7ff; }
 .form-path-lane.is-double .form-path-lane-mark { color: #7fdcae; }
