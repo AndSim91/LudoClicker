@@ -479,7 +479,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La Scuola diventa Social!",
         body: [
-          "L’Ordine delle Onde ha raggiunto 35 **Iscritti** attivi: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
+          "L’Ordine delle Onde conta ormai 15 collaboratori: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
           "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri Follower e porteranno più pubblico agli [[Eventi]]. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
           "Per trovare nuovi **Contatti** serviranno ancora gli [[Eventi]]. Abbiamo chiesto ai Social di promuoverli e hanno già preparato diciassette hashtag, tre balletti e un comunicato per un certo Guardia di Finanza.",
           "Dev’essere un influencer importante: lo nominano tutti.",
@@ -541,7 +541,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il Laboratorio dei Gadget è aperto",
         body: [
-          "La prima vittoria all'Accademico non si scorda mai. E per renderla ancora più iconica, abbiamo sbloccato i [[Gadget]]!",
+          "Vinta la Champion's Arena: una vittoria così merita un portachiavi. Anzi, un catalogo intero di [[Gadget]]!",
           "Il primo progetto è già disponibile, ma dovrai acquistarlo e svilupparlo prima di metterlo in catalogo.",
         ],
         focusRegions: ["navigation", "gadget-navigation"],

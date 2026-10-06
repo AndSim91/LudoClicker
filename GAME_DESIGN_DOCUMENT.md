@@ -47,7 +47,7 @@ Gli iscritti generano periodicamente **Euro** tramite le quote associative. Gli
 Euro sono l'unica valuta spendibile. Gli iscritti **Ultra Rari** diventano
 Collaboratori delle Onde dopo il Corso Y, i **Leggendari** subito
 all'iscrizione; i collaboratori possono essere assegnati liberamente a
-Redazione (che diventa Social a 35 iscritti attivi), Eventi, Attrezzatura,
+Redazione (che diventa Social con 15 collaboratori), Eventi, Attrezzatura,
 Istruttore e Gadget. Gli iscritti possono apprendere le Forme LudoSport
 seguendo il percorso `1 → X → 2 → Y → 3/4/5 → 6 → 7` (il Corso X esiste solo
 dopo l'acquisto del relativo Percorso Segreto) e i tre rami Spada Lunga, Staffa
@@ -411,7 +411,7 @@ ferma.
 ### 5.4 Follower
 
 I **Follower** misurano il pubblico raggiunto dall'automazione Social. Quando si
-sblocca Social (35 iscritti attivi), partono dalla Fama già raggiunta, senza
+sblocca Social (15 collaboratori), partono dalla Fama già raggiunta, senza
 generare nuova Fama, e diventano visibili nella barra superiore. Non sono
 spendibili. Si ottengono dai cicli di contenuti dei collaboratori Social e dai
 premi dei tornei. Ogni nuovo Follower aggiunge anche un punto Fama, aumenta
@@ -1039,6 +1039,12 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 | Milan Games Week & Cartoomics |     350 |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
 | Sfida a Cthulhu               |     500 | €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
 
+La **Sfida a Cthulhu** non si apre con la Fama: richiede un potenziamento
+segreto (decisione del 06/10, `requiresSecretUpgrade` in `events.ts`). Il suo
+obiettivo segreto non esiste ancora, quindi per ora l'evento non è mai
+disponibile; di conseguenza anche ToccoDiGilo, che si scopre completando la
+Sfida, resta per ora irraggiungibile.
+
 Un cooldown basato sul calendario scade all'inizio del mese di destinazione,
 anche quando il calendario viene avanzato dagli strumenti Admin.
 
@@ -1128,7 +1134,8 @@ prenotazione ottenuta tramite email e produce il possibile iscritto finale. Per
 lo scopo del gioco, ogni persona partecipa a una sola lezione.
 
 I **Social** sviluppano la presenza online della scuola. La Redazione si evolve
-in Social al raggiungimento di 35 iscritti attivi: non nasce un nuovo ruolo e i
+in Social con il **15° collaboratore** (decisione del 06/10, prima erano 35
+iscritti attivi; `socialUnlockCollaborators`, controllo in `recruitCollaborator`): non nasce un nuovo ruolo e i
 collaboratori già assegnati conservano incarico e Maestria. I contenuti Social
 avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
 95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
@@ -2380,8 +2387,8 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | potenziamento Fornitore ufficiale (500 €)  | fornitore ufficiale di spade                                             |
 | Primo Collaboratore delle Onde             | sezione Collaboratori e assegnazioni                                     |
 | 8 Collaboratori                            | gestione aggregata per settore                                           |
-| 35 iscritti attivi                         | Redazione si evolve in Social                                            |
-| Prima vittoria nell'Accademico Arena       | settore e pagina Gadget                                                  |
+| 15 collaboratori                           | Redazione si evolve in Social                                            |
+| Prima vittoria nella Champion's Arena      | settore e pagina Gadget                                                  |
 | Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Campioni d'Italia” |
 
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
@@ -2417,7 +2424,7 @@ Queste comunicazioni:
 
 Oggi i traguardi producono soltanto normali messaggi di sistema nella Posta in
 arrivo (per esempio “Partita la prima email” dopo la prima email,
-“La Redazione diventa Social” a 35 iscritti attivi, “Campioni
+“La Redazione diventa Social” con il 15° collaboratore, “Campioni
 d'Italia”), mentre l'introduzione delle nuove meccaniche è
 affidata alle scene di tutorial (sezione 13).
 
@@ -3035,7 +3042,7 @@ l'avanzamento.
     che chi è impegnato in un Evento o in una formazione cambia incarico solo
     dopo averlo concluso.
 
-11. **La Scuola diventa Social!** A 35 iscritti attivi la scena spiega
+11. **La Scuola diventa Social!** Con il 15° collaboratore la scena spiega
     contenuti, Follower (che aumentano Fama e affluenza agli Eventi) e
     sponsorizzazioni mensili, chiede di aprire **Scuola** e di assegnare almeno
     un Collaboratore ai Social.
@@ -3047,7 +3054,7 @@ l'avanzamento.
     > **Da implementare:** non esiste una scena dedicata all'attrezzatura; usura e danni sono citati solo nel dialogo “Eventi e attrezzatura” del passo 4.
 
 13. **Il Laboratorio Gadget** Alla prima vittoria di un atleta della scuola
-    nell'Accademico Arena, una scena in pausa annuncia lo sblocco e guida il
+    nella Champion's Arena, una scena in pausa annuncia lo sblocco e guida il
     giocatore ad aprire **Gadget**. Il riepilogo spiega pubblico raggiungibile,
     produttività e ruolo dei Collaboratori; il catalogo introduce acquisto del
     progetto, sviluppo, prova qualità, vendita automatica, legame fra qualità,
@@ -3643,7 +3650,8 @@ cambia.
 ### 19.1 Sblocco e catalogo base
 
 Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
-prima volta la disciplina Arena del Torneo Accademico Alpha. Lo sblocco apre la
+prima volta la Champion's Arena, in Arena o in Stile (decisione del 06/10,
+prima era l'Arena del Torneo Accademico Alpha). Lo sblocco apre la
 vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
 il progetto Portachiavi. Il progetto deve comunque essere acquistato. Una scena
 tutorial salvata e non ripetibile presenta il settore, mantiene il tempo in pausa
@@ -3671,7 +3679,9 @@ ma non introduce effetti di gioco sulle armi o sull'equipaggiamento.
 Ogni progetto successivo si sblocca automaticamente dopo 100 vendite della
 famiglia precedente, sommando le unità di tutte le sue rarità. Lo sblocco non
 ha un costo aggiuntivo, ma
-il nuovo progetto deve essere pagato e sviluppato. Spillette, Coppe, Premio
+il nuovo progetto deve essere pagato e sviluppato. Il catalogo mostra solo i
+prodotti già sbloccati: quelli di cui non si sono ancora raggiunti i requisiti
+non compaiono (decisione del 06/10, prima c'era la scheda «Progetto bloccato»). Spillette, Coppe, Premio
 Cu.Li. e Premio Piedozzi appartengono alla futura estensione degli Open e non
 fanno parte del catalogo base.
 
@@ -5204,7 +5214,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - I contatti possono esaurirsi.
 - Il volantinaggio rimane una fonte gratuita di pochi contatti e non richiede
   iscritti o spade.
-- A 35 iscritti attivi Redazione si evolve definitivamente in Social. I
+- Con il 15° collaboratore Redazione si evolve definitivamente in Social. I
   contenuti avanzano sempre, ma molto più lentamente mentre viene scritta una
   email. Ogni contenuto richiede inizialmente 100.000 caratteri e può generare
   Follower; Social non crea Contatti. I Follower aumentano Fama,
@@ -5222,7 +5232,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   liberamente. Non ha un livello generale, ma accumula maestria per settore:
   Novizio, Iniziato, Accademico, Cavaliere, Maestro, Leggenda.
 - Non esiste un limite massimo di collaboratori.
-- Gadget si sblocca con la prima vittoria della scuola all'Accademico Arena;
+- Gadget si sblocca con la prima vittoria della scuola alla Champion's Arena;
   il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei

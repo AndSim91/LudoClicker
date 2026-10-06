@@ -1,4 +1,4 @@
-import { getAcquisitionEventDefinition } from "../content/events";
+import { getAcquisitionEventDefinition, isAcquisitionEventUnlocked } from "../content/events";
 import { getCollaboratorMasteryDefinition } from "../content/mastery";
 import { GAME_CONFIG } from "./config";
 import {
@@ -76,7 +76,7 @@ function getEventStartDetails(
     return undefined;
   }
   if (
-    state.school.fame < definition.unlockMembers ||
+    !isAcquisitionEventUnlocked(definition, state.school.fame) ||
     checkContext.availableMembers < definition.requiredMembers ||
     checkContext.availableSwords < definition.requiredSwords
   ) return undefined;

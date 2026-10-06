@@ -8,7 +8,6 @@ import { GAME_CONFIG } from "./config";
 import { nextRandom } from "./random";
 import { createSecretLegendaryContact } from "./secretLegendaryRoster";
 import { addMessage } from "./stateUpdates";
-import { unlockSocialIfEligible } from "./unlocks";
 import type {
   ChroniclesChallenge,
   GameState,
@@ -194,7 +193,7 @@ function enrollLegendary(
       },
     },
   };
-  return recruitCollaborator(unlockSocialIfEligible(enrolled), contact, now);
+  return recruitCollaborator(enrolled, contact, now);
 }
 
 export function playChroniclesHand(

@@ -15,7 +15,6 @@ import {
 } from "./memberGroups";
 import { nextRandom } from "./random";
 import type { GameState, ScheduledTrial } from "./types";
-import { unlockSocialIfEligible } from "./unlocks";
 import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
 import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import { createInitialGadgetMonthlyRevenueState } from "./gadgetRevenue";
@@ -157,7 +156,7 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
       forms: amount > 0 ? true : nextState.unlocks.forms,
     },
   };
-  return amount > 0 ? unlockSocialIfEligible(updatedState) : updatedState;
+  return updatedState;
 }
 
 export function addAdminEuros(state: GameState, amount: number): GameState {

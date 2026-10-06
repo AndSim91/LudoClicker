@@ -14,7 +14,7 @@ describe("Social", () => {
   it("uses the approved base values", () => {
     const levels = createInitialState(1_000).upgrades;
 
-    expect(GAME_CONFIG.socialUnlockMembers).toBe(35);
+    expect(GAME_CONFIG.socialUnlockCollaborators).toBe(15);
     expect(getSocialContentCharacters(levels)).toBe(100_000);
     expect(getSocialFollowerChance(levels)).toBe(0.5);
     expect(getSocialDoubleFollowerChance(levels)).toBe(0);

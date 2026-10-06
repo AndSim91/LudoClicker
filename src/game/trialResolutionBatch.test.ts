@@ -115,40 +115,6 @@ describe("trial resolution batching", () => {
     expect(resolved.legendaryCollaborators.enrolledProfileIds).toContain("eva-parodi");
   });
 
-  it("unlocks Social only once while resolving multiple guaranteed enrollments", () => {
-    const state = createTrialResolutionState(2);
-    state.school = {
-      ...state.school,
-      activeMembers: 34,
-      peakActiveMembers: 34,
-      fame: 34,
-    };
-    state.scheduledTrials = state.scheduledTrials.map((trial) => ({
-      ...trial,
-      equipmentUsed: 0,
-    }));
-    state.equipment = {
-      ...state.equipment,
-      availableSwords: state.equipment.totalSwords,
-    };
-
-    const sequential = resolveSequentially(state);
-    const resolved = resolveInBatch(state);
-
-    expect(resolved).toEqual(sequential);
-    expect(resolved.school).toMatchObject({
-      activeMembers: 36,
-      fame: 36,
-      followers: 35,
-    });
-    expect(resolved.unlocks.social).toBe(true);
-    expect(
-      resolved.messages.filter((message) =>
-        message.subject === "La Redazione diventa Social"
-      ),
-    ).toHaveLength(1);
-  });
-
   it.each([10, 100, 1_000, 2_000])(
     "resolves %i simultaneous trials without losing records",
     (trialCount) => {

@@ -149,14 +149,19 @@ function tournamentResult(
 }
 
 describe("Gadget flow", () => {
-  it("unlocks only after an owned Arena victory at Academy level", () => {
+  it("unlocks only after an owned victory at the Champion's", () => {
     const initial = createInitialState(1_000, "Manager");
 
     expect(unlockGadgetSectorFromTournamentResult(
       initial,
-      tournamentResult("academy", true),
+      tournamentResult("champions", true),
       2_000,
     ).unlocks.gadget).toBe(true);
+    expect(unlockGadgetSectorFromTournamentResult(
+      initial,
+      tournamentResult("academy", true),
+      2_000,
+    )).toBe(initial);
     expect(unlockGadgetSectorFromTournamentResult(
       initial,
       tournamentResult("academy", false),

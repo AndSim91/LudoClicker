@@ -1,10 +1,18 @@
 import { createInitialCollaboratorMastery } from "../../content/mastery";
 import { createInitialUpgradeLevels } from "../../content/upgrades";
 import { sanitizeCollaboratorTargets } from "../collaboratorManagement";
-import { didOwnedAthleteWinAcademyArena } from "../gadgetFlow";
 import { createInitialGadgetState } from "../gadgetState";
-import type { CollaboratorMastery } from "../types";
+import type { CollaboratorMastery, TournamentResult } from "../types";
 import type { MigratableState } from "./types";
+
+// v65 rule (the Gadget sector then opened with an Academy Arena win); frozen here.
+function didOwnedAthleteWinAcademyArena(result: TournamentResult): boolean {
+  if (result.level !== "academy") return false;
+  const arenaWinner = result.participants.find(
+    (participant) => participant.id === result.arenaRanking[0],
+  );
+  return Boolean(arenaWinner?.ownedContactId);
+}
 
 function addGadgetMastery(
   mastery: Partial<CollaboratorMastery> | undefined,

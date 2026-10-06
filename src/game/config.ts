@@ -10,7 +10,7 @@ export const GAME_CONFIG = {
   initialSwords: 6,
   profileNameMaxLength: 80,
   rarityOverviewEmailsSent: 10,
-  socialUnlockMembers: 35,
+  socialUnlockCollaborators: 15,
   tournamentUnlockMembers: 6,
   tournamentMinimumMembers: 6,
   guaranteedAndreaContactPosition: 10,

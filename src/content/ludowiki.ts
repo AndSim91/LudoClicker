@@ -373,7 +373,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Crescita",
     title: "Social",
     summary: "Contenuti, Follower, nuovi contatti e sponsorizzazioni.",
-    introduction: "Quando la scuola cresce, la [[a:Redazione]] diventa [[a:Social]]. Il lavoro continua a sostenere le email e in parallelo produce contenuti che possono generare Follower, **Contatti** ed entrate ricorrenti.",
+    introduction: "Quando la squadra cresce, la [[a:Redazione]] diventa [[a:Social]]. Il lavoro continua a sostenere le email e in parallelo produce contenuti che possono generare Follower, **Contatti** ed entrate ricorrenti.",
     steps: [
       { icon: "people", label: "Collaboratori", detail: "Producono lavoro" },
       { icon: "mail", label: "Email", detail: "Riceve la quota principale" },
@@ -381,7 +381,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { icon: "trend", label: "Follower", detail: "**Fama** e rendita" },
     ],
     numbers: [
-      { label: "Sblocco", value: `${GAME_CONFIG.socialUnlockMembers} iscritti`, detail: "attivi nella scuola" },
+      { label: "Sblocco", value: `${GAME_CONFIG.socialUnlockCollaborators} collaboratori`, detail: "nella scuola" },
       { label: "Ripartizione base", value: "95% / 5%", detail: "email e contenuti mentre si scrive" },
       { label: "Ciclo contenuto", value: `${GAME_CONFIG.socialBaseContentCharacters.toLocaleString("it-IT")} caratteri`, detail: "requisito base" },
     ],
@@ -429,7 +429,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { icon: "gift", label: "Vendite", detail: "Partono in automatico" },
     ],
     numbers: [
-      { label: "Sblocco", value: "1ª vittoria Accademica", detail: "apre il Laboratorio" },
+      { label: "Sblocco", value: "1ª vittoria alla Champion's Arena", detail: "apre il Laboratorio" },
       { label: "Qualità minima utile", value: "> 50%", detail: "può sbloccare una nuova rarità" },
       { label: "Guadagno massimo squadra", value: `€ ${GAME_CONFIG.reptileMaximumGadgetGrossPerTeam.toLocaleString("it-IT")}`, detail: "limite per squadra nel Reptile" },
     ],

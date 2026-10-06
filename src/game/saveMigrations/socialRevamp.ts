@@ -1,4 +1,3 @@
-import { GAME_CONFIG } from "../config";
 import type { Collaborator, CollaboratorMastery, GameState } from "../types";
 import type { MigratableState } from "./types";
 
@@ -46,7 +45,7 @@ export function migrateSocialRevampState(state: MigratableState): MigratableStat
 
   const activeMembers = Math.max(0, state.school?.activeMembers ?? 0);
   const fame = Math.max(0, state.school?.historicMembers ?? 0);
-  const socialUnlocked = activeMembers >= GAME_CONFIG.socialUnlockMembers;
+  const socialUnlocked = activeMembers >= 35; // v50 rule, frozen
   const legacyStatistics = (state.statistics ?? {}) as Partial<GameState["statistics"]> & {
     socialTrials?: number;
     socialCampaigns?: number;

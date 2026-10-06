@@ -14,7 +14,14 @@ export interface AcquisitionEventDefinition {
   varianceMax: number;
   risk: "Basso" | "Medio" | "Alto";
   potential: "Molto bassa" | "Bassa" | "Media" | "Alta" | "Altissima";
+  /** Fama needed (the name is historical). */
   unlockMembers: number;
+  /**
+   * Needs its secret upgrade (decisione del 06/10). ponytail: no secret path
+   * opens it yet, so the event is never available; point this at the
+   * upgrade id once its secret objective exists.
+   */
+  requiresSecretUpgrade?: true;
   requiredMembers: number;
   requiredSwords: number;
   wearAdded: number;
@@ -398,6 +405,7 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
     risk: "Alto",
     potential: "Altissima",
     unlockMembers: 500,
+    requiresSecretUpgrade: true,
     requiredMembers: 1_000,
     requiredSwords: 1_000,
     wearAdded: 10_000,
@@ -410,8 +418,12 @@ export const ACQUISITION_EVENTS: AcquisitionEventDefinition[] = [
   },
 ];
 
-export function getUnlockedAcquisitionEvents(fameMembers: number) {
-  return ACQUISITION_EVENTS.filter((event) => event.unlockMembers <= fameMembers);
+export function isAcquisitionEventUnlocked(event: AcquisitionEventDefinition, fame: number) {
+  return !event.requiresSecretUpgrade && event.unlockMembers <= fame;
+}
+
+export function getUnlockedAcquisitionEvents(fame: number) {
+  return ACQUISITION_EVENTS.filter((event) => isAcquisitionEventUnlocked(event, fame));
 }
 
 export function getAcquisitionEventDefinition(id: AcquisitionEventId) {

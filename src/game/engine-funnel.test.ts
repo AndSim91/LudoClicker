@@ -506,7 +506,7 @@ describe("game engine: funnel", () => {
     expect(state.messages.some((message) => message.subject.endsWith("entra nel Consiglio"))).toBe(false);
   });
 
-  it("starts Social with one Follower per Fame point when a trial reaches the unlock", () => {
+  it("no longer opens Social when an enrollment reaches 35 members", () => {
     const initial = createInitialState(1_000);
     const contact = initial.contacts.find((candidate) => !candidate.specialProfileId)!;
     const trial = {
@@ -521,8 +521,8 @@ describe("game engine: funnel", () => {
       ...initial,
       school: {
         ...initial.school,
-        activeMembers: GAME_CONFIG.socialUnlockMembers - 1,
-        peakActiveMembers: GAME_CONFIG.socialUnlockMembers - 1,
+        activeMembers: 34,
+        peakActiveMembers: 34,
         fame: 80,
       },
       contacts: initial.contacts.map((candidate) =>
@@ -535,10 +535,9 @@ describe("game engine: funnel", () => {
 
     const unlocked = gameReducer(ready, { type: "TICK", now: trial.resolvesAt });
 
-    expect(unlocked.unlocks.social).toBe(true);
-    expect(unlocked.school.activeMembers).toBe(GAME_CONFIG.socialUnlockMembers);
+    expect(unlocked.unlocks.social).toBe(false);
+    expect(unlocked.school.activeMembers).toBe(35);
     expect(unlocked.school.fame).toBe(81);
-    expect(unlocked.school.followers).toBe(81);
   });
 
   it("makes enrollment equally difficult and progressive for every Legendary", () => {

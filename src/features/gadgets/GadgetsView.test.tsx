@@ -137,8 +137,8 @@ describe("GadgetsView", () => {
 
     expect(screen.getByText("200")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Polsino" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Tazza" })).toBeVisible();
-    expect(screen.getByText(/Si sblocca dopo 100 vendite di Polsino/)).toBeVisible();
+    // Products whose requirement is not met yet stay hidden.
+    expect(screen.queryByRole("heading", { name: "Tazza" })).not.toBeInTheDocument();
     expect(screen.getByText(/vendite extra per regali, sostituzioni e acquisti ripetuti/)).toBeVisible();
     expect(screen.getByText(/Non consumano il pubblico che diventerà raggiungibile/)).toBeVisible();
     expect(screen.queryByText(/recupero|margine|proiezione/i)).not.toBeInTheDocument();

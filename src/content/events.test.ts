@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 import { getBaseExpectedEventContacts } from "../game/eventRewards";
 import { ACQUISITION_EVENTS, getUnlockedAcquisitionEvents } from "./events";
 
+it("keeps the Sfida a Cthulhu locked until its secret upgrade exists", () => {
+  expect(getUnlockedAcquisitionEvents(Number.MAX_SAFE_INTEGER).map((event) => event.id))
+    .not.toContain("cthulhu-challenge");
+});
+
 describe("acquisition event progression", () => {
   it("starts with only free flyering and sea kata", () => {
     expect(getUnlockedAcquisitionEvents(0).map((event) => event.id)).toEqual([

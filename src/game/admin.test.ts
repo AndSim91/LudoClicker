@@ -13,25 +13,25 @@ function findSeed(predicate: (roll: number) => boolean): number {
 }
 
 describe("admin resource actions", () => {
-  it("adds members and updates member-based progression", () => {
+  it("adds members and updates member-based progression (Social stays tied to collaborators)", () => {
     const initial = createInitialState(1_000);
     const state = gameReducer(initial, {
       type: "ADMIN_ADD_MEMBERS",
-      amount: GAME_CONFIG.socialUnlockMembers,
+      amount: 35,
     });
 
     expect(state.school).toMatchObject({
-      activeMembers: GAME_CONFIG.socialUnlockMembers,
-      peakActiveMembers: GAME_CONFIG.socialUnlockMembers,
-      fame: GAME_CONFIG.socialUnlockMembers,
+      activeMembers: 35,
+      peakActiveMembers: 35,
+      fame: 35,
       // Achievements give no reward (4.4).
       euros: 0,
-      followers: GAME_CONFIG.socialUnlockMembers,
+      followers: 0,
     });
-    expect(state.unlocks).toMatchObject({ upgrades: true, social: true, forms: true });
+    expect(state.unlocks).toMatchObject({ upgrades: true, social: false, forms: true });
     expect(state.statistics.membersEnrolled).toBe(0);
     expect(state.contacts.filter((contact) => contact.status === "enrolled"))
-      .toHaveLength(GAME_CONFIG.socialUnlockMembers);
+      .toHaveLength(35);
     expect(new Set(state.contacts.map((contact) => contact.id)).size).toBe(state.contacts.length);
     const enrolledLegendaryIds = state.contacts.flatMap((contact) =>
       contact.status === "enrolled" && contact.specialProfileId

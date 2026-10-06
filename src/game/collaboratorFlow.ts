@@ -4,6 +4,7 @@ import { getRetainedLegendaryProgress } from "./contacts";
 import { makeGameId } from "./ids";
 import { getEnrolledLegendaryContacts } from "./runtimeIndexes";
 import { addMessage } from "./stateUpdates";
+import { unlockSocialIfEligible } from "./unlocks";
 import type { Contact, GameState } from "./types";
 
 export function recruitCollaborator(
@@ -44,7 +45,7 @@ export function recruitCollaborator(
     lastAgonistCourseYear:
       retained?.lastAgonistCourseYear ?? contact.lastAgonistCourseYear,
   };
-  const nextState: GameState = {
+  const nextState: GameState = unlockSocialIfEligible({
     ...state,
     collaborators: [...state.collaborators, collaborator],
     unlocks: { ...state.unlocks, collaborators: true },
@@ -52,7 +53,7 @@ export function recruitCollaborator(
       ...state.statistics,
       collaboratorsRecruited: state.statistics.collaboratorsRecruited + 1,
     },
-  };
+  }, now);
   const editorialSector = getCollaboratorAssignmentLabel(
     "writing",
     nextState.unlocks.social,

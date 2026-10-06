@@ -5,7 +5,6 @@ import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
 import { nextRandom } from "./random";
 import { recruitCollaborator } from "./collaboratorFlow";
 import { startNextCampaign } from "./emailFlow";
-import { unlockSocialIfEligible } from "./unlocks";
 import type {
   Contact,
   GameState,
@@ -160,10 +159,9 @@ function enrollRewardContact(state: GameState, contactId: string, now: number): 
       ? addLegendaryEnrollment(state.legendaryCollaborators, nextContact.specialProfileId)
       : state.legendaryCollaborators,
   };
-  const unlockedState = unlockSocialIfEligible(nextState);
   return nextContact.rarity === "legendary"
-    ? recruitCollaborator(unlockedState, nextContact, now)
-    : unlockedState;
+    ? recruitCollaborator(nextState, nextContact, now)
+    : nextState;
 }
 
 export function applyTournamentRewards(

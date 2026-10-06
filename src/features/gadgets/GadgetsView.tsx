@@ -6,7 +6,6 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import {
   GADGET_DEFINITIONS,
   GADGET_PRODUCT_ORDER,
-  GADGET_PROJECT_UNLOCK_SALES,
   getGadgetRevisionCost,
 } from "../../content/gadgets";
 import {
@@ -179,27 +178,6 @@ const GadgetProductCard = memo(function GadgetProductCard({
   const rarityProgressTooltip = nextRarity
     ? `Possibilità di salto a ${GADGET_RARITIES[nextRarity].label}: ${numberFormatter.format(rarityProgressPercent)}%`
     : undefined;
-  const previousDefinition = definition.previousProductId
-    ? GADGET_DEFINITIONS[definition.previousProductId]
-    : undefined;
-
-  if (!product.unlocked) {
-    return (
-      <article className="gadget-product-card is-locked">
-        <span className="gadget-product-rail" aria-hidden="true" />
-        <GadgetProductArtwork productId={productId} locked />
-        <div className="gadget-product-heading">
-          <span>Progetto bloccato</span>
-          <h2>{definition.name}</h2>
-          <p>
-            {previousDefinition
-              ? `Si sblocca dopo ${GADGET_PROJECT_UNLOCK_SALES} vendite di ${previousDefinition.name}.`
-              : "Non ancora disponibile."}
-          </p>
-        </div>
-      </article>
-    );
-  }
 
   const visualState = product.accepted
     ? highestRarityState.quality > 0 ? "is-selling" : "is-warning"
@@ -479,7 +457,8 @@ export function GadgetsView({
         data-tutorial-region="gadget-catalog"
         data-tutorial-target="true"
       >
-        {GADGET_PRODUCT_ORDER.map((productId) => {
+        {/* Products appear only once their requirement is met (decisione del 06/10). */}
+        {GADGET_PRODUCT_ORDER.filter((productId) => state.gadgets.products[productId].unlocked).map((productId) => {
           const product = state.gadgets.products[productId];
           const highestRarity = getHighestUnlockedGadgetRarity(product);
           const revisionCost = getGadgetRevisionCost(productId, highestRarity);

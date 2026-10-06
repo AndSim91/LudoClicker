@@ -20,7 +20,6 @@ import {
   isTrialEnrollmentGuaranteed,
 } from "./trialEnrollment";
 import type { Contact, GameState, ScheduledTrial } from "./types";
-import { hasSocialMemberRequirement, unlockSocialIfEligible } from "./unlocks";
 
 function compareCompletedTrials(
   left: ScheduledTrial,
@@ -213,10 +212,7 @@ export function resolveStartedTrialBatch(
     if (enrolled) {
       if (referralRoll < referralChance) referrals += 1;
       const firstEnrollment = stateBeforeTrial.school.fame === 0;
-      const nextActiveMembers = nextState.school.activeMembers + 1;
-      const socialUnlockedNow = !stateBeforeTrial.unlocks.social &&
-        hasSocialMemberRequirement(nextActiveMembers);
-      nextState = unlockSocialIfEligible({
+      nextState = {
         ...nextState,
         school: {
           ...nextState.school,
@@ -233,7 +229,7 @@ export function resolveStartedTrialBatch(
           upgrades: true,
           forms: true,
         },
-      });
+      };
       // 4.1: after the first one, new members are counted in the yearly digest.
       if (firstEnrollment) nextState = addMessage(
         nextState,
@@ -243,15 +239,6 @@ export function resolveStartedTrialBatch(
         "positive",
         "focused",
       );
-      if (socialUnlockedNow) {
-        nextState = addMessage(
-          nextState,
-          now + 1,
-          "La Redazione diventa Social",
-          "35 iscritti: abbastanza per avere un pubblico. I collaboratori Social ora portano follower, contatti e sponsor.",
-          "system",
-        );
-      }
       if (resolvedContact?.rarity === "legendary") {
         nextState = recruitCollaborator(nextState, resolvedContact, now);
       }

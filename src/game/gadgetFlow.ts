@@ -74,14 +74,12 @@ function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(Number.isFinite(score) ? score : 0)));
 }
 
-export function didOwnedAthleteWinAcademyArena(
-  result: TournamentResult,
-): boolean {
-  if (result.level !== "academy") return false;
-  const arenaWinner = result.participants.find(
-    (participant) => participant.id === result.arenaRanking[0],
+/** A school athlete wins the Champion's (Arena or Stile), as `championOwned` in tournamentFlow. */
+export function didOwnedAthleteWinChampions(result: TournamentResult): boolean {
+  if (result.level !== "champions") return false;
+  return [result.arenaRanking[0], result.styleRanking[0]].some((winnerId) =>
+    Boolean(result.participants.find((participant) => participant.id === winnerId)?.ownedContactId)
   );
-  return Boolean(arenaWinner?.ownedContactId);
 }
 
 export function unlockGadgetSector(state: GameState, now: number): GameState {
@@ -104,7 +102,7 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
     unlockedState,
     now,
     "Apre il Laboratorio Gadget",
-    "Col Torneo Accademico è arrivata anche un'idea: i portachiavi. Compra il progetto e mettici qualche collaboratore.",
+    "Vinta la Champion's Arena, e qualcuno ha già pensato ai portachiavi celebrativi. Compra il progetto e mettici qualche collaboratore.",
     "positive",
     "focused",
     "gadget",
@@ -116,7 +114,7 @@ export function unlockGadgetSectorFromTournamentResult(
   result: TournamentResult,
   now: number,
 ): GameState {
-  return didOwnedAthleteWinAcademyArena(result)
+  return didOwnedAthleteWinChampions(result)
     ? unlockGadgetSector(state, now)
     : state;
 }

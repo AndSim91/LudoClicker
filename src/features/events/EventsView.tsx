@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { ACQUISITION_EVENTS, type AcquisitionEventDefinition } from "../../content/events";
+import { ACQUISITION_EVENTS, isAcquisitionEventUnlocked, type AcquisitionEventDefinition } from "../../content/events";
 import { getEventCopyContactMultiplier, getEventExtraCopies } from "../../content/upgrades";
 import { GAME_CONFIG } from "../../game/config";
 import { getEventCopyCost } from "../../game/eventFlow";
@@ -113,7 +113,7 @@ export function EventsView({
   const usesTutorialSparringDuration = isTutorialScenePending(state, FIRST_EVENT_TUTORIAL_SCENE_ID);
   const visibleEvents = ACQUISITION_EVENTS.filter(
     (definition) =>
-      definition.unlockMembers <= state.school.fame ||
+      isAcquisitionEventUnlocked(definition, state.school.fame) ||
       runningEvents.some((event) => event.definitionId === definition.id),
   );
   return (

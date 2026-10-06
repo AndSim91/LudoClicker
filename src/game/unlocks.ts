@@ -1,17 +1,19 @@
 import { isOfficialSwordSupplierUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
+import { addMessage } from "./stateUpdates";
 import type { GameState } from "./types";
 
-export function hasSocialMemberRequirement(activeMembers: number): boolean {
-  return activeMembers >= GAME_CONFIG.socialUnlockMembers;
+export function hasSocialCollaboratorRequirement(collaborators: number): boolean {
+  return collaborators >= GAME_CONFIG.socialUnlockCollaborators;
 }
 
-export function unlockSocialIfEligible(state: GameState): GameState {
-  if (state.unlocks.social || !hasSocialMemberRequirement(state.school.activeMembers)) {
+/** Social opens with the 15th collaborator (decisione del 06/10), once. */
+export function unlockSocialIfEligible(state: GameState, now: number): GameState {
+  if (state.unlocks.social || !hasSocialCollaboratorRequirement(state.collaborators.length)) {
     return state;
   }
 
-  return {
+  return addMessage({
     ...state,
     school: {
       ...state.school,
@@ -24,11 +26,16 @@ export function unlockSocialIfEligible(state: GameState): GameState {
       ...state.unlocks,
       social: true,
     },
-  };
+  },
+  now + 2,
+  "La Redazione diventa Social",
+  `${GAME_CONFIG.socialUnlockCollaborators} collaboratori: qualcuno ha aperto le pagine social della scuola e nessuno ha avuto il coraggio di fermarlo. Chi lavora in Redazione ora porta anche follower e sponsor.`,
+  "system",
+  );
 }
 
 export function getSocialUnlockRequirementLabel(): string {
-  return `${GAME_CONFIG.socialUnlockMembers} iscritti attivi`;
+  return `${GAME_CONFIG.socialUnlockCollaborators} collaboratori`;
 }
 
 export function isCollaboratorAreaVisible(state: GameState): boolean {
