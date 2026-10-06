@@ -1,10 +1,18 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
 import { GameTimeProvider } from "../../game/GameTimeProvider";
 import type { Collaborator, FormBranch, FormId, GameState } from "../../game/types";
 import { PeopleView } from "./PeopleView";
+
+/** The Outlook layout of the sector cards; Modalità Onde draws them as scenes. */
+function inOutlook() {
+  document.documentElement.dataset.theme = "light";
+  onTestFinished(() => {
+    delete document.documentElement.dataset.theme;
+  });
+}
 
 afterEach(() => {
   cleanup();
@@ -289,7 +297,51 @@ describe("PeopleView", () => {
     expect(onIncrement).toHaveBeenCalledWith("writing");
   });
 
+  it("draws the Onde sector cards as scenes with the work underneath", () => {
+    const initial = createInitialState(1_000);
+    const worker = (id: string, assignment: "gadget" | "equipment" | "writing"): Collaborator => ({
+      id,
+      contactId: initial.contacts[0].id,
+      displayName: id,
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment,
+      rarity: "rare",
+    });
+    render(
+      <PeopleView
+        state={{
+          ...initial,
+          collaborators: [worker("onde-gadget", "gadget"), worker("onde-equipment", "equipment"), worker("onde-social", "writing")],
+          unlocks: { ...initial.unlocks, collaborators: true, gadget: true, social: true },
+          collaboratorManagement: { ...initial.collaboratorManagement, aggregateViewUnlocked: true },
+          gadgets: {
+            ...initial.gadgets,
+            monthlyRevenue: {
+              ...initial.gadgets.monthlyRevenue,
+              totals: { ...initial.gadgets.monthlyRevenue.totals, mug: 4_820 },
+            },
+          },
+        }}
+        onAssign={() => undefined}
+        onStartTraining={() => undefined}
+      />,
+    );
+
+    const card = (name: string) => within(screen.getByRole("heading", { name }).closest("article")!);
+    const gadget = card("Gadget");
+    expect(gadget.getByText("4.820,00 €/mese")).toBeVisible();
+    expect(gadget.getByText("Tazza · 4.820,00 €")).toBeVisible();
+    expect(gadget.queryByRole("region", { name: "Classifica ricavi Gadget del mese" })).not.toBeInTheDocument();
+    expect(card("Attrezzatura").getByText("Usura attrezzatura")).toBeVisible();
+    expect(card("Social").getByText(/follower$/)).toBeVisible();
+    expect(card("Social").getByText("Contenuti Social")).toBeVisible();
+    expect(gadget.getByRole("button", { name: "Gestisci Gadget" })).toBeEnabled();
+  });
+
   it("shows the live monthly Gadget market in the aggregate dashboard", () => {
+    inOutlook();
     const initial = createInitialState(1_000);
     const gadgetCollaborator: Collaborator = {
       id: "gadget-market-collaborator",
@@ -1303,6 +1355,7 @@ describe("PeopleView", () => {
   });
 
   it("keeps the idle equipment status separate from its wear indicator", () => {
+    inOutlook();
     const initial = createInitialState(1_000);
     const equipmentCollaborator = {
       id: "aggregate-equipment",
@@ -2112,6 +2165,7 @@ describe("PeopleView", () => {
   });
 
   it("shows separate Social and email rows in the aggregate Social box", () => {
+    inOutlook();
     const initial = createInitialState(1_000);
     const collaborator = {
       id: "collaborator-social-workstreams",

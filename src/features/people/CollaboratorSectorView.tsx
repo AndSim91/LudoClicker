@@ -44,11 +44,13 @@ import {
 } from "./instructorGroupPresentation";
 import { InstructorActivityLane } from "./InstructorActivityLane";
 import { InternalInstructorCourseList } from "./InternalInstructorCourseList";
+import { OndeSectorBody } from "./OndeSectorBody";
 import { FormLogoStrip } from "./PersonPresentation";
 import { QuickTeacherTraining, useQuickTrainingPreviews } from "./QuickTeacherTraining";
 import { countTeacherCoverage } from "../../game/quickTeacherTraining";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { GadgetRevenueRanking } from "./GadgetRevenueRanking";
+import { useOutlookTheme } from "../../shared/useOutlookTheme";
 
 const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "writing",
@@ -168,6 +170,7 @@ function StandardSectorCard({
     ],
     stateOverride,
   );
+  const outlook = useOutlookTheme();
   const label = getCollaboratorAssignmentLabel(role, state.unlocks.social);
   const assigned = state.collaborators.filter((collaborator) => collaborator.assignment === role);
   const activeEmail = selectActiveEmail(state);
@@ -198,24 +201,59 @@ function StandardSectorCard({
         getEmailAutomationPresentation(state, activeEmail),
       ]
     : undefined;
+  const header = (
+    <header>
+      <span className="sector-card-icon"><Icon name={ROLE_PRESENTATION[role].icon} /></span>
+      <span>
+        <h3>{label}</h3>
+        <small>{ROLE_PRESENTATION[role].description}</small>
+      </span>
+      <StaffingStepper
+        label={label}
+        actual={actual}
+        target={target}
+        available={available}
+        locked={locked}
+        onIncrement={onIncrement}
+        onDecrement={onDecrement}
+      />
+    </header>
+  );
+  const manageButton = (
+    <button
+      type="button"
+      className="sector-manage-button"
+      aria-label={`Gestisci ${label}`}
+      disabled={assigned.length === 0}
+      onClick={onOpen}
+    >
+      Gestisci
+      <Icon name="arrowRight" />
+    </button>
+  );
+  if (!outlook) {
+    // Modalità Onde (Tavola 4, 06/10): scene, work in progress, then Maestria and Gestisci.
+    return (
+      <article className={`collaborator-sector-card has-scene${assigned.length === 0 ? " is-empty" : ""}`}>
+        {header}
+        <OndeSectorBody
+          state={state}
+          role={role}
+          idle={assigned.length === 0}
+          activity={activity}
+          socialActivities={socialActivities}
+          now={now}
+        />
+        <footer className="sector-card-foot">
+          <SectorMasteryIndicator collaborators={assigned} role={role} />
+          {manageButton}
+        </footer>
+      </article>
+    );
+  }
   return (
     <article className={`collaborator-sector-card${assigned.length === 0 ? " is-empty" : ""}${socialActivities ? " has-workstreams" : ""}${role === "gadget" ? " is-gadget-ranking" : ""}`}>
-      <header>
-        <span className="sector-card-icon"><Icon name={ROLE_PRESENTATION[role].icon} /></span>
-        <span>
-          <h3>{label}</h3>
-          <small>{ROLE_PRESENTATION[role].description}</small>
-        </span>
-        <StaffingStepper
-          label={label}
-          actual={actual}
-          target={target}
-          available={available}
-          locked={locked}
-          onIncrement={onIncrement}
-          onDecrement={onDecrement}
-        />
-      </header>
+      {header}
 
       {role === "gadget" ? (
         <GadgetRevenueRanking
@@ -293,16 +331,7 @@ function StandardSectorCard({
         </>
       )}
 
-      <button
-        type="button"
-        className="sector-manage-button"
-        aria-label={`Gestisci ${label}`}
-        disabled={assigned.length === 0}
-        onClick={onOpen}
-      >
-        Gestisci
-        <Icon name="arrowRight" />
-      </button>
+      {manageButton}
     </article>
   );
 }

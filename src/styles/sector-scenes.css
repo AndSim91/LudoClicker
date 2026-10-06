@@ -1,0 +1,303 @@
+/*
+ * Scuola in Modalità Onde, card dei settori (Tavola 4, 06/10): stessa altezza
+ * per tutti, una scena animata per settore (SectorScene.tsx, sectorSceneArt.tsx),
+ * poi il lavoro in corso e il piede con Maestria e Gestisci.
+ * Le scene muovono solo transform e opacity di livelli HTML; si fermano senza
+ * collaboratori, con «Riduci animazioni» e fuori schermo.
+ */
+
+:root[data-theme="dark"] .people-view .collaborator-sector-card.has-scene {
+  display: grid;
+  height: 276px;
+  min-height: 0;
+  grid-template-rows: auto minmax(84px, 1fr) auto auto;
+}
+
+/* ---- La scena ---- */
+.sector-scene {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  container-type: size;
+  contain: paint;
+  border-block: 1px solid var(--line);
+  background: linear-gradient(180deg, #034965, #0a3a57);
+}
+
+.sector-scene.is-events {
+  background: #0b4f6e;
+}
+
+.sector-scene-art {
+  /* CSS px per unit of the 520 × 106 viewBox, «meet» in the band. */
+  --s: min(calc(100cqw / 520), calc(100cqh / 106));
+  position: absolute;
+  inset: 0;
+}
+
+.sector-scene-backdrop {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sector-scene-layer {
+  position: absolute;
+  left: calc(50% + (var(--x) - 260) * var(--s));
+  top: calc(50% + (var(--y) - 53) * var(--s));
+  width: calc(var(--w) * var(--s));
+  height: calc(var(--h) * var(--s));
+  pointer-events: none;
+}
+
+.sector-scene-layer > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sector-scene.is-idle .sector-scene-art {
+  opacity: 0.5;
+}
+
+/* Ferme senza collaboratori, con «Riduci animazioni» e fuori schermo: senza
+   animazione i livelli non restano nel compositore (in pausa ci resterebbero).
+   Il fotogramma fermo è la scena di base: passanti, cuori e scintille spariscono. */
+.sector-scene.is-idle .sector-scene-layer,
+.sector-scene.is-idle .scene-feed,
+.sector-scene.is-offscreen .sector-scene-layer,
+.sector-scene.is-offscreen .scene-feed,
+:root.reduce-motion .sector-scene-layer,
+:root.reduce-motion .scene-feed {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sector-scene-layer,
+  .scene-feed {
+    animation: none;
+  }
+}
+
+/* Le pastiglie dei dati, come la rendita dei Social. */
+.sector-scene-chip {
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  padding: 2px 8px;
+  border: 1px solid var(--onde-thread);
+  border-radius: 999px;
+  color: var(--onde-gold-bright);
+  background: rgb(2 30 51 / 82%);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.sector-scene-chip.is-top-left { left: 12px; }
+.sector-scene-chip.is-top-right { right: 12px; }
+.sector-scene-chip.is-second { top: 35px; }
+
+.sector-scene-chip.is-teal {
+  border-color: rgb(108 211 214 / 35%);
+  color: var(--onde-wave);
+}
+
+/* ---- Social: il feed dei duelli ---- */
+.scene-feed-window {
+  overflow: hidden;
+  border-radius: calc(8 * var(--s));
+}
+
+.scene-feed {
+  height: calc(var(--h) * var(--s));
+  animation: scene-feed 14s linear infinite;
+}
+
+.scene-feed > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-heart {
+  opacity: 0;
+  animation: scene-heart 3.6s ease-out infinite;
+}
+
+.scene-heart.is-2 { animation-delay: -1.8s; }
+
+/* ---- Eventi: gazebo, mare, passanti ---- */
+.scene-sea { animation: scene-drift 20s linear infinite; }
+
+.scene-saber { animation: scene-hum 1.3s ease-in-out infinite alternate; }
+
+.scene-walker { animation: scene-walk 14s linear infinite; animation-delay: -4s; }
+.scene-walker.is-browsing { animation-name: scene-browse; animation-duration: 16s; animation-delay: -7s; }
+.scene-walker.is-browsing.is-slow { animation-duration: 19s; animation-delay: -8s; }
+
+/* ---- Attrezzatura: rastrelliera e banco ---- */
+.scene-rack { animation: scene-hum 2.2s ease-in-out infinite alternate; }
+
+.scene-blade {
+  transform-origin: left center;
+  animation: scene-relight 5s ease-in-out -3.6s infinite;
+}
+
+.scene-blade-glow {
+  opacity: 0;
+  animation: scene-shine 5s ease-in-out -3.6s infinite;
+}
+
+.scene-wrench {
+  transform-origin: 85% 85%;
+  animation: scene-tap 0.9s ease-in-out infinite alternate;
+}
+
+.scene-sparks {
+  opacity: 0;
+  animation: scene-spark 0.9s ease-out infinite;
+}
+
+/* ---- Gadget: il banchetto ---- */
+.scene-hoodie {
+  transform-origin: 50% 0;
+  animation: scene-sway 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes scene-feed { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes scene-heart {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-450%) scale(1.1); }
+}
+@keyframes scene-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes scene-hum { from { opacity: 0.45; } to { opacity: 1; } }
+/* Walkers are 12 units wide: 4700% is the whole band. */
+@keyframes scene-walk { from { transform: translateX(0); } to { transform: translateX(4700%); } }
+@keyframes scene-browse {
+  0% { transform: translateX(0); }
+  42%, 62% { transform: translateX(2300%); }
+  100% { transform: translateX(4700%); }
+}
+@keyframes scene-relight {
+  0%, 12% { transform: scaleX(0); }
+  70%, 88% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+@keyframes scene-shine {
+  0%, 66% { opacity: 0; }
+  76% { opacity: 0.9; }
+  88% { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+@keyframes scene-tap { from { transform: rotate(-14deg); } to { transform: rotate(10deg); } }
+/* The three sparks jump together: one layer instead of three. */
+@keyframes scene-spark {
+  0% { opacity: 1; transform: translate(0, 0) scale(0.8); }
+  100% { opacity: 0; transform: translate(40%, -180%) scale(1.3); }
+}
+@keyframes scene-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+
+/* ---- Il lavoro in corso ---- */
+.sector-scene-data {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+}
+
+.sector-scene-row {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.sector-scene-row > span,
+.sector-scene-fact {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.sector-scene-row strong,
+.sector-scene-fact strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sector-scene-row small,
+.sector-scene-fact > span {
+  flex: none;
+  color: var(--ink-soft);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sector-scene-row small {
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sector-scene-fact strong { flex: 0 1 auto; }
+
+/* ---- Piede: Maestria e Gestisci ---- */
+.sector-card-foot {
+  display: flex;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-left: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.sector-card-foot .sector-mastery-average > span:last-child {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
+
+:root[data-theme="dark"] .people-view .sector-card-foot .sector-manage-button {
+  min-height: 36px;
+  border-top: 0;
+  border-radius: 0 0 10px 0;
+  background: transparent;
+}
+
+.sector-scene-row .progress-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: rgb(2 30 51 / 75%);
+}
+
+.sector-scene-row .progress-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
+}
+
+/* La battuta del settore intera: al massimo due righe, la scena si stringe. */
+:root[data-theme="dark"] .people-view .collaborator-sector-card.has-scene header > span:nth-child(2) > small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
+}

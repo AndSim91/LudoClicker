@@ -2787,7 +2787,17 @@ Un'unica pagina, in quest'ordine:
   Centro didattico la Copertura didattica (con la legenda Istruttori · Tecnici)
   occupa tutta la larghezza sotto la testata, sotto ci sono i corsi e
   l'Ufficio formazione, poi Maestria e Corsi Istruttori: la scheda cresce con
-  il contenuto (`src/styles/school-onde.css`);
+  il contenuto (`src/styles/school-onde.css`). Sempre in Onde le schede dei
+  settori sono tutte alte uguali e hanno una scena animata (Tavola 4 del
+  06/10): Social un telefono con il feed dei duelli e le pastiglie di follower,
+  rendita e bonus Eventi; Eventi il gazebo blu militare con il roll-up nero
+  della scuola, il mare e i passanti; Attrezzatura la rastrelliera e una lama
+  che si riaccende sul banco (non segue i dati); Gadget il banchetto con i
+  gadget disegnati e la pastiglia delle entrate del mese. Sotto la scena il
+  lavoro in corso (gli eventi in corso uno per riga), nel piede Maestria e
+  Gestisci. Le scene muovono solo trasformazioni e trasparenze di livelli
+  HTML e restano ferme senza collaboratori, con «Riduci animazioni» e fuori
+  schermo (`SectorScene.tsx`, `sectorSceneArt.tsx`, `src/styles/sector-scenes.css`);
 - Iscritti attivi, in due viste a scelta (piano 4.7, la scelta resta salvata
   nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
   **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
