@@ -783,8 +783,8 @@ describe("local save", () => {
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(migrated.automation.offlineContactBuffer).toBe(0);
-    expect(migrated.shortGoal.definitionId).toBe("send-emails");
-    expect(migrated.shortGoal.baseline).toBe(12);
+    expect(migrated.shortGoal.definitionId).toBe("complete-event");
+    expect(migrated.shortGoal.baseline).toBe(0);
     expect(migrated.messages).toHaveLength(1);
     expect(migrated.messages[0].stackCount).toBe(2);
   });

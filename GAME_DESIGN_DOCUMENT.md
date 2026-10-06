@@ -117,7 +117,7 @@ Il giocatore deve sentirsi contemporaneamente:
    compaiono soltanto quando il giocatore raggiunge traguardi comprensibili o
    completa speciali comunicazioni interne manuali. Nella scuola iniziale:
    Upgrade e Scuola dopo il primo iscritto, Contatti dalla prima Fama, Eventi
-   dopo l'obiettivo «Tre inviti in partenza» (3 email inviate), Tornei da 6 di
+   dopo la missione tutorial «Inviti in partenza» (2 email inviate), Tornei da 6 di
    Fama; dalla seconda
    scuola in poi tutte le aree principali sono aperte fin dall'inizio.
 
@@ -2426,7 +2426,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | Avvio                                      | Posta (composizione, Posta in arrivo, Posta inviata), Impostazioni, 5 contatti iniziali, 6 spade |
 | Prima email inviata                        | messaggio “Partita la prima email”; la prima email garantisce una prova |
-| Missione “Tre inviti in partenza” (3 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
+| Missione tutorial “Inviti in partenza” (2 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
 | Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
 | Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
 | 6 punti Fama                               | pagina Tornei                                                            |
@@ -2797,19 +2797,22 @@ In testa; In arrivo).
 
 La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quattro
 missioni girano sempre nello stesso ordine; una **serie** è un giro completo.
-L'obiettivo cresce a ogni serie fino a un tetto, il premio è il premio base per
-il numero della serie e non ha tetto:
+L'obiettivo parte da 2 e cresce di 1 a ogni serie fino a 5 (raggiunto alla
+quarta serie); il premio è 50 € per il numero della serie (50, 100, 150 €…) e
+non ha tetto:
 
-| Missione | Conta | Obiettivo (crescita per serie, tetto) | Premio base |
-| --- | --- | --- | ---: |
-| Tre inviti in partenza | email inviate | 3 (+2, max 11) | 15 € |
-| Agenda in movimento | prove prenotate | 2 (+1, max 6) | 20 € |
-| Uscire a toccare l'erba | eventi completati | 1 (+1, max 5) | 20 € |
-| Una sedia in più | nuovi iscritti | 1 (+1, max 5) | 25 € |
+| Ordine | Missione | Conta |
+| ---: | --- | --- |
+| 1 | Uscire a toccare l'erba | eventi completati |
+| 2 | Inviti in partenza | email inviate |
+| 3 | Agenda in movimento | prove prenotate |
+| 4 | Una sedia in più | nuovi iscritti |
 
-Tutti i tetti si raggiungono alla quinta serie. La scheda mostra il numero della
+Solo nella prima scuola la partita parte con la **missione tutorial** «Inviti in
+partenza» (2 email, 50 €), fuori dalle serie: completarla apre gli Eventi e fa
+partire la serie 1 da «Uscire a toccare l'erba». La scheda mostra il numero della
 serie, non della missione. A ogni nuova scuola le missioni ripartono dalla serie 1
-(«Tre inviti in partenza»), senza il messaggio che apre gli Eventi. Quando il
+(«Uscire a toccare l'erba»), senza missione tutorial. Quando il
 saldo raggiunge o supera **10.000 €**, una missione ancora a zero progresso si
 nasconde. Se possiede già almeno un punto di progresso, rimane invece attiva
 fino al completamento; la missione successiva applica nuovamente la regola del
@@ -3056,7 +3059,7 @@ l'avanzamento.
    tasto mentre il tempo resta fermo, e spiega che con Invio automatico
    disattivo la bozza resta ferma finché non si preme Invia. La scena termina quando la
    bozza passa a “Invio in corso...”; a quel punto il tempo riparte e inizia la
-   missione “Tre inviti in partenza”, che conta tre email ulteriori rispetto a
+   missione tutorial “Inviti in partenza”, che conta due email ulteriori rispetto a
    quelle già inviate o in invio. Gli Eventi si sbloccano soltanto al
    completamento di questa missione.
 

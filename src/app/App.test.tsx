@@ -54,7 +54,7 @@ describe("App profile and navigation", () => {
       expect(screen.queryByText("Invia la tua prima mail")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
     });
-    expect(screen.getByText("0/3")).toBeVisible();
+    expect(screen.getByText("0/2")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Eventi" })).not.toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText("Partita la prima email").length).toBeGreaterThan(0);

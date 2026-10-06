@@ -20,55 +20,55 @@ export interface ShortGoalDefinition {
 }
 
 export const SHORT_GOAL_ORDER: ShortGoalId[] = [
+  "complete-event",
   "send-emails",
   "book-trials",
-  "complete-event",
   "enroll-member",
 ];
 
 export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
   "send-emails": {
     id: "send-emails",
-    title: "Tre inviti in partenza",
+    title: "Inviti in partenza",
     description: "Completa una piccola tornata di email senza perdere il ritmo.",
     metric: "emailsSent",
-    baseTarget: 3,
-    targetGrowth: 2,
-    maxTarget: 11,
-    baseReward: 15,
+    baseTarget: 2,
+    targetGrowth: 1,
+    maxTarget: 5,
+    baseReward: 50,
     completionNarrative: "La segreteria ha dichiarato ufficialmente smaltita la pila urgente.",
   },
   "book-trials": {
     id: "book-trials",
     title: "Agenda in movimento",
-    description: "Ottieni due nuove prenotazioni per una lezione di prova.",
+    description: "Ottieni nuove prenotazioni per una lezione di prova.",
     metric: "trialsBooked",
     baseTarget: 2,
     targetGrowth: 1,
-    maxTarget: 6,
-    baseReward: 20,
+    maxTarget: 5,
+    baseReward: 50,
     completionNarrative: "Il calendario ha finalmente abbastanza appuntamenti da sembrare intenzionale.",
   },
   "complete-event": {
     id: "complete-event",
     title: "Uscire a toccare l'erba",
-    description: "Porta a termine un evento in esterna.",
+    description: "Porta a termine qualche evento in esterna.",
     metric: "eventsCompleted",
-    baseTarget: 1,
+    baseTarget: 2,
     targetGrowth: 1,
     maxTarget: 5,
-    baseReward: 20,
+    baseReward: 50,
     completionNarrative: "Il verbale della polizia locale conferma che siamo stati visti fuori dalla palestra.",
   },
   "enroll-member": {
     id: "enroll-member",
     title: "Una sedia in più",
-    description: "Trasforma una lezione di prova in una nuova iscrizione.",
+    description: "Trasforma le lezioni di prova in nuove iscrizioni.",
     metric: "membersEnrolled",
-    baseTarget: 1,
+    baseTarget: 2,
     targetGrowth: 1,
     maxTarget: 5,
-    baseReward: 25,
+    baseReward: 50,
     completionNarrative: "È stata aggiunta una sedia alla riunione e nessuno ha protestato.",
   },
 };
@@ -77,11 +77,19 @@ export function createInitialShortGoal(now: number): ShortGoalProgress {
   return createInitialEmailMission(0, now);
 }
 
+/**
+ * First school only: the email mission that opens Eventi. It sits outside the
+ * series (the order starts with Eventi), so an email mission at count 0 is it.
+ */
+export function isTutorialEmailMission(progress: ShortGoalProgress): boolean {
+  return progress.definitionId === "send-emails" && progress.completedCount === 0;
+}
+
 export function createInitialEmailMission(
   baseline: number,
   now: number,
 ): ShortGoalProgress {
-  const definition = SHORT_GOALS[SHORT_GOAL_ORDER[0]];
+  const definition = SHORT_GOALS["send-emails"];
   return {
     definitionId: definition.id,
     baseline,

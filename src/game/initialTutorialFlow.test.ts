@@ -32,7 +32,7 @@ function finishSendingEmail(state: GameState): GameState {
 }
 
 describe("initial tutorial progression", () => {
-  it("excludes the tutorial email from the three-email mission and unlocks Events only after it", () => {
+  it("excludes the tutorial email from the two-email mission and unlocks Events only after it", () => {
     const initial = createInitialState(1_000, "Andrea Ungaro");
     const firstDraftCompleted = completeActiveDraft(initial, 1_100);
 
@@ -50,7 +50,7 @@ describe("initial tutorial progression", () => {
     expect(tutorialCompleted.shortGoal).toMatchObject({
       definitionId: "send-emails",
       baseline: 1,
-      target: 3,
+      target: 2,
       completedCount: 0,
     });
     expect(getShortGoalProgress(tutorialCompleted)).toBe(0);
@@ -71,21 +71,16 @@ describe("initial tutorial progression", () => {
 
     progressed = finishSendingEmail(completeActiveDraft(progressed, 3_000));
     expect(progressed.statistics.emailsSent).toBe(3);
-    expect(getShortGoalProgress(progressed)).toBe(2);
-    expect(isGameAreaUnlocked("events", progressed)).toBe(false);
-
-    progressed = finishSendingEmail(completeActiveDraft(progressed, 4_000));
-    expect(progressed.statistics.emailsSent).toBe(4);
     expect(progressed.shortGoal).toMatchObject({
-      definitionId: "book-trials",
-      completedCount: 1,
+      definitionId: "complete-event",
+      completedCount: 0,
     });
     expect(isGameAreaUnlocked("events", progressed)).toBe(true);
     expect(progressed.messages.some(
       (message) => message.subject === "Si esce dalla palestra",
     )).toBe(true);
 
-    expect(progressed.pendingEmailOutcomes).toHaveLength(4);
+    expect(progressed.pendingEmailOutcomes).toHaveLength(3);
     expect(progressed.pendingEmailOutcomes.every(
       (outcome) => outcome.waitForTutorialEvent,
     )).toBe(true);
@@ -113,7 +108,7 @@ describe("initial tutorial progression", () => {
     expect(sparringCompleted.scheduledTrials).toHaveLength(0);
     expect(sparringCompleted.pendingEmailOutcomes.filter(
       (outcome) => outcome.waitForTutorialEvent,
-    )).toHaveLength(3);
+    )).toHaveLength(2);
     expect(sparringCompleted.pendingEmailOutcomes.find(
       (outcome) => outcome.tutorialSceneId === "first-event",
     )).toMatchObject({

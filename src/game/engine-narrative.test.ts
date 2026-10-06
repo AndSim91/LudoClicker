@@ -41,25 +41,29 @@ describe("game engine: narrative", () => {
     const completed = gameReducer(qualifying, { type: "TICK", now: 2_000 });
     const repeated = gameReducer(completed, { type: "TICK", now: 2_000 });
 
-    expect(completed.school.euros).toBe(15);
-    expect(completed.shortGoal.definitionId).toBe("book-trials");
-    expect(completed.shortGoal.completedCount).toBe(1);
-    expect(completed.messages[0].subject).toBe("Missione compiuta: Tre inviti in partenza");
-    expect(completed.messages[0].preview).toMatch(/\+15,00\s€\.$/);
+    // The tutorial email mission is outside the series: series 1 starts with Eventi.
+    expect(completed.school.euros).toBe(50);
+    expect(completed.shortGoal.definitionId).toBe("complete-event");
+    expect(completed.shortGoal.completedCount).toBe(0);
+    expect(completed.messages[0].subject).toBe("Missione compiuta: Inviti in partenza");
+    expect(completed.messages[0].preview).toMatch(/\+50,00\s€\.$/);
     expect(repeated.school.euros).toBe(completed.school.euros);
   });
 
   it("caps mission targets and multiplies the reward by the series", () => {
     const statistics = createInitialState(1_000).statistics;
-    // Series 2 (one full round done): 5 emails for 30 €.
+    // Order: Eventi, email, prove, iscrizioni.
+    expect(createShortGoalFromStatistics(statistics, 0, 0).definitionId).toBe("complete-event");
+    expect(createShortGoalFromStatistics(statistics, 3, 0).definitionId).toBe("enroll-member");
+    // Series 2 (one full round done): 3 events for 100 €.
     const second = createShortGoalFromStatistics(statistics, 4, 0);
-    expect(second.target).toBe(5);
-    expect(getShortGoalReward(second)).toBe(30);
-    // Series 9: targets stuck at the cap, reward still growing.
-    const ninth = createShortGoalFromStatistics(statistics, 32, 0);
-    expect(ninth.target).toBe(11);
-    expect(getShortGoalReward(ninth)).toBe(135);
-    expect(createShortGoalFromStatistics(statistics, 35, 0).target).toBe(5);
+    expect(second.target).toBe(3);
+    expect(getShortGoalReward(second)).toBe(100);
+    // Series 9: targets stuck at 5, reward still growing by 50 € a series.
+    const ninth = createShortGoalFromStatistics(statistics, 33, 0);
+    expect(ninth.definitionId).toBe("send-emails");
+    expect(ninth.target).toBe(5);
+    expect(getShortGoalReward(ninth)).toBe(450);
   });
 
   it("hides a zero-progress short goal at exactly 10,000 euros", () => {
@@ -163,10 +167,10 @@ describe("game engine: narrative", () => {
       definitionId: "send-emails",
       isActive: true,
     });
-    expect(completed.school.euros).toBe(10_015);
+    expect(completed.school.euros).toBe(10_050);
     expect(completed.shortGoal).toMatchObject({
-      definitionId: "book-trials",
-      completedCount: 1,
+      definitionId: "complete-event",
+      completedCount: 0,
       isActive: false,
     });
   });
