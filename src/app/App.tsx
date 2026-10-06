@@ -248,9 +248,11 @@ export function App() {
     setSelectedMessageId(null);
     setSelectedSentEmailId(null);
   }, []);
+  const [equipmentOpen, setEquipmentOpen] = useState(false);
   const tutorial = useTutorialController({
     state,
     activeView,
+    equipmentOpen,
     dispatch,
     onNavigate: navigateForTutorial,
   });
@@ -699,6 +701,8 @@ export function App() {
           onMaintainEquipment={maintainEquipment}
           onBuyOfficialSwords={buyOfficialSwords}
           dayPanelToggle={dayPanelToggle}
+          equipmentOpen={equipmentOpen || Boolean(tutorial.activeStep?.opensEquipment)}
+          onEquipmentOpenChange={setEquipmentOpen}
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
           <StableAppRail view={activeView} onChange={changeView} />

@@ -368,7 +368,8 @@
   font-weight: 400;
 }
 
-:root[data-theme="light"] .equipment-purchase-hint { display: none; }
+:root[data-theme="light"] .equipment-purchase-hint,
+:root[data-theme="light"] .equipment-purchase-missing { display: none; }
 
 :root[data-theme="light"] .equipment-lock {
   display: block;

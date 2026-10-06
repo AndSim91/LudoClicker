@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { ProgressBar } from "../common/ProgressBar";
 import { SchoolSaber } from "./SchoolSaber";
@@ -151,9 +151,18 @@ export function EquipmentDetailPanel({
               type="button"
               disabled={!canBuy}
               title={`Polaris EVO Basic, ${formatCurrency(getOfficialSwordPurchaseCost(state, 1))} l'una`}
+              // Concept B «Salvadanaio» (06/10/2026): without funds the pill fills with them.
+              style={canBuy ? undefined : {
+                "--equipment-buy-progress": `${Math.max(0, Math.min(100, (state.school.euros / purchaseCost) * 100))}%`,
+              } as CSSProperties}
               onClick={() => onBuyOfficialSwords(purchaseAmount)}
             >
               Acquista {purchaseAmount === 1 ? "1 spada" : `${purchaseAmount} spade`} {"\u00b7"} {formatCurrency(purchaseCost)}
+              {canBuy ? null : (
+                <span className="equipment-purchase-missing">
+                  mancano {formatCurrency(purchaseCost - Math.max(0, state.school.euros))}
+                </span>
+              )}
             </button>
             <button
               className="equipment-purchase-quantity"

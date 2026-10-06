@@ -998,6 +998,13 @@ barra del titolo,
 compare dopo il potenziamento **Fornitore ufficiale** (primo nodo di
 Attrezzatura, 500 €) e permette di comprare 1, 10 o 100 spade. Prima, al suo
 posto, c'è un pulsante spento «Acquisto spade · da sbloccare negli Upgrade».
+In Modalità Onde, senza Fondi sufficienti, il pulsante resta leggibile (fondo
+scuro) e si riempie d'azzurro in proporzione ai Fondi, con l'indicazione
+«mancano X €» (concept «Salvadanaio», 06/10/2026). La prima volta che la scuola
+arriva a 10 iscritti di picco parte un tutorial di A.N.D.E.R. (scena
+`sword-purchase`) che fa aprire il menu delle spade e indica Fornitore
+ufficiale negli Upgrade; i salvataggi già oltre i 10 iscritti lo segnano come
+visto con la migrazione v104.
 I salvataggi che avevano già aperto l'acquisto con la vecchia regola (15
 iscritti di picco o più di 6 spade) ricevono il nodo con la migrazione v99. Il
 prezzo di €330 è moltiplicato dall'**Inflazione di Luce**: se nell'anno è

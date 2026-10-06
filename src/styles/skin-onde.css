@@ -981,6 +981,36 @@
   --equipment-buy-ink: var(--onde-on-gold);
 }
 
+/* Concept B «Salvadanaio» (06/10/2026): without funds the pill is dark, readable,
+ * and fills with the wave colour as the Fondi grow; it says what is missing. */
+:root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled:not(.equipment-purchase-locked),
+:root[data-theme="dark"] .title-equipment-popover .equipment-purchase-quantity:disabled {
+  color: var(--onde-foam);
+  background: var(--onde-groove);
+  box-shadow: inset 0 0 0 1px rgb(108 211 214 / 35%);
+  opacity: 1;
+  filter: none;
+}
+
+:root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled:not(.equipment-purchase-locked) {
+  white-space: nowrap;
+  background:
+    linear-gradient(90deg, rgb(108 211 214 / 26%) var(--equipment-buy-progress, 0%), transparent 0)
+    var(--onde-groove);
+  transition: background 300ms linear;
+}
+
+:root[data-theme="dark"] .equipment-purchase-missing {
+  margin-left: 8px;
+  color: var(--onde-wave);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] .title-equipment-popover .equipment-purchase-button:disabled { transition: none; }
+}
+
 /* Email HTML in Onde: carta notte al posto del foglio bianco (anteprima, codice e posta inviata). */
 :root[data-theme="dark"] .email-source-workspace { background: var(--surface); }
 :root[data-theme="dark"] .email-source-preview,

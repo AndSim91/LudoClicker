@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
@@ -48,6 +49,8 @@ export function TitleBar({
   onMaintainEquipment = () => undefined,
   onBuyOfficialSwords = () => undefined,
   dayPanelToggle,
+  equipmentOpen,
+  onEquipmentOpenChange,
 }: {
   currentMonth: number;
   nextMonthAt: number;
@@ -69,7 +72,11 @@ export function TitleBar({
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
   /** «La mia giornata» drawer button: below 1441px it takes the place of the window controls. */
   dayPanelToggle?: ReactNode;
+  /** Swords menu, controlled by the app so the tutorial can read it; local otherwise. */
+  equipmentOpen?: boolean;
+  onEquipmentOpenChange?: (open: boolean) => void;
 }) {
+  const [localEquipmentOpen, setLocalEquipmentOpen] = useState(false);
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
   const nextGameSpeed = gameSpeed >= maxGameSpeed ? 1 : gameSpeed + 1;
@@ -128,6 +135,8 @@ export function TitleBar({
         euros={euros}
         onMaintainEquipment={onMaintainEquipment}
         onBuyOfficialSwords={onBuyOfficialSwords}
+        isOpen={equipmentOpen ?? localEquipmentOpen}
+        onOpenChange={onEquipmentOpenChange ?? setLocalEquipmentOpen}
       />
       <span
         className="title-resource title-fame"

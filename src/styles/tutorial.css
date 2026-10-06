@@ -57,6 +57,29 @@
     0 5px 18px rgb(3 32 58 / 38%);
 }
 
+/* Swords in the title bar (tutorial at 10 iscritti): the rest of the bar dims. */
+.title-bar[data-tutorial-treatment="focus"]:has(
+  [data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"]
+) {
+  z-index: auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.title-bar:has(
+  [data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"]
+) > :not(.title-equipment) {
+  opacity: .3;
+}
+
+[data-tutorial-region="title-equipment"][data-tutorial-treatment="focus"] {
+  z-index: 5001;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 2px var(--onde-gold, var(--blue-600)),
+    0 0 0 7px rgb(224 166 74 / 28%);
+}
+
 [data-tutorial-region="contacts-counter"][data-tutorial-treatment="focus"] svg,
 [data-tutorial-region="contacts-counter"][data-tutorial-treatment="focus"] small {
   color: var(--blue-700);

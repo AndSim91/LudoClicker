@@ -14,11 +14,13 @@ interface TutorialStepProgress {
 export function useTutorialController({
   state,
   activeView,
+  equipmentOpen = false,
   dispatch,
   onNavigate,
 }: {
   state: GameState;
   activeView: string;
+  equipmentOpen?: boolean;
   dispatch: (action: GameAction) => void;
   onNavigate?: (view: string) => void;
 }) {
@@ -33,8 +35,8 @@ export function useTutorialController({
     ? stepProgress.indexes
     : {};
   const context = useMemo<TutorialRuntimeContext>(
-    () => ({ state, activeView }),
-    [activeView, state],
+    () => ({ state, activeView, equipmentOpen }),
+    [activeView, equipmentOpen, state],
   );
   const unavailableSceneIds = new Set([
     ...state.tutorial.completedSceneIds,

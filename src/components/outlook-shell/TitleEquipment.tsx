@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { EquipmentDetailPanel } from "../equipment/EquipmentDetailPanel";
 import { SchoolSaber } from "../equipment/SchoolSaber";
@@ -15,18 +15,23 @@ export function TitleEquipment({
   euros,
   onMaintainEquipment,
   onBuyOfficialSwords,
+  isOpen,
+  onOpenChange,
 }: {
   equipment: GameState["equipment"];
   euros: number;
   onMaintainEquipment: () => void;
   onBuyOfficialSwords: (amount: 1 | 10 | 100) => void;
+  /** Lifted so the tutorial can see and hold the menu open. */
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const setIsOpen = onOpenChange;
   const rootRef = useRef<HTMLDivElement>(null);
   const availableSwords = getAvailableSwords(equipment);
   const damagedSwords = getEffectiveDamagedSwords(equipment);
   const status = damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
-  const toggle = () => setIsOpen((open) => !open);
+  const toggle = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -42,10 +47,10 @@ export function TitleEquipment({
       document.removeEventListener("pointerdown", closeOutside);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   return (
-    <div className={`title-equipment is-${status}`} ref={rootRef}>
+    <div className={`title-equipment is-${status}`} ref={rootRef} data-tutorial-region="title-equipment">
       <button
         className="title-equipment-toggle"
         type="button"

@@ -6,6 +6,7 @@ import {
 const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   title: ".title-bar",
   "contacts-counter": '[data-tutorial-region="contacts-counter"]',
+  "title-equipment": '[data-tutorial-region="title-equipment"]',
   commands: ".command-bar",
   navigation: ".app-rail",
   "events-navigation": '[data-tutorial-region="events-navigation"]',

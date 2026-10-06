@@ -1,5 +1,6 @@
 import { GAME_CONFIG } from "../game/config";
 import { isGameAreaUnlocked } from "../game/progression";
+import { isOfficialSwordSupplierUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
 import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
 import type { GameState } from "../game/types";
@@ -7,6 +8,7 @@ import type { GameState } from "../game/types";
 export const TUTORIAL_REGION_IDS = [
   "title",
   "contacts-counter",
+  "title-equipment",
   "commands",
   "navigation",
   "events-navigation",
@@ -61,6 +63,9 @@ export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as cons
 export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
 /** First yearly departures with no Istruttore assigned (06/10/2026). */
 export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
+/** At 10 members: the swords menu and the purchase (06/10/2026). */
+export const SWORD_PURCHASE_TUTORIAL_SCENE_ID = "sword-purchase" as const;
+export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 10;
 
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
@@ -74,6 +79,7 @@ export const TUTORIAL_SCENE_IDS = [
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
   MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
+  SWORD_PURCHASE_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
   ...LATE_TUTORIAL_SCENE_IDS,
 ] as const;
@@ -83,6 +89,8 @@ export type TutorialSceneId = typeof TUTORIAL_SCENE_IDS[number];
 export interface TutorialRuntimeContext {
   state: GameState;
   activeView: string;
+  /** The swords menu in the title bar is open. */
+  equipmentOpen?: boolean;
 }
 
 type RegionSelection =
@@ -104,6 +112,8 @@ interface TutorialStepBase {
   cardPlacement?: "left" | "right" | "below";
   /** Tornei opens on this tab while the step is shown. */
   tournamentTab?: "results" | "reptile";
+  /** The swords menu in the title bar stays open while the step is shown. */
+  opensEquipment?: boolean;
 }
 
 export interface TutorialDialogStep extends TutorialStepBase {
@@ -443,6 +453,47 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Assegna qualche Collaboratore all'Area [[a:Istruttore]] e fai partire dei corsi: chi impara nuove Forme ha molti più motivi per restare.",
         ],
         focusRegions: ["main"],
+      },
+    ],
+  },
+  {
+    id: SWORD_PURCHASE_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.school.peakActiveMembers >= SWORD_PURCHASE_TUTORIAL_MEMBERS,
+    steps: [
+      {
+        id: "sword-purchase-queue",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Dieci iscritti, sei spade",
+        body: ({ state }) => [
+          `Dieci **Iscritti** e ${state.equipment.totalSwords.toLocaleString("it-IT")} **Spade**: a Genova si chiama ottimizzazione delle risorse. In palestra, invece, si chiama fare la fila.`,
+          "Ogni corso e ogni prova consumano le spade, e prima o poi qualcuna si rompe. Lo stato dell'armeria è tutto in quella spada lassù.",
+        ],
+        focusRegions: ["title", "title-equipment"],
+      },
+      {
+        id: "open-sword-menu",
+        kind: "objective",
+        title: "Apri il menu delle spade",
+        body: ["Premi la spada nella barra in alto."],
+        focusRegions: ["title", "title-equipment"],
+        isComplete: ({ equipmentOpen }) => Boolean(equipmentOpen),
+      },
+      {
+        id: "sword-purchase-supplier",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Spade nuove",
+        body: ({ state }) => [
+          "Libere, in uso, rotte, usura: qui c'è tutto. Quando le spade non bastano più, si comprano da questo bottone.",
+          isOfficialSwordSupplierUnlocked(state.upgrades)
+            ? "Il conto con il fornitore è già aperto: con ×1, ×10 e ×100 scegli quante comprarne in una volta."
+            : "Prima però serve sbloccare «Fornitore ufficiale», nel ramo Attrezzatura degli [[Upgrade]]. Attento ai prezzi di Lama di Luce, gli piace cambiare!",
+        ],
+        focusRegions: ["title", "title-equipment"],
+        opensEquipment: true,
+        cardPlacement: "below",
       },
     ],
   },
