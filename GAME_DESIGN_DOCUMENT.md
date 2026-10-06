@@ -2005,7 +2005,9 @@ Fondi non si ripetono: sono già nella barra delle informazioni. Sotto, una riga
 completati (senza il totale: quanti ne mancano resta una sorpresa) e la legenda
 (da comprare, fondi insufficienti, completati, da scoprire); il riepilogo **Bonus totali** è una tendina chiusa. Ogni ramo è
 una **corsia**: a sinistra icona, nome, riepilogo dell'effetto e **punti nel
-ramo**; a destra i nodi, in nove colonne uguali per tutti i rami, disposti su
+ramo**; una piccola **«i»** in alto a destra del nome apre «A cosa serve», una
+frase su cosa migliora il ramo per chi gioca (senza anticipare i nodi
+nascosti; si chiude cliccando altrove; decisione del 06/10/2026, concept O3); a destra i nodi, in nove colonne uguali per tutti i rami, disposti su
 un'**onda** (un nodo in alto e uno in basso). L'onda si accende fino al nodo
 dopo l'ultimo completato. Ogni nodo non completato mostra livello e prezzo
 («2/5 · 600 €»). Un nodo **non ancora sbloccato** non si vede: al suo posto c'è

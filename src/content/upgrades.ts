@@ -120,18 +120,19 @@ export interface UpgradeDefinition {
 export const UPGRADE_CATEGORIES: Array<{
   id: UpgradeCategory;
   title: string;
+  /** What the branch improves for the player, in the «i» next to its name. No spoilers of hidden nodes. */
   description: string;
 }> = [
-  { id: "speed", title: "Scrittura", description: "Rende più rapida la produzione di email e contenuti Social." },
-  { id: "writing", title: "Creatività", description: "Migliora i cataloghi email e la probabilità di ottenere una prova." },
-  { id: "charisma", title: "Carisma", description: "Migliora pubblico, dimostrazioni e **Contatti** durante gli eventi." },
-  { id: "welcome", title: "Accoglienza", description: "Migliora lezioni di prova e conversione in nuovi **Iscritti**." },
-  { id: "equipment", title: "Attrezzatura", description: "Apre l'acquisto delle **Spade**, riduce l'usura programmata e automatizza la manutenzione." },
-  { id: "gadget", title: "Gadget", description: "Amplia il pubblico e rende più rapidi sviluppo, revisioni e vendite." },
-  { id: "instructors", title: "Insegnamento", description: "Sviluppa [[a:Istruttori]], Tecnici e preparazione agonistica." },
-  { id: "organization", title: "Organizzazione", description: "Coordina collaboratori, automazioni ed entrate ricorrenti." },
-  { id: "network", title: "Rete dell'Ordine", description: "Si apre con le scuole fondate: più è grande la [[Rete]], più vale." },
-  { id: "secrets", title: "Percorsi Segreti", description: "Alcuni percorsi si rivelano soltanto compiendo imprese particolari." },
+  { id: "speed", title: "Scrittura", description: "Ogni tasto vale di più: le email partono prima e la [[a:Redazione]] corre da sola." },
+  { id: "writing", title: "Creatività", description: "Email più chiare e più belle: più **Contatti** prenotano la lezione di prova." },
+  { id: "charisma", title: "Carisma", description: "Più gente si ferma allo stand, e più gente lascia i suoi contatti." },
+  { id: "welcome", title: "Accoglienza", description: "Una prima lezione che non si dimentica: più prove diventano **Iscritti**." },
+  { id: "equipment", title: "Attrezzatura", description: "**Spade** che si consumano meno e si riparano da sole. O quasi." },
+  { id: "gadget", title: "Gadget", description: "Gadget pronti prima e venduti a più gente: anche il banchetto porta entrate." },
+  { id: "instructors", title: "Insegnamento", description: "[[a:Istruttori]] più preparati e corsi più efficaci: gli allievi crescono prima." },
+  { id: "organization", title: "Organizzazione", description: "Collaboratori coordinati: più lavoro automatico, meno euro dispersi per strada." },
+  { id: "network", title: "Rete dell'Ordine", description: "Più la [[Rete]] è grande, più ogni scuola ne approfitta." },
+  { id: "secrets", title: "Percorsi Segreti", description: "Si rivelano solo compiendo imprese particolari. Il resto è un segreto, appunto." },
 ];
 
 const LEVEL_GROWTH = 1;

@@ -153,6 +153,19 @@ describe("UpgradesView", () => {
     expect(screen.queryByText("ToccoDiGilo")).not.toBeInTheDocument();
   });
 
+  it("explains what each branch improves behind the «i» next to its name", () => {
+    render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
+
+    const creativity = screen.getByRole("region", { name: "Creatività" });
+    const goal = within(creativity).getByText("A cosa serve").closest("details")!;
+    expect(goal).not.toHaveAttribute("open");
+    fireEvent.click(within(creativity).getByText("i", { selector: "summary" }));
+    expect(goal).toHaveAttribute("open");
+    expect(goal).toHaveTextContent("più Contatti prenotano la lezione di prova");
+    fireEvent.pointerDown(document.body);
+    expect(goal).not.toHaveAttribute("open");
+  });
+
   it("does not name the hidden node that follows in the details window", () => {
     render(<UpgradesView state={createInitialState(1_000)} onBuyUpgrade={() => undefined} />);
 

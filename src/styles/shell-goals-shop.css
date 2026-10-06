@@ -278,6 +278,86 @@
   font-weight: 600;
 }
 
+/* «A cosa serve»: a small «i» at the top right of the branch name. */
+.upgrade-lane {
+  position: relative;
+}
+
+.upgrade-lane:has(.upgrade-branch-goal[open]) {
+  z-index: 3;
+}
+
+.upgrade-lane-title {
+  position: relative;
+}
+
+.upgrade-branch-goal {
+  align-self: flex-start;
+  margin-left: -5px;
+}
+
+.upgrade-branch-goal summary {
+  position: relative;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  place-items: center;
+  border: 1px solid var(--accent-ink);
+  border-radius: 50%;
+  color: var(--accent-ink);
+  cursor: pointer;
+  font-family: Georgia, serif;
+  font-size: 9px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  list-style: none;
+}
+
+/* A bigger hit area than the 13 px circle. */
+.upgrade-branch-goal summary::after {
+  position: absolute;
+  inset: -9px;
+  content: "";
+}
+
+.upgrade-branch-goal summary::-webkit-details-marker {
+  display: none;
+}
+
+.upgrade-branch-goal[open] summary {
+  color: var(--surface);
+  background: var(--accent-ink);
+}
+
+.upgrade-branch-goal-note {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  width: 250px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: var(--surface);
+  box-shadow: var(--shadow-flyout);
+}
+
+.upgrade-branch-goal-note span {
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.upgrade-branch-goal-note p {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
 .upgrade-lane-heading p {
   margin: 0;
   color: var(--ink-muted);

@@ -791,6 +791,16 @@ export function UpgradesView({
     setSelection(null);
     window.requestAnimationFrame(() => anchor?.focus());
   }, [selection]);
+  // A click anywhere else closes the «A cosa serve» note of a branch.
+  useEffect(() => {
+    const closeGoals = (event: PointerEvent) => {
+      document.querySelectorAll<HTMLDetailsElement>(".upgrade-branch-goal[open]").forEach((goal) => {
+        if (!(event.target instanceof Node && goal.contains(event.target))) goal.open = false;
+      });
+    };
+    document.addEventListener("pointerdown", closeGoals);
+    return () => document.removeEventListener("pointerdown", closeGoals);
+  }, []);
   const toggleDetails = (upgradeId: UpgradeId, anchor: HTMLButtonElement) =>
     setSelection((current) => current?.upgradeId === upgradeId ? null : { upgradeId, anchor });
   let availableCount = 0;
@@ -911,6 +921,13 @@ export function UpgradesView({
                       {category.title}
                       {branchComplete ? <span className="sr-only"> (completo)</span> : null}
                     </h3>
+                    <details className="upgrade-branch-goal">
+                      <summary aria-label={`A cosa serve ${category.title}`}>i</summary>
+                      <div className="upgrade-branch-goal-note">
+                        <span>A cosa serve</span>
+                        <p><KeywordText text={category.description} /></p>
+                      </div>
+                    </details>
                   </div>
                   <p>{getCategorySummary(state, category.id)}</p>
                   {isSecrets || category.id === "network" ? null : (
