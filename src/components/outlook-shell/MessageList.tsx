@@ -235,7 +235,7 @@ export function MessageList({
                   Bozza per {activeContact.firstName} {activeContact.lastName}
                 </strong>
                 <small>{activeEmail.status === "readyToSend"
-                    ? "Pronta per l’invio: premi un tasto o fai clic"
+                    ? "Pronta per l’invio: premi Invia"
                     : "Digitazione in corso…"}</small>
               </span>
               <time>{time(activeEmail.createdAt)}</time>

@@ -552,6 +552,7 @@ describe("TutorialLayer", () => {
           <Composer
             state={state}
             onWrite={vi.fn()}
+            onSend={vi.fn()}
             onAutomaticSendingChange={vi.fn()}
           />
         </div>

@@ -32,7 +32,7 @@ describe("Composer", () => {
     };
 
     render(
-      <Composer state={state} onWrite={() => undefined} onAutomaticSendingChange={() => undefined} />,
+      <Composer state={state} onWrite={() => undefined} onSend={() => undefined} onAutomaticSendingChange={() => undefined} />,
     );
 
     expect(screen.getByText("La Redazione sta scrivendo")).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("Composer", () => {
     const { container } = render(
       <Composer
         state={state}
-        onWrite={() => undefined}
+        onWrite={() => undefined} onSend={() => undefined}
         onAutomaticSendingChange={() => undefined}
       />,
     );
@@ -75,7 +75,7 @@ describe("Composer", () => {
     render(
       <Composer
         state={createInitialState(1_000)}
-        onWrite={() => undefined}
+        onWrite={() => undefined} onSend={() => undefined}
         onAutomaticSendingChange={() => undefined}
       />,
     );
@@ -107,7 +107,7 @@ describe("Composer", () => {
     render(
       <Composer
         state={state}
-        onWrite={() => undefined}
+        onWrite={() => undefined} onSend={() => undefined}
         onAutomaticSendingChange={() => undefined}
       />,
     );
@@ -123,7 +123,7 @@ describe("Composer", () => {
     render(
       <Composer
         state={createInitialState(1_000)}
-        onWrite={() => undefined}
+        onWrite={() => undefined} onSend={() => undefined}
         onAutomaticSendingChange={onAutomaticSendingChange}
       />,
     );
@@ -160,7 +160,7 @@ describe("Composer", () => {
     render(
       <Composer
         state={state}
-        onWrite={() => undefined}
+        onWrite={() => undefined} onSend={() => undefined}
         onAutomaticSendingChange={() => undefined}
       />,
     );
@@ -180,7 +180,7 @@ describe("Composer", () => {
     };
 
     const { container } = render(
-      <Composer state={state} onWrite={() => undefined} onAutomaticSendingChange={() => undefined} />,
+      <Composer state={state} onWrite={() => undefined} onSend={() => undefined} onAutomaticSendingChange={() => undefined} />,
     );
 
     const line = container.querySelector<HTMLElement>(".composer-progress")!;

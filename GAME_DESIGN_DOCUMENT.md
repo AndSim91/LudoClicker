@@ -31,7 +31,7 @@ Flusso e la Frase perfetta.
 Le email completate vengono inviate automaticamente per impostazione predefinita
 e invitano il destinatario a partecipare a una singola lezione di prova in
 palestra. Il giocatore può disattivare l'invio automatico per rileggere la mail
-completa e confermarla con un ulteriore input. Dopo un intervallo compresso, il
+completa e spedirla col pulsante Invia. Dopo un intervallo compresso, il
 contatto può prenotare oppure sparire definitivamente. Chi partecipa alla
 lezione ha una probabilità di iscriversi che dipende dalla sua rarità, ma non
 la certezza.
@@ -191,7 +191,8 @@ flowchart LR
    perfetta, quando sbloccati).
 4. Quando il corpo è completo, la mail viene inviata automaticamente se il
    toggle «Invio automatico» (attivo per impostazione predefinita) è acceso;
-   altrimenti resta pronta fino al successivo input o al pulsante Invia.
+   altrimenti resta pronta finché il giocatore non preme il pulsante Invia
+   (tasti, clic sul corpo e collaboratori non la spediscono).
    L'invio mostra «Invio in corso…» per 0,35 secondi, ma non blocca: la mail
    va in Posta in uscita e la bozza successiva si apre nello stesso istante.
 5. Il contatto viene consumato e viene programmato l'esito ritardato dell'invito
@@ -700,8 +701,8 @@ nella partita. Al completamento:
 
 1. il cursore si ferma alla fine del testo;
 2. con l'invio automatico attivo la mail parte subito; con l'opzione disattivata
-   resta completamente visibile finché il giocatore non preme un tasto, fa
-   clic o preme **Invia** (i collaboratori non la spediscono);
+   resta completamente visibile finché il giocatore non preme **Invia**
+   (né i tasti, né i clic sul corpo, né i collaboratori la spediscono);
 3. la mail va in Posta in uscita e si apre subito la mail successiva, se esiste
    un contatto disponibile: si continua a scrivere senza aspettare;
 4. per 350 ms compare la notifica Outlook “Invio in corso…”, poi la mail passa
@@ -2863,8 +2864,7 @@ Azioni:
 - aprire comunicazioni di sblocco.
 
 La composizione ha l'interruttore **Invio automatico**: attivo, la bozza
-completata parte da sola; disattivo, si invia con un ultimo tasto o con il
-pulsante **Invia**. Dopo l'acquisto di Ritmo di battitura la composizione
+completata parte da sola; disattivo, si invia solo con il pulsante **Invia**. Dopo l'acquisto di Ritmo di battitura la composizione
 mostra anche l'indicatore del Flusso. La Posta in arrivo è divisa in
 **Evidenziata** e **Altra**; la Posta inviata mostra le campagne già spedite.
 
@@ -3048,7 +3048,7 @@ l'avanzamento.
 2. **Prima campagna inviti**\
    L'obiettivo “Invia la tua prima mail” chiede di scrivere premendo qualunque
    tasto mentre il tempo resta fermo, e spiega che con Invio automatico
-   disattivo si invia con un ultimo tasto o clic. La scena termina quando la
+   disattivo la bozza resta ferma finché non si preme Invia. La scena termina quando la
    bozza passa a “Invio in corso...”; a quel punto il tempo riparte e inizia la
    missione “Tre inviti in partenza”, che conta tre email ulteriori rispetto a
    quelle già inviate o in invio. Gli Eventi si sbloccano soltanto al
@@ -5163,7 +5163,7 @@ sembra un'applicazione di posta reale.
 
 Copertura attuale: `tests/e2e/game.spec.ts` verifica che un tasto e un clic
 nel corpo scrivano (2 caratteri) e che una mail completata si invii anche
-senza invio automatico. Ripetizione, modificatori, clic fuori dal corpo e
+senza invio automatico solo col pulsante Invia. Ripetizione, modificatori, clic fuori dal corpo e
 scorciatoie non hanno un test automatico.
 
 ### Economia
@@ -5294,7 +5294,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - L'invio è automatico e apre subito la mail successiva (dopo circa 0,35
   secondi di «Invio in corso…»). L'interruttore «Invio automatico» nel
   composer, attivo per impostazione predefinita, permette di disattivarlo: in
-  quel caso la mail completata si invia con un ulteriore tasto o clic.
+  quel caso la mail completata si invia solo col pulsante Invia.
 - Le email e i relativi modelli sono scelti automaticamente e possono ripetersi:
   i 100 modelli del catalogo si susseguono in ordine ciclico e il livello di
   presentazione dipende dai potenziamenti Creatività.

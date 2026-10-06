@@ -20,10 +20,12 @@ export const EMAIL_RUSH_PER_MINUTE = 30;
 export function Composer({
   state: stateOverride,
   onWrite,
+  onSend,
   onAutomaticSendingChange,
 }: {
   state?: GameState;
   onWrite: () => void;
+  onSend: () => void;
   onAutomaticSendingChange: (enabled: boolean) => void;
 }) {
   const selection = useGameSelector(
@@ -63,11 +65,11 @@ export function Composer({
   const readyToSend = email.status === "readyToSend";
   const progressPercent = Math.min(100, (email.revealedCharacters / Math.max(1, buildLength)) * 100);
   const bodyLabel = readyToSend
-    ? "Corpo del messaggio. Email completata. Premi un tasto o fai clic per inviare."
+    ? "Corpo del messaggio. Email completata. Premi Invia per spedirla."
     : "Corpo del messaggio. Premi un tasto o fai clic per continuare a scrivere.";
   return (
     <main className="composer" data-email-status={email.status}>
-      <div className="composer-tabs"><button className="active" type="button">Messaggio</button><button type="button">Inserisci</button><button type="button">Opzioni</button><button type="button">Formato testo</button><span /><button type="button" disabled={!readyToSend} onClick={onWrite}><Icon name="send" /> Invia</button><button type="button" disabled><Icon name="attach" /> Allega</button></div>
+      <div className="composer-tabs"><button className="active" type="button">Messaggio</button><button type="button">Inserisci</button><button type="button">Opzioni</button><button type="button">Formato testo</button><span /><button type="button" disabled={!readyToSend} onClick={onSend}><Icon name="send" /> Invia</button><button type="button" disabled><Icon name="attach" /> Allega</button></div>
       <div className="format-bar"><select aria-label="Tipo di carattere" defaultValue="Segoe UI"><option>Segoe UI</option></select><select aria-label="Dimensione carattere" defaultValue="11"><option>11</option></select><b>G</b><i>I</i><u>S</u><span>☷</span><span>≡</span><span>↗</span></div>
       <div
         className="mail-fields"
@@ -119,7 +121,7 @@ export function Composer({
           />
         </label>
         <em>{readyToSend
-            ? "Email completa · premi un tasto o fai clic per inviare"
+            ? "Email completa · premi Invia per spedirla"
             : "Digitazione in corso…"}</em>
         <WritingFlowMeter state={stateOverride} />
         <span className="composer-status-count">{displayedRevealedCharacters} / {buildLength} caratteri · {displayedWritingPower} per input</span>

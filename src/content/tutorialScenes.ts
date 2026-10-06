@@ -175,7 +175,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Invia la tua prima mail",
         body: [
-          "Premi un tasto qualsiasi fino a completare la bozza. Con Invio automatico attivo partirà subito; se lo disattivi, potrai rileggerla e inviarla con un ultimo tasto o clic. Non preoccuparti degli errori di battitura: siamo solo agli inizi.",
+          "Premi un tasto qualsiasi fino a completare la bozza. Con Invio automatico attivo partirà subito; se lo disattivi, resterà in bozza finché non premi Invia: né tu né i collaboratori la spedirete al posto tuo. Non preoccuparti degli errori di battitura: siamo solo agli inizi.",
         ],
         focusRegions: ["main", "composer-body"],
         isComplete: ({ state }) => state.emails.some((email) => email.status === "sending"),

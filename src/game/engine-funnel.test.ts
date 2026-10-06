@@ -114,7 +114,7 @@ describe("game engine: funnel", () => {
     expect(completed.emails[0].sendCompletesAt).toBe(2_000 + GAME_CONFIG.sendDelayMs);
   });
 
-  it("waits for one explicit final input when automatic sending is disabled", () => {
+  it("waits for the Invia button when automatic sending is disabled", () => {
     const state = createInitialState(1_000);
     const completed = gameReducer(
       {
@@ -136,7 +136,11 @@ describe("game engine: funnel", () => {
     });
     expect(enabledWhileWaiting.emails[0].status).toBe("sending");
 
-    const sending = gameReducer(completed, { type: "WRITE", now: 2_002 });
+    // Tasti e clic non bastano: serve il pulsante «Invia».
+    const typed = gameReducer(completed, { type: "WRITE", now: 2_002 });
+    expect(typed.emails[0].status).toBe("readyToSend");
+
+    const sending = gameReducer(completed, { type: "SEND_EMAIL", now: 2_002 });
     expect(sending.emails[0].status).toBe("sending");
     expect(sending.emails[0].sendCompletesAt).toBe(2_002 + GAME_CONFIG.sendDelayMs);
     // Posta in uscita: mentre parte, la bozza successiva è già aperta.

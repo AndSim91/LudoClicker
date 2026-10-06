@@ -227,14 +227,17 @@ test("completa e invia una mail senza invio automatico", async ({ page }) => {
   });
   await composer.click();
   const completedComposer = page.getByRole("button", {
-    name: "Corpo del messaggio. Email completata. Premi un tasto o fai clic per inviare.",
+    name: "Corpo del messaggio. Email completata. Premi Invia per spedirla.",
   });
   // Flusso writes more than one character per key: type until the draft is complete.
   for (let typed = 1; typed < totalCharacters && !(await completedComposer.isVisible()); typed += 1) {
     await page.keyboard.press("a");
   }
   await expect(completedComposer).toBeVisible();
+  // Tasti e clic non la spediscono: serve il pulsante Invia.
   await completedComposer.click();
+  await expect(completedComposer).toBeVisible();
+  await page.getByRole("button", { name: "Invia", exact: true }).click();
   await expect(page.getByText(/Bozza per/).first()).toBeVisible();
   await page.getByRole("button", { name: "Posta inviata", exact: true }).click();
   await expect(page.locator(".sent-row")).toHaveCount(1);

@@ -348,6 +348,10 @@ export function App() {
     () => dispatch({ type: "WRITE", now: getGameNow() }),
     [dispatch, getGameNow],
   );
+  const sendEmail = useCallback(
+    () => dispatch({ type: "SEND_EMAIL", now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
   const buyOfficialSwords = useCallback(
     (amount: 1 | 10 | 100) =>
       dispatch({ type: "BUY_OFFICIAL_SWORD", amount, now: getGameNow() }),
@@ -721,6 +725,7 @@ export function App() {
               ) : (
                 <StableComposer
                   onWrite={write}
+                  onSend={sendEmail}
                   onAutomaticSendingChange={setAutomaticEmailSending}
                 />
               )}

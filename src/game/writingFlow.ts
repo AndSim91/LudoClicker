@@ -40,9 +40,9 @@ export function writeCharacters(
   const activeEmail = selectActiveEmail(state);
   if (!activeEmail || amount <= 0) return state;
   if (activeEmail.status === "readyToSend") {
-    return source === "manual" || state.automation.autoSendEmails
-      ? sendEmail(state, now)
-      : state;
+    // Invio automatico spento: la bozza parte solo col pulsante «Invia» (SEND_EMAIL),
+    // né i tasti né la Redazione la spediscono.
+    return state.automation.autoSendEmails ? sendEmail(state, now) : state;
   }
   if (activeEmail.status !== "writing") return state;
   const buildLength = getEmailBuildLength(activeEmail);
