@@ -437,7 +437,7 @@ describe("game engine: progression", () => {
       ...initial,
       contacts: [athlete],
       collaborators: [lessonCollaborator],
-      automation: { ...initial.automation, lessonBuffer: 0.99 },
+      automation: { ...initial.automation, lessonBuffer: 0.995 },
       upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
     }, { type: "TICK", now: 2_000 });
     const improved = automated.contacts[0];
@@ -510,7 +510,7 @@ describe("game engine: progression", () => {
       ...initial,
       randomSeed: seed,
       contacts: [favorite, ordinary],
-      automation: { ...initial.automation, lessonBuffer: 0.99 },
+      automation: { ...initial.automation, lessonBuffer: 0.995 },
       collaborators: [{
         id: "collaborator-favorite-priority",
         contactId: initial.contacts[2].id,
@@ -706,7 +706,7 @@ describe("game engine: progression", () => {
       formId: "form-1",
       trainingTrack: "instructor",
       trainingPhase: "instructor",
-      trainingBaseDurationMs: 7_500,
+      trainingBaseDurationMs: 10_000,
     });
   });
 
@@ -797,10 +797,10 @@ describe("game engine: progression", () => {
     expect(training.collaborators[0].lastFormTrainingYear).toBe(2);
     expect(training.collaborators[0].formTrainingYearCount).toBe(1);
     expect(training.collaborators[0].training?.includesInstructorCertification).toBe(true);
-    expect(training.collaborators[0].training?.trainingBaseDurationMs).toBe(15_000);
-    expect(training.collaborators[0].training?.completesAt).toBe(9_500);
+    expect(training.collaborators[0].training?.trainingBaseDurationMs).toBe(20_000);
+    expect(training.collaborators[0].training?.completesAt).toBe(12_000);
     expect(pagoSportTraining.school.euros).toBe(325);
-    expect(pagoSportTraining.collaborators[0].training?.completesAt).toBe(8_000);
+    expect(pagoSportTraining.collaborators[0].training?.completesAt).toBe(10_000);
   });
 
   it("counts an Instructor's July course in the upcoming year and group teaching adds one slot", () => {
@@ -1454,7 +1454,7 @@ describe("game engine: progression", () => {
     expect(getAvailableForms({ ...longFormFive, forms: [...longFormFive.forms] }, 8).map((form) => form.id)).toEqual(["form-6"]);
 
     const legendary = { ...longFormFive, rarity: "legendary" as const, forms: [...longFormFive.forms, "form-6"] as const, lastFormTrainingYear: 8 };
-    expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(2);
+    expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(1.5);
     expect(getAvailableForms({ ...legendary, forms: [...legendary.forms] }, 9).map((form) => form.id)).toEqual(["form-7"]);
 
     const rareReady = {

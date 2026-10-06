@@ -18,7 +18,6 @@ import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
-import { isSummerBreak } from "./calendar";
 import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
@@ -103,7 +102,6 @@ export function selectAthleticPreparationInstructorIds(state: GameState): Set<st
   const activeInstructorIds = new Set<string>();
   if (
     !isAthleticPreparationUnlocked(state.upgrades) ||
-    isSummerBreak(state.school.currentMonth) ||
     !state.contacts.some((contact) => contact.status === "enrolled")
   ) return activeInstructorIds;
 

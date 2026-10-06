@@ -89,7 +89,10 @@ export const GAME_CONFIG = {
   technicalArenaDurationsMs: [120_000, 100_000, 80_000, 60_000, 40_000],
   agonistCourseBaseCost: 1_000,
   agonistCourseDurationMs: 60_000,
-  lessonImprovementIntervalMs: 60_000,
+  // Athletic preparation (06/10): one improvement every 2 minutes per point of
+  // productivity, every 5 minutes in July and August.
+  lessonImprovementIntervalMs: 120_000,
+  lessonImprovementSummerIntervalMs: 300_000,
   athleticPreparationFavoriteChance: 0.05,
   socialBaseContentCharacters: 100_000,
   socialBaseFollowerChance: 0.5,

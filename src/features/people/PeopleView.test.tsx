@@ -1193,7 +1193,7 @@ describe("PeopleView", () => {
   });
 
   it.each([7, 8])(
-    "shows the athletic preparation summer break in aggregate month %i",
+    "shows the slower summer athletic preparation in aggregate month %i",
     (currentMonth) => {
       const initial = createInitialState(1_000);
       const instructor = {
@@ -1213,13 +1213,18 @@ describe("PeopleView", () => {
         <PeopleView
           state={{
             ...initial,
-            school: { ...initial.school, currentMonth },
+            school: { ...initial.school, currentMonth, activeMembers: 1 },
+            // Someone to prepare: in summer the free instructors keep working.
+            contacts: initial.contacts.map((contact, index) =>
+              index === 1 ? { ...contact, status: "enrolled" as const } : contact),
             collaborators: [instructor],
             upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
             unlocks: { ...initial.unlocks, collaborators: true },
             collaboratorManagement: {
               ...initial.collaboratorManagement,
               aggregateViewUnlocked: true,
+              // One instructor wanted, so ours is not being released.
+              targets: { ...initial.collaboratorManagement.targets, instructor: 1 },
             },
           }}
           onAssign={() => undefined}
@@ -1227,13 +1232,13 @@ describe("PeopleView", () => {
         />,
       );
 
-      expect(screen.getByText("Pausa estiva")).toBeVisible();
+      // July and August: one improvement every 5 minutes instead of 2 (06/10).
+      expect(screen.getByText("Estate")).toBeVisible();
       const preparationBar = screen.getByRole("progressbar", {
-        name: "Preparazione atletica in pausa",
+        name: "Preparazione atletica estiva",
       });
-      expect(preparationBar).toHaveClass("is-inactive");
-      expect(preparationBar).not.toHaveClass("is-indeterminate");
-      expect(preparationBar).toHaveAttribute("aria-valuetext", "Pausa estiva");
+      expect(preparationBar).not.toHaveClass("is-inactive");
+      expect(preparationBar).toHaveAttribute("aria-valuetext", "Ritmo estivo, più lento");
     },
   );
 

@@ -593,11 +593,11 @@ export function processInstructorAthleticPreparation(
           automation: { ...state.automation, lessonBuffer: 0 },
         };
   }
-  if (
-    safeElapsedMs <= 0 ||
-    isSummerBreak(state.school.currentMonth) ||
-    !isAthleticPreparationUnlocked(state.upgrades)
-  ) return state;
+  if (safeElapsedMs <= 0 || !isAthleticPreparationUnlocked(state.upgrades)) return state;
+  // In July and August it goes on, slower: free instructors keep the athletes moving.
+  const intervalMs = isSummerBreak(state.school.currentMonth)
+    ? GAME_CONFIG.lessonImprovementSummerIntervalMs
+    : GAME_CONFIG.lessonImprovementIntervalMs;
 
   const availableInstructors = getAvailableAthleticPreparationInstructors(state);
   if (availableInstructors.length === 0) return state;
@@ -613,7 +613,7 @@ export function processInstructorAthleticPreparation(
     (1 + getUpgradeEffectTotal(state.upgrades, "athleticPreparationPower")) *
     getReputationMultiplier(state, "genetics");
   const total = state.automation.lessonBuffer +
-    (safeElapsedMs / GAME_CONFIG.lessonImprovementIntervalMs) *
+    (safeElapsedMs / intervalMs) *
       productivity *
       automationMultiplier *
       preparationMultiplier;

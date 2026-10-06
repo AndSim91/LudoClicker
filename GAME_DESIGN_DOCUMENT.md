@@ -440,7 +440,7 @@ disponibili per una nuova mail.
 I Collaboratori delle Onde sono iscritti che decidono di aiutare attivamente la
 scuola. Sono una sottocategoria degli Iscritti e non una valuta separata.
 Diventano collaboratori solo gli Ultra Rari che completano il Corso Y e i
-Leggendari al momento dell'iscrizione (con produttività doppia). Le
+Leggendari al momento dell'iscrizione (con produttività ×1,5). Le
 assegnazioni possibili sono Redazione (Social dopo lo sblocco), Eventi,
 Attrezzatura, Istruttore e Gadget.
 
@@ -1182,8 +1182,8 @@ Comuni e Rari non diventano Collaboratori delle Onde. Gli Ultra Rari diventano
 collaboratori dopo aver completato il **Corso Y**. I Leggendari diventano
 collaboratori fin dall'iscrizione. Il passaggio è automatico e certo: all'arrivo
 di ogni nuovo collaboratore la Posta riceve il messaggio **Nuovo collaboratore
-disponibile**. Nella produttività di ogni ruolo un Leggendario vale ×2, un Ultra
-Raro ×1.
+disponibile**. Nella produttività di ogni ruolo un Leggendario vale ×1,5 (×2
+fino al 06/10), un Ultra Raro ×1.
 
 La probabilità può aumentare con:
 
@@ -1395,11 +1395,12 @@ anticipo.
 La Preparazione atletica (Preparazione agonistica) si sblocca con il livello 5
 di **Nessun *Rancor*e** ed è svolta dagli Istruttori che non stanno insegnando,
 non sono in formazione e non stanno tenendo un Corso Istruttori interno come
-Tecnici. Ogni Istruttore produce un miglioramento al minuto per ogni punto di
-produttività (bonus Staffa e Forme 6/7 contano solo se attestati, più rarità e
-Maestria Istruttore), moltiplicato per le automazioni generiche e per
-l'efficacia di Nessun *Rancor*e. Ogni miglioramento assegna +1 Arena oppure +1
-Stile (50% ciascuno) a un iscritto.
+Tecnici. Ogni Istruttore produce un miglioramento **ogni 2 minuti** di gioco per
+ogni punto di produttività (rarità × Maestria Istruttore), moltiplicato per le
+automazioni generiche, per l'efficacia di Nessun *Rancor*e e per la Genetica.
+**A luglio e agosto non si ferma ma rallenta: un miglioramento ogni 5 minuti**
+(decisioni di Andrea del 06/10; prima 1 al minuto e pausa estiva). Ogni
+miglioramento assegna +1 Arena oppure +1 Stile (50% ciascuno) a un iscritto.
 
 La Preparazione atletica opera solo durante il gioco online. La selezione è
 casuale senza priorità legata alla debolezza dell'atleta e impedisce di

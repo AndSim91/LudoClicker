@@ -327,7 +327,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { icon: "trend", label: "Maestria", detail: "Aumenta l'efficacia" },
     ],
     numbers: [
-      { label: "Leggendario", value: "×2", detail: "moltiplicatore base di produttività" },
+      { label: "Leggendario", value: "×1,5", detail: "moltiplicatore base di produttività" },
       { label: "Ultra Raro", value: "×1", detail: "diventa Collaboratore dopo il Corso Y" },
       { label: "Vista aggregata", value: `${GAME_CONFIG.collaboratorAggregateUnlockCount}`, detail: "Collaboratori per gestire posti e priorità" },
       { label: "Leggenda", value: `+${Math.round(COLLABORATOR_MASTERY_LEVELS.at(-1)!.multiplier * 100)}%`, detail: "dopo due ore nello stesso settore" },

@@ -42,7 +42,7 @@ function preparationState(upgradeLevel: number): GameState {
     collaborators: [instructor("idle")],
     automation: {
       ...initial.automation,
-      lessonBuffer: 0.99,
+      lessonBuffer: 0.995,
     },
     upgrades: {
       ...initial.upgrades,
@@ -86,17 +86,17 @@ describe("instructor athletic preparation", () => {
   });
 
   it.each([7, 8])(
-    "pauses athletic preparation during summer month %i",
+    "slows athletic preparation to one improvement every 5 minutes in summer month %i",
     (currentMonth) => {
       const state = preparationState(5);
-      const paused = gameReducer({
+      const summer = gameReducer({
         ...state,
         school: { ...state.school, currentMonth },
       }, { type: "TICK", now: 2_000 });
 
-      expect(paused.contacts[0].arenaBase).toBe(10);
-      expect(paused.contacts[0].styleBase).toBe(10);
-      expect(paused.automation.lessonBuffer).toBe(0.99);
+      expect(summer.contacts[0].arenaBase).toBe(10);
+      expect(summer.contacts[0].styleBase).toBe(10);
+      expect(summer.automation.lessonBuffer).toBeCloseTo(0.995 + 1 / 300, 6);
     },
   );
 

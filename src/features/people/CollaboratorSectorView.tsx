@@ -390,7 +390,7 @@ function InstructorSectorCard({
   const summerBreak = isSummerBreak(state.school.currentMonth);
   const showAthleticPreparation = prepUnlocked && instructors.length > 0;
   const activePreparationInstructorCount = selectAthleticPreparationInstructorIds(state).size;
-  const preparationIsActive = !summerBreak && activePreparationInstructorCount > 0;
+  const preparationIsActive = activePreparationInstructorCount > 0;
   const teachingGroups = useMemo(
     () => groupInstructorTeachingEntries(entries),
     [entries],
@@ -460,27 +460,27 @@ function InstructorSectorCard({
                 <strong>Preparazione atletica</strong>
                 <ProgressBar
                   className={`instructor-preparation-loop${preparationIsActive ? "" : " is-inactive"}`}
-                  label={summerBreak
-                    ? "Preparazione atletica in pausa"
-                    : preparationIsActive
-                      ? "Preparazione atletica continuativa"
-                      : "Preparazione atletica in attesa"}
+                  label={!preparationIsActive
+                    ? "Preparazione atletica in attesa"
+                    : summerBreak
+                      ? "Preparazione atletica estiva"
+                      : "Preparazione atletica continuativa"}
                   value={0}
-                  valueText={summerBreak
-                    ? "Pausa estiva"
-                    : !preparationIsActive
-                      ? "In attesa di istruttori disponibili"
-                      : isPaused
-                        ? "Attività in pausa"
+                  valueText={!preparationIsActive
+                    ? "In attesa di istruttori disponibili"
+                    : isPaused
+                      ? "Attività in pausa"
+                      : summerBreak
+                        ? "Ritmo estivo, più lento"
                         : "Attività continuativa"}
                   indeterminate={preparationIsActive}
                   paused={isPaused}
                 />
-                <small>{summerBreak
-                  ? "Pausa estiva"
-                  : preparationIsActive
-                    ? "∞"
-                    : "In attesa"}</small>
+                <small>{!preparationIsActive
+                  ? "In attesa"
+                  : summerBreak
+                    ? "Estate"
+                    : "∞"}</small>
               </div>
             ) : null}
           </InstructorActivityLane>
