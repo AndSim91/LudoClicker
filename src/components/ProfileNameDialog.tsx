@@ -22,8 +22,8 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
         <span className="profile-eyebrow">LudoSport Genova</span>
         <h1 id="profile-dialog-title">Come ti chiami?</h1>
         <p id="profile-dialog-description">
-          Il tuo nome verrà salvato nel profilo delle email inviate dall&apos;Ordine delle Onde.
-          Potrai modificarlo in qualsiasi momento dalle Impostazioni.
+          Da oggi la scuola ha un nuovo Preside, e le email dell&apos;Ordine delle Onde dovranno pur firmarle qualcuno!
+          Il nome si può cambiare in ogni momento dalle Impostazioni.
         </p>
         <form onSubmit={submit}>
           <input
