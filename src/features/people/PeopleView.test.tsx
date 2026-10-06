@@ -2699,7 +2699,9 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getAllByText("Forma 1", { exact: true })).toHaveLength(1);
+    // Modalità Onde: nessuna etichetta sopra la mappa, il nome resta nel tooltip.
+    expect(screen.queryAllByText("Forma 1", { exact: true })).toHaveLength(0);
+    expect(screen.getByTitle("Forme conosciute: Forma 1")).toHaveClass("form-path-map");
   });
 
   it("does not report Forma 7 when the member has only trained this year", () => {

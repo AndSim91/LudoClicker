@@ -2858,7 +2858,9 @@ Un'unica pagina, in quest'ordine:
   In Modalità Onde (06/10) le Forme di ogni iscritto sono la mappa del percorso
   completo (F1, Corso X se sbloccato, F2, Corso Y, una corsia per Spada Lunga,
   Staffa e Doppie Spade Corte con le Forme 3–5, poi F6 e F7): le Forme imparate
-  sono accese, le altre in ombra (`FormPathMap.tsx`); in tabella l'email va a
+  sono accese, le altre in ombra (`FormPathMap.tsx`); sopra la mappa non c'è più
+  il nome dell'ultima Forma (resta nel tooltip e nel filtro «Percorso») e la mappa
+  è centrata nella riga, in tabella e nelle schede; in tabella l'email va a
   capo dopo la «@» e «Servono…» sta sotto il nome della prossima Forma;
 - riepilogo delle rarità (dopo 10 email inviate, un iscritto non Comune o il
   primo Collaboratore).

@@ -438,3 +438,9 @@
 
 .form-path-node.is-next-instructor { --next-ring: #2f8a57; }
 .form-path-node.is-next-technician { --next-ring: #8b5cf6; }
+
+/* Percorso senza nome (06/10): in Onde la cella ha solo la mappa, centrata nella riga. */
+:root[data-theme="dark"] .people-view .member-row .member-path {
+  align-self: center;
+  justify-content: center;
+}

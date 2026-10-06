@@ -55,7 +55,7 @@ export function MemberCard({
         <strong className={`member-rarity rarity-name ${rarityClass}`}>
           {getPresentedRarityLabel(contact.rarity, secret)}
         </strong>
-        <span>{path}</span>
+        {pathMap ? null : <span>{path}</span>}
       </div>
       {pathMap ? (
         <FormPathMap

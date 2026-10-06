@@ -26,11 +26,13 @@ const formName = (formId: FormId) => getFormDefinition(formId)?.longName ?? form
 function FormPathSkeleton({
   className = "",
   ariaLabel,
+  title,
   node,
   isLaneActive,
 }: {
   className?: string;
   ariaLabel: string;
+  title?: string;
   node: (formId: FormId) => ReactNode;
   isLaneActive: (ids: readonly FormId[]) => boolean;
 }) {
@@ -40,7 +42,7 @@ function FormPathSkeleton({
     ? ["form-1", "course-x", "form-2", "course-y"]
     : ["form-1", "form-2", "course-y"];
   return (
-    <div className={`form-path-map${className ? ` ${className}` : ""}`} aria-label={ariaLabel}>
+    <div className={`form-path-map${className ? ` ${className}` : ""}`} aria-label={ariaLabel} title={title}>
       <span className="form-path-segment">{trunk.map(node)}</span>
       <span className="form-path-lanes">
         {FORM_BRANCHES.map((branch) => {
@@ -99,6 +101,7 @@ export function FormPathMap({
   return (
     <FormPathSkeleton
       ariaLabel={names.length > 0 ? `Forme conosciute: ${names.join(", ")}` : "Forme conosciute: nessuna"}
+      title={names.length > 0 ? `Forme conosciute: ${names.join(", ")}` : undefined}
       node={node}
       isLaneActive={(ids) => ids.some((formId) => learned.has(formId))}
     />

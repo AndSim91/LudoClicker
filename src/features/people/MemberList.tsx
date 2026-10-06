@@ -685,7 +685,8 @@ export function MemberList({
               </strong>
             </span>
             <div className="member-path" data-label="Percorso">
-              <strong>{presentation.path}</strong>
+              {/* Onde: la mappa basta, il nome resta nel tooltip e nel filtro (06/10). */}
+              {outlook ? <strong>{presentation.path}</strong> : null}
               {outlook ? (
                 <FormLogoStrip
                   forms={memberForms}
