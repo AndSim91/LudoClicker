@@ -1969,8 +1969,8 @@ parole sono quelle del giocatore («caratteri a ogni tasto», «contatti a ogni
 evento», «probabilità che chi fa la prova si iscriva»), non quelle del codice.
 
 **Prezzi.** I prezzi nelle tabelle sono quelli di catalogo. In negozio valgono
-**un quarto** e salgono del **20% per ogni livello già comprato nello stesso
-ramo**: prezzo = catalogo × 0,25 × 1,2^(punti del ramo), arrotondato all'euro
+**un quarto** e salgono del **25% per ogni livello già comprato nello stesso
+ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), arrotondato all'euro
 (`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
 rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
 loro i prezzi: è il motivo per fondare, e le cime dei rami si raggiungono
@@ -2349,6 +2349,13 @@ livelli a 2 ore, 72% a 4, 78% a 6. Per non rendere irraggiungibili le cime,
 Fusione documenti, Corso di Marketing, Negozio online, Nessun Rancore e
 PagoSport crescono ×1,5 a livello invece di ×2. Albero completo (Rete esclusa):
 circa 4,5 Mld in negozio.
+
+**25% (decisione di Andrea del 06/10).** Stessa simulazione, seme 1, 5 ore, con
+le regole del 06/10: livelli comprati 30% a 1 ora, 48% a 2, 59% a 3, 66% a 4,
+69% a 5 (con il 20%: 30/55/67/73/77%); euro guadagnati a 5 ore 80 M (90 M con
+il 20%). Albero completo circa 24 Mld (Gadget 9 Mld, Insegnamento 6,8 Mld,
+Accoglienza 3,9 Mld, Carisma 2 Mld, Scrittura e Creatività 1,1 Mld,
+Attrezzatura 250 M, Organizzazione 136 M); l'ultimo livello più caro 4,3 Mld.
 
 ### 10.11 Sblocco progressivo
 

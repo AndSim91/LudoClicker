@@ -43,7 +43,7 @@ describe("game engine: progression", () => {
     expect(first.upgrades["prepared-presentation"]).toBe(1);
     expect(first.school.euros).toBe(187);
     expect(second.upgrades["prepared-presentation"]).toBe(2);
-    expect(second.school.euros).toBe(157);
+    expect(second.school.euros).toBe(156);
   });
 
   it("Compra tutto spends the funds cheapest first until nothing fits", () => {

@@ -379,13 +379,13 @@ export function hasCompletedUpgradePrerequisites(
 }
 
 /**
- * Prices climb by 20% for every level already bought in the same branch, and
+ * Prices climb by 25% for every level already bought in the same branch, and
  * go back down at every new school (upgrades start from zero there): the
  * reason to found one. Catalogue prices count at a quarter. The Rete
  * dell'Ordine (already gated by schools) and the secret paths (Corso X at 1 €)
  * keep their own prices.
  */
-export const UPGRADE_PRICING = { branchGrowth: 0.2, baseScale: 0.25 };
+export const UPGRADE_PRICING = { branchGrowth: 0.25, baseScale: 0.25 };
 
 /** Schools founded needed to buy the next level of a node. */
 export function getRequiredNetworkSchools(

@@ -185,11 +185,11 @@ describe("upgrade catalog", () => {
     expect(getUpgradeCost(writing, 0)).toBe(13);
   });
 
-  it("raises prices by 20% for every level already bought in the same branch", () => {
+  it("raises prices by 25% for every level already bought in the same branch", () => {
     const keyboard = getUpgradeDefinition("comfortable-keyboard")!;
     const levels = { ...createInitialUpgradeLevels(), "writing-rhythm": 2, "spell-check": 3 };
-    // Two points in Scrittura: 50 € × ¼ × 1,2² = 18 €. Creatività does not count.
-    expect(getUpgradeCost(keyboard, 0, levels)).toBe(18);
+    // Two points in Scrittura: 50 € × ¼ × 1,25² ≈ 20 €. Creatività does not count.
+    expect(getUpgradeCost(keyboard, 0, levels)).toBe(20);
     // A new school starts from no levels: back to the catalogue price.
     expect(getUpgradeCost(keyboard, 0, createInitialUpgradeLevels())).toBe(13);
   });
