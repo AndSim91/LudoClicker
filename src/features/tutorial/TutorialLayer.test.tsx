@@ -9,6 +9,9 @@ import {
 import { AppRail } from "../../components/outlook-shell/AppRail";
 import { Composer } from "../../components/outlook-shell/Composer";
 import { createInitialState } from "../../game/initialState";
+import { recruitCollaborator } from "../../game/collaboratorFlow";
+import { unlockGadgetSectorFromTournamentResult } from "../../game/gadgetFlow";
+import type { GameState, TournamentResult } from "../../game/types";
 import "../../styles/tutorial.css";
 import { TutorialLayer } from "./TutorialLayer";
 
@@ -151,6 +154,35 @@ describe("TutorialLayer", () => {
       },
       activeView: "contacts",
     })).toBe(true);
+  });
+
+  it("reaches the Social and Gadget tutorials through the real unlock paths (06/10)", () => {
+    const initial = createInitialState(1_000, "Andrea Ungaro");
+    const social = TUTORIAL_SCENES.find(({ id }) => id === "social-evolution")!;
+    const gadget = TUTORIAL_SCENES.find(({ id }) => id === "gadget-laboratory")!;
+    const team = Array.from({ length: 14 }, (_, index) => ({
+      id: `c${index}`, contactId: `x${index}`, displayName: "C", joinedAt: 1_000,
+      forms: [], instructorForms: [], assignment: null, rarity: "ultra-rare",
+    })) as GameState["collaborators"];
+    const withTeam = { ...initial, collaborators: team };
+    expect(social.canStart({ state: withTeam, activeView: "mail" })).toBe(false);
+    const recruited = recruitCollaborator(
+      withTeam,
+      { ...initial.contacts[0], rarity: "legendary" },
+      2_000,
+    );
+    expect(social.canStart({ state: recruited, activeView: "mail" })).toBe(true);
+
+    const champions = {
+      id: "r", level: "champions", season: 1, completedAt: 1_000, matches: [],
+      participants: [{ id: "w", ownedContactId: "owned" }],
+      arenaRanking: ["other"], styleRanking: ["w"],
+    } as unknown as TournamentResult;
+    const academy = { ...champions, level: "academy", arenaRanking: ["w"] } as TournamentResult;
+    expect(gadget.canStart({ state: unlockGadgetSectorFromTournamentResult(initial, academy, 2_000), activeView: "mail" })).toBe(false);
+    const gadgetOpen = unlockGadgetSectorFromTournamentResult(initial, champions, 2_000);
+    expect(gadget.canStart({ state: gadgetOpen, activeView: "mail" })).toBe(true);
+    expect(gadgetOpen.gadgets.products.keychain.unlocked).toBe(true);
   });
 
   it("starts the paused Gadget tutorial only after the permanent unlock", () => {

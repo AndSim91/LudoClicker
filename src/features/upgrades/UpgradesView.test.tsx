@@ -150,7 +150,7 @@ describe("UpgradesView", () => {
       getUpgradeDefinition("social-content-synthesis")!.effectLabel,
     )).toBeVisible();
     expect(screen.getByText("9 punti in Scrittura (ne hai 0)")).toBeVisible();
-    expect(screen.getByText("Social sbloccato")).toBeVisible();
+    expect(screen.getByText("Social sbloccato (15 collaboratori)")).toBeVisible();
     expect(screen.getByRole("button", { name: /^Bloccato ·/ })).toBeDisabled();
 
     fireEvent.keyDown(window, { key: "Escape" });
