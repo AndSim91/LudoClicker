@@ -56,6 +56,12 @@ function catalogueCost(definition: (typeof UPGRADE_DEFINITIONS)[number], level: 
 }
 
 describe("upgrade catalog", () => {
+  it("keeps every branch within ten upgrades (AGENTS.md, 06/10)", () => {
+    for (const category of UPGRADE_CATEGORIES) {
+      expect(definitionsFor(category.id).length, category.id).toBeLessThanOrEqual(10);
+    }
+  });
+
   it("contains eight public branches plus the secret row", () => {
     expect(UPGRADE_CATEGORIES.map((category) => category.id)).toEqual([
       "speed",

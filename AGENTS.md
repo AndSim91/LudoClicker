@@ -22,3 +22,10 @@
   un rischio concreto di regressione.
 - Se un controllo ampio è necessario, eseguire prima i controlli rapidi e non
   ripetere inutilmente test già superati.
+
+## Regole di gioco
+
+- Ogni ramo degli Upgrade ha al massimo **10 potenziamenti** visibili
+  (decisione del 06/10/2026). Per aggiungerne uno a un ramo pieno bisogna
+  prima valutare se integrarlo in un potenziamento esistente oppure eliminarne
+  un altro per fargli posto. Il controllo è in `src/content/upgrades.test.ts`.
