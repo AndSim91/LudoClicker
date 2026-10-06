@@ -366,15 +366,22 @@
   row-gap: 8px;
 }
 
-.form-path-map.is-coverage .form-path-segment,
-.form-path-map.is-coverage .form-path-lane {
-  gap: 10px;
+/* Spazio tra le Forme stretto: si allarga solo quanto serve ai numeri.
+   Nelle corsie le colonne si allineano sul numero più largo di ognuna. */
+.form-path-map.is-coverage .form-path-segment {
+  gap: 6px;
 }
 
 .form-path-map.is-coverage .form-path-lanes {
+  grid-template-columns: auto repeat(3, auto);
+  align-items: center;
   gap: 6px;
-  margin: 0 10px;
-  padding: 3px 8px;
+  margin: 0 8px;
+  padding: 3px 6px;
+}
+
+.form-path-map.is-coverage .form-path-lane {
+  display: contents;
 }
 
 .form-path-map.is-coverage .form-path-lane-mark {
@@ -382,16 +389,19 @@
   font-size: 11px;
 }
 
+.form-path-map.is-coverage .form-cover-node {
+  justify-content: flex-end;
+}
+
 .form-cover-node {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .form-cover-numbers {
   display: grid;
   grid-template-rows: 13px;
-  min-width: 26px;
   justify-items: end;
   align-content: center;
   font: 700 12px/13px var(--font-display);
