@@ -2566,7 +2566,10 @@ legenda (Allievi · Corso Istruttori · Corso Tecnici, Istruttori · Tecnici) e
 la **riga degli allenamenti**: a sinistra la Preparazione atletica, a destra
 Arena Tecnica / Corso Agonisti con un solo quadrante azzurro (lo insegna
 chiunque, quindi niente numeri Istruttori) e «N atleti · %». Prima dello
-sblocco ognuna delle due non si vede, ma il suo posto resta. Arena Tecnica ha
+sblocco ognuna delle due non si vede, ma il suo posto resta. Su uno schermo
+grande (corpo della scheda da 1260 px in su) le due barre passano in una
+colonna a destra della mappa e la mappa cresce di un quinto; quando la scheda
+si stringe tornano nella riga sotto la mappa. Arena Tecnica ha
 l'emblema su **fondo rosso** (`arena-tecnica.png`), il Corso Agonisti su fondo
 azzurro con la stella. A destra le pastiglie (Forme insegnabili, in arrivo,
 allievi, in formazione) e l'Ufficio formazione, che tiene sempre due posti (il

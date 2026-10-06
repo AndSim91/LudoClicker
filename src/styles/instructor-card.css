@@ -216,6 +216,47 @@
 
 .instructor-agonist-course > small b { color: var(--ring-students); font-weight: 600; }
 
+/* Schermo grande (06/10, Andrea): Preparazione atletica e Corso Agonisti in una
+   colonna a destra della mappa, che prende tutta l'altezza; quando la scheda
+   si stringe tornano nella riga sotto la mappa. */
+.instructor-sector-card.is-quadrants .instructor-sector-body {
+  container: instructor-body / inline-size;
+}
+
+@container instructor-body (min-width: 1260px) {
+  .instructor-sector-map {
+    grid-template-areas:
+      "map train"
+      "legend train";
+    grid-template-columns: minmax(0, 1fr) 270px;
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: 16px;
+  }
+
+  /* Con la riga sotto libera, la mappa cresce di un quinto. */
+  .instructor-sector-map .form-path-map.is-coverage { grid-area: map; zoom: 1.2; }
+  .instructor-ring-legend { grid-area: legend; }
+
+  .instructor-training-row {
+    grid-area: train;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .instructor-training-row .athletic-preparation-course {
+    grid-template-columns: 22px minmax(0, 1fr);
+    row-gap: 6px;
+    padding-block: 8px;
+  }
+
+  .instructor-training-row .athletic-preparation-course > .progress-bar,
+  .instructor-training-row .athletic-preparation-course > small {
+    grid-column: 1 / -1;
+  }
+}
+
 /* ---------- Colonna destra: numeri e Ufficio formazione ---------- */
 .instructor-sector-side {
   display: flex;
