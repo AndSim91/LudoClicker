@@ -567,6 +567,12 @@
   stroke-linecap: round;
 }
 
+/* .gym-clash now lives on an HTML layer in the gym (origin = its box); in the
+   arena it is an SVG <g>, where "center" would mean the whole arena. */
+svg g.gym-clash {
+  transform-box: fill-box;
+}
+
 .fd-touch {
   transform-box: fill-box;
   transform-origin: center;
