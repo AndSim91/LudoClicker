@@ -294,6 +294,32 @@
   border-radius: 3px;
 }
 
+/* E2a: una tacca per evento in corso, la più vicina all'esito a sinistra. */
+.event-ticks {
+  display: flex;
+  height: 30px;
+  gap: 2px;
+}
+
+.event-ticks > i {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 2px;
+  /* Pochi eventi: colonnine strette, non blocchi larghi quanto la card. */
+  max-width: 16px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(2 30 51 / 75%);
+}
+
+.event-ticks > i > b {
+  position: absolute;
+  inset: 0;
+  transform-origin: bottom;
+  /* scaleY, not height: the fill moves without a layout pass. */
+  background: linear-gradient(0deg, var(--onde-teal), var(--onde-wave));
+}
+
 .sector-scene-row .progress-bar > span {
   display: block;
   height: 100%;

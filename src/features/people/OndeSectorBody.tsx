@@ -7,8 +7,6 @@ import { formatCurrency, formatPercent } from "../../shared/formatters";
 import type { CollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { SectorScene } from "./SectorScene";
 
-const MAX_EVENT_ROWS = 2;
-
 function SceneRow({ row }: { row: CollaboratorAutomationPresentation }) {
   return (
     <div className={`sector-scene-row${row.inactive ? " is-inactive" : ""}`}>
@@ -41,24 +39,34 @@ function SceneFact({ label, value }: { label: string; value: string }) {
   );
 }
 
-type SceneRowData = CollaboratorAutomationPresentation & { key?: string };
+function getEventProgress(event: GameState["acquisitionEvents"][number], now: number) {
+  const duration = event.resolvesAt - event.startedAt;
+  return duration <= 0 ? 100 : Math.min(100, Math.max(0, (now - event.startedAt) / duration * 100));
+}
 
-function getRunningEventRows(state: GameState, now: number): SceneRowData[] {
-  return state.acquisitionEvents
+/**
+ * E2a (06/10): one tick per running event, nearest to its result first, filled
+ * from the bottom. Any number of events fits the same row.
+ */
+function EventTicks({ state, now }: { state: GameState; now: number }) {
+  const running = state.acquisitionEvents
     .filter((event) => event.status === "running" && event.collaboratorId)
-    .sort((a, b) => a.resolvesAt - b.resolvesAt)
-    .slice(0, MAX_EVENT_ROWS)
-    .map((event) => {
-      const duration = event.resolvesAt - event.startedAt;
-      return {
-        // Two Volantinaggi share the title: a shared key left ghost rows in the card.
-        key: event.id,
-        title: `${event.title} · ${event.location}`,
-        progress: duration <= 0 ? 100 : Math.min(100, Math.max(0, (now - event.startedAt) / duration * 100)),
-        progressLabel: event.title,
-        durationMs: duration,
-      };
-    });
+    .sort((a, b) => a.resolvesAt - b.resolvesAt);
+  const progress = running.map((event) => getEventProgress(event, now));
+  const average = progress.reduce((sum, value) => sum + value, 0) / running.length;
+  return (
+    <div className="sector-scene-row">
+      <span>
+        <strong>{running.length} {running.length === 1 ? "evento" : "eventi"} in corso</strong>
+        <small>media {Math.round(average)}%</small>
+      </span>
+      <div className="event-ticks" aria-hidden="true">
+        {running.map((event, index) => (
+          <i key={event.id}><b style={{ transform: `scaleY(${progress[index] / 100})` }} /></i>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function getMonthlyGadgetSales(state: GameState) {
@@ -114,12 +122,12 @@ export function OndeSectorBody({
   }
 
   if (role === "events") {
-    const rows = getRunningEventRows(state, now);
+    const anyRunning = state.acquisitionEvents.some((event) => event.status === "running" && event.collaboratorId);
     return (
       <>
         <SectorScene role={role} idle={idle} />
         <div className="sector-scene-data">
-          {(rows.length > 0 ? rows : [activity]).map((row: SceneRowData) => <SceneRow key={row.key ?? row.title} row={row} />)}
+          {anyRunning ? <EventTicks state={state} now={now} /> : <SceneRow row={activity} />}
         </div>
       </>
     );

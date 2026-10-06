@@ -2141,7 +2141,7 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
-  it("keeps the Onde sector rows steady: no ghost events, an empty track when idle", () => {
+  it("keeps the Onde sector rows steady: one tick per event, an empty track when idle", () => {
     const initial = createInitialState(1_000);
     const collaborators = ["events", "events", "writing"].map((assignment, index) => ({
       id: `steady-${index}`,
@@ -2186,8 +2186,8 @@ describe("PeopleView", () => {
       acquisitionEvents: [event("c", "Oktoberfest", "steady-0"), event("d", "Lucca", "steady-1")],
     }} {...props} />);
     const eventsCard = screen.getByRole("heading", { name: "Eventi" }).closest("article")!;
-    expect(eventsCard.querySelectorAll(".sector-scene-row")).toHaveLength(2);
-    expect(within(eventsCard).queryByText(/Volantinaggio/)).not.toBeInTheDocument();
+    expect(eventsCard.querySelectorAll(".event-ticks > i")).toHaveLength(2);
+    expect(within(eventsCard).getByText("2 eventi in corso")).toBeVisible();
     // S1: «Nessuna email da scrivere» keeps the row as tall as a bar.
     expect(container.querySelectorAll(".sector-scene-row.is-inactive .sector-scene-track")).toHaveLength(1);
   });
