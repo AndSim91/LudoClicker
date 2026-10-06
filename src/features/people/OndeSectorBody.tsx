@@ -103,7 +103,7 @@ export function OndeSectorBody({
   if (role === "writing") {
     return (
       <>
-        <SectorScene role={role} idle={idle}>
+        <SectorScene role={role} idle={idle} social={state.unlocks.social}>
           {state.unlocks.social ? (
             <>
               <span className="sector-scene-chip is-top-left">{formatCompactNumber(state.school.followers ?? 0)} follower</span>

@@ -59,6 +59,8 @@ const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
   "equipment",
 ];
 const ignoreAutomaticTeachingToggle = () => undefined;
+// The Redazione before it becomes Social (15 collaborators).
+const EDITORIAL_DESCRIPTION = "Scrivono le email della scuola. Le virgole sono un dettaglio.";
 
 const ROLE_PRESENTATION: Record<
   CollaboratorMasteryRole,
@@ -207,7 +209,7 @@ function StandardSectorCard({
       <span className="sector-card-icon"><Icon name={ROLE_PRESENTATION[role].icon} /></span>
       <span>
         <h3>{label}</h3>
-        <small>{ROLE_PRESENTATION[role].description}</small>
+        <small>{role === "writing" && !state.unlocks.social ? EDITORIAL_DESCRIPTION : ROLE_PRESENTATION[role].description}</small>
       </span>
       <StaffingStepper
         label={label}

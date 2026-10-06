@@ -2917,7 +2917,7 @@ Un'unica pagina, in quest'ordine:
   scheda Istruttori è la mappa con i quadranti K2 ad altezza fissa (vedi
   sopra). Sempre in Onde le schede dei
   settori sono tutte alte uguali e hanno una scena animata (Tavola 4 del
-  06/10): Social un telefono con il feed dei duelli e le pastiglie di follower,
+  06/10): la Redazione, finché non diventa Social, una scrivania con il portatile dove un'email si scrive riga per riga e parte come aeroplanino di carta, accanto a una tazza che fuma (descrizione «Scrivono le email della scuola. Le virgole sono un dettaglio.»); Social un telefono con il feed dei duelli e le pastiglie di follower,
   rendita e bonus Eventi; Eventi il gazebo blu militare con il roll-up nero
   della scuola, il mare e i passanti; Attrezzatura la rastrelliera e una lama
   che si riaccende sul banco (non segue i dati); Gadget il banchetto con i

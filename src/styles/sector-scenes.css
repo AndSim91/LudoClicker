@@ -132,6 +132,15 @@
 
 .scene-heart.is-2 { animation-delay: -1.8s; }
 
+/* ---- Redazione: l'email che si scrive e vola via (R1) ---- */
+.scene-type-line { transform-origin: 0 50%; animation: scene-type 6s steps(14) infinite; }
+.scene-type-line.is-2 { animation-name: scene-type-2; }
+.scene-type-line.is-3 { animation-name: scene-type-3; }
+.scene-plane { opacity: 0; animation: scene-plane 6s ease-in infinite; }
+.scene-steam { opacity: 0; transform-origin: 50% 100%; animation: scene-steam 3s ease-in-out infinite; }
+.scene-steam.is-late { animation-delay: -1.5s; }
+.scene-typist { transform-origin: 50% 100%; animation: scene-typist 0.5s steps(2) infinite; }
+
 /* ---- Eventi: gazebo, mare, passanti ---- */
 .scene-sea { animation: scene-drift 20s linear infinite; }
 
@@ -170,6 +179,20 @@
   animation: scene-sway 3.4s ease-in-out infinite alternate;
 }
 
+@keyframes scene-type { 0% { transform: scaleX(0); } 25%, 92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes scene-type-2 { 0%, 25% { transform: scaleX(0); } 50%, 92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes scene-type-3 { 0%, 50% { transform: scaleX(0); } 75%, 92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes scene-plane {
+  0%, 76% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  80% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(940%, -280%) scale(0.8); }
+}
+@keyframes scene-steam {
+  0% { opacity: 0; transform: translateY(20%) scaleY(0.7); }
+  40% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-40%) scaleY(1.1); }
+}
+@keyframes scene-typist { 50% { transform: translateY(2.5%); } }
 @keyframes scene-feed { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 @keyframes scene-heart {
   0% { opacity: 0; transform: translateY(0) scale(0.6); }

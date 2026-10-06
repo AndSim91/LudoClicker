@@ -233,10 +233,55 @@ function GadgetScene() {
   );
 }
 
+/**
+ * Redazione (before the Social, R1 of 06/10): a desk with a laptop, an email
+ * typed line by line, a paper plane taking it away, a mug steaming.
+ */
+function EditorialScene() {
+  const lines = [[32, 66], [39, 56], [46, 40]] as const;
+  return (
+    <>
+      <svg className="sector-scene-backdrop" viewBox="0 0 520 106" preserveAspectRatio="xMidYMid meet">
+        <rect x={-400} y={86} width={1320} height={40} fill="#083a55" />
+        <path d="M-400 86 H920" stroke="#0e5577" strokeWidth={2} />
+        <path d="M150 72 H372" stroke="#5a3a26" strokeWidth={5} strokeLinecap="round" />
+        <path d="M168 74 V96 M354 74 V96" stroke="#4a2f20" strokeWidth={4} />
+        <rect x={214} y={10} width={96} height={58} rx={4} fill={INK} stroke="#6cd3d6" strokeOpacity={0.6} strokeWidth={1.5} />
+        <path d="M206 70 H318 L312 74 H212 Z" fill="#0e4563" />
+        <rect x={220} y={16} width={84} height={46} rx={2} fill="#f5f3ee" />
+        <rect x={224} y={20} width={76} height={6} rx={1} fill="#e6eef2" />
+        <text x={226} y={25} fontSize={5} fontWeight={600} fill="#0a3a57">Oggetto: Nuovi iscritti</text>
+        {lines.map(([y, w]) => <rect key={y} x={226} y={y} width={w} height={3} rx={1.5} fill="#7d93a3" opacity={0.25} />)}
+        <rect x={332} y={58} width={12} height={13} rx={2} fill="#e0a64a" />
+        <path d="M344 61 q5 0 5 4 q0 4 -5 4" fill="none" stroke="#e0a64a" strokeWidth={1.6} />
+        <rect x={176} y={60} width={22} height={12} rx={1} fill="#0e4563" />
+        <rect x={178} y={56} width={18} height={5} rx={1} fill="#6cd3d6" opacity={0.5} />
+      </svg>
+      {lines.map(([y, w], index) => (
+        <SceneLayer key={y} box={{ x: 226, y, w, h: 3 }} className={`scene-type-line is-${index + 1}`}>
+          <rect x={226} y={y} width={w} height={3} rx={1.5} fill="#7d93a3" />
+        </SceneLayer>
+      ))}
+      <SceneLayer box={{ x: 300, y: 30, w: 18, h: 14 }} className="scene-plane">
+        <path d="M300 36 L318 30 L310 44 L308 38 Z" fill="#fbf1dc" />
+        <path d="M308 38 L318 30" stroke="#a9c7c6" strokeWidth={0.8} />
+      </SceneLayer>
+      {[336, 340].map((x, index) => (
+        <SceneLayer key={x} box={{ x: x - 2, y: 41, w: 4, h: 14 }} className={`scene-steam${index ? " is-late" : ""}`}>
+          <path d={`M${x} 54 q-2 -4 0 -7 q2 -3 0 -6`} fill="none" stroke="#fbf1dc" strokeOpacity={0.7} strokeWidth={1.2} />
+        </SceneLayer>
+      ))}
+      <SceneLayer box={{ x: 250, y: 58, w: 24, h: 42 }} className="scene-typist">
+        <g fill={INK}><circle cx={262} cy={65.5} r={6.9} /><path d="M252.8 74.7 H271.2 L273.5 100 H250.5 Z" /></g>
+      </SceneLayer>
+    </>
+  );
+}
+
 /** The scene of one sector; the Centro didattico has none. */
-export function SectorSceneArt({ role }: { role: CollaboratorMasteryRole }) {
+export function SectorSceneArt({ role, social = true }: { role: CollaboratorMasteryRole; social?: boolean }) {
   switch (role) {
-    case "writing": return <SocialScene />;
+    case "writing": return social ? <SocialScene /> : <EditorialScene />;
     case "events": return <EventsScene />;
     case "equipment": return <EquipmentScene />;
     case "gadget": return <GadgetScene />;
