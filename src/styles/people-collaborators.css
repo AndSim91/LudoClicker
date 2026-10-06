@@ -417,30 +417,6 @@
   background: var(--blue-050);
 }
 
-.collaborator-technician-training {
-  grid-column: 1 / -1;
-  min-width: 0;
-  padding: 10px 12px 12px;
-  border-top: 1px solid color-mix(in srgb, #8b5cf6 28%, var(--line));
-  background: color-mix(in srgb, #8b5cf6 5%, var(--surface));
-}
-
-.collaborator-technician-training:empty {
-  display: none;
-}
-
-.collaborator-technician-training > .technician-course-control,
-.collaborator-technician-training > .technician-course-reservation,
-.collaborator-technician-training > .training-locked {
-  box-sizing: border-box;
-  width: 100%;
-  margin: 0;
-}
-
-.collaborator-technician-training .technician-course-control.is-expanded {
-  grid-template-columns: minmax(0, 1fr);
-}
-
 .instructor-compact-training {
   display: flex;
   width: 100%;
@@ -922,4 +898,150 @@
   .collaborator-detail-drawer {
     animation: none;
   }
+}
+
+/* ---- Griglia 4×2 dal 5° collaboratore al Consiglio (06/10) ---- */
+.collaborator-table.is-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+  overflow: visible;
+  background: var(--surface-rail);
+}
+
+.people-view .collaborator-table.is-grid .collaborator-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "identity identity"
+    "role role"
+    "assign assign"
+    "activity activity"
+    "stats actions";
+  align-content: start;
+  min-height: 0;
+  column-gap: 0;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  content-visibility: visible;
+}
+
+.people-view .collaborator-table.is-grid .collaborator-row > [data-label] {
+  padding: 0 0 10px;
+}
+
+.collaborator-table.is-grid .collaborator-row > [data-label]::before {
+  display: none;
+}
+
+/* Avatar e nome in riga, la mappa delle Forme sotto a tutta larghezza. */
+.collaborator-table.is-grid .collaborator-identity {
+  display: grid;
+  grid-area: identity;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+
+.collaborator-table.is-grid .collaborator-identity .person-avatar { grid-row: span 2; }
+.collaborator-table.is-grid .collaborator-copy { display: contents; }
+.collaborator-table.is-grid .collaborator-copy > :nth-child(n + 3) { grid-column: 1 / -1; justify-self: center; }
+.collaborator-table.is-grid .form-path-map { --form-node: 14px; }
+
+.collaborator-table.is-grid .collaborator-current-role { grid-area: role; }
+.collaborator-table.is-grid .collaborator-assignment { grid-area: assign; }
+.collaborator-table.is-grid .collaborator-assignment > span:first-child { display: none; }
+.collaborator-table.is-grid .collaborator-activity { grid-area: activity; }
+
+/* Il piede: Arena e Stile a sinistra, Dettagli a destra, su una sola linea. */
+.collaborator-table.is-grid .collaborator-official-stats,
+.collaborator-table.is-grid .collaborator-row-actions {
+  display: flex;
+  align-self: end;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 0 0 !important;
+  border-top: 1px solid var(--line);
+}
+
+.collaborator-table.is-grid .collaborator-official-stats { grid-area: stats; }
+.collaborator-table.is-grid .collaborator-row-actions { grid-area: actions; }
+
+.collaborator-slot {
+  display: grid;
+  min-height: 220px;
+  place-content: center;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.collaborator-slot strong { color: var(--ink-muted); font-size: 13px; }
+.collaborator-slot.is-council { border-color: var(--onde-thread, var(--line-strong)); color: var(--onde-gold, var(--ink-muted)); }
+.collaborator-slot.is-council strong { color: var(--onde-gold-bright, var(--ink)); }
+
+@media (max-width: 1180px) {
+  .collaborator-table.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .collaborator-table.is-grid { grid-template-columns: minmax(0, 1fr); }
+  .collaborator-slot { min-height: 90px; }
+}
+
+/* ---- Corsi dell'istruttore a linguette, C2 (06/10) ---- */
+.course-tabs {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.course-tabs-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+}
+
+.course-tab {
+  --course: #3fbf7f;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 0;
+  background: var(--surface-muted);
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.course-tab.is-technician { --course: #a78bfa; }
+
+.course-tab > i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--course);
+}
+
+.course-tab.is-active {
+  background: color-mix(in srgb, var(--course) 22%, var(--surface));
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--course);
+}
+
+.course-tabs-panel.is-technician .training-start-button:not(:disabled) {
+  background: #6d4fd1;
+  color: #fff;
 }

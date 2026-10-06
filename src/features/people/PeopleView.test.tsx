@@ -1142,18 +1142,14 @@ describe("PeopleView", () => {
 
     view.unmount();
     const unlockedView = render(renderView(true));
-    const sisHeading = screen.getByText("Corso Tecnici");
-    const sisControl = sisHeading.closest(".technician-course-control");
-    expect(sisControl).toBeVisible();
-    expect(sisControl).not.toHaveClass("is-inline");
-    expect(sisControl?.parentElement).toHaveClass("collaborator-technician-training");
-    expect(sisControl?.parentElement).toHaveAttribute("aria-label", "Formazione Tecnici");
-    const sisToggle = screen.getByRole("button", { name: /Corso Tecnici/ });
-    expect(sisToggle).toHaveAttribute("aria-expanded", "false");
+    // C2: the two courses sit behind tabs, the Corso Istruttori first.
+    const technicianTab = screen.getByRole("tab", { name: "Tecnici SIS" });
+    expect(screen.getByRole("tab", { name: "Istruttori" })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByRole("button", { name: /Prenota SIS/ })).not.toBeInTheDocument();
+    expect(document.querySelector(".collaborator-technician-training")).not.toBeInTheDocument();
 
-    fireEvent.click(sisToggle);
-    expect(sisToggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(technicianTab);
+    expect(technicianTab).toHaveAttribute("aria-selected", "true");
 
     fireEvent.click(screen.getByRole("button", { name: /Prenota SIS/ }));
     expect(onBookTechnicianCourse).toHaveBeenCalledWith(collaborator.id, "form-1");
@@ -2139,6 +2135,37 @@ describe("PeopleView", () => {
     expect(screen.getAllByRole("progressbar")).toHaveLength(7);
     expect(screen.getAllByRole("progressbar", { name: "Progresso verso Iniziato" })).toHaveLength(4);
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
+  });
+
+  it("turns the collaborators into a 4×2 grid from the 5th to the Consiglio", () => {
+    const initial = createInitialState(1_000);
+    const staff = (count: number) => Array.from({ length: count }, (_, index) => ({
+      id: `grid-${index}`,
+      contactId: initial.contacts[index].id,
+      displayName: `Collaboratore ${index}`,
+      joinedAt: 1_000,
+      forms: [],
+      instructorForms: [],
+      assignment: index === 0 ? null : (index % 2 ? "writing" as const : "instructor" as const),
+      rarity: "ultra-rare" as const,
+    }));
+    const props = { onAssign: () => undefined, onStartTraining: () => undefined };
+    const unlocks = { ...initial.unlocks, collaborators: true };
+    const { container, rerender } = render(
+      <PeopleView state={{ ...initial, collaborators: staff(4), unlocks }} {...props} />,
+    );
+    expect(container.querySelector(".collaborator-table.is-grid")).toBeNull();
+
+    rerender(<PeopleView state={{ ...initial, collaborators: staff(5), unlocks }} {...props} />);
+    const grid = container.querySelector(".collaborator-table.is-grid")!;
+    expect(grid).not.toBeNull();
+    // Free first, then by sector; three empty places, the last one for the Consiglio.
+    expect([...grid.querySelectorAll(".collaborator-row .rarity-name")].map((name) => name.textContent))
+      .toEqual(["Collaboratore 0", "Collaboratore 2", "Collaboratore 4", "Collaboratore 1", "Collaboratore 3"]);
+    const slots = grid.querySelectorAll(".collaborator-slot");
+    expect(slots).toHaveLength(3);
+    expect(slots[2]).toHaveClass("is-council");
+    expect(within(grid as HTMLElement).queryByRole("columnheader")).toBeNull();
   });
 
   it("keeps the Onde sector rows steady: one tick per event, an empty track when idle", () => {

@@ -14,7 +14,7 @@ import {
   getCollaboratorMasteryRoleLabel,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { isSISTechnicianCourseUnlocked, getOfficialStatsVisibilityTier } from "../../content/upgrades";
+import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
 import { getContactPreparation, hasUnlockedOfficialStats, getHiddenStatsHint } from "../../game/athleteStats";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -42,13 +42,13 @@ import {
 } from "./collaboratorSorting";
 import { StaffForms } from "./FormPathMap";
 import { PersonName } from "./PersonPresentation";
-import {
-  InstructorCompactActivity,
-  InstructorCompactTraining,
-  TechnicianCourseControl,
-} from "./TrainingControl";
+import { InstructorCourseTabs } from "./InstructorCourseTabs";
+import { InstructorCompactActivity } from "./TrainingControl";
 
 const COLLABORATORS_PER_PAGE = 25;
+/** From the 5th collaborator to the Consiglio the list is a 4×2 grid (06/10). */
+const GRID_FROM = 5;
+const GRID_ORDER: CollaboratorAssignment[] = [null, "instructor", "writing", "events", "equipment", "gadget"];
 const COLLABORATOR_SORT_KEYS = [
   "name",
   "assignment",
@@ -221,8 +221,14 @@ export function CollaboratorList({
     athleticPreparationInstructorIds,
     now,
   }), [activeEmail, athleticPreparationInstructorIds, contactsById, now, state]);
+  const gridMode = state.collaborators.length >= GRID_FROM;
   const sortedCollaborators = useMemo(
     () => {
+      // Griglia: prima chi è libero, poi per settore come nel Consiglio.
+      if (gridMode) {
+        return [...state.collaborators].sort((a, b) =>
+          GRID_ORDER.indexOf(a.assignment) - GRID_ORDER.indexOf(b.assignment));
+      }
       const sorted = sortCollaborators(filteredCollaborators, sort, sortContext);
       // I non assegnati sempre in cima, con qualunque ordinamento.
       return [
@@ -230,7 +236,7 @@ export function CollaboratorList({
         ...sorted.filter((collaborator) => collaborator.assignment !== null),
       ];
     },
-    [filteredCollaborators, sort, sortContext],
+    [filteredCollaborators, gridMode, sort, sortContext, state.collaborators],
   );
   const pageCount = Math.max(
     1,
@@ -309,7 +315,8 @@ export function CollaboratorList({
           </span>
         </div>
       ) : (
-        <div className="collaborator-table">
+        <div className={`collaborator-table${gridMode ? " is-grid" : ""}`}>
+          {gridMode ? null : (<>
           <div
             className="collaborator-sort-mobile table-sort-controls"
             aria-label="Ordina collaboratori"
@@ -434,6 +441,7 @@ export function CollaboratorList({
             </label>
             <button type="button" onClick={resetFilters}>Azzera</button>
           </div>
+          </>)}
 
           {visibleCollaborators.map((collaborator) => {
             const contact = contactsById.get(collaborator.contactId);
@@ -610,13 +618,12 @@ export function CollaboratorList({
                     ))}
                   </select>
                   {collaborator.assignment === "instructor" ? (
-                    <InstructorCompactTraining
+                    <InstructorCourseTabs
                       collaborator={collaborator}
                       state={stateOverride}
                       onStartTraining={onStartTraining}
                       onBookTechnicianCourse={onBookTechnicianCourse}
                       collaboratorsById={collaboratorsById}
-                      showTechnicianCourse={false}
                     />
                   ) : null}
                 </div>
@@ -632,24 +639,26 @@ export function CollaboratorList({
                   </button>
                 </div>
 
-                {collaborator.assignment === "instructor" &&
-                isSISTechnicianCourseUnlocked(state.upgrades) ? (
-                  <div
-                    className="collaborator-technician-training"
-                    aria-label="Formazione Tecnici"
-                  >
-                    <TechnicianCourseControl
-                      collaborator={collaborator}
-                      state={stateOverride}
-                      onBookTechnicianCourse={onBookTechnicianCourse}
-                      showUnavailableState
-                    />
-                  </div>
-                ) : null}
               </article>
             );
           })}
-          {filteredCollaborators.length === 0 ? (
+          {gridMode
+            ? Array.from(
+                { length: Math.max(0, GAME_CONFIG.collaboratorAggregateUnlockCount - state.collaborators.length) },
+                (_, index) => {
+                  const council = state.collaborators.length + index === GAME_CONFIG.collaboratorAggregateUnlockCount - 1;
+                  return (
+                    <div className={`collaborator-slot${council ? " is-council" : ""}`} key={`slot-${index}`}>
+                      <strong>{council ? `${GAME_CONFIG.collaboratorAggregateUnlockCount}° posto` : "Posto libero"}</strong>
+                      <span>{council
+                        ? "Qui si riunisce il Consiglio delle Onde"
+                        : "Il prossimo Ultra Raro dopo il Corso Y"}</span>
+                    </div>
+                  );
+                },
+              )
+            : null}
+          {!gridMode && filteredCollaborators.length === 0 ? (
             <div className="collaborator-filter-empty">Nessun collaboratore corrisponde ai filtri.</div>
           ) : null}
         </div>
