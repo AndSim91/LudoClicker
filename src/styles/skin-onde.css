@@ -869,9 +869,12 @@
 
 :root[data-theme="dark"] .composer-flow-track > span {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
   background: linear-gradient(90deg, var(--onde-teal), var(--onde-wave));
-  transition: width 120ms linear;
+  /* Drains gliding from one game update to the next, on the compositor. */
+  transform: scaleX(var(--flow, 0));
+  transform-origin: left;
+  transition: transform var(--progress-transition-duration, 120ms) linear;
 }
 
 :root[data-theme="dark"] .composer-flow:not([data-multiplier="1"]) .composer-flow-game b {

@@ -8,17 +8,19 @@ export function GameTimeProvider({
   getWallNow = getSystemWallNow,
   isPaused,
   speed = 1,
+  updateIntervalMs = 0,
   children,
 }: {
   getNow: () => number;
   getWallNow?: () => number;
   isPaused: boolean;
   speed?: number;
+  updateIntervalMs?: number;
   children: ReactNode;
 }) {
   const source = useMemo<GameTimeSource>(
-    () => ({ getNow, getWallNow, isPaused, speed }),
-    [getNow, getWallNow, isPaused, speed],
+    () => ({ getNow, getWallNow, isPaused, speed, updateIntervalMs }),
+    [getNow, getWallNow, isPaused, speed, updateIntervalMs],
   );
   return (
     <GameTimeContext.Provider value={source}>

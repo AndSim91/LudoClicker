@@ -5,6 +5,8 @@ export interface GameTimeSource {
   getWallNow: () => number;
   isPaused: boolean;
   speed: number;
+  /** Real ms between game updates: UI clocks never refresh faster than the game. */
+  updateIntervalMs: number;
 }
 
 export const GameTimeContext = createContext<GameTimeSource | null>(null);
@@ -56,7 +58,10 @@ export function useGameTimeSource(): GameTimeSource | null {
 
 export function useGameTime(active: boolean, intervalMs: number): number {
   const source = useGameTimeSource();
-  const wallNow = useWallTime(active && !source?.isPaused, intervalMs);
+  const wallNow = useWallTime(
+    active && !source?.isPaused,
+    Math.max(intervalMs, source?.updateIntervalMs ?? 0),
+  );
   return source ? source.getNow() : wallNow;
 }
 

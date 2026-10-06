@@ -18,7 +18,7 @@ import { loadGame, trySaveGame, writePreparedGameSave } from "./save";
 import type { SaveGameResult } from "./saveDiagnostics";
 import { createSaveScheduler, type SaveScheduler } from "./saveScheduler";
 import type { GameSaveStatus } from "./saveStatus";
-import { getNextGameTickDelay, hasQueuedGameWorkAt } from "./gameScheduler";
+import { getGameStepMs, getNextGameTickDelay, hasQueuedGameWorkAt } from "./gameScheduler";
 import { postponeLightInflationEvent } from "./lightInflation";
 import { crashReporter } from "./crashReporting";
 import type { GameAction } from "./types";
@@ -34,12 +34,8 @@ interface PauseDrainRequest {
   wallNow: number;
 }
 
-export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minStepMs?: number } = {}) {
-  // A ref: changing the display mode must not restart the tick scheduler.
-  const minStepMsRef = useRef<number>(minStepMs);
-  useEffect(() => {
-    minStepMsRef.current = minStepMs;
-  }, [minStepMs]);
+/** cadenceMs: how often, in real time, the game updates in the current display mode. */
+export function useGameEngine({ cadenceMs = GAME_CONFIG.minTickStepMs }: { cadenceMs?: number } = {}) {
   const [initialWallNow] = useState(() => Date.now());
   const [state, dispatch] = useReducer(gameReducer, undefined, () => loadGame(initialWallNow));
   const stateRef = useRef(state);
@@ -55,6 +51,12 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
   // «Il tempo è denaro»: the speed saved in the game, unless the Admin selector overrides it.
   const [adminGameSpeed, setAdminGameSpeed] = useState<number | null>(null);
   const gameSpeed = adminGameSpeed ?? getPlayerGameSpeed(state);
+  const gameStepMs = getGameStepMs(cadenceMs, gameSpeed);
+  // A ref: changing the display mode must not restart the tick scheduler.
+  const gameStepMsRef = useRef(gameStepMs);
+  useEffect(() => {
+    gameStepMsRef.current = gameStepMs;
+  }, [gameStepMs]);
   const [saveStatus, setSaveStatus] = useState<GameSaveStatus>(() => ({
     phase: "pending",
     lastSavedAt: null,
@@ -159,7 +161,7 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
       const now = getGameNow();
       const delay = Math.max(
         gameDelayToWallDelay(minimumGameDelay, gameSpeed),
-        getNextGameTickDelay(stateRef.current, now, gameSpeed, minStepMsRef.current),
+        getNextGameTickDelay(stateRef.current, now, gameSpeed, gameStepMsRef.current),
       );
       const nextWallAt = Date.now() + delay;
       // Unrelated state updates must not restart or postpone the current deadline.
@@ -178,7 +180,7 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
           wallNow,
           stepBudget: MAX_CATCH_UP_STEPS_PER_TICK,
           workBudget: MAX_SIMULTANEOUS_WORK_PER_SLICE,
-          minStepMs: minStepMsRef.current,
+          minStepMs: gameStepMsRef.current,
           timeBudgetMs: TICK_TIME_BUDGET_MS,
         });
         // React aggiorna stateRef nel layout effect. Il follow-up mantiene vivo
@@ -402,6 +404,8 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
     getWallNow,
     getPersistableState,
     gameSpeed,
+    /** Real ms between UI updates: one per game step, at any speed. */
+    uiUpdateIntervalMs: gameStepMs / Math.max(1, gameSpeed),
     setGameSpeed,
     isPaused,
     togglePause,

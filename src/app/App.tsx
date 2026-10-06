@@ -163,6 +163,7 @@ export function App() {
     getWallNow,
     getPersistableState,
     gameSpeed,
+    uiUpdateIntervalMs,
     setGameSpeed,
     isPaused,
     togglePause,
@@ -174,7 +175,7 @@ export function App() {
     setPracticePaused,
     saveStatus,
     saveNow,
-  } = useGameEngine({ minStepMs: getTickStepMs(darkMode, reduceMotion) });
+  } = useGameEngine({ cadenceMs: getTickStepMs(darkMode, reduceMotion) });
   useEffect(() => preloadLazyViews(), []);
   const gameStateStore = useGameStateStore(state);
   const [view, setView] = useState<AppView>("mail");
@@ -650,10 +651,15 @@ export function App() {
       getWallNow={getWallNow}
       isPaused={isPaused}
       speed={gameSpeed}
+      updateIntervalMs={uiUpdateIntervalMs}
     >
       <div
         className="application-shell"
-        style={{ "--school-accent": state.school.accentColor } as CSSProperties}
+        style={{
+          "--school-accent": state.school.accentColor,
+          // Bars glide for exactly one update, so they move without stopping.
+          "--progress-transition-duration": `${uiUpdateIntervalMs}ms`,
+        } as CSSProperties}
       >
         <GameFeedbackLayer />
         <AchievementToast onOpen={openAchievements} />

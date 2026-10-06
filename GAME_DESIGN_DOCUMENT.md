@@ -2472,10 +2472,14 @@ presente in Impostazioni › Aspetto, insieme a **Riduci animazioni**.
 Peso delle quattro combinazioni (decisione di Andrea, dalla più pesante alla
 più leggera): **Onde > Outlook > Onde senza animazioni > Outlook senza
 animazioni**. Onde è la più bella e la predefinita; Outlook non ha animazioni
-decorative in ciclo e le barre avanzano a scatti a ogni aggiornamento, come in
-Windows. Il gioco avanza a passi di 0,5 s con le animazioni e di 1 s senza (in
-tutti e due i temi); Outlook senza animazioni deve girare anche su un
-processore lento a un solo core.
+decorative in ciclo. Il gioco si aggiorna ogni 0,5 s reali con le animazioni e
+ogni 1 s senza (in tutti e due i temi), e l'interfaccia si aggiorna con lo stesso
+ritmo; barre e tacche scivolano da un aggiornamento al successivo in ogni
+modalità, senza scatti (decisione di Andrea del 06/10). A 2× e 3× il ritmo reale
+resta lo stesso e ogni aggiornamento copre il doppio o il triplo del tempo di
+gioco (al massimo 1 s di gioco per passo), così tutto scorre fluido più in
+fretta. Outlook senza animazioni deve girare anche su un processore lento a un
+solo core.
 
 Nel Centro didattico, da **8 corsi della stessa Forma** le tacche (una per
 corso) lasciano il posto a **una barra sola per Forma** («Un giro per Forma»,
@@ -4376,8 +4380,13 @@ le notifiche sono scritte direttamente nei moduli di gioco.
 ### 23.3 Motore di gioco
 
 - aggiornamento visivo: orologi condivisi che rinfrescano barre e countdown
-  ogni 250 ms; `requestAnimationFrame` è usato solo nei minigiochi (Gadget e
-  Open Reptile);
+  una volta per passo di gioco (`uiUpdateIntervalMs` di `useGameEngine`, mai
+  più spesso del gioco); le barre scivolano verso il valore del passo dopo in
+  un passo esatto (`--progress-transition-duration` sulla shell, transizione
+  di `transform` anche in Outlook e senza animazioni), così arrivano in fondo
+  quando il gioco finisce il lavoro; il numero dei Fondi che rotola ridisegna
+  solo sé stesso; `requestAnimationFrame` è usato solo lì e nei minigiochi
+  (Gadget e Open Reptile);
 - tick economico a scadenza: l'azione `TICK` viene programmata per la prossima
   scadenza utile (esito email, prova, evento, quota mensile, formazione,
   evento narrativo…), con un battito di 1 secondo solo quando c'è automazione
@@ -4385,9 +4394,11 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   due passi distano almeno 250 ms di gioco (`minTickStepMs`): le scadenze più
   vicine si risolvono insieme nel passo successivo, così una scuola con
   migliaia di formazioni non fa decine di passi al secondo; nel gioco il passo
-  minimo è 500 ms con le animazioni e 1 s senza (`getTickStepMs` in
-  `useAppPreferences.ts`, campo `minStepMs` dell'azione `TICK`; simulazioni e
-  recupero offline restano a 250 ms);
+  minimo è 500 ms reali con le animazioni e 1 s senza (`getTickStepMs` in
+  `useAppPreferences.ts`), moltiplicato per la velocità e limitato a 1 s di
+  gioco, il massimo che l'automazione conta in un passo (`getGameStepMs`,
+  campo `minStepMs` dell'azione `TICK`; simulazioni e recupero offline restano
+  a 250 ms);
 - oltre 2.000 iscritti (con un margine di 250 prima di rifare i gruppi), gli
   ordinari più deboli senza tornei, formazione in corso o ruoli diventano
   contatori (`memberGroups`: rarità, provenienza, Forme, preferenze d'arma,

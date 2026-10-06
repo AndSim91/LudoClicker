@@ -14,6 +14,20 @@ import {
   formatExactNumber,
 } from "./resourceFormatting";
 
+/**
+ * Own component: while the figure rolls it re-renders every frame, and only this
+ * <strong> should, not the whole title bar with its month bar and equipment.
+ */
+function RollingBalance({ euros }: { euros: number }) {
+  const balance = useRollingNumber(euros);
+  return (
+    // Keyed on the rises so «Scatto» replays; the exact figure stays in title and aria-label.
+    <strong key={balance.pops} className={balance.pops ? "is-rising" : undefined} title={formatExactCurrency(euros)}>
+      {formatCompactCurrency(Math.round(balance.shown))}
+    </strong>
+  );
+}
+
 export function TitleBar({
   currentMonth,
   nextMonthAt,
@@ -52,7 +66,6 @@ export function TitleBar({
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
-  const balance = useRollingNumber(euros);
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
   const nextGameSpeed = gameSpeed >= maxGameSpeed ? 1 : gameSpeed + 1;
@@ -102,10 +115,7 @@ export function TitleBar({
           aria-label={`Fondi: ${formatExactCurrency(euros)}`}
         >
           <small>Fondi</small>
-          {/* Keyed on the rises so «Scatto» replays; the exact figure stays in title and aria-label. */}
-          <strong key={balance.pops} className={balance.pops ? "is-rising" : undefined} title={formatExactCurrency(euros)}>
-            {formatCompactCurrency(Math.round(balance.shown))}
-          </strong>
+          <RollingBalance euros={euros} />
         </span>
         <MonthlyIncomeSummary state={monthlyIncomeState} />
       </div>

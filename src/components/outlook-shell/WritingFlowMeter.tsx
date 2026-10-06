@@ -42,7 +42,7 @@ export function WritingFlowMeter({ state: stateOverride }: { state?: GameState }
       <span className="composer-flow-game" aria-hidden="true">
         <b>Flusso ×{multiplier}</b>
         <span className="composer-flow-track">
-          <span style={{ width: `${percent}%` }} />
+          <span style={{ "--flow": percent / 100 } as CSSProperties} />
         </span>
       </span>
     </span>

@@ -76,6 +76,16 @@
   transition-duration: 0.01ms !important;
 }
 
+/* Progress keeps gliding between game updates in every mode: without the glide a
+   bar would jump once a second. A transform transition runs on the compositor,
+   so it costs the main thread nothing. */
+.reduce-motion .progress-bar-linear:not(.is-indeterminate) > span,
+.reduce-motion .event-row > button.event-cancel-button .event-action-fill::after,
+.reduce-motion .appointment-pip-waiting::before,
+.reduce-motion .composer-flow-track > span {
+  transition-duration: var(--progress-transition-duration, 1s) !important;
+}
+
 /* Outlook camouflage: no decorative loops (Andrea: niente animazioni in Outlook),
    so it weighs less than Modalità Onde. What they show stays, still. */
 :root[data-theme="light"] .appointment-pip-live {
@@ -84,14 +94,6 @@
 
 :root[data-theme="light"] .appointment-pip-live::after {
   display: none;
-}
-
-/* Bars move in steps at each update, like Windows ones: a bar always in
-   transition kept the browser drawing 60 frames a second. */
-:root[data-theme="light"] .progress-bar-linear:not(.is-indeterminate) > span,
-:root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill::after,
-:root[data-theme="light"] .appointment-pip-waiting::before {
-  transition: none;
 }
 
 :root[data-theme="light"] .event-row > button.event-cancel-button .event-action-fill > span::before,

@@ -25,6 +25,17 @@ import { hasGadgetRuntimeWork } from "./gadgetEconomy";
 export const AUTOMATION_HEARTBEAT_MS = GAME_CONFIG.gameTickMs;
 const MAX_TIMEOUT_MS = 2_147_000_000;
 
+/**
+ * Game ms covered by one tick. The display mode sets how often the game updates
+ * in real time (cadenceMs); at 2× or 3× each update covers two or three times as
+ * much game time, so the UI keeps the same rhythm and everything simply moves
+ * faster. Capped at the heartbeat: automation counts at most one second per step,
+ * so at high speeds the game ticks more often instead.
+ */
+export function getGameStepMs(cadenceMs: number, gameSpeed: number): number {
+  return Math.min(AUTOMATION_HEARTBEAT_MS, cadenceMs * Math.max(1, gameSpeed));
+}
+
 function earlier(current: number, candidate: number | undefined): number {
   return candidate === undefined || !Number.isFinite(candidate)
     ? current

@@ -112,7 +112,7 @@
   background: color-mix(in srgb, currentColor 55%, transparent);
   transform: scaleX(var(--pip-fill, 0));
   transform-origin: left;
-  transition: transform 1s linear;
+  transition: transform var(--progress-transition-duration, 1s) linear;
 }
 
 .appointment-pip-enrolled {

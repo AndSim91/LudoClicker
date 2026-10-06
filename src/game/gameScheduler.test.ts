@@ -7,6 +7,7 @@ import {
 } from "./engine";
 import {
   AUTOMATION_HEARTBEAT_MS,
+  getGameStepMs,
   getNextGameDeadline,
   getNextGameTickAt,
   getNextGameTickDelay,
@@ -492,5 +493,16 @@ describe("game scheduler", () => {
     };
 
     expect(getNextGameTickDelay(soon, NOW)).toBe(GAME_CONFIG.minTickStepMs);
+  });
+});
+
+describe("getGameStepMs", () => {
+  it("keeps the real cadence and covers more game time at higher speeds", () => {
+    expect(getGameStepMs(500, 1)).toBe(500);
+    expect(getGameStepMs(500, 2)).toBe(1_000);
+    expect(getGameStepMs(1_000, 1)).toBe(1_000);
+    // Never past the heartbeat: automation counts at most one second per step.
+    expect(getGameStepMs(500, 3)).toBe(AUTOMATION_HEARTBEAT_MS);
+    expect(getGameStepMs(1_000, 2)).toBe(AUTOMATION_HEARTBEAT_MS);
   });
 });

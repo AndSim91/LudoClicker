@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
+import { GameTimeProvider } from "../../game/GameTimeProvider";
 import { ProgressBar } from "./ProgressBar";
 
 describe("ProgressBar", () => {
@@ -22,18 +23,22 @@ describe("ProgressBar", () => {
     expect(progress).toHaveStyle({
       "--progress": "0.35",
       "--progress-shift": "-65%",
-      "--progress-transition-duration": `${GAME_CONFIG.progressUpdateIntervalMs}ms`,
     });
   });
 
-  it("interpolates engine-driven progress over the whole game tick", () => {
-    render(<ProgressBar label="Progresso automazione" value={25} />);
+  it("aims a timed bar one game update ahead, scaled by the game speed", () => {
+    const bar = (isPaused: boolean) => (
+      <GameTimeProvider getNow={() => 0} isPaused={isPaused} speed={2} updateIntervalMs={500}>
+        <ProgressBar label="Progresso" value={35} durationMs={10_000} />
+      </GameTimeProvider>
+    );
+    const { rerender } = render(bar(false));
+    // One update = 500 ms real = 1 s of game at 2×, a tenth of the bar.
+    expect(screen.getByRole("progressbar", { name: "Progresso" })).toHaveStyle({ "--progress-shift": "-55%" });
+    expect(screen.getByRole("progressbar", { name: "Progresso" })).toHaveAttribute("aria-valuenow", "35");
 
-    const progress = screen.getByRole("progressbar", { name: "Progresso automazione" });
-    expect(progress).toHaveStyle({
-      "--progress-shift": "-75%",
-      "--progress-transition-duration": `${GAME_CONFIG.gameTickMs}ms`,
-    });
+    rerender(bar(true));
+    expect(screen.getByRole("progressbar", { name: "Progresso" })).toHaveStyle({ "--progress-shift": "-65%" });
   });
 
   it("uses the striped indeterminate state below one visual update", () => {
