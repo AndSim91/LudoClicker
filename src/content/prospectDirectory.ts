@@ -125,7 +125,7 @@ export const PROSPECT_LAST_NAMES = [
   "Serra",
   "Repetto",
   "Piciocchi",
-  "Sanguinolento",
+  "Sanguineti",
   "Polaretto",
   "Maggi",
   "Testa",
