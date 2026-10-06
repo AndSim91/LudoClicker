@@ -58,9 +58,9 @@ export const GAME_CONFIG = {
   tutorialSparringDurationMs: 5_000,
   // Andrea Simonazzi nella scuola iniziale è un tutorial: risposta, attesa e
   // prova durano pochi secondi in tutto.
-  tutorialAndreaOutcomeMs: 1_000,
-  tutorialAndreaTrialWaitMs: 1_000,
-  tutorialAndreaTrialDurationMs: 2_000,
+  tutorialAndreaOutcomeMs: 2_000,
+  tutorialAndreaTrialWaitMs: 5_000,
+  tutorialAndreaTrialDurationMs: 3_000,
   tutorialSparringMinimumContacts: 1,
   equipmentMaintenanceCostPerLoad: 2,
   equipmentDamagedSwordRepairCost: 250,
