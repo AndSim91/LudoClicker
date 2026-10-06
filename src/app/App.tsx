@@ -22,6 +22,8 @@ import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
 import { DayPanel } from "../features/day-panel/DayPanel";
+import { DayPanelToggle } from "../features/day-panel/DayPanelToggle";
+import { resolveTutorialRegions } from "../content/tutorialScenes";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
 import {
@@ -252,6 +254,19 @@ export function App() {
     dispatch,
     onNavigate: navigateForTutorial,
   });
+
+  // «La mia giornata» below 1441px is a drawer (B1); the tutorial pins it open when it points at it.
+  const [dayDrawerOpen, setDayDrawerOpen] = useState(false);
+  const toggleDayDrawer = useCallback(() => setDayDrawerOpen((open) => !open), []);
+  const closeDayDrawer = useCallback(() => setDayDrawerOpen(false), []);
+  const tutorialShowsDay = tutorial.activeStep
+    ? resolveTutorialRegions(tutorial.activeStep.focusRegions, tutorial.context).includes("day-panel")
+    : false;
+  const dayDrawer = dayDrawerOpen ? "open" : tutorialShowsDay ? "pinned" : "closed";
+  const dayPanelToggle = useMemo(
+    () => <DayPanelToggle open={dayDrawer !== "closed"} onToggle={toggleDayDrawer} />,
+    [dayDrawer, toggleDayDrawer],
+  );
 
   useLayoutEffect(() => {
     setTutorialPaused(tutorial.shouldPauseGame);
@@ -683,6 +698,7 @@ export function App() {
           onChangeGameSpeed={changeGameSpeed}
           onMaintainEquipment={maintainEquipment}
           onBuyOfficialSwords={buyOfficialSwords}
+          dayPanelToggle={dayPanelToggle}
         />
         <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
           <StableAppRail view={activeView} onChange={changeView} />
@@ -828,6 +844,8 @@ export function App() {
           </Suspense>
           <StableDayPanel
             onWatchFinal={watchFinal}
+            drawer={dayDrawer}
+            onCloseDrawer={closeDayDrawer}
           />
         </div>
         <footer className="status-bar">

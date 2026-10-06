@@ -32,7 +32,8 @@
   }
 }
 
-@media (max-width: 1300px) {
+/* Below 1441px «La mia giornata» leaves the grid and becomes a drawer (B1, 06/10). */
+@media (max-width: 1440px) {
   .workspace {
     grid-template-columns: 58px 190px 280px minmax(480px, 1fr);
   }
@@ -40,11 +41,9 @@
   .overview-workspace {
     grid-template-columns: 58px minmax(0, 1fr);
   }
+}
 
-  .day-panel {
-    display: none;
-  }
-
+@media (max-width: 1300px) {
   .command {
     display: none;
   }

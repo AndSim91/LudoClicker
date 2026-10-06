@@ -1058,3 +1058,49 @@
   25% { box-shadow: 0 0 0 4px var(--surface), 0 0 22px 6px rgb(108 211 214 / 75%); }
 }
 
+
+/* «La mia giornata» drawer: gold button like the saber, gold edge on the drawer. */
+:root[data-theme="dark"] .day-panel-toggle {
+  border-color: rgb(224 166 74 / 60%);
+  color: var(--onde-gold-soft);
+  background: rgb(224 166 74 / 8%);
+}
+
+:root[data-theme="dark"] .day-panel-toggle b {
+  color: var(--onde-on-gold);
+  background: var(--onde-gold);
+}
+
+:root[data-theme="dark"] .day-panel-toggle:hover {
+  background: rgb(224 166 74 / 18%);
+}
+
+:root[data-theme="dark"] .day-panel-toggle.is-open {
+  color: var(--onde-on-gold);
+  background: var(--onde-gold);
+}
+
+:root[data-theme="dark"] .day-panel-toggle.is-open b {
+  color: var(--onde-gold-soft);
+  background: var(--onde-on-gold);
+}
+
+:root[data-theme="dark"] .day-panel.is-drawer {
+  border-left-color: var(--onde-gold);
+  box-shadow: -24px 0 48px rgb(0 0 0 / 55%);
+}
+
+:root[data-theme="dark"] .day-panel-scrim {
+  background: rgb(2 20 35 / 50%);
+}
+
+:root[data-theme="dark"]:not(.reduce-motion) .day-panel.is-drawer {
+  animation: day-drawer-in 220ms ease-out;
+}
+
+@keyframes day-drawer-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(32px);
+  }
+}

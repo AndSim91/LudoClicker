@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Icon } from "../common/Icon";
 import { ProgressBar } from "../common/ProgressBar";
 import { getGameMonthName, getSchoolYear } from "../../game/calendar";
@@ -46,6 +47,7 @@ export function TitleBar({
   onChangeGameSpeed = () => undefined,
   onMaintainEquipment = () => undefined,
   onBuyOfficialSwords = () => undefined,
+  dayPanelToggle,
 }: {
   currentMonth: number;
   nextMonthAt: number;
@@ -65,6 +67,8 @@ export function TitleBar({
   onChangeGameSpeed?: (speed: number) => void;
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
+  /** «La mia giornata» drawer button: below 1441px it takes the place of the window controls. */
+  dayPanelToggle?: ReactNode;
 }) {
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
@@ -173,10 +177,13 @@ export function TitleBar({
           durationMs={GAME_CONFIG.gameMonthMs}
         />
       </span>
-      <div className="window-controls" aria-hidden="true">
-        <span>—</span>
-        <span>□</span>
-        <span>×</span>
+      <div className="title-end">
+        <span className="window-controls" aria-hidden="true">
+          <span>—</span>
+          <span>□</span>
+          <span>×</span>
+        </span>
+        {dayPanelToggle}
       </div>
     </header>
   );
