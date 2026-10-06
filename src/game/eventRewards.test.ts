@@ -48,9 +48,15 @@ function maximizeEventUpgrades(state: GameState): GameState {
   };
 }
 
+// Calibrated on the original 15-event catalog; the events added on 06/10 open
+// from the 3rd founded school and are not part of this baseline.
+const ORIGINAL_CATALOG = ACQUISITION_EVENTS.filter(
+  (event) => (event.requiredNetworkSchools ?? 0) <= 2,
+);
+
 function getMasterEventContactsPerMinute(state: GameState): number {
   const masterDurationMs = 5_000;
-  return ACQUISITION_EVENTS.reduce((total, definition) => {
+  return ORIGINAL_CATALOG.reduce((total, definition) => {
     const completionsPerMinute = definition.cooldown.kind === "realtime"
       ? 60_000 / (masterDurationMs + definition.cooldown.durationMs)
       : 1 / definition.cooldown.months;

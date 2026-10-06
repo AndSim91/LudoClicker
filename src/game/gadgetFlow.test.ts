@@ -13,6 +13,7 @@ import {
   processGadgets,
   startGadgetMinigame,
   startGadgetProject,
+  sellGadgetsAtEvent,
   startGadgetRevision,
   unlockGadgetSector,
   unlockGadgetSectorFromTournamentResult,
@@ -172,6 +173,50 @@ describe("Gadget flow", () => {
       tournamentResult("national", true),
       2_000,
     )).toBe(initial);
+  });
+
+  it("sells at the event stall within the monthly cap of the laboratory (Banchetto, 06/10)", () => {
+    const ready = unlockedState();
+    const selling: GameState = {
+      ...ready,
+      gadgets: {
+        ...ready.gadgets,
+        products: {
+          ...ready.gadgets.products,
+          wristband: withCommonRarity(
+            ready.gadgets.products.wristband,
+            { quality: 100 },
+            { projectPurchased: true, prototypeCompleted: true, accepted: true },
+          ),
+        },
+      },
+    };
+    // No level, no stall.
+    expect(sellGadgetsAtEvent(selling, 1_000, 2_000)).toBe(selling);
+
+    const stall = { ...selling, upgrades: { ...selling.upgrades, "gadget-event-stall": 5 } };
+    const capacity = getGadgetMonthlyAttemptCapacity(stall);
+    const sold = sellGadgetsAtEvent(stall, 1_000_000, 2_000);
+    const units = commonRarity(sold, "wristband").unitsSold;
+    // 1.000.000 people × 25% would be 250.000 attempts: the month stops at +50% of the lab.
+    expect(units).toBe(Math.floor(capacity * 0.5));
+    expect(commonRarity(sold, "wristband").extraUnitsSold).toBe(units);
+    expect(sold.school.euros).toBeGreaterThan(stall.school.euros);
+    expect(sellGadgetsAtEvent(sold, 1_000, 3_000)).toBe(sold);
+
+    // Small events add up through the fractional buffer instead of rounding to zero.
+    // (a bigger laboratory, so the monthly cap does not bind here)
+    let small = {
+      ...stall,
+      collaborators: Array.from({ length: 20 }, (_, index) => gadgetCollaborator(`g${index}`)),
+    };
+    expect(getGadgetMonthlyAttemptCapacity(small) * 0.5).toBeGreaterThan(10);
+    for (let event = 0; event < 20; event += 1) small = sellGadgetsAtEvent(small, 2, 2_000 + event);
+    expect(commonRarity(small, "wristband").unitsSold).toBe(10);
+
+    // Without Gadget collaborators the laboratory prepares nothing to sell.
+    const noLab = { ...stall, collaborators: [] };
+    expect(sellGadgetsAtEvent(noLab, 1_000, 2_000)).toBe(noLab);
   });
 
   it("charges the project, completes it with collaborators and never lowers quality", () => {

@@ -941,7 +941,7 @@ tempo compresso. Esistono eventi fissi ed eventi che compaiono casualmente.
 Nella prima versione gli esiti sono automatici: il sistema decisionale verrà
 valutato successivamente.
 
-> **Da implementare:** gli eventi si avviano dalla vista **Eventi** della barra laterale (che compare dopo il primo obiettivo breve), non da un Calendario; esistono solo i 15 eventi fissi della tabella, nessun evento di acquisizione casuale.
+> **Da implementare:** gli eventi si avviano dalla vista **Eventi** della barra laterale (che compare dopo il primo obiettivo breve), non da un Calendario; esistono solo i 23 eventi fissi della tabella, nessun evento di acquisizione casuale.
 
 Ogni evento richiede:
 
@@ -1035,9 +1035,28 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 | Burtomics                     |      90 |     €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
 | Genova Comics & Games         |     120 |    €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
 | Megacon Genova                |     180 |    €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
-| Lucca Comics & Games          |     250 |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
-| Milan Games Week & Cartoomics |     350 |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Lucca Comics & Games          | 250 · 1 scuola |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
+| Milan Games Week & Cartoomics | 350 · 2 scuole |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Romics                        | 450 · 3 scuole |    €25.000 | 24,00 |        60 |   120 |  1.200 | 36 mesi    |    altissima |
+| Napoli Comicon                | 600 · 4 scuole |    €30.000 | 26,75 |        70 |   140 |  1.400 | 36 mesi    |    altissima |
+| Evento Televisivo Rai         | 800 · 6 scuole |    €40.000 | 30,00 |        30 |    40 |    400 | 48 mesi    |    altissima |
+| Japan Expo                    | 1.000 · 8 scuole |  €60.000 | 35,00 |        90 |   180 |  1.800 | 48 mesi    |    altissima |
+| Gamescom                      | 1.300 · 10 scuole | €80.000 | 40,00 |       110 |   220 |  2.200 | 60 mesi    |    altissima |
+| San Diego Comic-Con           | 1.700 · 13 scuole | €120.000 | 45,00 |      130 |   260 |  2.600 | 72 mesi    |    altissima |
+| Viaggio nel passato           | 2.200 · 16 scuole | €250.000 | 60,00 |      100 |   300 |  3.000 | 96 mesi    |    altissima |
+| Eldorado                      | 3.000 · 20 scuole | €500.000 | 75,00 |      200 |   500 |  5.000 | 120 mesi   |    altissima |
 | Sfida a Cthulhu               |     500 | €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
+
+**Quattro livelli di eventi** (decisione del 06/10). Gli eventi **locali**
+(dal Volantinaggio al Megacon Genova) si aprono con la Fama in ogni scuola.
+Gli eventi **nazionali** (Lucca, Milan Games Week, Romics, Napoli Comicon,
+Evento Televisivo Rai), **internazionali** (Japan Expo, Gamescom, San Diego
+Comic-Con) e **assurdi** (Viaggio nel passato, Eldorado) chiedono in più un
+numero di scuole già fondate (`requiredNetworkSchools`), come la Rete
+dell'Ordine: ogni nuova scuola apre qualcosa di nuovo fino alla ventesima. La
+regola è unica (`isAcquisitionEventUnlocked`) per avvio, automazione e pagina.
+Il restyling della pagina Eventi, quando gli eventi visibili saranno molti, è
+da progettare con un concept.
 
 La **Sfida a Cthulhu** non si apre con la Fama: richiede un potenziamento
 segreto (decisione del 06/10, `requiresSecretUpgrade` in `events.ts`). Il suo
@@ -1101,6 +1120,14 @@ Le distribuzioni base sono:
 | Megacon Genova                | 25%: 9–11; 50%: 12–14; 25%: 15–17      |
 | Lucca Comics & Games          | 25%: 10–12; 50%: 14–16; 25%: 18–20     |
 | Milan Games Week & Cartoomics | 25%: 15–17; 50%: 18–22; 25%: 23–25     |
+| Romics                        | 25%: 18–20; 50%: 22–26; 25%: 28–30     |
+| Napoli Comicon                | 25%: 20–22; 50%: 25–29; 25%: 31–33     |
+| Evento Televisivo Rai         | 25%: 24–26; 50%: 28–32; 25%: 34–36     |
+| Japan Expo                    | 25%: 28–31; 50%: 33–37; 25%: 39–42     |
+| Gamescom                      | 25%: 32–35; 50%: 38–42; 25%: 45–48     |
+| San Diego Comic-Con           | 25%: 36–40; 50%: 43–47; 25%: 50–54     |
+| Viaggio nel passato           | 25%: 50–55; 50%: 58–62; 25%: 65–70     |
+| Eldorado                      | 25%: 60–66; 50%: 70–80; 25%: 84–90     |
 | Sfida a Cthulhu               | 25%: 40–44; 50%: 48–52; 25%: 56–60     |
 
 Gli intervalli sono uniformi: per esempio, una fascia 2–3 sceglie 2 o 3 con la
@@ -2198,12 +2225,13 @@ diventa visibile soltanto con lo sblocco del settore.
 | Vendita abbinata | +5% vendite abbinate per livello; massimo +25% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
 | Rhythm Gamer | probabilità di aprire la rarità successiva ×(1 + 20% per livello); massimo ×2 | 7.500 / 15.000 / 30.000 / 60.000 / 120.000 € |
 | Multitasking | +1 lavoro in contemporanea per livello: 2, poi 3 banchi, ognuno a piena velocità | 150.000 / 750.000 € |
+| Banchetto agli eventi | agli eventi seguiti dai collaboratori il 5% per livello delle persone incontrate compra un gadget, fino a +10% per livello della capacità del laboratorio nel mese; massimo 25% e +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
 
 Tutti i nodi richiedono lo sblocco del settore Gadget. Soglie in punti di
 Gadget, nell'ordine della linea: Vetrina della scuola 0, Strumenti di
 progettazione 0, Gestione degli ordini 2, Laboratorio revisioni 3, Negozio
 online 3 e lo sblocco di Social, **Rhythm Gamer** 5, Formazione commerciale 8,
-Vendita abbinata 12, **Multitasking** 20
+**Banchetto agli eventi** 10, Vendita abbinata 12, **Multitasking** 20
 e il progetto Tazza già sbloccato. La capacità commerciale riceve anche i bonus generici di
 automazione dell'Organizzazione.
 
@@ -3939,6 +3967,18 @@ rarità al 100% ottengono la Maestria al primo passo di gioco.
 | Gestione degli ordini      | +100% capacità commerciale                           | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 €          | Gadget |
 | Formazione commerciale     | +10 punti percentuali di conversione                 | 15.000 / 30.000 / 60.000 / 120.000 / 240.000 €         | Ordini 2 |
 | Vendita abbinata           | +25% vendite aggiuntive                              | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 €        | Formazione 3 e Tazza sbloccata |
+| Banchetto agli eventi      | vendite agli eventi, fino a +50% della capacità del laboratorio | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € | 10 punti Gadget |
+
+**Banchetto agli eventi** (decisione del 06/10, `sellGadgetsAtEvent` in
+`gadgetFlow.ts`). Quando finisce un evento seguito da un collaboratore, il 5%
+per livello delle persone incontrate prova il catalogo: i tentativi si dividono
+in parti uguali tra le varianti in vendita, passano per la conversione della
+qualità e diventano vendite extra, che non consumano il pubblico. Per non
+togliere senso al laboratorio, nel mese il banchetto non supera il 10% per
+livello della capacità ordinaria del settore (`gadgets.eventStall`): senza
+collaboratori Gadget non vende nulla, e con il nodo al massimo aggiunge al più
+metà delle vendite ordinarie. Le vendite contano per sblocchi, classifica del
+mese e Reputazione come le altre.
 
 Il ramo costa complessivamente 5.142.500 €. È visibile nella schermata Upgrade
 soltanto dopo lo sblocco del settore. I costi del ramo non crescono con le
@@ -5315,7 +5355,7 @@ completa:
     il primo collaboratore è Andrea Simonazzi, 10° contatto garantito; gli Ultra
     Rari compaiono con probabilità 5,5% solo dall'11° contatto);
 11. regole di accesso multiplo ai tre rami delle Forme 3/4/5;
-12. elenco iniziale degli eventi e dei luoghi reali di Genova (oggi 15 eventi
+12. elenco iniziale degli eventi e dei luoghi reali di Genova (oggi 23 eventi
     in `src/content/events.ts`, quasi tutti in luoghi reali della Liguria e
     oltre, dal Volantinaggio nel centro di Genova a Lucca Comics & Games e Milan
     Games Week; fa eccezione la Sfida a Cthulhu, ambientata a R'lyeh);

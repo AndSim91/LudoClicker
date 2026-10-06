@@ -3,8 +3,21 @@ import { getBaseExpectedEventContacts } from "../game/eventRewards";
 import { ACQUISITION_EVENTS, getUnlockedAcquisitionEvents } from "./events";
 
 it("keeps the Sfida a Cthulhu locked until its secret upgrade exists", () => {
-  expect(getUnlockedAcquisitionEvents(Number.MAX_SAFE_INTEGER).map((event) => event.id))
+  expect(getUnlockedAcquisitionEvents(Number.MAX_SAFE_INTEGER, 1_000).map((event) => event.id))
     .not.toContain("cthulhu-challenge");
+});
+
+it("opens nazionali, internazionali and assurdi with founded schools (06/10)", () => {
+  const ids = (schools: number) =>
+    getUnlockedAcquisitionEvents(Number.MAX_SAFE_INTEGER, schools).map((event) => event.id);
+  expect(ids(0)).toContain("megacon-genova");
+  expect(ids(0)).not.toContain("lucca-comics");
+  expect(ids(1)).toContain("lucca-comics");
+  expect(ids(5)).toContain("napoli-comicon");
+  expect(ids(5)).not.toContain("rai-tv-event");
+  expect(ids(19)).not.toContain("eldorado");
+  expect(ids(20)).toContain("eldorado");
+  expect(getUnlockedAcquisitionEvents(449, 20).map((event) => event.id)).not.toContain("romics");
 });
 
 describe("acquisition event progression", () => {
@@ -39,7 +52,7 @@ describe("acquisition event progression", () => {
       Bassa: 3,
       Media: 2,
       Alta: 3,
-      Altissima: 4,
+      Altissima: 12,
     });
   });
 
@@ -48,7 +61,7 @@ describe("acquisition event progression", () => {
       ACQUISITION_EVENTS
         .filter((event) => event.potential === "Altissima")
         .map((event) => event.unlockMembers),
-    ).toEqual([180, 250, 350, 500]);
+    ).toEqual([180, 250, 350, 450, 600, 800, 1_000, 1_300, 1_700, 2_200, 3_000, 500]);
   });
 
   it("keeps only flyering free", () => {
@@ -58,13 +71,13 @@ describe("acquisition event progression", () => {
 
   it("uses the agreed member, sword, and wear requirements", () => {
     expect(ACQUISITION_EVENTS.map((event) => event.requiredMembers)).toEqual([
-      0, 1, 2, 2, 4, 4, 6, 8, 10, 15, 20, 25, 40, 50, 1_000,
+      0, 1, 2, 2, 4, 4, 6, 8, 10, 15, 20, 25, 40, 50, 60, 70, 30, 90, 110, 130, 100, 200, 1_000,
     ]);
     expect(ACQUISITION_EVENTS.map((event) => event.requiredSwords)).toEqual([
-      0, 1, 2, 4, 4, 6, 8, 10, 12, 20, 20, 30, 50, 100, 1_000,
+      0, 1, 2, 4, 4, 6, 8, 10, 12, 20, 20, 30, 50, 100, 120, 140, 40, 180, 220, 260, 300, 500, 1_000,
     ]);
     expect(ACQUISITION_EVENTS.map((event) => event.wearAdded)).toEqual([
-      0, 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500, 750, 1_000, 10_000,
+      0, 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500, 750, 1_000, 1_200, 1_400, 400, 1_800, 2_200, 2_600, 3_000, 5_000, 10_000,
     ]);
   });
 
@@ -87,6 +100,14 @@ describe("acquisition event progression", () => {
       13,
       15,
       20,
+      24,
+      26.75,
+      30,
+      35,
+      40,
+      45,
+      60,
+      75,
       50,
     ]);
     expect(ACQUISITION_EVENTS.map((event) => [
@@ -107,6 +128,14 @@ describe("acquisition event progression", () => {
       [9, 17],
       [10, 20],
       [15, 25],
+      [18, 30],
+      [20, 33],
+      [24, 36],
+      [28, 42],
+      [32, 48],
+      [36, 54],
+      [50, 70],
+      [60, 90],
       [40, 60],
     ]);
   });
@@ -128,6 +157,14 @@ describe("acquisition event progression", () => {
       { kind: "calendar", months: 24 },
       { kind: "calendar", months: 30 },
       { kind: "calendar", months: 36 },
+      { kind: "calendar", months: 36 },
+      { kind: "calendar", months: 36 },
+      { kind: "calendar", months: 48 },
+      { kind: "calendar", months: 48 },
+      { kind: "calendar", months: 60 },
+      { kind: "calendar", months: 72 },
+      { kind: "calendar", months: 96 },
+      { kind: "calendar", months: 120 },
       { kind: "calendar", months: 120 },
     ]);
   });

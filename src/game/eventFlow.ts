@@ -1,4 +1,5 @@
 import { getAcquisitionEventDefinition, isAcquisitionEventUnlocked } from "../content/events";
+import { sellGadgetsAtEvent } from "./gadgetFlow";
 import { getCollaboratorMasteryDefinition } from "../content/mastery";
 import { GAME_CONFIG } from "./config";
 import {
@@ -76,7 +77,7 @@ function getEventStartDetails(
     return undefined;
   }
   if (
-    !isAcquisitionEventUnlocked(definition, state.school.fame) ||
+    !isAcquisitionEventUnlocked(definition, state.school.fame, state.network.schoolCount) ||
     checkContext.availableMembers < definition.requiredMembers ||
     checkContext.availableSwords < definition.requiredSwords
   ) return undefined;
@@ -295,6 +296,7 @@ export function resolveAcquisitionEvent(
       eventsCompleted: rewardState.statistics.eventsCompleted + 1,
     },
   };
+  if (event.collaboratorId) nextState = sellGadgetsAtEvent(nextState, event.peopleMet, now);
   if (event.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID) {
     const selectedOutcomeId = nextState.pendingEmailOutcomes.find(
       (outcome) => outcome.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID,

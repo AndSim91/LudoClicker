@@ -1,7 +1,9 @@
-import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity } from "../content/upgrades";
+import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity, getUpgradeEffectTotal } from "../content/upgrades";
 import { getReputationMultiplier } from "./reputation";
 import {
   GADGET_DEFINITIONS,
+  GADGET_EVENT_STALL_CAPACITY_SHARE,
+  GADGET_EVENT_STALL_PEOPLE_SHARE,
   GADGET_PRODUCT_ORDER,
   GADGET_PROJECT_UNLOCK_SALES,
   getGadgetRevisionCost,
@@ -757,17 +759,21 @@ function processGadgetSales(
     cross.remainder === state.gadgets.crossSellRemainder
   ) return state;
 
-  const gadgetsWithSales = recordGadgetMonthlyRevenue(
-    {
-      ...state.gadgets,
-      products: cross.products,
-      crossSellRemainder: cross.remainder,
-      crossSellCursor: cross.cursor,
-    },
-    state.gadgets.products,
-    cross.products,
-    state.school.currentMonth,
-  );
+  return bookGadgetSales(state, {
+    ...state.gadgets,
+    products: cross.products,
+    crossSellRemainder: cross.remainder,
+    crossSellCursor: cross.cursor,
+  }, revenue, now);
+}
+
+/** Cashes the revenue of new sales: Fondi, statistics, monthly ranking, next projects. */
+function bookGadgetSales(
+  state: GameState,
+  gadgets: GadgetState,
+  revenue: number,
+  now: number,
+): GameState {
   const soldState: GameState = {
     ...state,
     school: {
@@ -778,11 +784,77 @@ function processGadgetSales(
       ...state.statistics,
       eurosEarned: roundCurrency(state.statistics.eurosEarned + revenue),
     },
-    gadgets: {
-      ...gadgetsWithSales,
-    },
+    gadgets: recordGadgetMonthlyRevenue(
+      gadgets,
+      state.gadgets.products,
+      gadgets.products,
+      state.school.currentMonth,
+    ),
   };
   return unlockProductsFromSales(soldState, now);
+}
+
+/**
+ * Banchetto agli eventi (decisione del 06/10). At an event run by a
+ * collaborator, 5% per level of the people met try the catalog, as extra
+ * sales that do not use the audience. The month is capped at 10% per level
+ * of the laboratory's ordinary capacity: no Gadget collaborators, no stall.
+ */
+export function sellGadgetsAtEvent(
+  state: GameState,
+  peopleMet: number,
+  now: number,
+): GameState {
+  const level = getUpgradeEffectTotal(state.upgrades, "gadgetEventStall");
+  if (!state.unlocks.gadget || level <= 0 || peopleMet <= 0) return state;
+  const variants = getSellableGadgetVariants(state);
+  if (variants.length === 0) return state;
+  const month = state.school.currentMonth;
+  const used = state.gadgets.eventStall?.month === month ? state.gadgets.eventStall.attempts : 0;
+  const budget = getGadgetMonthlyAttemptCapacity(state) * GADGET_EVENT_STALL_CAPACITY_SHARE * level;
+  const attempts = Math.min(
+    peopleMet * GADGET_EVENT_STALL_PEOPLE_SHARE * level,
+    Math.max(0, budget - used),
+  );
+  if (attempts <= 0) return state;
+
+  let products = state.gadgets.products;
+  let revenue = 0;
+  for (const { productId, rarity } of variants) {
+    const rarityState = products[productId].rarities[rarity];
+    // Same fractional buffer as the monthly sales, so small events still add up.
+    const buffered = rarityState.salesRemainder + attempts / variants.length *
+      getGadgetQualityConversion(rarityState.quality, state.upgrades);
+    const sold = Math.floor(buffered + Number.EPSILON);
+    products = {
+      ...products,
+      [productId]: {
+        ...products[productId],
+        rarities: {
+          ...products[productId].rarities,
+          [rarity]: {
+            ...rarityState,
+            salesRemainder: Math.max(0, Math.min(0.999999999999, buffered - sold)),
+          },
+        },
+      },
+    };
+    const applied = applySales(
+      products,
+      productId,
+      rarity,
+      sold,
+      getReputationMultiplier(state, "socialGadgets"),
+      true,
+    );
+    products = applied.products;
+    revenue = roundCurrency(revenue + applied.revenue);
+  }
+  return bookGadgetSales(state, {
+    ...state.gadgets,
+    products,
+    eventStall: { month, attempts: used + attempts },
+  }, revenue, now);
 }
 
 export function processGadgets(

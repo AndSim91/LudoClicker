@@ -209,6 +209,14 @@ export type AcquisitionEventId =
   | "milan-games-week"
   | "oktoberfest"
   | "kata-sea-waves"
+  | "romics"
+  | "napoli-comicon"
+  | "rai-tv-event"
+  | "japan-expo"
+  | "gamescom"
+  | "san-diego-comic-con"
+  | "time-travel"
+  | "eldorado"
   | "cthulhu-challenge";
 
 export interface AcquisitionEvent {
@@ -295,6 +303,7 @@ export type UpgradeId =
   | "time-is-money"
   | "grand-council"
   | "multitasking"
+  | "gadget-event-stall"
   | "pre-event-check"
   | "maintenance-kit"
   | "organized-rack"
@@ -1001,6 +1010,8 @@ export interface GadgetState {
   crossSellRemainder: number;
   crossSellCursor: number;
   monthlyRevenue: GadgetMonthlyRevenueState;
+  /** Banchetto agli eventi: sale attempts already used in `month` (cap of the month). */
+  eventStall?: { month: number; attempts: number };
 }
 
 export interface GameState {

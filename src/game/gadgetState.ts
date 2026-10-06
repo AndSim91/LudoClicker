@@ -124,6 +124,10 @@ export function isValidGadgetState(value: unknown): value is GadgetState {
     const total = state.monthlyRevenue.totals[productId];
     if (!isFiniteNonNegative(total)) return false;
   }
+  if (state.eventStall !== undefined && (
+    !Number.isSafeInteger(state.eventStall?.month) ||
+    !isFiniteNonNegative(state.eventStall?.attempts)
+  )) return false;
   if (!Array.isArray(state.activeWorks) || !state.activeWorks.every(isValidGadgetWork)) return false;
   if (state.minigame && !isValidGadgetMinigame(state.minigame)) return false;
   if (state.minigameQueue !== undefined && (

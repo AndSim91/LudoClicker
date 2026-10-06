@@ -113,7 +113,7 @@ export function EventsView({
   const usesTutorialSparringDuration = isTutorialScenePending(state, FIRST_EVENT_TUTORIAL_SCENE_ID);
   const visibleEvents = ACQUISITION_EVENTS.filter(
     (definition) =>
-      isAcquisitionEventUnlocked(definition, state.school.fame) ||
+      isAcquisitionEventUnlocked(definition, state.school.fame, state.network.schoolCount) ||
       runningEvents.some((event) => event.definitionId === definition.id),
   );
   return (

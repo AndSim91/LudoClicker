@@ -135,6 +135,10 @@ export const GADGET_PROJECT_UNLOCK_SALES = 100;
 export const GADGET_REVISION_WORK_RATE = 1 / 3;
 export const GADGET_BASE_ATTEMPTS_PER_MONTH_PER_PRODUCTIVITY = 2;
 export const GADGET_EXTRA_SALES_SPEED_MULTIPLIER = 0.3;
+/** Banchetto agli eventi, per level: share of the people met who try the catalog… */
+export const GADGET_EVENT_STALL_PEOPLE_SHARE = 0.05;
+/** …capped each month at this share of the laboratory's ordinary capacity. */
+export const GADGET_EVENT_STALL_CAPACITY_SHARE = 0.1;
 
 export const GADGET_MEMBER_REACH_LEVELS = [0.1, 0.2, 0.35, 0.5, 0.75, 1] as const;
 export const GADGET_FOLLOWER_REACH_LEVELS = [

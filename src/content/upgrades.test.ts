@@ -71,9 +71,9 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      // One line per branch: nine columns, ten in the Rete dell'Ordine (one column per node there).
+      // One line per branch: nine columns, ten in Gadget and the Rete dell'Ordine (one column per node there).
       const expected = {
-        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 9, instructors: 9, organization: 8, network: 10,
+        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 10, instructors: 9, organization: 8, network: 10,
       } as Record<string, number>;
       expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
@@ -163,6 +163,7 @@ describe("upgrade catalog", () => {
       "gadget-cross-selling": [25_000, 50_000, 100_000, 200_000, 400_000],
       "rhythm-gamer": [7_500, 15_000, 30_000, 60_000, 120_000],
       multitasking: [150_000, 750_000],
+      "gadget-event-stall": [20_000, 40_000, 80_000, 160_000, 320_000],
     });
     expect(costsFor("instructors")).toEqual({
       "talent-eye": [1_000, 10_000],
