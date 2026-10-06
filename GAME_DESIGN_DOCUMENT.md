@@ -3981,6 +3981,32 @@ con il sistema precedente viene annullata senza rimborso, i collaboratori
 tornano agli incarichi di prima e il vecchio recap sparisce; albo, fama e
 vittorie restano.
 
+### 20.6.1 Il Reptile in Modalità Outlook
+
+Decisione di Andrea del 06/10: in Modalità Outlook il Reptile si veste da
+ufficio come il resto del gioco (`src/styles/reptile-outlook.css`, tutto sotto
+`:root[data-theme="light"]`; Onde non cambia).
+
+- **Pagina**: niente fumo né titolo da manifesto. Testata con l'icona in un
+  riquadro, il titolo da 18 px e lo stato a destra («Da organizzare»,
+  «In preparazione», «Gadget ferma», «Pronto per luglio», «Edizione
+  conclusa»); Fama, Squadre e Torneo nella fila di riquadri della pagina Gadget;
+  schede bianche con barre da 4 px nel **verde Reptile** (il verde di stato di
+  Office), barra ferma in rosso, avvisi come barre messaggio rosse e gialle,
+  pulsanti blu come nel resto di Outlook.
+- **Superba**: stessa veste con accento blu notte, senza vetrata, senza logo e
+  senza carattere classico.
+- **Giornata degli imprevisti e giorno del torneo**: finestre bianche su un
+  velo grigio invece dello schermo intero nero e verde. Il palazzetto è una
+  pianta grigia su carta millimetrata; le segnalazioni sono schede bianche con
+  un anello sottile che si svuota (grosse: bordo blu e numero di clic; urgenti:
+  bordo rosso e la scritta «Urgente · vale doppio» al posto della pulsazione;
+  tranquille: tratteggiate). Niente scosse, comparse o scritte che salgono: si
+  muovono solo gli anelli e la barra del tempo. Il giorno del torneo mostra i
+  settori come righe di una tabella, subito tutti visibili.
+- **Chronicles**: la stessa testata al posto della fascia blu notte con il
+  titolo dorato.
+
 ### 20.7 Torneo della Superba
 
 Quando, alla fine di un'edizione, la fama del Reptile raggiunge il **livello 1**
@@ -3997,7 +4023,7 @@ fase svizzera, tabellone, premi e fama) con tre differenze:
 
 - nome «Torneo della Superba» nella scheda Tornei, nei messaggi e nel recap;
   nell'albo d'oro ogni edizione indica se era Reptile o Superba;
-- grafica completamente diversa: il verde del Reptile lascia il posto alla
+- grafica completamente diversa in Onde (in Outlook vedi § 20.6.1): il verde del Reptile lascia il posto alla
   vetrata del logo del torneo (rossi e arancioni del tramonto, blu notte e teal
   del mare di Genova, sabbia della Lanterna, oro), con il logo nell'intestazione,
   lo sfondo a vetrata (`public/assets/superba-glass.svg`, logo

@@ -1,0 +1,1030 @@
+/*
+ * Torneo Reptile in Modalità Outlook (decisioni di Andrea del 06/10): pagina da
+ * ufficio con accento verde Reptile (verde di stato Office), Superba blu notte e
+ * senza logo, finestre del minigioco e del giorno del torneo bianche (O2), niente
+ * animazioni né sfondi. Onde non cambia: tutto è sotto :root[data-theme="light"].
+ */
+
+/* Parti della testata che esistono solo in Outlook. */
+.reptile-hero-tile,
+.reptile-hero-status {
+  display: none;
+}
+
+:root[data-theme="light"] .reptile-view {
+  --reptile-bg: #ffffff;
+  --reptile-surface: #ffffff;
+  --reptile-surface-soft: #f7f7f7;
+  --reptile-line: #e1dfdd;
+  --reptile-line-strong: #d2d0ce;
+  --reptile-ink: #242424;
+  --reptile-muted: #616161;
+  --reptile-soft: #8a8886;
+  --reptile-accent: #107c10;
+  --reptile-acid: #107c10;
+  --reptile-on-accent: #ffffff;
+  --reptile-bg-rgb: 255 255 255;
+  --reptile-accent-rgb: 16 124 16;
+  --reptile-acid-rgb: 16 124 16;
+  --reptile-line-rgb: 225 223 221;
+  --reptile-surface-rgb: 255 255 255;
+  --reptile-backdrop: none;
+  --reptile-accent-soft: #e9f5e9;
+  --reptile-accent-ink: #0e6a0e;
+  --reptile-red: #b42318;
+  gap: 16px;
+  border: 0;
+  outline: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .reptile-view.is-superba {
+  --reptile-accent: #0c3b5e;
+  --reptile-acid: #0c3b5e;
+  --reptile-accent-rgb: 12 59 94;
+  --reptile-acid-rgb: 12 59 94;
+  --reptile-accent-soft: #e6eef5;
+  --reptile-accent-ink: #0c3b5e;
+}
+
+:root[data-theme="light"] .reptile-view h2,
+:root[data-theme="light"] .reptile-view h3,
+:root[data-theme="light"] .reptile-view.is-superba h2,
+:root[data-theme="light"] .reptile-view.is-superba h3 {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="light"] .reptile-view button,
+:root[data-theme="light"] .reptile-view .reptile-day-scene,
+:root[data-theme="light"] .reptile-incidents-layer,
+:root[data-theme="light"] .reptile-day-layer {
+  transition: none;
+  animation: none;
+}
+
+:root[data-theme="light"] .reptile-view button:focus-visible,
+:root[data-theme="light"] .reptile-view select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Testata del torneo: icona, titolo, stato, poi la fila di riquadri come Gadget. */
+:root[data-theme="light"] .reptile-hero {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px 12px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+:root[data-theme="light"] .reptile-hero-tile {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--reptile-accent);
+  background: var(--reptile-accent-soft);
+}
+
+:root[data-theme="light"] .reptile-hero-tile svg {
+  width: 20px;
+  height: 20px;
+}
+
+:root[data-theme="light"] .reptile-hero-copy {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+:root[data-theme="light"] .reptile-hero-status {
+  display: block;
+  grid-column: 3;
+  grid-row: 1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--reptile-accent-ink);
+  background: var(--reptile-accent-soft);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .reptile-hero-status.is-alert {
+  color: var(--reptile-red);
+  background: #fde7e9;
+}
+
+:root[data-theme="light"] .superba-hero-logo {
+  display: none;
+}
+
+:root[data-theme="light"] .reptile-hero-kicker,
+:root[data-theme="light"] .reptile-section-kicker {
+  color: var(--reptile-muted);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="light"] .reptile-hero h2 {
+  margin: 1px 0 2px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+:root[data-theme="light"] .reptile-hero p {
+  color: var(--reptile-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+:root[data-theme="light"] .reptile-hero-stats {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  gap: 0;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .reptile-hero-stats > div {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 0;
+  min-height: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+:root[data-theme="light"] .reptile-hero-stats > div + div {
+  border-left: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-hero-stats svg {
+  grid-row: span 3;
+  width: 20px;
+  height: 20px;
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-hero-stats span,
+:root[data-theme="light"] .reptile-hero-stats small {
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .reptile-hero-stats strong {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Schede */
+:root[data-theme="light"] .reptile-page {
+  padding: 0;
+}
+
+:root[data-theme="light"] .reptile-panel,
+:root[data-theme="light"] .reptile-hall-panel,
+:root[data-theme="light"] .reptile-minicard,
+:root[data-theme="light"] .reptile-step-locked {
+  padding: 14px 16px;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+:root[data-theme="light"] .reptile-step-locked {
+  min-height: 0;
+  gap: 14px;
+}
+
+:root[data-theme="light"] .reptile-step-locked > svg {
+  width: 28px;
+  height: 28px;
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-locked-label {
+  margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+:root[data-theme="light"] .reptile-panel-heading {
+  margin-bottom: 12px;
+}
+
+:root[data-theme="light"] .reptile-panel .reptile-panel-heading h3,
+:root[data-theme="light"] .reptile-hall-panel .reptile-panel-heading h3,
+:root[data-theme="light"] .reptile-minicard h3 {
+  margin: 2px 0;
+  font-size: 15px;
+}
+
+:root[data-theme="light"] .reptile-panel-heading p,
+:root[data-theme="light"] .reptile-minicard p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Lo stato è già nella testata. */
+:root[data-theme="light"] .reptile-status-mark {
+  display: none;
+}
+
+:root[data-theme="light"] .reptile-count-mark {
+  padding: 0;
+  border: 0;
+  color: var(--reptile-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .reptile-summary {
+  gap: 0;
+  margin-bottom: 4px;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .reptile-summary > div {
+  padding: 8px 10px;
+  border: 0;
+}
+
+:root[data-theme="light"] .reptile-summary > div + div {
+  border-left: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-summary small {
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .reptile-summary strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Barre dei settori: 4 px, nel colore d'accento; la barra ferma in rosso. */
+:root[data-theme="light"] .reptile-bar-row {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  padding: 8px 0;
+}
+
+:root[data-theme="light"] .reptile-bar-glyph {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-bar-glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+:root[data-theme="light"] .reptile-bar-row b {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-bar-row small {
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-bar-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+:root[data-theme="light"] .reptile-bar-meta strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-bar-track {
+  height: 4px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-bar-track i,
+:root[data-theme="light"] .reptile-bar-row.is-full .reptile-bar-track i {
+  background: var(--reptile-accent);
+  transition: none;
+}
+
+:root[data-theme="light"] .reptile-bar-row.is-stuck .reptile-bar-glyph,
+:root[data-theme="light"] .reptile-bar-row.is-stuck .reptile-bar-meta,
+:root[data-theme="light"] .reptile-bar-row.is-stuck .reptile-bar-meta strong {
+  color: var(--reptile-red);
+}
+
+:root[data-theme="light"] .reptile-load {
+  gap: 2px;
+  margin-left: 4px;
+}
+
+:root[data-theme="light"] .reptile-load i {
+  width: 6px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+:root[data-theme="light"] .reptile-load i.is-on {
+  background: var(--reptile-soft);
+}
+
+/* Avvisi come le barre messaggio di Outlook. */
+:root[data-theme="light"] .reptile-alert {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  color: #6d5200;
+  background: #fff4ce;
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-alert.is-bad {
+  color: #6e0811;
+  background: #fde7e9;
+}
+
+:root[data-theme="light"] .reptile-inline-note {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--reptile-muted);
+  background: #f7f7f7;
+}
+
+/* Pulsanti: blu come nel resto di Outlook, anche con l'accento verde. */
+:root[data-theme="light"] .reptile-panel-actions {
+  margin-top: 14px;
+}
+
+:root[data-theme="light"] .reptile-view button.primary,
+:root[data-theme="light"] .reptile-view button.secondary,
+:root[data-theme="light"] .reptile-step-locked button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-view button.primary,
+:root[data-theme="light"] .reptile-step-locked button {
+  border: 1px solid var(--blue-600);
+  color: #fff;
+  background: var(--blue-600);
+}
+
+:root[data-theme="light"] .reptile-view button.primary:hover:not(:disabled) {
+  border-color: var(--blue-700);
+  background: var(--blue-700);
+  transform: none;
+}
+
+:root[data-theme="light"] .reptile-view button.secondary {
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: #fff;
+}
+
+:root[data-theme="light"] .reptile-view button.secondary:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .reptile-view button.text-button {
+  min-height: 0;
+  padding: 0;
+  color: var(--accent-ink);
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .reptile-view button.text-button:hover:not(:disabled) {
+  color: var(--blue-700);
+  text-decoration: underline;
+}
+
+:root[data-theme="light"] .reptile-view button:disabled {
+  opacity: .5;
+}
+
+:root[data-theme="light"] .reptile-view select {
+  border-color: var(--line-strong);
+  color: var(--ink);
+  background: #fff;
+}
+
+/* Minigioco, esito e albo */
+:root[data-theme="light"] .reptile-minicard {
+  gap: 10px;
+}
+
+:root[data-theme="light"] .reptile-minicard .reptile-panel-actions {
+  margin-top: 2px;
+}
+
+:root[data-theme="light"] .reptile-minicard-facts dt {
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .reptile-minicard-facts dd {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-minicard-bonus {
+  color: var(--reptile-accent-ink);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-tiles {
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  gap: 0;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .reptile-tiles > div {
+  padding: 8px 10px;
+  border: 0;
+  background: none;
+}
+
+:root[data-theme="light"] .reptile-tiles > div + div {
+  border-left: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-tiles small {
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .reptile-tiles strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-podium-line {
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-podium-line .is-home {
+  color: var(--reptile-accent-ink);
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-hall-list > div {
+  padding: 8px 0;
+}
+
+:root[data-theme="light"] .reptile-hall-list b {
+  color: var(--reptile-ink);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * Finestre del minigioco e del giorno del torneo: dialoghi bianchi su un velo,
+ * come la finale. Si muovono solo gli anelli e la barra del tempo.
+ * ------------------------------------------------------------------------- */
+:root[data-theme="light"] .reptile-incidents-layer,
+:root[data-theme="light"] .reptile-day-layer {
+  background: rgb(0 0 0 / 32%);
+}
+
+:root[data-theme="light"] .reptile-incidents-frame,
+:root[data-theme="light"] .reptile-day-stage {
+  width: min(1040px, 100%);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+}
+
+:root[data-theme="light"] .reptile-incidents-hud {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-incidents-clock small,
+:root[data-theme="light"] .reptile-incidents-bonus small {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="light"] .reptile-incidents-clock strong,
+:root[data-theme="light"] .reptile-incidents-bonus strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-incidents-bonus strong {
+  color: var(--reptile-accent-ink);
+}
+
+:root[data-theme="light"] .reptile-incidents-time {
+  height: 4px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-incidents-time i {
+  background: var(--blue-600);
+}
+
+:root[data-theme="light"] .reptile-incidents-combo {
+  height: 4px;
+}
+
+:root[data-theme="light"] .reptile-incidents-combo i {
+  border-radius: 1px;
+  background: var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-incidents-combo i.is-on,
+:root[data-theme="light"] .reptile-incidents-combo i.is-hot {
+  background: var(--blue-600);
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .reptile-incidents-combo i.is-hot {
+  background: var(--blue-800);
+}
+
+:root[data-theme="light"] .reptile-incidents-combo-label {
+  color: var(--reptile-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Pianta del palazzetto su carta millimetrata. */
+:root[data-theme="light"] .reptile-incidents-floor {
+  width: auto;
+  margin: 14px 18px 18px;
+  border: 1px solid var(--reptile-line-strong);
+  border-radius: 4px;
+  background-color: #fbfbfb;
+  background-image:
+    linear-gradient(var(--reptile-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--reptile-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+:root[data-theme="light"] .reptile-incidents-floor.is-shaking {
+  animation: none;
+}
+
+:root[data-theme="light"] .reptile-incidents-zone {
+  border: 1px solid var(--reptile-line-strong);
+  border-radius: 3px;
+  background: #fff;
+  transition: none;
+}
+
+:root[data-theme="light"] .reptile-incidents-zone span {
+  color: var(--reptile-muted);
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+:root[data-theme="light"] .reptile-incidents-zone.is-hot {
+  border-color: var(--reptile-soft);
+  background: #fff;
+}
+
+:root[data-theme="light"] .reptile-incidents-zone.is-hot span {
+  color: var(--reptile-ink);
+}
+
+:root[data-theme="light"] .reptile-incidents-zone.is-hurt {
+  border-color: #e8a3a8;
+  background: #fde7e9;
+}
+
+:root[data-theme="light"] .reptile-incidents-zone.is-hurt span {
+  color: var(--reptile-red);
+}
+
+:root[data-theme="light"] .reptile-incidents-arena {
+  border: 1px solid var(--reptile-line-strong);
+  background: #fff;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .reptile-incidents-arena::after {
+  background: var(--reptile-line-strong);
+  opacity: 1;
+}
+
+/* Segnalazioni come promemoria: anello sottile che si svuota. */
+:root[data-theme="light"] .reptile-view button.reptile-incident {
+  border: 1px solid var(--reptile-line-strong);
+  border-radius: 4px;
+  color: var(--reptile-ink);
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+  /* Near the floor's edge the card would shrink to one word per line. */
+  width: max-content;
+  max-width: 15em;
+  animation: none;
+}
+
+:root[data-theme="light"] .reptile-incident small {
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-incident-ring {
+  width: 26px;
+  height: 26px;
+  background: conic-gradient(var(--blue-600) calc(var(--left, 1) * 360deg), var(--reptile-line) 0);
+}
+
+:root[data-theme="light"] .reptile-incident-ring b,
+:root[data-theme="light"] .reptile-incident.is-big .reptile-incident-ring b {
+  width: 20px;
+  height: 20px;
+  color: var(--blue-600);
+  background: #fff;
+}
+
+:root[data-theme="light"] .reptile-incident.is-low .reptile-incident-ring {
+  background: conic-gradient(var(--reptile-red) calc(var(--left, 1) * 360deg), var(--reptile-line) 0);
+}
+
+:root[data-theme="light"] .reptile-view button.reptile-incident.is-big {
+  border-width: 1px;
+  border-color: var(--blue-600);
+}
+
+/* Urgente: bordo e anello rossi e la scritta, al posto della pulsazione. */
+:root[data-theme="light"] .reptile-view button.reptile-incident.is-urgent {
+  border-color: var(--reptile-red);
+  animation: none;
+}
+
+:root[data-theme="light"] .reptile-incident.is-urgent .reptile-incident-ring {
+  background: conic-gradient(var(--reptile-red) calc(var(--left, 1) * 360deg), var(--reptile-line) 0);
+}
+
+:root[data-theme="light"] .reptile-incident.is-urgent .reptile-incident-ring b {
+  color: var(--reptile-red);
+}
+
+:root[data-theme="light"] .reptile-incident.is-urgent > span:last-child::before {
+  display: block;
+  color: var(--reptile-red);
+  content: "Urgente · vale doppio";
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="light"] .reptile-view button.reptile-incident.is-calm {
+  border-style: dashed;
+  border-color: var(--reptile-soft);
+  color: var(--reptile-muted);
+  background: #fff;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .reptile-incident.is-calm .reptile-incident-ring {
+  border-color: var(--reptile-soft);
+  background: none;
+}
+
+:root[data-theme="light"] .reptile-incident.is-calm .reptile-incident-ring b {
+  color: var(--reptile-soft);
+  background: transparent;
+}
+
+:root[data-theme="light"] .reptile-incident-burst {
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: none;
+  animation: none;
+  transform: translate(-50%, -150%);
+}
+
+:root[data-theme="light"] .reptile-incident-burst.is-good {
+  color: var(--reptile-accent-ink);
+}
+
+:root[data-theme="light"] .reptile-incident-burst.is-bad {
+  color: var(--reptile-red);
+}
+
+:root[data-theme="light"] .reptile-incident-tip {
+  border: 1px solid #f2c661;
+  border-radius: 4px;
+  color: #6d5200;
+  background: #fff4ce;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-incidents-overlay {
+  background: rgb(255 255 255 / 92%);
+}
+
+:root[data-theme="light"] .reptile-incidents-overlay h3 {
+  font-size: 20px;
+}
+
+:root[data-theme="light"] .reptile-incidents-result {
+  color: var(--reptile-accent-ink);
+  font-size: 36px;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-incidents-stats dd {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Il giorno del torneo, come la finale in Outlook. */
+:root[data-theme="light"] .reptile-day-stage {
+  min-height: 0;
+}
+
+:root[data-theme="light"] .reptile-day-top {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-day-dots {
+  gap: 4px;
+}
+
+:root[data-theme="light"] .reptile-day-dots i {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+:root[data-theme="light"] .reptile-day-dots i.is-on {
+  background: var(--blue-600);
+}
+
+:root[data-theme="light"] .reptile-day-scene {
+  min-height: 360px;
+  align-content: start;
+  gap: 12px;
+  padding: 18px 22px 22px;
+}
+
+:root[data-theme="light"] .reptile-day-scene h3 {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+/* I timbri diventano le righe di una tabella, tutte visibili da subito. */
+:root[data-theme="light"] .reptile-day-stamps {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .reptile-day-stamp,
+:root[data-theme="light"] .reptile-day-stamp.is-in {
+  display: grid;
+  max-width: none;
+  grid-template-columns: minmax(180px, 16em) minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 10px;
+  border: 0;
+  color: var(--reptile-ink);
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+:root[data-theme="light"] .reptile-day-stamp + .reptile-day-stamp {
+  border-top: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-day-stamp b {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="light"] .reptile-day-stamp small {
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-day-stamp.is-gold {
+  color: var(--reptile-accent-ink);
+}
+
+:root[data-theme="light"] .reptile-day-resa,
+:root[data-theme="light"] .reptile-day-resa.is-in {
+  color: var(--reptile-accent-ink);
+  font-size: 28px;
+  font-weight: 600;
+  opacity: 1;
+  transition: none;
+}
+
+:root[data-theme="light"] .reptile-day-resa small {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .reptile-day-standings {
+  gap: 0;
+  border: 1px solid var(--reptile-line);
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .reptile-day-standings li {
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-day-standings li + li {
+  border-top: 1px solid var(--reptile-line);
+}
+
+:root[data-theme="light"] .reptile-day-standings small {
+  color: var(--reptile-muted);
+}
+
+:root[data-theme="light"] .reptile-day-standings li.is-home {
+  border-left: 0;
+  box-shadow: inset 3px 0 0 var(--reptile-accent);
+  color: var(--reptile-ink);
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .reptile-day-bracket {
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .reptile-day-bracket-column span {
+  border: 1px solid var(--reptile-line);
+  border-radius: 3px;
+  color: var(--reptile-ink);
+  background: #fff;
+  opacity: .35;
+  transition: none;
+}
+
+:root[data-theme="light"] .reptile-day-bracket-column span.is-in {
+  opacity: 1;
+}
+
+:root[data-theme="light"] .reptile-day-bracket-column span.is-home {
+  border-color: var(--reptile-accent);
+  color: var(--reptile-accent-ink);
+}
+
+:root[data-theme="light"] .reptile-day-podium small {
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .reptile-day-podium i {
+  border: 1px solid var(--reptile-line);
+  border-radius: 3px 3px 0 0;
+  color: var(--reptile-ink);
+  background: #f7f7f7;
+  font-size: 18px;
+  font-weight: 600;
+  animation: none;
+}
+
+:root[data-theme="light"] .reptile-day-podium > div:nth-child(2) i {
+  border-color: var(--reptile-accent);
+  color: var(--reptile-accent-ink);
+  background: var(--reptile-accent-soft);
+}
+
+:root[data-theme="light"] .reptile-day-podium > div.is-home small {
+  color: var(--reptile-accent-ink);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * Chronicles: la stessa testata al posto della fascia blu notte.
+ * ------------------------------------------------------------------------- */
+:root[data-theme="light"] .chronicles-banner {
+  min-height: 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  background: none;
+}
+
+:root[data-theme="light"] .chronicles-key-emblem {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--accent-ink);
+  background: var(--blue-100);
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .chronicles-key-emblem svg {
+  width: 20px;
+  height: 20px;
+}
+
+:root[data-theme="light"] .chronicles-banner > div {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+}
+
+:root[data-theme="light"] .chronicles-banner h2 {
+  margin: 0 0 2px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+:root[data-theme="light"] .chronicles-banner strong {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--accent-ink);
+  background: var(--blue-100);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .chronicles-banner p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  :root[data-theme="light"] .reptile-tiles {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :root[data-theme="light"] .reptile-hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="light"] .reptile-hero-stats > div + div {
+    border-top: 1px solid var(--reptile-line);
+    border-left: 0;
+  }
+
+  :root[data-theme="light"] .reptile-hero-status {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  :root[data-theme="light"] .reptile-hero-stats {
+    grid-row: 3;
+  }
+
+  :root[data-theme="light"] .reptile-day-stamp,
+  :root[data-theme="light"] .reptile-day-stamp.is-in {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

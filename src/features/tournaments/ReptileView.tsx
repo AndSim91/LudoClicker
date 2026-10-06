@@ -46,6 +46,24 @@ function signed(value: number): string {
   return `${value >= 0 ? "+" : "−"}${Math.abs(value).toLocaleString("it-IT")}`;
 }
 
+/** One line on where the tournament stands, for the Outlook header. */
+function getHeroStatus(
+  state: GameState,
+  outlook: ReturnType<typeof getReptileOutlook>,
+): { label: string; alert?: boolean } | undefined {
+  const reptile = state.tournaments.reptile;
+  if (!reptile.unlocked) return undefined;
+  if (!reptile.activeEdition) return { label: reptile.latestRecap ? "Edizione conclusa" : "Da organizzare" };
+  const stuck = outlook?.bars.filter((entry) => entry.stuck) ?? [];
+  if (stuck.length > 0) {
+    return {
+      label: `${stuck.map((entry) => REPTILE_SECTOR_LABELS[entry.sector]).join(", ")} ${stuck.length === 1 ? "ferma" : "ferme"}`,
+      alert: true,
+    };
+  }
+  return { label: outlook?.complete ? "Pronto per luglio" : "In preparazione" };
+}
+
 function ReptileHero({ state }: { state: GameState }) {
   const reptile = state.tournaments.reptile;
   const superba = isSuperbaTournament(state);
@@ -57,8 +75,12 @@ function ReptileHero({ state }: { state: GameState }) {
   const outlook = getReptileOutlook(state);
   const nextJuly = getNextReptileJuly(state.school.currentMonth, reptile.lastTournamentMonth);
   const tournamentMonth = reptile.activeEdition ? outlook?.tournamentMonth : nextJuly;
+  const status = getHeroStatus(state, outlook);
   return (
     <section className="reptile-hero" aria-labelledby="reptile-title" data-tutorial-region="reptile-hero">
+      {/* Outlook only (06/10): icon tile and status chip of the plain header; hidden in Onde. */}
+      <span className="reptile-hero-tile" aria-hidden="true"><Icon name="trophy" /></span>
+      {status ? <span className={`reptile-hero-status${status.alert ? " is-alert" : ""}`}>{status.label}</span> : null}
       <div className="reptile-hero-copy">
         {superba ? (
           <img className="superba-hero-logo" src="/assets/superba-logo.webp" alt="Logo del Torneo della Superba" />
@@ -357,7 +379,7 @@ function HallPanel({ reptile }: { reptile: GameState["tournaments"]["reptile"] }
     <section className="reptile-hall-panel" aria-labelledby="reptile-hall-title">
       <header className="reptile-panel-heading">
         <div><span className="reptile-section-kicker">Memoria del torneo</span><h3 id="reptile-hall-title">Albo d&apos;oro</h3></div>
-        <span className="reptile-count-mark">{reptile.hall.length} edizioni</span>
+        <span className="reptile-count-mark">{reptile.hall.length} {reptile.hall.length === 1 ? "edizione" : "edizioni"}</span>
       </header>
       {reptile.hall.length > 0 ? (
         <div className="reptile-hall-list">
