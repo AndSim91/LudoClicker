@@ -114,7 +114,7 @@ export function NetworkMap({
               <button
                 key={`${node.number}`}
                 type="button"
-                className={`network-node${node.current ? " is-current" : ""}${selected === index ? " is-selected" : ""}`}
+                className={`network-node${node.current ? " is-current" : ""}${node.number === 1 ? " is-mother" : ""}${selected === index ? " is-selected" : ""}`}
                 style={{ ...style, "--glow": glow.toFixed(2), "--size": `${Math.round(22 + 22 * glow)}px` } as React.CSSProperties}
                 onClick={() => setSelected(index)}
                 aria-pressed={selected === index}

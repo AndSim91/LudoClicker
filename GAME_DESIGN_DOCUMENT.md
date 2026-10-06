@@ -3334,7 +3334,10 @@ La pagina contiene, dall'alto:
   la Sede madre è sempre il n° 1, la scuola in corso è l'ultimo nodo e dopo c'è
   un nodo tratteggiato «la prossima?». In Onde i nodi sono sfere su un filo
   d'onda, più grandi e luminose in proporzione a √(Fama / Fama massima della
-  mappa); in Outlook diventano le schede di un organigramma. Fino a 6 scuole
+  mappa); in Outlook la mappa è una **linea del tempo** (decisione di Andrea
+  del 06/10): una scheda per scuola con «N° 1 · Sede madre», il nome intero,
+  città e Fama, la scuola in corso con il bordo blu, frecce sottili tra le
+  schede e una scheda tratteggiata «la prossima?». Fino a 6 scuole
   lasciate la mappa sta nella fascia; dalla 7ª scorre in orizzontale e si apre
   sulla scuola in corso. La riga sotto la mappa mostra numero, nome, città e
   Fama del nodo scelto, con i pulsanti «« Sede madre» e «Oggi »»;
@@ -3342,9 +3345,11 @@ La pagina contiene, dall'alto:
   soglia del punto successivo, Champion's Arena, Reptile/Superba, Chronicles;
   le vittorie mancanti restano visibili come «+1 possibile») e il pulsante
   «Fonda una nuova scuola…», disabilitato senza titolo nazionale o con una
-  prova di Leggendario Segreto in corso;
-- **Potenziamenti**: i sei rami con il livello su 50 (quadranti) e la
-  rendita della rete;
+  prova di Leggendario Segreto in corso (in Outlook è il pulsante blu della
+  pagina e i punti sono in nero, senza l'oro);
+- **Potenziamenti**: i sei rami con il livello su 50 (quadranti in Onde; in
+  Outlook una riga per ramo con descrizione, livello su 50, percentuale e una
+  barra sottile blu) e la rendita della rete;
 - **Resta per sempre**: Torneo della Superba e Corso X se sbloccati, Ludodex,
   Leggendari Segreti reclutati, Maestria dei gadget, Traguardi.
 
@@ -3353,7 +3358,8 @@ con il gioco in pausa finché è aperta (motivo di pausa `foundation`): nome e
 città obbligatori, con i segnaposto «Ordine delle Onde» e «Genova»; sotto, i
 sei rami e la rendita con pulsanti − e +. Ogni ramo mostra il livello intero:
 i punti già spesi nelle scuole precedenti sono in bianco e non si possono
-togliere (il − si ferma lì), quelli aggiunti adesso lo fanno diventare oro. In
+togliere (il − si ferma lì), quelli aggiunti adesso lo fanno diventare oro
+(in Outlook blu su azzurro). In
 fondo «Annulla» e un solo pulsante definitivo «Fonda …», attivo con nome,
 città e una spesa coperta. Il colore della scuola non si sceglie più: ogni
 scuola usa quello iniziale.

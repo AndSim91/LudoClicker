@@ -143,6 +143,12 @@ export function NetworkView({
                   </svg>
                   <span>{REPUTATION_UPGRADES[id].label}</span>
                   <small>+{Math.round(level * GAME_CONFIG.reputationStep * 100)}%</small>
+                  {/* Outlook draws a row with a bar instead of the ring (06/10): hidden in Onde. */}
+                  <em className="network-dial-desc">{REPUTATION_UPGRADES[id].description}</em>
+                  <em className="network-dial-level">{level}/{GAME_CONFIG.reputationUpgradeMaxLevel}</em>
+                  <em className="network-dial-bar" aria-hidden="true">
+                    <i style={{ width: `${(level / GAME_CONFIG.reputationUpgradeMaxLevel) * 100}%` }} />
+                  </em>
                 </div>
               );
             })}

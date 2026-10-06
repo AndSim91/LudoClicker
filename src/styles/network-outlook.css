@@ -1,0 +1,292 @@
+/*
+ * Rete dell'Ordine in Modalità Outlook (Andrea, 06/10): sedi come linea del
+ * tempo (concept S2), potenziamenti come barre (P2), niente oro né marrone.
+ * Onde non cambia: tutto è sotto :root[data-theme="light"], tranne gli elementi
+ * delle barre, nascosti fuori da Outlook.
+ */
+
+.network-dial-desc,
+.network-dial-level,
+.network-dial-bar {
+  display: none;
+}
+
+/* ---------- Sedi: linea del tempo ---------- */
+:root[data-theme="light"] .network-map {
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .network-map-track {
+  display: flex;
+  width: max-content !important;
+  min-width: 100%;
+  height: auto;
+  align-items: stretch;
+  gap: 22px;
+  padding: 14px;
+}
+
+:root[data-theme="light"] .network-map-track::before {
+  display: none;
+}
+
+:root[data-theme="light"] .network-node {
+  position: relative;
+  top: auto;
+  left: auto !important;
+  display: grid;
+  width: 176px;
+  flex: none;
+  align-content: start;
+  justify-items: start;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  text-align: left;
+  transform: none;
+}
+
+/* La freccia sottile verso la sede dopo. */
+:root[data-theme="light"] .network-node:not(.is-next)::after {
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  width: 22px;
+  height: 7px;
+  background:
+    linear-gradient(var(--line-strong), var(--line-strong)) left center / 17px 1px no-repeat,
+    conic-gradient(from 225deg at 100% 50%, var(--line-strong) 0 90deg, transparent 0) right center / 6px 7px no-repeat;
+  content: "";
+  transform: translateY(-50%);
+}
+
+:root[data-theme="light"] .network-node.is-current,
+:root[data-theme="light"] .network-node.is-selected {
+  border-color: var(--blue-600);
+}
+
+:root[data-theme="light"] .network-node.is-current {
+  box-shadow: inset 0 3px 0 var(--blue-600);
+}
+
+:root[data-theme="light"] .network-node.is-older,
+:root[data-theme="light"] .network-node.is-next {
+  border-style: dashed;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+/* L'etichetta «N° 1 · Sede madre» al posto del riquadro col nome tagliato. */
+:root[data-theme="light"] .network-node-orb,
+:root[data-theme="light"] .network-node.is-current .network-node-orb,
+:root[data-theme="light"] .network-node.is-selected .network-node-orb,
+:root[data-theme="light"] .network-node.is-older .network-node-orb,
+:root[data-theme="light"] .network-node.is-next .network-node-orb {
+  display: block;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: var(--ink-muted);
+  background: none;
+  box-shadow: none;
+  font-size: 11px;
+}
+
+:root[data-theme="light"] .network-node-orb > b {
+  display: inline;
+  font-weight: 400;
+}
+
+:root[data-theme="light"] .network-node-orb > b::before {
+  content: "N° ";
+}
+
+:root[data-theme="light"] .network-node.is-mother .network-node-orb > b::after {
+  content: " · Sede madre";
+}
+
+:root[data-theme="light"] .network-node-card {
+  display: none;
+}
+
+:root[data-theme="light"] .network-node > strong,
+:root[data-theme="light"] .network-node > small,
+:root[data-theme="light"] .network-node.is-older > strong,
+:root[data-theme="light"] .network-node.is-next > small {
+  display: block;
+  overflow: visible;
+  max-width: 100%;
+  margin: 0;
+  white-space: normal;
+}
+
+:root[data-theme="light"] .network-node > strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+:root[data-theme="light"] .network-node.is-older > strong {
+  color: var(--ink-muted);
+}
+
+:root[data-theme="light"] .network-node > small {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .network-node.is-next > small {
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+:root[data-theme="light"] .network-map-bar button {
+  border-color: var(--line-strong);
+  border-radius: 4px;
+}
+
+/* ---------- Se fondi ora ---------- */
+:root[data-theme="light"] .network-big b {
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 24px;
+}
+
+:root[data-theme="light"] .network-found {
+  min-height: 32px;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--blue-600);
+}
+
+:root[data-theme="light"] .network-found:hover:not(:disabled) {
+  background: var(--blue-700);
+}
+
+:root[data-theme="light"] .network-found:disabled {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
+/* ---------- Potenziamenti: una riga con la barra ---------- */
+:root[data-theme="light"] .network-panel {
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .network-dials {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+:root[data-theme="light"] .network-dial {
+  grid-template-areas:
+    "name desc level pct"
+    "bar bar bar bar";
+  grid-template-columns: auto minmax(0, 1fr) 46px 48px;
+  align-items: baseline;
+  justify-items: stretch;
+  column-gap: 8px;
+  row-gap: 5px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  text-align: left;
+}
+
+:root[data-theme="light"] .network-dial:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+:root[data-theme="light"] .network-dial svg {
+  display: none;
+}
+
+:root[data-theme="light"] .network-dial > span {
+  grid-area: name;
+  font-size: 12px;
+}
+
+:root[data-theme="light"] .network-dial-desc {
+  display: block;
+  overflow: hidden;
+  grid-area: desc;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .network-dial-level {
+  display: block;
+  grid-area: level;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+:root[data-theme="light"] .network-dial > small {
+  grid-area: pct;
+  color: var(--ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+:root[data-theme="light"] .network-dial-bar {
+  display: block;
+  overflow: hidden;
+  height: 4px;
+  grid-area: bar;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+:root[data-theme="light"] .network-dial-bar i {
+  display: block;
+  height: 100%;
+  background: var(--blue-600);
+}
+
+:root[data-theme="light"] .network-rent {
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .network-rent b {
+  font-family: inherit;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .network-keeps li {
+  border-color: var(--line-strong);
+  border-radius: 4px;
+}
+
+/* ---------- Finestra di fondazione ---------- */
+:root[data-theme="light"] .foundation-budget b {
+  color: var(--ink);
+}
+
+:root[data-theme="light"] .foundation-budget b.is-over {
+  color: var(--warning);
+}
+
+:root[data-theme="light"] .foundation-stepper b.is-added {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
