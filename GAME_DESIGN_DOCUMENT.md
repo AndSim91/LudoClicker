@@ -4373,6 +4373,15 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   i fondi escono dall'intervallo in cui la spesa resta la stessa
   (`getBuyAllPreview`); i punti spesi per ramo sono memorizzati per oggetto
   livelli (mai modificato sul posto);
+- animazioni solo sul compositore («Onde leggera», scelta di Andrea del
+  06/10: stesso aspetto, più leggere): la palestra della Scuola è scenografia
+  ferma più livelli HTML per atleti, spade e luci (`GymLayers.tsx`), mossi con
+  `transform` e `opacity`; il ronzio delle spade è una dissolvenza tra bagliore
+  morbido e forte; le barre di avanzamento scorrono con `translateX` (valore in
+  `--progress` / `--progress-shift` sulla traccia), l'evento «In corso» con
+  `scaleX` e luccichio e bordo come livelli; le strisce delle barre
+  indeterminate scorrono con `transform`. Nessuna animazione costringe la
+  pagina a ridisegnare a ogni fotogramma;
 - orologio di gioco con pausa (pulsante nella barra del titolo; il tutorial e
   i minigiochi mettono in pausa da soli) e velocità regolabile dal pannello
   Admin in sviluppo;
