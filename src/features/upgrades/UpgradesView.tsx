@@ -48,6 +48,7 @@ import {
   getGadgetFollowerReach,
   getGadgetMemberReach,
 } from "../../game/gadgetEconomy";
+import { KeywordText } from "../../components/common/KeywordText";
 
 const categoryIcons: Record<UpgradeCategory, IconName> = {
   speed: "spark",
@@ -667,7 +668,7 @@ function UpgradeDetailsDialog({
           </p>
         ) : (
           <>
-            <p id="upgrade-dialog-description">{definition.description}</p>
+            <p id="upgrade-dialog-description"><KeywordText text={definition.description} /></p>
 
             <dl className="upgrade-dialog-stats">
               <div>
@@ -683,7 +684,7 @@ function UpgradeDetailsDialog({
                   {level} di {definition.maxLevel}
                 </dd>
               </div>
-              <div><dt>Effetto</dt><dd>{definition.effectLabel}</dd></div>
+              <div><dt>Effetto</dt><dd><KeywordText text={definition.effectLabel} /></dd></div>
               <div>
                 <dt>Si apre con</dt>
                 <dd>

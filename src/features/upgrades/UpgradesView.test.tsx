@@ -5,6 +5,7 @@ import { createInitialState } from "../../game/engine";
 import { buyAllAffordableUpgrades } from "../../game/upgradeFlow";
 import { formatStat } from "../../shared/formatters";
 import { UpgradesView } from "./UpgradesView";
+import { stripKeywordMarkup } from "../../shared/keywordMarkup";
 
 afterEach(cleanup);
 
@@ -179,9 +180,9 @@ describe("UpgradesView", () => {
       name: /Apri dettagli Master of none/,
     }));
 
-    expect(screen.getByText(
-      getUpgradeDefinition("instructor-versatility")!.effectLabel,
-    )).toBeVisible();
+    expect(screen.getByText("Effetto").nextElementSibling).toHaveTextContent(
+      stripKeywordMarkup(getUpgradeDefinition("instructor-versatility")!.effectLabel),
+    );
   });
 
   it("shows the complete Nessun Rancore progression", () => {

@@ -12,6 +12,7 @@ import {
   type AchievementTier,
 } from "../../content/achievements";
 import type { GameState } from "../../game/types";
+import { KeywordText } from "../../components/common/KeywordText";
 
 type MedalTier = AchievementTier | "locked";
 type Filter = "Tutti" | AchievementCategory;
@@ -145,7 +146,7 @@ export function AchievementsSection({ state }: { state: GameState }) {
                 <span className="achievement-tile-copy">
                   <small>{card.category} · {card.tier === "locked" ? "Da sbloccare" : getAchievementTierLabel(card.tier)}</small>
                   <strong>{card.title}</strong>
-                  <span>{card.goal}</span>
+                  <span><KeywordText text={card.goal} /></span>
                   <span className="achievement-progress">
                     <span className="achievement-progress-bar"><span style={{ width: `${card.progress * 100}%` }} /></span>
                     <span>{card.progressLabel}</span>
@@ -162,7 +163,7 @@ export function AchievementsSection({ state }: { state: GameState }) {
             <Medal tier={selected.tier} glyph={selected.category === "Segreti" ? "?" : selected.title.charAt(0)} large />
             <span>{selected.tier === "locked" ? "Da sbloccare" : `Livello ${getAchievementTierLabel(selected.tier)}`}</span>
             <h2>{selected.title}</h2>
-            <p>{selected.flavor}</p>
+            <p><KeywordText text={selected.flavor} /></p>
           </div>
           <ol>
             {selected.steps.map((step) => (

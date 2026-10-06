@@ -1,0 +1,66 @@
+/* Keywords in the game's prose (06/10/2026, concept A). Outlook first, Onde below. */
+.kw {
+  padding: 0 5px;
+  border: 1px solid;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-decoration-break: clone;
+}
+
+.kw-page {
+  padding-left: 4px;
+  border-color: var(--blue-600);
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
+
+.kw-page svg {
+  width: 1em;
+  height: 1em;
+  margin-right: 3px;
+  vertical-align: -0.14em;
+}
+
+.kw-area {
+  border-style: dashed;
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.kw-number {
+  font-weight: 600;
+}
+
+.kw-rarity {
+  font-weight: 600;
+}
+
+.kw-rarity[data-rarity="common"] { color: var(--rarity-common-name); }
+.kw-rarity[data-rarity="rare"] { color: var(--rarity-rare-name); }
+.kw-rarity[data-rarity="ultra-rare"] { color: var(--rarity-ultra-rare-name); }
+.kw-rarity[data-rarity="legendary"] { color: var(--rarity-legendary-name); }
+
+.rail-item.is-keyword-hover {
+  outline: 2px solid var(--blue-600);
+  outline-offset: -2px;
+}
+
+:root[data-theme="dark"] .kw {
+  border-radius: 5px;
+}
+
+:root[data-theme="dark"] .kw-page {
+  border-color: var(--onde-wave);
+  color: var(--onde-wave);
+  background: var(--onde-selected);
+}
+
+:root[data-theme="dark"] .kw-area {
+  border-color: rgb(251 241 220 / 45%);
+  color: var(--onde-foam);
+}
+
+:root[data-theme="dark"] .rail-item.is-keyword-hover {
+  outline-color: var(--onde-wave);
+}

@@ -188,7 +188,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Eventi",
         body: [
-          "La prima missione è completata. Ora apri la pagina Eventi dalla barra a sinistra per organizzare nuove attività per la scuola.",
+          "La prima missione è completata. Ora apri la pagina [[Eventi]] dalla barra a sinistra per organizzare nuove attività per la scuola.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "events"
@@ -202,8 +202,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Eventi e attrezzatura",
         body: [
-          "Gli Eventi portano il nostro sport fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra nella speranza che ci siano persone interessate a provare il nostro sport.",
-          "Molte attività impegnano iscritti e spade. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla! Il Volantinaggio gratuito, invece, non richiede né iscritti né attrezzatura.",
+          "Gli [[Eventi]] portano il nostro sport fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra nella speranza che ci siano persone interessate a provare il nostro sport.",
+          "Molte attività impegnano **Iscritti** e **Spade**. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla! Il Volantinaggio gratuito, invece, non richiede né iscritti né attrezzatura.",
         ],
         focusRegions: ["main"],
       },
@@ -212,7 +212,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Avvia il volantinaggio gratuito",
         body: [
-          "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono iscritti o spade; poi attendi il suo completamento.",
+          "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono **Iscritti** o **Spade**; poi attendi il suo completamento.",
         ],
         focusRegions: ["main", "park-sparring-action"],
         isComplete: ({ state }) => hasCompletedTutorialSparring(state) ||
@@ -239,7 +239,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
             (event) => event.tutorialSceneId === "first-event",
           )?.contactReward ?? GAME_CONFIG.tutorialSparringMinimumContacts;
           return [
-            `Il volantinaggio è finito: +${contactReward} ${contactReward === 1 ? "nuovo contatto" : "nuovi contatti"} per la scuola! Gli Eventi servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
+            `Il volantinaggio è finito: +${contactReward} ${contactReward === 1 ? "nuovo **Contatto**" : "nuovi **Contatti**"} per la scuola! Gli [[Eventi]] servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
             "Non si tratta ancora di iscritti veri e propri, dovremo inviare le email per invitarli in palestra e, se la prova va bene, la scuola avrà una nuova recluta!",
           ];
         },
@@ -250,7 +250,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Osserva La mia giornata",
         body: [
-          "Torniamo in Posta e attendiamo la risposta a una delle email inviate a inizio partita.",
+          "Torniamo in [[Posta]] e attendiamo la risposta a una delle email inviate a inizio partita.",
         ],
         focusRegions: ["day-panel"],
         navigateTo: "mail",
@@ -297,9 +297,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Un Leggendario è per sempre",
         body: [
-          "Finora hai incontrato soltanto persone comuni. Ogni possibile iscritto possiede però una rarità possibile: Comune, Raro, Ultra Raro o Leggendario.",
-          "Finalmente hai incontrato il tuo primo atleta Leggendario della partita e col tempo potrai trovarli tutti, ognuno con effetti e caratteristiche diverse.",
-          "I Leggendari sono profili unici e, quando si iscrivono, diventano subito dei Collaboratori delle Onde per darti una mano nella gestione della scuola.",
+          "Finora hai incontrato soltanto persone comuni. Ogni possibile iscritto possiede però una rarità possibile: [[r:Comune]], [[r:Raro]], [[r:Ultra Raro]] o [[r:Leggendario]].",
+          "Finalmente hai incontrato il tuo primo atleta [[r:Leggendario]] della partita e col tempo potrai trovarli tutti, ognuno con effetti e caratteristiche diverse.",
+          "I [[r:Leggendari]] sono profili unici e, quando si iscrivono, diventano subito dei Collaboratori delle Onde per darti una mano nella gestione della scuola.",
           "Collezionali tutti!",
         ],
         focusRegions: ["main", "composer-header"],
@@ -330,7 +330,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri gli Upgrade",
         body: [
-          "Usa la barra a sinistra e apri Upgrade.",
+          "Usa la barra a sinistra e apri [[Upgrade]].",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "upgrades"
@@ -344,8 +344,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Sviluppare l'Ordine delle Onde",
         body: [
-          "Nella pagina Upgrade puoi spendere i fondi della scuola per migliorare scrittura, prove, eventi e automazioni.",
-          "Gli Upgrade si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
+          "Nella pagina [[Upgrade]] puoi spendere i **Fondi** della scuola per migliorare scrittura, prove, eventi e automazioni.",
+          "Gli [[Upgrade]] si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
         ],
         focusRegions: ["main"],
       },
@@ -371,7 +371,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Scuola",
         body: [
-          "Apri Scuola dalla barra a sinistra per raggiungere la sezione Collaboratori.",
+          "Apri [[Scuola]] dalla barra a sinistra per raggiungere la sezione Collaboratori.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -385,7 +385,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Aree di Attività",
         body: [
-          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. Redazione automatizza la compilazione delle email ai contatti; Eventi organizza le attività fuori dalla scuola per farla crescere; Attrezzatura serve per la manutenzione e riparazione delle spade della scuola; Istruttore serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
+          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. [[a:Redazione]] automatizza la compilazione delle email ai contatti; [[a:Eventi]] organizza le attività fuori dalla scuola per farla crescere; [[a:Attrezzatura]] serve per la manutenzione e riparazione delle spade della scuola; [[a:Istruttore]] serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
         ],
         focusRegions: ["main", "collaborator-section"],
         scrollToRegion: "collaborator-section",
@@ -445,7 +445,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la gestione dei Collaboratori",
         body: [
-          "Apri Scuola dalla barra a sinistra per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
+          "Apri [[Scuola]] dalla barra a sinistra per vedere i settori e il conteggio dei Collaboratori liberi accanto al titolo.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -479,9 +479,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La Scuola diventa Social!",
         body: [
-          "L’Ordine delle Onde ha raggiunto 35 iscritti attivi: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
-          "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri Follower e porteranno più pubblico agli Eventi. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
-          "Per trovare nuovi Contatti serviranno ancora gli Eventi. Abbiamo chiesto ai Social di promuoverli e hanno già preparato diciassette hashtag, tre balletti e un comunicato per un certo Guardia di Finanza.",
+          "L’Ordine delle Onde ha raggiunto 35 **Iscritti** attivi: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
+          "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri Follower e porteranno più pubblico agli [[Eventi]]. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
+          "Per trovare nuovi **Contatti** serviranno ancora gli [[Eventi]]. Abbiamo chiesto ai Social di promuoverli e hanno già preparato diciassette hashtag, tre balletti e un comunicato per un certo Guardia di Finanza.",
           "Dev’essere un influencer importante: lo nominano tutti.",
         ],
         focusRegions: ["main"],
@@ -492,10 +492,10 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Contenuti, Follower e Sponsorizzazioni",
         body: [
-          "I collaboratori Social producono sempre contenuti online. Quando c'è una Email da scrivere, le danno priorità senza interrompere completamente i contenuti.",
-          "Ogni contenuto può generare Follower. Ogni Follower aumenta anche la Fama della scuola e l'affluenza agli Eventi, che restano il modo per ottenere nuovi Contatti.",
+          "I collaboratori [[a:Social]] producono sempre contenuti online. Quando c'è una Email da scrivere, le danno priorità senza interrompere completamente i contenuti.",
+          "Ogni contenuto può generare Follower. Ogni Follower aumenta anche la **Fama** della scuola e l'affluenza agli [[Eventi]], che restano il modo per ottenere nuovi **Contatti**.",
           "I Follower producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
-          "Facile, no? Forse userò un Collaboratore Social per farmi ripartire la stampante..."
+          "Facile, no? Forse userò un Collaboratore [[a:Social]] per farmi ripartire la stampante..."
         ],
         focusRegions: ["title", "main"],
       },
@@ -504,7 +504,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Scuola",
         body: [
-          "Premi su Scuola nella barra a sinistra e raggiungi l'elenco dei Collaboratori delle Onde.",
+          "Premi su [[Scuola]] nella barra a sinistra e raggiungi l'elenco dei Collaboratori delle Onde.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "contacts"
@@ -518,8 +518,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Assegna un collaboratore ai Social",
         body: ({ state }) => [
           state.collaboratorManagement.aggregateViewUnlocked
-            ? "Aumenta di almeno uno i posti Social. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente."
-            : "Imposta almeno un Collaboratore sui Social. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente.",
+            ? "Aumenta di almeno uno i posti [[a:Social]]. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente."
+            : "Imposta almeno un Collaboratore sui [[a:Social]]. Senza Collaboratori assegnati le Email e i contenuti online non avanzeranno automaticamente.",
         ],
         focusRegions: ({ state }) => state.collaboratorManagement.aggregateViewUnlocked
           ? ["main", "collaborator-sectors"]
@@ -541,7 +541,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il Laboratorio dei Gadget è aperto",
         body: [
-          "La prima vittoria all'Accademico non si scorda mai. E per renderla ancora più iconica, abbiamo sbloccato i Gadget!",
+          "La prima vittoria all'Accademico non si scorda mai. E per renderla ancora più iconica, abbiamo sbloccato i [[Gadget]]!",
           "Il primo progetto è già disponibile, ma dovrai acquistarlo e svilupparlo prima di metterlo in catalogo.",
         ],
         focusRegions: ["navigation", "gadget-navigation"],
@@ -551,7 +551,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri Gadget",
         body: [
-          "Seleziona Gadget nella barra a sinistra per entrare nel laboratorio.",
+          "Seleziona [[Gadget]] nella barra a sinistra per entrare nel laboratorio.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "gadget"
@@ -565,8 +565,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il motore del capitalismo",
         body: [
-          "La Produttività della sezione Gadget è la somma del lavoro dei Collaboratori assegnati al settore. Senza di loro, progetti e revisioni restano fermi.",
-          "Il Pubblico raggiungibile indica quante persone puoi rendere partecipi del nostro splendido lavoro. Iscritti e, con gli Upgrade, Follower lo fanno crescere; oltre quella soglia restano possibili vendite occasionali, ma più lente.",
+          "La Produttività della sezione [[Gadget]] è la somma del lavoro dei Collaboratori assegnati al settore. Senza di loro, progetti e revisioni restano fermi.",
+          "Il Pubblico raggiungibile indica quante persone puoi rendere partecipi del nostro splendido lavoro. **Iscritti** e, con gli [[Upgrade]], Follower lo fanno crescere; oltre quella soglia restano possibili vendite occasionali, ma più lente.",
         ],
         focusRegions: ["main", "gadget-overview"],
       },
@@ -594,7 +594,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "open-tournaments",
         kind: "objective",
         title: "Apri Tornei",
-        body: ["Il primo torneo della scuola è finito. I risultati ti aspettano nella pagina Tornei."],
+        body: ["Il primo torneo della scuola è finito. I risultati ti aspettano nella pagina [[Tornei]]."],
         focusRegions: ({ activeView }) =>
           activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
         isComplete: ({ activeView }) => activeView === "tournaments",
@@ -631,7 +631,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Chi va avanti",
         body: [
           "Arena e Stile hanno due podi separati: due classifiche, due modi di farsi notare.",
-          "I migliori si qualificano al Torneo Accademico di aprile, e da lì al Nazionale di giugno. I posti dipendono dagli iscritti attivi: più cresce la scuola, più atleti porti.",
+          "I migliori si qualificano al Torneo Accademico di aprile, e da lì al Nazionale di giugno. I posti dipendono dagli **Iscritti** attivi: più cresce la scuola, più atleti porti.",
         ],
         focusRegions: ["main", "tournament-podium"],
         scrollToRegion: "tournament-podium",
@@ -643,7 +643,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La meta di quest'anno",
         body: [
-          "Un titolo al Nazionale, in Arena o in Stile, apre la Rete dell'Ordine: lì si fondano nuove scuole.",
+          "Un titolo al Nazionale, in Arena o in Stile, apre la [[Rete dell'Ordine]]: lì si fondano nuove scuole.",
           "Vincerli tutti e due nello stesso Nazionale fa succedere qualcosa in più. Lo scoprirai.",
         ],
         focusRegions: [],
@@ -661,7 +661,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "open-network",
         kind: "objective",
         title: "Apri la Rete dell'Ordine",
-        body: ["Un titolo nazionale e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: Rete."],
+        body: ["Un titolo nazionale e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Rete]]."],
         focusRegions: ({ activeView }) =>
           activeView === "network" ? ["main"] : ["navigation", "network-navigation"],
         isComplete: ({ activeView }) => activeView === "network",
@@ -672,7 +672,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La mappa della Rete",
         body: [
-          "Questa è la tua scuola, per ora l'unica. Quando ne fondi una nuova, quella che lasci resta sulla mappa con il suo nome, la città e la Fama.",
+          "Questa è la tua scuola, per ora l'unica. Quando ne fondi una nuova, quella che lasci resta sulla mappa con il suo nome, la città e la **Fama**.",
           "Non dovrai più gestirla: diventa una sede dell'Ordine.",
         ],
         focusRegions: ["main", "network-map"],
@@ -684,8 +684,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Fondare è ricominciare",
         body: [
-          "La nuova scuola parte da zero: fondi, iscritti, collaboratori, Upgrade e Fama.",
-          `Porti con te la Reputazione: ${GAME_CONFIG.reputationNationalTitlePoints} punti per il titolo nazionale e per ognuno degli altri grandi tornei vinti, più quelli che vengono dalla Fama. Più resti, più ne porti.`,
+          "La nuova scuola parte da zero: **Fondi**, **Iscritti**, collaboratori, [[Upgrade]] e **Fama**.",
+          `Porti con te la **Reputazione**: ${GAME_CONFIG.reputationNationalTitlePoints} punti per il titolo nazionale e per ognuno degli altri grandi tornei vinti, più quelli che vengono dalla **Fama**. Più resti, più ne porti.`,
         ],
         focusRegions: ["main", "network-ready"],
         cardPlacement: "right",
@@ -708,8 +708,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Cosa resta",
         body: [
-          "Ludodex, traguardi, Leggendari Segreti scoperti e segreti già trovati restano per sempre.",
-          "E un Leggendario a caso ti segue nella nuova scuola, ripartendo da zero come tutti.",
+          "Ludodex, traguardi, [[r:Leggendari]] Segreti scoperti e segreti già trovati restano per sempre.",
+          "E un [[r:Leggendario]] a caso ti segue nella nuova scuola, ripartendo da zero come tutti.",
         ],
         focusRegions: ["main", "network-keeps"],
         cardPlacement: "left",
@@ -737,7 +737,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "open-tournaments",
         kind: "objective",
         title: "Apri Tornei",
-        body: ["Il Nazionale ha lasciato il segno: ora la scuola può organizzare un torneo tutto suo. Apri Tornei."],
+        body: ["Il Nazionale ha lasciato il segno: ora la scuola può organizzare un torneo tutto suo. Apri [[Tornei]]."],
         focusRegions: ({ activeView }) =>
           activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
         isComplete: ({ activeView }) => activeView === "tournaments",
@@ -748,7 +748,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il Torneo Reptile",
         body: ({ state }) => [
-          `Un torneo a coppie, a ${state.school.city}, ogni luglio. Lo organizzi tu: affitti il palazzetto, prepari tutto e la scuola ci guadagna Fama, follower e l'incasso del banchetto.`,
+          `Un torneo a coppie, a ${state.school.city}, ogni luglio. Lo organizzi tu: affitti il palazzetto, prepari tutto e la scuola ci guadagna **Fama**, follower e l'incasso del banchetto.`,
           `Il palazzetto costa ${formatCurrency(GAME_CONFIG.reptileVenueCost)}. Puoi annullare quando vuoi e riavere metà: l'altra metà resta al gestore, come da tradizione.`,
         ],
         focusRegions: ["main", "reptile-hero"],
@@ -761,7 +761,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Cinque barre, cinque settori",
         body: [
-          "Ogni settore riempie la sua barra: Social, Eventi, Attrezzature, Istruttori e Gadget.",
+          "Ogni settore riempie la sua barra: [[a:Social]], [[a:Eventi]], [[a:Attrezzature]], [[a:Istruttori]] e [[a:Gadget]].",
           "Chi lavora dà metà del suo impegno alla barra e metà al lavoro di sempre. Chi è fermo dà tutto. Chi è senza incarico aiuta la barra più indietro, ma a metà.",
           "Se in un settore non c'è nessuno, la sua barra resta ferma. A barra piena quel settore torna al ritmo normale.",
         ],
@@ -777,7 +777,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Luglio, oppure il prossimo",
         body: [
           "Il torneo si gioca a luglio solo con tutte le barre piene. Altrimenti slitta al luglio dopo.",
-          "Prima finisci, migliore è la resa: in tre mesi è al massimo. Il giorno del torneo servono due spade libere per squadra, e ogni spada che manca pesa sulla resa.",
+          "Prima finisci, migliore è la resa: in tre mesi è al massimo. Il giorno del torneo servono due **Spade** libere per squadra, e ogni spada che manca pesa sulla resa.",
         ],
         focusRegions: ["main", "reptile-month"],
         scrollToRegion: "reptile-hero",

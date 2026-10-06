@@ -129,15 +129,15 @@ export const SECRET_ACHIEVEMENTS: readonly SecretAchievement[] = [
     condition: (s) => s.lightInflation.increases >= 5,
   },
   {
-    id: "abandoned-armory", title: "Armeria abbandonata", description: "Mille spade rotte nello stesso momento.",
+    id: "abandoned-armory", title: "Armeria abbandonata", description: "Mille **Spade** rotte nello stesso momento.",
     condition: (s) => s.equipment.damagedSwords >= 1_000,
   },
   {
-    id: "all-on-the-network", title: "Tutto sulla rete", description: "Venti punti Reputazione nella rendita in una sola fondazione.",
+    id: "all-on-the-network", title: "Tutto sulla rete", description: "Venti punti **Reputazione** nella rendita in una sola fondazione.",
     condition: (s) => getCareer(s).maxRentPoints >= 20,
   },
   {
-    id: "back-to-the-gym", title: "Ritorno in palestra", description: "Un Leggendario Segreto già reclutato è ricomparso tra i contatti di una nuova scuola.",
+    id: "back-to-the-gym", title: "Ritorno in palestra", description: "Un [[r:Leggendario]] Segreto già reclutato è ricomparso tra i **Contatti** di una nuova scuola.",
     condition: (s) => s.contacts.some((contact) => contact.secretLegendaryId &&
       contact.source !== "tournament" &&
       (SECRET_LEGENDARIES[contact.secretLegendaryId] as SecretLegendaryProfile).recruitment !== "never"),
@@ -147,11 +147,11 @@ export const SECRET_ACHIEVEMENTS: readonly SecretAchievement[] = [
     condition: (s) => (getCareer(s).earliestFoundationYear ?? Infinity) <= 2,
   },
   {
-    id: "exodus", title: "Esodo", description: "Cento iscritti persi in un solo fine anno.",
+    id: "exodus", title: "Esodo", description: "Cento **Iscritti** persi in un solo fine anno.",
     condition: (s) => getCareer(s).largestYearlyDeparture >= 100,
   },
   {
-    id: "living-legend", title: "Leggenda vivente", description: "Un Leggendario con Forma 7 e gli attestati di Istruttore e di Tecnico.",
+    id: "living-legend", title: "Leggenda vivente", description: "Un [[r:Leggendario]] con Forma 7 e gli attestati di Istruttore e di Tecnico.",
     condition: (s) => s.collaborators.some((collaborator) => collaborator.specialProfileId &&
       hasFormSeven(collaborator.forms) &&
       collaborator.instructorForms.length > 0 &&

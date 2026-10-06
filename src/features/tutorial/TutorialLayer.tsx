@@ -8,6 +8,7 @@ import {
   type TutorialStep,
 } from "../../content/tutorialScenes";
 import { applyTutorialTreatments } from "./tutorialRegions";
+import { KeywordText } from "../../components/common/KeywordText";
 
 export function TutorialLayer({
   scene,
@@ -108,7 +109,7 @@ export function TutorialLayer({
         </header>
         {step.title ? <h2 id="tutorial-step-title">{step.title}</h2> : null}
         <div id="tutorial-step-copy" className="tutorial-copy">
-          {body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {body.map((paragraph) => <p key={paragraph}><KeywordText text={paragraph} /></p>)}
         </div>
         {step.kind === "dialog" ? (
           <button

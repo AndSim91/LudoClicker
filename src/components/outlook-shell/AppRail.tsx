@@ -1,37 +1,11 @@
-import { Icon, type IconName } from "../common/Icon";
+import { Icon } from "../common/Icon";
+import { APP_RAIL_ITEMS, type AppView } from "./appRailItems";
 import { isGameAreaUnlocked, type GameArea } from "../../game/progression";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type { GameState } from "../../game/types";
 import { isAdminMode } from "../../app/adminMode";
 
-export type AppView = GameArea | "admin";
-
-interface AppRailItem {
-  id: AppView;
-  label: string;
-  icon: IconName;
-  devOnly?: boolean;
-  tutorialRegion?:
-    | "events-navigation"
-    | "contacts-navigation"
-    | "upgrades-navigation"
-    | "gadget-navigation"
-    | "tournaments-navigation"
-    | "network-navigation";
-}
-
-const items: AppRailItem[] = [
-  { id: "contacts", label: "Scuola", icon: "people", tutorialRegion: "contacts-navigation" },
-  { id: "mail", label: "Posta", icon: "mail" },
-  { id: "events", label: "Eventi", icon: "flag", tutorialRegion: "events-navigation" },
-  { id: "tournaments", label: "Tornei", icon: "trophy", tutorialRegion: "tournaments-navigation" },
-  { id: "gadget", label: "Gadget", icon: "gift", tutorialRegion: "gadget-navigation" },
-  { id: "upgrades", label: "Upgrade", icon: "spark", tutorialRegion: "upgrades-navigation" },
-  { id: "network", label: "Rete", icon: "network", tutorialRegion: "network-navigation" },
-  { id: "ludowiki", label: "LudoWiki", icon: "ludowiki" },
-  { id: "settings", label: "Impostazioni", icon: "settings" },
-  { id: "admin", label: "Admin", icon: "admin", devOnly: true },
-];
+export type { AppView } from "./appRailItems";
 
 export function AppRail({
   view,
@@ -46,7 +20,7 @@ export function AppRail({
     ["network", "school", "shortGoal", "statistics", "unlocks", "achievements", "tournaments"],
     stateOverride,
   );
-  const visibleItems = items.filter((item) => {
+  const visibleItems = APP_RAIL_ITEMS.filter((item) => {
     // The LudoWiki opens to everyone with the first achievement (4.4).
     if (item.id === "ludowiki") return isAdminMode || state.achievements.length > 0;
     if (item.devOnly) return isAdminMode;
@@ -59,6 +33,7 @@ export function AppRail({
           key={item.id}
           type="button"
           className={view === item.id ? "rail-item active" : "rail-item"}
+          data-view={item.id}
           data-tutorial-region={item.tutorialRegion}
           data-tutorial-target={item.tutorialRegion ? "true" : undefined}
           onClick={() => onChange(item.id)}

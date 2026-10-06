@@ -2632,6 +2632,32 @@ senza conteggio e due scorciatoie, Contatti e Iscritti; i Fondi stanno solo
 nella barra del titolo. Ogni messaggio dell'elenco ha l'iniziale del mittente,
 l'oggetto e una riga di anteprima.
 
+**Parole chiave nei testi** (concept A «Etichetta della barra», decisioni di
+Andrea del 06/10, dopo il feedback di un giocatore che faticava a partire col
+tutorial): nei testi da leggere (schede di A.N.D.E.R., LudoWiki, descrizioni ed
+effetti degli Upgrade, traguardi segreti) le parole del gioco hanno sempre lo
+stesso segno, in quattro famiglie:
+- **Pagine della barra** (Posta, Eventi, Scuola, Tornei, Gadget, Upgrade, Rete,
+  LudoWiki, Impostazioni): etichetta col simbolo della voce della barra,
+  turchese in Onde e blu in Outlook; al passaggio del mouse si illumina la voce
+  nella barra. Non apre la pagina al clic.
+- **Numeri della partita** (Contatti, Iscritti, Fondi, Spade, Fama,
+  Reputazione): grassetto e prima lettera maiuscola, solo quando la parola è
+  davvero il numero della partita e non parte di un discorso generale.
+- **Aree di Attività** (Redazione, Social, Eventi, Attrezzatura, Istruttore,
+  Gadget): etichetta a bordo tratteggiato senza simbolo, così l'incarico Eventi
+  non si confonde con la pagina Eventi.
+- **Rarità**: solo il colore della rarità, come nei nomi della Posta.
+Regole: mai su pulsanti, titoli, intestazioni e nella barra; solo la prima
+volta per paragrafo; solo quando la parola è la cosa del gioco. Si marcano a
+mano nei testi: `[[Eventi]]`, `**Contatti**`, `[[a:Redazione]]`,
+`[[r:Leggendario]]` (`src/shared/keywordMarkup.ts`), disegnati da
+`KeywordText` (`src/components/common/KeywordText.tsx`, stile in
+`src/styles/keywords.css`). Un test controlla che ogni pagina e rarità marcata
+nei file di `src/content` esista. Testi che finiscono anche in notifiche o
+riepiloghi costruiti dal codice (eventi narrativi, obiettivi completati) per ora
+restano senza segni.
+
 **Testata delle pagine in Modalità Outlook** (concept B «Barra compatta»,
 decisione di Andrea del 06/10): tutte le pagine con testata (Scuola, Eventi,
 Tornei, Gadget, Upgrade, Rete, LudoWiki, Impostazioni, Calendario) hanno la

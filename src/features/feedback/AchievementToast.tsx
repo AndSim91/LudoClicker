@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ACHIEVEMENT_TOTAL, describeAchievementGoal, describeAchievementKey } from "../../content/achievements";
 import { useGameSelector } from "../../game/GameStateContext";
 import type { AchievementKey, GameState } from "../../game/types";
+import { KeywordText } from "../../components/common/KeywordText";
 
 const TOAST_LIFETIME_MS = 5_000;
 
@@ -83,7 +84,7 @@ export function AchievementToast({ state: stateOverride, onOpen }: { state?: Gam
         <span className="achievement-toast-copy">
           <small>{toast.label}</small>
           <strong>{toast.title}</strong>
-          <span>{toast.detail}</span>
+          <span><KeywordText text={toast.detail} /></span>
         </span>
       </button>
       <button type="button" aria-label="Chiudi la notifica" onClick={() => setToast(null)}>×</button>

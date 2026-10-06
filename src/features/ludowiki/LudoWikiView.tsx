@@ -22,6 +22,7 @@ import {
   getLudodexStatus,
   type LudodexStatus,
 } from "./ludodexPresentation";
+import { KeywordText } from "../../components/common/KeywordText";
 
 export type LudoWikiSection = "ludodex" | "achievements" | "scenes" | "manual";
 type LudodexFilter = "all" | "discovered";
@@ -332,7 +333,7 @@ function ChapterDiagram({ chapter }: { chapter: LudoWikiChapter }) {
             <div className="ludowiki-step">
               <span><Icon name={wikiIconNames[step.icon]} /></span>
               <strong>{step.label}</strong>
-              <small>{step.detail}</small>
+              <small><KeywordText text={step.detail} /></small>
             </div>
             {index < chapter.steps.length - 1 ? <Icon name="arrowRight" /> : null}
           </div>
@@ -355,7 +356,7 @@ function ManualArticle({
       <header>
         <small>{chapter.group}</small>
         <h2 id="ludowiki-article-title">{chapter.title}</h2>
-        <p>{chapter.introduction}</p>
+        <p><KeywordText text={chapter.introduction} /></p>
       </header>
       <ChapterDiagram chapter={chapter} />
       <section aria-labelledby={`${chapter.id}-numbers`}>
@@ -365,14 +366,14 @@ function ManualArticle({
             <div key={`${number.label}-${number.value}`}>
               <span>{number.label}</span>
               <strong>{number.value}</strong>
-              <small>{number.detail}</small>
+              <small><KeywordText text={number.detail} /></small>
             </div>
           ))}
         </div>
       </section>
       <section className="ludowiki-rules" aria-labelledby={`${chapter.id}-rules`}>
         <h3 id={`${chapter.id}-rules`}>Come funziona</h3>
-        <ul>{chapter.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+        <ul>{chapter.rules.map((rule) => <li key={rule}><KeywordText text={rule} /></li>)}</ul>
       </section>
       {chapter.example ? (
         <section className="ludowiki-example" aria-labelledby={`${chapter.id}-example`}>

@@ -10,7 +10,7 @@ describe("AchievementToast", () => {
   it("describes what the achievement asked for", () => {
     expect(describeAchievementGoal("people-met:silver")).toBe("100.000 Persone incontrate agli eventi");
     expect(describeAchievementGoal("euros:bronze")).toMatch(/^Euro guadagnati: 10\.000/);
-    expect(describeAchievementGoal("exodus")).toBe("Cento iscritti persi in un solo fine anno.");
+    expect(describeAchievementGoal("exodus")).toBe("Cento **Iscritti** persi in un solo fine anno.");
   });
 
   it("shows the goal and opens the achievements page on click", () => {
