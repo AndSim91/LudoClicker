@@ -46,7 +46,7 @@ import { InstructorCourseTabs } from "./InstructorCourseTabs";
 import { InstructorCompactActivity } from "./TrainingControl";
 
 const COLLABORATORS_PER_PAGE = 25;
-/** From the 5th collaborator to the Consiglio the list is a 4×2 grid (06/10). */
+/** From the 5th collaborator to the Consiglio the list is a grid of 4 + 3 places (06/10). */
 const GRID_FROM = 5;
 const GRID_ORDER: CollaboratorAssignment[] = [null, "instructor", "writing", "events", "equipment", "gadget"];
 const COLLABORATOR_SORT_KEYS = [
@@ -643,19 +643,15 @@ export function CollaboratorList({
             );
           })}
           {gridMode
+            // The 8th collaborator opens the Consiglio: seven places, the second row centred.
             ? Array.from(
-                { length: Math.max(0, GAME_CONFIG.collaboratorAggregateUnlockCount - state.collaborators.length) },
-                (_, index) => {
-                  const council = state.collaborators.length + index === GAME_CONFIG.collaboratorAggregateUnlockCount - 1;
-                  return (
-                    <div className={`collaborator-slot${council ? " is-council" : ""}`} key={`slot-${index}`}>
-                      <strong>{council ? `${GAME_CONFIG.collaboratorAggregateUnlockCount}° posto` : "Posto libero"}</strong>
-                      <span>{council
-                        ? "Qui si riunisce il Consiglio delle Onde"
-                        : "Il prossimo Ultra Raro dopo il Corso Y"}</span>
-                    </div>
-                  );
-                },
+                { length: Math.max(0, GAME_CONFIG.collaboratorAggregateUnlockCount - 1 - state.collaborators.length) },
+                (_, index) => (
+                  <div className="collaborator-slot" key={`slot-${index}`}>
+                    <strong>Posto libero</strong>
+                    <span>Il prossimo Ultra Raro dopo il Corso Y</span>
+                  </div>
+                ),
               )
             : null}
           {!gridMode && filteredCollaborators.length === 0 ? (

@@ -2147,7 +2147,7 @@ describe("PeopleView", () => {
     expect(screen.queryByRole("checkbox", { name: "Attivo" })).not.toBeInTheDocument();
   });
 
-  it("turns the collaborators into a 4×2 grid from the 5th to the Consiglio", () => {
+  it("turns the collaborators into a grid of seven places from the 5th", () => {
     const initial = createInitialState(1_000);
     const staff = (count: number) => Array.from({ length: count }, (_, index) => ({
       id: `grid-${index}`,
@@ -2169,12 +2169,11 @@ describe("PeopleView", () => {
     rerender(<PeopleView state={{ ...initial, collaborators: staff(5), unlocks }} {...props} />);
     const grid = container.querySelector(".collaborator-table.is-grid")!;
     expect(grid).not.toBeNull();
-    // Free first, then by sector; three empty places, the last one for the Consiglio.
+    // Free first, then by sector; seven places in all, no word on the Consiglio.
     expect([...grid.querySelectorAll(".collaborator-row .rarity-name")].map((name) => name.textContent))
       .toEqual(["Collaboratore 0", "Collaboratore 2", "Collaboratore 4", "Collaboratore 1", "Collaboratore 3"]);
-    const slots = grid.querySelectorAll(".collaborator-slot");
-    expect(slots).toHaveLength(3);
-    expect(slots[2]).toHaveClass("is-council");
+    expect(grid.querySelectorAll(".collaborator-slot")).toHaveLength(2);
+    expect(grid).not.toHaveTextContent(/Consiglio/);
     expect(within(grid as HTMLElement).queryByRole("columnheader")).toBeNull();
   });
 
