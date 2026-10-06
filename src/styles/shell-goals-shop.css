@@ -306,13 +306,13 @@
 
 .upgrade-lane-canvas {
   position: relative;
-  min-width: 846px;
+  min-width: calc(94px * var(--lane-columns, 9));
 }
 
 .upgrade-lane-wave {
   position: absolute;
   top: 0;
-  left: calc(100% / 18);
+  left: calc(100% / (2 * var(--lane-columns, 9)));
   height: 54px;
   overflow: visible;
   pointer-events: none;
@@ -336,7 +336,7 @@
 .upgrade-lane-nodes {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--lane-columns, 9), minmax(0, 1fr));
   margin: 0;
   padding: 0 0 2px;
   list-style: none;

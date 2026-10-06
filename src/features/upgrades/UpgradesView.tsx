@@ -22,6 +22,7 @@ import {
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getUpgradeCategoryPoints,
+  getRequiredNetworkSchools,
   getUpgradeCost,
   getUpgradeEffectTotal,
   getUpgradeRequirements,
@@ -251,7 +252,10 @@ type UpgradeStatus = "locked" | "available" | "completed";
 
 /** The node line is a soft wave: odd nodes sit lower by this much (px). */
 const WAVE_AMPLITUDE = 24;
-/** Every lane uses the same nine columns, so nodes line up across branches. */
+/**
+ * Every lane uses the same nine columns, so nodes line up across branches; a
+ * lane with more nodes (the Rete dell'Ordine has ten) gets one column per node.
+ */
 const LANE_COLUMNS = 9;
 
 function getCategoryTitle(category: UpgradeCategory): string {
@@ -297,12 +301,13 @@ function getUpgradeRequirementRows(state: GameState, definition: UpgradeDefiniti
     else if (unlock === "forms") rows.push({ short: "Servono le Forme", full: "Centro didattico aperto (Forme)", met });
     else rows.push({ short: "Funzione da sbloccare", full: "Funzione del gioco sbloccata", met });
   }
-  if (definition.requiredNetworkSchools !== undefined) {
-    const one = definition.requiredNetworkSchools === 1;
+  const networkSchools = getRequiredNetworkSchools(definition, state.upgrades[definition.id] ?? 0);
+  if (networkSchools !== undefined) {
+    const one = networkSchools === 1;
     rows.push({
-      short: one ? "Fonda un'altra scuola" : `${definition.requiredNetworkSchools} scuole fondate`,
-      full: one ? "Un'altra scuola fondata" : `${definition.requiredNetworkSchools} scuole fondate`,
-      met: state.network.schoolCount >= definition.requiredNetworkSchools,
+      short: one ? "Fonda un'altra scuola" : `${networkSchools} scuole fondate`,
+      full: one ? "Un'altra scuola fondata" : `${networkSchools} scuole fondate`,
+      met: state.network.schoolCount >= networkSchools,
     });
   }
   if (definition.requiredGadgetProduct !== undefined) {
@@ -383,7 +388,7 @@ function getWavePath(lastIndex: number): string {
   return path;
 }
 
-function UpgradeLaneWave({ count, litTo }: { count: number; litTo: number }) {
+function UpgradeLaneWave({ count, litTo, columns }: { count: number; litTo: number; columns: number }) {
   if (count < 2) return null;
   const width = (count - 1) * 100;
   return (
@@ -392,7 +397,7 @@ function UpgradeLaneWave({ count, litTo }: { count: number; litTo: number }) {
       aria-hidden="true"
       viewBox={`0 0 ${width} 54`}
       preserveAspectRatio="none"
-      style={{ width: `calc(${count - 1} * 100% / ${LANE_COLUMNS})` }}
+      style={{ width: `calc(${count - 1} * 100% / ${columns})` }}
     >
       <path className="upgrade-lane-wave-base" d={getWavePath(count - 1)} />
       {litTo > 0 ? <path className="upgrade-lane-wave-lit" d={getWavePath(litTo)} /> : null}
@@ -879,8 +884,15 @@ export function UpgradesView({
                   )}
                 </div>
                 <div className="upgrade-lane-track">
-                  <div className="upgrade-lane-canvas">
-                    <UpgradeLaneWave count={definitions.length} litTo={litTo} />
+                  <div
+                    className="upgrade-lane-canvas"
+                    style={{ "--lane-columns": Math.max(LANE_COLUMNS, definitions.length) } as CSSProperties}
+                  >
+                    <UpgradeLaneWave
+                      count={definitions.length}
+                      litTo={litTo}
+                      columns={Math.max(LANE_COLUMNS, definitions.length)}
+                    />
                     <ol className="upgrade-lane-nodes">
                       {definitions.map((definition, index) =>
                         isSecrets &&

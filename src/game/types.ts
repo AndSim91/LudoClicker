@@ -292,6 +292,7 @@ export type UpgradeId =
   | "national-sponsor"
   | "network-arena"
   | "legends-visit"
+  | "time-is-money"
   | "grand-council"
   | "multitasking"
   | "pre-event-check"
@@ -1079,6 +1080,8 @@ export interface GameState {
     lastProcessedAt: number;
     autoSendEmails: boolean;
     autoTeachingEnabled: boolean;
+    /** Speed the player chose with «Il tempo è denaro» (1–3); capped by its level. */
+    gameSpeed?: number;
     writingBuffer: number;
     lessonBuffer: number;
     socialContentBuffer: number;
@@ -1154,6 +1157,7 @@ export type GameAction =
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number; spending?: ReputationSpending }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "BUY_ALL_UPGRADES"; now: number }
+  | { type: "SET_GAME_SPEED"; speed: number }
   | { type: "START_GADGET_PROJECT"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_REVISION"; productId: GadgetProductId; now: number }
   | { type: "START_GADGET_MINIGAME"; productId: GadgetProductId }

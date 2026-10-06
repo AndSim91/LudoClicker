@@ -9,7 +9,7 @@
 
 .title-bar {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto auto 38px auto auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto auto auto auto auto;
   align-items: center;
   color: white;
   background: var(--blue-700);
@@ -37,6 +37,40 @@
 }
 
 .title-pause.active {
+  color: #c7e8ff;
+}
+
+/* Pausa e «Il tempo è denaro» stanno nella stessa colonna della barra. */
+.title-time {
+  display: flex;
+  align-self: stretch;
+}
+
+.title-speed {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 45px;
+  padding: 0 10px 0 8px;
+  color: white;
+  background: transparent;
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.title-speed svg {
+  width: 17px;
+  height: 17px;
+}
+
+.title-speed:hover,
+.title-speed.fast {
+  background: rgb(255 255 255 / 14%);
+}
+
+.title-speed.fast {
   color: #c7e8ff;
 }
 
@@ -353,7 +387,7 @@
 
 @media (max-width: 1180px) {
   .title-bar {
-    grid-template-columns: 52px minmax(0, 1fr) auto auto 38px auto;
+    grid-template-columns: 52px minmax(0, 1fr) auto auto auto auto;
   }
 
   .window-controls {
@@ -363,7 +397,7 @@
 
 @media (max-width: 1000px) {
   .title-bar {
-    grid-template-columns: 52px minmax(0, 1fr) auto 38px auto;
+    grid-template-columns: 52px minmax(0, 1fr) auto auto auto;
   }
 
   .title-equipment {
@@ -373,7 +407,7 @@
 
 @media (max-width: 860px) {
   .title-bar {
-    grid-template-columns: 52px minmax(0, 1fr) 38px auto;
+    grid-template-columns: 52px minmax(0, 1fr) auto auto;
   }
 
   .title-fame {
@@ -383,7 +417,7 @@
 
 @media (max-width: 720px) {
   .title-bar {
-    grid-template-columns: 40px minmax(0, 1fr) 32px 90px;
+    grid-template-columns: 40px minmax(0, 1fr) auto 90px;
   }
 
   .title-resources {
@@ -420,6 +454,14 @@
 
   .title-pause {
     width: 32px;
+  }
+
+  .title-speed {
+    padding-inline: 4px;
+  }
+
+  .title-speed svg {
+    display: none;
   }
 
   .title-month {

@@ -2405,9 +2405,25 @@ compare dalla prima fondazione e ogni nodo bloccato dice quante scuole servono
 non mostra «punti nel ramo». Decisione del 05/10: dare al giocatore una strada
 visibile fino alla 20ª scuola.
 
+**Il tempo è denaro** (decisione del 06/10). Descrizione: «Abbiamo scoperto che
+il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che
+ci stiamo divertendo moltissimo.» Un nodo può chiedere scuole diverse per
+livello (`levelNetworkSchools`): qui 1 per il livello 1 e 5 per il livello 2.
+La velocità si sceglie con il pulsante «avanti veloce» accanto alla pausa
+(concept B: ogni clic passa alla velocità successiva, poi torna a 1×), visibile
+solo con il nodo comprato. Accelera l'orologio del gioco (`gameClock.ts`): mesi
+e quote, eventi, prove, corsi, tornei e collaboratori; non la scrittura delle
+email né i minigiochi in tempo reale. La scelta è salvata in
+`automation.gameSpeed` e limitata dal livello (`getPlayerGameSpeed`): alla
+fondazione di una nuova scuola il nodo riparte da zero e il gioco torna a 1×. Il
+selettore del pannello Admin (fino a 100×) ha la precedenza fino al ricaricamento.
+La corsia della Rete ha dieci nodi: una corsia con più di nove nodi usa una
+colonna per nodo.
+
 | Scuole | Potenziamento | Effetto | Costi per livello |
 | ---: | --- | --- | --- |
 | 1 | Coordinamento multi-sede | +10% velocità automazioni generiche per livello; massimo +50% | 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
+| 1 · 5 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 fino a 3× (5 scuole fondate) | 25.000 / 500.000 € |
 | 2 | Scambio di Istruttori | +10% velocità di tutti i corsi per livello; massimo +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
 | 3 | Lettere di raccomandazione | +1 punto Reputazione alla prossima fondazione per livello | 50.000 / 150.000 / 450.000 € |
 | 5 | Circuito della Rete | +1% contatti dagli eventi per ogni scuola della Rete, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |

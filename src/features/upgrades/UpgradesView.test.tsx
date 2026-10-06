@@ -47,7 +47,7 @@ describe("UpgradesView", () => {
       />,
     );
     const lane = screen.getByRole("region", { name: "Rete dell'Ordine" });
-    expect(within(lane).getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(9);
+    expect(within(lane).getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(10);
     expect(within(lane).getByText("2 scuole fondate")).toBeVisible();
     expect(within(lane).getByText("20 scuole fondate")).toBeVisible();
   });

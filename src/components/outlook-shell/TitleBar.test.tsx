@@ -57,8 +57,10 @@ describe("TitleBar", () => {
     expect(swords?.nextElementSibling).toBe(fame);
     // Fondi and «al mese» read together (Fase 8).
     expect(availability.nextElementSibling).toBe(monthlyIncome.closest(".title-monthly-income"));
-    expect(fame.nextElementSibling).toBe(pause);
-    expect(pause.nextElementSibling).toBe(container.querySelector(".title-month"));
+    expect(fame.nextElementSibling).toBe(pause.parentElement);
+    expect(pause.parentElement?.nextElementSibling).toBe(container.querySelector(".title-month"));
+    // Without «Il tempo è denaro» there is no speed button.
+    expect(screen.queryByRole("button", { name: /Velocità del gioco/ })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Mese corrente: Settembre, anno scolastico 1")).toHaveTextContent(
       "SettembreAnno scolastico 1",
     );
@@ -238,5 +240,37 @@ describe("TitleBar", () => {
       "aria-pressed",
       "true",
     );
+  });
+
+  it("shows the «Il tempo è denaro» button next to the pause and cycles through the allowed speeds", () => {
+    const onChangeGameSpeed = vi.fn();
+    const props = {
+      currentMonth: 9,
+      nextMonthAt: 1_000 + GAME_CONFIG.gameMonthMs,
+      now: 1_000,
+      contactsAwaitingEmail: 0,
+      activeMembers: 3,
+      fame: 7,
+      euros: 120,
+      monthlyIncomeState,
+      equipment,
+      isPaused: false,
+      onTogglePause: () => undefined,
+      onChangeGameSpeed,
+    };
+    const { rerender } = render(<TitleBar {...props} gameSpeed={1} maxGameSpeed={3} />);
+    const pause = screen.getByRole("button", { name: "Pausa" });
+    const speed = screen.getByRole("button", { name: "Velocità del gioco 1×: passa a 2×" });
+    expect(pause.nextElementSibling).toBe(speed);
+    expect(speed).toHaveTextContent("1×");
+    fireEvent.click(speed);
+    expect(onChangeGameSpeed).toHaveBeenLastCalledWith(2);
+
+    rerender(<TitleBar {...props} gameSpeed={3} maxGameSpeed={3} />);
+    fireEvent.click(screen.getByRole("button", { name: "Velocità del gioco 3×: passa a 1×" }));
+    expect(onChangeGameSpeed).toHaveBeenLastCalledWith(1);
+
+    rerender(<TitleBar {...props} gameSpeed={2} maxGameSpeed={2} />);
+    expect(screen.getByRole("button", { name: "Velocità del gioco 2×: passa a 1×" })).toHaveClass("fast");
   });
 });

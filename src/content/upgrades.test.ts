@@ -5,6 +5,8 @@ import {
   UPGRADE_DEFINITIONS,
   areAllFormBranchesUnlocked,
   createInitialUpgradeLevels,
+  getMaxGameSpeed,
+  getRequiredNetworkSchools,
   getUpgradeDefinition,
   getAgonistCourseMaximumStatGain,
   getAnnualFormTrainingLimit,
@@ -69,9 +71,9 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      // One line per branch, nine columns at most.
+      // One line per branch: nine columns, ten in the Rete dell'Ordine (one column per node there).
       const expected = {
-        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 9, instructors: 9, organization: 8, network: 9,
+        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 9, instructors: 9, organization: 8, network: 10,
       } as Record<string, number>;
       expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
@@ -392,5 +394,19 @@ describe("prerequisites and secret paths", () => {
       "Vincere il torneo più superbo dell'anno è solo l'inizio",
       "Esistono forze più grandi di quanto avresti mai potuto immaginare",
     ]);
+  });
+});
+
+describe("Il tempo è denaro", () => {
+  it("allows 2× from one school founded and 3× from five, at fixed prices", () => {
+    const node = getUpgradeDefinition("time-is-money")!;
+    expect(node.category).toBe("network");
+    expect(getRequiredNetworkSchools(node, 0)).toBe(1);
+    expect(getRequiredNetworkSchools(node, 1)).toBe(5);
+    expect(getUpgradeCost(node, 0, createInitialUpgradeLevels())).toBe(25_000);
+    expect(getUpgradeCost(node, 1, createInitialUpgradeLevels())).toBe(500_000);
+    expect(getMaxGameSpeed(createInitialUpgradeLevels())).toBe(1);
+    expect(getMaxGameSpeed({ ...createInitialUpgradeLevels(), "time-is-money": 1 })).toBe(2);
+    expect(getMaxGameSpeed({ ...createInitialUpgradeLevels(), "time-is-money": 2 })).toBe(3);
   });
 });

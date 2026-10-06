@@ -31,6 +31,7 @@ export type IconName =
   | "trophy"
   | "pause"
   | "play"
+  | "fast-forward"
   | "check"
   | "close"
   | "warning"
@@ -71,6 +72,7 @@ const paths: Record<IconName, React.ReactNode> = {
   trophy: <><path d="M8 4h8v4c0 3-1.6 5-4 5s-4-2-4-5V4Z"/><path d="M8 6H5v2c0 2 1.2 3 3.4 3M16 6h3v2c0 2-1.2 3-3.4 3M12 13v4m-4 3h8m-6-3h4"/></>,
   pause: <><path d="M8 5v14M16 5v14"/></>,
   play: <path d="m8 5 11 7-11 7V5Z" />,
+  "fast-forward": <path d="m3 6 8 6-8 6V6Zm10 0 8 6-8 6V6Z" />,
   check: <path d="m5 12 4 4L19 6" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
   warning: <><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></>,

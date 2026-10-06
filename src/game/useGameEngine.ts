@@ -22,6 +22,7 @@ import { getNextGameTickDelay, hasQueuedGameWorkAt } from "./gameScheduler";
 import { postponeLightInflationEvent } from "./lightInflation";
 import { crashReporter } from "./crashReporting";
 import type { GameAction } from "./types";
+import { getPlayerGameSpeed } from "./upgradeFlow";
 
 // About one frame: a long catch-up is split over several ticks so the page keeps drawing.
 const TICK_TIME_BUDGET_MS = 12;
@@ -51,7 +52,9 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
   const requestTickRescheduleRef = useRef<(() => void) | null>(null);
   const clockRef = useRef(createGameClockAnchor(state.lastSavedAt, initialWallNow));
   const [isPaused, setIsPaused] = useState(false);
-  const [gameSpeed, setGameSpeedState] = useState(1);
+  // «Il tempo è denaro»: the speed saved in the game, unless the Admin selector overrides it.
+  const [adminGameSpeed, setAdminGameSpeed] = useState<number | null>(null);
+  const gameSpeed = adminGameSpeed ?? getPlayerGameSpeed(state);
   const [saveStatus, setSaveStatus] = useState<GameSaveStatus>(() => ({
     phase: "pending",
     lastSavedAt: null,
@@ -326,14 +329,19 @@ export function useGameEngine({ minStepMs = GAME_CONFIG.minTickStepMs }: { minSt
   );
 
   const setGameSpeed = useCallback((speed: number) => {
-    const normalizedSpeed = normalizeGameSpeed(speed);
+    setAdminGameSpeed(normalizeGameSpeed(speed));
+  }, []);
+
+  // The clock follows the speed from the moment it changes (on load, on a click,
+  // back to 1× in a new school). Before the tick scheduler, which reads it.
+  useLayoutEffect(() => {
+    if (clockRef.current.speed === gameSpeed) return;
     const wallNow = Date.now();
     clockRef.current =
       pausedAtRef.current === null
-        ? changeGameClockSpeed(clockRef.current, wallNow, normalizedSpeed)
-        : createGameClockAnchor(pausedAtRef.current, wallNow, normalizedSpeed);
-    setGameSpeedState(normalizedSpeed);
-  }, []);
+        ? changeGameClockSpeed(clockRef.current, wallNow, gameSpeed)
+        : createGameClockAnchor(pausedAtRef.current, wallNow, gameSpeed);
+  }, [gameSpeed]);
 
   const togglePause = useCallback(() => {
     const reasons = pauseReasonsRef.current;

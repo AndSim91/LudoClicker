@@ -64,6 +64,8 @@ import { clearIncidentsAttempt, readIncidentsAttempt } from "../features/tournam
 import { getReptileSectorForRole } from "../game/reptileSectors";
 import { getTickStepMs, useAppPreferences } from "./useAppPreferences";
 import { isAdminMode } from "./adminMode";
+import { getMaxGameSpeed } from "../content/upgrades";
+import { getPlayerGameSpeed } from "../game/upgradeFlow";
 
 const StableTitleBar = memo(TitleBar);
 const StableAppRail = memo(AppRail);
@@ -272,6 +274,12 @@ export function App() {
     setMomentPaused(showsMoment);
   }, [showsMoment, setMomentPaused]);
   const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
+  const playerGameSpeed = getPlayerGameSpeed(state);
+  const maxGameSpeed = getMaxGameSpeed(state.upgrades);
+  const changeGameSpeed = useCallback(
+    (speed: number) => dispatch({ type: "SET_GAME_SPEED", speed }),
+    [dispatch],
+  );
   // A snapshot: the result may leave the detailed history while the final plays.
   const [watchedFinal, setWatchedFinal] = useState<TournamentResult>();
   const closeFinal = useCallback(() => setWatchedFinal(undefined), []);
@@ -660,6 +668,9 @@ export function App() {
           isPaused={isPaused}
           equipment={state.equipment}
           onTogglePause={togglePause}
+          gameSpeed={playerGameSpeed}
+          maxGameSpeed={maxGameSpeed}
+          onChangeGameSpeed={changeGameSpeed}
           onMaintainEquipment={maintainEquipment}
           onBuyOfficialSwords={buyOfficialSwords}
         />

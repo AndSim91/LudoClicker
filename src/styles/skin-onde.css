@@ -208,6 +208,10 @@
   box-shadow: inset 0 -1px 0 rgb(224 166 74 / 45%);
 }
 
+:root[data-theme="dark"] .title-speed.fast {
+  color: var(--onde-gold-bright);
+}
+
 :root[data-theme="dark"] .title-resource small {
   color: #e6f4f1;
 }

@@ -6,7 +6,9 @@ import {
   buyUpgrade,
   discoverSecretUpgrade,
   getBuyAllPreview,
+  getPlayerGameSpeed,
   planBuyAllUpgrades,
+  setGameSpeed,
 } from "./upgradeFlow";
 import { UPGRADE_DEFINITIONS, getUpgradeCost } from "../content/upgrades";
 
@@ -258,5 +260,30 @@ describe("Compra tutto", () => {
       const fresh = planBuyAllUpgrades(state);
       expect(getBuyAllPreview(state)).toEqual({ count: fresh.purchases.length, total: fresh.total });
     }
+  });
+});
+
+describe("Il tempo è denaro", () => {
+  it("opens level 2 only with five schools and keeps the chosen speed within the level", () => {
+    const initial = createInitialState(1_000);
+    const oneSchool = {
+      ...initial,
+      school: { ...initial.school, euros: 1_000_000 },
+      network: { ...initial.network, schoolCount: 1 },
+    };
+    expect(setGameSpeed(oneSchool, 3)).toBe(oneSchool);
+
+    const levelOne = buyUpgrade(oneSchool, "time-is-money");
+    expect(levelOne.upgrades["time-is-money"]).toBe(1);
+    expect(levelOne.school.euros).toBe(975_000);
+    expect(buyUpgrade(levelOne, "time-is-money")).toBe(levelOne);
+    expect(getPlayerGameSpeed(setGameSpeed(levelOne, 3))).toBe(2);
+
+    const fiveSchools = { ...levelOne, network: { ...levelOne.network, schoolCount: 5 } };
+    const levelTwo = setGameSpeed(buyUpgrade(fiveSchools, "time-is-money"), 3);
+    expect(levelTwo.upgrades["time-is-money"]).toBe(2);
+    expect(getPlayerGameSpeed(levelTwo)).toBe(3);
+    // A new school starts with no levels: the saved 3× counts as 1× until the node is bought again.
+    expect(getPlayerGameSpeed({ ...levelTwo, upgrades: initial.upgrades })).toBe(1);
   });
 });

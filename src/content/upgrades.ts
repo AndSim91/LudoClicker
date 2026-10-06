@@ -80,7 +80,8 @@ export type UpgradeEffect =
   | "athleteBaseStatsBonus"
   | "legendaryAppearanceBonus"
   | "foundationReputationDouble"
-  | "legacy";
+  | "legacy"
+  | "gameSpeedLevel";
 
 export interface UpgradeDefinition {
   id: UpgradeId;
@@ -109,6 +110,8 @@ export interface UpgradeDefinition {
   requiredUpgradeLevels?: Partial<Record<UpgradeId, number>>;
   requiredGadgetProduct?: GadgetProductId;
   requiredNetworkSchools?: number;
+  /** Schools founded needed for each level (index = level being bought), when they differ. */
+  levelNetworkSchools?: number[];
   hidden?: boolean;
   secretHint?: string;
 }
@@ -270,6 +273,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
 
   // Rete dell'Ordine: si apre con le scuole fondate.
   { id: "multi-site-coordination", category: "network", title: "Coordinamento multi-sede", description: "Le scuole della rete condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, requiredBranchPoints: 0 },
+  { id: "time-is-money", category: "network", title: "Il tempo è denaro", description: "Abbiamo scoperto che il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che ci stiamo divertendo moltissimo.", effectLabel: "Livello 1: puoi far andare il gioco a 2× · Livello 2: anche a 3× · La velocità si cambia accanto alla pausa; le email scritte da te restano al tuo ritmo", effect: "gameSpeedLevel", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 500_000], maxLevel: 2, requiredFame: noFame, requiredNetworkSchools: 1, levelNetworkSchools: [1, 5], requiredBranchPoints: 0 },
   { id: "instructor-exchange", category: "network", title: "Scambio di Istruttori", description: "Un mese qui, un mese là. Tornano con idee nuove e una valigia di spade da riparare.", effectLabel: "Ogni livello: tutti i corsi il 10% più veloci · Livello 5: +50%", effect: "courseSpeedBonus", effectPerLevel: 0.1, baseCost: 20_000, costGrowth: LEVEL_GROWTH, levelCosts: [20_000, 40_000, 80_000, 160_000, 320_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 2, requiredBranchPoints: 0 },
   { id: "recommendation-letters", category: "network", title: "Lettere di raccomandazione", description: "Tre righe firmate dalla Sede madre aprono porte che nemmeno sapevi chiuse.", effectLabel: "Ogni livello: +1 punto Reputazione alla prossima fondazione · Livello 3: +3", effect: "foundationReputationBonus", effectPerLevel: 1, baseCost: 50_000, costGrowth: LEVEL_GROWTH, levelCosts: [50_000, 150_000, 450_000], maxLevel: 3, requiredFame: noFame, requiredNetworkSchools: 3, requiredBranchPoints: 0 },
   { id: "network-circuit", category: "network", title: "Circuito della Rete", description: "Le scuole si passano piazze, date e contatti. Il gazebo, invece, se lo tengono stretto.", effectLabel: "Ogni livello: +1% di contatti dagli eventi per ogni scuola della Rete", effect: "networkEventContactBonus", effectPerLevel: 0.01, baseCost: 100_000, costGrowth: LEVEL_GROWTH, levelCosts: [100_000, 200_000, 400_000, 800_000, 1_600_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 5, requiredBranchPoints: 0 },
@@ -382,6 +386,19 @@ export function hasCompletedUpgradePrerequisites(
  * keep their own prices.
  */
 export const UPGRADE_PRICING = { branchGrowth: 0.2, baseScale: 0.25 };
+
+/** Schools founded needed to buy the next level of a node. */
+export function getRequiredNetworkSchools(
+  definition: UpgradeDefinition,
+  currentLevel: number,
+): number | undefined {
+  return definition.levelNetworkSchools?.[currentLevel] ?? definition.requiredNetworkSchools;
+}
+
+/** Fastest game speed the player may choose: 1×, plus one step per level of «Il tempo è denaro». */
+export function getMaxGameSpeed(levels: UpgradeLevels): number {
+  return 1 + getUpgradeEffectTotal(levels, "gameSpeedLevel");
+}
 
 export function getUpgradeCost(
   definition: UpgradeDefinition,

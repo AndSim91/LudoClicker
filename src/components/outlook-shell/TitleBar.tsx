@@ -27,6 +27,9 @@ export function TitleBar({
   equipment,
   isPaused,
   onTogglePause,
+  gameSpeed = 1,
+  maxGameSpeed = 1,
+  onChangeGameSpeed = () => undefined,
   onMaintainEquipment = () => undefined,
   onBuyOfficialSwords = () => undefined,
 }: {
@@ -42,12 +45,17 @@ export function TitleBar({
   equipment: GameState["equipment"];
   isPaused: boolean;
   onTogglePause: () => void;
+  /** «Il tempo è denaro»: chosen speed and the fastest one its level allows. */
+  gameSpeed?: number;
+  maxGameSpeed?: number;
+  onChangeGameSpeed?: (speed: number) => void;
   onMaintainEquipment?: () => void;
   onBuyOfficialSwords?: (amount: 1 | 10 | 100) => void;
 }) {
   const balance = useRollingNumber(euros);
   const liveNow = useGameTime(providedNow === undefined, GAME_CONFIG.progressUpdateIntervalMs);
   const now = providedNow ?? liveNow;
+  const nextGameSpeed = gameSpeed >= maxGameSpeed ? 1 : gameSpeed + 1;
   const monthName = getGameMonthName(currentMonth);
   const currentSchoolYear = getSchoolYear(currentMonth);
   const monthProgress = Math.min(
@@ -116,16 +124,30 @@ export function TitleBar({
           {formatCompactNumber(fame)}
         </strong>
       </span>
-      <button
-        className={isPaused ? "title-pause active" : "title-pause"}
-        type="button"
-        aria-label={isPaused ? "Riprendi" : "Pausa"}
-        aria-pressed={isPaused}
-        title={isPaused ? "Riprendi il gioco" : "Metti in pausa il gioco"}
-        onClick={onTogglePause}
-      >
-        <Icon name={isPaused ? "play" : "pause"} />
-      </button>
+      <span className="title-time">
+        <button
+          className={isPaused ? "title-pause active" : "title-pause"}
+          type="button"
+          aria-label={isPaused ? "Riprendi" : "Pausa"}
+          aria-pressed={isPaused}
+          title={isPaused ? "Riprendi il gioco" : "Metti in pausa il gioco"}
+          onClick={onTogglePause}
+        >
+          <Icon name={isPaused ? "play" : "pause"} />
+        </button>
+        {maxGameSpeed > 1 ? (
+          <button
+            className={gameSpeed > 1 ? "title-speed fast" : "title-speed"}
+            type="button"
+            aria-label={`Velocità del gioco ${gameSpeed}×: passa a ${nextGameSpeed}×`}
+            title={`Il tempo è denaro: passa a ${nextGameSpeed}×`}
+            onClick={() => onChangeGameSpeed(nextGameSpeed)}
+          >
+            <Icon name="fast-forward" />
+            <span>{gameSpeed}×</span>
+          </button>
+        ) : null}
+      </span>
       <span
         className="title-month"
         aria-label={`Mese corrente: ${monthName}, anno scolastico ${currentSchoolYear}`}

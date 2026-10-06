@@ -1,6 +1,8 @@
 import {
   UPGRADE_DEFINITIONS,
   getUpgradeCost,
+  getMaxGameSpeed,
+  getRequiredNetworkSchools,
   getUpgradeDefinition,
   hasCompletedUpgradePrerequisites,
   type UpgradeDefinition,
@@ -28,8 +30,7 @@ function canBuyIgnoringFunds(
     definition.hidden ||
     state.upgrades[definition.id] >= definition.maxLevel ||
     definition.requiredUnlocks?.some((unlock) => !state.unlocks[unlock]) ||
-    (definition.requiredNetworkSchools !== undefined &&
-      state.network.schoolCount < definition.requiredNetworkSchools) ||
+    state.network.schoolCount < (getRequiredNetworkSchools(definition, state.upgrades[definition.id] ?? 0) ?? 0) ||
     (definition.secretHint !== undefined &&
       !state.secretUpgradeDiscoveries.includes(definition.id as SecretUpgradeId)) ||
     (definition.requiredGadgetProduct !== undefined &&
@@ -82,6 +83,18 @@ function findCheapestPurchase(state: GameState): { id: UpgradeId; cost: number }
     if (canBuyIgnoringFunds(state, definition)) cheapest = { id: definition.id, cost };
   }
   return cheapest;
+}
+
+/** «Il tempo è denaro»: the chosen speed, never above what its level allows. */
+export function setGameSpeed(state: GameState, speed: number): GameState {
+  const allowed = Math.min(getMaxGameSpeed(state.upgrades), Math.max(1, Math.round(speed) || 1));
+  if ((state.automation.gameSpeed ?? 1) === allowed) return state;
+  return { ...state, automation: { ...state.automation, gameSpeed: allowed } };
+}
+
+/** Speed the game runs at for the player: the saved choice within the current level. */
+export function getPlayerGameSpeed(state: GameState): number {
+  return Math.min(state.automation.gameSpeed ?? 1, getMaxGameSpeed(state.upgrades));
 }
 
 /**
