@@ -208,7 +208,7 @@ function SectorCollaboratorRow({
     mastery[collaborator.assignment ?? "instructor"],
   );
   const officialStats = contact && hasUnlockedOfficialStats(collaborator.forms, getOfficialStatsVisibilityTier(state.upgrades))
-    ? getContactPreparation(contact, collaborator.forms)
+    ? getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(state.upgrades))
     : undefined;
   const isInstructor = collaborator.assignment === "instructor";
 

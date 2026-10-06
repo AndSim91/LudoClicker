@@ -1,4 +1,4 @@
-import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
+import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import {
@@ -83,14 +83,15 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     [state.collaborators],
   );
   const statsTier = getOfficialStatsVisibilityTier(state.upgrades);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const teamEntryByContactId = useMemo(() => new Map(
     state.contacts.map((contact) => {
       const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
-      const preparation = getContactPreparation(contact, forms);
+      const preparation = getContactPreparation(contact, forms, courseXUnlocked);
       const visible = hasUnlockedOfficialStats(forms, statsTier);
       return [contact.id, { contact, preparation, visible }] as const;
     }),
-  ), [collaboratorsByContactId, state.contacts, statsTier]);
+  ), [collaboratorsByContactId, courseXUnlocked, state.contacts, statsTier]);
   const delegation = delegationContactIds.flatMap((contactId) => {
     const entry = teamEntryByContactId.get(contactId);
     return entry?.contact.status === "enrolled" ? [entry] : [];

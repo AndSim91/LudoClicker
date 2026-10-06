@@ -1,4 +1,4 @@
-import type { Contact, FormId, PersonRarity, SpecialCollaboratorId } from "./types";
+import type { Contact, FormBranch, FormId, PersonRarity, SpecialCollaboratorId } from "./types";
 import { nextRandom } from "./random";
 
 const NUMERIC_FORM_BY_ID: Partial<Record<FormId, number>> = {
@@ -16,6 +16,78 @@ const NUMERIC_FORM_BY_ID: Partial<Record<FormId, number>> = {
   "form-6": 6,
   "form-7": 7,
 };
+
+/**
+ * Arena and Stile each Form adds (decision of 06/10): every Form is worth 10
+ * points in all. Spada Lunga splits them evenly, Staffa leans to Arena, Doppie
+ * Spade Corte to Stile. Every Form known adds, whatever the branch: all of them
+ * give +90%, +100% with Corso X, which counts only once its secret path is open.
+ */
+export const FORM_STAT_BONUSES: Partial<Record<FormId, { arena: number; style: number }>> = {
+  "form-1": { arena: 0.1, style: 0.1 },
+  "course-x": { arena: 0.1, style: 0.1 },
+  "form-2": { arena: 0.1, style: 0.1 },
+  "course-y": { arena: 0.05, style: 0.05 },
+  "form-3-long": { arena: 0.05, style: 0.05 },
+  "form-4-long": { arena: 0.05, style: 0.05 },
+  "form-5-long": { arena: 0.05, style: 0.05 },
+  "form-3-staff": { arena: 0.075, style: 0.025 },
+  "form-4-staff": { arena: 0.075, style: 0.025 },
+  "form-5-staff": { arena: 0.075, style: 0.025 },
+  "form-3-double": { arena: 0.025, style: 0.075 },
+  "form-4-double": { arena: 0.025, style: 0.075 },
+  "form-5-double": { arena: 0.025, style: 0.075 },
+  "form-6": { arena: 0.1, style: 0.1 },
+  "form-7": { arena: 0.1, style: 0.1 },
+};
+
+export function getFormStatBonuses(
+  forms: readonly FormId[],
+  courseXUnlocked = false,
+): { arena: number; style: number } {
+  let arena = 0;
+  let style = 0;
+  for (const formId of new Set(forms)) {
+    if (formId === "course-x" && !courseXUnlocked) continue;
+    const bonus = FORM_STAT_BONUSES[formId];
+    if (!bonus) continue;
+    arena += bonus.arena;
+    style += bonus.style;
+  }
+  // Rounded to the tenth of a percent: sums of 0,025 must not drift.
+  return { arena: Math.round(arena * 1_000) / 1_000, style: Math.round(style * 1_000) / 1_000 };
+}
+
+const BRANCH_LEVELS: Record<FormBranch, readonly FormId[]> = {
+  "Spada Lunga": ["form-3-long", "form-4-long", "form-5-long"],
+  Staffa: ["form-3-staff", "form-4-staff", "form-5-staff"],
+  "Doppia spada corta": ["form-3-double", "form-4-double", "form-5-double"],
+};
+const WEAPON_ORDER: readonly FormBranch[] = ["Spada Lunga", "Staffa", "Doppia spada corta"];
+
+/**
+ * The weapon an athlete fights with: the branch where they went furthest
+ * (Forme 3–5). A tie goes to their preferred branch, then Lunga, Staffa,
+ * Doppie. With only Forme 1–2 it is the Spada Lunga.
+ */
+export function getAthleteWeapon(
+  forms: readonly FormId[],
+  preferences: readonly FormBranch[] = [],
+): FormBranch {
+  const depth = (branch: FormBranch) =>
+    BRANCH_LEVELS[branch].reduce((level, formId, index) => forms.includes(formId) ? index + 1 : level, 0);
+  const order = [...new Set([...preferences, ...WEAPON_ORDER])];
+  let best: FormBranch = "Spada Lunga";
+  let bestDepth = 0;
+  for (const branch of order) {
+    const level = depth(branch);
+    if (level > bestDepth) {
+      best = branch;
+      bestDepth = level;
+    }
+  }
+  return best;
+}
 
 const RARITY_MINIMUM: Record<PersonRarity, number> = {
   common: 1,
@@ -56,12 +128,13 @@ export function getHiddenStatsHint(statsTier: number): string {
     : "Si vedono con Occhio del Maestro (Upgrade, Insegnamento)";
 }
 
+/** Arena or Stile for a tournament: base × (1 + bonus of the Forms) × experience. */
 export function getPreparation(
   base: number,
-  numericForms: number,
+  formBonus: number,
   tournamentExperience: number,
 ): number {
-  return base * (1 + Math.max(0, numericForms) * 0.1) *
+  return base * (1 + Math.max(0, formBonus)) *
     (1 + Math.min(20, Math.max(0, tournamentExperience)) * 0.03);
 }
 
@@ -80,7 +153,9 @@ export interface AthleteTournamentStats {
   base: { arena: number; style: number };
   numericForms: number;
   tournamentExperience: number;
-  formMultiplier: number;
+  /** Bonus of the Forms known, as a fraction (0,9 = +90%). */
+  formBonus: { arena: number; style: number };
+  weapon: FormBranch;
   experienceMultiplier: number;
   arena: number;
   style: number;
@@ -95,20 +170,22 @@ export interface AthleteTournamentStats {
 export function getAthleteTournamentStats(
   contact: Contact,
   forms: readonly FormId[] = contact.forms,
+  courseXUnlocked = false,
 ): AthleteTournamentStats {
   const base = getContactBaseStats(contact);
   const numericForms = getNumericFormCount(forms);
   const tournamentExperience = getContactTournamentExperience(contact);
-  const formMultiplier = 1 + numericForms * 0.1;
+  const formBonus = getFormStatBonuses(forms, courseXUnlocked);
   const experienceMultiplier = 1 + Math.min(20, tournamentExperience) * 0.03;
   return {
     base,
     numericForms,
     tournamentExperience,
-    formMultiplier,
+    formBonus,
+    weapon: getAthleteWeapon(forms, contact.formBranchPreferences),
     experienceMultiplier,
-    arena: getPreparation(base.arena, numericForms, tournamentExperience),
-    style: getPreparation(base.style, numericForms, tournamentExperience),
+    arena: getPreparation(base.arena, formBonus.arena, tournamentExperience),
+    style: getPreparation(base.style, formBonus.style, tournamentExperience),
   };
 }
 
@@ -165,8 +242,12 @@ export function createStableFallbackStats(
   return { arena, style };
 }
 
-export function getContactPreparation(contact: Contact, forms: readonly FormId[] = contact.forms) {
-  const stats = getAthleteTournamentStats(contact, forms);
+export function getContactPreparation(
+  contact: Contact,
+  forms: readonly FormId[] = contact.forms,
+  courseXUnlocked = false,
+) {
+  const stats = getAthleteTournamentStats(contact, forms, courseXUnlocked);
   return {
     arena: stats.arena,
     style: stats.style,

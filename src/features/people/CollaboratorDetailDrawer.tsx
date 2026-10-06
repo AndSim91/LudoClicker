@@ -6,6 +6,7 @@ import {
   getCollaboratorAssignmentLabel,
 } from "../../content/collaboratorRoles";
 import { getCollaboratorBonusSummary, getVisibleForms } from "../../content/forms";
+import { getCollaboratorMasteryRoleLabel } from "../../content/mastery";
 import { PERSON_RARITIES } from "../../content/rarities";
 import { isCourseXUnlocked } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -55,8 +56,12 @@ export function CollaboratorDetailDrawer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const bonusSummary = getCollaboratorBonusSummary(collaborator) ||
-    "Nessun bonus d'arma attivo";
+  const bonusSummary = getCollaboratorBonusSummary(
+    collaborator,
+    collaborator.assignment
+      ? getCollaboratorMasteryRoleLabel(collaborator.assignment, state.unlocks.social)
+      : "",
+  );
   const badgeLabel = PERSON_RARITIES[collaborator.rarity].collaboratorBadgeLabel;
 
   return (

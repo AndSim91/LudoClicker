@@ -3,9 +3,12 @@ import { SECRET_LEGENDARIES, type SecretLegendaryId } from "../content/secretLeg
 import { getTournamentSchool } from "../content/tournamentSchools";
 import { TOURNAMENT_DEFINITIONS } from "../content/tournaments";
 import { addAdminMembers } from "./adminFlow";
+import { FORM_DEFINITIONS } from "../content/forms";
 import {
   getAthleteTournamentStats,
+  getAthleteWeapon,
   getContactBaseStats,
+  getFormStatBonuses,
   getContactPreparation,
   getPreparation,
   getStyleVote,
@@ -51,8 +54,8 @@ function withoutExternalSecretLegendaries(state: GameState): GameState {
 
 describe("athlete tournament statistics", () => {
   it("uses forms and experience as multipliers of the immutable base", () => {
-    expect(getPreparation(100, 4, 20)).toBe(224);
-    expect(getPreparation(75, 7, 20)).toBeCloseTo(204);
+    expect(getPreparation(100, 0.4, 20)).toBe(224);
+    expect(getPreparation(75, 0.7, 20)).toBeCloseTo(204);
     expect(getStyleVote(125)).toBe(5);
   });
 
@@ -88,10 +91,12 @@ describe("athlete tournament statistics", () => {
     expect(stats.base).toEqual({ arena: 52, style: 41 });
     expect(stats.numericForms).toBe(7);
     expect(stats.tournamentExperience).toBe(10);
-    expect(stats.formMultiplier).toBeCloseTo(1.7);
+    // F1, F2, F3–F5 Lunga, F6, F7 (no Corso Y in this list): 10+10+15+10+10 = +55%.
+    expect(stats.formBonus).toEqual({ arena: 0.55, style: 0.55 });
+    expect(stats.weapon).toBe("Spada Lunga");
     expect(stats.experienceMultiplier).toBeCloseTo(1.3);
-    expect(stats.arena).toBeCloseTo(114.92);
-    expect(stats.style).toBeCloseTo(90.61);
+    expect(stats.arena).toBeCloseTo(52 * 1.55 * 1.3);
+    expect(stats.style).toBeCloseTo(41 * 1.55 * 1.3);
   });
 });
 
@@ -99,8 +104,8 @@ describe("secret legendary balancing", () => {
   function preparation(id: SecretLegendaryId) {
     const profile = SECRET_LEGENDARIES[id];
     return {
-      arena: getPreparation(profile.arenaBase, profile.numericForms, profile.externalExperience),
-      style: getPreparation(profile.styleBase, profile.numericForms, profile.externalExperience),
+      arena: getPreparation(profile.arenaBase, profile.numericForms * 0.1, profile.externalExperience),
+      style: getPreparation(profile.styleBase, profile.numericForms * 0.1, profile.externalExperience),
     };
   }
 
@@ -147,10 +152,10 @@ describe("secret legendary balancing", () => {
     expect(participant.arenaBase).toBe(profile.arenaBase);
     expect(participant.styleBase).toBe(profile.styleBase);
     expect(participant.arenaPreparation).toBeCloseTo(
-      getPreparation(profile.arenaBase, profile.numericForms, profile.externalExperience),
+      getPreparation(profile.arenaBase, profile.numericForms * 0.1, profile.externalExperience),
     );
     expect(participant.stylePreparation).toBeCloseTo(
-      getPreparation(profile.styleBase, profile.numericForms, profile.externalExperience),
+      getPreparation(profile.styleBase, profile.numericForms * 0.1, profile.externalExperience),
     );
     const ordinaryNpcs = result.participants.filter(({ id }) => id.startsWith("npc-"));
     expect(
@@ -593,5 +598,26 @@ describe("tournament calendar and immunity", () => {
     expect(processed.tournaments.qualification).toBeUndefined();
     expect(processed.tournaments.immuneContactIds).toEqual([]);
     expect(immunity.reasons).toEqual([]);
+  });
+});
+
+describe("Arena e Stile dalle Forme (06/10)", () => {
+  const ALL_FORMS = FORM_DEFINITIONS.map((definition) => definition.id);
+
+  it("gives +90% with every Form and +100% once Corso X counts", () => {
+    expect(getFormStatBonuses(ALL_FORMS)).toEqual({ arena: 0.9, style: 0.9 });
+    expect(getFormStatBonuses(ALL_FORMS, true)).toEqual({ arena: 1, style: 1 });
+  });
+
+  it("is worth 10 points per Form, split by weapon", () => {
+    expect(getFormStatBonuses(["form-3-long"])).toEqual({ arena: 0.05, style: 0.05 });
+    expect(getFormStatBonuses(["form-3-staff"])).toEqual({ arena: 0.075, style: 0.025 });
+    expect(getFormStatBonuses(["form-3-double"])).toEqual({ arena: 0.025, style: 0.075 });
+  });
+
+  it("fights with the weapon of the deepest branch, then the preferred one", () => {
+    expect(getAthleteWeapon(["form-1", "form-2"])).toBe("Spada Lunga");
+    expect(getAthleteWeapon(["form-3-long", "form-3-staff", "form-4-staff"])).toBe("Staffa");
+    expect(getAthleteWeapon(["form-3-long", "form-3-double"], ["Doppia spada corta"])).toBe("Doppia spada corta");
   });
 });

@@ -1,7 +1,14 @@
 import { getFormDefinition } from "../../content/forms";
 import { LOSE_BODIES, WIN_BODIES, type FighterBody } from "../people/fighterBodies";
-import { COMPLEX_TECHNIQUES, getNpcStyleForms } from "../../game/styleJudging";
+import { getAthleteWeapon } from "../../game/athleteStats";
+import {
+  COMPLEX_TECHNIQUES,
+  DISARMED_ARMONICHE,
+  getComplexTechniqueForms,
+  getNpcStyleForms,
+} from "../../game/styleJudging";
 import type {
+  FormBranch,
   FormId,
   StylePenaltyReason,
   TournamentMatch,
@@ -102,23 +109,33 @@ export interface DuelScript {
 const SAPD_FORMS: Record<string, readonly FormId[]> = {
   Sync: ["form-3-long"],
   Presa: ["form-2"],
-  Armonica: ["form-1", "form-3-long"],
+  Armonica: ["form-3-long"],
 };
 
 function formsOf(participant: TournamentParticipant): readonly FormId[] {
   return participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms);
 }
 
-function momentsOf(detail: TournamentStyleDetail | undefined, forms: readonly FormId[]): DuelMoment[] {
+/** The Form a technique comes from: Armoniche without a sword are Forma 1. */
+function formOfTechnique(name: string, forms: readonly FormId[], weapon: FormBranch): FormId | undefined {
+  if ((DISARMED_ARMONICHE as readonly string[]).includes(name)) return "form-1";
+  return getComplexTechniqueForms(forms, weapon)
+    .find((candidate) => COMPLEX_TECHNIQUES[candidate]?.includes(name));
+}
+
+function momentsOf(detail: TournamentStyleDetail | undefined, participant: TournamentParticipant): DuelMoment[] {
+  const forms = formsOf(participant);
+  const weapon = participant.weapon ?? getAthleteWeapon(forms);
   const longName = (form: FormId | undefined) => (form ? getFormDefinition(form)?.longName : undefined);
   const moments: DuelMoment[] = [];
   if (detail?.technique) {
-    // ponytail: a name shared by two weapons («Circolare») goes to the first known Form.
-    const form = forms.find((candidate) => COMPLEX_TECHNIQUES[candidate]?.includes(detail.technique!));
-    moments.push({ kind: "COM", name: detail.technique, form: longName(form) });
+    moments.push({ kind: "COM", name: detail.technique, form: longName(formOfTechnique(detail.technique, forms, weapon)) });
   }
-  if (detail?.highlight) {
-    const form = SAPD_FORMS[detail.highlight]?.find((candidate) => forms.includes(candidate));
+  // Armoniche and Sync are COM and SAPD at once: one moment is enough.
+  if (detail?.highlight && detail.highlight !== detail.technique) {
+    const form = (DISARMED_ARMONICHE as readonly string[]).includes(detail.highlight)
+      ? "form-1"
+      : SAPD_FORMS[detail.highlight]?.find((candidate) => forms.includes(candidate));
     moments.push({ kind: "SAPD", name: detail.highlight, form: longName(form) });
   }
   return moments;
@@ -133,7 +150,7 @@ export function getDuelScript({ match, a, b }: OwnedFinal): DuelScript {
   const sides = { a: { participant: a, detail: match.styleDetailA }, b: { participant: b, detail: match.styleDetailB } };
   for (const side of ["a", "b"] as const) {
     const free = assaults.filter((assault) => assault.winner === side);
-    for (const moment of momentsOf(sides[side].detail, formsOf(sides[side].participant))) {
+    for (const moment of momentsOf(sides[side].detail, sides[side].participant)) {
       const pool = free.filter((assault) => !assault.moment);
       if (pool.length > 0) pick(roll, pool).moment = moment;
     }

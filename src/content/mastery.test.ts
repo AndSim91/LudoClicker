@@ -8,7 +8,7 @@ import {
 } from "./mastery";
 
 describe("collaborator mastery", () => {
-  it("exposes the five Italian grades with personal bonuses up to 100%", () => {
+  it("exposes the five Italian grades with personal bonuses up to 200%", () => {
     expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.name)).toEqual([
       "Novizio",
       "Iniziato",
@@ -18,17 +18,17 @@ describe("collaborator mastery", () => {
     ]);
     expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.minimumXp)).toEqual([
       0,
-      60,
-      360,
-      2_160,
-      5_760,
+      300,
+      600,
+      1_800,
+      3_600,
     ]);
     expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.multiplier)).toEqual([
       0,
-      0.2,
-      0.4,
-      0.65,
+      0.25,
+      0.5,
       1,
+      2,
     ]);
     expect(COLLABORATOR_MASTERY_LEVELS.map((level) => level.eventCostMultiplier)).toEqual([
       1,
@@ -42,16 +42,16 @@ describe("collaborator mastery", () => {
 
   it("clamps the maximum grade and reports progress to the next grade", () => {
     expect(getCollaboratorMasteryDefinition(0).name).toBe("Novizio");
-    expect(getCollaboratorMasteryDefinition(360).name).toBe("Accademico");
-    expect(getCollaboratorMasteryDefinition(5_760).name).toBe("Maestro");
+    expect(getCollaboratorMasteryDefinition(600).name).toBe("Accademico");
+    expect(getCollaboratorMasteryDefinition(3_600).name).toBe("Maestro");
     expect(getCollaboratorMasteryDefinition(50_000).name).toBe("Maestro");
-    expect(getCollaboratorMasteryMultiplier(5_760)).toBeCloseTo(2);
-    expect(getCollaboratorMasteryProgress(210)).toMatchObject({
-      currentXp: 210,
-      nextXp: 360,
+    expect(getCollaboratorMasteryMultiplier(3_600)).toBeCloseTo(3);
+    expect(getCollaboratorMasteryProgress(450)).toMatchObject({
+      currentXp: 450,
+      nextXp: 600,
       progress: 50,
       definition: { name: "Iniziato" },
     });
-    expect(getCollaboratorMasteryProgress(5_760).progress).toBe(100);
+    expect(getCollaboratorMasteryProgress(3_600).progress).toBe(100);
   });
 });

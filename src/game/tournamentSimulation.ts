@@ -15,13 +15,24 @@ import {
   type TournamentNpcProfile,
   type TournamentTier,
 } from "../content/tournaments";
+import { isCourseXUnlocked } from "../content/upgrades";
 import {
   getAthleteTournamentStats,
+  getAthleteWeapon,
+  getFormStatBonuses,
   getPreparation,
   hasCompletedFormOne,
 } from "./athleteStats";
 import { nextRandom } from "./random";
-import { getNpcStyleForms, getStyleJudgeCount, judgeStyle } from "./styleJudging";
+import {
+  getNpcStyleForms,
+  getStyleJudgeCount,
+  judgeStyle,
+  rollDisarmedArmonica,
+  rollStyleActions,
+  type StyleActionInput,
+  type StyleActions,
+} from "./styleJudging";
 import { getCollaboratorsByContactId } from "./runtimeIndexes";
 import {
   getQualificationDisciplineSlotCount,
@@ -139,7 +150,7 @@ function createOwnedParticipants(
   return contacts.map((contact) => {
     const collaborator = collaboratorsByContactId.get(contact.id);
     const forms = collaborator?.forms ?? contact.forms;
-    const stats = getAthleteTournamentStats(contact, forms);
+    const stats = getAthleteTournamentStats(contact, forms, isCourseXUnlocked(state.upgrades));
     return {
       id: `owned-${contact.id}`,
       ownedContactId: contact.id,
@@ -151,6 +162,7 @@ function createOwnedParticipants(
       rarity: contact.secretLegendaryId ? "secret-legendary" : contact.rarity,
       numericForms: stats.numericForms,
       knownFormIds: [...forms],
+      weapon: stats.weapon,
       experience: stats.tournamentExperience,
       arenaBase: stats.base.arena,
       styleBase: stats.base.style,
@@ -243,8 +255,11 @@ function createNpcCandidate(
   const lastName = PROSPECT_LAST_NAMES[integer(cursor, 0, PROSPECT_LAST_NAMES.length - 1)];
   const schools = getNpcSchoolPool(level);
   const school = schools[integer(cursor, 0, schools.length - 1)];
+  const id = `npc-${level}-${sequence}-${cursor.seed >>> 0}`;
+  const forms = getNpcStyleForms(id, numericForms);
+  const formBonus = getFormStatBonuses(forms);
   return {
-    id: `npc-${level}-${sequence}-${cursor.seed >>> 0}`,
+    id,
     schoolId: school.id,
     firstName,
     lastName,
@@ -255,8 +270,9 @@ function createNpcCandidate(
     experience,
     arenaBase,
     styleBase,
-    arenaPreparation: getPreparation(arenaBase, numericForms, experience),
-    stylePreparation: getPreparation(styleBase, numericForms, experience),
+    weapon: getAthleteWeapon(forms),
+    arenaPreparation: getPreparation(arenaBase, formBonus.arena, experience),
+    stylePreparation: getPreparation(styleBase, formBonus.style, experience),
     condition: triangularCondition(cursor),
     qualificationDiscipline: discipline,
   };
@@ -319,6 +335,8 @@ function createSecretParticipant(
     throw new Error(`Il Leggendario Segreto ${id} non ha una scuola assegnata.`);
   }
   const school = getTournamentSchool(profile.schoolId);
+  // Secret Legendaries keep the designer's fixed targets: +10% per Form, as before 06/10.
+  const formBonus = profile.numericForms * 0.1;
   return {
     id: `secret-${id}`,
     secretLegendaryId: id,
@@ -332,16 +350,9 @@ function createSecretParticipant(
     experience: profile.externalExperience,
     arenaBase: profile.arenaBase,
     styleBase: profile.styleBase,
-    arenaPreparation: getPreparation(
-      profile.arenaBase,
-      profile.numericForms,
-      profile.externalExperience,
-    ),
-    stylePreparation: getPreparation(
-      profile.styleBase,
-      profile.numericForms,
-      profile.externalExperience,
-    ),
+    weapon: "Spada Lunga",
+    arenaPreparation: getPreparation(profile.arenaBase, formBonus, profile.externalExperience),
+    stylePreparation: getPreparation(profile.styleBase, formBonus, profile.externalExperience),
     condition: triangularCondition(cursor),
     qualificationDiscipline: profile.specialty === "style" ? "style" : "arena",
   };
@@ -605,8 +616,33 @@ function simulateMatch(
     else arenaScoreB += 1;
     assaults += side;
   }
+  const actionInput = (
+    participant: TournamentParticipant,
+    opponent: TournamentParticipant,
+    chance: number,
+    scored: number,
+  ): StyleActionInput => {
+    const forms = participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms);
+    return {
+      forms,
+      weapon: participant.weapon ?? getAthleteWeapon(forms),
+      style: participant.stylePreparation,
+      opponentStyle: opponent.stylePreparation,
+      assaultChance: chance,
+      scored,
+      roll: () => roll(cursor),
+    };
+  };
+  const inputA = actionInput(participantA, participantB, assaultChanceA, arenaScoreA);
+  const inputB = actionInput(participantB, participantA, 1 - assaultChanceA, arenaScoreB);
+  let actionsA = rollStyleActions(inputA);
+  let actionsB = rollStyleActions(inputB);
+  // Chi viene disarmato può rispondere solo con un'Armonica della Forma 1.
+  if (actionsB.highlight === "Disarmo") actionsA = rollDisarmedArmonica(actionsA, inputA);
+  if (actionsA.highlight === "Disarmo") actionsB = rollDisarmedArmonica(actionsB, inputB);
   const judge = (
     participant: TournamentParticipant,
+    actions: StyleActions,
     chance: number,
     scored: number,
     conceded: number,
@@ -617,7 +653,7 @@ function simulateMatch(
           conditionMultiplier(participant.condition) *
           encounterMultiplier(cursor)) /
         (cursor.styleFieldMean ?? participant.stylePreparation),
-      forms: participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms),
+      actions,
       experience: participant.experience,
       condition: participant.condition,
       assaultChance: chance,
@@ -626,8 +662,8 @@ function simulateMatch(
       judges: getStyleJudgeCount(cursor.styleLevel ?? "school", stage),
       roll: () => roll(cursor),
     });
-  const styleA = judge(participantA, assaultChanceA, arenaScoreA, arenaScoreB);
-  const styleB = judge(participantB, 1 - assaultChanceA, arenaScoreB, arenaScoreA);
+  const styleA = judge(participantA, actionsA, assaultChanceA, arenaScoreA, arenaScoreB);
+  const styleB = judge(participantB, actionsB, 1 - assaultChanceA, arenaScoreB, arenaScoreA);
   const ownedMatch = Boolean(participantA.ownedContactId || participantB.ownedContactId);
   return {
     id: `match-${stage}-${matchIndex}-${cursor.seed >>> 0}`,

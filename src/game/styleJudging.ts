@@ -1,4 +1,5 @@
 import type {
+  FormBranch,
   FormId,
   StylePenaltyReason,
   StyleSheet,
@@ -15,9 +16,10 @@ import type {
  * è quasi impossibile. I punti sono relativi al livello del campo del torneo.
  */
 
-// Tecniche complesse (COM) elencate dal documento per ciascuna Forma.
+// Tecniche complesse (COM) elencate dal documento per ciascuna Forma. Si fanno
+// solo con l'arma della Forma: F1 e F2 con la spada lunga (decisione del 06/10).
 export const COMPLEX_TECHNIQUES: Partial<Record<FormId, readonly string[]>> = {
-  "form-1": ["Settima", "Ottava", "Prima Armonica", "Seconda Armonica", "Terza Armonica", "Quarta Armonica"],
+  "form-1": ["Settima", "Ottava"],
   "form-2": ["Seconda di Quarta", "Biru Biru", "Sesta a Due Mani"],
   "form-3-long": ["Cruna dell'Ago", "Armonica", "Circolare", "Sync di Spalle", "Sync Fronte Taglio", "Sync in Blocco"],
   "form-4-long": ["Ceduta Impropria", "Gancio in Reverso Filo", "Mano Fantasma"],
@@ -35,6 +37,128 @@ export const COMPLEX_TECHNIQUES: Partial<Record<FormId, readonly string[]>> = {
   "form-5-staff": ["Spirale in Circolare", "Circolare in Armonica"],
 };
 
+/** Le Armoniche della Forma 1 si fanno senza spada: solo chi è stato disarmato. */
+export const DISARMED_ARMONICHE = [
+  "Prima Armonica",
+  "Seconda Armonica",
+  "Terza Armonica",
+  "Quarta Armonica",
+] as const;
+
+const FORM_WEAPON: Partial<Record<FormId, FormBranch>> = {
+  "form-1": "Spada Lunga",
+  "form-2": "Spada Lunga",
+  "form-3-long": "Spada Lunga",
+  "form-4-long": "Spada Lunga",
+  "form-5-long": "Spada Lunga",
+  "form-3-staff": "Staffa",
+  "form-4-staff": "Staffa",
+  "form-5-staff": "Staffa",
+  "form-3-double": "Doppia spada corta",
+  "form-4-double": "Doppia spada corta",
+  "form-5-double": "Doppia spada corta",
+};
+
+/** COM possibili: le tecniche delle Forme conosciute con l'arma usata nell'incontro. */
+export function getComplexTechniqueForms(forms: readonly FormId[], weapon: FormBranch): FormId[] {
+  return forms.filter((formId) => COMPLEX_TECHNIQUES[formId] && FORM_WEAPON[formId] === weapon);
+}
+
+/** Armoniche e Sync sono così rare che valgono 1 punto sia in COM sia in SAPD. */
+export function isComAndSapd(name: string): boolean {
+  return name.includes("Armonica") || name.startsWith("Sync");
+}
+
+const STYLE_ACTION_MAX_FROM_STYLE = 0.15;
+const STYLE_ACTION_FULL_STYLE = 500;
+const STYLE_ACTION_PER_ADVANTAGE = 0.4;
+const STYLE_ACTION_MAX_FROM_ADVANTAGE = 0.2;
+const STYLE_ACTION_CAP = 0.35;
+
+/**
+ * Probabilità di una COM o di una SAPD nell'incontro (decisione del 06/10):
+ * fino al 15% secondo lo Stile (pieno a 500), più 0,4 punti per ogni punto
+ * percentuale di Stile in più dell'avversario, fino a +20%. Tetto 35%.
+ */
+export function getStyleActionChance(style: number, opponentStyle: number): number {
+  const fromStyle = STYLE_ACTION_MAX_FROM_STYLE * Math.min(1, Math.max(0, style) / STYLE_ACTION_FULL_STYLE);
+  const advantage = opponentStyle > 0 ? Math.max(0, style / opponentStyle - 1) : 0;
+  const fromAdvantage = Math.min(STYLE_ACTION_MAX_FROM_ADVANTAGE, STYLE_ACTION_PER_ADVANTAGE * advantage);
+  return Math.min(STYLE_ACTION_CAP, fromStyle + fromAdvantage);
+}
+
+export interface StyleActions {
+  com: number;
+  sapd: number;
+  technique?: string;
+  highlight?: string;
+}
+
+export interface StyleActionInput {
+  forms: readonly FormId[];
+  weapon: FormBranch;
+  style: number;
+  opponentStyle: number;
+  /** Probabilità di vincere un assalto: misura quanto l'incontro è alla pari. */
+  assaultChance: number;
+  scored: number;
+  roll: () => number;
+}
+
+/** COM e SAPD con la spada in mano. */
+export function rollStyleActions(input: StyleActionInput): StyleActions {
+  const { roll, scored, assaultChance, forms } = input;
+  const chance = getStyleActionChance(input.style, input.opponentStyle);
+  const actions: StyleActions = { com: 0, sapd: 0 };
+
+  // COM: solo se integrate nel combattimento (no «farming»).
+  const open = assaultChance <= 0.85 && scored > 0;
+  const complexForms = getComplexTechniqueForms(forms, input.weapon);
+  if (open && complexForms.length > 0 && roll() < chance) {
+    const form = pick(roll, complexForms);
+    actions.technique = pick(roll, COMPLEX_TECHNIQUES[form]!);
+    if (isComAndSapd(actions.technique)) {
+      actions.com = 1;
+      actions.sapd = 1;
+    } else {
+      const advanced = form !== "form-1" && form !== "form-2";
+      actions.com = (advanced ? 1 : 0.5) + (roll() < 0.5 ? 0.5 : 0);
+    }
+  }
+
+  // SAPD: Sync, Armoniche, Prese, Disarmi; uguali per ogni arma.
+  const sapdOptions = [
+    "Disarmo",
+    ...(forms.includes("form-3-long") ? ["Sync", "Armonica"] : []),
+    ...(forms.includes("form-2") ? ["Presa"] : []),
+  ];
+  if (scored > 0 && roll() < chance) {
+    actions.highlight = pick(roll, sapdOptions);
+    actions.sapd = Math.max(actions.sapd, 1);
+    if (isComAndSapd(actions.highlight)) actions.com = Math.max(actions.com, 1);
+  }
+  return actions;
+}
+
+/**
+ * Chi è stato disarmato può fare solo un'Armonica della Forma 1, senza spada:
+ * vale 1 in COM e 1 in SAPD.
+ */
+export function rollDisarmedArmonica(
+  actions: StyleActions,
+  input: StyleActionInput,
+): StyleActions {
+  if (!input.forms.includes("form-1") || input.scored <= 0) return actions;
+  if (input.roll() >= getStyleActionChance(input.style, input.opponentStyle)) return actions;
+  const name = pick(input.roll, DISARMED_ARMONICHE);
+  return {
+    com: Math.max(actions.com, 1),
+    sapd: Math.max(actions.sapd, 1),
+    technique: actions.technique ?? name,
+    highlight: actions.highlight ?? name,
+  };
+}
+
 const FINAL_PHASES: readonly TournamentMatch["stage"][] = ["semifinal", "bronze", "final"];
 const BIG_STAGES: readonly TournamentLevel[] = ["national", "champions", "chronicles"];
 
@@ -46,16 +170,22 @@ export function getStyleJudgeCount(level: TournamentLevel, stage: TournamentMatc
 
 const WEAPONS = ["long", "double", "staff"] as const;
 
-/** Gli atleti esterni hanno solo il numero di Forme: l'arma è stabile per persona. */
+/**
+ * Gli atleti esterni hanno solo il numero di Forme: l'arma è stabile per persona
+ * e le Forme sono quelle del percorso più breve (Corso X escluso).
+ */
 export function getNpcStyleForms(id: string, numericForms: number): FormId[] {
   let hash = 0;
   for (const character of id) hash = (Math.imul(hash, 31) + character.charCodeAt(0)) | 0;
   const weapon = WEAPONS[(hash >>> 0) % WEAPONS.length];
   const forms: FormId[] = ["form-1"];
   if (numericForms >= 2) forms.push("form-2");
+  if (numericForms >= 3) forms.push("course-y");
   for (let form = 3; form <= Math.min(5, numericForms); form += 1) {
     forms.push(`form-${form}-${weapon}` as FormId);
   }
+  if (numericForms >= 6) forms.push("form-6");
+  if (numericForms >= 7) forms.push("form-7");
   return forms;
 }
 
@@ -68,7 +198,8 @@ export function scoreStyleSheet([bas, mov, din, com, sapd, gcc, dif, sog, pen]: 
 export interface StyleJudgementInput {
   /** Preparazione Stile del giorno (con la forma) divisa per la media del campo. */
   relativeStyle: number;
-  forms: readonly FormId[];
+  /** COM e SAPD dell'incontro (rollStyleActions): uguali per tutti i giudici. */
+  actions: StyleActions;
   experience: number;
   condition: number;
   /** Probabilità di vincere un assalto: misura quanto l'incontro è alla pari. */
@@ -115,33 +246,8 @@ export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
   const initiative = 1.5 * (scored / (scored + conceded) - assaultChance);
   // DIN: giornata; chi ha esperienza di torneo oscilla meno.
   const rhythm = (roll() - 0.5) * 0.6 * (1 - experienceShare / 2);
-  const open = assaultChance <= 0.85 && scored > 0;
 
-  // COM: rare, e solo se integrate nel combattimento (no «farming»).
-  let com = 0;
-  let technique: string | undefined;
-  const complexForms = input.forms.filter((form) => COMPLEX_TECHNIQUES[form]);
-  const skill = Math.min(1, Math.max(0, level / 2));
-  if (open && complexForms.length > 0 && roll() < Math.min(0.12, 0.03 * complexForms.length) * skill) {
-    const form = pick(roll, complexForms);
-    technique = pick(roll, COMPLEX_TECHNIQUES[form]!);
-    const advanced = form !== "form-1" && form !== "form-2";
-    com = (advanced ? 1 : 0.5) + (roll() < 0.5 ? 0.5 : 0);
-  }
-
-  // SAPD: Sync, Armoniche, Prese, Disarmi.
-  let sapd = 0;
-  let highlight: string | undefined;
-  const sapdOptions = [
-    "Disarmo",
-    ...(input.forms.includes("form-3-long") ? ["Sync"] : []),
-    ...(input.forms.includes("form-1") || input.forms.includes("form-3-long") ? ["Armonica"] : []),
-    ...(input.forms.includes("form-2") ? ["Presa"] : []),
-  ];
-  if (scored > 0 && roll() < (0.015 + 0.01 * (sapdOptions.length - 1)) * skill) {
-    highlight = pick(roll, sapdOptions);
-    sapd = highlight === "Disarmo" ? 1.5 : 1;
-  }
+  const { com, sapd, technique, highlight } = input.actions;
 
   // DIF: sovrastato in Arena e sconfitto, ma capace di andare comunque a segno
   // («still trying hard and well to score»).

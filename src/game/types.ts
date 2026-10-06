@@ -552,6 +552,8 @@ export interface TournamentParticipant {
   rarity: PersonRarity | "secret-legendary";
   numericForms: number;
   knownFormIds?: FormId[];
+  /** Weapon used in the matches; NPCs without it fight with their stable one. */
+  weapon?: FormBranch;
   experience: number;
   arenaBase: number;
   styleBase: number;

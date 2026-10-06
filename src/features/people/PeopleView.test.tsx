@@ -1851,7 +1851,7 @@ describe("PeopleView", () => {
         instructorForms: [] as FormId[],
         assignment: "writing" as const,
         rarity: "legendary" as const,
-        mastery: { writing: 120, events: 0, equipment: 0, instructor: 0 },
+        mastery: { writing: 400, events: 0, equipment: 0, instructor: 0 },
       },
       {
         id: "event-manager",
@@ -2419,8 +2419,9 @@ describe("PeopleView", () => {
       ...initial.contacts[0],
       status: "enrolled" as const,
       forms: ["course-y"] as FormId[],
-      arenaBase: 108.564,
-      styleBase: 50,
+      // Corso Y adds 5% (06/10): 103,394 × 1,05 ≈ 108,56 and 47,62 × 1,05 ≈ 50.
+      arenaBase: 103.394,
+      styleBase: 47.62,
     };
     render(
       <PeopleView

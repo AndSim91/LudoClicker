@@ -59,15 +59,30 @@ Un Comune può quindi ottenere 100/100, ma la probabilità è 1 su 10.000. La ra
 
 ### 2.3 Bonus delle Forme
 
-Contano esclusivamente le Forme numeriche da 1 a 7. Corso X e Corso Y non assegnano bonus.
+Decisione di Andrea del 06/10. Ogni Forma conosciuta vale 10 punti tra Arena e
+Stile, in qualunque ramo, applicati sempre alla statistica base
+(`FORM_STAT_BONUSES` e `getFormStatBonuses` in `src/game/athleteStats.ts`):
 
-Ogni numero di Forma completato assegna `+10%`, applicato sempre alla statistica base. Imparare più rami dello stesso numero non assegna più volte il bonus.
+| Forma | Arena | Stile |
+| --- | ---: | ---: |
+| F1, F2, F6, F7 | +10% | +10% |
+| Corso X (solo con il Percorso Segreto) | +10% | +10% |
+| Corso Y | +5% | +5% |
+| F3–F5 Spada Lunga | +5% | +5% |
+| F3–F5 Staffa | +7,5% | +2,5% |
+| F3–F5 Doppie Spade Corte | +2,5% | +7,5% |
 
 ```text
-moltiplicatoreForme = 1 + 0,10 × numeroFormeNumericheDistinte
+Arena = base × (1 + somma Arena delle Forme) × esperienza
+Stile = base × (1 + somma Stile delle Forme) × esperienza
 ```
 
-Il massimo attuale è `+70%`.
+Con tutte le Forme +90% su entrambe, +100% con il Corso X. I Leggendari Segreti
+tengono i valori fissati dal design (+10% per numero di Forma, come prima).
+
+**Arma.** Ogni atleta combatte con l'arma del ramo in cui è andato più avanti
+(F3–F5); a parità, il ramo preferito, poi Lunga, Staffa, Doppie; con solo F1–F2
+la Spada Lunga (`getAthleteWeapon`). Gli esterni hanno un'arma stabile per persona.
 
 ### 2.4 Esperienza torneistica
 
@@ -193,12 +208,22 @@ sopra 2,25 il livello sale più piano (pendenza 0,7) verso un massimo di 2,6
 - **MOV**: livello + 1,5 × (quota di assalti vinti − probabilità attesa di
   vincerne uno): l'iniziativa sull'Orizzonte degli Eventi.
 - **DIN**: livello + giornata (±0,3, metà con 20 tornei di esperienza).
-- **COM**: tecniche complesse dell'elenco SLM per le Forme dell'atleta
-  (`COMPLEX_TECHNIQUES`; gli esterni hanno Forma 1, 2 e un'arma stabile per
-  3–5). Molto rare: fino al 12% × abilità, e solo se l'incontro è vero
-  (probabilità d'assalto ≤ 85%) e l'atleta va a segno. F1–F2 0,5–1, F3–F5 1–1,5.
-- **SAPD**: Disarmo (1,5), Sync con F3 lunga, Armonica con F1 o F3 lunga, Presa
-  con F2 (1). Rare.
+- **Probabilità di COM e SAPD** (decisione del 06/10, `getStyleActionChance`):
+  fino al 15% secondo lo Stile dell'atleta (pieno a 500, in proporzione sotto),
+  più 0,4 punti per ogni punto percentuale di Stile in più dell'avversario, fino
+  a +20% (raggiunto con il 50% di vantaggio); tetto 35%. COM e SAPD si estraggono
+  separatamente, una volta per incontro, uguali per tutti i giudici.
+- **COM**: tecniche complesse dell'elenco SLM delle Forme conosciute **con
+  l'arma usata nell'incontro** (`getComplexTechniqueForms`): F1 e F2 solo con la
+  Spada Lunga; F6 e F7 non hanno COM. Solo se l'incontro è vero (probabilità
+  d'assalto ≤ 85%) e l'atleta va a segno. F1–F2 0,5–1, F3–F5 1–1,5.
+- **SAPD**: uguali per ogni arma. Disarmo (1), Presa con F2 (1), Sync e
+  Armonica con F3 Lunga.
+- **Armoniche e Sync** valgono 1 in COM e 1 in SAPD insieme: sono rarissime
+  nello sport.
+- **Disarmato**: chi subisce un Disarmo può rispondere solo con un'Armonica
+  della Forma 1 (Prima–Quarta Armonica), che si fa senza spada; stessa
+  probabilità, 1 in COM e 1 in SAPD (`rollDisarmedArmonica`).
 - **DIF**: 1 a chi, nettamente sovrastato in Arena (< 15%) e sconfitto, va
   comunque a segno.
 - **SOG**: gusto di ciascun giudice, più facile negli incontri decisi all'ultimo assalto (2–1, 3–2).

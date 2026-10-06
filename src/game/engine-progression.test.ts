@@ -356,7 +356,7 @@ describe("game engine: progression", () => {
     };
 
     let repairedAtTick: number | undefined;
-    for (let tick = 1; tick <= 224; tick += 1) {
+    for (let tick = 1; tick <= 300; tick += 1) {
       state = gameReducer(state, { type: "TICK", now: 1_000 + tick * 1_000 });
       if (state.equipment.damagedSwords === 0) {
         repairedAtTick = tick;
@@ -364,8 +364,9 @@ describe("game engine: progression", () => {
       }
     }
 
-    expect(repairedAtTick).toBeGreaterThan(60);
-    expect(repairedAtTick).toBeLessThan(225);
+    // Iniziato comes only after 5 minutes in the sector (06/10): a Novizio repairs alone.
+    expect(repairedAtTick).toBeGreaterThan(200);
+    expect(repairedAtTick).toBeLessThan(260);
     expect(state.equipment).toMatchObject({ availableSwords: 6, damagedSwords: 0, wear: 0 });
     expect(state.automation.equipmentBuffer).toBe(0);
     expect(state.school.euros).toBe(0);
@@ -1448,11 +1449,12 @@ describe("game engine: progression", () => {
     expect(completed.unlocks.collaborators).toBe(true);
     expect(completed.statistics.collaboratorsRecruited).toBe(1);
     const longFormFive = { ...collaborator, forms: ["form-1", "course-x", "form-2", "course-y", "form-3-long", "form-4-long", "form-5-long"] as const, formBranchPreferences: ["Spada Lunga" as const], assignment: "events" as const };
-    expect(getCollaboratorProductivity({ ...longFormFive, forms: [...longFormFive.forms] })).toBe(1.5);
+    // The Forms no longer add to the work of collaborators (06/10).
+    expect(getCollaboratorProductivity({ ...longFormFive, forms: [...longFormFive.forms] })).toBe(1);
     expect(getAvailableForms({ ...longFormFive, forms: [...longFormFive.forms] }, 8).map((form) => form.id)).toEqual(["form-6"]);
 
     const legendary = { ...longFormFive, rarity: "legendary" as const, forms: [...longFormFive.forms, "form-6"] as const, lastFormTrainingYear: 8 };
-    expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(3.2);
+    expect(getCollaboratorProductivity({ ...legendary, forms: [...legendary.forms] })).toBe(2);
     expect(getAvailableForms({ ...legendary, forms: [...legendary.forms] }, 9).map((form) => form.id)).toEqual(["form-7"]);
 
     const rareReady = {

@@ -1,4 +1,4 @@
-import { getOfficialStatsVisibilityTier } from "../../content/upgrades";
+import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
@@ -108,7 +108,7 @@ function getOfficialScore(
 ): number | null {
   const contact = context.contactsById.get(collaborator.contactId);
   if (!contact || !hasUnlockedOfficialStats(collaborator.forms, getOfficialStatsVisibilityTier(context.state.upgrades))) return null;
-  return getContactPreparation(contact, collaborator.forms)[key];
+  return getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(context.state.upgrades))[key];
 }
 
 function getSortValue(

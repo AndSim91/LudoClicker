@@ -100,12 +100,15 @@ describe("instructor athletic preparation", () => {
     },
   );
 
-  it("applies Staffa bonuses only from certified instructor forms", () => {
+  it("counts the instructor Mastery, not the Staffa Forms (06/10)", () => {
     const knownOnly = instructor("known");
     const certified = instructor("certified", ["form-3-staff"]);
+    const master = { ...knownOnly, mastery: { ...knownOnly.mastery!, instructor: 3_600 } };
 
     expect(getInstructorAthleticPreparationProductivity(certified))
-      .toBeGreaterThan(getInstructorAthleticPreparationProductivity(knownOnly));
+      .toBe(getInstructorAthleticPreparationProductivity(knownOnly));
+    expect(getInstructorAthleticPreparationProductivity(master))
+      .toBe(getInstructorAthleticPreparationProductivity(knownOnly) * 3);
   });
 
   it("keeps large preparation batches deterministic while reusing athlete pools", () => {

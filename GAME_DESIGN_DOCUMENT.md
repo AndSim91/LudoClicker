@@ -1213,10 +1213,17 @@ stessa curva di esperienza in tutti i ruoli:
 | Grado      | Tempo dal grado precedente | Tempo cumulativo | XP cumulativi | Bonus |
 | ---------- | -------------------------: | ---------------: | ------------: | ----: |
 | Novizio    |                          — |                0 |             0 |    0% |
-| Iniziato   |                   1 minuto |         1 minuto |            60 |   20% |
-| Accademico |                   5 minuti |         6 minuti |           360 |   40% |
-| Cavaliere  |                  30 minuti |        36 minuti |         2.160 |   65% |
-| Maestro    |                      1 ora |     1 ora e 36 m |         5.760 |  100% |
+| Iniziato   |                   5 minuti |         5 minuti |           300 |   25% |
+| Accademico |                   5 minuti |        10 minuti |           600 |   50% |
+| Cavaliere  |                  20 minuti |        30 minuti |         1.800 |  100% |
+| Maestro    |                  30 minuti |            1 ora |         3.600 |  200% |
+
+Decisione di Andrea del 06/10: le Forme non danno più bonus ai collaboratori
+(prima +15/30/50% Eventi con la Lunga, Preparazione atletica con la Staffa,
+Redazione/Social con le Doppie, +10/20% su tutto con F6/F7); quel valore è
+passato alla Maestria, così chi resta fisso in un settore diventa molto
+valido. La scheda del collaboratore mostra in «Bonus attivo» la resa nel
+settore attuale (rarità × Maestria, per esempio «Social ×3 · Maestro +200%»).
 
 Il bonus moltiplica la produttività del collaboratore in Redazione/Social,
 Attrezzatura, Gadget e Istruttore (velocità delle lezioni e Preparazione
@@ -1587,10 +1594,11 @@ scoglio economico principale inizia dopo Corso Y.
 Durate base: Forma 1 20 s, Corso X 25 s, Forma 2 30 s, Corso Y 35 s, Forma 3
 40 s, Forma 4 45 s, Forma 5 50 s, Forma 6 60 s, Forma 7 75 s. Quando un
 Istruttore insegna, la durata viene divisa per la sua produttività da
-Istruttore (Forme, rarità e Maestria).
+Istruttore (rarità e Maestria).
 
-Bonus dei collaboratori per Forma completata (per ramo conta solo la Forma più
-alta):
+Dal 06/10 le Forme non danno più bonus ai collaboratori (la Maestria dei
+collaboratori ne ha preso il posto); danno Arena e Stile agli atleti (vedi
+`docs/tournament-system-design.md` § 2.3). Tabella storica dei bonus tolti:
 
 | Forma   | Spada Lunga | Staffa                     | Doppia spada corta    |
 | ------- | ----------- | -------------------------- | --------------------- |

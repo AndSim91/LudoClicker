@@ -1,4 +1,5 @@
 import { FORM_DEFINITIONS } from "./forms";
+import { COLLABORATOR_MASTERY_LEVELS } from "./mastery";
 import { PERSON_RARITIES } from "./rarities";
 import {
   SECRET_LEGENDARIES,
@@ -329,9 +330,12 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { label: "Leggendario", value: "×2", detail: "moltiplicatore base di produttività" },
       { label: "Ultra Raro", value: "×1", detail: "diventa Collaboratore dopo il Corso Y" },
       { label: "Vista aggregata", value: `${GAME_CONFIG.collaboratorAggregateUnlockCount}`, detail: "Collaboratori per gestire posti e priorità" },
+      { label: "Maestro", value: `+${Math.round(COLLABORATOR_MASTERY_LEVELS.at(-1)!.multiplier * 100)}%`, detail: "dopo un'ora nello stesso settore" },
     ],
     rules: [
       "Ogni Collaboratore può avere un incarico operativo principale.",
+      `La Maestria cresce con il tempo nello stesso settore: ${COLLABORATOR_MASTERY_LEVELS.slice(1).map((level) => `${level.name} +${Math.round(level.multiplier * 100)}% dopo ${level.minimumXp / 60} minuti`).join(", ")}. Negli Eventi abbassa invece il costo degli eventi automatici.`,
+      "Le Forme non danno bonus ai Collaboratori: rendono più forti gli atleti in Arena e Stile.",
       "I posti aggregati distribuiscono automaticamente le persone rispettando le priorità.",
       "In una nuova scuola i Leggendari ripartono da zero: restano solo Arena e Stile naturali.",
     ],
@@ -342,7 +346,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     group: "Crescita",
     title: "Forme e corsi",
     summary: "Percorso tecnico, rami d'arma e Preparazione nei tornei.",
-    introduction: "La formazione aumenta il valore dell'iscritto e apre ruoli avanzati. Le Forme numeriche migliorano la Preparazione usata nei tornei; i corsi intermedi sbloccano invece capacità operative specifiche.",
+    introduction: "La formazione aumenta il valore dell'iscritto e apre ruoli avanzati. Ogni Forma e ogni corso aggiungono Arena e Stile usati nei tornei, in qualunque ramo; l'arma del ramo più avanzato decide con che cosa si combatte.",
     steps: [
       { icon: "book", label: "Forma 1", detail: "Inizia il percorso" },
       { icon: "spark", label: "Corsi X e Y", detail: "Aprono nuovi ruoli" },
@@ -351,12 +355,15 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     ],
     numbers: [
       { label: "Percorsi disponibili", value: `${FORM_DEFINITIONS.length}`, detail: "Forme e corsi nel catalogo" },
-      { label: "Bonus per Forma", value: "+10%", detail: "sulla Preparazione Arena e Stile" },
+      { label: "Tutte le Forme", value: "+90%", detail: "Arena e Stile; +100% con il Corso X" },
+      { label: "F1, F2, F6, F7", value: "+10%", detail: "Arena e Stile ciascuna" },
       { label: "Esperienza torneo", value: "+3%", detail: "per punto, fino a 20" },
     ],
     rules: [
-      "Dalla Forma 3 il percorso si divide in Spada Lunga, Staffa e Doppie Spade Corte.",
-      "La Preparazione combina valore base, Forme numeriche ed esperienza nei tornei.",
+      "Dalla Forma 3 il percorso si divide in Spada Lunga, Staffa e Doppie Spade Corte: ogni Forma vale 10 punti, divisi 5 e 5 con la Lunga, 7,5 in Arena e 2,5 in Stile con la Staffa, 2,5 e 7,5 con le Doppie.",
+      "Corso Y aggiunge il 5% in Arena e Stile; il Corso X il 10%, ma solo dopo il suo Percorso Segreto.",
+      "Si combatte con l'arma del ramo in cui si è andati più avanti: le tecniche complesse (COM) sono quelle di quell'arma. Forma 1 e 2 si fanno con la Spada Lunga.",
+      "La Preparazione combina valore base, Forme ed esperienza nei tornei.",
       "Costi, durata e spade richieste sono mostrati prima di avviare ogni formazione.",
     ],
     related: ["tornei", "collaboratori-settori", "economia-scuola"],

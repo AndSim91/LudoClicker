@@ -15,7 +15,7 @@ describe("collaborator mastery integration", () => {
       instructorForms: [],
       assignment: "writing" as const,
       mastery: {
-        writing: 59,
+        writing: 299,
         events: 0,
         equipment: 0,
         instructor: 0,
@@ -27,7 +27,7 @@ describe("collaborator mastery integration", () => {
       { type: "TICK", now: 2_000 },
     );
 
-    expect(next.collaborators[0].mastery?.writing).toBe(60);
+    expect(next.collaborators[0].mastery?.writing).toBe(300);
     expect(next.messages.some((message) =>
       message.subject === "Giulia Ferrando, Iniziato in Scrittura"
     )).toBe(true);
@@ -75,7 +75,7 @@ describe("collaborator mastery integration", () => {
       assignment: "events" as const,
       mastery: {
         writing: 0,
-        events: 5_760,
+        events: 3_600,
         equipment: 0,
         instructor: 0,
       },
@@ -102,13 +102,13 @@ describe("collaborator mastery integration", () => {
     );
     const event = started.acquisitionEvents[0];
 
-    expect(event.resolvesAt - event.startedAt).toBe(5_000);
+    expect(event.resolvesAt - event.startedAt).toBe(3_333);
     expect(event.cost).toBe(125);
     expect(event.wearAdded).toBe(15);
     expect(started.school.euros).toBe(875);
 
     const completed = gameReducer(started, { type: "TICK", now: event.resolvesAt });
-    expect(completed.collaborators[0].mastery?.events).toBe(5_765);
+    expect(completed.collaborators[0].mastery?.events).toBeCloseTo(3_603.333);
   });
 
   it("does not grant experience for equipment maintenance", () => {

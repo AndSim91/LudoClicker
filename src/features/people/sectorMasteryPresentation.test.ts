@@ -20,11 +20,11 @@ function collaborator(id: string, eventsXp: number): Collaborator {
 describe("sector mastery presentation", () => {
   it("derives the displayed level from the average role experience", () => {
     const average = getAverageSectorMastery([
-      collaborator("uno", 60),
-      collaborator("due", 660),
+      collaborator("uno", 300),
+      collaborator("due", 900),
     ], "events");
 
-    expect(average.averageXp).toBe(360);
+    expect(average.averageXp).toBe(600);
     expect(average.progress.definition.name).toBe("Accademico");
     expect(average.progress.progress).toBe(0);
   });
