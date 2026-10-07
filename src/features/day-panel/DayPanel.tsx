@@ -26,11 +26,8 @@ import {
   type DayNotificationPhase,
 } from "./dayNotifications";
 
-/** Above this the panel is a fixed column; below it a drawer (tablet at 1280, B1 06/10). */
+/** Above this the panel is always a column; below it the player opens and closes it (G2, 07/10). */
 export const DAY_PANEL_MEDIA_QUERY = "(min-width: 1441px)";
-
-/** Drawer state below the column breakpoint: «pinned» is opened by the tutorial, without the scrim. */
-export type DayDrawerState = "closed" | "open" | "pinned";
 const DAY_COUNTDOWN_UPDATE_INTERVAL_MS = 1_000;
 
 const phaseLabels: Record<DayNotificationPhase, string> = {
@@ -304,38 +301,30 @@ function DayNotificationTimeline({
 export function DayPanel({
   state: stateOverride,
   onWatchFinal,
-  drawer = "closed",
-  onCloseDrawer,
+  open = false,
+  onClose,
 }: {
   state?: GameState;
   onWatchFinal?: (resultId: string) => void;
-  drawer?: DayDrawerState;
-  onCloseDrawer?: () => void;
+  /** Below the breakpoint: shown as a column only while open. */
+  open?: boolean;
+  onClose?: () => void;
 }) {
-  const isColumn = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
-  if (!isColumn && drawer === "closed") return null;
+  const isAlwaysOpen = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
+  if (!isAlwaysOpen && !open) return null;
 
   return (
-    <>
-      {!isColumn && drawer === "open" ? (
-        <button className="day-panel-scrim" type="button" aria-label="Chiudi La mia giornata" onClick={onCloseDrawer} />
-      ) : null}
-      <aside
-        className={isColumn ? "day-panel" : "day-panel is-drawer"}
-        data-tutorial-target="true"
-        aria-label="La mia giornata"
-      >
-        <div className="day-heading">
-          <strong>La mia giornata</strong>
-          {isColumn ? <Icon name="calendar" /> : (
-            <button className="day-panel-close" type="button" aria-label="Chiudi La mia giornata" onClick={onCloseDrawer}>
-              <Icon name="close" />
-            </button>
-          )}
-        </div>
-        <ShortGoalCard state={stateOverride} />
-        <DayNotificationTimeline state={stateOverride} onWatchFinal={onWatchFinal} />
-      </aside>
-    </>
+    <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
+      <div className="day-heading">
+        <strong>La mia giornata</strong>
+        {isAlwaysOpen ? <Icon name="calendar" /> : (
+          <button className="day-panel-close" type="button" aria-label="Chiudi La mia giornata" onClick={onClose}>
+            <Icon name="close" />
+          </button>
+        )}
+      </div>
+      <ShortGoalCard state={stateOverride} />
+      <DayNotificationTimeline state={stateOverride} onWatchFinal={onWatchFinal} />
+    </aside>
   );
 }

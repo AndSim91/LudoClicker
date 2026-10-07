@@ -310,7 +310,7 @@ describe("DayPanel", () => {
     expect(screen.getByText("00:04")).toBeVisible();
   });
 
-  it("does not mount the closed drawer or its clocks below the responsive breakpoint", () => {
+  it("does not mount the closed panel or its clocks below the responsive breakpoint", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);
     const responsive = stubDayPanelMediaQuery(false);
@@ -330,21 +330,15 @@ describe("DayPanel", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("opens below the breakpoint as a drawer that closes from the scrim or the ×", () => {
+  it("below the breakpoint shows the open panel with a × that closes it", () => {
     stubDayPanelMediaQuery(false);
-    const onCloseDrawer = vi.fn();
+    const onClose = vi.fn();
 
-    const { rerender } = render(<DayPanel state={createInitialState(1_000)} drawer="open" onCloseDrawer={onCloseDrawer} />);
+    render(<DayPanel state={createInitialState(1_000)} open onClose={onClose} />);
 
-    expect(screen.getByRole("complementary", { name: "La mia giornata" })).toHaveClass("day-panel", "is-drawer");
-    const closeButtons = screen.getAllByRole("button", { name: "Chiudi La mia giornata" });
-    expect(closeButtons).toHaveLength(2);
-    closeButtons.forEach((button) => fireEvent.click(button));
-    expect(onCloseDrawer).toHaveBeenCalledTimes(2);
-
-    // Pinned by the tutorial: open, but without the scrim.
-    rerender(<DayPanel state={createInitialState(1_000)} drawer="pinned" onCloseDrawer={onCloseDrawer} />);
-    expect(screen.getAllByRole("button", { name: "Chiudi La mia giornata" })).toHaveLength(1);
+    expect(screen.getByRole("complementary", { name: "La mia giornata" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Chiudi La mia giornata" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("colors the attendee name according to their rarity", () => {

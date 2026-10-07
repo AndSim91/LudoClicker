@@ -32,7 +32,7 @@
   }
 }
 
-/* Below 1441px «La mia giornata» leaves the grid and becomes a drawer (B1, 06/10). */
+/* Below 1441px «La mia giornata» is a column only while the player keeps it open (G2, 07/10). */
 @media (max-width: 1440px) {
   .workspace {
     grid-template-columns: 58px 190px 280px minmax(480px, 1fr);
@@ -40,6 +40,14 @@
 
   .overview-workspace {
     grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .workspace.has-day-panel {
+    grid-template-columns: 58px 190px 280px minmax(0, 1fr) clamp(250px, 16vw, 310px);
+  }
+
+  .overview-workspace.has-day-panel {
+    grid-template-columns: 58px minmax(0, 1fr) clamp(250px, 16vw, 310px);
   }
 }
 

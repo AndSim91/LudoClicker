@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   reduceMotion: "oggetto-nuovi-iscritti.reduce-motion",
   tableSortPrefix: "oggetto-nuovi-iscritti.table-sort.v1",
   memberView: "oggetto-nuovi-iscritti.member-view",
+  dayPanelOpen: "oggetto-nuovi-iscritti.day-panel-open",
   crashSession: "oggetto-nuovi-iscritti.crash-session",
   crashReport: "oggetto-nuovi-iscritti.crash-report",
 } as const;

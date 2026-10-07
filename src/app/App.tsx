@@ -23,6 +23,7 @@ import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
 import { DayPanel } from "../features/day-panel/DayPanel";
 import { DayPanelToggle } from "../features/day-panel/DayPanelToggle";
+import { STORAGE_KEYS } from "../shared/storageKeys";
 import { resolveTutorialRegions } from "../content/tutorialScenes";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
@@ -257,17 +258,23 @@ export function App() {
     onNavigate: navigateForTutorial,
   });
 
-  // «La mia giornata» below 1441px is a drawer (B1); the tutorial pins it open when it points at it.
-  const [dayDrawerOpen, setDayDrawerOpen] = useState(false);
-  const toggleDayDrawer = useCallback(() => setDayDrawerOpen((open) => !open), []);
-  const closeDayDrawer = useCallback(() => setDayDrawerOpen(false), []);
+  // «La mia giornata» below 1441px is a column the player opens and closes (G2, 07/10);
+  // the choice survives reloads and the tutorial opens it when it points at it.
+  const [dayPanelOpen, setDayPanelOpen] = useState(
+    () => localStorage.getItem(STORAGE_KEYS.dayPanelOpen) === "true",
+  );
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.dayPanelOpen, String(dayPanelOpen));
+  }, [dayPanelOpen]);
+  const toggleDayPanel = useCallback(() => setDayPanelOpen((open) => !open), []);
+  const closeDayPanel = useCallback(() => setDayPanelOpen(false), []);
   const tutorialShowsDay = tutorial.activeStep
     ? resolveTutorialRegions(tutorial.activeStep.focusRegions, tutorial.context).includes("day-panel")
     : false;
-  const dayDrawer = dayDrawerOpen ? "open" : tutorialShowsDay ? "pinned" : "closed";
+  const dayPanelShown = dayPanelOpen || tutorialShowsDay;
   const dayPanelToggle = useMemo(
-    () => <DayPanelToggle open={dayDrawer !== "closed"} onToggle={toggleDayDrawer} />,
-    [dayDrawer, toggleDayDrawer],
+    () => <DayPanelToggle open={dayPanelShown} onToggle={toggleDayPanel} />,
+    [dayPanelShown, toggleDayPanel],
   );
 
   useLayoutEffect(() => {
@@ -704,7 +711,7 @@ export function App() {
           equipmentOpen={equipmentOpen || Boolean(tutorial.activeStep?.opensEquipment)}
           onEquipmentOpenChange={setEquipmentOpen}
         />
-        <div className={activeView === "mail" ? "workspace" : "workspace overview-workspace"}>
+        <div className={`${activeView === "mail" ? "workspace" : "workspace overview-workspace"}${dayPanelShown ? " has-day-panel" : ""}`}>
           <StableAppRail view={activeView} onChange={changeView} />
           <Suspense fallback={null}>
           {activeView === "mail" ? (
@@ -848,8 +855,8 @@ export function App() {
           </Suspense>
           <StableDayPanel
             onWatchFinal={watchFinal}
-            drawer={dayDrawer}
-            onCloseDrawer={closeDayDrawer}
+            open={dayPanelShown}
+            onClose={closeDayPanel}
           />
         </div>
         <footer className="status-bar">

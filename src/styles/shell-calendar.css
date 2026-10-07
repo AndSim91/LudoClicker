@@ -551,33 +551,7 @@
   text-decoration: none;
 }
 
-/* «La mia giornata» as a drawer below 1441px (B1, 06/10): it slides over the
-   page from the right, opened by the title-bar button. Outlook stays still. */
-.day-panel.is-drawer {
-  position: fixed;
-  top: 45px;
-  right: 0;
-  bottom: 26px;
-  width: min(340px, calc(100vw - 58px));
-  border-left: 1px solid var(--line-strong);
-  box-shadow: -12px 0 32px rgb(15 35 55 / 22%);
-}
-
-/* The tutorial focus brings its own z-index. */
-.day-panel.is-drawer:not([data-tutorial-treatment="focus"]) {
-  z-index: 40;
-}
-
-.day-panel-scrim {
-  position: fixed;
-  inset: 45px 0 26px;
-  z-index: 39;
-  padding: 0;
-  border: 0;
-  background: rgb(15 35 55 / 22%);
-  cursor: default;
-}
-
+/* «La mia giornata» below 1441px: close button and title-bar toggle (G2, 07/10). */
 .day-panel-close {
   display: grid;
   width: 34px;

@@ -9,8 +9,8 @@ import { selectDayNotifications } from "./dayNotifications";
 const BADGE_UPDATE_INTERVAL_MS = 1_000;
 
 /**
- * Title-bar button of the «La mia giornata» drawer (B1, 06/10). The gold badge
- * counts the notifications that appeared since the drawer was last open.
+ * Title-bar switch of «La mia giornata» below 1441px (G2, 07/10). The gold badge
+ * counts the notifications that appeared while the panel was closed.
  */
 export function DayPanelToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   const isColumn = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
