@@ -89,7 +89,7 @@ describe("upgrade del 05/10", () => {
     expect(without.contacts).toHaveLength(contacts.length);
   });
 
-  describe("Rete dell'Ordine", () => {
+  describe("Rete delle Onde", () => {
     it("Lettere di raccomandazione e Gran Consiglio cambiano la Reputazione della fondazione", () => {
       const base = getPrestigeReputationPreview(createInitialState(NOW, "Test", false)).points;
       const letters = withUpgrade("recommendation-letters", 3);

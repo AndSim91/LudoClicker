@@ -30,13 +30,13 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
   "send-emails": {
     id: "send-emails",
     title: "Inviti in partenza",
-    description: "Completa una piccola tornata di email senza perdere il ritmo.",
+    description: "Completa una piccola tornata di email senza perdere il ritmo. O le dita.",
     metric: "emailsSent",
     baseTarget: 2,
     targetGrowth: 1,
     maxTarget: 5,
     baseReward: 50,
-    completionNarrative: "La segreteria ha dichiarato ufficialmente smaltita la pila urgente.",
+    completionNarrative: "Email inviate! Ora attendiamo e speriamo che non siano finite nello SPAM...",
   },
   "book-trials": {
     id: "book-trials",
@@ -47,7 +47,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     targetGrowth: 1,
     maxTarget: 5,
     baseReward: 50,
-    completionNarrative: "Il calendario ha finalmente abbastanza appuntamenti da sembrare intenzionale.",
+    completionNarrative: "Il calendario ha finalmente abbastanza appuntamenti da far sparire le palle di fieno.",
   },
   "complete-event": {
     id: "complete-event",
@@ -58,7 +58,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     targetGrowth: 1,
     maxTarget: 5,
     baseReward: 50,
-    completionNarrative: "Il verbale della polizia locale conferma che siamo stati visti fuori dalla palestra.",
+    completionNarrative: "Il verbale della polizia locale conferma che non ci sono state deiezioni in strada a cavallo del tramonto.",
   },
   "enroll-member": {
     id: "enroll-member",
@@ -69,7 +69,7 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     targetGrowth: 1,
     maxTarget: 5,
     baseReward: 50,
-    completionNarrative: "È stata aggiunta una sedia alla riunione e nessuno ha protestato.",
+    completionNarrative: "Un nuovo nome si unisce alla chat dell'Ordine e tutti gli fanno le feste!",
   },
 };
 

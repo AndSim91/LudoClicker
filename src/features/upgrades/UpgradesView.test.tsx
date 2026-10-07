@@ -61,7 +61,7 @@ describe("UpgradesView", () => {
     ).toBe(10);
   });
 
-  it("shows the Rete dell'Ordine lane from the first foundation, locked by schools founded", () => {
+  it("shows the Rete delle Onde lane from the first foundation, locked by schools founded", () => {
     const initial = createInitialState(1_000);
     render(
       <UpgradesView
@@ -69,7 +69,7 @@ describe("UpgradesView", () => {
         onBuyUpgrade={() => undefined}
       />,
     );
-    const lane = screen.getByRole("region", { name: "Rete dell'Ordine" });
+    const lane = screen.getByRole("region", { name: "Rete delle Onde" });
     expect(
       within(lane).queryAllByRole("button", { name: /^Apri dettagli/ }).length +
       within(lane).queryAllByRole("img", HIDDEN).length,
@@ -104,9 +104,9 @@ describe("UpgradesView", () => {
     expect(screen.queryByRole("button", { name: /Apri dettagli Preparazione agonistica/ }))
       .not.toBeInTheDocument();
     // One line per branch: 9 + 8 + 9 + 9 + 8 + 10 + 9 + 8 nodes, no side branches;
-    // the Rete dell'Ordine lane waits for the first foundation.
+    // the Rete delle Onde lane waits for the first foundation.
     expect(screen.getAllByRole("button", { name: /^Apri dettagli/ })).toHaveLength(70);
-    expect(screen.queryByRole("heading", { name: "Rete dell'Ordine" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Rete delle Onde" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Apri dettagli Ritmo di battitura/ })).toBeVisible();
     expect(screen.getAllByRole("button", { name: /^Percorso segreto/ })).toHaveLength(2);
     expect(screen.queryByText("Corso X")).not.toBeInTheDocument();

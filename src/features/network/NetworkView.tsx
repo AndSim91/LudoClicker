@@ -72,7 +72,7 @@ export function NetworkView({
       <header>
         <Icon name="network" />
         <div>
-          <h1>Rete dell'Ordine</h1>
+          <h1>Rete delle Onde</h1>
           <p>{network.schoolCount === 0 ? "Una sede, per ora. La Reputazione è l'unica cosa che passa alla prossima." : `${formatStat(network.schoolCount + 1)} sedi, una sola Reputazione.`}</p>
         </div>
         <div className="network-reputation">

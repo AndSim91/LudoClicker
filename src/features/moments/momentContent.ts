@@ -7,7 +7,6 @@ import {
   LIGHT_INFLATION_EVENT_TITLE,
   LIGHT_INFLATION_MOMENT,
 } from "../../game/lightInflation";
-import { getEverEnrolledLegendaryIds } from "../../game/moments";
 import { formatCurrency, formatStat } from "../../shared/formatters";
 import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { getReptileFameLevel } from "../../game/reptilePreparation";
@@ -88,7 +87,7 @@ const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; 
   national: {
     kicker: "Torneo Nazionale · primo titolo",
     title: "Campioni d'Italia",
-    note: "La Rete dell'Ordine approva la fondazione di una nuova scuola.",
+    note: "La Rete delle Onde approva la fondazione di una nuova scuola.",
   },
   champions: {
     kicker: "Champion's Arena · prima vittoria",
@@ -180,10 +179,10 @@ export function describeFoundation(
   const lit = Math.min(number, CONSTELLATION_SIZE);
   return {
     kind: "foundation",
-    kicker: `Rete dell'Ordine · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
+    kicker: `Rete delle Onde · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
     title: getFoundationTitle(number),
     body: generic
-      ? "Una nuova scuola entra nella Rete dell'Ordine e accende una stella del simbolo."
+      ? "Una nuova scuola entra nella Rete delle Onde e accende una stella del simbolo."
       : `${previous?.name ?? "La scuola"} entra nella Rete${fame}; ${newcomer.name} apre a ${newcomer.city}.` +
         (follower ? ` Ti segue ${follower}.` : ""),
     number,
@@ -305,7 +304,6 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
   const profileId = key.slice("legendary:".length);
   const index = LUDODEX_LEGENDARIES.findIndex((legendary) => legendary.id === profileId);
   const legendary = LUDODEX_LEGENDARIES[index];
-  const discovered = getEverEnrolledLegendaryIds(state).length;
   const secret = legendary?.kind === "secret";
   const name = legendary ? `${legendary.firstName} ${legendary.lastName}` : "Un nuovo Leggendario";
   const dossier = legendary ? getLegendaryDossier(state, legendary) : undefined;
@@ -314,7 +312,7 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     secret,
     kicker: secret ? "Leggendario Segreto" : "Leggendario",
     title: secret ? "Un Leggendario Segreto entra nell'Ordine" : "Un Leggendario entra nell'Ordine",
-    body: `${name} entra nella scuola. Il suo dossier si apre nel Ludodex: ${discovered} / ${LUDODEX_LEGENDARIES.length}.`,
+    body: `${name} entra nella scuola. I suoi dati sono salvati nel Ludodex.`,
     name,
     initials: legendary ? `${legendary.firstName.charAt(0)}${legendary.lastName.charAt(0)}` : "?",
     number: `#${String(index + 1).padStart(3, "0")}`,

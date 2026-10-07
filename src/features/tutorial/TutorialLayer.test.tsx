@@ -81,7 +81,7 @@ describe("TutorialLayer", () => {
     expect(scene.canStart({ state: initial, activeView: "mail" })).toBe(false);
     expect(scene.canStart({ state: available, activeView: "mail" })).toBe(true);
     expect(introduction.body).toEqual([
-      "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una sola delle Aree di Attività disponibili alla volta e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace!",
+      "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una delle Aree di Attività disponibili e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace nel suo lavoro!",
     ]);
     expect(assignment.kind).toBe("objective");
     if (assignment.kind !== "objective") return;
@@ -232,7 +232,7 @@ describe("TutorialLayer", () => {
     expect(screen.getByRole("dialog", { name: "A.N.D.E.R." })).toBeVisible();
     expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     expect(screen.getByText(
-      "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+      "Ora che abbiamo un Collaboratore delle Onde, potremmo impiegarlo nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
     )).toBeVisible();
     unmount();
   });
@@ -585,7 +585,7 @@ describe("TutorialLayer", () => {
     const tutorialCard = container.querySelector<HTMLElement>(".tutorial-card")!;
     expect(container.querySelector(".tutorial-layer")).toHaveClass("is-card-left");
     expect(tutorialCard).toHaveTextContent("Un Leggendario è per sempre");
-    expect(tutorialCard).toHaveTextContent("Collezionali tutti!");
+    expect(tutorialCard).toHaveTextContent("Acchiappali tutti!");
   });
 
   it("scrolls the Gadget catalog into view for its explanation", () => {

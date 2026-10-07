@@ -131,7 +131,7 @@ export const UPGRADE_CATEGORIES: Array<{
   { id: "gadget", title: "Gadget", description: "Gadget pronti prima e venduti a più gente: anche il banchetto porta entrate." },
   { id: "instructors", title: "Insegnamento", description: "[[a:Istruttori]] più preparati e corsi più efficaci: gli allievi crescono prima." },
   { id: "organization", title: "Organizzazione", description: "Collaboratori coordinati: più lavoro automatico, meno euro dispersi per strada." },
-  { id: "network", title: "Rete dell'Ordine", description: "Più la [[Rete]] è grande, più ogni scuola ne approfitta." },
+  { id: "network", title: "Rete delle Onde", description: "Più la [[Rete]] è grande, più ogni scuola ne approfitta." },
   { id: "secrets", title: "Percorsi Segreti", description: "Si rivelano solo compiendo imprese particolari. Il resto è un segreto, appunto." },
 ];
 
@@ -274,7 +274,7 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Arriva A.N.D.E.R., che si occupa di notifiche, quote e pratiche. Non dorme, non sbaglia, e ci tiene a farlo sapere.", effectLabel: "Ogni livello: +10% sulle entrate mensili di quote e Social · Livello 5: +50%", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 18 },
   { id: "deposit-account", category: "organization", title: "Conto deposito", description: "La banca paga poco, ma paga. Il tesoriere dorme meglio.", effectLabel: "Ogni livello: ogni mese +0,5% di interessi sui **Fondi**, contando al massimo 250.000 € · Livello 5: +2,5%, fino a 6.250 € al mese", effect: "depositInterestRate", effectPerLevel: 0.005, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 23 },
 
-  // Rete dell'Ordine: si apre con le scuole fondate.
+  // Rete delle Onde: si apre con le scuole fondate.
   { id: "multi-site-coordination", category: "network", title: "Coordinamento multi-sede", description: "Le scuole della rete condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, requiredBranchPoints: 0 },
   { id: "time-is-money", category: "network", title: "Il tempo è denaro", description: "Abbiamo scoperto che il tempo scorre più velocemente quando ci si diverte, quindi abbiamo deciso che ci stiamo divertendo moltissimo.", effectLabel: "Livello 1: puoi far andare il gioco a 2× · Livello 2: anche a 3× · Livello 3: a 4× · Livello 4: a 5× · La velocità si cambia accanto alla pausa; le email scritte da te restano al tuo ritmo", effect: "gameSpeedLevel", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 150_000, 500_000, 2_000_000], maxLevel: 4, requiredFame: noFame, requiredNetworkSchools: 1, levelNetworkSchools: [1, 3, 5, 8], requiredBranchPoints: 0 },
   { id: "instructor-exchange", category: "network", title: "Scambio di Istruttori", description: "Un mese qui, un mese là. Tornano con idee nuove e una valigia di spade da riparare.", effectLabel: "Ogni livello: tutti i corsi il 10% più veloci · Livello 5: +50%", effect: "courseSpeedBonus", effectPerLevel: 0.1, baseCost: 20_000, costGrowth: LEVEL_GROWTH, levelCosts: [20_000, 40_000, 80_000, 160_000, 320_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 2, requiredBranchPoints: 0 },
@@ -609,7 +609,7 @@ export function getNetworkCourseSpeedBonus(levels: UpgradeLevels): number {
   return Math.min(5, levels["instructor-exchange"] ?? 0) * 0.1;
 }
 
-/** Rete dell'Ordine: effects that grow with the schools in the network. */
+/** Rete delle Onde: effects that grow with the schools in the network. */
 export function getNetworkEventContactMultiplier(levels: UpgradeLevels, schoolCount: number): number {
   return 1 + getUpgradeEffectTotal(levels, "networkEventContactBonus") * Math.max(0, schoolCount);
 }

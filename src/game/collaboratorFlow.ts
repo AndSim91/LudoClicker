@@ -64,9 +64,9 @@ export function recruitCollaborator(
   return addMessage(
     nextState,
     now + 1,
-    `${collaborator.displayName} entra nel Consiglio`,
+    "Un nuovo Collaboratore",
     legendary
-      ? "Un Leggendario tra i collaboratori. Non succede tutti i giorni: mettilo dove serve di più."
+      ? "Un Leggendario tra i collaboratori. Non succede tutti i giorni: scegli con cura il suo incarico, ogni aiuto possibile è una manna dal cielo!"
       : `Primo collaboratore dell'Ordine. Mettilo in ${editorialSector}, agli Eventi, in Attrezzatura o in palestra: più resta nello stesso posto, più diventa bravo.`,
     "positive",
     "focused",

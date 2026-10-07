@@ -203,6 +203,7 @@ describe("useTutorialController", () => {
 
     act(() => result.current.tutorial.continueScene());
     act(() => result.current.tutorial.continueScene());
+    act(() => result.current.tutorial.continueScene());
 
     expect(result.current.tutorial.activeStep?.kind).toBe("objective");
     expect(result.current.tutorial.isBlockingInput).toBe(false);
@@ -234,6 +235,7 @@ describe("useTutorialController", () => {
   it("returns to the first dialogue after replacing the current game", async () => {
     const { result } = renderHook(() => useTutorialHarness());
 
+    act(() => result.current.tutorial.continueScene());
     act(() => result.current.tutorial.continueScene());
     act(() => result.current.tutorial.continueScene());
     expect(result.current.tutorial.activeStep?.id).toBe("write-first-email");
@@ -454,7 +456,7 @@ describe("useTutorialController", () => {
       kind: "dialog",
       speaker: "A.N.D.E.R.",
       body: [
-        "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+        "Ora che abbiamo un Collaboratore delle Onde, potremmo impiegarlo nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
       ],
     });
     expect(result.current.tutorial.isBlockingInput).toBe(true);

@@ -87,7 +87,7 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
   const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / GAME_CONFIG.reputationFameDivisor));
-  // Rete dell'Ordine: Lettere di raccomandazione and Gran Consiglio.
+  // Rete delle Onde: Lettere di raccomandazione and Gran Consiglio.
   const letterPoints = getUpgradeEffectTotal(state.upgrades, "foundationReputationBonus");
   const councilDoubled = getUpgradeEffectTotal(state.upgrades, "foundationReputationDouble") > 0;
   const basePoints = GAME_CONFIG.reputationNationalTitlePoints + famePoints +

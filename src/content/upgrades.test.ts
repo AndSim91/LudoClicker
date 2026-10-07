@@ -77,7 +77,7 @@ describe("upgrade catalog", () => {
     ]);
     for (const category of UPGRADE_CATEGORIES) {
       if (category.id === "secrets") continue;
-      // One line per branch: nine columns, ten in Gadget and the Rete dell'Ordine (one column per node there).
+      // One line per branch: nine columns, ten in Gadget and the Rete delle Onde (one column per node there).
       const expected = {
         speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 10, instructors: 9, organization: 8, network: 10,
       } as Record<string, number>;
@@ -201,7 +201,7 @@ describe("upgrade catalog", () => {
     expect(getUpgradeCost(keyboard, 0, createInitialUpgradeLevels())).toBe(13);
   });
 
-  it("keeps the Rete dell'Ordine at its own prices", () => {
+  it("keeps the Rete delle Onde at its own prices", () => {
     const council = getUpgradeDefinition("grand-council")!;
     const levels = { ...createInitialUpgradeLevels(), "multi-site-coordination": 5 };
     expect(getUpgradeCost(council, 0, levels)).toBe(10_000_000);

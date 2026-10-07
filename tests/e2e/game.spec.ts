@@ -44,10 +44,12 @@ async function saveNow(page: Page) {
 test("avvia una nuova partita e rende interattivo il tutorial di scrittura", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("dialog", { name: "Come ti chiami?" })).toBeVisible();
-  await page.getByRole("textbox", { name: "Nome e cognome" }).fill("Andrea Test");
+  await page.getByRole("textbox", { name: "Come ti chiami?" }).fill("Andrea Test");
   await page.getByRole("button", { name: "Inizia" }).click();
 
   await expect(page.getByRole("dialog", { name: "Il primo giorno da Preside" })).toBeVisible();
+  await page.getByRole("button", { name: "Continua", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Chi siamo" })).toBeVisible();
   await page.getByRole("button", { name: "Continua", exact: true }).click();
   await page.getByRole("button", { name: "Continua", exact: true }).click();
   await expect(page.getByRole("status", { name: "Invia la tua prima mail" })).toBeVisible();
@@ -422,7 +424,7 @@ test("salva profilo e preferenze e li ripristina dopo il reload", async ({ page 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", async ({ page }) => {
+test("fonda una nuova scuola dalla Rete delle Onde dopo il titolo nazionale", async ({ page }) => {
   const state = createProgressedGameSave();
   state.tournaments.nationalTitlesCurrentSchool = 1;
   await installGameSave(page, state);
@@ -430,14 +432,14 @@ test("fonda una nuova scuola dalla Rete dell'Ordine dopo il titolo nazionale", a
   await page.getByRole("button", { name: "Pausa" }).click();
   await page.getByRole("button", { name: "Rete", exact: true }).click();
 
-  await expect(page.getByRole("heading", { name: "Rete dell'Ordine" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rete delle Onde" })).toBeVisible();
   await page.getByRole("button", { name: "Fonda una nuova scuola…" }).click();
   await page.getByLabel("Nome della scuola").fill("Onde di Levante");
   await page.getByLabel("Città").fill("La Spezia");
   await page.getByRole("button", { name: "Fonda Onde di Levante" }).click();
 
   // The new school starts back on the email composer.
-  await expect(page.getByRole("heading", { name: "Rete dell'Ordine" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Rete delle Onde" })).toHaveCount(0);
   await page.locator(".moment-layer").getByRole("button", { name: /Salta|Chiudi/ }).click();
   await page.getByRole("button", { name: "Rete", exact: true }).click();
   await expect(page.getByText(/Onde di Levante · v/)).toBeVisible();

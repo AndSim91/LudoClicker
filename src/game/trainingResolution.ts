@@ -466,7 +466,7 @@ function resolveTraining(
     context.state,
     context.now,
     `${collaborator?.displayName ?? `${member?.firstName} ${member?.lastName}`} ha finito ${definition.longName}`,
-    "Una Forma in più nel repertorio.",
+    "Un traguardo di tutto rispetto: chissà cosa riserverà il futuro...",
     "positive",
     "other",
     "training",

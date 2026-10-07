@@ -148,8 +148,8 @@ export function finalizeEmail(state: GameState, emailId: string, now: number): G
     nextState = addMessage(
       nextState,
       now,
-      "Partita la prima email",
-      "Adesso si aspetta. Le risposte arrivano da sole: tu intanto continua a scrivere.",
+      "Inviata la prima email!",
+      "Adesso si aspetta. Le risposte arriveranno da sole: tu intanto continua a scrivere.",
       "system",
     );
   }

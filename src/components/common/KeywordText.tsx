@@ -4,7 +4,7 @@ import { APP_RAIL_ITEMS } from "../outlook-shell/appRailItems";
 import { parseKeywordMarkup } from "../../shared/keywordMarkup";
 
 function findRailItem(text: string) {
-  // "Rete dell'Ordine" still points at "Rete": the label only has to start the text.
+  // "Rete delle Onde" still points at "Rete": the label only has to start the text.
   return APP_RAIL_ITEMS.find((item) => text === item.label || text.startsWith(`${item.label} `));
 }
 

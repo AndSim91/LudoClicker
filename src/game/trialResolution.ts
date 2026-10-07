@@ -1,4 +1,3 @@
-import { formatCurrency } from "../shared/formatters";
 import {
   addLegendaryEncounters,
   addLegendaryEnrollment,
@@ -235,7 +234,7 @@ export function resolveStartedTrialBatch(
         nextState,
         now,
         "Habemus inscriptum!",
-        `Il primo iscritto ha pagato: +${formatCurrency(enrollmentBonus)}. Nella barra a sinistra si sono accese Scuola e Upgrade.`,
+        "Il nostro primo iscritto! Ora possiamo accedere ai pannelli Scuola e Upgrade.",
         "positive",
         "focused",
       );
@@ -246,8 +245,8 @@ export function resolveStartedTrialBatch(
       nextState = addMessage(
         nextState,
         now,
-        `${resolvedContact.firstName} ${resolvedContact.lastName} ci deve pensare`,
-        "Niente iscrizione, per ora. Ha accettato un ultimo invito.",
+        "Amici come prima",
+        "Niente iscrizione, per ora. Il richiamo della spada laser è ancora debole in questa recluta.",
         "neutral",
         "other",
         "contacts",

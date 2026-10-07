@@ -241,10 +241,7 @@ export function resolveAcquisitionEvent(
   const scaledReward = event.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID
     ? {
         state,
-        amount: Math.max(
-          GAME_CONFIG.tutorialSparringMinimumContacts,
-          event.contactReward ?? 0,
-        ),
+        amount: GAME_CONFIG.tutorialSparringContacts,
       }
     : scaleContactGain(state, event.contactReward ?? 0, gainMultiplier);
   const rewardState = scaledReward.state;
@@ -326,7 +323,7 @@ export function resolveAcquisitionEvent(
       nextState,
       now + 1,
       "Primo evento archiviato",
-      "Le spade tornano a fine evento, non sempre intere. Le tieni d'occhio in La mia giornata.",
+      "Le spade tornano alla fine di un evento, ma non sempre intere. Tienile d'occhio!",
       "system",
     );
   }

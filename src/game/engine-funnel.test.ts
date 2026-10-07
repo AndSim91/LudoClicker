@@ -408,7 +408,7 @@ describe("game engine: funnel", () => {
     });
 
     expect(sent.emails.find((candidate) => candidate.id === email.id)?.status).toBe("sent");
-    expect(sent.messages.find((message) => message.subject === "Partita la prima email")?.sender)
+    expect(sent.messages.find((message) => message.subject === "Inviata la prima email!")?.sender)
       .toBe("A.N.D.E.R.");
     expect(sent.pendingEmailOutcomes).toHaveLength(1);
     expect(sent.pendingEmailOutcomes[0].result).toBe("trialBooked");
@@ -507,7 +507,7 @@ describe("game engine: funnel", () => {
     expect(state.collaborators).toHaveLength(0);
     expect(state.unlocks.forms).toBe(true);
     expect(state.unlocks.collaborators).toBe(false);
-    expect(state.messages.some((message) => message.subject.endsWith("entra nel Consiglio"))).toBe(false);
+    expect(state.messages.some((message) => message.subject === "Un nuovo Collaboratore")).toBe(false);
   });
 
   it("no longer opens Social when an enrollment reaches 35 members", () => {
@@ -593,8 +593,8 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.collaborators).toHaveLength(1);
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
     expect(protectedAttempt.unlocks.forms).toBe(true);
-    expect(protectedAttempt.messages.find((message) => message.subject === "Eva Parodi entra nel Consiglio")?.preview)
-      .toBe("Un Leggendario tra i collaboratori. Non succede tutti i giorni: mettilo dove serve di più.");
+    expect(protectedAttempt.messages.find((message) => message.subject === "Un nuovo Collaboratore")?.preview)
+      .toBe("Un Leggendario tra i collaboratori. Non succede tutti i giorni: scegli con cura il suo incarico, ogni aiuto possibile è una manna dal cielo!");
   });
 
   it("applies the same enrollment progression to Andrea and every other Legendary", () => {

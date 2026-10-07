@@ -201,8 +201,8 @@ function recordMissedTournament(
       ].slice(-GAME_CONFIG.recentMissedTournamentsLimit),
     },
   }, now, `${label} saltato`, reason === "insufficient-members"
-    ? `Servono ${GAME_CONFIG.tournamentMinimumMembers} iscritti con Forma 1. Per quest'anno si guarda dagli spalti.`
-    : "Nessuno dei nostri si è qualificato. Si tifa dagli spalti.",
+    ? `Servono ${GAME_CONFIG.tournamentMinimumMembers} iscritti con almeno Forma 1. Per quest'anno l'Accademico lo guarderemo dagli spalti.`
+    : "Nessuno dei nostri si è qualificato. Si tifa dagli spalti quest'anno.",
   "neutral", "focused", "tournaments");
 }
 

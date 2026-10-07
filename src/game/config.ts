@@ -61,7 +61,8 @@ export const GAME_CONFIG = {
   tutorialAndreaOutcomeMs: 2_000,
   tutorialAndreaTrialWaitMs: 5_000,
   tutorialAndreaTrialDurationMs: 3_000,
-  tutorialSparringMinimumContacts: 1,
+  // Il primo Volantinaggio del tutorial porta sempre questi contatti (07/10).
+  tutorialSparringContacts: 5,
   equipmentMaintenanceCostPerLoad: 2,
   equipmentDamagedSwordRepairCost: 250,
   equipmentAutomaticCostFactor: 0.75,

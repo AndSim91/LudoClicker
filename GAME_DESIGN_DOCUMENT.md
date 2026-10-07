@@ -283,7 +283,7 @@ calcola sulle quote (§ 17.6), anche la scuola lasciata ne beneficia.
 
 La somma delle quote è poi moltiplicata dai
 potenziamenti di entrate e da +5% per ogni scuola fondata; a questa si somma
-la rendita fissa delle scuole della Rete dell'Ordine (§ 17.6). Un mese dura **60 secondi
+la rendita fissa delle scuole della Rete delle Onde (§ 17.6). Un mese dura **60 secondi
 reali** e segue il normale ciclo da Gennaio a Dicembre;
 dopo Dicembre torna Gennaio. La partita inizia a Settembre. L'anno scolastico,
 sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
@@ -867,7 +867,7 @@ risposte dei destinatari:
 
 - “Habemus inscriptum!”, solo per il primo iscritto;
 - “Quota mensile: N €” a ogni nuovo scalino di quota;
-- “Nome entra nel Consiglio” per il primo collaboratore e per ogni
+- “Un nuovo Collaboratore” per il primo collaboratore e per ogni
   Leggendario.
 
 **Riepilogo dell'anno scolastico** (piano 4.1, decisione del 03/10). Le notizie
@@ -1990,7 +1990,7 @@ per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
 
 La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
-Insegnamento e Organizzazione**, poi la **Rete dell'Ordine** (§ 10.13, dalla
+Insegnamento e Organizzazione**, poi la **Rete delle Onde** (§ 10.13, dalla
 prima fondazione) e la riga dei **Percorsi Segreti**. Ogni ramo è **una sola
 linea di nodi**, senza rami laterali, al massimo nove: Scrittura, Carisma,
 Accoglienza, Gadget, Insegnamento e Rete ne hanno 9, Creatività e Attrezzatura
@@ -2043,7 +2043,7 @@ ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), 
 (`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
 rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
 loro i prezzi: è il motivo per fondare, e le cime dei rami si raggiungono
-scuola dopo scuola con la Reputazione. Rete dell'Ordine e Percorsi Segreti
+scuola dopo scuola con la Reputazione. Rete delle Onde e Percorsi Segreti
 tengono i prezzi di catalogo. Non c'è più la maggiorazione del 15% per scuola
 fondata (decisioni di Andrea del 05/10; misure in § 10.10).
 
@@ -2434,7 +2434,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | Traguardo                                  | Sblocco                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | Avvio                                      | Posta (composizione, Posta in arrivo, Posta inviata), Impostazioni, 5 contatti iniziali, 6 spade |
-| Prima email inviata                        | messaggio “Partita la prima email”; la prima email garantisce una prova |
+| Prima email inviata                        | messaggio “Inviata la prima email!”; la prima email garantisce una prova |
 | Prima missione “Inviti in partenza” (2 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
 | Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
 | Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
@@ -2480,7 +2480,7 @@ Queste comunicazioni:
   meccanica.
 
 Oggi i traguardi producono soltanto normali messaggi di sistema nella Posta in
-arrivo (per esempio “Partita la prima email” dopo la prima email,
+arrivo (per esempio “Inviata la prima email!” dopo la prima email,
 “La Redazione diventa Social” con il 15° collaboratore, “Campioni
 d'Italia”), mentre l'introduzione delle nuove meccaniche è
 affidata alle scene di tutorial (sezione 13).
@@ -2489,7 +2489,7 @@ affidata alle scene di tutorial (sezione 13).
 
 ---
 
-### 10.13 Rete dell'Ordine
+### 10.13 Rete delle Onde
 
 Un ramo che si apre con le **scuole fondate**, non con i punti: la corsia
 compare dalla prima fondazione e ogni nodo bloccato dice quante scuole servono
@@ -3058,9 +3058,13 @@ l'avanzamento.
 ### Sequenza iniziale
 
 1. **Benvenuto nell'Ordine delle Onde**\
-   Parte appena il giocatore ha scelto il proprio nome. Due dialoghi di
-   A.N.D.E.R. (“Il primo giorno da Preside” e “Una mail al giorno...”)
-   introducono il contesto; la partita parte con i primi 5 contatti fittizi.
+   Parte appena il giocatore ha scelto il proprio nome. Tre dialoghi di
+   A.N.D.E.R. (“Il primo giorno da Preside”, “Chi siamo” e “Un'email al
+   giorno...”) introducono il contesto: “Chi siamo” presenta LudoSport con
+   informazioni vere, senza ironia (scelta di Andrea del 07/10: serve contesto
+   a chi non conosce LudoSport), e fissa l'obiettivo di creare la scuola di
+   LudoSport più grande del mondo. La partita parte con i primi 5 contatti
+   fittizi.
 
 2. **Prima campagna inviti**\
    L'obiettivo “Invia la tua prima mail” chiede di scrivere premendo qualunque
@@ -3074,14 +3078,14 @@ l'avanzamento.
 3. **Configurazione campagna**\
    È la prima comunicazione di sistema manuale e sblocca Scrittura e Creatività.
 
-   > **Da implementare:** “Partita la prima email” è oggi un semplice messaggio di sistema che arriva in Posta in arrivo all'invio della prima email, senza scrittura manuale né sblocchi; la pagina Upgrade (con tutti i rami pubblici) si sblocca al primo iscritto.
+   > **Da implementare:** “Inviata la prima email!” è oggi un semplice messaggio di sistema che arriva in Posta in arrivo all'invio della prima email, senza scrittura manuale né sblocchi; la pagina Upgrade (con tutti i rami pubblici) si sblocca al primo iscritto.
 
 4. **Primi Eventi e attrezzatura**\
    Dopo la missione dei tre inviti guida il giocatore ad aprire Eventi
    (evidenziando la voce nell'app rail), spiega che le attività possono usurare
    o danneggiare le spade e richiede di avviare il **Volantinaggio** gratuito
    con “Partecipa gratis”. Soltanto in questo passaggio il volantinaggio dura 5
-   secondi e garantisce esattamente un nuovo contatto. La scena non ferma il
+   secondi e garantisce esattamente cinque nuovi contatti (`tutorialSparringContacts`, 07/10). La scena non ferma il
    tempo durante gli obiettivi (solo i dialoghi lo mettono in pausa), attende
    la fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
@@ -3113,7 +3117,7 @@ l'avanzamento.
    contatto successivo ad Andrea possono apparire contatti Rari, Ultra Rari e
    Leggendari. Il dialogo ricorda che i Leggendari sono profili unici, che
    iscrivendosi diventano subito Collaboratori delle Onde, e si chiude con
-   **“Collezionali tutti!”**. La scena riguarda solo la prima scuola.
+   **“Acchiappali tutti!”**. La scena riguarda solo la prima scuola.
 
 8. **Una mano in più** Alla comparsa del primo Collaboratore delle Onde, la
    scena resta in pausa e attende la conclusione degli eventuali tutorial già
@@ -3519,7 +3523,7 @@ percepibile; non deve richiedere più reset prima di diventare utile.
 
 ### 17.3 La pagina Rete e la fondazione
 
-La Rete dell'Ordine è una pagina a sé, voce **Rete** della barra delle
+La Rete delle Onde è una pagina a sé, voce **Rete** della barra delle
 applicazioni tra Upgrade e LudoWiki (`src/features/network/`). Compare con il
 primo titolo nazionale della scuola corrente e da lì resta per sempre, perché
 dopo la prima fondazione la tiene aperta il numero di scuole
@@ -3690,7 +3694,7 @@ Nel codice, per ogni scuola fondata:
 - **costi:** gli Upgrade ripartono da zero e i prezzi tornano a quelli di
   partenza (la curva per ramo, § 10, riparte);
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
-- **complessità organizzativa:** la Rete dell'Ordine (§ 10.13) apre un nodo
+- **complessità organizzativa:** la Rete delle Onde (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;
 - **moltiplicatori permanenti:** solo quelli comprati con la Reputazione (§ 5.7);
 - gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
@@ -3699,12 +3703,12 @@ Nel codice, per ogni scuola fondata:
 Le attività simultanee crescono con i potenziamenti, non con le scuole:
 Multitasking (Gadget) e Eventi nel Multiverso (Carisma).
 
-Ogni scuola lasciata entra nella **Rete dell'Ordine**. Versa una rendita
+Ogni scuola lasciata entra nella **Rete delle Onde**. Versa una rendita
 mensile fissa solo se alla fondazione si spendono punti Reputazione nella
 rendita (§ 5.7): ogni punto vale `iscritti × 40 € × 10% × 10%`. La rendita non
 è toccata da moltiplicatori e si somma alle entrate mensili
 (`getMonthlyOperationalIncome`); il riepilogo delle entrate la mostra come
-«Rete dell'Ordine».
+«Rete delle Onde».
 
 ---
 
@@ -4020,7 +4024,7 @@ gioca: l'occasione se c'è, altrimenti la rarità attuale. Se la rarità attuale
 ha la Maestria e quella dell'occasione no, si gioca la prova della nuova
 rarità. Nella riga della rarità la barra della qualità diventa il timbro
 «Maestria»: con un clic si gioca la prova per divertimento, senza effetti sul
-salvataggio e senza mettere in pausa il gioco. Nella Rete dell'Ordine la riga
+salvataggio e senza mettere in pausa il gioco. Nella Rete delle Onde la riga
 «Maestria dei gadget» conta le coppie ottenute. I salvataggi che hanno già una
 rarità al 100% ottengono la Maestria al primo passo di gioco.
 
@@ -5013,7 +5017,7 @@ traguardo sbloccato (prima era visibile solo in sviluppo).
 | Tornei | Re della Superba | Reptile o Superba vinti | 1 | 3 | 10 |
 | Tornei | Scrivere le Cronache | Chronicles vinte | 1 | 3 | 10 |
 | Tornei | Cacciatore di Segreti | Leggendari Segreti reclutati | 1 | 5 | 14 |
-| Rete | La Rete dell'Ordine | Scuole fondate | 1 | 5 | 10 |
+| Rete | La Rete delle Onde | Scuole fondate | 1 | 5 | 10 |
 | Rete | Nome che pesa | Punti Reputazione guadagnati | 10 | 100 | 1.000 |
 | Rete | Vivere di rendita | Rendita della rete al mese | 1.000 € | 100.000 € | 10 milioni € |
 | Rete | Al massimo | Potenziamenti Reputazione a 50 punti | 1 | 3 | 6 |

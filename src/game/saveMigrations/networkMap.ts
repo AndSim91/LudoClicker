@@ -2,7 +2,7 @@ import { GAME_CONFIG } from "../config";
 import type { MigratableState } from "./types";
 
 /*
- * v91, Rete dell'Ordine as a page with a map: a school left behind keeps only
+ * v91, Rete delle Onde as a page with a map: a school left behind keeps only
  * name, city and Fama (unknown before now); the count and the rent become two
  * numbers of the network; the map keeps the Sede madre and the latest schools.
  * Specialization and motto are gone. Reputation: Lezioni di prova is gone

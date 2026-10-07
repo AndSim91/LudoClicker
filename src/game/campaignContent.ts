@@ -43,7 +43,7 @@ export function createWelcomeMessage(now: number): InboxMessage {
     id: makeGameId("message", now, "welcome"),
     sender: "Sistema Oggetto: Nuovi Iscritti",
     subject: "Benvenuto! Inizia da qui",
-    preview: "Completa il messaggio aperto: ogni tasto inserisce il prossimo carattere.",
+    preview: "Completa l'email: ogni tasto o clic inserisce il prossimo carattere.",
     receivedAt: now,
     tone: "system",
     unread: true,

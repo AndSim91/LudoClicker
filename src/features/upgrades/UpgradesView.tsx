@@ -256,7 +256,7 @@ type UpgradeStatus = "locked" | "available" | "completed";
 const WAVE_AMPLITUDE = 24;
 /**
  * Every lane uses the same nine columns, so nodes line up across branches; a
- * lane with more nodes (the Rete dell'Ordine has ten) gets one column per node.
+ * lane with more nodes (the Rete delle Onde has ten) gets one column per node.
  */
 const LANE_COLUMNS = 9;
 
@@ -366,7 +366,7 @@ function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): bool
 function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
   if (category === "social") return state.unlocks.social;
   if (category === "gadget") return state.unlocks.gadget;
-  // Rete dell'Ordine: from the first foundation on.
+  // Rete delle Onde: from the first foundation on.
   if (category === "network") return state.network.schoolCount > 0;
   return true;
 }

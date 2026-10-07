@@ -43,6 +43,7 @@ describe("App profile and navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Riprendi" }));
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
     fireEvent.click(screen.getByRole("button", { name: "Continua" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continua" }));
 
     expect(screen.getByText("Invia la tua prima mail")).toBeVisible();
     expect(screen.getByRole("button", { name: "Riprendi" })).toBeVisible();
@@ -57,7 +58,7 @@ describe("App profile and navigation", () => {
     expect(screen.getByText("0/2")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Eventi" })).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getAllByText("Partita la prima email").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Inviata la prima email!").length).toBeGreaterThan(0);
     });
   });
 

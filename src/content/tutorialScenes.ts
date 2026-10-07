@@ -170,13 +170,24 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         focusRegions: ["title"],
       },
       {
+        id: "who-we-are",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Chi siamo",
+        body: [
+          "LudoSport è una realtà sportiva di Scherma con Spada Laser, nata nel 2006 a Milano, che in vent'anni è cresciuta enormemente aprendo scuole in tutto il mondo! Attraverso la sua filosofia fondativa del Se.Cu.Ri. (Servizio, Cura e Rispetto), sono state create Tecniche, Regolamenti e Tornei di livello nazionale ed internazionale!",
+          "Il nostro obiettivo è semplice: dobbiamo creare la scuola di LudoSport più grande del mondo!",
+        ],
+        focusRegions: ["title"],
+      },
+      {
         id: "draft-ready",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
         title: "Un'email al giorno...",
         body: [
-          "Ho predisposto qualche contatto email a cui scrivere. Li ho trovati scrivendo lettere a caso fino a notte fonda, dovresti ringraziarmi.",
-          "Ora scrivi una bella email pubblicitaria da spedire, il messaggio verrà inviato automaticamente poi dovremo solo attendere una risposta...",
+          "Ho già predisposto per te qualche contatto email a cui scrivere. Li ho trovati scrivendo lettere a caso per tutta la notte, dovresti ringraziarmi.",
+          "Ora inizia il tuo lavoro: scrivi un'email da inviare ai nostri contatti, poi dovremo solo attendere una risposta...",
         ],
         focusRegions: ["main"],
       },
@@ -185,7 +196,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Invia la tua prima mail",
         body: [
-          "Premi un tasto qualsiasi fino a completare la bozza. Con Invio automatico attivo partirà subito; se lo disattivi, resterà in bozza finché non premi Invia: né tu né i collaboratori la spedirete al posto tuo. Non preoccuparti degli errori di battitura: siamo solo agli inizi.",
+          "Premi un tasto qualsiasi fino a completare la bozza. Con Invio automatico attivo partirà subito; se lo disattivi, resterà in bozza finché non premi Invia. Non preoccuparti degli errori di battitura: siamo solo agli inizi.",
         ],
         focusRegions: ["main", "composer-body"],
         isComplete: ({ state }) => state.emails.some((email) => email.status === "sending"),
@@ -201,7 +212,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri la pagina Eventi",
         body: [
-          "La prima missione è completata. Ora apri la pagina [[Eventi]] dalla barra a sinistra per organizzare nuove attività per la scuola.",
+          "Adesso che hai inviato qualche email è il momento di procurarci nuovi contatti a cui scrivere!",
+          "Apri la pagina [[Eventi]] dalla barra a sinistra.",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "events"
@@ -215,8 +227,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Eventi e attrezzatura",
         body: [
-          "Gli [[Eventi]] portano il nostro sport fuori dalla palestra: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra nella speranza che ci siano persone interessate a provare il nostro sport.",
-          "Molte attività impegnano **Iscritti** e **Spade**. L'attrezzatura accumula usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla! Il Volantinaggio gratuito, invece, non richiede né iscritti né attrezzatura.",
+          "Gli [[Eventi]] servono a far conoscere il nostro sport al mondo esterno: incontrerai persone, farai dimostrazioni e potrai scavarti una buca a terra fino a che non trovi persone interessate a provare il nostro sport.",
+          "Attenzione: generalmente le attività richiedono un numero minimo di **Iscritti** e impegnano le **Spade** della scuola. L'attrezzatura può accumulare usura e potrebbe anche danneggiarsi: quando serve, dovrai eseguire la manutenzione prima di riutilizzarla!",
         ],
         focusRegions: ["main"],
       },
@@ -225,7 +237,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Avvia il volantinaggio gratuito",
         body: [
-          "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono **Iscritti** o **Spade**; poi attendi il suo completamento.",
+          "Trova “Volantinaggio” e premi “Partecipa gratis”. Non servono **Spade** per questo: poi attendi il suo completamento.",
         ],
         focusRegions: ["main", "park-sparring-action"],
         isComplete: ({ state }) => hasCompletedTutorialSparring(state) ||
@@ -247,15 +259,10 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "dialog",
         speaker: "A.N.D.E.R.",
         title: "Abbiamo dei contatti!",
-        body: ({ state }) => {
-          const contactReward = state.acquisitionEvents.find(
-            (event) => event.tutorialSceneId === "first-event",
-          )?.contactReward ?? GAME_CONFIG.tutorialSparringMinimumContacts;
-          return [
-            `Il volantinaggio è finito: +${contactReward} ${contactReward === 1 ? "nuovo **Contatto**" : "nuovi **Contatti**"} per la scuola! Gli [[Eventi]] servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.`,
-            "Non si tratta ancora di iscritti veri e propri, dovremo inviare le email per invitarli in palestra e, se la prova va bene, la scuola avrà una nuova recluta!",
-          ];
-        },
+        body: [
+          "Il volantinaggio è finito ed ecco dei nuovi **Contatti** per la scuola! Gli [[Eventi]] servono ad ampliare il pubblico che potrai invitare a fare lezioni di prova in palestra.",
+          "Non si tratta ancora di nuovi iscritti veri e propri, dovremo inviare le email per invitarli in palestra e, se la prova andrà bene, la scuola avrà una nuova recluta!",
+        ],
         focusRegions: ["title", "contacts-counter"],
       },
       {
@@ -263,7 +270,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Osserva La mia giornata",
         body: [
-          "Torniamo in [[Posta]] e attendiamo la risposta a una delle email inviate a inizio partita.",
+          "Torniamo in [[Posta]] e attendiamo la risposta a una delle email che hai già inviato.",
         ],
         focusRegions: ["day-panel"],
         navigateTo: "mail",
@@ -284,7 +291,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Lezioni di prova",
         body: [
-          "Come puoi vedere, una delle tue precedenti email ha avuto effetto: la prima prova in palestra è ora prenotata!",
+          "Come puoi vedere, una delle tue email ha avuto effetto: la prima prova in palestra è ora prenotata!",
           "La sezione “La mia giornata” è molto utile per tenere traccia di tutti gli avvenimenti dell'Ordine delle Onde, tra cui scoprire se la prova avrà successo o meno.",
           "Ora non ti resta che continuare a mandare email e fare eventi fino a che qualcuno non si iscriverà...",
           "Conto su di te!"
@@ -310,10 +317,11 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Un Leggendario è per sempre",
         body: [
-          "Finora hai incontrato soltanto persone comuni. Ogni possibile iscritto possiede però una rarità possibile: [[r:Comune]], [[r:Raro]], [[r:Ultra Raro]] o [[r:Leggendario]].",
-          "Finalmente hai incontrato il tuo primo atleta [[r:Leggendario]] della partita e col tempo potrai trovarli tutti, ognuno con effetti e caratteristiche diverse.",
+          "Finora hai incontrato soltanto persone comuni, ma il mondo non è fatto di persone comuni e di certo non lo è il mondo di LudoSport!",
+          "Ogni contatto possiede una rarità: [[r:Comune]], [[r:Raro]], [[r:Ultra Raro]] o [[r:Leggendario]].",
+          "Finalmente hai trovato il tuo primo contatto [[r:Leggendario]] e col tempo potrai trovarli tutti, ognuno con effetti e caratteristiche diverse.",
           "I [[r:Leggendari]] sono profili unici e, quando si iscrivono, diventano subito dei Collaboratori delle Onde per darti una mano nella gestione della scuola.",
-          "Collezionali tutti!",
+          "Acchiappali tutti!",
         ],
         focusRegions: ["main", "composer-header"],
         navigateTo: "mail",
@@ -333,7 +341,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Habemus inscriptum!",
         body: [
           `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nelle nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
-          "Più iscritti, più quote: è così che la scuola finanzia i suoi miglioramenti. E quando la scuola cresce, anche la quota sale.",
+          "Più iscritti, più quote: è così che la scuola finanzia i suoi miglioramenti. E quando la scuola cresce, ci potrebbero essere sempre più modi per aumentare i fondi.",
           `Pensavi che solo la tua Black Card fosse costosa?`,
         ],
         focusRegions: ["title"],
@@ -375,7 +383,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Una mano in più",
         body: [
-          "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una sola delle Aree di Attività disponibili alla volta e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace!",
+          "Abbiamo il nostro primo Collaboratore delle Onde! Ogni collaboratore può occuparsi di una delle Aree di Attività disponibili e, a suon di lavorare alacremente per la scuola di Genova, accumulerà punti Maestria che lo renderanno sempre più bravo ed efficace nel suo lavoro!",
         ],
         focusRegions: ["title"],
       },
@@ -398,7 +406,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Aree di Attività",
         body: [
-          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. [[a:Redazione]] automatizza la compilazione delle email ai contatti; [[a:Eventi]] organizza le attività fuori dalla scuola per farla crescere; [[a:Attrezzatura]] serve per la manutenzione e riparazione delle spade della scuola; [[a:Istruttore]] serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
+          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. [[a:Redazione]] automatizza la compilazione delle email; [[a:Eventi]] organizza le attività per scoprire nuovi contatti; [[a:Attrezzatura]] gestisce automaticamente la riparazione delle spade della scuola; [[a:Istruttore]] serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
         ],
         focusRegions: ["main", "collaborator-section"],
         scrollToRegion: "collaborator-section",
@@ -430,7 +438,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "dialog",
         speaker: "A.N.D.E.R.",
         body: [
-          "Ora che abbiamo i Collaboratori delle Onde, potremmo impiegarli nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+          "Ora che abbiamo un Collaboratore delle Onde, potremmo impiegarlo nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
         ],
         focusRegions: ["main"],
       },
@@ -449,7 +457,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Rinnovi mancati",
         body: [
-          "L'anno è finito e qualcuno non ha rinnovato l'iscrizione. Niente di personale: senza Istruttori e senza corsi durante l'anno, la gente si annoia e scopre all'improvviso che il calcetto del giovedì le mancava tantissimo.",
+          "L'anno è finito e qualcuno non ha rinnovato l'iscrizione. Niente di personale: senza abbastanza Istruttori e senza corsi durante l'anno, la gente si annoia e scopre all'improvviso che il divano le mancava tantissimo.",
           "Assegna qualche Collaboratore all'Area [[a:Istruttore]] e fai partire dei corsi: chi impara nuove Forme ha molti più motivi per restare.",
         ],
         focusRegions: ["main"],
@@ -467,8 +475,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Dieci iscritti, sei spade",
         body: ({ state }) => [
-          `Dieci **Iscritti** e ${state.equipment.totalSwords.toLocaleString("it-IT")} **Spade**: a Genova si chiama ottimizzazione delle risorse. In palestra, invece, si chiama fare la fila.`,
-          "Ogni corso e ogni prova consumano le spade, e prima o poi qualcuna si rompe. Lo stato dell'armeria è tutto in quella spada lassù.",
+          `Dieci **Iscritti** e sole ${state.equipment.totalSwords === 6 ? "sei" : state.equipment.totalSwords.toLocaleString("it-IT")} **Spade** della scuola: a Genova si chiama ottimizzazione delle risorse. In palestra, invece, si chiama fare la fila.`,
+          "Ogni corso e ogni prova consumano le spade, e prima o poi qualcuna si rompe...",
         ],
         focusRegions: ["title", "title-equipment"],
       },
@@ -488,7 +496,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         body: ({ state }) => [
           "Libere, in uso, rotte, usura: qui c'è tutto. Quando le spade non bastano più, si comprano da questo bottone.",
           isOfficialSwordSupplierUnlocked(state.upgrades)
-            ? "Il conto con il fornitore è già aperto: con ×1, ×10 e ×100 scegli quante comprarne in una volta."
+            ? "Il conto con il fornitore è già aperto: con ×1, ×10 e ×100 scegli quante comprarne in una volta sola. Attenzione a non finire tutti i fondi!"
             : "Prima però serve sbloccare «Fornitore ufficiale», nel ramo Attrezzatura degli [[Upgrade]]. Attento ai prezzi di Lama di Luce, gli piace cambiare!",
         ],
         focusRegions: ["title", "title-equipment"],
@@ -668,7 +676,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "open-tournaments",
         kind: "objective",
         title: "Apri Tornei",
-        body: ["Il primo torneo della scuola è finito. I risultati ti aspettano nella pagina [[Tornei]]."],
+        body: ["Il primo torneo della scuola si è concluso! I risultati ti aspettano nella pagina [[Tornei]]."],
         focusRegions: ({ activeView }) =>
           activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
         isComplete: ({ activeView }) => activeView === "tournaments",
@@ -679,8 +687,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Una finale da vedere",
         body: [
-          "Il primo torneo della scuola è in archivio: gironi, tabellone e due titoli in palio.",
-          "Se in finale c'è uno dei tuoi puoi guardarla con «Guarda la finale»: al meglio dei cinque assalti, con i giudici che compilano il Servizio dal vivo. Popcorn non inclusi.",
+          "Ogni torneo che disputeremo finirà nell'archivio: gironi, tabellone e titoli in palio.",
+          "Se in finale c'è uno dei nostri, potremo addirittura guardarla cliccando su «Guarda la finale»: uno spettacolo senza esclusione di colpi, con pubblico, Giudici di Gara e Giudici di Stile. Popcorn non inclusi.",
         ],
         focusRegions: ["main", "tournament-final"],
         tournamentTab: "results",
@@ -691,8 +699,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Arena e Stile",
         body: [
-          "Ogni incontro dà due risultati. In Arena vince chi mette a segno più colpi.",
-          "Lo Stile è il voto dei giudici: si parte da 5,5, un incontro eccezionale arriva a 8,5, il 10 è una leggenda metropolitana. «Dettaglio incontro» mostra la scheda di ogni giudice.",
+          "Ogni incontro dà due risultati. In Arena vince chi mette a segno più OH sul proprio avversario.",
+          "Lo Stile è il voto dei giudici: si parte con una base di 5,5 e si può salire fino al leggendario 10. «Dettaglio incontro» mostra la scheda di ogni combattimento.",
         ],
         focusRegions: ["main", "tournament-groups"],
         cardPlacement: "right",
@@ -704,8 +712,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Chi va avanti",
         body: [
-          "Arena e Stile hanno due podi separati: due classifiche, due modi di farsi notare.",
-          "I migliori si qualificano al Torneo Accademico di aprile, e da lì al Nazionale di giugno. I posti dipendono dagli **Iscritti** attivi: più cresce la scuola, più atleti porti.",
+          "Arena e Stile hanno due podi separati: due classifiche, due modi per diventare campioni.",
+          "I migliori si qualificano al Torneo Accademico che si svolge attorno ad aprile, e da lì al Nazionale italiano di giugno fino ad arrivare alla Champion's Arena, il torneo mondiale di LudoSport, che si tiene a novembre.",
         ],
         focusRegions: ["main", "tournament-podium"],
         scrollToRegion: "tournament-podium",
@@ -715,10 +723,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "this-year-goal",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "La meta di quest'anno",
+        title: "La nostra meta",
         body: [
-          "Un titolo al Nazionale, in Arena o in Stile, apre la [[Rete dell'Ordine]]: lì si fondano nuove scuole.",
-          "Vincerli tutti e due nello stesso Nazionale fa succedere qualcosa in più. Lo scoprirai.",
+          "Un titolo al Nazionale, in Arena o in Stile, ci darà accesso alla [[Rete delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
         ],
         focusRegions: [],
         tournamentTab: "results",
@@ -734,7 +741,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "open-network",
         kind: "objective",
-        title: "Apri la Rete dell'Ordine",
+        title: "Apri la Rete delle Onde",
         body: ["Un titolo nazionale e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Rete]]."],
         focusRegions: ({ activeView }) =>
           activeView === "network" ? ["main"] : ["navigation", "network-navigation"],
