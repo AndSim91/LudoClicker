@@ -852,3 +852,89 @@
     transform: scaleX(0);
   }
 }
+
+/* Mancato rinnovo (R13, 07/10): the appello on ruled paper. Outlook: white sheet with
+   light-blue rules; Onde: the same rules over night blue (skin-onde.css). */
+.day-renewal {
+  --renewal-cell: var(--blue-700);
+  --renewal-cross: #c50f1f;
+}
+
+.appointment.day-renewal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid #d1d1d1;
+  background: #fff repeating-linear-gradient(transparent 0 21px, #e6eef7 21px 22px);
+}
+
+.appointment .day-renewal-eyebrow {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.day-renewal-title {
+  color: var(--ink);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.appointment .day-renewal-grid {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 3px;
+  margin: 2px 0;
+}
+
+.day-renewal-grid i {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--renewal-cell);
+  opacity: 0.85;
+}
+
+.day-renewal-grid i.is-crossed {
+  background:
+    linear-gradient(45deg, transparent 42%, var(--renewal-cross) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--renewal-cross) 42% 58%, transparent 58%);
+  box-shadow: inset 0 0 0 1.5px var(--renewal-cross);
+  opacity: 1;
+}
+
+.appointment .day-renewal-names {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 44px;
+  font-size: 12.5px;
+  line-height: 22px;
+}
+
+.day-renewal-names s {
+  color: var(--ink);
+  text-decoration-color: var(--renewal-cross);
+  text-decoration-thickness: 1.5px;
+}
+
+.appointment .day-renewal-names small {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.appointment .day-renewal-stamp {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  padding: 1px 7px;
+  border: 2px solid color-mix(in srgb, var(--renewal-cross) 75%, transparent);
+  border-radius: 4px;
+  color: var(--renewal-cross);
+  background: rgb(255 255 255 / 55%);
+  font: 700 10.5px/17px var(--font-display, inherit);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-10deg);
+}

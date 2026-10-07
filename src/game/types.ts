@@ -378,6 +378,8 @@ export interface NarrativeEventRecord {
   summary: string;
   /** Missing on records saved before 07/10: the definition's values stand in. */
   effects?: NarrativeEffects;
+  /** Mancato rinnovo (R13, 07/10): the whole yearly rollout, the same on each of its records. */
+  renewal?: { departed: number; before: number };
   person?: {
     displayName: string;
     rarity: PersonRarity;
