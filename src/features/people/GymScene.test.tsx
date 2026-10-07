@@ -18,7 +18,7 @@ describe("GymScene", () => {
     render(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 0 } }} />);
 
     expect(screen.getByText("Sala in affitto")).toBeInTheDocument();
-    expect(screen.getByText("Prossimo traguardo: prima rastrelliera, a 10 iscritti")).toBeInTheDocument();
+    expect(screen.getByText("Prossimo traguardo: prima rastrelliera, a 25 iscritti")).toBeInTheDocument();
   });
 
   it("puts three pairs on the mat from 100 members and the scoreboard in the palazzetto", () => {
@@ -26,7 +26,7 @@ describe("GymScene", () => {
     const view = render(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 100 } }} />);
     expect(getGymFighterCount(100)).toBe(6);
     expect(view.container.querySelector(".gym-scoreboard")).toBeNull();
-    view.rerender(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 1_000 } }} />);
+    view.rerender(<GymScene state={{ ...initial, school: { ...initial.school, activeMembers: 500 } }} />);
     expect(view.container.querySelector(".gym-stage")).toHaveClass("is-hall");
     expect(screen.getByText("Player 1 0 – 0 Player 2")).toBeInTheDocument();
     expect(view.container.querySelectorAll(".gym-judge")).toHaveLength(2);

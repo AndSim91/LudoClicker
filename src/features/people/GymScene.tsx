@@ -97,7 +97,6 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
   const stage = getGymStageIndex(activeMembers);
   const current = GYM_STAGES[stage];
   const next = GYM_STAGES[stage + 1];
-  const has = (threshold: number) => activeMembers >= threshold;
   const hall = stage >= HALL_STAGE;
   const judges = stage >= JUDGES_STAGE;
   const view = hall ? VIEW.hall : VIEW.gym;
@@ -160,7 +159,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
           ) : null}
         </svg>
 
-        {has(50)
+        {stage >= 2
           ? LIGHT_BEAMS.map((points, index) => (
               <GymLayer key={points} box={LIGHT_BOXES[index]} className="gym-light">
                 <defs>
@@ -212,7 +211,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
           : null}
 
         <svg className="gym-backdrop" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          {has(500) ? (
+          {judges ? (
             <g className="gym-crowd">
               {Array.from({ length: 22 }, (_, index) => (
                 <circle key={index} cx={68 + index * 24} cy={index % 2 ? 128 : 132} r={6} />
@@ -221,23 +220,23 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             </g>
           ) : null}
 
-          {has(10) ? <rect x="140" y="144" width="360" height="10" rx="3" className="gym-mat" /> : null}
+          {stage >= 1 ? <rect x="140" y="144" width="360" height="10" rx="3" className="gym-mat" /> : null}
           {judges ? <ellipse cx="321" cy="151" rx="66" ry="7" className="gym-arena" /> : null}
 
-          {has(10) ? (
+          {stage >= 1 ? (
             <g className="gym-rack">
               <rect x="760" y="96" width="50" height="54" rx="2" />
             </g>
           ) : null}
 
-          {has(50) ? (
+          {stage >= 2 ? (
             <g className="gym-banner">
               <path d="M290 0 H350 V70 L320 86 L290 70 Z" />
               <image href="/assets/ordine-emblem.webp" x="301" y="8" width="38" height="50" />
             </g>
           ) : null}
 
-          {has(500) ? (
+          {judges ? (
             <g className="gym-trophies">
               <rect x="-40" y="80" width="84" height="5" rx="1" />
               {[-28, 0, 28].map((x) => (
@@ -250,7 +249,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
         {hall ? <GymScoreboard score={match.score} /> : null}
 
         {/* Rack blades hum in two alternating groups, as before (odd ones 2 s ahead). */}
-        {has(10)
+        {stage >= 1
           ? [0, 1].map((parity) => (
               <SaberLayers
                 key={parity}

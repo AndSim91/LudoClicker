@@ -2904,20 +2904,20 @@ Creare un evento usa un modulo simile a un vero appuntamento Outlook.
 Un'unica pagina, in quest'ordine:
 
 - la palestra illustrata, che cresce con la scuola (solo Modalità Onde; decisioni
-  di Andrea del 06/10, `gymStages.ts`, `GymScene.tsx`). Sei livelli, ognuno con
+  di Andrea del 06/10, soglie del 07/10, `gymStages.ts`, `GymScene.tsx`). Sei livelli, ognuno con
   il suo nome nella didascalia e il prossimo traguardo:
   - **Sala in affitto** (0 iscritti): porta, finestra, una lampadina che oscilla;
-  - **Prima rastrelliera** (10): tappeto e rastrelliera con le spade che ronzano;
+  - **Prima rastrelliera** (25): tappeto e rastrelliera con le spade che ronzano;
   - **Vessillo dell'Ordine** (50): lo stendardo e due fari al posto della lampadina;
   - **Allenamento di gruppo** (100): tre coppie sul tappeto;
-  - **Arena e giudici** (500): tribuna, trofei, il cerchio dell'Arena al centro e
+  - **Arena e giudici** (250): tribuna, trofei, il cerchio dell'Arena al centro e
     due giudici a bordo Arena, uno con il cellulare e uno con la maglietta blu
     dell'Ordine;
-  - **Palazzetto** (1.000): la scena resta alta 170 px ma la telecamera si
+  - **Palazzetto** (500): la scena resta alta 170 px ma la telecamera si
     allontana (capriate, gradinate ai lati, due fari che spazzano l'Arena) e
     compare il tabellone «Player 1 – Player 2».
 
-  Gli atleti seguono gli iscritti: 1 da 1 iscritto, una coppia da 10, tre coppie
+  Gli atleti seguono gli iscritti: 1 da 1 iscritto, una coppia da 25, tre coppie
   da 100, con le spade del colore delle rarità. La coppia centrale combatte come
   nella finale dei tornei (`boutChoreography.ts`, la stessa coreografia):
   qualche scambio e poi un taglio, nel 5% dei casi dopo un **Disarmo**; il
