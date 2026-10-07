@@ -2704,6 +2704,14 @@ La Modalità Onde usa **Barlow** per il testo e **Barlow Semi Condensed** per
 titoli e numeri, inclusi nel gioco (pesi 400, 500 e 600) perché ogni computer
 mostri le stesse lettere; il tema Outlook resta su Segoe UI.
 
+**Schermata iniziale in Modalità Onde** (concept B «Marea» con la schiuma S4
+«Scie», decisione di Andrea del 07/10): dietro «Come ti chiami?» il mare è
+disegnato dal gioco in SVG (`src/components/OndeSea.tsx`) e non è più
+un'immagine, quindi resta nitido a ogni risoluzione. Quattro file di onde con
+una cresta di schiuma e scie che scendono sul fronte scorrono piano, ognuna a
+una velocità diversa; in alto a destra restano le due spade, azzurra e oro, in
+diagonale. Con «Riduci animazioni» il mare resta fermo; in Outlook non c'è.
+
 Avvisi, riepiloghi e traguardi nella Posta li firma **A.N.D.E.R.**, l'assistente
 della scuola; le email della campagna e il benvenuto mantengono i loro mittenti.
 La voce è ironica per circa il 60% e asciutta per il 40%; i messaggi di sistema

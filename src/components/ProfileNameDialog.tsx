@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { GAME_CONFIG } from "../game/config";
+import { OndeSea } from "./OndeSea";
 
 export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string) => void }) {
   const [displayName, setDisplayName] = useState("");
@@ -12,6 +13,7 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
 
   return (
     <main className="profile-gate">
+      <OndeSea />
       <section
         className="profile-dialog"
         role="dialog"

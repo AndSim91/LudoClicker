@@ -314,10 +314,70 @@
 
 /* ---- Start screen ---------------------------------------------------- */
 
+/* Il mare (OndeSea) sta su un box 16:10 che copre sempre lo schermo, ancorato in
+   basso al centro (come uno sfondo «cover»). In Outlook non c'è. */
 :root[data-theme="dark"] .profile-gate {
+  overflow: hidden;
   background:
-    url("/assets/onde-wave.webp") center 62% / cover no-repeat,
-    #012a43;
+    radial-gradient(ellipse 70% 60% at 50% 18%, rgb(42 127 163 / 28%), transparent),
+    linear-gradient(#0d4364, #062c47 55%, #021a2c);
+}
+
+.onde-sea {
+  display: none;
+}
+
+:root[data-theme="dark"] .onde-sea {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  display: block;
+  width: max(100vw, 160vh);
+  aspect-ratio: 16 / 10;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.onde-sea > svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+}
+
+.onde-sea-sky {
+  width: 100%;
+}
+
+/* Le file scorrono di un periodo esatto: il giro si chiude senza salti. */
+.onde-sea-band {
+  animation: onde-sea-drift linear infinite;
+  will-change: transform;
+}
+
+.onde-sea-band.is-reverse {
+  animation-direction: reverse;
+}
+
+@keyframes onde-sea-drift {
+  to { transform: translateX(var(--onde-sea-shift)); }
+}
+
+/* Onde senza animazioni: il mare resta fermo e non tiene layer in memoria. */
+.reduce-motion .onde-sea-band {
+  animation: none !important;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onde-sea-band {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+:root[data-theme="dark"] .profile-dialog {
+  position: relative;
 }
 
 :root[data-theme="dark"] .profile-dialog {
