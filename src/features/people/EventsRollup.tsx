@@ -42,8 +42,8 @@ export function EventsRollup() {
         </g>
         {/* Title over the picture, then the white wave with text, logo, QR and contacts. */}
         <g fill={PAPER}>
-          <rect x={120} y={35.6} width={11} height={1.5} rx={0.4} transform="skewX(-12)" transformOrigin="125 36.3" />
-          <rect x={124} y={38.2} width={15} height={1.5} rx={0.4} transform="skewX(-12)" transformOrigin="131 39" />
+          <rect x={120} y={35.6} width={11} height={1.5} rx={0.4} transform="skewX(-12)" style={{ transformOrigin: "125px 36.3px" }} />
+          <rect x={124} y={38.2} width={15} height={1.5} rx={0.4} transform="skewX(-12)" style={{ transformOrigin: "131px 39px" }} />
           <path d="M118 42.5 C126 39.5 136 43.5 148 38.5 V63 H118 Z" />
         </g>
         <rect x={122} y={44.6} width={22} height={0.9} rx={0.4} fill="#4a4a4a" />
@@ -51,8 +51,8 @@ export function EventsRollup() {
         <rect x={121} y={46.4} width={24} height={0.9} rx={0.4} fill={ORANGE} />
         <rect x={122} y={48.2} width={22} height={0.9} rx={0.4} fill="#4a4a4a" />
         <path d="M122.4 50 L123.3 56 L124.2 56 Z M121.1 56.2 q2.2 -1.6 4.4 0" fill="none" stroke={ORANGE} strokeWidth={0.75} strokeLinejoin="round" />
-        <rect x={125.4} y={51} width={8.6} height={1.5} rx={0.3} fill="#2a2a2a" transform="skewX(-10)" transformOrigin="129 51.7" />
-        <rect x={128.6} y={53} width={5.4} height={1.3} rx={0.3} fill={ORANGE} transform="skewX(-10)" transformOrigin="131 53.6" />
+        <rect x={125.4} y={51} width={8.6} height={1.5} rx={0.3} fill="#2a2a2a" transform="skewX(-10)" style={{ transformOrigin: "129px 51.7px" }} />
+        <rect x={128.6} y={53} width={5.4} height={1.3} rx={0.3} fill={ORANGE} transform="skewX(-10)" style={{ transformOrigin: "131px 53.6px" }} />
         <rect x={136.6} y={50.6} width={3.8} height={3.8} fill="#111" />
         <g fill="#555">
           <rect x={141.4} y={51} width={5} height={0.7} /><rect x={141.4} y={52.3} width={5} height={0.7} /><rect x={141.4} y={53.6} width={4.2} height={0.7} />
@@ -66,7 +66,7 @@ export function EventsRollup() {
           <Athlete shape={HANGING_GUARD} saber="#ffbf2e" />
         </g>
         <path d="M119.6 83.6 C125 77 136 73.4 147 75.6" fill="none" stroke={PAPER} strokeWidth={0.7} opacity={0.5} />
-        <rect x={134.6} y={80.2} width={10.4} height={1.3} rx={0.3} fill={PAPER} transform="skewX(-12)" transformOrigin="140 80.8" />
+        <rect x={134.6} y={80.2} width={10.4} height={1.3} rx={0.3} fill={PAPER} transform="skewX(-12)" style={{ transformOrigin: "140px 80.8px" }} />
         <rect x={135.4} y={82.3} width={9.6} height={0.7} rx={0.3} fill={PAPER} opacity={0.9} />
       </g>
     </g>
