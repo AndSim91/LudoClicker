@@ -1,7 +1,7 @@
 import type { TournamentParticipant } from "../../game/types";
 import type { DuelScript, DuelSide } from "./finalDuel";
 import { participantName } from "./tournamentPresentation";
-import { STYLE_PENALTY_LABEL } from "./stylePresentation";
+import { describePenalty, STYLE_PENALTY_LABEL } from "./stylePresentation";
 
 /** Outlook: the final as a plain report, assault by assault. No animation. */
 export function FinalDuelReport({
@@ -42,9 +42,9 @@ export function FinalDuelReport({
           <ol>
             {script.penalties.map((penalty) => (
               <li key={penalty.side}>
-                <span>Assalto {penalty.assault + 1}</span>
+                <span>Fine incontro</span>
                 <span>
-                  Cartellino di Stile a <b>{participantName(participants[penalty.side])}</b> · {STYLE_PENALTY_LABEL[penalty.reason]} · −0,5
+                  Cartellino di Stile a <b>{participantName(participants[penalty.side])}</b> · {STYLE_PENALTY_LABEL[penalty.reason]} · {describePenalty(penalty.count)}
                 </span>
                 <span />
               </li>

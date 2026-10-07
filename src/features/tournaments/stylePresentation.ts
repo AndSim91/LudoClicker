@@ -28,8 +28,15 @@ export function describeJudges(sheets: readonly StyleSheet[]): JudgeVote[] {
   }));
 }
 
+/** Un solo cartellino a fine incontro, con una o più sanzioni da −0,5. */
+export function describePenalty(count: number): string {
+  const cost = `−${pointsFormatter.format(count * 0.5)}`;
+  return count > 1 ? `${count} sanzioni · ${cost}` : cost;
+}
+
 export function getMatchStyleSide(match: TournamentMatch, side: "a" | "b") {
-  return side === "a"
-    ? { vote: match.styleScoreA, detail: match.styleDetailA, penalty: match.stylePenaltyA }
-    : { vote: match.styleScoreB, detail: match.styleDetailB, penalty: match.stylePenaltyB };
+  const [vote, detail, penalty, count] = side === "a"
+    ? [match.styleScoreA, match.styleDetailA, match.stylePenaltyA, match.stylePenaltyCountA]
+    : [match.styleScoreB, match.styleDetailB, match.stylePenaltyB, match.stylePenaltyCountB];
+  return { vote, detail, penalty, penalties: penalty ? count ?? 1 : 0 };
 }

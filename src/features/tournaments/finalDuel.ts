@@ -75,10 +75,13 @@ export { STRIKES };
 export type DuelMoment = BoutMoment;
 export type DuelAssault = BoutAssault;
 
+/** The Style card comes at the end of the bout: one per athlete, one or more sanctions. */
 export interface DuelPenalty {
   side: DuelSide;
+  /** The last assault: the card goes up once it is over. */
   assault: number;
   reason: StylePenaltyReason;
+  count: number;
 }
 
 export interface DuelScript {
@@ -138,8 +141,11 @@ export function getDuelScript({ match, a, b }: OwnedFinal): DuelScript {
     }
   }
   const penalties: DuelPenalty[] = [];
-  for (const [side, reason] of [["a", match.stylePenaltyA], ["b", match.stylePenaltyB]] as const) {
-    if (reason) penalties.push({ side, reason, assault: Math.floor(roll() * assaults.length) });
+  for (const [side, reason, count] of [
+    ["a", match.stylePenaltyA, match.stylePenaltyCountA],
+    ["b", match.stylePenaltyB, match.stylePenaltyCountB],
+  ] as const) {
+    if (reason) penalties.push({ side, reason, count: count ?? 1, assault: Math.max(0, assaults.length - 1) });
   }
   const ending = {
     winner: match.winnerId === match.participantAId ? "a" : "b",

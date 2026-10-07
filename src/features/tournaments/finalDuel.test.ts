@@ -52,7 +52,8 @@ describe("Guarda la finale: copione e regia", () => {
       { kind: "COM", name: "Cruna dell'Ago", form: "Forma 3 Spada Lunga" },
       { kind: "SAPD", name: "Sync", form: "Forma 3 Spada Lunga" },
     ]));
-    expect(script.penalties).toEqual([expect.objectContaining({ side: "b", reason: "cura" })]);
+    // One Style card per athlete, at the end of the bout.
+    expect(script.penalties).toEqual([{ side: "b", reason: "cura", count: 1, assault: 4 }]);
     expect(getDuelScript(final)).toEqual(script);
   });
 
@@ -69,7 +70,7 @@ describe("Guarda la finale: copione e regia", () => {
     }
     const beforeEnd = events.filter((event) => event.type !== "end").reduce(applyEvent, startView(sheets));
     expect(beforeEnd.score).toEqual({ a: 3, b: 2 });
-    expect(beforeEnd.penalty).toEqual({ a: false, b: true });
+    expect(beforeEnd.penalty).toEqual({ a: 0, b: 1 });
     const last = events.reduce(applyEvent, startView(sheets));
     const ended = endView(script, sheets);
     expect(last.sheets).toEqual(ended.sheets);

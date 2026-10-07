@@ -193,61 +193,76 @@ GCC, DIF) da 0 a 3 a **mezzi punti**, SOG da 0 a 3 a punti interi e PEN.
 voto = 5,5 + 0,2 × punti tecnici + 0,1 × SOG − 0,5 × PEN
 ```
 
-La scala è stretta come nella realtà: si viaggia tra 5,5 e 8,5, 8,5 è un
-incontro eccezionale, 3 su una voce è la perfezione e il 10 è quasi
-impossibile. I punti sono **relativi al campo del torneo**: il livello atteso
-di un atleta è
+**Modello C** (decisione del 07/10, analisi in `claude/stile-panoramica.md` del
+progetto, tarata sul Nazionale italiano RA Alpha 2026 e sull'Accademico Roma
+2026): il voto è **assoluto**. Dipende dallo Stile dell'atleta, non dalla media
+del campo: lo Scolastico cresce con la qualità della scuola e un torneo più
+forte dà voti più alti. Via di mezzo tra la scala reale (Nazionale vero:
+mediana 6,1, il migliore 6,5) e una curva più generosa: un atleta vero cade
+più o meno a 110 di Stile da Iniziato (F1), 145 da Accademico (F1, F2, Y) e
+205 da Cavaliere (F3–F5 con un'arma). Sopra comincia la parte leggendaria.
 
-```text
-livello = 1,25 + 2 × ln(preparazioneStile × condizione × incontro / media del campo)
-sopra 2,25 il livello sale più piano (pendenza 0,7) verso un massimo di 2,6
-```
-
-- **BAS, GCC**: livello + occhio del giudice (±0,25, cioè mezzo punto: così
+- **Stile = qualità.** `getStyleQuality`: Q = 3 / (1 + (250 / Stile del
+  giorno)^1,4), con Stile del giorno = preparazione × condizione × incontro.
+  ~0,5 a 75, ~1,2 a 200, 1,5 a 250, ~2,6 a 1.000.
+- **BAS, GCC**: Q + occhio del giudice (±0,25, cioè mezzo punto: così
   l'arrotondamento al mezzo punto resta giusto in media).
-- **MOV**: livello + 1,5 × (quota di assalti vinti − probabilità attesa di
+- **MOV**: Q + 1,5 × (quota di assalti vinti − probabilità attesa di
   vincerne uno): l'iniziativa sull'Orizzonte degli Eventi.
-- **DIN**: livello + giornata (±0,3, metà con 20 tornei di esperienza).
-- **Probabilità di COM e SAPD** (decisione del 06/10, `getStyleActionChance`):
-  fino al 15% secondo lo Stile dell'atleta (pieno a 500, in proporzione sotto),
-  più 0,4 punti per ogni punto percentuale di Stile in più dell'avversario, fino
-  a +20% (raggiunto con il 50% di vantaggio); tetto 35%. COM e SAPD si estraggono
-  separatamente, una volta per incontro, uguali per tutti i giudici.
-- **COM**: tecniche complesse dell'elenco SLM delle Forme conosciute **con
-  l'arma usata nell'incontro** (`getComplexTechniqueForms`): F1 e F2 solo con la
-  Spada Lunga; F6 e F7 non hanno COM. Solo se l'incontro è vero (probabilità
-  d'assalto ≤ 85%) e l'atleta va a segno. F1–F2 0,5–1, F3–F5 1–1,5.
-- **SAPD**: uguali per ogni arma. Disarmo (1), Presa con F2 (1), Sync e
-  Armonica con F3 Lunga.
+- **DIN**: Q + giornata (±0,3, metà con 20 tornei di esperienza).
+- **Spazio per esprimersi** (`getExpressionSpace`, 0–1): dal rapporto di Stile
+  con l'avversario più 0,1 per ogni Forma di differenza. Pieno se l'avversario
+  ha tra ~0,75 e 3 volte il nostro potenziale; cala se ci sovrasta o se è così
+  debole da restare fermo.
+- **COM** (le Forme sono il repertorio): a ogni **assalto vinto**, probabilità
+  0,9 × (Q/3)^3,5 × repertorio × spazio; repertorio = Forme con COM per
+  **l'arma usata nell'incontro** (`getComplexTechniqueForms`; F1 e F2 solo con
+  la Spada Lunga, F6 e F7 senza COM) su 3. F1–F2 0,5–1, F3–F5 1–1,5; tetto 3.
+- **SAPD** (la differenza di potenziale le rende più facili): a ogni assalto
+  vinto, 0,5 × (Q/3)^3,5 × facilità × spazio, con facilità = 1 + 0,6 ×
+  ln(Stile / Stile avversario) tra 0,5 e 2. Disarmo (1), Presa con F2 (1),
+  Sync e Armonica con F3 Lunga; tetto 3.
 - **Armoniche e Sync** valgono 1 in COM e 1 in SAPD insieme: sono rarissime
   nello sport.
 - **Disarmato**: chi subisce un Disarmo può rispondere solo con un'Armonica
-  della Forma 1 (Prima–Quarta Armonica), che si fa senza spada; stessa
-  probabilità, 1 in COM e 1 in SAPD (`rollDisarmedArmonica`).
-- **DIF**: 1 a chi, nettamente sovrastato in Arena (< 15%) e sconfitto, va
-  comunque a segno.
-- **SOG**: gusto di ciascun giudice, più facile negli incontri decisi all'ultimo assalto (2–1, 3–2).
+  della Forma 1 (Prima–Quarta Armonica), che si fa senza spada; probabilità
+  delle SAPD, 1 in COM e 1 in SAPD (`rollDisarmedArmonica`).
+- **DIF** = «non ha potuto esprimersi» quanto avrebbe potuto: 3 × (Q/3)^1,5 ×
+  (1 − spazio), a mezzi punti. Sovrastato (meno Stile o meno Forme) oppure
+  davanti a chi resta fermo; pesa solo per chi avrebbe la qualità per farlo.
+  All'Accademico Roma 2026 la DIF compare proprio negli incontri tra gradi
+  lontani, da tutti e due i lati.
+- **SOG**: gusto di ciascun giudice, più facile negli incontri decisi
+  all'ultimo assalto (2–1, 3–2) e con più qualità.
 - **PEN**: il **cartellino di Stile**, separato da quelli dell'Arena e a scacchi
-  gialli e neri; 1–6% a incontro (più spesso a chi è inesperto, in cattiva forma
-  o perde 0–2), motivo Dichiarazione, Cura o Rispetto; −0,5 solo in quell'incontro.
+  gialli e neri. **Uno solo per atleta, a fine incontro**, ma con una o più
+  sanzioni (−0,5 ciascuna); possono prenderlo entrambi. A ogni assalto la prima
+  sanzione ha probabilità 0,3 / (1 + (Stile / 20)^2,5) (30% a 0 di Stile, ~15% a
+  20, ~4% a 45, ~1% a 75), × pressione dell'avversario (0,7–1,6),
+  inesperienza e brutta giornata; ogni sanzione in più nello stesso assalto ×0,4,
+  massimo 3 per assalto e **11** in tutto (voto 0). Motivo Dichiarazione, Cura o
+  Rispetto. `stylePenaltyCountA/B` salva il numero solo se è più di una.
 
 **Giudici:** uno nei gironi e nel tabellone; dalle semifinali (semifinali,
 finale per il bronzo, finale) due, quattro al Nazionale, in Champion's Arena e
 nelle Chronicles. Il voto dell'incontro è la media dei giudici; la classifica
-Stile usa la media di tutti gli incontri.
+Stile usa la media di tutti gli incontri. Al Chronicles gli esterni conoscono
+tutte le Forme (7).
 
 Si salvano le schede (`styleDetailA/B`, Giudice 1, 2…) per gli atleti della
 scuola e, nella finale con un nostro atleta, anche per l'avversario esterno;
-il cartellino (`stylePenaltyA/B`) per tutti. Quella finale salva anche l'ordine
-degli assalti (`assaults`, es. «abaa»). Il codice
+il cartellino (`stylePenaltyA/B`, `stylePenaltyCountA/B`) per tutti. Quella
+finale salva anche l'ordine degli assalti (`assaults`, es. «abaa»). Il codice
 Servizio v2 di ogni scheda si calcola alla lettura (`src/game/styleCode.ts`,
 porting dell'algoritmo pubblico `anfive/style-codes`).
 
-Misure (200 tornei per riga): mediana 6,5–6,6, 95% sotto 7,4, massimo visto
-8,5; chi vince lo Stile ha in media 7,4–7,6. Con un atleta della scuola a 8 tornei di
-esperienza, le vittorie nello Stile restano vicine a quelle del vecchio voto
-(Nazionale 1,35× lo standard 37% → 35%; Champion's 66% → 60%) e un atleta da
-200 di Stile batte sempre uno da 150.
+Voto tipico contro un pari (prototipo): 10 → 5,5 · 62 → 5,8 · 125 → 6,2 ·
+225 → 6,7 · 500 → 7,6 · 1.000 → 8,2 · 3.000 → 8,6 (giornata ottima 9,1).
+Misure sui tornei del gioco (60 per livello, standard di oggi): Accademico (90)
+mediana 6,0, vincitore 6,4, cartellini 6% degli incontri; Nazionale (110) 6,1,
+vincitore 6,6, cartellini 3%; Champion's (300) 7,0, vincitore 7,6, cartellini
+1%; Chronicles (~1.000) 7,9, vincitore 8,4, massimo 9,3. Con il Nazionale a 200
+(da decidere insieme al prestigio) la mediana sale a ~6,55.
 
 ### 5.1 «Guarda la finale»
 
@@ -278,6 +293,8 @@ del torneo (`FinalDuelLayer.tsx`), in non più di 30 secondi.
 - **Outlook**: nessuna animazione. Resoconto assalto per assalto («Montante al
   busto di X · «OH!» su Y»), cartellini di Stile e Servizio già compilato con
   i codici. Lo stesso vale con «Riduci animazioni».
+- Il cartellino di Stile si alza **a fine incontro**, uno per atleta, con il
+  numero di sanzioni; il telefono di Servizio mostra quel numero in PEN.
 - Il copione (colpi, assalto di COM/SAPD e cartellini) deriva dall'id
   dell'incontro (`finalDuel.ts`), la regia da `finalDuelTimeline.ts`. Le finali
   salvate prima non hanno l'ordine degli assalti né la scheda dell'esterno: il

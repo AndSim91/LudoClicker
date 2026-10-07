@@ -597,9 +597,12 @@ export interface TournamentMatch {
   /** Schede dei giudici di Stile: atleti della scuola, ed entrambi nella finale con un nostro atleta. */
   styleDetailA?: TournamentStyleDetail;
   styleDetailB?: TournamentStyleDetail;
-  /** Cartellino di Stile (−0,5 nell'incontro), per chiunque. */
+  /** Cartellino di Stile a fine incontro, per chiunque: −0,5 per ogni sanzione. */
   stylePenaltyA?: StylePenaltyReason;
   stylePenaltyB?: StylePenaltyReason;
+  /** Sanzioni sullo stesso cartellino, solo se più di una (assente = 1). */
+  stylePenaltyCountA?: number;
+  stylePenaltyCountB?: number;
   /** Chi ha preso ogni assalto («abba»): solo nella finale con un nostro atleta. */
   assaults?: string;
   winnerId: string;

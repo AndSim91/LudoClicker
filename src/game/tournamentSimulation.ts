@@ -25,6 +25,8 @@ import {
 } from "./athleteStats";
 import { nextRandom } from "./random";
 import {
+  countStyleForms,
+  getExpressionSpace,
   getNpcStyleForms,
   getStyleJudgeCount,
   judgeStyle,
@@ -68,8 +70,6 @@ interface RandomCursor {
   seed: number;
   // ponytail: Style context travels with the cursor because every match already receives it.
   styleLevel?: TournamentLevel;
-  /** Media della preparazione Stile del campo: i giudici valutano rispetto al torneo. */
-  styleFieldMean?: number;
 }
 
 interface MutableStanding {
@@ -520,7 +520,7 @@ function createChroniclesSecretParticipant(
     schoolName: "Chronicles of Ludosport",
     city: "Sede segreta",
     rarity: "secret-legendary",
-    numericForms: profile.numericForms,
+    numericForms: profile.numericForms || 7,
     experience: profile.externalExperience,
     arenaBase: profile.arenaBase,
     styleBase: profile.styleBase,
@@ -547,7 +547,8 @@ function createChroniclesNpcParticipants(
       schoolName: "Chronicles of Ludosport",
       city: "Sede segreta",
       rarity: "legendary" as const,
-      numericForms: 0,
+      // Al Chronicles si conoscono tutte le Forme (decisione del 07/10).
+      numericForms: 7,
       experience: 0,
       arenaBase,
       styleBase,
@@ -616,25 +617,38 @@ function simulateMatch(
     else arenaScoreB += 1;
     assaults += side;
   }
-  const actionInput = (
-    participant: TournamentParticipant,
-    opponent: TournamentParticipant,
-    chance: number,
-    scored: number,
-  ): StyleActionInput => {
+  // Stile del giorno, Forme e spazio per esprimersi: uguali per COM, SAPD e voto.
+  const styleSide = (participant: TournamentParticipant) => {
     const forms = participant.knownFormIds ?? getNpcStyleForms(participant.id, participant.numericForms);
     return {
       forms,
       weapon: participant.weapon ?? getAthleteWeapon(forms),
-      style: participant.stylePreparation,
-      opponentStyle: opponent.stylePreparation,
-      assaultChance: chance,
-      scored,
-      roll: () => roll(cursor),
+      style:
+        participant.stylePreparation *
+        conditionMultiplier(participant.condition) *
+        encounterMultiplier(cursor),
     };
   };
-  const inputA = actionInput(participantA, participantB, assaultChanceA, arenaScoreA);
-  const inputB = actionInput(participantB, participantA, 1 - assaultChanceA, arenaScoreB);
+  const sideA = styleSide(participantA);
+  const sideB = styleSide(participantB);
+  const spaceA = getExpressionSpace(sideA.style, sideB.style, countStyleForms(sideA.forms), countStyleForms(sideB.forms));
+  const spaceB = getExpressionSpace(sideB.style, sideA.style, countStyleForms(sideB.forms), countStyleForms(sideA.forms));
+  const actionInput = (
+    side: typeof sideA,
+    opponent: typeof sideA,
+    space: number,
+    scored: number,
+  ): StyleActionInput => ({
+    forms: side.forms,
+    weapon: side.weapon,
+    style: side.style,
+    opponentStyle: opponent.style,
+    space,
+    scored,
+    roll: () => roll(cursor),
+  });
+  const inputA = actionInput(sideA, sideB, spaceA, arenaScoreA);
+  const inputB = actionInput(sideB, sideA, spaceB, arenaScoreB);
   let actionsA = rollStyleActions(inputA);
   let actionsB = rollStyleActions(inputB);
   // Chi viene disarmato può rispondere solo con un'Armonica della Forma 1.
@@ -642,28 +656,26 @@ function simulateMatch(
   if (actionsA.highlight === "Disarmo") actionsB = rollDisarmedArmonica(actionsB, inputB);
   const judge = (
     participant: TournamentParticipant,
+    input: StyleActionInput,
     actions: StyleActions,
     chance: number,
-    scored: number,
     conceded: number,
   ) =>
     judgeStyle({
-      relativeStyle:
-        (participant.stylePreparation *
-          conditionMultiplier(participant.condition) *
-          encounterMultiplier(cursor)) /
-        (cursor.styleFieldMean ?? participant.stylePreparation),
+      style: input.style,
+      opponentStyle: input.opponentStyle,
+      space: input.space,
       actions,
       experience: participant.experience,
       condition: participant.condition,
       assaultChance: chance,
-      scored,
+      scored: input.scored,
       conceded,
       judges: getStyleJudgeCount(cursor.styleLevel ?? "school", stage),
       roll: () => roll(cursor),
     });
-  const styleA = judge(participantA, actionsA, assaultChanceA, arenaScoreA, arenaScoreB);
-  const styleB = judge(participantB, actionsB, 1 - assaultChanceA, arenaScoreB, arenaScoreA);
+  const styleA = judge(participantA, inputA, actionsA, assaultChanceA, arenaScoreB);
+  const styleB = judge(participantB, inputB, actionsB, 1 - assaultChanceA, arenaScoreA);
   const ownedMatch = Boolean(participantA.ownedContactId || participantB.ownedContactId);
   return {
     id: `match-${stage}-${matchIndex}-${cursor.seed >>> 0}`,
@@ -681,6 +693,9 @@ function simulateMatch(
     ...(participantB.ownedContactId || (stage === "final" && ownedMatch) ? { styleDetailB: styleB.detail } : {}),
     ...(styleA.penalty ? { stylePenaltyA: styleA.penalty } : {}),
     ...(styleB.penalty ? { stylePenaltyB: styleB.penalty } : {}),
+    // Più sanzioni sullo stesso cartellino: si salva il numero solo se è più di una.
+    ...(styleA.penalties > 1 ? { stylePenaltyCountA: styleA.penalties } : {}),
+    ...(styleB.penalties > 1 ? { stylePenaltyCountB: styleB.penalties } : {}),
     winnerId: arenaScoreA === wins ? participantA.id : participantB.id,
   };
 }
@@ -1078,9 +1093,6 @@ export function simulateTournament(
         : createNpcParticipants(state, level, npcCount, cursor);
   const participants = ensureUniqueParticipantNames(shuffle(cursor, [...owned, ...npcs]), cursor);
   const participantMap = new Map(participants.map((participant) => [participant.id, participant]));
-  cursor.styleFieldMean =
-    participants.reduce((total, participant) => total + participant.stylePreparation, 0) /
-    Math.max(1, participants.length);
   const matches: TournamentMatch[] = [];
   const mutableStandings: MutableStanding[] = [];
   const styleTotals = new Map(

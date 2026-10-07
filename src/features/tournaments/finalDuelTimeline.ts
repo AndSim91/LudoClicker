@@ -47,7 +47,7 @@ export type DuelSheets = Partial<Record<DuelSide, StyleSheet[]>>;
 
 export type DuelEvent = BoutEvent | ({ t: number } & (
   | { type: "engage" }
-  | { type: "card"; side: DuelSide }
+  | { type: "card"; side: DuelSide; count: number }
   | { type: "mark"; side: DuelSide; judge: number; row: number; value: number }
   | { type: "release"; key: string }
   | { type: "end"; sheets: DuelSheets; score: Record<DuelSide, number>; history: DuelSide[]; poses: Record<DuelSide, FighterPose> }
@@ -56,7 +56,8 @@ export type DuelEvent = BoutEvent | ({ t: number } & (
 export interface DuelView {
   score: Record<DuelSide, number>;
   history: DuelSide[];
-  penalty: Record<DuelSide, boolean>;
+  /** Sanctions on each athlete's Style card (0 = no card). */
+  penalty: Record<DuelSide, number>;
   sheets: DuelSheets;
   /** «+» buttons being pressed on the phone: side and row, «a3». */
   pressed: string[];
@@ -75,7 +76,7 @@ export interface DuelView {
 
 const blank = (sheets: StyleSheet[] | undefined) => sheets?.map((): StyleSheet => [0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-export function startView(sheets: DuelSheets, penalty: Record<DuelSide, boolean> = { a: false, b: false }): DuelView {
+export function startView(sheets: DuelSheets, penalty: Record<DuelSide, number> = { a: 0, b: 0 }): DuelView {
   return {
     score: { a: 0, b: 0 },
     history: [],
@@ -100,10 +101,8 @@ export function endView(script: DuelScript, sheets: DuelSheets): DuelView {
     (state, assault) => ({ ...state, [assault.winner]: state[assault.winner] + 1 }),
     { a: 0, b: 0 },
   );
-  const view = startView(sheets, {
-    a: script.penalties.some((penalty) => penalty.side === "a"),
-    b: script.penalties.some((penalty) => penalty.side === "b"),
-  });
+  const cardOf = (side: DuelSide) => script.penalties.find((penalty) => penalty.side === side)?.count ?? 0;
+  const view = startView(sheets, { a: cardOf("a"), b: cardOf("b") });
   return {
     ...view,
     score: end,
@@ -137,7 +136,7 @@ export function applyEvent(view: DuelView, event: DuelEvent): DuelView {
         history: [...view.history, event.side],
       };
     case "card":
-      return { ...view, penalty: { ...view.penalty, [event.side]: true }, carding: view.carding + 1 };
+      return { ...view, penalty: { ...view.penalty, [event.side]: event.count }, carding: view.carding + 1 };
     case "mark": {
       const sheets = view.sheets[event.side]?.map((sheet, judge) =>
         judge === event.judge ? (sheet.map((value, row) => (row === event.row ? event.value : value)) as StyleSheet) : sheet,
@@ -194,7 +193,10 @@ export function buildTimeline(
   });
   let durationMs = t + OUTRO_MS - GAP_MS;
 
-  for (const penalty of script.penalties) add(ends[penalty.assault] - 600, { type: "card", side: penalty.side });
+  // The Style card goes up at the end of the bout, with every sanction on it.
+  for (const penalty of script.penalties) {
+    add(ends[penalty.assault] + 300, { type: "card", side: penalty.side, count: penalty.count });
+  }
   for (const side of ["a", "b"] as const) {
     sheets[side]?.forEach((sheet, judge) => sheet.forEach((goal, row) => {
       if (row === PEN_ROW || goal <= 0) return;

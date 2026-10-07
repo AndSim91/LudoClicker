@@ -65,12 +65,14 @@ function MatchCompetitor({
   score,
   styleScore,
   stylePenalty,
+  stylePenaltyCount,
   winner,
 }: {
   participant: TournamentParticipant | undefined;
   score: number;
   styleScore: number;
   stylePenalty?: TournamentMatch["stylePenaltyA"];
+  stylePenaltyCount?: number;
   winner: boolean;
 }) {
   return (
@@ -83,7 +85,7 @@ function MatchCompetitor({
       <b>{score}</b>
       <small>
         {formatVote(styleScore)}
-        {stylePenalty ? <StyleCardMark reason={stylePenalty} /> : null}
+        {stylePenalty ? <StyleCardMark reason={stylePenalty} count={stylePenaltyCount} /> : null}
       </small>
     </span>
   );
@@ -129,6 +131,7 @@ function BracketMatch({
         score={match.arenaScoreA}
         styleScore={match.styleScoreA}
         stylePenalty={match.stylePenaltyA}
+        stylePenaltyCount={match.stylePenaltyCountA}
         winner={match.winnerId === a?.id}
       />
       <MatchCompetitor
@@ -136,6 +139,7 @@ function BracketMatch({
         score={match.arenaScoreB}
         styleScore={match.styleScoreB}
         stylePenalty={match.stylePenaltyB}
+        stylePenaltyCount={match.stylePenaltyCountB}
         winner={match.winnerId === b?.id}
       />
     </button>
@@ -606,7 +610,7 @@ export function TournamentResults({
                     />
                     <small>
                       Stile {formatVote(selectedMatch.styleScoreA)}
-                      {selectedMatch.stylePenaltyA ? <StyleCardMark reason={selectedMatch.stylePenaltyA} /> : null}
+                      {selectedMatch.stylePenaltyA ? <StyleCardMark reason={selectedMatch.stylePenaltyA} count={selectedMatch.stylePenaltyCountA} /> : null}
                     </small>
                   </span>
                   <b>
@@ -620,7 +624,7 @@ export function TournamentResults({
                     />
                     <small>
                       Stile {formatVote(selectedMatch.styleScoreB)}
-                      {selectedMatch.stylePenaltyB ? <StyleCardMark reason={selectedMatch.stylePenaltyB} /> : null}
+                      {selectedMatch.stylePenaltyB ? <StyleCardMark reason={selectedMatch.stylePenaltyB} count={selectedMatch.stylePenaltyCountB} /> : null}
                     </small>
                   </span>
                   <button

@@ -25,13 +25,13 @@ export function FinalServizioPhone({
   votes: Record<DuelSide, number>;
   judges: number;
 }) {
-  // Live, PEN follows the card raised in Arena.
+  // Live, PEN follows the card raised at the end of the bout.
   const sheetsOf = (side: DuelSide) =>
-    view.sheets[side]?.map((sheet): StyleSheet => [...sheet.slice(0, PEN_ROW), view.penalty[side] ? 1 : 0] as StyleSheet);
+    view.sheets[side]?.map((sheet): StyleSheet => [...sheet.slice(0, PEN_ROW), view.penalty[side]] as StyleSheet);
   const cell = (side: DuelSide, row: number) => {
     const sheets = sheetsOf(side);
     if (!sheets) {
-      return row === PEN_ROW ? <span className="fd-phone-value">{view.penalty[side] ? 1 : 0}</span> : <span className="fd-phone-value is-dim" aria-hidden="true">·</span>;
+      return row === PEN_ROW ? <span className="fd-phone-value">{view.penalty[side]}</span> : <span className="fd-phone-value is-dim" aria-hidden="true">·</span>;
     }
     const value = sheets.reduce((sum, sheet) => sum + sheet[row], 0) / sheets.length;
     return <span className={`fd-phone-value${value > 0 && row < PEN_ROW ? " is-lit" : ""}`}>{averageFormatter.format(value)}</span>;
@@ -46,7 +46,7 @@ export function FinalServizioPhone({
         <b>{vote}</b>
         <small>
           {participantName(participants[side])}
-          {view.penalty[side] ? <span className="fd-style-card" role="img" aria-label="Cartellino di Stile" /> : null}
+          {view.penalty[side] > 0 ? <span className="fd-style-card" role="img" aria-label="Cartellino di Stile" /> : null}
         </small>
       </div>
     );

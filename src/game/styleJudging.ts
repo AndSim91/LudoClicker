@@ -13,7 +13,7 @@ import type {
  * voto = 5,5 + 0,2 × punti tecnici + 0,1 × SOG − 0,5 × PEN.
  * Coefficienti dalle Guidelines for Style Judges 2.6.5. Come nella realtà, un
  * incontro normale sta tra 5,5 e 8,5, 3 su una voce è la perfezione e il 10
- * è quasi impossibile. I punti sono relativi al livello del campo del torneo.
+ * è quasi impossibile. Il voto è assoluto (modello C, 07/10): vedi sotto.
  */
 
 // Tecniche complesse (COM) elencate dal documento per ciascuna Forma. Si fanno
@@ -69,23 +69,49 @@ export function isComAndSapd(name: string): boolean {
   return name.includes("Armonica") || name.startsWith("Sync");
 }
 
-const STYLE_ACTION_MAX_FROM_STYLE = 0.15;
-const STYLE_ACTION_FULL_STYLE = 500;
-const STYLE_ACTION_PER_ADVANTAGE = 0.4;
-const STYLE_ACTION_MAX_FROM_ADVANTAGE = 0.2;
-const STYLE_ACTION_CAP = 0.35;
+/**
+ * Modello C del voto di Stile (decisione del 07/10, docs/tournament-system-design.md § 5).
+ * Il voto è assoluto: dipende dallo Stile dell'atleta, non dalla media del campo.
+ * Lo Stile è la qualità (BAS, MOV, DIN, GCC e sanzioni), le Forme sono il
+ * repertorio (COM), la differenza con l'avversario rende più facili le SAPD.
+ */
+const QUALITY_REFERENCE = 250;
+const QUALITY_SLOPE = 1.4;
+
+/** Qualità del giudice 0–3: ~0,5 a 75 di Stile, ~1,2 a 200, ~2,5 a 1.000. */
+export function getStyleQuality(style: number): number {
+  if (!(style > 0)) return 0;
+  return 3 / (1 + (QUALITY_REFERENCE / style) ** QUALITY_SLOPE);
+}
+
+/** Forme conosciute che contano per lo spazio per esprimersi (Corso X escluso). */
+export function countStyleForms(forms: readonly FormId[]): number {
+  return forms.filter((formId) => formId !== "course-x").length;
+}
 
 /**
- * Probabilità di una COM o di una SAPD nell'incontro (decisione del 06/10):
- * fino al 15% secondo lo Stile (pieno a 500), più 0,4 punti per ogni punto
- * percentuale di Stile in più dell'avversario, fino a +20%. Tetto 35%.
+ * Spazio per esprimersi (0–1). Pieno se l'avversario ha tra ~0,75 e 3 volte il
+ * nostro potenziale; cala se ci sovrasta o se è così debole da restare fermo.
+ * Il potenziale è lo Stile più un 10% per ogni Forma di differenza.
  */
-export function getStyleActionChance(style: number, opponentStyle: number): number {
-  const fromStyle = STYLE_ACTION_MAX_FROM_STYLE * Math.min(1, Math.max(0, style) / STYLE_ACTION_FULL_STYLE);
-  const advantage = opponentStyle > 0 ? Math.max(0, style / opponentStyle - 1) : 0;
-  const fromAdvantage = Math.min(STYLE_ACTION_MAX_FROM_ADVANTAGE, STYLE_ACTION_PER_ADVANTAGE * advantage);
-  return Math.min(STYLE_ACTION_CAP, fromStyle + fromAdvantage);
+export function getExpressionSpace(
+  style: number,
+  opponentStyle: number,
+  forms: number,
+  opponentForms: number,
+): number {
+  const gap = Math.log(Math.max(1e-3, style) / Math.max(1e-3, opponentStyle)) + 0.1 * (forms - opponentForms);
+  const overwhelmed = Math.max(0, -gap - 0.3);
+  const stillOpponent = Math.max(0, gap - 1.1);
+  return Math.exp(-(overwhelmed ** 2) / 0.4) * Math.exp(-(stillOpponent ** 2) / 0.6);
 }
+
+const COM_CHANCE = 0.9;
+const SAPD_CHANCE = 0.5;
+const ACTION_POWER = 3.5;
+/** Con 3 Forme che hanno COM per l'arma in mano il repertorio è pieno. */
+const FULL_REPERTOIRE = 3;
+const ACTION_CAP = 3;
 
 export interface StyleActions {
   com: number;
@@ -99,44 +125,64 @@ export interface StyleActionInput {
   weapon: FormBranch;
   style: number;
   opponentStyle: number;
-  /** Probabilità di vincere un assalto: misura quanto l'incontro è alla pari. */
-  assaultChance: number;
+  /** Spazio per esprimersi (getExpressionSpace). */
+  space: number;
+  /** Assalti vinti: COM e SAPD si portano solo in un assalto vinto. */
   scored: number;
   roll: () => number;
 }
 
-/** COM e SAPD con la spada in mano. */
+function actionStrength(style: number, space: number): number {
+  return (getStyleQuality(style) / 3) ** ACTION_POWER * space;
+}
+
+/** Facilità delle SAPD: 0,5–2 secondo il rapporto di Stile con l'avversario. */
+function sapdEase(style: number, opponentStyle: number): number {
+  const ratio = Math.max(1e-3, style) / Math.max(1e-3, opponentStyle);
+  return Math.min(2, Math.max(0.5, 1 + 0.6 * Math.log(ratio)));
+}
+
+/** Probabilità di una SAPD in un assalto vinto (anche l'Armonica del disarmato). */
+export function getSapdChance(style: number, opponentStyle: number, space: number): number {
+  return SAPD_CHANCE * actionStrength(style, space) * sapdEase(style, opponentStyle);
+}
+
+/** COM e SAPD con la spada in mano, assalto vinto per assalto vinto. */
 export function rollStyleActions(input: StyleActionInput): StyleActions {
-  const { roll, scored, assaultChance, forms } = input;
-  const chance = getStyleActionChance(input.style, input.opponentStyle);
+  const { roll, forms } = input;
   const actions: StyleActions = { com: 0, sapd: 0 };
-
-  // COM: solo se integrate nel combattimento (no «farming»).
-  const open = assaultChance <= 0.85 && scored > 0;
   const complexForms = getComplexTechniqueForms(forms, input.weapon);
-  if (open && complexForms.length > 0 && roll() < chance) {
-    const form = pick(roll, complexForms);
-    actions.technique = pick(roll, COMPLEX_TECHNIQUES[form]!);
-    if (isComAndSapd(actions.technique)) {
-      actions.com = 1;
-      actions.sapd = 1;
-    } else {
-      const advanced = form !== "form-1" && form !== "form-2";
-      actions.com = (advanced ? 1 : 0.5) + (roll() < 0.5 ? 0.5 : 0);
-    }
-  }
-
+  const comChance = COM_CHANCE * actionStrength(input.style, input.space) *
+    Math.min(1, complexForms.length / FULL_REPERTOIRE);
+  const sapdChance = getSapdChance(input.style, input.opponentStyle, input.space);
   // SAPD: Sync, Armoniche, Prese, Disarmi; uguali per ogni arma.
   const sapdOptions = [
     "Disarmo",
     ...(forms.includes("form-3-long") ? ["Sync", "Armonica"] : []),
     ...(forms.includes("form-2") ? ["Presa"] : []),
   ];
-  if (scored > 0 && roll() < chance) {
-    actions.highlight = pick(roll, sapdOptions);
-    actions.sapd = Math.max(actions.sapd, 1);
-    if (isComAndSapd(actions.highlight)) actions.com = Math.max(actions.com, 1);
+  for (let assault = 0; assault < input.scored; assault += 1) {
+    if (complexForms.length > 0 && roll() < comChance) {
+      const form = pick(roll, complexForms);
+      const technique = pick(roll, COMPLEX_TECHNIQUES[form]!);
+      actions.technique ??= technique;
+      if (isComAndSapd(technique)) {
+        actions.com += 1;
+        actions.sapd += 1;
+      } else {
+        const advanced = form !== "form-1" && form !== "form-2";
+        actions.com += (advanced ? 1 : 0.5) + (roll() < 0.5 ? 0.5 : 0);
+      }
+    }
+    if (roll() < sapdChance) {
+      const highlight = pick(roll, sapdOptions);
+      actions.highlight ??= highlight;
+      actions.sapd += 1;
+      if (isComAndSapd(highlight)) actions.com += 1;
+    }
   }
+  actions.com = Math.min(ACTION_CAP, actions.com);
+  actions.sapd = Math.min(ACTION_CAP, actions.sapd);
   return actions;
 }
 
@@ -149,7 +195,7 @@ export function rollDisarmedArmonica(
   input: StyleActionInput,
 ): StyleActions {
   if (!input.forms.includes("form-1") || input.scored <= 0) return actions;
-  if (input.roll() >= getStyleActionChance(input.style, input.opponentStyle)) return actions;
+  if (input.roll() >= getSapdChance(input.style, input.opponentStyle, input.space)) return actions;
   const name = pick(input.roll, DISARMED_ARMONICHE);
   return {
     com: Math.max(actions.com, 1),
@@ -196,8 +242,11 @@ export function scoreStyleSheet([bas, mov, din, com, sapd, gcc, dif, sog, pen]: 
 }
 
 export interface StyleJudgementInput {
-  /** Preparazione Stile del giorno (con la forma) divisa per la media del campo. */
-  relativeStyle: number;
+  /** Preparazione Stile del giorno (con la forma). */
+  style: number;
+  opponentStyle: number;
+  /** Spazio per esprimersi (getExpressionSpace). */
+  space: number;
   /** COM e SAPD dell'incontro (rollStyleActions): uguali per tutti i giudici. */
   actions: StyleActions;
   experience: number;
@@ -213,7 +262,9 @@ export interface StyleJudgementInput {
 export interface StyleJudgement {
   vote: number;
   detail: TournamentStyleDetail;
+  /** Il cartellino di Stile: uno solo, a fine incontro, con una o più sanzioni. */
   penalty?: StylePenaltyReason;
+  penalties: number;
 }
 
 const toHalf = (value: number) => Math.min(3, Math.max(0, Math.round(value * 2) / 2));
@@ -222,43 +273,60 @@ function pick<T>(roll: () => number, values: readonly T[]): T {
   return values[Math.min(values.length - 1, Math.floor(roll() * values.length))];
 }
 
-// Taratura: un atleta nella media del campo prende circa 1,25 su BAS, MOV,
-// DIN e GCC (voto ~6,5); chi vince lo Stile viaggia sui 2–2,5 (voto ~7,5).
-// Un 3 è raro: solo chi domina il campo e ha una buona giornata.
-const LEVEL_AT_AVERAGE = 1.25;
-const LEVEL_PER_LOG = 2;
-const TOP_KNEE = 2.25;
-const TOP_SLOPE = 0.7;
-/** Il livello non supera mai 2,6: anche chi stravince il campo prende un 3 solo con una bella giornata. */
-const TOP_SPAN = 0.35;
+/** Qualità a cui il SOG non cambia: sopra sale, sotto scende. */
+const SOG_PIVOT = 1.25;
+
+/** Prima sanzione in un assalto: 30% a 0 di Stile, ~15% a 20, ~4% a 45, ~1% a 75. */
+const SANCTION_CHANCE = 0.3;
+const SANCTION_HALF_STYLE = 20;
+const SANCTION_POWER = 2.5;
+const NEXT_SANCTION = 0.4;
+const SANCTIONS_PER_ASSAULT = 3;
+/** Con 11 sanzioni il voto è 0: oltre non ha senso. */
+export const MAX_STYLE_SANCTIONS = 11;
+
+/**
+ * Sanzioni dell'incontro: a ogni assalto 1, 2 o 3, sempre più improbabili.
+ * Contano poco Stile, un avversario che mette pressione, poca esperienza e
+ * una brutta giornata. Il giudice le scrive tutte su un solo cartellino.
+ */
+function rollSanctions(input: StyleJudgementInput): number {
+  const experienceShare = Math.min(20, Math.max(0, input.experience)) / 20;
+  const badForm = Math.min(1, Math.max(0, (1 - input.condition) / 0.3));
+  const pressure = Math.min(1.6, Math.max(0.7, (input.opponentStyle / Math.max(1, input.style)) ** 0.3));
+  const style = Math.max(0, input.style);
+  const first = SANCTION_CHANCE / (1 + (style / SANCTION_HALF_STYLE) ** SANCTION_POWER) * pressure *
+    (1.3 - 0.6 * experienceShare) * (1 + 0.5 * badForm);
+  let total = 0;
+  for (let assault = 0; assault < input.scored + input.conceded; assault += 1) {
+    let chance = first;
+    for (let count = 0; count < SANCTIONS_PER_ASSAULT && input.roll() < chance; count += 1) {
+      total += 1;
+      chance *= NEXT_SANCTION;
+    }
+  }
+  return Math.min(MAX_STYLE_SANCTIONS, total);
+}
 
 export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
   const { roll, scored, conceded, assaultChance } = input;
   const experienceShare = Math.min(20, Math.max(0, input.experience)) / 20;
-  const raw = LEVEL_AT_AVERAGE + LEVEL_PER_LOG * Math.log(Math.max(0.05, input.relativeStyle));
-  // Sopra 2,25 si sale più piano (pendenza 0,7) verso 2,6: il 3 resta la perfezione.
-  const level = raw <= TOP_KNEE
-    ? raw
-    : TOP_KNEE + TOP_SPAN * (1 - Math.exp((-(raw - TOP_KNEE) * TOP_SLOPE) / TOP_SPAN));
+  const quality = getStyleQuality(input.style);
 
   // Fatti dell'incontro, uguali per tutti i giudici.
   // MOV: iniziativa sull'Orizzonte degli Eventi oltre quanto atteso.
-  const initiative = 1.5 * (scored / (scored + conceded) - assaultChance);
+  const assaults = Math.max(1, scored + conceded);
+  const initiative = 1.5 * (scored / assaults - assaultChance);
   // DIN: giornata; chi ha esperienza di torneo oscilla meno.
   const rhythm = (roll() - 0.5) * 0.6 * (1 - experienceShare / 2);
-
   const { com, sapd, technique, highlight } = input.actions;
+  // DIF: «non ha potuto esprimersi» quanto avrebbe potuto, sovrastato o
+  // davanti a chi resta fermo. Pesa di più per chi ha più qualità.
+  const unexpressed = 3 * (quality / 3) ** 1.5 * (1 - input.space);
 
-  // DIF: sovrastato in Arena e sconfitto, ma capace di andare comunque a segno
-  // («still trying hard and well to score»).
-  const dif = assaultChance < 0.15 && conceded > scored && scored > 0 ? 1 : 0;
-
-  // Cartellino di Stile: può sempre capitare, più spesso a chi è inesperto,
-  // in cattiva forma o sta perdendo male. Vale −0,5 per questo incontro.
-  const badForm = Math.min(1, Math.max(0, (1 - input.condition) / 0.3));
-  const routed = scored === 0 ? 1 : 0;
+  const penalties = rollSanctions(input);
   let penalty: StylePenaltyReason | undefined;
-  if (roll() < 0.01 + 0.03 * (1 - experienceShare) + 0.02 * badForm + 0.015 * routed) {
+  if (penalties > 0) {
     const reason = roll();
     penalty = reason < 0.5 ? "declaration" : reason < 0.8 ? "cura" : "rispetto";
   }
@@ -269,17 +337,17 @@ export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
     // Occhio del giudice largo esattamente mezzo punto: l'arrotondamento al
     // mezzo punto resta giusto in media e non crea pareggi a gradini.
     const eye = () => (roll() - 0.5) * 0.5;
-    const sog = Math.min(3, Math.max(0, Math.floor(roll() * 2.2 + close + 0.3 * (level - LEVEL_AT_AVERAGE))));
+    const sog = Math.min(3, Math.max(0, Math.floor(roll() * 2.2 + close + 0.3 * (quality - SOG_PIVOT))));
     return [
-      toHalf(level + eye()),
-      toHalf(level + initiative + eye()),
-      toHalf(level + rhythm + eye()),
+      toHalf(quality + eye()),
+      toHalf(quality + initiative + eye()),
+      toHalf(quality + rhythm + eye()),
       com,
       sapd,
-      toHalf(level + eye()),
-      dif,
+      toHalf(quality + eye()),
+      unexpressed > 0.05 ? toHalf(unexpressed + eye()) : 0,
       sog,
-      penalty ? 1 : 0,
+      penalties,
     ];
   });
   const vote = sheets.reduce((total, sheet) => total + scoreStyleSheet(sheet), 0) / sheets.length;
@@ -287,6 +355,7 @@ export function judgeStyle(input: StyleJudgementInput): StyleJudgement {
   return {
     vote,
     penalty,
+    penalties,
     detail: {
       sheets,
       ...(technique ? { technique } : {}),

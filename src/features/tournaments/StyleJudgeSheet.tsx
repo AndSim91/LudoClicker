@@ -4,6 +4,7 @@ import { participantName } from "./tournamentPresentation";
 import { StyleCardMark } from "./StyleCardMark";
 import {
   STYLE_PENALTY_LABEL,
+  describePenalty,
   STYLE_SHEET_ROWS,
   describeJudges,
   formatStylePoints,
@@ -32,7 +33,7 @@ export function StyleJudgeSheet({
 
   const cell = (side: typeof left, sheet: typeof sheetA, index: number) => {
     if (sheet) return formatStylePoints(sheet[index]);
-    if (STYLE_SHEET_ROWS[index] === "PEN") return side.penalty ? "1" : "0";
+    if (STYLE_SHEET_ROWS[index] === "PEN") return String(side.penalties);
     return <span aria-hidden="true">·</span>;
   };
   // ponytail: if both athletes are ours, the left one's technique wins the label.
@@ -47,7 +48,7 @@ export function StyleJudgeSheet({
         <div className={a?.ownedContactId ? "is-owned" : undefined}>
           <b>{formatVote(left.vote)}</b>
           <small>{participantName(a)}</small>
-          {left.penalty ? <StyleCardMark reason={left.penalty} /> : null}
+          {left.penalty ? <StyleCardMark reason={left.penalty} count={left.penalties} /> : null}
         </div>
         <span className="style-sheet-arena">
           {match.arenaScoreA}–{match.arenaScoreB}
@@ -56,7 +57,7 @@ export function StyleJudgeSheet({
         <div className={b?.ownedContactId ? "is-owned" : undefined}>
           <b>{formatVote(right.vote)}</b>
           <small>{participantName(b)}</small>
-          {right.penalty ? <StyleCardMark reason={right.penalty} /> : null}
+          {right.penalty ? <StyleCardMark reason={right.penalty} count={right.penalties} /> : null}
         </div>
       </header>
       <table className="style-sheet-rows">
@@ -96,8 +97,8 @@ export function StyleJudgeSheet({
       {[left, right].map((side, index) =>
         side.penalty ? (
           <p key={index} className="style-sheet-penalty">
-            <StyleCardMark reason={side.penalty} />
-            {participantName(index === 0 ? a : b)} · {STYLE_PENALTY_LABEL[side.penalty]} · −0,5
+            <StyleCardMark reason={side.penalty} count={side.penalties} />
+            {participantName(index === 0 ? a : b)} · {STYLE_PENALTY_LABEL[side.penalty]} · {describePenalty(side.penalties)}
           </p>
         ) : null,
       )}

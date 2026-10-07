@@ -4938,7 +4938,9 @@ l'Arena, a destra il telefono di Servizio.
   Una COM o un SAPD compare sopra l'atleta con la Forma («Cruna dell'Ago ·
   COM · Forma 3 Spada Lunga») ed è il colpo decisivo di un assalto vinto da chi
   la esegue. I giudici (2 o 4) stanno a bordo Arena e alzano il cartellino di
-  Stile, a scacchi gialli e neri, quando arriva.
+  Stile, a scacchi gialli e neri, a fine incontro: uno per atleta, con una o
+  più sanzioni da −0,5 (voto di Stile assoluto, modello C del 07/10:
+  `docs/tournament-system-design.md` § 5).
 - **Disarmo** (decisione del 05/10; SAPD = Sync, Armoniche, Prese, Disarmi):
   quando c'è, si vede la spada che vola e cade a terra; l'atleta disarmato
   prende il taglio a mani vuote e chiama «OH!», poi raccoglie la spada.
