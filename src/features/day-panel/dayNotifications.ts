@@ -32,7 +32,8 @@ export type DayNotificationKind =
   | "direct-enrollment"
   | "tournament"
   | "important-event"
-  | "trials-cancelled";
+  | "trials-cancelled"
+  | "renewal";
 
 export type DayNotificationPhase =
   | "scheduled"
@@ -63,6 +64,8 @@ export interface DayNotification {
   tone?: "good" | "bad";
   eyebrow?: string;
   effects?: DayEffect[];
+  /** Mancato rinnovo (R13): the yearly rollout in one card. */
+  renewal?: { departed: number; before?: number; names: string[] };
   timestamp: number;
   startsAt?: number;
   expiresAt?: number;
@@ -416,12 +419,16 @@ export function selectDayNotifications(
     });
   }
 
+  const renewals: GameState["narrative"]["history"] = [];
   for (const event of state.narrative.history) {
     const expiresAt = event.occurredAt + DAY_NOTIFICATION_VISIBILITY_MS;
     if (event.occurredAt > gameNow || gameNow >= expiresAt) continue;
+    if (event.definitionId === "missed-renewal") {
+      renewals.push(event);
+      continue;
+    }
     const definition = narrativeDefinitionsById.get(event.definitionId);
-    // Mancato rinnovo keeps its own look (concept R, still to choose).
-    const isEventOrMishap = definition !== undefined && event.definitionId !== "missed-renewal";
+    const isEventOrMishap = definition !== undefined;
     const tone = isEventOrMishap ? definition.kind === "negative" ? "bad" : "good" : undefined;
     notifications.push({
       id: `important-event-${event.id}`,
@@ -453,7 +460,44 @@ export function selectDayNotifications(
     });
   }
 
+  notifications.push(...selectRenewalNotifications(renewals));
+
   return orderDayNotifications(groupCrowdedNotifications(notifications));
+}
+
+export const RENEWAL_CELLS = 42;
+
+/** Which of the appello's cells are crossed out: the share that left, spread over the grid. */
+export function getRenewalCrossedCells(departed: number, before: number): Set<number> {
+  const crossed = departed <= 0 || before <= 0
+    ? 0
+    : Math.min(RENEWAL_CELLS, Math.max(1, Math.round((departed / before) * RENEWAL_CELLS)));
+  return new Set(Array.from({ length: crossed }, (_, index) => Math.floor(((index + 0.5) * RENEWAL_CELLS) / crossed)));
+}
+
+/** Mancato rinnovo (R13, 07/10): one card per yearly rollout, whatever its number of records. */
+function selectRenewalNotifications(records: GameState["narrative"]["history"]): DayNotification[] {
+  const byRollout = new Map<number, GameState["narrative"]["history"]>();
+  for (const record of records) byRollout.set(record.occurredAt, [...(byRollout.get(record.occurredAt) ?? []), record]);
+  return [...byRollout.entries()].map(([occurredAt, rollout]) => {
+    const [first] = rollout;
+    const names = rollout.flatMap((record) => record.person ? [record.person.displayName] : []);
+    return {
+      id: `renewal-${first.id}`,
+      kind: "renewal" as const,
+      phase: "neutral" as const,
+      title: first.title,
+      detail: first.summary,
+      timestamp: occurredAt,
+      expiresAt: occurredAt + DAY_NOTIFICATION_VISIBILITY_MS,
+      renewal: {
+        // Records saved before 07/10 carry no totals: one record per named member then.
+        departed: first.renewal?.departed ?? names.length,
+        before: first.renewal?.before,
+        names,
+      },
+    };
+  });
 }
 
 /** The pastiglie of an Evento or Imprevisto; the colour says whether it helps, not the sign. */

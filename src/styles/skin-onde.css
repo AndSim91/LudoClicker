@@ -1232,3 +1232,22 @@
     transform: translateX(28px);
   }
 }
+
+/* Mancato rinnovo (R13) in Onde: the ruled sheet at night. */
+:root[data-theme="dark"] .day-renewal {
+  --renewal-cell: var(--onde-wave);
+  --renewal-cross: #ff8a78;
+}
+
+:root[data-theme="dark"] .appointment.day-renewal-body {
+  border-color: rgb(185 198 204 / 35%);
+  background: #173449 repeating-linear-gradient(transparent 0 21px, rgb(108 211 214 / 12%) 21px 22px);
+}
+
+:root[data-theme="dark"] .appointment .day-renewal-eyebrow {
+  color: #b9c6cc;
+}
+
+:root[data-theme="dark"] .appointment .day-renewal-stamp {
+  background: rgb(23 52 73 / 60%);
+}

@@ -246,22 +246,27 @@ function processMemberDepartures(
   const updated = grouped.state;
   const totalDeparted = departed.length + grouped.departed;
   if (totalDeparted === 0) return updated;
+  const renewal = { departed: totalDeparted, before: state.school.activeMembers };
   const withNarrative: GameState = {
     ...updated,
     narrative: {
       ...updated.narrative,
       history: [
         ...updated.narrative.history,
-        ...departed.map((member, index) => ({
+        // One record per named member; with only grouped departures, one record without a name.
+        ...(departed.length > 0 ? departed : [undefined]).map((member, index) => ({
           id: makeGameId("narrative", now, updated.narrative.history.length + index),
           definitionId: MISSED_RENEWAL_EVENT.id,
           title: MISSED_RENEWAL_EVENT.title,
           occurredAt: now,
           summary: MISSED_RENEWAL_EVENT.description,
-          person: {
-            displayName: `${member.firstName} ${member.lastName}`,
-            rarity: member.rarity,
-          },
+          renewal,
+          ...(member ? {
+            person: {
+              displayName: `${member.firstName} ${member.lastName}`,
+              rarity: member.rarity,
+            },
+          } : {}),
         })),
       ].slice(-GAME_CONFIG.narrativeHistoryLimit),
     },

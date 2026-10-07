@@ -14,6 +14,8 @@ import {
   getDayAlertKey,
   getDayPipFill,
   getNarrativeEffects,
+  getRenewalCrossedCells,
+  RENEWAL_CELLS,
   selectDayNotifications,
 } from "./dayNotifications";
 
@@ -359,19 +361,16 @@ describe("Eventi, Imprevisti e avvisi (07/10)", () => {
         history: [
           { id: "bad", definitionId: "unexpected-repair", title: "Un piccolo disastro", occurredAt: 50_000, summary: "" },
           { id: "good", definitionId: "word-of-mouth", title: "Passaparola inatteso", occurredAt: 50_000, summary: "", effects: { contacts: 3 } },
-          { id: "renewal", definitionId: "missed-renewal", title: "Mancato rinnovo", occurredAt: 50_000, summary: "Ciao." },
         ],
       },
     };
-    const [bad, good, renewal] = ["bad", "good", "renewal"].map((id) =>
+    const [bad, good] = ["bad", "good"].map((id) =>
       selectDayNotifications(state, 51_000).find((notification) => notification.id === `important-event-${id}`)!);
     expect(bad).toMatchObject({ tone: "bad", eyebrow: "Imprevisto" });
     expect(bad.effects?.map((effect) => effect.text)).toEqual(["usura", "spada rotta"]);
     expect(good).toMatchObject({ tone: "good", eyebrow: "Evento" });
     expect(good.effects?.[0]).toMatchObject({ amount: "+3", keyword: "Contatti" });
-    expect(renewal.tone).toBeUndefined();
     expect(getDayAlertKey(bad, 1)).toBe("important-event-bad");
-    expect(getDayAlertKey(renewal, 1)).toBeNull();
   });
 
   it("gathers trials cancelled for lack of swords in one red card, an avviso once per month", () => {
@@ -394,5 +393,35 @@ describe("Eventi, Imprevisti e avvisi (07/10)", () => {
     expect(cancelled?.effects?.[0]).toMatchObject({ amount: "2", text: "prove saltate", good: false });
     expect(getDayAlertKey(cancelled!, 3)).toBe(getDayAlertKey({ ...cancelled!, id: "other" }, 3));
     expect(getDayAlertKey(cancelled!, 4)).not.toBe(getDayAlertKey(cancelled!, 3));
+  });
+});
+
+describe("Mancato rinnovo (R13)", () => {
+  it("shows one card per yearly rollout with the totals and the names", () => {
+    const initial = createInitialState(10_000);
+    const record = (id: string, name?: string) => ({
+      id,
+      definitionId: "missed-renewal" as const,
+      title: "Mancato rinnovo",
+      occurredAt: 50_000,
+      summary: "",
+      renewal: { departed: 12, before: 140 },
+      ...(name ? { person: { displayName: name, rarity: "common" as const } } : {}),
+    });
+    const state: GameState = {
+      ...initial,
+      narrative: { ...initial.narrative, history: [record("a", "Giulia Calcagno"), record("b", "Mauro Rizzo")] },
+    };
+    const renewals = selectDayNotifications(state, 51_000).filter((notification) => notification.kind === "renewal");
+    expect(renewals).toHaveLength(1);
+    expect(renewals[0].renewal).toEqual({ departed: 12, before: 140, names: ["Giulia Calcagno", "Mauro Rizzo"] });
+    expect(getDayAlertKey(renewals[0], 1)).toBeNull();
+  });
+
+  it("crosses out the share that left, at least one cell", () => {
+    expect(getRenewalCrossedCells(12, 140).size).toBe(4);
+    expect(getRenewalCrossedCells(1, 100_000).size).toBe(1);
+    expect(getRenewalCrossedCells(0, 140).size).toBe(0);
+    expect(getRenewalCrossedCells(500, 100).size).toBe(RENEWAL_CELLS);
   });
 });

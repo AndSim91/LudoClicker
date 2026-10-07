@@ -19,6 +19,8 @@ import {
   getDayNotificationGroupKey,
   getDayPipFill,
   isSpecialDayPerson,
+  RENEWAL_CELLS,
+  getRenewalCrossedCells,
   type DayEffect,
   orderDayNotifications,
   selectDayNotifications,
@@ -47,7 +49,46 @@ const notificationIcons: Record<DayNotificationKind, IconName> = {
   tournament: "trophy",
   "important-event": "flag",
   "trials-cancelled": "warning",
+  renewal: "calendar",
 };
+
+const RENEWAL_NAMES = 3;
+
+/** Mancato rinnovo (R13, 07/10): the appello on ruled paper, names crossed out, a stamp. */
+function RenewalCard({ notification }: { notification: DayNotification }) {
+  const { departed, before, names } = notification.renewal!;
+  const crossed = before === undefined ? undefined : getRenewalCrossedCells(departed, before);
+  const others = departed - Math.min(names.length, RENEWAL_NAMES);
+  return (
+    <div className="appointment-entry day-renewal">
+      <div
+        className="appointment day-renewal-body"
+        aria-label={before === undefined
+          ? `${notification.title}: ${departed} iscritti non rinnovano`
+          : `Rinnovi dell'anno: ${before - departed} su ${before} rinnovano`}
+      >
+        <span className="day-renewal-eyebrow">Rinnovi dell'anno</span>
+        <strong className="day-renewal-title">
+          {before === undefined
+            ? `${departed} ${departed === 1 ? "iscritto non rinnova" : "iscritti non rinnovano"}`
+            : `${before - departed} su ${before} rinnovano`}
+        </strong>
+        {crossed ? (
+          <span className="day-renewal-grid" aria-hidden="true">
+            {Array.from({ length: RENEWAL_CELLS }, (_, index) => (
+              <i key={index} className={crossed.has(index) ? "is-crossed" : undefined} />
+            ))}
+          </span>
+        ) : null}
+        <span className="day-renewal-names">
+          {names.slice(0, RENEWAL_NAMES).map((name) => <s key={name}>{name}</s>)}
+          {others > 0 ? <small>{names.length > 0 ? `e altri ${others}` : `${others} iscritti`}</small> : null}
+          <span className="day-renewal-stamp" aria-hidden="true">Non rinnovato</span>
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function formatCountdown(milliseconds: number) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1_000));
@@ -179,6 +220,8 @@ export function DayNotificationEntry({
       valueText={expiryValueText}
     />
   );
+
+  if (notification.kind === "renewal" && notification.renewal) return <RenewalCard notification={notification} />;
 
   // Eventi, Imprevisti and cancelled trials: the V1 «Scheda» (07/10).
   if (notification.tone && notification.eyebrow) {
