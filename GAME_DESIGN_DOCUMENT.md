@@ -2712,6 +2712,11 @@ un'immagine, quindi resta nitido a ogni risoluzione. Quattro file di onde con
 una cresta di schiuma e scie che scendono sul fronte scorrono piano, ognuna a
 una velocità diversa; in alto a destra restano le due spade, azzurra e oro, in
 diagonale. Con «Riduci animazioni» il mare resta fermo; in Outlook non c'è.
+In **Modalità Outlook** lo sfondo è la «Carta intestata» (concept O3, 07/10):
+grigio chiaro, una fascia blu sottile in alto e, in basso, onde a filo appena
+accennate; tutto fermo e in solo CSS. In entrambe le modalità una nota a piè di
+pagina (concept H3) ricorda che **F9** cambia modalità in qualsiasi momento, e
+dice in quale si passa.
 
 Avvisi, riepiloghi e traguardi nella Posta li firma **A.N.D.E.R.**, l'assistente
 della scuola; le email della campagna e il benvenuto mantengono i loro mittenti.

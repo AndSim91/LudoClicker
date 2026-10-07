@@ -380,6 +380,26 @@
   position: relative;
 }
 
+/* La nota F9 sta sopra il mare: una pillola scura perché si legga sulle onde. */
+:root[data-theme="dark"] .profile-mode-hint {
+  right: auto;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 5px 14px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: rgb(2 26 44 / 72%);
+  transform: translateX(-50%);
+}
+
+:root[data-theme="dark"] .profile-mode-hint kbd {
+  border-color: rgb(224 166 74 / 70%);
+  color: var(--onde-gold-bright);
+  background: var(--onde-groove);
+  font-family: var(--font-display);
+}
+
 :root[data-theme="dark"] .profile-dialog {
   border-color: rgb(224 166 74 / 45%);
   background: rgb(10 58 87 / 94%);

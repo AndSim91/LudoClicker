@@ -5,9 +5,42 @@
   place-items: center;
   min-height: 100vh;
   padding: 24px;
+  /* Modalità Outlook, concept O3 «Carta intestata» (07/10/2026): fascia blu
+     sottile in alto e onde a filo appena accennate in basso. Ferma, solo CSS. */
   background:
-    radial-gradient(circle at 20% 15%, rgb(20 115 230 / 16%), transparent 34%),
-    linear-gradient(145deg, #eef5fb, #f8fafc 58%, #e9f2f9);
+    linear-gradient(#0f6cbd 0 4px, transparent 4px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 300' fill='none' stroke='%230f6cbd' stroke-width='2'%3E%3Cpath d='M-0 40Q130 20 260 40T520 40T780 40T1040 40T1300 40T1560 40T1820 40' stroke-opacity='0.12'/%3E%3Cpath d='M-80 76Q60 52 200 76T480 76T760 76T1040 76T1320 76T1600 76T1880 76' stroke-opacity='0.145'/%3E%3Cpath d='M-172 112Q-22 84 128 112T428 112T728 112T1028 112T1328 112T1628 112' stroke-opacity='0.17'/%3E%3Cpath d='M-275 148Q-115 116 45 148T365 148T685 148T1005 148T1325 148T1645 148' stroke-opacity='0.195'/%3E%3Cpath d='M-390 184Q-220 148 -50 184T290 184T630 184T970 184T1310 184T1650 184' stroke-opacity='0.22'/%3E%3Cpath d='M-516 220Q-336 180 -156 220T204 220T564 220T924 220T1284 220T1644 220' stroke-opacity='0.245'/%3E%3Cpath d='M-653 256Q-463 212 -273 256T107 256T487 256T867 256T1247 256T1627 256' stroke-opacity='0.27'/%3E%3C/svg%3E") center bottom / 100% auto no-repeat,
+    linear-gradient(#f6f7f9, #eceff3);
+}
+
+/* Concept H3: la nota F9 a piè di pagina, in entrambe le modalità. Fixed e non
+   absolute: dentro la griglia centrata anche un absolute verrebbe centrato. */
+.profile-mode-hint {
+  position: fixed;
+  right: 16px;
+  bottom: 18px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.profile-mode-hint kbd {
+  min-width: 30px;
+  padding: 1px 7px;
+  border: 1px solid #b8c0ca;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: var(--ink);
+  background: #f7f8fa;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .profile-dialog {

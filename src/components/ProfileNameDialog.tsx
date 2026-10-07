@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { GAME_CONFIG } from "../game/config";
+import { useOutlookTheme } from "../shared/useOutlookTheme";
 import { OndeSea } from "./OndeSea";
 
 export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string) => void }) {
   const [displayName, setDisplayName] = useState("");
+  const isOutlook = useOutlookTheme();
   const normalizedName = displayName.trim();
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -43,6 +45,10 @@ export function ProfileNameDialog({ onSubmit }: { onSubmit: (displayName: string
           <button type="submit" disabled={!normalizedName}>Inizia</button>
         </form>
       </section>
+      <p className="profile-mode-hint">
+        <kbd>F9</kbd>
+        {isOutlook ? "in qualsiasi momento per la Modalità Onde" : "in qualsiasi momento per la Modalità Outlook, da ufficio"}
+      </p>
     </main>
   );
 }
