@@ -9,12 +9,13 @@ import {
 import { selectDayTrials } from "../../game/selectors";
 import type {
   GameState,
+  NarrativeEffects,
   PersonRarity,
   TournamentResult,
 } from "../../game/types";
 import { findUpcomingTournament } from "../tournaments/tournamentPresentation";
 import { getOwnedFinal } from "../tournaments/finalDuel";
-import { formatList } from "../../shared/formatters";
+import { formatList, formatStat } from "../../shared/formatters";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
 export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
@@ -30,7 +31,8 @@ export type DayNotificationKind =
   | "trial-summary"
   | "direct-enrollment"
   | "tournament"
-  | "important-event";
+  | "important-event"
+  | "trials-cancelled";
 
 export type DayNotificationPhase =
   | "scheduled"
@@ -40,12 +42,27 @@ export type DayNotificationPhase =
   | "positive"
   | "neutral";
 
+/** One pastiglia under an Evento or Imprevisto: what it did to the game (07/10). */
+export interface DayEffect {
+  icon: "contact" | "coin" | "wrench" | "warning" | "check" | "calendar";
+  amount: string;
+  /** A game number («Contatti»): shown bold with its capital letter. */
+  keyword?: string;
+  text?: string;
+  /** Good for the school, whatever the sign: «−30 usura» is good. */
+  good: boolean;
+}
+
 export interface DayNotification {
   id: string;
   kind: DayNotificationKind;
   phase: DayNotificationPhase;
   title: string;
   detail: string;
+  /** Eventi (good, green) and Imprevisti or problems (bad, red). */
+  tone?: "good" | "bad";
+  eyebrow?: string;
+  effects?: DayEffect[];
   timestamp: number;
   startsAt?: number;
   expiresAt?: number;
@@ -145,6 +162,9 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
   let earliestScheduledStart: number | undefined;
   let tutorialTarget = false;
   const ordinaryPips: DayPip[] = [];
+  let cancelledCount = 0;
+  let cancelledFirst = Number.POSITIVE_INFINITY;
+  let cancelledExpiresAt = 0;
 
   for (const trial of selectDayTrials(state, gameNow)) {
     const contact = contactsById.get(trial.contactId);
@@ -189,6 +209,13 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       specialTrialNotifications.push(notification);
       continue;
     }
+    // No free sword: one red «Prove annullate» card, apart from the ordinary trials (07/10).
+    if (cancelled) {
+      cancelledCount += 1;
+      cancelledFirst = Math.min(cancelledFirst, terminalTimestamp);
+      cancelledExpiresAt = Math.max(cancelledExpiresAt, expiresAt ?? 0);
+      continue;
+    }
 
     trialCount += 1;
     ordinaryPips.push(...notification.pips!);
@@ -223,9 +250,26 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     ordinaryTrialNotifications.push(notification);
   }
 
-  if (trialCount === 0) return specialTrialNotifications;
+  const cancelledNotifications: DayNotification[] = cancelledCount === 0 ? [] : [{
+    id: "trials-cancelled",
+    kind: "trials-cancelled",
+    phase: "lost",
+    tone: "bad",
+    eyebrow: "Palestra",
+    title: cancelledCount === 1 ? "Prova annullata" : "Prove annullate",
+    detail: "Nessuna spada libera da prestare.",
+    timestamp: cancelledFirst,
+    expiresAt: cancelledExpiresAt,
+    effects: [{
+      icon: "calendar",
+      amount: String(cancelledCount),
+      text: cancelledCount === 1 ? "prova saltata" : "prove saltate",
+      good: false,
+    }],
+  }];
+  if (trialCount === 0) return [...specialTrialNotifications, ...cancelledNotifications];
   if (!groupOrdinaryTrialsByDefault && trialCount <= DAY_TRIAL_NOTIFICATION_LIMIT) {
-    return [...specialTrialNotifications, ...ordinaryTrialNotifications];
+    return [...specialTrialNotifications, ...cancelledNotifications, ...ordinaryTrialNotifications];
   }
 
   const phase: DayNotificationPhase = inProgressCount > 0
@@ -244,7 +288,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     formatTrialCount(lostCount, "senza iscrizione", "senza iscrizione"),
   ].filter((item): item is string => item !== undefined));
 
-  return [...specialTrialNotifications, {
+  return [...specialTrialNotifications, ...cancelledNotifications, {
     id: "trial-summary",
     kind: "trial-summary",
     phase,
@@ -376,12 +420,27 @@ export function selectDayNotifications(
     const expiresAt = event.occurredAt + DAY_NOTIFICATION_VISIBILITY_MS;
     if (event.occurredAt > gameNow || gameNow >= expiresAt) continue;
     const definition = narrativeDefinitionsById.get(event.definitionId);
+    // Mancato rinnovo keeps its own look (concept R, still to choose).
+    const isEventOrMishap = definition !== undefined && event.definitionId !== "missed-renewal";
+    const tone = isEventOrMishap ? definition.kind === "negative" ? "bad" : "good" : undefined;
     notifications.push({
       id: `important-event-${event.id}`,
       kind: "important-event",
       phase: definition?.tone === "positive" ? "positive" : "neutral",
       title: event.title,
-      detail: event.summary,
+      // The pastiglie carry the effect, so the text is the definition's alone.
+      detail: isEventOrMishap ? definition.description : event.summary,
+      ...(tone ? {
+        tone,
+        eyebrow: tone === "bad" ? "Imprevisto" : "Evento",
+        effects: getNarrativeEffects(event.effects ?? {
+          contacts: definition!.contactDelta,
+          euros: definition!.euroDelta,
+          wear: definition!.wearDelta,
+          damagedSwords: definition!.damagedSwordsDelta,
+          repairedSwords: definition!.repairedSwordsDelta,
+        }),
+      } : {}),
       timestamp: event.occurredAt,
       expiresAt,
       person: event.person
@@ -395,6 +454,46 @@ export function selectDayNotifications(
   }
 
   return orderDayNotifications(groupCrowdedNotifications(notifications));
+}
+
+/** The pastiglie of an Evento or Imprevisto; the colour says whether it helps, not the sign. */
+export function getNarrativeEffects(effects: NarrativeEffects): DayEffect[] {
+  const list: DayEffect[] = [];
+  const sign = (value: number) => value > 0 ? `+${value}` : `−${Math.abs(value)}`;
+  if (effects.contacts) list.push({ icon: "contact", amount: sign(effects.contacts), keyword: "Contatti", good: effects.contacts > 0 });
+  if (effects.euros) {
+    list.push({ icon: "coin", amount: `${effects.euros > 0 ? "+" : "−"}${formatStat(Math.abs(effects.euros))} €`, good: effects.euros > 0 });
+  }
+  if (effects.wear) list.push({ icon: "wrench", amount: sign(effects.wear), text: "usura", good: effects.wear < 0 });
+  if (effects.damagedSwords) {
+    list.push({ icon: "warning", amount: String(effects.damagedSwords), text: effects.damagedSwords === 1 ? "spada rotta" : "spade rotte", good: false });
+  }
+  if (effects.repairedSwords) {
+    list.push({ icon: "check", amount: String(effects.repairedSwords), text: effects.repairedSwords === 1 ? "spada riparata" : "spade riparate", good: true });
+  }
+  return list;
+}
+
+/**
+ * G4 (07/10): the notifications that become an avviso when the giornata is closed,
+ * as Andrea chose them. Each key fires once; null means «only in the giornata».
+ * Prove annullate fire at most once per game month; a Legendary's trial when booked
+ * and when it ends; tournaments when announced and when done.
+ */
+export function getDayAlertKey(notification: DayNotification, currentMonth: number): string | null {
+  switch (notification.kind) {
+    case "important-event":
+      return notification.tone ? notification.id : null;
+    case "trials-cancelled":
+      return `trials-cancelled-${currentMonth}`;
+    case "tournament":
+      return `${notification.id}:${notification.phase === "scheduled" ? "announced" : "done"}`;
+    case "trial":
+      if (!isSpecialDayPerson(notification)) return null;
+      return `${notification.id}:${notification.phase === "scheduled" || notification.phase === "in-progress" ? "booked" : "ended"}`;
+    default:
+      return null;
+  }
 }
 
 export function getDayNotificationGroupKey(notification: DayNotification): string {
@@ -441,6 +540,7 @@ function groupCrowdedNotifications(notifications: DayNotification[]): DayNotific
       timestamp: first.timestamp,
       expiresAt: Math.max(...sorted.map((member) => member.expiresAt ?? first.timestamp)),
       groupKey: key,
+      ...(first.tone ? { tone: first.tone, eyebrow: first.eyebrow } : {}),
     });
   }
   return [...notifications.filter((notification) => !grouped.has(notification)), ...summaries];

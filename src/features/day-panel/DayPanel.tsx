@@ -10,7 +10,7 @@ import { memo, useState, type CSSProperties } from "react";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
-import { getRarityClassName } from "../../shared/rarityPresentation";
+import { getPresentedRarityLabel, getRarityClassName } from "../../shared/rarityPresentation";
 import { useMediaQuery } from "../../shared/useMediaQuery";
 import { Icon, type IconName } from "../../components/common/Icon";
 import { ProgressBar } from "../../components/common/ProgressBar";
@@ -19,6 +19,7 @@ import {
   getDayNotificationGroupKey,
   getDayPipFill,
   isSpecialDayPerson,
+  type DayEffect,
   orderDayNotifications,
   selectDayNotifications,
   type DayNotification,
@@ -45,6 +46,7 @@ const notificationIcons: Record<DayNotificationKind, IconName> = {
   "direct-enrollment": "people",
   tournament: "trophy",
   "important-event": "flag",
+  "trials-cancelled": "warning",
 };
 
 function formatCountdown(milliseconds: number) {
@@ -96,7 +98,33 @@ const ShortGoalCard = memo(function ShortGoalCard({
   );
 });
 
-function DayNotificationEntry({
+function DayEffects({ effects }: { effects: readonly DayEffect[] }) {
+  return (
+    <span className="day-effects">
+      {effects.map((effect, index) => (
+        <span key={index} className={effect.good ? "day-effect is-good" : "day-effect is-bad"}>
+          <Icon name={effect.icon} />
+          {effect.amount}
+          {effect.keyword ? <> <b>{effect.keyword}</b></> : null}
+          {effect.text ? ` ${effect.text}` : null}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function getInitials(displayName: string): string {
+  return displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+}
+
+function getLegendaryTrialState(notification: DayNotification, timing: string): string {
+  if (notification.phase === "scheduled") return timing;
+  if (notification.phase === "in-progress") return "In palestra";
+  if (notification.phase === "enrolled") return "Iscritto";
+  return notification.detail ? "Annullata" : "Non iscritto";
+}
+
+export function DayNotificationEntry({
   notification,
   now,
   isTutorialTrial,
@@ -141,6 +169,71 @@ function DayNotificationEntry({
   const tournamentStatus = notification.phase === "scheduled" ? "Al via" : undefined;
   const accessibleTiming =
     isTournament && notification.phase !== "scheduled" ? "Fine" : timing;
+
+  const expiry = expiryProgress === undefined ? null : (
+    <ProgressBar
+      className="appointment-expiry"
+      label={`Tempo residuo della notifica: ${accessibleSubject}`}
+      value={expiryProgress}
+      durationMs={expiryDurationMs}
+      valueText={expiryValueText}
+    />
+  );
+
+  // Eventi, Imprevisti and cancelled trials: the V1 «Scheda» (07/10).
+  if (notification.tone && notification.eyebrow) {
+    return (
+      <div
+        className={`appointment-entry day-card is-${notification.tone} day-notification-${notification.kind}`}
+        onMouseEnter={onPause}
+        onMouseLeave={onResume}
+      >
+        <div className="appointment day-card-body" aria-label={`${notification.eyebrow}: ${notification.title}`}>
+          <span className="day-card-eyebrow">
+            <Icon name={notification.tone === "bad" ? "warning" : "spark"} />
+            {notification.eyebrow}
+          </span>
+          <strong className="day-card-title">{notification.title}</strong>
+          {notification.detail ? <small>{notification.detail}</small> : null}
+          {notification.effects && notification.effects.length > 0 ? <DayEffects effects={notification.effects} /> : null}
+        </div>
+        {expiry}
+      </div>
+    );
+  }
+
+  // A Legendary's trial: portrait with the countdown ring (L1 + L3, 07/10).
+  if (notification.kind === "trial" && notification.person && isSpecialDayPerson(notification)) {
+    const pip = notification.pips?.[0];
+    const ring = notification.phase === "scheduled" && pip ? getDayPipFill(pip, now) : 1;
+    const rarityClass = getRarityClassName(notification.person.rarity, notification.person.secretLegendary);
+    const state = getLegendaryTrialState(notification, timing);
+    return (
+      <div
+        className={`appointment-entry day-legend ${rarityClass} is-${notification.phase}`}
+        data-tutorial-region={isTutorialTrial ? "first-trial-row" : undefined}
+        data-tutorial-target={isTutorialTrial ? "true" : undefined}
+        onMouseEnter={onPause}
+        onMouseLeave={onResume}
+      >
+        <div className="appointment day-legend-body" aria-label={`${accessibleSubject}: ${state}`}>
+          <span className="day-legend-ring" style={{ "--ring": ring } as CSSProperties} aria-hidden="true">
+            <span className={`person-avatar ${rarityClass}`}>{getInitials(notification.person.displayName)}</span>
+          </span>
+          <span className="day-legend-copy">
+            <span className="day-legend-rarity">
+              {getPresentedRarityLabel(notification.person.rarity, notification.person.secretLegendary)}
+            </span>
+            <strong className={`rarity-name ${rarityClass}`}>{notification.person.displayName}</strong>
+            <span className="day-legend-line">
+              Lezione di prova <span className="day-legend-state">{state}</span>
+            </span>
+          </span>
+        </div>
+        {expiry}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -198,15 +291,7 @@ function DayNotificationEntry({
           ) : null}
         </div>
       </div>
-      {expiryProgress === undefined ? null : (
-        <ProgressBar
-          className="appointment-expiry"
-          label={`Tempo residuo della notifica: ${accessibleSubject}`}
-          value={expiryProgress}
-          durationMs={expiryDurationMs}
-          valueText={expiryValueText}
-        />
-      )}
+      {expiry}
     </div>
   );
 }

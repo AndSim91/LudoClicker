@@ -11,7 +11,9 @@ import {
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
   capDayPips,
+  getDayAlertKey,
   getDayPipFill,
+  getNarrativeEffects,
   selectDayNotifications,
 } from "./dayNotifications";
 
@@ -338,5 +340,59 @@ describe("selectDayNotifications", () => {
         .filter((notification) => notification.kind === "tournament")
         .map((notification) => notification.id),
     ).toEqual(["tournament-chronicles-a", "tournament-chronicles-b"]);
+  });
+});
+
+describe("Eventi, Imprevisti e avvisi (07/10)", () => {
+  it("colours the pastiglie by what helps the school, not by the sign", () => {
+    expect(getNarrativeEffects({ contacts: 2, euros: 1_000, wear: -30, repairedSwords: 1 }).map((effect) => [effect.amount, effect.good]))
+      .toEqual([["+2", true], ["+1.000 €", true], ["−30", true], ["1", true]]);
+    expect(getNarrativeEffects({ wear: 30, damagedSwords: 1 }).map((effect) => effect.good)).toEqual([false, false]);
+  });
+
+  it("makes negative events red Imprevisti with their effects, positive ones green Eventi", () => {
+    const initial = createInitialState(10_000);
+    const state: GameState = {
+      ...initial,
+      narrative: {
+        ...initial.narrative,
+        history: [
+          { id: "bad", definitionId: "unexpected-repair", title: "Un piccolo disastro", occurredAt: 50_000, summary: "" },
+          { id: "good", definitionId: "word-of-mouth", title: "Passaparola inatteso", occurredAt: 50_000, summary: "", effects: { contacts: 3 } },
+          { id: "renewal", definitionId: "missed-renewal", title: "Mancato rinnovo", occurredAt: 50_000, summary: "Ciao." },
+        ],
+      },
+    };
+    const [bad, good, renewal] = ["bad", "good", "renewal"].map((id) =>
+      selectDayNotifications(state, 51_000).find((notification) => notification.id === `important-event-${id}`)!);
+    expect(bad).toMatchObject({ tone: "bad", eyebrow: "Imprevisto" });
+    expect(bad.effects?.map((effect) => effect.text)).toEqual(["usura", "spada rotta"]);
+    expect(good).toMatchObject({ tone: "good", eyebrow: "Evento" });
+    expect(good.effects?.[0]).toMatchObject({ amount: "+3", keyword: "Contatti" });
+    expect(renewal.tone).toBeUndefined();
+    expect(getDayAlertKey(bad, 1)).toBe("important-event-bad");
+    expect(getDayAlertKey(renewal, 1)).toBeNull();
+  });
+
+  it("gathers trials cancelled for lack of swords in one red card, an avviso once per month", () => {
+    const initial = createInitialState(10_000);
+    const contacts = [0, 1].map((index) => ({ ...initial.contacts[0], id: `c-${index}`, status: "lost" as const }));
+    const state: GameState = {
+      ...initial,
+      contacts,
+      scheduledTrials: contacts.map((contact, index) => ({
+        id: `t-${index}`,
+        contactId: contact.id,
+        startsAt: 20_000,
+        resolvesAt: 50_000,
+        resultSeed: index,
+        status: "cancelled" as const,
+      })),
+    };
+    const cancelled = selectDayNotifications(state, 21_000).find((notification) => notification.kind === "trials-cancelled");
+    expect(cancelled).toMatchObject({ title: "Prove annullate", tone: "bad", eyebrow: "Palestra" });
+    expect(cancelled?.effects?.[0]).toMatchObject({ amount: "2", text: "prove saltate", good: false });
+    expect(getDayAlertKey(cancelled!, 3)).toBe(getDayAlertKey({ ...cancelled!, id: "other" }, 3));
+    expect(getDayAlertKey(cancelled!, 4)).not.toBe(getDayAlertKey(cancelled!, 3));
   });
 });

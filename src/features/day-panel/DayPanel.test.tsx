@@ -546,7 +546,11 @@ describe("DayPanel", () => {
     render(<DayPanel state={state} />);
 
     expect(screen.getByText("Riparazione non programmata")).toBeVisible();
-    expect(screen.getByText("Una spada richiede ricambi.")).toBeVisible();
+    // An Imprevisto: red card, the definition's text and its effects as pastiglie.
+    expect(screen.getByText("Imprevisto")).toBeVisible();
+    expect(screen.getByText("Non so cosa sia successo, non sono stato io!")).toBeVisible();
+    expect(screen.getByText("+30 usura")).toHaveClass("day-effect", "is-bad");
+    expect(screen.getByText("1 spada rotta")).toHaveClass("day-effect", "is-bad");
 
     act(() => {
       vi.advanceTimersByTime(5_000);

@@ -109,6 +109,13 @@ export function processNarrativeEvent(
           title: definition.title,
           occurredAt: now,
           summary,
+          effects: {
+            contacts: contacts.length || undefined,
+            euros: euroDelta || undefined,
+            wear: definition.wearDelta,
+            damagedSwords: definition.damagedSwordsDelta,
+            repairedSwords: definition.repairedSwordsDelta,
+          },
         },
       ].slice(-GAME_CONFIG.narrativeHistoryLimit),
     },

@@ -21,7 +21,9 @@ import { MessageList } from "../components/outlook-shell/MessageList";
 import { SentMailDetail } from "../components/outlook-shell/SentMailDetail";
 import { TitleBar } from "../components/outlook-shell/TitleBar";
 import { OverviewView } from "../features/OverviewView";
-import { DayPanel } from "../features/day-panel/DayPanel";
+import { DAY_PANEL_MEDIA_QUERY, DayPanel } from "../features/day-panel/DayPanel";
+import { DayAlerts } from "../features/day-panel/DayAlerts";
+import { useMediaQuery } from "../shared/useMediaQuery";
 import { DayPanelToggle } from "../features/day-panel/DayPanelToggle";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 import { resolveTutorialRegions } from "../content/tutorialScenes";
@@ -267,6 +269,8 @@ export function App() {
     localStorage.setItem(STORAGE_KEYS.dayPanelOpen, String(dayPanelOpen));
   }, [dayPanelOpen]);
   const toggleDayPanel = useCallback(() => setDayPanelOpen((open) => !open), []);
+  const openDayPanel = useCallback(() => setDayPanelOpen(true), []);
+  const dayPanelAlwaysOpen = useMediaQuery(DAY_PANEL_MEDIA_QUERY, true);
   const closeDayPanel = useCallback(() => setDayPanelOpen(false), []);
   const tutorialShowsDay = tutorial.activeStep
     ? resolveTutorialRegions(tutorial.activeStep.focusRegions, tutorial.context).includes("day-panel")
@@ -858,6 +862,10 @@ export function App() {
             open={dayPanelShown}
             onClose={closeDayPanel}
           />
+          {/* G4: avvisi only while the giornata is closed and nothing covers the game. */}
+          {dayPanelAlwaysOpen || dayPanelShown || showsMoment || watchedFinal || hasBlockingReptileFlow || tutorial.activeScene ? null : (
+            <DayAlerts onOpenDay={openDayPanel} onWatchFinal={watchFinal} />
+          )}
         </div>
         <footer className="status-bar">
           <span>Tutti i messaggi sono aggiornati.</span>

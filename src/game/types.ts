@@ -361,12 +361,23 @@ export type NarrativeEventId =
   | "too-many-volunteers"
   | "perfect-rack";
 
+/** What an Evento or Imprevisto actually did to the game (pastiglie in La mia giornata). */
+export interface NarrativeEffects {
+  contacts?: number;
+  euros?: number;
+  wear?: number;
+  damagedSwords?: number;
+  repairedSwords?: number;
+}
+
 export interface NarrativeEventRecord {
   id: string;
   definitionId: NarrativeEventId;
   title: string;
   occurredAt: number;
   summary: string;
+  /** Missing on records saved before 07/10: the definition's values stand in. */
+  effects?: NarrativeEffects;
   person?: {
     displayName: string;
     rarity: PersonRarity;
