@@ -616,11 +616,17 @@ Nei tornei successivi gli NPC aggiuntivi necessari a sostituire i posti non conq
 
 | Torneo | Comune | Raro | Ultra Raro | Forme | Esperienza |
 |---|---:|---:|---:|---|---:|
-| Accademico | 65% | 30% | 5% | F1–F4 | 1–6 |
-| Nazionale | 35% | 50% | 15% | F3–F6 | 5–14 |
-| Champion's | 40% | 52% | 8% | F4–F7 | 7–17 |
+| Accademico | 65% | 30% | 5% | F1, F2, Y, F3–F4 Lunga | 1–6 |
+| Nazionale | 35% | 50% | 15% | + F5 Lunga, F3–F4 seconda arma | 5–14 |
+| Champion's | 40% | 52% | 8% | + F5 seconda arma, F3 terza arma, F6 | 7–17 |
 
 Le percentuali descrivono i candidati. La selezione per fascia può far emergere più rarità elevate nei posti superiori senza modificare direttamente il tiro base.
+
+Le Forme dipendono solo dal livello del torneo e sono le stesse dei Leggendari
+Segreti (`src/game/levelForms.ts`); la seconda arma (Staffa o Doppia spada corta)
+è scelta dall'ID. Nelle Chronicles tutti hanno tutte le Forme. Base e
+preparazione vengono normalizzate insieme, quindi la media del torneo è davvero
+base × Forme × esperienza.
 
 La composizione finale e le code della distribuzione restano monitorate con una
 simulazione ripetibile che produce un report delle probabilità.
@@ -631,23 +637,33 @@ I Leggendari Segreti sono persone uniche e persistenti, normalmente reclutabili.
 Il colore semantico della rarità è marrone; la tonalità esatta deve rispettare
 il contrasto dell'interfaccia.
 
-Un profilo può fare riferimento all'ID di una scuola del catalogo e apparire
-soltanto nel livello del circuito assegnato a quella scuola. Un profilo ancora
-privo di scuola resta registrato ma non entra in alcun torneo. Prima che la
-scuola vinca per la prima volta Arena o Stile in un torneo ordinario, il primo
-Leggendario Segreto ha il 10% di probabilità di apparire. Dai tornei successivi
-alla prima vittoria, la sua presenza è garantita. Soltanto dopo l'apparizione
-del primo viene effettuato un secondo tiro indipendente: nel 20% dei casi entra
-anche un secondo Leggendario Segreto, se esiste un altro profilo esterno
-compatibile con quel livello del circuito. La prima vittoria è uno sblocco
-permanente della partita e resta valida anche dopo la fondazione di nuove scuole.
+Ogni profilo ha un livello (Accademico, Nazionale, Champion's, Chronicles) e
+compare solo in quel torneo. La sua scuola vera (es. LudoSport Alpha · Torino) è
+solo da mostrare. Prima che la scuola vinca per la prima volta Arena o Stile in
+un torneo ordinario, il primo Leggendario Segreto ha il 10% di probabilità di
+apparire. Dai tornei successivi alla prima vittoria, la sua presenza è
+garantita. Soltanto dopo l'apparizione del primo viene effettuato un secondo
+tiro indipendente: nel 20% dei casi entra anche un secondo Leggendario Segreto,
+se esiste un altro profilo esterno di quel livello. La prima vittoria è uno
+sblocco permanente della partita e resta valida anche dopo la fondazione di
+nuove scuole.
 
-I valori base dei profili sono configurati manualmente dal designer e non
-ricevono mai la normalizzazione o altri moltiplicatori legati al torneo. La
-preparazione finale applica soltanto le Forme e l'esperienza proprie del
-profilo. L'allineamento rispetto alla media del circuito è quindi una scelta di
-bilanciamento esplicita per ogni Leggendario Segreto. I profili senza scuola,
-riservati alle Chronicles, seguono la stessa regola.
+Revisione del 07/10. Ogni profilo ha tre cose distinte:
+
+- **valore da torneo**: Arena e Stile da avversario, fissi e scelti dal
+  designer, senza normalizzazione né moltiplicatori;
+- **Forme del suo livello**, le stesse degli avversari generati: Accademico F1,
+  F2, Y, F3 e F4 Lunga; Nazionale + F5 Lunga, F3 e F4 sulla seconda arma;
+  Champion's + F5 sulla seconda arma, F3 sulla terza, F6; Chronicles tutte. La
+  seconda arma è la Doppia spada corta per gli specialisti Stile, la Staffa per
+  gli altri. Da avversario ha l'esperienza del livello (5/10/15/20), che conta
+  solo nel voto di Stile;
+- **valore base**: Arena e Stile con cui entra a scuola, con le sue Forme ed
+  esperienza 0 (un Leggendario normale entra con 75/75). Poi cresce come tutti.
+
+Valore a scuola = base × (1 + bonus Forme) × (1 + 0,03 × esperienza).
+Gli specialisti hanno la statistica principale circa il 10% sopra l'altra; i
+completi sono entro il 3%.
 
 Condizione di sconfitta:
 
@@ -662,8 +678,9 @@ Non conta una sconfitta inflitta da un'altra scuola.
 Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una prova di 30 secondi nella scuola:
 
 Un profilo può disabilitare la prova con la regola `recruitment: "never"`.
-Daniele Maggi usa questa eccezione: resta sempre esterno e ogni sconfitta dona
-30 Euro alla scuola, senza creare contatti o prove.
+Adriano Panico (Accademico) e Daniele Maggi (Nazionale) usano questa eccezione:
+restano sempre esterni e ogni sconfitta dona alla scuola 500 Euro (Panico) o
+3.000 Euro (Maggi), senza creare contatti o prove.
 
 Una nuova prova dello stesso Leggendario Segreto riutilizza il contatto esistente, senza crearne un doppione.
 
@@ -690,59 +707,40 @@ Se la prova riesce:
 
 Una prova segreta in corso impedisce temporaneamente di fondare una nuova scuola.
 
-### 14.2 Profili iniziali di riferimento
+### 14.2 Catalogo (07/10)
 
-Il catalogo dei Leggendari Segreti è una lista manuale in continua evoluzione.
-La fonte completa e aggiornata è `src/content/secretLegendaries.ts`; i profili
-seguenti documentano soltanto i riferimenti iniziali e non sono un elenco
-esaustivo.
+La fonte è `src/content/secretLegendaries.ts`. Medie degli avversari generati:
+Accademico 100, Nazionale 200, Champion's 400, Chronicles 1.000.
 
-I target seguenti sono le preparazioni effettive dopo le Forme e l'esperienza
-canoniche del profilo. La media indicata è quella degli avversari ordinari del
-torneo e non modifica il Leggendario Segreto.
+| N. | Profilo | Torneo | Specialità | Scuola | Torneo A/S | Base A/S |
+|---:|---|---|---|---|---:|---:|
+| 1. | Marco Palena | Accademico | Stile | LudoSport Alpha · Torino | 156 / 172 | 85 / 95 |
+| 2. | Lorenzo Todaro | Accademico | Completo | LudoSport Alpha · Milano | 168 / 168 | 90 / 90 |
+| 3. | Elisa Brondolo | Accademico | Stile | LudoSport Alpha · Torino | 158 / 174 | 86 / 96 |
+| 4. | Ruggero Pini | Accademico | Arena | Ordine delle Onde · Genova | 150 / 136 | 82 / 74 |
+| 5. | Adriano Panico | Accademico | Arena | Ordine delle Onde · Chiavari | 174 / 158 | non reclutabile, 500 € |
+| 6. | Pietro Scarica | Nazionale | Completo | LudoSport Roma | 405 / 415 | 112 / 115 |
+| 7. | Piero Dipalo | Nazionale | Completo | LudoSport Adriatica · Ferrara | 372 / 378 | 102 / 104 |
+| 8. | Sara Magnifico | Nazionale | Stile | LudoSport Alpha · Milano | 358 / 402 | 97 / 108 |
+| 9. | Daniele Panizza | Nazionale | Arena | LudoSport Alpha · Torino | 400 / 362 | 108 / 98 |
+| 10. | Marco Brondolo | Nazionale | Completo | LudoSport Alpha · Torino | 390 / 385 | 106 / 105 |
+| 11. | Daniele Maggi | Nazionale | Completo | LudoSport Alpha · Milano | 385 / 385 | non reclutabile, 3.000 € |
+| 12. | Enrico Giovanetti | Champion's | Arena | Ordine delle Onde · Genova | 810 / 730 | 128 / 116 |
+| 13. | Francesco D'Addosio | Champion's | Completo | LudoSport Roma | 820 / 820 | 125 / 125 |
+| 14. | Jacopo Viola | Champion's | Stile | LudoSport Roma | 755 / 835 | 115 / 127 |
+| 15. | Pierluigi Chimienti | Champion's | Arena | LudoSport Aemilia · Modena | 790 / 715 | 124 / 112 |
+| 16. | Marcello Lovo | Champion's | Stile | LudoSport Aemilia · Bologna | 740 / 820 | 112 / 124 |
+| 17. | Simone Pedrazzi | Champion's | Stile | LudoSport Aemilia · Modena | 760 / 840 | 116 / 128 |
+| 18. | Debora Girelli | Chronicles | Stile | LudoSport Alpha · Milano | 995 / 1.105 | 126 / 140 |
+| 19. | Andrea Pini | Chronicles | Arena | Ordine delle Onde · Genova | 1.160 / 1.040 | 143 / 129 |
+| 20. | Antonio Rocchitelli | Chronicles | Arena | LudoSport Alpha · Milano | 1.210 / 1.090 | 146 / 132 |
+| 21. | Ugo Cesare Tonelli | Chronicles | Completo | LudoSport Alpha · Milano | 1.195 / 1.205 | 142 / 142 |
+| 22. | Paolo Scalzulli | Chronicles | Completo | LudoSport Alpha · Milano | 1.250 / 1.250 | 145 / 145 |
+| 23. | Carlos Jiménez Moyano | Chronicles | Completo | LudoSport Spain (Spagna) | 1.305 / 1.295 | 148 / 148 |
+| 24. | Lorenzo Ferrario | Chronicles | Completo | LudoSport Alpha · Milano | 1.500 / 1.500 | 160 / 160 |
 
-| N. | Profilo | Torneo | Media Arena/Stile | Arena effettiva | Stile effettivo |
-|---:|---|---|---:|---:|---:|
-| 1. | Marco Palena | Accademico Alpha | 90 / 90 | 140 | 155 |
-| 2. | Lorenzo Todaro | Accademico Alpha | 90 / 90 | 151 | 151 |
-| 3. | Daniele Panizza | Accademico Alpha | 90 / 90 | 155 | 140 |
-| 4. | Sara Magnifico | Accademico Alpha | 90 / 90 | 130 | 165 |
-| 5. | Daniele Maggi | Accademico Alpha | 90 / 90 | 140 | 140 |
-| 6. | Pietro Scarica | Nazionale | 110 / 110 | 220 | 230 |
-| 7. | Piero Dipalo | Nazionale | 110 / 110 | 200 | 210 |
-| 8. | Simone Pedrazzi | Nazionale | 110 / 110 | 200 | 225 |
-
-#### Marco Palena
-
-- rarità: Leggendario Segreto;
-- colore: marrone;
-- città: Torino;
-- Accademia: Alpha;
-- Forma NPC: 4;
-- esperienza NPC fissa: 5;
-- Arena base: 86,957;
-- Stile base: 96,273;
-- preparazione Arena NPC: 140;
-- preparazione Stile NPC: 155;
-- specialità: Stile.
-
-#### Lorenzo Todaro
-
-- rarità: Leggendario Segreto;
-- colore: marrone;
-- città: Milano;
-- Accademia: Alpha;
-- Forma NPC: 5;
-- esperienza NPC fissa: 5;
-- Arena base: 87,536;
-- Stile base: 87,536;
-- preparazione Arena NPC: 151;
-- preparazione Stile NPC: 151;
-- specialità: completo.
-
-Come NPC esterni mantengono sempre Forma ed esperienza canoniche, indipendentemente dalle apparizioni.
-
-Quando si iscrivono partono da esperienza 5 e la aumentano partecipando ai tornei della scuola. Se si disiscrivono tornano alla Forma canonica e a esperienza 5.
+Come avversari esterni mantengono sempre valore da torneo, Forme ed esperienza
+del livello. Se si disiscrivono e tornano, ripartono da quanto conservato.
 
 ## 15. Interfaccia
 
@@ -910,9 +908,9 @@ Le Chronicles sono un torneo segreto fuori calendario e avviato manualmente.
 - le chiavi persistono e possono essere usate in qualsiasi momento;
 - ogni chiave avvia una singola edizione e richiede la selezione manuale di esattamente sei atleti idonei;
 - non si puÃ² avviare un'altra edizione mentre esiste una sfida leggendaria attiva;
-- il tabellone contiene 64 partecipanti, inclusi tutti i Leggendari Segreti senza scuola ancora esterni;
-- gli avversari generati hanno preparazione media 1.000, mentre i Leggendari Segreti hanno media circa 1.200;
-- i valori di catalogo dei Leggendari sono valori effettivi nelle Chronicles, senza ulteriori moltiplicatori;
+- il tabellone contiene 64 partecipanti, inclusi tutti i Leggendari Segreti di livello Chronicles ancora esterni;
+- gli avversari generati hanno preparazione media 1.000, mentre i Leggendari Segreti vanno da circa 1.050 (Girelli) a 1.500 (Ferrario);
+- i Leggendari gareggiano con il loro valore da torneo; vinti, entrano con il valore base, tutte le Forme ed esperienza 0. Ordine di forza: Girelli, Pini, Rocchitelli, Tonelli, Scalzulli, Jiménez Moyano, Ferrario;
 - un Leggendario giÃ  iscritto Ã¨ un'istanza unica: non puÃ² ricomparire tra gli avversari.
 
 Ogni titolo Chronicles conquistato dalla scuola, Arena o Stile, assegna un tentativo completo contro il Leggendario disponibile piÃ¹ debole. A paritÃ  di forza la scelta Ã¨ casuale e deterministica rispetto al seed.

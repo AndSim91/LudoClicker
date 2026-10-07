@@ -1,25 +1,13 @@
-import { SECRET_LEGENDARIES } from "../content/secretLegendaries";
+import {
+  SECRET_LEGENDARIES,
+  getSecretLegendaryBase,
+  getSecretLegendaryForms,
+  getSecretLegendarySecondWeapon,
+} from "../content/secretLegendaries";
 import { createLegendaryEmailAddress } from "../content/emailAddresses";
 import { isCourseXUnlocked } from "../content/upgrades";
 import { makeGameId } from "./ids";
-import type { Contact, FormId, GameState, SecretLegendaryId } from "./types";
-
-export function getCanonicalSecretForms(
-  numericForms: number,
-  courseXUnlocked = true,
-): FormId[] {
-  const result: FormId[] = ["form-1"];
-  if (numericForms >= 2) {
-    if (courseXUnlocked) result.push("course-x");
-    result.push("form-2");
-  }
-  if (numericForms >= 3) result.push("course-y", "form-3-long");
-  if (numericForms >= 4) result.push("form-4-long");
-  if (numericForms >= 5) result.push("form-5-long");
-  if (numericForms >= 6) result.push("form-6");
-  if (numericForms >= 7) result.push("form-7");
-  return result;
-}
+import type { Contact, GameState, SecretLegendaryId } from "./types";
 
 export function createSecretLegendaryContact(
   state: GameState,
@@ -30,7 +18,9 @@ export function createSecretLegendaryContact(
   const existing = state.contacts.find((contact) => contact.secretLegendaryId === id);
   if (existing) return { ...existing, status };
   const profile = SECRET_LEGENDARIES[id];
-  // Won in a tournament: always the full canonical profile, whatever an earlier school left.
+  const [arenaBase, styleBase] = getSecretLegendaryBase(id);
+  // Won in a tournament: the Forms of their level and their own base values
+  // (not the tournament ones), whatever an earlier school left.
   return {
     id: makeGameId("secret", now, id),
     firstName: profile.firstName,
@@ -42,11 +32,12 @@ export function createSecretLegendaryContact(
     rarity: "legendary",
     specialProfileId: id,
     secretLegendaryId: id,
-    forms: getCanonicalSecretForms(profile.numericForms, isCourseXUnlocked(state.upgrades)),
-    formBranchPreferences: ["Spada Lunga"],
-    arenaBase: profile.arenaBase,
-    styleBase: profile.styleBase,
-    tournamentExperience: profile.externalExperience,
+    forms: getSecretLegendaryForms(id, isCourseXUnlocked(state.upgrades)),
+    formBranchPreferences: ["Spada Lunga", getSecretLegendarySecondWeapon(id) === "staff" ? "Staffa" : "Doppia spada corta"],
+    arenaBase,
+    styleBase,
+    // Enters with no tournament experience: it grows with the school (07/10).
+    tournamentExperience: 0,
     agonistCourseCompletions: 0,
     agonistCourseArenaBonus: 0,
     agonistCourseStyleBonus: 0,

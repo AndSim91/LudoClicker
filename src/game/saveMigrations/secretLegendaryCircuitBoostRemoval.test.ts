@@ -66,9 +66,9 @@ describe("Secret Legendary circuit boost removal save migration", () => {
     expect(migrated.version).toBe(GAME_CONFIG.version);
     expect(
       migrated.legendaryCollaborators.retainedProgress["pietro-scarica"]?.arenaBase,
-    ).toBeCloseTo(220 / (1.5 * 1.3) + 8);
+    ).toBeCloseTo(112 + 8); // v105: nuova base + quanto allenato
     expect(
       migrated.legendaryCollaborators.retainedProgress["pietro-scarica"]?.styleBase,
-    ).toBeCloseTo(230 / (1.5 * 1.3) + 26);
+    ).toBeCloseTo(115 + 26);
   });
 });

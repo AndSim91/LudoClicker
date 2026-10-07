@@ -79,7 +79,7 @@ export function scheduleSecretLegendaryTrial(
   now: number,
 ): GameState {
   const profile: SecretLegendaryProfile = SECRET_LEGENDARIES[id];
-  if (profile.recruitment === "never" || !profile.schoolId) return state;
+  if (profile.recruitment === "never" || profile.level === "chronicles") return state;
   const progress = state.network.secretLegendaries[id] ?? {
     status: "external",
     defeats: 0,

@@ -13,7 +13,6 @@ export interface TournamentTier {
 
 export interface TournamentNpcProfile {
   rarityWeights: readonly [Exclude<PersonRarity, "legendary">, number][];
-  formWeights: readonly [number, number][];
   experienceRange: readonly [number, number];
   tiers: readonly TournamentTier[];
 }
@@ -47,7 +46,6 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     standard: 100,
     npc: {
       rarityWeights: [["common", 0.65], ["rare", 0.30], ["ultra-rare", 0.05]],
-      formWeights: [[1, 0.20], [2, 0.40], [3, 0.30], [4, 0.10]],
       experienceRange: [1, 6],
       tiers: [
         { id: "ordinary", baseSlots: BASE_TIER_SLOTS[0], minimum: 55, maximum: 94 },
@@ -65,7 +63,6 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     standard: 200,
     npc: {
       rarityWeights: [["common", 0.35], ["rare", 0.50], ["ultra-rare", 0.15]],
-      formWeights: [[3, 0.10], [4, 0.35], [5, 0.40], [6, 0.15]],
       experienceRange: [5, 14],
       tiers: [
         { id: "ordinary", baseSlots: BASE_TIER_SLOTS[0], minimum: 75, maximum: 114 },
@@ -83,7 +80,6 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     standard: 400,
     npc: {
       rarityWeights: [["common", 0.40], ["rare", 0.52], ["ultra-rare", 0.08]],
-      formWeights: [[4, 0.18], [5, 0.38], [6, 0.33], [7, 0.11]],
       experienceRange: [7, 17],
       tiers: [
         { id: "ordinary", baseSlots: BASE_TIER_SLOTS[0], minimum: 100, maximum: 154 },

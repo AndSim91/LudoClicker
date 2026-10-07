@@ -4,11 +4,11 @@ import { PERSON_RARITIES } from "./rarities";
 import {
   SECRET_LEGENDARIES,
   SECRET_LEGENDARY_IDS,
+  getSecretLegendaryProfile,
   type SecretLegendaryId,
 } from "./secretLegendaries";
 import { UPGRADE_PRICING } from "./upgrades";
 import { SPECIAL_COLLABORATORS } from "./specialCollaborators";
-import { getTournamentSchool } from "./tournamentSchools";
 import { TOURNAMENT_DEFINITIONS } from "./tournaments";
 import { GAME_CONFIG } from "../game/config";
 import type { SpecialCollaboratorId } from "../game/types";
@@ -39,22 +39,20 @@ function getSecretLegendaryDiscovery(id: SecretLegendaryId): Pick<
   LudodexLegendary,
   "initialSchool" | "foundAt" | "acquisition"
 > {
-  const profile = SECRET_LEGENDARIES[id];
-  if (!profile.schoolId) {
+  const profile = getSecretLegendaryProfile(id);
+  const initialSchool = profile.school.city
+    ? `${profile.school.name} · ${profile.school.city}`
+    : profile.school.name;
+  if (profile.level === "chronicles") {
     return {
-      initialSchool: "Chronicles of Ludosport",
+      initialSchool,
       foundAt: "Chronicles of Ludosport",
       acquisition: "Vinci una disciplina nelle Chronicles, poi supera la sfida Leggendaria al meglio delle tre.",
     };
   }
-
-  const school = getTournamentSchool(profile.schoolId);
-  const initialSchool = "academy" in school && school.academy !== school.name
-    ? `${school.name} · ${school.academy}`
-    : school.name;
   return {
     initialSchool,
-    foundAt: TOURNAMENT_DEFINITIONS[school.level].label,
+    foundAt: TOURNAMENT_DEFINITIONS[profile.level].label,
     acquisition: "Batti il Leggendario nella sua disciplina per sbloccare una prova in palestra. Completala con successo per ottenere l'iscrizione.",
   };
 }

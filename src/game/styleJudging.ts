@@ -7,6 +7,7 @@ import type {
   TournamentMatch,
   TournamentStyleDetail,
 } from "./types";
+import { getFormLevelForCount, getLevelForms } from "./levelForms";
 
 /**
  * Voto di Stile come lo dà un giudice con l'app Servizio (INCOM):
@@ -214,25 +215,18 @@ export function getStyleJudgeCount(level: TournamentLevel, stage: TournamentMatc
   return BIG_STAGES.includes(level) ? 4 : 2;
 }
 
-const WEAPONS = ["long", "double", "staff"] as const;
-
 /**
- * Gli atleti esterni hanno solo il numero di Forme: l'arma è stabile per persona
- * e le Forme sono quelle del percorso più breve (Corso X escluso).
+ * Gli atleti esterni hanno solo il numero di Forme: 4, 5, 6 o 7 sono le Forme
+ * del livello (`getLevelForms`), con la seconda arma stabile per persona.
+ * Sotto le 4 (salvataggi vecchi) restano le prime Forme dell'Accademico.
  */
 export function getNpcStyleForms(id: string, numericForms: number): FormId[] {
   let hash = 0;
   for (const character of id) hash = (Math.imul(hash, 31) + character.charCodeAt(0)) | 0;
-  const weapon = WEAPONS[(hash >>> 0) % WEAPONS.length];
-  const forms: FormId[] = ["form-1"];
-  if (numericForms >= 2) forms.push("form-2");
-  if (numericForms >= 3) forms.push("course-y");
-  for (let form = 3; form <= Math.min(5, numericForms); form += 1) {
-    forms.push(`form-${form}-${weapon}` as FormId);
-  }
-  if (numericForms >= 6) forms.push("form-6");
-  if (numericForms >= 7) forms.push("form-7");
-  return forms;
+  const second = (hash >>> 0) % 2 === 0 ? "staff" : "double";
+  if (numericForms >= 4) return getLevelForms(getFormLevelForCount(numericForms), second);
+  const academy = getLevelForms("academy", second);
+  return academy.slice(0, numericForms >= 3 ? 4 : Math.max(1, numericForms));
 }
 
 export function scoreStyleSheet([bas, mov, din, com, sapd, gcc, dif, sog, pen]: StyleSheet): number {

@@ -150,7 +150,8 @@ describe("LudoWikiView", () => {
 
   it("keeps non-recruitable external opponents outside the completion total", () => {
     expect(LUDODEX_LEGENDARIES.some((entry) => entry.id === "daniele-maggi")).toBe(false);
-    expect(LUDODEX_LEGENDARIES).toHaveLength(22);
+    expect(LUDODEX_LEGENDARIES.some((entry) => entry.id === "adriano-panico")).toBe(false);
+    expect(LUDODEX_LEGENDARIES).toHaveLength(30);
   });
 
   it("defines school, encounter location and acquisition method for every Legendary", () => {
@@ -161,15 +162,15 @@ describe("LudoWikiView", () => {
     }
 
     expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "marco-palena")).toMatchObject({
-      initialSchool: "Ordine degli Elementi · LudoSport Alpha",
+      initialSchool: "LudoSport Alpha · Torino",
       foundAt: "Torneo Accademico Alpha",
     });
     expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "simone-pedrazzi")).toMatchObject({
-      initialSchool: "LudoSport Aemilia",
-      foundAt: "Torneo Nazionale",
+      initialSchool: "LudoSport Aemilia · Modena",
+      foundAt: "Champion's Arena",
     });
-    expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "francesco-d-addosio")).toMatchObject({
-      initialSchool: "Chronicles of Ludosport",
+    expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "lorenzo-ferrario")).toMatchObject({
+      initialSchool: "LudoSport Alpha · Milano",
       foundAt: "Chronicles of Ludosport",
     });
   });

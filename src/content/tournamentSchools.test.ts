@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   SECRET_LEGENDARIES,
-  SECRET_LEGENDARY_IDS,
+  getChroniclesLegendaryIds,
   getSecretLegendaryIdsForTournament,
+  type SecretLegendaryId,
 } from "./secretLegendaries";
 import {
   TOURNAMENT_SCHOOLS,
@@ -46,31 +47,40 @@ describe("tournament school catalogue", () => {
 });
 
 describe("secret legendary catalogue", () => {
-  it("links every profile to an existing school and derives its tournament", () => {
-    for (const id of SECRET_LEGENDARY_IDS) {
-      const profile = SECRET_LEGENDARIES[id];
-      if (profile.schoolId) expect(getTournamentSchool(profile.schoolId)).toBeDefined();
-    }
-
+  it("places every profile in its tournament (07/10)", () => {
     expect(getSecretLegendaryIdsForTournament("academy")).toEqual([
       "marco-palena",
       "lorenzo-todaro",
-      "daniele-panizza",
-      "sara-magnifico",
-      "daniele-maggi",
+      "elisa-brondolo",
+      "ruggero-pini",
+      "adriano-panico",
     ]);
     expect(getSecretLegendaryIdsForTournament("national")).toEqual([
       "pietro-scarica",
       "piero-dipalo",
+      "sara-magnifico",
+      "daniele-panizza",
+      "marco-brondolo",
+      "daniele-maggi",
+    ]);
+    expect(getSecretLegendaryIdsForTournament("champions")).toEqual([
+      "enrico-giovanetti",
+      "francesco-d-addosio",
+      "jacopo-viola",
+      "pierluigi-chimienti",
+      "marcello-lovo",
       "simone-pedrazzi",
     ]);
-    expect(getSecretLegendaryIdsForTournament("champions")).toEqual([]);
-    expect(SECRET_LEGENDARIES["francesco-d-addosio"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["paolo-scalzulli"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["lorenzo-ferrario"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["antonio-rocchitelli"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["ugo-cesare-tonelli"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["enrico-giovanetti"].schoolId).toBeUndefined();
-    expect(SECRET_LEGENDARIES["carlos-jimenez-moyano"].schoolId).toBeUndefined();
+    // The Chronicles challenge goes to the weakest one still free: this order.
+    const strength = (id: SecretLegendaryId) => SECRET_LEGENDARIES[id].tournament[0] + SECRET_LEGENDARIES[id].tournament[1];
+    expect([...getChroniclesLegendaryIds()].sort((a, b) => strength(a) - strength(b))).toEqual([
+      "debora-girelli",
+      "andrea-pini",
+      "antonio-rocchitelli",
+      "ugo-cesare-tonelli",
+      "paolo-scalzulli",
+      "carlos-jimenez-moyano",
+      "lorenzo-ferrario",
+    ]);
   });
 });

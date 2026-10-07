@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   SECRET_LEGENDARIES,
   getChroniclesLegendaryIds,
+  getSecretLegendaryForms,
 } from "../content/secretLegendaries";
 import { addAdminMembers } from "./adminFlow";
 import {
@@ -97,15 +98,19 @@ describe("Chronicles tournament", () => {
     expect(simulation.result.participants).toHaveLength(64);
     expect(secrets.map((participant) => participant.secretLegendaryId).sort())
       .toEqual([...getChroniclesLegendaryIds()].sort());
-    expect(average(secrets.map((participant) => participant.arenaPreparation))).toBe(1_200);
-    expect(average(secrets.map((participant) => participant.stylePreparation))).toBeCloseTo(1_199.714, 3);
+    const catalogue = getChroniclesLegendaryIds().map((id) => SECRET_LEGENDARIES[id].tournament);
+    expect(average(secrets.map((participant) => participant.arenaPreparation)))
+      .toBeCloseTo(average(catalogue.map(([arena]) => arena)), 6);
+    expect(average(secrets.map((participant) => participant.stylePreparation)))
+      .toBeCloseTo(average(catalogue.map(([, style]) => style)), 6);
     expect(average(generated.map((participant) => participant.arenaPreparation)))
       .toBeGreaterThan(950);
     expect(average(generated.map((participant) => participant.arenaPreparation)))
       .toBeLessThan(1_050);
     expect(simulation.result.secretLegendaryDefeatedIds).toEqual([]);
-    expect(secrets.find((participant) => participant.secretLegendaryId === "francesco-d-addosio"))
-      .toMatchObject({ arenaPreparation: 1_200, stylePreparation: 1_200 });
+    expect(secrets.find((participant) => participant.secretLegendaryId === "lorenzo-ferrario"))
+      .toMatchObject({ arenaPreparation: 1_500, stylePreparation: 1_500, numericForms: 7 });
+    expect(generated.every((participant) => participant.numericForms === 7 && participant.experience >= 15)).toBe(true);
   });
 
   it("removes a recruited unique Legendary from later fields", () => {
@@ -116,8 +121,8 @@ describe("Chronicles tournament", () => {
         ...initial.network,
         secretLegendaries: {
           ...initial.network.secretLegendaries,
-          "enrico-giovanetti": {
-            ...initial.network.secretLegendaries["enrico-giovanetti"],
+          "debora-girelli": {
+            ...initial.network.secretLegendaries["debora-girelli"],
             status: "enrolled" as const,
           },
         },
@@ -132,7 +137,7 @@ describe("Chronicles tournament", () => {
     ).result;
 
     expect(result.participants.some(
-      (participant) => participant.secretLegendaryId === "enrico-giovanetti",
+      (participant) => participant.secretLegendaryId === "debora-girelli",
     )).toBe(false);
   });
 
@@ -186,14 +191,14 @@ describe("Chronicles Legendary challenge", () => {
   it("starts from the weakest available Legendary and retries it with the second title", () => {
     const challenged = challengeState(true, true);
     expect(challenged.tournaments.chronicles.activeChallenge).toMatchObject({
-      legendaryId: "enrico-giovanetti",
+      legendaryId: "debora-girelli",
       discipline: "arena",
       queuedDisciplines: ["style"],
     });
 
     const retried = playDecisiveMatch(challenged, false);
     expect(retried.tournaments.chronicles.activeChallenge).toMatchObject({
-      legendaryId: "enrico-giovanetti",
+      legendaryId: "debora-girelli",
       discipline: "style",
       queuedDisciplines: [],
       playerWins: 0,
@@ -207,20 +212,22 @@ describe("Chronicles Legendary challenge", () => {
     const originalFame = challenged.school.fame;
     const won = playDecisiveMatch(challenged, true);
     const contact = won.contacts.find(
-      (candidate) => candidate.secretLegendaryId === "enrico-giovanetti",
+      (candidate) => candidate.secretLegendaryId === "debora-girelli",
     );
 
     expect(contact?.status).toBe("enrolled");
     expect(won.collaborators.some((collaborator) => collaborator.contactId === contact?.id)).toBe(true);
-    expect(won.network.secretLegendaries["enrico-giovanetti"].status).toBe("enrolled");
+    expect(won.network.secretLegendaries["debora-girelli"].status).toBe("enrolled");
     expect(won.school.fame).toBe(
       originalFame + GAME_CONFIG.chroniclesLegendaryFameReward + 1,
     );
     expect(won.tournaments.chronicles.activeChallenge).toMatchObject({
-      legendaryId: "antonio-rocchitelli",
+      legendaryId: "andrea-pini",
       discipline: "style",
     });
-    expect(SECRET_LEGENDARIES["antonio-rocchitelli"].arenaBase).toBe(1_080);
+    // She enters with her own base values, the Forms of the Chronicles and no experience.
+    expect(contact).toMatchObject({ arenaBase: 126, styleBase: 140, tournamentExperience: 0 });
+    expect(contact?.forms).toEqual(getSecretLegendaryForms("debora-girelli"));
   });
 
   it("ends a single-title attempt on loss and offers the same Legendary next time", () => {
@@ -230,6 +237,6 @@ describe("Chronicles Legendary challenge", () => {
 
     const next = challengeState(true, false);
     expect(next.tournaments.chronicles.activeChallenge?.legendaryId)
-      .toBe("enrico-giovanetti");
+      .toBe("debora-girelli");
   });
 });

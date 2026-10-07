@@ -35,7 +35,7 @@ function selectNextLegendary(
     .filter((id) => state.network.secretLegendaries[id]?.status === "external")
     .map((id) => ({
       id,
-      strength: (SECRET_LEGENDARIES[id].arenaBase + SECRET_LEGENDARIES[id].styleBase) / 2,
+      strength: (SECRET_LEGENDARIES[id].tournament[0] + SECRET_LEGENDARIES[id].tournament[1]) / 2,
     }))
     .sort((left, right) => left.strength - right.strength);
   if (available.length === 0) return { randomSeed: state.randomSeed };

@@ -4,10 +4,12 @@ import {
   SECRET_LEGENDARY_APPEARANCE_CHANCE,
   SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE,
   getChroniclesLegendaryIds,
+  getSecretLegendaryExperience,
+  getSecretLegendaryForms,
   getSecretLegendaryIdsForTournament,
   type SecretLegendaryProfile,
 } from "../content/secretLegendaries";
-import { getNpcSchoolPool, getTournamentSchool } from "../content/tournamentSchools";
+import { getNpcSchoolPool } from "../content/tournamentSchools";
 import {
   TOURNAMENT_DEFINITIONS,
   getNextTournamentLevel,
@@ -20,6 +22,7 @@ import {
   getAthleteTournamentStats,
   getAthleteWeapon,
   getFormStatBonuses,
+  getNumericFormCount,
   getPreparation,
   hasCompletedFormOne,
 } from "./athleteStats";
@@ -42,6 +45,7 @@ import {
   type QualificationSlotCount,
 } from "./tournamentQualification";
 import type {
+  FormId,
   Contact,
   GameState,
   PersonRarity,
@@ -246,7 +250,8 @@ function createNpcCandidate(
   sequence: number,
 ): TournamentParticipant {
   const rarity = weighted(cursor, profile.rarityWeights);
-  const numericForms = weighted(cursor, profile.formWeights);
+  // Forme del livello (07/10): Accademico 4, Nazionale 5, Champion's 6 Forme numeriche.
+  const numericForms = NPC_NUMERIC_FORMS[level];
   const experience = integer(cursor, profile.experienceRange[0], profile.experienceRange[1]);
   const minimum = getRarityMinimum(rarity);
   const arenaBase = integer(cursor, minimum, 100);
@@ -326,35 +331,57 @@ function allocateTierSlots(npcCount: number, tiers: readonly TournamentTier[]): 
   return slots;
 }
 
+const NPC_NUMERIC_FORMS: Record<ScheduledExternalTournamentLevel, number> = {
+  academy: 4,
+  national: 5,
+  champions: 6,
+};
+
+/**
+ * A Secret Legendary as an opponent (07/10): the designer's tournament values
+ * as they are, the Forms of their level and their own school.
+ */
 function createSecretParticipant(
   id: SecretLegendaryId,
   cursor: RandomCursor,
 ): TournamentParticipant {
-  const profile = SECRET_LEGENDARIES[id];
-  if (!profile.schoolId) {
-    throw new Error(`Il Leggendario Segreto ${id} non ha una scuola assegnata.`);
-  }
-  const school = getTournamentSchool(profile.schoolId);
-  // Secret Legendaries keep the designer's fixed targets: +10% per Form, as before 06/10.
-  const formBonus = profile.numericForms * 0.1;
+  const profile: SecretLegendaryProfile = SECRET_LEGENDARIES[id];
+  const forms = getSecretLegendaryForms(id);
+  const experience = getSecretLegendaryExperience(id);
+  const [arena, style] = profile.tournament;
+  const bases = basesFromPreparation(arena, style, forms, experience);
   return {
     id: `secret-${id}`,
     secretLegendaryId: id,
-    schoolId: school.id,
     firstName: profile.firstName,
     lastName: profile.lastName,
-    schoolName: school.name,
-    city: school.city,
+    schoolName: profile.school.name,
+    city: profile.school.city,
     rarity: "secret-legendary",
-    numericForms: profile.numericForms,
-    experience: profile.externalExperience,
-    arenaBase: profile.arenaBase,
-    styleBase: profile.styleBase,
-    weapon: "Spada Lunga",
-    arenaPreparation: getPreparation(profile.arenaBase, formBonus, profile.externalExperience),
-    stylePreparation: getPreparation(profile.styleBase, formBonus, profile.externalExperience),
+    numericForms: getNumericFormCount(forms),
+    knownFormIds: forms,
+    experience,
+    arenaBase: bases.arena,
+    styleBase: bases.style,
+    weapon: getAthleteWeapon(forms),
+    arenaPreparation: arena,
+    stylePreparation: style,
     condition: triangularCondition(cursor),
     qualificationDiscipline: profile.specialty === "style" ? "style" : "arena",
+  };
+}
+
+/** Base that, with these Forms and this experience, gives the preparation. */
+function basesFromPreparation(
+  arena: number,
+  style: number,
+  forms: readonly FormId[],
+  experience: number,
+): { arena: number; style: number } {
+  const bonus = getFormStatBonuses(forms);
+  return {
+    arena: arena / getPreparation(1, bonus.arena, experience),
+    style: style / getPreparation(1, bonus.style, experience),
   };
 }
 
@@ -439,8 +466,12 @@ function normalizeNpcFieldToStandard(
     0,
   ) / participants.length;
 
+  // The base moves with the preparation: the average of the field is base ×
+  // Forms × experience, not a correction on top (decisione del 07/10).
   return participants.map((participant) => ({
     ...participant,
+    arenaBase: participant.arenaBase * standard / arenaAverage,
+    styleBase: participant.styleBase * standard / styleAverage,
     arenaPreparation: participant.arenaPreparation * standard / arenaAverage,
     stylePreparation: participant.stylePreparation * standard / styleAverage,
   }));
@@ -507,41 +538,22 @@ function createNpcParticipants(
   });
 }
 
-function createChroniclesSecretParticipant(
-  id: SecretLegendaryId,
-  cursor: RandomCursor,
-): TournamentParticipant {
-  const profile = SECRET_LEGENDARIES[id];
-  return {
-    id: `secret-${id}`,
-    secretLegendaryId: id,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    schoolName: "Chronicles of Ludosport",
-    city: "Sede segreta",
-    rarity: "secret-legendary",
-    numericForms: profile.numericForms || 7,
-    experience: profile.externalExperience,
-    arenaBase: profile.arenaBase,
-    styleBase: profile.styleBase,
-    // In questo torneo i valori del catalogo sono la preparazione effettiva:
-    // la loro media è circa il 20% sopra quella degli avversari generati.
-    arenaPreparation: profile.arenaBase,
-    stylePreparation: profile.styleBase,
-    condition: triangularCondition(cursor),
-    qualificationDiscipline: profile.specialty === "style" ? "style" : "arena",
-  };
-}
+/** At the Chronicles a Secret Legendary is the same as anywhere else. */
+const createChroniclesSecretParticipant = createSecretParticipant;
 
 function createChroniclesNpcParticipants(
   count: number,
   cursor: RandomCursor,
 ): TournamentParticipant[] {
   return Array.from({ length: count }, (_, sequence) => {
-    const arenaBase = integer(cursor, 850, 1_150);
-    const styleBase = integer(cursor, 850, 1_150);
+    const arenaPreparation = integer(cursor, 850, 1_150);
+    const stylePreparation = integer(cursor, 850, 1_150);
+    const id = `npc-chronicles-${sequence}-${cursor.seed >>> 0}`;
+    // Every Form, experience 15–20: the base is what gives that preparation.
+    const experience = integer(cursor, 15, 20);
+    const bases = basesFromPreparation(arenaPreparation, stylePreparation, getNpcStyleForms(id, 7), experience);
     return {
-      id: `npc-chronicles-${sequence}-${cursor.seed >>> 0}`,
+      id,
       firstName: PROSPECT_FIRST_NAMES[integer(cursor, 0, PROSPECT_FIRST_NAMES.length - 1)],
       lastName: PROSPECT_LAST_NAMES[integer(cursor, 0, PROSPECT_LAST_NAMES.length - 1)],
       schoolName: "Chronicles of Ludosport",
@@ -549,11 +561,11 @@ function createChroniclesNpcParticipants(
       rarity: "legendary" as const,
       // Al Chronicles si conoscono tutte le Forme (decisione del 07/10).
       numericForms: 7,
-      experience: 0,
-      arenaBase,
-      styleBase,
-      arenaPreparation: arenaBase,
-      stylePreparation: styleBase,
+      experience,
+      arenaBase: bases.arena,
+      styleBase: bases.style,
+      arenaPreparation,
+      stylePreparation,
       condition: triangularCondition(cursor),
       qualificationDiscipline: sequence % 2 === 0 ? ("arena" as const) : ("style" as const),
     };

@@ -1,4 +1,4 @@
-import { SECRET_LEGENDARIES } from "../../content/secretLegendaries";
+import { getSecretLegendaryBase } from "../../content/secretLegendaries";
 import type { LudodexLegendary } from "../../content/ludowiki";
 import { getContactBaseStats } from "../../game/athleteStats";
 import type {
@@ -70,11 +70,11 @@ export function getLegendaryDossier(
   }
 
   const retained = state.legendaryCollaborators.retainedProgress[legendary.id];
-  const secretProfile = legendary.secretLegendaryId
-    ? SECRET_LEGENDARIES[legendary.secretLegendaryId]
-    : undefined;
-  const arenaBase = retained?.arenaBase ?? secretProfile?.arenaBase ?? 75;
-  const styleBase = retained?.styleBase ?? secretProfile?.styleBase ?? 75;
+  const [secretArena, secretStyle] = legendary.secretLegendaryId
+    ? getSecretLegendaryBase(legendary.secretLegendaryId)
+    : [75, 75];
+  const arenaBase = retained?.arenaBase ?? secretArena;
+  const styleBase = retained?.styleBase ?? secretStyle;
   return {
     arenaBase,
     styleBase,

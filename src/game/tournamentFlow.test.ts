@@ -200,7 +200,7 @@ describe("dynamic tournament qualification", () => {
 });
 
 describe("secret legendary tournament trials", () => {
-  it("keeps Daniele Maggi external and donates 30 euros after every defeat", () => {
+  it("keeps Daniele Maggi external and donates 3.000 euros after every defeat", () => {
     const initial = createInitialState(1_000, "Manager");
 
     expect(scheduleSecretLegendaryTrial(initial, "daniele-maggi", 10_000)).toBe(initial);
@@ -210,8 +210,8 @@ describe("secret legendary tournament trials", () => {
 
     expect(first.contacts).toHaveLength(initial.contacts.length);
     expect(first.scheduledTrials).toEqual([]);
-    expect(second.school.euros).toBe(initial.school.euros + 60);
-    expect(second.statistics.eurosEarned).toBe(initial.statistics.eurosEarned + 60);
+    expect(second.school.euros).toBe(initial.school.euros + 6_000);
+    expect(second.statistics.eurosEarned).toBe(initial.statistics.eurosEarned + 6_000);
     expect(second.network.secretLegendaries["daniele-maggi"]).toMatchObject({
       status: "external",
       defeats: 2,
@@ -232,10 +232,10 @@ describe("secret legendary tournament trials", () => {
       source: "tournament",
       status: "trialScheduled",
       secretLegendaryId: "marco-palena",
-      tournamentExperience: 5,
+      tournamentExperience: 0,
+      arenaBase: 85,
+      styleBase: 95,
     });
-    expect(contact.arenaBase).toBeCloseTo(156 / (1.4 * 1.15));
-    expect(contact.styleBase).toBeCloseTo(172 / (1.4 * 1.15));
     expect(contact.forms).toContain("form-4-long");
     expect(trial.resolvesAt - trial.startsAt).toBe(GAME_CONFIG.secretLegendaryTrialDurationMs);
     expect(scheduled.emails).toHaveLength(initial.emails.length);

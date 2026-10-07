@@ -1,11 +1,4 @@
-import {
-  SECRET_LEGENDARIES,
-  type SecretLegendaryId,
-} from "../../content/secretLegendaries";
-import {
-  getTournamentSchool,
-  type TournamentCircuitLevel,
-} from "../../content/tournamentSchools";
+import type { TournamentCircuitLevel } from "../../content/tournamentSchools";
 import type { MigratableState } from "./types";
 
 type DifficultyMultipliers = Record<TournamentCircuitLevel, number>;
@@ -16,14 +9,25 @@ const VERSION_59_DIFFICULTY_MULTIPLIERS: DifficultyMultipliers = {
   champions: 250 / 200,
 };
 
+// Livelli dei Leggendari Segreti com'erano fino alla v104: le migrazioni
+// storiche restano ferme anche se il catalogo cambia (07/10). Assenti = Chronicles.
+const HISTORICAL_LEVELS: Record<string, TournamentCircuitLevel> = {
+  "marco-palena": "academy",
+  "lorenzo-todaro": "academy",
+  "daniele-panizza": "academy",
+  "sara-magnifico": "academy",
+  "daniele-maggi": "academy",
+  "pietro-scarica": "national",
+  "piero-dipalo": "national",
+  "simone-pedrazzi": "national",
+};
+
 function getDifficultyMultiplier(
   profileId: string | undefined,
   multipliers: DifficultyMultipliers,
 ): number {
-  if (!profileId || !(profileId in SECRET_LEGENDARIES)) return 1;
-  const profile = SECRET_LEGENDARIES[profileId as SecretLegendaryId];
-  if (!profile.schoolId) return 1;
-  return multipliers[getTournamentSchool(profile.schoolId).level];
+  const level = profileId ? HISTORICAL_LEVELS[profileId] : undefined;
+  return level ? multipliers[level] : 1;
 }
 
 function scale(value: number | undefined, multiplier: number): number | undefined {
