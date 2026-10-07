@@ -139,8 +139,8 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
   return addMessage(
     ready,
     now,
-    "Campioni d'Italia",
-    `${state.school.name} vince il Nazionale. La Rete ora ti lascia aprire una nuova scuola: quando vuoi, la trovi nella nuova voce Rete, e più aspetti più Reputazione porti con te.`,
+    "Primi all'Accademico",
+    `${state.school.name} vince il Torneo Accademico. L'Ordine se ne accorge e la Rete ti lascia aprire una nuova scuola: quando vuoi, la trovi nella nuova voce Rete. Più aspetti, più Reputazione porti con te: un titolo al Nazionale, per dire, ne vale altri ${GAME_CONFIG.reputationNationalTitlePoints}.`,
     "system",
   );
 }

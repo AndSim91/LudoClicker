@@ -4,7 +4,8 @@ import type { FoundedSchool, GameState } from "./types";
 
 /*
  * Reputazione di rete (6.19): the only value that travels from a school to the
- * next one. The prestige earns 2 points for the national title that unlocked it,
+ * next one. The prestige earns 1 point for the Accademico title that unlocked it,
+ * 2 for a national title,
  * √(Fama / 128) points, +2 each for the Champion's Arena, the Reptile
  * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
  * - six permanent upgrades, +20% of their base value per point, up to 50 points;
@@ -69,6 +70,7 @@ function getReptileWin(state: GameState): "reptile" | "superba" | undefined {
 
 export interface PrestigeReputationPreview {
   famePoints: number;
+  nationalWin: boolean;
   championsWin: boolean;
   reptileWin?: "reptile" | "superba" | undefined;
   chroniclesWin: boolean;
@@ -83,6 +85,7 @@ export interface PrestigeReputationPreview {
 }
 
 export function getPrestigeReputationPreview(state: GameState): PrestigeReputationPreview {
+  const nationalWin = (state.tournaments.nationalTitlesCurrentSchool ?? 0) > 0;
   const championsWin = state.tournaments.championsVictoryCurrentSchool;
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
@@ -90,13 +93,16 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
   // Rete delle Onde: Lettere di raccomandazione and Gran Consiglio.
   const letterPoints = getUpgradeEffectTotal(state.upgrades, "foundationReputationBonus");
   const councilDoubled = getUpgradeEffectTotal(state.upgrades, "foundationReputationDouble") > 0;
-  const basePoints = GAME_CONFIG.reputationNationalTitlePoints + famePoints +
+  // The Accademico title opens the prestige; the National is worth more.
+  const basePoints = GAME_CONFIG.reputationAcademyTitlePoints +
+    (nationalWin ? GAME_CONFIG.reputationNationalTitlePoints : 0) + famePoints +
     [championsWin, reptileWin, chroniclesWin].filter(Boolean).length * GAME_CONFIG.reputationTournamentPoints +
     letterPoints;
   const rentValue = Math.max(0, state.school.activeMembers) *
     GAME_CONFIG.monthlyMemberFee * GAME_CONFIG.networkRentValueShare;
   return {
     famePoints,
+    nationalWin,
     championsWin,
     reptileWin,
     chroniclesWin,

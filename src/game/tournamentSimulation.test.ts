@@ -114,17 +114,17 @@ describe("secret legendary balancing", () => {
       academy: TOURNAMENT_DEFINITIONS.academy.standard,
       national: TOURNAMENT_DEFINITIONS.national.standard,
       champions: TOURNAMENT_DEFINITIONS.champions.standard,
-    }).toEqual({ academy: 90, national: 110, champions: 300 });
+    }).toEqual({ academy: 100, national: 200, champions: 400 });
 
     const targets: Partial<Record<SecretLegendaryId, readonly [number, number]>> = {
-      "marco-palena": [140, 155],
-      "lorenzo-todaro": [151, 151],
-      "daniele-panizza": [155, 140],
-      "sara-magnifico": [130, 165],
-      "daniele-maggi": [140, 140],
-      "pietro-scarica": [220, 230],
-      "piero-dipalo": [200, 210],
-      "simone-pedrazzi": [200, 225],
+      "marco-palena": [156, 172],
+      "lorenzo-todaro": [168, 168],
+      "daniele-panizza": [172, 156],
+      "sara-magnifico": [144, 183],
+      "daniele-maggi": [156, 156],
+      "pietro-scarica": [400, 418],
+      "piero-dipalo": [364, 382],
+      "simone-pedrazzi": [364, 409],
     };
     for (const id of Object.keys(targets) as SecretLegendaryId[]) {
       const [arena, style] = targets[id]!;
@@ -182,12 +182,12 @@ describe("secret legendary balancing", () => {
     const daniele = preparation("daniele-panizza");
     const sara = preparation("sara-magnifico");
 
-    expect(pietro.arena).toBeCloseTo(220);
-    expect(pietro.style).toBeCloseTo(230);
-    expect(daniele.arena).toBeCloseTo(155);
-    expect(daniele.style).toBeCloseTo(140);
-    expect(sara.arena).toBeCloseTo(130);
-    expect(sara.style).toBeCloseTo(165);
+    expect(pietro.arena).toBeCloseTo(400);
+    expect(pietro.style).toBeCloseTo(418);
+    expect(daniele.arena).toBeCloseTo(172);
+    expect(daniele.style).toBeCloseTo(156);
+    expect(sara.arena).toBeCloseTo(144);
+    expect(sara.style).toBeCloseTo(183);
     expect(getTournamentSchool(SECRET_LEGENDARIES["pietro-scarica"].schoolId!).level).toBe(
       "national",
     );
@@ -208,10 +208,10 @@ describe("secret legendary balancing", () => {
   });
 
   it("applies only Form and experience modifiers to manual bases", () => {
-    expect(preparation("piero-dipalo")).toEqual({ arena: 200, style: 210 });
-    expect(preparation("daniele-maggi")).toEqual({ arena: 140, style: 140 });
+    expect(preparation("piero-dipalo")).toEqual({ arena: 364, style: 382 });
+    expect(preparation("daniele-maggi")).toEqual({ arena: 156, style: 156 });
     expect(preparation("carlos-jimenez-moyano")).toEqual({ arena: 1_201, style: 1_199 });
-    expect(preparation("simone-pedrazzi")).toEqual({ arena: 200, style: 225 });
+    expect(preparation("simone-pedrazzi")).toEqual({ arena: 364, style: 409 });
     expect(getTournamentSchool(SECRET_LEGENDARIES["simone-pedrazzi"].schoolId!).level).toBe(
       "national",
     );
@@ -418,12 +418,12 @@ describe("tournament simulation", () => {
   });
 
   it.each([
-    { level: "academy" as const, standard: 90, qualifiers: 6 },
-    { level: "academy" as const, standard: 90, qualifiers: 12 },
-    { level: "national" as const, standard: 110, qualifiers: 6 },
-    { level: "national" as const, standard: 110, qualifiers: 12 },
-    { level: "champions" as const, standard: 300, qualifiers: 6 },
-    { level: "champions" as const, standard: 300, qualifiers: 12 },
+    { level: "academy" as const, standard: 100, qualifiers: 6 },
+    { level: "academy" as const, standard: 100, qualifiers: 12 },
+    { level: "national" as const, standard: 200, qualifiers: 6 },
+    { level: "national" as const, standard: 200, qualifiers: 12 },
+    { level: "champions" as const, standard: 400, qualifiers: 6 },
+    { level: "champions" as const, standard: 400, qualifiers: 12 },
   ])(
     "normalizes $level NPCs to standard $standard with $qualifiers school qualifiers",
     ({ level, standard, qualifiers }) => {

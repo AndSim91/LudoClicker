@@ -258,11 +258,11 @@ porting dell'algoritmo pubblico `anfive/style-codes`).
 
 Voto tipico contro un pari (prototipo): 10 → 5,5 · 62 → 5,8 · 125 → 6,2 ·
 225 → 6,7 · 500 → 7,6 · 1.000 → 8,2 · 3.000 → 8,6 (giornata ottima 9,1).
-Misure sui tornei del gioco (60 per livello, standard di oggi): Accademico (90)
+Misure sui tornei del gioco (60 per livello, standard prima del 07/10): Accademico (90)
 mediana 6,0, vincitore 6,4, cartellini 6% degli incontri; Nazionale (110) 6,1,
 vincitore 6,6, cartellini 3%; Champion's (300) 7,0, vincitore 7,6, cartellini
 1%; Chronicles (~1.000) 7,9, vincitore 8,4, massimo 9,3. Con il Nazionale a 200
-(da decidere insieme al prestigio) la mediana sale a ~6,55.
+(in vigore dal 07/10) la mediana sale a ~6,55.
 
 ### 5.1 «Guarda la finale»
 
@@ -521,14 +521,20 @@ Non comprende gli atleti della scuola, i posti vacanti o i Leggendari Segreti.
 
 | Torneo | Media Arena | Media Stile |
 |---|---:|---:|
-| Accademico | 90 | 90 |
-| Nazionale | 110 | 110 |
-| Champion's | 300 | 300 |
+| Accademico | 100 | 100 |
+| Nazionale | 200 | 200 |
+| Champion's | 400 | 400 |
+| Reptile (coppie esterne) | 500 × 1,1 per vittoria | 500 × 1,1 per vittoria |
 
-Dal 28/09 Accademico e Nazionale sono stati abbassati (erano 150 e 225) perché
-il primo titolo nazionale, che sblocca il prestigio, arrivi in 60–90 minuti di
-gioco attivo; i Leggendari Segreti hanno mantenuto i valori sotto, quindi ora
-sono nettamente sopra la media del loro torneo.
+Dal 07/10 (decisione di Andrea, con il voto di Stile assoluto): Accademico 100,
+Nazionale 200, Champion's 400 e Reptile 500 di base (`GAME_CONFIG.reptileStandard`,
+×1,1 per ogni vittoria precedente e ×1,25 con la Superba). Il prestigio si apre
+con il primo titolo all'Accademico. Prima: Accademico 90, Nazionale 110,
+Champion's 300 (e prima ancora 150 e 225), con il prestigio al Nazionale. I
+Leggendari Segreti dell'Accademico e del Nazionale sono stati alzati in
+proporzione (×100/90 e ×200/110: Palena 156/172, Todaro 168, Panizza 172/156,
+Magnifico 144/183, Maggi 156; Scarica 400/418, Dipalo 364/382, Pedrazzi
+364/409), così restano in cima al loro campo.
 
 Ogni campo viene normalizzato direttamente sul proprio standard, sia con sei
 sia con dodici qualificati della scuola. Lo standard non è una soglia rigida

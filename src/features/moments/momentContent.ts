@@ -87,7 +87,7 @@ const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; 
   national: {
     kicker: "Torneo Nazionale · primo titolo",
     title: "Campioni d'Italia",
-    note: "La Rete delle Onde approva la fondazione di una nuova scuola.",
+    note: "Il tricolore in palestra vale due punti di Reputazione. E una foto di gruppo.",
   },
   champions: {
     kicker: "Champion's Arena · prima vittoria",

@@ -540,7 +540,8 @@ i contenuti della scuola corrente e riparte da zero a ogni prestigio.
 `src/game/reputation.ts`):
 
 ```
-punti = 2 per il titolo nazionale che sblocca il prestigio
+punti = 1 per il titolo all'Accademico che sblocca il prestigio
+      + 2 se la scuola lasciata ha vinto un titolo nazionale
       + arrotonda per difetto(√(Fama / 128))
       + 2 se la scuola lasciata ha vinto la Champion's Arena
       + 2 se ha vinto il Torneo Reptile o della Superba (stesso torneo)
@@ -548,10 +549,10 @@ punti = 2 per il titolo nazionale che sblocca il prestigio
 ```
 
 La parte della Fama vale 1,25 × √(Fama / 200) (128 = 200 / 1,25²): l'n-esimo
-punto arriva a 128 × n² (128, 512, 1.152 …). Per esempio, senza altri tornei,
-Fama 127 dà 2 punti, Fama 10.000 ne dà 10 e Fama 30.000 ne dà 17
-(`reputationNationalTitlePoints = 2`, `reputationTournamentPoints = 2`,
-`reputationFameDivisor = 128`).
+punto arriva a 128 × n² (128, 512, 1.152 …). Per esempio, con il solo
+Accademico, Fama 127 dà 1 punto, Fama 10.000 ne dà 9 e Fama 30.000 ne dà 16
+(`reputationAcademyTitlePoints = 1`, `reputationNationalTitlePoints = 2`,
+`reputationTournamentPoints = 2`, `reputationFameDivisor = 128`).
 
 **Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
 scuola» della pagina Rete (§ 17.3); la spesa è definitiva e i punti non spesi
@@ -2446,7 +2447,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | 8 Collaboratori                            | gestione aggregata per settore                                           |
 | 15 collaboratori                           | Redazione si evolve in Social                                            |
 | Prima vittoria nella Champion's Arena      | settore e pagina Gadget                                                  |
-| Fama 150, 8 Collaboratori, 25 eventi e vittoria Champions nella scuola corrente | messaggio “Campioni d'Italia” |
+| Primo titolo all'Accademico (Arena o Stile) nella scuola corrente | messaggio «Primi all'Accademico» e voce Rete |
 
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
 Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
@@ -2455,8 +2456,8 @@ fondazione tutte le pagine, tranne Gadget, restano visibili fin dall'inizio.
 
 > **Da implementare:** statistiche minime dopo la prima email e report aggregato del funnel dopo la prima prova non esistono.
 
-Il primo prestigio (primo titolo nazionale) è calibrato per arrivare in
-**60–90 minuti** di gioco attivo (§ 21).
+Il primo prestigio (primo titolo all'Accademico, dal 07/10) è calibrato per
+arrivare in **55–90 minuti** di gioco attivo (§ 21).
 
 ### 10.12 Comunicazioni di sistema
 
@@ -2687,7 +2688,7 @@ I numeri del gioco vengono nascosti in elementi plausibili:
 - Caratteri al secondo: stato “Sincronizzazione” nella barra inferiore;
 - Conversione: pannello “Statistiche campagna”;
 - Spade disponibili: la **spada** nella barra del titolo (vedi sotto);
-- Prestigio: messaggio “Campioni d'Italia” ricevuto quando i requisiti sono
+- Prestigio: messaggio «Primi all'Accademico» ricevuto quando i requisiti sono
   soddisfatti.
 
 > **Da implementare:** la barra inferiore mostra solo testi statici (stato dei messaggi, profilo, connessione, scuola e versione) e non la velocità di scrittura; non esiste un pannello “Statistiche campagna” con la conversione.
@@ -3515,20 +3516,21 @@ tranquillo.
 ### 17.2 Sblocco
 
 L'offerta di fondare una nuova scuola arriva tramite una comunicazione di
-sistema ("Campioni d'Italia", inviata una sola volta per ciclo)
-appena la scuola corrente **vince un Torneo Nazionale**, di Arena o di Stile
-(`prestigeNationalTitles = 1`, `getPrestigeRequirements` in
-`src/game/progression.ts`). Conta solo la vittoria di un atleta della scuola
-corrente; i titoli vengono contati in `nationalTitlesCurrentSchool` e ripartono
-da zero nella nuova scuola. In più nessun Leggendario Segreto deve avere una
-prova in corso.
+sistema («Primi all'Accademico», inviata una sola volta per ciclo)
+appena la scuola corrente **vince un Torneo Accademico**, di Arena o di Stile
+(decisione del 07/10; `prestigeAcademyTitles = 1`, `getPrestigeRequirements` e
+`hasPrestigeTitle` in `src/game/progression.ts`). Conta solo la vittoria di un
+atleta della scuola corrente; i titoli vengono contati in
+`academyTitlesCurrentSchool` e ripartono da zero nella nuova scuola. Un titolo
+nazionale apre comunque la Rete (le partite salvate prima del 07/10). In più
+nessun Leggendario Segreto deve avere una prova in corso.
 
-Il Nazionale arriva dopo il Torneo Scolastico e l'Accademico Alpha,
-con le qualificazioni, e ha avversari da Forma 3 a 6, quindi richiede atleti
-con Forme avanzate: è il freno che fa durare il primo ciclo. Essendo
-il requisito, il titolo nazionale vale 1 punto Reputazione fisso (§ 5.7). Il
-requisito non cresce con le scuole fondate: a crescere è il costo dei
-potenziamenti (§ 17.6).
+Prima del 07/10 serviva il Nazionale. Con il voto di Stile assoluto (modello C)
+e il Nazionale portato a 200 di media, il primo Nazionale arriva a 2–3 ore:
+l'Accademico (100) apre la Rete a circa un'ora e il Nazionale diventa il primo
+traguardo «vero» della scuola, che vale 2 punti di Reputazione in più. Il
+titolo all'Accademico vale 1 punto fisso (§ 5.7). Il requisito non cresce con
+le scuole fondate: a crescere è il costo dei potenziamenti (§ 17.6).
 
 > **Da implementare:** il simulatore di bilanciamento non gioca i tornei, quindi la durata reale del ciclo fino al Nazionale non è ancora misurata.
 
@@ -3540,9 +3542,9 @@ percepibile; non deve richiedere più reset prima di diventare utile.
 
 La Rete delle Onde è una pagina a sé, voce **Rete** della barra delle
 applicazioni tra Upgrade e LudoWiki (`src/features/network/`). Compare con il
-primo titolo nazionale della scuola corrente e da lì resta per sempre, perché
-dopo la prima fondazione la tiene aperta il numero di scuole
-(`isGameAreaUnlocked`). L'email «Campioni d'Italia» rimanda alla voce Rete.
+primo titolo all'Accademico della scuola corrente e da lì resta per sempre,
+perché dopo la prima fondazione la tiene aperta il numero di scuole
+(`isGameAreaUnlocked`). L'email «Primi all'Accademico» rimanda alla voce Rete.
 
 La pagina contiene, dall'alto:
 
@@ -3558,10 +3560,11 @@ La pagina contiene, dall'alto:
   lasciate la mappa sta nella fascia; dalla 7ª scorre in orizzontale e si apre
   sulla scuola in corso. La riga sotto la mappa mostra numero, nome, città e
   Fama del nodo scelto, con i pulsanti «« Sede madre» e «Oggi »»;
-- **Se fondi ora**: i punti voce per voce (titolo nazionale, Fama con la
-  soglia del punto successivo, Champion's Arena, Reptile/Superba, Chronicles;
-  le vittorie mancanti restano visibili come «+1 possibile») e il pulsante
-  «Fonda una nuova scuola…», disabilitato senza titolo nazionale o con una
+- **Se fondi ora**: i punti voce per voce (titolo all'Accademico, titolo
+  nazionale, Fama con la soglia del punto successivo, Champion's Arena,
+  Reptile/Superba, Chronicles; le vittorie mancanti restano visibili come
+  «+2 possibili») e il pulsante «Fonda una nuova scuola…», disabilitato senza
+  titolo all'Accademico o con una
   prova di Leggendario Segreto in corso (in Outlook è il pulsante blu della
   pagina e i punti sono in nero, senza l'oro);
 - **Potenziamenti**: i sei rami con il livello su 50 (quadranti in Onde; in
@@ -3708,7 +3711,7 @@ Nel codice, per ogni scuola fondata:
 
 - **costi:** gli Upgrade ripartono da zero e i prezzi tornano a quelli di
   partenza (la curva per ramo, § 10, riparte);
-- **obiettivi:** ogni ciclo richiede di nuovo un titolo nazionale (§ 17.2);
+- **obiettivi:** ogni ciclo richiede di nuovo un titolo all'Accademico (§ 17.2);
 - **complessità organizzativa:** la Rete delle Onde (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;
 - **moltiplicatori permanenti:** solo quelli comprati con la Reputazione (§ 5.7);
@@ -4329,10 +4332,14 @@ Il primo prestigio è misurato da `src/game/long-term-balance.test.ts` con il
 simulatore (`simulateBalanceGame`, strategia predefinita «competitive»: assegna
 Istruttori, fa seguire le Forme a tutti gli iscritti e le Forme successive ai 12
 atleti migliori, compra la catena di Insegnamento e le spade per le formazioni in
-attesa). Il test richiede che il primo titolo nazionale non arrivi prima di 60
-minuti e che la mediana a ritmo intenso resti entro 90. Gli standard dei tornei
-sono stati tarati di conseguenza: Accademico 90 e Nazionale 110 (erano 150 e
-225), Champion's resta 300. Il ritmo è scandito dal calendario (un Nazionale ogni
+attesa). Il test richiede che il primo prestigio non arrivi prima di 55
+minuti e che la mediana a ritmo intenso resti entro 90. Dal 07/10 il prestigio
+si apre con il primo titolo all'Accademico e gli standard sono Accademico 100,
+Nazionale 200 e Champion's 400 (Reptile 500 di base); misure su 6 partite:
+intenso 56–80 minuti (mediana ~62), tranquillo 80–93. I Leggendari Segreti
+dell'Accademico e del Nazionale sono stati alzati in proporzione (×100/90 e
+×200/110) per restare in cima al loro campo. Prima del 07/10:
+Accademico 90 e Nazionale 110 (erano 150 e 225), Champion's 300. Il ritmo è scandito dal calendario (un Nazionale ogni
 12 minuti), quindi i tempi arrivano a gradini: 71, 83, 95, 107 minuti. La
 strategia «basic» (solo scrittura, eventi e potenziamenti del funnel) resta
 disponibile come opzione.

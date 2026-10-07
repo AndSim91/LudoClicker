@@ -902,7 +902,9 @@ export interface TournamentState {
   skippedSeasons: number[];
   ordinaryVictoryAchieved: boolean;
   championsVictoryCurrentSchool: boolean;
-  /** National titles (Arena or Style) won by the current school: one opens the prestige. */
+  /** Accademico titles (Arena or Style) won by the current school: one opens the prestige. */
+  academyTitlesCurrentSchool?: number;
+  /** National titles (Arena or Style) won by the current school: 2 points of Reputation. */
   nationalTitlesCurrentSchool?: number;
   chroniclesVictoryCurrentSchool?: boolean;
   chronicles: ChroniclesProgress;

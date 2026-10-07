@@ -37,21 +37,23 @@ const legacySchool = (monthlyRent?: number, name = "Ordine delle Onde") => ({
 
 const details = { name: "Ordine del Faro", city: "Trieste" };
 
-/** A school of 125 members, 10.000 Fama and a national title: ready to found. */
+/** A school of 125 members, 5.000 Fama, an Accademico and a national title: ready to found. */
 function readySchool(base: GameState = createInitialState(1_000, "Tester")): GameState {
   const withMembers = addAdminMembers(base, 125 - base.school.activeMembers);
   return {
     ...withMembers,
     school: { ...withMembers.school, fame: 5_000 },
-    tournaments: { ...withMembers.tournaments, nationalTitlesCurrentSchool: 1 },
+    tournaments: { ...withMembers.tournaments, academyTitlesCurrentSchool: 1, nationalTitlesCurrentSchool: 1 },
   };
 }
 
-it("earns 2 points for the national title, √(Fama/128), +2 for each kind of tournament won", () => {
+it("earns 1 point for the Accademico, 2 for the National, √(Fama/128), +2 for each kind of tournament won", () => {
   const ready = readySchool();
-  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 6, points: 8, rentPerPoint: 50 });
-  // Founding as soon as possible still earns the point of the national title.
-  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 127 } }).points).toBe(2);
+  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 6, nationalWin: true, points: 9, rentPerPoint: 50 });
+  // Founding as soon as possible still earns the point of the Accademico title.
+  const academyOnly = { ...ready, tournaments: { ...ready.tournaments, nationalTitlesCurrentSchool: 0 } };
+  expect(getPrestigeReputationPreview({ ...academyOnly, school: { ...ready.school, fame: 127 } }).points).toBe(1);
+  expect(getPrestigeReputationPreview(academyOnly)).toMatchObject({ nationalWin: false, points: 7 });
   // The n-th point of the Fama arrives at 128 × n² (128, 512, 1.152 …): 1,25 × √(Fama/200).
   expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 128 } }).famePoints).toBe(1);
   expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 1_152 } }).famePoints).toBe(3);
@@ -67,13 +69,13 @@ it("earns 2 points for the national title, √(Fama/128), +2 for each kind of to
       reptile: { ...ready.tournaments.reptile, hall: [win, win] },
     },
   };
-  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 14, reptileWin: "superba" });
+  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 15, reptileWin: "superba" });
 });
 
 it("spends points for good: permanent upgrades stay, rent points only lock this school's rent", () => {
   const first = foundSchool(readySchool(), details, 2_000, { upgrades: { writing: 2 }, rent: 4 });
-  // 8 points earned (2 + √(5.000/128)), 6 spent.
-  expect(first.network.reputation).toBe(2);
+  // 9 points earned (1 + 2 + √(5.000/128)), 6 spent.
+  expect(first.network.reputation).toBe(3);
   expect(first.network.reputationUpgrades?.writing).toBe(2);
   expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.4);
   expect(first.player.writingPower).toBeCloseTo(1.4);
@@ -93,12 +95,12 @@ it("spends points for good: permanent upgrades stay, rent points only lock this 
   // No rent points: no new rent, the old ones stay.
   const third = foundSchool(readySchool(second), details, 4_000);
   expect(getMonthlyNetworkRent(third)).toBe(450);
-  expect(third.network.reputation).toBe(13);
+  expect(third.network.reputation).toBe(16);
 });
 
 it("refuses the foundation when the spending is not covered or exceeds a cap", () => {
   const ready = readySchool();
-  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 9 })).toBe(ready);
+  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 10 })).toBe(ready);
   expect(foundSchool(ready, details, 2_000, { upgrades: { training: -1 }, rent: 0 })).toBe(ready);
   const nearlyMaxed = {
     ...ready,

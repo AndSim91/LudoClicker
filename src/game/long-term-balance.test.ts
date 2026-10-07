@@ -9,8 +9,10 @@ import {
 const GAME_COUNT = 2;
 const INTENSE_HORIZON_MS = 2 * 60 * 60_000;
 const RELAXED_HORIZON_MS = 2 * 60 * 60_000;
-// First prestige (first National title): 60–90 minutes of active play.
-const MINIMUM_MS = 60 * 60_000;
+// First prestige (first Accademico title, from 07/10): about 55–90 minutes of
+// active play. The calendar moves in 12-minute seasons: with the Accademico at
+// 100 the earliest games win it in season 5, at 56–57 minutes.
+const MINIMUM_MS = 55 * 60_000;
 const INTENSE_MAXIMUM_MS = 90 * 60_000;
 
 function seeds(count: number): number[] {
@@ -47,13 +49,13 @@ describe("long-term automated balance simulation", () => {
     const intenseTimes = reachedTimes(intense);
     const relaxedTimes = reachedTimes(relaxed);
 
-    expect(intenseTimes, "ogni partita intensa arriva al primo Nazionale").toHaveLength(GAME_COUNT);
-    expect.soft(percentile(intenseTimes, 0.1), "P10 del primo prestigio: almeno 60 minuti")
+    expect(intenseTimes, "ogni partita intensa arriva al primo titolo all'Accademico").toHaveLength(GAME_COUNT);
+    expect.soft(percentile(intenseTimes, 0.1), "P10 del primo prestigio: almeno 55 minuti")
       .toBeGreaterThanOrEqual(MINIMUM_MS);
     expect.soft(percentile(intenseTimes, 0.5), "mediana del primo prestigio intenso: entro 90 minuti")
       .toBeLessThanOrEqual(INTENSE_MAXIMUM_MS);
     if (relaxedTimes.length > 0) {
-      expect.soft(percentile(relaxedTimes, 0.1), "P10 del primo prestigio tranquillo: almeno 60 minuti")
+      expect.soft(percentile(relaxedTimes, 0.1), "P10 del primo prestigio tranquillo: almeno 55 minuti")
         .toBeGreaterThanOrEqual(MINIMUM_MS);
     }
   });
@@ -69,10 +71,10 @@ describe("long-term automated balance simulation", () => {
     }
   });
 
-  it("opens the prestige with one national title in Arena or Style, and offers it once", () => {
+  it("opens the prestige with one Accademico title in Arena or Style, and offers it once", () => {
     const startedAt = 1_700_000_000_000;
     const state = createInitialState(startedAt, "Prestige gate test");
-    expect(getPrestigeRequirements(state)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
+    expect(getPrestigeRequirements(state)).toEqual({ academyTitles: 1, currentAcademyTitles: 0 });
     expect(canFoundSchool({
       ...state,
       tournaments: { ...state.tournaments, championsVictoryCurrentSchool: true },
@@ -80,11 +82,16 @@ describe("long-term automated balance simulation", () => {
 
     const titled = {
       ...state,
-      tournaments: { ...state.tournaments, nationalTitlesCurrentSchool: 1 },
+      tournaments: { ...state.tournaments, academyTitlesCurrentSchool: 1 },
     };
+    // A game saved before 07/10 with a national title keeps its Rete open.
+    expect(canFoundSchool({
+      ...state,
+      tournaments: { ...state.tournaments, nationalTitlesCurrentSchool: 1 },
+    })).toBe(true);
     const ready = gameReducer(titled, { type: "TICK", now: startedAt + 1_000 });
     expect(canFoundSchool(ready)).toBe(true);
     expect(ready.network.prestigeOfferSent).toBe(true);
-    expect(ready.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
+    expect(ready.messages.filter((message) => message.subject === "Primi all'Accademico")).toHaveLength(1);
   });
 });

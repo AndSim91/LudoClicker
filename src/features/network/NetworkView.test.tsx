@@ -8,7 +8,12 @@ afterEach(() => cleanup());
 
 const ready = (): GameState => {
   const initial = createInitialState(1_000);
-  return { ...initial, tournaments: { ...initial.tournaments, nationalTitlesCurrentSchool: 1 } };
+  // An Accademico title (1 point) and 128 Fama (1 point): 2 points to spend.
+  return {
+    ...initial,
+    school: { ...initial.school, fame: 128 },
+    tournaments: { ...initial.tournaments, academyTitlesCurrentSchool: 1 },
+  };
 };
 
 it("founds a new school from one page: name and city, old points white and fixed, new ones gold", () => {
@@ -33,7 +38,7 @@ it("founds a new school from one page: name and city, old points white and fixed
   const genetics = screen.getByLabelText("Genetica: 3");
   expect(genetics).not.toHaveClass("is-added");
   expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
-  // Only the 2 points of the national title: each + turns gold, then the others stop.
+  // Only the 2 points of the Accademico and the Fama: each + turns gold, then the others stop.
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
   expect(screen.getByLabelText("Genetica: 4")).toHaveClass("is-added");
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" }));

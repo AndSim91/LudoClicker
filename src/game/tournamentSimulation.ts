@@ -934,6 +934,8 @@ export function createChampionsOpenAthletePairs(
   state: GameState,
   teamCount: number,
   seed: number,
+  /** Average Arena and Stile of the field: Champion's by default, Reptile its own. */
+  standard = TOURNAMENT_DEFINITIONS.champions.standard,
 ): { pairs: [TournamentParticipant, TournamentParticipant][]; nextSeed: number } {
   const cursor: RandomCursor = { seed };
   const count = Math.max(0, Math.floor(teamCount));
@@ -949,13 +951,10 @@ export function createChampionsOpenAthletePairs(
       );
     }
   });
-  let normalized = normalizeNpcFieldToStandard(
-    participants,
-    TOURNAMENT_DEFINITIONS.champions.standard,
-  );
+  let normalized = normalizeNpcFieldToStandard(participants, standard);
   normalized = normalizeOrdinaryNpcsToStandard(
     maybeInsertSecretLegendaries(state, "champions", normalized, cursor),
-    TOURNAMENT_DEFINITIONS.champions.standard,
+    standard,
   );
   normalized = ensureUniqueParticipantNames(normalized, cursor);
 

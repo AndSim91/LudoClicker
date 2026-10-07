@@ -1,5 +1,5 @@
 import { GAME_CONFIG } from "../game/config";
-import { isGameAreaUnlocked } from "../game/progression";
+import { hasPrestigeTitle, isGameAreaUnlocked } from "../game/progression";
 import { isOfficialSwordSupplierUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
 import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
@@ -725,7 +725,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La nostra meta",
         body: [
-          "Un titolo al Nazionale, in Arena o in Stile, ci darà accesso alla [[Rete delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
+          "Un titolo al Torneo Accademico, in Arena o in Stile, ci darà accesso alla [[Rete delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
         ],
         focusRegions: [],
         tournamentTab: "results",
@@ -736,13 +736,13 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     id: "network-introduction",
     pauseWhileActive: true,
     canStart: ({ state }) =>
-      state.network.schoolCount === 0 && (state.tournaments.nationalTitlesCurrentSchool ?? 0) > 0,
+      state.network.schoolCount === 0 && hasPrestigeTitle(state),
     steps: [
       {
         id: "open-network",
         kind: "objective",
         title: "Apri la Rete delle Onde",
-        body: ["Un titolo nazionale e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Rete]]."],
+        body: ["Un titolo all'Accademico e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Rete]]."],
         focusRegions: ({ activeView }) =>
           activeView === "network" ? ["main"] : ["navigation", "network-navigation"],
         isComplete: ({ activeView }) => activeView === "network",
@@ -766,7 +766,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Fondare è ricominciare",
         body: [
           "La nuova scuola parte da zero: **Fondi**, **Iscritti**, collaboratori, [[Upgrade]] e **Fama**.",
-          `Porti con te la **Reputazione**: ${GAME_CONFIG.reputationNationalTitlePoints} punti per il titolo nazionale e per ognuno degli altri grandi tornei vinti, più quelli che vengono dalla **Fama**. Più resti, più ne porti.`,
+          `Porti con te la **Reputazione**: ${GAME_CONFIG.reputationAcademyTitlePoints} punto per il titolo all'Accademico, ${GAME_CONFIG.reputationNationalTitlePoints} per il Nazionale e per ognuno degli altri grandi tornei vinti, più quelli che vengono dalla **Fama**. Più resti, più ne porti.`,
         ],
         focusRegions: ["main", "network-ready"],
         cardPlacement: "right",

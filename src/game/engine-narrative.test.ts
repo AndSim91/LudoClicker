@@ -328,8 +328,8 @@ describe("game engine: narrative", () => {
       details: { name: "Ordine del Faro", city: "Trieste" },
     });
 
-    expect(offered.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
-    expect(offeredAgain.messages.filter((message) => message.subject === "Campioni d'Italia")).toHaveLength(1);
+    expect(offered.messages.filter((message) => message.subject === "Primi all'Accademico")).toHaveLength(1);
+    expect(offeredAgain.messages.filter((message) => message.subject === "Primi all'Accademico")).toHaveLength(1);
     expect(founded.school.name).toBe("Ordine del Faro");
     expect(founded.school.city).toBe("Trieste");
     // Eva Parodi, the only Leggendario, follows the player as the first member.
@@ -375,18 +375,20 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    // 150 Fama earns 1 point (√(150/128)); the national title and the Champion's Arena 2 each. Nothing spent.
-    expect(founded.network.reputation).toBe(5);
+    // The Accademico title (counted from the national one) 1 point, 150 Fama 1 (√(150/128)),
+    // the national title and the Champion's Arena 2 each. Nothing spent.
+    expect(founded.network.reputation).toBe(6);
     // The map keeps only name, city and Fama of the school left behind.
     expect(founded.network.schools).toEqual([{ name: eligible.school.name, city: eligible.school.city, fame: eligible.school.fame }]);
     expect(founded.network).toMatchObject({ schoolCount: 1, monthlyRent: 0 });
     expect(founded.tournaments.nationalTitlesCurrentSchool).toBeUndefined();
+    expect(founded.tournaments.academyTitlesCurrentSchool).toBeUndefined();
     expect(founded.tournaments.ordinaryVictoryAchieved).toBe(true);
     // Founding alone gives no bonus: only the Reputation spent does.
     expect(founded.player.writingPower).toBeCloseTo(1);
     // Only the fee of the Leggendario who followed.
     expect(selectIncomePerMonth(founded)).toBe(40);
-    expect(getPrestigeRequirements(founded)).toEqual({ nationalTitles: 1, currentNationalTitles: 0 });
+    expect(getPrestigeRequirements(founded)).toEqual({ academyTitles: 1, currentAcademyTitles: 0 });
 
     const postPrestigeEvent = {
       id: "post-prestige-contacts",

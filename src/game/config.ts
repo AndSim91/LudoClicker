@@ -111,11 +111,14 @@ export const GAME_CONFIG = {
   narrativeEventMaxMs: 300_000,
   narrativeHistoryLimit: 30,
   narrativeNegativeStreakLimit: 2,
-  // Prestige: one national title (Arena or Style) opens the foundation of a new school.
-  prestigeNationalTitles: 1,
+  // Prestige (decisione del 07/10): one Accademico title (Arena or Style)
+  // opens the foundation of a new school. A national title opens it too.
+  prestigeAcademyTitles: 1,
   // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
   reputationStep: 0.2,
-  // The national title that unlocks the prestige is worth one point by itself.
+  // The Accademico title that unlocks the prestige is worth one point by itself.
+  reputationAcademyTitlePoints: 1,
+  // A national title (Arena or Style) of the school left behind.
   reputationNationalTitlePoints: 2,
   // Champion's Arena, Reptile/Superba and Chronicles won by the school left behind.
   reputationTournamentPoints: 2,
@@ -160,6 +163,8 @@ export const GAME_CONFIG = {
   reptileMaximumGadgetGrossPerTeam: 1_000,
   // Reptile fame level at which the Open becomes, for good, the Torneo della Superba.
   superbaReptileFameLevel: 1,
+  // Reptile: base Stile and Arena of the external pairs (×1,1 per earlier victory).
+  reptileStandard: 500,
   superbaDifficultyMultiplier: 1.25,
 } as const;
 

@@ -228,6 +228,8 @@ export function applyTournamentResult(
   );
   const championOwned = resolvedResult.level === "champions" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
+  const academyOwned = resolvedResult.level === "academy" &&
+    Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   const nationalOwned = resolvedResult.level === "national" &&
     Boolean(arenaWinner?.ownedContactId || styleWinner?.ownedContactId);
   const chroniclesOwned = resolvedResult.level === "chronicles" &&
@@ -262,6 +264,8 @@ export function applyTournamentResult(
         state.tournaments.ordinaryVictoryAchieved || ordinaryTournamentWon,
       championsVictoryCurrentSchool:
         state.tournaments.championsVictoryCurrentSchool || championOwned,
+      academyTitlesCurrentSchool:
+        (state.tournaments.academyTitlesCurrentSchool ?? 0) + (academyOwned ? 1 : 0),
       nationalTitlesCurrentSchool:
         (state.tournaments.nationalTitlesCurrentSchool ?? 0) + (nationalOwned ? 1 : 0),
       ...(state.tournaments.chroniclesVictoryCurrentSchool || chroniclesOwned

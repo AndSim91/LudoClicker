@@ -208,7 +208,7 @@ function createExternalTeams(
   cursor: RandomCursor,
 ): ReptileTeam[] {
   if (count <= 0) return [];
-  const generated = createChampionsOpenAthletePairs(state, count, cursor.seed);
+  const generated = createChampionsOpenAthletePairs(state, count, cursor.seed, GAME_CONFIG.reptileStandard);
   cursor.seed = generated.nextSeed;
   const difficultyMultiplier = getReptileDifficultyMultiplier(state);
   const teams: ReptileTeam[] = [];

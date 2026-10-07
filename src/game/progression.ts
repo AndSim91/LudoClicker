@@ -16,10 +16,9 @@ export type GameArea =
 export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (view === "mail" || view === "ludowiki" || view === "settings") return true;
   if (view === "gadget") return state.unlocks.gadget;
-  // Opens with the first national title and stays: after a foundation the count keeps it.
+  // Opens with the first Accademico title and stays: after a foundation the count keeps it.
   if (view === "network") {
-    return state.network.schoolCount > 0 ||
-      (state.tournaments.nationalTitlesCurrentSchool ?? 0) >= GAME_CONFIG.prestigeNationalTitles;
+    return state.network.schoolCount > 0 || hasPrestigeTitle(state);
   }
   if (state.network.schoolCount > 0) return true;
 
@@ -37,18 +36,28 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   return false;
 }
 
-/** The only gate of the prestige: a national title (Arena or Style) won by this school. */
+/**
+ * The only gate of the prestige (decisione del 07/10): an Accademico title
+ * (Arena or Style) won by this school. A national title counts too, so a game
+ * saved before the change keeps its open Rete.
+ */
 export function getPrestigeRequirements(state: GameState) {
+  const academy = state.tournaments.academyTitlesCurrentSchool ?? 0;
+  const national = state.tournaments.nationalTitlesCurrentSchool ?? 0;
   return {
-    nationalTitles: GAME_CONFIG.prestigeNationalTitles,
-    currentNationalTitles: state.tournaments.nationalTitlesCurrentSchool ?? 0,
+    academyTitles: GAME_CONFIG.prestigeAcademyTitles,
+    currentAcademyTitles: Math.max(academy, national > 0 ? GAME_CONFIG.prestigeAcademyTitles : 0),
   };
 }
 
-export function canFoundSchool(state: GameState): boolean {
+export function hasPrestigeTitle(state: GameState): boolean {
   const requirements = getPrestigeRequirements(state);
+  return requirements.currentAcademyTitles >= requirements.academyTitles;
+}
+
+export function canFoundSchool(state: GameState): boolean {
   return (
-    requirements.currentNationalTitles >= requirements.nationalTitles &&
+    hasPrestigeTitle(state) &&
     !Object.values(state.network.secretLegendaries).some(
       (progress) => progress.status === "trial",
     )

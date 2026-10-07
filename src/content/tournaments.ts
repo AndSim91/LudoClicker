@@ -43,7 +43,8 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     fieldSize: 64,
     // Academy and National are tuned so the first National title (the prestige
     // gate) arrives around 80–90 minutes of active play (balanceSimulation).
-    standard: 90,
+    // Decisione del 07/10: Accademico 100, Nazionale 200, Champion's 400.
+    standard: 100,
     npc: {
       rarityWeights: [["common", 0.65], ["rare", 0.30], ["ultra-rare", 0.05]],
       formWeights: [[1, 0.20], [2, 0.40], [3, 0.30], [4, 0.10]],
@@ -61,7 +62,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Torneo Nazionale",
     calendarMonth: 6,
     fieldSize: 64,
-    standard: 110,
+    standard: 200,
     npc: {
       rarityWeights: [["common", 0.35], ["rare", 0.50], ["ultra-rare", 0.15]],
       formWeights: [[3, 0.10], [4, 0.35], [5, 0.40], [6, 0.15]],
@@ -79,7 +80,7 @@ export const TOURNAMENT_DEFINITIONS: Record<TournamentLevel, TournamentDefinitio
     label: "Champion's Arena",
     calendarMonth: 11,
     fieldSize: 64,
-    standard: 300,
+    standard: 400,
     npc: {
       rarityWeights: [["common", 0.40], ["rare", 0.52], ["ultra-rare", 0.08]],
       formWeights: [[4, 0.18], [5, 0.38], [6, 0.33], [7, 0.11]],

@@ -4,7 +4,7 @@ import { ACHIEVEMENT_TOTAL } from "../../content/achievements";
 import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
-import { canFoundSchool, getPrestigeRequirements } from "../../game/progression";
+import { canFoundSchool, hasPrestigeTitle } from "../../game/progression";
 import {
   REPUTATION_UPGRADES,
   REPUTATION_UPGRADE_IDS,
@@ -42,8 +42,7 @@ export function NetworkView({
     return () => onFoundationOpenChange?.(false);
   }, [founding, onFoundationOpenChange]);
 
-  const requirements = getPrestigeRequirements(state);
-  const titled = requirements.currentNationalTitles >= requirements.nationalTitles;
+  const titled = hasPrestigeTitle(state);
   const ready = canFoundSchool(state);
   const preview = getPrestigeReputationPreview(state);
   const network = state.network;
@@ -93,12 +92,16 @@ export function NetworkView({
           <h2 id="network-ready-title">Se fondi ora</h2>
           <p className="network-big">
             <b>+{formatStat(preview.points)}</b>
-            <span>{titled ? `punti, ${formatStat(network.reputation + preview.points)} in tutto` : "serve prima il titolo nazionale"}</span>
+            <span>{titled ? `punti, ${formatStat(network.reputation + preview.points)} in tutto` : "serve prima un titolo all'Accademico"}</span>
           </p>
           <ul className="network-points">
             <li className={titled ? "is-done" : undefined}>
-              <span>Titolo nazionale<small>{titled ? "Arena o Stile, vinto" : "Vinci un Torneo Nazionale con questa scuola"}</small></span>
-              <b>+{GAME_CONFIG.reputationNationalTitlePoints}</b>
+              <span>Titolo all'Accademico<small>{titled ? "Arena o Stile, vinto" : "Vinci un Torneo Accademico con questa scuola"}</small></span>
+              <b>+{GAME_CONFIG.reputationAcademyTitlePoints}</b>
+            </li>
+            <li className={preview.nationalWin ? "is-done" : "is-open"}>
+              <span>Titolo nazionale<small>Arena o Stile</small></span>
+              <b>{preview.nationalWin ? `+${GAME_CONFIG.reputationNationalTitlePoints}` : `+${GAME_CONFIG.reputationNationalTitlePoints} possibili`}</b>
             </li>
             <li className={preview.famePoints > 0 ? "is-done" : undefined}>
               <span>Fama {formatStat(state.school.fame)}<small>il prossimo punto a {formatStat(nextFamePoint)}</small></span>
