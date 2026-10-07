@@ -34,6 +34,6 @@ export const visitorShape = (x: number): AthleteShape => ({
   d: `M${x} 104 L${x} 128 M${x} 128 L${x - 7} 150 M${x} 128 L${x + 8} 150 M${x} 110 L${x - 6} 123 M${x} 110 L${x + 6} 122`,
 });
 
-/** A ponytail falling behind the head of an athlete facing that way. */
+/** A long ponytail falling behind the head, down to the shoulder blades. */
 export const ponytail = (x: number, facing: 1 | -1) =>
-  `M${x - 4 * facing} 90 Q${x - 9 * facing} 93 ${x - 8 * facing} 103`;
+  `M${x - 4 * facing} 90 Q${x - 11 * facing} 94 ${x - 9 * facing} 106 Q${x - 8 * facing} 113 ${x - 10 * facing} 119`;
