@@ -72,8 +72,8 @@ describe("initial tutorial progression", () => {
     progressed = finishSendingEmail(completeActiveDraft(progressed, 3_000));
     expect(progressed.statistics.emailsSent).toBe(3);
     expect(progressed.shortGoal).toMatchObject({
-      definitionId: "complete-event",
-      completedCount: 0,
+      definitionId: "book-trials",
+      completedCount: 1,
     });
     expect(isGameAreaUnlocked("events", progressed)).toBe(true);
     expect(progressed.messages.some(

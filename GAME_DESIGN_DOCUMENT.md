@@ -117,7 +117,7 @@ Il giocatore deve sentirsi contemporaneamente:
    compaiono soltanto quando il giocatore raggiunge traguardi comprensibili o
    completa speciali comunicazioni interne manuali. Nella scuola iniziale:
    Upgrade e Scuola dopo il primo iscritto, Contatti dalla prima Fama, Eventi
-   dopo la missione tutorial «Inviti in partenza» (2 email inviate), Tornei da 6 di
+   dopo la prima missione «Inviti in partenza» (2 email inviate), Tornei da 6 di
    Fama; dalla seconda
    scuola in poi tutte le aree principali sono aperte fin dall'inizio.
 
@@ -2435,7 +2435,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | Avvio                                      | Posta (composizione, Posta in arrivo, Posta inviata), Impostazioni, 5 contatti iniziali, 6 spade |
 | Prima email inviata                        | messaggio “Partita la prima email”; la prima email garantisce una prova |
-| Missione tutorial “Inviti in partenza” (2 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
+| Prima missione “Inviti in partenza” (2 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
 | Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
 | Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
 | 6 punti Fama                               | pagina Tornei                                                            |
@@ -2812,16 +2812,15 @@ non ha tetto:
 
 | Ordine | Missione | Conta |
 | ---: | --- | --- |
-| 1 | Uscire a toccare l'erba | eventi completati |
-| 2 | Inviti in partenza | email inviate |
-| 3 | Agenda in movimento | prove prenotate |
-| 4 | Una sedia in più | nuovi iscritti |
+| 1 | Inviti in partenza | email inviate |
+| 2 | Agenda in movimento | prove prenotate |
+| 3 | Una sedia in più | nuovi iscritti |
+| 4 | Uscire a toccare l'erba | eventi completati |
 
-Solo nella prima scuola la partita parte con la **missione tutorial** «Inviti in
-partenza» (2 email, 50 €), fuori dalle serie: completarla apre gli Eventi e fa
-partire la serie 1 da «Uscire a toccare l'erba». La scheda mostra il numero della
-serie, non della missione. A ogni nuova scuola le missioni ripartono dalla serie 1
-(«Uscire a toccare l'erba»), senza missione tutorial. Quando il
+Nella prima scuola la prima «Inviti in partenza» apre gli Eventi. La scheda
+mostra il numero della serie, non della missione. A ogni nuova scuola le missioni
+ripartono dalla serie 1 («Inviti in partenza»), senza il messaggio che apre gli
+Eventi. Quando il
 saldo raggiunge o supera **10.000 €**, una missione ancora a zero progresso si
 nasconde. Se possiede già almeno un punto di progresso, rimane invece attiva
 fino al completamento; la missione successiva applica nuovamente la regola del
@@ -3068,7 +3067,7 @@ l'avanzamento.
    tasto mentre il tempo resta fermo, e spiega che con Invio automatico
    disattivo la bozza resta ferma finché non si preme Invia. La scena termina quando la
    bozza passa a “Invio in corso...”; a quel punto il tempo riparte e inizia la
-   missione tutorial “Inviti in partenza”, che conta due email ulteriori rispetto a
+   missione “Inviti in partenza”, che conta due email ulteriori rispetto a
    quelle già inviate o in invio. Gli Eventi si sbloccano soltanto al
    completamento di questa missione.
 

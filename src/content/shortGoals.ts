@@ -20,10 +20,10 @@ export interface ShortGoalDefinition {
 }
 
 export const SHORT_GOAL_ORDER: ShortGoalId[] = [
-  "complete-event",
   "send-emails",
   "book-trials",
   "enroll-member",
+  "complete-event",
 ];
 
 export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
@@ -77,19 +77,11 @@ export function createInitialShortGoal(now: number): ShortGoalProgress {
   return createInitialEmailMission(0, now);
 }
 
-/**
- * First school only: the email mission that opens Eventi. It sits outside the
- * series (the order starts with Eventi), so an email mission at count 0 is it.
- */
-export function isTutorialEmailMission(progress: ShortGoalProgress): boolean {
-  return progress.definitionId === "send-emails" && progress.completedCount === 0;
-}
-
 export function createInitialEmailMission(
   baseline: number,
   now: number,
 ): ShortGoalProgress {
-  const definition = SHORT_GOALS["send-emails"];
+  const definition = SHORT_GOALS[SHORT_GOAL_ORDER[0]];
   return {
     definitionId: definition.id,
     baseline,

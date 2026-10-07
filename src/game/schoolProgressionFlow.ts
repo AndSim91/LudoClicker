@@ -9,7 +9,6 @@ import {
   getShortGoalReward,
   getShortGoalValue,
   isShortGoalActive,
-  isTutorialEmailMission,
 } from "../content/shortGoals";
 import { formatCurrency, formatList } from "../shared/formatters";
 import { refreshWritingCampaignCopies } from "./campaignContent";
@@ -312,9 +311,7 @@ export function completeShortGoal(
 
   const definition = SHORT_GOALS[available.shortGoal.definitionId];
   const reward = scaleCurrencyGain(getShortGoalReward(available.shortGoal), gainMultiplier);
-  const isTutorial = isTutorialEmailMission(available.shortGoal);
-  // The tutorial mission is outside the series: the series starts after it.
-  const completedCount = isTutorial ? 0 : available.shortGoal.completedCount + 1;
+  const completedCount = available.shortGoal.completedCount + 1;
   const rewarded: GameState = {
     ...available,
     school: { ...available.school, euros: available.school.euros + reward },
@@ -324,7 +321,8 @@ export function completeShortGoal(
     },
   };
   const nextGoal = createNextShortGoal(rewarded, completedCount, now);
-  const progressed = isTutorial && available.network.schoolCount === 0
+  const progressed = definition.id === "send-emails" && available.shortGoal.completedCount === 0 &&
+      available.network.schoolCount === 0
     ? addMessage(
         { ...rewarded, shortGoal: nextGoal },
         now,

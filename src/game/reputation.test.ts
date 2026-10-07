@@ -288,16 +288,16 @@ it("restarts the Missioni delle Onde from series 1 at every new school", () => {
   };
   const founded = foundSchool(advanced, details, 2_000);
   expect(founded.shortGoal).toMatchObject({
-    definitionId: "complete-event",
+    definitionId: "send-emails",
     completedCount: 0,
     target: 2,
-    baseline: founded.statistics.eventsCompleted,
+    baseline: founded.statistics.emailsSent,
   });
   // Events are already open in a new school: no "Si esce dalla palestra" message.
   const completed = completeShortGoal({
     ...founded,
     school: { ...founded.school, euros: 0 },
-    statistics: { ...founded.statistics, eventsCompleted: founded.statistics.eventsCompleted + 2 },
+    statistics: { ...founded.statistics, emailsSent: founded.statistics.emailsSent + 2 },
   }, 3_000, 1);
   expect(completed.shortGoal.completedCount).toBe(1);
   expect(completed.messages.some((message) => message.subject === "Si esce dalla palestra")).toBe(false);

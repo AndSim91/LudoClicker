@@ -1,4 +1,4 @@
-import { getShortGoalProgress, isTutorialEmailMission } from "../content/shortGoals";
+import { getShortGoalProgress } from "../content/shortGoals";
 import { GAME_CONFIG } from "./config";
 import type { GameState } from "./types";
 
@@ -24,8 +24,10 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (state.network.schoolCount > 0) return true;
 
   if (view === "events") {
-    return !isTutorialEmailMission(state.shortGoal) ||
-      getShortGoalProgress(state) >= state.shortGoal.target;
+    return state.shortGoal.completedCount > 0 || (
+      state.shortGoal.definitionId === "send-emails" &&
+      getShortGoalProgress(state) >= state.shortGoal.target
+    );
   }
   if (view === "contacts") return state.school.fame > 0;
   if (view === "tournaments") {

@@ -41,10 +41,9 @@ describe("game engine: narrative", () => {
     const completed = gameReducer(qualifying, { type: "TICK", now: 2_000 });
     const repeated = gameReducer(completed, { type: "TICK", now: 2_000 });
 
-    // The tutorial email mission is outside the series: series 1 starts with Eventi.
     expect(completed.school.euros).toBe(50);
-    expect(completed.shortGoal.definitionId).toBe("complete-event");
-    expect(completed.shortGoal.completedCount).toBe(0);
+    expect(completed.shortGoal.definitionId).toBe("book-trials");
+    expect(completed.shortGoal.completedCount).toBe(1);
     expect(completed.messages[0].subject).toBe("Missione compiuta: Inviti in partenza");
     expect(completed.messages[0].preview).toMatch(/\+50,00\s€\.$/);
     expect(repeated.school.euros).toBe(completed.school.euros);
@@ -52,16 +51,16 @@ describe("game engine: narrative", () => {
 
   it("caps mission targets and multiplies the reward by the series", () => {
     const statistics = createInitialState(1_000).statistics;
-    // Order: Eventi, email, prove, iscrizioni.
-    expect(createShortGoalFromStatistics(statistics, 0, 0).definitionId).toBe("complete-event");
-    expect(createShortGoalFromStatistics(statistics, 3, 0).definitionId).toBe("enroll-member");
-    // Series 2 (one full round done): 3 events for 100 €.
+    // Order: email, prove, iscrizioni, Eventi.
+    expect(createShortGoalFromStatistics(statistics, 2, 0).definitionId).toBe("enroll-member");
+    expect(createShortGoalFromStatistics(statistics, 3, 0).definitionId).toBe("complete-event");
+    // Series 2 (one full round done): 3 emails for 100 €.
     const second = createShortGoalFromStatistics(statistics, 4, 0);
     expect(second.target).toBe(3);
     expect(getShortGoalReward(second)).toBe(100);
     // Series 9: targets stuck at 5, reward still growing by 50 € a series.
-    const ninth = createShortGoalFromStatistics(statistics, 33, 0);
-    expect(ninth.definitionId).toBe("send-emails");
+    const ninth = createShortGoalFromStatistics(statistics, 35, 0);
+    expect(ninth.definitionId).toBe("complete-event");
     expect(ninth.target).toBe(5);
     expect(getShortGoalReward(ninth)).toBe(450);
   });
@@ -169,8 +168,8 @@ describe("game engine: narrative", () => {
     });
     expect(completed.school.euros).toBe(10_050);
     expect(completed.shortGoal).toMatchObject({
-      definitionId: "complete-event",
-      completedCount: 0,
+      definitionId: "book-trials",
+      completedCount: 1,
       isActive: false,
     });
   });
