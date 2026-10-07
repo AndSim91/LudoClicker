@@ -2946,8 +2946,15 @@ Un'unica pagina, in quest'ordine:
   sopra). Sempre in Onde le schede dei
   settori sono tutte alte uguali e hanno una scena animata (Tavola 4 del
   06/10): la Redazione, finché non diventa Social, una scrivania con il portatile dove un'email si scrive riga per riga e parte come aeroplanino di carta, accanto a una tazza che fuma (descrizione «Scrivono le email della scuola. Le virgole sono un dettaglio.»); Social un telefono con il feed dei duelli e le pastiglie di follower,
-  rendita e bonus Eventi; Eventi il gazebo blu militare con il roll-up nero
-  della scuola, il mare e i passanti; Attrezzatura la rastrelliera e una lama
+  rendita e bonus Eventi; Eventi il gazebo blu militare con due atleti che
+  incrociano le spade, il roll-up nero della scuola, il mare e i passanti, e
+  dal 07/10 un secondo roll-up fermo con il manifesto LudoSport ridisegnato
+  (due atlete schiena contro schiena con le spade blu e rossa, la fascia
+  bianca con titolo, logo e QR, l'atleta al tramonto in guardia appesa con la
+  spada dorata; `EventsRollup.tsx`). Atleti e passanti dell'evento sono lo
+  stesso atleta stilizzato delle finali di torneo e della palestra
+  (`athleteShape.ts`, `Athlete.tsx` per le figure ferme, `Fighter` per
+  quelle animate); Attrezzatura la rastrelliera e una lama
   che si riaccende sul banco (non segue i dati); Gadget il banchetto con i
   gadget disegnati e la pastiglia delle entrate del mese. Sotto la scena il
   lavoro in corso (gli eventi in corso uno per riga), nel piede Maestria e

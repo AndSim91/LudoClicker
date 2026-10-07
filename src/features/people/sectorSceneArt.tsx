@@ -1,5 +1,8 @@
 import type { CSSProperties } from "react";
 import type { CollaboratorMasteryRole } from "../../game/types";
+import { Athlete, StillSaber } from "./Athlete";
+import { athletePose, visitorShape } from "./athleteShape";
+import { EventsRollup } from "./EventsRollup";
 import { SceneLayer } from "./SceneLayer";
 
 /*
@@ -82,6 +85,11 @@ function SocialScene() {
 const WAVE_A = "M0 14 Q62 4 125 14 T250 14 T375 14 T500 14 T625 14 T750 14 T875 14 T1000 14 T1125 14 V40 H0Z";
 const WAVE_B = "M0 14 Q50 6 100 14 T200 14 T300 14 T400 14 T500 14 T600 14 T700 14 T800 14 T900 14 T1000 14 T1100 14 V40 H0Z";
 
+// The athletes of the events are the game's (athleteShape.ts), at 0.62 of the gym.
+const GAZEBO_PAIR = "translate(231.8 -7) scale(.62)";
+const GAZEBO_LEFT = athletePose(0, 1, "attack");
+const GAZEBO_RIGHT = athletePose(62, -1, "attack");
+
 function EventsScene() {
   return (
     <>
@@ -98,10 +106,12 @@ function EventsScene() {
         <path d="M180 34 H320 V40 H180Z" fill="#26405c" />
         <path d="M180 40 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5 l7 5 l7 -5Z" fill="#26405c" />
         <path d="M186 40 V86 M314 40 V86" stroke="#c8d3dc" strokeOpacity={0.7} strokeWidth={3} />
-        <g fill={INK}>
-          <circle cx={234} cy={52} r={5} /><path d="M229 58h10l2 18h-14z" /><path d="M229 76l-4 10h4l3-8zM239 76l4 10h-4l-3-8z" />
-          <circle cx={268} cy={52} r={5} /><path d="M263 58h10l2 18h-14z" /><path d="M263 76l-4 10h4l3-8zM273 76l4 10h-4l-3-8z" />
+        {/* Under the gazebo two athletes of the game cross blades (the blades hum in their layer). */}
+        <g transform={GAZEBO_PAIR}>
+          <Athlete shape={GAZEBO_LEFT} />
+          <Athlete shape={GAZEBO_RIGHT} />
         </g>
+        <EventsRollup />
         {/* Roll-up of the school: black, the Ordine's emblem in white. */}
         <rect x={350} y={84} width={34} height={4} rx={1} fill="#8aa0b0" />
         <rect x={352} y={22} width={30} height={62} rx={1.5} fill="#0b0d10" stroke="#3a4450" strokeWidth={0.8} />
@@ -109,15 +119,17 @@ function EventsScene() {
         <rect x={356} y={66} width={22} height={2.5} rx={1} fill="#f4f1ea" />
         <rect x={359} y={71} width={16} height={2} rx={1} fill="#f4f1ea" opacity={0.5} />
       </svg>
-      <SceneLayer box={{ x: 236, y: 38, w: 30, h: 26 }} className="scene-saber">
-        <path d="M239 62 L256 40" stroke="#c9a7ff" strokeWidth={3} strokeLinecap="round" />
-        <path d="M263 62 L247 40" stroke="#6cd3d6" strokeWidth={3} strokeLinecap="round" />
+      <SceneLayer box={{ x: 236, y: 44, w: 30, h: 25 }} className="scene-saber">
+        <g transform={GAZEBO_PAIR}>
+          <StillSaber line={GAZEBO_LEFT.blade!} color="#c9a7ff" />
+          <StillSaber line={GAZEBO_RIGHT.blade!} color="#6cd3d6" />
+        </g>
       </SceneLayer>
-      <SceneLayer box={{ x: -30, y: 58, w: 12, h: 30 }} className="scene-walker">
-        <g transform="translate(-10 0)"><Walker y={63} r={4.4} /></g>
+      <SceneLayer box={{ x: -30, y: 54, w: 12, h: 34 }} className="scene-walker">
+        <g transform="translate(-10 11) scale(.5)"><Athlete shape={visitorShape(0)} /></g>
       </SceneLayer>
-      <SceneLayer box={{ x: -30, y: 60, w: 12, h: 28 }} className="scene-walker is-browsing">
-        <g transform="translate(-10 0)"><Walker y={66} r={4} /></g>
+      <SceneLayer box={{ x: -30, y: 56, w: 12, h: 32 }} className="scene-walker is-browsing">
+        <g transform="translate(-10 18.5) scale(.45)"><Athlete shape={visitorShape(0)} /></g>
       </SceneLayer>
     </>
   );

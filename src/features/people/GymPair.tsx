@@ -1,11 +1,12 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { GymLayer, SaberLayers } from "./GymLayers";
 import { boxAround } from "./gymBox";
+import { athleteBody, athletePose } from "./athleteShape";
 import { bodyShape, type FighterBody } from "./fighterBodies";
 import { canSpar, exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
 
-// A stick athlete: "guard" holds the blade upright, "attack" reaches towards
-// a partner standing 62 units away, so two attacks cross in the middle.
+// The game's stick athlete (athleteShape.ts), animated: "guard" holds the blade
+// upright, "attack" reaches a partner 62 units away, so two attacks cross in the middle.
 export function Fighter({
   x,
   facing,
@@ -51,14 +52,14 @@ export function Fighter({
       </g>
     );
   }
-  const hand = x + 14 * facing;
-  const tip = blade ?? (pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 });
+  const [hand, , poseX, poseY] = athletePose(x, facing, pose).blade!;
+  const tip = blade ?? { x: poseX, y: poseY };
   const raised = declare ? ` M${x} 110 L${x - 8 * facing} 96 L${x - 10 * facing} 84` : "";
   const arm = unarmed ? `M${x} 110 L${x + 9 * facing} 104 L${x + 12 * facing} 97` : `M${x} 110 L${hand} 116`;
   return (
     <g className="gym-fighter" style={{ animationDelay: offset }}>
       <circle cx={x} cy={96} r={7} />
-      <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 ${arm}${raised}`} />
+      <path d={`${athleteBody(x)} ${arm}${raised}`} />
       {unarmed ? null : (
         <line className="gym-saber" x1={hand} y1={116} x2={tip.x} y2={tip.y} style={{ color: saber, animationDelay: offset }} />
       )}
@@ -88,8 +89,9 @@ export function GymActor({
   step?: number;
 }) {
   const offset = `${-delay}s`;
-  const hand = x + 14 * facing;
-  const tip = pose === "guard" ? { x: hand + 4 * facing, y: 76 } : { x: hand + 30 * facing, y: 90 };
+  const shape = athletePose(x, facing, pose);
+  const [hand, , tipX, tipY] = shape.blade!;
+  const tip = { x: tipX, y: tipY };
   const geometry: Array<[number, number]> = [
     [x - 8, 150], [x + 9, 150], [x - 7, 89], [x + 7, 89], [hand, 116], [tip.x, tip.y],
   ];
@@ -108,7 +110,7 @@ export function GymActor({
       >
         <GymLayer box={box} className="gym-body">
           <circle cx={x} cy={96} r={7} />
-          <path d={`M${x} 104 L${x} 128 M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150 M${x} 110 L${hand} 116`} />
+          <path d={shape.d} />
         </GymLayer>
         <SaberLayers box={box} lines={[[hand, 116, tip.x, tip.y, saber]]} delay={offset} />
       </div>
