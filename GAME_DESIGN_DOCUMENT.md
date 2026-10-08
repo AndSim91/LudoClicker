@@ -3259,6 +3259,9 @@ l'avanzamento.
    infine «Gli Ander Games» dà la prima tappa (8 atleti con almeno la Forma 1)
    e indica «La mia giornata». I salvataggi già oltre i 10 iscritti o la
    prima scuola la segnano come vista (migrazione v106).
+   Dalla v108 i salvataggi sotto i 10 iscritti di picco che avevano ancora
+   le Forme aperte dalla vecchia regola (dal primo iscritto) le richiudono,
+   insieme a Tornei; si riaprono ai 10 iscritti con la scena.
 
    **Le tappe in «La mia giornata»** (08/10/2026). Dopo questa scena, in ogni
    scuola, l'obiettivo del momento resta fisso in «La mia giornata»: una
