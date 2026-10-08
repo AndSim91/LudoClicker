@@ -199,7 +199,7 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 3 },
+      school: { ...initial.school, activeMembers: 5 },
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 
@@ -212,12 +212,26 @@ describe("game engine: narrative", () => {
     expect(repeated.narrative.history).toHaveLength(1);
   });
 
+  it("holds Eventi e Imprevisti until the school has 5 members", () => {
+    const initial = createInitialState(1_000);
+    const due = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 4 },
+      narrative: { ...initial.narrative, nextEventAt: 2_000 },
+    };
+
+    const held = gameReducer(due, { type: "TICK", now: 2_000 });
+
+    expect(held.narrative.history).toHaveLength(0);
+    expect(held.narrative.nextEventAt).toBeGreaterThan(2_000);
+  });
+
   it("never resolves a missed renewal as a random narrative event", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 2, currentMonth: 7 },
-      contacts: initial.contacts.map((contact, index) => index < 2
+      school: { ...initial.school, activeMembers: 5, currentMonth: 7 },
+      contacts: initial.contacts.map((contact, index) => index < 5
         ? { ...contact, status: "enrolled" as const }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
@@ -237,8 +251,8 @@ describe("game engine: narrative", () => {
     const due = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, activeMembers: 3 },
-      contacts: initial.contacts.map((contact, index) => index < 3
+      school: { ...initial.school, activeMembers: 5 },
+      contacts: initial.contacts.map((contact, index) => index < 5
         ? { ...contact, status: "enrolled" as const }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },

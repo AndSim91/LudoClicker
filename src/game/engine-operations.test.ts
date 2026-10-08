@@ -321,8 +321,8 @@ describe("game engine: operations", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      randomSeed: 4,
-      school: { ...initial.school, activeMembers: 3, euros: 20 },
+      randomSeed: 1,
+      school: { ...initial.school, activeMembers: 5, euros: 20 },
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 

@@ -107,6 +107,7 @@ export const GAME_CONFIG = {
   socialBaseFollowerValue: 0.1,
   equipmentRepairIntervalMs: 1_500,
   equipmentSwordRepairWork: 150,
+  narrativeEventMinMembers: 5,
   narrativeEventMinMs: 120_000,
   narrativeEventMaxMs: 300_000,
   narrativeHistoryLimit: 30,

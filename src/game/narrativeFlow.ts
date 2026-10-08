@@ -21,7 +21,14 @@ export function processNarrativeEvent(
   now: number,
   gainMultiplier: number,
 ): GameState {
-  if (now < state.narrative.nextEventAt || state.school.activeMembers <= 0) return state;
+  if (now < state.narrative.nextEventAt) return state;
+  // Andrea 08/10: niente Eventi e Imprevisti sotto i 5 iscritti; il primo arriva entro 2 minuti dal quinto.
+  if (state.school.activeMembers < GAME_CONFIG.narrativeEventMinMembers) {
+    return {
+      ...state,
+      narrative: { ...state.narrative, nextEventAt: now + GAME_CONFIG.narrativeEventMinMs },
+    };
+  }
   const recentKinds = state.narrative.history
     .slice(-GAME_CONFIG.narrativeNegativeStreakLimit)
     .map((record) =>

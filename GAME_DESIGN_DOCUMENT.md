@@ -3425,7 +3425,11 @@ di Genova (`src/content/specialCollaborators.ts`) e i Leggendari Segreti
 Gli eventi casuali (eventi narrativi, `src/content/narrativeEvents.ts`) arrivano
 come messaggi nella Posta. Il loro esito è automatico; in seguito potranno
 offrire scelte. Ne avviene uno ogni 2–5 mesi di gioco (120.000–300.000 ms,
-estratti a caso), solo se la scuola ha almeno un iscritto attivo. L'evento è
+estratti a caso), solo se la scuola ha almeno 5 iscritti attivi
+(`narrativeEventMinMembers`, 08/10/2026): sotto quella soglia il timer viene
+rimandato di 2 mesi, così il primo evento arriva entro 2 mesi dal quinto
+iscritto. Gli eventi scriptati (Mancato rinnovo, sconfitte dei Leggendari
+Segreti) seguono le proprie regole. L'evento è
 estratto in modo uniforme fra quelli il cui minimo di iscritti attivi è
 raggiunto. Possono aggiungere contatti (con fonte "collaboratore"), Euro,
 usura dell'attrezzatura, spade rotte o riparate; non modificano
