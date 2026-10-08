@@ -3278,9 +3278,11 @@ l'avanzamento.
    8 atleti con almeno la Forma 1 (anche se l'ottavo arriva nel tick di
    dicembre, prima del controllo del torneo); prima di allora nessun torneo si
    gioca né risulta saltato. Arriva il messaggio «Si apre la stagione dei
-   tornei» e parte la scena: «Il Torneo Scolastico», «La nostra meta»
-   (Accademico → Rete delle Onde), obiettivo «Apri Tornei». **Testi
-   segnaposto**: li scrive Andrea. Dalla migrazione v107 Tornei resta aperto
+   tornei» e parte la scena (testi di Andrea): «Il Torneo Scolastico»
+   (otto atleti pronti, si aspetta dicembre), obiettivo «Apri Tornei»
+   (calendario e atleti della scuola), poi «La nostra meta» (Scolastico →
+   Accademico → Nazionale → Champion's Arena; «per ora voliamo bassi»: un
+   titolo all'Accademico apre il Network delle Onde). Dalla migrazione v107 Tornei resta aperto
    nei salvataggi con le Forme e già oltre la vecchia soglia (Fama 6, una
    scuola fondata o uno Scolastico giocato), che segnano la scena come vista.
 

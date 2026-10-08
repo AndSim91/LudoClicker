@@ -530,8 +530,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     ],
   },
   {
-    // 08/10/2026: when Tornei opens (8 athletes with Forma 1); the next tappa is playing the Scolastico.
-    // TESTI SEGNAPOSTO (bozze del documento «Primo tratto»): Andrea scrive quelli veri.
+    // 08/10/2026: when Tornei opens (8 athletes with Forma 1); the next tappa is playing the Scolastico. Testi di Andrea.
     id: TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID,
     pauseWhileActive: true,
     canStart: ({ state }) => state.unlocks.tournaments,
@@ -543,9 +542,17 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Il Torneo Scolastico",
         body: [
           "Il torneo scolastico è il momento in cui tutti i tuoi allievi si mettono alla prova. Ci saranno dei vincitori e degli sconfitti, ma l'importante è dare il massimo.",
-          "Abbiamo i nostri otto atleti: ci vediamo a dicembre.",
+          "Ora che abbiamo i nostri otto atleti pronti per combattere ci rimane solo da aspettare dicembre!",
         ],
         focusRegions: ["day-panel"],
+      },
+      {
+        id: "open-tournaments-page",
+        kind: "objective",
+        title: "Apri Tornei",
+        body: ["La sezione Tornei è ora aperta nel menu qui a fianco: qui troverai il calendario dei tornei e gli atleti che rappresenteranno la nostra scuola durante l'anno accademico."],
+        focusRegions: ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView }) => activeView === "tournaments",
       },
       {
         id: "school-tournament-goal",
@@ -553,17 +560,10 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "La nostra meta",
         body: [
-          "Un titolo al Torneo Accademico, in Arena o in Stile, ci darà accesso alla Rete delle Onde: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
+          "Dopo il Torneo Scolastico arriveremo a disputare il Torneo Accademico, da lì si potrà accedere al Nazionale Italiano ed infine arrivare alla Champion's Arena: il torneo mondiale di LudoSport!",
+          "Ma per ora voliamo bassi: riuscire a vincere all'Accademico in Arena o in Stile ci darà accesso al Network delle Onde: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
         ],
-        focusRegions: ["title"],
-      },
-      {
-        id: "open-tournaments-page",
-        kind: "objective",
-        title: "Apri Tornei",
-        body: ["Tornei è nella barra a sinistra: lì trovi il calendario e chi ci rappresenterà."],
-        focusRegions: ["navigation", "tournaments-navigation"],
-        isComplete: ({ activeView }) => activeView === "tournaments",
+        focusRegions: ["main"],
       },
     ],
   },
