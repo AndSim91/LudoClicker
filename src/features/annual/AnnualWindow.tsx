@@ -17,6 +17,8 @@ export function AnnualWindow({
   onFinal,
   finalDisabled,
   toolbar,
+  forcedPage,
+  planningToggle,
 }: {
   title: string;
   subtitle: string;
@@ -25,9 +27,19 @@ export function AnnualWindow({
   onFinal: () => void;
   finalDisabled?: boolean;
   toolbar?: ReactNode;
+  /** The tutorial shows this page while its step is on screen. */
+  forcedPage?: number;
+  /** «Pianificazione a fine anno» on or off (Andrea, 08/10 22:36). */
+  planningToggle?: { enabled: boolean; onChange: (enabled: boolean) => void };
 }) {
   const [index, setIndex] = useState(0);
-  const page = Math.min(index, pages.length - 1);
+  // After the tutorial the window stays on the page it was showing.
+  const [lastForcedPage, setLastForcedPage] = useState(forcedPage);
+  if (forcedPage !== lastForcedPage) {
+    setLastForcedPage(forcedPage);
+    if (forcedPage !== undefined) setIndex(forcedPage);
+  }
+  const page = Math.min(forcedPage ?? index, pages.length - 1);
   const last = page === pages.length - 1;
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +64,24 @@ export function AnnualWindow({
               <h2 id="annual-title">{title}</h2>
               <span>{subtitle}</span>
             </div>
-            <span className="annual-pause">Gioco in pausa</span>
+            <div className="annual-top-side">
+              {planningToggle ? (
+                <label
+                  className="annual-toggle"
+                  data-tutorial-region="planning-toggle"
+                  title="Spenta, a inizio luglio il gioco non si ferma più: la pagella resta nel Report annuale."
+                >
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={planningToggle.enabled}
+                    onChange={(event) => planningToggle.onChange(event.target.checked)}
+                  />
+                  <span>Pianificazione a fine anno</span>
+                </label>
+              ) : null}
+              <span className="annual-pause">Gioco in pausa</span>
+            </div>
           </div>
           {toolbar}
           <div className="annual-tabs" role="tablist">
@@ -73,14 +102,14 @@ export function AnnualWindow({
           {pages[page]?.render()}
         </div>
         <footer className="annual-nav">
-          <button type="button" className="prev" disabled={page === 0} onClick={() => setIndex(page - 1)}>
+          <button type="button" className="prev" disabled={page === 0 || forcedPage !== undefined} onClick={() => setIndex(page - 1)}>
             ‹ Indietro
           </button>
           <span className="annual-dots" aria-hidden="true">
             {pages.map((entry, position) => <i key={entry.title} className={position === page ? "on" : undefined} />)}
           </span>
           {last ? (
-            <button type="button" className="next is-final" disabled={finalDisabled} onClick={onFinal}>
+            <button type="button" className="next is-final" data-tutorial-region="planning-confirm" disabled={finalDisabled} onClick={onFinal}>
               {finalLabel}
             </button>
           ) : (

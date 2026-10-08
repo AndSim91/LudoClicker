@@ -20,7 +20,7 @@ function withCourse(plan: AnnualPlan, formId: FormId, track: QuickTrainingKind, 
 }
 
 /**
- * Pianificazione delle Onde (Andrea, 08/10): at the start of August the game
+ * Pianificazione delle Onde (Andrea, 08/10): at the start of July the game
  * stops on the pagella of the year and on the plan for the next one. Nothing
  * is spent until «Conferma il piano». The Consigli page (A.N.D.E.R. and
  * M.A.K.I.) comes later: Andrea is still working on it.
@@ -29,10 +29,15 @@ export function PlanningLayer({
   state,
   now,
   onConfirm,
+  page,
+  planningToggle,
 }: {
   state: GameState;
   now: number;
   onConfirm: (plan: AnnualPlan) => void;
+  /** Shown by the tutorial while its step is on screen. */
+  page?: "pagella" | "plan";
+  planningToggle?: { enabled: boolean; onChange: (enabled: boolean) => void };
 }) {
   const [plan, setPlan] = useState<AnnualPlan>(EMPTY_ANNUAL_PLAN);
   const report = state.annual?.report;
@@ -89,6 +94,8 @@ export function PlanningLayer({
         ...(report ? [{ title: "Pagella", render: () => <PagellaPage report={report} /> }] : []),
         { title: "Pianificazione", render: () => <PlanPage context={context} /> },
       ]}
+      forcedPage={page === undefined ? undefined : page === "plan" && report ? 1 : 0}
+      planningToggle={planningToggle}
       finalLabel="Conferma il piano"
       finalDisabled={headroom < -0.005}
       onFinal={() => onConfirm(plan)}

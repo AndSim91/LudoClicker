@@ -9,6 +9,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { isAnnualPlanningUnlocked } from "../game/annualReport";
 import { reloadOnStaleChunk } from "./reloadOnStaleChunk";
 import { Icon } from "../components/common/Icon";
 import { ProfileNameDialog } from "../components/ProfileNameDialog";
@@ -26,7 +27,7 @@ import { DayAlerts } from "../features/day-panel/DayAlerts";
 import { useMediaQuery } from "../shared/useMediaQuery";
 import { DayPanelToggle } from "../features/day-panel/DayPanelToggle";
 import { STORAGE_KEYS } from "../shared/storageKeys";
-import { resolveTutorialRegions } from "../content/tutorialScenes";
+import { ANNUAL_PLANNING_TUTORIAL_SCENE_ID, resolveTutorialRegions } from "../content/tutorialScenes";
 import { TutorialLayer } from "../features/tutorial/TutorialLayer";
 import { useTutorialController } from "../features/tutorial/useTutorialController";
 import {
@@ -309,8 +310,9 @@ export function App() {
     setMomentPaused(showsMoment);
   }, [showsMoment, setMomentPaused]);
   const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
-  // Pianificazione delle Onde (inizio agosto) e Report annuale: il gioco resta in pausa finché sono aperti.
-  const planningOpen = state.annual?.planningOpen === true;
+  // Pianificazione delle Onde (inizio luglio) e Report annuale: il gioco resta in pausa finché sono aperti.
+  // A save opened before the first Torneo Scolastico (build of 08/10 pomeriggio) waits for it too.
+  const planningOpen = state.annual?.planningOpen === true && isAnnualPlanningUnlocked(state);
   const [annualReportOpen, setAnnualReportOpen] = useState(false);
   const openAnnualReport = useCallback(() => setAnnualReportOpen(true), []);
   const closeAnnualReport = useCallback(() => setAnnualReportOpen(false), []);
@@ -318,6 +320,15 @@ export function App() {
   useLayoutEffect(() => {
     setPlanningPaused(showsAnnual);
   }, [showsAnnual, setPlanningPaused]);
+  const setAnnualPlanning = useCallback(
+    (enabled: boolean) => dispatch({ type: "SET_ANNUAL_PLANNING", enabled }),
+    [dispatch],
+  );
+  const planningToggle = isAnnualPlanningUnlocked(state)
+    ? { enabled: state.annual?.planningDisabled !== true, onChange: setAnnualPlanning }
+    : undefined;
+  // The planning tutorial points at the window itself: both stay on screen.
+  const planningTutorial = tutorial.activeScene?.id === ANNUAL_PLANNING_TUTORIAL_SCENE_ID;
   const confirmAnnualPlan = useCallback(
     (plan: AnnualPlan) => dispatch({ type: "CONFIRM_ANNUAL_PLAN", plan, now: getGameNow() }),
     [dispatch, getGameNow],
@@ -876,6 +887,7 @@ export function App() {
               onDarkModeChange={setDarkMode}
               reduceMotion={reduceMotion}
               onReduceMotionChange={setReduceMotion}
+              onAnnualPlanningChange={setAnnualPlanning}
             />
           )}
           </Suspense>
@@ -921,10 +933,21 @@ export function App() {
           onClose={closeReptileDay}
         />
       ) : null}
-      {!showsMoment && !hasBlockingReptileFlow && !tutorial.activeScene && planningOpen ? (
-        <PlanningLayer state={state} now={state.automation.lastProcessedAt} onConfirm={confirmAnnualPlan} />
+      {!showsMoment && !hasBlockingReptileFlow && (!tutorial.activeScene || planningTutorial) && planningOpen ? (
+        <PlanningLayer
+          state={state}
+          now={state.automation.lastProcessedAt}
+          onConfirm={confirmAnnualPlan}
+          page={planningTutorial ? tutorial.activeStep?.planningPage : undefined}
+          planningToggle={planningToggle}
+        />
       ) : annualReportOpen && !planningOpen ? (
-        <AnnualReportLayer state={state} now={state.automation.lastProcessedAt} onClose={closeAnnualReport} />
+        <AnnualReportLayer
+          state={state}
+          now={state.automation.lastProcessedAt}
+          onClose={closeAnnualReport}
+          planningToggle={planningToggle}
+        />
       ) : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />

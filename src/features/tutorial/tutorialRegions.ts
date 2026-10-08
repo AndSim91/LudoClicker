@@ -43,6 +43,14 @@ const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   "network-keeps": '[data-tutorial-region="network-keeps"]',
   "network-found": '[data-tutorial-region="network-found"]',
   status: ".status-bar",
+  "planning-grades": '[data-tutorial-region="planning-grades"]',
+  "planning-highlight": '[data-tutorial-region="planning-highlight"]',
+  "planning-sis": '[data-tutorial-region="planning-sis"]',
+  "planning-swords": '[data-tutorial-region="planning-swords"]',
+  "planning-funds": '[data-tutorial-region="planning-funds"]',
+  "planning-forecast": '[data-tutorial-region="planning-forecast"]',
+  "planning-toggle": '[data-tutorial-region="planning-toggle"]',
+  "planning-confirm": '[data-tutorial-region="planning-confirm"]',
 };
 
 export type TutorialTreatment = "focus" | "muted" | "hidden";

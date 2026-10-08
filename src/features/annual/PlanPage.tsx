@@ -138,29 +138,34 @@ function CourseCard({ context, formId, track }: { context: PlanContext; formId: 
   );
 }
 
-/** Lo schema delle Forme non va mai a capo: se non ci sta, si rimpicciolisce (Andrea, 08/10). */
+/**
+ * Lo schema delle Forme non va mai a capo: se non ci sta, si rimpicciolisce (Andrea, 08/10).
+ * A transform does not change the layout it measures, so measure and scale can
+ * never chase each other (the CSS zoom of the first version did: crash 08/10, React #185).
+ */
 function FittedMap({ children }: { children: ReactNode }) {
   const boxRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(1);
-  // The map's scrollWidth is its own width, untouched by the zoom: measure after every render.
-  const fit = () => {
-    const box = boxRef.current;
-    const map = box?.firstElementChild?.firstElementChild as HTMLElement | null | undefined;
-    if (!box || !map || map.scrollWidth === 0) return;
-    const next = Math.min(1, box.clientWidth / map.scrollWidth);
-    setZoom((current) => (Math.abs(current - next) > 0.001 ? next : current));
-  };
-  useLayoutEffect(fit);
+  const [fit, setFit] = useState<{ scale: number; height?: number }>({ scale: 1 });
   useLayoutEffect(() => {
     const box = boxRef.current;
-    if (!box || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(() => fit());
+    const map = box?.firstElementChild as HTMLElement | null | undefined;
+    if (!box || !map) return;
+    const measure = () => {
+      if (map.offsetWidth === 0) return;
+      const scale = Math.min(1, box.clientWidth / map.offsetWidth);
+      const height = Math.ceil(map.offsetHeight * scale);
+      setFit((current) => Math.abs(current.scale - scale) > 0.005 || current.height !== height ? { scale, height } : current);
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
     observer.observe(box);
+    observer.observe(map);
     return () => observer.disconnect();
   }, []);
   return (
-    <div ref={boxRef} className="annual-map-fit">
-      <div style={{ zoom }}>{children}</div>
+    <div ref={boxRef} className="annual-map-fit" style={{ height: fit.height }}>
+      <div className="annual-map-scale" style={{ transform: `scale(${fit.scale})` }}>{children}</div>
     </div>
   );
 }
@@ -179,7 +184,7 @@ function PlanCourses({ context, selected, onSelect }: {
   const counts = useMemo(() => getFormCoverageCounts(instructors), [instructors]);
   if (!state.unlocks.forms) {
     return (
-      <section className="annual-box">
+      <section className="annual-box" data-tutorial-region="planning-sis">
         <h3 className="annual-box-title">SIS · Scuola Internazionale Superiore</h3>
         <div className="annual-soon">
           <div>
@@ -193,7 +198,7 @@ function PlanCourses({ context, selected, onSelect }: {
   const now = counts.get(selected);
   const formName = getFormDefinition(selected)?.longName ?? selected;
   return (
-    <section className="annual-box">
+    <section className="annual-box" data-tutorial-region="planning-sis">
       <div className="annual-sis">
         <img src={SIS_LOGO} alt="Logo della SIS" />
         <div>
@@ -258,7 +263,7 @@ function PlanSwords({ context }: { context: PlanContext }) {
     : repairAffordable ? "Premi l'elsa per riparare le spade" : "Riparazione non possibile - Fondi esauriti";
 
   return (
-    <div className="title-equipment-popover annual-swords">
+    <div className="title-equipment-popover annual-swords" data-tutorial-region="planning-swords">
     <section className={`equipment-quick-card is-${condition === "In ordine" ? "healthy" : damaged > 0 ? "critical" : "warning"}`} aria-label="Spade della Scuola">
       <div className="equipment-quick-heading">
         <h3>Spade della Scuola</h3>
@@ -337,7 +342,7 @@ function PlanFunds({ context }: { context: PlanContext }) {
     else if (item.formId && item.track) context.onCourse(item.formId, item.track, "clear");
   };
   return (
-    <section className="annual-box">
+    <section className="annual-box" data-tutorial-region="planning-funds">
       <div className="annual-funds">
         <div><span>Fondi oggi</span><b>{formatCurrency(state.school.euros)}</b></div>
         <span className="arrow" aria-hidden="true">→</span>
@@ -440,7 +445,7 @@ function PlanMarket({ context }: { context: PlanContext }) {
   const nextYear = state.annual?.report ? state.annual.report.schoolYear + 1 : undefined;
   const change = Math.round(forecast.change * 100);
   return (
-    <section className="annual-market">
+    <section className="annual-market" data-tutorial-region="planning-forecast">
       <span className="annual-market-symbol">GUADAGNI PREVISTI{nextYear !== undefined ? ` · ANNO ${nextYear}` : ""}</span>
       <div className="annual-market-total">
         {formatCurrency(forecast.total)}

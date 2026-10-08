@@ -20,7 +20,7 @@ function highlightIcon(category: AnnualHighlight["category"]): string {
 /** H1 «Trofeo» (Andrea, 08/10): medal, the event, two mentions. */
 export function AnnualHighlightCard({ highlight }: { highlight: AnnualHighlight }) {
   return (
-    <div className="annual-highlight">
+    <div className="annual-highlight" data-tutorial-region="planning-highlight">
       <span className="annual-highlight-medal" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d={highlightIcon(highlight.category)} /></svg>
       </span>
@@ -50,7 +50,7 @@ function trend(grade: AnnualGrade, previous: AnnualGrade) {
 export function PagellaPage({ report }: { report: AnnualReport }) {
   return (
     <>
-      <div className="annual-grades">
+      <div className="annual-grades" data-tutorial-region="planning-grades">
         {report.grades.map((row) => {
           const previous = report.previousGrades?.[row.subject];
           return (

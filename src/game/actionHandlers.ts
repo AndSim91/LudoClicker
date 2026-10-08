@@ -149,6 +149,10 @@ export function createGameActionHandlers(
     ),
     UPDATE_PROFILE_NAME: (state, action) => updateProfileName(state, action.displayName),
     CONFIRM_ANNUAL_PLAN: (state, action) => confirmAnnualPlan(state, action.plan, action.now),
+    SET_ANNUAL_PLANNING: (state, action) => ({
+      ...state,
+      annual: { ...state.annual, planningDisabled: !action.enabled },
+    }),
     FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now, action.spending),
     BUY_UPGRADE: (state, action) => buyUpgrade(state, action.upgradeId),
     BUY_ALL_UPGRADES: (state) => buyAllAffordableUpgrades(state),

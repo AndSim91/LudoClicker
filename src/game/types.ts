@@ -1290,6 +1290,8 @@ export interface AnnualState {
   /** The Pianificazione waits for «Conferma il piano»: the game stays paused. */
   planningOpen?: boolean;
   lastHighlightCategory?: number;
+  /** The player switched the yearly Pianificazione off (it can be switched on again). */
+  planningDisabled?: boolean;
 }
 
 /** Debt from «Anticipo di cassa»: capital still owed, the interest follows the upgrade level. */
@@ -1333,6 +1335,7 @@ export type GameAction =
   | { type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL"; now: number }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
   | { type: "CONFIRM_ANNUAL_PLAN"; plan: AnnualPlan; now: number }
+  | { type: "SET_ANNUAL_PLANNING"; enabled: boolean }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number; spending?: ReputationSpending }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "BUY_ALL_UPGRADES"; now: number }

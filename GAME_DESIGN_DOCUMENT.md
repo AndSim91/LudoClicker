@@ -3069,10 +3069,20 @@ Decisioni di Andrea del 07–08/10/2026 (tavole di concept 1–14). Codice:
 `src/game/annualReport.ts` (registro, pagella, highlight), `src/game/annualPlanning.ts`
 (piano, previsione, conferma), `src/game/debt.ts` (debito), `src/features/annual/`.
 
-**Quando.** A inizio **agosto** di ogni anno il gioco si ferma (motivo di pausa
+**Quando.** A inizio **luglio** di ogni anno (decisione del 08/10 sera: i corsi
+sono finiti, settembre è lontano; prima era agosto) il gioco si ferma (motivo di pausa
 `planning`) sulla Pianificazione delle Onde; l'anno scolastico nuovo comincia a
-settembre. La prima arriva nell'agosto del primo anno (anno scolastico 0,
-gennaio–luglio). Pagine: **Pagella → Pianificazione**; la pagina **Consigli**
+settembre. Si apre con la **tappa del primo Torneo Scolastico** (decisione del
+08/10 sera; in ogni scuola dopo la prima fondazione è aperta da subito): la prima
+arriva nel luglio dopo quel dicembre. La pagella si scrive comunque ogni luglio,
+per il Report annuale. L'interruttore **«Pianificazione a fine anno»** (in alto
+nella finestra, sia nella Pianificazione sia nel Report annuale, e in
+Impostazioni › Partita, visibile solo dopo la tappa) la spegne e la riaccende:
+spenta, l'estate passa senza pause (`annual.planningDisabled`); spegnerla dentro la
+finestra aperta vale dal luglio dopo. La prima volta il tutorial
+`annual-planning` (A.N.D.E.R., sei passi) indica pagella, Highlight, SIS, spade,
+Fondi e previsione, interruttore e «Conferma il piano»; ogni passo apre la pagina
+giusta (`planningPage`). Pagine: **Pagella → Pianificazione**; la pagina **Consigli**
 (A.N.D.E.R. in rosso, M.A.K.I. in blu per i tornei Open dal Nazionale in poi) è
 ancora da disegnare. Il pulsante finale è «Conferma il piano»: fino ad allora
 nulla è speso.
@@ -3081,7 +3091,7 @@ nulla è speso.
 cumulativi (iscritti, partenze, Forme, prove fatte e annullate per mancanza di
 spade, eventi, euro guadagnati e per fonte, spade, collaboratori, titoli…). A ogni
 fine mese si registrano entrate e nuovi iscritti del mese e i candidati
-all'Highlight. A inizio agosto la differenza diventa la pagella, salvata intera e
+all'Highlight. A inizio luglio la differenza diventa la pagella, salvata intera e
 sostituita ogni anno. Nuove statistiche: `trialsCancelled`, `incomeBySource`
 (quote, Network, Social, gadget; il resto è «premi e altro»).
 

@@ -39,7 +39,7 @@ function YearData({ state, now }: { state: GameState; now: number }) {
         ))}
       </div>
       <p className="annual-note">
-        Fino {/^[aeiou]/.test(monthLabel(state.school.currentMonth)) ? "ad" : "a"} {monthLabel(state.school.currentMonth)}. Voti e pianificazione arrivano a inizio agosto.
+        Fino {/^[aeiou]/.test(monthLabel(state.school.currentMonth)) ? "ad" : "a"} {monthLabel(state.school.currentMonth)}. Voti e pianificazione arrivano a inizio luglio.
       </p>
     </>
   );
@@ -139,7 +139,17 @@ function PlanSummary({ report }: { report: AnnualReport }) {
  * «Report annuale» (Andrea, 08/10), from the Consiglio delle Onde: the game
  * pauses; the year so far without grades, or the whole pagella of last year.
  */
-export function AnnualReportLayer({ state, now, onClose }: { state: GameState; now: number; onClose: () => void }) {
+export function AnnualReportLayer({
+  state,
+  now,
+  onClose,
+  planningToggle,
+}: {
+  state: GameState;
+  now: number;
+  onClose: () => void;
+  planningToggle?: { enabled: boolean; onChange: (enabled: boolean) => void };
+}) {
   const report = state.annual?.report;
   const [year, setYear] = useState<"current" | "previous">("current");
   const showPrevious = year === "previous" && report;
@@ -159,6 +169,7 @@ export function AnnualReportLayer({ state, now, onClose }: { state: GameState; n
       title="Report annuale"
       subtitle={showPrevious ? `Pagella ${describeSchoolYear(report)}` : "Anno in corso, senza voti"}
       pages={pages}
+      planningToggle={planningToggle}
       finalLabel="Chiudi e riprendi"
       onFinal={onClose}
       toolbar={report ? (

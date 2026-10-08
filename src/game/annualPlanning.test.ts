@@ -30,7 +30,12 @@ function instructor(index: number): Collaborator {
 
 function august(euros: number, upgrades: Partial<GameState["upgrades"]> = {}): GameState {
   let state = createInitialState(0);
-  state = { ...state, school: { ...state.school, activeMembers: 20, peakActiveMembers: 20 } };
+  state = {
+    ...state,
+    school: { ...state.school, activeMembers: 20, peakActiveMembers: 20 },
+    // Past the first Torneo Scolastico (here: a school already founded), so the Pianificazione opens.
+    network: { ...state.network, schoolCount: 1 },
+  };
   state = collectFees(state, state.school.nextFeeAt + 6 * GAME_CONFIG.gameMonthMs, 1);
   return {
     ...state,

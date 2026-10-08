@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from "../game/config";
+import { isAnnualPlanningUnlocked } from "../game/annualReport";
 import { hasPrestigeTitle, isGameAreaUnlocked } from "../game/progression";
-import { isOfficialSwordSupplierUnlocked } from "./upgrades";
+import { isOfficialSwordSupplierUnlocked, isSISTechnicianCourseUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
 import { FIRST_EVENT_TUTORIAL_SCENE_ID, hasCompletedTutorialSparring, isTutorialSceneFinished } from "../game/tutorialProgress";
 import { getRunningAcquisitionEvents } from "../game/runtimeIndexes";
@@ -56,6 +57,14 @@ export const TUTORIAL_REGION_IDS = [
   "network-keeps",
   "network-found",
   "status",
+  "planning-grades",
+  "planning-highlight",
+  "planning-sis",
+  "planning-swords",
+  "planning-funds",
+  "planning-forecast",
+  "planning-toggle",
+  "planning-confirm",
 ] as const;
 
 export type TutorialRegionId = typeof TUTORIAL_REGION_IDS[number];
@@ -80,6 +89,8 @@ export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
 /** At 15 members: the swords menu and the purchase (06/10/2026, 15 dal 08/10). */
 export const SWORD_PURCHASE_TUTORIAL_SCENE_ID = "sword-purchase" as const;
 export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 15;
+/** The first Pianificazione delle Onde, the July after the first Torneo Scolastico (08/10/2026). */
+export const ANNUAL_PLANNING_TUTORIAL_SCENE_ID = "annual-planning" as const;
 
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
@@ -96,6 +107,7 @@ export const TUTORIAL_SCENE_IDS = [
   OUT_OF_CONTACTS_TUTORIAL_SCENE_ID,
   MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
   SWORD_PURCHASE_TUTORIAL_SCENE_ID,
+  ANNUAL_PLANNING_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
   ...LATE_TUTORIAL_SCENE_IDS,
 ] as const;
@@ -130,6 +142,8 @@ interface TutorialStepBase {
   tournamentTab?: "results" | "reptile";
   /** The swords menu in the title bar stays open while the step is shown. */
   opensEquipment?: boolean;
+  /** The Pianificazione delle Onde shows this page while the step is shown. */
+  planningPage?: "pagella" | "plan";
 }
 
 export interface TutorialDialogStep extends TutorialStepBase {
@@ -652,6 +666,91 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         focusRegions: ["title", "title-equipment"],
         opensEquipment: true,
         cardPlacement: "below",
+      },
+    ],
+  },
+  {
+    // Panoramica della Pianificazione delle Onde (Andrea, 08/10 22:36): A.N.D.E.R. indica i punti di cui parla.
+    id: ANNUAL_PLANNING_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.annual?.planningOpen === true && isAnnualPlanningUnlocked(state),
+    steps: [
+      {
+        id: "planning-grades",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La Pianificazione delle Onde",
+        body: [
+          "L'anno accademico è finito e i corsi ripartono a settembre. Ma chi ha tempo non aspetti tempo: il preside di una scuola LudoSport non dorme mai, anzi, fa i piani per l'anno successivo!",
+          "Si parte dalla **pagella**: sei materie, dalla A alla E. Niente media e niente bocciati: serve solo a capire dove la scuola corre e dove inciampa.",
+        ],
+        focusRegions: ["planning-grades"],
+        planningPage: "pagella",
+        cardPlacement: "below",
+      },
+      {
+        id: "planning-highlight",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Highlight annuale",
+        body: [
+          "Il momento più importante dell'anno, con due menzioni d'onore. Il prossimo anno vediamo di fare meglio.",
+        ],
+        focusRegions: ["planning-highlight"],
+        planningPage: "pagella",
+      },
+      {
+        id: "planning-sis",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La SIS",
+        body: ({ state }) => [
+          `Alla **SIS** i collaboratori diventano **Istruttori**${isSISTechnicianCourseUnlocked(state.upgrades) ? " e **Tecnici**" : ""}. Scegli una Forma sullo schema e premi la scheda del corso: ogni clic, un iscritto.`,
+          "I corsi partono appena confermi il piano.",
+        ],
+        focusRegions: ["planning-sis"],
+        planningPage: "plan",
+        cardPlacement: "right",
+      },
+      {
+        id: "planning-swords",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Spade per l'anno nuovo",
+        body: ({ state }) => [
+          "Premi l'elsa per riparare le spade prima di settembre.",
+          isOfficialSwordSupplierUnlocked(state.upgrades)
+            ? "Quelle nuove le paghi al prezzo di oggi, prima che Lama di Luce si inventi qualche aumento."
+            : "Per comprarne di nuove serve «Fornitore ufficiale», nel ramo Attrezzatura degli [[Upgrade]].",
+        ],
+        focusRegions: ["planning-swords"],
+        planningPage: "plan",
+        cardPlacement: "right",
+      },
+      {
+        id: "planning-money",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Fondi e guadagni previsti",
+        body: [
+          "Qui vedi quanto resta dopo il piano e quanto dovremmo incassare il prossimo anno, mese per mese.",
+          "Finché non confermi non si spende niente: ogni voce si toglie con la ×.",
+        ],
+        focusRegions: ["planning-funds", "planning-forecast"],
+        planningPage: "plan",
+        cardPlacement: "left",
+      },
+      {
+        id: "planning-confirm",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Conferma il piano",
+        body: [
+          "Quando sei pronto, conferma il piano e l'anno riparte.",
+          "Se preferisci che l'estate passi senza fermarsi, spegni «Pianificazione a fine anno» qui in alto: la ritrovi anche nelle Impostazioni.",
+        ],
+        focusRegions: ["planning-toggle", "planning-confirm"],
+        planningPage: "plan",
       },
     ],
   },

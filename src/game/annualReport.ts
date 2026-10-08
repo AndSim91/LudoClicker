@@ -31,7 +31,7 @@ import type {
  * Report annuale e pagella della Pianificazione delle Onde (Andrea, 07–08/10).
  * The ledger keeps the counters at the start of the school year and closes
  * each month (income, new members, Highlight candidates). At the start of
- * August the year becomes a pagella: six subjects graded A–E, the Highlight
+ * July the year becomes a pagella: six subjects graded A–E, the Highlight
  * annuale, the months for the forecast. In September the ledger starts over.
  */
 
@@ -62,7 +62,8 @@ export const INCOME_SOURCE_LABELS: Record<IncomeSource | "other", string> = {
 };
 
 const GRADES: readonly AnnualGrade[] = ["A", "B", "C", "D", "E"];
-const PLANNING_CALENDAR_MONTH = 8;
+/** Start of July: courses are over, September is far (Andrea, 08/10 22:48; it was August). */
+const PLANNING_CALENDAR_MONTH = 7;
 const MEMBER_RECORDS = [25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000];
 /** Rank of a title, for «a title higher than before». */
 const TITLE_RANK: Partial<Record<TournamentLevel, number>> = {
@@ -406,8 +407,24 @@ export function buildAnnualReport(state: GameState, now: number): AnnualReport {
 }
 
 /**
+ * The Pianificazione delle Onde opens with the tappa of the first Torneo
+ * Scolastico (Andrea, 08/10 22:36): a school that played one, or any school
+ * after the first foundation.
+ */
+export function isAnnualPlanningUnlocked(state: Pick<GameState, "tournaments" | "network">): boolean {
+  return state.network.schoolCount > 0 ||
+    state.tournaments.results.some((result) => result.level === "school") ||
+    state.tournaments.hall.some((entry) => entry.level === "school");
+}
+
+/** Unlocked and not switched off by the player (Impostazioni or the window itself). */
+export function isAnnualPlanningActive(state: GameState): boolean {
+  return isAnnualPlanningUnlocked(state) && state.annual?.planningDisabled !== true;
+}
+
+/**
  * End of `closedMonth` (called by collectFees after the month advanced): books
- * the month, writes the pagella at the start of August and opens the
+ * the month, writes the pagella at the start of July and opens the
  * Pianificazione, starts a new ledger with the school year.
  */
 export function closeAnnualMonth(state: GameState, closedMonth: number, now: number): GameState {
@@ -438,7 +455,8 @@ export function closeAnnualMonth(state: GameState, closedMonth: number, now: num
       annual: {
         ...next.annual,
         report,
-        planningOpen: true,
+        // A plan left open is replaced; with the Pianificazione off (or not open yet) only the pagella is kept.
+        planningOpen: isAnnualPlanningActive(next),
         lastHighlightCategory: report.highlight?.category,
       },
     };

@@ -18,7 +18,7 @@ import { isOfficialSwordSupplierVisible } from "./unlocks";
 import type { AnnualPlan, AnnualPlanSummary, FormId, GameState, PlannedCourse } from "./types";
 
 /*
- * Pianificazione delle Onde (Andrea, 08/10): at the start of August the game
+ * Pianificazione delle Onde (Andrea, 08/10): at the start of July the game
  * pauses on the pagella and on the plan for the next school year. Everything
  * planned is provisional; «Conferma il piano» makes it real at once: SIS
  * courses start, swords are repaired and bought at today's price (they still

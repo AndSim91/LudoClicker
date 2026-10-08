@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { isAnnualPlanningUnlocked } from "../game/annualReport";
 import type { AppView } from "../components/outlook-shell/AppRail";
 import { Icon } from "../components/common/Icon";
 import { GAME_CONFIG } from "../game/config";
@@ -28,6 +29,8 @@ interface OverviewViewProps {
   onDarkModeChange: (enabled: boolean) => void;
   reduceMotion: boolean;
   onReduceMotionChange: (enabled: boolean) => void;
+  /** Pianificazione delle Onde a fine anno: shown once it is unlocked (no spoilers). */
+  onAnnualPlanningChange?: (enabled: boolean) => void;
 }
 
 export function OverviewView({
@@ -44,8 +47,10 @@ export function OverviewView({
   onDarkModeChange,
   reduceMotion,
   onReduceMotionChange,
+  onAnnualPlanningChange,
 }: OverviewViewProps) {
-  const state = useGameStateSlices(["profile", "version"], stateOverride);
+  const state = useGameStateSlices(["annual", "network", "profile", "tournaments", "version"], stateOverride);
+  const showAnnualPlanning = onAnnualPlanningChange && isAnnualPlanningUnlocked(state);
   const [title, subtitle] = titles[view];
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState("");
@@ -111,6 +116,13 @@ export function OverviewView({
               <label className="settings-toggle-row"><span><strong>Tema scuro · Modalità Onde</strong><small>La veste di gioco dell'Ordine delle Onde. Premi F9 per passare subito alla vista chiara da ufficio e tornare indietro.</small></span><input type="checkbox" checked={darkMode} onChange={(event) => onDarkModeChange(event.target.checked)} /></label>
               <label className="settings-toggle-row"><span><strong>Riduci animazioni</strong><small>Disattiva transizioni, barre animate e cursore lampeggiante.</small></span><input type="checkbox" checked={reduceMotion} onChange={(event) => onReduceMotionChange(event.target.checked)} /></label>
             </section>
+
+            {showAnnualPlanning ? (
+              <section className="settings-section" aria-labelledby="settings-game-title">
+                <h2 id="settings-game-title">Partita</h2>
+                <label className="settings-toggle-row"><span><strong>Pianificazione delle Onde</strong><small>A inizio luglio il gioco si ferma su pagella e piano dell'anno nuovo. Spenta, l'anno scorre senza pause: la pagella resta nel Report annuale.</small></span><input type="checkbox" checked={state.annual?.planningDisabled !== true} onChange={(event) => onAnnualPlanningChange(event.target.checked)} /></label>
+              </section>
+            ) : null}
           </div>
 
           <div className="settings-column">
