@@ -359,7 +359,9 @@ export type NarrativeEventId =
   | "pini-at-work"
   | "spreadsheet-fan-club"
   | "too-many-volunteers"
-  | "perfect-rack";
+  | "perfect-rack"
+  | "rancor-den"
+  | "thirty-milanese-coins";
 
 /** What an Evento or Imprevisto actually did to the game (pastiglie in La mia giornata). */
 export interface NarrativeEffects {

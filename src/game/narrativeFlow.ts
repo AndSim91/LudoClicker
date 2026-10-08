@@ -31,7 +31,7 @@ export function processNarrativeEvent(
     recentKinds.every((kind) => kind === "negative");
   const eligible = NARRATIVE_EVENTS.filter(
     (definition) => state.school.activeMembers >= definition.minMembers &&
-      definition.id !== "missed-renewal" &&
+      !definition.scripted &&
       (!blockNegative || definition.kind !== "negative"),
   );
   if (eligible.length === 0) return state;

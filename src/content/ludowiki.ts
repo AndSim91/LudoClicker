@@ -11,6 +11,7 @@ import { UPGRADE_PRICING } from "./upgrades";
 import { SPECIAL_COLLABORATORS } from "./specialCollaborators";
 import { TOURNAMENT_DEFINITIONS } from "./tournaments";
 import { GAME_CONFIG } from "../game/config";
+import { formatCurrency } from "../shared/formatters";
 import type { SpecialCollaboratorId } from "../game/types";
 
 export interface LudodexLegendary {
@@ -19,6 +20,8 @@ export interface LudodexLegendary {
   lastName: string;
   kind: "standard" | "secret";
   secretLegendaryId?: SecretLegendaryId;
+  /** Non si iscrive mai (Panico, Maggi): la scheda si apre alla prima sconfitta. */
+  external?: true;
   initialSchool: string;
   foundAt: string;
   acquisition: string;
@@ -43,6 +46,13 @@ function getSecretLegendaryDiscovery(id: SecretLegendaryId): Pick<
   const initialSchool = profile.school.city
     ? `${profile.school.name} · ${profile.school.city}`
     : profile.school.name;
+  if (profile.recruitment === "never") {
+    return {
+      initialSchool,
+      foundAt: TOURNAMENT_DEFINITIONS[profile.level].label,
+      acquisition: `Non si iscrive mai. Battilo in torneo: ogni sconfitta vale una donazione di ${formatCurrency(profile.defeatRewardEuros ?? 0)} alla scuola.`,
+    };
+  }
   if (profile.level === "chronicles") {
     return {
       initialSchool,
@@ -58,23 +68,19 @@ function getSecretLegendaryDiscovery(id: SecretLegendaryId): Pick<
 }
 
 const SECRET_LUDODEX_LEGENDARIES: LudodexLegendary[] = SECRET_LEGENDARY_IDS
-  .filter((id) => {
-    const profile = SECRET_LEGENDARIES[id];
-    return !("recruitment" in profile) || profile.recruitment !== "never";
-  })
   .map((id) => ({
     id,
     firstName: SECRET_LEGENDARIES[id].firstName,
     lastName: SECRET_LEGENDARIES[id].lastName,
     kind: "secret",
     secretLegendaryId: id,
+    ...(getSecretLegendaryProfile(id).recruitment === "never" ? { external: true as const } : {}),
     ...getSecretLegendaryDiscovery(id),
   }));
 
 /**
- * Il Ludodex contiene solo profili che possono realmente iscriversi. I
- * Leggendari esterni non reclutabili restano avversari e non rendono il 100%
- * della collezione impossibile da raggiungere.
+ * Tutti i Leggendari. Quelli non reclutabili (Panico, Maggi) si scoprono alla
+ * prima sconfitta in torneo e non hanno una scena (08/10).
  */
 export const LUDODEX_LEGENDARIES: readonly LudodexLegendary[] = [
   ...STANDARD_LUDODEX_LEGENDARIES,

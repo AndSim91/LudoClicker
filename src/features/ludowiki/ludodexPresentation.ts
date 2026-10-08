@@ -1,4 +1,8 @@
-import { getSecretLegendaryBase } from "../../content/secretLegendaries";
+import {
+  getSecretLegendaryBase,
+  getSecretLegendaryProfile,
+  SECRET_LEGENDARY_IDS,
+} from "../../content/secretLegendaries";
 import type { LudodexLegendary } from "../../content/ludowiki";
 import { getContactBaseStats } from "../../game/athleteStats";
 import type {
@@ -10,7 +14,7 @@ import type {
 export interface LegendaryDossier {
   arenaBase: number;
   styleBase: number;
-  currentStatus: "enrolled" | "departed" | "remembered";
+  currentStatus: "enrolled" | "departed" | "remembered" | "external";
 }
 
 function getMostRelevantContact(
@@ -27,12 +31,16 @@ function getMostRelevantContact(
 }
 
 export function getDiscoveredLegendaryIds(
-  state: Pick<GameState, "legendaryCollaborators">,
+  state: Pick<GameState, "legendaryCollaborators" | "network">,
 ): ReadonlySet<SpecialCollaboratorId> {
   // Enrolled now, or in an earlier school (their progress is kept): the Ludodex survives the prestige.
+  // Who never enrolls is discovered at the first defeat (the network survives the prestige too).
   return new Set([
     ...state.legendaryCollaborators.enrolledProfileIds,
     ...Object.keys(state.legendaryCollaborators.retainedProgress) as SpecialCollaboratorId[],
+    ...SECRET_LEGENDARY_IDS.filter((id) =>
+      getSecretLegendaryProfile(id).recruitment === "never" &&
+      (state.network.secretLegendaries[id]?.defeats ?? 0) > 0),
   ]);
 }
 
@@ -59,6 +67,11 @@ export function getLegendaryDossier(
   state: Pick<GameState, "contacts" | "legendaryCollaborators">,
   legendary: LudodexLegendary,
 ): LegendaryDossier {
+  if (legendary.external && legendary.secretLegendaryId) {
+    // No base for who never enrolls: the dossier shows the tournament values.
+    const [arenaBase, styleBase] = getSecretLegendaryProfile(legendary.secretLegendaryId).tournament;
+    return { arenaBase, styleBase, currentStatus: "external" };
+  }
   const contact = getMostRelevantContact(state.contacts, legendary.id);
   if (contact) {
     const baseStats = getContactBaseStats(contact);

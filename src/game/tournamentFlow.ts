@@ -13,6 +13,8 @@ import { isGameAreaUnlocked } from "./progression";
 import { nextRandom } from "./random";
 import { createSecretLegendaryContact } from "./secretLegendaryRoster";
 import { addMessage } from "./stateUpdates";
+import { noteNarrativeEvent } from "./yearDigest";
+import { SECRET_DEFEAT_EVENTS } from "../content/narrativeEvents";
 import {
   applyTournamentRewards,
   describeTournamentRewardBonus,
@@ -144,12 +146,14 @@ export function resolveSecretLegendaryDefeat(
     failedTrials: 0,
   };
   const euros = profile.defeatRewardEuros ?? 0;
+  const event = SECRET_DEFEAT_EVENTS[id as keyof typeof SECRET_DEFEAT_EVENTS];
   const rewardedState: GameState = {
     ...state,
     school: { ...state.school, euros: state.school.euros + euros },
     statistics: {
       ...state.statistics,
       eurosEarned: state.statistics.eurosEarned + euros,
+      narrativeEvents: state.statistics.narrativeEvents + (event ? 1 : 0),
     },
     network: {
       ...state.network,
@@ -162,16 +166,25 @@ export function resolveSecretLegendaryDefeat(
         },
       },
     },
+    // No scene for who never enrolls: an Evento in La mia giornata (08/10).
+    narrative: event
+      ? {
+          ...state.narrative,
+          history: [
+            ...state.narrative.history,
+            {
+              id: makeGameId("narrative", now, `${id}-${progress.defeats + 1}`),
+              definitionId: event.id,
+              title: event.title,
+              occurredAt: now,
+              summary: event.description,
+              effects: { euros: euros || undefined },
+            },
+          ].slice(-GAME_CONFIG.narrativeHistoryLimit),
+        }
+      : state.narrative,
   };
-  return addMessage(
-    rewardedState,
-    now,
-    `${profile.firstName} ${profile.lastName} mantiene la promessa`,
-    `Ha perso e ha pagato: ${formatCurrency(euros)} alla scuola. Non si iscrive, ma la rivincita resta aperta.`,
-    "positive",
-    "focused",
-    "tournaments",
-  );
+  return event ? noteNarrativeEvent(rewardedState, event.title) : rewardedState;
 }
 
 function recordMissedTournament(

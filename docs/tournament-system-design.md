@@ -680,7 +680,10 @@ Alla fine del torneo, un Leggendario Segreto sconfitto avvia automaticamente una
 Un profilo può disabilitare la prova con la regola `recruitment: "never"`.
 Adriano Panico (Accademico) e Daniele Maggi (Nazionale) usano questa eccezione:
 restano sempre esterni e ogni sconfitta dona alla scuola 500 Euro (Panico) o
-3.000 Euro (Maggi), senza creare contatti o prove.
+3.000 Euro (Maggi), senza creare contatti o prove. Non hanno una scena: ogni
+sconfitta è un Evento in La mia giornata («La tana del Rancor» per Panico,
+«Trenta denari milanesi» per Maggi). Entrano nel Ludodex e la loro scheda, con
+i valori da torneo e il numero di sconfitte, si apre alla prima sconfitta.
 
 Una nuova prova dello stesso Leggendario Segreto riutilizza il contatto esistente, senza crearne un doppione.
 

@@ -148,10 +148,10 @@ describe("LudoWikiView", () => {
     expect(screen.getByRole("button", { name: /Gadget/ })).toBeVisible();
   });
 
-  it("keeps non-recruitable external opponents outside the completion total", () => {
-    expect(LUDODEX_LEGENDARIES.some((entry) => entry.id === "daniele-maggi")).toBe(false);
-    expect(LUDODEX_LEGENDARIES.some((entry) => entry.id === "adriano-panico")).toBe(false);
-    expect(LUDODEX_LEGENDARIES).toHaveLength(30);
+  it("lists the non-recruitable opponents too, as external entries", () => {
+    expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "daniele-maggi")).toMatchObject({ external: true });
+    expect(LUDODEX_LEGENDARIES.find((entry) => entry.id === "adriano-panico")).toMatchObject({ external: true });
+    expect(LUDODEX_LEGENDARIES).toHaveLength(32);
   });
 
   it("defines school, encounter location and acquisition method for every Legendary", () => {

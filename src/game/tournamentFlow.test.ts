@@ -1,3 +1,4 @@
+import { getDiscoveredLegendaryIds } from "../features/ludowiki/ludodexPresentation";
 import { describe, expect, it } from "vitest";
 import { SPECIAL_COLLABORATORS } from "../content/specialCollaborators";
 import { getTournamentReward } from "../content/tournaments";
@@ -217,6 +218,14 @@ describe("secret legendary tournament trials", () => {
       defeats: 2,
       failedTrials: 0,
     });
+    expect(second.messages).toHaveLength(initial.messages.length);
+    expect(second.narrative.history.at(-1)).toMatchObject({
+      definitionId: "thirty-milanese-coins",
+      title: "Trenta denari milanesi",
+      effects: { euros: 3_000 },
+    });
+    expect(getDiscoveredLegendaryIds(initial).has("daniele-maggi")).toBe(false);
+    expect(getDiscoveredLegendaryIds(first).has("daniele-maggi")).toBe(true);
   });
 
   it("starts Marco Palena's automatic 30-second trial without an email", () => {

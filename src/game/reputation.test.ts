@@ -240,7 +240,7 @@ it("lets a secret legendary recruited before join the ordinary legendaries of th
     styleBase: 150,
   });
   // The Ludodex remembers it after the prestige too.
-  expect(getDiscoveredLegendaryIds({ legendaryCollaborators: { ...state.legendaryCollaborators, enrolledProfileIds: [] } }))
+  expect(getDiscoveredLegendaryIds({ network: state.network, legendaryCollaborators: { ...state.legendaryCollaborators, enrolledProfileIds: [] } }))
     .toContain("marco-palena");
 });
 

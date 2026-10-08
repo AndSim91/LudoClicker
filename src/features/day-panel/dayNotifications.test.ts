@@ -373,6 +373,25 @@ describe("Eventi, Imprevisti e avvisi (07/10)", () => {
     expect(getDayAlertKey(bad, 1)).toBe("important-event-bad");
   });
 
+  it("shows a non-recruitable Legendary's defeat as a green Evento with the donation (08/10)", () => {
+    const initial = createInitialState(10_000);
+    const state: GameState = {
+      ...initial,
+      narrative: {
+        ...initial.narrative,
+        history: [{ id: "panico", definitionId: "rancor-den", title: "La tana del Rancor", occurredAt: 50_000, summary: "", effects: { euros: 500 } }],
+      },
+    };
+    const card = selectDayNotifications(state, 51_000).find((notification) => notification.id === "important-event-panico")!;
+    expect(card).toMatchObject({
+      tone: "good",
+      eyebrow: "Evento",
+      title: "La tana del Rancor",
+      detail: "Hai sconfitto Adriano Panico in torneo e la scuola ha ricevuto una donazione.",
+    });
+    expect(card.effects?.[0]).toMatchObject({ amount: "+500 €" });
+  });
+
   it("gathers trials cancelled for lack of swords in one red card, an avviso once per month", () => {
     const initial = createInitialState(10_000);
     const contacts = [0, 1].map((index) => ({ ...initial.contacts[0], id: `c-${index}`, status: "lost" as const }));

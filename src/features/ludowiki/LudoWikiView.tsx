@@ -82,7 +82,7 @@ function LudodexListRow({
   selected,
   onSelect,
 }: {
-  state: Pick<GameState, "contacts" | "legendaryCollaborators">;
+  state: Pick<GameState, "contacts" | "legendaryCollaborators" | "network">;
   legendary: LudodexLegendary;
   index: number;
   status: LudodexStatus;
@@ -107,7 +107,9 @@ function LudodexListRow({
         <strong>{status === "unknown" ? "???" : getLegendaryName(legendary)}</strong>
         {dossier ? (
           <span>
-            Arena base {formatStat(dossier.arenaBase)} · Stile base {formatStat(dossier.styleBase)}
+            {legendary.external
+              ? `Arena da torneo ${formatStat(dossier.arenaBase)} · Stile da torneo ${formatStat(dossier.styleBase)}`
+              : `Arena base ${formatStat(dossier.arenaBase)} · Stile base ${formatStat(dossier.styleBase)}`}
           </span>
         ) : status === "encountered" ? (
           <span>Incontrato · si apre alla prima iscrizione</span>
@@ -127,7 +129,7 @@ function LegendaryDossierPanel({
   status,
   onReplay,
 }: {
-  state: Pick<GameState, "contacts" | "legendaryCollaborators">;
+  state: Pick<GameState, "contacts" | "legendaryCollaborators" | "network">;
   legendary: LudodexLegendary;
   index: number;
   status: LudodexStatus;
@@ -178,7 +180,12 @@ function LegendaryDossierPanel({
 
   const dossier = getLegendaryDossier(state, legendary);
   const enrollments = getLegendaryEnrollmentCount(state, legendary.id);
-  const statusCopy = dossier.currentStatus === "enrolled"
+  const defeats = legendary.secretLegendaryId
+    ? state.network.secretLegendaries[legendary.secretLegendaryId]?.defeats ?? 0
+    : 0;
+  const statusCopy = dossier.currentStatus === "external"
+    ? "Avversario esterno · non si iscrive"
+    : dossier.currentStatus === "enrolled"
     ? "Attualmente nella scuola"
     : dossier.currentStatus === "departed"
       ? "Scoperto · non più nella scuola"
@@ -196,9 +203,11 @@ function LegendaryDossierPanel({
           </p>
           <span className="ludodex-discovery-status"><Icon name="check" />{statusCopy}</span>
           <span className="ludodex-enrollment-count">
-            {enrollments === 1 ? "Iscritto 1 volta" : `Iscritto ${enrollments} volte`}
+            {legendary.external
+              ? defeats === 1 ? "Sconfitto 1 volta" : `Sconfitto ${defeats} volte`
+              : enrollments === 1 ? "Iscritto 1 volta" : `Iscritto ${enrollments} volte`}
           </span>
-          {onReplay ? (
+          {onReplay && !legendary.external ? (
             <button type="button" className="scene-replay ludodex-scene-replay" onClick={() => onReplay(legendary.id as SpecialCollaboratorId)}>
               ▶ Rivedi la scena
             </button>
@@ -206,9 +215,9 @@ function LegendaryDossierPanel({
         </div>
       </div>
 
-      <div className="ludodex-stats" aria-label="Valori di base">
-        <div><span>Arena base</span><OfficialStatValue value={dossier.arenaBase} /></div>
-        <div><span>Stile base</span><OfficialStatValue value={dossier.styleBase} /></div>
+      <div className="ludodex-stats" aria-label={legendary.external ? "Valori da torneo" : "Valori di base"}>
+        <div><span>{legendary.external ? "Arena da torneo" : "Arena base"}</span><OfficialStatValue value={dossier.arenaBase} /></div>
+        <div><span>{legendary.external ? "Stile da torneo" : "Stile base"}</span><OfficialStatValue value={dossier.styleBase} /></div>
       </div>
 
       <dl className="ludodex-acquisition-info" aria-label="Provenienza e acquisizione">
@@ -234,7 +243,7 @@ function LegendaryDossierPanel({
   );
 }
 
-function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts" | "legendaryCollaborators">; onReplay?: (id: SpecialCollaboratorId) => void }) {
+function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts" | "legendaryCollaborators" | "network">; onReplay?: (id: SpecialCollaboratorId) => void }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<LudodexFilter>("all");
   const [selectedId, setSelectedId] = useState<SpecialCollaboratorId | null>(null);
