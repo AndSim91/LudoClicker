@@ -605,6 +605,94 @@
   background: rgb(255 255 255 / 16%);
 }
 
+/* «Ander Games» (08/10): C «Linguetta» in the heading, N3 in the closed switch.
+   Outlook colours here, Onde in skin-onde.css. The tip shows on hover; the pill
+   also on tap (focus); in the switch a tap opens the column instead. */
+.day-heading {
+  position: relative;
+}
+
+.school-goal-pill,
+.school-goal-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.school-goal-pill {
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--blue-600);
+  border-radius: 999px;
+  color: var(--blue-700);
+  background: transparent;
+}
+
+.school-goal-count {
+  margin-left: 2px;
+  padding-left: 8px;
+  border-left: 1px solid rgb(255 255 255 / 45%);
+}
+
+.day-panel-toggle {
+  position: relative;
+}
+
+.day-heading .school-goal-pill svg,
+.school-goal-count svg,
+.day-panel-toggle .school-goal-count svg {
+  width: 13px;
+  height: 13px;
+}
+
+.school-goal-tip {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  right: 8px;
+  display: none;
+  width: 210px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+
+.day-panel-toggle .school-goal-tip {
+  right: 0;
+}
+
+.school-goal-tip strong,
+.day-heading .school-goal-tip strong {
+  display: block;
+  flex: none;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.school-goal-pill:focus-visible .school-goal-tip,
+.school-goal-pill:focus .school-goal-tip {
+  display: block;
+}
+
+@media (hover: hover) {
+  .school-goal-pill:hover .school-goal-tip,
+  .school-goal-count:hover .school-goal-tip {
+    display: block;
+  }
+}
+
 /* V1 «Scheda» (07/10): Eventi green, Imprevisti and cancelled trials red, with the
    effects as pastiglie. Outlook colours here, Onde in skin-onde.css. */
 .day-card {

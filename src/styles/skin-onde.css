@@ -1177,6 +1177,45 @@
   background: var(--onde-on-gold);
 }
 
+/* «Ander Games» in Onde (08/10): gold pill and dark tip, like the concept C. */
+:root[data-theme="dark"] .school-goal-pill {
+  border-color: var(--onde-gold);
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"] .school-goal-pill.is-ready,
+:root[data-theme="dark"] .school-goal-count.is-ready {
+  color: #6fe0b0;
+}
+
+:root[data-theme="dark"] .school-goal-pill.is-ready {
+  border-color: #6fe0b0;
+}
+
+:root[data-theme="dark"] .school-goal-count {
+  border-left-color: rgb(224 166 74 / 50%);
+}
+
+:root[data-theme="dark"] .day-panel-toggle.is-open .school-goal-count {
+  border-left-color: rgb(0 0 0 / 30%);
+}
+
+:root[data-theme="dark"] .school-goal-tip {
+  border-color: rgb(224 166 74 / 45%);
+  color: #fff;
+  background: #0b2238;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+}
+
+:root[data-theme="dark"] .school-goal-tip strong,
+:root[data-theme="dark"] .day-heading .school-goal-tip strong {
+  color: var(--onde-gold-bright);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* V1 «Scheda» in Onde (07/10): Eventi green, Imprevisti red with a bright edge. */
 :root[data-theme="dark"] .day-card {
   --day-card-accent: #6fe0b0;

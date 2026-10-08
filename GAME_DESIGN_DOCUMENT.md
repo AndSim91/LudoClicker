@@ -3176,6 +3176,13 @@ l'avanzamento.
    infine «Gli Ander Games» dà l'obiettivo del Torneo Scolastico (8 atleti con
    almeno la Forma 1, a dicembre). I salvataggi già oltre i 10 iscritti o la
    prima scuola la segnano come vista (migrazione v106).
+   Da qui fino al primo Torneo Scolastico giocato dalla scuola (in ogni scuola,
+   dopo i 10 iscritti) l'obiettivo resta fisso in «La mia giornata»: una
+   linguetta «🏆 3/8» (atleti con almeno la Forma 1 su 8) accanto al titolo
+   (concept C, 08/10/2026), con il fumetto «Ander Games» al passaggio del mouse
+   o al tocco. Con la giornata chiusa (sotto 1441 px) il conteggio sta nel
+   pulsante «Giornata | 🏆 3/8» (N3): il passaggio del mouse mostra il fumetto,
+   un tocco apre la colonna.
 
 10. **Una squadra che cresce** All'ottavo Collaboratore la gestione passa alla
     vista aggregata per settore: la scena spiega il cambio, chiede di aprire
