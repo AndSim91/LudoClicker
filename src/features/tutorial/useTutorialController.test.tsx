@@ -458,4 +458,18 @@ describe("useTutorialController", () => {
     expect(result.current.tutorial.activeScene).toBeNull();
     expect(result.current.tutorial.shouldPauseGame).toBe(false);
   });
+
+  it("does not fall back to an objective already reached when its condition stops holding", async () => {
+    const { result } = renderHook(() => useTutorialHarness());
+
+    act(() => result.current.unlockGadgets());
+    await waitFor(() => expect(result.current.tutorial.activeScene?.id).toBe("gadget-laboratory"));
+    act(() => result.current.tutorial.continueScene());
+    act(() => result.current.setActiveView("gadget"));
+    await waitFor(() => expect(result.current.tutorial.activeStep?.id).toBe("gadget-workshop"));
+
+    // Like the sword menu closing when «Continua» is pressed.
+    act(() => result.current.setActiveView("mail"));
+    expect(result.current.tutorial.activeStep?.id).toBe("gadget-workshop");
+  });
 });

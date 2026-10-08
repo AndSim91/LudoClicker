@@ -57,6 +57,16 @@ export function useTutorialController({
   const activeScene = objectiveCompletedScene ? null : candidateScene;
   const activeStep = activeScene?.steps[resolvedStepIndex] ?? null;
   const activeStepNavigation = activeStep?.navigateTo;
+  const storedStepIndex = candidateScene ? stepIndexes[candidateScene.id] ?? 0 : 0;
+
+  // An objective reached stays reached: otherwise closing the sword menu by clicking
+  // «Continua» would undo "Apri il menu delle spade" and loop the scene back to it.
+  if (activeScene && resolvedStepIndex > storedStepIndex) {
+    setStepProgress((current) => ({
+      gameCreatedAt: current.gameCreatedAt,
+      indexes: { ...current.indexes, [activeScene.id]: resolvedStepIndex },
+    }));
+  }
 
   useEffect(() => {
     if (!activeStepNavigation || activeStepNavigation === activeView) return;
