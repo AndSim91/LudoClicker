@@ -10,6 +10,7 @@ import {
   getEquipmentAutomaticRepairTarget,
   getEquipmentAutomaticRepairUnitCost,
   getOfficialSwordPurchaseCost,
+  getEquipmentRepairStatus,
   getReservedSwords,
 } from "../../game/equipment";
 import type { GameState } from "../../game/types";
@@ -66,6 +67,13 @@ export function EquipmentDetailPanel({
           (state.automation.equipmentBuffer / GAME_CONFIG.equipmentSwordRepairWork) * 100,
         )
       : Math.min(100, state.automation.equipmentBuffer * 100);
+  const repairKind = getEquipmentRepairStatus(equipment, state.school.euros).kind;
+  const repairHint =
+    repairKind === "full" || repairKind === "partial"
+      ? "Premi l'elsa per riparare le spade"
+      : repairKind === "short"
+        ? "Riparazione non possibile - Fondi esauriti"
+        : "";
   const condition = damagedSwords > 0 ? "critical" : equipment.wear > 0 ? "warning" : "healthy";
   const count = (value: number) => value.toLocaleString("it-IT");
   const conditionLabel =
@@ -107,6 +115,9 @@ export function EquipmentDetailPanel({
         onRepair={onMaintainEquipment}
         size="large"
       />
+      {repairHint ? (
+        <p className={`equipment-repair-hint${repairKind === "short" ? " is-short" : ""}`}>{repairHint}</p>
+      ) : null}
       <ul className="equipment-legend">
         <li className="is-healthy">Libere <strong>{count(availableSwords)}</strong></li>
         <li className="is-in-use">In uso <strong>{count(reservedSwords)}</strong></li>

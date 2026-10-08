@@ -83,6 +83,31 @@
   transition: color 0.45s ease;
 }
 
+.school-saber-price {
+  gap: 1px;
+}
+
+/* Più specifico di «.school-saber-hilt svg» (il disegno dell'elsa, a tutto riquadro). */
+.school-saber-hilt .school-saber-price-wrench {
+  position: static;
+  width: 0.62em;
+  height: 0.62em;
+  flex: none;
+  fill: currentColor;
+}
+
+/* Sotto la spada della finestra: dove si ripara (Andrea, 08/10). */
+.equipment-repair-hint {
+  margin: 6px 0 0;
+  color: var(--onde-gold-bright, #986700);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.equipment-repair-hint.is-short {
+  color: var(--equipment-broken);
+}
+
 .school-saber-ring {
   fill: var(--saber-ring);
   filter: drop-shadow(0 0 2.5px var(--saber-ring));
@@ -223,6 +248,8 @@
   border-radius: 50%;
   background: var(--saber-dot);
 }
+
+:root[data-theme="light"] .school-saber-hilt .school-saber-price-wrench { display: none; }
 
 :root[data-theme="light"] .school-saber-price {
   position: static;

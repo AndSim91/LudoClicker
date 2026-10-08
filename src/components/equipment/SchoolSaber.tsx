@@ -133,7 +133,15 @@ export function SchoolSaber({
           <path d="M10.6 1.8a3.6 3.6 0 0 0-3.4 4.7L2.3 11.4a1.3 1.3 0 0 0 1.8 1.8L9 8.3a3.6 3.6 0 0 0 4.7-3.4l-1.9 1.9-1.9-.3-.3-1.9z" />
         </svg>
         <span className="school-saber-dot" aria-hidden="true" />
-        <span className="school-saber-price">{price}</span>
+        <span className="school-saber-price">
+          {price ? (
+            // Chiave inglese sull'impugnatura (Andrea, 08/10): qui si riparano le spade.
+            <svg className="school-saber-price-wrench" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M10.6 1.8a3.6 3.6 0 0 0-3.4 4.7L2.3 11.4a1.3 1.3 0 0 0 1.8 1.8L9 8.3a3.6 3.6 0 0 0 4.7-3.4l-1.9 1.9-1.9-.3-.3-1.9z" />
+            </svg>
+          ) : null}
+          {price}
+        </span>
         <span className="school-saber-action">{action}</span>
       </button>
       {bladeButton ? (

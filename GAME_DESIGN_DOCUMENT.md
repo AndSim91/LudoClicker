@@ -2786,7 +2786,9 @@ Tornei ha l'icona in tutte e due le modalità. CSS di entrambe in
 il riquadro Spade non sta più in La mia giornata. Nella barra del titolo,
 dopo «Spade 14 su 31», c'è una spada laser disegnata. L'**elsa** (70 px:
 pomolo a tappo, impugnatura, anello di stato, emettitore a rocchetto) è il
-pulsante di riparazione manuale: sull'impugnatura c'è il costo e l'anello
+pulsante di riparazione manuale: sull'impugnatura c'è il costo, preceduto da
+una piccola chiave inglese (decisione di Andrea dell'08/10: è lì che si
+riparano le spade), e l'anello
 prende il colore di quello che i fondi permettono, verde niente da riparare
 (impugnatura vuota), oro riparazione completa, arancio riparazione parziale
 con tutti i fondi, rosso fondi insufficienti (mostra il minimo), grigio se
@@ -2794,7 +2796,10 @@ l'usura è solo sulle spade in uso. Dopo il clic l'anello sfuma al verde, senza
 scritte. La **lama** mostra tutte le spade dall'elsa verso la punta: libere,
 usurate (con un minimo visibile del 4%), in uso, rotte. La scritta e la lama
 aprono il dettaglio (si chiude con Esc o cliccando fuori): numero grande delle
-spade libere, la spada più grande, la legenda con i numeri, gli addetti
+spade libere, la spada più grande, subito sotto la scritta «Premi l'elsa per
+riparare le spade» (oro; «Riparazione non possibile - Fondi esauriti» in rosso
+se i fondi non bastano; nulla se non c'è da riparare o l'usura è solo sulle
+spade in uso), la legenda con i numeri, gli addetti
 all'attrezzatura e l'acquisto in evidenza. Sotto i 1.001 pixel la spada
 sparisce dalla barra.
 

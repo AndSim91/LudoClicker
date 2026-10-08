@@ -36,6 +36,7 @@ describe("EquipmentDetailPanel", () => {
       "Libere 5In uso 1Rotte 0Usura 45 pt",
     );
 
+    expect(screen.getByText("Premi l'elsa per riparare le spade")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Ripara tutto/ }));
     expect(onMaintainEquipment).toHaveBeenCalledOnce();
   });
