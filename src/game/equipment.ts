@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from "./config";
+import { getSpendableEuros } from "./debt";
 import { getUpgradeEffectTotal } from "../content/upgrades";
 import { roundCurrency } from "./economy";
 import { getOfficialSwordUnitCost, recordLightInflationPurchase } from "./lightInflation";
@@ -323,7 +324,7 @@ export function buyOfficialSword(state: GameState, rawAmount = 1): GameState {
     !Number.isFinite(totalCost) ||
     !Number.isSafeInteger(totalSwords) ||
     !Number.isSafeInteger(availableSwords) ||
-    state.school.euros < totalCost
+    getSpendableEuros(state) < totalCost
   ) return state;
   return {
     ...state,

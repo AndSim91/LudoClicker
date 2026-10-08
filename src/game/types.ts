@@ -293,6 +293,7 @@ export type UpgradeId =
   | "bring-a-friend"
   | "rhythm-gamer"
   | "deposit-account"
+  | "cash-advance"
   | "instructor-exchange"
   | "recommendation-letters"
   | "network-circuit"
@@ -538,9 +539,15 @@ export interface Statistics {
   socialFollowersGained: number;
   formsCompleted: number;
   narrativeEvents: number;
+  /** Trials cancelled for lack of swords; absent before the Pianificazione delle Onde. */
+  trialsCancelled?: number;
+  /** Euros earned per source (the rest is prizes and bonuses); absent before the Pianificazione. */
+  incomeBySource?: Partial<Record<IncomeSource, number>>;
   /** Cumulative counters for the achievements (src/game/career.ts); absent before v87. */
   career?: CareerStatistics;
 }
+
+export type IncomeSource = "fees" | "network" | "social" | "gadgets";
 
 /** "council", "foundation", `victory:${level}` or `legendary:${profileId}` (src/game/moments.ts). */
 export type MomentKey = string;
@@ -1154,6 +1161,142 @@ export interface GameState {
     gadget: boolean;
   };
   upgrades: UpgradeLevels;
+  /** Debito della Pianificazione delle Onde (src/game/debt.ts); absent when the school owes nothing. */
+  debt?: SchoolDebt;
+  /** Report annuale and Pianificazione delle Onde (src/game/annualReport.ts). */
+  annual?: AnnualState;
+}
+
+export type AnnualSubject =
+  | "enrollment"
+  | "loyalty"
+  | "teaching"
+  | "tournaments"
+  | "administration"
+  | "finances";
+export type AnnualGrade = "A" | "B" | "C" | "D" | "E";
+
+/** Cumulative counters at a point of the year: the report is the difference between two. */
+export interface AnnualSnapshot {
+  /** Game time and month of the snapshot. */
+  at: number;
+  month: number;
+  activeMembers: number;
+  peakActiveMembers: number;
+  membersEnrolled: number;
+  membersDeparted: number;
+  formsCompleted: number;
+  trialsCompleted: number;
+  trialsCancelled: number;
+  eventsCompleted: number;
+  eurosEarned: number;
+  euros: number;
+  income: Partial<Record<IncomeSource, number>>;
+  totalSwords: number;
+  collaborators: number;
+  instructors: number;
+  technicians: number;
+  schoolCount: number;
+  nationalTitles: number;
+  championsWins: number;
+  reptileEditions: number;
+  council: boolean;
+  schoolTournamentPlayed: boolean;
+  /** Highest level with a title in this school, as a rank (0 = none). */
+  bestTitleRank: number;
+  legendaries: string[];
+}
+
+export interface AnnualMonth {
+  month: number;
+  earned: number;
+  enrolled: number;
+}
+
+/** Candidate for the Highlight annuale: categories 1 (story) … 5 (record). */
+export interface AnnualMark {
+  category: 1 | 2 | 3 | 4 | 5;
+  title: string;
+  month: number;
+  rarity: number;
+}
+
+export interface AnnualLedger {
+  schoolYear: number;
+  start: AnnualSnapshot;
+  /** The end of the last month closed, to find what happened in the next one. */
+  last: AnnualSnapshot;
+  months: AnnualMonth[];
+  marks: AnnualMark[];
+  /** Contacts by source at the start, for «Da dove arrivano i Contatti». */
+  startSources?: Partial<Record<Contact["source"], HistorySourceSummary>>;
+}
+
+export interface AnnualGradeRow {
+  subject: AnnualSubject;
+  text: string;
+  /** Absent when the subject has nothing to judge yet (no Forme, no tournaments). */
+  grade?: AnnualGrade;
+}
+
+export interface AnnualHighlight {
+  category: 1 | 2 | 3 | 4 | 5 | 6;
+  title: string;
+  /** Game month, absent for the number of the year. */
+  month?: number;
+  mentions: string[];
+}
+
+export interface PlannedCourse {
+  formId: FormId;
+  track: "instructor" | "technician";
+  count: number;
+}
+
+/** What the player set in the Pianificazione, still provisional. */
+export interface AnnualPlan {
+  courses: PlannedCourse[];
+  repair: boolean;
+  swords: number;
+}
+
+export interface AnnualPlanSummary {
+  courses: { formId: FormId; track: "instructor" | "technician"; count: number }[];
+  repaired: boolean;
+  swordsBought: number;
+  spent: number;
+  borrowed: number;
+}
+
+/** The pagella of a closed year, kept until the next one replaces it. */
+export interface AnnualReport {
+  schoolYear: number;
+  /** Game month the report was written (August). */
+  month: number;
+  grades: AnnualGradeRow[];
+  /** Grades of the year before, for the arrows. */
+  previousGrades?: Partial<Record<AnnualSubject, AnnualGrade>>;
+  highlight?: AnnualHighlight;
+  months: AnnualMonth[];
+  plan?: AnnualPlanSummary;
+}
+
+export interface AnnualState {
+  ledger?: AnnualLedger;
+  /** Pagella of the last closed year. */
+  report?: AnnualReport;
+  /** The Pianificazione waits for «Conferma il piano»: the game stays paused. */
+  planningOpen?: boolean;
+  lastHighlightCategory?: number;
+}
+
+/** Debt from «Anticipo di cassa»: capital still owed, the interest follows the upgrade level. */
+export interface SchoolDebt {
+  principal: number;
+  /** Installments still to pay; 0 with capital left = overdue, the school is blocked. */
+  monthsLeft: number;
+  /** Game month whose end pays the first installment (September after the Pianificazione). */
+  firstMonth: number;
 }
 
 export type GameAction =
@@ -1187,6 +1330,7 @@ export type GameAction =
   | { type: "ADMIN_ADVANCE_MONTH"; now: number }
   | { type: "ADMIN_SCHEDULE_LEGENDARY_TRIAL"; now: number }
   | { type: "UPDATE_PROFILE_NAME"; displayName: string }
+  | { type: "CONFIRM_ANNUAL_PLAN"; plan: AnnualPlan; now: number }
   | { type: "FOUND_SCHOOL"; details: SchoolFoundationDetails; now: number; spending?: ReputationSpending }
   | { type: "BUY_UPGRADE"; upgradeId: UpgradeId; now: number }
   | { type: "BUY_ALL_UPGRADES"; now: number }

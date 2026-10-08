@@ -12,9 +12,15 @@ import { getMemberAnnualDepartureChance } from "./formulas";
 import { getDepartureRiskReduction } from "../content/upgrades";
 import { departGroupedMembers } from "./memberGroups";
 import { makeGameId } from "./ids";
-import { getMonthlyOperationalIncome } from "./membershipEconomy";
+import {
+  getMonthlyIncomeBySource,
+  getMonthlyOperationalIncome,
+  recordIncomeBySource,
+} from "./membershipEconomy";
 import { nextRandom } from "./random";
 import { processSeptemberLightInflation } from "./lightInflation";
+import { payDebtInstallment } from "./debt";
+import { closeAnnualMonth } from "./annualReport";
 import type { GameState, SpecialCollaboratorId } from "./types";
 import { processTournamentAtMonthEnd } from "./tournamentFlow";
 import { processReptileCalendarTransition } from "./reptileFlow";
@@ -297,9 +303,11 @@ export function collectFees(
       currentMonth,
       nextState.school.nextFeeAt,
     );
-    const earned = scaleCurrencyGain(
-      getMonthlyOperationalIncome(nextState),
-      gainMultiplier,
+    const income = getMonthlyOperationalIncome(nextState);
+    const earned = scaleCurrencyGain(income, gainMultiplier);
+    const scale = income > 0 ? earned / income : 0;
+    const incomeParts = Object.fromEntries(
+      Object.entries(getMonthlyIncomeBySource(nextState)).map(([source, euros]) => [source, (euros ?? 0) * scale]),
     );
     nextState = {
       ...nextState,
@@ -313,11 +321,13 @@ export function collectFees(
         nextState.gadgets,
         currentMonth + 1,
       ),
-      statistics: {
+      statistics: recordIncomeBySource({
         ...nextState.statistics,
         eurosEarned: roundCurrency(nextState.statistics.eurosEarned + earned),
-      },
+      }, incomeParts),
     };
+    nextState = payDebtInstallment(nextState, currentMonth, now + period);
+    nextState = closeAnnualMonth(nextState, currentMonth, nextState.school.nextFeeAt - GAME_CONFIG.gameMonthMs);
     // A September crossed during catch-up still opens its notification now, not at its past game boundary.
     nextState = processSeptemberLightInflation(nextState, wallNow);
     if (isSchoolYearDepartureMonth(currentMonth)) {

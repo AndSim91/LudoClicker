@@ -1,4 +1,5 @@
 import { getReptileOrdinaryShare } from "./reptileSectors";
+import { getSpendableEuros } from "./debt";
 import {
   FORM_DEFINITIONS,
   getFormDefinition,
@@ -295,7 +296,7 @@ export function bookTechnicianCourse(
       startedAt: 0,
       completesAt: 0,
     }) === "technician" ||
-    state.school.euros < cost
+    getSpendableEuros(state) < cost
   ) return state;
 
   const booked: GameState = {
@@ -521,7 +522,7 @@ function processInstructorQualifications(
       nextState.upgrades,
       getInternalInstructorQualificationCost(definition.cost),
     );
-    if (nextState.school.euros < cost) break;
+    if (getSpendableEuros(nextState) < cost) break;
 
     const training = scheduleTraining(
       nextState,

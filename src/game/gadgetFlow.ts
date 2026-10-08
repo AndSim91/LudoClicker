@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { getGadgetRarityChanceMultiplier, getGadgetWorkCapacity, getUpgradeEffectTotal } from "../content/upgrades";
 import { getReputationMultiplier } from "./reputation";
 import {
@@ -780,10 +781,10 @@ function bookGadgetSales(
       ...state.school,
       euros: roundCurrency(state.school.euros + revenue),
     },
-    statistics: {
+    statistics: recordIncomeBySource({
       ...state.statistics,
       eurosEarned: roundCurrency(state.statistics.eurosEarned + revenue),
-    },
+    }, { gadgets: revenue }),
     gadgets: recordGadgetMonthlyRevenue(
       gadgets,
       state.gadgets.products,

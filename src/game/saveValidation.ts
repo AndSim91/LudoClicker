@@ -581,6 +581,21 @@ export function isValidGameState(value: unknown): value is GameState {
       typeof state.yearDigest.start === "object" &&
       Object.values(state.yearDigest.start ?? {}).every((value) => Number.isFinite(value))
     )) &&
+    (state.debt === undefined || (
+      Number.isFinite(state.debt.principal) &&
+      Number.isSafeInteger(state.debt.monthsLeft) &&
+      Number.isSafeInteger(state.debt.firstMonth)
+    )) &&
+    (state.annual === undefined || (
+      typeof state.annual === "object" &&
+      (state.annual.ledger === undefined || (
+        Array.isArray(state.annual.ledger.months) &&
+        Array.isArray(state.annual.ledger.marks) &&
+        typeof state.annual.ledger.start === "object" &&
+        typeof state.annual.ledger.last === "object"
+      )) &&
+      (state.annual.report === undefined || Array.isArray(state.annual.report.grades))
+    )) &&
     Array.isArray(state.moments?.seen) &&
     state.moments.seen.every((key) => typeof key === "string") &&
     Array.isArray(state.moments?.queue) &&

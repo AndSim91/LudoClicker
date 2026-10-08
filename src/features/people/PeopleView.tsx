@@ -36,6 +36,7 @@ export function PeopleView({
   onMoveOperationalPriority,
   onToggleAutomaticAssignment,
   onChangeAutomaticShare,
+  onOpenAnnualReport,
 }: {
   state?: GameState;
   onAssign: (collaboratorId: string, assignment: CollaboratorAssignment) => void;
@@ -57,6 +58,8 @@ export function PeopleView({
   ) => void;
   onToggleAutomaticAssignment?: (enabled: boolean) => void;
   onChangeAutomaticShare?: (assignment: CollaboratorMasteryRole, level: number) => void;
+  /** Consiglio delle Onde: «Report annuale», the year so far and last year's pagella. */
+  onOpenAnnualReport?: () => void;
 }) {
   const state = useGameStateSlices(
     [
@@ -128,6 +131,12 @@ export function PeopleView({
             <span>{showAggregateCollaborators
               ? `${availableCollaborators}/${state.collaborators.length} liberi`
               : state.collaborators.length}</span>
+            {showAggregateCollaborators && onOpenAnnualReport ? (
+              <button type="button" className="annual-report-button" onClick={onOpenAnnualReport}>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13.5V7.5M6.5 13.5V4M10 13.5V9M13.5 13.5V2.5M1.5 13.5h13" /></svg>
+                Report annuale
+              </button>
+            ) : null}
           </div>
           {onToggleAutomaticAssignment && onChangeAutomaticShare &&
           (showAggregateCollaborators || state.collaboratorManagement.automaticShares) ? (

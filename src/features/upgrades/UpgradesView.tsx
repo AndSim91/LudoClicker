@@ -717,6 +717,15 @@ function UpgradeDetailsDialog({
                 </dd>
               </div>
               <div><dt>Effetto</dt><dd><KeywordText text={definition.effectLabel} /></dd></div>
+              {definition.levelNotes ? (
+                <div>
+                  <dt>{level > 0 ? "Ora" : "Si comincia con"}</dt>
+                  <dd>
+                    {definition.levelNotes[Math.max(0, level - 1)]}
+                    {level > 0 && !completed ? <><br />Poi: {definition.levelNotes[level]}</> : null}
+                  </dd>
+                </div>
+              ) : null}
               <div>
                 <dt>Si apre con</dt>
                 <dd>

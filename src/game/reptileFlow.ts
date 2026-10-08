@@ -1,3 +1,4 @@
+import { recordIncomeBySource } from "./membershipEconomy";
 import { addCareer } from "./career";
 import { getContactBaseStats } from "./athleteStats";
 import { getCalendarMonth } from "./calendar";
@@ -135,7 +136,7 @@ export function applyReptileResult(
       result.economy.usedSchoolSwords,
     ),
     statistics: {
-      ...state.statistics,
+      ...recordIncomeBySource(state.statistics, { gadgets: result.economy.gadgetGross }),
       eurosEarned: state.statistics.eurosEarned + result.economy.gadgetGross,
       socialFollowersGained:
         state.statistics.socialFollowersGained + result.economy.followersGained,

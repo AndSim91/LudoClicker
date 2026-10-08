@@ -79,7 +79,7 @@ describe("upgrade catalog", () => {
       if (category.id === "secrets") continue;
       // One line per branch: nine columns, ten in Gadget and the Rete delle Onde (one column per node there).
       const expected = {
-        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 10, instructors: 9, organization: 8, network: 10,
+        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 10, instructors: 9, organization: 9, network: 10,
       } as Record<string, number>;
       expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
@@ -155,6 +155,7 @@ describe("upgrade catalog", () => {
       "training-office": [15_000],
       "order-secretariat": [10_000, 25_000, 50_000, 100_000, 200_000],
       "deposit-account": [10_000, 20_000, 40_000, 80_000, 160_000],
+      "cash-advance": [3_000, 6_000, 12_000, 24_000, 48_000],
     });
   });
 

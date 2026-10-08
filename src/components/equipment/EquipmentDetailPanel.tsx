@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { ProgressBar } from "../common/ProgressBar";
+import { getSpendableEuros, isDebtBlocked } from "../../game/debt";
 import { SchoolSaber } from "./SchoolSaber";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -23,7 +24,7 @@ const PURCHASE_AMOUNTS: readonly PurchaseAmount[] = [1, 10, 100];
 
 function getAffordablePurchaseAmounts(state: GameState): PurchaseAmount[] {
   return PURCHASE_AMOUNTS.filter(
-    (amount) => amount === 1 || state.school.euros >= getOfficialSwordPurchaseCost(state, amount),
+    (amount) => amount === 1 || getSpendableEuros(state) >= getOfficialSwordPurchaseCost(state, amount),
   );
 }
 
@@ -38,7 +39,7 @@ export function EquipmentDetailPanel({
   onBuyOfficialSwords: (amount: PurchaseAmount) => void;
 }) {
   const state = useGameStateSlices(
-    ["automation", "collaborators", "equipment", "lightInflation", "school"],
+    ["automation", "collaborators", "debt", "equipment", "lightInflation", "school"],
     stateOverride,
   );
   const [purchaseIndex, setPurchaseIndex] = useState(0);
@@ -49,7 +50,8 @@ export function EquipmentDetailPanel({
   const affordableAmounts = getAffordablePurchaseAmounts(state);
   const purchaseAmount = affordableAmounts[purchaseIndex % affordableAmounts.length];
   const purchaseCost = getOfficialSwordPurchaseCost(state, purchaseAmount);
-  const canBuy = state.school.euros >= purchaseCost;
+  const debtBlocked = isDebtBlocked(state);
+  const canBuy = getSpendableEuros(state) >= purchaseCost;
   const showSupplier = isOfficialSwordSupplierVisible(state);
   const equipmentCollaborators = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "equipment",
@@ -161,7 +163,9 @@ export function EquipmentDetailPanel({
               className="equipment-purchase-button"
               type="button"
               disabled={!canBuy}
-              title={`Polaris EVO Basic, ${formatCurrency(getOfficialSwordPurchaseCost(state, 1))} l'una`}
+              title={debtBlocked
+                ? "Acquisto fermo finché il debito non è saldato"
+                : `Polaris EVO Basic, ${formatCurrency(getOfficialSwordPurchaseCost(state, 1))} l'una`}
               onClick={() => onBuyOfficialSwords(purchaseAmount)}
             >
               Acquista {purchaseAmount === 1 ? "1 spada" : `${purchaseAmount} spade`} {"\u00b7"}{" "}

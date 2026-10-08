@@ -1,4 +1,5 @@
 import { getReptileOrdinaryShare } from "./reptileSectors";
+import { getSpendableEuros } from "./debt";
 import {
   AGONIST_COURSE_ID,
   canTrainForm,
@@ -155,7 +156,7 @@ export function startAgonistCourse(
     remainingAnnualSlots <= 0 ||
     student.lastAgonistCourseYear === trainingYear ||
     selectInstructorTeachingCount(state, instructor.id) >= capacity ||
-    state.school.euros < cost
+    getSpendableEuros(state) < cost
   ) return state;
 
   const requiredSwords = getAgonistCourseRequiredSwords(student.forms);
@@ -286,7 +287,7 @@ export function startFormTraining(
       getInstructorQualificationCost(definition.cost),
       formId,
     );
-    if (collaborator.training || state.school.euros < qualificationCost) return state;
+    if (collaborator.training || getSpendableEuros(state) < qualificationCost) return state;
     const training = scheduleTraining(
       state,
       collaborator.id,
@@ -367,7 +368,7 @@ export function startFormTraining(
       courseXUnlocked,
     ) ||
     !initialBranchCompatible ||
-    state.school.euros < trainingCost
+    getSpendableEuros(state) < trainingCost
   ) return state;
   const reservedEquipment = reserveSwords(state.equipment, definition.requiredSwords);
   if (!reservedEquipment) {

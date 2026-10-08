@@ -103,14 +103,8 @@ export function previewQuickTeacherTraining(
   return { formId: picked.formId, cost, affordable: state.school.euros >= cost };
 }
 
-function pickQuickTeacherTraining(
-  state: GameState,
-  kind: QuickTrainingKind,
-  now: number,
-): { state: GameState; formId?: FormId } {
-  const none = { state };
-  if (!state.unlocks.forms || !isQuickTeacherTrainingUnlocked(state.upgrades)) return none;
-  if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return none;
+/** Instructors who can take a course, best first: Maestria da Istruttore, then Stile. */
+function rankTrainingInstructors(state: GameState): Collaborator[] {
   const leaving = getInstructorPendingReleaseIds(state);
   const instructors = state.collaborators.filter(
     (collaborator) => collaborator.assignment === "instructor" && !leaving.has(collaborator.id),
@@ -123,7 +117,7 @@ function pickQuickTeacherTraining(
     const contact = contacts.get(collaborator.contactId);
     return contact ? getAthleteTournamentStats(contact, collaborator.forms).style : 0;
   };
-  const ranked = instructors
+  return instructors
     .map((collaborator) => ({
       collaborator,
       level: getCollaboratorMasteryLevel(collaborator.mastery?.instructor),
@@ -131,8 +125,46 @@ function pickQuickTeacherTraining(
     }))
     .sort((a, b) => b.level - a.level || b.style - a.style)
     .map((entry) => entry.collaborator);
+}
+
+/** Starts the course for one collaborator; the state is unchanged if a rule refuses it. */
+export function startTeacherCourse(
+  state: GameState,
+  collaboratorId: string,
+  formId: FormId,
+  kind: QuickTrainingKind,
+  now: number,
+): GameState {
+  return kind === "instructor"
+    ? startFormTraining(state, collaboratorId, formId, now)
+    : bookTechnicianCourse(state, collaboratorId, formId, now);
+}
+
+/** Who could take the Istruttori (or Tecnici) course on this Forma, best first (Pianificazione delle Onde). */
+export function getTeacherCourseCandidates(
+  state: GameState,
+  formId: FormId,
+  kind: QuickTrainingKind,
+): Collaborator[] {
+  if (!state.unlocks.forms) return [];
+  if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return [];
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const coverage = countTeacherCoverage(instructors, kind);
+  if (formId === "course-x" && !courseXUnlocked) return [];
+  return rankTrainingInstructors(state).filter((collaborator) =>
+    !covers(collaborator, formId, kind) && canReach(collaborator, formId, kind, courseXUnlocked));
+}
+
+function pickQuickTeacherTraining(
+  state: GameState,
+  kind: QuickTrainingKind,
+  now: number,
+): { state: GameState; formId?: FormId } {
+  const none = { state };
+  if (!state.unlocks.forms || !isQuickTeacherTrainingUnlocked(state.upgrades)) return none;
+  if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return none;
+  const ranked = rankTrainingInstructors(state);
+  const courseXUnlocked = isCourseXUnlocked(state.upgrades);
+  const coverage = countTeacherCoverage(ranked, kind);
   const forms = QUICK_TRAINING_FORM_ORDER
     .filter((formId) => courseXUnlocked || formId !== "course-x")
     .map((formId) => ({ formId, count: coverage.get(formId) ?? 0 }))
@@ -142,9 +174,7 @@ function pickQuickTeacherTraining(
   for (const { formId } of forms) {
     for (const collaborator of ranked) {
       if (covers(collaborator, formId, kind) || !canReach(collaborator, formId, kind, courseXUnlocked)) continue;
-      const next = kind === "instructor"
-        ? startFormTraining(state, collaborator.id, formId, now)
-        : bookTechnicianCourse(state, collaborator.id, formId, now);
+      const next = startTeacherCourse(state, collaborator.id, formId, kind, now);
       if (next !== state) return { state: next, formId };
     }
   }

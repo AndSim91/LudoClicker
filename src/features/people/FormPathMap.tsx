@@ -138,12 +138,17 @@ export function FormCoverageMap({
   activity,
   showTechnicians,
   highlight,
+  selected,
+  onSelect,
 }: {
   counts: ReadonlyMap<FormId, FormCoverageCount>;
   activity: ReadonlyMap<TrainingCourseId, FormActivity>;
   showTechnicians: boolean;
   /** Ufficio formazione: the Forms the two buttons would pick right now. */
   highlight?: { instructor?: FormId; technician?: FormId };
+  /** Pianificazione delle Onde: every Forma is a button, the chosen one glows (S2 «Alone»). */
+  selected?: FormId;
+  onSelect?: (formId: FormId) => void;
 }) {
   const at = (formId: FormId) => counts.get(formId);
   const covered = (formId: FormId) => (at(formId)?.instructors ?? 0) > 0;
@@ -169,8 +174,14 @@ export function FormCoverageMap({
     const running = activity.get(formId);
     const title = `${formName(formId)} · ${people(instructors, "Istruttore", "Istruttori", studyingInstructors)}${
       showTechnicians ? ` · ${people(technicians, "Tecnico", "Tecnici", studyingTechnicians)}` : ""}${activityTitle(running)}`;
+    const Node = onSelect ? "button" : "span";
     return (
-      <span key={formId} className="form-cover-node" title={title}>
+      <Node
+        key={formId}
+        className={`form-cover-node${onSelect ? " is-selectable" : ""}${selected === formId ? " is-selected" : ""}`}
+        title={title}
+        {...(onSelect ? { type: "button" as const, "aria-pressed": selected === formId, onClick: () => onSelect(formId) } : {})}
+      >
         <span className={`form-cover-numbers${showTechnicians ? " has-technicians" : ""}`} aria-hidden="true">
           {number(instructors, studyingInstructors, "is-instructor")}
           {showTechnicians ? number(technicians, studyingTechnicians, "is-technician") : null}
@@ -182,7 +193,7 @@ export function FormCoverageMap({
           </span>
           {running?.students ? <span className="form-cover-students" aria-hidden="true">{running.students.count}</span> : null}
         </span>
-      </span>
+      </Node>
     );
   };
   const coveredNames = FORM_DEFINITIONS.map(({ id }) => id).filter(covered).map(formName);

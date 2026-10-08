@@ -1,3 +1,4 @@
+import { createAnnualLedger } from "./annualReport";
 import { createInitialCareerStatistics } from "./career";
 import { createInitialUpgradeLevels } from "../content/upgrades";
 import { createInitialShortGoal } from "../content/shortGoals";
@@ -35,7 +36,7 @@ export function createInitialState(
   );
   const contacts = initialContacts.contacts;
 
-  return {
+  const state: GameState = {
     version: GAME_CONFIG.version,
     saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion,
     createdAt: now,
@@ -156,4 +157,5 @@ export function createInitialState(
     },
     upgrades: createInitialUpgradeLevels(),
   };
+  return { ...state, annual: { ledger: createAnnualLedger(state, now) } };
 }

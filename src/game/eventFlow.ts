@@ -1,4 +1,5 @@
 import { getAcquisitionEventDefinition, isAcquisitionEventUnlocked } from "../content/events";
+import { getSpendableEuros } from "./debt";
 import { sellGadgetsAtEvent } from "./gadgetFlow";
 import { getCollaboratorMasteryDefinition } from "../content/mastery";
 import { GAME_CONFIG } from "./config";
@@ -89,7 +90,7 @@ function getEventStartDetails(
     Math.round(definition.cost * (masteryDefinition?.eventMultiplier ?? 1)),
     runningCopies,
   );
-  if (state.school.euros < eventCost) return undefined;
+  if (getSpendableEuros(state) < eventCost) return undefined;
   return { definition, masteryDefinition, eventCost, runningCopies };
 }
 

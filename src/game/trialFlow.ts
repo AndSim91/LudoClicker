@@ -107,6 +107,7 @@ export function processScheduledTrialStarts(
         ? {
             ...state.statistics,
             contactsLost: state.statistics.contactsLost + cancelledTrialsCount,
+            trialsCancelled: (state.statistics.trialsCancelled ?? 0) + cancelledTrialsCount,
           }
         : state.statistics,
     legendaryPity,

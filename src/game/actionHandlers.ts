@@ -23,6 +23,7 @@ import {
 import { postponeLightInflationEvent } from "./lightInflation";
 import { updateProfileName } from "./profileFlow";
 import { foundSchool } from "./schoolProgressionFlow";
+import { confirmAnnualPlan } from "./annualPlanning";
 import {
   assignCollaborator,
 } from "./trainingFlow";
@@ -147,6 +148,7 @@ export function createGameActionHandlers(
       action.now,
     ),
     UPDATE_PROFILE_NAME: (state, action) => updateProfileName(state, action.displayName),
+    CONFIRM_ANNUAL_PLAN: (state, action) => confirmAnnualPlan(state, action.plan, action.now),
     FOUND_SCHOOL: (state, action) => foundSchool(state, action.details, action.now, action.spending),
     BUY_UPGRADE: (state, action) => buyUpgrade(state, action.upgradeId),
     BUY_ALL_UPGRADES: (state) => buyAllAffordableUpgrades(state),

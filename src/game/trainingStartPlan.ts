@@ -1,4 +1,5 @@
 import { getReptileOrdinaryShare } from "./reptileSectors";
+import { isDebtBlocked } from "./debt";
 import {
   AGONIST_COURSE_ID,
   canTrainForm,
@@ -128,6 +129,11 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
 
   get availableEuros(): number {
     return this.euros;
+  }
+
+  /** Overdue debt: courses stop (src/game/debt.ts). */
+  private spendable(): number {
+    return isDebtBlocked(this.state) ? 0 : this.euros;
   }
 
   private updateContact(contact: Contact): void {
@@ -279,7 +285,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       remainingAnnualSlots <= 0 ||
       student.lastAgonistCourseYear === this.trainingYear ||
       (this.teachingCounts.get(instructor.id) ?? 0) >= this.capacity ||
-      this.euros < cost
+      this.spendable() < cost
     ) return undefined;
 
     const requiredSwords = getAgonistCourseRequiredSwords(student.forms);
@@ -399,7 +405,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         getInstructorQualificationCost(definition.cost),
         formId,
       );
-      if (collaborator.training || this.euros < qualificationCost) return undefined;
+      if (collaborator.training || this.spendable() < qualificationCost) return undefined;
       const training = scheduleTraining(
         this.state,
         collaborator.id,
@@ -469,7 +475,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         this.courseXUnlocked,
       ) ||
       !initialBranchCompatible ||
-      this.euros < trainingCost
+      this.spendable() < trainingCost
     ) return undefined;
 
     const reservedEquipment = reserveSwords(this.equipment, definition.requiredSwords);

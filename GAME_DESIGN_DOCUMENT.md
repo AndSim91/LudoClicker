@@ -2329,6 +2329,7 @@ le entrate ricorrenti.
 | Priorità operative | rende modificabile la fila «Turni e precedenza» (chi consuma per primo Euro e spade e chi riceve aiuto) | 25.000 € |
 | A.N.D.E.R. | +10% a tutte le entrate ricorrenti per livello; massimo +50% | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 € |
 | Conto deposito | +0,5% al mese sui primi 250.000 € di Fondi per livello; massimo 6.250 € al mese | 10.000 / 20.000 / 40.000 / 80.000 / 160.000 € |
+| Anticipo di cassa | nella Pianificazione delle Onde si può spendere oltre i Fondi; interessi del creditore 20% / 16,25% / 12,5% / 8,75% / 5% (§ 12.7) | 3.000 / 6.000 / 12.000 / 24.000 / 48.000 € |
 
 Un settore principale è inattivo soltanto quando non ha lavoro reale da
 svolgere. Eventi è considerato attivo finché esiste un evento in corso, così i
@@ -2346,7 +2347,7 @@ sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
 Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
 3, Procedure standard 8, Ufficio formazione 8, Modulo di iscrizione 13, Priorità operative 18 e
 **Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
-A.N.D.E.R. 18, Conto deposito 23. Coordinamento multi-sede è passato alla Rete
+A.N.D.E.R. 18, Conto deposito 23, Anticipo di cassa 8. Coordinamento multi-sede è passato alla Rete
 dell'Ordine (§ 10.13). Gli interessi del **Conto deposito** («La banca paga poco, ma
 paga. Il tesoriere dorme meglio.») si calcolano a fine mese sui Fondi di quel
 momento, entrano nelle entrate mensili e compaiono nel loro dettaglio come
@@ -3059,6 +3060,86 @@ iscriversi: un avversario dichiaratamente non reclutabile non può rendere
 impossibile il 100% della collezione.
 
 ---
+
+### 12.7 Pianificazione delle Onde e Report annuale
+
+Decisioni di Andrea del 07–08/10/2026 (tavole di concept 1–14). Codice:
+`src/game/annualReport.ts` (registro, pagella, highlight), `src/game/annualPlanning.ts`
+(piano, previsione, conferma), `src/game/debt.ts` (debito), `src/features/annual/`.
+
+**Quando.** A inizio **agosto** di ogni anno il gioco si ferma (motivo di pausa
+`planning`) sulla Pianificazione delle Onde; l'anno scolastico nuovo comincia a
+settembre. La prima arriva nell'agosto del primo anno (anno scolastico 0,
+gennaio–luglio). Pagine: **Pagella → Pianificazione**; la pagina **Consigli**
+(A.N.D.E.R. in rosso, M.A.K.I. in blu per i tornei Open dal Nazionale in poi) è
+ancora da disegnare. Il pulsante finale è «Conferma il piano»: fino ad allora
+nulla è speso.
+
+**Registro dell'anno.** All'inizio dell'anno scolastico si fotografano i contatori
+cumulativi (iscritti, partenze, Forme, prove fatte e annullate per mancanza di
+spade, eventi, euro guadagnati e per fonte, spade, collaboratori, titoli…). A ogni
+fine mese si registrano entrate e nuovi iscritti del mese e i candidati
+all'Highlight. A inizio agosto la differenza diventa la pagella, salvata intera e
+sostituita ogni anno. Nuove statistiche: `trialsCancelled`, `incomeBySource`
+(quote, Rete, Social, gadget; il resto è «premi e altro»).
+
+**Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e
+frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
+- Iscrizioni: arrivati ÷ max(10, iscritti a inizio anno) ≥ 0,8 A · 0,5 B · 0,3 C · 0,15 D.
+- Fidelizzazione: 1 − andati via ÷ (iscritti a inizio anno + arrivati) ≥ 0,9 · 0,8 · 0,7 · 0,55.
+- Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti ≥ 1 · 0,6 · 0,35 · 0,15.
+- Risultati Agonistici (solo con almeno un torneo disputato): miglior piazzamento
+  pesato sul livello (1° 0,85, 2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1;
+  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3.
+- Amministrazione: prove annullate ÷ prove ≤ 2% A · 5% B · 10% C · 20% D; un voto
+  in meno se più di un quarto delle spade è rotto.
+- Finanze: entrate medie al mese contro l'anno prima (il primo anno: ultimi due
+  mesi contro i primi due) ≥ +30% · +10% · −5% · −20%; un voto in meno con il
+  debito scaduto.
+
+**Highlight annuale** (H1 «Trofeo»). Scala: 1 tappe della storia, 2 titoli,
+3 Leggendari, 4 prime volte, 5 record di iscritti, 6 il numero dell'anno (la
+materia col voto migliore). A parità vince il più raro, poi il più recente; i
+due eventi seguenti sono le menzioni. Le categorie 3–5 non fanno da highlight due
+anni di fila. Si nomina solo ciò che è già successo.
+
+**Pianificazione.**
+- **SIS · Scuola Internazionale Superiore**: lo schema delle Forme della
+  Copertura didattica (non va a capo, si rimpicciolisce), selezione S2 «Alone».
+  Per la Forma scelta, Corso Istruttori e (con «Tu conosci la SIS?») Corso
+  Tecnici: tutta la scheda iscrive il prossimo candidato (stesso ordine
+  dell'Ufficio formazione), «−» ne toglie uno, «Tutti» iscrive quanti Fondi e
+  limite del debito permettono. Conto «2 / 4», fino a 10 sagome, solo il totale.
+  Stati: «Partecipanti al massimo», «Fondi esauriti» / «Limite del debito»,
+  «Non disponibile · …». Senza il tutorial delle Forme: logo della SIS e
+  «Prossimamente». I corsi partono alla conferma.
+- **Spade della Scuola**: la scheda del menu delle spade (elsa che ripara,
+  legenda, «Acquista N spade» con ×1 / ×10 / ×100 / Max; con «Anticipo di cassa»
+  sempre tutte le quantità). Si pagano al prezzo di oggi ma contano per
+  l'Inflazione di Luce di settembre. Senza «Fornitore ufficiale» solo la scritta
+  «Spade acquistabili solo dopo aver sbloccato «Fornitore ufficiale» negli Upgrade».
+- **Fondi**: oggi → dopo il piano, spese raggruppate con la ×, «Spese provvisorie
+  ancora da confermare», «Annulla tutto».
+- **Guadagni previsti** (stile borsa): da settembre ad agosto, il livello degli
+  ultimi tre mesi (o le entrate mensili di oggi, se più alte) per il peso di ogni
+  mese nell'anno appena chiuso; «▲ +N%» contro l'anno chiuso, linea della media
+  dell'anno scorso, rata del debito in rosso dal basso, dettaglio «previsto» al
+  passaggio del mouse.
+
+**Debito** (upgrade «Anticipo di cassa», § 10.8). Solo la Pianificazione può
+andare sotto zero, finché il debito con gli interessi resta entro i guadagni
+previsti dell'anno dopo. Alla conferma i Fondi vanno a 0 e il resto diventa
+debito: capitale più interessi del creditore in 12 rate mensili prese a fine mese
+da settembre; se il debito cresce o il tasso migliora, la rata si ricalcola sul
+residuo. Dopo 12 rate, finché resta debito, si fermano eventi a pagamento, corsi
+(Allievi, Istruttori, Tecnici) e acquisto di spade; restano liberi riparazioni ed
+eventi gratuiti (`getSpendableEuros`). Messaggi di A.N.D.E.R. «Debito scaduto» e
+«Debito saldato». Fondare una nuova scuola lascia il debito alla vecchia.
+
+**Report annuale.** Nel Consiglio delle Onde, accanto a «Collaboratori», il
+pulsante «Report annuale» mette in pausa e apre l'anno in corso senza voti
+(Dati, Numeri, Tornei) o, con «Anno precedente», la pagella salvata (Pagella,
+Piano).
 
 ## 13. Tutorial narrativo e interattivo
 

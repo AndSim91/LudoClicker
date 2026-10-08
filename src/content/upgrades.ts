@@ -81,6 +81,7 @@ export type UpgradeEffect =
   | "athleteBaseStatsBonus"
   | "legendaryAppearanceBonus"
   | "foundationReputationDouble"
+  | "cashAdvanceLevel"
   | "legacy"
   | "gameSpeedLevel";
 
@@ -115,6 +116,8 @@ export interface UpgradeDefinition {
   levelNetworkSchools?: number[];
   hidden?: boolean;
   secretHint?: string;
+  /** One line per level, shown in the dialog (the lenders of «Anticipo di cassa»). */
+  levelNotes?: string[];
 }
 
 export const UPGRADE_CATEGORIES: Array<{
@@ -273,6 +276,14 @@ const UPGRADE_CATALOG: UpgradeDefinition[] = [
   { id: "operational-priorities", category: "organization", title: "Priorità operative", description: "Decidi tu l'ordine della fila: chi sta davanti spende per primo e riceve l'aiuto dei Turni. Le discussioni su chi viene prima, invece, restano.", effectLabel: "Puoi riordinare la fila dei settori in [[Scuola]]", effect: "operationalPrioritiesUnlock", effectPerLevel: 1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000], maxLevel: 1, requiredFame: noFame, requiredBranchPoints: 18, requiredUpgradeLevels: { "collaborator-shifts": 1 } },
   { id: "order-secretariat", category: "organization", title: "A.N.D.E.R.", description: "Arriva A.N.D.E.R., che si occupa di notifiche, quote e pratiche. Non dorme, non sbaglia, e ci tiene a farlo sapere.", effectLabel: "Ogni livello: +10% sulle entrate mensili di quote e Social · Livello 5: +50%", effect: "incomeMultiplier", effectPerLevel: 0.1, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 25_000, 50_000, 100_000, 200_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 18 },
   { id: "deposit-account", category: "organization", title: "Conto deposito", description: "La banca paga poco, ma paga. Il tesoriere dorme meglio.", effectLabel: "Ogni livello: ogni mese +0,5% di interessi sui **Fondi**, contando al massimo 250.000 € · Livello 5: +2,5%, fino a 6.250 € al mese", effect: "depositInterestRate", effectPerLevel: 0.005, baseCost: 10_000, costGrowth: LEVEL_GROWTH, levelCosts: [10_000, 20_000, 40_000, 80_000, 160_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 23 },
+  // Andrea, 08/10: un creditore per livello; il tasso scende dal 20% al 5% (src/game/debt.ts).
+  { id: "cash-advance", category: "organization", title: "Anticipo di cassa", description: "A volte i soldi non bastano e bisogna chiedere dei Prestiti per rendere una Scuola veramente grandiosa. Ma attento a scegliere con chi contrai i tuoi debiti...", effectLabel: "Nella Pianificazione delle Onde puoi spendere più dei **Fondi**: il debito si restituisce in 12 rate mensili, con gli interessi del creditore · Livello 1: +20% · 2: +16,25% · 3: +12,5% · 4: +8,75% · Livello 5: +5%", effect: "cashAdvanceLevel", effectPerLevel: 1, baseCost: 3_000, costGrowth: LEVEL_GROWTH, levelCosts: [3_000, 6_000, 12_000, 24_000, 48_000], maxLevel: 5, requiredFame: noFame, requiredBranchPoints: 8, levelNotes: [
+    "La Yakuza (+20%): niente scartoffie, solo contanti. Il tuo contatto non conosce la tua lingua, ma sa bene dove abiti.",
+    "Tuo cugino (+16,25%): ti fa volentieri un prestito, ma lo ricorderà a ogni festa comandata in famiglia fino alla fine dei tuoi giorni.",
+    "Un politico locale (+12,5%): fondi per lo sport giovanile, dice. Ma in cambio vorrà che presenziamo, spade in mano, a ogni campagna elettorale.",
+    "Un genovese (+8,75%): ha detto sì senza pensarci due volte. Ha preparato un piano di rientro in 12 punti, e c'è scritto che dobbiamo ripagargli con gli interessi pure la penna.",
+    "Banca SanPolaris (+5%): i tassi sono molto vantaggiosi, ma dopo aver parlato col direttore abbiamo aperto un conto, un fondo pensione e una polizza sulla vita delle spade.",
+  ] },
 
   // Rete delle Onde: si apre con le scuole fondate.
   { id: "multi-site-coordination", category: "network", title: "Coordinamento multi-sede", description: "Le scuole della rete condividono strumenti e procedure. Quello che funziona in una sede, adesso funziona in tutte.", effectLabel: "Ogni livello: tutti i collaboratori lavorano il 10% più in fretta · Livello 5: +50%", effect: "automationMultiplier", effectPerLevel: 0.1, baseCost: 25_000, costGrowth: LEVEL_GROWTH, levelCosts: [25_000, 50_000, 100_000, 200_000, 400_000], maxLevel: 5, requiredFame: noFame, requiredNetworkSchools: 1, requiredBranchPoints: 0 },

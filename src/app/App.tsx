@@ -48,6 +48,7 @@ import {
   selectContactsAwaitingEmail,
 } from "../game/selectors";
 import type {
+  AnnualPlan,
   AcquisitionEvent,
   CollaboratorAssignment,
   CollaboratorMasteryRole,
@@ -91,6 +92,8 @@ const lazyViewLoaders = {
   events: () => import("../features/events/EventsView").then((module) => ({ default: module.EventsView })),
   network: () => import("../features/network/NetworkView").then((module) => ({ default: module.NetworkView })),
   moment: () => import("../features/moments/MomentLayer").then((module) => ({ default: module.MomentLayer })),
+  planning: () => import("../features/annual/PlanningLayer").then((module) => ({ default: module.PlanningLayer })),
+  annualReport: () => import("../features/annual/AnnualReportLayer").then((module) => ({ default: module.AnnualReportLayer })),
   finalDuel: () => import("../features/tournaments/FinalDuelLayer").then((module) => ({ default: module.FinalDuelLayer })),
   reptileDay: () => import("../features/tournaments/ReptileDayLayer").then((module) => ({ default: module.ReptileDayLayer })),
   reptileIncidents: () => import("../features/tournaments/ReptileIncidentsLayer").then((module) => ({ default: module.ReptileIncidentsLayer })),
@@ -104,6 +107,8 @@ const UpgradesView = lazy(reloadOnStaleChunk(lazyViewLoaders.upgrades));
 const EventsView = lazy(reloadOnStaleChunk(lazyViewLoaders.events));
 const NetworkView = lazy(reloadOnStaleChunk(lazyViewLoaders.network));
 const MomentLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.moment));
+const PlanningLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.planning));
+const AnnualReportLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.annualReport));
 const FinalDuelLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.finalDuel));
 const ReptileDayLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.reptileDay));
 const ReptileIncidentsLayer = lazy(reloadOnStaleChunk(lazyViewLoaders.reptileIncidents));
@@ -178,6 +183,7 @@ export function App() {
     setMomentPaused,
     setFoundationPaused,
     setPracticePaused,
+    setPlanningPaused,
     saveStatus,
     saveNow,
   } = useGameEngine({ cadenceMs: getTickStepMs(darkMode, reduceMotion) });
@@ -303,6 +309,19 @@ export function App() {
     setMomentPaused(showsMoment);
   }, [showsMoment, setMomentPaused]);
   const dismissMoment = useCallback(() => dispatch({ type: "DISMISS_MOMENT" }), [dispatch]);
+  // Pianificazione delle Onde (inizio agosto) e Report annuale: il gioco resta in pausa finché sono aperti.
+  const planningOpen = state.annual?.planningOpen === true;
+  const [annualReportOpen, setAnnualReportOpen] = useState(false);
+  const openAnnualReport = useCallback(() => setAnnualReportOpen(true), []);
+  const closeAnnualReport = useCallback(() => setAnnualReportOpen(false), []);
+  const showsAnnual = planningOpen || annualReportOpen;
+  useLayoutEffect(() => {
+    setPlanningPaused(showsAnnual);
+  }, [showsAnnual, setPlanningPaused]);
+  const confirmAnnualPlan = useCallback(
+    (plan: AnnualPlan) => dispatch({ type: "CONFIRM_ANNUAL_PLAN", plan, now: getGameNow() }),
+    [dispatch, getGameNow],
+  );
   const playerGameSpeed = getPlayerGameSpeed(state);
   const maxGameSpeed = getMaxGameSpeed(state.upgrades);
   const changeGameSpeed = useCallback(
@@ -349,6 +368,7 @@ export function App() {
         !state.profile.displayName.trim() ||
         tutorial.isBlockingInput ||
         showsMoment ||
+        showsAnnual ||
         watchedFinal !== undefined ||
         event.repeat ||
         event.key === BOSS_KEY ||
@@ -362,6 +382,7 @@ export function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
     showsMoment,
+    showsAnnual,
     watchedFinal,
     activeView,
     dispatch,
@@ -782,6 +803,7 @@ export function App() {
               onToggleAutomaticTeaching={setAutomaticTeaching}
               onToggleFavorite={toggleMemberFavorite}
               onCancelEnrollment={cancelMemberEnrollment}
+              onOpenAnnualReport={openAnnualReport}
             />
           ) : activeView === "tournaments" ? (
             <StableTournamentsView
@@ -898,6 +920,11 @@ export function App() {
           city={state.school.city}
           onClose={closeReptileDay}
         />
+      ) : null}
+      {!showsMoment && !hasBlockingReptileFlow && !tutorial.activeScene && planningOpen ? (
+        <PlanningLayer state={state} now={state.automation.lastProcessedAt} onConfirm={confirmAnnualPlan} />
+      ) : annualReportOpen && !planningOpen ? (
+        <AnnualReportLayer state={state} now={state.automation.lastProcessedAt} onClose={closeAnnualReport} />
       ) : null}
       {activeMoment !== undefined ? (
         <MomentLayer key={activeMoment} state={state} momentKey={activeMoment} onDismiss={dismissMoment} />

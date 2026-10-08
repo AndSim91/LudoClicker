@@ -1,0 +1,288 @@
+/*
+ * Pianificazione delle Onde e Report annuale (tavola 14, Andrea 08/10).
+ * One window over the game, pages to leaf through. Dark like Modalità Onde;
+ * the Outlook theme only swaps the palette.
+ */
+.annual-layer {
+  --ap-navy-600: #0a3a57;
+  --ap-navy-700: #04263f;
+  --ap-navy-800: #021e33;
+  --ap-navy-900: #01121f;
+  --ap-panel: rgb(1 18 31 / 45%);
+  --ap-cream: #fbf1dc;
+  --ap-ink: #e6f4f1;
+  --ap-muted: #9fb6c4;
+  --ap-line: rgb(108 211 214 / 22%);
+  --ap-teal: rgb(108 211 214);
+  --ap-teal-soft: rgb(108 211 214 / 15%);
+  --ap-gold: #f0b85a;
+  --ap-gold-soft: rgb(240 184 90 / 16%);
+  --ap-good: #6fe0b0;
+  --ap-bad: #ff8a78;
+  --ap-ist: #2f8a57;
+  --ap-tec: #8b5cf6;
+  --ap-button: #111a24;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-moment, 200);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(1 12 22 / 72%);
+  backdrop-filter: blur(3px);
+  font-family: var(--font-body, system-ui);
+  color: var(--ap-ink);
+}
+
+:root[data-theme="light"] .annual-layer {
+  --ap-navy-600: #ffffff;
+  --ap-navy-700: #ffffff;
+  --ap-navy-800: #fafafa;
+  --ap-navy-900: #ffffff;
+  --ap-panel: #ffffff;
+  --ap-cream: #242424;
+  --ap-ink: #424242;
+  --ap-muted: #616161;
+  --ap-line: #e1dfdd;
+  --ap-teal: #0f6cbd;
+  --ap-teal-soft: #e5f1fb;
+  --ap-gold: #986700;
+  --ap-gold-soft: #fff2bd;
+  --ap-good: #107c10;
+  --ap-bad: #b42318;
+  --ap-button: #ffffff;
+  background: rgb(0 0 0 / 35%);
+  backdrop-filter: none;
+}
+
+.annual-layer button { user-select: none; -webkit-user-select: none; }
+
+.annual-window {
+  width: min(1060px, 100%);
+  /* Altezza fissa: le pagine si sfogliano senza far saltare la finestra. */
+  height: min(720px, calc(100vh - 32px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid rgb(240 184 90 / 45%);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--ap-navy-600), var(--ap-navy-700) 30%, var(--ap-navy-800));
+  box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
+}
+
+.annual-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 18px; }
+.annual-title { display: grid; gap: 1px; }
+.annual-title h2 { margin: 0; font: 600 19px var(--font-display, inherit); color: var(--ap-cream); }
+.annual-title span { font-size: 12px; color: var(--ap-muted); }
+.annual-pause { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--ap-gold); border: 1px solid rgb(240 184 90 / 50%); border-radius: 999px; padding: 2px 10px; }
+.annual-pause::before { content: ""; width: 8px; height: 10px; box-sizing: border-box; border-left: 3px solid var(--ap-gold); border-right: 3px solid var(--ap-gold); }
+
+.annual-years { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 16px 8px; }
+.annual-years button { font: 600 12px var(--font-body, inherit); color: var(--ap-muted); background: transparent; border: 1px solid var(--ap-line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.annual-years button[aria-pressed="true"] { color: var(--ap-cream); border-color: var(--ap-teal); background: var(--ap-teal-soft); }
+
+.annual-tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid rgb(240 184 90 / 30%); overflow-x: auto; }
+.annual-tabs button { flex: none; display: flex; align-items: center; gap: 6px; padding: 8px 12px 9px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--ap-muted); font: 600 13px var(--font-body, inherit); cursor: pointer; }
+.annual-tabs button .n { width: 18px; height: 18px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 11px; }
+.annual-tabs button[aria-selected="true"] { color: var(--ap-cream); border-bottom-color: var(--ap-gold); }
+.annual-tabs button[aria-selected="true"] .n { background: var(--ap-gold); border-color: var(--ap-gold); color: var(--ap-navy-900); }
+
+.annual-page { min-height: 0; overflow-y: auto; padding: 18px; display: grid; gap: 14px; align-content: start; }
+
+.annual-nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 10px 16px; border-top: 1px solid rgb(240 184 90 / 30%); background: var(--ap-panel); }
+.annual-nav button { font: 600 13px var(--font-body, inherit); color: var(--ap-ink); background: none; border: 1px solid var(--ap-line); border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.annual-nav button:disabled { opacity: .35; cursor: default; }
+.annual-nav .prev { justify-self: start; }
+.annual-nav .next { justify-self: end; }
+.annual-nav .next.is-final { border-color: var(--ap-gold); background: var(--ap-gold-soft); color: var(--ap-cream); }
+.annual-dots { display: flex; gap: 6px; }
+.annual-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgb(255 255 255 / 18%); }
+.annual-dots i.on { width: 18px; border-radius: 4px; background: var(--ap-gold); }
+:root[data-theme="light"] .annual-dots i { background: #d2d0ce; }
+
+.annual-note { margin: 0; font-size: 12px; color: var(--ap-muted); }
+
+/* Pagella */
+.annual-grades { border: 1px solid var(--ap-line); border-radius: 6px; overflow: hidden; }
+.annual-grade { display: grid; grid-template-columns: minmax(0, 1fr) 96px 34px 18px; align-items: center; gap: 10px; padding: 7px 12px; border-top: 1px solid var(--ap-line); font-size: 14px; font-variant-numeric: tabular-nums; }
+.annual-grade:first-child { border-top: 0; }
+.annual-grade .area { min-width: 0; color: var(--ap-cream); font-weight: 600; }
+.annual-grade .area small { display: block; font-weight: 400; font-size: 12px; color: var(--ap-muted); }
+.annual-grade .was { font-size: 12px; color: var(--ap-muted); text-align: right; }
+.annual-grade.is-plain { grid-template-columns: 170px minmax(0, 1fr); padding: 9px 12px; }
+.annual-grade.is-plain .data { font-size: 13px; }
+@media (max-width: 520px) { .annual-grade.is-plain { grid-template-columns: 1fr; gap: 2px; } }
+.annual-vote { width: 30px; height: 30px; display: grid; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font: 700 17px var(--font-display, inherit); }
+.annual-vote.is-a { color: var(--ap-good); }
+.annual-vote.is-b { color: var(--ap-teal); }
+.annual-vote.is-c { color: var(--ap-gold); }
+.annual-vote.is-d, .annual-vote.is-e { color: var(--ap-bad); }
+.annual-vote.is-none { color: var(--ap-muted); border-style: dashed; }
+.annual-trend { font-size: 13px; text-align: center; }
+.annual-trend.is-up { color: var(--ap-good); }
+.annual-trend.is-down { color: var(--ap-bad); }
+.annual-trend.is-same { color: var(--ap-muted); }
+
+/* Highlight annuale, H1 «Trofeo» */
+.annual-highlight { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 12px 14px; border: 1px solid rgb(240 184 90 / 60%); border-radius: 10px; background: radial-gradient(120% 140% at 0% 0%, rgb(240 184 90 / 22%), rgb(240 184 90 / 4%) 60%), var(--ap-navy-700); }
+.annual-highlight-medal { grid-row: span 2; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe3a3, #f0b85a 55%, #986700); box-shadow: 0 0 0 3px rgb(240 184 90 / 25%), 0 6px 14px rgb(0 0 0 / 35%); }
+.annual-highlight-medal svg { width: 26px; height: 26px; fill: #3c2b08; }
+.annual-highlight-body { display: grid; gap: 2px; min-width: 0; }
+.annual-highlight-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ap-gold); }
+.annual-highlight-title { font: 600 19px/1.2 var(--font-display, inherit); color: var(--ap-cream); }
+.annual-highlight-more { display: flex; flex-wrap: wrap; gap: 6px; }
+.annual-highlight-more span { padding: 2px 9px; border: 1px solid rgb(240 184 90 / 30%); border-radius: 999px; background: rgb(240 184 90 / 12%); font-size: 11.5px; }
+
+/* Pianificazione */
+.annual-plan { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 800px) { .annual-plan { grid-template-columns: 1fr; } }
+.annual-column { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.annual-box { display: grid; gap: 8px; min-width: 0; padding: 10px 12px; border: 1px solid var(--ap-line); border-radius: 8px; background: var(--ap-panel); }
+.annual-box-title { margin: 0; font: 600 15px var(--font-display, inherit); color: var(--ap-cream); }
+
+.annual-sis { display: flex; align-items: center; gap: 10px; }
+.annual-sis img { width: 46px; height: 46px; flex: none; border: 1.5px solid var(--ap-gold); border-radius: 50%; background: #fff; object-fit: cover; }
+.annual-sis b { display: block; font: 600 15px var(--font-display, inherit); color: var(--ap-cream); }
+.annual-sis span { font-size: 11px; color: var(--ap-muted); }
+.annual-soon { min-height: 230px; display: grid; place-items: center; padding: 16px; border: 1px dashed var(--ap-line); border-radius: 8px; text-align: center; background: repeating-linear-gradient(135deg, rgb(255 255 255 / 2.5%) 0 10px, transparent 10px 20px); }
+.annual-soon div { display: grid; justify-items: center; gap: 4px; }
+.annual-soon img { width: 104px; height: 104px; border: 2px solid var(--ap-gold); border-radius: 50%; background: #fff; object-fit: cover; opacity: .9; }
+.annual-soon strong { margin-top: 8px; font: 600 18px var(--font-display, inherit); letter-spacing: .04em; color: var(--ap-cream); }
+
+/* Lo schema delle Forme non va mai a capo: si rimpicciolisce (zoom) nella sua area. */
+.annual-map-fit { min-width: 0; width: 100%; overflow: hidden; }
+.annual-map-fit .form-path-map.is-coverage { flex-wrap: nowrap; width: max-content; }
+.annual-layer .form-cover-node.is-selectable { padding: 2px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; cursor: pointer; }
+.annual-layer .form-cover-node.is-selectable:hover { background: rgb(255 255 255 / 6%); }
+.annual-layer .form-cover-node.is-selectable:focus-visible { outline: 2px solid var(--ap-teal); outline-offset: 1px; }
+.annual-layer .form-cover-node .form-path-node { transition: transform .15s; }
+/* S2 «Alone»: il logo scelto cresce e brilla; i numeri si spostano a sinistra per non finirci sotto. */
+.annual-layer .form-cover-node.is-selected .form-path-node { transform: scale(1.2); filter: drop-shadow(0 0 5px rgb(240 184 90 / 90%)); }
+.annual-layer .form-cover-node.is-selected .form-path-node img { border: 2px solid var(--ap-gold); opacity: 1; filter: none; }
+.annual-layer .form-cover-node.is-selected .form-cover-numbers { margin-right: 6px; }
+
+.annual-form-detail { display: grid; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--ap-line); }
+.annual-form-name { font-size: 13px; font-weight: 600; color: var(--ap-cream); }
+.annual-form-name small { margin-left: 6px; font-weight: 400; color: var(--ap-muted); }
+.annual-courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.annual-courses.is-single { grid-template-columns: minmax(0, 1fr); max-width: 300px; }
+@media (max-width: 520px) { .annual-courses { grid-template-columns: 1fr; } }
+
+/* Pulsante del corso: Q1 con le sagome di Q3. Tutta la scheda iscrive un candidato. */
+.annual-course { --qa: var(--ap-ist); display: grid; gap: 4px; min-width: 0; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--qa) 55%, transparent); border-radius: 6px; background: color-mix(in srgb, var(--qa) 10%, var(--ap-button)); color: color-mix(in srgb, var(--qa) 60%, var(--ap-cream)); }
+.annual-course.is-technician { --qa: var(--ap-tec); }
+.annual-course.can-add { cursor: pointer; }
+.annual-course.can-add:hover { background: color-mix(in srgb, var(--qa) 18%, var(--ap-button)); }
+.annual-course.can-add:focus-visible { outline: 2px solid var(--ap-teal); outline-offset: 2px; }
+.annual-course.is-off { border-style: dashed; border-color: var(--ap-line); background: var(--ap-panel); color: var(--ap-muted); }
+.annual-course-line { display: flex; align-items: center; gap: 6px; font: 700 12px/1.25 var(--font-body, inherit); }
+.annual-course-sis { display: grid; place-items: center; min-width: 28px; min-height: 18px; padding: 1px 5px; border-radius: 999px; background: #6a5396; color: #fff; font: 800 10px var(--font-body, inherit); }
+.annual-course.is-off .annual-course-sis { background: #415467; }
+.annual-course-count { margin-left: auto; font: 700 13px var(--font-display, inherit); color: var(--ap-cream); font-variant-numeric: tabular-nums; }
+.annual-course-count small { font: 500 11px var(--font-body, inherit); color: var(--ap-muted); }
+.annual-course-detail { font: 500 11.5px var(--font-body, inherit); color: var(--ap-muted); }
+.annual-course-detail b { font-weight: 600; color: var(--ap-gold); }
+.annual-course-detail b.is-no { color: var(--ap-bad); }
+.annual-course-detail b.is-off { color: var(--ap-muted); }
+.annual-course-total { font-weight: 600; color: var(--ap-cream); }
+.annual-course-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.annual-seats { flex: 1; display: flex; gap: 2px; min-width: 0; }
+.annual-seat { position: relative; flex: none; width: 12px; height: 16px; }
+.annual-seat svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.annual-seat svg:first-child { fill: rgb(255 255 255 / 14%); }
+:root[data-theme="light"] .annual-seat svg:first-child { fill: #d2d0ce; }
+.annual-seat svg:last-child { fill: #3fbf7f; clip-path: inset(calc(100% - var(--fill)) 0 0 0); }
+.annual-course.is-technician .annual-seat svg:last-child { fill: #a98bff; }
+.annual-course-minus, .annual-course-all { height: 24px; border: 1px solid color-mix(in srgb, var(--qa) 55%, transparent); border-radius: 6px; background: color-mix(in srgb, var(--qa) 18%, var(--ap-button)); color: var(--ap-cream); font: 600 13px var(--font-body, inherit); cursor: pointer; }
+.annual-course-minus { width: 26px; }
+.annual-course-all { padding: 0 8px; font-size: 11px; }
+.annual-course-minus:hover:not(:disabled), .annual-course-all:hover:not(:disabled) { background: color-mix(in srgb, var(--qa) 34%, var(--ap-button)); }
+.annual-course-minus:disabled, .annual-course-all:disabled { opacity: .35; cursor: default; }
+
+/* Spade: la stessa scheda della finestra delle spade. */
+/* La scheda è quella del menu delle spade (title-equipment-popover), qui ferma nella colonna. */
+.annual-layer .title-equipment-popover.annual-swords { position: static; z-index: auto; width: auto; user-select: none; }
+.annual-swords-arriving { color: var(--ap-good); font-style: normal; }
+.annual-swords-locked { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px dashed var(--ap-line); border-radius: 6px; font-size: 12px; color: var(--ap-muted); }
+.annual-swords-locked svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; }
+
+/* Fondi */
+.annual-funds { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.annual-funds div { display: grid; }
+.annual-funds span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ap-muted); }
+.annual-funds b { font: 700 20px var(--font-display, inherit); color: var(--ap-cream); font-variant-numeric: tabular-nums; }
+.annual-funds b.is-negative { color: var(--ap-bad); }
+.annual-funds small { font-size: 11px; color: var(--ap-muted); }
+.annual-funds .arrow { color: var(--ap-gold); font-size: 18px; }
+.annual-items { display: grid; gap: 4px; max-height: 132px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.annual-item { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto 22px; align-items: center; gap: 8px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.annual-item i { width: 8px; height: 8px; border-radius: 50%; }
+.annual-item button { width: 22px; height: 22px; border: 1px solid var(--ap-line); border-radius: 50%; background: none; color: var(--ap-muted); font-size: 12px; line-height: 1; cursor: pointer; }
+.annual-items-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--ap-muted); }
+.annual-items-foot button { padding: 3px 9px; border: 1px solid var(--ap-line); border-radius: 6px; background: none; color: var(--ap-muted); font: 600 12px var(--font-body, inherit); cursor: pointer; }
+
+/* Guadagni previsti, stile borsa */
+.annual-market { display: grid; gap: 6px; min-width: 0; padding: 10px 12px; border: 1px solid rgb(108 211 214 / 30%); border-radius: 8px; background: #010b13; font-family: Consolas, "Courier New", monospace; }
+:root[data-theme="light"] .annual-market { background: #fafafa; }
+.annual-market-symbol { font-size: 11px; letter-spacing: .12em; color: var(--ap-muted); }
+.annual-market-total { font-size: 20px; font-weight: 700; color: var(--ap-cream); font-variant-numeric: tabular-nums; }
+.annual-market-change { margin-left: 6px; font-size: 14px; vertical-align: 2px; }
+.annual-market-change.is-up { color: var(--ap-good); }
+.annual-market-change.is-down { color: var(--ap-bad); }
+.annual-plot { position: relative; }
+.annual-plot svg { display: block; width: 100%; height: auto; }
+.annual-plot .grid { stroke: rgb(108 211 214 / 12%); stroke-width: 1; }
+.annual-plot .axis { fill: var(--ap-muted); font: 10px Consolas, monospace; }
+.annual-plot .bar-in { fill: var(--ap-good); opacity: .85; }
+.annual-plot .bar-debt { fill: var(--ap-bad); }
+.annual-plot .average { stroke: var(--ap-gold); stroke-dasharray: 3 3; stroke-width: 1; }
+.annual-plot .hit { fill: transparent; cursor: crosshair; outline: none; }
+.annual-plot .hit:hover, .annual-plot .hit:focus { fill: rgb(255 255 255 / 6%); }
+.annual-tip { position: absolute; top: 0; z-index: 3; min-width: 150px; display: grid; gap: 3px; padding: 7px 10px; border: 1px solid rgb(108 211 214 / 40%); border-radius: 6px; background: var(--ap-navy-800); box-shadow: 0 8px 20px rgb(0 0 0 / 45%); font: 11px var(--font-body, inherit); pointer-events: none; }
+.annual-tip b { font: 600 12px var(--font-display, inherit); color: var(--ap-cream); }
+.annual-tip span { display: flex; align-items: center; gap: 6px; }
+.annual-tip em { margin-left: auto; font-style: normal; color: var(--ap-cream); font-variant-numeric: tabular-nums; }
+.annual-tip em.is-negative { color: var(--ap-bad); }
+.annual-tip .net { padding-top: 3px; border-top: 1px solid var(--ap-line); }
+.annual-tip i, .annual-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; }
+.annual-legend { display: flex; flex-wrap: wrap; gap: 12px; font: 11px var(--font-body, inherit); color: var(--ap-muted); }
+.annual-legend i { margin-right: 5px; vertical-align: -1px; }
+.annual-legend .avg { width: 14px; height: 0; border-top: 1px dashed var(--ap-gold); border-radius: 0; vertical-align: 3px; }
+.annual-layer .k-in { background: var(--ap-good); }
+.annual-layer .k-debt { background: var(--ap-bad); }
+
+/* Report: Numeri e Tornei */
+.annual-two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 700px) { .annual-two { grid-template-columns: 1fr; } }
+.annual-block { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.annual-block h3 { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ap-teal); }
+.annual-columns { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 2px; align-items: end; height: 150px; padding-top: 18px; border-bottom: 1px solid rgb(108 211 214 / 40%); }
+.annual-columns > span { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.annual-columns i { width: 70%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--ap-teal); }
+.annual-columns b { position: absolute; bottom: 100%; font-size: 11px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.annual-xlabels { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 2px; font-size: 10px; letter-spacing: .04em; text-align: center; text-transform: uppercase; color: var(--ap-muted); }
+.annual-sources { display: grid; gap: 6px; }
+.annual-source { display: grid; grid-template-columns: 96px minmax(0, 1fr) 46px; gap: 8px; align-items: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+.annual-source .track { position: relative; height: 8px; border-radius: 0 4px 4px 0; background: rgb(255 255 255 / 7%); }
+.annual-source .track i { position: absolute; inset: 0 auto 0 0; border-radius: 0 4px 4px 0; background: var(--ap-teal); }
+.annual-source .pct { text-align: right; }
+.annual-totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .annual-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.annual-totals div { display: grid; padding: 8px 10px; border: 1px solid var(--ap-line); border-radius: 6px; }
+.annual-totals b { font: 600 19px var(--font-display, inherit); color: var(--ap-cream); font-variant-numeric: tabular-nums; }
+.annual-totals span { font-size: 12px; color: var(--ap-muted); }
+.annual-tournaments { display: grid; gap: 8px; }
+.annual-tournament { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--ap-line); border-radius: 6px; }
+.annual-tournament .month { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ap-muted); }
+.annual-tournament .name { font-weight: 600; color: var(--ap-cream); }
+.annual-pill { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: rgb(255 255 255 / 6%); color: var(--ap-muted); }
+.annual-pill.is-win { background: rgb(111 224 176 / 15%); color: var(--ap-good); }
+.annual-pill.is-podium { background: var(--ap-gold-soft); color: var(--ap-gold); }
+.annual-readonly { display: grid; gap: 8px; }
+.annual-readonly div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px; padding: 9px 12px; border: 1px solid var(--ap-line); border-radius: 6px; font-size: 13px; }
+.annual-readonly b { color: var(--ap-cream); }
+
+/* Report annuale nel Consiglio delle Onde */
+.annual-report-button { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border: 1px solid var(--onde-thread, #d2d0ce); border-radius: 999px; background: none; color: inherit; font: 600 12px var(--font-body, inherit); cursor: pointer; }
+.annual-report-button:hover { background: var(--onde-hover, #f5f5f5); }
+.annual-report-button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }

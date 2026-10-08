@@ -27,7 +27,7 @@ import { getPlayerGameSpeed } from "./upgradeFlow";
 // About one frame: a long catch-up is split over several ticks so the page keeps drawing.
 const TICK_TIME_BUDGET_MS = 12;
 
-type PauseReason = "manual" | "tutorial" | "gadget" | "reptile" | "moment" | "foundation" | "practice";
+type PauseReason = "manual" | "tutorial" | "gadget" | "reptile" | "moment" | "foundation" | "practice" | "planning";
 
 interface PauseDrainRequest {
   gameNow: number;
@@ -397,6 +397,14 @@ export function useGameEngine({ cadenceMs = GAME_CONFIG.minTickStepMs }: { caden
     [setPauseReason],
   );
 
+  /** Pianificazione delle Onde and Report annuale. */
+  const setPlanningPaused = useCallback(
+    (paused: boolean) => {
+      setPauseReason("planning", paused);
+    },
+    [setPauseReason],
+  );
+
   return {
     state,
     dispatch: dispatchAction,
@@ -415,6 +423,7 @@ export function useGameEngine({ cadenceMs = GAME_CONFIG.minTickStepMs }: { caden
     setMomentPaused,
     setFoundationPaused,
     setPracticePaused,
+    setPlanningPaused,
     saveStatus,
     saveNow,
   };
