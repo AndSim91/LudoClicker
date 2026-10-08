@@ -62,6 +62,7 @@ import { migrateSwordPurchaseTutorialState } from "./saveMigrations/swordPurchas
 import { migrateFormsTeachingTutorialState } from "./saveMigrations/formsTeachingTutorial";
 import { migrateTournamentsStageState } from "./saveMigrations/tournamentsStage";
 import { migrateFormsGateState } from "./saveMigrations/formsGate";
+import { migrateOutOfContactsTutorialState } from "./saveMigrations/outOfContactsTutorial";
 import { migrateSecretLegendaryRebaseState } from "./saveMigrations/secretLegendaryRebase";
 import { migrateNetworkRentState } from "./saveMigrations/networkRent";
 import { migrateReputationShopState } from "./saveMigrations/reputationShop";
@@ -143,6 +144,7 @@ const SAVE_MIGRATION_STAGES: SaveMigrationStage[] = [
   migrateFormsTeachingTutorialState,
   migrateTournamentsStageState,
   migrateFormsGateState,
+  migrateOutOfContactsTutorialState,
 ];
 
 function canCompactHistory(state: MigratableState): boolean {

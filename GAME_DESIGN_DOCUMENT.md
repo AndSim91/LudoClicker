@@ -3204,6 +3204,13 @@ l'avanzamento.
    la fine dell'evento e mette in evidenza il contatore **Contatti** nella barra
    superiore mentre spiega l'aumento.
 
+4b. **Rubrica vuota** (`out-of-contacts`, 08/10/2026). La prima volta in
+   assoluto che non resta nessun Contatto a cui scrivere e nessun Evento è in
+   corso (dopo il tutorial dei primi Eventi), un solo dialogo di A.N.D.E.R.
+   ricorda che il modo più veloce per avere Contatti sono gli Eventi in
+   esterna, con la voce Eventi evidenziata. Testi da approvare con Andrea. Dalla
+   v109 i salvataggi oltre i 10 iscritti o la prima scuola la segnano come vista.
+
 5. **Nuova lezione prenotata** Dopo la spiegazione sull'aumento dei contatti,
    **Continua** riporta automaticamente il giocatore in **Posta** con
    l'obiettivo “Osserva La mia giornata”. Gli esiti delle email inviate durante

@@ -2,7 +2,9 @@ import { GAME_CONFIG } from "../game/config";
 import { hasPrestigeTitle, isGameAreaUnlocked } from "../game/progression";
 import { isOfficialSwordSupplierUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
-import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
+import { FIRST_EVENT_TUTORIAL_SCENE_ID, hasCompletedTutorialSparring, isTutorialSceneFinished } from "../game/tutorialProgress";
+import { getRunningAcquisitionEvents } from "../game/runtimeIndexes";
+import { selectContactsAwaitingEmail } from "../game/selectors";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../game/tutorialScholarship";
 import type { GameState } from "../game/types";
 
@@ -71,6 +73,8 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
 /** When Tornei opens with 8 athletes with Forma 1 (08/10/2026). */
 export const TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID = "tournaments-opening" as const;
+/** The first time there is nobody left to write to and no event running (08/10/2026). */
+export const OUT_OF_CONTACTS_TUTORIAL_SCENE_ID = "out-of-contacts" as const;
 /** First yearly departures with no Istruttore assigned (06/10/2026). */
 export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
 /** At 15 members: the swords menu and the purchase (06/10/2026, 15 dal 08/10). */
@@ -89,6 +93,7 @@ export const TUTORIAL_SCENE_IDS = [
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   FORMS_TEACHING_TUTORIAL_SCENE_ID,
   TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID,
+  OUT_OF_CONTACTS_TUTORIAL_SCENE_ID,
   MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
   SWORD_PURCHASE_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
@@ -564,6 +569,28 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Ma per ora voliamo bassi: riuscire a vincere all'Accademico in Arena o in Stile ci darà accesso al [[Network delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
         ],
         focusRegions: ["main"],
+      },
+    ],
+  },
+  {
+    // 08/10/2026: the address book is empty and no event is out. TESTI DA APPROVARE (Andrea).
+    id: OUT_OF_CONTACTS_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) =>
+      isTutorialSceneFinished(state, FIRST_EVENT_TUTORIAL_SCENE_ID) &&
+      selectContactsAwaitingEmail(state) === 0 &&
+      getRunningAcquisitionEvents(state.acquisitionEvents).length === 0,
+    steps: [
+      {
+        id: "out-of-contacts-reminder",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Rubrica vuota",
+        body: [
+          "Abbiamo scritto a tutti i **Contatti** che avevamo. Proprio a tutti, anche a quello che cercava la sagra della focaccia.",
+          "Il modo più veloce per trovarne di nuovi è uscire dalla palestra: gli [[Eventi]] in esterna ci portano in mezzo alla gente, e la gente, ogni tanto, lascia la sua email.",
+        ],
+        focusRegions: ["navigation", "events-navigation"],
       },
     ],
   },
