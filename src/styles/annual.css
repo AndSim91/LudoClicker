@@ -62,7 +62,8 @@
   /* Altezza fissa: le pagine si sfogliano senza far saltare la finestra. */
   height: min(720px, calc(100vh - 32px));
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  /* Intestazione, pagina (si accorcia e scorre), pulsanti: i pulsanti restano sempre visibili. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 1px solid rgb(240 184 90 / 45%);
   border-radius: 10px;
