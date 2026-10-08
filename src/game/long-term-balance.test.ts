@@ -84,7 +84,7 @@ describe("long-term automated balance simulation", () => {
       ...state,
       tournaments: { ...state.tournaments, academyTitlesCurrentSchool: 1 },
     };
-    // A game saved before 07/10 with a national title keeps its Rete open.
+    // A game saved before 07/10 with a national title keeps its Network open.
     expect(canFoundSchool({
       ...state,
       tournaments: { ...state.tournaments, nationalTitlesCurrentSchool: 1 },

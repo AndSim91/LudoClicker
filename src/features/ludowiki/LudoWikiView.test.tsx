@@ -121,7 +121,7 @@ describe("LudoWikiView", () => {
     });
 
     render(<LudoWikiView state={state} />);
-    expect(screen.getByText("Conservato dalla Rete delle scuole")).toBeVisible();
+    expect(screen.getByText("Conservato dal Network delle scuole")).toBeVisible();
     expect(screen.getByText("90")).toBeVisible();
     expect(screen.getByText("80")).toBeVisible();
     expect(screen.queryByText("Scoperta permanente")).not.toBeInTheDocument();

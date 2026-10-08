@@ -23,7 +23,7 @@ export const ACHIEVEMENT_CATEGORIES = [
   "Formazione",
   "Collaboratori",
   "Tornei",
-  "Rete",
+  "Network",
   "Leggendari",
   "Gadget",
   "Segreti",
@@ -97,11 +97,11 @@ export const TIERED_ACHIEVEMENTS: readonly TieredAchievement[] = [
       return SECRET_LEGENDARY_IDS.filter((id) => everEnrolled.has(id) || s.network.secretLegendaries[id]?.status === "enrolled").length;
     },
   },
-  { id: "schools", category: "Rete", title: "La Rete delle Onde", measure: "Scuole fondate", thresholds: [1, 5, 10], value: (s) => s.network.schoolCount },
-  { id: "reputation", category: "Rete", title: "Nome che pesa", measure: "Punti Reputazione guadagnati", thresholds: [10, 100, 1_000], value: (s) => getCareer(s).reputationEarned },
-  { id: "rent", category: "Rete", title: "Vivere di rendita", measure: "Rendita della rete al mese", thresholds: [1_000, 100_000, 10_000_000], unit: "euro", value: getMonthlyNetworkRent },
+  { id: "schools", category: "Network", title: "Il Network delle Onde", measure: "Scuole fondate", thresholds: [1, 5, 10], value: (s) => s.network.schoolCount },
+  { id: "reputation", category: "Network", title: "Nome che pesa", measure: "Punti Reputazione guadagnati", thresholds: [10, 100, 1_000], value: (s) => getCareer(s).reputationEarned },
+  { id: "rent", category: "Network", title: "Vivere di rendita", measure: "Rendita del Network al mese", thresholds: [1_000, 100_000, 10_000_000], unit: "euro", value: getMonthlyNetworkRent },
   {
-    id: "maxed-upgrades", category: "Rete", title: "Al massimo", measure: "Potenziamenti Reputazione a 50 punti", thresholds: [1, 3, 6],
+    id: "maxed-upgrades", category: "Network", title: "Al massimo", measure: "Potenziamenti Reputazione a 50 punti", thresholds: [1, 3, 6],
     value: (s) => REPUTATION_UPGRADE_IDS.filter((id) => getReputationLevel(s, id) >= GAME_CONFIG.reputationUpgradeMaxLevel).length,
   },
   { id: "ludodex", category: "Leggendari", title: "Collezionista di leggende", measure: "Leggendari iscritti almeno una volta", thresholds: [5, 15, 22], value: (s) => getEverEnrolledLegendaryIds(s).size },
@@ -133,7 +133,7 @@ export const SECRET_ACHIEVEMENTS: readonly SecretAchievement[] = [
     condition: (s) => s.equipment.damagedSwords >= 1_000,
   },
   {
-    id: "all-on-the-network", title: "Tutto sulla rete", description: "Venti punti **Reputazione** nella rendita in una sola fondazione.",
+    id: "all-on-the-network", title: "Tutto sul Network", description: "Venti punti **Reputazione** nella rendita in una sola fondazione.",
     condition: (s) => getCareer(s).maxRentPoints >= 20,
   },
   {

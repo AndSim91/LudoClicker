@@ -186,7 +186,7 @@ export function foundSchool(
       ordinaryVictoryAchieved: state.tournaments.ordinaryVictoryAchieved,
     },
     achievements: state.achievements,
-    // The constellation of the Rete plays at every new school.
+    // The constellation of the Network plays at every new school.
     moments: { ...state.moments, queue: [...state.moments.queue, FOUNDATION_MOMENT] },
     // Scenes already seen (or skipped) in an earlier school never come back.
     tutorial: {
@@ -206,7 +206,7 @@ export function foundSchool(
     refreshWritingCampaignCopies(nextState),
     now,
     `${details.city.trim()} ha una scuola`,
-    `${state.school.name} entra nella Rete` +
+    `${state.school.name} entra nel Network` +
       (monthlyRent > 0 ? ` e ti versa ${formatRent(monthlyRent)} al mese, puntuale come una quota.` : ".") +
       ` Reputazione +${rent.points}, ${availableReputation - getSpentReputation(spending)} punti ancora da spendere.` +
       (follower ? ` ${follower.firstName} ${follower.lastName} ha già la borsa pronta: è il primo iscritto della nuova scuola.` : ""),

@@ -55,7 +55,7 @@ export const ANNUAL_SUBJECT_LABELS: Record<AnnualSubject, string> = {
 
 export const INCOME_SOURCE_LABELS: Record<IncomeSource | "other", string> = {
   fees: "quote",
-  network: "Rete",
+  network: "Network",
   social: "Social",
   gadgets: "gadget",
   other: "premi e altro",

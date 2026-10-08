@@ -38,7 +38,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
 /**
  * The only gate of the prestige (decisione del 07/10): an Accademico title
  * (Arena or Style) won by this school. A national title counts too, so a game
- * saved before the change keeps its open Rete.
+ * saved before the change keeps its open Network.
  */
 export function getPrestigeRequirements(state: GameState) {
   const academy = state.tournaments.academyTitlesCurrentSchool ?? 0;

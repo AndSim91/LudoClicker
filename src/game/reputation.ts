@@ -56,7 +56,7 @@ export function getReputationMultiplier(
   return 1 + getReputationLevel(state, id) * GAME_CONFIG.reputationStep;
 }
 
-/** Base Arena and Stile of new athletes: Genetica (Reputation) and Arena della Rete. */
+/** Base Arena and Stile of new athletes: Genetica (Reputation) and Arena del Network. */
 export function getAthleteGeneticsMultiplier(state: Pick<GameState, "network" | "upgrades">): number {
   return getReputationMultiplier(state, "genetics") *
     (1 + getUpgradeEffectTotal(state.upgrades, "athleteBaseStatsBonus"));
@@ -90,7 +90,7 @@ export function getPrestigeReputationPreview(state: GameState): PrestigeReputati
   const reptileWin = getReptileWin(state);
   const chroniclesWin = state.tournaments.chroniclesVictoryCurrentSchool === true;
   const famePoints = Math.floor(Math.sqrt(Math.max(0, state.school.fame) / GAME_CONFIG.reputationFameDivisor));
-  // Rete delle Onde: Lettere di raccomandazione and Gran Consiglio.
+  // Network delle Onde: Lettere di raccomandazione and Gran Consiglio.
   const letterPoints = getUpgradeEffectTotal(state.upgrades, "foundationReputationBonus");
   const councilDoubled = getUpgradeEffectTotal(state.upgrades, "foundationReputationDouble") > 0;
   // The Accademico title opens the prestige; the National is worth more.

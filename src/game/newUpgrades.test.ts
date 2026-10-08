@@ -89,7 +89,7 @@ describe("upgrade del 05/10", () => {
     expect(without.contacts).toHaveLength(contacts.length);
   });
 
-  describe("Rete delle Onde", () => {
+  describe("Network delle Onde", () => {
     it("Lettere di raccomandazione e Gran Consiglio cambiano la Reputazione della fondazione", () => {
       const base = getPrestigeReputationPreview(createInitialState(NOW, "Test", false)).points;
       const letters = withUpgrade("recommendation-letters", 3);
@@ -97,13 +97,13 @@ describe("upgrade del 05/10", () => {
       expect(getPrestigeReputationPreview(withUpgrade("grand-council", 1, letters)).points).toBe((base + 3) * 2);
     });
 
-    it("Circuito della Rete e Sponsor nazionale crescono con le scuole fondate", () => {
+    it("Circuito del Network e Sponsor nazionale crescono con le scuole fondate", () => {
       const levels = withUpgrade("national-sponsor", 2, withUpgrade("network-circuit", 5)).upgrades;
       expect(getNetworkEventContactMultiplier(levels, 10)).toBeCloseTo(1.5);
       expect(getNetworkSponsorIncome(levels, 10)).toBe(20_000);
     });
 
-    it("Arena della Rete alza i valori di partenza", () => {
+    it("Arena del Network alza i valori di partenza", () => {
       expect(getAthleteGeneticsMultiplier(withUpgrade("network-arena", 3))).toBeCloseTo(1.15);
     });
 

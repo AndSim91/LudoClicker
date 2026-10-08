@@ -91,7 +91,7 @@ export function MonthlyIncomeSummary({ state: stateOverride }: { state?: GameSta
           ) : null}
           {networkRent > 0 ? (
             <div>
-              <dt>Rete delle Onde</dt>
+              <dt>Network delle Onde</dt>
               <dd>{formatCurrency(networkRent)}</dd>
             </div>
           ) : null}

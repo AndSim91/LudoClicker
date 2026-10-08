@@ -34,7 +34,7 @@ describe("late tutorials migration (v102)", () => {
     expect(migrated.moments?.seen).toContain("chronicles-key");
   });
 
-  it("treats a save that founded a school as past the tournament, Rete and Reptile tutorials", () => {
+  it("treats a save that founded a school as past the tournament, Network and Reptile tutorials", () => {
     const migrated = migrateLateTutorialsState(v101((state) => ({
       ...state,
       network: { ...state.network, schoolCount: 1 },

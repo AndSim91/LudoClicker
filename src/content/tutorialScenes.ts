@@ -561,7 +561,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "La nostra meta",
         body: [
           "Dopo il Torneo Scolastico arriveremo a disputare il Torneo Accademico, da lì si potrà accedere al Nazionale Italiano ed infine arrivare alla Champion's Arena: il torneo mondiale di LudoSport!",
-          "Ma per ora voliamo bassi: riuscire a vincere all'Accademico in Arena o in Stile ci darà accesso al Network delle Onde: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
+          "Ma per ora voliamo bassi: riuscire a vincere all'Accademico in Arena o in Stile ci darà accesso al [[Network delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
         ],
         focusRegions: ["main"],
       },
@@ -868,8 +868,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "open-network",
         kind: "objective",
-        title: "Apri la Rete delle Onde",
-        body: ["Un titolo all'Accademico e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Rete]]."],
+        title: "Apri il Network delle Onde",
+        body: ["Un titolo all'Accademico e l'Ordine si accorge di te. Nella barra a sinistra è comparsa una voce nuova: [[Network]]."],
         focusRegions: ({ activeView }) =>
           activeView === "network" ? ["main"] : ["navigation", "network-navigation"],
         isComplete: ({ activeView }) => activeView === "network",
@@ -878,7 +878,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "network-map",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "La mappa della Rete",
+        title: "La mappa del Network",
         body: [
           "Questa è la tua scuola, per ora l'unica. Quando ne fondi una nuova, quella che lasci resta sulla mappa con il suo nome, la città e la **Fama**.",
           "Non dovrai più gestirla: diventa una sede dell'Ordine.",

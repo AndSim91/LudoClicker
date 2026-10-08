@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { CONSTELLATION_SIZE, CONSTELLATION_SLOTS, CROWN, CENTER_X, EDGES, type FoundationStar } from "./constellation";
 
-/* Nuova sede: the constellation of the Rete (geometry in constellation.ts). */
+/* Nuova sede: the constellation of the Network (geometry in constellation.ts). */
 const point = (index: number) => CONSTELLATION_SLOTS[index];
 
 /** Background stars, the same for a given school number. */

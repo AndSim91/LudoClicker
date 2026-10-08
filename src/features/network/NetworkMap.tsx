@@ -81,7 +81,7 @@ export function NetworkMap({
   };
 
   return (
-    <section className="network-map" aria-label="Mappa della Rete" data-tutorial-region="network-map">
+    <section className="network-map" aria-label="Mappa del Network" data-tutorial-region="network-map">
       <div className="network-map-scroll" ref={scrollRef}>
         <div className="network-map-track" style={{ width: fits ? "100%" : `${total}px` }}>
           <svg viewBox={`0 0 ${total} ${HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">

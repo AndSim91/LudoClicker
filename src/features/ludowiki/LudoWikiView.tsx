@@ -189,7 +189,7 @@ function LegendaryDossierPanel({
     ? "Attualmente nella scuola"
     : dossier.currentStatus === "departed"
       ? "Scoperto · non più nella scuola"
-      : "Conservato dalla Rete delle scuole";
+      : "Conservato dal Network delle scuole";
   return (
     <section className="ludodex-dossier" aria-labelledby="ludodex-dossier-title">
       <div className="ludodex-dossier-identity">

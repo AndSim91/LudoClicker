@@ -22,7 +22,7 @@ export interface AcquisitionEventDefinition {
    * upgrade id once its secret objective exists.
    */
   requiresSecretUpgrade?: true;
-  /** Schools already founded in the Rete (nazionali, internazionali, assurdi: decisione del 06/10). */
+  /** Schools already founded in the Network (nazionali, internazionali, assurdi: decisione del 06/10). */
   requiredNetworkSchools?: number;
   requiredMembers: number;
   requiredSwords: number;

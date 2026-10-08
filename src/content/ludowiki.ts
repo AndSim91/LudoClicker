@@ -306,13 +306,13 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     rules: [
       "Un nodo bloccato dice come si apre: i punti che servono nel ramo o il legame che manca.",
       `Ogni livello comprato rende più cari del ${Math.round(UPGRADE_PRICING.branchGrowth * 100)}% tutti i nodi dello stesso ramo; gli altri rami non cambiano. In una nuova scuola gli [[Upgrade]] ripartono da zero e i prezzi tornano quelli di partenza: le cime dei rami si raggiungono scuola dopo scuola, con la **Reputazione**.`,
-      "I nodi della [[Rete delle Onde]] e i percorsi segreti hanno prezzi fissi.",
+      "I nodi del [[Network delle Onde]] e i percorsi segreti hanno prezzi fissi.",
       "Pochi nodi hanno un legame narrativo: il Social, un nodo che ne trasforma un altro, punti di un altro ramo.",
       "Creatività resta una catena: ogni nodo è il catalogo email successivo.",
       "Occhio del Maestro decide quando si vedono Arena e Stile; Istruttori in e-Learning fa formare da soli gli Istruttori; Eventi nel Multiverso fa girare più copie dello stesso evento, che costano il doppio e trovano meno **Contatti**.",
       "Calendario fitto accorcia le attese tra gli eventi, Chat di Gruppo trattiene gli iscritti, Porta un amico porta **Contatti**, Progetto Influencer porta **Follower** sicuri, Rhythm Gamer apre prima le rarità dei Gadget, Conto deposito paga interessi sui **Fondi**.",
-      "Dalla prima fondazione compare la [[Rete delle Onde]]: i suoi nodi si aprono con le scuole fondate (1, 2, 3, 5, 7, 10, 13, 16, 20) e alcuni crescono con la Rete.",
-      "Il tempo è denaro ([[Rete delle Onde]]) fa scegliere la velocità del gioco con il pulsante accanto alla pausa: 2× dal livello 1 (1 scuola fondata), 3× dal livello 2 (3 scuole fondate), 4× dal livello 3 (5 scuole fondate) e 5× dal livello 4 (8 scuole fondate). Accelera tutto ciò che scorre da solo, non la scrittura delle email né i minigiochi; la scelta resta salvata, e in una scuola nuova si torna a 1× finché il nodo non è ricomprato.",
+      "Dalla prima fondazione compare il [[Network delle Onde]]: i suoi nodi si aprono con le scuole fondate (1, 2, 3, 5, 7, 10, 13, 16, 20) e alcuni crescono con il Network.",
+      "Il tempo è denaro ([[Network delle Onde]]) fa scegliere la velocità del gioco con il pulsante accanto alla pausa: 2× dal livello 1 (1 scuola fondata), 3× dal livello 2 (3 scuole fondate), 4× dal livello 3 (5 scuole fondate) e 5× dal livello 4 (8 scuole fondate). Accelera tutto ciò che scorre da solo, non la scrittura delle email né i minigiochi; la scelta resta salvata, e in una scuola nuova si torna a 1× finché il nodo non è ricomprato.",
       "Multitasking dà al laboratorio [[Gadget]] un secondo e un terzo banco: i collaudi in più aspettano in coda.",
       "I percorsi segreti compaiono soltanto dopo la loro scoperta nel gioco.",
     ],
@@ -447,14 +447,14 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
   {
     id: "rete-scuole",
     group: "Crescita",
-    title: "Rete e nuove scuole",
+    title: "Network e nuove scuole",
     summary: "Prestigio, requisiti di fondazione e progressi permanenti.",
-    introduction: "Fondare una nuova scuola riavvia il ciclo locale, **Fama** compresa, e ti dà punti **Reputazione**: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in sei potenziamenti permanenti o in una rendita fissa dalla scuola che lasci. La voce [[Rete]] compare con il primo titolo all'Accademico e da lì resta.",
+    introduction: "Fondare una nuova scuola riavvia il ciclo locale, **Fama** compresa, e ti dà punti **Reputazione**: è l'unico valore che passa da una scuola all'altra. Li spendi alla fondazione in sei potenziamenti permanenti o in una rendita fissa dalla scuola che lasci. La voce [[Network]] compare con il primo titolo all'Accademico e da lì resta.",
     steps: [
       { icon: "trend", label: "Requisiti", detail: "Completa il ciclo" },
       { icon: "trophy", label: "Accademico", detail: "Vinci Arena o Stile" },
       { icon: "people", label: "Fondazione", detail: "Apri una scuola" },
-      { icon: "book", label: "Rete", detail: "Conserva i progressi" },
+      { icon: "book", label: "Network", detail: "Conserva i progressi" },
     ],
     numbers: [
       { label: "Titoli all'Accademico", value: `${GAME_CONFIG.prestigeAcademyTitles}`, detail: "in Arena o in Stile, con la scuola corrente" },
@@ -465,7 +465,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
     rules: [
       "Serve una vittoria al Torneo Accademico, in Arena o in Stile, con la scuola corrente.",
       "Sei rami: Email/Social (caratteri per input, email e contenuti social), Eventi (**Contatti** a ogni evento), Iscrizioni (probabilità dopo la prova), Social e Gadget (entrate dai **follower** e vendite dei gadget), Formazione (corsi di atleti, Istruttori, Tecnici e agonisti), Genetica (valori di base dei nuovi atleti e Preparazione atletica).",
-      `La mappa della [[Rete]] conserva di ogni scuola solo nome, città e **Fama**; tiene la Sede madre e le ultime ${GAME_CONFIG.networkMapSchoolsLimit - 1}, le più vecchie restano contate.`,
+      `La mappa del [[Network]] conserva di ogni scuola solo nome, città e **Fama**; tiene la Sede madre e le ultime ${GAME_CONFIG.networkMapSchoolsLimit - 1}, le più vecchie restano contate.`,
       "La spesa è definitiva. I punti negli Upgrade restano per sempre; quelli nella rendita si consumano: bloccano una rendita fissa dalla scuola che lasci e la scuola successiva riparte da 0%.",
       "La rendita non ha tetto: è dove spendere la **Reputazione** quando gli Upgrade sono al massimo.",
       "L'Accademico apre la fondazione, il Nazionale aggiunge 2 punti di **Reputazione**; vincere più volte lo stesso torneo non aggiunge altro.",

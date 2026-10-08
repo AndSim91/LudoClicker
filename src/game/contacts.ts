@@ -127,7 +127,7 @@ function chooseLegendaryProfile(
   reservedProfileIds: ReadonlySet<SpecialCollaboratorId>,
   progress: LegendaryCollaboratorProgress,
   guaranteed = false,
-  /** Leggende in visita (Rete delle Onde). */
+  /** Leggende in visita (Network delle Onde). */
   chanceMultiplier = 1,
 ) {
   const [appearanceRoll, seedAfterAppearance] = nextRandom(seed);

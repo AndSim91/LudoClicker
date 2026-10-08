@@ -188,11 +188,11 @@ export function describeFoundation(
   const lit = Math.min(number, CONSTELLATION_SIZE);
   return {
     kind: "foundation",
-    kicker: `Rete delle Onde · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
+    kicker: `Network delle Onde · Sede n° ${number}${number === CONSTELLATION_SIZE ? " · Simbolo completo" : ""}`,
     title: getFoundationTitle(number),
     body: generic
-      ? "Una nuova scuola entra nella Rete delle Onde e accende una stella del simbolo."
-      : `${previous?.name ?? "La scuola"} entra nella Rete${fame}; ${newcomer.name} apre a ${newcomer.city}.` +
+      ? "Una nuova scuola entra nel Network delle Onde e accende una stella del simbolo."
+      : `${previous?.name ?? "La scuola"} entra nel Network${fame}; ${newcomer.name} apre a ${newcomer.city}.` +
         (follower ? ` Ti segue ${follower}.` : ""),
     number,
     stars: starred.map((school) => ({ light: school.fame === undefined ? null : Math.sqrt(school.fame / brightest) })),

@@ -278,12 +278,12 @@ Conta il record della scuola (`peakActiveMembers`): la quota non scende più,
 anche se a giugno qualcuno lascia, e riparte da €40 in una nuova scuola. Ogni
 nuova soglia è annunciata una volta con l'email «Quota mensile: X €», che
 indica anche la soglia successiva. Si applica solo alla quota base: i bonus di
-Forme, Istruttori e Tecnici non cambiano. Poiché la rendita della Rete si
+Forme, Istruttori e Tecnici non cambiano. Poiché la rendita del Network si
 calcola sulle quote (§ 17.6), anche la scuola lasciata ne beneficia.
 
 La somma delle quote è poi moltiplicata dai
 potenziamenti di entrate e da +5% per ogni scuola fondata; a questa si somma
-la rendita fissa delle scuole della Rete delle Onde (§ 17.6). Un mese dura **60 secondi
+la rendita fissa delle scuole del Network delle Onde (§ 17.6). Un mese dura **60 secondi
 reali** e segue il normale ciclo da Gennaio a Dicembre;
 dopo Dicembre torna Gennaio. Ogni scuola (anche quelle fondate) inizia a Gennaio
 dell'**anno scolastico 0**, che dura fino ad Agosto; da Settembre parte l'anno
@@ -557,7 +557,7 @@ Accademico, Fama 127 dà 1 punto, Fama 10.000 ne dà 9 e Fama 30.000 ne dà 16
 `reputationTournamentPoints = 2`, `reputationFameDivisor = 128`).
 
 **Spesa.** I punti si spendono alla fondazione, nella finestra «Fonda una nuova
-scuola» della pagina Rete (§ 17.3); la spesa è definitiva e i punti non spesi
+scuola» della pagina Network (§ 17.3); la spesa è definitiva e i punti non spesi
 restano per la fondazione successiva. Ogni punto vale **+20% del valore base**
 (`reputationStep = 0,2`, decisione del 04/10); i potenziamenti della scuola si
 applicano sopra.
@@ -576,7 +576,7 @@ I sei potenziamenti permanenti arrivano a 50 punti ciascuno (+1000%,
 `reputationUpgradeMaxLevel`) e non si azzerano mai
 (`network.reputationUpgrades`). Genetica vale per gli atleti che arrivano dopo
 la spesa: i cinque contatti iniziali di una scuola nascono senza. La **rendita
-della rete** si consuma: ogni punto blocca il 10% (`networkRentPointShare`) del
+del Network** si consuma: ogni punto blocca il 10% (`networkRentPointShare`) del
 valore di rendita della scuola che si sta lasciando, `iscritti × 40 € × 10%`
 (`networkRentValueShare`), come rendita mensile fissa di quella scuola. I punti non restano come livelli: alla fondazione successiva
 la rendita riparte da 0% e si calcola sulla nuova scuola, sommandosi alle
@@ -1069,7 +1069,7 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 Gli eventi **nazionali** (Lucca, Milan Games Week, Romics, Napoli Comicon,
 Evento Televisivo Rai), **internazionali** (Japan Expo, Gamescom, San Diego
 Comic-Con) e **assurdi** (Viaggio nel passato, Eldorado) chiedono in più un
-numero di scuole già fondate (`requiredNetworkSchools`), come la Rete
+numero di scuole già fondate (`requiredNetworkSchools`), come il Network
 dell'Ordine: ogni nuova scuola apre qualcosa di nuovo fino alla ventesima. La
 regola è unica (`isAcquisitionEventUnlocked`) per avvio, automazione e pagina.
 Il restyling della pagina Eventi, quando gli eventi visibili saranno molti, è
@@ -1996,10 +1996,10 @@ per gli Ultra Rari il valore effettivo è quindi **0,3%** nella prima scuola e
 
 La schermata **Upgrade** presenta otto rami pubblici, sempre nello stesso
 ordine: **Scrittura, Creatività, Carisma, Accoglienza, Attrezzatura, Gadget,
-Insegnamento e Organizzazione**, poi la **Rete delle Onde** (§ 10.13, dalla
+Insegnamento e Organizzazione**, poi il **Network delle Onde** (§ 10.13, dalla
 prima fondazione) e la riga dei **Percorsi Segreti**. Ogni ramo è **una sola
 linea di nodi**, senza rami laterali, al massimo nove: Scrittura, Carisma,
-Accoglienza, Gadget, Insegnamento e Rete ne hanno 9, Creatività e Attrezzatura
+Accoglienza, Gadget, Insegnamento e Network ne hanno 9, Creatività e Attrezzatura
 8, Organizzazione 7. Il ramo Gadget compare soltanto dopo lo sblocco del
 settore. Social non ha più un ramo
 separato: i suoi effetti sono distribuiti tra Scrittura e Creatività.
@@ -2049,7 +2049,7 @@ ramo** (20% fino al 06/10): prezzo = catalogo × 0,25 × 1,25^(punti del ramo), 
 (`UPGRADE_PRICING` e `getUpgradeCost` in `src/content/upgrades.ts`). Gli altri
 rami non cambiano. In una nuova scuola gli Upgrade ripartono da zero e con
 loro i prezzi: è il motivo per fondare, e le cime dei rami si raggiungono
-scuola dopo scuola con la Reputazione. Rete delle Onde e Percorsi Segreti
+scuola dopo scuola con la Reputazione. Network delle Onde e Percorsi Segreti
 tengono i prezzi di catalogo. Non c'è più la maggiorazione del 15% per scuola
 fondata (decisioni di Andrea del 05/10; misure in § 10.10).
 
@@ -2340,14 +2340,14 @@ Redazione è inattiva solo se non c'è un'email in scrittura e Social non è
 ancora sbloccato; Istruttore è inattivo se non insegna, non è in formazione e
 non c'è Preparazione agonistica attiva.
 
-Le automazioni generiche (Procedure standard e Coordinamento multi-sede della
-Rete, fino
+Le automazioni generiche (Procedure standard e Coordinamento multi-sede del
+Network, fino
 a +75% insieme) accelerano Redazione/Social, manutenzione dell'attrezzatura,
 sviluppo, revisioni e capacità commerciale Gadget e Preparazione agonistica.
 Soglie in punti di Organizzazione: Manuale operativo 0, Turni dei collaboratori
 3, Procedure standard 8, Ufficio formazione 8, Modulo di iscrizione 13, Priorità operative 18 e
 **Turni dei collaboratori almeno al livello 1** (la fila serve ai Turni),
-A.N.D.E.R. 18, Conto deposito 23, Anticipo di cassa 8. Coordinamento multi-sede è passato alla Rete
+A.N.D.E.R. 18, Conto deposito 23, Anticipo di cassa 8. Coordinamento multi-sede è passato al Network
 dell'Ordine (§ 10.13). Gli interessi del **Conto deposito** («La banca paga poco, ma
 paga. Il tesoriere dorme meglio.») si calcolano a fine mese sui Fondi di quel
 momento, entrano nelle entrate mensili e compaiono nel loro dettaglio come
@@ -2424,7 +2424,7 @@ con «Compra tutto» ogni 10 secondi (`spendSurplus` e `continueAfterPrestige` d
 3 ore. Con 20% e prezzi a un quarto: primo Nazionale 82,5–94,5 minuti, 53% dei
 livelli a 2 ore, 72% a 4, 78% a 6. Per non rendere irraggiungibili le cime,
 Fusione documenti, Corso di Marketing, Negozio online, Nessun Rancore e
-PagoSport crescono ×1,5 a livello invece di ×2. Albero completo (Rete esclusa):
+PagoSport crescono ×1,5 a livello invece di ×2. Albero completo (Network escluso):
 circa 4,5 Mld in negozio.
 
 **25% (decisione di Andrea del 06/10).** Stessa simulazione, seme 1, 5 ore, con
@@ -2454,7 +2454,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | 8 Collaboratori                            | gestione aggregata per settore                                           |
 | 15 collaboratori                           | Redazione si evolve in Social                                            |
 | Prima vittoria nella Champion's Arena      | settore e pagina Gadget                                                  |
-| Primo titolo all'Accademico (Arena o Stile) nella scuola corrente | messaggio «Primi all'Accademico» e voce Rete |
+| Primo titolo all'Accademico (Arena o Stile) nella scuola corrente | messaggio «Primi all'Accademico» e voce Network |
 
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
 Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
@@ -2498,7 +2498,7 @@ affidata alle scene di tutorial (sezione 13).
 
 ---
 
-### 10.13 Rete delle Onde
+### 10.13 Network delle Onde
 
 Un ramo che si apre con le **scuole fondate**, non con i punti: la corsia
 compare dalla prima fondazione e ogni nodo bloccato dice quante scuole servono
@@ -2520,7 +2520,7 @@ email né i minigiochi in tempo reale. La scelta è salvata in
 `automation.gameSpeed` e limitata dal livello (`getPlayerGameSpeed`): alla
 fondazione di una nuova scuola il nodo riparte da zero e il gioco torna a 1×. Il
 selettore del pannello Admin (fino a 100×) ha la precedenza fino al ricaricamento.
-La corsia della Rete ha dieci nodi: una corsia con più di nove nodi usa una
+La corsia del Network ha dieci nodi: una corsia con più di nove nodi usa una
 colonna per nodo.
 
 | Scuole | Potenziamento | Effetto | Costi per livello |
@@ -2529,19 +2529,19 @@ colonna per nodo.
 | 1 · 3 · 5 · 8 | Il tempo è denaro | velocità del gioco a scelta: L1 fino a 2× (1 scuola fondata), L2 3× (3), L3 4× (5), L4 5× (8) | 25.000 / 150.000 / 500.000 / 2.000.000 € |
 | 2 | Scambio di Istruttori | +10% velocità di tutti i corsi per livello; massimo +50% | 20.000 / 40.000 / 80.000 / 160.000 / 320.000 € |
 | 3 | Lettere di raccomandazione | +1 punto Reputazione alla prossima fondazione per livello | 50.000 / 150.000 / 450.000 € |
-| 5 | Circuito della Rete | +1% contatti dagli eventi per ogni scuola della Rete, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
+| 5 | Circuito del Network | +1% contatti dagli eventi per ogni scuola del Network, per livello | 100.000 / 200.000 / 400.000 / 800.000 / 1.600.000 € |
 | 7 | Albo dei Maestri | +10% per livello che un nuovo iscritto arrivi con la Forma 1 | 150.000 / 300.000 / 600.000 / 1.200.000 / 2.400.000 € |
-| 10 | Sponsor nazionale | +1.000 € al mese per ogni scuola della Rete, per livello | 500.000 / 1.500.000 / 4.500.000 € |
-| 13 | Arena della Rete | +5% ai valori di partenza di Arena e Stile dei nuovi atleti per livello | 1.000.000 / 3.000.000 / 9.000.000 € |
+| 10 | Sponsor nazionale | +1.000 € al mese per ogni scuola del Network, per livello | 500.000 / 1.500.000 / 4.500.000 € |
+| 13 | Arena del Network | +5% ai valori di partenza di Arena e Stile dei nuovi atleti per livello | 1.000.000 / 3.000.000 / 9.000.000 € |
 | 16 | Leggende in visita | +20% probabilità di Leggendari tra i nuovi contatti per livello | 2.000.000 / 6.000.000 / 18.000.000 € |
 | 20 | Gran Consiglio | raddoppia la Reputazione della prossima fondazione | 10.000.000 € |
 
 Come gli altri Upgrade, i livelli si azzerano alla fondazione: Lettere di
 raccomandazione e Gran Consiglio valgono per la fondazione della scuola in cui
-si comprano, e la finestra «Se fondi ora» della pagina Rete li mostra nel
+si comprano, e la finestra «Se fondi ora» della pagina Network li mostra nel
 conto (+N, ×2). Il raddoppio si applica dopo le Lettere. Scambio di Istruttori
 si somma a PagoSport prima del moltiplicatore della Reputazione Formazione.
-Arena della Rete moltiplica i valori come la Genetica (un +1 fisso su valori
+Arena del Network moltiplica i valori come la Genetica (un +1 fisso su valori
 da 0 a 100 sarebbe stato invisibile); non tocca i Leggendari, che hanno valori
 fissi. Leggende in visita non cambia i contatti forzati dai tornei. Sponsor
 nazionale compare nel dettaglio delle entrate mensili.
@@ -2745,7 +2745,7 @@ Andrea del 06/10, dopo il feedback di un giocatore che faticava a partire col
 tutorial): nei testi da leggere (schede di A.N.D.E.R., LudoWiki, descrizioni ed
 effetti degli Upgrade, traguardi segreti) le parole del gioco hanno sempre lo
 stesso segno, in quattro famiglie:
-- **Pagine della barra** (Posta, Eventi, Scuola, Tornei, Gadget, Upgrade, Rete,
+- **Pagine della barra** (Posta, Eventi, Scuola, Tornei, Gadget, Upgrade, Network,
   LudoWiki, Impostazioni): etichetta col simbolo della voce della barra,
   turchese in Onde e blu in Outlook; al passaggio del mouse si illumina la voce
   nella barra. Non apre la pagina al clic.
@@ -2768,7 +2768,7 @@ restano senza segni.
 
 **Testata delle pagine in Modalità Outlook** (concept B «Barra compatta»,
 decisione di Andrea del 06/10): tutte le pagine con testata (Scuola, Eventi,
-Tornei, Gadget, Upgrade, Rete, LudoWiki, Impostazioni, Calendario) hanno la
+Tornei, Gadget, Upgrade, Network, LudoWiki, Impostazioni, Calendario) hanno la
 stessa: icona della barra a sinistra a contorno, blu, da 20 px; titolo da 20 px;
 la frase della pagina in grigio sulla stessa riga (va a capo se non entra); una
 riga sottile sotto, oppure le schede che fanno da riga (Tornei, LudoWiki). A
@@ -3083,7 +3083,7 @@ spade, eventi, euro guadagnati e per fonte, spade, collaboratori, titoli…). A 
 fine mese si registrano entrate e nuovi iscritti del mese e i candidati
 all'Highlight. A inizio agosto la differenza diventa la pagella, salvata intera e
 sostituita ogni anno. Nuove statistiche: `trialsCancelled`, `incomeBySource`
-(quote, Rete, Social, gadget; il resto è «premi e altro»).
+(quote, Network, Social, gadget; il resto è «premi e altro»).
 
 **Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e
 frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
@@ -3325,18 +3325,18 @@ v102; i salvataggi che li hanno già superati li segnano come fatti):
     futuro» (non vinceremo subito, servono collaboratori), che indica la nuova
     tappa in «La mia giornata»: 8 Collaboratori delle Onde.
 15. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
-    nazionale, solo nella prima scuola. Fa aprire la Rete; mappa, fondare è
+    nazionale, solo nella prima scuola. Fa aprire il Network; mappa, fondare è
     ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
     rendita, cosa resta per sempre, «Nessuna fretta» sul pulsante di fondazione.
 16. **La scuola organizza un torneo** (`reptile-introduction`): allo sblocco del
-    Reptile; se lo stesso Nazionale apre anche la Rete parte subito dopo quella.
+    Reptile; se lo stesso Nazionale apre anche il Network parte subito dopo quella.
     Fa aprire Tornei, che si apre su Open › Reptile; palazzetto e rimborso, le
     barre dei settori, luglio o il prossimo (resa e spade libere), «La giornata
     degli imprevisti» fino a +25%.
 
 I passi possono mettere la scheda a destra o nella metà bassa
 (`cardPlacement`: `left`, `right`, `below`) per non coprire la zona evidenziata;
-nelle pagine Tornei, Reptile e Rete resta accesa solo la zona del passo e il
+nelle pagine Tornei, Reptile e Network resta accesa solo la zona del passo e il
 resto della pagina si scurisce.
 
 L'evidenziazione deve restare coerente con l'interfaccia ispirata a Windows:
@@ -3660,12 +3660,12 @@ appena la scuola corrente **vince un Torneo Accademico**, di Arena o di Stile
 `hasPrestigeTitle` in `src/game/progression.ts`). Conta solo la vittoria di un
 atleta della scuola corrente; i titoli vengono contati in
 `academyTitlesCurrentSchool` e ripartono da zero nella nuova scuola. Un titolo
-nazionale apre comunque la Rete (le partite salvate prima del 07/10). In più
+nazionale apre comunque il Network (le partite salvate prima del 07/10). In più
 nessun Leggendario Segreto deve avere una prova in corso.
 
 Prima del 07/10 serviva il Nazionale. Con il voto di Stile assoluto (modello C)
 e il Nazionale portato a 200 di media, il primo Nazionale arriva a 2–3 ore:
-l'Accademico (100) apre la Rete a circa un'ora e il Nazionale diventa il primo
+l'Accademico (100) apre il Network a circa un'ora e il Nazionale diventa il primo
 traguardo «vero» della scuola, che vale 2 punti di Reputazione in più. Il
 titolo all'Accademico vale 1 punto fisso (§ 5.7). Il requisito non cresce con
 le scuole fondate: a crescere è il costo dei potenziamenti (§ 17.6).
@@ -3676,18 +3676,19 @@ Il prestigio è una scelta volontaria. A differenza del gioco di riferimento, il
 primo prestigio deve concedere immediatamente un bonus permanente chiaramente
 percepibile; non deve richiedere più reset prima di diventare utile.
 
-### 17.3 La pagina Rete e la fondazione
+### 17.3 La pagina Network e la fondazione
 
-La Rete delle Onde è una pagina a sé, voce **Rete** della barra delle
+Il Network delle Onde (così in tutto il gioco dall'08/10/2026, prima «Rete delle
+Onde») è una pagina a sé, voce **Network** della barra delle
 applicazioni tra Upgrade e LudoWiki (`src/features/network/`). Compare con il
 primo titolo all'Accademico della scuola corrente e da lì resta per sempre,
 perché dopo la prima fondazione la tiene aperta il numero di scuole
-(`isGameAreaUnlocked`). L'email «Primi all'Accademico» rimanda alla voce Rete.
+(`isGameAreaUnlocked`). L'email «Primi all'Accademico» rimanda alla voce Network.
 
 La pagina contiene, dall'alto:
 
 - **intestazione** con il numero di sedi e la Reputazione da spendere;
-- **mappa della Rete** (`NetworkMap.tsx`): ogni scuola è un nodo numerato,
+- **mappa del Network** (`NetworkMap.tsx`): ogni scuola è un nodo numerato,
   la Sede madre è sempre il n° 1, la scuola in corso è l'ultimo nodo e dopo c'è
   un nodo tratteggiato «la prossima?». In Onde i nodi sono sfere su un filo
   d'onda, più grandi e luminose in proporzione a √(Fama / Fama massima della
@@ -3707,7 +3708,7 @@ La pagina contiene, dall'alto:
   pagina e i punti sono in nero, senza l'oro);
 - **Potenziamenti**: i sei rami con il livello su 50 (quadranti in Onde; in
   Outlook una riga per ramo con descrizione, livello su 50, percentuale e una
-  barra sottile blu) e la rendita della rete;
+  barra sottile blu) e la rendita del Network;
 - **Resta per sempre**: Torneo della Superba e Corso X se sbloccati, Ludodex,
   Leggendari Segreti reclutati, Maestria dei gadget, Traguardi.
 
@@ -3760,7 +3761,7 @@ ultime 49; le più vecchie diventano un nodo «altre N scuole» e restano solo
 nel conteggio (`addSchoolToMap`, `src/game/reputation.ts`). Salvataggi v90 →
 v91 (`saveMigrations/networkMap.ts`): le scuole già lasciate perdono gli altri
 campi e la Fama, che non era salvata («Fama non registrata»); rendita e
-conteggio diventano i due numeri della rete; spariscono motto e
+conteggio diventano i due numeri del Network; spariscono motto e
 specializzazione.
 
 ### 17.5 Cosa rimane
@@ -3850,7 +3851,7 @@ Nel codice, per ogni scuola fondata:
 - **costi:** gli Upgrade ripartono da zero e i prezzi tornano a quelli di
   partenza (la curva per ramo, § 10, riparte);
 - **obiettivi:** ogni ciclo richiede di nuovo un titolo all'Accademico (§ 17.2);
-- **complessità organizzativa:** la Rete delle Onde (§ 10.13) apre un nodo
+- **complessità organizzativa:** il Network delle Onde (§ 10.13) apre un nodo
   alla 1ª, 2ª, 3ª, 5ª, 7ª, 10ª, 13ª, 16ª e 20ª scuola fondata;
 - **moltiplicatori permanenti:** solo quelli comprati con la Reputazione (§ 5.7);
 - gli iscritti con Forma 7 hanno +0,5% di probabilità di lasciare la scuola
@@ -3859,12 +3860,12 @@ Nel codice, per ogni scuola fondata:
 Le attività simultanee crescono con i potenziamenti, non con le scuole:
 Multitasking (Gadget) e Eventi nel Multiverso (Carisma).
 
-Ogni scuola lasciata entra nella **Rete delle Onde**. Versa una rendita
+Ogni scuola lasciata entra nel **Network delle Onde**. Versa una rendita
 mensile fissa solo se alla fondazione si spendono punti Reputazione nella
 rendita (§ 5.7): ogni punto vale `iscritti × 40 € × 10% × 10%`. La rendita non
 è toccata da moltiplicatori e si somma alle entrate mensili
 (`getMonthlyOperationalIncome`); il riepilogo delle entrate la mostra come
-«Rete delle Onde».
+«Network delle Onde».
 
 ---
 
@@ -4180,7 +4181,7 @@ gioca: l'occasione se c'è, altrimenti la rarità attuale. Se la rarità attuale
 ha la Maestria e quella dell'occasione no, si gioca la prova della nuova
 rarità. Nella riga della rarità la barra della qualità diventa il timbro
 «Maestria»: con un clic si gioca la prova per divertimento, senza effetti sul
-salvataggio e senza mettere in pausa il gioco. Nella Rete delle Onde la riga
+salvataggio e senza mettere in pausa il gioco. Nel Network delle Onde la riga
 «Maestria dei gadget» conta le coppie ottenute. I salvataggi che hanno già una
 rarità al 100% ottengono la Maestria al primo passo di gioco.
 
@@ -5036,7 +5037,7 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   04/10; prima solo alla prima). Ogni sede è una stella e le stelle disegnano il
   simbolo dell'Ordine dello stendardo: la Sede madre è la punta, poi la lama, la
   fiamma interna e le onde alla base, a coppie sinistra/destra. Bastano **25
-  stelle**: la Sede madre e le ultime 24 scuole della mappa della Rete (la mappa
+  stelle**: la Sede madre e le ultime 24 scuole della mappa del Network (la mappa
   resta a 50). Le stelle da accendere si vedono già in filigrana; quelle accese
   sono più grandi e luminose quanta più Fama aveva la scuola (spente se il
   salvataggio non l'ha registrata). La nuova sede si accende in oro con il suo
@@ -5194,10 +5195,10 @@ traguardo sbloccato (prima era visibile solo in sviluppo).
 | Tornei | Re della Superba | Reptile o Superba vinti | 1 | 3 | 10 |
 | Tornei | Scrivere le Cronache | Chronicles vinte | 1 | 3 | 10 |
 | Tornei | Cacciatore di Segreti | Leggendari Segreti reclutati | 1 | 5 | 14 |
-| Rete | La Rete delle Onde | Scuole fondate | 1 | 5 | 10 |
-| Rete | Nome che pesa | Punti Reputazione guadagnati | 10 | 100 | 1.000 |
-| Rete | Vivere di rendita | Rendita della rete al mese | 1.000 € | 100.000 € | 10 milioni € |
-| Rete | Al massimo | Potenziamenti Reputazione a 50 punti | 1 | 3 | 6 |
+| Network | Il Network delle Onde | Scuole fondate | 1 | 5 | 10 |
+| Network | Nome che pesa | Punti Reputazione guadagnati | 10 | 100 | 1.000 |
+| Network | Vivere di rendita | Rendita del Network al mese | 1.000 € | 100.000 € | 10 milioni € |
+| Network | Al massimo | Potenziamenti Reputazione a 50 punti | 1 | 3 | 6 |
 | Leggendari | Collezionista di leggende | Leggendari iscritti almeno una volta | 5 | 15 | 22 |
 | Gadget | Bottega delle Onde | Gadget venduti | 1.000 | 100.000 | 10 milioni |
 
@@ -5208,7 +5209,7 @@ traguardo sbloccato (prima era visibile solo in sviluppo).
 3. **Ospite d'onore:** Andrea Simonazzi si è iscritto all'Ordine.
 4. **Inflazione galoppante:** Cinque Inflazioni di Luce sulle spade della stessa scuola.
 5. **Armeria abbandonata:** Mille spade rotte nello stesso momento.
-6. **Tutto sulla rete:** Venti punti Reputazione nella rendita in una sola fondazione.
+6. **Tutto sul Network:** Venti punti Reputazione nella rendita in una sola fondazione.
 7. **Ritorno in palestra:** Un Leggendario Segreto già reclutato è ricomparso tra i contatti di una nuova scuola.
 8. **Partenza a razzo:** Una nuova scuola fondata entro il secondo anno scolastico.
 9. **Esodo:** Cento iscritti persi in un solo fine anno.
@@ -5573,7 +5574,7 @@ qualunque funzione che possa far credere di inviare davvero email.
 - Il prestigio consiste nel trasferirsi e fondare una nuova scuola con nome
   scelto dal giocatore.
 
-  La fondazione si avvia dalla pagina Rete, in una finestra di una sola pagina (§ 17.3).
+  La fondazione si avvia dalla pagina Network, in una finestra di una sola pagina (§ 17.3).
 - Ogni nuova partita parte dall'Ordine delle Onde di Genova.
 - Il primo prestigio deve arrivare dopo circa 60–90 minuti e offrire subito un bonus
   significativo.

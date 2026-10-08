@@ -87,7 +87,7 @@ describe("MomentLayer", () => {
     const { container } = render(<MomentLayer state={state} momentKey="foundation" onDismiss={vi.fn()} />);
 
     expect(screen.getByRole("dialog", { name: "L'undicesima sede dell'Ordine" })).toBeVisible();
-    expect(screen.getByText("Scuola 10 entra nella Rete con 3.700 di Fama; Scuola del Vento apre a Torino.")).toBeVisible();
+    expect(screen.getByText("Scuola 10 entra nel Network con 3.700 di Fama; Scuola del Vento apre a Torino.")).toBeVisible();
     expect(screen.getByText("10 → 11 di 25")).toBeVisible();
     // Ten schools left are ten stars, two of them without Fama; the other fourteen wait as faint dots.
     expect(container.querySelectorAll(".moment-star")).toHaveLength(10);

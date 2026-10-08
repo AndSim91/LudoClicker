@@ -66,7 +66,7 @@ export function FoundationDialog({
       >
         <header>
           <h2 id="foundation-title">Fonda una nuova scuola</h2>
-          <p>{state.school.name} entra nella Rete con Fama {formatStat(state.school.fame)}. La nuova scuola riparte da zero; restano la Reputazione e i suoi potenziamenti.</p>
+          <p>{state.school.name} entra nel Network con Fama {formatStat(state.school.fame)}. La nuova scuola riparte da zero; restano la Reputazione e i suoi potenziamenti.</p>
         </header>
 
         <div className="foundation-body">
@@ -94,8 +94,8 @@ export function FoundationDialog({
             );
           })}
           <div className="foundation-row">
-            <span>Rendita della rete<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name}{rentAmount > 0 ? `, ${formatCurrency(rentAmount)} in tutto` : ""}.</small></span>
-            <Stepper label="Rendita della rete" value={spending.rent} added={spending.rent} onDown={() => change("rent", -1)} onUp={() => change("rent", 1)} canUp={canAdd()} />
+            <span>Rendita del Network<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name}{rentAmount > 0 ? `, ${formatCurrency(rentAmount)} in tutto` : ""}.</small></span>
+            <Stepper label="Rendita del Network" value={spending.rent} added={spending.rent} onDown={() => change("rent", -1)} onUp={() => change("rent", 1)} canUp={canAdd()} />
           </div>
         </div>
 

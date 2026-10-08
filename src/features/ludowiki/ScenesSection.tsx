@@ -13,7 +13,7 @@ import {
 
 /*
  * LudoWiki › Scene: the animated moments already seen, generic, replayable.
- * Leggendari and Rete can show the data of one unlocked Leggendario or sede.
+ * Leggendari and Network can show the data of one unlocked Leggendario or sede.
  */
 
 type Thumb = "council" | "social" | "legendary" | "trophy" | "gadget" | "superba" | "chronicles" | "foundation" | "inflation";

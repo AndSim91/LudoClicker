@@ -147,7 +147,7 @@ export function notifyPrestigeOffer(state: GameState, now: number): GameState {
     ready,
     now,
     "Primi all'Accademico",
-    `${state.school.name} vince il Torneo Accademico. L'Ordine se ne accorge e la Rete ti lascia aprire una nuova scuola: quando vuoi, la trovi nella nuova voce Rete. Più aspetti, più Reputazione porti con te: un titolo al Nazionale, per dire, ne vale altri ${GAME_CONFIG.reputationNationalTitlePoints}.`,
+    `${state.school.name} vince il Torneo Accademico. L'Ordine se ne accorge e il Network ti lascia aprire una nuova scuola: quando vuoi, la trovi nella nuova voce Network. Più aspetti, più Reputazione porti con te: un titolo al Nazionale, per dire, ne vale altri ${GAME_CONFIG.reputationNationalTitlePoints}.`,
     "system",
   );
 }

@@ -114,10 +114,10 @@ function getUpgradeBenefitsSummary(state: GameState) {
   addPercentage("Rischio di non rinnovare", "departureRiskReduction", "−");
   addPercentage("Iscritti che portano un amico", "referralChance", "");
   addPercentage("Interessi mensili sui Fondi", "depositInterestRate", "");
-  addPercentage("Velocità dei corsi (Rete)", "courseSpeedBonus");
+  addPercentage("Velocità dei corsi (Network)", "courseSpeedBonus");
   const networkEventBonus = getNetworkEventContactMultiplier(state.upgrades, state.network.schoolCount) - 1;
   if (networkEventBonus > 0) {
-    benefits.push({ label: "Contatti eventi (Rete)", value: `+${formatUpgradePercentage(networkEventBonus)}` });
+    benefits.push({ label: "Contatti eventi (Network)", value: `+${formatUpgradePercentage(networkEventBonus)}` });
   }
   const networkSponsor = getNetworkSponsorIncome(state.upgrades, state.network.schoolCount);
   if (networkSponsor > 0) benefits.push({ label: "Sponsor nazionale", value: `${formatCurrency(networkSponsor)} al mese` });
@@ -256,7 +256,7 @@ type UpgradeStatus = "locked" | "available" | "completed";
 const WAVE_AMPLITUDE = 24;
 /**
  * Every lane uses the same nine columns, so nodes line up across branches; a
- * lane with more nodes (the Rete delle Onde has ten) gets one column per node.
+ * lane with more nodes (the Network delle Onde has ten) gets one column per node.
  */
 const LANE_COLUMNS = 9;
 
@@ -366,7 +366,7 @@ function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): bool
 function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
   if (category === "social") return state.unlocks.social;
   if (category === "gadget") return state.unlocks.gadget;
-  // Rete delle Onde: from the first foundation on.
+  // Network delle Onde: from the first foundation on.
   if (category === "network") return state.network.schoolCount > 0;
   return true;
 }

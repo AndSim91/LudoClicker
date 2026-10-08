@@ -41,7 +41,7 @@ describe("tutorials of the second half (05/10)", () => {
     expect(result.current.tutorial.shouldPauseGame).toBe(true);
   });
 
-  it("plays the Rete first and then the Reptile when one Nazionale opens both", async () => {
+  it("plays the Network first and then the Reptile when one Nazionale opens both", async () => {
     const game = startedGame((state) => ({
       ...state,
       tournaments: {
@@ -59,7 +59,7 @@ describe("tutorials of the second half (05/10)", () => {
     await waitFor(() => expect(result.current.tutorial.activeStep?.tournamentTab).toBe("reptile"));
   });
 
-  it("does not introduce the Rete again in a school founded later", () => {
+  it("does not introduce the Network again in a school founded later", () => {
     const game = startedGame((state) => ({
       ...state,
       network: { ...state.network, schoolCount: 1 },
