@@ -33,6 +33,8 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
     chronicles: career.chroniclesWins,
   };
   return [
+    // Tappa 1 (08/10/2026): the first Torneo Scolastico played, once per save, before its tutorial.
+    ...((state.tournaments?.results ?? []).some((result) => result.level === "school") ? [SCHOOL_TOURNAMENT_MOMENT] : []),
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
     // Right after the Champion's Arena scene that opens it, before its tutorial (optional: old migrations run this too).
     ...(state.unlocks?.gadget ? [GADGET_MOMENT] : []),
@@ -45,6 +47,9 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
     ...(state.unlocks?.social ? [SOCIAL_MOMENT] : []),
   ];
 }
+
+/** Tappa 1: the podium of the first Torneo Scolastico (the v107 migration marks it seen on saves past it). */
+export const SCHOOL_TOURNAMENT_MOMENT = "school-tournament";
 
 /** The Reptile becomes, for good, the Torneo della Superba (after the victory scene, if any). */
 export const SUPERBA_MOMENT = "superba";

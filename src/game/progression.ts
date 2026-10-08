@@ -20,8 +20,8 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (view === "network") {
     return state.network.schoolCount > 0 || hasPrestigeTitle(state);
   }
-  // Opens with the Forme at 10 members, in every school (08/10/2026).
-  if (view === "tournaments") return state.unlocks.forms;
+  // Opens with 8 athletes with Forma 1, in every school (08/10/2026).
+  if (view === "tournaments") return state.unlocks.tournaments;
   if (state.network.schoolCount > 0) return true;
 
   if (view === "events") {

@@ -28,7 +28,7 @@ import {
   type DayNotificationKind,
   type DayNotificationPhase,
 } from "./dayNotifications";
-import { SchoolTournamentGoalPill } from "./SchoolTournamentGoalPill";
+import { StoryGoalPill } from "./StoryGoalPill";
 
 /** Above this the panel is always a column; below it the player opens and closes it (G2, 07/10). */
 export const DAY_PANEL_MEDIA_QUERY = "(min-width: 1441px)";
@@ -446,7 +446,7 @@ export function DayPanel({
     <aside className="day-panel" data-tutorial-target="true" aria-label="La mia giornata">
       <div className="day-heading">
         <strong>La mia giornata</strong>
-        <SchoolTournamentGoalPill state={stateOverride} />
+        <StoryGoalPill state={stateOverride} />
         {isAlwaysOpen ? <Icon name="calendar" /> : (
           <button className="day-panel-close" type="button" aria-label="Chiudi La mia giornata" onClick={onClose}>
             <Icon name="close" />

@@ -8,6 +8,7 @@ import { FoundationArt } from "./FoundationArt";
 import { GadgetArt } from "./GadgetArt";
 import { SocialArt } from "./SocialArt";
 import { SuperbaArt } from "./SuperbaArt";
+import { TAPPA_ONE_DURATION_MS, TappaOneArt } from "./TappaOneArt";
 import { COUNCIL_SEATS, describeMoment, type MomentContent } from "./momentContent";
 
 /** How long a moment's animation lasts; then it stays still until the player closes it. */
@@ -23,6 +24,7 @@ const OUTLOOK_ICONS: Record<MomentContent["kind"], IconName> = {
   chronicles: "key",
   social: "megaphone",
   gadget: "gift",
+  tappa: "trophy",
 };
 
 /** Lama di Luce letterhead: three crossed blades, green, white and red. */
@@ -158,6 +160,7 @@ function MomentArt({ content }: { content: MomentContent }) {
   if (content.kind === "chronicles") return <ChroniclesArt />;
   if (content.kind === "social") return <SocialArt followers={content.followers} />;
   if (content.kind === "gadget") return <GadgetArt />;
+  if (content.kind === "tappa") return <TappaOneArt still={motionReduced()} />;
   if (content.kind === "superba") return <SuperbaArt city={content.city} fameLabel={content.fameLabel} />;
   if (content.kind === "victory") {
     return (
@@ -222,7 +225,10 @@ export function MomentLayer({
 
   useEffect(() => {
     buttonRef.current?.focus();
-    const timer = window.setTimeout(() => setFinished(true), MOMENT_DURATION_MS);
+    const timer = window.setTimeout(
+      () => setFinished(true),
+      content.kind === "tappa" ? TAPPA_ONE_DURATION_MS : MOMENT_DURATION_MS,
+    );
     const handleKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
@@ -233,7 +239,7 @@ export function MomentLayer({
       window.clearTimeout(timer);
       window.removeEventListener("keydown", handleKey);
     };
-  }, [onDismiss]);
+  }, [onDismiss, content.kind]);
 
   const secret = content.kind === "legendary" && content.secret;
   return (
@@ -272,6 +278,14 @@ export function MomentLayer({
             <p className="moment-price"><span>Squadra</span><b>{GAME_CONFIG.chroniclesTeamSize} atleti</b></p>
             <p className="moment-price"><span>Dove</span><b>Tornei › Open</b></p>
           </>
+        ) : null}
+        {content.kind === "tappa" ? (
+          // Outlook: the podium as bars (PO, approved 07/10); hidden in Modalità Onde.
+          <div className="moment-podium-bars" aria-hidden="true">
+            {([[2, "is-second"], [1, "is-first"], [3, "is-third"]] as const).map(([place, className]) => (
+              <span key={place} className={className}><b>{place}</b></span>
+            ))}
+          </div>
         ) : null}
         {content.kind === "foundation" ? (
           <p className="moment-price">

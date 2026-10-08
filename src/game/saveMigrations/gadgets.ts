@@ -67,6 +67,7 @@ export function migrateGadgetState(state: MigratableState): MigratableState {
       upgrades: state.unlocks?.upgrades ?? false,
       collaborators: state.unlocks?.collaborators ?? false,
       social: state.unlocks?.social ?? false,
+      tournaments: state.unlocks?.tournaments ?? false,
       forms: state.unlocks?.forms ?? false,
       gadget: gadgetUnlocked,
     },

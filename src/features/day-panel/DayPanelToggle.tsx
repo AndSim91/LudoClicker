@@ -5,7 +5,7 @@ import { useGameTime } from "../../game/GameTimeContext";
 import { useMediaQuery } from "../../shared/useMediaQuery";
 import { DAY_PANEL_MEDIA_QUERY } from "./DayPanel";
 import { selectDayNotifications } from "./dayNotifications";
-import { SchoolTournamentGoalCount } from "./SchoolTournamentGoalPill";
+import { StoryGoalCount } from "./StoryGoalPill";
 
 const BADGE_UPDATE_INTERVAL_MS = 1_000;
 
@@ -41,7 +41,7 @@ function DayPanelToggleButton({ open, onToggle }: { open: boolean; onToggle: () 
       <Icon name="calendar" />
       <span>Giornata</span>
       {unseen > 0 ? <b aria-hidden="true">{unseen > 9 ? "9+" : unseen}</b> : null}
-      {open ? null : <SchoolTournamentGoalCount />}
+      {open ? null : <StoryGoalCount />}
     </button>
   );
 }

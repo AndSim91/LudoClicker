@@ -1158,6 +1158,8 @@ export interface GameState {
     collaborators: boolean;
     social: boolean;
     forms: boolean;
+    /** Tornei opens once with 8 athletes with Forma 1, in every school (08/10/2026). */
+    tournaments: boolean;
     gadget: boolean;
   };
   upgrades: UpgradeLevels;

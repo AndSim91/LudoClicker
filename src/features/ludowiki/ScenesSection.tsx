@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
 import { LIGHT_INFLATION_MOMENT } from "../../game/lightInflation";
-import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SCHOOL_TOURNAMENT_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT, getEverEnrolledLegendaryIds } from "../../game/moments";
 import type { GameState, MomentKey } from "../../game/types";
 import {
   describeFoundation,
@@ -19,6 +19,7 @@ import {
 type Thumb = "council" | "social" | "legendary" | "trophy" | "gadget" | "superba" | "chronicles" | "foundation" | "inflation";
 
 const SCENES: readonly { key: MomentKey; thumb: Thumb }[] = [
+  { key: SCHOOL_TOURNAMENT_MOMENT, thumb: "trophy" },
   { key: "council", thumb: "council" },
   { key: SOCIAL_MOMENT, thumb: "social" },
   { key: "legendary", thumb: "legendary" },

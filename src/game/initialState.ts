@@ -153,6 +153,7 @@ export function createInitialState(
       collaborators: false,
       social: false,
       forms: false,
+      tournaments: false,
       gadget: false,
     },
     upgrades: createInitialUpgradeLevels(),

@@ -10,6 +10,7 @@ import { createChroniclesVictoryChallenge } from "./chroniclesFlow";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { isGameAreaUnlocked } from "./progression";
+import { unlockTournamentsIfEligible } from "./unlocks";
 import { nextRandom } from "./random";
 import { createSecretLegendaryContact } from "./secretLegendaryRoster";
 import { addMessage } from "./stateUpdates";
@@ -405,10 +406,12 @@ export function startChroniclesTournament(
 }
 
 export function processTournamentAtMonthEnd(
-  state: GameState,
+  current: GameState,
   absoluteMonth: number,
   now: number,
 ): GameState {
+  // The 8th athlete may earn Forma 1 in the December tick itself: Tornei opens before the check.
+  const state = unlockTournamentsIfEligible(current, now);
   if (!isGameAreaUnlocked("tournaments", state)) return state;
   const level = LEVEL_BY_CALENDAR_MONTH[getCalendarMonth(absoluteMonth)];
   if (!level) return state;

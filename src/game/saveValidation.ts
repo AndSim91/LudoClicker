@@ -569,6 +569,7 @@ export function isValidGameState(value: unknown): value is GameState {
     hasValidHistoryArchive(state) &&
     typeof state.unlocks?.collaborators === "boolean" &&
     typeof state.unlocks?.forms === "boolean" &&
+    typeof state.unlocks?.tournaments === "boolean" &&
     typeof state.unlocks?.gadget === "boolean" &&
     Array.isArray(state.secretUpgradeDiscoveries) &&
     state.secretUpgradeDiscoveries.every(

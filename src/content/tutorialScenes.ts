@@ -69,6 +69,8 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 ] as const;
 
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
+/** When Tornei opens with 8 athletes with Forma 1 (08/10/2026). */
+export const TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID = "tournaments-opening" as const;
 /** First yearly departures with no Istruttore assigned (06/10/2026). */
 export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
 /** At 15 members: the swords menu and the purchase (06/10/2026, 15 dal 08/10). */
@@ -86,6 +88,7 @@ export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
   FORMS_TEACHING_TUTORIAL_SCENE_ID,
+  TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID,
   MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
   SWORD_PURCHASE_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
@@ -521,7 +524,46 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Ogni dicembre teniamo il Torneo Scolastico dell'Ordine delle Onde, detto anche «Ander Games». Ma per poterlo disputare servono almeno 8 atleti iscritti e capaci almeno in Forma 1.",
           "Il tuo prossimo obiettivo è riuscire a disputare il Torneo Scolastico. Non importa quando: dicembre arriva ogni anno, puntuale come Babbo Natale.",
         ],
+        // Tornei is still closed (it opens with 8 athletes): the goal lives in «La mia giornata».
+        focusRegions: ["day-panel"],
+      },
+    ],
+  },
+  {
+    // 08/10/2026: when Tornei opens (8 athletes with Forma 1); the next tappa is playing the Scolastico.
+    // TESTI SEGNAPOSTO (bozze del documento «Primo tratto»): Andrea scrive quelli veri.
+    id: TOURNAMENTS_OPENING_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    canStart: ({ state }) => state.unlocks.tournaments,
+    steps: [
+      {
+        id: "school-tournament-ahead",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il Torneo Scolastico",
+        body: [
+          "Il torneo scolastico è il momento in cui tutti i tuoi allievi si mettono alla prova. Ci saranno dei vincitori e degli sconfitti, ma l'importante è dare il massimo.",
+          "Abbiamo i nostri otto atleti: ci vediamo a dicembre.",
+        ],
+        focusRegions: ["day-panel"],
+      },
+      {
+        id: "school-tournament-goal",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La nostra meta",
+        body: [
+          "Un titolo al Torneo Accademico, in Arena o in Stile, ci darà accesso alla Rete delle Onde: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "open-tournaments-page",
+        kind: "objective",
+        title: "Apri Tornei",
+        body: ["Tornei è nella barra a sinistra: lì trovi il calendario e chi ci rappresenterà."],
         focusRegions: ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView }) => activeView === "tournaments",
       },
     ],
   },
@@ -789,28 +831,31 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         tournamentTab: "results",
       },
       {
-        id: "who-goes-on",
+        // Tappa 1 (07/10/2026): «Chi va avanti» joined with Andrea's text.
+        id: "only-the-beginning",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Chi va avanti",
+        title: "Solo l'inizio",
         body: [
           "Arena e Stile hanno due podi separati: due classifiche, due modi per diventare campioni.",
-          "I migliori si qualificano al Torneo Accademico che si svolge attorno ad aprile, e da lì al Nazionale italiano di giugno fino ad arrivare alla Champion's Arena, il torneo mondiale di LudoSport, che si tiene a novembre.",
+          "Il torneo scolastico è soltanto l'inizio del tuo viaggio. Gli sconfitti sono tornati ad allenarsi preparandosi per il prossimo anno, mentre i vincitori hanno guadagnato l'accesso al prossimo evento rated dell'anno: il Torneo Accademico, ad aprile!",
+          "Da lì si passa al Nazionale italiano di giugno, fino alla Champion's Arena, il torneo mondiale di LudoSport, a novembre.",
         ],
         focusRegions: ["main", "tournament-podium"],
         scrollToRegion: "tournament-podium",
         tournamentTab: "results",
       },
       {
-        id: "this-year-goal",
+        id: "a-guide-for-the-future",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "La nostra meta",
+        title: "Una guida per il futuro",
         body: [
-          "Un titolo al Torneo Accademico, in Arena o in Stile, ci darà accesso alla [[Rete delle Onde]]: il nostro unico modo per aprire nuove scuole e accrescere la nostra fama in tutto il mondo!",
+          "Non mi aspetto che lo vinceremo subito quest'anno: i nostri giovani pupilli conoscono ancora poche Forme e hanno bisogno di una guida che li porti verso il futuro.",
+          "Cerchiamo di aumentare il numero di collaboratori della scuola: abbiamo bisogno di tutto l'aiuto possibile per crescere.",
         ],
-        focusRegions: [],
-        tournamentTab: "results",
+        // The next tappa (8 Collaboratori delle Onde) appears in «La mia giornata».
+        focusRegions: ["day-panel"],
       },
     ],
   },

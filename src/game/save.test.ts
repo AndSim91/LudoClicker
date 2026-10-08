@@ -564,6 +564,7 @@ describe("local save", () => {
       collaborators: false,
       social: false,
       forms: false,
+      tournaments: false,
       gadget: false,
     });
     expect(migrated.statistics.automatedCharacters).toBe(0);

@@ -174,7 +174,7 @@ describe("MessageList", () => {
             activeMembers: GAME_CONFIG.formsUnlockMembers,
             fame: GAME_CONFIG.formsUnlockMembers,
           },
-          unlocks: { ...initial.unlocks, forms: true },
+          unlocks: { ...initial.unlocks, forms: true, tournaments: true },
           messages: [tournamentMessage, ...initial.messages],
         }}
         folder="inbox"

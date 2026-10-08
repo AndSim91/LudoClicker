@@ -29,15 +29,29 @@ const tick = (state: GameState) => gameReducer(state, { type: "TICK", now: 2_000
 const scene = TUTORIAL_SCENES.find(({ id }) => id === FORMS_TEACHING_TUTORIAL_SCENE_ID)!;
 
 describe("Forme, Istruttori e Tornei a 10 iscritti (08/10/2026)", () => {
-  it("opens Forme and Tornei together at 10 members, also in a founded school", () => {
+  it("opens the Forme at 10 members and Tornei only with 8 athletes with Forma 1, also in a founded school", () => {
     const nine = tick(school(9));
     expect(nine.unlocks.forms).toBe(false);
-    expect(isGameAreaUnlocked("tournaments", nine)).toBe(false);
-    expect(isGameAreaUnlocked("tournaments", { ...nine, network: { ...nine.network, schoolCount: 1 } })).toBe(false);
 
     const ten = tick(school(10));
     expect(ten.unlocks.forms).toBe(true);
-    expect(isGameAreaUnlocked("tournaments", ten)).toBe(true);
+    expect(isGameAreaUnlocked("tournaments", ten)).toBe(false);
+    expect(isGameAreaUnlocked("tournaments", { ...ten, network: { ...ten.network, schoolCount: 1 } })).toBe(false);
+
+    const withAthletes = (count: number) => {
+      let trained = 0;
+      return gameReducer({
+        ...ten,
+        contacts: ten.contacts.map((contact) =>
+          contact.status === "enrolled" && trained++ < count ? { ...contact, forms: ["form-1"] } : contact),
+      }, { type: "TICK", now: 3_000 });
+    };
+    // One of the ten is a collaborator (a Leggendario) without Forme: 8 trained = 7 athletes.
+    expect(withAthletes(8).unlocks.tournaments).toBe(false);
+    const eight = withAthletes(9);
+    expect(eight.unlocks.tournaments).toBe(true);
+    expect(isGameAreaUnlocked("tournaments", eight)).toBe(true);
+    expect(eight.messages[0].subject).toBe("Si apre la stagione dei tornei");
   });
 
   it("keeps the Area Istruttore closed until the Forme open", () => {

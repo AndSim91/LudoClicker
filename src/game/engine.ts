@@ -79,7 +79,7 @@ import type {
   LegendaryCollaboratorProgress,
 } from "./types";
 import { sendEmail, write, writeCharacters } from "./writingFlow";
-import { unlockFormsIfEligible } from "./unlocks";
+import { unlockFormsIfEligible, unlockTournamentsIfEligible } from "./unlocks";
 
 export { getLegendaryAppearanceChance } from "./contacts";
 export { canFoundSchool, getPrestigeRequirements } from "./progression";
@@ -308,7 +308,10 @@ function completeTickStep(
   );
   if (!resolved.complete) return resolved;
   // Enrollments resolve in the tick: the Forme open there, at most a tick after the 10th member.
-  const recruited = recruitEnrolledLegendaryCollaborators(unlockFormsIfEligible(resolved.state), now);
+  const recruited = recruitEnrolledLegendaryCollaborators(
+    unlockTournamentsIfEligible(unlockFormsIfEligible(resolved.state), now),
+    now,
+  );
   const reconciled = reconcileCollaboratorManagement(recruited);
   const progressed = completeShortGoal(
     queueMoments(syncYearDigest(grantAchievements(syncGadgetMastery(reconciled), now), now)),

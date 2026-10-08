@@ -8,7 +8,7 @@ import {
   LIGHT_INFLATION_MOMENT,
 } from "../../game/lightInflation";
 import { formatCurrency, formatStat } from "../../shared/formatters";
-import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
+import { CHRONICLES_KEY_MOMENT, FOUNDATION_MOMENT, GADGET_MOMENT, SCHOOL_TOURNAMENT_MOMENT, SOCIAL_MOMENT, SUPERBA_MOMENT } from "../../game/moments";
 import { getReptileFameLevel } from "../../game/reptilePreparation";
 import { SUPERBA_COPY } from "../../game/reptileUnlock";
 import { GAME_CONFIG } from "../../game/config";
@@ -47,6 +47,7 @@ export type MomentContent =
   | { kind: "chronicles"; kicker: string; title: string; body: string }
   | { kind: "social"; kicker: string; title: string; body: string; followers: number }
   | { kind: "gadget"; kicker: string; title: string; body: string }
+  | { kind: "tappa"; kicker: string; title: string; body: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
@@ -81,6 +82,14 @@ const GADGET_CONTENT: MomentContent = {
   kicker: "Champion's Arena vinta",
   title: "Apre il Laboratorio Gadget",
   body: "Una vittoria così va messa su tutto. Il primo progetto è pronto.",
+};
+
+/** Tappa 1 «Podio» (07/10/2026): generic pupils, no names. */
+const SCHOOL_TOURNAMENT_CONTENT: MomentContent = {
+  kind: "tappa",
+  kicker: "Tappa 1 · Ander Games",
+  title: "Il primo Torneo Scolastico",
+  body: "Il primo podio della scuola: tre atleti, tre spade accese, una foto da appendere in palestra.",
 };
 
 const VICTORY_COPY: Record<VictoryMomentLevel, { kicker: string; title: string; note: string }> = {
@@ -219,6 +228,7 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
     };
   }
   if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
+  if (key === SCHOOL_TOURNAMENT_MOMENT) return SCHOOL_TOURNAMENT_CONTENT;
   // Before the unlock of the current school the followers are still zero: Social starts them from the Fama.
   if (key === SOCIAL_MOMENT) return describeSocial(state.unlocks.social ? state.school.followers : state.school.fame);
   if (key === GADGET_MOMENT) return GADGET_CONTENT;
@@ -264,6 +274,7 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     return describeFoundation(state, state.network.schoolCount + 1, { follower });
   }
   if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
+  if (key === SCHOOL_TOURNAMENT_MOMENT) return SCHOOL_TOURNAMENT_CONTENT;
   if (key === SOCIAL_MOMENT) return describeSocial(state.school.followers);
   if (key === GADGET_MOMENT) return GADGET_CONTENT;
   if (key === SUPERBA_MOMENT) {

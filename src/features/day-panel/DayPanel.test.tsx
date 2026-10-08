@@ -473,7 +473,7 @@ describe("DayPanel", () => {
         nextFeeAt: 60_000,
         fame: 6,
       },
-      unlocks: { ...initial.unlocks, forms: true },
+      unlocks: { ...initial.unlocks, forms: true, tournaments: true },
     };
 
     const { rerender } = render(<DayPanel state={upcomingState} />);

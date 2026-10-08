@@ -36,7 +36,7 @@ function createTournamentSchool(memberCount = 6) {
   const enrolled = addAdminMembers(initial, memberCount);
   return {
     ...enrolled,
-    unlocks: { ...enrolled.unlocks, forms: true },
+    unlocks: { ...enrolled.unlocks, forms: true, tournaments: true },
     contacts: enrolled.contacts.map((contact) =>
       contact.status === "enrolled" ? { ...contact, forms: ["form-1" as const] } : contact,
     ),

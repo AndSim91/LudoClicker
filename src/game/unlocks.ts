@@ -1,6 +1,7 @@
 import { isOfficialSwordSupplierUnlocked } from "../content/upgrades";
 import { GAME_CONFIG } from "./config";
 import { addMessage } from "./stateUpdates";
+import { getEligibleSchoolContactsFromRoster } from "./tournamentSimulation";
 import type { CollaboratorAssignment, GameState } from "./types";
 
 export function hasSocialCollaboratorRequirement(collaborators: number): boolean {
@@ -38,6 +39,22 @@ export function unlockSocialIfEligible(state: GameState, now: number): GameState
 export function unlockFormsIfEligible(state: GameState): GameState {
   if (state.unlocks.forms || state.school.peakActiveMembers < GAME_CONFIG.formsUnlockMembers) return state;
   return { ...state, unlocks: { ...state.unlocks, forms: true } };
+}
+
+/** Tornei opens, for good, the first time the school has 8 athletes with Forma 1 (08/10/2026). */
+export function unlockTournamentsIfEligible(state: GameState, now: number): GameState {
+  if (state.unlocks.tournaments || !state.unlocks.forms) return state;
+  const athletes = getEligibleSchoolContactsFromRoster(state.contacts, state.collaborators).length;
+  if (athletes < GAME_CONFIG.tournamentMinimumMembers) return state;
+  return addMessage(
+    { ...state, unlocks: { ...state.unlocks, tournaments: true } },
+    now,
+    "Si apre la stagione dei tornei",
+    `${GAME_CONFIG.tournamentMinimumMembers} atleti con la Forma 1: la scuola può presentarsi al Torneo Scolastico. Tornei è nella barra a sinistra.`,
+    "positive",
+    "focused",
+    "tournaments",
+  );
 }
 
 /** Gadget opens with its sector, the Area Istruttore with the Forme. */

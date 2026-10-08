@@ -894,3 +894,77 @@
 @media (prefers-reduced-motion: reduce) {
   .moment-social *, .moment-gadget * { animation: none !important; }
 }
+
+/* Tappa 1 «Podio» (concept v4, 07/10/2026; TappaOneArt.tsx). The Arena of the
+ * Scolastico, the bout, then the podium layer on top. 8 s instead of 6.5. */
+.moment-layer.is-tappa .moment-progress span { animation-duration: 8s; }
+.moment-podium-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 64px;
+  margin: 14px 0 4px;
+}
+.moment-podium-bars span {
+  display: grid;
+  width: 54px;
+  padding-top: 6px;
+  place-items: start center;
+  border-radius: 3px 3px 0 0;
+  background: var(--blue-100);
+  font-size: 13px;
+}
+.moment-podium-bars .is-first { height: 100%; background: var(--blue-600); color: #fff; }
+.moment-podium-bars .is-second { height: 70%; }
+.moment-podium-bars .is-third { height: 48%; }
+:root[data-theme="dark"] .moment-podium-bars { display: none; }
+
+:root[data-theme="dark"] .moment-layer.is-tappa .moment-art {
+  position: relative;
+  width: min(760px, 92vw);
+  height: auto;
+  max-height: none;
+  aspect-ratio: 640 / 300;
+  overflow: hidden;
+  border: 1px solid rgb(224 166 74 / 35%);
+  border-radius: 10px;
+  background: #021e33;
+}
+:root[data-theme="dark"] .moment-layer.is-tappa .moment-kicker { animation-delay: 6.3s; }
+:root[data-theme="dark"] .moment-layer.is-tappa .moment-title { animation-delay: 6s; }
+:root[data-theme="dark"] .moment-layer.is-tappa .moment-body { animation-delay: 6.6s; }
+.moment-tappa .t1-duel,
+.moment-tappa .t1-podium-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.moment-tappa .t1-duel .fd-arena { width: 100%; height: 100%; }
+.moment-tappa.is-podium .t1-duel .gym-pair,
+.moment-tappa.is-podium .t1-duel .fd-judge { animation: t1-out 0.5s ease-in forwards; }
+.t1-step { transform-box: fill-box; transform-origin: 50% 100%; animation: t1-rise 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.15) both; }
+.t1-step-1 { fill: #f0b85a; }
+.t1-step-2 { fill: #c9d3d6; }
+.t1-step-3 { fill: #c98a52; }
+.t1-step rect { stroke: #0a1f33; stroke-width: 1.5px; }
+.t1-step-num { font: 600 18px var(--font-display); fill: #0a1f33; }
+.t1-banner-drop { animation: t1-drop 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) 0.35s both; }
+.t1-land { animation: t1-land 0.45s cubic-bezier(0.3, 1.5, 0.6, 1) both; }
+.t1-sparks circle { fill: #ffd27a; opacity: 0; transform-box: fill-box; animation: t1-spark 1.1s ease-out forwards; }
+.t1-caption { font: 600 20px var(--font-display); letter-spacing: 0.14em; fill: #ffe2a8; animation: t1-fade 0.6s ease-out 2.1s both; }
+.t1-flash { fill: #fff; opacity: 0; pointer-events: none; animation: t1-flash 0.5s ease-out 1.9s both; }
+.moment-tappa.is-still * { animation: none !important; }
+@keyframes t1-out { to { opacity: 0; } }
+@keyframes t1-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes t1-drop { from { transform: translateY(-190px); } to { transform: translateY(0); } }
+@keyframes t1-land { 0% { opacity: 0; transform: translateY(-70px); } 60% { opacity: 1; } to { opacity: 1; transform: translateY(0); } }
+@keyframes t1-spark { 0% { opacity: 1; transform: translate(0) scale(1); } to { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0.3); } }
+@keyframes t1-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes t1-flash { 0% { opacity: 0; } 20% { opacity: 0.85; } to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-tappa * { animation: none !important; }
+}
+.moment-tappa.is-still.is-podium .t1-duel .gym-pair,
+.moment-tappa.is-still.is-podium .t1-duel .fd-judge { opacity: 0; }
+/* «Riduci animazioni»: the podium is already there, so are the words. */
+:root[data-theme="dark"] .moment-layer.is-tappa:has(.moment-tappa.is-still) .moment-kicker,
+:root[data-theme="dark"] .moment-layer.is-tappa:has(.moment-tappa.is-still) .moment-title,
+:root[data-theme="dark"] .moment-layer.is-tappa:has(.moment-tappa.is-still) .moment-body { animation: none; }

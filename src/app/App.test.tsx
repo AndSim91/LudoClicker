@@ -127,7 +127,7 @@ describe("App profile and navigation", () => {
       school: { ...initial.school, activeMembers: 6, fame: 6 },
       equipment: { ...initial.equipment, wear: 3 },
       statistics: { ...initial.statistics, emailsSent: 3, eventsCompleted: 1 },
-      unlocks: { ...initial.unlocks, upgrades: true, forms: true },
+      unlocks: { ...initial.unlocks, upgrades: true, forms: true, tournaments: true },
     });
     render(<App />);
 
@@ -179,7 +179,7 @@ describe("App profile and navigation", () => {
     saveGame({
       ...initial,
       school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, fame: 10 },
-      unlocks: { ...initial.unlocks, forms: true },
+      unlocks: { ...initial.unlocks, forms: true, tournaments: true },
     });
     render(<App />);
 

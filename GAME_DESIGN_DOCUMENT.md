@@ -2444,8 +2444,9 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | Prima email inviata                        | messaggio “Inviata la prima email!”; la prima email garantisce una prova |
 | Prima missione “Inviti in partenza” (2 email dopo il tutorial) | pagina Eventi con il Volantinaggio gratuito               |
 | Prima prova prenotata                      | scena di tutorial sulle lezioni di prova in La mia giornata             |
-| Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici), Forme |
-| 6 punti Fama                               | pagina Tornei                                                            |
+| Primo iscritto                             | Euro e quote associative, pagine Scuola e Upgrade (tutti i rami pubblici) |
+| 10 iscritti di picco (in ogni scuola)      | Forme e Area Istruttore dei Collaboratori                                |
+| 8 atleti con la Forma 1 (in ogni scuola)   | pagina Tornei e messaggio «Si apre la stagione dei tornei»               |
 | 10 email inviate                           | riepilogo delle rarità nella pagina Scuola (compare prima se c'è già un iscritto non Comune o un Collaboratore) |
 | 10° contatto della scuola iniziale         | Andrea Simonazzi e, dal contatto successivo, le rarità avanzate         |
 | potenziamento Fornitore ufficiale (500 €)  | fornitore ufficiale di spade                                             |
@@ -2458,7 +2459,8 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
 Collaboratori 8 + 2 per ogni scuola già fondata, eventi completati 25 × ciclo;
 nessun Leggendario Segreto deve avere una prova in corso. Dopo la prima
-fondazione tutte le pagine, tranne Gadget, restano visibili fin dall'inizio.
+fondazione tutte le pagine, tranne Gadget, Forme e Tornei, restano visibili fin
+dall'inizio.
 
 > **Da implementare:** statistiche minime dopo la prima email e report aggregato del funnel dopo la prima prova non esistono.
 
@@ -3245,25 +3247,42 @@ l'avanzamento.
    disponibile. I salvataggi precedenti all'introduzione della scena la
    registrano come già saltata.
 
-9. **Forme, Istruttori e Tornei** (`forms-teaching`, 08/10/2026; sostituisce il
-   vecchio dialogo dello sconto Istruttori). In ogni scuola Forme, Area
-   Istruttore dei Collaboratori e pagina Tornei si aprono insieme a 10 iscritti
-   di picco; prima non se ne vede traccia. La scena parte solo la prima volta in
+9. **Forme e Istruttori** (`forms-teaching`, 08/10/2026; sostituisce il
+   vecchio dialogo dello sconto Istruttori). In ogni scuola Forme e Area
+   Istruttore dei Collaboratori si aprono insieme a 10 iscritti di picco; prima
+   non se ne vede traccia. La scena parte solo la prima volta in
    assoluto: «Dieci iscritti», «Le sette Forme» (parte vera su LudoSport),
    «Arena e Stile», «Il primo Istruttore»; poi due obiettivi, assegnare un
    Collaboratore (Andrea Simonazzi, che a 10 iscritti c'è sempre) all'Area
    Istruttore e fargli imparare la Forma 1 da Istruttore, gratis per la borsa
    di studio di Todaro (vale una volta sola, finché la scena non è conclusa);
-   infine «Gli Ander Games» dà l'obiettivo del Torneo Scolastico (8 atleti con
-   almeno la Forma 1, a dicembre). I salvataggi già oltre i 10 iscritti o la
+   infine «Gli Ander Games» dà la prima tappa (8 atleti con almeno la Forma 1)
+   e indica «La mia giornata». I salvataggi già oltre i 10 iscritti o la
    prima scuola la segnano come vista (migrazione v106).
-   Da qui fino al primo Torneo Scolastico giocato dalla scuola (in ogni scuola,
-   dopo i 10 iscritti) l'obiettivo resta fisso in «La mia giornata»: una
-   linguetta «🏆 3/8» (atleti con almeno la Forma 1 su 8) accanto al titolo
-   (concept C, 08/10/2026), con il fumetto «Ander Games» al passaggio del mouse
-   o al tocco. Con la giornata chiusa (sotto 1441 px) il conteggio sta nel
+
+   **Le tappe in «La mia giornata»** (08/10/2026). Dopo questa scena, in ogni
+   scuola, l'obiettivo del momento resta fisso in «La mia giornata»: una
+   linguetta accanto al titolo (concept C) con un fumetto al passaggio del
+   mouse o al tocco. Con la giornata chiusa (sotto 1441 px) il dato sta nel
    pulsante «Giornata | 🏆 3/8» (N3): il passaggio del mouse mostra il fumetto,
-   un tocco apre la colonna.
+   un tocco apre la colonna. Le tappe, in ordine (`storyGoal.ts`):
+   1. **Ander Games**: «🏆 3/8», atleti con almeno la Forma 1 su 8;
+   2. **Torneo Scolastico**: aperto Tornei, un conto alla rovescia fino al
+      prossimo Scolastico in secondi di gioco («42 s», sopra il minuto «9:42»);
+   3. **Collaboratori delle Onde**: dopo il primo Scolastico giocato, «👥 3/8»
+      collaboratori su 8; sparisce quando nasce il Consiglio delle Onde (il
+      fumetto non lo anticipa).
+
+9b. **Si apre la stagione dei tornei** (`tournaments-opening`, 08/10/2026).
+   Tornei si apre, per sempre e in ogni scuola, la prima volta che la scuola ha
+   8 atleti con almeno la Forma 1 (anche se l'ottavo arriva nel tick di
+   dicembre, prima del controllo del torneo); prima di allora nessun torneo si
+   gioca né risulta saltato. Arriva il messaggio «Si apre la stagione dei
+   tornei» e parte la scena: «Il Torneo Scolastico», «La nostra meta»
+   (Accademico → Rete delle Onde), obiettivo «Apri Tornei». **Testi
+   segnaposto**: li scrive Andrea. Dalla migrazione v107 Tornei resta aperto
+   nei salvataggi con le Forme e già oltre la vecchia soglia (Fama 6, una
+   scuola fondata o uno Scolastico giocato), che segnano la scena come vista.
 
 10. **Una squadra che cresce** All'ottavo Collaboratore la gestione passa alla
     vista aggregata per settore: la scena spiega il cambio, chiede di aprire
@@ -3296,11 +3315,13 @@ Tutorial della seconda metà della partita (decisione di Andrea del 05/10, dalla
 v102; i salvataggi che li hanno già superati li segnano come fatti):
 
 14. **Il primo torneo è finito** (`first-tournament`): al primo Torneo
-    Scolastico giocato davvero (uno saltato non lascia risultati). Fa aprire Tornei, che si apre su Risultati; poi «Guarda la
+    Scolastico giocato davvero (uno saltato non lascia risultati), dopo la scena
+    «Tappa 1». Fa aprire Tornei, che si apre su Risultati; poi «Guarda la
     finale», Arena e Stile (voto da 5,5 a 8,5 circa, «Dettaglio incontro»),
-    podi e qualificazioni (Accademico ad aprile, Nazionale a giugno, posti dagli
-    iscritti attivi) e la meta: il Nazionale apre la Rete, Arena e Stile insieme
-    «qualcosa in più».
+    «Solo l'inizio» (podi separati, i vincitori all'Accademico di aprile, poi
+    Nazionale di giugno e Champion's Arena di novembre) e «Una guida per il
+    futuro» (non vinceremo subito, servono collaboratori), che indica la nuova
+    tappa in «La mia giornata»: 8 Collaboratori delle Onde.
 15. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
     nazionale, solo nella prima scuola. Fa aprire la Rete; mappa, fondare è
     ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
@@ -4952,6 +4973,19 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   rivede quando il Consiglio nasce;
 - **un Leggendario entra nell'Ordine**: ogni Leggendario alla sua prima
   iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
+- **Tappa 1 · il primo Torneo Scolastico** (dall'08/10, concept «Podio»
+  v4): al primo Scolastico giocato, prima del tutorial `first-tournament`. Nell'Arena
+  dello Scolastico due allievi si scambiano uno o due attacchi con la vera
+  coreografia, poi quello d'oro vince con un Disarmo (senza etichetta);
+  pose finali, sale il podio 2-1-3, scende lo stendardo della scuola sopra
+  quello dell'Ordine, atterrano il terzo (rosso), il secondo (blu) e il primo
+  (oro), scintille, flash e la scritta «PRIMO TORNEO SCOLASTICO». Al massimo
+  8 s; con «Riduci animazioni» l'ultimo fotogramma. Testi: «Tappa 1 · Ander
+  Games» / «Il primo Torneo Scolastico» / «Il primo podio della scuola: tre
+  atleti, tre spade accese, una foto da appendere in palestra.» (da rivedere
+  con Andrea). In Outlook la scheda ha il trofeo e tre barre 2-1-3. Codice:
+  `TappaOneArt.tsx`, `SCHOOL_TOURNAMENT_MOMENT` in `moments.ts`; dalla v107 chi
+  ha già giocato uno Scolastico o fondato una scuola la segna come vista;
 - **prima vittoria** di Torneo Nazionale, Champion's Arena, Reptile (o
   Superba) e Chronicles of Ludosport;
 - **la porta delle Chronicles si apre** (dal 05/10, concept A): alla prima
