@@ -199,7 +199,7 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 5 },
+      school: { ...initial.school, activeMembers: 10 },
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 
@@ -212,11 +212,11 @@ describe("game engine: narrative", () => {
     expect(repeated.narrative.history).toHaveLength(1);
   });
 
-  it("holds Eventi e Imprevisti until the school has 5 members", () => {
+  it("holds Eventi e Imprevisti until the school has 10 members", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 4 },
+      school: { ...initial.school, activeMembers: 9 },
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
     };
 
@@ -230,8 +230,8 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const due = {
       ...initial,
-      school: { ...initial.school, activeMembers: 5, currentMonth: 7 },
-      contacts: initial.contacts.map((contact, index) => index < 5
+      school: { ...initial.school, activeMembers: 10, currentMonth: 7 },
+      contacts: initial.contacts.map((contact, index) => index < 10
         ? { ...contact, status: "enrolled" as const }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
@@ -251,8 +251,8 @@ describe("game engine: narrative", () => {
     const due = {
       ...initial,
       randomSeed: 0,
-      school: { ...initial.school, activeMembers: 5 },
-      contacts: initial.contacts.map((contact, index) => index < 5
+      school: { ...initial.school, activeMembers: 10 },
+      contacts: initial.contacts.map((contact, index) => index < 10
         ? { ...contact, status: "enrolled" as const }
         : contact),
       narrative: { ...initial.narrative, nextEventAt: 2_000 },
@@ -519,7 +519,7 @@ describe("game engine: narrative", () => {
     const initial = createInitialState(1_000);
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 6 },
+      school: { ...initial.school, activeMembers: 10 },
       narrative: {
         nextEventAt: 2_000,
         history: [

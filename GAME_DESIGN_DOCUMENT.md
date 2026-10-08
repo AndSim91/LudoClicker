@@ -3425,9 +3425,9 @@ di Genova (`src/content/specialCollaborators.ts`) e i Leggendari Segreti
 Gli eventi casuali (eventi narrativi, `src/content/narrativeEvents.ts`) arrivano
 come messaggi nella Posta. Il loro esito è automatico; in seguito potranno
 offrire scelte. Ne avviene uno ogni 2–5 mesi di gioco (120.000–300.000 ms,
-estratti a caso), solo se la scuola ha almeno 5 iscritti attivi
+estratti a caso), solo se la scuola ha almeno 10 iscritti attivi
 (`narrativeEventMinMembers`, 08/10/2026): sotto quella soglia il timer viene
-rimandato di 2 mesi, così il primo evento arriva entro 2 mesi dal quinto
+rimandato di 2 mesi, così il primo evento arriva entro 2 mesi dal decimo
 iscritto. Gli eventi scriptati (Mancato rinnovo, sconfitte dei Leggendari
 Segreti) seguono le proprie regole. L'evento è
 estratto in modo uniforme fra quelli il cui minimo di iscritti attivi è
@@ -4375,6 +4375,8 @@ disponibile come opzione.
 - l'automazione non arriva da un Ultra Raro casuale: il 10° contatto della
   scuola iniziale è sempre Andrea Simonazzi (Leggendario), con prenotazione al
   100% e iscrizione garantita; all'iscrizione diventa il primo collaboratore.
+  Nella scuola iniziale i suoi tempi sono da tutorial: risposta all'email in
+  2 secondi, attesa della prova 15 secondi, prova di 5 secondi;
   Rari, Ultra Rari e altri Leggendari compaiono solo dall'11° contatto;
 - il volantinaggio è sempre gratuito; il primo è guidato dal tutorial, dura 5
   secondi e porta sempre 1 contatto (normalmente dà 1 contatto solo nel 33%

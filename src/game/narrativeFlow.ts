@@ -22,7 +22,7 @@ export function processNarrativeEvent(
   gainMultiplier: number,
 ): GameState {
   if (now < state.narrative.nextEventAt) return state;
-  // Andrea 08/10: niente Eventi e Imprevisti sotto i 5 iscritti; il primo arriva entro 2 minuti dal quinto.
+  // Andrea 08/10: niente Eventi e Imprevisti sotto i 10 iscritti; il primo arriva entro 2 minuti dal decimo.
   if (state.school.activeMembers < GAME_CONFIG.narrativeEventMinMembers) {
     return {
       ...state,

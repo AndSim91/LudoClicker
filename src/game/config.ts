@@ -59,8 +59,8 @@ export const GAME_CONFIG = {
   // Andrea Simonazzi nella scuola iniziale è un tutorial: risposta, attesa e
   // prova durano pochi secondi in tutto.
   tutorialAndreaOutcomeMs: 2_000,
-  tutorialAndreaTrialWaitMs: 5_000,
-  tutorialAndreaTrialDurationMs: 3_000,
+  tutorialAndreaTrialWaitMs: 15_000,
+  tutorialAndreaTrialDurationMs: 5_000,
   // Il primo Volantinaggio del tutorial porta sempre questi contatti (07/10).
   tutorialSparringContacts: 5,
   equipmentMaintenanceCostPerLoad: 2,
@@ -107,7 +107,7 @@ export const GAME_CONFIG = {
   socialBaseFollowerValue: 0.1,
   equipmentRepairIntervalMs: 1_500,
   equipmentSwordRepairWork: 150,
-  narrativeEventMinMembers: 5,
+  narrativeEventMinMembers: 10,
   narrativeEventMinMs: 120_000,
   narrativeEventMaxMs: 300_000,
   narrativeHistoryLimit: 30,

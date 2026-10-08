@@ -32,7 +32,7 @@ describe("Andrea Simonazzi nella scuola iniziale", () => {
       const state = { ...initial, contacts: [contact], pendingEmailOutcomes: [outcome], network: { ...initial.network, schoolCount } };
       return resolveEmailOutcome(state, outcome, 1_000).scheduledTrials[0].resolvesAt - 1_000;
     };
-    expect(iterMs(0)).toBeLessThanOrEqual(10_000);
+    expect(iterMs(0)).toBe(20_000);
     expect(iterMs(3)).toBeGreaterThan(30_000);
   });
 });
