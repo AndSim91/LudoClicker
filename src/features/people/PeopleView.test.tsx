@@ -736,16 +736,13 @@ describe("PeopleView", () => {
     expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
       .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
-    const resetWritingSort = within(writingDialog).getByRole("button", {
-      name: "Ripristina ordinamento redazione",
-    });
-    expect(resetWritingSort).toBeEnabled();
-    fireEvent.click(resetWritingSort);
+    const writingSortSelect = within(writingDialog).getByRole("combobox", { name: "Ordina redazione" });
+    expect(writingSortSelect).toHaveValue("name");
+    fireEvent.change(writingSortSelect, { target: { value: "" } });
     expect(nameSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "none");
     expect(within(writingDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
       .toEqual(["Apri dettagli di Zeta Redazione", "Apri dettagli di Alpha Redazione"]);
-    expect(resetWritingSort).toBeDisabled();
 
     fireEvent.click(within(writingDialog).getByRole("button", { name: "Chiudi pannello Redazione" }));
     fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
@@ -758,7 +755,8 @@ describe("PeopleView", () => {
     expect(within(instructorDialog).queryByRole("button", {
       name: "Ordina collaboratori per Formazione Tecnici",
     })).not.toBeInTheDocument();
-    expect(within(instructorDialog).queryByRole("option", {
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: /^Filtri/ }));
+    expect(within(instructorDialog).queryByRole("button", {
       name: "Corso Tecnico prenotato",
     })).not.toBeInTheDocument();
 
@@ -770,23 +768,19 @@ describe("PeopleView", () => {
     expect(within(firstInstructorIdentity as HTMLElement).getByLabelText(/Forme conosciute:/)).toBeVisible();
     expect(within(firstInstructorIdentity as HTMLElement).getByLabelText("Valori Arena e Stile")).toBeVisible();
 
-    fireEvent.change(within(instructorDialog).getByRole("combobox", {
-      name: "Filtra istruttori per rarità",
-    }), { target: { value: "rare" } });
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Raro" }));
     expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
       .toEqual(["Apri dettagli di Beta Istruttore"]);
-    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera" }));
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera filtri" }));
     fireEvent.change(within(instructorDialog).getByRole("searchbox", {
       name: "Filtra istruttori per nome o email",
     }), { target: { value: "Delta" } });
     expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
       .toHaveLength(1);
-    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera" }));
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Azzera filtri" }));
 
-    const mobileSort = within(instructorDialog).getByRole("combobox", {
-      name: "Campo di ordinamento collaboratori del settore",
-    });
+    const mobileSort = within(instructorDialog).getByRole("combobox", { name: "Ordina istruttori" });
     fireEvent.change(mobileSort, { target: { value: "mastery" } });
     expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ })
       .map((button) => button.getAttribute("aria-label")))
@@ -860,18 +854,18 @@ describe("PeopleView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Gestisci Istruttori" }));
     const instructorDialog = screen.getByRole("dialog", { name: "Istruttori" });
-    const rarityFilter = within(instructorDialog).getByRole("combobox", {
-      name: /^Filtra istruttori per rarit/,
-    });
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: /^Filtri/ }));
+    const legendaryChip = within(instructorDialog).getByRole("button", { name: "Leggendario" });
 
-    fireEvent.change(rarityFilter, { target: { value: "legendary" } });
+    fireEvent.click(legendaryChip);
     expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
       .toHaveLength(2);
     expect(within(instructorDialog).getByRole("button", {
       name: "Apri dettagli di Enrico Giovanetti",
     })).toBeVisible();
 
-    fireEvent.change(rarityFilter, { target: { value: "secret-legendary" } });
+    fireEvent.click(legendaryChip);
+    fireEvent.click(within(instructorDialog).getByRole("button", { name: "Leggendario Segreto" }));
     expect(within(instructorDialog).getAllByRole("button", { name: /Apri dettagli di/ }))
       .toHaveLength(1);
     expect(within(instructorDialog).getByRole("button", {
@@ -992,10 +986,6 @@ describe("PeopleView", () => {
       name: "Preparazione atletica di Istruttore Preparatore",
     })).toHaveClass("is-indeterminate");
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Filtra per attività" }), {
-      target: { value: "active" },
-    });
-    expect(screen.getByText("Istruttore Preparatore")).toBeVisible();
   });
 
   it("draws active Instructor and Technician courses as their own quadrants", () => {
@@ -1561,14 +1551,12 @@ describe("PeopleView", () => {
     expect(rows[2]).toHaveTextContent("Punteggio Nascosto");
     expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
 
-    const resetSort = within(roster).getByRole("button", {
-      name: "Ripristina ordinamento iscritti",
-    });
-    fireEvent.click(resetSort);
+    const sortSelect = within(roster).getByRole("combobox", { name: "Ordina iscritti" });
+    expect(sortSelect).toHaveValue("arena");
+    fireEvent.change(sortSelect, { target: { value: "" } });
     rows = roster.querySelectorAll(".member-row:not(.people-head)");
     expect(rows[0]).toHaveTextContent("Punteggio Nascosto");
     expect(arenaSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "none");
-    expect(resetSort).toBeDisabled();
   });
 
   it("shows secret Legendaries as the highest official rarity without a name badge", () => {
@@ -1676,23 +1664,36 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Iscritti" });
-    expect(within(roster).getByRole("combobox", { name: "Filtra iscritti per rarità" })).toBeVisible();
+    fireEvent.click(within(roster).getByRole("button", { name: /^Filtri/ }));
     expect(within(roster).getByRole("spinbutton", { name: "Filtra iscritti per Arena minima" })).toBeVisible();
 
-    fireEvent.change(within(roster).getByRole("combobox", { name: "Filtra iscritti per rarità" }), {
-      target: { value: "rare" },
-    });
+    fireEvent.click(within(roster).getByRole("button", { name: "Raro" }));
     expect(within(roster).getByText("Bruno Raro")).toBeVisible();
     expect(within(roster).queryByText("Alba Esperta")).not.toBeInTheDocument();
 
-    fireEvent.click(within(roster).getByRole("button", { name: "Azzera filtri" }));
+    // Closed drawer: the active filter stays as a removable chip.
+    fireEvent.click(within(roster).getByRole("button", { name: /^Filtri · 1/ }));
+    fireEvent.click(within(roster).getByRole("button", { name: "Togli il filtro Raro" }));
+    expect(within(roster).getByText("Alba Esperta")).toBeVisible();
+    fireEvent.click(within(roster).getByRole("button", { name: /^Filtri/ }));
     fireEvent.change(within(roster).getByRole("spinbutton", { name: "Filtra iscritti per Arena minima" }), {
       target: { value: "50" },
     });
     expect(within(roster).getByText("Alba Esperta")).toBeVisible();
     expect(within(roster).queryByText("Bruno Raro")).not.toBeInTheDocument();
     expect(within(roster).queryByText("Carla Base")).not.toBeInTheDocument();
-    expect(within(roster).getByText("1 di 3 iscritti")).toBeVisible();
+    expect(roster.querySelector(".list-filter-count")).toHaveTextContent("1 di 3 iscritti");
+
+    fireEvent.change(within(roster).getByRole("spinbutton", { name: "Filtra iscritti per Arena minima" }), {
+      target: { value: "" },
+    });
+    // «Forme imparate»: only members who learned the Form.
+    fireEvent.click(within(roster).getByRole("button", { name: /^CY/ }));
+    expect(within(roster).queryByText("Carla Base")).not.toBeInTheDocument();
+    expect(within(roster).getByText("Bruno Raro")).toBeVisible();
+
+    fireEvent.click(within(roster).getByRole("button", { name: /Preferiti/ }));
+    expect(within(roster).getByText("Nessun iscritto corrisponde ai filtri.")).toBeVisible();
   });
 
   it("uses one shared progress clock for multiple simultaneous trainings", () => {
@@ -1880,76 +1881,7 @@ describe("PeopleView", () => {
     expect(within(roster).queryByText("Collaboratore Scalabile 0")).not.toBeInTheDocument();
   });
 
-  it("filters collaborators by the values shown in their table columns", () => {
-    const initial = withMasterEye(createInitialState(1_000));
-    const collaborators = [
-      {
-        id: "writer",
-        contactId: initial.contacts[0].id,
-        displayName: "Alba Autrice",
-        joinedAt: 1_000,
-        forms: [] as FormId[],
-        instructorForms: [] as FormId[],
-        assignment: "writing" as const,
-        rarity: "legendary" as const,
-        mastery: { writing: 400, events: 0, equipment: 0, instructor: 0 },
-      },
-      {
-        id: "event-manager",
-        contactId: initial.contacts[1].id,
-        displayName: "Bruno Eventi",
-        joinedAt: 1_000,
-        forms: ["course-y" as const],
-        instructorForms: [] as FormId[],
-        assignment: "events" as const,
-        rarity: "ultra-rare" as const,
-      },
-      {
-        id: "unassigned",
-        contactId: initial.contacts[2].id,
-        displayName: "Carla Libera",
-        joinedAt: 1_000,
-        forms: [] as FormId[],
-        instructorForms: [] as FormId[],
-        assignment: null,
-        rarity: "ultra-rare" as const,
-      },
-    ];
-    render(
-      <PeopleView
-        state={{
-          ...initial,
-          collaborators,
-          unlocks: { ...initial.unlocks, collaborators: true },
-        }}
-        onAssign={() => undefined}
-        onStartTraining={() => undefined}
-      />,
-    );
-
-    const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    fireEvent.change(within(roster).getByPlaceholderText("Nome o email"), {
-      target: { value: "Bruno" },
-    });
-    expect(within(roster).getByText("Bruno Eventi")).toBeVisible();
-    expect(within(roster).queryByText("Alba Autrice")).not.toBeInTheDocument();
-
-    fireEvent.click(within(roster).getByRole("button", { name: "Azzera" }));
-    fireEvent.change(within(roster).getByRole("combobox", { name: "Filtra per livello" }), {
-      target: { value: "1" },
-    });
-    expect(within(roster).getByText("Alba Autrice")).toBeVisible();
-    expect(within(roster).queryByText("Bruno Eventi")).not.toBeInTheDocument();
-
-    fireEvent.click(within(roster).getByRole("button", { name: "Azzera" }));
-    fireEvent.change(within(roster).getByRole("combobox", { name: "Filtra per statistiche" }), {
-      target: { value: "visible" },
-    });
-    expect(within(roster).getByText("Bruno Eventi")).toBeVisible();
-    expect(within(roster).queryByText("Carla Libera")).not.toBeInTheDocument();
-  });
-
-  it("sorts collaborator rows using column data in both directions", () => {
+  it("lists the collaborators before the Consiglio by sector, without filters or sorting", () => {
     const initial = withMasterEye(createInitialState(1_000));
     const contacts = [
       { ...initial.contacts[0], id: "contact-carla", arenaBase: 1, styleBase: 1 },
@@ -2002,40 +1934,17 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    const nameSort = within(roster).getByRole("button", {
-      name: "Ordina collaboratori per Collaboratore",
-    });
-    fireEvent.click(nameSort);
-    let rows = roster.querySelectorAll(".collaborator-row");
+    // Andrea, 08/10: at most seven collaborators here, so no search, filters or sorting.
+    expect(within(roster).queryByRole("searchbox")).not.toBeInTheDocument();
+    expect(within(roster).queryByRole("combobox", { name: /Ordina|Filtra/ })).not.toBeInTheDocument();
+    expect(within(roster).queryByRole("button", { name: /^Ordina/ })).not.toBeInTheDocument();
+    const rows = roster.querySelectorAll(".collaborator-row");
     expect(rows[0]).toHaveTextContent("Alba Esperta");
-    expect(rows[1]).toHaveTextContent("Bruno Tecnico");
-    expect(rows[2]).toHaveTextContent("Carla Base");
-
-    fireEvent.click(nameSort);
-    rows = roster.querySelectorAll(".collaborator-row");
-    expect(rows[0]).toHaveTextContent("Carla Base");
-    expect(nameSort.closest('[role="columnheader"]')).toHaveAttribute("aria-sort", "descending");
-
-    fireEvent.click(within(roster).getByRole("button", {
-      name: "Ordina collaboratori per Arena",
-    }));
-    rows = roster.querySelectorAll(".collaborator-row");
-    expect(rows[0]).toHaveTextContent("Bruno Tecnico");
-    expect(rows[1]).toHaveTextContent("Alba Esperta");
-    expect(rows[2]).toHaveTextContent("Carla Base");
-
-    const resetSort = within(roster).getByRole("button", {
-      name: "Ripristina ordinamento collaboratori",
-    });
-    fireEvent.click(resetSort);
-    rows = roster.querySelectorAll(".collaborator-row");
-    expect(rows[0]).toHaveTextContent("Carla Base");
-    expect(rows[1]).toHaveTextContent("Alba Esperta");
+    expect(rows[1]).toHaveTextContent("Carla Base");
     expect(rows[2]).toHaveTextContent("Bruno Tecnico");
-    expect(resetSort).toBeDisabled();
   });
 
-  it("keeps unassigned collaborators on top and highlighted with any sort", () => {
+  it("keeps unassigned collaborators on top and highlighted", () => {
     const initial = createInitialState(1_000);
     const contacts = [
       { ...initial.contacts[0], id: "contact-zeno", arenaBase: 1, styleBase: 1 },
@@ -2064,16 +1973,10 @@ describe("PeopleView", () => {
     );
 
     const roster = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    let rows = roster.querySelectorAll(".collaborator-row");
+    const rows = roster.querySelectorAll(".collaborator-row");
     expect(rows[0]).toHaveTextContent("Zeno Libero");
     expect(rows[0]).toHaveClass("is-unassigned");
     expect(rows[1]).not.toHaveClass("is-unassigned");
-
-    fireEvent.click(within(roster).getByRole("button", {
-      name: "Ordina collaboratori per Collaboratore",
-    }));
-    rows = roster.querySelectorAll(".collaborator-row");
-    expect(rows[0]).toHaveTextContent("Zeno Libero");
   });
 
   it("shows every collaborator automation progress without the Corso Agonisti box", () => {

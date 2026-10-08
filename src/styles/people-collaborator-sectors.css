@@ -1672,62 +1672,6 @@ button.shift-control-sector:focus-visible {
   border-radius: var(--radius-md);
 }
 
-.sector-roster-filters {
-  display: grid;
-  grid-template-columns: minmax(160px, 1.2fr) repeat(4, minmax(120px, .8fr)) 48px 64px;
-  min-height: 50px;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.sector-roster-filters label { min-width: 0; }
-
-.sector-roster-filters input,
-.sector-roster-filters select,
-.sector-roster-filters > button {
-  width: 100%;
-  min-height: 32px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--ink);
-  font-size: 12px;
-}
-
-.sector-roster-filters input { padding: 0 9px; }
-
-.sector-roster-filters > button {
-  color: var(--blue-700);
-  font-weight: 600;
-}
-
-.sector-roster-filters > button:disabled {
-  color: var(--ink-muted);
-  opacity: .55;
-  cursor: default;
-}
-
-.sector-roster-filter-summary {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  color: var(--ink-muted);
-}
-
-.sector-roster-filter-summary strong {
-  color: var(--ink);
-  font-size: 12px;
-}
-
-.sector-roster-filter-summary small {
-  font-size: 12px;
-}
-
 .sector-roster-filter-empty {
   display: grid;
   min-height: 150px;
@@ -1756,10 +1700,6 @@ button.shift-control-sector:focus-visible {
 .instructor-courses-link:disabled {
   color: var(--ink-soft);
   cursor: default;
-}
-
-.sector-roster-sort-mobile {
-  display: none;
 }
 
 .sector-roster-sort-button,
@@ -2041,51 +1981,6 @@ button.shift-control-sector:focus-visible {
 
   .sector-roster-head { display: none; }
 
-  .sector-roster-filters {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .sector-roster-search-filter { grid-column: span 2; }
-
-  .sector-roster-sort-mobile {
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    padding: 10px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .sector-roster-sort-mobile label {
-    display: flex;
-    min-width: 0;
-    flex: 1;
-    flex-direction: column;
-    gap: 5px;
-    color: var(--ink-muted);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .sector-roster-sort-mobile select,
-  .sector-roster-sort-mobile button {
-    min-height: 36px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--ink);
-    font-size: 12px;
-    text-transform: none;
-  }
-
-  .sector-roster-sort-mobile select {
-    width: 100%;
-  }
-
-  .sector-roster-sort-mobile button {
-    padding: 0 10px;
-    color: var(--blue-700);
-  }
-
   .sector-roster-row {
     grid-template-columns: minmax(180px, 1.3fr) minmax(120px, .8fr) minmax(170px, 1fr) 100px minmax(90px, auto) 74px;
   }
@@ -2262,12 +2157,6 @@ button.shift-control-sector:focus-visible {
   .sector-panel-summary strong { font-size: 12px; }
   .sector-panel-summary small { font-size: 12px; }
   .sector-panel-content { padding: 10px 10px 24px; }
-
-  .sector-roster-filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .sector-roster-search-filter { grid-column: 1 / -1; }
 
   .sector-roster { border: 0; overflow: visible; }
 

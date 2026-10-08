@@ -352,23 +352,6 @@
   font-size: 12px;
 }
 
-.people-view .member-filter-row {
-  background: color-mix(in srgb, var(--school-page-accent) 2%, var(--surface));
-}
-
-.people-view .member-filter-row input,
-.people-view .member-filter-row select {
-  min-height: 32px;
-  border-radius: 5px;
-  font-size: 12px;
-}
-
-.people-view .member-filter-summary {
-  min-height: 38px;
-  padding: 0 12px;
-  font-size: 12px;
-}
-
 .people-view .member-row:not(.people-head) {
   transition: background-color 120ms ease;
 }
@@ -394,11 +377,6 @@
     display: grid;
   }
 
-  .people-view .member-sort-mobile {
-    display: none;
-  }
-
-  .people-view .member-filter-row,
   .people-view .member-row,
   .people-view .member-row:not(.people-head) {
     grid-template-columns:
@@ -410,11 +388,6 @@
       minmax(104px, 0.65fr)
       minmax(218px, 1.45fr)
       38px;
-  }
-
-  .people-view .member-filter-row {
-    gap: 0;
-    padding: 0;
   }
 
   .people-view .member-row:not(.people-head) {

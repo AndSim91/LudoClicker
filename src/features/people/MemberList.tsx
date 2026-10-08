@@ -1,9 +1,10 @@
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { Icon } from "../../components/common/Icon";
-import { TableSortResetButton } from "../../components/common/TableSortResetButton";
+import { FilterChip, FilterGroup, ListFilterBar, type ActiveListFilter } from "../../components/common/ListFilterBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
-import { PERSON_RARITIES } from "../../content/rarities";
+import { FORM_DEFINITIONS } from "../../content/forms";
+import { getFormLogo } from "../../content/formLogos";
 import { getFormTrainingYear } from "../../game/calendar";
 import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
 import {
@@ -39,6 +40,13 @@ import {
   getPresentedRarityLabel,
   getRarityClassName,
 } from "../../shared/rarityPresentation";
+import {
+  matchesRarityFilter,
+  RARITY_FILTER_VALUES,
+  rarityFilterClassName,
+  rarityFilterLabel,
+} from "./rarityFilter";
+import { toggleValue, usePersistentFilters } from "../../shared/usePersistentFilters";
 import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { useOutlookTheme } from "../../shared/useOutlookTheme";
 import { STORAGE_KEYS } from "../../shared/storageKeys";
@@ -89,7 +97,32 @@ const MEMBER_SORT_KEYS = [
   "status",
   "next-form",
 ] as const satisfies readonly MemberSortKey[];
-type MemberRarityFilter = "all" | Contact["rarity"];
+const MEMBER_SORT_OPTIONS: { value: MemberSortKey; label: string }[] = [
+  { value: "name", label: "Nome" },
+  { value: "rarity", label: "Rarità" },
+  { value: "path", label: "Percorso" },
+  { value: "arena", label: "Arena" },
+  { value: "style", label: "Stile" },
+  { value: "status", label: "Ruolo" },
+  { value: "next-form", label: "Prossimo passo" },
+];
+const MEMBER_FILTER_DEFAULTS = {
+  rarities: [] as string[],
+  forms: [] as string[],
+  arenaMin: "",
+  styleMin: "",
+  statuses: [] as string[],
+  nextForms: [] as string[],
+  favorites: false,
+  open: false,
+};
+type MemberFilters = typeof MEMBER_FILTER_DEFAULTS;
+const formName = (formId: string) =>
+  FORM_DEFINITIONS.find((form) => form.id === formId)?.longName ?? formId;
+
+function withSelected(options: string[], selected: readonly string[]): string[] {
+  return [...options, ...selected.filter((value) => !options.includes(value))];
+}
 
 function sortedOptions(values: ReadonlySet<string>): string[] {
   return [...values].sort((left, right) =>
@@ -241,19 +274,13 @@ export function MemberList({
     sort,
     setSort,
     resetSort,
-    isDefaultSort,
   } = usePersistentTableSort<MemberSort>({
     storageId: "members",
     allowedKeys: MEMBER_SORT_KEYS,
     defaultSort: null,
   });
   const [search, setSearch] = useState("");
-  const [rarityFilter, setRarityFilter] = useState<MemberRarityFilter>("all");
-  const [pathFilter, setPathFilter] = useState("all");
-  const [arenaMinimum, setArenaMinimum] = useState("");
-  const [styleMinimum, setStyleMinimum] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [nextFormFilter, setNextFormFilter] = useState("all");
+  const [filters, setFilters] = usePersistentFilters<MemberFilters>("members", MEMBER_FILTER_DEFAULTS);
   const [cancellationTarget, setCancellationTarget] = useState<Contact | null>(null);
   const cancellationTriggerRef = useRef<HTMLButtonElement | null>(null);
   const deferredSearch = useDeferredValue(search);
@@ -308,30 +335,35 @@ export function MemberList({
     [getMemberPresentation, members],
   );
   const filterOptions = useMemo(() => {
-    const paths = new Set<string>();
     const statuses = new Set<string>();
     const nextForms = new Set<string>();
+    const learnedForms = new Set<string>();
+    let hasSecretLegendary = false;
     for (const presentation of memberPresentations) {
-      paths.add(presentation.path);
       statuses.add(presentation.status);
       nextForms.add(presentation.nextForm);
+      for (const formId of presentation.student.forms) learnedForms.add(formId);
+      if (presentation.contact.secretLegendaryId) hasSecretLegendary = true;
     }
     return {
-      paths: sortedOptions(paths),
+      // ponytail: a secret rarity shows up only once one is in the school (no spoilers).
+      rarities: RARITY_FILTER_VALUES.filter((value) => value !== "secret-legendary" || hasSecretLegendary),
+      forms: FORM_DEFINITIONS.map((form) => form.id).filter((formId) => learnedForms.has(formId)),
       statuses: sortedOptions(statuses),
       nextForms: sortedOptions(nextForms),
     };
   }, [memberPresentations]);
   const filteredMembers = useMemo(() => {
     const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
-    const minimumArena = arenaMinimum === "" ? undefined : Number(arenaMinimum);
-    const minimumStyle = styleMinimum === "" ? undefined : Number(styleMinimum);
+    const minimumArena = filters.arenaMin === "" ? undefined : Number(filters.arenaMin);
+    const minimumStyle = filters.styleMin === "" ? undefined : Number(filters.styleMin);
     const filtered: Contact[] = [];
     for (const presentation of memberPresentations) {
       const { contact } = presentation;
       if (normalizedSearch && !presentation.searchableText.includes(normalizedSearch)) continue;
-      if (rarityFilter !== "all" && contact.rarity !== rarityFilter) continue;
-      if (pathFilter !== "all" && presentation.path !== pathFilter) continue;
+      if (filters.favorites && !contact.favorite) continue;
+      if (!matchesRarityFilter(filters.rarities, contact.rarity, Boolean(contact.secretLegendaryId))) continue;
+      if (!filters.forms.every((formId) => presentation.student.forms.includes(formId as FormId))) continue;
       if (minimumArena !== undefined) {
         const arena = presentation.preparation?.arena ?? null;
         if (arena === null || arena < minimumArena) continue;
@@ -340,24 +372,12 @@ export function MemberList({
         const style = presentation.preparation?.style ?? null;
         if (style === null || style < minimumStyle) continue;
       }
-      if (
-        statusFilter !== "all" &&
-        presentation.status !== statusFilter
-      ) continue;
-      if (nextFormFilter !== "all" && presentation.nextForm !== nextFormFilter) continue;
+      if (filters.statuses.length > 0 && !filters.statuses.includes(presentation.status)) continue;
+      if (filters.nextForms.length > 0 && !filters.nextForms.includes(presentation.nextForm)) continue;
       filtered.push(contact);
     }
     return filtered;
-  }, [
-    arenaMinimum,
-    deferredSearch,
-    memberPresentations,
-    nextFormFilter,
-    pathFilter,
-    rarityFilter,
-    statusFilter,
-    styleMinimum,
-  ]);
+  }, [deferredSearch, filters, memberPresentations]);
   const sortedMembers = useMemo(
     () => sortMembers(filteredMembers, sort, sortContext),
     [filteredMembers, sort, sortContext],
@@ -377,8 +397,12 @@ export function MemberList({
         : { key, direction: "ascending" },
     );
   };
-  const selectSort = (key: MemberSortKey) => {
+  const selectSort = (key: MemberSortKey | null) => {
     setRequestedPage(0);
+    if (!key) {
+      resetSort();
+      return;
+    }
     setSort((current) => ({
       key,
       direction: current?.key === key ? current.direction : "ascending",
@@ -394,24 +418,48 @@ export function MemberList({
       : current,
     );
   };
-  const resetSorting = () => {
+  const updateFilters = (patch: Partial<MemberFilters>) => {
     setRequestedPage(0);
-    resetSort();
+    setFilters((current) => ({ ...current, ...patch }));
   };
-  const updateFilter = (update: () => void) => {
+  const toggleIn = (key: "rarities" | "forms" | "statuses" | "nextForms", value: string) => {
     setRequestedPage(0);
-    update();
+    setFilters((current) => ({ ...current, [key]: toggleValue(current[key], value) }));
   };
   const resetFilters = () => {
     setSearch("");
-    setRarityFilter("all");
-    setPathFilter("all");
-    setArenaMinimum("");
-    setStyleMinimum("");
-    setStatusFilter("all");
-    setNextFormFilter("all");
-    setRequestedPage(0);
+    updateFilters({ ...MEMBER_FILTER_DEFAULTS, open: filters.open });
   };
+  const activeFilters: ActiveListFilter[] = [
+    ...filters.rarities.map((value) => ({
+      key: `rarity-${value}`,
+      label: rarityFilterLabel(value),
+      className: rarityFilterClassName(value),
+      onRemove: () => toggleIn("rarities", value),
+    })),
+    ...filters.forms.map((formId) => ({
+      key: `form-${formId}`,
+      label: formName(formId),
+      onRemove: () => toggleIn("forms", formId),
+    })),
+    ...(filters.arenaMin !== ""
+      ? [{ key: "arena", label: `Arena ≥ ${filters.arenaMin}`, onRemove: () => updateFilters({ arenaMin: "" }) }]
+      : []),
+    ...(filters.styleMin !== ""
+      ? [{ key: "style", label: `Stile ≥ ${filters.styleMin}`, onRemove: () => updateFilters({ styleMin: "" }) }]
+      : []),
+    ...filters.statuses.map((value) => ({
+      key: `status-${value}`,
+      label: value,
+      onRemove: () => toggleIn("statuses", value),
+    })),
+    ...filters.nextForms.map((value) => ({
+      key: `next-${value}`,
+      label: value,
+      onRemove: () => toggleIn("nextForms", value),
+    })),
+  ];
+  const filtering = filteredMembers.length !== members.length;
   const closeCancellationDialog = useCallback(() => {
     cancellationTriggerRef.current?.focus();
     setCancellationTarget(null);
@@ -425,33 +473,114 @@ export function MemberList({
 
   return (
     <section className={`people-table member-development-list${view === "cards" ? " is-cards" : ""}`} aria-label="Iscritti">
-      <div className="member-sort-mobile table-sort-controls" aria-label="Ordina iscritti">
-        <label>
-          <span>Ordina per</span>
-          <select
-            aria-label="Campo di ordinamento"
-            value={sort?.key ?? ""}
-            onChange={(event) => selectSort(event.target.value as MemberSortKey)}
-          >
-            <option value="" disabled>Seleziona</option>
-            <option value="name">Nome</option>
-            <option value="rarity">Rarità</option>
-            <option value="path">Percorso</option>
-            <option value="arena">Arena</option>
-            <option value="style">Stile</option>
-            <option value="status">Stato</option>
-            <option value="next-form">Prossima Forma</option>
-          </select>
-        </label>
-        <button type="button" disabled={!sort} onClick={reverseSort}>
-          {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
-        </button>
-        <TableSortResetButton
-          disabled={isDefaultSort}
-          label="iscritti"
-          onReset={resetSorting}
-        />
-      </div>
+      <ListFilterBar
+        id="members"
+        noun="iscritti"
+        search={search}
+        searchLabel="Filtra iscritti per nome o email"
+        onSearch={(value) => {
+          setRequestedPage(0);
+          setSearch(value);
+        }}
+        favorites={{ active: filters.favorites, onToggle: () => updateFilters({ favorites: !filters.favorites }) }}
+        drawerOpen={filters.open}
+        onToggleDrawer={() => setFilters((current) => ({ ...current, open: !current.open }))}
+        activeFilters={activeFilters}
+        onResetFilters={resetFilters}
+        sortOptions={MEMBER_SORT_OPTIONS}
+        sort={sort}
+        onSortChange={selectSort}
+        onReverseSort={reverseSort}
+        count={
+          <>
+            {filtering
+              ? <><strong>{filteredMembers.length.toLocaleString("it-IT")}</strong> di {members.length.toLocaleString("it-IT")} iscritti</>
+              : <><strong>{members.length.toLocaleString("it-IT")}</strong> iscritti</>}
+            {groupedMembers > 0 ? (
+              <span title="Ancora senza scheda: nome e storia arrivano al primo corso.">
+                {" "}+ {groupedMembers.toLocaleString("it-IT")} senza scheda
+              </span>
+            ) : null}
+          </>
+        }
+        extra={
+          <span className="member-view-switch" role="group" aria-label="Vista degli iscritti">
+            <button type="button" aria-pressed={view === "table"} onClick={() => changeView("table")}>
+              <Icon name="menu" />Tabella
+            </button>
+            <button type="button" aria-pressed={view === "cards"} onClick={() => changeView("cards")}>
+              <Icon name="tasks" />Schede
+            </button>
+          </span>
+        }
+      >
+        <FilterGroup label="Rarità">
+          {filterOptions.rarities.map((value) => (
+            <FilterChip
+              key={value}
+              className={rarityFilterClassName(value)}
+              pressed={filters.rarities.includes(value)}
+              onToggle={() => toggleIn("rarities", value)}
+            >
+              {rarityFilterLabel(value)}
+            </FilterChip>
+          ))}
+        </FilterGroup>
+        <FilterGroup label="Forme imparate">
+          {withSelected(filterOptions.forms, filters.forms).map((formId) => (
+            <FilterChip
+              key={formId}
+              className="is-form"
+              title={formName(formId)}
+              pressed={filters.forms.includes(formId)}
+              onToggle={() => toggleIn("forms", formId)}
+            >
+              <img src={getFormLogo(formId as FormId).assetPath} alt="" />
+              {FORM_DEFINITIONS.find((form) => form.id === formId)?.shortName ?? formId}
+            </FilterChip>
+          ))}
+          {filterOptions.forms.length === 0 ? <span className="list-filter-empty">Ancora nessuna Forma imparata</span> : null}
+        </FilterGroup>
+        <div className="list-filter-group" role="group" aria-label="Arena e Stile minimi">
+          <small>Arena e Stile minimi</small>
+          <div className="list-filter-chips">
+            <label className="list-filter-number">
+              <span>Arena ≥</span>
+              <input
+                type="number"
+                min="0"
+                aria-label="Filtra iscritti per Arena minima"
+                value={filters.arenaMin}
+                onChange={(event) => updateFilters({ arenaMin: event.target.value })}
+              />
+            </label>
+            <label className="list-filter-number">
+              <span>Stile ≥</span>
+              <input
+                type="number"
+                min="0"
+                aria-label="Filtra iscritti per Stile minimo"
+                value={filters.styleMin}
+                onChange={(event) => updateFilters({ styleMin: event.target.value })}
+              />
+            </label>
+          </div>
+        </div>
+        <FilterGroup label="Ruolo" wide>
+          {withSelected(filterOptions.statuses, filters.statuses).map((value) => (
+            <FilterChip key={value} pressed={filters.statuses.includes(value)} onToggle={() => toggleIn("statuses", value)}>
+              {value}
+            </FilterChip>
+          ))}
+        </FilterGroup>
+        <FilterGroup label="Prossimo passo" wide>
+          {withSelected(filterOptions.nextForms, filters.nextForms).map((value) => (
+            <FilterChip key={value} pressed={filters.nextForms.includes(value)} onToggle={() => toggleIn("nextForms", value)}>
+              {value}
+            </FilterChip>
+          ))}
+        </FilterGroup>
+      </ListFilterBar>
       <div className="people-row people-head member-row">
         <SortableHeader label="Nome" sortKey="name" sort={sort} onSort={handleSort} />
         <SortableHeader label="Rarità" sortKey="rarity" sort={sort} onSort={handleSort} />
@@ -466,117 +595,6 @@ export function MemberList({
           onSort={handleSort}
         />
         <span className="member-actions-header" aria-hidden="true" />
-      </div>
-      <div className="member-filter-row" aria-label="Filtri iscritti">
-        <label>
-          <span className="sr-only">Cerca iscritto</span>
-          <input
-            type="search"
-            aria-label="Filtra iscritti per nome o email"
-            placeholder="Nome o email"
-            value={search}
-            onChange={(event) => updateFilter(() => setSearch(event.target.value))}
-          />
-        </label>
-        <label>
-          <span className="sr-only">Rarità iscritto</span>
-          <select
-            aria-label="Filtra iscritti per rarità"
-            value={rarityFilter}
-            onChange={(event) => updateFilter(() => setRarityFilter(event.target.value as MemberRarityFilter))}
-          >
-            <option value="all">Tutte le rarità</option>
-            {Object.entries(PERSON_RARITIES).map(([value, definition]) => (
-              <option value={value} key={value}>Rarità: {definition.label}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span className="sr-only">Percorso iscritto</span>
-          <select
-            aria-label="Filtra iscritti per percorso"
-            value={pathFilter}
-            onChange={(event) => updateFilter(() => setPathFilter(event.target.value))}
-          >
-            <option value="all">Tutti i percorsi</option>
-            {filterOptions.paths.map((path) => (
-              <option value={path} key={path}>Percorso: {path}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span className="sr-only">Arena minima</span>
-          <input
-            type="number"
-            min="0"
-            step="0.001"
-            aria-label="Filtra iscritti per Arena minima"
-            placeholder="Min."
-            value={arenaMinimum}
-            onChange={(event) => updateFilter(() => setArenaMinimum(event.target.value))}
-          />
-        </label>
-        <label>
-          <span className="sr-only">Stile minimo</span>
-          <input
-            type="number"
-            min="0"
-            step="0.001"
-            aria-label="Filtra iscritti per Stile minimo"
-            placeholder="Min."
-            value={styleMinimum}
-            onChange={(event) => updateFilter(() => setStyleMinimum(event.target.value))}
-          />
-        </label>
-        <label>
-          <span className="sr-only">Stato iscritto</span>
-          <select
-            aria-label="Filtra iscritti per stato"
-            value={statusFilter}
-            onChange={(event) => updateFilter(() => setStatusFilter(event.target.value))}
-          >
-            <option value="all">Tutti i ruoli</option>
-            {filterOptions.statuses.map((status) => (
-              <option value={status} key={status}>{status}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span className="sr-only">Prossima Forma</span>
-          <select
-            aria-label="Filtra iscritti per prossima Forma"
-            value={nextFormFilter}
-            onChange={(event) => updateFilter(() => setNextFormFilter(event.target.value))}
-          >
-            <option value="all">Tutte le prossime Forme</option>
-            {filterOptions.nextForms.map((nextForm) => (
-              <option value={nextForm} key={nextForm}>Prossima: {nextForm}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="member-filter-summary">
-        <span>
-          {filteredMembers.length === members.length
-            ? `${members.length.toLocaleString("it-IT")} iscritti`
-            : `${filteredMembers.length.toLocaleString("it-IT")} di ${members.length.toLocaleString("it-IT")} iscritti`}
-        </span>
-        {groupedMembers > 0 ? (
-          <span title="Ancora senza scheda: nome e storia arrivano al primo corso.">
-            + {groupedMembers.toLocaleString("it-IT")} senza scheda
-          </span>
-        ) : null}
-        {filteredMembers.length === members.length ? null : (
-          <button type="button" onClick={resetFilters}>Azzera filtri</button>
-        )}
-        <span className="member-view-switch" role="group" aria-label="Vista degli iscritti">
-          <button type="button" aria-pressed={view === "table"} onClick={() => changeView("table")}>
-            <Icon name="menu" />Tabella
-          </button>
-          <button type="button" aria-pressed={view === "cards"} onClick={() => changeView("cards")}>
-            <Icon name="tasks" />Schede
-          </button>
-        </span>
       </div>
       <div className={view === "cards" ? "member-card-grid" : "member-table-rows"}>
       {visibleMembers.map((contact) => {
@@ -715,12 +733,12 @@ export function MemberList({
                 <span className="member-stat-locked" title={getHiddenStatsHint(sortContext.statsTier)}>???</span>
               )}
             </span>
-            <span className="member-status" data-label="Stato">
+            <span className="member-status" data-label="Ruolo">
               {/* Every row here is an active member: only other states are worth a word. */}
               {contact.status === "enrolled" ? null : <span>{CONTACT_STATUS_LABELS[contact.status]}</span>}
               <small>{presentation.status}</small>
             </span>
-            <div className="member-training-cell" data-label="Prossima Forma">
+            <div className="member-training-cell" data-label="Prossimo passo">
               {training}
             </div>
             {cancelButton}

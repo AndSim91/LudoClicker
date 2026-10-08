@@ -2,14 +2,13 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { TableSortResetButton } from "../../components/common/TableSortResetButton";
+import { FilterChip, FilterGroup, ListFilterBar, type ActiveListFilter } from "../../components/common/ListFilterBar";
 import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import {
   COLLABORATOR_MASTERY_LEVELS,
   createInitialCollaboratorMastery,
   getCollaboratorMasteryProgress,
 } from "../../content/mastery";
-import { PERSON_RARITIES } from "../../content/rarities";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import {
   isCourseXUnlocked,
@@ -31,10 +30,8 @@ import type {
   FormId,
   GameState,
 } from "../../game/types";
-import {
-  getPresentedPersonRarity,
-  getRarityClassName,
-} from "../../shared/rarityPresentation";
+import { getRarityClassName } from "../../shared/rarityPresentation";
+import { toggleValue, usePersistentFilters } from "../../shared/usePersistentFilters";
 import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
@@ -46,6 +43,12 @@ import {
 import { getInstructorTeachingEntries } from "./instructorGroupPresentation";
 import { StaffForms } from "./FormPathMap";
 import { PersonName } from "./PersonPresentation";
+import {
+  matchesRarityFilter,
+  RARITY_FILTER_VALUES,
+  rarityFilterClassName,
+  rarityFilterLabel,
+} from "./rarityFilter";
 import { SectorMasteryIndicator } from "./SectorMasteryIndicator";
 import { SectorStatisticsSummary } from "./SectorStatisticsSummary";
 import {
@@ -54,9 +57,33 @@ import {
   InstructorTechnicianTraining,
 } from "./TrainingControl";
 
-type InstructorRarityFilter = "all" | ReturnType<typeof getPresentedPersonRarity>;
-type InstructorActivityFilter = "all" | "active" | "waiting";
-type InstructorTrainingFilter = "all" | "active" | "reserved" | "available";
+const SECTOR_FILTER_DEFAULTS = {
+  rarities: [] as string[],
+  mastery: [] as string[],
+  activity: [] as string[],
+  training: [] as string[],
+  open: false,
+};
+type SectorFilters = typeof SECTOR_FILTER_DEFAULTS;
+const ACTIVITY_LABELS: Record<string, string> = {
+  active: "Con allievi o preparazione",
+  waiting: "In attesa",
+};
+const TRAINING_LABELS: Record<string, string> = {
+  active: "Formazione in corso",
+  reserved: "Corso Tecnico prenotato",
+  available: "Nessuna formazione",
+};
+const SORT_LABELS: Record<SectorCollaboratorSortKey, string> = {
+  name: "Collaboratore",
+  mastery: "Maestria",
+  activity: "Attività",
+  arena: "Arena",
+  style: "Stile",
+  forms: "Forme",
+  "instructor-training": "Formazione Istruttore",
+  "technician-training": "Formazione Tecnici",
+};
 const SECTOR_SORT_KEYS = [
   "name",
   "mastery",
@@ -383,17 +410,16 @@ export function CollaboratorSectorPanel({
     sort,
     setSort,
     resetSort,
-    isDefaultSort,
   } = usePersistentTableSort<SectorCollaboratorSort>({
     storageId: `collaborator-sector.${role}`,
     allowedKeys: allowedSortKeys,
     defaultSort: null,
   });
   const [search, setSearch] = useState("");
-  const [rarityFilter, setRarityFilter] = useState<InstructorRarityFilter>("all");
-  const [activityFilter, setActivityFilter] = useState<InstructorActivityFilter>("all");
-  const [trainingFilter, setTrainingFilter] = useState<InstructorTrainingFilter>("all");
-  const [masteryFilter, setMasteryFilter] = useState("all");
+  const [filters, setFilters] = usePersistentFilters<SectorFilters>(
+    `collaborator-sector.${role}`,
+    SECTOR_FILTER_DEFAULTS,
+  );
   const deferredSearch = useDeferredValue(search);
   const assigned = useMemo(
     () => state.collaborators.filter((collaborator) => collaborator.assignment === role),
@@ -408,50 +434,33 @@ export function CollaboratorSectorPanel({
     [state],
   );
   const filteredAssigned = useMemo(() => {
-    if (role !== "instructor") return assigned;
     const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
     return assigned.filter((collaborator) => {
       const contact = contactsById.get(collaborator.contactId);
       const searchableText = `${collaborator.displayName} ${contact?.email ?? ""}`
         .toLocaleLowerCase("it-IT");
       if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
-      const presentedRarity = getPresentedPersonRarity(
-        collaborator.rarity,
-        Boolean(contact?.secretLegendaryId),
-      );
-      const matchesRarity = presentedRarity === rarityFilter ||
-        (rarityFilter === "legendary" && presentedRarity === "secret-legendary");
-      if (rarityFilter !== "all" && !matchesRarity) return false;
-      if (masteryFilter !== "all") {
+      if (!matchesRarityFilter(filters.rarities, collaborator.rarity, Boolean(contact?.secretLegendaryId))) return false;
+      if (filters.mastery.length > 0) {
         const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
-        const level = getCollaboratorMasteryProgress(mastery.instructor).level;
-        if (level !== Number(masteryFilter)) return false;
+        const level = getCollaboratorMasteryProgress(mastery[role]).level;
+        if (!filters.mastery.includes(String(level))) return false;
       }
-      if (activityFilter !== "all") {
+      if (role !== "instructor") return true;
+      if (filters.activity.length > 0) {
         const active = selectInstructorTeachingCount(state, collaborator.id) > 0 ||
           athleticPreparationInstructorIds.has(collaborator.id);
-        if (active !== (activityFilter === "active")) return false;
+        if (!filters.activity.includes(active ? "active" : "waiting")) return false;
       }
-      if (trainingFilter === "active" && !collaborator.training) return false;
-      if (trainingFilter === "reserved" && !collaborator.technicianCourseReservation) return false;
-      if (
-        trainingFilter === "available" &&
-        (collaborator.training || collaborator.technicianCourseReservation)
-      ) return false;
+      if (filters.training.length > 0) {
+        const training = collaborator.training
+          ? "active"
+          : collaborator.technicianCourseReservation ? "reserved" : "available";
+        if (!filters.training.includes(training)) return false;
+      }
       return true;
     });
-  }, [
-    activityFilter,
-    assigned,
-    athleticPreparationInstructorIds,
-    contactsById,
-    deferredSearch,
-    masteryFilter,
-    rarityFilter,
-    role,
-    state,
-    trainingFilter,
-  ]);
+  }, [assigned, athleticPreparationInstructorIds, contactsById, deferredSearch, filters, role, state]);
   const hasTimedWork = getInstructorTeachingEntries(state, courseXUnlocked).length > 0 ||
     state.acquisitionEvents.some((event) => event.status === "running");
   const now = useGameTime(hasTimedWork, GAME_CONFIG.progressUpdateIntervalMs);
@@ -468,8 +477,7 @@ export function CollaboratorSectorPanel({
     [filteredAssigned, sort, sortContext],
   );
   // A new search, filter or sort starts again from the first page.
-  const pageKey = [deferredSearch, rarityFilter, activityFilter, trainingFilter, masteryFilter,
-    sort?.key, sort?.direction].join("|");
+  const pageKey = [deferredSearch, JSON.stringify(filters), sort?.key, sort?.direction].join("|");
   const [pageState, setPageState] = useState({ key: pageKey, page: 0 });
   const pageCount = Math.max(1, Math.ceil(sortedAssigned.length / SECTOR_ROWS_PER_PAGE));
   const page = Math.min(pageState.key === pageKey ? pageState.page : 0, pageCount - 1);
@@ -512,10 +520,14 @@ export function CollaboratorSectorPanel({
       : { key, direction: "ascending" });
   };
 
-  const selectSort = (key: SectorCollaboratorSortKey) => {
+  const selectSort = (key: SectorCollaboratorSortKey | null) => {
+    if (!key) {
+      resetSort();
+      return;
+    }
     setSort((current) => ({
       key,
-      direction: current?.direction ?? "ascending",
+      direction: current?.key === key ? current.direction : "ascending",
     }));
   };
 
@@ -527,19 +539,43 @@ export function CollaboratorSectorPanel({
         }
       : current);
   };
-  const resetSorting = () => {
-    resetSort();
-  };
 
-  const hasActiveFilters = search !== "" || rarityFilter !== "all" ||
-    activityFilter !== "all" || trainingFilter !== "all" || masteryFilter !== "all";
+  const toggleIn = (key: "rarities" | "mastery" | "activity" | "training", value: string) =>
+    setFilters((current) => ({ ...current, [key]: toggleValue(current[key], value) }));
   const resetFilters = () => {
     setSearch("");
-    setRarityFilter("all");
-    setActivityFilter("all");
-    setTrainingFilter("all");
-    setMasteryFilter("all");
+    setFilters((current) => ({ ...SECTOR_FILTER_DEFAULTS, open: current.open }));
   };
+  const hasSecretLegendary = assigned.some((collaborator) =>
+    Boolean(contactsById.get(collaborator.contactId)?.secretLegendaryId));
+  const rarityOptions = RARITY_FILTER_VALUES.filter((value) =>
+    value !== "secret-legendary" || hasSecretLegendary || filters.rarities.includes(value));
+  const trainingOptions = Object.keys(TRAINING_LABELS)
+    .filter((value) => value !== "reserved" || technicianTrainingUnlocked);
+  const activeFilters: ActiveListFilter[] = [
+    ...filters.rarities.map((value) => ({
+      key: `rarity-${value}`,
+      label: rarityFilterLabel(value),
+      className: rarityFilterClassName(value),
+      onRemove: () => toggleIn("rarities", value),
+    })),
+    ...filters.mastery.map((value) => ({
+      key: `mastery-${value}`,
+      label: `Maestria: ${COLLABORATOR_MASTERY_LEVELS[Number(value)]?.name ?? value}`,
+      onRemove: () => toggleIn("mastery", value),
+    })),
+    ...(role === "instructor" ? filters.activity : []).map((value) => ({
+      key: `activity-${value}`,
+      label: ACTIVITY_LABELS[value] ?? value,
+      onRemove: () => toggleIn("activity", value),
+    })),
+    ...(role === "instructor" ? filters.training : []).map((value) => ({
+      key: `training-${value}`,
+      label: TRAINING_LABELS[value] ?? value,
+      onRemove: () => toggleIn("training", value),
+    })),
+  ];
+  const noun = roleLabel.toLocaleLowerCase("it-IT");
 
   return (
     <>
@@ -587,116 +623,66 @@ export function CollaboratorSectorPanel({
             </div>
           ) : (
             <div className="sector-roster">
-              {role === "instructor" ? (
-                <div className="sector-roster-filters" aria-label="Filtri istruttori">
-                  <label className="sector-roster-search-filter">
-                    <span className="sr-only">Cerca istruttore</span>
-                    <input
-                      type="search"
-                      aria-label="Filtra istruttori per nome o email"
-                      placeholder="Nome o email"
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                    />
-                  </label>
-                  <label>
-                    <span className="sr-only">Rarità istruttore</span>
-                    <select
-                      aria-label="Filtra istruttori per rarità"
-                      value={rarityFilter}
-                      onChange={(event) => setRarityFilter(event.target.value as InstructorRarityFilter)}
-                    >
-                      <option value="all">Tutte le rarità</option>
-                      {Object.entries(PERSON_RARITIES).map(([value, definition]) => (
-                        <option value={value} key={value}>Rarità: {definition.label}</option>
-                      ))}
-                      <option value="secret-legendary">Rarità: Leggendario Segreto</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span className="sr-only">Maestria istruttore</span>
-                    <select
-                      aria-label="Filtra istruttori per maestria"
-                      value={masteryFilter}
-                      onChange={(event) => setMasteryFilter(event.target.value)}
-                    >
-                      <option value="all">Tutte le maestrie</option>
-                      {COLLABORATOR_MASTERY_LEVELS.map((level, index) => (
-                        <option value={index} key={level.name}>Maestria: {level.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span className="sr-only">Attività istruttore</span>
-                    <select
-                      aria-label="Filtra istruttori per attività"
-                      value={activityFilter}
-                      onChange={(event) => setActivityFilter(event.target.value as InstructorActivityFilter)}
-                    >
-                      <option value="all">Tutte le attività</option>
-                      <option value="active">Con allievi o preparazione</option>
-                      <option value="waiting">In attesa</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span className="sr-only">Formazione personale istruttore</span>
-                    <select
-                      aria-label="Filtra istruttori per formazione"
-                      value={trainingFilter}
-                      onChange={(event) => setTrainingFilter(event.target.value as InstructorTrainingFilter)}
-                    >
-                      <option value="all">Tutte le formazioni</option>
-                      <option value="active">Formazione in corso</option>
-                      {technicianTrainingUnlocked ? (
-                        <option value="reserved">Corso Tecnico prenotato</option>
-                      ) : null}
-                      <option value="available">Nessuna formazione</option>
-                    </select>
-                  </label>
-                  <span className="sector-roster-filter-summary" aria-live="polite">
-                    <strong>{filteredAssigned.length}</strong>
-                    <small>di {assigned.length}</small>
-                  </span>
-                  <button type="button" disabled={!hasActiveFilters} onClick={resetFilters}>
-                    Azzera
-                  </button>
-                </div>
-              ) : null}
-              <div
-                className="sector-roster-sort-mobile table-sort-controls"
-                aria-label="Ordina collaboratori del settore"
+              <ListFilterBar
+                id={`sector-${role}`}
+                noun={noun}
+                search={search}
+                searchLabel={`Filtra ${noun} per nome o email`}
+                onSearch={setSearch}
+                drawerOpen={filters.open}
+                onToggleDrawer={() => setFilters((current) => ({ ...current, open: !current.open }))}
+                activeFilters={activeFilters}
+                onResetFilters={resetFilters}
+                sortOptions={allowedSortKeys.map((key) => ({ value: key, label: SORT_LABELS[key] }))}
+                sort={sort}
+                onSortChange={selectSort}
+                onReverseSort={reverseSort}
+                count={filteredAssigned.length === assigned.length
+                  ? <><strong>{assigned.length}</strong> {noun}</>
+                  : <><strong>{filteredAssigned.length}</strong> di {assigned.length}</>}
               >
-                <label>
-                  <span>Ordina per</span>
-                  <select
-                    aria-label="Campo di ordinamento collaboratori del settore"
-                    value={sort?.key ?? ""}
-                    onChange={(event) => selectSort(event.target.value as SectorCollaboratorSortKey)}
-                  >
-                    <option value="" disabled>Seleziona</option>
-                    <option value="name">Collaboratore</option>
-                    <option value="mastery">Maestria</option>
-                    <option value="activity">Attività</option>
-                    <option value="arena">Arena</option>
-                    <option value="style">Stile</option>
-                    <option value="forms">Forme</option>
-                    {role === "instructor" ? (
-                      <option value="instructor-training">Formazione Istruttore</option>
-                    ) : null}
-                    {technicianTrainingUnlocked ? (
-                      <option value="technician-training">Formazione Tecnici</option>
-                    ) : null}
-                  </select>
-                </label>
-                <button type="button" disabled={!sort} onClick={reverseSort}>
-                  {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
-                </button>
-                <TableSortResetButton
-                  disabled={isDefaultSort}
-                  label={roleLabel.toLocaleLowerCase("it-IT")}
-                  onReset={resetSorting}
-                />
-              </div>
+                <FilterGroup label="Rarità">
+                  {rarityOptions.map((value) => (
+                    <FilterChip
+                      key={value}
+                      className={rarityFilterClassName(value)}
+                      pressed={filters.rarities.includes(value)}
+                      onToggle={() => toggleIn("rarities", value)}
+                    >
+                      {rarityFilterLabel(value)}
+                    </FilterChip>
+                  ))}
+                </FilterGroup>
+                <FilterGroup label="Maestria" wide={role !== "instructor"}>
+                  {COLLABORATOR_MASTERY_LEVELS.map((level, index) => (
+                    <FilterChip
+                      key={level.name}
+                      pressed={filters.mastery.includes(String(index))}
+                      onToggle={() => toggleIn("mastery", String(index))}
+                    >
+                      {level.name}
+                    </FilterChip>
+                  ))}
+                </FilterGroup>
+                {role === "instructor" ? (
+                  <>
+                    <FilterGroup label="Attività">
+                      {Object.entries(ACTIVITY_LABELS).map(([value, label]) => (
+                        <FilterChip key={value} pressed={filters.activity.includes(value)} onToggle={() => toggleIn("activity", value)}>
+                          {label}
+                        </FilterChip>
+                      ))}
+                    </FilterGroup>
+                    <FilterGroup label="Formazione personale" wide>
+                      {trainingOptions.map((value) => (
+                        <FilterChip key={value} pressed={filters.training.includes(value)} onToggle={() => toggleIn("training", value)}>
+                          {TRAINING_LABELS[value]}
+                        </FilterChip>
+                      ))}
+                    </FilterGroup>
+                  </>
+                ) : null}
+              </ListFilterBar>
               <div className="sector-roster-head" role="row">
                 {role === "instructor" ? (
                   <SectorIdentitySortableHeader sort={sort} onSort={handleSort} />
@@ -771,7 +757,7 @@ export function CollaboratorSectorPanel({
               ) : null}
               {sortedAssigned.length === 0 ? (
                 <div className="sector-roster-filter-empty">
-                  <strong>Nessun istruttore corrisponde ai filtri</strong>
+                  <strong>Nessuno corrisponde ai filtri</strong>
                   <span>Modifica i criteri oppure azzera i filtri.</span>
                   <button type="button" onClick={resetFilters}>Azzera filtri</button>
                 </div>

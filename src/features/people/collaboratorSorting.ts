@@ -1,5 +1,4 @@
 import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
-import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
 import { getTrainingPhase } from "../../game/teacherTrainingFlow";
@@ -15,13 +14,8 @@ import {
   type CollaboratorAutomationPresentation,
 } from "./collaboratorAutomationPresentation";
 
-export type CollaboratorSortKey = "name" | "assignment" | "activity" | "arena" | "style";
+type CollaboratorSortKey = "name" | "activity" | "arena" | "style";
 export type CollaboratorSortDirection = "ascending" | "descending";
-
-export interface CollaboratorSort {
-  key: CollaboratorSortKey;
-  direction: CollaboratorSortDirection;
-}
 
 export interface CollaboratorSortContext {
   state: GameState;
@@ -117,35 +111,8 @@ function getSortValue(
   context: CollaboratorSortContext,
 ): string | number | null {
   if (key === "name") return collaborator.displayName;
-  if (key === "assignment") {
-    return collaborator.assignment
-      ? getCollaboratorAssignmentLabel(
-          collaborator.assignment,
-          context.state.unlocks.social,
-        )
-      : null;
-  }
   if (key === "activity") return getActivityValue(collaborator, context);
   return getOfficialScore(collaborator, key, context);
-}
-
-export function sortCollaborators(
-  collaborators: readonly Collaborator[],
-  sort: CollaboratorSort | null,
-  context: CollaboratorSortContext,
-): Collaborator[] {
-  if (!sort) return [...collaborators];
-  return collaborators
-    .map((collaborator, index) => ({
-      collaborator,
-      index,
-      value: getSortValue(collaborator, sort.key, context),
-    }))
-    .sort((left, right) =>
-      compareNullable(left.value, right.value, sort.direction) ||
-      left.index - right.index
-    )
-    .map(({ collaborator }) => collaborator);
 }
 
 function getSectorSortValue(

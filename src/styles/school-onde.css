@@ -208,8 +208,7 @@
 }
 
 @media (min-width: 761px) {
-  :root[data-theme="dark"] .people-view .member-row,
-  :root[data-theme="dark"] .people-view .member-filter-row {
+  :root[data-theme="dark"] .people-view .member-row {
     grid-template-columns:
       minmax(224px, 1.25fr)
       minmax(92px, 0.45fr)

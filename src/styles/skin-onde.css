@@ -119,10 +119,7 @@
 :root[data-theme="dark"] .overview-view,
 :root[data-theme="dark"] .people-hero,
 :root[data-theme="dark"] .people-table,
-:root[data-theme="dark"] .member-filter-row,
 :root[data-theme="dark"] .collaborator-table,
-:root[data-theme="dark"] .collaborator-table-filters,
-:root[data-theme="dark"] .collaborator-sort-mobile,
 :root[data-theme="dark"] .season-schedule,
 :root[data-theme="dark"] .qualified-team {
   background: var(--onde-page);

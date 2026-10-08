@@ -1,8 +1,7 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { TableSortResetButton } from "../../components/common/TableSortResetButton";
 import { EquipmentConditionBar } from "../../components/equipment/EquipmentConditionBar";
 import {
   COLLABORATOR_ASSIGNMENT_LABELS,
@@ -23,7 +22,6 @@ import { useGameTime } from "../../game/GameTimeContext";
 import {
   selectActiveEmail,
   selectAthleticPreparationInstructorIds,
-  selectInstructorTeachingCount,
 } from "../../game/selectors";
 import type {
   CollaboratorAssignment,
@@ -32,14 +30,8 @@ import type {
   GameState,
 } from "../../game/types";
 import { getRarityClassName } from "../../shared/rarityPresentation";
-import { usePersistentTableSort } from "../../shared/usePersistentTableSort";
 import { getCollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { CollaboratorDetailDrawer } from "./CollaboratorDetailDrawer";
-import {
-  sortCollaborators,
-  type CollaboratorSort,
-  type CollaboratorSortKey,
-} from "./collaboratorSorting";
 import { StaffForms } from "./FormPathMap";
 import { PersonName } from "./PersonPresentation";
 import { InstructorCourseTabs } from "./InstructorCourseTabs";
@@ -48,46 +40,11 @@ import { InstructorCompactActivity } from "./TrainingControl";
 const COLLABORATORS_PER_PAGE = 25;
 /** From the 5th collaborator to the Consiglio the list is a grid of 4 + 3 places (06/10). */
 const GRID_FROM = 5;
-const GRID_ORDER: CollaboratorAssignment[] = [null, "instructor", "writing", "events", "equipment", "gadget"];
-const COLLABORATOR_SORT_KEYS = [
-  "name",
-  "assignment",
-  "activity",
-  "arena",
-  "style",
-] as const satisfies readonly CollaboratorSortKey[];
-type CollaboratorFilter = "all" | "unassigned" | Exclude<CollaboratorAssignment, null>;
-type ActivityFilter = "all" | "active" | "waiting";
-type StatsFilter = "all" | "visible" | "locked";
-
-function CollaboratorSortableHeader({
-  label,
-  sortKey,
-  sort,
-  onSort,
-}: {
-  label: string;
-  sortKey: CollaboratorSortKey;
-  sort: CollaboratorSort | null;
-  onSort: (key: CollaboratorSortKey) => void;
-}) {
-  const active = sort?.key === sortKey;
-  return (
-    <span role="columnheader" aria-sort={active ? sort.direction : "none"}>
-      <button
-        type="button"
-        className={`collaborator-sort-button${active ? " is-active" : ""}`}
-        aria-label={`Ordina collaboratori per ${label}`}
-        onClick={() => onSort(sortKey)}
-      >
-        <span>{label}</span>
-        <span aria-hidden="true">
-          {active ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}
-        </span>
-      </button>
-    </span>
-  );
-}
+/**
+ * Before the Consiglio there are at most seven collaborators: no filters and no
+ * sorting (Andrea, 08/10). Free ones first, then by sector as in the Consiglio.
+ */
+const COLLABORATOR_ORDER: CollaboratorAssignment[] = [null, "instructor", "writing", "events", "equipment", "gadget"];
 
 export function CollaboratorList({
   state: stateOverride,
@@ -125,22 +82,6 @@ export function CollaboratorList({
   const statsTier = getOfficialStatsVisibilityTier(state.upgrades);
   const [requestedPage, setRequestedPage] = useState(0);
   const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [assignmentFilter, setAssignmentFilter] = useState<CollaboratorFilter>("all");
-  const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all");
-  const [statsFilter, setStatsFilter] = useState<StatsFilter>("all");
-  const [levelFilter, setLevelFilter] = useState("all");
-  const {
-    sort,
-    setSort,
-    resetSort,
-    isDefaultSort,
-  } = usePersistentTableSort<CollaboratorSort>({
-    storageId: "collaborators",
-    allowedKeys: COLLABORATOR_SORT_KEYS,
-    defaultSort: null,
-  });
-  const deferredSearch = useDeferredValue(search);
   const contactsById = useMemo(
     () => new Map<string, Contact>(state.contacts.map((contact) => [contact.id, contact])),
     [state.contacts],
@@ -162,86 +103,13 @@ export function CollaboratorList({
     hasTimedAutomation || hasActiveEquipmentAutomation || hasActiveGadgetWork,
     GAME_CONFIG.progressUpdateIntervalMs,
   );
-  const filteredCollaborators = useMemo(() => {
-    const normalizedSearch = deferredSearch.trim().toLocaleLowerCase("it-IT");
-    return state.collaborators.filter((collaborator) => {
-      const contact = contactsById.get(collaborator.contactId);
-      const searchableText = `${collaborator.displayName} ${contact?.email ?? ""}`
-        .toLocaleLowerCase("it-IT");
-      if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
-      if (
-        assignmentFilter !== "all" &&
-        (assignmentFilter === "unassigned"
-          ? collaborator.assignment !== null
-          : collaborator.assignment !== assignmentFilter)
-      ) return false;
-      if (
-        statsFilter !== "all" &&
-        hasUnlockedOfficialStats(collaborator.forms, statsTier) !== (statsFilter === "visible")
-      ) return false;
-      if (levelFilter !== "all") {
-        const mastery = collaborator.mastery ?? createInitialCollaboratorMastery();
-        const level = collaborator.assignment
-          ? getCollaboratorMasteryProgress(mastery[collaborator.assignment]).level
-          : -1;
-        if (level !== Number(levelFilter)) return false;
-      }
-      if (activityFilter !== "all") {
-        const automation = getCollaboratorAutomationPresentation({
-          state,
-          collaboratorId: collaborator.id,
-          assignment: collaborator.assignment,
-          now,
-          activeEmail,
-        });
-        const active = collaborator.assignment === "instructor"
-          ? selectInstructorTeachingCount(state, collaborator.id) > 0 ||
-            athleticPreparationInstructorIds.has(collaborator.id)
-          : automation.progress !== undefined;
-        if (active !== (activityFilter === "active")) return false;
-      }
-      return true;
-    });
-  }, [
-    activeEmail,
-    activityFilter,
-    athleticPreparationInstructorIds,
-    assignmentFilter,
-    contactsById,
-    deferredSearch,
-    levelFilter,
-    now,
-    state,
-    statsFilter,
-  ]);
-  const sortContext = useMemo(() => ({
-    state,
-    contactsById,
-    activeEmail,
-    athleticPreparationInstructorIds,
-    now,
-  }), [activeEmail, athleticPreparationInstructorIds, contactsById, now, state]);
   const gridMode = state.collaborators.length >= GRID_FROM;
   const sortedCollaborators = useMemo(
-    () => {
-      // Griglia: prima chi è libero, poi per settore come nel Consiglio.
-      if (gridMode) {
-        return [...state.collaborators].sort((a, b) =>
-          GRID_ORDER.indexOf(a.assignment) - GRID_ORDER.indexOf(b.assignment));
-      }
-      const sorted = sortCollaborators(filteredCollaborators, sort, sortContext);
-      // I non assegnati sempre in cima, con qualunque ordinamento.
-      return [
-        ...sorted.filter((collaborator) => collaborator.assignment === null),
-        ...sorted.filter((collaborator) => collaborator.assignment !== null),
-      ];
-    },
-    [filteredCollaborators, gridMode, sort, sortContext, state.collaborators],
+    () => [...state.collaborators].sort((a, b) =>
+      COLLABORATOR_ORDER.indexOf(a.assignment) - COLLABORATOR_ORDER.indexOf(b.assignment)),
+    [state.collaborators],
   );
-  const pageCount = Math.max(
-    1,
-    Math.ceil(filteredCollaborators.length / COLLABORATORS_PER_PAGE),
-  );
+  const pageCount = Math.max(1, Math.ceil(sortedCollaborators.length / COLLABORATORS_PER_PAGE));
   const page = Math.min(requestedPage, pageCount - 1);
   const visibleCollaborators = sortedCollaborators.slice(
     page * COLLABORATORS_PER_PAGE,
@@ -259,50 +127,6 @@ export function CollaboratorList({
         activeEmail,
       })
     : undefined;
-  const resetFilters = () => {
-    setSearch("");
-    setAssignmentFilter("all");
-    setActivityFilter("all");
-    setStatsFilter("all");
-    setLevelFilter("all");
-    setRequestedPage(0);
-  };
-  const updateFilter = (update: () => void) => {
-    setRequestedPage(0);
-    update();
-  };
-  const handleSort = (key: CollaboratorSortKey) => {
-    setRequestedPage(0);
-    setSort((current) => current?.key === key
-      ? {
-          key,
-          direction: current.direction === "ascending" ? "descending" : "ascending",
-        }
-      : { key, direction: "ascending" },
-    );
-  };
-  const selectSort = (key: CollaboratorSortKey) => {
-    setRequestedPage(0);
-    setSort((current) => ({
-      key,
-      direction: current?.key === key ? current.direction : "ascending",
-    }));
-  };
-  const reverseSort = () => {
-    setRequestedPage(0);
-    setSort((current) => current
-      ? {
-          ...current,
-          direction: current.direction === "ascending" ? "descending" : "ascending",
-        }
-      : current,
-    );
-  };
-  const resetSorting = () => {
-    setRequestedPage(0);
-    resetSort();
-  };
-
   return (
     <section className="collaborator-list" aria-label="Collaboratori delle Onde">
       {state.collaborators.length === 0 ? (
@@ -316,132 +140,16 @@ export function CollaboratorList({
         </div>
       ) : (
         <div className={`collaborator-table${gridMode ? " is-grid" : ""}`}>
-          {gridMode ? null : (<>
-          <div
-            className="collaborator-sort-mobile table-sort-controls"
-            aria-label="Ordina collaboratori"
-          >
-            <label>
-              <span>Ordina per</span>
-              <select
-                aria-label="Campo di ordinamento collaboratori"
-                value={sort?.key ?? ""}
-                onChange={(event) => selectSort(event.target.value as CollaboratorSortKey)}
-              >
-                <option value="" disabled>Seleziona</option>
-                <option value="name">Collaboratore</option>
-                <option value="assignment">Assegnazione</option>
-                <option value="activity">Attività</option>
-                <option value="arena">Arena</option>
-                <option value="style">Stile</option>
-              </select>
-            </label>
-            <button type="button" disabled={!sort} onClick={reverseSort}>
-              {sort?.direction === "descending" ? "Decrescente ↓" : "Crescente ↑"}
-            </button>
-            <TableSortResetButton
-              disabled={isDefaultSort}
-              label="collaboratori"
-              onReset={resetSorting}
-            />
-          </div>
-          <div className="collaborator-table-head">
-            <CollaboratorSortableHeader label="Collaboratore" sortKey="name" sort={sort} onSort={handleSort} />
-            <CollaboratorSortableHeader label="Assegnazione attuale" sortKey="assignment" sort={sort} onSort={handleSort} />
-            <CollaboratorSortableHeader label="Attività" sortKey="activity" sort={sort} onSort={handleSort} />
-            <span
-              className="collaborator-stat-sort"
-              role="columnheader"
-              aria-sort={sort?.key === "arena" || sort?.key === "style" ? sort.direction : "none"}
-            >
-              <button
-                type="button"
-                className={sort?.key === "arena" ? "is-active" : ""}
-                aria-label="Ordina collaboratori per Arena"
-                onClick={() => handleSort("arena")}
-              >Arena {sort?.key === "arena" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
-              <button
-                type="button"
-                className={sort?.key === "style" ? "is-active" : ""}
-                aria-label="Ordina collaboratori per Stile"
-                onClick={() => handleSort("style")}
-              >Stile {sort?.key === "style" ? (sort.direction === "ascending" ? "↑" : "↓") : "↕"}</button>
-            </span>
-            <span>Assegnazione</span>
-            <span>Azioni</span>
-          </div>
-
-          <div className="collaborator-table-filters" aria-label="Filtri collaboratori">
-            <label>
-              <span className="sr-only">Cerca collaboratore</span>
-              <input
-                type="search"
-                value={search}
-                placeholder="Nome o email"
-                onChange={(event) => updateFilter(() => setSearch(event.target.value))}
-              />
-            </label>
-            <label>
-              <span className="sr-only">Livello collaboratore</span>
-              <select
-                aria-label="Filtra per livello"
-                value={levelFilter}
-                onChange={(event) => updateFilter(() => setLevelFilter(event.target.value))}
-              >
-                <option value="all">Tutti i livelli</option>
-                {COLLABORATOR_MASTERY_LEVELS.map((level, index) => (
-                  <option value={index} key={level.name}>{level.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Attività collaboratore</span>
-              <select
-                aria-label="Filtra per attività"
-                value={activityFilter}
-                onChange={(event) => updateFilter(() => setActivityFilter(event.target.value as ActivityFilter))}
-              >
-                <option value="all">Tutte le attività</option>
-                <option value="active">In corso</option>
-                <option value="waiting">In attesa</option>
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Statistiche ufficiali</span>
-              <select
-                aria-label="Filtra per statistiche"
-                value={statsFilter}
-                onChange={(event) => updateFilter(() => setStatsFilter(event.target.value as StatsFilter))}
-              >
-                <option value="all">Tutte le statistiche</option>
-                <option value="visible">Arena/Stile visibili</option>
-                <option value="locked">Arena/Stile bloccati</option>
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Assegnazione collaboratore</span>
-              <select
-                aria-label="Filtra per assegnazione"
-                value={assignmentFilter}
-                onChange={(event) => updateFilter(() => setAssignmentFilter(event.target.value as CollaboratorFilter))}
-              >
-                <option value="all">Tutte le assegnazioni</option>
-                <option value="unassigned">Non assegnati</option>
-                {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
-                  .filter((value) => value !== "gadget" || state.unlocks.gadget)
-                  .map((value) => (
-                  <option value={value} key={value}>
-                    {getCollaboratorAssignmentLabel(
-                      value as Exclude<CollaboratorAssignment, null>,
-                      state.unlocks.social,
-                    )}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button type="button" onClick={resetFilters}>Azzera</button>
-          </div>
-          </>)}
+          {gridMode ? null : (
+            <div className="collaborator-table-head">
+              <span>Collaboratore</span>
+              <span>Assegnazione attuale</span>
+              <span>Attività</span>
+              <span>Arena / Stile</span>
+              <span>Assegnazione</span>
+              <span>Azioni</span>
+            </div>
+          )}
 
           {visibleCollaborators.map((collaborator) => {
             const contact = contactsById.get(collaborator.contactId);
@@ -654,9 +362,6 @@ export function CollaboratorList({
                 ),
               )
             : null}
-          {!gridMode && filteredCollaborators.length === 0 ? (
-            <div className="collaborator-filter-empty">Nessun collaboratore corrisponde ai filtri.</div>
-          ) : null}
         </div>
       )}
 

@@ -323,7 +323,8 @@ test("gestisce direttamente l'organico aggregato dei collaboratori", async ({ pa
       name: "Ordina collaboratori per Formazione Tecnici",
     }),
   ).toHaveCount(0);
-  await expect(instructorPanel.getByLabel("Filtra istruttori per rarità")).toBeVisible();
+  await instructorPanel.getByRole("button", { name: /^Filtri/ }).click();
+  await expect(instructorPanel.getByRole("group", { name: "Rarità" })).toBeVisible();
   await instructorPanel.getByRole("button", { name: "Chiudi pannello Istruttori" }).click();
 
   const collaboratorCount = page.getByText(/\d+\/\d+ liberi/);

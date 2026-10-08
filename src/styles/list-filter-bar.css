@@ -1,0 +1,316 @@
+/* Concept F3 «Cassetto dei filtri» (Tavola 12, 08/10). Outlook first, Onde below. */
+.list-filter-bar {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.list-filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.list-filter-search input,
+.list-filter-toggle,
+.list-filter-favorites,
+.list-filter-sort,
+.list-filter-number input {
+  height: 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+.list-filter-search input {
+  width: 220px;
+  max-width: 100%;
+  padding: 0 10px;
+}
+
+.list-filter-toggle,
+.list-filter-favorites {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.list-filter-caret {
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+.list-filter-toggle.has-active,
+.list-filter-toggle[aria-expanded="true"] {
+  border-color: var(--blue-600);
+  background: var(--blue-600);
+  color: #ffffff;
+}
+
+.list-filter-favorites[aria-pressed="true"] {
+  border-color: var(--blue-600);
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+.list-filter-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 10px;
+}
+
+.list-filter-sort label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.list-filter-sort select {
+  height: 28px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+}
+
+.list-filter-sort button {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--blue-700);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.list-filter-sort.is-active {
+  border-color: var(--blue-600);
+}
+
+.list-filter-spacer {
+  flex: 1;
+}
+
+.list-filter-count {
+  color: var(--ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.list-filter-count strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.list-filter-drawer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 24px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.list-filter-group {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 7px;
+}
+
+.list-filter-group.is-wide {
+  grid-column: span 3;
+}
+
+.list-filter-group > small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.list-filter-chips,
+.list-filter-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-filter-active {
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.list-filter-chip {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.list-filter-chip:hover,
+.list-filter-chip:focus-visible {
+  border-color: var(--blue-600);
+}
+
+.list-filter-chip.is-on {
+  border-color: var(--blue-600);
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+/* Rarities keep their own colour, on or off. */
+.list-filter-chip.rarity-rare { color: var(--rarity-rare-name); }
+.list-filter-chip.rarity-ultra-rare { color: var(--rarity-ultra-rare-name); }
+.list-filter-chip.rarity-legendary { color: var(--rarity-legendary-name); }
+.list-filter-chip.rarity-secret-legendary { color: var(--rarity-secret-legendary-name); }
+.list-filter-chip[class*="rarity-"].is-on { border-color: currentColor; }
+
+.list-filter-chip.is-form {
+  padding: 0 9px 0 3px;
+}
+
+.list-filter-chip.is-form img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.list-filter-chip.is-form.is-on img {
+  opacity: 1;
+}
+
+.list-filter-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.list-filter-number input {
+  width: 84px;
+  padding: 0 8px;
+}
+
+.list-filter-empty {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.list-filter-reset {
+  min-height: 28px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Onde: gold for what is active, the same panels as the rest of the page. */
+:root[data-theme="dark"] .list-filter-bar {
+  background: rgb(2 30 51 / 35%);
+}
+
+:root[data-theme="dark"] .list-filter-search input,
+:root[data-theme="dark"] .list-filter-toggle,
+:root[data-theme="dark"] .list-filter-favorites,
+:root[data-theme="dark"] .list-filter-sort,
+:root[data-theme="dark"] .list-filter-number input {
+  background: rgb(2 30 51 / 55%);
+}
+
+:root[data-theme="dark"] .list-filter-toggle.has-active,
+:root[data-theme="dark"] .list-filter-toggle[aria-expanded="true"] {
+  border-color: var(--onde-gold);
+  background: var(--onde-gold);
+  color: var(--onde-on-gold);
+}
+
+:root[data-theme="dark"] .list-filter-favorites[aria-pressed="true"],
+:root[data-theme="dark"] .list-filter-sort.is-active,
+:root[data-theme="dark"] .list-filter-chip.is-on {
+  border-color: var(--onde-gold);
+  background: rgb(224 166 74 / 14%);
+  color: var(--onde-gold-soft);
+}
+
+:root[data-theme="dark"] .list-filter-sort.is-active select,
+:root[data-theme="dark"] .list-filter-sort button {
+  color: var(--onde-gold-soft);
+}
+
+:root[data-theme="dark"] .list-filter-sort select option {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .list-filter-chip:hover,
+:root[data-theme="dark"] .list-filter-chip:focus-visible {
+  border-color: var(--onde-gold);
+}
+
+:root[data-theme="dark"] .list-filter-drawer {
+  background: rgb(2 30 51 / 45%);
+}
+
+:root[data-theme="dark"] .list-filter-chip[class*="rarity-"].is-on {
+  border-color: currentColor;
+  background: rgb(255 255 255 / 7%);
+}
+:root[data-theme="dark"] .list-filter-chip.rarity-rare.is-on { color: var(--rarity-rare-name); }
+:root[data-theme="dark"] .list-filter-chip.rarity-ultra-rare.is-on { color: var(--rarity-ultra-rare-name); }
+:root[data-theme="dark"] .list-filter-chip.rarity-legendary.is-on { color: var(--rarity-legendary-name); }
+:root[data-theme="dark"] .list-filter-chip.rarity-secret-legendary.is-on { color: var(--rarity-secret-legendary-name); }
+
+:root[data-theme="dark"] .list-filter-reset {
+  color: var(--onde-wave);
+}
+
+@media (max-width: 900px) {
+  .list-filter-drawer {
+    grid-template-columns: 1fr;
+  }
+
+  .list-filter-group.is-wide {
+    grid-column: auto;
+  }
+
+  .list-filter-search {
+    flex: 1 1 100%;
+  }
+
+  .list-filter-search input {
+    width: 100%;
+  }
+}
