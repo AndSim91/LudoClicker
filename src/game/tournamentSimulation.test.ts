@@ -20,7 +20,6 @@ import {
   getStyleVote,
 } from "./athleteStats";
 import { createInitialState, gameReducer } from "./engine";
-import { GAME_CONFIG } from "./config";
 import { getAthleteImmunityStatus } from "./athleteImmunity";
 import { departMembers } from "./membershipFlow";
 import type { GameState } from "./types";
@@ -37,6 +36,7 @@ function createTournamentSchool(memberCount = 6) {
   const enrolled = addAdminMembers(initial, memberCount);
   return {
     ...enrolled,
+    unlocks: { ...enrolled.unlocks, forms: true },
     contacts: enrolled.contacts.map((contact) =>
       contact.status === "enrolled" ? { ...contact, forms: ["form-1" as const] } : contact,
     ),
@@ -515,7 +515,6 @@ describe("tournament calendar and immunity", () => {
         ...state.school,
         currentMonth: 12,
         nextFeeAt: 61_000,
-        fame: GAME_CONFIG.tournamentUnlockMembers,
       },
     };
     const processed = gameReducer(december, { type: "TICK", now: 61_000 });

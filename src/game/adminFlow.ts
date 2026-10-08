@@ -18,6 +18,7 @@ import type { GameState, ScheduledTrial } from "./types";
 import { GADGET_PRODUCT_ORDER } from "../content/gadgets";
 import { GADGET_RARITY_ORDER } from "../content/gadgetRarities";
 import { createInitialGadgetMonthlyRevenueState } from "./gadgetRevenue";
+import { unlockFormsIfEligible } from "./unlocks";
 
 export function addAdminContacts(state: GameState, rawAmount: number): GameState {
   const amount = Math.trunc(rawAmount);
@@ -153,10 +154,10 @@ export function addAdminMembers(state: GameState, rawAmount: number): GameState 
     unlocks: {
       ...nextState.unlocks,
       upgrades: amount > 0 ? true : nextState.unlocks.upgrades,
-      forms: amount > 0 ? true : nextState.unlocks.forms,
     },
   };
-  return updatedState;
+  // The Forme (and Tornei) open at 10 members, as in the tick.
+  return unlockFormsIfEligible(updatedState);
 }
 
 export function addAdminEuros(state: GameState, amount: number): GameState {

@@ -15,7 +15,6 @@ import {
   needsCourseXRecovery,
 } from "../content/forms";
 import {
-  applyQualifyingCourseDiscount,
   areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
   getInstructorBranchCapacityBonus,
@@ -46,6 +45,7 @@ import type {
   FormTrainingStartMode,
   GameState,
 } from "./types";
+import { getQualifyingCourseCost } from "./tutorialScholarship";
 
 export interface TrainingStartResult {
   training: FormTraining;
@@ -394,9 +394,10 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
     const student = collaborator ?? member;
     const definition = getFormDefinition(formId);
     if (qualificationOnly && collaborator && definition) {
-      const qualificationCost = applyQualifyingCourseDiscount(
-        this.state.upgrades,
+      const qualificationCost = getQualifyingCourseCost(
+        this.state,
         getInstructorQualificationCost(definition.cost),
+        formId,
       );
       if (collaborator.training || this.euros < qualificationCost) return undefined;
       const training = scheduleTraining(
@@ -431,9 +432,10 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       instructorSelf && !instructor && isInstructorForm(formId),
     );
     const trainingCost = instructorTrack
-      ? applyQualifyingCourseDiscount(
-          this.state.upgrades,
+      ? getQualifyingCourseCost(
+          this.state,
           getInstructorFormCost(definition?.cost ?? 0),
+          formId,
         )
       : instructor
         ? getStudentFormCost(definition?.cost ?? 0)

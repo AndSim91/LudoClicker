@@ -5,7 +5,6 @@ import {
   getCollaboratorProductivity,
 } from "../content/forms";
 import { UPGRADE_DEFINITIONS } from "../content/upgrades";
-import { COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID } from "../content/tutorialScenes";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import {
@@ -565,14 +564,8 @@ describe("game engine: progression", () => {
     const nextSchoolYear = gameReducer(septemberState, { type: "START_FORM_TRAINING", personId: member.id, formId: "course-x", now: 23_000 });
 
     expect(blocked).toBe(ready);
-    expect(blocked.tutorial.triggeredSceneIds).not.toContain(
-      COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-    );
     expect(training.school.euros).toBe(162.5);
     expect(training.contacts[0].training?.formId).toBe("form-1");
-    expect(training.tutorial.triggeredSceneIds).toContain(
-      COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-    );
     expect(completed.contacts[0].forms).toContain("form-1");
     expect(completed.contacts[0].training).toBeUndefined();
     expect(completed.statistics.formsCompleted).toBe(1);
@@ -600,9 +593,6 @@ describe("game engine: progression", () => {
       formId: "form-2",
       trainingPhase: "athlete",
     });
-    expect(collaboratorAsStudent.tutorial.triggeredSceneIds).toContain(
-      COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-    );
   });
 
   it("allows manual member training without an Instructor at the base cost", () => {
@@ -625,9 +615,6 @@ describe("game engine: progression", () => {
     expect(training.school.euros).toBe(0);
     expect(training.contacts[0].training?.formId).toBe("form-1");
     expect(training.contacts[0].training?.instructorId).toBeUndefined();
-    expect(training.tutorial.triggeredSceneIds).not.toContain(
-      COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-    );
     expect(training.contacts[0].training?.completesAt).toBe(22_000);
   });
 

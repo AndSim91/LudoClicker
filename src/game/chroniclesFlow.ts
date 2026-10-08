@@ -174,7 +174,6 @@ function enrollLegendary(
       ...state.unlocks,
       upgrades: true,
       collaborators: true,
-      forms: true,
     },
     statistics: {
       ...state.statistics,

@@ -126,6 +126,7 @@ describe("dynamic tournament qualification", () => {
     const initial = addAdminMembers(createInitialState(1_000, "Manager"), memberCount);
     return {
       ...initial,
+      unlocks: { ...initial.unlocks, forms: true },
       contacts: initial.contacts.map((contact) =>
         contact.status === "enrolled"
           ? { ...contact, forms: ["form-1" as const] }

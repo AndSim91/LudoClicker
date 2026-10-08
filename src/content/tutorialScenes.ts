@@ -3,7 +3,16 @@ import { hasPrestigeTitle, isGameAreaUnlocked } from "../game/progression";
 import { isOfficialSwordSupplierUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
 import { hasCompletedTutorialSparring } from "../game/tutorialProgress";
+import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../game/tutorialScholarship";
 import type { GameState } from "../game/types";
+
+export { FORMS_TEACHING_TUTORIAL_SCENE_ID };
+
+/** The collaborator the Forme tutorial talks about: Andrea Simonazzi, or the first one. */
+function getTutorialInstructor(state: GameState) {
+  return state.collaborators.find((collaborator) => collaborator.specialProfileId === "andrea-simonazzi") ??
+    state.collaborators[0];
+}
 
 export const TUTORIAL_REGION_IDS = [
   "title",
@@ -60,7 +69,6 @@ export const LEGACY_TUTORIAL_SCENE_IDS = [
 ] as const;
 
 export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as const;
-export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
 /** First yearly departures with no Istruttore assigned (06/10/2026). */
 export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
 /** At 15 members: the swords menu and the purchase (06/10/2026, 15 dal 08/10). */
@@ -77,7 +85,7 @@ export const LATE_TUTORIAL_SCENE_IDS = [
 export const TUTORIAL_SCENE_IDS = [
   ...LEGACY_TUTORIAL_SCENE_IDS,
   FIRST_COLLABORATOR_TUTORIAL_SCENE_ID,
-  COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+  FORMS_TEACHING_TUTORIAL_SCENE_ID,
   MEMBER_DEPARTURES_TUTORIAL_SCENE_ID,
   SWORD_PURCHASE_TUTORIAL_SCENE_ID,
   "gadget-laboratory",
@@ -406,7 +414,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Aree di Attività",
         body: [
-          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. [[a:Redazione]] automatizza la compilazione delle email; [[a:Eventi]] organizza le attività per scoprire nuovi contatti; [[a:Attrezzatura]] gestisce automaticamente la riparazione delle spade della scuola; [[a:Istruttore]] serve per insegnare e supportare la formazione degli iscritti della scuola per renderli sempre più forti in preparazione ai tornei.",
+          "Da qui puoi selezionare l'incarico per ogni Collaboratore delle Onde. [[a:Redazione]] automatizza la compilazione delle email; [[a:Eventi]] organizza le attività per scoprire nuovi contatti; [[a:Attrezzatura]] gestisce automaticamente la riparazione delle spade della scuola.",
         ],
         focusRegions: ["main", "collaborator-section"],
         scrollToRegion: "collaborator-section",
@@ -425,22 +433,95 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     ],
   },
   {
-    id: COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
+    id: FORMS_TEACHING_TUTORIAL_SCENE_ID,
     pauseWhileActive: true,
-    canStart: ({ state }) => Boolean(
-      state.tutorial.triggeredSceneIds?.includes(
-        COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-      ),
-    ),
+    canStart: ({ state }) =>
+      state.unlocks.forms && state.school.peakActiveMembers >= GAME_CONFIG.formsUnlockMembers,
     steps: [
       {
-        id: "collaborator-teaching-discount",
+        id: "forms-ten-members",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
+        title: "Dieci iscritti",
         body: [
-          "Ora che abbiamo un Collaboratore delle Onde, potremmo impiegarlo nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
+          "Dieci **Iscritti**: non siamo più un gruppo di scappati di casa con le spade laser: siamo una scuola di scappati di casa con le spade laser. È l'ora di farti conoscere le Forme, gli Insegnanti ed i Tornei LudoSport.",
         ],
-        focusRegions: ["main"],
+        focusRegions: ["title"],
+      },
+      {
+        id: "forms-seven",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Le sette Forme",
+        body: [
+          "In LudoSport le tecniche si imparano attraverso le Forme: sette stili di combattimento che assieme formano un sistema completo e armonico di principi, movimenti e manovre. Ognuna ha una propria filosofia ed un modo differente di essere portata in arena, ed ogni atleta apprende il suo personale modo di combattere Forma dopo Forma.",
+          "Il percorso formativo inizia da Forma 1 e 2 con la spada lunga. Con il Corso Y si impara a conoscere anche staffa e doppie spade corte per poi scegliere le proprie armi preferite per le Forme 3, 4 e 5. Infine abbiamo le Forme 6 e 7 che raccolgono e concludono il percorso di un atleta.",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "forms-arena-style",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Arena e Stile",
+        body: [
+          "Ogni Forma porta un atleta a diventare più forte nel combattimento (Arena) o ad affinare la sua pura capacità tecnica (Stile) e tutto questo viene messo alla prova nelle competizioni torneistiche che il network LudoSport offre durante l'anno scolastico.",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "forms-first-instructor",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il primo Istruttore",
+        body: [
+          "Iniziamo assegnando un collaboratore al ruolo di [[a:Istruttore]]: in questo modo si occuperà di insegnare le Forme ai nostri iscritti e ci aiuterà a non fargli abbandonare la scuola a fine anno. Perché sì: un allievo che si annoia potrebbe riscoprire il piacere della cioccolata calda sul divano e a noi non piace perdere quote d'iscrizione. Siamo genovesi dopotutto!",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "assign-first-instructor",
+        kind: "objective",
+        title: "Assegna un collaboratore all'Area Istruttore",
+        body: ({ state }) => [
+          `Apri [[Scuola]] e scegli l'Area [[a:Istruttore]] per ${getTutorialInstructor(state)?.displayName ?? "un collaboratore"}.`,
+        ],
+        focusRegions: ({ activeView }) =>
+          activeView === "contacts"
+            ? ["main", "collaborator-section"]
+            : ["navigation", "contacts-navigation"],
+        scrollToRegion: "collaborator-section",
+        // ponytail: with no collaborator at all (Andrea Simonazzi always arrives first) the two steps pass by themselves.
+        isComplete: ({ state }) => state.collaborators.length === 0 ||
+          state.collaborators.some((collaborator) => collaborator.assignment === "instructor"),
+      },
+      {
+        id: "instructor-form-1",
+        kind: "objective",
+        title: "Fagli imparare la Forma 1 da Istruttore",
+        body: [
+          "La prima fase è apprendere la Forma da allievo, poi da istruttore, ma è tutto automatico. Di norma il corso Istruttori ha un costo, ma per questa volta offre Todaro con una bella borsa di studio.",
+        ],
+        focusRegions: ["main", "collaborator-section"],
+        scrollToRegion: "collaborator-section",
+        isComplete: ({ state }) => state.collaborators.length === 0 ||
+          state.collaborators.some((collaborator) =>
+            collaborator.instructorForms.includes("form-1") || (
+              collaborator.training?.formId === "form-1" &&
+              Boolean(collaborator.training.includesInstructorCertification)
+            )
+          ),
+      },
+      {
+        id: "ander-games",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Gli Ander Games",
+        body: [
+          "Ogni dicembre teniamo il Torneo Scolastico dell'Ordine delle Onde, detto anche «Ander Games». Ma per poterlo disputare servono almeno 8 atleti iscritti e capaci almeno in Forma 1.",
+          "Il tuo prossimo obiettivo è riuscire a disputare il Torneo Scolastico. Non importa quando: dicembre arriva ogni anno, puntuale come Babbo Natale.",
+        ],
+        focusRegions: ["navigation", "tournaments-navigation"],
       },
     ],
   },

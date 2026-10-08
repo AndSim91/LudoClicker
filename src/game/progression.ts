@@ -20,6 +20,8 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
   if (view === "network") {
     return state.network.schoolCount > 0 || hasPrestigeTitle(state);
   }
+  // Opens with the Forme at 10 members, in every school (08/10/2026).
+  if (view === "tournaments") return state.unlocks.forms;
   if (state.network.schoolCount > 0) return true;
 
   if (view === "events") {
@@ -29,9 +31,6 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
     );
   }
   if (view === "contacts") return state.school.fame > 0;
-  if (view === "tournaments") {
-    return state.school.fame >= GAME_CONFIG.tournamentUnlockMembers;
-  }
   if (view === "upgrades") return state.unlocks.upgrades;
   return false;
 }

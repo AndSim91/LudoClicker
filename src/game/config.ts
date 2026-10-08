@@ -1,7 +1,7 @@
 export const INITIAL_SAVE_COMPATIBILITY_VERSION = 1;
 
 export const GAME_CONFIG = {
-  version: 105,
+  version: 106,
   // Increment this only when a change cannot preserve the meaning of an old save.
   // A different value forces a fresh game instead of weakening the game design
   // to keep an incompatible save alive.
@@ -11,7 +11,8 @@ export const GAME_CONFIG = {
   profileNameMaxLength: 80,
   rarityOverviewEmailsSent: 10,
   socialUnlockCollaborators: 15,
-  tournamentUnlockMembers: 6,
+  // Forme, Area Istruttore and Tornei open together at 10 members of peak, in every school (08/10/2026).
+  formsUnlockMembers: 10,
   // The Torneo Scolastico needs 8 athletes with at least Forma 1 (08/10/2026).
   tournamentMinimumMembers: 8,
   guaranteedAndreaContactPosition: 10,

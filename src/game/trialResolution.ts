@@ -226,7 +226,6 @@ export function resolveStartedTrialBatch(
         unlocks: {
           ...nextState.unlocks,
           upgrades: true,
-          forms: true,
         },
       };
       // 4.1: after the first one, new members are counted in the yearly digest.

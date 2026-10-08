@@ -409,7 +409,7 @@ export const LUDOWIKI_CHAPTERS: readonly LudoWikiChapter[] = [
       { icon: "gift", label: "Premi", detail: "Miglior piazzamento" },
     ],
     numbers: [
-      { label: "Sblocco", value: `${GAME_CONFIG.tournamentUnlockMembers} Fama`, detail: "accesso iniziale alla pagina" },
+      { label: "Sblocco", value: `${GAME_CONFIG.formsUnlockMembers} iscritti`, detail: "insieme a Forme e Istruttori" },
       { label: "Accademico", value: `${TOURNAMENT_DEFINITIONS.academy.standard}`, detail: "standard medio del circuito" },
       { label: "Nazionale / Champion's", value: `${TOURNAMENT_DEFINITIONS.national.standard} / ${TOURNAMENT_DEFINITIONS.champions.standard}`, detail: "standard medi successivi" },
     ],

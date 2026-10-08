@@ -505,7 +505,8 @@ describe("game engine: funnel", () => {
     expect(state.statistics.trialsBooked).toBe(1);
     expect(state.statistics.membersEnrolled).toBe(1);
     expect(state.collaborators).toHaveLength(0);
-    expect(state.unlocks.forms).toBe(true);
+    // The Forme open at 10 members (08/10/2026), not with the first one.
+    expect(state.unlocks.forms).toBe(false);
     expect(state.unlocks.collaborators).toBe(false);
     expect(state.messages.some((message) => message.subject === "Un nuovo Collaboratore")).toBe(false);
   });
@@ -592,7 +593,6 @@ describe("game engine: funnel", () => {
     expect(protectedAttempt.contacts.find((contact) => contact.id === eva.id)?.status).toBe("enrolled");
     expect(protectedAttempt.collaborators).toHaveLength(1);
     expect(protectedAttempt.collaborators[0].rarity).toBe("legendary");
-    expect(protectedAttempt.unlocks.forms).toBe(true);
     expect(protectedAttempt.messages.find((message) => message.subject === "Un nuovo Collaboratore")?.preview)
       .toBe("Un Leggendario tra i collaboratori. Non succede tutti i giorni: scegli con cura il suo incarico, ogni aiuto possibile è una manna dal cielo!");
   });

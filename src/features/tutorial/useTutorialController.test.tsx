@@ -2,7 +2,6 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useCallback, useState } from "react";
 import { describe, expect, it } from "vitest";
 import {
-  COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
   LEGACY_TUTORIAL_SCENE_IDS,
 } from "../../content/tutorialScenes";
 import { gameReducer } from "../../game/engine";
@@ -176,17 +175,6 @@ function useTutorialHarness() {
       unlocks: {
         ...current.unlocks,
         gadget: true,
-      },
-    })),
-    triggerCollaboratorTeachingTutorial: () => setState((current) => ({
-      ...current,
-      tutorial: {
-        completedSceneIds: [
-          ...LEGACY_TUTORIAL_SCENE_IDS,
-          "first-collaborator",
-        ],
-        skippedSceneIds: [],
-        triggeredSceneIds: [COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID],
       },
     })),
   };
@@ -437,40 +425,6 @@ describe("useTutorialController", () => {
     await waitFor(() => {
       expect(result.current.state.tutorial.completedSceneIds).toContain("first-collaborator");
     });
-    expect(result.current.tutorial.activeScene).toBeNull();
-  });
-
-  it("shows the one-message teaching tutorial only after its situational trigger", async () => {
-    const { result } = renderHook(() => useTutorialHarness());
-
-    act(() => result.current.triggerCollaboratorTeachingTutorial());
-
-    await waitFor(() => {
-      expect(result.current.tutorial.activeScene?.id).toBe(
-        COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-      );
-    });
-    expect(result.current.tutorial.activeScene?.steps).toHaveLength(1);
-    expect(result.current.tutorial.activeStep).toMatchObject({
-      id: "collaborator-teaching-discount",
-      kind: "dialog",
-      speaker: "A.N.D.E.R.",
-      body: [
-        "Ora che abbiamo un Collaboratore delle Onde, potremmo impiegarlo nell'insegnamento. Questo non è solo utile per automatizzare i processi ripetitivi della scuola, ma porta anche un considerevole sconto sui corsi! (Siamo genovesi dopotutto)",
-      ],
-    });
-    expect(result.current.tutorial.isBlockingInput).toBe(true);
-
-    act(() => result.current.tutorial.continueScene());
-
-    await waitFor(() => {
-      expect(result.current.state.tutorial.completedSceneIds).toContain(
-        COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-      );
-    });
-    expect(result.current.state.tutorial.triggeredSceneIds).not.toContain(
-      COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID,
-    );
     expect(result.current.tutorial.activeScene).toBeNull();
   });
 

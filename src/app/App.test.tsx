@@ -165,11 +165,11 @@ describe("App profile and navigation", () => {
     expect(screen.getByLabelText("Follower Social: 12")).toBeVisible();
   });
 
-  it("unlocks tournaments after reaching six members", () => {
+  it("unlocks tournaments with the Forme at ten members", () => {
     const initial = createInitialState(Date.now(), "Andrea Ungaro");
     saveGame({
       ...initial,
-      school: { ...initial.school, activeMembers: 5, fame: 5 },
+      school: { ...initial.school, activeMembers: 9, peakActiveMembers: 9, fame: 9 },
     });
     const { unmount } = render(<App />);
 
@@ -178,7 +178,8 @@ describe("App profile and navigation", () => {
 
     saveGame({
       ...initial,
-      school: { ...initial.school, activeMembers: 6, fame: 6 },
+      school: { ...initial.school, activeMembers: 10, peakActiveMembers: 10, fame: 10 },
+      unlocks: { ...initial.unlocks, forms: true },
     });
     render(<App />);
 

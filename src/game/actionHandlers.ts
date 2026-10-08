@@ -1,5 +1,4 @@
 import { dismissMoment } from "./moments";
-import { COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID } from "../content/tutorialScenes";
 import {
   addAdminContacts,
   addAdminEuros,
@@ -37,7 +36,7 @@ import type {
 } from "./types";
 import { startChroniclesTournament } from "./tournamentFlow";
 import { buyAllAffordableUpgrades, buyUpgrade, setGameSpeed } from "./upgradeFlow";
-import { finishTutorialScene, triggerTutorialScene } from "./tutorialProgress";
+import { finishTutorialScene } from "./tutorialProgress";
 import {
   acceptGadgetProduct,
   completeGadgetMinigame,
@@ -218,38 +217,13 @@ export function createGameActionHandlers(
       state,
       action.contactId,
     ),
-    START_FORM_TRAINING: (state, action) => {
-      const collaboratorBefore = state.collaborators.find(
-        (collaborator) => collaborator.id === action.personId,
-      );
-      const memberBefore = state.contacts.find(
-        (contact) =>
-          contact.id === (collaboratorBefore?.contactId ?? action.personId) &&
-          contact.status === "enrolled",
-      );
-      const nextState = dependencies.startFormTraining(
-        state,
-        action.personId,
-        action.formId,
-        action.now,
-        action.mode,
-      );
-      const trainingBefore = collaboratorBefore?.training ?? memberBefore?.training;
-      const trainingAfter = collaboratorBefore
-        ? nextState.collaborators.find(
-            (collaborator) => collaborator.id === collaboratorBefore.id,
-          )?.training
-        : nextState.contacts.find((contact) => contact.id === memberBefore?.id)?.training;
-      const trainingStarted = Boolean(
-        trainingAfter &&
-        trainingAfter !== trainingBefore &&
-        trainingAfter.trainingPhase !== "instructor",
-      );
-
-      return memberBefore && state.collaborators.length > 0 && trainingStarted
-        ? triggerTutorialScene(nextState, COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID)
-        : nextState;
-    },
+    START_FORM_TRAINING: (state, action) => dependencies.startFormTraining(
+      state,
+      action.personId,
+      action.formId,
+      action.now,
+      action.mode,
+    ),
     START_ACQUISITION_EVENT: (state, action) => startAcquisitionEvent(
       state,
       action.definitionId,

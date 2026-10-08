@@ -3158,16 +3158,24 @@ l'avanzamento.
    automaticamente. Il dialogo iniziale ricorda il limite di un solo incarico
    alla volta e la Maestria accumulata lavorando; poi l'intera sezione
    **Collaboratori** viene evidenziata mentre una panoramica testuale presenta
-   Redazione, Eventi, Attrezzatura e Istruttore. La scena termina soltanto
+   Redazione, Eventi e Attrezzatura (l'Istruttore arriva a 10 iscritti). La scena termina soltanto
    quando il primo Collaboratore riceve un incarico liberamente scelto; un
    incarico già presente conta come completamento e **Salta** resta sempre
    disponibile. I salvataggi precedenti all'introduzione della scena la
    registrano come già saltata.
 
-9. **Collaboratori e insegnamento** La prima volta che si avvia la formazione
-   di un iscritto avendo già almeno un Collaboratore, un breve dialogo in pausa
-   suggerisce di impiegare i Collaboratori nell'insegnamento, anche per lo
-   sconto sui corsi.
+9. **Forme, Istruttori e Tornei** (`forms-teaching`, 08/10/2026; sostituisce il
+   vecchio dialogo dello sconto Istruttori). In ogni scuola Forme, Area
+   Istruttore dei Collaboratori e pagina Tornei si aprono insieme a 10 iscritti
+   di picco; prima non se ne vede traccia. La scena parte solo la prima volta in
+   assoluto: «Dieci iscritti», «Le sette Forme» (parte vera su LudoSport),
+   «Arena e Stile», «Il primo Istruttore»; poi due obiettivi, assegnare un
+   Collaboratore (Andrea Simonazzi, che a 10 iscritti c'è sempre) all'Area
+   Istruttore e fargli imparare la Forma 1 da Istruttore, gratis per la borsa
+   di studio di Todaro (vale una volta sola, finché la scena non è conclusa);
+   infine «Gli Ander Games» dà l'obiettivo del Torneo Scolastico (8 atleti con
+   almeno la Forma 1, a dicembre). I salvataggi già oltre i 10 iscritti o la
+   prima scuola la segnano come vista (migrazione v106).
 
 10. **Una squadra che cresce** All'ottavo Collaboratore la gestione passa alla
     vista aggregata per settore: la scena spiega il cambio, chiede di aprire

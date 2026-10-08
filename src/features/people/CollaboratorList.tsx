@@ -36,6 +36,7 @@ import { StaffForms } from "./FormPathMap";
 import { PersonName } from "./PersonPresentation";
 import { InstructorCourseTabs } from "./InstructorCourseTabs";
 import { InstructorCompactActivity } from "./TrainingControl";
+import { isCollaboratorAssignmentAvailable } from "../../game/unlocks";
 
 const COLLABORATORS_PER_PAGE = 25;
 /** From the 5th collaborator to the Consiglio the list is a grid of 4 + 3 places (06/10). */
@@ -315,7 +316,7 @@ export function CollaboratorList({
                   >
                     <option value="">Non assegnato</option>
                     {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
-                      .filter((value) => value !== "gadget" || state.unlocks.gadget)
+                      .filter((value) => isCollaboratorAssignmentAvailable(value as CollaboratorAssignment, state.unlocks))
                       .map((value) => (
                       <option value={value} key={value}>
                         {getCollaboratorAssignmentLabel(

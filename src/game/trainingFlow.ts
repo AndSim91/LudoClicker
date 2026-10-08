@@ -14,7 +14,6 @@ import {
   isInstructorForm,
 } from "../content/forms";
 import {
-  applyQualifyingCourseDiscount,
   areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
   getInstructorBranchCapacityBonus,
@@ -55,6 +54,8 @@ import {
   type TrainingFlowDependencies,
 } from "./trainingResolution";
 import { getWaitingTrainingsByPriority } from "./runtimeIndexes";
+import { isCollaboratorAssignmentAvailable } from "./unlocks";
+import { getQualifyingCourseCost } from "./tutorialScholarship";
 
 export {
   chooseFormBranchPreferences,
@@ -72,7 +73,7 @@ export function assignCollaborator(
   const collaborator = state.collaborators.find((candidate) => candidate.id === collaboratorId);
   if (
     !collaborator ||
-    (assignment === "gadget" && !state.unlocks.gadget) ||
+    !isCollaboratorAssignmentAvailable(assignment, state.unlocks) ||
     state.collaboratorManagement.automaticShares
   ) return state;
   const reassignedState = {
@@ -280,9 +281,10 @@ export function startFormTraining(
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   if (qualificationOnly && collaborator && definition) {
-    const qualificationCost = applyQualifyingCourseDiscount(
-      state.upgrades,
+    const qualificationCost = getQualifyingCourseCost(
+      state,
       getInstructorQualificationCost(definition.cost),
+      formId,
     );
     if (collaborator.training || state.school.euros < qualificationCost) return state;
     const training = scheduleTraining(
@@ -327,9 +329,10 @@ export function startFormTraining(
     instructorSelf && !instructor && isInstructorForm(formId),
   );
   const trainingCost = instructorTrack
-    ? applyQualifyingCourseDiscount(
-        state.upgrades,
+    ? getQualifyingCourseCost(
+        state,
         getInstructorFormCost(definition?.cost ?? 0),
+        formId,
       )
     : instructor
       ? getStudentFormCost(definition?.cost ?? 0)

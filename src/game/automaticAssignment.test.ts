@@ -38,7 +38,8 @@ function teacher(index: number, forms: FormId[]): Collaborator {
 }
 
 function withCollaborators(collaborators: Collaborator[]): GameState {
-  return { ...createInitialState(1_000), collaborators };
+  const initial = createInitialState(1_000);
+  return { ...initial, collaborators, unlocks: { ...initial.unlocks, forms: true } };
 }
 
 function withCouncil(state: GameState): GameState {

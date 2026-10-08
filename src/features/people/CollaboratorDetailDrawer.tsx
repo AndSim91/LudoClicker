@@ -22,6 +22,7 @@ import { CollaboratorMasterySummary } from "./CollaboratorMasterySummary";
 import type { CollaboratorAutomationPresentation } from "./collaboratorAutomationPresentation";
 import { FormLogoStrip, PersonName } from "./PersonPresentation";
 import { InstructorPanel, TrainingControl } from "./TrainingControl";
+import { isCollaboratorAssignmentAvailable } from "../../game/unlocks";
 
 export function CollaboratorDetailDrawer({
   state: stateOverride,
@@ -214,7 +215,7 @@ export function CollaboratorDetailDrawer({
             >
               <option value="">Non assegnato</option>
               {Object.keys(COLLABORATOR_ASSIGNMENT_LABELS)
-                .filter((value) => value !== "gadget" || state.unlocks.gadget)
+                .filter((value) => isCollaboratorAssignmentAvailable(value as CollaboratorAssignment, state.unlocks))
                 .map((value) => (
                 <option value={value} key={value}>
                   {getCollaboratorAssignmentLabel(

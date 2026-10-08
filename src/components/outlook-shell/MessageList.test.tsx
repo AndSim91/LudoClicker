@@ -171,9 +171,10 @@ describe("MessageList", () => {
           ...initial,
           school: {
             ...initial.school,
-            activeMembers: GAME_CONFIG.tournamentUnlockMembers,
-            fame: GAME_CONFIG.tournamentUnlockMembers,
+            activeMembers: GAME_CONFIG.formsUnlockMembers,
+            fame: GAME_CONFIG.formsUnlockMembers,
           },
+          unlocks: { ...initial.unlocks, forms: true },
           messages: [tournamentMessage, ...initial.messages],
         }}
         folder="inbox"

@@ -33,8 +33,9 @@ describe("FolderPane", () => {
           ...initial,
           school: {
             ...initial.school,
-            fame: GAME_CONFIG.tournamentUnlockMembers,
+            fame: GAME_CONFIG.formsUnlockMembers,
           },
+          unlocks: { ...initial.unlocks, forms: true },
           messages: [tournamentMessage, ...initial.messages],
         }}
         folder="inbox"

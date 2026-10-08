@@ -149,7 +149,6 @@ function enrollRewardContact(state: GameState, contactId: string, now: number): 
     unlocks: {
       ...state.unlocks,
       upgrades: true,
-      forms: true,
     },
     statistics: {
       ...state.statistics,

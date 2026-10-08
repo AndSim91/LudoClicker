@@ -220,6 +220,7 @@ describe("selectDayNotifications", () => {
         nextFeeAt: 70_000,
         fame: 6,
       },
+      unlocks: { ...initial.unlocks, forms: true },
     };
 
     expect(selectDayNotifications(state, 60_000)).toContainEqual({
@@ -253,6 +254,7 @@ describe("selectDayNotifications", () => {
         currentMonth: 11,
         fame: 6,
       },
+      unlocks: { ...decemberState.unlocks, forms: true },
     };
 
     expect(selectDayNotifications(decemberState, 60_000)).not.toContainEqual(
@@ -290,6 +292,7 @@ describe("selectDayNotifications", () => {
         nextFeeAt: 130_000,
         fame: 6,
       },
+      unlocks: { ...initial.unlocks, forms: true },
       tournaments: {
         ...initial.tournaments,
         results: [result],

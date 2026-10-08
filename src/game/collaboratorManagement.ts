@@ -20,6 +20,7 @@ import type {
   CollaboratorMasteryRole,
   GameState,
 } from "./types";
+import { isCollaboratorAssignmentAvailable } from "./unlocks";
 
 export function createEmptyCollaboratorTargets(): Record<CollaboratorMasteryRole, number> {
   return {
@@ -470,7 +471,7 @@ export const AUTOMATIC_MAX_LEVEL = 5;
 const AUTOMATIC_SHARE_MAX = AUTOMATIC_SHARE_PER_LEVEL * AUTOMATIC_MAX_LEVEL;
 
 export function getAutomaticAssignmentRoles(state: Pick<GameState, "unlocks">): CollaboratorMasteryRole[] {
-  return COLLABORATOR_MASTERY_ROLES.filter((role) => role !== "gadget" || state.unlocks.gadget);
+  return COLLABORATOR_MASTERY_ROLES.filter((role) => isCollaboratorAssignmentAvailable(role, state.unlocks));
 }
 
 export function getAutomaticShareLevel(share: number | undefined): number {

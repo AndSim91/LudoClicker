@@ -50,6 +50,7 @@ import { TrainingFormPreview } from "./PersonPresentation";
 import { getDefaultTrainingOption } from "./peoplePresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
 import { getTrainingDefinitions } from "./trainingOptions";
+import { getQualifyingCourseCost, isTutorialInstructorScholarship } from "../../game/tutorialScholarship";
 
 type InstructorTeachingEntry = {
   id: string;
@@ -122,9 +123,10 @@ function getDisplayedTrainingCost(
   mode: FormTrainingStartMode,
 ): number {
   if (qualification) {
-    return applyQualifyingCourseDiscount(
-      state.upgrades,
+    return getQualifyingCourseCost(
+      state,
       getInstructorQualificationCost(definition.cost),
+      definition.id,
     );
   }
   const availableInstructor = !isSummerBreak(state.school.currentMonth)
@@ -136,9 +138,10 @@ function getDisplayedTrainingCost(
     collaborator?.assignment === "instructor" &&
     isInstructorForm(definition.id)
   ) {
-    return applyQualifyingCourseDiscount(
-      state.upgrades,
+    return getQualifyingCourseCost(
+      state,
       getInstructorFormCost(definition.cost),
+      definition.id,
     );
   }
   return definition.cost;
@@ -664,9 +667,8 @@ export function TrainingControl({
       ? " training-roster"
       : "";
 
-  if (!state.unlocks.forms) {
-    return <div className={`training-locked${variantClass}`}><span>Formazione</span><strong>Disponibile dal primo iscritto</strong></div>;
-  }
+  // Before the Forme open (10 members) nothing is shown: no lock, no spoiler (08/10/2026).
+  if (!state.unlocks.forms) return null;
   if (student.training?.formId === "course-x" && !courseXUnlocked) {
     const progress = getTrainingProgress(student.training, now);
     const waitingForEquipment = student.training.status === "waitingForEquipment";
@@ -777,6 +779,8 @@ export function TrainingControl({
       qualification,
       trainingMode,
     );
+    const scholarship = cost === 0 && collaborator?.assignment === "instructor" &&
+      isTutorialInstructorScholarship(state);
     const hasInstructorDiscount = !qualification && cost < definition.cost;
     return {
       definition,
@@ -789,7 +793,9 @@ export function TrainingControl({
       qualified: collaborator?.assignment === "instructor"
         ? { count: instructorCounts.get(definition.id) ?? 0, role: "instructor" as const }
         : undefined,
-      contextLabel: qualification
+      contextLabel: scholarship
+        ? "Borsa di studio"
+        : qualification
         ? "Corso Istruttori"
         : hasInstructorDiscount
           ? "Sconto Istruttore"
@@ -818,6 +824,8 @@ export function TrainingControl({
     ? "Seleziona una Forma"
     : state.school.euros < selectedCost
       ? `Servono ${formatCurrency(selectedCost)}`
+      : selectedOption?.contextLabel === "Borsa di studio"
+        ? selectedIsQualification ? "Abilita · Gratis" : "Impara e abilita · Gratis"
       : selectedIsQualification
         ? `Abilita · ${formatCurrency(selectedCost)}`
         : selectedOption?.contextLabel === "Qualifica inclusa"
