@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GAME_CONFIG } from "../../game/config";
 import { createInitialState } from "../../game/engine";
+import { GameStateProvider } from "../../game/GameStateContext";
 import { TitleBar } from "./TitleBar";
 import {
   formatCompactCurrency,
@@ -20,6 +21,35 @@ const monthlyIncomeState = createInitialState(1_000, "Test", false);
 afterEach(cleanup);
 
 describe("TitleBar", () => {
+  it("keeps the sword menu open when the tutorial card is pressed", () => {
+    const onEquipmentOpenChange = vi.fn();
+    render(
+      <GameStateProvider state={monthlyIncomeState}>
+        <TitleBar
+          currentMonth={9}
+          nextMonthAt={1_000 + GAME_CONFIG.gameMonthMs}
+          now={1_000}
+          contactsAwaitingEmail={0}
+          activeMembers={15}
+          fame={0}
+          euros={0}
+          monthlyIncomeState={monthlyIncomeState}
+          equipment={equipment}
+          isPaused={false}
+          onTogglePause={() => undefined}
+          equipmentOpen
+          onEquipmentOpenChange={onEquipmentOpenChange}
+        />
+        <div className="tutorial-card"><button type="button">Continua</button></div>
+      </GameStateProvider>,
+    );
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Continua" }));
+    expect(onEquipmentOpenChange).not.toHaveBeenCalled();
+    fireEvent.pointerDown(document.body);
+    expect(onEquipmentOpenChange).toHaveBeenCalledWith(false);
+  });
+
   it("shows the month, school year, and progress toward the next month", () => {
     const { container, rerender } = render(
       <TitleBar

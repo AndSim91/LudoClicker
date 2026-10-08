@@ -36,7 +36,10 @@ export function TitleEquipment({
   useEffect(() => {
     if (!isOpen) return undefined;
     const closeOutside = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+      const target = event.target as Element;
+      // The tutorial card talks about this menu: pressing «Continua» must not close it.
+      if (rootRef.current?.contains(target) || target.closest?.(".tutorial-card")) return;
+      setIsOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsOpen(false);
