@@ -215,8 +215,8 @@ describe("App profile and navigation", () => {
 
     expect(await screen.findByRole("heading", { name: "Admin" })).toBeVisible();
     expect(screen.getByText("DEV ONLY")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "Passa a Ottobre" }));
-    expect(screen.getByRole("button", { name: "Passa a Novembre" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Passa a Febbraio" }));
+    expect(screen.getByRole("button", { name: "Passa a Marzo" })).toBeVisible();
   });
 
   it("opens the development-only LudoWiki", async () => {

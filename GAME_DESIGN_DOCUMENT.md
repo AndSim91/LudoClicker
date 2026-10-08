@@ -285,15 +285,17 @@ La somma delle quote è poi moltiplicata dai
 potenziamenti di entrate e da +5% per ogni scuola fondata; a questa si somma
 la rendita fissa delle scuole della Rete delle Onde (§ 17.6). Un mese dura **60 secondi
 reali** e segue il normale ciclo da Gennaio a Dicembre;
-dopo Dicembre torna Gennaio. La partita inizia a Settembre. L'anno scolastico,
+dopo Dicembre torna Gennaio. Ogni scuola (anche quelle fondate) inizia a Gennaio
+dell'**anno scolastico 0**, che dura fino ad Agosto; da Settembre parte l'anno
+scolastico 1 (decisione del 08/10/2026). L'anno scolastico,
 sempre visibile nella barra superiore, va da Settembre ad Agosto; la formazione
 si ferma a Luglio e Agosto e gli eventuali abbandoni vengono verificati nel
 passaggio tra Giugno e Luglio. La probabilità annuale di abbandono dipende
 dalla Forma più alta raggiunta (80% senza Forme, poi 65%, 50%, 35%, 25%, 15%,
 10%; con la Forma 7 scende a 2,5% per i Comuni, 0,5% per i Rari e 0,25% per gli
 Ultra Rari, +0,5% per ogni scuola fondata); i Leggendari non abbandonano mai.
-Per il tutorial, una scuola con al massimo 10 iscritti non perde nessuno a fine
-anno. Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
+Per il tutorial, una scuola con al massimo 9 iscritti non perde nessuno a fine
+anno: dal decimo iscritto gli abbandoni sono possibili (08/10/2026). Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
 spiega che senza Istruttori e corsi durante l'anno la gente si annoia e se ne va.
 Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
 «Passaparola inatteso» produce 2 nuovi contatti, non iscritti.
@@ -809,7 +811,10 @@ Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
 La formazione segue invece l'anno scolastico Settembre–Agosto: le lezioni sono
 attive da Settembre a Giugno, Luglio e Agosto sono pausa estiva e gli abbandoni
 vengono elaborati nel passaggio da Giugno a Luglio. L'anno scolastico indicato
-accanto al mese corrente nella barra superiore riparte a Settembre. Gli altri
+accanto al mese corrente nella barra superiore riparte a Settembre (da Gennaio ad
+Agosto del primo anno solare è l'anno 0; l'anno di formazione 0 va da Gennaio a
+Giugno, così una Forma imparata allora non blocca quella di Luglio; i tornei
+Open del primo anno solare non hanno qualificati e non vengono registrati). Gli altri
 tempi devono essere configurabili dai dati e non scritti direttamente nella
 logica.
 
@@ -1002,7 +1007,7 @@ posto, c'è un pulsante spento «Acquisto spade · da sbloccare negli Upgrade».
 In Modalità Onde, senza Fondi sufficienti, il pulsante resta leggibile: pillola
 vuota con il bordo azzurro, testo chiaro e prezzo in oro (concept «Contorno»,
 06/10/2026; il «Salvadanaio» con «mancano X €» allargava troppo la finestra). La prima volta che la scuola
-arriva a 10 iscritti di picco parte un tutorial di A.N.D.E.R. (scena
+arriva a 15 iscritti di picco (10 fino al 07/10/2026) parte un tutorial di A.N.D.E.R. (scena
 `sword-purchase`) che fa aprire il menu delle spade e indica Fornitore
 ufficiale negli Upgrade; i salvataggi già oltre i 10 iscritti lo segnano come
 visto con la migrazione v104.
@@ -3189,8 +3194,8 @@ l'avanzamento.
 Tutorial della seconda metà della partita (decisione di Andrea del 05/10, dalla
 v102; i salvataggi che li hanno già superati li segnano come fatti):
 
-14. **Il primo torneo è finito** (`first-tournament`): al primo risultato di
-    torneo salvato. Fa aprire Tornei, che si apre su Risultati; poi «Guarda la
+14. **Il primo torneo è finito** (`first-tournament`): al primo Torneo
+    Scolastico giocato davvero (uno saltato non lascia risultati). Fa aprire Tornei, che si apre su Risultati; poi «Guarda la
     finale», Arena e Stile (voto da 5,5 a 8,5 circa, «Dettaglio incontro»),
     podi e qualificazioni (Accademico ad aprile, Nazionale a giugno, posti dagli
     iscritti attivi) e la meta: il Nazionale apre la Rete, Arena e Stile insieme
@@ -4361,7 +4366,7 @@ disponibile come opzione.
   si acquistano i nodi «Ritmo di battitura» e «Frasi fatte»;
 - 0 collaboratori;
 - 6 spade disponibili;
-- €0 in cassa; la partita parte a Settembre del primo anno scolastico;
+- €0 in cassa; la partita parte a Gennaio dell'anno scolastico 0;
 - prenotazione e iscrizione dipendono dalla rarità secondo la tabella dei
   Contatti;
 - bonus immediato per ogni nuova iscrizione: €20;

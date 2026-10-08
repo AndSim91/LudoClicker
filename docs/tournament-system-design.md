@@ -343,7 +343,7 @@ Una Forma 1 completata esattamente sul confine rende l'atleta idoneo.
 
 ## 7. Torneo Scolastico
 
-L'area Tornei si sblocca al raggiungimento di sei iscritti. Lo Scolastico si attiva con almeno sei iscritti attivi che abbiano completato Forma 1.
+L'area Tornei si sblocca al raggiungimento di sei iscritti. Lo Scolastico si attiva con almeno otto iscritti attivi che abbiano completato Forma 1 (sei fino al 07/10/2026).
 
 Se il requisito non è soddisfatto:
 

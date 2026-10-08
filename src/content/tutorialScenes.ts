@@ -63,9 +63,9 @@ export const FIRST_COLLABORATOR_TUTORIAL_SCENE_ID = "first-collaborator" as cons
 export const COLLABORATOR_TEACHING_TUTORIAL_SCENE_ID = "collaborator-teaching" as const;
 /** First yearly departures with no Istruttore assigned (06/10/2026). */
 export const MEMBER_DEPARTURES_TUTORIAL_SCENE_ID = "member-departures" as const;
-/** At 10 members: the swords menu and the purchase (06/10/2026). */
+/** At 15 members: the swords menu and the purchase (06/10/2026, 15 dal 08/10). */
 export const SWORD_PURCHASE_TUTORIAL_SCENE_ID = "sword-purchase" as const;
-export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 10;
+export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 15;
 
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
@@ -473,9 +473,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "sword-purchase-queue",
         kind: "dialog",
         speaker: "A.N.D.E.R.",
-        title: "Dieci iscritti, sei spade",
+        title: "Quindici iscritti, sei spade",
         body: ({ state }) => [
-          `Dieci **Iscritti** e sole ${state.equipment.totalSwords === 6 ? "sei" : state.equipment.totalSwords.toLocaleString("it-IT")} **Spade** della scuola: a Genova si chiama ottimizzazione delle risorse. In palestra, invece, si chiama fare la fila.`,
+          `Quindici **Iscritti** e sole ${state.equipment.totalSwords === 6 ? "sei" : state.equipment.totalSwords.toLocaleString("it-IT")} **Spade** della scuola: a Genova si chiama ottimizzazione delle risorse. In palestra, invece, si chiama fare la fila.`,
           "Ogni corso e ogni prova consumano le spade, e prima o poi qualcuna si rompe...",
         ],
         focusRegions: ["title", "title-equipment"],
@@ -670,7 +670,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
   {
     id: "first-tournament",
     pauseWhileActive: true,
-    canStart: ({ state }) => state.tournaments.results.length > 0,
+    // After the first Torneo Scolastico actually played (a skipped one leaves no result).
+    canStart: ({ state }) => state.tournaments.results.some((result) => result.level === "school"),
     steps: [
       {
         id: "open-tournaments",

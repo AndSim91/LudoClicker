@@ -22,8 +22,8 @@ import { resetGadgetMonthlyRevenueForMonth } from "./gadgetRevenue";
 import { triggerTutorialScene } from "./tutorialProgress";
 import { MEMBER_DEPARTURES_TUTORIAL_SCENE_ID } from "../content/tutorialScenes";
 
-/** Tutorial grace (06/10/2026): a school this small never loses anyone at year end. */
-export const DEPARTURE_FREE_MEMBERS = 10;
+/** Tutorial grace (06/10/2026; 9 dal 08/10): up to 9 members nobody leaves at year end, from the 10th on they can. */
+export const DEPARTURE_FREE_MEMBERS = 9;
 
 export function departMembers(
   state: GameState,

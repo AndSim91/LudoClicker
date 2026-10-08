@@ -12,7 +12,8 @@ export const GAME_CONFIG = {
   rarityOverviewEmailsSent: 10,
   socialUnlockCollaborators: 15,
   tournamentUnlockMembers: 6,
-  tournamentMinimumMembers: 6,
+  // The Torneo Scolastico needs 8 athletes with at least Forma 1 (08/10/2026).
+  tournamentMinimumMembers: 8,
   guaranteedAndreaContactPosition: 10,
   collaboratorAggregateUnlockCount: 8,
   conversionGuaranteeFailures: 4,

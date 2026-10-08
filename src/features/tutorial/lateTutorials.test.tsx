@@ -29,7 +29,7 @@ describe("tutorials of the second half (05/10)", () => {
   it("shows the first tournament results on Tornei › Risultati once the player opens Tornei", async () => {
     const game = startedGame((state) => ({
       ...state,
-      tournaments: { ...state.tournaments, results: [{ id: "school-1" } as GameState["tournaments"]["results"][number]] },
+      tournaments: { ...state.tournaments, results: [{ id: "school-1", level: "school" } as GameState["tournaments"]["results"][number]] },
     }));
     const { result } = renderHook(() => useHarness(game));
     await waitFor(() => expect(result.current.tutorial.activeScene?.id).toBe("first-tournament"));

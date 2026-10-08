@@ -2682,7 +2682,8 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1, currentMonth: 1 },
+          // January of the second calendar year: training year 1.
+          school: { ...initial.school, activeMembers: 1, currentMonth: 13 },
           contacts: initial.contacts.map((contact) =>
             contact.id === enrolled.id ? enrolled : contact,
           ),

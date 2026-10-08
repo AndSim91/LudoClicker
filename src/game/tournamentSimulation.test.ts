@@ -482,21 +482,29 @@ describe("tournament simulation", () => {
 });
 
 describe("tournament calendar and immunity", () => {
-  it("runs the school tournament at the end of December", () => {
-    const state = createTournamentSchool();
-    const december = {
+  it("runs the school tournament at the end of December, only with 8 athletes with Forma 1", () => {
+    const inDecember = (state: GameState) => ({
       ...state,
-      school: {
-        ...state.school,
-        currentMonth: 12,
-        nextFeeAt: 61_000,
-      },
-    };
-    const processed = gameReducer(december, { type: "TICK", now: 61_000 });
+      school: { ...state.school, currentMonth: 12, nextFeeAt: 61_000 },
+    });
+    const skipped = gameReducer(inDecember(createTournamentSchool(7)), { type: "TICK", now: 61_000 });
+    expect(skipped.tournaments.results).toHaveLength(0);
+    expect(skipped.tournaments.missedTournaments[0]).toMatchObject({ level: "school", reason: "insufficient-members" });
+
+    const processed = gameReducer(inDecember(createTournamentSchool(8)), { type: "TICK", now: 61_000 });
     expect(processed.tournaments.results).toHaveLength(1);
     expect(processed.tournaments.results[0].level).toBe("school");
     expect(processed.tournaments.qualification?.level).toBe("academy");
     expect(processed.tournaments.immuneContactIds).toHaveLength(6);
+  });
+
+  it("skips the Open tournaments of the first calendar year: nobody can be qualified yet", () => {
+    const state = createTournamentSchool(8);
+    const april = gameReducer({
+      ...state,
+      school: { ...state.school, currentMonth: 4, nextFeeAt: 61_000 },
+    }, { type: "TICK", now: 61_000 });
+    expect(april.tournaments.missedTournaments).toHaveLength(0);
   });
 
   it("skips the season below six eligible members", () => {

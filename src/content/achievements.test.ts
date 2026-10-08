@@ -60,7 +60,7 @@ describe("achievements", () => {
       reputationEarned: 9,
       perfectPhrases: 7,
       maxRentPoints: 6,
-      earliestFoundationYear: 1,
+      earliestFoundationYear: 0,
     });
     expect(founded.player.perfectPhrases).toBeUndefined();
   });

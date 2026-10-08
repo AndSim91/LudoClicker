@@ -9,8 +9,9 @@ import {
 
 describe("school calendar", () => {
   it("keeps September through August in one school year and starts a new one in September", () => {
-    expect(getSchoolYear(1)).toBe(1);
-    expect(getSchoolYear(8)).toBe(1);
+    // January–August of the first calendar year are school year 0 (08/10/2026).
+    expect(getSchoolYear(1)).toBe(0);
+    expect(getSchoolYear(8)).toBe(0);
     expect(getSchoolYear(9)).toBe(1);
     expect(getSchoolYear(18)).toBe(1);
     expect(getSchoolYear(20)).toBe(1);
@@ -26,6 +27,9 @@ describe("school calendar", () => {
   });
 
   it("renews Form slots in July and keeps them assigned to the upcoming school year", () => {
+    expect(getFormTrainingYear(1)).toBe(0);
+    expect(getFormTrainingYear(6)).toBe(0);
+    expect(getFormTrainingYear(7)).toBe(1);
     expect(getFormTrainingYear(18)).toBe(1);
     expect(getFormTrainingYear(19)).toBe(2);
     expect(getFormTrainingYear(20)).toBe(2);

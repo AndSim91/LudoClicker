@@ -72,7 +72,8 @@ function getCalendarMonth(absoluteMonth: number): number {
 
 export function getTournamentSeason(level: TournamentLevel, absoluteMonth: number): number {
   const year = getGameYear(absoluteMonth);
-  return level === "school" ? year : Math.max(1, year - 1);
+  // Season 0 = the Open tournaments of the first calendar year: nobody can be qualified yet.
+  return level === "school" ? year : year - 1;
 }
 
 export function scheduleSecretLegendaryTrial(
@@ -412,6 +413,7 @@ export function processTournamentAtMonthEnd(
   const level = LEVEL_BY_CALENDAR_MONTH[getCalendarMonth(absoluteMonth)];
   if (!level) return state;
   const season = getTournamentSeason(level, absoluteMonth);
+  if (season < 1) return state;
   if (
     state.tournaments.results.some((result) => result.level === level && result.season === season) ||
     state.tournaments.missedTournaments.some((entry) => entry.level === level && entry.season === season)

@@ -37,7 +37,7 @@ function arenaState(level: number, rancoreLevel = 0): GameState {
   };
   return {
     ...initial,
-    school: { ...initial.school, activeMembers: 1, euros: 2_000 },
+    school: { ...initial.school, activeMembers: 1, euros: 2_000, currentMonth: 9 },
     contacts: [student],
     collaborators: [instructor],
     unlocks: { ...initial.unlocks, forms: true },

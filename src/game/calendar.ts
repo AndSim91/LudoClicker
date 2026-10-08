@@ -25,18 +25,20 @@ export function getGameYear(currentMonth: number): number {
   return Math.floor((normalizedMonth - 1) / GAME_MONTH_NAMES.length) + 1;
 }
 
+/** January–August of the first calendar year are school year 0 (08/10/2026). */
 export function getSchoolYear(currentMonth: number): number {
   const normalizedMonth = Math.max(1, Math.floor(currentMonth));
   return Math.max(
-    1,
+    0,
     Math.floor((normalizedMonth - SCHOOL_YEAR_START_MONTH) / GAME_MONTH_NAMES.length) + 1,
   );
 }
 
+/** January–June of the first calendar year are training year 0, so a Forma learned then does not block the next July. */
 export function getFormTrainingYear(currentMonth: number): number {
   const normalizedMonth = Math.max(1, Math.floor(currentMonth));
   return Math.max(
-    1,
+    0,
     Math.floor((normalizedMonth - FORM_TRAINING_YEAR_START_MONTH) / GAME_MONTH_NAMES.length) + 1,
   );
 }

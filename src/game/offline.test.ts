@@ -13,7 +13,7 @@ describe("offline progress disabled", () => {
 
     expect(result.summary).toBeNull();
     expect(result.state.school.euros).toBe(0);
-    expect(result.state.school.currentMonth).toBe(9);
+    expect(result.state.school.currentMonth).toBe(1);
     expect(result.state.school.nextFeeAt).toBe(181_000);
     expect(result.state.messages[0].subject).not.toBe("Riepilogo attività offline");
     expect(result.state.lastSavedAt).toBe(121_000);
@@ -24,7 +24,7 @@ describe("offline progress disabled", () => {
     const result = simulateOfflineProgress(initial, 90_001_000);
 
     expect(result.summary).toBeNull();
-    expect(result.state.school.currentMonth).toBe(9);
+    expect(result.state.school.currentMonth).toBe(1);
     expect(result.state.school.nextFeeAt).toBe(initial.school.nextFeeAt + 90_000_000);
   });
 

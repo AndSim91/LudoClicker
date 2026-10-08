@@ -12,9 +12,15 @@ function grow(state: GameState, month: number, added: Partial<GameState["statist
   return { ...state, school: { ...state.school, currentMonth: month }, statistics };
 }
 
+// These cases start from school year 1 (September); a new game starts in January of year 0.
+function september(): GameState {
+  const initial = createInitialState(1_000);
+  return { ...initial, school: { ...initial.school, currentMonth: 9 } };
+}
+
 describe("Riepilogo dell'anno scolastico (4.1)", () => {
   it("opens silently, appears with the first news and refreshes in place every month", () => {
-    const opened = syncYearDigest(createInitialState(1_000), 1_000);
+    const opened = syncYearDigest(september(), 1_000);
     expect(opened.yearDigest).toMatchObject({ schoolYear: 1, month: 9 });
     expect(opened.messages.some((message) => message.digest)).toBe(false);
 
@@ -43,7 +49,7 @@ describe("Riepilogo dell'anno scolastico (4.1)", () => {
   });
 
   it("closes the year into «Altra», departures included, and starts again", () => {
-    const opened = syncYearDigest(createInitialState(1_000), 1_000);
+    const opened = syncYearDigest(september(), 1_000);
     const spring = syncYearDigest(grow(opened, 12, { membersEnrolled: 2 }), 2_000);
     const nextYear = syncYearDigest(grow(spring, 21, { membersDeparted: 38 }), 3_000);
 

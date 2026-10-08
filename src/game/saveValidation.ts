@@ -395,7 +395,7 @@ export function isValidGameState(value: unknown): value is GameState {
       (contact.favorite === undefined || typeof contact.favorite === "boolean") &&
       (contact.trialRetryUsed === undefined || typeof contact.trialRetryUsed === "boolean") &&
       (contact.lastAgonistCourseYear === undefined ||
-        (Number.isSafeInteger(contact.lastAgonistCourseYear) && contact.lastAgonistCourseYear >= 1)) &&
+        (Number.isSafeInteger(contact.lastAgonistCourseYear) && contact.lastAgonistCourseYear >= 0)) &&
       (contact.agonistCourseCompletions === undefined ||
         isNonNegativeSafeInteger(contact.agonistCourseCompletions)) &&
       (contact.agonistCourseArenaBonus === undefined ||
@@ -516,7 +516,7 @@ export function isValidGameState(value: unknown): value is GameState {
       Array.isArray(collaborator.formBranchPreferences) &&
       (collaborator.lastAgonistCourseYear === undefined ||
         (Number.isSafeInteger(collaborator.lastAgonistCourseYear) &&
-          collaborator.lastAgonistCourseYear >= 1)) &&
+          collaborator.lastAgonistCourseYear >= 0)) &&
       !("autoTeachingEnabled" in collaborator) &&
       hasValidCollaboratorMastery(collaborator.mastery) &&
       hasValidTraining(collaborator.training)

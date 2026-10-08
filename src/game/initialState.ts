@@ -11,6 +11,9 @@ import { createInitialCollaboratorManagement } from "./collaboratorManagement";
 import { createInitialLightInflationState } from "./lightInflation";
 import { createInitialGadgetState } from "./gadgetState";
 
+/** Every school starts in January of school year 0; school year 1 starts in September (08/10/2026). */
+const START_MONTH = 1;
+
 export function createInitialState(
   now = Date.now(),
   displayName = "",
@@ -48,7 +51,7 @@ export function createInitialState(
       fame: 0,
       euros: 0,
       followers: 0,
-      currentMonth: 9,
+      currentMonth: START_MONTH,
       nextFeeAt: now + GAME_CONFIG.gameMonthMs,
     },
     player: { writingPower: 1 },
@@ -87,7 +90,7 @@ export function createInitialState(
       wear: 0,
     },
     lightInflation: createInitialLightInflationState(),
-    gadgets: createInitialGadgetState(9),
+    gadgets: createInitialGadgetState(START_MONTH),
     legendaryPity: 0,
     legendaryCollaborators: initialContacts.progress,
     tournaments: {

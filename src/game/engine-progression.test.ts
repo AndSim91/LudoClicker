@@ -543,7 +543,7 @@ describe("game engine: progression", () => {
     };
     const ready = {
       ...initial,
-      school: { ...initial.school, activeMembers: 1, euros: 200 },
+      school: { ...initial.school, activeMembers: 1, euros: 200, currentMonth: 9 },
       contacts: initial.contacts.map((contact) => contact.id === member.id ? member : contact),
       collaborators: [instructor],
       unlocks: { ...initial.unlocks, forms: true },

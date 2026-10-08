@@ -508,7 +508,8 @@ describe("collaborator aggregate management", () => {
     const equipmentCollaborator = collaborator(2, "equipment");
     const commonState: GameState = {
       ...initial,
-      school: { ...initial.school, euros: 37.5 },
+      // September: a January enrollment would be immune and lose the course to the collaborator.
+      school: { ...initial.school, euros: 37.5, currentMonth: 9 },
       contacts: [student],
       collaborators: [instructor, equipmentCollaborator],
       unlocks: { ...initial.unlocks, forms: true, collaborators: true },

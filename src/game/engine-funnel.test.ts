@@ -34,8 +34,8 @@ describe("game engine: funnel", () => {
     )).toBe(true);
     expect(selectActiveEmail(state)?.status).toBe("writing");
     expect(state.school.euros).toBe(0);
-    expect(state.school.currentMonth).toBe(9);
-    expect(getSchoolYear(state.school.currentMonth)).toBe(1);
+    expect(state.school.currentMonth).toBe(1);
+    expect(getSchoolYear(state.school.currentMonth)).toBe(0);
     expect(state.contacts.every((contact) => contact.rarity === "common")).toBe(true);
     expect(PERSON_RARITIES.common.queueAppearanceChance).toBe(0.8);
     expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.125);
@@ -693,7 +693,7 @@ describe("game engine: funnel", () => {
     const sameTick = gameReducer(paid, { type: "TICK", now: dueAt });
 
     expect(paid.school.euros).toBe(2 * GAME_CONFIG.monthlyMemberFee);
-    expect(paid.school.currentMonth).toBe(10);
+    expect(paid.school.currentMonth).toBe(2);
     expect(sameTick.school.euros).toBe(paid.school.euros);
   });
 
@@ -704,7 +704,7 @@ describe("game engine: funnel", () => {
       now: 1_000 + GAME_CONFIG.gameMonthMs * 3,
     });
 
-    expect(advanced.school.currentMonth).toBe(12);
+    expect(advanced.school.currentMonth).toBe(4);
     expect(advanced.school.euros).toBe(0);
   });
 
@@ -776,7 +776,7 @@ describe("game engine: funnel", () => {
     expect(septemberState.contacts.filter((contact) => contact.status === "departed")).toHaveLength(0);
   });
 
-  it("spares schools of up to 10 members and explains departures without Istruttori", () => {
+  it("spares schools of up to 9 members and explains departures without Istruttori", () => {
     const initial = createInitialState(1_000);
     const state = {
       ...initial,
@@ -784,7 +784,7 @@ describe("game engine: funnel", () => {
       contacts: initial.contacts.map((contact, index) => index < 2
         ? { ...contact, status: "enrolled" as const, rarity: "common" as const, enrolledMonth: 9 }
         : { ...contact, status: "lost" as const }),
-      school: { ...initial.school, activeMembers: 10, currentMonth: 18, nextFeeAt: 2_000 },
+      school: { ...initial.school, activeMembers: 9, currentMonth: 18, nextFeeAt: 2_000 },
     };
 
     const small = gameReducer(state, { type: "TICK", now: 2_000 });
@@ -793,7 +793,7 @@ describe("game engine: funnel", () => {
 
     const grown = gameReducer({
       ...state,
-      school: { ...state.school, activeMembers: 11 },
+      school: { ...state.school, activeMembers: 10 },
     }, { type: "TICK", now: 2_000 });
     expect(grown.statistics.membersDeparted).toBeGreaterThan(0);
     expect(grown.tutorial.triggeredSceneIds).toContain("member-departures");

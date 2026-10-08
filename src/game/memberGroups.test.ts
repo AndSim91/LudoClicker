@@ -107,7 +107,7 @@ describe("member groups", () => {
     const ids = new Set(grouped.contacts.map((contact) => contact.id));
     expect(ids.has("weak-agonist")).toBe(false);
     expect(ids.has("coursed-champion")).toBe(true);
-    const group = grouped.memberGroups?.find((candidate) => candidate.lastAgonistCourseYear);
+    const group = grouped.memberGroups?.find((candidate) => candidate.lastAgonistCourseYear !== undefined);
     expect(group?.lastAgonistCourseYear).toBe(trainingYear);
 
     const back = materializeGroupedMembers(grouped, 1, NOW, () => 0,
