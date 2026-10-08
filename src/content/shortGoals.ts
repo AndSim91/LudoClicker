@@ -77,6 +77,9 @@ export function createInitialShortGoal(now: number): ShortGoalProgress {
   return createInitialEmailMission(0, now);
 }
 
+/** Only the very first email mission (it unlocks Eventi) asks for 3; later ones use baseTarget. */
+export const INITIAL_EMAIL_MISSION_TARGET = 3;
+
 export function createInitialEmailMission(
   baseline: number,
   now: number,
@@ -85,7 +88,7 @@ export function createInitialEmailMission(
   return {
     definitionId: definition.id,
     baseline,
-    target: definition.baseTarget,
+    target: INITIAL_EMAIL_MISSION_TARGET,
     startedAt: now,
     completedCount: 0,
     isActive: true,

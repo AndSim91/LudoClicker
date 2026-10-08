@@ -163,8 +163,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "dialog",
         speaker: "",
         title: "Il primo giorno da Preside",
-        body: [
-          "Congratulazioni per aver accettato il posto da Preside dell'Ordine delle Onde di Genova!",
+        body: ({ state }) => [
+          `Ciao ${state.profile.displayName.trim()} e congratulazioni per aver accettato il posto da Preside dell'Ordine delle Onde!`,
           "Io sono A.N.D.E.R., il tuo assistente AI. Ti aiuterò a far crescere la tua prima scuola di LudoSport!",
         ],
         focusRegions: ["title"],
@@ -175,8 +175,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Chi siamo",
         body: [
-          "LudoSport è una realtà sportiva di Scherma con Spada Laser, nata nel 2006 a Milano, che in vent'anni è cresciuta enormemente aprendo scuole in tutto il mondo! Attraverso la sua filosofia fondativa del Se.Cu.Ri. (Servizio, Cura e Rispetto), sono state create Tecniche, Regolamenti e Tornei di livello nazionale ed internazionale!",
-          "Il nostro obiettivo è semplice: dobbiamo creare la scuola di LudoSport più grande del mondo!",
+          "LudoSport è una realtà sportiva di Scherma con Spada Laser, nata a Milano nel 2006 e che in vent'anni ha aperto scuole in tutto il mondo! Attraverso la filosofia del Se.Cu.Ri. (Servizio, Cura e Rispetto), sono state create Tecniche, Regolamenti e Tornei di livello nazionale ed internazionale.",
+          "Il nostro obiettivo qui è semplice: dobbiamo creare la scuola di LudoSport più grande del mondo!",
         ],
         focusRegions: ["title"],
       },
@@ -562,7 +562,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "La Scuola diventa Social!",
         body: [
           "L’Ordine delle Onde conta ormai 15 collaboratori: è arrivato il momento di svecchiarci. Perché siamo giovani, siamo trendy, siamo... Social!",
-          "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri Follower e porteranno più pubblico agli [[Eventi]]. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
+          "Da oggi i collaboratori non si limiteranno più a scrivere email: creeranno contenuti, aumenteranno i nostri **Follower** e porteranno più pubblico agli [[Eventi]]. Sempre gratis, naturalmente: in fondo, la visibilità non ha prezzo.",
           "Per trovare nuovi **Contatti** serviranno ancora gli [[Eventi]]. Abbiamo chiesto ai Social di promuoverli e hanno già preparato diciassette hashtag, tre balletti e un comunicato per un certo Guardia di Finanza.",
           "Dev’essere un influencer importante: lo nominano tutti.",
         ],
@@ -575,8 +575,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Contenuti, Follower e Sponsorizzazioni",
         body: [
           "I collaboratori [[a:Social]] producono sempre contenuti online. Quando c'è una Email da scrivere, le danno priorità senza interrompere completamente i contenuti.",
-          "Ogni contenuto può generare Follower. Ogni Follower aumenta anche la **Fama** della scuola e l'affluenza agli [[Eventi]], che restano il modo per ottenere nuovi **Contatti**.",
-          "I Follower producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
+          "Ogni contenuto può generare **Follower**. Ogni Follower aumenta anche la **Fama** della scuola e l'affluenza agli [[Eventi]], che restano il modo per ottenere nuovi **Contatti**.",
+          "I **Follower** producono inoltre una rendita costante grazie alle sponsorizzazioni che si aggiungono alle rette mensili degli iscritti.",
           "Facile, no? Forse userò un Collaboratore [[a:Social]] per farmi ripartire la stampante..."
         ],
         focusRegions: ["title", "main"],
@@ -648,7 +648,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Il motore del capitalismo",
         body: [
           "La Produttività della sezione [[Gadget]] è la somma del lavoro dei Collaboratori assegnati al settore. Senza di loro, progetti e revisioni restano fermi.",
-          "Il Pubblico raggiungibile indica quante persone puoi rendere partecipi del nostro splendido lavoro. **Iscritti** e, con gli [[Upgrade]], Follower lo fanno crescere; oltre quella soglia restano possibili vendite occasionali, ma più lente.",
+          "Il Pubblico raggiungibile indica quante persone puoi rendere partecipi del nostro splendido lavoro. **Iscritti** e, con gli [[Upgrade]], **Follower** lo fanno crescere; oltre quella soglia restano possibili vendite occasionali, ma più lente.",
         ],
         focusRegions: ["main", "gadget-overview"],
       },
@@ -829,7 +829,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il Torneo Reptile",
         body: ({ state }) => [
-          `Un torneo a coppie, a ${state.school.city}, ogni luglio. Lo organizzi tu: affitti il palazzetto, prepari tutto e la scuola ci guadagna **Fama**, follower e l'incasso del banchetto.`,
+          `Un torneo a coppie, a ${state.school.city}, ogni luglio. Lo organizzi tu: affitti il palazzetto, prepari tutto e la scuola ci guadagna **Fama**, **follower** e l'incasso del banchetto.`,
           `Il palazzetto costa ${formatCurrency(GAME_CONFIG.reptileVenueCost)}. Puoi annullare quando vuoi e riavere metà: l'altra metà resta al gestore, come da tradizione.`,
         ],
         focusRegions: ["main", "reptile-hero"],

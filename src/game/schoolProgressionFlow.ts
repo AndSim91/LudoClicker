@@ -327,7 +327,7 @@ export function completeShortGoal(
         { ...rewarded, shortGoal: nextGoal },
         now,
         "Si esce dalla palestra",
-        "Due inviti, missione compiuta. Ora la scuola può farsi vedere in giro: Eventi è nella barra a sinistra.",
+        "Tre inviti, missione compiuta. Ora la scuola può farsi vedere in giro: Eventi è nella barra a sinistra.",
         "system",
       )
     : { ...rewarded, shortGoal: nextGoal };

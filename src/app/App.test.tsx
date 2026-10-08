@@ -21,8 +21,10 @@ describe("App profile and navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Inizia" }));
 
     expect(screen.getByText("genova@ludosport.net")).toBeVisible();
-    expect(screen.getByText(/Andrea Ungaro/)).toBeVisible();
-    expect(screen.getByRole("dialog", { name: "Il primo giorno da Preside" })).toBeVisible();
+    expect(screen.getByText(/Profilo: Andrea Ungaro/)).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Il primo giorno da Preside" })).toHaveTextContent(
+      "Ciao Andrea Ungaro e congratulazioni",
+    );
   });
 
   it("shows the generated application version in the status bar", () => {
@@ -55,7 +57,7 @@ describe("App profile and navigation", () => {
       expect(screen.queryByText("Invia la tua prima mail")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Pausa" })).toBeVisible();
     });
-    expect(screen.getByText("0/2")).toBeVisible();
+    expect(screen.getByText("0/3")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Eventi" })).not.toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText("Inviata la prima email!").length).toBeGreaterThan(0);

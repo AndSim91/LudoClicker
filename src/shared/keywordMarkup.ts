@@ -3,7 +3,7 @@ import type { PersonRarity } from "../game/types";
 /**
  * Keywords in the game's prose (06/10/2026, concept A «Etichetta della barra»):
  *   [[Eventi]]        page of the left bar → label with the bar's icon
- *   **Contatti**      a number of the game (Contatti, Iscritti, Fondi, Spade, Fama, Reputazione) → bold
+ *   **Contatti**      a number of the game (Contatti, Iscritti, Fondi, Spade, Fama, Reputazione, Follower) → bold + icon
  *   [[a:Eventi]]      Area di Attività of a collaborator → dashed label
  *   [[r:Leggendari]]  rarity → the rarity's colour
  * Marked by hand, only at the first mention in a paragraph and only when the word is the game thing.

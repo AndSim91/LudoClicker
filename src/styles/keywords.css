@@ -32,6 +32,34 @@
   font-weight: 600;
 }
 
+.kw-number[data-resource] {
+  white-space: nowrap;
+}
+
+.kw-number svg {
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: .22em;
+  vertical-align: -0.17em;
+  color: var(--resource-color);
+}
+
+.kw-number[data-resource="people"] { --resource-color: #0f6cbd; }
+.kw-number[data-resource="saber"] { --resource-color: #0a8fb8; }
+.kw-number[data-resource="mail"] { --resource-color: #b7741a; }
+.kw-number[data-resource="euro"] { --resource-color: #2f8a3e; }
+.kw-number[data-resource="star"] { --resource-color: #b8860b; }
+.kw-number[data-resource="crest"] { --resource-color: #6a4fc4; }
+.kw-number[data-resource="heart"] { --resource-color: #d64545; }
+
+:root[data-theme="dark"] .kw-number[data-resource="people"] { --resource-color: #6fb2f0; }
+:root[data-theme="dark"] .kw-number[data-resource="saber"] { --resource-color: #4fd3f5; }
+:root[data-theme="dark"] .kw-number[data-resource="mail"] { --resource-color: #f0b45a; }
+:root[data-theme="dark"] .kw-number[data-resource="euro"] { --resource-color: #6fcf7f; }
+:root[data-theme="dark"] .kw-number[data-resource="star"] { --resource-color: #f2c94c; }
+:root[data-theme="dark"] .kw-number[data-resource="crest"] { --resource-color: #b49cf5; }
+:root[data-theme="dark"] .kw-number[data-resource="heart"] { --resource-color: #f58a8a; }
+
 .kw-rarity {
   font-weight: 600;
 }
