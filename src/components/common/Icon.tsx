@@ -87,7 +87,8 @@ const paths: Record<IconName, React.ReactNode> = {
   book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"/></>,
   ludowiki: <><path d="M3.5 6.5A3.5 3.5 0 0 1 7 3h4v17H7a3.5 3.5 0 0 0-3.5 1.5v-15Z"/><path d="M20.5 9v12.5A3.5 3.5 0 0 0 17 20h-4V3h2"/><path d="M7 8h2m-2 4h2"/><path d="m19 2 .8 2.2L22 5l-2.2.8L19 8l-.8-2.2L16 5l2.2-.8L19 2Z"/></>,
   network: <><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.3 11 16.7 7M7.3 13l9.4 4"/></>,
-  saber: <><rect x="10.8" y="2" width="2.4" height="11" rx="1.2"/><rect x="10.2" y="14" width="3.6" height="7.5" rx=".7"/><path d="M10.2 16.6h3.6M10.2 18.9h3.6"/></>,
+  // Concept B (Andrea, 09/10): diagonal so it fills the box like the other icons; halo + blade, emitter, hilt.
+  saber: <><path d="M9.5 14.5 20.5 3.5" strokeWidth="4.6" opacity=".25"/><path d="M9.5 14.5 20.5 3.5" strokeWidth="2.2"/><path d="m6.6 13.6 3.8 3.8"/><path d="m3.5 20.5 5-5" strokeWidth="3.4" opacity=".7"/></>,
   euro: <><circle cx="12" cy="12" r="9"/><path d="M15.2 8.6a4 4 0 1 0 0 6.8M7.6 11h5M7.6 13h5"/></>,
   star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5Z" />,
   crest: <><path d="M12 3 19.5 6v5.5c0 4.6-3.1 7.9-7.5 9.5-4.4-1.6-7.5-4.9-7.5-9.5V6L12 3Z"/><path d="M12 8.3l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4L12 8.3Z"/></>,
