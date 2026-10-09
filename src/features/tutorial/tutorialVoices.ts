@@ -16,7 +16,7 @@ export interface TutorialVoice {
 }
 
 const VOICES: Record<string, TutorialVoice> = {
-  "A.N.D.E.R.": { id: "ander", name: "A.N.D.E.R.", monogram: "A", role: "Assistente della scuola" },
+  "A.N.D.E.R.": { id: "ander", name: "A.N.D.E.R.", monogram: "A", role: "Assistente scolastico AI" },
   "M.A.K.I.": { id: "maki", name: "M.A.K.I.", monogram: "M", role: "Assistente dei tornei" },
   "???": { id: "mystery", name: "???", monogram: "?", role: "Mittente sconosciuto" },
 };

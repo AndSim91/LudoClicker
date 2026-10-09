@@ -622,7 +622,8 @@
 .is-dialog .tutorial-voice {
   display: grid;
   grid-template-columns: 34px auto;
-  column-gap: 11px;
+  align-content: center;
+  gap: 1px 11px;
   color: var(--voice-ink);
 }
 
