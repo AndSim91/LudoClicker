@@ -36,10 +36,18 @@ it("follows the tappe: athletes with Forma 1, the countdown to the Scolastico, t
   expect(selectStoryGoal(played, 0)).toEqual({ kind: "collaborators", value: played.collaborators.length, target: 8 });
   expect(getStoryGoalTip({ kind: "collaborators", value: 3, target: 8 }).text)
     .toBe("Servono 8 Collaboratori delle Onde. Ne abbiamo 3.");
-  expect(selectStoryGoal({
+
+  // After the Consiglio: a title at the Accademico (April, 3 months and a fraction from January).
+  const council = {
     ...played,
     collaboratorManagement: { ...played.collaboratorManagement, aggregateViewUnlocked: true },
-  }, 0)).toBeNull();
+  };
+  expect(selectStoryGoal(council, council.school.nextFeeAt - 30_000))
+    .toEqual({ kind: "academy", secondsLeft: 3 * GAME_CONFIG.gameMonthMs / 1_000 + 30 });
+  expect(getStoryGoalTip({ kind: "academy", secondsLeft: 42 }).text)
+    .toBe("Vinci un titolo all'Accademico, in Arena o in Stile. Il prossimo inizia tra 42 s.");
+  expect(selectStoryGoal({ ...council, tournaments: { ...council.tournaments, academyTitlesCurrentSchool: 1 } }, 0))
+    .toBeNull();
 });
 
 it("starts with 10 members, from the first one, until the Forme open", () => {

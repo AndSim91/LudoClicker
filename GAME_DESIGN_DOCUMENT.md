@@ -3364,8 +3364,12 @@ l'avanzamento.
    2. **Torneo Scolastico**: aperto Tornei, un conto alla rovescia fino al
       prossimo Scolastico in secondi di gioco («42 s», sopra il minuto «9:42»);
    3. **Collaboratori delle Onde**: dopo il primo Scolastico giocato, «👥 3/8»
-      collaboratori su 8; sparisce quando nasce il Consiglio delle Onde (il
-      fumetto non lo anticipa).
+      collaboratori su 8; lascia il posto alla tappa successiva quando nasce
+      il Consiglio delle Onde (il fumetto non lo anticipa);
+   4. **Torneo Accademico** (09/10/2026): dopo il Consiglio delle Onde, «🏆»
+      con il conto alla rovescia al prossimo Accademico (aprile); fumetto «Vinci
+      un titolo all'Accademico, in Arena o in Stile. Il prossimo inizia tra
+      9:42.»; sparisce con il primo titolo della scuola (Arena o Stile).
 
 9b. **Si apre la stagione dei tornei** (`tournaments-opening`, 08/10/2026).
    Tornei si apre, per sempre e in ogni scuola, la prima volta che la scuola ha

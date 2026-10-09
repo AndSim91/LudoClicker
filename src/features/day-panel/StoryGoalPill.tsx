@@ -20,13 +20,14 @@ const SLICES = [
   "tutorial",
 ] as const;
 const COUNTDOWN_INTERVAL_MS = 1_000;
-const GOAL_ICONS = { members: "contact", athletes: "trophy", tournament: "trophy", collaborators: "people" } as const;
+const GOAL_ICONS = { members: "contact", athletes: "trophy", tournament: "trophy", collaborators: "people", academy: "trophy" } as const;
 
 function useStoryGoal(state?: GameState, now?: number): StoryGoal | null {
   const sliced = useGameStateSlices(SLICES, state);
-  // The clock ticks only for the countdown to the Scolastico.
+  // The clock ticks only for the countdowns (Scolastico, then Accademico).
   const countingDown = sliced.unlocks.tournaments &&
-    !sliced.tournaments.results.some((result) => result.level === "school");
+    (!sliced.tournaments.results.some((result) => result.level === "school") ||
+      sliced.collaboratorManagement.aggregateViewUnlocked);
   const liveNow = useGameTime(now === undefined && countingDown, COUNTDOWN_INTERVAL_MS);
   return selectStoryGoal(sliced, now ?? liveNow);
 }

@@ -1,4 +1,8 @@
+import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
+import { getCalendarMonth } from "../../game/calendar";
 import { GAME_CONFIG } from "../../game/config";
+import { hasPrestigeTitle } from "../../game/progression";
+import { getTournamentSeason } from "../../game/tournamentFlow";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../../game/tutorialScholarship";
 import type { GameState } from "../../game/types";
@@ -8,13 +12,15 @@ import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPre
  * The goal of the current tappa in «La mia giornata» (08/10/2026), in every school:
  * from the first member, 10 members (Forme open; 09/10/2026), then
  * 8 athletes with Forma 1 (Tornei opens), then the countdown to the Torneo
- * Scolastico, then 8 Collaboratori delle Onde (the Consiglio, never named here).
+ * Scolastico, then 8 Collaboratori delle Onde (the Consiglio, never named here),
+ * then a title at the Torneo Accademico, Arena or Stile (09/10/2026).
  */
 export type StoryGoal =
   | { kind: "members"; value: number; target: number }
   | { kind: "athletes"; value: number; target: number }
   | { kind: "tournament"; secondsLeft: number }
-  | { kind: "collaborators"; value: number; target: number };
+  | { kind: "collaborators"; value: number; target: number }
+  | { kind: "academy"; secondsLeft: number };
 
 export type StoryGoalState = Pick<
   GameState,
@@ -43,9 +49,23 @@ export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal |
     if (upcoming?.level !== "school") return null;
     return { kind: "tournament", secondsLeft: Math.max(0, Math.ceil((upcoming.occursAt - now) / 1_000)) };
   }
-  if (state.collaboratorManagement.aggregateViewUnlocked) return null;
+  if (state.collaboratorManagement.aggregateViewUnlocked) {
+    return hasPrestigeTitle(state) ? null : { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) };
+  }
   const target = GAME_CONFIG.collaboratorAggregateUnlockCount;
   return { kind: "collaborators", value: Math.min(state.collaborators.length, target), target };
+}
+
+/** The Accademico of this calendar year if not yet played, otherwise next year's. */
+function getSecondsToNextAcademy(state: StoryGoalState, now: number): number {
+  const { currentMonth, nextFeeAt } = state.school;
+  const april = TOURNAMENT_DEFINITIONS.academy.calendarMonth;
+  let offset = (april - getCalendarMonth(currentMonth) + 12) % 12;
+  // The tournament runs at the end of its month: in April, skip it if already played (or missed).
+  const season = getTournamentSeason("academy", currentMonth);
+  if (offset === 0 && [...state.tournaments.results, ...state.tournaments.missedTournaments]
+    .some((entry) => entry.level === "academy" && entry.season === season)) offset = 12;
+  return Math.max(0, Math.ceil((nextFeeAt + offset * GAME_CONFIG.gameMonthMs - now) / 1_000));
 }
 
 /** «42 s» under a minute, then «9:42». */
@@ -55,11 +75,11 @@ export function formatCountdown(seconds: number): string {
 }
 
 export function getStoryGoalLabel(goal: StoryGoal): string {
-  return goal.kind === "tournament" ? formatCountdown(goal.secondsLeft) : `${goal.value}/${goal.target}`;
+  return goal.kind === "tournament" || goal.kind === "academy" ? formatCountdown(goal.secondsLeft) : `${goal.value}/${goal.target}`;
 }
 
 export function isStoryGoalReady(goal: StoryGoal): boolean {
-  return goal.kind !== "tournament" && goal.value >= goal.target;
+  return goal.kind !== "tournament" && goal.kind !== "academy" && goal.value >= goal.target;
 }
 
 export function getStoryGoalTip(goal: StoryGoal): { title: string; text: string } {
@@ -76,6 +96,12 @@ export function getStoryGoalTip(goal: StoryGoal): { title: string; text: string 
   }
   if (goal.kind === "tournament") {
     return { title: "Ander Games", text: `Il Torneo Scolastico inizia tra ${formatCountdown(goal.secondsLeft)}.` };
+  }
+  if (goal.kind === "academy") {
+    return {
+      title: "Torneo Accademico",
+      text: `Vinci un titolo all'Accademico, in Arena o in Stile. Il prossimo inizia tra ${formatCountdown(goal.secondsLeft)}.`,
+    };
   }
   return {
     title: "Collaboratori delle Onde",

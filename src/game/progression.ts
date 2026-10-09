@@ -40,7 +40,7 @@ export function isGameAreaUnlocked(view: GameArea, state: GameState): boolean {
  * (Arena or Style) won by this school. A national title counts too, so a game
  * saved before the change keeps its open Network.
  */
-export function getPrestigeRequirements(state: GameState) {
+export function getPrestigeRequirements(state: Pick<GameState, "tournaments">) {
   const academy = state.tournaments.academyTitlesCurrentSchool ?? 0;
   const national = state.tournaments.nationalTitlesCurrentSchool ?? 0;
   return {
@@ -49,7 +49,7 @@ export function getPrestigeRequirements(state: GameState) {
   };
 }
 
-export function hasPrestigeTitle(state: GameState): boolean {
+export function hasPrestigeTitle(state: Pick<GameState, "tournaments">): boolean {
   const requirements = getPrestigeRequirements(state);
   return requirements.currentAcademyTitles >= requirements.academyTitles;
 }
