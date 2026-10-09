@@ -89,11 +89,11 @@ export function getAthleteWeapon(
   return best;
 }
 
-const RARITY_MINIMUM: Record<PersonRarity, number> = {
-  common: 1,
-  rare: 25,
-  "ultra-rare": 50,
-  legendary: 1,
+/** Arena e Stile base per rarità, tiro uniforme min–max (decisione del 09/10). */
+export const RARITY_BASE_RANGE: Record<Exclude<PersonRarity, "legendary">, readonly [number, number]> = {
+  common: [1, 80],
+  rare: [25, 85],
+  "ultra-rare": [50, 90],
 };
 
 // I valori individuali dei Leggendari ordinari restano configurabili finché
@@ -201,12 +201,12 @@ export function rollAthleteBaseStats(
       DEFAULT_LEGENDARY_STATS;
     return { arena, style, nextSeed: seed };
   }
-  const minimum = RARITY_MINIMUM[rarity];
+  const [minimum, maximum] = RARITY_BASE_RANGE[rarity];
   const [arenaRoll, afterArena] = nextRandom(seed);
   const [styleRoll, nextSeed] = nextRandom(afterArena);
   return {
-    arena: Math.round((minimum + Math.floor(arenaRoll * (101 - minimum))) * geneticsMultiplier),
-    style: Math.round((minimum + Math.floor(styleRoll * (101 - minimum))) * geneticsMultiplier),
+    arena: Math.round((minimum + Math.floor(arenaRoll * (maximum + 1 - minimum))) * geneticsMultiplier),
+    style: Math.round((minimum + Math.floor(styleRoll * (maximum + 1 - minimum))) * geneticsMultiplier),
     nextSeed,
   };
 }
@@ -234,8 +234,8 @@ export function createStableFallbackStats(
     hash ^= character.charCodeAt(0);
     hash = Math.imul(hash, 16777619);
   }
-  const minimum = RARITY_MINIMUM[rarity];
-  const range = 101 - minimum;
+  const [minimum, maximum] = RARITY_BASE_RANGE[rarity];
+  const range = maximum + 1 - minimum;
   const arena = minimum + ((hash >>> 0) % range);
   const mixed = Math.imul(hash ^ 0x9e3779b9, 2246822519);
   const style = minimum + ((mixed >>> 0) % range);

@@ -26,6 +26,7 @@ import {
   getNumericFormCount,
   getPreparation,
   hasCompletedFormOne,
+  RARITY_BASE_RANGE,
 } from "./athleteStats";
 import { nextRandom } from "./random";
 import {
@@ -237,12 +238,6 @@ export function selectSchoolTournamentEntrants(state: GameState): SchoolTourname
   return selectSchoolTournamentEntrantsFromRoster(state.contacts, state.collaborators);
 }
 
-function getRarityMinimum(rarity: Exclude<PersonRarity, "legendary">): number {
-  if (rarity === "ultra-rare") return 50;
-  if (rarity === "rare") return 25;
-  return 1;
-}
-
 function createNpcCandidate(
   level: ScheduledExternalTournamentLevel,
   profile: TournamentNpcProfile,
@@ -254,9 +249,9 @@ function createNpcCandidate(
   // Forme del livello (07/10): Accademico 4, Nazionale 5, Champion's 6 Forme numeriche.
   const numericForms = NPC_NUMERIC_FORMS[level];
   const experience = integer(cursor, profile.experienceRange[0], profile.experienceRange[1]);
-  const minimum = getRarityMinimum(rarity);
-  const arenaBase = integer(cursor, minimum, 100);
-  const styleBase = integer(cursor, minimum, 100);
+  const [minimum, maximum] = RARITY_BASE_RANGE[rarity];
+  const arenaBase = integer(cursor, minimum, maximum);
+  const styleBase = integer(cursor, minimum, maximum);
   const firstName = PROSPECT_FIRST_NAMES[integer(cursor, 0, PROSPECT_FIRST_NAMES.length - 1)];
   const lastName = PROSPECT_LAST_NAMES[integer(cursor, 0, PROSPECT_LAST_NAMES.length - 1)];
   const schools = getNpcSchoolPool(level);

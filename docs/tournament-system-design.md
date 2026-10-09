@@ -45,17 +45,18 @@ Il modello dati deve accettare valori superiori a 100 per permettere future rari
 
 ### 2.2 Distribuzione per rarità
 
-La rarità modifica soltanto il minimo del tiro uniforme:
+Tiro uniforme tra minimo e massimo della rarità (decisione di Andrea del 09/10,
+`RARITY_BASE_RANGE` in `src/game/athleteStats.ts`, usato anche per gli NPC dei tornei):
 
 | Rarità | Arena base | Stile base |
 |---|---:|---:|
-| Comune | 1–100 | 1–100 |
-| Raro | 25–100 | 25–100 |
-| Ultra Raro | 50–100 | 50–100 |
+| Comune | 1–80 | 1–80 |
+| Raro | 25–85 | 25–85 |
+| Ultra Raro | 50–90 | 50–90 |
 | Leggendario | valori fissi | valori fissi |
 | Leggendario Segreto | valori fissi | valori fissi |
 
-Un Comune può quindi ottenere 100/100, ma la probabilità è 1 su 10.000. La rarità non assegna bonus successivi e non impone un valore massimo differente nella versione iniziale.
+Un Comune arriva al massimo a 80/80 (1 su 6.400). Prima del 09/10 il massimo era 100 per tutte le rarità. I valori già generati nei salvataggi non cambiano; Genetica (Reputazione) moltiplica il tiro. I Leggendari ordinari sono in revisione uno per uno (per ora 75/75).
 
 ### 2.3 Bonus delle Forme
 
