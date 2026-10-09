@@ -7,7 +7,7 @@ import { FIRST_EVENT_TUTORIAL_SCENE_ID, hasCompletedTutorialSparring, isTutorial
 import { getRunningAcquisitionEvents } from "../game/runtimeIndexes";
 import { selectContactsAwaitingEmail } from "../game/selectors";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../game/tutorialScholarship";
-import type { GameState } from "../game/types";
+import type { FormId, GameState } from "../game/types";
 
 export { FORMS_TEACHING_TUTORIAL_SCENE_ID };
 
@@ -144,6 +144,8 @@ interface TutorialStepBase {
   opensEquipment?: boolean;
   /** The Pianificazione delle Onde shows this page while the step is shown. */
   planningPage?: "pagella" | "plan";
+  /** Form logos under the text, one group per stage of the path (09/10/2026, «Le sette Forme»). */
+  formLogos?: readonly (readonly FormId[])[];
 }
 
 export interface TutorialDialogStep extends TutorialStepBase {
@@ -496,6 +498,12 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Il percorso formativo inizia da Forma 1 e 2 con la spada lunga. Con il Corso Y si impara a conoscere anche staffa e doppie spade corte per poi scegliere le proprie armi preferite per le Forme 3, 4 e 5. Infine abbiamo le Forme 6 e 7 che raccolgono e concludono il percorso di un atleta LudoSportino.",
         ],
         focusRegions: ["title"],
+        formLogos: [
+          ["form-1", "form-2"],
+          ["course-y"],
+          ["form-3-long", "form-4-long", "form-5-long"],
+          ["form-6", "form-7"],
+        ],
       },
       {
         id: "forms-arena-style",

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import {
   resolveTutorialBody,
   resolveTutorialRegions,
@@ -11,6 +11,8 @@ import { applyTutorialTreatments } from "./tutorialRegions";
 import { getStepVoice } from "./tutorialVoices";
 import { TutorialSignal } from "./TutorialSignal";
 import { KeywordText } from "../../components/common/KeywordText";
+import { getFormLogo } from "../../content/formLogos";
+import { getFormDefinition } from "../../content/forms";
 
 export function TutorialLayer({
   scene,
@@ -140,6 +142,25 @@ export function TutorialLayer({
         <div id="tutorial-step-copy" className="tutorial-copy">
           {body.map((paragraph) => <p key={paragraph}><KeywordText text={paragraph} /></p>)}
         </div>
+        {step.formLogos ? (
+          <div className="tutorial-forms" aria-hidden="true">
+            {step.formLogos.map((group, groupIndex) => (
+              <div className="tutorial-forms-stage" key={groupIndex}>
+                {group.map((formId) => (
+                  <span
+                    className="tutorial-form"
+                    key={formId}
+                    style={{ "--form-index": step.formLogos!.flat().indexOf(formId) } as CSSProperties}
+                  >
+                    <img src={getFormLogo(formId).assetPath} alt="" />
+                    {/* F3L → F3: the tutorial talks about the Form, not the weapon. */}
+                    <small>{getFormDefinition(formId)?.shortName.replace(/[LSD]$/, "")}</small>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null}
         {isReviewing ? <p className="tutorial-done">✓ Fatto</p> : null}
         <div className="tutorial-actions">
           {onBack && stepIndex > 0 ? (

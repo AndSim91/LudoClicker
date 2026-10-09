@@ -823,3 +823,85 @@
   font-size: 13px;
   font-weight: 700;
 }
+
+/* «Le sette Forme» (09/10/2026): the Form logos in stages (F1–F2 · CY · F3–F5 · F6–F7)
+ * joined by a line in the speaker's colour; in Onde they light up one after another. */
+.tutorial-forms {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+  margin-top: 16px;
+}
+
+.tutorial-forms::before {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  left: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--voice-line), transparent);
+  content: "";
+}
+
+.tutorial-forms-stage {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 24px;
+  background: var(--voice-tint);
+}
+
+.tutorial-form {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+.tutorial-form img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tutorial-form small {
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+:root[data-theme="dark"] .tutorial-form img {
+  border-color: rgb(251 241 220 / 55%);
+}
+
+/* Onde only: shadow → colour, one Form after another (opacity and filter on 8 small images). */
+:root[data-theme="dark"]:not(.reduce-motion) .tutorial-form img {
+  animation: tutorial-form-light 4.2s calc(var(--form-index) * 350ms) infinite both;
+}
+
+@keyframes tutorial-form-light {
+  0%, 100% {
+    opacity: .25;
+    filter: grayscale(1);
+  }
+
+  12%, 70% {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* Outlook: no line, a neutral band, no animation. */
+:root[data-theme="light"] .tutorial-forms::before {
+  display: none;
+}
+
+:root[data-theme="light"] .tutorial-forms-stage {
+  background: rgb(0 0 0 / 4%);
+}
