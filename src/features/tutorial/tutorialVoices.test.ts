@@ -15,4 +15,10 @@ describe("tutorial voices", () => {
     const objective = scene.steps.findIndex(({ kind }) => kind === "objective");
     expect(getStepVoice(scene, objective).id).toBe("ander");
   });
+
+  it("gives A.N.D.E.R. the scenes that open with an objective", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-event")!;
+    expect(scene.steps[0].kind).toBe("objective");
+    expect(getStepVoice(scene, 0).id).toBe("ander");
+  });
 });

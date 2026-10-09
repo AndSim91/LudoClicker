@@ -155,6 +155,8 @@ export interface TutorialDialogStep extends TutorialStepBase {
 export interface TutorialObjectiveStep extends TutorialStepBase {
   kind: "objective";
   title: string;
+  /** Who assigns it, when no dialog before it in the scene says so (default A.N.D.E.R.). */
+  speaker?: string;
   isComplete: (context: TutorialRuntimeContext) => boolean;
 }
 

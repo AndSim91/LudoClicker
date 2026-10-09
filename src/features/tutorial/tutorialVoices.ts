@@ -32,11 +32,17 @@ export function getTutorialVoice(speaker: string | undefined): TutorialVoice {
   return (speaker && VOICES[speaker]) || NEUTRAL_VOICE;
 }
 
-/** An objective is signed by whoever spoke last before it in the scene. */
+/**
+ * An objective is signed by its own speaker, else by whoever spoke last before
+ * it in the scene, else by A.N.D.E.R. (09/10/2026: every tutorial so far is his).
+ * The Ordine card is only for dialogs that leave the speaker empty.
+ */
 export function getStepVoice(scene: TutorialSceneDefinition, stepIndex: number): TutorialVoice {
+  const current = scene.steps[stepIndex];
+  if (current?.kind === "objective" && current.speaker) return getTutorialVoice(current.speaker);
   for (let index = stepIndex; index >= 0; index -= 1) {
     const step = scene.steps[index];
     if (step?.kind === "dialog") return getTutorialVoice(step.speaker);
   }
-  return NEUTRAL_VOICE;
+  return VOICES["A.N.D.E.R."];
 }
