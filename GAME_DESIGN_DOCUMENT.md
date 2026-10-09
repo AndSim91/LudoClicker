@@ -2740,7 +2740,9 @@ dell'**Ordine delle Onde**, in oro con l'emblema (N1); quelle firmate «???»,
 per gli incipit prima che una voce si presenti, sono grigio ardesia (X1). Gli
 obiettivi guidati restano della stessa famiglia di oggi, con la fascia a
 sinistra e un velo del colore di chi parlava prima (O3); se la scena si apre
-con un obiettivo, lo firma A.N.D.E.R. L'etichetta degli obiettivi è semplicemente «Tutorial»;
+con un obiettivo, lo firma A.N.D.E.R. Dal 09/10/2026 il tutorial del Reptile è di
+**M.A.K.I.**: si apre con una card «???» («Ehilà? ... Mi senti?») e la sua
+presentazione, «Una messaggera da Torino». L'etichetta degli obiettivi è semplicemente «Tutorial»;
 chi parla lo dice il monogramma. «Salta» c'è due
 volte: sotto la barra del titolo (S1) e nella card, accanto al contatore (S2).
 
@@ -3233,18 +3235,18 @@ l'avanzamento.
    esterna, con la voce Eventi evidenziata. Testi da approvare con Andrea. Dalla
    v109 i salvataggi oltre i 10 iscritti o la prima scuola la segnano come vista.
 
-5. **Nuova lezione prenotata** Dopo la spiegazione sull'aumento dei contatti,
-   **Continua** riporta automaticamente il giocatore in **Posta** con
-   l'obiettivo “Osserva La mia giornata”. Gli esiti delle email inviate durante
-   la missione restano in sospeso: alla fine del volantinaggio del tutorial la
-   prima email inviata (che ha sempre una prova garantita) diventa subito una
-   prova prenotata, mentre le altre ricevono il proprio esito, con il ritardo
-   originale, solo al termine di questa scena. Quando la prova compare in **La
-   mia giornata** con il conto alla rovescia, un dialogo in pausa (“Lezioni di
-   prova”) introduce il passaggio email → prova in palestra → possibile
-   iscrizione. Il pannello resta leggibile sotto il velo del tutorial, mentre
-   l'intera riga della prova viene portata in primo piano ed evidenziata. La
-   prima sequenza di tutorial termina premendo **Continua** in questo dialogo.
+5. **Nuova lezione prenotata** Dal 09/10/2026, dopo la spiegazione
+   sull'aumento dei contatti, l'ultimo passaggio della scena («Osserva La mia
+   giornata») è un dialogo di A.N.D.E.R. che lascia il giocatore in **Eventi**
+   (niente ritorno in Posta). Per tutta la scena gli esiti delle email restano
+   in sospeso, senza conto alla rovescia: partono, con il ritardo originale,
+   solo quando la scena finisce (o viene saltata). La prima email inviata ha
+   sempre una prova garantita. Quando la prima prova compare in **La mia
+   giornata**, un dialogo in pausa («Lezioni di prova») introduce il passaggio
+   email → prova in palestra → possibile iscrizione. Il pannello resta leggibile
+   sotto il velo del tutorial, mentre l'intera riga della prova viene portata in
+   primo piano ed evidenziata. Nelle partite successive il tutorial non torna e
+   le risposte non aspettano niente.
 
 6. **Primo bonus e quota associativa** Al primo iscritto, il dialogo
    “Habemus inscriptum!” introduce il bonus immediato di €50, la quota mensile

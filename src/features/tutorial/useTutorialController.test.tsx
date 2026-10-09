@@ -236,7 +236,7 @@ describe("useTutorialController", () => {
     expect(result.current.tutorial.activeStep?.kind).toBe("dialog");
   });
 
-  it("returns to Mail and closes the first tutorial round after presenting the trial", async () => {
+  it("stays on Eventi and opens the first trial tutorial after the Events tutorial", async () => {
     const { result } = renderHook(() => useTutorialHarness());
 
     act(() => result.current.unlockEvents());
@@ -279,16 +279,17 @@ describe("useTutorialController", () => {
 
     act(() => result.current.tutorial.continueScene());
 
+    // 09/10/2026: a dialog on Eventi, no jump back to Mail; it closes the scene.
     expect(result.current.tutorial.activeStep?.id).toBe("watch-first-trial");
-    expect(result.current.tutorial.shouldPauseGame).toBe(false);
-    expect(result.current.activeView).toBe("mail");
-    expect(result.current.navigationHistory).toEqual(["mail"]);
+    expect(result.current.tutorial.activeStep?.kind).toBe("dialog");
+    expect(result.current.activeView).toBe("events");
 
-    act(() => result.current.showTutorialTrial());
+    act(() => result.current.tutorial.continueScene());
 
     await waitFor(() => {
       expect(result.current.state.tutorial.completedSceneIds).toContain("first-event");
     });
+    act(() => result.current.showTutorialTrial());
     expect(result.current.state.tutorial.completedSceneIds).not.toContain("first-trial");
     expect(result.current.tutorial.activeScene?.id).toBe("first-trial");
     expect(result.current.tutorial.activeStep?.id).toBe("trial-booked");
@@ -302,25 +303,6 @@ describe("useTutorialController", () => {
     });
     expect(result.current.tutorial.activeScene).toBeNull();
     expect(result.current.tutorial.shouldPauseGame).toBe(false);
-  });
-
-  it("finishes the Events tutorial even when the first trial has already moved past scheduled", async () => {
-    const { result } = renderHook(() => useTutorialHarness());
-
-    act(() => result.current.unlockEvents());
-    act(() => result.current.setActiveView("events"));
-    act(() => result.current.tutorial.continueScene());
-    act(() => result.current.startFreeSparring());
-    act(() => result.current.tick(7_000));
-    act(() => result.current.tutorial.continueScene());
-    expect(result.current.tutorial.activeStep?.id).toBe("watch-first-trial");
-
-    // The booked trial already ran: only the booking statistic remains.
-    act(() => result.current.setStatistics({ trialsBooked: 1 }));
-
-    await waitFor(() => {
-      expect(result.current.state.tutorial.completedSceneIds).toContain("first-event");
-    });
   });
 
   it("keeps the Events tutorial ahead of later scenes once the mission unlocks it", async () => {

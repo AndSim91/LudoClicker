@@ -110,23 +110,29 @@ describe("initial tutorial progression", () => {
     const sparringCompleted = gameReducer(sparringStarted, { type: "TICK", now: 10_000 });
     expect(sparringCompleted.contacts.length).toBeGreaterThan(contactsBeforeSparring);
     expect(sparringCompleted.scheduledTrials).toHaveLength(0);
+    // 09/10/2026: every reply keeps waiting until the Events tutorial ends.
     expect(sparringCompleted.pendingEmailOutcomes.filter(
       (outcome) => outcome.waitForTutorialEvent,
-    )).toHaveLength(3);
-    expect(sparringCompleted.pendingEmailOutcomes.find(
-      (outcome) => outcome.tutorialSceneId === "first-event",
-    )).toMatchObject({
-      resolvesAt: 10_000,
-      result: "trialBooked",
-      waitForTutorialEvent: undefined,
-    });
+    )).toHaveLength(4);
+    const stillWaiting = gameReducer(sparringCompleted, { type: "TICK", now: 60_000 });
+    expect(stillWaiting.scheduledTrials).toHaveLength(0);
 
-    const trialAppeared = gameReducer(sparringCompleted, { type: "TICK", now: 10_001 });
+    const eventsTutorialDone = gameReducer(
+      { ...stillWaiting, automation: { ...stillWaiting.automation, lastProcessedAt: 60_000 } },
+      { type: "FINISH_TUTORIAL_SCENE", sceneId: "first-event", skipped: false },
+    );
+    const reserved = eventsTutorialDone.pendingEmailOutcomes.find(
+      (outcome) => outcome.tutorialSceneId === "first-event",
+    );
+    expect(reserved).toMatchObject({ result: "trialBooked", waitForTutorialEvent: undefined });
+    expect(reserved!.resolvesAt).toBeGreaterThan(60_000);
+
+    const trialAppeared = gameReducer(eventsTutorialDone, { type: "TICK", now: reserved!.resolvesAt });
     expect(trialAppeared.scheduledTrials).toContainEqual(expect.objectContaining({
       status: "scheduled",
       tutorialSceneId: "first-event",
     }));
-    expect(trialAppeared.statistics.trialsBooked).toBe(1);
+    expect(trialAppeared.statistics.trialsBooked).toBeGreaterThanOrEqual(1);
   });
 
   it("keeps later park sparring runs at their normal duration", () => {

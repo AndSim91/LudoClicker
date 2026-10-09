@@ -16,6 +16,12 @@ describe("tutorial voices", () => {
     expect(getStepVoice(scene, objective).id).toBe("ander");
   });
 
+  it("gives the Reptile to M.A.K.I. after a «???» incipit", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "reptile-introduction")!;
+    expect(scene.steps.map((_, index) => getStepVoice(scene, index).id))
+      .toEqual(["mystery", "maki", "maki", "maki", "maki", "maki", "maki"]);
+  });
+
   it("gives A.N.D.E.R. the scenes that open with an objective", () => {
     const scene = TUTORIAL_SCENES.find(({ id }) => id === "first-event")!;
     expect(scene.steps[0].kind).toBe("objective");

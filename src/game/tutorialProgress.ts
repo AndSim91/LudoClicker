@@ -86,10 +86,11 @@ export function finishTutorialScene(
           const sentAt = state.emails.find((email) => email.id === outcome.emailId)?.sentAt ??
             tutorialFinishedAt;
           const originalResponseDelay = Math.max(1, outcome.resolvesAt - sentAt);
+          // The reserved first booking keeps its tag: its trial is the one
+          // «first-trial» points at in La mia giornata.
           return {
             ...outcome,
             resolvesAt: tutorialFinishedAt + originalResponseDelay,
-            tutorialSceneId: undefined,
             waitForTutorialEvent: undefined,
           };
         })

@@ -55,6 +55,11 @@ describe("tutorials of the second half (05/10)", () => {
 
     act(() => result.current.tutorial.skipScene());
     await waitFor(() => expect(result.current.tutorial.activeScene?.id).toBe("reptile-introduction"));
+    // 09/10/2026: M.A.K.I. arrives first, with a «???» call and her introduction.
+    expect(result.current.tutorial.activeStep?.id).toBe("maki-signal");
+    act(() => result.current.tutorial.continueScene());
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("open-tournaments");
     act(() => result.current.setActiveView("tournaments"));
     await waitFor(() => expect(result.current.tutorial.activeStep?.tournamentTab).toBe("reptile"));
   });

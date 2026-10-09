@@ -295,29 +295,9 @@ export function resolveAcquisitionEvent(
     },
   };
   if (event.collaboratorId) nextState = sellGadgetsAtEvent(nextState, event.peopleMet, now);
-  if (event.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID) {
-    const selectedOutcomeId = nextState.pendingEmailOutcomes.find(
-      (outcome) => outcome.tutorialSceneId === FIRST_EVENT_TUTORIAL_SCENE_ID,
-    )?.id ?? nextState.pendingEmailOutcomes.find(
-      (outcome) => outcome.waitForTutorialEvent,
-    )?.id;
-    nextState = {
-      ...nextState,
-      pendingEmailOutcomes: nextState.pendingEmailOutcomes.map((outcome) => {
-        if (!outcome.waitForTutorialEvent) return outcome;
-        if (outcome.id === selectedOutcomeId) {
-          return {
-              ...outcome,
-              resolvesAt: now,
-              result: "trialBooked",
-              tutorialSceneId: FIRST_EVENT_TUTORIAL_SCENE_ID,
-              waitForTutorialEvent: undefined,
-            };
-        }
-        return outcome;
-      }),
-    };
-  }
+  // 09/10/2026: the tutorial flyering no longer books a trial on the spot. Email
+  // replies wait for the whole Events tutorial and start counting when it ends
+  // (finishTutorialScene).
   // 4.1: acquired contacts are counted in the yearly digest.
   if (rewardState.statistics.eventsCompleted === 0) {
     nextState = addMessage(
