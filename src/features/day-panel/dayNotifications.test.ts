@@ -71,14 +71,14 @@ describe("selectDayNotifications", () => {
 
     expect(selectDayNotifications(state, 50_000)).toEqual([]);
   });
-  it("keeps five trial notifications separate at the aggregation boundary", () => {
+  it("keeps two trial notifications separate at the aggregation boundary", () => {
     const state = stateWithTrialPhases(
       Array.from({ length: DAY_TRIAL_NOTIFICATION_LIMIT }, () => "scheduled" as const),
     );
 
     const notifications = selectDayNotifications(state, 100_000);
 
-    expect(notifications.filter((notification) => notification.kind === "trial")).toHaveLength(5);
+    expect(notifications.filter((notification) => notification.kind === "trial")).toHaveLength(2);
     expect(notifications).not.toContainEqual(
       expect.objectContaining({ kind: "trial-summary" }),
     );

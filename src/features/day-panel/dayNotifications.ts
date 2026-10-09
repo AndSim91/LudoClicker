@@ -18,7 +18,8 @@ import { getOwnedFinal } from "../tournaments/finalDuel";
 import { formatList, formatStat } from "../../shared/formatters";
 
 export const DAY_NOTIFICATION_VISIBILITY_MS = GAME_CONFIG.dayNotificationVisibilityMs;
-export const DAY_TRIAL_NOTIFICATION_LIMIT = 5;
+/** Ordinary trials shown one by one; from the 3rd at once they become one card (09/10). */
+export const DAY_TRIAL_NOTIFICATION_LIMIT = 2;
 export const DAY_TRIAL_GROUPING_UNLOCK_MEMBERS = 5;
 /** More notifications than this with the same title become one card. */
 export const DAY_NOTIFICATION_GROUP_LIMIT = 4;

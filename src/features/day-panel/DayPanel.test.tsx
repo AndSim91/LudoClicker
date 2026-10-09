@@ -237,14 +237,14 @@ describe("DayPanel", () => {
     expect(screen.getByText("In palestra")).toBeVisible();
   });
 
-  it("keeps exactly five trial rows separate", () => {
+  it("keeps exactly two trial rows separate", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);
 
     render(<DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT)} />);
 
-    expect(screen.getAllByText("Lezione di prova")).toHaveLength(5);
-    expect(screen.queryByText("5 lezioni di prova")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Lezione di prova")).toHaveLength(2);
+    expect(screen.queryByText("2 lezioni di prova")).not.toBeInTheDocument();
   });
 
   it("renders the ordinary group separately from Legendary trials after five members", () => {
@@ -271,7 +271,7 @@ describe("DayPanel", () => {
     expect(screen.getByText("Atleta 2")).toBeVisible();
   });
 
-  it("renders one tutorial-safe summary above five trial notifications", () => {
+  it("renders one tutorial-safe summary from three trial notifications", () => {
     vi.useFakeTimers();
     vi.setSystemTime(15_000);
 
@@ -279,8 +279,8 @@ describe("DayPanel", () => {
       <DayPanel state={stateWithScheduledTrials(DAY_TRIAL_NOTIFICATION_LIMIT + 1, 0)} />,
     );
 
-    expect(screen.getByText("6 lezioni di prova")).toBeVisible();
-    expect(screen.getByText("6 in programma")).toBeVisible();
+    expect(screen.getByText("3 lezioni di prova")).toBeVisible();
+    expect(screen.getByText("3 in programma")).toBeVisible();
     expect(screen.getByText("00:05")).toBeVisible();
     expect(screen.queryByText("Lezione di prova")).not.toBeInTheDocument();
     expect(container.querySelectorAll(".day-notification-trial-summary")).toHaveLength(1);
@@ -298,7 +298,7 @@ describe("DayPanel", () => {
 
     const { container } = render(<DayPanel state={stateWithScheduledTrials(100)} />);
 
-    expect(DAY_TRIAL_NOTIFICATION_LIMIT).toBe(5);
+    expect(DAY_TRIAL_NOTIFICATION_LIMIT).toBe(2);
     expect(screen.getByText("100 lezioni di prova")).toBeVisible();
     expect(screen.getByText("100 in programma")).toBeVisible();
     expect(container.querySelectorAll(".appointment-entry")).toHaveLength(1);
