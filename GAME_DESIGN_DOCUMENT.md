@@ -2897,16 +2897,16 @@ In testa; In arrivo).
 
 La scheda **Missioni delle Onde** è visibile all'inizio della partita. Quattro
 missioni girano sempre nello stesso ordine; una **serie** è un giro completo.
-L'obiettivo parte da 2 e cresce di 1 a ogni serie fino a 5 (raggiunto alla
-quarta serie); il premio è 50 € per il numero della serie (50, 100, 150 €…) e
-non ha tetto:
+Ogni missione ha il suo obiettivo base, che cresce di 1 a ogni serie fino a un
+tetto di base + 3 (raggiunto alla quarta serie); il premio è 50 € per il numero
+della serie (50, 100, 150 €…) e non ha tetto:
 
-| Ordine | Missione | Conta |
-| ---: | --- | --- |
-| 1 | Inviti in partenza | email inviate |
-| 2 | Agenda in movimento | prove prenotate |
-| 3 | Una sedia in più | nuovi iscritti |
-| 4 | Uscire a toccare l'erba | eventi completati |
+| Ordine | Missione | Conta | Base | Tetto |
+| ---: | --- | --- | ---: | ---: |
+| 1 | Inviti in partenza | email inviate | 3 | 6 |
+| 2 | Agenda in movimento | prove prenotate | 2 | 5 |
+| 3 | Una sedia in più | nuovi iscritti | 1 | 4 |
+| 4 | Uscire a toccare l'erba | eventi completati | 4 | 7 |
 
 Nella prima scuola la prima «Inviti in partenza» apre gli Eventi. La scheda
 mostra il numero della serie, non della missione. A ogni nuova scuola le missioni

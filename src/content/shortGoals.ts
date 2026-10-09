@@ -32,9 +32,9 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     title: "Inviti in partenza",
     description: "Completa una piccola tornata di email senza perdere il ritmo. O le dita.",
     metric: "emailsSent",
-    baseTarget: 2,
+    baseTarget: 3,
     targetGrowth: 1,
-    maxTarget: 5,
+    maxTarget: 6,
     baseReward: 50,
     completionNarrative: "Email inviate! Ora attendiamo e speriamo che non siano finite nello SPAM...",
   },
@@ -54,9 +54,9 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     title: "Uscire a toccare l'erba",
     description: "Porta a termine qualche evento in esterna.",
     metric: "eventsCompleted",
-    baseTarget: 2,
+    baseTarget: 4,
     targetGrowth: 1,
-    maxTarget: 5,
+    maxTarget: 7,
     baseReward: 50,
     completionNarrative: "Il verbale della polizia locale conferma che non ci sono state deiezioni in strada a cavallo del tramonto.",
   },
@@ -65,9 +65,9 @@ export const SHORT_GOALS: Record<ShortGoalId, ShortGoalDefinition> = {
     title: "Una sedia in più",
     description: "Trasforma le lezioni di prova in nuove iscrizioni.",
     metric: "membersEnrolled",
-    baseTarget: 2,
+    baseTarget: 1,
     targetGrowth: 1,
-    maxTarget: 5,
+    maxTarget: 4,
     baseReward: 50,
     completionNarrative: "Un nuovo nome si unisce alla chat dell'Ordine e tutti gli fanno le feste!",
   },
@@ -77,9 +77,6 @@ export function createInitialShortGoal(now: number): ShortGoalProgress {
   return createInitialEmailMission(0, now);
 }
 
-/** Only the very first email mission (it unlocks Eventi) asks for 3; later ones use baseTarget. */
-export const INITIAL_EMAIL_MISSION_TARGET = 3;
-
 export function createInitialEmailMission(
   baseline: number,
   now: number,
@@ -88,7 +85,7 @@ export function createInitialEmailMission(
   return {
     definitionId: definition.id,
     baseline,
-    target: INITIAL_EMAIL_MISSION_TARGET,
+    target: definition.baseTarget,
     startedAt: now,
     completedCount: 0,
     isActive: true,

@@ -54,14 +54,14 @@ describe("game engine: narrative", () => {
     // Order: email, prove, iscrizioni, Eventi.
     expect(createShortGoalFromStatistics(statistics, 2, 0).definitionId).toBe("enroll-member");
     expect(createShortGoalFromStatistics(statistics, 3, 0).definitionId).toBe("complete-event");
-    // Series 2 (one full round done): 3 emails for 100 €.
+    // Series 2 (one full round done): 4 emails (base 3 + 1) for 100 €.
     const second = createShortGoalFromStatistics(statistics, 4, 0);
-    expect(second.target).toBe(3);
+    expect(second.target).toBe(4);
     expect(getShortGoalReward(second)).toBe(100);
-    // Series 9: targets stuck at 5, reward still growing by 50 € a series.
+    // Series 9: Eventi stuck at its cap (base 4 + 3), reward still growing by 50 € a series.
     const ninth = createShortGoalFromStatistics(statistics, 35, 0);
     expect(ninth.definitionId).toBe("complete-event");
-    expect(ninth.target).toBe(5);
+    expect(ninth.target).toBe(7);
     expect(getShortGoalReward(ninth)).toBe(450);
   });
 
