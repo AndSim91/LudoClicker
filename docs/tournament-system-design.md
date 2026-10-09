@@ -50,13 +50,13 @@ Tiro uniforme tra minimo e massimo della rarità (decisione di Andrea del 09/10,
 
 | Rarità | Arena base | Stile base |
 |---|---:|---:|
-| Comune | 1–80 | 1–80 |
-| Raro | 25–85 | 25–85 |
-| Ultra Raro | 50–90 | 50–90 |
+| Comune | 1–75 | 1–75 |
+| Raro | 25–80 | 25–80 |
+| Ultra Raro | 45–85 | 45–85 |
 | Leggendario | valori fissi | valori fissi |
 | Leggendario Segreto | valori fissi | valori fissi |
 
-Un Comune arriva al massimo a 80/80 (1 su 6.400). Prima del 09/10 il massimo era 100 per tutte le rarità. I valori già generati nei salvataggi non cambiano; Genetica (Reputazione) moltiplica il tiro. I Leggendari ordinari sono in revisione uno per uno (per ora 75/75).
+Un Comune arriva al massimo a 75/75 (1 su 5.625). Prima del 09/10 il massimo era 100 per tutte le rarità. I valori già generati nei salvataggi non cambiano; Genetica (Reputazione) moltiplica il tiro. I Leggendari ordinari partono tutti da 80/80 (prima 75/75; i salvataggi salgono di +5).
 
 ### 2.3 Bonus delle Forme
 
@@ -664,7 +664,7 @@ Revisione del 07/10. Ogni profilo ha tre cose distinte:
   gli altri. Da avversario ha l'esperienza del livello (5/10/15/20), che conta
   solo nel voto di Stile;
 - **valore base**: Arena e Stile con cui entra a scuola, con le sue Forme ed
-  esperienza 0 (un Leggendario normale entra con 75/75). Poi cresce come tutti.
+  esperienza 0 (un Leggendario normale entra con 80/80). Poi cresce come tutti.
 
 Valore a scuola = base × (1 + bonus Forme) × (1 + 0,03 × esperienza).
 Gli specialisti hanno la statistica principale circa il 10% sopra l'altra; i

@@ -91,15 +91,15 @@ export function getAthleteWeapon(
 
 /** Arena e Stile base per rarità, tiro uniforme min–max (decisione del 09/10). */
 export const RARITY_BASE_RANGE: Record<Exclude<PersonRarity, "legendary">, readonly [number, number]> = {
-  common: [1, 80],
-  rare: [25, 85],
-  "ultra-rare": [50, 90],
+  common: [1, 75],
+  rare: [25, 80],
+  "ultra-rare": [45, 85],
 };
 
 // I valori individuali dei Leggendari ordinari restano configurabili finché
 // il design non li definirà. Il fallback è fisso, mai casuale.
 const FIXED_LEGENDARY_STATS: Partial<Record<SpecialCollaboratorId, readonly [number, number]>> = {};
-const DEFAULT_LEGENDARY_STATS = [75, 75] as const;
+export const DEFAULT_LEGENDARY_STATS = [80, 80] as const;
 
 export function getNumericFormCount(forms: readonly FormId[]): number {
   return new Set(forms.flatMap((formId) => {

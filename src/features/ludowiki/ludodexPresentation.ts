@@ -4,7 +4,7 @@ import {
   SECRET_LEGENDARY_IDS,
 } from "../../content/secretLegendaries";
 import type { LudodexLegendary } from "../../content/ludowiki";
-import { getContactBaseStats } from "../../game/athleteStats";
+import { DEFAULT_LEGENDARY_STATS, getContactBaseStats } from "../../game/athleteStats";
 import type {
   Contact,
   GameState,
@@ -85,7 +85,7 @@ export function getLegendaryDossier(
   const retained = state.legendaryCollaborators.retainedProgress[legendary.id];
   const [secretArena, secretStyle] = legendary.secretLegendaryId
     ? getSecretLegendaryBase(legendary.secretLegendaryId)
-    : [75, 75];
+    : DEFAULT_LEGENDARY_STATS;
   const arenaBase = retained?.arenaBase ?? secretArena;
   const styleBase = retained?.styleBase ?? secretStyle;
   return {
