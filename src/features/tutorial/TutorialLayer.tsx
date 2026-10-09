@@ -115,7 +115,7 @@ export function TutorialLayer({
                 <small>{voice.role}</small>
               </>
             ) : (
-              <b>Obiettivo guidato{voice.id === "neutral" ? "" : ` · ${voice.name}`}</b>
+              <b>Tutorial</b>
             )}
           </span>
           <span className="tutorial-step-meta">

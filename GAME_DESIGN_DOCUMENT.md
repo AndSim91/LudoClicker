@@ -2740,7 +2740,8 @@ dell'**Ordine delle Onde**, in oro con l'emblema (N1); quelle firmate «???»,
 per gli incipit prima che una voce si presenti, sono grigio ardesia (X1). Gli
 obiettivi guidati restano della stessa famiglia di oggi, con la fascia a
 sinistra e un velo del colore di chi parlava prima (O3); se la scena si apre
-con un obiettivo, lo firma A.N.D.E.R. «Salta» c'è due
+con un obiettivo, lo firma A.N.D.E.R. L'etichetta degli obiettivi è semplicemente «Tutorial»;
+chi parla lo dice il monogramma. «Salta» c'è due
 volte: sotto la barra del titolo (S1) e nella card, accanto al contatore (S2).
 
 Avvisi della Posta e notifiche di La mia giornata (Fase 8, prima schermata):
