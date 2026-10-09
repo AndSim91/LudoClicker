@@ -251,7 +251,7 @@ sorgente di entrate ricorrenti. Non sono spendibili.
 - **Ultra Rari:** contatti viola che diventano Collaboratori delle Onde dopo il
   Corso Y.
 
-Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€20**.
+Ogni nuovo iscritto accredita immediatamente un bonus di iscrizione di **€50** (€20 fino al 09/10/2026).
 In seguito, ogni iscritto attivo genera una quota base di **€40 per mese di
 gioco**, che sale con il record di iscritti della scuola (§ 5). **Forme, corsi,
 attestati da Istruttore e qualifiche da Tecnico non cambiano la quota** (tolti
@@ -804,7 +804,7 @@ Per il primo prototipo:
 | Attesa della lezione in palestra |                                                                       30 secondi |
 | Durata della lezione di prova    | 15 secondi (−1 secondo per livello di Sala preparata, minimo 10); Leggendario Segreto 30 secondi |
 | Esito della lezione              |                                                             immediato al termine |
-| Bonus di iscrizione              |                                                                  immediato (€20) |
+| Bonus di iscrizione              |                                                                  immediato (€50) |
 | Accredito della quota mensile    | al cambio mese (€40–160 secondo il record di iscritti) |
 
 Il mese di gioco dura 60 secondi e il calendario scorre da Gennaio a Dicembre.
@@ -3235,7 +3235,7 @@ l'avanzamento.
    prima sequenza di tutorial termina premendo **Continua** in questo dialogo.
 
 6. **Primo bonus e quota associativa** Al primo iscritto, il dialogo
-   “Habemus inscriptum!” introduce il bonus immediato di €20, la quota mensile
+   “Habemus inscriptum!” introduce il bonus immediato di €50, la quota mensile
    base di €40, che cresce con gli iscritti, e il finanziamento dei
    potenziamenti. Segue l'obiettivo di aprire
    **Upgrade** dall'app rail e un dialogo che presenta l'albero dei
@@ -4519,7 +4519,7 @@ disponibile come opzione.
 - €0 in cassa; la partita parte a Gennaio dell'anno scolastico 0;
 - prenotazione e iscrizione dipendono dalla rarità secondo la tabella dei
   Contatti;
-- bonus immediato per ogni nuova iscrizione: €20;
+- bonus immediato per ogni nuova iscrizione: €50;
 - quota ricorrente: €40 base per iscritto attivo (fino a €160 con il record di
   iscritti, § 5), a ogni mese di gioco; Forme e qualifiche non la cambiano;
 - durata di un mese di gioco: 60 secondi, ciclo Gennaio–Dicembre e anno
@@ -5644,7 +5644,7 @@ completa:
 7. conferma sull'eventuale uso di persone reali come personaggi;
 8. revisione dei valori di bilanciamento dopo il primo prototipo;
 9. importo e frequenza compressa delle quote associative (oggi da €40 a €160 al
-   mese di gioco da 60 secondi secondo il record di iscritti, più i bonus per Forme e qualifiche, e €20 una tantum
+   mese di gioco da 60 secondi secondo il record di iscritti, più i bonus per Forme e qualifiche, e €50 una tantum
    all'iscrizione);
 10. ritmo con cui il 5,5% di Ultra Rari introduce i primi collaboratori (oggi
     il primo collaboratore è Andrea Simonazzi, 10° contatto garantito; gli Ultra

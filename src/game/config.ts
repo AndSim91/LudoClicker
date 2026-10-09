@@ -52,7 +52,7 @@ export const GAME_CONFIG = {
     { members: 250, fee: 120 },
     { members: 500, fee: 160 },
   ],
-  enrollmentBonus: 20,
+  enrollmentBonus: 50,
   shortGoalActivationBalance: 10_000,
   shortGoalReactivationDelayMs: 60_000,
   gameMonthMs: 60_000,
