@@ -1,12 +1,5 @@
-import {
-  SHORT_GOALS,
-  getShortGoalProgress,
-  getShortGoalReward,
-  getShortGoalSeries,
-  isShortGoalActive,
-} from "../../content/shortGoals";
 import { GAME_CONFIG } from "../../game/config";
-import { memo, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import type { GameState } from "../../game/types";
@@ -29,6 +22,7 @@ import {
   type DayNotificationPhase,
 } from "./dayNotifications";
 import { StoryGoalPill } from "./StoryGoalPill";
+import { ShortGoalCard } from "./ShortGoalCard";
 
 /** Above this the panel is always a column; below it the player opens and closes it (G2, 07/10). */
 export const DAY_PANEL_MEDIA_QUERY = "(min-width: 1441px)";
@@ -106,39 +100,6 @@ function getTiming(notification: DayNotification, now: number): string {
   }
   return phaseLabels[notification.phase];
 }
-
-const ShortGoalCard = memo(function ShortGoalCard({
-  state: stateOverride,
-}: {
-  state?: GameState;
-}) {
-  const state = useGameStateSlices(["shortGoal", "statistics"], stateOverride);
-  if (!isShortGoalActive(state)) return null;
-  const definition = SHORT_GOALS[state.shortGoal.definitionId];
-  const progress = Math.min(state.shortGoal.target, getShortGoalProgress(state));
-  return (
-    <section className="short-goal-card" aria-label="Obiettivo breve">
-      <div className="short-goal-heading">
-        <span>Missioni delle Onde</span>
-        <b>Serie {getShortGoalSeries(state.shortGoal.completedCount)}</b>
-      </div>
-      <strong>{definition.title}</strong>
-      <p>{definition.description}</p>
-      <ProgressBar
-        className="short-goal-progress"
-        label={`Progresso: ${definition.title}`}
-        value={progress}
-        max={state.shortGoal.target}
-      />
-      <div className="short-goal-footer">
-        <span>
-          {progress}/{state.shortGoal.target}
-        </span>
-        <strong>Premio € {getShortGoalReward(state.shortGoal)}</strong>
-      </div>
-    </section>
-  );
-});
 
 function DayEffects({ effects }: { effects: readonly DayEffect[] }) {
   return (

@@ -8,6 +8,7 @@ import {
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, TournamentResult } from "../../game/types";
 import { DAY_PANEL_MEDIA_QUERY, DayPanel } from "./DayPanel";
+import { SHORT_GOAL_DONE_MS } from "./ShortGoalCard";
 import {
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
@@ -192,6 +193,24 @@ describe("DayPanel", () => {
     rerender(<DayPanel state={initial} />);
 
     expect(screen.getByLabelText("Obiettivo breve")).toBeVisible();
+  });
+
+  it("keeps a completed wave mission on screen for the effect, then shows the next one", () => {
+    vi.useFakeTimers();
+    const initial = createInitialState(1_000);
+    const { rerender } = render(<DayPanel state={initial} />);
+    expect(screen.getByText("Inviti in partenza")).toBeVisible();
+
+    rerender(<DayPanel state={{
+      ...initial,
+      shortGoal: { ...initial.shortGoal, definitionId: "book-trials", completedCount: 1 },
+    }} />);
+    expect(screen.getByText("Inviti in partenza")).toBeVisible();
+    expect(screen.getByText("Compiuta!")).toBeVisible();
+
+    act(() => vi.advanceTimersByTime(SHORT_GOAL_DONE_MS));
+    expect(screen.getByText("Agenda in movimento")).toBeVisible();
+    expect(screen.queryByText("Compiuta!")).not.toBeInTheDocument();
   });
 
   it("exposes only the tutorial trial row as the precise guided target", () => {

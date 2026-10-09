@@ -68,6 +68,104 @@
   color: var(--success);
 }
 
+/* Missione compiuta (concept C «Scintille»): in Onde la barra lampeggia d'oro, dalla
+   punta escono poche scintille e la missione nuova sale al posto della vecchia. In
+   Outlook e senza animazioni resta solo la riga verde, ferma. Solo transform e opacity. */
+.short-goal-track {
+  position: relative;
+}
+
+.short-goal-sparks {
+  display: none;
+}
+
+.short-goal-done-count {
+  font-weight: 600;
+}
+
+.short-goal-done-note {
+  margin-top: 7px;
+  padding: 4px 7px;
+  border-left: 3px solid var(--success);
+  background: #dff6dd;
+  color: var(--success);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .short-goal-done-note {
+  background: rgb(127 220 174 / 12%);
+}
+
+:root[data-theme="dark"]:not(.reduce-motion) .short-goal-done-note {
+  display: none;
+}
+
+:root[data-theme="dark"] .short-goal-done-count {
+  color: var(--onde-gold-bright);
+}
+
+:root[data-theme="dark"]:not(.reduce-motion) .short-goal-card.is-done {
+  animation: short-goal-out 0.3s 1.7s ease-in forwards;
+}
+
+:root[data-theme="dark"]:not(.reduce-motion) .short-goal-card.is-done .short-goal-progress > span {
+  animation: short-goal-flash 0.5s 0.1s;
+}
+
+:root[data-theme="dark"]:not(.reduce-motion) .short-goal-sparks {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  display: block;
+  pointer-events: none;
+}
+
+.short-goal-sparks i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: -2px;
+  border-radius: 50%;
+  background: var(--onde-gold-bright);
+  box-shadow: 0 0 6px var(--onde-gold);
+  opacity: 0;
+  animation: short-goal-spark 0.7s 0.1s ease-out forwards;
+}
+
+.short-goal-sparks i:nth-child(1) { --spark: -22px, -14px; }
+.short-goal-sparks i:nth-child(2) { --spark: -8px, -20px; }
+.short-goal-sparks i:nth-child(3) { --spark: 8px, -18px; }
+.short-goal-sparks i:nth-child(4) { --spark: 20px, -8px; }
+.short-goal-sparks i:nth-child(5) { --spark: 24px, 6px; }
+.short-goal-sparks i:nth-child(6) { --spark: 12px, 14px; }
+.short-goal-sparks i:nth-child(7) { --spark: -14px, 12px; }
+.short-goal-sparks i:nth-child(8) { --spark: 0px, -26px; }
+
+:root[data-theme="dark"]:not(.reduce-motion) .short-goal-card.is-arriving {
+  animation: short-goal-in 0.35s ease-out;
+}
+
+@keyframes short-goal-flash {
+  40% {
+    background: var(--onde-gold-soft);
+    box-shadow: 0 0 10px var(--onde-gold);
+  }
+}
+
+@keyframes short-goal-spark {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--spark)) scale(0.4); }
+}
+
+@keyframes short-goal-out {
+  to { opacity: 0; }
+}
+
+@keyframes short-goal-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
 .overview-view.shop-view {
   padding: 8px 20px 18px;
 }
