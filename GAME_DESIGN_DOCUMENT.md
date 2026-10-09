@@ -3239,7 +3239,8 @@ l'avanzamento.
    base di €40, che cresce con gli iscritti, e il finanziamento dei
    potenziamenti. Segue l'obiettivo di aprire
    **Upgrade** dall'app rail e un dialogo che presenta l'albero dei
-   potenziamenti.
+   potenziamenti. Dal 09/10/2026 (testi di Andrea) chiude «La prima tappa»,
+   con «La mia giornata» evidenziata: arrivare a 10 iscritti.
 
 7. **Il primo Leggendario** Quando Andrea Simonazzi diventa il decimo contatto
    della scuola iniziale e la sua email entra in scrittura, il gioco torna in
@@ -3280,12 +3281,16 @@ l'avanzamento.
    le Forme aperte dalla vecchia regola (dal primo iscritto) le richiudono,
    insieme a Tornei; si riaprono ai 10 iscritti con la scena.
 
-   **Le tappe in «La mia giornata»** (08/10/2026). Dopo questa scena, in ogni
+   **Le tappe in «La mia giornata»** (08/10/2026). Dal primo iscritto, in ogni
    scuola, l'obiettivo del momento resta fisso in «La mia giornata»: una
    linguetta accanto al titolo (concept C) con un fumetto al passaggio del
    mouse o al tocco. Con la giornata chiusa (sotto 1441 px) il dato sta nel
    pulsante «Giornata | 🏆 3/8» (N3): il passaggio del mouse mostra il fumetto,
    un tocco apre la colonna. Le tappe, in ordine (`storyGoal.ts`):
+   0. **Dieci iscritti** (dal 09/10/2026): dal primo iscritto di ogni scuola
+      finché le Forme non si aprono, una sagoma e «3/10» (iscritti attivi: sotto
+      i 10 nessuno se ne va); fumetto «Servono 10 iscritti. Ne abbiamo 3.».
+      La annuncia «La prima tappa» del tutorial del primo iscritto;
    1. **Ander Games**: «🏆 3/8», atleti con almeno la Forma 1 su 8;
    2. **Torneo Scolastico**: aperto Tornei, un conto alla rovescia fino al
       prossimo Scolastico in secondi di gioco («42 s», sopra il minuto «9:42»);

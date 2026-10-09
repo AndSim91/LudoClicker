@@ -369,10 +369,10 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "dialog",
         speaker: "A.N.D.E.R.",
         title: "Habemus inscriptum!",
+        // Testi di Andrea (09/10/2026).
         body: [
-          `Ogni nuovo iscritto all'Ordine delle Onde porterà subito nelle nostre casse ${GAME_CONFIG.enrollmentBonus}€ e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
-          "Più iscritti, più quote: è così che la scuola finanzia i suoi miglioramenti. E quando la scuola cresce, ci potrebbero essere sempre più modi per aumentare i fondi.",
-          `Pensavi che solo la tua Black Card fosse costosa?`,
+          `Abbiamo il nostro primo iscritto! Ogni iscrizione porta alle casse della Scuola ben ${GAME_CONFIG.enrollmentBonus}€ di base e successivamente una rata di ${GAME_CONFIG.monthlyMemberFee}€ ogni mese di gioco.`,
+          "Più iscritti, più quote: è così che la scuola finanzia la sua crescita. E quando la scuola cresce, anche i servizi che riusciamo a fornire agli iscritti crescono di conseguenza.",
         ],
         focusRegions: ["title"],
       },
@@ -381,7 +381,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         kind: "objective",
         title: "Apri gli Upgrade",
         body: [
-          "Usa la barra a sinistra e apri [[Upgrade]].",
+          "Usa il menu a sinistra e apri [[Upgrade]].",
         ],
         focusRegions: ({ activeView }) =>
           activeView === "upgrades"
@@ -395,10 +395,22 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Sviluppare l'Ordine delle Onde",
         body: [
-          "Nella pagina [[Upgrade]] puoi spendere i **Fondi** della scuola per migliorare scrittura, prove, eventi e automazioni.",
-          "Gli [[Upgrade]] si sbloccano in vari modi: non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio.",
+          "Nella pagina [[Upgrade]] possiamo spendere **Fondi** per migliorare scrittura delle email, eventi, lezioni di prova e gestione generale della scuola.",
+          "Gli [[Upgrade]] sono importanti, ma non serve comprare tutto subito. Scegli ciò che può aiutarti a crescere al meglio e sviluppa la tua strategia!",
         ],
         focusRegions: ["main"],
+      },
+      {
+        // 09/10/2026: the first tappa, 10 members, appears in «La mia giornata».
+        id: "first-tappa",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "La prima tappa",
+        body: [
+          "Un iscritto è un bell'inizio, ma dieci iscritti fanno una scuola: abbastanza perché la gente smetta di chiederci se siamo dell'anarchia mentre ci alleniamo.",
+          "Ecco la nostra prima tappa: arrivare a 10 **Iscritti**. La trovi in alto, in «La mia giornata»: confido in te!",
+        ],
+        focusRegions: ["day-panel"],
       },
     ],
   },

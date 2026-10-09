@@ -42,6 +42,14 @@ it("follows the tappe: athletes with Forma 1, the countdown to the Scolastico, t
   }, 0)).toBeNull();
 });
 
+it("starts with 10 members, from the first one, until the Forme open", () => {
+  const initial = createInitialState(1_000, "Test");
+  expect(selectStoryGoal(initial, 0)).toBeNull();
+  const three = addAdminMembers(initial, 3);
+  expect(selectStoryGoal(three, 0)).toEqual({ kind: "members", value: 3, target: 10 });
+  expect(getStoryGoalTip({ kind: "members", value: 3, target: 10 }).text).toBe("Servono 10 iscritti. Ne abbiamo 3.");
+});
+
 it("counts down in seconds, then minutes and seconds", () => {
   expect(formatCountdown(42)).toBe("42 s");
   expect(formatCountdown(582)).toBe("9:42");

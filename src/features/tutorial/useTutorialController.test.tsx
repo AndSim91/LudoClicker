@@ -382,6 +382,9 @@ describe("useTutorialController", () => {
     });
 
     act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("first-tappa");
+
+    act(() => result.current.tutorial.continueScene());
     await waitFor(() => {
       expect(result.current.tutorial.activeScene?.id).toBe("first-collaborator");
     });

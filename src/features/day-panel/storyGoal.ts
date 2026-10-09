@@ -6,10 +6,12 @@ import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPre
 
 /**
  * The goal of the current tappa in «La mia giornata» (08/10/2026), in every school:
+ * from the first member, 10 members (Forme open; 09/10/2026), then
  * 8 athletes with Forma 1 (Tornei opens), then the countdown to the Torneo
  * Scolastico, then 8 Collaboratori delle Onde (the Consiglio, never named here).
  */
 export type StoryGoal =
+  | { kind: "members"; value: number; target: number }
   | { kind: "athletes"; value: number; target: number }
   | { kind: "tournament"; secondsLeft: number }
   | { kind: "collaborators"; value: number; target: number };
@@ -21,8 +23,13 @@ export type StoryGoalState = Pick<
 
 export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal | null {
   const { completedSceneIds, skippedSceneIds } = state.tutorial;
+  if (!state.unlocks.forms) {
+    // Nobody can leave below 10 members, so the count only goes up.
+    const target = GAME_CONFIG.formsUnlockMembers;
+    const members = state.school.activeMembers;
+    return members > 0 ? { kind: "members", value: Math.min(members, target), target } : null;
+  }
   if (
-    !state.unlocks.forms ||
     !(completedSceneIds.includes(FORMS_TEACHING_TUTORIAL_SCENE_ID) ||
       skippedSceneIds.includes(FORMS_TEACHING_TUTORIAL_SCENE_ID))
   ) return null;
@@ -56,6 +63,9 @@ export function isStoryGoalReady(goal: StoryGoal): boolean {
 }
 
 export function getStoryGoalTip(goal: StoryGoal): { title: string; text: string } {
+  if (goal.kind === "members") {
+    return { title: "Dieci iscritti", text: `Servono ${goal.target} iscritti. Ne abbiamo ${goal.value}.` };
+  }
   if (goal.kind === "athletes") {
     return {
       title: "Ander Games",
