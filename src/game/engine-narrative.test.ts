@@ -443,7 +443,7 @@ describe("game engine: narrative", () => {
         euros: 2_500,
         activeMembers: 5,
         peakActiveMembers: 5,
-        fame: 5,
+        fame: 10,
       },
     };
 

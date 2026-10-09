@@ -1043,25 +1043,25 @@ richiesta); nei testi si dice «spada illuminata» o «spada luminosa», mai
 | Volantinaggio                 |       0 |         €0 |  0,33 |         0 |     0 |      0 | 5 secondi  |  molto bassa |
 | Kata contro le onde del mare  |       0 |        €50 |  0,50 |         1 |     1 |     10 | 10 secondi |  molto bassa |
 | Sparring al parco             |       5 |       €250 |  1,00 |         2 |     2 |     20 | 15 secondi |  molto bassa |
-| Lezioni all'aperto            |       5 |       €500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
-| Oktoberfest                   |      15 |       €750 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
-| Evento sportivo               |      10 |     €1.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
-| Mele Comics                   |      20 |     €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
-| CairoMix                      |      35 |     €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
-| CogoComix                     |      60 |     €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
-| Burtomics                     |      90 |     €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
-| Genova Comics & Games         |     120 |    €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
-| Megacon Genova                |     180 |    €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
-| Lucca Comics & Games          | 250 · 1 scuola |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
-| Milan Games Week & Cartoomics | 350 · 2 scuole |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
-| Romics                        | 450 · 3 scuole |    €25.000 | 24,00 |        60 |   120 |  1.200 | 36 mesi    |    altissima |
-| Napoli Comicon                | 600 · 4 scuole |    €30.000 | 26,75 |        70 |   140 |  1.400 | 36 mesi    |    altissima |
-| Evento Televisivo Rai         | 800 · 6 scuole |    €40.000 | 30,00 |        30 |    40 |    400 | 48 mesi    |    altissima |
+| Lezioni all'aperto            |      10 |       €500 |  1,50 |         2 |     4 |     30 | 30 secondi |        bassa |
+| Oktoberfest                   |      25 |       €750 |  1,50 |         4 |     4 |     40 | 1 mese     |        bassa |
+| Evento sportivo               |      15 |     €1.000 |  2,00 |         4 |     6 |     50 | 1 mese     |        bassa |
+| Mele Comics                   |      50 |     €2.500 |  2,50 |         6 |     8 |     75 | 3 mesi     |        media |
+| CairoMix                      |     100 |     €3.000 |  3,00 |         8 |    10 |    100 | 4 mesi     |        media |
+| CogoComix                     |     200 |     €5.000 |  5,00 |        10 |    12 |    150 | 6 mesi     |         alta |
+| Burtomics                     |     250 |     €7.500 |  7,50 |        15 |    20 |    200 | 12 mesi    |         alta |
+| Genova Comics & Games         |     300 |    €10.000 | 10,00 |        20 |    20 |    250 | 18 mesi    |         alta |
+| Megacon Genova                |     400 |    €13.000 | 13,00 |        25 |    30 |    500 | 24 mesi    |    altissima |
+| Lucca Comics & Games          | 500 · 1 scuola |    €15.000 | 15,00 |        40 |    50 |    750 | 30 mesi    |    altissima |
+| Milan Games Week & Cartoomics | 600 · 2 scuole |    €20.000 | 20,00 |        50 |   100 |  1.000 | 36 mesi    |    altissima |
+| Romics                        | 700 · 3 scuole |    €25.000 | 24,00 |        60 |   120 |  1.200 | 36 mesi    |    altissima |
+| Napoli Comicon                | 800 · 4 scuole |    €30.000 | 26,75 |        70 |   140 |  1.400 | 36 mesi    |    altissima |
+| Evento Televisivo Rai         | 900 · 6 scuole |    €40.000 | 30,00 |        30 |    40 |    400 | 48 mesi    |    altissima |
 | Japan Expo                    | 1.000 · 8 scuole |  €60.000 | 35,00 |        90 |   180 |  1.800 | 48 mesi    |    altissima |
-| Gamescom                      | 1.300 · 10 scuole | €80.000 | 40,00 |       110 |   220 |  2.200 | 60 mesi    |    altissima |
-| San Diego Comic-Con           | 1.700 · 13 scuole | €120.000 | 45,00 |      130 |   260 |  2.600 | 72 mesi    |    altissima |
-| Viaggio nel passato           | 2.200 · 16 scuole | €250.000 | 60,00 |      100 |   300 |  3.000 | 96 mesi    |    altissima |
-| Eldorado                      | 3.000 · 20 scuole | €500.000 | 75,00 |      200 |   500 |  5.000 | 120 mesi   |    altissima |
+| Gamescom                      | 1.250 · 10 scuole | €80.000 | 40,00 |       110 |   220 |  2.200 | 60 mesi    |    altissima |
+| San Diego Comic-Con           | 1.500 · 13 scuole | €120.000 | 45,00 |      130 |   260 |  2.600 | 72 mesi    |    altissima |
+| Viaggio nel passato           | 2.000 · 16 scuole | €250.000 | 60,00 |      100 |   300 |  3.000 | 96 mesi    |    altissima |
+| Eldorado                      | 3.500 · 20 scuole | €500.000 | 75,00 |      200 |   500 |  5.000 | 120 mesi   |    altissima |
 | Sfida a Cthulhu               |     500 | €1.000.000 | 50,00 |     1.000 | 1.000 | 10.000 | 120 mesi   |    altissima |
 
 **Quattro livelli di eventi** (decisione del 06/10). Gli eventi **locali**

@@ -798,7 +798,7 @@ describe("local save", () => {
         ...initial.school,
         euros: 1_500,
         activeMembers: 5,
-        fame: 5,
+        fame: 10,
         peakActiveMembers: 5,
       },
     }, {

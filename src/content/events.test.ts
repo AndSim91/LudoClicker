@@ -17,7 +17,7 @@ it("opens nazionali, internazionali and assurdi with founded schools (06/10)", (
   expect(ids(5)).not.toContain("rai-tv-event");
   expect(ids(19)).not.toContain("eldorado");
   expect(ids(20)).toContain("eldorado");
-  expect(getUnlockedAcquisitionEvents(449, 20).map((event) => event.id)).not.toContain("romics");
+  expect(getUnlockedAcquisitionEvents(699, 20).map((event) => event.id)).not.toContain("romics");
 });
 
 describe("acquisition event progression", () => {
@@ -37,7 +37,7 @@ describe("acquisition event progression", () => {
       ["park-sparring", 0, 0],
       ["kata-sea-waves", 0, 50],
       ["organized-flyering", 5, 250],
-      ["public-demo", 5, 500],
+      ["public-demo", 10, 500],
     ]);
   });
 
@@ -61,7 +61,7 @@ describe("acquisition event progression", () => {
       ACQUISITION_EVENTS
         .filter((event) => event.potential === "Altissima")
         .map((event) => event.unlockMembers),
-    ).toEqual([180, 250, 350, 450, 600, 800, 1_000, 1_300, 1_700, 2_200, 3_000, 500]);
+    ).toEqual([400, 500, 600, 700, 800, 900, 1_000, 1_250, 1_500, 2_000, 3_500, 500]);
   });
 
   it("keeps only flyering free", () => {

@@ -159,7 +159,7 @@ describe("game engine: operations", () => {
       school: {
         ...initial.school,
         activeMembers: 5,
-        fame: 5,
+        fame: 10,
         euros: 1_500,
       },
     };
@@ -254,7 +254,7 @@ describe("game engine: operations", () => {
     const state = createInitialState(1_000);
     const notFamousEnough = {
       ...state,
-      school: { ...state.school, euros: 500, activeMembers: 4, peakActiveMembers: 4, fame: 4 },
+      school: { ...state.school, euros: 500, activeMembers: 4, peakActiveMembers: 4, fame: 9 },
     };
     const blocked = gameReducer(notFamousEnough, {
       type: "START_ACQUISITION_EVENT",
@@ -263,7 +263,7 @@ describe("game engine: operations", () => {
     });
     const funded = {
       ...state,
-      school: { ...state.school, euros: 500, activeMembers: 5, peakActiveMembers: 5, fame: 5 },
+      school: { ...state.school, euros: 500, activeMembers: 5, peakActiveMembers: 5, fame: 10 },
     };
     const started = gameReducer(funded, {
       type: "START_ACQUISITION_EVENT",
@@ -284,7 +284,7 @@ describe("game engine: operations", () => {
         ...initial.school,
         activeMembers: 70,
         peakActiveMembers: 70,
-        fame: 100,
+        fame: 250,
         euros: 7_500,
       },
       equipment: { ...initial.equipment, totalSwords: 20, availableSwords: 20 },
@@ -297,7 +297,7 @@ describe("game engine: operations", () => {
     });
 
     expect(started.acquisitionEvents).toHaveLength(1);
-    expect(started.school.fame).toBe(100);
+    expect(started.school.fame).toBe(250);
   });
 
   it("repairs worn equipment by spending euros outside events", () => {

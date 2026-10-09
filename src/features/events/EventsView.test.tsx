@@ -103,7 +103,7 @@ describe("EventsView", () => {
             ...initial.school,
             activeMembers: 60,
             peakActiveMembers: 60,
-            fame: 60,
+            fame: 200,
           },
         }}
         onStart={() => undefined}
@@ -128,7 +128,7 @@ describe("EventsView", () => {
             ...initial.school,
             activeMembers: 70,
             peakActiveMembers: 70,
-            fame: 100,
+            fame: 250,
           },
         }}
         onStart={() => undefined}
@@ -255,7 +255,7 @@ describe("EventsView", () => {
           school: {
             ...initial.school,
             activeMembers: 20,
-            fame: 20,
+            fame: 50,
             nextFeeAt: Date.now() + 60_000,
           },
           activities: {
