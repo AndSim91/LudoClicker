@@ -671,6 +671,11 @@
   color: var(--ink-muted);
 }
 
+/* [data-voice] keeps the stripe level with the Onde card border rule, which it must beat. */
+.is-objective .tutorial-card[data-voice] {
+  border-left: 4px solid var(--voice);
+}
+
 .is-objective .tutorial-card {
   background: linear-gradient(var(--voice-tint), var(--voice-tint)), var(--surface);
 }
