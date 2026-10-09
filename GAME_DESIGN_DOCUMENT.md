@@ -391,7 +391,7 @@ Leggendario perde va alle altre rarità in proporzione. Esempi a Reputazione 0:
 **Spinta verso il Consiglio** (decisione di Andrea del 09/10, solo nella prima
 scuola, al servizio del tutorial; `getCouncilBoost` in `contacts.ts`): dal mese
 del primo Torneo Scolastico (fine della 1ª tappa della storia,
-`tournaments.firstSchoolTournamentMonth`), ogni 3 mesi senza 8 collaboratori
+`tournaments.firstSchoolTournamentMonth`), ogni mese senza 8 collaboratori
 aggiunge l'1% sia alla comparsa dei Leggendari sia a quella degli Ultra Rari,
 sommato dopo malus, Reputazione e Leggende in visita. Il totale accumulato si
 riduce del 12,5% per ogni collaboratore e, per gli Ultra Rari iscritti non

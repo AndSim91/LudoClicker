@@ -40,7 +40,7 @@ export function getLegendaryAppearanceChance(): number {
 
 /**
  * Spinta verso il Consiglio (09/10, first school only, for the tutorial): from
- * the first Torneo Scolastico, every 3 months without 8 collaborators adds 1%
+ * the first Torneo Scolastico, every month without 8 collaborators adds 1%
  * to both the Leggendario and the Ultra Raro appearance, after the malus. The
  * sum shrinks by 12,5% per collaborator and by 5/7,5/10% per enrolled Ultra
  * Raro not yet a collaborator (no Forms / Forma 1 / Forma 2); gone at 8.

@@ -83,8 +83,8 @@ export const GAME_CONFIG = {
   // the base at 50 (src/game/contacts.ts, getLegendaryEncounterMultiplier).
   legendaryRosterMalus: 0.75,
   // Spinta verso il Consiglio (09/10): first school only, from the first Torneo
-  // Scolastico until 8 collaborators, +1% Leggendari and Ultra Rari every 3 months.
-  councilBoostMonthsPerStep: 3,
+  // Scolastico until 8 collaborators, +1% Leggendari and Ultra Rari every month.
+  councilBoostMonthsPerStep: 1,
   councilBoostPerStep: 0.01,
   legendaryMalusReputationNeutral: 25,
   legendaryBonusReputationMax: 50,

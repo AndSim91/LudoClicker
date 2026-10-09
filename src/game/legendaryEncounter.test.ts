@@ -47,10 +47,10 @@ describe("Spinta verso il Consiglio (09/10)", () => {
   const boost = (patch: object = {}) =>
     getCouncilBoost({ ...base, ...patch } as unknown as Parameters<typeof getCouncilBoost>[0]);
 
-  it("+1% ogni 3 mesi dal primo Scolastico, ridotto da collaboratori e Ultra Rari", () => {
-    // 9 mesi = 3%; riduzione 2 × 12,5% + 5% + 7,5% + 10% = 47,5%.
-    expect(boost()).toBeCloseTo(0.03 * 0.525);
-    expect(boost({ school: { currentMonth: 12 } })).toBe(0);
+  it("+1% ogni mese dal primo Scolastico, ridotto da collaboratori e Ultra Rari", () => {
+    // 9 mesi = 9%; riduzione 2 × 12,5% + 5% + 7,5% + 10% = 47,5%.
+    expect(boost()).toBeCloseTo(0.09 * 0.525);
+    expect(boost({ school: { currentMonth: 10 } })).toBe(0);
   });
 
   it("niente bonus prima dello Scolastico, dopo la prima scuola o con 8 collaboratori", () => {
