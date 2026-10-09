@@ -236,6 +236,24 @@ describe("useTutorialController", () => {
     expect(result.current.tutorial.activeStep?.kind).toBe("dialog");
   });
 
+  it("goes back one step and reviews a done objective without redoing it", async () => {
+    const { result } = renderHook(() => useTutorialHarness());
+
+    act(() => result.current.unlockEvents());
+    await waitFor(() => expect(result.current.tutorial.activeStep?.id).toBe("open-events"));
+    act(() => result.current.setActiveView("events"));
+    expect(result.current.tutorial.activeStep?.id).toBe("events-and-equipment");
+
+    // «Indietro» on the dialog: the objective comes back as done, with «Continua».
+    act(() => result.current.tutorial.goBack());
+    expect(result.current.tutorial.activeStep?.id).toBe("open-events");
+    expect(result.current.tutorial.isReviewing).toBe(true);
+
+    act(() => result.current.tutorial.continueScene());
+    expect(result.current.tutorial.activeStep?.id).toBe("events-and-equipment");
+    expect(result.current.tutorial.isReviewing).toBe(false);
+  });
+
   it("stays on Eventi and opens the first trial tutorial after the Events tutorial", async () => {
     const { result } = renderHook(() => useTutorialHarness());
 

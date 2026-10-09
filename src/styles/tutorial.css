@@ -661,15 +661,15 @@
   color: #e2e3d3;
 }
 
-/* The assistants colour «Continua»; the Ordine keeps the game's button. */
-.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue {
+/* The assistants colour «Continua» (dialogs and objectives reviewed with «Indietro»); the Ordine keeps the game's button. */
+.tutorial-card:not([data-voice="neutral"]) .tutorial-continue {
   border-color: var(--voice);
   color: var(--on-voice);
   background: var(--voice);
 }
 
-.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue:hover,
-.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue:focus-visible {
+.tutorial-card:not([data-voice="neutral"]) .tutorial-continue:hover,
+.tutorial-card:not([data-voice="neutral"]) .tutorial-continue:focus-visible {
   filter: brightness(1.08);
 }
 
@@ -771,4 +771,55 @@
 
 :root[data-theme="dark"] [data-tutorial-region="contacts-counter"][data-tutorial-pointer] {
   background: var(--surface-muted);
+}
+
+/* «Indietro» (09/10/2026): bottom left, «Continua» or the waiting line on the right. */
+.tutorial-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 22px;
+}
+
+.is-objective .tutorial-actions {
+  margin-top: 17px;
+}
+
+.tutorial-actions .tutorial-continue,
+.tutorial-actions .tutorial-waiting {
+  margin: 0 0 0 auto;
+}
+
+.tutorial-actions .tutorial-back + .tutorial-waiting,
+.tutorial-actions .tutorial-waiting:first-child {
+  margin-left: 0;
+}
+
+.tutorial-actions .tutorial-back + .tutorial-waiting {
+  margin-left: auto;
+}
+
+.tutorial-back {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tutorial-back:hover,
+.tutorial-back:focus-visible {
+  border-color: var(--voice, var(--blue-600));
+  color: var(--ink);
+}
+
+.tutorial-done {
+  margin: 14px 0 0;
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 700;
 }

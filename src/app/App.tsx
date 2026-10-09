@@ -960,6 +960,8 @@ export function App() {
           stepIndex={tutorial.activeStepIndex}
           context={tutorial.context}
           onContinue={tutorial.continueScene}
+          onBack={tutorial.goBack}
+          isReviewing={tutorial.isReviewing}
           onSkip={tutorial.skipScene}
         />
       ) : null}

@@ -18,6 +18,8 @@ export function TutorialLayer({
   stepIndex,
   context,
   onContinue,
+  onBack,
+  isReviewing = false,
   onSkip,
 }: {
   scene: TutorialSceneDefinition;
@@ -25,6 +27,10 @@ export function TutorialLayer({
   stepIndex: number;
   context: TutorialRuntimeContext;
   onContinue: () => void;
+  /** «Indietro»: one step back; hidden on the first step. */
+  onBack?: () => void;
+  /** An objective already done, revisited with «Indietro». */
+  isReviewing?: boolean;
   onSkip: () => void;
 }) {
   const continueButtonRef = useRef<HTMLButtonElement>(null);
@@ -134,21 +140,29 @@ export function TutorialLayer({
         <div id="tutorial-step-copy" className="tutorial-copy">
           {body.map((paragraph) => <p key={paragraph}><KeywordText text={paragraph} /></p>)}
         </div>
-        {step.kind === "dialog" ? (
-          <button
-            ref={continueButtonRef}
-            className="tutorial-continue"
-            type="button"
-            onClick={onContinue}
-          >
-            Continua
-          </button>
-        ) : (
-          <div className="tutorial-waiting" aria-live="polite">
-            <i aria-hidden="true" />
-            In attesa della tua azione
-          </div>
-        )}
+        {isReviewing ? <p className="tutorial-done">✓ Fatto</p> : null}
+        <div className="tutorial-actions">
+          {onBack && stepIndex > 0 ? (
+            <button className="tutorial-back" type="button" onClick={onBack}>
+              ‹ Indietro
+            </button>
+          ) : null}
+          {step.kind === "dialog" || isReviewing ? (
+            <button
+              ref={continueButtonRef}
+              className="tutorial-continue"
+              type="button"
+              onClick={onContinue}
+            >
+              Continua
+            </button>
+          ) : (
+            <div className="tutorial-waiting" aria-live="polite">
+              <i aria-hidden="true" />
+              In attesa della tua azione
+            </div>
+          )}
+        </div>
       </section>
     </div>
     </>

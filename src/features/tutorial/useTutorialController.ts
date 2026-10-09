@@ -9,6 +9,8 @@ import type { GameAction, GameState } from "../../game/types";
 interface TutorialStepProgress {
   gameCreatedAt: number;
   indexes: Partial<Record<TutorialSceneId, number>>;
+  /** The furthest step reached in each scene: earlier objectives are only reviewed after «Indietro». */
+  furthest?: Partial<Record<TutorialSceneId, number>>;
 }
 
 export function useTutorialController({
@@ -31,9 +33,9 @@ export function useTutorialController({
   if (stepProgress.gameCreatedAt !== state.createdAt) {
     setStepProgress({ gameCreatedAt: state.createdAt, indexes: {} });
   }
-  const stepIndexes = stepProgress.gameCreatedAt === state.createdAt
-    ? stepProgress.indexes
-    : {};
+  const sameGame = stepProgress.gameCreatedAt === state.createdAt;
+  const stepIndexes = sameGame ? stepProgress.indexes : {};
+  const furthestIndexes = sameGame ? stepProgress.furthest ?? {} : {};
   const context = useMemo<TutorialRuntimeContext>(
     () => ({ state, activeView, equipmentOpen }),
     [activeView, equipmentOpen, state],
@@ -46,9 +48,11 @@ export function useTutorialController({
     (scene) => !unavailableSceneIds.has(scene.id) && scene.canStart(context),
   ) ?? null;
   let resolvedStepIndex = candidateScene ? stepIndexes[candidateScene.id] ?? 0 : 0;
+  const furthestStepIndex = candidateScene ? furthestIndexes[candidateScene.id] ?? 0 : 0;
   while (candidateScene) {
     const step = candidateScene.steps[resolvedStepIndex];
-    if (step?.kind !== "objective" || !step.isComplete(context)) break;
+    // An objective revisited with «Indietro» waits for «Continua», even when already done.
+    if (step?.kind !== "objective" || resolvedStepIndex < furthestStepIndex || !step.isComplete(context)) break;
     resolvedStepIndex += 1;
   }
   const objectiveCompletedScene = candidateScene && resolvedStepIndex >= candidateScene.steps.length
@@ -57,13 +61,15 @@ export function useTutorialController({
   const activeScene = objectiveCompletedScene ? null : candidateScene;
   const activeStep = activeScene?.steps[resolvedStepIndex] ?? null;
   const activeStepNavigation = activeStep?.navigateTo;
+  /** An objective already done, shown again after «Indietro»: «✓ Fatto» and «Continua». */
+  const isReviewing = activeStep?.kind === "objective" && resolvedStepIndex < furthestStepIndex;
   const storedStepIndex = candidateScene ? stepIndexes[candidateScene.id] ?? 0 : 0;
 
   // An objective reached stays reached: otherwise closing the sword menu by clicking
   // «Continua» would undo "Apri il menu delle spade" and loop the scene back to it.
   if (activeScene && resolvedStepIndex > storedStepIndex) {
     setStepProgress((current) => ({
-      gameCreatedAt: current.gameCreatedAt,
+      ...current,
       indexes: { ...current.indexes, [activeScene.id]: resolvedStepIndex },
     }));
   }
@@ -109,9 +115,29 @@ export function useTutorialController({
           ...currentIndexes,
           [activeScene.id]: resolvedStepIndex + 1,
         },
+        furthest: current.gameCreatedAt === state.createdAt ? current.furthest : undefined,
       };
     });
   }, [activeScene, finishScene, onNavigate, resolvedStepIndex, state.createdAt]);
+
+  /** «Indietro» (09/10/2026): one step back in the scene, remembering how far it had got. */
+  const goBack = useCallback(() => {
+    if (!activeScene || resolvedStepIndex === 0) return;
+    const previousStep = activeScene.steps[resolvedStepIndex - 1];
+    if (previousStep.navigateTo) onNavigate?.(previousStep.navigateTo);
+    setStepProgress((current) => {
+      const same = current.gameCreatedAt === state.createdAt;
+      const furthest = same ? current.furthest ?? {} : {};
+      return {
+        gameCreatedAt: state.createdAt,
+        indexes: { ...(same ? current.indexes : {}), [activeScene.id]: resolvedStepIndex - 1 },
+        furthest: {
+          ...furthest,
+          [activeScene.id]: Math.max(furthest[activeScene.id] ?? 0, resolvedStepIndex),
+        },
+      };
+    });
+  }, [activeScene, onNavigate, resolvedStepIndex, state.createdAt]);
 
   return {
     context,
@@ -119,6 +145,8 @@ export function useTutorialController({
     activeStep,
     activeStepIndex: resolvedStepIndex,
     continueScene,
+    goBack,
+    isReviewing,
     skipScene: () => finishScene(true),
     shouldPauseGame: Boolean(candidateScene?.pauseWhileActive || activeStep?.kind === "dialog"),
     isBlockingInput: activeStep?.kind === "dialog",

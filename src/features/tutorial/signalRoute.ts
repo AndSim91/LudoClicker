@@ -108,6 +108,8 @@ export function avoidTarget(
   card: Box,
   target: Box,
   viewport: { width: number; height: number },
+  /** Nothing of the card above this line (the big «Salta» lives there). */
+  minTop = 16,
 ): { dx: number; dy: number } {
   const gap = 20;
   const margin = 16;
@@ -121,7 +123,7 @@ export function avoidTarget(
   const width = card.right - card.left;
   const height = card.bottom - card.top;
   const fitsX = (left: number) => left >= margin && left + width <= viewport.width - margin;
-  const fitsY = (top: number) => top >= margin && top + height <= viewport.height - margin;
+  const fitsY = (top: number) => top >= Math.max(margin, minTop) && top + height <= viewport.height - margin;
   const options = [
     { dx: 0, dy: halo.bottom - card.top },
     { dx: 0, dy: halo.top - height - card.top },

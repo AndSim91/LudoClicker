@@ -56,7 +56,8 @@ export function TutorialSignal({
           right: moved.right - offset.dx,
           bottom: moved.bottom - offset.dy,
         };
-        const next = avoidTarget(natural, toBox(target.getBoundingClientRect()), viewport);
+        const skip = document.querySelector(".tutorial-skip")?.getBoundingClientRect();
+        const next = avoidTarget(natural, toBox(target.getBoundingClientRect()), viewport, skip ? skip.bottom + 10 : 16);
         if (next.dx !== offset.dx || next.dy !== offset.dy) {
           offset = next;
           card.style.translate = next.dx || next.dy ? `${next.dx}px ${next.dy}px` : "";
