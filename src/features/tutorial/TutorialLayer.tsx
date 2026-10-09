@@ -9,6 +9,7 @@ import {
 } from "../../content/tutorialScenes";
 import { applyTutorialTreatments } from "./tutorialRegions";
 import { getStepVoice } from "./tutorialVoices";
+import { TutorialSignal } from "./TutorialSignal";
 import { KeywordText } from "../../components/common/KeywordText";
 
 export function TutorialLayer({
@@ -27,6 +28,7 @@ export function TutorialLayer({
   onSkip: () => void;
 }) {
   const continueButtonRef = useRef<HTMLButtonElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
   const focusRegions = resolveTutorialRegions(step.focusRegions, context);
   const hiddenRegions = resolveTutorialRegions(step.hiddenRegions, context);
   const body = resolveTutorialBody(step.body, context);
@@ -97,7 +99,9 @@ export function TutorialLayer({
       >
         Salta
       </button>
+      <TutorialSignal regionIds={focusRegions} cardRef={cardRef} voice={voice.id} />
       <section
+        ref={cardRef}
         className="tutorial-card"
         data-voice={voice.id}
         role={step.kind === "dialog" ? "dialog" : "status"}

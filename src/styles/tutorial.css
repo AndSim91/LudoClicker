@@ -461,7 +461,7 @@
  * Dialogs get a soft header with badge, name and role, a coloured top line and
  * a tinted background; objectives keep the left stripe and a faint veil.
  * ------------------------------------------------------------------------- */
-.tutorial-card[data-voice="ander"] {
+:is(.tutorial-card, .tutorial-signal)[data-voice="ander"] {
   --voice: #c8000a;
   --voice-ink: #a8000a;
   --on-voice: #fff;
@@ -471,7 +471,7 @@
   --voice-bg: linear-gradient(180deg, #fff1f2 0%, #fff 62%);
 }
 
-.tutorial-card[data-voice="maki"] {
+:is(.tutorial-card, .tutorial-signal)[data-voice="maki"] {
   --voice: #007f99;
   --voice-ink: #006e85;
   --on-voice: #fff;
@@ -481,7 +481,7 @@
   --voice-bg: linear-gradient(180deg, #ebf9fb 0%, #fff 62%);
 }
 
-.tutorial-card[data-voice="mystery"] {
+:is(.tutorial-card, .tutorial-signal)[data-voice="mystery"] {
   --voice: #4e5360;
   --voice-ink: #3f434e;
   --on-voice: #fff;
@@ -491,7 +491,7 @@
   --voice-bg: linear-gradient(180deg, #f2f3f5 0%, #fff 62%);
 }
 
-.tutorial-card[data-voice="neutral"] {
+:is(.tutorial-card, .tutorial-signal)[data-voice="neutral"] {
   --voice: #9a6b10;
   --voice-ink: #875c08;
   --on-voice: #fff;
@@ -501,7 +501,7 @@
   --voice-bg: linear-gradient(180deg, #fcf8ef 0%, #fff 62%);
 }
 
-:root[data-theme="dark"] .tutorial-card[data-voice="ander"] {
+:root[data-theme="dark"] :is(.tutorial-card, .tutorial-signal)[data-voice="ander"] {
   --voice: #e8121c;
   --voice-ink: #ff8a83;
   --voice-line: rgb(232 18 28 / 60%);
@@ -510,7 +510,7 @@
   --voice-bg: linear-gradient(180deg, #3e1520 0%, #2c1a2a 55%, #1d2638 100%);
 }
 
-:root[data-theme="dark"] .tutorial-card[data-voice="maki"] {
+:root[data-theme="dark"] :is(.tutorial-card, .tutorial-signal)[data-voice="maki"] {
   --voice: #16c6d8;
   --voice-ink: #7fe6f0;
   --on-voice: #04263f;
@@ -520,7 +520,7 @@
   --voice-bg: linear-gradient(180deg, #07525e 0%, #073f52 55%, #0a3650 100%);
 }
 
-:root[data-theme="dark"] .tutorial-card[data-voice="mystery"] {
+:root[data-theme="dark"] :is(.tutorial-card, .tutorial-signal)[data-voice="mystery"] {
   --voice: #8a90a0;
   --voice-ink: #c3c8d4;
   --on-voice: #11161f;
@@ -530,7 +530,7 @@
   --voice-bg: linear-gradient(180deg, #1d222c 0%, #18243a 60%, #122f49 100%);
 }
 
-:root[data-theme="dark"] .tutorial-card[data-voice="neutral"] {
+:root[data-theme="dark"] :is(.tutorial-card, .tutorial-signal)[data-voice="neutral"] {
   --voice: var(--onde-gold);
   --voice-ink: #f3c272;
   --on-voice: var(--onde-on-gold);
@@ -692,4 +692,77 @@
     margin: -22px -20px 8px;
     padding-inline: 20px;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * «Segnale» (09/10/2026, concept T3): a trace from the card to the element the
+ * step talks about, a corner frame on it and three data packets. Onde: in the
+ * speaker's colour; Outlook: thin, grey, no packets.
+ * ------------------------------------------------------------------------- */
+.tutorial-signal {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tutorial-signal-trace,
+.tutorial-signal-frame {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.25;
+}
+
+.tutorial-signal-frame {
+  stroke-width: 1.5;
+  stroke-linecap: square;
+}
+
+.tutorial-signal-node {
+  fill: var(--ink-soft);
+}
+
+.tutorial-signal-packet {
+  display: none;
+}
+
+:root[data-theme="dark"] .tutorial-signal {
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--voice) 40%, transparent));
+}
+
+:root[data-theme="dark"] .tutorial-signal-trace {
+  stroke: var(--voice);
+  stroke-width: 2;
+}
+
+:root[data-theme="dark"] .tutorial-signal-frame {
+  stroke: var(--voice);
+  stroke-width: 2;
+}
+
+:root[data-theme="dark"] .tutorial-signal-node,
+:root[data-theme="dark"] .tutorial-signal-packet {
+  display: inline;
+  fill: var(--voice);
+}
+
+/* The element the signal points at leaves the dialog veil; the frame replaces its ring. */
+[data-tutorial-pointer] {
+  position: relative;
+  z-index: 6001 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+:root[data-theme="dark"] [data-tutorial-region="contacts-counter"][data-tutorial-pointer],
+:root[data-theme="dark"] [data-tutorial-region="contacts-counter"][data-tutorial-pointer] :is(svg, small) {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] [data-tutorial-region="contacts-counter"][data-tutorial-pointer] {
+  background: var(--surface-muted);
 }

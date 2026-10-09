@@ -3,7 +3,7 @@ import {
   type TutorialRegionId,
 } from "../../content/tutorialScenes";
 
-const REGION_SELECTORS: Record<TutorialRegionId, string> = {
+export const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   title: ".title-bar",
   "contacts-counter": '[data-tutorial-region="contacts-counter"]',
   "title-equipment": '[data-tutorial-region="title-equipment"]',

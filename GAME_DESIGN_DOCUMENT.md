@@ -2742,7 +2742,14 @@ obiettivi guidati restano della stessa famiglia di oggi, con la fascia a
 sinistra e un velo del colore di chi parlava prima (O3); se la scena si apre
 con un obiettivo, lo firma A.N.D.E.R. Dal 09/10/2026 il tutorial del Reptile è di
 **M.A.K.I.**: si apre con una card «???» («Ehilà? ... Mi senti?») e la sua
-presentazione, «Una messaggera da Torino». L'etichetta degli obiettivi è semplicemente «Tutorial»;
+presentazione, «Una messaggera da Torino». Quando un passaggio indica un elemento preciso
+(un contatore, una voce del menu, un pulsante, una riga di La mia giornata), un
+**segnale** (concept T3, 09/10/2026) lo collega alla card: una pista a gomito con
+angoli a 45° esce dal bordo della card verso l'elemento, che ha quattro angoli
+da mirino e resta fuori dal velo scuro. In Onde è nel colore di chi parla, con
+tre «pacchetti» di dati che scorrono (fermi senza animazioni); in Outlook è una
+linea grigia sottile, senza pacchetti. Niente segnale per le aree grandi (pagina,
+menu intero, barra) o quando l'elemento è fuori schermo o sotto la card. L'etichetta degli obiettivi è semplicemente «Tutorial»;
 chi parla lo dice il monogramma. «Salta» c'è due
 volte: sotto la barra del titolo (S1) e nella card, accanto al contatore (S2).
 
