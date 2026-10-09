@@ -6,6 +6,7 @@ import type { GameState, MomentKey } from "../../game/types";
 import { ChroniclesArt } from "./ChroniclesArt";
 import { FoundationArt } from "./FoundationArt";
 import { GadgetArt } from "./GadgetArt";
+import { LegendaryArt } from "./LegendaryArt";
 import { SocialArt } from "./SocialArt";
 import { SuperbaArt } from "./SuperbaArt";
 import { TAPPA_ONE_DURATION_MS, TappaOneArt } from "./TappaOneArt";
@@ -113,21 +114,7 @@ function MomentArt({ content }: { content: MomentContent }) {
       </svg>
     );
   }
-  if (content.kind === "legendary") {
-    return (
-      <div className="moment-art moment-legendary-art" aria-hidden="true">
-        <span className="moment-pillar" />
-        {[0, 1, 2, 3, 4].map((spark) => <span key={spark} className={`moment-spark is-${spark}`} />)}
-        <div className="moment-card-flip">
-          <span className="moment-card-number">{content.number}</span>
-          <span className="moment-card-initials">{content.initials}</span>
-          <strong>{content.name}</strong>
-          <span className="moment-card-rarity">{content.kicker}</span>
-          <span className="moment-card-stats">{content.stats}</span>
-        </div>
-      </div>
-    );
-  }
+  if (content.kind === "legendary") return <LegendaryArt />;
   if (content.kind === "inflation") {
     return (
       <div className="moment-art moment-decree" aria-hidden="true">

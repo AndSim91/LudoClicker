@@ -1,4 +1,4 @@
-import { LUDODEX_LEGENDARIES } from "../../content/ludowiki";
+import { LUDODEX_LEGENDARIES, formatLudodexNumber } from "../../content/ludowiki";
 import type { VictoryMomentLevel } from "../../game/moments";
 import {
   getLightInflationEventDescription,
@@ -13,7 +13,6 @@ import { getReptileFameLevel } from "../../game/reptilePreparation";
 import { SUPERBA_COPY } from "../../game/reptileUnlock";
 import { GAME_CONFIG } from "../../game/config";
 import type { GameState, MomentKey } from "../../game/types";
-import { getLegendaryDossier } from "../ludowiki/ludodexPresentation";
 import { CONSTELLATION_SIZE, type FoundationStar } from "./constellation";
 
 export type MomentContent =
@@ -24,10 +23,7 @@ export type MomentContent =
       title: string;
       body: string;
       secret: boolean;
-      initials: string;
       name: string;
-      number: string;
-      stats: string;
     }
   | { kind: "victory"; kicker: string; title: string; body: string; level: VictoryMomentLevel }
   | {
@@ -49,6 +45,9 @@ export type MomentContent =
   | { kind: "gadget"; kicker: string; title: string; body: string }
   | { kind: "tappa"; kicker: string; title: string; body: string }
   | { kind: "inflation"; kicker: string; title: string; body: string; oldPrice: string; newPrice: string; increase: string };
+
+/** The line under the name in the Leggendario scene. */
+const LEGENDARY_BODY = "Si unisce alla nostra Scuola!";
 
 /** The Consiglio is born with as many seats as collaborators unlock it. */
 export const COUNCIL_SEATS = GAME_CONFIG.collaboratorAggregateUnlockCount;
@@ -218,13 +217,10 @@ export function describeGenericMoment(state: GameState, key: MomentKey): MomentC
     return {
       kind: "legendary",
       secret: false,
-      kicker: "Leggendario",
-      title: "Un Leggendario entra nell'Ordine",
-      body: "Un nuovo nome entra nella scuola e il suo dossier si apre nel Ludodex.",
+      kicker: "Leggendario · #???",
+      title: "Un Leggendario",
+      body: LEGENDARY_BODY,
       name: "Leggendario",
-      initials: "?",
-      number: "#???",
-      stats: "",
     };
   }
   if (key === CHRONICLES_KEY_MOMENT) return CHRONICLES_KEY_CONTENT;
@@ -313,22 +309,17 @@ export function describeMoment(state: GameState, key: MomentKey): MomentContent 
     };
   }
   const profileId = key.slice("legendary:".length);
-  const index = LUDODEX_LEGENDARIES.findIndex((legendary) => legendary.id === profileId);
-  const legendary = LUDODEX_LEGENDARIES[index];
+  const legendary = LUDODEX_LEGENDARIES.find((candidate) => candidate.id === profileId);
   const secret = legendary?.kind === "secret";
   const name = legendary ? `${legendary.firstName} ${legendary.lastName}` : "Un nuovo Leggendario";
-  const dossier = legendary ? getLegendaryDossier(state, legendary) : undefined;
+  const rarity = secret ? "Leggendario Segreto" : "Leggendario";
+  // «Ombra lunga» (concept C5, 09/10/2026): rarità e numero, il nome, la frase.
   return {
     kind: "legendary",
     secret,
-    kicker: secret ? "Leggendario Segreto" : "Leggendario",
-    title: secret ? "Un Leggendario Segreto entra nell'Ordine" : "Un Leggendario entra nell'Ordine",
-    body: `${name} entra nella scuola. I suoi dati sono salvati nel Ludodex.`,
+    kicker: legendary ? `${rarity} · ${formatLudodexNumber(legendary)}` : rarity,
+    title: name,
+    body: LEGENDARY_BODY,
     name,
-    initials: legendary ? `${legendary.firstName.charAt(0)}${legendary.lastName.charAt(0)}` : "?",
-    number: `#${String(index + 1).padStart(3, "0")}`,
-    stats: dossier
-      ? `Arena ${Math.round(dossier.arenaBase)} · Stile ${Math.round(dossier.styleBase)}`
-      : "",
   };
 }

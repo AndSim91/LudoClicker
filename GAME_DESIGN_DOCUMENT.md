@@ -3114,6 +3114,10 @@ Contiene tre aree: Ludodex, Traguardi (§ 26) e Manuale di gioco.
   Leggendari ordinari appartengono inizialmente a LudoSport Genova - Ordine
   delle Onde; per i Leggendari Segreti questi dati derivano dalla scuola e dal
   torneo configurati, oppure dalle Chronicles of Ludosport.
+  Ogni voce ha un **numero fisso** (`LUDODEX_NUMBERS` in `ludowiki.ts`, dal
+  09/10/2026): #001–#008 i Leggendari, #009–#032 i Segreti per torneo, Panico
+  #013 e Maggi #019 compresi. Il numero non dipende dalla posizione nella
+  lista; un nuovo Leggendario prende il primo numero libero in fondo.
 - **Manuale di gioco**: versione consultabile e orientata al giocatore delle
   spiegazioni introdotte dai tutorial. Usa numeri correnti, esempi e schemi
   visivi, ma non espone identificativi interni, dettagli di implementazione o
@@ -5061,8 +5065,17 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   logo dell'Ordine e il Consiglio raggiunge i cinque settori di tutta la squadra. Dalla v93 chi
   l'aveva visto al primo collaboratore senza avere ancora il Consiglio lo
   rivede quando il Consiglio nasce;
-- **un Leggendario entra nell'Ordine**: ogni Leggendario alla sua prima
-  iscrizione in assoluto (oro; rosso per i Leggendari Segreti);
+- **un Leggendario si unisce alla Scuola** (dal 09/10, concept C5 «Ombra
+  lunga»): ogni Leggendario alla sua prima iscrizione in assoluto. Ai lati
+  della porta della Palestra si srotolano due stendardi della scuola (quelli
+  della Palestra, lunghi il doppio e più larghi, emblema centrato); le porte
+  si aprono su luce e fumo a filo della soglia; in controluce appare la
+  sagoma (l'atleta stilizzato dei combattimenti, senza simboli sul petto),
+  accende la spada illuminata e avanza mentre la sua ombra si accorcia; prende
+  colore dai piedi alla testa e il fumo si posa a terra. Testi: «Leggendario ·
+  #005» (o «Leggendario Segreto · #014»), il nome, «Si unisce alla nostra
+  Scuola!». Oro per i Leggendari; per i Segreti oro → rosso su stendardi, lama,
+  fumo, controluce e ombra. Codice: `LegendaryArt.tsx`;
 - **Tappa 1 · il primo Torneo Scolastico** (dall'08/10, concept «Podio»
   v4): al primo Scolastico giocato, prima del tutorial `first-tournament`. Nell'Arena
   dello Scolastico due allievi si scambiano uno o due attacchi con la vera

@@ -18,9 +18,10 @@ describe("MomentLayer", () => {
     const onDismiss = vi.fn();
     render(<MomentLayer state={state} momentKey="legendary:eva-parodi" onDismiss={onDismiss} />);
 
-    const dialog = screen.getByRole("dialog", { name: "Un Leggendario entra nell'Ordine" });
+    const dialog = screen.getByRole("dialog", { name: "Eva Parodi" });
     expect(dialog).toBeVisible();
-    expect(screen.getByText(/Eva Parodi entra nella scuola/)).toBeVisible();
+    expect(screen.getByText("Leggendario · #002")).toBeVisible();
+    expect(screen.getByText("Si unisce alla nostra Scuola!")).toBeVisible();
     // While it plays a click on the scene does nothing; «Salta» and Esc close it.
     fireEvent.click(dialog);
     expect(onDismiss).not.toHaveBeenCalled();
@@ -35,6 +36,16 @@ describe("MomentLayer", () => {
     expect(onDismiss).toHaveBeenCalledTimes(3);
     fireEvent.click(dialog);
     expect(onDismiss).toHaveBeenCalledTimes(4);
+  });
+
+  it("plays «Ombra lunga» for a Leggendario Segreto, with its fixed Ludodex number", () => {
+    const { container } = render(
+      <MomentLayer state={createInitialState(1_000, "Verifica UI")} momentKey="legendary:pietro-scarica" onDismiss={vi.fn()} />,
+    );
+    expect(screen.getByRole("dialog", { name: "Pietro Scarica" })).toHaveClass("is-secret");
+    expect(screen.getByText("Leggendario Segreto · #014")).toBeVisible();
+    expect(container.querySelectorAll(".lg-banner")).toHaveLength(2);
+    expect(container.querySelector(".lg-saber")).toBeInTheDocument();
   });
 
   it("opens the Chronicles door: six nameless figures, and the key in the Outlook notice", () => {

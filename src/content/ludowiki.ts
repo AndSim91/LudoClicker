@@ -19,6 +19,8 @@ export interface LudodexLegendary {
   firstName: string;
   lastName: string;
   kind: "standard" | "secret";
+  /** Numero fisso del Ludodex (09/10/2026): non dipende dalla posizione nella lista. */
+  ludodexNumber: number;
   secretLegendaryId?: SecretLegendaryId;
   /** Non si iscrive mai (Panico, Maggi): la scheda si apre alla prima sconfitta. */
   external?: true;
@@ -27,10 +29,56 @@ export interface LudodexLegendary {
   acquisition: string;
 }
 
+/**
+ * Numeri fissi del Ludodex (approvati il 09/10/2026, nell'ordine di allora):
+ * prima i Leggendari, poi i Segreti per torneo. Un nuovo Leggendario prende il
+ * primo numero libero in fondo, senza spostare gli altri.
+ */
+export const LUDODEX_NUMBERS: Record<SpecialCollaboratorId, number> = {
+  "andrea-simonazzi": 1,
+  "eva-parodi": 2,
+  "andrea-ferrari": 3,
+  "marco-gabriele-fedozzi": 4,
+  "matteo-scarzello": 5,
+  "chris-usai": 6,
+  "guglielmo-oliveri": 7,
+  "niccolo-efrati": 8,
+  "marco-palena": 9,
+  "lorenzo-todaro": 10,
+  "elisa-brondolo": 11,
+  "ruggero-pini": 12,
+  "adriano-panico": 13,
+  "pietro-scarica": 14,
+  "piero-dipalo": 15,
+  "sara-magnifico": 16,
+  "daniele-panizza": 17,
+  "marco-brondolo": 18,
+  "daniele-maggi": 19,
+  "enrico-giovanetti": 20,
+  "francesco-d-addosio": 21,
+  "jacopo-viola": 22,
+  "pierluigi-chimienti": 23,
+  "marcello-lovo": 24,
+  "simone-pedrazzi": 25,
+  "antonio-rocchitelli": 26,
+  "ugo-cesare-tonelli": 27,
+  "paolo-scalzulli": 28,
+  "carlos-jimenez-moyano": 29,
+  "debora-girelli": 30,
+  "andrea-pini": 31,
+  "lorenzo-ferrario": 32,
+};
+
+/** «#005»: il numero del Ludodex come lo mostra il gioco. */
+export function formatLudodexNumber(legendary: Pick<LudodexLegendary, "ludodexNumber">): string {
+  return `#${String(legendary.ludodexNumber).padStart(3, "0")}`;
+}
+
 const STANDARD_LUDODEX_LEGENDARIES: LudodexLegendary[] = SPECIAL_COLLABORATORS.map(
   (profile) => ({
     ...profile,
     kind: "standard",
+    ludodexNumber: LUDODEX_NUMBERS[profile.id],
     foundAt: profile.id === "andrea-simonazzi"
       ? `${GAME_CONFIG.guaranteedAndreaContactPosition}° contatto della scuola iniziale`
       : "Nuovi contatti, dopo lo sblocco delle rarità avanzate",
@@ -73,6 +121,7 @@ const SECRET_LUDODEX_LEGENDARIES: LudodexLegendary[] = SECRET_LEGENDARY_IDS
     firstName: SECRET_LEGENDARIES[id].firstName,
     lastName: SECRET_LEGENDARIES[id].lastName,
     kind: "secret",
+    ludodexNumber: LUDODEX_NUMBERS[id],
     secretLegendaryId: id,
     ...(getSecretLegendaryProfile(id).recruitment === "never" ? { external: true as const } : {}),
     ...getSecretLegendaryDiscovery(id),
@@ -85,7 +134,7 @@ const SECRET_LUDODEX_LEGENDARIES: LudodexLegendary[] = SECRET_LEGENDARY_IDS
 export const LUDODEX_LEGENDARIES: readonly LudodexLegendary[] = [
   ...STANDARD_LUDODEX_LEGENDARIES,
   ...SECRET_LUDODEX_LEGENDARIES,
-];
+].sort((a, b) => a.ludodexNumber - b.ludodexNumber);
 
 export type LudoWikiChapterGroup =
   | "Primi passi"

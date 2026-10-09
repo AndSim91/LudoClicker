@@ -272,95 +272,138 @@
   .moment-council .moment-council-emblem { opacity: 1; }
 }
 
-/* Legendary: a pillar of light, the card flips in. Red for a Leggendario Segreto. */
+/*
+ * Legendary «Ombra lunga» (concept C5, 09/10/2026; LegendaryArt.tsx). Units are
+ * cqw of the scene (100 × 54). Timeline: banners 0 s, doors and smoke at the
+ * threshold 0.7 s, silhouette 2.1 s, blade 2.8 s, walk 3.2 s, colour 4.4 s,
+ * texts 4.8 s. Gold for a Leggendario, red for a Leggendario Segreto.
+ */
 .moment-legendary-art {
+  --lg-accent: #f0b85a;
+  --lg-saber: #f5b700;
+  --lg-smoke: rgb(236 228 210 / 70%);
+  --lg-light: rgb(240 184 90 / 55%);
+  --lg-shadow: rgb(0 0 0 / 70%);
+  --lg-ink: #021e33;
+  --lg-foam: #fbf1dc;
   position: relative;
-  --moment-card-from: #f8df8b;
-  --moment-card-to: #c99324;
-  --moment-card-ink: #3d2a00;
-  --moment-light: rgb(240 184 90 / 60%);
+  container-type: inline-size;
 }
-
 .moment-layer.is-secret .moment-legendary-art {
-  --moment-card-from: #ffb3a8;
-  --moment-card-to: #e25a4d;
-  --moment-card-ink: #3a0603;
-  --moment-light: rgb(255 120 100 / 55%);
+  --lg-accent: #e25a4d;
+  --lg-saber: #e5322d;
+  --lg-smoke: rgb(255 200 188 / 64%);
+  --lg-light: rgb(255 120 100 / 50%);
+  --lg-shadow: rgb(130 14 4 / 75%);
+}
+:root[data-theme="dark"] .moment-legendary-art {
+  width: min(660px, 92vw);
+  height: auto;
+  max-height: none;
+  aspect-ratio: 100 / 54;
+  align-self: end;
+}
+.moment-legendary-art > * { position: absolute; }
+.lg-defs { position: absolute; }
+
+.lg-banner { top: 3cqw; width: 14cqw; height: auto; transform-origin: top; z-index: 1; }
+.lg-banner.is-left { left: 21cqw; }
+.lg-banner.is-right { right: 21cqw; }
+.lg-banner path { fill: #0a1f33; stroke: var(--lg-accent); stroke-width: 2; stroke-linejoin: round; }
+.lg-emblem-red { display: none; }
+.moment-layer.is-secret .lg-emblem-red { display: inline; }
+.moment-layer.is-secret .lg-emblem-gold { display: none; }
+
+.lg-frame { left: 37cqw; top: 3cqw; width: 26cqw; height: 37cqw; box-sizing: border-box; overflow: hidden; border: 0.7cqw solid #0d3a57; border-bottom: 0; border-radius: 0.6cqw 0.6cqw 0 0; background: #031a2b; z-index: 2; }
+.lg-light { position: absolute; inset: -20%; background: radial-gradient(ellipse at 50% 70%, rgb(255 238 200 / 95%), var(--lg-light) 38%, transparent 72%); opacity: 0.6; }
+.lg-floor { left: 12cqw; right: 12cqw; top: 40cqw; height: 0.4cqw; background: linear-gradient(90deg, transparent, rgb(108 211 214 / 40%), transparent); z-index: 2; }
+.lg-shadow { left: 50%; top: 40cqw; width: 14cqw; height: 19cqw; margin-left: -7cqw; transform-origin: 50% 0; transform: scaleY(0.18); background: linear-gradient(to bottom, var(--lg-shadow), transparent); clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%); z-index: 2; }
+
+.lg-figure { left: 50%; bottom: 10.5cqw; width: 17cqw; height: 27cqw; margin-left: -8.5cqw; z-index: 3; }
+.lg-walk { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.lg-walk svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lg-walk path, .lg-walk line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.lg-lit-under circle { fill: var(--lg-ink); }
+.lg-lit-under path { stroke: var(--lg-ink); stroke-width: 9; }
+.lg-lit-top circle { fill: var(--lg-foam); }
+.lg-lit-top path { stroke: var(--lg-foam); stroke-width: 5; }
+.lg-shade-under circle { fill: rgb(255 226 170 / 55%); }
+.lg-shade-under path { stroke: rgb(255 226 170 / 55%); stroke-width: 9.5; }
+.lg-shade-top circle { fill: var(--lg-ink); }
+.lg-shade-top path { stroke: var(--lg-ink); stroke-width: 6; }
+.lg-shade { clip-path: inset(0 0 100% 0); }
+.lg-step-1 { opacity: 0; }
+.lg-saber line { stroke-dasharray: 42; stroke-dashoffset: 0; }
+.lg-saber .is-glow { stroke: var(--lg-saber); stroke-width: 9; opacity: 0.3; }
+.lg-saber .is-color { stroke: var(--lg-saber); stroke-width: 4; }
+.lg-saber .is-core { stroke: #fff; stroke-width: 1.6; opacity: 0.75; }
+.lg-hilt { stroke: #8b96a3; stroke-width: 3.4; }
+
+/* The smoke: a bank flush with the threshold inside the doorway, under the doors. */
+.lg-doorway { left: 37.7cqw; top: 3.7cqw; width: 24.6cqw; height: 36.3cqw; overflow: hidden; z-index: 4; }
+.lg-doors { z-index: 5; }
+.lg-bank {
+  position: absolute; left: -15%; right: -15%; bottom: 0; height: 100%; transform: translateY(74%);
+  background:
+    radial-gradient(34% 12% at 18% 14%, var(--lg-smoke), transparent),
+    radial-gradient(34% 12% at 52% 10%, var(--lg-smoke), transparent),
+    radial-gradient(34% 12% at 84% 15%, var(--lg-smoke), transparent),
+    linear-gradient(to top, var(--lg-smoke) 0 55%, transparent 88%);
+}
+.lg-door { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(180deg, #0f4a6b, #0a3550); box-shadow: inset 0 0 0 0.3cqw #06263b; }
+.lg-door::after { content: ""; position: absolute; top: 18%; width: 32%; height: 22%; border-radius: 0.4cqw; background: rgb(255 236 190 / 28%); }
+.lg-door.is-left { left: 0; transform: translateX(-102%); }
+.lg-door.is-left::after { right: 18%; }
+.lg-door.is-right { right: 0; transform: translateX(102%); }
+.lg-door.is-right::after { left: 18%; }
+.lg-smoke { inset: 0; z-index: 4; pointer-events: none; }
+.lg-puff { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, var(--lg-smoke), transparent); opacity: 0.5; }
+
+.lg-banner.is-left { animation: lg-unroll 0.6s ease-out both; }
+.lg-banner.is-right { animation: lg-unroll 0.6s ease-out 0.15s both; }
+.lg-door { animation: lg-door 1s ease-in-out 0.7s both; }
+.lg-light { animation: lg-light 4.4s ease-out 0.7s both; }
+.lg-bank { animation: lg-bank 2.7s ease-in-out both; }
+.lg-puff { animation: lg-puff 2.6s ease-out 1.5s both; }
+.lg-figure { animation: moment-fade 0.4s ease-out 2.1s both; }
+.lg-shadow { animation: lg-shadow 2.4s ease-out 2.1s both; }
+.lg-saber line { animation: lg-ignite 0.3s ease-out 2.8s both; }
+.lg-walk { animation: lg-walk 1.3s ease-out 3.2s both; }
+.lg-step-0 { animation: lg-step-0 0.33s steps(1) 3.2s 4 both; }
+.lg-step-1 { animation: lg-step-1 0.33s steps(1) 3.2s 4 both; }
+.lg-shade { animation: lg-colour 0.9s ease-in-out 4.4s both; }
+:root[data-theme="dark"] .moment-layer.is-legendary .moment-title { animation-delay: 4.8s; }
+:root[data-theme="dark"] .moment-layer.is-legendary .moment-kicker { animation-delay: 4.9s; }
+:root[data-theme="dark"] .moment-layer.is-legendary .moment-body { animation-delay: 5.1s; }
+
+@keyframes lg-unroll { from { transform: scaleY(0); } }
+@keyframes lg-door { from { transform: none; } }
+@keyframes lg-light { 0% { opacity: 0; } 20%, 80% { opacity: 1; } }
+@keyframes lg-bank { 0%, 70% { transform: translateY(42%); } }
+@keyframes lg-puff {
+  0% { opacity: 0; transform: translate(var(--puff-x), var(--puff-y)) scale(0.25); }
+  25% { opacity: 0.9; transform: translate(var(--puff-x), var(--puff-y)) scale(0.5); }
+}
+@keyframes lg-shadow {
+  0% { opacity: 0; transform: scaleX(0.55) scaleY(1); }
+  20%, 45% { opacity: 1; transform: scaleX(0.55) scaleY(1); }
+}
+@keyframes lg-ignite { from { stroke-dashoffset: 42; } }
+@keyframes lg-walk { from { transform: translateY(-3.5cqw) scale(0.5); } }
+@keyframes lg-step-0 { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes lg-step-1 { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lg-colour { from { clip-path: inset(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-legendary-art, .moment-legendary-art * { animation: none !important; }
 }
 
-.moment-pillar {
-  position: absolute;
-  inset: 0 30%;
-  background: linear-gradient(to top, var(--moment-light), transparent);
-  filter: blur(18px);
-  opacity: 0.6;
-  transform-origin: 50% 100%;
-  animation: moment-pillar 1.2s ease-out both;
-}
-
-.moment-spark {
-  position: absolute;
-  bottom: 12%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--moment-accent);
-  opacity: 0;
-  animation: moment-spark 2.4s ease-out 1.4s 2 both;
-}
-.moment-spark.is-0 { left: 30%; }
-.moment-spark.is-1 { left: 40%; animation-delay: 1.8s; }
-.moment-spark.is-2 { left: 58%; animation-delay: 1.6s; }
-.moment-spark.is-3 { left: 68%; animation-delay: 2.1s; }
-.moment-spark.is-4 { left: 49%; animation-delay: 2.4s; }
-
-.moment-card-flip {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: flex;
-  width: min(250px, 60vw);
-  height: min(330px, 42vh);
-  box-sizing: border-box;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 20px;
-  border: 3px solid var(--onde-foam);
-  border-radius: 18px;
-  color: var(--moment-card-ink);
-  background: linear-gradient(160deg, var(--moment-card-from), var(--moment-card-to));
-  box-shadow: 0 0 60px var(--moment-light);
-  transform: translate(-50%, -50%);
-  animation: moment-card-flip 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1) 1.1s both;
-}
-
-.moment-card-number { align-self: flex-start; font-family: var(--font-display); font-size: 18px; font-weight: 700; }
-.moment-card-initials {
-  display: grid;
-  width: 46%;
-  aspect-ratio: 1;
-  place-items: center;
-  border: 4px solid var(--moment-card-ink);
-  border-radius: 50%;
-  background: var(--onde-foam);
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 700;
-}
-.moment-card-flip strong { font-family: var(--font-display); font-size: 26px; line-height: 1; text-align: center; }
-.moment-card-rarity { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.moment-card-stats { margin-top: auto; font-size: 14px; }
-
+/* Superba and others reuse these. */
 @keyframes moment-pillar { from { opacity: 0; transform: scaleY(0); } }
 @keyframes moment-spark {
   0% { opacity: 0; transform: translateY(0); }
   20% { opacity: 1; }
   100% { opacity: 0; transform: translateY(-180px); }
-}
-@keyframes moment-card-flip {
-  from { opacity: 0; transform: translate(-50%, -50%) perspective(900px) rotateY(90deg) scale(0.8); }
-  70% { opacity: 1; transform: translate(-50%, -50%) perspective(900px) rotateY(-8deg) scale(1.04); }
 }
 
 /* Victory: two blades cross, a flash, the cup rises. */

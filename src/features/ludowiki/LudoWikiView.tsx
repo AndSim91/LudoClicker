@@ -4,6 +4,7 @@ import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { formatStat } from "../../shared/formatters";
 import {
   LUDODEX_LEGENDARIES,
+  formatLudodexNumber,
   LUDOWIKI_CHAPTER_GROUPS,
   LUDOWIKI_CHAPTERS,
   type LudodexLegendary,
@@ -77,21 +78,19 @@ function LegendaryMark({
 function LudodexListRow({
   state,
   legendary,
-  index,
   status,
   selected,
   onSelect,
 }: {
   state: Pick<GameState, "contacts" | "legendaryCollaborators" | "network">;
   legendary: LudodexLegendary;
-  index: number;
   status: LudodexStatus;
   selected: boolean;
   onSelect: () => void;
 }) {
   const dossier = status === "enrolled" ? getLegendaryDossier(state, legendary) : undefined;
   const accessibleName = status === "unknown"
-    ? `Apri voce Ludodex sconosciuta ${index + 1}`
+    ? `Apri voce Ludodex sconosciuta ${legendary.ludodexNumber}`
     : `Apri dossier di ${getLegendaryName(legendary)}`;
   return (
     <button
@@ -103,7 +102,7 @@ function LudodexListRow({
     >
       <LegendaryMark legendary={legendary} status={status} />
       <span className="ludodex-row-copy">
-        <small>#{(index + 1).toString().padStart(3, "0")}</small>
+        <small>{formatLudodexNumber(legendary)}</small>
         <strong>{status === "unknown" ? "???" : getLegendaryName(legendary)}</strong>
         {dossier ? (
           <span>
@@ -125,13 +124,11 @@ function LudodexListRow({
 function LegendaryDossierPanel({
   state,
   legendary,
-  index,
   status,
   onReplay,
 }: {
   state: Pick<GameState, "contacts" | "legendaryCollaborators" | "network">;
   legendary: LudodexLegendary;
-  index: number;
   status: LudodexStatus;
   onReplay?: (id: SpecialCollaboratorId) => void;
 }) {
@@ -141,7 +138,7 @@ function LegendaryDossierPanel({
         <div className="ludodex-dossier-identity">
           <LegendaryMark legendary={legendary} status="encountered" large />
           <div>
-            <small>#{(index + 1).toString().padStart(3, "0")}</small>
+            <small>{formatLudodexNumber(legendary)}</small>
             <h2 id="ludodex-dossier-title">{getLegendaryName(legendary)}</h2>
             <p className={legendary.kind === "secret" ? "rarity-secret-legendary" : "rarity-legendary"}>
               <Icon name="spark" />
@@ -167,7 +164,7 @@ function LegendaryDossierPanel({
     return (
       <section className="ludodex-dossier is-locked" aria-label="Dossier non ancora scoperto">
         <LegendaryMark legendary={legendary} status="unknown" large />
-        <small>#{(index + 1).toString().padStart(3, "0")}</small>
+        <small>{formatLudodexNumber(legendary)}</small>
         <h2>Leggendario sconosciuto</h2>
         <p>Questo dossier si aprirà quando il Leggendario si iscriverà per la prima volta a una delle tue scuole.</p>
         <div className="ludodex-permanence-note">
@@ -195,7 +192,7 @@ function LegendaryDossierPanel({
       <div className="ludodex-dossier-identity">
         <LegendaryMark legendary={legendary} status="enrolled" large />
         <div>
-          <small>#{(index + 1).toString().padStart(3, "0")}</small>
+          <small>{formatLudodexNumber(legendary)}</small>
           <h2 id="ludodex-dossier-title">{getLegendaryName(legendary)}</h2>
           <p className={legendary.kind === "secret" ? "rarity-secret-legendary" : "rarity-legendary"}>
             <Icon name="spark" />
@@ -258,9 +255,6 @@ function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts"
   });
   const selectedLegendary = visibleLegendaries.find((legendary) => legendary.id === selectedId) ??
     visibleLegendaries[0];
-  const selectedIndex = selectedLegendary
-    ? LUDODEX_LEGENDARIES.findIndex((legendary) => legendary.id === selectedLegendary.id)
-    : -1;
   const discoveredCount = LUDODEX_LEGENDARIES.reduce(
     (total, legendary) => total + Number(discoveredIds.has(legendary.id)),
     0,
@@ -300,20 +294,16 @@ function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts"
           <button type="button" className={filter === "discovered" ? "is-active" : ""} onClick={() => setFilter("discovered")} aria-pressed={filter === "discovered"}>Scoperti</button>
         </div>
         <div className="ludodex-list">
-          {visibleLegendaries.length > 0 ? visibleLegendaries.map((legendary) => {
-            const index = LUDODEX_LEGENDARIES.findIndex((candidate) => candidate.id === legendary.id);
-            return (
-              <LudodexListRow
-                key={legendary.id}
-                state={state}
-                legendary={legendary}
-                index={index}
-                status={statusOf(legendary.id)}
-                selected={selectedLegendary?.id === legendary.id}
-                onSelect={() => setSelectedId(legendary.id)}
-              />
-            );
-          }) : (
+          {visibleLegendaries.length > 0 ? visibleLegendaries.map((legendary) => (
+            <LudodexListRow
+              key={legendary.id}
+              state={state}
+              legendary={legendary}
+              status={statusOf(legendary.id)}
+              selected={selectedLegendary?.id === legendary.id}
+              onSelect={() => setSelectedId(legendary.id)}
+            />
+          )) : (
             <div className="ludowiki-empty"><Icon name="search" /><strong>Nessun dossier trovato</strong><span>Prova a cambiare ricerca o filtro.</span></div>
           )}
         </div>
@@ -323,7 +313,6 @@ function LudodexSection({ state, onReplay }: { state: Pick<GameState, "contacts"
           onReplay={onReplay}
           state={state}
           legendary={selectedLegendary}
-          index={selectedIndex}
           status={statusOf(selectedLegendary.id)}
         />
       ) : (
