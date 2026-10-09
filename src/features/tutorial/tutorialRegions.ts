@@ -29,6 +29,7 @@ export const REGION_SELECTORS: Record<TutorialRegionId, string> = {
   "collaborator-social-assignment": '[data-tutorial-region="collaborator-social-assignment"]',
   "collaborator-sectors": '[data-tutorial-region="collaborator-sectors"]',
   "tournaments-navigation": '[data-tutorial-region="tournaments-navigation"]',
+  "tournaments-open-tab": '[data-tutorial-region="tournaments-open-tab"]',
   "network-navigation": '[data-tutorial-region="network-navigation"]',
   "tournament-final": '[data-tutorial-region="tournament-final"]',
   "tournament-groups": '[data-tutorial-region="tournament-groups"]',

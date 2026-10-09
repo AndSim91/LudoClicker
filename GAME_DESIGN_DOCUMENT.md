@@ -2779,9 +2779,10 @@ dell'**Ordine delle Onde**, in oro con l'emblema (N1); quelle firmate «???»,
 per gli incipit prima che una voce si presenti, sono grigio ardesia (X1). Gli
 obiettivi guidati restano della stessa famiglia di oggi, con la fascia a
 sinistra e un velo del colore di chi parlava prima (O3); se la scena si apre
-con un obiettivo, lo firma A.N.D.E.R. Dal 09/10/2026 il tutorial del Reptile è di
-**M.A.K.I.**: si apre con una card «???» («Ehilà? ... Mi senti?») e la sua
-presentazione, «Una messaggera da Torino». Quando un passaggio indica un elemento preciso
+con un obiettivo, lo firma A.N.D.E.R. Dal 10/10/2026 **M.A.K.I.** entra alla
+nascita del Consiglio delle Onde (`academy-goal`): A.N.D.E.R. apre la scena, poi
+una card «???» («Ehilà? ... Mi senti?») e la presentazione «Una messaggera da
+Torino»; il tutorial del Reptile è tutto suo, senza più presentazione. Quando un passaggio indica un elemento preciso
 (un contatore, una voce del menu, un pulsante, una riga di La mia giornata), un
 **segnale** (concept T3, 09/10/2026) lo collega alla card: una pista a gomito con
 angoli a 45° esce dal bordo della card verso l'elemento, che ha quattro angoli
@@ -3422,14 +3423,23 @@ v102; i salvataggi che li hanno già superati li segnano come fatti):
     Nazionale di giugno e Champion's Arena di novembre) e «Una guida per il
     futuro» (non vinceremo subito, servono collaboratori), che indica la nuova
     tappa in «La mia giornata»: 8 Collaboratori delle Onde.
+14b. **Prossima fermata: l'Accademico** (`academy-goal`, 10/10/2026, testi di
+    Andrea): alla nascita del Consiglio delle Onde, solo nella prima scuola e
+    solo se l'Accademico non è già vinto. A.N.D.E.R. festeggia il Consiglio e
+    passa la parola; card «???», presentazione di M.A.K.I., «Apri Tornei»,
+    «Prossima fermata: l'Accademico» (aprile, solo i qualificati dello
+    Scolastico, un titolo apre il Network) e «Non sarà una passeggiata», che
+    indica la tappa in «La mia giornata». Solo dopo questa scena (o in una scuola
+    fondata dopo) compare la tappa dell'Accademico.
 15. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
     nazionale, solo nella prima scuola. Fa aprire il Network; mappa, fondare è
     ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
     rendita, cosa resta per sempre, «Nessuna fretta» sul pulsante di fondazione.
 16. **La scuola organizza un torneo** (`reptile-introduction`): allo sblocco del
     Reptile; se lo stesso Nazionale apre anche il Network parte subito dopo quella.
-    Fa aprire Tornei, che si apre su Open › Reptile; palazzetto e rimborso, le
-    barre dei settori, luglio o il prossimo (resa e spade libere), «La giornata
+    Tutta di M.A.K.I. (10/10/2026): fa aprire Tornei, poi premere «Open» fino
+    alla pagina del Reptile (l'obiettivo aspetta la pagina vera); palazzetto e
+    rimborso, «Cinque lavori, cinque lavoratori», luglio o il prossimo (resa e spade libere), «La giornata
     degli imprevisti» fino a +25%.
 
 I passi possono mettere la scheda a destra o nella metà bassa

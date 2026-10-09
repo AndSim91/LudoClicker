@@ -14,6 +14,7 @@ const SLICES = [
   "contacts",
   "collaborators",
   "collaboratorManagement",
+  "network",
   "school",
   "tournaments",
   "unlocks",

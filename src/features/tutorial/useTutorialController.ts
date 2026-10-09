@@ -17,12 +17,14 @@ export function useTutorialController({
   state,
   activeView,
   equipmentOpen = false,
+  reptileOpen = false,
   dispatch,
   onNavigate,
 }: {
   state: GameState;
   activeView: string;
   equipmentOpen?: boolean;
+  reptileOpen?: boolean;
   dispatch: (action: GameAction) => void;
   onNavigate?: (view: string) => void;
 }) {
@@ -37,8 +39,8 @@ export function useTutorialController({
   const stepIndexes = sameGame ? stepProgress.indexes : {};
   const furthestIndexes = sameGame ? stepProgress.furthest ?? {} : {};
   const context = useMemo<TutorialRuntimeContext>(
-    () => ({ state, activeView, equipmentOpen }),
-    [activeView, equipmentOpen, state],
+    () => ({ state, activeView, equipmentOpen, reptileOpen }),
+    [activeView, equipmentOpen, reptileOpen, state],
   );
   const unavailableSceneIds = new Set([
     ...state.tutorial.completedSceneIds,

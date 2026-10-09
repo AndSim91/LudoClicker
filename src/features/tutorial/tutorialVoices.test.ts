@@ -16,10 +16,15 @@ describe("tutorial voices", () => {
     expect(getStepVoice(scene, objective).id).toBe("ander");
   });
 
-  it("gives the Reptile to M.A.K.I. after a «???» incipit", () => {
-    const scene = TUTORIAL_SCENES.find(({ id }) => id === "reptile-introduction")!;
+  it("passes from A.N.D.E.R. to M.A.K.I. after the Consiglio, through a «???» incipit", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "academy-goal")!;
     expect(scene.steps.map((_, index) => getStepVoice(scene, index).id))
-      .toEqual(["mystery", "maki", "maki", "maki", "maki", "maki", "maki"]);
+      .toEqual(["ander", "mystery", "maki", "maki", "maki", "maki"]);
+  });
+
+  it("gives the whole Reptile to M.A.K.I.", () => {
+    const scene = TUTORIAL_SCENES.find(({ id }) => id === "reptile-introduction")!;
+    expect(scene.steps.every((_, index) => getStepVoice(scene, index).id === "maki")).toBe(true);
   });
 
   it("gives A.N.D.E.R. the scenes that open with an objective", () => {

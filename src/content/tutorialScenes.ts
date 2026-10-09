@@ -43,6 +43,7 @@ export const TUTORIAL_REGION_IDS = [
   "collaborator-social-assignment",
   "collaborator-sectors",
   "tournaments-navigation",
+  "tournaments-open-tab",
   "network-navigation",
   "tournament-final",
   "tournament-groups",
@@ -92,9 +93,13 @@ export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 15;
 /** The first Pianificazione delle Onde, the July after the first Torneo Scolastico (08/10/2026). */
 export const ANNUAL_PLANNING_TUTORIAL_SCENE_ID = "annual-planning" as const;
 
+/** Tappa 2 (10/10/2026): after the Consiglio delle Onde, M.A.K.I. arrives and points at the Accademico. */
+export const ACADEMY_GOAL_TUTORIAL_SCENE_ID = "academy-goal" as const;
+
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
   "first-tournament",
+  ACADEMY_GOAL_TUTORIAL_SCENE_ID,
   "network-introduction",
   "reptile-introduction",
 ] as const;
@@ -119,6 +124,8 @@ export interface TutorialRuntimeContext {
   activeView: string;
   /** The swords menu in the title bar is open. */
   equipmentOpen?: boolean;
+  /** Tornei › Open › Reptile is on screen. */
+  reptileOpen?: boolean;
 }
 
 type RegionSelection =
@@ -1013,6 +1020,80 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     ],
   },
   {
+    id: ACADEMY_GOAL_TUTORIAL_SCENE_ID,
+    pauseWhileActive: true,
+    // Only in the first school, and only while the Accademico is still to win.
+    canStart: ({ state }) =>
+      state.collaboratorManagement.aggregateViewUnlocked &&
+      state.network.schoolCount === 0 &&
+      !hasPrestigeTitle(state),
+    steps: [
+      {
+        id: "council-born",
+        kind: "dialog",
+        speaker: "A.N.D.E.R.",
+        title: "Il Consiglio delle Onde",
+        body: [
+          "Otto collaboratori, otto teste, un'unica chat di gruppo in cui si spamma fino a notte fonda: è nato il Consiglio delle Onde!",
+          "Un po' come la Compagnia dell'Anello, ma con un membro in meno e nessun anello perché costano.",
+          "Ma adesso parliamo del tuo prossimo obiettivo...",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "maki-signal",
+        kind: "dialog",
+        speaker: "???",
+        body: ["Ehilà? ... Mi senti? ... Come li fanno complicati questi cosi ..."],
+        focusRegions: ["title"],
+      },
+      {
+        id: "maki-introduction",
+        kind: "dialog",
+        speaker: "M.A.K.I.",
+        title: "Una messaggera da Torino",
+        body: [
+          "Ciao! Io sono M.A.K.I. e sono la tua assistente IA preposta per aiutarti con i [[Tornei]] di LudoSport!",
+          "Se A.N.D.E.R. poteva aiutarti con tutta la parte di gestione della scuola, io sono qui col compito di districarci nella complessa giungla composta di file Excel, convocazione degli Arbitri e atleti che si ammalano la mattina stessa dei tornei.",
+        ],
+        focusRegions: ["title"],
+      },
+      {
+        id: "open-tournaments",
+        kind: "objective",
+        title: "Apri Tornei",
+        body: ["Apri [[Tornei]]."],
+        focusRegions: ({ activeView }) =>
+          activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView }) => activeView === "tournaments",
+      },
+      {
+        id: "next-stop-academy",
+        kind: "dialog",
+        speaker: "M.A.K.I.",
+        title: "Prossima fermata: l'Accademico",
+        body: [
+          "Pensavi che gli Ander Games fossero complicati? Ogni anno ad aprile si disputa il Torneo Accademico, e solo i qualificati del vostro Torneo Scolastico possono accedervi.",
+          "Un titolo in Arena o in Stile vi permetterà di aprire finalmente il [[Network delle Onde]], perché fuori da Genova c'è un intero mondo che non sa ancora chi siate.",
+        ],
+        focusRegions: ["main"],
+      },
+      {
+        id: "not-a-walk",
+        kind: "dialog",
+        speaker: "M.A.K.I.",
+        title: "Non sarà una passeggiata",
+        body: [
+          "All'Accademico non si combatte più contro i vostri compagni di palestra: arrivano atleti da altre scuole, con più Forme e molta più esperienza alle spalle. Dobbiamo quindi prepararci al meglio per raggiungere il nostro obiettivo.",
+          "Il conto alla rovescia è già partito e puoi tenerlo d'occhio nella sezione apposita in [[La mia giornata]].",
+          "Conto su di te!",
+        ],
+        // The countdown to the Accademico is the pill in «La mia giornata».
+        focusRegions: ["day-panel"],
+      },
+    ],
+  },
+  {
     id: "network-introduction",
     pauseWhileActive: true,
     canStart: ({ state }) =>
@@ -1095,34 +1176,24 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
     canStart: ({ state }) => state.tournaments.reptile.unlocked,
     steps: [
       {
-        id: "maki-signal",
-        kind: "dialog",
-        speaker: "???",
-        body: ["Ehilà? ... Mi senti? ... Come li fanno complicati questi cosi ..."],
-        focusRegions: ["title"],
-      },
-      {
-        id: "maki-introduction",
-        kind: "dialog",
-        speaker: "M.A.K.I.",
-        title: "Una messaggera da Torino",
-        body: [
-          "Ciao! Io sono M.A.K.I. e sono la tua assistente IA preposta per aiutarti con i [[Tornei]] di LudoSport!",
-          "Se A.N.D.E.R. poteva aiutarti con tutta la parte di gestione della scuola, chi meglio di me per districarci nella complessa giungla composta di file Excel, convocazione degli Arbitri e atleti che si ammalano la mattina stessa dei tornei?",
-        ],
-        focusRegions: ["title"],
-      },
-      {
-        id: "open-tournaments",
+        id: "national-legacy",
         kind: "objective",
+        speaker: "M.A.K.I.",
         title: "Apri Tornei",
-        body: [
-          "Il Nazionale si è appena concluso e ha lasciato il segno: ora la tua scuola può organizzare un torneo Open tutto suo. Con Blackjack e Jacopo Viola di Lusso!",
-          "Apri [[Tornei]].",
-        ],
+        body: ["Il Nazionale si è appena concluso e ha lasciato il segno: ora la tua scuola può organizzare un torneo Open tutto suo. Con Blackjack e Jacopo Viola di Lusso!"],
         focusRegions: ({ activeView }) =>
           activeView === "tournaments" ? ["main"] : ["navigation", "tournaments-navigation"],
         isComplete: ({ activeView }) => activeView === "tournaments",
+      },
+      {
+        id: "open-reptile",
+        kind: "objective",
+        speaker: "M.A.K.I.",
+        title: "Apri Tornei",
+        body: ["Apri [[Tornei]]. Poi premi su «Open» e arriva alla pagina del Reptile."],
+        focusRegions: ({ activeView }) =>
+          activeView === "tournaments" ? ["main", "tournaments-open-tab"] : ["navigation", "tournaments-navigation"],
+        isComplete: ({ activeView, reptileOpen }) => activeView === "tournaments" && Boolean(reptileOpen),
       },
       {
         id: "reptile-tournament",
@@ -1130,9 +1201,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "M.A.K.I.",
         title: "Il Torneo Reptile",
         body: [
-          "Il Torneo Reptile è un torneo a coppie, unico nel suo genere, che la tua scuola ha partorito in una notte di luna piena e ha deciso di disputarlo solo di luglio.",
+          "Il Torneo Reptile è un torneo a coppie unico nel suo genere che la tua scuola ha partorito in una notte di luna piena e ha deciso che si terrà solamente di luglio, nel bel mezzo del cambiamento climatico.",
           "Ora l'organizzazione del Reptile spetta a te: affitti il palazzetto, prepari tutto e la scuola ci guadagna **Fama**, **follower** e l'incasso del banchetto.",
-          `Il palazzetto ha un costo di ${formatCurrency(GAME_CONFIG.reptileVenueCost)}, quindi fossi in te farei attenzione prima di iniziare questo viaggio verso l'ignoto. In ogni caso puoi annullare quando vuoi e riavere metà della quota spesa.`,
+          `Il palazzetto ha un costo di ${formatCurrency(GAME_CONFIG.reptileVenueCost)}, quindi fossi in te farei attenzione prima di iniziare questo viaggio verso l'ignoto. Per fortuna puoi annullare quando vuoi e riavere metà della quota spesa, che è meglio di niente.`,
         ],
         focusRegions: ["main", "reptile-hero"],
         cardPlacement: "below",
@@ -1142,7 +1213,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         id: "five-bars",
         kind: "dialog",
         speaker: "M.A.K.I.",
-        title: "Cinque barre, cinque settori",
+        title: "Cinque lavori, cinque lavoratori",
         body: [
           "Ogni settore del Consiglio delle Onde lavorerà alacremente per rendere il Reptile il migliore torneo sulla piazza: [[a:Social]], [[a:Eventi]], [[a:Attrezzature]], [[a:Istruttori]] e [[a:Gadget]], ognuno con un compito ben preciso e responsabilità inenarrabili.",
           "Se in un settore non c'è nessuno i lavori non procedono, quindi fai attenzione!",
@@ -1161,7 +1232,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
           "Il torneo si disputa a luglio solo se tutti i lavori sono stati completati.",
           "Altrimenti slitta all'anno successivo. Nulla di cui preoccuparsi troppo, insomma.",
           "Prima finisci, migliore è la resa del Torneo.",
-          "Ricorda che serviranno anche due **Spade** libere per ogni squadra partecipante, e ogni spada che manca peserà sulla resa finale dell'evento.",
+          "Ricorda che serviranno anche due **Spade** libere per ogni squadra partecipante, e ogni spada che mancherà al torneo peserà sulla resa finale dell'evento.",
         ],
         focusRegions: ["main", "reptile-month"],
         scrollToRegion: "reptile-hero",
@@ -1174,9 +1245,9 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "M.A.K.I.",
         title: "Il preside in palazzetto",
         body: [
-          "Hai tempo fino alla sera prima del Torneo per disputare l'evento «La giornata degli imprevisti»: 30 secondi, un solo tentativo, dove potrai sfoggiare le tue grandi capacità da problem-solver.",
+          "Hai tempo fino alla sera prima del Torneo per disputare l'evento «La giornata degli imprevisti»: 30 secondi, un solo tentativo, dove potrai sfoggiare le tue grandi capacità da problemsolver.",
           "Non potrai salvare un torneo nato male con dei collaboratori scansafatiche, ma potresti fare la differenza tra una competizione piacevole ed una catastrofe apocalittica.",
-          "Ho anche predisposto la possibilità di effettuare dei tutorial di prova, così non sbaglierai troppo quando ti cimenterai nell'impresa.",
+          "Ho anche predisposto la possibilità di effettuare delle prove senza rischiare nulla, così non sbaglierai troppo quando ti cimenterai nell'impresa.",
         ],
         // The minigame card exists once the tournament is organized.
         focusRegions: ({ state }) =>

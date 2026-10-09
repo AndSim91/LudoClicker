@@ -38,9 +38,15 @@ it("follows the tappe: athletes with Forma 1, the countdown to the Scolastico, t
     .toBe("Servono 8 Collaboratori delle Onde. Ne abbiamo 3.");
 
   // After the Consiglio: a title at the Accademico (April, 3 months and a fraction from January).
-  const council = {
+  const unannounced = {
     ...played,
     collaboratorManagement: { ...played.collaboratorManagement, aggregateViewUnlocked: true },
+  };
+  // M.A.K.I. announces the Accademico first (10/10/2026).
+  expect(selectStoryGoal(unannounced, 0)).toBeNull();
+  const council = {
+    ...unannounced,
+    tutorial: { ...unannounced.tutorial, completedSceneIds: [FORMS_TEACHING_TUTORIAL_SCENE_ID, "academy-goal"] },
   };
   expect(selectStoryGoal(council, council.school.nextFeeAt - 30_000))
     .toEqual({ kind: "academy", secondsLeft: 3 * GAME_CONFIG.gameMonthMs / 1_000 + 30 });

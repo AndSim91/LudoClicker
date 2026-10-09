@@ -206,12 +206,15 @@ export function TournamentsView({
   onReplayReptileDay = () => undefined,
   focusResultId,
   tutorialTab,
+  onReptileShownChange,
 }: {
   state?: GameState;
   /** Opens straight on this result in Risultati (from «Mostra i risultati» of the final). */
   focusResultId?: string;
   /** A tutorial step shows this tab (the latest result, or Open › Reptile). */
   tutorialTab?: "results" | "reptile";
+  /** Tells the tutorial whether Open › Reptile is on screen. */
+  onReptileShownChange?: (shown: boolean) => void;
   gameSpeed?: number;
   onOpenAthletes?: () => void;
   onStartChronicles?: (contactIds: string[]) => void;
@@ -262,6 +265,11 @@ export function TournamentsView({
       setOpenTournamentTab("reptile");
     }
   }
+  const reptileShown = visibleTab === "open" && visibleOpenTournamentTab === "reptile";
+  useEffect(() => {
+    onReptileShownChange?.(reptileShown);
+    return () => onReptileShownChange?.(false);
+  }, [onReptileShownChange, reptileShown]);
   useEffect(() => {
     onStartChroniclesRef.current = onStartChronicles;
   }, [onStartChronicles]);
@@ -310,7 +318,7 @@ export function TournamentsView({
         <TabButton active={visibleTab === "hall"} onClick={() => setTab("hall")}>
           Albo d'oro
         </TabButton>
-        <TabButton active={visibleTab === "open"} onClick={() => setTab("open")}>
+        <TabButton active={visibleTab === "open"} onClick={() => setTab("open")} tutorialRegion="tournaments-open-tab">
           Open
         </TabButton>
       </div>

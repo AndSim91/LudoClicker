@@ -259,10 +259,12 @@ export function App() {
     setSelectedSentEmailId(null);
   }, []);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
+  const [reptileOpen, setReptileOpen] = useState(false);
   const tutorial = useTutorialController({
     state,
     activeView,
     equipmentOpen,
+    reptileOpen,
     dispatch,
     onNavigate: navigateForTutorial,
   });
@@ -821,6 +823,7 @@ export function App() {
               key={tournamentFocus?.key}
               focusResultId={tournamentFocus?.resultId}
               tutorialTab={tutorial.activeStep?.tournamentTab}
+              onReptileShownChange={setReptileOpen}
               gameSpeed={gameSpeed}
               onOpenAthletes={openMembers}
               onStartChronicles={startChronicles}

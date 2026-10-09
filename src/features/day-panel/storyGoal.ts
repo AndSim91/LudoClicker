@@ -5,6 +5,7 @@ import { hasPrestigeTitle } from "../../game/progression";
 import { getTournamentSeason } from "../../game/tournamentFlow";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../../game/tutorialScholarship";
+import { ACADEMY_GOAL_TUTORIAL_SCENE_ID } from "../../content/tutorialScenes";
 import type { GameState } from "../../game/types";
 import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPresentation";
 
@@ -13,7 +14,8 @@ import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPre
  * from the first member, 10 members (Forme open; 09/10/2026), then
  * 8 athletes with Forma 1 (Tornei opens), then the countdown to the Torneo
  * Scolastico, then 8 Collaboratori delle Onde (the Consiglio, never named here),
- * then a title at the Torneo Accademico, Arena or Stile (09/10/2026).
+ * then a title at the Torneo Accademico, Arena or Stile (09/10/2026), once
+ * M.A.K.I. has announced it (10/10/2026; schools founded later skip the scene).
  */
 export type StoryGoal =
   | { kind: "members"; value: number; target: number }
@@ -24,7 +26,7 @@ export type StoryGoal =
 
 export type StoryGoalState = Pick<
   GameState,
-  "contacts" | "collaborators" | "collaboratorManagement" | "school" | "tournaments" | "unlocks" | "tutorial"
+  "contacts" | "collaborators" | "collaboratorManagement" | "network" | "school" | "tournaments" | "unlocks" | "tutorial"
 >;
 
 export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal | null {
@@ -50,7 +52,12 @@ export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal |
     return { kind: "tournament", secondsLeft: Math.max(0, Math.ceil((upcoming.occursAt - now) / 1_000)) };
   }
   if (state.collaboratorManagement.aggregateViewUnlocked) {
-    return hasPrestigeTitle(state) ? null : { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) };
+    const announced = state.network.schoolCount > 0 ||
+      completedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID) ||
+      skippedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID);
+    return hasPrestigeTitle(state) || !announced
+      ? null
+      : { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) };
   }
   const target = GAME_CONFIG.collaboratorAggregateUnlockCount;
   return { kind: "collaborators", value: Math.min(state.collaborators.length, target), target };
