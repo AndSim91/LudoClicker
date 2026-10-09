@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLegendaryEncounterMultiplier } from "./contacts";
+import { getCouncilBoost, getLegendaryEncounterMultiplier } from "./contacts";
 import { createInitialCareerStatistics } from "./career";
 import type { GameState } from "./types";
 
@@ -26,5 +26,37 @@ describe("Leggendari in squadra e Reputazione (09/10)", () => {
     expect(getLegendaryEncounterMultiplier(state(8, 35))).toBeCloseTo(1.4);
     expect(getLegendaryEncounterMultiplier(state(8, 50))).toBe(2);
     expect(getLegendaryEncounterMultiplier(state(8, 400))).toBe(2);
+  });
+});
+
+describe("Spinta verso il Consiglio (09/10)", () => {
+  const base = {
+    network: { schoolCount: 0 },
+    tournaments: { firstSchoolTournamentMonth: 10 },
+    school: { currentMonth: 19 },
+    collaborators: [{ contactId: "c1" }, { contactId: "c2" }],
+    contacts: [
+      { id: "c1", rarity: "legendary", status: "enrolled" },
+      { id: "c2", rarity: "legendary", status: "enrolled" },
+      { id: "u0", rarity: "ultra-rare", status: "enrolled", forms: [] },
+      { id: "u1", rarity: "ultra-rare", status: "enrolled", forms: ["form-1"] },
+      { id: "u2", rarity: "ultra-rare", status: "enrolled", forms: ["form-1", "form-2"] },
+      { id: "ux", rarity: "ultra-rare", status: "lost", forms: [] },
+    ],
+  };
+  const boost = (patch: object = {}) =>
+    getCouncilBoost({ ...base, ...patch } as unknown as Parameters<typeof getCouncilBoost>[0]);
+
+  it("+1% ogni 3 mesi dal primo Scolastico, ridotto da collaboratori e Ultra Rari", () => {
+    // 9 mesi = 3%; riduzione 2 × 12,5% + 5% + 7,5% + 10% = 47,5%.
+    expect(boost()).toBeCloseTo(0.03 * 0.525);
+    expect(boost({ school: { currentMonth: 12 } })).toBe(0);
+  });
+
+  it("niente bonus prima dello Scolastico, dopo la prima scuola o con 8 collaboratori", () => {
+    expect(boost({ tournaments: {} })).toBe(0);
+    expect(boost({ network: { schoolCount: 1 } })).toBe(0);
+    expect(boost({ collaborators: Array.from({ length: 8 }, (_, i) => ({ contactId: `k${i}` })) })).toBe(0);
+    expect(boost({ collaborators: Array.from({ length: 7 }, (_, i) => ({ contactId: `k${i}` })) })).toBe(0);
   });
 });

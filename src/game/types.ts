@@ -910,6 +910,8 @@ export interface TournamentState {
   immuneContactIds: string[];
   skippedSeasons: number[];
   ordinaryVictoryAchieved: boolean;
+  /** school.currentMonth of the first Torneo Scolastico (end of the 1st story stage). */
+  firstSchoolTournamentMonth?: number;
   championsVictoryCurrentSchool: boolean;
   /** Accademico titles (Arena or Style) won by the current school: one opens the prestige. */
   academyTitlesCurrentSchool?: number;

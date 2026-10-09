@@ -259,6 +259,8 @@ export function applyTournamentResult(
       : contact),
     tournaments: {
       ...state.tournaments,
+      firstSchoolTournamentMonth: state.tournaments.firstSchoolTournamentMonth ??
+        (resolvedResult.level === "school" ? state.school.currentMonth : undefined),
       results: compactDetailedTournamentResults([
         ...state.tournaments.results,
         resolvedResult,

@@ -39,6 +39,32 @@ export function getLegendaryAppearanceChance(): number {
 }
 
 /**
+ * Spinta verso il Consiglio (09/10, first school only, for the tutorial): from
+ * the first Torneo Scolastico, every 3 months without 8 collaborators adds 1%
+ * to both the Leggendario and the Ultra Raro appearance, after the malus. The
+ * sum shrinks by 12,5% per collaborator and by 5/7,5/10% per enrolled Ultra
+ * Raro not yet a collaborator (no Forms / Forma 1 / Forma 2); gone at 8.
+ */
+export function getCouncilBoost(
+  state: Pick<GameState, "network" | "tournaments" | "school" | "collaborators" | "contacts">,
+): number {
+  const startMonth = state.tournaments.firstSchoolTournamentMonth;
+  const collaborators = state.collaborators.length;
+  if (state.network.schoolCount > 0 || startMonth === undefined || collaborators >= 8) return 0;
+  const steps = Math.floor((state.school.currentMonth - startMonth) / GAME_CONFIG.councilBoostMonthsPerStep);
+  if (steps <= 0) return 0;
+  const collaboratorContactIds = new Set(state.collaborators.map((collaborator) => collaborator.contactId));
+  let reduction = collaborators * 0.125;
+  for (const contact of state.contacts) {
+    if (contact.rarity !== "ultra-rare" || contact.status !== "enrolled" ||
+      collaboratorContactIds.has(contact.id)) continue;
+    const forms = contact.forms ?? [];
+    reduction += forms.includes("form-2") ? 0.1 : forms.includes("form-1") ? 0.075 : 0.05;
+  }
+  return steps * GAME_CONFIG.councilBoostPerStep * Math.max(0, 1 - reduction);
+}
+
+/**
  * Leggendari in squadra (09/10): every Leggendario enrolled in this school
  * beyond the first takes 25% off the chance of meeting the others, in the
  * contacts and (Secret) in tournaments. The career Reputation softens it in a
@@ -77,10 +103,11 @@ export function getUltraRareAppearanceChance(collaboratorCount: number): number 
 function chooseOrdinaryRarity(
   seed: number,
   collaboratorCount: number,
+  ultraRareBonus = 0,
 ): { rarity: Exclude<PersonRarity, "legendary">; nextSeed: number } {
   const [rarityRoll, nextSeed] = nextRandom(seed);
   const nonLegendaryChance = 1 - PERSON_RARITIES.legendary.queueAppearanceChance;
-  const ultraRareChance = getUltraRareAppearanceChance(collaboratorCount);
+  const ultraRareChance = getUltraRareAppearanceChance(collaboratorCount) + ultraRareBonus;
   // What Ultra Rari lose goes to Comuni and Rari in proportion.
   const { rare, common } = PERSON_RARITIES;
   const rareShare = rare.queueAppearanceChance /
@@ -149,9 +176,11 @@ function chooseLegendaryProfile(
   guaranteed = false,
   /** Leggende in visita (Network delle Onde). */
   chanceMultiplier = 1,
+  /** Spinta verso il Consiglio, added after every multiplier. */
+  chanceBonus = 0,
 ) {
   const [appearanceRoll, seedAfterAppearance] = nextRandom(seed);
-  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance() * chanceMultiplier) {
+  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance() * chanceMultiplier + chanceBonus) {
     return { profile: undefined, legendaryRolled: false, nextSeed: seedAfterAppearance };
   }
   const candidates: LegendaryCandidate[] = [
@@ -307,6 +336,7 @@ export function createAcquiredContacts(
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
   const legendaryChanceMultiplier = (1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus")) *
     getLegendaryEncounterMultiplier(state);
+  const councilBoost = getCouncilBoost(state);
   const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;
@@ -334,6 +364,7 @@ export function createAcquiredContacts(
           progress,
           false,
           legendaryChanceMultiplier,
+          councilBoost,
         )
         : { profile: undefined, legendaryRolled: false, nextSeed };
     const specialProfile = selected.profile;
@@ -355,7 +386,7 @@ export function createAcquiredContacts(
       : selected.legendaryRolled
         ? { rarity: "ultra-rare" as const, nextSeed }
       : advancedRaritiesUnlocked
-        ? chooseOrdinaryRarity(nextSeed, state.collaborators.length)
+        ? chooseOrdinaryRarity(nextSeed, state.collaborators.length, councilBoost)
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
     const generated = createRandomProspect(nextSeed, specialProfile);

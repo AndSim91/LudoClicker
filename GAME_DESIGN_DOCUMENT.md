@@ -388,6 +388,17 @@ fondazioni (`statistics.career.reputationEarned`), speso o no: a 25 punti il
 malus sparisce, a 50 la comparsa raddoppia (10%) e poi resta lì. Quello che il
 Leggendario perde va alle altre rarità in proporzione. Esempi a Reputazione 0:
 5% con 1 Leggendario, 3,75% con 2, 2,11% con 4, 0,67% con 8, 0,21% con 12.
+**Spinta verso il Consiglio** (decisione di Andrea del 09/10, solo nella prima
+scuola, al servizio del tutorial; `getCouncilBoost` in `contacts.ts`): dal mese
+del primo Torneo Scolastico (fine della 1ª tappa della storia,
+`tournaments.firstSchoolTournamentMonth`), ogni 3 mesi senza 8 collaboratori
+aggiunge l'1% sia alla comparsa dei Leggendari sia a quella degli Ultra Rari,
+sommato dopo malus, Reputazione e Leggende in visita. Il totale accumulato si
+riduce del 12,5% per ogni collaboratore e, per gli Ultra Rari iscritti non
+ancora collaboratori, del 5% (senza Forme), 7,5% (Forma 1) o 10% (Forma 2);
+la riduzione arriva al massimo al 100%. Con 8 collaboratori il bonus sparisce.
+Obiettivo: il Consiglio delle Onde attivo prima del primo titolo Accademico.
+
 Lo stesso moltiplicatore riduce, nei tornei, la comparsa del primo Leggendario
 Segreto prima della prima vittoria (§ Leggendari Segreti in
 `docs/tournament-system-design.md`).
