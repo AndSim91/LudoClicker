@@ -37,20 +37,20 @@ describe("game engine: funnel", () => {
     expect(state.school.currentMonth).toBe(1);
     expect(getSchoolYear(state.school.currentMonth)).toBe(0);
     expect(state.contacts.every((contact) => contact.rarity === "common")).toBe(true);
-    expect(PERSON_RARITIES.common.queueAppearanceChance).toBe(0.8);
-    expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.125);
-    expect(PERSON_RARITIES["ultra-rare"].queueAppearanceChance).toBe(0.055);
-    expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.02);
-    // Ultra Rari get scarcer with the team: 5,5% until 8 collaborators, 1,1% from 100.
-    expect(getUltraRareAppearanceChance(0)).toBe(0.055);
-    expect(getUltraRareAppearanceChance(8)).toBe(0.055);
-    expect(getUltraRareAppearanceChance(54)).toBeCloseTo(0.033);
-    expect(getUltraRareAppearanceChance(100)).toBeCloseTo(0.011);
-    expect(getUltraRareAppearanceChance(446)).toBeCloseTo(0.011);
+    expect(PERSON_RARITIES.common.queueAppearanceChance).toBe(0.725);
+    expect(PERSON_RARITIES.rare.queueAppearanceChance).toBe(0.15);
+    expect(PERSON_RARITIES["ultra-rare"].queueAppearanceChance).toBe(0.075);
+    expect(PERSON_RARITIES.legendary.queueAppearanceChance).toBe(0.05);
+    // Ultra Rari get scarcer with the team: 7,5% until 8 collaborators, 1,5% from 100.
+    expect(getUltraRareAppearanceChance(0)).toBe(0.075);
+    expect(getUltraRareAppearanceChance(8)).toBe(0.075);
+    expect(getUltraRareAppearanceChance(54)).toBeCloseTo(0.045);
+    expect(getUltraRareAppearanceChance(100)).toBeCloseTo(0.015);
+    expect(getUltraRareAppearanceChance(446)).toBeCloseTo(0.015);
     expect(Object.values(PERSON_RARITIES).reduce(
       (total, rarity) => total + rarity.queueAppearanceChance,
       0,
-    )).toBe(1);
+    )).toBeCloseTo(1);
     expect(getEnrollmentChance(state, "common")).toBe(0.625);
     expect(getEnrollmentChance(state, "rare")).toBe(0.4);
     expect(getEnrollmentChance(state, "ultra-rare")).toBeCloseTo(7 / 30);

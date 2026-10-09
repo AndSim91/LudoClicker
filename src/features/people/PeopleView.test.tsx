@@ -1797,13 +1797,13 @@ describe("PeopleView", () => {
     expect(screen.getByRole("heading", { name: "Scuola" })).toBeVisible();
     expect(screen.queryByRole("tab", { name: /Potenziali interessati/ })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "ComuneComparsa: 80%Prova dopo l'email: 40%",
+      "ComuneComparsa: 72,5%Prova dopo l'email: 40%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "Ultra RaroComparsa: 5,5%Prova dopo l'email: 75%",
+      "Ultra RaroComparsa: 7,5%Prova dopo l'email: 75%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
-      "LeggendarioComparsa: 2%Prova dopo l'email: 100%",
+      "LeggendarioComparsa: 5%Prova dopo l'email: 100%",
     );
     expect(screen.getByRole("region", { name: "Sistema di rarità" })).toHaveTextContent(
       "Effettiva base email → iscritto: 25%",

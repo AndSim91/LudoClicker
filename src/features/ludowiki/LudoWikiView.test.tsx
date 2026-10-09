@@ -140,7 +140,7 @@ describe("LudoWikiView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Rarità e Leggendari" }));
     expect(screen.getByRole("heading", { name: "Rarità e Leggendari" })).toBeVisible();
-    expect(screen.getByText("2% in coda")).toBeVisible();
+    expect(screen.getByText("5% in coda")).toBeVisible();
 
     fireEvent.change(screen.getByRole("textbox", { name: "Cerca nel manuale" }), {
       target: { value: "Gadget" },

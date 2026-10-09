@@ -1,4 +1,5 @@
 import { PROSPECT_FIRST_NAMES, PROSPECT_LAST_NAMES } from "../content/prospectDirectory";
+import { getLegendaryEncounterMultiplier } from "./contacts";
 import {
   SECRET_LEGENDARIES,
   SECRET_LEGENDARY_APPEARANCE_CHANCE,
@@ -432,8 +433,10 @@ function maybeInsertSecretLegendaries(
   participants: TournamentParticipant[],
   cursor: RandomCursor,
 ): TournamentParticipant[] {
+  // Until the first victory the Secret is rarer with every Leggendario in the
+  // team (09/10); the second one keeps its flat 20%.
   const firstAppears = state.tournaments.ordinaryVictoryAchieved ||
-    roll(cursor) < SECRET_LEGENDARY_APPEARANCE_CHANCE;
+    roll(cursor) < SECRET_LEGENDARY_APPEARANCE_CHANCE * getLegendaryEncounterMultiplier(state);
   if (!firstAppears) return participants;
 
   const first = insertSecretLegendary(state, level, participants, cursor, new Set());

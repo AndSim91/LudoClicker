@@ -281,7 +281,7 @@ export function getChroniclesLegendaryIds(): readonly SecretLegendaryId[] {
   return SECRET_LEGENDARY_IDS.filter((id) => SECRET_LEGENDARIES[id].level === "chronicles");
 }
 
-export const SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.1;
+export const SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.05;
 export const SECOND_SECRET_LEGENDARY_APPEARANCE_CHANCE = 0.2;
 
 export function getSecretLegendaryIdsForTournament(

@@ -353,18 +353,44 @@ iscriversi dopo la prova:
 
 | Rarità      | Comparsa | Prova dopo la mail | Iscrizione base | Effettiva base mail → iscritto | Massimo ordinario | Collaboratore            |
 | ----------- | -------: | -----------------: | --------------: | -----------------------------: | ----------------: | ------------------------ |
-| Comune      |      80% |                40% |           62,5% |                            25% |              100% | Mai                      |
-| Raro        |    12,5% |                50% |             40% |                            20% |               90% | Mai                      |
-| Ultra Raro  |     5,5% |                75% |          23,33% |                          17,5% |               50% | Dopo il Corso Y          |
-| Leggendario |       2% |               100% |             15% |                            15% |               35% | Subito dopo l'iscrizione |
+| Comune      |    72,5% |                40% |           62,5% |                            25% |              100% | Mai                      |
+| Raro        |      15% |                50% |             40% |                            20% |               90% | Mai                      |
+| Ultra Raro  |     7,5% |                75% |          23,33% |                          17,5% |               50% | Dopo il Corso Y          |
+| Leggendario |       5% |               100% |             15% |                            15% |               35% | Subito dopo l'iscrizione |
 
-La comparsa degli **Ultra Rari** scende con la squadra: 5,5% fino a 8
-collaboratori (il Consiglio), poi in linea retta fino all'1,1% con 100
+Comparse in vigore dal 09/10/2026 (prima: Comune 80%, Raro 12,5%, Ultra Raro
+5,5%, Leggendario 2%).
+
+La comparsa degli **Ultra Rari** scende con la squadra: 7,5% fino a 8
+collaboratori (il Consiglio), poi in linea retta fino all'1,5% con 100
 collaboratori (Leggendari compresi), e resta lì (`getUltraRareAppearanceChance`
 in `contacts.ts`; decisione di Andrea del 05/10). La partenza a 8 invece che a 0
 tiene il primo Nazionale nei tempi: con il calo da 0 la simulazione intensa lo
-spostava al luglio successivo (94 minuti invece di 82,5). Quello che perdono va a Comuni e Rari in proporzione; i
-Leggendari restano al 2%. I contatti iniziali di una nuova scuola usano il 5,5%.
+spostava al luglio successivo (94 minuti invece di 82,5). Quello che perdono va a Comuni e Rari in proporzione. I contatti iniziali di
+una nuova scuola usano il 7,5%.
+
+La comparsa dei **Leggendari** dipende dai Leggendari già in squadra e dalla
+Reputazione di carriera (decisione di Andrea del 09/10,
+`getLegendaryEncounterMultiplier` in `contacts.ts`):
+
+```text
+extra       = max(0, Leggendari iscritti nella scuola − 1)
+mitigazione = min(Reputazione di carriera, 25) / 25
+malus       = 0,75 ^ (extra × (1 − mitigazione))
+bonus       = 1 + clamp(Reputazione di carriera − 25, 0, 25) / 25
+comparsa    = 5% × malus × bonus × Leggende in visita
+```
+
+Il primo Leggendario non conta (Andrea Simonazzi nella prima scuola, il
+Leggendario portato alla fondazione nelle successive); i Leggendari Segreti
+iscritti contano. La Reputazione di carriera è il totale guadagnato alle
+fondazioni (`statistics.career.reputationEarned`), speso o no: a 25 punti il
+malus sparisce, a 50 la comparsa raddoppia (10%) e poi resta lì. Quello che il
+Leggendario perde va alle altre rarità in proporzione. Esempi a Reputazione 0:
+5% con 1 Leggendario, 3,75% con 2, 2,11% con 4, 0,67% con 8, 0,21% con 12.
+Lo stesso moltiplicatore riduce, nei tornei, la comparsa del primo Leggendario
+Segreto prima della prima vittoria (§ Leggendari Segreti in
+`docs/tournament-system-design.md`).
 
 I potenziamenti di Creatività fanno avanzare linearmente la prenotazione della
 prova dalla probabilità base fino a 85% per i Comuni, 90% per i Rari, 95% per
@@ -1244,7 +1270,7 @@ La probabilità può aumentare con:
 - progetti interni;
 - potenziamenti organizzativi.
 
-> **Da implementare:** nel codice le probabilità di rarità dei contatti sono fisse (Leggendario 2%, Ultra Raro 5,5%, Raro 12,5%) e il reclutamento non ha probabilità; nessuno di questi fattori le modifica.
+> **Da implementare:** nel codice le probabilità di rarità dei contatti dipendono solo dai collaboratori (Ultra Rari), dai Leggendari in squadra e dalla Reputazione di carriera (Leggendari, § 5.3) e da Leggende in visita; il reclutamento non ha probabilità e i fattori qui sopra non le modificano.
 
 ### 9.2 Dati e regole
 
@@ -5324,7 +5350,7 @@ email per almeno 15 minuti senza errori bloccanti.
 
 ### Fase 3 — Collaboratori e automazione
 
-- generazione degli Ultra Rari secondo la quota del 5,5%;
+- generazione degli Ultra Rari secondo la quota del 7,5%;
 - assegnazioni;
 - scrittura automatica;
 - raccolta contatti;

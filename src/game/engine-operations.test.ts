@@ -472,7 +472,7 @@ describe("game engine: operations", () => {
       automation: { ...initial.automation, lastProcessedAt: 2_000 },
     }, { type: "TICK", now: 2_000 });
 
-    expect(getLegendaryAppearanceChance()).toBe(0.02);
+    expect(getLegendaryAppearanceChance()).toBe(0.05);
     expect(resolved.contacts.at(-1)?.specialProfileId).toBe("andrea-simonazzi");
     expect(resolved.legendaryCollaborators.encounteredProfileIds).toContain(
       resolved.contacts.at(-1)?.specialProfileId,

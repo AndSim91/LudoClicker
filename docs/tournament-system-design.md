@@ -640,10 +640,14 @@ il contrasto dell'interfaccia.
 Ogni profilo ha un livello (Accademico, Nazionale, Champion's, Chronicles) e
 compare solo in quel torneo. La sua scuola vera (es. LudoSport Alpha · Torino) è
 solo da mostrare. Prima che la scuola vinca per la prima volta Arena o Stile in
-un torneo ordinario, il primo Leggendario Segreto ha il 10% di probabilità di
-apparire. Dai tornei successivi alla prima vittoria, la sua presenza è
-garantita. Soltanto dopo l'apparizione del primo viene effettuato un secondo
-tiro indipendente: nel 20% dei casi entra anche un secondo Leggendario Segreto,
+un torneo ordinario, il primo Leggendario Segreto ha il 5% di probabilità di
+apparire (10% fino al 09/10), moltiplicato per lo stesso fattore dei contatti:
+−25% per ogni Leggendario in squadra oltre il primo, attenuato dalla
+Reputazione di carriera fino a sparire a 25 punti, poi fino al doppio a 50
+(`getLegendaryEncounterMultiplier`, GDD § 5.3). Dai tornei successivi alla
+prima vittoria, la sua presenza è garantita, senza malus. Soltanto dopo
+l'apparizione del primo viene effettuato un secondo tiro indipendente: nel 20%
+dei casi, fisso e senza malus, entra anche un secondo Leggendario Segreto,
 se esiste un altro profilo esterno di quel livello. La prima vittoria è uno
 sblocco permanente della partita e resta valida anche dopo la fondazione di
 nuove scuole.

@@ -12,6 +12,7 @@ import { SPECIAL_COLLABORATORS, type SpecialCollaboratorProfile } from "../conte
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { getCurrentSchoolContactCount } from "./historyArchive";
+import { getCareer } from "./career";
 import { getReservedLegendaryProfileIds } from "./legendaryAvailability";
 import { nextRandom } from "./random";
 import { advanceRandomSeed, rollAthleteBaseStats } from "./athleteStats";
@@ -35,6 +36,25 @@ export const ANDREA_SIMONAZZI_PROFILE = SPECIAL_COLLABORATORS.find(
 
 export function getLegendaryAppearanceChance(): number {
   return PERSON_RARITIES.legendary.queueAppearanceChance;
+}
+
+/**
+ * Leggendari in squadra (09/10): every Leggendario enrolled in this school
+ * beyond the first takes 25% off the chance of meeting the others, in the
+ * contacts and (Secret) in tournaments. The career Reputation softens it in a
+ * straight line and cancels it at 25 points; from 25 to 50 the base rises to
+ * double, then stays there.
+ */
+export function getLegendaryEncounterMultiplier(
+  state: Pick<GameState, "legendaryCollaborators" | "statistics">,
+): number {
+  const extra = Math.max(0, state.legendaryCollaborators.enrolledProfileIds.length - 1);
+  const reputation = getCareer(state).reputationEarned;
+  const neutral = GAME_CONFIG.legendaryMalusReputationNeutral;
+  const bonusSpan = GAME_CONFIG.legendaryBonusReputationMax - neutral;
+  const mitigation = Math.min(reputation, neutral) / neutral;
+  const bonus = Math.min(Math.max(0, reputation - neutral), bonusSpan) / bonusSpan;
+  return GAME_CONFIG.legendaryRosterMalus ** (extra * (1 - mitigation)) * (1 + bonus);
 }
 
 /**
@@ -285,7 +305,8 @@ export function createAcquiredContacts(
   const contactIds = new Set(state.contacts.map((contact) => contact.id));
   let nextSequence = state.statistics.contactsAcquired;
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
-  const legendaryChanceMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus");
+  const legendaryChanceMultiplier = (1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus")) *
+    getLegendaryEncounterMultiplier(state);
   const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;

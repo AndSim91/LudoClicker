@@ -77,7 +77,13 @@ export const GAME_CONFIG = {
   eventContactProtectedActiveMembers: 10,
   // Event contacts halve for every 1.000 active members beyond the first ten.
   eventContactHalvingMembers: 1_000,
-  ultraRareMinimumAppearanceChance: 0.011,
+  ultraRareMinimumAppearanceChance: 0.015,
+  // Leggendari in squadra (09/10): each one beyond the first takes 25% off the
+  // others' appearance; career Reputation cancels it at 25 points and doubles
+  // the base at 50 (src/game/contacts.ts, getLegendaryEncounterMultiplier).
+  legendaryRosterMalus: 0.75,
+  legendaryMalusReputationNeutral: 25,
+  legendaryBonusReputationMax: 50,
   ultraRareDeclineStartCollaborators: 8,
   ultraRareFloorCollaborators: 100,
   equipmentMaximumUpgradeWearReduction: 0.5,
