@@ -3116,7 +3116,8 @@ Contiene tre aree: Ludodex, Traguardi (§ 26) e Manuale di gioco.
   torneo configurati, oppure dalle Chronicles of Ludosport.
   Ogni voce ha un **numero fisso** (`LUDODEX_NUMBERS` in `ludowiki.ts`, dal
   09/10/2026): #001–#008 i Leggendari, #009–#032 i Segreti per torneo, Panico
-  #013 e Maggi #019 compresi. Il numero non dipende dalla posizione nella
+  #013 e Maggi #019 compresi; i Chronicles (#026–#032) nell'ordine delle
+  sfide, da Girelli a Ferrario. Il numero non dipende dalla posizione nella
   lista; un nuovo Leggendario prende il primo numero libero in fondo.
 - **Manuale di gioco**: versione consultabile e orientata al giocatore delle
   spiegazioni introdotte dai tutorial. Usa numeri correnti, esempi e schemi

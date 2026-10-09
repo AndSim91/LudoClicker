@@ -60,12 +60,13 @@ export const LUDODEX_NUMBERS: Record<SpecialCollaboratorId, number> = {
   "pierluigi-chimienti": 23,
   "marcello-lovo": 24,
   "simone-pedrazzi": 25,
-  "antonio-rocchitelli": 26,
-  "ugo-cesare-tonelli": 27,
-  "paolo-scalzulli": 28,
-  "carlos-jimenez-moyano": 29,
-  "debora-girelli": 30,
-  "andrea-pini": 31,
+  // Chronicles nell'ordine delle sfide, dal più debole al più forte (09/10/2026).
+  "debora-girelli": 26,
+  "andrea-pini": 27,
+  "antonio-rocchitelli": 28,
+  "ugo-cesare-tonelli": 29,
+  "paolo-scalzulli": 30,
+  "carlos-jimenez-moyano": 31,
   "lorenzo-ferrario": 32,
 };
 
