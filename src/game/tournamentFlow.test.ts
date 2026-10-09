@@ -531,7 +531,7 @@ describe("tournament reward effects", () => {
       contacts: 0,
       bonus: { kind: "trial", rarity: "legendary" },
     });
-    const expiresAt = trialResolvedAt + GAME_CONFIG.dayNotificationVisibilityMs;
+    const expiresAt = trialResolvedAt + GAME_CONFIG.dayTrialLostVisibilityMs;
 
     expect(resolveTournamentRewardFallbacks(
       waitingForExpiry,

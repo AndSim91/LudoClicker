@@ -7,7 +7,7 @@ import { getAvailableStandardLegendaryProfiles } from "./legendaryAvailability";
 import type { Contact, GameState, ScheduledTrial } from "./types";
 
 const TRIAL_RESOLVED_AT = 2_000;
-const TRIAL_EXPIRES_AT = TRIAL_RESOLVED_AT + GAME_CONFIG.dayNotificationVisibilityMs;
+const TRIAL_EXPIRES_AT = TRIAL_RESOLVED_AT + GAME_CONFIG.dayTrialLostVisibilityMs;
 
 function stateWithOneEnrolledAndSevenFailed(): GameState {
   const initial = createInitialState(1_000, "Manager");

@@ -375,10 +375,11 @@ describe("DayPanel", () => {
     );
   });
 
+  // Resolved at 50 s: iscritto lasts 8 s, non iscritto 6 s (09/10).
   it.each([
-    ["enrolled", "Iscritto", "appointment-enrolled"],
-    ["lost", "Non iscritto", "appointment-lost"],
-  ] as const)("shows the %s outcome with its row color", (contactStatus, label, className) => {
+    ["enrolled", "Iscritto", "appointment-enrolled", "37.5", "3 secondi rimanenti"],
+    ["lost", "Non iscritto", "appointment-lost", "16.667", "1 secondo rimanente"],
+  ] as const)("shows the %s outcome with its row color", (contactStatus, label, className, progress, remaining) => {
     vi.useFakeTimers();
     vi.setSystemTime(55_000);
 
@@ -387,11 +388,11 @@ describe("DayPanel", () => {
     expect(screen.getByText(label).closest(".appointment")).toHaveClass(className);
     expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
       "aria-valuenow",
-      "50",
+      progress,
     );
     expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
       "aria-valuetext",
-      "5 secondi rimanenti",
+      remaining,
     );
   });
 
@@ -451,7 +452,7 @@ describe("DayPanel", () => {
     expect(screen.getByText("Iscritto")).toBeVisible();
     expect(screen.getByRole("progressbar", { name: /Tempo residuo/ })).toHaveAttribute(
       "aria-valuetext",
-      "5 secondi rimanenti",
+      "3 secondi rimanenti",
     );
 
     fireEvent.mouseLeave(notificationRow!);

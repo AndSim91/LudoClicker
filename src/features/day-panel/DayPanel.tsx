@@ -157,7 +157,7 @@ export function DayNotificationEntry({
   const expiryValueText =
     expiryRemainingSeconds === undefined
       ? undefined
-      : `${expiryRemainingSeconds} ${expiryRemainingSeconds === 1 ? "secondo" : "secondi"} rimanenti`;
+      : `${expiryRemainingSeconds} ${expiryRemainingSeconds === 1 ? "secondo rimanente" : "secondi rimanenti"}`;
   const personClassName = notification.person
     ? `rarity-name ${getRarityClassName(
         notification.person.rarity,

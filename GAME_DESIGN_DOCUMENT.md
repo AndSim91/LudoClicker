@@ -955,8 +955,10 @@ spada e senza aggiungere usura.
 Una volta raggiunto il massimo storico di 5 iscritti, **La mia giornata**
 raggruppa in un unico riepilogo tutte le lezioni di prova ordinarie visibili,
 anche quando ce n'è soltanto una. Prima di quella soglia il riepilogo compare
-solo quando le prove ordinarie visibili sono più di 5. Le prove concluse o
-annullate restano visibili per 10 secondi. Le prove dei Leggendari e dei Leggendari
+solo quando le prove ordinarie visibili sono più di 5. Le prove concluse restano
+visibili per 8 secondi se il contatto si iscrive e per 6 secondi se non si
+iscrive; le prove annullate per 6 secondi. Gli iscritti al volo restano visibili
+per 8 secondi, eventi narrativi e Mancato rinnovo per 10 (tempo di gioco). Le prove dei Leggendari e dei Leggendari
 Segreti sono sempre escluse dal riepilogo e restano visibili singolarmente.
 
 Anche le altre notifiche con lo stesso titolo (iscritti al volo, eventi
@@ -967,14 +969,14 @@ fuori e i tornei non si raggruppano. Sotto la soglia tornano le schede singole.
 
 Nel mese di un torneo disputabile, **La mia giornata** mantiene visibile una
 notifica con il conto alla rovescia fino alla fine del mese. Alla risoluzione
-del torneo la stessa notifica mostra l'esito effettivo per 10 secondi.
+del torneo la stessa notifica mostra l'esito effettivo per 15 secondi.
 Se nella finale di Arena combatte un nostro atleta, la notifica non dice chi
 ha vinto (sarebbe uno spoiler): al posto dell'esito c'è il pulsante
 **«Guarda la finale»** (§ 25.2).
 
 Gli esiti negativi dei singoli contatti non producono messaggi: sono visibili
 nelle statistiche aggregate del funnel, nello stato della mail inviata e, per
-le prove, per 10 secondi in La mia giornata (“non iscritto” oppure “Annullata:
+le prove, per 6 secondi in La mia giornata (“non iscritto” oppure “Annullata:
 nessuna spada disponibile”).
 
 ---

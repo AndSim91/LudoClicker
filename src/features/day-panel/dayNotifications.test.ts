@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../../game/config";
 import { describe, expect, it } from "vitest";
 
 import { createInitialState } from "../../game/engine";
@@ -7,7 +8,6 @@ import {
 } from "../../game/lightInflation";
 import type { ContactStatus, GameState, ScheduledTrial } from "../../game/types";
 import {
-  DAY_NOTIFICATION_VISIBILITY_MS,
   DAY_TRIAL_GROUPING_UNLOCK_MEMBERS,
   DAY_TRIAL_NOTIFICATION_LIMIT,
   capDayPips,
@@ -265,7 +265,7 @@ describe("selectDayNotifications", () => {
     );
   });
 
-  it("replaces the tournament countdown with the result for ten seconds", () => {
+  it("replaces the tournament countdown with the result for fifteen seconds", () => {
     const initial = createInitialState(10_000);
     const completedAt = 70_000;
     const result = {
@@ -304,11 +304,11 @@ describe("selectDayNotifications", () => {
         id: "tournament-school-1",
         phase: "neutral",
         title: "Torneo Scolastico completato",
-        expiresAt: completedAt + DAY_NOTIFICATION_VISIBILITY_MS,
+        expiresAt: completedAt + GAME_CONFIG.dayTournamentResultVisibilityMs,
       }),
     );
     expect(
-      selectDayNotifications(completedState, completedAt + DAY_NOTIFICATION_VISIBILITY_MS),
+      selectDayNotifications(completedState, completedAt + GAME_CONFIG.dayTournamentResultVisibilityMs),
     ).not.toContainEqual(expect.objectContaining({ id: "tournament-school-1" }));
   });
 

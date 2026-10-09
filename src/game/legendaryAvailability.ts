@@ -54,7 +54,7 @@ export function getReservedLegendaryProfileIds(
     state.scheduledTrials
       .filter((trial) =>
         trial.status === "completed" &&
-        now < trial.resolvesAt + GAME_CONFIG.dayNotificationVisibilityMs
+        now < trial.resolvesAt + GAME_CONFIG.dayTrialLostVisibilityMs
       )
       .map((trial) => trial.contactId),
   );

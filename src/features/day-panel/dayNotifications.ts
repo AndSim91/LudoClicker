@@ -175,15 +175,18 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     const completed = trial.status === "completed";
     const cancelled = trial.status === "cancelled";
     const terminalTimestamp = cancelled ? trial.startsAt : trial.resolvesAt;
-    const expiresAt = completed || cancelled
-      ? terminalTimestamp + DAY_NOTIFICATION_VISIBILITY_MS
-      : undefined;
-    if (expiresAt !== undefined && gameNow >= expiresAt) continue;
     const phase: DayNotificationPhase = cancelled
       ? "lost"
       : completed
       ? contact?.status === "enrolled" ? "enrolled" : "lost"
       : gameNow < trial.startsAt ? "scheduled" : "in-progress";
+    const expiryDurationMs = cancelled
+      ? GAME_CONFIG.dayTrialCancelledVisibilityMs
+      : completed
+      ? phase === "enrolled" ? GAME_CONFIG.dayTrialEnrolledVisibilityMs : GAME_CONFIG.dayTrialLostVisibilityMs
+      : undefined;
+    const expiresAt = expiryDurationMs === undefined ? undefined : terminalTimestamp + expiryDurationMs;
+    if (expiresAt !== undefined && gameNow >= expiresAt) continue;
     const timestamp = completed || cancelled ? terminalTimestamp : trial.startsAt;
     const isSpecialTrial = contact?.rarity === "legendary" ||
       Boolean(contact?.secretLegendaryId) ||
@@ -198,6 +201,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
       timestamp,
       startsAt: trial.startsAt,
       expiresAt,
+      expiryDurationMs,
       tutorialTarget: trial.tutorialSceneId === "first-event",
       pips: [{ state: getDayPipState(phase), startsAt: trial.startsAt }],
       person: contact
@@ -264,6 +268,7 @@ function selectTrialNotifications(state: GameState, gameNow: number): DayNotific
     detail: "Nessuna spada libera da prestare.",
     timestamp: cancelledFirst,
     expiresAt: cancelledExpiresAt,
+    expiryDurationMs: GAME_CONFIG.dayTrialCancelledVisibilityMs,
     effects: [{
       icon: "calendar",
       amount: String(cancelledCount),
@@ -365,7 +370,7 @@ export function selectDayNotifications(
 
   for (const contact of getDirectEnrollmentContacts(state.contacts, state.scheduledTrials)) {
     if (contact.acquiredAt > gameNow) continue;
-    const expiresAt = contact.acquiredAt + DAY_NOTIFICATION_VISIBILITY_MS;
+    const expiresAt = contact.acquiredAt + GAME_CONFIG.dayDirectEnrollmentVisibilityMs;
     if (gameNow >= expiresAt) break;
     notifications.push({
       id: `direct-enrollment-${contact.id}`,
@@ -375,6 +380,7 @@ export function selectDayNotifications(
       detail: "Saltata la prova: ha firmato e basta.",
       timestamp: contact.acquiredAt,
       expiresAt,
+      expiryDurationMs: GAME_CONFIG.dayDirectEnrollmentVisibilityMs,
       person: {
         displayName: `${contact.firstName} ${contact.lastName}`,
         rarity: contact.rarity,
@@ -403,7 +409,7 @@ export function selectDayNotifications(
   }
 
   for (const result of state.tournaments.results) {
-    const expiresAt = result.completedAt + DAY_NOTIFICATION_VISIBILITY_MS;
+    const expiresAt = result.completedAt + GAME_CONFIG.dayTournamentResultVisibilityMs;
     if (result.completedAt > gameNow || gameNow >= expiresAt) continue;
     const summary = getTournamentSummary(result);
     notifications.push({
@@ -415,6 +421,7 @@ export function selectDayNotifications(
       title: `${TOURNAMENT_DEFINITIONS[result.level].label} completato`,
       timestamp: result.completedAt,
       expiresAt,
+      expiryDurationMs: GAME_CONFIG.dayTournamentResultVisibilityMs,
       // With one of ours in the final, the winners would spoil «Guarda la finale».
       ...(getOwnedFinal(result) ? { detail: "", finalResultId: result.id } : { detail: summary.detail }),
     });
@@ -584,6 +591,7 @@ function groupCrowdedNotifications(notifications: DayNotification[]): DayNotific
         : sameDetail ? first.detail : "",
       timestamp: first.timestamp,
       expiresAt: Math.max(...sorted.map((member) => member.expiresAt ?? first.timestamp)),
+      expiryDurationMs: first.expiryDurationMs,
       groupKey: key,
       ...(first.tone ? { tone: first.tone, eyebrow: first.eyebrow } : {}),
     });

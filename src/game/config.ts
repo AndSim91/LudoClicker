@@ -23,7 +23,14 @@ export const GAME_CONFIG = {
   trialWaitMinMs: 30_000,
   trialWaitMaxMs: 30_000,
   trialDurationMs: 15_000,
+  /** La mia giornata: Eventi e Imprevisti, Mancato rinnovo e tutto ciò che non ha una durata propria. */
   dayNotificationVisibilityMs: 10_000,
+  // Durate per tipo decise il 09/10/2026 (tempo di gioco).
+  dayTrialEnrolledVisibilityMs: 8_000,
+  dayTrialLostVisibilityMs: 6_000,
+  dayTrialCancelledVisibilityMs: 6_000,
+  dayDirectEnrollmentVisibilityMs: 8_000,
+  dayTournamentResultVisibilityMs: 15_000,
   progressUpdateIntervalMs: 250,
   gameTickMs: 1_000,
   // ponytail: scadenze vicine si risolvono nello stesso passo (al più 250 ms dopo); passi più fitti costavano CPU senza cambiare il gioco.
