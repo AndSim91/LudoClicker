@@ -603,15 +603,16 @@
   color: var(--ink);
 }
 
-/* Dialog (concept I): soft header, coloured top line, tinted card. */
-.is-dialog .tutorial-card {
+/* Dialog (concept I): soft header, coloured top line, tinted card. [data-voice]
+ * keeps these rules level with the Onde card rule above, which they must beat. */
+.is-dialog .tutorial-card[data-voice] {
   overflow: hidden;
   border-color: var(--voice-line);
   border-top: 3px solid var(--voice);
   background: var(--voice-bg);
 }
 
-.is-dialog .tutorial-card > header {
+.is-dialog .tutorial-card[data-voice] > header {
   margin: -25px -27px 8px;
   padding: 14px 27px;
   border-bottom: 1px solid var(--voice-line);
@@ -630,6 +631,11 @@
   width: 34px;
   height: 34px;
   font-size: 15px;
+}
+
+.is-dialog .tutorial-voice b,
+.is-dialog .tutorial-voice small {
+  line-height: 1.35;
 }
 
 .is-dialog .tutorial-voice small {
@@ -676,7 +682,7 @@
 }
 
 @media (max-width: 720px) {
-  .is-dialog .tutorial-card > header {
+  .is-dialog .tutorial-card[data-voice] > header {
     margin: -22px -20px 8px;
     padding-inline: 20px;
   }
