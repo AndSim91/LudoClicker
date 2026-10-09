@@ -98,6 +98,40 @@ export function computeSignalRoute(
   };
 }
 
+/**
+ * Where to slide the card so it does not sit on the element it talks about
+ * (09/10/2026): the smallest move below, above, right or left of the element
+ * that keeps the whole card on screen. {0, 0} when they do not overlap or the
+ * card fits nowhere.
+ */
+export function avoidTarget(
+  card: Box,
+  target: Box,
+  viewport: { width: number; height: number },
+): { dx: number; dy: number } {
+  const gap = 20;
+  const margin = 16;
+  const halo: Box = {
+    left: target.left - gap,
+    top: target.top - gap,
+    right: target.right + gap,
+    bottom: target.bottom + gap,
+  };
+  if (!overlaps(card, halo)) return { dx: 0, dy: 0 };
+  const width = card.right - card.left;
+  const height = card.bottom - card.top;
+  const fitsX = (left: number) => left >= margin && left + width <= viewport.width - margin;
+  const fitsY = (top: number) => top >= margin && top + height <= viewport.height - margin;
+  const options = [
+    { dx: 0, dy: halo.bottom - card.top },
+    { dx: 0, dy: halo.top - height - card.top },
+    { dx: halo.right - card.left, dy: 0 },
+    { dx: halo.left - width - card.left, dy: 0 },
+  ].filter(({ dx, dy }) => fitsX(card.left + dx) && fitsY(card.top + dy));
+  options.sort((a, b) => Math.hypot(a.dx, a.dy) - Math.hypot(b.dx, b.dy));
+  return options[0] ?? { dx: 0, dy: 0 };
+}
+
 /** The point at fraction `f` of the trace length (for the data packets). */
 export function pointAlong(points: readonly Point[], f: number): Point {
   const lengths = points.slice(1).map((point, index) =>

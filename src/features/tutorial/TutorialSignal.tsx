@@ -2,7 +2,7 @@ import { useLayoutEffect, useState, type RefObject } from "react";
 import type { TutorialRegionId } from "../../content/tutorialScenes";
 import { motionReduced } from "../../shared/motion";
 import { REGION_SELECTORS } from "./tutorialRegions";
-import { computeSignalRoute, pickSignalRegion, pointAlong, type Box, type SignalRoute } from "./signalRoute";
+import { avoidTarget, computeSignalRoute, pickSignalRegion, pointAlong, type Box, type SignalRoute } from "./signalRoute";
 import type { TutorialVoiceId } from "./tutorialVoices";
 
 const PACKETS = [0.22, 0.5, 0.78];
@@ -33,6 +33,8 @@ export function TutorialSignal({
     let frame = 0;
     let lastKey = "";
     let pointed: HTMLElement | null = null;
+    const movedCard = cardRef.current;
+    let offset = { dx: 0, dy: 0 };
     const point = (element: HTMLElement | null) => {
       if (pointed === element) return;
       pointed?.removeAttribute("data-tutorial-pointer");
@@ -44,13 +46,29 @@ export function TutorialSignal({
       if (typeof window === "undefined") return;
       const card = cardRef.current;
       const target = document.querySelector<HTMLElement>(REGION_SELECTORS[regionId]);
+      const viewport = { width: window.innerWidth, height: window.innerHeight };
+      if (card && target) {
+        // The card slides off the element it talks about (measured where it would sit unmoved).
+        const moved = card.getBoundingClientRect();
+        const natural: Box = {
+          left: moved.left - offset.dx,
+          top: moved.top - offset.dy,
+          right: moved.right - offset.dx,
+          bottom: moved.bottom - offset.dy,
+        };
+        const next = avoidTarget(natural, toBox(target.getBoundingClientRect()), viewport);
+        if (next.dx !== offset.dx || next.dy !== offset.dy) {
+          offset = next;
+          card.style.translate = next.dx || next.dy ? `${next.dx}px ${next.dy}px` : "";
+        }
+      }
       const anchor = card?.querySelector(".tutorial-monogram")?.getBoundingClientRect();
       const next = card && target
         ? computeSignalRoute(
           toBox(card.getBoundingClientRect()),
           toBox(target.getBoundingClientRect()),
           anchor ? anchor.top + anchor.height / 2 : card.getBoundingClientRect().top + 32,
-          { width: window.innerWidth, height: window.innerHeight },
+          viewport,
         )
         : null;
       point(next ? target : null);
@@ -69,6 +87,9 @@ export function TutorialSignal({
     const settle = window.setTimeout(schedule, 220);
     window.addEventListener("resize", schedule);
     window.addEventListener("scroll", schedule, true);
+    // Windows that slide in (Pianificazione, drawers) settle after the card: measure again then.
+    document.addEventListener("animationend", schedule, true);
+    document.addEventListener("transitionend", schedule, true);
     const observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
@@ -76,8 +97,11 @@ export function TutorialSignal({
       window.clearTimeout(settle);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("scroll", schedule, true);
+      document.removeEventListener("animationend", schedule, true);
+      document.removeEventListener("transitionend", schedule, true);
       observer.disconnect();
       point(null);
+      if (movedCard) movedCard.style.translate = "";
     };
   }, [regionId, cardRef]);
 

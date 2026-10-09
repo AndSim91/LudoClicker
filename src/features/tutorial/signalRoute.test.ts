@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeSignalRoute, pickSignalRegion, pointAlong } from "./signalRoute";
+import { avoidTarget, computeSignalRoute, pickSignalRegion, pointAlong } from "./signalRoute";
 
 const viewport = { width: 1280, height: 800 };
 const card = { left: 380, top: 190, right: 900, bottom: 530 };
@@ -39,5 +39,20 @@ describe("signal route", () => {
 
   it("walks the trace for the data packets", () => {
     expect(pointAlong([[0, 0], [10, 0], [10, 10]], 0.75)).toEqual([10, 5]);
+  });
+
+  it("slides the card off the element it talks about, by the smallest move", () => {
+    // The yearly highlight row under a centred card: the card goes above it.
+    const centred = { left: 390, top: 303, right: 910, bottom: 550 };
+    const highlight = { left: 140, top: 478, right: 1146, bottom: 566 };
+    const move = avoidTarget(centred, highlight, { width: 1251, height: 858 });
+    expect(move.dx).toBe(0);
+    expect(centred.bottom + move.dy).toBeLessThanOrEqual(highlight.top - 20);
+    expect(centred.top + move.dy).toBeGreaterThanOrEqual(16);
+  });
+
+  it("leaves the card alone when they do not overlap or it fits nowhere", () => {
+    expect(avoidTarget(card, { left: 58, top: 15, right: 140, bottom: 30 }, viewport)).toEqual({ dx: 0, dy: 0 });
+    expect(avoidTarget(card, { left: 0, top: 0, right: 1280, bottom: 800 }, viewport)).toEqual({ dx: 0, dy: 0 });
   });
 });
