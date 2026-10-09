@@ -2732,6 +2732,16 @@ La voce è ironica per circa il 60% e asciutta per il 40%; i messaggi di sistema
 (salvataggi, errori, impostazioni) restano asciutti. Un avviso non supera due
 frasi e non spiega regole: quelle stanno nella LudoWiki.
 
+Le card dei tutorial (09/10/2026) mostrano chi parla. **A.N.D.E.R.** è rosso
+Sith, **M.A.K.I.** blu caraibico: i loro dialoghi hanno una testata tinta con
+monogramma, nome e ruolo, un filo colorato in alto, lo sfondo sfumato del loro
+colore e «Continua» colorato (concept I). Le card senza firma sono
+dell'**Ordine delle Onde**, in oro con l'emblema (N1); quelle firmate «???»,
+per gli incipit prima che una voce si presenti, sono grigio ardesia (X1). Gli
+obiettivi guidati restano della stessa famiglia di oggi, con la fascia a
+sinistra e un velo del colore di chi parlava prima (O3). «Salta» c'è due
+volte: sotto la barra del titolo (S1) e nella card, accanto al contatore (S2).
+
 Avvisi della Posta e notifiche di La mia giornata (Fase 8, prima schermata):
 le prime volte e gli sblocchi hanno una battuta; quelli che tornano spesso
 (tornei, quote, maestrie, corsi, notifiche della giornata) solo un'ironia

@@ -225,10 +225,11 @@
   pointer-events: none;
 }
 
+/* S1 (09/10/2026): below the title bar, so «Giornata» stays free. */
 .tutorial-skip {
   position: absolute;
   z-index: 2;
-  top: 20px;
+  top: 58px;
   right: 22px;
   min-height: 34px;
   padding: 0 16px;
@@ -265,11 +266,11 @@
 
 .is-objective .tutorial-card {
   position: absolute;
-  top: 72px;
+  top: 104px;
   right: 22px;
   width: min(390px, calc(100vw - 44px));
   padding: 20px 22px;
-  border-left: 4px solid var(--blue-600);
+  border-left: 4px solid var(--voice);
   box-shadow: 0 14px 40px rgb(18 47 76 / 22%);
 }
 
@@ -346,7 +347,7 @@
   align-items: center;
   gap: 9px;
   margin-top: 17px;
-  color: var(--blue-700);
+  color: var(--voice-ink);
   font-size: 12px;
   font-weight: 600;
 }
@@ -355,8 +356,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--blue-600);
-  box-shadow: 0 0 0 4px rgb(15 108 189 / 14%);
+  background: var(--voice);
+  box-shadow: 0 0 0 4px var(--voice-line);
   animation: tutorial-waiting-pulse 1.4s ease-in-out infinite;
 }
 
@@ -368,9 +369,9 @@
 }
 
 :root[data-theme="dark"] .tutorial-card {
-  border-color: #285f8d;
-  color: #f3f7fb;
-  background: rgb(24 31 39 / 98%);
+  border-color: var(--line-strong);
+  color: var(--ink);
+  background: linear-gradient(180deg, #0c4262, #0a3a57);
 }
 
 :root[data-theme="dark"] [data-tutorial-treatment="muted"] {
@@ -405,7 +406,6 @@
   }
 
   .tutorial-skip {
-    top: 14px;
     right: 14px;
   }
 }
@@ -452,4 +452,232 @@
     0 0 0 3px white,
     0 0 0 8px color-mix(in srgb, var(--blue-600) 40%, transparent),
     0 0 0 100vmax rgb(4 14 26 / 52%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Voci dei tutorial (09/10/2026, concept I + O3 + N1 + X1).
+ * Each card knows who signs it (data-voice): A.N.D.E.R. rosso Sith, M.A.K.I.
+ * blu caraibico, «???» ardesia, the Ordine delle Onde (cards nobody signs) oro.
+ * Dialogs get a soft header with badge, name and role, a coloured top line and
+ * a tinted background; objectives keep the left stripe and a faint veil.
+ * ------------------------------------------------------------------------- */
+.tutorial-card[data-voice="ander"] {
+  --voice: #c8000a;
+  --voice-ink: #a8000a;
+  --on-voice: #fff;
+  --voice-line: rgb(200 0 10 / 45%);
+  --voice-band: #fbe3e5;
+  --voice-tint: #fff7f7;
+  --voice-bg: linear-gradient(180deg, #fff1f2 0%, #fff 62%);
+}
+
+.tutorial-card[data-voice="maki"] {
+  --voice: #007f99;
+  --voice-ink: #006e85;
+  --on-voice: #fff;
+  --voice-line: rgb(0 127 153 / 45%);
+  --voice-band: #dcf3f7;
+  --voice-tint: #f4fbfc;
+  --voice-bg: linear-gradient(180deg, #ebf9fb 0%, #fff 62%);
+}
+
+.tutorial-card[data-voice="mystery"] {
+  --voice: #4e5360;
+  --voice-ink: #3f434e;
+  --on-voice: #fff;
+  --voice-line: rgb(78 83 96 / 40%);
+  --voice-band: #ebecef;
+  --voice-tint: #f7f7f9;
+  --voice-bg: linear-gradient(180deg, #f2f3f5 0%, #fff 62%);
+}
+
+.tutorial-card[data-voice="neutral"] {
+  --voice: #9a6b10;
+  --voice-ink: #875c08;
+  --on-voice: #fff;
+  --voice-line: rgb(154 107 16 / 40%);
+  --voice-band: #f8f0de;
+  --voice-tint: #fdfaf3;
+  --voice-bg: linear-gradient(180deg, #fcf8ef 0%, #fff 62%);
+}
+
+:root[data-theme="dark"] .tutorial-card[data-voice="ander"] {
+  --voice: #e8121c;
+  --voice-ink: #ff8a83;
+  --voice-line: rgb(232 18 28 / 60%);
+  --voice-band: rgb(232 18 28 / 20%);
+  --voice-tint: rgb(232 18 28 / 7%);
+  --voice-bg: linear-gradient(180deg, #3e1520 0%, #2c1a2a 55%, #1d2638 100%);
+}
+
+:root[data-theme="dark"] .tutorial-card[data-voice="maki"] {
+  --voice: #16c6d8;
+  --voice-ink: #7fe6f0;
+  --on-voice: #04263f;
+  --voice-line: rgb(22 198 216 / 60%);
+  --voice-band: rgb(22 198 216 / 18%);
+  --voice-tint: rgb(22 198 216 / 6%);
+  --voice-bg: linear-gradient(180deg, #07525e 0%, #073f52 55%, #0a3650 100%);
+}
+
+:root[data-theme="dark"] .tutorial-card[data-voice="mystery"] {
+  --voice: #8a90a0;
+  --voice-ink: #c3c8d4;
+  --on-voice: #11161f;
+  --voice-line: rgb(160 166 182 / 40%);
+  --voice-band: rgb(160 166 182 / 12%);
+  --voice-tint: rgb(160 166 182 / 6%);
+  --voice-bg: linear-gradient(180deg, #1d222c 0%, #18243a 60%, #122f49 100%);
+}
+
+:root[data-theme="dark"] .tutorial-card[data-voice="neutral"] {
+  --voice: var(--onde-gold);
+  --voice-ink: #f3c272;
+  --on-voice: var(--onde-on-gold);
+  --voice-line: rgb(224 166 74 / 50%);
+  --voice-band: rgb(224 166 74 / 13%);
+  --voice-tint: rgb(224 166 74 / 5%);
+  --voice-bg: linear-gradient(180deg, #0e4767, #0a3a57);
+}
+
+.tutorial-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tutorial-voice b {
+  font-weight: 700;
+}
+
+.tutorial-monogram {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--on-voice);
+  background: var(--voice);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.tutorial-card[data-voice="neutral"] .tutorial-monogram {
+  background: var(--voice) url("/assets/ordine-emblem.webp") center / 62% no-repeat;
+}
+
+:root[data-theme="dark"] .tutorial-card[data-voice="neutral"] .tutorial-monogram {
+  background: rgb(224 166 74 / 16%) url("/assets/ordine-emblem.webp") center / 58% no-repeat;
+  box-shadow: inset 0 0 0 1px var(--voice-line);
+}
+
+.tutorial-step-meta {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+/* S2: the in-card «Salta», quieter than the one under the title bar. */
+.tutorial-skip-inline {
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.tutorial-skip-inline:hover,
+.tutorial-skip-inline:focus-visible {
+  border-color: var(--voice);
+  color: var(--ink);
+}
+
+/* Dialog (concept I): soft header, coloured top line, tinted card. */
+.is-dialog .tutorial-card {
+  overflow: hidden;
+  border-color: var(--voice-line);
+  border-top: 3px solid var(--voice);
+  background: var(--voice-bg);
+}
+
+.is-dialog .tutorial-card > header {
+  margin: -25px -27px 8px;
+  padding: 14px 27px;
+  border-bottom: 1px solid var(--voice-line);
+  background: var(--voice-band);
+}
+
+.is-dialog .tutorial-voice {
+  display: grid;
+  grid-template-columns: 34px auto;
+  column-gap: 11px;
+  color: var(--voice-ink);
+}
+
+.is-dialog .tutorial-monogram {
+  grid-row: span 2;
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+}
+
+.is-dialog .tutorial-voice small {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+:root:not([data-theme="dark"]) .is-dialog .tutorial-copy p {
+  color: #474747;
+}
+
+:root[data-theme="dark"] .tutorial-copy p {
+  color: #e2e3d3;
+}
+
+/* The assistants colour «Continua»; the Ordine keeps the game's button. */
+.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue {
+  border-color: var(--voice);
+  color: var(--on-voice);
+  background: var(--voice);
+}
+
+.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue:hover,
+.is-dialog .tutorial-card:not([data-voice="neutral"]) .tutorial-continue:focus-visible {
+  filter: brightness(1.08);
+}
+
+/* Objective (O3): the same family as today, stripe and faint veil in the voice's colour. */
+.is-objective .tutorial-card > header .tutorial-voice {
+  color: var(--ink-muted);
+}
+
+.is-objective .tutorial-card {
+  background: linear-gradient(var(--voice-tint), var(--voice-tint)), var(--surface);
+}
+
+:root[data-theme="dark"] .is-objective .tutorial-card {
+  background:
+    linear-gradient(var(--voice-tint), var(--voice-tint)),
+    linear-gradient(180deg, #0c4262, #0a3a57);
+}
+
+@media (max-width: 720px) {
+  .is-dialog .tutorial-card > header {
+    margin: -22px -20px 8px;
+    padding-inline: 20px;
+  }
 }

@@ -191,7 +191,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
       {
         id: "empty-school",
         kind: "dialog",
-        speaker: "",
+        speaker: "A.N.D.E.R.",
         title: "Il primo giorno da Preside",
         body: ({ state }) => [
           `Ciao ${state.profile.displayName.trim()} e congratulazioni per aver accettato il posto da Preside dell'Ordine delle Onde!`,

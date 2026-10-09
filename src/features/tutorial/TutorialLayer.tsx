@@ -8,6 +8,7 @@ import {
   type TutorialStep,
 } from "../../content/tutorialScenes";
 import { applyTutorialTreatments } from "./tutorialRegions";
+import { getStepVoice } from "./tutorialVoices";
 import { KeywordText } from "../../components/common/KeywordText";
 
 export function TutorialLayer({
@@ -29,6 +30,7 @@ export function TutorialLayer({
   const focusRegions = resolveTutorialRegions(step.focusRegions, context);
   const hiddenRegions = resolveTutorialRegions(step.hiddenRegions, context);
   const body = resolveTutorialBody(step.body, context);
+  const voice = getStepVoice(scene, stepIndex);
   const focusRegionKey = focusRegions.join(",");
   const hiddenRegionKey = hiddenRegions.join(",");
 
@@ -97,15 +99,30 @@ export function TutorialLayer({
       </button>
       <section
         className="tutorial-card"
+        data-voice={voice.id}
         role={step.kind === "dialog" ? "dialog" : "status"}
         aria-modal={step.kind === "dialog" ? "true" : undefined}
         aria-labelledby={step.title ? "tutorial-step-title" : undefined}
-        aria-label={!step.title && step.kind === "dialog" ? step.speaker : undefined}
+        aria-label={!step.title && step.kind === "dialog" ? voice.name : undefined}
         aria-describedby="tutorial-step-copy"
       >
         <header>
-          {step.kind === "dialog" ? <span>{step.speaker}</span> : <span>Obiettivo guidato</span>}
-          <small>{stepIndex + 1} / {scene.steps.length}</small>
+          <span className="tutorial-voice">
+            <i className="tutorial-monogram" aria-hidden="true">{voice.monogram}</i>
+            {step.kind === "dialog" ? (
+              <>
+                <b>{voice.name}</b>
+                <small>{voice.role}</small>
+              </>
+            ) : (
+              <b>Obiettivo guidato{voice.id === "neutral" ? "" : ` · ${voice.name}`}</b>
+            )}
+          </span>
+          <span className="tutorial-step-meta">
+            <small>{stepIndex + 1} / {scene.steps.length}</small>
+            {/* S2 (09/10/2026): a second «Salta» inside the card, next to the counter. */}
+            <button className="tutorial-skip-inline" type="button" onClick={onSkip}>Salta</button>
+          </span>
         </header>
         {step.title ? <h2 id="tutorial-step-title">{step.title}</h2> : null}
         <div id="tutorial-step-copy" className="tutorial-copy">
