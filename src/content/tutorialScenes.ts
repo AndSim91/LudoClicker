@@ -675,12 +675,11 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Spade nuove",
         body: ({ state }) => [
           "Libere, in uso, rotte, usura: qui c'è tutto. Quando le spade non bastano più, si comprano dal bottone apposito.",
-          ...(isOfficialSwordSupplierUnlocked(state.upgrades)
-            ? [
-                "Il conto con Lama di Luce è già aperto.",
-                "Ricorda di effettuare regolarmente la manutenzione delle spade e di acquistarne quante più possibile per far progredire la nostra scuola, ma attenzione a non finire tutti i fondi per delle Polaris nuove sgargianti!",
-              ]
-            : ["Prima però serve sbloccare «Fornitore ufficiale», nel ramo Attrezzatura degli [[Upgrade]]. Attento ai prezzi di Lama di Luce, gli piace cambiare!"]),
+          isOfficialSwordSupplierUnlocked(state.upgrades)
+            ? "Il conto con Lama di Luce è già aperto."
+            : "Prima però serve sbloccare «Fornitore ufficiale», nel ramo Attrezzatura degli [[Upgrade]]. Attento ai prezzi di Lama di Luce, gli piace cambiare!",
+          // The repair needs no upgrade: it is not a purchase (09/10/2026).
+          "Ricorda di effettuare regolarmente la manutenzione delle spade e di acquistarne quante più possibile per far progredire la nostra scuola, ma attenzione a non finire tutti i fondi per delle Polaris nuove sgargianti!",
         ],
         focusRegions: ["title", "title-equipment"],
         opensEquipment: true,
