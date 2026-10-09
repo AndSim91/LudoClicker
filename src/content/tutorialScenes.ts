@@ -478,7 +478,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Dieci iscritti",
         body: [
-          "Dieci **Iscritti**: non siamo più un gruppo di scappati di casa con le spade laser: siamo una scuola di scappati di casa con le spade laser. È l'ora di farti conoscere le Forme, gli Insegnanti ed i Tornei LudoSport.",
+          "Dieci **Iscritti**: non siamo più un gruppo di scappati di casa con le spade laser: ora siamo una vera e propria Scuola di scappati di casa con le spade laser! È l'ora di farti conoscere le Forme e gli Insegnanti di LudoSport.",
         ],
         focusRegions: ["title"],
       },
