@@ -86,6 +86,8 @@ export function TutorialLayer({
   }, [step]);
 
   return (
+    <>
+    {step.kind === "dialog" ? <div className="tutorial-veil" aria-hidden="true" /> : null}
     <div className={[
       "tutorial-layer",
       `is-${step.kind}`,
@@ -149,5 +151,6 @@ export function TutorialLayer({
         )}
       </section>
     </div>
+    </>
   );
 }

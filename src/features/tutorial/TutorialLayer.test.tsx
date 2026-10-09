@@ -234,8 +234,10 @@ describe("TutorialLayer", () => {
     )!;
 
     expect(layer).toHaveClass("is-dialog");
-    expect(getComputedStyle(layer).zIndex).toBe("6000");
-    expect(getComputedStyle(collaborators).zIndex).toBe("5001");
+    // 09/10/2026: veil 6000 < target 5001/6001 < card layer 6002.
+    expect(getComputedStyle(layer).zIndex).toBe("6002");
+    expect(getComputedStyle(container.querySelector(".tutorial-veil")!).zIndex).toBe("6000");
+    expect(Number(getComputedStyle(collaborators).zIndex)).toBeLessThan(6002);
     unmount();
   });
 

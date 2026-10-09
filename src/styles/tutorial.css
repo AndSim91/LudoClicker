@@ -200,9 +200,10 @@
   }
 }
 
+/* Layers (09/10/2026): veil 6000 < element the signal points at 6001 < card 6002. */
 .tutorial-layer {
   position: fixed;
-  z-index: 5000;
+  z-index: 6002;
   inset: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
 }
@@ -211,9 +212,14 @@
   display: grid;
   place-items: center;
   padding: 28px;
-  background: rgb(8 25 43 / 34%);
   pointer-events: auto;
+}
+
+.tutorial-veil {
+  position: fixed;
   z-index: 6000;
+  inset: 0;
+  background: rgb(8 25 43 / 34%);
 }
 
 .tutorial-layer.is-dialog.is-card-left {
