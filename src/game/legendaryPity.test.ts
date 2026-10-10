@@ -62,7 +62,7 @@ function createTrialState({
 }
 
 describe("Legendary Pity", () => {
-  it("gains one point on every failed trial and survives an ordinary enrollment", () => {
+  it("ignores ordinary trials: only Leggendari move it (10/10)", () => {
     const initial = createInitialState(1_000, "", false);
     const ordinaryChance = getEnrollmentChance(initial, "common");
     const failureSeed = findSeed((roll) => roll >= ordinaryChance);
@@ -84,14 +84,14 @@ describe("Legendary Pity", () => {
     );
 
     expect(failed.contacts[0].status).toBe("lost");
-    expect(failed.legendaryPity).toBe(6);
+    expect(failed.legendaryPity).toBe(5);
     expect(ordinaryEnrollment.contacts[0].status).toBe("enrolled");
     expect(ordinaryEnrollment.legendaryPity).toBe(6);
   });
 
-  it("adds whole Pity points after the personal Legendary bonus and caps at 100%", () => {
+  it("adds 5% per Pity point after the personal Legendary bonus and caps at 100%", () => {
     const base = createTrialState({
-      legendaryPity: 20,
+      legendaryPity: 4,
       resultSeed: 0,
       specialProfileId: "eva-parodi",
     });
@@ -102,7 +102,7 @@ describe("Legendary Pity", () => {
         enrollmentAttempts: { "eva-parodi": 2 },
       },
     };
-    const capped: GameState = { ...withPersonalFailures, legendaryPity: 100 };
+    const capped: GameState = { ...withPersonalFailures, legendaryPity: 20 };
 
     expect(getLegendaryEnrollmentChance(base.state, "eva-parodi")).toBeCloseTo(0.35);
     expect(getLegendaryEnrollmentChance(withPersonalFailures, "eva-parodi")).toBeCloseTo(0.41);
@@ -110,9 +110,9 @@ describe("Legendary Pity", () => {
   });
 
   it("resets on a standard Legendary enrollment and increments on its failure", () => {
-    const pity = 20;
+    const pity = 4;
     const chanceWithoutPity = 0.15;
-    const chanceWithPity = chanceWithoutPity + pity / 100;
+    const chanceWithPity = chanceWithoutPity + pity * 0.05;
     const successOnlyWithPitySeed = findSeed(
       (roll) => roll >= chanceWithoutPity && roll < chanceWithPity,
     );
@@ -149,7 +149,7 @@ describe("Legendary Pity", () => {
 
   it("makes a 100% Pity trial guaranteed even when no sword is available", () => {
     const prepared = createTrialState({
-      legendaryPity: 85,
+      legendaryPity: 17,
       resultSeed: 1,
       specialProfileId: "eva-parodi",
     });

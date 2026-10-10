@@ -238,7 +238,7 @@ describe("prenotazione delle spade", () => {
       cancellationReason: "equipment",
     });
     expect(cancelled.contacts[0].status).toBe("lost");
-    expect(cancelled.legendaryPity).toBe(1);
+    expect(cancelled.legendaryPity).toBe(0);
   });
 
   it("svolge senza spada una prova con iscrizione effettiva al 100%", () => {

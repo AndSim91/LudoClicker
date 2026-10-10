@@ -38,43 +38,57 @@ export function getLegendaryAppearanceChance(): number {
   return PERSON_RARITIES.legendary.queueAppearanceChance;
 }
 
+/** Contacts still on their way to the school, or enrolled. */
+const PIPELINE_STATUSES: ReadonlySet<Contact["status"]> = new Set([
+  "available", "writing", "invited", "trialScheduled", "enrolled",
+]);
+
 /**
- * Spinta verso il Consiglio (09/10, first school only, for the tutorial): from
- * the first Torneo Scolastico, every month without 8 collaborators adds 1%
- * to both the Leggendario and the Ultra Raro appearance, after the malus. The
- * sum shrinks by 12,5% per collaborator and by 5/7,5/10% per enrolled Ultra
- * Raro not yet a collaborator (no Forms / Forma 1 / Forma 2); gone at 8.
+ * Spinta verso il Consiglio (10/10, first school only, for the tutorial): from
+ * the first Torneo Scolastico, every month without 8 collaborators adds 5% to
+ * the Ultra Raro appearance, with no cap. The whole sum shrinks by 12,5% for
+ * every Ultra Raro or Leggendario waiting for the email, in a trial or
+ * enrolled: at 8 it is zero, but it keeps growing behind and comes back if
+ * some of them are lost. `extraPipeline` counts those met in the same batch.
  */
 export function getCouncilBoost(
   state: Pick<GameState, "network" | "tournaments" | "school" | "collaborators" | "contacts">,
+  extraPipeline = 0,
 ): number {
   const startMonth = state.tournaments.firstSchoolTournamentMonth;
-  const collaborators = state.collaborators.length;
-  if (state.network.schoolCount > 0 || startMonth === undefined || collaborators >= 8) return 0;
+  if (state.network.schoolCount > 0 || startMonth === undefined || state.collaborators.length >= 8) return 0;
   const steps = Math.floor((state.school.currentMonth - startMonth) / GAME_CONFIG.councilBoostMonthsPerStep);
   if (steps <= 0) return 0;
-  const collaboratorContactIds = new Set(state.collaborators.map((collaborator) => collaborator.contactId));
-  let reduction = collaborators * 0.125;
+  let pipeline = extraPipeline;
   for (const contact of state.contacts) {
-    if (contact.rarity !== "ultra-rare" || contact.status !== "enrolled" ||
-      collaboratorContactIds.has(contact.id)) continue;
-    const forms = contact.forms ?? [];
-    reduction += forms.includes("form-2") ? 0.1 : forms.includes("form-1") ? 0.075 : 0.05;
+    if ((contact.rarity === "ultra-rare" || contact.rarity === "legendary") &&
+      PIPELINE_STATUSES.has(contact.status)) pipeline += 1;
   }
-  return steps * GAME_CONFIG.councilBoostPerStep * Math.max(0, 1 - reduction);
+  return steps * GAME_CONFIG.councilBoostPerStep * Math.max(0, 1 - pipeline * 0.125);
+}
+
+/** Leggendari enrolled, waiting for the email or in a trial (a failed trial frees the slot). */
+export function getPipelineLegendaryCount(state: Pick<GameState, "contacts">): number {
+  const ids = new Set<string>();
+  for (const contact of state.contacts) {
+    if (contact.specialProfileId && PIPELINE_STATUSES.has(contact.status)) ids.add(contact.specialProfileId);
+  }
+  return ids.size;
 }
 
 /**
- * Leggendari in squadra (09/10): every Leggendario enrolled in this school
- * beyond the first takes 25% off the chance of meeting the others, in the
- * contacts and (Secret) in tournaments. The career Reputation softens it in a
+ * Leggendari in squadra (09/10, 75% dal 10/10): every Leggendario of this
+ * school beyond the first takes 75% off the chance of meeting the others. In
+ * the contacts it counts those enrolled, waiting for the email or in a trial
+ * (`rosterCount`); in tournaments (Secret) the enrolled ones. The career Reputation softens it in a
  * straight line and cancels it at 25 points; from 25 to 50 the base rises to
  * double, then stays there.
  */
 export function getLegendaryEncounterMultiplier(
   state: Pick<GameState, "legendaryCollaborators" | "statistics">,
+  rosterCount = state.legendaryCollaborators.enrolledProfileIds.length,
 ): number {
-  const extra = Math.max(0, state.legendaryCollaborators.enrolledProfileIds.length - 1);
+  const extra = Math.max(0, rosterCount - 1);
   const reputation = getCareer(state).reputationEarned;
   const neutral = GAME_CONFIG.legendaryMalusReputationNeutral;
   const bonusSpan = GAME_CONFIG.legendaryBonusReputationMax - neutral;
@@ -176,11 +190,9 @@ function chooseLegendaryProfile(
   guaranteed = false,
   /** Leggende in visita (Network delle Onde). */
   chanceMultiplier = 1,
-  /** Spinta verso il Consiglio, added after every multiplier. */
-  chanceBonus = 0,
 ) {
   const [appearanceRoll, seedAfterAppearance] = nextRandom(seed);
-  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance() * chanceMultiplier + chanceBonus) {
+  if (!guaranteed && appearanceRoll >= getLegendaryAppearanceChance() * chanceMultiplier) {
     return { profile: undefined, legendaryRolled: false, nextSeed: seedAfterAppearance };
   }
   const candidates: LegendaryCandidate[] = [
@@ -334,9 +346,9 @@ export function createAcquiredContacts(
   const contactIds = new Set(state.contacts.map((contact) => contact.id));
   let nextSequence = state.statistics.contactsAcquired;
   const currentSchoolContactCount = getCurrentSchoolContactCount(state);
-  const legendaryChanceMultiplier = (1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus")) *
-    getLegendaryEncounterMultiplier(state);
-  const councilBoost = getCouncilBoost(state);
+  const legendsVisitMultiplier = 1 + getUpgradeEffectTotal(state.upgrades, "legendaryAppearanceBonus");
+  let pipelineLegendaries = getPipelineLegendaryCount(state);
+  let addedPipeline = 0;
   const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
   const contacts = Array.from({ length: count }, (_, index) => {
     const queuePosition = currentSchoolContactCount + index + 1;
@@ -363,8 +375,7 @@ export function createAcquiredContacts(
           reservedProfileIds,
           progress,
           false,
-          legendaryChanceMultiplier,
-          councilBoost,
+          legendsVisitMultiplier * getLegendaryEncounterMultiplier(state, pipelineLegendaries),
         )
         : { profile: undefined, legendaryRolled: false, nextSeed };
     const specialProfile = selected.profile;
@@ -376,6 +387,7 @@ export function createAcquiredContacts(
       : undefined;
     nextSeed = selected.nextSeed;
     if (specialProfile) {
+      pipelineLegendaries += 1;
       progress = addLegendaryEncounter(progress, specialProfile.id);
       reservedProfileIds.add(specialProfile.id);
     }
@@ -386,9 +398,10 @@ export function createAcquiredContacts(
       : selected.legendaryRolled
         ? { rarity: "ultra-rare" as const, nextSeed }
       : advancedRaritiesUnlocked
-        ? chooseOrdinaryRarity(nextSeed, state.collaborators.length, councilBoost)
+        ? chooseOrdinaryRarity(nextSeed, state.collaborators.length, getCouncilBoost(state, addedPipeline))
         : chooseEarlyRarity(nextSeed);
     if (ordinary) nextSeed = ordinary.nextSeed;
+    if (specialProfile || ordinary?.rarity === "ultra-rare") addedPipeline += 1;
     const generated = createRandomProspect(nextSeed, specialProfile);
     const { firstName, lastName } = generated;
     const email = specialProfile

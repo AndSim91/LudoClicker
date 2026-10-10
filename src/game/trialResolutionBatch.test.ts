@@ -88,7 +88,7 @@ describe("trial resolution batching", () => {
       "lost",
       "enrolled",
     ]);
-    expect(resolved.legendaryPity).toBe(4);
+    expect(resolved.legendaryPity).toBe(0);
   });
 
   it("applies a legendary Pity increase before resolving the next trial", () => {

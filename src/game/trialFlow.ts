@@ -66,7 +66,9 @@ export function processScheduledTrialStarts(
       cancellationReason: "equipment",
     });
     cancelledTrialsCount += 1;
-    legendaryPity = incrementLegendaryPity(legendaryPity);
+    if (contactsById?.get(trial.contactId)?.specialProfileId) {
+      legendaryPity = incrementLegendaryPity(legendaryPity);
+    }
 
     const mutableContactsById = contactsById;
     const contact = mutableContactsById?.get(trial.contactId);

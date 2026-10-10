@@ -32,10 +32,21 @@ function isTutorialAndrea(state: GameState, contactId: string): boolean {
       ANDREA_SIMONAZZI_ID;
 }
 
+/**
+ * Spinta verso il Consiglio (10/10): in the first school, until 8
+ * collaborators, A.N.D.E.R. puts Ultra Rari and Leggendari on top of the mail.
+ */
+function findPriorityContact(state: GameState) {
+  if (state.network.schoolCount > 0 || state.collaborators.length >= 8) return undefined;
+  return state.contacts.find((contact) => contact.status === "available" &&
+    (contact.rarity === "ultra-rare" || contact.rarity === "legendary"));
+}
+
 export function startNextCampaign(currentState: GameState, now: number): GameState {
   if (selectActiveEmail(currentState)) return currentState;
   let state = currentState;
-  let nextContact = state.contacts.find((contact) => contact.status === "available");
+  let nextContact = findPriorityContact(state) ??
+    state.contacts.find((contact) => contact.status === "available");
   if (!nextContact) {
     const pooled = materializePooledContact(state, now);
     if (!pooled) return state;

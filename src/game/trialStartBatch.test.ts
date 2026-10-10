@@ -69,19 +69,20 @@ describe("processScheduledTrialStarts", () => {
     });
     expect(started.equipment.availableSwords).toBe(0);
     expect(started.statistics.contactsLost).toBe(state.statistics.contactsLost + 2);
-    expect(started.legendaryPity).toBe(state.legendaryPity + 2);
+    // Pity (10/10): only Leggendari move it.
+    expect(started.legendaryPity).toBe(state.legendaryPity);
   });
 
   it("applies cancellation pity before deciding the next legendary trial", () => {
     const state = createTrialStartState(2, 0);
-    state.legendaryPity = 84;
+    state.legendaryPity = 16;
     state.contacts = state.contacts.map((contact) => ({
       ...contact,
       rarity: "legendary",
       specialProfileId: "eva-parodi",
     }));
 
-    expect(getLegendaryEnrollmentChance(state, "eva-parodi")).toBeCloseTo(0.99);
+    expect(getLegendaryEnrollmentChance(state, "eva-parodi")).toBeCloseTo(0.95);
 
     const started = processScheduledTrialStarts(state, NOW);
 
@@ -95,7 +96,7 @@ describe("processScheduledTrialStarts", () => {
     });
     expect(started.contacts[0].status).toBe("lost");
     expect(started.contacts[1].status).toBe("trialScheduled");
-    expect(started.legendaryPity).toBe(85);
+    expect(started.legendaryPity).toBe(17);
     expect(started.statistics.contactsLost).toBe(state.statistics.contactsLost + 1);
   });
 
@@ -141,7 +142,7 @@ describe("processScheduledTrialStarts", () => {
         cancelledCount,
       );
       expect(started.statistics.contactsLost).toBe(state.statistics.contactsLost + cancelledCount);
-      expect(started.legendaryPity).toBe(state.legendaryPity + cancelledCount);
+      expect(started.legendaryPity).toBe(state.legendaryPity);
       expect(started.equipment.availableSwords).toBe(0);
     },
   );

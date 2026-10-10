@@ -370,34 +370,41 @@ spostava al luglio successivo (94 minuti invece di 82,5). Quello che perdono va 
 una nuova scuola usano il 7,5%.
 
 La comparsa dei **Leggendari** dipende dai Leggendari già in squadra e dalla
-Reputazione di carriera (decisione di Andrea del 09/10,
+Reputazione di carriera (decisioni di Andrea del 09/10 e del 10/10,
 `getLegendaryEncounterMultiplier` in `contacts.ts`):
 
 ```text
-extra       = max(0, Leggendari iscritti nella scuola − 1)
+extra       = max(0, Leggendari della scuola − 1)
 mitigazione = min(Reputazione di carriera, 25) / 25
-malus       = 0,75 ^ (extra × (1 − mitigazione))
+malus       = 0,25 ^ (extra × (1 − mitigazione))
 bonus       = 1 + clamp(Reputazione di carriera − 25, 0, 25) / 25
 comparsa    = 5% × malus × bonus × Leggende in visita
 ```
 
-Il primo Leggendario non conta (Andrea Simonazzi nella prima scuola, il
-Leggendario portato alla fondazione nelle successive); i Leggendari Segreti
-iscritti contano. La Reputazione di carriera è il totale guadagnato alle
+Nei contatti contano i Leggendari iscritti, quelli in coda per l'email e quelli
+con la prova prenotata (`getPipelineLegendaryCount`); chi fallisce la prova non
+conta più finché non torna tra i contatti. Il primo non conta (Andrea Simonazzi
+nella prima scuola, il Leggendario portato alla fondazione nelle successive); i
+Leggendari Segreti contano. Nei tornei (Segreti) contano gli iscritti. La Reputazione di carriera è il totale guadagnato alle
 fondazioni (`statistics.career.reputationEarned`), speso o no: a 25 punti il
 malus sparisce, a 50 la comparsa raddoppia (10%) e poi resta lì. Quello che il
 Leggendario perde va alle altre rarità in proporzione. Esempi a Reputazione 0:
-5% con 1 Leggendario, 3,75% con 2, 2,11% con 4, 0,67% con 8, 0,21% con 12.
-**Spinta verso il Consiglio** (decisione di Andrea del 09/10, solo nella prima
-scuola, al servizio del tutorial; `getCouncilBoost` in `contacts.ts`): dal mese
-del primo Torneo Scolastico (fine della 1ª tappa della storia,
-`tournaments.firstSchoolTournamentMonth`), ogni mese senza 8 collaboratori
-aggiunge l'1% sia alla comparsa dei Leggendari sia a quella degli Ultra Rari,
-sommato dopo malus, Reputazione e Leggende in visita. Il totale accumulato si
-riduce del 12,5% per ogni collaboratore e, per gli Ultra Rari iscritti non
-ancora collaboratori, del 5% (senza Forme), 7,5% (Forma 1) o 10% (Forma 2);
-la riduzione arriva al massimo al 100%. Con 8 collaboratori il bonus sparisce.
-Obiettivo: il Consiglio delle Onde attivo prima del primo titolo Accademico.
+5% con 1 Leggendario, 1,25% con 2, 0,31% con 3, 0,08% con 4.
+
+**Spinta verso il Consiglio** (decisioni di Andrea del 09–10/10, solo nella
+prima scuola, al servizio del tutorial). Obiettivo: il Consiglio delle Onde
+attivo prima del primo titolo Accademico, con molti Ultra Rari.
+
+- Dal mese del primo Torneo Scolastico (fine della 1ª tappa della storia,
+  `tournaments.firstSchoolTournamentMonth`), ogni mese senza 8 collaboratori
+  aggiunge il 5% alla comparsa degli Ultra Rari, senza tetto
+  (`getCouncilBoost` in `contacts.ts`). Il totale si riduce del 12,5% per ogni
+  Ultra Raro o Leggendario in coda per l'email, in prova o iscritto: a 8 è zero,
+  ma continua a crescere e torna attivo se qualcuno fallisce la prova o non si
+  presenta. Con 8 collaboratori sparisce.
+- Finché non ci sono 8 collaboratori, la prossima email va prima agli Ultra Rari
+  e ai Leggendari in coda (A.N.D.E.R. li mette in cima alla posta,
+  `startNextCampaign` in `emailFlow.ts`).
 
 Lo stesso moltiplicatore riduce, nei tornei, la comparsa del primo Leggendario
 Segreto prima della prima vittoria (§ Leggendari Segreti in
@@ -421,12 +428,12 @@ disponibile, una sola volta, un contatto non iscritto dopo la prova (esclusi i
 Leggendari Segreti), che riceverà così una seconda email.
 
 Il **Pity** è un contatore globale interno e non viene mostrato
-nell'interfaccia. Ogni prova in palestra che non produce un'iscrizione, comprese
-quelle annullate per mancanza di spade, aggiunge 1 al contatore. Nelle prove dei
-Leggendari ordinari e Segreti, ogni punto Pity aggiunge un punto percentuale
-alla probabilità già calcolata, fino al 100%. L'iscrizione di un Leggendario
-ordinario o Segreto riporta Pity a zero; l'iscrizione di qualunque altra rarità
-lo lascia invariato. Il bonus personale dei Leggendari resta separato: ogni loro
+nell'interfaccia. Dal 10/10 conta solo le prove dei Leggendari (ordinari e
+Segreti): ognuna che non produce un'iscrizione, comprese quelle annullate per
+mancanza di spade, aggiunge 1 al contatore, e ogni punto aggiunge il 5% alla
+probabilità d'iscrizione del Leggendario successivo, senza tetto al contatore
+(la probabilità arriva al massimo al 100%). L'iscrizione di un Leggendario
+riporta Pity a zero; le prove delle altre rarità non lo toccano. Il bonus personale dei Leggendari resta separato: ogni loro
 precedente tentativo fallito aggiunge 3 punti percentuali entro il massimo
 ordinario del 35%, poi si applica Pity oltre quel limite.
 
@@ -879,7 +886,7 @@ probabilitàIscrizioneDopoProva = clamp(
 )
 
 probabilitàIscrizioneLeggendario = min(
-  probabilitàIscrizioneDopoProva + Pity / 100,
+  probabilitàIscrizioneDopoProva + Pity × 5%,
   1
 )
 ```
@@ -891,8 +898,9 @@ probabilitàIscrizioneLeggendario = min(
 | Ultra Raro  |                   75% → 95% |             23,33% → 50% |
 | Leggendario |                 100% → 100% |                 15% → 35% |
 
-Il Pity aumenta di 1 a ogni prova non conclusa con un'iscrizione (anche se
-annullata per mancanza di spade) e si azzera quando si iscrive un Leggendario.
+Il Pity aumenta di 1 a ogni prova di un Leggendario non conclusa con
+un'iscrizione (anche se annullata per mancanza di spade) e si azzera quando si
+iscrive un Leggendario.
 
 > **Da implementare:** i fattori moltiplicativi della formula originaria (moltiplicatore di scrittura e di reputazione, bonus prestigio, qualità della lezione, stato dell'attrezzatura) non entrano nelle probabilità di prenotazione e iscrizione.
 

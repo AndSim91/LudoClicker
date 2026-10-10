@@ -85,14 +85,15 @@ export const GAME_CONFIG = {
   // Event contacts halve for every 1.000 active members beyond the first ten.
   eventContactHalvingMembers: 1_000,
   ultraRareMinimumAppearanceChance: 0.015,
-  // Leggendari in squadra (09/10): each one beyond the first takes 25% off the
-  // others' appearance; career Reputation cancels it at 25 points and doubles
-  // the base at 50 (src/game/contacts.ts, getLegendaryEncounterMultiplier).
-  legendaryRosterMalus: 0.75,
-  // Spinta verso il Consiglio (09/10): first school only, from the first Torneo
-  // Scolastico until 8 collaborators, +1% Leggendari and Ultra Rari every month.
+  // Leggendari in squadra (10/10): each one beyond the first (enrolled, waiting
+  // for the email or in a trial) takes 75% off the others' appearance; career
+  // Reputation cancels it at 25 points and doubles the base at 50
+  // (src/game/contacts.ts, getLegendaryEncounterMultiplier).
+  legendaryRosterMalus: 0.25,
+  // Spinta verso il Consiglio (10/10): first school only, from the first Torneo
+  // Scolastico until 8 collaborators, +5% Ultra Rari every month.
   councilBoostMonthsPerStep: 1,
-  councilBoostPerStep: 0.01,
+  councilBoostPerStep: 0.05,
   legendaryMalusReputationNeutral: 25,
   legendaryBonusReputationMax: 50,
   ultraRareDeclineStartCollaborators: 8,

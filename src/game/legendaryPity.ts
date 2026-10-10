@@ -1,4 +1,5 @@
-const CHANCE_PER_PITY_POINT = 0.01;
+// Pity (10/10): only failed Leggendario trials count, +5% each, no cap.
+const CHANCE_PER_PITY_POINT = 0.05;
 
 export function applyLegendaryPityBonus(
   enrollmentChance: number,
@@ -16,6 +17,6 @@ export function updateLegendaryPityAfterTrial(
   enrolled: boolean,
   isLegendaryTrial: boolean,
 ): number {
-  if (enrolled) return isLegendaryTrial ? 0 : legendaryPity;
-  return incrementLegendaryPity(legendaryPity);
+  if (!isLegendaryTrial) return legendaryPity;
+  return enrolled ? 0 : incrementLegendaryPity(legendaryPity);
 }
