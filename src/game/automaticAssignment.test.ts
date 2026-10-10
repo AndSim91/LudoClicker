@@ -208,13 +208,13 @@ describe("Istruttori in e-Learning", () => {
   it("starts Forma 1 as an instructor (learn and qualify) when there are funds", () => {
     const started = startELearningInstructorCourses(withInstructor(), 5_000);
     const training = started.collaborators[1].training;
-    expect(training).toMatchObject({ formId: "form-1", includesInstructorCertification: true });
+    expect(training).toMatchObject({ formId: "form-1", includesInstructorCertification: true, eLearning: true });
     expect(started.school.euros).toBeLessThan(1_000);
   });
 
   it("only qualifies them when they already know Forma 1", () => {
     const started = startELearningInstructorCourses(withInstructor({ forms: ["form-1"] }), 5_000);
-    expect(started.collaborators[1].training).toMatchObject({ formId: "form-1", trainingTrack: "instructor" });
+    expect(started.collaborators[1].training).toMatchObject({ formId: "form-1", trainingTrack: "instructor", eLearning: true });
   });
 
   it("waits without funds and starts as soon as the money is there", () => {

@@ -27,6 +27,7 @@ import type {
   Collaborator,
   Contact,
   FormBranch,
+  FormId,
   FormTraining,
   GameState,
   InboxMessage,
@@ -174,10 +175,26 @@ function replacePersonTraining(
   if (collaborator) updateCollaborator(context, { ...collaborator, training });
 }
 
-function getExamFailureChance(
+function getContextCollaborator(
+  context: TrainingResolutionContext,
+  id: string | undefined,
+): Collaborator | undefined {
+  return id
+    ? context.collaboratorUpdates.get(id) ?? context.collaboratorsById.get(id)
+    : undefined;
+}
+
+/**
+ * Hidden exam odds. e-Learning malus (+15 points, 25% penalty): a self-taught
+ * e-Learning athlete phase, an e-Learning Istruttore phase (not the refresher),
+ * and students of an Istruttore qualified through e-Learning. Students of an
+ * Istruttore who is also Tecnico of the Form get −15 points.
+ */
+export function getExamProfile(
   state: GameState,
   training: FormTraining,
-): number | undefined {
+  teacher: Collaborator | undefined,
+): { failureChance: number; penaltyShare: number } | undefined {
   const phase = getTrainingPhase(training);
   const baseFailureChance = phase === "athlete"
     ? 0.55
@@ -187,10 +204,28 @@ function getExamFailureChance(
         ? 0.45
         : undefined;
   if (baseFailureChance === undefined) return undefined;
-  return Math.max(
-    0,
-    baseFailureChance - getTrainingExamSuccessChanceBonus(state.upgrades),
-  );
+  let modifier = 0;
+  let eLearning = false;
+  if (phase === "athlete") {
+    if (!teacher) eLearning = Boolean(training.eLearning);
+    else if ((teacher.technicianForms ?? []).includes(training.formId as FormId)) {
+      modifier -= GAME_CONFIG.technicianTeacherExamBonus;
+    } else {
+      eLearning = (teacher.eLearningInstructorForms ?? []).includes(training.formId as FormId);
+    }
+  } else if (phase === "instructor") {
+    eLearning = Boolean(training.eLearning && !training.refresher);
+  }
+  if (eLearning) modifier += GAME_CONFIG.eLearningExamFailureMalus;
+  return {
+    failureChance: Math.max(
+      0,
+      baseFailureChance + modifier - getTrainingExamSuccessChanceBonus(state.upgrades),
+    ),
+    penaltyShare: eLearning
+      ? GAME_CONFIG.eLearningExamFailurePenaltyShare
+      : GAME_CONFIG.examFailurePenaltyShare,
+  };
 }
 
 function getFallbackTrainingBaseDuration(training: FormTraining): number {
@@ -213,11 +248,15 @@ function resolveHiddenExam(
   personId: string,
   training: FormTraining,
 ): boolean {
-  const failureChance = getExamFailureChance(context.state, training);
-  if (failureChance === undefined) return true;
+  const exam = getExamProfile(
+    context.state,
+    training,
+    getContextCollaborator(context, training.instructorId),
+  );
+  if (!exam) return true;
   const [roll, nextSeed] = nextRandom(context.state.randomSeed);
   context.state = { ...context.state, randomSeed: nextSeed };
-  if (roll >= failureChance) return true;
+  if (roll >= exam.failureChance) return true;
 
   const baseDuration = training.trainingBaseDurationMs ??
     getFallbackTrainingBaseDuration(training);
@@ -231,7 +270,7 @@ function resolveHiddenExam(
     ...training,
     completesAt: context.now + Math.max(
       GAME_CONFIG.minimumTrainingDurationMs,
-      Math.round(baseDuration * 0.1 * durationMultiplier),
+      Math.round(baseDuration * exam.penaltyShare * durationMultiplier),
     ),
     examFailures: (training.examFailures ?? 0) + 1,
     trainingBaseDurationMs: baseDuration,
@@ -257,12 +296,22 @@ function resolveInstructorOrTechnicianPhase(
     return true;
   }
 
+  // e-Learning qualification marks the Form; a manual course, a refresher or
+  // the Corso Tecnici clears it.
+  const eLearningQualification = phase === "instructor" &&
+    Boolean(training.eLearning && !training.refresher);
+  const otherELearningForms = (collaborator.eLearningInstructorForms ?? [])
+    .filter((formId) => formId !== training.formId);
+  const eLearningInstructorForms = eLearningQualification
+    ? [...otherELearningForms, training.formId]
+    : otherELearningForms;
   const updated: Collaborator = phase === "instructor"
     ? {
         ...collaborator,
         instructorForms: collaborator.instructorForms.includes(training.formId)
           ? collaborator.instructorForms
           : [...collaborator.instructorForms, training.formId],
+        eLearningInstructorForms,
         training: undefined,
       }
     : {
@@ -270,6 +319,7 @@ function resolveInstructorOrTechnicianPhase(
         technicianForms: (collaborator.technicianForms ?? []).includes(training.formId)
           ? collaborator.technicianForms
           : [...(collaborator.technicianForms ?? []), training.formId],
+        eLearningInstructorForms,
         training: undefined,
       };
   updateCollaborator(context, updated);
@@ -277,12 +327,18 @@ function resolveInstructorOrTechnicianPhase(
   context.state = context.dependencies.addMessage(
     context.state,
     context.now,
-    phase === "instructor"
-      ? `${collaborator.displayName} insegna ${definition.longName}`
-      : `${collaborator.displayName}, Tecnico di ${definition.longName}`,
-    phase === "instructor"
-      ? `Attestato in tasca: da oggi ${definition.longName} la spiega a chi entra.`
-      : "Corso finito. Adesso sa anche perché si fa così.",
+    phase === "technician"
+      ? `${collaborator.displayName}, Tecnico di ${definition.longName}`
+      : training.refresher
+        ? `${collaborator.displayName} aggiornato su ${definition.longName}`
+        : `${collaborator.displayName} insegna ${definition.longName}`,
+    phase === "technician"
+      ? "Corso finito. Adesso sa anche perché si fa così."
+      : training.refresher
+        ? "Il Tecnico ha corretto due o tre cose imparate in video. Da oggi è un Istruttore a tutti gli effetti."
+        : eLearningQualification
+          ? `Attestato scaricato in PDF: da oggi ${definition.longName} la spiega a chi entra. Più o meno.`
+          : `Attestato in tasca: da oggi ${definition.longName} la spiega a chi entra.`,
     "positive",
     "other",
     "training",
@@ -421,6 +477,7 @@ function resolveTraining(
           includesInstructorCertification: true,
           trainingTrack: "combined-instructor",
           trainingPhase: "instructor",
+          ...(training.eLearning ? { eLearning: true } : {}),
         },
         context.teachingCounts,
       )

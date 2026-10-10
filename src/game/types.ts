@@ -51,6 +51,10 @@ export interface FormTraining {
   instructorTrainingDurationMultiplier?: number;
   agonistCourseSlotsConsumed?: number;
   agonistCourseGrantsStats?: boolean;
+  /** Started by «Istruttori in e-Learning»: self-taught phases and the Istruttore phase take the e-Learning malus. */
+  eLearning?: boolean;
+  /** Corso di aggiornamento: a Tecnico turns an e-Learning Istruttore into a normal one. */
+  refresher?: boolean;
 }
 
 export interface Contact {
@@ -477,6 +481,8 @@ export interface Collaborator {
   forms: FormId[];
   instructorForms: FormId[];
   technicianForms?: FormId[];
+  /** Forms qualified through «Istruttori in e-Learning» (subset of instructorForms). */
+  eLearningInstructorForms?: FormId[];
   technicianCourseReservation?: TechnicianCourseReservation;
   formBranchPreferences?: FormBranch[];
   assignment: CollaboratorAssignment;
@@ -495,6 +501,7 @@ export interface RetainedLegendaryProgress {
   forms: FormId[];
   instructorForms: FormId[];
   technicianForms?: FormId[];
+  eLearningInstructorForms?: FormId[];
   formBranchPreferences?: FormBranch[];
   joinedAt: number;
   mastery?: CollaboratorMastery;

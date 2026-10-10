@@ -469,19 +469,24 @@ function processInstructorQualifications(
       collaborator.training ||
       activeTechnicianIds.has(collaborator.id)
     ) return [];
-    return collaborator.forms.flatMap((formId) =>
-      (!courseXUnlocked && formId === "course-x") ||
-      (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) ||
-        collaborator.instructorForms.includes(formId) ||
+    const eLearningForms = collaborator.eLearningInstructorForms ?? [];
+    return collaborator.forms.flatMap((formId) => {
+      // An e-Learning Istruttore gets the Corso di aggiornamento, after everyone
+      // who does not teach the Form yet.
+      const refresher = eLearningForms.includes(formId);
+      return (!courseXUnlocked && formId === "course-x") ||
+        (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) ||
+        (collaborator.instructorForms.includes(formId) && !refresher) ||
         !availableTechnicianForms.has(formId)
         ? []
         : [{
             collaboratorId: collaborator.id,
             formId,
+            refresher,
             rank: getFormProgressionRank(formId),
             joinedAt: collaborator.joinedAt,
-          }]
-    );
+          }];
+    });
   });
   if (qualificationCandidates.length === 0) return state;
   const demandByForm = getInstructorCourseDemandByForm(
@@ -492,6 +497,7 @@ function processInstructorQualifications(
     ...candidate,
     demand: demandByForm.get(candidate.formId) ?? 0,
   })).sort((left, right) =>
+    Number(left.refresher) - Number(right.refresher) ||
     left.rank - right.rank ||
     right.demand - left.demand ||
     left.joinedAt - right.joinedAt ||
@@ -520,7 +526,8 @@ function processInstructorQualifications(
     if (!technician) continue;
     const cost = applyQualifyingCourseDiscount(
       nextState.upgrades,
-      getInternalInstructorQualificationCost(definition.cost),
+      getInternalInstructorQualificationCost(definition.cost) *
+        (candidate.refresher ? GAME_CONFIG.refresherCourseCostShare : 1),
     );
     if (getSpendableEuros(nextState) < cost) break;
 
@@ -528,7 +535,8 @@ function processInstructorQualifications(
       nextState,
       candidate.collaboratorId,
       now,
-      getInstructorQualificationDuration(definition.durationMs) /
+      getInstructorQualificationDuration(definition.durationMs) *
+        (candidate.refresher ? GAME_CONFIG.refresherCourseDurationShare : 1) /
         (getCollaboratorProductivity(trainee, "instructor") *
           getReptileOrdinaryShare(nextState, "instructor")),
       {
@@ -540,6 +548,7 @@ function processInstructorQualifications(
         includesInstructorCertification: true,
         trainingTrack: "instructor",
         trainingPhase: "instructor",
+        ...(candidate.refresher ? { refresher: true } : {}),
       },
     );
     nextState = {

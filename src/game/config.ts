@@ -36,6 +36,16 @@ export const GAME_CONFIG = {
   // ponytail: scadenze vicine si risolvono nello stesso passo (al più 250 ms dopo); passi più fitti costavano CPU senza cambiare il gioco.
   minTickStepMs: 250,
   minimumTrainingDurationMs: 1_000,
+  /** Hidden exam: a failed exam adds this share of the base duration. */
+  examFailurePenaltyShare: 0.1,
+  /** Istruttori in e-Learning: +15 points of failure and a heavier penalty. */
+  eLearningExamFailureMalus: 0.15,
+  eLearningExamFailurePenaltyShare: 0.25,
+  /** An Istruttore who is also Tecnico of the Form: −15 points of failure for their students. */
+  technicianTeacherExamBonus: 0.15,
+  /** Corso di aggiornamento: share of a normal Corso Istruttori with a Tecnico. */
+  refresherCourseDurationShare: 0.5,
+  refresherCourseCostShare: 0.25,
   instructorTrainingWhileTeachingDurationMultiplier: 3,
   sendDelayMs: 350,
   maxAutomatedEmailsPerStep: 50,

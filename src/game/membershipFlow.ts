@@ -72,6 +72,7 @@ export function departMembers(
       forms: [...(collaborator?.forms ?? member.forms)],
       instructorForms: [...(collaborator?.instructorForms ?? [])],
       technicianForms: [...(collaborator?.technicianForms ?? [])],
+      eLearningInstructorForms: [...(collaborator?.eLearningInstructorForms ?? [])],
       formBranchPreferences: [
         ...(collaborator?.formBranchPreferences ?? member.formBranchPreferences ?? []),
       ],

@@ -21,7 +21,7 @@ export function getELearningForms(tier: number, courseXUnlocked: boolean): FormI
  * of the list on their own — the same course as the button in the Centro
  * didattico («Abilita» if they already know the Form, «Impara e abilita»
  * otherwise). Without funds, slots or swords nothing happens and it is tried
- * again at the next tick. Someone finishing lessons before changing sector is
+ * again at the next tick. The course is marked `eLearning`: see the hidden exam. Someone finishing lessons before changing sector is
  * left out.
  */
 export function startELearningInstructorCourses(state: GameState, now: number): GameState {
@@ -40,6 +40,16 @@ export function startELearningInstructorCourses(state: GameState, now: number): 
     .reduce((current, collaborator) => {
       const teaches = getVisibleForms(collaborator.instructorForms, courseXUnlocked);
       const next = forms.find((formId) => !teaches.includes(formId));
-      return next ? startFormTraining(current, collaborator.id, next, now) : current;
+      if (!next) return current;
+      const started = startFormTraining(current, collaborator.id, next, now);
+      // Marked so the exam knows: self-taught or e-Learning Istruttore phases take the malus.
+      return started === current ? current : {
+        ...started,
+        collaborators: started.collaborators.map((candidate) =>
+          candidate.id === collaborator.id && candidate.training
+            ? { ...candidate, training: { ...candidate.training, eLearning: true } }
+            : candidate
+        ),
+      };
     }, state);
 }

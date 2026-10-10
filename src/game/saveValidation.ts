@@ -233,6 +233,8 @@ function hasValidTraining(training: GameState["contacts"][number]["training"]): 
     (training.agonistCourseGrantsStats === undefined ||
       typeof training.agonistCourseGrantsStats === "boolean") &&
     (training.technicianId === undefined || typeof training.technicianId === "string") &&
+    (training.eLearning === undefined || typeof training.eLearning === "boolean") &&
+    (training.refresher === undefined || typeof training.refresher === "boolean") &&
     (training.trainingTrack === undefined ||
       training.trainingTrack === "athlete" ||
       training.trainingTrack === "combined-instructor" ||
@@ -477,6 +479,10 @@ export function isValidGameState(value: unknown): value is GameState {
         (progress.technicianForms ?? []).every((formId) =>
           progress.forms.includes(formId) && progress.instructorForms.includes(formId)
         ) &&
+        isUniqueFormIdList(progress.eLearningInstructorForms ?? []) &&
+        (progress.eLearningInstructorForms ?? []).every((formId) =>
+          progress.instructorForms.includes(formId)
+        ) &&
         (progress.agonistCourseArenaBonus === undefined ||
           isNonNegativeSafeInteger(progress.agonistCourseArenaBonus)) &&
         (progress.agonistCourseStyleBonus === undefined ||
@@ -501,6 +507,10 @@ export function isValidGameState(value: unknown): value is GameState {
       isUniqueFormIdList(collaborator.technicianForms ?? []) &&
       (collaborator.technicianForms ?? []).every((formId) =>
         collaborator.forms.includes(formId) && collaborator.instructorForms.includes(formId)
+      ) &&
+      isUniqueFormIdList(collaborator.eLearningInstructorForms ?? []) &&
+      (collaborator.eLearningInstructorForms ?? []).every((formId) =>
+        collaborator.instructorForms.includes(formId)
       ) &&
       (collaborator.technicianCourseReservation === undefined || (
         isUniqueFormIdList([collaborator.technicianCourseReservation.formId]) &&

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./initialState";
 import { gameReducer } from "./engine";
+import { nextRandom } from "./random";
+import { getExamProfile } from "./trainingResolution";
 import type { Collaborator, FormId, FormTraining } from "./types";
 
 function qualifiedCollaborator(
@@ -226,5 +228,75 @@ describe("esami di formazione nascosti", () => {
     expect(instructorPassed.collaborators[0].instructorForms).toEqual(["form-1"]);
     expect(instructorPassed.collaborators[0].training).toBeUndefined();
     expect(instructorPassed.collaborators[0].formTrainingYearCount).toBe(1);
+  });
+
+  describe("malus di Istruttori in e-Learning", () => {
+    const initial = createInitialState(1_000, "", false);
+    const athleteCourse: FormTraining = { formId: "form-1", startedAt: 0, completesAt: 0, trainingPhase: "athlete", trainingTrack: "athlete" };
+    const instructorCourse: FormTraining = { ...athleteCourse, trainingPhase: "instructor", trainingTrack: "instructor" };
+    const teacher = (extra: Partial<Collaborator>): Collaborator => ({
+      ...qualifiedCollaborator(initial, athleteCourse),
+      training: undefined,
+      instructorForms: ["form-1"] as FormId[],
+      ...extra,
+    });
+    const profile = (training: FormTraining, by?: Collaborator) => {
+      const result = getExamProfile(initial, training, by);
+      return result && { failure: Math.round(result.failureChance * 100), penalty: result.penaltyShare };
+    };
+
+    it("sets the exam odds by who teaches and how the course started", () => {
+      expect(profile(athleteCourse, teacher({}))).toEqual({ failure: 55, penalty: 0.1 });
+      expect(profile(athleteCourse, teacher({ eLearningInstructorForms: ["form-1"] })))
+        .toEqual({ failure: 70, penalty: 0.25 });
+      expect(profile(athleteCourse, teacher({ technicianForms: ["form-1"] })))
+        .toEqual({ failure: 40, penalty: 0.1 });
+      // An e-Learning Istruttore of another Form teaches this one normally.
+      expect(profile(athleteCourse, teacher({ eLearningInstructorForms: ["form-2"] })))
+        .toEqual({ failure: 55, penalty: 0.1 });
+      // Self-taught: malus only when e-Learning started it, not from the button.
+      expect(profile({ ...athleteCourse, eLearning: true })).toEqual({ failure: 70, penalty: 0.25 });
+      expect(profile(athleteCourse)).toEqual({ failure: 55, penalty: 0.1 });
+      // Taught by a normal colleague, an e-Learning course has no athlete malus.
+      expect(profile({ ...athleteCourse, eLearning: true }, teacher({}))).toEqual({ failure: 55, penalty: 0.1 });
+      expect(profile({ ...instructorCourse, eLearning: true })).toEqual({ failure: 65, penalty: 0.25 });
+      expect(profile({ ...instructorCourse, refresher: true })).toEqual({ failure: 50, penalty: 0.1 });
+      expect(profile(instructorCourse)).toEqual({ failure: 50, penalty: 0.1 });
+    });
+
+    const seedWith = (test: (roll: number) => boolean) =>
+      Array.from({ length: 500 }, (_, index) => index + 1).find((seed) => test(nextRandom(seed)[0]))!;
+    const resolve = (training: FormTraining, extra: Partial<Collaborator>, randomSeed: number) => gameReducer({
+      ...initial,
+      contacts: [],
+      collaborators: [{ ...qualifiedCollaborator(initial, training), ...extra }],
+      randomSeed,
+    }, { type: "TICK", now: 2_000 }).collaborators[0];
+    const timed: FormTraining = {
+      ...instructorCourse,
+      startedAt: 1_000,
+      completesAt: 2_000,
+      status: "running",
+      trainingBaseDurationMs: 10_000,
+      trainingDurationMultiplier: 1,
+    };
+
+    it("delays a failed e-Learning qualification by 25%", () => {
+      const failed = resolve({ ...timed, eLearning: true }, {}, seedWith((roll) => roll < 0.5));
+      expect(failed.training?.completesAt).toBe(4_500);
+    });
+
+    it("marks the Form after e-Learning and clears it with a refresher or the Corso Tecnici", () => {
+      const pass = seedWith((roll) => roll > 0.9);
+      const eLearned = resolve({ ...timed, eLearning: true }, {}, pass);
+      expect(eLearned.instructorForms).toEqual(["form-1"]);
+      expect(eLearned.eLearningInstructorForms).toEqual(["form-1"]);
+
+      const marked = { instructorForms: ["form-1"] as FormId[], eLearningInstructorForms: ["form-1"] as FormId[] };
+      expect(resolve({ ...timed, refresher: true }, marked, pass).eLearningInstructorForms).toEqual([]);
+      const technician = resolve({ ...timed, trainingPhase: "technician", trainingTrack: "technician" }, marked, pass);
+      expect(technician.technicianForms).toEqual(["form-1"]);
+      expect(technician.eLearningInstructorForms).toEqual([]);
+    });
   });
 });

@@ -185,6 +185,15 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
           waiting.trainingTrack === "athlete" ? "student-only" : "standard",
         );
     if (restarted) {
+      const restartedCollaborator = waiting.eLearning
+        ? this.collaboratorsById.get(personId)
+        : undefined;
+      if (restartedCollaborator?.training) {
+        this.updateCollaborator({
+          ...restartedCollaborator,
+          training: { ...restartedCollaborator.training, eLearning: true },
+        });
+      }
       this.updateTeachingCount(
         restarted.training.instructorId ?? restarted.training.requestedInstructorId,
         1,

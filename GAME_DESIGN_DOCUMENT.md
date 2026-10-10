@@ -1758,6 +1758,18 @@ Regole:
 - ogni verifica non superata prolunga soltanto la fase interessata del **10%**
   della sua durata originaria; la verifica viene ripetuta al nuovo termine senza
   mostrare probabilità, fallimenti o messaggi al giocatore;
+- **Istruttori in e-Learning** (malus fisso): +15 punti percentuali di rischio
+  e prolungamento del **25%** invece del 10% per la fase da atleta imparata da
+  sola con l'e-Learning («Impara e abilita» senza un Istruttore della Forma),
+  per la fase da Istruttore avviata dall'e-Learning e per gli allievi di un
+  Istruttore abilitato con l'e-Learning in quella Forma. Gli allievi di un
+  Istruttore che è anche Tecnico della Forma hanno invece −15 punti. «Master of
+  none» si applica dopo. Solo i corsi avviati in automatico dall'upgrade sono
+  e-Learning: «Abilita» e «Impara e abilita» premuti a mano nel Centro didattico
+  restano normali (`getExamProfile` in `trainingResolution.ts`);
+- valori attesi con 55% di base: Istruttore normale 45% di promossi al primo
+  esame e +12% di durata media; Istruttore e-Learning 30% e +58%; Istruttore +
+  Tecnico 60% e +7%. Corso Istruttori normale +10%, e-Learning +46%;
 - le verifiche da atleta valgono per tutte le Forme e i Corsi che assegnano un
   badge, inclusi Corso X, Corso Y e le varianti di ramo. Arena Tecnica e Corso
   Agonisti sono esclusi;
@@ -1943,6 +1955,12 @@ Regole:
 - il Corso Istruttori interno costa il **75% del normale Corso Istruttori**,
   cioè il **187,5% del costo base**, e mantiene durata ed esame del modulo da
   Istruttore;
+- **corso di aggiornamento**: con la stessa automazione un Tecnico aggiorna gli
+  Istruttori abilitati con l'e-Learning nella sua Forma, dopo aver formato chi
+  non la insegna ancora. Dura il **50%** e costa il **25%** del Corso
+  Istruttori interno, ha l'esame normale da Istruttore e al termine l'Istruttore
+  è normale a tutti gli effetti. Anche diventare Tecnico della Forma toglie il
+  malus dell'e-Learning;
 - **Il costo del Servizio** riduce fino al 25% sia questi Corsi Istruttori sia
   i Corsi Tecnici SIS; non si applica ai percorsi da atleta;
 - i livelli 2–4 di **Tu conosci la SIS?** aumentano la velocità dei soli Corsi
@@ -2328,7 +2346,7 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Occhio del Maestro | L1 Arena e Stile visibili dopo il Corso Y; L2 visibili dall'iscrizione. Senza il nodo non si vedono mai | 1.000 / 10.000 € |
 | Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
 | Master of none | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 € |
-| Istruttori in e-Learning | gli Istruttori fanno da soli il corso da istruttore delle Forme, uno alla volta: L1 Forma 1; L2 anche Forma 2 (e Corso X, se sbloccato); L3 anche Corso Y. Mai oltre | 1.500 / 6.000 / 20.000 € |
+| Istruttori in e-Learning | gli Istruttori fanno da soli il corso da istruttore delle Forme, uno alla volta: L1 Forma 1; L2 anche Forma 2 (e Corso X, se sbloccato); L3 anche Corso Y. Mai oltre. Malus fisso agli esami (+15 punti, prolungamento 25%) finché un Tecnico non li aggiorna | 1.500 / 6.000 / 20.000 € |
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
@@ -2359,7 +2377,9 @@ lista che non sa ancora insegnare, con le stesse regole del pulsante del Centro
 didattico («Abilita» o «Impara e abilita»: costo, spade e posti annuali). Senza
 fondi riprova al tick successivo. Il Corso X entra con il livello 2 perché,
 quando è sbloccato, il percorso lo chiede prima di qualsiasi altra Forma
-(`automaticInstructorTraining.ts`).
+(`automaticInstructorTraining.ts`). Questi corsi sono marcati
+`eLearning` e la Forma abilitata così finisce in `eLearningInstructorForms`:
+vedi il malus degli esami e il corso di aggiornamento dei Tecnici in 9.7.
 
 ### 10.8 Organizzazione
 

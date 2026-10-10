@@ -30,6 +30,7 @@ export function recruitCollaborator(
     forms: [...(retained?.forms ?? contact.forms)],
     instructorForms: [...(retained?.instructorForms ?? [])],
     technicianForms: [...(retained?.technicianForms ?? [])],
+    eLearningInstructorForms: [...(retained?.eLearningInstructorForms ?? [])],
     formBranchPreferences: [
       ...(retained?.formBranchPreferences ?? contact.formBranchPreferences ?? []),
     ],
