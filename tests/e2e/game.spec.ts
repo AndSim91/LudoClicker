@@ -65,7 +65,7 @@ test("avvia una nuova partita e rende interattivo il tutorial di scrittura", asy
 
 test("in Modalità Onde le card del tutorial prendono il colore di chi parla", async ({ page }) => {
   // The Onde card rule is more specific than a bare voice rule: dialog and objective must still show A.N.D.E.R.'s red.
-  await page.addInitScript(() => localStorage.setItem("oggetto-nuovi-iscritti.theme", "dark"));
+  await page.addInitScript(() => localStorage.setItem("ludoclicker.theme", "dark"));
   await page.goto("/");
   await page.getByRole("textbox", { name: "Come ti chiami?" }).fill("Andrea Test");
   await page.getByRole("button", { name: "Inizia" }).click();

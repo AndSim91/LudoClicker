@@ -449,7 +449,7 @@ export function App() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `oggetto-nuovi-iscritti-${Date.now()}.json`;
+    anchor.download = `ludoclicker-${Date.now()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   }, [getPersistableState]);

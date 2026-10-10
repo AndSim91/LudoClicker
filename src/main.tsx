@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
 import { AppErrorBoundary } from "./app/AppErrorBoundary";
 import { initializeCrashReporting } from "./game/crashReporting";
-import { STORAGE_KEYS } from "./shared/storageKeys";
+import { migrateLegacyStorageKeys, STORAGE_KEYS } from "./shared/storageKeys";
 // Modalità Onde typefaces (Fase 8), bundled so every computer shows the same letters.
 import "@fontsource/barlow/400.css";
 import "@fontsource/barlow/400-italic.css";
@@ -22,6 +22,7 @@ import "./styles/table-sorting.css";
 import "./styles/list-filter-bar.css";
 import "./styles/keywords.css";
 
+migrateLegacyStorageKeys(localStorage);
 initializeCrashReporting();
 
 if (localStorage.getItem(STORAGE_KEYS.theme) !== "light") {

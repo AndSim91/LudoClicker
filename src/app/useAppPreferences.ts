@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { STORAGE_KEYS } from "../shared/storageKeys";
 
 // ponytail: one-off migration from the short-lived separate "skin" preference.
-const LEGACY_SKIN_KEY = "oggetto-nuovi-iscritti.skin";
+const LEGACY_SKIN_KEY = "ludoclicker.skin";
 
 function readInitialDarkMode(): boolean {
   const legacySkin = localStorage.getItem(LEGACY_SKIN_KEY);

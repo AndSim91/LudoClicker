@@ -4678,7 +4678,7 @@ disponibile come opzione.
 
 ### 22.1 Strategia
 
-- `localStorage`, chiave `oggetto-nuovi-iscritti.save`, con il testo JSON
+- `localStorage`, chiave `ludoclicker.save`, con il testo JSON
   compresso tramite lz-string (prefisso `lz-string-v1:`); i vecchi salvataggi
   in JSON semplice restano leggibili;
 - salvataggio automatico ogni 60 secondi, preparato in background in un Web
@@ -4692,7 +4692,7 @@ disponibile come opzione.
   i salvataggi più vecchi vengono migrati, quelli incompatibili non vengono
   sovrascritti finché il giocatore non azzera la partita;
 - prima di ogni scrittura il salvataggio precedente viene copiato in
-  `oggetto-nuovi-iscritti.save.backup`; se il principale è corrotto si carica
+  `ludoclicker.save.backup`; se il principale è corrotto si carica
   il backup, e un backup valido non viene mai sostituito da un principale
   corrotto;
 - export/import JSON nelle Impostazioni;

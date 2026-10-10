@@ -211,7 +211,7 @@ describe("local save", () => {
     const state = createInitialState(1_000);
     saveGame({ ...state, school: { ...state.school, euros: 42 } }, 2_000);
 
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save"))
+    expect(localStorage.getItem("ludoclicker.save"))
       .toEqual(expect.stringMatching(new RegExp("^" + STORED_SAVE_PREFIX)));
     expect(loadGame(3_000).school.euros).toBe(42);
     expect(loadGame(3_000).lastSavedAt).toBe(3_000);
@@ -220,7 +220,7 @@ describe("local save", () => {
   it("compresses a legacy primary before keeping it as the backup", () => {
     const state = createInitialState(1_000);
     localStorage.setItem(
-      "oggetto-nuovi-iscritti.save",
+      "ludoclicker.save",
       JSON.stringify({ ...state, school: { ...state.school, euros: 21 } }),
     );
 
@@ -228,10 +228,10 @@ describe("local save", () => {
       { ...state, school: { ...state.school, euros: 42 } },
       2_000,
     )).toBe(true);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup"))
+    expect(localStorage.getItem("ludoclicker.save.backup"))
       .toEqual(expect.stringMatching(new RegExp("^" + STORED_SAVE_PREFIX)));
 
-    localStorage.removeItem("oggetto-nuovi-iscritti.save");
+    localStorage.removeItem("ludoclicker.save");
     expect(loadGame(3_000).school.euros).toBe(21);
   });
 
@@ -309,32 +309,32 @@ describe("local save", () => {
   });
 
   it("falls back in memory without overwriting a corrupt save", () => {
-    localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
+    localStorage.setItem("ludoclicker.save", "not-json");
 
     const state = loadGame(5_000);
     expect(state.createdAt).toBe(5_000);
     expect(state.contacts).toHaveLength(5);
     expect(saveGame(state, 6_000)).toBe(false);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBe("not-json");
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBeNull();
+    expect(localStorage.getItem("ludoclicker.save")).toBe("not-json");
+    expect(localStorage.getItem("ludoclicker.save.backup")).toBeNull();
   });
 
   it("still validates a primary replaced after this session saved it", () => {
     const state = createInitialState(5_000, "Andrea Ungaro");
     expect(saveGame(state, 6_000)).toBe(true);
-    localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
+    localStorage.setItem("ludoclicker.save", "not-json");
 
     expect(saveGame(state, 7_000)).toBe(false);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBe("not-json");
+    expect(localStorage.getItem("ludoclicker.save")).toBe("not-json");
   });
 
   it("does not overwrite the only remaining corrupt backup", () => {
-    localStorage.setItem("oggetto-nuovi-iscritti.save.backup", "not-json");
+    localStorage.setItem("ludoclicker.save.backup", "not-json");
 
     const state = loadGame(5_000);
     expect(saveGame(state, 6_000)).toBe(false);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBeNull();
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBe("not-json");
+    expect(localStorage.getItem("ludoclicker.save")).toBeNull();
+    expect(localStorage.getItem("ludoclicker.save.backup")).toBe("not-json");
   });
 
   it("keeps incompatible saves protected until an explicit reset", () => {
@@ -344,17 +344,17 @@ describe("local save", () => {
       saveCompatibilityVersion: GAME_CONFIG.saveCompatibilityVersion + 1,
       school: { ...state.school, euros: 999 },
     };
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(incompatible));
-    localStorage.setItem("oggetto-nuovi-iscritti.save.backup", JSON.stringify(incompatible));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(incompatible));
+    localStorage.setItem("ludoclicker.save.backup", JSON.stringify(incompatible));
 
     const restarted = loadGame(5_000);
 
     expect(restarted.createdAt).toBe(5_000);
     expect(restarted.school.euros).toBe(0);
     expect(saveGame(restarted, 6_000)).toBe(false);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save"))
+    expect(localStorage.getItem("ludoclicker.save"))
       .toBe(JSON.stringify(incompatible));
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup"))
+    expect(localStorage.getItem("ludoclicker.save.backup"))
       .toBe(JSON.stringify(incompatible));
   });
 
@@ -364,8 +364,8 @@ describe("local save", () => {
       ...state,
       school: { ...state.school, euros: 21 },
     });
-    localStorage.setItem("oggetto-nuovi-iscritti.save", "not-json");
-    localStorage.setItem("oggetto-nuovi-iscritti.save.backup", backup);
+    localStorage.setItem("ludoclicker.save", "not-json");
+    localStorage.setItem("ludoclicker.save.backup", backup);
 
     const recovered = loadGame(2_000);
     expect(recovered.school.euros).toBe(21);
@@ -374,7 +374,7 @@ describe("local save", () => {
       3_000,
     )).toBe(true);
 
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBe(backup);
+    expect(localStorage.getItem("ludoclicker.save.backup")).toBe(backup);
     expect(loadGame(4_000).school.euros).toBe(42);
   });
 
@@ -382,7 +382,7 @@ describe("local save", () => {
     const state = createInitialState(1_000);
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.saveCompatibilityVersion;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     expect(loadGame(1_000).saveCompatibilityVersion)
       .toBe(GAME_CONFIG.saveCompatibilityVersion);
@@ -420,7 +420,7 @@ describe("local save", () => {
         email: `${contact.email.split("@")[0]}@esempio.test`,
       })),
     };
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -443,7 +443,7 @@ describe("local save", () => {
       })),
     };
     localStorage.setItem(
-      "oggetto-nuovi-iscritti.save",
+      "ludoclicker.save",
       JSON.stringify(withNumericSuffixes),
     );
 
@@ -457,7 +457,7 @@ describe("local save", () => {
   it("prompts for a name when an existing save has no user profile", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     delete legacy.profile;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -474,7 +474,7 @@ describe("local save", () => {
     delete legacy.statistics.peopleMet;
     delete legacy.statistics.demonstrationsGiven;
     delete legacy.statistics.eventsCompleted;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
     expect(migrated.version).toBe(GAME_CONFIG.version);
@@ -491,7 +491,7 @@ describe("local save", () => {
     legacy.version = 2;
     legacy.upgrades = { speedLevel: 2 };
     legacy.player = { writingPower: 3 };
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
     expect(migrated.version).toBe(GAME_CONFIG.version);
@@ -518,7 +518,7 @@ describe("local save", () => {
         status: "running",
       },
     ];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -534,7 +534,7 @@ describe("local save", () => {
     legacy.version = 4;
     delete legacy.equipment;
     delete legacy.statistics.maintenanceCompleted;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -552,7 +552,7 @@ describe("local save", () => {
     delete legacy.statistics.collaboratorsRecruited;
     delete legacy.statistics.automatedCharacters;
     delete legacy.statistics.socialContacts;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -574,7 +574,7 @@ describe("local save", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 6;
     delete legacy.statistics.socialCampaigns;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -588,7 +588,7 @@ describe("local save", () => {
     legacy.version = 7;
     legacy.unlocks = { upgrades: true, collaborators: true, social: true };
     delete legacy.statistics.formsCompleted;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -606,7 +606,7 @@ describe("local save", () => {
       "clear-subject": 0,
       "welcome-procedure": 0,
     };
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -622,7 +622,7 @@ describe("local save", () => {
     delete legacy.achievements;
     delete legacy.narrative;
     delete legacy.statistics.narrativeEvents;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(5_000);
 
@@ -641,7 +641,7 @@ describe("local save", () => {
     delete legacy.school.accentColor;
     delete legacy.school.motto;
     delete legacy.school.specialization;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -666,7 +666,7 @@ describe("local save", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 11;
     delete legacy.school.currentMonth;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -698,7 +698,7 @@ describe("local save", () => {
       forms: [],
       assignment: null,
     }];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -721,7 +721,7 @@ describe("local save", () => {
       assignment: null,
       specialProfileId: "andrea-simonazzi",
     }];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -745,7 +745,7 @@ describe("local save", () => {
       assignment: null,
       specialProfileId: "andrea-simonazzi",
     }];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -760,7 +760,7 @@ describe("local save", () => {
     legacy.version = 16;
     legacy.upgrades["call-to-action"] = 1;
     delete legacy.emails[0].presentationLevel;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -778,7 +778,7 @@ describe("local save", () => {
       { ...legacy.messages[0], id: "word-1", subject: "Passaparola inatteso" },
       { ...legacy.messages[0], id: "word-2", subject: "Passaparola inatteso" },
     ];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -808,7 +808,7 @@ describe("local save", () => {
     });
     const legacy = JSON.parse(JSON.stringify({ ...started, version: 19 }));
     delete legacy.acquisitionEvents[0].membersUsed;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(2_000);
 
@@ -830,7 +830,7 @@ describe("local save", () => {
     delete legacy.contacts[0].enrolledMonth;
     delete legacy.statistics.membersDeparted;
     delete legacy.school.peakActiveMembers;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -856,7 +856,7 @@ describe("local save", () => {
     legacy.school.historicMembers = legacy.school.fame;
     delete legacy.school.fame;
     delete legacy.school.peakActiveMembers;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -880,7 +880,7 @@ describe("local save", () => {
         rarity: "legendary",
       }],
     }));
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -907,7 +907,7 @@ describe("local save", () => {
       }],
     }));
     delete legacy.legendaryCollaborators.retainedProgress;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -938,7 +938,7 @@ describe("local save", () => {
         rarity: "rare",
       }],
     }));
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -956,7 +956,7 @@ describe("local save", () => {
     const legacy = JSON.parse(JSON.stringify(createInitialState(1_000)));
     legacy.version = 26;
     delete legacy.equipment.damagedSwords;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -969,7 +969,7 @@ describe("local save", () => {
     legacy.version = 27;
     legacy.equipment.wear = 100;
     legacy.equipment.damagedSwords = 0;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -992,7 +992,7 @@ describe("local save", () => {
       presentationLevel: 2,
       body: signedBody.replace("\n\nLegend, Ordine delle Onde - Genova", ""),
     };
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -1021,7 +1021,7 @@ describe("local save", () => {
       },
       rarity: "rare",
     }];
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -1057,7 +1057,7 @@ describe("local save", () => {
         : {}),
     }));
     legacy.statistics.narrativeEvents = 35;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -1090,7 +1090,7 @@ describe("local save", () => {
         rarity: "common",
       },
     }));
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
 
@@ -1117,7 +1117,7 @@ describe("local save", () => {
       revealedCharacters: Math.round(body.length / 2),
     };
     const previousRevealedCharacters = legacy.emails[0].revealedCharacters;
-    localStorage.setItem("oggetto-nuovi-iscritti.save", JSON.stringify(legacy));
+    localStorage.setItem("ludoclicker.save", JSON.stringify(legacy));
 
     const migrated = loadGame(1_000);
     const migratedEmail = migrated.emails[0];
@@ -1135,8 +1135,8 @@ describe("local save", () => {
     const reset = resetGame(4_000);
 
     expect(reset.createdAt).toBe(4_000);
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save")).toBeNull();
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.save.backup")).toBeNull();
+    expect(localStorage.getItem("ludoclicker.save")).toBeNull();
+    expect(localStorage.getItem("ludoclicker.save.backup")).toBeNull();
   });
 
   it("removes previously saved obsolete messages", () => {
@@ -1152,7 +1152,7 @@ describe("local save", () => {
       subject,
     }));
     localStorage.setItem(
-      "oggetto-nuovi-iscritti.save",
+      "ludoclicker.save",
       JSON.stringify({ ...state, messages: [...obsoleteMessages, ...state.messages] }),
     );
 

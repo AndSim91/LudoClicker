@@ -254,10 +254,10 @@ describe("App profile and navigation", () => {
 
   it("migrates the old separate Onde preference into the dark theme", () => {
     saveGame(createInitialState(Date.now(), "Andrea Ungaro"));
-    localStorage.setItem("oggetto-nuovi-iscritti.skin", "ufficio");
+    localStorage.setItem("ludoclicker.skin", "ufficio");
     render(<App />);
 
     expect(document.documentElement.dataset.theme).toBe("light");
-    expect(localStorage.getItem("oggetto-nuovi-iscritti.skin")).toBeNull();
+    expect(localStorage.getItem("ludoclicker.skin")).toBeNull();
   });
 });
