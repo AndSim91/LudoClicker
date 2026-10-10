@@ -76,6 +76,8 @@ interface RandomCursor {
   seed: number;
   // ponytail: Style context travels with the cursor because every match already receives it.
   styleLevel?: TournamentLevel;
+  /** Hidden multiplier on the school's athletes, only inside the matches (see `simulateWithoutSchoolTitle`). */
+  ownedHandicap?: number;
 }
 
 interface MutableStanding {
@@ -95,6 +97,7 @@ interface SimulatedTournament {
 
 export interface TournamentSimulationOptions {
   vacantQualificationContactIds?: readonly string[];
+  ownedHandicap?: number;
 }
 
 function roll(cursor: RandomCursor): number {
@@ -603,12 +606,14 @@ function simulateMatch(
   matchIndex: number,
   groupIndex?: number,
 ): TournamentMatch {
+  const handicap = (participant: TournamentParticipant) =>
+    participant.ownedContactId ? cursor.ownedHandicap ?? 1 : 1;
   const poweredA =
-    participantA.arenaPreparation ** ARENA_DECISIVENESS *
+    (handicap(participantA) * participantA.arenaPreparation) ** ARENA_DECISIVENESS *
     conditionMultiplier(participantA.condition) *
     encounterMultiplier(cursor);
   const poweredB =
-    participantB.arenaPreparation ** ARENA_DECISIVENESS *
+    (handicap(participantB) * participantB.arenaPreparation) ** ARENA_DECISIVENESS *
     conditionMultiplier(participantB.condition) *
     encounterMultiplier(cursor);
   const assaultChanceA = clamp(
@@ -634,6 +639,7 @@ function simulateMatch(
       forms,
       weapon: participant.weapon ?? getAthleteWeapon(forms),
       style:
+        handicap(participant) *
         participant.stylePreparation *
         conditionMultiplier(participant.condition) *
         encounterMultiplier(cursor),
@@ -1058,6 +1064,7 @@ export function simulateTournament(
   const cursor: RandomCursor = {
     seed: state.randomSeed,
     styleLevel: level,
+    ownedHandicap: options.ownedHandicap,
   };
   const definition = TOURNAMENT_DEFINITIONS[level];
   // A school can eventually contain thousands of athletes. Aggregate

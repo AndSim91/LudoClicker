@@ -10,6 +10,7 @@ import {
 import { getAthleteTournamentStats } from "./athleteStats";
 import { getFormTrainingYear, isSummerBreak } from "./calendar";
 import { canFoundSchool, createInitialState, gameReducer } from "./engine";
+import { ACADEMY_GOAL_TUTORIAL_SCENE_ID, isAcademyTappaOpen } from "./tutorialProgress";
 import { getEquipmentMinimumMaintenanceCost } from "./equipment";
 import { isEventCooldownActive } from "./eventCooldowns";
 import { isOfficialSwordSupplierVisible } from "./unlocks";
@@ -112,6 +113,18 @@ const FOCUSED_ATHLETES = 12;
 
 function dispatch(state: GameState, action: GameAction): GameState {
   return gameReducer(state, action);
+}
+
+/** The player reads M.A.K.I.'s scene when the Consiglio is born: without it the Accademico is never won. */
+function playAcademyTappaScene(state: GameState): GameState {
+  if (!state.collaboratorManagement.aggregateViewUnlocked || isAcademyTappaOpen(state)) return state;
+  return {
+    ...state,
+    tutorial: {
+      ...state.tutorial,
+      completedSceneIds: [...state.tutorial.completedSceneIds, ACADEMY_GOAL_TUTORIAL_SCENE_ID],
+    },
+  };
 }
 
 function runningEvents(state: GameState) {
@@ -338,6 +351,7 @@ export function simulateBalanceGame({
   for (let elapsedMs = 0; elapsedMs <= horizonMs; elapsedMs += tickMs) {
     const now = startedAt + elapsedMs;
     state = dispatch(state, { type: "TICK", now });
+    state = playAcademyTappaScene(state);
     state = takeStrategicActions(state, now, strategy);
     // A player who presses "Compra tutto" every now and then.
     if (spendSurplus && elapsedMs % 10_000 === 0) {

@@ -545,3 +545,53 @@ describe("tournament reward effects", () => {
     ).rewards[0].bonus).toMatchObject({ rarity: "legendary" });
   });
 });
+
+describe("no school title before the Accademico tappa (10/10/2026)", () => {
+  const FORMS = ["form-1", "form-2", "course-y", "form-3-long", "form-4-long", "form-5-long"] as const;
+
+  function strongAcademy(tappaOpen: boolean) {
+    const initial = addAdminMembers(createInitialState(1_000, "Manager"), 12);
+    const enrolled = initial.contacts.filter((contact) => contact.status === "enrolled");
+    return {
+      ...initial,
+      unlocks: { ...initial.unlocks, forms: true, tournaments: true },
+      contacts: initial.contacts.map((contact) => contact.status === "enrolled"
+        ? { ...contact, forms: [...FORMS], arenaBase: 100, styleBase: 100, tournamentExperience: 20 }
+        : contact),
+      tutorial: {
+        ...initial.tutorial,
+        completedSceneIds: tappaOpen ? [...initial.tutorial.completedSceneIds, "academy-goal"] : initial.tutorial.completedSceneIds,
+      },
+      tournaments: {
+        ...initial.tournaments,
+        qualification: {
+          level: "academy" as const,
+          season: 1,
+          contactIds: enrolled.map((contact) => contact.id),
+          slotCount: 12 as const,
+          activeMembersAtQualification: 12,
+        },
+        immuneContactIds: [],
+      },
+    };
+  }
+
+  const schoolTitles = (result: TournamentResult) => {
+    const owned = new Set(result.participants.filter((entry) => entry.ownedContactId).map((entry) => entry.id));
+    return [result.arenaRanking[0], result.styleRanking[0]].filter((id) => owned.has(id)).length;
+  };
+
+  it("quietly redraws until both titles go elsewhere, and stops once the tappa is open", () => {
+    let titlesAfter = 0;
+    for (let seed = 1; seed <= 10; seed += 1) {
+      const before = processTournamentAtMonthEnd({ ...strongAcademy(false), randomSeed: seed }, 16, 20_000);
+      const result = before.tournaments.results.at(-1)!;
+      expect(result.level).toBe("academy");
+      expect(schoolTitles(result)).toBe(0);
+      expect(before.tournaments.academyTitlesCurrentSchool ?? 0).toBe(0);
+      const after = processTournamentAtMonthEnd({ ...strongAcademy(true), randomSeed: seed }, 16, 20_000);
+      titlesAfter += schoolTitles(after.tournaments.results.at(-1)!);
+    }
+    expect(titlesAfter).toBeGreaterThan(0);
+  });
+});

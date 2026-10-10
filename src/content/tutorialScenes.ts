@@ -3,7 +3,7 @@ import { isAnnualPlanningUnlocked } from "../game/annualReport";
 import { hasPrestigeTitle, isGameAreaUnlocked } from "../game/progression";
 import { isOfficialSwordSupplierUnlocked, isSISTechnicianCourseUnlocked } from "./upgrades";
 import { formatCurrency } from "../shared/formatters";
-import { FIRST_EVENT_TUTORIAL_SCENE_ID, hasCompletedTutorialSparring, isTutorialSceneFinished } from "../game/tutorialProgress";
+import { ACADEMY_GOAL_TUTORIAL_SCENE_ID, FIRST_EVENT_TUTORIAL_SCENE_ID, hasCompletedTutorialSparring, isTutorialSceneFinished } from "../game/tutorialProgress";
 import { getRunningAcquisitionEvents } from "../game/runtimeIndexes";
 import { selectContactsAwaitingEmail } from "../game/selectors";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../game/tutorialScholarship";
@@ -93,8 +93,7 @@ export const SWORD_PURCHASE_TUTORIAL_MEMBERS = 15;
 /** The first Pianificazione delle Onde, the July after the first Torneo Scolastico (08/10/2026). */
 export const ANNUAL_PLANNING_TUTORIAL_SCENE_ID = "annual-planning" as const;
 
-/** Tappa 2 (10/10/2026): after the Consiglio delle Onde, M.A.K.I. arrives and points at the Accademico. */
-export const ACADEMY_GOAL_TUTORIAL_SCENE_ID = "academy-goal" as const;
+export { ACADEMY_GOAL_TUTORIAL_SCENE_ID };
 
 /** Tutorials of the second half of the game (05/10/2026): the migration to v102 marks them done on saves already past them. */
 export const LATE_TUTORIAL_SCENE_IDS = [
@@ -1085,7 +1084,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         title: "Non sarà una passeggiata",
         body: [
           "All'Accademico non si combatte più contro i vostri compagni di palestra: arrivano atleti da altre scuole, con più Forme e molta più esperienza alle spalle. Dobbiamo quindi prepararci al meglio per raggiungere il nostro obiettivo.",
-          "Il conto alla rovescia è già partito e puoi tenerlo d'occhio nella sezione apposita in [[La mia giornata]].",
+          "Il conto alla rovescia è già partito e puoi tenerlo d'occhio nella sezione apposita in «La mia giornata».",
           "Conto su di te!",
         ],
         // The countdown to the Accademico is the pill in «La mia giornata».

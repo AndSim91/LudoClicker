@@ -10,6 +10,7 @@ import { createChroniclesVictoryChallenge } from "./chroniclesFlow";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { isGameAreaUnlocked } from "./progression";
+import { isAcademyTappaOpen } from "./tutorialProgress";
 import { unlockTournamentsIfEligible } from "./unlocks";
 import { nextRandom } from "./random";
 import { createSecretLegendaryContact } from "./secretLegendaryRoster";
@@ -23,6 +24,7 @@ import {
 } from "./tournamentRewardFlow";
 import { getEligibleSchoolContacts, simulateTournament } from "./tournamentSimulation";
 import type {
+  Contact,
   GameState,
   SecretLegendaryId,
   TournamentLevel,
@@ -445,8 +447,43 @@ export function processTournamentAtMonthEnd(
   const vacantQualificationContactIds = qualification.contactIds.filter(
     (id) => contactsById.get(id)?.status !== "enrolled",
   );
-  const simulation = simulateTournament(state, level, season, now, ownedContacts, {
-    vacantQualificationContactIds,
-  });
+  const options = { vacantQualificationContactIds };
+  const simulation = isAcademyTappaOpen(state) || (level !== "academy" && level !== "national")
+    ? simulateTournament(state, level, season, now, ownedContacts, options)
+    : simulateWithoutSchoolTitle(state, level, season, now, ownedContacts, options);
   return applyTournamentResult(state, simulation.result, simulation.nextSeed, now);
+}
+
+const QUIET_REDRAWS = 12;
+const MAX_REDRAWS = 200;
+
+/**
+ * Before the Accademico tappa (10/10/2026, first school only) the school never
+ * takes a title at the Accademico or the Nazionale, and nothing says so: the
+ * draw is quietly repeated until both titles go to other schools. Only a school
+ * that wins every redraw gets a hidden handicap, inside the matches alone.
+ */
+function simulateWithoutSchoolTitle(
+  state: GameState,
+  level: TournamentLevel,
+  season: number,
+  now: number,
+  ownedContacts: readonly Contact[],
+  options: { vacantQualificationContactIds: string[] },
+): ReturnType<typeof simulateTournament> {
+  let seeded = state;
+  let simulation = simulateTournament(seeded, level, season, now, ownedContacts, options);
+  // ponytail: plain redraw loop; after MAX_REDRAWS the last draw stands (never reached in practice).
+  for (let attempt = 1; attempt <= MAX_REDRAWS && schoolTakesTitle(simulation.result); attempt += 1) {
+    seeded = { ...seeded, randomSeed: simulation.nextSeed };
+    const ownedHandicap = attempt < QUIET_REDRAWS ? undefined : attempt < QUIET_REDRAWS * 2 ? 0.5 : 0.05;
+    simulation = simulateTournament(seeded, level, season, now, ownedContacts, { ...options, ownedHandicap });
+  }
+  return simulation;
+}
+
+function schoolTakesTitle(result: TournamentResult): boolean {
+  const byId = new Map(result.participants.map((participant) => [participant.id, participant]));
+  return [result.arenaRanking[0], result.styleRanking[0]]
+    .some((id) => Boolean(byId.get(id)?.ownedContactId));
 }

@@ -2,6 +2,16 @@ import { createInitialEmailMission } from "../content/shortGoals";
 import type { TutorialSceneId } from "../content/tutorialScenes";
 import type { GameState } from "./types";
 
+/** Tappa 2 (10/10/2026): after the Consiglio delle Onde, M.A.K.I. arrives and points at the Accademico. */
+export const ACADEMY_GOAL_TUTORIAL_SCENE_ID = "academy-goal" as const;
+
+/** The Accademico tappa is open: its scene is done, or this is a school founded later. */
+export function isAcademyTappaOpen(state: Pick<GameState, "network" | "tutorial">): boolean {
+  return state.network.schoolCount > 0 ||
+    state.tutorial.completedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID) ||
+    state.tutorial.skippedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID);
+}
+
 export const FIRST_EVENT_TUTORIAL_SCENE_ID = "first-event" as const;
 
 // Completed events leave `acquisitionEvents` (moved to the history archive in

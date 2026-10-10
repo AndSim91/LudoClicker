@@ -5,7 +5,7 @@ import { hasPrestigeTitle } from "../../game/progression";
 import { getTournamentSeason } from "../../game/tournamentFlow";
 import { getEligibleSchoolContactsFromRoster } from "../../game/tournamentSimulation";
 import { FORMS_TEACHING_TUTORIAL_SCENE_ID } from "../../game/tutorialScholarship";
-import { ACADEMY_GOAL_TUTORIAL_SCENE_ID } from "../../content/tutorialScenes";
+import { isAcademyTappaOpen } from "../../game/tutorialProgress";
 import type { GameState } from "../../game/types";
 import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPresentation";
 
@@ -52,10 +52,7 @@ export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal |
     return { kind: "tournament", secondsLeft: Math.max(0, Math.ceil((upcoming.occursAt - now) / 1_000)) };
   }
   if (state.collaboratorManagement.aggregateViewUnlocked) {
-    const announced = state.network.schoolCount > 0 ||
-      completedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID) ||
-      skippedSceneIds.includes(ACADEMY_GOAL_TUTORIAL_SCENE_ID);
-    return hasPrestigeTitle(state) || !announced
+    return hasPrestigeTitle(state) || !isAcademyTappaOpen(state)
       ? null
       : { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) };
   }

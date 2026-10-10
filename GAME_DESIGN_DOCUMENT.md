@@ -3431,6 +3431,14 @@ v102; i salvataggi che li hanno già superati li segnano come fatti):
     Scolastico, un titolo apre il Network) e «Non sarà una passeggiata», che
     indica la tappa in «La mia giornata». Solo dopo questa scena (o in una scuola
     fondata dopo) compare la tappa dell'Accademico.
+    **Regola nascosta** (10/10/2026, mai scritta nei testi): finché questa
+    scena non è conclusa, nella prima scuola la scuola non vince titoli
+    all'Accademico né al Nazionale. Il torneo si gioca normalmente, ma se un
+    nostro atleta prenderebbe il titolo in Arena o in Stile il sorteggio si
+    rigioca in silenzio (`simulateWithoutSchoolTitle` in `tournamentFlow.ts`);
+    solo una scuola che vince ogni nuovo sorteggio riceve, dopo 12 tentativi, un
+    malus invisibile dentro gli incontri. La simulazione di bilanciamento
+    conclude la scena alla nascita del Consiglio.
 15. **L'Ordine ti ha notato** (`network-introduction`): al primo titolo
     nazionale, solo nella prima scuola. Fa aprire il Network; mappa, fondare è
     ricominciare (Reputazione da tornei e Fama), sei potenziamenti a +20% o la
