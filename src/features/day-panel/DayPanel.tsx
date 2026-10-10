@@ -54,20 +54,15 @@ function RenewalCard({ notification }: { notification: DayNotification }) {
   const { departed, before, names } = notification.renewal!;
   const crossed = before === undefined ? undefined : getRenewalCrossedCells(departed, before);
   const others = departed - Math.min(names.length, RENEWAL_NAMES);
+  const leave = departed === 1 ? "lascia la scuola" : "lasciano la scuola";
+  const title = before === undefined
+    ? `${departed} ${departed === 1 ? "iscritto" : "iscritti"} ${leave}`
+    : `${departed} su ${before} ${leave}`;
   return (
     <div className="appointment-entry day-renewal">
-      <div
-        className="appointment day-renewal-body"
-        aria-label={before === undefined
-          ? `${notification.title}: ${departed} iscritti non rinnovano`
-          : `Rinnovi dell'anno: ${before - departed} su ${before} rinnovano`}
-      >
+      <div className="appointment day-renewal-body" aria-label={`Rinnovi dell'anno: ${title}`}>
         <span className="day-renewal-eyebrow">Rinnovi dell'anno</span>
-        <strong className="day-renewal-title">
-          {before === undefined
-            ? `${departed} ${departed === 1 ? "iscritto non rinnova" : "iscritti non rinnovano"}`
-            : `${before - departed} su ${before} rinnovano`}
-        </strong>
+        <strong className="day-renewal-title">{title}</strong>
         {crossed ? (
           <span className="day-renewal-grid" aria-hidden="true">
             {Array.from({ length: RENEWAL_CELLS }, (_, index) => (
