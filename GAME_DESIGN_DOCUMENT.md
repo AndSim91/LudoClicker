@@ -15,8 +15,17 @@ prototipazione\
 
 ## 1. Sintesi
 
-LudoClicker è un browser game clicker incrementale ambientato dentro
-una simulazione quasi perfetta di Outlook per Windows 11.
+LudoClicker è un browser game clicker incrementale che racconta cosa vuol dire
+far crescere una scuola di LudoSport: dalla prima email d'invito fino alla
+scuola più grande del mondo, con i più grandi campioni della storia di
+LudoSport. È un omaggio a LudoSport, un gesto d'amore per lo sport e per la sua
+comunità, fatto da un iscritto che si prende un po' in giro, per far conoscere
+il mondo LudoSport dentro e fuori le sue mura.
+
+La veste del gioco è la **Modalità Onde**. Con **F9** il gioco si traveste da
+Outlook per Windows 11 (**Modalità Outlook**): un camuffamento da ufficio che
+permette di continuare a giocare anche quando qualcuno guarda lo schermo. Il
+camuffamento non è il cuore del gioco, ma deve funzionare davvero (§ 11.1).
 
 Il giocatore collabora inizialmente con **LudoSport Genova – Ordine delle Onde**
 e deve trovare nuovi potenziali interessati, ottenere i loro indirizzi email,
@@ -71,21 +80,21 @@ indefinitamente.
 
 Il giocatore deve sentirsi contemporaneamente:
 
-- una persona che sta rispondendo alle email in ufficio;
+- il Preside di una scuola di LudoSport, che la fa crescere un iscritto alla
+  volta;
 - un reclutatore instancabile dell'Ordine delle Onde;
 - il coordinatore di una piccola organizzazione che cresce fino a diventare una
   rete di scuole;
 - il protagonista di una commedia amministrativa sempre più assurda, raccontata
-  esclusivamente attraverso email, calendari, contatti e documenti
-  apparentemente professionali.
+  attraverso email, eventi, tornei e la vita della palestra.
 
 ### 2.2 Pilastri di design
 
-1. **Camuffamento credibile**\
-   A colpo d'occhio il gioco deve sembrare Outlook per Windows 11. Le
-   informazioni ludiche devono essere presentate come normali elementi di posta,
-   calendario, contatti e attività. F9 alterna in ogni momento la veste Outlook
-   chiara e il tema scuro «Modalità Onde».
+1. **Un omaggio a LudoSport**\
+   Il gioco è un gesto d'amore per lo sport e per la sua comunità: racconta cosa
+   significa gestire una scuola e fa conoscere il mondo LudoSport sia a chi lo
+   pratica sia a chi non lo ha mai visto. Si prende in giro con affetto, mai con
+   cattiveria.
 
 2. **Input immediato e soddisfacente**\
    Qualunque tasto utile fa avanzare il testo. Non si può sbagliare a scrivere.
@@ -112,8 +121,15 @@ Il giocatore deve sentirsi contemporaneamente:
    terminologia LudoSport. I riferimenti a franchise cinematografici esterni
    restano indiretti e comici.
 
-7. **Svelamento progressivo**\
-   Il gioco comincia quasi vuoto. Nuove cartelle, funzioni e sistemi di Outlook
+7. **Camuffamento da ufficio**\
+   La Modalità Outlook è un travestimento e tale deve restare: con F9, in
+   qualunque momento, il gioco deve sembrare Outlook per Windows 11 a chi guarda
+   lo schermo, con le informazioni di gioco presentate come normali elementi di
+   posta, calendario, contatti e attività (§ 11.1). F9 riporta alla Modalità
+   Onde, la veste del gioco.
+
+8. **Svelamento progressivo**\
+   Il gioco comincia quasi vuoto. Nuove pagine, funzioni e sistemi
    compaiono soltanto quando il giocatore raggiunge traguardi comprensibili o
    completa speciali comunicazioni interne manuali. Nella scuola iniziale:
    Upgrade e Scuola dopo il primo iscritto, Contatti dalla prima Fama, Eventi
@@ -146,9 +162,10 @@ Esempio di escalation:
 ### 3.1 Pubblico principale
 
 - membri e amici della comunità LudoSport;
+- chi non conosce LudoSport e può scoprirlo giocando;
 - appassionati di incremental e idle game;
-- giocatori che apprezzano interfacce diegetiche;
-- utenti desktop che vogliono sessioni brevi durante la giornata.
+- utenti desktop che vogliono sessioni brevi durante la giornata, anche in
+  ufficio (Modalità Outlook).
 
 ### 3.2 Durata delle sessioni
 
@@ -2620,11 +2637,12 @@ da 0 a 100 sarebbe stato invisibile); non tocca i Leggendari, che hanno valori
 fissi. Leggende in visita non cambia i contatti forzati dai tornei. Sponsor
 nazionale compare nel dettaglio delle entrate mensili.
 
-## 11. Interfaccia Outlook per Windows 11
+## 11. Interfaccia: Modalità Onde e Modalità Outlook
 
-### 11.1 Obiettivo di camuffamento
+### 11.1 Obiettivo di camuffamento (Modalità Outlook)
 
-Il gioco deve raggiungere un camuffamento percepito del 99%:
+La Modalità Onde è la veste del gioco. La Modalità Outlook è il camuffamento da
+ufficio e deve raggiungere un camuffamento percepito del 99%:
 
 - alla prima occhiata sembra una normale finestra di Outlook;
 - non mostra barre di risorse, monete, gemme o pulsanti da videogioco;
@@ -5446,7 +5464,7 @@ email per almeno 15 minuti senza errori bloccanti.
 **Criterio di completamento:** il gioco progredisce lentamente anche senza input
 manuale.
 
-### Fase 4 — Camuffamento Outlook completo
+### Fase 4 — Camuffamento Outlook completo (Modalità Outlook)
 
 - layout fedele a Windows 11;
 - Posta, Calendario, Scuola e Attività (nel codice la barra delle app mostra
@@ -5581,8 +5599,9 @@ pagina.
 ### Interfaccia
 
 - è utilizzabile a 1366×768 senza elementi essenziali nascosti;
-- non compare alcun controllo tipico da clicker nella vista principale;
-- i valori sono leggibili senza rompere il camuffamento;
+- in Modalità Outlook non compare alcun controllo tipico da clicker nella vista
+  principale;
+- in Modalità Outlook i valori sono leggibili senza rompere il camuffamento;
 - tutte le funzioni principali sono raggiungibili da tastiera;
 - non viene riprodotto audio.
 
@@ -5644,8 +5663,9 @@ qualunque funzione che possa far credere di inviare davvero email.
 ## 30. Decisioni già approvate
 
 - Le email sono completamente simulate.
-- L'interfaccia di riferimento è Outlook su Windows 11.
-- Il camuffamento richiesto è del 99%.
+- Il gioco è un omaggio a LudoSport; la sua veste è la Modalità Onde.
+- La Modalità Outlook (F9) è un camuffamento da ufficio: imita Outlook su
+  Windows 11 e il camuffamento richiesto è del 99%.
 - Posta, Calendario, Scuola e altri elementi possono ospitare meccaniche di
   gioco.
 - Ogni input parte da un carattere e viene migliorato con i potenziamenti.
