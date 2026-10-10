@@ -337,7 +337,7 @@ function MinigameCard({
   );
 }
 
-function RecapPanel({ result, onReplay }: { result: ReptileTournamentResult; onReplay: () => void }) {
+export function ReptileRecapPanel({ result, onReplay }: { result: ReptileTournamentResult; onReplay: () => void }) {
   const winner = getReptileWinner(result);
   const teamsById = new Map(result.teams.map((team) => [team.id, team]));
   const homeCount = result.teams.filter((team) => team.home).length;
@@ -444,7 +444,7 @@ export function ReptileView({
         ) : (
           <div className="reptile-page-grid">
             <div className="reptile-column">
-              {!edition && reptile.latestRecap ? <RecapPanel result={reptile.latestRecap} onReplay={onReplayDay} /> : null}
+              {!edition && reptile.latestRecap ? <ReptileRecapPanel result={reptile.latestRecap} onReplay={onReplayDay} /> : null}
               {edition
                 ? <PreparationPanel state={state} edition={edition} onCancel={onCancel} />
                 : <OrganizePanel state={state} onOrganize={onOrganize} />}

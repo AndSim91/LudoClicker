@@ -157,7 +157,7 @@ test("la Modalità Onde mantiene il contrasto AA nelle schermate principali", as
   report["LudoWiki · Scene"] = await audit(page);
 
   await openArea(page, "Tornei");
-  for (const tab of ["Risultati", "Albo d'oro", "Open"]) {
+  for (const tab of ["Risultati", "Open"]) {
     await page.getByRole("tab", { name: tab }).click();
     await page.waitForTimeout(300);
     report[`Tornei · ${tab}`] = await audit(page);

@@ -720,6 +720,8 @@ export interface TournamentResult {
   schoolPreliminary?: SchoolTournamentPreliminary;
   qualificationAllocation?: TournamentQualificationAllocation;
   vacantQualificationContactIds?: string[];
+  /** Chronicles only: the school year it was played in (the ordinary levels derive it from level and season). */
+  schoolYear?: number;
 }
 
 export interface TournamentHallEntry {

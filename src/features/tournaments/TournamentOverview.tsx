@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import {
   TOURNAMENT_DEFINITIONS,
-  TOURNAMENT_LEVEL_ORDER,
   getNextTournamentLevel,
 } from "../../content/tournaments";
 import {
@@ -17,20 +16,34 @@ import {
   selectSchoolTournamentEntrantsFromRoster,
 } from "../../game/tournamentSimulation";
 import { useGameTime } from "../../game/GameTimeContext";
-import type { GameState, TournamentResult } from "../../game/types";
+import type { GameState } from "../../game/types";
 import {
   findUpcomingTournament,
   formatTournamentCountdown,
-  getResultForLevelAndSeason,
   getUpcomingDelegationContactIds,
   monthShortLabel,
 } from "./tournamentPresentation";
 import { TournamentContactIdentity } from "./TournamentAthleteIdentity";
 import { formatStat } from "../../shared/formatters";
+import { getSchoolYear } from "../../game/calendar";
+import { getReptileTournamentName } from "../../game/reptileUnlock";
+import {
+  YEAR_ENTRY_LABEL,
+  findEntry,
+  getDefaultEntry,
+  getTournamentYearView,
+  type YearEntry,
+} from "./schoolYearTournaments";
+import { TournamentYearCalendar } from "./TournamentYearCalendar";
+import { TournamentYearPanel } from "./TournamentYearPanel";
 
 interface TournamentOverviewProps {
   state?: GameState;
-  onOpenResult: (result: TournamentResult) => void;
+  /** Row picked in the calendar (shared with Risultati). */
+  selectedKey?: string;
+  onSelectEntry: (key: string) => void;
+  /** «Tabellone completo»: the same tournament in Risultati. */
+  onOpenResults: (key: string) => void;
 }
 
 function selectTournamentOverviewState(state: GameState): GameState {
@@ -43,6 +56,8 @@ function haveSameTournamentOverviewState(left: GameState, right: GameState): boo
     left.school.currentMonth === right.school.currentMonth &&
     left.school.name === right.school.name &&
     left.school.city === right.school.city &&
+    left.school.nextFeeAt === right.school.nextFeeAt &&
+    left.network.superbaTournament === right.network.superbaTournament &&
     left.upgrades["talent-eye"] === right.upgrades["talent-eye"] &&
     left.collaborators.length === right.collaborators.length &&
     left.collaborators.every((collaborator, index) => {
@@ -53,7 +68,12 @@ function haveSameTournamentOverviewState(left: GameState, right: GameState): boo
     });
 }
 
-export function TournamentOverview({ state: stateOverride, onOpenResult }: TournamentOverviewProps) {
+export function TournamentOverview({
+  state: stateOverride,
+  selectedKey,
+  onSelectEntry,
+  onOpenResults,
+}: TournamentOverviewProps) {
   const state = useGameSelector(
     selectTournamentOverviewState,
     stateOverride,
@@ -124,6 +144,47 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
       : `${participationCount} iscritt${participationCount === 1 ? "o" : "i"}`
     : `${participationCount} qualificat${participationCount === 1 ? "o" : "i"}`;
 
+  const yearView = useMemo(
+    () => getTournamentYearView(state),
+    [state.school.currentMonth, state.school.nextFeeAt, state.tournaments], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const selectedEntry = findEntry(yearView, selectedKey) ?? getDefaultEntry(yearView);
+  const labelOf = (entry: YearEntry) => entry.level === "reptile" ? getReptileTournamentName(state) : YEAR_ENTRY_LABEL[entry.level];
+  const nextList = delegation.length > 0 ? delegation : officialQualified;
+  const nextStandard = upcomingDefinition?.standard ?? 0;
+  const barWidth = (value: number) => `${Math.min(100, (value / Math.max(1, nextStandard * 2.4 || 500)) * 100)}%`;
+  const nextBody = (
+    <div className="tyear-team">
+      {nextList.length > 0 ? (
+        <>
+          <p className="tyear-team-head" aria-hidden="true">
+            <span>#</span><span>{upcoming?.level === "school" ? "Convocati" : "Qualificati"}</span><span>Arena</span><span>Stile</span>
+          </p>
+          <div className="tyear-team-list">
+            {nextList.map(({ contact, preparation, visible }, index) => (
+              <p key={contact.id}>
+                <b>{index + 1}</b>
+                <TournamentContactIdentity contact={contact} schoolName={state.school.name} schoolCity={state.school.city} />
+                {[preparation.arena, preparation.style].map((value, statIndex) => (
+                  <span key={statIndex} className="tyear-stat">
+                    {visible ? formatStat(value) : "???"}
+                    {visible ? <i><i className={nextStandard && value >= nextStandard ? "is-over" : undefined} style={{ width: barWidth(value) }} /></i> : null}
+                  </span>
+                ))}
+              </p>
+            ))}
+          </div>
+          <p className="tyear-esito">
+            <span>{nextStandard ? `In oro chi supera il campo del torneo (${nextStandard})` : "Standard interno: conta la qualità della scuola"}</span>
+            <span>{participationLabel}</span>
+          </p>
+        </>
+      ) : (
+        <p className="tyear-note">{missingQualificationLabel}</p>
+      )}
+    </div>
+  );
+
   return (
     <div className="tournament-overview">
       <section className="next-tournament" aria-labelledby="next-tournament-title">
@@ -138,7 +199,7 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
           <small>Inizia tra</small>
           <strong>{upcoming ? formatTournamentCountdown(upcoming.occursAt - now) : "—"}</strong>
           <span>{upcomingDefinition
-            ? `${upcomingDefinition.calendarMonth.toString().padStart(2, "0")} ${monthShortLabel[upcomingDefinition.calendarMonth]} · STAGIONE ${upcoming?.season}`
+            ? `${upcomingDefinition.calendarMonth.toString().padStart(2, "0")} ${monthShortLabel[upcomingDefinition.calendarMonth]} · ANNO SCOLASTICO ${upcoming ? getSchoolYear(upcoming.absoluteMonth) : ""}`
             : "Nessun evento in programma"}</span>
         </div>
         <div className="next-tournament-participation">
@@ -154,96 +215,24 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
         </div>
       </section>
 
-      <div className="tournament-overview-grid">
-        <section className="season-schedule" aria-labelledby="season-schedule-title">
-          <h2 id="season-schedule-title">Calendario della stagione</h2>
-          <div className="season-schedule-head" aria-hidden="true">
-            <span>Mese</span><span>Torneo</span><span>Stato</span><span>Standard</span><span>Progresso stagione</span>
-          </div>
-          {TOURNAMENT_LEVEL_ORDER.map((level, levelIndex) => {
-            const definition = TOURNAMENT_DEFINITIONS[level];
-            const completed = upcoming
-              ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season)
-              : undefined;
-            const missed = [...state.tournaments.missedTournaments]
-              .reverse()
-              .find((entry) => entry.level === level && entry.season === upcoming?.season);
-            const isNext = upcoming?.level === level;
-            const isQualified = qualification?.level === level && qualification.season === upcoming?.season;
-            const status = completed
-              ? `Completato · stagione ${completed.season}`
-              : missed
-                ? "Non disputato"
-                : isNext
-                  ? "Torneo in arrivo"
-                  : isQualified
-                    ? `${qualification.contactIds.length} qualificati`
-                    : "In attesa";
-            const rowClass = [
-              "season-schedule-row",
-              completed ? "is-completed" : "",
-              isNext ? "is-next" : "",
-              completed ? "is-clickable" : "",
-            ].filter(Boolean).join(" ");
-            return (
-              <button
-                key={level}
-                type="button"
-                className={rowClass}
-                disabled={!completed}
-                onClick={() => completed && onOpenResult(completed)}
-                aria-label={completed ? `Apri i risultati di ${definition.label}, stagione ${completed.season}` : undefined}
-              >
-                <time><strong>{definition.calendarMonth.toString().padStart(2, "0")}</strong><small>{monthShortLabel[definition.calendarMonth]}</small></time>
-                <span className="schedule-name"><strong>{definition.label}</strong></span>
-                <span className="schedule-status"><i aria-hidden="true" />{status}</span>
-                <span className="schedule-standard">{definition.standard ? `Standard ${definition.standard}` : "Standard interno"}</span>
-                <span className="schedule-progress" aria-label={`Tappa ${levelIndex + 1} di ${TOURNAMENT_LEVEL_ORDER.length}`}>
-                  {TOURNAMENT_LEVEL_ORDER.map((entry, index) => <i key={entry} className={index <= levelIndex && (completed || isNext) ? "active" : ""} />)}
-                </span>
-              </button>
-            );
-          })}
-        </section>
-
-        <section className="qualified-team" aria-labelledby="qualified-team-title">
-          <header><h2 id="qualified-team-title">Qualificati</h2><span>{officialQualified.length} atlet{officialQualified.length === 1 ? "a" : "i"}{qualificationByeCount > 0 ? ` · ${qualificationByeCount} bye` : ""}</span></header>
-          {officialQualified.length > 0 && qualification ? (
-            <>
-              <div className="qualified-team-head" aria-hidden="true"><span>#</span><span>Atleta</span><span>Arena</span><span>Stile</span></div>
-              <div className="qualified-team-list">
-                {officialQualified.map(({ contact, preparation, visible }, index) => (
-                  <div key={contact.id}>
-                    <b>{index + 1}</b>
-                    <span>
-                      <TournamentContactIdentity
-                        contact={contact}
-                        schoolName={state.school.name}
-                        schoolCity={state.school.city}
-                      />
-                      <small>{TOURNAMENT_DEFINITIONS[qualification.level].label} · anno {qualification.season}</small>
-                    </span>
-                    <strong>{visible ? formatStat(preparation.arena) : "???"}</strong>
-                    <strong>{visible ? formatStat(preparation.style) : "???"}</strong>
-                  </div>
-                ))}
-              </div>
-              <footer>
-                <strong>Media squadra</strong>
-                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : formatStat(officialQualified.reduce((sum, entry) => sum + entry.preparation.arena, 0) / officialQualified.length)}</span>
-                <span>{officialQualified.some((entry) => !entry.visible) ? "???" : formatStat(officialQualified.reduce((sum, entry) => sum + entry.preparation.style, 0) / officialQualified.length)}</span>
-              </footer>
-            </>
-          ) : (
-            <div className="qualified-team-empty">
-              <span aria-hidden="true"><Icon name="trophy" /></span>
-              <strong>{missingQualificationLabel}</strong>
-              <p>{qualificationByeCount > 0
-                ? "Il torneo verrà disputato mantenendo i relativi posti vacanti."
-                : "In attesa del prossimo Torneo Scolastico."}</p>
-            </div>
-          )}
-        </section>
+      <div className="tyear-grid">
+        <TournamentYearCalendar
+          view={yearView}
+          selectedKey={selectedEntry?.key}
+          labelOf={labelOf}
+          onSelect={(entry) => onSelectEntry(entry.key)}
+        />
+        {selectedEntry ? (
+          <TournamentYearPanel
+            entry={selectedEntry}
+            previous={Boolean(yearView.previous?.entries.includes(selectedEntry))}
+            label={labelOf(selectedEntry)}
+            reptileTitle={getReptileTournamentName(state)}
+            countdown={upcoming ? formatTournamentCountdown(upcoming.occursAt - now) : undefined}
+            nextBody={nextBody}
+            onOpenResults={(entry) => onOpenResults(entry.key)}
+          />
+        ) : null}
       </div>
     </div>
   );

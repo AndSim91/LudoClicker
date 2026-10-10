@@ -79,7 +79,7 @@ describe("tournament history retention", () => {
     expect(locked.messages.some((message) => message.threadKey === "tournaments")).toBe(false);
   });
 
-  it("keeps only the latest detailed season and bounds missed seasons", () => {
+  it("keeps the detailed results of the latest two school years and bounds missed seasons", () => {
     const initial = createInitialState(1_000, "Manager");
     const result = (index: number): TournamentResult => ({
       id: `result-${index}`,
@@ -113,7 +113,7 @@ describe("tournament history retention", () => {
 
     const compacted = compactTournamentHistory(expanded);
 
-    expect(compacted.tournaments.results.map((entry) => entry.id)).toEqual(["result-29"]);
+    expect(compacted.tournaments.results.map((entry) => entry.id)).toEqual(["result-28", "result-29"]);
     expect(compacted.tournaments.missedTournaments).toHaveLength(
       GAME_CONFIG.recentMissedTournamentsLimit,
     );

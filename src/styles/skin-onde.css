@@ -119,9 +119,7 @@
 :root[data-theme="dark"] .overview-view,
 :root[data-theme="dark"] .people-hero,
 :root[data-theme="dark"] .people-table,
-:root[data-theme="dark"] .collaborator-table,
-:root[data-theme="dark"] .season-schedule,
-:root[data-theme="dark"] .qualified-team {
+:root[data-theme="dark"] .collaborator-table {
   background: var(--onde-page);
 }
 
@@ -684,10 +682,6 @@
   color: var(--onde-gold-bright);
 }
 
-:root[data-theme="dark"] .tournament-hall h2 {
-  color: var(--onde-gold-bright);
-}
-
 /* ---- Scuola: the gym that grows (GymScene) -------------------------------- */
 
 :root[data-theme="dark"] .gym-scene {
@@ -946,7 +940,6 @@
   100% { opacity: 0; transform: scale(1.6); }
 }
 
-
 /* ---- Posta: Flusso di scrittura ------------------------------------------- */
 
 :root[data-theme="dark"] .composer-flow-office,
@@ -1037,7 +1030,6 @@
   25%, 70% { opacity: 1; transform: translate(-50%, -20%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, 50%) scale(0.95); }
 }
-
 
 /* Corso Tecnici (SIS): resta glicine ma su fondo notte, senza il cartoncino chiaro. */
 :root[data-theme="dark"] .technician-course-control,
@@ -1149,7 +1141,6 @@
 @keyframes upgrade-node-flash-onde {
   25% { box-shadow: 0 0 0 4px var(--surface), 0 0 22px 6px rgb(108 211 214 / 75%); }
 }
-
 
 /* «La mia giornata» toggle: gold like the saber. */
 :root[data-theme="dark"] .day-panel-toggle {

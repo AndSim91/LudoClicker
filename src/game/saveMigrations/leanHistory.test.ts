@@ -96,7 +96,10 @@ describe("lean history migration", () => {
 
     expect(migrated).toMatchObject({ version: GAME_CONFIG.version });
     expect(isValidGameState(migrated)).toBe(true);
+    // The Tornei page keeps two school years (10/10/2026): last year's results stay too.
     expect(migrated.tournaments.results.map((entry) => entry.id)).toEqual([
+      "old-school",
+      "old-academy",
       "current-school-replay",
       "current-academy",
       "current-chronicles",

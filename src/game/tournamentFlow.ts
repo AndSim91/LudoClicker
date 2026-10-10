@@ -5,7 +5,7 @@ import {
   type SecretLegendaryProfile,
 } from "../content/secretLegendaries";
 import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../content/tournaments";
-import { getGameYear } from "./calendar";
+import { getGameYear, getSchoolYear } from "./calendar";
 import { createChroniclesVictoryChallenge } from "./chroniclesFlow";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
@@ -403,7 +403,7 @@ export function startChroniclesTournament(
   const simulation = simulateTournament(paidState, "chronicles", season, now, team);
   return applyTournamentResult(
     paidState,
-    simulation.result,
+    { ...simulation.result, schoolYear: getSchoolYear(state.school.currentMonth) },
     simulation.nextSeed,
     now,
   );

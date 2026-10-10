@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compactDetailedTournamentResults,
+  getTournamentSchoolYear,
   replaceTournamentHallEntry,
 } from "./tournamentHistory";
 import type { TournamentResult } from "./types";
@@ -64,22 +65,32 @@ function result(
 }
 
 describe("tournament history", () => {
-  it("retains one result per level in the latest ordinary season and the latest Chronicles", () => {
+  it("retains one result per level for the latest two school years and the latest Chronicles", () => {
     const results = [
       result("school-1", "school", 1),
       result("academy-1", "academy", 1),
+      result("champions-1", "champions", 1), // played in school year 2
       result("school-2-old", "school", 2),
       result("school-2-new", "school", 2),
       result("academy-2", "academy", 2),
+      result("school-3", "school", 3),
       result("chronicles-2", "chronicles", 2),
       result("chronicles-3", "chronicles", 3),
     ];
 
     expect(compactDetailedTournamentResults(results).map((entry) => entry.id)).toEqual([
+      "champions-1",
       "school-2-new",
       "academy-2",
+      "school-3",
       "chronicles-3",
     ]);
+  });
+
+  it("places the Champion's Arena in the school year after its season", () => {
+    expect(getTournamentSchoolYear({ level: "champions", season: 4 })).toBe(5);
+    expect(getTournamentSchoolYear({ level: "national", season: 4 })).toBe(4);
+    expect(getTournamentSchoolYear({ level: "chronicles", season: 4, schoolYear: 3 })).toBe(3);
   });
 
   it("stores only school first-place names and overwrites the same edition", () => {

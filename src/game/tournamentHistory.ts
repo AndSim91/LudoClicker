@@ -54,35 +54,45 @@ export function buildTournamentHall(
 }
 
 /**
- * Mantiene i dettagli dell'ultima stagione del circuito ordinario e soltanto
- * l'ultima edizione delle Chronicles. Eventuali duplicati dello stesso livello
- * vengono sovrascritti dal risultato piu recente.
+ * School year (September–August) a tournament belongs to. Scolastico, Accademico
+ * and Nazionale of season S fall in school year S; the Champion's Arena of season
+ * S is played in November of the next school year.
+ */
+export function getTournamentSchoolYear(
+  result: Pick<TournamentResult, "level" | "season" | "schoolYear">,
+): number {
+  if (result.level === "chronicles") return result.schoolYear ?? result.season;
+  return result.level === "champions" ? result.season + 1 : result.season;
+}
+
+/**
+ * Keeps the details of the ordinary circuit for the latest two school years
+ * (the Tornei page shows the current one, or the previous one while nothing has
+ * been played yet) and only the latest Chronicles edition. A duplicate of the
+ * same level and school year is replaced by the most recent result.
  */
 export function compactDetailedTournamentResults(
   results: readonly TournamentResult[],
 ): TournamentResult[] {
-  let latestOrdinarySeason: number | undefined;
+  let latestSchoolYear: number | undefined;
   let latestChronicles: TournamentResult | undefined;
   for (const result of results) {
     if (result.level === "chronicles") {
       latestChronicles = result;
-    } else if (
-      latestOrdinarySeason === undefined ||
-      result.season > latestOrdinarySeason
-    ) {
-      latestOrdinarySeason = result.season;
+      continue;
     }
+    const schoolYear = getTournamentSchoolYear(result);
+    if (latestSchoolYear === undefined || schoolYear > latestSchoolYear) latestSchoolYear = schoolYear;
   }
 
-  const selectedByLevel = new Map<TournamentResult["level"], TournamentResult>();
+  const selectedByKey = new Map<string, TournamentResult>();
   for (const result of results) {
-    if (result.level === "chronicles") continue;
-    if (result.season === latestOrdinarySeason) selectedByLevel.set(result.level, result);
+    if (result.level === "chronicles" || latestSchoolYear === undefined) continue;
+    const schoolYear = getTournamentSchoolYear(result);
+    if (schoolYear >= latestSchoolYear - 1) selectedByKey.set(`${result.level}:${schoolYear}`, result);
   }
-  if (latestChronicles) selectedByLevel.set("chronicles", latestChronicles);
+  if (latestChronicles) selectedByKey.set("chronicles", latestChronicles);
 
-  const selectedIds = new Set(
-    [...selectedByLevel.values()].map((result) => result.id),
-  );
+  const selectedIds = new Set([...selectedByKey.values()].map((result) => result.id));
   return results.filter((result) => selectedIds.has(result.id));
 }

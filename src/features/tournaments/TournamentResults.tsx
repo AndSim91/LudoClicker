@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { TOURNAMENT_DEFINITIONS, getNextTournamentLevel } from "../../content/tournaments";
 import type {
   TournamentMatch,
@@ -47,6 +47,8 @@ interface TournamentResultsProps {
     label: string;
     onClick: () => void;
   };
+  /** Replaces the context bar with the scene banner of the Tornei page (10/10/2026). */
+  banner?: ReactNode;
 }
 
 function groupLetter(groupIndex: number): string {
@@ -340,6 +342,7 @@ export function TournamentResults({
   onViewQualified,
   knownFormsByContactId,
   continuationAction,
+  banner,
 }: TournamentResultsProps) {
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
   const [selectedMatchId, setSelectedMatchId] = useState<string>();
@@ -426,6 +429,16 @@ export function TournamentResults({
     <div
       className={`tournament-results-view${result.level === "chronicles" ? " is-chronicles" : ""}`}
     >
+      {banner ? (
+        <section className="results-banner">
+          {banner}
+          {ownedFinal ? (
+            <button type="button" className="results-watch-final" data-tutorial-region="tournament-final" onClick={() => setWatchingFinal(true)}>
+              Guarda la finale
+            </button>
+          ) : null}
+        </section>
+      ) : (
       <section className="results-context">
         <button type="button" className="back-to-calendar" onClick={onBackToOverview}>
           <span aria-hidden="true">‹</span> Calendario
@@ -479,6 +492,7 @@ export function TournamentResults({
         </label>
         <b aria-hidden="true" />
       </section>
+      )}
 
       {preliminary ? (
         <div className="result-view-tabs" role="tablist" aria-label="Visualizzazione del torneo">

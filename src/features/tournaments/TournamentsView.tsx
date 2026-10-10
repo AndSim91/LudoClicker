@@ -1,12 +1,9 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../../components/common/Icon";
 import { TabButton } from "../../components/common/TabButton";
-import { TOURNAMENT_DEFINITIONS } from "../../content/tournaments";
 import type {
   GameState,
   RockPaperScissorsChoice,
-  TournamentDiscipline,
-  TournamentHallEntry,
   TournamentResult,
 } from "../../game/types";
 import { gameDelayToWallDelay } from "../../game/gameClock";
@@ -18,125 +15,25 @@ import {
 } from "./ChroniclesTournamentLoading";
 import { TournamentOverview } from "./TournamentOverview";
 import { TournamentResults } from "./TournamentResults";
-import { useVirtualRows } from "../../shared/useVirtualRows";
-import { levelShortLabel, type TournamentTab } from "./tournamentPresentation";
-import { ReptileView } from "./ReptileView";
-
-const TOURNAMENT_HALL_ROW_HEIGHT = 150;
+import { type TournamentTab } from "./tournamentPresentation";
+import { ReptileRecapPanel, ReptileView } from "./ReptileView";
+import { getReptileTournamentName } from "../../game/reptileUnlock";
+import { getGameMonthName } from "../../game/calendar";
+import {
+  YEAR_ENTRY_LABEL,
+  YEAR_ENTRY_SHORT,
+  findEntry,
+  getDefaultEntry,
+  getPlayedEntries,
+  getTournamentYearView,
+  type TournamentYearView,
+  type YearEntry,
+} from "./schoolYearTournaments";
+import { TournamentScene } from "./TournamentScene";
+import { OrderPennant } from "./OrderPennant";
+import { participantName } from "./tournamentPresentation";
 
 type OpenTournamentTab = "reptile" | "chronicles";
-
-type TournamentHallRow = {
-  id: string;
-  label: string;
-  level: string;
-  season: number;
-  arenaWinner?: string;
-  styleWinner?: string;
-};
-
-function getTournamentHallRows(hall: readonly TournamentHallEntry[]): TournamentHallRow[] {
-  return [...hall].reverse().map((entry) => ({
-    id: `${entry.level}-${entry.season}`,
-    label: TOURNAMENT_DEFINITIONS[entry.level].label,
-    level: levelShortLabel[entry.level],
-    season: entry.season,
-    arenaWinner: entry.arenaWinner,
-    styleWinner: entry.styleWinner,
-  }));
-}
-
-function TournamentHallDiscipline({
-  discipline,
-  winner,
-}: {
-  discipline: TournamentDiscipline;
-  winner?: string;
-}) {
-  const label = discipline === "arena" ? "Arena" : "Stile";
-  return (
-    <section className={`tournament-hall-discipline is-${discipline}`} aria-label={label}>
-      <header>
-        <Icon name={discipline === "arena" ? "trophy" : "spark"} />
-        <h4>{label}</h4>
-      </header>
-      {winner ? (
-        <div className="tournament-hall-winner">
-          <b>1°</b>
-          <strong>{winner}</strong>
-        </div>
-      ) : (
-        <p className="tournament-hall-empty-discipline">Nessuna vittoria della scuola</p>
-      )}
-    </section>
-  );
-}
-
-const TournamentsHall = memo(function TournamentsHall({
-  hall,
-}: {
-  hall: readonly TournamentHallEntry[];
-}) {
-  const entries = useMemo(() => getTournamentHallRows(hall), [hall]);
-  const winnerCount = entries.reduce(
-    (total, entry) => total + Number(Boolean(entry.arenaWinner)) + Number(Boolean(entry.styleWinner)),
-    0,
-  );
-  const virtualRows = useVirtualRows({
-    count: entries.length,
-    rowHeight: TOURNAMENT_HALL_ROW_HEIGHT,
-  });
-  const renderedEntries = entries.slice(virtualRows.startIndex, virtualRows.endIndex);
-  return (
-    <section className="tournament-hall" aria-label="Albo d'oro">
-      <header>
-        <div>
-          <h2>Albo d'oro</h2>
-          <small>Solo vittorie della scuola</small>
-        </div>
-        <span>{winnerCount} {winnerCount === 1 ? "vittoria" : "vittorie"}</span>
-      </header>
-      <div className="virtualized-tournament-hall" onScroll={virtualRows.onScroll}>
-        {virtualRows.paddingTop > 0 ? (
-          <div
-            className="virtual-list-spacer"
-            style={{ height: virtualRows.paddingTop }}
-            aria-hidden="true"
-          />
-        ) : null}
-        {renderedEntries.map((entry) => (
-          <article key={entry.id} className="tournament-hall-tournament">
-            <header>
-              <div>
-                <Icon name="trophy" />
-                <div>
-                  <h3>{entry.label}</h3>
-                  <small>
-                    Livello {entry.level} · Stagione {entry.season}
-                  </small>
-                </div>
-              </div>
-            </header>
-            <div className="tournament-hall-disciplines">
-              <TournamentHallDiscipline discipline="arena" winner={entry.arenaWinner} />
-              <TournamentHallDiscipline discipline="style" winner={entry.styleWinner} />
-            </div>
-          </article>
-        ))}
-        {virtualRows.paddingBottom > 0 ? (
-          <div
-            className="virtual-list-spacer"
-            style={{ height: virtualRows.paddingBottom }}
-            aria-hidden="true"
-          />
-        ) : null}
-        {entries.length === 0 ? (
-          <p className="empty-tournaments">L'Albo d'Oro è ancora vuoto.</p>
-        ) : null}
-      </div>
-    </section>
-  );
-});
 
 function selectTournamentContactForms(state: GameState): GameState["contacts"] {
   return state.contacts;
@@ -159,8 +56,10 @@ const StoredTournamentResults = memo(function StoredTournamentResults({
   onBackToOverview,
   onViewQualified,
   continuationAction,
+  banner,
 }: {
   state?: GameState;
+  banner?: ReactNode;
   result: TournamentResult;
   results: readonly TournamentResult[];
   onSelectResult: (resultId: string) => void;
@@ -189,7 +88,122 @@ const StoredTournamentResults = memo(function StoredTournamentResults({
       onViewQualified={onViewQualified}
       knownFormsByContactId={knownFormsByContactId}
       continuationAction={continuationAction}
+      banner={banner}
     />
+  );
+});
+
+/** Banner of Risultati: the hall of the tournament with its name, champion and outcome. */
+function ResultsBanner({ entry, view, label, reptileTitle }: { entry: YearEntry; view: TournamentYearView; label: string; reptileTitle: string }) {
+  const previous = Boolean(view.previous?.entries.includes(entry));
+  const month = entry.calendarMonth ? getGameMonthName(entry.calendarMonth).toLowerCase() : "Open";
+  const result = entry.result;
+  const champion = result
+    ? result.participants.find((participant) => participant.id === result.arenaRanking[0])
+    : undefined;
+  const reptile = entry.reptileResult;
+  const reptileWinner = reptile ? reptile.teams.find((team) => team.id === reptile.podiumTeamIds[0]) : undefined;
+  return (
+    <div className={`results-banner-art${previous ? " is-previous" : ""}`}>
+      <TournamentScene level={entry.level} fighters={false} title={reptileTitle} />
+      <div className="results-banner-copy">
+        <div>
+          <span className={`tyear-eyebrow${previous ? " is-previous" : ""}`}>
+            Anno scolastico {entry.schoolYear}{previous ? " · anno precedente" : ""} · {month}
+          </span>
+          <h2>{label}</h2>
+          <span className="results-banner-meta">
+            {result
+              ? `${result.participants.length} partecipanti${result.schoolPreliminary ? ` · ${result.schoolPreliminary.eligibleCount} idonei alle preliminari` : ""}`
+              : reptile ? `${reptile.teamCount} coppie · ${reptile.swissRounds} turni svizzeri` : ""}
+          </span>
+        </div>
+        {champion || reptileWinner ? (
+          <div className="results-banner-champion">
+            <span className="tyear-eyebrow">{reptile ? "Vincitori" : "Campione Arena"}</span>
+            <b className={champion?.ownedContactId || reptileWinner?.home ? "is-owned" : undefined}>
+              {champion ? <OrderPennant owner={champion} large /> : reptileWinner ? <OrderPennant owner={reptileWinner} large /> : null}
+              {champion ? participantName(champion) : reptileWinner?.athletes.map((athlete) => athlete.lastName).join(" / ")}
+            </b>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Tournaments of the year as chips; the played ones open, the previous year's in red. */
+function ResultsChips({
+  view,
+  selectedKey,
+  onSelect,
+}: {
+  view: TournamentYearView;
+  selectedKey: string | undefined;
+  onSelect: (key: string) => void;
+}) {
+  const chip = (entry: YearEntry, previous: boolean) => entry.status === "done" ? (
+    <button
+      key={entry.key}
+      type="button"
+      className={`results-chip${previous ? " is-previous" : ""}`}
+      aria-pressed={entry.key === selectedKey}
+      onClick={() => onSelect(entry.key)}
+    >
+      {YEAR_ENTRY_SHORT[entry.level]}
+      {entry.calendarMonth ? <small>{getGameMonthName(entry.calendarMonth).slice(0, 3).toLowerCase()}</small> : null}
+    </button>
+  ) : (
+    <span key={entry.key} className="results-chip is-off">
+      {YEAR_ENTRY_SHORT[entry.level]}
+      <small>{entry.status === "next" ? "prossimo" : entry.status === "out" ? "senza di noi" : "in attesa"}</small>
+    </span>
+  );
+  return (
+    <nav className="results-chips" aria-label="Tornei dell'anno">
+      <p>
+        <span className="results-chips-label">Anno {view.schoolYear}</span>
+        {view.entries.map((entry) => chip(entry, false))}
+      </p>
+      {view.previous ? (
+        <p>
+          <span className="results-chips-label is-previous">Anno {view.previous.schoolYear} · anno precedente</span>
+          {view.previous.entries.map((entry) => chip(entry, true))}
+        </p>
+      ) : null}
+    </nav>
+  );
+}
+
+const SceneCard = memo(function SceneCard({
+  level,
+  title,
+  status,
+  note,
+  locked,
+  selected,
+  onSelect,
+}: {
+  level: "reptile" | "chronicles";
+  title: string;
+  status: string;
+  note: string;
+  locked: boolean;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button type="button" className={`open-scene-card is-${level}${locked ? " is-locked" : ""}`} aria-pressed={selected} onClick={onSelect}>
+      <span className="open-scene-art">
+        <TournamentScene level={level} fighters={false} title={title} />
+        {locked ? <span className="open-scene-lock"><Icon name="lock" /></span> : null}
+        <span className="open-scene-status">{status}</span>
+      </span>
+      <span className="open-scene-copy">
+        <strong>{title}</strong>
+        <small>{note}</small>
+      </span>
+    </button>
   );
 });
 
@@ -226,46 +240,54 @@ export function TournamentsView({
   onReplayReptileDay?: () => void;
 }) {
   const state = useGameStateSlices(
-    ["tournaments", "network"],
+    ["tournaments", "network", "school"],
     stateOverride,
   );
+  const yearView = useMemo(
+    () => getTournamentYearView(state),
+    [state.school.currentMonth, state.school.nextFeeAt, state.tournaments], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const focusKey = focusResultId
+    ? getPlayedEntries(yearView).find((entry) => entry.result?.id === focusResultId)?.key
+    : undefined;
   const [tab, setTab] = useState<TournamentTab>(focusResultId ? "results" : "overview");
   const [openTournamentTab, setOpenTournamentTab] = useState<OpenTournamentTab>("reptile");
-  const [selectedResultId, setSelectedResultId] = useState(focusResultId);
+  const [selectedKey, setSelectedKey] = useState<string | undefined>(focusKey);
   const [chroniclesLoading, setChroniclesLoading] = useState(false);
   const [showChroniclesResult, setShowChroniclesResult] = useState(false);
   const chroniclesStartTimerRef = useRef<number | undefined>(undefined);
   const onStartChroniclesRef = useRef(onStartChronicles);
   const chroniclesUnlocked = state.tournaments.chronicles.unlocked;
+  const reptile = state.tournaments.reptile;
+  const reptileTitle = getReptileTournamentName(state);
   const chroniclesLoadingMs = gameDelayToWallDelay(
     CHRONICLES_TOURNAMENT_LOADING_MS,
     gameSpeed,
   );
-  const visibleTab = tab;
-  const visibleOpenTournamentTab = openTournamentTab;
-  const latestResult = state.tournaments.results.at(-1);
-  const selectedResult =
-    state.tournaments.results.find((result) => result.id === selectedResultId) ?? latestResult;
+  const labelOf = (entry: YearEntry) => entry.level === "reptile" ? reptileTitle : YEAR_ENTRY_LABEL[entry.level];
+  const played = getPlayedEntries(yearView);
+  const selectedForResults = (() => {
+    const chosen = findEntry(yearView, selectedKey);
+    if (chosen?.status === "done") return chosen;
+    const fallback = getDefaultEntry(yearView);
+    return fallback?.status === "done" ? fallback : played.at(-1);
+  })();
   const latestChroniclesResult = [...state.tournaments.results]
     .reverse()
     .find((result) => result.level === "chronicles");
-  const openResult = (result: TournamentResult) => {
-    setSelectedResultId(result.id);
-    setTab("results");
-  };
   // A tutorial step moves to its tab once, when the step asks for it (adjusted while rendering).
   const [shownTutorialTab, setShownTutorialTab] = useState<typeof tutorialTab>();
   if (tutorialTab !== shownTutorialTab) {
     setShownTutorialTab(tutorialTab);
     if (tutorialTab === "results") {
-      setSelectedResultId(undefined);
+      setSelectedKey(undefined);
       setTab("results");
     } else if (tutorialTab === "reptile") {
       setTab("open");
       setOpenTournamentTab("reptile");
     }
   }
-  const reptileShown = visibleTab === "open" && visibleOpenTournamentTab === "reptile";
+  const reptileShown = tab === "open" && (openTournamentTab === "reptile" || !chroniclesUnlocked);
   useEffect(() => {
     onReptileShownChange?.(reptileShown);
     return () => onReptileShownChange?.(false);
@@ -290,13 +312,18 @@ export function TournamentsView({
     chroniclesStartTimerRef.current = window.setTimeout(() => {
       chroniclesStartTimerRef.current = undefined;
       onStartChroniclesRef.current(pendingContactIds);
-      setSelectedResultId(undefined);
+      setSelectedKey(undefined);
       setTab("open");
       setOpenTournamentTab("chronicles");
       setShowChroniclesResult(true);
       setChroniclesLoading(false);
     }, chroniclesLoadingMs);
   };
+
+  const reptileStatus = !reptile.unlocked
+    ? "Da sbloccare"
+    : reptile.activeEdition ? "In preparazione" : "Da organizzare";
+  const chroniclesStatus = state.tournaments.chronicles.activeChallenge ? "Sfida in corso" : "Pronto";
 
   return (
     <main className="overview-view tournaments-view">
@@ -309,16 +336,13 @@ export function TournamentsView({
         </div>
       </header>
       <div className="people-tabs tournament-tabs" role="tablist" aria-label="Sezioni tornei">
-        <TabButton active={visibleTab === "overview"} onClick={() => setTab("overview")}>
+        <TabButton active={tab === "overview"} onClick={() => setTab("overview")}>
           Panoramica
         </TabButton>
-        <TabButton active={visibleTab === "results"} onClick={() => setTab("results")}>
+        <TabButton active={tab === "results"} onClick={() => setTab("results")}>
           Risultati
         </TabButton>
-        <TabButton active={visibleTab === "hall"} onClick={() => setTab("hall")}>
-          Albo d'oro
-        </TabButton>
-        <TabButton active={visibleTab === "open"} onClick={() => setTab("open")} tutorialRegion="tournaments-open-tab">
+        <TabButton active={tab === "open"} onClick={() => setTab("open")}>
           Open
         </TabButton>
       </div>
@@ -326,46 +350,68 @@ export function TournamentsView({
       {chroniclesLoading ? (
         <ChroniclesTournamentLoading durationMs={chroniclesLoadingMs} />
       ) : null}
-      {!chroniclesLoading && visibleTab === "overview" ? (
-        <TournamentOverview state={stateOverride} onOpenResult={openResult} />
+      {!chroniclesLoading && tab === "overview" ? (
+        <TournamentOverview
+          state={stateOverride}
+          selectedKey={selectedKey}
+          onSelectEntry={setSelectedKey}
+          onOpenResults={(key) => {
+            setSelectedKey(key);
+            setTab("results");
+          }}
+        />
       ) : null}
-      {!chroniclesLoading && visibleTab === "results" ? (
-        selectedResult ? (
-          <StoredTournamentResults
-            state={stateOverride}
-            result={selectedResult}
-            results={state.tournaments.results}
-            onSelectResult={setSelectedResultId}
-            onBackToOverview={() => setTab("overview")}
-            onViewQualified={onOpenAthletes}
-          />
-        ) : (
-          <p className="empty-tournaments tournament-empty-page">Nessun torneo disputato.</p>
-        )
+      {!chroniclesLoading && tab === "results" ? (
+        <div className="results-page">
+          <ResultsChips view={yearView} selectedKey={selectedForResults?.key} onSelect={setSelectedKey} />
+          {selectedForResults?.result ? (
+            <StoredTournamentResults
+              state={stateOverride}
+              result={selectedForResults.result}
+              results={played.flatMap((entry) => entry.result ? [entry.result] : [])}
+              onSelectResult={(resultId) => setSelectedKey(played.find((entry) => entry.result?.id === resultId)?.key)}
+              onBackToOverview={() => setTab("overview")}
+              onViewQualified={onOpenAthletes}
+              banner={<ResultsBanner entry={selectedForResults} view={yearView} label={labelOf(selectedForResults)} reptileTitle={reptileTitle} />}
+            />
+          ) : selectedForResults?.reptileResult ? (
+            <div className="tournament-results-view is-reptile">
+              <section className="results-banner">
+                <ResultsBanner entry={selectedForResults} view={yearView} label={labelOf(selectedForResults)} reptileTitle={reptileTitle} />
+              </section>
+              <ReptileRecapPanel result={selectedForResults.reptileResult} onReplay={onReplayReptileDay} />
+            </div>
+          ) : (
+            <p className="empty-tournaments tournament-empty-page">Nessun torneo disputato.</p>
+          )}
+        </div>
       ) : null}
-      {!chroniclesLoading && visibleTab === "hall" ? (
-        <TournamentsHall hall={state.tournaments.hall} />
-      ) : null}
-      {!chroniclesLoading && visibleTab === "open" ? (
+      {!chroniclesLoading && tab === "open" ? (
         <section className="open-tournaments" aria-label="Tornei Open">
-          <div className="people-tabs open-tournament-tabs" role="tablist" aria-label="Tornei Open">
-            <TabButton
-              active={visibleOpenTournamentTab === "reptile"}
-              onClick={() => setOpenTournamentTab("reptile")}
-            >
-              {state.network.superbaTournament ? "Superba" : "Reptile"}
-            </TabButton>
+          <div className={`open-scene-cards${chroniclesUnlocked ? "" : " is-single"}`} role="group" aria-label="Tornei Open">
+            <SceneCard
+              level="reptile"
+              title={reptileTitle}
+              status={reptileStatus}
+              note="Coppie, gironi svizzeri, a luglio a Genova"
+              locked={!reptile.unlocked}
+              selected={openTournamentTab === "reptile"}
+              onSelect={() => setOpenTournamentTab("reptile")}
+            />
             {chroniclesUnlocked ? (
-              <TabButton
-                active={visibleOpenTournamentTab === "chronicles"}
-                onClick={() => setOpenTournamentTab("chronicles")}
-              >
-                Chronicles
-              </TabButton>
+            <SceneCard
+              level="chronicles"
+              title="Chronicles of Ludosport"
+              status={chroniclesStatus}
+              note="Il torneo delle leggende, quando vuoi"
+              locked={false}
+              selected={openTournamentTab === "chronicles"}
+              onSelect={() => setOpenTournamentTab("chronicles")}
+            />
             ) : null}
           </div>
 
-          {visibleOpenTournamentTab === "reptile" ? (
+          {openTournamentTab === "reptile" || !chroniclesUnlocked ? (
             <ReptileView
               state={stateOverride}
               onOrganize={onOrganizeReptile}

@@ -752,53 +752,42 @@ del livello. Se si disiscrivono e tornano, ripartono da quanto conservato.
 
 ## 15. Interfaccia
 
-Viene aggiunta l'area `Tornei`, composta da:
+L'area `Tornei` ha tre linguette (concept A «Scena della finale», 10/10/2026;
+l'Albo d'oro è stato tolto):
 
-- Stagione;
-- Partecipanti;
-- Torneo;
-- Albo d'Oro.
+- Panoramica;
+- Risultati;
+- Open.
 
-### 15.1 Stagione
+### 15.1 Panoramica
 
-Mostra calendario, stato dei quattro tornei e avanzamento verso i sei idonei allo Scolastico.
+In alto il prossimo torneo con conto alla rovescia e partecipanti. Sotto, a
+sinistra il calendario dell'**anno scolastico** (settembre–agosto): Champion's
+Arena di novembre (chiude la stagione precedente), Scolastico, Accademico Alpha,
+Nazionale e, se organizzati, Reptile e Chronicles. Ogni torneo può essere scelto:
 
-Stati previsti:
+- disputato: a destra la scena della finale (la stessa di «Guarda la finale»,
+  per livello), il segnapunti arancione con il risultato, le targhette dei due
+  finalisti con lo stendardo dell'Ordine, i podi di Arena e Stile e l'esito;
+- prossimo: la scena vuota con il conto alla rovescia e la delegazione, con le
+  barre di Arena e Stile in oro sopra il campo del torneo;
+- in attesa o senza di noi: la scena spenta con una riga di spiegazione.
 
-- in attesa;
-- qualificato;
-- non qualificato;
-- sospeso per idonei insufficienti;
-- completato.
+Se nell'anno scolastico non si è ancora disputato nulla compaiono, sotto, i
+tornei del solo anno precedente, segnati in rosso come «anno precedente». Il
+Reptile si gioca di notte sul porto di Genova (scena con la Lanterna).
 
-### 15.2 Partecipanti
+### 15.2 Risultati
 
-Per gli atleti della scuola mostra:
+In alto i tornei dell'anno come pastiglie (quelli dell'anno precedente in rosso
+quando valgono le regole sopra), poi uno striscione con la scena del torneo,
+il campione Arena e «Guarda la finale». Sotto restano gironi, tabellone,
+dettaglio incontri, podi, qualificati e premi. Per il Reptile c'è il riepilogo
+dell'edizione.
 
-- Forma;
-- esperienza;
-- Arena e Stile base, oppure `???` prima del Corso X;
-- preparazione visibile dopo Corso X;
-- origine della qualificazione;
-- immunità;
-- podi precedenti.
-
-### 15.3 Risultati
-
-Il torneo viene simulato e salvato automaticamente. I dettagli completi restano
-consultabili soltanto per l'ultima stagione competitiva. Un nuovo risultato
-dello stesso livello e della stessa stagione sovrascrive il precedente; delle
-Chronicles viene conservato soltanto il risultato più recente. Il giocatore può
-consultare:
-
-- riepilogo;
-- gironi;
-- tabellone Arena;
-- classifica Stile;
-- dettaglio incontri;
-- condizione generale;
-- qualificati e ripescaggi;
-- premi.
+I dettagli completi restano consultabili per gli ultimi due anni scolastici. Un
+nuovo risultato dello stesso livello e dello stesso anno sovrascrive il
+precedente; delle Chronicles viene conservato soltanto il risultato più recente.
 
 In tutte le viste dei tornei, il nome di ogni atleta conserva il colore della
 propria rarità ed è accompagnato dal badge della scuola di appartenenza. Il
@@ -807,6 +796,12 @@ scuole esterne usano un badge neutro. Il badge mostra soltanto il nome
 dell'Ordine, senza aggiungere la città; passando il mouse sul badge, un tooltip
 indica la città o le città della scuola.
 
+### 15.3 Open
+
+Una scheda con la scena per ogni torneo Open (Chronicles solo dopo lo
+sblocco); sotto, la pagina del torneo scelto (organizzazione, preparazione,
+minigioco, recap).
+
 Prima dell'incontro le probabilità vengono espresse qualitativamente:
 
 - nettamente sfavorito;
@@ -814,20 +809,6 @@ Prima dell'incontro le probabilità vengono espresse qualitativamente:
 - equilibrato;
 - favorito;
 - nettamente favorito.
-
-### 15.4 Albo d'Oro
-
-L'Albo d'Oro è uno storico permanente ma volutamente minimale. Registra una
-voce soltanto quando la scuola del giocatore vince Arena o Stile e conserva:
-
-- stagione;
-- torneo;
-- nome del vincitore Arena, se appartiene alla scuola;
-- nome del vincitore Stile, se appartiene alla scuola.
-
-Non conserva partecipanti, podi completi, scuole avversarie, punteggi, Forme o
-esperienza. L'appartenenza alla scuola viene determinata dall'ID dell'iscritto,
-non dal nome testuale della scuola.
 
 ## 16. Ordine di risoluzione
 
