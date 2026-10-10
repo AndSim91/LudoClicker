@@ -581,7 +581,7 @@ describe("no school title before the Accademico tappa (10/10/2026)", () => {
     return [result.arenaRanking[0], result.styleRanking[0]].filter((id) => owned.has(id)).length;
   };
 
-  it("quietly redraws until both titles go elsewhere, and stops once the tappa is open", () => {
+  it("quietly redraws until both titles and the Nazionale places go elsewhere, and stops once the tappa is open", () => {
     let titlesAfter = 0;
     for (let seed = 1; seed <= 10; seed += 1) {
       const before = processTournamentAtMonthEnd({ ...strongAcademy(false), randomSeed: seed }, 16, 20_000);
@@ -589,6 +589,9 @@ describe("no school title before the Accademico tappa (10/10/2026)", () => {
       expect(result.level).toBe("academy");
       expect(schoolTitles(result)).toBe(0);
       expect(before.tournaments.academyTitlesCurrentSchool ?? 0).toBe(0);
+      // Nobody of ours goes to the Nazionale either.
+      expect(result.qualifiers.some((qualifier) => qualifier.ownedContactId)).toBe(false);
+      expect(before.tournaments.qualification).toBeUndefined();
       const after = processTournamentAtMonthEnd({ ...strongAcademy(true), randomSeed: seed }, 16, 20_000);
       titlesAfter += schoolTitles(after.tournaments.results.at(-1)!);
     }

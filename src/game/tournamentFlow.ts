@@ -448,7 +448,7 @@ export function processTournamentAtMonthEnd(
     (id) => contactsById.get(id)?.status !== "enrolled",
   );
   const options = { vacantQualificationContactIds };
-  const simulation = isAcademyTappaOpen(state) || (level !== "academy" && level !== "national")
+  const simulation = isAcademyTappaOpen(state) || level !== "academy"
     ? simulateTournament(state, level, season, now, ownedContacts, options)
     : simulateWithoutSchoolTitle(state, level, season, now, ownedContacts, options);
   return applyTournamentResult(state, simulation.result, simulation.nextSeed, now);
@@ -459,9 +459,10 @@ const MAX_REDRAWS = 200;
 
 /**
  * Before the Accademico tappa (10/10/2026, first school only) the school never
- * takes a title at the Accademico or the Nazionale, and nothing says so: the
- * draw is quietly repeated until both titles go to other schools. Only a school
- * that wins every redraw gets a hidden handicap, inside the matches alone.
+ * takes a title at the Accademico nor a place at the Nazionale, and nothing says
+ * so: the draw is quietly repeated until both titles and every qualification go
+ * to other schools. Only a school that keeps winning gets a hidden handicap,
+ * inside the matches alone. With no qualifier the Nazionale is closed too.
  */
 function simulateWithoutSchoolTitle(
   state: GameState,
@@ -485,5 +486,6 @@ function simulateWithoutSchoolTitle(
 function schoolTakesTitle(result: TournamentResult): boolean {
   const byId = new Map(result.participants.map((participant) => [participant.id, participant]));
   return [result.arenaRanking[0], result.styleRanking[0]]
-    .some((id) => Boolean(byId.get(id)?.ownedContactId));
+    .some((id) => Boolean(byId.get(id)?.ownedContactId)) ||
+    result.qualifiers.some((qualifier) => qualifier.ownedContactId);
 }
