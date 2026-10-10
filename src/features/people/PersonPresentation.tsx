@@ -13,6 +13,7 @@ export function FormLogoStrip({
   forms,
   instructorForms = [],
   technicianForms = [],
+  eLearningForms = [],
   showLabels = true,
   className = "",
   counts,
@@ -21,6 +22,8 @@ export function FormLogoStrip({
   forms: FormId[];
   instructorForms?: readonly FormId[];
   technicianForms?: readonly FormId[];
+  /** Forme abilitate con l'e-Learning: pallino a metà (C1, 10/10). */
+  eLearningForms?: readonly FormId[];
   showLabels?: boolean;
   className?: string;
   /** Copertura didattica: quanti Istruttori (e Tecnici, se c'è la SIS) per Forma. */
@@ -43,6 +46,7 @@ export function FormLogoStrip({
       logo,
       instructorCertified: instructorForms.includes(formId),
       technicianCertified: technicianForms.includes(formId),
+      eLearning: eLearningForms.includes(formId) && !technicianForms.includes(formId),
     };
   });
 
@@ -55,7 +59,7 @@ export function FormLogoStrip({
     >
       {entries.length === 0 ? (
         <span className="form-logo-empty">Nessuna forma completata</span>
-      ) : entries.map(({ formId, longName, shortName, logo, instructorCertified, technicianCertified }) => (
+      ) : entries.map(({ formId, longName, shortName, logo, instructorCertified, technicianCertified, eLearning }) => (
         <span
           className={`form-logo-item ${showLabels ? "" : "compact"} ${logo.source === "generated" ? "generated" : ""} ${instructorCertified ? "instructor-certified" : ""} ${technicianCertified ? "technician-certified" : ""}${highlight?.instructor === formId ? " is-next-instructor" : ""}${highlight?.technician === formId ? " is-next-technician" : ""}`}
           key={formId}
@@ -63,9 +67,11 @@ export function FormLogoStrip({
           data-short-name={shortName}
           title={`${longName}${technicianCertified
             ? " · Qualifica da Tecnico"
-            : instructorCertified
-              ? " · Attestato da istruttore"
-              : ""}`}
+            : eLearning
+              ? " · Attestato da istruttore (e-Learning) · in attesa di un Tecnico"
+              : instructorCertified
+                ? " · Attestato da istruttore"
+                : ""}`}
         >
           <span className="form-logo-mark">
             <img
@@ -74,7 +80,7 @@ export function FormLogoStrip({
             />
             {technicianCertified || instructorCertified ? (
               <span
-                className={`form-instructor-crown${technicianCertified ? " is-technician" : ""}`}
+                className={`form-instructor-crown${technicianCertified ? " is-technician" : eLearning ? " is-elearning" : ""}`}
                 aria-hidden="true"
               >♛</span>
             ) : null}

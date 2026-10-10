@@ -79,6 +79,16 @@
   box-shadow: inset 0 0 0 2px var(--blue-600), 0 0 0 1.5px var(--surface);
 }
 
+/* C1 (10/10): Istruttore e-Learning, pallino a metà tra pieno e anello. */
+:root[data-theme="light"] .form-logo-mark > .form-instructor-crown.is-elearning {
+  background: linear-gradient(90deg, var(--blue-600) 50%, var(--surface) 50%);
+  box-shadow: inset 0 0 0 1.5px var(--blue-600), 0 0 0 1.5px var(--surface);
+}
+
+:root[data-theme="light"] .form-logo-mark > .form-instructor-crown.is-elearning::after {
+  display: none;
+}
+
 :root[data-theme="light"] .form-logo-item.is-next-instructor .form-logo-mark img,
 :root[data-theme="light"] .form-logo-item.is-next-technician .form-logo-mark img {
   --next-ring: var(--blue-600);

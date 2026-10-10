@@ -275,6 +275,7 @@ function SectorCollaboratorRow({
                 forms={collaborator.forms}
                 instructorForms={collaborator.instructorForms}
                 technicianForms={collaborator.technicianForms}
+                eLearningForms={collaborator.eLearningInstructorForms}
                 showLabels={false}
               />
             </div>
@@ -313,6 +314,7 @@ function SectorCollaboratorRow({
             forms={collaborator.forms}
             instructorForms={collaborator.instructorForms}
             technicianForms={collaborator.technicianForms}
+            eLearningForms={collaborator.eLearningInstructorForms}
             showLabels={false}
           />
         </>

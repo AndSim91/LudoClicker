@@ -696,7 +696,9 @@ export function TrainingControl({
       ? collaboratorsById.get(student.training.technicianId)
       : undefined;
     const trainingPhase = getTrainingPhase(student.training);
-    const courseTitle = trainingPhase === "instructor"
+    const courseTitle = student.training.refresher
+      ? `Corso di aggiornamento · ${definition?.longName ?? "Forma"}`
+      : trainingPhase === "instructor"
       ? `Corso Istruttori · ${definition?.longName ?? "Forma"}`
       : trainingPhase === "technician"
         ? `Corso Tecnico SIS · ${definition?.longName ?? "Forma"}`

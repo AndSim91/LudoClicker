@@ -184,6 +184,20 @@
   background: #d4aeff;
 }
 
+/* T5 (10/10): Istruttore abilitato con l'e-Learning, tacca d'oro più il Wi-Fi
+   sull'angolo del logo (due tacche su tre: connessione così così). Fermo. */
+.form-path-node.is-elearning::before {
+  position: absolute;
+  top: calc(var(--form-node) - 7px);
+  right: -3px;
+  z-index: 1;
+  width: 9px;
+  height: 7px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 14'%3E%3Cg fill='none' stroke='%23f0b85a' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M2 5.5a10 10 0 0 1 14 0'/%3E%3Cpath d='M5 8.6a6 6 0 0 1 8 0'/%3E%3C/g%3E%3Ccircle cx='9' cy='12' r='1.8' fill='%23f0b85a'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 1px var(--onde-abyss)) drop-shadow(0 0 1px var(--onde-abyss));
+  content: "";
+}
+
 .member-card .form-path-map {
   --form-node: 18px;
   margin: 2px 0 4px;

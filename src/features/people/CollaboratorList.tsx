@@ -204,6 +204,7 @@ export function CollaboratorList({
                       forms={collaborator.forms}
                       instructorForms={collaborator.instructorForms}
                       technicianForms={collaborator.technicianForms}
+                      eLearningForms={collaborator.eLearningInstructorForms}
                     />
                   </div>
                 </div>

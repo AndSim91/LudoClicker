@@ -1961,6 +1961,13 @@ Regole:
   Istruttori interno, ha l'esame normale da Istruttore e al termine l'Istruttore
   è normale a tutti gli effetti. Anche diventare Tecnico della Forma toglie il
   malus dell'e-Learning;
+- **segno in interfaccia** (10/10): in Modalità Onde la Forma abilitata con
+  l'e-Learning tiene la tacca d'oro e aggiunge sull'angolo del logo il simbolo
+  del Wi-Fi con due tacche su tre (concept T5); in Outlook il pallino diventa a
+  metà tra il pieno dell'Istruttore e l'anello del Tecnico (C1). Tooltip:
+  «Attestato da istruttore (e-Learning) · in attesa di un Tecnico». La
+  Copertura didattica non lo mostra, perché la Forma è comunque coperta. Il
+  corso in corso si chiama «Corso di aggiornamento»;
 - **Il costo del Servizio** riduce fino al 25% sia questi Corsi Istruttori sia
   i Corsi Tecnici SIS; non si applica ai percorsi da atleta;
 - i livelli 2–4 di **Tu conosci la SIS?** aumentano la velocità dei soli Corsi

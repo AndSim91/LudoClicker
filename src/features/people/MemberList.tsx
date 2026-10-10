@@ -710,12 +710,14 @@ export function MemberList({
                   forms={memberForms}
                   instructorForms={collaborator?.instructorForms}
                   technicianForms={collaborator?.technicianForms}
+                  eLearningForms={collaborator?.eLearningInstructorForms}
                 />
               ) : (
                 <FormPathMap
                   forms={memberForms}
                   instructorForms={collaborator?.instructorForms}
                   technicianForms={collaborator?.technicianForms}
+                  eLearningForms={collaborator?.eLearningInstructorForms}
                 />
               )}
             </div>

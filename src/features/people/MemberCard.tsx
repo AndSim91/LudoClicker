@@ -62,12 +62,14 @@ export function MemberCard({
           forms={forms}
           instructorForms={collaborator?.instructorForms}
           technicianForms={collaborator?.technicianForms}
+          eLearningForms={collaborator?.eLearningInstructorForms}
         />
       ) : (
         <FormLogoStrip
           forms={forms}
           instructorForms={collaborator?.instructorForms}
           technicianForms={collaborator?.technicianForms}
+          eLearningForms={collaborator?.eLearningInstructorForms}
           showLabels={false}
         />
       )}

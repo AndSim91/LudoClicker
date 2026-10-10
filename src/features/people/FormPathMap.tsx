@@ -73,22 +73,30 @@ export function FormPathMap({
   forms,
   instructorForms = [],
   technicianForms = [],
+  eLearningForms = [],
 }: {
   forms: readonly FormId[];
   instructorForms?: readonly FormId[];
   technicianForms?: readonly FormId[];
+  /** T5 (10/10): Istruttore abilitato con l'e-Learning, simbolo del Wi-Fi sul logo. */
+  eLearningForms?: readonly FormId[];
 }) {
   const learned = new Set(forms);
   const node = (formId: FormId) => {
     const lit = learned.has(formId);
     const technician = technicianForms.includes(formId);
     const instructor = instructorForms.includes(formId);
+    const eLearning = instructor && !technician && eLearningForms.includes(formId);
     return (
       <span
         key={formId}
         className={`form-path-node${lit ? " is-learned" : ""}${formId === "course-y" ? " is-course-y" : ""}${
-          lit && technician ? " is-technician" : lit && instructor ? " is-instructor" : ""}`}
-        title={`${formName(formId)}${lit ? "" : " · da fare"}${technician ? " · Qualifica da Tecnico" : instructor ? " · Attestato da istruttore" : ""}`}
+          lit && technician ? " is-technician" : lit && instructor ? " is-instructor" : ""}${lit && eLearning ? " is-elearning" : ""}`}
+        title={`${formName(formId)}${lit ? "" : " · da fare"}${technician
+          ? " · Qualifica da Tecnico"
+          : eLearning
+            ? " · Attestato da istruttore (e-Learning) · in attesa di un Tecnico"
+            : instructor ? " · Attestato da istruttore" : ""}`}
       >
         <img src={getFormLogo(formId).assetPath} alt="" />
       </span>
@@ -213,12 +221,14 @@ export function StaffForms({
   forms,
   instructorForms,
   technicianForms,
+  eLearningForms,
   stripClassName,
   showLabels,
 }: {
   forms: FormId[];
   instructorForms?: readonly FormId[];
   technicianForms?: readonly FormId[];
+  eLearningForms?: readonly FormId[];
   stripClassName?: string;
   showLabels?: boolean;
 }) {
@@ -229,9 +239,15 @@ export function StaffForms({
       forms={forms}
       instructorForms={instructorForms}
       technicianForms={technicianForms}
+      eLearningForms={eLearningForms}
       showLabels={showLabels}
     />
   ) : (
-    <FormPathMap forms={forms} instructorForms={instructorForms} technicianForms={technicianForms} />
+    <FormPathMap
+      forms={forms}
+      instructorForms={instructorForms}
+      technicianForms={technicianForms}
+      eLearningForms={eLearningForms}
+    />
   );
 }
