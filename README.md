@@ -1,4 +1,6 @@
-# Oggetto: Nuovi Iscritti
+# LudoClicker
+
+*Un incremental game dell'Ordine delle Onde*
 
 Incremental game browser completo basato sul [Game Design Document](./GAME_DESIGN_DOCUMENT.md), presentato come una sobria applicazione di posta e organizzazione.
 

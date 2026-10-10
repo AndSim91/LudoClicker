@@ -262,7 +262,7 @@ function EditorialScene() {
         <path d="M206 70 H318 L312 74 H212 Z" fill="#0e4563" />
         <rect x={220} y={16} width={84} height={46} rx={2} fill="#f5f3ee" />
         <rect x={224} y={20} width={76} height={6} rx={1} fill="#e6eef2" />
-        <text x={226} y={25} fontSize={5} fontWeight={600} fill="#0a3a57">Oggetto: Nuovi iscritti</text>
+        <text x={226} y={25} fontSize={5} fontWeight={600} fill="#0a3a57">Oggetto: Lezione di prova</text>
         {lines.map(([y, w]) => <rect key={y} x={226} y={y} width={w} height={3} rx={1.5} fill="#7d93a3" opacity={0.25} />)}
         <rect x={332} y={58} width={12} height={13} rx={2} fill="#e0a64a" />
         <path d="M344 61 q5 0 5 4 q0 4 -5 4" fill="none" stroke="#e0a64a" strokeWidth={1.6} />

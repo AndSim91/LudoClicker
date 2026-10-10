@@ -41,7 +41,7 @@ export function createCampaign(
 export function createWelcomeMessage(now: number): InboxMessage {
   return {
     id: makeGameId("message", now, "welcome"),
-    sender: "Sistema Oggetto: Nuovi Iscritti",
+    sender: "Sistema LudoClicker",
     subject: "Benvenuto! Inizia da qui",
     preview: "Completa l'email: ogni tasto o clic inserisce il prossimo carattere.",
     receivedAt: now,

@@ -8,6 +8,8 @@ import {
 import type { Contact } from "../types";
 import type { MigratableState } from "./types";
 
+const LEGACY_SYSTEM_SENDER = "Sistema Oggetto: Nuovi Iscritti";
+
 const LEGACY_PROSPECT_EMAIL_DOMAIN = "@esempio.test";
 
 function demoteLegendaryContact(contact: Contact): Contact {
@@ -177,6 +179,15 @@ export function normalizeLegacySave(state: MigratableState): MigratableState {
         ...contact,
         email: contact.email.replace(/\.\d+(?=@)/, ""),
       })),
+    };
+  }
+
+  // ponytail: rinomina del gioco (10/10/2026), il mittente è salvato nel messaggio di benvenuto.
+  if (migrated.messages?.some((message) => message.sender === LEGACY_SYSTEM_SENDER)) {
+    migrated = {
+      ...migrated,
+      messages: migrated.messages.map((message) =>
+        message.sender === LEGACY_SYSTEM_SENDER ? { ...message, sender: "Sistema LudoClicker" } : message),
     };
   }
 

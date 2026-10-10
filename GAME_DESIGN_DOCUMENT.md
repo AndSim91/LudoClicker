@@ -1,8 +1,8 @@
-# Oggetto: Nuovi Iscritti
+# LudoClicker
 
 ## Game Design Document
 
-**Titolo di lavorazione:** Oggetto: Nuovi Iscritti\
+**Titolo:** LudoClicker\
 **Sottotitolo:** Un incremental game dell'Ordine delle Onde\
 **Versione documento:** 1.1\
 **Stato:** concept avanzato, economia e progressione definite, pronto per la
@@ -15,7 +15,7 @@ prototipazione\
 
 ## 1. Sintesi
 
-Oggetto: Nuovi Iscritti è un browser game clicker incrementale ambientato dentro
+LudoClicker è un browser game clicker incrementale ambientato dentro
 una simulazione quasi perfetta di Outlook per Windows 11.
 
 Il giocatore collabora inizialmente con **LudoSport Genova – Ordine delle Onde**
