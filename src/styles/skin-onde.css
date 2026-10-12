@@ -794,6 +794,8 @@
 .gym-judge-mark { stroke: #e9f3ff; stroke-width: 1.4; stroke-linecap: round; }
 .gym-judge-cardface { stroke: #111417; stroke-width: 1; }
 .gym-judge-card { transform-box: view-box; animation: gym-card-up 1.8s ease-out forwards; }
+.gym-judge-chair { fill: none; stroke: #2a6f8f; stroke-width: 3; stroke-linecap: round; }
+.gym-judge-pose { animation: gym-judge-settle 0.35s ease-out; }
 .gym-rack rect { fill: #04263f; }
 .gym-crowd { fill: #04263f; }
 .gym-trophies { fill: #f0b85a; }
@@ -898,6 +900,10 @@
 
 @keyframes gym-bulb { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
 @keyframes gym-sweep { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+@keyframes gym-judge-settle {
+  from { opacity: 0.4; }
+}
+
 @keyframes gym-card-up {
   0% { transform: rotate(var(--down)); opacity: 0; }
   14%, 82% { transform: none; opacity: 1; }

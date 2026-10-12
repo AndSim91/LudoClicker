@@ -42,6 +42,16 @@ describe("GymScene", () => {
     expect(view.container.querySelector(".gym-judge.is-phone .gym-judge-card")).toBeNull();
   });
 
+  it("keeps the Style judge on his chair, which stays there when he gets up", () => {
+    const view = render(<GymReferees />);
+    const head = () => view.container.querySelector(".gym-judge.is-phone .gym-judge-ink")?.getAttribute("cy");
+    expect(view.container.querySelectorAll(".gym-judge-chair")).toHaveLength(1);
+    expect(head()).toBe("106");
+    view.rerender(<GymReferees styleJudgeUp />);
+    expect(view.container.querySelectorAll(".gym-judge-chair")).toHaveLength(1);
+    expect(head()).toBe("100");
+  });
+
   it("shows every rarity the school has before filling the mat by member share", () => {
     expect(getGymSaberRarities({ common: 40 }, 2)).toEqual(["common", "common"]);
     expect(getGymSaberRarities({ common: 40, legendary: 1 }, 1)).toEqual(["legendary"]);

@@ -13,7 +13,15 @@ import type { BoutSide } from "../arena/boutChoreography";
 import { GymBoutPair } from "./GymBoutPair";
 import { GymActor, GymPair } from "./GymPair";
 import { GymLayer, SaberLayers } from "./GymLayers";
-import { addGymPoint, applyGymCard, isGymMatchOver, rollGymCard, type GymScore } from "./gymMatch";
+import {
+  GYM_JUDGE_STAND_CHANCE,
+  GYM_JUDGE_STAND_MS,
+  addGymPoint,
+  applyGymCard,
+  isGymMatchOver,
+  rollGymCard,
+  type GymScore,
+} from "./gymMatch";
 import { GymReferees, GymScoreboard, type RaisedCard } from "./GymReferees";
 import type { GymBox } from "./gymBox";
 
@@ -55,12 +63,25 @@ const JUDGES_STAGE = GYM_STAGES.findIndex((stage) => stage.name === "Arena e giu
 function useGymMatch() {
   const [score, setScore] = useState<GymScore>({ a: 0, b: 0 });
   const [card, setCard] = useState<RaisedCard>();
+  const [judgeUp, setJudgeUp] = useState(false);
   const timers = useRef<number[]>([]);
+  const standTimer = useRef<number>();
   const later = (ms: number, next: () => void) => timers.current.push(window.setTimeout(next, ms));
-  useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
+  useEffect(() => () => {
+    timers.current.forEach((timer) => window.clearTimeout(timer));
+    window.clearTimeout(standTimer.current);
+  }, []);
 
   const onPoint = useCallback((side: BoutSide) => {
     timers.current = [];
+    if (standTimer.current === undefined && Math.random() < GYM_JUDGE_STAND_CHANCE) {
+      const [min, max] = GYM_JUDGE_STAND_MS;
+      setJudgeUp(true);
+      standTimer.current = window.setTimeout(() => {
+        standTimer.current = undefined;
+        setJudgeUp(false);
+      }, min + Math.random() * (max - min));
+    }
     setScore((current) => addGymPoint(current, side));
     const raised = rollGymCard(Math.random);
     if (!raised) return;
@@ -75,7 +96,7 @@ function useGymMatch() {
     return () => window.clearTimeout(timer);
   }, [score]);
 
-  return { score, card, onPoint };
+  return { score, card, judgeUp, onPoint };
 }
 
 // Subscribes to members and contacts only, so money ticks do not repaint the scene.
@@ -262,7 +283,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             ))
           : null}
 
-        {judges ? <GymReferees card={match.card} /> : null}
+        {judges ? <GymReferees card={match.card} styleJudgeUp={match.judgeUp} /> : null}
 
         {fighterCount === 1 ? <GymActor x={320} facing={1} saber={sabers[0]} pose="guard" /> : null}
         {fighterCount >= 2 ? (

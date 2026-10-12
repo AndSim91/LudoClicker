@@ -14,6 +14,9 @@ export type GymScore = Record<BoutSide, number>;
 export const GYM_MATCH_POINTS = 3;
 export const GYM_STYLE_CARD_CHANCE = 0.1;
 export const GYM_REFEREE_CARD_CHANCE = 0.1;
+/** After a point the seated Style judge may get up to look closer, for 4–10 s. */
+export const GYM_JUDGE_STAND_CHANCE = 0.05;
+export const GYM_JUDGE_STAND_MS: [number, number] = [4_000, 10_000];
 /** Share of the gym's cuts that come from a Disarmo. */
 export const GYM_DISARM_CHANCE = 0.05;
 
