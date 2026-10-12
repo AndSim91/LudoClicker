@@ -158,7 +158,7 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
         <section className="season-schedule" aria-labelledby="season-schedule-title">
           <h2 id="season-schedule-title">Calendario della stagione</h2>
           <div className="season-schedule-head" aria-hidden="true">
-            <span>Mese</span><span>Torneo</span><span>Stato</span><span>Standard</span><span>Progresso stagione</span>
+            <span>Mese</span><span>Torneo</span><span>Stato</span><span>Progresso stagione</span>
           </div>
           {TOURNAMENT_LEVEL_ORDER.map((level, levelIndex) => {
             const definition = TOURNAMENT_DEFINITIONS[level];
@@ -170,8 +170,13 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
               .find((entry) => entry.level === level && entry.season === upcoming?.season);
             const isNext = upcoming?.level === level;
             const isQualified = qualification?.level === level && qualification.season === upcoming?.season;
-            const status = completed
-              ? `Completato · stagione ${completed.season}`
+            // Not played yet this season: the previous season's result stays visible (12/10/2026).
+            const previous = upcoming && !completed && !missed && !isNext && !isQualified
+              ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season - 1)
+              : undefined;
+            const shown = completed ?? previous;
+            const status = shown
+              ? `Completato · stagione ${shown.season}`
               : missed
                 ? "Non disputato"
                 : isNext
@@ -181,23 +186,22 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
                     : "In attesa";
             const rowClass = [
               "season-schedule-row",
-              completed ? "is-completed" : "",
+              shown ? "is-completed is-clickable" : "",
+              previous ? "is-previous" : "",
               isNext ? "is-next" : "",
-              completed ? "is-clickable" : "",
             ].filter(Boolean).join(" ");
             return (
               <button
                 key={level}
                 type="button"
                 className={rowClass}
-                disabled={!completed}
-                onClick={() => completed && onOpenResult(completed)}
-                aria-label={completed ? `Apri i risultati di ${definition.label}, stagione ${completed.season}` : undefined}
+                disabled={!shown}
+                onClick={() => shown && onOpenResult(shown)}
+                aria-label={shown ? `Apri i risultati di ${definition.label}, stagione ${shown.season}` : undefined}
               >
                 <time><strong>{definition.calendarMonth.toString().padStart(2, "0")}</strong><small>{monthShortLabel[definition.calendarMonth]}</small></time>
                 <span className="schedule-name"><strong>{definition.label}</strong></span>
                 <span className="schedule-status"><i aria-hidden="true" />{status}</span>
-                <span className="schedule-standard">{definition.standard ? `Standard ${definition.standard}` : "Standard interno"}</span>
                 <span className="schedule-progress" aria-label={`Tappa ${levelIndex + 1} di ${TOURNAMENT_LEVEL_ORDER.length}`}>
                   {TOURNAMENT_LEVEL_ORDER.map((entry, index) => <i key={entry} className={index <= levelIndex && (completed || isNext) ? "active" : ""} />)}
                 </span>

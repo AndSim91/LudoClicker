@@ -30,6 +30,7 @@
   --onde-on-gold: #0a1f33;
   --onde-gold-soft: #f3d79f;
   --onde-thread: rgb(224 166 74 / 30%);
+  --schedule-previous-bg: var(--onde-groove);
   /* The title bar gradient, fixed to the viewport, darkening towards the bottom. */
   --onde-page:
     linear-gradient(180deg, rgb(1 14 25 / 0%) 45px, rgb(1 14 25 / 50%)) fixed,
@@ -681,10 +682,6 @@
 }
 
 :root[data-theme="dark"] .bracket-match > span.is-winner b {
-  color: var(--onde-gold-bright);
-}
-
-:root[data-theme="dark"] .tournament-hall h2 {
   color: var(--onde-gold-bright);
 }
 

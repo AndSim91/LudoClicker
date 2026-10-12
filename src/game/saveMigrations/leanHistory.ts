@@ -1,7 +1,4 @@
-import {
-  buildTournamentHall,
-  compactDetailedTournamentResults,
-} from "../tournamentHistory";
+import { compactDetailedTournamentResults } from "../tournamentHistory";
 import type { GameState } from "../types";
 import type { MigratableState } from "./types";
 
@@ -17,7 +14,6 @@ export function migrateLeanHistoryState(
     ? {
         ...state.tournaments,
         results: compactDetailedTournamentResults(results),
-        hall: buildTournamentHall(results),
       }
     : state.tournaments;
 

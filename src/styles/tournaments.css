@@ -720,8 +720,7 @@
 .group-stage,
 .knockout-stage,
 .podium-qualification-rail,
-.tournament-rewards,
-.tournament-hall {
+.tournament-rewards {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -732,8 +731,7 @@
 .group-stage > h2,
 .knockout-stage > h2,
 .podium-qualification-rail > h2,
-.tournament-rewards > h2,
-.tournament-hall > header {
+.tournament-rewards > h2 {
   margin: 0;
   padding: 15px 18px;
   border-bottom: 1px solid var(--line);
@@ -745,8 +743,7 @@
 .season-schedule-row {
   display: grid;
   grid-template-columns:
-    64px minmax(190px, 1.35fr) minmax(120px, 0.95fr) minmax(120px, 0.9fr)
-    minmax(130px, 1fr);
+    64px minmax(190px, 1.35fr) minmax(150px, 1.1fr) minmax(130px, 1fr);
   align-items: center;
 }
 
@@ -778,8 +775,7 @@
   -webkit-text-fill-color: var(--ink);
 }
 
-.season-schedule-row:disabled .schedule-status,
-.season-schedule-row:disabled .schedule-standard {
+.season-schedule-row:disabled .schedule-status {
   color: var(--ink-muted);
   -webkit-text-fill-color: var(--ink-muted);
 }
@@ -799,6 +795,15 @@
 .season-schedule-row.is-clickable:hover,
 .season-schedule-row.is-clickable:focus-visible {
   background: var(--blue-050);
+}
+
+/* The previous season's tournaments, not played yet this season (12/10/2026). */
+.season-schedule-row.is-previous {
+  background: var(--schedule-previous-bg, #edebe9);
+}
+
+.season-schedule-row.is-previous .schedule-status {
+  color: var(--ink-muted);
 }
 
 .season-schedule-row time {
@@ -824,8 +829,7 @@
 }
 
 .schedule-name,
-.schedule-status,
-.schedule-standard {
+.schedule-status {
   padding-right: 12px;
 }
 
@@ -860,11 +864,6 @@
 
 .is-next .schedule-status {
   color: var(--blue-700);
-}
-
-.schedule-standard {
-  color: var(--ink-muted);
-  font-size: 11px;
 }
 
 .schedule-progress {
@@ -905,23 +904,10 @@
   background: var(--success);
 }
 
-.qualified-team > header,
-.tournament-hall > header {
+.qualified-team > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.tournament-hall > header > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tournament-hall > header small {
-  color: var(--ink-muted);
-  font-size: 10px;
-  font-weight: 600;
 }
 
 .qualified-team {
@@ -930,14 +916,12 @@
   flex-direction: column;
 }
 
-.qualified-team h2,
-.tournament-hall h2 {
+.qualified-team h2 {
   margin: 0;
   font-size: 16px;
 }
 
-.qualified-team header span,
-.tournament-hall header span {
+.qualified-team header span {
   color: var(--ink-muted);
   font-size: 11px;
 }
@@ -2026,153 +2010,6 @@
   text-align: right;
 }
 
-.tournament-hall > div {
-  display: flex;
-  flex-direction: column;
-}
-
-.tournament-hall > .virtualized-tournament-hall {
-  max-height: min(65vh, 638px);
-  overflow-x: auto;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.tournament-hall .virtual-list-spacer {
-  flex: 0 0 auto;
-}
-
-.tournament-hall-tournament {
-  display: flex;
-  min-width: 560px;
-  height: 150px;
-  flex: 0 0 150px;
-  flex-direction: column;
-  border-bottom: 1px solid var(--line);
-  overflow: hidden;
-}
-
-.tournament-hall-tournament:last-child {
-  border-bottom: 0;
-}
-
-.tournament-hall-tournament > header {
-  display: flex;
-  height: 54px;
-  flex: 0 0 54px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.tournament-hall-tournament > header > div {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 12px;
-}
-
-.tournament-hall-tournament > header > div > svg {
-  width: 20px;
-  height: 20px;
-  flex: 0 0 auto;
-  color: var(--accent-ink);
-}
-
-.tournament-hall-tournament > header h3 {
-  overflow: hidden;
-  margin: 0;
-  color: var(--ink);
-  font-size: 15px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tournament-hall-tournament > header small {
-  color: var(--ink-muted);
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.tournament-hall-disciplines {
-  display: grid;
-  min-height: 0;
-  flex: 1;
-  grid-template-columns: 1fr 1fr;
-}
-
-.tournament-hall-discipline {
-  min-width: 0;
-  padding: 10px 18px;
-}
-
-.tournament-hall-discipline + .tournament-hall-discipline {
-  border-left: 1px solid var(--line);
-}
-
-.tournament-hall-discipline > header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0 0 8px;
-  border: 0;
-}
-
-.tournament-hall-discipline > header svg {
-  width: 18px;
-  height: 18px;
-  color: var(--accent-ink);
-}
-
-.tournament-hall-discipline.is-style > header svg {
-  color: var(--warning);
-}
-
-.tournament-hall-discipline h4 {
-  margin: 0;
-  font-size: 13px;
-}
-
-.tournament-hall-winner {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding-left: 7px;
-  border-left: 3px solid var(--official-stat-outline);
-  border-top: 1px solid var(--line);
-}
-
-.tournament-hall-winner > b {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 50%;
-  background: #fff0b8;
-  color: #765000;
-  font-size: 11px;
-}
-
-.tournament-hall-winner > strong {
-  overflow: hidden;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tournament-hall-empty-discipline {
-  margin: 0;
-  padding: 14px 0;
-  color: var(--ink-muted);
-  font-size: 11px;
-}
-
 .empty-tournaments {
   margin: 0;
   padding: 24px;
@@ -2235,7 +2072,7 @@
 
   .season-schedule-head,
   .season-schedule-row {
-    min-width: 760px;
+    min-width: 620px;
   }
 
   .results-context {

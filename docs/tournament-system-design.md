@@ -757,11 +757,20 @@ Viene aggiunta l'area `Tornei`, composta da:
 - Stagione;
 - Partecipanti;
 - Torneo;
-- Albo d'Oro.
+- Open, visibile soltanto dopo aver sbloccato almeno un torneo Open (Reptile o
+  Chronicles).
+
+L'Albo d'Oro dei tornei ordinari è stato rimosso il 12/10/2026 per alleggerire
+il salvataggio (migrazione v111); il Reptile conserva il proprio.
 
 ### 15.1 Stagione
 
 Mostra calendario, stato dei quattro tornei e avanzamento verso i sei idonei allo Scolastico.
+
+Finché un torneo non è stato disputato nella stagione in corso, la sua riga
+mostra il risultato della stagione precedente («Completato · stagione 10») su
+uno sfondo diverso, e resta cliccabile per aprirne i risultati. La colonna
+«Standard» è stata tolta (12/10/2026): suggeriva una soglia che non esiste.
 
 Stati previsti:
 
@@ -786,7 +795,7 @@ Per gli atleti della scuola mostra:
 ### 15.3 Risultati
 
 Il torneo viene simulato e salvato automaticamente. I dettagli completi restano
-consultabili soltanto per l'ultima stagione competitiva. Un nuovo risultato
+consultabili per le ultime due stagioni competitive. Un nuovo risultato
 dello stesso livello e della stessa stagione sovrascrive il precedente; delle
 Chronicles viene conservato soltanto il risultato più recente. Il giocatore può
 consultare:
@@ -814,20 +823,6 @@ Prima dell'incontro le probabilità vengono espresse qualitativamente:
 - equilibrato;
 - favorito;
 - nettamente favorito.
-
-### 15.4 Albo d'Oro
-
-L'Albo d'Oro è uno storico permanente ma volutamente minimale. Registra una
-voce soltanto quando la scuola del giocatore vince Arena o Stile e conserva:
-
-- stagione;
-- torneo;
-- nome del vincitore Arena, se appartiene alla scuola;
-- nome del vincitore Stile, se appartiene alla scuola.
-
-Non conserva partecipanti, podi completi, scuole avversarie, punteggi, Forme o
-esperienza. L'appartenenza alla scuola viene determinata dall'ID dell'iscritto,
-non dal nome testuale della scuola.
 
 ## 16. Ordine di risoluzione
 

@@ -32,10 +32,7 @@ import type {
 } from "./types";
 import { unlockGadgetSectorFromTournamentResult } from "./gadgetFlow";
 import { unlockReptileFromTournamentResult } from "./reptileUnlock";
-import {
-  compactDetailedTournamentResults,
-  replaceTournamentHallEntry,
-} from "./tournamentHistory";
+import { compactDetailedTournamentResults } from "./tournamentHistory";
 
 const LEVEL_BY_CALENDAR_MONTH: Partial<Record<number, TournamentLevel>> = {
   12: "school",
@@ -267,7 +264,6 @@ export function applyTournamentResult(
         ...state.tournaments.results,
         resolvedResult,
       ]),
-      hall: replaceTournamentHallEntry(state.tournaments.hall, resolvedResult),
       qualification: nextLevel && ownedQualifierIds.length > 0
         ? {
             level: nextLevel as Exclude<TournamentLevel, "school">,

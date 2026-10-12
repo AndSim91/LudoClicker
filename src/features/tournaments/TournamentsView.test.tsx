@@ -535,94 +535,48 @@ describe("TournamentsView", () => {
     expect(view.queryByText("Completato · stagione 1")).not.toBeInTheDocument();
   });
 
-  it("shows only first-place school winners from the compact hall", () => {
+  it("shows Open only after an Open tournament is unlocked, without the Albo d'oro", () => {
     const initial = createStateWithForms();
-    const simulation = simulateTournament(
-      initial,
-      "academy",
-      1,
-      181_000,
-      getEligibleSchoolContacts(initial),
-    );
-    const schoolWinner = simulation.result.participants.find(
-      (participant) => participant.ownedContactId,
-    )!;
-    const externalWinner = simulation.result.participants.find(
-      (participant) => !participant.ownedContactId,
-    )!;
-    const result = {
-      ...simulation.result,
-      arenaPodium: [
-        {
-          participantId: externalWinner.id,
-          position: 1 as const,
-          discipline: "arena" as const,
-          score: 1,
-        },
-        {
-          participantId: schoolWinner.id,
-          position: 2 as const,
-          discipline: "arena" as const,
-          score: 2,
-        },
-      ],
-      stylePodium: [],
-    };
-    const state = {
+    const locked = render(<TournamentsView state={initial} />);
+    const lockedTabs = within(within(locked.container).getByRole("tablist", { name: "Sezioni tornei" }));
+    expect(lockedTabs.queryByRole("tab", { name: "Open" })).not.toBeInTheDocument();
+    expect(lockedTabs.queryByRole("tab", { name: "Albo d'oro" })).not.toBeInTheDocument();
+    locked.unmount();
+
+    const chroniclesOnly = {
       ...initial,
-      tournaments: {
-        ...initial.tournaments,
-        results: [result],
-        hall: [{
-          level: result.level,
-          season: result.season,
-          arenaWinner: `${schoolWinner.firstName} ${schoolWinner.lastName}`,
-        }],
-      },
+      tournaments: { ...initial.tournaments, chronicles: { unlocked: true, keys: 0 } },
     };
-    const { container } = render(<TournamentsView state={state} />);
+    const { container } = render(<TournamentsView state={chroniclesOnly} />);
     const view = within(container);
-
-    fireEvent.click(view.getByRole("tab", { name: "Albo d'oro" }));
-
-    expect(view.getByRole("heading", { name: "Torneo Accademico Alpha" })).toBeVisible();
-    expect(view.getByText("Livello Accademico · Stagione 1")).toBeVisible();
-    expect(view.getByRole("heading", { name: "Arena" })).toBeVisible();
-    expect(view.getByRole("heading", { name: "Stile" })).toBeVisible();
-    expect(view.getByText(`${schoolWinner.firstName} ${schoolWinner.lastName}`)).toBeVisible();
-    expect(view.getByText("Nessuna vittoria della scuola")).toBeVisible();
-    expect(
-      view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`),
-    ).not.toBeInTheDocument();
+    fireEvent.click(within(view.getByRole("tablist", { name: "Sezioni tornei" })).getByRole("tab", { name: "Open" }));
+    const openTabs = within(view.getByRole("tablist", { name: "Tornei Open" }));
+    expect(openTabs.queryByRole("tab", { name: "Reptile" })).not.toBeInTheDocument();
+    expect(openTabs.getByRole("tab", { name: "Chronicles" })).toHaveAttribute("aria-selected", "true");
   });
 
-  it("keeps tournament cards at their fixed height with a long virtualized history", () => {
+  it("shows the previous season's result, marked, until this season's is played", () => {
     const { state, result } = createCompletedTournamentState();
-    const hall = Array.from({ length: 24 }, (_, index) => ({
-      level: result.level,
-      season: index + 1,
-      arenaWinner: `Vincitore ${index + 1}`,
-    }));
+    const previous = { ...result, id: "previous-national", level: "national" as const, season: result.season - 1 };
     const { container } = render(
       <TournamentsView
-        state={{
-          ...state,
-          tournaments: { ...state.tournaments, hall },
-        }}
+        state={{ ...state, tournaments: { ...state.tournaments, results: [previous, ...state.tournaments.results] } }}
       />,
     );
-    const view = within(container);
-
-    fireEvent.click(view.getByRole("tab", { name: "Albo d'oro" }));
-
-    const cards = container.querySelectorAll<HTMLElement>(".tournament-hall-tournament");
-    expect(cards).toHaveLength(18);
-    expect(getComputedStyle(cards[0]).flexShrink).toBe("0");
-    expect(getComputedStyle(cards[0]).flexBasis).toBe("150px");
+    const row = within(container).getByRole("button", {
+      name: `Apri i risultati di Torneo Nazionale, stagione ${previous.season}`,
+    });
+    expect(row).toHaveClass("is-previous");
+    expect(row).toHaveTextContent(`Completato · stagione ${previous.season}`);
   });
 
   it("keeps Chronicles completely hidden until it is unlocked", () => {
-    const { container } = render(<TournamentsView state={createStateWithForms()} />);
+    const initial = createStateWithForms();
+    const state = {
+      ...initial,
+      tournaments: { ...initial.tournaments, reptile: { ...initial.tournaments.reptile, unlocked: true } },
+    };
+    const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
     const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));

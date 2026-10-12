@@ -97,22 +97,11 @@ describe("lean history migration", () => {
     expect(migrated).toMatchObject({ version: GAME_CONFIG.version });
     expect(isValidGameState(migrated)).toBe(true);
     expect(migrated.tournaments.results.map((entry) => entry.id)).toEqual([
+      "old-school",
+      "old-academy",
       "current-school-replay",
       "current-academy",
       "current-chronicles",
-    ]);
-    expect(migrated.tournaments.hall).toEqual([
-      { level: "school", season: 1, arenaWinner: "Ada Arena" },
-      { level: "academy", season: 1, styleWinner: "Sofia Stile" },
-      {
-        level: "school",
-        season: 2,
-        arenaWinner: "Ada Arena",
-        styleWinner: "Sofia Stile",
-      },
-      { level: "academy", season: 2, styleWinner: "Sofia Stile" },
-      { level: "chronicles", season: 2, arenaWinner: "Ada Arena" },
-      { level: "chronicles", season: 3, styleWinner: "Sofia Stile" },
     ]);
     expect(migrated.messages.some((message) => message.id === socialMessage.id)).toBe(false);
     expect(legacy.tournaments.results).toBe(results);

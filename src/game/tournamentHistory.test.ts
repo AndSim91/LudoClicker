@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  compactDetailedTournamentResults,
-  replaceTournamentHallEntry,
-} from "./tournamentHistory";
+import { compactDetailedTournamentResults } from "./tournamentHistory";
 import type { TournamentResult } from "./types";
 
 function result(
   id: string,
   level: TournamentResult["level"],
   season: number,
-  ownedArena = false,
-  ownedStyle = false,
 ): TournamentResult {
   return {
     id,
@@ -20,7 +15,6 @@ function result(
     participants: [
       {
         id: `${id}-arena`,
-        ownedContactId: ownedArena ? "owned-arena" : undefined,
         firstName: "Ada",
         lastName: "Arena",
         schoolName: "Onde",
@@ -36,7 +30,6 @@ function result(
       },
       {
         id: `${id}-style`,
-        ownedContactId: ownedStyle ? "owned-style" : undefined,
         firstName: "Sofia",
         lastName: "Stile",
         schoolName: "Onde",
@@ -64,8 +57,9 @@ function result(
 }
 
 describe("tournament history", () => {
-  it("retains one result per level in the latest ordinary season and the latest Chronicles", () => {
+  it("retains one result per level in the latest two ordinary seasons and the latest Chronicles", () => {
     const results = [
+      result("school-0", "school", 0),
       result("school-1", "school", 1),
       result("academy-1", "academy", 1),
       result("school-2-old", "school", 2),
@@ -76,22 +70,11 @@ describe("tournament history", () => {
     ];
 
     expect(compactDetailedTournamentResults(results).map((entry) => entry.id)).toEqual([
+      "school-1",
+      "academy-1",
       "school-2-new",
       "academy-2",
       "chronicles-3",
     ]);
-  });
-
-  it("stores only school first-place names and overwrites the same edition", () => {
-    const won = result("academy-1", "academy", 1, true, false);
-    const hall = replaceTournamentHallEntry([], won);
-    expect(hall).toEqual([{
-      level: "academy",
-      season: 1,
-      arenaWinner: "Ada Arena",
-    }]);
-
-    const lostReplay = result("academy-1-replay", "academy", 1, false, false);
-    expect(replaceTournamentHallEntry(hall, lostReplay)).toEqual([]);
   });
 });

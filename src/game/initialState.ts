@@ -96,7 +96,6 @@ export function createInitialState(
     legendaryCollaborators: initialContacts.progress,
     tournaments: {
       results: [],
-      hall: [],
       missedTournaments: [],
       immuneContactIds: [],
       skippedSeasons: [],

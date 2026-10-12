@@ -722,13 +722,6 @@ export interface TournamentResult {
   vacantQualificationContactIds?: string[];
 }
 
-export interface TournamentHallEntry {
-  level: TournamentLevel;
-  season: number;
-  arenaWinner?: string;
-  styleWinner?: string;
-}
-
 export interface SecretLegendaryProgress {
   status: "external" | "trial" | "enrolled";
   defeats: number;
@@ -901,7 +894,6 @@ export interface ReptileProgress {
 
 export interface TournamentState {
   results: TournamentResult[];
-  hall: TournamentHallEntry[];
   missedTournaments: {
     level: TournamentLevel;
     season: number;

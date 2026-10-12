@@ -136,7 +136,7 @@ export function takeAnnualSnapshot(state: GameState, now: number): AnnualSnapsho
     reptileEditions: state.tournaments.reptile.hall.length,
     council: state.collaboratorManagement.aggregateViewUnlocked === true,
     schoolTournamentPlayed: state.tournaments.results.some((result) => result.level === "school") ||
-      state.tournaments.hall.some((entry) => entry.level === "school"),
+      state.tournaments.firstSchoolTournamentMonth !== undefined,
     bestTitleRank: getBestTitleRank(state),
     legendaries: [
       ...getEverEnrolledLegendaryIds(state),
@@ -414,7 +414,7 @@ export function buildAnnualReport(state: GameState, now: number): AnnualReport {
 export function isAnnualPlanningUnlocked(state: Pick<GameState, "tournaments" | "network">): boolean {
   return state.network.schoolCount > 0 ||
     state.tournaments.results.some((result) => result.level === "school") ||
-    state.tournaments.hall.some((entry) => entry.level === "school");
+    state.tournaments.firstSchoolTournamentMonth !== undefined;
 }
 
 /** Unlocked and not switched off by the player (Impostazioni or the window itself). */
