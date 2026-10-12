@@ -50,8 +50,8 @@ function createCompletedTournamentState() {
 function openChronicles(view: ReturnType<typeof within>) {
   const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));
   fireEvent.click(mainTabs.getByRole("tab", { name: "Open" }));
-  const openCards = within(view.getByRole("group", { name: "Tornei Open" }));
-  fireEvent.click(openCards.getByRole("button", { name: /Chronicles of Ludosport/ }));
+  const openTabs = within(view.getByRole("tablist", { name: "Tornei Open" }));
+  fireEvent.click(openTabs.getByRole("tab", { name: "Chronicles" }));
 }
 
 describe("TournamentsView", () => {
@@ -60,8 +60,8 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    expect(view.getByRole("heading", { name: "Anno scolastico 1" })).toBeVisible();
-    expect(view.getAllByText("6 iscritti")[0]).toBeVisible();
+    expect(view.getByText("Calendario della stagione")).toBeVisible();
+    expect(view.getByText("6 iscritti")).toBeVisible();
     expect(view.getByText("al Torneo Scolastico")).toBeVisible();
     expect(view.queryByRole("tab", { name: "Atleti" })).not.toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    expect(within(container.querySelector<HTMLElement>(".next-tournament")!).getByText("64 convocati")).toBeVisible();
+    expect(view.getByText("64 convocati")).toBeVisible();
     expect(view.getByText("su 80 idonei · preliminari aggregate")).toBeVisible();
     expect(view.queryByText("80 iscritti")).not.toBeInTheDocument();
   });
@@ -108,7 +108,8 @@ describe("TournamentsView", () => {
 
     fireEvent.click(view.getByRole("tab", { name: "Risultati" }));
 
-    expect(view.getByText(/64 partecipanti · 80 idonei alle preliminari/)).toBeVisible();
+    expect(view.getByText("64 partecipanti")).toBeVisible();
+    expect(view.getByText("80 idonei alle preliminari")).toBeVisible();
 
     const preliminaryTab = view.getByRole("tab", { name: "Preliminari, 80 idonei" });
     expect(preliminaryTab).toHaveAttribute("aria-selected", "false");
@@ -172,11 +173,10 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    expect(view.getAllByText("1 qualificato")[0]).toBeVisible();
+    expect(view.getByText("1 qualificato")).toBeVisible();
     expect(view.getByText("al Torneo Accademico Alpha · 1 bye")).toBeVisible();
-    fireEvent.click(view.getByRole("button", { name: /Torneo Accademico Alpha/ }));
-    const team = within(container.querySelector<HTMLElement>(".tyear-team")!);
-    expect(team.getByText(`${active.firstName} ${active.lastName}`)).toBeVisible();
+    expect(view.getByText("1 atleta · 1 bye")).toBeVisible();
+    expect(view.getByText(`${active.firstName} ${active.lastName}`)).toBeVisible();
     expect(view.queryByText(`${departed.firstName} ${departed.lastName}`)).not.toBeInTheDocument();
   });
 
@@ -197,14 +197,13 @@ describe("TournamentsView", () => {
       },
     };
     const { container } = render(<TournamentsView state={state} />);
-    fireEvent.click(within(container).getByRole("button", { name: /Torneo Accademico Alpha/ }));
-    const qualifiedTeam = within(container.querySelector<HTMLElement>(".tyear-team")!);
+    const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
 
-    expect(qualifiedTeam.getByText("2 qualificati")).toBeVisible();
+    expect(qualifiedTeam.getByText("2 atleti")).toBeVisible();
     qualifiedContacts.forEach((contact) => {
       expect(qualifiedTeam.getByText(`${contact.firstName} ${contact.lastName}`)).toBeVisible();
     });
-    expect(container.querySelectorAll(".tyear-team-list > p")).toHaveLength(2);
+    expect(container.querySelectorAll(".qualified-team-list > div")).toHaveLength(2);
   });
 
   it("explains a missing National qualification and removes delegation form", () => {
@@ -225,15 +224,13 @@ describe("TournamentsView", () => {
       },
     };
     const { container } = render(<TournamentsView state={state} />);
-    const view = within(container);
-    const nationalRow = view.getByRole("button", { name: /Torneo Nazionale/ });
+    const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
 
-    expect(within(nationalRow).getByText("Senza di noi")).toBeVisible();
-    fireEvent.click(nationalRow);
-    const panel = within(container.querySelector<HTMLElement>(".tyear-panel")!);
-    expect(panel.getByText("Si gioca senza di noi")).toBeVisible();
-    expect(panel.getByText("Nessun nostro atleta era qualificato.")).toBeVisible();
-    expect(view.queryByText("Forma della delegazione")).not.toBeInTheDocument();
+    expect(
+      qualifiedTeam.getByText("Nessun atleta qualificato per il Torneo Nazionale anno 1."),
+    ).toBeVisible();
+    expect(qualifiedTeam.getByText("In attesa del prossimo Torneo Scolastico.")).toBeVisible();
+    expect(within(container).queryByText("Forma della delegazione")).not.toBeInTheDocument();
   });
 
   it("opens a completed tournament directly from the calendar", () => {
@@ -241,9 +238,11 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    expect(result.season).toBe(1);
-    expect(view.getByRole("heading", { name: "Torneo Scolastico" })).toBeVisible();
-    fireEvent.click(view.getByRole("button", { name: "Tabellone completo ›" }));
+    fireEvent.click(
+      view.getByRole("button", {
+        name: `Apri i risultati di Torneo Scolastico, stagione ${result.season}`,
+      }),
+    );
 
     expect(view.getByRole("tab", { name: "Risultati" })).toHaveAttribute("aria-selected", "true");
     expect(view.getByText("Gironi")).toBeVisible();
@@ -497,7 +496,7 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    expect(view.getAllByText("5 qualificati")[0]).toBeVisible();
+    expect(view.getByText("5 qualificati")).toBeVisible();
     expect(view.getByText("al Torneo Nazionale")).toBeVisible();
     expect(view.queryByText("Delegazione incompleta")).not.toBeInTheDocument();
     expect(view.queryByText("5/6")).not.toBeInTheDocument();
@@ -532,17 +531,94 @@ describe("TournamentsView", () => {
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    // Nothing played yet in school year 2: last year's Nazionale shows under «anno precedente».
-    const [current, previous] = view.getAllByRole("button", { name: /Torneo Nazionale/ });
-    expect(within(current).getByText("Prossimo torneo")).toBeVisible();
-    expect(within(previous).getByText("Risultati")).toBeVisible();
-    expect(view.getByText("Anno scolastico 1 · anno precedente")).toBeVisible();
-    expect(view.queryByText("Disputato")).not.toBeInTheDocument();
+    expect(view.getByText("Torneo in arrivo")).toBeVisible();
+    expect(view.queryByText("Completato · stagione 1")).not.toBeInTheDocument();
   });
 
-  it("has no Albo d'oro tab any more (10/10/2026)", () => {
-    const { container } = render(<TournamentsView state={createStateWithForms()} />);
-    expect(within(container).queryByRole("tab", { name: "Albo d'oro" })).not.toBeInTheDocument();
+  it("shows only first-place school winners from the compact hall", () => {
+    const initial = createStateWithForms();
+    const simulation = simulateTournament(
+      initial,
+      "academy",
+      1,
+      181_000,
+      getEligibleSchoolContacts(initial),
+    );
+    const schoolWinner = simulation.result.participants.find(
+      (participant) => participant.ownedContactId,
+    )!;
+    const externalWinner = simulation.result.participants.find(
+      (participant) => !participant.ownedContactId,
+    )!;
+    const result = {
+      ...simulation.result,
+      arenaPodium: [
+        {
+          participantId: externalWinner.id,
+          position: 1 as const,
+          discipline: "arena" as const,
+          score: 1,
+        },
+        {
+          participantId: schoolWinner.id,
+          position: 2 as const,
+          discipline: "arena" as const,
+          score: 2,
+        },
+      ],
+      stylePodium: [],
+    };
+    const state = {
+      ...initial,
+      tournaments: {
+        ...initial.tournaments,
+        results: [result],
+        hall: [{
+          level: result.level,
+          season: result.season,
+          arenaWinner: `${schoolWinner.firstName} ${schoolWinner.lastName}`,
+        }],
+      },
+    };
+    const { container } = render(<TournamentsView state={state} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Albo d'oro" }));
+
+    expect(view.getByRole("heading", { name: "Torneo Accademico Alpha" })).toBeVisible();
+    expect(view.getByText("Livello Accademico · Stagione 1")).toBeVisible();
+    expect(view.getByRole("heading", { name: "Arena" })).toBeVisible();
+    expect(view.getByRole("heading", { name: "Stile" })).toBeVisible();
+    expect(view.getByText(`${schoolWinner.firstName} ${schoolWinner.lastName}`)).toBeVisible();
+    expect(view.getByText("Nessuna vittoria della scuola")).toBeVisible();
+    expect(
+      view.queryByText(`${externalWinner.firstName} ${externalWinner.lastName}`),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps tournament cards at their fixed height with a long virtualized history", () => {
+    const { state, result } = createCompletedTournamentState();
+    const hall = Array.from({ length: 24 }, (_, index) => ({
+      level: result.level,
+      season: index + 1,
+      arenaWinner: `Vincitore ${index + 1}`,
+    }));
+    const { container } = render(
+      <TournamentsView
+        state={{
+          ...state,
+          tournaments: { ...state.tournaments, hall },
+        }}
+      />,
+    );
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("tab", { name: "Albo d'oro" }));
+
+    const cards = container.querySelectorAll<HTMLElement>(".tournament-hall-tournament");
+    expect(cards).toHaveLength(18);
+    expect(getComputedStyle(cards[0]).flexShrink).toBe("0");
+    expect(getComputedStyle(cards[0]).flexBasis).toBe("150px");
   });
 
   it("keeps Chronicles completely hidden until it is unlocked", () => {
@@ -552,8 +628,9 @@ describe("TournamentsView", () => {
     const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));
     expect(mainTabs.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
     fireEvent.click(mainTabs.getByRole("tab", { name: "Open" }));
-    const openCards = within(view.getByRole("group", { name: "Tornei Open" }));
-    expect(openCards.getByRole("button", { name: /Torneo Reptile/ })).toHaveAttribute("aria-pressed", "true");
+    const openTabs = within(view.getByRole("tablist", { name: "Tornei Open" }));
+    expect(openTabs.queryByRole("tab", { name: "Chronicles" })).not.toBeInTheDocument();
+    expect(openTabs.getByRole("tab", { name: "Reptile" })).toHaveAttribute("aria-selected", "true");
     expect(view.queryByText("Chronicles of Ludosport")).not.toBeInTheDocument();
     expect(view.getByRole("heading", { name: "Torneo Reptile" })).toBeVisible();
   });
@@ -743,8 +820,8 @@ describe("TournamentsView", () => {
       act(() => vi.advanceTimersByTime(1));
       expect(onStartChronicles).toHaveBeenCalledTimes(1);
       expect(view.queryByRole("status")).not.toBeInTheDocument();
-      expect(within(view.getByRole("group", { name: "Tornei Open" })).getByRole("button", { name: /Chronicles of Ludosport/ })).toHaveAttribute(
-        "aria-pressed",
+      expect(view.getByRole("tab", { name: "Chronicles" })).toHaveAttribute(
+        "aria-selected",
         "true",
       );
 
@@ -761,8 +838,8 @@ describe("TournamentsView", () => {
           onStartChronicles={onStartChronicles}
         />,
       );
-      expect(within(view.getByRole("group", { name: "Tornei Open" })).getByRole("button", { name: /Chronicles of Ludosport/ })).toHaveAttribute(
-        "aria-pressed",
+      expect(view.getByRole("tab", { name: "Chronicles" })).toHaveAttribute(
+        "aria-selected",
         "true",
       );
       expect(container.querySelector(".tournament-results-view")).toHaveClass("is-chronicles");
