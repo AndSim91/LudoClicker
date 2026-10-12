@@ -109,9 +109,12 @@
 .annual-cell { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .annual-fit { position: absolute; top: 0; left: 0; box-sizing: border-box; width: calc(100% / var(--fit-scale, 1)); transform: scale(var(--fit-scale, 1)); transform-origin: top left; display: grid; gap: 8px; align-content: start; padding: 10px 12px; }
 .annual-cell.is-page .annual-fit { gap: 14px; padding: 4px; }
+/* Le spese riempiono la loro sezione e scorrono dentro: con tante voci il resto non si rimpicciolisce. */
+.annual-cell[data-fit-fill] > .annual-fit { height: calc(100% / var(--fit-scale, 1)); grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
 @media (max-width: 760px) {
   .annual-cell { overflow: visible; }
   .annual-fit { position: static; width: auto; transform: none; }
+  .annual-cell[data-fit-fill] > .annual-fit { height: auto; }
 }
 
 .annual-nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 10px 16px; border-top: 1px solid rgb(240 184 90 / 30%); background: var(--ap-panel); }
@@ -259,7 +262,7 @@
 .annual-funds b.is-negative { color: var(--ap-bad); }
 .annual-funds small { font-size: 11px; color: var(--ap-muted); }
 .annual-funds .arrow { color: var(--ap-gold); font-size: 18px; }
-.annual-items { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.annual-items { display: grid; gap: 4px; align-content: start; min-height: 0; margin: 0; padding: 0 4px 0 0; overflow-y: auto; scrollbar-width: thin; list-style: none; }
 .annual-item { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto 22px; align-items: center; gap: 8px; font-size: 12px; font-variant-numeric: tabular-nums; }
 .annual-item i { width: 8px; height: 8px; border-radius: 50%; }
 .annual-item button { width: 22px; height: 22px; border: 1px solid var(--ap-line); border-radius: 50%; background: none; color: var(--ap-muted); font-size: 12px; line-height: 1; cursor: pointer; }

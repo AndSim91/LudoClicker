@@ -18,12 +18,14 @@ export function useSharedFit(rootRef: RefObject<HTMLElement | null>, key: unknow
     if (!root || typeof ResizeObserver === "undefined") return;
     let frame = 0;
     const cells = () => [...root.querySelectorAll<HTMLElement>("[data-fit-cell]")];
+    // A `data-fit-fill` cell fills its area and scrolls inside: it never sets the scale or the rows.
+    const sizing = () => cells().filter((cell) => cell.dataset.fitFill === undefined);
     const set = (name: string, value: number) => {
       const current = Number(root.style.getPropertyValue(name) || 1);
       if (Math.abs(current - value) > 0.002) root.style.setProperty(name, value.toFixed(4));
     };
     /** Largest scale at which every cell holds its content, at the scale now applied. */
-    const room = () => Math.min(...cells().map((cell) => {
+    const room = () => Math.min(...sizing().map((cell) => {
       const content = cell.firstElementChild as HTMLElement | null;
       if (!content) return MAX_SCALE;
       return Math.min(cell.clientHeight / Math.max(1, content.scrollHeight), cell.clientWidth / Math.max(1, content.scrollWidth));
@@ -31,7 +33,7 @@ export function useSharedFit(rootRef: RefObject<HTMLElement | null>, key: unknow
     /** Each row as tall as its tallest content, in proportion. */
     const shareRows = () => {
       const rows = new Map<string, number>();
-      for (const cell of cells()) {
+      for (const cell of sizing()) {
         const row = cell.dataset.fitRow;
         const content = cell.firstElementChild as HTMLElement | null;
         if (row && content) rows.set(row, Math.max(rows.get(row) ?? 0, content.scrollHeight));

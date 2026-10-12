@@ -473,9 +473,22 @@ function PlanMarket({ context }: { context: PlanContext }) {
 }
 
 /** A section of the page: its content shrinks or grows with the window, never scrolls (Andrea, 12/10). */
-function Cell({ className, region, row, children }: { className: string; region: string; row: 1 | 2; children: ReactNode }) {
+function Cell({ className, region, row, fill, children }: {
+  className: string;
+  region: string;
+  row: 1 | 2;
+  /** Fills its area and scrolls inside instead of sizing the page (the list of spese, Andrea 12/10). */
+  fill?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <section className={`annual-cell ${className}`} data-fit-cell data-fit-row={row} data-tutorial-region={region}>
+    <section
+      className={`annual-cell ${className}`}
+      data-fit-cell
+      data-fit-row={row}
+      data-fit-fill={fill ? "" : undefined}
+      data-tutorial-region={region}
+    >
       <div className="annual-fit">{children}</div>
     </section>
   );
@@ -493,7 +506,7 @@ export function PlanPage({ context }: { context: PlanContext }) {
         <PlanCourses context={context} selected={selected} onSelect={setSelected} />
       </Cell>
       <Cell className="annual-box is-swords" region="planning-swords" row={1}><PlanSwords context={context} /></Cell>
-      <Cell className="annual-box is-funds" region="planning-funds" row={1}><PlanFunds context={context} /></Cell>
+      <Cell className="annual-box is-funds" region="planning-funds" row={1} fill><PlanFunds context={context} /></Cell>
       <Cell className="annual-box is-upgrades" region="planning-upgrades" row={2}>
         <PlanUpgrades base={context.state.upgrades} view={context.upgradeView} onAdd={context.onUpgrades} />
       </Cell>
