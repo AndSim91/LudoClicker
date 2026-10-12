@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { useSharedFit } from "./useSharedFit";
+
 export interface AnnualPage {
   title: string;
   render: () => ReactNode;
+  /** The page lays out its own `[data-fit-cell]` sections; otherwise it is one section. */
+  cells?: boolean;
 }
 
 /**
@@ -44,6 +48,7 @@ export function AnnualWindow({
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { pageRef.current?.scrollTo?.({ top: 0 }); }, [page]);
+  useSharedFit(pageRef, page);
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
@@ -99,7 +104,13 @@ export function AnnualWindow({
           </div>
         </header>
         <div ref={pageRef} className="annual-page" role="tabpanel" aria-label={pages[page]?.title}>
-          {pages[page]?.render()}
+          {pages[page]?.cells ? pages[page].render() : (
+            <div className="annual-single">
+              <section className="annual-cell is-page" data-fit-cell>
+                <div className="annual-fit">{pages[page]?.render()}</div>
+              </section>
+            </div>
+          )}
         </div>
         <footer className="annual-nav">
           <button type="button" className="prev" disabled={page === 0 || forcedPage !== undefined} onClick={() => setIndex(page - 1)}>

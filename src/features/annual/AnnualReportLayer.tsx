@@ -129,6 +129,7 @@ function PlanSummary({ report }: { report: AnnualReport }) {
     <div className="annual-readonly">
       <div><b>SIS</b><span>{courses.length ? courses.join(", ") : "Nessun corso"}</span></div>
       <div><b>Spade</b><span>{swords.length ? swords.join(", ") : "Nessuna spesa"}</span></div>
+      {plan.upgrades ? <div><b>Upgrade</b><span>{plan.upgrades} {plan.upgrades === 1 ? "livello" : "livelli"}</span></div> : null}
       <div><b>Speso</b><span>{formatCurrency(plan.spent)}</span></div>
       {plan.borrowed > 0 ? <div><b>Debito</b><span>{formatCurrency(plan.borrowed)}, da restituire in 12 rate</span></div> : null}
     </div>

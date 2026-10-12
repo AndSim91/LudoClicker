@@ -88,6 +88,23 @@ describe("Pianificazione delle Onde", () => {
     expect(confirmAnnualPlan(state, { courses: [], repair: false, swords: tooMany }, 0)).toBe(state);
   });
 
+  it("buys upgrades with the Fondi only, and they already count in the plan", () => {
+    const state = august(5_000, { "official-supplier": 0 });
+    const plan = { courses: [], repair: false, swords: 1, upgrades: ["official-supplier" as const] };
+    const simulated = simulateAnnualPlan(state, plan, 0);
+    // «Fornitore ufficiale» bought in the plan opens the swords of the same plan.
+    expect(simulated.items.map((item) => item.kind)).toEqual(["upgrade", "swords"]);
+
+    const confirmed = confirmAnnualPlan(state, plan, 0);
+    expect(confirmed.upgrades["official-supplier"]).toBe(1);
+    expect(confirmed.school.euros).toBeCloseTo(5_000 - simulated.cost, 2);
+    expect(confirmed.annual?.report?.plan).toMatchObject({ upgrades: 1, swordsBought: 1 });
+
+    // With «Anticipo di cassa» the swords may go into debt, the upgrade never.
+    const broke = august(10, { "official-supplier": 0, "cash-advance": 1 });
+    expect(confirmAnnualPlan(broke, { ...plan, swords: 0 }, 0)).toBe(broke);
+  });
+
   it("sends instructors to the SIS: as many as planned, the best first", () => {
     const base = august(100_000);
     const state: GameState = {

@@ -34,8 +34,13 @@ describe("PlanningLayer", () => {
     expect(screen.getByText("Spade nuove acquistate ×1")).toBeVisible();
     expect(screen.getByText("Spese provvisorie ancora da confermare")).toBeVisible();
 
+    // Upgrade nella Pianificazione: the cheapest node joins the provisional voci.
+    fireEvent.click(screen.getByRole("button", { name: /Compra il prossimo/ }));
+    expect(screen.getByText(/^Upgrade · /)).toBeVisible();
+
     fireEvent.click(screen.getByRole("button", { name: "Conferma il piano" }));
-    expect(onConfirm).toHaveBeenCalledWith({ courses: [], repair: false, swords: 1 });
+    expect(onConfirm).toHaveBeenCalledWith(expect.objectContaining({ courses: [], repair: false, swords: 1 }));
+    expect(onConfirm.mock.calls[0][0].upgrades).toHaveLength(1);
   });
 
   it("opens the Report annuale on the year so far, without grades", () => {

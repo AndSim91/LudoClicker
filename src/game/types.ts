@@ -1269,12 +1269,16 @@ export interface AnnualPlan {
   courses: PlannedCourse[];
   repair: boolean;
   swords: number;
+  /** Upgrade levels bought in the plan, in order (Andrea, 12/10): paid with the Fondi only. */
+  upgrades?: UpgradeId[];
 }
 
 export interface AnnualPlanSummary {
   courses: { formId: FormId; track: "instructor" | "technician"; count: number }[];
   repaired: boolean;
   swordsBought: number;
+  /** Upgrade levels bought (absent in reports saved before 12/10). */
+  upgrades?: number;
   spent: number;
   borrowed: number;
 }

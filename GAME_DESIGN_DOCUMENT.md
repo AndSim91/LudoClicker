@@ -3243,7 +3243,20 @@ materia col voto migliore). A parità vince il più raro, poi il più recente; i
 due eventi seguenti sono le menzioni. Le categorie 3–5 non fanno da highlight due
 anni di fila. Si nomina solo ciò che è già successo.
 
-**Pianificazione.**
+**Pianificazione.** Disposizione L2 «Fascia degli Upgrade» (12/10): in alto SIS,
+Spade e Fondi, in basso Upgrade e Guadagni previsti. La finestra arriva a
+1440 × 900 e nessuna pagina scorre: tutte le sezioni scalano insieme (75–125%)
+e le due righe si dividono l'altezza in base al contenuto; sotto il 75% la
+pagina si allunga e scorre. La stessa regola vale per Pagella e Report annuale.
+- **Upgrade** (concept M1 «Coda sui nodi»): le corsie della pagina Upgrade in
+  piccolo, senza il ramo Segreti. I nodi che «Compra tutto» prenderebbe portano
+  il numero d'ordine, il prossimo pulsa (non in Outlook né senza animazioni), i
+  nodi nel piano diventano oro. «Compra il prossimo» e «Compra tutto» usano la
+  stessa coda della pagina Upgrade; il clic su un nodo apre la sua scheda con
+  «Compra». Gli Upgrade sono spese provvisorie (una riga per nodo con la ×) e si
+  pagano solo con i Fondi, mai col debito; valgono già dentro il piano (es.
+  «Fornitore ufficiale» apre le spade, «Tu conosci la SIS?» i Corsi Tecnici).
+  Togliendone uno cadono anche quelli che non sarebbero più aperti.
 - **SIS · Scuola Internazionale Superiore**: lo schema delle Forme della
   Copertura didattica (non va a capo, si rimpicciolisce), selezione S2 «Alone».
   Per la Forma scelta, Corso Istruttori e (con «Tu conosci la SIS?») Corso

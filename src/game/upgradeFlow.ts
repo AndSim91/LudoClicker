@@ -74,7 +74,7 @@ const BUY_ALL_DEFINITIONS = UPGRADE_DEFINITIONS.filter(
 );
 
 /** The cheapest node the rules allow, with its price at these levels. */
-function findCheapestPurchase(state: GameState): { id: UpgradeId; cost: number } | undefined {
+export function findCheapestPurchase(state: GameState): { id: UpgradeId; cost: number } | undefined {
   let cheapest: { id: UpgradeId; cost: number } | undefined;
   for (const definition of BUY_ALL_DEFINITIONS) {
     const cost = getUpgradeCost(definition, state.upgrades[definition.id], state.upgrades);

@@ -1,4 +1,5 @@
 import { getFormDefinition } from "../content/forms";
+import { getUpgradeDefinition } from "../content/upgrades";
 import { getCalendarMonth, getSchoolYearStartMonth, getSchoolYear } from "./calendar";
 import { addDebt, getCashAdvanceRate, getDebtTotal, isDebtBlocked } from "./debt";
 import { roundCurrency } from "./economy";
@@ -15,7 +16,8 @@ import {
   type QuickTrainingKind,
 } from "./quickTeacherTraining";
 import { isOfficialSwordSupplierVisible } from "./unlocks";
-import type { AnnualPlan, AnnualPlanSummary, FormId, GameState, PlannedCourse } from "./types";
+import { buyUpgrade } from "./upgradeFlow";
+import type { AnnualPlan, AnnualPlanSummary, FormId, GameState, PlannedCourse, UpgradeId } from "./types";
 
 /*
  * Pianificazione delle Onde (Andrea, 08/10): at the start of July the game
@@ -26,11 +28,12 @@ import type { AnnualPlan, AnnualPlanSummary, FormId, GameState, PlannedCourse } 
  * can go below zero, up to what next year is expected to earn (interest included).
  */
 
-export const EMPTY_ANNUAL_PLAN: AnnualPlan = { courses: [], repair: false, swords: 0 };
+export const EMPTY_ANNUAL_PLAN: AnnualPlan = { courses: [], repair: false, swords: 0, upgrades: [] };
 
 export interface PlanItem {
   key: string;
-  kind: "course" | "repair" | "swords";
+  kind: "course" | "repair" | "swords" | "upgrade";
+  upgradeId?: UpgradeId;
   track?: QuickTrainingKind;
   formId?: FormId;
   label: string;
@@ -52,11 +55,34 @@ function courseLabel(course: PlannedCourse): string {
   return `${course.track === "technician" ? "Corso Tecnici" : "Corso Istruttori"} · ${form}`;
 }
 
-/** Applies the plan in order (repair, swords, courses), each voce costing what it takes from the Fondi. */
+/**
+ * Applies the plan in order (upgrades, repair, swords, courses), each voce costing
+ * what it takes from the Fondi. Upgrades come first, so they already count in the
+ * plan («Fornitore ufficiale» opens the swords, «Tu conosci la SIS?» the Tecnici).
+ */
 function applyPlan(state: GameState, plan: AnnualPlan, now: number): PlanOutcome {
   let next = state;
   const items: PlanItem[] = [];
   const spend = (before: GameState) => roundCurrency(before.school.euros - next.school.euros);
+  const upgradeItems = new Map<UpgradeId, PlanItem>();
+  for (const upgradeId of plan.upgrades ?? []) {
+    const before = next;
+    next = buyUpgrade(next, upgradeId);
+    if (next === before) continue;
+    const item = upgradeItems.get(upgradeId) ?? {
+      key: `upgrade:${upgradeId}`,
+      kind: "upgrade" as const,
+      upgradeId,
+      label: "",
+      count: 0,
+      cost: 0,
+    };
+    item.count += 1;
+    item.cost = roundCurrency(item.cost + spend(before));
+    item.label = `Upgrade · ${getUpgradeDefinition(upgradeId)?.title ?? upgradeId}${item.count > 1 ? ` ×${item.count}` : ""}`;
+    upgradeItems.set(upgradeId, item);
+  }
+  items.push(...upgradeItems.values());
   if (plan.repair) {
     const before = next;
     next = maintainEquipment(next);
@@ -99,6 +125,22 @@ function applyPlan(state: GameState, plan: AnnualPlan, now: number): PlanOutcome
 export function simulateAnnualPlan(state: GameState, plan: AnnualPlan, now: number): PlanOutcome {
   const rich = { ...state, school: { ...state.school, euros: SIMULATION_FUNDS } };
   return applyPlan(rich, plan, now);
+}
+
+/** What the plan spends on upgrades: the Fondi must cover it, debt never does (Andrea, 12/10). */
+export function getPlanUpgradeCost(outcome: PlanOutcome): number {
+  return roundCurrency(outcome.items.reduce((sum, item) => sum + (item.kind === "upgrade" ? item.cost : 0), 0));
+}
+
+/** The upgrade levels that still apply, in order: dropping one may close a later node. */
+export function keepValidUpgrades(state: GameState, upgrades: UpgradeId[]): UpgradeId[] {
+  let next: GameState = { ...state, school: { ...state.school, euros: SIMULATION_FUNDS } };
+  return upgrades.filter((upgradeId) => {
+    const after = buyUpgrade(next, upgradeId);
+    if (after === next) return false;
+    next = after;
+    return true;
+  });
 }
 
 /** Cost of one more course on this Forma after the plan; undefined if nobody can take it. */
@@ -172,6 +214,7 @@ export function confirmAnnualPlan(state: GameState, plan: AnnualPlan, now: numbe
   const simulated = simulateAnnualPlan(state, plan, now);
   const shortfall = Math.max(0, roundCurrency(simulated.cost - Math.max(0, euros)));
   if (shortfall > getDebtCapacity(state) + 0.01) return state;
+  if (getPlanUpgradeCost(simulated) > Math.max(0, euros) + 0.005) return state;
 
   const funded = { ...state, school: { ...state.school, euros: euros + shortfall } };
   const applied = applyPlan(funded, plan, now);
@@ -188,6 +231,7 @@ export function confirmAnnualPlan(state: GameState, plan: AnnualPlan, now: numbe
       : []),
     repaired: applied.items.some((item) => item.kind === "repair"),
     swordsBought: applied.items.find((item) => item.kind === "swords")?.count ?? 0,
+    upgrades: applied.items.reduce((sum, item) => sum + (item.kind === "upgrade" ? item.count : 0), 0),
     spent: applied.cost,
     borrowed,
   };

@@ -19,11 +19,12 @@ import {
   getReservedSwords,
 } from "../../game/equipment";
 import { getTeacherCourseCandidates, type QuickTrainingKind } from "../../game/quickTeacherTraining";
-import type { AnnualPlan, FormId, GameState } from "../../game/types";
+import type { AnnualPlan, FormId, GameState, UpgradeId } from "../../game/types";
 import { isOfficialSwordSupplierVisible } from "../../game/unlocks";
 import { formatCurrency } from "../../shared/formatters";
 import { FormCoverageMap } from "../people/FormPathMap";
 import { getFormCoverageCounts } from "../people/instructorGroupPresentation";
+import { PlanUpgrades } from "./PlanUpgrades";
 
 export const SIS_LOGO = "/assets/sis-logo.webp";
 const NO_ACTIVITY = new Map();
@@ -45,6 +46,10 @@ export interface PlanContext {
   onRepair: (repair: boolean) => void;
   onSwords: (swords: number) => void;
   onClear: () => void;
+  /** The game after the plan, with the Fondi still free for upgrades (never the debt). */
+  upgradeView: GameState;
+  onUpgrades: (upgradeIds: UpgradeId[]) => void;
+  onRemoveUpgrade: (upgradeId: UpgradeId) => void;
 }
 
 const count = (value: number) => value.toLocaleString("it-IT");
@@ -184,7 +189,7 @@ function PlanCourses({ context, selected, onSelect }: {
   const counts = useMemo(() => getFormCoverageCounts(instructors), [instructors]);
   if (!state.unlocks.forms) {
     return (
-      <section className="annual-box" data-tutorial-region="planning-sis">
+      <>
         <h3 className="annual-box-title">SIS · Scuola Internazionale Superiore</h3>
         <div className="annual-soon">
           <div>
@@ -192,13 +197,13 @@ function PlanCourses({ context, selected, onSelect }: {
             <strong>Prossimamente</strong>
           </div>
         </div>
-      </section>
+      </>
     );
   }
   const now = counts.get(selected);
   const formName = getFormDefinition(selected)?.longName ?? selected;
   return (
-    <section className="annual-box" data-tutorial-region="planning-sis">
+    <>
       <div className="annual-sis">
         <img src={SIS_LOGO} alt="Logo della SIS" />
         <div>
@@ -228,7 +233,7 @@ function PlanCourses({ context, selected, onSelect }: {
           {technicians ? <CourseCard context={context} formId={selected} track="technician" /> : null}
         </div>
       </div>
-    </section>
+    </>
   );
 }
 
@@ -263,7 +268,7 @@ function PlanSwords({ context }: { context: PlanContext }) {
     : repairAffordable ? "Premi l'elsa per riparare le spade" : "Riparazione non possibile - Fondi esauriti";
 
   return (
-    <div className="title-equipment-popover annual-swords" data-tutorial-region="planning-swords">
+    <div className="title-equipment-popover annual-swords">
     <section className={`equipment-quick-card is-${condition === "In ordine" ? "healthy" : damaged > 0 ? "critical" : "warning"}`} aria-label="Spade della Scuola">
       <div className="equipment-quick-heading">
         <h3>Spade della Scuola</h3>
@@ -331,18 +336,20 @@ const ITEM_COLORS: Record<string, string> = {
   technician: "var(--ap-tec)",
   repair: "#6ed38a",
   swords: "var(--ap-gold)",
+  upgrade: "var(--ap-teal)",
 };
 
 function PlanFunds({ context }: { context: PlanContext }) {
   const { state, outcome, canBorrow, capacity } = context;
   const after = state.school.euros - outcome.cost;
   const undo = (item: PlanItem) => {
-    if (item.kind === "repair") context.onRepair(false);
+    if (item.kind === "upgrade" && item.upgradeId) context.onRemoveUpgrade(item.upgradeId);
+    else if (item.kind === "repair") context.onRepair(false);
     else if (item.kind === "swords") context.onSwords(0);
     else if (item.formId && item.track) context.onCourse(item.formId, item.track, "clear");
   };
   return (
-    <section className="annual-box" data-tutorial-region="planning-funds">
+    <>
       <div className="annual-funds">
         <div><span>Fondi oggi</span><b>{formatCurrency(state.school.euros)}</b></div>
         <span className="arrow" aria-hidden="true">→</span>
@@ -372,7 +379,7 @@ function PlanFunds({ context }: { context: PlanContext }) {
       ) : (
         <p className="annual-note">Nessuna spesa in programma.</p>
       )}
-    </section>
+    </>
   );
 }
 
@@ -445,7 +452,7 @@ function PlanMarket({ context }: { context: PlanContext }) {
   const nextYear = state.annual?.report ? state.annual.report.schoolYear + 1 : undefined;
   const change = Math.round(forecast.change * 100);
   return (
-    <section className="annual-market" data-tutorial-region="planning-forecast">
+    <>
       <span className="annual-market-symbol">GUADAGNI PREVISTI{nextYear !== undefined ? ` · ANNO ${nextYear}` : ""}</span>
       <div className="annual-market-total">
         {formatCurrency(forecast.total)}
@@ -461,10 +468,20 @@ function PlanMarket({ context }: { context: PlanContext }) {
         {installment > 0 ? <span><i className="k-debt" />rata del debito</span> : null}
         {forecast.lastAverage > 0 ? <span><i className="avg" />media anno scorso</span> : null}
       </div>
+    </>
+  );
+}
+
+/** A section of the page: its content shrinks or grows with the window, never scrolls (Andrea, 12/10). */
+function Cell({ className, region, row, children }: { className: string; region: string; row: 1 | 2; children: ReactNode }) {
+  return (
+    <section className={`annual-cell ${className}`} data-fit-cell data-fit-row={row} data-tutorial-region={region}>
+      <div className="annual-fit">{children}</div>
     </section>
   );
 }
 
+/** Concept L2 «Fascia degli Upgrade» (Andrea, 12/10): SIS, Spade, Fondi on top; Upgrade and Guadagni below. */
 export function PlanPage({ context }: { context: PlanContext }) {
   // Si apre sulla prima Forma che qualcuno può prendere.
   const [selected, setSelected] = useState<FormId>(() =>
@@ -472,14 +489,15 @@ export function PlanPage({ context }: { context: PlanContext }) {
       getTeacherCourseCandidates(context.state, formId, "instructor").length > 0) ?? "form-1");
   return (
     <div className="annual-plan">
-      <div className="annual-column">
+      <Cell className="annual-box is-sis" region="planning-sis" row={1}>
         <PlanCourses context={context} selected={selected} onSelect={setSelected} />
-        <PlanSwords context={context} />
-      </div>
-      <div className="annual-column">
-        <PlanFunds context={context} />
-        <PlanMarket context={context} />
-      </div>
+      </Cell>
+      <Cell className="annual-box is-swords" region="planning-swords" row={1}><PlanSwords context={context} /></Cell>
+      <Cell className="annual-box is-funds" region="planning-funds" row={1}><PlanFunds context={context} /></Cell>
+      <Cell className="annual-box is-upgrades" region="planning-upgrades" row={2}>
+        <PlanUpgrades base={context.state.upgrades} view={context.upgradeView} onAdd={context.onUpgrades} />
+      </Cell>
+      <Cell className="annual-market" region="planning-forecast" row={2}><PlanMarket context={context} /></Cell>
     </div>
   );
 }

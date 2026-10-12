@@ -4,11 +4,13 @@ import {
   EMPTY_ANNUAL_PLAN,
   getAnnualForecast,
   getDebtCapacity,
+  getPlanUpgradeCost,
+  keepValidUpgrades,
   simulateAnnualPlan,
 } from "../../game/annualPlanning";
 import { getCashAdvanceRate, getDebtTotal, isDebtBlocked } from "../../game/debt";
 import type { QuickTrainingKind } from "../../game/quickTeacherTraining";
-import type { AnnualPlan, FormId, GameState } from "../../game/types";
+import type { AnnualPlan, FormId, GameState, UpgradeId } from "../../game/types";
 import { AnnualWindow } from "./AnnualWindow";
 import { describeSchoolYear } from "./annualLabels";
 import { PagellaPage } from "./PagellaPage";
@@ -49,6 +51,11 @@ export function PlanningLayer({
   const rate = getCashAdvanceRate(state.upgrades);
   const borrowed = Math.max(0, outcome.cost - Math.max(0, state.school.euros));
   const installment = (getDebtTotal(state) + borrowed * (1 + (rate ?? 0))) / 12;
+  // Upgrades only with the Fondi left after the rest of the plan, never with the debt (Andrea, 12/10).
+  const upgradeView = useMemo(
+    () => ({ ...outcome.state, school: { ...outcome.state.school, euros: Math.max(0, state.school.euros - outcome.cost) } }),
+    [outcome, state.school.euros],
+  );
 
   const changeCourse = useCallback((formId: FormId, track: QuickTrainingKind, change: "add" | "remove" | "all" | "clear") => {
     setPlan((current) => {
@@ -84,6 +91,12 @@ export function PlanningLayer({
     onRepair: (repair) => setPlan((current) => ({ ...current, repair })),
     onSwords: (swords) => setPlan((current) => ({ ...current, swords: Math.max(0, swords) })),
     onClear: () => setPlan(EMPTY_ANNUAL_PLAN),
+    upgradeView,
+    onUpgrades: (upgradeIds) => setPlan((current) => ({ ...current, upgrades: [...(current.upgrades ?? []), ...upgradeIds] })),
+    onRemoveUpgrade: (upgradeId: UpgradeId) => setPlan((current) => ({
+      ...current,
+      upgrades: keepValidUpgrades(state, (current.upgrades ?? []).filter((entry) => entry !== upgradeId)),
+    })),
   };
 
   return (
@@ -92,12 +105,12 @@ export function PlanningLayer({
       subtitle={report ? `Pagella ${describeSchoolYear(report)} · prima del nuovo anno scolastico` : "Prima del nuovo anno scolastico"}
       pages={[
         ...(report ? [{ title: "Pagella", render: () => <PagellaPage report={report} /> }] : []),
-        { title: "Pianificazione", render: () => <PlanPage context={context} /> },
+        { title: "Pianificazione", render: () => <PlanPage context={context} />, cells: true },
       ]}
       forcedPage={page === undefined ? undefined : page === "plan" && report ? 1 : 0}
       planningToggle={planningToggle}
       finalLabel="Conferma il piano"
-      finalDisabled={headroom < -0.005}
+      finalDisabled={headroom < -0.005 || getPlanUpgradeCost(outcome) > Math.max(0, state.school.euros) + 0.005}
       onFinal={() => onConfirm(plan)}
     />
   );

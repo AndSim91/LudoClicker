@@ -363,7 +363,7 @@ function isUpgradeVisible(state: GameState, definition: UpgradeDefinition): bool
     (definition.category !== "network" || state.network.schoolCount > 0);
 }
 
-function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
+export function isUpgradeCategoryVisible(state: GameState, category: UpgradeCategory): boolean {
   if (category === "social") return state.unlocks.social;
   if (category === "gadget") return state.unlocks.gadget;
   // Network delle Onde: from the first foundation on.
@@ -382,7 +382,7 @@ function getUpgradeStatus(state: GameState, definition: UpgradeDefinition): Upgr
  * so the tree keeps its surprises (decision of 06/10/2026, concept Q1). Discovered
  * secret paths keep their own lock, since finding them is the point.
  */
-function isUpgradeHidden(state: GameState, definition: UpgradeDefinition): boolean {
+export function isUpgradeHidden(state: GameState, definition: UpgradeDefinition): boolean {
   return definition.category !== "secrets" && getUpgradeStatus(state, definition) === "locked";
 }
 
@@ -552,7 +552,7 @@ function MysteryUpgradeNode({
   );
 }
 
-function UpgradeDetailsDialog({
+export function UpgradeDetailsDialog({
   definition,
   state: stateOverride,
   anchor,
