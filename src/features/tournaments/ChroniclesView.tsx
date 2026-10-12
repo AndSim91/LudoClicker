@@ -186,7 +186,7 @@ export function ChroniclesView({
           ] as const;
         }),
       ),
-    [collaboratorsByContactId, eligible],
+    [collaboratorsByContactId, eligible, state.upgrades],
   );
   const sortedEligible = useMemo(
     () =>

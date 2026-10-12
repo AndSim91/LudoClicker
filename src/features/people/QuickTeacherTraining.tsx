@@ -1,37 +1,10 @@
-import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { getFormDefinition } from "../../content/forms";
-import { isQuickTeacherTrainingUnlocked, isSISTechnicianCourseUnlocked } from "../../content/upgrades";
 import { getGameMonthName } from "../../game/calendar";
-import {
-  previewQuickTeacherTraining,
-  type QuickTrainingKind,
-  type QuickTrainingPreview,
-} from "../../game/quickTeacherTraining";
+import type { QuickTrainingKind, QuickTrainingPreview } from "../../game/quickTeacherTraining";
 import { getNextSISStartMonth } from "../../game/teacherTrainingFlow";
-import type { GameState } from "../../game/types";
+import type { QuickTrainingPreviews } from "./useQuickTrainingPreviews";
 import { formatCurrency } from "../../shared/formatters";
-
-export interface QuickTrainingPreviews {
-  enabled: boolean;
-  technicianEnabled: boolean;
-  instructor?: QuickTrainingPreview;
-  technician?: QuickTrainingPreview;
-}
-
-/** Ufficio formazione: cosa farebbero i due pulsanti adesso (Forma e costo). */
-export function useQuickTrainingPreviews(state: GameState, now: number): QuickTrainingPreviews {
-  return useMemo(() => {
-    const enabled = isQuickTeacherTrainingUnlocked(state.upgrades);
-    const technicianEnabled = enabled && isSISTechnicianCourseUnlocked(state.upgrades);
-    return {
-      enabled,
-      technicianEnabled,
-      instructor: enabled ? previewQuickTeacherTraining(state, "instructor", now) : undefined,
-      technician: technicianEnabled ? previewQuickTeacherTraining(state, "technician", now) : undefined,
-    };
-  }, [state, now]);
-}
 
 function QuickButton({
   kind,

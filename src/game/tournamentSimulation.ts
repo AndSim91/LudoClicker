@@ -50,7 +50,6 @@ import type {
   FormId,
   Contact,
   GameState,
-  PersonRarity,
   SecretLegendaryId,
   TournamentDiscipline,
   TournamentGroupStanding,

@@ -13,9 +13,13 @@ describe("migrateLegendaryBase80State", () => {
       ],
       legendaryCollaborators: { retainedProgress: { "eva-parodi": { arenaBase: 75, styleBase: 77 }, "marco-palena": { arenaBase: 85, styleBase: 95 } } },
     } as unknown as MigratableState;
-    const next = migrateLegendaryBase80State(state) as any;
+    const next = migrateLegendaryBase80State(state) as unknown as {
+      version: number;
+      contacts: { arenaBase: number; styleBase: number }[];
+      legendaryCollaborators: { retainedProgress: Record<string, { arenaBase: number; styleBase: number }> };
+    };
     expect(next.version).toBe(110);
-    expect(next.contacts.map((c: any) => [c.arenaBase, c.styleBase])).toEqual([[81, 80], [85, 95], [40, 90]]);
+    expect(next.contacts.map((c) => [c.arenaBase, c.styleBase])).toEqual([[81, 80], [85, 95], [40, 90]]);
     expect(next.legendaryCollaborators.retainedProgress["eva-parodi"]).toEqual({ arenaBase: 80, styleBase: 82 });
     expect(next.legendaryCollaborators.retainedProgress["marco-palena"]).toEqual({ arenaBase: 85, styleBase: 95 });
   });

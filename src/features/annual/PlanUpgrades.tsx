@@ -13,11 +13,8 @@ import {
 import type { GameState, UpgradeId } from "../../game/types";
 import { findCheapestPurchase, planBuyAllUpgrades } from "../../game/upgradeFlow";
 import { formatCurrency } from "../../shared/formatters";
-import {
-  UpgradeDetailsDialog,
-  isUpgradeCategoryVisible,
-  isUpgradeHidden,
-} from "../upgrades/UpgradesView";
+import { UpgradeDetailsDialog } from "../upgrades/UpgradesView";
+import { isUpgradeCategoryVisible, isUpgradeHidden } from "../upgrades/upgradeStatus";
 
 const LANE_COLUMNS = 9;
 const nodeY = (index: number) => (index % 2 === 0 ? 8 : 22);
