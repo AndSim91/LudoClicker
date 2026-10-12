@@ -1,5 +1,6 @@
 import type { GameState, ShortGoalId, ShortGoalProgress, Statistics } from "../game/types";
 import { GAME_CONFIG } from "../game/config";
+import { getScheduledTrials } from "../game/runtimeIndexes";
 
 type ShortGoalMetric = keyof Pick<
   Statistics,
@@ -96,6 +97,16 @@ export function getShortGoalValue(state: GameState, definitionId: ShortGoalId): 
   return state.statistics[SHORT_GOALS[definitionId].metric];
 }
 
+/**
+ * Baseline when a mission becomes active: "Agenda in movimento" also counts
+ * the trial lessons already on the calendar at that moment.
+ */
+export function getShortGoalActivationBaseline(state: GameState, definitionId: ShortGoalId): number {
+  const value = getShortGoalValue(state, definitionId);
+  if (definitionId !== "book-trials") return value;
+  return Math.max(0, value - getScheduledTrials(state.scheduledTrials).length);
+}
+
 export function getShortGoalProgress(state: GameState): number {
   return Math.max(0, getShortGoalValue(state, state.shortGoal.definitionId) - state.shortGoal.baseline);
 }
@@ -118,9 +129,12 @@ export function createNextShortGoal(
   completedCount: number,
   now: number,
 ): ShortGoalProgress {
+  const goal = createShortGoalFromStatistics(state.statistics, completedCount, now);
+  const isActive = state.school.euros < GAME_CONFIG.shortGoalActivationBalance;
   return {
-    ...createShortGoalFromStatistics(state.statistics, completedCount, now),
-    isActive: state.school.euros < GAME_CONFIG.shortGoalActivationBalance,
+    ...goal,
+    baseline: isActive ? getShortGoalActivationBaseline(state, goal.definitionId) : goal.baseline,
+    isActive,
   };
 }
 

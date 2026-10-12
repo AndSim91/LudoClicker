@@ -5,6 +5,7 @@ import {
   SHORT_GOALS,
   createNextShortGoal,
   createShortGoalFromStatistics,
+  getShortGoalActivationBaseline,
   getShortGoalProgress,
   getShortGoalReward,
   getShortGoalValue,
@@ -293,6 +294,7 @@ export function refreshShortGoalAvailability(
     ...synchronized,
     shortGoal: {
       ...synchronized.shortGoal,
+      baseline: getShortGoalActivationBaseline(synchronized, synchronized.shortGoal.definitionId),
       startedAt: now,
       isActive: true,
       reactivationStartedAt: undefined,
