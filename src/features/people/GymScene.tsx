@@ -65,7 +65,7 @@ function useGymMatch() {
   const [card, setCard] = useState<RaisedCard>();
   const [judgeUp, setJudgeUp] = useState(false);
   const timers = useRef<number[]>([]);
-  const standTimer = useRef<number>();
+  const standTimer = useRef<number | undefined>(undefined);
   const later = (ms: number, next: () => void) => timers.current.push(window.setTimeout(next, ms));
   useEffect(() => () => {
     timers.current.forEach((timer) => window.clearTimeout(timer));
