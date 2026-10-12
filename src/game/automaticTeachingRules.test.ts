@@ -509,3 +509,40 @@ describe("automatic teaching rules", () => {
     expect(startAgonist).not.toHaveBeenCalled();
   });
 });
+
+describe("Ultra Rari first during the Consiglio tappa (12/10/2026)", () => {
+  function crowdedSchool(councilTappa: boolean, forms: FormId[] = []): GameState {
+    const initial = teachingState();
+    const template = initial.contacts[0];
+    const student = (id: string, rarity: Contact["rarity"], acquiredAt: number): Contact => ({
+      ...template,
+      id,
+      status: "enrolled",
+      rarity,
+      acquiredAt,
+      forms: [...forms],
+      favorite: false,
+      training: undefined,
+    });
+    const legendaries = Array.from({ length: 40 }, (_, index) => student(`legendary-${index}`, "legendary", 1_000));
+    return {
+      ...initial,
+      school: { ...initial.school, activeMembers: 41, euros: 1_000_000 },
+      contacts: [...legendaries, student("ultra", "ultra-rare", 2_000)],
+      collaborators: [instructor("teacher", "common", ["form-1", "form-2", "course-y"])],
+      tournaments: { ...initial.tournaments, firstSchoolTournamentMonth: councilTappa ? 1 : undefined },
+    };
+  }
+  const ultraTraining = (state: GameState) =>
+    gameReducer(state, { type: "TICK", now: 2_000 }).contacts.find((contact) => contact.id === "ultra")?.training;
+
+  it("puts the Ultra Raro ahead of everyone for Forma 1, only during the tappa", () => {
+    expect(ultraTraining(crowdedSchool(false))).toBeUndefined();
+    expect(ultraTraining(crowdedSchool(true))).toMatchObject({ formId: "form-1" });
+    const council = crowdedSchool(true);
+    expect(ultraTraining({
+      ...council,
+      collaboratorManagement: { ...council.collaboratorManagement, aggregateViewUnlocked: true },
+    })).toBeUndefined();
+  });
+});

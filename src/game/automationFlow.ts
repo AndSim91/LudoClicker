@@ -743,6 +743,11 @@ export function processAutomaticTeaching(
   const favoriteContactIds = new Set(
     state.contacts.flatMap((contact) => contact.favorite ? [contact.id] : []),
   );
+  // Tappa del Consiglio delle Onde (12/10/2026, first school, from the first Scolastico
+  // to the Consiglio): Ultra Rari go first for F1, F2 and Corso Y, as if they were favorites.
+  const councilTappa = state.network.schoolCount === 0 &&
+    state.tournaments.firstSchoolTournamentMonth !== undefined &&
+    !state.collaboratorManagement.aggregateViewUnlocked;
   const contactsById = new Map(state.contacts.map((contact) => [contact.id, contact]));
   const capacity = selectInstructorCapacity(state);
   const instructorLoads = new Map(
@@ -860,11 +865,13 @@ export function processAutomaticTeaching(
       )
       : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];
+    const councilPriority = councilTappa && student.rarity === "ultra-rare" &&
+      (candidate === "form-1" || candidate === "form-2" || candidate === "course-y");
     return [student.id, {
       departureRisk,
-      isFavorite: "acquiredAt" in student
+      isFavorite: councilPriority || ("acquiredAt" in student
         ? student.favorite === true
-        : favoriteContactIds.has(student.contactId),
+        : favoriteContactIds.has(student.contactId)),
       rarityPriority: getAutomaticTeachingRarityPriority(student),
       isCollaborator: !("acquiredAt" in student),
       formPriority: candidate

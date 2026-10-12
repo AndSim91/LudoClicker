@@ -422,6 +422,11 @@ attivo prima del primo titolo Accademico, con molti Ultra Rari.
 - Finché non ci sono 8 collaboratori, la prossima email va prima agli Ultra Rari
   e ai Leggendari in coda (A.N.D.E.R. li mette in cima alla posta,
   `startNextCampaign` in `emailFlow.ts`).
+- Dal primo Torneo Scolastico alla nascita del Consiglio delle Onde (12/10),
+  nell'insegnamento automatico gli Ultra Rari passano davanti a tutti per i
+  corsi di Forma 1, Forma 2 e Corso Y, come se fossero nei Preferiti (anche se
+  non lo sono; `processAutomaticTeaching` in `automationFlow.ts`). Per le Forme
+  successive valgono le priorità normali.
 
 Lo stesso moltiplicatore riduce, nei tornei, la comparsa del primo Leggendario
 Segreto prima della prima vittoria (§ Leggendari Segreti in
