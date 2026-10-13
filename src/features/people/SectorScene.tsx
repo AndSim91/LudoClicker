@@ -25,12 +25,15 @@ export function SectorScene({
   role,
   idle,
   social = true,
+  rollupLevel = 0,
   children,
 }: {
   role: CollaboratorMasteryRole;
   idle: boolean;
   /** Redazione or Social: the writing sector changes scene at 15 collaborators. */
   social?: boolean;
+  /** Level of «Roll-up delle Onde», shown in the Eventi scene. */
+  rollupLevel?: number;
   children?: ReactNode;
 }) {
   const [ref, onScreen] = useOnScreen();
@@ -39,7 +42,7 @@ export function SectorScene({
       ref={ref}
       className={`sector-scene is-${role}${idle ? " is-idle" : ""}${onScreen ? "" : " is-offscreen"}`}
     >
-      <div className="sector-scene-art" aria-hidden="true"><SectorSceneArt role={role} social={social} /></div>
+      <div className="sector-scene-art" aria-hidden="true"><SectorSceneArt role={role} social={social} rollupLevel={rollupLevel} /></div>
       {children}
     </div>
   );

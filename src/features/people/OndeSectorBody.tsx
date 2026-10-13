@@ -125,7 +125,7 @@ export function OndeSectorBody({
     const anyRunning = state.acquisitionEvents.some((event) => event.status === "running" && event.collaboratorId);
     return (
       <>
-        <SectorScene role={role} idle={idle} />
+        <SectorScene role={role} idle={idle} rollupLevel={state.upgrades["wave-rollup"] ?? 0} />
         <div className="sector-scene-data">
           {anyRunning ? <EventTicks state={state} now={now} /> : <SceneRow row={activity} />}
         </div>

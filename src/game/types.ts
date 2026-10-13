@@ -311,6 +311,7 @@ export type UpgradeId =
   | "gadget-event-stall"
   | "pre-event-check"
   | "maintenance-kit"
+  | "wave-rollup"
   | "organized-rack"
   | "essential-parts"
   | "demo-set"

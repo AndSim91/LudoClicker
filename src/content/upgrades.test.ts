@@ -79,7 +79,7 @@ describe("upgrade catalog", () => {
       if (category.id === "secrets") continue;
       // One line per branch: nine columns, ten in Gadget and the Network delle Onde (one column per node there).
       const expected = {
-        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 8, gadget: 10, instructors: 9, organization: 9, network: 10,
+        speed: 9, writing: 8, charisma: 9, welcome: 9, equipment: 9, gadget: 10, instructors: 9, organization: 9, network: 10,
       } as Record<string, number>;
       expect(definitionsFor(category.id), category.id).toHaveLength(expected[category.id] ?? 7);
     }
@@ -140,6 +140,7 @@ describe("upgrade catalog", () => {
       "official-supplier": [500],
       "pre-event-check": [100, 200, 400, 800, 1_600],
       "maintenance-kit": [250, 500, 1_000, 2_000, 4_000],
+      "wave-rollup": [750, 1_500, 3_000, 6_000, 12_000],
       "organized-rack": [500, 750, 1_000, 1_500, 2_500],
       "essential-parts": [1_000, 2_000, 4_000, 8_000, 16_000],
       checklist: [2_500, 5_000, 10_000, 20_000, 40_000],
@@ -231,7 +232,7 @@ describe("branch effects", () => {
       UPGRADE_DEFINITIONS.map((definition) => [definition.id, definition.maxLevel]),
     ) as ReturnType<typeof createInitialUpgradeLevels>;
     expect(getCreativityProgress(maximum)).toBe(1);
-    expect(getUpgradeEffectTotal(maximum, "eventContactsMultiplier")).toBeCloseTo(1.1);
+    expect(getUpgradeEffectTotal(maximum, "eventContactsMultiplier")).toBeCloseTo(1.35);
     expect(getUpgradeEffectTotal(maximum, "eventAttendanceMultiplier")).toBeCloseTo(0.9);
     expect(getUpgradeEffectTotal(maximum, "enrollmentProgress")).toBeCloseTo(1);
     expect(getUpgradeEffectTotal(maximum, "failedTrialRetryChance")).toBe(0.25);
@@ -389,7 +390,7 @@ describe("prerequisites and secret paths", () => {
     expect(getMissingUpgradeRequirement(welcome, memorable)).toMatchObject({ kind: "points", category: "instructors", required: 10 });
     expect(getMissingUpgradeRequirement({ ...welcome, "technical-arena": 5, "instructor-versatility": 5 }, memorable)).toBeUndefined();
     expect(find("operational-priorities").requiredUpgradeLevels).toEqual({ "collaborator-shifts": 1 });
-    expect(Object.keys(find("all-fixed").requiredUpgradeLevels ?? {})).toHaveLength(7);
+    expect(Object.keys(find("all-fixed").requiredUpgradeLevels ?? {})).toHaveLength(8);
     expect(find("e-learning").requiredUnlocks).toEqual(["forms"]);
     const linked = UPGRADE_DEFINITIONS.filter((definition) => definition.requiredUpgradeLevels).map((definition) => definition.id);
     expect(linked.sort()).toEqual(["agonist-course-intensity", "all-fixed", "operational-priorities"]);

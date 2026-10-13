@@ -2332,6 +2332,7 @@ a essere acquistate dal giocatore.
 | Fornitore ufficiale | sblocca l'acquisto delle spade (un solo livello) | 500 € |
 | Controllo prima dell'uso | −2% usura programmata | 100 / 200 / 400 / 800 / 1.600 € |
 | Kit di manutenzione | +10% velocità manutenzione automatica | 250 / 500 / 1.000 / 2.000 / 4.000 € |
+| Roll-up delle Onde | +5% Contatti a ogni evento; in Modalità Onde la scena degli Eventi mostra il roll-up nero dal livello 1 e il manifesto dal livello 3 | 750 / 1.500 / 3.000 / 6.000 / 12.000 € |
 | Banco da lavoro | riserva lavoro pari al 2% dell'usura massima di tutte le spade; massimo 10% | 500 / 750 / 1.000 / 1.500 / 2.500 € |
 | Ricambi essenziali | −15 punti lavoro per riparare una spada rotta; da 150 a 75 | 1.000 / 2.000 / 4.000 / 8.000 / 16.000 € |
 | Lista di controllo | −4% usura programmata | 2.500 / 5.000 / 10.000 / 20.000 / 40.000 € |
@@ -2349,7 +2350,7 @@ A ramo completo l'usura programmata scende del 50%, che è anche il tetto
 massimo della riduzione da potenziamenti; la velocità di manutenzione
 automatica sale del 100%, sommata ai bonus generici di automazione
 dell'Organizzazione. Soglie in punti di Attrezzatura: Fornitore ufficiale e
-Controllo prima dell'uso 0, Kit di manutenzione 4, Banco da lavoro 9, Ricambi
+Controllo prima dell'uso 0, Kit di manutenzione 4, Roll-up delle Onde 6, Banco da lavoro 9, Ricambi
 essenziali 13, Lista di controllo 18, Registro dell'attrezzatura 23, Le abbiamo
 messe a posto tutte 28 e **ogni altro nodo del ramo almeno al livello 1** (la
 dichiarazione deve essere supportata dai fatti).

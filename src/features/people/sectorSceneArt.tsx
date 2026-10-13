@@ -90,7 +90,8 @@ const GAZEBO_PAIR = "translate(231.8 -7) scale(.62)";
 const GAZEBO_LEFT = athletePose(0, 1, "attack");
 const GAZEBO_RIGHT = athletePose(62, -1, "attack");
 
-function EventsScene() {
+/** `rollupLevel` is the level of «Roll-up delle Onde»: the black roll-up from 1, the poster from 3. */
+function EventsScene({ rollupLevel }: { rollupLevel: number }) {
   return (
     <>
       <svg className="sector-scene-backdrop" viewBox="0 0 520 106" preserveAspectRatio="xMidYMid meet">
@@ -111,13 +112,17 @@ function EventsScene() {
           <Athlete shape={GAZEBO_LEFT} />
           <Athlete shape={GAZEBO_RIGHT} />
         </g>
-        <EventsRollup />
+        {rollupLevel >= 3 ? <EventsRollup /> : null}
         {/* Roll-up of the school: black, the Ordine's emblem in white. */}
-        <rect x={350} y={84} width={34} height={4} rx={1} fill="#8aa0b0" />
-        <rect x={352} y={22} width={30} height={62} rx={1.5} fill="#0b0d10" stroke="#3a4450" strokeWidth={0.8} />
-        <image href="/assets/orders/onde.webp" x={356} y={30} width={22} height={29} />
-        <rect x={356} y={66} width={22} height={2.5} rx={1} fill="#f4f1ea" />
-        <rect x={359} y={71} width={16} height={2} rx={1} fill="#f4f1ea" opacity={0.5} />
+        {rollupLevel >= 1 ? (
+          <g>
+            <rect x={350} y={84} width={34} height={4} rx={1} fill="#8aa0b0" />
+            <rect x={352} y={22} width={30} height={62} rx={1.5} fill="#0b0d10" stroke="#3a4450" strokeWidth={0.8} />
+            <image href="/assets/orders/onde.webp" x={356} y={30} width={22} height={29} />
+            <rect x={356} y={66} width={22} height={2.5} rx={1} fill="#f4f1ea" />
+            <rect x={359} y={71} width={16} height={2} rx={1} fill="#f4f1ea" opacity={0.5} />
+          </g>
+        ) : null}
       </svg>
       <SceneLayer box={{ x: 236, y: 44, w: 30, h: 25 }} className="scene-saber">
         <g transform={GAZEBO_PAIR}>
@@ -291,10 +296,10 @@ function EditorialScene() {
 }
 
 /** The scene of one sector; the Centro didattico has none. */
-export function SectorSceneArt({ role, social = true }: { role: CollaboratorMasteryRole; social?: boolean }) {
+export function SectorSceneArt({ role, social = true, rollupLevel = 0 }: { role: CollaboratorMasteryRole; social?: boolean; rollupLevel?: number }) {
   switch (role) {
     case "writing": return social ? <SocialScene /> : <EditorialScene />;
-    case "events": return <EventsScene />;
+    case "events": return <EventsScene rollupLevel={rollupLevel} />;
     case "equipment": return <EquipmentScene />;
     case "gadget": return <GadgetScene />;
     default: return null;
