@@ -31,7 +31,7 @@ function Judge({ x, y, carding, checker, reading }: { x: number; y: number; card
   const [sx, sy] = shape.shoulder;
   return (
     <g className="fd-judge" transform={`translate(${x} ${y}) scale(.8) translate(0 -164)`}>
-      <JudgeFigure shape={shape} prefix="fd-judge" f={f} reading={reading && !cardUp} cardArm={!cardUp} />
+      <JudgeFigure shape={shape} prefix="fd-judge" reading={reading && !cardUp} cardArm={!cardUp} />
       {cardUp ? (
         <g key={carding} className="fd-judge-card">
           <path d={`M${sx} ${sy} L${sx + 12 * f} ${sy - 14} L${sx + 14 * f} ${sy - 26}`} />

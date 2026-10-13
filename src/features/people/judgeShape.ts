@@ -17,6 +17,10 @@ export interface JudgeShape {
   cardArm: string;
   /** The Servizio phone in hand. */
   phone?: [number, number];
+  /** While reading: the finger that taps the screen (animated on its own). */
+  tapArm?: string;
+  /** While reading: where the head goes when the judge looks up at the Arena. */
+  headUp?: [number, number];
   /** Where the card arm starts. */
   shoulder: [number, number];
 }
@@ -26,9 +30,11 @@ export const judgeChair = (x: number, f: 1 | -1) =>
   `M${x - 12 * f} 136 H${x + 6 * f} M${x - 11 * f} 136 V115 M${x - 10 * f} 136 V150 M${x + 4 * f} 136 V150`;
 
 /**
- * `reading` (13/10, concept J3 «Due pollici»): right after a point the Style
- * judge holds Servizio in both hands at the chest, head bowed, and presses «+».
- * Only the phone judge has it; both arms are in `arms`, so `cardArm` is empty.
+ * `reading` (13/10, concept S2 «Guarda e annota»): right after a point the Style
+ * judge holds Servizio at the chest with one hand and taps it with the other,
+ * head bowed; halfway through he looks up at the Arena (`headUp`), then writes
+ * again. Only the phone judge has it; the holding arm is in `arms`, the tapping
+ * one in `tapArm`, so `cardArm` is empty.
  */
 export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -1, reading = false): JudgeShape {
   const reads = reading && kind === "phone";
@@ -38,10 +44,12 @@ export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -
     if (reads) {
       return {
         head: [hx + 2.5 * f, 109.5],
+        headUp: [hx, 106],
         body: `M${hx} 113 L${hx} 133 L${x + 10 * f} 133 L${x + 11 * f} 150`,
-        arms: `M${hx} 118 L${hx + 6 * f} 125 L${hx + 10 * f} 117 M${hx} 118 L${hx + 4 * f} 127 L${hx + 9 * f} 121`,
+        arms: `M${hx} 118 L${hx + 6 * f} 127 L${hx + 10 * f} 124`,
+        tapArm: `M${hx} 118 L${hx + 4 * f} 127 L${hx + 11 * f} 121`,
         cardArm: "",
-        phone: [hx + (f > 0 ? 8 : -14), 110],
+        phone: [hx + (f > 0 ? 9 : -15), 115],
         shoulder: [hx, 118],
       };
     }
@@ -56,11 +64,13 @@ export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -
   }
   if (reads) {
     return {
-      head: [x + 2.5 * f, 103.5],
+      head: [x + 2 * f, 103.5],
+      headUp: [x, 100],
       body: `M${x} 107 L${x} 128 M${x} 128 L${x - 7} 150 M${x} 128 L${x + 7} 150`,
-      arms: `M${x} 112 L${x + 6 * f} 119 L${x + 10 * f} 111 M${x} 112 L${x + 4 * f} 121 L${x + 9 * f} 115`,
+      arms: `M${x} 112 L${x + 6 * f} 121 L${x + 9 * f} 117`,
+      tapArm: `M${x} 112 L${x + 4 * f} 120 L${x + 10 * f} 114`,
       cardArm: "",
-      phone: [x + (f > 0 ? 8 : -14), 104],
+      phone: [x + (f > 0 ? 8 : -14), 110],
       shoulder: [x, 112],
     };
   }

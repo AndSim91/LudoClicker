@@ -53,7 +53,6 @@ function GymJudge({
         <JudgeFigure
           shape={shape}
           prefix="gym-judge"
-          f={f}
           reading={reads}
           cardArm={!raised}
           wear={kind === "shirt" ? (

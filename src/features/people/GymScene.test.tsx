@@ -53,13 +53,15 @@ describe("GymScene", () => {
     expect(head()).toBe("100");
   });
 
-  it("lets the Style judge write on Servizio with both hands, but not while his card is up", () => {
+  it("lets the Style judge write on Servizio and look up (S2), but not while his card is up", () => {
     const view = render(<GymReferees reading />);
-    expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
+    const writing = () => view.container.querySelectorAll(".gym-judge.is-phone .judge-finger, .gym-judge.is-phone .judge-head-up");
+    expect(writing()).toHaveLength(2);
+    expect(view.container.querySelector(".gym-judge.is-phone text")).toBeNull();
     view.rerender(<GymReferees reading card={{ id: 1, card: "style" }} />);
-    expect(view.container.querySelectorAll(".gym-judge-tap")).toHaveLength(0);
+    expect(writing()).toHaveLength(0);
     view.rerender(<GymReferees reading styleJudgeUp />);
-    expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
+    expect(writing()).toHaveLength(2);
   });
 
   it("walks a pair to the rack and back with other blades, waiting for the rack", () => {
