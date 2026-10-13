@@ -124,7 +124,7 @@ interface RackWalk {
 
 /**
  * Rack swaps for everyone (13/10, concepts R1 + V2 + C2): each athlete on the
- * mat stays 40–90 s, then walks to the rack and is replaced, never halfway
+ * mat stays 120–150 s, then walks to the rack and is replaced, never halfway
  * through a bout and at most two walking at a time. The new blade follows the
  * members' rarities and what is already on the mat (gymRack.ts).
  */
