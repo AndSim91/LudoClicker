@@ -17,6 +17,7 @@ import {
   type IdleTrick,
   type KataLevel,
   type SceneStudent,
+  type SceneWeaponShares,
   type StaffMove,
 } from "./instructorLesson";
 
@@ -328,6 +329,8 @@ export const InstructorScene = memo(function InstructorScene({
   studentsInCourses,
   activeMembers,
   rarityCounts,
+  weaponShares,
+  schoolYear,
   coverage,
   hasInstructors,
   hasTechnician,
@@ -336,6 +339,9 @@ export const InstructorScene = memo(function InstructorScene({
   studentsInCourses: number;
   activeMembers: number;
   rarityCounts: GymRarityCounts;
+  /** Members by weapon: with the rarities, the students drawn at every school year. */
+  weaponShares: SceneWeaponShares;
+  schoolYear: number;
   coverage: readonly FormId[];
   hasInstructors: boolean;
   /** With at least one Tecnico in the school the tunic turns lilac. */
@@ -347,8 +353,16 @@ export const InstructorScene = memo(function InstructorScene({
   const scale = size.height / SCENE_HEIGHT;
   const width = Math.max(200, (size.width / size.height) * SCENE_HEIGHT);
   const plan = useMemo(
-    () => planInstructorScene({ width, studentsInCourses: hasInstructors ? studentsInCourses : 0, activeMembers, rarityCounts, coverage }),
-    [activeMembers, coverage, hasInstructors, rarityCounts, studentsInCourses, width],
+    () => planInstructorScene({
+      width,
+      studentsInCourses: hasInstructors ? studentsInCourses : 0,
+      activeMembers,
+      rarityCounts,
+      weaponShares,
+      schoolYear,
+      coverage,
+    }),
+    [activeMembers, coverage, hasInstructors, rarityCounts, schoolYear, studentsInCourses, weaponShares, width],
   );
   const tunic = hasTechnician ? TUNIC.technician : TUNIC.instructor;
   const teaching = plan.students.length > 0;

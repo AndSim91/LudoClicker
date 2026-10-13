@@ -1,11 +1,12 @@
-import { getGymSaberRarities, getGymStageIndex, type GymRarity, type GymRarityCounts } from "../../content/gymStages";
-import type { FormId } from "../../game/types";
+import { getGymStageIndex, type GymRarity, type GymRarityCounts } from "../../content/gymStages";
+import { nextRandom } from "../../game/random";
+import type { FormBranch, FormId } from "../../game/types";
 
 /**
  * «Lezione degli Istruttori» (13/10, Andrea): the scene of the Instructors card
  * in Modalità Onde. The same gym lesson always, which grows with the school:
- * students on two rows of four facing the instructor, blades by the members'
- * rarities, weapons and kata by the Forms the school can teach.
+ * students on two rows of four facing the instructor, weapons and blades drawn
+ * every school year from the members (13/10), kata by the Forms the school can teach.
  * Scene units: a band 128 tall (y 50–178, feet at 150), as wide as the panel.
  */
 
@@ -50,17 +51,62 @@ export function getSceneStudentCount(studentsInCourses: number, activeMembers: n
   return Math.max(0, Math.min(studentsInCourses, cap, narrow ? 4 : 8));
 }
 
-/** Everybody holds a long saber; one staff and one pair of short sabers when the school teaches those Forms. */
-export function getSceneWeapons(count: number, coverage: readonly FormId[]): SceneWeapon[] {
-  const weapons = Array<SceneWeapon>(count).fill("long");
-  if (count < 2) return weapons;
-  if (coverage.some((formId) => formId.endsWith("-staff"))) weapons[Math.min(2, count - 1)] = "staff";
-  if (coverage.some((formId) => formId.endsWith("-double"))) {
-    // The first student (closest to the instructor) always keeps the long saber.
-    const slot = weapons.findIndex((weapon, index) => index > 0 && weapon === "long");
-    if (slot > 0) weapons[slot] = "dual";
+export type SceneWeaponShares = Record<SceneWeapon, number>;
+
+const BRANCH_WEAPON: Record<FormBranch, SceneWeapon> = {
+  "Spada Lunga": "long",
+  Staffa: "staff",
+  "Doppia spada corta": "dual",
+};
+
+/**
+ * How many members hold each weapon: a member counts for his preferred weapons (shared
+ * equally among them), the long saber without preferences. `count` is for the archive.
+ */
+export function getSceneWeaponShares(
+  members: Iterable<{ formBranchPreferences?: readonly FormBranch[]; count?: number }>,
+): SceneWeaponShares {
+  const shares: SceneWeaponShares = { long: 0, staff: 0, dual: 0 };
+  for (const member of members) {
+    const people = member.count ?? 1;
+    const branches = member.formBranchPreferences ?? [];
+    if (branches.length === 0) shares.long += people;
+    for (const branch of branches) shares[BRANCH_WEAPON[branch]] += people / branches.length;
   }
-  return weapons;
+  return shares;
+}
+
+function pickWeighted<T extends string>(weights: Partial<Record<T, number>>, roll: number, fallback: T): T {
+  const entries = (Object.entries(weights) as [T, number][]).filter(([, weight]) => weight > 0);
+  const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
+  let left = roll * total;
+  for (const [key, weight] of entries) {
+    if (left < weight) return key;
+    left -= weight;
+  }
+  return entries.at(-1)?.[0] ?? fallback;
+}
+
+/**
+ * Weapons and blade colours of the students (Andrea, 13/10): drawn again at every
+ * school year, each place with the members' share of weapons and of rarities, so the
+ * lesson changes from year to year and mirrors the school. Within a year a place keeps
+ * its student. The first place (closest to the instructor) keeps the long saber.
+ */
+export function rollSceneStudents(
+  count: number,
+  schoolYear: number,
+  rarityCounts: GymRarityCounts,
+  weaponShares: SceneWeaponShares,
+): { rarity: GymRarity; weapon: SceneWeapon }[] {
+  return Array.from({ length: count }, (_, index) => {
+    const [rarityRoll, seed] = nextRandom(schoolYear * 7_919 + index * 104_729 + 17);
+    const [weaponRoll] = nextRandom(seed);
+    return {
+      rarity: pickWeighted<GymRarity>(rarityCounts, rarityRoll, "common"),
+      weapon: index === 0 ? "long" : pickWeighted<SceneWeapon>(weaponShares, weaponRoll, "long"),
+    };
+  });
 }
 
 const spread = (n: number, from: number, to: number) =>
@@ -71,6 +117,8 @@ export function planInstructorScene({
   studentsInCourses,
   activeMembers,
   rarityCounts,
+  weaponShares,
+  schoolYear,
   coverage,
 }: {
   /** Panel width in scene units (128 × width / height). */
@@ -78,23 +126,24 @@ export function planInstructorScene({
   studentsInCourses: number;
   activeMembers: number;
   rarityCounts: GymRarityCounts;
+  weaponShares: SceneWeaponShares;
+  schoolYear: number;
   coverage: readonly FormId[];
 }): InstructorScenePlan {
   const narrow = width < NARROW_SCENE_UNITS;
   const count = getSceneStudentCount(studentsInCourses, activeMembers, narrow);
-  const rarities = getGymSaberRarities(rarityCounts, count);
-  const weapons = getSceneWeapons(count, coverage);
+  const rolled = rollSceneStudents(count, schoolYear, rarityCounts, weaponShares);
   // Front row takes the even places, back row the odd ones, staggered.
   const frontCount = Math.ceil(count / 2);
   const frontX = spread(frontCount, narrow ? 112 : 136, width - (narrow ? 58 : 66));
   const backX = spread(count - frontCount, narrow ? 146 : 170, width - (narrow ? 30 : 34));
-  const students = rarities.map((rarity, index): SceneStudent => {
+  const students = rolled.map(({ rarity, weapon }, index): SceneStudent => {
     const back = index % 2 === 1;
     const row = Math.floor(index / 2);
     return {
       x: back ? backX[row] : frontX[row],
       rarity,
-      weapon: weapons[index],
+      weapon,
       back,
       delay: (back ? 0.5 : 0.45) + row * 0.07,
     };

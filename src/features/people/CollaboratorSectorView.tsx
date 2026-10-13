@@ -19,7 +19,7 @@ import { useGameTime, useGameTimeSource } from "../../game/GameTimeContext";
 import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManagement";
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
 import { hasGadgetRuntimeWork } from "../../game/gadgetEconomy";
-import { isSummerBreak } from "../../game/calendar";
+import { getSchoolYear, isSummerBreak } from "../../game/calendar";
 import { isAnnualTeachingExhausted } from "../../game/memberGroups";
 import {
   selectActiveEmail,
@@ -49,6 +49,7 @@ import { getFormActivity } from "./formActivity";
 import { InstructorCoverageTable } from "./InstructorCoverageTable";
 import { AgonistCourse, AthleticPreparation } from "./InstructorTrainingRow";
 import { InstructorScene } from "./InstructorScene";
+import { getSceneWeaponShares } from "./instructorLesson";
 import { getTechnicianCourseDefinitions, getTrainingDefinitions } from "./trainingOptions";
 import { AvailableCoursesButton } from "./AvailableCoursesButton";
 import { OndeSectorBody } from "./OndeSectorBody";
@@ -429,7 +430,7 @@ function InstructorSectorCard({
     (instructor.training && getTrainingPhase(instructor.training) === "instructor")
   ).length;
   const technicianCount = instructors.filter((instructor) => (instructor.technicianForms ?? []).length > 0).length;
-  // Blade colours of the lesson, as in the gym: counted again only when the contacts change.
+  // Blades and weapons of the lesson, archive included: counted again only when the members change.
   const memberRarityCounts = useMemo(() => {
     const counts: GymRarityCounts = {};
     for (const contact of state.contacts) {
@@ -437,8 +438,16 @@ function InstructorSectorCard({
       const rarity = contact.secretLegendaryId ? "secret-legendary" : contact.rarity;
       counts[rarity] = (counts[rarity] ?? 0) + 1;
     }
+    for (const group of state.memberGroups ?? []) counts[group.rarity] = (counts[group.rarity] ?? 0) + group.count;
     return counts;
-  }, [state.contacts]);
+  }, [state.contacts, state.memberGroups]);
+  const memberWeaponShares = useMemo(
+    () => getSceneWeaponShares([
+      ...state.contacts.filter((contact) => contact.status === "enrolled"),
+      ...(state.memberGroups ?? []),
+    ]),
+    [state.contacts, state.memberGroups],
+  );
   const preparationInstructorCount = selectAthleticPreparationInstructorIds(state).size;
   const summerBreak = isSummerBreak(state.school.currentMonth);
   // B2 (Andrea, 13/10): Istruttori fermi perché tutti hanno già fatto il corso dell'anno.
@@ -569,6 +578,8 @@ function InstructorSectorCard({
               studentsInCourses={studentCount}
               activeMembers={state.school.activeMembers}
               rarityCounts={memberRarityCounts}
+              weaponShares={memberWeaponShares}
+              schoolYear={getSchoolYear(state.school.currentMonth)}
               coverage={coverage}
               hasInstructors={instructors.length > 0}
               hasTechnician={technicianCount > 0}

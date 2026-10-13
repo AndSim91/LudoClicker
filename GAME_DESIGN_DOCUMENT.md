@@ -2761,17 +2761,24 @@ livelli della Palestra, niente rastrelliera) l'Istruttore a sinistra guida la
 Forma e gli allievi, su due file sfalsate da 4 rivolte verso di lui, la
 ripetono un attimo dopo. In scena ci sono gli allievi dei corsi in corso, fino
 a un tetto per livello della Palestra: 1, 2, 3, 4, 6 e 8 (al massimo 4 se la
-colonna è stretta). Le spade seguono le rarità degli iscritti con la regola
-della Palestra; la sequenza si allunga con le Forme insegnabili (Forma 1
-guardia e fendente, Forma 2 anche la parata alta, Corso Y anche l'affondo) e
-con le Forme della Staffa e della Doppia compaiono un allievo con la staffa
-(elsa lunga al centro, movimenti Otto, Mulino e Spazzata e cavatappi scelti a
-caso a ogni giro) e uno con le due spade corte. L'Istruttore ha la tunica
+colonna è stretta). Armi e colori delle lame si estraggono di nuovo a ogni
+anno scolastico (13/10): ogni posto pesca l'arma in proporzione alle armi
+preferite degli iscritti (chi ne ha più d'una conta per ciascuna in parti
+uguali, chi non ne ha tiene la spada lunga) e il colore in proporzione alle
+rarità degli iscritti, archivio compreso; nello stesso anno ogni posto tiene il
+suo allievo e il primo, il più vicino all'Istruttore, ha sempre la spada lunga.
+La staffa e le due spade corte hanno entrambe le lame dello stesso colore. La
+sequenza si allunga con le Forme insegnabili (Forma 1 guardia e fendente,
+Forma 2 anche la parata alta, Corso Y anche l'affondo); la staffa ha l'elsa
+lunga al centro e i movimenti Otto, Mulino e Spazzata e cavatappi scelti a
+caso a ogni giro. L'Istruttore ha la tunica
 LudoSport verde scuro con la cintura marrone e una piccola treccia marrone (il
 segno dell'Istruttore), lilla quando la scuola ha almeno un Tecnico. Ogni 60–90
 secondi spegne la spada e fa il **giro di correzione** tra le due file,
 fermandosi accanto a ogni allievo, poi torna al suo posto. Senza corsi in corso
-è seduto nell'angolo e scorre i social sul telefono. Ferma fuori schermo e con
+si allena da solo con la spada, un trick a caso alla volta (rin di polso, otto
+davanti al corpo, lancio e presa, elicottero sopra la testa, freestyle con
+scia) con una pausa in guardia tra l'uno e l'altro (13/10). Ferma fuori schermo e con
 «Riduci animazioni».
 
 In Outlook il corpo è alto 340 px e la tabella scorre dentro con

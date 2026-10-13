@@ -5,17 +5,19 @@ import { InstructorScene } from "./InstructorScene";
 const props = {
   activeMembers: 600,
   rarityCounts: { common: 500, rare: 50 },
+  weaponShares: { long: 6, staff: 4, dual: 0 },
+  schoolYear: 2,
   coverage: ["form-1", "form-2", "course-y", "form-3-staff"] as const,
   hasInstructors: true,
   hasTechnician: false,
 };
 
 describe("InstructorScene", () => {
-  it("draws up to eight students on two rows, one with the staff, and the instructor in green", () => {
+  it("draws up to eight students on two rows, with the members' weapons, and the instructor in green", () => {
     const { container } = render(<InstructorScene {...props} studentsInCourses={30} />);
     expect(container.querySelectorAll(".iscene-box:not(.iscene-bulb)")).toHaveLength(9);
     expect(container.querySelectorAll(".is-back-row")).toHaveLength(4);
-    expect(container.querySelectorAll(".iscene-staff")).toHaveLength(1);
+    expect(container.querySelectorAll(".iscene-staff").length).toBeGreaterThan(0);
     expect(container.querySelector(".iscene-arm.k3")).not.toBeNull();
     expect(container.querySelector('path[fill="#1d5a45"]')).not.toBeNull();
   });
