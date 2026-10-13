@@ -45,8 +45,9 @@ export function rollsBout(random: Random, pace: SparPace): boolean {
 }
 
 /**
- * The athlete who goes to the rack (13/10): the right one of the rightmost pair.
- * The scene sets `away` before the walk; the pair keeps `busy` while it spars.
+ * A pair and the rack swaps (13/10): the scene sets `away` while one of its
+ * athletes is at the rack (no bouts then); the pair keeps `busy` while it spars,
+ * so nobody leaves halfway through a bout.
  */
 export interface RackHold {
   away: boolean;

@@ -62,14 +62,28 @@ describe("GymScene", () => {
     expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
   });
 
-  it("walks an athlete to the rack and back with another blade", () => {
+  it("walks an athlete to the rack and back with another blade, waiting for the rack", () => {
     vi.useFakeTimers();
     const onDone = vi.fn();
-    const view = render(<GymRackSwap fromX={352} sabers={["#4aa8ff", "#ffd166"]} onDone={onDone} />);
-    expect(view.container.querySelector(".gym-walker")).toHaveClass("is-walking");
+    let free = false;
+    const rack = { claim: () => free, release: vi.fn() };
+    const view = render(<GymRackSwap id={7} homeX={170} sabers={["#4aa8ff", "#ffd166"]} rack={rack} onDone={onDone} />);
+    // It appears on its own spot, then walks: never drawn straight at the rack.
+    const walker = () => view.container.querySelector<HTMLElement>(".gym-walker")!;
+    expect(walker().style.getPropertyValue("--dx")).toBe("0");
+    act(() => vi.advanceTimersByTime(100));
+    expect(walker()).toHaveClass("is-walking");
     // One phase per timer: let React render between them.
-    for (let step = 0; step < 7; step += 1) act(() => vi.advanceTimersByTime(5_000));
-    expect(onDone).toHaveBeenCalledTimes(1);
+    const run = (steps: number) => {
+      for (let step = 0; step < steps; step += 1) act(() => vi.advanceTimersByTime(7_000));
+    };
+    run(4);
+    expect(view.container.querySelector(".gym-walker")).not.toHaveClass("is-walking");
+    expect(onDone).not.toHaveBeenCalled();
+    free = true;
+    run(12);
+    expect(onDone).toHaveBeenCalledWith(7);
+    expect(rack.release).toHaveBeenCalledWith(7);
     expect(view.container.querySelector(".gym-saber-line")).toHaveStyle({ color: "#ffd166" });
     vi.useRealTimers();
   });

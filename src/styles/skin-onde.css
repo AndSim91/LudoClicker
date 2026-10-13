@@ -797,13 +797,16 @@
 .gym-judge-chair { fill: none; stroke: #2a6f8f; stroke-width: 3; stroke-linecap: round; }
 .gym-judge-pose { animation: gym-judge-settle 0.35s ease-out; }
 /* Rack swap (GymRackSwap.tsx): the walk is one transform, legs and blade cross-fade. */
+/* Concept V2: in the back lane the walker is a step behind the pairs (--dy, --k, pivot on the feet). */
 .gym-walker {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transform: translateX(calc(var(--dx, 0) * var(--s)));
+  transform-origin: calc(50% + (var(--home-x) - var(--vb-cx)) * var(--s)) calc(85px + (150 - var(--vb-cy)) * var(--s));
+  transform: translate(calc(var(--dx, 0) * var(--s)), calc(var(--dy, 0) * var(--s))) scale(var(--k, 1));
   transition: transform var(--walk-ms, 0ms) linear, opacity 0.8s linear;
 }
+.gym-walker-lane { position: absolute; inset: 0; transition: opacity 0.35s linear; }
 .gym-walker-blade { position: absolute; inset: 0; transition: opacity 0.5s linear; }
 .gym-walk-b { opacity: 0; }
 .gym-walker.is-walking .gym-walk-a { animation: gym-walk 0.4s steps(1, end) infinite; }

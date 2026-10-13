@@ -133,16 +133,16 @@ export function GymPair({
   sabers,
   index,
   hold,
-  away = false,
+  away = [false, false],
 }: {
   leftX: number;
   rightX: number;
   sabers: [string, string];
   index: number;
-  /** Set on the rightmost pair: its right athlete may be at the rack. */
+  /** Shared with the scene: whether one athlete is at the rack, whether the pair spars. */
   hold?: RefObject<RackHold>;
-  /** The right athlete is at the rack. */
-  away?: boolean;
+  /** Left and right athlete at the rack (concept R1). */
+  away?: [boolean, boolean];
 }) {
 
   const [steps, setSteps] = useState<[number, number]>([0, 0]);
@@ -203,8 +203,8 @@ export function GymPair({
       className={sparring ? "gym-pair is-sparring" : "gym-pair"}
       style={{ "--gym-move": `${moveMs}ms` } as CSSProperties}
     >
-      <GymActor x={leftX} facing={1} saber={sabers[0]} delay={index * 1.3} step={steps[0]} />
-      {away ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} step={steps[1]} />}
+      {away[0] ? null : <GymActor x={leftX} facing={1} saber={sabers[0]} delay={index * 1.3} step={steps[0]} />}
+      {away[1] ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} step={steps[1]} />}
       {clash ? (
         <GymLayer
           key={clash.id}

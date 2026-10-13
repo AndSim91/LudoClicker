@@ -19,16 +19,16 @@ export function GymBoutPair({
   sabers,
   onPoint,
   hold,
-  away = false,
+  away = [false, false],
 }: {
   leftX: number;
   rightX: number;
   sabers: [string, string];
   onPoint: (side: BoutSide) => void;
-  /** Set when this is the only pair: its right athlete may be at the rack. */
+  /** Shared with the scene: whether one athlete is at the rack, whether the pair spars. */
   hold?: RefObject<RackHold>;
-  /** The right athlete is at the rack. */
-  away?: boolean;
+  /** Left and right athlete at the rack (concept R1). */
+  away?: [boolean, boolean];
 }) {
 
   const [view, setView] = useState<BoutView | null>(null);
@@ -73,8 +73,8 @@ export function GymBoutPair({
   if (!view) {
     return (
       <div className="gym-pair">
-        <GymActor x={leftX} facing={1} saber={sabers[0]} delay={0} />
-        {away ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={1.7} />}
+        {away[0] ? null : <GymActor x={leftX} facing={1} saber={sabers[0]} delay={0} />}
+        {away[1] ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={1.7} />}
       </div>
     );
   }
