@@ -20,7 +20,7 @@ export interface AgonistCourseStatus {
   ring?: CourseRing;
 }
 
-function AthleticPreparation({ status }: { status: AthleticPreparationStatus }) {
+export function AthleticPreparation({ status }: { status: AthleticPreparationStatus }) {
   if (!status.unlocked) return <div className="instructor-training-cell is-locked" aria-hidden="true" />;
   const { active, summer, paused, instructorCount } = status;
   return (
@@ -44,7 +44,7 @@ function AthleticPreparation({ status }: { status: AthleticPreparationStatus }) 
   );
 }
 
-function AgonistCourse({ status }: { status: AgonistCourseStatus }) {
+export function AgonistCourse({ status }: { status: AgonistCourseStatus }) {
   if (!status.unlocked) return <div className="instructor-training-cell is-locked" aria-hidden="true" />;
   const { ring, starred } = status;
   const name = starred ? "Corso Agonisti" : "Arena Tecnica";

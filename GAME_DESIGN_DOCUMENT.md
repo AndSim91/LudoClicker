@@ -2718,20 +2718,47 @@ fondi colorati e «Prenota SIS» è un pulsante bianco.
 
 **Scheda Istruttori, regola per entrambe le modalità (06/10): altezza fissa**,
 così non cambia quando un corso parte o finisce (`src/styles/instructor-card.css`).
-In Onde il corpo è alto 264 px: la mappa ha sempre tutte le corsie, sotto la
-legenda (Allievi · Corso Istruttori · Corso Tecnici, Istruttori · Tecnici) e
-la **riga degli allenamenti**: a sinistra la Preparazione atletica, a destra
-Arena Tecnica / Corso Agonisti con un solo quadrante azzurro (lo insegna
-chiunque, quindi niente numeri Istruttori) e «N atleti · %». Prima dello
-sblocco ognuna delle due non si vede, ma il suo posto resta. Su uno schermo
-grande (corpo della scheda da 1260 px in su) le due barre passano in una
-colonna a destra della mappa e la mappa cresce di un quinto; quando la scheda
-si stringe tornano nella riga sotto la mappa. Arena Tecnica ha
+In Onde il corpo è alto 264 px, con la **disposizione G** (13/10). A sinistra
+la mappa con tutte le corsie e sotto la legenda (Allievi · Corso Istruttori ·
+Corso Tecnici, Istruttori · Tecnici); sopra il primo tratto (Forma 1, Corso X,
+Forma 2, Corso Y) la riga di Arena Tecnica / Corso Agonisti, con un solo
+quadrante azzurro (lo insegna chiunque, quindi niente numeri Istruttori) e
+«N atleti · %», sotto il primo tratto la Preparazione atletica: righe compatte
+allineate al bordo alto e al bordo basso del riquadro delle Forme a 3 armi,
+larghe quanto il tratto. Prima dello sblocco ognuna delle due non si vede, ma
+il suo posto resta. Arena Tecnica ha
 l'emblema su **fondo rosso** (`arena-tecnica.png`), il Corso Agonisti su fondo
-azzurro con la stella. A destra le pastiglie (Forme insegnabili, in arrivo,
-allievi, in formazione) e l'Ufficio formazione, che tiene sempre due posti (il
+azzurro con la stella. A destra la scena della **Lezione degli Istruttori**
+con sopra le pastiglie (Forme insegnabili, in arrivo, allievi, in formazione)
+e sotto l'Ufficio formazione, che tiene sempre due posti (il
 secondo, senza SIS, è «Forma un Tecnico · Con la SIS, dagli Upgrade»
-tratteggiato). In Outlook il corpo è alto 340 px e la tabella scorre dentro con
+tratteggiato). La colonna destra prende lo spazio che avanza tra 276 e 620 px;
+la mappa cresce di un quinto solo se a destra restano almeno 520 px (corpo
+della scheda da 1280 px in su); da 520 px in su i due posti dell'Ufficio
+formazione stanno affiancati e la scena è alta circa 150 px, sotto tornano uno
+sopra l'altro e la scena scende a circa 100 px.
+
+**Lezione degli Istruttori** (13/10, `InstructorScene.tsx`,
+`instructorLesson.ts`, `instructor-scene.css`), solo in Onde: nella palestra
+della scuola (parete, finestra, pavimento; lampadina e stendardo agli stessi
+livelli della Palestra, niente rastrelliera) l'Istruttore a sinistra guida la
+Forma e gli allievi, su due file sfalsate da 4 rivolte verso di lui, la
+ripetono un attimo dopo. In scena ci sono gli allievi dei corsi in corso, fino
+a un tetto per livello della Palestra: 1, 2, 3, 4, 6 e 8 (al massimo 4 se la
+colonna è stretta). Le spade seguono le rarità degli iscritti con la regola
+della Palestra; la sequenza si allunga con le Forme insegnabili (Forma 1
+guardia e fendente, Forma 2 anche la parata alta, Corso Y anche l'affondo) e
+con le Forme della Staffa e della Doppia compaiono un allievo con la staffa
+(elsa lunga al centro, movimenti Otto, Mulino e Spazzata e cavatappi scelti a
+caso a ogni giro) e uno con le due spade corte. L'Istruttore ha la tunica
+LudoSport verde scuro con la cintura marrone e una piccola treccia marrone (il
+segno dell'Istruttore), lilla quando la scuola ha almeno un Tecnico. Ogni 60–90
+secondi spegne la spada e fa il **giro di correzione** tra le due file,
+fermandosi accanto a ogni allievo, poi torna al suo posto. Senza corsi in corso
+è seduto nell'angolo e scorre i social sul telefono. Ferma fuori schermo e con
+«Riduci animazioni».
+
+In Outlook il corpo è alto 340 px e la tabella scorre dentro con
 l'intestazione ferma, con righe vuote quando sono poche. Il piede è uno solo:
 Maestria media · Corsi Istruttori disponibili · Gestisci. La scritta «Centro
 didattico» sopra «Istruttori» non c'è più. Sotto i 1100 px la scheda va in
@@ -3116,8 +3143,8 @@ Un'unica pagina, in quest'ordine:
   settori sono tutte alte uguali e hanno una scena animata (Tavola 4 del
   06/10): la Redazione, finché non diventa Social, una scrivania con il portatile dove un'email si scrive riga per riga e parte come aeroplanino di carta, accanto a una tazza che fuma (descrizione «Scrivono le email della scuola. Le virgole sono un dettaglio.»); Social un telefono con il feed dei duelli e le pastiglie di follower,
   rendita e bonus Eventi; Eventi il gazebo blu militare con due atleti che
-  incrociano le spade, il roll-up nero della scuola, il mare e i passanti, e
-  dal 07/10 un secondo roll-up fermo con il manifesto LudoSport ridisegnato
+  incrociano le spade, il mare e i passanti; con l'upgrade «Roll-up delle Onde»
+  il roll-up nero della scuola (dal livello 1) e un secondo roll-up fermo con il manifesto LudoSport ridisegnato (dal livello 3)
   (due atlete schiena contro schiena con le spade blu e rossa, la fascia
   bianca con titolo, logo e QR, l'atleta al tramonto in guardia appesa con la
   spada dorata; `EventsRollup.tsx`). Atleti e passanti dell'evento sono lo

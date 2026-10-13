@@ -935,7 +935,8 @@ describe("PeopleView", () => {
     );
     const view = render(renderView(false));
 
-    expect(screen.getByText("Preparazione atletica").closest(".instructor-training-row")).toBeVisible();
+    // Disposizione G (13/10): under the first stretch of the Forms map.
+    expect(screen.getByText("Preparazione atletica").closest(".form-path-trunk-slot.is-below")).toBeVisible();
     const preparationBar = screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     });

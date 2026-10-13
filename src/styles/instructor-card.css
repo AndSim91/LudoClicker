@@ -216,45 +216,113 @@
 
 .instructor-agonist-course > small b { color: var(--ring-students); font-weight: 600; }
 
-/* Schermo grande (06/10, Andrea): Preparazione atletica e Corso Agonisti in una
-   colonna a destra della mappa, che prende tutta l'altezza; quando la scheda
-   si stringe tornano nella riga sotto la mappa. */
+/* Disposizione G (13/10, Andrea): la mappa a sinistra con Corso Agonisti sopra e
+   Preparazione atletica sotto il primo tratto; a destra la scena della lezione e
+   l'Ufficio formazione. La colonna destra prende lo spazio che avanza, da 276 a
+   620 px; la mappa si ingrandisce di 1,2× solo se a destra restano 520 px. */
 .instructor-sector-card.is-quadrants .instructor-sector-body {
   container: instructor-body / inline-size;
 }
 
-@container instructor-body (min-width: 1260px) {
-  .instructor-sector-map {
-    grid-template-areas:
-      "map train"
-      "legend train";
-    grid-template-columns: minmax(0, 1fr) 270px;
-    grid-template-rows: minmax(0, 1fr) auto;
-    column-gap: 16px;
+@media (min-width: 1101px) {
+  .instructor-sector-card.is-quadrants .instructor-sector-body {
+    grid-template-columns: minmax(max-content, 1fr) minmax(276px, 620px);
   }
+}
 
-  /* Con la riga sotto libera, la mappa cresce di un quinto. */
-  .instructor-sector-map .form-path-map.is-coverage { grid-area: map; zoom: 1.2; }
-  .instructor-ring-legend { grid-area: legend; }
+.instructor-sector-card.is-quadrants .instructor-sector-map {
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding-inline: 12px;
+}
 
-  .instructor-training-row {
-    grid-area: train;
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: 10px;
-    margin: 0;
-  }
+@container instructor-body (min-width: 1280px) {
+  .instructor-sector-map .form-path-map.is-coverage { zoom: 1.2; }
+}
 
-  .instructor-training-row .athletic-preparation-course {
-    grid-template-columns: 22px minmax(0, 1fr);
-    row-gap: 6px;
-    padding-block: 8px;
-  }
+/* Il primo tratto in colonna: sopra e sotto le due righe, allineate ai bordi del
+   riquadro delle Forme a 3 armi; larghe quanto il tratto, senza allargarlo. */
+.form-path-trunk {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-self: stretch;
+  gap: 10px;
+}
 
-  .instructor-training-row .athletic-preparation-course > .progress-bar,
-  .instructor-training-row .athletic-preparation-course > small {
-    grid-column: 1 / -1;
-  }
+.form-path-trunk-slot {
+  display: flex;
+  width: 0;
+  min-width: 100%;
+  min-height: 0;
+}
+
+.form-path-trunk-slot.is-above { align-items: flex-start; }
+.form-path-trunk-slot.is-below { align-items: flex-end; }
+
+.form-path-trunk-slot > .instructor-training-cell {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  align-content: center;
+  padding: 2px 8px 7px;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+.form-path-trunk-slot > .athletic-preparation-course,
+.form-path-trunk-slot > .instructor-agonist-course {
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 1px;
+  margin: 0;
+}
+
+.form-path-trunk-slot .athletic-preparation-course-logo,
+.form-path-trunk-slot .instructor-agonist-medal {
+  grid-row: 1 / 3;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+}
+
+.form-path-trunk-slot .athletic-preparation-course-logo svg { width: 12px; height: 12px; }
+.form-path-trunk-slot .instructor-agonist-medal img { width: 18px; height: 18px; }
+.form-path-trunk-slot .instructor-agonist-medal > svg { width: 24px; height: 24px; }
+
+.form-path-trunk-slot .instructor-training-cell > strong {
+  grid-column: 2;
+  justify-self: start;
+  padding-left: 0;
+  margin-left: 0;
+  text-align: left;
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-path-trunk-slot .instructor-training-cell > small {
+  grid-column: 2;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  color: var(--ink-soft);
+  font-size: 10.5px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La barra della Preparazione diventa una linea sottile sul fondo della riga. */
+.form-path-trunk-slot .athletic-preparation-course > .progress-bar {
+  position: absolute;
+  right: 8px;
+  bottom: 3px;
+  left: 40px;
+  max-height: 2px;
+  height: 2px;
+  margin: 0;
 }
 
 /* ---------- Colonna destra: numeri e Ufficio formazione ---------- */
@@ -265,6 +333,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
+  container: instructor-side / inline-size;
   overflow: hidden;
   border-left: 1px solid var(--line);
   background: color-mix(in srgb, var(--blue-050) 30%, var(--surface));
@@ -502,6 +571,30 @@
 :root[data-theme="light"] .instructor-sector-side { background: var(--surface-muted); }
 :root[data-theme="light"] .instructor-side-label { color: var(--ink-muted); }
 
+/* La scena prende l'altezza che avanza sopra l'Ufficio formazione. */
+.instructor-sector-side > .iscene {
+  flex: 1 1 auto;
+  min-height: 92px;
+  container: iscene / inline-size;
+}
+
+.instructor-office {
+  display: grid;
+  gap: 6px;
+}
+
+@container iscene (max-width: 330px) {
+  .iscene-chip-more { display: none; }
+}
+
+/* Da 520 px in su i due riquadri dell'Ufficio formazione stanno affiancati. */
+/* (La misura è senza il margine interno della colonna: 520 px meno 28.) */
+@container instructor-side (min-width: 492px) {
+  .instructor-sector-side .instructor-quick-training { flex-direction: row; }
+  .instructor-sector-side .instructor-quick-training > button,
+  .instructor-sector-side .instructor-quick-training > .instructor-quick-slot { flex: 1 1 0; min-width: 0; }
+}
+
 /* Stretta: tutto in colonna, altezza naturale. */
 @media (max-width: 1100px) {
   .instructor-sector-card .instructor-sector-body,
@@ -531,6 +624,8 @@
     border-top: 1px solid var(--line);
     border-left: 0;
   }
+
+  .instructor-sector-side > .iscene { min-height: 150px; }
 
   .instructor-training-row { grid-template-columns: minmax(0, 1fr); }
   .instructor-training-cell.is-locked { display: none; }

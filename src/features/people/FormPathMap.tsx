@@ -31,12 +31,17 @@ function FormPathSkeleton({
   title,
   node,
   isLaneActive,
+  trunkAbove,
+  trunkBelow,
 }: {
   className?: string;
   ariaLabel: string;
   title?: string;
   node: (formId: FormId) => ReactNode;
   isLaneActive: (ids: readonly FormId[]) => boolean;
+  /** Over and under the first stretch (Forma 1 to Corso Y), aligned with the weapons box (13/10). */
+  trunkAbove?: ReactNode;
+  trunkBelow?: ReactNode;
 }) {
   const state = useOptionalGameState();
   const courseX = state ? isCourseXUnlocked(state.upgrades) : true;
@@ -45,7 +50,13 @@ function FormPathSkeleton({
     : ["form-1", "form-2", "course-y"];
   return (
     <div className={`form-path-map${className ? ` ${className}` : ""}`} aria-label={ariaLabel} title={title}>
-      <span className="form-path-segment">{trunk.map(node)}</span>
+      {trunkAbove || trunkBelow ? (
+        <span className="form-path-trunk">
+          <span className="form-path-trunk-slot is-above">{trunkAbove}</span>
+          <span className="form-path-segment">{trunk.map(node)}</span>
+          <span className="form-path-trunk-slot is-below">{trunkBelow}</span>
+        </span>
+      ) : <span className="form-path-segment">{trunk.map(node)}</span>}
       <span className="form-path-lanes">
         {FORM_BRANCHES.map((branch) => {
           const ids = BRANCH_FORM_IDS[branch];
@@ -148,6 +159,8 @@ export function FormCoverageMap({
   highlight,
   selected,
   onSelect,
+  trunkAbove,
+  trunkBelow,
 }: {
   counts: ReadonlyMap<FormId, FormCoverageCount>;
   activity: ReadonlyMap<TrainingCourseId, FormActivity>;
@@ -157,6 +170,9 @@ export function FormCoverageMap({
   /** Pianificazione delle Onde: every Forma is a button, the chosen one glows (S2 «Alone»). */
   selected?: FormId;
   onSelect?: (formId: FormId) => void;
+  /** Card Istruttori (13/10): Corso Agonisti over the first stretch, Preparazione atletica under it. */
+  trunkAbove?: ReactNode;
+  trunkBelow?: ReactNode;
 }) {
   const at = (formId: FormId) => counts.get(formId);
   const covered = (formId: FormId) => (at(formId)?.instructors ?? 0) > 0;
@@ -212,6 +228,8 @@ export function FormCoverageMap({
       ariaLabel={coveredNames.length > 0 ? `Forme insegnabili: ${coveredNames.join(", ")}` : "Forme insegnabili: nessuna"}
       node={node}
       isLaneActive={(ids) => ids.some((formId) => counts.has(formId))}
+      trunkAbove={trunkAbove}
+      trunkBelow={trunkBelow}
     />
   );
 }

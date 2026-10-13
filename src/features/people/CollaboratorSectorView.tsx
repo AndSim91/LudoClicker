@@ -11,6 +11,7 @@ import {
   isTechnicalArenaUnlocked,
 } from "../../content/upgrades";
 import { AGONIST_COURSE_ID } from "../../content/forms";
+import type { GymRarityCounts } from "../../content/gymStages";
 import { getTrainingPhase } from "../../game/teacherTrainingFlow";
 import { GAME_CONFIG } from "../../game/config";
 import { useGameStateSlices } from "../../game/GameStateContext";
@@ -46,7 +47,8 @@ import {
 import { FormCoverageMap } from "./FormPathMap";
 import { getFormActivity } from "./formActivity";
 import { InstructorCoverageTable } from "./InstructorCoverageTable";
-import { InstructorTrainingRow } from "./InstructorTrainingRow";
+import { AgonistCourse, AthleticPreparation } from "./InstructorTrainingRow";
+import { InstructorScene } from "./InstructorScene";
 import { getTechnicianCourseDefinitions, getTrainingDefinitions } from "./trainingOptions";
 import { AvailableCoursesButton } from "./AvailableCoursesButton";
 import { OndeSectorBody } from "./OndeSectorBody";
@@ -426,6 +428,16 @@ function InstructorSectorCard({
     return phase === "instructor" || phase === "technician";
   }).length;
   const technicianCount = instructors.filter((instructor) => (instructor.technicianForms ?? []).length > 0).length;
+  // Blade colours of the lesson, as in the gym: counted again only when the contacts change.
+  const memberRarityCounts = useMemo(() => {
+    const counts: GymRarityCounts = {};
+    for (const contact of state.contacts) {
+      if (contact.status !== "enrolled") continue;
+      const rarity = contact.secretLegendaryId ? "secret-legendary" : contact.rarity;
+      counts[rarity] = (counts[rarity] ?? 0) + 1;
+    }
+    return counts;
+  }, [state.contacts]);
   const preparationInstructorCount = selectAthleticPreparationInstructorIds(state).size;
   const summerBreak = isSummerBreak(state.school.currentMonth);
   // B2 (Andrea, 13/10): Istruttori fermi perché tutti hanno già fatto il corso dell'anno.
@@ -527,6 +539,18 @@ function InstructorSectorCard({
               activity={activity}
               showTechnicians={showTechnicians}
               highlight={quickHighlight}
+              trunkAbove={<AgonistCourse status={{
+                unlocked: agonistUnlocked,
+                starred: agonistStarred,
+                ring: activity.get(AGONIST_COURSE_ID)?.students,
+              }} />}
+              trunkBelow={<AthleticPreparation status={{
+                unlocked: prepUnlocked && instructors.length > 0,
+                active: preparationInstructorCount > 0,
+                summer: summerBreak,
+                paused: isPaused,
+                instructorCount: preparationInstructorCount,
+              }} />}
             />
             <p className="instructor-ring-legend">
               <span className="is-students">Allievi</span>
@@ -537,33 +561,29 @@ function InstructorSectorCard({
                 {showTechnicians ? <> · <b className="is-technician">{technicianCount}</b> {technicianCount === 1 ? "Tecnico" : "Tecnici"}</> : null}
               </span>
             </p>
-            <InstructorTrainingRow
-              preparation={{
-                unlocked: prepUnlocked && instructors.length > 0,
-                active: preparationInstructorCount > 0,
-                summer: summerBreak,
-                paused: isPaused,
-                instructorCount: preparationInstructorCount,
-              }}
-              agonist={{
-                unlocked: agonistUnlocked,
-                starred: agonistStarred,
-                ring: activity.get(AGONIST_COURSE_ID)?.students,
-              }}
-            />
           </div>
           <aside className="instructor-sector-side">
-            <p className="instructor-side-chips">
-              <span><b>{coverage.length}</b> Forme insegnabili</span>
-              {studyingOnlyForms > 0 ? <span><b>+{studyingOnlyForms}</b> in arrivo</span> : null}
-              <span><b>{studentCount}</b> allievi</span>
-              {staffInTraining > 0 ? <span><b>{staffInTraining}</b> in formazione</span> : null}
-            </p>
+            {/* G (13/10): the lesson in the gym, the data chips on it, the Ufficio formazione under it. */}
+            <InstructorScene
+              studentsInCourses={studentCount}
+              activeMembers={state.school.activeMembers}
+              rarityCounts={memberRarityCounts}
+              coverage={coverage}
+              hasInstructors={instructors.length > 0}
+              hasTechnician={technicianCount > 0}
+            >
+              <span className="sector-scene-chip is-top-left">
+                <b>{coverage.length}</b> Forme<span className="iscene-chip-more"> insegnabili</span>
+              </span>
+              {studyingOnlyForms > 0 ? <span className="sector-scene-chip is-top-left is-second"><b>+{studyingOnlyForms}</b> in arrivo</span> : null}
+              <span className="sector-scene-chip is-top-right"><b>{studentCount}</b> allievi</span>
+              {staffInTraining > 0 ? <span className="sector-scene-chip is-top-right is-second"><b>{staffInTraining}</b> in formazione</span> : null}
+            </InstructorScene>
             {coursesButton ?? (
-              <>
+              <div className="instructor-office">
                 <span className="instructor-side-label">Ufficio formazione</span>
                 {office}
-              </>
+              </div>
             )}
           </aside>
         </div>

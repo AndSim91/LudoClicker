@@ -1,0 +1,288 @@
+/*
+ * «Lezione degli Istruttori» (13/10, Andrea), Modalità Onde: InstructorScene.tsx.
+ * The scene is drawn in units of a 128-tall band (y 50–178, feet at 150); --s is
+ * the CSS px per unit, set by the component. Every moving piece is an HTML layer
+ * turned or slid with transform and opacity only; all of it stops off screen and
+ * with «Riduci animazioni».
+ */
+
+.iscene {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  contain: paint;
+  border: 1px solid var(--onde-thread, #2d6f93);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #034965, #0a3a57);
+}
+
+.iscene.is-empty .iscene-backdrop { opacity: 0.6; }
+
+.iscene-backdrop {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A figure's box: 100 × 100 units around x, from y 60 (10 units under the top). */
+.iscene-box {
+  position: absolute;
+  left: calc((var(--bx) - 50) * var(--s));
+  top: calc(10 * var(--s));
+  width: calc(100 * var(--s));
+  height: calc(100 * var(--s));
+  pointer-events: none;
+}
+
+.iscene-box > svg,
+.iscene-box > div,
+.iscene-arm > svg,
+.iscene-staff > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Back row: smaller and darker, feet at 141. */
+.iscene-box.is-back-row {
+  opacity: 0.72;
+  transform: translateY(calc(-9 * var(--s))) scale(0.84);
+  transform-origin: 50% 90%;
+}
+
+.iscene-walker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.iscene-box.is-walking {
+  transform: translateY(calc(-4 * var(--s))) scale(0.92);
+  transform-origin: 50% 90%;
+}
+
+.iscene-limb {
+  fill: none;
+  stroke: #021e33;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iscene-limb.is-thin { stroke-width: 5; }
+
+/* ---- The kata: the arm turns at the shoulder (the box's centre) on the beats of the Form ----
+   Forma 1: guard, raise, cut. Forma 2: also the high parry. Corso Y: also the thrust. */
+.iscene-arm {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  animation: iscene-k1 3.6s ease-in-out infinite;
+}
+
+.iscene-arm.k2 { animation-name: iscene-k2; animation-duration: 4.2s; }
+.iscene-arm.k3 { animation-name: iscene-k3; animation-duration: 4.8s; }
+.iscene-arm.is-back { animation-direction: reverse; }
+
+@keyframes iscene-k1 {
+  0%, 18% { transform: rotate(0deg); }
+  34% { transform: rotate(calc(var(--dir) * -38deg)); }
+  52%, 62% { transform: rotate(calc(var(--dir) * 62deg)); }
+  80%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes iscene-k2 {
+  0%, 12% { transform: rotate(0deg); }
+  26% { transform: rotate(calc(var(--dir) * -38deg)); }
+  40%, 46% { transform: rotate(calc(var(--dir) * 62deg)); }
+  62%, 70% { transform: rotate(calc(var(--dir) * -82deg)); }
+  86%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes iscene-k3 {
+  0%, 10% { transform: rotate(0deg); }
+  22% { transform: rotate(calc(var(--dir) * -38deg)); }
+  34%, 38% { transform: rotate(calc(var(--dir) * 62deg)); }
+  50%, 56% { transform: rotate(calc(var(--dir) * -82deg)); }
+  70%, 78% { transform: rotate(calc(var(--dir) * 92deg)); }
+  92%, 100% { transform: rotate(0deg); }
+}
+
+/* ---- The staff: hilt at the hand, tilted 25°, turning around the hilt ---- */
+.iscene-staff-pos {
+  position: absolute;
+  left: calc((var(--hx) - 35) * var(--s));
+  top: calc(20 * var(--s));
+  width: calc(70 * var(--s));
+  height: calc(70 * var(--s));
+  transform: rotate(calc(var(--dir) * 25deg));
+}
+
+.iscene-staff {
+  position: absolute;
+  inset: 0;
+  animation-duration: 3.6s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.iscene-staff.k2 { animation-duration: 4.2s; }
+.iscene-staff.k3 { animation-duration: 4.8s; }
+.iscene-staff[data-move="otto"].k1 { animation-name: iscene-otto-1; }
+.iscene-staff[data-move="otto"].k2 { animation-name: iscene-otto-2; }
+.iscene-staff[data-move="otto"].k3 { animation-name: iscene-otto-3; }
+.iscene-staff[data-move="mulino"].k1 { animation-name: iscene-mulino-1; }
+.iscene-staff[data-move="mulino"].k2 { animation-name: iscene-mulino-2; }
+.iscene-staff[data-move="mulino"].k3 { animation-name: iscene-mulino-3; }
+.iscene-staff[data-move="spazzata"].k1 { animation-name: iscene-spazzata-1; }
+.iscene-staff[data-move="spazzata"].k2 { animation-name: iscene-spazzata-2; }
+.iscene-staff[data-move="spazzata"].k3 { animation-name: iscene-spazzata-3; }
+
+/* V1 Otto: a turn back while raising, a turn forward on the cut. */
+@keyframes iscene-otto-1 {
+  0%, 18% { transform: rotate(0deg); }
+  34% { transform: rotate(calc(var(--dir) * -360deg)); }
+  52%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes iscene-otto-2 {
+  0%, 12% { transform: rotate(0deg); }
+  26% { transform: rotate(calc(var(--dir) * -360deg)); }
+  40%, 46% { transform: rotate(0deg); }
+  62%, 70% { transform: rotate(calc(var(--dir) * -270deg)); }
+  86%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes iscene-otto-3 {
+  0%, 10% { transform: rotate(0deg); }
+  22% { transform: rotate(calc(var(--dir) * -360deg)); }
+  34%, 38% { transform: rotate(0deg); }
+  50%, 56% { transform: rotate(calc(var(--dir) * -270deg)); }
+  70%, 78% { transform: rotate(calc(var(--dir) * -320deg)); }
+  92%, 100% { transform: rotate(0deg); }
+}
+
+/* V3 Mulino: always turning slowly at the side, faster on the cut, still on the parry. */
+@keyframes iscene-mulino-1 {
+  0% { transform: rotate(0deg); }
+  18% { transform: rotate(calc(var(--dir) * 60deg)); }
+  34% { transform: rotate(calc(var(--dir) * 120deg)); }
+  52% { transform: rotate(calc(var(--dir) * 480deg)); }
+  62% { transform: rotate(calc(var(--dir) * 520deg)); }
+  80% { transform: rotate(calc(var(--dir) * 640deg)); }
+  100% { transform: rotate(calc(var(--dir) * 720deg)); }
+}
+
+@keyframes iscene-mulino-2 {
+  0% { transform: rotate(0deg); }
+  12% { transform: rotate(calc(var(--dir) * 40deg)); }
+  26% { transform: rotate(calc(var(--dir) * 90deg)); }
+  40% { transform: rotate(calc(var(--dir) * 450deg)); }
+  46% { transform: rotate(calc(var(--dir) * 470deg)); }
+  62%, 70% { transform: rotate(calc(var(--dir) * 630deg)); }
+  86% { transform: rotate(calc(var(--dir) * 690deg)); }
+  100% { transform: rotate(calc(var(--dir) * 720deg)); }
+}
+
+@keyframes iscene-mulino-3 {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(calc(var(--dir) * 30deg)); }
+  22% { transform: rotate(calc(var(--dir) * 80deg)); }
+  34% { transform: rotate(calc(var(--dir) * 440deg)); }
+  38% { transform: rotate(calc(var(--dir) * 455deg)); }
+  50%, 56% { transform: rotate(calc(var(--dir) * 630deg)); }
+  70%, 78% { transform: rotate(calc(var(--dir) * 700deg)); }
+  92% { transform: rotate(calc(var(--dir) * 715deg)); }
+  100% { transform: rotate(calc(var(--dir) * 720deg)); }
+}
+
+/* V4 Spazzata e cavatappi: the low blade sweeps forward, then the staff rises turning on itself. */
+@keyframes iscene-spazzata-1 {
+  0%, 18% { transform: rotate(0deg) scaleY(1); }
+  34% { transform: rotate(calc(var(--dir) * 20deg)) scaleY(1); }
+  52%, 62% { transform: rotate(calc(var(--dir) * -70deg)) scaleY(1); }
+  70% { transform: rotate(calc(var(--dir) * 140deg)) scaleY(0.4); }
+  80% { transform: rotate(calc(var(--dir) * 290deg)) scaleY(1); }
+  100% { transform: rotate(calc(var(--dir) * 360deg)) scaleY(1); }
+}
+
+@keyframes iscene-spazzata-2 {
+  0%, 12% { transform: rotate(0deg) scaleY(1); }
+  26% { transform: rotate(calc(var(--dir) * 20deg)) scaleY(1); }
+  40%, 46% { transform: rotate(calc(var(--dir) * -70deg)) scaleY(1); }
+  54% { transform: rotate(calc(var(--dir) * 90deg)) scaleY(0.4); }
+  62%, 70% { transform: rotate(calc(var(--dir) * 270deg)) scaleY(1); }
+  86%, 100% { transform: rotate(calc(var(--dir) * 360deg)) scaleY(1); }
+}
+
+@keyframes iscene-spazzata-3 {
+  0%, 10% { transform: rotate(0deg) scaleY(1); }
+  22% { transform: rotate(calc(var(--dir) * 20deg)) scaleY(1); }
+  34%, 38% { transform: rotate(calc(var(--dir) * -70deg)) scaleY(1); }
+  44% { transform: rotate(calc(var(--dir) * 90deg)) scaleY(0.4); }
+  50%, 56% { transform: rotate(calc(var(--dir) * 270deg)) scaleY(1); }
+  70%, 78% { transform: rotate(calc(var(--dir) * 330deg)) scaleY(1); }
+  92%, 100% { transform: rotate(calc(var(--dir) * 360deg)) scaleY(1); }
+}
+
+/* ---- The walking instructor, the phone, the bulb ---- */
+.iscene-step { animation: iscene-step 0.5s steps(1) infinite; }
+.iscene-step.is-b { animation-delay: -0.25s; }
+
+@keyframes iscene-step {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.iscene-phone-glow {
+  opacity: 0.6;
+  animation: iscene-glow 3s ease-in-out infinite;
+}
+
+@keyframes iscene-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.iscene-phone-thumb { animation: iscene-scroll 1.6s ease-in-out infinite; }
+
+@keyframes iscene-scroll {
+  0%, 20% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(calc(-5 * var(--s))); opacity: 1; }
+  70%, 100% { transform: translateY(calc(-5 * var(--s))); opacity: 0; }
+}
+
+.iscene-box.iscene-bulb {
+  top: 0;
+  transform-origin: 50% 0;
+  animation: iscene-sway 5s ease-in-out infinite;
+}
+
+@keyframes iscene-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* Still off screen and with «Riduci animazioni»: without animation the layers leave the compositor. */
+.iscene.is-offscreen *,
+:root.reduce-motion .iscene * {
+  animation: none !important;
+}
+
+.iscene.is-offscreen .iscene-step.is-b,
+:root.reduce-motion .iscene .iscene-step.is-b {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iscene * { animation: none !important; }
+  .iscene .iscene-step.is-b { opacity: 0; }
+}
+
+/* The data chips sit on the scene, as on the other sector cards. */
+.iscene .sector-scene-chip b { color: var(--ink, #e9f2f7); font-weight: 600; }
