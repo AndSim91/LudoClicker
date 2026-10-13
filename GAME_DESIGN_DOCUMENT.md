@@ -3134,9 +3134,14 @@ Un'unica pagina, in quest'ordine:
   nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
   **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
   Forme, Arena e Stile, stato, prossima Forma, preferito e annullamento).
-  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste;
-  il tooltip del conteggio spiega che sono i meno forti oltre il limite, che
-  hanno già le loro Forme e ricevono una scheda al prossimo corso. Nella
+  Il titolo mostra tutti gli iscritti attivi (con e senza scheda, lo stesso
+  numero della barra in alto) e sotto una barra per rarità (A4, 13/10): la
+  parte piena ha la scheda, quella tratteggiata è «in archivio», con la
+  legenda «Comuni N + M in archivio» (`MemberCompositionBar`). Filtri,
+  ordinamento e conteggio «+ N in archivio» sono comuni alle due viste; il
+  tooltip del conteggio spiega che oltre il limite i Comuni meno forti
+  finiscono in archivio, frequentano, pagano e seguono i corsi come tutti e
+  ricevono una scheda al prossimo corso. Nella
   colonna Prossimo passo, chi ha usato tutti i corsi dell'anno mostra «Corsi
   dell'anno 1/1» (o 2/2, 3/3) con «riparte a settembre» (C2, 13/10). Nella
   scheda Istruttori, quando nessun allievo è in corso perché tutti, con e senza

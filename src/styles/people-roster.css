@@ -840,3 +840,60 @@
   overflow-wrap: normal;
   white-space: nowrap;
 }
+
+/* A4 «Barra di composizione» (13/10): rarità degli iscritti, piena con scheda, tratteggiata in archivio. */
+.member-composition {
+  padding: 8px 4px 2px;
+}
+
+.member-composition-bar {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
+.member-composition-bar > i {
+  display: block;
+  min-width: 2px;
+  height: 100%;
+  background: var(--rarity-color);
+}
+
+.member-composition-bar > i.is-archived {
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--rarity-color) 55%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+.member-composition .is-common { --rarity-color: var(--rarity-common-accent); }
+.member-composition .is-rare { --rarity-color: var(--rarity-rare-accent); }
+.member-composition .is-ultra-rare { --rarity-color: var(--rarity-ultra-rare-accent); }
+.member-composition .is-legendary { --rarity-color: var(--rarity-legendary-accent); }
+
+.member-composition-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 6px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.member-composition-legend > span::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--rarity-color);
+}
+
+.member-composition-legend b {
+  color: var(--ink);
+  font-weight: 600;
+}

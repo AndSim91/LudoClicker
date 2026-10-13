@@ -498,8 +498,8 @@ export function MemberList({
               ? <><strong>{filteredMembers.length.toLocaleString("it-IT")}</strong> di {members.length.toLocaleString("it-IT")} iscritti</>
               : <><strong>{members.length.toLocaleString("it-IT")}</strong> iscritti</>}
             {groupedMembers > 0 ? (
-              <span title={`Oltre i ${GAME_CONFIG.materialEnrolledMembersLimit.toLocaleString("it-IT")} iscritti i meno forti restano senza scheda per non rallentare il gioco: hanno già le loro Forme e la ricevono al prossimo corso.`}>
-                {" "}+ {groupedMembers.toLocaleString("it-IT")} senza scheda
+              <span title={`Per non rallentare il gioco, oltre i ${GAME_CONFIG.materialEnrolledMembersLimit.toLocaleString("it-IT")} iscritti i Comuni meno forti finiscono in archivio: frequentano, pagano e seguono i corsi come tutti, ma senza scheda. Al prossimo corso ne ricevono una.`}>
+                {" "}+ {groupedMembers.toLocaleString("it-IT")} in archivio
               </span>
             ) : null}
           </>

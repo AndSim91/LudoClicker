@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { GAME_CONFIG } from "../../game/config";
+import { getGroupedMemberCount } from "../../game/memberGroups";
 import { useGameStateSlices } from "../../game/GameStateContext";
 import type {
   CollaboratorAssignment,
@@ -15,6 +16,7 @@ import { ShiftControl } from "./ShiftControl";
 import { CollaboratorList } from "./CollaboratorList";
 import { CollaboratorSectorView } from "./CollaboratorSectorView";
 import { GymScene } from "./GymScene";
+import { MemberCompositionBar } from "./MemberCompositionBar";
 import { MemberList } from "./MemberList";
 import { RarityOverview } from "./RarityOverview";
 
@@ -66,6 +68,7 @@ export function PeopleView({
       "collaboratorManagement",
       "collaborators",
       "contacts",
+      "memberGroups",
       "statistics",
       "unlocks",
     ],
@@ -175,8 +178,9 @@ export function PeopleView({
       <section className="people-section">
         <div className="people-section-heading is-inline-count">
           <h2>Iscritti attivi</h2>
-          <span>{members.length}</span>
+          <span>{(members.length + getGroupedMemberCount(state)).toLocaleString("it-IT")}</span>
         </div>
+        <MemberCompositionBar members={members} groups={state.memberGroups ?? []} />
         <MemberList
           state={stateOverride}
           collaboratorsByContactId={collaboratorsByContactId}
