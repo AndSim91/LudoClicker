@@ -47,17 +47,17 @@ function readySchool(base: GameState = createInitialState(1_000, "Tester")): Gam
   };
 }
 
-it("earns 1 point for the Accademico, 2 for the National, √(Fama/128), +2 for each kind of tournament won", () => {
+it("earns 3 points for the Accademico, 2 for the National, √(Fama/106), +2 for each kind of tournament won", () => {
   const ready = readySchool();
-  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 6, nationalWin: true, points: 9, rentPerPoint: 50 });
+  expect(getPrestigeReputationPreview(ready)).toMatchObject({ famePoints: 6, nationalWin: true, points: 11, rentPerPoint: 50 });
   // Founding as soon as possible still earns the point of the Accademico title.
   const academyOnly = { ...ready, tournaments: { ...ready.tournaments, nationalTitlesCurrentSchool: 0 } };
-  expect(getPrestigeReputationPreview({ ...academyOnly, school: { ...ready.school, fame: 127 } }).points).toBe(1);
-  expect(getPrestigeReputationPreview(academyOnly)).toMatchObject({ nationalWin: false, points: 7 });
-  // The n-th point of the Fama arrives at 128 × n² (128, 512, 1.152 …): 1,25 × √(Fama/200).
-  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 128 } }).famePoints).toBe(1);
-  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 1_152 } }).famePoints).toBe(3);
-  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 10_000 } }).famePoints).toBe(8);
+  expect(getPrestigeReputationPreview({ ...academyOnly, school: { ...ready.school, fame: 105 } }).points).toBe(3);
+  expect(getPrestigeReputationPreview(academyOnly)).toMatchObject({ nationalWin: false, points: 9 });
+  // The n-th point of the Fama arrives at 106 × n² (106, 424, 954 …): ≈ 1,375 × √(Fama/200).
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 106 } }).famePoints).toBe(1);
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 954 } }).famePoints).toBe(3);
+  expect(getPrestigeReputationPreview({ ...ready, school: { ...ready.school, fame: 10_000 } }).famePoints).toBe(9);
 
   const win = { schoolYear: 2, teamId: "home", schoolName: ready.school.name, athleteNames: ["A", "B"] as [string, string], superba: true };
   const decorated: GameState = {
@@ -69,13 +69,13 @@ it("earns 1 point for the Accademico, 2 for the National, √(Fama/128), +2 for 
       reptile: { ...ready.tournaments.reptile, hall: [win, win] },
     },
   };
-  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 15, reptileWin: "superba" });
+  expect(getPrestigeReputationPreview(decorated)).toMatchObject({ points: 17, reptileWin: "superba" });
 });
 
 it("spends points for good: permanent upgrades stay, rent points only lock this school's rent", () => {
   const first = foundSchool(readySchool(), details, 2_000, { upgrades: { writing: 2 }, rent: 4 });
-  // 9 points earned (1 + 2 + √(5.000/128)), 6 spent.
-  expect(first.network.reputation).toBe(3);
+  // 11 points earned (3 + 2 + √(5.000/106)), 6 spent.
+  expect(first.network.reputation).toBe(5);
   expect(first.network.reputationUpgrades?.writing).toBe(2);
   expect(getReputationMultiplier(first, "writing")).toBeCloseTo(1.4);
   expect(first.player.writingPower).toBeCloseTo(1.4);
@@ -95,12 +95,12 @@ it("spends points for good: permanent upgrades stay, rent points only lock this 
   // No rent points: no new rent, the old ones stay.
   const third = foundSchool(readySchool(second), details, 4_000);
   expect(getMonthlyNetworkRent(third)).toBe(450);
-  expect(third.network.reputation).toBe(16);
+  expect(third.network.reputation).toBe(22);
 });
 
 it("refuses the foundation when the spending is not covered or exceeds a cap", () => {
   const ready = readySchool();
-  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 10 })).toBe(ready);
+  expect(foundSchool(ready, details, 2_000, { upgrades: {}, rent: 12 })).toBe(ready);
   expect(foundSchool(ready, details, 2_000, { upgrades: { training: -1 }, rent: 0 })).toBe(ready);
   const nearlyMaxed = {
     ...ready,

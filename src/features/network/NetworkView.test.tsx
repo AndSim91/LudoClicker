@@ -8,10 +8,10 @@ afterEach(() => cleanup());
 
 const ready = (): GameState => {
   const initial = createInitialState(1_000);
-  // An Accademico title (1 point) and 128 Fama (1 point): 2 points to spend.
+  // An Accademico title (3 points) and no Fama: 3 points to spend.
   return {
     ...initial,
-    school: { ...initial.school, fame: 128 },
+    school: { ...initial.school, fame: 0 },
     tournaments: { ...initial.tournaments, academyTitlesCurrentSchool: 1 },
   };
 };
@@ -37,10 +37,11 @@ it("founds a new school from one page: name and city, old points white and fixed
   // The 3 points spent in an earlier school show, white, and cannot be taken back.
   expect(screen.getByLabelText("Genetica: 3")).toHaveTextContent(/^3$/);
   expect(screen.getByRole("button", { name: "Togli un punto da Genetica" })).toBeDisabled();
-  // Only the 2 points of the Accademico and the Fama: each + turns gold, then the others stop.
+  // Only the 3 points of the Accademico: each + turns gold, then the others stop.
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" }));
   expect(screen.getByLabelText("Genetica: 4")).toHaveTextContent("3+1");
   expect(screen.getByText("+80%", { selector: ".foundation-now" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" }));
   fireEvent.click(screen.getByRole("button", { name: "Aggiungi un punto a Email/Social" }));
   expect(screen.getByRole("button", { name: "Aggiungi un punto a Genetica" })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Togli un punto da Genetica" }));
@@ -54,7 +55,7 @@ it("founds a new school from one page: name and city, old points white and fixed
   fireEvent.click(screen.getByRole("button", { name: "Fonda Onde di Levante" }));
   expect(onFoundSchool).toHaveBeenCalledWith(
     { name: "Onde di Levante", city: "La Spezia" },
-    expect.objectContaining({ rent: 0, upgrades: expect.objectContaining({ genetics: 1, writing: 1 }) }),
+    expect.objectContaining({ rent: 0, upgrades: expect.objectContaining({ genetics: 1, writing: 2 }) }),
   );
   expect(onFoundationOpenChange).toHaveBeenLastCalledWith(false);
 });

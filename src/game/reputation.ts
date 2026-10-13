@@ -4,9 +4,9 @@ import type { FoundedSchool, GameState } from "./types";
 
 /*
  * Reputazione di rete (6.19): the only value that travels from a school to the
- * next one. The prestige earns 1 point for the Accademico title that unlocked it,
+ * next one. The prestige earns 3 points for the Accademico title that unlocked it,
  * 2 for a national title,
- * √(Fama / 128) points, +2 each for the Champion's Arena, the Reptile
+ * √(Fama / 106) points, +2 each for the Champion's Arena, the Reptile
  * (or the Superba it became) and the Chronicles won by the school left behind. Points are spent at the foundation, for good:
  * - six permanent upgrades, +20% of their base value per point, up to 50 points;
  * - the network rent, which is consumed: each point locks 10% of the rent value
