@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { BoutSide } from "../arena/boutChoreography";
 import { GymLayer } from "./GymLayers";
 import type { GymCard, GymScore } from "./gymMatch";
+import { JudgeFigure } from "./JudgeFigure";
 import { judgeChair, judgeShape, type JudgeKind, type JudgePose } from "./judgeShape";
 
 /** A card being raised: the id restarts the animation for the next one. */
@@ -18,10 +19,24 @@ const CARD_FILL: Record<GymCard, string> = { style: "url(#gym-checker)", white: 
  * in the Order's blue T-shirt stands and raises the white or the yellow card; a
  * card exists only while it is raised. The figure comes from judgeShape.ts.
  */
-function GymJudge({ x, kind, pose, raised }: { x: number; kind: JudgeKind; pose: JudgePose; raised?: RaisedCard }) {
+function GymJudge({
+  x,
+  kind,
+  pose,
+  reading = false,
+  raised,
+}: {
+  x: number;
+  kind: JudgeKind;
+  pose: JudgePose;
+  reading?: boolean;
+  raised?: RaisedCard;
+}) {
   // Both face the Arena: the phone judge is on the left, the other on the right.
   const f = kind === "phone" ? 1 : -1;
-  const shape = judgeShape(kind, pose, x, f);
+  // A raised Style card wins: the judge reads Servizio again once it is down.
+  const reads = reading && !raised;
+  const shape = judgeShape(kind, pose, x, f, reads);
   const [sx, sy] = shape.shoulder;
   return (
     <GymLayer box={{ x: x - 26, y: 66, w: 52, h: 88 }} className={`gym-judge is-${kind}`}>
@@ -35,17 +50,19 @@ function GymJudge({ x, kind, pose, raised }: { x: number; kind: JudgeKind; pose:
       {kind === "phone" ? <path className="gym-judge-chair" d={judgeChair(x, f)} /> : null}
       {/* The key replays the settle animation when the judge sits down or gets up. */}
       <g key={pose} className="gym-judge-pose">
-        <circle className="gym-judge-ink" cx={shape.head[0]} cy={shape.head[1]} r={6.5} />
-        <path className="gym-judge-limb" d={shape.body} />
-        {kind === "shirt" ? (
-          <>
-            <path className="gym-judge-shirt" d={`M${x - 6} 106 H${x + 6} L${x + 12} 113 L${x + 8} 116 L${x + 6} 114 V128 H${x - 6} V114 L${x - 8} 116 L${x - 12} 113 Z`} />
-            <path className="gym-judge-mark" d={`M${x + 2} 110 V115`} />
-          </>
-        ) : null}
-        {shape.arms ? <path className="gym-judge-limb" d={shape.arms} /> : null}
-        {shape.phone ? <rect className="gym-judge-phone" x={shape.phone[0]} y={shape.phone[1]} width={6} height={9} rx={1} /> : null}
-        {raised ? null : <path className="gym-judge-limb" d={shape.cardArm} />}
+        <JudgeFigure
+          shape={shape}
+          prefix="gym-judge"
+          f={f}
+          reading={reads}
+          cardArm={!raised}
+          wear={kind === "shirt" ? (
+            <>
+              <path className="gym-judge-shirt" d={`M${x - 6} 106 H${x + 6} L${x + 12} 113 L${x + 8} 116 L${x + 6} 114 V128 H${x - 6} V114 L${x - 8} 116 L${x - 12} 113 Z`} />
+              <path className="gym-judge-mark" d={`M${x + 2} 110 V115`} />
+            </>
+          ) : null}
+        />
       </g>
       {raised ? (
         <g
@@ -61,10 +78,19 @@ function GymJudge({ x, kind, pose, raised }: { x: number; kind: JudgeKind; pose:
   );
 }
 
-export function GymReferees({ card, styleJudgeUp = false }: { card?: RaisedCard; styleJudgeUp?: boolean }) {
+export function GymReferees({
+  card,
+  styleJudgeUp = false,
+  reading = false,
+}: {
+  card?: RaisedCard;
+  styleJudgeUp?: boolean;
+  /** The Style judge is writing on Servizio after a point. */
+  reading?: boolean;
+}) {
   return (
     <>
-      <GymJudge x={100} kind="phone" pose={styleJudgeUp ? "standing" : "seated"} raised={card?.card === "style" ? card : undefined} />
+      <GymJudge x={100} kind="phone" pose={styleJudgeUp ? "standing" : "seated"} reading={reading} raised={card?.card === "style" ? card : undefined} />
       <GymJudge x={550} kind="shirt" pose="standing" raised={card && card.card !== "style" ? card : undefined} />
     </>
   );

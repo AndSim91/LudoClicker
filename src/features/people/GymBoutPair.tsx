@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { BoutPair } from "../arena/BoutPair";
 import { applyBoutEvent, planCutBout, startBoutView, type BoutSide, type BoutView } from "../arena/boutChoreography";
 import { GymLayer } from "./GymLayers";
 import { GymActor } from "./GymPair";
 import { GYM_DISARM_CHANCE } from "./gymMatch";
-import { canSpar, nextIdleMs, rollsBout } from "./gymSparring";
+import { CENTRAL_PACE, canSpar, nextIdleMs, rollsBout, type RackHold } from "./gymSparring";
 
 /**
  * The central pair of the gym (06/10): it breathes like the others, but its
@@ -18,12 +18,19 @@ export function GymBoutPair({
   rightX,
   sabers,
   onPoint,
+  hold,
+  away = [false, false],
 }: {
   leftX: number;
   rightX: number;
   sabers: [string, string];
   onPoint: (side: BoutSide) => void;
+  /** Shared with the scene: whether one athlete is at the rack, whether the pair spars. */
+  hold?: RefObject<RackHold>;
+  /** Left and right athlete at the rack (concept R1). */
+  away?: [boolean, boolean];
 }) {
+
   const [view, setView] = useState<BoutView | null>(null);
   const pointRef = useRef(onPoint);
   useEffect(() => {
@@ -31,15 +38,17 @@ export function GymBoutPair({
   }, [onPoint]);
 
   useEffect(() => {
+    const rack = hold?.current; // the scene's object: same one for the whole effect
     const stage = { left: leftX, right: rightX };
     let timers: number[] = [];
     const later = (ms: number, next: () => void) => timers.push(window.setTimeout(next, ms));
-    const idle = () => later(nextIdleMs(Math.random), () => {
+    const idle = () => later(nextIdleMs(Math.random, CENTRAL_PACE), () => {
       timers = []; // everything scheduled before has fired
-      if (!canSpar() || !rollsBout(Math.random)) {
+      if (!canSpar() || rack?.away || !rollsBout(Math.random, CENTRAL_PACE)) {
         idle();
         return;
       }
+      if (rack) rack.busy = true;
       const bout = planCutBout(stage, Math.random, GYM_DISARM_CHANCE);
       setView(startBoutView());
       for (const event of bout.events) {
@@ -49,19 +58,23 @@ export function GymBoutPair({
         });
       }
       later(bout.durationMs, () => {
+        if (rack) rack.busy = false;
         setView(null);
         idle();
       });
     });
     idle();
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [leftX, rightX]);
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      if (rack) rack.busy = false;
+    };
+  }, [leftX, rightX, hold]);
 
   if (!view) {
     return (
       <div className="gym-pair">
-        <GymActor x={leftX} facing={1} saber={sabers[0]} delay={0} />
-        <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={1.7} />
+        {away[0] ? null : <GymActor x={leftX} facing={1} saber={sabers[0]} delay={0} />}
+        {away[1] ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={1.7} />}
       </div>
     );
   }

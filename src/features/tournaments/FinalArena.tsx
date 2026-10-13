@@ -4,6 +4,12 @@ import type { TournamentLevel } from "../../game/types";
 import type { DuelSide } from "./finalDuel";
 import { FinalArenaBackdrop } from "./FinalArenaBackdrop";
 import { DUEL_LEFT, DUEL_RIGHT, type DuelView } from "./finalDuelTimeline";
+import { JudgeFigure } from "../people/JudgeFigure";
+import { judgeShape } from "../people/judgeShape";
+import { useBriefFlag, useJudgeReading } from "../people/useJudgeReading";
+
+/** How long the chequered card stays up (the fd-card animation). */
+const CARD_MS = 1_600;
 
 const STAGE = { left: DUEL_LEFT, right: DUEL_RIGHT };
 
@@ -13,17 +19,23 @@ const JUDGE_SPOTS: Record<number, [number, number][]> = {
   4: [[96, 216], [196, 198], [444, 198], [544, 216]],
 };
 
-/** A Style judge with Servizio in hand; the chequered card goes up on a penalty. */
-function Judge({ x, y, carding, checker }: { x: number; y: number; carding: number; checker: string }) {
+/**
+ * A Style judge with Servizio in hand: the game's judge (judgeShape.ts), turned
+ * towards the Arena. After every point he writes on the phone (concept J3); the
+ * chequered card goes up on a penalty. Drawn in gym units, feet on the spot.
+ */
+function Judge({ x, y, carding, checker, reading }: { x: number; y: number; carding: number; checker: string; reading: boolean }) {
+  const f = x < 320 ? 1 : -1;
+  const cardUp = useBriefFlag(carding, 0, CARD_MS);
+  const shape = judgeShape("phone", "standing", 0, f, reading && !cardUp);
+  const [sx, sy] = shape.shoulder;
   return (
-    <g className="fd-judge" transform={`translate(${x} ${y}) scale(.8)`}>
-      <circle cx={0} cy={-60} r={6} />
-      <path d="M0 -53 L0 -32 M0 -32 L-6 -14 M0 -32 L7 -14 M0 -48 L8 -44" />
-      <rect className="fd-judge-phone" x={7} y={-50} width={6} height={9} rx={1.5} />
-      {carding > 0 ? (
+    <g className="fd-judge" transform={`translate(${x} ${y}) scale(.8) translate(0 -164)`}>
+      <JudgeFigure shape={shape} prefix="fd-judge" f={f} reading={reading && !cardUp} cardArm={!cardUp} />
+      {cardUp ? (
         <g key={carding} className="fd-judge-card">
-          <rect x={-16} y={-100} width={14} height={19} rx={1.5} fill={`url(#${checker})`} stroke="#fbf1dc" strokeWidth={1} />
-          <path d="M-6 -82 L-2 -50" />
+          <path d={`M${sx} ${sy} L${sx + 12 * f} ${sy - 14} L${sx + 14 * f} ${sy - 26}`} />
+          <rect x={sx + (f > 0 ? 7 : -21)} y={sy - 45} width={14} height={19} rx={1.5} fill={`url(#${checker})`} stroke="#fbf1dc" strokeWidth={1} />
         </g>
       ) : null}
     </g>
@@ -43,6 +55,7 @@ export function FinalArena({
   sabers: Record<DuelSide, string>;
 }) {
   const checker = `fd-checker-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const reading = useJudgeReading(view.history.length);
   return (
     <svg className="fd-arena" viewBox="0 0 640 300" aria-hidden="true">
       <defs>
@@ -54,7 +67,7 @@ export function FinalArena({
       </defs>
       <FinalArenaBackdrop level={level} />
       {(JUDGE_SPOTS[judges] ?? JUDGE_SPOTS[2]).map(([x, y]) => (
-        <Judge key={x} x={x} y={y} carding={view.carding} checker={checker} />
+        <Judge key={x} x={x} y={y} carding={view.carding} checker={checker} reading={reading} />
       ))}
       <g
         className={view.fighting ? "gym-pair is-sparring" : "gym-pair"}

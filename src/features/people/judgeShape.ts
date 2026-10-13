@@ -25,10 +25,26 @@ export interface JudgeShape {
 export const judgeChair = (x: number, f: 1 | -1) =>
   `M${x - 12 * f} 136 H${x + 6 * f} M${x - 11 * f} 136 V115 M${x - 10 * f} 136 V150 M${x + 4 * f} 136 V150`;
 
-export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -1): JudgeShape {
+/**
+ * `reading` (13/10, concept J3 «Due pollici»): right after a point the Style
+ * judge holds Servizio in both hands at the chest, head bowed, and presses «+».
+ * Only the phone judge has it; both arms are in `arms`, so `cardArm` is empty.
+ */
+export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -1, reading = false): JudgeShape {
+  const reads = reading && kind === "phone";
   if (pose === "seated") {
     // Sits a little behind his spot, knees towards the Arena.
     const hx = x - 3 * f;
+    if (reads) {
+      return {
+        head: [hx + 2.5 * f, 109.5],
+        body: `M${hx} 113 L${hx} 133 L${x + 10 * f} 133 L${x + 11 * f} 150`,
+        arms: `M${hx} 118 L${hx + 6 * f} 125 L${hx + 10 * f} 117 M${hx} 118 L${hx + 4 * f} 127 L${hx + 9 * f} 121`,
+        cardArm: "",
+        phone: [hx + (f > 0 ? 8 : -14), 110],
+        shoulder: [hx, 118],
+      };
+    }
     return {
       head: [hx, 106],
       body: `M${hx} 113 L${hx} 133 L${x + 10 * f} 133 L${x + 11 * f} 150`,
@@ -36,6 +52,16 @@ export function judgeShape(kind: JudgeKind, pose: JudgePose, x: number, f: 1 | -
       cardArm: `M${hx} 118 L${hx + 5 * f} 127 L${hx + 9 * f} 131`,
       phone: kind === "phone" ? [hx + 10 * f, 115] : undefined,
       shoulder: [hx, 118],
+    };
+  }
+  if (reads) {
+    return {
+      head: [x + 2.5 * f, 103.5],
+      body: `M${x} 107 L${x} 128 M${x} 128 L${x - 7} 150 M${x} 128 L${x + 7} 150`,
+      arms: `M${x} 112 L${x + 6 * f} 119 L${x + 10 * f} 111 M${x} 112 L${x + 4 * f} 121 L${x + 9 * f} 115`,
+      cardArm: "",
+      phone: [x + (f > 0 ? 8 : -14), 104],
+      shoulder: [x, 112],
     };
   }
   if (kind === "phone") {

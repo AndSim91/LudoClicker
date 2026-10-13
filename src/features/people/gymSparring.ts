@@ -19,22 +19,40 @@ export interface GymExchange {
   clash: boolean;
 }
 
-// Idle 6-14 s, then a 30% roll: a pair spars roughly 10% of the time.
-const IDLE_MIN_MS = 6_000;
-const IDLE_SPAN_MS = 8_000;
-const BOUT_CHANCE = 0.3;
+/** How often a pair spars: a pause of idleMinMs + up to idleSpanMs, then a roll. */
+export interface SparPace {
+  idleMinMs: number;
+  idleSpanMs: number;
+  chance: number;
+}
+
+// 13/10: between concepts A2 «Moderato» and A1 «Vivace», a little livelier than A2.
+// The central pair (the real bouts, with the cut) spars a little over 40% of the
+// time, the side pairs (soft exchanges) about a fifth.
+export const CENTRAL_PACE: SparPace = { idleMinMs: 2_500, idleSpanMs: 3_000, chance: 0.65 };
+export const SIDE_PACE: SparPace = { idleMinMs: 4_000, idleSpanMs: 5_000, chance: 0.4 };
 const BOUT_MIN_MS = 2_500;
 const BOUT_SPAN_MS = 2_500;
 
 const between = (random: Random, min: number, max: number) => min + random() * (max - min);
 
 /** How long a pair waits before rolling for a bout. */
-export function nextIdleMs(random: Random): number {
-  return IDLE_MIN_MS + random() * IDLE_SPAN_MS;
+export function nextIdleMs(random: Random, pace: SparPace): number {
+  return pace.idleMinMs + random() * pace.idleSpanMs;
 }
 
-export function rollsBout(random: Random): boolean {
-  return random() < BOUT_CHANCE;
+export function rollsBout(random: Random, pace: SparPace): boolean {
+  return random() < pace.chance;
+}
+
+/**
+ * A pair and the rack swaps (13/10): the scene sets `away` while one of its
+ * athletes is at the rack (no bouts then); the pair keeps `busy` while it spars,
+ * so nobody leaves halfway through a bout.
+ */
+export interface RackHold {
+  away: boolean;
+  busy: boolean;
 }
 
 /** A bout of a few seconds: quick exchanges, random attacker, reach and rhythm. */
