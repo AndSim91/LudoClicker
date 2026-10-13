@@ -88,6 +88,16 @@ describe("Pianificazione delle Onde", () => {
     expect(confirmAnnualPlan(state, { courses: [], repair: false, swords: tooMany }, 0)).toBe(state);
   });
 
+  it("buys the swords on debt even when the Fondi carry fractions of a cent", () => {
+    for (const fraction of [0.001, 0.004, 0.0049, 0.3333333, 0.6666667]) {
+      const state = august(100 + fraction, { "cash-advance": 1 });
+      const confirmed = confirmAnnualPlan(state, { courses: [], repair: false, swords: 1 }, 0);
+      expect(confirmed.annual?.planningOpen).toBe(false);
+      expect(confirmed.equipment.totalSwords).toBe(state.equipment.totalSwords + 1);
+      expect(confirmed.annual?.report?.plan?.swordsBought).toBe(1);
+    }
+  });
+
   it("buys upgrades with the Fondi only, and they already count in the plan", () => {
     const state = august(5_000, { "official-supplier": 0 });
     const plan = { courses: [], repair: false, swords: 1, upgrades: ["official-supplier" as const] };

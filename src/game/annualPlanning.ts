@@ -216,10 +216,14 @@ export function confirmAnnualPlan(state: GameState, plan: AnnualPlan, now: numbe
   if (shortfall > getDebtCapacity(state) + 0.01) return state;
   if (getPlanUpgradeCost(simulated) > Math.max(0, euros) + 0.005) return state;
 
-  const funded = { ...state, school: { ...state.school, euros: euros + shortfall } };
+  // The real run gets at least what the simulation spent, plus a cent: Fondi with
+  // fractions of a cent made «Fondi + shortfall» fall just short and the purchase
+  // was skipped while the plan still closed (Andrea, 13/10). The cost is counted
+  // from the real Fondi, so the extra cent is never spent.
+  const funded = { ...state, school: { ...state.school, euros: Math.max(euros, simulated.cost) + 0.01 } };
   const applied = applyPlan(funded, plan, now);
   const left = roundCurrency(euros - applied.cost);
-  const borrowed = Math.max(0, -left);
+  const borrowed = roundCurrency(Math.max(0, -left));
   let next: GameState = {
     ...applied.state,
     school: { ...applied.state.school, euros: borrowed > 0 ? Math.min(0, euros) : left },
