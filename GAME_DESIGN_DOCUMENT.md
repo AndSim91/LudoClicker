@@ -3173,8 +3173,9 @@ Un'unica pagina, in quest'ordine:
   colonna Prossimo passo, chi ha usato tutti i corsi dell'anno mostra «Corsi
   dell'anno 1/1» (o 2/2, 3/3) con «riparte a settembre» (C2, 13/10). Nella
   scheda Istruttori, quando nessun allievo è in corso perché tutti, con e senza
-  scheda, hanno già usato i corsi dell'anno, una fascia «Pausa didattica fino a
-  settembre» sta sopra la mappa (Onde, mappa attenuata) o in cima alla tabella
+  scheda, hanno già usato i corsi dell'anno, una fascia «Corsi dell'anno
+  completati» (prima «Pausa didattica fino a settembre», che a marzo sembrava
+  la pausa estiva) sta sopra la mappa (Onde, mappa attenuata) o in cima alla tabella
   (Outlook), senza cambiare l'altezza della scheda (B2, 13/10;
   `isAnnualTeachingExhausted`).
   In Modalità Onde (06/10) le Forme di ogni iscritto sono la mappa del percorso

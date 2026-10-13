@@ -447,8 +447,8 @@ function InstructorSectorCard({
   );
   const pauseBand = annualPause ? (
     <p className="instructor-annual-pause" role="status">
-      <b>Pausa didattica fino a settembre.</b> Tutti gli iscritti hanno già seguito il loro
-      corso di quest'anno. Gli Istruttori riprendono a settembre, dopo la pausa estiva.
+      <b>Corsi dell'anno completati.</b> Tutti gli iscritti hanno già seguito il loro corso
+      di quest'anno: gli Istruttori riprendono a settembre, con il nuovo anno di corsi.
     </p>
   ) : null;
 
