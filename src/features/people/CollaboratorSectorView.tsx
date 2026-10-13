@@ -61,7 +61,7 @@ const STANDARD_ROLES: readonly CollaboratorMasteryRole[] = [
 ];
 const ignoreAutomaticTeachingToggle = () => undefined;
 // The Redazione before it becomes Social (15 collaborators).
-const EDITORIAL_DESCRIPTION = "Scrivono le email della scuola. Le virgole sono un dettaglio.";
+const EDITORIAL_DESCRIPTION = "Scrivono le email della scuola. La grammatica è facoltativa.";
 
 const ROLE_PRESENTATION: Record<
   CollaboratorMasteryRole,
@@ -69,23 +69,23 @@ const ROLE_PRESENTATION: Record<
 > = {
   writing: {
     icon: "megaphone",
-    description: "Post, video e follower. Qualcuno deve pur rispondere ai commenti.",
+    description: "Post, video e follower. Qualcuno prima o poi risponderà anche ai PM.",
   },
   events: {
     icon: "calendar",
-    description: "Portano la scuola fuori dalla palestra e tornano con i contatti.",
+    description: "Portano le spade fuori dalla palestra e a volte tornano con gente nuova.",
   },
   equipment: {
     icon: "wrench",
-    description: "Riparano le spade. Ce n'è sempre almeno una rotta.",
+    description: "Riparano le spade. O almeno ci provano.",
   },
   instructor: {
     icon: "people",
-    description: "Insegnano le Forme e preparano gli agonisti. Con pazienza infinita.",
+    description: "Insegnano le Forme e preparano gli agonisti. Con infinita pazienza.",
   },
   gadget: {
     icon: "gift",
-    description: "Inventano, collaudano e vendono i Gadget della scuola.",
+    description: "Inventano, collaudano, fanno esplodere e vendono i Gadget della scuola.",
   },
 };
 
