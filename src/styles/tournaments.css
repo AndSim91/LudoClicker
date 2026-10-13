@@ -3508,11 +3508,11 @@
   content: "";
 }
 
-/* The others fade a little, they do not disappear (Andrea: «nascondendo leggermente meno»). */
+/* The others fade a little, they do not disappear (Andrea: «nascondendo leggermente meno», poi «un 10% in più»). */
 .is-spotlight .group-table tbody tr:not(.is-owned),
 .is-spotlight .bracket-match > span:not(.is-owned),
 .is-spotlight .results-podium-list > div > span:not(.is-owned) {
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 .results-context > .results-spotlight {
