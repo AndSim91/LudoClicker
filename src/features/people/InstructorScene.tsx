@@ -303,7 +303,8 @@ export const InstructorScene = memo(function InstructorScene({
   );
   const tunic = hasTechnician ? TUNIC.technician : TUNIC.instructor;
   const teaching = plan.students.length > 0;
-  const active = onScreen && teaching && !motionReduced();
+  // The round does not follow the courses (Andrea, 13/10): only the screen and «Riduci animazioni».
+  const active = onScreen && !motionReduced();
 
   // Correction round (13/10): every 60–90 s the instructor walks between the rows and back.
   const [phase, setPhase] = useState<RoundPhase>("lead");
@@ -320,10 +321,20 @@ export const InstructorScene = memo(function InstructorScene({
   }, [plan]);
   useEffect(() => {
     if (!active || phase !== "lead") return undefined;
-    const timer = window.setTimeout(() => {
-      setRound({ spot: planRef.current.spot, stops: planRef.current.stops });
-      setPhase("out");
-    }, nextRoundDelayMs());
+    let timer = 0;
+    const arm = () => {
+      timer = window.setTimeout(() => {
+        const current = planRef.current;
+        // Nobody in the rows right now: the next round, not a restart of the countdown.
+        if (current.stops.length === 0) {
+          arm();
+          return;
+        }
+        setRound({ spot: current.spot, stops: current.stops });
+        setPhase("out");
+      }, nextRoundDelayMs());
+    };
+    arm();
     return () => window.clearTimeout(timer);
   }, [active, phase]);
   // Layout effect: the walk back starts before the next paint, so the walker never flashes at its spot.
@@ -368,9 +379,10 @@ export const InstructorScene = memo(function InstructorScene({
       <Gym width={width} stage={plan.stage} />
       {plan.stage < 2 ? <Bulb width={width} /> : null}
       {back.map((student, index) => <Pupil key={`b${index}`} student={student} level={plan.level} />)}
-      {hasInstructors && !teaching ? <Scroller tunic={tunic} /> : null}
+      {hasInstructors && !teaching && shownPhase === "lead" ? <Scroller tunic={tunic} /> : null}
       {teaching && shownPhase === "lead" ? <Instructor x={plan.spot} tunic={tunic} level={plan.level} /> : null}
-      {teaching && shownPhase !== "lead" ? (
+      {/* A round already started ends even if the courses empty the rows meanwhile. */}
+      {shownPhase !== "lead" ? (
         <div ref={walkerRef} className="iscene-walker">
           <Walker x={round.spot} f={shownPhase === "out" ? 1 : -1} tunic={tunic} />
         </div>
