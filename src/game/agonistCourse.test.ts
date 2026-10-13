@@ -457,7 +457,8 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     const initial = arenaState(1);
     const withoutQualifiedInstructor = {
       ...initial,
-      school: { ...initial.school, euros: 5_000 },
+      // April: before it, a learnable Forma 1 keeps the Corso Agonisti waiting.
+      school: { ...initial.school, euros: 5_000, currentMonth: 4 },
       contacts: [{ ...initial.contacts[0], forms: [] }],
     };
 

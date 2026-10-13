@@ -505,7 +505,11 @@ describe("collaborator aggregate management", () => {
       forms: ["form-1"] as Collaborator["forms"],
       instructorForms: ["form-1"] as Collaborator["instructorForms"],
     };
-    const equipmentCollaborator = collaborator(2, "equipment");
+    // Already past Forma 1: collaborators come first, it must not take the member's course.
+    const equipmentCollaborator = {
+      ...collaborator(2, "equipment"),
+      forms: ["form-1"] as Collaborator["forms"],
+    };
     const commonState: GameState = {
       ...initial,
       // September: a January enrollment would be immune and lose the course to the collaborator.

@@ -49,6 +49,8 @@ function teachingState(): GameState {
       ...initial.school,
       activeMembers: 2,
       euros: 10_000,
+      // April: from here the Corso Agonisti is open to who still has a Forma to learn.
+      currentMonth: 4,
     },
     unlocks: {
       ...initial.unlocks,
@@ -153,6 +155,20 @@ describe("automatic teaching rules", () => {
 
     expect(training?.formId).toBe("agonist-course");
     expect(training?.instructorId).toBe(unrelatedCertificate.id);
+  });
+
+  it("keeps the Corso Agonisti for April when a Forma can still be learned this year", () => {
+    const initial = teachingState();
+    const student = branchStudent(initial.contacts[0], "staff-student");
+    const unrelatedCertificate = instructor("long-only", "legendary", ["form-3-long"]);
+    const state: GameState = {
+      ...initial,
+      school: { ...initial.school, activeMembers: 1, currentMonth: 3 },
+      contacts: [student],
+      collaborators: [unrelatedCertificate],
+    };
+
+    expect(gameReducer(state, { type: "TICK", now: 2_000 }).contacts[0].training).toBeUndefined();
   });
 
   it("automatically teaches a non-preferred branch at Master of none level five", () => {

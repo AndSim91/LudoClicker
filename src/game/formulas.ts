@@ -113,6 +113,33 @@ export function getWritingPower(state: GameState) {
 
 const ANNUAL_DEPARTURE_CHANCE_BY_FORM = [0.8, 0.65, 0.5, 0.35, 0.25, 0.15, 0.1, 0.05] as const;
 
+function getHighestFormLevel(forms: FormId[]): number {
+  return forms.reduce((highest, formId) => {
+    const match = /^form-(\d)/.exec(formId);
+    return match ? Math.max(highest, Number(match[1])) : highest;
+  }, 0);
+}
+
+function getDepartureChanceAtFormLevel(
+  level: number,
+  rarity: PersonRarity,
+  foundedSchools: number,
+): number {
+  if (level >= 7) {
+    return Math.round(clamp(
+      GAME_CONFIG.formSevenDepartureChance[rarity] +
+        Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool,
+      0,
+      1,
+    ) * 1_000) / 1_000;
+  }
+  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.max(0, level)];
+}
+
+function reduceDepartureChance(chance: number, riskReduction: number): number {
+  return riskReduction > 0 ? Math.round(chance * (1 - riskReduction) * 1_000) / 1_000 : chance;
+}
+
 export function getMemberAnnualDepartureChance(
   forms: FormId[],
   rarity: PersonRarity = "common",
@@ -121,23 +148,28 @@ export function getMemberAnnualDepartureChance(
   riskReduction = 0,
 ): number {
   if (rarity === "legendary") return 0;
-  if (riskReduction > 0) {
-    return Math.round(
-      getMemberAnnualDepartureChance(forms, rarity, foundedSchools) * (1 - riskReduction) * 1_000,
-    ) / 1_000;
-  }
+  return reduceDepartureChance(
+    getDepartureChanceAtFormLevel(getHighestFormLevel(forms), rarity, foundedSchools),
+    riskReduction,
+  );
+}
 
-  const highestForm = forms.reduce((highest, formId) => {
-    const match = /^form-(\d)/.exec(formId);
-    return match ? Math.max(highest, Number(match[1])) : highest;
-  }, 0);
-  if (highestForm >= 7) {
-    return Math.round(clamp(
-      GAME_CONFIG.formSevenDepartureChance[rarity] +
-        Math.max(0, foundedSchools) * GAME_CONFIG.departureChancePerFoundedSchool,
-      0,
-      1,
-    ) * 1_000) / 1_000;
-  }
-  return ANNUAL_DEPARTURE_CHANCE_BY_FORM[Math.min(7, highestForm)];
+/**
+ * Departure risk used only to order automatic teaching (decision of 13/10/2026):
+ * rarity counts as Forms missing, so rarer athletes rank as more at risk.
+ * `formsBack`: 1 Raro, 2 Ultra Raro, 3 Leggendario, 4 Leggendario Segreto
+ * (a Raro with Forma 6 counts as Forma 5: 15% instead of 10%).
+ */
+export function getTeachingPriorityDepartureChance(
+  forms: FormId[],
+  formsBack: number,
+  foundedSchools = 0,
+  riskReduction = 0,
+): number {
+  // Only Comuni can still be at level 7 here, so their Forma 7 chance applies.
+  const level = getHighestFormLevel(forms) - formsBack;
+  return reduceDepartureChance(
+    getDepartureChanceAtFormLevel(level, "common", foundedSchools),
+    riskReduction,
+  );
 }

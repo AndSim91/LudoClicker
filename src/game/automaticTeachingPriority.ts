@@ -42,11 +42,12 @@ export function compareAutomaticTeachingStudentPriority(
   left: AutomaticTeachingStudentPriority,
   right: AutomaticTeachingStudentPriority,
 ): number {
+  // 13/10/2026: collaborators before departure risk.
   return Number(right.isFavorite) - Number(left.isFavorite) ||
+    Number(right.isCollaborator) - Number(left.isCollaborator) ||
     right.departureRisk - left.departureRisk ||
     right.rarityPriority - left.rarityPriority ||
     left.formPriority - right.formPriority ||
-    Number(right.isCollaborator) - Number(left.isCollaborator) ||
     left.acquiredAt - right.acquiredAt ||
     left.originalOrder - right.originalOrder;
 }

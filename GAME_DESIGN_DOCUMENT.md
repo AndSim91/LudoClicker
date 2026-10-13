@@ -1830,7 +1830,10 @@ Regole:
   formativo libero e ha completato il proprio percorso oppure nessun Istruttore
   automatico possiede le qualifiche per le sue prossime Forme; un Collaboratore
   assegnato come Istruttore lo riceve soltanto se non ha più alcuna Forma
-  personale disponibile. Nessuno dei due corsi parte a luglio o agosto;
+  personale disponibile. Nessuno dei due corsi parte a luglio o agosto. Chi ha
+  ancora una Forma apprendibile nell'anno (anche senza un Istruttore libero in
+  quel momento) non riceve il corso automatico prima di **aprile**; chi non ha
+  Forme apprendibili può riceverlo da settembre;
 - l'Istruttore che segue Arena Tecnica o il Corso Agonisti deve essere una
   persona diversa dall'allievo: un Collaboratore assegnato come Istruttore può
   partecipare soltanto se un altro Istruttore disponibile lo segue;
@@ -1853,10 +1856,18 @@ Regole:
 - i costi di Arena Tecnica e Corso Agonisti sono importi diretti per atleta e
   non ricevono la riduzione applicata alle Forme insegnate;
 - l'automazione ordina gli allievi privilegiando, nell'ordine: gli atleti
-  preferiti, il rischio effettivo di abbandono annuale più alto, la rarità
-  (**Leggendario Segreto → Leggendario → Ultra Raro → Raro → Comune**), la
-  prossima formazione meno avanzata, i collaboratori e infine gli iscritti con
-  `acquiredAt` meno recente. A parità completa conserva l'ordine originale;
+  preferiti, i collaboratori, il rischio di abbandono annuale più alto, la
+  rarità (**Leggendario Segreto → Leggendario → Ultra Raro → Raro → Comune**),
+  la prossima formazione meno avanzata e infine gli iscritti con `acquiredAt`
+  meno recente. A parità completa conserva l'ordine originale. Il rischio usato
+  per quest'ordine conta la rarità come Forme mancanti: Raro −1 Forma, Ultra
+  Raro −2, Leggendario −3, Leggendario Segreto −4 (un Raro con Forma 6 conta
+  come Forma 5, 15% invece di 10%); i Leggendari non sono immuni in
+  quest'ordine, mentre le altre immunità azzerano il rischio. Il rischio reale
+  di abbandono non cambia;
+- dopo il Corso Y l'automazione cerca di insegnare Forma 3 in ogni ramo
+  disponibile, poi Forma 4 in ogni ramo e poi Forma 5; Forma 6 e Forma 7
+  vengono dopo le Forme dei rami ancora apprendibili;
 - quando il Percorso Segreto Corso X è stato scoperto e acquistato, Corso X
   precede ogni formazione successiva a
   Forma 1: chi ha completato Forma 1 ma non Corso X può ricevere soltanto Corso

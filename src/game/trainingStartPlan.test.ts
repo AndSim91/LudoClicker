@@ -128,7 +128,8 @@ describe("batched automatic teaching plan", () => {
           ["form-1", "course-x", "form-2", "course-y"],
           1_400,
         ),
-        formBranchPreferences: ["Spada Lunga" as const],
+        // No branch to learn: the Corso Agonisti is open from September.
+        formBranchPreferences: [],
       },
     ];
     const state: GameState = {

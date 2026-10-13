@@ -54,6 +54,11 @@ describe("automatic teaching student priority", () => {
       },
     },
     {
+      name: "collaborator before departure risk",
+      preferred: { ...BASE_PRIORITY, isCollaborator: true },
+      other: { ...BASE_PRIORITY, departureRisk: 0.8 },
+    },
+    {
       name: "departure risk before rarity",
       preferred: { ...BASE_PRIORITY, departureRisk: 0.2 },
       other: { ...BASE_PRIORITY, departureRisk: 0.1, rarityPriority: 4 },
@@ -64,9 +69,9 @@ describe("automatic teaching student priority", () => {
       other: { ...BASE_PRIORITY, rarityPriority: 3, formPriority: 0 },
     },
     {
-      name: "less advanced training before collaborator status",
-      preferred: { ...BASE_PRIORITY, formPriority: 0 },
-      other: { ...BASE_PRIORITY, formPriority: 1, isCollaborator: true },
+      name: "collaborator status before less advanced training",
+      preferred: { ...BASE_PRIORITY, formPriority: 1, isCollaborator: true },
+      other: { ...BASE_PRIORITY, formPriority: 0 },
     },
     {
       name: "collaborator before enrollment age",

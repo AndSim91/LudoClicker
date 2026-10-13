@@ -20,7 +20,7 @@ import {
   isAthleticPreparationUnlocked,
   isCourseXUnlocked,
 } from "../content/upgrades";
-import { getFormTrainingYear, isSummerBreak } from "./calendar";
+import { getCalendarMonth, getFormTrainingYear, isSummerBreak } from "./calendar";
 import { getCollaboratorFallbackProductivity } from "./collaboratorFallback";
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import {
@@ -35,12 +35,12 @@ import {
   getEquipmentAutomaticRepairUnitCost,
   repairEquipment,
 } from "./equipment";
-import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
+import { getAthleteImmunityStatus } from "./athleteImmunity";
 import {
   compareAutomaticTeachingStudentPriority,
   getAutomaticTeachingRarityPriority,
 } from "./automaticTeachingPriority";
-import { getMemberAnnualDepartureChance } from "./formulas";
+import { getTeachingPriorityDepartureChance } from "./formulas";
 import { getDepartureRiskReduction } from "../content/upgrades";
 import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import {
@@ -779,7 +779,8 @@ export function processAutomaticTeaching(
     student.id,
     getAutomaticFormCandidates(student, courseXUnlocked, unrestrictedFormBranches),
   ]));
-  const qualifiedFormCandidates = new Map(students.map((student) => [
+  // Forms the student could learn this year, with or without a free Istruttore now.
+  const learnableFormCandidates = new Map(students.map((student) => [
     student.id,
     (automaticFormCandidates.get(student.id) ?? []).filter((formId) => {
       const definition = getFormDefinition(formId);
@@ -793,10 +794,15 @@ export function processAutomaticTeaching(
           !unrestrictedFormBranches,
           annualTrainingLimit,
           courseXUnlocked,
-        ) &&
-        instructorsByForm.get(formId)?.some((instructor) => instructor.id !== student.id)
+        )
       );
     }),
+  ]));
+  const qualifiedFormCandidates = new Map(students.map((student) => [
+    student.id,
+    (learnableFormCandidates.get(student.id) ?? []).filter((formId) =>
+      instructorsByForm.get(formId)?.some((instructor) => instructor.id !== student.id)
+    ),
   ]));
   const instructorsWithAvailablePersonalForms = new Set(
     state.collaborators.filter((collaborator) => {
@@ -855,15 +861,19 @@ export function processAutomaticTeaching(
         !("acquiredAt" in student),
       )
       : undefined;
+    const rarityPriority = getAutomaticTeachingRarityPriority(student);
+    // 13/10/2026: rarity counts as Forms missing; being Leggendario is no immunity here.
     const departureRisk = contact &&
-      !isAthleteImmuneFromDeparture(immunity!, "annual-rollout")
-      ? getMemberAnnualDepartureChance(
-        student.forms,
-        contact.rarity,
-        state.network.schoolCount,
-        departureRiskReduction,
-      )
-      : 0;
+      immunity!.reasons.some((reason) => reason !== "legendary")
+      ? 0
+      : contact
+        ? getTeachingPriorityDepartureChance(
+          student.forms,
+          rarityPriority,
+          state.network.schoolCount,
+          departureRiskReduction,
+        )
+        : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];
     const councilPriority = councilTappa && student.rarity === "ultra-rare" &&
       (candidate === "form-1" || candidate === "form-2" || candidate === "course-y");
@@ -872,7 +882,7 @@ export function processAutomaticTeaching(
       isFavorite: councilPriority || ("acquiredAt" in student
         ? student.favorite === true
         : favoriteContactIds.has(student.contactId)),
-      rarityPriority: getAutomaticTeachingRarityPriority(student),
+      rarityPriority,
       isCollaborator: !("acquiredAt" in student),
       formPriority: candidate
         ? automaticFormPriority.get(candidate) ?? Number.MAX_SAFE_INTEGER
@@ -905,6 +915,10 @@ export function processAutomaticTeaching(
   // Prima vengono tentate tutte le Forme, nell'ordine degli allievi.
   // Arena Tecnica e Corso Agonisti usano soltanto la capienza rimasta.
   const agonistCourseCost = getAgonistCourseCost(state);
+  // 13/10/2026: who can still learn a Forma this year waits until April for the
+  // Corso Agonisti; without learnable Forme it is open from September.
+  const calendarMonth = getCalendarMonth(state.school.currentMonth);
+  const formsComeFirst = calendarMonth >= 9 || calendarMonth < 4;
   for (const student of students) {
     const qualifiedCandidates = qualifiedFormCandidates.get(student.id) ?? [];
     const candidate = qualifiedCandidates.find((formId) => {
@@ -945,6 +959,7 @@ export function processAutomaticTeaching(
     if (
       (courseXUnlocked && needsCourseXRecovery(student.forms)) ||
       qualifiedCandidates.length > 0 ||
+      (formsComeFirst && (learnableFormCandidates.get(student.id)?.length ?? 0) > 0) ||
       instructorsWithAvailablePersonalForms.has(student.id) ||
       (state.upgrades["technical-arena"] ?? 0) < 1
     ) continue;

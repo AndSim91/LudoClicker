@@ -50,24 +50,24 @@ function computeAutomaticFormCandidates(student: {
   const nextCore = core.find((formId) => !student.forms.includes(formId));
   if (nextCore) return [nextCore];
 
+  // 13/10/2026: Forma 3 in every available branch, then Forma 4, then Forma 5;
+  // Forma 6 and 7 only after the branches (first in the list = tried first).
+  const eligibleBranches = unrestrictedFormBranches
+    ? FORM_BRANCHES
+    : student.formBranchPreferences ?? [];
+  const branchForms = eligibleBranches
+    .flatMap((branch) => {
+      const nextForm = BRANCH_FORM_IDS[branch].find((formId) => !student.forms.includes(formId));
+      return nextForm ? [nextForm] : [];
+    })
+    .sort((left, right) => getFormProgressionRank(left) - getFormProgressionRank(right));
   const completedFormFive = ([
     "form-5-long",
     "form-5-staff",
     "form-5-double",
   ] as FormId[]).some((formId) => student.forms.includes(formId));
-  if (completedFormFive && !student.forms.includes("form-6")) return ["form-6"];
-  if (completedFormFive && !student.forms.includes("form-7")) return ["form-7"];
-
-  const eligibleBranches = unrestrictedFormBranches
-    ? FORM_BRANCHES
-    : student.formBranchPreferences ?? [];
-  const orderedBranches = eligibleBranches.slice().sort((left, right) => {
-    const startedLeft = BRANCH_FORM_IDS[left].some((formId) => student.forms.includes(formId));
-    const startedRight = BRANCH_FORM_IDS[right].some((formId) => student.forms.includes(formId));
-    return Number(startedRight) - Number(startedLeft);
-  });
-  return orderedBranches.flatMap((branch) => {
-    const nextForm = BRANCH_FORM_IDS[branch].find((formId) => !student.forms.includes(formId));
-    return nextForm ? [nextForm] : [];
-  });
+  const lateForm = completedFormFive
+    ? (["form-6", "form-7"] as FormId[]).find((formId) => !student.forms.includes(formId))
+    : undefined;
+  return lateForm ? [...branchForms, lateForm] : branchForms;
 }
