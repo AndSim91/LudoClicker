@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { getGymFighterCount, getGymSaberRarities, getGymStageIndex, GYM_STAGES } from "../../content/gymStages";
 import { createInitialState } from "../../game/engine";
+import { GymRackSwap } from "./GymRackSwap";
 import { GymReferees } from "./GymReferees";
 import { GymScene } from "./GymScene";
 
@@ -50,6 +51,27 @@ describe("GymScene", () => {
     view.rerender(<GymReferees styleJudgeUp />);
     expect(view.container.querySelectorAll(".gym-judge-chair")).toHaveLength(1);
     expect(head()).toBe("100");
+  });
+
+  it("lets the Style judge write on Servizio with both hands, but not while his card is up", () => {
+    const view = render(<GymReferees reading />);
+    expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
+    view.rerender(<GymReferees reading card={{ id: 1, card: "style" }} />);
+    expect(view.container.querySelectorAll(".gym-judge-tap")).toHaveLength(0);
+    view.rerender(<GymReferees reading styleJudgeUp />);
+    expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
+  });
+
+  it("walks an athlete to the rack and back with another blade", () => {
+    vi.useFakeTimers();
+    const onDone = vi.fn();
+    const view = render(<GymRackSwap fromX={352} sabers={["#4aa8ff", "#ffd166"]} onDone={onDone} />);
+    expect(view.container.querySelector(".gym-walker")).toHaveClass("is-walking");
+    // One phase per timer: let React render between them.
+    for (let step = 0; step < 7; step += 1) act(() => vi.advanceTimersByTime(5_000));
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(view.container.querySelector(".gym-saber-line")).toHaveStyle({ color: "#ffd166" });
+    vi.useRealTimers();
   });
 
   it("shows every rarity the school has before filling the mat by member share", () => {

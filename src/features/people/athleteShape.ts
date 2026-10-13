@@ -37,3 +37,17 @@ export const visitorShape = (x: number): AthleteShape => ({
 /** A long ponytail falling behind the head, down to the shoulder blades. */
 export const ponytail = (x: number, facing: 1 | -1) =>
   `M${x - 4 * facing} 90 Q${x - 11 * facing} 94 ${x - 9 * facing} 106 Q${x - 8 * facing} 113 ${x - 10 * facing} 119`;
+
+/** Walking to or from the rack (13/10): blade held low ahead, two leg frames to alternate. */
+export function athleteWalk(x: number, facing: 1 | -1) {
+  const hand = x + 12 * facing;
+  return {
+    head: [x, 96] as [number, number],
+    d: `M${x} 104 L${x} 128 M${x} 110 L${hand} 119`,
+    legs: [
+      `M${x} 128 L${x - 8} 150 M${x} 128 L${x + 9} 150`,
+      `M${x} 128 L${x - 2} 150 M${x} 128 L${x + 3} 150`,
+    ] as const,
+    blade: [hand, 119, x + 27 * facing, 140] as [number, number, number, number],
+  };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exchangeSteps, nextIdleMs, planBout, rollsBout, type Random } from "./gymSparring";
+import { CENTRAL_PACE, SIDE_PACE, exchangeSteps, nextIdleMs, planBout, rollsBout, type Random, type SparPace } from "./gymSparring";
 
 function seeded(seed: number): Random {
   let value = seed;
@@ -26,17 +26,25 @@ describe("gym sparring", () => {
     expect(exchangeSteps({ attacker: 1, reach: 10, attackMs: 200, recoverMs: 200, clash: true })).toEqual([-4, -10]);
   });
 
-  it("keeps a pair breathing about nine tenths of the time", () => {
+  const share = (pace: SparPace) => {
     const random = seeded(42);
     let idle = 0;
     let sparring = 0;
     for (let cycle = 0; cycle < 5_000; cycle += 1) {
-      idle += nextIdleMs(random);
-      if (!rollsBout(random)) continue;
+      idle += nextIdleMs(random, pace);
+      if (!rollsBout(random, pace)) continue;
       sparring += planBout(random).reduce((sum, item) => sum + item.attackMs + item.recoverMs, 0);
     }
-    const share = sparring / (idle + sparring);
-    expect(share).toBeGreaterThan(0.06);
-    expect(share).toBeLessThan(0.14);
+    return sparring / (idle + sparring);
+  };
+
+  it("keeps the side pairs sparring about a sixth of the time", () => {
+    expect(share(SIDE_PACE)).toBeGreaterThan(0.1);
+    expect(share(SIDE_PACE)).toBeLessThan(0.22);
+  });
+
+  it("lets the central pair spar about a third of the time", () => {
+    expect(share(CENTRAL_PACE)).toBeGreaterThan(0.25);
+    expect(share(CENTRAL_PACE)).toBeLessThan(0.42);
   });
 });

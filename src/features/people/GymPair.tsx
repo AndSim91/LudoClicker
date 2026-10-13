@@ -1,9 +1,9 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type RefObject } from "react";
 import { GymLayer, SaberLayers } from "./GymLayers";
 import { boxAround } from "./gymBox";
 import { athleteBody, athletePose } from "./athleteShape";
 import { bodyShape, type FighterBody } from "./fighterBodies";
-import { canSpar, exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange } from "./gymSparring";
+import { SIDE_PACE, canSpar, exchangeSteps, nextIdleMs, planBout, rollsBout, type GymExchange, type RackHold } from "./gymSparring";
 
 // The game's stick athlete (athleteShape.ts), animated: "guard" holds the blade
 // upright, "attack" reaches a partner 62 units away, so two attacks cross in the middle.
@@ -132,18 +132,26 @@ export function GymPair({
   rightX,
   sabers,
   index,
+  hold,
+  away = false,
 }: {
   leftX: number;
   rightX: number;
   sabers: [string, string];
   index: number;
+  /** Set on the rightmost pair: its right athlete may be at the rack. */
+  hold?: RefObject<RackHold>;
+  /** The right athlete is at the rack. */
+  away?: boolean;
 }) {
+
   const [steps, setSteps] = useState<[number, number]>([0, 0]);
   const [moveMs, setMoveMs] = useState(300);
   const [sparring, setSparring] = useState(false);
   const [clash, setClash] = useState<{ id: number; x: number } | null>(null);
 
   useEffect(() => {
+    const rack = hold?.current; // the scene's object: same one for the whole effect
     let timer = 0;
     let clashId = 0;
     const later = (ms: number, next: () => void) => {
@@ -153,17 +161,19 @@ export function GymPair({
       setMoveMs(ms);
       setSteps(next);
     };
-    const idle = () => later(nextIdleMs(Math.random), () => {
-      if (!canSpar() || !rollsBout(Math.random)) {
+    const idle = () => later(nextIdleMs(Math.random, SIDE_PACE), () => {
+      if (!canSpar() || rack?.away || !rollsBout(Math.random, SIDE_PACE)) {
         idle();
         return;
       }
+      if (rack) rack.busy = true;
       setSparring(true);
       fight(planBout(Math.random), 0);
     });
     const fight = (exchanges: GymExchange[], at: number) => {
       const exchange = exchanges[at];
       if (!exchange) {
+        if (rack) rack.busy = false;
         setSparring(false);
         move(400, [0, 0]);
         idle();
@@ -182,8 +192,11 @@ export function GymPair({
       });
     };
     idle();
-    return () => window.clearTimeout(timer);
-  }, [leftX, rightX]);
+    return () => {
+      window.clearTimeout(timer);
+      if (rack) rack.busy = false;
+    };
+  }, [leftX, rightX, hold]);
 
   return (
     <div
@@ -191,7 +204,7 @@ export function GymPair({
       style={{ "--gym-move": `${moveMs}ms` } as CSSProperties}
     >
       <GymActor x={leftX} facing={1} saber={sabers[0]} delay={index * 1.3} step={steps[0]} />
-      <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} step={steps[1]} />
+      {away ? null : <GymActor x={rightX} facing={-1} saber={sabers[1]} delay={index * 1.3 + 1.7} step={steps[1]} />}
       {clash ? (
         <GymLayer
           key={clash.id}

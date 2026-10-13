@@ -23,6 +23,9 @@ import {
   type GymScore,
 } from "./gymMatch";
 import { GymReferees, GymScoreboard, type RaisedCard } from "./GymReferees";
+import { GymRackSwap } from "./GymRackSwap";
+import { canSpar, type RackHold } from "./gymSparring";
+import { useJudgeReading } from "./useJudgeReading";
 import type { GymBox } from "./gymBox";
 
 const BLUE_SABER = GYM_SABER_COLORS.common;
@@ -42,6 +45,7 @@ const LIGHT_BOXES: GymBox[] = [
   { x: 318, y: 0, w: 132, h: 150 },
 ];
 const RACK_BOX: GymBox = { x: 752, y: 86, w: 66, h: 68 };
+const RACK_BODY_BOX: GymBox = { x: 756, y: 92, w: 58, h: 62 };
 const BULB_BOX: GymBox = { x: 260, y: 0, w: 120, h: 150 };
 // Palazzetto: two lamps on the trusses sweep the Arena (lamp x, aim x).
 const SWEEPS: Array<[number, number]> = [[60, 300], [580, 340]];
@@ -56,6 +60,9 @@ const VIEW = {
   hall: { x: -420, y: -40, w: 1480, h: 230 },
 };
 
+/** Concept R1 (13/10): an athlete goes to the rack and is replaced, one swap a minute. */
+const RACK_SWAP_EVERY_MS = 60_000;
+
 const HALL_STAGE = GYM_STAGES.findIndex((stage) => stage.name === "Palazzetto");
 const JUDGES_STAGE = GYM_STAGES.findIndex((stage) => stage.name === "Arena e giudici");
 
@@ -64,6 +71,7 @@ function useGymMatch() {
   const [score, setScore] = useState<GymScore>({ a: 0, b: 0 });
   const [card, setCard] = useState<RaisedCard>();
   const [judgeUp, setJudgeUp] = useState(false);
+  const [points, setPoints] = useState(0);
   const timers = useRef<number[]>([]);
   const standTimer = useRef<number | undefined>(undefined);
   const later = (ms: number, next: () => void) => timers.current.push(window.setTimeout(next, ms));
@@ -82,6 +90,7 @@ function useGymMatch() {
         setJudgeUp(false);
       }, min + Math.random() * (max - min));
     }
+    setPoints((current) => current + 1);
     setScore((current) => addGymPoint(current, side));
     const raised = rollGymCard(Math.random);
     if (!raised) return;
@@ -96,7 +105,63 @@ function useGymMatch() {
     return () => window.clearTimeout(timer);
   }, [score]);
 
-  return { score, card, judgeUp, onPoint };
+  return { score, card, judgeUp, points, onPoint };
+}
+
+/**
+ * One swap a minute at the rack (concept R1), only once the gym has a rack and
+ * a pair. The athlete who goes is the right one of the rightmost pair (slot);
+ * the pair waits while it is away, and the swap starts only between bouts.
+ */
+function useRackSwap(enabled: boolean, slot: number, sabers: string[]) {
+  const hold = useRef<RackHold>({ away: false, busy: false });
+  const [swap, setSwap] = useState<{ id: number; sabers: [string, string] }>();
+  const [swapped, setSwapped] = useState<{ slot: number; saber: string }>();
+  const shown = sabers.map((saber, index) => (swapped?.slot === index ? swapped.saber : saber));
+  const shownRef = useRef(shown);
+  useEffect(() => {
+    shownRef.current = shown;
+  });
+
+  const idle = swap === undefined;
+  useEffect(() => {
+    if (!enabled || !idle) return undefined;
+    let timer = 0;
+    const tryStart = () => {
+      if (!canSpar()) {
+        timer = window.setTimeout(tryStart, RACK_SWAP_EVERY_MS);
+        return;
+      }
+      if (hold.current.busy) {
+        timer = window.setTimeout(tryStart, 1_000);
+        return;
+      }
+      const current = shownRef.current[slot];
+      const colors = [...new Set(shownRef.current)];
+      const others = colors.filter((color) => color !== current);
+      const pool = others.length > 0 ? others : colors;
+      hold.current.away = true;
+      setSwap({ id: Date.now(), sabers: [current, pool[Math.floor(Math.random() * pool.length)]] });
+    };
+    timer = window.setTimeout(tryStart, RACK_SWAP_EVERY_MS);
+    return () => window.clearTimeout(timer);
+  }, [enabled, idle, slot, hold]);
+
+  // A new layout (more pairs, no rack) drops a swap halfway and its colour.
+  useEffect(() => () => {
+    hold.current.away = false;
+    setSwap(undefined);
+    setSwapped(undefined);
+  }, [enabled, slot, hold]);
+
+  const onDone = useCallback(() => {
+    if (!swap) return;
+    hold.current.away = false;
+    setSwapped({ slot, saber: swap.sabers[1] });
+    setSwap(undefined);
+  }, [hold, slot, swap]);
+
+  return { hold, swap, shown, onDone };
 }
 
 // Subscribes to members and contacts only, so money ticks do not repaint the scene.
@@ -114,7 +179,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
     return counts;
   }, [contacts]);
   const fighterCount = getGymFighterCount(activeMembers);
-  const sabers = getGymSaberRarities(rarityCounts, fighterCount).map((rarity) => GYM_SABER_COLORS[rarity]);
+  const schoolSabers = getGymSaberRarities(rarityCounts, fighterCount).map((rarity) => GYM_SABER_COLORS[rarity]);
   const stage = getGymStageIndex(activeMembers);
   const current = GYM_STAGES[stage];
   const next = GYM_STAGES[stage + 1];
@@ -123,6 +188,12 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
   const view = hall ? VIEW.hall : VIEW.gym;
   const viewBox = `${view.x} ${view.y} ${view.w} ${view.h}`;
   const match = useGymMatch();
+  const reading = useJudgeReading(match.points);
+  // The athlete closest to the rack: right of the right pair, or of the only pair.
+  const rackSlot = fighterCount >= 6 ? 5 : 1;
+  const rackX = fighterCount >= 6 ? PAIR_SPOTS[2] + PAIR_GAP : PAIR_SPOTS[0] + PAIR_GAP;
+  const rack = useRackSwap(stage >= 1 && fighterCount >= 2, rackSlot, schoolSabers);
+  const sabers = rack.shown;
   const tiers = [0, 1, 2, 3];
 
   return (
@@ -244,12 +315,6 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
           {stage >= 1 ? <rect x="140" y="144" width="360" height="10" rx="3" className="gym-mat" /> : null}
           {judges ? <ellipse cx="321" cy="151" rx="66" ry="7" className="gym-arena" /> : null}
 
-          {stage >= 1 ? (
-            <g className="gym-rack">
-              <rect x="760" y="96" width="50" height="54" rx="2" />
-            </g>
-          ) : null}
-
           {stage >= 2 ? (
             <g className="gym-banner">
               <path d="M290 0 H350 V70 L320 86 L290 70 Z" />
@@ -267,6 +332,14 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
           ) : null}
         </svg>
 
+        {rack.swap ? <GymRackSwap key={rack.swap.id} fromX={rackX} sabers={rack.swap.sabers} onDone={rack.onDone} /> : null}
+        {/* The rack's body is a layer above the walker, who goes behind it. */}
+        {stage >= 1 ? (
+          <GymLayer box={RACK_BODY_BOX} className="gym-rack">
+            <rect x="760" y="96" width="50" height="54" rx="2" />
+          </GymLayer>
+        ) : null}
+
         {hall ? <GymScoreboard score={match.score} /> : null}
 
         {/* Rack blades hum in two alternating groups, as before (odd ones 2 s ahead). */}
@@ -283,7 +356,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             ))
           : null}
 
-        {judges ? <GymReferees card={match.card} styleJudgeUp={match.judgeUp} /> : null}
+        {judges ? <GymReferees card={match.card} styleJudgeUp={match.judgeUp} reading={reading} /> : null}
 
         {fighterCount === 1 ? <GymActor x={320} facing={1} saber={sabers[0]} pose="guard" /> : null}
         {fighterCount >= 2 ? (
@@ -292,6 +365,8 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             rightX={PAIR_SPOTS[0] + PAIR_GAP}
             sabers={[sabers[0], sabers[1]]}
             onPoint={match.onPoint}
+            hold={rackSlot === 1 ? rack.hold : undefined}
+            away={rackSlot === 1 && rack.swap !== undefined}
           />
         ) : null}
         {PAIR_SPOTS.slice(1, Math.floor(fighterCount / 2)).map((x, index) => (
@@ -301,6 +376,8 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             rightX={x + PAIR_GAP}
             sabers={[sabers[(index + 1) * 2], sabers[(index + 1) * 2 + 1]]}
             index={index + 1}
+            hold={rackSlot === (index + 1) * 2 + 1 ? rack.hold : undefined}
+            away={rackSlot === (index + 1) * 2 + 1 && rack.swap !== undefined}
           />
         ))}
       </div>
