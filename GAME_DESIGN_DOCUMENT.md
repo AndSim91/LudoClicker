@@ -2592,7 +2592,7 @@ L'interfaccia non mostra tutti i sistemi dall'inizio. La sequenza attuale è:
 | Primo Collaboratore delle Onde             | sezione Collaboratori e assegnazioni                                     |
 | 8 Collaboratori                            | gestione aggregata per settore                                           |
 | 15 collaboratori                           | Redazione si evolve in Social                                            |
-| Prima vittoria nella Champion's Arena      | settore e pagina Gadget                                                  |
+| Prima vittoria al Nazionale                | settore e pagina Gadget                                                  |
 | Primo titolo all'Accademico (Arena o Stile) nella scuola corrente | messaggio «Primi all'Accademico» e voce Network |
 
 I requisiti della nuova scuola crescono a ogni ciclo: Fama 150 × ciclo,
@@ -4192,8 +4192,10 @@ cambia.
 ### 19.1 Sblocco e catalogo base
 
 Il settore **Gadget** si sblocca quando un atleta della scuola vince per la
-prima volta la Champion's Arena, in Arena o in Stile (decisione del 06/10,
-prima era l'Arena del Torneo Accademico Alpha). Lo sblocco apre la
+prima volta il Nazionale, in Arena o in Stile (decisione del 13/10/2026; dal
+06/10 era la Champion's Arena, prima ancora l'Arena del Torneo Accademico
+Alpha). In ogni nuova scuola va vinto di nuovo; la migrazione v113 apre i
+Gadget ai salvataggi che avevano già vinto il Nazionale nella scuola corrente. Lo sblocco apre la
 vista Gadget, il relativo incarico dei Collaboratori, il ramo di potenziamenti e
 il progetto Portachiavi. Il progetto deve comunque essere acquistato. Una scena
 tutorial salvata e non ripetibile presenta il settore, mantiene il tempo in pausa
@@ -5325,7 +5327,7 @@ costellazione dell'Ordine e l'Inflazione di Luce:
   della vittoria e prima del tutorial del Laboratorio. Su un foglio da progetto
   si disegnano uno dopo l'altro portachiavi, tazza, maglietta e cappellino,
   poi diventano veri con lo stemma dell'Ordine; nessun nome e nessun prezzo.
-  Testi: «Champion's Arena vinta» / «Apre il Laboratorio Gadget» / «Una
+  Testi: «Nazionale vinto» / «Apre il Laboratorio Gadget» / «Una
   vittoria così va messa su tutto. Il primo progetto è pronto.» In Outlook
   l'icona è il regalo. Codice: `GadgetArt.tsx`, `GADGET_MOMENT`. Le due scene
   si vedono una volta per partita, come i tutorial; dalla v103 chi ha già il
@@ -5844,7 +5846,7 @@ qualunque funzione che possa far credere di inviare davvero email.
   liberamente. Non ha un livello generale, ma accumula maestria per settore:
   Novizio, Iniziato, Accademico, Cavaliere, Maestro, Leggenda.
 - Non esiste un limite massimo di collaboratori.
-- Gadget si sblocca con la prima vittoria della scuola alla Champion's Arena;
+- Gadget si sblocca con la prima vittoria della scuola al Nazionale;
   il Portachiavi resta un progetto a pagamento e ogni prodotto successivo richiede
   100 vendite del precedente.
 - La qualità Gadget non può diminuire; revisioni, pubblico, produttività dei

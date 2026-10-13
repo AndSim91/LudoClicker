@@ -150,14 +150,14 @@ function tournamentResult(
 }
 
 describe("Gadget flow", () => {
-  it("unlocks only after an owned victory at the Champion's", () => {
+  it("unlocks only after an owned victory at the Nazionale (13/10/2026)", () => {
     const initial = createInitialState(1_000, "Manager");
 
     expect(unlockGadgetSectorFromTournamentResult(
       initial,
       tournamentResult("champions", true),
       2_000,
-    ).unlocks.gadget).toBe(true);
+    )).toBe(initial);
     expect(unlockGadgetSectorFromTournamentResult(
       initial,
       tournamentResult("academy", true),
@@ -172,7 +172,7 @@ describe("Gadget flow", () => {
       initial,
       tournamentResult("national", true),
       2_000,
-    )).toBe(initial);
+    ).unlocks.gadget).toBe(true);
   });
 
   it("sells at the event stall within the monthly cap of the laboratory (Banchetto, 06/10)", () => {

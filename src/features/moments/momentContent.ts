@@ -78,7 +78,7 @@ function describeSocial(followers: number): MomentContent {
 /** «Il progetto sul banco» (concept G2, 06/10/2026): no names, no prices. */
 const GADGET_CONTENT: MomentContent = {
   kind: "gadget",
-  kicker: "Champion's Arena vinta",
+  kicker: "Nazionale vinto",
   title: "Apre il Laboratorio Gadget",
   body: "Una vittoria così va messa su tutto. Il primo progetto è pronto.",
 };

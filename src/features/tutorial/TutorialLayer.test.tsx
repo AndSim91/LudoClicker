@@ -172,14 +172,14 @@ describe("TutorialLayer", () => {
     );
     expect(social.canStart({ state: recruited, activeView: "mail" })).toBe(true);
 
-    const champions = {
-      id: "r", level: "champions", season: 1, completedAt: 1_000, matches: [],
+    const national = {
+      id: "r", level: "national", season: 1, completedAt: 1_000, matches: [],
       participants: [{ id: "w", ownedContactId: "owned" }],
       arenaRanking: ["other"], styleRanking: ["w"],
     } as unknown as TournamentResult;
-    const academy = { ...champions, level: "academy", arenaRanking: ["w"] } as TournamentResult;
+    const academy = { ...national, level: "academy", arenaRanking: ["w"] } as TournamentResult;
     expect(gadget.canStart({ state: unlockGadgetSectorFromTournamentResult(initial, academy, 2_000), activeView: "mail" })).toBe(false);
-    const gadgetOpen = unlockGadgetSectorFromTournamentResult(initial, champions, 2_000);
+    const gadgetOpen = unlockGadgetSectorFromTournamentResult(initial, national, 2_000);
     expect(gadget.canStart({ state: gadgetOpen, activeView: "mail" })).toBe(true);
     expect(gadgetOpen.gadgets.products.keychain.unlocked).toBe(true);
   });

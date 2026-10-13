@@ -52,7 +52,7 @@ export function getUpgradeRequirementRows(state: GameState, definition: UpgradeD
   for (const unlock of definition.requiredUnlocks ?? []) {
     const met = Boolean(state.unlocks[unlock]);
     if (unlock === "social") rows.push({ short: "Serve il Social", full: `Social sbloccato (${getSocialUnlockRequirementLabel()})`, met });
-    else if (unlock === "gadget") rows.push({ short: "Serve il settore Gadget", full: "Settore Gadget sbloccato (vittoria alla Champion's Arena)", met });
+    else if (unlock === "gadget") rows.push({ short: "Serve il settore Gadget", full: "Settore Gadget sbloccato (vittoria al Nazionale)", met });
     else if (unlock === "forms") rows.push({ short: "Servono le Forme", full: "Centro didattico aperto (Forme)", met });
     else rows.push({ short: "Funzione da sbloccare", full: "Funzione del gioco sbloccata", met });
   }

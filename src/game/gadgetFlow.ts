@@ -77,9 +77,12 @@ function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(Number.isFinite(score) ? score : 0)));
 }
 
-/** A school athlete wins the Champion's (Arena or Stile), as `championOwned` in tournamentFlow. */
-export function didOwnedAthleteWinChampions(result: TournamentResult): boolean {
-  if (result.level !== "champions") return false;
+/**
+ * A school athlete wins the Nazionale (Arena or Stile), as `nationalOwned` in
+ * tournamentFlow: it opens the Gadget (Andrea, 13/10/2026; before, the Champion's).
+ */
+export function didOwnedAthleteWinNational(result: TournamentResult): boolean {
+  if (result.level !== "national") return false;
   return [result.arenaRanking[0], result.styleRanking[0]].some((winnerId) =>
     Boolean(result.participants.find((participant) => participant.id === winnerId)?.ownedContactId)
   );
@@ -105,7 +108,7 @@ export function unlockGadgetSector(state: GameState, now: number): GameState {
     unlockedState,
     now,
     "Apre il Laboratorio Gadget",
-    "Vinta la Champion's Arena, e qualcuno ha già pensato ai portachiavi celebrativi. Compra il progetto e mettici qualche collaboratore.",
+    "Vinto il Nazionale, e qualcuno ha già pensato ai portachiavi celebrativi. Compra il progetto e mettici qualche collaboratore.",
     "positive",
     "focused",
     "gadget",
@@ -117,7 +120,7 @@ export function unlockGadgetSectorFromTournamentResult(
   result: TournamentResult,
   now: number,
 ): GameState {
-  return didOwnedAthleteWinChampions(result)
+  return didOwnedAthleteWinNational(result)
     ? unlockGadgetSector(state, now)
     : state;
 }

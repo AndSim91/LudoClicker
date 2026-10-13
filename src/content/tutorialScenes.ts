@@ -904,7 +904,7 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         speaker: "A.N.D.E.R.",
         title: "Il Laboratorio dei Gadget è aperto",
         body: [
-          "Vinta la Champion's Arena: una vittoria così merita un trofeo. Anzi, un catalogo intero di [[Gadget]] della scuola!",
+          "Vinto il Nazionale: una vittoria così merita un trofeo. Anzi, un catalogo intero di [[Gadget]] della scuola!",
           "Il primo progetto è già disponibile, ma dovrai acquistarlo e svilupparlo prima di metterlo in catalogo.",
         ],
         focusRegions: ["navigation", "gadget-navigation"],

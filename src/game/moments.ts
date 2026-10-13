@@ -36,7 +36,7 @@ export function getReachedMomentKeys(state: GameState): MomentKey[] {
     // Tappa 1 (08/10/2026): the first Torneo Scolastico played, once per save, before its tutorial.
     ...((state.tournaments?.results ?? []).some((result) => result.level === "school") ? [SCHOOL_TOURNAMENT_MOMENT] : []),
     ...VICTORY_MOMENT_LEVELS.filter((level) => wins[level] > 0).map((level) => `victory:${level}`),
-    // Right after the Champion's Arena scene that opens it, before its tutorial (optional: old migrations run this too).
+    // Right after the Nazionale scene that opens it, before its tutorial (optional: old migrations run this too).
     ...(state.unlocks?.gadget ? [GADGET_MOMENT] : []),
     ...(state.network.superbaTournament ? [SUPERBA_MOMENT] : []),
     // The first key of the playthrough: `seen` outlives the foundations, `unlocked` does not.
