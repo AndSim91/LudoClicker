@@ -14,6 +14,7 @@ import {
 import {
   applyQualifyingCourseDiscount,
   areAllFormBranchesUnlocked,
+  getInstructorStudentBranchCapacity,
   getPagoSportAllCourseSpeedBonus,
   getPagoSportTechnicianSpeedBonus,
   getSISTechnicianCourseSpeedBonus,
@@ -405,7 +406,12 @@ function getInstructorCourseDemandByForm(
     // Una persona conta una sola volta per Forma anche se un vecchio salvataggio
     // contiene preferenze di ramo duplicate.
     const requestedForms = new Set(
-      getAutomaticFormCandidates(person, courseXUnlocked, unrestrictedFormBranches),
+      getAutomaticFormCandidates(
+        person,
+        courseXUnlocked,
+        unrestrictedFormBranches,
+        getInstructorStudentBranchCapacity(state.upgrades),
+      ),
     );
     for (const formId of requestedForms) {
       demandByForm.set(formId, (demandByForm.get(formId) ?? 0) + 1);

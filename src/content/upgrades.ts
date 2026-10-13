@@ -512,6 +512,13 @@ export function areAllFormBranchesUnlocked(levels: UpgradeLevels): boolean {
   return getUpgradeEffectTotal(levels, "unrestrictedFormBranches") > 0;
 }
 
+/** Branches an Istruttore collaborator can study (Master of none). */
+export function getInstructorStudentBranchCapacity(levels: UpgradeLevels): number {
+  return areAllFormBranchesUnlocked(levels)
+    ? 3
+    : Math.min(3, 1 + getInstructorBranchCapacityBonus(levels));
+}
+
 export function getAnnualFormTrainingLimit(levels: UpgradeLevels): number {
   return 1 + Number((levels["promiscuous-instructor"] ?? 0) >= 6) +
     Number((levels.pagosport ?? 0) >= 1);

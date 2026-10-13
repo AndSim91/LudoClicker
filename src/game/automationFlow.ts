@@ -12,6 +12,7 @@ import {
 } from "../content/forms";
 import {
   areAllFormBranchesUnlocked,
+  getInstructorStudentBranchCapacity,
   getAnnualFormTrainingLimit,
   getEquipmentPreparedWorkMaximum,
   getEquipmentSwordRepairWork,
@@ -775,9 +776,15 @@ export function processAutomaticTeaching(
       else instructorsByForm.set(formId, [instructor]);
     }
   }
+  const instructorBranchCapacity = getInstructorStudentBranchCapacity(state.upgrades);
   const automaticFormCandidates = new Map(students.map((student) => [
     student.id,
-    getAutomaticFormCandidates(student, courseXUnlocked, unrestrictedFormBranches),
+    getAutomaticFormCandidates(
+      student,
+      courseXUnlocked,
+      unrestrictedFormBranches,
+      instructorBranchCapacity,
+    ),
   ]));
   // Forms the student could learn this year, with or without a free Istruttore now.
   const learnableFormCandidates = new Map(students.map((student) => [
@@ -790,8 +797,13 @@ export function processAutomaticTeaching(
           student,
           definition,
           trainingYear,
-          unrestrictedFormBranches ? 3 : undefined,
-          !unrestrictedFormBranches,
+          unrestrictedFormBranches
+            ? 3
+            : "assignment" in student && student.assignment === "instructor"
+              ? instructorBranchCapacity
+              : undefined,
+          !unrestrictedFormBranches &&
+            !("assignment" in student && student.assignment === "instructor"),
           annualTrainingLimit,
           courseXUnlocked,
         )

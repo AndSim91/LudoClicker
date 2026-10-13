@@ -4,7 +4,7 @@ import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athlet
 import { advanceRandomSeed, RARITY_BASE_RANGE, rollAthleteBaseStats } from "./athleteStats";
 import { getFormTrainingYear, getSchoolYear, isSummerBreak } from "./calendar";
 import { getFormTrainingCount } from "../content/forms";
-import { areAllFormBranchesUnlocked, getAnnualFormTrainingLimit, isCourseXUnlocked } from "../content/upgrades";
+import { areAllFormBranchesUnlocked, getAnnualFormTrainingLimit, getInstructorStudentBranchCapacity, isCourseXUnlocked } from "../content/upgrades";
 import { getAutomaticFormCandidates } from "./formProgression";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
@@ -390,8 +390,9 @@ export function isAnnualTeachingExhausted(
   const courseX = isCourseXUnlocked(state.upgrades);
   const unrestricted = areAllFormBranchesUnlocked(state.upgrades);
   let blocked = false;
-  const check = (member: Pick<Contact, "rarity" | "forms" | "formBranchPreferences" | "lastFormTrainingYear" | "formTrainingYearCount">) => {
-    if (getAutomaticFormCandidates(member, courseX, unrestricted).length === 0) return true;
+  const instructorBranches = getInstructorStudentBranchCapacity(state.upgrades);
+  const check = (member: Pick<Contact, "rarity" | "forms" | "formBranchPreferences" | "lastFormTrainingYear" | "formTrainingYearCount"> & { assignment?: string | null }) => {
+    if (getAutomaticFormCandidates(member, courseX, unrestricted, instructorBranches).length === 0) return true;
     if (getFormTrainingCount(member, trainingYear) < limit) return false;
     blocked = true;
     return true;

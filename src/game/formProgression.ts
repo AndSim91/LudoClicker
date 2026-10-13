@@ -22,16 +22,38 @@ const candidatesCache = new WeakMap<readonly FormId[], {
   candidates: FormId[];
 }>();
 
-export function getAutomaticFormCandidates(student: {
+type CandidateStudent = {
   forms: FormId[];
   formBranchPreferences?: FormBranch[];
-}, courseXUnlocked = true, unrestrictedFormBranches = false): FormId[] {
-  const flags = (courseXUnlocked ? 1 : 0) + (unrestrictedFormBranches ? 2 : 0);
+  assignment?: string | null;
+};
+
+/**
+ * Master of none (Andrea, 13/10/2026) decides what a student wants to learn: an
+ * Istruttore collaborator wants up to `instructorBranchCapacity` branches, like the
+ * manual courses already allowed. Ordinary members keep their preferences.
+ */
+export function getAutomaticFormCandidates(
+  student: CandidateStudent,
+  courseXUnlocked = true,
+  unrestrictedFormBranches = false,
+  instructorBranchCapacity = 1,
+): FormId[] {
+  const branchCapacity = !unrestrictedFormBranches && student.assignment === "instructor"
+    ? instructorBranchCapacity
+    : 1;
+  const flags = (courseXUnlocked ? 1 : 0) + (unrestrictedFormBranches ? 2 : 0) +
+    (branchCapacity > 1 ? branchCapacity * 4 : 0);
   const cached = candidatesCache.get(student.forms);
   if (cached?.flags === flags && cached.preferences === student.formBranchPreferences) {
     return cached.candidates;
   }
-  const candidates = computeAutomaticFormCandidates(student, courseXUnlocked, unrestrictedFormBranches);
+  const candidates = computeAutomaticFormCandidates(
+    student,
+    courseXUnlocked,
+    unrestrictedFormBranches,
+    branchCapacity,
+  );
   candidatesCache.set(student.forms, {
     preferences: student.formBranchPreferences,
     flags,
@@ -40,10 +62,12 @@ export function getAutomaticFormCandidates(student: {
   return candidates;
 }
 
-function computeAutomaticFormCandidates(student: {
-  forms: FormId[];
-  formBranchPreferences?: FormBranch[];
-}, courseXUnlocked: boolean, unrestrictedFormBranches: boolean): FormId[] {
+function computeAutomaticFormCandidates(
+  student: CandidateStudent,
+  courseXUnlocked: boolean,
+  unrestrictedFormBranches: boolean,
+  branchCapacity: number,
+): FormId[] {
   const core: FormId[] = courseXUnlocked
     ? ["form-1", "course-x", "form-2", "course-y"]
     : ["form-1", "form-2", "course-y"];
@@ -52,9 +76,19 @@ function computeAutomaticFormCandidates(student: {
 
   // 13/10/2026: Forma 3 in every available branch, then Forma 4, then Forma 5;
   // Forma 6 and 7 only after the branches (first in the list = tried first).
+  const preferences = student.formBranchPreferences ?? [];
+  const learnedBranches = FORM_BRANCHES.filter((branch) =>
+    BRANCH_FORM_IDS[branch].some((formId) => student.forms.includes(formId))
+  );
+  // The first branch is always a preference, as in the manual courses; the extra
+  // ones (preferred first) only while the Istruttore has room for a new branch.
   const eligibleBranches = unrestrictedFormBranches
     ? FORM_BRANCHES
-    : student.formBranchPreferences ?? [];
+    : branchCapacity > 1 && learnedBranches.length > 0
+      ? [...new Set([...preferences, ...learnedBranches, ...FORM_BRANCHES])].filter((branch) =>
+          learnedBranches.includes(branch) || learnedBranches.length < branchCapacity
+        )
+      : preferences;
   const branchForms = eligibleBranches
     .flatMap((branch) => {
       const nextForm = BRANCH_FORM_IDS[branch].find((formId) => !student.forms.includes(formId));
