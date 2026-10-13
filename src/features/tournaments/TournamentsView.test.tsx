@@ -47,6 +47,11 @@ function createCompletedTournamentState() {
   };
 }
 
+/** The right panel shows the latest result: select the upcoming row to see the Qualificati. */
+function showQualified(container: HTMLElement) {
+  fireEvent.click(within(container).getByRole("button", { name: /^Qualificati per / }));
+}
+
 function openChronicles(view: ReturnType<typeof within>) {
   const mainTabs = within(view.getByRole("tablist", { name: "Sezioni tornei" }));
   fireEvent.click(mainTabs.getByRole("tab", { name: "Open" }));
@@ -172,6 +177,7 @@ describe("TournamentsView", () => {
     };
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
+    showQualified(container);
 
     expect(view.getByText("1 qualificato")).toBeVisible();
     expect(view.getByText("al Torneo Accademico Alpha · 1 bye")).toBeVisible();
@@ -197,6 +203,7 @@ describe("TournamentsView", () => {
       },
     };
     const { container } = render(<TournamentsView state={state} />);
+    showQualified(container);
     const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
 
     expect(qualifiedTeam.getByText("2 atleti")).toBeVisible();
@@ -224,6 +231,7 @@ describe("TournamentsView", () => {
       },
     };
     const { container } = render(<TournamentsView state={state} />);
+    showQualified(container);
     const qualifiedTeam = within(container.querySelector<HTMLElement>(".qualified-team")!);
 
     expect(
@@ -233,16 +241,23 @@ describe("TournamentsView", () => {
     expect(within(container).queryByText("Forma della delegazione")).not.toBeInTheDocument();
   });
 
-  it("opens a completed tournament directly from the calendar", () => {
+  it("shows the selected tournament's recap and opens its details", () => {
     const { state, result } = createCompletedTournamentState();
     const { container } = render(<TournamentsView state={state} />);
     const view = within(container);
 
-    fireEvent.click(
-      view.getByRole("button", {
-        name: `Apri i risultati di Torneo Scolastico, stagione ${result.season}`,
-      }),
-    );
+    const row = view.getByRole("button", {
+      name: `Resoconto di Torneo Scolastico, stagione ${result.season}`,
+    });
+    expect(row).toHaveAttribute("aria-pressed", "true");
+    const recap = within(container.querySelector<HTMLElement>(".tournament-recap")!);
+    expect(recap.getByRole("heading", { name: "Torneo Scolastico" })).toBeVisible();
+    expect(recap.getByText(/tutti della scuola/)).toBeVisible();
+
+    showQualified(container);
+    expect(container.querySelector(".tournament-recap")).toBeNull();
+    fireEvent.click(row);
+    fireEvent.click(view.getByRole("button", { name: "Apri dettagli" }));
 
     expect(view.getByRole("tab", { name: "Risultati" })).toHaveAttribute("aria-selected", "true");
     expect(view.getByText("Gironi")).toBeVisible();
@@ -564,7 +579,7 @@ describe("TournamentsView", () => {
       />,
     );
     const row = within(container).getByRole("button", {
-      name: `Apri i risultati di Torneo Nazionale, stagione ${previous.season}`,
+      name: `Resoconto di Torneo Nazionale, stagione ${previous.season}`,
     });
     expect(row).toHaveClass("is-previous");
     expect(row).toHaveTextContent(`Completato · stagione ${previous.season}`);

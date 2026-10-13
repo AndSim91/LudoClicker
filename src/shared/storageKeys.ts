@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   listFiltersPrefix: `${PREFIX}list-filters.v1`,
   memberView: `${PREFIX}member-view`,
   dayPanelOpen: `${PREFIX}day-panel-open`,
+  tournamentSpotlight: `${PREFIX}tournament-spotlight`,
   crashSession: `${PREFIX}crash-session`,
   crashReport: `${PREFIX}crash-report`,
 } as const;

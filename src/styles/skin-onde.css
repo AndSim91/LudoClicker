@@ -31,6 +31,8 @@
   --onde-gold-soft: #f3d79f;
   --onde-thread: rgb(224 166 74 / 30%);
   --schedule-previous-bg: var(--onde-groove);
+  --recap-selected: var(--onde-gold);
+  --recap-podium: var(--onde-gold-bright);
   /* The title bar gradient, fixed to the viewport, darkening towards the bottom. */
   --onde-page:
     linear-gradient(180deg, rgb(1 14 25 / 0%) 45px, rgb(1 14 25 / 50%)) fixed,
@@ -122,7 +124,8 @@
 :root[data-theme="dark"] .people-table,
 :root[data-theme="dark"] .collaborator-table,
 :root[data-theme="dark"] .season-schedule,
-:root[data-theme="dark"] .qualified-team {
+:root[data-theme="dark"] .qualified-team,
+:root[data-theme="dark"] .tournament-recap {
   background: var(--onde-page);
 }
 
@@ -675,6 +678,20 @@
 :root[data-theme="dark"] .next-tournament-countdown {
   border-right-color: var(--line-strong);
   border-left-color: var(--line-strong);
+}
+
+:root[data-theme="dark"] .tournament-results-view {
+  --owned-line: var(--onde-wave);
+  --owned-on-line: var(--onde-abyss);
+  --owned-tint: rgb(108 211 214 / 13%);
+}
+
+:root[data-theme="dark"] .results-spotlight input::after {
+  background: var(--onde-foam);
+}
+
+:root[data-theme="dark"] .results-spotlight input:checked::after {
+  background: var(--onde-abyss);
 }
 
 :root[data-theme="dark"] .bracket-match > span.is-owned {

@@ -26,6 +26,24 @@ import {
 import { tournamentSchoolDisplayName } from "./tournamentSchoolPresentation";
 import { StyleJudgeSheet } from "./StyleJudgeSheet";
 import { StyleCardMark } from "./StyleCardMark";
+import { qualificationDestination } from "./tournamentRecap";
+import { STORAGE_KEYS } from "../../shared/storageKeys";
+
+function readSpotlight(): boolean {
+  try {
+    return window.localStorage.getItem(STORAGE_KEYS.tournamentSpotlight) === "on";
+  } catch {
+    return false;
+  }
+}
+
+function storeSpotlight(on: boolean): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEYS.tournamentSpotlight, on ? "on" : "off");
+  } catch {
+    // ponytail: a blocked storage only forgets the choice.
+  }
+}
 
 const KNOCKOUT_STAGE_ORDER: TournamentMatch["stage"][] = [
   "round64",
@@ -51,13 +69,6 @@ interface TournamentResultsProps {
 
 function groupLetter(groupIndex: number): string {
   return String.fromCharCode(65 + groupIndex);
-}
-
-function qualificationDestination(level: ReturnType<typeof getNextTournamentLevel>): string {
-  if (level === "academy") return "all'Accademico";
-  if (level === "national") return "al Nazionale";
-  if (level === "champions") return "alla Champion's Arena";
-  return "complessivi";
 }
 
 function MatchCompetitor({
@@ -346,6 +357,7 @@ export function TournamentResults({
   const [showMatchDetail, setShowMatchDetail] = useState(false);
   const [preliminaryResultId, setPreliminaryResultId] = useState<string>();
   const [watchingFinal, setWatchingFinal] = useState(false);
+  const [spotlight, setSpotlight] = useState(readSpotlight);
   const closeFinal = useCallback(() => setWatchingFinal(false), []);
   const ownedFinal = getOwnedFinal(result);
   const tournamentTabRef = useRef<HTMLButtonElement>(null);
@@ -354,6 +366,11 @@ export function TournamentResults({
     () => new Map(result.participants.map((participant) => [participant.id, participant])),
     [result.participants],
   );
+  // Our athletes stand out (concept C «Riflettore», 13/10/2026), unless the field is all ours.
+  const ownedCount = result.participants.filter((participant) => participant.ownedContactId).length;
+  const highlightOwned = ownedCount > 0 && ownedCount < result.participants.length;
+  const ownedGroupIndices = useMemo(() => new Set(result.groupStandings.flatMap((standing) =>
+    participantById.get(standing.participantId)?.ownedContactId ? [standing.groupIndex] : [])), [participantById, result.groupStandings]);
   const groupIndices = useMemo(
     () =>
       [...new Set(result.groupStandings.map((standing) => standing.groupIndex))].sort(
@@ -424,7 +441,12 @@ export function TournamentResults({
 
   return (
     <div
-      className={`tournament-results-view${result.level === "chronicles" ? " is-chronicles" : ""}`}
+      className={[
+        "tournament-results-view",
+        result.level === "chronicles" ? "is-chronicles" : "",
+        highlightOwned ? "highlights-owned" : "",
+        highlightOwned && spotlight ? "is-spotlight" : "",
+      ].filter(Boolean).join(" ")}
     >
       <section className="results-context">
         <button type="button" className="back-to-calendar" onClick={onBackToOverview}>
@@ -463,7 +485,21 @@ export function TournamentResults({
             Guarda la finale
           </button>
         ) : null}
-        <label>
+        {highlightOwned ? (
+          <label className="results-spotlight">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={spotlight}
+              onChange={(event) => {
+                setSpotlight(event.target.checked);
+                storeSpotlight(event.target.checked);
+              }}
+            />
+            <span>Solo la nostra scuola</span>
+          </label>
+        ) : null}
+        <label className="results-switcher">
           <span>Cambia torneo</span>
           <select
             aria-label="Cambia torneo"
@@ -552,7 +588,13 @@ export function TournamentResults({
                     type="button"
                     role="tab"
                     aria-selected={activeGroupIndex === groupIndex}
-                    className={activeGroupIndex === groupIndex ? "active" : ""}
+                    className={[
+                      activeGroupIndex === groupIndex ? "active" : "",
+                      ownedGroupIndices.has(groupIndex) ? "has-owned" : "",
+                    ].filter(Boolean).join(" ")}
+                    title={ownedGroupIndices.has(groupIndex) && highlightOwned
+                      ? "Ci sono atleti della nostra scuola"
+                      : undefined}
                     onClick={() => {
                       setSelectedGroupIndex(groupIndex);
                       setSelectedMatchId(undefined);

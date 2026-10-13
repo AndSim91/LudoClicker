@@ -777,6 +777,12 @@ mostra il risultato della stagione precedente («Completato · stagione 10») su
 uno sfondo diverso, e resta cliccabile per aprirne i risultati. La colonna
 «Standard» è stata tolta (12/10/2026): suggeriva una soglia che non esiste.
 
+Il pannello a destra del calendario segue la riga selezionata (13/10/2026):
+all'apertura è selezionato l'ultimo torneo disputato e il pannello ne mostra un
+resoconto rapido (miglior risultato dei nostri in Arena e in Stile, squadra,
+vincitori, nostri qualificati, premi) con «Apri dettagli» verso i Risultati.
+Selezionando il torneo in arrivo il pannello mostra i Qualificati.
+
 Stati previsti:
 
 - in attesa;
@@ -798,6 +804,12 @@ Per gli atleti della scuola mostra:
 - podi precedenti.
 
 ### 15.3 Risultati
+
+Gli atleti della nostra scuola sono evidenziati (righe, tabellone e podio con
+velo e filo nel colore della scuola, pastiglia piena, segno sulle lettere dei
+gironi in cui giocano); l'interruttore «Solo la nostra scuola» attenua gli altri
+senza nasconderli e si ricorda tra le sessioni. Se tutti i partecipanti sono
+nostri (Scolastico) non si evidenzia nulla.
 
 Il torneo viene simulato e salvato automaticamente. I dettagli completi restano
 consultabili per le ultime due stagioni competitive. Un nuovo risultato

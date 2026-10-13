@@ -1,5 +1,5 @@
 import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import {
   TOURNAMENT_DEFINITIONS,
@@ -17,7 +17,8 @@ import {
   selectSchoolTournamentEntrantsFromRoster,
 } from "../../game/tournamentSimulation";
 import { useGameTime } from "../../game/GameTimeContext";
-import type { GameState, TournamentResult } from "../../game/types";
+import type { GameState, TournamentLevel, TournamentResult } from "../../game/types";
+import { TournamentRecap } from "./TournamentRecap";
 import {
   findUpcomingTournament,
   formatTournamentCountdown,
@@ -106,6 +107,39 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
     (qualification?.contactIds.length ?? 0) - officialQualified.length,
   );
   const latestResult = state.tournaments.results.at(-1);
+  const scheduleRows = TOURNAMENT_LEVEL_ORDER.map((level) => {
+    const definition = TOURNAMENT_DEFINITIONS[level];
+    const completed = upcoming
+      ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season)
+      : undefined;
+    const missed = state.tournaments.missedTournaments
+      .some((entry) => entry.level === level && entry.season === upcoming?.season);
+    const isNext = upcoming?.level === level;
+    const isQualified = qualification?.level === level && qualification.season === upcoming?.season;
+    // Not played yet this season: the previous season's result stays visible (12/10/2026).
+    const previous = upcoming && !completed && !missed && !isNext && !isQualified
+      ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season - 1)
+      : undefined;
+    const shown = completed ?? previous;
+    const status = shown
+      ? `Completato · stagione ${shown.season}`
+      : missed
+        ? "Non disputato"
+        : isNext
+          ? "Torneo in arrivo"
+          : isQualified
+            ? `${qualification.contactIds.length} qualificati`
+            : "In attesa";
+    return { level, definition, completed, previous, shown, isNext, status };
+  });
+  // Concept R1 (13/10/2026): the right panel follows the selected row; it opens on the
+  // latest tournament played, the upcoming one shows the Qualificati as before.
+  const [selectedLevel, setSelectedLevel] = useState<TournamentLevel>();
+  const latestShown = scheduleRows
+    .filter((row) => row.shown)
+    .sort((a, b) => (b.shown?.completedAt ?? 0) - (a.shown?.completedAt ?? 0))[0];
+  const selectedRow = scheduleRows.find((row) => row.level === selectedLevel && (row.shown || row.isNext)) ??
+    latestShown ?? scheduleRows.find((row) => row.isNext);
   const qualificationTarget = qualification
     ? { level: qualification.level, season: qualification.season }
     : latestResult
@@ -161,44 +195,28 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
           <div className="season-schedule-head" aria-hidden="true">
             <span>Mese</span><span>Torneo</span><span>Stato</span><span>Progresso stagione</span>
           </div>
-          {TOURNAMENT_LEVEL_ORDER.map((level, levelIndex) => {
-            const definition = TOURNAMENT_DEFINITIONS[level];
-            const completed = upcoming
-              ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season)
-              : undefined;
-            const missed = [...state.tournaments.missedTournaments]
-              .reverse()
-              .find((entry) => entry.level === level && entry.season === upcoming?.season);
-            const isNext = upcoming?.level === level;
-            const isQualified = qualification?.level === level && qualification.season === upcoming?.season;
-            // Not played yet this season: the previous season's result stays visible (12/10/2026).
-            const previous = upcoming && !completed && !missed && !isNext && !isQualified
-              ? getResultForLevelAndSeason(state.tournaments.results, level, upcoming.season - 1)
-              : undefined;
-            const shown = completed ?? previous;
-            const status = shown
-              ? `Completato · stagione ${shown.season}`
-              : missed
-                ? "Non disputato"
-                : isNext
-                  ? "Torneo in arrivo"
-                  : isQualified
-                    ? `${qualification.contactIds.length} qualificati`
-                    : "In attesa";
+          {scheduleRows.map(({ level, definition, completed, previous, shown, isNext, status }, levelIndex) => {
+            const selectable = Boolean(shown) || isNext;
+            const selected = selectedRow?.level === level;
             const rowClass = [
               "season-schedule-row",
-              shown ? "is-completed is-clickable" : "",
+              shown ? "is-completed" : "",
+              selectable ? "is-clickable" : "",
               previous ? "is-previous" : "",
               isNext ? "is-next" : "",
+              selected ? "is-selected" : "",
             ].filter(Boolean).join(" ");
             return (
               <button
                 key={level}
                 type="button"
                 className={rowClass}
-                disabled={!shown}
-                onClick={() => shown && onOpenResult(shown)}
-                aria-label={shown ? `Apri i risultati di ${definition.label}, stagione ${shown.season}` : undefined}
+                disabled={!selectable}
+                aria-pressed={selectable ? selected : undefined}
+                onClick={() => setSelectedLevel(level)}
+                aria-label={shown
+                  ? `Resoconto di ${definition.label}, stagione ${shown.season}`
+                  : isNext ? `Qualificati per ${definition.label}` : undefined}
               >
                 <time><strong>{definition.calendarMonth.toString().padStart(2, "0")}</strong><small>{monthShortLabel[definition.calendarMonth]}</small></time>
                 <span className="schedule-name"><strong>{definition.label}</strong></span>
@@ -211,6 +229,14 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
           })}
         </section>
 
+        {selectedRow?.shown ? (
+          <TournamentRecap
+            key={selectedRow.shown.id}
+            result={selectedRow.shown}
+            previousSeason={Boolean(selectedRow.previous)}
+            onOpenDetails={() => selectedRow.shown && onOpenResult(selectedRow.shown)}
+          />
+        ) : (
         <section className="qualified-team" aria-labelledby="qualified-team-title">
           <header><h2 id="qualified-team-title">Qualificati</h2><span>{officialQualified.length} atlet{officialQualified.length === 1 ? "a" : "i"}{qualificationByeCount > 0 ? ` · ${qualificationByeCount} bye` : ""}</span></header>
           {officialQualified.length > 0 && qualification ? (
@@ -249,6 +275,7 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
             </div>
           )}
         </section>
+        )}
       </div>
     </div>
   );
