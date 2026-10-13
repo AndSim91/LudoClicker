@@ -39,6 +39,8 @@
 .iscene-box > svg,
 .iscene-box > div,
 .iscene-step > svg,
+.iscene-idle-arm > svg,
+.iscene-idle-spin > svg,
 .iscene-arm > svg,
 .iscene-staff > svg {
   position: absolute;
@@ -231,31 +233,13 @@
   92%, 100% { transform: rotate(calc(var(--dir) * 360deg)) scaleY(1); }
 }
 
-/* ---- The walking instructor, the phone, the bulb ---- */
+/* ---- The walking instructor and the bulb ---- */
 .iscene-step { animation: iscene-step 0.5s steps(1) infinite; }
 .iscene-step.is-b { animation-delay: -0.25s; }
 
 @keyframes iscene-step {
   0% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-.iscene-phone-glow {
-  opacity: 0.6;
-  animation: iscene-glow 3s ease-in-out infinite;
-}
-
-@keyframes iscene-glow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.9; }
-}
-
-.iscene-phone-thumb { animation: iscene-scroll 1.6s ease-in-out infinite; }
-
-@keyframes iscene-scroll {
-  0%, 20% { transform: translateY(0); opacity: 1; }
-  60% { transform: translateY(calc(-5 * var(--s))); opacity: 1; }
-  70%, 100% { transform: translateY(calc(-5 * var(--s))); opacity: 0; }
 }
 
 .iscene-box.iscene-bulb {
@@ -267,6 +251,72 @@
 @keyframes iscene-sway {
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(3deg); }
+}
+
+/* ---- Istruttore a riposo (13/10): sword tricks at random, A B D E I of the concepts ----
+   Shoulder at the box centre, hand at 64% 56%. Every trick starts and ends in guard. */
+.iscene-idle-arm,
+.iscene-idle-toss,
+.iscene-idle-spin,
+.iscene-idle-ghost {
+  position: absolute;
+  inset: 0;
+}
+
+.iscene-idle-arm { transform-origin: 50% 50%; }
+.iscene-idle-spin,
+.iscene-idle-ghost { transform-origin: 64% 56%; }
+.iscene-idle-ghost { transform: rotate(var(--g)); }
+
+.is-trick-a .iscene-idle-arm { animation: idle-a-arm 3s ease-in-out both; }
+.is-trick-a .iscene-idle-spin { animation: idle-a-spin 3s ease-in-out both; }
+@keyframes idle-a-arm { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(6deg); } }
+@keyframes idle-a-spin {
+  0% { transform: rotate(0deg); }
+  28% { transform: rotate(360deg); }
+  55%, 100% { transform: rotate(720deg); }
+}
+
+.is-trick-b .iscene-idle-arm { animation: idle-b-arm 3.6s ease-in-out both; }
+.is-trick-b .iscene-idle-spin { animation: idle-b-spin 3.6s linear both; }
+@keyframes idle-b-arm {
+  0%, 100% { transform: rotate(0deg); }
+  12%, 62% { transform: rotate(-35deg); }
+  37%, 87% { transform: rotate(30deg); }
+}
+@keyframes idle-b-spin { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
+
+.is-trick-d .iscene-idle-arm { animation: idle-d-arm 2.6s ease-in-out both; }
+.is-trick-d .iscene-idle-toss { animation: idle-d-toss 2.6s both; }
+.is-trick-d .iscene-idle-spin { animation: idle-d-spin 2.6s ease-in-out both; }
+@keyframes idle-d-arm { 0%, 60%, 100% { transform: rotate(0deg); } 12% { transform: rotate(-28deg); } }
+@keyframes idle-d-toss {
+  0%, 8% { transform: translateY(0); animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
+  33% { transform: translateY(calc(-18 * var(--s))); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  62%, 100% { transform: translateY(0); }
+}
+@keyframes idle-d-spin { 0%, 10% { transform: rotate(0deg); } 62%, 100% { transform: rotate(720deg); } }
+
+/* E: arm up, the blade flat over the head; its length grows and shrinks like a rotor seen from the side. */
+.is-trick-e .iscene-idle-arm { animation: idle-e-arm 3.2s ease-in-out both; }
+.is-trick-e .iscene-idle-spin { animation: idle-e-spin 3.2s ease-in-out both; }
+@keyframes idle-e-arm { 0%, 100% { transform: rotate(0deg); } 15%, 85% { transform: rotate(-84deg); } }
+@keyframes idle-e-spin {
+  0%, 100% { transform: rotate(0deg) scaleY(1); }
+  15%, 38.3%, 61.7%, 85% { transform: rotate(174deg) scaleY(1); }
+  20.8%, 32.5%, 44.2%, 55.8%, 67.5%, 79.2% { transform: rotate(174deg) scaleY(0.15); }
+  26.7%, 50%, 73.3% { transform: rotate(174deg) scaleY(-1); }
+}
+
+/* I: fast spins with a golden trail (three fading copies behind), then a sudden stop in guard. */
+.is-trick-i .iscene-idle-arm { animation: idle-a-arm 2s ease-in-out both; }
+.is-trick-i .iscene-idle-spin { animation: idle-i-spin 2s linear both; }
+.is-trick-i .iscene-idle-ghost .iscene-idle-spin { animation-name: idle-i-trail; }
+@keyframes idle-i-spin { 0% { transform: rotate(0deg); } 70%, 100% { transform: rotate(1080deg); } }
+@keyframes idle-i-trail {
+  0% { transform: rotate(0deg); opacity: 1; }
+  66% { opacity: 1; }
+  70%, 100% { transform: rotate(1080deg); opacity: 0; }
 }
 
 /* Still off screen and with «Riduci animazioni»: without animation the layers leave the compositor. */

@@ -3,6 +3,7 @@ import {
   getKataLevel,
   getSceneStudentCount,
   getSceneWeapons,
+  pickIdleTrick,
   pickStaffMove,
   planInstructorScene,
 } from "./instructorLesson";
@@ -54,5 +55,12 @@ describe("Lezione degli Istruttori", () => {
     expect(pickStaffMove("otto", () => 0)).toBe("mulino");
     expect(pickStaffMove("mulino", () => 0.99)).toBe("spazzata");
     expect(pickStaffMove(undefined, () => 0)).toBe("otto");
+  });
+
+  it("picks the sword tricks at random, never the same twice in a row (Andrea, 13/10)", () => {
+    expect(pickIdleTrick(undefined, () => 0)).toBe("a");
+    expect(pickIdleTrick("a", () => 0)).toBe("b");
+    expect(pickIdleTrick("i", () => 0.99)).toBe("e");
+    for (let roll = 0; roll < 1; roll += 0.05) expect(pickIdleTrick("d", () => roll)).not.toBe("d");
   });
 });

@@ -121,3 +121,21 @@ export function pickStaffMove(current: StaffMove | undefined, random: () => numb
   const options = STAFF_MOVES.filter((move) => move !== current);
   return options[Math.floor(random() * options.length)] ?? STAFF_MOVES[0];
 }
+
+/**
+ * Istruttore a riposo (Andrea, 13/10): without courses he practises sword tricks on his
+ * own, one at a time at random (concepts A rin di polso, B otto, D lancio e presa,
+ * E elicottero, I freestyle con scia). The lengths match instructor-scene.css.
+ */
+export const IDLE_TRICK_MS = { a: 3_000, b: 3_600, d: 2_600, e: 3_200, i: 2_000 } as const;
+export type IdleTrick = keyof typeof IDLE_TRICK_MS;
+const IDLE_TRICKS = Object.keys(IDLE_TRICK_MS) as IdleTrick[];
+
+/** Any trick but the last one. */
+export function pickIdleTrick(previous: IdleTrick | undefined, random: () => number = Math.random): IdleTrick {
+  const choices = IDLE_TRICKS.filter((trick) => trick !== previous);
+  return choices[Math.min(choices.length - 1, Math.floor(random() * choices.length))];
+}
+
+/** In guard between two tricks. */
+export const idlePauseMs = (random: () => number = Math.random) => 1_200 + random() * 1_800;

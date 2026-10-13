@@ -6,11 +6,15 @@ import { ATHLETE_INK, athleteBody } from "./athleteShape";
 import {
   ROUND_BACK_MS,
   ROUND_STOP_MS,
+  IDLE_TRICK_MS,
   SCENE_HEIGHT,
   SCENE_TOP,
+  idlePauseMs,
   nextRoundDelayMs,
+  pickIdleTrick,
   pickStaffMove,
   planInstructorScene,
+  type IdleTrick,
   type KataLevel,
   type SceneStudent,
   type StaffMove,
@@ -20,7 +24,7 @@ import {
  * «Lezione degli Istruttori» (13/10, Andrea): the scene above the Ufficio
  * formazione in the Instructors card, Modalità Onde only. Static parts (gym,
  * bodies) are SVG; every moving part (arms, staffs, the walking instructor, the
- * phone) is its own small HTML layer that the compositor turns or slides with
+ * practising sword) is its own small HTML layer that the compositor turns or slides with
  * transform and opacity (instructor-scene.css). Still off screen, with «Riduci
  * animazioni» and without students.
  */
@@ -184,23 +188,67 @@ function Walker({ x, f, tunic }: { x: number; f: 1 | -1; tunic: string }) {
   );
 }
 
-/** No course running: the instructor sits in the corner scrolling the socials (the seated Style judge). */
-function Scroller({ tunic }: { tunic: string }) {
-  const x = 26;
-  const hx = x - 3;
+/** Holds the sword by the hilt, centred on the hand, blade up. */
+function Saber({ x, hand }: { x: number; hand: number }) {
   return (
-    <FigureBox x={x}>
+    <svg viewBox={boxView(x)} aria-hidden="true">
+      <Blade x1={hand} y1={111} x2={hand} y2={73} color={INSTRUCTOR_BLADE} />
+      <line x1={hand} y1={111} x2={hand} y2={122} stroke="#4a5866" strokeWidth={3.6} strokeLinecap="round" />
+      <line x1={hand} y1={115} x2={hand} y2={118} stroke="#8fa3b3" strokeWidth={3.9} />
+    </svg>
+  );
+}
+
+interface IdleTurn { trick?: IdleTrick; last?: IdleTrick; n: number }
+
+/** From a trick to the pause in guard, from the pause to a new trick. */
+const advanceTurn = (current: IdleTurn): IdleTurn => current.trick
+  ? { last: current.trick, n: current.n }
+  : { trick: pickIdleTrick(current.last), last: current.last, n: current.n + 1 };
+
+/**
+ * No course running (Andrea, 13/10): the instructor practises on his own, a sword trick
+ * at random (A, B, D, E, I of the concepts), then a pause in guard. Each trick remounts
+ * the figure, so its CSS animations start together from the guard pose.
+ */
+function Practicer({ tunic, moving }: { tunic: string; moving: boolean }) {
+  const x = 36;
+  const hand = x + 14;
+  const [turn, setTurn] = useState<IdleTurn>({ n: 0 });
+  // The trick ends with its arm animation (a busy page starts it late), the pause with a
+  // timer; the timer also closes a trick whose animation never ran.
+  useEffect(() => {
+    if (!moving) return undefined;
+    const timer = window.setTimeout(
+      () => setTurn(advanceTurn),
+      turn.trick ? IDLE_TRICK_MS[turn.trick] * 2 : idlePauseMs(),
+    );
+    return () => window.clearTimeout(timer);
+  }, [moving, turn]);
+  const trick = moving ? turn.trick : undefined;
+  return (
+    <FigureBox key={turn.n} x={x} className={trick ? `iscene-idle is-trick-${trick}` : "iscene-idle"}>
       <svg viewBox={boxView(x)} aria-hidden="true">
-        <path d={`M${x - 12} 136 H${x + 6} M${x - 11} 136 V115 M${x - 10} 136 V150 M${x + 4} 136 V150`} stroke="#3b5566" strokeWidth={3} fill="none" strokeLinecap="round" />
-        <path className="iscene-limb is-thin" d={`M${hx} 113 L${hx} 133 L${x + 10} 133 L${x + 11} 150`} />
-        <path d={`M${hx - 5} 112 L${hx + 5} 112 L${hx + 6} 132 L${x + 9} 131 L${x + 10} 138 L${hx - 7} 138 Z`} fill={tunic} />
-        <rect x={hx - 6} y={124} width={12} height={3} rx={1} fill={BELT} />
-        <circle cx={hx + 2} cy={108} r={6.5} fill={ATHLETE_INK} />
-        <path className="iscene-limb is-thin" d={`M${hx} 118 L${hx + 6} 127 L${hx + 10} 123`} />
-        <rect x={hx + 9} y={114} width={6} height={9} rx={1} fill={ATHLETE_INK} stroke="#6cd3d6" strokeWidth={1} />
+        <path className="iscene-limb" d={athleteBody(x)} />
+        <Tunic x={x} f={1} color={tunic} />
+        <circle cx={x} cy={96} r={7} fill={ATHLETE_INK} />
       </svg>
-      <div className="iscene-phone-glow"><svg viewBox={boxView(x)} aria-hidden="true"><rect x={hx + 9} y={114} width={6} height={9} rx={1} fill="#6cd3d6" /></svg></div>
-      <div className="iscene-phone-thumb"><svg viewBox={boxView(x)} aria-hidden="true"><rect x={hx + 10.5} y={119} width={3} height={1.4} rx={0.6} fill="#fff" /></svg></div>
+      <div
+        className="iscene-idle-arm"
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget) setTurn(advanceTurn);
+        }}
+      >
+        <svg viewBox={boxView(x)} aria-hidden="true"><path className="iscene-limb" d={`M${x} 110 L${hand} 116`} /></svg>
+        {trick === "i" ? [20, 40, 60].map((angle, index) => (
+          <div key={angle} className="iscene-idle-ghost" style={{ "--g": `${-angle}deg`, opacity: 0.36 - index * 0.12 } as CSSProperties}>
+            <div className="iscene-idle-spin"><Saber x={x} hand={hand} /></div>
+          </div>
+        )) : null}
+        <div className="iscene-idle-toss">
+          <div className="iscene-idle-spin"><Saber x={x} hand={hand} /></div>
+        </div>
+      </div>
     </FigureBox>
   );
 }
@@ -380,7 +428,7 @@ export const InstructorScene = memo(function InstructorScene({
       <Gym width={width} stage={plan.stage} />
       {plan.stage < 2 ? <Bulb width={width} /> : null}
       {back.map((student, index) => <Pupil key={`b${index}`} student={student} level={plan.level} />)}
-      {hasInstructors && !teaching && shownPhase === "lead" ? <Scroller tunic={tunic} /> : null}
+      {hasInstructors && !teaching && shownPhase === "lead" ? <Practicer tunic={tunic} moving={active} /> : null}
       {teaching && shownPhase === "lead" ? <Instructor x={plan.spot} tunic={tunic} level={plan.level} /> : null}
       {/* A round already started ends even if the courses empty the rows meanwhile. */}
       {shownPhase !== "lead" ? (
