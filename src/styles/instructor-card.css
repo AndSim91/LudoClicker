@@ -535,3 +535,45 @@
   .instructor-training-row { grid-template-columns: minmax(0, 1fr); }
   .instructor-training-cell.is-locked { display: none; }
 }
+
+/* ---------- B2 «Fascia di pausa» (13/10): tutti hanno già fatto il corso dell'anno ---------- */
+.instructor-annual-pause {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--annual-pause, #f0a35a);
+  border-radius: 0 6px 6px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.instructor-annual-pause b { color: var(--annual-pause, #f0a35a); }
+
+/* Onde: la fascia sta sopra la mappa, che resta visibile ma attenuata (altezza fissa). */
+.instructor-sector-card.is-quadrants .instructor-sector-map { position: relative; }
+
+.instructor-sector-card.is-quadrants .instructor-annual-pause {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  right: 14px;
+  left: 14px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  background: rgb(240 163 90 / 14%);
+  backdrop-filter: blur(2px);
+}
+
+.instructor-sector-card.is-quadrants .is-annual-pause .instructor-sector-map > :not(.instructor-annual-pause) {
+  opacity: 0.45;
+}
+
+/* Outlook: barra messaggio sobria, ferma in cima alla tabella. */
+.instructor-sector-card.is-table .instructor-annual-pause {
+  --annual-pause: var(--warning);
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  margin: 0 0 6px;
+  background: var(--surface);
+  color: var(--ink);
+}

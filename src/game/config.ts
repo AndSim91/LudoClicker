@@ -166,8 +166,13 @@ export const GAME_CONFIG = {
   recentEmailsLimit: 500,
   /** Available contacts kept as objects; the ordinary ones beyond it become counters. */
   materialAvailableContactsLimit: 100,
-  /** Enrolled members kept as objects; the ordinary ones beyond it are grouped. */
-  materialEnrolledMembersLimit: 2_000,
+  /** Enrolled members kept as objects; the ordinary ones beyond it are grouped (5.000 dal 13/10). */
+  materialEnrolledMembersLimit: 5_000,
+  /**
+   * Natural talents never grouped: Arena + Stile di base at least this share of the
+   * highest roll of their rarity at the current Genetica (Andrea, 13/10).
+   */
+  materialTalentShare: 0.95,
   // Grouping starts only this far past the limit, then brings it back to the limit:
   // members taken out for a course do not trigger a regrouping at every step.
   materialEnrolledMembersSlack: 250,

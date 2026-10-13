@@ -17,6 +17,7 @@ import {
   getOfficialStatsVisibilityTier,
 } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
+import { GAME_CONFIG } from "../../game/config";
 import { getGroupedMemberCount } from "../../game/memberGroups";
 import type {
   Collaborator,
@@ -497,7 +498,7 @@ export function MemberList({
               ? <><strong>{filteredMembers.length.toLocaleString("it-IT")}</strong> di {members.length.toLocaleString("it-IT")} iscritti</>
               : <><strong>{members.length.toLocaleString("it-IT")}</strong> iscritti</>}
             {groupedMembers > 0 ? (
-              <span title="Ancora senza scheda: nome e storia arrivano al primo corso.">
+              <span title={`Oltre i ${GAME_CONFIG.materialEnrolledMembersLimit.toLocaleString("it-IT")} iscritti i meno forti restano senza scheda per non rallentare il gioco: hanno già le loro Forme e la ricevono al prossimo corso.`}>
                 {" "}+ {groupedMembers.toLocaleString("it-IT")} senza scheda
               </span>
             ) : null}

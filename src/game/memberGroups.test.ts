@@ -9,6 +9,7 @@ import {
   departGroupedMembers,
   getGroupedMemberCount,
   groupExcessMembers,
+  isAnnualTeachingExhausted,
   materializeGroupedMembers,
   sampleBinomial,
 } from "./memberGroups";
@@ -63,6 +64,43 @@ describe("member groups", () => {
     expect(ids.has("weakest")).toBe(false);
     expect(memberCount(grouped)).toBe(grouped.school.activeMembers);
     expect(getMonthlyMemberFees(grouped)).toBe(feesBefore);
+  });
+
+  it("groups Comuni before Rari and keeps natural talents (Andrea, 13/10)", () => {
+    const base = withMembers(LIMIT);
+    const person = base.contacts.find((contact) => contact.status === "enrolled")!;
+    const weakRare: Contact = { ...person, id: "weak-rare", rarity: "rare", arenaBase: 0, styleBase: 0 };
+    const strongCommon: Contact = { ...person, id: "strong-common", rarity: "common", arenaBase: 60, styleBase: 60 };
+    const talent: Contact = { ...person, id: "talent", rarity: "common", arenaBase: 75, styleBase: 72 };
+    const state: GameState = {
+      ...base,
+      contacts: [...base.contacts, weakRare, strongCommon, talent],
+      school: { ...base.school, activeMembers: base.school.activeMembers + 3 },
+    };
+
+    const ids = new Set(groupExcessMembers(state).contacts.map((contact) => contact.id));
+
+    expect(ids.has("weak-rare")).toBe(true);
+    expect(ids.has("talent")).toBe(true);
+  });
+
+  it("knows when everyone has used this year's course (Andrea, 13/10)", () => {
+    const base = withMembers(3);
+    const month = 9 + 12 * 4; // settembre: niente pausa estiva
+    const year = getFormTrainingYear(month);
+    const trained = (contact: Contact): Contact => contact.status === "enrolled"
+      ? { ...contact, lastFormTrainingYear: year, formTrainingYearCount: 1 }
+      : contact;
+    const state: GameState = {
+      ...base,
+      school: { ...base.school, currentMonth: month },
+      unlocks: { ...base.unlocks, forms: true },
+      contacts: base.contacts.map(trained),
+    };
+
+    expect(isAnnualTeachingExhausted(state)).toBe(true);
+    expect(isAnnualTeachingExhausted({ ...state, contacts: base.contacts })).toBe(false);
+    expect(isAnnualTeachingExhausted({ ...state, school: { ...state.school, currentMonth: month - 1 } })).toBe(false);
   });
 
   it("groups members with weapon preferences and gives them back", () => {

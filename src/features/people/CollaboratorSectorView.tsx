@@ -19,6 +19,7 @@ import { getCollaboratorAssignmentCounts } from "../../game/collaboratorManageme
 import { getEquipmentAutomaticRepairTarget } from "../../game/equipment";
 import { hasGadgetRuntimeWork } from "../../game/gadgetEconomy";
 import { isSummerBreak } from "../../game/calendar";
+import { isAnnualTeachingExhausted } from "../../game/memberGroups";
 import {
   selectActiveEmail,
   selectAthleticPreparationInstructorIds,
@@ -367,7 +368,7 @@ function InstructorSectorCard({
   onQuickTeacherTraining?: (kind: "instructor" | "technician") => void;
 }) {
   const state = useGameStateSlices(
-    ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "network", "school", "unlocks", "upgrades"],
+    ["acquisitionEvents", "automation", "collaboratorManagement", "collaborators", "contacts", "equipment", "gadgets", "memberGroups", "network", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const isPaused = useGameTimeSource()?.isPaused ?? false;
@@ -427,6 +428,17 @@ function InstructorSectorCard({
   const technicianCount = instructors.filter((instructor) => (instructor.technicianForms ?? []).length > 0).length;
   const preparationInstructorCount = selectAthleticPreparationInstructorIds(state).size;
   const summerBreak = isSummerBreak(state.school.currentMonth);
+  // B2 (Andrea, 13/10): Istruttori fermi perché tutti hanno già fatto il corso dell'anno.
+  const annualPause = useMemo(
+    () => studentCount === 0 && instructors.length > 0 && isAnnualTeachingExhausted(state),
+    [instructors.length, state, studentCount],
+  );
+  const pauseBand = annualPause ? (
+    <p className="instructor-annual-pause" role="status">
+      <b>Pausa didattica fino a settembre.</b> Tutti gli iscritti hanno già seguito il loro
+      corso di quest'anno. Gli Istruttori riprendono a settembre, dopo la pausa estiva.
+    </p>
+  ) : null;
 
   const office = onQuickTeacherTraining ? (
     <QuickTeacherTraining
@@ -479,8 +491,9 @@ function InstructorSectorCard({
       </header>
 
       {outlook ? (
-        <div className="instructor-sector-body">
+        <div className={`instructor-sector-body${annualPause ? " is-annual-pause" : ""}`}>
           <div className="instructor-table-scroll">
+            {pauseBand}
             <InstructorCoverageTable
               counts={formCoverage}
               activity={activity}
@@ -506,8 +519,9 @@ function InstructorSectorCard({
           </aside>
         </div>
       ) : (
-        <div className="instructor-sector-body">
+        <div className={`instructor-sector-body${annualPause ? " is-annual-pause" : ""}`}>
           <div className="instructor-sector-map">
+            {pauseBand}
             <FormCoverageMap
               counts={formCoverage}
               activity={activity}

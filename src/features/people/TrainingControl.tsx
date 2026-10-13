@@ -735,7 +735,13 @@ export function TrainingControl({
 
   if (academicallyAvailable.length === 0) {
     if (!annualTrainingAvailable) {
-      return <div className={`training-locked${variantClass}`}><strong>Corsi annuali completati</strong></div>;
+      // C2 (Andrea, 13/10): quanti corsi dell'anno sono stati usati e quando si riparte.
+      return (
+        <div className={`training-locked${variantClass}`}>
+          <strong>Corsi dell'anno {annualTrainingLimit}/{annualTrainingLimit}</strong>
+          <span>riparte a settembre</span>
+        </div>
+      );
     }
     const latestForm = getFormDefinition(student.forms.at(-1)!);
     return <div className={`training-locked${variantClass}`}><strong title={`Fino alla ${latestForm?.longName ?? "ultima Forma"}`}>Percorso completato</strong></div>;

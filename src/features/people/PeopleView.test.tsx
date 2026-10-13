@@ -2706,7 +2706,8 @@ describe("PeopleView", () => {
       />,
     );
 
-    expect(screen.getByText("Corsi annuali completati")).toBeVisible();
+    expect(screen.getByText("Corsi dell'anno 1/1")).toBeVisible();
+    expect(screen.getByText("riparte a settembre")).toBeVisible();
     expect(screen.queryByText("Percorso completato alla Forma 7")).not.toBeInTheDocument();
   });
 

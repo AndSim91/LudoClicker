@@ -3134,7 +3134,16 @@ Un'unica pagina, in quest'ordine:
   nel browser): **Tabella**, 25 righe per pagina con le colonne ordinabili, e
   **Schede**, 24 riquadri per pagina con gli stessi dati (rarità, percorso e
   Forme, Arena e Stile, stato, prossima Forma, preferito e annullamento).
-  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste.
+  Filtri, ordinamento e conteggio «senza scheda» sono comuni alle due viste;
+  il tooltip del conteggio spiega che sono i meno forti oltre il limite, che
+  hanno già le loro Forme e ricevono una scheda al prossimo corso. Nella
+  colonna Prossimo passo, chi ha usato tutti i corsi dell'anno mostra «Corsi
+  dell'anno 1/1» (o 2/2, 3/3) con «riparte a settembre» (C2, 13/10). Nella
+  scheda Istruttori, quando nessun allievo è in corso perché tutti, con e senza
+  scheda, hanno già usato i corsi dell'anno, una fascia «Pausa didattica fino a
+  settembre» sta sopra la mappa (Onde, mappa attenuata) o in cima alla tabella
+  (Outlook), senza cambiare l'altezza della scheda (B2, 13/10;
+  `isAnnualTeachingExhausted`).
   In Modalità Onde (06/10) le Forme di ogni iscritto sono la mappa del percorso
   completo (F1, Corso X se sbloccato, F2, Corso Y, una corsia per Spada Lunga,
   Staffa e Doppie Spade Corte con le Forme 3–5, poi F6 e F7): le Forme imparate
@@ -4957,13 +4966,19 @@ le notifiche sono scritte direttamente nei moduli di gioco.
   gioco, il massimo che l'automazione conta in un passo (`getGameStepMs`,
   campo `minStepMs` dell'azione `TICK`; simulazioni e recupero offline restano
   a 250 ms);
-- oltre 2.000 iscritti (con un margine di 250 prima di rifare i gruppi), gli
-  ordinari più deboli senza tornei, formazione in corso o ruoli diventano
-  contatori (`memberGroups`: rarità, provenienza, Forme, preferenze d'arma,
-  contatori annuali e anno del Corso Agonisti finché contano) e tornano persone
-  quando servono per un corso; «più deboli» conta anche i bonus del Corso
-  Agonisti, che chi finisce in un gruppo perde insieme al numero di corsi fatti
-  (decisione di Andrea, 05/10);
+- oltre 5.000 iscritti (2.000 fino al 13/10; con un margine di 250 prima di
+  rifare i gruppi), gli ordinari senza tornei, formazione in corso o ruoli
+  diventano contatori (`memberGroups`: rarità, provenienza, Forme, preferenze
+  d'arma, contatori annuali e anno del Corso Agonisti finché contano) e tornano
+  persone quando servono per un corso; si raggruppano prima i Comuni, poi i
+  Rari, infine gli Ultra Rari, e in ciascuna rarità i più deboli (decisione di
+  Andrea, 13/10); «più deboli» conta anche i bonus del Corso Agonisti, che chi
+  finisce in un gruppo perde insieme al numero di corsi fatti (decisione di
+  Andrea, 05/10); non si raggruppano mai Leggendari, preferiti e talenti
+  naturali, cioè chi ha Arena + Stile di base almeno al 95% del massimo della
+  sua rarità con la Genetica attuale (`materialTalentShare`); chi torna persona
+  riceve nome e valori nuovi; la Preparazione atletica raggiunge solo chi ha
+  una scheda, quindi gli iscritti senza scheda non crescono;
 - un recupero lungo si ferma dopo ~12 ms reali e prosegue al tick successivo
   (`timeBudgetMs` del `TICK`), così la pagina continua a disegnarsi;
 - l'insegnamento automatico salta il suo giro quando nessun Istruttore ha un

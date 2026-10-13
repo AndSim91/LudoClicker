@@ -1,15 +1,18 @@
 import { getAthleteGeneticsMultiplier } from "./reputation";
 import { createRandomProspect } from "../content/prospectDirectory";
 import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
-import { advanceRandomSeed, rollAthleteBaseStats } from "./athleteStats";
-import { getFormTrainingYear, getSchoolYear } from "./calendar";
+import { advanceRandomSeed, RARITY_BASE_RANGE, rollAthleteBaseStats } from "./athleteStats";
+import { getFormTrainingYear, getSchoolYear, isSummerBreak } from "./calendar";
+import { getFormTrainingCount } from "../content/forms";
+import { areAllFormBranchesUnlocked, getAnnualFormTrainingLimit, isCourseXUnlocked } from "../content/upgrades";
+import { getAutomaticFormCandidates } from "./formProgression";
 import { GAME_CONFIG } from "./config";
 import { makeGameId } from "./ids";
 import { nextRandom } from "./random";
 import type { Contact, GameState, MemberGroup } from "./types";
 
 // Fase 7.5: ordinary members beyond GAME_CONFIG.materialEnrolledMembersLimit live as
-// counters. Below the limit nothing changes, so ordinary games never see a group.
+// counters (Preparazione atletica only reaches people, so grouped members never grow). Below the limit nothing changes, so ordinary games never see a group.
 
 export function getGroupedMemberCount(state: Pick<GameState, "memberGroups">): number {
   let count = 0;
@@ -113,9 +116,20 @@ function mergeGroups(groups: Iterable<MemberGroup>, currentMonth: number): Membe
   return [...merged.values()];
 }
 
-function isGroupable(contact: Contact, keep: ReadonlySet<string>): contact is Contact & {
-  rarity: MemberGroup["rarity"];
-} {
+/** Comuni first, then Rari, then Ultra Rari (Andrea, 13/10). */
+const GROUPING_RARITY_ORDER: Record<MemberGroup["rarity"], number> = { common: 0, rare: 1, "ultra-rare": 2 };
+
+/** A natural talent: natural Arena + Stile near the best roll of the rarity. */
+function isNaturalTalent(contact: Contact & { rarity: MemberGroup["rarity"] }, geneticsMultiplier: number): boolean {
+  const best = RARITY_BASE_RANGE[contact.rarity][1] * 2 * geneticsMultiplier;
+  return (contact.arenaBase ?? 0) + (contact.styleBase ?? 0) >= best * GAME_CONFIG.materialTalentShare;
+}
+
+function isGroupable(
+  contact: Contact,
+  keep: ReadonlySet<string>,
+  geneticsMultiplier: number,
+): contact is Contact & { rarity: MemberGroup["rarity"] } {
   return contact.status === "enrolled" &&
     contact.rarity !== "legendary" &&
     !contact.specialProfileId &&
@@ -123,7 +137,8 @@ function isGroupable(contact: Contact, keep: ReadonlySet<string>): contact is Co
     !contact.favorite &&
     !contact.training &&
     !contact.tournamentExperience &&
-    !keep.has(contact.id);
+    !keep.has(contact.id) &&
+    !isNaturalTalent(contact as Contact & { rarity: MemberGroup["rarity"] }, geneticsMultiplier);
 }
 
 /**
@@ -159,16 +174,19 @@ export function countEnrolledContacts(contacts: readonly Contact[]): number {
 }
 
 /**
- * Groups the weakest ordinary members beyond the limit, so the strongest athletes
- * stay available as people for tournaments.
+ * Groups the ordinary members beyond the limit: Comuni first, then Rari, then Ultra
+ * Rari, the weakest first in each, so the strongest athletes stay people.
  */
 export function groupExcessMembers(state: GameState): GameState {
   const excess = countEnrolledContacts(state.contacts) - GAME_CONFIG.materialEnrolledMembersLimit;
   if (excess <= 0) return state;
   const keep = getContactsToKeep(state);
+  const geneticsMultiplier = getAthleteGeneticsMultiplier(state);
   const candidates = state.contacts
-    .filter((contact) => isGroupable(contact, keep))
-    .sort((left, right) => getGroupingStrength(left) - getGroupingStrength(right))
+    .filter((contact) => isGroupable(contact, keep, geneticsMultiplier))
+    .sort((left, right) =>
+      GROUPING_RARITY_ORDER[left.rarity] - GROUPING_RARITY_ORDER[right.rarity] ||
+      getGroupingStrength(left) - getGroupingStrength(right))
     .slice(0, excess);
   if (candidates.length === 0) return state;
 
@@ -356,4 +374,37 @@ export function removeGroupedMembers(state: GameState, count: number): GameState
   return remaining === count
     ? state
     : { ...state, memberGroups: groups.length > 0 ? groups : undefined };
+}
+
+/**
+ * Pausa didattica (Andrea, 13/10): nobody, with or without a scheda, can start a
+ * Forma this training year because everyone who still has one to learn has already
+ * used the yearly courses. False in the summer break, which has its own message.
+ */
+export function isAnnualTeachingExhausted(
+  state: Pick<GameState, "collaborators" | "contacts" | "memberGroups" | "school" | "upgrades" | "unlocks">,
+): boolean {
+  if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return false;
+  const trainingYear = getFormTrainingYear(state.school.currentMonth);
+  const limit = getAnnualFormTrainingLimit(state.upgrades);
+  const courseX = isCourseXUnlocked(state.upgrades);
+  const unrestricted = areAllFormBranchesUnlocked(state.upgrades);
+  let blocked = false;
+  const check = (member: Pick<Contact, "rarity" | "forms" | "formBranchPreferences" | "lastFormTrainingYear" | "formTrainingYearCount">) => {
+    if (getAutomaticFormCandidates(member, courseX, unrestricted).length === 0) return true;
+    if (getFormTrainingCount(member, trainingYear) < limit) return false;
+    blocked = true;
+    return true;
+  };
+  // A collaborator studies with the Forme and the yearly count of his own record.
+  const staff = new Map(state.collaborators.map((collaborator) => [collaborator.contactId, collaborator]));
+  for (const contact of state.contacts) {
+    if (contact.status !== "enrolled") continue;
+    const collaborator = staff.get(contact.id);
+    if (!check(collaborator ? { ...contact, ...collaborator, rarity: contact.rarity } : contact)) return false;
+  }
+  for (const group of state.memberGroups ?? []) {
+    if (group.count > 0 && !check(group)) return false;
+  }
+  return blocked;
 }
