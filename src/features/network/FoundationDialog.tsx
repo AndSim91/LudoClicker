@@ -4,6 +4,7 @@ import {
   REPUTATION_UPGRADES,
   REPUTATION_UPGRADE_IDS,
   getReputationLevel,
+  getMonthlyNetworkRent,
   getSpentReputation,
   isValidReputationSpending,
   type PrestigeReputationPreview,
@@ -50,7 +51,8 @@ export function FoundationDialog({
     setAdded((current) => ({ ...current, [key]: Math.max(0, (current[key] ?? 0) + delta) }));
   const canAdd = (id?: ReputationUpgradeId) =>
     left > 0 && (!id || getReputationLevel(state, id) + (added[id] ?? 0) < GAME_CONFIG.reputationUpgradeMaxLevel);
-  const rentAmount = Math.round(preview.rentPerPoint * spending.rent);
+  // Like the % rows: the rent already earned plus what the points added now would bring.
+  const rentTotal = getMonthlyNetworkRent(state) + Math.round(preview.rentPerPoint * spending.rent);
 
   return (
     <div className="foundation-backdrop">
@@ -94,7 +96,7 @@ export function FoundationDialog({
             );
           })}
           <div className="foundation-row">
-            <span>Rendita del Network<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name}{rentAmount > 0 ? `, ${formatCurrency(rentAmount)} in tutto` : ""}.</small></span>
+            <span>Rendita del Network<small>Si consuma: ogni punto blocca {formatCurrency(Math.round(preview.rentPerPoint))}/mese da {state.school.name} · {formatCurrency(rentTotal)}/mese</small></span>
             <Stepper label="Rendita del Network" value={spending.rent} added={spending.rent} onDown={() => change("rent", -1)} onUp={() => change("rent", 1)} canUp={canAdd()} />
           </div>
         </div>
