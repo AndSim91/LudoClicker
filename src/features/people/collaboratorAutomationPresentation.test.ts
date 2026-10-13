@@ -227,7 +227,7 @@ describe("getCollaboratorAutomationPresentation", () => {
       emails: [],
       collaborators: [socialCollaborator],
       unlocks: { ...initial.unlocks, social: true },
-      automation: { ...initial.automation, socialContentBuffer: 50_000 },
+      automation: { ...initial.automation, socialContentBuffer: 25_000 },
       upgrades: {
         ...initial.upgrades,
         "automatic-signature": 1,
@@ -243,7 +243,7 @@ describe("getCollaboratorAutomationPresentation", () => {
     });
 
     expect(presentation.title).toBe("Contenuti Social");
-    expect(presentation.detail).toBe("+0,5% Eventi · 10,00\u00a0€/mese");
+    expect(presentation.detail).toBe("+0,5% Eventi · 20,00\u00a0€/mese");
     expect(presentation.progress).toBe(50);
     expect(presentation.progressLabel).toBe("Produzione dei prossimi contenuti Social");
     expect(presentation.durationMs).toBeGreaterThan(0);

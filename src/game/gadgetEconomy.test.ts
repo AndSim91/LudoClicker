@@ -69,8 +69,8 @@ describe("Gadget economy", () => {
     ]);
     expect(GADGET_PRODUCT_ORDER.map((productId) =>
       getGadgetUnitProfit(productId, 100)
-    )).toEqual([5, 10, 15, 20, 30, 35, 20, 35, 40, 100]);
-    expect(getGadgetUnitProfit("hoodie", 75)).toBe(30);
+    )).toEqual([10, 20, 30, 40, 60, 70, 40, 70, 80, 200]);
+    expect(getGadgetUnitProfit("hoodie", 75)).toBe(60);
     expect(GADGET_DEFINITIONS["custom-hilt"].premiumOnly).toBe(true);
   });
 
@@ -85,7 +85,7 @@ describe("Gadget economy", () => {
       "wristband",
       100,
       rarity as Parameters<typeof getGadgetUnitProfit>[2],
-    ))).toEqual([15, 22.5, 30, 37.5, 45]);
+    ))).toEqual([30, 45, 60, 75, 90]);
     expect(getGadgetRevisionCost("wristband", "rare")).toBe(625);
     expect(getGadgetRevisionCost("wristband", "secret-legendary")).toBe(1_000);
     expect(getGadgetWorkRequirement("wristband", "revision", "legendary")).toBe(

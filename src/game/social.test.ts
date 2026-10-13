@@ -15,11 +15,11 @@ describe("Social", () => {
     const levels = createInitialState(1_000).upgrades;
 
     expect(GAME_CONFIG.socialUnlockCollaborators).toBe(15);
-    expect(getSocialContentCharacters(levels)).toBe(100_000);
+    expect(getSocialContentCharacters(levels)).toBe(50_000);
     expect(getSocialFollowerChance(levels)).toBe(0.5);
     expect(getSocialDoubleFollowerChance(levels)).toBe(0);
     expect(getSocialEventPromotionBonus(0)).toBe(0);
-    expect(getSocialFollowerValue(levels)).toBe(0.1);
+    expect(getSocialFollowerValue(levels)).toBe(0.2);
   });
 
   it("adds 5% Event promotion every 1,000 followers without a cap", () => {
@@ -40,10 +40,10 @@ describe("Social", () => {
       "marketing-course": 5,
     };
 
-    expect(getSocialContentCharacters(maximum)).toBe(50_000);
+    expect(getSocialContentCharacters(maximum)).toBe(25_000);
     expect(getSocialFollowerChance(maximum)).toBe(0.95);
     expect(getSocialDoubleFollowerChance(maximum)).toBe(0.05);
-    expect(getSocialFollowerValue(maximum)).toBe(0.5);
+    expect(getSocialFollowerValue(maximum)).toBe(1);
   });
 
   it("collects sponsorships monthly and applies only A.N.D.E.R.", () => {
@@ -59,7 +59,7 @@ describe("Social", () => {
       },
     };
 
-    expect(getMonthlySocialIncome(state)).toBe(120);
+    expect(getMonthlySocialIncome(state)).toBe(240);
   });
 
   it("credits sponsorships with the monthly fees instead of content cycles", () => {
@@ -75,8 +75,8 @@ describe("Social", () => {
       now: state.school.nextFeeAt,
     });
 
-    expect(collected.school.euros).toBe(100);
-    expect(collected.statistics.eurosEarned).toBe(100);
+    expect(collected.school.euros).toBe(200);
+    expect(collected.statistics.eurosEarned).toBe(200);
     expect(collected.statistics.socialContentCycles).toBe(0);
   });
 });

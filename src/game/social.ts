@@ -6,11 +6,11 @@ import type { GameState, UpgradeLevels } from "./types";
 
 const SOCIAL_CONTENT_CHARACTERS = [
   GAME_CONFIG.socialBaseContentCharacters,
-  90_000,
-  80_000,
-  70_000,
-  60_000,
-  50_000,
+  45_000,
+  40_000,
+  35_000,
+  30_000,
+  25_000,
 ] as const;
 const SOCIAL_FOLLOWER_CHANCES = [
   GAME_CONFIG.socialBaseFollowerChance,
@@ -22,11 +22,11 @@ const SOCIAL_FOLLOWER_CHANCES = [
 ] as const;
 const SOCIAL_FOLLOWER_VALUES = [
   GAME_CONFIG.socialBaseFollowerValue,
-  0.15,
-  0.2,
   0.3,
   0.4,
-  0.5,
+  0.6,
+  0.8,
+  1,
 ] as const;
 
 function boundedLevel(levels: UpgradeLevels, id: keyof UpgradeLevels, maximum: number): number {

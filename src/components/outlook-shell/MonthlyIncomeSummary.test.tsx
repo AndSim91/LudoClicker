@@ -16,7 +16,7 @@ describe("MonthlyIncomeSummary", () => {
       forms: index === 0 ? (["form-1"] as FormId[]) : contact.forms,
     }));
     const memberFees = 80;
-    const socialIncome = 10;
+    const socialIncome = 20;
 
     render(
       <MonthlyIncomeSummary
@@ -47,7 +47,7 @@ describe("MonthlyIncomeSummary", () => {
     expect(tooltip).toHaveTextContent("Quote iscritti");
     expect(tooltip).toHaveTextContent(/80,00\s*€/);
     expect(tooltip).toHaveTextContent("Bonus Social");
-    expect(tooltip).toHaveTextContent(/10,00\s*€/);
+    expect(tooltip).toHaveTextContent(/20,00\s*€/);
     expect(tooltip).not.toHaveTextContent("Vendite Gadget (stima)");
   });
 
@@ -100,10 +100,10 @@ describe("MonthlyIncomeSummary", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/Entrate mensili: 415,00/)).toBeVisible();
+    expect(screen.getByLabelText(/Entrate mensili: 430,00/)).toBeVisible();
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent("Vendite Gadget (stima)");
     expect(hotState.gadgets.monthlyRevenue).toBeUndefined();
-    expect(tooltip).toHaveTextContent(/15,00\s*€/);
+    expect(tooltip).toHaveTextContent(/30,00\s*€/);
   });
 });

@@ -260,7 +260,7 @@ describe("game engine: progression", () => {
         unlocks: { ...initial.unlocks, collaborators: true, social: true },
         automation: {
           ...initial.automation,
-          socialContentBuffer: 99_995,
+          socialContentBuffer: 49_995,
         },
       },
       { type: "TICK", now: 2_000 },

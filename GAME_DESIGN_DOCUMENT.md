@@ -1255,15 +1255,15 @@ avanzano sempre. Quando una email richiede scrittura, la ripartizione interna è
 95% alla mail e 5% ai contenuti; questo rapporto non viene mostrato al
 giocatore. Senza email, tutta la potenza produce contenuti. **Fusione
 documenti** copia inoltre nei contenuti il 5% per livello (massimo 25%) della
-quota destinata alla mail, senza rallentarla. Un contenuto richiede 100.000
-caratteri (fino a 50.000 con Sintesi dei contenuti) e ha il 50% di probabilità
+quota destinata alla mail, senza rallentarla. Un contenuto richiede 50.000
+caratteri (fino a 25.000 con Sintesi dei contenuti; dimezzati il 13/10) e ha il 50% di probabilità
 base di ottenere un Follower (fino al 95% con Pubblicità vincente, che al 5°
 livello aggiunge il 5% di Follower doppio). Ogni Follower aggiunge anche 1 punto
 di Fama. Social non crea mai Contatti: ogni 1.000 Follower aumenta invece del
 5% l'affluenza agli Eventi, senza alcun limite massimo. Social non genera prove
 dirette, non migliora la qualità dei contatti e non accredita denaro per ciclo.
-Le sponsorizzazioni vengono riscosse con le rette mensili, a partire da 0,10 €
-per Follower (fino a 0,50 € con Corso di Marketing). Il completamento dei contenuti aggiorna Follower e statistiche ma
+Le sponsorizzazioni vengono riscosse con le rette mensili, a partire da 0,20 €
+per Follower (fino a 1 € con Corso di Marketing; raddoppiati il 13/10). Il completamento dei contenuti aggiorna Follower e statistiche ma
 non genera email interne: la posta è riservata a informazioni operative o
 narrative importanti. Le campagne manuali del vecchio sistema non esistono più.
 
@@ -4179,18 +4179,18 @@ catalogo.
 
 Il catalogo base segue questo ordine:
 
-| Prodotto                 | Costo progetto | Guadagno per pezzo al 100% | Lavoro base con P = 1 | Revisione Comune |
+| Prodotto                 | Costo progetto | Guadagno per pezzo al 100% (×2 dal 13/10) | Lavoro base con P = 1 | Revisione Comune |
 | ------------------------ | --------------: | --------------------------: | ---------------------: | ----------------: |
-| Portachiavi              |         1.000 € |                         5 € |             10 minuti |           100 € |
-| Set di Adesivi           |         2.000 € |                        10 € |             30 minuti |           250 € |
-| Polsino                  |         5.000 € |                        15 € |             60 minuti |           500 € |
-| Tazza                    |        10.000 € |                        20 € |             75 minuti |         1.000 € |
-| Maglietta                |        15.000 € |                        30 € |             90 minuti |         1.500 € |
-| Cappellino               |        20.000 € |                        35 € |            100 minuti |         2.000 € |
-| Mutande (boxer sportivi) |        25.000 € |                        20 € |            120 minuti |         2.500 € |
-| Maglietta Sportiva       |        30.000 € |                        35 € |            120 minuti |         3.000 € |
-| Felpa                    |        40.000 € |                        40 € |            150 minuti |         4.000 € |
-| Elsa personalizzata      |        50.000 € |                       100 € |            300 minuti |         5.000 € |
+| Portachiavi              |         1.000 € |                       10 € |             10 minuti |           100 € |
+| Set di Adesivi           |         2.000 € |                       20 € |             30 minuti |           250 € |
+| Polsino                  |         5.000 € |                       30 € |             60 minuti |           500 € |
+| Tazza                    |        10.000 € |                       40 € |             75 minuti |         1.000 € |
+| Maglietta                |        15.000 € |                       60 € |             90 minuti |         1.500 € |
+| Cappellino               |        20.000 € |                       70 € |            100 minuti |         2.000 € |
+| Mutande (boxer sportivi) |        25.000 € |                       40 € |            120 minuti |         2.500 € |
+| Maglietta Sportiva       |        30.000 € |                       70 € |            120 minuti |         3.000 € |
+| Felpa                    |        40.000 € |                       80 € |            150 minuti |         4.000 € |
+| Elsa personalizzata      |        50.000 € |                      200 € |            300 minuti |         5.000 € |
 
 L'Elsa personalizzata è un prodotto solo premium: appartiene al catalogo Gadget
 ma non introduce effetti di gioco sulle armi o sull'equipaggiamento.
