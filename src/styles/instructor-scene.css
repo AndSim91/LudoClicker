@@ -38,6 +38,7 @@
 
 .iscene-box > svg,
 .iscene-box > div,
+.iscene-step > svg,
 .iscene-arm > svg,
 .iscene-staff > svg {
   position: absolute;
