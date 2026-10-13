@@ -310,37 +310,51 @@ export const InstructorScene = memo(function InstructorScene({
   const walkerRef = useRef<HTMLDivElement>(null);
   // Off screen or with «Riduci animazioni» the instructor is back at his spot.
   const shownPhase: RoundPhase = active ? phase : "lead";
+  // The round follows the rows it saw when it started: the plan is rebuilt at every tick
+  // (contacts, students), and restarting the walk on each one kept the instructor
+  // walking in place by his spot (bug of 13/10).
+  const [round, setRound] = useState(() => ({ spot: plan.spot, stops: plan.stops }));
+  const planRef = useRef(plan);
+  useLayoutEffect(() => {
+    planRef.current = plan;
+  }, [plan]);
   useEffect(() => {
     if (!active || phase !== "lead") return undefined;
-    const timer = window.setTimeout(() => setPhase("out"), nextRoundDelayMs());
+    const timer = window.setTimeout(() => {
+      setRound({ spot: planRef.current.spot, stops: planRef.current.stops });
+      setPhase("out");
+    }, nextRoundDelayMs());
     return () => window.clearTimeout(timer);
   }, [active, phase]);
   // Layout effect: the walk back starts before the next paint, so the walker never flashes at its spot.
   useLayoutEffect(() => {
     const element = walkerRef.current;
+    const { spot, stops } = round;
     if (shownPhase === "lead" || !element) return undefined;
-    if (typeof element.animate !== "function" || plan.stops.length === 0) {
+    if (typeof element.animate !== "function" || stops.length === 0) {
       const timer = window.setTimeout(() => setPhase("lead"), 0);
       return () => window.clearTimeout(timer);
     }
-    const px = (units: number) => `translateX(${((units - plan.spot) * scale).toFixed(1)}px)`;
-    const last = plan.stops[plan.stops.length - 1];
+    const px = (units: number) => `translateX(${((units - spot) * scale).toFixed(1)}px)`;
+    const last = stops[stops.length - 1];
     let animation: Animation;
     if (shownPhase === "out") {
-      const n = plan.stops.length;
-      const frames: Keyframe[] = [{ transform: px(plan.spot), offset: 0, easing: "ease-in-out" }];
-      plan.stops.forEach((stop, index) => {
+      const n = stops.length;
+      const frames: Keyframe[] = [{ transform: px(spot), offset: 0, easing: "ease-in-out" }];
+      stops.forEach((stop, index) => {
         frames.push({ transform: px(stop), offset: (index + 0.45) / n, easing: "ease-in-out" });
         frames.push({ transform: px(stop), offset: (index + 1) / n, easing: "ease-in-out" });
       });
       animation = element.animate(frames, { duration: n * ROUND_STOP_MS, fill: "forwards" });
       animation.onfinish = () => setPhase("back");
     } else {
-      animation = element.animate([{ transform: px(last) }, { transform: px(plan.spot) }], { duration: ROUND_BACK_MS, easing: "ease-in-out", fill: "forwards" });
+      animation = element.animate([{ transform: px(last) }, { transform: px(spot) }], { duration: ROUND_BACK_MS, easing: "ease-in-out", fill: "forwards" });
       animation.onfinish = () => setPhase("lead");
     }
     return () => animation.cancel();
-  }, [shownPhase, plan.spot, plan.stops, scale]);
+    // round changes only together with the start of a walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shownPhase, scale]);
 
   const front = plan.students.filter((student) => !student.back);
   const back = plan.students.filter((student) => student.back);
@@ -358,7 +372,7 @@ export const InstructorScene = memo(function InstructorScene({
       {teaching && shownPhase === "lead" ? <Instructor x={plan.spot} tunic={tunic} level={plan.level} /> : null}
       {teaching && shownPhase !== "lead" ? (
         <div ref={walkerRef} className="iscene-walker">
-          <Walker x={plan.spot} f={shownPhase === "out" ? 1 : -1} tunic={tunic} />
+          <Walker x={round.spot} f={shownPhase === "out" ? 1 : -1} tunic={tunic} />
         </div>
       ) : null}
       {front.map((student, index) => <Pupil key={`f${index}`} student={student} level={plan.level} />)}
