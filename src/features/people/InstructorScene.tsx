@@ -223,9 +223,10 @@ function Gym({ width, stage }: { width: number; stage: number }) {
       <path d={`M0 162 H${width} M0 172 H${width}`} stroke="#0e4563" strokeWidth={1.5} />
       {stage >= 1 ? <rect x={width * 0.18} y={144} width={width * 0.78} height={8} rx={3} fill="#177c89" /> : null}
       {stage >= 2 ? (
+        // Lo stendardo della scuola, lo stesso della Palestra a metà misura (Andrea, 13/10).
         <g>
-          <path d={`M${mid - 15} ${SCENE_TOP} H${mid + 15} V${SCENE_TOP + 30} L${mid} ${SCENE_TOP + 38} L${mid - 15} ${SCENE_TOP + 30} Z`} fill="#1b5fa8" stroke="#f0b85a" strokeWidth={1.6} strokeLinejoin="round" />
-          <path d={`M${mid} ${SCENE_TOP + 7} L${mid + 4} ${SCENE_TOP + 18} L${mid} ${SCENE_TOP + 27} L${mid - 4} ${SCENE_TOP + 18} Z`} fill="#f0b85a" />
+          <path d={`M${mid - 15} ${SCENE_TOP} H${mid + 15} V${SCENE_TOP + 35} L${mid} ${SCENE_TOP + 43} L${mid - 15} ${SCENE_TOP + 35} Z`} fill="#0a1f33" stroke="#f0b85a" strokeWidth={1.2} strokeLinejoin="round" />
+          <image href="/assets/ordine-emblem.webp" x={mid - 9.5} y={SCENE_TOP + 4} width={19} height={25} />
         </g>
       ) : null}
     </svg>
