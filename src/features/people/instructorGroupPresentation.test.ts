@@ -73,7 +73,7 @@ describe("instructor group presentation", () => {
   it("includes active Technician courses but excludes SIS reservations", () => {
     const active = {
       ...instructor("active", ["form-1"]),
-      training: {
+      technicianCourse: {
         formId: "form-1" as const,
         startedAt: 1_000,
         completesAt: 11_000,

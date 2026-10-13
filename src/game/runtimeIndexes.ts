@@ -6,8 +6,19 @@ import type {
   PendingEmailOutcome,
   ScheduledTrial,
 } from "./types";
+import { getPersonTrainings, hasAnyTraining } from "./trainingSlots";
 
 type TrainingPerson = Contact | Collaborator;
+
+/** Earliest end among the running courses of a person (every slot). */
+export function getPersonNextTrainingDeadline(person: TrainingPerson): number | undefined {
+  let deadline: number | undefined;
+  for (const [, training] of getPersonTrainings(person)) {
+    if (training.status === "waitingForEquipment") continue;
+    if (deadline === undefined || training.completesAt < deadline) deadline = training.completesAt;
+  }
+  return deadline;
+}
 
 const activeEmailsCache = new WeakMap<CampaignEmail[], CampaignEmail[]>();
 const sendingEmailsCache = new WeakMap<CampaignEmail[], CampaignEmail[]>();
@@ -282,7 +293,7 @@ export function getPeopleInTraining<T extends TrainingPerson>(people: T[]): T[] 
   return cachedFilter(
     activeTrainingsCache as WeakMap<T[], T[]>,
     people,
-    (person) => Boolean(person.training),
+    (person) => hasAnyTraining(person),
   );
 }
 
@@ -292,9 +303,7 @@ export function getNextTrainingDeadline<T extends TrainingPerson>(
   return cacheDeadline(
     trainingDeadlineCache as WeakMap<T[], number>,
     people,
-    (person) => person.training?.status === "waitingForEquipment"
-      ? undefined
-      : person.training?.completesAt,
+    getPersonNextTrainingDeadline,
   );
 }
 

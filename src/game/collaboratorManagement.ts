@@ -1,3 +1,4 @@
+import { hasAnyTraining } from "./trainingSlots";
 import { COLLABORATOR_MASTERY_ROLES } from "../content/mastery";
 import {
   getCollaboratorProductivity,
@@ -68,7 +69,7 @@ export function getBusyCollaboratorIds(state: GameState): ReadonlySet<string> {
     if (event.collaboratorId) busyIds.add(event.collaboratorId);
   }
   for (const collaborator of state.collaborators) {
-    if (collaborator.training) busyIds.add(collaborator.id);
+    if (hasAnyTraining(collaborator)) busyIds.add(collaborator.id);
   }
   for (const instructorId of getInstructorTeachingCounts(
     state.contacts,

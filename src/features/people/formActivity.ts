@@ -49,10 +49,13 @@ export function getFormActivity(
     if (phase === "athlete" || phase === "agonist") add(training.formId, "students", training);
   }
   for (const instructor of instructors) {
-    const training = instructor.training;
-    const phase = training ? getTrainingPhase(training) : undefined;
-    if (training && phase === "instructor") add(training.formId, "instructorCourse", training);
-    if (training && phase === "technician") add(training.formId, "technicianCourse", training);
+    const { training, instructorCourse, technicianCourse } = instructor;
+    // «Impara e abilita» reaches its Istruttore phase in the allievo slot.
+    if (training && getTrainingPhase(training) === "instructor") {
+      add(training.formId, "instructorCourse", training);
+    }
+    if (instructorCourse) add(instructorCourse.formId, "instructorCourse", instructorCourse);
+    if (technicianCourse) add(technicianCourse.formId, "technicianCourse", technicianCourse);
     else if (instructor.technicianCourseReservation) {
       add(instructor.technicianCourseReservation.formId, "technicianCourse");
     }

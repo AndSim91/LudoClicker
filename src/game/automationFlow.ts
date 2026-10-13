@@ -43,7 +43,7 @@ import {
 } from "./automaticTeachingPriority";
 import { getTeachingPriorityDepartureChance } from "./formulas";
 import { getDepartureRiskReduction } from "../content/upgrades";
-import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
+import { getAthleticPreparationShare } from "./trainingShares";
 import {
   compareInstructorTeachingPriority,
   selectActiveEmail,
@@ -605,7 +605,8 @@ export function processInstructorAthleticPreparation(
 
   const productivity = availableInstructors.reduce(
     (total, collaborator) =>
-      total + getInstructorAthleticPreparationProductivity(collaborator),
+      total + getInstructorAthleticPreparationProductivity(collaborator) *
+        getAthleticPreparationShare(state, collaborator.id),
     0,
   );
   const automationMultiplier =
@@ -709,12 +710,9 @@ export function processAutomaticTeaching(
   if (!state.unlocks.forms || isSummerBreak(state.school.currentMonth)) return state;
   if (isAutomaticTeachingKnownIdle(state)) return state;
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);
-  const priorityQualificationTechnicianIds =
-    getPriorityInstructorQualificationTechnicianIds(state);
   const hasAutomaticInstructor = state.collaborators.some((collaborator) =>
     collaborator.assignment === "instructor" &&
-    !pendingReleaseIds.has(collaborator.id) &&
-    !priorityQualificationTechnicianIds.has(collaborator.id)
+    !pendingReleaseIds.has(collaborator.id)
   );
   if (!hasAutomaticInstructor || !canStartAnyAutomaticCourse(state, pendingReleaseIds)) {
     rememberAutomaticTeachingNoOp(state);
@@ -766,8 +764,7 @@ export function processAutomaticTeaching(
   for (const instructor of state.collaborators) {
     if (
       instructor.assignment !== "instructor" ||
-      pendingReleaseIds.has(instructor.id) ||
-      priorityQualificationTechnicianIds.has(instructor.id)
+      pendingReleaseIds.has(instructor.id)
     ) continue;
     for (const formId of instructor.forms) {
       if (isInstructorForm(formId) && !instructor.instructorForms.includes(formId)) continue;
@@ -981,7 +978,6 @@ export function processAutomaticTeaching(
       if (
         candidate.assignment !== "instructor" ||
         pendingReleaseIds.has(candidate.id) ||
-        priorityQualificationTechnicianIds.has(candidate.id) ||
         (instructorLoads.get(candidate.id) ?? 0) >= capacity
       ) continue;
       hasAvailableInstructor = true;

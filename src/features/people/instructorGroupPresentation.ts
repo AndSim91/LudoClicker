@@ -177,7 +177,7 @@ export function getInternalInstructorCourseEntries(
     collaborators.map((collaborator) => [collaborator.id, collaborator]),
   );
   const all = collaborators.flatMap((trainee) => {
-    const training = trainee.training;
+    const training = trainee.instructorCourse;
     const technician = training?.technicianId
       ? collaboratorsById.get(training.technicianId)
       : undefined;
@@ -204,10 +204,8 @@ export function getTechnicianCourseEntries(
   let cached = technicianCoursesCache.get(collaborators);
   if (!cached) {
     const all = collaborators.flatMap((trainee) => {
-      const training = trainee.training;
-      const isTechnicianCourse = training?.trainingPhase === "technician" ||
-        training?.trainingTrack === "technician";
-      return training && isTechnicianCourse
+      const training = trainee.technicianCourse;
+      return training
         ? [{
             id: trainee.id,
             displayName: trainee.displayName,
@@ -277,13 +275,19 @@ export function getFormCoverageCounts(instructors: readonly Collaborator[]): Map
     const training = instructor.training;
     const track = training ? getTrainingTrack(training) : undefined;
     const trainingForm = training?.formId as FormId | undefined;
-    if (trainingForm && (track === "instructor" || track === "combined-instructor") &&
+    if (trainingForm && track === "combined-instructor" &&
       !instructor.instructorForms.includes(trainingForm)) {
       bump(trainingForm, "studyingInstructors");
     }
+    const instructorCourseForm = instructor.instructorCourse?.formId as FormId | undefined;
+    if (
+      instructorCourseForm &&
+      instructorCourseForm !== trainingForm &&
+      !instructor.instructorForms.includes(instructorCourseForm)
+    ) bump(instructorCourseForm, "studyingInstructors");
     // Corso Tecnici in corso o prenotato alla SIS.
     const technicianTarget = instructor.technicianCourseReservation?.formId ??
-      (trainingForm && (track === "technician" || training?.trainingPhase === "technician") ? trainingForm : undefined);
+      (instructor.technicianCourse?.formId as FormId | undefined);
     if (technicianTarget && !technicianForms.includes(technicianTarget)) bump(technicianTarget, "studyingTechnicians");
   }
   return counts;

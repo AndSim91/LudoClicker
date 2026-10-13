@@ -126,7 +126,7 @@ describe("Instructor colleague training", () => {
 
     expect(traineeInQualification.forms).toContain("form-2");
     expect(traineeInQualification.instructorForms).not.toContain("form-2");
-    expect(traineeInQualification.training).toMatchObject({
+    expect(traineeInQualification.instructorCourse).toMatchObject({
       formId: "form-2",
       technicianId: teacher.id,
       trainingTrack: "instructor",
@@ -139,7 +139,7 @@ describe("Instructor colleague training", () => {
       { ...qualifying, randomSeed: 1 },
       {
         type: "TICK",
-        now: traineeInQualification.training!.completesAt,
+        now: traineeInQualification.instructorCourse!.completesAt,
       },
     );
     const qualifiedInstructor = qualified.collaborators.find(
@@ -148,7 +148,7 @@ describe("Instructor colleague training", () => {
 
     expect(qualifiedInstructor.forms).toContain("form-2");
     expect(qualifiedInstructor.instructorForms).toContain("form-2");
-    expect(qualifiedInstructor.training).toBeUndefined();
+    expect(qualifiedInstructor.instructorCourse).toBeUndefined();
     expect(qualifiedInstructor.formTrainingYearCount).toBe(1);
   });
 });

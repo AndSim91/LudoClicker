@@ -17,7 +17,6 @@ import {
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { getMessageThreadKey } from "./messages";
 import { getMonthlyOperationalIncome } from "./membershipEconomy";
-import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import { isGameAreaUnlocked } from "./progression";
 import {
   getActiveCampaignEmails,
@@ -72,7 +71,7 @@ export function selectAvailableEventMembers(state: GameState): number {
 }
 
 export function selectBusyInstructorIds(state: GameState): Set<string> {
-  const busy = getPriorityInstructorQualificationTechnicianIds(state);
+  const busy = new Set<string>();
   for (const collaboratorId of getInstructorPendingReleaseIds(state)) {
     busy.add(collaboratorId);
   }
@@ -107,14 +106,11 @@ export function selectAthleticPreparationInstructorIds(state: GameState): Set<st
 
   const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);
-  const priorityQualificationTechnicianIds =
-    getPriorityInstructorQualificationTechnicianIds(state);
+  // 13/10/2026: also while following courses; the capacity is split (trainingShares.ts).
   for (const collaborator of state.collaborators) {
     if (
       collaborator.assignment === "instructor" &&
       !pendingReleaseIds.has(collaborator.id) &&
-      !collaborator.training &&
-      !priorityQualificationTechnicianIds.has(collaborator.id) &&
       (teachingCounts.get(collaborator.id) ?? 0) === 0
     ) activeInstructorIds.add(collaborator.id);
   }

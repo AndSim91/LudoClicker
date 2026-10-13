@@ -1024,7 +1024,7 @@ describe("PeopleView", () => {
       joinedAt: 2_000,
       instructorForms: [] as FormId[],
       technicianForms: [] as FormId[],
-      training: {
+      instructorCourse: {
         formId: "form-1" as const,
         startedAt: 1_000,
         completesAt: 11_000,
@@ -1053,7 +1053,7 @@ describe("PeopleView", () => {
       displayName: "Aspirante Tecnico",
       joinedAt: 2_500,
       technicianForms: [] as FormId[],
-      training: {
+      technicianCourse: {
         formId: "form-1" as const,
         startedAt: 1_000,
         completesAt: 21_000,
@@ -1104,9 +1104,9 @@ describe("PeopleView", () => {
       {
         ...trainee,
         instructorForms: ["form-1"],
-        training: undefined,
+        instructorCourse: undefined,
       },
-      { ...technicianTrainee, training: undefined },
+      { ...technicianTrainee, technicianCourse: undefined },
       ...otherCollaborators,
     ]));
 

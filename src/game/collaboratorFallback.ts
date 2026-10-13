@@ -1,3 +1,4 @@
+import { hasAnyTraining } from "./trainingSlots";
 import { getCollaboratorProductivity } from "../content/forms";
 import {
   getUpgradeEffectTotal,
@@ -52,7 +53,7 @@ export function isPrimarySectorIdle(
   const role = collaborator.assignment;
   if (!role) return false;
   if (role !== "instructor") return !isSectorWorking(state, role);
-  if (collaborator.training) return false;
+  if (hasAnyTraining(collaborator)) return false;
   const teaching = getInstructorTeachingCounts(
     state.contacts,
     state.collaborators,

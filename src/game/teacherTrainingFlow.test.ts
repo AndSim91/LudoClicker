@@ -143,13 +143,13 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       getCollaboratorProductivity(candidate, "instructor");
 
     expect(july.collaborators[0].technicianCourseReservation).toBeUndefined();
-    expect(july.collaborators[0].training).toMatchObject({
+    expect(july.collaborators[0].technicianCourse).toMatchObject({
       formId: "form-1",
       trainingTrack: "technician",
       trainingPhase: "technician",
       trainingBaseDurationMs: expectedBaseDuration,
     });
-    expect(july.collaborators[0].training?.completesAt).toBe(
+    expect(july.collaborators[0].technicianCourse?.completesAt).toBe(
       3_000 + Math.round(expectedBaseDuration / 2),
     );
     expect(july.collaborators[0].formTrainingYearCount).toBeUndefined();
@@ -219,7 +219,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
 
     const multipliers = [1, 2, 3, 4].map((level) =>
       processTechnicianCourseReservations(stateAtLevel(level), 2_000)
-        .collaborators[0].training?.trainingDurationMultiplier
+        .collaborators[0].technicianCourse?.trainingDurationMultiplier
     );
     expect(multipliers).toEqual([
       1,
@@ -229,7 +229,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     ]);
   });
 
-  it("keeps a paid July booking queued while busy and starts it later", () => {
+  it("starts a paid July booking alongside the course as allievo (13/10/2026)", () => {
     const initial = createInitialState(1_000, "", false);
     const candidate = {
       ...instructor(initial, "busy-candidate", 1_000, ["form-1"], ["form-1"]),
@@ -249,18 +249,9 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     };
 
     const booked = bookTechnicianCourse(july, candidate.id, "form-1", 2_000);
-    expect(booked.collaborators[0].technicianCourseReservation?.eligibleMonth).toBe(7);
+    expect(booked.collaborators[0].technicianCourseReservation).toBeUndefined();
     expect(booked.collaborators[0].training?.trainingTrack).toBe("athlete");
-
-    const september = processTechnicianCourseReservations({
-      ...booked,
-      school: { ...booked.school, currentMonth: 9 },
-      collaborators: booked.collaborators.map((collaborator) => ({
-        ...collaborator,
-        training: undefined,
-      })),
-    }, 60_000);
-    expect(september.collaborators[0].training?.trainingTrack).toBe("technician");
+    expect(booked.collaborators[0].technicianCourse?.trainingTrack).toBe("technician");
   });
 
   it("starts an eligible SIS booking before assigning a new automatic Form", () => {
@@ -299,7 +290,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     );
 
     expect(processedCandidate?.technicianCourseReservation).toBeUndefined();
-    expect(processedCandidate?.training).toMatchObject({
+    expect(processedCandidate?.technicianCourse).toMatchObject({
       formId: "form-1",
       trainingTrack: "technician",
       trainingPhase: "technician",
@@ -326,11 +317,11 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     };
 
     const started = processAutomaticInstructorQualifications(ready, 4_000);
-    const active = started.collaborators.filter((collaborator) => collaborator.training);
+    const active = started.collaborators.filter((collaborator) => collaborator.instructorCourse);
 
     expect(active).toHaveLength(1);
     expect(active[0].id).toBe(lowerForm.id);
-    expect(active[0].training).toMatchObject({
+    expect(active[0].instructorCourse).toMatchObject({
       formId: "form-1",
       technicianId: technician.id,
       trainingTrack: "instructor",
@@ -341,23 +332,16 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     );
   });
 
-  it("gives the Instructor-Technician's new Instructor course first priority", () => {
+  it("a Tecnico teaching a Corso Istruttori also teaches allievi, splitting his capacity (13/10/2026)", () => {
     const initial = createInitialState(1_000, "", false);
-    const technician = {
-      ...instructor(
-        initial,
-        "sole-technician",
-        1_000,
-        ["form-1", "course-x"],
-        ["form-1", "course-x"],
-        ["form-1"],
-      ),
-      technicianCourseReservation: {
-        formId: "course-x" as const,
-        bookedAt: 1_500,
-        eligibleMonth: 9,
-      },
-    };
+    const technician = instructor(
+      initial,
+      "sole-technician",
+      1_000,
+      ["form-1", "course-x"],
+      ["form-1", "course-x"],
+      ["form-1"],
+    );
     const trainee = instructor(initial, "registered-trainee", 2_000, ["form-1"], []);
     const athlete = {
       ...initial.contacts[0],
@@ -376,33 +360,29 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       },
       collaborators: [technician, trainee],
       unlocks: { ...initial.unlocks, forms: true, collaborators: true },
-      upgrades: { ...initial.upgrades, "agonist-course-intensity": 5 },
-      automation: { ...initial.automation, lessonBuffer: 0.99 },
     };
 
     const processed = gameReducer(ready, { type: "TICK", now: 2_000 });
-    const processedTechnician = processed.collaborators.find(
-      (collaborator) => collaborator.id === technician.id,
-    );
     const processedTrainee = processed.collaborators.find(
       (collaborator) => collaborator.id === trainee.id,
     );
 
-    expect(processedTrainee?.training).toMatchObject({
+    expect(processedTrainee?.instructorCourse).toMatchObject({
       formId: "form-1",
       technicianId: technician.id,
       trainingTrack: "instructor",
       trainingPhase: "instructor",
     });
-    expect(processed.contacts[0].training).toBeUndefined();
-    expect(processedTechnician?.training).toBeUndefined();
-    expect(processedTechnician?.technicianCourseReservation).toEqual(
-      technician.technicianCourseReservation,
-    );
-    expect(processed.automation.lessonBuffer).toBe(0.99);
+    expect(processed.contacts[0].training).toMatchObject({
+      formId: "form-1",
+      instructorId: technician.id,
+    });
+    // Corso Istruttori taught (3) + allievi (2): 60% to the course, 40% to the allievi.
+    expect(processedTrainee?.instructorCourse?.trainingDurationMultiplier).toBeCloseTo(1 / 0.6);
+    expect(processed.contacts[0].training?.trainingDurationMultiplier).toBeCloseTo(1 / 0.4);
   });
 
-  it("keeps the Technician on the priority course while another Instructor teaches athletes", () => {
+  it("starts the Corso Istruttori and the allievi's lessons in the same tick", () => {
     const initial = createInitialState(1_000, "", false);
     const technician = instructor(
       initial,
@@ -444,15 +424,12 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       (collaborator) => collaborator.id === trainee.id,
     );
 
-    expect(processedTrainee?.training).toMatchObject({
+    expect(processedTrainee?.instructorCourse).toMatchObject({
       technicianId: technician.id,
       trainingTrack: "instructor",
       trainingPhase: "instructor",
     });
-    expect(processed.contacts[0].training).toMatchObject({
-      formId: "form-1",
-      instructorId: backup.id,
-    });
+    expect(processed.contacts[0].training).toMatchObject({ formId: "form-1" });
   });
 
   it("requires an aspiring Instructor to be assigned to the Instructor role", () => {
@@ -512,10 +489,10 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     };
 
     const started = processAutomaticInstructorQualifications(ready, 4_000);
-    const trainee = started.collaborators.find((collaborator) => collaborator.training);
+    const trainee = started.collaborators.find((collaborator) => collaborator.instructorCourse);
 
     expect(trainee?.id).toBe(earlierStaff.id);
-    expect(trainee?.training?.formId).toBe("form-3-staff");
+    expect(trainee?.instructorCourse?.formId).toBe("form-3-staff");
   });
 
   it("counts duplicated legacy branch preferences only once in qualification demand", () => {
@@ -563,10 +540,10 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     };
 
     const started = processAutomaticInstructorQualifications(ready, 4_000);
-    const trainee = started.collaborators.find((collaborator) => collaborator.training);
+    const trainee = started.collaborators.find((collaborator) => collaborator.instructorCourse);
 
     expect(trainee?.id).toBe(longCandidate.id);
-    expect(trainee?.training?.formId).toBe("form-3-long");
+    expect(trainee?.instructorCourse?.formId).toBe("form-3-long");
   });
 
   it("combines PagoSport and summer speed additively, then applies the teaching slowdown", () => {
@@ -589,7 +566,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     const summerPago = {
       ...initial,
       school: { ...initial.school, currentMonth: 7 },
-      collaborators: [{ ...technician, training: technicalTraining }],
+      collaborators: [{ ...technician, technicianCourse: technicalTraining }],
       upgrades: { ...initial.upgrades, pagosport: 3 },
     };
 
@@ -655,13 +632,13 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     };
 
     const first = processAutomaticInstructorQualifications(ready, 4_000);
-    expect(first.collaborators[1].training).toBeUndefined();
-    expect(first.collaborators[2].training).toMatchObject({ technicianId: technician.id });
-    expect(first.collaborators[2].training?.refresher).toBeUndefined();
+    expect(first.collaborators[1].instructorCourse).toBeUndefined();
+    expect(first.collaborators[2].instructorCourse).toMatchObject({ technicianId: technician.id });
+    expect(first.collaborators[2].instructorCourse?.refresher).toBeUndefined();
 
     const alone = { ...ready, collaborators: [technician, eLearner] };
     const refreshed = processAutomaticInstructorQualifications(alone, 4_000);
-    const training = refreshed.collaborators[1].training;
+    const training = refreshed.collaborators[1].instructorCourse;
     expect(training).toMatchObject({
       formId: "form-1",
       technicianId: technician.id,
@@ -671,7 +648,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     expect(refreshed.school.euros).toBeCloseTo(
       1_000 - getInternalInstructorQualificationCost(50) * 0.25,
     );
-    const normalDuration = (first.collaborators[2].training?.completesAt ?? 0) - 4_000;
+    const normalDuration = (first.collaborators[2].instructorCourse?.completesAt ?? 0) - 4_000;
     expect((training?.completesAt ?? 0) - 4_000).toBeCloseTo(normalDuration / 2, -1);
   });
 
@@ -688,7 +665,7 @@ describe("Tecnici e Corsi Istruttori interni", () => {
       upgrades: { ...initial.upgrades, "project-x": 1 },
     }, 4_000);
 
-    expect(started.collaborators[1].training).toMatchObject({
+    expect(started.collaborators[1].instructorCourse).toMatchObject({
       formId: "course-x",
       technicianId: technician.id,
       trainingPhase: "instructor",

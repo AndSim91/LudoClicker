@@ -1,3 +1,4 @@
+import { mapPersonTrainings } from "./trainingSlots";
 import { getVisibleForms } from "../content/forms";
 import { getInstructorSelfTrainingTier, isCourseXUnlocked } from "../content/upgrades";
 import { startFormTraining } from "./trainingFlow";
@@ -35,20 +36,28 @@ export function startELearningInstructorCourses(state: GameState, now: number): 
   return state.collaborators
     .filter((collaborator) =>
       collaborator.assignment === "instructor" &&
-      !collaborator.training &&
       !(collaborator.id in leaving)
     )
     .reduce((current, collaborator) => {
       const teaches = getVisibleForms(collaborator.instructorForms, courseXUnlocked);
       const next = forms.find((formId) => !teaches.includes(formId));
       if (!next) return current;
+      // «Abilita» uses the Corso Istruttori slot, «Impara e abilita» the allievo one.
+      if (collaborator.forms.includes(next) ? collaborator.instructorCourse : collaborator.training) {
+        return current;
+      }
       const started = startFormTraining(current, collaborator.id, next, now);
       // Marked so the exam knows: self-taught or e-Learning Istruttore phases take the malus.
-      return started === current ? current : {
+      if (started === current) return current;
+      const before = current.collaborators.find((candidate) => candidate.id === collaborator.id);
+      // The slot that just got a course (allievo or Corso Istruttori) is the e-Learning one.
+      return {
         ...started,
         collaborators: started.collaborators.map((candidate) =>
-          candidate.id === collaborator.id && candidate.training
-            ? { ...candidate, training: { ...candidate.training, eLearning: true } }
+          candidate.id === collaborator.id
+            ? mapPersonTrainings(candidate, (training, slot) =>
+                before?.[slot] ? training : { ...training, eLearning: true }
+              )
             : candidate
         ),
       };

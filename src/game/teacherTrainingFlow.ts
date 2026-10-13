@@ -31,14 +31,12 @@ import {
   getAutomaticFormCandidates,
   getFormProgressionRank,
 } from "./formProgression";
-import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
-import {
-  getCollaboratorsById,
-  getInstructorTeachingCounts,
-  getPeopleInTraining,
-} from "./runtimeIndexes";
-import { selectInstructorTeachingCount } from "./selectors";
+import { getPeopleInTraining } from "./runtimeIndexes";
+import { getTrainingRate } from "./trainingShares";
+import { mapPersonTrainings } from "./trainingSlots";
 import type {
+  Collaborator,
+  Contact,
   FormId,
   FormTraining,
   FormTrainingPhase,
@@ -74,44 +72,10 @@ export function getTrainingPhase(training: FormTraining): FormTrainingPhase {
   return "athlete";
 }
 
-function hasActiveStudentLesson(
-  state: GameState,
-  collaboratorId: string,
-  teachingCounts?: ReadonlyMap<string, number>,
-): boolean {
-  return teachingCounts
-    ? (teachingCounts.get(collaboratorId) ?? 0) > 0
-    : selectInstructorTeachingCount(state, collaboratorId) > 0;
-}
-
-export function getInstructorTrainingWorkloadMultiplier(
-  state: GameState,
-  personId: string,
-  training: FormTraining,
-  teachingCounts?: ReadonlyMap<string, number>,
-): number | undefined {
-  const track = getTrainingTrack(training);
-  const phase = getTrainingPhase(training);
-  const teacherTraining = phase === "instructor" ||
-    phase === "technician" ||
-    track === "combined-instructor" ||
-    (track === "athlete" &&
-      getCollaboratorsById(state.collaborators).get(personId)?.assignment === "instructor");
-  if (!teacherTraining) return undefined;
-  return hasActiveStudentLesson(state, personId, teachingCounts) ||
-    Boolean(
-      training.technicianId &&
-      hasActiveStudentLesson(state, training.technicianId, teachingCounts),
-    )
-    ? GAME_CONFIG.instructorTrainingWhileTeachingDurationMultiplier
-    : 1;
-}
-
 export function getTrainingDurationMultiplier(
   state: GameState,
   personId: string,
   training: FormTraining,
-  teachingCounts?: ReadonlyMap<string, number>,
 ): number {
   const track = getTrainingTrack(training);
   let speed = 1 + getPagoSportAllCourseSpeedBonus(state.upgrades) +
@@ -129,13 +93,8 @@ export function getTrainingDurationMultiplier(
       getSISTechnicianCourseSpeedBonus(state.upgrades);
   }
 
-  const workloadMultiplier = getInstructorTrainingWorkloadMultiplier(
-    state,
-    personId,
-    training,
-    teachingCounts,
-  ) ?? 1;
-  return workloadMultiplier / Math.max(1, speed);
+  // Corsi in parallelo (13/10/2026): the share of capacity left for this course.
+  return 1 / (Math.max(1, speed) * getTrainingRate(state, personId, training));
 }
 
 export function scheduleTraining(
@@ -144,7 +103,6 @@ export function scheduleTraining(
   now: number,
   baseDurationMs: number,
   training: Omit<FormTraining, "startedAt" | "completesAt">,
-  teachingCounts?: ReadonlyMap<string, number>,
 ): FormTraining {
   const timingDraft: FormTraining = {
     ...training,
@@ -157,7 +115,6 @@ export function scheduleTraining(
     state,
     personId,
     timingDraft,
-    teachingCounts,
   );
   return {
     ...timingDraft,
@@ -166,73 +123,66 @@ export function scheduleTraining(
       Math.round(baseDurationMs * trainingDurationMultiplier),
     ),
     trainingDurationMultiplier,
-    instructorTrainingDurationMultiplier: getInstructorTrainingWorkloadMultiplier(
-      state,
-      personId,
-      timingDraft,
-      teachingCounts,
-    ),
   };
 }
 
-function refreshPersonTraining<
-  Person extends { id: string; training?: FormTraining },
->(
+function refreshCourse(
+  state: GameState,
+  personId: string,
+  training: FormTraining,
+  now: number,
+): FormTraining {
+  if (training.status === "waitingForEquipment" || training.completesAt <= now) return training;
+  const previousMultiplier = training.trainingDurationMultiplier ??
+    training.instructorTrainingDurationMultiplier ??
+    1;
+  const nextMultiplier = getTrainingDurationMultiplier(state, personId, training);
+  if (
+    Math.abs(previousMultiplier - nextMultiplier) < 0.000_001 &&
+    training.instructorTrainingDurationMultiplier === undefined
+  ) return training;
+
+  const remaining = Math.max(0, training.completesAt - now);
+  const completesAt = now + Math.round(remaining / Math.max(0.000_001, previousMultiplier) * nextMultiplier);
+  // The bar keeps its place and only changes pace.
+  const elapsed = Math.max(0, now - training.startedAt);
+  const startedAt = remaining > 0 && elapsed > 0
+    ? now - Math.round(elapsed * (completesAt - now) / remaining)
+    : training.startedAt;
+  const refreshed: FormTraining = {
+    ...training,
+    startedAt,
+    completesAt,
+    trainingDurationMultiplier: nextMultiplier,
+  };
+  delete refreshed.instructorTrainingDurationMultiplier;
+  return refreshed;
+}
+
+function refreshPersonTraining<Person extends Contact | Collaborator>(
   state: GameState,
   person: Person,
   now: number,
-  teachingCounts: ReadonlyMap<string, number>,
 ): Person {
   const originalTraining = person.training;
-  const training = originalTraining &&
+  // Old saves: an Istruttore's plain course is the combined «Impara e abilita».
+  const withTrack = originalTraining &&
     !originalTraining.trainingTrack &&
     "assignment" in person &&
     person.assignment === "instructor" &&
     !isAgonistCourse(originalTraining.formId)
     ? {
-        ...originalTraining,
-        trainingTrack: "combined-instructor" as const,
-        trainingPhase: "athlete" as const,
+        ...person,
+        training: {
+          ...originalTraining,
+          trainingTrack: "combined-instructor" as const,
+          trainingPhase: "athlete" as const,
+        },
       }
-    : originalTraining;
-  if (
-    !training ||
-    training.status === "waitingForEquipment" ||
-    training.completesAt <= now
-  ) return person;
-
-  const previousMultiplier = training.trainingDurationMultiplier ??
-    training.instructorTrainingDurationMultiplier ??
-    1;
-  const nextMultiplier = getTrainingDurationMultiplier(
-    state,
-    person.id,
-    training,
-    teachingCounts,
+    : person;
+  return mapPersonTrainings(withTrack, (training) =>
+    refreshCourse(state, person.id, training, now)
   );
-  const nextWorkloadMultiplier = getInstructorTrainingWorkloadMultiplier(
-    state,
-    person.id,
-    training,
-    teachingCounts,
-  );
-  if (
-    training === originalTraining &&
-    Math.abs(previousMultiplier - nextMultiplier) < 0.000_001 &&
-    training.instructorTrainingDurationMultiplier === nextWorkloadMultiplier
-  ) return person;
-
-  const remainingWork = Math.max(0, training.completesAt - now) /
-    Math.max(0.000_001, previousMultiplier);
-  return {
-    ...person,
-    training: {
-      ...training,
-      completesAt: now + Math.round(remainingWork * nextMultiplier),
-      trainingDurationMultiplier: nextMultiplier,
-      instructorTrainingDurationMultiplier: nextWorkloadMultiplier,
-    },
-  };
 }
 
 export function refreshTrainingDurations(state: GameState, now: number): GameState {
@@ -240,15 +190,14 @@ export function refreshTrainingDurations(state: GameState, now: number): GameSta
   const collaboratorsInTraining = getPeopleInTraining(state.collaborators);
   if (contactsInTraining.length === 0 && collaboratorsInTraining.length === 0) return state;
 
-  const teachingCounts = getInstructorTeachingCounts(state.contacts, state.collaborators);
   const contactUpdates = new Map<string, GameState["contacts"][number]>();
   const collaboratorUpdates = new Map<string, GameState["collaborators"][number]>();
   for (const contact of contactsInTraining) {
-    const refreshed = refreshPersonTraining(state, contact, now, teachingCounts);
+    const refreshed = refreshPersonTraining(state, contact, now);
     if (refreshed !== contact) contactUpdates.set(contact.id, refreshed);
   }
   for (const collaborator of collaboratorsInTraining) {
-    const refreshed = refreshPersonTraining(state, collaborator, now, teachingCounts);
+    const refreshed = refreshPersonTraining(state, collaborator, now);
     if (refreshed !== collaborator) collaboratorUpdates.set(collaborator.id, refreshed);
   }
   if (contactUpdates.size === 0 && collaboratorUpdates.size === 0) return state;
@@ -293,11 +242,7 @@ export function bookTechnicianCourse(
     !collaborator.instructorForms.includes(formId) ||
     (collaborator.technicianForms ?? []).includes(formId) ||
     collaborator.technicianCourseReservation ||
-    getTrainingTrack(collaborator.training ?? {
-      formId,
-      startedAt: 0,
-      completesAt: 0,
-    }) === "technician" ||
+    collaborator.technicianCourse ||
     getSpendableEuros(state) < cost
   ) return state;
 
@@ -330,8 +275,6 @@ export function processTechnicianCourseReservations(
   }
   let nextState = state;
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);
-  const priorityQualificationTechnicianIds =
-    getPriorityInstructorQualificationTechnicianIds(state);
   const reservations = state.collaborators
     .filter((collaborator) => collaborator.technicianCourseReservation)
     .sort((left, right) =>
@@ -351,8 +294,7 @@ export function processTechnicianCourseReservations(
       !reservation ||
       (!isCourseXUnlocked(nextState.upgrades) && reservation.formId === "course-x") ||
       (isCourseXUnlocked(nextState.upgrades) && needsCourseXRecovery(collaborator.forms)) ||
-      collaborator.training ||
-      priorityQualificationTechnicianIds.has(collaborator.id) ||
+      collaborator.technicianCourse ||
       collaborator.assignment !== "instructor" ||
       pendingReleaseIds.has(collaborator.id) ||
       !isSISTechnicianCourseUnlocked(nextState.upgrades) ||
@@ -381,7 +323,7 @@ export function processTechnicianCourseReservations(
       ...nextState,
       collaborators: nextState.collaborators.map((candidate) => {
         if (candidate.id !== collaborator.id) return candidate;
-        const updated = { ...candidate, training };
+        const updated = { ...candidate, technicianCourse: training };
         delete updated.technicianCourseReservation;
         return updated;
       }),
@@ -445,10 +387,11 @@ function processInstructorQualifications(
   let nextState = state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const pendingReleaseIds = getInstructorPendingReleaseIds(state);
+  // A Tecnico teaches one Corso Istruttori at a time; he may follow courses meanwhile.
   const activeTechnicianIds = new Set(
     state.collaborators.flatMap((collaborator) =>
-      collaborator.training?.technicianId
-        ? [collaborator.training.technicianId]
+      collaborator.instructorCourse?.technicianId
+        ? [collaborator.instructorCourse.technicianId]
         : []
     ),
   );
@@ -473,8 +416,7 @@ function processInstructorQualifications(
     if (
       collaborator.assignment !== "instructor" ||
       pendingReleaseIds.has(collaborator.id) ||
-      collaborator.training ||
-      activeTechnicianIds.has(collaborator.id)
+      collaborator.instructorCourse
     ) return [];
     const eLearningForms = collaborator.eLearningInstructorForms ?? [];
     return collaborator.forms.flatMap((formId) => {
@@ -528,7 +470,7 @@ function processInstructorQualifications(
     const trainee = nextState.collaborators.find(
       (collaborator) => collaborator.id === candidate.collaboratorId,
     );
-    if (!definition || !trainee || trainee.training) continue;
+    if (!definition || !trainee || trainee.instructorCourse) continue;
     const technician = nextState.collaborators
       .filter((collaborator) =>
         collaborator.id !== candidate.collaboratorId &&
@@ -571,7 +513,7 @@ function processInstructorQualifications(
       school: { ...nextState.school, euros: roundCurrency(nextState.school.euros - cost) },
       collaborators: nextState.collaborators.map((collaborator) =>
         collaborator.id === candidate.collaboratorId
-          ? { ...collaborator, training }
+          ? { ...collaborator, instructorCourse: training }
           : collaborator
       ),
     };

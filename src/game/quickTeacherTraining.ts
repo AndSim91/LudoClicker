@@ -21,12 +21,13 @@ export const QUICK_TRAINING_FORM_ORDER: readonly FormId[] = [
 /** Chi copre già la Forma, contando anche chi ci sta arrivando (così due clic non finiscono sulla stessa). */
 function covers(collaborator: Collaborator, formId: FormId, kind: QuickTrainingKind): boolean {
   if (kind === "instructor") {
-    return collaborator.instructorForms.includes(formId) || collaborator.training?.formId === formId;
+    return collaborator.instructorForms.includes(formId) ||
+      collaborator.instructorCourse?.formId === formId ||
+      collaborator.training?.formId === formId;
   }
   return (collaborator.technicianForms ?? []).includes(formId) ||
     collaborator.technicianCourseReservation?.formId === formId ||
-    (collaborator.training?.formId === formId &&
-      (collaborator.training.trainingPhase === "technician" || collaborator.training.trainingTrack === "technician"));
+    collaborator.technicianCourse?.formId === formId;
 }
 
 /**
@@ -51,8 +52,9 @@ function canReach(collaborator: Collaborator, formId: FormId, kind: QuickTrainin
   if (kind === "technician") {
     return collaborator.instructorForms.includes(formId) && !collaborator.technicianCourseReservation;
   }
+  // Already knows it: the Corso Istruttori has its own slot; otherwise the course as allievo.
+  if (collaborator.forms.includes(formId)) return !collaborator.instructorCourse;
   if (collaborator.training) return false;
-  if (collaborator.forms.includes(formId)) return true;
   const definition = getFormDefinition(formId);
   if (!definition) return false;
   if (definition.anyPrerequisite) return definition.anyPrerequisite.some((id) => collaborator.forms.includes(id));

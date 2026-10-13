@@ -1,3 +1,4 @@
+import { mapPersonTrainings, type SlottedPerson } from "./trainingSlots";
 import type { GameState } from "./types";
 
 export interface OfflineSummary {
@@ -34,18 +35,12 @@ export function freezeGameState(
       automation: { ...state.automation, lastProcessedAt: now },
     };
   }
-  const shiftTraining = <T extends { training?: { startedAt: number; completesAt: number } }>(
-    person: T,
-  ): T => person.training
-    ? {
-        ...person,
-        training: {
-          ...person.training,
-          startedAt: person.training.startedAt + elapsedMs,
-          completesAt: person.training.completesAt + elapsedMs,
-        },
-      }
-    : person;
+  const shiftTraining = <T extends SlottedPerson>(person: T): T =>
+    mapPersonTrainings(person, (training) => ({
+      ...training,
+      startedAt: training.startedAt + elapsedMs,
+      completesAt: training.completesAt + elapsedMs,
+    }));
 
   return {
     ...state,

@@ -400,12 +400,12 @@ function InstructorSectorCard({
   // Chi può iniziare adesso una Formazione Istruttore (abilitazione o «Impara e abilita»),
   // con lo stesso elenco della colonna Formazione Istruttore.
   const startableInstructors = useMemo(() => state.unlocks.forms
-    ? instructors.filter((instructor) => !instructor.training &&
+    ? instructors.filter((instructor) =>
         getTrainingDefinitions(state, instructor, instructor).available.length > 0).length
     : 0, [instructors, state]);
   // Chi può prenotare adesso un Corso Tecnici SIS: libero, senza prenotazioni, con una Forma da abilitare.
   const startableTechnicians = useMemo(() => sisUnlocked && state.unlocks.forms
-    ? instructors.filter((instructor) => !instructor.training &&
+    ? instructors.filter((instructor) => !instructor.technicianCourse &&
         !instructor.technicianCourseReservation &&
         getTechnicianCourseDefinitions(instructor, courseXUnlocked).length > 0).length
     : 0, [courseXUnlocked, instructors, sisUnlocked, state.unlocks.forms]);
@@ -423,10 +423,11 @@ function InstructorSectorCard({
   const agonistStarred = isAgonistCourseUnlocked(state.upgrades);
   const agonistUnlocked = isTechnicalArenaUnlocked(state.upgrades);
   const studentCount = [...activity.values()].reduce((total, rings) => total + (rings.students?.count ?? 0), 0);
-  const staffInTraining = instructors.filter((instructor) => {
-    const phase = instructor.training ? getTrainingPhase(instructor.training) : undefined;
-    return phase === "instructor" || phase === "technician";
-  }).length;
+  const staffInTraining = instructors.filter((instructor) =>
+    instructor.instructorCourse ||
+    instructor.technicianCourse ||
+    (instructor.training && getTrainingPhase(instructor.training) === "instructor")
+  ).length;
   const technicianCount = instructors.filter((instructor) => (instructor.technicianForms ?? []).length > 0).length;
   // Blade colours of the lesson, as in the gym: counted again only when the contacts change.
   const memberRarityCounts = useMemo(() => {

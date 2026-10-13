@@ -24,6 +24,13 @@ import {
   getTrainingTrack,
   scheduleTraining,
 } from "./teacherTrainingFlow";
+import {
+  getTrainingSlot,
+  setPersonTraining,
+  TRAINING_SLOTS,
+  type SlottedPerson,
+  type TrainingSlot,
+} from "./trainingSlots";
 import type {
   Collaborator,
   Contact,
@@ -169,11 +176,12 @@ function replacePersonTraining(
   context: TrainingResolutionContext,
   personId: string,
   training: FormTraining | undefined,
+  slot: TrainingSlot = "training",
 ): void {
   const contact = context.contactsById.get(personId);
   const collaborator = context.collaboratorsById.get(personId);
-  if (contact) updateContact(context, { ...contact, training });
-  if (collaborator) updateCollaborator(context, { ...collaborator, training });
+  if (contact && slot === "training") updateContact(context, { ...contact, training });
+  if (collaborator) updateCollaborator(context, setPersonTraining(collaborator, slot, training));
 }
 
 function getContextCollaborator(
@@ -248,6 +256,7 @@ function resolveHiddenExam(
   context: TrainingResolutionContext,
   personId: string,
   training: FormTraining,
+  slot: TrainingSlot,
 ): boolean {
   const exam = getExamProfile(
     context.state,
@@ -265,7 +274,6 @@ function resolveHiddenExam(
     context.state,
     personId,
     training,
-    context.teachingCounts,
   );
   replacePersonTraining(context, personId, {
     ...training,
@@ -276,7 +284,7 @@ function resolveHiddenExam(
     examFailures: (training.examFailures ?? 0) + 1,
     trainingBaseDurationMs: baseDuration,
     trainingDurationMultiplier: durationMultiplier,
-  });
+  }, slot);
   return false;
 }
 
@@ -291,8 +299,9 @@ function resolveInstructorOrTechnicianPhase(
   const definition = isAgonistCourse(training.formId)
     ? undefined
     : getFormDefinition(training.formId);
+  const slot = getTrainingSlot(training);
   if (!collaborator || !definition || isAgonistCourse(training.formId)) {
-    replacePersonTraining(context, personId, undefined);
+    replacePersonTraining(context, personId, undefined, slot);
     transitionTeachingLoad(context, training, undefined);
     return true;
   }
@@ -313,19 +322,17 @@ function resolveInstructorOrTechnicianPhase(
     ? [...otherELearningForms, ...grantedForms]
     : otherELearningForms;
   const addTo = (forms: FormId[]) => [...new Set([...forms, ...grantedForms])];
-  const updated: Collaborator = syncCourseXTitles(phase === "instructor"
+  const updated: Collaborator = syncCourseXTitles(setPersonTraining(phase === "instructor"
     ? {
         ...collaborator,
         instructorForms: addTo(collaborator.instructorForms),
         eLearningInstructorForms,
-        training: undefined,
       }
     : {
         ...collaborator,
         technicianForms: addTo(collaborator.technicianForms ?? []),
         eLearningInstructorForms,
-        training: undefined,
-      });
+      }, slot, undefined));
   updateCollaborator(context, updated);
   transitionTeachingLoad(context, training, undefined);
   context.state = context.dependencies.addMessage(
@@ -435,10 +442,20 @@ function resolveTraining(
   context: TrainingResolutionContext,
   personId: string,
 ): void {
+  // The qualification slots first: a Corso Istruttori that ends together with the
+  // Forma it qualifies for is no reason to wait.
+  for (const slot of [...TRAINING_SLOTS].reverse()) resolveTrainingSlot(context, personId, slot);
+}
+
+function resolveTrainingSlot(
+  context: TrainingResolutionContext,
+  personId: string,
+  slot: TrainingSlot,
+): void {
   const collaborator = context.collaboratorsById.get(personId);
-  const member = context.contactsById.get(personId);
+  const member = slot === "training" ? context.contactsById.get(personId) : undefined;
   const student = collaborator ?? member;
-  const training = student?.training;
+  const training = (student as SlottedPerson | undefined)?.[slot];
   if (
     !student ||
     !training ||
@@ -446,7 +463,11 @@ function resolveTraining(
     training.completesAt > context.now
   ) return;
 
-  if (!resolveHiddenExam(context, personId, training)) return;
+  if (!resolveHiddenExam(context, personId, training, slot)) return;
+  if (slot !== "training") {
+    resolveInstructorOrTechnicianPhase(context, collaborator, personId, training);
+    return;
+  }
   if (resolveInstructorOrTechnicianPhase(
     context,
     collaborator,
@@ -489,7 +510,6 @@ function resolveTraining(
           trainingPhase: "instructor",
           ...(training.eLearning ? { eLearning: true } : {}),
         },
-        context.teachingCounts,
       )
     : undefined;
 

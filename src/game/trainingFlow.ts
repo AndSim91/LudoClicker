@@ -287,7 +287,7 @@ export function startFormTraining(
       getInstructorQualificationCost(definition.cost),
       formId,
     );
-    if (collaborator.training || getSpendableEuros(state) < qualificationCost) return state;
+    if (collaborator.instructorCourse || getSpendableEuros(state) < qualificationCost) return state;
     const training = scheduleTraining(
       state,
       collaborator.id,
@@ -313,7 +313,7 @@ export function startFormTraining(
       },
       collaborators: state.collaborators.map((candidate) =>
         candidate.id === collaborator.id
-          ? { ...candidate, training }
+          ? { ...candidate, instructorCourse: training }
           : candidate
       ),
     };

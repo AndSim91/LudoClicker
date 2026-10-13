@@ -558,7 +558,8 @@ export const TUTORIAL_SCENES: readonly TutorialSceneDefinition[] = [
         scrollToRegion: "collaborator-section",
         isComplete: ({ state }) => state.collaborators.length === 0 ||
           state.collaborators.some((collaborator) =>
-            collaborator.instructorForms.includes("form-1") || (
+            collaborator.instructorForms.includes("form-1") ||
+            collaborator.instructorCourse?.formId === "form-1" || (
               collaborator.training?.formId === "form-1" &&
               Boolean(collaborator.training.includesInstructorCertification)
             )

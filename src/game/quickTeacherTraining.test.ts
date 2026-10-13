@@ -50,8 +50,8 @@ describe("Ufficio formazione", () => {
       instructor(3, known, ["form-1"], 400),
     ], [300, 100, 200]);
     const next = gameReducer(state, { type: "START_QUICK_TEACHER_TRAINING", kind: "instructor", now: 5_000 });
-    expect(next.collaborators[2].training?.formId).toBe("form-2");
-    expect(next.collaborators[1].training).toBeUndefined();
+    expect(next.collaborators[2].instructorCourse?.formId).toBe("form-2");
+    expect(next.collaborators[1].instructorCourse).toBeUndefined();
   });
 
   it("prefers higher Maestria over Stile", () => {
@@ -59,7 +59,7 @@ describe("Ufficio formazione", () => {
       instructor(1, known, ["form-1"], 2_200),
       instructor(2, known, ["form-1"], 400),
     ], [100, 300]);
-    expect(startQuickTeacherTraining(state, "instructor", 5_000).collaborators[0].training?.formId).toBe("form-2");
+    expect(startQuickTeacherTraining(state, "instructor", 5_000).collaborators[0].instructorCourse?.formId).toBe("form-2");
   });
 
   it("does not pile two clicks on the same Form", () => {
@@ -69,8 +69,8 @@ describe("Ufficio formazione", () => {
     ], [100, 100]);
     const once = startQuickTeacherTraining(state, "instructor", 5_000);
     const twice = startQuickTeacherTraining(once, "instructor", 5_000);
-    expect(once.collaborators[0].training?.formId).toBe("form-1");
-    expect(twice.collaborators[1].training?.formId).toBe("form-2");
+    expect(once.collaborators[0].instructorCourse?.formId).toBe("form-1");
+    expect(twice.collaborators[1].instructorCourse?.formId).toBe("form-2");
   });
 
   it("lets someone with only Forma 1 learn Forma 2 when Corso X is locked", () => {

@@ -67,6 +67,7 @@ import {
   getAvailableContactCount,
   getPendingEmailOutcomes,
   getPeopleInTraining,
+  getPersonNextTrainingDeadline,
   getRunningAcquisitionEvents,
   getScheduledTrials,
   getSendingEmails,
@@ -214,12 +215,10 @@ function tickStep(
   const completedTrainingIds = [
     ...getPeopleInTraining(nextState.contacts),
     ...getPeopleInTraining(nextState.collaborators),
-  ].flatMap((person) =>
-      person.training!.status !== "waitingForEquipment" &&
-      person.training!.completesAt <= now
-      ? [person.id]
-      : []
-  );
+  ].flatMap((person) => {
+    const deadline = getPersonNextTrainingDeadline(person);
+    return deadline !== undefined && deadline <= now ? [person.id] : [];
+  });
   const trainingWork = reserveWork(completedTrainingIds.length);
   nextState = resolveFormTrainingBatch(
     nextState,

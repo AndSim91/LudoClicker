@@ -1,3 +1,4 @@
+import { hasAnyTraining } from "../../game/trainingSlots";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
@@ -455,7 +456,7 @@ export function CollaboratorSectorPanel({
         if (!filters.activity.includes(active ? "active" : "waiting")) return false;
       }
       if (filters.training.length > 0) {
-        const training = collaborator.training
+        const training = hasAnyTraining(collaborator)
           ? "active"
           : collaborator.technicianCourseReservation ? "reserved" : "available";
         if (!filters.training.includes(training)) return false;

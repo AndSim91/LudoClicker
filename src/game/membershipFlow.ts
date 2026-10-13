@@ -1,3 +1,4 @@
+import { mapPersonTrainings } from "./trainingSlots";
 import { recordCareer } from "./career";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
@@ -172,11 +173,13 @@ export function cancelMemberEnrollment(
         : contact,
     ),
     collaborators: departed.collaborators.map((collaborator) =>
-      removedCollaboratorId && (
-        collaborator.training?.instructorId === removedCollaboratorId ||
-        collaborator.training?.technicianId === removedCollaboratorId
-      )
-        ? { ...collaborator, training: undefined }
+      removedCollaboratorId
+        ? mapPersonTrainings(collaborator, (training) =>
+            training.instructorId === removedCollaboratorId ||
+            training.technicianId === removedCollaboratorId
+              ? undefined
+              : training
+          )
         : collaborator,
     ),
     network: secretLegendaryId

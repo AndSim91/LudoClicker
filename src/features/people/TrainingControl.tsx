@@ -38,6 +38,7 @@ import { getTrainingPhase } from "../../game/teacherTrainingFlow";
 import type {
   Collaborator,
   FormId,
+  FormTraining,
   FormTrainingStartMode,
   GameState,
 } from "../../game/types";
@@ -322,9 +323,7 @@ export function TechnicianCourseControl({
   const definitions = getTechnicianCourseDefinitions(collaborator, courseXUnlocked);
   const variantClass = variant === "compact" ? " training-compact" : "";
 
-  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
-    return null;
-  }
+  if (collaborator.technicianCourse) return null;
   if (reservation?.formId === "course-x" && !courseXUnlocked) {
     return null;
   }
@@ -452,14 +451,6 @@ export function InstructorQualificationTraining({
   onStartTraining: (personId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
-  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
-    return (
-      <div className="training-locked training-compact">
-        <span>Formazione Istruttore</span>
-        <strong>Disponibile al termine del Corso Tecnico</strong>
-      </div>
-    );
-  }
   return (
     <TrainingControl
       personId={collaborator.id}
@@ -469,6 +460,7 @@ export function InstructorQualificationTraining({
       collaboratorsById={collaboratorsById}
       onStartTraining={onStartTraining}
       variant="compact"
+      course={collaborator.instructorCourse}
     />
   );
 }
@@ -486,7 +478,7 @@ export function InstructorTechnicianTraining({
   onBookTechnicianCourse?: (collaboratorId: string, formId: FormId) => void;
   collaboratorsById: Map<string, Collaborator>;
 }) {
-  if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {
+  if (collaborator.technicianCourse) {
     return (
       <TrainingControl
         personId={collaborator.id}
@@ -496,6 +488,7 @@ export function InstructorTechnicianTraining({
         collaboratorsById={collaboratorsById}
         onStartTraining={onStartTraining}
         variant="compact"
+        course={collaborator.technicianCourse}
       />
     );
   }
@@ -537,7 +530,18 @@ export function InstructorCompactTraining({
         onStartTraining={onStartTraining}
         variant="compact"
       />
-      {showTechnicianCourse ? (
+      {showTechnicianCourse && collaborator.technicianCourse ? (
+        <TrainingControl
+          personId={collaborator.id}
+          displayName={collaborator.displayName}
+          student={collaborator}
+          state={stateOverride}
+          collaboratorsById={collaboratorsById}
+          onStartTraining={onStartTraining}
+          variant="compact"
+          course={collaborator.technicianCourse}
+        />
+      ) : showTechnicianCourse ? (
         <TechnicianCourseControl
           collaborator={collaborator}
           state={stateOverride}
@@ -611,6 +615,7 @@ export function TrainingControl({
   collaboratorsById,
   variant = "default",
   trainingMode = "standard",
+  course,
 }: {
   personId: string;
   displayName: string;
@@ -624,14 +629,19 @@ export function TrainingControl({
   ) => void;
   variant?: "default" | "compact" | "roster";
   trainingMode?: FormTrainingStartMode;
+  /** The course to show; by default the course as allievo, then the Corso Istruttori. */
+  course?: FormTraining;
 }) {
+  // Corsi in parallelo (13/10/2026): one course shown at a time until the concept.
+  const shownTraining = course ?? student.training ??
+    ("instructorCourse" in student ? (student as Collaborator).instructorCourse : undefined);
   const state = useGameStateSlices(
     ["collaborators", "contacts", "school", "unlocks", "upgrades"],
     stateOverride,
   );
   const [selectedFormId, setSelectedFormId] = useState<FormId | "">("");
   const now = useGameTime(
-    Boolean(student.training),
+    Boolean(shownTraining),
     GAME_CONFIG.progressUpdateIntervalMs,
   );
   const trainingYear = getFormTrainingYear(state.school.currentMonth);
@@ -658,9 +668,9 @@ export function TrainingControl({
 
   // Before the Forme open (10 members) nothing is shown: no lock, no spoiler (08/10/2026).
   if (!state.unlocks.forms) return null;
-  if (student.training?.formId === "course-x" && !courseXUnlocked) {
-    const progress = getTrainingProgress(student.training, now);
-    const waitingForEquipment = student.training.status === "waitingForEquipment";
+  if (shownTraining?.formId === "course-x" && !courseXUnlocked) {
+    const progress = getTrainingProgress(shownTraining, now);
+    const waitingForEquipment = shownTraining.status === "waitingForEquipment";
     return (
       <div className={`training-progress${variantClass}`}>
         <span>Formazione precedente in corso</span>
@@ -669,35 +679,35 @@ export function TrainingControl({
           className="training-progress-bar"
           label={`Formazione di ${displayName}`}
           value={progress}
-          durationMs={student.training.completesAt - student.training.startedAt}
+          durationMs={shownTraining.completesAt - shownTraining.startedAt}
         />
       </div>
     );
   }
-  if (student.training) {
-    const definition = isAgonistCourse(student.training.formId)
+  if (shownTraining) {
+    const definition = isAgonistCourse(shownTraining.formId)
       ? undefined
-      : getFormDefinition(student.training.formId);
-    const instructor = student.training.instructorId
-      ? collaboratorsById.get(student.training.instructorId)
+      : getFormDefinition(shownTraining.formId);
+    const instructor = shownTraining.instructorId
+      ? collaboratorsById.get(shownTraining.instructorId)
       : undefined;
-    const technician = student.training.technicianId
-      ? collaboratorsById.get(student.training.technicianId)
+    const technician = shownTraining.technicianId
+      ? collaboratorsById.get(shownTraining.technicianId)
       : undefined;
-    const trainingPhase = getTrainingPhase(student.training);
-    const courseTitle = student.training.refresher
+    const trainingPhase = getTrainingPhase(shownTraining);
+    const courseTitle = shownTraining.refresher
       ? `Corso di aggiornamento · ${definition?.longName ?? "Forma"}`
       : trainingPhase === "instructor"
       ? `Corso Istruttori · ${definition?.longName ?? "Forma"}`
       : trainingPhase === "technician"
         ? `Corso Tecnico SIS · ${definition?.longName ?? "Forma"}`
         : getTrainingCourseTitle(
-            student.training.formId,
+            shownTraining.formId,
             isAgonistCourseUnlocked(state.upgrades),
-            student.training.agonistCourseGrantsStats,
+            shownTraining.agonistCourseGrantsStats,
           );
-    const progress = getTrainingProgress(student.training, now);
-    const waitingForEquipment = student.training.status === "waitingForEquipment";
+    const progress = getTrainingProgress(shownTraining, now);
+    const waitingForEquipment = shownTraining.status === "waitingForEquipment";
     return (
       <div className={`training-progress${variantClass}`}>
         <span>
@@ -705,7 +715,7 @@ export function TrainingControl({
           {definition?.branch ? ` — ${definition.branch}` : ""}
           {instructor ? ` · con ${instructor.displayName}` : ""}
           {technician ? ` · con il Tecnico ${technician.displayName}` : ""}
-          {student.training.trainingTrack === "combined-instructor" && trainingPhase === "athlete"
+          {shownTraining.trainingTrack === "combined-instructor" && trainingPhase === "athlete"
             ? " · attestato incluso"
             : ""}
         </span>
@@ -714,7 +724,7 @@ export function TrainingControl({
           className="training-progress-bar"
           label={`Formazione di ${displayName}`}
           value={progress}
-          durationMs={student.training.completesAt - student.training.startedAt}
+          durationMs={shownTraining.completesAt - shownTraining.startedAt}
         />
       </div>
     );

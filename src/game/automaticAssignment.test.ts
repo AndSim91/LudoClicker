@@ -213,7 +213,7 @@ describe("Istruttori in e-Learning", () => {
 
   it("only qualifies them when they already know Forma 1", () => {
     const started = startELearningInstructorCourses(withInstructor({ forms: ["form-1"] }), 5_000);
-    expect(started.collaborators[1].training).toMatchObject({ formId: "form-1", trainingTrack: "instructor", eLearning: true });
+    expect(started.collaborators[1].instructorCourse).toMatchObject({ formId: "form-1", trainingTrack: "instructor", eLearning: true });
   });
 
   it("waits without funds and starts as soon as the money is there", () => {

@@ -1,3 +1,4 @@
+import { mapPersonTrainings, type SlottedPerson } from "./trainingSlots";
 import type {
   AcquisitionEventCooldown,
   FormTraining,
@@ -8,19 +9,15 @@ function shiftOptional(timestamp: number | undefined, offsetMs: number) {
   return timestamp === undefined ? undefined : timestamp + offsetMs;
 }
 
-function shiftTraining<T extends { training?: FormTraining }>(
+function shiftTraining<T extends SlottedPerson>(
   person: T,
   offsetMs: number,
 ): T {
-  if (!person.training) return person;
-  return {
-    ...person,
-    training: {
-      ...person.training,
-      startedAt: person.training.startedAt + offsetMs,
-      completesAt: person.training.completesAt + offsetMs,
-    },
-  };
+  return mapPersonTrainings(person, (training: FormTraining) => ({
+    ...training,
+    startedAt: training.startedAt + offsetMs,
+    completesAt: training.completesAt + offsetMs,
+  }));
 }
 
 function shiftCooldown(

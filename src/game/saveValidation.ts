@@ -1,3 +1,4 @@
+import { getTrainingSlot } from "./trainingSlots";
 import { COLLABORATOR_MASTERY_ROLES } from "../content/mastery";
 import { isUniqueFormIdList } from "../content/forms";
 import {
@@ -506,7 +507,15 @@ export function isValidGameState(value: unknown): value is GameState {
           collaborator.lastAgonistCourseYear >= 0)) &&
       !("autoTeachingEnabled" in collaborator) &&
       hasValidCollaboratorMastery(collaborator.mastery) &&
-      hasValidTraining(collaborator.training)
+      hasValidTraining(collaborator.training) &&
+      hasValidTraining(collaborator.instructorCourse) &&
+      hasValidTraining(collaborator.technicianCourse) &&
+      // Corsi in parallelo: each course sits in its own slot.
+      (!collaborator.training || getTrainingSlot(collaborator.training) === "training") &&
+      (!collaborator.instructorCourse ||
+        getTrainingSlot(collaborator.instructorCourse) === "instructorCourse") &&
+      (!collaborator.technicianCourse ||
+        getTrainingSlot(collaborator.technicianCourse) === "technicianCourse")
     ) &&
     hasValidCollaboratorManagement(state) &&
     hasValidLegendaryAssignments(state) &&

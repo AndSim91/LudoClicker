@@ -450,7 +450,8 @@ describe("Arena Tecnica e Corso Agonisti", () => {
     );
 
     expect(started.contacts[0].training?.formId).toBe("agonist-course");
-    expect(started.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(3);
+    // Her own course (1) and the allievi (2) share her capacity: a third to the course.
+    expect(started.collaborators[0].training?.trainingDurationMultiplier).toBeCloseTo(3);
   });
 
   it("uses the Corso Agonisti when no qualified Instructor can teach the next Form", () => {

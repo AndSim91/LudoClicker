@@ -218,21 +218,22 @@ function tryFormTraining(
 // (the combined path also grants the attestation). Summer is the natural window.
 function trainInstructors(state: GameState, now: number): GameState {
   let nextState = state;
+  // 13/10/2026: the Corso Istruttori and the course as allievo run in parallel.
   for (const instructor of state.collaborators) {
-    if (instructor.assignment !== "instructor" || instructor.training) continue;
+    if (instructor.assignment !== "instructor") continue;
     const uncertified = instructor.forms.find(
       (formId) => !instructor.instructorForms.includes(formId),
     );
-    if (uncertified) {
+    if (uncertified && !instructor.instructorCourse) {
       nextState = dispatch(nextState, {
         type: "START_FORM_TRAINING",
         personId: instructor.id,
         formId: uncertified,
         now,
       });
-      continue;
     }
-    nextState = tryFormTraining(nextState, instructor, now, true);
+    const current = nextState.collaborators.find((candidate) => candidate.id === instructor.id);
+    if (current && !current.training) nextState = tryFormTraining(nextState, current, now, true);
   }
   return nextState;
 }

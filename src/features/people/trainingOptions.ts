@@ -43,7 +43,8 @@ export function getTrainingDefinitions(
   const summerBreak = isSummerBreak(state.school.currentMonth);
   if (summerBreak && !isInstructor) return { qualification: [], available: [], annualTrainingAvailable };
 
-  const qualification = isInstructor
+  // The Corso Istruttori has its own slot (13/10/2026): one at a time, beside the course as allievo.
+  const qualification = isInstructor && !collaborator.instructorCourse
     ? collaborator.forms.flatMap((formId) => {
         const definition = getFormDefinition(formId);
         return definition && hasOwnInstructorCourse(formId) &&

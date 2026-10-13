@@ -1,7 +1,6 @@
 import { getOfficialStatsVisibilityTier, isCourseXUnlocked } from "../../content/upgrades";
 import { getContactPreparation, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import { selectActiveEmail, selectInstructorTeachingCount } from "../../game/selectors";
-import { getTrainingPhase } from "../../game/teacherTrainingFlow";
 import { createInitialCollaboratorMastery } from "../../content/mastery";
 import type {
   Collaborator,
@@ -126,15 +125,10 @@ function getSectorSortValue(
   }
   if (key === "forms") return collaborator.forms.length;
   if (key === "instructor-training" || key === "technician-training") {
-    const isTechnicianTraining = collaborator.training
-      ? getTrainingPhase(collaborator.training) === "technician"
-      : false;
-    const matchesColumn = key === "technician-training"
-      ? isTechnicianTraining
-      : Boolean(collaborator.training) && !isTechnicianTraining;
-    if (collaborator.training && matchesColumn) {
-      return collaborator.training.status === "waitingForEquipment" ? 1 : 0;
-    }
+    const course = key === "technician-training"
+      ? collaborator.technicianCourse
+      : collaborator.instructorCourse ?? collaborator.training;
+    if (course) return course.status === "waitingForEquipment" ? 1 : 0;
     return key === "technician-training" && collaborator.technicianCourseReservation ? 2 : null;
   }
   return getSortValue(collaborator, key, context);

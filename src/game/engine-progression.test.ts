@@ -689,7 +689,7 @@ describe("game engine: progression", () => {
 
     expect(qualifiedFormOne.school.euros).toBe(1_375);
     expect(qualifiedFormOne.collaborators[0].instructorForms).toEqual([]);
-    expect(qualifiedFormOne.collaborators[0].training).toMatchObject({
+    expect(qualifiedFormOne.collaborators[0].instructorCourse).toMatchObject({
       formId: "form-1",
       trainingTrack: "instructor",
       trainingPhase: "instructor",
@@ -909,17 +909,23 @@ describe("game engine: progression", () => {
     );
     const slowTraining = training.collaborators[0].training!;
 
+    // Corsi in parallelo (13/10/2026): her course (1) and her allievi (2) share her capacity.
     expect(slowTraining.completesAt - slowTraining.startedAt).toBe(normalDuration * 3);
-    expect(slowTraining.instructorTrainingDurationMultiplier).toBe(3);
+    expect(slowTraining.trainingDurationMultiplier).toBeCloseTo(3);
+    // The allievo's course slows too: two thirds of the teacher go to the class.
+    const studentCourse = training.contacts.find((contact) => contact.id === student.id)!.training!;
+    expect(studentCourse.trainingDurationMultiplier).toBeCloseTo(1.5);
 
+    const teachingStoppedAt = studentCourse.completesAt;
     const studentFinished = gameReducer(
       { ...training, randomSeed: 1 },
-      { type: "TICK", now: 12_000 },
+      { type: "TICK", now: teachingStoppedAt },
     );
-    const teachingStoppedAt = student.training.completesAt;
-    expect(studentFinished.collaborators[0].training?.completesAt).toBe(
-      teachingStoppedAt +
-        Math.round((slowTraining.completesAt - teachingStoppedAt) / 3),
+    expect(studentFinished.contacts.find((contact) => contact.id === student.id)?.training)
+      .toBeUndefined();
+    expect(studentFinished.collaborators[0].training?.completesAt).toBeCloseTo(
+      teachingStoppedAt + (slowTraining.completesAt - teachingStoppedAt) / 3,
+      -1,
     );
   });
 
@@ -1260,7 +1266,8 @@ describe("game engine: progression", () => {
 
     expect(teaching.contacts.find((contact) => contact.id === student.id)?.training?.instructorId)
       .toBe(instructor.id);
-    expect(teaching.collaborators[0].training?.instructorTrainingDurationMultiplier).toBe(3);
+    // Her own course (1) and the allievi (2) share her capacity: a third to the course.
+    expect(teaching.collaborators[0].training?.trainingDurationMultiplier).toBeCloseTo(3);
   });
 
   it("generates one to three weapon preferences when Course Y is completed", () => {

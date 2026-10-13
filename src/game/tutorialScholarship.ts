@@ -19,7 +19,8 @@ export function isTutorialInstructorScholarship(
     !skippedSceneIds.includes(FORMS_TEACHING_TUTORIAL_SCENE_ID) &&
     !state.collaborators.some((collaborator) =>
       collaborator.instructorForms.length > 0 ||
-      Boolean(collaborator.training?.includesInstructorCertification)
+      Boolean(collaborator.training?.includesInstructorCertification) ||
+      Boolean(collaborator.instructorCourse)
     );
 }
 

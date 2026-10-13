@@ -130,7 +130,9 @@ describe("Pianificazione delle Onde", () => {
     expect(simulated.items).toMatchObject([{ label: "Corso Istruttori · Forma 2 ×2", count: 2 }]);
 
     const confirmed = confirmAnnualPlan(state, plan, 5_000);
-    expect(confirmed.collaborators.map((collaborator) => collaborator.training?.formId)).toEqual([undefined, "form-2", "form-2"]);
+    expect(confirmed.collaborators.map((collaborator) =>
+      (collaborator.instructorCourse ?? collaborator.training)?.formId
+    )).toEqual([undefined, "form-2", "form-2"]);
     expect(confirmed.school.euros).toBeCloseTo(100_000 - simulated.cost, 2);
   });
 });

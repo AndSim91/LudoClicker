@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { isSISTechnicianCourseUnlocked } from "../../content/upgrades";
 import { useGameStateSlices } from "../../game/GameStateContext";
-import { getTrainingPhase } from "../../game/teacherTrainingFlow";
 import type { Collaborator, FormId, GameState } from "../../game/types";
 import { InstructorCompactTraining, TechnicianCourseControl } from "./TrainingControl";
 
@@ -26,9 +25,7 @@ export function InstructorCourseTabs({
   collaboratorsById: Map<string, Collaborator>;
 }) {
   const state = useGameStateSlices(["upgrades"], stateOverride);
-  const studyingTechnician = Boolean(
-    collaborator.training && getTrainingPhase(collaborator.training) === "technician",
-  );
+  const studyingTechnician = Boolean(collaborator.technicianCourse);
   const [tab, setTab] = useState<CourseTab>(
     studyingTechnician || collaborator.technicianCourseReservation ? "technician" : "instructor",
   );

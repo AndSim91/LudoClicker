@@ -44,11 +44,11 @@ describe("PagoSport", () => {
     });
 
     expect(started.school.euros).toBe(500);
-    expect(started.collaborators[0].training).toMatchObject({
+    expect(started.collaborators[0].technicianCourse).toMatchObject({
       trainingTrack: "technician",
       trainingBaseDurationMs: 200_000,
     });
-    expect(started.collaborators[0].training?.completesAt).toBe(82_000);
+    expect(started.collaborators[0].technicianCourse?.completesAt).toBe(82_000);
   });
 
   it("keeps courses paid and speeds every course by 50% at level three", () => {

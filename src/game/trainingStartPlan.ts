@@ -29,7 +29,6 @@ import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { GAME_CONFIG, getTechnicalArenaDurationMs } from "./config";
 import { roundCurrency } from "./economy";
 import { getAvailableSwords, reserveSwords } from "./equipment";
-import { getPriorityInstructorQualificationTechnicianIds } from "./instructorPriority";
 import { getInstructorTeachingCounts } from "./runtimeIndexes";
 import {
   compareInstructorTeachingPriority,
@@ -91,7 +90,6 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
   private readonly changedContactIds = new Set<string>();
   private readonly changedCollaboratorIds = new Set<string>();
   private readonly pendingReleaseIds: ReadonlySet<string>;
-  private readonly priorityQualificationTechnicianIds: Set<string>;
   private readonly capacity: number;
   private readonly courseXUnlocked: boolean;
   private readonly unrestrictedFormBranches: boolean;
@@ -117,8 +115,6 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       state.collaborators.map((collaborator) => collaborator.contactId),
     );
     this.pendingReleaseIds = getInstructorPendingReleaseIds(state);
-    this.priorityQualificationTechnicianIds =
-      getPriorityInstructorQualificationTechnicianIds(state);
     this.capacity = selectInstructorCapacity(state);
     this.courseXUnlocked = isCourseXUnlocked(state.upgrades);
     this.unrestrictedFormBranches = areAllFormBranchesUnlocked(state.upgrades);
@@ -226,7 +222,6 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         .filter((collaborator) =>
           collaborator.assignment === "instructor" &&
           !this.pendingReleaseIds.has(collaborator.id) &&
-          !this.priorityQualificationTechnicianIds.has(collaborator.id) &&
           collaborator.forms.includes(formId) &&
           (!needsQualification || collaborator.instructorForms.includes(formId)))
         .map((collaborator) => collaborator.id);
@@ -337,7 +332,6 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         trainingTrack: "agonist",
         trainingPhase: "agonist",
       },
-      this.teachingCounts,
     );
     this.equipment = reservedEquipment;
     this.euros = roundCurrency(this.euros - cost);
@@ -415,7 +409,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         getInstructorQualificationCost(definition.cost),
         formId,
       );
-      if (collaborator.training || this.spendable() < qualificationCost) return undefined;
+      if (collaborator.instructorCourse || this.spendable() < qualificationCost) return undefined;
       const training = scheduleTraining(
         this.state,
         collaborator.id,
@@ -432,10 +426,9 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
           trainingTrack: "instructor",
           trainingPhase: "instructor",
         },
-        this.teachingCounts,
       );
       this.euros = roundCurrency(this.euros - qualificationCost);
-      this.updateCollaborator({ ...collaborator, training });
+      this.updateCollaborator({ ...collaborator, instructorCourse: training });
       return { training };
     }
 
@@ -528,7 +521,6 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
         trainingTrack: instructorTrack ? "combined-instructor" : "athlete",
         trainingPhase: "athlete",
       },
-      this.teachingCounts,
     );
     const formTrainingYearCount = getFormTrainingCount(student, this.trainingYear) + 1;
     this.equipment = reservedEquipment;

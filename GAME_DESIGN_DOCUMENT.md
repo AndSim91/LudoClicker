@@ -1517,9 +1517,10 @@ anticipo.
 | Coordinamento        | funzione futura, non inclusa nell'MVP                                                                              |
 
 La Preparazione atletica (Preparazione agonistica) si sblocca con il livello 5
-di **Nessun *Rancor*e** ed è svolta dagli Istruttori che non stanno insegnando,
-non sono in formazione e non stanno tenendo un Corso Istruttori interno come
-Tecnici. Ogni Istruttore produce un miglioramento **ogni 2 minuti** di gioco per
+di **Nessun *Rancor*e** ed è svolta dagli Istruttori che non stanno insegnando
+agli allievi. Dal 13/10/2026 convive con i corsi che l'Istruttore segue o tiene
+e ne divide la capacità (peso 2, vedi «Capacità e corsi in parallelo»): la sua
+produttività è moltiplicata per la quota che le resta. Ogni Istruttore produce un miglioramento **ogni 2 minuti** di gioco per
 ogni punto di produttività (rarità × Maestria Istruttore), moltiplicato per le
 automazioni generiche, per l'efficacia di Nessun *Rancor*e e per la Genetica.
 **A luglio e agosto non si ferma ma rallenta: un miglioramento ogni 5 minuti**
@@ -1877,7 +1878,8 @@ Regole:
   Corso Tecnico SIS già prenotato e idoneo, assegnare tutte le Forme automatiche,
   usare la capienza residua per Arena Tecnica o Corso Agonisti e infine
   contribuire alla Preparazione agonistica. Le attività formative personali
-  restano compatibili con l'insegnamento secondo le regole di rallentamento;
+  restano compatibili con l'insegnamento e ne dividono la capacità (vedi
+  «Capacità e corsi in parallelo»);
 - il toggle **Insegnamento automatico** è attivo di default e viene salvato.
   Disattivarlo impedisce nuovi avvii automatici di Forme, Arena Tecnica, Corso
   Agonisti, Corsi Istruttori interni e Corsi Tecnici SIS; le formazioni già in
@@ -1913,7 +1915,9 @@ Regole:
   primi due livelli portano da uno a due e poi a tre i rami d'arma che un
   Collaboratore assegnato come Istruttore può apprendere, anche oltre le
   preferenze iniziali (il primo ramo deve comunque essere fra le preferenze).
-  I livelli 3 e 4 aumentano rispettivamente
+  Master of none decide cosa l'allievo vuole imparare, quindi vale anche per
+  l'insegnamento automatico: gli Istruttori titolati insegnano quei rami
+  (Andrea, 13/10/2026). I livelli 3 e 4 aumentano rispettivamente
   di 10 e 20 punti percentuali la possibilità di superare gli esami da atleta,
   Istruttore e Tecnico. Il quinto livello permette a ogni allievo che ha
   completato Corso Y di scegliere liberamente fra tutti i rami d'arma, ignorando
@@ -1993,10 +1997,10 @@ Regole:
 - il corso costa il **1000% del costo base** e ha una durata base pari al **1000%
   della durata della Forma**;
 - la prenotazione è disponibile tutto l'anno e viene pagata subito. In luglio o
-  agosto il corso parte immediatamente se il Collaboratore è libero; negli altri
-  mesi viene programmato per il luglio successivo. Se a luglio il Collaboratore
-  è impegnato, parte appena si libera, anche dopo l'estate; ogni Collaboratore
-  può avere una sola prenotazione alla volta;
+  agosto il corso parte immediatamente; negli altri mesi viene programmato per
+  il luglio successivo. Dal 13/10/2026 corre in parallelo agli altri corsi del
+  Collaboratore (ne aspetta solo un altro Corso Tecnici già in corso); ogni
+  Collaboratore può avere una sola prenotazione alla volta;
 - un corso già iniziato continua senza limiti di calendario;
 - un Tecnico forma automaticamente un solo aspirante Istruttore alla volta per
   una Forma compatibile. L'aspirante deve essere assegnato come Istruttore,
@@ -2024,13 +2028,24 @@ Regole:
 - la scelta automatica privilegia, nell'ordine, la Forma più bassa nella
   progressione, l'attestato più utile agli allievi in attesa e il Collaboratore
   entrato prima nella scuola;
-- Istruttori e Tecnici possono continuare a insegnare agli allievi mentre sono
-  coinvolti in queste formazioni. Se il partecipante o, nel corso interno, il
-  Tecnico sta anche insegnando, la durata residua diventa tripla; la penalità
-  non si cumula se entrambi insegnano;
-- finché tiene un Corso Istruttori interno, il Tecnico conclude le lezioni già
-  avviate ma non riceve nuovi allievi, non avvia un proprio Corso Tecnico e non
-  contribuisce alla Preparazione atletica;
+- **Capacità e corsi in parallelo** (Andrea, 13/10/2026; sostituisce la durata
+  tripla e la precedenza del Tecnico sul Corso Istruttori interno). Una persona
+  può avere attive insieme fino a cinque attività: (1) il corso che segue da
+  allievo (Forma, «Impara e abilita» o Corso Agonisti); (2) il Corso Istruttori
+  che segue da un Tecnico o in autonomia; (3) i corsi allievi che tiene da
+  Istruttore; (4) il Corso Istruttori interno che tiene da Tecnico; (5) il
+  Corso Tecnici SIS che segue. La sua capacità è una sola e si divide tra le
+  attività attive: ognuna riceve **peso / somma dei pesi attivi** (da sola il
+  100%). Pesi: Corso Istruttori tenuto da Tecnico **3**, corsi allievi tenuti
+  **2** (una sola attività anche con sei allievi), Preparazione atletica **2**
+  (solo senza allievi), ogni corso seguito **1**. La velocità di un corso è la
+  più bassa tra la quota che gli dà chi lo segue e quella che gli dà chi lo
+  tiene, quindi un Istruttore che rallenta rallenta anche i suoi allievi. Le
+  formazioni in attesa di spade non consumano capacità. Il limite di corsi
+  all'anno vale solo per il corso da allievo. Nel salvataggio i corsi (2) e (5)
+  hanno un posto proprio (`instructorCourse`, `technicianCourse`, migrazione
+  v112; `trainingShares.ts`, `trainingSlots.ts`); quando cambia la ripartizione
+  la barra di avanzamento resta al suo punto e cambia solo il passo;
 - la durata del Corso Tecnico e del Corso Istruttori interno viene divisa per la
   produttività da Istruttore del partecipante;
 - sulla singola Forma la corona dorata identifica l'attestato da Istruttore; la

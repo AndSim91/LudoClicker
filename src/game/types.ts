@@ -485,6 +485,10 @@ export interface Collaborator {
   /** Forms qualified through «Istruttori in e-Learning» (subset of instructorForms). */
   eLearningInstructorForms?: FormId[];
   technicianCourseReservation?: TechnicianCourseReservation;
+  /** Corso Istruttori seguito (13/10/2026): in parallelo al corso da allievo in `training`. */
+  instructorCourse?: FormTraining;
+  /** Corso Tecnici seguito (13/10/2026): in parallelo agli altri corsi. */
+  technicianCourse?: FormTraining;
   formBranchPreferences?: FormBranch[];
   assignment: CollaboratorAssignment;
   /** ponytail: ignored since «Turni e precedenza» (proposta B); kept only so old saves validate. */

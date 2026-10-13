@@ -9,10 +9,12 @@ const course = (formId: FormTraining["formId"], extra: Partial<FormTraining> = {
 
 const student = (id: string, training: FormTraining) => ({ id, displayName: id, instructorId: "i", training });
 
+// Corsi in parallelo: a Corso Tecnici sits in its own slot.
 const staff = (training?: FormTraining, reservation?: Collaborator["technicianCourseReservation"]): Collaborator => ({
   id: "c", contactId: "k", displayName: "C", joinedAt: 0, forms: [], instructorForms: [],
   assignment: "instructor", mastery: createInitialCollaboratorMastery(), rarity: "rare",
-  training, technicianCourseReservation: reservation,
+  ...(training?.trainingPhase === "technician" ? { technicianCourse: training } : { training }),
+  technicianCourseReservation: reservation,
 });
 
 describe("getFormActivity", () => {
