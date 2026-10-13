@@ -2,12 +2,12 @@ import type { GymRarity, GymRarityCounts } from "../../content/gymStages";
 
 /**
  * The gym's rack swaps (13/10, concepts R1 + V2 + C2): every athlete on the mat
- * stays 120–150 s, then walks to the rack and is replaced. Uses Math.random on
+ * stays 120–180 s, then walks to the rack and is replaced. Uses Math.random on
  * purpose: nothing here touches the game state or its seeded RNG.
  */
-export const GYM_LIFESPAN_MS: [number, number] = [120_000, 150_000];
+export const GYM_LIFESPAN_MS: [number, number] = [120_000, 180_000];
 /** On opening the page the clocks start already staggered, so nobody leaves together. */
-export const GYM_FIRST_LIFESPAN_MS: [number, number] = [20_000, 150_000];
+export const GYM_FIRST_LIFESPAN_MS: [number, number] = [20_000, 180_000];
 /** Athletes walking at the same time; one at a time at the rack itself. */
 export const GYM_MAX_WALKERS = 2;
 
