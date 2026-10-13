@@ -85,3 +85,23 @@ export function getTrainingDefinitions(
     : [...qualification, ...newForms];
   return { qualification, available, annualTrainingAvailable };
 }
+
+/**
+ * Forme per cui un Istruttore può fare il Corso Tecnici SIS: abilitato da
+ * Istruttore, non ancora Tecnico. Usata dal controllo SIS e dal contatore della card.
+ */
+export function getTechnicianCourseDefinitions(
+  collaborator: Collaborator,
+  courseXUnlocked: boolean,
+): FormDefinition[] {
+  if (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) return [];
+  return collaborator.forms.flatMap((formId) => {
+    const definition = getFormDefinition(formId);
+    return definition &&
+      (courseXUnlocked || formId !== "course-x") &&
+      collaborator.instructorForms.includes(formId) &&
+      !(collaborator.technicianForms ?? []).includes(formId)
+      ? [definition]
+      : [];
+  });
+}

@@ -46,7 +46,8 @@ import { FormCoverageMap } from "./FormPathMap";
 import { getFormActivity } from "./formActivity";
 import { InstructorCoverageTable } from "./InstructorCoverageTable";
 import { InstructorTrainingRow } from "./InstructorTrainingRow";
-import { getTrainingDefinitions } from "./trainingOptions";
+import { getTechnicianCourseDefinitions, getTrainingDefinitions } from "./trainingOptions";
+import { AvailableCoursesButton } from "./AvailableCoursesButton";
 import { OndeSectorBody } from "./OndeSectorBody";
 import { QuickTeacherTraining } from "./QuickTeacherTraining";
 import { useQuickTrainingPreviews } from "./useQuickTrainingPreviews";
@@ -399,6 +400,12 @@ function InstructorSectorCard({
     ? instructors.filter((instructor) => !instructor.training &&
         getTrainingDefinitions(state, instructor, instructor).available.length > 0).length
     : 0, [instructors, state]);
+  // Chi può prenotare adesso un Corso Tecnici SIS: libero, senza prenotazioni, con una Forma da abilitare.
+  const startableTechnicians = useMemo(() => sisUnlocked && state.unlocks.forms
+    ? instructors.filter((instructor) => !instructor.training &&
+        !instructor.technicianCourseReservation &&
+        getTechnicianCourseDefinitions(instructor, courseXUnlocked).length > 0).length
+    : 0, [courseXUnlocked, instructors, sisUnlocked, state.unlocks.forms]);
   const quickPreviews = useQuickTrainingPreviews(state, now);
   const quickHighlight = onQuickTeacherTraining
     ? { instructor: quickPreviews.instructor?.formId, technician: quickPreviews.technician?.formId }
@@ -428,6 +435,15 @@ function InstructorSectorCard({
       onStart={onQuickTeacherTraining}
     />
   ) : null;
+  // Senza Ufficio formazione, al suo posto il contatore dei corsi che apre il Centro didattico.
+  const coursesButton = office && quickPreviews.enabled ? null : (
+    <AvailableCoursesButton
+      instructors={startableInstructors}
+      technicians={startableTechnicians}
+      showTechnicians={sisUnlocked}
+      onOpen={onOpen}
+    />
+  );
 
   return (
     <article className={`instructor-sector-card ${outlook ? "is-table" : "is-quadrants"}`}>
@@ -481,8 +497,12 @@ function InstructorSectorCard({
               <div><dt>Staff in formazione</dt><dd>{staffInTraining}</dd></div>
               <div><dt>Preparazione atletica</dt><dd>{!prepUnlocked ? "Da sbloccare" : preparationInstructorCount > 0 ? (summerBreak ? "Estiva" : "Continuativa") : "In attesa"}</dd></div>
             </dl>
-            {office ? <span className="instructor-side-label">Ufficio formazione</span> : null}
-            {office}
+            {coursesButton ?? (
+              <>
+                <span className="instructor-side-label">Ufficio formazione</span>
+                {office}
+              </>
+            )}
           </aside>
         </div>
       ) : (
@@ -525,15 +545,19 @@ function InstructorSectorCard({
               <span><b>{studentCount}</b> allievi</span>
               {staffInTraining > 0 ? <span><b>{staffInTraining}</b> in formazione</span> : null}
             </p>
-            {office ? <span className="instructor-side-label">Ufficio formazione</span> : null}
-            {office}
+            {coursesButton ?? (
+              <>
+                <span className="instructor-side-label">Ufficio formazione</span>
+                {office}
+              </>
+            )}
           </aside>
         </div>
       )}
 
       <footer className="sector-card-foot instructor-sector-foot">
         <SectorMasteryIndicator collaborators={instructors} role="instructor" />
-        <button
+        {coursesButton ? null : <button
           type="button"
           className="instructor-courses-link"
           aria-label={startableInstructors > 0
@@ -543,7 +567,7 @@ function InstructorSectorCard({
           disabled={startableInstructors === 0}
         >
           Corsi Istruttori disponibili · {startableInstructors}
-        </button>
+        </button>}
         <button type="button" className="sector-manage-button is-primary" aria-label="Gestisci Istruttori" onClick={onOpen}>
           Gestisci
           <Icon name="arrowRight" />

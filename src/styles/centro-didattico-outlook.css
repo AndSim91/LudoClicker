@@ -135,6 +135,28 @@
   color: var(--accent-ink);
 }
 
+/* Contatore dei corsi prima dell'Ufficio: riquadro bianco come le sue righe. */
+:root[data-theme="light"] .instructor-available-courses {
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+:root[data-theme="light"] .instructor-available-courses:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+:root[data-theme="light"] .instructor-available-row b {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+:root[data-theme="light"] .instructor-available-courses:disabled,
+:root[data-theme="light"] .instructor-available-courses:disabled b {
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+}
+
 /* ---------- SIS: il viola resta solo nell'etichetta ---------- */
 :root[data-theme="light"] .technician-course-control,
 :root[data-theme="light"] .technician-course-reservation {

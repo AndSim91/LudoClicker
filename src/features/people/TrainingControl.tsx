@@ -10,7 +10,6 @@ import {
   getTrainingCourseTitle,
   isInstructorForm,
   isAgonistCourse,
-  needsCourseXRecovery,
   type FormDefinition,
   type FormStudent,
 } from "../../content/forms";
@@ -49,7 +48,7 @@ import {
 import { TrainingFormPreview } from "./PersonPresentation";
 import { getDefaultTrainingOption } from "./peoplePresentation";
 import { TrainingOptionPicker } from "./TrainingOptionPicker";
-import { getTrainingDefinitions } from "./trainingOptions";
+import { getTechnicianCourseDefinitions, getTrainingDefinitions } from "./trainingOptions";
 import { getQualifyingCourseCost, isTutorialInstructorScholarship } from "../../game/tutorialScholarship";
 
 type InstructorTeachingEntry = {
@@ -320,17 +319,7 @@ export function TechnicianCourseControl({
     ),
     [state.collaborators],
   );
-  const recoveryPending = courseXUnlocked && needsCourseXRecovery(collaborator.forms);
-  const definitions = collaborator.forms.flatMap((formId) => {
-    const definition = getFormDefinition(formId);
-    return definition &&
-      (courseXUnlocked || formId !== "course-x") &&
-      !recoveryPending &&
-      collaborator.instructorForms.includes(formId) &&
-      !(collaborator.technicianForms ?? []).includes(formId)
-      ? [definition]
-      : [];
-  });
+  const definitions = getTechnicianCourseDefinitions(collaborator, courseXUnlocked);
   const variantClass = variant === "compact" ? " training-compact" : "";
 
   if (collaborator.training && getTrainingPhase(collaborator.training) === "technician") {

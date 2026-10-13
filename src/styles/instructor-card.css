@@ -322,6 +322,72 @@
 
 .instructor-quick-slot strong { font-weight: 600; }
 
+/* Prima dell'Ufficio formazione: numeri in colonna come la Copertura (C5), senza oro (13/10). */
+.instructor-available-courses {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink-muted);
+  background: color-mix(in srgb, var(--accent-ink) 7%, var(--surface));
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.instructor-available-row {
+  display: contents;
+}
+
+.instructor-available-row b {
+  min-width: 2ch;
+  font: 600 24px/1 var(--font-display, inherit);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.instructor-available-row.is-instructor b { color: var(--success); }
+.instructor-available-row.is-technician b { color: #d4aeff; }
+
+.instructor-available-go {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.instructor-available-go svg {
+  width: 13px;
+  height: 13px;
+  margin-left: auto;
+}
+
+.instructor-available-courses:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-ink) 14%, var(--surface));
+}
+
+.instructor-available-courses:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.instructor-available-courses:disabled {
+  border-style: dashed;
+  background: var(--surface-muted);
+  cursor: default;
+}
+
+.instructor-available-courses:disabled b,
+.instructor-available-courses:disabled .instructor-available-go {
+  color: var(--ink-soft);
+}
+
 /* ---------- Piede: Maestria · Corsi Istruttori disponibili · Gestisci ---------- */
 .instructor-sector-foot {
   gap: 16px;

@@ -100,8 +100,18 @@ describe("PeopleView", () => {
     // Modalità Onde: Copertura didattica sulla mappa (C5), i numeri a sinistra del logo.
     expect(screen.getByTitle("Forma 1 · 1 Istruttore")).toHaveTextContent("1");
     // Forma 1 già abilitata, ma può «Impara e abilita» la Forma 2: conta come corso disponibile.
-    expect(screen.getByRole("button", { name: "Apri 1 Corsi Istruttori disponibili" }))
-      .toHaveTextContent("Corsi Istruttori disponibili · 1");
+    // Senza Ufficio formazione: il contatore dei corsi al suo posto, e niente link nel piede.
+    expect(screen.getByRole("button", { name: "Apri il Centro didattico · 1 Corsi Istruttori disponibili" }))
+      .toHaveTextContent("1Corsi Istruttori disponibili");
+    expect(screen.queryByRole("button", { name: "Apri 1 Corsi Istruttori disponibili" })).not.toBeInTheDocument();
+
+    // Con la SIS conta anche chi può prenotare il Corso Tecnici della Forma 1.
+    view.rerender(
+      <PeopleView state={state({ "sis-accreditation": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
+    );
+    expect(screen.getByRole("button", {
+      name: "Apri il Centro didattico · 1 Corsi Istruttori disponibili · 1 Corsi Tecnici disponibili",
+    })).toBeEnabled();
 
     view.rerender(
       <PeopleView state={state({ "training-office": 1 })} onAssign={() => undefined} onStartTraining={() => undefined} onQuickTeacherTraining={onQuick} />,
@@ -109,6 +119,9 @@ describe("PeopleView", () => {
     const button = screen.getByRole("button", { name: /^Forma un Istruttore · Forma 2.*Corso Istruttori/ });
     fireEvent.click(button);
     expect(onQuick).toHaveBeenCalledWith("instructor");
+    expect(screen.queryByRole("button", { name: /^Apri il Centro didattico/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Apri 1 Corsi Istruttori disponibili" }))
+      .toHaveTextContent("Corsi Istruttori disponibili · 1");
     expect(screen.queryByRole("button", { name: /^Forma un Tecnico/ })).not.toBeInTheDocument();
 
     view.rerender(
@@ -936,11 +949,10 @@ describe("PeopleView", () => {
     expect(screen.getByRole("progressbar", {
       name: "Preparazione atletica continuativa",
     })).toHaveAttribute("aria-valuetext", "Attività in pausa");
-    expect(screen.getByText("Corsi Istruttori disponibili · 1")).toBeVisible();
-
     const courseAction = screen.getByRole("button", {
-      name: "Apri 1 Corsi Istruttori disponibili",
+      name: "Apri il Centro didattico · 1 Corsi Istruttori disponibili",
     });
+    expect(courseAction).toBeVisible();
     fireEvent.click(courseAction);
     expect(screen.getByRole("dialog", { name: "Istruttori" })).toBeVisible();
   });
