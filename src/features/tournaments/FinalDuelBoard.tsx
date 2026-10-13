@@ -1,4 +1,6 @@
+import { getHiddenStatsHint, hasUnlockedOfficialStats } from "../../game/athleteStats";
 import type { TournamentParticipant } from "../../game/types";
+import { useOfficialStatsTier } from "../../game/useOfficialStatsTier";
 import { formatStat } from "../../shared/formatters";
 import type { DuelSide } from "./finalDuel";
 import { TournamentParticipantIdentity } from "./TournamentAthleteIdentity";
@@ -15,6 +17,11 @@ export function FinalDuelBoard({
   history: DuelSide[];
   bestOf: number;
 }) {
+  const statsTier = useOfficialStatsTier();
+  const stat = (side: DuelSide, value: number) =>
+    hasUnlockedOfficialStats(participants[side].knownFormIds ?? [], statsTier)
+      ? formatStat(value)
+      : <span title={getHiddenStatsHint(statsTier)}>???</span>;
   const who = (side: DuelSide) => (
     <div className={`fd-board-side is-${side}`}>
       <div className={`fd-board-who is-${side}${participants[side].ownedContactId ? " is-owned" : ""}`}>
@@ -23,8 +30,8 @@ export function FinalDuelBoard({
       </div>
       {/* The final is always Arena: that row is the one in gold. */}
       <dl className="fd-board-stats">
-        <div className="is-arena"><dt>Arena</dt><dd>{formatStat(participants[side].arenaPreparation)}</dd></div>
-        <div><dt>Stile</dt><dd>{formatStat(participants[side].stylePreparation)}</dd></div>
+        <div className="is-arena"><dt>Arena</dt><dd>{stat(side, participants[side].arenaPreparation)}</dd></div>
+        <div><dt>Stile</dt><dd>{stat(side, participants[side].stylePreparation)}</dd></div>
       </dl>
     </div>
   );

@@ -1,6 +1,8 @@
 import { useMemo, type CSSProperties } from "react";
 import { OfficialStatValue } from "../../components/common/OfficialStatValue";
 import { PERSON_RARITIES } from "../../content/rarities";
+import { getHiddenStatsHint, hasUnlockedOfficialStats } from "../../game/athleteStats";
+import { useOfficialStatsTier } from "../../game/useOfficialStatsTier";
 import type {
   FormId,
   SchoolTournamentPreliminary,
@@ -44,6 +46,7 @@ function PreliminaryRanking({
   knownFormsByContactId,
 }: PreliminaryRankingProps) {
   const label = discipline === "arena" ? "Arena" : "Stile";
+  const statsTier = useOfficialStatsTier();
   const entries = participantIds.flatMap((contactId) => {
     const participant = participantByContactId.get(contactId);
     return participant ? [participant] : [];
@@ -118,13 +121,17 @@ function PreliminaryRanking({
                     </div>
                   </td>
                   <td>
-                    <OfficialStatValue
-                      value={
-                        discipline === "arena"
-                          ? participant.arenaPreparation
-                          : participant.stylePreparation
-                      }
-                    />
+                    {hasUnlockedOfficialStats(knownForms ?? [], statsTier) ? (
+                      <OfficialStatValue
+                        value={
+                          discipline === "arena"
+                            ? participant.arenaPreparation
+                            : participant.stylePreparation
+                        }
+                      />
+                    ) : (
+                      <span title={getHiddenStatsHint(statsTier)}>???</span>
+                    )}
                   </td>
                 </tr>
               );

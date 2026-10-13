@@ -92,6 +92,8 @@ export function useGameSelector<Selection>(
   selector: (state: GameState) => Selection,
   override?: GameState,
   isEqual: (left: Selection, right: Selection) => boolean = Object.is,
+  /** Returned outside a GameStateProvider (isolated component tests) instead of throwing. */
+  fallback?: () => Selection,
 ): Selection {
   const contextState = useContext(GameStateContext);
   const store = useContext(GameStateStoreContext);
@@ -104,6 +106,7 @@ export function useGameSelector<Selection>(
     return () => {
       const state = override ?? contextState ?? store?.getState();
       if (!state) {
+        if (fallback) return fallback();
         throw new Error(
           "Game state is unavailable: render inside GameStateProvider or provide state.",
         );
@@ -114,7 +117,7 @@ export function useGameSelector<Selection>(
       selectedValue = nextSelection;
       return nextSelection;
     };
-  }, [contextState, isEqual, override, selector, store]);
+  }, [contextState, fallback, isEqual, override, selector, store]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

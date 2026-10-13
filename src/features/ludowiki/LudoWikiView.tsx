@@ -12,6 +12,8 @@ import {
   type LudoWikiVisualIcon,
 } from "../../content/ludowiki";
 import { useGameState } from "../../game/GameStateContext";
+import { useOfficialStatsTier } from "../../game/useOfficialStatsTier";
+import { getHiddenStatsHint } from "../../game/athleteStats";
 import { AchievementsSection } from "./AchievementsSection";
 import { ScenesSection } from "./ScenesSection";
 import { describeMoment, type MomentContent } from "../moments/momentContent";
@@ -88,6 +90,8 @@ function LudodexListRow({
   selected: boolean;
   onSelect: () => void;
 }) {
+  // Arena e Stile only with Occhio del Maestro, here too.
+  const statsVisible = useOfficialStatsTier() > 0;
   const dossier = status === "enrolled" ? getLegendaryDossier(state, legendary) : undefined;
   const accessibleName = status === "unknown"
     ? `Apri voce Ludodex sconosciuta ${legendary.ludodexNumber}`
@@ -106,7 +110,7 @@ function LudodexListRow({
         <strong>{status === "unknown" ? "???" : getLegendaryName(legendary)}</strong>
         {dossier ? (
           <span>
-            {legendary.external
+            {!statsVisible ? "Dossier aperto" : legendary.external
               ? `Arena da torneo ${formatStat(dossier.arenaBase)} · Stile da torneo ${formatStat(dossier.styleBase)}`
               : `Arena base ${formatStat(dossier.arenaBase)} · Stile base ${formatStat(dossier.styleBase)}`}
           </span>
@@ -132,6 +136,7 @@ function LegendaryDossierPanel({
   status: LudodexStatus;
   onReplay?: (id: SpecialCollaboratorId) => void;
 }) {
+  const statsTier = useOfficialStatsTier();
   if (status === "encountered") {
     return (
       <section className="ludodex-dossier is-encountered" aria-labelledby="ludodex-dossier-title">
@@ -213,8 +218,8 @@ function LegendaryDossierPanel({
       </div>
 
       <div className="ludodex-stats" aria-label={legendary.external ? "Valori da torneo" : "Valori di base"}>
-        <div><span>{legendary.external ? "Arena da torneo" : "Arena base"}</span><OfficialStatValue value={dossier.arenaBase} /></div>
-        <div><span>{legendary.external ? "Stile da torneo" : "Stile base"}</span><OfficialStatValue value={dossier.styleBase} /></div>
+        <div><span>{legendary.external ? "Arena da torneo" : "Arena base"}</span>{statsTier > 0 ? <OfficialStatValue value={dossier.arenaBase} /> : <strong title={getHiddenStatsHint(0)}>???</strong>}</div>
+        <div><span>{legendary.external ? "Stile da torneo" : "Stile base"}</span>{statsTier > 0 ? <OfficialStatValue value={dossier.styleBase} /> : <strong title={getHiddenStatsHint(0)}>???</strong>}</div>
       </div>
 
       <dl className="ludodex-acquisition-info" aria-label="Provenienza e acquisizione">
