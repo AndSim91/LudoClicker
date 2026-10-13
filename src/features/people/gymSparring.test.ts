@@ -38,13 +38,13 @@ describe("gym sparring", () => {
     return sparring / (idle + sparring);
   };
 
-  it("keeps the side pairs sparring about a sixth of the time", () => {
-    expect(share(SIDE_PACE)).toBeGreaterThan(0.1);
-    expect(share(SIDE_PACE)).toBeLessThan(0.22);
+  it("keeps the side pairs sparring about a fifth of the time", () => {
+    expect(share(SIDE_PACE)).toBeGreaterThan(0.15);
+    expect(share(SIDE_PACE)).toBeLessThan(0.3);
   });
 
-  it("lets the central pair spar about a third of the time", () => {
-    expect(share(CENTRAL_PACE)).toBeGreaterThan(0.25);
-    expect(share(CENTRAL_PACE)).toBeLessThan(0.42);
+  it("lets the central pair spar a little over 40% of the time", () => {
+    expect(share(CENTRAL_PACE)).toBeGreaterThan(0.36);
+    expect(share(CENTRAL_PACE)).toBeLessThan(0.52);
   });
 });

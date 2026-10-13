@@ -62,12 +62,15 @@ describe("GymScene", () => {
     expect(view.container.querySelectorAll(".gym-judge.is-phone .gym-judge-tap")).toHaveLength(3);
   });
 
-  it("walks an athlete to the rack and back with another blade, waiting for the rack", () => {
+  it("walks a pair to the rack and back with other blades, waiting for the rack", () => {
     vi.useFakeTimers();
     const onDone = vi.fn();
     let free = false;
     const rack = { claim: () => free, release: vi.fn() };
-    const view = render(<GymRackSwap id={7} homeX={170} sabers={["#4aa8ff", "#ffd166"]} rack={rack} onDone={onDone} />);
+    const view = render(
+      <GymRackSwap id={7} homes={[170, 232]} sabers={[["#4aa8ff", "#ffd166"], ["#6bf0b0", "#d4aeff"]]} rack={rack} onDone={onDone} />,
+    );
+    expect(view.container.querySelectorAll(".gym-walker")).toHaveLength(2);
     // It appears on its own spot, then walks: never drawn straight at the rack.
     const walker = () => view.container.querySelector<HTMLElement>(".gym-walker")!;
     expect(walker().style.getPropertyValue("--dx")).toBe("0");
@@ -84,7 +87,9 @@ describe("GymScene", () => {
     run(12);
     expect(onDone).toHaveBeenCalledWith(7);
     expect(rack.release).toHaveBeenCalledWith(7);
-    expect(view.container.querySelector(".gym-saber-line")).toHaveStyle({ color: "#ffd166" });
+    const blades = view.container.querySelectorAll(".gym-saber-line");
+    expect(blades[0]).toHaveStyle({ color: "#ffd166" });
+    expect(blades[1]).toHaveStyle({ color: "#d4aeff" });
     vi.useRealTimers();
   });
 

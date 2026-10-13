@@ -25,7 +25,7 @@ import {
 } from "./gymMatch";
 import { GymReferees, GymScoreboard, type RaisedCard } from "./GymReferees";
 import { GymRackSwap, type RackTurns } from "./GymRackSwap";
-import { GYM_FIRST_LIFESPAN_MS, GYM_LIFESPAN_MS, GYM_MAX_WALKERS, between, pickSwapRarity } from "./gymRack";
+import { GYM_FIRST_LIFESPAN_MS, GYM_LIFESPAN_MS, GYM_MAX_WALKING_PAIRS, between, pickSwapRarity } from "./gymRack";
 import { canSpar, type RackHold } from "./gymSparring";
 import { useJudgeReading } from "./useJudgeReading";
 import type { GymBox } from "./gymBox";
@@ -108,37 +108,36 @@ function useGymMatch() {
 }
 
 // Where each blade of getGymSaberRarities stands: the central pair, then the side
-// pairs from the left (see the pairs at the bottom of GymScene).
+// pairs from the left (see the pairs at the bottom of GymScene). Pair p holds
+// slots 2p and 2p + 1.
 const SLOT_X = [290, 352, 170, 232, 408, 470];
-const pairOf = (slot: number) => Math.floor(slot / 2);
-// How often the scene looks for an athlete whose time on the mat is up. Not the
-// game tick: it only reads refs and sets state when someone actually leaves.
+// How often the scene looks for a pair whose time on the mat is up. Not the
+// game tick: it only reads refs and sets state when a pair actually leaves.
 const RACK_CHECK_MS = 1_500;
 
 interface RackWalk {
   id: number;
-  slot: number;
-  sabers: [string, string];
-  to: GymRarity;
+  pair: number;
+  /** Per athlete (left, right): the blade going out and the one coming back. */
+  sabers: Array<[string, string]>;
+  to: [GymRarity, GymRarity];
 }
 
 /**
- * Rack swaps for everyone (13/10, concepts R1 + V2 + C2): each athlete on the
- * mat stays 120–180 s, then walks to the rack and is replaced, never halfway
- * through a bout and at most two walking at a time. The new blade follows the
- * members' rarities and what is already on the mat (gymRack.ts).
+ * Rack swaps (13/10, concepts R1 + V2 + C2): each pair on the mat stays
+ * 120–180 s, then walks to the rack together and is replaced by a new pair, so
+ * nobody stands alone waiting for a partner. Never halfway through a bout, one
+ * pair at a time. The new blades follow the members' rarities and what is
+ * already on the mat (gymRack.ts).
  */
 function useRackSwaps(enabled: boolean, fighterCount: number, counts: GymRarityCounts) {
   const target = useMemo(() => getGymSaberRarities(counts, fighterCount), [counts, fighterCount]);
   const [overrides, setOverrides] = useState<Partial<Record<number, GymRarity>>>({});
   const shown = target.map((rarity, slot) => overrides[slot] ?? rarity);
   const [walks, setWalks] = useState<RackWalk[]>([]);
-  const holds = [
-    useRef<RackHold>({ away: false, busy: false }),
-    useRef<RackHold>({ away: false, busy: false }),
-    useRef<RackHold>({ away: false, busy: false }),
-  ];
-  const [h0, h1, h2] = holds;
+  const h0 = useRef<RackHold>({ away: false, busy: false });
+  const h1 = useRef<RackHold>({ away: false, busy: false });
+  const h2 = useRef<RackHold>({ away: false, busy: false });
   const owner = useRef<number | null>(null);
   const rack = useMemo<RackTurns>(() => ({
     claim: (id) => {
@@ -161,7 +160,7 @@ function useRackSwaps(enabled: boolean, fighterCount: number, counts: GymRarityC
   useEffect(() => {
     if (!enabled) return undefined;
     const now = Date.now();
-    due.current = Array.from({ length: fighterCount }, () => now + between(Math.random, GYM_FIRST_LIFESPAN_MS));
+    due.current = Array.from({ length: Math.floor(fighterCount / 2) }, () => now + between(Math.random, GYM_FIRST_LIFESPAN_MS));
     const pairs = [h0, h1, h2];
     return () => {
       pairs.forEach((hold) => {
@@ -171,41 +170,53 @@ function useRackSwaps(enabled: boolean, fighterCount: number, counts: GymRarityC
       setWalks([]);
       setOverrides({});
     };
-  }, [enabled, fighterCount, h0, h1, h2]);
+  }, [enabled, fighterCount]);
 
   useEffect(() => {
     if (!enabled) return undefined;
     const pairs = [h0, h1, h2];
     const timer = window.setInterval(() => {
       const { shown: mat, target: goal, counts: members, walks: walking } = live.current;
-      if (!canSpar() || walking.length >= GYM_MAX_WALKERS) return;
+      if (!canSpar() || walking.length >= GYM_MAX_WALKING_PAIRS) return;
       const now = Date.now();
-      const slot = due.current.findIndex((at, index) =>
-        now >= at && !walking.some((walk) => walk.slot === index) && !pairs[pairOf(index)].current.busy);
-      if (slot < 0) return;
-      const to = pickSwapRarity(mat.filter((_, index) => index !== slot), goal, members, Math.random);
-      pairs[pairOf(slot)].current.away = true;
+      const pair = due.current.findIndex((at, index) =>
+        now >= at && !walking.some((walk) => walk.pair === index) && !pairs[index].current.busy);
+      if (pair < 0) return;
+      // Two new blades, one after the other, each seeing the one drawn before.
+      const left = 2 * pair;
+      const staying = mat.filter((_, slot) => slot !== left && slot !== left + 1);
+      const first = pickSwapRarity(staying, goal, members, Math.random);
+      const second = pickSwapRarity([...staying, first], goal, members, Math.random);
+      pairs[pair].current.away = true;
       nextId.current += 1;
-      const walk = { id: nextId.current, slot, to, sabers: [GYM_SABER_COLORS[mat[slot]], GYM_SABER_COLORS[to]] as [string, string] };
+      const walk: RackWalk = {
+        id: nextId.current,
+        pair,
+        to: [first, second],
+        sabers: [
+          [GYM_SABER_COLORS[mat[left]], GYM_SABER_COLORS[first]],
+          [GYM_SABER_COLORS[mat[left + 1]], GYM_SABER_COLORS[second]],
+        ],
+      };
       live.current.walks = [...walking, walk];
       setWalks((list) => [...list, walk]);
     }, RACK_CHECK_MS);
     return () => window.clearInterval(timer);
-  }, [enabled, h0, h1, h2]);
+  }, [enabled]);
 
   const onDone = useCallback((id: number) => {
     const walk = live.current.walks.find((item) => item.id === id);
     if (!walk) return;
     const rest = live.current.walks.filter((item) => item.id !== id);
     live.current.walks = rest;
-    [h0, h1, h2][pairOf(walk.slot)].current.away = rest.some((item) => pairOf(item.slot) === pairOf(walk.slot));
-    due.current[walk.slot] = Date.now() + between(Math.random, GYM_LIFESPAN_MS);
-    setOverrides((current) => ({ ...current, [walk.slot]: walk.to }));
+    [h0, h1, h2][walk.pair].current.away = false;
+    due.current[walk.pair] = Date.now() + between(Math.random, GYM_LIFESPAN_MS);
+    setOverrides((current) => ({ ...current, [2 * walk.pair]: walk.to[0], [2 * walk.pair + 1]: walk.to[1] }));
     setWalks(rest);
-  }, [h0, h1, h2]);
+  }, []);
 
-  const away = (slot: number) => walks.some((walk) => walk.slot === slot);
-  return { shown, walks, holds, rack, onDone, away };
+  const away = (pair: number) => walks.some((walk) => walk.pair === pair);
+  return { shown, walks, holds: [h0, h1, h2], rack, onDone, away };
 }
 
 // Subscribes to members and contacts only, so money ticks do not repaint the scene.
@@ -375,7 +386,14 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
 
         {/* Walkers come before the pairs: in the back lane they pass behind them (concept V2). */}
         {rack.walks.map((walk) => (
-          <GymRackSwap key={walk.id} id={walk.id} homeX={SLOT_X[walk.slot]} sabers={walk.sabers} rack={rack.rack} onDone={rack.onDone} />
+          <GymRackSwap
+            key={walk.id}
+            id={walk.id}
+            homes={[SLOT_X[2 * walk.pair], SLOT_X[2 * walk.pair + 1]]}
+            sabers={walk.sabers}
+            rack={rack.rack}
+            onDone={rack.onDone}
+          />
         ))}
         {/* The rack's body is a layer above the walker, who goes behind it. */}
         {stage >= 1 ? (
@@ -410,7 +428,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             sabers={[sabers[0], sabers[1]]}
             onPoint={match.onPoint}
             hold={rack.holds[0]}
-            away={[rack.away(0), rack.away(1)]}
+            away={[rack.away(0), rack.away(0)]}
           />
         ) : null}
         {PAIR_SPOTS.slice(1, Math.floor(fighterCount / 2)).map((x, index) => (
@@ -421,7 +439,7 @@ export function GymScene({ state: stateOverride }: { state?: GameState }) {
             sabers={[sabers[(index + 1) * 2], sabers[(index + 1) * 2 + 1]]}
             index={index + 1}
             hold={rack.holds[index + 1]}
-            away={[rack.away((index + 1) * 2), rack.away((index + 1) * 2 + 1)]}
+            away={[rack.away(index + 1), rack.away(index + 1)]}
           />
         ))}
       </div>

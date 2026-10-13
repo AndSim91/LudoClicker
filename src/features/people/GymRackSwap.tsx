@@ -31,8 +31,8 @@ const ORDER: Phase[] = [
 ];
 
 interface Look {
-  /** Target x of the walk, in scene units. */
-  x: number;
+  /** Target x of each athlete's walk, in scene units. */
+  xs: number[];
   ms: number;
   lane: "front" | "back";
   facing: 1 | -1;
@@ -41,53 +41,66 @@ interface Look {
   walking: boolean;
 }
 
-/** What each phase looks like and how long it lasts (walks scale with the distance). */
-function phaseLook(phase: Phase, homeX: number): Look {
-  const walk = (from: number, to: number) => Math.round((Math.abs(to - from) / WALK_SPEED) * 1_000);
+/** Room between two athletes walking together; the rightmost leads. */
+const PAIR_GAP = 36;
+
+/**
+ * What each phase looks like and how long it lasts. A pair walks together: at
+ * the rack and in line the rightmost athlete leads and the other one keeps
+ * PAIR_GAP behind; a walk lasts as long as the longer of the two.
+ */
+function phaseLook(phase: Phase, homes: number[]): Look {
+  const order = [...homes].sort((a, b) => a - b);
+  const behind = homes.map((home) => PAIR_GAP * (homes.length - 1 - order.indexOf(home)));
+  const at = (x: number) => homes.map((_, index) => x - behind[index]);
+  const fromHome = (dx: number) => homes.map((home) => home + dx);
+  const walk = (from: number[], to: number[]) =>
+    Math.max(...from.map((x, index) => Math.round((Math.abs(to[index] - x) / WALK_SPEED) * 1_000)));
   const outbound = { facing: 1, blade: true, shown: true, walking: true } as const;
   const inbound = { facing: -1, blade: true, shown: true, walking: true } as const;
   switch (phase) {
     // A new element has no previous position to animate from: it is drawn on
     // its spot first, and only the next phase moves it (no jump to the rack).
-    case "start": return { ...outbound, x: homeX, ms: 80, lane: "front", walking: false };
-    case "leave": return { ...outbound, x: homeX + 14, ms: 350, lane: "back" };
-    case "out": return { ...outbound, x: QUEUE_X, ms: walk(homeX + 14, QUEUE_X), lane: "back" };
-    case "queue": return { ...outbound, x: QUEUE_X, ms: 250, lane: "back", walking: false };
-    case "approach": return { ...outbound, x: RACK_STOP_X, ms: 450, lane: "front" };
-    case "rack-out": return { ...outbound, x: RACK_STOP_X, ms: 1_100, lane: "front", blade: false, walking: false };
-    case "behind": return { ...outbound, x: BEHIND_X, ms: 800, lane: "front", blade: false, shown: false };
-    case "gone": return { ...inbound, x: BEHIND_X, ms: 800, lane: "front", blade: false, shown: false, walking: false };
-    case "in": return { ...inbound, x: RACK_STOP_X, ms: 800, lane: "front", blade: false };
-    case "rack-in": return { ...inbound, x: RACK_STOP_X, ms: 800, lane: "front", walking: false };
-    case "backstep": return { ...inbound, x: RACK_STOP_X - 30, ms: 400, lane: "back" };
-    case "back": return { ...inbound, x: homeX + 14, ms: walk(RACK_STOP_X - 30, homeX + 14), lane: "back" };
-    case "arrive": return { ...inbound, x: homeX, ms: 350, lane: "front" };
+    case "start": return { ...outbound, xs: homes, ms: 80, lane: "front", walking: false };
+    case "leave": return { ...outbound, xs: fromHome(14), ms: 350, lane: "back" };
+    case "out": return { ...outbound, xs: at(QUEUE_X), ms: walk(fromHome(14), at(QUEUE_X)), lane: "back" };
+    case "queue": return { ...outbound, xs: at(QUEUE_X), ms: 250, lane: "back", walking: false };
+    case "approach": return { ...outbound, xs: at(RACK_STOP_X), ms: 450, lane: "front" };
+    case "rack-out": return { ...outbound, xs: at(RACK_STOP_X), ms: 1_100, lane: "front", blade: false, walking: false };
+    case "behind": return { ...outbound, xs: homes.map(() => BEHIND_X), ms: 1_000, lane: "front", blade: false, shown: false };
+    case "gone": return { ...inbound, xs: homes.map(() => BEHIND_X), ms: 800, lane: "front", blade: false, shown: false, walking: false };
+    case "in": return { ...inbound, xs: at(RACK_STOP_X), ms: 1_000, lane: "front", blade: false };
+    case "rack-in": return { ...inbound, xs: at(RACK_STOP_X), ms: 800, lane: "front", walking: false };
+    case "backstep": return { ...inbound, xs: at(RACK_STOP_X - 30), ms: 400, lane: "back" };
+    case "back": return { ...inbound, xs: fromHome(14), ms: walk(at(RACK_STOP_X - 30), fromHome(14)), lane: "back" };
+    case "arrive": return { ...inbound, xs: homes, ms: 350, lane: "front" };
   }
 }
 
 /**
- * Concepts R1 «Dietro la rastrelliera» + V2 «Corsia di fondo» (13/10): an
- * athlete walks behind the pairs to the rack, rests the blade and goes behind
- * it; another comes out, takes a blade of another colour and walks back to the
- * same spot. If the rack is taken, they wait a few steps before it. Compositor
- * layers only: the walk is a transform, the legs and the blade cross-fade.
+ * Concepts R1 «Dietro la rastrelliera» + V2 «Corsia di fondo» (13/10): a pair
+ * walks behind the other pairs to the rack, rests the blades and goes behind
+ * it; a new pair comes out, takes blades of other colours and walks back to the
+ * same spots. If the rack is taken, they wait a few steps before it. Compositor
+ * layers only: the walk is a transform, the legs and the blades cross-fade.
  */
 export function GymRackSwap({
   id,
-  homeX,
+  homes,
   sabers,
   rack,
   onDone,
 }: {
   id: number;
-  homeX: number;
-  /** The blade going to the rack and the one coming back. */
-  sabers: [string, string];
+  /** The spots of the athletes walking together (a pair). */
+  homes: number[];
+  /** For each athlete, the blade going to the rack and the one coming back. */
+  sabers: Array<[string, string]>;
   rack: RackTurns;
   onDone: (id: number) => void;
 }) {
   const [phase, setPhase] = useState<Phase>("start");
-  const look = phaseLook(phase, homeX);
+  const look = phaseLook(phase, homes);
 
   useEffect(() => {
     if (phase === "backstep") rack.release(id);
@@ -112,33 +125,40 @@ export function GymRackSwap({
   // Leaving the scene halfway (a new layout) frees the rack.
   useEffect(() => () => rack.release(id), [id, rack]);
 
-  const shape = athleteWalk(homeX, look.facing);
-  const box = { x: homeX - 34, y: 84, w: 68, h: 72 };
-  const saber = ORDER.indexOf(phase) <= ORDER.indexOf("behind") ? sabers[0] : sabers[1];
+  const second = ORDER.indexOf(phase) > ORDER.indexOf("behind");
   const back = look.lane === "back";
   return (
-    <div
-      className={look.walking ? "gym-walker is-walking" : "gym-walker"}
-      style={{
-        "--dx": look.x - homeX,
-        "--dy": back ? BACK_LANE.dy : 0,
-        "--k": back ? BACK_LANE.scale : 1,
-        "--home-x": homeX,
-        "--walk-ms": `${look.ms}ms`,
-        opacity: look.shown ? 1 : 0,
-      } as CSSProperties}
-    >
-      <div className="gym-walker-lane" style={{ opacity: back ? BACK_LANE.dim : 1 }}>
-        <GymLayer box={box} className="gym-body">
-          <circle cx={shape.head[0]} cy={shape.head[1]} r={7} />
-          <path d={shape.d} />
-        </GymLayer>
-        <GymLayer box={box} className="gym-body gym-walk-a"><path d={shape.legs[0]} /></GymLayer>
-        <GymLayer box={box} className="gym-body gym-walk-b"><path d={shape.legs[1]} /></GymLayer>
-        <div className="gym-walker-blade" style={{ opacity: look.blade ? 1 : 0 }}>
-          <SaberLayers box={box} lines={[[...shape.blade, saber]]} />
-        </div>
-      </div>
-    </div>
+    <>
+      {homes.map((homeX, index) => {
+        const shape = athleteWalk(homeX, look.facing);
+        const box = { x: homeX - 34, y: 84, w: 68, h: 72 };
+        return (
+          <div
+            key={index}
+            className={look.walking ? "gym-walker is-walking" : "gym-walker"}
+            style={{
+              "--dx": look.xs[index] - homeX,
+              "--dy": back ? BACK_LANE.dy : 0,
+              "--k": back ? BACK_LANE.scale : 1,
+              "--home-x": homeX,
+              "--walk-ms": `${look.ms}ms`,
+              opacity: look.shown ? 1 : 0,
+            } as CSSProperties}
+          >
+            <div className="gym-walker-lane" style={{ opacity: back ? BACK_LANE.dim : 1 }}>
+              <GymLayer box={box} className="gym-body">
+                <circle cx={shape.head[0]} cy={shape.head[1]} r={7} />
+                <path d={shape.d} />
+              </GymLayer>
+              <GymLayer box={box} className="gym-body gym-walk-a"><path d={shape.legs[0]} /></GymLayer>
+              <GymLayer box={box} className="gym-body gym-walk-b"><path d={shape.legs[1]} /></GymLayer>
+              <div className="gym-walker-blade" style={{ opacity: look.blade ? 1 : 0 }}>
+                <SaberLayers box={box} lines={[[...shape.blade, sabers[index][second ? 1 : 0]]]} />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </>
   );
 }

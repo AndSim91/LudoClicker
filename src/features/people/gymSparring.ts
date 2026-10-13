@@ -26,10 +26,11 @@ export interface SparPace {
   chance: number;
 }
 
-// 13/10, concept A2 «Moderato»: the central pair (the real bouts, with the cut)
-// spars about a third of the time, the side pairs (soft exchanges) about a sixth.
-export const CENTRAL_PACE: SparPace = { idleMinMs: 3_000, idleSpanMs: 4_000, chance: 0.55 };
-export const SIDE_PACE: SparPace = { idleMinMs: 5_000, idleSpanMs: 7_000, chance: 0.35 };
+// 13/10: between concepts A2 «Moderato» and A1 «Vivace», a little livelier than A2.
+// The central pair (the real bouts, with the cut) spars a little over 40% of the
+// time, the side pairs (soft exchanges) about a fifth.
+export const CENTRAL_PACE: SparPace = { idleMinMs: 2_500, idleSpanMs: 3_000, chance: 0.65 };
+export const SIDE_PACE: SparPace = { idleMinMs: 4_000, idleSpanMs: 5_000, chance: 0.4 };
 const BOUT_MIN_MS = 2_500;
 const BOUT_SPAN_MS = 2_500;
 
