@@ -8,7 +8,7 @@ import {
   getStudentFormCost,
   getTechnicianCourseCost,
   getTrainingCourseTitle,
-  isInstructorForm,
+  hasOwnInstructorCourse,
   isAgonistCourse,
   type FormDefinition,
   type FormStudent,
@@ -135,7 +135,7 @@ function getDisplayedTrainingCost(
   if (
     mode === "standard" &&
     collaborator?.assignment === "instructor" &&
-    isInstructorForm(definition.id)
+    hasOwnInstructorCourse(definition.id)
   ) {
     return getQualifyingCourseCost(
       state,

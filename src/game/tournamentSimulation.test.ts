@@ -15,6 +15,7 @@ import {
   getAthleteWeapon,
   getContactBaseStats,
   getFormStatBonuses,
+  getTeachingStatBonuses,
   getContactPreparation,
   getPreparation,
   getStyleVote,
@@ -581,6 +582,13 @@ describe("Arena e Stile dalle Forme (06/10)", () => {
   it("gives +90% with every Form and +100% once Corso X counts", () => {
     expect(getFormStatBonuses(ALL_FORMS)).toEqual({ arena: 0.9, style: 0.9 });
     expect(getFormStatBonuses(ALL_FORMS, true)).toEqual({ arena: 1, style: 1 });
+  });
+
+  it("adds +1% Arena per Istruttore Form and +1% Stile per Tecnico Form", () => {
+    const titles = { instructorForms: ["form-1", "form-2", "course-x"], technicianForms: ["form-1"] } as const;
+    expect(getTeachingStatBonuses({ ...titles, instructorForms: [...titles.instructorForms], technicianForms: [...titles.technicianForms] }))
+      .toEqual({ arena: 0.02, style: 0.01 });
+    expect(getTeachingStatBonuses(undefined)).toEqual({ arena: 0, style: 0 });
   });
 
   it("is worth 10 points per Form, split by weapon", () => {

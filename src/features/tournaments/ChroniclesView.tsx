@@ -176,11 +176,12 @@ export function ChroniclesView({
     () =>
       new Map(
         eligible.map((contact) => {
-          const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
+          const collaborator = collaboratorsByContactId.get(contact.id);
+          const forms = collaborator?.forms ?? contact.forms;
           return [
             contact.id,
             {
-              values: getContactPreparation(contact, forms, isCourseXUnlocked(state.upgrades)),
+              values: getContactPreparation(contact, forms, isCourseXUnlocked(state.upgrades), collaborator),
               visible: hasUnlockedOfficialStats(forms, getOfficialStatsVisibilityTier(state.upgrades)),
             },
           ] as const;

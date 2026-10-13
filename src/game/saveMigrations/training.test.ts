@@ -112,6 +112,7 @@ describe("Form training save migration", () => {
     const migrated = migrate(legacy) as ReturnType<typeof createInitialState>;
 
     expect(migrated.version).toBe(GAME_CONFIG.version);
-    expect(migrated.collaborators[0].instructorForms).toEqual(["form-1", "course-x"]);
+    // The old certificate gave Corso X too; since 13/10 it needs Forma 1 + Forma 2.
+    expect(migrated.collaborators[0].instructorForms).toEqual(["form-1"]);
   });
 });

@@ -13,6 +13,7 @@ import {
   getTrainingExamSuccessChanceBonus,
 } from "../content/upgrades";
 import { getContactBaseStats } from "./athleteStats";
+import { syncCourseXTitles } from "./courseXTitles";
 import { GAME_CONFIG } from "./config";
 import { completeEquipmentUse, getPlannedEquipmentWear } from "./equipment";
 import { nextRandom } from "./random";
@@ -296,32 +297,35 @@ function resolveInstructorOrTechnicianPhase(
     return true;
   }
 
+  // Corso X has no title of its own: the Tecnico of Corso X qualifies on Forma 1
+  // and Forma 2 together, and the Corso X title follows (courseXTitles.ts).
+  // Old saves may still hold a Corso X course of another kind: it grants nothing.
+  const grantedForms: FormId[] = training.formId !== "course-x"
+    ? [training.formId]
+    : phase === "instructor" && training.technicianId ? ["form-1", "form-2"] : [];
   // e-Learning qualification marks the Form; a manual course, a refresher or
   // the Corso Tecnici clears it.
   const eLearningQualification = phase === "instructor" &&
     Boolean(training.eLearning && !training.refresher);
   const otherELearningForms = (collaborator.eLearningInstructorForms ?? [])
-    .filter((formId) => formId !== training.formId);
+    .filter((formId) => !grantedForms.includes(formId));
   const eLearningInstructorForms = eLearningQualification
-    ? [...otherELearningForms, training.formId]
+    ? [...otherELearningForms, ...grantedForms]
     : otherELearningForms;
-  const updated: Collaborator = phase === "instructor"
+  const addTo = (forms: FormId[]) => [...new Set([...forms, ...grantedForms])];
+  const updated: Collaborator = syncCourseXTitles(phase === "instructor"
     ? {
         ...collaborator,
-        instructorForms: collaborator.instructorForms.includes(training.formId)
-          ? collaborator.instructorForms
-          : [...collaborator.instructorForms, training.formId],
+        instructorForms: addTo(collaborator.instructorForms),
         eLearningInstructorForms,
         training: undefined,
       }
     : {
         ...collaborator,
-        technicianForms: (collaborator.technicianForms ?? []).includes(training.formId)
-          ? collaborator.technicianForms
-          : [...(collaborator.technicianForms ?? []), training.formId],
+        technicianForms: addTo(collaborator.technicianForms ?? []),
         eLearningInstructorForms,
         training: undefined,
-      };
+      });
   updateCollaborator(context, updated);
   transitionTeachingLoad(context, training, undefined);
   context.state = context.dependencies.addMessage(
@@ -331,9 +335,13 @@ function resolveInstructorOrTechnicianPhase(
       ? `${collaborator.displayName}, Tecnico di ${definition.longName}`
       : training.refresher
         ? `${collaborator.displayName} aggiornato su ${definition.longName}`
-        : `${collaborator.displayName} insegna ${definition.longName}`,
+        : training.formId === "course-x"
+          ? `${collaborator.displayName} insegna Forma 1 e Forma 2`
+          : `${collaborator.displayName} insegna ${definition.longName}`,
     phase === "technician"
       ? "Corso finito. Adesso sa anche perché si fa così."
+      : training.formId === "course-x"
+        ? "Due attestati con un corso solo. Corso X, a quel punto, viene da sé."
       : training.refresher
         ? "Il Tecnico ha corretto due o tre cose imparate in video. Da oggi è un Istruttore a tutti gli effetti."
         : eLearningQualification
@@ -460,7 +468,9 @@ function resolveTraining(
         preferences: [...(student.formBranchPreferences ?? [])],
         nextSeed: context.state.randomSeed,
       };
-  const combinedInstructorCourse = getTrainingTrack(training) === "combined-instructor";
+  // Corso X gives no instructor title of its own: learning it alone stops at the Form.
+  const combinedInstructorCourse = getTrainingTrack(training) === "combined-instructor" &&
+    training.formId !== "course-x";
   const instructorPhase = combinedInstructorCourse && collaborator
     ? scheduleTraining(
         context.state,

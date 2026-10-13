@@ -674,4 +674,26 @@ describe("Tecnici e Corsi Istruttori interni", () => {
     const normalDuration = (first.collaborators[2].training?.completesAt ?? 0) - 4_000;
     expect((training?.completesAt ?? 0) - 4_000).toBeCloseTo(normalDuration / 2, -1);
   });
+
+  it("has the Tecnico of Corso X teach Forma 1 and Forma 2 in one course", () => {
+    const initial = createInitialState(1_000, "", false);
+    const known: FormId[] = ["form-1", "course-x", "form-2"];
+    const technician = instructor(initial, "technician", 1_000, known, known, known);
+    const trainee = instructor(initial, "trainee", 2_000, known, []);
+    const started = processAutomaticInstructorQualifications({
+      ...initial,
+      contacts: [],
+      school: { ...initial.school, currentMonth: 9, euros: 100_000 },
+      collaborators: [technician, trainee],
+      upgrades: { ...initial.upgrades, "project-x": 1 },
+    }, 4_000);
+
+    expect(started.collaborators[1].training).toMatchObject({
+      formId: "course-x",
+      technicianId: technician.id,
+      trainingPhase: "instructor",
+    });
+    // No SIS Tecnici course on Corso X: its title comes from Forma 1 + Forma 2.
+    expect(bookTechnicianCourse(started, technician.id, "course-x", 5_000)).toBe(started);
+  });
 });

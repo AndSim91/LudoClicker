@@ -102,7 +102,7 @@ function getOfficialScore(
 ): number | null {
   const contact = context.contactsById.get(collaborator.contactId);
   if (!contact || !hasUnlockedOfficialStats(collaborator.forms, getOfficialStatsVisibilityTier(context.state.upgrades))) return null;
-  return getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(context.state.upgrades))[key];
+  return getContactPreparation(contact, collaborator.forms, isCourseXUnlocked(context.state.upgrades), collaborator)[key];
 }
 
 function getSortValue(

@@ -115,7 +115,7 @@ function rankTrainingInstructors(state: GameState): Collaborator[] {
   );
   const style = (collaborator: Collaborator) => {
     const contact = contacts.get(collaborator.contactId);
-    return contact ? getAthleteTournamentStats(contact, collaborator.forms).style : 0;
+    return contact ? getAthleteTournamentStats(contact, collaborator.forms, false, collaborator).style : 0;
   };
   return instructors
     .map((collaborator) => ({
@@ -149,7 +149,8 @@ export function getTeacherCourseCandidates(
   if (!state.unlocks.forms) return [];
   if (kind === "technician" && !isSISTechnicianCourseUnlocked(state.upgrades)) return [];
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  if (formId === "course-x" && !courseXUnlocked) return [];
+  // Corso X has no course of its own: its titles come from Forma 1 + Forma 2.
+  if (formId === "course-x") return [];
   return rankTrainingInstructors(state).filter((collaborator) =>
     !covers(collaborator, formId, kind) && canReach(collaborator, formId, kind, courseXUnlocked));
 }
@@ -166,7 +167,7 @@ function pickQuickTeacherTraining(
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const coverage = countTeacherCoverage(ranked, kind);
   const forms = QUICK_TRAINING_FORM_ORDER
-    .filter((formId) => courseXUnlocked || formId !== "course-x")
+    .filter((formId) => formId !== "course-x") // titles from Forma 1 + 2
     .map((formId) => ({ formId, count: coverage.get(formId) ?? 0 }))
     .sort((a, b) => a.count - b.count); // stabile: a parità resta l'ordine di Andrea
 

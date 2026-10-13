@@ -190,7 +190,7 @@ function createMemberPresentationReader(
       nextForm: getMemberNextFormLabel(contact, context) ??
         "Nessuna Forma disponibile",
       preparation: hasVisibleStats
-        ? getContactPreparation(contact, student.forms)
+        ? getContactPreparation(contact, student.forms, false, "instructorForms" in student ? student : undefined)
         : undefined,
     };
     cache.set(contact, presentation);

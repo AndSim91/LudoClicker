@@ -12,6 +12,7 @@ import {
   getInstructorQualificationDuration,
   getStudentFormCost,
   isAgonistCourse,
+  hasOwnInstructorCourse,
   isInstructorForm,
   needsCourseXRecovery,
 } from "../content/forms";
@@ -389,12 +390,12 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       !studentOnly &&
       collaborator?.assignment === "instructor" &&
       collaborator.forms.includes(formId) &&
-      isInstructorForm(formId) &&
+      hasOwnInstructorCourse(formId) &&
       !collaborator.instructorForms.includes(formId),
     );
     const canTrainAsInstructorInSummer = Boolean(
       !studentOnly &&
-      collaborator?.assignment === "instructor" && isInstructorForm(formId),
+      collaborator?.assignment === "instructor" && hasOwnInstructorCourse(formId),
     );
     if (
       isSummerBreak(this.state.school.currentMonth) &&
@@ -444,7 +445,7 @@ class BatchedTrainingStartPlan implements TrainingStartPlan {
       : undefined;
     const instructorTrack = Boolean(
       !studentOnly &&
-      instructorSelf && !instructor && isInstructorForm(formId),
+      instructorSelf && !instructor && hasOwnInstructorCourse(formId),
     );
     const trainingCost = instructorTrack
       ? getQualifyingCourseCost(

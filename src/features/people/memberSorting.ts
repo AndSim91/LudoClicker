@@ -62,7 +62,7 @@ export function getMemberVisibleScore(
 ): number | null {
   const forms = getMemberStudent(contact, context).forms;
   if (!hasUnlockedOfficialStats(forms, context.statsTier)) return null;
-  return getContactPreparation(contact, forms)[key];
+  return getContactPreparation(contact, forms, false, context.collaboratorsByContactId.get(contact.id))[key];
 }
 
 export function getMemberNextFormLabel(

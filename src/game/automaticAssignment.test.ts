@@ -198,11 +198,10 @@ describe("Istruttori in e-Learning", () => {
   }
 
   it("lists the Forms of each level in path order, with Corso X once it exists", () => {
-    expect(getELearningForms(0, false)).toEqual([]);
-    expect(getELearningForms(1, true)).toEqual(["form-1"]);
-    expect(getELearningForms(2, false)).toEqual(["form-1", "form-2"]);
-    expect(getELearningForms(2, true)).toEqual(["form-1", "course-x", "form-2"]);
-    expect(getELearningForms(3, true)).toEqual(["form-1", "course-x", "form-2", "course-y"]);
+    expect(getELearningForms(0)).toEqual([]);
+    expect(getELearningForms(1)).toEqual(["form-1"]);
+    expect(getELearningForms(2)).toEqual(["form-1", "form-2"]);
+    expect(getELearningForms(3)).toEqual(["form-1", "form-2", "course-y"]);
   });
 
   it("starts Forma 1 as an instructor (learn and qualify) when there are funds", () => {

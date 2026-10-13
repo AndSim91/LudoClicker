@@ -1,4 +1,4 @@
-import type { Contact, FormBranch, FormId, PersonRarity, SpecialCollaboratorId } from "./types";
+import type { Collaborator, Contact, FormBranch, FormId, PersonRarity, SpecialCollaboratorId } from "./types";
 import { nextRandom } from "./random";
 
 const NUMERIC_FORM_BY_ID: Partial<Record<FormId, number>> = {
@@ -56,6 +56,27 @@ export function getFormStatBonuses(
   }
   // Rounded to the tenth of a percent: sums of 0,025 must not drift.
   return { arena: Math.round(arena * 1_000) / 1_000, style: Math.round(style * 1_000) / 1_000 };
+}
+
+/**
+ * Teaching titles (decision of 13/10): +1% Arena for every Form the athlete is
+ * Istruttore of, +1% Stile for every Form they are Tecnico of. Added to the
+ * same sum as the Forms. e-Learning Istruttori count too.
+ */
+export const TEACHING_STAT_BONUS = 0.01;
+
+export type TeachingTitles = Pick<Collaborator, "instructorForms" | "technicianForms">;
+
+export function getTeachingStatBonuses(
+  titles: TeachingTitles | undefined,
+  courseXUnlocked = false,
+): { arena: number; style: number } {
+  const count = (forms: readonly FormId[] = []) =>
+    [...new Set(forms)].filter((formId) => formId !== "course-x" || courseXUnlocked).length;
+  return {
+    arena: Math.round(count(titles?.instructorForms) * TEACHING_STAT_BONUS * 1_000) / 1_000,
+    style: Math.round(count(titles?.technicianForms) * TEACHING_STAT_BONUS * 1_000) / 1_000,
+  };
 }
 
 const BRANCH_LEVELS: Record<FormBranch, readonly FormId[]> = {
@@ -155,6 +176,8 @@ export interface AthleteTournamentStats {
   tournamentExperience: number;
   /** Bonus of the Forms known, as a fraction (0,9 = +90%). */
   formBonus: { arena: number; style: number };
+  /** Bonus of the Istruttore/Tecnico titles, as a fraction. */
+  teachingBonus: { arena: number; style: number };
   weapon: FormBranch;
   experienceMultiplier: number;
   arena: number;
@@ -171,21 +194,25 @@ export function getAthleteTournamentStats(
   contact: Contact,
   forms: readonly FormId[] = contact.forms,
   courseXUnlocked = false,
+  /** The athlete's collaborator record, if any: only collaborators hold teaching titles. */
+  titles?: TeachingTitles,
 ): AthleteTournamentStats {
   const base = getContactBaseStats(contact);
   const numericForms = getNumericFormCount(forms);
   const tournamentExperience = getContactTournamentExperience(contact);
   const formBonus = getFormStatBonuses(forms, courseXUnlocked);
+  const teachingBonus = getTeachingStatBonuses(titles, courseXUnlocked);
   const experienceMultiplier = 1 + Math.min(20, tournamentExperience) * 0.03;
   return {
     base,
     numericForms,
     tournamentExperience,
     formBonus,
+    teachingBonus,
     weapon: getAthleteWeapon(forms, contact.formBranchPreferences),
     experienceMultiplier,
-    arena: getPreparation(base.arena, formBonus.arena, tournamentExperience),
-    style: getPreparation(base.style, formBonus.style, tournamentExperience),
+    arena: getPreparation(base.arena, formBonus.arena + teachingBonus.arena, tournamentExperience),
+    style: getPreparation(base.style, formBonus.style + teachingBonus.style, tournamentExperience),
   };
 }
 
@@ -246,8 +273,9 @@ export function getContactPreparation(
   contact: Contact,
   forms: readonly FormId[] = contact.forms,
   courseXUnlocked = false,
+  titles?: TeachingTitles,
 ) {
-  const stats = getAthleteTournamentStats(contact, forms, courseXUnlocked);
+  const stats = getAthleteTournamentStats(contact, forms, courseXUnlocked, titles);
   return {
     arena: stats.arena,
     style: stats.style,

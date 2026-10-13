@@ -2,7 +2,7 @@ import {
   getAvailableForms,
   getFormDefinition,
   getFormTrainingCount,
-  isInstructorForm,
+  hasOwnInstructorCourse,
   needsCourseXRecovery,
   type FormDefinition,
   type FormStudent,
@@ -46,7 +46,7 @@ export function getTrainingDefinitions(
   const qualification = isInstructor
     ? collaborator.forms.flatMap((formId) => {
         const definition = getFormDefinition(formId);
-        return definition && isInstructorForm(formId) &&
+        return definition && hasOwnInstructorCourse(formId) &&
             (courseXUnlocked || formId !== "course-x") &&
             !recoveryPending &&
             !collaborator.instructorForms.includes(formId)
@@ -81,7 +81,7 @@ export function getTrainingDefinitions(
       )
     : [];
   const available = summerBreak
-    ? [...qualification, ...newForms.filter((definition) => isInstructorForm(definition.id))]
+    ? [...qualification, ...newForms.filter((definition) => hasOwnInstructorCourse(definition.id))]
     : [...qualification, ...newForms];
   return { qualification, available, annualTrainingAvailable };
 }

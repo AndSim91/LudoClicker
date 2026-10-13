@@ -12,7 +12,7 @@ import {
   getInstructorQualificationDuration,
   needsCourseXRecovery,
   getStudentFormCost,
-  isInstructorForm,
+  hasOwnInstructorCourse,
 } from "../content/forms";
 import {
   areAllFormBranchesUnlocked,
@@ -264,12 +264,12 @@ export function startFormTraining(
     !studentOnly &&
     collaborator?.assignment === "instructor" &&
     collaborator.forms.includes(formId) &&
-    isInstructorForm(formId) &&
+    hasOwnInstructorCourse(formId) &&
     !collaborator.instructorForms.includes(formId),
   );
   const canTrainAsInstructorInSummer = Boolean(
     !studentOnly &&
-    collaborator?.assignment === "instructor" && isInstructorForm(formId),
+    collaborator?.assignment === "instructor" && hasOwnInstructorCourse(formId),
   );
   if (isSummerBreak(state.school.currentMonth) && !canTrainAsInstructorInSummer) return state;
   const member = state.contacts.find((candidate) =>
@@ -327,7 +327,7 @@ export function startFormTraining(
     : undefined;
   const instructorTrack = Boolean(
     !studentOnly &&
-    instructorSelf && !instructor && isInstructorForm(formId),
+    instructorSelf && !instructor && hasOwnInstructorCourse(formId),
   );
   const trainingCost = instructorTrack
     ? getQualifyingCourseCost(

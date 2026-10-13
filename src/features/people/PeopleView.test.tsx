@@ -2880,24 +2880,24 @@ describe("PeopleView", () => {
       <PeopleView
         state={{
           ...initial,
-          school: { ...initial.school, activeMembers: 1, currentMonth: 19, euros: 400 },
+          school: { ...initial.school, activeMembers: 1, currentMonth: 19, euros: 5_000 },
           contacts: initial.contacts.map((contact) =>
             contact.id === student.id ? student : contact,
           ),
           collaborators: [instructor],
           unlocks: { ...initial.unlocks, collaborators: true, forms: true },
-          upgrades: { ...initial.upgrades, "project-x": 1 },
         }}
         onAssign={() => undefined}
         onStartTraining={onStartTraining}
       />,
     );
 
+    // Not Corso X: it has no instructor course since 13/10.
     const region = screen.getByRole("region", { name: "Collaboratori delle Onde" });
-    expect(within(region).getByRole("img", { name: /Corso X/ })).toBeVisible();
+    expect(within(region).getByRole("img", { name: /Forma 2/ })).toBeVisible();
     expect(within(region).getByRole("button", { name: /Impara e abilita/ })).toBeEnabled();
     fireEvent.click(within(region).getByRole("button", { name: /Impara e abilita/ }));
 
-    expect(onStartTraining).toHaveBeenCalledWith(instructor.id, "course-x");
+    expect(onStartTraining).toHaveBeenCalledWith(instructor.id, "form-2");
   });
 });

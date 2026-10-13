@@ -73,9 +73,14 @@ Stile, in qualunque ramo, applicati sempre alla statistica base
 | F3–F5 Staffa | +7,5% | +2,5% |
 | F3–F5 Doppie Spade Corte | +2,5% | +7,5% |
 
+**Titoli** (decisione del 13/10): +1% di Arena per ogni Forma di cui l'atleta
+è Istruttore, +1% di Stile per ogni Forma di cui è Tecnico, sommati ai bonus
+delle Forme (`getTeachingStatBonuses`). Corso X conta solo con il Percorso
+Segreto; il suo titolo viene da Forma 1 + Forma 2.
+
 ```text
-Arena = base × (1 + somma Arena delle Forme) × esperienza
-Stile = base × (1 + somma Stile delle Forme) × esperienza
+Arena = base × (1 + somma Arena delle Forme + 1% × Forme da Istruttore) × esperienza
+Stile = base × (1 + somma Stile delle Forme + 1% × Forme da Tecnico) × esperienza
 ```
 
 Con tutte le Forme +90% su entrambe, +100% con il Corso X. I Leggendari Segreti

@@ -22,6 +22,7 @@ import {
   isCourseXUnlocked,
 } from "../content/upgrades";
 import { isSummerBreak } from "./calendar";
+import { hasBothCourseXTitles } from "./courseXTitles";
 import { getInstructorPendingReleaseIds } from "./collaboratorManagement";
 import { GAME_CONFIG } from "./config";
 import { roundCurrency } from "./economy";
@@ -282,7 +283,7 @@ export function bookTechnicianCourse(
   if (
     !collaborator ||
     !definition ||
-    (!courseXUnlocked && formId === "course-x") ||
+    formId === "course-x" || // Tecnico di Corso X = Tecnico di Forma 1 e 2 (courseXTitles.ts)
     (courseXUnlocked && needsCourseXRecovery(collaborator?.forms ?? [])) ||
     !isSISTechnicianCourseUnlocked(state.upgrades) ||
     collaborator.assignment !== "instructor" ||
@@ -473,10 +474,16 @@ function processInstructorQualifications(
     return collaborator.forms.flatMap((formId) => {
       // An e-Learning Istruttore gets the Corso di aggiornamento, after everyone
       // who does not teach the Form yet.
-      const refresher = eLearningForms.includes(formId);
-      return (!courseXUnlocked && formId === "course-x") ||
+      // Corso X: the Tecnico teaches Forma 1 and Forma 2 together, to whoever
+      // knows both and still misses one of the two titles.
+      const courseX = formId === "course-x";
+      const refresher = !courseX && eLearningForms.includes(formId);
+      const qualified = courseX
+        ? !collaborator.forms.includes("form-2") || hasBothCourseXTitles(collaborator.instructorForms)
+        : collaborator.instructorForms.includes(formId);
+      return (!courseXUnlocked && courseX) ||
         (courseXUnlocked && needsCourseXRecovery(collaborator.forms)) ||
-        (collaborator.instructorForms.includes(formId) && !refresher) ||
+        (qualified && !refresher) ||
         !availableTechnicianForms.has(formId)
         ? []
         : [{
@@ -498,6 +505,8 @@ function processInstructorQualifications(
     demand: demandByForm.get(candidate.formId) ?? 0,
   })).sort((left, right) =>
     Number(left.refresher) - Number(right.refresher) ||
+    // Two titles in one course beat Forma 1 or Forma 2 alone.
+    Number(right.formId === "course-x") - Number(left.formId === "course-x") ||
     left.rank - right.rank ||
     right.demand - left.demand ||
     left.joinedAt - right.joinedAt ||

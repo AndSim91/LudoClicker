@@ -158,7 +158,7 @@ function createOwnedParticipants(
   return contacts.map((contact) => {
     const collaborator = collaboratorsByContactId.get(contact.id);
     const forms = collaborator?.forms ?? contact.forms;
-    const stats = getAthleteTournamentStats(contact, forms, isCourseXUnlocked(state.upgrades));
+    const stats = getAthleteTournamentStats(contact, forms, isCourseXUnlocked(state.upgrades), collaborator);
     return {
       id: `owned-${contact.id}`,
       ownedContactId: contact.id,
@@ -197,11 +197,12 @@ export function selectSchoolTournamentEntrantsFromRoster(
 
   const collaboratorsByContactId = getCollaboratorsByContactId(collaborators);
   const ranked = eligibleContacts.map((contact, rosterIndex) => {
-    const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
+    const collaborator = collaboratorsByContactId.get(contact.id);
+    const forms = collaborator?.forms ?? contact.forms;
     return {
       contact,
       rosterIndex,
-      stats: getAthleteTournamentStats(contact, forms),
+      stats: getAthleteTournamentStats(contact, forms, false, collaborator),
     };
   });
   const compareBy =

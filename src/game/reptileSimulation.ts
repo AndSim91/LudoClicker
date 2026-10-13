@@ -60,8 +60,10 @@ function conditionMultiplier(condition: number): number {
   return 0.7 + 0.3 * condition;
 }
 
-function toHomeAthlete(contact: Contact): ReptileAthlete {
-  const stats = getAthleteTournamentStats(contact);
+type StatsOf = (contact: Contact) => ReturnType<typeof getAthleteTournamentStats>;
+
+function toHomeAthlete(contact: Contact, statsOf: StatsOf): ReptileAthlete {
+  const stats = statsOf(contact);
   return {
     id: `reptile-athlete-${contact.id}`,
     ownedContactId: contact.id,
@@ -129,10 +131,11 @@ function selectHomeContacts(
   count: number,
   eventsQuality: number,
   cursor: RandomCursor,
+  statsOf: StatsOf,
 ): Contact[] {
   const ranked = [...eligible].sort((a, b) => {
-    const statsA = getAthleteTournamentStats(a);
-    const statsB = getAthleteTournamentStats(b);
+    const statsA = statsOf(a);
+    const statsB = statsOf(b);
     return (statsB.arena + statsB.style) - (statsA.arena + statsA.style);
   });
   if (eventsQuality >= 100) return ranked.slice(0, count);
@@ -177,10 +180,13 @@ function createHomeTeams(
   const eligible = state.contacts.filter(
     (contact) => contact.status === "enrolled" && hasCompletedFormOne(contact.forms),
   );
-  const selected = selectHomeContacts(eligible, homeTeamCount * 2, eventsQuality, cursor)
+  const titlesByContactId = new Map(state.collaborators.map((entry) => [entry.contactId, entry]));
+  const statsOf: StatsOf = (contact) =>
+    getAthleteTournamentStats(contact, contact.forms, false, titlesByContactId.get(contact.id));
+  const selected = selectHomeContacts(eligible, homeTeamCount * 2, eventsQuality, cursor, statsOf)
     .sort((a, b) => {
-      const statsA = getAthleteTournamentStats(a);
-      const statsB = getAthleteTournamentStats(b);
+      const statsA = statsOf(a);
+      const statsB = statsOf(b);
       return (statsB.arena + statsB.style) - (statsA.arena + statsA.style);
     });
   const half = Math.floor(selected.length / 2);
@@ -191,7 +197,7 @@ function createHomeTeams(
     state.school.name,
     state.school.city,
     true,
-    [toHomeAthlete(contact), toHomeAthlete(weakest[index])],
+    [toHomeAthlete(contact, statsOf), toHomeAthlete(weakest[index], statsOf)],
     cursor,
   ));
 }

@@ -167,7 +167,7 @@ export function CollaboratorList({
               : undefined;
             const hasVisibleStats = hasUnlockedOfficialStats(collaborator.forms, statsTier);
             const officialStats = contact && hasVisibleStats
-              ? getContactPreparation(contact, collaborator.forms)
+              ? getContactPreparation(contact, collaborator.forms, false, collaborator)
               : undefined;
             const selected = collaborator.id === selectedCollaboratorId;
             const nextMasteryLevel = masteryProgress

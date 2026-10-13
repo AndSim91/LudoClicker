@@ -1948,10 +1948,26 @@ Regole:
 
 Il **Tecnico** è una qualifica per singola Forma o Corso, non un nuovo incarico
 operativo. Il percorso è disponibile per ogni formazione che assegna un badge,
-inclusi Corso X e Corso Y, ma esclude il Corso Agonisti. I percorsi da
-Istruttore e Tecnico di Corso X sono disponibili soltanto dopo l'acquisto del
-Percorso Segreto Corso X; il Corso Tecnico continua a richiedere anche il primo
-livello di **Tu conosci la SIS?**.
+incluso Corso Y, ma esclude il Corso Agonisti e il Corso X. Il Corso Tecnico
+richiede il primo livello di **Tu conosci la SIS?**.
+
+**Corso X (decisione del 13/10/2026).** Corso X non ha un corso Istruttori né
+un corso Tecnici suoi: chi è Istruttore sia di Forma 1 sia di Forma 2 è anche
+Istruttore di Corso X, chi è Tecnico di entrambe è anche Tecnico di Corso X
+(`src/game/courseXTitles.ts`, riallineato anche al caricamento dei salvataggi).
+Il Tecnico di Corso X non forma Istruttori di Corso X: con un solo corso
+interno (costo e durata del Corso X) rende un Istruttore abilitato a Forma 1 e
+Forma 2 insieme, e il titolo di Corso X arriva da sé. Chi impara Corso X da
+solo, senza un Istruttore disponibile, prende solo la Forma. Corso X resta
+fuori da e-Learning, Ufficio formazione, Corso Tecnici SIS e Pianificazione.
+Conta, una volta sbloccato, come ogni altra Forma per i bonus di Arena e Stile
+(+10%) e per i titoli (+1%, § 9.7.2).
+
+### 9.7.2 Titoli e statistiche (decisione del 13/10/2026)
+
+Ogni Forma di cui un atleta è Istruttore dà +1% di Arena, ogni Forma di cui è
+Tecnico +1% di Stile (anche e-Learning). Si sommano ai bonus delle Forme
+(`getTeachingStatBonuses` in `src/game/athleteStats.ts`).
 
 Regole:
 
@@ -2375,7 +2391,7 @@ potenziamenti forti del Corso Agonisti arrivano nella parte finale.
 | Occhio del Maestro | L1 Arena e Stile visibili dopo il Corso Y; L2 visibili dall'iscrizione. Senza il nodo non si vedono mai | 1.000 / 10.000 € |
 | Percorso Tecnico | L1 Arena Tecnica; L2 durata 120→100 s; L3 durata 100→80 s; L4 durata 80→60 s; L5 durata 60→40 s; costo sempre 500 € | 1.000 / 2.000 / 5.000 / 7.500 / 10.000 € |
 | Master of none | L1–L2 +1 ramo d'arma accessibile agli Istruttori per livello; L3 +10 punti percentuali agli esami; L4 +20 complessivi; L5 tutti i rami d'arma disponibili a ogni allievo dopo Corso Y | 2.000 / 4.000 / 8.000 / 16.000 / 32.000 € |
-| Istruttori in e-Learning | gli Istruttori fanno da soli il corso da istruttore delle Forme, uno alla volta: L1 Forma 1; L2 anche Forma 2 (e Corso X, se sbloccato); L3 anche Corso Y. Mai oltre. Malus fisso agli esami (+15 punti, prolungamento 25%) finché un Tecnico non li aggiorna | 1.500 / 6.000 / 20.000 € |
+| Istruttori in e-Learning | gli Istruttori fanno da soli il corso da istruttore delle Forme, uno alla volta: L1 Forma 1; L2 anche Forma 2; L3 anche Corso Y. Mai oltre. Malus fisso agli esami (+15 punti, prolungamento 25%) finché un Tecnico non li aggiorna | 1.500 / 6.000 / 20.000 € |
 | Tu conosci la SIS? | L1 candidature SIS; L2/L3/L4 +10%/+20%/+30% velocità Corsi Tecnici | 5.000 / 10.000 / 20.000 / 40.000 € |
 | Il costo del Servizio | −5% al costo dei percorsi che assegnano attestati da Istruttore o qualifiche da Tecnico; massimo −25% | 2.500 / 5.000 / 10.000 / 25.000 / 50.000 € |
 | Didattica di gruppo | L1–L5 capacità contemporanea 2→6 allievi; L6 +1 corso annuale | 10.000 / 25.000 / 50.000 / 100.000 / 200.000 / 400.000 € |
@@ -2497,7 +2513,7 @@ dopo (il livello acquistato invece si azzera con la fondazione).
 
 | Percorso dopo la scoperta | Effetto | Prezzo | Indizio prima della scoperta |
 | --- | --- | ---: | --- |
-| Corso X | sblocca Corso X e i relativi percorsi da Istruttore e Tecnico | 1 € | “Vincere il torneo più superbo dell'anno è solo l'inizio” |
+| Corso X | sblocca Corso X; Istruttori e Tecnici di Corso X vengono da Forma 1 + Forma 2 | 1 € | “Vincere il torneo più superbo dell'anno è solo l'inizio” |
 | ToccoDiGilo | +9999% velocità con cui gli Istruttori insegnano le Forme | 1.000.000 € | “Esistono forze più grandi di quanto avresti mai potuto immaginare” |
 
 Un vecchio salvataggio che possiede già uno dei due potenziamenti lo considera

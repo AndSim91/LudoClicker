@@ -86,8 +86,9 @@ export function TournamentOverview({ state: stateOverride, onOpenResult }: Tourn
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const teamEntryByContactId = useMemo(() => new Map(
     state.contacts.map((contact) => {
-      const forms = collaboratorsByContactId.get(contact.id)?.forms ?? contact.forms;
-      const preparation = getContactPreparation(contact, forms, courseXUnlocked);
+      const collaborator = collaboratorsByContactId.get(contact.id);
+      const forms = collaborator?.forms ?? contact.forms;
+      const preparation = getContactPreparation(contact, forms, courseXUnlocked, collaborator);
       const visible = hasUnlockedOfficialStats(forms, statsTier);
       return [contact.id, { contact, preparation, visible }] as const;
     }),

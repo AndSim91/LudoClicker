@@ -126,6 +126,15 @@ export function isInstructorForm(formId: TrainingCourseId): formId is FormId {
   return FORM_DEFINITIONS.some((definition) => definition.id === formId);
 }
 
+/**
+ * Forms with a course to become their Istruttore. Corso X has none: its title
+ * comes from Forma 1 + Forma 2 (src/game/courseXTitles.ts). Teaching Corso X
+ * still needs the title, so `isInstructorForm` stays true for it.
+ */
+export function hasOwnInstructorCourse(formId: TrainingCourseId): formId is FormId {
+  return isInstructorForm(formId) && formId !== "course-x";
+}
+
 export function getInstructorFormCost(cost: number): number {
   return Math.round(cost * 3.5 * 100) / 100;
 }

@@ -5,13 +5,14 @@ import type { FormId, GameState } from "./types";
 
 /**
  * The Forms an Istruttore takes on alone with «Istruttori in e-Learning», in
- * path order: L1 Forma 1, L2 Forma 2 (and Corso X once it exists, since the
- * path asks for it first), L3 Corso Y. Never beyond Corso Y.
+ * path order: L1 Forma 1, L2 Forma 2, L3 Corso Y. Never beyond Corso Y.
+ * Never Corso X: its title comes from Forma 1 + Forma 2.
  */
-export function getELearningForms(tier: number, courseXUnlocked: boolean): FormId[] {
+export function getELearningForms(tier: number): FormId[] {
   const forms: FormId[] = [];
   if (tier >= 1) forms.push("form-1");
-  if (tier >= 2) forms.push(...(courseXUnlocked ? ["course-x" as const] : []), "form-2");
+  // Corso X has no instructor course: Forma 1 + Forma 2 bring its title.
+  if (tier >= 2) forms.push("form-2");
   if (tier >= 3) forms.push("course-y");
   return forms;
 }
@@ -28,7 +29,7 @@ export function startELearningInstructorCourses(state: GameState, now: number): 
   const tier = getInstructorSelfTrainingTier(state.upgrades);
   if (tier === 0 || !state.unlocks.forms) return state;
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
-  const forms = getELearningForms(tier, courseXUnlocked);
+  const forms = getELearningForms(tier);
   const leaving = state.collaboratorManagement.automaticPendingMoves ?? {};
   // ponytail: retried every tick for each Istruttore with a course left; fine while they are few.
   return state.collaborators

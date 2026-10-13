@@ -5,6 +5,7 @@ import {
   isCataloguedLegendaryId,
   isSecretLegendaryId,
 } from "../legendaryAvailability";
+import { syncCourseXTitles } from "../courseXTitles";
 import type { Contact } from "../types";
 import type { MigratableState } from "./types";
 
@@ -80,7 +81,8 @@ function normalizeLegendaryAssignments(state: MigratableState): MigratableState 
     return { ...standardLegendary, rarity: "legendary" as const };
   });
 
-  const collaborators = state.collaborators?.map((collaborator) => {
+  // Corso X titles follow Forma 1 + Forma 2 (decision of 13/10), old saves included.
+  const collaborators = state.collaborators?.map(syncCourseXTitles).map((collaborator) => {
     const canonicalContact = collaborator.specialProfileId
       ? canonicalContactByProfile.get(collaborator.specialProfileId)
       : undefined;
