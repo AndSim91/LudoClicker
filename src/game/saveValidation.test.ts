@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./engine";
 import { isValidGameState } from "./saveValidation";
+import { createInitialCollaboratorMastery } from "../content/mastery";
+import { syncCourseXTitles } from "./courseXTitles";
+import type { Collaborator } from "./types";
 
 describe("save validation at extreme scale", () => {
   it("accepts safe billion-scale counters and a finite quadrillion-scale balance", () => {
@@ -132,5 +135,27 @@ describe("Legendary save invariants", () => {
     expect(isValidGameState({ ...initial, contacts: [generic] })).toBe(false);
     expect(isValidGameState({ ...initial, contacts: [eva, duplicateEva] })).toBe(false);
     expect(isValidGameState(duplicatedTrials)).toBe(false);
+  });
+});
+
+describe("derived Corso X titles", () => {
+  it("keeps a Tecnico of Forma 1 and 2 who never learned Corso X as a Form", () => {
+    const initial = createInitialState(1_000, "", false);
+    const technician = syncCourseXTitles<Collaborator>({
+      id: "tech",
+      contactId: "contact-tech",
+      displayName: "Tecnico",
+      joinedAt: 1_000,
+      forms: ["form-1", "form-2"],
+      instructorForms: ["form-1", "form-2"],
+      technicianForms: ["form-1", "form-2"],
+      eLearningInstructorForms: [],
+      formBranchPreferences: [],
+      assignment: "instructor",
+      mastery: createInitialCollaboratorMastery(),
+      rarity: "ultra-rare",
+    });
+    expect(technician.technicianForms).toContain("course-x");
+    expect(isValidGameState({ ...initial, collaborators: [technician] })).toBe(true);
   });
 });

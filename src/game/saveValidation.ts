@@ -452,7 +452,8 @@ export function isValidGameState(value: unknown): value is GameState {
         isUniqueFormIdList(progress.instructorForms) &&
         isUniqueFormIdList(progress.technicianForms ?? []) &&
         (progress.technicianForms ?? []).every((formId) =>
-          progress.forms.includes(formId) && progress.instructorForms.includes(formId)
+          // Corso X title derives from Forma 1 + 2 (courseXTitles.ts), not a learned Form
+        (formId === "course-x" || progress.forms.includes(formId)) && progress.instructorForms.includes(formId)
         ) &&
         isUniqueFormIdList(progress.eLearningInstructorForms ?? []) &&
         (progress.eLearningInstructorForms ?? []).every((formId) =>
@@ -481,7 +482,8 @@ export function isValidGameState(value: unknown): value is GameState {
       isUniqueFormIdList(collaborator.instructorForms) &&
       isUniqueFormIdList(collaborator.technicianForms ?? []) &&
       (collaborator.technicianForms ?? []).every((formId) =>
-        collaborator.forms.includes(formId) && collaborator.instructorForms.includes(formId)
+        // Corso X title derives from Forma 1 + 2 (courseXTitles.ts), not a learned Form
+        (formId === "course-x" || collaborator.forms.includes(formId)) && collaborator.instructorForms.includes(formId)
       ) &&
       isUniqueFormIdList(collaborator.eLearningInstructorForms ?? []) &&
       (collaborator.eLearningInstructorForms ?? []).every((formId) =>
