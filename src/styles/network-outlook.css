@@ -283,10 +283,16 @@
   color: var(--warning);
 }
 
-:root[data-theme="light"] .foundation-stepper b.is-added {
-  align-self: stretch;
-  display: grid;
-  place-items: center;
+:root[data-theme="light"] .foundation-stepper sup,
+:root[data-theme="light"] .foundation-now {
   color: var(--blue-700);
-  background: var(--blue-050);
+}
+
+/* Outlook: no dial, the rows stay plain text (ponytail: own Outlook concept still to choose). */
+:root[data-theme="light"] .foundation-ring {
+  display: none;
+}
+
+:root[data-theme="light"] .foundation-row {
+  grid-template-columns: minmax(0, 1fr) auto;
 }

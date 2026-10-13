@@ -676,7 +676,7 @@ button.network-node {
 
 .foundation-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 6px 0;
@@ -716,17 +716,64 @@ button.network-node {
 }
 
 .foundation-stepper b {
-  min-width: 36px;
-  text-align: center;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  min-width: 48px;
   font-variant-numeric: tabular-nums;
 }
 
-.foundation-stepper b.is-added {
-  color: #8a5a00;
+.foundation-stepper sup,
+.foundation-now {
+  color: var(--network-rep);
 }
 
-:root[data-theme="dark"] .foundation-stepper b.is-added {
-  color: var(--onde-gold);
+.foundation-stepper sup {
+  font-size: 11px;
+}
+
+.foundation-was {
+  color: var(--ink-soft);
+}
+
+/* Concept E (13/10): the Network page dial beside each row. */
+.foundation-ring {
+  width: 44px;
+  height: 44px;
+}
+
+.foundation-ring circle {
+  fill: none;
+  stroke-width: 4;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.foundation-ring .track {
+  stroke: var(--line);
+}
+
+.foundation-ring .is-base {
+  stroke: var(--accent-ink);
+}
+
+.foundation-ring .is-added {
+  stroke: var(--network-rep);
+}
+
+.foundation-ring text {
+  fill: var(--ink);
+  font: 700 13px var(--font-body, "Segoe UI", system-ui, sans-serif);
+}
+
+.foundation-ring text.is-added {
+  fill: var(--network-rep);
+}
+
+.foundation-ring text.is-infinite {
+  font-size: 21px;
+  font-weight: 500;
 }
 
 .foundation-dialog > footer {
