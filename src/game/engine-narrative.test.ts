@@ -389,9 +389,9 @@ describe("game engine: narrative", () => {
     expect(founded.upgrades["comfortable-keyboard"]).toBe(0);
     expect(founded.upgrades["project-x"]).toBe(0);
     expect(founded.secretUpgradeDiscoveries).toEqual(["project-x"]);
-    // The Accademico title (counted from the national one) 3 points, 150 Fama 1 (√(150/106)),
+    // The Accademico title (counted from the national one) 2 points, 150 Fama 1 (√(150/115)),
     // the national title and the Champion's Arena 2 each. Nothing spent.
-    expect(founded.network.reputation).toBe(8);
+    expect(founded.network.reputation).toBe(7);
     // The map keeps only name, city and Fama of the school left behind.
     expect(founded.network.schools).toEqual([{ name: eligible.school.name, city: eligible.school.city, fame: eligible.school.fame }]);
     expect(founded.network).toMatchObject({ schoolCount: 1, monthlyRent: 0 });

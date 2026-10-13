@@ -147,15 +147,15 @@ export const GAME_CONFIG = {
   prestigeAcademyTitles: 1,
   // Reputazione di rete (src/game/reputation.ts): +20% of the base value per point.
   reputationStep: 0.2,
-  // The Accademico title that unlocks the prestige (13/10: 3 points, was 1).
-  reputationAcademyTitlePoints: 3,
+  // The Accademico title that unlocks the prestige (13/10: 2 points like the tournaments, was 1).
+  reputationAcademyTitlePoints: 2,
   // A national title (Arena or Style) of the school left behind.
   reputationNationalTitlePoints: 2,
   // Champion's Arena, Reptile/Superba and Chronicles won by the school left behind.
   reputationTournamentPoints: 2,
-  // Fama points = ⌊√(Fama / divisor)⌋: 106 ≈ 200 / 1,375², so 1,375 × √(Fama / 200)
-  // (13/10: +10% on the old 1,25 × √(Fama / 200)) with whole thresholds.
-  reputationFameDivisor: 106,
+  // Fama points = ⌊√(Fama / divisor)⌋: the n-th point arrives at divisor × n².
+  // 13/10: 115 ≈ 128 × 0,9, every threshold 10% sooner (was 128).
+  reputationFameDivisor: 115,
   reputationUpgradeMaxLevel: 50,
   // Rent value of a school left behind: members × base fee × this share.
   networkRentValueShare: 0.1,
