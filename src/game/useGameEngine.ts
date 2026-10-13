@@ -298,13 +298,24 @@ export function useGameEngine({ cadenceMs = GAME_CONFIG.minTickStepMs }: { caden
       }
 
       const remainsPaused = reasons.size > 0;
+      // The Pianificazione stops where the game opened it: the time the tab spent in
+      // background after July is not processed later, even if another pause came first
+      // (Andrea, 13/10).
+      const planningStop = shouldPause && reason === "planning"
+        ? stateRef.current.automation.lastProcessedAt
+        : undefined;
+      if (wasPaused && planningStop !== undefined && pausedAtRef.current !== null &&
+          planningStop < pausedAtRef.current) {
+        pausedAtRef.current = planningStop;
+        if (pauseDrainRef.current) pauseDrainRef.current = { ...pauseDrainRef.current, gameNow: planningStop };
+      }
       if (wasPaused === remainsPaused) return;
 
       const wallNow = Date.now();
       const pausedAt = pausedAtRef.current;
 
       if (remainsPaused && pausedAt === null) {
-        const gameNow = getGameNowAt(wallNow);
+        const gameNow = Math.min(getGameNowAt(wallNow), planningStop ?? Infinity);
         pausedAtRef.current = gameNow;
         pausedWallAtRef.current = wallNow;
         pauseDrainRef.current = { gameNow, wallNow };

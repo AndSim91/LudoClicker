@@ -386,6 +386,9 @@ function tick(
     nextState = completedStep.state;
     remainingWorkBudget -= completedStep.workProcessed;
     if (!completedStep.complete) break;
+    // Pianificazione delle Onde: il tempo si ferma a luglio anche in un lungo recupero
+    // (scheda in sottofondo), il resto aspetta la conferma del piano (Andrea, 13/10).
+    if (!previousState.annual?.planningOpen && nextState.annual?.planningOpen) break;
     if (boundary >= now) break;
     if (remainingWorkBudget <= 0) break;
     if (performance.now() >= yieldAt) break;

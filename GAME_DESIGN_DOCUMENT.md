@@ -3288,7 +3288,10 @@ cumulativi (iscritti, partenze, Forme, prove fatte e annullate per mancanza di
 spade, eventi, euro guadagnati e per fonte, spade, collaboratori, titoli…). A ogni
 fine mese si registrano entrate e nuovi iscritti del mese e i candidati
 all'Highlight. A inizio luglio la differenza diventa la pagella, salvata intera e
-sostituita ogni anno. Nuove statistiche: `trialsCancelled`, `incomeBySource`
+sostituita ogni anno. Quando si apre la Pianificazione il tempo si ferma lì anche
+durante un lungo recupero (scheda in sottofondo): il recupero si interrompe a
+luglio e il tempo passato in sottofondo dopo quel momento non viene giocato dopo
+la conferma del piano (13/10). Nuove statistiche: `trialsCancelled`, `incomeBySource`
 (quote, Network, Social, gadget; il resto è «premi e altro»).
 
 **Pagella.** Voti A–E, niente media né «Ammesso», confronto con l'anno prima e

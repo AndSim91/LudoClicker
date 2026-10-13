@@ -47,6 +47,21 @@ describe("annual report", () => {
     expect(report.months[0].earned).toBeGreaterThan(0);
   });
 
+  it("stops a long catch-up at July when the Pianificazione opens (Andrea, 13/10)", () => {
+    let state = createInitialState(0);
+    state = {
+      ...state,
+      school: { ...state.school, activeMembers: 20, peakActiveMembers: 20 },
+      network: { ...state.network, schoolCount: 1 },
+    };
+    // A background tab wakes up half a year later: one TICK for the whole gap.
+    const later = state.school.nextFeeAt + 11 * GAME_CONFIG.gameMonthMs;
+    const ticked = gameReducer(state, { type: "TICK", now: later, gainMultiplier: 1 });
+
+    expect(ticked.school.currentMonth).toBe(7);
+    expect(ticked.annual?.planningOpen).toBe(true);
+  });
+
   it("starts a new ledger with the school year", () => {
     let state = createInitialState(0);
     state = collectFees(state, state.school.nextFeeAt + 7 * GAME_CONFIG.gameMonthMs, 1);
