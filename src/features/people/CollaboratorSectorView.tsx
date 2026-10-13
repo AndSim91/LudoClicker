@@ -572,12 +572,8 @@ function InstructorSectorCard({
               hasInstructors={instructors.length > 0}
               hasTechnician={technicianCount > 0}
             >
-              {/* Andrea, 13/10: allievi nella stessa etichetta delle Forme, niente «in formazione». */}
-              <span className="sector-scene-chip is-top-left">
-                <b>{coverage.length}</b> Forme<span className="iscene-chip-more"> insegnabili</span>
-                {" · "}<b>{studentCount}</b> allievi
-              </span>
-              {studyingOnlyForms > 0 ? <span className="sector-scene-chip is-top-left is-second"><b>+{studyingOnlyForms}</b> in arrivo</span> : null}
+              {/* Andrea, 13/10: solo gli allievi (niente Forme insegnabili né «in formazione»). */}
+              <span className="sector-scene-chip is-top-left"><b>{studentCount}</b> allievi</span>
             </InstructorScene>
             {coursesButton ?? (
               <div className="instructor-office">

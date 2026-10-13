@@ -583,10 +583,6 @@
   gap: 6px;
 }
 
-@container iscene (max-width: 330px) {
-  .iscene-chip-more { display: none; }
-}
-
 /* Da 520 px in su i due riquadri dell'Ufficio formazione stanno affiancati. */
 /* (La misura è senza il margine interno della colonna: 520 px meno 28.) */
 @container instructor-side (min-width: 492px) {
