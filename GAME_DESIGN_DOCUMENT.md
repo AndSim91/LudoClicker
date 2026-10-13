@@ -1861,10 +1861,9 @@ Regole:
   la prossima formazione meno avanzata e infine gli iscritti con `acquiredAt`
   meno recente. A parità completa conserva l'ordine originale. Il rischio usato
   per quest'ordine conta la rarità come Forme mancanti: Raro −1 Forma, Ultra
-  Raro −2, Leggendario −3, Leggendario Segreto −4 (un Raro con Forma 6 conta
-  come Forma 5, 15% invece di 10%); i Leggendari non sono immuni in
-  quest'ordine, mentre le altre immunità azzerano il rischio. Il rischio reale
-  di abbandono non cambia;
+  Raro −2 (un Raro con Forma 6 conta come Forma 5, 15% invece di 10%). I
+  Leggendari, sempre collaboratori, restano immuni e le immunità azzerano il
+  rischio. Il rischio reale di abbandono non cambia;
 - dopo il Corso Y l'automazione cerca di insegnare Forma 3 in ogni ramo
   disponibile, poi Forma 4 in ogni ramo e poi Forma 5; Forma 6 e Forma 7
   vengono dopo le Forme dei rami ancora apprendibili;

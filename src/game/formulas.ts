@@ -157,8 +157,8 @@ export function getMemberAnnualDepartureChance(
 /**
  * Departure risk used only to order automatic teaching (decision of 13/10/2026):
  * rarity counts as Forms missing, so rarer athletes rank as more at risk.
- * `formsBack`: 1 Raro, 2 Ultra Raro, 3 Leggendario, 4 Leggendario Segreto
- * (a Raro with Forma 6 counts as Forma 5: 15% instead of 10%).
+ * `formsBack`: 1 Raro, 2 Ultra Raro (a Raro with Forma 6 counts as Forma 5: 15%
+ * instead of 10%). Leggendari are immune collaborators: their risk stays 0.
  */
 export function getTeachingPriorityDepartureChance(
   forms: FormId[],

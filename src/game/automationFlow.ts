@@ -35,7 +35,7 @@ import {
   getEquipmentAutomaticRepairUnitCost,
   repairEquipment,
 } from "./equipment";
-import { getAthleteImmunityStatus } from "./athleteImmunity";
+import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import {
   compareAutomaticTeachingStudentPriority,
   getAutomaticTeachingRarityPriority,
@@ -862,18 +862,17 @@ export function processAutomaticTeaching(
       )
       : undefined;
     const rarityPriority = getAutomaticTeachingRarityPriority(student);
-    // 13/10/2026: rarity counts as Forms missing; being Leggendario is no immunity here.
+    // 13/10/2026: rarity counts as Forms missing (Raro 1, Ultra Raro 2). Leggendari
+    // are always collaborators and immune, so they never get here.
     const departureRisk = contact &&
-      immunity!.reasons.some((reason) => reason !== "legendary")
-      ? 0
-      : contact
-        ? getTeachingPriorityDepartureChance(
-          student.forms,
-          rarityPriority,
-          state.network.schoolCount,
-          departureRiskReduction,
-        )
-        : 0;
+      !isAthleteImmuneFromDeparture(immunity!, "annual-rollout")
+      ? getTeachingPriorityDepartureChance(
+        student.forms,
+        rarityPriority,
+        state.network.schoolCount,
+        departureRiskReduction,
+      )
+      : 0;
     const candidate = automaticFormCandidates.get(student.id)?.[0];
     const councilPriority = councilTappa && student.rarity === "ultra-rare" &&
       (candidate === "form-1" || candidate === "form-2" || candidate === "course-y");
