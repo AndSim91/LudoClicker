@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { createInitialState } from "./initialState";
 import {
   getAthleteImmunityStatus,
+  getYearlyRiskReduction,
   isAthleteImmuneFromDeparture,
 } from "./athleteImmunity";
+import { getSchoolYear } from "./calendar";
 
 describe("athlete immunity", () => {
   it("protects January-August enrollments from every departure until September", () => {
@@ -62,5 +64,22 @@ describe("athlete immunity", () => {
     expect(status.message).toBe("Corso in palestra");
     expect(isAthleteImmuneFromDeparture(status, "annual-rollout")).toBe(true);
     expect(isAthleteImmuneFromDeparture(status, "unexpected-event")).toBe(false);
+  });
+
+  it("saves with the course of the year below 500 Iscritti, halves the risk from 500 on (14/10/2026)", () => {
+    const athlete = {
+      ...createInitialState(1_000).contacts[0],
+      enrolledMonth: 1,
+      lastFormTrainingYear: getSchoolYear(30),
+    };
+    const small = getAthleteImmunityStatus({ currentMonth: 30, activeMembers: 499 }, athlete);
+    const large = getAthleteImmunityStatus({ currentMonth: 30, activeMembers: 500 }, athlete);
+
+    expect(isAthleteImmuneFromDeparture(small, "annual-rollout")).toBe(true);
+    expect(isAthleteImmuneFromDeparture(large, "annual-rollout")).toBe(false);
+    expect(large.message).toBeNull();
+    expect(getYearlyRiskReduction(large, 0)).toBe(0.5);
+    expect(getYearlyRiskReduction(large, 0.2)).toBeCloseTo(0.6);
+    expect(getYearlyRiskReduction(small, 0.2)).toBe(0.2);
   });
 });

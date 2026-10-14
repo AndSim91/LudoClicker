@@ -1,6 +1,6 @@
 import { getAthleteGeneticsMultiplier } from "./reputation";
 import { createRandomProspect } from "../content/prospectDirectory";
-import { getAthleteImmunityStatus, isAthleteImmuneFromDeparture } from "./athleteImmunity";
+import { getAthleteImmunityStatus, getYearlyRiskReduction, isAthleteImmuneFromDeparture } from "./athleteImmunity";
 import { advanceRandomSeed, RARITY_BASE_RANGE, rollAthleteBaseStats } from "./athleteStats";
 import { getFormTrainingYear, getSchoolYear, isSummerBreak } from "./calendar";
 import { getFormTrainingCount } from "../content/forms";
@@ -301,23 +301,26 @@ export function sampleBinomial(
 /** Yearly departures of the grouped members; the departed leave as archived contacts. */
 export function departGroupedMembers(
   state: GameState,
-  getChance: (group: MemberGroup) => number,
+  getChance: (group: MemberGroup, reduction: (riskReduction: number) => number) => number,
+  /** School size before the departures (course protection below 500). */
+  activeMembers = state.school.activeMembers,
 ): { state: GameState; departed: number } {
   const groups = state.memberGroups;
   if (!groups?.length) return { state, departed: 0 };
   const context = {
     currentMonth: state.school.currentMonth,
     tournamentQualification: state.tournaments.qualification,
+    activeMembers,
   };
   let seed = state.randomSeed;
   let departed = 0;
   const contactsBySource = { ...state.historyArchive.contactsBySource };
   const remaining = groups.map((group) => {
     const profile = getGroupMemberProfile(group, context.currentMonth);
-    if (isAthleteImmuneFromDeparture(getAthleteImmunityStatus(context, profile), "annual-rollout")) {
-      return group;
-    }
-    const [leaving, after] = sampleBinomial(group.count, getChance(group), seed);
+    const immunity = getAthleteImmunityStatus(context, profile);
+    if (isAthleteImmuneFromDeparture(immunity, "annual-rollout")) return group;
+    const chance = getChance(group, (riskReduction) => getYearlyRiskReduction(immunity, riskReduction));
+    const [leaving, after] = sampleBinomial(group.count, chance, seed);
     seed = after;
     if (leaving === 0) return group;
     departed += leaving;

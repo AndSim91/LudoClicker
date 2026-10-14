@@ -327,7 +327,12 @@ export function gradeAnnualYear(
   }
   const played = data.tournaments.filter((entry) => Number.isFinite(entry.place));
   if (played.length > 0) {
-    const score = Math.max(...played.map((entry) => placeScore(entry.place, entry.result.level)));
+    // 14/10/2026: only the most important tournament played in the year counts
+    // (after the Accademico the Scolastico, always won, no longer lifts the grade).
+    const rankOf = (entry: (typeof played)[number]) => TITLE_RANK[entry.result.level] ?? 0;
+    const top = Math.max(...played.map(rankOf));
+    const counted = top > 0 ? played.filter((entry) => rankOf(entry) === top) : played;
+    const score = Math.max(...counted.map((entry) => placeScore(entry.place, entry.result.level)));
     grades.tournaments = scoreToGrade(score, [0.8, 0.6, 0.45, 0.3]);
   }
   const cancelledShare = data.cancelled / Math.max(1, data.trials + data.cancelled);

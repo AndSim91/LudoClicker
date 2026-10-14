@@ -3,13 +3,16 @@ import { describe, expect, it } from "vitest";
 import {
   closeAnnualMonth,
   findAnnualMarks,
+  getAnnualYearData,
+  gradeAnnualYear,
   pickAnnualHighlight,
   takeAnnualSnapshot,
 } from "./annualReport";
 import { GAME_CONFIG } from "./config";
 import { createInitialState, gameReducer } from "./engine";
 import { collectFees } from "./membershipFlow";
-import type { AnnualMark } from "./types";
+import { addAdminMembers } from "./adminFlow";
+import type { AnnualMark, TournamentResult } from "./types";
 
 describe("annual report", () => {
   it("writes the pagella; the Pianificazione waits for the first Torneo Scolastico and can be switched off", () => {
@@ -102,5 +105,27 @@ describe("annual report", () => {
     });
     expect(pickAnnualHighlight(marks, {}, data, 4).title).toBe("250 iscritti");
     expect(closeAnnualMonth(state, 1, 0).annual?.ledger?.months).toHaveLength(1);
+  });
+
+  it("grades Risultati Agonistici on the most important tournament of the year (14/10/2026)", () => {
+    const state = createInitialState(0);
+    const data = getAnnualYearData(state, 0);
+    const entry = (level: TournamentResult["level"], place: number) => ({ result: { level } as TournamentResult, place });
+    const grade = (tournaments: ReturnType<typeof entry>[]) =>
+      gradeAnnualYear(state, { ...data, tournaments }).tournaments;
+
+    expect(grade([entry("school", 1)])).toBe("A");
+    // The Scolastico won no longer covers a poor Accademico.
+    expect(grade([entry("school", 1), entry("academy", 20)])).toBe("E");
+    expect(grade([entry("school", 1), entry("academy", 1)])).toBe("A");
+  });
+
+  it("counts the June departures in the pagella of that year (14/10/2026)", () => {
+    let state = addAdminMembers(createInitialState(0), 600);
+    state = { ...state, school: { ...state.school, currentMonth: 13 } };
+    for (let month = 0; month < 6; month += 1) state = collectFees(state, state.school.nextFeeAt, 1);
+    const loyalty = state.annual!.report!.grades.find((row) => row.subject === "loyalty")!.text;
+    expect(state.statistics.membersDeparted).toBeGreaterThan(0);
+    expect(loyalty).toBe(`${state.statistics.membersDeparted} andati via, ${state.school.activeMembers} rimasti`);
   });
 });

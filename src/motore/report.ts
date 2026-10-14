@@ -72,7 +72,7 @@ export function creaReport(analisi: Analisi, meta: { creato: string; partite: nu
   const segreti = sezione("segreti", "Leggendari Segreti",
     "Domande C18–C20: prima sconfitta in torneo e iscrizione alla scuola di ogni Leggendario Segreto; in fondo a ogni torneo, quando sono tutti iscritti.",
     analisi.segreti.map((gruppo) => `<h3>${LIVELLI[gruppo.livello] ?? gruppo.livello}</h3><table><thead><tr><th>Leggendario</th><th>Prima sconfitta</th><th>Iscritto</th></tr></thead><tbody>${
-      gruppo.persone.map((p) => `<tr><th>${esc(p.nome)}</th>${cellaTempo(p.sconfitto)}${cellaTempo(p.iscritto)}</tr>`).join("")
+      gruppo.persone.map((p) => `<tr><th>${esc(p.nome)}</th>${cellaTempo(p.sconfitto)}${p.reclutabile ? cellaTempo(p.iscritto) : "<td>non reclutabile</td>"}</tr>`).join("")
     }<tr class="totale"><th>Tutti iscritti</th><td></td>${cellaTempo(gruppo.tuttiIscritti)}</tr></tbody></table>`).join(""));
 
   const leggendari = sezione("leggendari", "Leggendari",

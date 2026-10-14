@@ -170,11 +170,15 @@ describe("event contact rewards", () => {
         fame: 10,
       },
     })).toBe(1);
-    // Halves for every 1.000 members beyond the first ten.
-    expect(getEventMarketAvailability(withMembers(100))).toBeCloseTo(0.9395, 4);
-    expect(getEventMarketAvailability(withMembers(1_010))).toBe(0.5);
-    expect(getEventMarketAvailability(withMembers(2_010))).toBe(0.25);
-    expect(getEventMarketAvailability(withMembers(5_000))).toBeCloseTo(0.0315, 4);
+    // 14/10/2026: halves every 130 members beyond the first 300, both ×1,27 per founded school.
+    expect(getEventMarketAvailability(withMembers(300))).toBe(1);
+    expect(getEventMarketAvailability(withMembers(430))).toBe(0.5);
+    expect(getEventMarketAvailability(withMembers(560))).toBe(0.25);
+    const secondSchool = withMembers(381 + 165.1);
+    expect(getEventMarketAvailability({
+      ...secondSchool,
+      network: { ...secondSchool.network, schoolCount: 1 },
+    })).toBeCloseTo(0.5, 6);
     expect(getEventMarketAvailability(withMembers(10))).toBe(1);
   });
 
@@ -182,7 +186,7 @@ describe("event contact rewards", () => {
     const initial = createInitialState(1_000);
     const depleted = maximizeEventUpgrades({
       ...withEventCollaborators(initial, 10),
-      school: { ...initial.school, activeMembers: 5_000 },
+      school: { ...initial.school, activeMembers: 950 },
       unlocks: { ...initial.unlocks, social: true },
     });
     const withFollowers = (followers: number) => ({
@@ -200,7 +204,7 @@ describe("event contact rewards", () => {
     const initial = createInitialState(1_000);
     const depleted = {
       ...initial,
-      school: { ...initial.school, activeMembers: 5_000 },
+      school: { ...initial.school, activeMembers: 560 },
     };
     const fixedRewardDefinition = {
       ...sparring,

@@ -42,11 +42,12 @@ export function getEventCollaboratorBonus(state: GameState): number {
 }
 
 export function getEventMarketAvailability(state: GameState): number {
+  const schoolScale = GAME_CONFIG.eventContactSchoolGrowth ** Math.max(0, state.network.schoolCount);
   const depletedMembers = Math.max(
     0,
-    state.school.activeMembers - GAME_CONFIG.eventContactProtectedActiveMembers,
+    state.school.activeMembers - GAME_CONFIG.eventContactProtectedActiveMembers * schoolScale,
   );
-  return 0.5 ** (depletedMembers / GAME_CONFIG.eventContactHalvingMembers);
+  return 0.5 ** (depletedMembers / (GAME_CONFIG.eventContactHalvingMembers * schoolScale));
 }
 
 export function getEventContactBonus(state: GameState): number {

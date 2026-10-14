@@ -52,8 +52,16 @@ it("follows the tappe: athletes with Forma 1, the countdown to the Scolastico, t
     .toEqual({ kind: "academy", secondsLeft: 3 * GAME_CONFIG.gameMonthMs / 1_000 + 30 });
   expect(getStoryGoalTip({ kind: "academy", secondsLeft: 42 }).text)
     .toBe("Vinci un titolo all'Accademico, in Arena o in Stile. Il prossimo inizia tra 42 s.");
-  expect(selectStoryGoal({ ...council, tournaments: { ...council.tournaments, academyTitlesCurrentSchool: 1 } }, 0))
-    .toBeNull();
+  // The title: nothing until the Network tutorial, then founding a new school (14/10/2026).
+  const titled = { ...council, tournaments: { ...council.tournaments, academyTitlesCurrentSchool: 1 } };
+  expect(selectStoryGoal(titled, 0)).toBeNull();
+  const networkSeen = {
+    ...titled,
+    tutorial: { ...titled.tutorial, completedSceneIds: [...titled.tutorial.completedSceneIds, "network-introduction"] },
+  };
+  expect(selectStoryGoal(networkSeen, 0)).toEqual({ kind: "foundation" });
+  expect(selectStoryGoal({ ...titled, network: { ...titled.network, schoolCount: 1 } }, 0))
+    .toEqual({ kind: "foundation" });
 });
 
 it("starts with 10 members, from the first one, until the Forme open", () => {

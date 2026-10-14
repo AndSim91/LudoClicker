@@ -91,9 +91,14 @@ export const GAME_CONFIG = {
   equipmentBreakLoad: 100,
   eventWearMultiplier: 1,
   eventZeroContactProtectionCollaboratorThreshold: 4,
-  eventContactProtectedActiveMembers: 10,
-  // Event contacts halve for every 1.000 active members beyond the first ten.
-  eventContactHalvingMembers: 1_000,
+  // Event contacts halve for every `eventContactHalvingMembers` active members beyond
+  // the protected ones. Andrea 14/10/2026: the first school stops around 1.000
+  // Iscritti, later schools higher. Both numbers grow by `eventContactSchoolGrowth`
+  // per founded school (1,27^19 ≈ 100: school 20 about a hundred times school 1).
+  // ponytail: first guesses, tuned with the test engine.
+  eventContactProtectedActiveMembers: 300,
+  eventContactHalvingMembers: 130,
+  eventContactSchoolGrowth: 1.27,
   ultraRareMinimumAppearanceChance: 0.015,
   // Leggendari in squadra (10/10): each one beyond the first (enrolled, waiting
   // for the email or in a trial) takes 75% off the others' appearance; career

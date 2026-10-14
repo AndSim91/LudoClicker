@@ -3,6 +3,7 @@ import { recordCareer } from "./career";
 import { MISSED_RENEWAL_EVENT } from "../content/narrativeEvents";
 import {
   getAthleteImmunityStatus,
+  getYearlyRiskReduction,
   isAthleteImmuneFromDeparture,
   type AthleteDepartureContext,
 } from "./athleteImmunity";
@@ -213,8 +214,12 @@ function processMemberDepartures(
   const immunityContext = {
     currentMonth: state.school.currentMonth,
     tournamentQualification: state.tournaments.qualification,
+    activeMembers: state.school.activeMembers,
   };
+  const riskReduction = getDepartureRiskReduction(state.upgrades);
+  const reductionById = new Map<string, number>();
   const eligibleMembers = state.contacts.filter((contact) => {
+    if (contact.status !== "enrolled") return false;
     const collaborator = collaboratorsByContactId.get(contact.id);
     const immunity = getAthleteImmunityStatus(
       immunityContext,
@@ -222,8 +227,9 @@ function processMemberDepartures(
       collaborator ?? contact,
       Boolean(collaborator),
     );
-    return contact.status === "enrolled" &&
-      !isAthleteImmuneFromDeparture(immunity, "annual-rollout");
+    if (isAthleteImmuneFromDeparture(immunity, "annual-rollout")) return false;
+    reductionById.set(contact.id, getYearlyRiskReduction(immunity, riskReduction));
+    return true;
   });
   if (eligibleMembers.length === 0 && !state.memberGroups?.length) return state;
 
@@ -238,7 +244,7 @@ function processMemberDepartures(
       forms,
       member.rarity,
       state.network.schoolCount,
-      getDepartureRiskReduction(state.upgrades),
+      reductionById.get(member.id) ?? riskReduction,
     );
     if (roll < departureChance) departedIds.add(member.id);
   }
@@ -246,13 +252,13 @@ function processMemberDepartures(
   const materialUpdated: GameState = departedIds.size > 0
     ? departMembers({ ...state, randomSeed: nextSeed }, departedIds, true, "annual-rollout")
     : { ...state, randomSeed: nextSeed };
-  const grouped = departGroupedMembers(materialUpdated, (group) =>
+  const grouped = departGroupedMembers(materialUpdated, (group, reduction) =>
     getMemberAnnualDepartureChance(
       group.forms,
       group.rarity,
       state.network.schoolCount,
-      getDepartureRiskReduction(state.upgrades),
-    ));
+      reduction(riskReduction),
+    ), state.school.activeMembers);
   const updated = grouped.state;
   const totalDeparted = departed.length + grouped.departed;
   if (totalDeparted === 0) return updated;
@@ -331,9 +337,7 @@ export function collectFees(
       }, incomeParts),
     };
     nextState = payDebtInstallment(nextState, currentMonth, now + period);
-    nextState = closeAnnualMonth(nextState, currentMonth, nextState.school.nextFeeAt - GAME_CONFIG.gameMonthMs);
-    // A September crossed during catch-up still opens its notification now, not at its past game boundary.
-    nextState = processSeptemberLightInflation(nextState, wallNow);
+    // End of June: the departures land before the pagella closes the year, so it counts them (14/10/2026).
     if (isSchoolYearDepartureMonth(currentMonth)) {
       const departedBefore = nextState.statistics.membersDeparted;
       nextState = processMemberDepartures(nextState, now + period);
@@ -341,6 +345,9 @@ export function collectFees(
         largestYearlyDeparture: nextState.statistics.membersDeparted - departedBefore,
       });
     }
+    nextState = closeAnnualMonth(nextState, currentMonth, nextState.school.nextFeeAt - GAME_CONFIG.gameMonthMs);
+    // A September crossed during catch-up still opens its notification now, not at its past game boundary.
+    nextState = processSeptemberLightInflation(nextState, wallNow);
     nextState = processReptileCalendarTransition(nextState, now + period);
   }
   return nextState;

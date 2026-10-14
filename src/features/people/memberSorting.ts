@@ -10,6 +10,7 @@ import {
 import { getMemberAnnualDepartureChance } from "../../game/formulas";
 import {
   getAthleteImmunityStatus,
+  getYearlyRiskReduction,
   type AthleteImmunityContext,
 } from "../../game/athleteImmunity";
 import type { Collaborator, Contact } from "../../game/types";
@@ -124,7 +125,7 @@ function getDisplayedRisk(contact: Contact, context: MemberSortContext): number 
     student.forms,
     contact.rarity,
     context.foundedSchools,
-    context.departureRiskReduction,
+    getYearlyRiskReduction(immunity, context.departureRiskReduction),
   );
 }
 

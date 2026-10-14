@@ -112,6 +112,8 @@ export function leggendariSegreti(registri: RegistroPartita[]) {
     const ids = Object.entries(SECRET_LEGENDARIES)
       .filter(([, profile]) => profile.level === livello)
       .map(([id]) => id);
+    const reclutabile = (id: string) =>
+      (SECRET_LEGENDARIES[id as keyof typeof SECRET_LEGENDARIES] as { recruitment?: string }).recruitment !== "never";
     const persone = ids.map((id) => {
       const profile = SECRET_LEGENDARIES[id as keyof typeof SECRET_LEGENDARIES];
       const sconfitto = registri.map((registro) =>
@@ -121,12 +123,14 @@ export function leggendariSegreti(registri: RegistroPartita[]) {
       return {
         id,
         nome: `${profile.firstName} ${profile.lastName}`,
+        reclutabile: reclutabile(id),
         sconfitto: distribuzione(sconfitto),
         iscritto: distribuzione(iscritto),
       };
     });
     const tuttiIscritti = registri.map((registro) => {
-      const tempi = ids.map((id) =>
+      // Chi non si iscrive mai per scelta (es. Adriano Panico) non conta.
+      const tempi = ids.filter(reclutabile).map((id) =>
         primo(registro, (e) => e.tipo === "segreto" && e.chiave === id && e.dati?.stato === "enrolled")?.t);
       return tempi.every((t) => t !== undefined) ? Math.max(...(tempi as number[])) : undefined;
     });

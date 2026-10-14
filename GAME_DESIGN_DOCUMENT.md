@@ -312,7 +312,12 @@ dalla Forma più alta raggiunta (80% senza Forme, poi 65%, 50%, 35%, 25%, 15%,
 10%; con la Forma 7 scende a 2,5% per i Comuni, 0,5% per i Rari e 0,25% per gli
 Ultra Rari, +0,5% per ogni scuola fondata); i Leggendari non abbandonano mai.
 Per il tutorial, una scuola con al massimo 9 iscritti non perde nessuno a fine
-anno: dal decimo iscritto gli abbandoni sono possibili (08/10/2026). Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
+anno: dal decimo iscritto gli abbandoni sono possibili (08/10/2026).
+Un corso iniziato nell'anno scolastico (Forma, Corso Y, Arena Tecnica/Corso
+Agonisti) protegge dall'abbandono di fine anno finché la scuola ha meno di 500
+iscritti; da 500 in su non salva più ma **dimezza** il rischio rimasto dopo la
+Forma e la Chat di Gruppo (decisione del 14/10/2026). Gli abbandoni di Giugno
+entrano nella pagella di quell'anno. Ai primi abbandoni senza Collaboratori assegnati agli Istruttori, A.N.D.E.R.
 spiega che senza Istruttori e corsi durante l'anno la gente si annoia e se ne va.
 Ogni abbandono è registrato come «Mancato rinnovo». L'evento narrativo
 «Passaparola inatteso» produce 2 nuovi contatti, non iscritti.
@@ -1232,8 +1237,12 @@ indicazioni generiche di esito e resa, mai queste percentuali.
 
 Il bacino dei contatti usa esclusivamente gli iscritti attivi. I primi dieci non
 applicano penalità; oltre quella soglia i contatti degli eventi **si dimezzano
-ogni 1.000 iscritti** (× 0,5^((iscritti − 10) / 1.000), `eventContactHalvingMembers`;
-decisione di Andrea del 05/10, prima era 1.000 / (1.000 + iscritti − 10)). Se
+ogni 130 iscritti oltre i primi 300** (× 0,5^((iscritti − 300) / 130),
+`eventContactProtectedActiveMembers` e `eventContactHalvingMembers`); entrambe
+le soglie crescono di ×1,27 per ogni scuola fondata (`eventContactSchoolGrowth`),
+così la prima scuola si ferma intorno ai 1.000 iscritti e la scuola 20 circa
+cento volte più in alto (decisione di Andrea del 14/10/2026; prima si dimezzavano
+ogni 1.000 iscritti oltre i primi dieci). Se
 qualcuno lascia la scuola, la disponibilità risale perché quella persona, o una
 persona equivalente nella rappresentazione delle rarità non nominali, può
 tornare nel bacino futuro. La curva non raggiunge mai zero: 50% a 1.010 iscritti,
@@ -1817,7 +1826,8 @@ Regole:
 - al livello 1 Percorso Tecnico costa **€1.000** e sblocca Arena Tecnica come formazione
   automatica soggetta al toggle globale dell'insegnamento. La formazione
   costa **€500 per atleta**, dura 120 secondi, non migliora le statistiche ma
-  protegge subito l'allievo dal controllo annuale degli abbandoni;
+  protegge subito l'allievo dal controllo annuale degli abbandoni (da 500
+  iscritti ne dimezza il rischio);
 - il livello 2 costa **€2.000** e porta la durata base di Arena Tecnica a **100
   secondi**;
 - il livello 3 costa **€5.000** e porta la durata base di Arena Tecnica a **80
@@ -3335,7 +3345,10 @@ frecce dal secondo anno. Soglie provvisorie, da tarare giocando:
 - Didattica (solo con le Forme aperte): Forme insegnate ÷ iscritti ≥ 1 · 0,6 · 0,35 · 0,15.
 - Risultati Agonistici (solo con almeno un torneo disputato): miglior piazzamento
   pesato sul livello (1° 0,85, 2° 0,7, 3–4° 0,55, 5–8° 0,4, 9–16° 0,25, poi 0,1;
-  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3.
+  +0,05 per livello sopra lo Scolastico) ≥ 0,8 · 0,6 · 0,45 · 0,3. Conta solo il
+  torneo più importante disputato nell'anno (Scolastico, Accademico, Nazionale,
+  Champion's): dopo l'Accademico lo Scolastico vinto non alza più il voto
+  (14/10/2026).
 - Amministrazione: prove annullate ÷ prove ≤ 2% A · 5% B · 10% C · 20% D; un voto
   in meno se più di un quarto delle spade è rotto.
 - Finanze: entrate medie al mese contro l'anno prima (il primo anno: ultimi due
@@ -3606,7 +3619,10 @@ v102; i salvataggi che li hanno già superati li segnano come fatti):
     «Prossima fermata: l'Accademico» (aprile, solo i qualificati dello
     Scolastico, un titolo apre il Network) e «Non sarà una passeggiata», che
     indica la tappa in «La mia giornata». Solo dopo questa scena (o in una scuola
-    fondata dopo) compare la tappa dell'Accademico.
+    fondata dopo) compare la tappa dell'Accademico. Vinto il titolo e concluso
+    il tutorial del Network (`network-introduction`; nelle scuole fondate dopo
+    subito), la tappa diventa **fondare una nuova scuola** (pastiglia «Fonda»,
+    14/10/2026; testo provvisorio da riscrivere).
     **Regola nascosta** (10/10/2026, mai scritta nei testi): finché questa
     scena non è conclusa, nella prima scuola la scuola non vince titoli
     all'Accademico e nessun suo atleta si qualifica al Nazionale. Il torneo si

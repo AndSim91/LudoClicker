@@ -15,14 +15,19 @@ import { findUpcomingTournamentFromSchedule } from "../tournaments/tournamentPre
  * 8 athletes with Forma 1 (Tornei opens), then the countdown to the Torneo
  * Scolastico, then 8 Collaboratori delle Onde (the Consiglio, never named here),
  * then a title at the Torneo Accademico, Arena or Stile (09/10/2026), once
- * M.A.K.I. has announced it (10/10/2026; schools founded later skip the scene).
+ * M.A.K.I. has announced it (10/10/2026; schools founded later skip the scene),
+ * then founding a new school, once the Network tutorial is over (14/10/2026).
  */
 export type StoryGoal =
   | { kind: "members"; value: number; target: number }
   | { kind: "athletes"; value: number; target: number }
   | { kind: "tournament"; secondsLeft: number }
   | { kind: "collaborators"; value: number; target: number }
-  | { kind: "academy"; secondsLeft: number };
+  | { kind: "academy"; secondsLeft: number }
+  | { kind: "foundation" };
+
+/** The prestige tutorial (first school only): the foundation tappa waits for it. */
+const NETWORK_TUTORIAL_SCENE_ID = "network-introduction";
 
 export type StoryGoalState = Pick<
   GameState,
@@ -52,9 +57,15 @@ export function selectStoryGoal(state: StoryGoalState, now: number): StoryGoal |
     return { kind: "tournament", secondsLeft: Math.max(0, Math.ceil((upcoming.occursAt - now) / 1_000)) };
   }
   if (state.collaboratorManagement.aggregateViewUnlocked) {
-    return hasPrestigeTitle(state) || !isAcademyTappaOpen(state)
-      ? null
-      : { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) };
+    if (hasPrestigeTitle(state)) {
+      const networkTutorialDone = state.network.schoolCount > 0 ||
+        completedSceneIds.includes(NETWORK_TUTORIAL_SCENE_ID) ||
+        skippedSceneIds.includes(NETWORK_TUTORIAL_SCENE_ID);
+      return networkTutorialDone ? { kind: "foundation" } : null;
+    }
+    return isAcademyTappaOpen(state)
+      ? { kind: "academy", secondsLeft: getSecondsToNextAcademy(state, now) }
+      : null;
   }
   const target = GAME_CONFIG.collaboratorAggregateUnlockCount;
   return { kind: "collaborators", value: Math.min(state.collaborators.length, target), target };
@@ -79,11 +90,13 @@ export function formatCountdown(seconds: number): string {
 }
 
 export function getStoryGoalLabel(goal: StoryGoal): string {
+  if (goal.kind === "foundation") return "Fonda";
   return goal.kind === "tournament" || goal.kind === "academy" ? formatCountdown(goal.secondsLeft) : `${goal.value}/${goal.target}`;
 }
 
 export function isStoryGoalReady(goal: StoryGoal): boolean {
-  return goal.kind !== "tournament" && goal.kind !== "academy" && goal.value >= goal.target;
+  return goal.kind !== "tournament" && goal.kind !== "academy" && goal.kind !== "foundation" &&
+    goal.value >= goal.target;
 }
 
 export function getStoryGoalTip(goal: StoryGoal): { title: string; text: string } {
@@ -100,6 +113,13 @@ export function getStoryGoalTip(goal: StoryGoal): { title: string; text: string 
   }
   if (goal.kind === "tournament") {
     return { title: "Ander Games", text: `Il Torneo Scolastico inizia tra ${formatCountdown(goal.secondsLeft)}.` };
+  }
+  if (goal.kind === "foundation") {
+    // ponytail: placeholder text, Andrea writes the final one.
+    return {
+      title: "Una nuova scuola",
+      text: "Il Network delle Onde è aperto: fonda una nuova scuola e porta l'Ordine fuori da Genova.",
+    };
   }
   if (goal.kind === "academy") {
     return {

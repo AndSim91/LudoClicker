@@ -17,11 +17,23 @@ export type AthleteDepartureContext =
 export interface AthleteImmunityContext {
   currentMonth: number;
   tournamentQualification?: TournamentState["qualification"];
+  /** School size: from 500 Iscritti a course no longer saves, it halves the risk. Unset = protected. */
+  activeMembers?: number;
 }
+
+/**
+ * Corso dell'anno (Andrea, 14/10/2026): below 500 Iscritti a course started in the
+ * school year saves from the yearly departures; from 500 on it halves the risk left
+ * after the Forma (and Chat di Gruppo).
+ */
+export const COURSE_IMMUNITY_MEMBER_LIMIT = 500;
+export const COURSE_DEPARTURE_FACTOR = 0.5;
 
 export interface AthleteImmunityStatus {
   reasons: AthleteImmunityReason[];
   annualRollout: boolean;
+  /** The course of the year halves the yearly risk instead of cancelling it. */
+  courseHalvesRisk: boolean;
   unexpectedEvents: boolean;
   message: string | null;
 }
@@ -70,7 +82,9 @@ export function getAthleteImmunityStatus(
     reasons.push("gym-course");
   }
 
-  const annualRollout = reasons.length > 0;
+  const courseOnly = (context.activeMembers ?? 0) >= COURSE_IMMUNITY_MEMBER_LIMIT;
+  const annualRollout = reasons.some((reason) => !(courseOnly && reason === "gym-course"));
+  const courseHalvesRisk = !annualRollout && reasons.includes("gym-course");
   const unexpectedEvents = reasons.some((reason) =>
     reason === "legendary" ||
     reason === "tournament-qualification" ||
@@ -79,8 +93,9 @@ export function getAthleteImmunityStatus(
   return {
     reasons,
     annualRollout,
+    courseHalvesRisk,
     unexpectedEvents,
-    message: reasons.length > 0 ? ATHLETE_IMMUNITY_MESSAGES[reasons[0]] : null,
+    message: annualRollout ? ATHLETE_IMMUNITY_MESSAGES[reasons[0]] : null,
   };
 }
 
@@ -94,4 +109,9 @@ export function isAthleteImmuneFromDeparture(
   return status.reasons.some((reason) =>
     reason === "legendary" || reason === "tournament-qualification"
   );
+}
+
+/** Risk reduction (Chat di Gruppo) with the course of the year on top, when it only halves the risk. */
+export function getYearlyRiskReduction(status: AthleteImmunityStatus, riskReduction = 0): number {
+  return status.courseHalvesRisk ? 1 - (1 - riskReduction) * COURSE_DEPARTURE_FACTOR : riskReduction;
 }

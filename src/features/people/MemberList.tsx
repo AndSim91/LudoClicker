@@ -6,7 +6,7 @@ import { getCollaboratorAssignmentLabel } from "../../content/collaboratorRoles"
 import { FORM_DEFINITIONS } from "../../content/forms";
 import { getFormLogo } from "../../content/formLogos";
 import { getFormTrainingYear } from "../../game/calendar";
-import { getAthleteImmunityStatus } from "../../game/athleteImmunity";
+import { COURSE_IMMUNITY_MEMBER_LIMIT, getAthleteImmunityStatus, getYearlyRiskReduction } from "../../game/athleteImmunity";
 import {
   areAllFormBranchesUnlocked,
   getAnnualFormTrainingLimit,
@@ -163,7 +163,7 @@ function getDisplayedMemberStatus(
     student.forms,
     contact.rarity,
     context.foundedSchools,
-    context.departureRiskReduction,
+    getYearlyRiskReduction(immunity, context.departureRiskReduction),
   );
 }
 
@@ -289,10 +289,13 @@ export function MemberList({
   const annualTrainingLimit = getAnnualFormTrainingLimit(state.upgrades);
   const courseXUnlocked = isCourseXUnlocked(state.upgrades);
   const foundedSchools = state.network.schoolCount;
+  // Only the 500-Iscritti threshold matters here, so the list does not rebuild at every enrollment.
+  const courseOnly = state.school.activeMembers >= COURSE_IMMUNITY_MEMBER_LIMIT;
   const immunityContext = useMemo(() => ({
     currentMonth,
     tournamentQualification: state.tournaments.qualification,
-  }), [currentMonth, state.tournaments.qualification]);
+    activeMembers: courseOnly ? COURSE_IMMUNITY_MEMBER_LIMIT : 0,
+  }), [currentMonth, state.tournaments.qualification, courseOnly]);
   const sortContext = useMemo(
     () => ({
       currentTrainingYear: getFormTrainingYear(currentMonth),
