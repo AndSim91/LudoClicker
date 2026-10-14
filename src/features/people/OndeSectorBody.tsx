@@ -45,8 +45,9 @@ function getEventProgress(event: GameState["acquisitionEvents"][number], now: nu
 }
 
 /**
- * E2a (06/10): one tick per running event, nearest to its result first, filled
- * from the bottom. Any number of events fits the same row.
+ * E1 (14/10, replaces the tall ticks of E2a): the track splits into one segment
+ * per running event, nearest to its result first, filled from the left. As tall
+ * as the empty track, so the scene above never shrinks when events start.
  */
 function EventTicks({ state, now }: { state: GameState; now: number }) {
   const running = state.acquisitionEvents
@@ -62,7 +63,7 @@ function EventTicks({ state, now }: { state: GameState; now: number }) {
       </span>
       <div className="event-ticks" aria-hidden="true">
         {running.map((event, index) => (
-          <i key={event.id}><b style={{ transform: `scaleY(${progress[index] / 100})` }} /></i>
+          <i key={event.id}><b style={{ transform: `scaleX(${progress[index] / 100})` }} /></i>
         ))}
       </div>
     </div>
