@@ -140,7 +140,7 @@ function descriviStato(registro) {
     if (evento.tipo === "fondazione" && evento.chiave !== "disponibile") return "scuola appena fondata";
     if (evento.scuola !== scuola) continue;
     if (evento.tipo === "fondazione") return "può fondare, cresce ancora";
-    if (evento.tipo === "criterio-fondazione") return `pronta a fondare (attende ${evento.valore} mesi)`;
+    if (evento.tipo === "criterio-fondazione") return `pronta a fondare (dopo ${evento.valore} mesi e almeno 15 anni)`;
     if (evento.tipo === "titolo" && TITOLI[evento.chiave]) return TITOLI[evento.chiave];
     if (evento.tipo === "sblocco" && evento.chiave === "consiglio") return "nato il Consiglio delle Onde";
     if (evento.tipo === "tappa" && evento.chiave === "primo-scolastico") return "primo Scolastico giocato";

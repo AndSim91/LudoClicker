@@ -47,6 +47,8 @@ export const REGOLE = {
   sogliaUpgrade: 5,
   /** Scattato il criterio, resta ancora da 0 a 24 mesi (0–2 anni) a caso prima di fondare. */
   mesiExtraMassimi: 24,
+  /** Andrea (14/10): in ogni scuola si fonda solo dopo aver finito almeno 15 anni scolastici. */
+  anniMinimiPrimaDiFondare: 15,
   /** ponytail: quante spade compra in Pianificazione, da tarare: una ogni 4 iscritti. */
   spadePerIscritto: 0.25,
   prioritaCollaboratori: ["instructor", "writing", "gadget", "events", "equipment"] as const,

@@ -289,7 +289,14 @@ export function giocaPartita({
         livelliInizioAnno = totaleLivelli(state);
       }
 
-      if (fondaAlMese !== undefined && state.school.currentMonth >= fondaAlMese && canFoundSchool(state)) {
+      // Anno scolastico 16 iniziato = 15 anni finiti (l'anno 0 è il gennaio–agosto d'apertura).
+      const anniFiniti = getSchoolYear(state.school.currentMonth) - 1;
+      if (
+        fondaAlMese !== undefined &&
+        state.school.currentMonth >= fondaAlMese &&
+        anniFiniti >= REGOLE.anniMinimiPrimaDiFondare &&
+        canFoundSchool(state)
+      ) {
         fondaAlMese = undefined;
         if (scuola >= maxScuole) {
           annota("fine", "scuola-completa");
